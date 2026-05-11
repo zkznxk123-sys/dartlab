@@ -342,20 +342,259 @@ class Company:
                 df = df.select(keep)
         return df
 
-    # ── filings ──
-
-    def filings(self) -> list[dict[str, Any]]:
-        """공시 목록 (초기 스캐폴딩: 빈 리스트).
+    @property
+    def topics(self) -> pl.DataFrame:
+        """사용 가능한 topic 목록 (CompanyProtocol 충족).
 
         Returns:
-            list[dict] — 현재 빈 list.
+            ``topic`` 컬럼만 가진 DataFrame.
 
         Example:
             >>> c = Company("7203")
-            >>> c.filings()
-            []
+            >>> c.topics.head()
 
         Raises:
             없음.
         """
-        return []
+        secs = self.sections
+        if secs.is_empty():
+            return pl.DataFrame(schema={"topic": pl.Utf8})
+        return secs.select("topic").unique().sort("topic")
+
+    # ── filings ──
+
+    def filings(self) -> pl.DataFrame | None:
+        """공시 목록 (초기 스캐폴딩: 빈 DataFrame, CompanyProtocol 충족).
+
+        Returns:
+            빈 DataFrame (EDINET filings 본 구현 후속 phase).
+
+        Example:
+            >>> c = Company("7203")
+            >>> c.filings()
+
+        Raises:
+            없음.
+        """
+        return pl.DataFrame(
+            schema={
+                "docId": pl.Utf8,
+                "filerName": pl.Utf8,
+                "submittedAt": pl.Utf8,
+                "docTypeCode": pl.Utf8,
+            }
+        )
+
+    def diff(
+        self,
+        topic: str | None = None,
+        fromPeriod: str | None = None,
+        toPeriod: str | None = None,
+    ) -> pl.DataFrame | None:
+        """기간 간 텍스트 변화 감지 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 None 반환. 후속 phase 에서 docs sections 의
+        period 차이 diff 빌더 추가 예정.
+
+        Args:
+            topic: 비교 대상 topic.
+            fromPeriod: 시작 period.
+            toPeriod: 종료 period.
+
+        Returns:
+            현재 None.
+
+        Example:
+            >>> c.diff("riskFactors", fromPeriod="2023", toPeriod="2024")
+
+        Raises:
+            없음.
+        """
+        return None
+
+    def disclosure(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        *,
+        days: int = 365,
+        type: str | None = None,
+        keyword: str | None = None,
+        finalOnly: bool = False,
+    ) -> pl.DataFrame:
+        """실시간 공시 검색 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 빈 DataFrame. 후속 phase 에서
+        ``edinet/openapi/client.listDocuments`` 위임 예정.
+
+        Args:
+            start: 시작일 (YYYY-MM-DD).
+            end: 종료일.
+            days: 기간 (start/end 미지정 시).
+            type: 서류 유형 필터.
+            keyword: 키워드 필터.
+            finalOnly: 최종본만.
+
+        Returns:
+            빈 DataFrame (현재).
+
+        Example:
+            >>> c.disclosure(days=90)
+
+        Raises:
+            없음.
+        """
+        return pl.DataFrame(
+            schema={
+                "docId": pl.Utf8,
+                "filerName": pl.Utf8,
+                "submittedAt": pl.Utf8,
+                "docTypeCode": pl.Utf8,
+            }
+        )
+
+    def liveFilings(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        *,
+        days: int | None = None,
+        limit: int = 20,
+        keyword: str | None = None,
+        forms: list[str] | tuple[str, ...] | None = None,
+        finalOnly: bool = False,
+    ) -> pl.DataFrame:
+        """실시간 공시 목록 — EDINET OpenAPI 위임 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 빈 DataFrame. 후속 phase 에서 client.listDocuments
+        위임 + form/type 매핑 예정.
+
+        Args:
+            start: 시작일.
+            end: 종료일.
+            days: 기간.
+            limit: 최대 행 수.
+            keyword: 키워드 필터.
+            forms: form 유형 리스트.
+            finalOnly: 최종본만.
+
+        Returns:
+            빈 DataFrame (현재).
+
+        Example:
+            >>> c.liveFilings(days=30, limit=10)
+
+        Raises:
+            없음.
+        """
+        return pl.DataFrame()
+
+    def readFiling(
+        self,
+        filing: Any,
+        *,
+        maxChars: int | None = None,
+    ) -> dict[str, Any]:
+        """공시 원문 읽기 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 빈 dict. 후속 phase 에서 ``downloadDocument`` +
+        XBRL 파싱 위임 예정.
+
+        Args:
+            filing: filing dict 또는 docId.
+            maxChars: 최대 문자 수.
+
+        Returns:
+            빈 dict (현재).
+
+        Example:
+            >>> c.readFiling({"docId": "S100T1HW"})
+
+        Raises:
+            없음.
+        """
+        return {}
+
+    def view(self, *, port: int = 8400) -> None:
+        """브라우저 뷰어 실행 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 no-op. 후속 phase 에서 dart/edgar 와 동등한
+        local launchViewer 위임 예정.
+
+        Args:
+            port: 로컬 서버 포트.
+
+        Returns:
+            None.
+
+        Example:
+            >>> c.view()
+
+        Raises:
+            없음.
+        """
+        return None
+
+    def quant(
+        self,
+        metric: str | None = None,
+        **kwargs: Any,
+    ) -> dict | pl.DataFrame | None:
+        """기술적 분석 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 None. 후속 phase 에서 일본 시장 OHLCV
+        (yahoo finance JP) 위임 예정.
+
+        Args:
+            metric: 지표 이름 (None 이면 종합).
+            **kwargs: 추가 옵션.
+
+        Returns:
+            현재 None.
+
+        Example:
+            >>> c.quant("rsi")
+
+        Raises:
+            없음.
+        """
+        return None
+
+    def ask(
+        self,
+        question: str,
+        *,
+        include: list[str] | None = None,
+        exclude: list[str] | None = None,
+        provider: str | None = None,
+        model: str | None = None,
+        stream: bool = False,
+        **kwargs: Any,
+    ) -> str | Any:
+        """LLM 에게 기업 분석 질문 (CompanyProtocol 충족 stub).
+
+        EDINET 본 구현 미완 — 현재 안내 메시지 반환. 후속 phase 에서 dartlab.ai.kernel
+        위임 + JP-EDINET 컨텍스트 패키지 추가 예정.
+
+        Args:
+            question: 자연어 질문.
+            include: 컨텍스트 포함 키.
+            exclude: 제외 키.
+            provider: LLM provider.
+            model: 모델명.
+            stream: 스트리밍 여부.
+            **kwargs: provider 별 옵션.
+
+        Returns:
+            안내 메시지 (현재).
+
+        Example:
+            >>> c.ask("최근 리스크는?")
+
+        Raises:
+            없음.
+        """
+        return (
+            "EDINET Company.ask 본 구현 미완 — 후속 phase 에서 dartlab.ai.kernel 위임 + "
+            "JP-EDINET 컨텍스트 패키지 추가 예정. dart/edgar Company.ask 와 동등 surface."
+        )
