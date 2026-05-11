@@ -1,11 +1,6 @@
 {
-  "_note": "P0.5 baseline — Protocol 미구현 / Company 갭. P1.5 (Protocol) + P8 (EDINET) 에서 메우며 축소",
-  "missingProtocols": [
-    "DocsProvider",
-    "FinanceProvider",
-    "FilingsProvider",
-    "MemorySafeProvider"
-  ],
+  "_note": "P1.5 후 갱신 — 4 Protocol 신설 완료. CompanyProtocol __enter__/__exit__ 추가. 잔존: EDINET select 메서드 (P8 대상).",
+  "missingProtocols": [],
   "missingProviderImpls": [
     "edinet: {'select'} 메서드 부재"
   ]

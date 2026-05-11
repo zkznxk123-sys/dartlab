@@ -2,9 +2,68 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
 import polars as pl
+
+# ── P-트랙 룰 1+8+10+11: provider 메서드 반환 dataclass SSOT ──
+
+
+@dataclass(frozen=True)
+class FilingResult:
+    """공시 1 건 read 결과."""
+
+    stockCode: str
+    period: str
+    title: str
+    body: str
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class Section:
+    """공시 본문 1 섹션."""
+
+    stockCode: str
+    period: str
+    sectionTitle: str
+    sectionOrder: int
+    content: str | None = None
+    url: str | None = None
+
+
+@dataclass(frozen=True)
+class Account:
+    """재무 계정 1 라인."""
+
+    accountId: str
+    label: str
+    sjDiv: str  # BS/IS/CF/CIS/SCE
+    value: float | None = None
+
+
+@dataclass(frozen=True)
+class Filing:
+    """공시 메타 1 건 (검색용)."""
+
+    stockCode: str
+    rceptNo: str
+    title: str
+    submittedAt: str
+    formType: str | None = None
+
+
+@dataclass(frozen=True)
+class StatementsResult:
+    """재무제표 정규화 결과."""
+
+    stockCode: str
+    period: str
+    kind: str  # annual / Q1 / Q2 / Q3
+    statements: pl.DataFrame
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @runtime_checkable
@@ -12,11 +71,42 @@ class CompanyProtocol(Protocol):
     """Company 공통 인터페이스.
 
     DART Company와 EDGAR Company 모두 이 Protocol을 만족한다.
+    P-트랙 룰 11: context manager + cleanup 의무.
     """
 
     corpName: str
     market: str
     currency: str
+
+    def __enter__(self) -> "CompanyProtocol":
+        """context manager 진입 — Company 그대로 반환.
+
+        Example:
+            with Company("005930") as c:
+                c.show("IS").head()
+
+        Returns:
+            self.
+
+        Raises:
+            없음.
+        """
+        ...
+
+    def __exit__(self, excType: Any, excVal: Any, excTb: Any) -> None:
+        """context manager 종료 — BoundedCache evict + RSS 회수.
+
+        룰 11 만족. Polars 네이티브 힙 누수 차단.
+
+        Args:
+            excType: 예외 type (정상 종료 시 None).
+            excVal: 예외 인스턴스.
+            excTb: traceback.
+
+        Raises:
+            없음 (cleanup 실패 시 silent — 정상 종료 우선).
+        """
+        ...
 
     @property
     def index(self) -> pl.DataFrame:
@@ -266,4 +356,185 @@ class MacroDataProvider(Protocol):
 
     def fetchSeriesYoy(self, seriesId: str) -> float | None:
         """seriesId 의 YoY 변화율."""
+        ...
+
+
+# ── P-트랙 룰 1: 3-provider 동일 surface 강제 Protocol ──
+
+
+@runtime_checkable
+class DocsProvider(Protocol):
+    """3-provider (dart/edgar/edinet) 공통 docs (공시 본문) 표면.
+
+    룰 1 (Protocol 동일 surface) 강제. 새 regulator 추가 = 이 Protocol 구현 drop-in.
+
+    구현체 시그니처는 동일해야 한다 — `test_providerContract.py` 가 introspect.
+    """
+
+    def fetchFiling(self, stockCode: str, *, period: str) -> FilingResult | None:
+        """단일 공시 본문 fetch.
+
+        Args:
+            stockCode: 종목코드 (DART 6자리 / EDGAR ticker / EDINET 4자리).
+            period: 보고기간 (예 "2024" annual / "2024Q1").
+
+        Returns:
+            FilingResult 또는 데이터 없으면 None.
+
+        Raises:
+            ValueError: stockCode 형식 오류.
+            OSError: 외부 데이터 접근 실패.
+        """
+        ...
+
+    def listSections(self, stockCode: str, *, period: str) -> list[Section]:
+        """단일 회사의 섹션 list (full materialize).
+
+        Args:
+            stockCode: 종목코드.
+            period: 보고기간.
+
+        Returns:
+            Section 리스트 (빈 list 가능).
+
+        Raises:
+            OSError: 데이터 접근 실패.
+        """
+        ...
+
+    def iterSections(self, stockCode: str, *, period: str) -> Iterator[Section]:
+        """단일 회사 섹션 streaming iterator (룰 10 — limit pair).
+
+        Args:
+            stockCode: 종목코드.
+            period: 보고기간.
+
+        Yields:
+            Section.
+
+        Raises:
+            OSError: 데이터 접근 실패.
+        """
+        ...
+
+
+@runtime_checkable
+class FinanceProvider(Protocol):
+    """3-provider 공통 finance (XBRL/재무제표) 표면."""
+
+    def fetchStatements(
+        self,
+        stockCode: str,
+        *,
+        period: str,
+        kind: str = "annual",
+        limit: int = 100,
+    ) -> StatementsResult | None:
+        """재무제표 정규화 패널 fetch.
+
+        Args:
+            stockCode: 종목코드.
+            period: 보고기간.
+            kind: annual / Q1 / Q2 / Q3.
+            limit: 반환 row 상한 (룰 8 강제).
+
+        Returns:
+            StatementsResult 또는 None.
+
+        Raises:
+            ValueError: kind 미지원 값.
+            OSError: 데이터 접근 실패.
+        """
+        ...
+
+    def listAccounts(self, stockCode: str) -> list[Account]:
+        """전 계정 list.
+
+        Args:
+            stockCode: 종목코드.
+
+        Returns:
+            Account 리스트.
+
+        Raises:
+            OSError: 데이터 접근 실패.
+        """
+        ...
+
+    def iterAccounts(self, stockCode: str) -> Iterator[Account]:
+        """계정 streaming iterator.
+
+        Args:
+            stockCode: 종목코드.
+
+        Yields:
+            Account.
+
+        Raises:
+            OSError: 데이터 접근 실패.
+        """
+        ...
+
+
+@runtime_checkable
+class FilingsProvider(Protocol):
+    """3-provider 공통 filings (공시 검색) 표면."""
+
+    def search(self, query: str, *, market: str | None = None, limit: int = 20) -> list[Filing]:
+        """공시 검색 (메타).
+
+        Args:
+            query: 검색어.
+            market: KR/US/JP 필터.
+            limit: 결과 상한 (룰 8 강제).
+
+        Returns:
+            Filing 리스트.
+
+        Raises:
+            ValueError: query 빈 문자열.
+            OSError: 데이터 접근 실패.
+        """
+        ...
+
+    def iterSearch(self, query: str, *, market: str | None = None) -> Iterator[Filing]:
+        """검색 결과 streaming.
+
+        Args:
+            query: 검색어.
+            market: 시장 필터.
+
+        Yields:
+            Filing.
+
+        Raises:
+            ValueError: query 빈 문자열.
+        """
+        ...
+
+
+@runtime_checkable
+class MemorySafeProvider(Protocol):
+    """공통 — 모든 provider 가 만족해야 하는 메모리-safe surface (룰 11)."""
+
+    def cleanupCache(self) -> int:
+        """BoundedCache evict + Polars 힙 회수.
+
+        Returns:
+            evict 된 entry 수.
+
+        Raises:
+            없음 (cleanup 실패는 silent).
+        """
+        ...
+
+    def memorySnapshot(self) -> dict[str, int]:
+        """캐시 크기 + RSS 등 메모리 상태 snapshot.
+
+        Returns:
+            keys: "cacheSize" (entry count), "rssMb" (현 RSS MB).
+
+        Raises:
+            없음.
+        """
         ...

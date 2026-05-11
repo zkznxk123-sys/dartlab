@@ -1,8 +1,6 @@
 {
-  "_note": "P0.5 baseline — CompanyProtocol + 3 provider Company 의 __enter__/__exit__ 미구현. P1.5 (Protocol) + P7 (provider) 에서 메우며 축소",
+  "_note": "P1.5 후 갱신 — CompanyProtocol __enter__/__exit__ 추가 완료. 잔존: dart/edgar/edinet Company.__enter__/__exit__ 6 개 (P7 대상).",
   "missingContextManagers": [
-    "CompanyProtocol.__enter__",
-    "CompanyProtocol.__exit__",
     "dart: Company.__enter__",
     "dart: Company.__exit__",
     "edgar: Company.__enter__",
