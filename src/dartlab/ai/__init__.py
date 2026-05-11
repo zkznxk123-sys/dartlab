@@ -79,11 +79,11 @@ def getConfig(provider: str | None = None, role: str | None = None, **kwargs: An
     values = {
         "provider": resolved_provider,
         "model": resolvedModel,
-        "api_key": resolved.get("api_key") or base.apiKey,
-        "base_url": resolved.get("base_url") or base.baseUrl,
+        "apiKey": resolved.get("api_key") or resolved.get("apiKey") or base.apiKey,
+        "baseUrl": resolved.get("base_url") or resolved.get("baseUrl") or base.baseUrl,
         "temperature": resolved.get("temperature") if resolved.get("temperature") is not None else base.temperature,
-        "max_tokens": resolved.get("max_tokens") if resolved.get("max_tokens") is not None else base.maxTokens,
-        "system_prompt": resolved.get("system_prompt") or base.systemPrompt,
+        "maxTokens": resolved.get("max_tokens") if resolved.get("maxTokens") is not None else base.maxTokens,
+        "systemPrompt": resolved.get("system_prompt") or resolved.get("systemPrompt") or base.systemPrompt,
     }
     for key, value in kwargs.items():
         if key in values and value is not None:

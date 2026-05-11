@@ -17,13 +17,13 @@ _log = getLogger(__name__)
 
 import polars as pl
 
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     REVENUE_IDS as _REVENUE_IDS,
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     REVENUE_NMS as _REVENUE_NMS,
 )
-from dartlab.scan._helpers import (
+from dartlab.scan.parquetLoad import (
     loadValuationSnapshot,
     scanFinanceParquets,
 )

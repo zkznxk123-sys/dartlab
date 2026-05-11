@@ -47,7 +47,7 @@ def patch_ohlcv(monkeypatch):
     def _patcher(seeds_per_code: dict[str, int] | None = None):
         import importlib
 
-        _helpers = importlib.import_module("dartlab.quant._helpers")
+        _helpers = importlib.import_module("dartlab.quant.screen.dataAccess")
         _backtest = importlib.import_module("dartlab.quant.strategy.backtest")
         _scan_bt = importlib.import_module("dartlab.quant.screen.scanBacktest")
 

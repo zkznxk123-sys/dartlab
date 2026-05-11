@@ -41,7 +41,7 @@ from dartlab.analysis.financial.insight.types import (
 )
 from dartlab.analysis.financial.ratios import RatioResult
 from dartlab.core.sector.types import Sector
-from dartlab.scan.rank import RankInfo
+from dartlab.scan.screen.rank import RankInfo
 
 
 class TestTypes:

@@ -344,7 +344,7 @@ def scanScreen(target: str | None = None, *, spec: dict | None = None, verbose: 
     dartlab.search : docs 텍스트 조건의 검색 인덱스.
     """
     if spec is not None:
-        from dartlab.scan.fields import executeScreenSpec
+        from dartlab.scan.builder.fields import executeScreenSpec
 
         if target is not None:
             raise ValueError("screen 은 target 프리셋과 spec 을 동시에 받을 수 없습니다.")

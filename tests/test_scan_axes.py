@@ -67,7 +67,7 @@ def test_debt_imports():
 
 
 def test_helpers_parse_num():
-    from dartlab.scan._helpers import parseNumStr
+    from dartlab.scan.parquetLoad import parseNumStr
 
     assert parseNumStr("1,234") == 1234.0
     assert parseNumStr("-") is None

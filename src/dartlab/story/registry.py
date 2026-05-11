@@ -1149,7 +1149,7 @@ def _buildPeerPositionBlocks(company, keys, basePeriod, safe: Callable, need: Ca
         return
     import importlib
 
-    _ext = importlib.import_module("dartlab.scan.extended")
+    _ext = importlib.import_module("dartlab.scan.builder.extended")
     calcGovernanceSummary = _ext.calcGovernanceSummary
     calcPeerPosition = _ext.calcPeerPosition
     from dartlab.story.builders import peerPositionBlock

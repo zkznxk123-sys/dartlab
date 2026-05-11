@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_rankinfo_creation():
-    from dartlab.scan.rank import RankInfo
+    from dartlab.scan.screen.rank import RankInfo
 
     ri = RankInfo(
         stockCode="005930",
@@ -35,7 +35,7 @@ def test_rankinfo_creation():
 
 
 def test_rankinfo_repr():
-    from dartlab.scan.rank import RankInfo
+    from dartlab.scan.screen.rank import RankInfo
 
     ri = RankInfo(
         stockCode="005930",
@@ -54,7 +54,7 @@ def test_rankinfo_repr():
 
 
 def test_rankinfo_asdict():
-    from dartlab.scan.rank import RankInfo
+    from dartlab.scan.screen.rank import RankInfo
 
     ri = RankInfo(stockCode="X", corpName="Y", sector="Z", industryGroup="W")
     d = asdict(ri)
@@ -64,7 +64,7 @@ def test_rankinfo_asdict():
 
 def test_rankinfo_none_repr():
     """revenue가 None이면 repr에 N/A 표시."""
-    from dartlab.scan.rank import RankInfo
+    from dartlab.scan.screen.rank import RankInfo
 
     ri = RankInfo(stockCode="X", corpName="테스트", sector="IT", industryGroup="기타")
     assert "N/A" in repr(ri)
@@ -75,10 +75,10 @@ def test_rankinfo_none_repr():
 
 def test_getRank_no_snapshot(monkeypatch):
     """스냅샷이 없으면 None 반환."""
-    import dartlab.scan.rank as mod
+    import dartlab.scan.screen.rank as mod
 
     monkeypatch.setattr(mod, "_SNAPSHOT", None)
     monkeypatch.setattr(mod, "_loadCache", lambda: None)
-    from dartlab.scan.rank import getRank
+    from dartlab.scan.screen.rank import getRank
 
     assert getRank("005930") is None

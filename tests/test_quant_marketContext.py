@@ -92,8 +92,8 @@ def patch_market_data(monkeypatch):
         import importlib
 
         _gather_entry = importlib.import_module("dartlab.gather.entry")
-        _benchmark_mod = importlib.import_module("dartlab.quant.benchmark")
-        _mc_mod = importlib.import_module("dartlab.quant.marketContext")
+        _benchmark_mod = importlib.import_module("dartlab.quant.benchmark.data")
+        _mc_mod = importlib.import_module("dartlab.quant.regime.marketContext")
 
         stockDf = _make_ohlcv_df(stockClose)
         bm_df = _make_ohlcv_df(_index_close(n=len(stockClose)))
@@ -234,7 +234,7 @@ class TestCalcMarketContext:
     def test_no_data_returns_error(self, monkeypatch):
         from dartlab.quant.regime.marketContext import calcMarketContext
 
-        monkeypatch.setattr("dartlab.quant.marketContext.fetchOhlcv", lambda code, **kw: None)
+        monkeypatch.setattr("dartlab.quant.regime.marketContext.fetchOhlcv", lambda code, **kw: None)
         r = calcMarketContext("FAIL", market="KR")
         assert "error" in r
 
@@ -267,7 +267,7 @@ class TestAxisRegistry:
         assert "marketContext" in _AXIS_REGISTRY
         entry = _AXIS_REGISTRY["marketContext"]
         assert entry.fn == "calcMarketContext"
-        assert entry.module == "dartlab.quant.marketContext"
+        assert entry.module == "dartlab.quant.regime.marketContext"
         assert entry.group == "risk"
 
     def test_korean_alias(self):

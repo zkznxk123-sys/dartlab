@@ -63,7 +63,7 @@ def _isolateScanDir(monkeypatch, tmp_path):
 
 
 def test_loadValuationSnapshot_missing_returns_none(_isolateScanDir):
-    from dartlab.scan._helpers import loadValuationSnapshot
+    from dartlab.scan.parquetLoad import loadValuationSnapshot
 
     frame, snapshotAt = loadValuationSnapshot()
     assert frame is None
@@ -71,7 +71,7 @@ def test_loadValuationSnapshot_missing_returns_none(_isolateScanDir):
 
 
 def test_loadValuationSnapshot_reads_valid_parquet(_isolateScanDir):
-    from dartlab.scan._helpers import loadValuationSnapshot
+    from dartlab.scan.parquetLoad import loadValuationSnapshot
 
     ts = datetime(2026, 4, 23, 19, 0, 0)  # tzinfo 없음 — parquet read 후 동일 타입
     _writeMockParquet(_isolateScanDir / "valuation.parquet", ts)
@@ -87,7 +87,7 @@ def test_loadValuationSnapshot_reads_valid_parquet(_isolateScanDir):
 
 def test_loadValuationSnapshot_missing_required_column_returns_none(_isolateScanDir):
     """스키마 불일치 parquet (필수 컬럼 누락) 이면 None 반환."""
-    from dartlab.scan._helpers import loadValuationSnapshot
+    from dartlab.scan.parquetLoad import loadValuationSnapshot
 
     # current 컬럼 누락
     bad = pl.DataFrame(

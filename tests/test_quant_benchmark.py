@@ -271,7 +271,7 @@ def test_bab_ranks_by_beta_not_vol(monkeypatch):
         return bench_df
 
     monkeypatch.setattr(hf, "loadFiltered", lambda **_: pl.DataFrame(rows))
-    monkeypatch.setattr("dartlab.quant.benchmark.fetchBenchmarkOhlcv", fake_fetch)
+    monkeypatch.setattr("dartlab.quant.benchmark.data.fetchBenchmarkOhlcv", fake_fetch)
 
     result = calcBAB(betaWindow=252, volWindow=60)
 

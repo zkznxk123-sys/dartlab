@@ -79,7 +79,7 @@ def _historyTest(company) -> TestResult:
     현재: scan 기반 peer 기업 중 유사 재무구조를 가진 top 3가 존재하는지.
     """
     try:
-        from dartlab.scan.extended import calcPeerPosition
+        from dartlab.scan.builder.extended import calcPeerPosition
 
         peer = calcPeerPosition(company)
         if peer and peer.get("crossViews"):
@@ -107,7 +107,7 @@ def _experienceTest(company) -> TestResult:
     try:
         import importlib
 
-        calcPeerPosition = importlib.import_module("dartlab.scan.extended").calcPeerPosition
+        calcPeerPosition = importlib.import_module("dartlab.scan.builder.extended").calcPeerPosition
 
         peer = calcPeerPosition(company)
         total = peer.get("total_stocks", 0) if peer else 0

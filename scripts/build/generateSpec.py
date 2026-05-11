@@ -1208,7 +1208,7 @@ def _dataclassesSection() -> str:
     lines.append(_dataclassTable(SectorInfo, "SectorInfo"))
     lines.append(_dataclassTable(SectorParams, "SectorParams"))
 
-    from dartlab.scan.rank import RankInfo
+    from dartlab.scan.screen.rank import RankInfo
 
     lines.append(_dataclassTable(RankInfo, "RankInfo"))
 
