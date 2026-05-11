@@ -76,7 +76,7 @@ def patch_fetch_ohlcv(monkeypatch):
         def _fake_fetch(stockCode, **kwargs):
             return df
 
-        monkeypatch.setattr("dartlab.quant.forecast.fetchOhlcv", _fake_fetch)
+        monkeypatch.setattr("dartlab.quant.benchmark.forecast.fetchOhlcv", _fake_fetch)
         return df
 
     return _patcher
@@ -292,7 +292,7 @@ class TestForecastReturns:
     def test_no_data_returns_error(self, monkeypatch):
         from dartlab.quant.benchmark.forecast import forecastReturns
 
-        monkeypatch.setattr("dartlab.quant.forecast.fetchOhlcv", lambda code, **kw: None)
+        monkeypatch.setattr("dartlab.quant.benchmark.forecast.fetchOhlcv", lambda code, **kw: None)
         r = forecastReturns("FAIL", market="KR", horizon=5)
         assert "error" in r
 
@@ -344,7 +344,7 @@ class TestAxisRegistry:
         assert "forecast" in _AXIS_REGISTRY
         entry = _AXIS_REGISTRY["forecast"]
         assert entry.fn == "forecastReturns"
-        assert entry.module == "dartlab.quant.forecast"
+        assert entry.module == "dartlab.quant.benchmark.forecast"
         assert entry.stockRequired is True
 
     def test_korean_alias(self):

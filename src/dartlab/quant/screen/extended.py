@@ -160,7 +160,7 @@ def calcTechnicalSignals(company) -> dict | None:
     ohlcv["low"].to_numpy().astype(np.float64)
 
     from dartlab.core import indicators as ind
-    from dartlab.quant import signals as sig
+    from dartlab.quant.signal import generator as sig
 
     rsi = ind.vrsi(close, 14)
     recent = min(20, len(close))

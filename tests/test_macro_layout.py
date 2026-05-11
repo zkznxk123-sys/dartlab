@@ -1,14 +1,7 @@
 """F2 강행 — macro/ 폴더 구조 회귀 방지.
 
-macro/ 평면 33 파일이 7 서브폴더 (rates/cycles/crisis/scenarios/forecast/
-corporate/trade) 로 정리됐다. 본 테스트는 평면 회귀 (서브폴더 우회 import)
-를 차단한다.
-
-테스트 게이트:
-    1. macro/ 직속 .py ⊆ {__init__, _helpers, assets, liquidity, sentiment,
-       historicalContext, summary, spec} (root 8 개)
-    2. 7 서브폴더 모두 __init__.py 존재
-    3. 26 모듈이 정확한 서브폴더에 위치
+F2.1 (이번 라운드): assets/historicalContext → corporate/, liquidity/sentiment → cycles/, _helpers → seriesFetch.
+root 잔존: __init__, seriesFetch, summary, spec.
 """
 
 from __future__ import annotations
@@ -21,11 +14,7 @@ MACRO = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "macro"
 
 ROOT_ALLOWED: set[str] = {
     "__init__.py",
-    "_helpers.py",
-    "assets.py",
-    "liquidity.py",
-    "sentiment.py",
-    "historicalContext.py",
+    "seriesFetch.py",  # F2.1: _helpers.py → seriesFetch.py (헬퍼 generic 이름 폐지)
     "summary.py",
     "spec.py",
 }
@@ -40,10 +29,17 @@ EXPECTED_LAYOUT: dict[str, set[str]] = {
         "turningPoint.py",
         "inventoryCycle.py",
         "inventory.py",
+        "liquidity.py",  # F2.1: root → cycles
+        "sentiment.py",  # F2.1: root → cycles
     },
     "crisis": {"crisis.py", "fci.py", "growthAtRisk.py", "rrCrisisDB.py"},
     "forecast": {"forecast.py", "nowcast.py", "macroBacktest.py"},
-    "corporate": {"corporate.py", "corporateAggregate.py"},
+    "corporate": {
+        "corporate.py",
+        "corporateAggregate.py",
+        "assets.py",  # F2.1: root → corporate
+        "historicalContext.py",  # F2.1: root → corporate
+    },
     "trade": {"trade.py", "termsOfTrade.py"},
 }
 
@@ -79,15 +75,22 @@ def test_macro_scenarios_has_three_new() -> None:
 @pytest.mark.unit
 def test_macro_subfolder_imports() -> None:
     """7 서브폴더 모두 import 가능 (회귀 시 ImportError)."""
-    from dartlab.macro.corporate import corporate, corporateAggregate  # noqa: F401
+    from dartlab.macro.corporate import (  # noqa: F401
+        assets,  # F2.1: root → corporate
+        corporate,
+        corporateAggregate,
+        historicalContext,  # F2.1: root → corporate
+    )
     from dartlab.macro.crisis import crisis, fci, growthAtRisk, rrCrisisDB  # noqa: F401
     from dartlab.macro.cycles import (  # noqa: F401
         cycle,
         inflection,
         inventory,
         inventoryCycle,
+        liquidity,  # F2.1: root → cycles
         macroCycle,
         regimeSwitching,
+        sentiment,  # F2.1: root → cycles
         turningPoint,
     )
     from dartlab.macro.forecast import forecast, macroBacktest, nowcast  # noqa: F401
