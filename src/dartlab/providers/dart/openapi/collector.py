@@ -492,3 +492,36 @@ def listUncollectedKind(
     if limit:
         result = result[:limit]
     return result
+
+
+def iterUncollected(*, client: DartClient | None = None, limit: int | None = None):
+    """``listUncollected`` 의 iterator pair (룰 10).
+
+    Args:
+        client: DartClient (재사용 시).
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Yields:
+        ``(종목코드, 회사명)`` 튜플.
+
+    Example:
+        >>> for code, name in iterUncollected(limit=10):
+        ...     print(code, name)
+    """
+    yield from listUncollected(client=client, limit=limit)
+
+
+def iterUncollectedKind(*, limit: int | None = None):
+    """``listUncollectedKind`` 의 iterator pair (룰 10).
+
+    Args:
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Yields:
+        ``(종목코드, 회사명)`` 튜플.
+
+    Example:
+        >>> for code, name in iterUncollectedKind(limit=10):
+        ...     print(code, name)
+    """
+    yield from listUncollectedKind(limit=limit)

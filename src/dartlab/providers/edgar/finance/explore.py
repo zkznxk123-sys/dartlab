@@ -148,3 +148,29 @@ def listTags(
     if limit is not None:
         tagCounts = tagCounts.head(limit)
     return tagCounts
+
+
+def iterTags(
+    cik: str,
+    *,
+    edgarDir: Path | None = None,
+    limit: int | None = None,
+):
+    """``listTags`` 의 iterator pair (룰 10).
+
+    Args:
+        cik: SEC CIK.
+        edgarDir: edgar 데이터 디렉터리 override.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Yields:
+        태그 row dict.
+
+    Example:
+        >>> for row in iterTags("0000320193", limit=20):
+        ...     print(row["tag"])
+    """
+    df = listTags(cik, edgarDir=edgarDir, limit=limit)
+    if df is None:
+        return
+    yield from df.iter_rows(named=True)

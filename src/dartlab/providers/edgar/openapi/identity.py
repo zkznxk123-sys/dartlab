@@ -136,3 +136,29 @@ def searchIssuers(
     if limit is not None:
         result = result.head(limit)
     return result
+
+
+def iterIssuers(
+    query: str,
+    client: EdgarClient | None = None,
+    *,
+    refresh: bool = False,
+    limit: int | None = None,
+):
+    """``searchIssuers`` 의 iterator pair (룰 10).
+
+    Args:
+        query: 검색어.
+        client: EdgarClient (재사용 시).
+        refresh: True 면 ticker 캐시 재다운로드.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Yields:
+        issuer row dict.
+
+    Example:
+        >>> for row in iterIssuers("apple", limit=10):
+        ...     print(row["ticker"])
+    """
+    df = searchIssuers(query, client, refresh=refresh, limit=limit)
+    yield from df.iter_rows(named=True)

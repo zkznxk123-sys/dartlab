@@ -84,6 +84,26 @@ def searchName(keyword, *, limit: int | None = None):
     return df
 
 
+def iterName(keyword, *, limit: int | None = None):
+    """``searchName`` 의 iterator pair (룰 10) — row-level 스트리밍.
+
+    Args:
+        keyword: 회사명 substring.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Yields:
+        row dict.
+
+    Example:
+        >>> for row in iterName("삼성", limit=10):
+        ...     print(row["corp_name"])
+    """
+    df = searchName(keyword, limit=limit)
+    if df is None:
+        return
+    yield from df.iter_rows(named=True)
+
+
 from dartlab.providers.dart.accessor.docsAccessor import _DocsAccessor
 from dartlab.providers.dart.accessor.financeAccessor import _FinanceAccessor
 from dartlab.providers.dart.accessor.profileAccessor import _ProfileAccessor
@@ -344,6 +364,25 @@ def listExportModules(*, limit: int | None = None) -> list[tuple[str, str]]:
     if limit is not None:
         items = items[:limit]
     return items
+
+
+def iterExportModules(*, limit: int | None = None):
+    """``listExportModules`` 의 iterator pair (룰 10).
+
+    Args:
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Yields:
+        ``(prop, label)`` 튜플.
+
+    Example:
+        >>> for prop, label in iterExportModules(limit=20):
+        ...     print(prop, label)
+    """
+    for i, item in enumerate(_getAllProperties()):
+        if limit is not None and i >= limit:
+            return
+        yield item
 
 
 class Company:

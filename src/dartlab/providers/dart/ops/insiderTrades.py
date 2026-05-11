@@ -118,6 +118,44 @@ async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None)
         return []
 
 
+async def iterInsiderTradingRaw(stockCode: str, *, limit: int | None = None):
+    """``fetchInsiderTradingRaw`` 의 async iterator pair (룰 10).
+
+    Args:
+        stockCode: 종목코드.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Yields:
+        거래 dict.
+
+    Example:
+        >>> async for row in iterInsiderTradingRaw("005930", limit=10):
+        ...     print(row["name"])
+    """
+    rows = await fetchInsiderTradingRaw(stockCode, limit=limit)
+    for r in rows:
+        yield r
+
+
+async def iterMajorShareholdersRaw(stockCode: str, *, limit: int | None = None):
+    """``fetchMajorShareholdersRaw`` 의 async iterator pair (룰 10).
+
+    Args:
+        stockCode: 종목코드.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Yields:
+        대량보유 변동 dict.
+
+    Example:
+        >>> async for row in iterMajorShareholdersRaw("005930", limit=10):
+        ...     print(row["holderName"])
+    """
+    rows = await fetchMajorShareholdersRaw(stockCode, limit=limit)
+    for r in rows:
+        yield r
+
+
 def _safeInt(val) -> int:
     """안전한 int 변환 — 콤마/기호 제거. None/실패 시 0."""
     if val is None:

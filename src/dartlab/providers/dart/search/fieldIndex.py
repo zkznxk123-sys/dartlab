@@ -613,3 +613,31 @@ def contentStats() -> dict:
             "avgDocLength": idx["avgDocLength"],
         }
     return out
+
+
+def iterContent(
+    query: str,
+    *,
+    corpCode: str | None = None,
+    stockCode: str | None = None,
+    limit: int = 10,
+):
+    """``searchContent`` 의 iterator pair (룰 10).
+
+    Args:
+        query: 자연어 쿼리.
+        corpCode: corp_code 필터.
+        stockCode: 종목코드 필터.
+        limit: 반환 건수.
+
+    Yields:
+        검색 결과 row dict.
+
+    Example:
+        >>> for row in iterContent("매출", limit=5):
+        ...     print(row.get("rcept_no"))
+    """
+    df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+    if df is None or df.is_empty():
+        return
+    yield from df.iter_rows(named=True)

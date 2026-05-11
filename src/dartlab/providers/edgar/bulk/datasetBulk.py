@@ -366,10 +366,28 @@ def listLocalQuarters(*, kind: str = "sub", limit: int | None = None) -> list[tu
     return out
 
 
+def iterLocalQuarters(*, kind: str = "sub", limit: int | None = None):
+    """``listLocalQuarters`` 의 iterator pair (룰 10).
+
+    Args:
+        kind: SEC dataset 종류 (sub/num/pre/tag).
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Yields:
+        ``(year, quarter)`` 튜플.
+
+    Example:
+        >>> for y, q in iterLocalQuarters(limit=8):
+        ...     print(y, q)
+    """
+    yield from listLocalQuarters(kind=kind, limit=limit)
+
+
 __all__ = [
     "DATASET_FILES",
     "convertQuarterlyToParquets",
     "discoverLatestQuarter",
     "downloadQuarterlyDataset",
     "listLocalQuarters",
+    "iterLocalQuarters",
 ]

@@ -1,22 +1,4 @@
 {
-  "_note": "P5.4 sync",
-  "violations": [
-    "src/dartlab/providers/dart/company.py::listExportModules (iter pair iterExportModules 부재)",
-    "src/dartlab/providers/dart/company.py::searchName (iter pair iterName 부재)",
-    "src/dartlab/providers/dart/openapi/collector.py::listUncollected (iter pair iterUncollected 부재)",
-    "src/dartlab/providers/dart/openapi/collector.py::listUncollectedKind (iter pair iterUncollectedKind 부재)",
-    "src/dartlab/providers/dart/openapi/corpCode.py::searchCompanies (iter pair iterCompanies 부재)",
-    "src/dartlab/providers/dart/openapi/disclosure.py::listFilings (iter pair iterFilings 부재)",
-    "src/dartlab/providers/dart/ops/insiderTrades.py::fetchInsiderTradingRaw (iter pair iterInsiderTradingRaw 부재)",
-    "src/dartlab/providers/dart/ops/insiderTrades.py::fetchMajorShareholdersRaw (iter pair iterMajorShareholdersRaw 부재)",
-    "src/dartlab/providers/dart/search/fieldIndex.py::searchContent (iter pair iterContent 부재)",
-    "src/dartlab/providers/dart/search/ngramIndex.py::searchNgram (iter pair iterNgram 부재)",
-    "src/dartlab/providers/edgar/accessor/financeAccessor.py::listTags (iter pair iterTags 부재)",
-    "src/dartlab/providers/edgar/bulk/datasetBulk.py::listLocalQuarters (iter pair iterLocalQuarters 부재)",
-    "src/dartlab/providers/edgar/docs/fetch.py::fetchEdgarDocs (iter pair iterEdgarDocs 부재)",
-    "src/dartlab/providers/edgar/finance/explore.py::listTags (iter pair iterTags 부재)",
-    "src/dartlab/providers/edgar/openapi/identity.py::searchIssuers (iter pair iterIssuers 부재)",
-    "src/dartlab/providers/edinet/openapi/client.py::listDocuments (iter pair iterDocuments 부재)",
-    "src/dartlab/providers/edinet/openapi/client.py::listEdinetCodes (iter pair iterEdinetCodes 부재)"
-  ]
+  "_note": "P-B2 sync",
+  "violations": []
 }

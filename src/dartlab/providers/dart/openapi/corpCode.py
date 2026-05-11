@@ -175,3 +175,29 @@ def searchCompanies(
     if limit is not None:
         result = result.head(limit)
     return result
+
+
+def iterCompanies(
+    client: DartClient,
+    query: str,
+    listedOnly: bool = False,
+    *,
+    limit: int | None = None,
+):
+    """``searchCompanies`` 의 iterator pair (룰 10).
+
+    Args:
+        client: DartClient.
+        query: 검색어.
+        listedOnly: True 면 상장사만.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Yields:
+        row dict.
+
+    Example:
+        >>> for row in iterCompanies(client, "삼성", limit=10):
+        ...     print(row["corp_name"])
+    """
+    df = searchCompanies(client, query, listedOnly, limit=limit)
+    yield from df.iter_rows(named=True)

@@ -130,6 +130,60 @@ def listFilings(
     return df
 
 
+def iterFilings(
+    client: DartClient,
+    corp: str | None = None,
+    start: str | None = None,
+    end: str | None = None,
+    *,
+    filingType: str | None = None,
+    finalOnly: bool = False,
+    corpClass: Literal["Y", "K", "N", "E"] | None = None,
+    sort: Literal["date", "crp", "rpt"] = "date",
+    ascending: bool = False,
+    fetchAll: bool = True,
+    limit: int | None = None,
+):
+    """``listFilings`` 의 iterator pair (룰 10).
+
+    Args:
+        client: DartClient.
+        corp: 기업 식별자.
+        start: 시작일 (YYYYMMDD).
+        end: 종료일.
+        filingType: 공시 유형 코드.
+        finalOnly: 최종보고서만.
+        corpClass: 법인구분.
+        sort: 정렬 기준.
+        ascending: 오름차순.
+        fetchAll: 자동 페이지네이션.
+        limit: 최대 행 수.
+
+    Yields:
+        공시 row dict.
+
+    Example:
+        >>> for row in iterFilings(client, "005930", limit=10):
+        ...     print(row["report_nm"])
+    """
+    df = listFilings(
+        client,
+        corp,
+        start,
+        end,
+        filingType=filingType,
+        finalOnly=finalOnly,
+        corpClass=corpClass,
+        sort=sort,
+        ascending=ascending,
+        fetchAll=fetchAll,
+        limit=limit,
+    )
+    if df is None:
+        return
+    yield from df.iter_rows(named=True)
+
+
 def companyInfo(
     client: DartClient,
     corp: str,

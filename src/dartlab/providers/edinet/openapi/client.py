@@ -201,3 +201,41 @@ class EdinetClient:
         if limit is not None:
             results = results[:limit]
         return results
+
+    def iterDocuments(
+        self,
+        period: str,
+        *,
+        docType: str | None = None,
+        limit: int | None = None,
+    ):
+        """``listDocuments`` 의 iterator pair (룰 10).
+
+        Args:
+            period: 조회일 (YYYY-MM-DD).
+            docType: 서류 유형 필터.
+            limit: 최대 항목 수. None 이면 무제한.
+
+        Yields:
+            서류 dict.
+
+        Example:
+            >>> for doc in client.iterDocuments("2026-05-01", limit=10):
+            ...     print(doc["docID"])
+        """
+        yield from self.listDocuments(period, docType=docType, limit=limit)
+
+    def iterEdinetCodes(self, *, limit: int | None = None):
+        """``listEdinetCodes`` 의 iterator pair (룰 10).
+
+        Args:
+            limit: 최대 항목 수. None 이면 무제한.
+
+        Yields:
+            기업 dict.
+
+        Example:
+            >>> for ec in client.iterEdinetCodes(limit=100):
+            ...     print(ec["edinetCode"])
+        """
+        yield from self.listEdinetCodes(limit=limit)

@@ -1248,3 +1248,52 @@ def _supportedRegularForms(submissions: dict, sinceYear: int) -> list[str]:
         if formType not in forms:
             forms.append(formType)
     return forms
+
+
+def iterEdgarDocs(
+    ticker: str,
+    outPath: Path,
+    *,
+    sinceYear: int = SINCE_YEAR,
+    maxFilings: int | None = None,
+    filingTimeout: int = FILING_TIMEOUT_SECONDS,
+    showProgress: bool = True,
+    sourceMode: str = "sec_api",
+    strictQuality: bool = False,
+):
+    """``fetchEdgarDocs`` 의 iterator pair (룰 10).
+
+    ``fetchEdgarDocs`` 가 parquet 한 번 빌드하는 것과 달리, ``iterEdgarDocs`` 는 결과 parquet
+    을 row 단위로 yield. 호출자가 메모리 전체 로드 없이 streaming 가능.
+
+    Args:
+        ticker: SEC ticker.
+        outPath: 결과 parquet 경로.
+        sinceYear: 시작 연도.
+        maxFilings: 최대 filings 수.
+        filingTimeout: filing 별 timeout (초).
+        showProgress: 진행 표시.
+        sourceMode: 소스 모드.
+        strictQuality: 품질 검증 strict.
+
+    Yields:
+        섹션 row dict.
+
+    Example:
+        >>> for row in iterEdgarDocs("AAPL", Path("apple.parquet"), maxFilings=5):
+        ...     print(row.get("section_title"))
+    """
+    fetchEdgarDocs(
+        ticker,
+        outPath,
+        sinceYear=sinceYear,
+        maxFilings=maxFilings,
+        filingTimeout=filingTimeout,
+        showProgress=showProgress,
+        sourceMode=sourceMode,
+        strictQuality=strictQuality,
+    )
+    if not outPath.exists():
+        return
+    df = pl.read_parquet(outPath)
+    yield from df.iter_rows(named=True)

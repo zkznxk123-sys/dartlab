@@ -158,3 +158,21 @@ class _FinanceAccessor:
         from dartlab.providers.edgar.finance.explore import listTags
 
         return listTags(self._company.cik, limit=limit)
+
+    def iterTags(self, *, limit: int | None = None):
+        """``listTags`` 의 iterator pair (룰 10).
+
+        Args:
+            limit: 최대 행 수. None 이면 무제한.
+
+        Yields:
+            태그 row dict.
+
+        Example:
+            >>> for row in c.finance.iterTags(limit=20):
+            ...     print(row["tag"], row["count"])
+        """
+        df = self.listTags(limit=limit)
+        if df is None:
+            return
+        yield from df.iter_rows(named=True)
