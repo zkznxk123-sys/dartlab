@@ -1,0 +1,4 @@
+{
+  "_note": "P0.5 baseline — raw data/*/docs/*.parquet glob 패턴. P3 docsIndex 도입 후 축소",
+  "violations": []
+}
