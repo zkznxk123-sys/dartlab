@@ -733,7 +733,7 @@ def _loadKrx(field: str, spec: dict[str, Any]) -> pl.DataFrame:
 
 
 def _loadKrxLatestYear() -> pl.DataFrame:
-    from dartlab.gather._hfBulk import loadFiltered
+    from dartlab.gather.bulkData.hfBulk import loadFiltered
 
     this_year = date.today().year
     raw = loadFiltered(year=this_year, adjustment="raw")
@@ -743,7 +743,7 @@ def _loadKrxLatestYear() -> pl.DataFrame:
 
 
 def _loadKrxWindow(*, start: str | None, end: str | None) -> pl.DataFrame:
-    from dartlab.gather._hfBulk import loadFiltered
+    from dartlab.gather.bulkData.hfBulk import loadFiltered
 
     return loadFiltered(start=start, end=end, adjustment="raw")
 
@@ -869,7 +869,7 @@ def _loadKrxIndexScalar(field: str, spec: dict[str, Any]) -> float | int | str |
         if raw is None or raw.is_empty():
             raw = _loadKrxIndexYear(market=market, year=year - 1)
     else:
-        from dartlab.gather._hfIndexBulk import loadFiltered
+        from dartlab.gather.bulkData.hfIndexBulk import loadFiltered
 
         raw = loadFiltered(market=market, start=start, end=end)
     if raw is None or raw.is_empty():
@@ -879,7 +879,7 @@ def _loadKrxIndexScalar(field: str, spec: dict[str, Any]) -> float | int | str |
 
 
 def _loadKrxIndexYear(*, market: str, year: int) -> pl.DataFrame:
-    from dartlab.gather._hfIndexBulk import loadFiltered
+    from dartlab.gather.bulkData.hfIndexBulk import loadFiltered
 
     return loadFiltered(market=market, year=year)
 

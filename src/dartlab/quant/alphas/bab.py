@@ -89,7 +89,7 @@ def calcBAB(
         volWindow = int(window)
 
     try:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
         from dartlab.quant.benchmark.data import resolveBenchmark
     except ImportError:
         return None

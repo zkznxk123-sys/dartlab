@@ -55,7 +55,7 @@ def _loadExisting(out: Path, year: int) -> pl.DataFrame | None:
         return pl.read_parquet(out)
     # GitHub Actions cache miss / 첫 run / 캐시 eviction 대비 — HF 의 raw-{year} 다운로드
     try:
-        from dartlab.gather._hfBulk import _loadYear
+        from dartlab.gather.bulkData.hfBulk import _loadYear
 
         df = _loadYear(year)
         if df is not None and not df.is_empty():
@@ -101,7 +101,7 @@ def _findLastBasDd(outDir: Path) -> date | None:
             return date(int(s[:4]), int(s[4:6]), int(s[6:8]))
     # 로컬 비어있으면 HF 현재 연도 시도 (캐시 miss 대비)
     try:
-        from dartlab.gather._hfBulk import _loadYear
+        from dartlab.gather.bulkData.hfBulk import _loadYear
 
         df = _loadYear(date.today().year)
         if df is not None and not df.is_empty():
@@ -263,7 +263,7 @@ def main() -> int:
         counts = asyncio.run(buildBackfill(outDir, args.start, args.end, apiKey))
 
     if args.push:
-        from dartlab.gather._hfDeploy import deployKrxToHF
+        from dartlab.gather.bulkData.hfDeploy import deployKrxToHF
 
         if counts:
             result = deployKrxToHF(outDir, repoId=args.repo_id)

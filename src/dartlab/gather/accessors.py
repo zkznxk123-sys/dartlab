@@ -102,7 +102,7 @@ class DefaultQuantAccessor:
     def fetchUniverseBulk(self, stockCodes: list[str], *, columns: list[str]) -> pl.DataFrame | None:
         """다종목 bulk 패널."""
         try:
-            from dartlab.gather._hfBulk import loadFiltered
+            from dartlab.gather.bulkData.hfBulk import loadFiltered
         except ImportError:
             return None
         try:

@@ -104,7 +104,7 @@ def _latestSectorCandidate(stockCode: str, listedMarket: str | None) -> dict[str
     if not stockCode or listedMarket not in {"KOSPI", "KOSDAQ"}:
         return None
     try:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         raw = loadFiltered(start=_defaultStart(45), adjustment="raw")
         if isEmptyDf(raw) or not {"ISU_CD", "SECT_TP_NM", "BAS_DD"}.issubset(set(raw.columns)):
@@ -150,7 +150,7 @@ def _styleCandidate(stockCode: str | None, listedMarket: str | None) -> dict[str
     if not stockCode or listedMarket not in {"KOSPI", "KOSDAQ"}:
         return None
     try:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         raw = loadFiltered(start=_defaultStart(45), adjustment="raw")
         required = {"ISU_CD", "MKT_NM", "BAS_DD", "MKTCAP"}
@@ -397,7 +397,7 @@ def fetchBenchmarkOhlcv(
 
     if meta["source"] == "krxIndex":
         try:
-            from dartlab.gather._hfIndexBulk import loadFiltered
+            from dartlab.gather.bulkData.hfIndexBulk import loadFiltered
 
             raw = loadFiltered(
                 market=meta["indexMarket"],

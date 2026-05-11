@@ -155,7 +155,7 @@ def loadFiltered(
 
     Example::
 
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
         df = loadFiltered(stockCode="005930", year=2024)              # split (기본)
         df = loadFiltered(stockCode="005930", year=2024, adjustment="tr")  # Total Return
 

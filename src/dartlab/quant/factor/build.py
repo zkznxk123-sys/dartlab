@@ -70,7 +70,7 @@ def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
     if market != "KR":
         return {}
     try:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         # 연말 ~6일 (12-25 ~ 12-31) 중 마지막 거래일 시총 사용 (휴일 robust)
         long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
@@ -205,7 +205,7 @@ def _portfolioReturns(codes: list[str], market: str, year: str, maxN: int = 30) 
     if market == "KR":
         # KR: _hfBulk 한 번 호출로 종목 리스트 long fetch
         try:
-            from dartlab.gather._hfBulk import loadFiltered
+            from dartlab.gather.bulkData.hfBulk import loadFiltered
 
             target_codes = codes[:maxN]
             long_df = loadFiltered(start=f"{year}-01-01", end=f"{year}-12-31", adjustment="raw")

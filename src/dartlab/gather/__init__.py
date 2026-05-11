@@ -823,14 +823,14 @@ class Gather:
         """
         if apiKey is None:
             try:
-                from dartlab.gather import _macroHf
+                from dartlab.gather.bulkData import macroHf
                 from dartlab.gather.ecos import catalog as ecos_catalog
 
                 indicator = ecos_catalog.resolveId(indicator)
                 ids = ecos_catalog.getAllIds() if scope == "catalog" else self._MACRO_KR
                 if indicator:
-                    return _macroHf.fetchSeries("ecos", indicator, start=start, end=end)
-                return _macroHf.fetchMulti("ecos", ids, start=start, end=end)
+                    return macroHf.fetchSeries("ecos", indicator, start=start, end=end)
+                return macroHf.fetchMulti("ecos", ids, start=start, end=end)
             except Exception as exc:
                 if isinstance(exc, ValueError):
                     raise
@@ -907,13 +907,13 @@ class Gather:
         """
         if apiKey is None:
             try:
-                from dartlab.gather import _macroHf
+                from dartlab.gather.bulkData import macroHf
                 from dartlab.gather.fred import catalog as fred_catalog
 
                 ids = fred_catalog.getAllIds() if scope == "catalog" else self._MACRO_US
                 if indicator:
-                    return _macroHf.fetchSeries("fred", indicator, start=start, end=end)
-                return _macroHf.fetchMulti("fred", ids, start=start, end=end)
+                    return macroHf.fetchSeries("fred", indicator, start=start, end=end)
+                return macroHf.fetchMulti("fred", ids, start=start, end=end)
             except Exception as exc:
                 if isinstance(exc, ValueError):
                     raise

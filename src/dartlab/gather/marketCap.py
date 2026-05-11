@@ -170,7 +170,7 @@ def marketCap(
 
     if market == "KR":
         # KRX 일별 시총 직접 사용 — DART 합성 폐기 (Phase A)
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         df = loadFiltered(stockCode=stockCode, start=start, end=end, adjustment="raw")
         if df is None or df.is_empty():

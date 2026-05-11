@@ -147,7 +147,7 @@ def _loadExisting(out: Path, year: int) -> pl.DataFrame | None:
     if out.exists():
         return pl.read_parquet(out)
     try:
-        from dartlab.gather._hfIndexBulk import _loadYear
+        from dartlab.gather.bulkData.hfIndexBulk import _loadYear
 
         df = _loadYear(year)
         if df is not None and not df.is_empty():
@@ -207,7 +207,7 @@ def _findLastBasDd(outDir: Path) -> date | None:
             s = df["BAS_DD"].max()
             return date(int(s[:4]), int(s[4:6]), int(s[6:8]))
     try:
-        from dartlab.gather._hfIndexBulk import _loadYear
+        from dartlab.gather.bulkData.hfIndexBulk import _loadYear
 
         df = _loadYear(date.today().year)
         if df is not None and not df.is_empty():
@@ -361,7 +361,7 @@ def main() -> int:
         counts = asyncio.run(buildBackfill(outDir, args.start, args.end, apiKey))
 
     if args.push:
-        from dartlab.gather._hfDeploy import deployKrxIndexToHF
+        from dartlab.gather.bulkData.hfDeploy import deployKrxIndexToHF
 
         if counts:
             result = deployKrxIndexToHF(outDir, repoId=args.repo_id)

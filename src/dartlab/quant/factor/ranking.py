@@ -227,7 +227,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     market_caps: dict[str, float] = {}
     if market == "KR":
         try:
-            from dartlab.gather._hfBulk import loadFiltered
+            from dartlab.gather.bulkData.hfBulk import loadFiltered
 
             mc_long = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
             if mc_long is not None and not mc_long.is_empty():

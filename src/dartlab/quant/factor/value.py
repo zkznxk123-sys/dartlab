@@ -45,7 +45,7 @@ def _fetchYearEndMarketcaps(market: str, year: str) -> dict[str, float]:
     if market != "KR":
         return {}
     try:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         long_df = loadFiltered(start=f"{year}-12-25", end=f"{year}-12-31", adjustment="raw")
         if long_df is None or long_df.is_empty():

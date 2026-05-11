@@ -455,7 +455,7 @@ def gatherKrx(
     # target="raw" 면 KRX 원본 그대로 (adjustment 적용 X), 그 외엔 split-adj 적용.
     adjMode = "raw" if target == "raw" else "split"
     if not apiKey:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         longDf = loadFiltered(start=start, end=end, adjustment=adjMode)
     else:

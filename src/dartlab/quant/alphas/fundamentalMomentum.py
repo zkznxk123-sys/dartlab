@@ -106,7 +106,7 @@ def calcFundamentalMomentum(
 
     # ── 12-1 price momentum (KRX _hfBulk) ──
     try:
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
 
         long_df = loadFiltered(adjustment="raw")
     except Exception as exc:  # noqa: BLE001

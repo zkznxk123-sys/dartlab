@@ -878,7 +878,7 @@ def calcFactorIC(
 
     try:
         from dartlab.core.cross.scanBridge import extractAnnualConsolidated
-        from dartlab.gather._hfBulk import loadFiltered
+        from dartlab.gather.bulkData.hfBulk import loadFiltered
         from dartlab.quant.factor.build import _buildUniverseMetrics, _latestYear
         from dartlab.quant.screen.dataAccess import loadScanParquet
     except Exception as exc:  # noqa: BLE001

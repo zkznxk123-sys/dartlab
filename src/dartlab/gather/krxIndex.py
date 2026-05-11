@@ -441,7 +441,7 @@ def gatherKrxIndex(
             )
         )
     else:
-        from dartlab.gather._hfIndexBulk import loadFiltered
+        from dartlab.gather.bulkData.hfIndexBulk import loadFiltered
 
         long_df = loadFiltered(
             market=market,

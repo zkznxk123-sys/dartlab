@@ -163,7 +163,7 @@ def loadFiltered(
 
     Examples
     --------
-    >>> from dartlab.gather._hfIndexBulk import loadFiltered
+    >>> from dartlab.gather.bulkData.hfIndexBulk import loadFiltered
     >>> loadFiltered(market="KOSPI", start="2026-04-28", end="2026-04-28")
     >>> loadFiltered(year=2025)
 
