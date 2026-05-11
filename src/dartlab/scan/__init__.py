@@ -848,16 +848,19 @@ class Scan:
             >>> df = dartlab.scan.docsSections(sectionTitle="신용평가", year=2024, onlyWithContent=True, limit=50)
             >>> df.select(["stockCode", "corpName", "contentLength"]).head()
         """
-        from dartlab.core.dataLoader import _dataDir
+        from dartlab.core.dataLoader import _dataDir, _getDataRoot
 
         if market not in ("KR", "US", "JP"):
             raise ValueError(f"지원 안 함 market: {market}. KR/US/JP 만.")
 
-        # P3 는 KR (dart) 만. P3.5 에서 US/JP 분기 추가.
-        if market != "KR":
-            raise NotImplementedError(f"market={market} 는 P3.5 에서 활성. 현재 KR 만.")
+        # market 별 인덱스 path (P3 KR, P3.5 US/JP)
+        if market == "KR":
+            indexPath = Path(_dataDir("scan")) / "docsIndex.parquet"
+        elif market == "US":
+            indexPath = _getDataRoot() / "edgar" / "scan" / "docsIndex.parquet"
+        else:  # JP
+            indexPath = _getDataRoot() / "edinet" / "scan" / "docsIndex.parquet"
 
-        indexPath = Path(_dataDir("scan")) / "docsIndex.parquet"
         if not indexPath.exists():
             raise FileNotFoundError(
                 f"docsIndex.parquet 미빌드: {indexPath}. "

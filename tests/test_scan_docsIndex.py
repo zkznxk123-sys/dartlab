@@ -209,14 +209,34 @@ def test_docsSections_limit_enforced(docsFixture: Path, tmp_path: Path, monkeypa
     assert scan.docsSections(limit=2).height == 2  # 룰 8
 
 
-def test_docsSections_market_us_not_implemented(tmp_path: Path, monkeypatch) -> None:
-    """market="US" 는 P3.5 NotImplementedError."""
+def test_docsSections_market_invalid(tmp_path: Path, monkeypatch) -> None:
+    """market 미지원 값은 ValueError."""
     from dartlab.scan import Scan
 
     monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
     scan = Scan()
-    with pytest.raises(NotImplementedError, match="P3.5"):
+    with pytest.raises(ValueError, match="KR/US/JP"):
+        scan.docsSections(market="ZZ")
+
+
+def test_docsSections_market_us_routes_to_edgar(tmp_path: Path, monkeypatch) -> None:
+    """market="US" → data/edgar/scan/docsIndex.parquet 경로 미빌드 시 안내 메시지."""
+    from dartlab.scan import Scan
+
+    monkeypatch.setattr("dartlab.core.dataLoader._getDataRoot", lambda: tmp_path)
+    scan = Scan()
+    with pytest.raises(FileNotFoundError, match="edgar"):
         scan.docsSections(market="US")
+
+
+def test_docsSections_market_jp_routes_to_edinet(tmp_path: Path, monkeypatch) -> None:
+    """market="JP" → data/edinet/scan/docsIndex.parquet 경로 미빌드 시 안내 메시지."""
+    from dartlab.scan import Scan
+
+    monkeypatch.setattr("dartlab.core.dataLoader._getDataRoot", lambda: tmp_path)
+    scan = Scan()
+    with pytest.raises(FileNotFoundError, match="edinet"):
+        scan.docsSections(market="JP")
 
 
 def test_iterDocsSections_yields_dicts(docsFixture: Path, tmp_path: Path, monkeypatch) -> None:

@@ -1,23 +1,26 @@
-"""docs 슬림 cross-company 인덱스 빌더 — P3 (whimsical-marinating-axolotl 흡수).
+"""docs 슬림 cross-company 인덱스 빌더 — P3 / P3.5.
 
-전 종목 ``data/dart/docs/*.parquet`` 를 단일 슬림 parquet 으로 통합. 메타데이터만
+전 종목 ``data/{provider}/docs/*.parquet`` 를 단일 슬림 parquet 으로 통합. 메타데이터만
 (``section_content`` 제외) 보유해 cross-company 질문 ("X 섹션 보유 회사") 을
 RSS <100 MB 로 1~2 초 내 답.
 
-산출물 ``data/dart/scan/docsIndex.parquet`` schema:
-    stockCode      Utf8           # 종목코드
+산출물 ``data/{provider}/scan/docsIndex.parquet`` schema:
+    stockCode      Utf8           # 종목코드 (dart 6자리 / edgar ticker / edinet 4자리)
     corpName       Utf8           # 회사명 (조회 편의)
     year           Int32          # 보고연도
     reportType     Categorical    # annual / Q1 / Q2 / Q3
     periodKey      Utf8           # "2024" / "2024Q1"
     sectionOrder   Int32          # 보고서 내 순서
     sectionTitle   Utf8           # 섹션 제목 (검색 대상)
-    sectionUrl     Utf8           # DART 뷰어 직링크
+    sectionUrl     Utf8           # 외부 뷰어 직링크
     contentLength  UInt32         # section_content 글자 수 (헤더-only 판별용)
     hasTable       Boolean        # 본문에 markdown table 포함 여부
-    docId          Utf8           # rcept_no
+    docId          Utf8           # filing id (DART rcept_no / EDGAR accession / EDINET docId)
 
 룰 8 (limit) + 룰 9 (raw cross-scan 차단) 충족 — Scan.docsSections() 가 본 인덱스 경유.
+
+P3: DART (`buildDocsIndex`)
+P3.5: EDGAR (`buildEdgarDocsIndex`) / EDINET (`buildEdinetDocsIndex`) — 동일 schema.
 """
 
 from __future__ import annotations
@@ -197,3 +200,103 @@ def buildDocsIndex(
         )
 
     return outputPath
+
+
+# ─── P3.5: EDGAR / EDINET 빌더 (동일 schema, 다른 docs 디렉토리) ──────
+
+
+def buildEdgarDocsIndex(
+    *,
+    sinceYear: int = 2016,
+    batchSize: int = 100,
+    docsDir: str | Path | None = None,
+    outputPath: str | Path | None = None,
+    verbose: bool = False,
+) -> Path:
+    """EDGAR docs parquet → 슬림 메타 인덱스 (P3.5).
+
+    DART 와 동일 schema (stockCode / corpName / year / reportType / periodKey /
+    sectionOrder / sectionTitle / sectionUrl / contentLength / hasTable / docId).
+
+    Args:
+        sinceYear: 시작 연도. 이전 filing 제외.
+        batchSize: concat 단위.
+        docsDir: ``data/edgar/docs/`` 디렉토리. None 이면 기본 경로.
+        outputPath: 산출 parquet 경로. None 이면 ``data/edgar/scan/docsIndex.parquet``.
+        verbose: 진행 로그.
+
+    Returns:
+        산출 parquet 절대 경로.
+
+    Raises:
+        FileNotFoundError: docs 디렉토리/parquet 부재.
+        RuntimeError: 추출 결과 0 건.
+
+    Example:
+        >>> from dartlab.scan.builder.docsIndex import buildEdgarDocsIndex
+        >>> path = buildEdgarDocsIndex(sinceYear=2020, verbose=True)
+    """
+    from dartlab.core.dataLoader import _getDataRoot
+
+    if docsDir is None:
+        docsDir = _getDataRoot() / "edgar" / "docs"
+    if outputPath is None:
+        scanDir = _getDataRoot() / "edgar" / "scan"
+        scanDir.mkdir(parents=True, exist_ok=True)
+        outputPath = scanDir / "docsIndex.parquet"
+
+    return buildDocsIndex(
+        sinceYear=sinceYear,
+        batchSize=batchSize,
+        docsDir=docsDir,
+        outputPath=outputPath,
+        verbose=verbose,
+    )
+
+
+def buildEdinetDocsIndex(
+    *,
+    sinceYear: int = 2016,
+    batchSize: int = 100,
+    docsDir: str | Path | None = None,
+    outputPath: str | Path | None = None,
+    verbose: bool = False,
+) -> Path:
+    """EDINET docs parquet → 슬림 메타 인덱스 (P3.5).
+
+    DART/EDGAR 와 동일 schema.
+
+    Args:
+        sinceYear: 시작 연도.
+        batchSize: concat 단위.
+        docsDir: ``data/edinet/docs/`` 디렉토리.
+        outputPath: 산출 ``data/edinet/scan/docsIndex.parquet``.
+        verbose: 진행 로그.
+
+    Returns:
+        산출 parquet 절대 경로.
+
+    Raises:
+        FileNotFoundError: docs 디렉토리/parquet 부재.
+        RuntimeError: 추출 결과 0 건.
+
+    Example:
+        >>> from dartlab.scan.builder.docsIndex import buildEdinetDocsIndex
+        >>> path = buildEdinetDocsIndex(sinceYear=2020, verbose=True)
+    """
+    from dartlab.core.dataLoader import _getDataRoot
+
+    if docsDir is None:
+        docsDir = _getDataRoot() / "edinet" / "docs"
+    if outputPath is None:
+        scanDir = _getDataRoot() / "edinet" / "scan"
+        scanDir.mkdir(parents=True, exist_ok=True)
+        outputPath = scanDir / "docsIndex.parquet"
+
+    return buildDocsIndex(
+        sinceYear=sinceYear,
+        batchSize=batchSize,
+        docsDir=docsDir,
+        outputPath=outputPath,
+        verbose=verbose,
+    )
