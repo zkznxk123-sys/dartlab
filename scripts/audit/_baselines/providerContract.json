@@ -1,7 +1,5 @@
 {
-  "_note": "P1.5 후 갱신 — 4 Protocol 신설 완료. CompanyProtocol __enter__/__exit__ 추가. 잔존: EDINET select 메서드 (P8 대상).",
+  "_note": "P8 후 갱신 — EDINET Company.select 메서드 추가 완료. Protocol contract baseline 0 — strict 달성.",
   "missingProtocols": [],
-  "missingProviderImpls": [
-    "edinet: {'select'} 메서드 부재"
-  ]
+  "missingProviderImpls": []
 }

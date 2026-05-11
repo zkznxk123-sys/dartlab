@@ -302,8 +302,60 @@ class Company:
             "edinetCode": self.edinetCode,
         }
 
+    def select(
+        self,
+        topic: str,
+        indList: str | list[str] | None = None,
+        colList: str | list[str] | None = None,
+    ) -> pl.DataFrame | None:
+        """topic 데이터에서 행/열 선택 (P8 — CompanyProtocol 충족).
+
+        EDINET 은 select 본 구현 미흡 — show 결과에 indList/colList 만큼 필터링.
+        Phase 후속에서 dart/edgar 와 동등한 cascade 매칭 구현 예정.
+
+        Args:
+            topic: BS/IS/CF/CIS/ratios 등.
+            indList: 행 (계정명) 필터.
+            colList: 열 (기간) 필터.
+
+        Returns:
+            필터된 DataFrame 또는 None.
+
+        Raises:
+            없음 (show 가 None 반환 시 None 그대로).
+
+        Example:
+            >>> c = Company("7203")
+            >>> c.select("IS", indList="매출액")
+        """
+        df = self.show(topic)
+        if df is None:
+            return None
+        if indList is not None:
+            inds = [indList] if isinstance(indList, str) else list(indList)
+            if "account" in df.columns:
+                df = df.filter(pl.col("account").is_in(inds))
+        if colList is not None:
+            cols = [colList] if isinstance(colList, str) else list(colList)
+            keep = [c for c in df.columns if c in cols or c == "account"]
+            if keep:
+                df = df.select(keep)
+        return df
+
     # ── filings ──
 
     def filings(self) -> list[dict[str, Any]]:
-        """공시 목록 (초기 스캐폴딩: 빈 리스트)."""
+        """공시 목록 (초기 스캐폴딩: 빈 리스트).
+
+        Returns:
+            list[dict] — 현재 빈 list.
+
+        Example:
+            >>> c = Company("7203")
+            >>> c.filings()
+            []
+
+        Raises:
+            없음.
+        """
         return []
