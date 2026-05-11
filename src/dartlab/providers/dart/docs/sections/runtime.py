@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from dartlab.providers.dart.docs.sections._common import RE_SPLIT_SUFFIX
 from dartlab.providers.dart.docs.sections.artifacts import loadProjectionRules
+from dartlab.providers.dart.docs.sections.sectionsBase import RE_SPLIT_SUFFIX
 
 _RE_MAJOR_HEADING = re.compile(r"^([가-힣])\.\s*(.+)$")
 _RE_TABLE_SEP = re.compile(r"^\|(?:\s*:?-{3,}:?\s*\|)+$")

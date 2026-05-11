@@ -7,8 +7,8 @@ from dataclasses import dataclass, field
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sections._common import basePath
 from dartlab.providers.dart.docs.sections.mapper import stripSectionPrefix
+from dartlab.providers.dart.docs.sections.sectionsBase import basePath
 
 
 def _leafTitle(path: str) -> str:

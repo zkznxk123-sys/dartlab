@@ -64,10 +64,10 @@ class SectionsAnalyzer:
             return empty
 
         from dartlab.core.reportSelector import selectReport
-        from dartlab.providers.dart.docs.sections._common import REPORT_KINDS, periodOrderValue
         from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
         from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
         from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
+        from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, periodOrderValue
 
         years = sorted({str(year) for year in raw["year"].drop_nulls().to_list()}, reverse=True)
         catalog: dict[str, dict[str, Any]] = {}
@@ -211,8 +211,8 @@ class SectionsAnalyzer:
             return empty
 
         from dartlab.core.reportSelector import selectReport
-        from dartlab.providers.dart.docs.sections._common import REPORT_KINDS, detectContentCol, periodOrderValue
         from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
+        from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, detectContentCol, periodOrderValue
         from dartlab.providers.dart.docs.sections.views import splitMarkdownBlocks
 
         contentCol = detectContentCol(raw)

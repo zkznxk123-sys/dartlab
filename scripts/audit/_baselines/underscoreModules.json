@@ -1,21 +1,4 @@
 {
   "_note": "P-트랙 P1 에서 도메인 명시 rename 시 축소",
-  "violations": [
-    "src/dartlab/providers/dart/_docsIndex.py",
-    "src/dartlab/providers/dart/_filings.py",
-    "src/dartlab/providers/dart/_financeBuilders.py",
-    "src/dartlab/providers/dart/_scanRelated.py",
-    "src/dartlab/providers/dart/_sectionsAnalyzer.py",
-    "src/dartlab/providers/dart/_sectionsBuilder.py",
-    "src/dartlab/providers/dart/_selectHelpers.py",
-    "src/dartlab/providers/dart/_showDispatch.py",
-    "src/dartlab/providers/dart/_showSelectUtils.py",
-    "src/dartlab/providers/dart/_viewerParse.py",
-    "src/dartlab/providers/dart/docs/sections/_common.py",
-    "src/dartlab/providers/edgar/_docs_accessor.py",
-    "src/dartlab/providers/edgar/_finance_accessor.py",
-    "src/dartlab/providers/edgar/_profile_accessor.py",
-    "src/dartlab/providers/edgar/_report_accessor.py",
-    "src/dartlab/providers/edgar/_showDispatch.py"
-  ]
+  "violations": []
 }

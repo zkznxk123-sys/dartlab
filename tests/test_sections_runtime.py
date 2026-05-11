@@ -4,11 +4,6 @@ pytestmark = pytest.mark.unit
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sections._common import (
-    periodOrderValue,
-    periodSortKey,
-    sortPeriods,
-)
 from dartlab.providers.dart.docs.sections.artifacts import (
     loadProjectionRules,
     loadSectionProfileTable,
@@ -21,6 +16,11 @@ from dartlab.providers.dart.docs.sections.runtime import (
     extractSemanticUnits,
     semanticTopicForBlock,
     semanticTopicForLabel,
+)
+from dartlab.providers.dart.docs.sections.sectionsBase import (
+    periodOrderValue,
+    periodSortKey,
+    sortPeriods,
 )
 from dartlab.providers.dart.docs.sections.views import (
     blockPriority,

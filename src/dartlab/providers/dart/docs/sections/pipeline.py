@@ -30,11 +30,6 @@ import polars as pl
 
 from dartlab.core.dataLoader import loadData
 from dartlab.core.reportSelector import selectReport
-from dartlab.providers.dart.docs.sections._common import (
-    REPORT_KINDS,
-    detectContentCol,
-    sortPeriods,
-)
 from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
 from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 from dartlab.providers.dart.docs.sections.runtime import (
@@ -43,6 +38,11 @@ from dartlab.providers.dart.docs.sections.runtime import (
     chapterTeacherTopics,
     detailTopicForTopic,
     projectionSuppressedTopics,
+)
+from dartlab.providers.dart.docs.sections.sectionsBase import (
+    REPORT_KINDS,
+    detectContentCol,
+    sortPeriods,
 )
 from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
 
