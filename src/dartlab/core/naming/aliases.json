@@ -3,15 +3,15 @@
     "version": "1.0.0",
     "description": "매개변수 의미 → 표준 이름 매핑 (SSOT). 사용처: scripts/audit/namingConsistency.py.",
     "policy": "src/dartlab/skills/specs/operation/code.md (의미 같으면 같은 이름 → AI 추론 단순화).",
-    "lastUpdated": "2026-05-10",
+    "lastUpdated": "2026-05-11",
     "rule": "신규 매개변수는 표준 이름 사용. alias 사용 시 namingConsistency lint fail. 표준에 없는 의미는 PR 로 사전에 추가 후 사용."
   },
   "aliases": {
     "stockIdentifier": {
       "standard": "stockCode",
-      "aliases": ["code", "codeOrName", "corp_code", "corpCode", "stkCd", "stk_cd", "stock_code"],
+      "aliases": ["codeOrName", "stkCd", "stk_cd", "stock_code"],
       "scope": ["arg", "var"],
-      "note": "종목코드/회사명 통합 식별자. 'ticker' 는 EDGAR/SEC US 도메인 표준 별칭으로 면제 (지역 의미). 회사명 입력 자동 라우팅은 dartlab.Company 가 처리."
+      "note": "종목코드/회사명 통합 식별자 (KR 6자리). 'ticker' 는 EDGAR/SEC US 도메인 표준 별칭으로 면제. 'corpCode' 는 DART API 의 8자리 corp_code 식별자 — 별 의미라 alias 에서 분리. 'code' 도 Python source code / OAuth code 와 충돌해 alias 에서 분리."
     },
     "marketCode": {
       "standard": "market",
