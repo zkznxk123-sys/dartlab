@@ -685,11 +685,11 @@ def _docsConditionValues(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataF
     if not query:
         raise ValueError("docs 조건 value 에 검색어가 필요합니다.")
     scope = "content" if field == "docs.content" else "title"
-    top_k = int(cond.get("topK", spec.get("docsTopK", 500)))
+    top_k = int(cond.get("limit", spec.get("docsTopK", 500)))
 
     from dartlab.providers.dart.search import search
 
-    hits = search(query, topK=top_k, scope=scope)
+    hits = search(query, limit=top_k, scope=scope)
     if hits is None or hits.is_empty() or "info" in hits.columns:
         return pl.DataFrame({"stockCode": [], field: []})
     sc_col = "stock_code" if "stock_code" in hits.columns else "stockCode" if "stockCode" in hits.columns else None

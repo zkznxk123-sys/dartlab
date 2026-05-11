@@ -200,7 +200,7 @@ def search(
     corp: str | None = None,
     start: str | None = None,
     end: str | None = None,
-    topK: int = 10,
+    limit: int = 10,
     scope: str = "auto",
 ):
     """공시 검색. **⚠ BETA — AI 사용 비권장**.
@@ -242,7 +242,7 @@ def search(
         corp: 종목 필터 (종목코드 "005930" 또는 회사명 "삼성전자").
         start: 시작일 (YYYYMMDD).
         end: 종료일 (YYYYMMDD).
-        topK: 반환 건수 (기본 10).
+        limit: 반환 건수 (기본 10).
         scope: ``"auto"`` (기본), ``"title"``, ``"content"``, ``"both"``.
 
     Returns
@@ -285,7 +285,7 @@ def search(
         )
     from dartlab.providers.dart.search import search as _search
 
-    return _search(query, corp=corp, start=start, end=end, topK=topK, scope=scope)
+    return _search(query, corp=corp, start=start, end=end, limit=limit, scope=scope)
 
 
 def searchName(keyword: str):

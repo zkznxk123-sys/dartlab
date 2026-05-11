@@ -34,13 +34,13 @@ def search(
     corp: str | None = None,
     start: str | None = None,
     end: str | None = None,
-    topK: int = 10,
+    limit: int = 10,
     scope: str = "auto",
 ) -> pl.DataFrame:
     """공시 검색.
 
     scope 파라미터:
-    - ``"auto"`` (기본): title 먼저 검색, topK 미달이면 content 결과로 보강.
+    - ``"auto"`` (기본): title 먼저 검색, limit 미달이면 content 결과로 보강.
       제목형/본문형 쿼리 모두 커버. 중복은 rcept_no 기준 제거.
     - ``"title"``: report_nm + section_title ngram (빠름, 제목형 쿼리용).
     - ``"content"``: section_content 본문 BM25 (개념/내용형 쿼리용).
@@ -66,14 +66,14 @@ def search(
     corpCode, stockCode = _resolveCorp(corp)
 
     if scope == "title":
-        result = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+        result = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "content":
-        result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+        result = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     elif scope == "auto":
-        result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+        result = _searchAuto(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     else:  # both
-        titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
-        contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+        titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
+        contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
         titleHits = titleHits.with_columns(pl.lit("title").alias("scope"))
         contentHits = contentHits.with_columns(pl.lit("content").alias("scope"))
         commonCols = [c for c in titleHits.columns if c in contentHits.columns]
@@ -92,26 +92,26 @@ def search(
     return result
 
 
-def _searchTitle(query, *, corpCode, stockCode, topK):
+def _searchTitle(query, *, corpCode, stockCode, limit):
     from dartlab.providers.dart.search.ngramIndex import searchNgram
 
-    return searchNgram(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+    return searchNgram(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
 
 
-def _searchContent(query, *, corpCode, stockCode, topK):
+def _searchContent(query, *, corpCode, stockCode, limit):
     from dartlab.providers.dart.search.fieldIndex import searchContent
 
-    return searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK)
+    return searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
 
 
-def _searchAuto(query, *, corpCode, stockCode, topK):
+def _searchAuto(query, *, corpCode, stockCode, limit):
     """auto 모드 — 쿼리 유형 자동 판별 후 맞는 엔진 선택.
 
     판별: 쿼리 전체가 어느 문서의 report_nm에 substring으로 들어가면 제목형,
     아니면 본문형으로 취급. 둘 다 실행해서 substring 히트가 있는 쪽을 우선.
     """
-    titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, topK=topK * 2)
-    contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, topK=topK * 2)
+    titleHits = _searchTitle(query, corpCode=corpCode, stockCode=stockCode, limit=limit * 2)
+    contentHits = _searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit * 2)
 
     tValid = titleHits is not None and titleHits.height > 0 and "info" not in titleHits.columns
     cValid = contentHits is not None and contentHits.height > 0 and "info" not in contentHits.columns
@@ -119,9 +119,9 @@ def _searchAuto(query, *, corpCode, stockCode, topK):
     if not tValid and not cValid:
         return titleHits if titleHits is not None else contentHits
     if not cValid:
-        return titleHits.head(topK)
+        return titleHits.head(limit)
     if not tValid:
-        return contentHits.head(topK)
+        return contentHits.head(limit)
 
     # 쿼리 전체가 report_nm에 들어간 결과만 — 제목형 매칭의 정의
     queryNorm = query.strip()
@@ -130,9 +130,9 @@ def _searchAuto(query, *, corpCode, stockCode, topK):
 
     commonCols = [c for c in titleHits.columns if c in contentHits.columns]
 
-    if titleStrictCount >= topK:
+    if titleStrictCount >= limit:
         # 제목에 쿼리 전체 들어간 결과로 충분
-        return titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope")).head(topK)
+        return titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope")).head(limit)
 
     # 제목 strict 부족 — content로 보강. rcept_no 중복 제거
     tagged_title = titleStrict.select(commonCols).with_columns(pl.lit("title").alias("scope"))
@@ -141,9 +141,9 @@ def _searchAuto(query, *, corpCode, stockCode, topK):
         usedRcepts = set(titleStrict["rcept_no"].to_list())
         tagged_content = tagged_content.filter(~pl.col("rcept_no").is_in(list(usedRcepts)))
 
-    needed = max(topK - titleStrictCount, 0)
+    needed = max(limit - titleStrictCount, 0)
     result = pl.concat([tagged_title, tagged_content.head(needed)])
-    return result.head(topK)
+    return result.head(limit)
 
 
 def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
@@ -276,11 +276,11 @@ def profile(stockCode: str | None = None):
     return loadProfile(stockCode)
 
 
-def pulse(topK: int = 10) -> pl.DataFrame:
+def pulse(limit: int = 10) -> pl.DataFrame:
     """최근 월의 공시 유형별 건수 + 전월 대비 변화."""
     from dartlab.providers.dart.search.derived import pulse as _pulse
 
-    return _pulse(topK=topK)
+    return _pulse(limit=limit)
 
 
 def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> pl.DataFrame:
@@ -297,8 +297,8 @@ def dna(stockCode: str) -> dict:
     return _dna(stockCode)
 
 
-def similarCompanies(stockCode: str, topK: int = 5) -> pl.DataFrame:
+def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
     """공시 패턴이 유사한 기업 탐색 (코사인 유사도)."""
     from dartlab.providers.dart.search.derived import similarCompanies as _similar
 
-    return _similar(stockCode, topK=topK)
+    return _similar(stockCode, limit=limit)

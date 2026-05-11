@@ -445,7 +445,7 @@ def _buildTypeIndex(meta: pl.DataFrame) -> tuple[dict, dict]:
     return typeIndex, typeToDocIds
 
 
-def _matchTypes(query: str, typeIndex: dict, topK: int = 3) -> list[tuple[str, float]]:
+def _matchTypes(query: str, typeIndex: dict, limit: int = 3) -> list[tuple[str, float]]:
     """L0: 쿼리 → 가장 유사한 정규화 유형 매칭."""
     expanded = query
     for informal, formal in _L0_INFORMAL.items():
@@ -466,7 +466,7 @@ def _matchTypes(query: str, typeIndex: dict, topK: int = 3) -> list[tuple[str, f
         scores.append((typeName, score))
 
     scores.sort(key=lambda x: x[1], reverse=True)
-    return scores[:topK]
+    return scores[:limit]
 
 
 def searchNgram(
@@ -474,7 +474,7 @@ def searchNgram(
     *,
     corpCode: str | None = None,
     stockCode: str | None = None,
-    topK: int = 10,
+    limit: int = 10,
 ) -> pl.DataFrame:
     """계층적 검색 — L0 유형 라우팅 + BM25F bincount.
 
@@ -496,7 +496,7 @@ def searchNgram(
     # L0: 유형 매칭 (임계값 0.2 — 약한 부분 매칭 차단)
     _L0_MIN_SCORE = 0.2
     typeIndex, typeToDocIds = _buildTypeIndex(meta)
-    matchedTypes = [(t, s) for t, s in _matchTypes(query, typeIndex, topK=3) if s >= _L0_MIN_SCORE]
+    matchedTypes = [(t, s) for t, s in _matchTypes(query, typeIndex, limit=3) if s >= _L0_MIN_SCORE]
     l0DocIds = set()
     for typeName, _ in matchedTypes:
         l0DocIds.update(typeToDocIds[typeName])
@@ -508,7 +508,7 @@ def searchNgram(
 
     if matchedTypes:
         for typeName, typeScore in matchedTypes:
-            for docId in typeToDocIds[typeName][: topK * 3]:
+            for docId in typeToDocIds[typeName][: limit * 3]:
                 if docId >= nDocs:
                     continue
                 row = meta.row(docId, named=True)
@@ -557,7 +557,7 @@ def searchNgram(
             flat = np.concatenate(allMatched)
             counts = np.bincount(flat, minlength=nDocs)
 
-            nTop = min(topK * 5, nDocs)
+            nTop = min(limit * 5, nDocs)
             topIndices = np.argpartition(counts, -nTop)[-nTop:]
             topIndices = topIndices[np.argsort(counts[topIndices])[::-1]]
 
@@ -613,7 +613,7 @@ def searchNgram(
                     }
                 )
 
-                if len(rows) >= topK * 3:
+                if len(rows) >= limit * 3:
                     break
 
     # (L0 문서는 이미 위에서 삽입됨)
@@ -622,7 +622,7 @@ def searchNgram(
         return pl.DataFrame()
 
     rows.sort(key=lambda x: x["score"], reverse=True)
-    return pl.DataFrame(rows[:topK])
+    return pl.DataFrame(rows[:limit])
 
 
 # ── 통계 ──

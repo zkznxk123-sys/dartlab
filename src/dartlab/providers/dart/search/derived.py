@@ -211,7 +211,7 @@ def loadTimeline(
     return result
 
 
-def pulse(topK: int = 10) -> pl.DataFrame:
+def pulse(limit: int = 10) -> pl.DataFrame:
     """최근 월의 공시 유형별 건수 + 전월 대비 변화.
 
     Returns
@@ -225,7 +225,7 @@ def pulse(topK: int = 10) -> pl.DataFrame:
 
     periods = tl["period"].unique().sort(descending=True)
     if len(periods) < 2:
-        return tl.head(topK)
+        return tl.head(limit)
 
     current = periods[0]
     previous = periods[1]
@@ -254,7 +254,7 @@ def pulse(topK: int = 10) -> pl.DataFrame:
         .sort("current", descending=True)
     )
 
-    return merged.head(topK)
+    return merged.head(limit)
 
 
 # ── Disclosure DNA ──
@@ -352,7 +352,7 @@ def dna(stockCode: str) -> dict:
     }
 
 
-def similarCompanies(stockCode: str, topK: int = 5) -> pl.DataFrame:
+def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
     """공시 패턴이 유사한 기업 탐색 (코사인 유사도).
 
     Returns
@@ -376,7 +376,7 @@ def similarCompanies(stockCode: str, topK: int = 5) -> pl.DataFrame:
     sims = data["vectors"] @ target / (norms * targetNorm + 1e-10)
     sims[idx] = -1  # 자기 자신 제외
 
-    topIndices = np.argsort(sims)[::-1][:topK]
+    topIndices = np.argsort(sims)[::-1][:limit]
 
     rows = []
     for i in topIndices:

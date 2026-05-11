@@ -290,7 +290,7 @@ def searchContent(
     *,
     corpCode: str | None = None,
     stockCode: str | None = None,
-    topK: int = 10,
+    limit: int = 10,
 ) -> pl.DataFrame:
     """content 전용 BM25 검색. main + delta 병합.
 
@@ -298,7 +298,7 @@ def searchContent(
     ----------
     query : 자연어 쿼리. 공백으로 단어 분리.
     corpCode, stockCode : 필터.
-    topK : 반환 건수.
+    limit : 반환 건수.
     """
     tokens = tokenizeWord(query)
     if not tokens:
@@ -321,7 +321,7 @@ def searchContent(
     if "delta" in segments:
         dIdx, dMeta = segments["delta"]
         dScores = _scoreBM25(dIdx, tokens)
-        top = np.argsort(-dScores)[: topK * 3]
+        top = np.argsort(-dScores)[: limit * 3]
         for i in top:
             if dScores[i] <= 0:
                 break
@@ -332,7 +332,7 @@ def searchContent(
     if "main" in segments:
         mIdx, mMeta = segments["main"]
         mScores = _scoreBM25(mIdx, tokens)
-        top = np.argsort(-mScores)[: topK * 3]
+        top = np.argsort(-mScores)[: limit * 3]
         for i in top:
             if mScores[i] <= 0:
                 break
@@ -359,7 +359,7 @@ def searchContent(
             ("https://dart.fss.or.kr/dsaf001/main.do?rcpNo=" + pl.col("rcept_no")).alias("dartUrl"),
         )
 
-    return df.head(topK)
+    return df.head(limit)
 
 
 # ── 풀리빌드 + 증분 ──

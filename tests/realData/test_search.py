@@ -21,7 +21,7 @@ class TestSearchEngine:
         import dartlab
 
         try:
-            result = dartlab.search("반도체", topK=3)
+            result = dartlab.search("반도체", limit=3)
         except FileNotFoundError:
             pytest.skip("search 인덱스 parquet 없음")
         except Exception as e:
