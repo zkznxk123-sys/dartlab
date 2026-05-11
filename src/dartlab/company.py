@@ -148,7 +148,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
     # 유사 종목 top-3 제안 (KRX listing 기반 fuzzy — 초성·편집거리·substring 지원)
     hint = ""
     try:
-        from dartlab.gather.listing import fuzzySearch
+        from dartlab.gather.krx.listing import fuzzySearch
 
         suggestions = fuzzySearch(codeOrName, maxResults=3)
         if suggestions.height > 0:

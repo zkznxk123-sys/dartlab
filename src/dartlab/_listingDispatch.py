@@ -101,7 +101,7 @@ def listing(
 
 def _dartlist() -> pl.DataFrame:
     """OpenDART 전체 법인 목록 (상장+비상장, corp_code 8자리 포함)."""
-    from dartlab.gather.listing import getDartList
+    from dartlab.gather.krx.listing import getDartList
 
     return getDartList()
 

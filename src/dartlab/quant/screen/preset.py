@@ -45,12 +45,12 @@ def _screenPriceBased(preset: str, market: str, universe: list[str] | None = Non
     # 종목 풀 결정
     if universe is None:
         try:
-            from dartlab.gather.listing import getTopStocks
+            from dartlab.gather.krx.listing import getTopStocks
 
             universe = getTopStocks(market=market, limit=100)
         except (ImportError, AttributeError):
             try:
-                from dartlab.gather.listing import getKindList
+                from dartlab.gather.krx.listing import getKindList
 
                 df = getKindList()
                 universe = df.head(100)["종목코드"].to_list() if df is not None else []

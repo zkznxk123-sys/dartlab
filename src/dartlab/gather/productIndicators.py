@@ -121,7 +121,7 @@ def getProductIndicators(stockCode: str) -> list[dict]:
 def _getProductText(stockCode: str) -> str:
     """kindList에서 주요제품 텍스트 조회."""
     try:
-        from dartlab.gather.listing import getKindList
+        from dartlab.gather.krx.listing import getKindList
 
         df = getKindList()
         row = df.filter(df["종목코드"] == stockCode)

@@ -71,7 +71,7 @@ from typing import Literal
 import httpx
 import polars as pl
 
-from dartlab.gather.krxApi import _isFinalized, _normalizeDate
+from dartlab.gather.krx.krxApi import _isFinalized, _normalizeDate
 
 log = logging.getLogger(__name__)
 

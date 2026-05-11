@@ -39,7 +39,7 @@ def apiSearch(q: str = Query(..., min_length=1)):
         fuzzy_used = False
 
         if not rows:
-            from dartlab.gather.listing import fuzzySearch
+            from dartlab.gather.krx.listing import fuzzySearch
 
             df = fuzzySearch(q, maxResults=20)
             rows = df.to_dicts() if len(df) > 0 else []

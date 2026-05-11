@@ -52,7 +52,7 @@ def _fiscalMonthMap() -> dict[str, int]:
 
     # 1. listing 기반
     try:
-        from dartlab.gather.listing import getKindList
+        from dartlab.gather.krx.listing import getKindList
 
         li = getKindList()
         if li is not None and not li.is_empty():
@@ -780,7 +780,7 @@ def buildValuation(*, verbose: bool = True) -> Path | None:
         _say("[valuation] 상장사 목록 로드...")
 
     try:
-        from dartlab.gather.listing import getKindList
+        from dartlab.gather.krx.listing import getKindList
 
         listing = getKindList()
     except (ImportError, OSError, RuntimeError) as e:

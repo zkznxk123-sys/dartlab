@@ -18,7 +18,7 @@ def test_dataReleaseHasKrxIndices():
 
 def test_parseKrxIndexResponseAddsMarketGroup():
     """원본 idx 응답에 시장군 컬럼을 보강해 연도 parquet 에 섞어 저장한다."""
-    from dartlab.gather.krxIndex import _parseKrxIndexResponse
+    from dartlab.gather.krx.krxIndex import _parseKrxIndexResponse
 
     df = _parseKrxIndexResponse(
         {
@@ -46,7 +46,7 @@ def test_gatherKrxIndexDefaultsToHf(monkeypatch):
     import importlib
 
     hf = importlib.import_module("dartlab.gather.bulkData.hfIndexBulk")
-    from dartlab.gather.krxIndex import gatherKrxIndex
+    from dartlab.gather.krx.krxIndex import gatherKrxIndex
 
     raw = pl.DataFrame(
         [

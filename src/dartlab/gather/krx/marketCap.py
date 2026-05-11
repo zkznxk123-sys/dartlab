@@ -17,7 +17,7 @@
     - marketCapTotal = close × (commonOutstanding + preferredOutstanding)
 
 호출 패턴:
-    >>> from dartlab.gather.marketCap import marketCap
+    >>> from dartlab.gather.krx.marketCap import marketCap
     >>> df = marketCap("005930")          # 일별 시계열
     >>> snap = marketCapSnapshot("005930") # 최신 한 점
 
@@ -315,6 +315,6 @@ def marketCapAll(
     """
     if start is None:
         raise ValueError("marketCapAll: start 필수 (단일일자도 start 만)")
-    from dartlab.gather.krxApi import gatherKrx
+    from dartlab.gather.krx.krxApi import gatherKrx
 
     return gatherKrx("marketCap", start=start, end=end, market=market)

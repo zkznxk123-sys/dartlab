@@ -417,7 +417,7 @@ def _lookupFromProductIndex(stockCode: str) -> str | None:
 def _lookupFromKindList(stockCode: str) -> tuple[str | None, str | None]:
     """kindList에서 업종/주요제품 조회."""
     try:
-        from dartlab.gather.listing import getKindList
+        from dartlab.gather.krx.listing import getKindList
 
         df = getKindList()
         row = df.filter(df["종목코드"] == stockCode)

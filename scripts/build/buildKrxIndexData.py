@@ -58,8 +58,8 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.gather.krxApi import _normalizeDate
-from dartlab.gather.krxIndex import fetchKrxIndexRange
+from dartlab.gather.krx.krxApi import _normalizeDate
+from dartlab.gather.krx.krxIndex import fetchKrxIndexRange
 
 _KST = timezone(timedelta(hours=9))
 _KRX_READY_KST = time(17, 0)

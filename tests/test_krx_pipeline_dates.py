@@ -90,7 +90,7 @@ def test_krx_freshness_accepts_empty_yesterday_today_response(krx_build_module):
 )
 def test_krx_direct_api_guard_only_blocks_future_dates(bas_dd, now, expected):
     """직접 API 내부 가드는 미래 날짜만 막고 오늘은 실제 응답을 확인한다."""
-    from dartlab.gather.krxApi import _KST, _isFinalized
+    from dartlab.gather.krx.krxApi import _KST, _isFinalized
 
     assert _isFinalized(bas_dd, now=now.replace(tzinfo=_KST)) is expected
 
@@ -99,7 +99,7 @@ def test_krx_direct_api_guard_only_blocks_future_dates(bas_dd, now, expected):
 @pytest.mark.asyncio
 async def test_krx_price_range_calls_weekend_days(monkeypatch):
     """가격 range 는 어제/오늘이 주말이어도 API 를 직접 호출한다."""
-    from dartlab.gather import krxApi
+    from dartlab.gather.krx import krxApi
 
     calls: list[tuple[str, str]] = []
 
@@ -118,7 +118,7 @@ async def test_krx_price_range_calls_weekend_days(monkeypatch):
 @pytest.mark.asyncio
 async def test_krx_index_range_calls_weekend_days(monkeypatch):
     """지수 range 도 어제/오늘이 주말이어도 API 를 직접 호출한다."""
-    from dartlab.gather import krxIndex
+    from dartlab.gather.krx import krxIndex
 
     calls: list[tuple[str, str]] = []
 

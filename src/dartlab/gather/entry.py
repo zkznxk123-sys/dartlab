@@ -578,7 +578,7 @@ class GatherEntry:
                 return pl.DataFrame()
             return pl.DataFrame(peers)
         if axis == "krx":
-            from dartlab.gather.krxApi import gatherKrx
+            from dartlab.gather.krx.krxApi import gatherKrx
 
             apiKey = kwargs.pop("apiKey", None)
             stockCodes = kwargs.pop("stockCodes", None)
@@ -595,7 +595,7 @@ class GatherEntry:
                 apiKey=apiKey,
             )
         if axis == "krxIndex":
-            from dartlab.gather.krxIndex import gatherKrxIndex
+            from dartlab.gather.krx.krxIndex import gatherKrxIndex
 
             apiKey = kwargs.pop("apiKey", None)
             indexFilter = kwargs.pop("indexFilter", None)

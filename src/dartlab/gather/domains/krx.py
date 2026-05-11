@@ -185,7 +185,7 @@ def _getKindSector(stockCode: str) -> str:
     try:
         import polars as pl
 
-        from dartlab.gather.listing import getKindList
+        from dartlab.gather.krx.listing import getKindList
 
         df = getKindList()
         match = df.filter(pl.col("종목코드") == stockCode)
@@ -212,7 +212,7 @@ def _getKindMarket(stockCode: str) -> str:
     try:
         import polars as pl
 
-        from dartlab.gather.listing import getKindList
+        from dartlab.gather.krx.listing import getKindList
 
         df = getKindList()
         match = df.filter(pl.col("종목코드") == stockCode)

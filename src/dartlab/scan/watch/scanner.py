@@ -226,7 +226,7 @@ def _filterBySector(codes: list[str], sector: str, *, classifier=None) -> list[s
     """
     if classifier is None:
         return codes
-    from dartlab.gather.listing import codeToName
+    from dartlab.gather.krx.listing import codeToName
 
     filtered = []
     for code in codes:

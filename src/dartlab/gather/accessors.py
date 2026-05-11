@@ -133,7 +133,7 @@ class DefaultIndustryAccessor:
     def fetchListing(self, *, market: str = "KR") -> pl.DataFrame | None:
         """전종목 listing snapshot — KRX 기준 (short_code/marketCode/marketEngName 컬럼)."""
         try:
-            from dartlab.gather.listing import getKrxList
+            from dartlab.gather.krx.listing import getKrxList
         except ImportError:
             return None
         try:

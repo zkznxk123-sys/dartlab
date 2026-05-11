@@ -749,7 +749,7 @@ def _loadKrxWindow(*, start: str | None, end: str | None) -> pl.DataFrame:
 
 
 def _finalizeKrxValues(raw: pl.DataFrame, name: str, field: str) -> pl.DataFrame:
-    from dartlab.gather.krxApi import _KRX_TO_STD
+    from dartlab.gather.krx.krxApi import _KRX_TO_STD
 
     rename = {k: v for k, v in _KRX_TO_STD.items() if k in raw.columns}
     df = raw.rename(rename).sort(["stockCode", "date"])
@@ -885,7 +885,7 @@ def _loadKrxIndexYear(*, market: str, year: int) -> pl.DataFrame:
 
 
 def _finalizeKrxIndexScalar(raw: pl.DataFrame, name: str, spec: dict[str, Any]) -> float | int | str | None:
-    from dartlab.gather.krxIndex import _KRX_TO_STD
+    from dartlab.gather.krx.krxIndex import _KRX_TO_STD
 
     rename = {k: v for k, v in _KRX_TO_STD.items() if k in raw.columns}
     df = raw.rename(rename).sort("date")

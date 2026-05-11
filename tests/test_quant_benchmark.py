@@ -24,7 +24,7 @@ def _krx_listing() -> pl.DataFrame:
 
 def test_resolve_benchmark_uses_listing_market(monkeypatch):
     """KOSPI/KOSDAQ 종목은 상장시장 기준 기본 지수를 사용한다."""
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant.benchmark.data import resolveBenchmark
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
@@ -41,7 +41,7 @@ def test_resolve_benchmark_uses_listing_market(monkeypatch):
 
 def test_resolve_benchmark_stack_adds_sector_candidate(monkeypatch):
     """industry node가 있으면 benchmarkStack에 섹터 지수 후보를 추가한다."""
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant import benchmark as bm
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
@@ -63,7 +63,7 @@ def test_resolve_benchmark_stack_adds_sector_candidate(monkeypatch):
 
 def test_resolve_benchmark_stack_explicit_override_wins(monkeypatch):
     """benchmark 직접 지정은 market/sector/style보다 우선한다."""
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant import benchmark as bm
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
@@ -81,7 +81,7 @@ def test_resolve_benchmark_stack_explicit_override_wins(monkeypatch):
 
 def test_resolve_benchmark_stack_sector_fallbacks_to_market(monkeypatch):
     """섹터 후보가 없으면 primary는 시장 지수로 fallback한다."""
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant import benchmark as bm
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
@@ -100,7 +100,7 @@ def test_resolve_benchmark_stack_adds_size_style_candidate(monkeypatch):
     import importlib
 
     hf = importlib.import_module("dartlab.gather.bulkData.hfBulk")
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant import benchmark as bm
 
     rows = []
@@ -151,7 +151,7 @@ def test_fetch_benchmark_ohlcv_standardizes_krx_raw(monkeypatch):
     import importlib
 
     hf = importlib.import_module("dartlab.gather.bulkData.hfIndexBulk")
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
     raw = pl.DataFrame(
@@ -187,7 +187,7 @@ def test_quant_benchmark_axis_dispatch(monkeypatch):
     import importlib
 
     hf = importlib.import_module("dartlab.gather.bulkData.hfIndexBulk")
-    from dartlab.gather import listing
+    from dartlab.gather.krx import listing
     from dartlab.quant import Quant
 
     rows = []

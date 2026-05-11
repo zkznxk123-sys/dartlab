@@ -23,7 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from dartlab.gather.listing import getKrxList  # noqa: E402
+from dartlab.gather.krx.listing import getKrxList  # noqa: E402
 from dartlab.industry.build.pipeline import loadEdges, loadNodes  # noqa: E402
 from dartlab.industry.taxonomy import getIndustry, loadTaxonomy  # noqa: E402
 

@@ -51,7 +51,7 @@ def _parseCategories(raw: str) -> list[str]:
 
 
 def _kindListCodes() -> list[str]:
-    from dartlab.gather.listing import getKindList
+    from dartlab.gather.krx.listing import getKindList
 
     df = getKindList()
     if "시장구분" in df.columns:

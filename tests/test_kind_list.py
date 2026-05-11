@@ -11,14 +11,14 @@ import polars as pl
 
 def _listingMod():
     """GatherEntry가 attribute 접근을 가로채므로 sys.modules에서 직접 가져온다."""
-    from dartlab.gather.listing import searchName  # noqa: F401 — 모듈 로드 보장
+    from dartlab.gather.krx.listing import searchName  # noqa: F401 — 모듈 로드 보장
 
     return sys.modules["dartlab.gather.listing"]
 
 
 class TestKindListSearch:
     def test_search_name_treats_keyword_as_literal(self, monkeypatch):
-        from dartlab.gather.listing import searchName
+        from dartlab.gather.krx.listing import searchName
 
         monkeypatch.setattr(
             _listingMod(),
@@ -35,7 +35,7 @@ class TestKindListSearch:
         assert result.height == 0
 
     def test_search_name_blank_keyword_returns_empty(self, monkeypatch):
-        from dartlab.gather.listing import searchName
+        from dartlab.gather.krx.listing import searchName
 
         monkeypatch.setattr(
             _listingMod(),
