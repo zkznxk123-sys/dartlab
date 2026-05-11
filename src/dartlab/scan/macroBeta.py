@@ -215,7 +215,7 @@ def _loadMacroForScan(periodCols: list[str]) -> dict[str, list[float | None]] | 
         {gdp: [...], rate: [...], fx: [...]} — 기간별 값.
         유효 데이터 없으면 None.
     """
-    from dartlab.gather.macro import alignToFinancialPeriods, loadMacroParquet
+    from dartlab.gather.transforms.macro import alignToFinancialPeriods, loadMacroParquet
 
     indicators = {"gdp": "GDP", "rate": "BASE_RATE", "fx": "USDKRW"}
     result: dict[str, list[float | None]] = {}

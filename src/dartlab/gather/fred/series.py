@@ -91,7 +91,7 @@ def fetchSeries(
     _cache.put(seriesId, start, end, freq, aggregation, df, daily=is_daily)
 
     if enrich:
-        from dartlab.gather.macro import enrichAndCache
+        from dartlab.gather.transforms.macro import enrichAndCache
 
         df = enrichAndCache(seriesId, df, source="fred")
 

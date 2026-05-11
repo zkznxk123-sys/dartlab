@@ -791,11 +791,11 @@ def _loadAdaptive(
     2. 각 변수와 revGrowth의 상관도 계산
     3. 상관도 상위 3개 선택
     """
-    from dartlab.gather.macro import alignToFinancialPeriods, loadMacroParquet
+    from dartlab.gather.transforms.macro import alignToFinancialPeriods, loadMacroParquet
 
     # 매핑 후보
     try:
-        from dartlab.gather.exogenousAxes import getExogenousSeriesIds
+        from dartlab.gather.mapping.exogenousAxes import getExogenousSeriesIds
 
         mapped = getExogenousSeriesIds(stockCode=stockCode)
     except (ImportError, KeyError):
@@ -891,10 +891,10 @@ def _loadMacroAligned(periodCols: list[str], stockCode: str | None = None) -> di
         {"v0": [yoy_change, ...], "v1": [...], "_usedIndicators": {...}}
         또는 None (데이터 없음).
     """
-    from dartlab.gather.macro import alignToFinancialPeriods, loadMacroParquet
+    from dartlab.gather.transforms.macro import alignToFinancialPeriods, loadMacroParquet
 
     try:
-        from dartlab.gather.exogenousAxes import getExogenousSeriesIds
+        from dartlab.gather.mapping.exogenousAxes import getExogenousSeriesIds
 
         seriesPairs = getExogenousSeriesIds(stockCode=stockCode)
     except (ImportError, KeyError):
@@ -2156,7 +2156,7 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
     _getSectorKey(company)
     industry = None
     try:
-        from dartlab.gather.exogenousAxes import _lookupFromKindList
+        from dartlab.gather.mapping.exogenousAxes import _lookupFromKindList
 
         industry, _ = _lookupFromKindList(_getStockCode(company) or "")
     except (ImportError, TypeError):

@@ -27,8 +27,8 @@ if env_path.exists():
 
 def main():
     from dartlab.gather.fred import Fred
-    from dartlab.gather.macro import enrichAndCache
-    from dartlab.gather.productIndicators import PRODUCT_INDICATOR_MAP
+    from dartlab.gather.transforms.macro import enrichAndCache
+    from dartlab.gather.mapping.productIndicators import PRODUCT_INDICATOR_MAP
 
     # 고유 FRED 시리즈 ID 추출
     fredIds: set[str] = set()

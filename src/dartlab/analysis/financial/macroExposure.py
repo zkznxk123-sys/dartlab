@@ -106,7 +106,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     """
     import polars as pl
 
-    from dartlab.gather.exogenousAxes import ExogenousIndicator, getExogenousIndicators
+    from dartlab.gather.mapping.exogenousAxes import ExogenousIndicator, getExogenousIndicators
 
     g = _getGather()
     if g is None:

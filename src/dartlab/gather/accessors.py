@@ -45,7 +45,7 @@ class DefaultFinanceAccessor:
     def fetchExogenousAxes(self, stockCode: str) -> list[tuple[str, str]]:
         """종목별 매크로 축 매핑."""
         try:
-            from dartlab.gather.exogenousAxes import getExogenousAxes
+            from dartlab.gather.mapping.exogenousAxes import getExogenousAxes
         except ImportError:
             return []
         try:
@@ -56,7 +56,7 @@ class DefaultFinanceAccessor:
     def fetchAlignedMacro(self, stockCode: str, periods: list[str]) -> pl.DataFrame | None:
         """period 기준 정렬된 매크로 패널."""
         try:
-            from dartlab.gather.macro import loadMacroParquet
+            from dartlab.gather.transforms.macro import loadMacroParquet
         except ImportError:
             return None
         try:
