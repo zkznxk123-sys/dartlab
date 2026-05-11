@@ -164,7 +164,7 @@ def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFr
 
 def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = False) -> pl.DataFrame | None:
     """report apiType의 정제된 DataFrame 반환."""
-    from dartlab.providers.dart.reportAccessor import reportFrameInner as _reportFrameInner
+    from dartlab.providers.dart.accessor.reportAccessor import reportFrameInner as _reportFrameInner
 
     return _reportFrameInner(company.stockCode, apiType, topic, raw=raw)
 
@@ -303,8 +303,8 @@ def showImpl(
     raw: bool = False,
 ) -> pl.DataFrame | None:
     """topic 의 데이터를 반환 — 사용자 c.show 의 내부 구현."""
-    from dartlab.providers.dart.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
+    from dartlab.providers.dart.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.docs.notes import _NOTES_DISPATCH
 
     # Q1.5 dispatcher: alias 해석 → 5 사례 분기 (list period / segments / finance / notes / sections).
@@ -366,8 +366,8 @@ def showSectionsTopic(
     sections 캐시 → topic 필터 → block dispatch (finance / report / docs).
     미등록 topic 은 warning + None. registered-but-empty 는 silent None.
     """
-    from dartlab.providers.dart.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex
+    from dartlab.providers.dart.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
 
     if "_sections" in company._cache:
         sec = company._cache["_sections"]

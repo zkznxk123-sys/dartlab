@@ -70,6 +70,10 @@ def searchName(keyword):
     return _listingResolver().search(keyword)
 
 
+from dartlab.providers.dart.accessor.docsAccessor import _DocsAccessor
+from dartlab.providers.dart.accessor.financeAccessor import _FinanceAccessor
+from dartlab.providers.dart.accessor.profileAccessor import _ProfileAccessor
+from dartlab.providers.dart.accessor.reportAccessor import _ReportAccessor
 from dartlab.providers.dart.checks import (
     _checkDartDocsFreshness,
     _ensureAllData,
@@ -77,8 +81,6 @@ from dartlab.providers.dart.checks import (
     _shapeString,
 )
 from dartlab.providers.dart.docs.notes import Notes
-from dartlab.providers.dart.docsAccessor import _DocsAccessor
-from dartlab.providers.dart.financeAccessor import _FinanceAccessor
 from dartlab.providers.dart.financeMappers import (
     _RATIO_TEMPLATE_FIELDS,
     _ratioArchetypeOverrideForIndustryGroup,
@@ -87,8 +89,6 @@ from dartlab.providers.dart.financeMappers import (
     _ratioTemplateKeyForIndustryGroup,
     _shouldFallbackToAnnualRatios,
 )
-from dartlab.providers.dart.profileAccessor import _ProfileAccessor
-from dartlab.providers.dart.reportAccessor import _ReportAccessor
 
 # 플러그인 등록 후 재구축 가능하도록 lazy 초기화
 _MODULE_REGISTRY: list[tuple[str, str, str, Any]] | None = None

@@ -1,6 +1,7 @@
 {
   "_note": "P-트랙 phase 통과마다 축소",
   "violations": [
+    "src/dartlab/providers/dart/accessor/profileAccessor.py::get",
     "src/dartlab/providers/dart/company.py::fetch",
     "src/dartlab/providers/dart/company.py::getKindList",
     "src/dartlab/providers/dart/company.py::listExportModules",
@@ -28,10 +29,6 @@
     "src/dartlab/providers/dart/openapi/remote.py::getDf",
     "src/dartlab/providers/dart/openapi/remote.py::getDfAll",
     "src/dartlab/providers/dart/openapi/remote.py::getJson",
-    "src/dartlab/providers/dart/profileAccessor.py::get",
-    "src/dartlab/providers/dart/search/__init__.py::search",
-    "src/dartlab/providers/dart/search/fieldIndex.py::searchContent",
-    "src/dartlab/providers/dart/search/ngramIndex.py::searchNgram",
     "src/dartlab/providers/edgar/bulk/datasetBulk.py::listLocalQuarters",
     "src/dartlab/providers/edgar/company.py::search",
     "src/dartlab/providers/edgar/docs/fetch.py::fetchEdgarDocs",

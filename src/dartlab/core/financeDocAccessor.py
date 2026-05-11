@@ -58,7 +58,7 @@ class FinanceDocAccessor(Protocol):
 
 _ACCESSOR: FinanceDocAccessor | None = None
 
-_KNOWN_ACCESSOR_MODULES: tuple[str, ...] = ("dartlab.providers.dart.financeDocAccessor",)
+_KNOWN_ACCESSOR_MODULES: tuple[str, ...] = ("dartlab.providers.dart.accessor.financeDocAccessor",)
 _DISCOVERED = False
 
 
