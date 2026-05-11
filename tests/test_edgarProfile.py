@@ -9,7 +9,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_profile_sections_returns_none_for_empty_docs_sections():
-    from dartlab.providers.edgar.profileAccessor import _ProfileAccessor
+    from dartlab.providers.edgar.accessor.profileAccessor import _ProfileAccessor
 
     company = types.SimpleNamespace(
         _cache={},

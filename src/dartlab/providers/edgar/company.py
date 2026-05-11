@@ -28,10 +28,10 @@ _log = getLogger(__name__)
 import polars as pl
 
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.providers.edgar.docsAccessor import _DocsAccessor
-from dartlab.providers.edgar.financeAccessor import _FinanceAccessor
+from dartlab.providers.edgar.accessor.docsAccessor import _DocsAccessor
+from dartlab.providers.edgar.accessor.financeAccessor import _FinanceAccessor
+from dartlab.providers.edgar.accessor.profileAccessor import _ProfileAccessor
 from dartlab.providers.edgar.openapi.submissions import SUPPORTED_REGULAR_FORMS
-from dartlab.providers.edgar.profileAccessor import _ProfileAccessor
 from dartlab.providers.filingHelpers import filingRecord, filterFilingsByKeyword, resolveDateWindow, truncateText
 
 _PERIOD_COLUMN_RE = re.compile(r"^\d{4}(Q[1-4])?$")
@@ -915,7 +915,7 @@ class Company:
         Returns:
             ``(series, periods)`` 또는 None.
         """
-        from dartlab.providers.edgar.dataDispatcher import buildFinanceSeries
+        from dartlab.providers.edgar.builder.dataDispatcher import buildFinanceSeries
 
         return buildFinanceSeries(self, freq=freq, scope=scope)
 
@@ -960,7 +960,7 @@ class Company:
 
     def _buildRatios(self) -> pl.DataFrame | None:
         """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출."""
-        from dartlab.providers.edgar.dataDispatcher import buildRatios
+        from dartlab.providers.edgar.builder.dataDispatcher import buildRatios
 
         return buildRatios(self)
 
@@ -1776,7 +1776,7 @@ class Company:
             c.show("risk")                        # 위와 동일 (alias)
             c.show("IS", period="2024")           # 2024년만 필터
         """
-        from dartlab.providers.edgar.dataDispatcher import showImpl
+        from dartlab.providers.edgar.builder.dataDispatcher import showImpl
 
         result = showImpl(self, topic, block, period=period, raw=raw, **_kw)
         if asOf is None or result is None:
@@ -1785,13 +1785,13 @@ class Company:
 
     @staticmethod
     def _transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-        from dartlab.providers.edgar.dataDispatcher import transposeToVertical
+        from dartlab.providers.edgar.builder.dataDispatcher import transposeToVertical
 
         return transposeToVertical(wide, periods)
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""
-        from dartlab.providers.edgar.dataDispatcher import buildBlockIndex
+        from dartlab.providers.edgar.builder.dataDispatcher import buildBlockIndex
 
         return buildBlockIndex(topicRows)
 
@@ -2152,31 +2152,31 @@ class Company:
         return df
 
     def _applyPeriodFilter(self, payload: Any, period: str | None) -> Any:
-        from dartlab.providers.edgar.dataDispatcher import applyPeriodFilter
+        from dartlab.providers.edgar.builder.dataDispatcher import applyPeriodFilter
 
         return applyPeriodFilter(payload, period)
 
     @staticmethod
     def _shapeStr(df: pl.DataFrame | None) -> str:
-        from dartlab.providers.edgar.dataDispatcher import shapeStr
+        from dartlab.providers.edgar.builder.dataDispatcher import shapeStr
 
         return shapeStr(df)
 
     @staticmethod
     def _periodsStr(df: pl.DataFrame | None) -> str:
-        from dartlab.providers.edgar.dataDispatcher import periodsStr
+        from dartlab.providers.edgar.builder.dataDispatcher import periodsStr
 
         return periodsStr(df)
 
     @staticmethod
     def _previewFinance(df: pl.DataFrame | None) -> str:
-        from dartlab.providers.edgar.dataDispatcher import previewFinance
+        from dartlab.providers.edgar.builder.dataDispatcher import previewFinance
 
         return previewFinance(df)
 
     @staticmethod
     def _previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
-        from dartlab.providers.edgar.dataDispatcher import previewDocsCell
+        from dartlab.providers.edgar.builder.dataDispatcher import previewDocsCell
 
         return previewDocsCell(topicRows, periodCols)
 
@@ -2448,7 +2448,7 @@ class Company:
     def _report(self):
         """[INTERNAL] EDGAR report 백엔드 — XBRL 기반. 사용자 API: c.show(...)."""
         if self._reportAccessor is None:
-            from dartlab.providers.edgar.reportAccessor import _ReportAccessor
+            from dartlab.providers.edgar.accessor.reportAccessor import _ReportAccessor
 
             self._reportAccessor = _ReportAccessor(self)
         return self._reportAccessor

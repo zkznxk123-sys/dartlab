@@ -6,8 +6,6 @@
         "bulk"
       ],
       "extra": [
-        "accessor",
-        "builder",
         "ops",
         "parse",
         "search"
@@ -15,8 +13,6 @@
     },
     "edgar": {
       "missing": [
-        "accessor",
-        "builder",
         "ops",
         "parse",
         "search"

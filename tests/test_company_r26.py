@@ -64,7 +64,7 @@ def test_edgar_company_show_has_explicit_error_path():
     """
     import inspect
 
-    from dartlab.providers.edgar.dataDispatcher import showImpl
+    from dartlab.providers.edgar.builder.dataDispatcher import showImpl
 
     src = inspect.getsource(showImpl)
     assert "ValueError" in src

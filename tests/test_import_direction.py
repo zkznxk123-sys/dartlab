@@ -117,7 +117,7 @@ _KNOWN_VIOLATIONS = {
     # S8 으로 미룸. 그때 풀 예정.
     ("dartlab.providers.dart.builder.docsIndexBuilder", "dartlab.analysis"),
     ("dartlab.providers.dart.builder.financeStatementBuilder", "dartlab.analysis"),
-    ("dartlab.providers.edgar.financeAccessor", "dartlab.analysis"),
+    ("dartlab.providers.edgar.accessor.financeAccessor", "dartlab.analysis"),
 }
 
 

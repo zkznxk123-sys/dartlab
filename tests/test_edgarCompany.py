@@ -10,9 +10,9 @@ pytestmark = pytest.mark.heavy
 
 
 def test_accessor_imports():
-    from dartlab.providers.edgar.docsAccessor import _DocsAccessor
-    from dartlab.providers.edgar.financeAccessor import _FinanceAccessor
-    from dartlab.providers.edgar.profileAccessor import _ProfileAccessor
+    from dartlab.providers.edgar.accessor.docsAccessor import _DocsAccessor
+    from dartlab.providers.edgar.accessor.financeAccessor import _FinanceAccessor
+    from dartlab.providers.edgar.accessor.profileAccessor import _ProfileAccessor
 
     assert _DocsAccessor is not None
     assert _FinanceAccessor is not None
