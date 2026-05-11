@@ -184,9 +184,9 @@ def normalizeLabel(label: str) -> str:
     return label
 
 
-def splitPeriodBlocks(section: str) -> list[tuple[str, str]]:
+def splitPeriodBlocks(content: str) -> list[tuple[str, str]]:
     """섹션을 당기/전기 블록으로 분리."""
-    lines = section.split("\n")
+    lines = content.split("\n")
     blocks = []
     currentPeriod = None
     blockLines = []
@@ -608,16 +608,16 @@ def _computeEnd(parsed):
     return parsed, True
 
 
-def findMovementTables(section: str):
+def findMovementTables(content: str):
     """유형자산 주석에서 변동표를 찾아 파싱.
 
     Returns list of parsed dicts (period, unit, categories, rows)
     and metadata dict with reliability info.
     """
-    blocks = splitPeriodBlocks(section)
+    blocks = splitPeriodBlocks(content)
 
     if not blocks:
-        blocks = [("당기", section)]
+        blocks = [("당기", content)]
 
     allParsed = []
     for period, block in blocks:

@@ -147,19 +147,19 @@ def costByNature(stockCode: str, period: str = "y") -> CostByNatureResult | None
     )
 
 
-def _buildRatios(ts: pl.DataFrame, years: list[str]) -> pl.DataFrame | None:
+def _buildRatios(timeSeries: pl.DataFrame, years: list[str]) -> pl.DataFrame | None:
     """각 비용 항목의 합계 대비 비율(%) 계산."""
-    if ts is None or ts.height == 0:
+    if timeSeries is None or timeSeries.height == 0:
         return None
 
     rows = []
     for yr in years:
-        col = ts[yr].to_list()
+        col = timeSeries[yr].to_list()
         total = sum(v for v in col if v is not None and v > 0)
         if total <= 0:
             continue
 
-        accounts = ts["account"].to_list()
+        accounts = timeSeries["account"].to_list()
         for i, name in enumerate(accounts):
             val = col[i]
             ratio = (val / total * 100) if val is not None else None

@@ -118,21 +118,21 @@ class EdinetClient:
 
     def listDocuments(
         self,
-        date: str,
+        period: str,
         *,
         docType: str | None = None,
     ) -> list[dict[str, Any]]:
         """특정 날짜의 제출 서류 목록 조회.
 
         Args:
-            date: 조회일 (YYYY-MM-DD).
+            period: 조회일 (YYYY-MM-DD).
             docType: 서류 유형 필터 (예: "120" = 유가증권보고서).
 
         Returns:
             서류 dict 리스트. 각 dict에 docID, filerName, edinetCode 등 포함.
         """
         params: dict[str, Any] = {
-            "date": date,
+            "period": period,
             "type": 2,  # type=2: 메타데이터 포함
         }
         resp = self._get(f"{BASE_URL}/documents.json", params=params)

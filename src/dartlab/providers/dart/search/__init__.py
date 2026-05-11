@@ -215,7 +215,7 @@ def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
     return collectMetaRange(startDate, endDate, **kwargs)
 
 
-def fillContent(date: str | None = None, **kwargs):
+def fillContent(period: str | None = None, **kwargs):
     """공시 원문 채우기 (Phase 2)."""
     from dartlab.providers.dart.openapi.allFilingsCollector import (
         fillContent as _fill,
@@ -224,8 +224,8 @@ def fillContent(date: str | None = None, **kwargs):
         fillContentAll as _fillAll,
     )
 
-    if date:
-        return _fill(date, **kwargs)
+    if period:
+        return _fill(period, **kwargs)
     return _fillAll(**kwargs)
 
 

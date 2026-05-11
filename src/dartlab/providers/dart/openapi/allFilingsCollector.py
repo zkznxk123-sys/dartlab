@@ -132,7 +132,7 @@ def _collectOneDoc(client: DartClient, rceptNo: str) -> list[dict]:
 
 
 def collectMetaDay(
-    date: str,
+    period: str,
     *,
     client: DartClient | None = None,
     corpClasses: list[str] | None = None,
@@ -149,24 +149,24 @@ def collectMetaDay(
         corpClasses = ["Y", "K"]
 
     outDir = _allFilingsDir()
-    metaPath = outDir / f"{date}{_META_SUFFIX}.parquet"
-    fullPath = outDir / f"{date}.parquet"
+    metaPath = outDir / f"{period}{_META_SUFFIX}.parquet"
+    fullPath = outDir / f"{period}.parquet"
 
     # 원문까지 완료됐거나 목록이 있으면 건너뜀
     if fullPath.exists():
         if showProgress:
-            _log.info("[%s] 원문 수집 완료됨", date)
+            _log.info("[%s] 원문 수집 완료됨", period)
         return None
     if metaPath.exists():
         if showProgress:
             df = pl.read_parquet(metaPath)
-            _log.info("[%s] 목록 있음 (%d건)", date, df.height)
+            _log.info("[%s] 목록 있음 (%d건)", period, df.height)
         return None
 
-    meta = listFilings(client, start=date, end=date, fetchAll=True)
+    meta = listFilings(client, start=period, end=period, fetchAll=True)
     if meta.height == 0:
         if showProgress:
-            _log.info("[%s] 공시 없음 (휴일)", date)
+            _log.info("[%s] 공시 없음 (휴일)", period)
         return None
 
     if corpClasses:
@@ -174,7 +174,7 @@ def collectMetaDay(
 
     if meta.height == 0:
         if showProgress:
-            _log.info("[%s] 상장사 공시 없음", date)
+            _log.info("[%s] 상장사 공시 없음", period)
         return None
 
     # 저장
@@ -183,7 +183,7 @@ def collectMetaDay(
     tmpPath.rename(metaPath)
 
     if showProgress:
-        _log.info("[%s] 목록 %d건 저장", date, meta.height)
+        _log.info("[%s] 목록 %d건 저장", period, meta.height)
 
     return meta
 
@@ -242,7 +242,7 @@ def collectMetaRange(
 
 
 def fillContent(
-    date: str,
+    period: str,
     *,
     client: DartClient | None = None,
     showProgress: bool = True,
@@ -255,26 +255,26 @@ def fillContent(
         client = DartClient()
 
     outDir = _allFilingsDir()
-    metaPath = outDir / f"{date}{_META_SUFFIX}.parquet"
-    fullPath = outDir / f"{date}.parquet"
+    metaPath = outDir / f"{period}{_META_SUFFIX}.parquet"
+    fullPath = outDir / f"{period}.parquet"
 
     # 원문 완료 → 건너뜀
     if fullPath.exists():
         if showProgress:
-            _log.info("[%s] 원문 이미 완료", date)
+            _log.info("[%s] 원문 이미 완료", period)
         return None
 
     # 목록 없음
     if not metaPath.exists():
         if showProgress:
-            _log.info("[%s] 목록 없음 (먼저 collectMetaDay 실행)", date)
+            _log.info("[%s] 목록 없음 (먼저 collectMetaDay 실행)", period)
         return None
 
     meta = pl.read_parquet(metaPath)
     total = meta.height
 
     if showProgress:
-        _log.info("[%s] %d건 원문 수집 시작", date, total)
+        _log.info("[%s] %d건 원문 수집 시작", period, total)
 
     allRows: list[dict] = []
     success = empty = 0
@@ -341,7 +341,7 @@ def fillContent(
     if showProgress:
         _log.info(
             "[%s] 완료: %d건 성공, %d건 빈, %d행, %.1fMB",
-            date,
+            period,
             success,
             empty,
             df.height,
@@ -419,9 +419,9 @@ def pendingDates() -> list[str]:
     return dates
 
 
-def loadDay(date: str) -> pl.DataFrame | None:
+def loadDay(period: str) -> pl.DataFrame | None:
     """수집된 하루치 데이터 로드."""
-    path = _allFilingsDir() / f"{date}.parquet"
+    path = _allFilingsDir() / f"{period}.parquet"
     if not path.exists():
         return None
     return pl.read_parquet(path)
