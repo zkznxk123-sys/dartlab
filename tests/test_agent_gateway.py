@@ -163,7 +163,7 @@ def test_agent_runs_endpoint_streams_only_public_events(monkeypatch) -> None:
         yield {"event": "ACTIVITY_DELTA", "data": json.dumps({"summary": "근거 확인", "status": "done"})}
         yield {"event": "RUN_FINISHED", "data": json.dumps({"status": "ok", "refs": ["skill:start"]})}
 
-    monkeypatch.setattr(agent_api, "stream_agent_run", fake_stream)
+    monkeypatch.setattr(agent_api, "streamAgentRun", fake_stream)
     with TestClient(app, raise_server_exceptions=False) as client:
         with client.stream(
             "POST",

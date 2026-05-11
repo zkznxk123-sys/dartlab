@@ -79,22 +79,22 @@ class TestStateFile:
         state_path = tmp_path / "state.json"
         monkeypatch.setattr("dartlab.channel.devtunnel._STATE_FILE", state_path)
 
-        _saveState(tunnelId="abc.jpe1", tunnel_label="dartlab-test")
+        _saveState(tunnelId="abc.jpe1", tunnelLabel="dartlab-test")
         loaded = _loadState()
 
-        assert loaded["tunnel_id"] == "abc.jpe1"
-        assert loaded["tunnel_label"] == "dartlab-test"
+        assert loaded["tunnelId"] == "abc.jpe1"
+        assert loaded["tunnelLabel"] == "dartlab-test"
 
     def test_save_merges_with_existing(self, tmp_path, monkeypatch):
         state_path = tmp_path / "state.json"
         monkeypatch.setattr("dartlab.channel.devtunnel._STATE_FILE", state_path)
 
         _saveState(tunnelId="abc")
-        _saveState(tunnel_label="label")
+        _saveState(tunnelLabel="label")
         loaded = _loadState()
 
-        assert loaded["tunnel_id"] == "abc"
-        assert loaded["tunnel_label"] == "label"
+        assert loaded["tunnelId"] == "abc"
+        assert loaded["tunnelLabel"] == "label"
 
 
 # ══════════════════════════════════════

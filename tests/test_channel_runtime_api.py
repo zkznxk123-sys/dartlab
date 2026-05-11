@@ -86,7 +86,7 @@ def test_channel_start_validates_required_fields(client):
 
 def test_dev_channel_status_and_start(client, monkeypatch):
     monkeypatch.setattr(
-        "dartlab.server.services.devChannelRuntime.setup_devtunnel",
+        "dartlab.server.services.devChannelRuntime.setupDevtunnel",
         lambda *, port, autoYes: ("https://dartlab-8400.jpe1.devtunnels.ms/", _FakeProcess()),
     )
 

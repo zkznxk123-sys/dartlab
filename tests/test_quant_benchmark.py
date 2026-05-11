@@ -46,11 +46,10 @@ def test_resolve_benchmark_stack_adds_sector_candidate(monkeypatch):
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
     monkeypatch.setattr(
-        bm,
-        "primaryIndustryNode",
+        "dartlab.quant.benchmark.data.primaryIndustryNode",
         lambda _: {"industry": "semiconductor", "confidence": 0.9, "source": "test"},
     )
-    monkeypatch.setattr(bm, "indexExists", lambda *_: True)
+    monkeypatch.setattr("dartlab.quant.benchmark.data.indexExists", lambda *_: True)
 
     stack = bm.resolveBenchmarkStack("005930", market="KR", benchmarkMode="sector")
     resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="sector")
@@ -69,8 +68,7 @@ def test_resolve_benchmark_stack_explicit_override_wins(monkeypatch):
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
     monkeypatch.setattr(
-        bm,
-        "primaryIndustryNode",
+        "dartlab.quant.benchmark.data.primaryIndustryNode",
         lambda _: {"industry": "semiconductor", "confidence": 0.9, "source": "test"},
     )
 
@@ -87,8 +85,8 @@ def test_resolve_benchmark_stack_sector_fallbacks_to_market(monkeypatch):
     from dartlab.quant import benchmark as bm
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
-    monkeypatch.setattr(bm, "primaryIndustryNode", lambda _: None)
-    monkeypatch.setattr(bm, "_latestSectorCandidate", lambda *_: None)
+    monkeypatch.setattr("dartlab.quant.benchmark.data.primaryIndustryNode", lambda _: None)
+    monkeypatch.setattr("dartlab.quant.benchmark.data._latestSectorCandidate", lambda *_: None)
 
     resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="sector")
 
@@ -120,8 +118,8 @@ def test_resolve_benchmark_stack_adds_size_style_candidate(monkeypatch):
 
     monkeypatch.setattr(listing, "getKrxList", lambda: _krx_listing())
     monkeypatch.setattr(hf, "loadFiltered", lambda **_: pl.DataFrame(rows))
-    monkeypatch.setattr(bm, "primaryIndustryNode", lambda _: None)
-    monkeypatch.setattr(bm, "indexExists", lambda *_: True)
+    monkeypatch.setattr("dartlab.quant.benchmark.data.primaryIndustryNode", lambda _: None)
+    monkeypatch.setattr("dartlab.quant.benchmark.data.indexExists", lambda *_: True)
 
     resolved = bm.resolveBenchmark("005930", market="KR", benchmarkMode="style")
 

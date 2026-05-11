@@ -276,7 +276,7 @@ class TestTechnicalVerdict:
             }
         )
 
-    @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
+    @patch("dartlab.quant.signal.analyzer._fetchBenchmark", return_value=None)
     def test_uptrend_verdict(self, mock_bench):
         from dartlab.quant.signal.analyzer import technicalVerdict
 
@@ -287,7 +287,7 @@ class TestTechnicalVerdict:
         assert result["rsi"] > 50
         assert "score" in result
 
-    @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
+    @patch("dartlab.quant.signal.analyzer._fetchBenchmark", return_value=None)
     def test_downtrend_verdict(self, mock_bench):
         from dartlab.quant.signal.analyzer import technicalVerdict
 
@@ -297,7 +297,7 @@ class TestTechnicalVerdict:
         assert result["verdict"] in ("약세", "중립")
         assert result["rsi"] < 50
 
-    @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
+    @patch("dartlab.quant.signal.analyzer._fetchBenchmark", return_value=None)
     def test_verdict_has_required_keys(self, mock_bench):
         from dartlab.quant.signal.analyzer import technicalVerdict
 
@@ -307,7 +307,7 @@ class TestTechnicalVerdict:
         for key in ("verdict", "score", "rsi", "aboveSma20", "aboveSma60", "bbPosition", "signals"):
             assert key in result
 
-    @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
+    @patch("dartlab.quant.signal.analyzer._fetchBenchmark", return_value=None)
     def test_score_range(self, mock_bench):
         from dartlab.quant.signal.analyzer import technicalVerdict
 
@@ -316,7 +316,7 @@ class TestTechnicalVerdict:
         result = technicalVerdict(df)
         assert -4 <= result["score"] <= 4
 
-    @patch("dartlab.quant.analyzer._fetchBenchmark", return_value=None)
+    @patch("dartlab.quant.signal.analyzer._fetchBenchmark", return_value=None)
     def test_signals_dict_structure(self, mock_bench):
         from dartlab.quant.signal.analyzer import technicalVerdict
 

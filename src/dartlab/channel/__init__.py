@@ -10,4 +10,4 @@ from __future__ import annotations
 
 from dartlab.channel.devtunnel import DevTunnelSetupError, setupDevtunnel
 
-__all__ = ["DevTunnelSetupError", "setup_devtunnel"]
+__all__ = ["DevTunnelSetupError", "setupDevtunnel"]

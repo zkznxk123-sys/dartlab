@@ -396,7 +396,7 @@ def _loadAccountMap() -> dict[str, str]:
     """
     import json
 
-    mapPath = Path(__file__).resolve().parents[1] / "core" / "data" / "accountMappings.json"
+    mapPath = Path(__file__).resolve().parents[2] / "core" / "data" / "accountMappings.json"
     if not mapPath.exists():
         return {}
     try:

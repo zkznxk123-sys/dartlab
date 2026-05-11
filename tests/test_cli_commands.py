@@ -40,7 +40,7 @@ def _mock_company():
 
 
 def _patch_dartlab(monkeypatch, company=None):
-    """configure_dartlab()가 mock dartlab 모듈을 반환하도록 패치.
+    """configureDartlab()가 mock dartlab 모듈을 반환하도록 패치.
 
     Python 모듈 import 캐싱 때문에 source 모듈뿐 아니라
     각 command 모듈에 이미 바인딩된 참조도 함께 패치해야 한다.
@@ -61,7 +61,7 @@ def _patch_dartlab(monkeypatch, company=None):
 
     # source 모듈 패치
     monkeypatch.setattr(
-        "dartlab.cli.services.runtime.configure_dartlab",
+        "dartlab.cli.services.runtime.configureDartlab",
         factory,
     )
 
@@ -81,17 +81,17 @@ def _patch_dartlab(monkeypatch, company=None):
 
     for mod_path in _CMD_MODULES:
         if mod_path in sys.modules:
-            monkeypatch.setattr(f"{mod_path}.configure_dartlab", factory)
+            monkeypatch.setattr(f"{mod_path}.configureDartlab", factory)
 
     return fake_mod
 
 
 @pytest.fixture()
 def mock_output(monkeypatch):
-    """dartlab.cli.services.output의 get_console/print_dataframe을 mock."""
+    """dartlab.cli.services.output의 getConsole/printDataframe을 mock."""
     console = MagicMock()
-    monkeypatch.setattr("dartlab.cli.services.output.get_console", lambda: console)
-    monkeypatch.setattr("dartlab.cli.services.output.print_dataframe", lambda *a, **kw: None)
+    monkeypatch.setattr("dartlab.cli.services.output.getConsole", lambda: console)
+    monkeypatch.setattr("dartlab.cli.services.output.printDataframe", lambda *a, **kw: None)
     return console
 
 
@@ -226,7 +226,7 @@ def test_collect_stats():
 def test_plugin_list():
     from dartlab.cli.commands.plugin import run
 
-    with patch("dartlab.cli.commands.plugin._list_plugins", return_value=0) as mock_list:
+    with patch("dartlab.cli.commands.plugin._listPlugins", return_value=0) as mock_list:
         rc = run(_ns(plugin_command="list"))
     assert rc == 0
     mock_list.assert_called_once()
@@ -271,7 +271,7 @@ def test_mcp_import():
 
 def test_report_stdout(monkeypatch, capsys):
     _patch_dartlab(monkeypatch)
-    with patch("dartlab.cli.commands.report._build_report", return_value="# Report\n"):
+    with patch("dartlab.cli.commands.report._buildReport", return_value="# Report\n"):
         from dartlab.cli.commands.report import run
 
         rc = run(_ns(company="999999", sections=None, output=None))

@@ -25,7 +25,7 @@ def test_sort_openai_models_orders_by_version_desc() -> None:
 @pytest.mark.unit
 def test_sort_openai_models_does_not_force_stale_fallback_to_top() -> None:
     """fallback 이 stale (5.4) 인데 input 에 5.5 있으면 5.5 가 첫 항목."""
-    from dartlab.ai.settings import model_resolver
+    from dartlab.ai.settings import modelResolver as model_resolver
     from dartlab.ai.settings.modelResolver import sortOpenaiModels
 
     # stale fallback 시뮬레이션
@@ -50,7 +50,7 @@ def test_latest_openai_model_uses_env_override(monkeypatch) -> None:
 @pytest.mark.unit
 def test_latest_openai_model_uses_backend_when_present(monkeypatch) -> None:
     """backend availableModels() 첫 신모델 사용."""
-    from dartlab.ai.providers import oauth_codex
+    from dartlab.ai.providers import oauthCodex as oauth_codex
     from dartlab.ai.settings.modelResolver import latestOpenaiModel
 
     monkeypatch.delenv("DARTLAB_LATEST_OPENAI_MODEL", raising=False)
@@ -60,8 +60,8 @@ def test_latest_openai_model_uses_backend_when_present(monkeypatch) -> None:
 
 @pytest.mark.unit
 def test_latest_openai_model_falls_back_when_backend_unavailable(monkeypatch) -> None:
-    from dartlab.ai.providers import oauth_codex
-    from dartlab.ai.settings import model_resolver
+    from dartlab.ai.providers import oauthCodex as oauth_codex
+    from dartlab.ai.settings import modelResolver as model_resolver
     from dartlab.ai.settings.modelResolver import latestOpenaiModel
 
     monkeypatch.delenv("DARTLAB_LATEST_OPENAI_MODEL", raising=False)
@@ -75,8 +75,8 @@ def test_latest_openai_model_falls_back_when_backend_unavailable(monkeypatch) ->
 
 @pytest.mark.unit
 def test_latest_openai_model_falls_back_when_backend_returns_empty(monkeypatch) -> None:
-    from dartlab.ai.providers import oauth_codex
-    from dartlab.ai.settings import model_resolver
+    from dartlab.ai.providers import oauthCodex as oauth_codex
+    from dartlab.ai.settings import modelResolver as model_resolver
     from dartlab.ai.settings.modelResolver import latestOpenaiModel
 
     monkeypatch.delenv("DARTLAB_LATEST_OPENAI_MODEL", raising=False)

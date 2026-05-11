@@ -44,19 +44,32 @@ _META_ALLOWED_FILES = {
 
 
 def _staticImports(path: Path) -> list[str]:
+    """모듈 최상단 (def/class 본문 외) 의 static import 만 수집.
+
+    함수/메서드 본문의 lazy import 는 import 시점이 호출 시점이라 'static'
+    이 아니다 — 본 가드의 의도는 모듈 로딩 chain 차단.
+    """
     try:
         tree = ast.parse(path.read_text(encoding="utf-8"))
     except SyntaxError:
         return []
     names: list[str] = []
-    for node in ast.walk(tree):
+    for node in tree.body:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 names.append(alias.name)
         elif isinstance(node, ast.ImportFrom):
-            # ImportFrom 의 module 만 수집 (level=0 — 절대 경로)
             if node.level == 0 and node.module:
                 names.append(node.module)
+        elif isinstance(node, ast.If):
+            # TYPE_CHECKING 블록 등 module-level if — 그 안의 import 도 static.
+            for sub in node.body:
+                if isinstance(sub, ast.Import):
+                    for alias in sub.names:
+                        names.append(alias.name)
+                elif isinstance(sub, ast.ImportFrom):
+                    if sub.level == 0 and sub.module:
+                        names.append(sub.module)
     return names
 
 

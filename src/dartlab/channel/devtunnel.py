@@ -301,12 +301,12 @@ def ensureLoggedIn(binPath: str, autoYes: bool = False) -> None:
 
 
 def ensureTunnel(binPath: str, port: int) -> str:
-    """tunnel ID 재사용 또는 신규 생성. tunnel_id 반환.
+    """tunnel ID 재사용 또는 신규 생성. tunnelId 반환.
 
     포트 매핑 + anonymous 접근 + anti-phishing 우회까지 보장.
     """
     state = _loadState()
-    existing_id = state.get("tunnel_id")
+    existing_id = state.get("tunnelId")
     if existing_id:
         try:
             result = subprocess.run(
@@ -403,7 +403,7 @@ def ensureTunnel(binPath: str, port: int) -> str:
     if not tunnelId:
         raise DevTunnelSetupError("tunnel 생성 3회 시도 후 실패")
 
-    _saveState(tunnelId=tunnelId, tunnel_label=tunnel_label)
+    _saveState(tunnelId=tunnelId, tunnelLabel=tunnel_label)
     logger.info(f"  ✓ tunnel ID: {tunnelId}")
 
     _ensurePortMapping(binPath, tunnelId, port)

@@ -111,7 +111,7 @@ class TestHandleAsk:
     @pytest.mark.asyncio
     async def test_any_question_goes_to_ai(self):
         """종목 없는 질문도 AI에 전달된다 (company=None)."""
-        with patch("dartlab.channel.adapters.base.ChannelAdapter._run_analysis", return_value="답변입니다") as mock_run:
+        with patch("dartlab.channel.adapters.base.ChannelAdapter._runAnalysis", return_value="답변입니다") as mock_run:
             adapter = MockAdapter()
             await adapter.handleAsk("ch1", "blah blah")
             # "분석 중..." + 결과 = 2개 메시지
@@ -123,7 +123,7 @@ class TestHandleAsk:
 
     @pytest.mark.asyncio
     async def test_successful_analysis(self):
-        with patch("dartlab.channel.adapters.base.ChannelAdapter._run_analysis", return_value="삼성전자의 배당은..."):
+        with patch("dartlab.channel.adapters.base.ChannelAdapter._runAnalysis", return_value="삼성전자의 배당은..."):
             adapter = MockAdapter()
             await adapter.handleAsk("ch1", "삼성전자 배당 분석")
             # "분석 중..." + 결과 = 2개 메시지
@@ -135,7 +135,7 @@ class TestHandleAsk:
     async def test_long_response_chunked(self):
         long_text = "x" * 250
 
-        with patch("dartlab.channel.adapters.base.ChannelAdapter._run_analysis", return_value=long_text):
+        with patch("dartlab.channel.adapters.base.ChannelAdapter._runAnalysis", return_value=long_text):
             adapter = MockAdapter()
             await adapter.handleAsk("ch1", "테스트 분석")
             # "분석 중..." + 청크들

@@ -42,7 +42,7 @@ class _MockCompany:
 def test_auto_gather_retries_after_empty_result() -> None:
     """첫 show() 가 빈 → update() 자동 호출 → 두 번째 show() 가 정상 → autoGatherUsed=True."""
     company = _MockCompany(second_call_rows=1, update_returns={"finance": 12})
-    with patch("dartlab.ai.tools.engineCall._resolve_company", return_value=company):
+    with patch("dartlab.ai.tools.engineCall._resolveCompany", return_value=company):
         result = _companyShow({"target": "005930", "topic": "BS"})
     assert result.ok is True
     assert company.update_called is True
@@ -67,7 +67,7 @@ def test_auto_gather_skipped_when_first_call_succeeds() -> None:
             )
 
     company = _StableCompany()
-    with patch("dartlab.ai.tools.engineCall._resolve_company", return_value=company):
+    with patch("dartlab.ai.tools.engineCall._resolveCompany", return_value=company):
         result = _companyShow({"target": "005930", "topic": "BS"})
     assert result.ok is True
     assert company.update_called is False
@@ -82,7 +82,7 @@ def test_auto_gather_disabled_via_env_var(monkeypatch: pytest.MonkeyPatch) -> No
     # 모듈 reload 효과를 위해 _AUTO_GATHER_ENABLED 를 직접 패치
     with patch("dartlab.ai.tools.engineCall._AUTO_GATHER_ENABLED", False):
         company = _MockCompany(second_call_rows=1)
-        with patch("dartlab.ai.tools.engineCall._resolve_company", return_value=company):
+        with patch("dartlab.ai.tools.engineCall._resolveCompany", return_value=company):
             result = _companyShow({"target": "005930", "topic": "BS"})
     assert result.ok is False
     assert result.error == "empty_result"

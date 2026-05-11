@@ -54,11 +54,11 @@ def _isolateScanDir(monkeypatch, tmp_path):
     """모든 테스트에서 scan parquet 경로를 tmp_path 로 리다이렉트."""
     scanDir = tmp_path / "scan"
     scanDir.mkdir()
-    from dartlab.scan import _helpers
+    from dartlab.scan import parquetLoad
 
-    monkeypatch.setattr(_helpers, "_ensureScanData", lambda: scanDir)
+    monkeypatch.setattr(parquetLoad, "_ensureScanData", lambda: scanDir)
     # 전역 플래그 리셋 (다른 테스트 간 간섭 방지)
-    monkeypatch.setattr(_helpers, "_scanDownloaded", False, raising=False)
+    monkeypatch.setattr(parquetLoad, "_scanDownloaded", False, raising=False)
     return scanDir
 
 

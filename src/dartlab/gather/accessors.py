@@ -131,14 +131,14 @@ class DefaultIndustryAccessor:
     """IndustryDataAccessor 기본 구현."""
 
     def fetchListing(self, *, market: str = "KR") -> pl.DataFrame | None:
-        """전종목 listing snapshot."""
+        """전종목 listing snapshot — KRX 기준 (short_code/marketCode/marketEngName 컬럼)."""
         try:
-            from dartlab.gather.listing import getKindList
+            from dartlab.gather.listing import getKrxList
         except ImportError:
             return None
         try:
-            return getKindList(market=market)
-        except (ValueError, RuntimeError, KeyError):
+            return getKrxList()
+        except (ValueError, RuntimeError, KeyError, TypeError):
             return None
 
     def fetchScanProfitability(self) -> pl.DataFrame | None:

@@ -80,7 +80,7 @@ def test_ask_public_entry_financial_statement_uses_engine_call(monkeypatch) -> N
     import dartlab.ai.tools.engineCall as engine_call_mod
     from dartlab.ai.kernel import ask
 
-    monkeypatch.setattr(engine_call_mod, "_resolve_company", lambda target: _FakeCompany())
+    monkeypatch.setattr(engine_call_mod, "_resolveCompany", lambda target: _FakeCompany())
 
     events = list(ask("삼성전자 재무상태표 확인", events=True))
     answer = _answer(events)
@@ -103,7 +103,7 @@ def test_ask_public_entry_compares_two_financial_statements(monkeypatch) -> None
     def fake_resolve(target: str):
         return _FakePeerCompany() if "하이닉스" in target else _FakeCompany()
 
-    monkeypatch.setattr(engine_call_mod, "_resolve_company", fake_resolve)
+    monkeypatch.setattr(engine_call_mod, "_resolveCompany", fake_resolve)
 
     events = list(ask("삼성전자와 SK하이닉스 재무상태표 비교", events=True))
     answer = _answer(events)
@@ -151,7 +151,7 @@ def test_ask_missing_company_returns_actionable_failure(monkeypatch) -> None:
     import dartlab.ai.tools.engineCall as engine_call_mod
     from dartlab.ai.kernel import ask
 
-    monkeypatch.setattr(engine_call_mod, "_resolve_company", lambda target: None)
+    monkeypatch.setattr(engine_call_mod, "_resolveCompany", lambda target: None)
 
     answer = ask("재무상태표 확인", stream=False)
 
