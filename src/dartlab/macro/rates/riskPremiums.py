@@ -18,7 +18,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-_DEFAULTS_PATH = Path(__file__).resolve().parent.parent / "core" / "data" / "damodaranDefaults.json"
+_DEFAULTS_PATH = Path(__file__).resolve().parent.parent.parent / "core" / "data" / "damodaranDefaults.json"
 
 
 @lru_cache(maxsize=1)
