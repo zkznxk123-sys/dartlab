@@ -32,7 +32,7 @@ def _discover() -> None:
     _PROVIDERS.sort(key=lambda cls: getattr(cls, "priority", lambda: 99)())
 
 
-def Company(codeOrName: str) -> CompanyProtocol:
+def Company(stockCode: str) -> CompanyProtocol:
     """**사람의 최상위 관문** — 종목 하나의 모든 엔진에 접근하는 파사드.
 
     dartlab 투톱 진입점:
@@ -86,7 +86,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
         - industry: 섹터 밸류체인 (Company-독립)
 
     Args:
-        codeOrName: 종목코드, 회사명, 또는 영문 ticker.
+        stockCode: 종목코드, 회사명, 또는 영문 ticker.
 
     Returns:
         CompanyProtocol — DART 또는 EDGAR Company 인스턴스 (파사드).
@@ -113,7 +113,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
     """
     _discover()
 
-    normalized = codeOrName.strip()
+    normalized = stockCode.strip()
     if not normalized:
         raise ValueError(
             "종목코드 또는 회사명을 입력해 주세요.\n"
@@ -150,7 +150,7 @@ def Company(codeOrName: str) -> CompanyProtocol:
     try:
         from dartlab.gather.krx.listing import fuzzySearch
 
-        suggestions = fuzzySearch(codeOrName, maxResults=3)
+        suggestions = fuzzySearch(stockCode, maxResults=3)
         if suggestions.height > 0:
             rows = [f"    - {r['회사명']} ({r['종목코드']})" for r in suggestions.iter_rows(named=True)]
             hint = "\n  유사 종목:\n" + "\n".join(rows)
@@ -161,12 +161,12 @@ def Company(codeOrName: str) -> CompanyProtocol:
     try:
         from dartlab.core.messaging import format as gfmt
 
-        baseMsg = gfmt("error:no_data", stockCode=codeOrName)
+        baseMsg = gfmt("error:no_data", stockCode=stockCode)
         raise ValueError(baseMsg + hint)
     except (ImportError, KeyError):
         raise ValueError(
-            f"'{codeOrName}'을(를) 찾을 수 없습니다{cause}.\n"
-            f"  검색: dartlab.searchName('{codeOrName}')\n"
+            f"'{stockCode}'을(를) 찾을 수 없습니다{cause}.\n"
+            f"  검색: dartlab.searchName('{stockCode}')\n"
             f"  전체 목록: dartlab.listing(){hint}"
         )
 

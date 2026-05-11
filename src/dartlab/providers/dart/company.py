@@ -404,12 +404,12 @@ class Company:
         """
         return 10
 
-    def __init__(self, codeOrName: str):
+    def __init__(self, stockCode: str):
         import time as _time
 
         _initStart = _time.perf_counter()
 
-        normalized = codeOrName.strip()
+        normalized = stockCode.strip()
         if re.match(r"^[0-9A-Za-z]{6}$", normalized):
             self.stockCode = normalized.upper()
         else:
@@ -671,16 +671,16 @@ class Company:
         return searchName(keyword)
 
     @staticmethod
-    def resolve(codeOrName: str) -> str | None:
+    def resolve(stockCode: str) -> str | None:
         """종목코드 또는 회사명 → 종목코드 변환.
 
         Args:
-            codeOrName: 종목코드 ("005930") 또는 종목명 ("삼성전자").
+            stockCode: 종목코드 ("005930") 또는 종목명 ("삼성전자").
 
         Returns:
             str | None — 6자리 종목코드. 못 찾으면 None.
         """
-        normalized = codeOrName.strip()
+        normalized = stockCode.strip()
         if re.match(r"^[0-9A-Za-z]{6}$", normalized):
             return normalized.upper()
         return nameToCode(normalized)
