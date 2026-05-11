@@ -6,13 +6,13 @@ import time
 
 import pytest
 
-from dartlab.gather.cache import GatherCache
+from dartlab.gather.infra.cache import GatherCache
+from dartlab.gather.infra.resilience import CircuitBreaker, SourceHealthTracker
 from dartlab.gather.marketConfig import (
     MARKETS,
     getMarketConfig,
     resolveTicker,
 )
-from dartlab.gather.resilience import CircuitBreaker, SourceHealthTracker
 from dartlab.gather.types import CircuitOpenError, PriceSnapshot
 
 pytestmark = pytest.mark.unit

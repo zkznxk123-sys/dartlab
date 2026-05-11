@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from .http import GatherHttpClient
+from .infra.http import GatherHttpClient
 from .types import InstitutionOwnership, SourceUnavailableError
 
 log = logging.getLogger(__name__)

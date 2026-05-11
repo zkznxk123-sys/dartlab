@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-from .types import DomainConfig, RateLimitExceededError, SourceUnavailableError
+from ..types import DomainConfig, RateLimitExceededError, SourceUnavailableError
 
 log = logging.getLogger(__name__)
 

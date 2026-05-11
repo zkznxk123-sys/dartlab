@@ -33,7 +33,7 @@ def _fetchOhlcv(company: Any) -> pl.DataFrame | None:
 
     result = None
     try:
-        from dartlab.gather.http import runAsync
+        from dartlab.gather.infra.http import runAsync
         from dartlab.gather.price import fetch as fetchPrice
 
         snapshot = runAsync(fetchPrice(stockCode, market=_detectMarket(company)))

@@ -10,9 +10,9 @@ from __future__ import annotations
 import logging
 import time
 
-from .cache import GatherCache
-from .resilience import circuitBreaker as _cb
-from .resilience import healthTracker as _ht
+from .infra.cache import GatherCache
+from .infra.resilience import circuitBreaker as _cb
+from .infra.resilience import healthTracker as _ht
 
 log = logging.getLogger(__name__)
 

@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from dartlab.gather.cache import GatherCache
-from dartlab.gather.http import GatherHttpClient, _AsyncRateLimiter
+from dartlab.gather.infra.cache import GatherCache
+from dartlab.gather.infra.http import GatherHttpClient, _AsyncRateLimiter
 from dartlab.gather.types import (
     FlowData,
     GatherResult,
@@ -120,7 +120,7 @@ class TestGatherHttpClient:
     """GatherHttpClient 기본 동작."""
 
     def test_close(self):
-        from dartlab.gather.http import runAsync
+        from dartlab.gather.infra.http import runAsync
 
         client = GatherHttpClient()
         runAsync(client.close())  # 에러 없이 종료

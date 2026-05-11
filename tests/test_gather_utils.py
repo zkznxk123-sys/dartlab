@@ -4,8 +4,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.gather.cache import GatherCache
-from dartlab.gather.resilience import CircuitBreaker, SourceHealthTracker
+from dartlab.gather.infra.cache import GatherCache
+from dartlab.gather.infra.resilience import CircuitBreaker, SourceHealthTracker
 from dartlab.gather.search import SearchResult, formatResults, searchAvailable
 
 # ══════════════════════════════════════
@@ -143,7 +143,7 @@ class TestGatherCache:
 
     def test_ttl_expiry(self, monkeypatch):
         """TTL 만료 시 None 반환, stale에 보존."""
-        from dartlab.gather import cache as cache_mod
+        from dartlab.gather.infra import cache as cache_mod
 
         t = [1000.0]
 

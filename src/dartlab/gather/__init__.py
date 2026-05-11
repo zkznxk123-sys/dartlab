@@ -35,9 +35,9 @@ from . import news as _news
 from . import ownership as _ownership
 from . import price as _price
 from . import sector as _sector
-from .cache import GatherCache
 from .domains import loadDomain
-from .http import GatherHttpClient, runAsync
+from .infra.cache import GatherCache
+from .infra.http import GatherHttpClient, runAsync
 from .marketConfig import getMarketConfig
 from .types import (
     FlowData,
@@ -380,7 +380,7 @@ class Gather:
         df = pl.DataFrame(raw)
         if "date" in df.columns and df["date"].dtype == pl.Utf8:
             df = df.with_columns(pl.col("date").str.to_date("%Y-%m-%d").alias("date"))
-        from .cache import TTL_HISTORY
+        from .infra.cache import TTL_HISTORY
 
         self._cache.put(cache_key, df, TTL_HISTORY)
         return df
@@ -454,7 +454,7 @@ class Gather:
         if cached is not None:
             return cached  # type: ignore[return-value]
         from .domains import DIVIDENDS_FALLBACK
-        from .resilience import circuitBreaker as _cb
+        from .infra.resilience import circuitBreaker as _cb
 
         for source in DIVIDENDS_FALLBACK:
             if _cb.isOpen(source):
@@ -504,7 +504,7 @@ class Gather:
         if cached is not None:
             return cached  # type: ignore[return-value]
         from .domains import DIVIDENDS_FALLBACK
-        from .resilience import circuitBreaker as _cb
+        from .infra.resilience import circuitBreaker as _cb
 
         for source in DIVIDENDS_FALLBACK:
             if _cb.isOpen(source):

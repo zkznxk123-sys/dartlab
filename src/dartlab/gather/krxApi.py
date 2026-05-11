@@ -459,7 +459,7 @@ def gatherKrx(
 
         longDf = loadFiltered(start=start, end=end, adjustment=adjMode)
     else:
-        from .http import runAsync
+        from .infra.http import runAsync
 
         longDf = runAsync(fetchKrxRange(start, end, market=mkt, apiKey=apiKey))
 

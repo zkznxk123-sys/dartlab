@@ -62,7 +62,7 @@ def _estimateWacc(company) -> float | None:
             # 시총: gather.price 경유 (beta 감쇠에 필요)
             marketCap = None
             try:
-                from dartlab.gather.http import runAsync
+                from dartlab.gather.infra.http import runAsync
                 from dartlab.gather.price import fetch
 
                 stockCode = getattr(company, "stockCode", "")

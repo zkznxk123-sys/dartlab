@@ -80,7 +80,7 @@ def test_webSearch_uses_cache(monkeypatch):
     monkeypatch.setattr(search, "_tavilyAvailable", lambda: True)
     monkeypatch.setattr(search, "_searchTavily", fakeTavily)
 
-    from dartlab.gather.resilience import circuitBreaker
+    from dartlab.gather.infra.resilience import circuitBreaker
 
     circuitBreaker.recordSuccess("tavily")
 
@@ -149,7 +149,7 @@ def test_readUrl_fallback_to_bs4(monkeypatch):
     monkeypatch.setattr(reader, "_readBs4", fakeBs4)
     reader._cache.clear()
     # circuit breaker 리셋
-    from dartlab.gather.resilience import circuitBreaker
+    from dartlab.gather.infra.resilience import circuitBreaker
 
     circuitBreaker.recordSuccess("jina")
     circuitBreaker.recordSuccess("bs4_reader")

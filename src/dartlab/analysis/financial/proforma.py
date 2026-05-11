@@ -544,7 +544,7 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
     try:
         import httpx
 
-        from dartlab.gather.http import runAsync
+        from dartlab.gather.infra.http import runAsync
 
         async def _calc():
             async with httpx.AsyncClient(timeout=15) as client:
