@@ -1,8 +1,38 @@
-"""정관에 관한 사항 파서."""
+"""정관에 관한 사항 파이프라인.
+
+P2 통합: 기존 articlesOfIncorporation/{parser,pipeline,types}.py 단일 모듈로 흡수.
+"""
+
+from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+import polars as pl
+
+from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.core.reportSelector import selectReport
+
+if TYPE_CHECKING:
+    import polars as pl
 
 
+# types
+@dataclass
+class ArticlesResult:
+    """정관에 관한 사항 분석 결과."""
+
+    corpName: str | None = None
+    nYears: int = 0
+    changes: list[dict] = field(default_factory=list)
+    purposes: list[dict] = field(default_factory=list)
+    noData: bool = False
+    changesDf: pl.DataFrame | None = None
+    purposesDf: pl.DataFrame | None = None
+
+
+# parser
 def splitCells(line: str) -> list[str]:
     """파이프 구분자로 셀 분리."""
     cells = [c.strip() for c in line.split("|")]
@@ -128,3 +158,53 @@ def parseBusinessPurpose(content: str) -> list[dict]:
         results.append(entry)
 
     return results
+
+
+# pipeline
+def articlesOfIncorporation(stockCode: str) -> ArticlesResult | None:
+    """정관에 관한 사항 분석."""
+    try:
+        df = loadData(stockCode)
+    except FileNotFoundError:
+        return None
+
+    corpName = extractCorpName(df)
+    years = sorted(df["year"].unique().to_list(), reverse=True)
+
+    for year in years[:2]:
+        report = selectReport(df, year, reportKind="annual")
+        if report is None:
+            continue
+
+        for row in report.iter_rows(named=True):
+            title = row.get("section_title", "") or ""
+            if "정관" in title:
+                content = row.get("section_content", "") or ""
+                if len(content) < 50:
+                    continue
+
+                changes = parseArticlesChanges(content)
+                purposes = parseBusinessPurpose(content)
+
+                if not changes and not purposes:
+                    if "없습니다" in content[:500] or "해당사항" in content[:500]:
+                        return ArticlesResult(corpName=corpName, nYears=1, noData=True)
+                    continue
+
+                changesDf = None
+                if changes:
+                    changesDf = pl.DataFrame(changes)
+
+                purposesDf = None
+                if purposes:
+                    purposesDf = pl.DataFrame(purposes)
+
+                return ArticlesResult(
+                    corpName=corpName,
+                    nYears=1,
+                    changes=changes,
+                    purposes=purposes,
+                    changesDf=changesDf,
+                    purposesDf=purposesDf,
+                )
+    return None
