@@ -34,7 +34,21 @@ _RCEPT_NO_PATTERN = re.compile(r"[?&]rcpNo=(\d{14})")
 
 
 def buildFilings(company: Company) -> pl.DataFrame | None:
-    """이 종목의 공시 문서 목록 + DART 뷰어 링크 (로컬 parquet)."""
+    """이 종목의 공시 문서 목록 + DART 뷰어 링크 (로컬 parquet).
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``year/rceptDate/rceptNo/reportType/dartUrl`` 컬럼 DataFrame.
+        docs 부재 시 빈 schema DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildFilings(c).head()
+    """
     if not company._hasDocs:
         return pl.DataFrame(
             schema={
@@ -68,7 +82,21 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
 
 
 def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dict[str, int]:
-    """누락된 최신 공시를 증분 수집."""
+    """누락된 최신 공시를 증분 수집.
+
+    Args:
+        company: Company 인스턴스.
+        categories: 수집 카테고리 (None 이면 전체).
+
+    Returns:
+        ``{category: count}`` 수집 통계 dict.
+
+    Raises:
+        없음 (OpenDART 호출 실패는 ``collectMissing`` 내부 처리).
+
+    Example:
+        >>> buildUpdate(c, categories=["docs"])
+    """
     from dartlab.providers.dart.openapi.freshness import collectMissing
 
     return collectMissing(company.stockCode, categories=categories)
@@ -87,7 +115,26 @@ def buildDisclosure(
     keyword: str | None = None,
     finalOnly: bool = False,
 ) -> pl.DataFrame:
-    """OpenDART 단일 종목 공시 목록."""
+    """OpenDART 단일 종목 공시 목록.
+
+    Args:
+        company: Company 인스턴스.
+        start: 시작일 (YYYYMMDD).
+        end: 종료일.
+        days: 기간 (start/end 미지정 시).
+        type: 공시 유형 코드 (A=정기, B=주요사항, ...).
+        keyword: 키워드 필터.
+        finalOnly: True 면 최종보고서만.
+
+    Returns:
+        공시 목록 DataFrame (빈 경우 빈 DataFrame).
+
+    Raises:
+        없음 (OpenDART 오류는 빈 DataFrame).
+
+    Example:
+        >>> buildDisclosure(c, days=90, type="A")
+    """
     from dartlab.providers.dart.openapi.dart import Dart
 
     d = Dart()
@@ -114,10 +161,29 @@ def buildLiveFilings(
     forms: list[str] | tuple[str, ...] | None = None,
     finalOnly: bool = False,
 ) -> pl.DataFrame:
-    """OpenDART 실시간 공시 정규화 (docId/filedAt/title/formType/...).
+    """OpenDART 실시간 공시 정규화 (``docId/filedAt/title/formType/...``).
 
-    forms 인자는 DART 에 forms 개념이 없어 무시. liveFilings public API 시그니처
+    ``forms`` 인자는 DART 에 forms 개념이 없어 무시 — liveFilings public API 시그니처
     호환 위해 유지.
+
+    Args:
+        company: Company 인스턴스.
+        start: 시작일.
+        end: 종료일.
+        days: 기간.
+        limit: 최대 행 수.
+        keyword: 키워드 필터.
+        forms: form 유형 리스트 (DART 무시).
+        finalOnly: 최종본만.
+
+    Returns:
+        정규화된 공시 DataFrame (BoundedCache 결과).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildLiveFilings(c, days=30, limit=10)
     """
     del forms
 
@@ -209,7 +275,26 @@ def buildReadFiling(
     maxChars: int | None = None,
     sections: bool = False,
 ) -> dict[str, Any]:
-    """접수번호 또는 liveFilings row 로 공시 원문 읽기."""
+    """접수번호 또는 ``liveFilings`` row 로 공시 원문 읽기.
+
+    ``filing`` 이 14 자리 숫자면 직접 rceptNo. dict/Series 면 ``rceptNo``/``docId``/
+    ``viewerUrl`` 키 추출. ``sections=True`` 면 ZIP 다운로드 + 섹션 파싱.
+
+    Args:
+        company: Company 인스턴스.
+        filing: 14 자리 rceptNo str / liveFilings row dict / DART viewer URL.
+        maxChars: 본문 최대 문자 (truncate).
+        sections: True 면 ZIP 섹션 분리, False 면 텍스트 본문.
+
+    Returns:
+        ``{docId, market, title, docUrl, viewerUrl, ...}`` dict.
+
+    Raises:
+        ValueError: rceptNo 추출 실패 시.
+
+    Example:
+        >>> buildReadFiling(c, "20240315000123")
+    """
     record = filingRecord(filing) or {}
 
     if isinstance(filing, str):

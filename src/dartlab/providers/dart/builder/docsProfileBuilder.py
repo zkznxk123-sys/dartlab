@@ -65,7 +65,20 @@ _STATIC_CHAPTER_MAP: dict[str, str] = {
 
 
 def profileTable(company: Company) -> pl.DataFrame | None:
-    """profileTable — TODO 한국어 동작 설명."""
+    """section profile artifact 로드 (캐시).
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``loadSectionProfileTable()`` 결과 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> profileTable(c)
+    """
     cacheKey = "_sectionProfileTable"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
@@ -77,7 +90,21 @@ def profileTable(company: Company) -> pl.DataFrame | None:
 
 
 def chapterMap(company: Company) -> dict[str, str]:
-    """chapterMap — TODO 한국어 동작 설명."""
+    """topic → chapter (II~XII) 매핑 — static + profile-derived 결합.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        ``{topic: chapter}`` dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chapterMap(c)["BS"]
+        'III'
+    """
     cacheKey = "_chapterMap"
     if cacheKey in company._cache:
         return company._cache[cacheKey]
@@ -104,7 +131,22 @@ def chapterMap(company: Company) -> dict[str, str]:
 
 
 def chapterForTopic(company: Company, topic: str) -> str:
-    """chapterForTopic — TODO 한국어 동작 설명."""
+    """topic → chapter — notes XI / unknown XII fallback.
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름.
+
+    Returns:
+        chapter str (II~XII).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chapterForTopic(c, "executive")
+        'VIII'
+    """
     cm = chapterMap(company)
     if topic in cm:
         return cm[topic]
@@ -117,7 +159,22 @@ def chapterForTopic(company: Company, topic: str) -> str:
 
 
 def topicLabel(company: Company, topic: str) -> str:
-    """topicLabel — TODO 한국어 동작 설명."""
+    """topic → 한글 라벨 — CIS/SCE 우선 + registry/``_TOPIC_LABELS``.
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름.
+
+    Returns:
+        한글 라벨 (미매핑 시 topic 그대로 반환).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> topicLabel(c, "CIS")
+        '포괄손익계산서'
+    """
     from dartlab.core.registry import getEntry as _getEntry
     from dartlab.providers.dart.company import _TOPIC_LABELS, _getAllProperties
 
@@ -137,7 +194,24 @@ def topicLabel(company: Company, topic: str) -> str:
 
 
 def buildSections(company: Company) -> pl.DataFrame | None:
-    """sections — docs + finance + report 통합 지도 (property 본체)."""
+    """sections — docs + finance + report 통합 지도 (``c.sections`` property 본체).
+
+    docs sections 행을 기본 골격으로, finance/report 행을 chapter/topic 정렬 위치에 삽입.
+    docs 에 없는 finance/report topic 은 해당 chapter 의 마지막에 orphan 삽입. 결과는
+    period 컬럼 내림차순 정렬.
+
+    Args:
+        company: Company 인스턴스.
+
+    Returns:
+        통합 sections DataFrame (BoundedCache) 또는 None (docs sections 부재).
+
+    Raises:
+        없음 (report merge 실패는 logger warning 후 계속 진행).
+
+    Example:
+        >>> sections = buildSections(c)
+    """
     from dartlab.providers.dart.company import _CHAPTER_TITLES, _topicForApiType
     from dartlab.providers.dart.docs.sections import reorderPeriodColumns
 

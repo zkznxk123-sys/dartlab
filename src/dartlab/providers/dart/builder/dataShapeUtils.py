@@ -20,7 +20,25 @@ from dartlab.providers.dart.checks import _isPeriodColumn
 
 
 def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
-    """재무제표 DataFrame 후처리: all-null 행 제거, CF 고유 정리, 중복행 병합."""
+    """재무제표 DataFrame 후처리 — all-null 행 제거, CF 고유 정리, 중복행 병합.
+
+    - CF 고유: ``"당기순이익"`` 제거 (standalone 차분 오류), 영문 항목 제거.
+    - 공통: 모든 기간이 null 인 행 제거.
+    - 공통: 같은 ``항목`` 중복행 병합 (mapper 의 한국어 → snakeId 1:N 충돌 해결).
+
+    Args:
+        df: 후처리 대상 DataFrame.
+        sjDiv: BS/IS/CF/CIS/SCE 중 하나.
+
+    Returns:
+        후처리된 DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> cleanFinanceDataFrame(df, "CF")
+    """
     periodCols = [c for c in df.columns if _isPeriodColumn(c)]
     if not periodCols:
         return df
@@ -45,14 +63,44 @@ def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
 
 
 def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-    """wide → long 변환. dartlab.core.show 의 transposeToVertical 위임."""
+    """wide → long 변환. ``dartlab.core.show.transposeToVertical`` 위임.
+
+    Args:
+        wide: 행=계정/열=period wide DataFrame.
+        periods: 변환 대상 period 컬럼 리스트.
+
+    Returns:
+        long DataFrame 또는 None (변환 실패).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> transposeToVertical(wide_df, ["2024Q4", "2024Q3"])
+    """
     from dartlab.core.show import transposeToVertical as _coreTransposeToVertical
 
     return _coreTransposeToVertical(wide, periods)
 
 
 def warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
-    """미등록 topic 경고 — 유사 topic 제안 + c.topics 안내."""
+    """미등록 topic 경고 — 유사 topic 제안 + ``c.topics`` 안내.
+
+    difflib 의 ``get_close_matches`` 로 상위 3 개 유사 topic 추출.
+
+    Args:
+        topic: 미등록 topic 이름.
+        sec: sections DataFrame (``topic`` 컬럼에서 후보 풀 추출).
+
+    Returns:
+        None (warning 만 발생).
+
+    Raises:
+        없음 (warnings.warn 호출만).
+
+    Example:
+        >>> warnUnknownTopic("majorShareholders", sections_df)  # majorHolder 제안
+    """
     import difflib
     import warnings
 
@@ -73,7 +121,23 @@ def warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
 
 
 def applyPeriodFilter(payload: Any, period: str | None) -> Any:
-    """period 컬럼 필터링 — exact / Q4 fallback / period 컬럼 매칭."""
+    """period 컬럼 필터링 — exact / Q4 fallback / period 컬럼 매칭.
+
+    매칭 우선순위: ``rawPeriod`` 정규화 → exact → ``"2024"`` → ``"2024Q4"`` 확장.
+
+    Args:
+        payload: DataFrame 또는 임의 payload (DataFrame 아니면 그대로 반환).
+        period: 필터 period (``"2024"`` / ``"2024Q4"`` / None).
+
+    Returns:
+        필터된 DataFrame 또는 원본 payload (period 미지정 시).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> applyPeriodFilter(df, "2024Q4")
+    """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
     from dartlab.providers.dart.docs.sections import rawPeriod

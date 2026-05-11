@@ -22,7 +22,21 @@ if TYPE_CHECKING:
 
 
 def buildDocsItemIndex(company: Company, topic: str) -> dict[str, list[tuple[int, pl.DataFrame]]]:
-    """topic 의 모든 테이블 블록을 수평화하고 항목명 역인덱스를 빌드."""
+    """topic 의 모든 테이블 블록을 수평화하고 항목명 역인덱스를 빌드.
+
+    Args:
+        company: ``Company`` 인스턴스 (캐시 사용).
+        topic: topic 이름 (예: ``"BS"``).
+
+    Returns:
+        ``{normalizedItemKey: [(blockOrder, horizontalDF), ...]}`` 역인덱스 dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> idx = buildDocsItemIndex(c, "BS")
+    """
     from dartlab.core.show import normalizeItemKey
 
     cacheKey = f"_docsItemIdx_{topic}"
@@ -90,7 +104,23 @@ def selectFromDocsTopic(
     indList: list[str],
     colList: list[str] | None,
 ) -> pl.DataFrame | None:
-    """역인덱스에서 indList 항목을 cascade 매칭으로 찾아 추출 (exact → contains → fuzzy)."""
+    """역인덱스에서 ``indList`` 항목을 cascade 매칭 (exact → contains → fuzzy).
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름.
+        indList: 검색 항목명 리스트.
+        colList: period 컬럼 필터 (None 이면 전체).
+
+    Returns:
+        매칭된 행 + 필터된 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> selectFromDocsTopic(c, "BS", ["총자산"], colList=["2024", "2023"])
+    """
     from dartlab.core.show import normalizeItemKey, selectFromShow
 
     idx = buildDocsItemIndex(company, topic)
@@ -155,10 +185,24 @@ def selectFromDocsTopicAll(
     indList: list[str] | None,
     colList: list[str] | None,
 ) -> pl.DataFrame | None:
-    """multi-block docs topic: indList/colList 조합 처리.
+    """multi-block docs topic: ``indList``/``colList`` 조합 처리.
 
-    indList 가 있으면 cascade 매칭, None 이면 전체 항목.
-    colList 는 기간 필터.
+    indList 가 있으면 cascade 매칭, None 이면 전체 항목. colList 는 기간 필터.
+
+    Args:
+        company: Company 인스턴스.
+        topic: topic 이름.
+        indList: 검색 항목명 리스트 (None 이면 전체).
+        colList: period 컬럼 필터 (None 이면 전체).
+
+    Returns:
+        통합 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> selectFromDocsTopicAll(c, "executive", indList=None, colList=["2024"])
     """
     from dartlab.core.show import selectFromShow
 
