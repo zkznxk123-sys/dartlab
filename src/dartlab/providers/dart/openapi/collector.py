@@ -400,13 +400,18 @@ def collectMultiple(
     return results
 
 
-def listUncollected(*, client: DartClient | None = None) -> list[tuple[str, str]]:
+def listUncollected(*, client: DartClient | None = None, limit: int | None = None) -> list[tuple[str, str]]:
     """아직 수집되지 않은 상장 종목 리스트.
 
-    Returns
-    -------
-    list
-        [(종목코드, 회사명), ...]
+    Args:
+        client: DartClient (재사용 시).
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Returns:
+        ``[(종목코드, 회사명), ...]`` 리스트.
+
+    Example:
+        >>> listUncollected(limit=50)
     """
     c = client or DartClient()
     codes = loadCorpCodes(c)
@@ -417,6 +422,8 @@ def listUncollected(*, client: DartClient | None = None) -> list[tuple[str, str]
     existing = {f.stem for f in dataDir.glob("*.parquet") if not f.name.startswith(".")}
 
     uncollected = listed.filter(~pl.col("stock_code").is_in(list(existing)))
+    if limit is not None:
+        uncollected = uncollected.head(limit)
     return list(
         zip(
             uncollected["stock_code"].to_list(),

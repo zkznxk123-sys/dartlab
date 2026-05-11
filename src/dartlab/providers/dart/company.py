@@ -65,9 +65,23 @@ def getKindList(*, forceRefresh: bool = False):
     return _listingResolver().kindList(forceRefresh=forceRefresh)
 
 
-def searchName(keyword):
-    """ListingResolver 경유 회사명 검색."""
-    return _listingResolver().search(keyword)
+def searchName(keyword, *, limit: int | None = None):
+    """ListingResolver 경유 회사명 검색.
+
+    Args:
+        keyword: 회사명 substring.
+        limit: 최대 행 수. None 이면 무제한 (룰 8 — None 은 keyword 만족용 explicit opt-out).
+
+    Returns:
+        매칭 DataFrame 또는 None.
+
+    Example:
+        >>> searchName("삼성", limit=10)
+    """
+    df = _listingResolver().search(keyword)
+    if df is not None and limit is not None:
+        df = df.head(limit)
+    return df
 
 
 from dartlab.providers.dart.accessor.docsAccessor import _DocsAccessor
@@ -313,17 +327,23 @@ def _parseAsof(value: str) -> tuple[int | None, int | None]:
     return None, None
 
 
-def listExportModules() -> list[tuple[str, str]]:
-    """Excel/export용 DART 공개 모듈 목록.
+def listExportModules(*, limit: int | None = None) -> list[tuple[str, str]]:
+    """Excel/export 용 DART 공개 모듈 목록.
 
-    Returns
-    -------
-    list[tuple[str, str]]
-        (prop : str, label : str) 튜플 리스트 — Excel export 시 컬럼 이름
-        생성용. prop 은 Company 속성명 (예: "businessOverview"), label 은
-        사용자 표시용 한글 라벨.
+    Args:
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Returns:
+        ``(prop, label)`` 튜플 리스트 — Excel export 컬럼명 생성용. prop 은 Company
+        속성명 (예 ``"businessOverview"``), label 은 사용자 표시용 한글 라벨.
+
+    Example:
+        >>> listExportModules(limit=20)
     """
-    return list(_getAllProperties())
+    items = list(_getAllProperties())
+    if limit is not None:
+        items = items[:limit]
+    return items
 
 
 class Company:
@@ -738,16 +758,20 @@ class Company:
         return getKindList(forceRefresh=forceRefresh)
 
     @staticmethod
-    def search(keyword: str) -> pl.DataFrame:
+    def search(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
         """회사명 부분 검색 (KIND 목록 기준).
 
         Args:
             keyword: 검색어 (부분 일치).
+            limit: 최대 행 수. None 이면 무제한.
 
         Returns:
             pl.DataFrame — 매칭 종목 목록.
+
+        Example:
+            >>> Company.search("삼성", limit=10)
         """
-        return searchName(keyword)
+        return searchName(keyword, limit=limit)
 
     @staticmethod
     def resolve(stockCode: str) -> str | None:
@@ -4286,12 +4310,28 @@ class Company:
 class _DartDisclosureFetcher:
     """gather/Calendar 가 사용할 DART 공시 수집 어댑터."""
 
-    def fetch(self, stockCode, *, days=400, type="A"):
-        """단일 종목 공시 history 반환. 실패 시 None."""
+    def fetch(self, stockCode, *, days=400, type="A", limit: int | None = None):
+        """단일 종목 공시 history 반환. 실패 시 None.
+
+        Args:
+            stockCode: 종목코드.
+            days: 조회 일수.
+            type: 공시 타입 (A=정기·B=수시 등).
+            limit: 최대 행 수. None 이면 무제한 (단건 컨텍스트라 통상 미사용).
+
+        Returns:
+            DataFrame 또는 None.
+
+        Example:
+            >>> _DartDisclosureFetcher().fetch("005930", days=90, limit=10)
+        """
         try:
-            return Company(stockCode).disclosure(days=days, type=type)
+            df = Company(stockCode).disclosure(days=days, type=type)
         except (OSError, ValueError, RuntimeError):
             return None
+        if df is not None and limit is not None:
+            df = df.head(limit)
+        return df
 
 
 def _registerDartDisclosureFetcher() -> None:

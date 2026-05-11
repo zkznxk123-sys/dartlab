@@ -62,10 +62,24 @@ class YearSections:
         """textChunks — TODO 한국어 동작 설명."""
         return [c for c in self.chunks if c.kind not in ("skipped", "table_only")]
 
-    def search(self, keyword: str) -> list[SectionChunk]:
-        """search — TODO 한국어 동작 설명."""
+    def search(self, keyword: str, *, limit: int | None = None) -> list[SectionChunk]:
+        """텍스트 chunk 에서 keyword 매칭 (path 또는 본문).
+
+        Args:
+            keyword: 검색어 (대소문자 무시).
+            limit: 최대 결과 수. None 이면 무제한.
+
+        Returns:
+            매칭된 SectionChunk 리스트.
+
+        Example:
+            >>> sections.search("매출", limit=5)
+        """
         kw = keyword.lower()
-        return [c for c in self.chunks if kw in c.path.lower() or kw in c.textContent.lower()]
+        hits = [c for c in self.chunks if kw in c.path.lower() or kw in c.textContent.lower()]
+        if limit is not None:
+            hits = hits[:limit]
+        return hits
 
     def toLinesDf(self) -> pl.DataFrame:
         """텍스트 청크를 줄 단위 DataFrame으로 변환."""
@@ -158,10 +172,24 @@ class SectionResult:
         """years — TODO 한국어 동작 설명."""
         return self.periods
 
-    def search(self, keyword: str) -> dict[str, dict[str, str]]:
-        """키워드로 topic 검색."""
+    def search(self, keyword: str, *, limit: int | None = None) -> dict[str, dict[str, str]]:
+        """키워드로 topic 검색.
+
+        Args:
+            keyword: 검색어 (대소문자 무시).
+            limit: 최대 topic 수. None 이면 무제한.
+
+        Returns:
+            ``{topic: {period: text, ...}, ...}`` dict.
+
+        Example:
+            >>> result.search("매출", limit=5)
+        """
         kw = keyword.lower()
-        return {t: series for t, series in self._topicMap.items() if kw in t.lower()}
+        hits = {t: series for t, series in self._topicMap.items() if kw in t.lower()}
+        if limit is not None:
+            hits = dict(list(hits.items())[:limit])
+        return hits
 
     def overview(self) -> pl.DataFrame:
         """전체 topic × period 크기 매트릭스."""

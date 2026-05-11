@@ -94,11 +94,20 @@ def listTags(
     cik: str,
     *,
     edgarDir: Path | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame | None:
-    """SEC companyfacts의 모든 us-gaap 태그 목록과 빈도.
+    """SEC companyfacts 의 모든 us-gaap 태그 목록과 빈도.
+
+    Args:
+        cik: SEC CIK.
+        edgarDir: edgar 데이터 디렉터리 override.
+        limit: 최대 행 수. None 이면 무제한.
 
     Returns:
-        DataFrame with columns: tag, snakeId, count, stmt
+        ``tag/snakeId/count/stmt`` 컬럼 DataFrame 또는 None.
+
+    Example:
+        >>> listTags("0000320193", limit=50)
     """
     if edgarDir is None:
         from dartlab.core.dataLoader import _dataDir
@@ -136,4 +145,6 @@ def listTags(
         pl.col("tag").replace_strict(tagToStmt, default=pl.lit("")).alias("stmt"),
     )
 
+    if limit is not None:
+        tagCounts = tagCounts.head(limit)
     return tagCounts

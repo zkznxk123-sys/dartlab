@@ -34,14 +34,19 @@ def _getDart():
         return None
 
 
-async def fetchInsiderTradingRaw(stockCode: str) -> list[dict]:
+async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) -> list[dict]:
     """임원/주요주주 주식 거래 내역 raw dict — DART elestock.json.
 
-    Returns
-    -------
-    list[dict]
-        각 거래의 표준화된 dict (date/name/position/tradeType/changeShares/afterShares/reason/source).
-        호출자 (gather/insider.py) 가 InsiderTrade dataclass 로 변환.
+    Args:
+        stockCode: 종목코드.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Returns:
+        각 거래의 표준화된 dict 리스트 (date/name/position/tradeType/changeShares/afterShares/reason/source).
+        호출자 (gather/insider.py) 가 ``InsiderTrade`` dataclass 로 변환.
+
+    Example:
+        >>> await fetchInsiderTradingRaw("005930", limit=20)
     """
     dart = _getDart()
     if dart is None:
@@ -64,19 +69,27 @@ async def fetchInsiderTradingRaw(stockCode: str) -> list[dict]:
                     "source": "dart",
                 }
             )
+        if limit is not None:
+            result = result[:limit]
         return result
     except (ValueError, OSError, KeyError, TypeError) as exc:
         log.warning("DART executiveShares 실패 (%s): %s", stockCode, exc)
         return []
 
 
-async def fetchMajorShareholdersRaw(stockCode: str) -> list[dict]:
+async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None) -> list[dict]:
     """5% 이상 대량보유 변동 raw dict — DART majorstock.json.
 
-    Returns
-    -------
-    list[dict]
-        holderName/shares/ratio/changeDate/changeType/source. 호출자가 MajorHolder dataclass 변환.
+    Args:
+        stockCode: 종목코드.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Returns:
+        holderName/shares/ratio/changeDate/changeType/source dict 리스트.
+        호출자가 ``MajorHolder`` dataclass 변환.
+
+    Example:
+        >>> await fetchMajorShareholdersRaw("005930", limit=10)
     """
     dart = _getDart()
     if dart is None:
@@ -97,6 +110,8 @@ async def fetchMajorShareholdersRaw(stockCode: str) -> list[dict]:
                     "source": "dart",
                 }
             )
+        if limit is not None:
+            result = result[:limit]
         return result
     except (ValueError, OSError, KeyError, TypeError) as exc:
         log.warning("DART majorShareholders 실패 (%s): %s", stockCode, exc)

@@ -102,8 +102,22 @@ def searchIssuers(
     client: EdgarClient | None = None,
     *,
     refresh: bool = False,
+    limit: int | None = None,
 ) -> pl.DataFrame:
-    """티커/CIK/회사명으로 SEC 등록 기업을 검색하여 DataFrame으로 반환."""
+    """티커/CIK/회사명으로 SEC 등록 기업을 검색하여 DataFrame 반환.
+
+    Args:
+        query: 검색어.
+        client: EdgarClient (재사용 시).
+        refresh: True 면 ticker 캐시 재다운로드.
+        limit: 최대 행 수. None 이면 무제한.
+
+    Returns:
+        매칭 DataFrame.
+
+    Example:
+        >>> searchIssuers("apple", limit=10)
+    """
     if not query or not str(query).strip():
         return pl.DataFrame(schema={"ticker": pl.Utf8, "cik": pl.Utf8, "title": pl.Utf8})
 
@@ -112,9 +126,13 @@ def searchIssuers(
     upper = text.upper()
 
     if text.isdigit():
-        return df.filter(pl.col("cik").str.contains(text))
+        result = df.filter(pl.col("cik").str.contains(text))
+    else:
+        result = df.filter(
+            pl.col("ticker").str.contains(upper, literal=True)
+            | pl.col("title").str.to_uppercase().str.contains(upper, literal=True)
+        ).sort(["ticker", "cik"])
 
-    return df.filter(
-        pl.col("ticker").str.contains(upper, literal=True)
-        | pl.col("title").str.to_uppercase().str.contains(upper, literal=True)
-    ).sort(["ticker", "cik"])
+    if limit is not None:
+        result = result.head(limit)
+    return result

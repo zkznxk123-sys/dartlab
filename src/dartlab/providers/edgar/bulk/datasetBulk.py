@@ -341,15 +341,29 @@ def convertQuarterlyToParquets(
     return outPaths
 
 
-def listLocalQuarters(*, kind: str = "sub") -> list[tuple[int, int]]:
-    """로컬 `data/edgar/meta/{kind}/` 에 있는 (year, quarter) 목록."""
+def listLocalQuarters(*, kind: str = "sub", limit: int | None = None) -> list[tuple[int, int]]:
+    """로컬 ``data/edgar/meta/{kind}/`` 에 있는 ``(year, quarter)`` 목록.
+
+    Args:
+        kind: SEC dataset 종류 (sub/num/pre/tag).
+        limit: 최대 항목 수. None 이면 무제한.
+
+    Returns:
+        ``(year, quarter)`` 정렬 리스트.
+
+    Example:
+        >>> listLocalQuarters(kind="sub", limit=8)
+    """
     d = _metaDir(kind)
     out: list[tuple[int, int]] = []
     for p in d.glob("*.parquet"):
         m = _QUARTER_PARQUET_RE.match(p.name)
         if m:
             out.append((int(m.group(1)), int(m.group(2))))
-    return sorted(out)
+    out = sorted(out)
+    if limit is not None:
+        out = out[:limit]
+    return out
 
 
 __all__ = [

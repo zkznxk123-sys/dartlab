@@ -149,20 +149,22 @@ def searchCompanies(
     client: DartClient,
     query: str,
     listedOnly: bool = False,
+    *,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """회사명 부분 매치 검색.
 
-    Parameters
-    ----------
-    query : str
-        검색어 (회사명 부분 매치).
-    listedOnly : bool
-        True면 상장사만 (stock_code가 빈 문자열이 아닌 것).
+    Args:
+        client: DartClient.
+        query: 검색어 (회사명 부분 매치).
+        listedOnly: True면 상장사만 (stock_code 비빈).
+        limit: 최대 행 수. None 이면 무제한.
 
-    Returns
-    -------
-    pl.DataFrame
-        매칭된 회사 목록.
+    Returns:
+        매칭된 회사 목록 DataFrame.
+
+    Example:
+        >>> searchCompanies(client, "삼성", listedOnly=True, limit=20)
     """
     df = loadCorpCodes(client)
     result = df.filter(pl.col("corp_name").str.contains(query, literal=True))
@@ -170,4 +172,6 @@ def searchCompanies(
     if listedOnly:
         result = result.filter(pl.col("stock_code").str.strip_chars() != "")
 
+    if limit is not None:
+        result = result.head(limit)
     return result

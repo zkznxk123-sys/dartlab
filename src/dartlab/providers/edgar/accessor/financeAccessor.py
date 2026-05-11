@@ -143,8 +143,18 @@ class _FinanceAccessor:
 
         return explore(self._company.cik, query)
 
-    def listTags(self) -> pl.DataFrame | None:
-        """보고된 모든 us-gaap 태그 목록."""
+    def listTags(self, *, limit: int | None = None) -> pl.DataFrame | None:
+        """보고된 모든 us-gaap 태그 목록.
+
+        Args:
+            limit: 최대 행 수. None 이면 무제한.
+
+        Returns:
+            태그 목록 DataFrame 또는 None.
+
+        Example:
+            >>> c.finance.listTags(limit=50)
+        """
         from dartlab.providers.edgar.finance.explore import listTags
 
-        return listTags(self._company.cik)
+        return listTags(self._company.cik, limit=limit)

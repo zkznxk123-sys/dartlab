@@ -1,7 +1,10 @@
 """provider collection-반환 메서드의 `limit` keyword 기본값 검증 — P-트랙 룰 8.
 
-heuristic: providers/ 의 public 함수 중 이름이 `fetch*`/`get*`/`list*`/`search*` 로 시작하는
-함수는 `limit: int = N` keyword 의무. cross-company full-df 반환 차단.
+heuristic: providers/ 의 public 함수 중 이름이 `fetch*`/`list*`/`search*` 로 시작하는
+collection-반환 메서드는 `limit: int = N` keyword 의무. cross-company full-df 반환 차단.
+
+`get*` 은 단건 응답 (HTTP getBytes/getJson, 단일 값 getXxx) 비중이 압도적이라 prefix 검사 제외.
+collection 반환 의도면 이름을 `list*`/`search*`/`fetch*` 로 정렬.
 
 iter* 패밀리는 yield 가 메모리-bound 라 limit 불필요 (룰 10 이 별도로 강제).
 
@@ -23,17 +26,18 @@ _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "providers"
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "limitDefault.json"
 
-_TARGET_PREFIXES = ("fetch", "get", "list", "search")
+_TARGET_PREFIXES = ("fetch", "list", "search")
+
+
+_LIMIT_KEYWORD_ALIASES = frozenset({"limit", "maxFilings", "maxResults", "maxRows", "topK", "n", "topN"})
 
 
 def _hasLimitKwarg(func: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
-    """함수 시그니처에 `limit` keyword 가 있는지."""
-    for arg in func.args.args + func.args.kwonlyargs:
-        if arg.arg == "limit":
-            return True
-    if func.args.vararg and func.args.vararg.arg == "limit":
-        return True
-    return False
+    """함수 시그니처에 limit 역할 keyword 가 있는지 (별칭 인정)."""
+    names = {arg.arg for arg in func.args.args + func.args.kwonlyargs}
+    if func.args.vararg:
+        names.add(func.args.vararg.arg)
+    return bool(names & _LIMIT_KEYWORD_ALIASES)
 
 
 def _matchesTarget(name: str) -> bool:

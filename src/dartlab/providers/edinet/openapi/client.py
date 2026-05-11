@@ -121,15 +121,20 @@ class EdinetClient:
         period: str,
         *,
         docType: str | None = None,
+        limit: int | None = None,
     ) -> list[dict[str, Any]]:
         """특정 날짜의 제출 서류 목록 조회.
 
         Args:
             period: 조회일 (YYYY-MM-DD).
-            docType: 서류 유형 필터 (예: "120" = 유가증권보고서).
+            docType: 서류 유형 필터 (예: ``"120"`` = 유가증권보고서).
+            limit: 최대 항목 수. None 이면 무제한.
 
         Returns:
-            서류 dict 리스트. 각 dict에 docID, filerName, edinetCode 등 포함.
+            서류 dict 리스트. 각 dict 에 docID, filerName, edinetCode 등 포함.
+
+        Example:
+            >>> client.listDocuments("2026-05-01", docType="120", limit=50)
         """
         params: dict[str, Any] = {
             "period": period,
@@ -141,6 +146,8 @@ class EdinetClient:
         results: list[dict[str, Any]] = data.get("results", [])
         if docType:
             results = [d for d in results if d.get("docTypeCode") == docType]
+        if limit is not None:
+            results = results[:limit]
         return results
 
     # ── 서류 다운로드 ──
@@ -176,12 +183,21 @@ class EdinetClient:
 
     # ── EDINET 코드 목록 ──
 
-    def listEdinetCodes(self) -> list[dict[str, Any]]:
+    def listEdinetCodes(self, *, limit: int | None = None) -> list[dict[str, Any]]:
         """EDINET 코드 목록 (기업 마스터) 다운로드.
+
+        Args:
+            limit: 최대 항목 수. None 이면 무제한.
 
         Returns:
             기업 dict 리스트 (edinetCode, filerName, securitiesCode 등).
+
+        Example:
+            >>> client.listEdinetCodes(limit=100)
         """
         resp = self._get(f"{BASE_URL}/edinetcode.json")
         data = resp.json()
-        return data.get("results", [])
+        results: list[dict[str, Any]] = data.get("results", [])
+        if limit is not None:
+            results = results[:limit]
+        return results

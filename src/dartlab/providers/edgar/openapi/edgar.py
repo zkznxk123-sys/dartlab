@@ -40,9 +40,20 @@ class OpenEdgar:
     ):
         self._client = EdgarClient(userAgent=userAgent, email=email)
 
-    def search(self, query: str) -> pl.DataFrame:
-        """티커 또는 회사명으로 SEC 등록 기업을 검색."""
-        return searchIssuers(query, self._client)
+    def search(self, query: str, *, limit: int | None = None) -> pl.DataFrame:
+        """티커 또는 회사명으로 SEC 등록 기업을 검색.
+
+        Args:
+            query: 검색어 (ticker 또는 회사명).
+            limit: 최대 행 수. None 이면 무제한.
+
+        Returns:
+            매칭 DataFrame.
+
+        Example:
+            >>> Edgar().search("apple", limit=10)
+        """
+        return searchIssuers(query, self._client, limit=limit)
 
     def company(self, tickerOrCik: str) -> dict[str, Any]:
         """티커 또는 CIK로 기업 identity 정보를 조회."""

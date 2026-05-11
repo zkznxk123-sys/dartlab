@@ -337,15 +337,23 @@ class Dart:
         self,
         query: str,
         listed: bool = False,
+        *,
+        limit: int | None = None,
     ) -> pl.DataFrame:
         """회사명 검색.
 
-        Examples
-        --------
-        >>> d.search("삼성")
-        >>> d.search("카카오", listed=True)
+        Args:
+            query: 검색어.
+            listed: True면 상장사만.
+            limit: 최대 행 수. None 이면 무제한.
+
+        Returns:
+            매칭 DataFrame.
+
+        Example:
+            >>> d.search("삼성", limit=10)
         """
-        return searchCompanies(self._client, query, listedOnly=listed)
+        return searchCompanies(self._client, query, listedOnly=listed, limit=limit)
 
     # ── corp_code ──────────────────────────────────────────
 

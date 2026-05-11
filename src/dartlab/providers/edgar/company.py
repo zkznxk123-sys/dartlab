@@ -828,8 +828,19 @@ class Company:
         )
 
     @staticmethod
-    def search(keyword: str) -> pl.DataFrame:
-        """ticker / 회사명 검색. 대소무시 부분 매칭."""
+    def search(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
+        """ticker / 회사명 검색. 대소무시 부분 매칭.
+
+        Args:
+            keyword: ticker 또는 회사명 부분.
+            limit: 최대 행 수. None 이면 무제한.
+
+        Returns:
+            종목코드/회사명/시장구분/cik 컬럼 DataFrame.
+
+        Example:
+            >>> Company.search("apple", limit=10)
+        """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
         kw = keyword.strip()
@@ -855,7 +866,7 @@ class Company:
         if hit.height == 0:
             # 회사명 매칭 (대소무시)
             hit = universe.filter(pl.col("title").str.to_lowercase().str.contains(kw.lower(), literal=True))
-        return hit.select(
+        result = hit.select(
             [
                 pl.col("ticker").alias("종목코드"),
                 pl.col("title").alias("회사명"),
@@ -863,6 +874,9 @@ class Company:
                 pl.col("cik"),
             ]
         )
+        if limit is not None:
+            result = result.head(limit)
+        return result
 
     def view(self, *, port: int = 8400) -> None:
         """브라우저에서 공시 뷰어를 열어 sections/index를 시각화.

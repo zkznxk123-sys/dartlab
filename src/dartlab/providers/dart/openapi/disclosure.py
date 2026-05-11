@@ -60,6 +60,7 @@ def listFilings(
     sort: Literal["date", "crp", "rpt"] = "date",
     ascending: bool = False,
     fetchAll: bool = True,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """공시 목록 조회.
 
@@ -121,8 +122,12 @@ def listFilings(
     params["sort_mth"] = "asc" if ascending else "desc"
 
     if fetchAll:
-        return client.getDfAll("list.json", params)
-    return client.getDf("list.json", params)
+        df = client.getDfAll("list.json", params)
+    else:
+        df = client.getDf("list.json", params)
+    if df is not None and limit is not None:
+        df = df.head(limit)
+    return df
 
 
 def companyInfo(
