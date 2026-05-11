@@ -748,7 +748,7 @@ class Company:
             Freshness:
                 local cache 기반. c.update() 호출 시점이 기준.
         """
-        from dartlab.providers.dart._filings import buildFilings
+        from dartlab.providers.dart.filingsCatalog import buildFilings
 
         return buildFilings(self)
 
@@ -790,7 +790,7 @@ class Company:
             Freshness:
                 호출 시점에 DART API 와 비교해 누락만 수집. 매 호출 시점 = 최신 기준.
         """
-        from dartlab.providers.dart._filings import buildUpdate
+        from dartlab.providers.dart.filingsCatalog import buildUpdate
 
         return buildUpdate(self, categories=categories)
 
@@ -877,7 +877,7 @@ class Company:
             Freshness:
                 DART API 실시간 (분 단위). filings() 와 다름 (filings 는 local cache).
         """
-        from dartlab.providers.dart._filings import buildDisclosure
+        from dartlab.providers.dart.filingsCatalog import buildDisclosure
 
         return buildDisclosure(self, start, end, days=days, type=type, keyword=keyword, finalOnly=finalOnly)
 
@@ -949,7 +949,7 @@ class Company:
             TargetMarkets:
                 - KR
         """
-        from dartlab.providers.dart._filings import buildLiveFilings
+        from dartlab.providers.dart.filingsCatalog import buildLiveFilings
 
         return buildLiveFilings(
             self,
@@ -1017,7 +1017,7 @@ class Company:
             Freshness:
                 DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download.
         """
-        from dartlab.providers.dart._filings import buildReadFiling
+        from dartlab.providers.dart.filingsCatalog import buildReadFiling
 
         return buildReadFiling(self, filing, maxChars=maxChars, sections=sections)
 
@@ -1322,39 +1322,39 @@ class Company:
         return payload if isinstance(payload, pl.DataFrame) else None
 
     def _sceMatrix(self):
-        from dartlab.providers.dart._financeBuilders import sceMatrix
+        from dartlab.providers.dart.financeStatementBuilder import sceMatrix
 
         return sceMatrix(self)
 
     def _sceSeriesAnnual(self):
-        from dartlab.providers.dart._financeBuilders import sceSeriesAnnual
+        from dartlab.providers.dart.financeStatementBuilder import sceSeriesAnnual
 
         return sceSeriesAnnual(self)
 
     def _sce(self) -> pl.DataFrame | None:
-        from dartlab.providers.dart._financeBuilders import sce
+        from dartlab.providers.dart.financeStatementBuilder import sce
 
         return sce(self)
 
     def _financeCisAnnual(self):
-        from dartlab.providers.dart._financeBuilders import financeCisAnnual
+        from dartlab.providers.dart.financeStatementBuilder import financeCisAnnual
 
         return financeCisAnnual(self)
 
     def _financeCisQuarterly(self):
-        from dartlab.providers.dart._financeBuilders import financeCisQuarterly
+        from dartlab.providers.dart.financeStatementBuilder import financeCisQuarterly
 
         return financeCisQuarterly(self)
 
     def _ratioSeries(self):
-        from dartlab.providers.dart._financeBuilders import ratioSeries
+        from dartlab.providers.dart.financeStatementBuilder import ratioSeries
 
         return ratioSeries(self)
 
     def _financeOrDocsStatement(
         self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
     ) -> pl.DataFrame | None:
-        from dartlab.providers.dart._financeBuilders import financeOrDocsStatement
+        from dartlab.providers.dart.financeStatementBuilder import financeOrDocsStatement
 
         return financeOrDocsStatement(self, sjDiv, freq=freq, scope=scope)
 
@@ -1363,12 +1363,12 @@ class Company:
 
     @staticmethod
     def _aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
-        from dartlab.providers.dart._financeBuilders import aggregateCisAnnual
+        from dartlab.providers.dart.financeStatementBuilder import aggregateCisAnnual
 
         return aggregateCisAnnual(qDf)
 
     def _financeStmt(self, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated") -> pl.DataFrame | None:
-        from dartlab.providers.dart._financeBuilders import financeStmt
+        from dartlab.providers.dart.financeStatementBuilder import financeStmt
 
         return financeStmt(self, sjDiv, freq=freq, scope=scope)
 
@@ -3181,7 +3181,7 @@ class Company:
         사용자는 ``c.show("ratios")`` 호출. show() 가 finance topic dispatch 에서
         이 빌더를 호출.
         """
-        from dartlab.providers.dart._financeBuilders import buildRatios
+        from dartlab.providers.dart.financeStatementBuilder import buildRatios
 
         return buildRatios(self)
 
@@ -3201,7 +3201,7 @@ class Company:
         Returns:
             ``(series, periods)`` 또는 None.
         """
-        from dartlab.providers.dart._financeBuilders import buildFinanceSeries
+        from dartlab.providers.dart.financeStatementBuilder import buildFinanceSeries
 
         return buildFinanceSeries(self, freq=freq, scope=scope)
 
@@ -3493,7 +3493,7 @@ class Company:
     # ── network (관계 지도) ──────────────────────────────────
 
     # ── scan-related 5 진입점 (network/governance/workforce/capital/debt) ──
-    # 구현은 dartlab.providers.dart._scanRelated 모듈에 위임. facade 는
+    # 구현은 dartlab.providers.dart.scanAggregator 모듈에 위임. facade 는
     # docstring + thin delegate 만 유지.
 
     def network(self, view: str | None = None, *, hops: int = 1):
@@ -3553,7 +3553,7 @@ class Company:
             Freshness:
                 대량보유/임원 공시 기준.
         """
-        from dartlab.providers.dart._scanRelated import buildScanNetwork
+        from dartlab.providers.dart.scanAggregator import buildScanNetwork
 
         return buildScanNetwork(self, view, hops=hops)
 
@@ -3619,7 +3619,7 @@ class Company:
             TargetMarkets:
                 - KR (DART)
         """
-        from dartlab.providers.dart._scanRelated import buildScanGovernance
+        from dartlab.providers.dart.scanAggregator import buildScanGovernance
 
         return buildScanGovernance(self, view)
 
@@ -3674,7 +3674,7 @@ class Company:
             TargetMarkets:
                 - KR
         """
-        from dartlab.providers.dart._scanRelated import buildScanWorkforce
+        from dartlab.providers.dart.scanAggregator import buildScanWorkforce
 
         return buildScanWorkforce(self, view)
 
@@ -3741,7 +3741,7 @@ class Company:
             TargetMarkets:
                 - KR
         """
-        from dartlab.providers.dart._scanRelated import buildScanCapital
+        from dartlab.providers.dart.scanAggregator import buildScanCapital
 
         return buildScanCapital(self, view)
 
@@ -3806,7 +3806,7 @@ class Company:
             TargetMarkets:
                 - KR
         """
-        from dartlab.providers.dart._scanRelated import buildScanDebt
+        from dartlab.providers.dart.scanAggregator import buildScanDebt
 
         return buildScanDebt(self, view)
 
