@@ -511,7 +511,7 @@ class Company:
         """
         return self
 
-    def __exit__(self, excType: object, excVal: object, excTb: object) -> None:
+    def __exit__(self, _excType: object, _excVal: object, _excTb: object) -> None:
         """context manager 종료 — BoundedCache evict + RSS 회수.
 
         룰 11 만족. Polars 네이티브 힙 누수 차단.

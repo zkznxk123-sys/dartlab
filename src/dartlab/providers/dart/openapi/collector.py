@@ -51,9 +51,6 @@ from dartlab.providers.dart.parse.viewerPageExtractor import (  # noqa: E402
     DART_MAIN_BASE as _DART_MAIN_BASE,
 )
 from dartlab.providers.dart.parse.viewerPageExtractor import (
-    DART_VIEWER_BASE as _DART_VIEWER_BASE,
-)
-from dartlab.providers.dart.parse.viewerPageExtractor import (
     htmlToText as _htmlToText,
 )
 from dartlab.providers.dart.parse.viewerPageExtractor import (

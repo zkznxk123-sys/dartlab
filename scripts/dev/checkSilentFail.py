@@ -36,17 +36,19 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # 사용자 설정/인증 파일 (옵셔널)
         "ai/settings/secrets.py",
         "ai/settings/profile.py",
-        "ai/persistence/knowledge_db.py",
-        "ai/providers/support/codex_cli.py",
+        "ai/providers/support/codexCli.py",
         "ai/tools/__init__.py",
+        "ai/tools/listEngineGaps.py",
         "channel/devtunnel.py",
         "server/api/ai.py",
         # 런타임 데이터 캐시 (HF/API 응답 파일) — 없으면 빈 결과가 정상
         "gather/domains/naver.py",
-        "gather/domains/yahoo_chart.py",
+        "gather/domains/yahooChart.py",
         "providers/dart/openapi/allFilingsCollector.py",
         "providers/dart/openapi/batch.py",
         "providers/dart/openapi/dartKey.py",
+        "providers/dart/accessor/financeDocAccessor.py",
+        "providers/dart/ops/insiderTrades.py",
         "providers/edgar/openapi/batch.py",
         "providers/edgar/docs/notesParsers.py",
         "providers/edgar/report/employee.py",
@@ -54,34 +56,28 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # gather 도메인 — 외부 API 응답 (네트워크 실패 시 빈 결과가 정상)
         "gather/domains/dartApi.py",
         "gather/domains/fdr.py",
-        "gather/insider.py",
-        "gather/news.py",
+        "gather/sources/insider.py",
+        "gather/sources/news.py",
+        "core/providers/secrets.py",
         # credit runtime history/audit — 사용자 생성 데이터
-        "credit/audit.py",
-        "credit/history.py",
+        "credit/monitoring/audit.py",
+        "credit/monitoring/history.py",
         # scan builder — 프리빌드 runtime 상태 (데이터 없으면 스킵)
-        "scan/builder.py",
-        "scan/edgarBuilder.py",
+        "scan/builder/core.py",
+        "scan/edgar/builder.py",
         # AI 런타임 상태 저장 (없으면 첫 실행)
-        "ai/persistence/blog_insights.py",
-        "ai/context/playbook.py",
-        "ai/persistence/store.py",
-        "ai/reference.py",
-        # AI outcome memory — user-generated decision logs (~/.dartlab/decisions/{market}/)
-        # 디렉토리/파일 부재 = "아직 결정 기록 없음" semantic, FileNotFoundError 부적절.
-        "ai/memory/outcome_resolver.py",
-        "ai/memory/outcome_log.py",
-        "ai/memory/outcome_stats.py",
         "ai/__init__.py",
         "skills/registry.py",
+        # AI outcome memory — user-generated decision logs (~/.dartlab/decisions/{market}/)
+        # 디렉토리/파일 부재 = "아직 결정 기록 없음" semantic, FileNotFoundError 부적절.
+        "ai/memory/outcomeResolver.py",
+        "ai/memory/outcomeLog.py",
+        "ai/memory/outcomeStats.py",
         # analysis/forecast/core 런타임 캐시 (HF seed/backtest output)
         "analysis/forecast/forwardTest.py",
-        "core/finance/bottomUpBeta.py",
-        # core mappers 런타임 data (scanner 출력)
         "core/mappers/scanner.py",
         # AI provider 옵셔널 (Ollama 등 로컬 LLM)
         "ai/providers/ollama.py",
-        "ai/providers/support/codex_cli.py",
         # analysis runtime 결과 (이전 스토리 캐시)
         "analysis/financial/storyValidation.py",
         # industry build pipeline — 단계별 중간 산출물 (없으면 이전 단계 재실행)
@@ -93,7 +89,7 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # artifacts.loadProjectionRules — 알려진 chapter 만 loud-fail, 미등록은 빈 dict (의도적)
         "providers/dart/docs/sections/artifacts.py",
         # quant bottom-up beta peer 추출 — scan finance parquet 없으면 섹터 기본 beta fallback
-        "quant/bottomUpBeta.py",
+        "quant/risk/bottomUpBeta.py",
     }
 )
 

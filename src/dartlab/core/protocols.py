@@ -93,15 +93,15 @@ class CompanyProtocol(Protocol):
         """
         ...
 
-    def __exit__(self, excType: Any, excVal: Any, excTb: Any) -> None:
+    def __exit__(self, _excType: Any, _excVal: Any, _excTb: Any) -> None:
         """context manager 종료 — BoundedCache evict + RSS 회수.
 
         룰 11 만족. Polars 네이티브 힙 누수 차단.
 
         Args:
-            excType: 예외 type (정상 종료 시 None).
-            excVal: 예외 인스턴스.
-            excTb: traceback.
+            _excType: 예외 type (정상 종료 시 None) — 미사용.
+            _excVal: 예외 인스턴스 — 미사용.
+            _excTb: traceback — 미사용.
 
         Raises:
             없음 (cleanup 실패 시 silent — 정상 종료 우선).
