@@ -443,7 +443,8 @@ def loadData(
             available = [c for c in columns if c in schemaNames]
             if available:
                 lf = lf.select(available)
-        df = lf.collect()
+        # M2: streaming engine 명시 — filter + select 만 있는 단순 chain 은 호환 + O(batch) 메모리
+        df = lf.collect(engine="streaming")
     else:
         df = pl.read_parquet(str(path))
     result = _normalizeLoadedFrame(df, category)
