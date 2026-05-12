@@ -105,7 +105,7 @@ def _buildUniverseMetrics(market: str, year: str) -> dict[str, dict[str, float]]
     if lf is None:
         return {}
 
-    snap = extractAnnualConsolidated(lf.collect())
+    snap = extractAnnualConsolidated(lf.collect(engine="streaming"))
     if snap.is_empty():
         return {}
 
@@ -264,7 +264,7 @@ def buildFactors(market: str = "KR") -> dict | None:
     lf = loadScanParquet("finance", market)
     if lf is None:
         return None
-    snap = extractAnnualConsolidated(lf.collect())
+    snap = extractAnnualConsolidated(lf.collect(engine="streaming"))
     year = _latestYear(snap)
     if year is None:
         return None

@@ -192,7 +192,7 @@ def loadChangesForStock(stockCode: str):
     lf = pl.scan_parquet(path)
     for col in STOCK_CODE_COLUMNS:
         try:
-            return lf.filter(pl.col(col) == stockCode).collect()
+            return lf.filter(pl.col(col) == stockCode).collect(engine="streaming")
         except pl.exceptions.ColumnNotFoundError:
             continue
     return None
@@ -228,14 +228,14 @@ def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", r
             return None, None
 
         # 이 종목의 값
-        row = lf.filter(pl.col(actual_stock_col) == stockCode).select(col).collect()
+        row = lf.filter(pl.col(actual_stock_col) == stockCode).select(col).collect(engine="streaming")
         if len(row) == 0 or row.item() is None:
             return None, None
 
         val = float(row.item())
 
         # 전체 분포에서 백분위
-        all_vals = lf.select(col).drop_nulls().collect().to_series()
+        all_vals = lf.select(col).drop_nulls().collect(engine="streaming").to_series()
         if len(all_vals) == 0:
             return val, None
 
@@ -294,7 +294,7 @@ def loadAllfilingsForStock(stockCode: str, *, lookbackDays: int | None = None):
             matched_col = next((c for c in candidate_cols if c in schema), None)
             if matched_col is None:
                 continue
-            filtered = lf.filter(pl.col(matched_col) == stockCode).collect()
+            filtered = lf.filter(pl.col(matched_col) == stockCode).collect(engine="streaming")
             if len(filtered) > 0:
                 frames.append(filtered)
         except (OSError, pl.exceptions.ComputeError):

@@ -76,7 +76,7 @@ def _buildUniverse(market: str, year: str) -> dict[str, list[float]]:
     lf = loadScanParquet("finance", market)
     if lf is None:
         return {}
-    annual = extractAnnualConsolidated(lf.collect())
+    annual = extractAnnualConsolidated(lf.collect(engine="streaming"))
     edgar = isEdgarSchema(annual)
     yearCol = "fy" if edgar else "bsns_year"
     year_val = int(year) if edgar else year
@@ -169,7 +169,7 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         return {**result, "error": "finance.parquet 없음"}
 
     try:
-        snap = extractAnnualConsolidated(lf.collect())
+        snap = extractAnnualConsolidated(lf.collect(engine="streaming"))
     except (pl.exceptions.ColumnNotFoundError, pl.exceptions.ComputeError) as e:
         return {**result, "error": str(e)}
     if snap.is_empty():

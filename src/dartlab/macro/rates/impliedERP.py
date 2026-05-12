@@ -198,7 +198,7 @@ def _aggregateFinanceSnapshot() -> dict[str, Any] | None:
             lf.select(cols)
             .filter(pl.col("fs_nm").str.contains("연결"))
             .filter(pl.col("reprt_nm").str.contains("4분기"))
-            .collect()
+            .collect(engine="streaming")
         )
         if snap.is_empty():
             return None

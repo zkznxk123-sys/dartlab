@@ -24,7 +24,7 @@ def _filterStock(lf, stockCode: str):
     for col in ("stockCode", "종목코드", "corp_code"):
         if col in schema:
             try:
-                df = lf.filter(pl.col(col) == stockCode).collect()
+                df = lf.filter(pl.col(col) == stockCode).collect(engine="streaming")
                 if not df.is_empty():
                     return df
             except pl.exceptions.ComputeError:

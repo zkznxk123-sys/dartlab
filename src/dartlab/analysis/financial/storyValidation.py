@@ -181,7 +181,7 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
             lf.select(cols)
             .filter(pl.col("fs_nm").str.contains("연결"))
             .filter(pl.col("reprt_nm").str.contains("4분기"))
-            .collect()
+            .collect(engine="streaming")
         )
     except (pl.exceptions.PolarsError, OSError):
         return []
@@ -323,7 +323,7 @@ def calcPlausibilityBand(
                 lf.select(cols)
                 .filter(pl.col("fs_nm").str.contains("연결"))
                 .filter(pl.col("reprt_nm").str.contains("4분기"))
-                .collect()
+                .collect(engine="streaming")
             )
             if not snap.is_empty():
                 years = sorted(snap["bsns_year"].unique().to_list(), reverse=True)

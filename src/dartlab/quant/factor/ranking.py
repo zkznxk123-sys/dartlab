@@ -141,7 +141,7 @@ def _parse(val) -> float | None:
 def _loadAccount(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str, float]:
     """특정 계정의 전종목 금액 추출 — scanBridge 경유 DART/EDGAR 통일."""
     try:
-        full = lf.collect()
+        full = lf.collect(engine="streaming")
     except (KeyError, ValueError, TypeError, AttributeError):
         return {}
     annual = extractAnnualConsolidated(full)
@@ -196,7 +196,7 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     edgar = isEdgarSchema(lf)
     yearCol = "fy" if edgar else "bsns_year"
     try:
-        years = lf.select(yearCol).unique().collect().to_series().sort(descending=True).to_list()
+        years = lf.select(yearCol).unique().collect(engine="streaming").to_series().sort(descending=True).to_list()
         years = [str(y) for y in years]
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}

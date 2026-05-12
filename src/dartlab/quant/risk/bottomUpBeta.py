@@ -168,7 +168,7 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
             lf.select(cols)
             .filter(pl.col("fs_nm").str.contains("연결"))
             .filter(pl.col("reprt_nm").str.contains("4분기"))
-            .collect()
+            .collect(engine="streaming")
         )
     except (pl.exceptions.PolarsError, OSError):
         return []

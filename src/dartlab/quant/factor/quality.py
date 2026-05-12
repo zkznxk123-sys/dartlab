@@ -93,7 +93,7 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
 
     # 전체 universe 스냅샷 (연간 연결재무) — 횡단면 z 계산용
     try:
-        snap = extractAnnualConsolidated(lf.collect())
+        snap = extractAnnualConsolidated(lf.collect(engine="streaming"))
     except (pl.exceptions.ColumnNotFoundError, pl.exceptions.ComputeError) as e:
         return {**result, "error": str(e)}
     if snap.is_empty():

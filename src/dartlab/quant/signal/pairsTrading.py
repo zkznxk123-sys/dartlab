@@ -157,7 +157,7 @@ def _getTopStocks(market: str, n: int = 5) -> list[str]:
         return []
 
     try:
-        full = lf.collect()
+        full = lf.collect(engine="streaming")
     except (KeyError, ValueError, TypeError, AttributeError):
         return []
 

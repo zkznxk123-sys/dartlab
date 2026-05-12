@@ -188,7 +188,7 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
         return {**result, "error": "finance.parquet 없음"}
 
     try:
-        full = lf.collect()
+        full = lf.collect(engine="streaming")
         df = extractAnnualConsolidated(full)
         if df.is_empty():
             df = full
@@ -296,7 +296,7 @@ def _screenDividend(result: dict, market: str, stockCode: str | None) -> dict:
     if lf is None:
         return {**result, "error": "dividend.parquet 없음"}
     try:
-        df = lf.collect()
+        df = lf.collect(engine="streaming")
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
 

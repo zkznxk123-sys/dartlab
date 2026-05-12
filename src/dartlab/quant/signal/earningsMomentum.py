@@ -59,7 +59,7 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     if lf is None:
         return {**result, "error": "finance.parquet 없음"}
     try:
-        full = lf.filter(pl.col("stockCode") == stockCode).collect()
+        full = lf.filter(pl.col("stockCode") == stockCode).collect(engine="streaming")
     except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {**result, "error": str(e)}
     if full.is_empty():

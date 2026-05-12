@@ -889,7 +889,7 @@ def calcFactorIC(
         lf = loadScanParquet("finance", market)
         if lf is None:
             return None
-        snap = extractAnnualConsolidated(lf.collect())
+        snap = extractAnnualConsolidated(lf.collect(engine="streaming"))
         year = _latestYear(snap)
         if year is None:
             return None
