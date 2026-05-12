@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from dartlab.reference.mappers.engine import BaseMapper, MapperStats
+from dartlab.core.mapperEngine import BaseMapper, MapperStats
 
 _STRUCTURE_PATH = Path(__file__).resolve().parents[1] / "data" / "notesStructure.json"
 

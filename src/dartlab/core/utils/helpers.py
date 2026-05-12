@@ -46,11 +46,12 @@ def parseNumStr(s: str | None) -> float | None:
 # ══════════════════════════════════════
 
 
+_PERIOD_COLUMN_RE = re.compile(r"^\d{4}(Q[1-4])?$")
+
+
 def periodCols(df: pl.DataFrame) -> list[str]:
     """DataFrame에서 기간 컬럼만 추출 (최신 먼저)."""
-    from dartlab.providers.show import isPeriodColumn
-
-    return [c for c in df.columns if isPeriodColumn(c)]
+    return [c for c in df.columns if _PERIOD_COLUMN_RE.fullmatch(c)]
 
 
 def annualCols(df: pl.DataFrame, maxYears: int = 8) -> list[str]:

@@ -17,7 +17,7 @@ import logging
 
 import polars as pl
 
-from dartlab.frame.market import resolveMarket
+from dartlab.core.market import resolveMarket
 from dartlab.quant.screen.dataAccess import extractAccount, loadScanParquet
 from dartlab.synth.scanBridge import extractAnnualConsolidated, isEdgarSchema
 

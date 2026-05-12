@@ -12,7 +12,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from dartlab.reference.mappers.engine import BaseMapper, MapperStats
+from dartlab.core.mapperEngine import BaseMapper, MapperStats
 
 _DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "parserMappings"
 

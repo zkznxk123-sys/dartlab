@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dartlab.core.registry import ColumnMeta, DataEntry  # noqa: F401
+from dartlab.core.dataEntry import ColumnMeta, DataEntry  # noqa: F401
 
 _REPORT_ENTRIES: list[DataEntry] = [
     # ═══════════════════════════════════════════════════════

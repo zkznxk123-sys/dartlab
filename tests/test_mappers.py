@@ -304,7 +304,7 @@ def test_missing():
 
 def test_notes_lookup_amount():
     """금액 항목 조회."""
-    from dartlab.reference.mappers.notesMapper import NotesMapper
+    from dartlab.providers.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     result = m.lookup("완제품")
@@ -315,7 +315,7 @@ def test_notes_lookup_amount():
 
 def test_notes_lookup_rate():
     """비율 항목 → skip."""
-    from dartlab.reference.mappers.notesMapper import NotesMapper
+    from dartlab.providers.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     result = m.lookup("연이자율")
@@ -326,7 +326,7 @@ def test_notes_lookup_rate():
 
 def test_notes_isAmount():
     """isAmount 판별."""
-    from dartlab.reference.mappers.notesMapper import NotesMapper
+    from dartlab.providers.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     assert m.isAmount("완제품")
@@ -336,7 +336,7 @@ def test_notes_isAmount():
 
 def test_notes_isSkip():
     """isSkip 판별."""
-    from dartlab.reference.mappers.notesMapper import NotesMapper
+    from dartlab.providers.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     assert m.isSkip("연이자율")
@@ -346,7 +346,7 @@ def test_notes_isSkip():
 
 def test_notes_hasForeignCurrency():
     """외화 항목 판별."""
-    from dartlab.reference.mappers.notesMapper import NotesMapper
+    from dartlab.providers.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     assert m.hasForeignCurrency("외화대출")
@@ -355,7 +355,7 @@ def test_notes_hasForeignCurrency():
 
 def test_notes_byCategory():
     """카테고리별 항목 조회."""
-    from dartlab.reference.mappers.notesMapper import NotesMapper
+    from dartlab.providers.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     inventory = m.byCategory("inventory")
@@ -378,7 +378,7 @@ def test_notes_stats():
 
 def test_scanner_classifyType():
     """항목 유형 자동 분류."""
-    from dartlab.reference.mappers.scanner import _classifyType
+    from dartlab.providers.mappers.scanner import _classifyType
 
     assert _classifyType("연이자율(%)", []) == "rate"
     assert _classifyType("할인율", []) == "rate"
@@ -389,7 +389,7 @@ def test_scanner_classifyType():
 
 def test_scanner_hasForeignInName():
     """항목명 외화 판별."""
-    from dartlab.reference.mappers.scanner import _hasForeignInName
+    from dartlab.providers.mappers.scanner import _hasForeignInName
 
     assert _hasForeignInName("외화대출")
     assert _hasForeignInName("USD차입금")
@@ -401,7 +401,7 @@ def test_scanner_hasForeignInName():
 
 def test_common_pickValue():
     """common.pickValue 값 선택."""
-    from dartlab.reference.mappers.common import pickValue
+    from dartlab.providers.mappers.common import pickValue
 
     # 원화 값 우선
     assert pickValue(["USD 1,000", "1,234,567"]) == "1,234,567"
@@ -411,7 +411,7 @@ def test_common_pickValue():
 
 def test_common_isCurrentPeriod():
     """당기 판정."""
-    from dartlab.reference.mappers.common import isCurrentPeriod
+    from dartlab.providers.mappers.common import isCurrentPeriod
 
     assert isCurrentPeriod("당기말")
     assert isCurrentPeriod("당기")
@@ -421,7 +421,7 @@ def test_common_isCurrentPeriod():
 
 def test_common_normalizeName():
     """한글 사이 공백 제거."""
-    from dartlab.reference.mappers.common import normalizeName
+    from dartlab.providers.mappers.common import normalizeName
 
     assert normalizeName("기 초") == "기초"
     assert normalizeName("  기 말  ") == "기말"

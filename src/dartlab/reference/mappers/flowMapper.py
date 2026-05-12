@@ -9,7 +9,7 @@ event 계정은 4분기 strict 합산 대신 있는 분기만 합산.
 
 from __future__ import annotations
 
-from dartlab.reference.mappers.engine import BaseMapper, MapperStats
+from dartlab.core.mapperEngine import BaseMapper, MapperStats
 
 
 class FlowMapper(BaseMapper):

@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.frame.market import resolveMarket
 from dartlab.quant.screen.dataAccess import fetchOhlcv
 
 

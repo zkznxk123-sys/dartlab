@@ -919,7 +919,7 @@ class Company:
             _log.info("Company('%s') 준비 완료 (%.1fs)", self.stockCode, _initElapsed)
 
     def __repr__(self):
-        from dartlab.reference.htmlRenderer import getHtmlRenderer
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:
@@ -2896,7 +2896,7 @@ class Company:
         """
         if topic is not None:
             topic = _resolveTopic(topic)
-        from dartlab.reference.docs.diff import (
+        from dartlab.providers.docs.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
@@ -2973,7 +2973,7 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 텍스트).
         """
-        from dartlab.reference.docs.diff import keywordFrequency
+        from dartlab.providers.docs.diff import keywordFrequency
 
         docsSections = self._docs.sections
         if docsSections is None:
@@ -5484,7 +5484,7 @@ class Company:
             OutputSchema:
                 - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - 로컬 표시 가능 환경 + dartlab.reference.viewer.
+                - 로컬 표시 가능 환경 + dartlab.providers.viewer.
             Freshness:
                 - 호출 시점 (서버 데이터 별도 fetch X).
             Dataflow:
@@ -5492,7 +5492,7 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 viewer).
         """
-        from dartlab.reference.viewer import launchViewer
+        from dartlab.providers.viewer import launchViewer
 
         launchViewer(self.stockCode, port=port)
 

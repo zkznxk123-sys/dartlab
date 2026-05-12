@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dartlab.reference.htmlRenderer import registerHtmlRenderer
+from dartlab.core.htmlRenderer import registerHtmlRenderer
 
 
 class VizHtmlRenderer:

@@ -1,7 +1,7 @@
 import re
 
 from dartlab.core.constants import DEFAULT_UNIT_SCALE, UNIT_SCALE
-from dartlab.reference.mappers.common import normalizeName as _normalizeKoSpaces
+from dartlab.providers.mappers.common import normalizeName as _normalizeKoSpaces
 
 
 def extractTables(content: str) -> list[dict]:

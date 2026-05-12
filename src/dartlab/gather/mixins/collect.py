@@ -70,7 +70,7 @@ class _GatherCollectMixin(GatherMixinContext):
         See Also:
             ``price``/``flow``/``sector``/``news``/``insiderTrading`` — 개별 axis.
         """
-        from dartlab.frame.market import resolveMarket
+        from dartlab.core.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
         t0 = time.monotonic()

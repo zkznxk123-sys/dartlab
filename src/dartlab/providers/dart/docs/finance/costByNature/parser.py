@@ -3,8 +3,8 @@
 import re
 
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
+from dartlab.providers.mappers.parserMapper import loadCostByNature
 from dartlab.providers.tableParser import detectUnit, parseAmount
-from dartlab.reference.mappers.parserMapper import loadCostByNature
 
 _CBN = loadCostByNature()
 NORMALIZE_MAP = _CBN.get("normalize", [])

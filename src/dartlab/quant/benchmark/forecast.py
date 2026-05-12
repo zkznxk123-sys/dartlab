@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.frame.market import resolveMarket
 from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 _VALID_MODELS = ("naive", "ar1", "etsHolt", "theta")

@@ -30,8 +30,8 @@ import logging
 
 import polars as pl
 
+from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.frame.market import resolveMarket
 
 # 이전: quant._helpers.fetchOhlcv (gather entry wrapper) — gather 자체이므로 직접 호출.
 # 이전: quant._helpers.loadSharesOutstanding — gather/_hfBulk + scan parquet wrapper —

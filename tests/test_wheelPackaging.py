@@ -208,7 +208,7 @@ def test_installedWheel_importAndSectionsLoad(builtWheel: Path, tmp_path):
             "-X",
             "utf8",
             "-c",
-            "from dartlab.reference.mappers.parserMapper import loadSections; "
+            "from dartlab.providers.mappers.parserMapper import loadSections; "
             "s = loadSections(); "
             "assert s.get('chapterByMajor'), 'chapterByMajor empty — 2026-04-19 사고 재현'; "
             "print('OK chapterByMajor:', len(s['chapterByMajor']))",

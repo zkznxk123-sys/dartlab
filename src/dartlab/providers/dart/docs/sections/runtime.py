@@ -9,7 +9,7 @@ from dartlab.providers.dart.docs.sections.sectionsBase import RE_SPLIT_SUFFIX
 
 _RE_MAJOR_HEADING = re.compile(r"^([가-힣])\.\s*(.+)$")
 _RE_TABLE_SEP = re.compile(r"^\|(?:\s*:?-{3,}:?\s*\|)+$")
-from dartlab.reference.mappers.parserMapper import loadSections
+from dartlab.providers.mappers.parserMapper import loadSections
 
 _CHAPTER_BY_MAJOR = {int(k): v for k, v in loadSections().get("chapterByMajor", {}).items()}
 _CHAPTER_II_SPLIT_SOURCE = "주요제품및원재료등"
@@ -63,12 +63,12 @@ def chapterFromMajorNum(majorNum: int) -> str | None:
         - 역방향 (chapter → majorNum) 은 ``_CHAPTER_BY_MAJOR`` 의 inverse map 필요.
 
     SeeAlso:
-        - ``dartlab.reference.mappers.parserMapper.loadSections`` — ``chapterByMajor`` SSOT.
+        - ``dartlab.providers.mappers.parserMapper.loadSections`` — ``chapterByMajor`` SSOT.
         - ``applyProjections`` — chapter II 합산 topic 분배 시 본 매핑 사용.
         - ``detailTopicForTopic`` / ``semanticTopicForLabel`` — 같은 sections runtime API 집합.
 
     Requires:
-        - dartlab.reference.mappers.parserMapper — chapter 매핑 source (module top-level load).
+        - dartlab.providers.mappers.parserMapper — chapter 매핑 source (module top-level load).
 
     AIContext:
         Ask Workbench 가 "사업의 내용 어디에 있냐"/"III 장 본문" 질문 처리 시 호출. AI 가
@@ -650,7 +650,7 @@ def detailTopicForBlock(
         - ``semanticTopicForBlock`` — 부문/리스크 분류의 자매 함수.
 
     Requires:
-        - dartlab.reference.mappers.parserMapper — ``detailTopicMap`` + ``detailTopicKeywords`` source.
+        - dartlab.providers.mappers.parserMapper — ``detailTopicMap`` + ``detailTopicKeywords`` source.
         - 외부 의존 없음 — 순수 키워드 매칭.
 
     AIContext:

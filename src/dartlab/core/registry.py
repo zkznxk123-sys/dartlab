@@ -14,76 +14,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any
+from dartlab.core._entries import _BUSINESS_ALIASES as _BUSINESS_ALIASES
+from dartlab.core._entries import _ENTRIES as _ENTRIES
 
-
-@dataclass(frozen=True)
-class ColumnMeta:
-    """DataFrame 컬럼 메타데이터 (LLM 컨텍스트용)."""
-
-    name: str
-    description: str
-    unit: str = ""
-
-
-@dataclass(frozen=True)
-class DataEntry:
-    """데이터 소스 메타데이터 — registry의 최소 단위.
-
-    category별 역할:
-    - finance: 시계열 재무제표 (annual.IS, timeseries.BS 등)
-    - report: 공시 파싱 모듈 (dividend, employee 등)
-    - notes: K-IFRS 주석 (notes.receivables 등)
-    - disclosure: 서술형 공시 (business, mdna 등)
-    - raw: 원본 parquet (rawDocs, rawFinance, rawReport)
-    - analysis: L2 분석 엔진 (ratios, insight, sector, rank)
-    """
-
-    name: str
-    label: str
-    category: str
-    dataType: str
-    description: str
-
-    modulePath: str | None = None
-    funcName: str | None = None
-    extractor: Any = None
-
-    # DART API 의 apiType 이름 — topic name 과 다를 때만 명시.
-    # 없으면 topic name 과 apiType 동일 취급.
-    # 예: audit topic 의 DART apiType = "auditOpinion".
-    apiType: str | None = None
-
-    # notes 카테고리 전용 dispatch 정보 (notes.py 가 소비).
-    # (callerModuleName, koreanKeyword) 튜플.
-    # callerModuleName 이 "notesDetail" 이면 _call_notesDetail(koreanKeyword) 호출,
-    # 아니면 _call_module(callerModuleName) 호출.
-    notesDispatch: tuple[str, str] | None = None
-
-    # topic 단축 alias — 사용자가 `show("board")` 처럼 짧은 이름으로 접근 가능.
-    # 2026-04-21 Q1.4: company.py 의 _TOPIC_ALIASES 하드코딩 dict 를 이관.
-    aliases: tuple[str, ...] = ()
-
-    requires: str | None = None
-    unit: str = "백만원"
-    columns: tuple[ColumnMeta, ...] = ()
-    analysisHints: tuple[str, ...] = ()
-    relatedModules: tuple[str, ...] = ()
-    maxRows: int = 30
-
-    # AI 노출 메타데이터
-    aiExposed: bool = True
-    aiCategory: str = "data"
-    aiHint: str = ""
-    aiQuestionTypes: tuple[str, ...] = ()
-    aiKeywords: tuple[str, ...] = ()
-
-
-# DataEntry 목록은 _entries.py에서 관리 (942줄 → 별도 파일)
-from dartlab.frame.types import _BUSINESS_ALIASES as _BUSINESS_ALIASES  # noqa: I001, E402
-from dartlab.frame.types import _ENTRIES as _ENTRIES  # noqa: I001, E402
-
+# dataclass 는 core/dataEntry.py 로 분리 (circular import 회피). registry 는 re-export.
+from dartlab.core.dataEntry import ColumnMeta, DataEntry
 
 # ── 인덱스 (O(1) 조회) ──
 

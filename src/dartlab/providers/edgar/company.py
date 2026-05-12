@@ -783,7 +783,7 @@ class Company:
         return Path(config.dataDir) / "edgar" / "tickers.parquet"
 
     def __repr__(self):
-        from dartlab.reference.htmlRenderer import getHtmlRenderer
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:
@@ -1718,7 +1718,7 @@ class Company:
             OutputSchema:
                 - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - 로컬 표시 가능 환경 + `dartlab.reference.viewer` 의존.
+                - 로컬 표시 가능 환경 + `dartlab.providers.viewer` 의존.
             Freshness:
                 - 호출 시점 즉시 (서버 별도 데이터 fetch X).
             Dataflow:
@@ -1726,7 +1726,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) — viewer 는 ticker 별 디스패치.
         """
-        from dartlab.reference.viewer import launchViewer
+        from dartlab.providers.viewer import launchViewer
 
         launchViewer(self.ticker, port=port)
 
@@ -3493,7 +3493,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) 10-K/Q 변경 추적.
         """
-        from dartlab.reference.docs.diff import (
+        from dartlab.providers.docs.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
@@ -3569,7 +3569,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) 10-K/Q 텍스트 분석.
         """
-        from dartlab.reference.docs.diff import keywordFrequency
+        from dartlab.providers.docs.diff import keywordFrequency
 
         docsSections = self._docs.sections
         if docsSections is None:

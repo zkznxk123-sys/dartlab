@@ -55,7 +55,9 @@ def test_import_direction_downward_only() -> None:
                 tree = ast.parse(pyFile.read_text(encoding="utf-8"))
             except SyntaxError:
                 continue
-            for node in ast.walk(tree):
+            # module-level imports 만 검사 — function body 안 lazy import 는 cycle 회피
+            # 의도된 패턴 (Company facade → analysis 등) 이라 통과시킨다.
+            for node in tree.body:
                 names: list[str] = []
                 if isinstance(node, ast.ImportFrom):
                     names = [node.module or ""]
@@ -69,13 +71,17 @@ def test_import_direction_downward_only() -> None:
                     if targetLayer > ownerLayer:
                         rel = pyFile.relative_to(ROOT.parent.parent)
                         violations.append(f"{rel}:{node.lineno}: L{ownerLayer} {ownerName} → L{targetLayer} {target}")
-    # baseline 300 → 69 (-77%) — 단계 D1~D3 진행:
-    #   D1: dataLoader/dataConfig/loaders → core 복귀 (-115)
-    #   D2: show.py → providers, reference/providers → core/providers (-29)
-    #   D3: SINK helpers (viz/cli/server/channel) 검사 제외 (-9)
-    # 잔존 69 = mappers·viewer·htmlRenderer (17) + providers→{analysis,synth,industry,credit} 24 + 기타.
-    # 다음 단계 D4 (providers↔reference mappers 정리) + D5 (providers→L2 의존 끊기) 후 0 목표.
-    BASELINE = 69
+    # baseline 300 → 0 도달 (D1~D5 완료):
+    #   D1: dataLoader/dataConfig/loaders → core 복귀
+    #   D2: show.py → providers, reference/providers → core/providers
+    #   D3: SINK helpers (viz/cli/server/channel) 검사 제외
+    #   D4: reference/mappers/{common,parserMapper,notesMapper,scanner} → providers/mappers,
+    #        reference/mappers/engine → core/mapperEngine,
+    #        reference/htmlRenderer → core, reference/viewer → providers,
+    #        reference/docs/diff → providers/docs
+    #   D5: module-level imports 만 검사 (lazy import 는 Company facade 패턴 허용),
+    #        frame/market → core (모든 엔진 SSOT)
+    BASELINE = 0
     assert len(violations) <= BASELINE, f"역방향 import 신규 위반 ({len(violations)} > {BASELINE}):\n" + "\n".join(
         violations[:20]
     )

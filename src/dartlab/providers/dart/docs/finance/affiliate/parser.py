@@ -503,7 +503,7 @@ def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
 # ── 변동내역 ──────────────────────────────────────────────────
 
 
-from dartlab.reference.mappers.parserMapper import loadAffiliate
+from dartlab.providers.mappers.parserMapper import loadAffiliate
 
 MOVEMENT_COL_MAP = loadAffiliate().get("movement", {})
 

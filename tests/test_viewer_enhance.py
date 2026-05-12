@@ -33,7 +33,7 @@ class TestDiffMatrix(unittest.TestCase):
         )
 
     def test_basic(self):
-        from dartlab.reference.docs.diff import buildDiffMatrix
+        from dartlab.providers.docs.diff import buildDiffMatrix
 
         sections = self._make_sections()
         result = buildDiffMatrix(sections)
@@ -48,7 +48,7 @@ class TestDiffMatrix(unittest.TestCase):
         self.assertIn("changeRate", row)
 
     def test_text_only(self):
-        from dartlab.reference.docs.diff import buildDiffMatrix
+        from dartlab.providers.docs.diff import buildDiffMatrix
 
         sections = self._make_sections()
         full = buildDiffMatrix(sections)
@@ -58,7 +58,7 @@ class TestDiffMatrix(unittest.TestCase):
         self.assertLessEqual(text["topic_count"], full["topic_count"])
 
     def test_heatmap_spec_shape(self):
-        from dartlab.reference.docs.diff import buildDiffMatrix, buildHeatmapSpec
+        from dartlab.providers.docs.diff import buildDiffMatrix, buildHeatmapSpec
 
         sections = self._make_sections()
         matrixData = buildDiffMatrix(sections)
@@ -338,7 +338,7 @@ class TestIntegrationReal(unittest.TestCase):
         cls.c = dartlab.Company("005930")
 
     def test_diff_matrix_real(self):
-        from dartlab.reference.docs.diff import buildDiffMatrix
+        from dartlab.providers.docs.diff import buildDiffMatrix
 
         sections = self.c._docs.sections.raw
         result = buildDiffMatrix(sections, textOnly=True)

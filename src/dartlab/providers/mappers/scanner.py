@@ -5,7 +5,7 @@ notesStructure.json을 갱신한다.
 
 사용법::
 
-    from dartlab.reference.mappers.scanner import scanNotes, scanAll
+    from dartlab.providers.mappers.scanner import scanNotes, scanAll
 
     # 단일 종목 스캔
     result = scanNotes("005930")
@@ -25,7 +25,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from dartlab.reference.mappers.common import normalizeName
+from dartlab.providers.mappers.common import normalizeName
 
 log = logging.getLogger(__name__)
 
@@ -75,10 +75,10 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
     """
     try:
         from dartlab.core.dataLoader import loadData
+        from dartlab.providers.mappers.notesMapper import NOTES_KEYWORDS
         from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
         from dartlab.providers.reportSelector import selectReport
         from dartlab.providers.tableParser import parseNotesTable
-        from dartlab.reference.mappers.notesMapper import NOTES_KEYWORDS
     except ImportError:
         return {}
 

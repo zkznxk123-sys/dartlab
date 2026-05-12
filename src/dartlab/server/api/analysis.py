@@ -48,7 +48,7 @@ def apiCompanyDiffMatrix(
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
-    from dartlab.reference.docs.diff import buildDiffMatrix, buildHeatmapSpec
+    from dartlab.providers.docs.diff import buildDiffMatrix, buildHeatmapSpec
 
     try:
         sections = c._docs.sections.raw
@@ -94,7 +94,7 @@ def apiCompanyDiffTopic(
 
         diff_chunks: list[dict] = []
         if result is not None:
-            from dartlab.reference.docs.diff import charDiff
+            from dartlab.providers.docs.diff import charDiff
 
             rows = result.to_dicts()
             i = 0

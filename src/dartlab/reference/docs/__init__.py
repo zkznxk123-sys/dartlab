@@ -1,11 +1,6 @@
 """DART/EDGAR 공통 docs 유틸리티."""
 
-from dartlab.reference.docs.bridge import (
-    extractAmountsFromText,
-    getFinanceAmounts,
-    matchAmounts,
-)
-from dartlab.reference.docs.diff import (
+from dartlab.providers.docs.diff import (
     DiffEntry,
     DiffResult,
     DiffSummary,
@@ -14,6 +9,11 @@ from dartlab.reference.docs.diff import (
     buildHeatmapSpec,
     sectionsDiff,
     topicDiff,
+)
+from dartlab.reference.docs.bridge import (
+    extractAmountsFromText,
+    getFinanceAmounts,
+    matchAmounts,
 )
 from dartlab.reference.docs.topicGraph import (
     analyzeGraph,

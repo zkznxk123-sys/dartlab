@@ -6,13 +6,13 @@
 
 from __future__ import annotations
 
-from dartlab.core.registry import DataEntry
-from dartlab.frame.types.analysis import _ANALYSIS_ENTRIES
-from dartlab.frame.types.disclosure import _DISCLOSURE_ENTRIES
-from dartlab.frame.types.finance import _FINANCE_ENTRIES
-from dartlab.frame.types.notes import _NOTES_ENTRIES
-from dartlab.frame.types.raw import _RAW_ENTRIES
-from dartlab.frame.types.report import _REPORT_ENTRIES
+from dartlab.core._entries.analysis import _ANALYSIS_ENTRIES
+from dartlab.core._entries.disclosure import _DISCLOSURE_ENTRIES
+from dartlab.core._entries.finance import _FINANCE_ENTRIES
+from dartlab.core._entries.notes import _NOTES_ENTRIES
+from dartlab.core._entries.raw import _RAW_ENTRIES
+from dartlab.core._entries.report import _REPORT_ENTRIES
+from dartlab.core.dataEntry import DataEntry
 
 _ENTRIES: list[DataEntry] = [
     *_FINANCE_ENTRIES,

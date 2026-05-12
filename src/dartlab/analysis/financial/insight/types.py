@@ -165,7 +165,7 @@ class DistressResult:
 
     def _repr_html_(self) -> str:
         """Jupyter/Marimo용 HTML."""
-        from dartlab.reference.htmlRenderer import getHtmlRenderer
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:
@@ -226,7 +226,7 @@ class AnalysisResult:
         return result
 
     def __repr__(self):
-        from dartlab.reference.htmlRenderer import getHtmlRenderer
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:
@@ -240,7 +240,7 @@ class AnalysisResult:
 
     def _repr_html_(self) -> str:
         """Jupyter/Marimo용 HTML."""
-        from dartlab.reference.htmlRenderer import getHtmlRenderer
+        from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:

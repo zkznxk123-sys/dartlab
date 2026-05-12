@@ -6,7 +6,7 @@ MapperEngine 인터페이스로 래핑한다. 원본 코드 수정 0줄.
 
 from __future__ import annotations
 
-from dartlab.reference.mappers.engine import BaseMapper, MapperStats
+from dartlab.core.mapperEngine import BaseMapper, MapperStats
 
 
 class TopicMapper(BaseMapper):

@@ -9,7 +9,7 @@ import logging
 
 import numpy as np
 
-from dartlab.frame.market import resolveMarket
+from dartlab.core.market import resolveMarket
 
 log = logging.getLogger(__name__)
 

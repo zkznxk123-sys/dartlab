@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dartlab.core.registry import ColumnMeta, DataEntry  # noqa: F401
+from dartlab.core.dataEntry import ColumnMeta, DataEntry  # noqa: F401
 
 _DISCLOSURE_ENTRIES: list[DataEntry] = [
     # disclosure — 서술형 공시

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import polars as pl
 
-from dartlab.reference.docs.diff import DiffEntry, DiffResult
+from dartlab.providers.docs.diff import DiffEntry, DiffResult
 
 # 변화 스코어링용 기본 키워드
 _SIGNAL_KEYWORDS: dict[str, list[str]] = {
