@@ -149,6 +149,13 @@ def searchName(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
 
     Returns:
         매칭된 종목 DataFrame (회사명, 종목코드, ...).
+
+    Raises:
+        FileNotFoundError: KIND listing cache 미생성 시 ``getKindList`` 가 raise.
+        OSError: KIND 페이지 fetch 실패.
+
+    Example:
+        >>> df = searchName("삼성", limit=10)
     """
     kw = keyword.strip()
     if not kw:
@@ -176,6 +183,13 @@ def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:
 
     Returns:
         매칭된 종목 DataFrame (회사명, 종목코드, ...), 관련도 순.
+
+    Raises:
+        FileNotFoundError: KIND listing cache 미생성 시 ``getKindList`` 가 raise.
+        OSError: KIND 페이지 fetch 실패.
+
+    Example:
+        >>> df = fuzzySearch("삼전", maxResults=5)
     """
     kw = keyword.strip()
     if not kw:

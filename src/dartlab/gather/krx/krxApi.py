@@ -152,6 +152,17 @@ async def fetchKrxBydd(
     pl.DataFrame
         그 날 시장 전종목 OHLCV + 시총 + 발행주식수. 컬럼은 KRX 응답 그대로.
         미래 일자 또는 거래일 아니면 빈 DataFrame.
+
+    Raises
+    ------
+    ValueError
+        apiKey 미지정 또는 market 이 ``"STK"``/``"KSQ"`` 가 아닌 경우.
+    httpx.HTTPStatusError
+        KRX OpenAPI 응답이 4xx/5xx (인증/권한/네트워크 오류).
+
+    Example
+    -------
+    >>> df = await fetchKrxBydd("2024-04-15", market="STK", apiKey="...")
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키가 필요합니다")
@@ -243,6 +254,17 @@ async def fetchKrxRange(
     ----------
     limit : int | None
         반환 행수 상한 (concat 후 head). None이면 전체.
+
+    Raises
+    ------
+    ValueError
+        apiKey 미지정.
+    httpx.HTTPError
+        KRX OpenAPI 응답 오류 (날짜 단위 호출 중 실패 시 즉시 raise).
+
+    Example
+    -------
+    >>> df = await fetchKrxRange("2024-04-01", "2024-04-15", market="ALL", apiKey="...")
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키가 필요합니다")

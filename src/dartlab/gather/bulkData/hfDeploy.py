@@ -104,5 +104,22 @@ def deployKrxIndexToHF(
     pathInRepo: str = DEFAULT_INDEX_PATH_IN_REPO,
     token: str | None = None,
 ) -> dict:
-    """KRX 지수 raw parquet 을 HF dataset ``krx/indices`` 로 업로드."""
+    """KRX 지수 raw parquet 을 HF dataset ``krx/indices`` 로 업로드.
+
+    Args:
+        localDir: 업로드 대상 parquet 들이 모인 로컬 디렉터리.
+        repoId: HF dataset repo ID (예: ``"eddmpython/dartlab-data"``).
+        pathInRepo: HF repo 내부 경로 (예: ``"krx/indices"``).
+        token: HF 토큰. None이면 환경변수/세션 키 사용.
+
+    Returns:
+        ``{"uploaded": int, "files": int, "commitUrl": str | None}`` — 업로드 결과 요약.
+
+    Raises:
+        FileNotFoundError: ``localDir`` 부재.
+        huggingface_hub.HfHubHTTPError: HF API 오류 (인증/권한/네트워크).
+
+    Example:
+        >>> deployKrxIndexToHF("data/krx/indices", token=os.environ["HF_TOKEN"])
+    """
     return deployKrxToHF(localDir, repoId=repoId, pathInRepo=pathInRepo, token=token)

@@ -82,7 +82,21 @@ class _TableParser(HTMLParser):
         self._cell = ""
 
     def handle_starttag(self, tag: str, _attrs):
-        """HTML 여는 태그 처리 (stdlib HTMLParser hook)."""
+        """HTML 여는 태그 처리 (stdlib HTMLParser hook).
+
+        Args:
+            tag: 태그 이름 (소문자).
+            _attrs: 태그 속성 리스트 — 본 파서에서 사용 안 함.
+
+        Returns:
+            None — 내부 상태만 갱신.
+
+        Raises:
+            없음.
+
+        Example:
+            stdlib HTMLParser 의 콜백 — 사용자는 ``parser.feed(html)`` 만 호출.
+        """
         if tag == "table":
             self._inTable = True
         elif tag == "tr" and self._inTable:
@@ -93,7 +107,20 @@ class _TableParser(HTMLParser):
             self._cell = ""
 
     def handle_endtag(self, tag: str):
-        """HTML 닫는 태그 처리 (stdlib HTMLParser hook)."""
+        """HTML 닫는 태그 처리 (stdlib HTMLParser hook).
+
+        Args:
+            tag: 태그 이름 (소문자).
+
+        Returns:
+            None — 내부 상태만 갱신.
+
+        Raises:
+            없음.
+
+        Example:
+            stdlib HTMLParser 의 콜백 — 사용자는 ``parser.feed(html)`` 만 호출.
+        """
         if tag in ("td", "th") and self._inCell:
             self._inCell = False
             self._row.append(self._cell.strip())
@@ -105,7 +132,20 @@ class _TableParser(HTMLParser):
             self._inTable = False
 
     def handle_data(self, data: str):
-        """HTML 텍스트 데이터 처리 (stdlib HTMLParser hook)."""
+        """HTML 텍스트 데이터 처리 (stdlib HTMLParser hook).
+
+        Args:
+            data: 태그 사이의 텍스트.
+
+        Returns:
+            None — 내부 cell 버퍼에 누적.
+
+        Raises:
+            없음.
+
+        Example:
+            stdlib HTMLParser 의 콜백 — 사용자는 ``parser.feed(html)`` 만 호출.
+        """
         if self._inCell:
             self._cell += data
 
@@ -215,6 +255,15 @@ def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
         상장일 : str — 상장일
         결산월 : str — 결산월
         대표자명 : str — 대표자명
+
+    Raises
+    ------
+    없음
+        KIND fetch 실패 시 빈 DataFrame 반환 (예외 흡수).
+
+    Example
+    -------
+    >>> df = getKindList()
     """
     global _memory, _memoryTs
 
@@ -269,10 +318,25 @@ def _invalidateSearchCache() -> None:
 def codeToName(stockCode: str) -> str | None:
     """종목코드 → 회사명.
 
+    Parameters
+    ----------
+    stockCode : str
+        6자리 종목코드.
+
     Returns
     -------
     str | None
         회사명. 못 찾으면 None.
+
+    Raises
+    ------
+    없음
+        ``getKindList()`` 가 빈 DataFrame 반환 시 None.
+
+    Example
+    -------
+    >>> codeToName("005930")
+    '삼성전자'
     """
     df = getKindList()
     match = df.filter(pl.col("종목코드") == stockCode)
@@ -284,10 +348,25 @@ def codeToName(stockCode: str) -> str | None:
 def nameToCode(corpName: str) -> str | None:
     """회사명 → 종목코드. 정확히 일치하는 첫 번째 결과.
 
+    Parameters
+    ----------
+    corpName : str
+        회사명.
+
     Returns
     -------
     str | None
         6자리 종목코드. 못 찾으면 None.
+
+    Raises
+    ------
+    없음
+        ``getKindList()`` 가 빈 DataFrame 반환 시 None.
+
+    Example
+    -------
+    >>> nameToCode("삼성전자")
+    '005930'
     """
     df = getKindList()
     match = df.filter(pl.col("회사명") == corpName)
@@ -355,6 +434,12 @@ def getDartList(*, forceRefresh: bool = False) -> pl.DataFrame:
 
     Returns:
         DataFrame (corp_code, corp_name, stock_code, modify_date).
+
+    Raises:
+        없음 — HF 다운로드 실패 시 캐시 fallback 또는 빈 DataFrame.
+
+    Example:
+        >>> df = getDartList()
     """
     global _dartMemory, _dartMemoryTs
 
@@ -515,6 +600,15 @@ def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
         short_code : str — 단축 종목코드 (6자리)
         codeName : str — 종목명
         marketName : str — 시장구분 (KOSPI/KOSDAQ/KONEX)
+
+    Raises
+    ------
+    없음
+        KRX API 실패 시 빈 DataFrame 반환 (예외 흡수).
+
+    Example
+    -------
+    >>> df = getKrxList()
     """
     global _krxMemory, _krxMemoryTs
 
@@ -564,6 +658,21 @@ class GatherListingResolver:
             검색어.
         limit : int | None
             반환 행수 상한 (가장 관련도 높은 N). None이면 전체.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            매칭된 종목 DataFrame. 위임 실패 시 None.
+
+        Raises
+        ------
+        없음
+            ValueError/OSError 는 내부에서 흡수.
+
+        Example
+        -------
+        >>> r = GatherListingResolver()
+        >>> df = r.search("삼성", limit=10)
         """
         try:
             from .fuzzy import searchName
@@ -573,7 +682,30 @@ class GatherListingResolver:
             return None
 
     def fuzzy(self, query: str, *, maxResults: int = 5) -> pl.DataFrame | None:
-        """fuzzy 검색 — fuzzySearch 위임."""
+        """fuzzy 검색 — fuzzySearch 위임.
+
+        Parameters
+        ----------
+        query : str
+            검색어 (한글/영문/초성).
+        maxResults : int
+            최대 결과 수. 기본 5.
+
+        Returns
+        -------
+        pl.DataFrame | None
+            관련도 순 매칭 DataFrame. 위임 실패 시 None.
+
+        Raises
+        ------
+        없음
+            ValueError/OSError 는 내부에서 흡수.
+
+        Example
+        -------
+        >>> r = GatherListingResolver()
+        >>> df = r.fuzzy("삼전", maxResults=5)
+        """
         try:
             from .fuzzy import fuzzySearch
 
@@ -582,21 +714,84 @@ class GatherListingResolver:
             return None
 
     def codeToName(self, stockCode: str) -> str | None:
-        """stockCode → 회사명 변환."""
+        """stockCode → 회사명 변환.
+
+        Parameters
+        ----------
+        stockCode : str
+            6자리 종목코드.
+
+        Returns
+        -------
+        str | None
+            회사명. 위임 실패 또는 미존재 시 None.
+
+        Raises
+        ------
+        없음
+            ValueError/OSError 는 내부에서 흡수.
+
+        Example
+        -------
+        >>> r = GatherListingResolver()
+        >>> r.codeToName("005930")
+        """
         try:
             return codeToName(stockCode)
         except (ValueError, OSError):
             return None
 
     def nameToCode(self, corpName: str) -> str | None:
-        """회사명 → stockCode 변환."""
+        """회사명 → stockCode 변환.
+
+        Parameters
+        ----------
+        corpName : str
+            회사명 (정확한 매칭).
+
+        Returns
+        -------
+        str | None
+            6자리 종목코드. 위임 실패 또는 미존재 시 None.
+
+        Raises
+        ------
+        없음
+            ValueError/OSError 는 내부에서 흡수.
+
+        Example
+        -------
+        >>> r = GatherListingResolver()
+        >>> r.nameToCode("삼성전자")
+        """
         try:
             return nameToCode(corpName)
         except (ValueError, OSError):
             return None
 
     def kindList(self, *, forceRefresh: bool = False) -> pl.DataFrame:
-        """KIND 상장법인 목록."""
+        """KIND 상장법인 목록.
+
+        Parameters
+        ----------
+        forceRefresh : bool
+            True면 캐시 무시 재요청.
+
+        Returns
+        -------
+        pl.DataFrame
+            전체 상장법인 목록 — getKindList 와 동일 스키마.
+
+        Raises
+        ------
+        없음
+            getKindList 가 내부에서 흡수.
+
+        Example
+        -------
+        >>> r = GatherListingResolver()
+        >>> df = r.kindList()
+        """
         return getKindList(forceRefresh=forceRefresh)
 
 

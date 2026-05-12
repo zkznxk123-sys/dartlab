@@ -48,6 +48,20 @@ def fetchOhlcv(stockCode: str, *, limit: int | None = None, **kwargs):
         종목코드/티커.
     limit : int | None
         반환 행수 상한. None이면 전체.
+
+    Returns
+    -------
+    object | None
+        gather("price") 결과 (PriceSnapshot 또는 DataFrame). 위임 실패 시 None.
+
+    Raises
+    ------
+    없음
+        ImportError/ValueError/TypeError/RuntimeError 는 흡수.
+
+    Example
+    -------
+    >>> snap = fetchOhlcv("005930", market="KR")
     """
     try:
         g = GatherEntry()
@@ -66,6 +80,25 @@ def loadSharesOutstanding(market: str = "KR"):
     KR/US 모두 dataDir 의 표준 경로에서 read-only 로드 (auto-download 책임은
     호출자 측 — story/scan 이 미리 _ensureScanData 호출). gather 는 scan 위
     layer 라 scan import 안 함 (단방향 정책).
+
+    Parameters
+    ----------
+    market : str
+        시장 코드. ``"KR"`` 이면 ``data/dart/scan``, 그 외는 ``data/edgar/scan``.
+
+    Returns
+    -------
+    pl.LazyFrame | None
+        발행주식수 LazyFrame. parquet 파일 부재 시 None + warning 로그.
+
+    Raises
+    ------
+    없음
+        파일 부재는 None 반환.
+
+    Example
+    -------
+    >>> lf = loadSharesOutstanding("KR")
     """
     from pathlib import Path
 
@@ -176,6 +209,15 @@ def marketCap(
         - marketCapTotal : float — 전체 시가총액 (원). KR 은 marketCap 동일 (우선주 별도 ISU_CD 로 합산 시 별도 호출).
 
         데이터 없으면 None.
+
+    Raises
+    ------
+    없음
+        HF/주가/sharesOutstanding 부재는 warning 로그 + None 반환.
+
+    Example
+    -------
+    >>> df = marketCap("005930", market="KR", start="2024-01-01")
     """
     market = resolveMarket(stockCode, market)
 
@@ -265,6 +307,15 @@ def marketCapSnapshot(
         - marketCapTotal : float — 전체 시가총액 (원)
 
         데이터 없으면 None.
+
+    Raises
+    ------
+    없음
+        marketCap() 이 None 반환 시 None.
+
+    Example
+    -------
+    >>> snap = marketCapSnapshot("005930", market="KR")
     """
     # 디폴트: 최근 30일 (snapshot 은 최신 한 점만 필요 — 전체 연도 fetch 회피)
     if start is None and end is None:
@@ -323,6 +374,12 @@ def marketCapAll(
             {YYYYMMDD} : Int64 — 일자별 시총 (원)
 
         데이터 없으면 None.
+
+    Raises:
+        ValueError: start 가 None 일 때.
+
+    Example:
+        >>> df = marketCapAll(start="2024-01-01", end="2024-01-31", market="KOSPI")
     """
     if start is None:
         raise ValueError("marketCapAll: start 필수 (단일일자도 start 만)")

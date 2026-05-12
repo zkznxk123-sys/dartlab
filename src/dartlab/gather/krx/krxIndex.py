@@ -147,6 +147,10 @@ async def fetchKrxIndexBydd(
     ------
     ValueError : apiKey 미지정 또는 market 잘못
     httpx.HTTPStatusError : 401 (idx 카테고리 권한 없음 — 신청 필요), 기타 HTTP 에러
+
+    Example
+    -------
+    >>> df = await fetchKrxIndexBydd("2024-04-15", market="KOSPI", apiKey="...")
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키 필요")
@@ -284,6 +288,10 @@ async def fetchKrxIndexRange(
     -----
     HTTP 오류를 warning 으로 삼키지 않는다. bulk parquet 은 한 날짜 결측이
     누적되면 HF SSOT 자체가 오염되므로, retry 이후 실패는 작업 전체 실패로 둔다.
+
+    Example
+    -------
+    >>> df = await fetchKrxIndexRange("2024-04-01", "2024-04-15", market="KOSPI", apiKey="...")
     """
     startD = datetime.strptime(_normalizeDate(start), "%Y%m%d").date()
     endD = datetime.strptime(_normalizeDate(end), "%Y%m%d").date()

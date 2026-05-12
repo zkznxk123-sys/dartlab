@@ -55,6 +55,15 @@ def loadManifest(source: str) -> pl.DataFrame:
         frequency : str — 원본 주기
         unit : str — 단위
         status : str — ok/stale/error
+
+    Raises
+    ------
+    ValueError
+        source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
+
+    Example
+    -------
+    >>> mf = loadManifest("fred")
     """
     from dartlab.core.dataLoader import loadData
 
@@ -62,7 +71,29 @@ def loadManifest(source: str) -> pl.DataFrame:
 
 
 def loadObservations(source: str) -> pl.DataFrame:
-    """HF macro observations 로드."""
+    """HF macro observations 로드.
+
+    Parameters
+    ----------
+    source : str
+        ``"fred"`` 또는 ``"ecos"``.
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 관측일
+        seriesId : str — 시리즈 ID
+        value : float — 관측값
+
+    Raises
+    ------
+    ValueError
+        source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
+
+    Example
+    -------
+    >>> obs = loadObservations("ecos")
+    """
     from dartlab.core.dataLoader import loadData
 
     df = loadData("observations", category=_category(source))
@@ -72,7 +103,28 @@ def loadObservations(source: str) -> pl.DataFrame:
 
 
 def availableSeries(source: str) -> set[str]:
-    """HF manifest 기준 사용 가능한 시리즈 ID 집합."""
+    """HF manifest 기준 사용 가능한 시리즈 ID 집합.
+
+    Parameters
+    ----------
+    source : str
+        ``"fred"`` 또는 ``"ecos"``.
+
+    Returns
+    -------
+    set[str]
+        manifest 에 존재하는 모든 시리즈 ID. manifest 비어 있거나
+        ``seriesId`` 컬럼 부재면 빈 set.
+
+    Raises
+    ------
+    ValueError
+        source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
+
+    Example
+    -------
+    >>> ids = availableSeries("fred")
+    """
     manifest = loadManifest(source)
     if manifest.is_empty() or "seriesId" not in manifest.columns:
         return set()
@@ -98,6 +150,10 @@ def fetchSeries(
     ------
     ValueError
         HF 카탈로그에 없는 시리즈일 때. 직접 API가 필요하면 ``apiKey=``를 명시해야 한다.
+
+    Example
+    -------
+    >>> df = fetchSeries("fred", "GDP", start="2020-01-01", limit=20)
     """
     sourceKey = source.lower()
     supported = availableSeries(sourceKey)
@@ -139,6 +195,15 @@ def fetchMulti(
     ----------
     limit : int | None
         반환 행수 상한 (가장 최근 N). None이면 전체.
+
+    Raises
+    ------
+    ValueError
+        HF 카탈로그에 없는 시리즈가 ``seriesIds`` 에 포함된 경우.
+
+    Example
+    -------
+    >>> df = fetchMulti("fred", ["GDP", "UNRATE"], start="2020-01-01")
     """
     if not seriesIds:
         return pl.DataFrame()
@@ -166,7 +231,27 @@ def fetchMulti(
 
 
 def latestUpdatedAt(source: str) -> datetime | None:
-    """manifest 의 최신 갱신 시각 반환."""
+    """manifest 의 최신 갱신 시각 반환.
+
+    Parameters
+    ----------
+    source : str
+        ``"fred"`` 또는 ``"ecos"``.
+
+    Returns
+    -------
+    datetime | None
+        manifest 의 ``updatedAtUtc`` 컬럼 최대값. 컬럼/값 부재 또는 파싱 실패 시 None.
+
+    Raises
+    ------
+    ValueError
+        source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
+
+    Example
+    -------
+    >>> ts = latestUpdatedAt("fred")
+    """
     manifest = loadManifest(source)
     if manifest.is_empty() or "updatedAtUtc" not in manifest.columns:
         return None
