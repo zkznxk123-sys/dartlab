@@ -69,7 +69,7 @@ def buildDocsItemIndex(company: Company, topic: str) -> dict[str, list[tuple[int
         TargetMarkets:
             - KR (DART) select.
     """
-    from dartlab.reference.show import normalizeItemKey
+    from dartlab.providers.show import normalizeItemKey
 
     cacheKey = f"_docsItemIdx_{topic}"
     cached = company._cache.get(cacheKey)
@@ -185,7 +185,7 @@ def selectFromDocsTopic(
         TargetMarkets:
             - KR (DART) select.
     """
-    from dartlab.reference.show import normalizeItemKey, selectFromShow
+    from dartlab.providers.show import normalizeItemKey, selectFromShow
 
     idx = buildDocsItemIndex(company, topic)
     if not idx:
@@ -300,7 +300,7 @@ def selectFromDocsTopicAll(
         TargetMarkets:
             - KR (DART) select.
     """
-    from dartlab.reference.show import selectFromShow
+    from dartlab.providers.show import selectFromShow
 
     if indList is not None:
         return selectFromDocsTopic(company, topic, indList, colList)

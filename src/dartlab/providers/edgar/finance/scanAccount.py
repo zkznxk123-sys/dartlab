@@ -200,7 +200,7 @@ def scanAccount(
     Requires:
         - polars
         - concurrent.futures.ThreadPoolExecutor
-        - dartlab.frame.dataLoader (``_dataDir``)
+        - dartlab.core.dataLoader (``_dataDir``)
         - dartlab.providers.edgar.openapi.identity (``loadTickers``)
 
     Capabilities:
@@ -246,7 +246,7 @@ def scanAccount(
         TargetMarkets:
             - US (SEC EDGAR) — NYSE/NASDAQ/AMEX/OTC SEC 등록 + 10-K/10-Q 정기공시.
     """
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     edgarDir = Path(_dataDir("edgar"))
     parquetFiles = sorted(edgarDir.glob("*.parquet"))

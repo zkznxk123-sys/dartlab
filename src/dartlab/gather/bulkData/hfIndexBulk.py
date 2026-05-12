@@ -97,7 +97,7 @@ def _loadYear(year: int) -> pl.DataFrame | None:
     여기서 직접 URL을 만들지 않는다. ``DATA_RELEASES["krxIndices"]`` 와
     ``loadData`` 가 경로와 freshness 를 관리하는 단일 진입점이다.
     """
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     name = f"raw-{year}"
     try:

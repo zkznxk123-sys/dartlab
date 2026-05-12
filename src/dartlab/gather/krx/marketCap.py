@@ -136,7 +136,7 @@ def loadSharesOutstanding(market: str = "KR"):
 
     import polars as pl
 
-    from dartlab.frame.dataConfig import dataDir
+    from dartlab.core.dataConfig import dataDir
 
     base = Path(dataDir()) / ("dart" if market == "KR" else "edgar") / "scan"
     path = base / "sharesOutstanding.parquet"

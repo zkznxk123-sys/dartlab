@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.frame.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.providers.reportSelector import extractReportYear, selectReport
 from dartlab.providers.tableParser import parseAmount
 
@@ -215,7 +215,7 @@ def dividend(stockCode: str) -> DividendResult | None:
 
     Requires:
         - polars — DataFrame.
-        - dartlab.frame.dataLoader — ``loadData`` + ``extractCorpName``.
+        - dartlab.core.dataLoader — ``loadData`` + ``extractCorpName``.
         - dartlab.providers.reportSelector — ``selectReport`` + ``extractReportYear``.
         - dartlab.providers.tableParser — ``parseAmount`` (parseDividendTable 경유).
 

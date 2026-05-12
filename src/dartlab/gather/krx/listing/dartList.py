@@ -26,7 +26,7 @@ def _dartListCacheFile() -> Path:
     Path
         ``{dataRoot}/dartList/dartList.parquet`` 경로.
     """
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / "dartList" / "dartList.parquet"
 

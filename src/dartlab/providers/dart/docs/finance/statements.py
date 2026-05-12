@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.frame.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
 from dartlab.providers.reportSelector import parsePeriodKey, selectReport
 from dartlab.providers.tableParser import extractAccounts
 
@@ -364,7 +364,7 @@ def statements(
 
     Requires:
         - polars — DataFrame.
-        - dartlab.frame.dataLoader — ``loadData`` + ``PERIOD_KINDS``.
+        - dartlab.core.dataLoader — ``loadData`` + ``PERIOD_KINDS``.
         - dartlab.providers.reportSelector — ``selectReport`` + ``parsePeriodKey``.
         - dartlab.providers.tableParser — ``extractAccounts``.
 

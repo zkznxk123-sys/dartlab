@@ -77,7 +77,7 @@ def _loadYear(year: int) -> pl.DataFrame | None:
     pl.DataFrame | None
         해당 연도 raw OHLCV. HF 에 미빌드면 None + 안내 로그.
     """
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     stockCode = f"raw-{year}"  # filename = stockCode + ".parquet" (loadData 컨벤션)
     try:

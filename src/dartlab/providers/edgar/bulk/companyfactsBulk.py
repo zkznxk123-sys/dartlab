@@ -56,7 +56,7 @@ def _bulkDir() -> Path:
 
 def _financeDir() -> Path:
     from dartlab import config as _cfg
-    from dartlab.frame.dataConfig import DATA_RELEASES
+    from dartlab.core.dataConfig import DATA_RELEASES
 
     d = Path(_cfg.dataDir) / DATA_RELEASES["edgar"]["dir"]
     d.mkdir(parents=True, exist_ok=True)

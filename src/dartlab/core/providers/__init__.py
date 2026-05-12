@@ -9,7 +9,7 @@ ai/settings/{provider_catalog, secrets}.py 는 0.10 까지 re-export shim 유지
 0.11 에서 제거 예정 (CHANGELOG 명시).
 """
 
-from dartlab.reference.providers.registry import (
+from dartlab.core.providers.registry import (
     _PROVIDERS,
     AI_ROLES,
     ProviderSpec,
@@ -24,13 +24,13 @@ from dartlab.reference.providers.registry import (
     publicProviderIds,
     wiredProviderIds,
 )
-from dartlab.reference.providers.secrets import (
+from dartlab.core.providers.secrets import (
     SecretEntry,
     SecretStore,
     SecretStoreError,
     getSecretStore,
 )
-from dartlab.reference.providers.setupGuide import (
+from dartlab.core.providers.setupGuide import (
     DISPLAY_ORDER,
     noProviderMessage,
     providerGuide,

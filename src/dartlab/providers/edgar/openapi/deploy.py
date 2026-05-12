@@ -23,7 +23,7 @@ import logging
 import os
 from pathlib import Path
 
-from dartlab.frame.dataConfig import DATA_RELEASES, HF_REPO
+from dartlab.core.dataConfig import DATA_RELEASES, HF_REPO
 
 _log = logging.getLogger(__name__)
 

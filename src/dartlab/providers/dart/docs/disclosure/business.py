@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 
 import polars as pl
 
-from dartlab.frame.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.providers.reportSelector import extractReportYear, selectReport
 
 SECTION_KEYS = {

@@ -81,7 +81,7 @@ def loadManifest(source: str) -> pl.DataFrame:
     fetchSeries : 실제 시계열 fetch (manifest 매칭 후 호출).
     latestUpdatedAt : manifest 의 갱신 시각.
     """
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     return loadData("manifest", category=_category(source))
 
@@ -126,7 +126,7 @@ def loadObservations(source: str) -> pl.DataFrame:
     fetchMulti : 복수 시리즈 wide pivot.
     loadManifest : 시리즈 universe.
     """
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     df = loadData("observations", category=_category(source))
     if "date" in df.columns:

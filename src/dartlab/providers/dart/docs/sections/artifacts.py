@@ -187,7 +187,7 @@ def loadSectionProfileTable() -> pl.DataFrame | None:
     """
     try:
         with packagedArtifactPath("sectionProfileTable.parquet") as path:
-            from dartlab.frame.dataLoader import readParquetSafe
+            from dartlab.core.dataLoader import readParquetSafe
 
             return readParquetSafe(path)
     except FileNotFoundError as e:

@@ -404,7 +404,7 @@ def test_company_resolveTickerRow_falls_back_to_listed_universe(monkeypatch, tmp
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
     monkeypatch.setattr(
-        "dartlab.frame.dataLoader.loadEdgarListedUniverse",
+        "dartlab.core.dataLoader.loadEdgarListedUniverse",
         lambda *args, **kwargs: _ticker_df(),
     )
     monkeypatch.setattr("dartlab.providers.edgar.finance.pivot.buildTimeseries", lambda *args, **kwargs: None)

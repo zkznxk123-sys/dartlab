@@ -149,8 +149,8 @@ def _getFinancials5y(stockCode: str) -> list[dict]:
     try:
         import polars as pl
 
-        from dartlab.frame.dataConfig import DATA_RELEASES
-        from dartlab.frame.dataLoader import _getDataRoot
+        from dartlab.core.dataConfig import DATA_RELEASES
+        from dartlab.core.dataLoader import _getDataRoot
 
         finPath = _getDataRoot() / DATA_RELEASES["scan"]["dir"] / "finance.parquet"
         if not finPath.exists():

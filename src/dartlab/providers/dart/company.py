@@ -22,13 +22,13 @@ import polars as pl
 pl.Config.set_fmt_str_lengths(80)
 pl.Config.set_tbl_width_chars(200)
 
-from dartlab.core.logger import getLogger
-from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.frame.dataLoader import (
+from dartlab.core.dataLoader import (
     buildIndex,
     extractCorpName,
     loadData,
 )
+from dartlab.core.logger import getLogger
+from dartlab.core.polarsUtil import isEmptyDf
 
 _log = getLogger(__name__)
 
@@ -813,7 +813,7 @@ class Company:
             - polars
             - dartlab.core.memory.BoundedCache (30 entry cap)
             - dartlab.providers.dart.accessor.* (Notes/Profile/Docs/Finance/Report)
-            - dartlab.frame.dataLoader.loadData (corpName 추출)
+            - dartlab.core.dataLoader.loadData (corpName 추출)
 
         Capabilities:
             - 단일 한국 상장사 facade 진입점 — docs/finance/report 통합 access.
@@ -2258,7 +2258,7 @@ class Company:
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""
-        from dartlab.reference.show import buildBlockIndex
+        from dartlab.providers.show import buildBlockIndex
 
         return buildBlockIndex(topicRows)
 
@@ -2647,7 +2647,7 @@ class Company:
             c.select("IS", ["매출액"]).chart()
         """
         from dartlab.frame.select import SelectResult
-        from dartlab.reference.show import selectFromShow
+        from dartlab.providers.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None X)
         try:

@@ -2,10 +2,10 @@
 
 본체: src/dartlab/core/providers/registry.py
 0.10 부터 snake alias 제거 (사용자 결정). 모든 사용처 camelCase 갱신 완료.
-0.11 release 시 본 shim 제거 예정 — `from dartlab.reference.providers import ...` 직접 사용.
+0.11 release 시 본 shim 제거 예정 — `from dartlab.core.providers import ...` 직접 사용.
 """
 
-from dartlab.reference.providers.registry import (  # noqa: F401
+from dartlab.core.providers.registry import (  # noqa: F401
     _PROVIDERS,
     AI_ROLES,
     ProviderSpec,

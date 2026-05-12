@@ -118,7 +118,7 @@ def loadListing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, d
 
 def _scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     """report parquet에서 특정 apiType만 LazyFrame 스캔."""
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     report_dir = Path(_dataDir("report"))
     parquet_files = sorted(report_dir.glob("*.parquet"))
@@ -481,7 +481,7 @@ def scanAffiliateDocs(
     >>> gt = scanAffiliateDocs(n2c, c2n)
     >>> gt.get("005930")
     """
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     docs_dir = Path(_dataDir("docs"))
     parquet_files = sorted(docs_dir.glob("*.parquet"))

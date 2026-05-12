@@ -20,8 +20,8 @@ import re
 
 import polars as pl
 
+from dartlab.core.dataLoader import loadData
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.frame.dataLoader import loadData
 from dartlab.providers.edgar.docs.sections.mapper import mapSectionTitle
 from dartlab.providers.edgar.docs.sections.textStructure import parseTextStructure
 from dartlab.providers.edgar.docs.sections.views import sortPeriods

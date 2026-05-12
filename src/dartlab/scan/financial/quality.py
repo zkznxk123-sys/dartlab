@@ -183,7 +183,7 @@ def _scanPerFile() -> pl.DataFrame:
         - cfToNi : float — 영업CF / 순이익 (배). 극단값(|x|>20) 은 None
         - grade : str — 이익의 질 등급 (우수/양호/보통/주의/위험)
     """
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

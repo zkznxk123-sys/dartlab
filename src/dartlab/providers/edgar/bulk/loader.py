@@ -86,6 +86,6 @@ def registerEdgarBulkLoader() -> None:
     AIContext:
         <TODO: AI 호출 컨텍스트>
     """
-    from dartlab.frame.loaders import registerLoader
+    from dartlab.core.loaders import registerLoader
 
     registerLoader(EdgarBulkLoader())

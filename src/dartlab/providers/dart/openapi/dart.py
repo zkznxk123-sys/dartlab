@@ -30,7 +30,7 @@ from typing import Literal
 import polars as pl
 
 from dartlab import config as _dartlabConfig
-from dartlab.frame.dataConfig import DATA_RELEASES
+from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.providers.dart.openapi.client import DartClient
 
 # ── 내부 상수 ──────────────────────────────────────────────

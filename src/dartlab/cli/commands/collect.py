@@ -256,7 +256,7 @@ def _runRepairCache(console, args) -> int:
     과거 ETag 사이드카 first-write 버그(2026-04-06 발견)로 영구 stale로 굳어진
     로컬 parquet들을 일괄 회복한다. ETag + Content-Length 2단계 검증.
     """
-    from dartlab.frame.dataLoader import repairLocalCache
+    from dartlab.core.dataLoader import repairLocalCache
 
     dryRun = getattr(args, "dry_run", False)
     catsArg = getattr(args, "categories", None)
@@ -543,7 +543,7 @@ def _runEdgarUncollected(console, args) -> int:
 def _loadEdgarTickers(tier: str) -> list[str] | None:
     """tier별 EDGAR ticker 목록 — SEC 동적 유니버스 우선, 정적 JSON fallback."""
     try:
-        from dartlab.frame.dataLoader import loadEdgarTargetUniverse
+        from dartlab.core.dataLoader import loadEdgarTargetUniverse
 
         df = loadEdgarTargetUniverse(tier)
         if df.height > 0:

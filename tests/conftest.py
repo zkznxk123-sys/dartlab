@@ -30,8 +30,8 @@ from pathlib import Path
 
 import pytest
 
+from dartlab.core.dataLoader import _dataDir
 from dartlab.core.memory import PRESSURE_CRITICAL_MB, getMemoryMb
-from dartlab.frame.dataLoader import _dataDir
 
 
 def pytest_configure(config):

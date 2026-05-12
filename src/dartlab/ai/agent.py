@@ -100,8 +100,18 @@ def runAgent(
         # 회귀 가드: 노드 추가 아님. 기계적 메모리 관리만.
         _microcompact(messages, keepLast=2)
 
+        # lazy 소비 — provider 가 토큰 yield 하는 즉시 SSE chunk emit (typing 효과).
+        # 회귀 가드: list(streamProvider(...)) 로 한 번에 모은 뒤 풀면 LLM 응답 끝까지 블록 →
+        # UI 가 "분석중..." 만 길게 보이다 한 방에 답이 나타남. iterator 그대로 돌려야 한다.
+        final_chunk = None
         try:
-            chunks = list(streamProvider(provider, messages, tools))
+            for chunk in streamProvider(provider, messages, tools):
+                if chunk.final:
+                    final_chunk = chunk
+                    continue
+                if chunk.text:
+                    text_emitted += chunk.text
+                    yield TraceEvent("chunk", {"text": chunk.text})
         except Exception as exc:  # noqa: BLE001
             logger.exception(
                 "stream_provider failed (provider=%s, iter=%d)",
@@ -111,13 +121,6 @@ def runAgent(
             yield TraceEvent("error", {"error": f"{type(exc).__name__}: {exc}"})
             return
 
-        # 텍스트 델타 emit (final 아닌 chunks)
-        for chunk in chunks:
-            if chunk.text and not chunk.final:
-                text_emitted += chunk.text
-                yield TraceEvent("chunk", {"text": chunk.text})
-
-        final_chunk = next((c for c in chunks if c.final), None)
         turn = final_chunk.turn if final_chunk else None
         if turn is None:
             yield TraceEvent("error", {"error": "no_final_turn"})

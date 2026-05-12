@@ -160,7 +160,7 @@ class CredentialManager:
         if provider is not None:
             provider.save(value)
             return
-        from dartlab.reference.providers import apiKeySecretName, getSecretStore, normalizeProvider
+        from dartlab.core.providers import apiKeySecretName, getSecretStore, normalizeProvider
 
         rawProvider = name.replace("_api_key", "")
         normalized = normalizeProvider(rawProvider) or rawProvider
@@ -172,10 +172,10 @@ class CredentialManager:
         try:
             import os
 
-            from dartlab.reference.providers import (
+            from dartlab.core.providers import (
                 _PROVIDERS as _AI_PROVIDERS,
             )
-            from dartlab.reference.providers import (
+            from dartlab.core.providers import (
                 apiKeySecretName,
                 getSecretStore,
                 oauthSecretName,
@@ -210,7 +210,7 @@ class CredentialManager:
     def _getDefaultProvider(self) -> str | None:
         """ai_profile.json 의 defaultProvider 만 직접 조회 (core/providers thin 헬퍼)."""
         try:
-            from dartlab.reference.providers import getDefaultProvider
+            from dartlab.core.providers import getDefaultProvider
 
             return getDefaultProvider()
         except ImportError:

@@ -58,7 +58,7 @@ def edgarFinancePath(cik: str) -> Path:
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / "edgar" / "finance" / f"{cik}.parquet"
 

@@ -48,7 +48,7 @@ def parseNumStr(s: str | None) -> float | None:
 
 def periodCols(df: pl.DataFrame) -> list[str]:
     """DataFrame에서 기간 컬럼만 추출 (최신 먼저)."""
-    from dartlab.reference.show import isPeriodColumn
+    from dartlab.providers.show import isPeriodColumn
 
     return [c for c in df.columns if isPeriodColumn(c)]
 

@@ -111,7 +111,7 @@ def test_dart_finance_isinstance_protocol():
 
 
 @pytest.mark.skipif(
-    not __import__("dartlab.frame.dataLoader", fromlist=["_dataDir"])
+    not __import__("dartlab.core.dataLoader", fromlist=["_dataDir"])
     ._dataDir("edgar")
     .joinpath("AAPL.parquet")
     .exists(),

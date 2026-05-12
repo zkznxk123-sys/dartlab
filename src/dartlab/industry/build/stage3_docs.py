@@ -36,8 +36,8 @@ _TOPIC_WEIGHT: dict[str, float] = {
 
 def _docsDir() -> Path:
     """docs parquet 디렉토리."""
-    from dartlab.frame.dataConfig import DATA_RELEASES
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / DATA_RELEASES["docs"]["dir"]
 

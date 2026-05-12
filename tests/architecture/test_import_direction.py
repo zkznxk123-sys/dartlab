@@ -10,25 +10,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
 
-LAYER_OF = {
-    "core": 0,
-    "gather": 1,
-    "providers": 1,
-    "scan": 15,
-    "frame": 15,
-    "synth": 15,
-    "reference": 15,
-    "analysis": 2,
-    "macro": 2,
-    "quant": 2,
-    "industry": 2,
-    "credit": 2,
-    "story": 3,
-    "viz": 4,
-    "server": 4,
-    "ai": 4,
-    "mcp": 4,
+LAYER_OF: dict[str, float] = {
+    "core": 0.0,
+    "gather": 1.0,
+    "providers": 1.0,
+    "scan": 1.5,
+    "frame": 1.5,
+    "synth": 1.5,
+    "reference": 1.5,
+    "analysis": 2.0,
+    "macro": 2.0,
+    "quant": 2.0,
+    "industry": 2.0,
+    "credit": 2.0,
+    "story": 3.0,
+    "ai": 4.0,
+    "mcp": 4.0,
 }
+# sink 헬퍼 — CLAUDE.md "표현/전송 헬퍼: 모든 계층 결과를 다른 매체로". 호출 방향 룰 예외.
+# 어디서도 import 가능 (L0~L3 → viz/cli/server/channel OK). 단 sink 끼리 cross 는 별 룰 미적용.
+SINK_HELPERS = {"viz", "cli", "server", "channel"}
 
 
 def _topLevel(modName: str) -> str | None:
@@ -62,14 +63,19 @@ def test_import_direction_downward_only() -> None:
                     names = [a.name for a in node.names]
                 for n in names:
                     target = _topLevel(n)
-                    if target is None or target not in LAYER_OF:
+                    if target is None or target in SINK_HELPERS or target not in LAYER_OF:
                         continue
                     targetLayer = LAYER_OF[target]
                     if targetLayer > ownerLayer:
                         rel = pyFile.relative_to(ROOT.parent.parent)
                         violations.append(f"{rel}:{node.lineno}: L{ownerLayer} {ownerName} → L{targetLayer} {target}")
-    # backward compat 광범위 shim — baseline 등록, 신규 위반만 차단
-    BASELINE = 300
+    # baseline 300 → 69 (-77%) — 단계 D1~D3 진행:
+    #   D1: dataLoader/dataConfig/loaders → core 복귀 (-115)
+    #   D2: show.py → providers, reference/providers → core/providers (-29)
+    #   D3: SINK helpers (viz/cli/server/channel) 검사 제외 (-9)
+    # 잔존 69 = mappers·viewer·htmlRenderer (17) + providers→{analysis,synth,industry,credit} 24 + 기타.
+    # 다음 단계 D4 (providers↔reference mappers 정리) + D5 (providers→L2 의존 끊기) 후 0 목표.
+    BASELINE = 69
     assert len(violations) <= BASELINE, f"역방향 import 신규 위반 ({len(violations)} > {BASELINE}):\n" + "\n".join(
         violations[:20]
     )

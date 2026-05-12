@@ -10,7 +10,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.frame.dataConfig import (
+from dartlab.core.dataConfig import (
     DATA_RELEASES,
     HF_REPO,
     hfBaseUrl,
@@ -406,7 +406,7 @@ def loadData(
         effectiveSinceYear = 2009
     if category == "edgarDocs":
         # registry dispatch (정공법 B — DIP). providers/edgar 가 EdgarDocsLoader 등록.
-        from dartlab.frame.loaders import getLoader
+        from dartlab.core.loaders import getLoader
 
         loader = getLoader("edgarDocs")
         if loader is None:
@@ -464,7 +464,7 @@ def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefr
     """
     if category == "edgar":
         # registry dispatch (정공법 B — DIP). providers/edgar 가 EdgarBulkLoader 등록.
-        from dartlab.frame.loaders import getLoader
+        from dartlab.core.loaders import getLoader
 
         loader = getLoader("edgar")
         if loader is None:

@@ -297,7 +297,7 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
         TargetMarkets:
             - US (SEC EDGAR) show dispatch.
     """
-    from dartlab.reference.show import transposeToVertical as _coreTranspose
+    from dartlab.providers.show import transposeToVertical as _coreTranspose
 
     return _coreTranspose(wide, periods)
 
@@ -349,7 +349,7 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
         TargetMarkets:
             - US (SEC EDGAR) show dispatch.
     """
-    from dartlab.reference.show import buildBlockIndex as _coreBuildBlockIndex
+    from dartlab.providers.show import buildBlockIndex as _coreBuildBlockIndex
 
     return _coreBuildBlockIndex(topicRows)
 

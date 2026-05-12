@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from dartlab.reference.providers import (
+from dartlab.core.providers import (
     _PROVIDERS,
     AI_ROLES,
     ProviderSpec,

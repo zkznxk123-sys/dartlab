@@ -223,7 +223,7 @@ def _scanPerFile() -> pl.DataFrame:
         컬럼 상세는 ``_computeGrowth`` 독스트링 참조.
         데이터가 없으면 빈 DataFrame.
     """
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

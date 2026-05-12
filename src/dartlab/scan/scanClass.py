@@ -347,7 +347,7 @@ class Scan:
             - :meth:`iterDocsSections` — 본 메서드의 streaming pair (룰 10)
             - :func:`dartlab.scan.builders.kr.docsIndex.buildDocsIndex` — source 빌더
         """
-        from dartlab.frame.dataLoader import _dataDir, _getDataRoot
+        from dartlab.core.dataLoader import _dataDir, _getDataRoot
         from dartlab.scan.io.cross import pickCrossScanEngine
 
         if market not in ("KR", "US", "JP"):

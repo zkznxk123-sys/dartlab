@@ -49,7 +49,7 @@ def samsungAnnual():
     from dartlab.providers.dart.finance.pivot import buildAnnual
 
     df = pl.read_parquet(FIXTURE_FINANCE)
-    with patch("dartlab.frame.dataLoader.loadData", return_value=df):
+    with patch("dartlab.core.dataLoader.loadData", return_value=df):
         result = buildAnnual("005930")
 
     assert result is not None, "buildAnnual returned None for fixture"

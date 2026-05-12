@@ -62,7 +62,7 @@ def _mockLoadData(stockCode: str, category: str, **_kwargs):
 
 def test_gather_macro_uses_hf_without_api_key(monkeypatch):
     """API 키 없이 FRED HF observations 에서 단일 지표 반환."""
-    import dartlab.frame.dataLoader as dataLoader
+    import dartlab.core.dataLoader as dataLoader
     from dartlab.gather import getDefaultGather
 
     monkeypatch.setattr(dataLoader, "loadData", _mockLoadData)
@@ -77,7 +77,7 @@ def test_gather_macro_default_wide_keeps_existing_scope(monkeypatch):
     """기본 전체 호출은 기존 default 목록 기반 wide 형태를 유지."""
     import importlib
 
-    import dartlab.frame.dataLoader as dataLoader
+    import dartlab.core.dataLoader as dataLoader
 
     gather_mod = importlib.import_module("dartlab.gather")
 
@@ -91,7 +91,7 @@ def test_gather_macro_default_wide_keeps_existing_scope(monkeypatch):
 
 def test_gather_macro_unknown_hf_series_requires_explicit_api_key(monkeypatch):
     """HF 카탈로그 밖 지표는 apiKey 없이 자동 API fallback 하지 않음."""
-    import dartlab.frame.dataLoader as dataLoader
+    import dartlab.core.dataLoader as dataLoader
     from dartlab.gather import getDefaultGather
 
     monkeypatch.setattr(dataLoader, "loadData", _mockLoadData)

@@ -152,7 +152,7 @@ def test_docsSections_missing_index_clear_error(monkeypatch, tmp_path: Path) -> 
     """인덱스 미빌드 시 FileNotFoundError + 안내 메시지."""
     from dartlab.scan import Scan
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
     scan = Scan()
     with pytest.raises(FileNotFoundError, match="prebuildData.py"):
         scan.docsSections(year=2024)
@@ -168,7 +168,7 @@ def test_docsSections_filter_by_section_title(docsFixture: Path, tmp_path: Path,
     indexPath = scanDir / "docsIndex.parquet"
     buildDocsIndex(docsDir=docsFixture, outputPath=indexPath, sinceYear=2016)
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
 
     scan = Scan()
     df = scan.docsSections(sectionTitle="신용평가")
@@ -185,7 +185,7 @@ def test_docsSections_only_with_content(docsFixture: Path, tmp_path: Path, monke
     scanDir.mkdir()
     buildDocsIndex(docsDir=docsFixture, outputPath=scanDir / "docsIndex.parquet", sinceYear=2016)
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
 
     scan = Scan()
     df = scan.docsSections(sectionTitle="신용평가", onlyWithContent=True)
@@ -202,7 +202,7 @@ def test_docsSections_limit_enforced(docsFixture: Path, tmp_path: Path, monkeypa
     scanDir.mkdir()
     buildDocsIndex(docsDir=docsFixture, outputPath=scanDir / "docsIndex.parquet", sinceYear=2016)
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
 
     scan = Scan()
     assert scan.docsSections().height == 5  # default limit=100, 5 rows
@@ -213,7 +213,7 @@ def test_docsSections_market_invalid(tmp_path: Path, monkeypatch) -> None:
     """market 미지원 값은 ValueError."""
     from dartlab.scan import Scan
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
     scan = Scan()
     with pytest.raises(ValueError, match="KR/US/JP"):
         scan.docsSections(market="ZZ")
@@ -223,7 +223,7 @@ def test_docsSections_market_us_routes_to_edgar(tmp_path: Path, monkeypatch) -> 
     """market="US" → data/edgar/scan/docsIndex.parquet 경로 미빌드 시 안내 메시지."""
     from dartlab.scan import Scan
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._getDataRoot", lambda: tmp_path)
+    monkeypatch.setattr("dartlab.core.dataLoader._getDataRoot", lambda: tmp_path)
     scan = Scan()
     with pytest.raises(FileNotFoundError, match="edgar"):
         scan.docsSections(market="US")
@@ -233,7 +233,7 @@ def test_docsSections_market_jp_routes_to_edinet(tmp_path: Path, monkeypatch) ->
     """market="JP" → data/edinet/scan/docsIndex.parquet 경로 미빌드 시 안내 메시지."""
     from dartlab.scan import Scan
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._getDataRoot", lambda: tmp_path)
+    monkeypatch.setattr("dartlab.core.dataLoader._getDataRoot", lambda: tmp_path)
     scan = Scan()
     with pytest.raises(FileNotFoundError, match="edinet"):
         scan.docsSections(market="JP")
@@ -248,7 +248,7 @@ def test_iterDocsSections_yields_dicts(docsFixture: Path, tmp_path: Path, monkey
     scanDir.mkdir()
     buildDocsIndex(docsDir=docsFixture, outputPath=scanDir / "docsIndex.parquet", sinceYear=2016)
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda subdir: str(tmp_path / subdir))
 
     scan = Scan()
     rows = list(scan.iterDocsSections(sectionTitle="신용평가"))

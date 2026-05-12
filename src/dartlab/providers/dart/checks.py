@@ -37,9 +37,9 @@ def _importAndCall(modulePath: str, funcName: str, stockCode: str, **kwargs) -> 
 
 def _ensureData(stockCode: str, category: str) -> bool:
     """3단계 폴백: 로컬 → HuggingFace 다운로드 → DART API 자동 수집."""
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _dataDir, _download
     from dartlab.core.messaging import emit
-    from dartlab.frame.dataConfig import DATA_RELEASES
-    from dartlab.frame.dataLoader import _dataDir, _download
 
     dest = _dataDir(category) / f"{stockCode}.parquet"
 
@@ -109,7 +109,7 @@ def _ensureAllData(stockCode: str) -> dict[str, bool]:
         # Pyodide: 로컬 파일시스템 없음. loadData()가 on-demand로 HF fetch.
         return {"docs": True, "finance": True, "report": True}
 
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     categories = ["docs", "finance", "report"]
     result: dict[str, bool] = {}
@@ -150,8 +150,8 @@ def _checkDartDocsFreshness(stockCode: str, category: str = "docs"):
 
     Returns: FreshnessResult | None (L3 체크 결과, API 키 없으면 None).
     """
+    from dartlab.core.dataLoader import _checkRemoteFreshness, _dataDir, _download
     from dartlab.core.messaging import emit
-    from dartlab.frame.dataLoader import _checkRemoteFreshness, _dataDir, _download
 
     path = _dataDir(category) / f"{stockCode}.parquet"
     if not path.exists():

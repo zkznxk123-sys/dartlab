@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 from lxml import etree
 
 from dartlab import config as _cfg
-from dartlab.frame.dataConfig import DATA_RELEASES
+from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
 from dartlab.providers.dart.openapi.disclosure import listFilings

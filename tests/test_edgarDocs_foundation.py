@@ -21,7 +21,7 @@ def test_edgarDocs_fixture_loads():
 
 
 def test_edgarDocs_has_minimum_common_schema(tmp_path, monkeypatch):
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -70,7 +70,7 @@ def test_edgarDocs_preserves_edgar_specific_columns():
 
 
 def test_edgarDocs_common_view_values(tmp_path, monkeypatch):
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -94,7 +94,7 @@ def test_edgarDocs_common_view_values(tmp_path, monkeypatch):
 
 
 def test_extractCorpName_supports_company_name():
-    from dartlab.frame.dataLoader import extractCorpName
+    from dartlab.core.dataLoader import extractCorpName
 
     df = pl.read_parquet(FIXTURE_EDGAR_DOCS)
     assert extractCorpName(df) == "Apple Inc."
@@ -102,7 +102,7 @@ def test_extractCorpName_supports_company_name():
 
 def test_buildIndex_supports_accession_no(tmp_path, monkeypatch):
     from dartlab import config
-    from dartlab.frame.dataLoader import buildIndex
+    from dartlab.core.dataLoader import buildIndex
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -124,7 +124,7 @@ def test_buildIndex_supports_accession_no(tmp_path, monkeypatch):
 
 
 def test_data_releases_has_edgarDocs():
-    from dartlab.frame.dataConfig import DATA_RELEASES
+    from dartlab.core.dataConfig import DATA_RELEASES
 
     assert "edgarDocs" in DATA_RELEASES
     assert DATA_RELEASES["edgarDocs"]["dir"] == "edgar/docs"
@@ -134,7 +134,7 @@ def test_data_releases_has_edgarDocs():
 def test_downloadAll_blocks_edgarDocs_bulk_download():
     import pytest
 
-    from dartlab.frame.dataLoader import downloadAll
+    from dartlab.core.dataLoader import downloadAll
 
     with pytest.raises(ValueError, match="edgarDocs"):
         downloadAll("edgarDocs")
@@ -163,7 +163,7 @@ def test_download_skips_edgarDocs(monkeypatch, capsys, tmp_path):
 
 def test_loadData_falls_back_to_edgar_api(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     fixture = pl.read_parquet(FIXTURE_EDGAR_DOCS)
     dataRoot = tmp_path / "data"
@@ -179,7 +179,7 @@ def test_loadData_falls_back_to_edgar_api(monkeypatch, tmp_path):
         fixture.write_parquet(outPath)
         return outPath
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._download", fakeDownload)
+    monkeypatch.setattr("dartlab.core.dataLoader._download", fakeDownload)
     monkeypatch.setattr("dartlab.providers.edgar.docs.fetch.fetchEdgarDocs", fakeFetchEdgarDocs)
 
     df = loadData("AAPL", category="edgarDocs")
@@ -191,7 +191,7 @@ def test_loadData_falls_back_to_edgar_api(monkeypatch, tmp_path):
 
 def test_loadData_edgarDocs_sinceYear_override(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     fixture = pl.read_parquet(FIXTURE_EDGAR_DOCS)
     dataRoot = tmp_path / "data"
@@ -208,7 +208,7 @@ def test_loadData_edgarDocs_sinceYear_override(monkeypatch, tmp_path):
         fixture.write_parquet(outPath)
         return outPath
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._download", fakeDownload)
+    monkeypatch.setattr("dartlab.core.dataLoader._download", fakeDownload)
     monkeypatch.setattr("dartlab.providers.edgar.docs.fetch.fetchEdgarDocs", fakeFetchEdgarDocs)
 
     loadData("AAPL", category="edgarDocs", sinceYear=2015)
@@ -217,7 +217,7 @@ def test_loadData_edgarDocs_sinceYear_override(monkeypatch, tmp_path):
 
 
 def test_getLocalEdgarDocsState_reads_latest_from_parquet(tmp_path):
-    from dartlab.frame.dataLoader import _getLocalEdgarDocsState
+    from dartlab.core.dataLoader import _getLocalEdgarDocsState
 
     df = pl.read_parquet(FIXTURE_EDGAR_DOCS)
     path = tmp_path / "AAPL.parquet"
@@ -232,7 +232,7 @@ def test_getLocalEdgarDocsState_reads_latest_from_parquet(tmp_path):
 
 def test_loadData_edgarDocs_local_only_uses_local_file(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -249,7 +249,7 @@ def test_loadData_edgarDocs_local_only_uses_local_file(monkeypatch, tmp_path):
 
 def test_loadData_edgarDocs_force_check_skips_rebuild_when_fresh(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -260,7 +260,7 @@ def test_loadData_edgarDocs_force_check_skips_rebuild_when_fresh(monkeypatch, tm
 
     monkeypatch.setattr(config, "dataDir", str(dataRoot))
     monkeypatch.setattr(
-        "dartlab.frame.dataLoader._getLatestRegularEdgarFiling",
+        "dartlab.core.dataLoader._getLatestRegularEdgarFiling",
         lambda stockCode, sinceYear=2009: {
             "ticker": "AAPL",
             "cik": "0000320193",
@@ -272,7 +272,7 @@ def test_loadData_edgarDocs_force_check_skips_rebuild_when_fresh(monkeypatch, tm
 
     rebuilt = {"called": False}
     monkeypatch.setattr(
-        "dartlab.frame.dataLoader._incrementalUpdateEdgarDocs",
+        "dartlab.core.dataLoader._incrementalUpdateEdgarDocs",
         lambda *args, **kwargs: rebuilt.__setitem__("called", True),
     )
 
@@ -282,7 +282,7 @@ def test_loadData_edgarDocs_force_check_skips_rebuild_when_fresh(monkeypatch, tm
 
 def test_loadData_edgarDocs_force_check_runs_incremental_when_stale(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     dataRoot = tmp_path / "data"
     docsDir = dataRoot / "edgar" / "docs"
@@ -293,7 +293,7 @@ def test_loadData_edgarDocs_force_check_runs_incremental_when_stale(monkeypatch,
 
     monkeypatch.setattr(config, "dataDir", str(dataRoot))
     monkeypatch.setattr(
-        "dartlab.frame.dataLoader._getLatestRegularEdgarFiling",
+        "dartlab.core.dataLoader._getLatestRegularEdgarFiling",
         lambda stockCode, sinceYear=2009: {
             "ticker": "AAPL",
             "cik": "0000320193",
@@ -310,7 +310,7 @@ def test_loadData_edgarDocs_force_check_runs_incremental_when_stale(monkeypatch,
         called["path"] = pathArg
         called["latest"] = latestRemote
 
-    monkeypatch.setattr("dartlab.frame.dataLoader._incrementalUpdateEdgarDocs", fakeIncremental)
+    monkeypatch.setattr("dartlab.core.dataLoader._incrementalUpdateEdgarDocs", fakeIncremental)
 
     loadData("AAPL", category="edgarDocs", refresh="force_check")
     assert called["stockCode"] == "AAPL"
@@ -318,7 +318,7 @@ def test_loadData_edgarDocs_force_check_runs_incremental_when_stale(monkeypatch,
 
 
 def test_selectEdgarReport_annual_and_quarter():
-    from dartlab.frame.dataLoader import _normalizeLoadedFrame
+    from dartlab.core.dataLoader import _normalizeLoadedFrame
     from dartlab.providers.reportSelector import selectEdgarReport
 
     df = pl.read_parquet(FIXTURE_EDGAR_DOCS)
@@ -562,7 +562,7 @@ def test_prepareEdgarCollectibleUniverse_writes_incremental_cache_and_progress(m
             },
         }
 
-    monkeypatch.setattr("dartlab.frame.dataLoader.loadEdgarListedUniverse", fakeLoadListedUniverse)
+    monkeypatch.setattr("dartlab.core.dataLoader.loadEdgarListedUniverse", fakeLoadListedUniverse)
     monkeypatch.setattr("dartlab.providers.edgar.docs.fetch._getSubmissions", fakeGetSubmissions)
 
     progressPath = tmp_path / "universe.progress.jsonl"
@@ -1163,7 +1163,7 @@ def test_parseEdgarPeriodKey_and_extractEdgarReportYear():
 
 def test_updateEdgarListedUniverse_writes_cache(monkeypatch, tmp_path):
     from dartlab import config
-    from dartlab.frame.dataLoader import loadEdgarListedUniverse, updateEdgarListedUniverse
+    from dartlab.core.dataLoader import loadEdgarListedUniverse, updateEdgarListedUniverse
 
     payload = {
         "data": [
@@ -1175,7 +1175,7 @@ def test_updateEdgarListedUniverse_writes_cache(monkeypatch, tmp_path):
     }
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path / "data"))
-    monkeypatch.setattr("dartlab.frame.dataLoader._fetchJson", lambda url: payload)
+    monkeypatch.setattr("dartlab.core.dataLoader._fetchJson", lambda url: payload)
 
     path = updateEdgarListedUniverse(force=True)
     df = loadEdgarListedUniverse()
@@ -1192,7 +1192,7 @@ def test_updateEdgarListedUniverse_writes_cache(monkeypatch, tmp_path):
 def test_fetchJson_uses_sec_user_agent(monkeypatch):
     import json
 
-    from dartlab.frame.dataLoader import _fetchJson
+    from dartlab.core.dataLoader import _fetchJson
 
     class FakeResponse:
         def __enter__(self):
@@ -1208,7 +1208,7 @@ def test_fetchJson_uses_sec_user_agent(monkeypatch):
         assert request.headers["User-agent"] == "DartLab eddmpython@gmail.com"
         return FakeResponse()
 
-    monkeypatch.setattr("dartlab.frame.dataLoader.urlopen", fakeUrlopen)
+    monkeypatch.setattr("dartlab.core.dataLoader.urlopen", fakeUrlopen)
 
     payload = _fetchJson("https://example.com/test.json")
 

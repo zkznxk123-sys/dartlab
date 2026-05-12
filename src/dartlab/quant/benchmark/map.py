@@ -77,7 +77,7 @@ def availableIndexNames() -> set[tuple[str, str]]:
     """
     import polars as pl
 
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataLoader import _getDataRoot
 
     root = Path(_getDataRoot()) / "krx" / "indices"
     files = sorted(root.glob("raw-*.parquet"), reverse=True)

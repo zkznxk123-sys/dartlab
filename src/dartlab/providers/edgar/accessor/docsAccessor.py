@@ -502,7 +502,7 @@ class _DocsAccessor:
         if key in self._company._cache:
             return self._company._cache[key]
 
-        from dartlab.frame.dataLoader import loadData
+        from dartlab.core.dataLoader import loadData
 
         df = loadData(self._company.ticker, category="edgarDocs")
         if isEmptyDf(df):

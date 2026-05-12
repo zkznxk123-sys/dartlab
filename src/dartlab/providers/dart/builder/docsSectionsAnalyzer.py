@@ -95,7 +95,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = empty
             return empty
 
-        from dartlab.frame.dataLoader import loadData
+        from dartlab.core.dataLoader import loadData
 
         raw = loadData(
             self._stockCode,
@@ -321,7 +321,7 @@ class SectionsAnalyzer:
             self._cache[cacheKey] = empty
             return empty
 
-        from dartlab.frame.dataLoader import loadData
+        from dartlab.core.dataLoader import loadData
 
         raw = loadData(
             self._stockCode,

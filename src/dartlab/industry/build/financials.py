@@ -32,8 +32,8 @@ _ASSET_SANITY_LIMIT = 5.0e15
 
 
 def _finPath() -> Path:
-    from dartlab.frame.dataConfig import DATA_RELEASES
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     return _getDataRoot() / DATA_RELEASES["scan"]["dir"] / "finance.parquet"
 

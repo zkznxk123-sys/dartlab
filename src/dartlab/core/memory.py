@@ -193,7 +193,7 @@ def cleanupBetweenCompanies(label: str = "") -> tuple[float, float]:
     """
     before = getMemoryMb()
     try:
-        from dartlab.frame.dataLoader import _clearLoadCache
+        from dartlab.core.dataLoader import _clearLoadCache
 
         _clearLoadCache()
     except (ImportError, AttributeError):
@@ -381,7 +381,7 @@ class BoundedCache:
                     del self._store[k]
             self._max = max(self._default_max // 8, 1)
             try:
-                from dartlab.frame.dataLoader import _clearLoadCache
+                from dartlab.core.dataLoader import _clearLoadCache
 
                 _clearLoadCache()
             except (ImportError, AttributeError):

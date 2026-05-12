@@ -135,7 +135,7 @@ def buildDocsIndex(
         - :func:`dartlab.scan.scanClass.Scan.docsSections` — 본 인덱스 소비자
         - :data:`_OUTPUT_SCHEMA` — 컬럼 contract
     """
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     docsRoot = Path(docsDir) if docsDir else Path(_dataDir("docs"))
     if not docsRoot.exists():
@@ -304,7 +304,7 @@ def buildEdgarDocsIndex(
         - :func:`buildDocsIndex` — 본 wrapper 의 위임 대상
         - :func:`buildEdinetDocsIndex` — 일본 시장 동일 schema
     """
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataLoader import _getDataRoot
 
     if docsDir is None:
         docsDir = _getDataRoot() / "edgar" / "docs"
@@ -374,7 +374,7 @@ def buildEdinetDocsIndex(
     SeeAlso:
         - :func:`buildDocsIndex` · :func:`buildEdgarDocsIndex` — 동일 schema sibling
     """
-    from dartlab.frame.dataLoader import _getDataRoot
+    from dartlab.core.dataLoader import _getDataRoot
 
     if docsDir is None:
         docsDir = _getDataRoot() / "edinet" / "docs"

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.frame.dataLoader import extractCorpName, loadData
+from dartlab.core.dataLoader import extractCorpName, loadData
 from dartlab.providers.dart.docs.finance.audit.parser import (
     classifyBlock,
     dedup,

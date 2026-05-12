@@ -16,7 +16,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from dartlab.reference.providers.routing import AI_ROLES
+from dartlab.core.providers.routing import AI_ROLES
 
 
 @dataclass(frozen=True)

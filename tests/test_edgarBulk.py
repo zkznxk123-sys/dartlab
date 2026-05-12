@@ -226,7 +226,7 @@ def test_dataset_files_excludes_num() -> None:
 
 
 def test_dataconfig_edgar_meta_registered() -> None:
-    from dartlab.frame.dataConfig import DATA_RELEASES
+    from dartlab.core.dataConfig import DATA_RELEASES
 
     assert "edgarMeta" in DATA_RELEASES
     assert DATA_RELEASES["edgarMeta"]["dir"] == "edgar/meta"

@@ -2,7 +2,7 @@
 
 import polars as pl
 
-from dartlab.frame.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
 from dartlab.providers.dart.docs.finance.affiliate.extractor import parseTableRows
 from dartlab.providers.dart.docs.finance.affiliate.parser import (
     extractMovements,

@@ -50,7 +50,7 @@ async def _getTickerLock(key: str) -> asyncio.Lock:
 def _edgarDataPath(category: str, key: str) -> Path:
     """EDGAR parquet 저장 경로."""
     from dartlab import config as _cfg
-    from dartlab.frame.dataConfig import DATA_RELEASES
+    from dartlab.core.dataConfig import DATA_RELEASES
 
     subDir = DATA_RELEASES[category]["dir"]
     dest = Path(_cfg.dataDir) / subDir / f"{key}.parquet"
@@ -89,7 +89,7 @@ def _existingFinanceLatestFiled(path: Path) -> str | None:
 
 def _resolveTickerMap(tickers: list[str]) -> dict[str, dict[str, str]]:
     """ticker 목록 → {ticker: {"cik": ..., "title": ...}} 맵."""
-    from dartlab.frame.dataLoader import loadEdgarListedUniverse
+    from dartlab.core.dataLoader import loadEdgarListedUniverse
 
     universe = loadEdgarListedUniverse()
     tickerMap: dict[str, dict[str, str]] = {}
@@ -569,7 +569,7 @@ def batchCollectEdgarAll(
         TargetMarkets:
             - US (SEC EDGAR) 배치.
     """
-    from dartlab.frame.dataLoader import loadEdgarTargetUniverse
+    from dartlab.core.dataLoader import loadEdgarTargetUniverse
 
     universe = loadEdgarTargetUniverse(tier)
     allTickers = universe["ticker"].to_list()

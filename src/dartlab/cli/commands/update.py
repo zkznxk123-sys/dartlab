@@ -51,7 +51,7 @@ def run(args) -> int:
 
 def _updateCodes(console, args) -> int:
     """특정 종목 데이터를 HF에서 최신으로 갱신."""
-    from dartlab.frame.dataLoader import loadData
+    from dartlab.core.dataLoader import loadData
 
     cats = _parseCategories(args)
     updated = 0
@@ -76,7 +76,7 @@ def _updateCodes(console, args) -> int:
 
 def _updateAll(console, args) -> int:
     """전체 카테고리를 HF 최신으로 갱신."""
-    from dartlab.frame.dataLoader import downloadAll
+    from dartlab.core.dataLoader import downloadAll
 
     cats = _parseCategories(args)
 

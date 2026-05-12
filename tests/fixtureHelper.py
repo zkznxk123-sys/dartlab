@@ -33,8 +33,8 @@ def hasFixture(stockCode: str, category: str) -> bool:
 
 @contextmanager
 def patchLoadData(df: pl.DataFrame):
-    """dartlab.frame.dataLoader.loadData를 fixture DataFrame으로 패치."""
-    with patch("dartlab.frame.dataLoader.loadData", return_value=df):
+    """dartlab.core.dataLoader.loadData를 fixture DataFrame으로 패치."""
+    with patch("dartlab.core.dataLoader.loadData", return_value=df):
         yield
 
 

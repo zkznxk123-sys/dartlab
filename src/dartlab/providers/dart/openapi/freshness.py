@@ -36,7 +36,7 @@ class FreshnessResult:
 
 def _freshnessPath(stockCode: str, category: str = "docs") -> Path:
     """freshness 사이드카 파일 경로."""
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     return _dataDir(category) / f"{stockCode}.freshness"
 
@@ -66,7 +66,7 @@ def _saveFreshnessResult(result: FreshnessResult, category: str = "docs") -> Non
 
 def _loadLocalRceptNos(stockCode: str) -> tuple[set[str], str | None]:
     """로컬 docs parquet에서 rcept_no 세트 + 최신 rcept_dt."""
-    from dartlab.frame.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     path = _dataDir("docs") / f"{stockCode}.parquet"
     if not path.exists():
@@ -350,8 +350,8 @@ def scanMarketFreshness(
         TargetMarkets:
             - KR (DART) freshness.
     """
+    from dartlab.core.dataLoader import _dataDir
     from dartlab.core.messaging import emit
-    from dartlab.frame.dataLoader import _dataDir
     from dartlab.providers.dart.openapi.client import DartClient
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey, resolveDartKeys
     from dartlab.providers.dart.openapi.disclosure import listFilings
