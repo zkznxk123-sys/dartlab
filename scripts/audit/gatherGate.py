@@ -1,20 +1,27 @@
-"""G-트랙 게이트 — gather/ 도메인 7 룰 통합 audit.
+"""G-트랙 게이트 — gather/ 도메인 8 룰 통합 audit (G+ 격상 후).
 
 `providerGate.py` 의 자매 script. providers/ 의 11 룰 중 gather/ 에 적용
-가능한 7 룰만 일괄 실행. 각 audit script 에 `--baseline <path>` 옵션으로
-gather 전용 baseline 을 주입.
+가능한 7 룰 + G+ 트랙 신설 룰 6b (9-section) 통합 실행. 각 audit script 에
+`--baseline <path>` 옵션으로 gather 전용 baseline 을 주입.
 
 적용 룰:
-    3. LoC 임계      (folderSize.py + gatherSize.json)
-    4. __init__ thin (initThin.py + gatherInit.json)
-    5. _*.py 0       (underscoreModules.py + gatherUnderscore.json)
-    6. docstring 4-섹션 (docstring4Section.py + gatherDocstring4Section.json)
-    8. limit keyword (limitDefault.py + gatherLimitDefault.json)
-    7. src↔tests mirror (test_structureMirror.py — gather scope, P-G7 이후)
-    9. raw cross-scan (test_no_raw_cross_scan.py — gather scope, P-G8 이후)
+    3.  LoC 임계      (folderSize.py + gatherSize.json)
+    4.  __init__ thin (initThin.py + gatherInit.json)
+    5.  _*.py 0       (underscoreModules.py + gatherUnderscore.json)
+    6.  docstring 4-섹션 (docstring4Section.py + gatherDocstring4Section.json)
+    6b. docstring 9-섹션 (docstring9Section.py + gatherDocstring9Section.json) — G+ P-D0
+    8.  limit keyword (limitDefault.py + gatherLimitDefault.json)
+    7.  src↔tests mirror (test_structureMirror.py — gather scope, P-G7)
+    9.  raw cross-scan (test_no_raw_cross_scan.py — gather scope, P-G8)
 
-제외 룰 (gather 본질 상 적용 불가):
+제외 룰 (gather 본질 상 적용 불가, providers 룰 10 spirit 만 accessors 에 차용):
     1 Protocol contract / 2 폴더 mirror / 10 iter pair / 11 Company context
+
+룰 6b 9-section 적용 정책 (G+ 트랙 사용자 결정):
+    - 진입점 영역 (entry/handlers/main, mixins, sources, accessors): strict PASS
+    - wrapper 영역 (krx/bulkData/domains/ecos/fred/dart/infra): baseline freeze
+      (단순 fetch wrapper 에 AIContext/Guide noise 회피 — gatherDocstring9Section.json
+       의 183 잔여 위반은 의도된 freeze)
 
 사용법:
     uv run python -X utf8 scripts/audit/gatherGate.py
