@@ -46,6 +46,19 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
         crossViews : list[dict] — 교차 관점 (view, basis)
         narrative : str — 서사 요약 문장
         데이터 부족 시 None.
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 시 내부에서 흡수 → None 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.extended import calcPeerPosition
+    >>> import dartlab
+    >>> c = dartlab.Company("005930")
+    >>> pos = calcPeerPosition(c)
+    >>> pos["profitability_pct"] if pos else "no data"
     """
     import polars as pl
 
@@ -219,6 +232,19 @@ def calcGovernanceSummary(company) -> dict | None:
         grade : str | None — 등급 (A~E)
         narrative : str — 요약 문장
         데이터 없으면 narrative만 포함한 dict.
+
+    Raises
+    ------
+    AttributeError
+        company 가 stockCode 속성 없을 시 None 반환 (예외 없음).
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.extended import calcGovernanceSummary
+    >>> import dartlab
+    >>> c = dartlab.Company("005930")
+    >>> g = calcGovernanceSummary(c)
+    >>> g.get("grade") if g else "no data"
     """
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
     if not code:

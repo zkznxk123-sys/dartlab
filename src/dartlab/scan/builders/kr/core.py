@@ -324,6 +324,17 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     -------
     Path | None
         생성된 changes.parquet 경로. 데이터 없으면 None.
+
+    Raises
+    ------
+    polars.PolarsError
+        docs parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.core import buildChanges
+    >>> p = buildChanges(sinceYear=2021, verbose=True)
+    >>> p.exists() if p else "no docs"
     """
     docsDir = _docsDir()
     outDir = _scanDir()
@@ -424,6 +435,17 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     -------
     Path | None
         생성된 finance.parquet 경로. 데이터 없으면 None.
+
+    Raises
+    ------
+    polars.PolarsError
+        finance parquet 손상 또는 sink_parquet 실패 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.core import buildFinance
+    >>> p = buildFinance(sinceYear=2021, verbose=True)
+    >>> p.exists() if p else "no data"
     """
     finDir = _financeDir()
     outDir = _scanDir()
@@ -550,6 +572,17 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
     -------
     list[Path]
         생성된 apiType별 parquet 경로 목록.
+
+    Raises
+    ------
+    polars.PolarsError
+        report parquet 손상 또는 sink_parquet 실패 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.core import buildReport
+    >>> paths = buildReport(sinceYear=2021, verbose=True)
+    >>> [p.name for p in paths[:3]]
     """
     repDir = _reportDir()
     outDir = _scanDir() / "report"
@@ -698,6 +731,18 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     Path | None
         생성된 ``finance-lite.parquet`` 경로. 원본 없거나 결과 비면 None.
 
+    Raises
+    ------
+    polars.PolarsError
+        원본 finance.parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.core import buildFinanceLite
+    >>> p = buildFinanceLite(verbose=True)
+    >>> p.stat().st_size < 25_000_000 if p else "no source"
+    True
+
     Notes
     -----
     - `LITE_ACCOUNTS` 는 `scan/_helpers.py` 가 SSOT.
@@ -777,11 +822,27 @@ def buildValuation(*, verbose: bool = True) -> Path | None:
     HuggingFace ``eddmpython/dartlab-data`` 의 ``dart/scan/`` 에 업로드되며, 사용자는
     `dartlab.scan("valuation")` 호출 시 자동 다운로드 + 즉시 로드한다 (1초 이내).
 
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
     Returns
     -------
     Path | None
         생성된 `valuation.parquet` 경로. 수집 실패 또는 rate-limit 으로 0건이면
         기존 parquet 덮어쓰지 않고 ``None`` 반환.
+
+    Raises
+    ------
+    없음 — listing 로드 실패 · 네이버 rate-limit · OSError 는 내부에서 흡수 + None 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.core import buildValuation
+    >>> p = buildValuation(verbose=True)
+    >>> p.name if p else "rate-limited"
+    'valuation.parquet'
     """
     from dartlab.scan.financial.valuation import _RAW_SCHEMA, fetchValuationRaw
 
@@ -853,6 +914,18 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
         finance_lite : Path | None — finance-lite.parquet 경로 (pyodide 용 경량)
         report : list[Path] — apiType별 parquet 경로 목록
         sharesOutstanding : Path | None — sharesOutstanding.parquet 경로
+
+    Raises
+    ------
+    polars.PolarsError
+        하위 buildChanges · buildFinance · buildReport 가 발생시키는 예외 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.core import buildScan
+    >>> result = buildScan(sinceYear=2021, verbose=True)
+    >>> result["finance"].exists() if result["finance"] else "no data"
+    True
     """
     if verbose:
         _say(f"전종목 scan 프리빌드 시작 (sinceYear={sinceYear})")

@@ -69,6 +69,18 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
             capital_class : str | None — 주주환원 분류 (환원형/중립/희석형)
             icr : float | None — 이자보상배율 (배)
             debt_risk : str | None — 부채 위험등급 (안전/관찰/주의/고위험)
+
+    Raises
+    ------
+    polars.PolarsError
+        scan 4 축 (governance · workforce · capital · debt) 호출 실패 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.snapshot import buildScanSnapshot
+    >>> snap = buildScanSnapshot(verbose=True)
+    >>> snap["005930"]["governance_grade"]
+    'B'
     """
     if verbose:
         _log.info("[scan] 전종목 스냅샷 빌드 시작...")
@@ -295,6 +307,16 @@ def getScanPosition(stockCode: str) -> dict | None:
             risk : str — 위험등급
             total : int — 전종목 수
         스냅샷 없으면 None.
+
+    Raises
+    ------
+    없음 — 스냅샷 미존재 시 None 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.snapshot import getScanPosition
+    >>> pos = getScanPosition("005930")
+    >>> pos["governance"]["percentile"] if pos else "no snapshot"
     """
     cache = _ensureCache()
     if cache is None:

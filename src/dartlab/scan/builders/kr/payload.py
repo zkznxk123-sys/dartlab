@@ -34,6 +34,17 @@ def governanceToInsight(row: dict) -> dict | None:
         risks : list[dict] — 위험 요인 (level, category, text)
         opportunities : list[dict] — 기회 요인 (level, category, text)
         등급 없으면 None.
+
+    Raises
+    ------
+    없음 — row dict.get 기본값 처리.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.payload import governanceToInsight
+    >>> insight = governanceToInsight({"등급": "B", "총점": 75, "지분율": 35})
+    >>> insight["grade"]
+    'B'
     """
     grade = row.get("등급")
     score = row.get("총점")
@@ -100,6 +111,17 @@ def workforceToInsight(row: dict) -> dict | None:
         risks : list[dict] — 위험 요인 (level, category, text)
         opportunities : list[dict] — 기회 요인 (level, category, text)
         직원수 없으면 None.
+
+    Raises
+    ------
+    없음 — row dict.get 기본값 처리.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.payload import workforceToInsight
+    >>> insight = workforceToInsight({"직원수": 1000, "평균급여_만원": 5000, "직원당매출_억": 3.5})
+    >>> insight["grade"]
+    'B'
     """
     emp = row.get("직원수")
     if emp is None:
@@ -176,6 +198,17 @@ def capitalToInsight(row: dict) -> dict | None:
         risks : list[dict] — 위험 요인 (level, category, text)
         opportunities : list[dict] — 기회 요인 (level, category, text)
         분류 없으면 None.
+
+    Raises
+    ------
+    없음 — row dict.get 기본값 처리.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.payload import capitalToInsight
+    >>> insight = capitalToInsight({"분류": "환원형", "배당여부": True, "DPS": 1000, "배당수익률": 3.5})
+    >>> insight["grade"]
+    'A'
     """
     cls = row.get("분류")
     if cls is None:
@@ -243,6 +276,17 @@ def debtToInsight(row: dict) -> dict | None:
         risks : list[dict] — 위험 요인 (level, category, text)
         opportunities : list[dict] — 기회 요인 (level, category, text)
         위험등급 없으면 None.
+
+    Raises
+    ------
+    없음 — row dict.get 기본값 처리.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.payload import debtToInsight
+    >>> insight = debtToInsight({"위험등급": "안전", "부채비율": 80, "ICR": 6.5})
+    >>> insight["grade"]
+    'A'
     """
     risk_level = row.get("위험등급")
     if risk_level is None:
@@ -308,6 +352,18 @@ def buildScanPayload(company) -> dict[str, dict | None]:
         workforce : dict | None — 인력 insight
         capital : dict | None — 주주환원 insight
         debt : dict | None — 부채구조 insight
+
+    Raises
+    ------
+    없음 — 각 axis 호출 실패 (AttributeError·FileNotFoundError·RuntimeError) 는 내부 흡수 → None.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.payload import buildScanPayload
+    >>> import dartlab
+    >>> c = dartlab.Company("005930")
+    >>> payload = buildScanPayload(c)
+    >>> payload["governance"]["grade"] if payload["governance"] else "n/a"
     """
     result: dict[str, dict | None] = {}
     for axis, converter in _SCAN_CONVERTERS.items():
@@ -349,6 +405,19 @@ def buildUnifiedPayload(company) -> dict[str, dict | None]:
         workforce : dict | None — 인력 insight
         capital : dict | None — 주주환원 insight
         debt : dict | None — 부채구조 insight
+
+    Raises
+    ------
+    없음 — insight 및 scan 호출 실패는 내부 흡수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.kr.payload import buildUnifiedPayload
+    >>> import dartlab
+    >>> c = dartlab.Company("005930")
+    >>> payload = buildUnifiedPayload(c)
+    >>> set(payload.keys()) >= {"profitability", "governance", "workforce"}
+    True
     """
     # insight 7영역
     insight_areas: dict[str, dict] = {}
