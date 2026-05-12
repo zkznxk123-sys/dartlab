@@ -120,6 +120,26 @@ def test_streaming_unsupported_annotated() -> None:
     assert counts["asof"] >= 4, f"asof 마커 부족: {counts['asof']}/4"
 
 
+def test_gather_no_raw_cross_company_scan() -> None:
+    """gather/ 내부에 raw cross-company glob 패턴 0 건 — P-G8 명시 가드.
+
+    `src/dartlab` 전체 검사로 자동 포함되지만, gather 단독으로도 회귀 방지
+    명시한다 (gather 가 cross-scan 진입점 위험 1차 위치).
+    """
+    repoSrc = _REPO / "src" / "dartlab" / "gather"
+    if not repoSrc.exists():
+        pytest.skip("gather/ 부재")
+    gather_violations: list[str] = []
+    for p in repoSrc.rglob("*.py"):
+        if "__pycache__" in p.parts:
+            continue
+        gather_violations.extend(_scanFile(p))
+    assert not gather_violations, (
+        f"gather/ raw cross-scan 위반 {len(gather_violations)} 건: {gather_violations[:10]}. "
+        "엔진 내부는 docsIndex / hfBulk.loadFiltered 같은 슬림 인덱스만 사용."
+    )
+
+
 def test_inline_annotation_excluded() -> None:
     """``# polars-streaming-unsupported`` 주석 있는 line 은 차단 제외 (M0 화이트리스트).
 
