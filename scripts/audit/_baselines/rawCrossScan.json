@@ -1,4 +1,4 @@
 {
-  "_note": "P0.5 baseline — raw data/*/docs/*.parquet glob 패턴. P3 docsIndex 도입 후 축소",
+  "_note": "M0 화이트리스트: streaming engine 미지원 22 건 (pivot/window/asof) 은 inline `# polars-streaming-unsupported: <reason>` 주석으로 차단 예외. P3 docsIndex 도입 후 violations 0 유지.",
   "violations": []
 }
