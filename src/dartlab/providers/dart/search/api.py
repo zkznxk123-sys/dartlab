@@ -226,27 +226,57 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
 
 
 def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = False, **kwargs) -> int:
-    """Ngram 인덱스 빌드. allFilings + (선택) docs 통합.
+    """Ngram (title) 인덱스 빌드 — allFilings parquet + (옵션) docs sections 통합.
+
+    Capabilities:
+        - ``ngramIndex.buildNgramIndex`` wrapper — parquetPaths 지정 시 해당 파일들만, 미지정
+          시 default allFilings.parquet 1 종 처리.
+        - ``includeDocs=True`` → sections parquet 도 인덱싱 (제목 + section_title ngram).
+        - 운영자 admin 함수 — 일반 사용자 (AI) 가 직접 호출 X.
 
     Args:
-        parquetPaths: 인자.
-        includeDocs: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> buildIndex(...)
+        parquetPaths: 인덱싱 대상 parquet 경로 list. None → default.
+        includeDocs: True → sections 도 포함. 기본 False.
+        **kwargs: ngramIndex.buildNgramIndex 로 forward.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 인덱싱된 row 수.
+
+    Example:
+        >>> # buildIndex()  # default
+        >>> # buildIndex(includeDocs=True)  # 전체
+
+    Guide:
+        - "월 1 회 인덱스 풀 빌드" → ``rebuildIndex()`` (본 함수 includeDocs=True 호출).
+        - "특정 parquet 만 인덱싱" → ``buildIndex(parquetPaths=[...])``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``rebuildIndex`` — 본 함수의 includeDocs=True 단축.
+        - ``dartlab.providers.dart.search.ngramIndex.buildNgramIndex`` — 본 함수 본체.
+        - ``rebuildContent`` — content (BM25) 인덱스의 동등 함수.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.search.ngramIndex — buildNgramIndex SSOT.
+        - allFilings parquet 또는 지정 parquet 가 존재.
+
+    AIContext:
+        admin 영역 — AI 가 직접 호출 X. 운영자가 정기적으로 인덱스 갱신할 때 사용. AI 가 "왜
+        검색 결과 0" 질문 받으면 ``stats()`` 로 인덱스 빌드 상태 검사 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 인덱스 빌드 중 (long-running) 다른 검색 호출 → 파편 응답 가능. 운영자가 lock 보장.
+            - parquetPaths 가 존재하지 않으면 silent 0 또는 FileNotFoundError.
+        OutputSchema:
+            - 1 int — 인덱싱 row 수.
+        Prerequisites:
+            - allFilings parquet (또는 명시 parquetPaths) 가 존재.
+        Freshness:
+            - 본 함수 호출 시점에 인덱스 갱신.
+        Dataflow:
+            - allFilings parquet → 본 함수 → ngram 인덱스 → ``search`` 함수 사용.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.ngramIndex import buildNgramIndex
 
@@ -254,44 +284,97 @@ def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = Fal
 
 
 def rebuildIndex(**kwargs) -> int:
-    """전체 인덱스 리빌드 — allFilings + docs 통합.
+    """전체 인덱스 리빌드 — ``buildIndex(includeDocs=True)`` 단축.
+
+    Capabilities:
+        - ``buildIndex`` 의 includeDocs=True 호출 wrapper.
+        - allFilings + sections 합산 인덱싱.
 
     Args:
-        (인자 자동 생성).
-
-    Raises:
-        없음.
-
-    Example:
-        >>> rebuildIndex(...)
+        **kwargs: buildIndex 로 forward.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 인덱싱 row 수.
+
+    Example:
+        >>> # rebuildIndex()
+
+    Guide:
+        - 월 1 회 정기 full 빌드 → 본 함수.
+        - delta 증분 빌드 → ``rebuildContentDelta``.
+
+    SeeAlso:
+        - ``buildIndex`` — 본 함수의 본체.
+        - ``rebuildContent`` — content (BM25) 의 동등 함수.
+
+    Requires:
+        - dartlab.providers.dart.search.ngramIndex — buildNgramIndex 경유.
+
+    AIContext:
+        admin 함수, AI 직접 호출 X.
+
+    LLM Specifications:
+        AntiPatterns:
+            - buildIndex 와 동일.
+        OutputSchema:
+            - 1 int.
+        Prerequisites:
+            - buildIndex 와 동일.
+        Freshness:
+            - 본 함수 시점 인덱스 갱신.
+        Dataflow:
+            - allFilings + sections → 본 함수 → 인덱스.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     return buildIndex(includeDocs=True, **kwargs)
 
 
 def rebuildContent(**kwargs) -> int:
-    """content 인덱스 main 세그먼트 풀리빌드 (월 1회).
+    """content (BM25) 인덱스의 main 세그먼트 풀빌드 — 월 1 회 운영.
+
+    Capabilities:
+        - ``fieldIndex.rebuildMain`` wrapper — main 세그먼트 전체 재빌드.
+        - delta 세그먼트는 별도 (``rebuildContentDelta``).
+        - 두 세그먼트 분리 = main (월간 풀빌드) + delta (일간 증분).
 
     Args:
-        (인자 자동 생성).
-
-    Raises:
-        없음.
-
-    Example:
-        >>> rebuildContent(...)
+        **kwargs: fieldIndex.rebuildMain 로 forward.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 빌드된 row 수.
+
+    Example:
+        >>> # rebuildContent()
+
+    Guide:
+        - 매월 1 일 cron → 본 함수.
+        - 일간 증분 → ``rebuildContentDelta``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``rebuildContentDelta`` — delta 세그먼트의 동등 함수.
+        - ``dartlab.providers.dart.search.fieldIndex.rebuildMain`` — 본 함수 본체.
+        - ``rebuildIndex`` — ngram (title) 의 동등 함수.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.search.fieldIndex — rebuildMain SSOT.
+
+    AIContext:
+        admin 함수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - main 빌드 중 search content scope 호출 → 불완전 응답.
+        OutputSchema:
+            - 1 int.
+        Prerequisites:
+            - allFilings + section_content parquet 존재.
+        Freshness:
+            - 본 함수 호출 시점.
+        Dataflow:
+            - parquet → 본 함수 → main 세그먼트.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.fieldIndex import rebuildMain
 
@@ -299,26 +382,48 @@ def rebuildContent(**kwargs) -> int:
 
 
 def rebuildContentDelta(**kwargs) -> int:
-    """content 인덱스 delta 세그먼트 빌드 (일 단위 증분).
+    """content (BM25) 인덱스의 delta 세그먼트 일간 증분 빌드.
+
+    Capabilities:
+        - ``fieldIndex.rebuildDelta`` wrapper — 마지막 main 빌드 이후 신규 row 만 증분.
+        - 매일 cron 으로 호출 (빠름, 5~10 분).
 
     Args:
-        (인자 자동 생성).
-
-    Raises:
-        없음.
-
-    Example:
-        >>> rebuildContentDelta(...)
+        **kwargs: fieldIndex.rebuildDelta 로 forward.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 추가 인덱싱 row 수.
+
+    Example:
+        >>> # rebuildContentDelta()
+
+    Guide:
+        - 매일 cron → 본 함수.
+        - 월간 main 빌드 → ``rebuildContent``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``rebuildContent`` — main 세그먼트.
+        - ``dartlab.providers.dart.search.fieldIndex.rebuildDelta`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.search.fieldIndex — rebuildDelta SSOT.
+
+    AIContext:
+        admin 함수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - main 빌드 안 됐는데 delta 만 빌드 → search content 결과 부정확.
+        OutputSchema:
+            - 1 int.
+        Prerequisites:
+            - main 세그먼트 빌드 완료. 신규 parquet row 존재.
+        Freshness:
+            - 본 함수 호출 시점.
+        Dataflow:
+            - parquet (신규 row) → 본 함수 → delta 세그먼트.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.fieldIndex import rebuildDelta
 
@@ -326,27 +431,54 @@ def rebuildContentDelta(**kwargs) -> int:
 
 
 def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
-    """공시 목록 수집 (Phase 1).
+    """DART OpenAPI 공시 목록 수집 (Phase 1) — allFilingsCollector 위임.
+
+    Capabilities:
+        - ``openapi.allFilingsCollector.collectMetaRange`` wrapper — 기간 (YYYYMMDD) 의 공시 메타 수집.
+        - 본문 (section_content) 은 Phase 2 (``fillContent``) 에서 별도.
+        - 운영자 admin 함수 — DART OpenAPI rate limit 의무.
 
     Args:
-        startDate: 인자.
-        endDate: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> collectMeta(...)
+        startDate: 수집 시작일 (YYYYMMDD 문자열).
+        endDate: 수집 종료일 (YYYYMMDD).
+        **kwargs: collectMetaRange 로 forward.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 수집된 공시 row 수.
+
+    Example:
+        >>> # collectMeta("20240101", "20240131")  # 2024 년 1 월
+
+    Guide:
+        - 매월 1 일 cron → 전월 메타 수집.
+        - 본문 같이 → ``fillContent`` 별도 호출.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fillContent`` — Phase 2 본문 수집.
+        - ``dartlab.providers.dart.openapi.allFilingsCollector.collectMetaRange`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.openapi.allFilingsCollector — collectMetaRange SSOT.
+        - DART OpenAPI key 환경변수 (DART_API_KEY).
+
+    AIContext:
+        admin 함수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - DART_API_KEY 미설정 → ValueError.
+            - startDate > endDate → 0.
+            - rate limit 초과 → 일시 차단 (운영자 retry).
+        OutputSchema:
+            - 1 int.
+        Prerequisites:
+            - DART OpenAPI key.
+        Freshness:
+            - 본 함수 호출 시점 데이터.
+        Dataflow:
+            - DART OpenAPI → 본 함수 → allFilings parquet.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import collectMetaRange
 
@@ -354,23 +486,52 @@ def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
 
 
 def fillContent(period: str | None = None, **kwargs):
-    """공시 원문 채우기 (Phase 2).
+    """공시 원문 (section_content) 채우기 (Phase 2) — Phase 1 메타 수집 이후 단계.
+
+    Capabilities:
+        - period 지정 시 ``fillContent(period)`` (특정 기간), 미지정 시 ``fillContentAll()``.
+        - 메타 row 중 section_content 누락된 것만 채움.
 
     Args:
-        period: 인자.
+        period: 기간 문자열 (예 "202401") 또는 None (전체).
+        **kwargs: 위임 함수로 forward.
 
-    Raises:
-        없음.
+    Returns:
+        allFilingsCollector 의 반환 형태 의존.
 
     Example:
-        >>> fillContent(...)
+        >>> # fillContent("202401")  # 2024 년 1 월
+        >>> # fillContent()  # 전체 누락분
+
+    Guide:
+        - 매월 1 일 cron, 메타 수집 직후 → 본 함수 ``period=전월``.
+        - 본문 결락 보수 → ``fillContent()`` (전체).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` — Phase 1 메타 수집.
+        - ``dartlab.providers.dart.openapi.allFilingsCollector.fillContent`` / ``fillContentAll`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.openapi.allFilingsCollector — fillContent / fillContentAll.
+        - DART OpenAPI key.
+
+    AIContext:
+        admin 함수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - Phase 1 (메타) 미실행 → 채울 row 없음.
+            - rate limit 초과 → 일시 차단.
+        OutputSchema:
+            - 위임 반환 형태 의존.
+        Prerequisites:
+            - Phase 1 완료 + DART OpenAPI key.
+        Freshness:
+            - 본 함수 호출 시점.
+        Dataflow:
+            - DART OpenAPI 본문 endpoint → 본 함수 → allFilings parquet (section_content 컬럼).
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import (
         fillContent as _fill,
@@ -385,26 +546,52 @@ def fillContent(period: str | None = None, **kwargs):
 
 
 def stats() -> dict:
-    """수집 + 인덱스 통합 통계.
+    """수집 + 인덱스 통합 통계 — collector 통계 + ngramIndex 통계 merge.
+
+    Capabilities:
+        - ``allFilingsCollector.stats()`` 결과 dict 에 ``"stemIndex"`` 키로 ngramStats 추가.
+        - 운영자가 "지금 인덱스/parquet 상태" 한 번에 확인.
 
     Args:
-        (인자 자동 생성).
-
-    Raises:
         없음.
 
-    Example:
-        >>> stats(...)
-
     Returns:
-        <TODO: return desc> (dict)
+        dict — collector stats + ``"stemIndex"`` (ngramStats 결과).
+
+    Example:
+        >>> # s = stats()
+        >>> # "stemIndex" in s
+        >>> # True
+
+    Guide:
+        - "검색 결과 비어 있다" 디버깅 → 본 함수로 인덱스 row 수 확인.
+        - 운영 대시보드 → 본 함수 결과 시각화.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildIndex`` / ``rebuildContent`` — 인덱스 생성.
+        - ``dartlab.providers.dart.openapi.allFilingsCollector.stats`` — collector 통계.
+        - ``dartlab.providers.dart.search.ngramIndex.ngramStats`` — ngram 통계.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.openapi.allFilingsCollector — stats.
+        - dartlab.providers.dart.search.ngramIndex — ngramStats.
+
+    AIContext:
+        AI 가 "검색 결과 0" 질문 받으면 본 함수 호출 → 인덱스 빌드 여부 확인 후 운영자 안내.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 인덱스/parquet 결락 → 일부 키 누락. caller 는 dict.get 사용.
+        OutputSchema:
+            - dict — collector 키 + ``"stemIndex"``.
+        Prerequisites:
+            - 본 함수 자체 사전조건 없음. 결과는 인덱스/parquet 상태 의존.
+        Freshness:
+            - 본 함수 호출 시점.
+        Dataflow:
+            - collector.stats + ngramStats → merge → 본 함수.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import stats as collectorStats
     from dartlab.providers.dart.search.ngramIndex import ngramStats
@@ -416,26 +603,49 @@ def stats() -> dict:
 
 
 def pushIndex(**kwargs) -> str:
-    """stemIndex를 HuggingFace에 업로드.
+    """stemIndex 를 HuggingFace Hub 에 업로드 — 운영자 publish 단계.
+
+    Capabilities:
+        - ``ngramIndex.pushStemIndex`` wrapper — HF Hub repo 로 인덱스 업로드.
+        - 일반 사용자는 ``pullIndex`` 로 다운로드만, push 는 운영자 한정.
 
     Args:
-        (인자 자동 생성).
-
-    Raises:
-        없음.
-
-    Example:
-        >>> pushIndex(...)
+        **kwargs: pushStemIndex 로 forward (예 repo_id, token 등).
 
     Returns:
-        <TODO: return desc> (str)
+        str — 업로드 URL 또는 HF commit hash (구현 의존).
+
+    Example:
+        >>> # pushIndex(repo_id="user/dartlab-index")
+
+    Guide:
+        - 인덱스 정기 갱신 후 → 본 함수로 publish → 사용자 ``pullIndex`` 동기화.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``pullIndex`` — 본 함수의 역방향 (download).
+        - ``dartlab.providers.dart.search.ngramIndex.pushStemIndex`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.search.ngramIndex — pushStemIndex.
+        - HF_TOKEN 환경변수 (또는 kwargs token).
+
+    AIContext:
+        admin 함수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - HF_TOKEN 미설정 → 401.
+            - repo_id 누락 → ValueError.
+        OutputSchema:
+            - 1 str.
+        Prerequisites:
+            - HF account + write 권한.
+        Freshness:
+            - 본 함수 호출 시점.
+        Dataflow:
+            - local stemIndex → 본 함수 → HF Hub.
+        TargetMarkets:
+            - KR (DART) 한정 (인덱스 자체가 DART 데이터).
     """
     from dartlab.providers.dart.search.ngramIndex import pushStemIndex
 
@@ -443,23 +653,52 @@ def pushIndex(**kwargs) -> str:
 
 
 def pullIndex(**kwargs):
-    """HuggingFace에서 검색 인덱스 다운로드 (stemIndex + contentIndex).
+    """HuggingFace Hub 에서 검색 인덱스 다운로드 — stemIndex + contentIndex 통합.
+
+    Capabilities:
+        - ``ngramIndex.pullStemIndex`` 1 차 + ``fieldIndex.pullContentIndex`` 2 차.
+        - contentIndex 다운로드 실패는 silent log + skip (stem 만으로도 title scope 동작).
+        - 새 환경에서 ``buildIndex`` 안 돌리고 빠르게 검색 시작 가능.
 
     Args:
-        (인자 자동 생성).
+        **kwargs: pullStemIndex 로 forward.
 
-    Raises:
-        없음.
+    Returns:
+        ngramResult — pullStemIndex 의 반환 (다운로드된 파일 수 또는 status).
 
     Example:
-        >>> pullIndex(...)
+        >>> # pullIndex()
+
+    Guide:
+        - 새 PC 세팅 직후 → 본 함수.
+        - 인덱스 빌드 (운영자 환경) → ``buildIndex`` + ``rebuildContent`` 직접.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``pushIndex`` — 본 함수의 역방향 (upload).
+        - ``dartlab.providers.dart.search.ngramIndex.pullStemIndex`` — stem 다운로드.
+        - ``dartlab.providers.dart.search.fieldIndex.pullContentIndex`` — content 다운로드.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.search.ngramIndex / fieldIndex.
+        - HF cache 가능 환경 (디스크 공간).
+
+    AIContext:
+        AI 가 "검색 결과 0" 인데 인덱스 미빌드 상태면 본 함수 안내. 새 사용자 setup 경로.
+
+    LLM Specifications:
+        AntiPatterns:
+            - HF Hub 접근 불가 (오프라인) → 다운로드 실패.
+            - 디스크 공간 부족 → IOError.
+        OutputSchema:
+            - ngramResult — pullStemIndex 반환 의존.
+        Prerequisites:
+            - 네트워크 접근.
+        Freshness:
+            - HF Hub 의 최신 published 인덱스 기준.
+        Dataflow:
+            - HF Hub → 본 함수 → local stemIndex + contentIndex.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.fieldIndex import pullContentIndex
     from dartlab.providers.dart.search.ngramIndex import pullStemIndex
@@ -598,27 +837,57 @@ def pulse(limit: int = 10) -> pl.DataFrame:
 
 
 def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> pl.DataFrame:
-    """유형×월 빈도 시계열 조회.
+    """공시 유형 × 월 빈도 시계열 조회 — 시장 활동 시계열 (``pulse`` 의 시계열 확장).
+
+    Capabilities:
+        - ``derived.loadTimeline`` wrapper — 사전 집계된 monthly time series 에서 필터.
+        - typeFilter (예 "A" 정기공시 / "B" 주요사항보고) 로 특정 유형만.
+        - periodFilter (예 "2024") 로 특정 연도/월만.
 
     Args:
-        typeFilter: 인자.
-        periodFilter: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> timeline(...)
+        typeFilter: 유형 코드 (또는 None = 전체).
+        periodFilter: 기간 문자열 (예 "2024" / "2024-01") 또는 None.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — ``["period", "typeCode", "count", ...]``. period 오름차순.
+
+    Example:
+        >>> from dartlab.providers.dart.search.api import timeline
+        >>> df = timeline(typeFilter="A")  # 정기공시 시계열
+        >>> df.height >= 0
+        True
+
+    Guide:
+        - "정기공시 월별 추세" → ``timeline(typeFilter="A")``.
+        - "2024 년 전체" → ``timeline(periodFilter="2024")``.
+        - 최근 월 1 개만 → ``pulse``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``pulse`` — 최근 월 시장 펄스 (시계열 X).
+        - ``dartlab.providers.dart.search.derived.loadTimeline`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.search.derived — loadTimeline.
+
+    AIContext:
+        Workbench "최근 N 년 X 유형 추세" 질문 entry. AI 가 결과를 line chart 또는 자연어 trend
+        설명으로 변환 ("2024 년 1 분기 임시공시 증가").
+
+    LLM Specifications:
+        AntiPatterns:
+            - timeFilter 가 정의된 유형 코드 외 → 빈 결과 (silent).
+            - periodFilter 형식 다양 (예 "2024" vs "2024-01") → derived 구현 의존.
+        OutputSchema:
+            - pl.DataFrame — period/typeCode/count.
+        Prerequisites:
+            - derived timeline parquet 빌드.
+        Freshness:
+            - derived 갱신 시점.
+        Dataflow:
+            - allFilings → derived monthly time series → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.derived import loadTimeline
 
