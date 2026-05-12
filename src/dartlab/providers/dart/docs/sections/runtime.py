@@ -37,19 +37,58 @@ _DETAIL_TOPIC_KEYWORDS = {k: tuple(v) for k, v in _SEC.get("detailTopicKeywords"
 
 
 def chapterFromMajorNum(majorNum: int) -> str | None:
-    """정수 장번호를 로마숫자 chapter 문자열로 변환한다.
+    """정수 장번호 → 로마숫자 chapter 매핑 (1→"I" / 2→"II" / 3→"III" ...).
+
+    Capabilities:
+        - ``_CHAPTER_BY_MAJOR`` (parserMapper 가 load 한 ``chapterByMajor`` 매핑) 으로 단순 lookup.
+        - 매핑 외 값 (예 0/8 이상) → None.
+        - 정기보고서 chapter 정렬 (예 II=사업의 내용 / III=재무에 관한 사항) 의 SSOT.
 
     Args:
-        majorNum: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> chapterFromMajorNum(...)
+        majorNum: 정수 장번호 (1~7 사이가 일반적, parserMapper 매핑에 따라 달라짐).
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 로마숫자 chapter ("I"/"II"/"III"/...). 매핑 없음 → None.
+
+    Example:
+        >>> from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
+        >>> chapterFromMajorNum(2)
+        'II'
+        >>> chapterFromMajorNum(999) is None
+        True
+
+    Guide:
+        - "사업의 내용 (장 2) 가 무엇인지" → ``chapterFromMajorNum(2)`` → "II".
+        - "raw majorNum 정수만 알고 chapter 문자열 필요" → 본 함수.
+        - 역방향 (chapter → majorNum) 은 ``_CHAPTER_BY_MAJOR`` 의 inverse map 필요.
+
+    SeeAlso:
+        - ``dartlab.core.mappers.parserMapper.loadSections`` — ``chapterByMajor`` SSOT.
+        - ``applyProjections`` — chapter II 합산 topic 분배 시 본 매핑 사용.
+        - ``detailTopicForTopic`` / ``semanticTopicForLabel`` — 같은 sections runtime API 집합.
+
+    Requires:
+        - dartlab.core.mappers.parserMapper — chapter 매핑 source (module top-level load).
+
+    AIContext:
+        Ask Workbench 가 "사업의 내용 어디에 있냐"/"III 장 본문" 질문 처리 시 호출. AI 가
+        사람에게 chapter 표기 일관성 유지 (II/2 혼용 X). None 반환 = 비정상 majorNum,
+        sections 파이프라인 버그 의심 — 그대로 무시 X, 로깅 필요.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 부동소수 majorNum (예 2.5) → KeyError 아닌 None (dict.get).
+            - chapter 매핑이 동적 (parserMapper 갱신) → 본 함수 결과도 모듈 load 시점 의존.
+        OutputSchema:
+            - 1 스칼라. str | None.
+        Prerequisites:
+            - ``loadSections().chapterByMajor`` 가 비어 있지 않아야 한다 (parserMapper 정상).
+        Freshness:
+            - parserMapper 의 chapter 매핑 갱신 시 갱신 (현재 정기보고서 표준).
+        Dataflow:
+            - parserMapper.chapterByMajor → 본 함수 → applyProjections / caller (AI).
+        TargetMarkets:
+            - KR (DART) 정기보고서 한정. EDGAR 10-K item 구조와 무관.
     """
     return _CHAPTER_BY_MAJOR.get(majorNum)
 
@@ -131,25 +170,64 @@ def projectionSuppressedTopics() -> dict[str, set[str]]:
 
 
 def splitByMajorHeading(text: str) -> list[tuple[str, str]]:
-    """텍스트를 '가. 나. 다.' 등 주요 heading 기준으로 (label, body) 쌍으로 분리한다.
+    """텍스트를 ``가./나./다.`` 한글 한 글자 + 점 + 공백 + 제목 패턴 기준으로 분리.
+
+    Capabilities:
+        - 정규식 ``^([가-힣])\\.\\s*(.+)$`` 으로 라인 단위 매칭.
+        - 매칭된 라인을 새 segment 시작 (label = 매칭 라인 자체).
+        - 미매칭 라인은 현 segment 의 body 누적.
+        - 빈 라인은 skip, body 가 빈 segment 는 제외.
+        - 첫 segment label = ``"(root)"`` (heading 등장 전 본문).
 
     Args:
-        text: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> splitByMajorHeading(...)
+        text: 분리 대상 다중 라인 텍스트. 정기보고서 본문 chunk 단위가 일반적.
 
     Returns:
-        <TODO: return desc> (list[tuple[str, str]])
+        list[tuple[str, str]] — ``[(label, body), ...]``. body 가 빈 항목은 제외.
+        heading 자체가 없으면 ``[("(root)", text)]`` (root 만 1 개).
+
+    Example:
+        >>> from dartlab.providers.dart.docs.sections.runtime import splitByMajorHeading
+        >>> text = "가. 개요\\n본문 1\\n나. 상세\\n본문 2"
+        >>> result = splitByMajorHeading(text)
+        >>> len(result) == 2 and result[0][0].startswith("가.")
+        True
+
+    Guide:
+        - "사업의 내용 chunk 를 의미 단위로 쪼개기" → 본 함수.
+        - heading 이 영문/숫자 (예 "1. ")라면 매칭 안 됨 — 한글 한 글자 (``가-힣``) 만.
+        - 분리 후 각 segment 를 ``semanticTopicForLabel`` 로 분류해 최종 topic 결정.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``extractSemanticUnits`` — 본 함수를 wrap 해 부문/리스크 topic 한정 사용.
+        - ``semanticTopicForLabel`` — 분리된 label 의 semantic 분류 진행.
+        - ``applyProjections`` — chapter II ``주요제품및원재료등`` 분할 시 본 함수 활용.
 
     Requires:
-        - dartlab
+        - re (stdlib) — ``_RE_MAJOR_HEADING`` 정규식.
+        - 외부 dependency 없음 — 순수 텍스트 처리.
+
+    AIContext:
+        Workbench 가 "이 회사 사업의 내용 II장 어떤 항목 있냐" 류 질문 처리 시 sections 파이프
+        내부에서 호출. 단독 노출은 드물고 ``applyProjections`` 내부에서 ``주요제품및원재료등``
+        합산 chunk 를 ``productService`` / ``rawMaterial`` 로 쪼개기 위해 사용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - heading 이 한글 한 글자 + 점 패턴 외 → 미분리 → ``[("(root)", text)]``.
+            - 본문 안 ``가.`` 같은 우연 매칭 (예 일반 문장 시작) → 잘못된 segment 분리 가능성.
+              caller 가 결과 검토 필요.
+        OutputSchema:
+            - row: N segment = N heading + 1 (root) 또는 root 만 1.
+            - tuple: (label: str, body: str), body 는 ``"\\n"`` join.
+        Prerequisites:
+            - 입력 text 가 ``\\n`` 라인 분리 가능. UTF-8 정상 디코딩 가정.
+        Freshness:
+            - 정적 정규식. SEC 양식 변경 무관 (KR 한정).
+        Dataflow:
+            - chunker / parser → 본 함수 → semanticTopicForLabel / applyProjections.
+        TargetMarkets:
+            - KR (DART) 정기보고서. 다른 언어 heading 패턴은 별도 함수 필요.
     """
     lines = [line.rstrip() for line in text.splitlines()]
     segments: list[tuple[str, list[str]]] = []
@@ -202,26 +280,65 @@ def extractSemanticUnits(topic: str, text: str) -> list[tuple[str, str]]:
 
 
 def semanticTopicForLabel(topic: str, label: str) -> str | None:
-    """topic과 label 텍스트를 기반으로 세분화된 semantic topic을 판별한다.
+    """sourceTopic + label 텍스트의 키워드 매칭으로 세분 semantic topic 판별.
+
+    Capabilities:
+        - ``_ATOMIC_SEMANTIC_TOPICS`` (segment*/리스크 17 개) 는 입력 topic 그대로 반환.
+        - ``segmentOverview``/``segmentFinancialSummary`` 입력 → ``반도체/DS``/``DX/MX``/
+          ``디지털미디어/VD``/``DA``/``디스플레이``/``하만/Harman``/``기타`` 키워드 매칭으로 7 세분 topic.
+        - ``riskDerivative`` 입력 → ``시장위험``/``신용위험``/``유동성``/``자본``/``환위험``/
+          ``금리위험``/``공정가치``/``파생상품`` 키워드 매칭으로 8 세분 topic.
+        - 기타 topic → None.
 
     Args:
-        topic: 인자.
-        label: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> semanticTopicForLabel(...)
+        topic: 상위 topic. ``segmentOverview``/``riskDerivative``/``segmentFinancialSummary``
+            이외는 대부분 None.
+        label: heading 텍스트 (``splitByMajorHeading`` 결과의 첫 요소).
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 세분 semantic topic ID. 매칭 없음 → None.
+
+    Example:
+        >>> from dartlab.providers.dart.docs.sections.runtime import semanticTopicForLabel
+        >>> semanticTopicForLabel("segmentOverview", "가. 반도체부문")
+        'segmentSemiconductor'
+        >>> semanticTopicForLabel("randomTopic", "label") is None
+        True
+
+    Guide:
+        - "삼성전자 segment 별로 쪼개기" → ``splitByMajorHeading`` → 각 label 에 본 함수 적용.
+        - "리스크 derivative 항목 분류" → ``topic="riskDerivative"`` 로 호출.
+        - 회사가 삼성전자/하만 등 특정 segment 표기를 쓰지 않으면 None — caller fallback.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``semanticTopicForBlock`` — 본 함수 결과 None 시 block 본문/table cell 도 검사.
+        - ``_ATOMIC_SEMANTIC_TOPICS`` (모듈 상수) — 세분 topic ID set.
+        - ``extractSemanticUnits`` — 본 함수의 일반적 호출 컨텍스트.
 
     Requires:
-        - dartlab
+        - 외부 dependency 없음 — 순수 키워드 매칭.
+
+    AIContext:
+        Workbench 가 "삼성전자 반도체 segment 실적" 질문 처리 시 sections 파이프 안에서 호출.
+        키워드 매칭이 회사별 표기 (예 "Display Solutions" 아닌 "디스플레이") 에 의존 — 회사
+        commenter (수동 등록) 가 잡지 못한 표기는 None. caller 가 None 결과를 "분류 불가"
+        로 fallback 처리.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 매핑이 삼성전자 등 대형 segment 명에 편향. 중소형주 segment 표기는 미커버.
+            - "반도체" 키워드가 본문 어디에든 있으면 매칭 → false positive 가능.
+            - 키워드 우선순위 = 함수 안 if 순서. 동시 매칭 시 첫 매칭만.
+        OutputSchema:
+            - 1 스칼라. str | None.
+        Prerequisites:
+            - topic 입력이 정의된 6 범주 중 1 이어야 의미 있음 (나머지는 None).
+        Freshness:
+            - 정적 키워드 매핑. segment 표기 변화 (예 사명 변경) 시 본 함수 수정 필요.
+        Dataflow:
+            - splitByMajorHeading → 본 함수 → segment 단위 row 생성.
+        TargetMarkets:
+            - KR (DART) 한정. KR 대형주 위주 키워드 set.
     """
     if topic in _ATOMIC_SEMANTIC_TOPICS:
         return topic
@@ -358,29 +475,75 @@ def detailTopicForBlock(
     blockType: str,
     blockText: str,
 ) -> str | None:
-    """topic/label/본문 키워드를 종합하여 부속명세서 detail topic을 판별한다.
+    """topic + sourceTopic + label + block 본문/table cell 의 키워드 종합 부속명세서 분류.
+
+    Capabilities:
+        - 1 차 ``detailTopicForTopic`` lookup — topic 자체가 ``_DETAIL_TOPIC_MAP`` key 면 즉시 반환.
+        - 2 차 candidates 묶음 (sourceTopic + label + blockText + table lead cells) 를 ``"\\n"`` join.
+        - 3 차 topic 별 키워드 매칭 — ``productService`` 11 sub-topic / ``riskDerivative``/
+          ``financialNotes``/``intellectualProperty``/``majorContractsAndRnd``/``salesOrder``/
+          ``affiliateGroupDetail``/``audit``/``majorHolder``/``environmentRegulation`` 별 분류.
+        - 4 차 ``_DETAIL_TOPIC_KEYWORDS`` (parserMapper 의 fallback 키워드 매핑) 검사 (audit/financialNotes 한정).
+        - 매칭 없음 → None.
 
     Args:
-        topic: 인자.
-        sourceTopic: 인자.
-        label: 인자.
-        blockType: 인자.
-        blockText: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> detailTopicForBlock(...)
+        topic: 현 block 의 분류 후보 topic.
+        sourceTopic: chunk 의 원 topic (분할/투영 전).
+        label: heading 텍스트.
+        blockType: ``"text"`` 또는 ``"table"`` — table 이면 lead cell 추가 검사.
+        blockText: block 본문 (text 면 paragraph, table 이면 markdown table).
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — detail topic ID (예 ``"trustBusinessDetail"``/``"derivativeProductDetail"``).
+        매칭 없음 → None.
+
+    Example:
+        >>> from dartlab.providers.dart.docs.sections.runtime import detailTopicForBlock
+        >>> result = detailTopicForBlock("productService", "productService", "가. 신탁업무(상세)", "text", "본문")
+        >>> result
+        'trustBusinessDetail'
+        >>> detailTopicForBlock("randomTopic", "src", "label", "text", "본문") is None
+        True
+
+    Guide:
+        - "은행 신탁업무 부속명세서 분류" → ``productService`` topic + "신탁업무(상세)" 키워드.
+        - "감사보수 부속명세 vs 재무제표 주석 부속명세 구분" → 본 함수가 둘을 분리.
+        - "삼성그룹 계열사 상세 분류" → ``affiliateGroupDetail`` topic + "기업집단에소속된회사(상세)".
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``detailTopicForTopic`` — 본 함수의 1 차 lookup 단계.
+        - ``_DETAIL_TOPIC_KEYWORDS`` (parserMapper) — 4 차 fallback 매핑 SSOT.
+        - ``_tableLeadCells`` (모듈 private) — table cell 추출 헬퍼.
+        - ``semanticTopicForBlock`` — 부문/리스크 분류의 자매 함수.
 
     Requires:
-        - dartlab
+        - dartlab.core.mappers.parserMapper — ``detailTopicMap`` + ``detailTopicKeywords`` source.
+        - 외부 의존 없음 — 순수 키워드 매칭.
+
+    AIContext:
+        Workbench 가 "이 회사 사업의 내용 부속명세서 (상세) 항목" 질문 처리 시 sections 파이프
+        에서 호출. 부속명세서 분류가 정밀하면 AI 답변이 정확 ("이 회사 신탁업무 부속명세서는
+        이 표에 있다"). None 반환 = "분류 불가, 원본 chunk 그대로". caller 는 detail
+        분류 실패를 사용자에게 노출 X (기본 topic 으로 fallback).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 키워드가 정확 일치 X (예 띄어쓰기 "신탁 업무(상세)") → 미매칭 → None. parserMapper
+              의 키워드 등록 시 띄어쓰기 동시 등록 필요.
+            - topic="audit" 인데 본문에 ``auditFeeDetail`` 키워드 등장 → 본 함수가 의도적으로
+              ``auditFeeDetail`` 만 통과 (다른 detail 은 audit topic 과 무관하다고 판정).
+            - blockType 이 "table" 외 (예 "list") → lead cell 검사 skip.
+        OutputSchema:
+            - 1 스칼라. str | None.
+        Prerequisites:
+            - ``loadSections()`` 결과의 ``detailTopicMap``/``detailTopicKeywords`` 가 채워져 있어야.
+        Freshness:
+            - parserMapper 의 키워드 매핑이 정기보고서 표기 변화 따라 갱신 — 본 함수 결과도 의존.
+        Dataflow:
+            - chunker → block → 본 함수 → sections row 의 detailTopic 필드.
+        TargetMarkets:
+            - KR (DART) 한정. 금융업/제조업/IT/유통업 다양 (productService 11 sub-topic 이 금융업
+              위주, 다른 산업은 별 커버 X).
     """
     direct = detailTopicForTopic(topic)
     if direct:
@@ -468,26 +631,80 @@ def applyProjections(
     rows: list[dict[str, object]],
     teacherTopics: dict[str, set[str]],
 ) -> list[dict[str, object]]:
-    """chapter II 합산 topic을 학습된 projection 규칙으로 개별 topic에 분배한다.
+    """chapter II 합산 topic 을 학습된 projection 규칙으로 개별 topic 에 분배한다.
+
+    Capabilities:
+        - ``loadProjectionRules("chapterII")`` 가 반환한 ``{sourceTopic: [targetTopic, ...]}``
+          매핑으로 chapter II row 를 복제 분배.
+        - ``주요제품및원재료등`` source 는 ``splitByMajorHeading`` 으로 본문 쪼개기 → 각
+          segment 를 ``_routeChapterIISegment`` 키워드 매칭 (원재료/생산설비 → rawMaterial /
+          제품/서비스 → productService) 로 분류 → 분류된 buffer 를 새 row 로 생성.
+        - 분류 실패 segment 가 있어도 fallback 으로 ``rawMaterial`` / ``productService`` 양쪽에
+          원본 전체 복제 (teacher 토픽 set 안에 있을 때 한정).
+        - 일반 source → ``rules`` 가 명시한 target 으로 직접 row 복제 (sourceTopic/projectionKind
+          메타 동행).
+        - 이미 존재하는 ``(chapter, topic)`` 쌍은 skip (중복 방지).
 
     Args:
-        rows: 인자.
-        teacherTopics: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> applyProjections(...)
+        rows: section rows. 각 row 는 ``chapter``/``topic``/``text``/``blockType``/``blockOrder``/
+            ``majorNum``/``orderSeq`` 키 보유 (모두 optional 안전 처리).
+        teacherTopics: ``chapterTeacherTopics`` 결과 — ``{chapter: {topic, ...}}``. 본 함수는
+            ``teacherTopics["II"]`` 만 사용 (chapter II 한정 분배).
 
     Returns:
-        <TODO: return desc> (list[dict[str, object]])
+        list[dict[str, object]] — rows 복사본 + 새 분배 row 추가. 입력 rows 변형 X (immutable
+        가드). projection 규칙이 비면 입력 그대로 반환.
+
+    Example:
+        >>> from dartlab.providers.dart.docs.sections.runtime import applyProjections
+        >>> rows = [{"chapter": "II", "topic": "X", "text": "ABC", "blockType": "text", "blockOrder": 0}]
+        >>> result = applyProjections(rows, {"II": {"X"}})
+        >>> len(result) >= 1
+        True
+
+    Guide:
+        - "정기보고서 chapter II 의 합산 topic 을 개별 항목으로 분배" → 본 함수.
+        - "삼성전자 사업의 내용 II 장 product/raw 분리" → ``주요제품및원재료등`` source 가 자동
+          분할 (``splitByMajorHeading`` + 키워드 라우팅).
+        - 분배 후 row 는 ``sourceTopic`` + ``projectionKind`` 메타로 추적 가능.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``chapterTeacherTopics`` — 본 함수가 받는 ``teacherTopics`` 의 source.
+        - ``splitByMajorHeading`` — chapter II split source 의 본문 분할 헬퍼.
+        - ``loadProjectionRules`` (artifacts) — projection 매핑 SSOT (학습된 규칙).
+        - ``_routeChapterIISegment`` (모듈 private) — 분할 segment 의 키워드 라우팅 로직.
 
     Requires:
-        - dartlab
+        - dartlab.providers.dart.docs.sections.artifacts.loadProjectionRules — 매핑 source.
+        - 본 모듈 함수 ``splitByMajorHeading`` / ``_routeChapterIISegment`` — 분할/라우팅.
+
+    AIContext:
+        Workbench 가 "이 회사 사업의 내용 II 장 어떤 항목들" 질문 처리 시 sections 파이프 final
+        step 으로 호출. 본 함수 없으면 chapter II 가 합산 topic 1 개로 뭉뜽그려져 AI 가
+        세부 topic 별 검색 불가. ``projectionKind="directRule"``/``"headingRule"`` 메타로
+        분배 출처 추적 → 잘못 분배된 row 는 사용자 검토 시 trace 가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - projection 매핑 (parserMapper) 가 비어 있음 → 입력 rows 그대로 반환 (silent).
+            - teacherTopics["II"] 가 비어 있음 → 분배 0 (모든 후보 skip).
+            - ``주요제품및원재료등`` 본문이 segment 키워드 ("제품"/"원재료") 없음 → fallback
+              으로 양쪽 target 에 동일 본문 복제 → 중복성 발생 (의도된 보수적 분배).
+            - input rows 변형 X — 본 함수는 list copy 후 append (caller 의 다른 사용 안전).
+        OutputSchema:
+            - row: 입력 N + 분배 추가 K = N+K rows. K 는 projection 매핑 + 분할 결과 의존.
+            - 새 row 의 필수 필드: chapter/topic/text/blockType/blockOrder/majorNum/orderSeq/
+              sourceTopic/projectionKind.
+        Prerequisites:
+            - loadProjectionRules 가 정상 (parserMapper 학습된 매핑 보유).
+            - teacherTopics 가 chapterTeacherTopics 결과로 채워짐.
+        Freshness:
+            - projection 매핑은 학습 (sectioning pipeline) 결과 — 학습 갱신 시 본 함수 결과 변화.
+        Dataflow:
+            - sections pipeline (chunker → mapper) → chapterTeacherTopics → 본 함수 → 최종 rows
+              (sections.parquet).
+        TargetMarkets:
+            - KR (DART) 정기보고서 chapter II ("사업의 내용") 한정. III 장 이후는 분배 X.
     """
     if not rows:
         return rows
