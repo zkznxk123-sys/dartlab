@@ -592,7 +592,7 @@ class Company:
     # ── P7: Company context manager + 메모리-safe surface (룰 11 + MemorySafeProvider) ──
 
     def __enter__(self) -> "Company":
-        """context manager 진입 — Company 인스턴스 그대로 반환.
+        """context manager 진입 — OomTripwire 시작 + self 반환.
 
         Example:
             with Company("AAPL") as c:
@@ -604,10 +604,14 @@ class Company:
         Raises:
             없음.
         """
+        from dartlab.core.memory import OomTripwire
+
+        self._oomTripwire = OomTripwire()
+        self._oomTripwire.start()
         return self
 
     def __exit__(self, _excType: object, _excVal: object, _excTb: object) -> None:
-        """context manager 종료 — BoundedCache evict + RSS 회수.
+        """context manager 종료 — OomTripwire 정지 + BoundedCache evict + RSS 회수.
 
         Args:
             excType: 예외 type.
@@ -617,6 +621,12 @@ class Company:
         Raises:
             없음.
         """
+        try:
+            tw = getattr(self, "_oomTripwire", None)
+            if tw is not None:
+                tw.stop()
+        except (AttributeError, RuntimeError):
+            pass
         try:
             self.cleanupCache()
         except (AttributeError, KeyError, RuntimeError):
