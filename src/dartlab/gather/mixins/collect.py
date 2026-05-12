@@ -29,7 +29,21 @@ class _GatherCollectMixin(GatherMixinContext):
             - 뉴스도 병렬 수집 (최근 7일)
             - 개별 도메인 실패 격리 — 나머지 결과로 스냅샷 생성
             - 10초 타임아웃 (부분 결과 반환)
-            - TTL 캐시
+            - TTL 캐시 (DARTLAB_TTL_SNAPSHOT override)
+
+        AIContext:
+            - story/Company 가 "전체 외부 데이터" 한 번에 fetch 시 사용
+            - 각 도메인 별 fail-soft — 부분 결과로도 분석 진행 가능
+
+        Guide:
+            5 mixin 의 axis 를 병렬로 한 번에. 단일 호출 대비 ~5x 빠름.
+            partial result 일 수 있어 호출자가 None 체크 필요.
+
+        When:
+            initial discovery / dashboard 렌더 / 전체 axis 한 번 캐시 워밍 시.
+
+        How:
+            stockCode + market → asyncio.gather(5 domain + news + sector + insider).
 
         Args:
             stock_code: 종목코드 ("005930") 또는 티커 ("AAPL").
@@ -39,7 +53,7 @@ class _GatherCollectMixin(GatherMixinContext):
             GatherSnapshot — 도메인별 결과 + 뉴스 + 수집 시각.
 
         Requires:
-            없음 (공개 API).
+            네트워크 (5+ 외부 API 동시 호출).
 
         Raises:
             없음 — 도메인 실패는 격리, 10초 타임아웃 후 부분 결과.
@@ -50,6 +64,9 @@ class _GatherCollectMixin(GatherMixinContext):
             snap = g.collect("005930")       # 삼성전자 전체 수집
             snap.price                       # PriceSnapshot
             snap.news                        # 뉴스 리스트
+
+        See Also:
+            ``price``/``flow``/``sector``/``news``/``insiderTrading`` — 개별 axis.
         """
         from dartlab.core.market import resolveMarket
 

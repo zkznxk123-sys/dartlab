@@ -40,7 +40,21 @@ class _GatherPriceMixin(GatherMixinContext):
             - OHLCV + 거래량 DataFrame
             - snapshot=True 시 현재가 PriceSnapshot 반환
             - 자동 fallback 체인 (Naver -> Yahoo -> FMP)
-            - TTL 캐시 (5분)
+            - TTL 캐시 (5분, DARTLAB_TTL_PRICE override 가능)
+
+        AIContext:
+            - quant/analysis 가 OHLCV 입력으로 소비 — gather → analysis 흐름의 데이터 원천
+
+        Guide:
+            ``Gather`` 클래스의 핵심 진입점. 단일 종목/티커의 OHLCV 시계열을
+            한 호출로 fetch. snapshot=True 면 PriceSnapshot 단건 (현재가).
+
+        When:
+            "주가 추이 보여줘" 같은 사용자 의도 — 단일 종목 OHLCV 필요 시.
+
+        How:
+            stockCode + market → fallback chain → DataFrame.
+            quant 의 indicator 추가는 별도 ``transforms.indicatorDispatch.addIndicators``.
 
         Args:
             stock_code: 종목코드 ("005930") 또는 티커 ("AAPL").
@@ -65,6 +79,11 @@ class _GatherPriceMixin(GatherMixinContext):
             g.price("005930")                    # 삼성전자 1년
             g.price("AAPL", market="US")         # Apple 1년
             g.price("005930", snapshot=True)     # 현재가 스냅샷
+
+        See Also:
+            ``flow`` — 외국인/기관 수급 (같은 종목, 다른 axis).
+            ``history`` — start/end 명시 시계열.
+            ``dartlab.gather.transforms.indicatorDispatch.addIndicators`` — 보조지표.
         """
         # market 자동 감지 (core SSOT)
         from dartlab.core.market import resolveMarket
@@ -119,7 +138,19 @@ class _GatherPriceMixin(GatherMixinContext):
             - KR 전용 (Naver 금융)
             - 외국인/기관/개인 순매수 + 외국인 보유비율
             - 일별 시계열 DataFrame
-            - TTL 캐시
+            - TTL 캐시 (DARTLAB_TTL_FLOW override 가능)
+
+        AIContext:
+            - 외국인/기관 매매 동향 — sentiment / 시장 압력 신호로 분석
+
+        Guide:
+            US 시장은 Naver 미지원 → None. KR 만 작동.
+
+        When:
+            "외국인 매매 동향" 같은 KR 종목 수급 분석 의도 시.
+
+        How:
+            stockCode → Naver fetch → date 파싱 → DataFrame.
 
         Args:
             stock_code: 종목코드 ("005930").
@@ -139,6 +170,10 @@ class _GatherPriceMixin(GatherMixinContext):
 
             g = getDefaultGather()
             g.flow("005930")   # 삼성전자 수급 시계열
+
+        See Also:
+            ``price`` — 같은 종목의 OHLCV.
+            ``ownership`` — 누적 지분 보유 (스냅샷).
         """
         from dartlab.core.market import resolveMarket
 
@@ -204,6 +239,18 @@ class _GatherPriceMixin(GatherMixinContext):
             - 연도별 RevenueConsensus 리스트
             - TTL 캐시
 
+        AIContext:
+            - 미래 컨센서스 fetch — story/analysis 가 future 매출 전망에 사용
+
+        Guide:
+            KR 만 본격 지원 (Naver). US 는 빈 리스트 (provider 미연결).
+
+        When:
+            매출/이익 컨센서스 시계열 (분석가 추정) 필요 시.
+
+        How:
+            stockCode + market → domain fetch → RevenueConsensus 리스트.
+
         Args:
             stock_code: 종목코드 ("005930") 또는 티커 ("AAPL").
             market: "KR" 또는 "US". 기본 "KR".
@@ -222,6 +269,9 @@ class _GatherPriceMixin(GatherMixinContext):
             g = getDefaultGather()
             g.revenue_consensus("005930")              # 삼성전자
             g.revenue_consensus("AAPL", market="US")   # Apple
+
+        See Also:
+            ``dartlab.analysis.revenueForecast`` — 컨센서스 + 분석.
         """
         from ..domains import loadDomain
 
@@ -257,7 +307,19 @@ class _GatherPriceMixin(GatherMixinContext):
             - fallback 체인: Naver(KR) -> naver_global -> FMP -> Yahoo
             - date, open, high, low, close, volume 컬럼
             - 자동 날짜 파싱 (문자열 -> pl.Date)
-            - TTL 캐시 (TTL_HISTORY)
+            - TTL 캐시 (TTL_HISTORY, DARTLAB_TTL_HISTORY override)
+
+        AIContext:
+            - 백테스트/regime 분석의 시계열 입력 원천
+
+        Guide:
+            ``price()`` 가 기본 1년 자동 — start/end 명시 시 본 함수 호출.
+
+        When:
+            특정 기간 OHLCV 필요 시 (regime change date 분석 등).
+
+        How:
+            start/end ISO date → fallback chain → DataFrame.
 
         Args:
             stock_code: 종목코드 ("005930") 또는 티커 ("AAPL").
@@ -280,6 +342,9 @@ class _GatherPriceMixin(GatherMixinContext):
             g = getDefaultGather()
             g.history("005930", start="2025-01-01", end="2025-12-31")
             g.history("AAPL", start="2025-06-01", end="2025-12-31", market="US")
+
+        See Also:
+            ``price`` — 기본 1년 단축 호출.
         """
         # market 자동 감지 (core SSOT)
         from dartlab.core.market import resolveMarket

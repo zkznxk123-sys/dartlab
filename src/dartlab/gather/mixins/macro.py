@@ -84,6 +84,19 @@ class _GatherMacroMixin(GatherMixinContext):
             - 단일 지표: (date, value) DataFrame
             - 직접 API: apiKey 명시 시만 ECOS/FRED API 호출
 
+        AIContext:
+            - macro 엔진의 raw 데이터 원천. analysis/quant 가 regime/anomaly 분석에 사용
+
+        Guide:
+            indicator 인자가 KR/US 둘 중 어디 코드인지 자동 감지 (스마트 라우팅).
+            "CPI" 는 KR, "FEDFUNDS" 는 US 로 자동 분기.
+
+        When:
+            거시경제 지표 시계열 필요 시. 단일 지표 또는 시장 전체.
+
+        How:
+            indicator → _detectMarket → HF 벌크 또는 직접 API → wide/single DF.
+
         Args:
             market: "KR" 또는 "US". 지표 코드 직접 전달도 가능 (자동 감지).
             indicator: 지표 코드 ("CPI", "FEDFUNDS" 등). None이면 전체 지표.
@@ -111,6 +124,10 @@ class _GatherMacroMixin(GatherMixinContext):
             g.macro("FEDFUNDS")       # 연방기금금리 (자동 US 감지)
             g.macro("KR", "CPI")      # 명시적 KR + CPI
             g.macro("US", "SP500")    # 명시적 US + S&P500
+
+        See Also:
+            ``dartlab.macro`` 엔진 — 본 raw 데이터의 분석 결과.
+            ``dartlab.gather.bulkData.macroHf`` — HF 벌크 경로.
         """
         if scope not in {"default", "catalog"}:
             raise ValueError("scope 는 'default' 또는 'catalog' 여야 합니다.")

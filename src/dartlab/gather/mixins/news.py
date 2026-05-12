@@ -22,8 +22,22 @@ class _GatherNewsMixin(GatherMixinContext):
             - Google News RSS 기반 뉴스 수집
             - KR/US 시장별 검색
             - 기간 제한 (기본 30일)
-            - circuit breaker + TTL 캐시
+            - circuit breaker + TTL 캐시 (DARTLAB_TTL_NEWS override)
             - DataFrame: title, link, published, source 컬럼
+
+        AIContext:
+            - sentiment / event-driven 분석의 외부 신호 원천
+            - 본문은 untrusted external — provider 가 [EXTERNAL CONTENT START] 마커 적용
+
+        Guide:
+            query 는 자유 문자열 (종목명 + 키워드 조합 가능). KR/US Google News
+            언어 분기.
+
+        When:
+            sentiment / event 분석 / catalyst 모니터링 시.
+
+        How:
+            query + market → Google News RSS → DataFrame.
 
         Args:
             query: 검색어 (종목명, 키워드 등).
@@ -46,6 +60,9 @@ class _GatherNewsMixin(GatherMixinContext):
             g.news("삼성전자")                # KR 뉴스 30일
             g.news("Apple", market="US")     # US 뉴스 30일
             g.news("반도체", days=7)          # 최근 7일
+
+        See Also:
+            ``dartDoc`` — DART 공시 본문 (RSS 가 아닌 viewer 직접).
         """
         cache_key = f"{query}:{market}:news"
         cached = self._cache.getTyped(cache_key, "news")
@@ -72,6 +89,9 @@ class _GatherNewsMixin(GatherMixinContext):
 
         Returns:
             pl.DataFrame — section_order, title, url, text 컬럼.
+
+        Requires:
+            네트워크 (dart viewer 무인증 접근).
 
         Raises:
             InvalidRceptNoError: rceptNo 가 14자리 숫자 아님.
