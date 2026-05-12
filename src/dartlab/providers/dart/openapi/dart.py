@@ -375,21 +375,22 @@ class Dart:
             없음.
 
         Returns:
-            <TODO: return desc> (dict[str, str])
+            dict — 기업 개황 정보 (corpCode/corpName/stockName/stockCode 등).
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 회사명 부분 매치 X — corp 인자는 정확명 또는 stockCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict[str, str] — DART openAPI company endpoint 응답 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY + corp (회사명 또는 stockCode).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - corp → resolveCorpCode → DART API company → 정규화 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return companyInfo(self._client, corp)
 
@@ -530,21 +531,23 @@ class Dart:
             >>> corpCodes(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 (1만/일) 초과 시 빈 응답.
+                - 전체 corp_code (~11만) 그대로 LLM 노출 → 토큰 폭증. corpCode lookup 후 filter 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — endpoint 별 정규화 컬럼.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient request → DART API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return loadCorpCodes(self._client, refresh=refresh)
 
@@ -681,15 +684,16 @@ class Dart:
             없음.
 
         Args:
-            corps: <TODO: param desc> (list[str])
-            year: <TODO: param desc> (str | int | None)
-            q: <TODO: param desc> (int | None)
+            corps: 회사명 또는 stockCode 리스트.
+            year: 사업연도 (예 2024). None 이면 직전 연도.
+            q: 분기 (1~4). None 이면 4분기 (사업보고서).
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -699,27 +703,30 @@ class Dart:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         corpCodes = [_resolveCorpCode(self._client, c) for c in corps]
         bsnsYear = str(year) if year else str(datetime.now().year - 1)
@@ -758,24 +765,26 @@ class Dart:
             없음.
 
         Args:
-            category: <TODO: param desc> (str)
+            category: report 카테고리 (배당/주식총수/자기주식 등).
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 (1만/일) 초과 시 빈 응답.
+                - 전체 corp_code (~11만) 그대로 LLM 노출 → 토큰 폭증. corpCode lookup 후 filter 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — endpoint 별 정규화 컬럼.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient request → DART API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return self._client.getDf(
             "xbrlTaxonomy.json",
@@ -900,10 +909,11 @@ class Dart:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -913,27 +923,30 @@ class Dart:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         return self._client.getDf("majorstock.json", {"corp_code": corpCodeStr})
@@ -952,10 +965,11 @@ class Dart:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -965,27 +979,30 @@ class Dart:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         return self._client.getDf("elestock.json", {"corp_code": corpCodeStr})
@@ -1020,14 +1037,15 @@ class Dart:
             없음.
 
         Args:
-            rceptNo: <TODO: param desc> (str)
-            savePath: <TODO: param desc> (str | Path | None)
+            rceptNo: DART 접수번호 (14 자리 또는 그 형식).
+            savePath: 저장 경로. None 이면 메모리만.
 
         Returns:
-            <TODO: return desc> (Path)
+            Path — 저장된 파일 경로.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1037,27 +1055,30 @@ class Dart:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         raw = self._client.getBytes("document.xml", {"rcept_no": rceptNo})
         dest = Path(savePath) if savePath else Path(f"{rceptNo}.zip")
@@ -1086,13 +1107,14 @@ class Dart:
             없음.
 
         Args:
-            rceptNo: <TODO: param desc> (str)
+            rceptNo: DART 접수번호 (14 자리 또는 그 형식).
 
         Returns:
-            <TODO: return desc> (str)
+            str — DART OpenAPI 응답 텍스트.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1102,27 +1124,30 @@ class Dart:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         raw = self._client.getBytes("document.xml", {"rcept_no": rceptNo})
         zf = zipfile.ZipFile(io.BytesIO(raw))
@@ -1170,21 +1195,22 @@ class Dart:
             >>> filingTypes(...)
 
         Returns:
-            <TODO: return desc> (dict[str, str])
+            dict — 기업 개황 정보 (corpCode/corpName/stockName/stockCode 등).
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 회사명 부분 매치 X — corp 인자는 정확명 또는 stockCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict[str, str] — DART openAPI company endpoint 응답 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY + corp (회사명 또는 stockCode).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - corp → resolveCorpCode → DART API company → 정규화 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return dict(FILING_TYPES)
 
@@ -1202,21 +1228,22 @@ class Dart:
             >>> markets(...)
 
         Returns:
-            <TODO: return desc> (dict[str, str])
+            dict — 기업 개황 정보 (corpCode/corpName/stockName/stockCode 등).
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 회사명 부분 매치 X — corp 인자는 정확명 또는 stockCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict[str, str] — DART openAPI company endpoint 응답 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY + corp (회사명 또는 stockCode).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - corp → resolveCorpCode → DART API company → 정규화 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return dict(CORP_CLASS)
 
@@ -1234,21 +1261,23 @@ class Dart:
             >>> reportTypes(...)
 
         Returns:
-            <TODO: return desc> (list[str])
+            list[str] — 결과 목록.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 결과 추측 X — 정확 인자 값 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - DART OpenAPI 응답 정규화 (메서드별 다름).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return sorted(_REPORT_ENDPOINTS.keys())
 
@@ -1362,16 +1391,17 @@ class DartCompany:
             없음.
 
         Args:
-            category: <TODO: param desc> (str)
-            start: <TODO: param desc> (str | int | None)
-            end: <TODO: param desc> (int | None)
-            q: <TODO: param desc> (int | None)
+            category: report 카테고리 (배당/주식총수/자기주식 등).
+            start: 시작 연도 또는 ISO 날짜. None 이면 기본값.
+            end: 종료 연도. None 이면 현재 연도.
+            q: 분기 (1~4). None 이면 4분기 (사업보고서).
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1381,27 +1411,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         if start is not None and end is None:
             end = _autoEnd()
@@ -1456,17 +1489,18 @@ class DartCompany:
             없음.
 
         Args:
-            start: <TODO: param desc> (str | int | None)
-            end: <TODO: param desc> (int | None)
-            q: <TODO: param desc> (int | None)
-            consolidated: <TODO: param desc> (bool)
-            full: <TODO: param desc> (bool)
+            start: 시작 연도 또는 ISO 날짜. None 이면 기본값.
+            end: 종료 연도. None 이면 현재 연도.
+            q: 분기 (1~4). None 이면 4분기 (사업보고서).
+            consolidated: True 면 연결, False 면 별도.
+            full: True 면 모든 계정, False 면 주요 계정만.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1476,27 +1510,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         if start is not None and end is None:
             end = _autoEnd()
@@ -1540,21 +1577,23 @@ class DartCompany:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 (1만/일) 초과 시 빈 응답.
+                - 전체 corp_code (~11만) 그대로 LLM 노출 → 토큰 폭증. corpCode lookup 후 filter 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — endpoint 별 정규화 컬럼.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient request → DART API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return self._dart.filings(
             self._corp,
@@ -1578,21 +1617,22 @@ class DartCompany:
             없음.
 
         Returns:
-            <TODO: return desc> (dict[str, str])
+            dict — 기업 개황 정보 (corpCode/corpName/stockName/stockCode 등).
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 회사명 부분 매치 X — corp 인자는 정확명 또는 stockCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict[str, str] — DART openAPI company endpoint 응답 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY + corp (회사명 또는 stockCode).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - corp → resolveCorpCode → DART API company → 정규화 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return self._dart.company(self._corp)
 
@@ -1617,13 +1657,14 @@ class DartCompany:
             없음.
 
         Args:
-            type: <TODO: param desc> (Literal['major', 'executive', 'all'])
+            type: 주주 종류 — "major" / "executive" / "all".
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | dict[str, pl.DataFrame])
+            pl.DataFrame 또는 dict[str, pl.DataFrame] — 주주 종류별 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1633,27 +1674,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         if type == "major":
             return self._dart.majorShareholders(self._corp)
@@ -1683,21 +1727,23 @@ class DartCompany:
             없음.
 
         Returns:
-            <TODO: return desc> (Path)
+            Path — 저장된 파일 경로.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 결과 추측 X — 정확 인자 값 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - DART OpenAPI 응답 정규화 (메서드별 다름).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return self._dart.document(rceptNo, savePath)
 
@@ -1715,21 +1761,23 @@ class DartCompany:
             없음.
 
         Returns:
-            <TODO: return desc> (str)
+            str — DART OpenAPI 응답 텍스트.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError. caller 사전 검증.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 결과 추측 X — 정확 인자 값 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - DART OpenAPI 응답 정규화 (메서드별 다름).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return self._dart.documentText(rceptNo)
 
@@ -1762,10 +1810,11 @@ class DartCompany:
             없음.
 
         Returns:
-            <TODO: return desc> (Path)
+            Path — 저장된 파일 경로.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1775,27 +1824,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         stockCode = self._resolveStockCode()
         corpName = self._dart._resolveCorpName(self._corp)
@@ -1862,16 +1914,17 @@ class DartCompany:
             없음.
 
         Args:
-            start: <TODO: param desc> (str | int | None)
-            end: <TODO: param desc> (int | None)
-            q: <TODO: param desc> (int | None)
-            categories: <TODO: param desc> (list[str] | None)
+            start: 시작 연도 또는 ISO 날짜. None 이면 기본값.
+            end: 종료 연도. None 이면 현재 연도.
+            q: 분기 (1~4). None 이면 4분기 (사업보고서).
+            categories: 처리 카테고리 리스트. None 이면 전체.
 
         Returns:
-            <TODO: return desc> (Path)
+            Path — 저장된 파일 경로.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1881,27 +1934,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
@@ -1963,10 +2019,11 @@ class DartCompany:
             없음.
 
         Returns:
-            <TODO: return desc> (Path)
+            Path — 저장된 파일 경로.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -1976,27 +2033,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         df = self.filings(start, end, type=type, final=final)
         stockCode = self._resolveStockCode()
@@ -2032,14 +2092,15 @@ class DartCompany:
             없음.
 
         Args:
-            year: <TODO: param desc> (str | int | None)
-            q: <TODO: param desc> (int | None)
+            year: 사업연도 (예 2024). None 이면 직전 연도.
+            q: 분기 (1~4). None 이면 4분기 (사업보고서).
 
         Returns:
-            <TODO: return desc> (Path)
+            Path — 저장된 파일 경로.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 본 함수의 HTTP backend.
+            - ``Dart`` (facade) — 사용자 진입.
 
         Requires:
             - dartlab
@@ -2049,27 +2110,30 @@ class DartCompany:
             - zipfile
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI endpoint 위임 + 응답 정규화. 회사 식별자 자동 매핑 (corpCode resolve).
+              일 호출 한도 (개인 1만/일) 내 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART OpenAPI 호출" → 본 메서드. 사용자 facade 는 ``Dart()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal DART API client — AI 가 직접 호출 시 rate limit 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 미설정 → RuntimeError.
+                - 일 호출 한도 초과 시 빈 응답.
+                - 회사명 부분 매치 X — 정확명 또는 stockCode/corpCode.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 dict — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 환경변수 + 회사 식별자.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → DartClient → DART API → JSON → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         corpCodeStr = _resolveCorpCode(self._dart._client, self._corp)
         bsnsYear = str(year) if year else str(datetime.now().year - 1)

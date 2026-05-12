@@ -58,17 +58,19 @@ class OpenEdgar:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return searchIssuers(query, self._client, limit=limit)
 
@@ -89,17 +91,19 @@ class OpenEdgar:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return resolveIssuer(tickerOrCik, self._client)
 
@@ -119,34 +123,39 @@ class OpenEdgar:
             >>> OpenEdgar().submissionsJson("AAPL")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 본 함수의 HTTP request backend.
+            - ``OpenEdgar`` — 본 클래스의 facade.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC EDGAR public API endpoint 위임 + 정규화 (submissions/companyfacts/concept/frame).
+              User-Agent 헤더 필수 (SEC 표준) — API 키 불요.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "SEC EDGAR API 호출" → 본 메서드.
+            - 사용자 facade 는 ``OpenEdgar()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal SEC API client — AI 가 직접 호출 시 rate limit (10 req/s) 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         cik = self.company(tickerOrCik)["cik"]
         return getSubmissionsJson(cik, self._client)
@@ -177,34 +186,39 @@ class OpenEdgar:
             >>> OpenEdgar().filings("AAPL", forms=["10-K"])
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 본 함수의 HTTP request backend.
+            - ``OpenEdgar`` — 본 클래스의 facade.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC EDGAR public API endpoint 위임 + 정규화 (submissions/companyfacts/concept/frame).
+              User-Agent 헤더 필수 (SEC 표준) — API 키 불요.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "SEC EDGAR API 호출" → 본 메서드.
+            - 사용자 facade 는 ``OpenEdgar()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal SEC API client — AI 가 직접 호출 시 rate limit (10 req/s) 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         info = self.company(tickerOrCik)
         submissions = getSubmissionsJson(info["cik"], self._client)
@@ -234,34 +248,39 @@ class OpenEdgar:
             >>> OpenEdgar().companyFactsJson("AAPL")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 본 함수의 HTTP request backend.
+            - ``OpenEdgar`` — 본 클래스의 facade.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC EDGAR public API endpoint 위임 + 정규화 (submissions/companyfacts/concept/frame).
+              User-Agent 헤더 필수 (SEC 표준) — API 키 불요.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "SEC EDGAR API 호출" → 본 메서드.
+            - 사용자 facade 는 ``OpenEdgar()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal SEC API client — AI 가 직접 호출 시 rate limit (10 req/s) 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         cik = self.company(tickerOrCik)["cik"]
         return getCompanyFactsJson(cik, self._client)
@@ -289,34 +308,39 @@ class OpenEdgar:
             >>> OpenEdgar().companyConceptJson("AAPL", "us-gaap", "Revenues")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 본 함수의 HTTP request backend.
+            - ``OpenEdgar`` — 본 클래스의 facade.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC EDGAR public API endpoint 위임 + 정규화 (submissions/companyfacts/concept/frame).
+              User-Agent 헤더 필수 (SEC 표준) — API 키 불요.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "SEC EDGAR API 호출" → 본 메서드.
+            - 사용자 facade 는 ``OpenEdgar()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal SEC API client — AI 가 직접 호출 시 rate limit (10 req/s) 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         cik = self.company(tickerOrCik)["cik"]
         return getCompanyConceptJson(cik, taxonomy, tag, self._client)
@@ -347,17 +371,19 @@ class OpenEdgar:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return getFrameJson(taxonomy, tag, unit, period, self._client)
 
@@ -391,17 +417,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return str(self._identity["ticker"])
 
@@ -421,17 +449,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return str(self._identity["cik"])
 
@@ -449,17 +479,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return dict(self._identity)
 
@@ -477,17 +509,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return getSubmissionsJson(self.cik, self._edgar._client)
 
@@ -515,34 +549,39 @@ class OpenEdgarCompany:
             >>> e("AAPL").filings(forms=["10-K"])
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 본 함수의 HTTP request backend.
+            - ``OpenEdgar`` — 본 클래스의 facade.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC EDGAR public API endpoint 위임 + 정규화 (submissions/companyfacts/concept/frame).
+              User-Agent 헤더 필수 (SEC 표준) — API 키 불요.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "SEC EDGAR API 호출" → 본 메서드.
+            - 사용자 facade 는 ``OpenEdgar()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal SEC API client — AI 가 직접 호출 시 rate limit (10 req/s) 주의.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         submissions = self.submissionsJson()
         return filingsFrame(
@@ -569,17 +608,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return getCompanyFactsJson(self.cik, self._edgar._client)
 
@@ -601,17 +642,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return getCompanyConceptJson(self.cik, taxonomy, tag, self._edgar._client)
 
@@ -632,17 +675,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return _saveDocs(self.ticker, sinceYear=sinceYear)
 
@@ -660,17 +705,19 @@ class OpenEdgarCompany:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. EdgarClient 초기화 시 자동 주입.
+                - rate limit (10 req/s) 초과 시 차단 — SEC 표준.
+                - 빈 응답 (회사 부재) → caller 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame — endpoint 별 정규화.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (User-Agent 필수, 키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → EdgarClient → SEC API → JSON 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return _saveFinance(self.cik, client=self._edgar._client)
 
