@@ -38,62 +38,115 @@ _BATCH = 200
 
 
 def _fiscalMonthMap() -> dict[str, int]:
-    """종목코드 → 결산월(int) 매핑.
+    """종목코드 → 결산월(int) SSOT 매핑 — 전종목 cover.
 
-    12월 결산은 포함하지 않음 (기본값이므로).
-    listing + 데이터 패턴 양쪽에서 비12월 결산을 판별.
+    데이터 소스 우선순위 (12월 결산도 12 로 명시 포함):
+
+    1. listing (KIND) ``결산월`` 컬럼 — 상장사 권위 SSOT
+    2. raw finance parquet 의 사업보고서 (``reprt_code='11011'``) ``rcept_no``
+       첫 8자 (접수일자) → 접수월 - 3 (mod 12) = 결산월. listing 미포함 종목
+       (비상장·리츠·SPAC·신규상장) 보강.
+    3. fallback: 12 (12월 결산 보수 가정 — 가장 흔한 케이스)
 
     Returns
     -------
     dict[str, int]
-        {종목코드: 결산월} — 비12월 결산 종목만 포함 (예: {"035720": 3}).
+        {종목코드: 결산월 1-12} — 모든 finance 파일 종목에 결산월 부여. 12월 결산
+        포함 (변환 함수에서 identity 매핑되어 안전). 빈 dict 이면 데이터 없음.
+
+    Examples
+    --------
+    >>> fm = _fiscalMonthMap()
+    >>> fm["005930"]   # 삼성전자 (12월 결산)
+    12
+    >>> fm["448730"]   # 삼성FN리츠 (10월 결산, listing 누락→raw 추정)
+    10
     """
     result: dict[str, int] = {}
 
-    # 1. listing 기반
+    # 1. listing 기반 (12월 포함 모든 결산월)
     try:
         from dartlab.gather.krx.listing import getKindList
 
         li = getKindList()
         if li is not None and not li.is_empty():
             if "결산월" in li.columns and "종목코드" in li.columns:
-                nonDec = li.filter(pl.col("결산월") != "12월")
-                for row in nonDec.select(["종목코드", "결산월"]).iter_rows():
+                for row in li.select(["종목코드", "결산월"]).iter_rows():
                     code, month_str = row
+                    if not isinstance(month_str, str):
+                        continue
                     try:
-                        result[code] = int(month_str.replace("월", ""))
+                        m = int(month_str.replace("월", ""))
                     except (ValueError, AttributeError):
-                        pass
+                        continue
+                    if 1 <= m <= 12:
+                        result[code] = m
     except (ImportError, FileNotFoundError, OSError):
         pass
 
-    # 2. 데이터 기반 — listing에 없는 종목(상폐 등)은 bsns_year 패턴으로 추론
-    from datetime import date
-
-    today = date.today()
-    calYear = today.year
-    # 12월 결산이면 4월 현재 maxBsnsYear=작년(2025)
-    maxBsnsYear12 = str(calYear - 1) if today.month <= 4 else str(calYear)
-
+    # 2. raw 사업보고서 접수일 기반 — listing 미포함 종목 보강
     finDir = _financeDir()
     if finDir.exists():
         for pf in finDir.glob("*.parquet"):
             code = pf.stem
             if code in result:
-                continue  # listing에서 이미 파악
-            try:
-                lz = pl.scan_parquet(str(pf))
-                if "bsns_year" not in lz.collect_schema().names():
-                    continue
-                maxYear = lz.select(pl.col("bsns_year").cast(pl.Utf8).max()).collect(engine="streaming").item()
-                if maxYear is not None and maxYear > maxBsnsYear12:
-                    # 정확한 결산월은 모르지만, 비12월 결산 확정
-                    # 보수적으로 6월(가장 흔한 비12월)로 추정
-                    result[code] = 6
-            except (pl.exceptions.PolarsError, OSError):
                 continue
+            estimated = _estimateFiscalMonthFromAnnualFiling(pf)
+            result[code] = estimated if estimated is not None else 12
 
     return result
+
+
+def _estimateFiscalMonthFromAnnualFiling(pf: Path) -> int | None:
+    """raw finance parquet → 사업보고서 접수일 기반 결산월 추정.
+
+    DART 사업보고서 (``reprt_code='11011'``) 마감 = 결산월 종료 + 3개월 이내.
+    ``rcept_no`` 첫 8자 = 접수일자 ``YYYYMMDD``. 결산월 = (접수월 - 3) mod 12.
+
+    여러 사업보고서 접수일의 추정 결산월 **최빈값** 채택 (회계연도 변경 이력 노이즈
+    방어).
+
+    Parameters
+    ----------
+    pf : Path
+        raw finance parquet 경로 (``{stockCode}.parquet``).
+
+    Returns
+    -------
+    int | None
+        추정 결산월 (1-12). 사업보고서 row 없거나 파싱 실패 시 None.
+    """
+    from collections import Counter
+
+    try:
+        lz = pl.scan_parquet(str(pf))
+        schemaNames = lz.collect_schema().names()
+        if "reprt_code" not in schemaNames or "rcept_no" not in schemaNames:
+            return None
+        annual = lz.filter(pl.col("reprt_code") == "11011").select("rcept_no").unique().collect(engine="streaming")
+    except (pl.exceptions.PolarsError, OSError):
+        return None
+
+    if annual.is_empty():
+        return None
+
+    months: list[int] = []
+    for rcn in annual["rcept_no"].to_list():
+        if not isinstance(rcn, str) or len(rcn) < 8:
+            continue
+        try:
+            rmonth = int(rcn[4:6])
+        except ValueError:
+            continue
+        if not 1 <= rmonth <= 12:
+            continue
+        # 결산월 = 접수월 - 3, 1-12 cycling
+        fm = ((rmonth - 3 - 1) % 12) + 1
+        months.append(fm)
+
+    if not months:
+        return None
+    return Counter(months).most_common(1)[0][0]
 
 
 def _toCalendarPeriod(bsnsYear: int, fiscalQ: int, fiscalMonth: int) -> tuple[int, int]:
@@ -118,14 +171,49 @@ def _toCalendarPeriod(bsnsYear: int, fiscalQ: int, fiscalMonth: int) -> tuple[in
     3월 결산(M=3), bsns_year=2026:
     Q1→2025Q2, Q2→2025Q3, Q3→2025Q4, Q4→2026Q1.
     """
-    import math
-
-    endMonth = (fiscalMonth + fiscalQ * 3) % 12
-    if endMonth == 0:
-        endMonth = 12
-    calQ = math.ceil(endMonth / 3)
+    endMonth = ((fiscalMonth + fiscalQ * 3 - 1) % 12) + 1
+    calQ = ((endMonth - 1) // 3) + 1
     calYear = bsnsYear - 1 if endMonth > fiscalMonth else bsnsYear
     return calYear, calQ
+
+
+_FISCAL_Q_MAP = {"1분기": 1, "2분기": 2, "3분기": 3, "4분기": 4}
+
+
+def _calendarizeFiscalColumns(df: pl.DataFrame, fiscalMonth: int) -> pl.DataFrame:
+    """``bsns_year`` / ``reprt_nm`` 을 캘린더 기준으로 환원 (polars 벡터).
+
+    DART 사업연도/회계분기 → ``_toCalendarPeriod`` 동일 수학을 polars expression
+    으로 옮긴 벡터 변환. 12월 결산은 identity (calYear=bsns_year, calQ=fiscalQ).
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``bsns_year`` (str/int) · ``reprt_nm`` (str, "N분기") 컬럼을 가진 raw finance.
+    fiscalMonth : int
+        결산월 (1-12).
+
+    Returns
+    -------
+    pl.DataFrame
+        ``bsns_year`` · ``reprt_nm`` 이 캘린더 기준으로 환원된 동일 schema DataFrame.
+        ``reprt_nm`` 이 ``"N분기"`` 패턴이 아닌 row 는 그대로 보존.
+    """
+    bsnsInt = pl.col("bsns_year").cast(pl.Int32, strict=False)
+    fq = pl.col("reprt_nm").replace_strict(_FISCAL_Q_MAP, default=None, return_dtype=pl.Int32)
+    endMonth = ((fiscalMonth + fq * 3 - 1) % 12) + 1
+    calQ = ((endMonth - 1) // 3) + 1
+    calYear = pl.when(endMonth > fiscalMonth).then(bsnsInt - 1).otherwise(bsnsInt)
+    # fq 가 null 이면 변환 skip (원본 유지)
+    newBsns = (
+        pl.when(fq.is_not_null() & bsnsInt.is_not_null()).then(calYear.cast(pl.Utf8)).otherwise(pl.col("bsns_year"))
+    )
+    newRept = (
+        pl.when(fq.is_not_null() & bsnsInt.is_not_null())
+        .then(calQ.cast(pl.Utf8) + pl.lit("분기"))
+        .otherwise(pl.col("reprt_nm"))
+    )
+    return df.with_columns(newBsns.alias("bsns_year"), newRept.alias("reprt_nm"))
 
 
 def _scanDir() -> Path:
@@ -465,10 +553,11 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     if verbose and acctMap:
         _say(f"[finance] accountMappings: {len(acctMap)}개 매핑 로드")
 
-    # 비12월 결산 종목 → 달력 분기 변환 준비
+    # 결산월 SSOT — 전종목 (12월 결산 포함). 변환 분기에서 일관 적용 (12월은 identity).
     fmMap = _fiscalMonthMap()
     if verbose and fmMap:
-        _say(f"[finance] 비12월 결산 {len(fmMap)}종목 → 달력 분기 변환")
+        nonDec = sum(1 for m in fmMap.values() if m != 12)
+        _say(f"[finance] 결산월 SSOT {len(fmMap)}종목 (비12월 {nonDec}) → 캘린더 분기 환원")
 
     if verbose:
         _say(f"[finance] {len(allFiles)}종목, sinceYear={sinceYear}")
@@ -496,26 +585,11 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
         if df.height == 0:
             continue
 
-        # 비12월 결산 → bsns_year/reprt_nm을 달력 기준으로 변환
+        # 모든 종목 캘린더 분기 환원 (12월 결산 = identity). polars 벡터 변환.
         code = pf.stem
-        if code in fmMap and "bsns_year" in df.columns and "reprt_nm" in df.columns:
-            fm = fmMap[code]
-            _FQ_MAP = {"1분기": 1, "2분기": 2, "3분기": 3, "4분기": 4}
-            rows = []
-            for row in df.iter_rows(named=True):
-                fq = _FQ_MAP.get(row["reprt_nm"])
-                if fq is not None:
-                    try:
-                        calY, calQ = _toCalendarPeriod(int(row["bsns_year"]), fq, fm)
-                        r = dict(row)
-                        r["bsns_year"] = str(calY)
-                        r["reprt_nm"] = f"{calQ}분기"
-                        rows.append(r)
-                    except (ValueError, TypeError):
-                        rows.append(row)
-                else:
-                    rows.append(row)
-            df = pl.DataFrame(rows, schema=df.schema)
+        fm = fmMap.get(code, 12)
+        if "bsns_year" in df.columns and "reprt_nm" in df.columns:
+            df = _calendarizeFiscalColumns(df, fm)
 
         # 계정명 정규화: account_nm → snakeId 컬럼 추가
         if acctMap and "account_nm" in df.columns:

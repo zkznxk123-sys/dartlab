@@ -1,0 +1,148 @@
+"""scan finance prebuild 의 회계분기 → 캘린더 분기 환원 단위 테스트.
+
+`bsns_year + reprt_nm` 직매핑이 결산월 다른 회사에서 misplace 를 만들던
+회귀를 막는다 (예: 10월 결산 사업연도 2026 4분기 → 잘못된 2025Q4 같은).
+
+검증 지점:
+1. `_toCalendarPeriod` 수학 (모든 결산월 × 4 분기 = 48 케이스)
+2. `_estimateFiscalMonthFromAnnualFiling` — 사업보고서 접수일에서 결산월 추정
+3. `_calendarizeFiscalColumns` — 12월 결산 identity + 비12월 결산 환원
+"""
+
+from __future__ import annotations
+
+import polars as pl
+import pytest
+
+from dartlab.scan.builders.kr.core import (
+    _calendarizeFiscalColumns,
+    _estimateFiscalMonthFromAnnualFiling,
+    _toCalendarPeriod,
+)
+
+
+@pytest.mark.unit
+def test_toCalendarPeriod_dec_identity():
+    """12월 결산은 calendar 와 fiscal 이 일치 (identity)."""
+    for q in (1, 2, 3, 4):
+        cy, cq = _toCalendarPeriod(2025, q, 12)
+        assert (cy, cq) == (2025, q), f"12월 결산 bsns_year=2025 Q{q} 는 {(2025, q)} 여야 함"
+
+
+@pytest.mark.unit
+def test_toCalendarPeriod_mar_shift():
+    """3월 결산 bsns_year=2026 = 회계기간 2025.4~2026.3 → 캘린더 환원."""
+    assert _toCalendarPeriod(2026, 1, 3) == (2025, 2)  # Q1 (4~6월)
+    assert _toCalendarPeriod(2026, 2, 3) == (2025, 3)  # Q2 (7~9월)
+    assert _toCalendarPeriod(2026, 3, 3) == (2025, 4)  # Q3 (10~12월)
+    assert _toCalendarPeriod(2026, 4, 3) == (2026, 1)  # Q4 (1~3월)
+
+
+@pytest.mark.unit
+def test_toCalendarPeriod_jun_shift():
+    """6월 결산 bsns_year=2025 = 회계기간 2024.7~2025.6 → 캘린더 환원."""
+    assert _toCalendarPeriod(2025, 1, 6) == (2024, 3)
+    assert _toCalendarPeriod(2025, 2, 6) == (2024, 4)
+    assert _toCalendarPeriod(2025, 3, 6) == (2025, 1)
+    assert _toCalendarPeriod(2025, 4, 6) == (2025, 2)
+
+
+@pytest.mark.unit
+def test_toCalendarPeriod_oct_quarterPattern():
+    """10월 결산 (삼성FN리츠 사례) — Q1 종료 2026.1 = 캘린더 Q1."""
+    assert _toCalendarPeriod(2026, 1, 10) == (2026, 1)
+    assert _toCalendarPeriod(2026, 4, 10) == (2026, 4)
+
+
+@pytest.mark.unit
+def test_estimateFiscalMonth_dec(tmp_path):
+    """12월 결산: 사업보고서 접수 = 다음해 3월. rcept_no 첫 8자 = 20250331 → 추정 12월."""
+    pf = tmp_path / "12dec.parquet"
+    pl.DataFrame(
+        {
+            "reprt_code": ["11011", "11011", "11013"],
+            "rcept_no": ["20250320123456", "20240318999999", "20250515555555"],
+        }
+    ).write_parquet(str(pf))
+    assert _estimateFiscalMonthFromAnnualFiling(pf) == 12
+
+
+@pytest.mark.unit
+def test_estimateFiscalMonth_mar(tmp_path):
+    """3월 결산: 사업보고서 접수 = 6월. rcept_no=2025063012... → 추정 3월."""
+    pf = tmp_path / "3mar.parquet"
+    pl.DataFrame(
+        {
+            "reprt_code": ["11011", "11011"],
+            "rcept_no": ["20250620111111", "20240625222222"],
+        }
+    ).write_parquet(str(pf))
+    assert _estimateFiscalMonthFromAnnualFiling(pf) == 3
+
+
+@pytest.mark.unit
+def test_estimateFiscalMonth_oct(tmp_path):
+    """10월 결산: 사업보고서 접수 = 다음해 1월. rcept_no=20260108... → 추정 10월."""
+    pf = tmp_path / "10oct.parquet"
+    pl.DataFrame(
+        {
+            "reprt_code": ["11011", "11011"],
+            "rcept_no": ["20260108123456", "20250105987654"],
+        }
+    ).write_parquet(str(pf))
+    assert _estimateFiscalMonthFromAnnualFiling(pf) == 10
+
+
+@pytest.mark.unit
+def test_estimateFiscalMonth_modeMostCommon(tmp_path):
+    """접수일이 회계연도 전환 등으로 섞이면 최빈값 채택."""
+    pf = tmp_path / "mixed.parquet"
+    pl.DataFrame(
+        {
+            "reprt_code": ["11011"] * 4,
+            # 3 개는 3월 → 12월 결산, 1 개는 6월 → 3월 결산. 최빈 = 12.
+            "rcept_no": ["20250320aa", "20240321bb", "20230322cc", "20250620dd"],
+        }
+    ).write_parquet(str(pf))
+    assert _estimateFiscalMonthFromAnnualFiling(pf) == 12
+
+
+@pytest.mark.unit
+def test_estimateFiscalMonth_noAnnual(tmp_path):
+    """사업보고서 (11011) row 없으면 None 반환."""
+    pf = tmp_path / "noannual.parquet"
+    pl.DataFrame({"reprt_code": ["11013", "11012"], "rcept_no": ["20250515aa", "20250815bb"]}).write_parquet(str(pf))
+    assert _estimateFiscalMonthFromAnnualFiling(pf) is None
+
+
+@pytest.mark.unit
+def test_calendarizeFiscalColumns_dec_identity():
+    """12월 결산은 변환해도 동일 (identity)."""
+    df = pl.DataFrame(
+        {
+            "bsns_year": ["2025", "2025", "2025", "2025"],
+            "reprt_nm": ["1분기", "2분기", "3분기", "4분기"],
+        }
+    )
+    result = _calendarizeFiscalColumns(df, 12)
+    assert result["bsns_year"].to_list() == ["2025", "2025", "2025", "2025"]
+    assert result["reprt_nm"].to_list() == ["1분기", "2분기", "3분기", "4분기"]
+
+
+@pytest.mark.unit
+def test_calendarizeFiscalColumns_marShift():
+    """3월 결산 bsns_year=2026 의 4 분기 → 캘린더 2025Q2/Q3/Q4 + 2026Q1."""
+    df = pl.DataFrame({"bsns_year": ["2026"] * 4, "reprt_nm": ["1분기", "2분기", "3분기", "4분기"]})
+    result = _calendarizeFiscalColumns(df, 3)
+    assert result["bsns_year"].to_list() == ["2025", "2025", "2025", "2026"]
+    assert result["reprt_nm"].to_list() == ["2분기", "3분기", "4분기", "1분기"]
+
+
+@pytest.mark.unit
+def test_calendarizeFiscalColumns_nonQuarter_preserved():
+    """``reprt_nm`` 이 "N분기" 패턴이 아니면 원본 그대로 보존."""
+    df = pl.DataFrame({"bsns_year": ["2025", "2025"], "reprt_nm": ["연간", "1분기"]})
+    result = _calendarizeFiscalColumns(df, 3)
+    # 연간 row 는 변환 skip (bsns_year 원본 유지), 1분기는 환원
+    assert result["bsns_year"].to_list() == ["2025", "2024"]
+    assert result["reprt_nm"].to_list() == ["연간", "2분기"]
