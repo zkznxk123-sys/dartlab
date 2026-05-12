@@ -20,7 +20,7 @@ import pytest
 @pytest.mark.unit
 def test_lite_accounts_all_in_sortOrder():
     """LITE_ACCOUNTS 30 개가 sortOrder.json 에 모두 존재."""
-    from dartlab.scan.parquetLoad import _LITE_ACCOUNTS_BS, _LITE_ACCOUNTS_CF, _LITE_ACCOUNTS_IS, LITE_ACCOUNTS
+    from dartlab.scan.io.parquet import _LITE_ACCOUNTS_BS, _LITE_ACCOUNTS_CF, _LITE_ACCOUNTS_IS, LITE_ACCOUNTS
 
     sortOrderPath = Path(__file__).resolve().parents[1] / "src" / "dartlab" / "core" / "utils" / "sortOrder.json"
     data = json.loads(sortOrderPath.read_text(encoding="utf-8"))
@@ -39,7 +39,7 @@ def test_lite_accounts_all_in_sortOrder():
 @pytest.mark.unit
 def test_lite_spec_constants():
     """lite 스펙 상수가 기대값대로 유지되는지 — 회귀 보호."""
-    from dartlab.scan.parquetLoad import LITE_SINCE_YEAR, LITE_SJ_DIVS
+    from dartlab.scan.io.parquet import LITE_SINCE_YEAR, LITE_SJ_DIVS
 
     assert LITE_SINCE_YEAR == 2022, "5년치 분기 스펙 (2022~) 변경되면 파일 크기/서비스 UX 에 영향"
     assert "SCE" not in LITE_SJ_DIVS, "SCE (자본변동) 는 용량 27.8% 차지 + scan 미사용이라 반드시 제외"
@@ -50,7 +50,7 @@ def test_lite_spec_constants():
 def test_buildFinanceLite_filters_correctly(tmp_path, monkeypatch):
     """buildFinanceLite 가 원본에서 sj_div/계정/연도 필터를 정확히 적용하는지."""
     from dartlab.scan.builder import core as builderCore
-    from dartlab.scan.parquetLoad import LITE_SINCE_YEAR
+    from dartlab.scan.io.parquet import LITE_SINCE_YEAR
 
     # 가짜 finance.parquet 작성 — 원본과 동일 스키마
     scanDir = tmp_path / "dart" / "scan"

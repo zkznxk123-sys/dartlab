@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     parseNumStr,
     pickBestQuarter,
     scanParquets,
@@ -220,7 +220,7 @@ def scanRevenueGrowth() -> dict[str, float]:
 
     프리빌드 finance.parquet 우선, 없으면 per-file fallback.
     """
-    from dartlab.scan.parquetLoad import _ensureScanData
+    from dartlab.scan.io.parquet import _ensureScanData
 
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

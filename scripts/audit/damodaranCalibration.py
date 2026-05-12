@@ -39,7 +39,7 @@ def main() -> int:
 
     import polars as pl
 
-    from dartlab.scan.parquetLoad import _ensureScanData, parseNumStr
+    from dartlab.scan.io.parquet import _ensureScanData, parseNumStr
 
     scan_dir = _ensureScanData()
     path = scan_dir / "finance.parquet"

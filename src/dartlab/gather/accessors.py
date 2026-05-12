@@ -389,7 +389,7 @@ class DefaultIndustryAccessor:
             >>> df = a.fetchScanProfitability(limit=100)
         """
         try:
-            from dartlab.scan.parquetLoad import scanFinanceParquets
+            from dartlab.scan.io.parquet import scanFinanceParquets
         except ImportError:
             return None
         try:
@@ -420,7 +420,7 @@ class DefaultIndustryAccessor:
             >>> df = a.fetchScanFinanceParquet("finance", limit=100)
         """
         try:
-            from dartlab.scan.parquetLoad import scanFinanceParquets
+            from dartlab.scan.io.parquet import scanFinanceParquets
         except ImportError:
             return None
         try:

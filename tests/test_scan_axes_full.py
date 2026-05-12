@@ -18,38 +18,38 @@ pytestmark = pytest.mark.unit
 
 class TestParseNum:
     def test_int(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr(42) == 42.0
 
     def test_float(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr(3.14) == 3.14
 
     def test_string_number(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr("1,234,567") == 1234567.0
 
     def test_string_negative(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr("-500") == -500.0
 
     def test_dash_returns_none(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr("-") is None
 
     def test_empty_returns_none(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr("") is None
         assert parseNumStr(None) is None
 
     def test_invalid_string(self):
-        from dartlab.scan.parquetLoad import parseNumStr
+        from dartlab.scan.io.parquet import parseNumStr
 
         assert parseNumStr("N/A") is None
 
@@ -59,7 +59,7 @@ class TestParseNum:
 
 class TestExtractAccount:
     def test_match_by_account_id(self):
-        from dartlab.scan.parquetLoad import extractAccount
+        from dartlab.scan.io.parquet import extractAccount
 
         df = pl.DataFrame(
             {
@@ -72,7 +72,7 @@ class TestExtractAccount:
         assert result == 1_000_000.0
 
     def test_match_by_account_nm(self):
-        from dartlab.scan.parquetLoad import extractAccount
+        from dartlab.scan.io.parquet import extractAccount
 
         df = pl.DataFrame(
             {
@@ -85,7 +85,7 @@ class TestExtractAccount:
         assert result == 2_000_000.0
 
     def test_no_match(self):
-        from dartlab.scan.parquetLoad import extractAccount
+        from dartlab.scan.io.parquet import extractAccount
 
         df = pl.DataFrame(
             {
@@ -98,7 +98,7 @@ class TestExtractAccount:
         assert result is None
 
     def test_none_amount(self):
-        from dartlab.scan.parquetLoad import extractAccount
+        from dartlab.scan.io.parquet import extractAccount
 
         df = pl.DataFrame(
             {
@@ -117,7 +117,7 @@ class TestExtractAccount:
 class TestEnsureScanData:
     def test_returns_path_when_exists(self, tmp_path):
         """기존 scan 데이터가 있으면 해당 경로를 반환한다."""
-        import dartlab.scan.parquetLoad as helpers
+        import dartlab.scan.io.parquet as helpers
 
         scan_dir = tmp_path / "scan"
         scan_dir.mkdir()
@@ -128,7 +128,7 @@ class TestEnsureScanData:
         helpers._scanDownloaded = False
 
         try:
-            with patch("dartlab.scan.parquetLoad._ensureScanData") as mock_ensure:
+            with patch("dartlab.scan.io.parquet._ensureScanData") as mock_ensure:
                 mock_ensure.return_value = scan_dir
                 result = mock_ensure()
                 assert result == scan_dir
@@ -142,7 +142,7 @@ class TestEnsureScanData:
 class TestScanParquets:
     def test_prebuild_scan_parquet(self, tmp_path):
         """프리빌드 scan parquet에서 데이터를 읽는다."""
-        from dartlab.scan.parquetLoad import scanParquets
+        from dartlab.scan.io.parquet import scanParquets
 
         # Create a test parquet file
         report_dir = tmp_path / "scan" / "report"
@@ -160,7 +160,7 @@ class TestScanParquets:
         )
         df.write_parquet(str(report_dir / "majorHolder.parquet"))
 
-        with patch("dartlab.scan.parquetLoad._ensureScanData", return_value=tmp_path / "scan"):
+        with patch("dartlab.scan.io.parquet._ensureScanData", return_value=tmp_path / "scan"):
             result = scanParquets(
                 "majorHolder",
                 ["stockCode", "year", "quarter", "name", "pct"],
@@ -174,7 +174,7 @@ class TestScanParquets:
 
 class TestFindLatestYear:
     def test_finds_year_with_enough_data(self):
-        from dartlab.scan.parquetLoad import findLatestYear
+        from dartlab.scan.io.parquet import findLatestYear
 
         rows = [{"year": "2023", "value": str(i)} for i in range(600)]
         rows += [{"year": "2022", "value": str(i)} for i in range(600)]
@@ -182,7 +182,7 @@ class TestFindLatestYear:
         assert findLatestYear(df, "value", minCount=500) == "2023"
 
     def test_skips_sparse_year(self):
-        from dartlab.scan.parquetLoad import findLatestYear
+        from dartlab.scan.io.parquet import findLatestYear
 
         rows_2023 = [{"year": "2023", "value": ""} for _ in range(600)]
         rows_2022 = [{"year": "2022", "value": str(i)} for i in range(600)]
@@ -190,7 +190,7 @@ class TestFindLatestYear:
         assert findLatestYear(df, "value", minCount=500) == "2022"
 
     def test_returns_none_if_no_year_qualifies(self):
-        from dartlab.scan.parquetLoad import findLatestYear
+        from dartlab.scan.io.parquet import findLatestYear
 
         rows = [{"year": "2023", "value": None} for _ in range(10)]
         df = pl.DataFrame(rows)
@@ -202,7 +202,7 @@ class TestFindLatestYear:
 
 class TestPickBestQuarter:
     def test_prefers_q2(self):
-        from dartlab.scan.parquetLoad import pickBestQuarter
+        from dartlab.scan.io.parquet import pickBestQuarter
 
         df = pl.DataFrame(
             {
@@ -215,7 +215,7 @@ class TestPickBestQuarter:
         assert result["quarter"][0] == "2분기"
 
     def test_falls_back_to_q4(self):
-        from dartlab.scan.parquetLoad import pickBestQuarter
+        from dartlab.scan.io.parquet import pickBestQuarter
 
         df = pl.DataFrame(
             {
@@ -232,24 +232,24 @@ class TestPickBestQuarter:
 
 class TestParseDateYear:
     def test_dot_format(self):
-        from dartlab.scan.parquetLoad import parseDateYear
+        from dartlab.scan.io.parquet import parseDateYear
 
         assert parseDateYear("2023.06.15") == 2023
 
     def test_dash_format(self):
-        from dartlab.scan.parquetLoad import parseDateYear
+        from dartlab.scan.io.parquet import parseDateYear
 
         assert parseDateYear("2022-12-31") == 2022
 
     def test_none(self):
-        from dartlab.scan.parquetLoad import parseDateYear
+        from dartlab.scan.io.parquet import parseDateYear
 
         assert parseDateYear(None) is None
         assert parseDateYear("") is None
         assert parseDateYear("-") is None
 
     def test_out_of_range(self):
-        from dartlab.scan.parquetLoad import parseDateYear
+        from dartlab.scan.io.parquet import parseDateYear
 
         assert parseDateYear("1800.01.01") is None
 
@@ -259,7 +259,7 @@ class TestParseDateYear:
 
 class TestQuarterOrder:
     def test_q2_has_highest_priority(self):
-        from dartlab.scan.parquetLoad import QUARTER_ORDER
+        from dartlab.scan.io.parquet import QUARTER_ORDER
 
         assert QUARTER_ORDER["2분기"] < QUARTER_ORDER["4분기"]
         assert QUARTER_ORDER["2분기"] < QUARTER_ORDER["3분기"]

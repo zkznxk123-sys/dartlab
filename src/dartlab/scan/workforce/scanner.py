@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     findLatestYear,
     parseNumStr,
     pickBestQuarter,
@@ -179,7 +179,7 @@ def scanRevenuePerEmployee() -> dict[str, float]:
     }
     REVENUE_NMS = {"매출액", "수익(매출액)", "영업수익", "매출", "순영업수익"}
 
-    from dartlab.scan.parquetLoad import _ensureScanData
+    from dartlab.scan.io.parquet import _ensureScanData
 
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

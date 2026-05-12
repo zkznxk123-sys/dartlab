@@ -26,7 +26,7 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-from dartlab.scan.parquetLoad import _ensureScanData
+from dartlab.scan.io.parquet import _ensureScanData
 
 # 심각 키워드 (audit 안전 67%가 미감지 — 실험 107-002 검증)
 _SEVERE_KEYWORDS = ["횡령", "배임", "과징금", "손해배상"]

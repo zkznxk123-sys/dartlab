@@ -54,16 +54,16 @@ def _isolateScanDir(monkeypatch, tmp_path):
     """모든 테스트에서 scan parquet 경로를 tmp_path 로 리다이렉트."""
     scanDir = tmp_path / "scan"
     scanDir.mkdir()
-    from dartlab.scan import parquetLoad
+    from dartlab.scan.io import parquet
 
-    monkeypatch.setattr(parquetLoad, "_ensureScanData", lambda: scanDir)
+    monkeypatch.setattr(parquet, "_ensureScanData", lambda: scanDir)
     # 전역 플래그 리셋 (다른 테스트 간 간섭 방지)
-    monkeypatch.setattr(parquetLoad, "_scanDownloaded", False, raising=False)
+    monkeypatch.setattr(parquet, "_scanDownloaded", False, raising=False)
     return scanDir
 
 
 def test_loadValuationSnapshot_missing_returns_none(_isolateScanDir):
-    from dartlab.scan.parquetLoad import loadValuationSnapshot
+    from dartlab.scan.io.parquet import loadValuationSnapshot
 
     frame, snapshotAt = loadValuationSnapshot()
     assert frame is None
@@ -71,7 +71,7 @@ def test_loadValuationSnapshot_missing_returns_none(_isolateScanDir):
 
 
 def test_loadValuationSnapshot_reads_valid_parquet(_isolateScanDir):
-    from dartlab.scan.parquetLoad import loadValuationSnapshot
+    from dartlab.scan.io.parquet import loadValuationSnapshot
 
     ts = datetime(2026, 4, 23, 19, 0, 0)  # tzinfo 없음 — parquet read 후 동일 타입
     _writeMockParquet(_isolateScanDir / "valuation.parquet", ts)
@@ -87,7 +87,7 @@ def test_loadValuationSnapshot_reads_valid_parquet(_isolateScanDir):
 
 def test_loadValuationSnapshot_missing_required_column_returns_none(_isolateScanDir):
     """스키마 불일치 parquet (필수 컬럼 누락) 이면 None 반환."""
-    from dartlab.scan.parquetLoad import loadValuationSnapshot
+    from dartlab.scan.io.parquet import loadValuationSnapshot
 
     # current 컬럼 누락
     bad = pl.DataFrame(

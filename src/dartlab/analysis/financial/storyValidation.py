@@ -152,7 +152,7 @@ def _findPhaseMatchingPeers(stockCode: str, phase: str, *, limit: int = 5) -> li
 
         import polars as pl
 
-        _h = importlib.import_module("dartlab.scan.parquetLoad")
+        _h = importlib.import_module("dartlab.scan.io.parquet")
         _ensureScanData = _h._ensureScanData
         parseNumStr = _h.parseNumStr
     except ImportError:
@@ -299,7 +299,7 @@ def calcPlausibilityBand(
 
         import polars as pl
 
-        _h = importlib.import_module("dartlab.scan.parquetLoad")
+        _h = importlib.import_module("dartlab.scan.io.parquet")
         _ensureScanData = _h._ensureScanData
         parseNumStr = _h.parseNumStr
 

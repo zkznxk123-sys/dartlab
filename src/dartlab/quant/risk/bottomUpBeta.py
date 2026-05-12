@@ -148,7 +148,7 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
 
         import polars as pl
 
-        _scanHelpers = importlib.import_module("dartlab.scan.parquetLoad")
+        _scanHelpers = importlib.import_module("dartlab.scan.io.parquet")
         _ensureScanData = _scanHelpers._ensureScanData
         parseNumStr = _scanHelpers.parseNumStr
     except ImportError:

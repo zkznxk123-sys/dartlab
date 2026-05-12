@@ -47,7 +47,7 @@ def scanMacroBeta(
         nObs : int — 유효 관측치 수
         confidence : str — 신뢰도 (high/medium/low)
     """
-    from dartlab.scan.parquetLoad import _ensureScanData
+    from dartlab.scan.io.parquet import _ensureScanData
 
     # 전종목 매출 시계열 로드 (프리빌드 finance.parquet에서 추출)
     try:
@@ -144,7 +144,7 @@ def _loadRevenueSeries(scanDir: Path) -> pl.DataFrame | None:
         {year}A : float — 연도별 매출 (원). 컬럼명 예: "2024A"
         데이터 없으면 None.
     """
-    from dartlab.scan.parquetLoad import parseNumStr
+    from dartlab.scan.io.parquet import parseNumStr
 
     scanPath = scanDir / "finance.parquet"
     if not scanPath.exists():

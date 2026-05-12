@@ -741,7 +741,7 @@ class Scan:
             >>> df = dartlab.scan.docsSections(year=2024, engine="duckdb", limit=10000)
         """
         from dartlab.core.dataLoader import _dataDir, _getDataRoot
-        from dartlab.scan.crossScanEngine import pickCrossScanEngine
+        from dartlab.scan.io.cross import pickCrossScanEngine
 
         if market not in ("KR", "US", "JP"):
             raise ValueError(f"지원 안 함 market: {market}. KR/US/JP 만.")

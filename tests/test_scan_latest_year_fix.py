@@ -27,7 +27,7 @@ def _mockFinanceRow(stockCode: str, year: int, accountId: str, accountNm: str, a
 
 def test_filterLatestPerStock_keepsEachStocksOwnMaxYear():
     """A 종목은 2026 까지, B 는 2025 까지, C 는 2024 까지만 있을 때 각자 자기 max 만 통과."""
-    from dartlab.scan.parquetLoad import filterLatestPerStock
+    from dartlab.scan.io.parquet import filterLatestPerStock
 
     rows = [
         {"stockCode": "A", "bsns_year": 2025, "val": 100},
@@ -45,7 +45,7 @@ def test_filterLatestPerStock_keepsEachStocksOwnMaxYear():
 
 
 def test_filterLatestPerStock_emptyReturnsEmpty():
-    from dartlab.scan.parquetLoad import filterLatestPerStock
+    from dartlab.scan.io.parquet import filterLatestPerStock
 
     df = pl.DataFrame(schema={"stockCode": pl.Utf8, "bsns_year": pl.Int64})
     result = filterLatestPerStock(df)
@@ -53,7 +53,7 @@ def test_filterLatestPerStock_emptyReturnsEmpty():
 
 
 def test_filterLatestPerStock_missingColumnReturnsAsIs():
-    from dartlab.scan.parquetLoad import filterLatestPerStock
+    from dartlab.scan.io.parquet import filterLatestPerStock
 
     df = pl.DataFrame({"other": [1, 2, 3]})
     result = filterLatestPerStock(df)

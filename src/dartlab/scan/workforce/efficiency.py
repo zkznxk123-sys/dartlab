@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dartlab.scan.parquetLoad import scanFinanceParquets
+from dartlab.scan.io.parquet import scanFinanceParquets
 from dartlab.scan.workforce.scanner import scanEmployee, scanTotalPayroll
 
 REVENUE_IDS = {

@@ -7,25 +7,25 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.core.utils.calc import cagr as _cagr  # noqa: E402
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     NI_IDS as _NI_IDS,
 )
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     NI_NMS as _NI_NMS,
 )
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     OP_IDS as _OP_IDS,
 )
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     OP_NMS as _OP_NMS,
 )
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     REVENUE_IDS as _REVENUE_IDS,
 )
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     REVENUE_NMS as _REVENUE_NMS,
 )
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     _ensureScanData,
     extractAccount,
 )

@@ -704,7 +704,7 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     - 원본 재빌드 없이 이미 정규화된 finance.parquet 에서 필터만 하므로 <1초.
     """
     from dartlab.providers.dart.finance.scanAccount import _buildFastKeys
-    from dartlab.scan.parquetLoad import LITE_ACCOUNTS, LITE_SINCE_YEAR, LITE_SJ_DIVS
+    from dartlab.scan.io.parquet import LITE_ACCOUNTS, LITE_SINCE_YEAR, LITE_SJ_DIVS
 
     effectiveSinceYear = LITE_SINCE_YEAR if sinceYear is None else sinceYear
     outDir = _scanDir()

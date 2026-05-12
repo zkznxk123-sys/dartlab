@@ -10,7 +10,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from dartlab.scan.crossScanEngine import (
+from dartlab.scan.io.cross import (
     CrossScanEngine,
     DuckDbCrossScan,
     PolarsCrossScan,

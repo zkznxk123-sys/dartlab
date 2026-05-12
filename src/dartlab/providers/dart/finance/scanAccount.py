@@ -567,7 +567,7 @@ def scanAccount(
 
     from dartlab.core.dataLoader import _IS_PYODIDE
 
-    _ensureScanData = importlib.import_module("dartlab.scan.parquetLoad")._ensureScanData
+    _ensureScanData = importlib.import_module("dartlab.scan.io.parquet")._ensureScanData
 
     scanDir = _ensureScanData()
     scanFileName = "finance-lite.parquet" if _IS_PYODIDE else "finance.parquet"

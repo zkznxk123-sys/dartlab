@@ -172,7 +172,7 @@ def _aggregateFinanceSnapshot() -> dict[str, Any] | None:
 
         import polars as pl
 
-        _scanHelpers = importlib.import_module("dartlab.scan.parquetLoad")
+        _scanHelpers = importlib.import_module("dartlab.scan.io.parquet")
         _ensureScanData = _scanHelpers._ensureScanData
         parseNumStr = _scanHelpers.parseNumStr
 

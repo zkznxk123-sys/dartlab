@@ -52,7 +52,7 @@ def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
     float | None
         매칭된 계정의 금액 (원). 없으면 None.
     """
-    from dartlab.scan.parquetLoad import extractAccount
+    from dartlab.scan.io.parquet import extractAccount
 
     return extractAccount(row_sub, list(id_list), list(nm_list))
 
@@ -111,7 +111,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
         _TA_IDS,
         _TA_NMS,
     )
-    from dartlab.scan.parquetLoad import _ensureScanData
+    from dartlab.scan.io.parquet import _ensureScanData
 
     # 부채 계정 — scan.debt 에서 재사용 (없으면 fallback)
     try:

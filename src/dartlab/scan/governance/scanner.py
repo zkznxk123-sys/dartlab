@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.scan.parquetLoad import (
+from dartlab.scan.io.parquet import (
     findLatestYear,
     parseNumStr,
     pickBestQuarter,
