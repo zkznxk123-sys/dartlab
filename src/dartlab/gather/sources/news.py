@@ -267,3 +267,45 @@ def fetchNews(
     if limit is not None and limit > 0:
         return df.head(limit)
     return df
+
+
+def iterFetchNews(
+    query: str,
+    *,
+    market: str = "KR",
+    days: int = 30,
+    batchSize: int = 100,
+):
+    """fetchNews 의 streaming pair — DataFrame 을 batchSize 행씩 yield (A 트랙 I2).
+
+    Capabilities: DataFrame 을 batchSize 단위 slice yield.
+    AIContext: news sentiment scoring 의 chunk 처리 진입점.
+    Guide: fetchNews 가 None/empty 면 yield 없음.
+    When: 메모리 효율 chunk 처리 필요 시.
+    How: fetchNews → df.slice(i, batchSize) iterate.
+
+    Args:
+        query: 검색어.
+        market: "KR" 또는 "US". 기본 "KR".
+        days: 최근 N일.
+        batchSize: batch 크기.
+
+    Yields:
+        pl.DataFrame — 각 batch.
+
+    Raises:
+        없음.
+
+    Example::
+
+        for batch in iterFetchNews("삼성전자", batchSize=20): score(batch)
+
+    Requires: 네트워크.
+    See Also: ``fetchNews``.
+    """
+    df = fetchNews(query, market=market, days=days)
+    if df is None or df.is_empty():
+        return
+    height = df.height
+    for i in range(0, height, batchSize):
+        yield df.slice(i, batchSize)

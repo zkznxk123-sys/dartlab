@@ -125,3 +125,85 @@ async def fetchMajorShareholders(
     except (ImportError, OSError, TypeError) as exc:
         log.warning("majorShareholders 실패 (%s): %s", stockCode, exc)
         return []
+
+
+def iterFetchInsiderTrading(
+    stockCode: str,
+    *,
+    market: str = "KR",
+    batchSize: int = 100,
+):
+    """fetchInsiderTrading 의 streaming pair — list 를 batchSize 단위 yield (A 트랙 I2).
+
+    Capabilities: list[InsiderTrade] 를 batchSize slice yield.
+    AIContext: informed trading 흐름의 chunk 처리.
+    Guide: fetch 가 빈 list 면 yield 없음.
+    When: 내부자 거래가 많은 회사의 chunk 처리 시.
+    How: runAsync(fetchInsiderTrading) → list slice iterate.
+
+    Args:
+        stockCode: 종목코드.
+        market: 시장. "KR"만 지원.
+        batchSize: batch 크기.
+
+    Yields:
+        list[InsiderTrade] — 각 batch.
+
+    Raises:
+        없음.
+
+    Example::
+
+        for batch in iterFetchInsiderTrading("005930", batchSize=50): process(batch)
+
+    Requires: KR DART_API_KEY env.
+    See Also: ``fetchInsiderTrading``.
+    """
+    from ..infra.http import runAsync
+
+    trades = runAsync(fetchInsiderTrading(stockCode, market=market))
+    if not trades:
+        return
+    for i in range(0, len(trades), batchSize):
+        yield trades[i : i + batchSize]
+
+
+def iterFetchMajorShareholders(
+    stockCode: str,
+    *,
+    market: str = "KR",
+    batchSize: int = 100,
+):
+    """fetchMajorShareholders 의 streaming pair — list 를 batchSize 단위 yield (A 트랙 I2).
+
+    Capabilities: list[MajorHolder] 를 batchSize slice yield.
+    AIContext: 5% 보유 변동의 chunk 처리 — 시계열 활동 timeline.
+    Guide: fetch 가 빈 list 면 yield 없음.
+    When: 대량보유 변동이 많은 회사의 chunk 처리 시.
+    How: runAsync(fetchMajorShareholders) → list slice iterate.
+
+    Args:
+        stockCode: 종목코드.
+        market: 시장. "KR"만 지원.
+        batchSize: batch 크기.
+
+    Yields:
+        list[MajorHolder] — 각 batch.
+
+    Raises:
+        없음.
+
+    Example::
+
+        for batch in iterFetchMajorShareholders("005930"): process(batch)
+
+    Requires: KR DART_API_KEY env.
+    See Also: ``fetchMajorShareholders``.
+    """
+    from ..infra.http import runAsync
+
+    holders = runAsync(fetchMajorShareholders(stockCode, market=market))
+    if not holders:
+        return
+    for i in range(0, len(holders), batchSize):
+        yield holders[i : i + batchSize]

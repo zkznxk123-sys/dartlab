@@ -81,6 +81,51 @@ async def fetch(
         return []
 
 
+def iterFetch(
+    stockCode: str,
+    *,
+    market: str = "KR",
+    client: GatherHttpClient | None = None,
+    batchSize: int = 100,
+):
+    """fetch 의 streaming pair — list 를 batchSize 단위 yield (A 트랙 I2).
+
+    Capabilities: list[InstitutionOwnership] 를 batchSize slice yield.
+    AIContext: 외국인/기관 보유 흐름의 chunk 처리.
+    Guide: fetch 가 빈 list 면 yield 없음. client=None 이면 자동 생성.
+    When: 다수 보유자 ownership 데이터 chunk 처리 시.
+    How: runAsync(fetch) → list slice iterate.
+
+    Args:
+        stockCode: 종목코드.
+        market: 시장. "KR"만 지원.
+        client: HTTP 클라이언트. None 이면 GatherHttpClient 자동 생성.
+        batchSize: batch 크기.
+
+    Yields:
+        list[InstitutionOwnership] — 각 batch.
+
+    Raises:
+        없음.
+
+    Example::
+
+        for batch in iterFetch("005930"): aggregate(batch)
+
+    Requires: 네트워크.
+    See Also: ``fetch``.
+    """
+    from ..infra.http import runAsync
+
+    if client is None:
+        client = GatherHttpClient()
+    owners = runAsync(fetch(stockCode, market=market, client=client))
+    if not owners:
+        return
+    for i in range(0, len(owners), batchSize):
+        yield owners[i : i + batchSize]
+
+
 def _cleanFloat(text) -> float:
     """숫자 텍스트를 float로 변환. 콤마·공백 제거.
 
