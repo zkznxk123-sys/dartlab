@@ -118,11 +118,87 @@ def buildSkillArtifacts(
     ]
     _writeJson(web_path / "index.json", {"meta": meta, "skills": search_index})
     _writeJson(web_path / "pyodide.json", {"skills": pyodide_manifest})
+    _writeJson(web_path / "graph.json", _buildGraphPayload(skills))
 
     return {
         "skillCount": len(skills),
         "webDir": str(web_path),
         "categories": categories,
+    }
+
+
+def _buildGraphPayload(skills: list[Any]) -> dict[str, Any]:
+    """SkillSpec 리스트 → graph.json 직렬화 payload.
+
+    Description
+    -----------
+    buildSkillGraph 결과를 nodes + edges + cycles + entries + orphans +
+    unreachable 6 필드 dict 로 직렬화. 랜딩 /skills/graph 라우트가 import.
+
+    Parameters
+    ----------
+    skills : list[SkillSpec]
+        listSkills() 결과.
+
+    Returns
+    -------
+    dict
+        nodes : list[dict] — id, title, category, purpose, inDegree, outDegree, cluster, isEntry, isLeaf, isOrphan, audiences
+        edges : list[dict] — src, dst, kind
+        entries : list[str]
+        cycles : list[list[str]]
+        orphans : list[str]
+        unreachable : list[str]
+
+    Raises
+    ------
+    없음
+        검증/lint 는 graphLint.py.
+
+    Examples
+    --------
+    >>> payload = _buildGraphPayload(listSkills())
+    >>> 'nodes' in payload
+    True
+
+    Notes
+    -----
+    cluster 는 시각화 색상 그룹화 키. audiences 는 frontmatter directive 마커
+    명시 주체 셋 (트랙 4 후 채워짐).
+
+    Guide
+    -----
+    landing 빌드 시 import. 카테고리별 색상은 categoryColors SSOT.
+
+    See Also
+    --------
+    dartlab.skills.graph.buildSkillGraph : 그래프 모델.
+    """
+    from dartlab.skills.graph import buildSkillGraph
+
+    graph = buildSkillGraph(skills)
+    return {
+        "nodes": [
+            {
+                "id": node.id,
+                "title": node.title,
+                "category": node.category,
+                "purpose": node.purpose,
+                "inDegree": node.inDegree,
+                "outDegree": node.outDegree,
+                "cluster": node.cluster,
+                "isEntry": node.isEntry,
+                "isLeaf": node.isLeaf,
+                "isOrphan": node.isOrphan,
+                "audiences": list(node.audiences),
+            }
+            for node in graph.nodes
+        ],
+        "edges": [{"src": edge.src, "dst": edge.dst, "kind": edge.kind} for edge in graph.edges],
+        "entries": list(graph.entryNodes),
+        "cycles": [list(cycle) for cycle in graph.cycles],
+        "orphans": list(graph.orphanNodes),
+        "unreachable": list(graph.unreachableFromEntry),
     }
 
 

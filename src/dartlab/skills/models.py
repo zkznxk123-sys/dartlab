@@ -145,6 +145,16 @@ class SkillSpec:
     validationRuns: list[dict[str, Any]] = field(default_factory=list)
     validatedAt: str | None = None
     storyboardKey: str | None = None
+    # ── Skill Graph 모델 (트랙 2) — 작업 흐름 path · 3 주체 분기 · 트리 분류 ──
+    predecessors: list[str] = field(default_factory=list)
+    successors: list[str] = field(default_factory=list)
+    audiences: dict[str, str] = field(default_factory=dict)
+    isLeafNode: bool = False
+    entryHint: bool = False
+    graphTier: str | None = None
+    cluster: str | None = None
+    # ── 사람용 도입 본문 (트랙 8) — landing 페이지 상단 영역 ──
+    humanIntro: str | None = None
 
     def toDict(self) -> dict[str, Any]:
         """toDict — TODO 한국어 동작 설명."""
