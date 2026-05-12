@@ -618,7 +618,7 @@ def _loadValuation(field: str) -> pl.DataFrame:
         if raw is not None and not raw.is_empty() and name in raw.columns:
             return raw.select("stockCode", pl.col(name).alias(field))
 
-    from dartlab.scan.valuation import scanValuation
+    from dartlab.scan.financial.valuation import scanValuation
 
     df = scanValuation(verbose=False)
     if df is None or df.is_empty() or name not in df.columns:

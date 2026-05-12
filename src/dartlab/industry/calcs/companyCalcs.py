@@ -213,10 +213,10 @@ def calcSectorMetrics(company: Any) -> dict | None:
     try:
         import importlib
 
-        scanGrowth = importlib.import_module("dartlab.scan.growth").scanGrowth
+        scanGrowth = importlib.import_module("dartlab.scan.financial.growth").scanGrowth
         import importlib
 
-        scanProfitability = importlib.import_module("dartlab.scan.profitability").scanProfitability
+        scanProfitability = importlib.import_module("dartlab.scan.financial.profitability").scanProfitability
 
         prof = scanProfitability()
         grow = scanGrowth()
@@ -319,7 +319,7 @@ def calcSectorCycle(company: Any) -> dict | None:
     try:
         import importlib
 
-        scanProfitability = importlib.import_module("dartlab.scan.profitability").scanProfitability
+        scanProfitability = importlib.import_module("dartlab.scan.financial.profitability").scanProfitability
         prof = scanProfitability()
     except Exception:
         return None

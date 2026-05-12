@@ -62,7 +62,7 @@ def test_filterLatestPerStock_missingColumnReturnsAsIs():
 
 def test_computeProfitability_noLongerDroppedByGlobalLatestYear():
     """엔진 버그: 전 샘플 중 단 1 종목만 2026, 나머지는 2025 자. 결과는 전종목이어야 함 (수정 전엔 1건만 남음)."""
-    from dartlab.scan.profitability import _computeProfitability
+    from dartlab.scan.financial.profitability import _computeProfitability
 
     rows = []
     # A: 2026 까지 있음 (조기 제출 종목 시뮬)
@@ -98,7 +98,7 @@ def test_computeProfitability_noLongerDroppedByGlobalLatestYear():
 
 def test_computeGrowth_perStockYearsNotGlobal():
     """CAGR 계산이 각 종목의 자기 최신·기준 연도 pair 를 쓰는지 검증."""
-    from dartlab.scan.growth import _computeGrowth
+    from dartlab.scan.financial.growth import _computeGrowth
 
     rows = []
     # A: 2023, 2026 (4년 gap → baseYear=2023)

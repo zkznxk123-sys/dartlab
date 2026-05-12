@@ -102,7 +102,7 @@ def test_loadValuationSnapshot_missing_required_column_returns_none(_isolateScan
 
 def test_scanValuation_prebuild_path_skips_naver(_isolateScanDir, monkeypatch):
     """prebuild parquet 이 있으면 네이버 API (fetchValuationRaw) 는 호출되지 않아야 한다."""
-    import dartlab.scan.valuation as vmod  # subpackage 직접 import (dartlab.scan 는 Scan 인스턴스라 attr dispatch)
+    import dartlab.scan.financial.valuation as vmod  # subpackage 직접 import (dartlab.scan 는 Scan 인스턴스라 attr dispatch)
 
     ts = datetime(2026, 4, 23, 19, 0, 0)
     _writeMockParquet(_isolateScanDir / "valuation.parquet", ts)
@@ -130,7 +130,7 @@ def test_scanValuation_prebuild_path_skips_naver(_isolateScanDir, monkeypatch):
 
 def test_scanValuation_fallback_when_no_prebuild(_isolateScanDir, monkeypatch):
     """prebuild 없을 때 fetchValuationRaw 호출 경로로 빠져야 함."""
-    import dartlab.scan.valuation as vmod  # subpackage 직접 import (dartlab.scan 는 Scan 인스턴스라 attr dispatch)
+    import dartlab.scan.financial.valuation as vmod  # subpackage 직접 import (dartlab.scan 는 Scan 인스턴스라 attr dispatch)
 
     ts = datetime(2026, 4, 23, 20, 0, 0)
 
@@ -165,7 +165,7 @@ def test_scanValuation_fallback_when_no_prebuild(_isolateScanDir, monkeypatch):
 
 def test_scanValuation_refresh_true_bypasses_prebuild(_isolateScanDir, monkeypatch):
     """refresh=True 이면 prebuild 있어도 네이버 재수집 경로."""
-    import dartlab.scan.valuation as vmod  # subpackage 직접 import (dartlab.scan 는 Scan 인스턴스라 attr dispatch)
+    import dartlab.scan.financial.valuation as vmod  # subpackage 직접 import (dartlab.scan 는 Scan 인스턴스라 attr dispatch)
 
     ts_old = datetime(2026, 4, 20, 19, 0, 0)
     _writeMockParquet(_isolateScanDir / "valuation.parquet", ts_old)

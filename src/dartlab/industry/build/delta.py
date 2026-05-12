@@ -99,8 +99,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     """
     from pathlib import Path
 
-    from dartlab.scan.parquetLoad import _ensureScanData
-    from dartlab.scan.profitability import (
+    from dartlab.scan.financial.profitability import (
         _EQ_IDS,
         _EQ_NMS,
         _NI_IDS,
@@ -112,6 +111,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
         _TA_IDS,
         _TA_NMS,
     )
+    from dartlab.scan.parquetLoad import _ensureScanData
 
     # 부채 계정 — scan.debt 에서 재사용 (없으면 fallback)
     try:
@@ -158,28 +158,28 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     prior = df.filter(pl.col("bsns_year") == priorYear)
 
     def _ratios(sub: pl.DataFrame) -> tuple:
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _EQ_IDS as EQ_IDS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _EQ_NMS as EQ_NMS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _NI_IDS as NI_IDS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _NI_NMS as NI_NMS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _OP_IDS as OP_IDS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _OP_NMS as OP_NMS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _REVENUE_IDS as R_IDS,
         )
-        from dartlab.scan.profitability import (
+        from dartlab.scan.financial.profitability import (
             _REVENUE_NMS as R_NMS,
         )
 

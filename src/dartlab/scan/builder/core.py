@@ -783,7 +783,7 @@ def buildValuation(*, verbose: bool = True) -> Path | None:
         생성된 `valuation.parquet` 경로. 수집 실패 또는 rate-limit 으로 0건이면
         기존 parquet 덮어쓰지 않고 ``None`` 반환.
     """
-    from dartlab.scan.valuation import _RAW_SCHEMA, fetchValuationRaw
+    from dartlab.scan.financial.valuation import _RAW_SCHEMA, fetchValuationRaw
 
     if verbose:
         _say("[valuation] 상장사 목록 로드...")

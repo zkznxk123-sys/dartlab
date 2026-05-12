@@ -317,7 +317,7 @@ def _loadScanMetrics() -> dict[str, dict]:
 
     # cashflow (8종 패턴)
     try:
-        from dartlab.scan.cashflow import scanCashflow
+        from dartlab.scan.financial.cashflow import scanCashflow
 
         cf = scanCashflow()
         for r in cf.iter_rows(named=True):
@@ -345,7 +345,7 @@ def _loadScanMetrics() -> dict[str, dict]:
 
     # quality (이익의 질)
     try:
-        from dartlab.scan.quality import scanQuality
+        from dartlab.scan.financial.quality import scanQuality
 
         qual = scanQuality()
         for r in qual.iter_rows(named=True):
@@ -359,7 +359,7 @@ def _loadScanMetrics() -> dict[str, dict]:
 
     # liquidity (유동성)
     try:
-        from dartlab.scan.liquidity import scanLiquidity
+        from dartlab.scan.financial.liquidity import scanLiquidity
 
         liq = scanLiquidity()
         for r in liq.iter_rows(named=True):
