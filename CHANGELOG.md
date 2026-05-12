@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+gather 엔진 production-grade 격상 — observability · 메모리 효율 · 진입점 문서 일관화.
+
+### Added
+
+- `getDefaultGather()` 가 멀티스레드 환경에서도 단일 인스턴스 보장 (double-checked locking).
+  웹 서버 / 워커 풀 / Jupyter parallel 컨텍스트에서 캐시·HTTP 클라이언트 중복 생성 없음.
+- 메모리 효율 스트리밍 — Finance accessor 에 내부자 거래 / 기관 보유 / 뉴스 3 종 batch 진입점 추가.
+  큰 결과를 한 번에 메모리로 못 올릴 때 batchSize 단위 iter 처리 가능.
+- 캐시 상태 스냅샷 노출 — telemetry 모듈에서 누적 hit/miss/evict 카운터 read API.
+  SRE/관측 도구가 캐시 효율 모니터링 가능.
+- TTL 환경변수 16 종 (`DARTLAB_TTL_PRICE`/`FLOW`/`MACRO`/`SECTOR`/`LISTING` 등) —
+  배포 환경별 캐시 만료 조정 (0 설정 시 캐시 즉시 만료).
+
+### Changed
+
+- 회사 정보 / 뉴스 / 거시지표 axis 의 fetch 종료 시점에 telemetry 신호 emit —
+  외부 listener 가 axis 별 latency / cacheHit / market 메트릭 자동 수집.
+  변경 전엔 price/flow/macro 만 신호 송신, 이제 dividends/splits/sector/
+  insider/majorHolder/ownership/peers/news/dartDoc 도 동일하게 신호.
+- KR 가격 source fallback 발동 시 (Naver → Yahoo 등) telemetry 신호 송신 —
+  primary 안정성 추적 + circuit breaker 동작 감사 자동화.
+- 캐시 get/put/eviction 매 호출마다 누적 카운터 갱신 — 매 100 회마다 자동 스냅샷 emit.
+
+### Internal
+
+- gather 진입점 문서 일관화 — KRX listing/api/index/marketCap, 외부 API
+  wrapper (Naver/FMP/Yahoo/FDR), entry handlers, transforms 총 70+ public
+  함수에 Capabilities/AIContext/Guide/When/How 5 섹션 보강. 외부 호출 시그니처 0 변동.
+- 테스트 placeholder smoke → functional 격상 — 진입점·인프라·소스·KRX 영역
+  19 모듈 (`tests/gather/entry/`, `tests/gather/infra/`, `tests/gather/sources/`,
+  `tests/gather/krx/`) 의 단위 테스트가 실제 동작 검증으로 전환.
+
+### Migration
+
+호환 변경 없음. 새 API (iter 메서드, telemetry snapshot) 는 추가 only —
+기존 코드 수정 불필요.
+
 ## [0.10.0] - 2026-05-10
 
 라이브러리 수준 아키텍처 정합화 — 양방향 cycle 0, layer 단방향 strict, snake_case 정리.
