@@ -45,6 +45,18 @@ def _resolveApiKey() -> str:
     raise RuntimeError("OPEN_DART_KEY 또는 DART_API_KEY 환경변수 필요")
 
 
+def _atomicWriteParquet(combined: dict[str, dict], outPath: Path) -> None:
+    """corp_code 매핑 dict → parquet 으로 atomic 저장 (temp → rename).
+
+    중간 저장과 최종 저장 모두 호출. 도중 실패해도 기존 파일 보존 (PolarsError 가
+    write 중 났을 때 partial file 이 ``corpProfile.parquet`` 을 덮어쓰지 않게).
+    """
+    df = pl.DataFrame(list(combined.values()))
+    tmp = outPath.with_suffix(outPath.suffix + ".tmp")
+    df.write_parquet(str(tmp), compression="zstd")
+    tmp.replace(outPath)
+
+
 def _fetchOne(client: DartClient, row: dict, *, retry: int = 5, delay: float = 0.5) -> dict | None:
     """단일 corp_code 의 companyInfo() 호출 → dict 반환. 실패 시 None.
 
@@ -151,36 +163,45 @@ def buildCorpProfile(
     failed = 0
     t0 = time.perf_counter()
 
+    outPath.parent.mkdir(parents=True, exist_ok=True)
+
+    # 중간 저장 빈도 — 인터럽트/quota 소진 시점까지 누적된 결과 보존.
+    FLUSH_EVERY = 500
+    combined: dict[str, dict] = dict(existing)
+
     print(f"[corpProfile] companyInfo 병렬 prefetch (workers={workers}) ...")
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = [pool.submit(_fetchOne, client, row) for row in rows]
-        for i, fut in enumerate(as_completed(futures), 1):
-            result = fut.result()
-            if result is None:
-                failed += 1
-            else:
-                results.append(result)
-            if i % 200 == 0:
-                elapsed = time.perf_counter() - t0
-                rate = i / elapsed if elapsed > 0 else 0
-                print(f"  [{i}/{len(rows)}] {len(results)}ok {failed}fail {rate:.1f}/s")
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(_fetchOne, client, row) for row in rows]
+            for i, fut in enumerate(as_completed(futures), 1):
+                result = fut.result()
+                if result is None:
+                    failed += 1
+                else:
+                    results.append(result)
+                    combined[result["corp_code"]] = result
+                if i % 200 == 0:
+                    elapsed = time.perf_counter() - t0
+                    rate = i / elapsed if elapsed > 0 else 0
+                    print(f"  [{i}/{len(rows)}] {len(results)}ok {failed}fail {rate:.1f}/s")
+                if i % FLUSH_EVERY == 0 and combined:
+                    _atomicWriteParquet(combined, outPath)
+                    print(f"  → 중간 저장: {len(combined)} rows")
+    except KeyboardInterrupt:
+        print("[corpProfile] 인터럽트 — 누적 결과 저장 후 종료")
+        if combined:
+            _atomicWriteParquet(combined, outPath)
+        raise
 
     elapsed = time.perf_counter() - t0
     print(f"[corpProfile] 완료: {len(results)}ok {failed}fail {elapsed:.0f}초")
-
-    # 기존 결과 + 신규 결과 union (corp_code 키 기준 신규 우선)
-    combined: dict[str, dict] = dict(existing)
-    for r in results:
-        combined[r["corp_code"]] = r
 
     if not combined:
         print("[corpProfile] 결과 없음 — 종료")
         return None
 
-    df = pl.DataFrame(list(combined.values()))
-
-    outPath.parent.mkdir(parents=True, exist_ok=True)
-    df.write_parquet(str(outPath), compression="zstd")
+    _atomicWriteParquet(combined, outPath)
+    df = pl.read_parquet(str(outPath))
     diskKb = outPath.stat().st_size / 1024
     print(f"[corpProfile] saved: {outPath} ({df.height} rows, {diskKb:.0f}KB)")
 
@@ -202,13 +223,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="DART corp_profile prefetch 빌드")
     parser.add_argument("--limit", type=int, default=0, help="처리할 최대 종목 수 (0=무제한, 테스트용)")
     parser.add_argument("--workers", type=int, default=5, help="동시 호출 수 (rate limit, 기본 5)")
-    parser.add_argument("--stockOnly", action="store_true", help="stock_code 있는 종목만 (상장사)")
+    parser.add_argument(
+        "--allCorps",
+        action="store_true",
+        help="비상장 포함 전종목 (~117K, 기본은 상장사 ~3964만)",
+    )
     parser.add_argument("--output", type=str, default="", help="출력 path (기본 data/dart/scan/corpProfile.parquet)")
     parser.add_argument("--noResume", action="store_true", help="기존 결과 무시하고 전종목 재호출")
     args = parser.parse_args()
 
     result = buildCorpProfile(
-        stockOnly=args.stockOnly,
+        stockOnly=not args.allCorps,
         workers=args.workers,
         limit=args.limit,
         output=Path(args.output) if args.output else None,

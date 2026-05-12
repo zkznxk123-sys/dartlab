@@ -567,6 +567,15 @@ def _loadRawFinanceViaDuckDb(
         ``sj_div`` 필터 (예: ``["IS", "CIS"]``). None 이면 미적용.
     sinceYear : int | None
         ``bsns_year >= sinceYear`` 필터. None 이면 미적용.
+    accountIds : set[str] | list[str] | None
+        ``account_id`` IN 절 push-down. None/빈 컬렉션이면 미적용. ``accountNms`` 와
+        OR 결합 — 두 키 어느 쪽이라도 매칭되면 통과.
+    accountNms : set[str] | list[str] | None
+        ``account_nm`` IN 절 push-down. None/빈 컬렉션이면 미적용.
+    columns : tuple[str, ...] | list[str] | None
+        반환 LazyFrame 의 SELECT 컬럼. None 이면 ``_RAW_FINANCE_DEFAULT_COLS`` 10 컬럼
+        (필수 메타 + 금액). ``stockCode`` 가 포함되면 raw 의 ``stock_code`` 가 자동
+        alias 된다.
 
     Returns
     -------

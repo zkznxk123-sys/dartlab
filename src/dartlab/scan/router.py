@@ -314,7 +314,7 @@ def _edgarDispatch(axis: str, kwargs: dict) -> pl.DataFrame | None:
         "debt",
     }
     if axis in _EDGAR_XBRL_AXES:
-        from dartlab.scan.builders.krs.edgar.scan import edgarScan
+        from dartlab.scan.builders.edgar.scan import edgarScan
 
         return edgarScan(axis, **kwargs)
 
