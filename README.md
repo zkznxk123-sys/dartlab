@@ -261,6 +261,19 @@ dartlab.gather("macro", "FEDFUNDS")           # 자동 US 감지
 dartlab.gather("news", "삼성전자")             # Google News RSS
 ```
 
+**대량 데이터 batch 순회** — 인사이더 거래·지분·뉴스를 generator 로 분할 yield (메모리 안전, 전 종목 스캔용):
+
+```python
+from dartlab.gather.accessors import DefaultFinanceAccessor
+a = DefaultFinanceAccessor()
+for batch in a.iterNews("삼성전자", days=30, batchSize=100):
+    process(batch)
+# 동행: a.iterInsiderTrades("005930") · a.iterOwnership("005930")
+# 일괄: a.fetchInsiderTrades / fetchOwnership / fetchNews
+```
+
+`getDefaultGather()` 싱글턴은 thread-safe (멀티스레드 환경 단일 인스턴스 보장). 캐시 통계·source fallback 신호는 `getCacheStatsSnapshot()` · `DARTLAB_TELEMETRY=stdout` 으로 추적.
+
 ### Analysis — 재무 인과 분석
 
 > 설계: [engines.analysis](https://eddmpython.github.io/dartlab/skills)
