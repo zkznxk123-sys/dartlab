@@ -221,7 +221,7 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
     dict[str, float]
         {종목코드: 매출액(원)}.
     """
-    scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
+    scCol = "stockCode"
 
     target = (
         pl.scan_parquet(str(scanPath))

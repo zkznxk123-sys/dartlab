@@ -98,7 +98,7 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         - grade : str — 이익의 질 등급 (우수/양호/보통/주의/위험)
     """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
-    scCol = "stockCode" if "stockCode" in schema else "stock_code"
+    scCol = "stockCode"
 
     allIds = list(NI_IDS | OCF_IDS | TA_IDS)
     allNms = list(NI_NMS | OCF_NMS | TA_NMS)

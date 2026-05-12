@@ -1,15 +1,18 @@
-"""providers Protocol contract 검증 — P-트랙 룰 1 게이트.
+"""providers Protocol contract 검증 — P-트랙 룰 1 게이트 + P-PR0 isinstance runtime.
 
 dart/edgar/edinet 3 provider 가 동일 Protocol 표면 (DocsProvider · FinanceProvider ·
 FilingsProvider · MemorySafeProvider · CompanyProtocol) 만족하는지 검증.
 
 P0.5 baseline: Protocol 일부는 아직 P1.5 에서 신설 — 미존재 시 xfail.
 P1.5 이후 strict: 모든 Protocol isinstance + 메서드 시그니처 introspection 일치.
+P-PR0 (2026-05-12): 실 Company 인스턴스 isinstance runtime 검증 2 함수 추가 —
+    baseline 모드 (현 위반 등록 + new violation 만 fail). P-PR8 strict 전환.
 
 게이트 활성화 단계:
-    P0.5 (현재) — Protocol import 시도, ImportError 면 xfail (회귀 가드만)
-    P1.5 — Protocol 신설 직후 isinstance 검증 활성
-    P8 — EDINET 갭 메운 뒤 전 contract strict
+    P0.5 — Protocol import 시도, ImportError 면 xfail (회귀 가드만) — 완료
+    P1.5 — Protocol 신설 직후 isinstance 검증 활성 — 완료 (5 Protocol 실재)
+    P-PR0 — Company 인스턴스 + namespace isinstance baseline 모드 — 본 PR
+    P-PR8 — 전 contract strict (isinstanceRuntimeViolations / namespaceIsinstanceViolations 0)
 """
 
 from __future__ import annotations
@@ -86,3 +89,94 @@ def test_provider_company_isinstance_baseline() -> None:
     allowed = set(baseline.get("missingProviderImpls", []))
     new_violations = set(violations) - allowed
     assert not new_violations, f"Provider Company contract 회귀: {new_violations} (baseline 외 신규)."
+
+
+# ── P-PR0 추가: 실 인스턴스 isinstance runtime 검증 (baseline 모드) ──
+
+_PROVIDER_PROBES: tuple[tuple[str, str], ...] = (
+    ("dart", "005930"),
+    ("edgar", "AAPL"),
+    ("edinet", "7203"),
+)
+
+
+def test_company_isinstance_runtime() -> None:
+    """3 provider Company 인스턴스가 CompanyProtocol isinstance 만족 (baseline 모드).
+
+    Protocol 5 종은 `core/protocols.py` 에 실재. 본 테스트는 *실 Company 인스턴스* 가
+    Protocol 의 `__instancecheck__` 를 통과하는지 검증.
+
+    인스턴스 생성 실패 (외부 의존 / 초기화 비용) 도 violation 으로 기록 — baseline 등록.
+    P-PR8 strict 전환 시 `isinstanceRuntimeViolations` 카운트 0 강제.
+    """
+    from dartlab.core.protocols import CompanyProtocol
+
+    violations: list[str] = []
+    for providerName, stockCode in _PROVIDER_PROBES:
+        try:
+            mod = importlib.import_module(f"dartlab.providers.{providerName}.company")
+            company = mod.Company(stockCode)
+        except Exception as exc:  # noqa: BLE001 — 인스턴스 생성 실패 자체가 violation
+            violations.append(f"{providerName}: 인스턴스 생성 실패 — {type(exc).__name__}: {exc}")
+            continue
+
+        try:
+            if not isinstance(company, CompanyProtocol):
+                violations.append(f"{providerName}: isinstance(co, CompanyProtocol) == False")
+        finally:
+            if hasattr(company, "__exit__"):
+                try:
+                    company.__exit__(None, None, None)
+                except Exception:  # noqa: BLE001 — cleanup silent
+                    pass
+
+    baseline = _loadBaseline()
+    allowed = set(baseline.get("isinstanceRuntimeViolations", []))
+    new_violations = set(violations) - allowed
+    assert not new_violations, (
+        f"CompanyProtocol isinstance runtime 회귀 {len(new_violations)} 건: {new_violations}. "
+        "P-PR0 baseline 에 등록하거나 Company 구현 보강 필요."
+    )
+
+
+def test_provider_namespaces_isinstance() -> None:
+    """co.docs / co.finance namespace 가 각 Provider Protocol 만족 (baseline 모드).
+
+    DocsProvider · FinanceProvider 의 메서드 시그니처 (fetchFiling/fetchStatements/...) 가
+    3 provider namespace 에 매핑되는지 검증.
+
+    namespace 부재 또는 isinstance 미통과 = violation. P-PR8 strict 전환.
+    """
+    from dartlab.core.protocols import DocsProvider, FinanceProvider
+
+    violations: list[str] = []
+    for providerName, stockCode in _PROVIDER_PROBES:
+        try:
+            mod = importlib.import_module(f"dartlab.providers.{providerName}.company")
+            company = mod.Company(stockCode)
+        except Exception as exc:  # noqa: BLE001
+            violations.append(f"{providerName}: 인스턴스 생성 실패 — {type(exc).__name__}: {exc}")
+            continue
+
+        try:
+            for nsName, protocolCls in (("docs", DocsProvider), ("finance", FinanceProvider)):
+                namespace = getattr(company, nsName, None)
+                if namespace is None:
+                    violations.append(f"{providerName}.{nsName}: namespace 부재")
+                    continue
+                if not isinstance(namespace, protocolCls):
+                    violations.append(f"{providerName}.{nsName}: isinstance({protocolCls.__name__}) == False")
+        finally:
+            if hasattr(company, "__exit__"):
+                try:
+                    company.__exit__(None, None, None)
+                except Exception:  # noqa: BLE001
+                    pass
+
+    baseline = _loadBaseline()
+    allowed = set(baseline.get("namespaceIsinstanceViolations", []))
+    new_violations = set(violations) - allowed
+    assert not new_violations, (
+        f"Namespace Protocol isinstance 회귀 {len(new_violations)} 건: {new_violations}. "
+        "P-PR0 baseline 에 등록하거나 namespace 구현 보강 필요."
+    )

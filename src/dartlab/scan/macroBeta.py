@@ -151,7 +151,7 @@ def _loadRevenueSeries(scanDir: Path) -> pl.DataFrame | None:
         return None
 
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
-    scCol = "stockCode" if "stockCode" in schema else "stock_code"
+    scCol = "stockCode"
 
     REVENUE_IDS = {
         "Revenue",

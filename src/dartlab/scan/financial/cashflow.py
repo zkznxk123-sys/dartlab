@@ -109,7 +109,7 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         fcf : int — 잉여현금흐름, OCF + ICF (원)
         pattern : str — 라이프사이클 패턴명
     """
-    scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
+    scCol = "stockCode"
 
     allIds = list(OCF_IDS | ICF_IDS | FINCF_IDS)
     allNms = list(OCF_NMS | ICF_NMS | FINCF_NMS)

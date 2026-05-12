@@ -443,7 +443,7 @@ def _scanFinanceFromMerged(
     dict[str, float]
         {종목코드: 금액(원)} — 종목별 최신 연도 첫 매칭 계정의 값.
     """
-    scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
+    scCol = "stockCode"
 
     target = (
         pl.scan_parquet(str(scanPath))

@@ -94,7 +94,7 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         빈 DataFrame — 데이터 없음
     """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
-    scCol = "stockCode" if "stockCode" in schema else "stock_code"
+    scCol = "stockCode"
 
     allIds = list(CA_IDS | CL_IDS | INV_IDS)
     allNms = list(CA_NMS | CL_NMS | INV_NMS)

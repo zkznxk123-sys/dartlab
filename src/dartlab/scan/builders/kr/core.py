@@ -671,7 +671,7 @@ def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
             _say("[shares] 발행주식수 풀 빌드 시작")
         df = buildSharesOutstandingScan()
         if verbose:
-            _say(f"[shares] 완료: rows={df.height} stocks={df['stock_code'].n_unique()}")
+            _say(f"[shares] 완료: rows={df.height} stocks={df['stockCode'].n_unique()}")
         return _scanDir() / "sharesOutstanding.parquet"
     except (FileNotFoundError, RuntimeError, OSError, ValueError) as exc:
         if verbose:

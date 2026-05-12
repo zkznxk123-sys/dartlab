@@ -44,7 +44,7 @@ def _scanIcrFromMerged(scanPath: Path) -> dict[str, float]:
     dict[str, float]
         {종목코드: ICR(배)} — 영업이익/이자비용. 종목별 최신 연도 기준.
     """
-    scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
+    scCol = "stockCode"
 
     allIds = list(OP_IDS | INTEREST_IDS)
     allNms = list(OP_NMS | INTEREST_NMS)

@@ -218,7 +218,7 @@ def _debtMixFromMerged(scanPath: Path) -> dict[str, dict]:
     dict[str, dict]
         {종목코드: {총부채(원), 부채비율(%)}} — 종목별 최신 연도 기준.
     """
-    scCol = "stockCode" if "stockCode" in pl.scan_parquet(str(scanPath)).collect_schema().names() else "stock_code"
+    scCol = "stockCode"
 
     bs = (
         pl.scan_parquet(str(scanPath))

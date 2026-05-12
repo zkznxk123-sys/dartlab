@@ -130,7 +130,7 @@ def _scanFromMerged(scanPath: Path) -> pl.DataFrame:
         데이터가 없으면 빈 DataFrame.
     """
     schema = pl.scan_parquet(str(scanPath)).collect_schema().names()
-    scCol = "stockCode" if "stockCode" in schema else "stock_code"
+    scCol = "stockCode"
 
     allIds = list(_REVENUE_IDS | _OP_IDS | _NI_IDS)
     allNms = list(_REVENUE_NMS | _OP_NMS | _NI_NMS)
@@ -195,7 +195,7 @@ def _scanPerFile() -> pl.DataFrame:
         return pl.DataFrame()
 
     combined = pl.concat(allDfs, how="diagonal_relaxed")
-    scCol = "stockCode" if "stockCode" in combined.columns else "stock_code"
+    scCol = "stockCode"
     return _computeGrowth(combined, scCol)
 
 
@@ -208,7 +208,7 @@ def _computeGrowth(target: pl.DataFrame, scCol: str) -> pl.DataFrame:
         손익계산서(IS/CIS) 행만 포함된 DataFrame.
         필수 컬럼: ``bsns_year``, ``account_id``, ``account_nm``, ``thstrm_amount``.
     scCol : str
-        종목코드 컬럼명 (``"stockCode"`` 또는 ``"stock_code"``).
+        종목코드 컬럼명 (``"stockCode"``).
 
     Returns
     -------

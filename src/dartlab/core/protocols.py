@@ -1,4 +1,57 @@
-"""DART/EDGAR Company 공통 Protocol — 구조적 타이핑."""
+"""3-provider 동일 surface Protocol SSOT — DART · EDGAR · EDINET 구조적 타이핑.
+
+Capabilities:
+    - 3 regulator (한국 DART · 미국 SEC EDGAR · 일본 EDINET) 의 `Company` / docs / finance / filings
+      구현체가 만족해야 하는 Protocol contract 단일 출처.
+    - `runtime_checkable` 데코레이터로 `isinstance(co, CompanyProtocol)` 런타임 검증 지원.
+    - 새 regulator 추가 = 본 모듈의 Protocol 5 종 (`CompanyProtocol` · `DocsProvider` ·
+      `FinanceProvider` · `FilingsProvider` · `MemorySafeProvider`) drop-in 구현.
+
+Args:
+    (module-level, no callable signature)
+
+Returns:
+    Protocol 정의 5 + 보조 dataclass 5 (`FilingResult` · `Section` · `Account` · `Filing` ·
+    `StatementsResult`) + L2 analysis 의존성 추상 Protocol 4 (`FinanceDataAccessor` 등).
+
+Example:
+    >>> from dartlab.core.protocols import CompanyProtocol
+    >>> from dartlab.providers.dart import Company
+    >>> isinstance(Company("005930"), CompanyProtocol)
+    True
+
+Guide:
+    - Company facade 구현 시 본 모듈을 import 해 isinstance 검증 동행.
+    - 새 메서드 추가 시 본 모듈에 시그니처 명시 → 3 provider 동시 구현.
+    - 메서드 신설 PR 은 `tests/test_providerContract.py` baseline 갱신 동행.
+
+SeeAlso:
+    - `operation.architecture` § "Provider Protocol 동일 surface (3-provider mirror)"
+    - `operation.code` § "11 룰" 룰 1 (Protocol 동일 surface)
+    - `runtime.providerProtocol` § 새 provider 추가 절차
+
+Requires:
+    polars (StatementsResult.statements 타입). 다른 외부 의존성 0.
+
+AIContext:
+    LLM 이 `isinstance(co, CompanyProtocol)` 로 capability 추론 후 method dispatch.
+    Protocol 시그니처는 `inspect.signature()` 로 introspect 가능.
+
+LLM Specifications:
+    AntiPatterns:
+        - 본 Protocol 을 우회한 duck-typing (`hasattr` 직접 사용) 금지 — `isinstance` 강제.
+        - Protocol 시그니처 변경 시 3 provider 동시 갱신 의무 (P-PR0 후 strict).
+    OutputSchema:
+        Protocol class (5) + dataclass (5) — 모두 `@runtime_checkable` 또는 `@dataclass(frozen=True)`.
+    Prerequisites:
+        Python 3.12+ (`Protocol` + `runtime_checkable`).
+    Freshness:
+        Protocol 정의는 P-PR 트랙 동안만 변경. 본 모듈 시그니처 stable 가정.
+    Dataflow:
+        provider (`providers.{dart,edgar,edinet}.company`) → 본 Protocol → caller (story / AI agent).
+    TargetMarkets:
+        한국 (DART) · 미국 (EDGAR) · 일본 (EDINET). 신규 regulator 는 본 Protocol 구현으로 추가.
+"""
 
 from __future__ import annotations
 

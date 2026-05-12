@@ -677,7 +677,7 @@ class Scan:
 
         # stockCode 필터 (target이 있고 targetParam이 None인 축)
         if target and entry.targetParam is None and isinstance(result, pl.DataFrame):
-            for col in ("종목코드", "stockCode", "stock_code"):
+            for col in ("종목코드", "stockCode"):
                 if col in result.columns:
                     result = result.filter(pl.col(col) == target)
                     break

@@ -1,5 +1,14 @@
 {
-  "_note": "P8 후 갱신 — EDINET Company.select 메서드 추가 완료. Protocol contract baseline 0 — strict 달성.",
+  "_note": "P-PR0 후 갱신 (2026-05-12) — 5 Protocol module docstring 강화 + isinstance runtime 게이트 baseline 모드 진입. namespace 6 violation 은 private `_docs`/`_finance` 만 존재 — public namespace 노출은 P-PR6/7/8 edgar 깊이 작업 동행.",
   "missingProtocols": [],
-  "missingProviderImpls": []
+  "missingProviderImpls": [],
+  "isinstanceRuntimeViolations": [],
+  "namespaceIsinstanceViolations": [
+    "dart.docs: namespace 부재",
+    "dart.finance: namespace 부재",
+    "edgar.docs: namespace 부재",
+    "edgar.finance: namespace 부재",
+    "edinet.docs: isinstance(DocsProvider) == False",
+    "edinet.finance: namespace 부재"
+  ]
 }
