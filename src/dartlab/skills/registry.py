@@ -142,10 +142,58 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
         if spec.scope == "builtin":
             lintSkill(spec)
     result = sorted(specs, key=lambda item: item.id)
+    _warnGraphIntegrityOnce(result)
 
     if not _skillsCacheDisabled():
         _LIST_SKILLS_CACHE[includeUser] = tuple(result)
     return result
+
+
+_GRAPH_WARNED = False
+
+
+def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
+    """그래프 정합성 warn-only — 모듈 lifetime 1 회 (phase 1 정책).
+
+    Description
+    -----------
+    listSkills 호출 시 1 회 만 실행. 깨진 ref · 3+ SCC · orphan · unreachable
+    카운트 logger.warning 출력. raise 없음. phase 2 (신규 spec 차단) 또는 phase
+    3 (전수 차단) 은 별도 정책.
+
+    환경변수 `DARTLAB_SKILL_GRAPH_LINT=0` 으로 명시 비활성 가능.
+    """
+    global _GRAPH_WARNED
+    if _GRAPH_WARNED:
+        return
+    import os
+
+    if os.environ.get("DARTLAB_SKILL_GRAPH_LINT", "1") == "0":
+        _GRAPH_WARNED = True
+        return
+    try:
+        from .graph import buildSkillGraph
+        from .graphLint import detectThreePlusCycles, reportOrphans, validateReachability, validateRefExistence
+
+        all_ids = frozenset(s.id for s in specs)
+        graph = buildSkillGraph(specs)
+        broken_total = 0
+        for s in specs:
+            broken_total += len(validateRefExistence(s, all_ids))
+        cycles = detectThreePlusCycles(graph)
+        orphans = reportOrphans(graph)
+        unreachable = validateReachability(graph)
+        if broken_total or cycles or orphans or unreachable:
+            logger.warning(
+                "[skill-graph] phase1 warn — broken=%d cycles=%d orphans=%d unreachable=%d (DARTLAB_SKILL_GRAPH_LINT=0 to silence)",
+                broken_total,
+                len(cycles),
+                len(orphans),
+                len(unreachable),
+            )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[skill-graph] phase1 warn 자체 실패: %s", exc)
+    _GRAPH_WARNED = True
 
 
 def getSkill(skillId: str, *, includeUser: bool = True) -> SkillSpec:
@@ -492,6 +540,8 @@ def _normalizeSpecData(data: dict[str, Any]) -> dict[str, Any]:
         "examples",
         "verifiedBy",
         "expectedNovelty",
+        "predecessors",
+        "successors",
     }
     for field in list_fields:
         value = data.get(field)
@@ -518,6 +568,7 @@ def _normalizeSpecData(data: dict[str, Any]) -> dict[str, Any]:
         "gap",
         "testUniverse",
         "falsifier",
+        "audiences",
     ):
         value = data.get(field)
         if value is None:
