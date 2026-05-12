@@ -166,8 +166,12 @@ def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
       여전히 warn (사용자 손작업 결).
 
     환경변수:
-    - `DARTLAB_SKILL_GRAPH_LINT=0` — 전체 비활성 (silence).
+    - `DARTLAB_SKILL_GRAPH_LINT=1` — phase 1 warn 출력 활성 (기본 off).
     - `DARTLAB_SKILL_GRAPH_LINT_STRICT=1` — phase 2 활성 (신규/수정 spec 차단).
+
+    기본 off — listSkills 호출이 잦은 결 (MCP / ask / `import dartlab`) 결로 매번
+    warn 출력 결이 시끄러운 결. 운영자가 점검 결로 명시 활성. 별도 점검 결은
+    `scripts/audit/skillGraphOrphanReport.py` 결로 가능.
 
     phase 2 활성 시 listSkills 호출이 ValueError 로 차단되어 검색 cascade
     영향. 운영자가 broken / cycle 0 으로 만든 후에만 켤 것 (feedback_skill_os_dogfood
@@ -178,7 +182,7 @@ def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
         return
     import os
 
-    if os.environ.get("DARTLAB_SKILL_GRAPH_LINT", "1") == "0":
+    if os.environ.get("DARTLAB_SKILL_GRAPH_LINT", "0") != "1":
         _GRAPH_WARNED = True
         return
     strict = os.environ.get("DARTLAB_SKILL_GRAPH_LINT_STRICT", "0") == "1"
@@ -197,7 +201,7 @@ def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
         if broken_total or cycles or orphans or unreachable:
             phase = "phase2 strict" if strict else "phase1 warn"
             logger.warning(
-                "[skill-graph] %s — broken=%d cycles=%d orphans=%d unreachable=%d (DARTLAB_SKILL_GRAPH_LINT=0 to silence)",
+                "[skill-graph] %s — broken=%d cycles=%d orphans=%d unreachable=%d",
                 phase,
                 broken_total,
                 len(cycles),
