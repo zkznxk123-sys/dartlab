@@ -59,14 +59,14 @@ def test_iter_methods_exist() -> None:
     assert callable(ia.iterScanFinanceParquet)
 
 
-def test_iter_returns_generator() -> None:
-    """iter 메서드가 generator 객체 반환 (lazy)."""
+def test_iter_returns_generator(monkeypatch) -> None:
+    """iter 메서드가 generator 객체 반환 (lazy) — fetch mock 으로 네트워크 회피."""
     from dartlab.gather.accessors import DefaultFinanceAccessor
 
     fa = DefaultFinanceAccessor()
-    gen = fa.iterPriceSnapshot("__INVALID__", batchSize=10)
-    # fetch 가 실패해도 generator 자체는 정상 반환
+    # fetch 가 빈 DataFrame 반환하도록 mock — generator 는 empty yield
+    monkeypatch.setattr(fa, "fetchPriceSnapshot", lambda *a, **kw: pl.DataFrame({"x": list(range(25))}))
+    gen = fa.iterPriceSnapshot("005930", batchSize=10)
     assert hasattr(gen, "__next__")
-    # consume (None 이면 yield 안 함 → 0 batches)
     batches = list(gen)
-    assert isinstance(batches, list)  # 빈 리스트 또는 batches
+    assert len(batches) == 3  # 25 / 10 = 3 batches
