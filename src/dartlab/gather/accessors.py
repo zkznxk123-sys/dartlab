@@ -9,12 +9,30 @@ core.protocols 의 4 Protocol 의 default 구현을 한 곳에 모아 둔다. ca
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterator
 
 import polars as pl
 
 if TYPE_CHECKING:
     from dartlab.core.protocols import CompanyProtocol
+
+
+def _iterDataFrameBatches(df: pl.DataFrame | None, batchSize: int) -> Iterator[pl.DataFrame]:
+    """공통 헬퍼 — DataFrame 을 batchSize 행씩 yield (G+ P-Q6).
+
+    df 가 None / empty 면 yield 없이 종료.
+
+    Args:
+        df: 분할 대상 DataFrame.
+        batchSize: 한 batch 의 행 수 (1+).
+
+    Yields:
+        pl.DataFrame — 각 batch slice.
+    """
+    if df is None or df.height == 0:
+        return
+    for i in range(0, df.height, batchSize):
+        yield df.slice(i, batchSize)
 
 
 class DefaultFinanceAccessor:
@@ -243,6 +261,55 @@ class DefaultFinanceAccessor:
         except (ValueError, RuntimeError, KeyError):
             return None
 
+    # ── iter pair (G+ P-Q6 — providers 룰 10 spirit) ──
+
+    def iterPriceSnapshot(
+        self,
+        stockCode: str,
+        *,
+        market: str = "KR",
+        start: str | None = None,
+        end: str | None = None,
+        batchSize: int = 100,
+    ) -> Iterator[pl.DataFrame]:
+        """fetchPriceSnapshot 의 streaming pair — batchSize 행씩 yield (G+ P-Q6 룰 10 spirit).
+
+        Args: stockCode/market/start/end (fetchPriceSnapshot 와 동일), batchSize.
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterPriceSnapshot("005930", batchSize=50): process(batch)
+
+        Requires: 네트워크 (fetchPriceSnapshot 위임).
+        See Also: ``fetchPriceSnapshot`` — full DataFrame.
+        """
+        df = self.fetchPriceSnapshot(stockCode, market=market, start=start, end=end)
+        yield from _iterDataFrameBatches(df, batchSize)
+
+    def iterMacroSeries(
+        self,
+        seriesId: str,
+        *,
+        source: str = "fred",
+        start: str | None = None,
+        batchSize: int = 100,
+    ) -> Iterator[pl.DataFrame]:
+        """fetchMacroSeries 의 streaming pair — batch yield (G+ P-Q6).
+
+        Args: seriesId/source/start (fetchMacroSeries 와 동일), batchSize.
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterMacroSeries("FEDFUNDS", batchSize=50): analyze(batch)
+
+        Requires: 네트워크.
+        See Also: ``fetchMacroSeries``.
+        """
+        df = self.fetchMacroSeries(seriesId, source=source, start=start)
+        yield from _iterDataFrameBatches(df, batchSize)
+
 
 class DefaultQuantAccessor:
     """QuantDataAccessor 기본 구현."""
@@ -449,6 +516,30 @@ class DefaultQuantAccessor:
                     pass
         return out
 
+    # ── iter pair (G+ P-Q6) ──
+
+    def iterUniverseBulk(
+        self,
+        stockCodes: list[str],
+        *,
+        columns: list[str],
+        batchSize: int = 1000,
+    ) -> Iterator[pl.DataFrame]:
+        """fetchUniverseBulk 의 streaming pair — batch 별 yield (G+ P-Q6).
+
+        Args: stockCodes/columns (fetchUniverseBulk 와 동일), batchSize.
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterUniverseBulk(codes, columns=["close"]): handle(batch)
+
+        Requires: ``data/<provider>/bulk/*.parquet``.
+        See Also: ``fetchUniverseBulk``.
+        """
+        df = self.fetchUniverseBulk(stockCodes, columns=columns)
+        yield from _iterDataFrameBatches(df, batchSize)
+
 
 class DefaultIndustryAccessor:
     """IndustryDataAccessor 기본 구현."""
@@ -551,3 +642,37 @@ class DefaultIndustryAccessor:
             return lf.collect(engine="streaming")
         except (ValueError, RuntimeError, KeyError, AttributeError):
             return None
+
+    # ── iter pair (G+ P-Q6) ──
+
+    def iterListing(self, *, market: str = "KR", batchSize: int = 200) -> Iterator[pl.DataFrame]:
+        """fetchListing 의 streaming pair — batch 별 yield (G+ P-Q6).
+
+        Args: market (시장 코드), batchSize (한 batch 행 수).
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterListing(batchSize=500): pass
+
+        Requires: KRX API/캐시.
+        See Also: ``fetchListing``.
+        """
+        df = self.fetchListing(market=market)
+        yield from _iterDataFrameBatches(df, batchSize)
+
+    def iterScanFinanceParquet(self, name: str = "finance", *, batchSize: int = 1000) -> Iterator[pl.DataFrame]:
+        """fetchScanFinanceParquet 의 streaming pair — scan batch yield (G+ P-Q6).
+
+        Args: name (parquet 카테고리), batchSize (한 batch 행 수).
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterScanFinanceParquet("finance"): pass
+
+        Requires: ``data/<provider>/scan/<name>.parquet``.
+        See Also: ``fetchScanFinanceParquet``.
+        """
+        df = self.fetchScanFinanceParquet(name)
+        yield from _iterDataFrameBatches(df, batchSize)
