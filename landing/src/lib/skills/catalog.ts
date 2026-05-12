@@ -39,6 +39,17 @@ export interface SkillDoc {
 	forbidden?: string[];
 	examples?: string[];
 	runtimeCompatibility?: Record<string, RuntimeEntry>;
+	// 트랙 8 — 새 frontmatter 필드 (graph + 사람용 도입)
+	humanIntro?: string;
+	predecessors?: string[];
+	successors?: string[];
+	audiences?: Record<string, string>;
+	isLeafNode?: boolean;
+	entryHint?: boolean;
+	graphTier?: string | null;
+	cluster?: string | null;
+	visualRefs?: string[];
+	bodyHuman?: string;
 }
 
 export interface SkillIndexMeta {
