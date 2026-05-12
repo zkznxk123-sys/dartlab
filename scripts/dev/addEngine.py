@@ -14,7 +14,7 @@ Description
 
 검증 자동 동행:
 - `uv run python -X utf8 scripts/build/validateSkills.py {new_skill}.md`
-- (자동 생성 금지 — `scripts/build/generateSkills.py` 수동 호출 금지. JSON 산출물 동기화는 운영자가 직접)
+- (도구 폐기 — `scripts/build/generateSkills.py` 와 `src/dartlab/skills/compiler.py` 모두 삭제됨. JSON 산출물 6 종은 운영자가 직접 작성)
 
 사용법:
     uv run python -X utf8 scripts/dev/addEngine.py myEngine \\
@@ -150,9 +150,7 @@ def main() -> int:
     )
     print()
     print("[next] 운영자 수동 작업:")
-    print(
-        "  0. (자동 생성 금지) src/dartlab/skills/{index,agent,mcp,web,pyodide,graph}.json 동기화 필요 시 운영자가 직접 처리"
-    )
+    print("  0. (도구 폐기) src/dartlab/skills/{index,agent,mcp,web,pyodide,graph}.json 은 운영자 직접 작성")
     print(f"  1. src/dartlab/__init__.py — `from . import {name}` 또는 `__all__` re-export")
     print("  2. pyproject.toml [tool.importlinter] — 새 contract 추가 (L2 격리)")
     print("  3. src/dartlab/skills/specs/operation/architecture.md — L2 계층 표에 한 줄")

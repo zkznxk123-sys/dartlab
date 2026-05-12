@@ -11,7 +11,7 @@ addEngine.py 의 축소판 — 새 엔진이 아니라 *기존 엔진 안의 응
 
 검증 자동 동행:
 - `uv run python -X utf8 scripts/build/validateSkills.py {new}.md`
-- (자동 생성 금지 — `scripts/build/generateSkills.py` 수동 호출 금지. JSON 산출물 동기화는 운영자가 직접)
+- (도구 폐기 — `scripts/build/generateSkills.py` 와 `src/dartlab/skills/compiler.py` 모두 삭제됨. JSON 산출물 6 종은 운영자가 직접 작성)
 
 사용법:
     uv run python -X utf8 scripts/dev/addAxis.py company compareTargets \\
@@ -131,7 +131,7 @@ def main() -> int:
         check=False,
     )
     print()
-    print("[next] (자동 생성 금지) skills/{index,agent,...}.json 동기화는 운영자 수동 처리")
+    print("[next] (도구 폐기) skills/{index,agent,...}.json 은 운영자 직접 작성")
 
     print()
     print("[next] 운영자 수동 작업:")

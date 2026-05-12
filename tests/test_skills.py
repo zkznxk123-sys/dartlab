@@ -523,22 +523,9 @@ def test_skill_evidence_check_reports_missing() -> None:
     assert "table" in result.missing
 
 
-def test_skill_compiler_builds_web_index(tmp_path: Path) -> None:
-    result = skills.buildSkillArtifacts(webDir=tmp_path / "web")
-
-    assert result["skillCount"] > 0
-    assert (tmp_path / "web" / "index.json").exists()
-    assert (tmp_path / "web" / "pyodide.json").exists()
-
-    payload = json.loads((tmp_path / "web" / "index.json").read_text(encoding="utf-8"))
-    public_items = payload["skills"]
-    assert public_items
-    assert all(item["category"] != "capability" for item in public_items)
-    assert all(not item["id"].startswith("basic.") for item in public_items)
-    assert all(not item["id"].startswith("capability:") for item in public_items)
-    assert payload["meta"]["entrySkillId"] == "start.dartlabSkillOs"
-    assert "Basic Engine Maps" not in json.dumps(payload, ensure_ascii=False)
-    assert "Capability Reference" not in json.dumps(payload, ensure_ascii=False)
+# test_skill_compiler_builds_web_index 폐기 — `buildSkillArtifacts` 도구 폐기
+# (skills/compiler.py + scripts/build/generateSkills.py 삭제). 산출물 6 종은
+# 운영자 직접 작성 — 별 검증 (validateSkills) 으로 대체.
 
 
 def test_builtin_skill_specs_are_package_sources() -> None:

@@ -7,7 +7,6 @@ of maintaining separate skill resolvers.
 
 from __future__ import annotations
 
-from .compiler import buildSkillArtifacts
 from .models import EvidenceCheckResult, SkillCategory, SkillMatch, SkillSpec
 from .registry import checkEvidence, describeSkill, getSkill, lintSkill, listSkills, searchSkills
 
@@ -21,7 +20,6 @@ __all__ = [
     "get",
     "describe",
     "checkEvidence",
-    "buildSkillArtifacts",
     "listSkills",
     "searchSkills",
     "getSkill",
