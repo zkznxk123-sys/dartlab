@@ -25,6 +25,9 @@ from .models import SkillSpec
 logger = logging.getLogger(__name__)
 
 _REF_FIELDS = ("knowledgeRefs", "sourceRefs", "toolRefs", "datasetRefs")
+# skill id namespace 4 카테고리 + recipe — 이 prefix 결로 시작하는 ref 만 skill id 결로 검증.
+# `dart.scan` · `krx.prices` · `market.flow` · `CHANGELOG.md` 같은 dataset/tool/파일 결은 namespace 다름.
+_SKILL_ID_PREFIXES = ("engines.", "operation.", "start.", "runtime.", "recipes.")
 _QUOTE_PATTERN = re.compile(r'^\s*-\s*[\'"][a-z][a-zA-Z0-9.]+[\'"]\s*$', re.MULTILINE)
 
 
@@ -84,6 +87,10 @@ def validateRefExistence(spec: SkillSpec, allIds: frozenset[str]) -> list[str]:
                         broken.append(f"{spec.id}.sourceRefs -> {target} (missing)")
                 continue
             if not ref or "." not in ref or ref.startswith("dartlab.") or ref.startswith("http"):
+                continue
+            # toolRefs · datasetRefs 는 namespace 다름 (tool id · dataset id). skill id prefix 결로
+            # 시작하는 ref 만 검증 — 그 외 (`dart.scan` · `krx.prices` · `CHANGELOG.md`) 는 skip.
+            if not ref.startswith(_SKILL_ID_PREFIXES):
                 continue
             if ref not in allIds:
                 broken.append(f"{spec.id}.{field_name} -> {ref} (missing)")
