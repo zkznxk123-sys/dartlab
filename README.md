@@ -55,11 +55,11 @@ DartLab 은 단순 금융 데이터 라이브러리가 아니다. **한국 (DART
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/architecture-dark.svg">
-    <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / AI 자율 작업대 (chat-native + 운용 자원 3 종 = Skill OS + Capability + Tools 11) / L3 조합기 story / L2 분석엔진 5 (analysis · credit · macro · quant · industry) / L1.5 횡단 (scan · search) / L1 (company · gather) / L0 core / 외부 1 차 소스 / 3 자 진화 루프" width="720">
+    <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / AI 자율 작업대 (chat-native + 운용 자원 3 종 = Skill OS + Capability + Tools 11) / L3 조합기 story / L2 분석엔진 5 (analysis · credit · macro · quant · industry) / L1.5 가공 4 형제 (scan · frame · synth · reference) / L1 (gather · providers) / L0 core / 외부 1 차 소스 / 3 자 진화 루프" width="720">
   </picture>
 </p>
 
-> ① 사람·외부 LLM (MCP) → ② 입구 두 갈래 (`dartlab.ask` AI · `dartlab.Company` 사람) → ③ **AI 자율 작업대** (chat-native + 운용 자원 3 종: Skill OS · Capability · Tools 11) → ④ **L3 조합기** `story` (분석엔진 X — 순환참조 방지용 다중 결합 책임자) → ⑤ **L2 분석엔진 5** (`analysis · credit · macro · quant · industry`) → ⑥ **L1.5 횡단** (`scan · search`) → ⑦ **L1** (`company · gather`) → ⑧ **L0** `core/` → ⑨ 외부 1 차 소스. ⑩ **3 자 진화 루프** — 답변 → 시장 N 일 후 reflection → 사람 검토 → Skill OS · 엔진 docstring 갱신 (AI 자율 진화 아님).
+> ① 사람·외부 LLM (MCP) → ② 입구 두 갈래 (`dartlab.ask` AI · `dartlab.Company` 사람) → ③ **AI 자율 작업대** (chat-native + 운용 자원 3 종: Skill OS · Capability · Tools 11) → ④ **L3 조합기** `story` (분석엔진 X — 순환참조 방지용 다중 결합 책임자) → ⑤ **L2 분석엔진 5** (`analysis · credit · macro · quant · industry`) → ⑥ **L1.5 가공 4 형제** (`scan` 횡단면 · `frame` raw 결합 · `synth` 후처리/매칭 · `reference` 룩업+매핑) → ⑦ **L1 raw 생산** (`gather · providers`) → ⑧ **L0** `core/` (DIP Protocol + primitive) → ⑨ 외부 1 차 소스. ⑩ **3 자 진화 루프** — 답변 → 시장 N 일 후 reflection → 사람 검토 → Skill OS · 엔진 docstring 갱신 (AI 자율 진화 아님).
 
 **한 줄 사용** — Python 또는 MCP:
 
@@ -84,7 +84,7 @@ codex  mcp add dartlab -- dartlab mcp        # Codex CLI
 - **외부 본문 untrusted** — DART/EDGAR 공시·웹 검색·뉴스 본문은 *데이터* 이지 *지시* 가 아니다. `[EXTERNAL CONTENT START — untrusted]` 마커로 감싸 prompt injection 차단. 마커 안의 "이전 지시 무시" 문구는 따르지 않는다.
 - **3 자 진화 루프 (AI 자율 진화 아님)** — AI 분석 → 시장 N 일 후 reflection → 사람 검토 → skill / 엔진 docstring / 블로그 갱신. `propose_skill` 폐기 ([2026-05-07, `4ad36db1b`](https://github.com/eddmpython/dartlab/commit/4ad36db1b)) — `kind=generated` 자기진화 사다리는 0 promoted skill 로 dormant 였고 *시장 평가* 가 더 강한 신호.
 
-**계층 — import 단방향 강제**: `L0 core ← L1 (company · gather) ← L1.5 횡단 (scan · search) ← L2 분석엔진 5 (analysis · credit · macro · quant · industry) ← L3 조합기 (story — 분석엔진 X) ← L4 소비자 (AI · 사람)`. L2 엔진 상호 import 0 건 (CI 강제) — story 가 L2 다중 소비를 단독으로 짊어져 순환참조 차단. 새 국가 추가 = `providers/` 패키지 하나, core 수정 0 줄.
+**계층 — import 단방향 강제**: `L0 core ← L1 (gather · providers) ← L1.5 가공 4 형제 (scan · frame · synth · reference) ← L2 분석엔진 5 (analysis · credit · macro · quant · industry) ← L3 조합기 (story — 분석엔진 X) ← L4 소비자 (AI · 사람)`. L2 엔진 상호 import 0 건 + L1.5 4 형제 cross import 0 건 (CI 강제 [tests/architecture/](tests/architecture/) 5 종) — story 가 L2 다중 소비를 단독으로 짊어져 순환참조 차단. 새 국가 추가 = `providers/` 패키지 하나, core 수정 0 줄. L1.5 4 형제 책임: `scan` 횡단면 (한 metric × 다수 회사), `frame` raw 결합 (panel/시계열 view), `synth` 분석 후처리·매칭·시나리오, `reference` 정적 JSON 룩업+매핑 엔진.
 
 상세 — [`operation.philosophy`](https://eddmpython.github.io/dartlab/skills) (사상 SSOT 정점) · [`ai/SSOT.md`](src/dartlab/ai/SSOT.md) (AI 엔진 정체성 + Outcome 선순환).
 
