@@ -74,7 +74,21 @@ def detectUnitLabel(content: str) -> str | None:
 
 
 def extractRawTables(content: str) -> list[dict]:
-    """마크다운 테이블 파싱 (빈 셀 유지). 멀티레벨 헤더 처리에 필수."""
+    """마크다운 테이블 파싱 (빈 셀 유지). 멀티레벨 헤더 처리에 필수.
+
+    Args:
+        content: 마크다운 테이블이 포함된 문자열.
+
+    Returns:
+        파싱된 테이블 목록. 각 테이블 = ``{"headers": list[list], "rows": list[list]}``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractRawTables("| a | b |\\n|---|---|\\n| 1 | 2 |")
+        [{'headers': [['a', 'b']], 'rows': [['1', '2']]}]
+    """
     tables = []
     lines = content.split("\n")
     i = 0
@@ -355,14 +369,23 @@ def _detectPatternD(tables: list[dict]) -> list[dict] | None:
 
 
 def parseNotesTable(section: str) -> list[dict] | None:
-    """주석 섹션에서 테이블 데이터 추출. 4가지 패턴 자동 감지.
+    """주석 섹션에서 테이블 데이터 추출. 4 가지 패턴 자동 감지.
 
-    패턴 A: 멀티레벨 헤더 (당기말/전기말 스팬)
-    패턴 B: 당기/전기 분리 테이블 (XBRL 공시)
-    패턴 C: 단순 테이블 (기간이 열)
-    패턴 D: 단일 시점 테이블 (기간 마커 없음)
+    Args:
+        section: 주석 섹션 본문 (마크다운 테이블 포함).
 
-    반환: [{"pattern": "A"|"B"|"C"|"D", "period": str, "headers": list, "items": list}]
+    Returns:
+        파싱된 패턴별 dict 목록 또는 미감지 시 ``None``. 각 dict =
+        ``{"pattern": "A"|"B"|"C"|"D", "period": str, "headers": list, "items": list}``.
+        패턴 A = 멀티레벨 헤더 (당기말/전기말 스팬), B = 당기/전기 분리, C = 단순,
+        D = 단일 시점.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseNotesTable("| 항목 | 당기 | 전기 |\\n|---|---|---|\\n| 매출 | 100 | 90 |")
+        [{'pattern': 'C', ...}]
     """
     tables = extractRawTables(section)
     if not tables:
@@ -388,7 +411,23 @@ def parseNotesTable(section: str) -> list[dict] | None:
 
 
 def extractAccounts(content: str) -> tuple[dict[str, list[float | None]], list[str]]:
-    """요약재무정보 테이블에서 {항목: [당기, 전기, ...]} 추출. 단위 정규화 포함."""
+    """요약재무정보 테이블에서 {항목: [당기, 전기, ...]} 추출. 단위 정규화 포함.
+
+    Args:
+        content: 요약재무정보 마크다운 본문.
+
+    Returns:
+        ``(accounts, periods)`` 튜플. ``accounts`` = {항목명: [당기 값, 전기 값, ...]},
+        ``periods`` = 기간 라벨 순서. 단위는 백만원/천원/원 자동 감지 후 정규화.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> accounts, periods = extractAccounts(content)
+        >>> accounts["매출액"]
+        [123456.0, 100000.0]
+    """
     unit = detectUnit(content)
     tables = extractTables(content)
 
