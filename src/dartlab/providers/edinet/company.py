@@ -94,7 +94,40 @@ class _DocsNamespace:
 
     @property
     def sections(self) -> pl.DataFrame:
-        """docs 수평화 sections DataFrame."""
+        """docs 수평화 sections DataFrame (lazy).
+
+        Capabilities:
+            - lazy load — 첫 호출 시 ``_loadSections`` 실행 + cache.
+
+        Returns:
+            pl.DataFrame — sections wide DataFrame.
+
+        Guide:
+            - "EDINET docs sections" → ``c.docs.sections``.
+
+        SeeAlso:
+            - ``_loadSections`` (모듈 private) — 본 함수 본체.
+
+        Requires:
+            - polars.
+
+        AIContext:
+            EDINET 작업 패스 영역. AI 직접 호출 X.
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - sections wide DataFrame.
+            Prerequisites:
+                - docs parquet 수집 (구현 후).
+            Freshness:
+                - docs 수집 시점.
+            Dataflow:
+                - docs parquet → _loadSections → 본 함수.
+            TargetMarkets:
+                - JP (EDINET) 한정.
+        """
         if self._sections is None:
             self._sections = self._loadSections()
         return self._sections
@@ -279,19 +312,88 @@ class Company:
 
     @property
     def corpName(self) -> str | None:
-        """회사명."""
+        """회사명 (한자 정식명).
+
+        Returns:
+            str | None — ``_corpName`` 그대로. 미수집 시 None.
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - 1 str 또는 None.
+            Prerequisites:
+                - EDINET 메타 1 회 이상 수집.
+            Freshness:
+                - 메타 수집 시점.
+            Dataflow:
+                - EDINET API → _corpName → 본 함수.
+            TargetMarkets:
+                - JP (EDINET) 한정.
+        """
         return self._corpName
 
     @property
     def securitiesCode(self) -> str | None:
-        """4자리 증권코드 (東証 코드)."""
+        """4 자리 증권코드 (東証 코드).
+
+        Returns:
+            str | None — 4 자리 증권코드 또는 None.
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - 1 str (4 자리) 또는 None.
+            Prerequisites:
+                - EDINET 메타 수집.
+            Freshness:
+                - 메타 수집 시점.
+            Dataflow:
+                - EDINET API → _securitiesCode → 본 함수.
+            TargetMarkets:
+                - JP (EDINET) 한정.
+        """
         return self._securitiesCode
 
     # ── sections (merged view) ──
 
     @property
     def sections(self) -> pl.DataFrame:
-        """profile.sections — docs.sections 기반 merged view."""
+        """profile.sections — docs.sections 기반 merged view.
+
+        Capabilities:
+            - ``self.docs.sections`` 그대로 위임.
+
+        Returns:
+            pl.DataFrame — sections wide DataFrame.
+
+        Guide:
+            - "EDINET 회사 sections" → ``c.sections``.
+
+        SeeAlso:
+            - ``_DocsNamespace.sections`` — 본 함수의 source.
+
+        Requires:
+            - polars.
+
+        AIContext:
+            EDINET 작업 패스 영역. AI 가 직접 호출 X (placeholder).
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - sections wide DataFrame.
+            Prerequisites:
+                - docs.sections 가 채워져 있음.
+            Freshness:
+                - docs 수집 시점.
+            Dataflow:
+                - docs.sections → 본 함수.
+            TargetMarkets:
+                - JP (EDINET) 한정.
+        """
         return self.docs.sections
 
     # ── 공개 인터페이스 ──
@@ -359,7 +461,43 @@ class Company:
 
     @property
     def index(self) -> pl.DataFrame:
-        """수평화 보드 — 전체 topic 요약."""
+        """수평화 보드 — 전체 topic 요약 (chapter/label/topic/periods).
+
+        Capabilities:
+            - sections 의 unique topic list 추출.
+            - 각 topic → (chapter, label) 매핑 (``_YUHO_LABELS`` + ``_FINANCE_LABELS``).
+            - period unique count = 시계열 길이.
+
+        Returns:
+            pl.DataFrame — 컬럼 chapter/label/topic/periods. sections empty 시 빈 schema.
+
+        Guide:
+            - "EDINET 회사 index 매트릭스" → ``c.index``.
+
+        SeeAlso:
+            - ``sections`` — 본 함수의 input source.
+            - ``_YUHO_LABELS`` / ``_FINANCE_LABELS`` — chapter/label 매핑.
+
+        Requires:
+            - polars.
+
+        AIContext:
+            EDINET 작업 패스 영역. AI 가 직접 호출 X.
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - chapter/label/topic/periods.
+            Prerequisites:
+                - sections 수집.
+            Freshness:
+                - sections 시점.
+            Dataflow:
+                - sections → 본 함수 → AI.
+            TargetMarkets:
+                - JP (EDINET) 한정.
+        """
         secs = self.sections
         if secs.is_empty():
             return pl.DataFrame(
@@ -390,7 +528,46 @@ class Company:
         return pl.DataFrame(rows)
 
     def trace(self, topic: str) -> dict[str, Any]:
-        """source provenance 추적."""
+        """source provenance 추적 — finance / docs source 구분 + market 메타.
+
+        Capabilities:
+            - ``_TOPIC_ALIASES`` 매핑 후 source 분기.
+            - finance topic (BS/IS/CF/CIS) → source="finance".
+            - 그 외 → source="docs".
+
+        Args:
+            topic: topicId 또는 alias.
+
+        Returns:
+            dict — topic / source / market / edinetCode 메타.
+
+        Guide:
+            - "EDINET 회사 topic trace" → ``c.trace("BS")``.
+
+        SeeAlso:
+            - ``show`` — 본 함수의 짝 (실제 데이터 반환).
+            - ``_TOPIC_ALIASES`` (모듈 상수) — alias 매핑.
+
+        Requires:
+            - 외부 의존 없음.
+
+        AIContext:
+            EDINET 작업 패스 영역. AI 가 직접 호출 X.
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - dict — 4 키.
+            Prerequisites:
+                - EDINET Company instance.
+            Freshness:
+                - 본 함수 호출 시점 (정적).
+            Dataflow:
+                - alias map → 본 함수 → AI 디버그.
+            TargetMarkets:
+                - JP (EDINET) 한정.
+        """
         resolved = _TOPIC_ALIASES.get(topic, topic)
         return {
             "topic": resolved,

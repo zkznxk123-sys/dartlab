@@ -1,8 +1,4 @@
 {
   "_note": "P-PR 트랙 — providers/ docstring Guide sub-section baseline. P-PR2 (자동 sweep) / P-PR3 (사람 review) 통과마다 축소. P-PR3 종료 시 strict 0.",
-  "violations": [
-    "src/dartlab/providers/edinet/company.py::index",
-    "src/dartlab/providers/edinet/company.py::sections",
-    "src/dartlab/providers/edinet/company.py::trace"
-  ]
+  "violations": []
 }

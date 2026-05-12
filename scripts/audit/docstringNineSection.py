@@ -106,8 +106,8 @@ def _scan() -> dict[str, list[str]]:
             isPureNone = _isPureReturnNone(node)
             key = f"{rel}::{node.name}"
             for section, keywords in _SECTION_KEYWORDS.items():
-                # 면제 조건
-                if isWrapper and section in {"Capabilities", "Guide", "AIContext"}:
+                # 면제 조건 — wrapper 는 thin delegate 라 의미 X (SeeAlso/Requires 포함)
+                if isWrapper and section in {"Capabilities", "Guide", "AIContext", "SeeAlso", "Requires"}:
                     continue
                 if isPureNone and section == "Specifications":
                     continue
@@ -125,7 +125,7 @@ def _loadBaseline(section: str, path: Path) -> set[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="providers docstring 9-section (sub) audit")
-    parser.add_argument("--mode", choices=["baseline", "strict"], default="baseline")
+    parser.add_argument("--mode", choices=["baseline", "strict"], default="strict")
     parser.add_argument("--update-baseline", action="store_true")
     args = parser.parse_args()
 
