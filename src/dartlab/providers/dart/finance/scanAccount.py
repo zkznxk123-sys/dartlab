@@ -427,16 +427,16 @@ def scanAccount(
     없음 (지원되지 않는 snakeId 또는 데이터 부재 시 빈 DataFrame).
 
     Args:
-        snakeId: <TODO: param desc> (str)
-        sjDiv: <TODO: param desc> (str | None)
-        fsPref: <TODO: param desc> (str)
-        freq: <TODO: param desc> (str)
+        snakeId: 계정 식별자.
+        sjDiv: 재무제표 종류 (BS/IS/CF). None 이면 전체.
+        fsPref: 연결 우선 ("CFS") 또는 별도 ("OFS").
+        freq: "Q" (분기) 또는 "Y" (연간).
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 전종목 시계열.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``AccountMapper`` / ``scanAccount``.
 
     Requires:
         - concurrent
@@ -445,24 +445,25 @@ def scanAccount(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 전종목 단일 계정/비율 연간 시계열 추출.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 가 횡단 비교 분석 시 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 종목 호출 X — 전종목 배치만. 단일 종목은 ``c.show()`` 사용.
+            - limit 없이 호출 시 ~25K row + 135MB 메모리.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [stockCode × 연도 시계열].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (전종목).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 ~45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance/*.parquet (병렬) → snakeId filter → 연간 시계열 DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전종목 스캔.
     """
     from dartlab.frame.dataLoader import _dataDir
 
@@ -844,15 +845,15 @@ def scanRatio(
         지원하지 않는 ``ratioName`` 일 때 (사용 가능 목록 + hint 포함).
 
     Args:
-        ratioName: <TODO: param desc> (str)
-        fsPref: <TODO: param desc> (str)
-        freq: <TODO: param desc> (str)
+        ratioName: 비율 이름 (예 "ROE", "현금흐름비율").
+        fsPref: 연결 우선 ("CFS") 또는 별도 ("OFS").
+        freq: "Q" (분기) 또는 "Y" (연간).
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 전종목 시계열.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``AccountMapper`` / ``scanAccount``.
 
     Requires:
         - concurrent
@@ -861,24 +862,25 @@ def scanRatio(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 전종목 단일 계정/비율 연간 시계열 추출.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 가 횡단 비교 분석 시 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 종목 호출 X — 전종목 배치만. 단일 종목은 ``c.show()`` 사용.
+            - limit 없이 호출 시 ~25K row + 135MB 메모리.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [stockCode × 연도 시계열].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (전종목).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 ~45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance/*.parquet (병렬) → snakeId filter → 연간 시계열 DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전종목 스캔.
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
@@ -949,21 +951,22 @@ def scanRatioList() -> list[dict[str, str]]:
     scanFields : 조건형 스크리닝 필드 카탈로그.
 
     Returns:
-        <TODO: return desc> (list[dict[str, str]])
+        list[dict[str, str]] — 카탈로그 dict 리스트.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 종목 호출 X — 전종목 배치만. 단일 종목은 ``c.show()`` 사용.
+            - limit 없이 호출 시 ~25K row + 135MB 메모리.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [stockCode × 연도 시계열].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (전종목).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 ~45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance/*.parquet (병렬) → snakeId filter → 연간 시계열 DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전종목 스캔.
     """
     return [{"name": k, "label": v["label"], "unit": "%" if v.get("pct") else "배"} for k, v in _RATIO_DEFS.items()]
 
@@ -1018,10 +1021,10 @@ def scanAccountList() -> list[dict[str, str]]:
     scanFields : 조건형 스크리닝 필드 카탈로그.
 
     Returns:
-        <TODO: return desc> (list[dict[str, str]])
+        list[dict[str, str]] — 카탈로그 dict 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``AccountMapper`` / ``scanAccount``.
 
     Requires:
         - concurrent
@@ -1030,24 +1033,25 @@ def scanAccountList() -> list[dict[str, str]]:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 전종목 단일 계정/비율 연간 시계열 추출.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 가 횡단 비교 분석 시 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 종목 호출 X — 전종목 배치만. 단일 종목은 ``c.show()`` 사용.
+            - limit 없이 호출 시 ~25K row + 135MB 메모리.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [stockCode × 연도 시계열].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (전종목).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 ~45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance/*.parquet (병렬) → snakeId filter → 연간 시계열 DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전종목 스캔.
     """
     from dartlab.core.utils.ordering import _ensureLoaded
 

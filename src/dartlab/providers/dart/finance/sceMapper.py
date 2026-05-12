@@ -643,33 +643,33 @@ def normalizeCause(accountNm: str) -> str:
         'net_income'
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``CAUSE_SYNONYMS`` / ``DETAIL_MAP`` — 본 모듈 매핑.
 
     Requires:
-        - <TODO: external requires>
+        - stdlib only.
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SCE account_nm → 변동사유 snakeId 2-tier 매핑.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show("SCE")`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal SCE mapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — finance pivot.SCE 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str (snakeId) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - CAUSE_SYNONYMS / DETAIL_MAP 매핑.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - account_nm → 2-tier 매칭 → snakeId.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) SCE 매핑.
     """
     nm = accountNm.strip()
     if nm in CAUSE_SYNONYMS:
@@ -876,33 +876,33 @@ def normalizeDetail(detail: str | None) -> str:
         'retained_earnings'
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``CAUSE_SYNONYMS`` / ``DETAIL_MAP`` — 본 모듈 매핑.
 
     Requires:
-        - <TODO: external requires>
+        - stdlib only.
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SCE account_nm → 변동사유 snakeId 2-tier 매핑.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show("SCE")`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal SCE mapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — finance pivot.SCE 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str (snakeId) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - CAUSE_SYNONYMS / DETAIL_MAP 매핑.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - account_nm → 2-tier 매칭 → snakeId.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) SCE 매핑.
     """
     if not detail:
         return "unknown"

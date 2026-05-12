@@ -229,33 +229,33 @@ class AccountMapper:
             >>> mapper.map("ifrs-full_Revenue", "매출액")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``accountMappings.json`` / ``AccountMapper`` — 본 모듈 origin.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal mapper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str / dict / None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - accountMappings.json.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 매핑 학습 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - account_id → 7 단계 매핑 → snakeId.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 항목 매핑.
         """
         if cls._instance is None:
             cls._instance = cls()
@@ -275,19 +275,19 @@ class AccountMapper:
             >>> AccountMapper.release()  # accountMappings.json 갱신 후
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``accountMappings.json`` / ``AccountMapper`` — 본 모듈 origin.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal mapper — AI 직접 호출 X.
         """
         cls._instance = None
         cls._mappings = None
@@ -340,33 +340,33 @@ class AccountMapper:
             'sales'
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``accountMappings.json`` / ``AccountMapper`` — 본 모듈 origin.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal mapper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str / dict / None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - accountMappings.json.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 매핑 학습 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - account_id → 7 단계 매핑 → snakeId.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 항목 매핑.
         """
         stripped = _stripPrefix(accountId) if accountId else ""
         normalizedId = ID_SYNONYMS.get(stripped, stripped)
@@ -415,33 +415,33 @@ class AccountMapper:
             '매출액'
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``accountMappings.json`` / ``AccountMapper`` — 본 모듈 origin.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - account_id / 한글명 → snakeId 매핑 helper.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal mapper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str / dict / None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - accountMappings.json.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 매핑 학습 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - account_id → 7 단계 매핑 → snakeId.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 항목 매핑.
         """
         from dartlab.core.utils.labels import getKoreanLabels
 
@@ -467,17 +467,17 @@ class AccountMapper:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str / dict / None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - accountMappings.json.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 매핑 학습 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - account_id → 7 단계 매핑 → snakeId.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 항목 매핑.
         """
         return _commonSortOrder(sjDiv)
 
@@ -501,16 +501,16 @@ class AccountMapper:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str / dict / None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - accountMappings.json.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 매핑 학습 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - account_id → 7 단계 매핑 → snakeId.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 항목 매핑.
         """
         return _commonLevelMap(sjDiv)

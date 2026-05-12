@@ -161,17 +161,18 @@ def buildTimeseries(
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show 위임.
+            - CFS/OFS 우선순위 가정 X — CFS 우선.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / tuple / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (XBRL 원본).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → CFS 우선 + 누적/standalone 변환 → 분기별 series dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) finance pivot.
     """
     return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS")
 
@@ -202,7 +203,8 @@ def clearFinanceCache() -> None:
         >>> clearFinanceCache()  # parquet 재로드 강제
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildTimeseries`` — entry.
+        - ``financeMappers`` — mapper helpers.
 
     Requires:
         - dartlab
@@ -211,13 +213,13 @@ def clearFinanceCache() -> None:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - finance parquet 분기별 시계열 피벗 helper.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal pivot — AI 직접 호출 X.
     """
     _buildTimeseriesCached.cache_clear()
 
@@ -248,7 +250,8 @@ def buildAnnual(
         >>> series, years = buildAnnual("005930")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildTimeseries`` — entry.
+        - ``financeMappers`` — mapper helpers.
 
     Requires:
         - dartlab
@@ -257,27 +260,28 @@ def buildAnnual(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - finance parquet 분기별 시계열 피벗 helper.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal pivot — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show 위임.
+            - CFS/OFS 우선순위 가정 X — CFS 우선.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / tuple / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (XBRL 원본).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → CFS 우선 + 누적/standalone 변환 → 분기별 series dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) finance pivot.
     """
     qResult = buildTimeseries(stockCode, fsDivPref)
     if qResult is None:
@@ -313,7 +317,8 @@ def buildCumulative(
         >>> series, periods = buildCumulative("005930")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildTimeseries`` — entry.
+        - ``financeMappers`` — mapper helpers.
 
     Requires:
         - dartlab
@@ -322,27 +327,28 @@ def buildCumulative(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - finance parquet 분기별 시계열 피벗 helper.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal pivot — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show 위임.
+            - CFS/OFS 우선순위 가정 X — CFS 우선.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / tuple / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (XBRL 원본).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → CFS 우선 + 누적/standalone 변환 → 분기별 series dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) finance pivot.
     """
     qResult = buildTimeseries(stockCode, fsDivPref)
     if qResult is None:
@@ -778,7 +784,8 @@ def buildSceMatrix(
         >>> matrix, years = buildSceMatrix("005930")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildTimeseries`` — entry.
+        - ``financeMappers`` — mapper helpers.
 
     Requires:
         - dartlab
@@ -787,27 +794,28 @@ def buildSceMatrix(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - finance parquet 분기별 시계열 피벗 helper.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal pivot — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show 위임.
+            - CFS/OFS 우선순위 가정 X — CFS 우선.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / tuple / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (XBRL 원본).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → CFS 우선 + 누적/standalone 변환 → 분기별 series dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) finance pivot.
     """
     from dartlab.frame.dataLoader import loadData
 
@@ -927,7 +935,8 @@ def buildSceAnnual(
         >>> series, years = buildSceAnnual("005930")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildTimeseries`` — entry.
+        - ``financeMappers`` — mapper helpers.
 
     Requires:
         - dartlab
@@ -936,27 +945,28 @@ def buildSceAnnual(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - finance parquet 분기별 시계열 피벗 helper.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal pivot — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show 위임.
+            - CFS/OFS 우선순위 가정 X — CFS 우선.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / tuple / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet (XBRL 원본).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → CFS 우선 + 누적/standalone 변환 → 분기별 series dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) finance pivot.
     """
     result = buildSceMatrix(stockCode, fsDivPref)
     if result is None:

@@ -25,33 +25,33 @@ def buildSpec() -> dict:
         ['IS', 'BS', 'CF', 'SCE']
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Skill OS`` build pipeline — 본 spec 소비자.
 
     Requires:
-        - <TODO: external requires>
+        - stdlib only.
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - dart/finance 엔진 메타 스펙 dict 반환 — Skill OS 빌드용.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - Skill OS 자동 추출.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal spec — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 spec 외부 의존 X — 정적 dict.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict {name, description, summary, detail}.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 없음.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 코드 변경 시 갱신.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 코드 → 정적 spec dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART).
     """
     import dataclasses
 
