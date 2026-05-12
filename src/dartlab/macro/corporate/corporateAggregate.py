@@ -61,13 +61,13 @@ class LeverageCycleResult:
 
 # ── scanBridge 경유 — DART/EDGAR 통일 ──
 
-from dartlab.core.cross.scanBridge import (
+from dartlab.synth.scanBridge import (
     extractAnnualConsolidated as _extract_annual_consolidated,
 )
-from dartlab.core.cross.scanBridge import (
+from dartlab.synth.scanBridge import (
     medianRatioByYear as _median_ratio_bridge,
 )
-from dartlab.core.cross.scanBridge import (
+from dartlab.synth.scanBridge import (
     sumAccountByYear as _sum_account_bridge,
 )
 
@@ -128,7 +128,7 @@ def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
     ICR(이자보상배율) = 영업이익 / 이자비용.
     ICR < 1 = 영업이익으로 이자도 못 갚는 기업.
     """
-    from dartlab.core.cross.scanBridge import getAccountValue, isEdgarSchema
+    from dartlab.synth.scanBridge import getAccountValue, isEdgarSchema
 
     annual = _extract_annual_consolidated(financeDf)
 

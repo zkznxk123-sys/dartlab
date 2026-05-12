@@ -1,7 +1,7 @@
 """synth — L1.5 분석 후처리/매칭/시나리오.
 
 분석 결과 + scan 결과 + 룰 (reference) 을 결합해 매칭·분류·시나리오 후처리.
-현 dartlab.core.cross + indicators·axisGuide·ratioCategories·overrides 가
+현 dartlab.synth + indicators·axisGuide·ratioCategories·overrides 가
 본 위치로 이동 예정 (P-CORE B). 본 단계는 골격만.
 
 룰 (operation.architecture SSOT):

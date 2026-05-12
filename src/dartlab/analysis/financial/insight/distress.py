@@ -82,7 +82,7 @@ def _mapCreditGrade20(overall: float) -> tuple[str, str, float]:
         description : str — 등급 설명
         pd : float — 부도 확률 (%)
     """
-    from dartlab.core.cross.creditGradeTable import mapTo20Grade
+    from dartlab.synth.creditGradeTable import mapTo20Grade
 
     return mapTo20Grade(overall)
 

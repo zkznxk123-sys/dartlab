@@ -1,4 +1,4 @@
-"""[shim] core/cross/creditGradeTable → credit/gradeTable 도메인 복귀 (0.10 까지 BC).
+"""[shim] synth/creditGradeTable → credit/gradeTable 도메인 복귀 (0.10 까지 BC).
 
 본체: src/dartlab/credit/gradeTable.py
 0.11 release 시 본 shim 제거. 직접 사용처는 `from dartlab.credit.scoring.gradeTable import ...` 로 갱신.
@@ -18,4 +18,4 @@ def __getattr__(name: str):
     try:
         return getattr(mod, name)
     except AttributeError as exc:
-        raise AttributeError(f"module 'dartlab.core.cross.creditGradeTable' has no attribute {name!r}") from exc
+        raise AttributeError(f"module 'dartlab.synth.creditGradeTable' has no attribute {name!r}") from exc
