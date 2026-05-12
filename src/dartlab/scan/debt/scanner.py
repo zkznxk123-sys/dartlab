@@ -21,6 +21,17 @@ def scanBonds() -> dict[str, dict]:
             사채잔액 : float — 사채 총잔액 (백만원)
             단기잔액 : float — 1년 이내 만기 잔액 (백만원)
             단기비중 : float — 단기잔액/사채잔액 (%)
+
+    Raises
+    ------
+    polars.PolarsError
+        corporateBond report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.debt.scanner import scanBonds
+    >>> bonds = scanBonds()
+    >>> bonds.get("005930", {}).get("사채잔액")
     """
     raw = scanParquets(
         "corporateBond",
@@ -86,6 +97,17 @@ def scanShortDebt() -> dict[str, dict]:
             단기사채잔액 : float — 단기사채 잔액 (백만원)
             CP잔액 : float — 기업어음 잔액 (백만원)
             단기채무합계 : float — 단기사채 + CP 합산 (백만원)
+
+    Raises
+    ------
+    polars.PolarsError
+        shortTermBond · commercialPaper report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.debt.scanner import scanShortDebt
+    >>> short = scanShortDebt()
+    >>> short.get("005930", {}).get("단기채무합계")
     """
     stb = scanParquets(
         "shortTermBond",
@@ -141,6 +163,17 @@ def scanDebtMix() -> dict[str, dict]:
         {종목코드: info} 매핑. 각 info:
             총부채 : float — 부채총계 (원)
             부채비율 : float | None — 부채비율 (%)
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 시 per-file fallback 전환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.debt.scanner import scanDebtMix
+    >>> mix = scanDebtMix()
+    >>> mix.get("005930", {}).get("부채비율")
     """
     from dartlab.scan.io.parquet import _ensureScanData
 

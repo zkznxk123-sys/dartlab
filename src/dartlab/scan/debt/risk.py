@@ -148,9 +148,26 @@ def _scanIcrPerFile() -> dict[str, float]:
 
 
 def scanIcr() -> dict[str, float]:
-    """finance IS → {종목코드: ICR}.
+    """전종목 ICR (이자보상배율) 스캔.
 
-    프리빌드 finance.parquet 우선, 없으면 per-file fallback.
+    프리빌드 finance.parquet 우선, 없으면 per-file fallback. 영업이익 / 이자비용
+    공식을 적용해 종목별 ICR 을 산출한다.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: ICR(배)}. 이자비용 0 이거나 매칭 실패면 제외.
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 시 per-file fallback 전환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.debt.risk import scanIcr
+    >>> icrMap = scanIcr()
+    >>> icrMap.get("005930")
     """
     from dartlab.scan.io.parquet import _ensureScanData
 
@@ -168,10 +185,36 @@ def classifyRisk(
 ) -> str:
     """ICR x 단기비중 x 단기채무 → 위험등급.
 
-    - 고위험: (단기비중 >= 50% AND ICR < 1) OR (ICR < 1 AND 단기채무 존재)
-    - 주의:   단기비중 >= 50% OR ICR < 1 OR 단기채무 존재
-    - 관찰:   ICR < 3
-    - 안전:   그 외
+    Parameters
+    ----------
+    icr : float | None
+        이자보상배율 (배).
+    shortRatio : float | None
+        단기 부채 비중 (%, 단기/사채).
+    shortDebtTotal : float | None, optional
+        단기사채 + CP 합계 (백만원).
+
+    Returns
+    -------
+    str
+        위험등급. 다음 분기:
+
+        - 고위험: (단기비중 >= 50% AND ICR < 1) OR (ICR < 1 AND 단기채무 존재)
+        - 주의:   단기비중 >= 50% OR ICR < 1 OR 단기채무 존재
+        - 관찰:   ICR < 3
+        - 안전:   그 외
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.debt.risk import classifyRisk
+    >>> classifyRisk(icr=0.5, shortRatio=60)
+    '고위험'
+    >>> classifyRisk(icr=5.0, shortRatio=10)
+    '안전'
     """
     sr = shortRatio if shortRatio is not None else 0
     hasShortDebt = shortDebtTotal is not None and shortDebtTotal > 0

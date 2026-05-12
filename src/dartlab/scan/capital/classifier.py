@@ -10,10 +10,32 @@ def classifyReturn(
 ) -> tuple[str, bool]:
     """순주주환원 방향 분류.
 
-    Returns:
-        (분류, 모순형여부)
-        분류: "적극환원" / "환원형" / "중립" / "희석형"
-        모순형: 배당하면서 최근 증자
+    Parameters
+    ----------
+    hasDividend : bool
+        현금배당 여부.
+    hasBuyback : bool
+        자사주 매입 여부.
+    recentIncrease : bool
+        최근 유상증자 여부.
+
+    Returns
+    -------
+    tuple[str, bool]
+        (분류, 모순형여부) — 분류는 "적극환원/환원형/중립/희석형",
+        모순형은 배당 + 최근 증자 동시일 때 True.
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.capital.classifier import classifyReturn
+    >>> classifyReturn(True, True, False)
+    ('적극환원', False)
+    >>> classifyReturn(True, False, True)
+    ('중립', True)
     """
     return_score = 0
     if hasDividend:

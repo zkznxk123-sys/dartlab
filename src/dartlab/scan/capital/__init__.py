@@ -24,9 +24,35 @@ from dartlab.scan.capital.scanner import (
 def scanCapital(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 주주환원 스캔 → 순환원 분류 DataFrame.
 
-    컬럼: 종목코드, 배당여부, DPS, 배당수익률, 자사주보유, 자사주취득,
-          자사주처분, 자사주소각, 취득수량, 처분수량, 소각수량,
-          최근증자, 환원점수, 분류, 모순형
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        배당여부 : bool — DPS > 0
+        DPS : float — 주당 현금배당금 (원)
+        배당수익률 : float — 현금배당수익률 (%)
+        자사주보유 / 자사주취득 / 자사주처분 / 자사주소각 : bool
+        취득수량 / 처분수량 / 소각수량 : float
+        최근증자 : bool
+        환원점수 : float — 0~3 누적 점수
+        분류 : str — 적극환원/환원형/중립/희석형
+        모순형 : bool — 배당 + 최근 증자
+
+    Raises
+    ------
+    polars.PolarsError
+        dividend · treasuryStock · capitalChange report parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("capital")
+    >>> df.filter(pl.col("분류") == "환원형").select(["종목코드", "DPS"]).head()
     """
 
     def _say(msg: str) -> None:

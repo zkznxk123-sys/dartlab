@@ -20,8 +20,34 @@ from dartlab.scan.debt.scanner import scanBonds, scanDebtMix, scanShortDebt
 def scanDebt(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 부채 스캔 → 종합 DataFrame.
 
-    컬럼: 종목코드, 사채잔액, 단기잔액, 단기비중, 단기사채잔액, CP잔액,
-          단기채무합계, 총부채, 부채비율, ICR, 위험등급
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        사채잔액 : float — 사채 총잔액 (백만원)
+        단기잔액 : float — 1년 이내 만기 잔액 (백만원)
+        단기비중 : float — 단기잔액/사채잔액 (%)
+        단기사채잔액 / CP잔액 : float — 별도 측정
+        단기채무합계 : float — 단기사채 + CP
+        총부채 / 부채비율 : float — finance BS 기준
+        ICR : float — 영업이익 / 이자비용
+        위험등급 : str — 안전/관찰/주의/고위험
+
+    Raises
+    ------
+    polars.PolarsError
+        corporateBond · shortTermBond · finance.parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("debt")
+    >>> df.filter(pl.col("위험등급") == "고위험").select(["종목코드", "ICR"]).head()
     """
 
     def _say(msg: str) -> None:

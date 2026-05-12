@@ -30,6 +30,17 @@ def scanDividend() -> dict[str, dict]:
             DPS : float — 주당 현금배당금 (원)
             배당수익률 : float — 현금배당수익률 (%)
             배당총액_백만 : float — 현금배당금 총액 (백만원)
+
+    Raises
+    ------
+    polars.PolarsError
+        dividend report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.capital.scanner import scanDividend
+    >>> div = scanDividend()
+    >>> div.get("005930", {}).get("DPS")
     """
     raw = scanParquets(
         "dividend",
@@ -108,6 +119,17 @@ def scanTreasuryStock() -> dict[str, dict]:
             취득수량 : int — 당기 취득 주식수 (주)
             처분수량 : int — 당기 처분 주식수 (주)
             소각수량 : int — 당기 소각 주식수 (주)
+
+    Raises
+    ------
+    polars.PolarsError
+        treasuryStock report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.capital.scanner import scanTreasuryStock
+    >>> ts = scanTreasuryStock()
+    >>> ts.get("005930", {}).get("자사주보유")
     """
     raw = scanParquets(
         "treasuryStock",
@@ -183,6 +205,17 @@ def scanCapitalChange() -> dict[str, dict]:
     dict[str, dict]
         {종목코드: info} 매핑. 각 info:
             최근증자 : bool — 최근 3년 내 증자 여부
+
+    Raises
+    ------
+    polars.PolarsError
+        capitalChange report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.capital.scanner import scanCapitalChange
+    >>> cc = scanCapitalChange()
+    >>> cc.get("005930", {}).get("최근증자")
     """
     raw = scanParquets(
         "capitalChange",
