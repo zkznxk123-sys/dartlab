@@ -116,6 +116,19 @@ def scanFields(query: str | None = None, source: str | None = None) -> pl.DataFr
     screen spec 으로 조합한 뒤, 남은 종목만 Company/analysis 로 심층 확인한다.
     Verified: finance/report/docs/krx/krxIndex source 가 단일 표로 노출된다.
 
+    Capabilities:
+        - 5 원천 (finance / report / docs / krx / krxIndex / valuation) 의 가용 필드를 한 표로
+          노출. 각 필드의 단위·연산자·coverage·example·notes 메타로 spec 작성을 가이드.
+        - 데이터 자체는 로드 안 함 — 카탈로그 검색만. 실제 scan 은 `scan("screen", spec=...)`.
+
+    AIContext:
+        Agent 가 사용자 의도 ("저PBR 종목" / "ROE 높은 회사") 를 받으면, 직접 raw 컬럼 추정
+        대신 본 함수로 spec 에 들어갈 정규 필드 키 (`finance.ratio.roe` 등) 를 먼저 확인.
+        잘못된 필드명 추정으로 인한 ValueError 회피.
+
+    Requires:
+        - 메모리에 보유한 카탈로그 dict (`_catalog()` 산출). 외부 의존 없음.
+
     See Also
     --------
     dartlab.scan : scan 단일 진입점.
@@ -199,6 +212,22 @@ def executeScreenSpec(spec: dict[str, Any]) -> pl.DataFrame:
     How: 가치·성장·품질·가격·공시 중 최소 3축을 조합하고, 결과 종목은
     Company/analysis 로 원문과 재무제표를 재검증한다.
     Verified: 기존 preset 호출과 독립적으로 spec 경로만 실행된다.
+
+    Capabilities:
+        - spec 의 ``where`` (AND) / ``any`` (OR) / ``select`` / ``sort`` / ``limit`` 을 해석해
+          필요한 원천만 lazy 로 로드 후 후보 종목 DataFrame 반환. finance/ratio/valuation/krx/
+          report/docs 필드를 동일 spec 안에서 자유 조합.
+        - 필드별 resolver 가 단위·연산자 검증 — 잘못된 spec 은 즉시 ValueError.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("screen", spec={...})`` 호출 시 본 함수가 router 진입점.
+        AI 가 spec 을 직접 만들 때 ``scanFields`` 로 필드 가용성 + 단위·연산자를 먼저 확인하면
+        ValueError 회피.
+
+    Requires:
+        - 필요시 lazy 로드: scan/finance.parquet (finance/ratio), scan/report/{apiType}.parquet,
+          docs 검색 인덱스 (`dartlab.search`), valuation.parquet, krx listing.
+        - 외부 호출 없음 — 모든 데이터 로컬 prebuild 자산.
 
     See Also
     --------

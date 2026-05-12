@@ -49,10 +49,10 @@ def _cachePath() -> Path:
 
 
 def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
-    """전종목 scan 4축 핵심 지표 스냅샷 생성.
+    """전종목 scan 4 축 핵심 지표 + 분포 스냅샷 캐시 (백분위 조회용).
 
-    기존 scan 함수를 그대로 호출하여 종목별 핵심 지표를 추출한다.
-    결과를 JSON으로 저장하여 이후 조회는 즉시 가능.
+    scan 4 axis (governance/workforce/capital/debt) 의 핵심 지표만 종목별 1 row 로 추출 후
+    분포 배열도 같이 저장. 조회 시 ``getScanPosition`` 이 본 캐시만 읽어 즉시 백분위 응답.
 
     Parameters
     ----------
@@ -81,6 +81,36 @@ def buildScanSnapshot(*, verbose: bool = True) -> dict[str, dict]:
     >>> snap = buildScanSnapshot(verbose=True)
     >>> snap["005930"]["governance_grade"]
     'B'
+
+    Capabilities:
+        - 4 axis 의 핵심 지표 1 개 (governance score / rev_per_employee / capital_class / icr) +
+          등급 / risk 라벨을 종목별 1 dict 로 합산. 분포 배열도 함께 sorting 해서 JSON 저장.
+        - 결과 캐시: ``~/.dartlab/data/_cache/scan_snapshot.json``. ``getScanPosition`` 이 ≤ 10ms 응답.
+
+    AIContext:
+        Agent 가 "이 종목 시장 내 위치" 질문 (백분위·등급·랭킹) 시 본 빌드 산출 캐시 경유.
+        AI 가 매번 4 axis scan 을 재실행하지 않고 캐시만 읽도록 함 (메모리 폭주 방지).
+
+    Guide:
+        - 캐시 invalidation 정책 없음 — 사용자가 명시적으로 rebuild 호출.
+        - 4 axis 중 1 개 fail 시 그 axis 만 None 으로 — 부분 캐시 허용.
+
+    When:
+        prebuild 사이클 별도 단계 (현재는 manual). ``buildScan`` 와 다른 분류.
+
+    How:
+        scan 4 axis 함수 직접 호출 (scanMajorHolderPct/scanOutsideDirectors/...) → 종목별 score
+        합산 + grade → snapshot dict. 분포 배열은 ``sorted()`` 적재. ``_snapshotPath`` 에 JSON write.
+
+    Requires:
+        - scan governance scanner / scorer 모듈
+        - scan workforce.scanner / capital / debt 모듈
+        - ``~/.dartlab/data/_cache/`` 디렉토리 쓰기
+
+    SeeAlso:
+        - :func:`getScanPosition` — 캐시 소비자 (백분위 조회)
+        - :mod:`dartlab.scan.governance` · :mod:`dartlab.scan.workforce` · :mod:`dartlab.scan.capital`
+          · :mod:`dartlab.scan.debt` — 4 axis 산출
     """
     if verbose:
         _log.info("[scan] 전종목 스냅샷 빌드 시작...")
@@ -277,9 +307,9 @@ def _percentile(sortedArr: list[float], value: float) -> float:
 
 
 def getScanPosition(stockCode: str) -> dict | None:
-    """종목의 scan 4축 시장 내 위치 조회.
+    """종목 1 개의 scan 4 축 시장 내 위치 (값/백분위/등급) 즉시 조회.
 
-    스냅샷이 없으면 None. buildScanSnapshot() 선행 필요.
+    스냅샷이 없으면 None. ``buildScanSnapshot()`` 선행 필요. 캐시 hit 시 ≤ 10ms 응답.
 
     Parameters
     ----------
@@ -317,6 +347,35 @@ def getScanPosition(stockCode: str) -> dict | None:
     >>> from dartlab.scan.builders.kr.snapshot import getScanPosition
     >>> pos = getScanPosition("005930")
     >>> pos["governance"]["percentile"] if pos else "no snapshot"
+
+    Capabilities:
+        - 캐시된 ``scan_snapshot.json`` 만 읽어 종목 1 개의 4 축 값 + 백분위 + 등급 즉시 반환.
+          분포 배열 (정렬됨) + bisect 로 O(log n) 백분위 계산.
+        - 데이터 미존재 / 부분 축 누락 시 None 또는 부분 dict — 호출자 방어 필수.
+
+    AIContext:
+        Server API (Company 페이로드) 가 1 사 분석 시 호출하는 핵심 백분위 source. Agent 가
+        "이 종목 시장 내 어느 정도?" 질문 시 즉시 응답. buildScanSnapshot 재실행 없이 cached.
+
+    Guide:
+        - 캐시 미존재 시 None — 호출자가 ``buildScanSnapshot`` 호출하거나 백분위 단락 skip.
+        - 캐시 stale 여부 판정 없음 — TTL 정책은 호출자 책임.
+
+    When:
+        Server API 가 1 사 페이로드 빌드 시. 대량 호출은 본 함수가 적합 (axis scan 직접 호출보다
+        2~3 자릿수 빠름).
+
+    How:
+        ``_ensureCache()`` 로 JSON 캐시 로드 → snapshot[stockCode] dict 추출 → 4 axis 별로 분포
+        배열 + 종목 값으로 ``_percentile`` (bisect) 계산 → 4 키 dict 반환.
+
+    Requires:
+        - 캐시 파일 ``~/.dartlab/data/_cache/scan_snapshot.json`` (``buildScanSnapshot`` 산출)
+
+    SeeAlso:
+        - :func:`buildScanSnapshot` — 본 함수의 source 캐시 생성
+        - :func:`_percentile` — bisect 기반 O(log n) 계산
+        - :func:`calcPeerPosition` (extended.py) — 같은 컨셉의 finance.parquet 직접 스캔 버전
     """
     cache = _ensureCache()
     if cache is None:
