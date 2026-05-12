@@ -65,6 +65,8 @@ AAPL = "AAPL"
 # ── 메모리 안전 한계 (MB) ──
 # 이 값을 넘으면 pytest 자체를 안전 종료하여 OOM 방지
 # CI에서 더 큰 한계 필요 시 PYTEST_MEMORY_LIMIT_MB 환경변수로 override
+# M1 (2026-05-12): PRESSURE_FATAL 이 2000 으로 분리됐지만 테스트 종료 임계는
+# CRITICAL=1500 그대로. 테스트 환경은 더 보수적이어야 한다 (병렬 테스트 압박).
 _PYTEST_MEMORY_LIMIT_MB = float(os.environ.get("PYTEST_MEMORY_LIMIT_MB", str(PRESSURE_CRITICAL_MB)))
 
 

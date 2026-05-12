@@ -23,13 +23,18 @@ log = logging.getLogger(__name__)
 # Polars 네이티브 메모리 포함, 단일 프로세스 기준
 # 2026-04-22 AI audit 관찰: 현대차·삼성전자급 대기업 + 14축 analysis 호출 시
 # peak 13GB 까지 폭증 → EMERGENCY 에서만 pinned 비움. 더 일찍 개입해야 한다.
-# - CRITICAL 1500 은 conftest.PYTEST_MEMORY_LIMIT_MB 기본값이라 유지 (테스트 한계)
-# - FATAL 을 1500 으로 하향: BoundedCache pinned 제외 비우기를 공격적으로
-# - EMERGENCY 를 2500 으로 하향: pinned 비우기 + string cache 회수를 일찍
-PRESSURE_WARNING_MB = 800.0  # 경고: 캐시 절반 축소
-PRESSURE_CRITICAL_MB = 1500.0  # 위험: 캐시 1/4 축소 + GC
-PRESSURE_FATAL_MB = 1500.0  # 치명: 캐시 전체(pinned 제외) 비우기 + GC
-PRESSURE_EMERGENCY_MB = 2500.0  # 응급: pinned 까지 비우기 + polars string cache 회수
+# 2026-05-12 M1: PRESSURE_FATAL=CRITICAL=1500 동치였던 dead-code 분기 정정.
+# `_checkPressure` (L362-) 의 `if mem > FATAL: ... elif mem > CRITICAL:` 구조에서
+# 임계가 동치면 CRITICAL elif 가 절대 도달 못함. FATAL 을 2000 으로 분리하여
+# 4 단계 escalation 활성화:
+# - WARNING 800: 캐시 절반 축소
+# - CRITICAL 1500: 캐시 1/4 축소 + GC (conftest.PYTEST_MEMORY_LIMIT_MB 기본값)
+# - FATAL 2000: pinned 제외 전부 비우기 + GC (BoundedCache 공격적 정리)
+# - EMERGENCY 2500: pinned 까지 비우기 + polars string cache 회수
+PRESSURE_WARNING_MB = 800.0
+PRESSURE_CRITICAL_MB = 1500.0
+PRESSURE_FATAL_MB = 2000.0
+PRESSURE_EMERGENCY_MB = 2500.0
 
 # ── lazy-build atomic sentinel ──
 # `if key not in cache: cache[key] = build(...); return cache[key]` 패턴은 atomic 이

@@ -70,6 +70,34 @@ class TestCacheCaps:
         )
 
 
+class TestPressureLevels:
+    """M1: PRESSURE_* 4 단계 escalation 임계 분리 검증."""
+
+    def test_fatal_distinct_from_critical(self):
+        """PRESSURE_FATAL > PRESSURE_CRITICAL 분리 — 동치 시 CRITICAL elif dead code."""
+        from dartlab.core.memory import PRESSURE_CRITICAL_MB, PRESSURE_FATAL_MB
+
+        assert PRESSURE_FATAL_MB > PRESSURE_CRITICAL_MB, (
+            f"FATAL={PRESSURE_FATAL_MB} CRITICAL={PRESSURE_CRITICAL_MB} 동치 — "
+            f"`if mem > FATAL: ... elif mem > CRITICAL:` 구조에서 CRITICAL elif 도달 불가"
+        )
+
+    def test_levels_strictly_increasing(self):
+        """WARNING < CRITICAL < FATAL < EMERGENCY 엄격 증가 — 4 단계 escalation 보장."""
+        from dartlab.core.memory import (
+            PRESSURE_CRITICAL_MB,
+            PRESSURE_EMERGENCY_MB,
+            PRESSURE_FATAL_MB,
+            PRESSURE_WARNING_MB,
+        )
+
+        levels = [PRESSURE_WARNING_MB, PRESSURE_CRITICAL_MB, PRESSURE_FATAL_MB, PRESSURE_EMERGENCY_MB]
+        assert levels == sorted(levels) and len(set(levels)) == 4, (
+            f"4 단계 임계 엄격 증가 실패: WARNING={PRESSURE_WARNING_MB} CRITICAL={PRESSURE_CRITICAL_MB} "
+            f"FATAL={PRESSURE_FATAL_MB} EMERGENCY={PRESSURE_EMERGENCY_MB}"
+        )
+
+
 class TestCleanupBetweenCompanies:
     def test_returns_before_after_tuple(self):
         """(before, after) 튜플 반환."""
