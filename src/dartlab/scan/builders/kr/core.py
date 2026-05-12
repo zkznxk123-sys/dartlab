@@ -447,19 +447,19 @@ def _buildRawChanges(parquetPath: Path, stockCode: str, sinceYear: int = 2021) -
 
 
 def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
-    """docs → changes 프리빌드.
+    """docs/*.parquet → ``changes.parquet`` 프리빌드 (전종목 sectionTitle 변화 감지).
 
     Parameters
     ----------
     sinceYear : int
-        시작 연도.
+        시작 연도. 이전 연도는 비교 baseline 으로만 사용. 기본 2021.
     verbose : bool
         진행 로그 출력 여부.
 
     Returns
     -------
     Path | None
-        생성된 changes.parquet 경로. 데이터 없으면 None.
+        생성된 ``changes.parquet`` 경로. docs 데이터 없으면 None.
 
     Raises
     ------
@@ -471,6 +471,39 @@ def buildChanges(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     >>> from dartlab.scan.builders.kr.core import buildChanges
     >>> p = buildChanges(sinceYear=2021, verbose=True)
     >>> p.exists() if p else "no docs"
+
+    Capabilities:
+        - 전종목 docs (사업보고서 섹션) 의 연도별 변화 (appeared/disappeared/numeric/structural/wording)
+          를 한 parquet 으로 합산. ``_buildRawChanges`` 가 종목당 변화 추출, 200 종목 배치로
+          임시 청크 저장 후 ``_mergeBatchFiles`` 단일 파일 머지.
+
+    AIContext:
+        AI agent 가 ``dartlab.scan("disclosureRisk")`` 또는 ``dartlab.scan("dividendTrend")``
+        호출 시 본 빌드 산출물을 LazyFrame 으로 스캔해 우발부채/감사 변경/사업 전환 같은
+        선행 리스크 신호를 추출한다.
+
+    Guide:
+        - CI prebuild 파이프라인 (``.github/scripts/prebuildData.py``) 이 매일 2 회 자동 호출.
+        - 로컬에서는 docs raw parquet 가 ``data/dart/docs/`` 에 있을 때만 의미.
+        - 결과 parquet (~수십 MB) 은 HF ``eddmpython/dartlab-data`` 의 ``dart/scan/`` 에 업로드.
+
+    When:
+        Data Sync 직후 (KST 03:00 / 15:00) prebuild 단계에서. 사용자가 직접 호출하는 일은 드물다 —
+        스캔 axis (disclosureRisk/dividendTrend) 호출이 자동 다운로드를 트리거하므로.
+
+    How:
+        ``buildScan`` 의 첫 단계. ``_docsDir()`` 의 종목별 raw parquet 을 순회 → 종목당
+        ``_buildRawChanges`` 호출 → 200 단위 배치 임시 청크 → 전체 ``_mergeBatchFiles`` 단일 합산.
+        실패 종목은 silent skip + ``verbose=True`` 에서만 카운트 표시.
+
+    Requires:
+        - 로컬 ``data/dart/docs/{stockCode}.parquet`` (Data Sync 가 채움)
+        - ``year`` · ``section_order`` · ``section_title`` · ``section_content`` 컬럼
+
+    SeeAlso:
+        - :func:`buildScan` — 본 함수를 포함한 전체 프리빌드 통합 호출
+        - :func:`_buildRawChanges` — 종목당 변화 추출 (private)
+        - :func:`buildFinance` · :func:`buildReport` — 같은 prebuild 단계의 동료 빌더
     """
     docsDir = _docsDir()
     outDir = _scanDir()
@@ -559,30 +592,74 @@ def _loadAccountMap() -> dict[str, str]:
 
 
 def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
-    """finance 전종목 합산 프리빌드.
+    """finance/*.parquet → ``finance.parquet`` 합산 (결산월 환원 + 계정 정규화).
+
+    가장 비싼 prebuild 단계. 종목별 raw parquet 을 순회하며 (1) 결산월 SSOT 기반 캘린더
+    분기 환원, (2) accountMappings.json 으로 ``account_nm`` → ``account_id_std`` snakeId
+    정규화. ~3964 종목 → 300+ MB 단일 합본 출력.
 
     Parameters
     ----------
     sinceYear : int
-        시작 연도.
+        포함할 최소 사업연도 (``bsns_year >= sinceYear``). 기본 2021. CI 매개변수.
     verbose : bool
         진행 로그 출력 여부.
 
     Returns
     -------
     Path | None
-        생성된 finance.parquet 경로. 데이터 없으면 None.
+        생성된 ``finance.parquet`` 경로. raw parquet 없으면 None.
 
     Raises
     ------
     polars.PolarsError
-        finance parquet 손상 또는 sink_parquet 실패 시.
+        finance parquet 손상 또는 ``sink_parquet`` 실패 시.
 
     Examples
     --------
     >>> from dartlab.scan.builders.kr.core import buildFinance
     >>> p = buildFinance(sinceYear=2021, verbose=True)
     >>> p.exists() if p else "no data"
+
+    Capabilities:
+        - 종목별 raw finance parquet 을 단일 합본으로 정규화. 결산월 다른 회사 (10/3/6월) 의
+          ``bsns_year``/``reprt_nm`` 을 캘린더 기준으로 환원해 횡단 비교 가능 형태로 변환.
+        - 계정명 한글 → snakeId (예: "매출액" → "sales") 정규화로 다언어 라벨 안전.
+        - 빌드 직후 ``_sanityCheckCalendarYears`` 로 ``bsns_year > today.year`` 회귀 자동 감지.
+
+    AIContext:
+        ``dartlab.scan("account", "매출액")`` · ``scan("ratio", "roe")`` · scan financial 6 축
+        (profitability/growth/quality/...) 의 1 차 데이터 source. AI 가 횡단 재무 분석 호출 시
+        본 빌드 산출물을 LazyFrame 으로 스캔하여 ``finance/sanity`` warning 이 있는 환경에서는
+        결과 신뢰도가 떨어진다고 안내해야 한다.
+
+    Guide:
+        - 결산월 SSOT 우선순위: corp_profile (DART API) → listing (KIND) → rcept_no 추정 → 12 fallback.
+          P-S11 이후 corp_profile 이 권위 SSOT. ``scripts/build/buildCorpProfile.py`` 가 매 prebuild
+          전에 갱신 (신규 상장 / 결산월 변경 즉시 반영).
+        - 비12월 결산 환원 실패 시 회계분기가 캘린더에 misplace (예: 10월 결산 사업연도 2026 4 분기
+          → 잘못된 2025Q4 같은). sanity check 가 warning emit.
+
+    When:
+        매 prebuild 사이클 (KST 03:00 / 15:00, ``Data Sync.yml`` workflow 직후). 사용자가 직접
+        호출하는 케이스: 로컬에 raw finance 다운로드 후 scan axis 호출 전.
+
+    How:
+        ``buildScan`` 의 두 번째 단계 (``buildChanges`` 직후). 종목당 파이프라인 = read_parquet →
+        stockCode 컬럼 보강 → bsns_year 필터 → ``_calendarizeFiscalColumns`` → account_id_std 추가 →
+        200 단위 배치 임시 청크 → ``_mergeBatchFiles`` (diagonal_relaxed). 매 종목 실패는 silent
+        skip — `sink_parquet` segfault 가드를 위해 청크 파일 + diagonal merge 강행.
+
+    Requires:
+        - 로컬 ``data/dart/finance/{stockCode}.parquet`` (Data Sync 가 채움)
+        - ``data/dart/scan/corpProfile.parquet`` (선택 — buildCorpProfile 가 갱신)
+        - ``src/dartlab/core/data/accountMappings.json`` (snakeId SSOT)
+
+    SeeAlso:
+        - :func:`_fiscalMonthMap` · :func:`_calendarizeFiscalColumns` · :func:`_sanityCheckCalendarYears`
+        - :func:`_loadAccountMap` — accountMappings.json 로더
+        - :func:`buildFinanceLite` — 본 빌드 산출물을 필터해 pyodide 경량본 파생
+        - :mod:`dartlab.scan.io.parquet` — 호출자측 LazyFrame 스캔/필터 헬퍼
     """
     finDir = _financeDir()
     outDir = _scanDir()
@@ -726,30 +803,70 @@ def _sanityCheckCalendarYears(outputPath: Path) -> None:
 
 
 def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
-    """report → apiType별 분리 parquet 프리빌드.
+    """report/*.parquet → apiType별 12개 분리 parquet 프리빌드.
+
+    ``SCAN_API_TYPES`` 12 종 (majorHolder/executive/employee/auditOpinion/dividend/...) 의
+    각 apiType 마다 종목별 raw row 를 모아 별도 parquet 으로 출력. report.parquet 단일
+    합본이 아닌 12개 분할 — apiType 마다 스키마가 다르고 사용 단위가 다르므로.
 
     Parameters
     ----------
     sinceYear : int
-        시작 연도.
+        포함할 최소 ``year`` (``year >= sinceYear``). 기본 2021.
     verbose : bool
         진행 로그 출력 여부.
 
     Returns
     -------
     list[Path]
-        생성된 apiType별 parquet 경로 목록.
+        생성된 apiType별 parquet 경로 목록. data 없는 apiType 은 제외.
 
     Raises
     ------
     polars.PolarsError
-        report parquet 손상 또는 sink_parquet 실패 시.
+        report parquet 손상 또는 ``sink_parquet`` 실패 시.
 
     Examples
     --------
     >>> from dartlab.scan.builders.kr.core import buildReport
     >>> paths = buildReport(sinceYear=2021, verbose=True)
     >>> [p.name for p in paths[:3]]
+
+    Capabilities:
+        - 종목별 raw report parquet 을 12 apiType 별로 split. ``apiType`` 컬럼 == 카테고리
+          매칭으로 종목 row 를 해당 apiType bucket 에 추가. 200 종목 단위 배치 청크 → merge.
+        - apiType 마다 다른 컬럼 스키마 흡수 (``diagonal_relaxed`` concat).
+
+    AIContext:
+        ``scan("governance")`` (executive/majorHolder/outsideDirector), ``scan("workforce")``
+        (employee/executivePay*), ``scan("capital")`` (dividend/treasuryStock/capitalChange/
+        corporateBond), ``scan("audit")`` (auditOpinion/minorityHolder) 등 비재무 scan 축의
+        1 차 source. AI 가 axis 호출 시 본 빌드 산출물을 LazyFrame 으로 필터한다.
+
+    Guide:
+        - 출력 경로: ``data/dart/scan/report/{apiType}.parquet``
+        - 12 apiType 중 일부만 raw 에 있으면 그 apiType 만 생성 (나머지 silent skip).
+        - 파일 크기는 apiType 마다 차이 큰 — employee/executive 가 가장 크다.
+
+    When:
+        매 prebuild 사이클 (KST 03:00 / 15:00). buildChanges/buildFinance 직후.
+        사용자 직접 호출 드물다.
+
+    How:
+        ``buildScan`` 의 4 번째 단계. apiType 별 buffer dict (``apiChunks``) 를 유지하면서
+        종목당 raw 를 12 apiType 으로 filter → buffer push. ``_BATCH`` (200) 도달 시 임시
+        청크 flush. 종료 시 잔존 청크 flush + apiType 마다 ``_mergeBatchFiles`` 단일 파일 머지.
+        12 임시 디렉토리 (``_tmp_{apiType}/``) 사용 후 cleanup.
+
+    Requires:
+        - 로컬 ``data/dart/report/{stockCode}.parquet`` (Data Sync 가 채움)
+        - ``apiType`` 컬럼 (필수, 없으면 종목 skip)
+
+    SeeAlso:
+        - :data:`SCAN_API_TYPES` — 처리 대상 12 apiType list
+        - :func:`buildScan` — 본 함수 포함 통합 호출
+        - :func:`buildChanges` · :func:`buildFinance` — 같은 prebuild 단계 동료 빌더
+        - :mod:`dartlab.scan.io.parquet` — :func:`scanParquets` 가 본 빌드 출력 lazy scan
     """
     repDir = _reportDir()
     outDir = _scanDir() / "report"
@@ -880,28 +997,29 @@ def _buildSharesOutstandingSafe(*, verbose: bool = True) -> Path | None:
 
 
 def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> Path | None:
-    """pyodide(브라우저) 용 경량 finance 프리빌드.
+    """pyodide(브라우저) 용 ``finance-lite.parquet`` 파생 — finance.parquet 30 계정 5년 필터.
 
-    이미 빌드된 ``finance.parquet``(307MB) 에서 주요 계정 30 개(`LITE_ACCOUNTS`)
-    × 5년치 분기만 추려 ``finance-lite.parquet``(~18MB) 를 생성한다.
-    브라우저 pyodide 가 pyarrow 로 전체 로드 후 필터링에 사용한다.
+    이미 빌드된 ``finance.parquet`` (~307MB) 에서 주요 계정 30 개 (``LITE_ACCOUNTS``)
+    × 5년치 분기만 추려 ``finance-lite.parquet`` (~18MB) 를 생성한다. 브라우저 pyodide
+    환경이 ``pl.scan_parquet`` 미지원이라 pyarrow 로 전체 로드 후 ``pl.from_arrow`` 변환해
+    쓰는데, 원본 307MB 는 메모리 한계라 경량본이 필수.
 
     Parameters
     ----------
     sinceYear : int | None
-        시작 연도. ``None`` 이면 `LITE_SINCE_YEAR` 기본값 사용.
+        포함할 최소 ``bsns_year``. ``None`` 이면 ``LITE_SINCE_YEAR`` 기본 (2022) 사용.
     verbose : bool
         진행 로그 출력 여부.
 
     Returns
     -------
     Path | None
-        생성된 ``finance-lite.parquet`` 경로. 원본 없거나 결과 비면 None.
+        생성된 ``finance-lite.parquet`` 경로. 원본 ``finance.parquet`` 없거나 결과 비면 None.
 
     Raises
     ------
     polars.PolarsError
-        원본 finance.parquet 손상 시.
+        원본 ``finance.parquet`` 손상 또는 ``sink_parquet`` 실패 시.
 
     Examples
     --------
@@ -910,10 +1028,40 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     >>> p.stat().st_size < 25_000_000 if p else "no source"
     True
 
-    Notes
-    -----
-    - `LITE_ACCOUNTS` 는 `scan/_helpers.py` 가 SSOT.
-    - 원본 재빌드 없이 이미 정규화된 finance.parquet 에서 필터만 하므로 <1초.
+    Capabilities:
+        - 원본 합본 ``finance.parquet`` 에 (1) ``sj_div ∈ LITE_SJ_DIVS`` (IS/BS/CIS/CF — SCE 제외)
+          (2) ``bsns_year >= sinceYear`` (3) ``account_id/account_nm ∈ LITE_ACCOUNTS synonym union``
+          필터 push-down → ``sink_parquet``. lazy 라 메모리 부담 거의 없음 (<1초, MB 단위).
+        - ``_buildFastKeys`` 가 30 개 snakeId 마다 한/영 변형 컬렉션 (~수백 키) 으로 확장.
+
+    AIContext:
+        Pyodide 빌드 (``dartlab.io/pyodide``) 의 ``dartlab.scan("account", ...)`` 호출이
+        ``finance.parquet`` 대신 본 경량본을 로드. 브라우저 메모리 한계 안에서 30 핵심 계정
+        시계열을 사용 가능하게 만든다.
+
+    Guide:
+        - 빌드 순서: ``buildFinance`` 직후 (원본이 이미 캘린더 환원·snakeId 정규화 상태).
+        - 새 계정 필요 시 ``LITE_ACCOUNTS`` 에만 추가하면 자동 반영. 30 개 한도는 메모리 정책.
+        - 5 년치 (2022~) 분기 보장. 더 긴 시계열은 별도 풀빌드 호출.
+
+    When:
+        매 prebuild 사이클 (``buildScan`` 의 3 번째 단계). pyodide 배포가 본 빌드 산출물을
+        HF 에서 자동 다운로드해 브라우저 ``scan`` 호출에 활용.
+
+    How:
+        ``finance.parquet`` 의 lazy scan → 3 단 filter chain → ``sink_parquet``. summary
+        쿼리 (rows / unique stocks) 로 결과 검증. 0 행이면 출력 unlink + None 반환.
+        coverage 게이트 없음 (재빌드 호출이라 원본 기준).
+
+    Requires:
+        - 선행 ``buildFinance`` 산출 ``finance.parquet`` (``data/dart/scan/finance.parquet``)
+        - ``LITE_ACCOUNTS`` · ``LITE_SJ_DIVS`` · ``LITE_SINCE_YEAR`` (``scan/io/parquet.py`` SSOT)
+        - ``_buildFastKeys`` (한/영 라벨 union — ``providers/dart/finance/scanAccount.py``)
+
+    SeeAlso:
+        - :func:`buildFinance` — 본 빌드의 source 합본 생성
+        - :data:`LITE_ACCOUNTS` · :data:`LITE_SJ_DIVS` · :data:`LITE_SINCE_YEAR`
+        - :func:`buildScan` — 본 함수를 포함한 통합 호출
     """
     from dartlab.providers.dart.finance.scanAccount import _buildFastKeys
     from dartlab.scan.io.parquet import LITE_ACCOUNTS, LITE_SINCE_YEAR, LITE_SJ_DIVS
@@ -985,9 +1133,9 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
 def buildValuation(*, verbose: bool = True) -> Path | None:
     """네이버 API 로 전종목 시세·밸류에이션 raw 수집 → ``valuation.parquet``.
 
-    GH Actions cron (`valuationSnapshot.yml`, 매일 KST 04:00) 에서 호출. 결과 parquet 은
+    GH Actions cron (``valuationSnapshot.yml``, 매일 KST 04:00) 에서 호출. 결과 parquet 은
     HuggingFace ``eddmpython/dartlab-data`` 의 ``dart/scan/`` 에 업로드되며, 사용자는
-    `dartlab.scan("valuation")` 호출 시 자동 다운로드 + 즉시 로드한다 (1초 이내).
+    ``dartlab.scan("valuation")`` 호출 시 자동 다운로드 + 즉시 로드한다 (1초 이내).
 
     Parameters
     ----------
@@ -997,8 +1145,8 @@ def buildValuation(*, verbose: bool = True) -> Path | None:
     Returns
     -------
     Path | None
-        생성된 `valuation.parquet` 경로. 수집 실패 또는 rate-limit 으로 0건이면
-        기존 parquet 덮어쓰지 않고 ``None`` 반환.
+        생성된 ``valuation.parquet`` 경로. 수집 실패 또는 rate-limit 으로 0 건이거나
+        coverage < 55 % 이면 기존 parquet 덮어쓰지 않고 ``None`` 반환.
 
     Raises
     ------
@@ -1010,6 +1158,40 @@ def buildValuation(*, verbose: bool = True) -> Path | None:
     >>> p = buildValuation(verbose=True)
     >>> p.name if p else "rate-limited"
     'valuation.parquet'
+
+    Capabilities:
+        - 상장사 ~3964 종목의 ``marketCap`` · ``per`` · ``pbr`` · ``dividendYield`` · ``current``
+          · ``snapshotAt`` 6 컬럼을 네이버 API 에서 raw 수집. PSR/grade 는 loader 가 매출 parquet
+          결합 후 runtime 계산 — 본 빌드는 raw 만 책임.
+        - 품질 게이트 — 수집 coverage < 55 % 이면 기존 parquet 보존 (stale data > corrupted).
+
+    AIContext:
+        ``dartlab.scan("valuation")`` 호출의 1 차 source. AI 가 밸류에이션 비교 시 (PER/PBR/PSR)
+        본 빌드 산출물 + finance 매출 결합한 결과를 사용. snapshotAt 컬럼이 데이터 freshness 의
+        ground truth — 24 h 초과 시 사용자에게 stale 경고.
+
+    Guide:
+        - cron 외 수동 호출: rate-limit 위험 — 같은 IP 가 짧은 시간에 두 번 돌리면 0 건 응답.
+        - 출력 ``valuation.parquet`` 는 ``HF eddmpython/dartlab-data`` 의 ``dart/scan/`` 동기화.
+        - listing 미보유 환경에서는 silent skip (None).
+
+    When:
+        GH Actions cron 매일 KST 04:00 자동 호출. 로컬 수동 호출은 디버깅/품질 검증 한정.
+
+    How:
+        listing (KRX KIND) → 종목코드 리스트 → ``fetchValuationRaw`` (네이버 API 병렬) →
+        coverage 게이트 → ``_RAW_SCHEMA`` 컬럼만 selecting → 단일 parquet write. rate-limit
+        대응은 ``fetchValuationRaw`` 내부 backoff 가 담당.
+
+    Requires:
+        - 네이버 finance API 접근 (rate-limit 의식)
+        - ``dartlab.gather.krx.listing.getKindList()`` 가 종목코드 반환
+        - ``dartlab.scan.financial.valuation`` 의 ``fetchValuationRaw`` · ``_RAW_SCHEMA``
+
+    SeeAlso:
+        - :func:`dartlab.scan.financial.valuation.fetchValuationRaw` — 네이버 raw 수집
+        - :func:`dartlab.scan.io.parquet.loadValuationSnapshot` — 빌드 결과 lazy load
+        - :func:`buildScan` — 본 함수는 통합 빌드에 포함되지 않음 (별도 cron)
     """
     from dartlab.scan.financial.valuation import _RAW_SCHEMA, fetchValuationRaw
 
@@ -1064,28 +1246,34 @@ def buildValuation(*, verbose: bool = True) -> Path | None:
 
 
 def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path | list[Path] | None]:
-    """changes + finance + finance-lite + report + sharesOutstanding 전체 프리빌드.
+    """scan 프리빌드 통합 (changes + finance + finance-lite + report + sharesOutstanding).
+
+    ``.github/scripts/prebuildData.py`` 가 매 prebuild 사이클 (KST 03:00 / 15:00) 에 호출하는
+    파사드. 하위 5 단계를 순서대로 실행하며, 각 단계 실패는 silent skip — 한 단계가 깨져도
+    다른 산출물은 정상 생성. ``buildValuation`` 은 별도 cron 이므로 본 함수에 포함 안 됨.
 
     Parameters
     ----------
     sinceYear : int
-        시작 연도 (`buildFinance` 용). `buildFinanceLite` 는 `LITE_SINCE_YEAR` 기본값 사용.
+        시작 연도 (``buildFinance`` / ``buildReport`` / ``buildChanges`` 공통). 기본 2021.
+        ``buildFinanceLite`` 는 ``LITE_SINCE_YEAR`` 자체 기본값 (2022) 사용.
     verbose : bool
         진행 로그 출력 여부.
 
     Returns
     -------
     dict[str, Path | list[Path] | None]
-        changes : Path | None — changes.parquet 경로
-        finance : Path | None — finance.parquet 경로
-        finance_lite : Path | None — finance-lite.parquet 경로 (pyodide 용 경량)
-        report : list[Path] — apiType별 parquet 경로 목록
-        sharesOutstanding : Path | None — sharesOutstanding.parquet 경로
+        - changes : Path | None — ``changes.parquet`` 경로
+        - finance : Path | None — ``finance.parquet`` 경로
+        - finance_lite : Path | None — ``finance-lite.parquet`` 경로 (pyodide 경량본)
+        - report : list[Path] — apiType별 parquet 경로 목록
+        - sharesOutstanding : Path | None — ``sharesOutstanding.parquet`` 경로
 
     Raises
     ------
     polars.PolarsError
-        하위 buildChanges · buildFinance · buildReport 가 발생시키는 예외 전파.
+        하위 ``buildChanges`` · ``buildFinance`` · ``buildReport`` 가 발생시키는 예외 전파.
+        ``_buildSharesOutstandingSafe`` 는 자체 catch 라 전파 안 됨.
 
     Examples
     --------
@@ -1093,6 +1281,39 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
     >>> result = buildScan(sinceYear=2021, verbose=True)
     >>> result["finance"].exists() if result["finance"] else "no data"
     True
+
+    Capabilities:
+        - 5 산출물 (changes / finance / finance-lite / report 12 / sharesOutstanding) 의
+          단일 호출 파사드. 호출자는 본 함수 1 회로 모든 prebuild 출력을 얻는다.
+        - 단계 간 의존: finance-lite ← finance (재빌드 아닌 필터만). 다른 단계는 독립.
+
+    AIContext:
+        prebuild 파이프라인의 main entry. AI 가 "scan 프리빌드 어떻게 만들지?" 질문 시 본
+        함수 호출만 알려주면 충분 (하위 5 함수는 implementation detail).
+
+    Guide:
+        - 호출 직전에 ``scripts/build/buildCorpProfile.py`` 실행 권장 (결산월 SSOT 최신화).
+        - 실행 후 산출 합계 (MB) 로깅. HF 업로드는 호출자 (``prebuildData.py``) 책임.
+        - 단계 1 개 실패해도 다른 4 개는 정상 — 부분 산출 허용 (CI 회복력).
+
+    When:
+        매 prebuild 사이클 — Data Sync workflow 직후 KST 03:00 / 15:00. 로컬 수동 실행은
+        raw 데이터 충분히 갖춘 환경에서 디버깅 / 검증 용도.
+
+    How:
+        1) ``buildChanges`` → 2) ``buildFinance`` (결산월 환원 + sanity check 자동) →
+        3) ``buildFinanceLite`` (finance.parquet 직후 파생) → 4) ``buildReport`` (apiType 분할)
+        → 5) ``_buildSharesOutstandingSafe`` (별도 try/except wrapper).
+
+    Requires:
+        - 로컬 ``data/dart/{docs,finance,report}/{stockCode}.parquet`` (Data Sync 결과)
+        - 출력 디렉토리 쓰기 권한 (``data/dart/scan/``)
+
+    SeeAlso:
+        - :func:`buildChanges` · :func:`buildFinance` · :func:`buildFinanceLite` ·
+          :func:`buildReport` · :func:`_buildSharesOutstandingSafe`
+        - :func:`buildValuation` — 본 함수에 포함 안 됨 (별도 cron 트리거)
+        - ``.github/scripts/prebuildData.py`` — 호출자 + HF 업로드 + 품질 검증
     """
     if verbose:
         _say(f"전종목 scan 프리빌드 시작 (sinceYear={sinceYear})")
