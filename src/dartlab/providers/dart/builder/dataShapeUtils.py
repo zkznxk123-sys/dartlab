@@ -40,34 +40,36 @@ def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
         >>> cleanFinanceDataFrame(df, "CF")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dataDispatcher`` — 본 모듈 호출자.
+        - ``Company.show`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/show 후처리 stateless utility (cleanFinanceDataFrame / transposeToVertical /
+          warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal show helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show 보조.
     """
     periodCols = [c for c in df.columns if _isPeriodColumn(c)]
     if not periodCols:
@@ -109,34 +111,36 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
         >>> transposeToVertical(wide_df, ["2024Q4", "2024Q3"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dataDispatcher`` — 본 모듈 호출자.
+        - ``Company.show`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/show 후처리 stateless utility (cleanFinanceDataFrame / transposeToVertical /
+          warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal show helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show 보조.
     """
     from dartlab.reference.show import transposeToVertical as _coreTransposeToVertical
 
@@ -162,34 +166,36 @@ def warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
         >>> warnUnknownTopic("majorShareholders", sections_df)  # majorHolder 제안
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dataDispatcher`` — 본 모듈 호출자.
+        - ``Company.show`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/show 후처리 stateless utility (cleanFinanceDataFrame / transposeToVertical /
+          warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal show helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show 보조.
     """
     import difflib
     import warnings
@@ -229,34 +235,36 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
         >>> applyPeriodFilter(df, "2024Q4")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dataDispatcher`` — 본 모듈 호출자.
+        - ``Company.show`` / ``Company.select`` — public surface.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/show 후처리 stateless utility (cleanFinanceDataFrame / transposeToVertical /
+          warnUnknownTopic / applyPeriodFilter).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal show helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show 보조.
     """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload

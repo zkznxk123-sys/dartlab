@@ -58,34 +58,36 @@ def indexFinanceRows(company: Company) -> list[dict[str, Any]]:
         >>> indexFinanceRows(c)[:5]
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.index`` — public surface.
+        - ``indexFinanceRows`` / ``indexDocsRows`` / ``indexReportRows`` — 본 모듈.
 
     Requires:
         - dartlab
         - gc
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - Company.index 의 finance/docs/report rows 빌더. chapter 별 정렬 + source 별 메타.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.index`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal index builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.index property 위임.
+            - 데이터 부재 source 누락 시 None — caller 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] — index row 리스트 (chapter/topic/label/kind/source/periods/shape/preview).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report 중 1+ 보유.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - Company state → 본 builder → index row 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) index builder.
     """
     rows: list[dict[str, Any]] = []
     _STMT_ORDER = {"BS": 0, "IS": 1, "CIS": 2, "CF": 3, "SCE": 4}
@@ -157,34 +159,36 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
         >>> indexDocsRows(c)[:5]
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.index`` — public surface.
+        - ``indexFinanceRows`` / ``indexDocsRows`` / ``indexReportRows`` — 본 모듈.
 
     Requires:
         - dartlab
         - gc
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - Company.index 의 finance/docs/report rows 빌더. chapter 별 정렬 + source 별 메타.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.index`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal index builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.index property 위임.
+            - 데이터 부재 source 누락 시 None — caller 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] — index row 리스트 (chapter/topic/label/kind/source/periods/shape/preview).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report 중 1+ 보유.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - Company state → 본 builder → index row 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) index builder.
     """
     if not company._hasDocs:
         return []
@@ -239,34 +243,34 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
             20244
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.index`` — public surface.
 
         Requires:
             - dartlab
             - gc
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - Company.index source 별 rows 빌더. chapter 정렬 + source 메타.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.index`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal index builder — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — Company.index 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] — index row.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 source parquet.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - Company state → 본 builder → index row.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) index.
         """
         if not isinstance(period, str):
             return -1
@@ -368,34 +372,34 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
             >>> topicRowSortKey(("BS", "0"))  # nested function example
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.index`` — public surface.
 
         Requires:
             - dartlab
             - gc
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - Company.index source 별 rows 빌더. chapter 정렬 + source 메타.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.index`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal index builder — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — Company.index 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] — index row.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 source parquet.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - Company state → 본 builder → index row.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) index.
         """
         topic, segmentKey = key
         majorNum, firstSeq = topicFirstSeq.get(topic, (99, 999999))
@@ -475,34 +479,36 @@ def indexReportRows(company: Company, *, existingTopics: set[str] | None = None)
         >>> indexReportRows(c, existingTopics={"BS", "IS"})
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.index`` — public surface.
+        - ``indexFinanceRows`` / ``indexDocsRows`` / ``indexReportRows`` — 본 모듈.
 
     Requires:
         - dartlab
         - gc
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - Company.index 의 finance/docs/report rows 빌더. chapter 별 정렬 + source 별 메타.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.index`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal index builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.index property 위임.
+            - 데이터 부재 source 누락 시 None — caller 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] — index row 리스트 (chapter/topic/label/kind/source/periods/shape/preview).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report 중 1+ 보유.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - Company state → 본 builder → index row 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) index builder.
     """
     rows: list[dict[str, Any]] = []
     if not company._hasReport:

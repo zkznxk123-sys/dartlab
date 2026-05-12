@@ -64,34 +64,36 @@ def sceMatrix(company: Company):
         >>> sceMatrix(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - finance 부재 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → series-tuple → mapper → DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART XBRL).
     """
     if not company._hasFinance:
         return None
@@ -121,34 +123,36 @@ def sceSeriesAnnual(company: Company):
         >>> sceSeriesAnnual(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - finance 부재 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → series-tuple → mapper → DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART XBRL).
     """
     if not company._hasFinance:
         return None
@@ -253,34 +257,36 @@ def financeCisAnnual(company: Company):
         >>> financeCisAnnual(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - finance 부재 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → series-tuple → mapper → DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART XBRL).
     """
     if not company._hasFinance:
         return None
@@ -308,34 +314,36 @@ def financeCisQuarterly(company: Company):
         >>> financeCisQuarterly(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - finance 부재 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → series-tuple → mapper → DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART XBRL).
     """
     if not company._hasFinance:
         return None
@@ -365,34 +373,36 @@ def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
         >>> aggregateCisAnnual(cis_quarterly_df)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - finance 부재 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → series-tuple → mapper → DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART XBRL).
     """
     yearGroups: dict[str, list[str]] = {}
     for col in qDf.columns:
@@ -434,34 +444,36 @@ def ratioSeries(company: Company):
         >>> ratioSeries(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` ("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") — public surface.
+        - ``financeMappers`` — XBRL → snakeId 변환.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 + 연간/분기 series-tuple.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal finance builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 위임.
+            - finance 부재 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple[dict, list[str]] — series-tuple.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance 갱신 시점 (분기 마감 후 45 일).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - finance parquet → series-tuple → mapper → DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART XBRL).
     """
     if not company._hasFinance:
         return None

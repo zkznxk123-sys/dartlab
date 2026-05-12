@@ -38,34 +38,36 @@ def buildDocsItemIndex(company: Company, topic: str) -> dict[str, list[tuple[int
         >>> idx = buildDocsItemIndex(c, "BS")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.select`` — public surface.
+        - ``buildDocsItemIndex`` / ``selectFromDocsTopic`` / ``selectFromDocsTopicAll`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - docs item 역인덱스 + cascade 매칭 (exact → contains → fuzzy). multi-block topic 전체 처리.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.select`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal select matcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X.
+            - indList 빈 list → 명시 에러. None 으로 의도.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs parquet (역인덱스 source).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 블록 수평화 + 역인덱스 → cascade match → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) select.
     """
     from dartlab.reference.show import normalizeItemKey
 
@@ -152,34 +154,36 @@ def selectFromDocsTopic(
         >>> selectFromDocsTopic(c, "BS", ["총자산"], colList=["2024", "2023"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.select`` — public surface.
+        - ``buildDocsItemIndex`` / ``selectFromDocsTopic`` / ``selectFromDocsTopicAll`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - docs item 역인덱스 + cascade 매칭 (exact → contains → fuzzy). multi-block topic 전체 처리.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.select`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal select matcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X.
+            - indList 빈 list → 명시 에러. None 으로 의도.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs parquet (역인덱스 source).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 블록 수평화 + 역인덱스 → cascade match → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) select.
     """
     from dartlab.reference.show import normalizeItemKey, selectFromShow
 
@@ -265,34 +269,36 @@ def selectFromDocsTopicAll(
         >>> selectFromDocsTopicAll(c, "executive", indList=None, colList=["2024"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.select`` — public surface.
+        - ``buildDocsItemIndex`` / ``selectFromDocsTopic`` / ``selectFromDocsTopicAll`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - docs item 역인덱스 + cascade 매칭 (exact → contains → fuzzy). multi-block topic 전체 처리.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.select`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal select matcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X.
+            - indList 빈 list → 명시 에러. None 으로 의도.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs parquet (역인덱스 source).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 블록 수평화 + 역인덱스 → cascade match → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) select.
     """
     from dartlab.reference.show import selectFromShow
 

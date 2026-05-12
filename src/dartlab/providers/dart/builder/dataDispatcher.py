@@ -68,34 +68,36 @@ def showFinanceTopic(
         >>> showFinanceTopic(c, "IS", freq="Y")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     if topic == "ratios":
         return company._applyPeriodFilter(company._buildRatios(), period)
@@ -132,34 +134,36 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
         >>> traceFinanceTopic(c, "BS", period="2024")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -184,34 +188,36 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
             >>> collect({"sales": [1000]}, [2024], "IS")  # nested function example
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART show dispatch helper — topic 별 source 호출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal dispatcher — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — Company facade (c.show/c._showImpl) 위임.
+                - topic 미정의 → None. caller None 분기.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / None — topic 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 finance/docs/report parquet (topic source 별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance/docs/report 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - topic → alias 해석 → 5 사례 분기 → finance/sections/notes/report → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) show dispatch.
         """
         if not series:
             return
@@ -293,17 +299,18 @@ def showReportTopic(
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     return company._applyPeriodFilter(reportFrame(company, topic, raw=raw), period)
 
@@ -326,34 +333,36 @@ def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFr
         >>> reportFrame(c, "dividend")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     if company._report is None:
         return None
@@ -392,34 +401,36 @@ def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = 
         >>> reportFrameInner(c, "dividend", "dividend")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.accessor.reportAccessor import reportFrameInner as _reportFrameInner
 
@@ -446,34 +457,36 @@ def showSegmentsSub(company: Company, sub: str) -> pl.DataFrame | None:
         >>> showSegmentsSub(c, "region")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     segResult = company._callModule("segments")
     if segResult is None:
@@ -514,34 +527,36 @@ def showDirectTopic(
         >>> showDirectTopic(c, "dividend")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     if company._hasReport:
         try:
@@ -604,34 +619,36 @@ def showSectionBlock(
         >>> showSectionBlock(c, topic_df, block=0)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     if "blockType" not in topicFrame.columns or "blockOrder" not in topicFrame.columns:
         return company._applyPeriodFilter(topicFrame, period)
@@ -691,34 +708,36 @@ def horizontalizeTableBlock(
         >>> horizontalizeTableBlock(c, topic_df, 0, ["2024", "2023"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.parse.tableHorizontalizer import (
         horizontalizeTableBlock as _horizontalize,
@@ -767,34 +786,36 @@ def showImpl(
         >>> showImpl(c, "IS", freq="Y", scope="separate")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
@@ -852,34 +873,36 @@ def showFinanceStatement(
         >>> showFinanceStatement(c, "IS", None, period="2024Q4", freq="Q", scope="consolidated")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame
 
@@ -925,34 +948,36 @@ def showSectionsTopic(
         >>> showSectionsTopic(c, "executive", None, period="2024", raw=False, freq="Q", scope="consolidated")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.show`` / ``Company._showImpl`` — public surface.
+        - ``SectionsAnalyzer`` — sections 파생표.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 finance/docs/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - finance/docs/report 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → 분기 → source → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex

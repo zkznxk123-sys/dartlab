@@ -59,34 +59,36 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
         >>> buildFinanceSeries(c, freq="Q")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나 (받음: {freq!r})")
@@ -131,34 +133,36 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
         >>> buildRatios(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     from dartlab.providers.edgar.company import _ratioSeriesToDataFrame
 
@@ -195,34 +199,36 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
         >>> applyPeriodFilter(df, "2024")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
@@ -260,34 +266,36 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
         >>> transposeToVertical(df, ["2024", "2023"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     from dartlab.reference.show import transposeToVertical as _coreTranspose
 
@@ -310,34 +318,36 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
         >>> buildBlockIndex(sec.filter(pl.col("topic") == "10-K::item7Mdna"))
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     from dartlab.reference.show import buildBlockIndex as _coreBuildBlockIndex
 
@@ -363,34 +373,36 @@ def shapeStr(df: pl.DataFrame | None) -> str:
         >>> shapeStr(df)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     if df is None:
         return "-"
@@ -413,34 +425,36 @@ def periodsStr(df: pl.DataFrame | None) -> str:
         >>> periodsStr(df)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     if df is None:
         return "-"
@@ -466,34 +480,36 @@ def previewFinance(df: pl.DataFrame | None) -> str:
         >>> previewFinance(df)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     if isEmptyDf(df):
         return "-"
@@ -517,34 +533,36 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
         >>> previewDocsCell(topicRows, ["2024", "2023"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     for row in topicRows.iter_rows(named=True):
         for col in periodCols:
@@ -590,34 +608,36 @@ def showImpl(
         >>> showImpl(c, "IS", freq="Y")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarCompany.show`` — public surface.
+        - ``buildFinanceSeries`` / ``buildRatios`` / ``applyPeriodFilter`` — 본 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR Company.show dispatch + finance series-tuple + ratios + period filter + preview.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal dispatcher — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade 위임.
+            - topic 미정의 → None. caller None 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / tuple / dict / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 SEC companyfacts/sections 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - topic → finance/sections 분기 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) show dispatch.
     """
     from dartlab.providers.edgar.company import _TOPIC_ALIASES
 

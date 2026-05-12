@@ -55,34 +55,36 @@ class SectionsAnalyzer:
             >>> analyzer.topicManifest().head()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         cacheKey = "_docsTopicManifest"
         if cacheKey in self._cache:
@@ -221,34 +223,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionTopics()[:5]
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         manifest = self.topicManifest()
         if manifest.is_empty() or "topic" not in manifest.columns:
@@ -273,34 +277,36 @@ class SectionsAnalyzer:
             >>> analyzer.topicOutline("executive")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if topic is None:
             return self.topicManifest()
@@ -432,34 +438,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsFreq("annual")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -499,34 +507,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsOrdered()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -569,34 +579,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsCoverage(topic="executive")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -684,34 +696,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsSemanticRegistry(collisionsOnly=True)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -777,34 +791,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsStructureRegistry(nodeType="section")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -871,34 +887,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsStructureEvents()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -953,34 +971,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsStructureSummary()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -1040,34 +1060,36 @@ class SectionsAnalyzer:
             >>> analyzer.sectionsStructureChanges()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         if not self._hasDocs:
             return None
@@ -1118,34 +1140,36 @@ class SectionsAnalyzer:
             >>> analyzer.topicSubtables("rawMaterial")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         cacheKey = f"_topicSubtables:{topic}"
         if cacheKey in self._cache:
@@ -1176,34 +1200,36 @@ class SectionsAnalyzer:
             >>> analyzer.subtopicWide("rawMaterial")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         result = self.topicSubtables(topic)
         return None if result is None else result.wide
@@ -1224,34 +1250,36 @@ class SectionsAnalyzer:
             >>> analyzer.subtopicLong("rawMaterial")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``SectionsAnalyzer`` 클래스 — 본 메서드의 owner.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생표 (manifest / outline / freq / coverage / registry) 생성.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections analyzer — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기.
+                - 본 클래스 직접 호출 X — Company 가 lazy 초기화 + 위임.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → sections 파생표 (manifest/outline/freq/coverage/registry).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) sections 분석.
         """
         result = self.topicSubtables(topic)
         return None if result is None else result.long

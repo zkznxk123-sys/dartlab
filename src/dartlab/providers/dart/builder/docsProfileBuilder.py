@@ -80,34 +80,35 @@ def profileTable(company: Company) -> pl.DataFrame | None:
         >>> profileTable(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.sections`` / ``buildSections`` — public surface 와 본체.
+        - ``docsIndexBuilder`` — index 빌더 (sections 보완).
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.sections / profileTable / chapterMap / chapterForTopic / topicLabel 본체.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade (c.sections/c._profileTable) 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs/finance/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 3 source → buildSections → profile/chapter 매핑 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections + profile.
     """
     cacheKey = "_sectionProfileTable"
     if cacheKey in company._cache:
@@ -136,34 +137,35 @@ def chapterMap(company: Company) -> dict[str, str]:
         'III'
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.sections`` / ``buildSections`` — public surface 와 본체.
+        - ``docsIndexBuilder`` — index 빌더 (sections 보완).
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.sections / profileTable / chapterMap / chapterForTopic / topicLabel 본체.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade (c.sections/c._profileTable) 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs/finance/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 3 source → buildSections → profile/chapter 매핑 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections + profile.
     """
     cacheKey = "_chapterMap"
     if cacheKey in company._cache:
@@ -208,34 +210,35 @@ def chapterForTopic(company: Company, topic: str) -> str:
         'VIII'
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.sections`` / ``buildSections`` — public surface 와 본체.
+        - ``docsIndexBuilder`` — index 빌더 (sections 보완).
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.sections / profileTable / chapterMap / chapterForTopic / topicLabel 본체.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade (c.sections/c._profileTable) 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs/finance/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 3 source → buildSections → profile/chapter 매핑 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections + profile.
     """
     cm = chapterMap(company)
     if topic in cm:
@@ -266,34 +269,35 @@ def topicLabel(company: Company, topic: str) -> str:
         '포괄손익계산서'
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.sections`` / ``buildSections`` — public surface 와 본체.
+        - ``docsIndexBuilder`` — index 빌더 (sections 보완).
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.sections / profileTable / chapterMap / chapterForTopic / topicLabel 본체.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade (c.sections/c._profileTable) 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs/finance/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 3 source → buildSections → profile/chapter 매핑 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections + profile.
     """
     from dartlab.core.registry import getEntry as _getEntry
     from dartlab.providers.dart.company import _TOPIC_LABELS, _getAllProperties
@@ -333,34 +337,35 @@ def buildSections(company: Company) -> pl.DataFrame | None:
         >>> sections = buildSections(c)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.sections`` / ``buildSections`` — public surface 와 본체.
+        - ``docsIndexBuilder`` — index 빌더 (sections 보완).
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART Company.sections / profileTable / chapterMap / chapterForTopic / topicLabel 본체.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections builder — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company facade (c.sections/c._profileTable) 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs/finance/report parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 데이터 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 3 source → buildSections → profile/chapter 매핑 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections + profile.
     """
     from dartlab.providers.dart.company import _CHAPTER_TITLES, _topicForApiType
     from dartlab.providers.dart.docs.sections import reorderPeriodColumns
