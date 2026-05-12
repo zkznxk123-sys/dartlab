@@ -56,6 +56,38 @@ def scanWorkforce(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("workforce")
     >>> df.sort("직원당매출_억", descending=True).head()
+
+    Capabilities:
+        - 4 sub-scanner (scanEmployee / scanRevenuePerEmployee / scanSalaryGrowth + scanRevenueGrowth
+          / scanTopPay) 결과 통합. 직원수 + 평균급여 + 남녀격차 + 근속 + 직원당매출 + 성장률 +
+          고액 보수 wide column.
+        - 급여매출괴리 = 급여성장률 - 매출성장률. 양수면 인건비가 매출보다 빨리 늘어남 (warning 신호).
+
+    AIContext:
+        Agent 가 ``dartlab.scan("workforce")`` 호출 시 본 함수 dispatch. "직원당 매출 높은 회사"
+        스크리닝, "급여 급증 회사" watchlist, 1 사 인력 효율 비교 source.
+
+    Guide:
+        - 직원수 = 정규 + 계약 합산. 외주는 제외.
+        - 평균급여 가중평균 = 직원수 가중. 남녀격차는 (남-여)/남 정의.
+
+    When:
+        대시보드 workforce 카드 빌드 시. 인력 효율 스크리닝 시.
+
+    How:
+        4 sub-scanner 순차 호출 → growth_df 변환 (scanSalaryGrowth + scanRevenueGrowth →
+        computeSalaryVsRevenue) → all_codes union → 종목별 dict merge → 명시적 schema 로
+        DataFrame 적재 (null safety).
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{employee,executivePayIndividual}.parquet`` (``buildReport``)
+        - ``data/dart/scan/finance.parquet`` (직원당매출 / 성장률 계산)
+
+    SeeAlso:
+        - :func:`scanEmployee` · :func:`scanRevenuePerEmployee` · :func:`scanTopPay` —
+          기본 sub-scanner
+        - :func:`computeSalaryVsRevenue` — 급여 vs 매출 성장률 결합
+        - :func:`dartlab.scan.builders.kr.payload.workforceToInsight` — 카드 변환
     """
 
     def _say(msg: str) -> None:

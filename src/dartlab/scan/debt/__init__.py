@@ -48,6 +48,36 @@ def scanDebt(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("debt")
     >>> df.filter(pl.col("위험등급") == "고위험").select(["종목코드", "ICR"]).head()
+
+    Capabilities:
+        - 4 sub-scanner (scanBonds / scanShortDebt / scanDebtMix / scanIcr) 결과 union → 종목별
+          사채잔액 + 단기비중 + CP + 부채비율 + ICR + 종합 위험등급 (안전/관찰/주의/고위험).
+        - ICR (영업이익/이자비용) 이 가장 강한 부채 위험 지표.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("debt")`` 호출 시 본 함수 dispatch. 부채 리스크 스크리닝
+        (ICR < 1 종목 watchlist) · 단기차입 비중 비교 · 위험등급 cross-company 분석 source.
+
+    Guide:
+        - infer_schema_length=None 강제 — 큰 금액 (1.2e11+) 에서 polars schema inference overflow
+          회귀 방지 (재발 사례 있음).
+        - 위험등급 SSOT: ``classifyRisk(icr, shortRatio, shortDebtTotal)``.
+
+    When:
+        대시보드 debt 카드 빌드 시. 부채 리스크 스크리닝 시.
+
+    How:
+        scanBonds / scanShortDebt / scanDebtMix / scanIcr 순차 호출 → all_codes union →
+        종목별 dict merge → classifyRisk 위험등급 → wide row 적재. infer_schema_length 가드.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{corporateBond,shortTermBond}.parquet`` (``buildReport``)
+        - ``data/dart/scan/finance.parquet`` (부채비율/ICR 계산)
+
+    SeeAlso:
+        - :func:`scanBonds` · :func:`scanShortDebt` · :func:`scanDebtMix` · :func:`scanIcr` — sub-scanner
+        - :func:`classifyRisk` — 위험등급 정책
+        - :func:`dartlab.scan.financial.liquidity.scanLiquidity` — 유동성 보완 axis
     """
 
     def _say(msg: str) -> None:

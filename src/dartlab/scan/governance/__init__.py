@@ -65,6 +65,35 @@ def scanGovernance(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("governance")
     >>> df.filter(pl.col("등급") == "A").select(["종목코드", "총점"]).head()
+
+    Capabilities:
+        - 5 sub-scanner (지분율/사외이사/pay ratio/감사의견/소액주주지분) 결과 union → 종목별 5
+          축 점수 + 100 점 만점 총점 + 5 단계 등급 (A/B/C/D/E).
+        - 유효축수 컬럼으로 데이터 신뢰도 표시 (5/5 vs 부분).
+
+    AIContext:
+        Agent 가 ``dartlab.scan("governance")`` 호출 시 본 함수 dispatch. governance 종합 등급
+        스크리닝, "A 등급" 종목 watchlist, 1 사 지배구조 5 축 비교 source.
+
+    Guide:
+        - 100 점 만점 = 5 축 × 20 점. scorer 모듈이 각 점수 산식 SSOT.
+        - 사외이사 비율은 중도사임 / 겸직 인원도 결합해 점수 차감.
+
+    When:
+        대시보드 governance 카드 빌드 시. cross-company 등급 스크리닝 시.
+
+    How:
+        5 sub-scanner 순차 호출 → all_codes union → 종목별 dict merge → score* 5 함수 호출 →
+        총점 + grade + 유효축수 → wide row 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{majorHolder,outsideDirector,executivePayAllTotal,auditOpinion,minorityHolder}.parquet``
+          (``buildReport`` 산출)
+
+    SeeAlso:
+        - :mod:`dartlab.scan.governance.scanner` · :mod:`dartlab.scan.governance.scorer`
+        - :func:`dartlab.scan.builders.kr.payload.governanceToInsight` — 등급 → InsightResult 변환
+        - :func:`dartlab.scan.audit.scanAudit` — 감사 단독 axis (본 함수의 보완)
     """
 
     def _say(msg: str) -> None:

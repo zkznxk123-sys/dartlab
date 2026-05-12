@@ -53,6 +53,34 @@ def scanCapital(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("capital")
     >>> df.filter(pl.col("분류") == "환원형").select(["종목코드", "DPS"]).head()
+
+    Capabilities:
+        - 3 sub-scanner (scanDividend / scanTreasuryStock / scanCapitalChange) 결과 union →
+          종목별 환원 점수 (0~3) + 분류 4 종 (적극환원/환원형/중립/희석형) + 모순형 (배당+증자) 플래그.
+        - 자사주 소각 = 가장 강한 환원 신호 (점수 +1 가중).
+
+    AIContext:
+        Agent 가 ``dartlab.scan("capital")`` 호출 시 본 함수 dispatch. "환원형 종목" 스크리닝,
+        "모순형 (배당+증자) 종목" 감지, 배당+자사주 통합 정책 분석 source.
+
+    Guide:
+        - 모순형 (배당 + 최근 증자) 은 자본정책 일관성 결여 신호 — risk 단락 인용.
+        - 분류 SSOT: ``classifyReturn(hasDividend, hasBuyback, recentIncrease)`` private.
+
+    When:
+        대시보드 capital 카드 빌드 시. 환원/희석 스크리닝 시.
+
+    How:
+        scanDividend / scanTreasuryStock / scanCapitalChange 순차 호출 → all_codes union →
+        종목별 dict merge → classifyReturn 분류 → 점수 + 모순형 결합 → wide row 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{dividend,treasuryStock,capitalChange}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`scanDividend` · :func:`scanTreasuryStock` · :func:`scanCapitalChange` — sub-scanner
+        - :func:`classifyReturn` — 분류 정책
+        - :func:`dartlab.scan.dividendTrend.scanDividendTrend` — 배당 시계열 보완 axis
     """
 
     def _say(msg: str) -> None:
