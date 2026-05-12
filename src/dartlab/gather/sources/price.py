@@ -32,6 +32,27 @@ async def fetch(
     3. 성공/실패를 circuit breaker + health tracker에 기록
     4. 전부 실패 시 stale cache에서 반환 시도
 
+    Capabilities:
+        - market-aware fallback chain + 동적 health scoring
+        - circuit breaker open 시 skip
+        - stale cache 안전망 (마지막 성공값 보존)
+
+    AIContext:
+        - mixin.price 의 backend — gather price axis 의 진짜 source-level 진입점
+
+    Guide:
+        Naver(KR)/Yahoo(US)/FMP/FDR 등 fallback chain. health 가 가장 좋은
+        source 부터 시도 (recency 가중).
+
+    When:
+        gather.price() 의 PriceSnapshot 호출 chain 진입 시.
+
+    How:
+        chain reorder → 각 source 시도 → 성공 시 record → 실패 시 stale.
+
+    Requires:
+        네트워크 (다중 fallback source).
+
     Parameters
     ----------
     stock_code : str
@@ -71,6 +92,10 @@ async def fetch(
     Example
     -------
     >>> snap = await fetch("005930", market="KR")
+
+    See Also:
+        ``dartlab.gather.infra.resilience.CircuitBreaker``.
+        ``dartlab.gather.domains.fallback.healthTracker``.
     """
     config = getMarketConfig(market)
     chain = getPriceFallback(market)

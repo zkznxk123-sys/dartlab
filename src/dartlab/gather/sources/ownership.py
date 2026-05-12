@@ -41,6 +41,9 @@ async def fetch(
 
         KR 외 시장이거나 조회 실패 시 빈 리스트 [].
 
+    Requires:
+        네트워크 (Naver 직접 호출).
+
     Raises
     ------
     없음

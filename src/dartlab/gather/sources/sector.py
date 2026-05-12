@@ -19,6 +19,26 @@ async def fetch(
 ) -> SectorInfo | None:
     """업종 분류 조회 -- KR만 지원.
 
+    Capabilities:
+        - KRX KIND + Naver sector 매핑
+        - 단일 SectorInfo (sector + industry 1:1)
+        - circuit breaker 자동 적용
+
+    AIContext:
+        - mixin.sector 의 backend — industry 분석의 진짜 진입점
+
+    Guide:
+        US 등 다른 시장은 None. KR 만 작동.
+
+    When:
+        gather.sector() 호출 시.
+
+    How:
+        stockCode → KIND lookup + Naver enrich → SectorInfo.
+
+    Requires:
+        네트워크 (KIND/Naver).
+
     Parameters
     ----------
     stockCode : str
@@ -52,6 +72,9 @@ async def fetch(
     Example
     -------
     >>> info = await fetch("005930", market="KR", client=client)
+
+    See Also:
+        ``dartlab.gather.krx.listing.getKindList``.
     """
     del limit
     if market != "KR":

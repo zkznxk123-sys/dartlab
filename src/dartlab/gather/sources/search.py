@@ -126,6 +126,26 @@ def webSearch(
 ) -> list[SearchResult]:
     """웹 검색. Tavily API 키가 없으면 빈 리스트.
 
+    Capabilities:
+        - Tavily API 검색 (key 있으면)
+        - 캐시 30분
+        - circuit breaker — 연속 실패 시 자동 차단
+
+    AIContext:
+        - AI 엔진의 외부 검색 도구 (workbench 가 호출)
+
+    Guide:
+        TAVILY_API_KEY env 필수. 미설정 시 빈 리스트 (silent fallback).
+
+    When:
+        AI 가 외부 검색 evidence 필요 시.
+
+    How:
+        query → Tavily → SearchResult list → cache.
+
+    Requires:
+        TAVILY_API_KEY env.
+
     Parameters
     ----------
     query : str
@@ -153,6 +173,9 @@ def webSearch(
     Example
     -------
     >>> hits = webSearch("samsung electronics", maxResults=5)
+
+    See Also:
+        ``newsSearch`` — 뉴스 전용 검색.
     """
     cacheKey = f"search:{query}:{maxResults}:{days}"
     cached = _cache.get(cacheKey)
@@ -186,6 +209,26 @@ def newsSearch(
 ) -> list[SearchResult]:
     """뉴스 검색. Tavily topic=news.
 
+    Capabilities:
+        - Tavily news 전용 검색
+        - 캐시 30분
+        - circuit breaker
+
+    AIContext:
+        - AI 엔진의 외부 뉴스 검색 (catalyst 분석 도구)
+
+    Guide:
+        webSearch 와 분리 — topic=news 로 신선도 ↑ 결과.
+
+    When:
+        catalyst / event-driven 분석의 외부 뉴스 fetch 시.
+
+    How:
+        query → Tavily(topic=news) → SearchResult list.
+
+    Requires:
+        TAVILY_API_KEY env.
+
     Parameters
     ----------
     query : str
@@ -213,6 +256,9 @@ def newsSearch(
     Example
     -------
     >>> news = newsSearch("samsung", maxResults=10, days=7)
+
+    See Also:
+        ``webSearch`` — general 검색.
     """
     cacheKey = f"news_search:{query}:{maxResults}:{days}"
     cached = _cache.get(cacheKey)
@@ -241,6 +287,25 @@ def newsSearch(
 def searchAvailable(*, limit: int | None = None) -> dict[str, bool]:
     """검색 백엔드 가용성 확인.
 
+    Capabilities:
+        - 백엔드별 boolean 가용성 dict
+        - "any" 키로 종합 가용성 통합
+
+    AIContext:
+        - AI 가 검색 가능 여부 사전 확인 시 호출
+
+    Guide:
+        TAVILY_API_KEY 미설정 시 tavily=False. 추후 backend 추가 시 키 확장.
+
+    When:
+        AI 의 사전 capability discovery 시.
+
+    How:
+        backend별 _tavilyAvailable 등 check → bool dict.
+
+    Requires:
+        없음 (env check).
+
     Parameters
     ----------
     limit : int | None
@@ -261,6 +326,9 @@ def searchAvailable(*, limit: int | None = None) -> dict[str, bool]:
     -------
     >>> caps = searchAvailable()
     >>> caps["tavily"]
+
+    See Also:
+        ``webSearch``/``newsSearch`` — capability 후 호출 대상.
     """
     del limit
     tavily = _tavilyAvailable()
@@ -272,6 +340,25 @@ def searchAvailable(*, limit: int | None = None) -> dict[str, bool]:
 
 def formatResults(results: list[SearchResult], *, maxChars: int = 4000) -> str:
     """검색 결과를 LLM 컨텍스트용 마크다운으로 포맷.
+
+    Capabilities:
+        - SearchResult list → 마크다운 문자열
+        - maxChars 초과 시 truncate
+
+    AIContext:
+        - AI 엔진이 검색 결과를 prompt context 로 직렬화할 때 사용
+
+    Guide:
+        본문 untrusted 마커는 caller 의 책임 — 본 함수는 단순 직렬화만.
+
+    When:
+        webSearch/newsSearch 결과를 prompt 에 주입 직전.
+
+    How:
+        results → "## title\\nURL\\nsnippet" 패턴 → truncate.
+
+    Requires:
+        없음 (순수 문자열 조작).
 
     Parameters
     ----------
@@ -293,6 +380,9 @@ def formatResults(results: list[SearchResult], *, maxChars: int = 4000) -> str:
     Example
     -------
     >>> txt = formatResults(results, maxChars=2000)
+
+    See Also:
+        ``webSearch``/``newsSearch`` — results 의 source.
     """
     if not results:
         return "(검색 결과 없음)"

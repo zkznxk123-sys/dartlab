@@ -22,6 +22,25 @@ async def fetch(
 ) -> list[dict]:
     """히스토리 OHLCV — fallback 체인 (async).
 
+    Capabilities:
+        - HISTORY_FALLBACK 체인 — Naver(KR) → naver_global → FMP → Yahoo
+        - 첫 성공 source 결과 반환
+
+    AIContext:
+        - mixin.history 의 backend — quant 백테스트 데이터 원천
+
+    Guide:
+        market="KR" 이면 Naver 최우선. 외 시장은 fallback 체인만.
+
+    When:
+        gather.history(start, end) 호출 시.
+
+    How:
+        chain 구성 → 순차 시도 → 빈 결과면 다음 fallback.
+
+    Requires:
+        네트워크 (외부 OHLCV provider).
+
     Parameters
     ----------
     stock_code : str
@@ -59,6 +78,10 @@ async def fetch(
     Example
     -------
     >>> rows = await fetch("005930", start="2024-01-01", end="2024-12-31", limit=10)
+
+    See Also:
+        ``dartlab.gather.domains.naver.fetchHistory`` — KR primary.
+        ``dartlab.gather.domains.fdr.fetchHistory`` — Korean global fallback.
     """
     chain: list[str] = []
     # KR → naver 최우선

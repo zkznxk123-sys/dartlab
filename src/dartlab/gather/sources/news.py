@@ -158,6 +158,25 @@ async def _fetchAsync(
 def toDataFrame(items: list[NewsItem]) -> pl.DataFrame:
     """NewsItem 리스트 → pl.DataFrame 변환.
 
+    Capabilities:
+        - 빈 리스트도 동일 스키마 빈 DataFrame 반환 (consistency)
+        - 최신순 정렬 (date desc)
+
+    AIContext:
+        - 뉴스 fetch 결과를 polars 분석 흐름으로 brigde
+
+    Guide:
+        items 가 빈 리스트면 _EMPTY_SCHEMA 의 빈 DataFrame.
+
+    When:
+        _fetchAsync 결과 후 표 형태로 변환할 때.
+
+    How:
+        list[NewsItem] → dict rows → DataFrame → date sort.
+
+    Requires:
+        polars (모듈 import).
+
     Parameters
     ----------
     items : list[NewsItem]
@@ -181,6 +200,9 @@ def toDataFrame(items: list[NewsItem]) -> pl.DataFrame:
     -------
     >>> items = [NewsItem(date="2024-01-01", title="t", source="s", url="u")]
     >>> toDataFrame(items)
+
+    See Also:
+        ``_fetchAsync`` — items 의 생성.
     """
     if not items:
         return pl.DataFrame(schema=_EMPTY_SCHEMA)
@@ -201,6 +223,22 @@ def fetchNews(
 ) -> pl.DataFrame:
     """기업명/티커로 뉴스 검색 (동기 래퍼, 하위호환).
 
+    Capabilities:
+        - sync wrapper (async _fetchAsync → runAsync 으로 변환)
+        - DataFrame 결과 (limit slice)
+
+    AIContext:
+        - 동기 흐름 caller (analysis/Company) 에서 직접 호출
+
+    Guide:
+        async 컨텍스트라면 ``_fetchAsync`` 직접 사용 권장.
+
+    When:
+        sync caller 가 뉴스 DataFrame 필요 시.
+
+    How:
+        query + market + days → _fetchAsync → toDataFrame → .head(limit).
+
     Args:
         query: 기업명 또는 티커.
         market: "KR" 또는 "US".
@@ -210,11 +248,17 @@ def fetchNews(
     Returns:
         (date, title, source, url) DataFrame.
 
+    Requires:
+        네트워크 (Google News RSS).
+
     Raises:
         없음 — Google News RSS 파싱 실패는 빈 DataFrame 반환.
 
     Example:
         >>> df = fetchNews("삼성전자", market="KR", days=7, limit=10)
+
+    See Also:
+        ``_fetchAsync`` — async backend.
     """
     from ..infra.http import runAsync
 

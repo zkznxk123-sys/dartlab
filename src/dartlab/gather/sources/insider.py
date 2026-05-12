@@ -42,6 +42,9 @@ async def fetchInsiderTrading(
 
         KR 외 시장이거나 조회 실패 시 빈 리스트 [].
 
+    Requires:
+        KR: DART_API_KEY env (providers/dart/ops/insiderTrades).
+
     Raises
     ------
     없음
@@ -96,6 +99,9 @@ async def fetchMajorShareholders(
         - changeType : str — 변동 유형 (취득/처분/변동)
 
         KR 외 시장이거나 조회 실패 시 빈 리스트 [].
+
+    Requires:
+        KR: DART_API_KEY env (providers/dart/ops/insiderTrades).
 
     Raises
     ------
