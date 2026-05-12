@@ -112,7 +112,7 @@ def test_scanAccount_pyodide_path_uses_pyarrow(tmp_path, monkeypatch):
 
     import importlib
 
-    from dartlab.core import dataLoader
+    from dartlab.frame import dataLoader
 
     # `dartlab.providers.dart.finance.scanAccount` 는 함수와 모듈이 같은 이름이라
     # `from X import scanAccount` 는 함수로 가려짐 — 모듈 경로로 직접 import.

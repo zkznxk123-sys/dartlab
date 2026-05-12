@@ -10,7 +10,7 @@ from unittest.mock import patch
 import polars as pl
 import pytest
 
-from dartlab.core import dataLoader
+from dartlab.frame import dataLoader
 from dartlab.frame.dataLoader import _LOAD_CACHE, _LOAD_CACHE_MAX, _clearLoadCache, loadData
 
 pytestmark = pytest.mark.unit

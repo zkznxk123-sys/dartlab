@@ -10,9 +10,9 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from dartlab.core import indicators as ind
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant.signal import generator as sig
+from dartlab.synth import indicators as ind
 
 
 def enrichWithIndicators(df: pl.DataFrame) -> pl.DataFrame:

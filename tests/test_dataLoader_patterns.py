@@ -54,7 +54,7 @@ def test_downloadAll_scan_uses_list_pattern(tmp_path, monkeypatch):
     from unittest.mock import patch
 
     from dartlab import config
-    from dartlab.core import dataLoader
+    from dartlab.frame import dataLoader
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path))
     scanDir = tmp_path / "dart" / "scan"
@@ -83,7 +83,7 @@ def test_downloadAll_scan_raises_on_missing_finance(tmp_path, monkeypatch):
     from unittest.mock import patch
 
     from dartlab import config
-    from dartlab.core import dataLoader
+    from dartlab.frame import dataLoader
 
     monkeypatch.setattr(config, "dataDir", str(tmp_path))
     # 실제 HF 호출 차단 + report/ 만 생성 (루트 finance.parquet 은 의도적으로 누락)

@@ -57,7 +57,7 @@ def _resolveIndicator(target: str) -> tuple[Callable, dict, list[str]]:
         kwargs: period 등 인자 dict
         inputCols: 함수에 전달할 OHLCV 컬럼 리스트 (예: ["close"], ["high", "low", "close"])
     """
-    from dartlab.core import indicators as ind
+    from dartlab.synth import indicators as ind
 
     # camelCase / 대소문자 정규화 — "williamsR14" → "williamsr14", "ForceIndex13" → "forceindex13"
     t = target.strip().lower()

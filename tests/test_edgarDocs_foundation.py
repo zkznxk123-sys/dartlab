@@ -142,7 +142,7 @@ def test_downloadAll_blocks_edgarDocs_bulk_download():
 
 def test_download_skips_edgarDocs(monkeypatch, capsys, tmp_path):
     from dartlab import config
-    from dartlab.core import dataLoader
+    from dartlab.frame import dataLoader
 
     calls: list[tuple[str, str]] = []
 

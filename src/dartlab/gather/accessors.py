@@ -741,7 +741,7 @@ class DefaultQuantAccessor:
             ``dartlab.synth.indicators`` — 지표 함수 카탈로그.
         """
         try:
-            from dartlab.core import indicators as ind
+            from dartlab.synth import indicators as ind
         except ImportError:
             return {}
         if limit is not None and limit > 0:
