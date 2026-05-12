@@ -81,6 +81,9 @@ _FACADE_PATTERNS = {
 
 # ── 알려진 인프라 역방향 의존 (리팩토링에서 순차 해소) ──
 _KNOWN_VIOLATIONS = {
+    # core/protocols → providers (L0→L1) — docstring doctest 예시 (>>> from dartlab.providers.dart import Company)
+    # AST import 0건, regex lazy-import 가 doctest 줄을 잡는 false positive
+    ("dartlab.core.protocols", "dartlab.providers"),
     # core/ → providers (L0→L1)
     ("dartlab.core.dataLoader", "dartlab.providers"),
     ("dartlab.core.resolve", "dartlab.gather"),
