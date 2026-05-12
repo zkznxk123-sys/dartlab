@@ -22,10 +22,10 @@ import polars as pl
 
 from dartlab.core.dataLoader import loadData
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.core.reportSelector import selectEdgarReport
 from dartlab.providers.edgar.docs.sections.mapper import mapSectionTitle
 from dartlab.providers.edgar.docs.sections.textStructure import parseTextStructure
 from dartlab.providers.edgar.docs.sections.views import sortPeriods
+from dartlab.providers.reportSelector import selectEdgarReport
 
 
 def _splitTextTable(content: str) -> tuple[str, str]:

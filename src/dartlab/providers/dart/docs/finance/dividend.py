@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.core.reportSelector import extractReportYear, selectReport
-from dartlab.core.tableParser import parseAmount
+from dartlab.providers.reportSelector import extractReportYear, selectReport
+from dartlab.providers.tableParser import parseAmount
 
 if TYPE_CHECKING:
     import polars as pl
@@ -211,13 +211,13 @@ def dividend(stockCode: str) -> DividendResult | None:
         - ``DividendResult`` (dataclass) — 본 함수 반환 타입.
         - ``dartlab.providers.dart.docs.finance.statements.statements`` — 같은 패턴 (재무제표 시계열).
         - ``dartlab.providers.dart.report.pivot.pivotDividend`` — report API (parquet 기반) 동등 함수.
-        - ``dartlab.core.reportSelector.selectReport`` — 사업보고서 선택.
+        - ``dartlab.providers.reportSelector.selectReport`` — 사업보고서 선택.
 
     Requires:
         - polars — DataFrame.
         - dartlab.core.dataLoader — ``loadData`` + ``extractCorpName``.
-        - dartlab.core.reportSelector — ``selectReport`` + ``extractReportYear``.
-        - dartlab.core.tableParser — ``parseAmount`` (parseDividendTable 경유).
+        - dartlab.providers.reportSelector — ``selectReport`` + ``extractReportYear``.
+        - dartlab.providers.tableParser — ``parseAmount`` (parseDividendTable 경유).
 
     AIContext:
         Workbench "이 회사 배당 어떻게 변했냐"/"DPS 추세" 질문의 entry. ``report.pivotDividend``

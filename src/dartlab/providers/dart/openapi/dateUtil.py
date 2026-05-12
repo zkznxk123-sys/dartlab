@@ -49,41 +49,42 @@ def parseDate(value: str | datetime | date | None, asEnd: bool = False) -> str |
         >>> parseDate(...)
 
     Args:
-        value: <TODO: param desc> (str | datetime | date | None)
-        asEnd: <TODO: param desc> (bool)
+        value: 날짜 입력 (str/datetime/date 또는 None).
+        asEnd: True 면 기간 끝 날짜로 해석.
 
     Returns:
-        <TODO: return desc> (str | None)
+        str — YYYYMMDD 형식 또는 None.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``parseDate`` / ``defaultStart`` / ``defaultEnd`` — 본 모듈 함수.
 
     Requires:
         - calendar
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART OpenAPI 의 YYYYMMDD 형식 변환 + 유연한 입력 파싱 (str/datetime/date/None).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART API 날짜 변환" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 잘못된 월/일 → ValueError. caller 검증 의무.
+            - asEnd 토글 가정 X — 명시.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str (YYYYMMDD) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 없음 (stdlib only).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정적 (입력 변환만).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 사용자 입력 → 본 함수 → YYYYMMDD str.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 날짜 형식.
     """
     if value is None:
         return None
@@ -137,37 +138,38 @@ def defaultStart() -> str:
         >>> defaultStart(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — YYYYMMDD 형식.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``parseDate`` / ``defaultStart`` / ``defaultEnd`` — 본 모듈 함수.
 
     Requires:
         - calendar
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART OpenAPI 의 YYYYMMDD 형식 변환 + 유연한 입력 파싱 (str/datetime/date/None).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART API 날짜 변환" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 잘못된 월/일 → ValueError. caller 검증 의무.
+            - asEnd 토글 가정 X — 명시.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str (YYYYMMDD) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 없음 (stdlib only).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정적 (입력 변환만).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 사용자 입력 → 본 함수 → YYYYMMDD str.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 날짜 형식.
     """
     now = datetime.now()
     try:
@@ -191,7 +193,7 @@ def defaultEnd() -> str:
         >>> defaultEnd(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — YYYYMMDD 형식.
 
     LLM Specifications:
         AntiPatterns:
@@ -201,10 +203,10 @@ def defaultEnd() -> str:
         Prerequisites:
             - <TODO: 사전조건>
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정적 (입력 변환만).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 사용자 입력 → 본 함수 → YYYYMMDD str.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 날짜 형식.
     """
     return datetime.now().strftime("%Y%m%d")

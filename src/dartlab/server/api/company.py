@@ -227,7 +227,7 @@ def apiViewerDoc(
             )
             base = periods[0] if periods else None
 
-        from dartlab.core.docs.viewer import viewer
+        from dartlab.reference.docs.viewer import viewer
 
         doc = viewer(sec, topic, base, compare)
         doc["stockCode"] = company.stockCode

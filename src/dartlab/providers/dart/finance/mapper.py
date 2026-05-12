@@ -12,9 +12,9 @@
 
 데이터 SSOT (`engines.mappers` 학습 파이프라인 참조):
 
-- accountMappings.json — `src/dartlab/core/data/accountMappings.json` (core 승격, 34,171 entries)
+- accountMappings.json — `src/dartlab/reference/data/accountMappings.json` (core 승격, 34,171 entries)
 - 로더 — `dartlab.core.utils.labels._loadAccountMappings`
-- snakeId 정의 — `standardAccounts` (core/data/accountMappings.json 안 sub-key)
+- snakeId 정의 — `standardAccounts` (reference/data/accountMappings.json 안 sub-key)
 
 학습 갱신 절차는 운영자 수동 — JSON 직접 patch 후 `AccountMapper.release()` 로 캐시 무효화.
 """

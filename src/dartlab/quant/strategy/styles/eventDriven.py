@@ -40,11 +40,11 @@ from datetime import date as Date
 
 import numpy as np
 
-from dartlab.core.indicators import vsma
 from dartlab.quant.signal.event import calcEventSignal
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, getStockCode
+from dartlab.synth.indicators import vsma
 
 
 def _dateToFilingFlag(dates: list, filingDateStrs: list[str], window: int = 20) -> np.ndarray:

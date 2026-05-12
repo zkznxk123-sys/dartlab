@@ -32,21 +32,22 @@ class DartKeyStatus:
             >>> toDict(...)
 
         Returns:
-            <TODO: return desc> (dict[str, Any])
+            dict[str, Any] — 상태 dict.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 평문 노출 X — 환경변수 또는 .env 파일 사용.
+                - 키 여러 개 (로테이션) 시 keyCount > 1 — 단일 키 가정 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / str / Path / bool / DartKeyStatus — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - DART_API_KEY 환경변수 또는 .env 파일.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 키 설정 시점 (정적).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - env / .env → 본 헬퍼 → DartClient.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) — API 키 관리.
         """
         return {
             "configured": self.configured,
@@ -70,36 +71,37 @@ def findProjectEnvPath(startPath: Path | None = None) -> Path:
         >>> findProjectEnvPath(...)
 
     Returns:
-        <TODO: return desc> (Path)
+        Path — .env 파일 경로.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     start = startPath or Path.cwd()
     for current in (start, *start.parents):
@@ -122,36 +124,37 @@ def loadDotenvDartKeys(startPath: Path | None = None) -> list[str]:
         >>> loadDotenvDartKeys(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — DART API 키 목록.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     envPath = findProjectEnvPath(startPath)
     if not envPath.exists():
@@ -199,36 +202,37 @@ def resolveDartKeys(
         >>> resolveDartKeys(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — DART API 키 목록.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     if apiKeys:
         return [item.strip() for item in apiKeys if item and item.strip()]
@@ -263,21 +267,22 @@ def hasDartApiKey(startPath: Path | None = None) -> bool:
         >>> hasDartApiKey(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 성공 여부.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 키 검증 실패 시 None 반환 — caller 분기.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - bool / list[str] / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - env / .env 파일 접근.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → 사용자/DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 setup.
     """
     return bool(resolveDartKeys(startPath=startPath))
 
@@ -295,36 +300,37 @@ def getDartKeyStatus(startPath: Path | None = None) -> DartKeyStatus:
         >>> getDartKeyStatus(...)
 
     Returns:
-        <TODO: return desc> (DartKeyStatus)
+        DartKeyStatus — 키 상태 dataclass.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     envPath = findProjectEnvPath(startPath)
     envKeys = os.environ.get("DART_API_KEYS", "")
@@ -368,36 +374,37 @@ def saveDartKeyToDotenv(key: str, startPath: Path | None = None) -> Path:
         >>> saveDartKeyToDotenv(...)
 
     Returns:
-        <TODO: return desc> (Path)
+        Path — .env 파일 경로.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     envPath = findProjectEnvPath(startPath)
     lines: list[str] = []
@@ -435,36 +442,37 @@ def clearDartKeyFromDotenv(startPath: Path | None = None) -> Path:
         >>> clearDartKeyFromDotenv(...)
 
     Returns:
-        <TODO: return desc> (Path)
+        Path — .env 파일 경로.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     envPath = findProjectEnvPath(startPath)
     if not envPath.exists():
@@ -494,36 +502,37 @@ def validateDartApiKey(key: str) -> dict[str, Any]:
         >>> validateDartApiKey(...)
 
     Returns:
-        <TODO: return desc> (dict[str, Any])
+        dict[str, Any] — 상태 dict.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
     Requires:
         - datetime
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART_API_KEY 환경 탐지 + 상태 dataclass 또는 키 list 반환. .env 또는 환경변수 우선순위.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 키 상태 확인" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal key helper — AI 가 직접 호출 X. 운영자 setup.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 평문 노출 X.
+            - 단일 키 가정 X — DART_API_KEYS (복수) 도 지원.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / Path / bool / DartKeyStatus — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY 또는 DART_API_KEYS 환경변수, 또는 .env 파일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 키 설정 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - env / .env → 본 헬퍼 → DartClient.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) — API 키 관리.
     """
     from dartlab.providers.dart.openapi.client import DartClient
 
@@ -564,19 +573,19 @@ class DartKeyProvider:
             >>> check(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
         Requires:
             - datetime
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 키 setup/검증/저장 헬퍼. 운영자 도구.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 키 등록 / 검증" → 본 메서드.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal key helper — AI 직접 호출 X.
         """
         from dartlab.core.credentials import CredentialStatus
 
@@ -615,33 +624,34 @@ class DartKeyProvider:
             >>> save(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartKeyStatus`` / ``DartClient`` — 본 키 사용 처.
 
         Requires:
             - datetime
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 키 setup/검증/저장 헬퍼. 운영자 도구.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 키 등록 / 검증" → 본 메서드.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal key helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 평문 노출 X — 환경변수 또는 .env 파일 사용.
+                - 키 여러 개 (로테이션) 시 keyCount > 1 — 단일 키 가정 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / str / Path / bool / DartKeyStatus — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - DART_API_KEY 환경변수 또는 .env 파일.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 키 설정 시점 (정적).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - env / .env → 본 헬퍼 → DartClient.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) — API 키 관리.
         """
         saveDartKeyToDotenv(value)
 

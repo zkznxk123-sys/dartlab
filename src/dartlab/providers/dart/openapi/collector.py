@@ -204,16 +204,16 @@ class DocsCollector:
             >>> collect(...)
 
         Args:
-            quarters: <TODO: param desc> (int)
-            includeQuarterly: <TODO: param desc> (bool)
-            minDelay: <TODO: param desc> (float)
-            maxDelay: <TODO: param desc> (float)
+            quarters: 수집 분기 수 (예 8 = 2 년치).
+            includeQuarterly: True 면 분기보고서 포함, False 면 사업보고서만.
+            minDelay: 최소 호출 간격 (초).
+            maxDelay: 최대 호출 간격 (초).
 
         Returns:
-            <TODO: return desc> (int)
+            int — 수집 건수.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
         Requires:
             - dartlab
@@ -223,27 +223,28 @@ class DocsCollector:
             - random
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 정기보고서 docs (사업/분기/반기) ZIP 다운로드 + 분기별 분할.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal collector — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 다종목 collect → 일 한도 초과. 멀티 키 (DART_API_KEYS) 또는 분산 수집.
+                - quarters > 20 호출 시 부담 — DART 5 년 cap.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY + 종목코드.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (정기보고서 마감 후 30~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목코드 → DartClient → docs ZIP 다운로드 → HTML→text → parquet.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 정기보고서 수집.
         """
         filings = self._getFilingList(
             quarters=quarters,
@@ -422,19 +423,19 @@ def collectMultiple(
         >>> collectMultiple(...)
 
     Args:
-        stockCodes: <TODO: param desc> (list[str])
-        quarters: <TODO: param desc> (int)
-        includeQuarterly: <TODO: param desc> (bool)
-        minDelay: <TODO: param desc> (float)
-        maxDelay: <TODO: param desc> (float)
-        stockDelay: <TODO: param desc> (tuple[float, float])
-        client: <TODO: param desc> (DartClient | None)
+        stockCodes: 종목코드 리스트.
+        quarters: 수집 분기 수.
+        includeQuarterly: True 면 분기보고서 포함.
+        minDelay: 최소 호출 간격 (초).
+        maxDelay: 최대 호출 간격 (초).
+        stockDelay: 종목 간 sleep 구간 (min, max).
+        client: DartClient 인스턴스. None 이면 자동 생성.
 
     Returns:
-        <TODO: return desc> (dict[str, int])
+        dict[str, int] — 종목 별 수집 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
     Requires:
         - dartlab
@@ -444,27 +445,28 @@ def collectMultiple(
         - random
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 docs 수집 + 통계.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 수집 → 일 한도 초과.
+            - quarters > 20 호출 시 부담.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 종목코드.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 정기보고서.
     """
     sharedClient = client or DartClient()
     results: dict[str, int] = {}
@@ -516,7 +518,7 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
         없음.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
     Requires:
         - dartlab
@@ -526,27 +528,28 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
         - random
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 docs 수집 + 통계.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 수집 → 일 한도 초과.
+            - quarters > 20 호출 시 부담.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 종목코드.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 정기보고서.
     """
     c = client or DartClient()
     codes = loadCorpCodes(c)
@@ -580,10 +583,10 @@ def collectionStats(*, client: DartClient | None = None) -> dict:
         >>> collectionStats(...)
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — 수집 통계.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
     Requires:
         - dartlab
@@ -593,27 +596,28 @@ def collectionStats(*, client: DartClient | None = None) -> dict:
         - random
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 docs 수집 + 통계.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 수집 → 일 한도 초과.
+            - quarters > 20 호출 시 부담.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 종목코드.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 정기보고서.
     """
     c = client or DartClient()
     codes = loadCorpCodes(c)
@@ -656,13 +660,13 @@ def listUncollectedKind(
         >>> listUncollectedKind(...)
 
     Args:
-        limit: <TODO: param desc> (int | None)
+        limit: 최대 결과 수. None 이면 무제한.
 
     Returns:
-        <TODO: return desc> (list[tuple[str, str]])
+        list[tuple[str, str]] — 종목 (코드, 이름) 페어 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
     Requires:
         - dartlab
@@ -672,27 +676,28 @@ def listUncollectedKind(
         - random
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 docs 수집 + 통계.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 수집 → 일 한도 초과.
+            - quarters > 20 호출 시 부담.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 종목코드.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 정기보고서.
     """
     from dartlab.core.listingResolver import getListingResolver
 
@@ -738,7 +743,7 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
         ...     print(code, name)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
     Requires:
         - dartlab
@@ -748,27 +753,28 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
         - random
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 docs 수집 + 통계.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 수집 → 일 한도 초과.
+            - quarters > 20 호출 시 부담.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 종목코드.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 정기보고서.
     """
     yield from listUncollected(client=client, limit=limit)
 
@@ -790,7 +796,7 @@ def iterUncollectedKind(*, limit: int | None = None):
         ...     print(code, name)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DocsCollector`` 클래스 / ``collectMultiple`` — 본 모듈 entry.
 
     Requires:
         - dartlab
@@ -800,26 +806,27 @@ def iterUncollectedKind(*, limit: int | None = None):
         - random
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 docs 수집 + 통계.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 수집 → 일 한도 초과.
+            - quarters > 20 호출 시 부담.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 종목코드.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 → DartClient → docs ZIP → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 정기보고서.
     """
     yield from listUncollectedKind(limit=limit)

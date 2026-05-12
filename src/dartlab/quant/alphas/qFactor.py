@@ -20,9 +20,9 @@ import logging
 
 import numpy as np
 
-from dartlab.core.cross.scanBridge import extractAnnualConsolidated
 from dartlab.quant.factor.build import _buildUniverseMetrics, _latestYear
 from dartlab.quant.screen.dataAccess import loadScanParquet
+from dartlab.synth.scanBridge import extractAnnualConsolidated
 
 log = logging.getLogger(__name__)
 

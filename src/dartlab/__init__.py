@@ -1023,12 +1023,12 @@ def capabilities(key: str | None = None, *, search: str | None = None) -> dict |
             capabilities() → 목차 → capabilities("apiRef") → 상세 → run_python 으로 실행
     """
     if search is not None:
-        from dartlab.core.capability.search import searchCapabilities
+        from dartlab.reference.capability.search import searchCapabilities
 
         results = searchCapabilities(search)
         return {key: entry for key, entry, _score in results}
 
-    from dartlab.core.capability._generated import CAPABILITIES
+    from dartlab.reference.capability._generated import CAPABILITIES
 
     if key is None:
         return {k: v.get("summary", "") for k, v in CAPABILITIES.items()}

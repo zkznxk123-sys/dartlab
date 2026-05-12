@@ -98,21 +98,22 @@ class DartClient:
             >>> currentKey(...)
 
         Returns:
-            <TODO: return desc> (str)
+            str — 현재 활성 키.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DartApiError (status="013" 등) 미처리 → 예외 propagate. caller try/except 의무.
+                - 단일 키로 분당 580 req 초과 → rate limit. 멀티 키 (DART_API_KEYS) 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 또는 DART_API_KEYS.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → httpx → DART API → 응답 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         return self._keys[self._keyIndex]
 
@@ -150,15 +151,16 @@ class DartClient:
             >>> getJson(...)
 
         Args:
-            endpoint: <TODO: param desc> (str)
-            params: <TODO: param desc> (dict[str, Any] | None)
-            emptyOn013: <TODO: param desc> (bool)
+            endpoint: DART API endpoint (예 "company.json").
+            params: 요청 파라미터 dict. None 이면 빈 dict.
+            emptyOn013: True 면 DART status="013" (조회 결과 없음) 을 빈 결과로 변환.
 
         Returns:
-            <TODO: return desc> (dict[str, Any])
+            dict[str, Any] — DART OpenAPI JSON 응답.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``resolveDartKeys`` — 멀티 키 resolve.
+            - ``Dart`` facade — 본 client wrapper.
 
         Requires:
             - dartlab
@@ -167,27 +169,29 @@ class DartClient:
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI HTTP 호출 + 멀티 키 로테이션 + rate limit 분산 + DataFrame 변환.
+              에러 코드 013 (empty result) 옵션 처리.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 facade 는 ``Dart()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal HTTP client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DartApiError (status="013" 등) 미처리 → 예외 propagate. caller try/except 의무.
+                - 단일 키로 분당 580 req 초과 → rate limit. 멀티 키 (DART_API_KEYS) 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 또는 DART_API_KEYS.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → httpx → DART API → 응답 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         triedKeys = 0
         while triedKeys < len(self._keys):
@@ -237,10 +241,11 @@ class DartClient:
             >>> getBytes(...)
 
         Returns:
-            <TODO: return desc> (bytes)
+            bytes — DART OpenAPI binary 응답.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``resolveDartKeys`` — 멀티 키 resolve.
+            - ``Dart`` facade — 본 client wrapper.
 
         Requires:
             - dartlab
@@ -249,27 +254,29 @@ class DartClient:
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI HTTP 호출 + 멀티 키 로테이션 + rate limit 분산 + DataFrame 변환.
+              에러 코드 013 (empty result) 옵션 처리.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 facade 는 ``Dart()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal HTTP client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DartApiError (status="013" 등) 미처리 → 예외 propagate. caller try/except 의무.
+                - 단일 키로 분당 580 req 초과 → rate limit. 멀티 키 (DART_API_KEYS) 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 또는 DART_API_KEYS.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → httpx → DART API → 응답 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         triedKeys = 0
         while triedKeys < len(self._keys):
@@ -319,10 +326,11 @@ class DartClient:
             >>> getDf(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``resolveDartKeys`` — 멀티 키 resolve.
+            - ``Dart`` facade — 본 client wrapper.
 
         Requires:
             - dartlab
@@ -331,27 +339,29 @@ class DartClient:
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI HTTP 호출 + 멀티 키 로테이션 + rate limit 분산 + DataFrame 변환.
+              에러 코드 013 (empty result) 옵션 처리.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 facade 는 ``Dart()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal HTTP client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DartApiError (status="013" 등) 미처리 → 예외 propagate. caller try/except 의무.
+                - 단일 키로 분당 580 req 초과 → rate limit. 멀티 키 (DART_API_KEYS) 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 또는 DART_API_KEYS.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → httpx → DART API → 응답 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         data = self.getJson(endpoint, params, emptyOn013=True)
         rows = data.get(listKey, [])
@@ -381,10 +391,11 @@ class DartClient:
             >>> getDfAll(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART OpenAPI 응답 정규화 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``resolveDartKeys`` — 멀티 키 resolve.
+            - ``Dart`` facade — 본 client wrapper.
 
         Requires:
             - dartlab
@@ -393,27 +404,29 @@ class DartClient:
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI HTTP 호출 + 멀티 키 로테이션 + rate limit 분산 + DataFrame 변환.
+              에러 코드 013 (empty result) 옵션 처리.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 facade 는 ``Dart()`` — 본 클래스 직접 사용 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal HTTP client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DartApiError (status="013" 등) 미처리 → 예외 propagate. caller try/except 의무.
+                - 단일 키로 분당 580 req 초과 → rate limit. 멀티 키 (DART_API_KEYS) 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame / dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY 또는 DART_API_KEYS.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → httpx → DART API → 응답 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         merged = dict(params) if params else {}
         merged["page_count"] = str(pageSize)

@@ -5,7 +5,6 @@ import re
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.core.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.executivePay.parser import (
     classifyBlock,
     extractTableBlocks,
@@ -13,6 +12,7 @@ from dartlab.providers.dart.docs.finance.executivePay.parser import (
     parsePayIndividualBlock,
 )
 from dartlab.providers.dart.docs.finance.executivePay.types import ExecutivePayResult
+from dartlab.providers.reportSelector import selectReport
 
 PAY_SECTION_PATTERNS = [
     r"임원의\s*보수",

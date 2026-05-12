@@ -828,7 +828,7 @@ class Quant:
 
     def _guide(self) -> pl.DataFrame:
         """축 카탈로그 — 통일 컬럼 (axis, label, description, example, group)."""
-        from dartlab.core.axisGuide import buildAxisGuideDataFrame
+        from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
         def _desc(_k: str, entry) -> str:
             if not entry.stockRequired:

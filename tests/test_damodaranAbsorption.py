@@ -165,7 +165,7 @@ def test_liquidationValuation_recovery_rates():
 
 @pytest.mark.requires_data
 def test_overrides_validation():
-    from dartlab.core.overrides import VALUATION_KEYS
+    from dartlab.synth.overrides import VALUATION_KEYS
 
     # 신규 Damodaran 키들
     assert "lifeCyclePhase" in VALUATION_KEYS
@@ -177,7 +177,7 @@ def test_overrides_validation():
 @pytest.mark.requires_data
 def test_detectExtremeFlags_lifecycle_conflict():
     """생애주기 decline 인데 CAGR > 15% 면 lifecycle_conflict flag."""
-    from dartlab.core.overrides import detectExtremeFlags
+    from dartlab.synth.overrides import detectExtremeFlags
 
     flags = detectExtremeFlags(
         {
@@ -191,7 +191,7 @@ def test_detectExtremeFlags_lifecycle_conflict():
 
 @pytest.mark.requires_data
 def test_detectExtremeFlags_survival_extreme_low():
-    from dartlab.core.overrides import detectExtremeFlags
+    from dartlab.synth.overrides import detectExtremeFlags
 
     flags = detectExtremeFlags({"pSurvival": 0.10})
     keys = [f["flag"] for f in flags]

@@ -12,8 +12,8 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.core.reportSelector import extractReportYear, selectReport
-from dartlab.core.tableParser import parseAmount
+from dartlab.providers.reportSelector import extractReportYear, selectReport
+from dartlab.providers.tableParser import parseAmount
 
 if TYPE_CHECKING:
     import polars as pl

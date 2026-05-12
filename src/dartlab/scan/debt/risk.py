@@ -99,7 +99,7 @@ def _scanIcrPerFile() -> dict[str, float]:
     dict[str, float]
         {종목코드: ICR(배)} — 영업이익/이자비용.
     """
-    from dartlab.reference.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

@@ -141,8 +141,8 @@ def _ensureScanData() -> Path:
     Path
         scan 프리빌드 디렉토리 경로 (~/.dartlab/data/scan/).
     """
+    from dartlab.core.dataLoader import _IS_PYODIDE, _dataDir
     from dartlab.core.messaging import emit
-    from dartlab.reference.dataLoader import _IS_PYODIDE, _dataDir
 
     scanDir = Path(_dataDir("scan"))
 
@@ -158,7 +158,7 @@ def _ensureScanData() -> Path:
             return scanDir
         emit("scan:prebuild_missing")
         try:
-            from dartlab.reference.dataLoader import downloadAll
+            from dartlab.core.dataLoader import downloadAll
 
             downloadAll("scan")  # pyodide 분기에서 _pyodideFetchScanLite 호출
             _scanDownloaded = True
@@ -176,7 +176,7 @@ def _ensureScanData() -> Path:
             return scanDir
         # TTL 초과 — 갱신 시도하되 실패해도 기존 파일 사용
         try:
-            from dartlab.reference.dataLoader import downloadAll
+            from dartlab.core.dataLoader import downloadAll
 
             downloadAll("scan")
         except (ImportError, RuntimeError, ValueError):
@@ -187,7 +187,7 @@ def _ensureScanData() -> Path:
     # 루트 필수 파일 누락 (신규 사용자 또는 과거 버그로 불완전 캐시) → HF 다운로드
     emit("scan:prebuild_missing")
     try:
-        from dartlab.reference.dataLoader import downloadAll
+        from dartlab.core.dataLoader import downloadAll
 
         downloadAll("scan")
         _scanDownloaded = True
@@ -276,7 +276,7 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
             pass  # fallback to per-file scan
 
     # 2순위: 종목별 순회 (fallback)
-    from dartlab.reference.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     report_dir = Path(_dataDir("report"))
     parquet_files = sorted(report_dir.glob("*.parquet"))
@@ -1111,7 +1111,7 @@ def scanFinanceParquets(
             pass  # fallback
 
     # 2순위: raw glob → DuckDB streaming SQL (fallback)
-    from dartlab.reference.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     finance_dir = Path(_dataDir("finance"))
     lz = _loadRawFinanceViaDuckDb(

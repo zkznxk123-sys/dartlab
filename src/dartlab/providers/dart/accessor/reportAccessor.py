@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
+from dartlab.core.dataLoader import loadData
 from dartlab.core.memory import BoundedCache
 from dartlab.core.polarsUtil import isEmptyDf
-from dartlab.reference.dataLoader import loadData
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company

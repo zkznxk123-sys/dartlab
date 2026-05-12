@@ -11,9 +11,9 @@ from dartlab.core.dataLoader import (
     extractCorpName,
     loadData,
 )
-from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
-from dartlab.core.reportSelector import extractReportYear, selectReport
-from dartlab.core.tableParser import detectUnit, extractAccounts, extractTables, parseAmount
+from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
+from dartlab.providers.reportSelector import extractReportYear, selectReport
+from dartlab.providers.tableParser import detectUnit, extractAccounts, extractTables, parseAmount
 
 __all__ = [
     "DART_VIEWER",

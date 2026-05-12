@@ -156,10 +156,11 @@ def collectMetaDay(
         >>> collectMetaDay(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame 또는 None — 수집 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -169,27 +170,28 @@ def collectMetaDay(
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     if client is None:
         client = DartClient()
@@ -259,17 +261,18 @@ def collectMetaRange(
         >>> collectMetaRange(...)
 
     Args:
-        startDate: <TODO: param desc> (str)
-        endDate: <TODO: param desc> (str)
-        client: <TODO: param desc> (DartClient | None)
-        corpClasses: <TODO: param desc> (list[str] | None)
-        showProgress: <TODO: param desc> (bool)
+        startDate: 시작일 (YYYYMMDD).
+        endDate: 종료일 (YYYYMMDD).
+        client: DartClient 인스턴스. None 이면 자동 생성.
+        corpClasses: 회사 종류 필터 (KOSPI/KOSDAQ/etc). None 이면 전체.
+        showProgress: True 면 progress 로그 출력.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 수집 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -279,27 +282,28 @@ def collectMetaRange(
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     from datetime import datetime, timedelta
 
@@ -361,10 +365,11 @@ def fillContent(
         >>> fillContent(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame 또는 None — 수집 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -374,27 +379,28 @@ def fillContent(
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     if client is None:
         client = DartClient()
@@ -515,14 +521,15 @@ def fillContentAll(
         >>> fillContentAll(...)
 
     Args:
-        client: <TODO: param desc> (DartClient | None)
-        showProgress: <TODO: param desc> (bool)
+        client: DartClient 인스턴스. None 이면 자동 생성.
+        showProgress: True 면 progress 로그 출력.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 수집 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -532,27 +539,28 @@ def fillContentAll(
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     if client is None:
         client = DartClient()
@@ -603,10 +611,11 @@ def collectedDates() -> list[str]:
         >>> collectedDates(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과 목록.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -616,27 +625,28 @@ def collectedDates() -> list[str]:
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     outDir = _allFilingsDir()
     dates = sorted(
@@ -659,10 +669,11 @@ def pendingDates() -> list[str]:
         >>> pendingDates(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과 목록.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -672,27 +683,28 @@ def pendingDates() -> list[str]:
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     outDir = _allFilingsDir()
     dates = sorted(
@@ -715,10 +727,11 @@ def loadDay(period: str) -> pl.DataFrame | None:
         >>> loadDay(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame 또는 None — 수집 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -728,27 +741,28 @@ def loadDay(period: str) -> pl.DataFrame | None:
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     path = _allFilingsDir() / f"{period}.parquet"
     if not path.exists():
@@ -770,10 +784,11 @@ def loadAll() -> pl.DataFrame:
         >>> loadAll(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -783,27 +798,28 @@ def loadAll() -> pl.DataFrame:
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     outDir = _allFilingsDir()
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
@@ -825,10 +841,11 @@ def stats() -> dict:
         >>> stats(...)
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — 결과 dict.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
+        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
 
     Requires:
         - bs4
@@ -838,27 +855,28 @@ def stats() -> dict:
         - zipfile
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
+            - 원문 수집 일괄 호출 X — 일자별 분할.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / int / Path — 함수별 다름.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + 일자 인자.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 일자 → listFilings → zipCollector → HTML→text → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 전체 공시.
     """
     completed = collectedDates()
     pending = pendingDates()

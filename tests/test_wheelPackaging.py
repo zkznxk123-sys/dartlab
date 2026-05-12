@@ -8,7 +8,7 @@ git-tracked 된 모든 번들 리소스(JSON/parquet/py.typed)가 wheel 에
 포함됐는지 zip 파일 목록 수준에서 직접 검증한다.
 
 과거 사고 (2026-04-19, 0.9.15 + 0.9.16 모두):
-    PyPI 에 올라간 wheel 에 `src/dartlab/core/data/parserMappings/` 누락 →
+    PyPI 에 올라간 wheel 에 `src/dartlab/reference/data/parserMappings/` 누락 →
     외부 사용자가 `import dartlab` 하는 순간 `FileNotFoundError`.
     wheel-smoke job 이 별도로 빌드한 wheel 을 검증했기에 PyPI 에 올라간
     wheel 과 다른 대상을 본 게 원인. 이 테스트는 매 push 마다 실제 빌드를
@@ -110,10 +110,10 @@ def test_parserMappings_inWheel(builtWheel: Path):
     with zipfile.ZipFile(builtWheel) as zf:
         names = zf.namelist()
     required = [
-        "dartlab/core/data/parserMappings/sections.json",
-        "dartlab/core/data/parserMappings/affiliate.json",
-        "dartlab/core/data/parserMappings/costByNature.json",
-        "dartlab/core/data/parserMappings/sectorPriors.json",
+        "dartlab/reference/data/parserMappings/sections.json",
+        "dartlab/reference/data/parserMappings/affiliate.json",
+        "dartlab/reference/data/parserMappings/costByNature.json",
+        "dartlab/reference/data/parserMappings/sectorPriors.json",
     ]
     for req in required:
         assert req in names, (
@@ -126,7 +126,7 @@ def test_accountMappings_inWheel(builtWheel: Path):
     """accountMappings.json — 재무제표 라벨링 전멸 방지."""
     with zipfile.ZipFile(builtWheel) as zf:
         names = zf.namelist()
-    assert "dartlab/core/data/accountMappings.json" in names, (
+    assert "dartlab/reference/data/accountMappings.json" in names, (
         "accountMappings.json 누락 — 모든 계정 라벨이 snakeId 로만 표시되는 회귀"
     )
 
@@ -208,7 +208,7 @@ def test_installedWheel_importAndSectionsLoad(builtWheel: Path, tmp_path):
             "-X",
             "utf8",
             "-c",
-            "from dartlab.core.mappers.parserMapper import loadSections; "
+            "from dartlab.reference.mappers.parserMapper import loadSections; "
             "s = loadSections(); "
             "assert s.get('chapterByMajor'), 'chapterByMajor empty — 2026-04-19 사고 재현'; "
             "print('OK chapterByMajor:', len(s['chapterByMajor']))",
@@ -255,7 +255,7 @@ def test_gitignorePatterns_noUnrootedDirsOverlappingSrcDartlab():
     """`.gitignore` 의 루트-미지정 디렉토리 패턴이 src/dartlab 하위와 매치되지 않음.
 
     2026-04-19 사고 직접 원인: `.gitignore` 의 `data/` (leading `/` 없음) 이
-    `src/dartlab/core/data/` 까지 매치해서 wheel 에서 누락됨. 같은 class 의
+    `src/dartlab/reference/data/` 까지 매치해서 wheel 에서 누락됨. 같은 class 의
     재유입을 lint 로 차단한다.
 
     검사: 각 unrooted 디렉토리 패턴 (예: `data/`, `_backup/`, `logs/`) 이
@@ -308,7 +308,7 @@ def test_dalio48Match_loadCases_loudFail_onMissingData(monkeypatch):
     """dalio48Match._loadCases 가 파일 부재 시 FileNotFoundError 발생."""
     from importlib import resources
 
-    import dartlab.core.cross.dalio48Match as mod
+    import dartlab.synth.dalio48Match as mod
 
     # 실제 파일이 있는 상태 기준선: 정상 로드
     cases = mod._loadCases()

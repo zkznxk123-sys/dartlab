@@ -73,7 +73,7 @@ procedure:
   - c.timeseries / c.annual / c.cumulative — 분기 · 연도 · 누적 시계열.
   - c.ratios — 재무비율 (CFS 기본, OFS getRatios("OFS")).
   - 6 sub-domain 진입: from dartlab.finance.{affiliate, segment, summary, majorHolder, costByNature, rawMaterial}.
-  - 매핑 SSOT — engines.mappers ↔ core/data/accountMappings.json (34,171 entries).
+  - 매핑 SSOT — engines.mappers ↔ reference/data/accountMappings.json (34,171 entries).
 linkedSkills:
   - engines.company
   - engines.mappers
@@ -181,7 +181,7 @@ majorHolder(stockCode)
 | `scanAccount.py` | 미매핑 계정 스캔 (학습 후속 데이터) |
 | `spec.py` | 엔진 명세 (`summary.mappedAccounts` 등) |
 
-데이터 SSOT — `core/data/accountMappings.json` (`learnedSynonyms: 31,489` / `standardAccounts: 3,402` / `merged: 34,171`). 학습 사이클은 `engines.mappers` 참조.
+데이터 SSOT — `reference/data/accountMappings.json` (`learnedSynonyms: 31,489` / `standardAccounts: 3,402` / `merged: 34,171`). 학습 사이클은 `engines.mappers` 참조.
 
 ### 시계열 API
 
@@ -356,9 +356,9 @@ DART 공시 요약재무정보에서 숫자 브릿지 매칭으로 계정명을 
 ## 의존 (sub-domain 공통)
 
 - `dartlab.core.dataLoader` — `loadData` · `extractCorpName` · `PERIOD_KINDS`
-- `dartlab.core.notesExtractor` — `extractNotesContent` · `findNumberedSection`
-- `dartlab.core.reportSelector` — 보고서 선택
-- `dartlab.core.tableParser` — 마크다운 테이블 파싱, 금액/단위 처리
+- `dartlab.providers.notesExtractor` — `extractNotesContent` · `findNumberedSection`
+- `dartlab.providers.reportSelector` — 보고서 선택
+- `dartlab.providers.tableParser` — 마크다운 테이블 파싱, 금액/단위 처리
 - `engines.mappers` — 계정명 → snakeId 정규화
 
 ## evidence 기준

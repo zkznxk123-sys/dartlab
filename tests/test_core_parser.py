@@ -4,7 +4,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.core.tableParser import detectUnit, parseAmount, parseNotesTable
+from dartlab.providers.tableParser import detectUnit, parseAmount, parseNotesTable
 
 
 class TestParseAmount:

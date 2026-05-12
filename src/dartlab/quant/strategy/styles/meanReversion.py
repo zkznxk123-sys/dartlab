@@ -37,11 +37,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.core.indicators import vrsi
 from dartlab.quant.risk.volatility import _volatilitySeries
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays
+from dartlab.synth.indicators import vrsi
 
 
 def _residualZScore(close: np.ndarray, window: int = 60) -> np.ndarray:

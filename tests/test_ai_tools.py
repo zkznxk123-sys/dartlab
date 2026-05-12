@@ -25,7 +25,7 @@ def test_deprecated_tools_not_in_registry():
 
 
 def test_read_capability_uses_capability_ssot():
-    """후속 도구 read_capability 가 dartlab.core.capability.search 를 그대로 활용."""
+    """후속 도구 read_capability 가 dartlab.reference.capability.search 를 그대로 활용."""
     from dartlab.ai.tools.readCapability import readCapability
 
     result = readCapability("scan growth")

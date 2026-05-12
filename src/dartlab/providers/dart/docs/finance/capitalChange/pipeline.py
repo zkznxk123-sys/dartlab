@@ -5,7 +5,6 @@ import re
 import polars as pl
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.core.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.capitalChange.parser import (
     extractTableBlocks,
     parseCapitalChangeTable,
@@ -13,6 +12,7 @@ from dartlab.providers.dart.docs.finance.capitalChange.parser import (
     parseTreasuryStockTable,
 )
 from dartlab.providers.dart.docs.finance.capitalChange.types import CapitalChangeResult
+from dartlab.providers.reportSelector import selectReport
 
 CAPITAL_SECTION_PATTERNS = [r"자본금\s*변동"]
 SHARE_SECTION_PATTERNS = [r"주식의\s*총수"]

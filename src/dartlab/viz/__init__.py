@@ -39,7 +39,7 @@ from dartlab.core.palette import COLORS  # noqa: F401
 
 # core/select.py 가 viz 의존 없이 HTML 렌더 — viz import 시점에 자동 등록.
 # pyodide 등 plotly 미설치 환경은 viz import 자체가 실패해 register 도 안 됨.
-from dartlab.core.render import register as _registerRenderer
+from dartlab.reference.render import register as _registerRenderer
 from dartlab.viz.charts import (
     balanceSheet as balance_sheet_chart,
 )

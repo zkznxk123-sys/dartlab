@@ -152,10 +152,11 @@ class AsyncDartClient:
             >>> getJson(...)
 
         Returns:
-            <TODO: return desc> (dict[str, Any] | None)
+            dict[str, Any] 또는 None — 결과 dict.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -165,27 +166,28 @@ class AsyncDartClient:
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 대량 batch (1만+ 종목) → 일 한도 초과. 키 N 개 (DART_API_KEYS) 필수.
+                - 동시 워커 수 >> 키 수 → rate limit. 워커 = 키 수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY (또는 DART_API_KEYS).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목 list → asyncio Queue → 워커 N → DART API → parquet 저장.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 배치 수집.
         """
         await self._throttle()
         merged = {"crtfc_key": self._key}
@@ -224,10 +226,11 @@ class AsyncDartClient:
             >>> getDf(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame 또는 None — 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -237,27 +240,28 @@ class AsyncDartClient:
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 대량 batch (1만+ 종목) → 일 한도 초과. 키 N 개 (DART_API_KEYS) 필수.
+                - 동시 워커 수 >> 키 수 → rate limit. 워커 = 키 수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY (또는 DART_API_KEYS).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목 list → asyncio Queue → 워커 N → DART API → parquet 저장.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 배치 수집.
         """
         data = await self.getJson(endpoint, params, emptyOn013=True)
         if data is None:
@@ -279,10 +283,11 @@ class AsyncDartClient:
             >>> getBytes(...)
 
         Returns:
-            <TODO: return desc> (bytes | None)
+            bytes 또는 None — 응답 본문.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -292,27 +297,28 @@ class AsyncDartClient:
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 대량 batch (1만+ 종목) → 일 한도 초과. 키 N 개 (DART_API_KEYS) 필수.
+                - 동시 워커 수 >> 키 수 → rate limit. 워커 = 키 수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY (또는 DART_API_KEYS).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목 list → asyncio Queue → 워커 N → DART API → parquet 저장.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 배치 수집.
         """
         await self._throttle()
         merged = {"crtfc_key": self._key}
@@ -342,7 +348,8 @@ class AsyncDartClient:
             >>> close(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -352,13 +359,13 @@ class AsyncDartClient:
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
         """
         await self._client.aclose()
 
@@ -980,7 +987,7 @@ def batchCollect(
         >>> batchCollect(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
 
     Requires:
         - asyncio
@@ -990,27 +997,28 @@ def batchCollect(
         - io
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART OpenAPI 배치 수집 단계 — asyncio 기반 N-키 분배.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 batch 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal batch helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 batch → 일 한도 초과. 키 N 개 필수.
+            - 동시 워커 수 >> 키 수 → rate limit.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEYS.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 list → asyncio Queue → DART API → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 배치 수집.
     """
     cats = categories or ["finance", "report", "docs"]
     keys = resolveDartKeys()
@@ -1149,7 +1157,8 @@ def batchCollect(
             >>> completeFn(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -1159,27 +1168,28 @@ def batchCollect(
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 대량 batch (1만+ 종목) → 일 한도 초과. 키 N 개 (DART_API_KEYS) 필수.
+                - 동시 워커 수 >> 키 수 → rate limit. 워커 = 키 수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY (또는 DART_API_KEYS).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목 list → asyncio Queue → 워커 N → DART API → parquet 저장.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 배치 수집.
         """
         with lock:
             completedCount[0] += 1
@@ -1204,7 +1214,8 @@ def batchCollect(
             >>> statusFn(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -1214,27 +1225,28 @@ def batchCollect(
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 대량 batch (1만+ 종목) → 일 한도 초과. 키 N 개 (DART_API_KEYS) 필수.
+                - 동시 워커 수 >> 키 수 → rate limit. 워커 = 키 수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY (또는 DART_API_KEYS).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목 list → asyncio Queue → 워커 N → DART API → parquet 저장.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 배치 수집.
         """
         with lock:
             workerLines[workerIdx] = f"{corpName} ({stockCode})"
@@ -1254,7 +1266,8 @@ def batchCollect(
             >>> periodFn(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
+            - ``resolveDartKeys`` — 멀티 키 resolve.
 
         Requires:
             - asyncio
@@ -1264,27 +1277,28 @@ def batchCollect(
             - io
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal batch helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 키로 대량 batch (1만+ 종목) → 일 한도 초과. 키 N 개 (DART_API_KEYS) 필수.
+                - 동시 워커 수 >> 키 수 → rate limit. 워커 = 키 수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY (또는 DART_API_KEYS).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 종목 list → asyncio Queue → 워커 N → DART API → parquet 저장.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 배치 수집.
         """
         with lock:
             workerLines[workerIdx] = f"{corpName} | {detail}"
@@ -1347,10 +1361,10 @@ def batchCollectAll(
         >>> batchCollectAll(...)
 
     Returns:
-        <TODO: return desc> (dict[str, dict[str, int]])
+        dict[str, dict[str, int]] — 종목 × 카테고리 별 수집 통계.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
 
     Requires:
         - asyncio
@@ -1360,27 +1374,28 @@ def batchCollectAll(
         - io
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART OpenAPI 배치 수집 단계 — asyncio 기반 N-키 분배.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 batch 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal batch helper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 키로 대량 batch → 일 한도 초과. 키 N 개 필수.
+            - 동시 워커 수 >> 키 수 → rate limit.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEYS.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 종목 list → asyncio Queue → DART API → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 배치 수집.
     """
     from dartlab.core.listingResolver import getListingResolver
 

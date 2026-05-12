@@ -48,7 +48,7 @@ def apiCompanyDiffMatrix(
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
-    from dartlab.core.docs.diff import buildDiffMatrix, buildHeatmapSpec
+    from dartlab.reference.docs.diff import buildDiffMatrix, buildHeatmapSpec
 
     try:
         sections = c._docs.sections.raw
@@ -94,7 +94,7 @@ def apiCompanyDiffTopic(
 
         diff_chunks: list[dict] = []
         if result is not None:
-            from dartlab.core.docs.diff import charDiff
+            from dartlab.reference.docs.diff import charDiff
 
             rows = result.to_dicts()
             i = 0
@@ -160,7 +160,7 @@ def apiCompanyBridge(
 
     import polars as pl
 
-    from dartlab.core.docs.bridge import (
+    from dartlab.reference.docs.bridge import (
         extractAmountsFromText,
         getFinanceAmounts,
         matchAmounts,
@@ -217,7 +217,7 @@ def apiCompanyTopicsGraph(
     except HANDLED_API_ERRORS as e:
         raise HTTPException(status_code=404, detail=guideDetail(e))
 
-    from dartlab.core.docs.topicGraph import (
+    from dartlab.reference.docs.topicGraph import (
         analyzeGraph,
         buildMentionMatrix,
     )

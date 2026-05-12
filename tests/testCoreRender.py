@@ -7,8 +7,8 @@ from __future__ import annotations
 
 import pytest
 
-from dartlab.core.render import ChartHtmlRenderer, getRenderer, register
-from dartlab.core.render import registry as _registryModule
+from dartlab.reference.render import ChartHtmlRenderer, getRenderer, register
+from dartlab.reference.render import registry as _registryModule
 
 pytestmark = pytest.mark.unit
 

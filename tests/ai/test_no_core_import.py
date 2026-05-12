@@ -1,6 +1,6 @@
 """회귀 가드 — ai/ 가 dartlab core engine 을 정적 import 하지 않는다.
 
-ai/tools/{readSkill,readCapability}.py 만 dartlab.skills.* 와 dartlab.core.capability.* 메타 read-only 허용.
+ai/tools/{readSkill,readCapability}.py 만 dartlab.skills.* 와 dartlab.reference.capability.* 메타 read-only 허용.
 P-revised: proposeSkill / kind=generated 사다리 폐기로 spec 작성 도구 없음.
 """
 

@@ -63,7 +63,7 @@ procedure:
   - RunPython prelude 의 `normalizeColumn(topic, hint)` 사용 — 한글/snake/alias → 표준 snake_id.
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
-  - 매핑 정의는 `src/dartlab/core/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR) — 사람이 JSON 직접 편집 후 `AccountMapper.release()` 호출.
+  - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR) — 사람이 JSON 직접 편집 후 `AccountMapper.release()` 호출.
   - 신규 매핑은 confidence + category + type 메타 함께 등록.
 linkedSkills:
   - engines.company
@@ -150,13 +150,13 @@ columnsFor("BS")
 
 | 자산 | 경로 | 내용 | 갱신 방식 |
 |---|---|---|---|
-| DART 학습 매핑 | `src/dartlab/core/data/accountMappings.json` | `standardAccounts: 3,402` / `learnedSynonyms: 31,489` / `merged: 34,171` / `_metadata.lastUpdate` | 사람 수동 편집 |
+| DART 학습 매핑 | `src/dartlab/reference/data/accountMappings.json` | `standardAccounts: 3,402` / `learnedSynonyms: 31,489` / `merged: 34,171` / `_metadata.lastUpdate` | 사람 수동 편집 |
 | EDGAR 학습 동의어 | `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` | 11,375 SEC GAAP 태그 | 사람 수동 편집 |
-| Notes 구조 학습 | `src/dartlab/core/data/notesStructure.json` | 2,700 종목 notes 항목 `{type, category, frequency}` | `scanAll()` 자동 갱신 |
+| Notes 구조 학습 | `src/dartlab/reference/data/notesStructure.json` | 2,700 종목 notes 항목 `{type, category, frequency}` | `scanAll()` 자동 갱신 |
 | 라벨 SSOT | `src/dartlab/core/utils/labels.py::_loadAccountMappings` | DART 학습 매핑 로더 | — |
 | 캐시 무효화 | `src/dartlab/providers/dart/finance/mapper.py::AccountMapper.release` | JSON 직접 편집 후 호출 | — |
 
-DART 측 mapper 데이터는 `core/data/` 로 통합 승격 (`providers/dart/finance/mapperData/` 디렉토리 폐기). EDGAR 는 자체 `mapperData/` 보유 — 두 provider 패턴 비대칭 (대칭 작업은 후속 트랙).
+DART 측 mapper 데이터는 `reference/data/` 로 통합 승격 (`providers/dart/finance/mapperData/` 디렉토리 폐기). EDGAR 는 자체 `mapperData/` 보유 — 두 provider 패턴 비대칭 (대칭 작업은 후속 트랙).
 
 ### 사이클 4 단계
 
@@ -172,7 +172,7 @@ DART 측 mapper 데이터는 `core/data/` 로 통합 승격 (`providers/dart/fin
    → 예: "재고자산" ↔ "재고자산합계" 자동 추천
 
 3. 사람 검토 + JSON patch (수동)
-   - core/data/accountMappings.json 의 `mappings` key 에 한글명 → snakeId 추가
+   - reference/data/accountMappings.json 의 `mappings` key 에 한글명 → snakeId 추가
    - 또는 providers/edgar/finance/mapperData/learnedSynonyms.json
    - 검토 시 category / type 메타 함께 등록
 

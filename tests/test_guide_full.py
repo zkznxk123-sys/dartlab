@@ -172,14 +172,14 @@ class TestHints:
 
 class TestCapabilities:
     def test_capability_kind_constants(self):
-        from dartlab.core.capability.registry import CapabilityKind
+        from dartlab.reference.capability.registry import CapabilityKind
 
         assert CapabilityKind.DATA == "data"
         assert CapabilityKind.ANALYSIS == "analysis"
         assert CapabilityKind.WORKFLOW == "workflow"
 
     def test_widget_spec_to_payload(self):
-        from dartlab.core.capability.registry import WidgetSpec
+        from dartlab.reference.capability.registry import WidgetSpec
 
         ws = WidgetSpec(widget="chart", props={"type": "line"}, key="c1", title="매출")
         payload = ws.toPayload()
@@ -189,7 +189,7 @@ class TestCapabilities:
         assert payload["title"] == "매출"
 
     def test_widget_spec_minimal(self):
-        from dartlab.core.capability.registry import WidgetSpec
+        from dartlab.reference.capability.registry import WidgetSpec
 
         ws = WidgetSpec(widget="table")
         payload = ws.toPayload()
@@ -197,7 +197,7 @@ class TestCapabilities:
         assert payload["widget"] == "table"
 
     def test_view_spec_to_payload(self):
-        from dartlab.core.capability.registry import ViewSpec, WidgetSpec
+        from dartlab.reference.capability.registry import ViewSpec, WidgetSpec
 
         vs = ViewSpec(
             layout="grid",
@@ -210,7 +210,7 @@ class TestCapabilities:
         assert payload["title"] == "테스트"
 
     def test_view_spec_single_widget(self):
-        from dartlab.core.capability.registry import ViewSpec
+        from dartlab.reference.capability.registry import ViewSpec
 
         vs = ViewSpec.singleWidget("table", {"data": []}, key="t1", viewTitle="뷰")
         payload = vs.toPayload()
@@ -219,7 +219,7 @@ class TestCapabilities:
         assert payload["title"] == "뷰"
 
     def test_ui_action_navigate(self):
-        from dartlab.core.capability.registry import UiAction
+        from dartlab.reference.capability.registry import UiAction
 
         action = UiAction.navigate(view="viewer", topic="IS", period="2023")
         payload = action.toPayload()
@@ -228,7 +228,7 @@ class TestCapabilities:
         assert payload["topic"] == "IS"
 
     def test_ui_action_toast(self):
-        from dartlab.core.capability.registry import UiAction
+        from dartlab.reference.capability.registry import UiAction
 
         action = UiAction.toast("테스트 알림", level="warning")
         payload = action.toPayload()
@@ -237,7 +237,7 @@ class TestCapabilities:
         assert payload["level"] == "warning"
 
     def test_ui_action_select_company(self):
-        from dartlab.core.capability.registry import UiAction
+        from dartlab.reference.capability.registry import UiAction
 
         action = UiAction.selectCompany("005930", "삼성전자", "KOSPI")
         payload = action.toPayload()
@@ -246,7 +246,7 @@ class TestCapabilities:
         assert payload["corpName"] == "삼성전자"
 
     def test_ui_action_layout(self):
-        from dartlab.core.capability.registry import UiAction
+        from dartlab.reference.capability.registry import UiAction
 
         action = UiAction.layout("sidebar", "open")
         payload = action.toPayload()
@@ -254,7 +254,7 @@ class TestCapabilities:
         assert payload["target"] == "sidebar"
 
     def test_capability_spec_to_dict(self):
-        from dartlab.core.capability.registry import CapabilitySpec
+        from dartlab.reference.capability.registry import CapabilitySpec
 
         spec = CapabilitySpec(
             id="test",
@@ -267,7 +267,7 @@ class TestCapabilities:
         assert d["label"] == "테스트"
 
     def test_build_capability_summary(self):
-        from dartlab.core.capability.registry import CapabilitySpec, buildCapabilitySummary
+        from dartlab.reference.capability.registry import CapabilitySpec, buildCapabilitySummary
 
         specs = [
             CapabilitySpec(id="a", label="A", description="", input_schema={}, kind="data"),

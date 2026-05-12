@@ -258,7 +258,7 @@ src/dartlab/ai/
 ### 경계 강제 (테스트로 잠금)
 
 - `ai/workbench/` · `ai/tools/` · `ai/providers/` · `ai/lenses/` 는 `dartlab.{analysis,company,scan,quant,gather,macro,industry,review,credit,viz,...}` 등 core engine 을 **정적 import 하지 않는다**. (현재 코드도 위반 0 — 본 규칙은 회귀 가드.)
-- `ai/tools/{readSkill,readCapability}.py` 만 `dartlab.skills.*` (메타) 와 `dartlab.core.capability.*` 의 docstring 을 read-only 접근. 데이터 호출은 안 한다.
+- `ai/tools/{readSkill,readCapability}.py` 만 `dartlab.skills.*` (메타) 와 `dartlab.reference.capability.*` 의 docstring 을 read-only 접근. 데이터 호출은 안 한다.
 - `ai/` 코드는 `src/dartlab/skills/` 의 컨텐츠를 일체 변경하지 않는다 (P-revised — HARVEST `propose_skill` 폐기).
 
 ### 코드 컨벤션

@@ -24,7 +24,6 @@ import logging
 
 import polars as pl
 
-from dartlab.core.cross.scanBridge import extractAnnualConsolidated, isEdgarSchema
 from dartlab.core.market import resolveMarket
 from dartlab.quant.factor.quality import _isFinancial
 from dartlab.quant.screen.dataAccess import (
@@ -33,6 +32,7 @@ from dartlab.quant.screen.dataAccess import (
     loadScanParquet,
     ohlcvToArrays,
 )
+from dartlab.synth.scanBridge import extractAnnualConsolidated, isEdgarSchema
 
 log = logging.getLogger(__name__)
 

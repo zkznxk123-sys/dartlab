@@ -29,7 +29,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from dartlab.core.financeDocAccessor import getFinanceDocAccessor
-from dartlab.core.ratioCategories import RATIO_CATEGORIES
+from dartlab.synth.ratioCategories import RATIO_CATEGORIES
 
 if TYPE_CHECKING:
     from dartlab.core.protocols import CompanyProtocol as Company

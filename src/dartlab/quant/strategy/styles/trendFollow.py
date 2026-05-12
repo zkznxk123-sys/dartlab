@@ -42,12 +42,12 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.core.indicators import vema
 from dartlab.quant.signal.generator import vmacdSignal
 from dartlab.quant.signal.momentum import _momentumSeries
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays
+from dartlab.synth.indicators import vema
 
 
 def build(

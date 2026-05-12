@@ -82,14 +82,15 @@ def loadCorpCodes(client: DartClient, refresh: bool = False) -> pl.DataFrame:
         >>> loadCorpCodes(...)
 
     Args:
-        client: <TODO: param desc> (DartClient)
-        refresh: <TODO: param desc> (bool)
+        client: DartClient 인스턴스.
+        refresh: True 면 캐시 무시 후 새로 다운로드.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — corp_code 전체 목록.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``findCorpCode`` / ``searchCompanies`` — 본 모듈 다른 함수.
+        - ``DartClient`` — 다운로드 backend.
 
     Requires:
         - dartlab
@@ -99,27 +100,28 @@ def loadCorpCodes(client: DartClient, refresh: bool = False) -> pl.DataFrame:
         - threading
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 8 자리 corp_code 와 종목코드/회사명 변환. 24 h 캐시.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사명 → corp_code" → ``findCorpCode``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal lookup — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 24 h 캐시 — 신규 회사 누락 시 refresh=True.
+            - 동명이인 best match 1 개만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY (다운로드 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - corp_code parquet 24 h 캐시.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DART API corpCode.xml → parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) corp_code.
     """
     global _memCache
 
@@ -163,15 +165,16 @@ def findCorpCode(
         없음.
 
     Args:
-        client: <TODO: param desc> (DartClient)
-        query: <TODO: param desc> (str)
-        refresh: <TODO: param desc> (bool)
+        client: DartClient 인스턴스.
+        query: 회사명 또는 종목코드.
+        refresh: True 면 캐시 무시 후 새로 다운로드.
 
     Returns:
-        <TODO: return desc> (str | None)
+        str — 8 자리 corp_code 또는 None.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``findCorpCode`` / ``searchCompanies`` — 본 모듈 다른 함수.
+        - ``DartClient`` — 다운로드 backend.
 
     Requires:
         - dartlab
@@ -181,27 +184,28 @@ def findCorpCode(
         - threading
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 8 자리 corp_code 와 종목코드/회사명 변환. 24 h 캐시.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사명 → corp_code" → ``findCorpCode``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal lookup — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 24 h 캐시 — 신규 회사 누락 시 refresh=True.
+            - 동명이인 best match 1 개만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY (다운로드 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - corp_code parquet 24 h 캐시.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DART API corpCode.xml → parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) corp_code.
     """
     df = loadCorpCodes(client, refresh=refresh)
 
@@ -260,7 +264,8 @@ def searchCompanies(
         없음.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``findCorpCode`` / ``searchCompanies`` — 본 모듈 다른 함수.
+        - ``DartClient`` — 다운로드 backend.
 
     Requires:
         - dartlab
@@ -270,27 +275,28 @@ def searchCompanies(
         - threading
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 8 자리 corp_code 와 종목코드/회사명 변환. 24 h 캐시.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사명 → corp_code" → ``findCorpCode``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal lookup — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 24 h 캐시 — 신규 회사 누락 시 refresh=True.
+            - 동명이인 best match 1 개만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY (다운로드 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - corp_code parquet 24 h 캐시.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DART API corpCode.xml → parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) corp_code.
     """
     df = loadCorpCodes(client)
     result = df.filter(pl.col("corp_name").str.contains(query, literal=True))
@@ -329,7 +335,8 @@ def iterCompanies(
         ...     print(row["corp_name"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``findCorpCode`` / ``searchCompanies`` — 본 모듈 다른 함수.
+        - ``DartClient`` — 다운로드 backend.
 
     Requires:
         - dartlab
@@ -339,27 +346,28 @@ def iterCompanies(
         - threading
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 8 자리 corp_code 와 종목코드/회사명 변환. 24 h 캐시.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사명 → corp_code" → ``findCorpCode``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal lookup — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 24 h 캐시 — 신규 회사 누락 시 refresh=True.
+            - 동명이인 best match 1 개만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / pl.DataFrame / None — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - DART_API_KEY (다운로드 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - corp_code parquet 24 h 캐시.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DART API corpCode.xml → parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) corp_code.
     """
     df = searchCompanies(client, query, listedOnly, limit=limit)
     yield from df.iter_rows(named=True)

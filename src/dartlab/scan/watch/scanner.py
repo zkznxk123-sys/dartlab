@@ -25,7 +25,7 @@ _log = getLogger(__name__)
 
 import polars as pl
 
-from dartlab.core.docs.diff import DiffResult, sectionsDiff
+from dartlab.reference.docs.diff import DiffResult, sectionsDiff
 from dartlab.scan.watch.scorer import ScoredChange, scoreChanges, scoredToDataframe
 
 
@@ -204,8 +204,8 @@ def _listLocalDocs() -> list[str]:
     list[str]
         정렬된 종목코드 목록 (6자리). 디렉토리 없으면 빈 리스트.
     """
-    from dartlab.reference.dataConfig import DATA_RELEASES
-    from dartlab.reference.dataLoader import _getDataRoot
+    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     docs_dir = _getDataRoot() / DATA_RELEASES["docs"]["dir"]
     if not docs_dir.exists():

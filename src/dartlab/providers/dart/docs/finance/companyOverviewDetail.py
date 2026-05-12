@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 
 from dartlab.core.dataLoader import extractCorpName, loadData
-from dartlab.core.reportSelector import selectReport
+from dartlab.providers.reportSelector import selectReport
 
 
 # types

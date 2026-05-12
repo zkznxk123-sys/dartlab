@@ -882,10 +882,10 @@ def calcFactorIC(
         return None
 
     try:
-        from dartlab.core.cross.scanBridge import extractAnnualConsolidated
         from dartlab.gather.bulkData.hfBulk import loadFiltered
         from dartlab.quant.factor.build import _buildUniverseMetrics, _latestYear
         from dartlab.quant.screen.dataAccess import loadScanParquet
+        from dartlab.synth.scanBridge import extractAnnualConsolidated
     except Exception as exc:  # noqa: BLE001
         log.warning("calcFactorIC import 실패: %s", type(exc).__name__)
         return None

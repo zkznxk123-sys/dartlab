@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import polars as pl
 import pytest
 
-from dartlab.core.axisGuide import buildAxisGuideDataFrame
+from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
 pytestmark = pytest.mark.unit
 

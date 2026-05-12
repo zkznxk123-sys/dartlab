@@ -2,7 +2,7 @@
 
 import re
 
-from dartlab.core.tableParser import parseAmount
+from dartlab.providers.tableParser import parseAmount
 
 
 def splitCells(line: str) -> list[str]:

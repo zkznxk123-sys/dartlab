@@ -3,10 +3,10 @@
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
-from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
-from dartlab.core.reportSelector import selectReport
 from dartlab.providers.dart.docs.finance.segment.parser import parseSegmentTables
 from dartlab.providers.dart.docs.finance.segment.types import SegmentsResult, SegmentTable
+from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
+from dartlab.providers.reportSelector import selectReport
 
 
 def segments(

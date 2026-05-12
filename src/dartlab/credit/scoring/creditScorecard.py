@@ -76,7 +76,7 @@ def weightedScore(axes: list[dict]) -> float:
 
 
 # mapTo20Grade / estimatePD / notchGrade / isInvestmentGrade / gradeCategory:
-# core/cross/creditGradeTable SSOT 에서 import (모듈 상단 from 절). 중복 정의 제거.
+# synth/creditGradeTable SSOT 에서 import (모듈 상단 from 절). 중복 정의 제거.
 
 
 # ── 현금흐름등급 (eCR) ──

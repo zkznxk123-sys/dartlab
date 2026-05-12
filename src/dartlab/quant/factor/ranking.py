@@ -10,13 +10,13 @@ import logging
 import numpy as np
 import polars as pl
 
-from dartlab.core.cross.scanBridge import (
+from dartlab.quant.screen.dataAccess import loadScanParquet
+from dartlab.quant.strategy.metrics import pearsonCorr, spearmanCorr
+from dartlab.synth.scanBridge import (
     extractAnnualConsolidated,
     getAccountValue,
     isEdgarSchema,
 )
-from dartlab.quant.screen.dataAccess import loadScanParquet
-from dartlab.quant.strategy.metrics import pearsonCorr, spearmanCorr
 
 log = logging.getLogger(__name__)
 

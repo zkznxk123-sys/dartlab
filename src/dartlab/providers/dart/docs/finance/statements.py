@@ -12,8 +12,8 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
-from dartlab.core.reportSelector import parsePeriodKey, selectReport
-from dartlab.core.tableParser import extractAccounts
+from dartlab.providers.reportSelector import parsePeriodKey, selectReport
+from dartlab.providers.tableParser import extractAccounts
 
 if TYPE_CHECKING:
     import polars as pl
@@ -82,7 +82,7 @@ def extractContent(
         - ``extractConsolidatedContent`` — 하위 호환 wrapper (scope 무시).
         - ``splitStatements`` — 본 함수 결과 content 를 BS/IS/CF 로 분리.
         - ``statements`` — 본 함수의 일반적 호출자 (시계열 빌드).
-        - ``dartlab.core.reportSelector.selectReport`` — report 의 source.
+        - ``dartlab.providers.reportSelector.selectReport`` — report 의 source.
 
     Requires:
         - polars — DataFrame 필터.
@@ -233,7 +233,7 @@ def splitStatements(content: str) -> dict[str, str]:
     SeeAlso:
         - ``_STATEMENT_PATTERNS`` (모듈 상수) — 5 종 정규식 SSOT.
         - ``extractContent`` — 본 함수 입력의 source.
-        - ``dartlab.core.tableParser.extractAccounts`` — 본 함수 결과 각 제표의 다음 단계 파서.
+        - ``dartlab.providers.tableParser.extractAccounts`` — 본 함수 결과 각 제표의 다음 단계 파서.
 
     Requires:
         - re (stdlib) — 정규식 매칭.
@@ -358,15 +358,15 @@ def statements(
     SeeAlso:
         - ``StatementsResult`` (dataclass) — 본 함수 반환 타입.
         - ``extractContent`` / ``splitStatements`` — 파이프 단계.
-        - ``dartlab.core.tableParser.extractAccounts`` — 항목/금액 파싱.
-        - ``dartlab.core.reportSelector.selectReport`` — 정기보고서 선택.
+        - ``dartlab.providers.tableParser.extractAccounts`` — 항목/금액 파싱.
+        - ``dartlab.providers.reportSelector.selectReport`` — 정기보고서 선택.
         - ``dartlab.providers.dart.docs.finance.dividend.dividend`` — 같은 패턴 (배당 시계열).
 
     Requires:
         - polars — DataFrame.
         - dartlab.core.dataLoader — ``loadData`` + ``PERIOD_KINDS``.
-        - dartlab.core.reportSelector — ``selectReport`` + ``parsePeriodKey``.
-        - dartlab.core.tableParser — ``extractAccounts``.
+        - dartlab.providers.reportSelector — ``selectReport`` + ``parsePeriodKey``.
+        - dartlab.providers.tableParser — ``extractAccounts``.
 
     AIContext:
         Workbench 재무 토픽의 entry point. "이 회사 매출/순이익 추이" / "EPS / ROE" / "자산총계

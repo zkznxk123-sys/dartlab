@@ -875,7 +875,7 @@ def _normalizeDartDocs(df: pl.DataFrame) -> pl.DataFrame:
     if "doc_url" not in cols and "section_url" in cols:
         exprs.append(pl.col("section_url").alias("doc_url"))
     if "period_key" not in cols and "report_type" in cols:
-        from dartlab.core.reportSelector import parsePeriodKey
+        from dartlab.providers.reportSelector import parsePeriodKey
 
         exprs.append(pl.col("report_type").map_elements(parsePeriodKey, return_dtype=pl.Utf8).alias("period_key"))
 

@@ -15,7 +15,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-from dartlab.reference.dataConfig import DATA_RELEASES
+from dartlab.core.dataConfig import DATA_RELEASES
 
 
 @dataclass

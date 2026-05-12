@@ -672,7 +672,7 @@ def _knownCapabilities() -> set[str]:
     if _KNOWN_CAPS_CACHE is not None and not _skillsCacheDisabled():
         return set(_KNOWN_CAPS_CACHE)
     try:
-        from dartlab.core.capability._generated import CAPABILITIES
+        from dartlab.reference.capability._generated import CAPABILITIES
     except Exception:
         return set()
     caps = frozenset(str(key) for key in CAPABILITIES)

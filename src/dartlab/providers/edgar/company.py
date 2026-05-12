@@ -712,7 +712,7 @@ class Company:
         return Path(config.dataDir) / "edgar" / "tickers.parquet"
 
     def __repr__(self):
-        from dartlab.core.htmlRenderer import getHtmlRenderer
+        from dartlab.reference.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:
@@ -1647,7 +1647,7 @@ class Company:
             OutputSchema:
                 - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - 로컬 표시 가능 환경 + `dartlab.core.viewer` 의존.
+                - 로컬 표시 가능 환경 + `dartlab.reference.viewer` 의존.
             Freshness:
                 - 호출 시점 즉시 (서버 별도 데이터 fetch X).
             Dataflow:
@@ -1655,7 +1655,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) — viewer 는 ticker 별 디스패치.
         """
-        from dartlab.core.viewer import launchViewer
+        from dartlab.reference.viewer import launchViewer
 
         launchViewer(self.ticker, port=port)
 
@@ -3005,7 +3005,7 @@ class Company:
             c.select("IS", ["Revenue", "Net Income"], ["2024", "2023"])
         """
         from dartlab.core.select import SelectResult
-        from dartlab.core.show import selectFromShow
+        from dartlab.reference.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None 차단)
         try:
@@ -3422,7 +3422,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) 10-K/Q 변경 추적.
         """
-        from dartlab.core.docs.diff import (
+        from dartlab.reference.docs.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
@@ -3498,7 +3498,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) 10-K/Q 텍스트 분석.
         """
-        from dartlab.core.docs.diff import keywordFrequency
+        from dartlab.reference.docs.diff import keywordFrequency
 
         docsSections = self._docs.sections
         if docsSections is None:
@@ -4063,7 +4063,7 @@ class Company:
         # Item 9A: 내부통제
         item9a = self.show("10-K::item9AControlsAndProcedures", block=0)
         if item9a is not None:
-            from dartlab.core.show import isPeriodColumn
+            from dartlab.reference.show import isPeriodColumn
 
             pcols = [c for c in item9a.columns if isPeriodColumn(c)]
             if pcols:
@@ -4081,7 +4081,7 @@ class Company:
         # Item 14: 감사 수수료
         item14 = self.show("10-K::item14PrincipalAccountantFees", block=0)
         if item14 is not None:
-            from dartlab.core.show import isPeriodColumn
+            from dartlab.reference.show import isPeriodColumn
 
             pcols = [c for c in item14.columns if isPeriodColumn(c)]
             if pcols:
@@ -4163,7 +4163,7 @@ class Company:
         ]:
             df = self.show(topic_key, block=0)
             if df is not None:
-                from dartlab.core.show import isPeriodColumn
+                from dartlab.reference.show import isPeriodColumn
 
                 pcols = [c for c in df.columns if isPeriodColumn(c)]
                 if pcols:
@@ -4242,7 +4242,7 @@ class Company:
             block_df = self.show("10-K::item1Business", block=block_id)
             if block_df is None:
                 continue
-            from dartlab.core.show import isPeriodColumn
+            from dartlab.reference.show import isPeriodColumn
 
             pcols = [c for c in block_df.columns if isPeriodColumn(c)]
             if not pcols:
@@ -4280,7 +4280,7 @@ class Company:
         rev_per_employee = None
         isDf = self.show("IS")
         if isDf is not None:
-            from dartlab.core.show import isPeriodColumn, selectFromShow
+            from dartlab.reference.show import isPeriodColumn, selectFromShow
 
             rev_row = selectFromShow(isDf, ["sales"])
             if rev_row is not None:
@@ -4369,14 +4369,14 @@ class Company:
         cf = self.show("CF")
         if bs is None:
             return None
-        from dartlab.core.show import selectFromShow
+        from dartlab.reference.show import selectFromShow
 
         equity = selectFromShow(bs, ["total_stockholders_equity", "retained_earnings"])
         divs = selectFromShow(cf, ["dividends_paid"]) if cf is not None else None
         if equity is None:
             return None
         rows: list[dict] = [{"종목코드": self.ticker, "회사명": self.corpName}]
-        from dartlab.core.show import isPeriodColumn
+        from dartlab.reference.show import isPeriodColumn
 
         pcols = [c for c in equity.columns if isPeriodColumn(c)]
         if pcols:
@@ -4457,7 +4457,7 @@ class Company:
         bs = self.show("BS")
         if bs is None:
             return None
-        from dartlab.core.show import selectFromShow
+        from dartlab.reference.show import selectFromShow
 
         debt_accts = selectFromShow(
             bs,
@@ -4473,7 +4473,7 @@ class Company:
         if debt_accts is None:
             return None
         rows: list[dict] = [{"종목코드": self.ticker, "회사명": self.corpName}]
-        from dartlab.core.show import isPeriodColumn
+        from dartlab.reference.show import isPeriodColumn
 
         pcols = [c for c in debt_accts.columns if isPeriodColumn(c)]
         if pcols:

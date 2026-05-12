@@ -33,7 +33,7 @@ class TestDiffMatrix(unittest.TestCase):
         )
 
     def test_basic(self):
-        from dartlab.core.docs.diff import buildDiffMatrix
+        from dartlab.reference.docs.diff import buildDiffMatrix
 
         sections = self._make_sections()
         result = buildDiffMatrix(sections)
@@ -48,7 +48,7 @@ class TestDiffMatrix(unittest.TestCase):
         self.assertIn("changeRate", row)
 
     def test_text_only(self):
-        from dartlab.core.docs.diff import buildDiffMatrix
+        from dartlab.reference.docs.diff import buildDiffMatrix
 
         sections = self._make_sections()
         full = buildDiffMatrix(sections)
@@ -58,7 +58,7 @@ class TestDiffMatrix(unittest.TestCase):
         self.assertLessEqual(text["topic_count"], full["topic_count"])
 
     def test_heatmap_spec_shape(self):
-        from dartlab.core.docs.diff import buildDiffMatrix, buildHeatmapSpec
+        from dartlab.reference.docs.diff import buildDiffMatrix, buildHeatmapSpec
 
         sections = self._make_sections()
         matrixData = buildDiffMatrix(sections)
@@ -82,7 +82,7 @@ class TestBridge(unittest.TestCase):
     """003 bridge — extract_amounts / match_amounts."""
 
     def test_extract_amounts_patterns(self):
-        from dartlab.core.docs.bridge import extractAmountsFromText
+        from dartlab.reference.docs.bridge import extractAmountsFromText
 
         # 조+억
         r = extractAmountsFromText("매출액 86조 1,229억원")
@@ -113,7 +113,7 @@ class TestBridge(unittest.TestCase):
         self.assertEqual(extractAmountsFromText(None), [])
 
     def test_match_amounts_tolerance(self):
-        from dartlab.core.docs.bridge import matchAmounts
+        from dartlab.reference.docs.bridge import matchAmounts
 
         textAmounts = [
             {"value_억": 1000, "raw": "1,000억", "unit": "억"},
@@ -134,7 +134,7 @@ class TestBridge(unittest.TestCase):
         self.assertEqual(len(matches_strict), 0)
 
     def test_zero_values_skipped(self):
-        from dartlab.core.docs.bridge import matchAmounts
+        from dartlab.reference.docs.bridge import matchAmounts
 
         textAmounts = [{"value_억": 0, "raw": "0", "unit": "억"}]
         financeAmounts = {"매출액": 1000.0}
@@ -164,7 +164,7 @@ class TestTopicGraph(unittest.TestCase):
         )
 
     def test_mention_matrix_structure(self):
-        from dartlab.core.docs.topicGraph import buildMentionMatrix
+        from dartlab.reference.docs.topicGraph import buildMentionMatrix
 
         sections = self._make_sections()
         result = buildMentionMatrix(sections)
@@ -176,7 +176,7 @@ class TestTopicGraph(unittest.TestCase):
         self.assertGreater(len(result["adjacency"]), 0)
 
     def test_analyze_graph_threshold(self):
-        from dartlab.core.docs.topicGraph import analyzeGraph
+        from dartlab.reference.docs.topicGraph import analyzeGraph
 
         adjacency = {
             ("a", "b"): 5,
@@ -194,7 +194,7 @@ class TestTopicGraph(unittest.TestCase):
         self.assertEqual(result_all["edges"], 3)
 
     def test_empty_adjacency(self):
-        from dartlab.core.docs.topicGraph import analyzeGraph
+        from dartlab.reference.docs.topicGraph import analyzeGraph
 
         result = analyzeGraph({}, threshold=1)
         self.assertEqual(result["edges"], 0)
@@ -338,7 +338,7 @@ class TestIntegrationReal(unittest.TestCase):
         cls.c = dartlab.Company("005930")
 
     def test_diff_matrix_real(self):
-        from dartlab.core.docs.diff import buildDiffMatrix
+        from dartlab.reference.docs.diff import buildDiffMatrix
 
         sections = self.c._docs.sections.raw
         result = buildDiffMatrix(sections, textOnly=True)
@@ -348,7 +348,7 @@ class TestIntegrationReal(unittest.TestCase):
     def test_bridge_real(self):
         import re
 
-        from dartlab.core.docs.bridge import (
+        from dartlab.reference.docs.bridge import (
             extractAmountsFromText,
             getFinanceAmounts,
             matchAmounts,
@@ -378,7 +378,7 @@ class TestIntegrationReal(unittest.TestCase):
         self.assertGreater(len(matched), 0)
 
     def test_topic_graph_real(self):
-        from dartlab.core.docs.topicGraph import (
+        from dartlab.reference.docs.topicGraph import (
             analyzeGraph,
             buildMentionMatrix,
             getRelatedTopics,

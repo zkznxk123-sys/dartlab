@@ -203,7 +203,7 @@ def test_multiStageDcf_tg_auto_correction():
 @pytest.mark.unit
 def test_overrides_has_phase3_keys():
     """신규 Phase 3 override 키가 VALUATION_KEYS 에 등록됨."""
-    from dartlab.core.overrides import FORECAST_KEYS, VALUATION_KEYS
+    from dartlab.synth.overrides import FORECAST_KEYS, VALUATION_KEYS
 
     for key in ("impliedERP", "bottomUpBeta", "optimalROIC", "synergyType", "controlScenario"):
         assert key in VALUATION_KEYS, f"{key} missing in VALUATION_KEYS"
@@ -214,7 +214,7 @@ def test_overrides_has_phase3_keys():
 @pytest.mark.unit
 def test_detectExtremeFlags_control_synergy_double_count():
     """Control + Synergy > standalone × 0.5 → control_synergy_double_count flag."""
-    from dartlab.core.overrides import detectExtremeFlags
+    from dartlab.synth.overrides import detectExtremeFlags
 
     flags = detectExtremeFlags(
         {
@@ -230,7 +230,7 @@ def test_detectExtremeFlags_control_synergy_double_count():
 @pytest.mark.unit
 def test_detectExtremeFlags_implied_far_from_historical():
     """Implied ERP 가 historical 대비 ±3%p 초과 → flag."""
-    from dartlab.core.overrides import detectExtremeFlags
+    from dartlab.synth.overrides import detectExtremeFlags
 
     flags = detectExtremeFlags(
         {

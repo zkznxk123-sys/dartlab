@@ -76,6 +76,12 @@ class GatherCache:
     def get(self, key: str) -> object | None:
         """캐시 조회 — 만료되었으면 stale로 이동 후 None 반환.
 
+        Capabilities: thread-safe LRU + TTL 만료 자동 stale 이전 + hit/miss telemetry.
+        AIContext: gather mixin (price/flow/...) 의 cache hit 단일 진입점.
+        Guide: 만료된 데이터는 _stale 보관 — getStale 로 fallback.
+        When: gather mixin 메서드의 첫 단계.
+        How: lock → store lookup → TTL 비교 → telemetry record.
+
         Parameters
         ----------
         key : str
@@ -91,9 +97,18 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``self._lock`` (threading.Lock) + ``self._store`` OrderedDict.
+
         Example
         -------
         >>> v = cache.get("005930:price")
+
+        See Also
+        --------
+        getStale : 만료 데이터 fallback.
+        put · getTyped : 동행 인터페이스.
         """
         with self._lock:
             entry = self._store.get(key)
@@ -118,6 +133,12 @@ class GatherCache:
     def put(self, key: str, value: object, ttl: int = TTL_DEFAULT) -> None:
         """캐시 저장 — max_entries 초과 시 가장 오래된 항목 LRU 축출.
 
+        Capabilities: thread-safe write + LRU 축출 + evict telemetry.
+        AIContext: gather mixin 의 fetch 직후 cache 저장 진입.
+        Guide: 기존 키 덮어쓰기 + stale 제거.
+        When: 가격/수급 fetch 직후 cache 저장 시.
+        How: lock → 기존 key 제거 → store insert → max 초과 시 popitem(last=False).
+
         Parameters
         ----------
         key : str
@@ -136,9 +157,18 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``self._lock`` + ``self._store`` + ``self._max``.
+
         Example
         -------
         >>> cache.put("005930:price", snap, ttl=300)
+
+        See Also
+        --------
+        putTyped : 데이터 유형별 TTL 자동.
+        get : 동행 read.
         """
         evictCount = 0
         with self._lock:
@@ -171,6 +201,12 @@ class GatherCache:
     def getStale(self, key: str) -> object | None:
         """만료된 데이터 반환 — stale-while-revalidate 패턴의 최후 fallback.
 
+        Capabilities: ``self._stale[key]`` lookup — TTL 만료 후 보존된 마지막 값.
+        AIContext: 외부 API 모두 실패 시 stale 데이터로 graceful degradation 진입.
+        Guide: TTL 만료 = 신선도 떨어짐 (사용자 표시 시 warning 권장).
+        When: fetch 모든 source 실패 후 캐시 stale fallback 필요 시.
+        How: ``with self._lock: return self._stale.get(key)``.
+
         Parameters
         ----------
         key : str
@@ -186,15 +222,30 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``self._stale`` dict + ``self._lock``.
+
         Example
         -------
         >>> stale = cache.getStale("005930:price")
+
+        See Also
+        --------
+        getTyped(allowStale=True) : 통합 인터페이스.
+        get : live 항목 read.
         """
         with self._lock:
             return self._stale.get(key)
 
     def getTyped(self, stockCode: str, dataType: str, *, allowStale: bool = False) -> object | None:
         """데이터 유형별 캐시 조회 — "{stock_code}:{data_type}" 키로 자동 조합.
+
+        Capabilities: stockCode + dataType → 키 조합 + get + (선택) getStale fallback.
+        AIContext: gather mixin 의 사용자-friendly cache 진입 — 키 조합 자동.
+        Guide: allowStale=True 시 외부 API 실패 graceful — 사용자에게 warning 표시 책임.
+        When: gather mixin (price/flow/sector/...) 의 첫 단계.
+        How: ``key = f'{stockCode}:{dataType}'`` → get → allowStale 시 getStale fallback.
 
         Parameters
         ----------
@@ -215,9 +266,18 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        get / getStale 인터페이스.
+
         Example
         -------
         >>> snap = cache.getTyped("005930", "price")
+
+        See Also
+        --------
+        putTyped : 동행 write.
+        get · getStale : 위임 대상.
         """
         key = f"{stockCode}:{dataType}"
         result = self.get(key)
@@ -229,6 +289,12 @@ class GatherCache:
 
     def putTyped(self, stockCode: str, dataType: str, value: object) -> None:
         """데이터 유형에 맞는 TTL로 저장 — _TTL_MAP에서 자동 매핑.
+
+        Capabilities: stockCode + dataType → 키 + _TTL_MAP TTL 자동 + put 위임.
+        AIContext: gather mixin 의 cache write — 데이터 유형별 TTL 자동.
+        Guide: dataType 미등록 시 TTL_DEFAULT (3600s).
+        When: fetch 직후 cache 저장 시.
+        How: ``_TTL_MAP.get(dataType, TTL_DEFAULT)`` → ``self.put(key, value, ttl)``.
 
         Parameters
         ----------
@@ -248,15 +314,30 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``_TTL_MAP`` + ``self.put`` 가용.
+
         Example
         -------
         >>> cache.putTyped("005930", "price", snap)
+
+        See Also
+        --------
+        getTyped : 동행 read.
+        put : 위임 대상.
         """
         ttl = _TTL_MAP.get(dataType, TTL_DEFAULT)
         self.put(f"{stockCode}:{dataType}", value, ttl)
 
     def invalidate(self, stockCode: str) -> None:
         """특정 종목의 모든 캐시 제거 — live + stale 양쪽에서 prefix 매칭 삭제.
+
+        Capabilities: stockCode prefix 매칭 키 모두 store + stale 에서 삭제.
+        AIContext: 사용자 신선 데이터 강제 / live 가격 갱신 진입.
+        Guide: 종목 한정 — 전체 invalidate 는 clear().
+        When: gather.invalidate(stockCode) 사용자 호출 시.
+        How: lock → store + stale prefix match → 키 삭제.
 
         Parameters
         ----------
@@ -272,9 +353,18 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``self._lock`` + ``self._store`` + ``self._stale``.
+
         Example
         -------
         >>> cache.invalidate("005930")
+
+        See Also
+        --------
+        clear : 전체 캐시 비우기.
+        engine.Gather.invalidate : 본 메서드 caller.
         """
         with self._lock:
             prefix = f"{stockCode}:"
@@ -307,6 +397,12 @@ class GatherCache:
     def size(self) -> int:
         """캐시에 저장된 live 항목 수 (stale 제외).
 
+        Capabilities: ``len(self._store)`` — live OrderedDict 만.
+        AIContext: 캐시 차지 진단 / 디버깅 진입.
+        Guide: stale 제외 — 진짜 메모리 사용 = size + len(_stale).
+        When: cache 상태 진단 / dashboard 표시 시.
+        How: ``len(self._store)``.
+
         Returns
         -------
         int
@@ -316,9 +412,17 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``self._store`` OrderedDict.
+
         Example
         -------
         >>> cache.size
+
+        See Also
+        --------
+        clear : 전체 size 0 만들기.
         """
         return len(self._store)
 

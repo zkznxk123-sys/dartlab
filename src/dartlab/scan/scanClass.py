@@ -347,7 +347,7 @@ class Scan:
             - :meth:`iterDocsSections` — 본 메서드의 streaming pair (룰 10)
             - :func:`dartlab.scan.builders.kr.docsIndex.buildDocsIndex` — source 빌더
         """
-        from dartlab.reference.dataLoader import _dataDir, _getDataRoot
+        from dartlab.core.dataLoader import _dataDir, _getDataRoot
         from dartlab.scan.io.cross import pickCrossScanEngine
 
         if market not in ("KR", "US", "JP"):
@@ -449,7 +449,7 @@ class Scan:
             - example : str — 호출 예시 코드 문자열.
             - apiKey : str — 필요한 API 키 (scan은 전부 불필요).
         """
-        from dartlab.core.axisGuide import buildAxisGuideDataFrame
+        from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
         financial_axes = set(_SCAN_GROUPS.get("financial", []))
         _EDGAR_AXES = {

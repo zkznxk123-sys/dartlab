@@ -89,8 +89,8 @@ _KNOWN_VIOLATIONS = {
     ("dartlab.core.resolve", "dartlab.gather"),
     ("dartlab.core", "dartlab.gather"),  # core/__init__ → listing
     # core/ → providers (L0→L1)
-    ("dartlab.core.docs.diff", "dartlab.providers"),
-    ("dartlab.core.docs.diff", "dartlab.scan"),
+    ("dartlab.reference.docs.diff", "dartlab.providers"),
+    ("dartlab.reference.docs.diff", "dartlab.scan"),
     # core/search → providers (L0→L1) — 수집 디렉토리/파일 참조
     ("dartlab.providers.dart.search", "dartlab.providers"),
     # core/finance → scan (L0→L1) — lazy import (함수 내부)
@@ -101,7 +101,7 @@ _KNOWN_VIOLATIONS = {
     # analysis → ai (L2→L3) — lazy import (storyValidation → KnowledgeDB 조회)
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
     # core/_generated → analysis (L0→L2) — generateSpec 자동 생성 (CAPABILITIES JSON 안 example 문자열 매칭)
-    ("dartlab.core.capability._generated", "dartlab.analysis"),
+    ("dartlab.reference.capability._generated", "dartlab.analysis"),
     # core/credentials → providers — DART API 키 관리 lazy import
     ("dartlab.core.credentials", "dartlab.providers"),
     # core/credentials → ai.settings — provider 카탈로그/secret store/profile 조회 lazy import

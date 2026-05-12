@@ -2,8 +2,8 @@
 
 import re
 
-from dartlab.core.tableParser import detectUnit, parseAmount
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
+from dartlab.providers.tableParser import detectUnit, parseAmount
 from dartlab.reference.mappers.parserMapper import loadCostByNature
 
 _CBN = loadCostByNature()

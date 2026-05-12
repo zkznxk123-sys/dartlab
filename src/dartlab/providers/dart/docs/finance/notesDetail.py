@@ -15,10 +15,10 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
-from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
-from dartlab.core.reportSelector import selectReport
-from dartlab.core.tableParser import detectUnit, parseAmount, parseNotesTable
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
+from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
+from dartlab.providers.reportSelector import selectReport
+from dartlab.providers.tableParser import detectUnit, parseAmount, parseNotesTable
 from dartlab.reference.mappers.common import isCurrentPeriod, normalizeName, pickValue
 from dartlab.reference.mappers.notesMapper import NOTES_KEYWORDS, NotesMapper
 

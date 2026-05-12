@@ -256,7 +256,7 @@ def scanDebtMix() -> dict[str, dict]:
             pass
 
     # fallback: 종목별 순회
-    from dartlab.reference.dataLoader import _dataDir
+    from dartlab.core.dataLoader import _dataDir
 
     finance_dir = Path(_dataDir("finance"))
     parquet_files = sorted(finance_dir.glob("*.parquet"))
