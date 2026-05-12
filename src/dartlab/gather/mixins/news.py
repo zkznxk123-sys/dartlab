@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import polars as pl
 
 from ..infra.http import runAsync
+from ..infra.telemetry import emitGatherFetch
 from ..sources import news as _news
 from .context import GatherMixinContext
 
@@ -64,15 +66,21 @@ class _GatherNewsMixin(GatherMixinContext):
         See Also:
             ``dartDoc`` — DART 공시 본문 (RSS 가 아닌 viewer 직접).
         """
-        cache_key = f"{query}:{market}:news"
-        cached = self._cache.getTyped(cache_key, "news")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        items = runAsync(_news._fetchAsync(query, market=market, days=days, client=self._client))
-        df = _news.toDataFrame(items)
-        if not df.is_empty():
-            self._cache.putTyped(cache_key, "news", df)
-        return df
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{query}:{market}:news"
+            cached = self._cache.getTyped(cache_key, "news")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            items = runAsync(_news._fetchAsync(query, market=market, days=days, client=self._client))
+            df = _news.toDataFrame(items)
+            if not df.is_empty():
+                self._cache.putTyped(cache_key, "news", df)
+            return df
+        finally:
+            emitGatherFetch("news", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def dartDoc(self, rceptNo: str) -> "pl.DataFrame":
         """DART 공시 viewer 원문 fetch (14자리 rcept_no, 무인증).
@@ -106,6 +114,10 @@ class _GatherNewsMixin(GatherMixinContext):
             g = getDefaultGather()
             df = g.dartDoc("20240315000123")
         """
-        from dartlab.gather.dart.viewer import fetch as _fetchDartDoc
+        t0 = time.monotonic()
+        try:
+            from dartlab.gather.dart.viewer import fetch as _fetchDartDoc
 
-        return _fetchDartDoc(rceptNo, client=self._client)
+            return _fetchDartDoc(rceptNo, client=self._client)
+        finally:
+            emitGatherFetch("dartDoc", (time.monotonic() - t0) * 1000, cacheHit=False, market="KR")

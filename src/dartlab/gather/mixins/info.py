@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import logging
+import time
 
 from ..infra.http import runAsync
+from ..infra.telemetry import emitGatherFetch
 from ..sources import insider as _insider
 from ..sources import ownership as _ownership
 from ..sources import sector as _sector
@@ -60,30 +62,36 @@ class _GatherInfoMixin(GatherMixinContext):
         See Also:
             ``splits`` — 액면분할/병합 이력 (같은 fallback 패턴).
         """
-        cache_key = f"{stockCode}:{market}:dividends"
-        cached = self._cache.getTyped(cache_key, "dividends")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        from ..domains import DIVIDENDS_FALLBACK, loadDomain
-        from ..infra.resilience import circuitBreaker as _cb
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{stockCode}:{market}:dividends"
+            cached = self._cache.getTyped(cache_key, "dividends")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            from ..domains import DIVIDENDS_FALLBACK, loadDomain
+            from ..infra.resilience import circuitBreaker as _cb
 
-        for source in DIVIDENDS_FALLBACK:
-            if _cb.isOpen(source):
-                continue
-            try:
-                module = loadDomain(source)
-                if not hasattr(module, "fetchDividends"):
+            for source in DIVIDENDS_FALLBACK:
+                if _cb.isOpen(source):
                     continue
-                result = runAsync(module.fetchDividends(stockCode, self._client, market=market))
-                if result:
-                    _cb.recordSuccess(source)
-                    self._cache.putTyped(cache_key, "dividends", result)
-                    return result
-            except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
-                _cb.recordFailure(source)
-                log.warning("dividends %s 실패 (%s): %s", source, stockCode, exc)
-                continue
-        return []
+                try:
+                    module = loadDomain(source)
+                    if not hasattr(module, "fetchDividends"):
+                        continue
+                    result = runAsync(module.fetchDividends(stockCode, self._client, market=market))
+                    if result:
+                        _cb.recordSuccess(source)
+                        self._cache.putTyped(cache_key, "dividends", result)
+                        return result
+                except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
+                    _cb.recordFailure(source)
+                    log.warning("dividends %s 실패 (%s): %s", source, stockCode, exc)
+                    continue
+            return []
+        finally:
+            emitGatherFetch("dividends", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def splits(self, stockCode: str, *, market: str = "KR") -> list[dict]:
         """액면분할/병합 이력 조회.
@@ -129,30 +137,36 @@ class _GatherInfoMixin(GatherMixinContext):
             ``dividends`` — 같은 fallback 체인.
             ``dartlab.gather.transforms.adjustPrice`` — split 보정 변환.
         """
-        cache_key = f"{stockCode}:{market}:splits"
-        cached = self._cache.getTyped(cache_key, "splits")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        from ..domains import DIVIDENDS_FALLBACK, loadDomain
-        from ..infra.resilience import circuitBreaker as _cb
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{stockCode}:{market}:splits"
+            cached = self._cache.getTyped(cache_key, "splits")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            from ..domains import DIVIDENDS_FALLBACK, loadDomain
+            from ..infra.resilience import circuitBreaker as _cb
 
-        for source in DIVIDENDS_FALLBACK:
-            if _cb.isOpen(source):
-                continue
-            try:
-                module = loadDomain(source)
-                if not hasattr(module, "fetchSplits"):
+            for source in DIVIDENDS_FALLBACK:
+                if _cb.isOpen(source):
                     continue
-                result = runAsync(module.fetchSplits(stockCode, self._client, market=market))
-                if result:
-                    _cb.recordSuccess(source)
-                    self._cache.putTyped(cache_key, "splits", result)
-                    return result
-            except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
-                _cb.recordFailure(source)
-                log.warning("splits %s 실패 (%s): %s", source, stockCode, exc)
-                continue
-        return []
+                try:
+                    module = loadDomain(source)
+                    if not hasattr(module, "fetchSplits"):
+                        continue
+                    result = runAsync(module.fetchSplits(stockCode, self._client, market=market))
+                    if result:
+                        _cb.recordSuccess(source)
+                        self._cache.putTyped(cache_key, "splits", result)
+                        return result
+                except (SourceUnavailableError, ImportError, OSError, AttributeError) as exc:
+                    _cb.recordFailure(source)
+                    log.warning("splits %s 실패 (%s): %s", source, stockCode, exc)
+                    continue
+            return []
+        finally:
+            emitGatherFetch("splits", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def sector(self, stockCode: str, *, market: str = "KR") -> SectorInfo | None:
         """업종 분류 조회 -- KR(KIND+Naver) / US(Yahoo assetProfile).
@@ -198,14 +212,20 @@ class _GatherInfoMixin(GatherMixinContext):
             ``industryPeers`` — 같은 업종 종목 리스트.
             ``dartlab.gather.krx.listing.getKindList`` — KR KIND 등록부.
         """
-        cache_key = f"{stockCode}:{market}"
-        cached = self._cache.getTyped(cache_key, "sector_info")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        result = runAsync(_sector.fetch(stockCode, market=market, client=self._client))
-        if result:
-            self._cache.putTyped(cache_key, "sector_info", result)
-        return result
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{stockCode}:{market}"
+            cached = self._cache.getTyped(cache_key, "sector_info")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            result = runAsync(_sector.fetch(stockCode, market=market, client=self._client))
+            if result:
+                self._cache.putTyped(cache_key, "sector_info", result)
+            return result
+        finally:
+            emitGatherFetch("sector", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def insiderTrading(self, stockCode: str, *, market: str = "KR") -> list[InsiderTrade]:
         """내부자(임원/주요주주) 거래 내역 조회.
@@ -253,14 +273,20 @@ class _GatherInfoMixin(GatherMixinContext):
         from dartlab.core.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
-        cache_key = f"{stockCode}:{market}:insider"
-        cached = self._cache.getTyped(cache_key, "insider")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        result = runAsync(_insider.fetchInsiderTrading(stockCode, market=market, client=self._client))
-        if result:
-            self._cache.putTyped(cache_key, "insider", result)
-        return result
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{stockCode}:{market}:insider"
+            cached = self._cache.getTyped(cache_key, "insider")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            result = runAsync(_insider.fetchInsiderTrading(stockCode, market=market, client=self._client))
+            if result:
+                self._cache.putTyped(cache_key, "insider", result)
+            return result
+        finally:
+            emitGatherFetch("insider", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def majorShareholders(self, stockCode: str, *, market: str = "KR") -> list[MajorHolder]:
         """5% 이상 대량보유 주주 변동 조회 (KR 전용).
@@ -303,14 +329,20 @@ class _GatherInfoMixin(GatherMixinContext):
         See Also:
             ``ownership`` — 기관/외국인 비율 (시점 스냅샷).
         """
-        cache_key = f"{stockCode}:{market}:major_holder"
-        cached = self._cache.getTyped(cache_key, "major_holder")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        result = runAsync(_insider.fetchMajorShareholders(stockCode, market=market, client=self._client))
-        if result:
-            self._cache.putTyped(cache_key, "major_holder", result)
-        return result
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{stockCode}:{market}:major_holder"
+            cached = self._cache.getTyped(cache_key, "major_holder")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            result = runAsync(_insider.fetchMajorShareholders(stockCode, market=market, client=self._client))
+            if result:
+                self._cache.putTyped(cache_key, "major_holder", result)
+            return result
+        finally:
+            emitGatherFetch("majorHolder", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def ownership(self, stockCode: str, *, market: str = "KR") -> list[InstitutionOwnership]:
         """기관/외국인 지분 보유 조회.
@@ -359,14 +391,20 @@ class _GatherInfoMixin(GatherMixinContext):
         from dartlab.core.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
-        cache_key = f"{stockCode}:{market}:ownership"
-        cached = self._cache.getTyped(cache_key, "ownership")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        result = runAsync(_ownership.fetch(stockCode, market=market, client=self._client))
-        if result:
-            self._cache.putTyped(cache_key, "ownership", result)
-        return result
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cache_key = f"{stockCode}:{market}:ownership"
+            cached = self._cache.getTyped(cache_key, "ownership")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            result = runAsync(_ownership.fetch(stockCode, market=market, client=self._client))
+            if result:
+                self._cache.putTyped(cache_key, "ownership", result)
+            return result
+        finally:
+            emitGatherFetch("ownership", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def industryPeers(self, stockCode: str, *, market: str = "KR") -> list[dict]:
         """같은 업종 내 피어 종목 목록 (시총 포함).
@@ -409,11 +447,15 @@ class _GatherInfoMixin(GatherMixinContext):
         See Also:
             ``sector`` — peer 의 industryCode 원천.
         """
-        sectorInfo = self.sector(stockCode, market=market)
-        if not sectorInfo or not sectorInfo.industryCode:
-            return []
-        if market == "KR":
-            from ..domains.krx import fetchIndustryPeers
+        t0 = time.monotonic()
+        try:
+            sectorInfo = self.sector(stockCode, market=market)
+            if not sectorInfo or not sectorInfo.industryCode:
+                return []
+            if market == "KR":
+                from ..domains.krx import fetchIndustryPeers
 
-            return runAsync(fetchIndustryPeers(sectorInfo.industryCode, self._client))
-        return []
+                return runAsync(fetchIndustryPeers(sectorInfo.industryCode, self._client))
+            return []
+        finally:
+            emitGatherFetch("peers", (time.monotonic() - t0) * 1000, cacheHit=False, market=market)

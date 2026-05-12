@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from datetime import datetime, timezone
 
 from ..domains import loadDomain
 from ..infra.http import runAsync
+from ..infra.telemetry import emitGatherFetch
 from ..marketConfig import getMarketConfig
 from ..sources import insider as _insider
 from ..sources import news as _news
@@ -71,13 +73,19 @@ class _GatherCollectMixin(GatherMixinContext):
         from dartlab.core.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
-        cached = self._cache.getTyped(stockCode, "snapshot")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
+        t0 = time.monotonic()
+        cacheHit = False
+        try:
+            cached = self._cache.getTyped(stockCode, "snapshot")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
 
-        snapshot = runAsync(self._collectAsync(stockCode, market))
-        self._cache.putTyped(stockCode, "snapshot", snapshot)
-        return snapshot
+            snapshot = runAsync(self._collectAsync(stockCode, market))
+            self._cache.putTyped(stockCode, "snapshot", snapshot)
+            return snapshot
+        finally:
+            emitGatherFetch("collect", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     async def _collectAsync(self, stockCode: str, market: str) -> GatherSnapshot:
         """내부 async 수집 — 도메인별 + 보조 데이터 병렬, 10초 타임아웃.

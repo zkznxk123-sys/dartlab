@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import polars as pl
 
+from ..infra.telemetry import emitGatherFetch
 from .context import GatherMixinContext
 
 log = logging.getLogger(__name__)
@@ -129,10 +131,6 @@ class _GatherMacroMixin(GatherMixinContext):
             ``dartlab.macro`` 엔진 — 본 raw 데이터의 분석 결과.
             ``dartlab.gather.bulkData.macroHf`` — HF 벌크 경로.
         """
-        import time
-
-        from ..infra.telemetry import emitGatherFetch
-
         t0 = time.monotonic()
         try:
             if scope not in {"default", "catalog"}:
@@ -202,57 +200,61 @@ class _GatherMacroMixin(GatherMixinContext):
         ValueError
             HF 카탈로그 밖 지표를 apiKey 없이 요청한 경우.
         """
-        if apiKey is None:
+        t0 = time.monotonic()
+        try:
+            if apiKey is None:
+                try:
+                    from dartlab.gather.bulkData import macroHf
+                    from dartlab.gather.ecos import catalog as ecos_catalog
+
+                    indicator = ecos_catalog.resolveId(indicator)
+                    ids = ecos_catalog.getAllIds() if scope == "catalog" else self._MACRO_KR
+                    if indicator:
+                        return macroHf.fetchSeries("ecos", indicator, start=start, end=end)
+                    return macroHf.fetchMulti("ecos", ids, start=start, end=end)
+                except Exception as exc:
+                    if isinstance(exc, ValueError):
+                        raise
+                    log.warning("macro KR HF 실패: %s", exc)
+                    return None
+
             try:
-                from dartlab.gather.bulkData import macroHf
-                from dartlab.gather.ecos import catalog as ecos_catalog
+                from dartlab.gather.ecos import Ecos
+                from dartlab.gather.ecos.types import EcosError
+            except ImportError:
+                log.debug("ecos 모듈 없음 — KR macro 수집 생략")
+                return None
+            try:
+                ecos = Ecos(apiKey=apiKey)
+            except EcosError:
+                from dartlab.core.env import promptAndSave
 
-                indicator = ecos_catalog.resolveId(indicator)
-                ids = ecos_catalog.getAllIds() if scope == "catalog" else self._MACRO_KR
+                key = promptAndSave(
+                    "ECOS_API_KEY",
+                    label="한국은행 ECOS API 키가 필요합니다.",
+                    guide="무료 발급: https://ecos.bok.or.kr/api/#/",
+                )
+                if not key:
+                    log.info("ECOS_API_KEY 미설정 — KR macro 조회 불가")
+                    return None
+                ecos = Ecos(apiKey=key)
+            kwargs: dict = {}
+            if start:
+                kwargs["start"] = start
+            if end:
+                kwargs["end"] = end
+            try:
                 if indicator:
-                    return macroHf.fetchSeries("ecos", indicator, start=start, end=end)
-                return macroHf.fetchMulti("ecos", ids, start=start, end=end)
-            except Exception as exc:
-                if isinstance(exc, ValueError):
-                    raise
-                log.warning("macro KR HF 실패: %s", exc)
+                    from dartlab.gather.ecos import catalog as ecos_catalog
+
+                    indicator = ecos_catalog.resolveId(indicator)
+                    return ecos.series(indicator, **kwargs)
+                return ecos.compare(self._MACRO_KR, **kwargs)
+            except (KeyError, ValueError, OSError, EcosError) as exc:
+                log.warning("macro KR 실패: %s", exc)
                 return None
-
-        try:
-            from dartlab.gather.ecos import Ecos
-            from dartlab.gather.ecos.types import EcosError
-        except ImportError:
-            log.debug("ecos 모듈 없음 — KR macro 수집 생략")
-            return None
-        try:
-            ecos = Ecos(apiKey=apiKey)
-        except EcosError:
-            from dartlab.core.env import promptAndSave
-
-            key = promptAndSave(
-                "ECOS_API_KEY",
-                label="한국은행 ECOS API 키가 필요합니다.",
-                guide="무료 발급: https://ecos.bok.or.kr/api/#/",
-            )
-            if not key:
-                log.info("ECOS_API_KEY 미설정 — KR macro 조회 불가")
-                return None
-            ecos = Ecos(apiKey=key)
-        kwargs: dict = {}
-        if start:
-            kwargs["start"] = start
-        if end:
-            kwargs["end"] = end
-        try:
-            if indicator:
-                from dartlab.gather.ecos import catalog as ecos_catalog
-
-                indicator = ecos_catalog.resolveId(indicator)
-                return ecos.series(indicator, **kwargs)
-            return ecos.compare(self._MACRO_KR, **kwargs)
-        except (KeyError, ValueError, OSError, EcosError) as exc:
-            log.warning("macro KR 실패: %s", exc)
-            return None
+        finally:
+            emitGatherFetch("macroKR", (time.monotonic() - t0) * 1000, cacheHit=False, market="KR")
 
     def _macroUS(
         self,
@@ -286,50 +288,54 @@ class _GatherMacroMixin(GatherMixinContext):
         ValueError
             HF 카탈로그 밖 지표를 apiKey 없이 요청한 경우.
         """
-        if apiKey is None:
+        t0 = time.monotonic()
+        try:
+            if apiKey is None:
+                try:
+                    from dartlab.gather.bulkData import macroHf
+                    from dartlab.gather.fred import catalog as fred_catalog
+
+                    ids = fred_catalog.getAllIds() if scope == "catalog" else self._MACRO_US
+                    if indicator:
+                        return macroHf.fetchSeries("fred", indicator, start=start, end=end)
+                    return macroHf.fetchMulti("fred", ids, start=start, end=end)
+                except Exception as exc:
+                    if isinstance(exc, ValueError):
+                        raise
+                    log.warning("macro US HF 실패 (indicator=%s): %s", indicator or "ALL", exc)
+                    return None
+
             try:
-                from dartlab.gather.bulkData import macroHf
-                from dartlab.gather.fred import catalog as fred_catalog
+                from dartlab.gather.fred import Fred
+                from dartlab.gather.fred.types import FredError
+            except ImportError:
+                log.debug("fred 모듈 없음 — US macro 수집 생략")
+                return None
+            try:
+                fred = Fred(apiKey=apiKey)
+            except FredError:
+                from dartlab.core.env import promptAndSave
 
-                ids = fred_catalog.getAllIds() if scope == "catalog" else self._MACRO_US
+                key = promptAndSave(
+                    "FRED_API_KEY",
+                    label="FRED API 키가 필요합니다.",
+                    guide="무료 발급: https://fred.stlouisfed.org/docs/api/api_key.html",
+                )
+                if not key:
+                    log.info("FRED_API_KEY 미설정 — US macro 조회 불가")
+                    return None
+                fred = Fred(apiKey=key)
+            kwargs: dict = {}
+            if start:
+                kwargs["start"] = start
+            if end:
+                kwargs["end"] = end
+            try:
                 if indicator:
-                    return macroHf.fetchSeries("fred", indicator, start=start, end=end)
-                return macroHf.fetchMulti("fred", ids, start=start, end=end)
-            except Exception as exc:
-                if isinstance(exc, ValueError):
-                    raise
-                log.warning("macro US HF 실패 (indicator=%s): %s", indicator or "ALL", exc)
+                    return fred.series(indicator, **kwargs)
+                return fred.compare(self._MACRO_US, **kwargs)
+            except (KeyError, ValueError, OSError, FredError) as exc:
+                log.warning("macro US 실패 (indicator=%s): %s", indicator or "ALL", exc)
                 return None
-
-        try:
-            from dartlab.gather.fred import Fred
-            from dartlab.gather.fred.types import FredError
-        except ImportError:
-            log.debug("fred 모듈 없음 — US macro 수집 생략")
-            return None
-        try:
-            fred = Fred(apiKey=apiKey)
-        except FredError:
-            from dartlab.core.env import promptAndSave
-
-            key = promptAndSave(
-                "FRED_API_KEY",
-                label="FRED API 키가 필요합니다.",
-                guide="무료 발급: https://fred.stlouisfed.org/docs/api/api_key.html",
-            )
-            if not key:
-                log.info("FRED_API_KEY 미설정 — US macro 조회 불가")
-                return None
-            fred = Fred(apiKey=key)
-        kwargs: dict = {}
-        if start:
-            kwargs["start"] = start
-        if end:
-            kwargs["end"] = end
-        try:
-            if indicator:
-                return fred.series(indicator, **kwargs)
-            return fred.compare(self._MACRO_US, **kwargs)
-        except (KeyError, ValueError, OSError, FredError) as exc:
-            log.warning("macro US 실패 (indicator=%s): %s", indicator or "ALL", exc)
-            return None
+        finally:
+            emitGatherFetch("macroUS", (time.monotonic() - t0) * 1000, cacheHit=False, market="US")
