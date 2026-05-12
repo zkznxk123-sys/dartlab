@@ -1,23 +1,6 @@
-"""DART Company 의 finance 빌더 helpers.
+"""DART Company finance 빌더 helpers. facade thin delegate.
 
-Company 의 finance topic (BS/IS/CF/CIS/SCE/ratios) 빌드 로직을 facade 에서 분리.
-Company facade 는 본 모듈의 함수에 thin delegate.
-
-show("ratios") / show("BS") / show("CIS") 같은 finance topic 호출 → _showDispatch 가
-이 모듈의 함수들로 dispatch (상위 facade method 경유).
-
-Module-level functions:
-    sceMatrix             — SCE 3차원 매트릭스 (캐시)
-    sceSeriesAnnual       — SCE 연간 시계열 (캐시)
-    sce                   — SCE DataFrame (분기/연도 정렬)
-    financeCisAnnual      — CIS 연간 series (캐시)
-    financeCisQuarterly   — CIS 분기 series (캐시)
-    ratioSeries           — 비율 분기 series + 연간 fallback
-    financeOrDocsStatement — finance 우선, docs fallback dispatch
-    aggregateCisAnnual    — CIS 분기 → 연간 (4 분기 합)
-    financeStmt           — sjDiv DataFrame (캐싱)
-    buildRatios           — 비율 DataFrame 정렬
-    buildFinanceSeries    — series-tuple 빌더 (Q/Y/YTD × CFS/OFS)
+show("BS"/"IS"/"CF"/"CIS"/"SCE"/"ratios") 진입점이 위임하는 backing 함수.
 """
 
 from __future__ import annotations
