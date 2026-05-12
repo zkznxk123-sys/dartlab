@@ -120,16 +120,26 @@ class _GatherPriceMixin(GatherMixinContext):
             volume : int — 거래량 (주).
             None — 데이터 수집 실패 시.
         """
+        import time
+
         from dartlab.core.market import resolveMarket
 
+        from ..infra.telemetry import emitGatherFetch
+
+        t0 = time.monotonic()
+        cacheHit = False
         market = resolveMarket(stockCode, market)
-        cached = self._cache.getTyped(stockCode, "price")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        result = runAsync(_price.fetch(stockCode, market=market, client=self._client))
-        if result:
-            self._cache.putTyped(stockCode, "price", result)
-        return result
+        try:
+            cached = self._cache.getTyped(stockCode, "price")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            result = runAsync(_price.fetch(stockCode, market=market, client=self._client))
+            if result:
+                self._cache.putTyped(stockCode, "price", result)
+            return result
+        finally:
+            emitGatherFetch("price", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
 
     def flow(self, stockCode: str, *, market: str = "KR") -> "pl.DataFrame | None":
         """투자자별 수급 시계열 조회 (KR 전용).
@@ -175,23 +185,33 @@ class _GatherPriceMixin(GatherMixinContext):
             ``price`` — 같은 종목의 OHLCV.
             ``ownership`` — 누적 지분 보유 (스냅샷).
         """
+        import time
+
         from dartlab.core.market import resolveMarket
 
+        from ..infra.telemetry import emitGatherFetch
+
+        t0 = time.monotonic()
+        cacheHit = False
         market = resolveMarket(stockCode, market)
         import polars as pl
 
-        if market != "KR":
-            return None
-        cache_key = f"{stockCode}:flow_series"
-        cached = self._cache.getTyped(cache_key, "flow")
-        if cached is not None:
-            return cached  # type: ignore[return-value]
-        raw = runAsync(_flow.fetch(stockCode, market=market, client=self._client))
-        if not raw:
-            return None
-        df = pl.DataFrame(raw)
-        if "date" in df.columns and df["date"].dtype == pl.Utf8:
-            df = df.with_columns(pl.col("date").str.to_date("%Y%m%d").alias("date"))
+        try:
+            if market != "KR":
+                return None
+            cache_key = f"{stockCode}:flow_series"
+            cached = self._cache.getTyped(cache_key, "flow")
+            if cached is not None:
+                cacheHit = True
+                return cached  # type: ignore[return-value]
+            raw = runAsync(_flow.fetch(stockCode, market=market, client=self._client))
+            if not raw:
+                return None
+            df = pl.DataFrame(raw)
+            if "date" in df.columns and df["date"].dtype == pl.Utf8:
+                df = df.with_columns(pl.col("date").str.to_date("%Y%m%d").alias("date"))
+        finally:
+            emitGatherFetch("flow", (time.monotonic() - t0) * 1000, cacheHit=cacheHit, market=market)
         self._cache.putTyped(cache_key, "flow", df)
         return df
 

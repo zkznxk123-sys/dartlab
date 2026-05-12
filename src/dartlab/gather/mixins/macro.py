@@ -129,15 +129,23 @@ class _GatherMacroMixin(GatherMixinContext):
             ``dartlab.macro`` 엔진 — 본 raw 데이터의 분석 결과.
             ``dartlab.gather.bulkData.macroHf`` — HF 벌크 경로.
         """
-        if scope not in {"default", "catalog"}:
-            raise ValueError("scope 는 'default' 또는 'catalog' 여야 합니다.")
-        # 스마트 라우팅: market 위치에 지표 코드가 온 경우
-        if market not in self._KNOWN_MARKETS:
-            indicator = market
-            market = self._detectMarket(indicator)
-        if market == "KR":
-            return self._macroKR(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
-        return self._macroUS(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
+        import time
+
+        from ..infra.telemetry import emitGatherFetch
+
+        t0 = time.monotonic()
+        try:
+            if scope not in {"default", "catalog"}:
+                raise ValueError("scope 는 'default' 또는 'catalog' 여야 합니다.")
+            # 스마트 라우팅: market 위치에 지표 코드가 온 경우
+            if market not in self._KNOWN_MARKETS:
+                indicator = market
+                market = self._detectMarket(indicator)
+            if market == "KR":
+                return self._macroKR(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
+            return self._macroUS(indicator, start=start, end=end, apiKey=apiKey, scope=scope)
+        finally:
+            emitGatherFetch("macro", (time.monotonic() - t0) * 1000, cacheHit=False, market=market)
 
     def _detectMarket(self, indicator: str) -> str:
         """지표 코드로 market 자동 감지 — ECOS 카탈로그에 있으면 KR, 없으면 US.
