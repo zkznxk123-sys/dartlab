@@ -7,6 +7,9 @@ import time
 from collections import OrderedDict
 from dataclasses import dataclass
 
+# hit/miss/evict 카운터 record (telemetry SSOT, A 트랙 O1)
+from .telemetry import recordCacheEvict, recordCacheHit, recordCacheMiss
+
 # TTL 상수 — `infra.ttl` SSOT 에서 import (G+ P-Q4, env override 가능)
 from .ttl import (
     TTL_DEFAULT,
@@ -95,15 +98,22 @@ class GatherCache:
         with self._lock:
             entry = self._store.get(key)
             if entry is None:
-                return None
-            if time.monotonic() > entry.expires_at:
+                isHit = False
+            elif time.monotonic() > entry.expires_at:
                 # stale store에 보존 후 live에서 제거
                 self._stale[key] = entry.value
                 del self._store[key]
                 self._trimStale()
-                return None
-            self._store.move_to_end(key)
-            return entry.value
+                isHit = False
+            else:
+                self._store.move_to_end(key)
+                value = entry.value
+                isHit = True
+        if isHit:
+            recordCacheHit()
+            return value
+        recordCacheMiss()
+        return None
 
     def put(self, key: str, value: object, ttl: int = TTL_DEFAULT) -> None:
         """캐시 저장 — max_entries 초과 시 가장 오래된 항목 LRU 축출.
@@ -130,6 +140,7 @@ class GatherCache:
         -------
         >>> cache.put("005930:price", snap, ttl=300)
         """
+        evictCount = 0
         with self._lock:
             if key in self._store:
                 del self._store[key]
@@ -140,6 +151,9 @@ class GatherCache:
             )
             while len(self._store) > self._max:
                 self._store.popitem(last=False)
+                evictCount += 1
+        for _ in range(evictCount):
+            recordCacheEvict()
 
     def _trimStale(self) -> None:
         """stale store 용량 제한 — 삽입순으로 가장 오래된 항목부터 제거 (lock 내에서 호출).

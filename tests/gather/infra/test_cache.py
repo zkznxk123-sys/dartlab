@@ -92,3 +92,48 @@ def test_invalidate_stockCode() -> None:
     assert cache.getTyped("005930", "price") is None
     assert cache.getTyped("005930", "flow") is None
     assert cache.getTyped("000660", "price") == "v3"
+
+
+def test_cache_stats_counter() -> None:
+    """get hit/miss + put eviction 마다 telemetry 카운터 누적 — A 트랙 O1."""
+    from dartlab.gather.infra.cache import GatherCache
+    from dartlab.gather.infra.telemetry import getCacheStatsSnapshot, resetCacheStats
+
+    resetCacheStats()
+    base = getCacheStatsSnapshot()
+    assert base == {"hit": 0, "miss": 0, "evicted": 0}
+
+    cache = GatherCache(maxEntries=3)
+    cache.put("k1", "v1", ttl=60)
+    cache.put("k2", "v2", ttl=60)
+    cache.put("k3", "v3", ttl=60)
+
+    # hit 5 회
+    for _ in range(5):
+        assert cache.get("k1") == "v1"
+    # miss 3 회
+    for _ in range(3):
+        assert cache.get("nonexistent") is None
+    # eviction 2 회 (maxEntries=3 에 5 키 → 2 축출)
+    cache.put("k4", "v4", ttl=60)
+    cache.put("k5", "v5", ttl=60)
+
+    snap = getCacheStatsSnapshot()
+    assert snap["hit"] == 5
+    assert snap["miss"] == 3
+    assert snap["evicted"] == 2
+
+
+def test_cache_stats_reset_isolation() -> None:
+    """resetCacheStats 가 모든 카운터를 0 으로 — 테스트 격리 보장."""
+    from dartlab.gather.infra.cache import GatherCache
+    from dartlab.gather.infra.telemetry import getCacheStatsSnapshot, resetCacheStats
+
+    cache = GatherCache(maxEntries=2)
+    cache.put("a", 1, ttl=60)
+    cache.get("a")
+    cache.get("missing")
+    assert getCacheStatsSnapshot()["hit"] >= 1
+
+    resetCacheStats()
+    assert getCacheStatsSnapshot() == {"hit": 0, "miss": 0, "evicted": 0}

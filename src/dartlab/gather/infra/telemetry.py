@@ -71,6 +71,9 @@ _cacheHits: int = 0
 _cacheMisses: int = 0
 _cacheEvictions: int = 0
 
+# 매 N record 마다 emit 트리거 (busy emit 회피).
+_EMIT_EVERY: Final[int] = 100
+
 
 def emitGatherFetch(axis: str, latencyMs: float, *, cacheHit: bool, market: str | None = None) -> None:
     """fetch 종료 신호 — axis × latency × cacheHit (× market).
@@ -231,6 +234,198 @@ def emitGatherFallback(axis: str, primary: str, fallback: str) -> None:
         _coreEmit("gather:fallback", axis=axis, primary=primary, fallback=fallback)
     except (KeyError, ValueError, RuntimeError):
         pass
+
+
+def recordCacheHit() -> None:
+    """캐시 hit 1회 누적 — 매 _EMIT_EVERY 회마다 자동 snapshot emit.
+
+    Capabilities:
+        - GatherCache.get 의 hit 분기에서 fire-and-forget 호출.
+        - 매 N=100 hit 마다 emit 으로 외부 listener 에 누적 신호.
+
+    AIContext:
+        - cache hit rate 자동 추적 — listener 가 hit / (hit+miss) 비율 계산.
+
+    Guide:
+        호출 시점은 GatherCache.get 의 hit 직후. 본 함수가 lock + N 트리거 책임.
+
+    When:
+        매 캐시 hit 직후.
+
+    How:
+        ``recordCacheHit()`` — 인자 없음, 1 회 증가.
+
+    Args:
+        없음.
+
+    Returns:
+        None — fire-and-forget.
+
+    Requires:
+        모듈 전역 lock + 카운터.
+
+    Raises:
+        없음 — try/except 흡수.
+
+    Example::
+
+        recordCacheHit()  # cache.py 의 get hit 직후
+
+    See Also:
+        ``recordCacheMiss`` / ``recordCacheEvict`` / ``getCacheStatsSnapshot``.
+    """
+    global _cacheHits
+    try:
+        with _lock:
+            _cacheHits += 1
+            shouldEmit = _cacheHits % _EMIT_EVERY == 0
+            hit, miss, evicted = _cacheHits, _cacheMisses, _cacheEvictions
+        if shouldEmit:
+            _coreEmit("gather:cache:stats", hit=hit, miss=miss, evicted=evicted)
+    except (KeyError, ValueError, RuntimeError):
+        pass
+
+
+def recordCacheMiss() -> None:
+    """캐시 miss 1회 누적 — 매 _EMIT_EVERY 회마다 자동 snapshot emit.
+
+    Capabilities:
+        - GatherCache.get 의 miss 분기에서 fire-and-forget 호출.
+
+    AIContext:
+        - cache miss 폭증 감지 (예: TTL 설정 잘못, 새 stockCode 폭주).
+
+    Guide:
+        호출 시점은 GatherCache.get 이 None 반환 시 (entry 미존재 또는 TTL 만료).
+
+    When:
+        매 캐시 miss 직후.
+
+    How:
+        ``recordCacheMiss()``.
+
+    Args:
+        없음.
+
+    Returns:
+        None.
+
+    Requires:
+        모듈 전역 lock + 카운터.
+
+    Raises:
+        없음.
+
+    Example::
+
+        recordCacheMiss()
+
+    See Also:
+        ``recordCacheHit`` / ``recordCacheEvict``.
+    """
+    global _cacheMisses
+    try:
+        with _lock:
+            _cacheMisses += 1
+            shouldEmit = _cacheMisses % _EMIT_EVERY == 0
+            hit, miss, evicted = _cacheHits, _cacheMisses, _cacheEvictions
+        if shouldEmit:
+            _coreEmit("gather:cache:stats", hit=hit, miss=miss, evicted=evicted)
+    except (KeyError, ValueError, RuntimeError):
+        pass
+
+
+def recordCacheEvict() -> None:
+    """캐시 eviction 1회 누적 — 매 _EMIT_EVERY 회마다 자동 snapshot emit.
+
+    Capabilities:
+        - GatherCache.put 의 LRU 축출 분기에서 호출.
+
+    AIContext:
+        - eviction 빈발 감지 → cache maxEntries ↑ 필요 신호.
+
+    Guide:
+        capacity overflow 시 가장 오래된 항목 제거 직후 호출.
+
+    When:
+        매 LRU 축출 직후.
+
+    How:
+        ``recordCacheEvict()``.
+
+    Args:
+        없음.
+
+    Returns:
+        None.
+
+    Requires:
+        모듈 전역 lock + 카운터.
+
+    Raises:
+        없음.
+
+    Example::
+
+        recordCacheEvict()
+
+    See Also:
+        ``recordCacheHit`` / ``recordCacheMiss``.
+    """
+    global _cacheEvictions
+    try:
+        with _lock:
+            _cacheEvictions += 1
+            shouldEmit = _cacheEvictions % _EMIT_EVERY == 0
+            hit, miss, evicted = _cacheHits, _cacheMisses, _cacheEvictions
+        if shouldEmit:
+            _coreEmit("gather:cache:stats", hit=hit, miss=miss, evicted=evicted)
+    except (KeyError, ValueError, RuntimeError):
+        pass
+
+
+def resetCacheStats() -> None:
+    """테스트용 카운터 리셋 — 단위 테스트 격리 보장.
+
+    Capabilities:
+        - 모듈 전역 카운터를 0 으로 초기화.
+
+    AIContext:
+        - test fixture 의 setup/teardown 에서 호출 — counter 누수 회피.
+
+    Guide:
+        프로덕션 코드에서 호출 금지. 테스트 전용.
+
+    When:
+        pytest fixture teardown 또는 setup.
+
+    How:
+        ``resetCacheStats()``.
+
+    Args:
+        없음.
+
+    Returns:
+        None.
+
+    Requires:
+        모듈 전역 lock.
+
+    Raises:
+        없음.
+
+    Example::
+
+        resetCacheStats()
+
+    See Also:
+        ``getCacheStatsSnapshot``.
+    """
+    global _cacheHits, _cacheMisses, _cacheEvictions
+    with _lock:
+        _cacheHits = 0
+        _cacheMisses = 0
+        _cacheEvictions = 0
 
 
 def getCacheStatsSnapshot() -> dict[str, int]:
