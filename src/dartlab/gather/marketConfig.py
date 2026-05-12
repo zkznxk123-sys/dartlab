@@ -155,6 +155,16 @@ def resolveTicker(stockCode: str, market: str, source: str) -> str:
     str
         소스에 맞게 변환된 ticker 문자열.
         예: "7203.T" (JP/yahoo_chart), "0293.HK" (HK), "005930" (KR/naver).
+
+    Raises
+    ------
+    ValueError
+        등록되지 않은 market 코드.
+
+    Example
+    -------
+    >>> resolveTicker("005930", "KR", "naver")
+    '005930'
     """
     config = getMarketConfig(market)
 

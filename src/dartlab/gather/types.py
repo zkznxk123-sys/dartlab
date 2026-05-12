@@ -487,6 +487,14 @@ class GatherSnapshot:
         -------
         PriceSnapshot | None
             수집된 소스 중 첫 번째 유효한 주가 스냅샷. 없으면 None.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.price
         """
         for r in self.results.values():
             if r.price:
@@ -501,6 +509,14 @@ class GatherSnapshot:
         -------
         FlowData | None
             첫 번째 유효한 수급 데이터. 없으면 None.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.flow
         """
         for r in self.results.values():
             if r.flow:
@@ -515,6 +531,14 @@ class GatherSnapshot:
         -------
         list[NewsItem]
             뉴스 항목 리스트.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.news
         """
         return self._news
 
@@ -526,6 +550,14 @@ class GatherSnapshot:
         -------
         SectorInfo | None
             업종 분류 정보. 없으면 None.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.sectorInfo
         """
         for r in self.results.values():
             if r.sectorInfo:
@@ -540,6 +572,14 @@ class GatherSnapshot:
         -------
         list[InsiderTrade]
             내부자 거래 리스트.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.insiderTrades
         """
         for r in self.results.values():
             if r.insiderTrades:
@@ -554,6 +594,14 @@ class GatherSnapshot:
         -------
         ShortSellingData | None
             공매도 데이터. 없으면 None.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.shortSelling
         """
         for r in self.results.values():
             if r.shortSelling:
@@ -568,6 +616,14 @@ class GatherSnapshot:
         -------
         list[str]
             오류 없이 수집 완료된 소스 이름 리스트.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.sourcesAvailable
         """
         return [d for d, r in self.results.items() if r.error is None]
 
@@ -579,6 +635,14 @@ class GatherSnapshot:
         -------
         list[str]
             오류가 발생한 소스 이름 리스트.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap.sourcesFailed
         """
         return [d for d, r in self.results.items() if r.error is not None]
 
@@ -589,6 +653,15 @@ class GatherSnapshot:
         -------
         MarketSnapshot
             현재가, 컨센서스, 멀티플, 수급, 52주 범위를 포함한 flat 구조.
+
+        Raises
+        ------
+        없음
+            price 부재면 빈 multiples/None price_range 로 graceful 반환.
+
+        Example
+        -------
+        >>> snap.toMarketSnapshot()
         """
         price = self.price
         flow = self.flow

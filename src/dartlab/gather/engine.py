@@ -86,6 +86,11 @@ class Gather(
         None
             캐시에서 해당 종목의 모든 데이터 유형 항목을 제거한다.
 
+        Raises
+        ------
+        없음
+            미존재 종목은 silent (cache.invalidate 가 graceful).
+
         Example::
 
             g = getDefaultGather()
@@ -100,6 +105,16 @@ class Gather(
         -------
         None
             _owns_client=True일 때만 내부 GatherHttpClient 세션을 종료한다.
+
+        Raises
+        ------
+        없음
+            클라이언트 close 는 graceful.
+
+        Example
+        -------
+        >>> g = Gather()
+        >>> g.close()
         """
         if self._owns_client:
             runAsync(self._client.close())

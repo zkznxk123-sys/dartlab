@@ -97,6 +97,9 @@ class _GatherMacroMixin:
             기본 HF 경로: 불필요.
             직접 API 경로: KR ECOS_API_KEY, US FRED_API_KEY 값을 apiKey 로 명시 전달.
 
+        Raises:
+            ValueError: scope 가 ``"default"``/``"catalog"`` 외일 때.
+
         Example::
 
             g = getDefaultGather()

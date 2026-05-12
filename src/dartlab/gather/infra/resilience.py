@@ -89,6 +89,15 @@ class CircuitBreaker:
         -------
         bool
             True면 차단 상태 (요청 불가), False면 통과 허용.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> if not cb.isOpen("naver"):
+        ...     fetch_naver()
         """
         with self._lock:
             cs = self._get(source)
@@ -113,6 +122,18 @@ class CircuitBreaker:
         ----------
         source : str
             데이터 소스 이름.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cb.recordSuccess("naver")
         """
         with self._lock:
             cs = self._get(source)
@@ -126,6 +147,18 @@ class CircuitBreaker:
         ----------
         source : str
             데이터 소스 이름.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cb.recordFailure("naver")
         """
         with self._lock:
             cs = self._get(source)
@@ -150,6 +183,14 @@ class CircuitBreaker:
         -------
         str
             "closed", "open", "half_open" 중 하나.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cb.state("naver")
         """
         with self._lock:
             return self._get(source).state.value
@@ -179,6 +220,14 @@ class _SourceHealth:
         -------
         float
             건강도 점수 (0.0~1.0, 점). 기록 없으면 0.5 (중립).
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> h.score
         """
         if not self.records:
             return 0.5  # 데이터 없으면 중립
@@ -214,6 +263,18 @@ class SourceHealthTracker:
             요청 성공 여부.
         latency : float
             응답 지연시간 (초). 기본 0.0.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> tracker.record("naver", success=True, latency=0.4)
         """
         with self._lock:
             if source not in self._sources:
@@ -238,6 +299,14 @@ class SourceHealthTracker:
         -------
         float
             건강도 점수 (0.0~1.0, 점). 데이터 없으면 0.5 (중립).
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> s = tracker.score("naver")
         """
         with self._lock:
             if source not in self._sources:
@@ -259,6 +328,14 @@ class SourceHealthTracker:
         list[str]
             health score 기준 재정렬된 소스 이름 리스트.
             1위와 최하위 차이가 0.2 미만이면 원본 순서 유지.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> reordered = tracker.reorder(("naver", "fmp", "yahoo"))
         """
         scored = [(name, self.score(name)) for name in chain]
         # 안정적 정렬: score 같으면 원래 순서 유지

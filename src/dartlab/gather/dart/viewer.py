@@ -85,6 +85,10 @@ async def fetchAsync(
         rceptNo 가 14자리 숫자 아님.
     DocumentNotFoundError
         viewer 가 sub-doc 을 반환하지 않음 (비공개 / 잘못된 번호).
+
+    Example
+    -------
+    >>> df = await fetchAsync("20240315000123")
     """
     _validateRceptNo(rceptNo)
 
@@ -156,6 +160,17 @@ def fetch(
         HTTP 클라이언트. None 이면 자체 생성.
     limit : int | None
         반환 섹션 수 상한 (앞쪽 N 섹션). None이면 전체.
+
+    Raises
+    ------
+    InvalidRceptNoError
+        rceptNo 가 14자리 숫자 아님.
+    DocumentNotFoundError
+        viewer 가 sub-doc 을 반환하지 않음.
+
+    Example
+    -------
+    >>> df = fetch("20240315000123")
     """
     if client is not None:
         # 이미 외부 client 가 있으면 자체 event loop 안에서 호출됐을 수 있다.
@@ -164,7 +179,22 @@ def fetch(
 
 
 def docMeta(rceptNo: str, *, client: GatherHttpClient | None = None) -> DartDocMeta:
-    """viewer fetch + 메타 요약 (sectionCount 만 필요할 때)."""
+    """viewer fetch + 메타 요약 (sectionCount 만 필요할 때).
+
+    Args:
+        rceptNo: 14자리 접수번호.
+        client: HTTP 클라이언트. None 이면 자체 생성.
+
+    Returns:
+        ``DartDocMeta(rceptNo, indexUrl, sectionCount)``.
+
+    Raises:
+        InvalidRceptNoError: rceptNo 가 14자리 숫자 아님.
+        DocumentNotFoundError: viewer 가 sub-doc 을 반환하지 않음.
+
+    Example:
+        >>> m = docMeta("20240315000123")
+    """
     df = fetch(rceptNo, client=client)
     return DartDocMeta(
         rceptNo=rceptNo,

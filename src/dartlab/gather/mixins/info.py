@@ -35,6 +35,9 @@ class _GatherInfoMixin:
         Requires:
             없음 (공개 API).
 
+        Raises:
+            없음 — fallback 체인 내부 예외는 흡수.
+
         Example::
 
             g = getDefaultGather()
@@ -85,6 +88,9 @@ class _GatherInfoMixin:
         Requires:
             없음 (공개 API).
 
+        Raises:
+            없음 — fallback 체인 내부 예외는 흡수.
+
         Example::
 
             g = getDefaultGather()
@@ -126,6 +132,9 @@ class _GatherInfoMixin:
         Returns:
             SectorInfo | None -- 업종코드, 업종명, 시장구분.
 
+        Raises:
+            없음 — provider 내부 예외는 None 반환으로 흡수.
+
         Example::
 
             g = getDefaultGather()
@@ -150,6 +159,9 @@ class _GatherInfoMixin:
 
         Returns:
             list[InsiderTrade] -- 내부자 거래 내역. 없으면 빈 리스트.
+
+        Raises:
+            없음 — provider 내부 예외는 빈 리스트로 흡수.
 
         Example::
 
@@ -179,6 +191,9 @@ class _GatherInfoMixin:
         Returns:
             list[MajorHolder] -- 대량보유 변동 내역. 없으면 빈 리스트.
 
+        Raises:
+            없음 — provider 내부 예외는 빈 리스트로 흡수.
+
         Example::
 
             g = getDefaultGather()
@@ -202,6 +217,9 @@ class _GatherInfoMixin:
 
         Returns:
             list[InstitutionOwnership] -- 지분 보유 목록.
+
+        Raises:
+            없음 — provider 내부 예외는 빈 리스트로 흡수.
 
         Example::
 
@@ -230,6 +248,9 @@ class _GatherInfoMixin:
 
         Returns:
             list[dict] -- stockCode, stockName, marketCap 등.
+
+        Raises:
+            없음 — sector 부재 또는 KR 외 시장은 빈 리스트.
 
         Example::
 

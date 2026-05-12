@@ -111,6 +111,15 @@ def runAsync(coro):
     -------
     Any
         코루틴의 반환값. 타입은 전달된 코루틴에 따라 다르다.
+
+    Raises
+    ------
+    없음
+        코루틴 내부 예외는 호출자에게 전파.
+
+    Example
+    -------
+    >>> result = runAsync(coro)
     """
     try:
         asyncio.get_running_loop()
@@ -151,6 +160,10 @@ class _AsyncRateLimiter:
         ------
         RateLimitExceededError
             timeout 내 슬롯 획득 실패 시.
+
+        Example
+        -------
+        >>> await limiter.acquire(timeout=10.0)
         """
         deadline = time.monotonic() + timeout
         while True:
@@ -299,6 +312,10 @@ class GatherHttpClient:
         ------
         SourceUnavailableError
             모든 재시도 실패 시.
+
+        Example
+        -------
+        >>> resp = await client.get("https://example.com/api")
         """
         domain = urlparse(url).netloc
         policy = self._getPolicy(domain)
@@ -380,6 +397,10 @@ class GatherHttpClient:
         ------
         SourceUnavailableError
             모든 재시도 실패 시.
+
+        Example
+        -------
+        >>> resp = await client.post("https://example.com/api", json={"k": "v"})
         """
         domain = urlparse(url).netloc
         policy = self._getPolicy(domain)
@@ -426,5 +447,19 @@ class GatherHttpClient:
         raise SourceUnavailableError(f"{domain} POST 요청 실패 ({maxRetries}회 재시도): {last_exc}")
 
     async def close(self) -> None:
-        """HTTP 클라이언트 종료. 내부 httpx.AsyncClient의 커넥션 풀을 정리."""
+        """HTTP 클라이언트 종료. 내부 httpx.AsyncClient의 커넥션 풀을 정리.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        없음
+            aclose 는 graceful.
+
+        Example
+        -------
+        >>> await client.close()
+        """
         await self._client.aclose()

@@ -81,6 +81,14 @@ class GatherCache:
         object | None
             캐시된 값 — 유효한 항목이 있을 때.
             None — 키가 없거나 TTL 만료 시 (만료 데이터는 stale로 이동).
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> v = cache.get("005930:price")
         """
         with self._lock:
             entry = self._store.get(key)
@@ -111,6 +119,14 @@ class GatherCache:
         -------
         None
             기존 키가 있으면 덮어쓰고, stale 항목도 제거한다.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cache.put("005930:price", snap, ttl=300)
         """
         with self._lock:
             if key in self._store:
@@ -149,6 +165,14 @@ class GatherCache:
         object | None
             만료 후 보존된 마지막 값.
             None — stale 항목이 없을 때.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> stale = cache.getStale("005930:price")
         """
         with self._lock:
             return self._stale.get(key)
@@ -170,6 +194,14 @@ class GatherCache:
         object | None
             캐시된 값 (PriceSnapshot, ConsensusData, pl.DataFrame 등).
             None — 캐시 미스이고 allow_stale=False이거나 stale도 없을 때.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> snap = cache.getTyped("005930", "price")
         """
         key = f"{stockCode}:{dataType}"
         result = self.get(key)
@@ -195,6 +227,14 @@ class GatherCache:
         -------
         None
             "{stock_code}:{data_type}" 키로 적절한 TTL과 함께 저장한다.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cache.putTyped("005930", "price", snap)
         """
         ttl = _TTL_MAP.get(dataType, TTL_DEFAULT)
         self.put(f"{stockCode}:{dataType}", value, ttl)
@@ -211,6 +251,14 @@ class GatherCache:
         -------
         None
             해당 종목의 price, flow 등 모든 데이터 유형 캐시를 삭제한다.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cache.invalidate("005930")
         """
         with self._lock:
             prefix = f"{stockCode}:"
@@ -226,6 +274,14 @@ class GatherCache:
         -------
         None
             모든 캐시 항목을 제거한다. size가 0이 된다.
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cache.clear()
         """
         with self._lock:
             self._store.clear()
@@ -239,6 +295,14 @@ class GatherCache:
         -------
         int
             현재 live 캐시에 저장된 항목 수 (개).
+
+        Raises
+        ------
+        없음.
+
+        Example
+        -------
+        >>> cache.size
         """
         return len(self._store)
 

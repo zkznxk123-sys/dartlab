@@ -40,6 +40,9 @@ class _GatherCollectMixin:
         Requires:
             없음 (공개 API).
 
+        Raises:
+            없음 — 도메인 실패는 격리, 10초 타임아웃 후 부분 결과.
+
         Example::
 
             g = getDefaultGather()

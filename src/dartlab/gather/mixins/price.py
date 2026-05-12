@@ -55,6 +55,9 @@ class _GatherPriceMixin:
         Requires:
             없음 (공개 API).
 
+        Raises:
+            없음 — fallback 체인 내부 예외는 흡수.
+
         Example::
 
             g = getDefaultGather()
@@ -127,6 +130,9 @@ class _GatherPriceMixin:
 
         Requires:
             없음 (공개 API).
+
+        Raises:
+            없음 — fallback 체인 내부 예외는 흡수.
 
         Example::
 
@@ -207,6 +213,9 @@ class _GatherPriceMixin:
         Requires:
             없음 (공개 API).
 
+        Raises:
+            없음 — fallback 체인 내부 예외는 흡수.
+
         Example::
 
             g = getDefaultGather()
@@ -261,6 +270,9 @@ class _GatherPriceMixin:
 
         Requires:
             없음 (공개 API).
+
+        Raises:
+            없음 — fallback 체인 내부 예외는 흡수.
 
         Example::
 

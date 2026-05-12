@@ -36,6 +36,9 @@ class _GatherNewsMixin:
         Requires:
             없음 (공개 API).
 
+        Raises:
+            없음 — RSS 파싱 실패는 빈 DataFrame.
+
         Example::
 
             g = getDefaultGather()
