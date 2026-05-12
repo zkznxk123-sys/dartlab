@@ -19,11 +19,11 @@ _log = getLogger(__name__)
 import polars as pl
 
 from dartlab.scan.network.classifier import classifyBalanced
-from dartlab.scan.network.cycles import detectCycles
 from dartlab.scan.network.edges import (
     buildHolderEdges,
     buildInvestEdges,
     deduplicateEdges,
+    detectCycles,
 )
 from dartlab.scan.network.export import (
     exportEgo,
