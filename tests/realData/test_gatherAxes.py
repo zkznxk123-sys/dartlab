@@ -48,9 +48,9 @@ def _resolveTarget(axis: str) -> str | None:
     keyword → SAMSUNG (자유 문자열로 종목코드도 검색어로 작동)
     none → None
     """
-    from dartlab.gather.entry import _AXIS_REGISTRY
+    from dartlab.gather.entry import AXIS_REGISTRY
 
-    entry = _AXIS_REGISTRY[axis]
+    entry = AXIS_REGISTRY[axis]
     if entry.targetType == "stockCode":
         return SAMSUNG
     if entry.targetType == "columnName":

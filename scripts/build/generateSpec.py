@@ -938,8 +938,11 @@ def _scanAxisSection() -> str:
 
 
 def _gatherAxisSection() -> str:
-    """gather/_AXIS_REGISTRY에서 축 명세 추출 (scan과 동일 AST 패턴)."""
-    gatherEntry = SRC / "dartlab" / "gather" / "entry.py"
+    """gather/AXIS_REGISTRY에서 축 명세 추출 (scan과 동일 AST 패턴).
+
+    G+ P-Q1 이후 dispatch.py 의 public AXIS_REGISTRY symbol 을 읽는다.
+    """
+    gatherEntry = SRC / "dartlab" / "gather" / "entry" / "dispatch.py"
     if not gatherEntry.exists():
         return ""
 
@@ -949,16 +952,16 @@ def _gatherAxisSection() -> str:
     except SyntaxError:
         return ""
 
-    # _AXIS_REGISTRY dict 찾기
+    # AXIS_REGISTRY dict 찾기
     registryNode = None
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == "_AXIS_REGISTRY":
+                if isinstance(target, ast.Name) and target.id == "AXIS_REGISTRY":
                     registryNode = node.value
                     break
         elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            if node.target.id == "_AXIS_REGISTRY" and node.value:
+            if node.target.id == "AXIS_REGISTRY" and node.value:
                 registryNode = node.value
 
     if registryNode is None or not isinstance(registryNode, ast.Dict):
@@ -1491,11 +1494,16 @@ def _generateCatalog() -> str:
 # ─── _generatedCapabilities.py 생성 ───────────────────────────
 
 
-def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix: str) -> None:
-    """엔진의 `_AXIS_REGISTRY` dict 를 AST 로 읽어 `{prefix}.{axis}` 로 entries 에 주입.
+def _parseAxisRegistry(
+    entries: dict[str, dict[str, str]], path: Path, *, prefix: str, registryName: str = "_AXIS_REGISTRY"
+) -> None:
+    """엔진의 axis registry dict 를 AST 로 읽어 `{prefix}.{axis}` 로 entries 에 주입.
 
-    Assign + AnnAssign(`_AXIS_REGISTRY: dict[...] = {...}`) 둘 다 지원.
+    Assign + AnnAssign(`{registryName}: dict[...] = {...}`) 둘 다 지원.
     각 axis 의 keyword 중 label/description 을 summary/capabilities 로 매핑.
+
+    registryName 기본값은 `_AXIS_REGISTRY` (scan/macro). gather 는 G+ P-Q1
+    이후 `AXIS_REGISTRY` (public) 사용.
     """
     if not path.exists():
         return
@@ -1508,12 +1516,12 @@ def _parseAxisRegistry(entries: dict[str, dict[str, str]], path: Path, *, prefix
         dictNode = None
         if isinstance(node, ast.Assign):
             for tgt in node.targets:
-                if isinstance(tgt, ast.Name) and tgt.id == "_AXIS_REGISTRY":
+                if isinstance(tgt, ast.Name) and tgt.id == registryName:
                     dictNode = node.value
                     break
         elif isinstance(node, ast.AnnAssign):
             tgt = node.target
-            if isinstance(tgt, ast.Name) and tgt.id == "_AXIS_REGISTRY":
+            if isinstance(tgt, ast.Name) and tgt.id == registryName:
                 dictNode = node.value
         if not isinstance(dictNode, ast.Dict):
             continue
@@ -1957,7 +1965,12 @@ def _generateCapabilitiesPy() -> str:
     # Assign + AnnAssign 양쪽 지원 (type annotation 있는 선언도 처리)
     _parseAxisRegistry(entries, SRC / "dartlab" / "scan" / "__init__.py", prefix="scan")
     _parseAxisRegistry(entries, SRC / "dartlab" / "macro" / "__init__.py", prefix="macro")
-    _parseAxisRegistry(entries, SRC / "dartlab" / "gather" / "entry.py", prefix="gather")
+    _parseAxisRegistry(
+        entries,
+        SRC / "dartlab" / "gather" / "entry" / "dispatch.py",
+        prefix="gather",
+        registryName="AXIS_REGISTRY",
+    )
 
     _applyAiContractMetadata(entries)
     dictJson = json.dumps(entries, ensure_ascii=False, indent=4, sort_keys=True)

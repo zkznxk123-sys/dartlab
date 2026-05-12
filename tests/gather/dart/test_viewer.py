@@ -136,12 +136,12 @@ class TestPublicSurface:
         assert callable(d.meta)
 
     def test_gather_entry_axis_registered(self):
-        from dartlab.gather.entry import _API_KEY_INFO, _AXIS_REGISTRY
+        from dartlab.gather.entry import API_KEY_INFO, AXIS_REGISTRY
 
-        assert "dartDoc" in _AXIS_REGISTRY
-        assert "dartDoc" in _API_KEY_INFO
-        assert _API_KEY_INFO["dartDoc"].startswith("불필요")
-        entry = _AXIS_REGISTRY["dartDoc"]
+        assert "dartDoc" in AXIS_REGISTRY
+        assert "dartDoc" in API_KEY_INFO
+        assert API_KEY_INFO["dartDoc"].startswith("불필요")
+        entry = AXIS_REGISTRY["dartDoc"]
         assert entry.targetType == "rceptNo"
 
     def test_gather_class_has_dartDoc_method(self):

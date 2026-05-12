@@ -20,7 +20,7 @@ TargetType = Literal["stockCode", "columnName", "indicator", "keyword", "rceptNo
 
 
 @dataclass(frozen=True)
-class _GatherAxisEntry:
+class GatherAxisEntry:
     """gather 축 메타데이터.
 
     targetType 은 axis 가 받는 target 의 의미를 명시 — test_gatherAxisContract 가
@@ -38,8 +38,8 @@ class _GatherAxisEntry:
     hidden: bool = False
 
 
-_AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
-    "price": _GatherAxisEntry(
+AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
+    "price": GatherAxisEntry(
         label="주가",
         description=(
             "OHLCV 시계열 (수정주가). "
@@ -49,13 +49,13 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         example='gather("price", "005930") / gather("price", "AAPL", market="US")',
         targetType="stockCode",
     ),
-    "flow": _GatherAxisEntry(
+    "flow": GatherAxisEntry(
         label="수급",
         description="외국인/기관 순매수 시계열 (KR 전용, Naver).",
         example='gather("flow", "005930")',
         targetType="stockCode",
     ),
-    "macro": _GatherAxisEntry(
+    "macro": GatherAxisEntry(
         label="거시지표",
         description=(
             "ECOS(KR) / FRED(US) 거시지표 시계열. 기본 HF 벌크 (apiKey 없음), apiKey 명시 시 ECOS/FRED 직접 API."
@@ -64,37 +64,37 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         targetRequired=False,
         targetType="indicator",
     ),
-    "news": _GatherAxisEntry(
+    "news": GatherAxisEntry(
         label="뉴스",
         description="Google News RSS 뉴스 수집 (기본 최근 30일).",
         example='gather("news", "삼성전자", days=7)',
         targetType="keyword",
     ),
-    "sector": _GatherAxisEntry(
+    "sector": GatherAxisEntry(
         label="업종",
         description="업종 분류 (KR KIND+Naver / US sectorCode).",
         example='gather("sector", "005930")',
         targetType="stockCode",
     ),
-    "insider": _GatherAxisEntry(
+    "insider": GatherAxisEntry(
         label="내부자거래",
         description="내부자 (임원·주요주주) 거래 (KR DART · DART_API_KEY 필요).",
         example='gather("insider", "005930")',
         targetType="stockCode",
     ),
-    "ownership": _GatherAxisEntry(
+    "ownership": GatherAxisEntry(
         label="지분 보유",
         description="기관/외국인 지분 보유 현황 (KR Naver).",
         example='gather("ownership", "005930")',
         targetType="stockCode",
     ),
-    "peers": _GatherAxisEntry(
+    "peers": GatherAxisEntry(
         label="피어",
         description="동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버",
         example='gather("peers", "005930")',
         targetType="stockCode",
     ),
-    "krx": _GatherAxisEntry(
+    "krx": GatherAxisEntry(
         label="KRX 회사별 시계열",
         description=(
             "KOSPI/KOSDAQ 전종목 wide pivot — 행=stockCode+corpName, 열=일자. "
@@ -109,7 +109,7 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
     ),
     # 미공개 — 데이터 준비 중. _guide() / __repr__ 에서 숨김. 내부 dispatch 는 동작.
     # 정식 표기: krxIndex (camelCase, dartlab 표준 — 모듈/함수명과 일관).
-    "krxIndex": _GatherAxisEntry(
+    "krxIndex": GatherAxisEntry(
         label="KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
         description=(
             "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) "
@@ -122,7 +122,7 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         targetRequired=False,
         targetType="columnName",
     ),
-    "dartDoc": _GatherAxisEntry(
+    "dartDoc": GatherAxisEntry(
         label="DART 공시 원문",
         description=(
             "14자리 rcept_no 만으로 DART 공시 viewer 의 원문 본문 fetch (무인증). "
@@ -133,7 +133,7 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
         example='gather("dartDoc", "20240315000123")',
         targetType="rceptNo",
     ),
-    "calendar": _GatherAxisEntry(
+    "calendar": GatherAxisEntry(
         label="catalyst 일정",
         description=(
             "다가오는 정기공시 (사업/반기/분기보고서) due date 추론. "
@@ -149,7 +149,7 @@ _AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
 
 # axis 별 필요한 API 키 — _guide() 와 test_gatherAxisContract 가 공통 소비.
 # 값이 "불필요" 가 아니면 환경변수에 키가 설정돼야 axis 호출 가능.
-_API_KEY_INFO: dict[str, str] = {
+API_KEY_INFO: dict[str, str] = {
     "price": "불필요",
     "flow": "불필요",
     "macro": "불필요 (기본 HF SSOT, apiKey 명시 시 ECOS/FRED 직접 호출)",
@@ -164,7 +164,7 @@ _API_KEY_INFO: dict[str, str] = {
     "calendar": "DART_API_KEY (Company.disclosure 사용)",
 }
 
-_ALIASES: dict[str, str] = {
+AXIS_ALIASES: dict[str, str] = {
     "주가": "price",
     "수급": "flow",
     "거시": "macro",
@@ -184,7 +184,7 @@ _ALIASES: dict[str, str] = {
 # 정식 표기 = 네이버 fchart 가 받는 외부 API 심볼 (uppercase). 사용자는 정식 표기
 # 또는 명시 한글 alias 만 사용한다. ``"kospi"`` 같은 case alias 는 인정하지 않음
 # (consistency_no_alias 원칙 — silent case-insensitive lookup 은 alias).
-_INDEX_SYMBOLS: dict[str, str] = {
+INDEX_SYMBOLS: dict[str, str] = {
     # 정식 외부 API 심볼 (self-map — registry 등록 표시)
     "KOSPI": "KOSPI",
     "KOSDAQ": "KOSDAQ",
@@ -254,7 +254,7 @@ def _fetchNaverIndex(symbol: str, limit: int = 500) -> pl.DataFrame:
 def _resolveAxis(axis: str) -> str:
     """축 이름/한글 별칭 → 정규 키.
 
-    consistency_no_alias 원칙: registry key 와 ``_ALIASES`` 의 명시적 한글 매핑만
+    consistency_no_alias 원칙: registry key 와 ``AXIS_ALIASES`` 의 명시적 한글 매핑만
     유효. case-insensitive lookup (예: ``"PRICE"`` → ``"price"``) 는 silent
     alias 라 인정하지 않는다 — 사용자가 정식 표기 (``"price"``, ``"krxIndex"``)
     를 정확히 쓰도록 유도.
@@ -275,11 +275,11 @@ def _resolveAxis(axis: str) -> str:
     ValueError
         미등록 축 이름 또는 case 불일치 (``"Price"``, ``"krxindex"``) 일 때.
     """
-    if axis in _AXIS_REGISTRY:
+    if axis in AXIS_REGISTRY:
         return axis
-    if axis in _ALIASES:
-        return _ALIASES[axis]
-    available = ", ".join(sorted(_AXIS_REGISTRY))
+    if axis in AXIS_ALIASES:
+        return AXIS_ALIASES[axis]
+    available = ", ".join(sorted(AXIS_REGISTRY))
     raise ValueError(
         f"알 수 없는 gather 축: '{axis}'. 가용 축: {available}\n"
         f"  사용법: c.gather() 또는 dartlab.gather() 로 전체 축 가이드를 확인하세요."

@@ -12,10 +12,10 @@ from typing import Any
 import polars as pl
 
 from .dispatch import (
-    _ALIASES,
-    _API_KEY_INFO,
-    _AXIS_REGISTRY,
-    _INDEX_SYMBOLS,
+    API_KEY_INFO,
+    AXIS_ALIASES,
+    AXIS_REGISTRY,
+    INDEX_SYMBOLS,
     _fetchNaverIndex,
     _resolveAxis,
 )
@@ -181,7 +181,7 @@ class GatherEntry:
             return self._guide()
 
         resolved = _resolveAxis(axis)
-        entry = _AXIS_REGISTRY[resolved]
+        entry = AXIS_REGISTRY[resolved]
 
         if entry.targetRequired and target is None:
             raise ValueError(f'gather("{resolved}")에는 대상이 필요합니다.\n  예: {entry.example}')
@@ -216,8 +216,8 @@ class GatherEntry:
 
         if axis == "price":
             # 시장 지수 심볼이면 네이버 차트 API 직접 수집
-            if target and target in _INDEX_SYMBOLS:
-                result = _fetchNaverIndex(_INDEX_SYMBOLS[target])
+            if target and target in INDEX_SYMBOLS:
+                result = _fetchNaverIndex(INDEX_SYMBOLS[target])
             else:
                 result = g.price(target, market=market, start=start, end=end)
             # R30-1: 빈 DataFrame silent → 명시적 ValueError
@@ -385,9 +385,9 @@ class GatherEntry:
                 "label": entry.label,
                 "description": entry.description,
                 "example": entry.example,
-                "apiKey": _API_KEY_INFO.get(key, "불필요"),
+                "apiKey": API_KEY_INFO.get(key, "불필요"),
             }
-            for key, entry in _AXIS_REGISTRY.items()
+            for key, entry in AXIS_REGISTRY.items()
             if not entry.hidden
         ]
         return pl.DataFrame(rows)
@@ -417,7 +417,7 @@ class GatherEntry:
         )
 
     def __repr__(self) -> str:
-        visibleAxes = [(k, e) for k, e in _AXIS_REGISTRY.items() if not e.hidden]
+        visibleAxes = [(k, e) for k, e in AXIS_REGISTRY.items() if not e.hidden]
         lines = [
             f"Gather — {len(visibleAxes)}축 외부 시장 데이터 수집",
             "",
