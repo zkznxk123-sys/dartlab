@@ -114,6 +114,34 @@ def scanEfficiency(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("efficiency")
     >>> df.sort("자산회전율", descending=True).head()
+
+    Capabilities:
+        - 전종목 finance.parquet 에서 종목별 자산/재고/매출채권/매입채무 회전율 + 일수 +
+          CCC (현금전환주기) 계산 → 4 단계 효율성 등급.
+        - CCC = invDays + arDays - apDays. 짧을수록 운영자본 효율 양호.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("efficiency")`` 호출 시 본 함수 dispatch. 운영자본 회전 비교,
+        재고 적체 위험 감지 (invDays 급증), CCC 변화로 매출 회수 / 매입 결제 정책 분석 source.
+
+    Guide:
+        - 업종 차이 큰 — 유통업 CCC 30 일 vs 제조업 CCC 180 일 normal. 단순 비교 시 업종 보정.
+        - 재고/매출채권 없는 서비스업은 회전율 None.
+
+    When:
+        대시보드 efficiency 카드 빌드 시. 운영자본 효율 cross-company 비교 시.
+
+    How:
+        finance.parquet lazy filter → IS (매출/COGS) + BS (재고/매출채권/매입채무/유형자산/총자산)
+        wide pivot → 회전율 / 일수 / CCC 계산 → 등급 분기.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출)
+        - 매출 + COGS + BS 5 계정 + 매입채무
+
+    SeeAlso:
+        - :func:`dartlab.scan.financial.profitability.scanProfitability` — 절대 수익성 (분자)
+        - :func:`dartlab.scan.financial.liquidity.scanLiquidity` — 유동성 보완
     """
     if verbose:
         _log.info("효율성 스캔: 계정 수집 중...")

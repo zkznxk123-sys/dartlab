@@ -131,6 +131,34 @@ def scanGrowth(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("growth")
     >>> df.filter(pl.col("등급") == "고성장").head()
+
+    Capabilities:
+        - 전종목 finance.parquet 에서 종목별 매출/영업이익/순이익 3 년 CAGR 계산 → 등급 +
+          패턴 분류 (수익개선/외형성장/구조조정/전면역성장/혼합/안정).
+        - 매출 + 영업이익 부호 / 크기 조합으로 패턴 6 종 분기.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("growth")`` 호출 시 본 함수 dispatch. "고성장 종목" 스크리닝,
+        "구조조정 종목" (매출 하락 + 영업이익 상승) watchlist, 성장 패턴 cross-company source.
+
+    Guide:
+        - CAGR 3 년 = 최신 fy 와 fy-3 사이. 3 년치 데이터 없는 종목은 None.
+        - 패턴 "구조조정" 은 매출 하락에도 영업이익 개선 — 비용 효율화 신호로 인용 가능.
+
+    When:
+        대시보드 growth 카드 빌드 시. 성장 패턴 cross-company 분석 시.
+
+    How:
+        ``_ensureScanData`` → finance.parquet 합본 있으면 ``_scanFromMerged`` (lazy filter +
+        종목별 3 년 wide pivot + CAGR + 등급/패턴 분기). 합본 없으면 ``_scanPerFile`` fallback.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출) 또는
+          ``data/dart/finance/{stockCode}.parquet`` (fallback)
+
+    SeeAlso:
+        - :func:`dartlab.scan.financial.profitability.scanProfitability` — financial 동료 axis
+        - :func:`dartlab.scan.dividendTrend.scanDividendTrend` — 배당 시계열 (별도 axis)
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

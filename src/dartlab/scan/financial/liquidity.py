@@ -253,6 +253,33 @@ def scanLiquidity(*, verbose: bool = True) -> pl.DataFrame:
     Notes
     -----
     금융업 (은행/보험/증권) 은 유동자산/유동부채 계정 없어 결과 없음.
+
+    Capabilities:
+        - 전종목 finance.parquet 에서 종목별 유동자산 / 유동부채 / 재고 합산 → 유동비율 + 당좌
+          비율 + 4 단계 등급 (우수/보통/주의/위험).
+        - 금융업 종목은 BS 계정 부재로 결과 0 (silent skip).
+
+    AIContext:
+        Agent 가 ``dartlab.scan("liquidity")`` 호출 시 본 함수 dispatch. 단기 지급능력 비교,
+        파산 리스크 사전 감지 source. 부채 axis (`scanDebt`) 와 보완 관계.
+
+    Guide:
+        - 유동비율 100 % 미만 = 단기 지급능력 부족 가능 신호. 당좌비율은 재고를 제외한 보수 지표.
+        - 금융업 0 row 는 데이터 결여이지 "양호" 가 아님.
+
+    When:
+        대시보드 liquidity 카드 빌드 시. 단기 지급 위험 스크리닝 시.
+
+    How:
+        ``_ensureScanData`` → ``finance.parquet`` 합본 있으면 ``_scanFromMerged`` (BS 계정
+        wide + 유동/당좌 비율 + 등급 분기). 합본 없으면 ``_scanPerFile`` fallback.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.debt.scanDebt` — 부채 구조 axis (본 함수의 보완)
+        - :func:`dartlab.scan.financial.efficiency.scanEfficiency` — CCC 등 운영 효율
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

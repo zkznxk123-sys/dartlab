@@ -283,6 +283,33 @@ def scanValuation(*, refresh: bool = False, verbose: bool = True) -> pl.DataFram
     >>> df = dartlab.scan("valuation")
     >>> df.sort("PBR").select(["종목코드", "PER", "PBR", "PSR", "등급"]).head()
     >>> df = dartlab.scan("valuation", refresh=True)  # 네이버 실시간
+
+    Capabilities:
+        - prebuild snapshot 우선 로드 (≤ 1초) → 매출 결합 후 PSR / 등급 runtime 계산. refresh=True
+          시 네이버 실시간 ~50 초 강제 수집.
+        - 등급: 저평가/적정/고평가/과열/해당없음. snapshotAt 으로 데이터 freshness 명시.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("valuation")`` 호출 시 본 함수 dispatch. AI 가 "지금 기준" 가치평가
+        질문에는 refresh=True 명시 — 일반 cross-company 비교는 default snapshot.
+
+    When:
+        대시보드 valuation 카드 빌드 시. cross-company 가치 스크리닝 (저PBR/저PER) 시.
+
+    How:
+        ``loadValuationSnapshot`` 으로 prebuild parquet 시도 → 성공 시 ``_enrichValuation`` (매출
+        결합 + PSR + grade) → 반환. 실패 / refresh=True 시 네이버 API fetchValuationRaw + 동일
+        enrich pipeline.
+
+    Requires:
+        - 로컬 ``data/dart/scan/valuation.parquet`` (``buildValuation`` cron 산출) — fallback 으로
+          네이버 API 시도.
+        - 매출 데이터 (``data/dart/scan/finance.parquet``) — PSR 결합.
+
+    SeeAlso:
+        - :func:`fetchValuationRaw` — 네이버 raw 수집 (refresh 경로)
+        - :func:`dartlab.scan.io.parquet.loadValuationSnapshot` — prebuild 로더
+        - :func:`dartlab.scan.builders.kr.core.buildValuation` — prebuild 빌더
     """
     if not refresh:
         frame, snapshotAt = loadValuationSnapshot()

@@ -272,6 +272,34 @@ def scanCashflow(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("cashflow")
     >>> df.filter(pl.col("패턴") == "성장기").select(["종목코드", "종목명"]).head()
+
+    Capabilities:
+        - 전종목 finance.parquet 에서 종목별 OCF/ICF/FCF 추출 + 라이프사이클 패턴 분류
+          (성장기/안정기/구조조정/위기/등). FCF = OCF + ICF (CAPEX 부호 음수 반영).
+        - 부호 조합 (OCF+/-, ICF+/-, finCf+/-) 으로 패턴 결정.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("cashflow")`` 호출 시 본 함수 dispatch. 라이프사이클 단계 비교
+        (성장기 vs 성숙기), 외부의존형 / 현금위기형 watchlist source.
+
+    Guide:
+        - 패턴 분류는 1 년 단면 — 2~3 년 시계열 비교는 호출자가 별도.
+        - CAPEX 큰 성장기 종목은 FCF 음수일 수 있음 — 부정적 평가 X.
+
+    When:
+        대시보드 cashflow 카드 빌드 시. 라이프사이클 cross-company 분석 시.
+
+    How:
+        ``_ensureScanData`` → finance.parquet 합본 우선 ``_scanFromMerged`` (CF 3 계정 wide +
+        FCF + 패턴 분기). 합본 없으면 ``_scanPerFile``.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출)
+        - CF 3 계정 (영업/투자/재무) snakeId
+
+    SeeAlso:
+        - :func:`dartlab.scan.financial.quality.scanQuality` — CF/NI 회계 품질 보완
+        - :func:`dartlab.scan.builders.kr.payload.capitalToInsight` — capital axis 와 결합
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

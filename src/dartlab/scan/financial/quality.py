@@ -281,6 +281,33 @@ def scanQuality(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("quality")
     >>> df.filter(pl.col("등급") == "우수").select(["종목코드", "발생액비율"]).head()
+
+    Capabilities:
+        - 전종목 finance.parquet 에서 종목별 당기순이익 / 영업현금흐름 / 자산총계 합산 → 발생액
+          비율 ((NI-OCF)/TA) + CF/NI 비율 + 4 단계 등급 (우수/보통/주의/위험).
+        - CF/NI |x|>5 극단값은 None — 분모 NI 극소가 만든 noise 거름.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("quality")`` 호출 시 본 함수 dispatch. "이익이 현금으로 뒷받침되지
+        않는 종목" 스크리닝, 회계 품질 cross-company 비교 source. 분식 회계 의심 신호 — 발생액
+        비율 > 0.10 = 주의.
+
+    When:
+        대시보드 quality 카드 빌드 시. 이익 품질 스크리닝 시. 분식 회계 감지 prototype 시.
+
+    How:
+        ``_ensureScanData`` → finance.parquet 합본 있으면 ``_scanFromMerged`` (NI/OCF/TA wide
+        + 발생액 비율 + CF/NI + 등급 분기). 합본 없으면 ``_scanPerFile`` fallback.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출) 또는
+          ``data/dart/finance/{stockCode}.parquet`` (fallback)
+        - **KR 종목 한정** — US/글로벌 종목은 별도 EDGAR axis 사용 (`_scanQuality`)
+
+    SeeAlso:
+        - :func:`dartlab.scan.financial.profitability.scanProfitability` — 절대 수익성
+        - :func:`dartlab.scan.financial.cashflow.scanCashflow` — 현금흐름 패턴
+        - :func:`dartlab.scan.builders.edgar.scan._scanQuality` — US 종목 (대칭 axis)
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

@@ -103,6 +103,38 @@ def scanProfitability(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("profitability")
     >>> df.sort("ROE", descending=True).head()
+
+    Capabilities:
+        - 전종목 finance.parquet 에서 종목별 매출/영업이익/순이익/자산/자본 합산 → 4 지표
+          (영업이익률/순이익률/ROE/ROA) + 5 단계 등급 (우수/양호/보통/저수익/적자).
+        - prebuild 합본 우선, 없으면 종목별 parquet 순회 fallback (``_scanPerFile``).
+
+    AIContext:
+        Agent 가 ``dartlab.scan("profitability")`` 호출 시 본 함수 dispatch. "ROE 상위 종목"
+        스크리닝, "고마진 회사" 비교, 1 사 수익성 등급 source. financial 7 axis 중 가장 빈번.
+
+    Guide:
+        - 등급 기준은 4 지표 중 max(opMargin, roe). 가장 좋은 지표 채택 — 부문별 특수성 흡수.
+        - 결산월 환원 후 데이터라 비12월 결산도 캘린더 단면으로 비교 가능.
+
+    When:
+        대시보드 profitability 카드 빌드 시. cross-company 수익성 스크리닝 시.
+
+    How:
+        ``_ensureScanData`` → ``finance.parquet`` 경로 확인 → 합본 있으면 ``_scanFromMerged``
+        lazy filter (연결재무 + 최신 fy) → 종목별 4 지표 계산 + grade 분기. 합본 없으면
+        ``_scanPerFile`` fallback.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출) 또는
+          ``data/dart/finance/{stockCode}.parquet`` (fallback)
+        - REVENUE/OP/NI/TA/EQ public 상수 (``scan.io.parquet``)
+
+    SeeAlso:
+        - :func:`dartlab.scan.financial.growth.scanGrowth` · :func:`scanQuality` —
+          financial 7 axis 동료
+        - :func:`dartlab.scan.builders.kr.core.buildFinance` — source 빌드
+        - :func:`dartlab.scan.io.parquet.scanFinanceParquets` — LazyFrame helper
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"
