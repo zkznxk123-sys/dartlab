@@ -81,8 +81,8 @@ class DataEntry:
 
 
 # DataEntry 목록은 _entries.py에서 관리 (942줄 → 별도 파일)
-from dartlab.core._entries import _BUSINESS_ALIASES as _BUSINESS_ALIASES  # noqa: I001, E402
-from dartlab.core._entries import _ENTRIES as _ENTRIES  # noqa: I001, E402
+from dartlab.frame.types import _BUSINESS_ALIASES as _BUSINESS_ALIASES  # noqa: I001, E402
+from dartlab.frame.types import _ENTRIES as _ENTRIES  # noqa: I001, E402
 
 
 # ── 인덱스 (O(1) 조회) ──
