@@ -36,7 +36,7 @@ def cli_module():
 def _writeRecipe(path: Path, status: str = "unverified", *, extra_fields: str = "") -> None:
     body = (
         "---\n"
-        "id: engines.recipe.cliProbe\n"
+        "id: recipes.cliProbe\n"
         "title: CLI 검증 probe\n"
         "category: engines\n"
         "kind: recipe\n"
@@ -95,7 +95,7 @@ def test_promote_rejects_when_scorecard_fails(tmp_path: Path, cli_module, monkey
     monkeypatch.setenv("DARTLAB_RECIPE_RUNS_DIR", str(tmp_path / "runs"))
 
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.creditDistressDual"
+    args.skillId = "recipes.creditDistressDual"
     args.toStatus = "verified"
     args.force = False
     rc = cli_module.cmd_promote(args)
@@ -113,7 +113,7 @@ def test_promote_with_force_bypasses_scorecard(tmp_path: Path, cli_module, monke
     monkeypatch.setenv("DARTLAB_RECIPE_RUNS_DIR", str(tmp_path / "runs"))
 
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.cliProbe"
+    args.skillId = "recipes.cliProbe"
     args.toStatus = "verified"
     args.force = True
     rc = cli_module.cmd_promote(args)
@@ -129,7 +129,7 @@ def test_promote_noop_when_already_target_status(tmp_path: Path, cli_module, mon
     monkeypatch.setattr(cli_module, "_recipeMeta", lambda sid: {"status": "verified"})
 
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.cliProbe"
+    args.skillId = "recipes.cliProbe"
     args.toStatus = "verified"
     args.force = False
     rc = cli_module.cmd_promote(args)
@@ -143,7 +143,7 @@ def test_promote_rejects_unknown_transition_without_force(tmp_path: Path, cli_mo
     monkeypatch.setattr(cli_module, "_recipeMeta", lambda sid: {"status": "verified"})
 
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.cliProbe"
+    args.skillId = "recipes.cliProbe"
     args.toStatus = "curated"
     args.force = False
     rc = cli_module.cmd_promote(args)
@@ -156,7 +156,7 @@ def test_deprecate_requires_reason(tmp_path: Path, cli_module, monkeypatch):
     monkeypatch.setattr(cli_module, "RECIPE_DIR", tmp_path)
 
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.cliProbe"
+    args.skillId = "recipes.cliProbe"
     args.reason = ""
     rc = cli_module.cmd_deprecate(args)
     assert rc == 1
@@ -168,7 +168,7 @@ def test_deprecate_marks_status_deprecated(tmp_path: Path, cli_module, monkeypat
     monkeypatch.setattr(cli_module, "RECIPE_DIR", tmp_path)
 
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.cliProbe"
+    args.skillId = "recipes.cliProbe"
     args.reason = "drift > 50%"
     rc = cli_module.cmd_deprecate(args)
     assert rc == 0
@@ -184,6 +184,6 @@ def test_promote_to_storyboard_requires_verified_or_curated(tmp_path: Path, cli_
         lambda sid: {"status": "tested"},  # verified 미만 → 거부.
     )
     args = type("Args", (), {})()
-    args.skillId = "engines.recipe.cliProbe"
+    args.skillId = "recipes.cliProbe"
     rc = cli_module.cmd_promote_to_storyboard(args)
     assert rc == 1

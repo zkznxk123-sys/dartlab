@@ -71,7 +71,7 @@ lastUpdated: "2026-05-12"
 
 ## 무엇을 하나
 
-`src/dartlab/skills/specs/engines/recipe/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `scripts/dev/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 자기개선 사다리 (AI 가 recipe 를 자동 승급) 회귀 차단의 코드화.
+`src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `scripts/dev/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 자기개선 사다리 (AI 가 recipe 를 자동 승급) 회귀 차단의 코드화.
 
 배경: dartlab 의 진화 루프는 *3 자* (AI 분석 → 시장 reflection → 사람 검토) 다. AI 자율 진화 아니다. `propose_skill` 자기진화 사다리는 0 promoted 로 dormant 였고 폐기 ([2026-05-07 `4ad36db1b`](https://github.com/eddmpython/dartlab/commit/4ad36db1b)). recipe 도 동일 룰.
 
@@ -107,18 +107,18 @@ uv run python -X utf8 scripts/dev/recipe_promote.py --list
 
 # 특정 recipe 승급 (CLI 가 scorecard 검사 후 통과 시만 commit)
 uv run python -X utf8 scripts/dev/recipe_promote.py \
-    --id engines.recipe.dailyMorningNote \
+    --id recipes.dailyMorningNote \
     --to tested
 
 # verified 승급 (scorecard 6 신호 + reviewer note 필수)
 uv run python -X utf8 scripts/dev/recipe_promote.py \
-    --id engines.recipe.dailyMorningNote \
+    --id recipes.dailyMorningNote \
     --to verified \
     --reviewer-note "S&P 500 30 일 reflection 결과 hit rate 72%"
 
 # deprecated (사유 필수)
 uv run python -X utf8 scripts/dev/recipe_promote.py \
-    --id engines.recipe.dailyMorningNote \
+    --id recipes.dailyMorningNote \
     --to deprecated \
     --reason "FRED API 2026-06 spec 변경으로 macroRef 갱신 불가"
 ```

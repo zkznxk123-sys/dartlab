@@ -1,7 +1,7 @@
-"""Recipe spec lint — engines/recipe/*.md 가 ValidateRecipe 와 호환 가능한지 검증.
+"""Recipe spec lint — recipes/*.md 가 ValidateRecipe 와 호환 가능한지 검증.
 
 검사 항목:
-1. kind == "recipe" 강제 (engines/recipe/ 디렉터리 전체)
+1. kind == "recipe" 강제 (recipes/ 디렉터리 전체)
 2. `## 공개 호출 방식` 섹션 + ```python 코드블록 ≥ 1
 3. python 코드블록이 ast.parse 통과 (ValidateRecipe 가 추출해서 실행)
 4. linkedSkills 가 실제 skill id 로 해상도
@@ -21,7 +21,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-_RECIPE_DIR = Path(__file__).resolve().parents[1] / "src" / "dartlab" / "skills" / "specs" / "engines" / "recipe"
+_RECIPE_DIR = Path(__file__).resolve().parents[1] / "src" / "dartlab" / "skills" / "specs" / "recipes"
 
 
 def _recipe_paths() -> list[Path]:
@@ -59,7 +59,7 @@ def test_every_recipe_has_kind_recipe():
         data = _readMarkdownSkill(text, path)
         if data.get("kind") != "recipe":
             failures.append(f"{path.name}: kind={data.get('kind')!r}")
-    assert not failures, "engines/recipe/ 의 spec 은 kind: recipe 강제\n" + "\n".join(failures)
+    assert not failures, "recipes/ 의 spec 은 kind: recipe 강제\n" + "\n".join(failures)
 
 
 def test_every_recipe_public_call_block_parses_as_python():

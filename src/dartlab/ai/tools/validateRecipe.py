@@ -148,7 +148,7 @@ def validateRecipe(
     Parameters
     ----------
     skillId : str
-        ``engines.recipe.<slug>``.
+        ``recipes.<slug>``.
     targets : list[str], optional
         실행 대상 stockCode 목록. 미지정시 spec 의 ``testUniverse.stockCodes`` 또는 005930 fallback.
     asOf : str, optional

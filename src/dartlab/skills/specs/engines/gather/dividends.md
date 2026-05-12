@@ -66,7 +66,7 @@ examples:
   - 배당락 + 보정 가격
 linkedSkills:
   - engines.scan.dividendTrend
-  - engines.analysis.dividendCapitalReturn
+  - recipes.dividendCapitalReturn
   - engines.gather.splits
 source:
   type: manual_skill

@@ -71,7 +71,7 @@ examples:
 linkedSkills:
   - engines.quant
   - engines.analysis.governance
-  - engines.analysis.governanceAudit
+  - recipes.governanceAuditComposite
   - engines.scan.governance
 source:
   type: manual_skill

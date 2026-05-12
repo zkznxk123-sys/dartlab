@@ -4,7 +4,7 @@
 사용자 질문에 자율적으로 호출하는 stateless 도구. 작성된 spec 의 status 는 항상 `drafted` —
 승격은 운영자 CLI (`scripts/dev/recipe_promote.py`) 단독 권한.
 
-작성 위치: `src/dartlab/skills/specs/engines/recipe/{slug}.md`. recipe-전용 frontmatter
+작성 위치: `src/dartlab/skills/specs/recipes/{slug}.md`. recipe-전용 frontmatter
 (gap/falsifier/expectedNovelty/testUniverse) 강제. 동일 id 가 이미 있으면 거부.
 """
 
@@ -19,7 +19,7 @@ from dartlab.ai.contracts import Ref
 
 from .types import ToolResult
 
-_RECIPE_DIR = Path(__file__).resolve().parents[2] / "skills" / "specs" / "engines" / "recipe"
+_RECIPE_DIR = Path(__file__).resolve().parents[2] / "skills" / "specs" / "recipes"
 
 
 def _validateGap(gap: Any) -> str | None:
@@ -64,7 +64,7 @@ def proposeRecipe(
     Parameters
     ----------
     id : str
-        ``engines.recipe.<slug>`` 형식. 동일 id 가 이미 존재하면 거부.
+        ``recipes.<slug>`` 형식. 동일 id 가 이미 존재하면 거부.
     title : str
         한국어 제목. 공백만이면 거부.
     purpose : str, optional
@@ -97,10 +97,10 @@ def proposeRecipe(
     skill_id = (id or "").strip()
     if not skill_id:
         return ToolResult(False, "id 가 비어 있다", error="missing_id")
-    if not skill_id.startswith("engines.recipe."):
+    if not skill_id.startswith("recipes."):
         return ToolResult(
             False,
-            f"id 는 'engines.recipe.<slug>' 형식 (got {skill_id!r})",
+            f"id 는 'recipes.<slug>' 형식 (got {skill_id!r})",
             error="invalid_id_prefix",
         )
     if not (title or "").strip():
@@ -125,7 +125,7 @@ def proposeRecipe(
     frontmatter: dict[str, Any] = {
         "id": skill_id,
         "title": title.strip(),
-        "category": "engines",
+        "category": "recipes",
         "kind": "recipe",
         "scope": "builtin",
         "status": "drafted",

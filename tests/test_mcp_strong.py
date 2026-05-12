@@ -68,7 +68,7 @@ async def _run_probe() -> dict:
 
             # 5. prompts/get — recipe 본문 + arguments prefix
             try:
-                got = await session.get_prompt("engines.recipe.dailyMorningNote", {"tickers": "005930"})
+                got = await session.get_prompt("recipes.dailyMorningNote", {"tickers": "005930"})
                 out["prompt_body_chars"] = len(got.messages[0].content.text) if got.messages else 0
                 out["prompt_includes_user_input"] = "사용자 입력" in (got.messages[0].content.text or "")
             except Exception as exc:
@@ -146,7 +146,7 @@ def test_mcp_strong_annotations_and_structured_and_prompts():
     # ── prompts ──
     assert len(out["prompts"]) >= 10, f"recipe 카테고리 prompts ≥ 10 노출 (실제 {len(out['prompts'])})"
     prompt_names = {name for name, _ in out["prompts"]}
-    assert "engines.recipe.dailyMorningNote" in prompt_names
+    assert "recipes.dailyMorningNote" in prompt_names
 
     assert out.get("prompt_body_chars", 0) > 500, "recipe prompt 본문이 500 chars 이상"
     assert out.get("prompt_includes_user_input"), "사용자 arguments 가 prompt 본문에 prefix 됨"

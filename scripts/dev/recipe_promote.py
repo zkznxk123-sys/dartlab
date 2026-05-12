@@ -12,8 +12,8 @@ frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
 
 실행:
     uv run python -X utf8 scripts/dev/recipe_promote.py list
-    uv run python -X utf8 scripts/dev/recipe_promote.py inspect engines.recipe.creditDistressDual
-    uv run python -X utf8 scripts/dev/recipe_promote.py promote engines.recipe.creditDistressDual
+    uv run python -X utf8 scripts/dev/recipe_promote.py inspect recipes.creditDistressDual
+    uv run python -X utf8 scripts/dev/recipe_promote.py promote recipes.creditDistressDual
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RECIPE_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "engines" / "recipe"
+RECIPE_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes"
 
 # 프로젝트 모듈 import 를 위해 src 를 path 추가.
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -147,7 +147,7 @@ def cmd_list(args: argparse.Namespace) -> int:
     rows: list[tuple[str, str, int, float]] = []
     for path in sorted(RECIPE_DIR.glob("*.md")):
         slug = path.stem
-        skill_id = f"engines.recipe.{slug}"
+        skill_id = f"recipes.{slug}"
         try:
             _, front, _ = _readSpec(path)
         except ValueError:

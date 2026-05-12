@@ -1,4 +1,4 @@
-"""recipe_schema_migrate — engines/recipe/*.md frontmatter 에 gap 필드 일괄 추가.
+"""recipe_schema_migrate — recipes/*.md frontmatter 에 gap 필드 일괄 추가.
 
 용도
 ----
@@ -28,7 +28,7 @@ from collections import Counter
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-RECIPE_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "engines" / "recipe"
+RECIPE_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes"
 
 _ENGINE_RE = re.compile(r"^engines\.([a-zA-Z][\w]*)")
 # 분석/조합 의미가 약한 facade · meta · 인프라 엔진은 gap.primary 후보에서 제외.

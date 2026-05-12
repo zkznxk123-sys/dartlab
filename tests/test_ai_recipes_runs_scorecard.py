@@ -27,7 +27,7 @@ def runsDir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-def _make_record(skillId: str = "engines.recipe.x", **overrides) -> RecipeRunRecord:
+def _make_record(skillId: str = "recipes.x", **overrides) -> RecipeRunRecord:
     base = {
         "runId": "r1",
         "skillId": skillId,
@@ -62,7 +62,7 @@ def test_append_run_creates_file_then_appends(runsDir: Path) -> None:
 
 
 def test_load_runs_returns_empty_for_unknown_skill(runsDir: Path) -> None:
-    df = loadRuns("engines.recipe.nonexistent")
+    df = loadRuns("recipes.nonexistent")
     assert df.is_empty()
     assert "runId" in df.columns
 
@@ -73,9 +73,9 @@ def test_scorecard_pass_rate_and_completeness(runsDir: Path) -> None:
     appendRun(_make_record(runId="r3", target="C", headlineValue="0.5", ok=True))
     appendRun(_make_record(runId="r4", target="D", headlineValue="0.7", ok=False, evidenceKinds=["skillRef"]))
 
-    runs = loadRuns("engines.recipe.x")
+    runs = loadRuns("recipes.x")
     sc = computeScorecard(
-        "engines.recipe.x",
+        "recipes.x",
         runs,
         requiredEvidence=["skillRef", "tableRef", "valueRef", "dateRef"],
         expectedNovelty=["consensus"],
@@ -96,9 +96,9 @@ def test_scorecard_meets_thresholds_only_when_all_signals_pass(runsDir: Path) ->
     # 5 target × 모든 ok=True × 다양한 headline.
     for i, code in enumerate(["005930", "000660", "035420", "051910", "055550"]):
         appendRun(_make_record(runId=f"r{i}", target=code, headlineValue=str(0.3 + i * 0.15), ok=True))
-    runs = loadRuns("engines.recipe.x")
+    runs = loadRuns("recipes.x")
     sc = computeScorecard(
-        "engines.recipe.x",
+        "recipes.x",
         runs,
         requiredEvidence=["skillRef", "tableRef", "valueRef", "dateRef"],
         expectedNovelty=["consensus"],
@@ -117,9 +117,9 @@ def test_scorecard_meets_thresholds_only_when_all_signals_pass(runsDir: Path) ->
 
 def test_scorecard_fails_threshold_when_no_novelty(runsDir: Path) -> None:
     appendRun(_make_record(runId="r1", target="A", headlineValue="0.5"))
-    runs = loadRuns("engines.recipe.x")
+    runs = loadRuns("recipes.x")
     sc = computeScorecard(
-        "engines.recipe.x",
+        "recipes.x",
         runs,
         requiredEvidence=["skillRef"],
         expectedNovelty=[],  # 빈 → novelty=False
@@ -131,8 +131,8 @@ def test_scorecard_fails_threshold_when_no_novelty(runsDir: Path) -> None:
 
 def test_scorecard_handles_empty_runs(runsDir: Path) -> None:
     sc = computeScorecard(
-        "engines.recipe.empty",
-        loadRuns("engines.recipe.empty"),
+        "recipes.empty",
+        loadRuns("recipes.empty"),
         requiredEvidence=["skillRef"],
         expectedNovelty=["x"],
         falsifierPresent=True,
@@ -165,8 +165,8 @@ def test_drift_suggests_deprecate_on_high_schema_error_rate(runsDir: Path) -> No
                 capturedAt=f"2026-05-{i + 1:02d}T00:00:00+00:00",
             )
         )
-    runs = loadRuns("engines.recipe.x")
-    report = detectDrift("engines.recipe.x", runs, recentN=10, baselineN=30)
+    runs = loadRuns("recipes.x")
+    report = detectDrift("recipes.x", runs, recentN=10, baselineN=30)
     assert report.schemaDriftRate == 1.0
     assert report.suggestDeprecate
 
@@ -174,7 +174,7 @@ def test_drift_suggests_deprecate_on_high_schema_error_rate(runsDir: Path) -> No
 def test_drift_returns_pending_when_run_count_low(runsDir: Path) -> None:
     for i in range(3):
         appendRun(_make_record(runId=f"r{i}"))
-    runs = loadRuns("engines.recipe.x")
-    report = detectDrift("engines.recipe.x", runs, recentN=10, baselineN=30)
+    runs = loadRuns("recipes.x")
+    report = detectDrift("recipes.x", runs, recentN=10, baselineN=30)
     assert not report.suggestDeprecate
     assert any("진단 보류" in note for note in report.notes)

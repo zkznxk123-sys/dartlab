@@ -322,7 +322,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "ProposeRecipe": ToolSpec(
         "ProposeRecipe",
-        "engines.recipe.<slug> markdown spec 1 건 신규 작성 (status=drafted). gap.primary ≥ 2 + falsifier.description 강제. 승격은 운영자 CLI 단독.",
+        "recipes.<slug> markdown spec 1 건 신규 작성 (status=drafted). gap.primary ≥ 2 + falsifier.description 강제. 승격은 운영자 CLI 단독.",
         {
             "type": "object",
             "properties": {

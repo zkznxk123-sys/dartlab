@@ -125,7 +125,7 @@ def _tokenize(text: str) -> set[str]:
 
 
 _STOCK_CODE_RE = re.compile(r"\b\d{6}\b")
-_RECIPE_TAG_PREFIX = "skill:engines.recipe."
+_RECIPE_TAG_PREFIXES = ("skill:recipes.", "skill:engines.recipe.")
 _TARGET_TAG_PREFIX = "target:"
 _METRIC_TAG_PREFIX = "metric:"
 
@@ -135,7 +135,8 @@ def _scoreRecall(row: dict, qTokens: set[str], qMeta: dict) -> float:
 
     가중치:
     - target:{stockCode} 일치: +0.3
-    - skill:engines.recipe.* 태그: +0.2 (recipe 우선 회상)
+    - skill:recipes.* 태그: +0.2 (recipe 우선 회상)
+      기존 memory 호환을 위해 skill:engines.recipe.* 도 동일 처리.
     - metric:{name} 이 query 토큰에 포함: +0.2 (특정 지표 회상)
     """
     text_for_scoring = row.get("text") or row.get("question") or ""
@@ -158,7 +159,7 @@ def _scoreRecall(row: dict, qTokens: set[str], qMeta: dict) -> float:
                 if code in target_codes:
                     bonus += 0.3
                     break
-        if any(str(t).startswith(_RECIPE_TAG_PREFIX) for t in tags):
+        if any(str(t).startswith(_RECIPE_TAG_PREFIXES) for t in tags):
             bonus += 0.2
         for tag in tags:
             tag_str = str(tag)

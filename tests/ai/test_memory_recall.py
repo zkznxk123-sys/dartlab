@@ -30,9 +30,9 @@ def test_recall_boosts_target_match(isolated_decisions: Path) -> None:
 
 @pytest.mark.unit
 def test_recall_boosts_recipe_skill(isolated_decisions: Path) -> None:
-    """skill:engines.recipe.* 태그 record 가 +0.2 가중."""
+    """skill:recipes.* 태그 record 가 +0.2 가중."""
     remember("일반 분석 결과", tags=["skill:engines.company"])
-    remember("종합 recipe 분석 결과", tags=["skill:engines.recipe.companyDeepAnalysis"])
+    remember("종합 recipe 분석 결과", tags=["skill:recipes.companyDeepAnalysis"])
 
     results = recall("종합 분석 recipe", k=5)
     # recipe 태그가 첫 번째

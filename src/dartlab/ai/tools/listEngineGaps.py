@@ -16,7 +16,7 @@ from typing import Any
 
 from .types import ToolResult
 
-_RECIPE_DIR = Path(__file__).resolve().parents[2] / "skills" / "specs" / "engines" / "recipe"
+_RECIPE_DIR = Path(__file__).resolve().parents[2] / "skills" / "specs" / "recipes"
 
 # facade · meta · 인프라 엔진은 페어 후보에서 제외 (recipe_schema_migrate.py 와 동일).
 _EXCLUDED_FROM_GAP = frozenset({"recipe", "company", "mappers", "dashboard", "viz", "data"})

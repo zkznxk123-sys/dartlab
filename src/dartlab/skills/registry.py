@@ -65,7 +65,7 @@ def _loadIntentBoosts() -> tuple[dict[str, Any], ...]:
     return _INTENT_BOOSTS_CACHE
 
 
-_MANUAL_SKILL_CATEGORIES = {"start", "runtime", "operation", "engines", "user"}
+_MANUAL_SKILL_CATEGORIES = {"start", "runtime", "operation", "engines", "recipes", "user"}
 
 
 def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:

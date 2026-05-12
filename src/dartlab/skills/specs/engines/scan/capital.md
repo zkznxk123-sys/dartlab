@@ -66,7 +66,7 @@ examples:
   - 산업 평균 배당성향 대비
 linkedSkills:
   - engines.analysis.capitalAllocation
-  - engines.analysis.dividendCapitalReturn
+  - recipes.dividendCapitalReturn
   - engines.scan.dividendTrend
 source:
   type: manual_skill
