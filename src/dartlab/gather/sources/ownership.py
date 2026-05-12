@@ -40,6 +40,15 @@ async def fetch(
         - source : str — 데이터 출처 ("naver")
 
         KR 외 시장이거나 조회 실패 시 빈 리스트 [].
+
+    Raises
+    ------
+    없음
+        provider 내부 예외 (SourceUnavailableError/KeyError/ValueError/TypeError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetch("005930", market="KR", client=client, limit=5)
     """
     if market != "KR":
         return []

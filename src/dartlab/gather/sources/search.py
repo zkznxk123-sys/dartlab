@@ -144,6 +144,15 @@ def webSearch(
         source : str — ``"tavily"``
         published : str | None — 발행일
         캐시 TTL 30분. Tavily 미설정 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Tavily 내부 예외 (OSError/ValueError/KeyError/RuntimeError) 는 빈 리스트 + circuit breaker.
+
+    Example
+    -------
+    >>> hits = webSearch("samsung electronics", maxResults=5)
     """
     cacheKey = f"search:{query}:{maxResults}:{days}"
     cached = _cache.get(cacheKey)
@@ -195,6 +204,15 @@ def newsSearch(
         source : str — ``"tavily"``
         published : str | None — 발행일
         캐시 TTL 30분. Tavily 미설정 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Tavily 내부 예외 (OSError/ValueError/KeyError/RuntimeError) 는 빈 리스트 + circuit breaker.
+
+    Example
+    -------
+    >>> news = newsSearch("samsung", maxResults=10, days=7)
     """
     cacheKey = f"news_search:{query}:{maxResults}:{days}"
     cached = _cache.get(cacheKey)
@@ -233,6 +251,16 @@ def searchAvailable(*, limit: int | None = None) -> dict[str, bool]:
     dict[str, bool]
         tavily : bool — Tavily 백엔드 사용 가능 여부
         any : bool — 하나 이상의 백엔드 사용 가능 여부
+
+    Raises
+    ------
+    없음
+        backend 진단 함수 — 모든 실패는 False 로 표현.
+
+    Example
+    -------
+    >>> caps = searchAvailable()
+    >>> caps["tavily"]
     """
     del limit
     tavily = _tavilyAvailable()
@@ -256,6 +284,15 @@ def formatResults(results: list[SearchResult], *, maxChars: int = 4000) -> str:
     -------
     str
         마크다운 형식 문자열. 결과 없으면 ``"(검색 결과 없음)"``.
+
+    Raises
+    ------
+    없음
+        포맷팅 전용 — 입력 list 가 비어 있으면 안내 문자열 반환.
+
+    Example
+    -------
+    >>> txt = formatResults(results, maxChars=2000)
     """
     if not results:
         return "(검색 결과 없음)"

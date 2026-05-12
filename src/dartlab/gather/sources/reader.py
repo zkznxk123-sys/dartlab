@@ -131,8 +131,17 @@ def _readBs4(url: str) -> str:
 def readUrl(url: str) -> str:
     """URL 본문을 마크다운/텍스트로 추출.
 
+    Args:
+        url: ``http://`` 또는 ``https://`` 로 시작하는 본문 추출 대상 URL.
+
     Returns:
         추출된 텍스트. 실패 시 오류 메시지 문자열.
+
+    Raises:
+        없음 — Jina/BS4 실패는 fallback 후 오류 메시지 문자열로 반환.
+
+    Example:
+        >>> readUrl("https://example.com/article")
     """
     if not url or not url.startswith(("http://", "https://")):
         return f"[오류] 유효한 URL이 아닙니다: {url}"

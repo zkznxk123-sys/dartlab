@@ -50,6 +50,15 @@ async def fetch(
         - volume : int — 거래량 (주)
 
         전체 fallback 실패 시 빈 리스트 [].
+
+    Raises
+    ------
+    없음
+        fallback 체인 내부 예외 (GatherError/ImportError/OSError/ValueError/AttributeError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetch("005930", start="2024-01-01", end="2024-12-31", limit=10)
     """
     chain: list[str] = []
     # KR → naver 최우선

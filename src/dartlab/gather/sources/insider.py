@@ -41,6 +41,15 @@ async def fetchInsiderTrading(
         - reason : str — 변동 사유
 
         KR 외 시장이거나 조회 실패 시 빈 리스트 [].
+
+    Raises
+    ------
+    없음
+        provider 내부 예외 (ImportError/OSError/TypeError) 는 흡수.
+
+    Example
+    -------
+    >>> trades = await fetchInsiderTrading("005930", market="KR", limit=10)
     """
     if market != "KR":
         return []
@@ -87,6 +96,15 @@ async def fetchMajorShareholders(
         - changeType : str — 변동 유형 (취득/처분/변동)
 
         KR 외 시장이거나 조회 실패 시 빈 리스트 [].
+
+    Raises
+    ------
+    없음
+        provider 내부 예외 (ImportError/OSError/TypeError) 는 흡수.
+
+    Example
+    -------
+    >>> holders = await fetchMajorShareholders("005930", market="KR", limit=10)
     """
     if market != "KR":
         return []

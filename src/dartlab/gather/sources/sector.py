@@ -43,6 +43,15 @@ async def fetch(
         - source : str — 데이터 출처
 
         KR 외 시장이거나 조회 실패 시 None.
+
+    Raises
+    ------
+    없음
+        provider 내부 예외 (SourceUnavailableError/ImportError/OSError) 는 흡수.
+
+    Example
+    -------
+    >>> info = await fetch("005930", market="KR", client=client)
     """
     del limit
     if market != "KR":

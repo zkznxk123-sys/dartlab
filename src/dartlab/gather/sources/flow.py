@@ -41,6 +41,15 @@ async def fetch(
         - individualNet : float — 개인 순매수 (주)
 
         KR 외 시장이거나 전체 fallback 실패 시 None.
+
+    Raises
+    ------
+    없음
+        fallback 체인 내부 예외는 GatherError/ImportError/OSError 로 흡수.
+
+    Example
+    -------
+    >>> rows = await fetch("005930", market="KR", limit=20)
     """
     if market != "KR":
         return None

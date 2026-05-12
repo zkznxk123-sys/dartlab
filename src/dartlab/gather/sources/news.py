@@ -171,6 +171,16 @@ def toDataFrame(items: list[NewsItem]) -> pl.DataFrame:
         source : str — 언론사명
         url : str — 기사 링크
         최신순 정렬. 빈 리스트이면 빈 DataFrame (동일 스키마).
+
+    Raises
+    ------
+    없음
+        빈 리스트는 빈 DataFrame 반환.
+
+    Example
+    -------
+    >>> items = [NewsItem(date="2024-01-01", title="t", source="s", url="u")]
+    >>> toDataFrame(items)
     """
     if not items:
         return pl.DataFrame(schema=_EMPTY_SCHEMA)
@@ -199,6 +209,12 @@ def fetchNews(
 
     Returns:
         (date, title, source, url) DataFrame.
+
+    Raises:
+        없음 — Google News RSS 파싱 실패는 빈 DataFrame 반환.
+
+    Example:
+        >>> df = fetchNews("삼성전자", market="KR", days=7, limit=10)
     """
     from ..infra.http import runAsync
 

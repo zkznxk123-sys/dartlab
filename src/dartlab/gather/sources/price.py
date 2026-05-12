@@ -62,6 +62,15 @@ async def fetch(
         - is_stale : bool — stale cache 반환 여부
 
         전체 fallback + stale cache 모두 실패 시 None.
+
+    Raises
+    ------
+    없음
+        fallback 체인 내부 예외 (GatherError/ImportError/OSError) 는 흡수.
+
+    Example
+    -------
+    >>> snap = await fetch("005930", market="KR")
     """
     config = getMarketConfig(market)
     chain = getPriceFallback(market)
