@@ -38,13 +38,13 @@ def splitSubtables(md: str) -> list[list[str]]:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections markdown table → 구조 분류 + 수평화 + 서브테이블 분리.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.table()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal table parser — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
@@ -332,13 +332,13 @@ def buildTableDataFrame(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections markdown table → 구조 분류 + 수평화 + 서브테이블 분리.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.table()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal table parser — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:

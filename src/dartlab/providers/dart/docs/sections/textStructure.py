@@ -231,10 +231,10 @@ def parseTextStructureWithState(
         >>> parseTextStructureWithState(...)
 
     Returns:
-        <TODO: return desc> (tuple[list[dict[str, object]], list[dict[str, Any]]])
+        tuple[list[dict], list[dict]] — (노드, 엣지) 페어.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``mapper`` / ``runtime`` — sections 분석 호출자.
 
     Requires:
         - dartlab
@@ -242,27 +242,27 @@ def parseTextStructureWithState(
         - hashlib
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 본문 텍스트 → 노드 (heading/body) 분류 + 정규식 패턴 매칭.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal text structure — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections runtime/analysis 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / str / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections 본문 텍스트.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - text → 정규식 매칭 → 노드 분류 (heading/body) → 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections text structure.
     """
     nodes: list[dict[str, object]] = []
     stack: list[dict[str, object]] = [dict(item) for item in (initialHeadings or [])]
@@ -279,7 +279,7 @@ def parseTextStructureWithState(
             >>> flushBody(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``mapper`` / ``runtime`` — sections 호출자.
 
         Requires:
             - dartlab
@@ -287,13 +287,13 @@ def parseTextStructureWithState(
             - hashlib
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 본문 텍스트 → 노드 분류 + 정규식 매칭.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal text structure — AI 직접 호출 X.
         """
         nonlocal bodyLines, segmentOrder
         body = "\n".join(bodyLines).strip()
@@ -424,10 +424,10 @@ def parseTextStructure(
         >>> parseTextStructure(...)
 
     Returns:
-        <TODO: return desc> (list[dict[str, object]])
+        list[dict] — 결과 dict 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``mapper`` / ``runtime`` — sections 분석 호출자.
 
     Requires:
         - dartlab
@@ -435,27 +435,27 @@ def parseTextStructure(
         - hashlib
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 본문 텍스트 → 노드 (heading/body) 분류 + 정규식 패턴 매칭.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal text structure — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections runtime/analysis 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / str / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections 본문 텍스트.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - text → 정규식 매칭 → 노드 분류 (heading/body) → 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections text structure.
     """
     nodes, _stack = parseTextStructureWithState(text, sourceBlockOrder=sourceBlockOrder, topic=topic)
     return nodes
