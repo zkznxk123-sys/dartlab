@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
-from dartlab.core.dataLoader import DART_VIEWER, loadData
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.dataLoader import DART_VIEWER, loadData
 from dartlab.providers.filingHelpers import filingRecord, filterFilingsByKeyword, resolveDateWindow, truncateText
 
 if TYPE_CHECKING:
@@ -63,11 +63,11 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
         - ``buildUpdate`` — 본 함수의 누락 공시 증분 수집 자매.
         - ``buildDisclosure`` — OpenDART 직접 호출 (로컬 parquet X).
         - ``Company.filings`` — 본 함수의 facade.
-        - ``dartlab.core.dataLoader.loadData`` / ``DART_VIEWER`` — 데이터/URL source.
+        - ``dartlab.frame.dataLoader.loadData`` / ``DART_VIEWER`` — 데이터/URL source.
 
     Requires:
         - polars — DataFrame.
-        - dartlab.core.dataLoader — loadData + DART_VIEWER 상수.
+        - dartlab.frame.dataLoader — loadData + DART_VIEWER 상수.
 
     AIContext:
         Workbench "이 회사 공시 목록" / "최근 보고서" 질문 entry. 로컬 parquet 기반이라 빠름.
@@ -337,7 +337,7 @@ def buildLiveFilings(
         - polars — DataFrame.
         - dartlab.providers.dart.openapi.dart — OpenDart.
         - dartlab.providers.filingHelpers — filterFilingsByKeyword + resolveDateWindow.
-        - dartlab.core.dataLoader — DART_VIEWER 상수.
+        - dartlab.frame.dataLoader — DART_VIEWER 상수.
         - dartlab.core.messaging — progress (사용자 알림).
         - DART_API_KEY.
 
@@ -495,7 +495,7 @@ def buildReadFiling(
 
     Requires:
         - polars (입력 Series 처리) + dartlab.providers.filingHelpers — filingRecord / truncateText.
-        - dartlab.core.dataLoader — DART_VIEWER.
+        - dartlab.frame.dataLoader — DART_VIEWER.
         - dartlab.providers.dart.openapi — ZIP 다운로드 (sections=True 시).
         - DART_API_KEY (ZIP 다운로드 시).
 

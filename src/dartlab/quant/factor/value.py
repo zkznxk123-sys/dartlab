@@ -24,7 +24,7 @@ import logging
 
 import polars as pl
 
-from dartlab.core.market import resolveMarket
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.factor.quality import _isFinancial
 from dartlab.quant.screen.dataAccess import (
     extractAccount,

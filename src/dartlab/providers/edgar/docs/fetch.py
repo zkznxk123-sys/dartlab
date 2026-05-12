@@ -843,7 +843,7 @@ def prepareEdgarCollectibleUniverse(
             - <TODO: 대상 시장>
     """
     from dartlab import config
-    from dartlab.core.dataLoader import loadEdgarListedUniverse
+    from dartlab.frame.dataLoader import loadEdgarListedUniverse
 
     cachePath = Path(config.dataDir) / "edgar" / "docsCollectibleUniverse.parquet"
     cacheDf = _loadCollectibleUniverseCache(cachePath, forceRefresh=forceRefresh)

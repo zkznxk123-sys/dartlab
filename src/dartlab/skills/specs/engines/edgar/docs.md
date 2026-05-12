@@ -89,7 +89,7 @@ lastUpdated: '2026-05-12'
 ```python
 import dartlab
 from dartlab.providers.edgar.docs.sections import sections
-from dartlab.core.dataLoader import loadData
+from dartlab.frame.dataLoader import loadData
 
 # 사용자 진입점 — Company facade
 c = dartlab.Company("AAPL")

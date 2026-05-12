@@ -355,7 +355,7 @@ DART 공시 요약재무정보에서 숫자 브릿지 매칭으로 계정명을 
 
 ## 의존 (sub-domain 공통)
 
-- `dartlab.core.dataLoader` — `loadData` · `extractCorpName` · `PERIOD_KINDS`
+- `dartlab.frame.dataLoader` — `loadData` · `extractCorpName` · `PERIOD_KINDS`
 - `dartlab.providers.notesExtractor` — `extractNotesContent` · `findNumberedSection`
 - `dartlab.providers.reportSelector` — 보고서 선택
 - `dartlab.providers.tableParser` — 마크다운 테이블 파싱, 금액/단위 처리

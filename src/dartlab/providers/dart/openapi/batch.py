@@ -443,7 +443,7 @@ def _existingReportPeriods(path: Path) -> set[tuple[str, str, str]]:
 def _dataPath(category: str, stockCode: str) -> Path:
     """parquet 저장 경로."""
     from dartlab import config as _cfg
-    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.frame.dataConfig import DATA_RELEASES
 
     subDir = DATA_RELEASES.get(category, {}).get("dir", f"dart/{category}")
     dest = Path(_cfg.dataDir) / subDir / f"{stockCode}.parquet"

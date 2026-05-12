@@ -9,9 +9,9 @@ from pathlib import Path
 import polars as pl
 
 from dartlab import config as _dartlabConfig
-from dartlab.core.dataConfig import DATA_RELEASES
-from dartlab.core.dataLoader import loadEdgarListedUniverse
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.dataConfig import DATA_RELEASES
+from dartlab.frame.dataLoader import loadEdgarListedUniverse
 from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
 from dartlab.providers.edgar.openapi.client import EdgarClient
 from dartlab.providers.edgar.openapi.facts import (

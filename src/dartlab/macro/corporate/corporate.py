@@ -63,7 +63,7 @@ def _loadScanFinance(market: str) -> pl.DataFrame | None:
             return df
 
     try:
-        from dartlab.core.dataLoader import loadScanFinance
+        from dartlab.frame.dataLoader import loadScanFinance
 
         df = loadScanFinance(market=market)
         if df is not None:

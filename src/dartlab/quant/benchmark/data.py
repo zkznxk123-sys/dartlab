@@ -9,8 +9,8 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.benchmark.map import INDEX_ALIASES, indexExists, primaryIndustryNode, sectorCandidates
 
 log = logging.getLogger(__name__)

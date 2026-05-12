@@ -402,7 +402,7 @@ def _valuationCatalogRows() -> list[dict[str, str]]:
 
 
 def _reportCatalogRows() -> list[dict[str, str]]:
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
     from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES
 
     rows: list[dict[str, str]] = []
@@ -673,7 +673,7 @@ def _loadReport(field: str) -> pl.DataFrame:
 
 
 def _loadReportExists(apiType: str) -> pl.DataFrame:
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
     from dartlab.scan.io.parquet import _ensureScanData
 
     scan_path = _ensureScanData() / "report" / f"{apiType}.parquet"

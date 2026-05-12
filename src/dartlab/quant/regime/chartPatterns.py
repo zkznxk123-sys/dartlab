@@ -12,8 +12,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.regime.pattern import _findPivots
 from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 

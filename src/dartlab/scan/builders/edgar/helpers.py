@@ -218,7 +218,7 @@ def scanEdgarRawTags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
         - :func:`scanEdgarAccounts` — snakeId 정규화 경로 (권장)
         - :func:`dartlab.scan.builders.edgar.scan._scanAudit` — 본 함수 호출자 예시
     """
-    from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.frame.dataLoader import _getDataRoot
 
     edgarDir = _getDataRoot() / "edgar" / "finance"
     if not edgarDir.exists():

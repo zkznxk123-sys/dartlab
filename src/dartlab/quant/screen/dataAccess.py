@@ -94,7 +94,7 @@ def fetchBenchmark(market: str = "KR", **kwargs: Any):
 
 def _scanDataRoot() -> Path:
     """data/ 루트 경로."""
-    from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.frame.dataLoader import _getDataRoot
 
     return Path(_getDataRoot())
 

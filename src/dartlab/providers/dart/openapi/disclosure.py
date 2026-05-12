@@ -138,17 +138,19 @@ def listFilings(
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - corp 와 start 둘 다 None → ValueError. 둘 중 하나 필수.
+            - corpClass + corp 동시 → corpClass 무시 (corp 우선).
+            - fetchAll=True 큰 기간 → DART API 페이지 폭증. limit 또는 기간 분할 의무.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [corp_code, corp_name, rcept_no, report_nm, rcept_dt, ...].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + (corp 또는 start).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 인자 → DartClient → DART API → pagination 통합 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시 검색.
     """
     params: dict[str, str] = {}
 
@@ -236,17 +238,19 @@ def iterFilings(
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - corp 와 start 둘 다 None → ValueError. 둘 중 하나 필수.
+            - corpClass + corp 동시 → corpClass 무시 (corp 우선).
+            - fetchAll=True 큰 기간 → DART API 페이지 폭증. limit 또는 기간 분할 의무.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [corp_code, corp_name, rcept_no, report_nm, rcept_dt, ...].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + (corp 또는 start).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 인자 → DartClient → DART API → pagination 통합 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시 검색.
     """
     df = listFilings(
         client,
@@ -326,17 +330,19 @@ def companyInfo(
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - corp 와 start 둘 다 None → ValueError. 둘 중 하나 필수.
+            - corpClass + corp 동시 → corpClass 무시 (corp 우선).
+            - fetchAll=True 큰 기간 → DART API 페이지 폭증. limit 또는 기간 분할 의무.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [corp_code, corp_name, rcept_no, report_nm, rcept_dt, ...].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + DART_API_KEY + (corp 또는 start).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART OpenAPI 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 인자 → DartClient → DART API → pagination 통합 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시 검색.
     """
     corpCode = _resolveCorpCode(client, corp)
     data = client.getJson("company.json", {"corp_code": corpCode})

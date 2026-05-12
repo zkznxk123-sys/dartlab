@@ -6,7 +6,7 @@ market 파라미터 기본값이 "KR"인 곳에서 resolveMarket을 호출하면
 
 Usage::
 
-    from dartlab.core.market import detectMarket, resolveMarket
+    from dartlab.frame.market import detectMarket, resolveMarket
 
     detectMarket("005930")   # "KR"
     detectMarket("INTC")     # "US"

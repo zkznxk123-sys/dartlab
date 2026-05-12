@@ -85,8 +85,8 @@ _KNOWN_VIOLATIONS = {
     # AST import 0건, regex lazy-import 가 doctest 줄을 잡는 false positive
     ("dartlab.core.protocols", "dartlab.providers"),
     # core/ → providers (L0→L1)
-    ("dartlab.core.dataLoader", "dartlab.providers"),
-    ("dartlab.core.resolve", "dartlab.gather"),
+    ("dartlab.frame.dataLoader", "dartlab.providers"),
+    ("dartlab.frame.resolve", "dartlab.gather"),
     ("dartlab.core", "dartlab.gather"),  # core/__init__ → listing
     # core/ → providers (L0→L1)
     ("dartlab.reference.docs.diff", "dartlab.providers"),

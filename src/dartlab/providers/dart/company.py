@@ -22,13 +22,13 @@ import polars as pl
 pl.Config.set_fmt_str_lengths(80)
 pl.Config.set_tbl_width_chars(200)
 
-from dartlab.core.dataLoader import (
+from dartlab.core.logger import getLogger
+from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.dataLoader import (
     buildIndex,
     extractCorpName,
     loadData,
 )
-from dartlab.core.logger import getLogger
-from dartlab.core.polarsUtil import isEmptyDf
 
 _log = getLogger(__name__)
 
@@ -2511,7 +2511,7 @@ class Company:
         SeeAlso:
             - ``_selectImpl`` — 실제 필터 구현.
             - ``show`` — 본 함수의 입력 source.
-            - ``dartlab.core.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.
+            - ``dartlab.frame.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.
 
         Requires:
             - dartlab
@@ -2574,7 +2574,7 @@ class Company:
             c.select("BS", ["자본총계"], scope="separate")    # 별도 자본
             c.select("IS", ["매출액"]).chart()
         """
-        from dartlab.core.select import SelectResult
+        from dartlab.frame.select import SelectResult
         from dartlab.reference.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None X)

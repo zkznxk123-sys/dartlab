@@ -206,7 +206,7 @@ def scanAccount(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
 
     edgarDir = Path(_dataDir("edgar"))
     parquetFiles = sorted(edgarDir.glob("*.parquet"))

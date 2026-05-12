@@ -23,8 +23,8 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 _KR_MACRO_DEFAULT = ("USDKRW", "BASE_RATE", "CPI", "M2")

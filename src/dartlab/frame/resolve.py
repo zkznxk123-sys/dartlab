@@ -2,7 +2,7 @@
 
 사용법::
 
-    from dartlab.core.resolve import resolve_from_text, resolve_alias
+    from dartlab.frame.resolve import resolve_from_text, resolve_alias
 
     # 자연어에서 종목+질문 분리
     company, question = resolve_from_text("삼성전자 재무건전성 분석해줘")

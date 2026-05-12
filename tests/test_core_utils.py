@@ -6,7 +6,6 @@ pytestmark = pytest.mark.unit
 
 import polars as pl
 
-from dartlab.core.select import SelectResult
 from dartlab.core.utils.helpers import (
     annualColsFromPeriods,
     mergeRows,
@@ -14,6 +13,7 @@ from dartlab.core.utils.helpers import (
     quarterlyColsFromPeriods,
     toDict,
 )
+from dartlab.frame.select import SelectResult
 
 # ══════════════════════════════════════
 # parseNumStr

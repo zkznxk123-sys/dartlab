@@ -44,7 +44,7 @@ def _krxCacheFile() -> Path:
     Path
         ``{dataRoot}/krxList/corpList.parquet`` 경로.
     """
-    from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.frame.dataLoader import _getDataRoot
 
     return _getDataRoot() / "krxList" / "corpList.parquet"
 

@@ -4,7 +4,7 @@ L1 listing 함수 (codeToName/fuzzySearch/...) 는 dartlab/__init__.py 가 직�
 re-export 하므로 core 가 노출 책임 짊어지지 않음 (정공법 D — Facade).
 """
 
-from dartlab.core.dataLoader import (
+from dartlab.frame.dataLoader import (
     DART_VIEWER,
     PERIOD_KINDS,
     buildIndex,

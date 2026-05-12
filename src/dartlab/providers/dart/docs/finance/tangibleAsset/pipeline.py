@@ -2,7 +2,7 @@
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.frame.dataLoader import extractCorpName, loadData
 from dartlab.providers.dart.docs.finance.tangibleAsset.parser import findMovementTables
 from dartlab.providers.dart.docs.finance.tangibleAsset.types import TangibleAssetResult, TangibleMovement
 from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection

@@ -23,7 +23,7 @@ def reportDf():
 
 def _patchLoadData(reportDf):
     return patch(
-        "dartlab.core.dataLoader.loadData",
+        "dartlab.frame.dataLoader.loadData",
         return_value=reportDf,
     )
 

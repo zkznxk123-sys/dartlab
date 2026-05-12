@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.frame.dataLoader import extractCorpName, loadData
 from dartlab.providers.reportSelector import extractReportYear, selectReport
 from dartlab.providers.tableParser import parseAmount
 

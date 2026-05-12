@@ -21,7 +21,7 @@ import numpy as np
 import polars as pl
 
 from dartlab import config as _cfg
-from dartlab.core.dataConfig import DATA_RELEASES
+from dartlab.frame.dataConfig import DATA_RELEASES
 
 # ── 동의어 테이블 ──
 
@@ -583,7 +583,7 @@ def searchNgram(
     docIds = index["docIds"]
     nDocs = meta.height
 
-    from dartlab.core.dataLoader import DART_VIEWER
+    from dartlab.frame.dataLoader import DART_VIEWER
 
     # L0: 유형 매칭 (임계값 0.2 — 약한 부분 매칭 차단)
     _L0_MIN_SCORE = 0.2
@@ -844,7 +844,7 @@ def pushStemIndex(*, token: str | None = None) -> str:
     """
     from huggingface_hub import HfApi
 
-    from dartlab.core.dataConfig import HF_REPO
+    from dartlab.frame.dataConfig import HF_REPO
 
     outDir = _stemIndexDir()
     hfDir = DATA_RELEASES["stemIndex"]["dir"]
@@ -911,8 +911,8 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
     """
     from huggingface_hub import snapshot_download
 
-    from dartlab.core.dataConfig import HF_REPO
     from dartlab.core.messaging import emit
+    from dartlab.frame.dataConfig import HF_REPO
 
     outDir = _stemIndexDir()
     hfDir = DATA_RELEASES["stemIndex"]["dir"]

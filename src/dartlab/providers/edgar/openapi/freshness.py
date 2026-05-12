@@ -35,7 +35,7 @@ class EdgarFreshnessResult:
 def _edgarDataDir(category: str) -> Path:
     """EDGAR 데이터 디렉토리."""
     from dartlab import config as _cfg
-    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.frame.dataConfig import DATA_RELEASES
 
     subDir = DATA_RELEASES[category]["dir"]
     return Path(_cfg.dataDir) / subDir
@@ -104,7 +104,7 @@ def _loadLocalAccessionNos(ticker: str) -> tuple[set[str], str | None]:
 
 def _resolveCik(ticker: str) -> str | None:
     """ticker → CIK 해석."""
-    from dartlab.core.dataLoader import loadEdgarListedUniverse
+    from dartlab.frame.dataLoader import loadEdgarListedUniverse
 
     universe = loadEdgarListedUniverse()
     match = universe.filter(pl.col("ticker") == ticker.upper())
@@ -295,7 +295,7 @@ def scanEdgarMarketFreshness(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.core.dataLoader import loadEdgarTargetUniverse
+    from dartlab.frame.dataLoader import loadEdgarTargetUniverse
 
     universe = loadEdgarTargetUniverse(tier)
     tickers = universe["ticker"].to_list()

@@ -196,7 +196,7 @@ def resolveFromText(text: str) -> tuple[CompanyProtocol | None, str]:
         resolveFromText("오늘 날씨 어때")
         # → (None, "오늘 날씨 어때")
     """
-    from dartlab.core.resolve import resolveStockCodeFromText
+    from dartlab.frame.resolve import resolveStockCodeFromText
 
     stockCode, remaining = resolveStockCodeFromText(text)
     if stockCode is None:

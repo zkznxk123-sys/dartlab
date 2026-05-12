@@ -35,8 +35,8 @@ if not _IS_PYODIDE:
 # `from dartlab import Company` / `dartlab.Company` 두 패턴 모두 PEP 562 가 자동 처리.
 _LAZY_ATTRS: dict[str, tuple[str, str | None]] = {
     "Company": ("dartlab.company", "Company"),
-    "ChartResult": ("dartlab.core.select", "ChartResult"),
-    "SelectResult": ("dartlab.core.select", "SelectResult"),
+    "ChartResult": ("dartlab.frame.select", "ChartResult"),
+    "SelectResult": ("dartlab.frame.select", "SelectResult"),
 }
 if not _IS_PYODIDE:
     _LAZY_ATTRS.update(
@@ -75,8 +75,8 @@ async def prefetch(*stockCodes: str, categories: list[str] | None = None) -> Non
 
     await pyodide_js.loadPackage(["pyarrow", "lxml", "polars", "numpy", "pydantic"])
 
-    from dartlab.core.dataConfig import DATA_RELEASES, hfBaseUrl
     from dartlab.core.logger import getLogger
+    from dartlab.frame.dataConfig import DATA_RELEASES, hfBaseUrl
     from pyodide.http import pyfetch  # type: ignore[import-not-found]
 
     _prefetchLog = getLogger(__name__ + ".prefetch")
@@ -477,7 +477,7 @@ def downloadAll(category: str = "finance", *, forceUpdate: bool = False) -> None
         dartlab.downloadAll("report")    # 보고서 전체 — governance/workforce/capital/debt에 필요
         dartlab.downloadAll("docs")      # 공시 전체 — digest에 필요 (대용량 ~8GB)
     """
-    from dartlab.core.dataLoader import downloadAll as _downloadAll
+    from dartlab.frame.dataLoader import downloadAll as _downloadAll
 
     _downloadAll(category, forceUpdate=forceUpdate)
 

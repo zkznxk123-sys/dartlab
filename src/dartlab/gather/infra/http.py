@@ -120,6 +120,22 @@ def runAsync(coro):
     Example
     -------
     >>> result = runAsync(coro)
+
+    Capabilities
+    ------------
+    persistent thread loop 사용 — Marimo/FastAPI 환경 호환.
+    AIContext: 동기 컨텍스트에서 async 코드 호출 진입.
+    Guide: 이미 loop 실행 중이면 ThreadPoolExecutor 위임.
+    When: notebook / CLI / Jupyter 환경에서 async fetch 호출 시.
+    How: ``asyncio.get_running_loop()`` 확인 → 분기 (direct vs thread submit).
+
+    Requires
+    --------
+    ``_thread_pool`` (ThreadPoolExecutor) + ``_thread_loop`` (persistent loop).
+
+    See Also
+    --------
+    GatherHttpClient : 본 함수의 caller.
     """
     try:
         asyncio.get_running_loop()
@@ -151,6 +167,12 @@ class _AsyncRateLimiter:
     async def acquire(self, timeout: float = 30.0) -> None:
         """속도 제한 슬롯 획득 (윈도우 내 최대 요청 수 준수).
 
+        Capabilities: sliding window rate limiter + 최소 간격 보장.
+        AIContext: GatherHttpClient 의 도메인별 rate limit 진입.
+        Guide: timeout 초과 시 RateLimitExceededError raise.
+        When: GatherHttpClient.get/post 의 매 요청 직전.
+        How: lock → window 비교 + min_interval 대기 → timestamp append.
+
         Parameters
         ----------
         timeout : float
@@ -161,9 +183,17 @@ class _AsyncRateLimiter:
         RateLimitExceededError
             timeout 내 슬롯 획득 실패 시.
 
+        Requires
+        --------
+        ``self._lock`` + ``self._timestamps`` + ``self._rpm`` + ``self._window``.
+
         Example
         -------
         >>> await limiter.acquire(timeout=10.0)
+
+        See Also
+        --------
+        GatherHttpClient.get · post : 본 메서드 caller.
         """
         deadline = time.monotonic() + timeout
         while True:
@@ -290,6 +320,12 @@ class GatherHttpClient:
     ) -> httpx.Response:
         """GET 요청 — rate limit + semaphore + 재시도 (async).
 
+        Capabilities: 도메인별 jitter + rate limit + semaphore + 429/5xx 지수 backoff retry.
+        AIContext: gather 의 모든 외부 GET 호출 단일 진입점 (naver/yahoo/krx/etc).
+        Guide: 도메인별 RPM/concurrency/jitter 자동 적용.
+        When: gather domains/* 의 모든 fetch 호출 시.
+        How: jitter → limiter.acquire → semaphore → httpx GET → 429/5xx retry.
+
         Parameters
         ----------
         url : str
@@ -313,9 +349,18 @@ class GatherHttpClient:
         SourceUnavailableError
             모든 재시도 실패 시.
 
+        Requires
+        --------
+        ``DOMAIN_POLICY`` 등록 (미등록 도메인은 _DEFAULT_POLICY).
+
         Example
         -------
         >>> resp = await client.get("https://example.com/api")
+
+        See Also
+        --------
+        post : POST 변형.
+        _AsyncRateLimiter.acquire : rate limit slot 획득.
         """
         domain = urlparse(url).netloc
         policy = self._getPolicy(domain)

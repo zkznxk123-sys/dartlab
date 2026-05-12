@@ -11,7 +11,7 @@ import polars as pl
 import pytest
 
 from dartlab.core import dataLoader
-from dartlab.core.dataLoader import _LOAD_CACHE, _LOAD_CACHE_MAX, _clearLoadCache, loadData
+from dartlab.frame.dataLoader import _LOAD_CACHE, _LOAD_CACHE_MAX, _clearLoadCache, loadData
 
 pytestmark = pytest.mark.unit
 
@@ -32,11 +32,11 @@ class TestLoadDataCache:
     def test_second_call_returns_cached_dataframe(self):
         """같은 (stockCode, category) 재호출 시 pl.read_parquet 1회만 실행."""
         with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch("dartlab.frame.dataLoader._ensureLocalParquet", lambda *a, **k: None),
             patch(
-                "dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
+                "dartlab.frame.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
             ) as readParquet,
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+            patch("dartlab.frame.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             a = loadData("005930", "finance")
             b = loadData("005930", "finance")
@@ -46,9 +46,9 @@ class TestLoadDataCache:
     def test_different_keys_cache_separately(self):
         """stockCode 또는 category 가 다르면 별도 캐시 엔트리."""
         with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch("dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))),
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+            patch("dartlab.frame.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch("dartlab.frame.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))),
+            patch("dartlab.frame.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             loadData("005930", "finance")
             loadData("005930", "docs")
@@ -58,11 +58,11 @@ class TestLoadDataCache:
     def test_refresh_force_bypasses_cache(self):
         """refresh="force" 는 LRU 를 우회하고 재로드."""
         with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch("dartlab.frame.dataLoader._ensureLocalParquet", lambda *a, **k: None),
             patch(
-                "dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
+                "dartlab.frame.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
             ) as readParquet,
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+            patch("dartlab.frame.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             loadData("005930", "finance")
             loadData("005930", "finance", refresh="force")
@@ -71,12 +71,12 @@ class TestLoadDataCache:
     def test_krx_auto_bypasses_memory_cache_when_freshness_expired(self):
         """KRX daily 데이터는 TTL 만료 시 프로세스 LRU보다 HF freshness를 우선한다."""
         with (
-            patch("dartlab.core.dataLoader._shouldRefreshHfCategory", side_effect=[False, True]) as shouldRefresh,
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch("dartlab.frame.dataLoader._shouldRefreshHfCategory", side_effect=[False, True]) as shouldRefresh,
+            patch("dartlab.frame.dataLoader._ensureLocalParquet", lambda *a, **k: None),
             patch(
-                "dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))
+                "dartlab.frame.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))
             ) as readParquet,
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+            patch("dartlab.frame.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             first = loadData("raw-2026", "krxPrices")
             second = loadData("raw-2026", "krxPrices")
@@ -88,9 +88,9 @@ class TestLoadDataCache:
     def test_clear_cache_empties_store(self):
         """_clearLoadCache 가 LRU 를 완전히 비운다."""
         with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch("dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")),
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+            patch("dartlab.frame.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch("dartlab.frame.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")),
+            patch("dartlab.frame.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             loadData("005930", "finance")
             loadData("068270", "finance")
@@ -102,9 +102,9 @@ class TestLoadDataCache:
         """_LOAD_CACHE_MAX 초과 시 가장 오래된 엔트리 evict."""
         # MAX 보다 2 많은 엔트리 삽입
         with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch("dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))),
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+            patch("dartlab.frame.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch("dartlab.frame.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))),
+            patch("dartlab.frame.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             for i in range(_LOAD_CACHE_MAX + 2):
                 loadData(f"{i:06d}", "finance")

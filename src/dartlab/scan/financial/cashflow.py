@@ -186,7 +186,7 @@ def _scanPerFile() -> pl.DataFrame:
         fcf : int — 잉여현금흐름, OCF + ICF (원)
         pattern : str — 라이프사이클 패턴명
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

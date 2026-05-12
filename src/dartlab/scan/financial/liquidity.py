@@ -167,7 +167,7 @@ def _scanPerFile() -> pl.DataFrame:
             grade : str — 유동성 등급
         빈 DataFrame — 데이터 없음
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

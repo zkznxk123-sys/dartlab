@@ -2,7 +2,7 @@ import re
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
+from dartlab.frame.dataLoader import PERIOD_KINDS, extractCorpName, loadData
 from dartlab.providers.dart.docs.finance.summary.bridgeMatcher import numberBridgeMatch, periodToIndex
 from dartlab.providers.dart.docs.finance.summary.contentExtractor import extractSummaryContent
 from dartlab.providers.dart.docs.finance.summary.segmentation import detectBreakpoints

@@ -86,7 +86,7 @@ class _GatherPriceMixin(GatherMixinContext):
             ``dartlab.gather.transforms.indicatorDispatch.addIndicators`` — 보조지표.
         """
         # market 자동 감지 (core SSOT)
-        from dartlab.core.market import resolveMarket
+        from dartlab.frame.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
 
@@ -122,7 +122,7 @@ class _GatherPriceMixin(GatherMixinContext):
         """
         import time
 
-        from dartlab.core.market import resolveMarket
+        from dartlab.frame.market import resolveMarket
 
         from ..infra.telemetry import emitGatherFetch
 
@@ -187,7 +187,7 @@ class _GatherPriceMixin(GatherMixinContext):
         """
         import time
 
-        from dartlab.core.market import resolveMarket
+        from dartlab.frame.market import resolveMarket
 
         from ..infra.telemetry import emitGatherFetch
 
@@ -367,7 +367,7 @@ class _GatherPriceMixin(GatherMixinContext):
             ``price`` — 기본 1년 단축 호출.
         """
         # market 자동 감지 (core SSOT)
-        from dartlab.core.market import resolveMarket
+        from dartlab.frame.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
 

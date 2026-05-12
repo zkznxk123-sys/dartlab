@@ -98,7 +98,7 @@ def _loadAndNormalize(
     fsDivPref: str = "CFS",
 ) -> tuple[pl.DataFrame, list[str]] | None:
     """finance parquet → 정규화된 DataFrame + periods (내부용)."""
-    from dartlab.core.dataLoader import loadData
+    from dartlab.frame.dataLoader import loadData
 
     _FINANCE_COLS = [
         "sj_div",
@@ -809,7 +809,7 @@ def buildSceMatrix(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.core.dataLoader import loadData
+    from dartlab.frame.dataLoader import loadData
 
     _SCE_COLS = [
         "sj_div",

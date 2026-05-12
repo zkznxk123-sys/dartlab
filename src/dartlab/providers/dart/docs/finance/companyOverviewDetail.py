@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.frame.dataLoader import extractCorpName, loadData
 from dartlab.providers.reportSelector import selectReport
 
 

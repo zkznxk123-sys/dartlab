@@ -10,7 +10,7 @@ import logging
 
 import polars as pl
 
-from dartlab.core.market import resolveMarket
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.screen.dataAccess import loadScanParquet
 
 log = logging.getLogger(__name__)

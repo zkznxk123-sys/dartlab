@@ -30,9 +30,9 @@ from typing import Any
 
 import numpy as np
 
-from dartlab.core.market import resolveMarket
 from dartlab.core.memory import withMemoryBudget
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
 

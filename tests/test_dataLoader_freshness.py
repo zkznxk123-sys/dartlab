@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pytest
 
-from dartlab.core.dataLoader import _checkRemoteFreshness
+from dartlab.frame.dataLoader import _checkRemoteFreshness
 
 
 @pytest.mark.unit
@@ -31,7 +31,7 @@ def test_etag_missing_should_be_stale(tmp_path):
 
     # 원격 ETag 정상 조회 가능
     with patch(
-        "dartlab.core.dataLoader._fetchRemoteEtagAndSize",
+        "dartlab.frame.dataLoader._fetchRemoteEtagAndSize",
         return_value=("remote-etag-123", 8),  # 8 bytes = 로컬 크기와 같음
     ):
         stale = _checkRemoteFreshness("test", parquet, "finance")
@@ -52,7 +52,7 @@ def test_etag_match_and_size_match_is_fresh(tmp_path):
     etag_file.write_text("matched-etag", encoding="utf-8")
 
     with patch(
-        "dartlab.core.dataLoader._fetchRemoteEtagAndSize",
+        "dartlab.frame.dataLoader._fetchRemoteEtagAndSize",
         return_value=("matched-etag", 13),
     ):
         stale = _checkRemoteFreshness("test", parquet, "finance")
@@ -72,7 +72,7 @@ def test_etag_match_but_size_differs_is_stale(tmp_path):
     etag_file.write_text("matched-etag", encoding="utf-8")
 
     with patch(
-        "dartlab.core.dataLoader._fetchRemoteEtagAndSize",
+        "dartlab.frame.dataLoader._fetchRemoteEtagAndSize",
         return_value=("matched-etag", 100),  # 다름
     ):
         stale = _checkRemoteFreshness("test", parquet, "finance")
@@ -89,7 +89,7 @@ def test_etag_differs_is_stale(tmp_path):
     etag_file.write_text("old-etag", encoding="utf-8")
 
     with patch(
-        "dartlab.core.dataLoader._fetchRemoteEtagAndSize",
+        "dartlab.frame.dataLoader._fetchRemoteEtagAndSize",
         return_value=("new-etag", 3),
     ):
         stale = _checkRemoteFreshness("test", parquet, "finance")
@@ -104,7 +104,7 @@ def test_remote_etag_unavailable_returns_none(tmp_path):
     parquet.write_bytes(b"x")
 
     with patch(
-        "dartlab.core.dataLoader._fetchRemoteEtagAndSize",
+        "dartlab.frame.dataLoader._fetchRemoteEtagAndSize",
         return_value=("", 0),
     ):
         stale = _checkRemoteFreshness("test", parquet, "finance")

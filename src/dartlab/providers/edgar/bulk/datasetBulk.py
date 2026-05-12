@@ -64,7 +64,7 @@ def _bulkDir() -> Path:
 
 def _metaDir(sub: str) -> Path:
     from dartlab import config as _cfg
-    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.frame.dataConfig import DATA_RELEASES
 
     base = DATA_RELEASES.get("edgarMeta", {}).get("dir", "edgar/meta")
     d = Path(_cfg.dataDir) / base / sub

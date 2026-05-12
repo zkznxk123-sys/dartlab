@@ -53,7 +53,7 @@ class TestCacheCaps:
         회사 1 개 docs DataFrame ~수백 MB × max entries = 잠재 점유. CLAUDE.md
         병렬 2 × 카테고리 4 = 8 정합. 16 으로 회귀하면 메모리 압박 재유입.
         """
-        from dartlab.core.dataLoader import _LOAD_CACHE_MAX
+        from dartlab.frame.dataLoader import _LOAD_CACHE_MAX
 
         assert _LOAD_CACHE_MAX <= 8, f"_LOAD_CACHE_MAX={_LOAD_CACHE_MAX} — 8 초과는 회사 다중 분석 시 RSS 폭증"
 

@@ -58,12 +58,12 @@ def extractRaw(
         - ``extractClean`` — extractRaw 결과에 ``_castNumeric`` 적용 (Float64 변환).
         - ``extractAnnual`` — 연 1 회 분기 기준 필터 (대표분기 자동/수동).
         - ``extractResult`` — ``ReportResult`` dataclass 래핑.
-        - ``dartlab.core.dataLoader.loadData`` — report parquet 의 실제 로더.
+        - ``dartlab.frame.dataLoader.loadData`` — report parquet 의 실제 로더.
         - ``dartlab.providers.dart.report.types.API_TYPES`` — 지원 apiType 목록.
 
     Requires:
         - polars — DataFrame 입출력 + 정규식 추출.
-        - dartlab.core.dataLoader — report category parquet 로딩 (lazy import).
+        - dartlab.frame.dataLoader — report category parquet 로딩 (lazy import).
         - dartlab.core.polarsUtil.isEmptyDf — None/empty 통합 검사.
 
     AIContext:
@@ -98,7 +98,7 @@ def extractRaw(
     Raises:
         없음.
     """
-    from dartlab.core.dataLoader import loadData
+    from dartlab.frame.dataLoader import loadData
 
     df = baseDf if baseDf is not None else loadData(stockCode, category="report")
     if isEmptyDf(df):

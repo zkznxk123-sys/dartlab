@@ -141,7 +141,7 @@ def _scanAccountFromMerged(
     전체 로드 → `pl.from_arrow` 로 DataFrame 전환 후 동일 필터 연산. 원본 파일은
     `finance-lite.parquet`(18MB) 이므로 메모리 부담 없음.
     """
-    from dartlab.core.dataLoader import _IS_PYODIDE
+    from dartlab.frame.dataLoader import _IS_PYODIDE
 
     try:
         if lazyFrame is not None:
@@ -464,7 +464,7 @@ def scanAccount(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
 
     snakeId = _resolveSnakeId(snakeId)
 
@@ -479,7 +479,7 @@ def scanAccount(
     # 일반 환경은 전량 `finance.parquet`(~307MB) 사용.
     import importlib
 
-    from dartlab.core.dataLoader import _IS_PYODIDE
+    from dartlab.frame.dataLoader import _IS_PYODIDE
 
     _ensureScanData = importlib.import_module("dartlab.scan.io.parquet")._ensureScanData
 

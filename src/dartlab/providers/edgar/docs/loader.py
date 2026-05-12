@@ -92,9 +92,9 @@ def ensureEdgarDocs(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.core.dataConfig import DATA_RELEASES
-    from dartlab.core.dataLoader import _download
     from dartlab.core.messaging import emit
+    from dartlab.frame.dataConfig import DATA_RELEASES
+    from dartlab.frame.dataLoader import _download
 
     if refresh not in {"auto", "force_check", "force_rebuild", "local_only"}:
         raise ValueError(f"지원하지 않는 refresh 정책: {refresh}")
@@ -658,7 +658,7 @@ class EdgarDocsLoader:
 
 def _registerEdgarDocsLoader() -> None:
     """import 시점 등록 — circular import 회피용 함수 lazy import."""
-    from dartlab.core.loaders import registerLoader
+    from dartlab.frame.loaders import registerLoader
 
     registerLoader(EdgarDocsLoader())
 

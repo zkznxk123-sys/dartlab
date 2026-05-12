@@ -10,7 +10,7 @@ pytestmark = pytest.mark.unit
 
 def test_dataReleaseHasKrxIndices():
     """KRX 지수 HF 카테고리는 가격과 별도 SSOT 를 가진다."""
-    from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.frame.dataConfig import DATA_RELEASES
 
     assert DATA_RELEASES["krxIndices"]["dir"] == "krx/indices"
     assert DATA_RELEASES["krxIndices"]["public"] is True

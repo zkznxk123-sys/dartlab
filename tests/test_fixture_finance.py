@@ -62,7 +62,7 @@ class TestPivotWithFixture:
     def test_buildTimeseriesFromDf(self, financeDf):
         from dartlab.providers.dart.finance.pivot import buildTimeseries
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=financeDf):
+        with patch("dartlab.frame.dataLoader.loadData", return_value=financeDf):
             result = buildTimeseries("005930")
 
         assert result is not None
@@ -75,7 +75,7 @@ class TestPivotWithFixture:
     def test_timeseriesHasRevenue(self, financeDf):
         from dartlab.providers.dart.finance.pivot import buildTimeseries
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=financeDf):
+        with patch("dartlab.frame.dataLoader.loadData", return_value=financeDf):
             series, periods = buildTimeseries("005930")
 
         assert "sales" in series["IS"]
@@ -86,7 +86,7 @@ class TestPivotWithFixture:
     def test_timeseriesHasAssets(self, financeDf):
         from dartlab.providers.dart.finance.pivot import buildTimeseries
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=financeDf):
+        with patch("dartlab.frame.dataLoader.loadData", return_value=financeDf):
             series, periods = buildTimeseries("005930")
 
         assert "total_assets" in series["BS"]
@@ -94,7 +94,7 @@ class TestPivotWithFixture:
     def test_buildAnnualFromDf(self, financeDf):
         from dartlab.providers.dart.finance.pivot import buildAnnual
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=financeDf):
+        with patch("dartlab.frame.dataLoader.loadData", return_value=financeDf):
             result = buildAnnual("005930")
 
         assert result is not None
@@ -106,7 +106,7 @@ class TestPivotWithFixture:
         from dartlab.analysis.financial.ratios import calcRatios
         from dartlab.providers.dart.finance.pivot import buildAnnual
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=financeDf):
+        with patch("dartlab.frame.dataLoader.loadData", return_value=financeDf):
             result = buildAnnual("005930")
 
         assert result is not None
@@ -134,7 +134,7 @@ class TestPivotWithFixture:
             }
         )
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=df):
+        with patch("dartlab.frame.dataLoader.loadData", return_value=df):
             result = buildTimeseries("005930")
 
         assert result is not None

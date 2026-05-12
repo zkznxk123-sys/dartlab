@@ -28,7 +28,7 @@ from collections.abc import Iterator
 
 import polars as pl
 
-from dartlab.core.dataLoader import loadData
+from dartlab.frame.dataLoader import loadData
 from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
 from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 from dartlab.providers.dart.docs.sections.runtime import (

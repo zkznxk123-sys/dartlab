@@ -2,7 +2,7 @@
 
 import polars as pl
 
-from dartlab.core.dataLoader import extractCorpName, loadData
+from dartlab.frame.dataLoader import extractCorpName, loadData
 from dartlab.providers.dart.docs.disclosure.rawMaterial.parser import (
     parseCapex,
     parseEquipment,

@@ -74,7 +74,7 @@ def scanNotes(stockCode: str) -> dict[str, dict[str, Any]]:
         {항목명: {"type", "category", "foreignCurrency", "count", "years": set[str]}}
     """
     try:
-        from dartlab.core.dataLoader import loadData
+        from dartlab.frame.dataLoader import loadData
         from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
         from dartlab.providers.reportSelector import selectReport
         from dartlab.providers.tableParser import parseNotesTable
@@ -276,7 +276,7 @@ def scanAll(
 
     # 종목 목록 가져오기
     try:
-        from dartlab.core.dataLoader import _dataDir
+        from dartlab.frame.dataLoader import _dataDir
 
         dataDir = _dataDir("docs")
     except (ImportError, KeyError):

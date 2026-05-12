@@ -37,7 +37,7 @@ from dartlab.providers.edgar.finance.mapper import EdgarMapper
 
 
 def _getEdgarDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
 
     return _dataDir("edgar")
 

@@ -270,7 +270,7 @@ class _GatherInfoMixin(GatherMixinContext):
         See Also:
             ``majorShareholders`` — 5% 이상 대량보유 (KR 전용).
         """
-        from dartlab.core.market import resolveMarket
+        from dartlab.frame.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
         t0 = time.monotonic()
@@ -388,7 +388,7 @@ class _GatherInfoMixin(GatherMixinContext):
             ``flow`` — 일별 매매 동향.
             ``majorShareholders`` — 5% 이상 변동 (KR DART).
         """
-        from dartlab.core.market import resolveMarket
+        from dartlab.frame.market import resolveMarket
 
         market = resolveMarket(stockCode, market)
         t0 = time.monotonic()

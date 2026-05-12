@@ -69,7 +69,7 @@ def explore(
             - <TODO: 대상 시장>
     """
     if edgarDir is None:
-        from dartlab.core.dataLoader import _dataDir
+        from dartlab.frame.dataLoader import _dataDir
 
         edgarDir = _dataDir("edgar")
 
@@ -177,7 +177,7 @@ def listTags(
             - <TODO: 대상 시장>
     """
     if edgarDir is None:
-        from dartlab.core.dataLoader import _dataDir
+        from dartlab.frame.dataLoader import _dataDir
 
         edgarDir = _dataDir("edgar")
 

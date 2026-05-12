@@ -688,7 +688,7 @@ class Company:
                 return r
 
         try:
-            from dartlab.core.dataLoader import loadEdgarListedUniverse
+            from dartlab.frame.dataLoader import loadEdgarListedUniverse
 
             listed = loadEdgarListedUniverse()
             row = listed.filter(pl.col("ticker") == tickerUpper)
@@ -1470,7 +1470,7 @@ class Company:
         SeeAlso:
             - ``search`` — keyword 부분 매칭 검색.
             - ``dart.providers.dart.company.Company.listing`` — KR 패리티.
-            - ``dartlab.core.dataLoader.loadEdgarListedUniverse`` — origin.
+            - ``dartlab.frame.dataLoader.loadEdgarListedUniverse`` — origin.
 
         Requires:
             - dartlab
@@ -1503,7 +1503,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR) NASDAQ/NYSE/AMEX.
         """
-        from dartlab.core.dataLoader import loadEdgarListedUniverse
+        from dartlab.frame.dataLoader import loadEdgarListedUniverse
 
         universe = loadEdgarListedUniverse()
         return universe.select(
@@ -1567,7 +1567,7 @@ class Company:
             TargetMarkets:
                 - US (SEC EDGAR).
         """
-        from dartlab.core.dataLoader import loadEdgarListedUniverse
+        from dartlab.frame.dataLoader import loadEdgarListedUniverse
 
         kw = keyword.strip()
         if not kw:
@@ -2932,7 +2932,7 @@ class Company:
         SeeAlso:
             - ``_selectImpl`` — 실제 구현.
             - ``show`` — 본 함수의 입력 소스.
-            - ``dartlab.core.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.
+            - ``dartlab.frame.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.
 
         Requires:
             - dartlab
@@ -3004,7 +3004,7 @@ class Company:
             c.select("BS", "Total Assets", "2024")
             c.select("IS", ["Revenue", "Net Income"], ["2024", "2023"])
         """
-        from dartlab.core.select import SelectResult
+        from dartlab.frame.select import SelectResult
         from dartlab.reference.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None 차단)

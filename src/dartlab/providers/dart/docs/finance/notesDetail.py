@@ -14,8 +14,8 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
-from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
+from dartlab.frame.dataLoader import PERIOD_KINDS, extractCorpName, loadData
 from dartlab.providers.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.providers.reportSelector import selectReport
 from dartlab.providers.tableParser import detectUnit, parseAmount, parseNotesTable

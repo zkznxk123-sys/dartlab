@@ -201,7 +201,7 @@ def test_loadCorpProfileMap_missingFile_returnsEmpty(tmp_path, monkeypatch):
     """corpProfile.parquet 없으면 빈 dict (다른 SSOT fallback 으로 위임)."""
     from dartlab.scan.builders.kr.core import _loadCorpProfileMap
 
-    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda _cat: tmp_path)
+    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda _cat: tmp_path)
     assert _loadCorpProfileMap() == {}
 
 
@@ -220,7 +220,7 @@ def test_loadCorpProfileMap_validParquet_extractsMapping(tmp_path, monkeypatch):
         }
     ).write_parquet(str(pf))
 
-    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda _cat: tmp_path)
+    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda _cat: tmp_path)
     result = _loadCorpProfileMap()
     assert result == {"005930": 12, "000660": 12}  # stockCode 빈 row 는 제외
 
@@ -240,6 +240,6 @@ def test_loadCorpProfileMap_handlesAccMtVariants(tmp_path, monkeypatch):
         }
     ).write_parquet(str(pf))
 
-    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda _cat: tmp_path)
+    monkeypatch.setattr("dartlab.frame.dataLoader._dataDir", lambda _cat: tmp_path)
     result = _loadCorpProfileMap()
     assert result == {"100001": 12, "100002": 12, "100003": 6}  # invalid 는 skip

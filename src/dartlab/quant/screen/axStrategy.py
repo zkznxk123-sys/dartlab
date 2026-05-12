@@ -17,8 +17,8 @@ from dataclasses import dataclass
 import numpy as np
 import polars as pl
 
-from dartlab.core.market import resolveMarket
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.frame.market import resolveMarket
 from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 from dartlab.quant.strategy.backtest import (
     BacktestResult,

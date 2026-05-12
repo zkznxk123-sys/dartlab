@@ -163,7 +163,7 @@ async def apiDataPreview(code: str, module: str, maxRows: int = Query(50, ge=1, 
 @router.get("/api/data/stats")
 def apiDataStats():
     """로컬 데이터 현황 — 문서/재무 파일 수, dartlab 버전."""
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.frame.dataLoader import _dataDir
 
     stats: dict[str, Any] = {
         "version": dartlab.__version__ if hasattr(dartlab, "__version__") else "unknown",

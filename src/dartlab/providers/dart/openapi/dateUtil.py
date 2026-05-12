@@ -197,15 +197,15 @@ def defaultEnd() -> str:
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 시스템 시간대 가정 X — 호출 시점 local datetime.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str (YYYYMMDD).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 없음 (stdlib).
         Freshness:
-            - 정적 (입력 변환만).
+            - 호출 시점.
         Dataflow:
-            - 사용자 입력 → 본 함수 → YYYYMMDD str.
+            - datetime.now → 본 함수 → YYYYMMDD str.
         TargetMarkets:
             - KR (DART) 날짜 형식.
     """
