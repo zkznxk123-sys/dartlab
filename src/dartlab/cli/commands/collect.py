@@ -290,7 +290,7 @@ def _runRepairCache(console, args) -> int:
 
 def _runScan(console, args) -> int:
     """전종목 scan 프리빌드 실행."""
-    from dartlab.scan.builder.core import (
+    from dartlab.scan.builders.kr.core import (
         buildChanges,
         buildFinance,
         buildFinanceLite,
@@ -413,7 +413,7 @@ def _runEdgar(console, args) -> int:
 
 def _runEdgarScan(console, args) -> int:
     """EDGAR scan 프리빌드."""
-    from dartlab.scan.edgar.builder import buildEdgarScan
+    from dartlab.scan.builders.edgar.builder import buildEdgarScan
 
     sinceYear = getattr(args, "since_year", 2021)
     console.print(f"[bold]EDGAR scan 프리빌드[/] sinceYear={sinceYear}\n")

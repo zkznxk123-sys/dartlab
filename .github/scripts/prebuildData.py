@@ -36,7 +36,7 @@ def _checkDataReady(dataDir: str) -> dict[str, int]:
 
 def _buildScan(dataDir: str) -> dict[str, Path | list[Path] | None]:
     """scan 프리빌드 실행."""
-    from dartlab.scan.builder import buildScan
+    from dartlab.scan.builders.kr import buildScan
 
     return buildScan(sinceYear=2021, verbose=True)
 
@@ -59,7 +59,7 @@ def _buildDocsIndex(dataDir: str) -> Path | None:
         PosixPath('data/dart/scan/docsIndex.parquet')
     """
     try:
-        from dartlab.scan.builder.docsIndex import buildDocsIndex
+        from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
         return buildDocsIndex(sinceYear=2016, batchSize=100, verbose=True)
     except (FileNotFoundError, RuntimeError) as exc:

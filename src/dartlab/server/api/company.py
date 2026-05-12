@@ -522,7 +522,7 @@ def apiCompanyScan(code: str, axis: str):
 @router.get("/api/company/{code}/scan/position")
 def apiCompanyScanPosition(code: str):
     """6-Axis 전체 포지션 요약 — 사전 빌드 스냅샷 기반."""
-    from dartlab.scan.builder.snapshot import getScanPosition
+    from dartlab.scan.builders.kr.snapshot import getScanPosition
 
     position = getScanPosition(code)
     if position is None:
@@ -543,7 +543,7 @@ def apiCompanyInsightsUnified(code: str):
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
-    from dartlab.scan.builder.payload import buildUnifiedPayload
+    from dartlab.scan.builders.kr.payload import buildUnifiedPayload
 
     try:
         unified = buildUnifiedPayload(company)

@@ -25,9 +25,9 @@ universe 를 스캔해 ranking · filter · candidate evidence table 을 만든�
 
 from __future__ import annotations
 
-from dartlab.scan.builder.core import buildChanges, buildFinance, buildReport, buildScan
-from dartlab.scan.builder.payload import buildScanPayload, buildUnifiedPayload
-from dartlab.scan.builder.snapshot import buildScanSnapshot, getScanPosition
+from dartlab.scan.builders.kr.core import buildChanges, buildFinance, buildReport, buildScan
+from dartlab.scan.builders.kr.payload import buildScanPayload, buildUnifiedPayload
+from dartlab.scan.builders.kr.snapshot import buildScanSnapshot, getScanPosition
 from dartlab.scan.router import Scan, availableScans
 
 __all__ = [

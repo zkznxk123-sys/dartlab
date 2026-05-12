@@ -91,7 +91,7 @@ def buildDocsIndex(
         RuntimeError: 추출 결과 0 건.
 
     Example:
-        >>> from dartlab.scan.builder.docsIndex import buildDocsIndex
+        >>> from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
         >>> path = buildDocsIndex(sinceYear=2020, batchSize=200, verbose=True)
         >>> print(path)
         .../data/dart/scan/docsIndex.parquet
@@ -236,7 +236,7 @@ def buildEdgarDocsIndex(
         RuntimeError: 추출 결과 0 건.
 
     Example:
-        >>> from dartlab.scan.builder.docsIndex import buildEdgarDocsIndex
+        >>> from dartlab.scan.builders.kr.docsIndex import buildEdgarDocsIndex
         >>> path = buildEdgarDocsIndex(sinceYear=2020, verbose=True)
     """
     from dartlab.core.dataLoader import _getDataRoot
@@ -284,7 +284,7 @@ def buildEdinetDocsIndex(
         RuntimeError: 추출 결과 0 건.
 
     Example:
-        >>> from dartlab.scan.builder.docsIndex import buildEdinetDocsIndex
+        >>> from dartlab.scan.builders.kr.docsIndex import buildEdinetDocsIndex
         >>> path = buildEdinetDocsIndex(sinceYear=2020, verbose=True)
     """
     from dartlab.core.dataLoader import _getDataRoot

@@ -5,7 +5,7 @@
 을 생성하고 HuggingFace 에 업로드한다. 실패 시 기존 parquet 은 그대로 유지된다.
 
 흐름:
-  1. `dartlab.scan.builder.buildValuation()` 호출
+  1. `dartlab.scan.builders.kr.buildValuation()` 호출
   2. 생성된 parquet 검증 (0건 / 55% 미만 → 기존 유지)
   3. HF upload_file → `dart/scan/valuation.parquet`
 
@@ -25,7 +25,7 @@ from _hfRetry import retryHfCall  # noqa: E402
 
 def _build(dataDir: str) -> Path | None:
     """`buildValuation()` 실행. parquet 경로 반환 (실패면 None)."""
-    from dartlab.scan.builder import buildValuation
+    from dartlab.scan.builders.kr import buildValuation
 
     return buildValuation(verbose=True)
 

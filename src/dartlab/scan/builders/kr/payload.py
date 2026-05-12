@@ -6,7 +6,7 @@ scan 엔진(governance/workforce/capital/debt) 결과를 insight 7영역과
 
 사용법::
 
-    from dartlab.scan.builder.payload import (
+    from dartlab.scan.builders.kr.payload import (
         build_scan_payload, build_unified_payload,
     )
 

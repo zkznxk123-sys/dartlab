@@ -187,7 +187,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
         example='scan("macroBeta")',
     ),
     "fields": _AxisEntry(
-        module="dartlab.scan.builder.fields",
+        module="dartlab.scan.builders.kr.fields",
         fn="scanFields",
         label="필드카탈로그",
         description="조건형 스크리닝용 필드 검색 (finance/report/docs/krx/krxIndex)",
@@ -318,7 +318,7 @@ def _edgarDispatch(axis: str, kwargs: dict) -> pl.DataFrame | None:
         "debt",
     }
     if axis in _EDGAR_XBRL_AXES:
-        from dartlab.scan._edgar_scan import edgarScan
+        from dartlab.scan.builders.krs.edgar.scan import edgarScan
 
         return edgarScan(axis, **kwargs)
 

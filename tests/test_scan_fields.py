@@ -33,7 +33,7 @@ def test_scan_fields_searches_korean_and_english():
 
 def test_screen_spec_filters_selects_and_sorts(monkeypatch):
     """screen(spec=...) applies where/select/sort using field value frames."""
-    from dartlab.scan.builder import fields as scan_fields
+    from dartlab.scan.builders.kr import fields as scan_fields
     from dartlab.scan.screen import scanScreen
 
     values = {
@@ -66,7 +66,7 @@ def test_screen_spec_filters_selects_and_sorts(monkeypatch):
 
 def test_screen_spec_rejects_unknown_op(monkeypatch):
     """Unsupported operators fail with a field-specific message."""
-    from dartlab.scan.builder import fields as scan_fields
+    from dartlab.scan.builders.kr import fields as scan_fields
     from dartlab.scan.screen import scanScreen
 
     monkeypatch.setattr(
@@ -133,7 +133,7 @@ def test_docs_condition_uses_search_hits(monkeypatch):
 
 def test_krx_index_is_select_context(monkeypatch):
     """krxIndex fields attach scalar market context and cannot filter stocks."""
-    from dartlab.scan.builder import fields as scan_fields
+    from dartlab.scan.builders.kr import fields as scan_fields
     from dartlab.scan.screen import scanScreen
 
     monkeypatch.setattr(

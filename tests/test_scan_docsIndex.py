@@ -75,7 +75,7 @@ def docsFixture(tmp_path: Path) -> Path:
 
 def test_buildDocsIndex_minimal_fixture(docsFixture: Path, tmp_path: Path) -> None:
     """3 회사 docs 로 빌드 → schema · row 수 검증."""
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
     result = buildDocsIndex(docsDir=docsFixture, outputPath=outPath, batchSize=2, sinceYear=2016)
@@ -102,7 +102,7 @@ def test_buildDocsIndex_minimal_fixture(docsFixture: Path, tmp_path: Path) -> No
 
 def test_buildDocsIndex_no_content_column(docsFixture: Path, tmp_path: Path) -> None:
     """산출 parquet 에 section_content 가 들어가지 않음 (회귀 가드)."""
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
     buildDocsIndex(docsDir=docsFixture, outputPath=outPath, sinceYear=2016)
@@ -113,7 +113,7 @@ def test_buildDocsIndex_no_content_column(docsFixture: Path, tmp_path: Path) -> 
 
 def test_buildDocsIndex_content_length_zero_for_placeholder(docsFixture: Path, tmp_path: Path) -> None:
     """헤더-only 섹션 (`section_content=""`) 은 contentLength=0."""
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
     buildDocsIndex(docsDir=docsFixture, outputPath=outPath, sinceYear=2016)
@@ -125,7 +125,7 @@ def test_buildDocsIndex_content_length_zero_for_placeholder(docsFixture: Path, t
 
 def test_buildDocsIndex_has_table_detection(docsFixture: Path, tmp_path: Path) -> None:
     """본문에 `|` 포함 시 hasTable=True (markdown table 감지)."""
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     outPath = tmp_path / "docsIndex.parquet"
     buildDocsIndex(docsDir=docsFixture, outputPath=outPath, sinceYear=2016)
@@ -137,7 +137,7 @@ def test_buildDocsIndex_has_table_detection(docsFixture: Path, tmp_path: Path) -
 
 def test_buildDocsIndex_empty_docs_dir(tmp_path: Path) -> None:
     """parquet 0 건 시 FileNotFoundError."""
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     emptyDir = tmp_path / "empty"
     emptyDir.mkdir()
@@ -161,7 +161,7 @@ def test_docsSections_missing_index_clear_error(monkeypatch, tmp_path: Path) -> 
 def test_docsSections_filter_by_section_title(docsFixture: Path, tmp_path: Path, monkeypatch) -> None:
     """sectionTitle="신용평가" 키워드 부분 매칭."""
     from dartlab.scan import Scan
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     scanDir = tmp_path / "scan"
     scanDir.mkdir()
@@ -179,7 +179,7 @@ def test_docsSections_filter_by_section_title(docsFixture: Path, tmp_path: Path,
 def test_docsSections_only_with_content(docsFixture: Path, tmp_path: Path, monkeypatch) -> None:
     """onlyWithContent=True 는 contentLength=0 placeholder 제외."""
     from dartlab.scan import Scan
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     scanDir = tmp_path / "scan"
     scanDir.mkdir()
@@ -196,7 +196,7 @@ def test_docsSections_only_with_content(docsFixture: Path, tmp_path: Path, monke
 def test_docsSections_limit_enforced(docsFixture: Path, tmp_path: Path, monkeypatch) -> None:
     """limit 기본값 100 → 5 row 모두 반환. limit=2 → 2 row."""
     from dartlab.scan import Scan
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     scanDir = tmp_path / "scan"
     scanDir.mkdir()
@@ -242,7 +242,7 @@ def test_docsSections_market_jp_routes_to_edinet(tmp_path: Path, monkeypatch) ->
 def test_iterDocsSections_yields_dicts(docsFixture: Path, tmp_path: Path, monkeypatch) -> None:
     """iterDocsSections 가 dict yield (룰 10 pair)."""
     from dartlab.scan import Scan
-    from dartlab.scan.builder.docsIndex import buildDocsIndex
+    from dartlab.scan.builders.kr.docsIndex import buildDocsIndex
 
     scanDir = tmp_path / "scan"
     scanDir.mkdir()

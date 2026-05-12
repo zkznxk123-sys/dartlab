@@ -3,8 +3,8 @@
 scan/builder/{core,payload,fields,snapshot,extended,docsIndex}.py
 """
 
-from dartlab.scan.builder.core import buildChanges, buildFinance, buildReport, buildScan  # noqa: F401
-from dartlab.scan.builder.docsIndex import (  # noqa: F401
+from dartlab.scan.builders.kr.core import buildChanges, buildFinance, buildReport, buildScan  # noqa: F401
+from dartlab.scan.builders.kr.docsIndex import (  # noqa: F401
     buildDocsIndex,
     buildEdgarDocsIndex,
     buildEdinetDocsIndex,

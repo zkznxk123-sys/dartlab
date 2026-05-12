@@ -5,7 +5,7 @@ rank 엔진의 buildSnapshot/getRank 패턴과 동일.
 
 사용법::
 
-    from dartlab.scan.builder.snapshot import buildScanSnapshot, getScanPosition
+    from dartlab.scan.builders.kr.snapshot import buildScanSnapshot, getScanPosition
 
     buildScanSnapshot()  # 최초 1회
     pos = getScanPosition("005930")
