@@ -58,7 +58,7 @@ def runAgent(
     provider: Any,
     history: list[dict[str, Any]] | None = None,
     toolNames: tuple[str, ...] = _DEFAULT_TOOL_NAMES,
-    maxIterations: int = 8,
+    maxIterations: int = 30,
     **_unused: Any,
 ) -> Iterator[TraceEvent]:
     """본체 — chat-native autonomous tool-calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환."""
@@ -316,8 +316,36 @@ def runAgent(
                 yield TraceEvent("chunk", {"text": piece})
         break
     else:
-        yield TraceEvent("error", {"error": "max_iterations_reached"})
-        return
+        # max_iterations 도달 → graceful finalize. 에러로 죽이지 않고, tools=[] 로
+        # 마지막 1 회 turn 강제 — 지금까지 쌓인 tool 결과 컨텍스트로 답안 작성.
+        # 근거 부족은 답안 안에서 한계로 명시. 무한 도구 루프 차단 + 부분 답 보장.
+        messages.append(
+            {
+                "role": "user",
+                "content": (
+                    "도구 호출 한도에 도달했습니다. 추가 도구 호출 없이 지금까지 "
+                    "수집한 결과로 사용자 질문에 답을 작성하세요. 근거 부족 부분은 "
+                    "솔직히 한계로 명시하고, 가능한 범위에서 답을 정리하세요."
+                ),
+            }
+        )
+        final_chunk = None
+        try:
+            for chunk in streamProvider(provider, messages, []):
+                if chunk.final:
+                    final_chunk = chunk
+                    continue
+                if chunk.text:
+                    text_emitted += chunk.text
+                    yield TraceEvent("chunk", {"text": chunk.text})
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("max_iterations finalize failed")
+            yield TraceEvent("error", {"error": f"max_iterations_finalize_failed: {exc}"})
+            return
+        if final_chunk and not text_emitted and getattr(final_chunk, "turn", None) and final_chunk.turn.content:
+            text_emitted = final_chunk.turn.content
+            for piece in _chunks(text_emitted, size=64):
+                yield TraceEvent("chunk", {"text": piece})
 
     # chat-native HARVEST bridge — workbench HARVEST 와 동일 helper 로 memory 작성.
     # SSOT.md Principle 6 정합 (모든 종료 경로 → decisions.jsonl + skill_stats.jsonl).

@@ -167,11 +167,11 @@ def test_runAgent_failure_streak_blocks_repeat(monkeypatch: pytest.MonkeyPatch) 
 
 
 # ── 4. max_iterations 초과 → error 이벤트 ──────────────────────────────────
-def test_runAgent_max_iterations_emits_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    """LLM 이 끝없이 도구 호출 → max_iterations 도달 → 'max_iterations_reached' error."""
+def test_runAgent_max_iterations_emits_graceful_finalize(monkeypatch: pytest.MonkeyPatch) -> None:
+    """max_iterations 도달 시 error 로 죽지 않고, tools=[] 로 마지막 1 회 강제 turn →
+    수집된 컨텍스트로 답안 작성. error 이벤트 X, chunk 텍스트 + done event 정상."""
 
     def fake_execute(name: str, args: dict[str, Any]) -> dict[str, Any]:
-        # 매번 *다른* error code 반환 — failure_streak 안 걸리게.
         idx = args.get("_iter", 0)
         return {
             "ok": False,
@@ -183,7 +183,7 @@ def test_runAgent_max_iterations_emits_error(monkeypatch: pytest.MonkeyPatch) ->
 
     monkeypatch.setattr("dartlab.ai.agent.executeTool", fake_execute)
 
-    # 매 turn 마다 *다른* args 의 ReadSkill 호출 (failure_streak 가 같은 (name,error) 만 차단)
+    # 4 회 tool turn 후 finalize turn 1 회 (tools=[] 강제 호출에 응답).
     provider = _ScriptedProvider(
         [
             ProviderTurn(
@@ -191,15 +191,27 @@ def test_runAgent_max_iterations_emits_error(monkeypatch: pytest.MonkeyPatch) ->
                 toolCalls=[ToolCall(id=f"t{i}", name="ReadSkill", args={"_iter": i})],
                 raw=None,
             )
-            for i in range(20)  # max_iterations 보다 충분히 많이
+            for i in range(4)
+        ]
+        + [
+            ProviderTurn(
+                content="컨텍스트 부족하지만 모은 자료로 정리한 부분 답안.",
+                toolCalls=[],
+                raw=None,
+            )
         ]
     )
 
     events = _collect(runAgent("loop test", provider=provider, toolNames=("ReadSkill",), maxIterations=4))
 
     errors = [e for e in events if e.kind == "error"]
-    assert errors, "max_iterations 도달 시 error 이벤트 emit 돼야 한다"
-    assert any("max_iterations_reached" in str(e.data.get("error") or "") for e in errors)
+    assert not errors, f"graceful finalize 모드 — error 이벤트 없어야 한다 (got {errors})"
+    chunk_texts = [str(e.data.get("text") or "") for e in events if e.kind == "chunk"]
+    assert any("부분 답안" in text for text in chunk_texts), (
+        f"finalize turn 의 답안 텍스트가 chunk 로 emit 돼야 한다 (got {chunk_texts})"
+    )
+    done = [e for e in events if e.kind == "done"]
+    assert done, "정상 done 이벤트 emit"
 
 
 # ── 5. 도구 결과 data 가 LLM 다음 turn 메시지에 inject 되는지 ───────────
