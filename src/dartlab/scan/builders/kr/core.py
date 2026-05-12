@@ -499,7 +499,8 @@ def _loadAccountMap() -> dict[str, str]:
     """
     import json
 
-    mapPath = Path(__file__).resolve().parents[2] / "core" / "data" / "accountMappings.json"
+    # parents[3] = src/dartlab (scan/builders/kr/core.py → 3 단계 up)
+    mapPath = Path(__file__).resolve().parents[3] / "core" / "data" / "accountMappings.json"
     if not mapPath.exists():
         return {}
     try:
