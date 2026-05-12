@@ -42,6 +42,12 @@ _MIRROR_FOLDERS: frozenset[str] = frozenset(
     {"accessor", "builder", "bulk", "docs", "finance", "openapi", "ops", "parse", "report", "search"}
 )
 
+# gather/ 의 도메인 직속 subpackage — mirror 대상은 아니지만 도메인 응집 위해
+# LoC 작아도 폴더 유지. providers/ 의 _MIRROR_FOLDERS 와 같은 의도, 다른 엔진.
+_GATHER_EXEMPT_FOLDERS: frozenset[str] = frozenset(
+    {"bulkData", "dart", "domains", "ecos", "fred", "infra", "krx", "mapping", "sources", "transforms"}
+)
+
 
 def _isMirrorFolder(folder: Path) -> bool:
     """provider 직속 sub-folder 인지 — providers/{X}/{MIRROR}/ 패턴 매칭."""
@@ -53,6 +59,18 @@ def _isMirrorFolder(folder: Path) -> bool:
     if len(parts) <= idx + 2:
         return False
     return parts[idx + 2] in _MIRROR_FOLDERS and len(parts) == idx + 3
+
+
+def _isGatherExemptFolder(folder: Path) -> bool:
+    """gather/ 직속 도메인 sub-folder 인지 — gather/<EXEMPT>/ 패턴 매칭."""
+    parts = folder.parts
+    if "gather" not in parts:
+        return False
+    idx = parts.index("gather")
+    # gather/<sub> → 정확히 idx+1 이 exempt folder
+    if len(parts) <= idx + 1:
+        return False
+    return parts[idx + 1] in _GATHER_EXEMPT_FOLDERS and len(parts) == idx + 2
 
 
 def _countLoc(path: Path) -> int:
@@ -85,6 +103,8 @@ def _scan(target: Path) -> dict[str, list[dict]]:
                 continue  # 상위 폴더 (sub-folder 보유) 는 스킵
             if _isMirrorFolder(child):
                 continue  # 룰 2 mirror 강제 폴더 — LoC 임계 면제
+            if _isGatherExemptFolder(child):
+                continue  # gather/ 도메인 응집 폴더 — LoC 임계 면제
             loc = _folderLoc(child)
             if loc <= _SMALL_THRESHOLD:
                 violations["over_split"].append(
