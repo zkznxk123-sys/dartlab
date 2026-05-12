@@ -85,8 +85,14 @@ def fetchSeries(
     *,
     start: str | None = None,
     end: str | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """HF macro 단일 시리즈 조회 → ``(date, value)``.
+
+    Parameters
+    ----------
+    limit : int | None
+        반환 행수 상한 (가장 최근 N). None이면 전체.
 
     Raises
     ------
@@ -113,7 +119,10 @@ def fetchSeries(
         df = df.filter(pl.col("date") <= _toDate(end))
     if df.is_empty():
         return pl.DataFrame(schema={"date": pl.Date, "value": pl.Float64})
-    return df.select("date", "value").sort("date")
+    out = df.select("date", "value").sort("date")
+    if limit is not None and limit > 0:
+        return out.tail(limit)
+    return out
 
 
 def fetchMulti(
@@ -122,8 +131,15 @@ def fetchMulti(
     *,
     start: str | None = None,
     end: str | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame:
-    """HF macro 복수 시리즈 조회 → wide DataFrame."""
+    """HF macro 복수 시리즈 조회 → wide DataFrame.
+
+    Parameters
+    ----------
+    limit : int | None
+        반환 행수 상한 (가장 최근 N). None이면 전체.
+    """
     if not seriesIds:
         return pl.DataFrame()
 
@@ -143,7 +159,10 @@ def fetchMulti(
     fillCols = [c for c in result.columns if c != "date"]
     if fillCols:
         result = result.sort("date").with_columns([pl.col(c).forward_fill() for c in fillCols])
-    return result.sort("date")
+    out = result.sort("date")
+    if limit is not None and limit > 0:
+        return out.tail(limit)
+    return out
 
 
 def latestUpdatedAt(source: str) -> datetime | None:

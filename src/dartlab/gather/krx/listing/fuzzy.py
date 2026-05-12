@@ -140,11 +140,12 @@ def _getSearchCache() -> dict[str, object]:
     return _searchCache
 
 
-def searchName(keyword: str) -> pl.DataFrame:
+def searchName(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
     """회사명 부분 검색.
 
     Args:
         keyword: 검색 키워드 (예: "삼성", "반도체").
+        limit: 반환 행수 상한 (가장 위 N). None이면 매칭 전체.
 
     Returns:
         매칭된 종목 DataFrame (회사명, 종목코드, ...).
@@ -153,7 +154,10 @@ def searchName(keyword: str) -> pl.DataFrame:
     if not kw:
         return getKindList().head(0)
     df = getKindList()
-    return df.filter(pl.col("회사명").str.contains(kw, literal=True))
+    result = df.filter(pl.col("회사명").str.contains(kw, literal=True))
+    if limit is not None and limit > 0:
+        return result.head(limit)
+    return result
 
 
 def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:

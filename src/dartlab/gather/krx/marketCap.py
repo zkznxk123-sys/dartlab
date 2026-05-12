@@ -39,11 +39,22 @@ from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.gather.entry import GatherEntry
 
 
-def fetchOhlcv(stockCode: str, **kwargs):
-    """gather("price") 직접 호출 — quant._helpers wrapper 우회 (단방향 정책)."""
+def fetchOhlcv(stockCode: str, *, limit: int | None = None, **kwargs):
+    """gather("price") 직접 호출 — quant._helpers wrapper 우회 (단방향 정책).
+
+    Parameters
+    ----------
+    stockCode : str
+        종목코드/티커.
+    limit : int | None
+        반환 행수 상한. None이면 전체.
+    """
     try:
         g = GatherEntry()
-        return g("price", stockCode, **kwargs)
+        result = g("price", stockCode, **kwargs)
+        if limit is not None and limit > 0 and result is not None and hasattr(result, "head"):
+            return result.head(limit)
+        return result
     except (ImportError, ValueError, TypeError, RuntimeError):
         log.warning("OHLCV fetch 실패: %s", stockCode)
         return None

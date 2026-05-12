@@ -555,12 +555,20 @@ class GatherListingResolver:
     core/providers 가 gather/listing.py 직접 import 안 함. module load 시점에 register.
     """
 
-    def search(self, query: str) -> pl.DataFrame | None:
-        """회사명 검색 — searchName 위임."""
+    def search(self, query: str, *, limit: int | None = None) -> pl.DataFrame | None:
+        """회사명 검색 — searchName 위임.
+
+        Parameters
+        ----------
+        query : str
+            검색어.
+        limit : int | None
+            반환 행수 상한 (가장 관련도 높은 N). None이면 전체.
+        """
         try:
             from .fuzzy import searchName
 
-            return searchName(query)
+            return searchName(query, limit=limit)
         except (ValueError, OSError):
             return None
 

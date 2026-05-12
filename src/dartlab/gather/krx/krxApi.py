@@ -127,6 +127,7 @@ async def fetchKrxBydd(
     market: Literal["STK", "KSQ"] = "STK",
     apiKey: str,
     client: httpx.AsyncClient | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """KRX OpenAPI - 하루치 전종목 OHLCV (raw, async).
 
@@ -143,6 +144,8 @@ async def fetchKrxBydd(
         KRX OpenAPI 인증키 (필수, 명시).
     client : httpx.AsyncClient | None
         비동기 HTTP 클라이언트. None 이면 자동 생성/종료.
+    limit : int | None
+        반환 행수 상한 (전종목 중 상위 N). None이면 전체.
 
     Returns
     -------
@@ -182,7 +185,10 @@ async def fetchKrxBydd(
         if own:
             await client.aclose()
 
-    return _parseKrxResponse(data, market=market, basDd=basDd)
+    df = _parseKrxResponse(data, market=market, basDd=basDd)
+    if limit is not None and limit > 0 and not df.is_empty():
+        return df.head(limit)
+    return df
 
 
 def _parseKrxResponse(data: dict, *, market: str, basDd: str) -> pl.DataFrame:
@@ -226,11 +232,17 @@ async def fetchKrxRange(
     market: Literal["STK", "KSQ", "ALL"] = "ALL",
     apiKey: str,
     sleepSec: float = 0.3,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """KRX OpenAPI - 기간 루프 (역방향 일별, async).
 
     최근일자 → 과거일자 순서. 휴장일/미확정일은 직접 호출 후 빈 응답으로 제외.
     한 일자당 시장당 1 호출. ALL 이면 STK + KSQ 각각.
+
+    Parameters
+    ----------
+    limit : int | None
+        반환 행수 상한 (concat 후 head). None이면 전체.
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키가 필요합니다")
@@ -259,7 +271,10 @@ async def fetchKrxRange(
 
     if not frames:
         return pl.DataFrame()
-    return pl.concat(frames, how="diagonal_relaxed")
+    out = pl.concat(frames, how="diagonal_relaxed")
+    if limit is not None and limit > 0:
+        return out.head(limit)
+    return out
 
 
 def gatherKrx(

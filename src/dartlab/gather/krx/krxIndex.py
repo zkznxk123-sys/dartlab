@@ -121,6 +121,7 @@ async def fetchKrxIndexBydd(
     market: Literal["KRX", "KOSPI", "KOSDAQ"] = "KOSPI",
     apiKey: str,
     client: httpx.AsyncClient | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """KRX OpenAPI - 하루치 시장군 전체 지수 OHLCV (raw, async).
 
@@ -133,6 +134,8 @@ async def fetchKrxIndexBydd(
     apiKey : str
         KRX OpenAPI 인증키 (필수 명시) — idx 카테고리 권한 별도 신청 필요.
     client : httpx.AsyncClient | None
+    limit : int | None
+        반환 행수 상한. None이면 전체.
 
     Returns
     -------
@@ -185,7 +188,10 @@ async def fetchKrxIndexBydd(
         if own:
             await client.aclose()
 
-    return _parseKrxIndexResponse(data, market=market, basDd=basDd)
+    df = _parseKrxIndexResponse(data, market=market, basDd=basDd)
+    if limit is not None and limit > 0 and not df.is_empty():
+        return df.head(limit)
+    return df
 
 
 def _parseKrxIndexResponse(data: dict, *, market: str, basDd: str) -> pl.DataFrame:
@@ -239,6 +245,7 @@ async def fetchKrxIndexRange(
     concurrency: int = 5,
     retries: int = 3,
     sleepSec: float = 0.0,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """KRX 지수 범위를 일자별로 직접 수집한다.
 
@@ -258,6 +265,8 @@ async def fetchKrxIndexRange(
         403/429/5xx 재시도 횟수. 최종 실패는 예외로 올려 결측 저장을 막는다.
     sleepSec : float
         성공 요청 뒤 대기 시간(초).
+    limit : int | None
+        반환 행수 상한 (concat 후 head). None이면 전체.
 
     Returns
     -------
@@ -318,7 +327,10 @@ async def fetchKrxIndexRange(
 
     if not out:
         return pl.DataFrame()
-    return pl.concat(out, how="vertical_relaxed")
+    df = pl.concat(out, how="vertical_relaxed")
+    if limit is not None and limit > 0:
+        return df.head(limit)
+    return df
 
 
 def gatherKrxIndex(
