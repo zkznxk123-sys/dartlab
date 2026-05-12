@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.report.types  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_to_wide_callable() -> None:
+    """toWide() callable smoke."""
+    from dartlab.providers.dart.report.types import AuditResult
+
+    assert hasattr(AuditResult, "toWide")

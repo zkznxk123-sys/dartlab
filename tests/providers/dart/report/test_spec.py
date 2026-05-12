@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.report.spec  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_build_spec_callable() -> None:
+    """buildSpec() callable smoke."""
+    from dartlab.providers.dart.report.spec import buildSpec
+
+    assert callable(buildSpec)

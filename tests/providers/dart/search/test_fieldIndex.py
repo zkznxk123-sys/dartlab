@@ -10,3 +10,87 @@ def test_imports():
         import dartlab.providers.dart.search.fieldIndex  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_build_content_segment_callable() -> None:
+    """buildContentSegment() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import buildContentSegment
+
+    assert callable(buildContentSegment)
+
+
+def test_clear_cache_callable() -> None:
+    """clearCache() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import clearCache
+
+    assert callable(clearCache)
+
+
+def test_content_stats_callable() -> None:
+    """contentStats() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import contentStats
+
+    assert callable(contentStats)
+
+
+def test_iter_content_callable() -> None:
+    """iterContent() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import iterContent
+
+    assert callable(iterContent)
+
+
+def test_load_segment_callable() -> None:
+    """loadSegment() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import loadSegment
+
+    assert callable(loadSegment)
+
+
+def test_pull_content_index_callable() -> None:
+    """pullContentIndex() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import pullContentIndex
+
+    assert callable(pullContentIndex)
+
+
+def test_push_content_index_callable() -> None:
+    """pushContentIndex() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import pushContentIndex
+
+    assert callable(pushContentIndex)
+
+
+def test_rebuild_delta_callable() -> None:
+    """rebuildDelta() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import rebuildDelta
+
+    assert callable(rebuildDelta)
+
+
+def test_rebuild_main_callable() -> None:
+    """rebuildMain() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import rebuildMain
+
+    assert callable(rebuildMain)
+
+
+def test_save_segment_callable() -> None:
+    """saveSegment() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import saveSegment
+
+    assert callable(saveSegment)
+
+
+def test_search_content_callable() -> None:
+    """searchContent() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import searchContent
+
+    assert callable(searchContent)
+
+
+def test_tokenize_word_callable() -> None:
+    """tokenizeWord() callable smoke."""
+    from dartlab.providers.dart.search.fieldIndex import tokenizeWord
+
+    assert callable(tokenizeWord)

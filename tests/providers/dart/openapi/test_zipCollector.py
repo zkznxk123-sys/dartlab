@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.openapi.zipCollector  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_collect_callable() -> None:
+    """collect() callable smoke."""
+    from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+
+    assert hasattr(ZipDocsCollector, "collect")

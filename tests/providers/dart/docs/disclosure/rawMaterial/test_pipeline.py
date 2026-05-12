@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.disclosure.rawMaterial.pipeline  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_raw_material_callable() -> None:
+    """rawMaterial() callable smoke."""
+    from dartlab.providers.dart.docs.disclosure.rawMaterial.pipeline import rawMaterial
+
+    assert callable(rawMaterial)

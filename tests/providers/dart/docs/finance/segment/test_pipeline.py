@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.finance.segment.pipeline  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_segments_callable() -> None:
+    """segments() callable smoke."""
+    from dartlab.providers.dart.docs.finance.segment.pipeline import segments
+
+    assert callable(segments)

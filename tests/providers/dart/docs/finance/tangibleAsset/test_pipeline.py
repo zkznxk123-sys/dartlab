@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.finance.tangibleAsset.pipeline  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_tangible_asset_callable() -> None:
+    """tangibleAsset() callable smoke."""
+    from dartlab.providers.dart.docs.finance.tangibleAsset.pipeline import tangibleAsset
+
+    assert callable(tangibleAsset)

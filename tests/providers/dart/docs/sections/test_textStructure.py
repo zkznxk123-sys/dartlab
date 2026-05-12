@@ -10,3 +10,17 @@ def test_imports():
         import dartlab.providers.dart.docs.sections.textStructure  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_parse_text_structure_callable() -> None:
+    """parseTextStructure() callable smoke."""
+    from dartlab.providers.dart.docs.sections.textStructure import parseTextStructure
+
+    assert callable(parseTextStructure)
+
+
+def test_parse_text_structure_with_state_callable() -> None:
+    """parseTextStructureWithState() callable smoke."""
+    from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
+
+    assert callable(parseTextStructureWithState)

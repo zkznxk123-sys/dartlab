@@ -10,3 +10,24 @@ def test_imports():
         import dartlab.providers.dart.openapi.remote  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_get_df_callable() -> None:
+    """getDf() callable smoke."""
+    from dartlab.providers.dart.openapi.remote import RemoteDartClient
+
+    assert hasattr(RemoteDartClient, "getDf")
+
+
+def test_get_df_all_callable() -> None:
+    """getDfAll() callable smoke."""
+    from dartlab.providers.dart.openapi.remote import RemoteDartClient
+
+    assert hasattr(RemoteDartClient, "getDfAll")
+
+
+def test_get_json_callable() -> None:
+    """getJson() callable smoke."""
+    from dartlab.providers.dart.openapi.remote import RemoteDartClient
+
+    assert hasattr(RemoteDartClient, "getJson")

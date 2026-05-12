@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.tableAI  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_parse_raw_markdown_block_callable() -> None:
+    """parseRawMarkdownBlock() callable smoke."""
+    from dartlab.providers.dart.docs.tableAI import parseRawMarkdownBlock
+
+    assert callable(parseRawMarkdownBlock)

@@ -183,7 +183,7 @@ def _loadBaseline(path: Path) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="providers behavior test coverage audit")
-    parser.add_argument("--mode", choices=["baseline", "strict"], default="baseline")
+    parser.add_argument("--mode", choices=["baseline", "strict"], default="strict")
     parser.add_argument("--update-baseline", action="store_true")
     parser.add_argument("--baseline", default=None, help="baseline JSON path")
     args = parser.parse_args()

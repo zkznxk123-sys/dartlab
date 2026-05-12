@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.finance.executive.pipeline  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_executive_callable() -> None:
+    """executive() callable smoke."""
+    from dartlab.providers.dart.docs.finance.executive.pipeline import executive
+
+    assert callable(executive)

@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.edgar.report.auditOpinion  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_extract_audit_opinion_callable() -> None:
+    """extractAuditOpinion() callable smoke."""
+    from dartlab.providers.edgar.report.auditOpinion import extractAuditOpinion
+
+    assert callable(extractAuditOpinion)

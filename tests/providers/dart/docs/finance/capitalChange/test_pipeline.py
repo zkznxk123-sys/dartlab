@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.finance.capitalChange.pipeline  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_capital_change_callable() -> None:
+    """capitalChange() callable smoke."""
+    from dartlab.providers.dart.docs.finance.capitalChange.pipeline import capitalChange
+
+    assert callable(capitalChange)

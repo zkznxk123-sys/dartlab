@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.finance.costByNature.pipeline  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_cost_by_nature_callable() -> None:
+    """costByNature() callable smoke."""
+    from dartlab.providers.dart.docs.finance.costByNature.pipeline import costByNature
+
+    assert callable(costByNature)

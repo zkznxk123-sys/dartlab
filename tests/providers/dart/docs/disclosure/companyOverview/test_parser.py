@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.disclosure.companyOverview.parser  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_parse_overview_callable() -> None:
+    """parseOverview() callable smoke."""
+    from dartlab.providers.dart.docs.disclosure.companyOverview.parser import parseOverview
+
+    assert callable(parseOverview)

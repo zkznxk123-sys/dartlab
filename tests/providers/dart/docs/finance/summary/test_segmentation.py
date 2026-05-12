@@ -10,3 +10,10 @@ def test_imports():
         import dartlab.providers.dart.docs.finance.summary.segmentation  # noqa: F401
     except ImportError as e:
         pytest.skip(f"module import requires data/env: {e}")
+
+
+def test_detect_breakpoints_callable() -> None:
+    """detectBreakpoints() callable smoke."""
+    from dartlab.providers.dart.docs.finance.summary.segmentation import detectBreakpoints
+
+    assert callable(detectBreakpoints)
