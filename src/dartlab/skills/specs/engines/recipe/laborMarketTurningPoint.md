@@ -76,9 +76,18 @@ for indicator in indicators:
     except Exception as exc:
         rows.append({"indicator": indicator, "error": str(exc), "ok": False})
 
-forecast = dartlab.macro("forecast", market=market)
-cycle = dartlab.macro("cycle", market=market)
-summary = dartlab.macro("summary", market=market)
+try:
+    forecast = dartlab.macro("forecast", market=market)
+except Exception as exc:
+    forecast = {"error": str(exc)}
+try:
+    cycle = dartlab.macro("cycle", market=market)
+except Exception as exc:
+    cycle = {"error": str(exc)}
+try:
+    summary = dartlab.macro("summary", market=market)
+except Exception as exc:
+    summary = {"error": str(exc)}
 
 emit_result(
     table=rows,

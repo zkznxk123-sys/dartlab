@@ -74,7 +74,10 @@ import dartlab
 
 market = "KR"
 guide = dartlab.macro()
-summary = dartlab.macro("summary", market=market)
+try:
+    summary = dartlab.macro("summary", market=market)
+except Exception as exc:
+    summary = {"error": str(exc)}
 cycle = dartlab.macro("cycle", market=market)
 rates = dartlab.macro("rates", market=market)
 liquidity = dartlab.macro("liquidity", market=market)

@@ -78,7 +78,10 @@ for indicator in indicators:
 
 rates = dartlab.macro("rates", market=market)
 forecast = dartlab.macro("forecast", market=market)
-summary = dartlab.macro("summary", market=market)
+try:
+    summary = dartlab.macro("summary", market=market)
+except Exception as exc:
+    summary = {"error": str(exc)}
 
 emit_result(
     table=rows,

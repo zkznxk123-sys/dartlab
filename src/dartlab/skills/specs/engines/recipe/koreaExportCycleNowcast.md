@@ -86,7 +86,10 @@ except Exception as exc:
 
 trade = dartlab.macro("trade", market=market)
 corporate = dartlab.macro("corporate", market=market)
-summary = dartlab.macro("summary", market=market)
+try:
+    summary = dartlab.macro("summary", market=market)
+except Exception as exc:
+    summary = {"error": str(exc)}
 
 emit_result(
     table=rows,

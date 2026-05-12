@@ -76,9 +76,18 @@ for indicator in indicators:
     except Exception as exc:
         rows.append({"indicator": indicator, "error": str(exc), "ok": False})
 
-rates = dartlab.macro("rates", market=market)
-inflationScenario = dartlab.macro("scenario", "인플레이션 충격", market=market, severity="moderate")
-summary = dartlab.macro("summary", market=market)
+try:
+    rates = dartlab.macro("rates", market=market)
+except Exception as exc:
+    rates = {"error": str(exc)}
+try:
+    inflationScenario = dartlab.macro("scenario", "인플레이션 충격", market=market, severity="moderate")
+except Exception as exc:
+    inflationScenario = {"error": str(exc)}
+try:
+    summary = dartlab.macro("summary", market=market)
+except Exception as exc:
+    summary = {"error": str(exc)}
 
 emit_result(
     table=rows,

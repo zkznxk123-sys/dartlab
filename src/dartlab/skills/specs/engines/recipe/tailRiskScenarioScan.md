@@ -67,7 +67,10 @@ lastUpdated: '2026-05-12'
 import dartlab
 
 market = "US"
-current = dartlab.macro("summary", market=market)
+try:
+    current = dartlab.macro("summary", market=market)
+except Exception as exc:
+    current = {"error": str(exc)}
 scenarioNames = [
     "2008 금융위기",
     "2020 COVID",

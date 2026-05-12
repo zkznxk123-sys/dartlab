@@ -78,7 +78,10 @@ for indicator in indicators:
 
 usCrisis = dartlab.macro("crisis", market="US")
 krAssets = dartlab.macro("assets", market="KR")
-krSummary = dartlab.macro("summary", market="KR")
+try:
+    krSummary = dartlab.macro("summary", market="KR")
+except Exception as exc:
+    krSummary = {"error": str(exc)}
 
 emit_result(
     table=rows,

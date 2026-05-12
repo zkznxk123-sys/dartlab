@@ -71,7 +71,10 @@ market = "US"
 crisis = dartlab.macro("crisis", market=market)
 liquidity = dartlab.macro("liquidity", market=market)
 rates = dartlab.macro("rates", market=market)
-summary = dartlab.macro("summary", market=market)
+try:
+    summary = dartlab.macro("summary", market=market)
+except Exception as exc:
+    summary = {"error": str(exc)}
 
 creditRows = []
 if isinstance(crisis, dict):

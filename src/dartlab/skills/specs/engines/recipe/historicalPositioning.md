@@ -67,7 +67,10 @@ lastUpdated: '2026-05-12'
 import dartlab
 
 market = "KR"
-current = dartlab.macro("summary", market=market)
+try:
+    current = dartlab.macro("summary", market=market)
+except Exception as exc:
+    current = {"error": str(exc)}
 cycle = dartlab.macro("cycle", market=market)
 crisis = dartlab.macro("crisis", market=market)
 
