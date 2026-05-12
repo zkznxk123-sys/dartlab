@@ -72,6 +72,13 @@
 			무엇을 분석하거나 운영하려는지 먼저 고른다. 각 skill 은 입력 · 출력 · 검증 기준 · 실행 순서를
 			한 화면에 묶는다. 사람과 LLM 이 같은 표면을 본다 — 외부 API 문서를 직접 뒤지지 않는다.
 		</p>
+		<p class="lead-graph">
+			<a href="{base}/skills/graph" class="graph-link">
+				<Sparkles size={14} />
+				<span>그래프로 보기 — 257 노드 클릭 탐색</span>
+				<ArrowRight size={14} />
+			</a>
+		</p>
 
 		<div class="search-row">
 			<button class="cmdk-btn" onclick={openGlobalSearch} type="button">
