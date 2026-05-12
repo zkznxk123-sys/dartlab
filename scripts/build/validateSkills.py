@@ -19,7 +19,7 @@ from pathlib import Path
 
 REQUIRED_SCALAR = ("id", "title", "category", "purpose")
 REQUIRED_LIST = ("whenToUse",)
-ALLOWED_CATEGORIES = {"start", "runtime", "operation", "engines"}
+ALLOWED_CATEGORIES = {"start", "runtime", "operation", "engines", "recipes"}
 ALLOWED_KINDS = {"generated", "curated", "user", "recipe"}
 
 

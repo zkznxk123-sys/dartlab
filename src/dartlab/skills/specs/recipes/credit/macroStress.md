@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.creditMacroStress
+id: recipes.credit.macroStress
 title: 신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성
 category: recipes
 kind: recipe
@@ -163,15 +163,84 @@ emit_result(
 )
 ```
 
-## 호출 동작
+## 호출 동작 — 5 단 분석 구조
 
-1. `c.credit(detail=True)` — 현재 시점 dCR + 7 axis subscores.
-2. `c.analysis("macro", "매크로민감도")` — 금리 / 환율 elasticity.
-3. `c.show("IS"|"BS", freq="Y")` — EBIT / interest / borrowings 추출.
-4. 금리 +200bp × 차입금 → shocked interest expense 계산.
-5. shocked ICR (Interest Coverage Ratio) = EBIT / shocked interest.
-6. ICR 가 base 대비 50% 이상 하락하면 채무상환 axis -15 점 (간이 매핑).
-7. 7 axis 가중 평균 → 등급 재계산.
+답변은 분석 5 단 (결론 / 근거 / 메커니즘 / 반례·한계 / 후속 모니터링) 매핑. 매크로 충격 (금리 +200bp 등) 시나리오 결과를 5 단으로 정리.
+
+### 1. 결론 도출
+
+회사의 *매크로 충격 후 신용등급 유지 가능성* + *가장 먼저 깨지는 axis* + *충격 강도 sensitivity* 를 한 문장 정량 결론으로.
+
+좋은 결론 예시:
+- "005930 (삼성전자) 금리 +200bp 충격 시 dCR-AA → AA 유지 (ICR 24.5×→15.8×, -8.7), binding axis 없음. +400bp 시도 AA → A 1 단 하락 (ICR 9.1×). 매크로 stress 내성 매우 강함."
+- "BGF리테일 (027410) 금리 +200bp 시 dCR-BBB → BB 1 단 하락 (ICR 3.8×→2.1×, 채무상환 axis -15 점), binding axis = 채무상환. +300bp 시도 BB → B 추가 하락. 금리 stress 취약."
+
+금지 — 단일 시나리오 (200bp) 결과만 단정. 100/200/300/400/500bp **5 강도 sensitivity curve** 동반 권장.
+
+### 2. 핵심 근거 수집
+
+`requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
+
+- **skillRef**: `engines.credit.creditRisk` (base dCR + 7 axis), `engines.analysis.macroSensitivity` (금리·환율 elasticity), `engines.analysis.financing` (차입 만기·변동/고정 비율), `engines.macro.rates` (시장 금리 곡선).
+- **sourceRef**: DART 재무제표 — IS (operating_profit, interest_expense), BS (total_borrowings, total_liabilities, equity). 분기 또는 연간 freq 명시.
+- **tableRef** (5 행 sensitivity curve): rateShockBp ∈ {0, 100, 200, 300, 400, 500} × {shockedGrade, shockedICR, icrDelta, bindingAxis}.
+- **valueRef**: baseGrade · baseICR · shockedGrade@200bp · shockedICR@200bp · icrDelta · bindingAxis.
+- **dateRef**: 재무 기준 분기 (예: 2024-12-31) + 매크로 asOf.
+
+도구: `RunPython` (5 강도 batch 계산 + axis 점수 재계산 + 등급 mapping).
+
+### 3. 메커니즘 분석
+
+매크로 충격 → 신용등급 변동 *3 층 인과 경로*:
+
+```mermaid
+graph LR
+  M["매크로 충격<br/>(+200bp 금리)"] --> I["이자비용 증가<br/>차입금 × shock_bp/10000"]
+  I --> ICR["ICR 하락<br/>EBIT / shocked_interest"]
+  ICR --> A["채무상환 axis ↓<br/>(ICR base 대비 -50%면 -15pt)"]
+  E["환율 충격<br/>(+10% USD/KRW)"] --> EBIT["EBIT 변동<br/>(수출비중·원자재 가중)"]
+  EBIT --> ICR
+  A --> G["dCR 등급 ↓<br/>7 axis 가중 평균"]
+```
+
+**3 종 충격 시나리오** 동시 흔들기 권장 (1 차원 충격 단정 금지):
+- 금리 +200bp (default)
+- 환율 +10% (수출/수입 비중 따라 EBIT 영향)
+- 영업이익 -20% (cycle downturn 가정)
+
+각 충격은 *독립* 또는 *복합* (정책 + 환율 동시) 시뮬레이션 가능. 복합이 더 conservative.
+
+### 4. 반례·한계
+
+- **Falsifier**: shocked dCR == base dCR for ≥ 90% of KOSPI200 → recipe 노이즈 (sensitivity 작동 안 함). pythonCheck 자동 검증.
+- **휴리스틱 등급 mapping 한계**: score → 등급 변환이 간이 (85→AA, 75→A, ...). 실 dCR 알고리즘은 axis 가중 + 산업·규모 조정 더 복잡.
+- **rate sensitivity 가정**: 차입금 *전체* 에 같은 충격 가정 — 실제는 *변동/고정 비율* + 만기 분포 차등. `engines.analysis.financing` 으로 비율 확인.
+- **EBIT 일정 가정**: 1 차 wave 는 EBIT 고정 — 금리 ↑ 시 매출/마진 동시 압박 미반영. 2 차 wave (영업이익 -20%) 별도 시나리오 필수.
+- **회복 경로 단정 금지**: 1 분기 충격으로 dCR 영구 하락 단정 X — *지속 vs 일시* 구분 (정책 lag 4~6 분기 후 정상화 가능).
+- **한국 / 미국 시장 차이**:
+  - 한국 — chaebol 그룹 보증·자금 지원 변수. 단일 회사 ICR 만으로 신용 단정 위험. 그룹 차원 stress 별도.
+  - 미국 — 회사채 시장 발달 → 금리 충격 즉시 회사채 spread 반영. ICR 보다 spread-based stress 가 더 빠른 신호.
+- **failureModes** — 회사 변동/고정 비율 무시 / binding axis 분석 없이 등급만 / macroSensitivity elasticity 신뢰도 차이 — 답변 작성 시 self-check.
+
+### 5. 후속 모니터링
+
+답변 끝에 모니터링 표:
+
+| 지표 | 현재값 | 임계값 (재시뮬 시그널) | 리뷰 주기 |
+|---|---|---|---|
+| 시장 금리 (국고 3Y) | (macro.rates) | +50bp 추가 | 주간 |
+| 회사 사채 yield | (gather) | spread +30bp | 월간 |
+| 환율 USD/KRW | (macro.fx) | ±5% | 주간 |
+| 분기 영업이익 | (IS) | YoY -10% | 분기 |
+| 외부 KIS/NICE 신용등급 | (gather) | watch 진입 | 분기 |
+
+연계 절차:
+- shockedGrade 가 BB 이하면 → `recipes.credit.covenantStressTest` (차입약정 위반 점검)
+- bindingAxis = 채무상환 → `engines.analysis.financing` 으로 차입 만기·변동/고정 비율
+- bindingAxis = 사업안정성 → `recipes.credit.quantConsensus` (Altman / Beneish / Piotroski 합의)
+- universe 확장 (KOSPI200 전수 stress) → `recipes.credit.distressCandidateScreen`
+
+재호출 트리거: "삼성전자 금리 +200bp 충격에서 dCR 유지?", "현대차 환율 +10% 시 신용 axis 어디 깨지나", "HMM 영업이익 -20% 시 dCR 등급 변동".
 
 ## 대표 반환 형태
 
@@ -200,9 +269,9 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → shockedGrade + bindingAxis 산출.
-2. shockedGrade 가 BB 이하로 떨어지면 `recipes.credit.creditCovenantStressTest` 와 결합 — 차입약정 위반 가능성 함께 점검.
+2. shockedGrade 가 BB 이하로 떨어지면 `recipes.credit.covenantStressTest` 와 결합 — 차입약정 위반 가능성 함께 점검.
 3. bindingAxis = 채무상환 → `engines.analysis.financing` 으로 차입 만기 schedule + 변동/고정 비율 상세.
-4. bindingAxis = 사업안정성 → `recipes.credit.creditQuantConsensus` 와 결합 — Altman / Beneish / Piotroski 합의 부도 신호 동반 검증.
+4. bindingAxis = 사업안정성 → `recipes.credit.quantConsensus` 와 결합 — Altman / Beneish / Piotroski 합의 부도 신호 동반 검증.
 5. 5 종목 실행 후 `recipes.credit.distressCandidateScreen` 으로 universe 확장.
 
 ## 기본 검증

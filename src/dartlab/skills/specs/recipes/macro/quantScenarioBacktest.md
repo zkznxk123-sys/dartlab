@@ -1,5 +1,5 @@
 ---
-id: recipes.macro.macroQuantScenarioBacktest
+id: recipes.macro.quantScenarioBacktest
 title: 매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest
 category: recipes
 kind: recipe

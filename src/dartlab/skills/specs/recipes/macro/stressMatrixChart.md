@@ -1,5 +1,5 @@
 ---
-id: recipes.macro.economicStressMatrixChart
+id: recipes.macro.stressMatrixChart
 title: 경제 스트레스 매트릭스 차트
 category: recipes
 kind: recipe
@@ -18,7 +18,7 @@ linkedSkills:
   - engines.viz
   - recipes.macro.tailRiskScenarioScan
   - recipes.macro.dollarFundingStress
-  - recipes.credit.creditCycleStressMap
+  - recipes.credit.cycleStressMap
 toolRefs:
   - RunPython
   - CompileVisual
@@ -121,7 +121,7 @@ emit_result(
 ## 연계 절차
 
 1. 달러/환율 신호가 크면 `recipes.macro.dollarFundingStress`.
-2. 신용/스프레드 신호가 크면 `recipes.credit.creditCycleStressMap`.
+2. 신용/스프레드 신호가 크면 `recipes.credit.cycleStressMap`.
 3. 금리곡선 신호가 크면 `recipes.macro.yieldCurveStress`.
 
 ## 기본 검증

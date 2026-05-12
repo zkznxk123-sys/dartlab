@@ -166,7 +166,7 @@ def main() -> int:
     parser.add_argument("--path", type=Path, default=RECIPE_DIR, help="recipe 디렉터리")
     args = parser.parse_args()
 
-    paths = sorted(args.path.glob("*.md"))
+    paths = sorted(args.path.rglob("*.md"))
     if not paths:
         print(f"recipe 파일 없음: {args.path}", file=sys.stderr)
         return 1

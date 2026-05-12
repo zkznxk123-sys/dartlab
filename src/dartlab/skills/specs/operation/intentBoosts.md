@@ -221,7 +221,7 @@ intentBoosts:
       - cashflow
       - "cash flow"
     boost: 10.0
-  - skillIds: ["recipes.dividend.dividendCapitalReturn"]
+  - skillIds: ["recipes.dividend.capitalReturn"]
     terms:
       - 배당
       - 주주환원
@@ -229,7 +229,7 @@ intentBoosts:
       - dividend
       - buyback
     boost: 10.0
-  - skillIds: ["recipes.governance.governanceAuditComposite"]
+  - skillIds: ["recipes.governance.auditComposite"]
     terms:
       - 지배구조
       - 감사

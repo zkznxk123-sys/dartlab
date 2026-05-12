@@ -125,13 +125,87 @@ def dupontDecompose(is_df: pl.DataFrame, bs_df: pl.DataFrame, years: list[str]) 
 result = dupontDecompose(is_df, bs_df, years)
 ```
 
-## 호출 동작
+## 호출 동작 — 5 단 분석 구조
 
-1. `c.show("IS", freq="Y")` — 5 기간 손익계산서 시계열 (snakeId 기반 wide).
-2. `c.show("BS", freq="Y")` — 5 기간 재무상태표.
-3. snakeId 로 6 항목 추출 — sales / operating_profit / earnings_before_tax / net_income / total_assets / total_stockholders_equity.
-4. 평균자산 / 평균자본 계산 (직전년도 + 당년도 / 2).
-5. 5 동인 직접 계산 + 재구성 ROE (5 곱) — 원본 ROE 와 일치 검증.
+답변은 분석 5 단 (결론 / 근거 / 메커니즘 / 반례·한계 / 후속 모니터링) 매핑. DuPont 5 동인 분해 결과를 5 단 답안 구조에 재배치한다.
+
+### 1. 결론 도출
+
+회사의 *ROE 시계열 추세 + 5 동인 중 주도 동인 + 구조적 vs 일시적 분리* 를 한 문장 정량 결론으로.
+
+좋은 결론 예시:
+- "005930 (삼성전자) 5 년 ROE 14.8% → 11.2% (-3.6%p), 주도 동인 OperatingMargin (-2.8%p 기여) — 메모리 사이클 다운턴이 영업마진 압박. AssetTurnover·FinancialLeverage 안정 (각 ±0.05), TaxBurden 0.78 보합. **구조적 ROE 하락 (사업 마진)** 이지 *일시적 레버리지 변동* 아님."
+- "035420 (NAVER) 5 년 ROE 12.5% → 9.8%, AssetTurnover (-0.4 기여) 가 주도 — 사업 확장 자산 증가 (커머스·콘텐츠 투자). OperatingMargin 22% 유지, FinancialLeverage 1.4 안정. **자산 효율 일시 저하 (CAPEX 사이클)** — 향후 자산 회수 시 ROE 회복 가능."
+
+금지 — "ROE 15% = 좋음" 단정. 반드시 *5 동인 분포* + *주도 동인 식별* + *구조적 vs 일시적 분리* 동반.
+
+### 2. 핵심 근거 수집
+
+`requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
+
+- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS 호출), `engines.scan.ratio` (비교용 산업 평균). analysis axis 의존 X — *raw 직접 계산* 이 본 recipe 핵심.
+- **sourceRef**: DART 공시 — 5 년 손익계산서 (sales, operating_profit, earnings_before_tax, net_income) + 5 년 재무상태표 (total_assets, total_stockholders_equity). 연결재무 기준.
+- **tableRef** (4~5 행 시계열): year × {taxBurden, interestBurden, operatingMargin, assetTurnover, financialLeverage, roeReconstructed}.
+- **valueRef**: 최근년도 5 동인 + 5 년 표준편차 (변동성) + 주도 동인 (표준편차 최대) + 산업 평균 비교.
+- **dateRef**: 5 회계년도 (예: 2021-12-31 ~ 2025-12-31).
+
+도구: `RunPython` (L1 wide DataFrame → snakeId 필터 → 6 항목 추출 → 5 동인 계산). `EngineCall` 보조 (industry peer 평균 비교).
+
+### 3. 메커니즘 분석
+
+ROE = 5 동인 곱. 인과 경로 시각:
+
+```mermaid
+graph LR
+  S["Sales<br/>매출"] --> OM["OperatingMargin<br/>(EBIT/Sales)"]
+  OM --> IB["InterestBurden<br/>(EBT/EBIT)<br/>=부채 자본 구조"]
+  IB --> TB["TaxBurden<br/>(NI/EBT)<br/>=세제 효율"]
+  S --> AT["AssetTurnover<br/>(Sales/AvgAssets)<br/>=자산 효율"]
+  AT --> FL["FinancialLeverage<br/>(AvgAssets/AvgEquity)<br/>=레버리지"]
+  TB --> ROE["ROE<br/>= 5 동인 곱"]
+  FL --> ROE
+```
+
+각 동인의 *해석* (답변 본문에 명시):
+- **OperatingMargin** ↓ → 사업 본업 수익성 (사이클·가격·비용 구조 변화)
+- **AssetTurnover** ↓ → 자산 활용도 (CAPEX 후 회수 지연·재고 과다·매출채권 회전)
+- **FinancialLeverage** ↑ → 부채로 자본 증폭 (위험 동반) — *quality 우위* 가 아닌 *증폭 효과*
+- **InterestBurden** ↓ → 이자비용 증가 (부채·금리)
+- **TaxBurden** 변동 → 세제·세무 조정 (보통 산업 안정)
+
+**주도 동인 식별** 휴리스틱: 5 년 표준편차 가장 큰 동인이 ROE 변동의 주 원인 (70%+ 설명력이면 단일 동인 사이클).
+
+### 4. 반례·한계
+
+- **Falsifier**: `roeReconstructed` 와 원본 ROE (`net_income / avg_equity`) 차이 > 0.5%p 면 데이터 누락/이상.
+- **음수 영업이익 (적자) 회사**: InterestBurden = EBT/EBIT 가 무한대 또는 음수. 적자 회사에 framework 단순 적용 X — 흑자 5 년 회사만 권장.
+- **금융업 부적합**: 은행·보험 IS 구조 다름 (이자수익·보험료 = 매출). 별도 framework 필요.
+- **earnings_before_tax snakeId 가용성**: 일부 회사 IS 에서 영업외손익 분리 안 됨. fallback — `net_income / (1 - taxRate)` 추정.
+- **평균자산 단일 시점 가중**: 직전년말 + 당년말 / 2 사용 — 분기 가중평균 (Q1·Q2·Q3·Q4) 이 더 정확.
+- **연결 vs 별도**: 본 recipe 는 연결재무 기준. 지주회사 (자회사 효과 큼) 는 분해 결과 해석 주의 — 별도 재무로 재실행 권장.
+- **일회성 효과**: OperatingMargin 단발 변동 (영업외이익·자산매각 등) → 연간 분해 시 노이즈. 분기 시계열 (`freq="Q"`) 로 평활화 권장.
+- **회계 기준 변경**: K-IFRS 자발적 정책 변경 (예: 운용리스 IFRS 16 도입) 시점 영향 미보정.
+- **failureModes** — earnings_before_tax 가용성 / 분기 가중평균 / 연결 vs 별도 / 일회성 / 회계 기준 변경 — 답변 작성 시 self-check.
+
+### 5. 후속 모니터링
+
+답변 끝에 모니터링 표:
+
+| 동인 | 현재값 | 5년 평균 | 산업 평균 | 임계값 (재분석 시그널) |
+|---|---|---|---|---|
+| OperatingMargin | (계산) | (계산) | (scan.ratio) | ±2%p 변동 |
+| AssetTurnover | (계산) | (계산) | (scan.ratio) | ±0.1 변동 |
+| FinancialLeverage | (계산) | (계산) | (scan.ratio) | ±0.2 변동 |
+| roeReconstructed | (계산) | (계산) | (scan.ratio) | ±2%p YoY |
+
+연계 절차:
+- OperatingMargin 변동 → `recipes.quality.workingCapitalQuality` (운전자본 효율)
+- AssetTurnover 변동 → CAPEX 시계열 + `engines.analysis.cashflow`
+- FinancialLeverage 변동 → `recipes.credit.distressDual` (부채 위험)
+- 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates`
+- 자본 배분 평가 → `recipes.quality.capitalAllocationScorecard`
+
+재호출 트리거: "삼성전자 5 년 ROE 5 동인 분해", "DuPont 동인 표준편차 큰 항목 식별", "산업 평균 분해 + 회사 비교".
 
 ## 대표 반환 형태
 
@@ -162,7 +236,7 @@ result = dupontDecompose(is_df, bs_df, years)
 2. 동인 변화 큰 (표준편차 큰) 항목 식별 — ROE 변동의 원인.
 3. OperatingMargin 변동 → `recipes.quality.workingCapitalQuality` 로 운전자본 효율 점검.
 4. AssetTurnover 변동 → 자산 재투자 시점 (CAPEX 시계열) 분석.
-5. FinancialLeverage 변동 → `recipes.credit.creditDistressDual` 로 부채 위험 점검.
+5. FinancialLeverage 변동 → `recipes.credit.distressDual` 로 부채 위험 점검.
 6. 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates` 와 상호 검증.
 
 ## 기본 검증

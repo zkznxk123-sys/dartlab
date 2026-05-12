@@ -1,5 +1,5 @@
 ---
-id: recipes.macro.macroToCompany
+id: recipes.macro.toCompany
 title: 매크로 → 섹터 → 회사 영향 (transmission)
 category: recipes
 kind: recipe

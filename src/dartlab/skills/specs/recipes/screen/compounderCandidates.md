@@ -122,14 +122,95 @@ candidates = (
 )
 ```
 
-## 호출 동작
+## 호출 동작 — 5 단 분석 구조
 
-1. `scanRatio("roe", freq="Y")` — 5 기간 컬럼 wide 테이블.
-2. polars `mean_horizontal` + `list.std` — 5 년 평균·표준편차·최소값.
-3. `scanRatio("revenueGrowth", freq="Y")` — 5 기간 모두 양수 필터 (역성장 없음).
-4. `scanRatio("grossMargin", freq="Y")` — 5 년 평균·표준편차.
-5. join → 4 게이트 (ROE 평균 ≥ 15, ROE std ≤ 5, ROE min ≥ 10, 5 년 양성장, gm 평균 ≥ 25, gm std ≤ 5).
-6. ROE 평균 내림차순 정렬.
+답변은 분석 5 단 (결론 / 근거 / 메커니즘 / 반례·한계 / 후속 모니터링) 매핑. 횡단 스크린이지만 *후보 종목군 + 산업 분포 + quality 분포* 를 5 단으로 정리.
+
+### 1. 결론 도출
+
+전종목 횡단 *compounder 후보 N 개 + 산업 분포 + ROE/마진 quality 평균* 한 문장 정량 결론.
+
+좋은 결론 예시:
+- "KOSPI+KOSDAQ 약 2,400 종목 횡단 — 5 년 일관 quality 후보 42 개 통과 (ROE 5y mean 평균 19.2% / std 평균 2.8%p / min 평균 14.1%, gross margin 5y mean 평균 38.5%). **산업 분포**: 소비재 (12) / 금융·보험 (8) / 통신 (6) / 헬스케어 (5) / 플랫폼 (4) / 기타 (7). 사이클 산업 (반도체·조선·정유) 자연 제외 — 의도된 동작."
+- "후보 수 17 개 (KR universe 작음). 평균 ROE 17.5%, max 28% (KT&G), min 15.1% (강원랜드). gross margin 평균 32% — 통신·필수소비 우위. PER 평균 18× — *survivorship 비싸짐* watch list."
+
+금지 — 단년도 고-ROE 로 compounder 단정. 반드시 **5 년 평균 + 표준편차 (작음) + 5 년 양성장 + grossMargin 안정** 4 게이트 합의.
+
+### 2. 핵심 근거 수집
+
+`requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
+
+- **skillRef**: `engines.scan.ratio` (ROE·revenueGrowth·grossMargin 5 년 wide), `engines.analysis.profitability` (개별 후보 ROE 동인), `engines.analysis.efficiency` (capital cycle), `engines.scan.valuation` (PER·PBR 비교용).
+- **sourceRef**: DART 5 년 IS·BS — ROE = NI / equity, revenueGrowth = YoY, grossMargin = (sales-cogs)/sales. 5 년 연간 시계열.
+- **tableRef** (2 표):
+  1. 후보 리스트 — stockCode · corpName · roe5yMean · roe5yStd · roe5yMin · gm5yMean · gm5yStd · 매년 ROE
+  2. 산업 분포 — KICS_3 × {후보 수, 평균 ROE, 평균 gm}
+- **valueRef**: 통과 후보 수 · 후보 평균 ROE · 표준편차 · 평균 grossMargin · 산업 다양성 (가장 큰 산업 비중).
+- **dateRef**: 5 회계년도.
+
+도구: `RunPython` (scanRatio 3 회 + join + 게이트 filter + sort).
+
+### 3. 메커니즘 분석
+
+Compounder = *일관 고-ROE × 안정 매출 × 안정 마진* 3 신호 합의:
+
+```mermaid
+graph LR
+  UNIV["전종목 universe<br/>(KOSPI+KOSDAQ)"] --> ROE5["ROE 5y wide<br/>(scanRatio('roe', freq='Y'))"]
+  UNIV --> REV5["revenueGrowth 5y wide"]
+  UNIV --> GM5["grossMargin 5y wide"]
+  ROE5 --> G1["G1: roe5yMean ≥ 15<br/>roe5yStd ≤ 5<br/>roe5yMin ≥ 10"]
+  REV5 --> G2["G2: 5 년 모두 양성장"]
+  GM5 --> G3["G3: gm5yMean ≥ 25<br/>gm5yStd ≤ 5"]
+  G1 --> JOIN["3 게이트 교집합"]
+  G2 --> JOIN
+  G3 --> JOIN
+  JOIN --> SORT["ROE 평균 내림차순"]
+  SORT --> CAND["compounder 후보 N"]
+```
+
+**학술 근거** (답변에 인용):
+- Buffett (1977-2024 주주서한): 단년도 고-ROE ≠ wonderful company. 사이클 전체 일관 고-ROE 만 진짜 compounder.
+- Asness-Frazzini-Pedersen (2019) "Quality Minus Junk": profitability + safety + payout 결합 quality factor → 1956-2016 연 +5%p 초과수익.
+- Novy-Marx (2014): ROE *일관성* (low volatility) 이 high mean ROE 보다 미래 수익률 강한 상관.
+- Sloan (1996): 일관 고-ROE 회사가 mean reversion 회피 비율 30% (전체 평균 5%) — moat 정량 신호.
+
+### 4. 반례·한계
+
+- **Falsifier**: 사이클 큰 회사가 통과하면 게이트 약함. 통과 종목의 산업 분포 + 5 년 ROE σ 확인.
+- **단년도 고-ROE 금지**: 5 년 평균·std·min 3 종 합의 필수.
+- **매출 역성장 1 회 → 자격 박탈 X**: 사이클성 (자동차·반도체) vs 일회성 (M&A 흡수) 구분 필요. 본 recipe 는 *5 년 모두 양성장* 강제 → 사이클 자연 제외.
+- **ROE 자본구조 영향**: 부채 ↑ → 자본 ↓ → ROE 인위적 상승. `debtRatio ≤ 100` 보조 게이트 권장.
+- **ROIC > WACC 부재**: Buffett 원전 framework 핵심. dartlab WACC 부재로 ROE 만 사용. capital efficiency 검증 약함 — `recipes.valuation.intrinsicValueBand` 의 EVA spread 결합.
+- **5 년 시계열 가용성**: 신규 IPO (5 년 미만) 자동 제외. 사업부 개편·분할도 역사 단절.
+- **산업 정상 ROE 차이**: 대형주 vs 중소형주, 산업별 (금융 15% vs IT 25%) 정상 분포 다름. 산업 percentile 게이트 권장.
+- **일회성 효과**: M&A·자산 매각으로 ROE 단발 변동.
+- **회계 정책 변경**: K-IFRS 자발적 변경 시점 영향 미보정.
+- **Survivorship bias**: 5 년 일관 quality = 검증된 종목 → 비싸진 상태 가능. **PER ≤ 25** 가치 게이트 결합 권장.
+- **failureModes** — 5 년 윈도우 시작점 / 사업 개편 / 산업 정상 분포 / 일회성 / 회계 변경.
+
+### 5. 후속 모니터링
+
+답변 끝에 모니터링 표:
+
+| 신호 | 임계값 (재스크린 시그널) | 리뷰 주기 |
+|---|---|---|
+| 후보 수 | KR 30-60 / US 100-150 정상 | 분기 |
+| 후보 평균 ROE | 18-22% 정상 | 분기 |
+| 후보 평균 std | 2-3%p 정상 | 분기 |
+| 산업 집중도 | 한 산업 80%+ = 게이트 점검 | 분기 |
+| 분기 ROE | YoY -3%p = watch | 분기 |
+| 분기 매출 YoY | < 0% = compounder 제외 후보 | 분기 |
+
+연계 절차:
+- GP/A 게이트 결합 → `recipes.valuation.qualityValueScreen`
+- PEG 가치 게이트 → `recipes.valuation.garpScreen` (비싸지 않은지)
+- 안정성 게이트 → `recipes.credit.distressFilter`
+- ROE 동인 (margin × turnover × leverage) → `recipes.quality.dupontDriver`
+- 자본배분 정성 → `recipes.quality.capitalAllocationScorecard`
+- moat narrative → `engines.story`
+
+재호출 트리거: "KR 시장 5 년 일관 compounder 후보", "ROE >= 15% + 표준편차 작은 종목", "매출 안정 성장 + 고-margin", "compounder + valuation 결합".
 
 ## 대표 반환 형태
 

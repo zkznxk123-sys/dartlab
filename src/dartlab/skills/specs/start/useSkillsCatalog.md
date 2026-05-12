@@ -163,7 +163,7 @@ skill 본문은 capability 의 사용 설명. 세부 인자와 전체 반환 필
 
 ## 다음 단계
 
-- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 4 카테고리 + 검증 게이트.
+- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 5 카테고리 + 검증 게이트.
 - [start.installUv](/skills/start.installUv) — uv 설치와 첫 실행.
 - [start.quickStart](/skills/start.quickStart) — 8 단계 walkthrough.
 - [start.firstAnalysisRecipe](/skills/start.firstAnalysisRecipe) — 첫 회사 분석 recipe.

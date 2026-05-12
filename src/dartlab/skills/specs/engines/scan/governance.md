@@ -67,7 +67,7 @@ examples:
   - 소액주주 분산도 상위
 linkedSkills:
   - engines.analysis.governance
-  - recipes.governance.governanceAuditComposite
+  - recipes.governance.auditComposite
   - engines.scan.insider
 source:
   type: manual_skill

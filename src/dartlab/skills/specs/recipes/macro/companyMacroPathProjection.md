@@ -151,4 +151,4 @@ emit_result(
 
 1. 본 recipe → 적정가치 분포.
 2. probAboveCurrent > 0.7 → strong buy / < 0.3 → strong sell signal.
-3. distribution std-dev 큰 종목 → sensitivity 큰 회사. `recipes.macro.macroBetaPeerScreen` 와 결합.
+3. distribution std-dev 큰 종목 → sensitivity 큰 회사. `recipes.macro.betaPeerScreen` 와 결합.

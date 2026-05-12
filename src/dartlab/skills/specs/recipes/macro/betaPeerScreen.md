@@ -1,5 +1,5 @@
 ---
-id: recipes.macro.macroBetaPeerScreen
+id: recipes.macro.betaPeerScreen
 title: 같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출
 category: recipes
 kind: recipe
@@ -153,5 +153,5 @@ else:
 ## 연계 절차
 
 1. 본 recipe → idiosyncratic 매크로 outlier 종목.
-2. outlier flag → `recipes.credit.creditMacroStress` 와 결합 — 매크로 충격 시 영향 정량화.
+2. outlier flag → `recipes.credit.macroStress` 와 결합 — 매크로 충격 시 영향 정량화.
 3. 시장 stress 시 → 기대 P&L 분기 (outlier vs peer) 검증 → backtest.

@@ -140,4 +140,4 @@ emit_result(
 
 1. 본 recipe → 도입/후행기 + 퀄리티 + 부도 위험 통과 종목.
 2. 통과 종목 → `recipes.macro.qualityMacroBeta` 와 결합 — 사이클 phase 정합성 추가 검증.
-3. backtest → `recipes.macro.macroQuantScenarioBacktest` 로 시나리오 별 IR.
+3. backtest → `recipes.macro.quantScenarioBacktest` 로 시나리오 별 IR.

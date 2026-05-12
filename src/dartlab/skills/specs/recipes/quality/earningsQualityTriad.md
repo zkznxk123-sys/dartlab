@@ -18,7 +18,7 @@ linkedSkills:
   - engines.gather
   - recipes.quality.workingCapitalQuality
   - recipes.credit.distressFilter
-  - recipes.credit.creditDistressDual
+  - recipes.credit.distressDual
   - recipes.valuation.qualityValueScreen
 toolRefs:
   - EngineCall
@@ -152,14 +152,88 @@ triad = pl.DataFrame({
 )
 ```
 
-## 호출 동작
+## 호출 동작 — 5 단 분석 구조
 
-1. `c.show("BS" | "IS" | "CF", freq="Y")` 3 회 — 5 년 wide.
-2. snakeId 로 12 raw 항목 추출.
-3. Sloan ACC = (NI − CFO) / AvgAssets — 5 점 시계열.
-4. Beneish M-Score = 8 변수 logit (당년/전년 비교) — 5 점 중 4 점 시계열 (전년 비교 위해 1 점 손실).
-5. Novy-Marx GP/A = (Sales − COGS) / Total Assets — 5 점 시계열.
-6. 종합 위험 점수 — Sloan flag + Beneish flag (0 ~ 2).
+답변은 분석 5 단 (결론 / 근거 / 메커니즘 / 반례·한계 / 후속 모니터링) 매핑. 3 모델 (Sloan · Beneish · Novy-Marx) 합의 결과를 5 단으로 정리.
+
+### 1. 결론 도출
+
+회사의 *이익 quality 종합 의견* + *3 모델 합의 점수 (0/1/2)* + *주도 위험 신호* 를 한 문장 정량 결론으로.
+
+좋은 결론 예시:
+- "005930 (삼성전자) 5 년 이익 quality riskScore 0/2 (Sloan ACC 0.03 < 0.10, Beneish M -2.41 < -1.78), GP/A 28.5% (상위 5%). **3 모델 합의 = 강한 quality 우위**, 분식 신호 부재. Novy-Marx 기준 산업 1 분위."
+- "OOOOOO 5 년 riskScore 2/2 (Sloan ACC 0.18 > 0.10, Beneish M -0.52 > -1.78 분식 의심 zone), GP/A 4.2% (하위 20%). **3 모델 일관 위험 신호** — 정정공시·감사 의견 정밀 검증 필요."
+
+금지 — 단일 모델 (Sloan 또는 Beneish 1 개) 신호로 분식 단정. 반드시 **3 모델 모두 검토 후 합의 점수 (0/1/2)** 인용.
+
+### 2. 핵심 근거 수집
+
+`requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
+
+- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw BS/IS/CF). analysis axis (`이익품질`) 의존 X — *학술 공식 직접 적용* 이 본 recipe 핵심.
+- **sourceRef**: DART 공시 — BS (total_assets, trade_receivables, ppe, current_assets, total_liabilities, long_term_debt), IS (sales, cost_of_sales, net_income, sga, depreciation), CF (cash_flow_from_operations). 연결재무 5 년 시계열.
+- **tableRef** (5 년 시계열): year × {sloanAccruals, sloanFlag, beneishM, beneishFlag, gpa, gpaPct, riskScore}.
+- **valueRef**: 최근년도 3 모델 점수 + 5 년 평균 + 산업 분위 (GP/A 산업 평균 대비).
+- **dateRef**: 5 회계년도.
+
+도구: `RunPython` (3 모델 batch 계산 + DataFrame join).
+
+### 3. 메커니즘 분석
+
+3 모델 *서로 다른 신호 포착* — 종합 합의가 강한 이유:
+
+```mermaid
+graph LR
+  NI["Net Income<br/>(IS)"] --> SLOAN["Sloan ACC<br/>=(NI−CFO)/AvgAssets<br/>발생주의 vs 현금주의 괴리"]
+  CFO["CFO<br/>(CF)"] --> SLOAN
+  AR["AR·재고·매출<br/>(BS·IS)"] --> BENEISH["Beneish M-Score<br/>8 변수 logit<br/>분식 detection 76%"]
+  SGA["SGA·감가·부채<br/>(IS·BS)"] --> BENEISH
+  COGS["COGS<br/>(IS)"] --> GPA["Novy-Marx GP/A<br/>=(Sales−COGS)/Assets<br/>quality factor"]
+  ASSETS["Total Assets<br/>(BS)"] --> GPA
+  SLOAN --> SCORE["riskScore 0/1/2<br/>(Sloan flag + Beneish flag)"]
+  BENEISH --> SCORE
+  GPA --> CONTEXT["quality context<br/>(상위/하위 분위)"]
+```
+
+각 모델의 *해석* (답변 본문에 명시):
+- **Sloan ACC > 0.10** → 발생주의 이익이 현금 이익을 크게 초과 — 미래 회귀 가능성. 1962-1991 백테스트 연 10%p 음 차이.
+- **Beneish M > -1.78** → 8 변수 분식 의심 zone. Enron (1998 M=+5.5) 1 년 전 detection 성공.
+- **Novy-Marx GP/A** → ROE·ROA 보다 강한 quality factor. 가치 (B/M) 와 음 상관.
+
+**합의 게이트**: riskScore = 2 (Sloan + Beneish 모두 의심) 일 때만 *위험 claim*. 1/2 = watch list, 0/2 = clean.
+
+### 4. 반례·한계
+
+- **Falsifier**: 3 모델 중 1~2 만 의심해도 분식 단정 금지 — 3 모델 일관 (riskScore 2) 만 risk claim.
+- **미국 임계의 KR 적용**: Sloan 임계 0.10, Beneish -1.78 모두 *미국 표본* 추정. KR chaebol 회계 특이성 (계열사 internal trading) 으로 DSRI·SGI false positive 가능.
+- **분식 *예측* 아닌 *의심 신호***: 점수 통과해도 실제 분식 보장 X. 학술 통계 모델.
+- **산업별 적합성**: 제조업 vs 서비스업 임계 분포 다름. Novy-Marx GP/A 는 `cost_of_sales` 분리 안 된 서비스업 (콘텐츠·플랫폼) 부적합.
+- **snakeId 가용성**: Beneish 8 변수 모두 가용 필요. `sga`, `depreciation_expense`, `ppe` 일부 결손 → 0 처리 시 점수 왜곡. 가용 변수 수 답변에 명시.
+- **연결 vs 별도**: chaebol 지주회사 별도재무 vs 연결재무 차이 큼. 본 recipe 연결 기준.
+- **일회성 손익 (M&A)**: 영업외이익 큰 해 NI 급증 → Sloan ACC 단발 spike. 5 년 추세 동반.
+- **SOX 효과**: 미국 SOX (2002) 이후 Beneish 검출률 다소 낮아짐 — 분식 회사도 8 변수 패턴 회피 학습.
+- **failureModes** — 산업별 적합성 / Sloan 정의 (BS-OCF) 차이 / Beneish KR 매핑 / GP/A 분모 모호 / 합의 게이트 false negative — 답변 작성 시 self-check.
+
+### 5. 후속 모니터링
+
+답변 끝에 모니터링 표:
+
+| 신호 | 현재값 | 5년 평균 | 임계값 | 리뷰 주기 |
+|---|---|---|---|---|
+| Sloan ACC | (계산) | (계산) | > 0.10 | 분기 |
+| Beneish M | (계산) | (계산) | > -1.78 | 분기 |
+| GP/A | (계산) | (계산) | 산업 하위 30% | 연간 |
+| riskScore | 0/1/2 | (5년 평균) | 2 = watch | 분기 |
+| 감사 의견 | (DART) | — | 한정·부적정 | 연간 |
+| 정정공시 빈도 | (DART) | — | 3+/연 | 분기 |
+
+연계 절차:
+- riskScore = 2 → `recipes.quality.workingCapitalQuality` (AR/Inv vs Sales gap)
+- 분식 의심 → `c.disclosure(...)` 의 감사보고서 의견·정정공시 빈도
+- GP/A 강 + Sloan 약 = 진짜 quality → `recipes.valuation.qualityValueScreen`
+- 분식 + 부도 → `recipes.credit.distressDual` (강한 회피 신호)
+
+재호출 트리거: "삼성전자 3 모델 합의 quality", "Sloan + Beneish + Novy-Marx 결합", "분식 의심 신호 (3 모델 일관)".
 
 ## 대표 반환 형태
 
@@ -192,7 +266,7 @@ triad = pl.DataFrame({
 2. riskScore = 2 (양 모델 의심) → `recipes.quality.workingCapitalQuality` 의 AR/Inv vs Sales gap 점검.
 3. 실제 분식 의심 회사 → 공시 (`c.disclosure(...)`) 의 감사보고서 의견·정정공시 빈도 검증.
 4. GP/A 강 (상위 10%) + Sloan 약 (하위 30%) = 진짜 quality. `recipes.valuation.qualityValueScreen` 와 상호 검증.
-5. `recipes.credit.creditDistressDual` 와 결합 — 분식 의심 + 부도 위험 = 강한 회피 신호.
+5. `recipes.credit.distressDual` 와 결합 — 분식 의심 + 부도 위험 = 강한 회피 신호.
 
 ## 기본 검증
 

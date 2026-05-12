@@ -64,7 +64,7 @@ examples:
   - 배당 시작 회사 1 년 후 추세
   - payout + FCF 지속 가능성
 linkedSkills:
-  - recipes.dividend.dividendCapitalReturn
+  - recipes.dividend.capitalReturn
   - engines.analysis.cashflow
   - engines.scan.capital
 source:

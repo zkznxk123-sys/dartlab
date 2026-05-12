@@ -15,7 +15,7 @@ linkedSkills:
   - engines.scan.profitability
   - engines.credit
   - engines.quant.sentiment
-  - recipes.credit.creditQuantConsensus
+  - recipes.credit.quantConsensus
 toolRefs:
   - EngineCall
   - RunPython
@@ -132,6 +132,6 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → 동시 적신호 종목 목록.
-2. 각 종목 → `recipes.credit.creditQuantConsensus` 4-source 합의 추가 검증.
-3. shocked stress → `recipes.credit.creditMacroStress` 매크로 충격 추가 영향.
+2. 각 종목 → `recipes.credit.quantConsensus` 4-source 합의 추가 검증.
+3. shocked stress → `recipes.credit.macroStress` 매크로 충격 추가 영향.
 4. 자동 alert → 운영자 review (chat-native 흐름, status 자동 변경 X).

@@ -1,5 +1,5 @@
 ---
-id: recipes.macro.macroLiquidityCycle
+id: recipes.macro.liquidityCycle
 title: 매크로 유동성 사이클 (금리 + 환율 + 유동성)
 category: recipes
 kind: recipe

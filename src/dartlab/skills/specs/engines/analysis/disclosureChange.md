@@ -68,7 +68,7 @@ examples:
   - 리스크 섹션 추가/삭제
   - 정기 vs 수시 공시 분류
 linkedSkills:
-  - recipes.disclosure.disclosureEvent
+  - recipes.disclosure.event
   - engines.scan.disclosureRisk
   - engines.search
   - runtime.workbenchEvidenceFlow

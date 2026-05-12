@@ -23,7 +23,7 @@ outputs:
 linkedSkills:
   - engines.gather
   - recipes.report.dailyMorningNote
-  - recipes.disclosure.disclosureEvent
+  - recipes.disclosure.event
   - engines.company
 toolRefs:
   - RunPython
@@ -108,7 +108,7 @@ emit_result(
 1. engines.gather — gather('calendar', codes, horizon_days) 호출
 2. recipes.report.dailyMorningNote — morning note 의 "오늘 주목" 섹션과 연동
 3. recipes.report.thesisTracker — thesis 의 catalyst 영역 갱신
-4. recipes.disclosure.disclosureEvent — 발생한 이벤트 사후 분석 path
+4. recipes.disclosure.event — 발생한 이벤트 사후 분석 path
 
 ## 한계 (P0)
 

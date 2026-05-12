@@ -143,4 +143,4 @@ emit_result(
 
 1. 본 recipe → 키워드 별 anomaly z-score.
 2. anomalyFlag = True 키워드 ≥ 2 → `engines.analysis.predictionSignal` 의 input feature.
-3. 동시 발현 → `recipes.disclosure.disclosureToneToStoryRisk` 와 결합 — story.risk 자동 발행 트리거.
+3. 동시 발현 → `recipes.disclosure.toneToStoryRisk` 와 결합 — story.risk 자동 발행 트리거.

@@ -138,4 +138,4 @@ emit_result(
 1. 본 recipe → 회사 quality + 사이클 phase 정합성.
 2. phaseAlignment = True → `recipes.screen.industryStageScreen` 으로 같은 산업 stage 후행기 종목 추가 발굴.
 3. phaseAlignment = False → 다음 phase 전환까지 대기 (timing 신호).
-4. universe 검증은 `recipes.macro.macroQuantScenarioBacktest` 로 backtest.
+4. universe 검증은 `recipes.macro.quantScenarioBacktest` 로 backtest.

@@ -87,7 +87,7 @@ def _readFrontmatterEngines(path: Path) -> list[str]:
 def _buildAdjacency(recipeDir: Path) -> Counter:
     """recipe 디렉터리에서 모든 페어 빈도 누적."""
     bridge_counts: Counter[frozenset[str]] = Counter()
-    for path in sorted(recipeDir.glob("*.md")):
+    for path in sorted(recipeDir.rglob("*.md")):
         engines = list(set(_readFrontmatterEngines(path)))
         for a, b in combinations(sorted(engines), 2):
             bridge_counts[frozenset({a, b})] += 1

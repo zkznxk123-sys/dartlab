@@ -1,5 +1,5 @@
 ---
-id: recipes.disclosure.disclosureToneToStoryRisk
+id: recipes.disclosure.toneToStoryRisk
 title: 공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)
 category: recipes
 kind: recipe

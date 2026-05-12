@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.screenAndChart
+id: recipes.screen.chart
 title: 스캔 + 차트 결합 (scan 결과 → table-backed chart)
 category: recipes
 kind: recipe

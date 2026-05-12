@@ -1,5 +1,5 @@
 ---
-id: recipes.macro.economicTimeSeriesChart
+id: recipes.macro.timeSeriesChart
 title: 경제 원자료 시계열 차트
 category: recipes
 kind: recipe

@@ -168,14 +168,91 @@ valueBand = pl.DataFrame({
 })
 ```
 
-## 호출 동작
+## 호출 동작 — 5 단 분석 구조
 
-1. `c.show("IS" | "BS" | "CF" | "FQ", freq="Y")` 4 회.
-2. snakeId 로 9 raw 항목 추출.
-3. Graham — 5 년 평균 EPS + 5 년 CAGR + AAA yield 가정 → 본질가치 V (원).
-4. EVA spread — NOPAT / InvestedCapital − WACC_proxy → spread (%p).
-5. CFROI proxy — (CFO − Depreciation) / InvestedCapital 5 년 평균 → CFROI (%).
-6. 3 anchor band — 각 anchor 의 시장가 비교 해석.
+답변은 분석 5 단 (결론 / 근거 / 메커니즘 / 반례·한계 / 후속 모니터링) 매핑. 3 anchor (Graham · EVA spread · CFROI proxy) 결과를 본질가치 band 로 묶어 답안 구성.
+
+### 1. 결론 도출
+
+회사의 *본질가치 band + 현재 시장가 위치 + 3 anchor 합의도* 한 문장 정량 결론.
+
+좋은 결론 예시:
+- "005930 (삼성전자) 본질가치 band 60,000~85,000 원 (Graham V 72,000 / EVA spread +3.2%p 가치 창출 / CFROI 9.8% > WACC 7%), 현재가 71,500 원 = band 중앙 +1%. **3 anchor 일관 가치 창출** — fair value 근방, 안전마진 부재."
+- "OOOOOO band 18,000~32,000 원 (Graham 22,000 / EVA -1.5%p 가치 파괴 / CFROI 5.2% < WACC 7%), 현재가 14,500 원 = band 하단 -19%. **2/3 anchor 약세 + 시장가 하단 이탈** — value trap 가능성, 보수적 접근."
+
+금지 — 단일 anchor (Graham 만 또는 EVA 만) 결과로 fair value 단정. 반드시 **3 anchor 모두 산출 + band 형태**.
+
+### 2. 핵심 근거 수집
+
+`requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
+
+- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS/CF/FQ), `engines.scan.valuation` (PER/PBR snapshot 비교용). analysis valuation axis 의존 X.
+- **sourceRef**: DART 공시 — IS (sales, operating_profit, earnings_before_tax, net_income, depreciation), BS (total_stockholders_equity, long_term_debt), CF (cash_flow_from_operations), FQ (eps_basic). 5 년 연간 시계열.
+- **외부 가정**: AAA yield (Y_AAA 4.0~5.0%), WACC_proxy (KR 7% / US 8%) — 답변에 가정 명시 + 민감도 (±1%) 동반.
+- **tableRef** (3 행 anchor): anchor × {value, interpretation, marketPriceComparison}.
+- **valueRef**: Graham V · EVA spread · CFROI 5y avg · 현재 시장가 · 안전마진 비율 (V/Market).
+- **dateRef**: 5 회계년도 + 시장가 snapshot date.
+
+도구: `RunPython` (4 raw 호출 + 9 변수 추출 + 3 anchor 계산).
+
+### 3. 메커니즘 분석
+
+3 anchor 가 *서로 다른 가정* 으로 본질가치를 추정 — 합의 시 band claim.
+
+```mermaid
+graph LR
+  EPS["EPS·CAGR·AAA yield"] --> G["Graham V<br/>= EPS×(8.5+2g)×4.4/Y_AAA<br/>회계 기반"]
+  OP["NOPAT·Invested Capital"] --> EVA["EVA spread<br/>= ROIC − WACC<br/>자본비용 기반"]
+  WACC["WACC_proxy"] --> EVA
+  CFO["CFO − maintenance CAPEX"] --> CFROI["CFROI proxy<br/>= (CFO−Dep)/IC<br/>현금흐름 기반"]
+  IC["Invested Capital"] --> CFROI
+  G --> BAND["본질가치 band<br/>3 anchor 합의"]
+  EVA --> BAND
+  CFROI --> BAND
+  BAND --> SAFETY["안전마진<br/>= 시장가 / V"]
+```
+
+각 anchor *해석* (답변 본문):
+- **Graham V**: 회계 EPS·성장률 + AAA yield 보정. 시장가 < V × 0.5 = deep value 안전마진. Graham 1962-2000 백테스트 +6%p 초과수익.
+- **EVA spread**: ROIC − WACC. +값 = 자본 효율 우월 (자본 창출). -값 = 자본 파괴 (장기 deteriorate). Stewart 1991 correlation 0.50-0.65.
+- **CFROI proxy**: 현금 ROIC. 회계 ROE 보다 noise 적음. HOLT 1950-2020 — CFROI > WACC 회사 미래 stock return 우월.
+
+**3 anchor 합의 게이트**: 모두 *저평가* (V > 시장가, spread > 0, CFROI > WACC) → 강한 매수 신호. 1~2 anchor 만 합의 → watch.
+
+### 4. 반례·한계
+
+- **Falsifier**: 3 anchor 중 1~2 만 합의해도 fair value 단정 금지 — 3 anchor 일관 시만 band claim.
+- **가정 민감도**: AAA yield ±1%, WACC ±2% 변화 시 V/spread/CFROI 변화 큼. 답변에 가정 + 민감도 (low/base/high 3 케이스) 동반 권장.
+- **Graham 1974 미국 표본**: KR 시장 직접 검증 부재. KR chaebol 회계 (지주·자회사 internal trading) 으로 EPS noise 가능.
+- **EVA WACC proxy**: 산업·국가·회사별 다름. CAPM (beta + risk-free + ERP) 정확. 본 recipe 는 7%/8% 단순 가정.
+- **CFROI 단순화**: 원전 (HOLT) 은 인플레이션 조정 IRR over asset life. 본 proxy 는 (CFO − Dep) / IC — asset vintage·inflation 미보정.
+- **EPS CAGR 사이클**: 5 년 CAGR 가 사이클 시작/끝 노이즈 (조선·반도체). 더 긴 (10 년) 또는 정상화 EPS 권장.
+- **음수 영업이익**: 적자 회사는 EVA spread·CFROI 음 무한대 가능 — band 산출 X.
+- **금융업 부적합**: 은행·보험 IC 정의 다름 (예금·보험료). 별도 framework.
+- **시가총액 시계열 결합 X**: `c.show("PRICE")` 마지막 종가만. 추세 비교 별 처리.
+- **failureModes** — AAA yield KR 적합성 / WACC CAPM 가정 / CFROI inflation 누락 / 3 anchor 가정 차이로 band 폭 큼 / 시점 차이.
+
+### 5. 후속 모니터링
+
+답변 끝에 모니터링 표:
+
+| 신호 | 현재값 | 임계값 | 리뷰 주기 |
+|---|---|---|---|
+| Graham V vs 시장가 | (계산) | 시장가 < V × 0.5 = 매수 | 분기 |
+| EVA spread | (계산) | > 0 (가치 창출) | 분기 |
+| CFROI − WACC | (계산) | > 0 (자본 효율) | 분기 |
+| AAA yield (Y_AAA) | (gather) | ±50bp | 월간 |
+| WACC 추정 (CAPM) | (계산) | beta 재계산 시 | 연간 |
+| 시장가 / V (안전마진) | (계산) | < 50% = 강한 매수 | 일간 |
+
+연계 절차:
+- EVA spread > 0 + CFROI > WACC → `recipes.screen.compounderCandidates` 합의 (진짜 quality)
+- EVA spread < 0 + CFROI < WACC → `recipes.credit.distressFilter` (자본 파괴)
+- 5 년 EVA spread 안정 양수 = quality compounder → `recipes.quality.dupontDriver` 결합
+- PER/PBR 정량 매트릭스 → `engines.scan.valuation` snapshot 비교
+- 자본 배분 효율 → `recipes.quality.capitalAllocationScorecard`
+
+재호출 트리거: "삼성전자 3 anchor 본질가치 band", "Graham + EVA + CFROI 결합", "시장가 vs 본질가치 band 비교".
 
 ## 대표 반환 형태
 

@@ -69,7 +69,7 @@ examples:
   - 소액주주 분산도
   - CEO 보수 산업 평균 대비
 linkedSkills:
-  - recipes.governance.governanceAuditComposite
+  - recipes.governance.auditComposite
   - engines.scan.governance
   - engines.scan.insider
   - engines.gather.ownership

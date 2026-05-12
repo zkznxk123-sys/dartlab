@@ -13,7 +13,7 @@ whenToUse:
   - 외부 LLM 이 dartlab 작업을 시작할 때
   - 문서 · API 사용법 · 분석 절차가 흩어져 보일 때
   - 전체 체계와 확장 규칙을 한 번에 확인할 때
-  - 4 카테고리 (start · runtime · operation · engines) 의 의미 파악
+  - 5 카테고리 (start · runtime · operation · engines · recipes) 의 의미 파악
   - skill 검색 패턴 익히기
 inputs:
   - 사용자 목적 (분석 · 운영 · 확장 중 어디)
@@ -63,7 +63,7 @@ runtimeCompatibility:
   pyodide:
     status: supported
 procedure:
-  - 작업 목적을 4 카테고리 (start · runtime · operation · engines) 중 하나로 분류한다.
+  - 작업 목적을 5 카테고리 (start · runtime · operation · engines · recipes) 중 하나로 분류한다.
   - whenToUse 키워드로 skill 을 검색하고 후보 1~3 개로 좁힌다.
   - 후보 skill 의 frontmatter (purpose · inputs · outputs · runtimeCompatibility) 와 본문 (공개 호출 방식 · 호출 동작) 을 읽는다.
   - 답변에 묶을 evidence (target · period · tableRef · valueRef · dateRef · executionRef) 를 미리 고정한다.
@@ -98,7 +98,7 @@ DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가
 
 각 skill 은 `id` · `purpose` · `whenToUse` · `inputs` · `outputs` · `procedure` · `examples` · `runtimeCompatibility` · `requiredEvidence` 를 frontmatter 에 갖고, 본문에 `## 공개 호출 방식` · `## 호출 동작` · `## 대표 반환 형태` 를 둔다. 사람이 그대로 실행할 수 있고, AI 가 도구로 호출할 수 있다.
 
-## 4 카테고리
+## 5 카테고리
 
 | 카테고리 | 의미 | 대표 skill |
 |---|---|---|
@@ -106,6 +106,7 @@ DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가
 | `runtime` | 실행 환경 — Pyodide · MCP · Web AI · Local Python · VSCode · 노트북 | `runtime.mcp`, `runtime.notebooks`, `runtime.pyodideBrowser` |
 | `operation` | 운영 규칙 — 사상 · 코드 품질 · API 계약 · 테스트 · 안정성 · 검증 방법론 | `operation.philosophy`, `operation.apiContract`, `operation.stability` |
 | `engines` | 엔진별 기본 사용법 + 응용 실행 — 회사 · 분석 · 시장 스캔 · 매크로 · 퀀트 · 스토리 | `engines.company`, `engines.analysis`, `engines.scan` |
+| `recipes` | 여러 엔진을 조합해 깊은 분석 품질을 강제하는 절차 | `recipes.credit.deepDive`, `recipes.governance.workforceAndCapital`, `recipes.macro.sixActs` |
 
 엔진 응용 skill 의 `id` 는 `engines.{group}.{axis}` 형식 (`engines.analysis.cashflow`). 기본 skill 은 `engines.{group}` (`engines.company`).
 
@@ -120,6 +121,7 @@ DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가
 | "ROE / 매출 시장 횡단 스캔" | `engines.scan`, `engines.scan.ratio` |
 | "신용 등급 분석" | `engines.credit.creditRisk` |
 | "매크로 / 거시 / 경기" | `engines.macro` 군 |
+| "깊게 분석 / 조합 / thesis / stress" | `recipes.*` 군 |
 | "공시 검색 / 본문 찾기" | `engines.search`, `engines.company.disclosureEvent` |
 | "AI / 자연어 분석" | `runtime.workbenchEvidenceFlow`, `runtime.mcpWorkbench` |
 | "테스트 / 검증 방법" | `operation.testing`, `operation.methodology` |

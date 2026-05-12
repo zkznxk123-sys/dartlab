@@ -157,7 +157,7 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 
 ### 3. protoSkill
 
-- SCHEMA.md `## 1. 4 카테고리` 표에 따라 카테고리 결정. 신규 axis 가 *signal/event* 영역이면 `engines.scan.{slug}` 또는 `engines.analysis.eventBased.{slug}`. *재무 인과* 면 `engines.analysis.{slug}`.
+- SCHEMA.md `## 1. 5 카테고리` 표에 따라 카테고리 결정. 신규 axis 가 *signal/event* 영역이면 `engines.scan.{slug}` 또는 `engines.analysis.eventBased.{slug}`. 여러 엔진을 묶어 답변 품질을 높이는 절차면 `recipes.{domain}.{slug}`.
 - 초안 markdown 을 `.dartlab/skills/incubating/{category}.{slug}.md` 경로에 SaveArtifact 로 저장.
 - frontmatter 필수 5 개 (id·title·category·purpose·whenToUse) 채우고 `requiredEvidence[]` 에 ground-truth 3 케이스 명시 — 예: 005930 (성공), 047810 (위기), 138930 (저평가).
 - 본문 강제 섹션 (engine skill 인 경우): `## 공개 호출 방식`, `## 호출 동작`, `## 대표 반환 형태`.

@@ -65,7 +65,7 @@ examples:
   - 특기사항 keyword
   - 감사 보수 산업 평균
 linkedSkills:
-  - recipes.governance.governanceAuditComposite
+  - recipes.governance.auditComposite
   - engines.scan.disclosureRisk
   - engines.analysis.earningsQuality
 source:

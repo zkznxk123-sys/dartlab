@@ -12,7 +12,7 @@
 >
 > `llms.txt` · `sitemap.xml` 은 별도 `scripts/build/generateSpec.py` 책임.
 
-## 1. 4 카테고리 + 디렉토리
+## 1. 5 카테고리 + 디렉토리
 
 | 카테고리 | 위치 | 의미 |
 |---|---|---|
@@ -20,8 +20,11 @@
 | `runtime` | `specs/runtime/{name}.md` | 실행 환경 (Pyodide, MCP, Web AI, Local Python, VSCode) |
 | `operation` | `specs/operation/{name}.md` | 운영 규칙 (philosophy, code, apiContract, architecture, testing) |
 | `engines` | `specs/engines/{group}/SKILL.md` (기본) + `specs/engines/{group}/{axis}.md` (응용) | 엔진별 기본 사용법 + 응용 실행 스킬 |
+| `recipes` | `specs/recipes/{domain}/{name}.md` | 여러 엔진을 묶어 깊은 분석 품질을 강제하는 조합 절차 |
 
 엔진 응용 스킬의 `id` 는 `engines.{group}.{axis}` 형식 (예: `engines.analysis.cashflow`). 기본 스킬은 `engines.{group}` (예: `engines.company`).
+
+Recipe id 는 `recipes.{domain}.{name}` 형식이다. `{domain}` 이 이미 방향을 설명하므로 `{name}` 에 같은 단어를 반복하지 않는다. 예: `recipes.credit.deepDive`, `recipes.dividend.capitalReturn`, `recipes.governance.audit`, `recipes.macro.sixActs`. 나쁜 예: `recipes.credit.creditDeepDive`, `recipes.dividend.dividendThesis`.
 
 ## 2. frontmatter 필드
 
@@ -31,7 +34,7 @@
 |---|---|---|
 | `id` | `string` | 점-분리 (`category.name` 또는 `engines.group.axis`). 다른 곳에서 참조하는 표준 식별자. |
 | `title` | `string` | 사람이 읽는 짧은 제목. 카드·헤더에 노출. |
-| `category` | `start` \| `runtime` \| `operation` \| `engines` | 카테고리 태그. |
+| `category` | `start` \| `runtime` \| `operation` \| `engines` \| `recipes` | 카테고리 태그. |
 | `purpose` | `string` | 1~2 문장. 이 skill 이 무엇을 하는지. 카드 미리보기·메타 디스크립션·llms.txt 에 직접 노출. |
 | `whenToUse` | `string[]` | 어떤 질문/작업에 매칭되는 키워드. 검색·필터의 핵심. 비어있지 않게. |
 
@@ -138,8 +141,8 @@ skill 사이 링크는 항상 `[title](/skills/{id})` 절대 path 로 박는다.
 
 ## 4. 새 skill 추가 절차
 
-1. 카테고리 결정 (4 개 중 하나).
-2. `src/dartlab/skills/specs/{category}/{name}.md` 생성. 엔진 응용은 `specs/engines/{group}/{axis}.md`.
+1. 카테고리 결정 (5 개 중 하나).
+2. `src/dartlab/skills/specs/{category}/{name}.md` 생성. 엔진 응용은 `specs/engines/{group}/{axis}.md`, recipe 는 `specs/recipes/{domain}/{name}.md`.
 3. 위 §2 의 필수 필드 5 개 + 권장 필드 채우기. `procedure[]` · `examples[]` 비워두기보다 1~2 개라도 채우기 (페이지 풍부도).
 4. 본문 산문 작성 (§3 권장 구조).
 5. 인덱스 빌드: `uv run python -X utf8 scripts/build/generateSkills.py`. `index.json` · `pyodide.json` 갱신.
@@ -159,7 +162,7 @@ skill 사이 링크는 항상 `[title](/skills/{id})` 절대 path 로 박는다.
 검증 항목:
 - frontmatter 존재.
 - 필수 필드 5 개 (id·title·category·purpose·whenToUse) 비어있지 않음.
-- `category` 가 4 카테고리 안.
+- `category` 가 5 카테고리 안.
 - `id` 점 포함.
 
 ## 7. 무엇을 하지 않는가
@@ -167,4 +170,4 @@ skill 사이 링크는 항상 `[title](/skills/{id})` 절대 path 로 박는다.
 - capability/docstring 에서 본문 자동 생성 — 금지. SSOT 분리.
 - 174 개 본문 일괄 변환 또는 마이그레이션 — 운영자 페이스로 점진.
 - frontmatter schema 에 새 필드 즉흥 추가 — [landing/src/lib/skills/catalog.ts](landing/src/lib/skills/catalog.ts) 의 `SkillDoc` 인터페이스와 동기화 필요.
-- 카테고리 추가 — 4 개 (start/runtime/operation/engines) 외에 추가하지 않는다.
+- 카테고리 추가 — 5 개 (start/runtime/operation/engines/recipes) 외에 추가하지 않는다.

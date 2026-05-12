@@ -45,7 +45,7 @@ class SkillNode:
     title : str
         사람 가독 제목.
     category : str
-        start/runtime/operation/engines 4 카테고리.
+        start/runtime/operation/engines/recipes 5 카테고리.
     purpose : str
         1~2 문장 요약.
     inDegree : int

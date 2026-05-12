@@ -12,8 +12,8 @@ frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
 
 실행:
     uv run python -X utf8 scripts/dev/recipe_promote.py list
-    uv run python -X utf8 scripts/dev/recipe_promote.py inspect recipes.credit.creditDistressDual
-    uv run python -X utf8 scripts/dev/recipe_promote.py promote recipes.credit.creditDistressDual
+    uv run python -X utf8 scripts/dev/recipe_promote.py inspect recipes.credit.distressDual
+    uv run python -X utf8 scripts/dev/recipe_promote.py promote recipes.credit.distressDual
 """
 
 from __future__ import annotations
@@ -133,8 +133,17 @@ def _recipeMeta(skillId: str) -> dict[str, object]:
 
 
 def _pathFor(skillId: str) -> Path:
-    slug = skillId.split(".")[-1] or skillId
+    parts = skillId.split(".")
+    if len(parts) >= 3 and parts[0] == "recipes":
+        return RECIPE_DIR / parts[1] / f"{parts[-1]}.md"
+    slug = parts[-1] or skillId
     return RECIPE_DIR / f"{slug}.md"
+
+
+def _skillIdForPath(path: Path) -> str:
+    rel = path.relative_to(RECIPE_DIR)
+    stem_parts = list(rel.with_suffix("").parts)
+    return "recipes." + ".".join(stem_parts)
 
 
 # ── 서브커맨드 ──
@@ -145,9 +154,8 @@ def cmd_list(args: argparse.Namespace) -> int:
         print(f"recipe 디렉터리 없음: {RECIPE_DIR}", file=sys.stderr)
         return 1
     rows: list[tuple[str, str, int, float]] = []
-    for path in sorted(RECIPE_DIR.glob("*.md")):
-        slug = path.stem
-        skill_id = f"recipes.{slug}"
+    for path in sorted(RECIPE_DIR.rglob("*.md")):
+        skill_id = _skillIdForPath(path)
         try:
             _, front, _ = _readSpec(path)
         except ValueError:

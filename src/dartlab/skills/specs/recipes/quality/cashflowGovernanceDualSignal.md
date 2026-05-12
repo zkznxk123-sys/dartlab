@@ -129,5 +129,5 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → triple flag 종목 식별.
-2. tripleFlag = True → `recipes.credit.creditQuantConsensus` 와 결합 — Beneish M-score 분식 신호와 교차 검증.
-3. universe 적용 → `recipes.governance.governanceAuditNetwork` 로 cross-sectional flag.
+2. tripleFlag = True → `recipes.credit.quantConsensus` 와 결합 — Beneish M-score 분식 신호와 교차 검증.
+3. universe 적용 → `recipes.governance.auditNetwork` 로 cross-sectional flag.

@@ -72,7 +72,7 @@ linkedSkills:
   - engines.quant
   - engines.quant.accruals
   - engines.analysis.earningsQuality
-  - recipes.governance.governanceAuditComposite
+  - recipes.governance.auditComposite
 source:
   type: manual_skill
   format: markdown

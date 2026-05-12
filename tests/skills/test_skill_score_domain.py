@@ -13,11 +13,12 @@ def test_composite_query_promotes_recipe_skill_above_baseline() -> None:
     results = searchSkills("삼성전자 종합 분석", limit=10)
     ids = [m.skill.id for m in results]
     recipe_count = sum(1 for sid in ids if sid.startswith("recipes."))
-    # 종합 키워드 시 recipe 가 결과에 최소 1 개 진입해야 함
-    assert recipe_count >= 1, f"recipe 가 top-10 결과에 없음. ids={ids}"
+    # 종합 키워드 시 recipe 가 결과에 여럿 진입해야 함.
+    assert recipe_count >= 3, f"recipe 가 top-10 결과에 충분히 없음. ids={ids}"
 
-    # 비교 기준: 종합 키워드 없는 동일 회사 query 와 recipe 비율 비교
-    baseline = searchSkills("삼성전자", limit=10)
+    # 비교 기준: 종합 키워드 없는 동일 회사 일반 분석 query 와 recipe 비율 비교.
+    # 회사명 단독 query 는 recipe 예시 문구와 과매칭되어 baseline 으로 부적합하다.
+    baseline = searchSkills("삼성전자 분석", limit=10)
     baseline_recipes = sum(1 for m in baseline if m.skill.id.startswith("recipes."))
     assert recipe_count >= baseline_recipes, (
         f"composite query recipe={recipe_count}, baseline recipe={baseline_recipes}. "

@@ -66,8 +66,8 @@ examples:
   - 5+ 신호 종합
 linkedSkills:
   - engines.analysis.disclosureChange
-  - recipes.governance.governanceAuditComposite
-  - recipes.disclosure.disclosureEvent
+  - recipes.governance.auditComposite
+  - recipes.disclosure.event
 source:
   type: manual_skill
   format: markdown

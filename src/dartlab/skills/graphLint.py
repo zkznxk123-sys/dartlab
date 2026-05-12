@@ -25,7 +25,7 @@ from .models import SkillSpec
 logger = logging.getLogger(__name__)
 
 _REF_FIELDS = ("knowledgeRefs", "sourceRefs", "toolRefs", "datasetRefs")
-# skill id namespace 4 카테고리 + recipe — 이 prefix 결로 시작하는 ref 만 skill id 결로 검증.
+# skill id namespace 5 카테고리 — 이 prefix 결로 시작하는 ref 만 skill id 결로 검증.
 # `dart.scan` · `krx.prices` · `market.flow` · `CHANGELOG.md` 같은 dataset/tool/파일 결은 namespace 다름.
 _SKILL_ID_PREFIXES = ("engines.", "operation.", "start.", "runtime.", "recipes.")
 _QUOTE_PATTERN = re.compile(r'^\s*-\s*[\'"][a-z][a-zA-Z0-9.]+[\'"]\s*$', re.MULTILINE)

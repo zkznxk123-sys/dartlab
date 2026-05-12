@@ -118,7 +118,7 @@ emit_result(
 
 ## 연계 절차
 
-1. 신용 시나리오가 핵심이면 `recipes.credit.creditCycleStressMap`.
+1. 신용 시나리오가 핵심이면 `recipes.credit.cycleStressMap`.
 2. 한국 특화 위기가 필요하면 `recipes.macro.koreaMacroStressMap`.
 3. 실제 포트폴리오 손실률이 필요하면 `engines.quant.tailrisk`.
 

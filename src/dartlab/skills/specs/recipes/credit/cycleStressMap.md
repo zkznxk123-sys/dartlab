@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.creditCycleStressMap
+id: recipes.credit.cycleStressMap
 title: 신용사이클 스트레스 지도
 category: recipes
 kind: recipe
@@ -117,7 +117,7 @@ emit_result(
 
 ## 연계 절차
 
-1. 기업 신용 질문이면 `engines.credit` 또는 `recipes.credit.creditMacroStress`.
+1. 기업 신용 질문이면 `engines.credit` 또는 `recipes.credit.macroStress`.
 2. 역사적 유사 사례가 필요하면 `recipes.macro.historicalPositioning`.
 3. 꼬리손실 분포가 필요하면 `recipes.macro.tailRiskScenarioScan`.
 

@@ -4,7 +4,7 @@
 사용자 질문에 자율적으로 호출하는 stateless 도구. 작성된 spec 의 status 는 항상 `drafted` —
 승격은 운영자 CLI (`scripts/dev/recipe_promote.py`) 단독 권한.
 
-작성 위치: `src/dartlab/skills/specs/recipes/{slug}.md`. recipe-전용 frontmatter
+작성 위치: `src/dartlab/skills/specs/recipes/{category}/{slug}.md`. recipe-전용 frontmatter
 (gap/falsifier/expectedNovelty/testUniverse) 강제. 동일 id 가 이미 있으면 거부.
 """
 
@@ -46,6 +46,13 @@ def _slug(skillId: str) -> str:
     return skillId.split(".")[-1] or skillId
 
 
+def _recipePath(skillId: str) -> Path:
+    parts = skillId.split(".")
+    if len(parts) >= 3 and parts[0] == "recipes":
+        return _RECIPE_DIR / parts[1] / f"{parts[-1]}.md"
+    return _RECIPE_DIR / f"{_slug(skillId)}.md"
+
+
 def proposeRecipe(
     id: str,
     title: str,
@@ -64,7 +71,7 @@ def proposeRecipe(
     Parameters
     ----------
     id : str
-        ``recipes.<slug>`` 형식. 동일 id 가 이미 존재하면 거부.
+        ``recipes.<category>.<slug>`` 형식. 동일 id 가 이미 존재하면 거부.
     title : str
         한국어 제목. 공백만이면 거부.
     purpose : str, optional
@@ -97,10 +104,11 @@ def proposeRecipe(
     skill_id = (id or "").strip()
     if not skill_id:
         return ToolResult(False, "id 가 비어 있다", error="missing_id")
-    if not skill_id.startswith("recipes."):
+    parts = skill_id.split(".")
+    if len(parts) != 3 or parts[0] != "recipes" or not parts[1] or not parts[2]:
         return ToolResult(
             False,
-            f"id 는 'recipes.<slug>' 형식 (got {skill_id!r})",
+            f"id 는 'recipes.<category>.<slug>' 형식 (got {skill_id!r})",
             error="invalid_id_prefix",
         )
     if not (title or "").strip():
@@ -114,7 +122,7 @@ def proposeRecipe(
     if err:
         return ToolResult(False, err, error="invalid_falsifier")
 
-    target_path = _RECIPE_DIR / f"{_slug(skill_id)}.md"
+    target_path = _recipePath(skill_id)
     if target_path.exists():
         return ToolResult(
             False,

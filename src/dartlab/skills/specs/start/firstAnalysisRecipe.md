@@ -134,6 +134,6 @@ print(result)
 
 ## 다음 단계
 
-- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 4 카테고리 + 검증 게이트.
+- [start.dartlabSkillOs](/skills/start.dartlabSkillOs) — Skill OS 5 카테고리 + 검증 게이트.
 - [start.useSkillsCatalog](/skills/start.useSkillsCatalog) — 검색 → 선택 → 검증 → 실행 패턴.
 - [Skills 카탈로그](/skills) — 179 개 skill 검색.

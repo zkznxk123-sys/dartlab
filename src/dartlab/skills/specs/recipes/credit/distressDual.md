@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.creditDistressDual
+id: recipes.credit.distressDual
 title: 부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)
 category: recipes
 kind: recipe
