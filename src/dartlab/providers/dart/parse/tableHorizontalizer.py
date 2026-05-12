@@ -82,6 +82,9 @@ def stripUnitHeader(sub: list[str]) -> list[str] | None:
             - DART 공시 HTML → table block split → 본 함수 → horizontalizeTableBlock.
         TargetMarkets:
             - KR (DART 공시 표). EDGAR 10-K table 은 별도 ``providers/edgar/parse``.
+
+    Raises:
+        없음.
     """
     firstRow = None
     for line in sub:
@@ -488,6 +491,9 @@ def horizontalizeTableBlock(
             - sections (provider builder) → topicFrame → 본 함수 → Company.show.
         TargetMarkets:
             - KR (DART 공시 표 markdown). EDGAR 10-K 표는 별도.
+
+    Raises:
+        없음.
     """
     boRow = topicFrame.filter((pl.col("blockOrder") == blockOrder) & (pl.col("blockType") == "table"))
     if boRow.is_empty():

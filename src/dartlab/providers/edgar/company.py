@@ -597,6 +597,9 @@ class Company:
                 - 사용자 입력 → Company() factory → 본 함수 → provider 선택.
             TargetMarkets:
                 - US (SEC EDGAR) 한정.
+
+        Raises:
+            없음.
         """
         s = code.strip()
         if s.isdigit() and len(s) <= 10:
@@ -4383,6 +4386,12 @@ class Company:
                 - 향후 SEC Form 13F → 본 함수.
             TargetMarkets:
                 - US (EDGAR) 한정. 현재 미구현.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> network(...)
         """
         del view, hops
         return None
@@ -4422,6 +4431,12 @@ class Company:
                 - 향후 sections → 본 함수.
             TargetMarkets:
                 - US (EDGAR) 한정. 현재 미구현.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> topicSummaries(...)
         """
         return {}
 
@@ -4465,6 +4480,12 @@ class Company:
                 - 향후 SEC bulk → 본 함수.
             TargetMarkets:
                 - US (EDGAR) 한정. 현재 bulk pipeline 위임.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> update(...)
         """
         del categories
         return {}

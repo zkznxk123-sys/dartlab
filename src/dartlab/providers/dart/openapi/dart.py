@@ -341,6 +341,9 @@ class Dart:
                 - OpenDART API → 본 함수 → caller.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         startDate = parseDate(start, asEnd=False) or defaultStart()
         endDate = parseDate(end, asEnd=True) or defaultEnd()
@@ -450,6 +453,9 @@ class Dart:
                 - OpenDART corpCode.zip → parquet → 본 함수 → AI.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         return searchCompanies(self._client, query, listedOnly=listed, limit=limit)
 
@@ -505,6 +511,9 @@ class Dart:
                 - corp_code parquet → findCorpCode → 본 함수 → caller.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         return findCorpCode(self._client, query)
 
@@ -609,6 +618,9 @@ class Dart:
                 - OpenDART API → 본 함수 → caller (또는 DartCompany 경유).
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1

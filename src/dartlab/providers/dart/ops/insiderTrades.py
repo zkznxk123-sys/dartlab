@@ -102,6 +102,9 @@ async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) ->
             - ``Dart.executiveShares`` (OpenAPI) → 본 함수 정규화 → caller (gather/insider).
         TargetMarkets:
             - KR (DART). 미국 Form 4 은 ``providers/edgar/disclosure/form4`` (P-PR7).
+
+    Raises:
+        없음.
     """
     dart = _getDart()
     if dart is None:
@@ -193,6 +196,9 @@ async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None)
             - ``Dart.majorShareholders`` (OpenAPI) → 본 함수 정규화 → caller.
         TargetMarkets:
             - KR (DART). SC 13D/G (미국) 은 ``providers/edgar`` 별도 (P-PR7+ 후속).
+
+    Raises:
+        없음.
     """
     dart = _getDart()
     if dart is None:
@@ -275,6 +281,9 @@ async def iterInsiderTradingRaw(stockCode: str, *, limit: int | None = None):
             - ``fetchInsiderTradingRaw`` 결과 list → 본 함수 yield → caller.
         TargetMarkets:
             - KR (DART).
+
+    Raises:
+        없음.
     """
     rows = await fetchInsiderTradingRaw(stockCode, limit=limit)
     for r in rows:
@@ -331,6 +340,9 @@ async def iterMajorShareholdersRaw(stockCode: str, *, limit: int | None = None):
             - ``fetchMajorShareholdersRaw`` 결과 → 본 함수 yield → caller.
         TargetMarkets:
             - KR (DART).
+
+    Raises:
+        없음.
     """
     rows = await fetchMajorShareholdersRaw(stockCode, limit=limit)
     for r in rows:

@@ -118,6 +118,9 @@ def predictCalendar(
             - caller (``Company.disclosure`` / ``c.calendar()``) → 본 함수 → DataFrame.
         TargetMarkets:
             - KR (DART). EDGAR/EDINET 은 별도 fiscal cycle — 본 함수 미지원.
+
+    Raises:
+        없음.
     """
     if not disclosures:
         return pl.DataFrame(schema=OUTPUT_SCHEMA)

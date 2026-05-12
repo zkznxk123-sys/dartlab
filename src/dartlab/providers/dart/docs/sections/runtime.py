@@ -89,6 +89,9 @@ def chapterFromMajorNum(majorNum: int) -> str | None:
             - parserMapper.chapterByMajor → 본 함수 → applyProjections / caller (AI).
         TargetMarkets:
             - KR (DART) 정기보고서 한정. EDGAR 10-K item 구조와 무관.
+
+    Raises:
+        없음.
     """
     return _CHAPTER_BY_MAJOR.get(majorNum)
 
@@ -288,6 +291,9 @@ def splitByMajorHeading(text: str) -> list[tuple[str, str]]:
             - chunker / parser → 본 함수 → semanticTopicForLabel / applyProjections.
         TargetMarkets:
             - KR (DART) 정기보고서. 다른 언어 heading 패턴은 별도 함수 필요.
+
+    Raises:
+        없음.
     """
     lines = [line.rstrip() for line in text.splitlines()]
     segments: list[tuple[str, list[str]]] = []
@@ -422,6 +428,9 @@ def semanticTopicForLabel(topic: str, label: str) -> str | None:
             - splitByMajorHeading → 본 함수 → segment 단위 row 생성.
         TargetMarkets:
             - KR (DART) 한정. KR 대형주 위주 키워드 set.
+
+    Raises:
+        없음.
     """
     if topic in _ATOMIC_SEMANTIC_TOPICS:
         return topic
@@ -664,6 +673,9 @@ def detailTopicForBlock(
         TargetMarkets:
             - KR (DART) 한정. 금융업/제조업/IT/유통업 다양 (productService 11 sub-topic 이 금융업
               위주, 다른 산업은 별 커버 X).
+
+    Raises:
+        없음.
     """
     direct = detailTopicForTopic(topic)
     if direct:
@@ -825,6 +837,9 @@ def applyProjections(
               (sections.parquet).
         TargetMarkets:
             - KR (DART) 정기보고서 chapter II ("사업의 내용") 한정. III 장 이후는 분배 X.
+
+    Raises:
+        없음.
     """
     if not rows:
         return rows

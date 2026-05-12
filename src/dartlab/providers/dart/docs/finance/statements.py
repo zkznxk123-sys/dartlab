@@ -111,6 +111,9 @@ def extractContent(
             - selectReport → 본 함수 → splitStatements → extractAccounts → DataFrame.
         TargetMarkets:
             - KR (DART) 정기보고서. EDGAR 10-K 의 financial statements 와 별개.
+
+    Raises:
+        없음.
     """
     if scope != "separate":
         cons = report.filter(
@@ -189,6 +192,9 @@ def extractConsolidatedContent(report: pl.DataFrame) -> str | None:
             - report → ``extractContent`` → 본 함수 → caller (content only).
         TargetMarkets:
             - KR (DART) 정기보고서.
+
+    Raises:
+        없음.
     """
     content, scope = extractContent(report)
     return content
@@ -256,6 +262,9 @@ def splitStatements(content: str) -> dict[str, str]:
             - extractContent → 본 함수 → extractAccounts → DataFrame.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     lines = content.split("\n")
 
@@ -387,6 +396,9 @@ def statements(
         TargetMarkets:
             - KR (DART) 한정. EDGAR 의 ``finance.scanAccount`` (XBRL 기반) 가 동등 함수
               (다른 파이프).
+
+    Raises:
+        없음.
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

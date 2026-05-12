@@ -243,6 +243,9 @@ def dividend(stockCode: str) -> DividendResult | None:
             - loadData → selectReport → parseDividendTable → 본 함수 → caller (AI 답변).
         TargetMarkets:
             - KR (DART) 한정. EDGAR 의 dividend 는 별도 (Form 4 / 8-K 또는 XBRL).
+
+    Raises:
+        없음.
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

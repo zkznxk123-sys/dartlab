@@ -89,6 +89,9 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
             - gather → parquet → loadData → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정. EDGAR 는 ``edgar`` provider 의 동등 함수.
+
+    Raises:
+        없음.
     """
     if not company._hasDocs:
         return pl.DataFrame(
@@ -175,6 +178,9 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
             - OpenDART → 본 함수 → parquet (append) → 후속 buildFilings 가 갱신 반영.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.openapi.freshness import collectMissing
 
@@ -257,6 +263,9 @@ def buildDisclosure(
             - OpenDART API → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정. EDGAR 는 별도 provider.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.openapi.dart import Dart
 
@@ -353,6 +362,9 @@ def buildLiveFilings(
             - OpenDART → 본 함수 (정규화) → cache → AI 답변.
         TargetMarkets:
             - KR (DART). cross-provider schema = edgar.liveFilings 와 동일.
+
+    Raises:
+        없음.
     """
     del forms
 

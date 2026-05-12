@@ -154,6 +154,9 @@ def companyScanView(company: Company, df: pl.DataFrame | None, view: str | None)
             - scan prebuild → ensure* → 본 함수 → builder → c.governance/workforce/...
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     if isEmptyDf(df):
         return None
@@ -266,6 +269,9 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
             - 지분 데이터 → scan.network.buildGraph → cache → 본 함수 → AI/UI.
         TargetMarkets:
             - KR (DART) 상장사 한정.
+
+    Raises:
+        없음.
     """
     result = _ensureNetwork(company)
     if result is None:
@@ -469,6 +475,9 @@ def buildScanGovernance(company: Company, view: str | None = None) -> pl.DataFra
             - dartlab.scan.governance → ensure cache → 본 함수 → c.governance().
         TargetMarkets:
             - KR (DART) 상장사 한정.
+
+    Raises:
+        없음.
     """
     return companyScanView(company, _ensureGovernance(company), view)
 
@@ -516,6 +525,9 @@ def buildScanWorkforce(company: Company, view: str | None = None) -> pl.DataFram
             - dartlab.scan.workforce → ensure → 본 함수 → c.workforce().
         TargetMarkets:
             - KR 상장사 한정.
+
+    Raises:
+        없음.
     """
     return companyScanView(company, _ensureWorkforce(company), view)
 
@@ -563,6 +575,9 @@ def buildScanCapital(company: Company, view: str | None = None) -> pl.DataFrame 
             - dartlab.scan.capital → ensure → 본 함수 → c.capital().
         TargetMarkets:
             - KR 상장사 한정.
+
+    Raises:
+        없음.
     """
     return companyScanView(company, _ensureCapital(company), view)
 
@@ -610,5 +625,8 @@ def buildScanDebt(company: Company, view: str | None = None) -> pl.DataFrame | N
             - dartlab.scan.debt → ensure → 본 함수 → c.debt().
         TargetMarkets:
             - KR 상장사 한정.
+
+    Raises:
+        없음.
     """
     return companyScanView(company, _ensureDebt(company), view)

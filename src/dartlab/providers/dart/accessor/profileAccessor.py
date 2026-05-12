@@ -149,6 +149,9 @@ class _ProfileAccessor:
                 - 4 source → 본 함수 (long merge) → caller (AI / trace / availableTopics).
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         cacheKey = "_profileFacts"
         if cacheKey in self._company._cache:
@@ -365,6 +368,9 @@ class _ProfileAccessor:
                 - docs / finance → _getPrimary → 본 함수 → AI.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         return self._company._getPrimary("sections")
 
@@ -414,6 +420,9 @@ class _ProfileAccessor:
                 - facts + sections → union → 본 함수.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         topics = set()
         if self.sections is not None and "topic" in self.sections.columns:
@@ -547,6 +556,9 @@ class _ProfileAccessor:
                 - facts + sections → 본 함수 → AI 디버그 응답.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -659,6 +671,9 @@ class _ProfileAccessor:
                 - report parquet (stockTotal) → extractAnnual → 본 함수 → 시가총액 계산.
             TargetMarkets:
                 - KR (DART) 한정.
+
+        Raises:
+            없음.
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:

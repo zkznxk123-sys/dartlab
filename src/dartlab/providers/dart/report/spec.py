@@ -64,6 +64,9 @@ def buildSpec() -> dict:
             - types (API_TYPES + API_TYPE_LABELS) → 본 함수 → caller (메타 답변).
         TargetMarkets:
             - KR (DART) 한정. 동등 함수는 edgar/edinet 도 동일 패턴 (각 provider 마다 spec.py).
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES
 

@@ -127,6 +127,12 @@ class _DocsNamespace:
                 - docs parquet → _loadSections → 본 함수.
             TargetMarkets:
                 - JP (EDINET) 한정.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> sections(...)
         """
         if self._sections is None:
             self._sections = self._loadSections()
@@ -330,6 +336,12 @@ class Company:
                 - EDINET API → _corpName → 본 함수.
             TargetMarkets:
                 - JP (EDINET) 한정.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> corpName(...)
         """
         return self._corpName
 
@@ -353,6 +365,12 @@ class Company:
                 - EDINET API → _securitiesCode → 본 함수.
             TargetMarkets:
                 - JP (EDINET) 한정.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> securitiesCode(...)
         """
         return self._securitiesCode
 
@@ -393,6 +411,12 @@ class Company:
                 - docs.sections → 본 함수.
             TargetMarkets:
                 - JP (EDINET) 한정.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> sections(...)
         """
         return self.docs.sections
 
@@ -445,6 +469,9 @@ class Company:
 
         Requires:
             - polars
+
+        Raises:
+            없음.
         """
         resolved = _TOPIC_ALIASES.get(topic, topic)
 
@@ -497,6 +524,12 @@ class Company:
                 - sections → 본 함수 → AI.
             TargetMarkets:
                 - JP (EDINET) 한정.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> index(...)
         """
         secs = self.sections
         if secs.is_empty():
@@ -567,6 +600,12 @@ class Company:
                 - alias map → 본 함수 → AI 디버그.
             TargetMarkets:
                 - JP (EDINET) 한정.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> trace(...)
         """
         resolved = _TOPIC_ALIASES.get(topic, topic)
         return {

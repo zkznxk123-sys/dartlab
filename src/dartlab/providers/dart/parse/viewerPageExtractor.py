@@ -95,6 +95,9 @@ def tableToMarkdown(table) -> str:
             - DART viewer HTML → BeautifulSoup parse → 본 함수 → sections content cell.
         TargetMarkets:
             - 일반 — HTML table 표준 형식이면 KR/US/JP 모두 변환 가능.
+
+    Raises:
+        없음.
     """
     rows: list[list[str]] = []
     for tr in table.find_all("tr"):
@@ -185,6 +188,9 @@ def htmlToText(html: str) -> str:
             - DART viewer.do HTTP 응답 → 본 함수 → docs builder.
         TargetMarkets:
             - KR (DART), US (EDGAR 10-K filing HTML — 동일 패턴), JP (EDINET).
+
+    Raises:
+        없음.
     """
     soup = BeautifulSoup(html, "lxml")
 

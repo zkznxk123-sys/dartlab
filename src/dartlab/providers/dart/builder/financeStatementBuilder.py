@@ -212,6 +212,9 @@ def sce(company: Company) -> pl.DataFrame | None:
             - finance → sceSeriesAnnual → 본 함수 → c.show("SCE").
         TargetMarkets:
             - KR (DART) 한정. EDGAR 의 statement of equity 는 별도.
+
+    Raises:
+        없음.
     """
     cacheKey = "_sceDataFrame_CFS"
     if cacheKey in company._cache:
@@ -532,6 +535,9 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
             - finance → buildFinanceSeries → ratioSeries → 본 함수 → c.show("ratios").
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     rs = ratioSeries(company)
     if rs is None:
@@ -608,6 +614,9 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
             - finance parquet → buildFinanceSeries → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     cacheKey = f"_financeStmt_{sjDiv}_{freq}_{scope}"
     if cacheKey in company._cache:
@@ -683,6 +692,9 @@ def financeOrDocsStatement(
             - financeStmt → 본 함수 → docs.statements (fallback).
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
     if sjDiv == "CIS" and scope == "consolidated":

@@ -277,6 +277,9 @@ def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = Fal
             - allFilings parquet → 본 함수 → ngram 인덱스 → ``search`` 함수 사용.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.ngramIndex import buildNgramIndex
 
@@ -326,6 +329,9 @@ def rebuildIndex(**kwargs) -> int:
             - allFilings + sections → 본 함수 → 인덱스.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     return buildIndex(includeDocs=True, **kwargs)
 
@@ -375,6 +381,9 @@ def rebuildContent(**kwargs) -> int:
             - parquet → 본 함수 → main 세그먼트.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.fieldIndex import rebuildMain
 
@@ -424,6 +433,9 @@ def rebuildContentDelta(**kwargs) -> int:
             - parquet (신규 row) → 본 함수 → delta 세그먼트.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.fieldIndex import rebuildDelta
 
@@ -479,6 +491,9 @@ def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
             - DART OpenAPI → 본 함수 → allFilings parquet.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import collectMetaRange
 
@@ -532,6 +547,9 @@ def fillContent(period: str | None = None, **kwargs):
             - DART OpenAPI 본문 endpoint → 본 함수 → allFilings parquet (section_content 컬럼).
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import (
         fillContent as _fill,
@@ -592,6 +610,9 @@ def stats() -> dict:
             - collector.stats + ngramStats → merge → 본 함수.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import stats as collectorStats
     from dartlab.providers.dart.search.ngramIndex import ngramStats
@@ -646,6 +667,9 @@ def pushIndex(**kwargs) -> str:
             - local stemIndex → 본 함수 → HF Hub.
         TargetMarkets:
             - KR (DART) 한정 (인덱스 자체가 DART 데이터).
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.ngramIndex import pushStemIndex
 
@@ -699,6 +723,9 @@ def pullIndex(**kwargs):
             - HF Hub → 본 함수 → local stemIndex + contentIndex.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.fieldIndex import pullContentIndex
     from dartlab.providers.dart.search.ngramIndex import pullStemIndex
@@ -769,6 +796,9 @@ def profile(stockCode: str | None = None):
             - allFilings parquet → derived (profile/dna/pulse 빌드) → 본 함수 → caller.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.derived import loadProfile
 
@@ -830,6 +860,9 @@ def pulse(limit: int = 10) -> pl.DataFrame:
             - allFilings parquet → derived (monthly aggregate) → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.derived import pulse as _pulse
 
@@ -888,6 +921,9 @@ def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> 
             - allFilings → derived monthly time series → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.derived import loadTimeline
 
@@ -948,6 +984,9 @@ def dna(stockCode: str) -> dict:
             - allFilings parquet → derived DNA → 본 함수 → similarCompanies / AI 답변.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.derived import dna as _dna
 
@@ -1014,6 +1053,9 @@ def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
             - allFilings → derived DNA → similarity matrix → 본 함수 → AI 답변.
         TargetMarkets:
             - KR (DART) 한정. EDGAR similarCompanies 는 미지원 (별도 SEC 코퍼스 필요).
+
+    Raises:
+        없음.
     """
     from dartlab.providers.dart.search.derived import similarCompanies as _similar
 

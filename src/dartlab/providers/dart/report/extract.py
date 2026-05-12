@@ -94,6 +94,9 @@ def extractRaw(
               ``extractAnnual``/``extractResult``/``pivot*`` 함수들.
         TargetMarkets:
             - KR (DART). EDGAR/EDINET 은 별도 finance/disclosure 파이프라인 — 본 함수 미지원.
+
+    Raises:
+        없음.
     """
     from dartlab.core.dataLoader import loadData
 
@@ -197,6 +200,9 @@ def extractClean(
             - extractRaw → 본 함수 → extractAnnual / extractResult / pivot*.
         TargetMarkets:
             - KR (DART). 다른 provider 는 본 함수 무관 — finance/disclosure 별도 파이프.
+
+    Raises:
+        없음.
     """
     df = extractRaw(stockCode, apiType, baseDf=baseDf)
     if df is None:
@@ -277,6 +283,9 @@ def extractAnnual(
             - extractRaw → extractClean → 본 함수 → extractResult / pivot*.
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     df = extractClean(stockCode, apiType, baseDf=baseDf)
     if df is None:
@@ -367,6 +376,9 @@ def extractResult(
             - extractAnnual → 본 함수. pivot 함수와는 병렬 옵션 (caller 가 선택).
         TargetMarkets:
             - KR (DART) 한정.
+
+    Raises:
+        없음.
     """
     df = extractAnnual(stockCode, apiType, quarterNum, baseDf=baseDf)
     if df is None:
