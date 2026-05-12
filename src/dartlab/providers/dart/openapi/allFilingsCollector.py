@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 from dartlab import config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.logger import getLogger
+from dartlab.core.memory import withMemoryBudget
 from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.disclosure import listFilings
 
@@ -492,6 +493,7 @@ def loadDay(period: str) -> pl.DataFrame | None:
     return pl.read_parquet(path)
 
 
+@withMemoryBudget(limitMb=500)
 def loadAll() -> pl.DataFrame:
     """원문 수집 완료된 전체 데이터 로드.
 

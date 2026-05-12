@@ -31,6 +31,7 @@ from typing import Any
 import numpy as np
 
 from dartlab.core.market import resolveMarket
+from dartlab.core.memory import withMemoryBudget
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 from dartlab.quant.strategy.metrics import TRADING_DAYS, calcIR, fundamentalLawIR
@@ -454,6 +455,7 @@ def _interpret(result: dict, names: list[str]) -> list[str]:
 # ══════════════════════════════════════════════════════════════════════
 
 
+@withMemoryBudget(limitMb=300)
 def calcFactorTearSheet(
     factorName: str = "smb",
     *,
@@ -606,6 +608,7 @@ def _interpretFactorSharpe(sharpe: float, factor: str) -> str:
     return f"{level} ({direction})"
 
 
+@withMemoryBudget(limitMb=300)
 def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
     """Multi-Factor Risk Decomposition (Barra-style B Σ_f Bᵀ + D).
 
@@ -742,6 +745,7 @@ def _interpretRiskDecomp(sysShare: float, factorContrib: dict) -> str:
     return f"{kind} | 최대 팩터 기여: {top[0]} ({top[1]:+.1f}%)"
 
 
+@withMemoryBudget(limitMb=500)
 def calcFactorTearSheetAll(*, market: str = "KR") -> dict | None:
     """4 표준 팩터 (SMB/HML/RMW/CMA) 의 tear sheet 종합 — story 시장분석 섹션 자동 사용.
 
@@ -799,6 +803,7 @@ _FACTOR_KEY_MAP = {
 }
 
 
+@withMemoryBudget(limitMb=300)
 def calcFactorIC(
     factorName: str = "value",
     *,
@@ -1042,6 +1047,7 @@ def _interpretIC(icir: float, factor: str, *, nDays: int | None = None) -> str:
     return f"{level} ({sign}{factor}){suffix}"
 
 
+@withMemoryBudget(limitMb=500)
 def calcFactorICAll(*, market: str = "KR", horizon: int = 5) -> dict | None:
     """4 팩터 (size/value/quality/investment) 의 Cross-Sectional IC 종합.
 

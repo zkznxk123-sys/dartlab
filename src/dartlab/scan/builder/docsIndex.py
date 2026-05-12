@@ -31,6 +31,8 @@ from pathlib import Path
 
 import polars as pl
 
+from dartlab.core.memory import withMemoryBudget
+
 log = logging.getLogger(__name__)
 
 _DEFAULT_DOCS_PATTERN = "*.parquet"
@@ -63,6 +65,7 @@ def _periodKey(year: int, reportType: str) -> str:
     return f"{year}{reportType}"
 
 
+@withMemoryBudget(limitMb=1000)
 def buildDocsIndex(
     *,
     sinceYear: int = 2016,

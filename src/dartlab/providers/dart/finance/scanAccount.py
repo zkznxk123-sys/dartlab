@@ -18,6 +18,7 @@ from pathlib import Path
 
 import polars as pl
 
+from dartlab.core.memory import withMemoryBudget
 from dartlab.providers.dart.finance.mapper import (
     ACCOUNT_NAME_SYNONYMS,
     ID_SYNONYMS,
@@ -391,6 +392,7 @@ def _scanAccountFromMerged(
     return result
 
 
+@withMemoryBudget(limitMb=500)
 def scanAccount(
     snakeId: str,
     *,

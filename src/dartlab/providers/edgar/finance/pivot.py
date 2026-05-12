@@ -25,6 +25,7 @@ from typing import Optional
 
 import polars as pl
 
+from dartlab.core.memory import withMemoryBudget
 from dartlab.core.utils.ordering import sortSeries
 from dartlab.core.utils.period import (
     buildFiscalToCalendarMap,
@@ -41,6 +42,7 @@ def _getEdgarDir() -> Path:
     return _dataDir("edgar")
 
 
+@withMemoryBudget(limitMb=500)
 def buildTimeseries(
     cik: str,
     *,
