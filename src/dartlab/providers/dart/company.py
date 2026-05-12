@@ -67,17 +67,18 @@ def codeToName(stockCode):
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 4 자리 / 7 자리 코드 호출 → None. KR stockCode 는 6 자리 strict.
+            - 회사명으로 호출 X — 반대 매핑은 ``nameToCode``.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str 회사명 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - ListingResolver origin (KRX kind 목록 cache).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - KIND 갱신 시점 (일 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - stockCode → ListingResolver → kind dict → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (KOSPI/KOSDAQ/KONEX).
     """
     return _listingResolver().codeToName(stockCode)
 
@@ -99,17 +100,18 @@ def nameToCode(corpName):
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 영문명 호출 → None. KIND 는 한국어 정식 회사명 기반.
+            - 정확 매치만 — 부분 매칭은 ``searchName``.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str 6 자리 종목코드 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - ListingResolver origin (KRX kind 목록).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - KIND 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - corpName → ListingResolver → name 인덱스 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR.
     """
     return _listingResolver().nameToCode(corpName)
 
@@ -131,17 +133,18 @@ def getKindList(*, forceRefresh: bool = False):
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - forceRefresh=True 빈번 호출 → KRX 부하. 일 1 회 충분.
+            - 전체 DataFrame 그대로 LLM 컨텍스트 → 2000+ row 토큰 폭증. searchName 활용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame — 컬럼 [stockCode, corpName, market, sector, ...].
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + KRX KIND endpoint.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 호출 시점 또는 cache (forceRefresh=False).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - KRX KIND → ListingResolver.kindList → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (KOSPI + KOSDAQ + KONEX 전체 상장).
     """
     return _listingResolver().kindList(forceRefresh=forceRefresh)
 
@@ -163,34 +166,39 @@ def searchName(keyword, *, limit: int | None = None):
         없음.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``nameToCode`` — 정확 매치.
+        - ``iterName`` — 같은 결과의 row-level generator.
+        - ``Company.search`` — Company 라우터 패리티 인터페이스.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - corpName 컬럼에 keyword substring 매칭하는 row 반환. KRX KIND 의 전체 상장사 대상.
+          정확 매칭 없으면 부분 매칭 fallback.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "삼성 들어간 회사 다 찾기" → ``searchName("삼성")``.
+        - "상위 10 건만" → ``searchName("삼성", limit=10)``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 가 사용자 "○○ 회사" 모호 입력 받았을 때 후보 추출. limit 명시로 토큰 절약 의무.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - limit 없이 짧은 keyword ("주") → 수백 row 반환. 항상 limit 명시.
+            - 영문 keyword → KIND 가 한국어 corpName origin 이라 매치 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [stockCode, corpName, market, sector, ...] 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - ListingResolver origin (KIND kindList cache).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - KIND 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - keyword → ListingResolver.search → kindList substring filter → head(limit).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR.
     """
     df = _listingResolver().search(keyword)
     if df is not None and limit is not None:
@@ -216,34 +224,35 @@ def iterName(keyword, *, limit: int | None = None):
         ...     print(row["corp_name"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``searchName`` — 같은 결과의 DataFrame 버전.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - ``searchName`` 결과를 row dict 단위 generator 로 streaming. 대량 회사 looping 시 메모리 절약.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "대량 회사 순차 처리" → ``for row in iterName(kw):``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 의 자동 batch 처리 — 결과 row 하나씩 회사 분석 dispatch. searchName 보다 lazy.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - generator 소진 후 재호출 → 새 generator (정상 동작).
+            - generator → list() 즉시 변환 시 searchName 과 동등. iterName 의 streaming 이점 사라짐.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - generator[dict] — row dict 시리즈.
         Prerequisites:
-            - <TODO: 사전조건>
+            - ``searchName`` 과 동일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - ``searchName`` 과 동일.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - searchName(keyword, limit) → df.iter_rows(named=True) → 본 generator.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR.
     """
     df = searchName(keyword, limit=limit)
     if df is None:
@@ -324,20 +333,22 @@ def rebuildModuleRegistry() -> None:
         >>> rebuildModuleRegistry()
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_getModuleRegistry`` — 실 lazy 재구축 함수.
+        - ``listExportModules`` / ``iterExportModules`` — registry 소비자.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 외부 플러그인 (skill / new docs module) 등록 후 ``_MODULE_REGISTRY`` / ``_MODULE_INDEX`` /
+          ``_ALL_PROPERTIES`` 3 캐시 invalidate. 다음 호출부터 새 module 인지.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "새 플러그인 추가 후 즉시 인식" → 본 함수 호출 후 ``c.show(newTopic)``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 가 새 module 추가 후 즉시 c.show 호출 시 본 함수 자동 호출 의무. 자동 dispatch 회로.
     """
     global _MODULE_REGISTRY, _MODULE_INDEX, _ALL_PROPERTIES
     _MODULE_REGISTRY = None
@@ -534,34 +545,37 @@ def listExportModules(*, limit: int | None = None) -> list[tuple[str, str]]:
         없음.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``iterExportModules`` — 같은 결과 generator pair.
+        - ``rebuildModuleRegistry`` — registry 캐시 갱신.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - ``_ALL_PROPERTIES`` (BS/IS/CF + docs/report module 명) 전체 list 반환. AI 가 사용자에게
+          "이 회사 어떤 데이터 가능" 카탈로그 답변 시 origin.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "사용 가능 module 목록" → ``listExportModules()``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench introspection — Company 이 가진 attribute (BS/IS/dividend/employee 등) 카탈로그.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - limit 없이 노출 → 30+ 항목, 토큰 부담. UI 한정 표시.
+            - registry 변경 직후 호출 → 캐시 stale 가능. rebuildModuleRegistry 선행 의무.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[tuple[str, str]] — (propName, 한국어 라벨) pair.
         Prerequisites:
-            - <TODO: 사전조건>
+            - _MODULE_REGISTRY 초기화 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - registry 변경 시점 (플러그인 등록 시).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - _getAllProperties → 본 함수 → head(limit).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART 정기보고서 module 라벨).
     """
     items = list(_getAllProperties())
     if limit is not None:
@@ -586,34 +600,34 @@ def iterExportModules(*, limit: int | None = None):
         ...     print(prop, label)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``listExportModules`` — 같은 결과 list 버전.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - ``_ALL_PROPERTIES`` 의 streaming generator. 대량 module 순회 시 list 적재 없이 lazy.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "module 별 처리 streaming" → ``for prop, label in iterExportModules():``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        AI 의 자동 module-by-module dispatch 시 메모리 절약 — 한 번에 1 module 처리.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - list() 즉시 변환 → listExportModules 와 동등. streaming 이점 없어짐.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - generator[tuple[str, str]].
         Prerequisites:
-            - <TODO: 사전조건>
+            - ``listExportModules`` 와 동일.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - ``listExportModules`` 와 동일.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - _getAllProperties → enumerate + limit → 본 generator.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR.
     """
     for i, item in enumerate(_getAllProperties()):
         if limit is not None and i >= limit:
@@ -689,40 +703,44 @@ class Company:
             >>> Company("005930").canHandle()
 
         Args:
-            code: <TODO: param desc> (str)
+            code: 종목코드/회사명 후보 문자열.
 
         Returns:
-            <TODO: return desc> (bool)
+            bool — DART 처리 가능 여부.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``edgar.Company.canHandle`` — US ticker 패리티.
+            - ``priority`` — 라우터 정렬 SSOT.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 6 자리 alphanumeric (KR stockCode) 또는 한글 (회사명) 매칭. EDGAR 의 5 자리 영문 ticker
+              와 disjoint — 라우터 정확 dispatch.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 처리 가능 코드냐" → 본 함수.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            Company 팩토리 내부. AI 가 직접 호출 X — Company() 가 자동 dispatch.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 영문 5 자 ticker (예 "AAPL") → False — EDGAR 가 처리.
+                - 빈 문자열 → False (re.match 실패).
+                - 6 자리지만 영문 only (예 "ABCDEF") → True 가능 — KRX KIND lookup 시 실 매치 필요.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - bool.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 입력이 str.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정적 패턴.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 입력 → Company() → 본 함수 → DART 분기 결정.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (KOSPI/KOSDAQ/KONEX).
         """
         if re.match(r"^[0-9A-Za-z]{6}$", code):
             return True
@@ -746,21 +764,21 @@ class Company:
             >>> Company("005930").priority()
 
         Returns:
-            <TODO: return desc> (int)
+            int 상수 10 (DART = primary).
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 상수 외부에서 hard-code 비교 — 라우터 순서 변경 시 회귀.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - int 상수 10.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 라우터 SSOT 변경 시.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - Company 팩토리 → 본 함수 → provider 우선순위 정렬.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — primary provider.
         """
         return 10
 
@@ -920,34 +938,38 @@ class Company:
             없음 (cleanupBetweenCompanies 가 내부 silent).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``memorySnapshot`` — 호출 전/후 RSS 비교.
+            - ``__exit__`` — context manager 종료 시 본 함수 자동 호출.
+            - ``dartlab.core.memory.cleanupBetweenCompanies`` — Polars Rust heap 회수.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 인스턴스 ``self._cache`` (BoundedCache) 의 모든 entry evict + Polars 네이티브 힙
+              ``cleanupBetweenCompanies`` 호출. KR multi-company loop 사이 회수.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "다음 종목 진입 전 메모리 회수" → 본 함수 또는 ``with Company(c):`` 컨텍스트.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 다종목 batch (50+ 종목 분석) 안 본 함수 의무 호출. 누락 시 Rust heap 누적 OOM.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 호출 없이 다종목 순회 → Polars 힙 누적 → OOM.
+                - ``gc.collect()`` 만 호출 → Rust heap 회수 X. 본 함수 필수.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - int — evict 된 entry 수.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인스턴스 활성 상태.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 즉시.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - self._cache → clear → cleanupBetweenCompanies(label) → Rust heap.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — 본 클래스 인스턴스.
         """
         from dartlab.core.memory import cleanupBetweenCompanies
 
@@ -973,34 +995,37 @@ class Company:
             없음.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``cleanupCache`` — 본 함수가 보여준 RSS 회수.
+            - ``dartlab.core.memory.getMemoryMb`` — psutil 기반 RSS.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - ``self._cache`` entry 수 + 현 프로세스 RSS (MB) dict 합산. MemorySafeProvider Protocol entry.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사가 메모리 얼마 쓰나" → 본 함수.
+            - "cleanupCache 효과 확인" → 호출 전/후 비교.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            OOM tripwire 발동 직전 본 함수로 회사별 메모리 분포 보고 + AI 가 cleanup 결정.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - RSS 절대값 환경 간 비교 X (Windows vs WSL 차이) — 동일 환경 내 추세만.
+                - cacheSize 0 == 메모리 정리 완료 X. Polars Rust heap 별도 영역.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"cacheSize": int, "rssMb": int}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - psutil (getMemoryMb 의존).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - psutil RSS + self._cache len → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — 본 클래스 인스턴스 추적.
         """
         from dartlab.core.memory import getMemoryMb
 
@@ -1022,37 +1047,41 @@ class Company:
             없음.
 
         Returns:
-            <TODO: return desc> (dict[str, str])
+            dict[str, str] — topic → 200 자 요약 텍스트.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``topics`` — DataFrame 카탈로그.
+            - ``index`` — topic 메타 보드.
+            - ``mapSectionTitle`` — sections title 정규화 매핑.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - finance 6 topic 은 고정 한국어 설명 + docs topic 은 최신 사업보고서 첫 200 자 요약 합산.
+              AI 가 topic 라우팅 결정 시 (어느 topic 사용자 질문에 해당?) 의 origin.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 어떤 데이터 어떤 내용 담고 있나" → 본 함수.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench query routing — 사용자 자연어 → topic 선택 시 본 dict 으로 후보 좁힘.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 200 자 cap → 본문 전체 가정 X — 자세히는 show() 호출 의무.
+                - 본 함수 결과는 cache — 새 보고서 업데이트 시 새 인스턴스 만들어야.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict[str, str] — topic 이름 → 한국어 요약 (≤ 200 자).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 최신 사업보고서 docs (선택) + finance topic 카탈로그.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 인스턴스 cache — 동일 인스턴스 lifetime 동안 고정.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance summaries (고정) + docs latest report 200 자 합산.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR.
         """
         cacheKey = "_topicSummaries"
         if cacheKey in self._cache:
@@ -1212,17 +1241,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - forceRefresh=True 빈번 호출 → KRX 부하.
+                - 전체 ~2500 row 그대로 LLM → 토큰 폭증. search 활용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — [code, name, market, sector, ...].
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + KRX KIND endpoint.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - KIND 갱신 시점 (일 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - getKindList(forceRefresh) → 본 staticmethod.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (KOSPI + KOSDAQ + KONEX).
         """
         return getKindList(forceRefresh=forceRefresh)
 
@@ -1245,17 +1275,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - limit 없이 흔한 keyword → 수십~수백 row.
+                - 영문 keyword → 매치 X (KIND 한국어 origin).
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [stockCode, corpName, market, sector, ...].
             Prerequisites:
-                - <TODO: 사전조건>
+                - ListingResolver origin.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - KIND 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - searchName(keyword, limit) → 본 staticmethod.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR.
         """
         return searchName(keyword, limit=limit)
 
@@ -1276,34 +1307,37 @@ class Company:
             >>> Company("005930").resolve()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``codeName`` — 반대 (code → name).
+            - ``nameToCode`` — module-level 등가.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 입력이 6 자리 alphanumeric 이면 그대로 (대문자화), 한국어 회사명이면 nameToCode 위임.
+              사용자 입력 표준화 entry — KR 종목코드 또는 회사명 양쪽 받는 헬퍼.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "사용자 모호 입력 → 표준 종목코드" → 본 함수.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 사용자 발화 "삼성전자" / "005930" 모두 처리 — 일관 stockCode 반환.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 영문 5 자 → 6 자리 매칭 X → nameToCode 시도 → None. EDGAR 코드는 다른 provider.
+                - 회사명 정확 매치만 — 부분 매치는 ``searchName``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str (6 자 대문자) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - ListingResolver origin.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - KIND 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 입력 → regex 6 자 검사 → 통과 시 upper, 실패 시 nameToCode.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR.
         """
         normalized = stockCode.strip()
         if re.match(r"^[0-9A-Za-z]{6}$", normalized):
@@ -1328,17 +1362,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 회사명 입력 → None (반대 방향은 nameToCode).
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str 회사명 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - ListingResolver origin.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - KIND 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - codeToName(stockCode) → 본 staticmethod.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR.
         """
         return codeToName(stockCode)
 
@@ -1361,17 +1395,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 전체 status DataFrame LLM 컨텍스트 → 수천 row.
+                - 보유 == 최신 가정 X — update() 미실행 시 stale 가능.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [stockCode, corpName, docs:bool, finance:bool, report:bool, lastUpdated].
             Prerequisites:
-                - <TODO: 사전조건>
+                - 로컬 data/ 디렉토리 인덱스 build.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 디스크 스캔.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - data/{docs,finance,report}/*.parquet → buildIndex → 본 staticmethod.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — 로컬 보유 종목 카탈로그.
         """
         return buildIndex()
 
