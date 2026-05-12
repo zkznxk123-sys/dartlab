@@ -7,6 +7,7 @@ news/entry 위임 호출. 모듈 import 시 자동 등록 (side-effect).
 
 from __future__ import annotations
 
+import threading
 from typing import Any
 
 from .main import GatherEntry
@@ -64,10 +65,14 @@ class _GatherProviderAdapter:
 # ── Gather 싱글턴 진입점 (룰 4 thin: gather/__init__.py 의 함수 정의를 모듈로 이동) ──
 
 _defaultGather: object | None = None
+_defaultGatherLock: threading.Lock = threading.Lock()
 
 
 def getDefaultGather():
     """Gather 싱글턴 반환 — 같은 세션 내 캐시/HTTP 클라이언트 재사용.
+
+    Thread-safe — double-checked locking 으로 멀티스레드 환경에서도 단일 인스턴스
+    보장. lock 미보유 fast-path 가 정상 케이스 (이미 초기화) latency 무시 가능.
 
     Returns:
         Gather — 싱글턴 인스턴스 (첫 호출 시 자동 생성).
@@ -83,9 +88,11 @@ def getDefaultGather():
     """
     global _defaultGather
     if _defaultGather is None:
-        from dartlab.gather.engine import Gather
+        with _defaultGatherLock:
+            if _defaultGather is None:
+                from dartlab.gather.engine import Gather
 
-        _defaultGather = Gather()
+                _defaultGather = Gather()
     return _defaultGather
 
 
