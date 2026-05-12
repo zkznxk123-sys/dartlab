@@ -178,12 +178,10 @@ def _mergeBatchFiles(batchDir: Path, outputPath: Path, *, how: str = "vertical")
     if not batchFiles:
         return 0
 
-    parts = [pl.read_parquet(str(f)) for f in batchFiles]
-    merged = pl.concat(parts, how=how)
-    merged.write_parquet(str(outputPath), compression="zstd")
-    totalRows = merged.height
-    del merged, parts
-    return totalRows
+    lazyParts = [pl.scan_parquet(str(f)) for f in batchFiles]
+    merged = pl.concat(lazyParts, how=how)
+    merged.sink_parquet(str(outputPath), compression="zstd")
+    return pl.scan_parquet(str(outputPath)).select(pl.len()).collect().item()
 
 
 # ── changes ──────────────────────────────────────────────────────────
@@ -742,27 +740,32 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
         "thstrm_add_amount",
     ]
 
-    df = (
+    lf = (
         pl.scan_parquet(str(srcPath))
         .filter(pl.col("sj_div").is_in(list(LITE_SJ_DIVS)))
         .filter(pl.col("bsns_year").cast(pl.Int32, strict=False) >= effectiveSinceYear)
         .filter(pl.col("account_id").is_in(keysList) | pl.col("account_nm").is_in(keysList))
         .select(keepCols)
-        .collect(engine="streaming")
     )
+    lf.sink_parquet(str(outputPath), compression="zstd")
 
-    if df.is_empty():
+    summary = (
+        pl.scan_parquet(str(outputPath))
+        .select(pl.len().alias("rows"), pl.col("stockCode").n_unique().alias("stocks"))
+        .collect()
+    )
+    rows = int(summary["rows"][0])
+    if rows == 0:
+        outputPath.unlink(missing_ok=True)
         if verbose:
             _say("[finance-lite] 결과 없음")
         return None
 
-    df.write_parquet(str(outputPath), compression="zstd")
-
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024
-    stocks = df["stockCode"].n_unique()
+    stocks = int(summary["stocks"][0])
     if verbose:
-        _say(f"[finance-lite] 완료: {stocks}종목, {df.height:,}행, {diskMb:.1f}MB, {elapsed:.1f}초 → {outputPath.name}")
+        _say(f"[finance-lite] 완료: {stocks}종목, {rows:,}행, {diskMb:.1f}MB, {elapsed:.1f}초 → {outputPath.name}")
 
     return outputPath
 
