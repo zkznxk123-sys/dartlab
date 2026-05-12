@@ -215,6 +215,12 @@ CATALOG: dict[str, list[CatalogEntry]] = {
 def getGroups() -> list[str]:
     """카탈로그 그룹 이름 목록.
 
+    Capabilities: CATALOG dict keys → list 단순 변환.
+    AIContext: 사용자/AI 가 사전정의 13 그룹 (growth/inflation/rates/...) universe 조회 시.
+    Guide: dict 순서 보장 (Python 3.7+).
+    When: catalog UI / facade.catalog() 진입 시.
+    How: ``list(CATALOG.keys())``.
+
     Returns
     -------
     list[str]
@@ -224,15 +230,29 @@ def getGroups() -> list[str]:
     ------
     없음.
 
+    Requires
+    --------
+    CATALOG 사전 정의.
+
     Example
     -------
     >>> getGroups()
+
+    See Also
+    --------
+    getGroup · getGroupIds : 그룹별 detail.
     """
     return list(CATALOG.keys())
 
 
 def getGroup(name: str) -> list[CatalogEntry]:
     """그룹 내 시리즈 목록.
+
+    Capabilities: CATALOG[name] lookup → CatalogEntry list (id/label/group/freq/unit/description).
+    AIContext: facade.group / 사용자가 특정 카테고리 (rates, inflation 등) 시리즈 탐색 시 진입.
+    Guide: 미존재 그룹은 빈 리스트 — silent fallback.
+    When: 그룹 단위 fetch / UI dropdown 진입 시.
+    How: ``CATALOG.get(name, [])``.
 
     Parameters
     ----------
@@ -249,15 +269,30 @@ def getGroup(name: str) -> list[CatalogEntry]:
     없음
         미존재 그룹은 빈 리스트.
 
+    Requires
+    --------
+    CATALOG 사전 + ``name`` 이 등록된 그룹.
+
     Example
     -------
     >>> entries = getGroup("rates")
+
+    See Also
+    --------
+    getGroupIds : id 만 추출.
+    getGroups : 전체 그룹 list.
     """
     return CATALOG.get(name, [])
 
 
 def getGroupIds(name: str) -> list[str]:
     """그룹 내 시리즈 ID 목록.
+
+    Capabilities: getGroup → [e.id for e in entries] 단순 변환.
+    AIContext: facade.group 의 fetchMulti 직전 호출 — 그룹 내 모든 시리즈 일괄 fetch.
+    Guide: 미존재 그룹은 빈 list — silent.
+    When: 그룹 단위 bulk fetch (series.fetchMulti) 직전.
+    How: ``[e.id for e in CATALOG.get(name, [])]``.
 
     Parameters
     ----------
@@ -274,15 +309,30 @@ def getGroupIds(name: str) -> list[str]:
     없음
         미존재 그룹은 빈 리스트.
 
+    Requires
+    --------
+    CATALOG 사전.
+
     Example
     -------
     >>> ids = getGroupIds("rates")
+
+    See Also
+    --------
+    getGroup : entry detail 까지.
+    series.fetchMulti : 본 함수 결과의 caller.
     """
     return [e.id for e in CATALOG.get(name, [])]
 
 
 def getAllIds() -> list[str]:
     """전체 카탈로그 시리즈 ID.
+
+    Capabilities: CATALOG 전 그룹 iterate → 모든 시리즈 ID flat list.
+    AIContext: macro engine 의 universe / 운영자 cron 의 publish 대상.
+    Guide: 중복 ID 가능 — caller 가 set() 처리 책임.
+    When: bulk fetch / catalog 동기화 / 전체 manifest 빌드 시.
+    How: 모든 그룹 iterate → ``[e.id for entries in CATALOG.values() for e in entries]``.
 
     Returns
     -------
@@ -293,15 +343,30 @@ def getAllIds() -> list[str]:
     ------
     없음.
 
+    Requires
+    --------
+    CATALOG 사전.
+
     Example
     -------
     >>> ids = getAllIds()
+
+    See Also
+    --------
+    getAllEntries : detail 까지.
+    getGroupIds : 그룹별 id.
     """
     return [e.id for entries in CATALOG.values() for e in entries]
 
 
 def getAllEntries() -> list[CatalogEntry]:
     """전체 카탈로그 엔트리.
+
+    Capabilities: CATALOG 전 그룹의 모든 CatalogEntry flat list.
+    AIContext: catalog UI / toDataframe / 외부 노출 (FRED 카탈로그 dump) 진입.
+    Guide: getAllIds 와 같은 iterate 패턴이지만 entry detail 까지.
+    When: 카탈로그 표시 / 디버깅 / spec 검증 시.
+    How: ``[e for entries in CATALOG.values() for e in entries]``.
 
     Returns
     -------
@@ -312,15 +377,30 @@ def getAllEntries() -> list[CatalogEntry]:
     ------
     없음.
 
+    Requires
+    --------
+    CATALOG 사전.
+
     Example
     -------
     >>> es = getAllEntries()
+
+    See Also
+    --------
+    getAllIds : id 만.
+    toDataframe : DataFrame 형식.
     """
     return [e for entries in CATALOG.values() for e in entries]
 
 
 def findEntry(seriesId: str) -> CatalogEntry | None:
     """시리즈 ID로 카탈로그 엔트리 검색.
+
+    Capabilities: CATALOG 전 그룹 linear scan → 첫 매칭 entry 반환.
+    AIContext: 사용자 입력 seriesId 가 카탈로그에 있는지 확인 + label/unit 추출 진입.
+    Guide: O(N) 선형 검색 — 호출 빈도 낮으면 OK.
+    When: fetch 직전 seriesId 의 한글 label/unit 추출 시.
+    How: 모든 그룹 nested loop ``for entries in CATALOG.values(): for e in entries:``.
 
     Parameters
     ----------
@@ -337,9 +417,17 @@ def findEntry(seriesId: str) -> CatalogEntry | None:
     없음
         미존재 시 None 반환.
 
+    Requires
+    --------
+    CATALOG 사전.
+
     Example
     -------
     >>> e = findEntry("GDP")
+
+    See Also
+    --------
+    series.fetchSeries : 본 함수로 entry meta 확인 후 fetch.
     """
     for entries in CATALOG.values():
         for e in entries:
@@ -350,6 +438,12 @@ def findEntry(seriesId: str) -> CatalogEntry | None:
 
 def toDataframe(group: str | None = None) -> pl.DataFrame:
     """카탈로그 → Polars DataFrame.
+
+    Capabilities: CatalogEntry list → DataFrame (6 컬럼 id/label/group/frequency/unit/description).
+    AIContext: catalog UI 표시 / Skill OS catalog noting / blog catalog dump 진입.
+    Guide: group filter 없으면 전체. 빈 결과는 schema-defined 빈 DataFrame.
+    When: catalog DataFrame 형태 노출 시 (UI / dashboard / 외부 export).
+    How: getGroup / getAllEntries → list[dict] → pl.DataFrame.
 
     Parameters
     ----------
@@ -368,9 +462,18 @@ def toDataframe(group: str | None = None) -> pl.DataFrame:
     없음
         미존재 그룹은 빈 DataFrame.
 
+    Requires
+    --------
+    polars + CATALOG 사전.
+
     Example
     -------
     >>> df = toDataframe(group="rates")
+
+    See Also
+    --------
+    getGroup · getAllEntries : 본 함수의 source.
+    facade.catalog : 위임 진입점.
     """
     entries = getGroup(group) if group else getAllEntries()
     if not entries:

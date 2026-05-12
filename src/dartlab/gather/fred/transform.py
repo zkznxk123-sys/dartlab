@@ -14,6 +14,12 @@ import polars as pl
 def yoy(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     """전년 동기 대비 변화율 (%).
 
+    Capabilities: _inferPeriod 자동 감지 → pl.col.shift(period) → percentage change.
+    AIContext: 인플레이션/생산 등 YoY 비교 — facade.yoy 의 본체.
+    Guide: 일/주/월/분기/연간 frequency 자동. 3 row 미만은 period=1 fallback.
+    When: macro 시계열의 YoY 변화율 컬럼 추가 시.
+    How: ``(pl.col(col) / pl.col(col).shift(period) - 1) * 100``.
+
     12개월 전 값 대비 퍼센트 변화. 월별 데이터 기준.
     분기별 데이터는 4행 전, 연간은 1행 전.
 
@@ -33,9 +39,18 @@ def yoy(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     ------
     없음.
 
+    Requires
+    --------
+    df 에 ``date`` + col 컬럼.
+
     Example
     -------
     >>> df_yoy = yoy(df)
+
+    See Also
+    --------
+    mom · diff : 변화율 다른 형태.
+    _inferPeriod : period 자동 감지.
     """
     period = _inferPeriod(df)
     return df.with_columns(((pl.col(col) / pl.col(col).shift(period) - 1) * 100).alias(f"{col}_yoy"))
@@ -43,6 +58,12 @@ def yoy(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
 
 def mom(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     """전월 대비 변화율 (%). 일별 데이터는 전일 대비.
+
+    Capabilities: shift(1) percentage change — frequency 무관 단순 1 기 차이.
+    AIContext: 단기 모멘텀 분석 — facade.mom 의 본체.
+    Guide: 1 기 시차만. period 다른 변화율은 diff(periods=N) 또는 yoy 사용.
+    When: 단기 가속/감속 추적 시.
+    How: ``(pl.col(col) / pl.col(col).shift(1) - 1) * 100``.
 
     Parameters
     ----------
@@ -60,15 +81,29 @@ def mom(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     ------
     없음.
 
+    Requires
+    --------
+    df 에 col 컬럼 + ≥ 2 row.
+
     Example
     -------
     >>> df_mom = mom(df)
+
+    See Also
+    --------
+    yoy · diff : 변화율 다른 형태.
     """
     return df.with_columns(((pl.col(col) / pl.col(col).shift(1) - 1) * 100).alias(f"{col}_mom"))
 
 
 def diff(df: pl.DataFrame, col: str = "value", periods: int = 1) -> pl.DataFrame:
     """차분 (현재 값 - N기간 전 값).
+
+    Capabilities: ``pl.col.shift(periods)`` 차분 — 단위 보존 (절대값).
+    AIContext: 변화량 (변화율 아닌 절대) 분석 진입 — 금리 변동 bp 등.
+    Guide: 변화율 대신 절대값 변화 필요 시.
+    When: 금리/스프레드 변동량 분석 시.
+    How: ``pl.col(col) - pl.col(col).shift(periods)``.
 
     Parameters
     ----------
@@ -88,15 +123,29 @@ def diff(df: pl.DataFrame, col: str = "value", periods: int = 1) -> pl.DataFrame
     ------
     없음.
 
+    Requires
+    --------
+    df 에 col 컬럼 + ≥ periods+1 row.
+
     Example
     -------
     >>> df_diff = diff(df, periods=4)
+
+    See Also
+    --------
+    yoy · mom : 변화율 형태.
     """
     return df.with_columns((pl.col(col) - pl.col(col).shift(periods)).alias(f"{col}_diff{periods}"))
 
 
 def movingAverage(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl.DataFrame:
     """이동평균.
+
+    Capabilities: ``pl.col.rolling_mean(window)`` — smoothing.
+    AIContext: short-term noise 제거 — facade.movingAverage 의 본체.
+    Guide: window 기본 12 (월별 데이터 1 년). 작을수록 noise 많음.
+    When: trend 추출 / regime classifier 입력 시.
+    How: ``pl.col(col).rolling_mean(window_size=window)``.
 
     Parameters
     ----------
@@ -116,15 +165,29 @@ def movingAverage(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl.
     ------
     없음.
 
+    Requires
+    --------
+    df 에 col 컬럼 + ≥ window row.
+
     Example
     -------
     >>> df_ma = movingAverage(df, window=6)
+
+    See Also
+    --------
+    yoy · mom : 변화율 동행 transform.
     """
     return df.with_columns(pl.col(col).rolling_mean(window_size=window).alias(f"{col}_ma{window}"))
 
 
 def normalize(df: pl.DataFrame, col: str = "value", baseDate: str | None = None) -> pl.DataFrame:
     """기준일 = 100 정규화.
+
+    Capabilities: baseDate 의 값을 100 으로 rebase — 단위 무관 비교.
+    AIContext: 단위 다른 시계열 비교 (예: GDP 와 산업생산지수) 진입.
+    Guide: baseDate 매칭 row 없으면 그 이전 가장 가까운 날짜 fallback.
+    When: 다른 단위의 시계열을 같은 스케일로 plot / 비교 시.
+    How: baseVal = df.filter(date<=baseDate).tail(1)[col][0] → col/baseVal*100.
 
     Parameters
     ----------
@@ -146,9 +209,17 @@ def normalize(df: pl.DataFrame, col: str = "value", baseDate: str | None = None)
     ValueError
         baseDate 가 YYYY-MM-DD 포맷이 아닐 때.
 
+    Requires
+    --------
+    df 에 ``date`` + col 컬럼.
+
     Example
     -------
     >>> df_norm = normalize(df, baseDate="2020-01-01")
+
+    See Also
+    --------
+    normalizeMulti : wide DataFrame 일괄 정규화.
     """
     if baseDate is not None:
         from datetime import datetime
@@ -176,6 +247,12 @@ def normalize(df: pl.DataFrame, col: str = "value", baseDate: str | None = None)
 def normalizeMulti(df: pl.DataFrame, baseDate: str | None = None) -> pl.DataFrame:
     """wide DataFrame의 모든 값 컬럼을 기준일=100 정규화.
 
+    Capabilities: wide DataFrame 의 수치 컬럼 별 normalize 일괄 적용.
+    AIContext: cross-series 비교 plot 진입 — 같은 baseDate=100 스케일.
+    Guide: date 컬럼 제외. dtype check (Float/Int) 후만 처리.
+    When: 다중 시계열 plot / dashboard 표시 시.
+    How: 컬럼별 ``normalize(df.select('date', col), col, baseDate)`` → 결과 컬럼 덮어쓰기.
+
     date 컬럼 제외한 모든 수치 컬럼을 정규화.
 
     Parameters
@@ -195,9 +272,17 @@ def normalizeMulti(df: pl.DataFrame, baseDate: str | None = None) -> pl.DataFram
     ValueError
         baseDate 가 YYYY-MM-DD 포맷이 아닐 때 (normalize 위임).
 
+    Requires
+    --------
+    df 에 ``date`` 컬럼 + ≥ 1 수치 컬럼.
+
     Example
     -------
     >>> df_n = normalizeMulti(wide_df, baseDate="2020-01-01")
+
+    See Also
+    --------
+    normalize : 단일 컬럼 정규화.
     """
     result = df.clone()
     for col in df.columns:
@@ -215,6 +300,12 @@ def normalizeMulti(df: pl.DataFrame, baseDate: str | None = None) -> pl.DataFram
 def correlation(df: pl.DataFrame, method: str = "pearson") -> pl.DataFrame:
     """복수 시계열 간 상관행렬.
 
+    Capabilities: dropna 후 pl.corr 로 N×N 상관 행렬 dict.
+    AIContext: 매크로 변수 간 통계 관계 추출 — facade.correlation 의 본체.
+    Guide: ≥ 2 컬럼 필수. method 는 pearson 만 (polars 기본).
+    When: regime/portfolio 분석 입력 정의 시.
+    How: dropna → nested loop ``pl.corr(value_cols[i], value_cols[j])``.
+
     Args:
         df: wide DataFrame (date, col1, col2, ...).
         method: "pearson" (기본). Polars 기본 지원.
@@ -225,8 +316,14 @@ def correlation(df: pl.DataFrame, method: str = "pearson") -> pl.DataFrame:
     Raises:
         없음 — 컬럼 2개 미만이면 빈 DataFrame.
 
+    Requires:
+        df 에 ≥ 2 수치 컬럼 (date 제외) + dropna 후 ≥ 2 row.
+
     Example:
         >>> corr = correlation(wide_df)
+
+    See Also:
+        leadLag : 동행 시차 분석.
     """
     value_cols = [c for c in df.columns if c != "date"]
     if len(value_cols) < 2:
@@ -259,8 +356,23 @@ def leadLag(
 ) -> pl.DataFrame:
     """선행/후행 상관분석.
 
+    Capabilities: -maxLag ~ +maxLag 시프트 별 pl.corr 측정 → DataFrame.
+    AIContext: 매크로 lead-lag 관계 추론 — facade.leadLag 의 본체.
+    Guide: 양수 lag = colB 가 후행. shift 후 < 3 row → None.
+    When: 정책 효과 시차 / 선행 지표 발굴 시.
+    How: lag 범위 iterate → shifted DataFrame pair → pl.corr → list 누적.
+
     col_a를 기준으로 col_b를 -max_lag ~ +max_lag 시프트하여 상관계수 측정.
     양수 lag = col_b가 col_a보다 후행, 음수 = col_b가 선행.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        wide DataFrame (date, colA, colB, ...).
+    colA, colB : str
+        분석 대상 두 컬럼.
+    maxLag : int
+        ± lag 최대.
 
     Returns:
         DataFrame (lag, correlation).
@@ -268,8 +380,14 @@ def leadLag(
     Raises:
         없음 — 데이터 3행 미만이면 lag 별 None.
 
+    Requires:
+        df 에 colA + colB 컬럼 + dropna 후 ≥ 3 row.
+
     Example:
         >>> df_ll = leadLag(wide_df, "FEDFUNDS", "UNRATE", maxLag=6)
+
+    See Also:
+        correlation : 동시점 상관 행렬.
     """
     clean = df.select(colA, colB).drop_nulls()
     a = clean[colA]

@@ -24,6 +24,12 @@ def fetchSeries(
 ) -> pl.DataFrame:
     """FRED 시계열 → Polars DataFrame ``(date, value)``.
 
+    Capabilities: 캐시 확인 → FRED /series/observations GET → DataFrame 변환 + 캐시 저장.
+    AIContext: FRED 단일 시계열의 단일 진입점 — facade.series / 외부 caller 모두 본 함수.
+    Guide: missing value (".") 은 None 으로 처리. cache hit 시 즉시 반환.
+    When: 매크로 단일 시계열 분석 시 (가장 빈번한 호출 path).
+    How: cache.get → client.get(/series/observations) → date/value parse → cache.put.
+
     Parameters
     ----------
     client : FredClient
@@ -57,6 +63,16 @@ def fetchSeries(
     Example
     -------
     >>> df = fetchSeries(client, "GDP", start="2020-01-01")
+
+    Requires
+    --------
+    FredClient (``FRED_API_KEY``) + cache 가용.
+
+    See Also
+    --------
+    fetchMulti : 복수 시리즈 wide.
+    fetchMeta : 시리즈 메타.
+    facade.Fred.series : 클래스 facade.
     """
     cached = _cache.get(seriesId, start, end, freq, aggregation)
     if cached is not None:
@@ -123,6 +139,12 @@ def fetchMulti(
 ) -> pl.DataFrame:
     """복수 시계열 → wide DataFrame ``(date, GDP, UNRATE, ...)``.
 
+    Capabilities: fetchSeries fan-out → outer join + forward_fill + 메모리 관리.
+    AIContext: macro cross-series 비교 진입 — 5 질문 batch 매크로 7771MB OOM 회귀 방지 코드.
+    Guide: 주파수 다르면 outer join 후 forward_fill. del frames + gc.collect 로 Rust 힙 회수.
+    When: 매크로 dashboard / regime 분석 / correlation 분석 시.
+    How: fetchSeries fan-out → frames list → join chain → del + gc → forward_fill 일괄.
+
     주파수가 다른 시리즈를 합칠 때 outer join 후 forward-fill.
 
     Parameters
@@ -154,6 +176,15 @@ def fetchMulti(
     Example
     -------
     >>> df = fetchMulti(client, ["GDP", "UNRATE"], start="2020-01-01")
+
+    Requires
+    --------
+    FredClient + 모든 ``seriesIds`` 가 valid (실패 시 부분 결과). 메모리 ≥ 시리즈 수 × 시계열 크기.
+
+    See Also
+    --------
+    fetchSeries : 본 함수의 내부 fan-out 대상.
+    facade.Fred.compare : 클래스 facade.
     """
     if not seriesIds:
         return pl.DataFrame()
@@ -200,6 +231,12 @@ def searchSeries(
 ) -> pl.DataFrame:
     """키워드 검색 → DataFrame.
 
+    Capabilities: FRED /series/search endpoint GET → 인기도 순 DataFrame.
+    AIContext: 카탈로그에 없는 시리즈 fuzzy 탐색 진입 — 사용자 자유 키워드.
+    Guide: 영문 키워드. order_by="popularity" desc.
+    When: 카탈로그 외 시리즈 탐색 시 (특수 indicator / micro data).
+    How: ``client.get('/series/search', search_text=query, limit=limit, order_by='popularity')``.
+
     Parameters
     ----------
     client : FredClient
@@ -227,6 +264,16 @@ def searchSeries(
     Example
     -------
     >>> df = searchSeries(client, "unemployment", limit=10)
+
+    Requires
+    --------
+    FredClient (``FRED_API_KEY``).
+
+    See Also
+    --------
+    catalog : 사전정의 그룹.
+    fetchMeta : 단일 시리즈 메타.
+    facade.Fred.search : 클래스 facade.
     """
     data = client.get(
         "/series/search",
@@ -273,6 +320,12 @@ def searchSeries(
 def fetchMeta(client: FredClient, seriesId: str, *, limit: int | None = None) -> SeriesMeta:
     """시계열 메타데이터 조회.
 
+    Capabilities: FRED /series endpoint GET → SeriesMeta named tuple.
+    AIContext: fetch 전 series 의 frequency/units/last_updated 확인 진입.
+    Guide: 미존재 시리즈 → SeriesNotFoundError.
+    When: 시리즈 단위 분석 전 메타 검증 시.
+    How: ``client.get('/series', seriesId=seriesId)`` → SeriesMeta 패킹.
+
     Parameters
     ----------
     client : FredClient
@@ -296,6 +349,15 @@ def fetchMeta(client: FredClient, seriesId: str, *, limit: int | None = None) ->
     Example
     -------
     >>> m = fetchMeta(client, "GDP")
+
+    Requires
+    --------
+    FredClient (``FRED_API_KEY``) + 유효 seriesId.
+
+    See Also
+    --------
+    fetchSeries : 본문 시계열.
+    facade.Fred.meta : 클래스 facade.
     """
     del limit
     data = client.get("/series", seriesId=seriesId)
@@ -322,6 +384,12 @@ def fetchMeta(client: FredClient, seriesId: str, *, limit: int | None = None) ->
 def fetchReleases(client: FredClient, *, limit: int = 20) -> pl.DataFrame:
     """최근 데이터 릴리즈 일정.
 
+    Capabilities: FRED /releases endpoint GET → 보도자료 우선 정렬 DataFrame.
+    AIContext: 매크로 신선도 모니터링 / 발표 일정 추적 진입.
+    Guide: order_by="press_release" desc, sort_order=desc.
+    When: 매크로 dashboard 의 staleness 표시 / 다음 발표 예측 시.
+    How: ``client.get('/releases', limit=limit, order_by='press_release', sort_order='desc')``.
+
     Parameters
     ----------
     client : FredClient
@@ -343,6 +411,15 @@ def fetchReleases(client: FredClient, *, limit: int = 20) -> pl.DataFrame:
     Example
     -------
     >>> df = fetchReleases(client, limit=5)
+
+    Requires
+    --------
+    FredClient (``FRED_API_KEY``).
+
+    See Also
+    --------
+    fetchMeta : 단일 시리즈의 last_updated.
+    facade.Fred.releases : 클래스 facade.
     """
     data = client.get("/releases", limit=limit, order_by="press_release", sort_order="desc")
     releases = data.get("releases", [])

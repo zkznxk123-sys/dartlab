@@ -46,6 +46,12 @@ class FredClient:
     def get(self, endpoint: str, **params) -> dict:
         """GET 요청 → JSON dict.
 
+        Capabilities: FRED REST GET + 120 RPM rate limit + 429/5xx 지수 backoff retry + key rotation.
+        AIContext: FRED 모든 series/category/release 호출의 단일 HTTP 진입점.
+        Guide: api_key 환경변수 (multi-key 콤마 분리) — 429 시 자동 rotate.
+        When: series/catalog/transform 모든 FRED API 호출 시.
+        How: rate limit 대기 → GET → 200 OK / 429 retry / 4xx raise / 5xx retry.
+
         Parameters
         ----------
         endpoint : str
@@ -66,6 +72,21 @@ class FredClient:
             API 키가 유효하지 않을 때 (403).
         FredError
             기타 API 오류 또는 3회 재시도 초과.
+
+        Requires
+        --------
+        ``FRED_API_KEY`` 환경변수 (또는 ``apiKey=`` 인자) — 무료 발급
+        ``https://fred.stlouisfed.org/docs/api/api_key.html``.
+
+        Example
+        -------
+        >>> c = FredClient()
+        >>> data = c.get("/series/observations", series_id="GDP")
+
+        See Also
+        --------
+        close : 세션 정리.
+        series.fetchSeries · catalog : 본 메서드 caller.
         """
         params.setdefault("file_type", "json")
         params["api_key"] = self._resolveKey()
@@ -110,6 +131,12 @@ class FredClient:
     def close(self) -> None:
         """세션 닫기.
 
+        Capabilities: httpx.Client.close 위임.
+        AIContext: FredClient 리소스 정리 — context exit / 명시 cleanup 진입.
+        Guide: idempotent — 두 번 호출 graceful.
+        When: dartlab 종료 / Fred facade close 시.
+        How: ``self._session.close()``.
+
         Returns
         -------
         None
@@ -119,10 +146,18 @@ class FredClient:
         없음
             httpx 세션 close 는 graceful.
 
+        Requires
+        --------
+        ``self._session`` (httpx.Client) 가용.
+
         Example
         -------
         >>> c = FredClient()
         >>> c.close()
+
+        See Also
+        --------
+        facade.Fred.close : 본 메서드의 caller.
         """
         self._session.close()
 
