@@ -39,34 +39,37 @@ class _DocsAccessor:
             >>> c._docs.sections.head()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         key = "_docs_sections"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -91,34 +94,37 @@ class _DocsAccessor:
             >>> c._docs.retrievalBlocks.head()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         key = "_docs_retrievalBlocks"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -143,34 +149,37 @@ class _DocsAccessor:
             >>> c._docs.contextSlices.head()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         key = "_docs_contextSlices"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -197,34 +206,37 @@ class _DocsAccessor:
             >>> c._docs.notes("inventory")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         from dartlab.providers.edgar.docs.notes import notes
 
@@ -248,34 +260,37 @@ class _DocsAccessor:
             >>> c._docs.notesByCategory("inventory")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         from dartlab.providers.edgar.docs.notes import notesByCategory
 
@@ -294,34 +309,37 @@ class _DocsAccessor:
             >>> c._docs.noteCategories()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         from dartlab.providers.edgar.docs.notes import noteCategories
 
@@ -340,34 +358,37 @@ class _DocsAccessor:
             >>> c._docs.freq()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         key = "_docs_freq"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -391,34 +412,37 @@ class _DocsAccessor:
             >>> c._docs.coverage()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         key = "_docs_coverage"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -442,40 +466,43 @@ class _DocsAccessor:
             >>> c._docs.filings().head()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``providers.edgar.docs.sections.pipeline.sections`` — 본 namespace 의 backend.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC 10-K/10-Q sections wide DataFrame 의 _DocsAccessor namespace. atomic cache pattern
+              (cache.get + 로컬 var) — BoundedCache evict 안전.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show("10-K::item...")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 (신규 IPO 등) → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC 10-K/10-Q docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → pipeline.sections → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         key = "_docs_filings"
         if key in self._company._cache:
             return self._company._cache[key]
 
-        from dartlab.core.dataLoader import loadData
+        from dartlab.reference.dataLoader import loadData
 
         df = loadData(self._company.ticker, category="edgarDocs")
         if isEmptyDf(df):

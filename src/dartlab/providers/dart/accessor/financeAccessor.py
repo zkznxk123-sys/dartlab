@@ -40,17 +40,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - finance 부재 회사 → None.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 finance parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance parquet → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART XBRL 정규화) 한정.
         """
         return self._company.rawFinance
 
@@ -69,17 +70,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - finance 부재 회사 → None.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 finance parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance parquet → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART XBRL 정규화) 한정.
         """
         return self._company._financeOrDocsStatement("BS")
 
@@ -98,17 +100,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - finance 부재 회사 → None.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 finance parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance parquet → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART XBRL 정규화) 한정.
         """
         return self._company._financeOrDocsStatement("IS")
 
@@ -127,17 +130,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - finance 부재 회사 → None.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 finance parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance parquet → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART XBRL 정규화) 한정.
         """
         return self._company._financeOrDocsStatement("CIS")
 
@@ -156,17 +160,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — internal namespace. 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS")``.
+                - finance 부재 회사 → None.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 finance parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance parquet → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART XBRL 정규화) 한정.
         """
         return self._company._financeOrDocsStatement("CF")
 

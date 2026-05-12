@@ -33,33 +33,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().sanction("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.docs.finance.sanction import sanction
 
@@ -84,33 +87,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().contingentLiability("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.docs.finance.contingentLiability import contingentLiability
 
@@ -135,33 +141,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().executive("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.docs.finance.executive import executive
 
@@ -186,33 +195,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().relatedPartyTx("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
 
@@ -237,33 +249,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().pivotDividend("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.report.pivot import pivotDividend
 
@@ -288,33 +303,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().buildAnnual("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.finance.pivot import buildAnnual
 
@@ -339,33 +357,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().buildTimeseries("005930")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.finance.pivot import buildTimeseries
 
@@ -387,33 +408,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().accountLabels()["sales"]
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         try:
             from dartlab.providers.dart.finance.mapper import AccountMapper
@@ -435,33 +459,36 @@ class DartFinanceDocAccessor:
             >>> DartFinanceDocAccessor().exportModules()[:5]
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - 위임 모듈 — ``providers.dart.docs.finance.*`` 의 동명 함수.
+            - ``getFinanceDocAccessor()`` — analysis/financial 이 본 accessor 호출 entry.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - analysis/financial 이 stockCode → 단발 doc 호출 시 본 Protocol 구현체 위임. 예외 silent
+              (None 반환) — caller 가 graceful fallback.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 직접 호출 X — analysis 모듈이 자동 dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal Protocol adapter — AI 가 직접 호출 X. analysis 모듈이 본 accessor 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 사용자 직접 호출 X — analysis 모듈이 dispatch.
+                - 예외 silent (None 반환) → caller None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 위임 모듈 결과 (DataFrame/dict 등) 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs/finance parquet (위임 모듈별).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 위임 모듈 데이터 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → providers.dart.docs.finance.X → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) 한정.
         """
         try:
             from dartlab.providers.dart.company import listExportModules

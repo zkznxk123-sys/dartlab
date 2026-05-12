@@ -42,33 +42,36 @@ class _ProfileAccessor:
             >>> c._profileAccessor.sections
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.sections`` — public surface.
+            - ``_DocsAccessor.sections`` — docs spine origin.
 
         Requires:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - docs.sections (spine) + finance topics (BS/IS/CF/CIS) merge — chapter × topic × source ×
+              period 통합 보드. ratios 별도 column 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal merge accessor — AI 가 직접 호출 X. Company facade 가 본 함수 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기 의무.
+                - merge 결과의 source 컬럼 무시 X — docs vs finance origin 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [chapter, topic, blockType, blockOrder, source, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections + finance 시리즈.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs + finance 의 latest min.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections + finance topics → merge → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         cacheKey = "_sections"
         if cacheKey in self._company._cache:
@@ -146,33 +149,36 @@ class _ProfileAccessor:
             >>> c._profileAccessor.sharesOutstanding
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.sections`` — public surface.
+            - ``_DocsAccessor.sections`` — docs spine origin.
 
         Requires:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - docs.sections (spine) + finance topics (BS/IS/CF/CIS) merge — chapter × topic × source ×
+              period 통합 보드. ratios 별도 column 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal merge accessor — AI 가 직접 호출 X. Company facade 가 본 함수 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - docs 부재 회사 → None. caller None 분기 의무.
+                - merge 결과의 source 컬럼 무시 X — docs vs finance origin 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [chapter, topic, blockType, blockOrder, source, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections + finance 시리즈.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs + finance 의 latest min.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections + finance topics → merge → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:
@@ -202,16 +208,17 @@ class _ProfileAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 결과 dict source 무시 X — docs/finance origin 명시 의무.
+                - profile.trace 는 Company.trace 의 단순 위임 — 추가 가공 없음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {topic, source, period?, ...} 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - Company.trace 가용.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - Company.trace 와 동일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 본 namespace → Company.trace(topic, period).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return self._company.trace(topic, period=period)

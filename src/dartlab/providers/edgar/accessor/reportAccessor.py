@@ -52,17 +52,19 @@ class _ReportAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - apiType 추측 X — 14 종 _SUPPORTED 명시.
+                - report 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("dividend"/"treasuryStock"/...)``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet + 10-K sections (선택).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - apiType → _SUPPORTED dispatch → extractor 위임 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL + 10-K) 한정.
         """
         return list(_SUPPORTED.keys())
 
@@ -80,33 +82,37 @@ class _ReportAccessor:
             >>> c._report.availableApiTypes
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_SUPPORTED`` (모듈) — 14 apiType → extractor 매핑.
+            - ``providers.edgar.report.*`` — 개별 extractor 모듈.
 
         Requires:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - XBRL companyfacts + 10-K sections 기반 14 apiType (dividend/treasuryStock/employee/audit/
+              executive/majorHolder/...) 위임 dispatch. DART 28 apiType 와 인터페이스 통일.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("dividend"/...)`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal report accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - apiType 추측 X — 14 종 _SUPPORTED 명시.
+                - report 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("dividend"/"treasuryStock"/...)``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet + 10-K sections (선택).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - apiType → _SUPPORTED dispatch → extractor 위임 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL + 10-K) 한정.
         """
         available = []
         for apiType in _SUPPORTED:
@@ -131,33 +137,37 @@ class _ReportAccessor:
             >>> c._report.extract("dividend")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_SUPPORTED`` (모듈) — 14 apiType → extractor 매핑.
+            - ``providers.edgar.report.*`` — 개별 extractor 모듈.
 
         Requires:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - XBRL companyfacts + 10-K sections 기반 14 apiType (dividend/treasuryStock/employee/audit/
+              executive/majorHolder/...) 위임 dispatch. DART 28 apiType 와 인터페이스 통일.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("dividend"/...)`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal report accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - apiType 추측 X — 14 종 _SUPPORTED 명시.
+                - report 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("dividend"/"treasuryStock"/...)``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet + 10-K sections (선택).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - apiType → _SUPPORTED dispatch → extractor 위임 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL + 10-K) 한정.
         """
         if apiType in self._cache:
             return self._cache[apiType]

@@ -101,17 +101,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         return self._stmtDf("BS")
 
@@ -130,17 +131,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         return self._stmtDf("IS")
 
@@ -159,17 +161,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         return self._stmtDf("CF")
 
@@ -188,17 +191,18 @@ class _FinanceAccessor:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         return self._stmtDf("CI")
 
@@ -216,20 +220,22 @@ class _FinanceAccessor:
             >>> c._finance.ratios  # 내부 — 사용자는 c.show("ratios")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_stmtDf`` — 본 property 의 backend.
+            - ``Company.show("ratios")`` / ``Company.show("BS"/"IS"/"CF"/"CIS")`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 4 재무제표 (BS/IS/CF/CIS) + ratios 의 _FinanceAccessor namespace. XBRL companyfacts 정규화
+              결과를 snakeId × period wide DataFrame 으로 노출. cache 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X.
         """
         val = self._company._cache.get("_ratios", _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -258,20 +264,22 @@ class _FinanceAccessor:
             >>> c._finance.ratioSeries  # 내부 — 사용자는 c.show("ratioSeries")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_stmtDf`` — 본 property 의 backend.
+            - ``Company.show("ratios")`` / ``Company.show("BS"/"IS"/"CF"/"CIS")`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 4 재무제표 (BS/IS/CF/CIS) + ratios 의 _FinanceAccessor namespace. XBRL companyfacts 정규화
+              결과를 snakeId × period wide DataFrame 으로 노출. cache 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X.
         """
         cacheKey = "_ratioSeries"
         if cacheKey in self._company._cache:
@@ -301,34 +309,37 @@ class _FinanceAccessor:
             >>> c._finance.SCE  # 내부 — 사용자는 c.show("SCE")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_stmtDf`` — 본 property 의 backend.
+            - ``Company.show("ratios")`` / ``Company.show("BS"/"IS"/"CF"/"CIS")`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 4 재무제표 (BS/IS/CF/CIS) + ratios 의 _FinanceAccessor namespace. XBRL companyfacts 정규화
+              결과를 snakeId × period wide DataFrame 으로 노출. cache 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         cacheKey = "_finance_SCE"
         if cacheKey in self._company._cache:
@@ -355,34 +366,37 @@ class _FinanceAccessor:
             >>> c._finance.explore("Revenue")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_stmtDf`` — 본 property 의 backend.
+            - ``Company.show("ratios")`` / ``Company.show("BS"/"IS"/"CF"/"CIS")`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 4 재무제표 (BS/IS/CF/CIS) + ratios 의 _FinanceAccessor namespace. XBRL companyfacts 정규화
+              결과를 snakeId × period wide DataFrame 으로 노출. cache 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         from dartlab.providers.edgar.finance.explore import explore
 
@@ -404,34 +418,37 @@ class _FinanceAccessor:
             >>> c._finance.listTags(limit=50)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_stmtDf`` — 본 property 의 backend.
+            - ``Company.show("ratios")`` / ``Company.show("BS"/"IS"/"CF"/"CIS")`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 4 재무제표 (BS/IS/CF/CIS) + ratios 의 _FinanceAccessor namespace. XBRL companyfacts 정규화
+              결과를 snakeId × period wide DataFrame 으로 노출. cache 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         from dartlab.providers.edgar.finance.explore import listTags
 
@@ -454,34 +471,37 @@ class _FinanceAccessor:
             ...     print(row["tag"], row["count"])
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_stmtDf`` — 본 property 의 backend.
+            - ``Company.show("ratios")`` / ``Company.show("BS"/"IS"/"CF"/"CIS")`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 4 재무제표 (BS/IS/CF/CIS) + ratios 의 _FinanceAccessor namespace. XBRL companyfacts 정규화
+              결과를 snakeId × period wide DataFrame 으로 노출. cache 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - finance 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show("BS"/"IS"/"CF"/"CIS"/"ratios")``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [snakeId, 항목, period...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 SEC companyfacts.parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → buildFinanceSeries → EdgarMapper → snakeId/한국어 라벨화 → 본 namespace.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR XBRL) 한정.
         """
         df = self.listTags(limit=limit)
         if df is None:

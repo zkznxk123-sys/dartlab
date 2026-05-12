@@ -45,17 +45,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._getPrimary("sections")
 
@@ -74,17 +75,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self.raw
 
@@ -105,17 +107,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._getPrimary("sections", topics=frozenset(topics))
 
@@ -133,17 +136,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionTopics()
 
@@ -164,17 +168,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsTopicOutline(topic=topic)
 
@@ -195,34 +200,37 @@ class _SectionsSource:
             >>> c._docs.sections.periods(recentFirst=True)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_DocsAccessor.sections`` — 본 namespace 의 parent accessor.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 의 도출 view (periods/ordered/coverage/freq/semanticRegistry/structureRegistry 등)
+              를 _SectionsSource namespace 로 dispatch. parent _DocsAccessor 가 본 namespace 노출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections-level accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         frame = self.raw
         if frame is None:
@@ -249,17 +257,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
@@ -288,17 +297,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsCoverage(
             topic=topic,
@@ -324,17 +334,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsFreq(freqScope, includeMixed=includeMixed)
 
@@ -363,17 +374,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -407,17 +419,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -453,17 +466,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -500,17 +514,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -549,17 +564,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureEvents(
             topic=topic,
@@ -596,17 +612,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureSummary(
             topic=topic,
@@ -646,17 +663,18 @@ class _SectionsSource:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureChanges(
             topic=topic,
@@ -694,34 +712,37 @@ class _SectionsSource:
             >>> c._docs.sections.changes(topic="riskFactors")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_DocsAccessor.sections`` — 본 namespace 의 parent accessor.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 의 도출 view (periods/ordered/coverage/freq/semanticRegistry/structureRegistry 등)
+              를 _SectionsSource namespace 로 dispatch. parent _DocsAccessor 가 본 namespace 노출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections-level accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         frame = self.raw
         if frame is None:
@@ -744,34 +765,37 @@ class _SectionsSource:
             >>> c._docs.sections.changeSummary(topN=5)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_DocsAccessor.sections`` — 본 namespace 의 parent accessor.
+            - ``Company.sections`` — public surface.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 의 도출 view (periods/ordered/coverage/freq/semanticRegistry/structureRegistry 등)
+              를 _SectionsSource namespace 로 dispatch. parent _DocsAccessor 가 본 namespace 노출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` / ``c.show()`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal sections-level accessor — AI 가 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 회사 → None. caller None 분기 의무.
+                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (topic × period 보드) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 sections) 한정.
         """
         ch = self.changes()
         if isEmptyDf(ch):

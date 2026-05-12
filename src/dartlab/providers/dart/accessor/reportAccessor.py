@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
-from dartlab.core.dataLoader import loadData
 from dartlab.core.memory import BoundedCache
 from dartlab.core.polarsUtil import isEmptyDf
+from dartlab.reference.dataLoader import loadData
 
 if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
@@ -173,34 +173,38 @@ def reportFrameInner(stockCode: str, apiType: str, topic: str, *, raw: bool = Fa
         >>> reportFrameInner("005930", "stockTotal", "stockTotal")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_COL_KR`` — DART API 컬럼 한국어 매핑.
+        - ``providers.dart.report.extract.extractClean`` — raw → cleaned 변환.
+        - ``reportPivotBySe`` — se × period 수평화 보조.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report parquet 의 apiType 별 row 추출 + (a) 2015 제외 (b) stock_knd 보통주 우선 (c) se ×
+          period 수평화 또는 행 기반 반환 (d) raw=False 시 한국어 컬럼 라벨화.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show("topic")`` — 본 함수 직접 호출 X (internal helper).
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal report helper — AI 가 직접 호출 X. Company.show 가 backing 호출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 2015 데이터 가정 X — extractClean 후 필터 제외됨.
+            - stock_knd 다양 (우선주 등) 회사 — 보통주 only filter 적용 됨.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame (수평화 또는 행 기반) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report parquet + REPORT_COL_KR 매핑.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART 정기보고서 마감 후 30~45 일.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - extractClean → 2015/stock_knd filter → reportPivotBySe / row-based → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART 정형 공시) 한정.
     """
     from dartlab.providers.dart.report.extract import extractClean
 
@@ -255,34 +259,38 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
         >>> reportPivotBySe(extracted_df)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_COL_KR`` — DART API 컬럼 한국어 매핑.
+        - ``providers.dart.report.extract.extractClean`` — raw → cleaned 변환.
+        - ``reportPivotBySe`` — se × period 수평화 보조.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report parquet 의 apiType 별 row 추출 + (a) 2015 제외 (b) stock_knd 보통주 우선 (c) se ×
+          period 수평화 또는 행 기반 반환 (d) raw=False 시 한국어 컬럼 라벨화.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show("topic")`` — 본 함수 직접 호출 X (internal helper).
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal report helper — AI 가 직접 호출 X. Company.show 가 backing 호출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 2015 데이터 가정 X — extractClean 후 필터 제외됨.
+            - stock_knd 다양 (우선주 등) 회사 — 보통주 only filter 적용 됨.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame (수평화 또는 행 기반) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report parquet + REPORT_COL_KR 매핑.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - DART 정기보고서 마감 후 30~45 일.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - extractClean → 2015/stock_knd filter → reportPivotBySe / row-based → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART 정형 공시) 한정.
     """
     df = df.with_columns((pl.col("year").cast(pl.Utf8) + "Q" + pl.col("quarterNum").cast(pl.Utf8)).alias("_period"))
     # null-only 행 제외
@@ -362,34 +370,37 @@ class _ReportAccessor:
             >>> c._report.extract("dividend")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = f"_extract_{apiType}"
         if cacheKey in self._cache:
@@ -420,34 +431,37 @@ class _ReportAccessor:
             >>> c._report.extractAnnual("stockTotal")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = f"_annual_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
@@ -478,34 +492,37 @@ class _ReportAccessor:
             >>> c._report.result("dividend")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = f"_result_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
@@ -543,34 +560,37 @@ class _ReportAccessor:
             >>> c._report.status()  # 전체 28 종
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES, PREFERRED_QUARTER
 
@@ -604,20 +624,22 @@ class _ReportAccessor:
             >>> c.show("dividend")  # 권장
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -638,20 +660,22 @@ class _ReportAccessor:
             >>> c.show("employee")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -672,20 +696,22 @@ class _ReportAccessor:
             >>> c.show("majorHolder")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -706,20 +732,22 @@ class _ReportAccessor:
             >>> c.show("executive")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -740,20 +768,22 @@ class _ReportAccessor:
             >>> c.show("audit")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -784,34 +814,37 @@ class _ReportAccessor:
             >>> c._report.apiTypes
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         from dartlab.providers.dart.report.types import API_TYPES
 
@@ -832,34 +865,37 @@ class _ReportAccessor:
             '배당'
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS
 
@@ -879,34 +915,37 @@ class _ReportAccessor:
             >>> c._report.availableApiTypes
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
+            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
+              내부 backing namespace.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - report 데이터 부재 회사 → None. caller None 분기.
+                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 report parquet 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART 정기보고서 마감 후 30~45 일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - report parquet → apiType 별 dispatch → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = "_availableApiTypes"
         if cacheKey in self._cache:
