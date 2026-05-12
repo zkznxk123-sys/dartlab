@@ -569,11 +569,11 @@ def _buildChanges(
 
     # 인접 기간 비교
     long = long.sort(["_row", "period"])
-    long = long.with_columns(  # polars-streaming-unsupported: over (window function shift)
-        pl.col("period").shift(1).over("_row").alias("_prevPeriod"),
-        pl.col("_hash").shift(1).over("_row").alias("_prevHash"),
-        pl.col("_len").shift(1).over("_row").alias("_prevLen"),
-        pl.col("text").shift(1).over("_row").alias("_prevText"),
+    long = long.with_columns(
+        pl.col("period").shift(1).over("_row").alias("_prevPeriod"),  # polars-streaming-unsupported: over
+        pl.col("_hash").shift(1).over("_row").alias("_prevHash"),  # polars-streaming-unsupported: over
+        pl.col("_len").shift(1).over("_row").alias("_prevLen"),  # polars-streaming-unsupported: over
+        pl.col("text").shift(1).over("_row").alias("_prevText"),  # polars-streaming-unsupported: over
     )
 
     # 변화 필터

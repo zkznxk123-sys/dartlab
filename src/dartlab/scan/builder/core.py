@@ -231,10 +231,16 @@ def _buildRawChanges(parquetPath: Path, stockCode: str, sinceYear: int = 2021) -
     work = raw.select(["year", "section_order", "section_title", "section_content"])
     work = work.sort(["section_order", "section_title", "year"])
 
-    work = work.with_columns(  # polars-streaming-unsupported: over (window function shift)
+    work = work.with_columns(
         [
-            pl.col("year").shift(1).over(["section_order", "section_title"]).alias("_prevYear"),
-            pl.col("section_content").shift(1).over(["section_order", "section_title"]).alias("_prevContent"),
+            pl.col("year")
+            .shift(1)
+            .over(["section_order", "section_title"])
+            .alias("_prevYear"),  # polars-streaming-unsupported: over
+            pl.col("section_content")
+            .shift(1)
+            .over(["section_order", "section_title"])
+            .alias("_prevContent"),  # polars-streaming-unsupported: over
         ]
     )
 

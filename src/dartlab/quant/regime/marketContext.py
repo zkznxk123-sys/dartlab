@@ -83,7 +83,9 @@ def _alignDates(stockDf: pl.DataFrame, otherDf: pl.DataFrame, *, otherValueCol: 
     s = stockDf.select(["date", "close"]).sort("date")
     o = otherDf.select(["date", otherValueCol]).sort("date")
     o = o.with_columns(pl.col(otherValueCol).forward_fill())
-    joined = s.join_asof(o, on="date", strategy="backward").drop_nulls(subset=[otherValueCol])
+    joined = s.join_asof(o, on="date", strategy="backward").drop_nulls(
+        subset=[otherValueCol]
+    )  # polars-streaming-unsupported: asof
     if joined.height < 5:
         return np.array([]), np.array([])
     return (

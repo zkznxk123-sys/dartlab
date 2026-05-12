@@ -271,7 +271,7 @@ def _applySplitFactor(
     )
     rawSorted = raw.sort([codeCol, dateCol])
     joined = (
-        rawSorted.join_asof(ev, on=dateCol, by=codeCol, strategy="forward")
+        rawSorted.join_asof(ev, on=dateCol, by=codeCol, strategy="forward")  # polars-streaming-unsupported: asof
         .with_columns(
             # CRSP: ex-day 본인의 가격은 raw (factor=1), 그 *이전* 가격에만 누적 factor.
             # forward 매칭이 raw.date <= ev.date 라 ev.date == raw.date 인 경우
@@ -329,7 +329,7 @@ def _applyDivFactor(
     )
     rawSorted = raw.sort([codeCol, dateCol])
     joined = (
-        rawSorted.join_asof(ev, on=dateCol, by=codeCol, strategy="forward")
+        rawSorted.join_asof(ev, on=dateCol, by=codeCol, strategy="forward")  # polars-streaming-unsupported: asof
         .with_columns(
             pl.when(pl.col(dateCol) == pl.col("_evDate"))
             .then(pl.col("_revCumDiv") / pl.col("_divAdj"))

@@ -90,6 +90,36 @@ def test_no_raw_cross_company_scan() -> None:
     )
 
 
+def test_streaming_unsupported_annotated() -> None:
+    """M3: pivot/window/asof 27 호출부에 ``polars-streaming-unsupported`` 마커 부착 확인.
+
+    M2 의 streaming engine 일괄 도입 시 이 호출부는 eager 유지 — 마커가
+    auditor 에게 그 의도를 명시. 카테고리별 최소 횟수만 검증 (정확한 line 위치는
+    refactor 로 이동 가능하므로 fragile 회피).
+    """
+    counts = {"pivot": 0, "over": 0, "asof": 0}
+    for root in _SCAN_ROOTS:
+        for p in (_REPO / root).rglob("*.py"):
+            if "__pycache__" in p.parts:
+                continue
+            try:
+                text = p.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue
+            for line in text.splitlines():
+                if "polars-streaming-unsupported" not in line:
+                    continue
+                if ": pivot" in line:
+                    counts["pivot"] += 1
+                elif ": over" in line:
+                    counts["over"] += 1
+                elif ": asof" in line:
+                    counts["asof"] += 1
+    assert counts["pivot"] >= 11, f"pivot 마커 부족: {counts['pivot']}/11"
+    assert counts["over"] >= 12, f"over 마커 부족: {counts['over']}/12"
+    assert counts["asof"] >= 4, f"asof 마커 부족: {counts['asof']}/4"
+
+
 def test_inline_annotation_excluded() -> None:
     """``# polars-streaming-unsupported`` 주석 있는 line 은 차단 제외 (M0 화이트리스트).
 

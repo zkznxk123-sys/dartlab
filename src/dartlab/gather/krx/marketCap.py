@@ -204,7 +204,7 @@ def marketCap(
 
     px = px.sort("date").select(["date", "close", "volume"])
 
-    merged = px.join_asof(
+    merged = px.join_asof(  # polars-streaming-unsupported: asof
         shares,
         left_on="date",
         right_on="rcept_date",
