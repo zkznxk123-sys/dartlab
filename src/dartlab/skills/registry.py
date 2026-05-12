@@ -606,6 +606,14 @@ def _normalizeSpecData(data: dict[str, Any]) -> dict[str, Any]:
         data["validationRuns"] = []
     if data.get("pyodide") and not data["runtimeCompatibility"].get("pyodide"):
         data["runtimeCompatibility"]["pyodide"] = data["pyodide"]
+    # yaml 이 따옴표 없는 ISO date (`lastUpdated: 2026-05-12`) 를 datetime.date 로 파싱한다.
+    # 본 spec dict 는 JSON 직렬화 대상 (mcp/agent/web.json + MCP `_resourcePayload`) — date 객체는
+    # json.dumps 가 TypeError 로 차단한다. 운영자가 따옴표 빠뜨려도 무탈하게 ISO str 로 강제.
+    import datetime as _dt
+
+    lu = data.get("lastUpdated")
+    if isinstance(lu, (_dt.date, _dt.datetime)):
+        data["lastUpdated"] = lu.isoformat()
     # SkillSpec field 가 아닌 frontmatter 키는 drop — markdown 에 자유 메타 (intentBoosts 등) 허용.
     import dataclasses as _dc
 

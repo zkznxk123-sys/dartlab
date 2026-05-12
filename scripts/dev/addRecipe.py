@@ -63,7 +63,7 @@ runtimeCompatibility:
     notes: []
 sourceRefs:
   - dartlab://skills/recipes.{name}
-lastUpdated: {today}
+lastUpdated: "{today}"
 ---
 
 # {title}

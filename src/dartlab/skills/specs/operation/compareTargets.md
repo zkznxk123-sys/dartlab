@@ -67,7 +67,7 @@ runtimeCompatibility:
     status: supported
     notes: []
 status: observed
-lastUpdated: 2026-05-12
+lastUpdated: "2026-05-12"
 ---
 
 # 여러 종목 비교 — 토픽-기간 그리드 정규화

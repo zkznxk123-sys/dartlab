@@ -64,7 +64,7 @@ runtimeCompatibility:
     status: unsupported
     notes: CLI 호출 필요 — 브라우저 환경 X
 status: observed
-lastUpdated: 2026-05-12
+lastUpdated: "2026-05-12"
 ---
 
 # Recipe 6-stage lifecycle — 자기개선 사다리 회귀 차단

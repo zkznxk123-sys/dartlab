@@ -64,7 +64,7 @@ runtimeCompatibility:
     notes: []
 sourceRefs:
   - dartlab://skills/engines.{name}
-lastUpdated: {today}
+lastUpdated: "{today}"
 ---
 
 # {title}

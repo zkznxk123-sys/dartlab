@@ -71,7 +71,7 @@ runtimeCompatibility:
     status: supported
     notes: []
 status: observed
-lastUpdated: 2026-05-12
+lastUpdated: "2026-05-12"
 ---
 
 # 6 막 인과 서사 — 기업 분석 한정
