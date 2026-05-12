@@ -878,7 +878,7 @@ class Scan:
             lf = lf.filter(pl.col("contentLength") > 0)
         if limit and limit > 0:
             lf = lf.limit(limit)
-        return lf.collect()
+        return lf.collect(engine="streaming")
 
     def iterDocsSections(
         self,

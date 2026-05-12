@@ -151,7 +151,7 @@ class DefaultIndustryAccessor:
             lf = scanFinanceParquets("profitability")
             if lf is None:
                 return None
-            return lf.collect()
+            return lf.collect(engine="streaming")
         except (ValueError, RuntimeError, KeyError, AttributeError):
             return None
 
@@ -165,6 +165,6 @@ class DefaultIndustryAccessor:
             lf = scanFinanceParquets(name)
             if lf is None:
                 return None
-            return lf.collect()
+            return lf.collect(engine="streaming")
         except (ValueError, RuntimeError, KeyError, AttributeError):
             return None

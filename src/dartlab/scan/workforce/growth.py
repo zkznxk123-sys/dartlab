@@ -116,7 +116,7 @@ def _scanRevenueGrowthFromMerged(scanPath: Path) -> dict[str, float]:
             & (pl.col("bsns_year") <= "2024")
             & (pl.col("account_id").is_in(list(REVENUE_IDS)) | pl.col("account_nm").is_in(list(REVENUE_NMS)))
         )
-        .collect()
+        .collect(engine="streaming")
     )
     if target.is_empty():
         return {}
@@ -171,7 +171,7 @@ def _scanRevenueGrowthPerFile() -> dict[str, float]:
                     pl.col("sj_div").is_in(["IS", "CIS"])
                     & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
                 )
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue

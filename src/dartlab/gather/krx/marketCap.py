@@ -109,7 +109,7 @@ def _stockSharesSeries(stockCode: str, market: str) -> pl.DataFrame | None:
                         "preferredOutstanding",
                     ]
                 )
-                .collect()
+                .collect(engine="streaming")
             )
         else:
             df = (
@@ -117,7 +117,7 @@ def _stockSharesSeries(stockCode: str, market: str) -> pl.DataFrame | None:
                 .select(["end", "val"])
                 .rename({"end": "rcept_date", "val": "outstandingShares"})
                 .with_columns(pl.lit(0.0).alias("preferredOutstanding"))
-                .collect()
+                .collect(engine="streaming")
             )
     except (pl.exceptions.PolarsError, pl.exceptions.ColumnNotFoundError):
         return None

@@ -104,7 +104,7 @@ def _scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
             lf = lf.with_columns([pl.lit(None).alias(c) for c in missing])
         unified.append(lf.select(sorted(all_cols)))
 
-    return pl.concat(unified).collect()
+    return pl.concat(unified).collect(engine="streaming")
 
 
 def scanInvested() -> pl.DataFrame:
@@ -247,7 +247,7 @@ def scanAffiliateDocs(
                     pl.col("section_title").str.contains("계열회사 현황")
                     | pl.col("section_title").str.contains("계열회사에 관한 사항")
                 )
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue

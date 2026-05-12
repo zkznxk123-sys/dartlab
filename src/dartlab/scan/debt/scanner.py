@@ -169,7 +169,7 @@ def scanDebtMix() -> dict[str, dict]:
                     (pl.col("sj_div") == "BS")
                     & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
                 )
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue
@@ -226,7 +226,7 @@ def _debtMixFromMerged(scanPath: Path) -> dict[str, dict]:
             (pl.col("sj_div") == "BS")
             & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
         )
-        .collect()
+        .collect(engine="streaming")
     )
     if bs.is_empty() or "account_id" not in bs.columns:
         return {}

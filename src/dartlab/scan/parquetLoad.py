@@ -212,7 +212,7 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
             available = [c for c in keepCols if c in schema_names]
             non_meta = [c for c in available if c not in ("stockCode", "year", "quarter")]
             if non_meta:
-                return lf.select(available).collect()
+                return lf.select(available).collect(engine="streaming")
         except (pl.exceptions.PolarsError, OSError):
             pass  # fallback to per-file scan
 
@@ -257,7 +257,7 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
             lf = lf.with_columns([pl.lit(None).alias(c) for c in missing])
         unified.append(lf.select(sorted(all_cols)))
 
-    return pl.concat(unified).collect()
+    return pl.concat(unified).collect(engine="streaming")
 
 
 from dartlab.core.utils.helpers import parseNumStr  # noqa: E402
@@ -451,7 +451,7 @@ def _scanFinanceFromMerged(
             pl.col("sj_div").is_in(sjDivs)
             & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
         )
-        .collect()
+        .collect(engine="streaming")
     )
 
     if target.is_empty() or "account_id" not in target.columns:
@@ -589,7 +589,7 @@ def scanFinanceParquets(
                     pl.col("sj_div").is_in(sj_divs)
                     & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
                 )
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue

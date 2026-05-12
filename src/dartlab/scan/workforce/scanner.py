@@ -229,7 +229,7 @@ def _revenueFromMerged(scanPath: Path, revIds: set[str], revNms: set[str]) -> di
             pl.col("sj_div").is_in(["IS", "CIS"])
             & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
         )
-        .collect()
+        .collect(engine="streaming")
     )
     if target.is_empty() or "account_id" not in target.columns:
         return {}
@@ -300,7 +300,7 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
                     pl.col("sj_div").is_in(["IS", "CIS"])
                     & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
                 )
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue

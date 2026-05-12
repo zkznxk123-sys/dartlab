@@ -109,7 +109,7 @@ def scanEdgarRawTags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
                 pl.scan_parquet(fp)
                 .filter(pl.col("tag").is_in(tags) & pl.col("form").is_in(["10-K", "20-F"]))
                 .select("tag", "val", "fy", "entityName")
-                .collect()
+                .collect(engine="streaming")
             )
 
             if df.is_empty():
