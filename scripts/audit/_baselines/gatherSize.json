@@ -3,6 +3,8 @@
   "over_split": [],
   "under_split": [
     "src/dartlab/gather/accessors.py",
-    "src/dartlab/gather/domains/naver.py"
+    "src/dartlab/gather/domains/naver.py",
+    "src/dartlab/gather/ecos/catalog.py",
+    "src/dartlab/gather/types.py"
   ]
 }
