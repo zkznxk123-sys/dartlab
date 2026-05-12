@@ -310,6 +310,246 @@ class DefaultFinanceAccessor:
         df = self.fetchMacroSeries(seriesId, source=source, start=start)
         yield from _iterDataFrameBatches(df, batchSize)
 
+    def fetchInsiderTrades(
+        self,
+        stockCode: str,
+        *,
+        market: str = "KR",
+        limit: int | None = None,
+    ) -> pl.DataFrame | None:
+        """내부자 거래 내역 DataFrame — gather.insiderTrading 위임 (A 트랙 I1).
+
+        Capabilities:
+            - KR: DART 임원거래 공시 / US: SEC Form 4 (EDGAR)
+            - InsiderTrade dataclass list → pl.DataFrame 변환
+            - 빈 결과는 None (caller 가 None 분기)
+
+        AIContext:
+            - informed trading 신호. 외부 listener 가 dataframe accessor 로 받음.
+
+        Guide:
+            ``gather.engine.Gather().insiderTrading(...)`` 결과 list 를 DataFrame 으로
+            동형 변환. dataclass __dict__ 가 그대로 row.
+
+        When:
+            insider 흐름 시계열을 DataFrame 처리 (filter/group/aggregate) 필요 시.
+
+        How:
+            stockCode + market → mixin 위임 → list[InsiderTrade] → DataFrame.
+
+        Args:
+            stockCode: 종목코드 ("005930") 또는 티커 ("AAPL").
+            market: "KR" 또는 "US". 기본 "KR".
+
+        Returns:
+            pl.DataFrame | None — 거래 내역. 없으면 None.
+
+        Requires:
+            KR: DART_API_KEY env. US: 없음.
+
+        Raises:
+            없음 — provider 내부 예외는 빈 list/None 으로 흡수.
+
+        Example::
+
+            a = DefaultFinanceAccessor()
+            df = a.fetchInsiderTrades("005930")
+
+        See Also:
+            ``iterInsiderTrades`` — streaming pair.
+            ``dartlab.gather.mixins.info.insiderTrading`` — 원본 list.
+        """
+        from dartlab.gather.engine import Gather
+
+        trades = Gather().insiderTrading(stockCode, market=market)
+        if not trades:
+            return None
+        rows = [t.__dict__ if hasattr(t, "__dict__") else dict(t) for t in trades]
+        df = pl.DataFrame(rows)
+        return df.head(limit) if limit is not None else df
+
+    def iterInsiderTrades(
+        self,
+        stockCode: str,
+        *,
+        market: str = "KR",
+        batchSize: int = 100,
+    ) -> Iterator[pl.DataFrame]:
+        """fetchInsiderTrades 의 streaming pair — batchSize 행씩 yield (A 트랙 I1).
+
+        Args: stockCode/market (fetchInsiderTrades 와 동일), batchSize.
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterInsiderTrades("005930", batchSize=50): process(batch)
+
+        Requires: 네트워크 (fetchInsiderTrades 위임).
+        See Also: ``fetchInsiderTrades`` — full DataFrame.
+        """
+        df = self.fetchInsiderTrades(stockCode, market=market)
+        yield from _iterDataFrameBatches(df, batchSize)
+
+    def fetchOwnership(
+        self,
+        stockCode: str,
+        *,
+        market: str = "KR",
+        limit: int | None = None,
+    ) -> pl.DataFrame | None:
+        """기관/외국인 지분 보유 DataFrame — gather.ownership 위임 (A 트랙 I1).
+
+        Capabilities:
+            - KR: Naver 외국인 비율 + 기관 보유 / US: Yahoo institutionOwners
+            - InstitutionOwnership list → pl.DataFrame
+            - 빈 결과는 None
+
+        AIContext:
+            - 외국인/기관 보유 흐름 분석. flow() 일별 변동의 누적 형태.
+
+        Guide:
+            ``gather.engine.Gather().ownership(...)`` 결과 list 를 DataFrame 동형.
+
+        When:
+            institutional ownership 시계열 DataFrame 처리 필요 시.
+
+        How:
+            stockCode + market → mixin 위임 → DataFrame.
+
+        Args:
+            stockCode: 종목코드 또는 티커.
+            market: "KR" 또는 "US". 기본 "KR".
+
+        Returns:
+            pl.DataFrame | None — 지분 보유. 없으면 None.
+
+        Requires:
+            네트워크.
+
+        Raises:
+            없음.
+
+        Example::
+
+            a = DefaultFinanceAccessor()
+            df = a.fetchOwnership("005930")
+
+        See Also:
+            ``iterOwnership`` — streaming pair.
+            ``dartlab.gather.mixins.info.ownership`` — 원본 list.
+        """
+        from dartlab.gather.engine import Gather
+
+        owners = Gather().ownership(stockCode, market=market)
+        if not owners:
+            return None
+        rows = [o.__dict__ if hasattr(o, "__dict__") else dict(o) for o in owners]
+        df = pl.DataFrame(rows)
+        return df.head(limit) if limit is not None else df
+
+    def iterOwnership(
+        self,
+        stockCode: str,
+        *,
+        market: str = "KR",
+        batchSize: int = 100,
+    ) -> Iterator[pl.DataFrame]:
+        """fetchOwnership 의 streaming pair — batchSize 행씩 yield (A 트랙 I1).
+
+        Args: stockCode/market (fetchOwnership 와 동일), batchSize.
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterOwnership("005930"): aggregate(batch)
+
+        Requires: 네트워크.
+        See Also: ``fetchOwnership``.
+        """
+        df = self.fetchOwnership(stockCode, market=market)
+        yield from _iterDataFrameBatches(df, batchSize)
+
+    def fetchNews(
+        self,
+        query: str,
+        *,
+        market: str = "KR",
+        days: int = 30,
+        limit: int | None = None,
+    ) -> pl.DataFrame | None:
+        """뉴스 검색 DataFrame — gather.news 위임 (A 트랙 I1).
+
+        Capabilities:
+            - Google News RSS — title/link/published/source 컬럼
+            - KR/US 시장별 검색
+            - 빈 결과는 None
+
+        AIContext:
+            - sentiment / event 분석의 외부 신호 원천. 본문은 untrusted external.
+
+        Guide:
+            ``gather.engine.Gather().news(...)`` 결과 DataFrame 을 그대로 반환
+            (이미 DataFrame). is_empty() 시 None 으로 정규화.
+
+        When:
+            뉴스 시계열 batch 처리 / sentiment scoring 시.
+
+        How:
+            query + market + days → mixin 위임 → DataFrame.
+
+        Args:
+            query: 검색어 (종목명, 키워드).
+            market: "KR" 또는 "US". 기본 "KR".
+            days: 최근 N일. 기본 30.
+
+        Returns:
+            pl.DataFrame | None — 뉴스. 빈 결과면 None.
+
+        Requires:
+            네트워크 (Google News RSS).
+
+        Raises:
+            없음.
+
+        Example::
+
+            a = DefaultFinanceAccessor()
+            df = a.fetchNews("삼성전자", days=7)
+
+        See Also:
+            ``iterNews`` — streaming pair.
+            ``dartlab.gather.mixins.news.news`` — 원본 DataFrame.
+        """
+        from dartlab.gather.engine import Gather
+
+        df = Gather().news(query, market=market, days=days)
+        if df is None or df.is_empty():
+            return None
+        return df.head(limit) if limit is not None else df
+
+    def iterNews(
+        self,
+        query: str,
+        *,
+        market: str = "KR",
+        days: int = 30,
+        batchSize: int = 100,
+    ) -> Iterator[pl.DataFrame]:
+        """fetchNews 의 streaming pair — batchSize 행씩 yield (A 트랙 I1).
+
+        Args: query/market/days (fetchNews 와 동일), batchSize.
+        Yields: pl.DataFrame — 각 batch.
+        Raises: 없음.
+        Example::
+
+            for batch in a.iterNews("삼성전자", batchSize=20): score_sentiment(batch)
+
+        Requires: 네트워크.
+        See Also: ``fetchNews``.
+        """
+        df = self.fetchNews(query, market=market, days=days)
+        yield from _iterDataFrameBatches(df, batchSize)
+
 
 class DefaultQuantAccessor:
     """QuantDataAccessor 기본 구현."""
