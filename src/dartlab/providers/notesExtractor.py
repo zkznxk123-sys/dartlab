@@ -6,7 +6,21 @@ import polars as pl
 
 
 def extractNotesContent(report: pl.DataFrame) -> list[str]:
-    """보고서에서 연결재무제표 주석 섹션 내용 추출."""
+    """보고서에서 연결재무제표 주석 섹션 내용 추출.
+
+    Args:
+        report: ``section_title`` · ``section_content`` 컬럼이 포함된 보고서 DataFrame.
+
+    Returns:
+        ``"연결재무제표"`` + ``"주석"`` 매칭 섹션 본문 multiline 문자열 목록. 매칭 0 시 빈 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractNotesContent(report)
+        ['1. 매출 관련 ...', ...]
+    """
     section = report.filter(
         pl.col("section_title").str.contains("연결재무제표") & pl.col("section_title").str.contains("주석")
     )
