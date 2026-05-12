@@ -1,18 +1,6 @@
 {
   "_note": "G+ 트랙 P-D 에서 docstring 채우며 축소",
   "violations": [
-    "src/dartlab/gather/accessors.py::fetchAlignedMacro",
-    "src/dartlab/gather/accessors.py::fetchBenchmarkOhlcv",
-    "src/dartlab/gather/accessors.py::fetchExogenousAxes",
-    "src/dartlab/gather/accessors.py::fetchListing",
-    "src/dartlab/gather/accessors.py::fetchMacroSeries",
-    "src/dartlab/gather/accessors.py::fetchOhlcv",
-    "src/dartlab/gather/accessors.py::fetchPriceSnapshot",
-    "src/dartlab/gather/accessors.py::fetchScanFinanceParquet",
-    "src/dartlab/gather/accessors.py::fetchScanProfitability",
-    "src/dartlab/gather/accessors.py::fetchTechnicalIndicators",
-    "src/dartlab/gather/accessors.py::fetchUniverseBulk",
-    "src/dartlab/gather/accessors.py::lookupCompany",
     "src/dartlab/gather/bulkData/hfBulk.py::loadFiltered",
     "src/dartlab/gather/bulkData/hfDeploy.py::deployKrxIndexToHF",
     "src/dartlab/gather/bulkData/hfDeploy.py::deployKrxToHF",

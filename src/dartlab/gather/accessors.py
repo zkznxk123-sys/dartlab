@@ -31,6 +31,23 @@ class DefaultFinanceAccessor:
     ) -> pl.DataFrame | None:
         """OHLCV 스냅샷 fetch — gather("price") 위임.
 
+        Capabilities:
+            - L2 (analysis/quant) 가 gather 직접 import 없이 OHLCV 접근
+            - limit kwarg 로 행수 상한 (가장 위 N) 적용
+
+        AIContext:
+            - story/Company 가 본 accessor 를 L2 함수에 주입 — F3 DIP
+
+        Guide:
+            FinanceDataAccessor Protocol 의 default 구현. L2 코드는
+            Protocol 만 의존, 본 구현은 gather 의존을 흡수.
+
+        When:
+            quant/screen/regime 같은 L2 함수가 OHLCV 데이터 필요 시.
+
+        How:
+            ``getFinanceAccessor()`` 로 인스턴스 얻기 → L2 함수에 인자로 전달.
+
         Args:
             stockCode: 종목코드/티커.
             market: 시장 코드 (기본 ``"KR"``).
@@ -41,12 +58,19 @@ class DefaultFinanceAccessor:
         Returns:
             OHLCV DataFrame. fetch 실패 시 None.
 
+        Requires:
+            네트워크 (gather("price") 가 외부 API 호출). API 키 불필요.
+
         Raises:
             없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
 
         Example:
             >>> a = DefaultFinanceAccessor()
             >>> df = a.fetchPriceSnapshot("005930", market="KR", limit=10)
+
+        See Also:
+            ``dartlab.gather.GatherEntry`` — 본 함수가 위임하는 진입점.
+            ``dartlab.core.protocols.FinanceDataAccessor`` — Protocol.
         """
         from dartlab.gather.entry import GatherEntry
 
@@ -69,6 +93,23 @@ class DefaultFinanceAccessor:
     ) -> pl.DataFrame | None:
         """단일 macro 시계열 fetch — gather("macro") 위임.
 
+        Capabilities:
+            - FRED (US) / ECOS (KR) 단일 시리즈 조회
+            - limit kwarg 로 최근 N 행
+
+        AIContext:
+            - L2 macro/quant 가 raw 시계열 데이터 필요 시 본 accessor 경유
+
+        Guide:
+            FRED 의 GDP / UNRATE / FEDFUNDS, ECOS 의 BASE_RATE 등 단일
+            지표 ID 로 호출. 전체 macro 는 ``gather("macro")`` 직접 호출.
+
+        When:
+            특정 거시지표 시계열 필요 시 (회귀분석/regime/anomaly).
+
+        How:
+            seriesId + source 로 fetch → df.tail(limit) 으로 최근 N.
+
         Args:
             seriesId: macro 시리즈 ID (예: "GDP", "UNRATE").
             source: 데이터 소스 (``"fred"`` | ``"ecos"``). 기본 ``"fred"``.
@@ -78,12 +119,19 @@ class DefaultFinanceAccessor:
         Returns:
             ``(date, value)`` DataFrame. fetch 실패 시 None.
 
+        Requires:
+            네트워크 (FRED / ECOS 호출). FRED_API_KEY / ECOS_API_KEY env 권장.
+
         Raises:
             없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
 
         Example:
             >>> a = DefaultFinanceAccessor()
             >>> gdp = a.fetchMacroSeries("GDP", source="fred", limit=50)
+
+        See Also:
+            ``dartlab.gather.fred.facade.Fred`` — FRED 클라이언트.
+            ``dartlab.gather.ecos.facade.Ecos`` — ECOS 클라이언트.
         """
         from dartlab.gather.entry import GatherEntry
 
@@ -105,6 +153,9 @@ class DefaultFinanceAccessor:
 
         Returns:
             ``[(seriesId, source), ...]`` 리스트. 매핑 없거나 실패 시 빈 리스트.
+
+        Requires:
+            ``dartlab.gather.mapping.exogenousAxes`` 모듈 — 매핑 사전 (parquet).
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
@@ -142,6 +193,9 @@ class DefaultFinanceAccessor:
         Returns:
             패널 DataFrame. parquet 없거나 실패 시 None.
 
+        Requires:
+            ``data/<provider>/macro/aligned/*.parquet`` 사전 빌드.
+
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
 
@@ -169,6 +223,9 @@ class DefaultFinanceAccessor:
 
         Returns:
             Company 인스턴스. dartlab.company import 실패 또는 생성 실패 시 None.
+
+        Requires:
+            ``dartlab.company`` 모듈 + 종목코드 ↔ corp_code 매핑.
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
@@ -200,6 +257,23 @@ class DefaultQuantAccessor:
     ) -> pl.DataFrame | None:
         """단일 종목 OHLCV — quant.screen.dataAccess.fetchOhlcv 위임.
 
+        Capabilities:
+            - quant 모듈 OHLCV 진입점 (단일 종목)
+            - limit 으로 최근 N 일 슬라이스
+
+        AIContext:
+            - quant/screen/regime 같은 L2 가 OHLCV 데이터 접근 시
+
+        Guide:
+            QuantDataAccessor Protocol 의 default 구현. fetchOhlcv 는
+            quant.screen.dataAccess 의 wrapper.
+
+        When:
+            quant 함수가 단일 종목 시계열 필요 시.
+
+        How:
+            stockCode + market → fetchOhlcv → df.tail(limit).
+
         Args:
             stockCode: 종목코드/티커.
             market: 시장 코드 (기본 ``"KR"``).
@@ -209,12 +283,18 @@ class DefaultQuantAccessor:
         Returns:
             OHLCV DataFrame. fetch 실패 시 None.
 
+        Requires:
+            네트워크 (quant.screen.dataAccess 가 gather 위임).
+
         Raises:
             없음 — 위임 함수의 예외는 호출자가 처리.
 
         Example:
             >>> a = DefaultQuantAccessor()
             >>> df = a.fetchOhlcv("005930", market="KR", limit=20)
+
+        See Also:
+            ``dartlab.quant.screen.dataAccess.fetchOhlcv`` — 본 위임의 backend.
         """
         from dartlab.quant.screen.dataAccess import fetchOhlcv
 
@@ -241,6 +321,9 @@ class DefaultQuantAccessor:
 
         Returns:
             ``(ohlcv_df | None, meta | None)`` 튜플. fetch 실패 시 ``(None, None)``.
+
+        Requires:
+            ``dartlab.quant.benchmark.data`` 모듈 + 종목별 benchmark 매핑.
 
         Raises:
             없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
@@ -280,6 +363,9 @@ class DefaultQuantAccessor:
         Returns:
             bulk 패널 DataFrame. fetch 실패 시 None.
 
+        Requires:
+            ``data/<provider>/bulk/*.parquet`` (HF SSOT 미러).
+
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
 
@@ -308,6 +394,24 @@ class DefaultQuantAccessor:
     ) -> dict[str, pl.DataFrame]:
         """지표 번들 — gather.indicators 의 함수 시리즈 호출.
 
+        Capabilities:
+            - 다중 보조지표 한 번에 fetch (rsi/ma/macd 등)
+            - limit 으로 지표 개수 상한 (앞쪽 N)
+
+        AIContext:
+            - quant 가 종목별 지표 패키지 필요 시 본 accessor 경유
+
+        Guide:
+            indicators list 의 각 이름을 ``dartlab.core.indicators`` 의
+            함수로 lookup → fn(stockCode) 호출. callable 아니거나 실패한
+            지표는 결과에서 제외.
+
+        When:
+            screen/regime 등이 ad-hoc 지표 조합 필요 시.
+
+        How:
+            indicators=["rsi14", "ma20"] → {"rsi14": df, "ma20": df}.
+
         Args:
             stockCode: 종목코드/티커.
             indicators: 호출할 지표 이름 리스트 (예: ``["rsi14", "ma20"]``).
@@ -316,12 +420,18 @@ class DefaultQuantAccessor:
         Returns:
             ``{indicatorName: DataFrame}`` 딕셔너리. 위임 import 실패 시 빈 딕셔너리.
 
+        Requires:
+            ``dartlab.core.indicators`` 모듈 (각 지표 함수 정의).
+
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/TypeError 는 내부에서 흡수.
 
         Example:
             >>> a = DefaultQuantAccessor()
             >>> out = a.fetchTechnicalIndicators("005930", ["rsi14"], limit=1)
+
+        See Also:
+            ``dartlab.core.indicators`` — 지표 함수 카탈로그.
         """
         try:
             from dartlab.core import indicators as ind
@@ -353,6 +463,9 @@ class DefaultIndustryAccessor:
         Returns:
             전종목 listing DataFrame. import 실패 또는 fetch 실패 시 None.
 
+        Requires:
+            ``dartlab.gather.krx.listing`` 모듈 + KRX API (또는 캐시).
+
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/TypeError 는 내부에서 흡수.
 
@@ -380,6 +493,9 @@ class DefaultIndustryAccessor:
 
         Returns:
             수익성 parquet 의 collect DataFrame. import/scan 실패 시 None.
+
+        Requires:
+            ``data/<provider>/scan/profitability.parquet`` 사전 빌드 + scan engine.
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/AttributeError 는 내부에서 흡수.
@@ -411,6 +527,9 @@ class DefaultIndustryAccessor:
 
         Returns:
             카테고리 parquet 의 collect DataFrame. import/scan 실패 시 None.
+
+        Requires:
+            ``data/<provider>/scan/<name>.parquet`` 사전 빌드 + scan engine.
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/AttributeError 는 내부에서 흡수.
