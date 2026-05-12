@@ -116,7 +116,12 @@ def buildSkillArtifacts(
     pyodide_manifest = [
         _pyodideDoc(skill) for skill in skills if _runtimeStatus(skill, "pyodide") in {"supported", "limited"}
     ]
+    mcp_docs = [_mcpDoc(skill, allSkills=skills) for skill in skills]
+    web_docs = [_webDoc(skill) for skill in skills]
     _writeJson(web_path / "index.json", {"meta": meta, "skills": search_index})
+    _writeJson(web_path / "agent.json", {"meta": meta, "skills": search_index})  # index.json alias
+    _writeJson(web_path / "mcp.json", {"meta": meta, "skills": mcp_docs})
+    _writeJson(web_path / "web.json", {"meta": meta, "skills": web_docs})
     _writeJson(web_path / "pyodide.json", {"skills": pyodide_manifest})
     _writeJson(web_path / "graph.json", _buildGraphPayload(skills))
 
@@ -125,6 +130,180 @@ def buildSkillArtifacts(
         "webDir": str(web_path),
         "categories": categories,
     }
+
+
+def _mcpDoc(skill: Any, *, allSkills: list[Any]) -> dict[str, Any]:
+    """외부 LLM (MCP) 용 경량 문서 — 5 핵심 필드 + nextSkills max 5.
+
+    Description
+    -----------
+    토큰 절약 목적. frontmatter 의 *진입 매칭* 에 필요한 5 종 (id/title/
+    category/purpose/whenToUse) + chain hint (linkedSkills + successors +
+    succeededBy 합성, max 5). bodyPreview 는 directive 마커 `:::for-llm` 본문
+    있으면 그것, 없으면 처음 600 자.
+
+    Parameters
+    ----------
+    skill : SkillSpec
+    allSkills : list[SkillSpec]
+        nextSkills chain hint 매칭용 (id 셋 검증).
+
+    Returns
+    -------
+    dict
+        skill 당 < 300 토큰 목표.
+
+    Examples
+    --------
+    >>> _mcpDoc(spec, allSkills=specs)["id"]
+
+    Notes
+    -----
+    `:::for-llm` directive 가 본문에 있으면 그것만 추출, 없으면 본문 600자
+    fallback.
+
+    Guide
+    -----
+    랜딩/agent.json 와 분리된 경량 인덱스. 외부 LLM 진입 시 1 차 fetch.
+
+    See Also
+    --------
+    _agentDoc : 내부 AI 용 (frontmatter + bodyPreview 1500자).
+    _webDoc : 사람 용 풍부.
+    """
+    all_ids = {s.id for s in allSkills}
+    next_skills: list[str] = []
+    for field_name in ("linkedSkills", "successors", "succeededBy"):
+        for raw in getattr(skill, field_name, None) or []:
+            if not isinstance(raw, str):
+                continue
+            ref = raw.strip().strip('"').strip("'")
+            if ref and ref in all_ids and ref not in next_skills:
+                next_skills.append(ref)
+            if len(next_skills) >= 5:
+                break
+        if len(next_skills) >= 5:
+            break
+
+    directives = _splitDirectives(str(skill.source.get("body") or ""))
+    body_preview = directives.get("llm") or (str(skill.source.get("body") or "")[:600])
+
+    return {
+        "id": skill.id,
+        "title": _publicText(skill.title),
+        "category": skill.category,
+        "purpose": _publicText(skill.purpose),
+        "whenToUse": _publicList(skill.whenToUse),
+        "nextSkills": next_skills,
+        "bodyPreview": body_preview,
+    }
+
+
+def _webDoc(skill: Any) -> dict[str, Any]:
+    """사람 (랜딩) 용 풍부 문서 — humanIntro + image + visualRefs 포함.
+
+    Description
+    -----------
+    `_searchDoc` 결 베이스 + humanIntro/image 추가. directive `:::for-human`
+    있으면 그것을 bodyHuman 으로 추출.
+
+    Parameters
+    ----------
+    skill : SkillSpec
+
+    Returns
+    -------
+    dict
+        사람 가독성 위주, 토큰 제약 없음.
+
+    Examples
+    --------
+    >>> _webDoc(spec)["humanIntro"]
+
+    Notes
+    -----
+    랜딩 빌드 시 import. ProcedureStepper · UsageExamples · EvidenceChecklist
+    등 시각 컴포넌트 매핑.
+
+    Guide
+    -----
+    humanIntro 가 채워진 spec 부터 우선 표시.
+
+    See Also
+    --------
+    _agentDoc : 같은 본문이지만 내부 AI 용.
+    """
+    base = _searchDoc(skill)
+    directives = _splitDirectives(str(skill.source.get("body") or ""))
+    base["humanIntro"] = getattr(skill, "humanIntro", None)
+    base["visualRefs"] = _publicList(getattr(skill, "visualRefs", None) or [])
+    base["bodyHuman"] = directives.get("human")
+    return base
+
+
+def _splitDirectives(body: str) -> dict[str, str]:
+    """본문 안 `:::for-llm` / `:::for-agent` / `:::for-human` directive 추출.
+
+    Description
+    -----------
+    mdsvex 가 사람용 본문에는 그대로 렌더 (custom directive 처리 가능),
+    MCP/agent 인덱스 빌드 시 본 함수가 해당 블록 *만* 추출.
+
+    문법:
+        :::for-llm
+        외부 LLM 만 읽는 본문
+        :::end
+
+        :::for-agent
+        내부 AI 엔진 본문
+        :::end
+
+        :::for-human
+        사람 도입 본문
+        :::end
+
+    Parameters
+    ----------
+    body : str
+        frontmatter 뒤 본문.
+
+    Returns
+    -------
+    dict
+        key 가 "llm"/"agent"/"human", 값이 해당 블록 본문 (없으면 미포함).
+
+    Examples
+    --------
+    >>> _splitDirectives(":::for-llm\\nshort\\n:::end")
+    {'llm': 'short'}
+
+    Notes
+    -----
+    한 본문에 같은 directive 가 여러 번 있으면 모두 join. 마커 없으면 빈 dict.
+
+    Guide
+    -----
+    새 spec 작성 시 *주체별 본문 분기* 가 필요할 때만 명시. 없으면 본문 전체
+    가 모든 주체에 직렬화.
+
+    See Also
+    --------
+    _mcpDoc : llm block fallback 처리.
+    _webDoc : human block fallback 처리.
+    """
+    import re as _re
+
+    out: dict[str, list[str]] = {"llm": [], "agent": [], "human": []}
+    pattern = _re.compile(
+        r":::for-(llm|agent|human)\s*\n(.*?)\n:::end",
+        _re.DOTALL,
+    )
+    for match in pattern.finditer(body or ""):
+        audience = match.group(1)
+        content = match.group(2).strip()
+        if content:
+            out[audience].append(content)
+    return {k: "\n\n".join(v) for k, v in out.items() if v}
 
 
 def _buildGraphPayload(skills: list[Any]) -> dict[str, Any]:
