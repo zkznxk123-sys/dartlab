@@ -51,17 +51,56 @@ def _listingResolver():
 
 
 def codeToName(stockCode):
-    """ListingResolver 경유 stockCode → 회사명."""
+    """ListingResolver 경유 stockCode → 회사명.
+
+    Args:
+        stockCode: 종목코드 (6자리).
+
+    Returns:
+        회사명 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> codeToName("005930")
+    """
     return _listingResolver().codeToName(stockCode)
 
 
 def nameToCode(corpName):
-    """ListingResolver 경유 회사명 → stockCode."""
+    """ListingResolver 경유 회사명 → stockCode.
+
+    Args:
+        corpName: 회사명.
+
+    Returns:
+        종목코드 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> nameToCode("삼성전자")
+    """
     return _listingResolver().nameToCode(corpName)
 
 
 def getKindList(*, forceRefresh: bool = False):
-    """ListingResolver 경유 KIND 상장법인 목록."""
+    """ListingResolver 경유 KIND 상장법인 목록.
+
+    Args:
+        forceRefresh: 캐시 무시.
+
+    Returns:
+        상장법인 DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getKindList(forceRefresh=False)
+    """
     return _listingResolver().kindList(forceRefresh=forceRefresh)
 
 
@@ -77,6 +116,9 @@ def searchName(keyword, *, limit: int | None = None):
 
     Example:
         >>> searchName("삼성", limit=10)
+
+    Raises:
+        없음.
     """
     df = _listingResolver().search(keyword)
     if df is not None and limit is not None:
@@ -171,7 +213,14 @@ def _getAllProperties() -> list[tuple[str, str]]:
 
 
 def rebuildModuleRegistry() -> None:
-    """플러그인 등록 후 호출 — 모듈 레지스트리 캐시 무효화."""
+    """플러그인 등록 후 호출 — 모듈 레지스트리 캐시 무효화.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rebuildModuleRegistry()
+    """
     global _MODULE_REGISTRY, _MODULE_INDEX, _ALL_PROPERTIES
     _MODULE_REGISTRY = None
     _MODULE_INDEX = None
@@ -362,6 +411,9 @@ def listExportModules(*, limit: int | None = None) -> list[tuple[str, str]]:
 
     Example:
         >>> listExportModules(limit=20)
+
+    Raises:
+        없음.
     """
     items = list(_getAllProperties())
     if limit is not None:
@@ -451,6 +503,12 @@ class Company:
         bool
             True 면 DART provider 로 처리. 6자리 alphanumeric (KR 종목코드)
             또는 한글 포함 문자열이면 True.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").canHandle()
         """
         if re.match(r"^[0-9A-Za-z]{6}$", code):
             return True
@@ -466,6 +524,12 @@ class Company:
         -------
         int
             provider 우선순위. DART 는 10 — EDGAR (20) 보다 먼저 시도.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").priority()
         """
         return 10
 
@@ -649,6 +713,9 @@ class Company:
         dict[str, str]
             키 = topic 이름 (예: "BS", "IS", "dividend", "companyOverview")
             값 = 200자 요약 텍스트
+
+        Raises:
+            없음.
         """
         cacheKey = "_topicSummaries"
         if cacheKey in self._cache:
@@ -799,6 +866,12 @@ class Company:
 
         Requires:
             데이터: listing (자동 다운로드)
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").listing()
         """
         return getKindList(forceRefresh=forceRefresh)
 
@@ -815,6 +888,9 @@ class Company:
 
         Example:
             >>> Company.search("삼성", limit=10)
+
+        Raises:
+            없음.
         """
         return searchName(keyword, limit=limit)
 
@@ -827,6 +903,12 @@ class Company:
 
         Returns:
             str | None — 6자리 종목코드. 못 찾으면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").resolve()
         """
         normalized = stockCode.strip()
         if re.match(r"^[0-9A-Za-z]{6}$", normalized):
@@ -842,6 +924,12 @@ class Company:
 
         Returns:
             str | None — 회사명. 못 찾으면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").codeName()
         """
         return codeToName(stockCode)
 
@@ -855,6 +943,12 @@ class Company:
 
         Returns:
             pl.DataFrame — 종목코드, 회사명, docs/finance/report 유무, 최종일시.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").status()
         """
         return buildIndex()
 
@@ -895,6 +989,12 @@ class Company:
                 - viewerUrl : str — DART 뷰어 링크
             Freshness:
                 local cache 기반. c.update() 호출 시점이 기준.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").filings()
         """
         from dartlab.providers.dart.builder.filingsCatalog import buildFilings
 
@@ -937,6 +1037,12 @@ class Company:
                 - report : int — 추가 수집된 report 건수
             Freshness:
                 호출 시점에 DART API 와 비교해 누락만 수집. 매 호출 시점 = 최신 기준.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").update()
         """
         from dartlab.providers.dart.builder.filingsCatalog import buildUpdate
 
@@ -1024,6 +1130,9 @@ class Company:
                 - formType : str — 공시 유형 (정기/주요사항/지분 등)
             Freshness:
                 DART API 실시간 (분 단위). filings() 와 다름 (filings 는 local cache).
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.filingsCatalog import buildDisclosure
 
@@ -1096,6 +1205,9 @@ class Company:
                 DART API 실시간 (분 단위).
             TargetMarkets:
                 - KR
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.filingsCatalog import buildLiveFilings
 
@@ -1164,6 +1276,9 @@ class Company:
                 - sections : list[dict] — 섹션 목록 (sections=True)
             Freshness:
                 DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download.
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.filingsCatalog import buildReadFiling
 
@@ -1211,6 +1326,9 @@ class Company:
                 - HuggingFace docs parquet 원본 — 컬럼 구조는 dataset 별로 다름
             Freshness:
                 HuggingFace parquet 다운로드 시점.
+
+        Raises:
+            없음.
         """
         if not self._hasDocs:
             self._hintOnce("rawDocs", "rawDocs", "docs")
@@ -1262,6 +1380,9 @@ class Company:
                 - XBRL 정규화 전 원본 — bsns_year / sj_div / account_id / amount 등
             Freshness:
                 HuggingFace finance parquet 다운로드 시점.
+
+        Raises:
+            없음.
         """
         if not self._hasFinanceParquet:
             self._hintOnce("rawFinance", "rawFinance", "finance")
@@ -1313,6 +1434,9 @@ class Company:
                 - 정기보고서 API 원본 — 컬럼은 보고서 form 별로 다름
             Freshness:
                 HuggingFace report parquet 다운로드 시점.
+
+        Raises:
+            없음.
         """
         if not self._hasReport:
             self._hintOnce("rawReport", "rawReport", "report")
@@ -1574,6 +1698,9 @@ class Company:
                 - source : str — docs / finance / report
             Freshness:
                 docs/finance/report 3 source 각각의 최신 시점. c.update() 시점.
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.docsProfileBuilder import buildSections
 
@@ -2166,6 +2293,9 @@ class Company:
             - watch: 변화 중요도 스코어링 (diff보다 요약적)
             - keywordTrend: 키워드 빈도 추이 (텍스트 변화의 다른 관점)
             - show: 특정 기간 원문 조회
+
+        Raises:
+            없음.
         """
         if topic is not None:
             topic = _resolveTopic(topic)
@@ -2227,6 +2357,9 @@ class Company:
         SeeAlso:
             - diff: 텍스트 줄 단위 변경 비교 (키워드가 아닌 전체 변경)
             - watch: 변화 중요도 스코어링
+
+        Raises:
+            없음.
         """
         from dartlab.core.docs.diff import keywordFrequency
 
@@ -2273,6 +2406,9 @@ class Company:
         SeeAlso:
             - liveFilings: 최신 공시 (뉴스가 아닌 공식 공시)
             - gather: 뉴스 포함 4축 외부 데이터 수집
+
+        Raises:
+            없음.
         """
         from dartlab.core.gatherProvider import getGatherProvider
 
@@ -2315,6 +2451,9 @@ class Company:
         SeeAlso:
             - diff: 줄 단위 상세 변경 비교 (watch보다 세밀)
             - keywordTrend: 키워드 빈도 추이
+
+        Raises:
+            없음.
         """
         import importlib
 
@@ -2341,6 +2480,12 @@ class Company:
         CallableAccessor
             dual-access proxy. 호출 시 ``_storyImpl`` 이 ``Story`` 객체 반환
             (blocks / toMarkdown() / toHtml()). 상세는 ``_storyImpl`` docstring.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").story()
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2471,6 +2616,12 @@ class Company:
             dual-access proxy. 호출 시 ``_analysisImpl`` 이
             ``pl.DataFrame | dict`` 반환 (axis=None → 가이드 DataFrame, axis
             지정 → 축별 dict). 상세는 ``_analysisImpl`` docstring.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").analysis()
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2599,6 +2750,9 @@ class Company:
             r = c.validateStory()
             for f in r["rules"]["flags"]:
                 print(f['severity'], f['reason'])
+
+        Raises:
+            없음.
         """
         from dartlab.analysis.financial.storyValidation import (
             calcPlausibilityBand,
@@ -2640,6 +2794,12 @@ class Company:
         CallableAccessor
             dual-access proxy. 호출 시 ``_creditImpl`` 이 dict 반환 (grade,
             score (점), healthScore (점), axes, outlook). 상세는 ``_creditImpl``.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").credit()
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2804,6 +2964,9 @@ class Company:
                 - news: title / link / pubDate (string)
             Freshness:
                 price/flow: T+1 (전일 종가). macro: ECOS/FRED 갱신 주기. news: 실시간 RSS.
+
+        Raises:
+            없음.
         """
         from dartlab.core.gatherProvider import getGatherProvider
 
@@ -2857,6 +3020,9 @@ class Company:
         SeeAlso:
             - show: topic 전체 데이터 (table은 subtopic 단위 파싱)
             - select: show() 결과에서 행/열 필터
+
+        Raises:
+            없음.
         """
         result = self._topicSubtables(topic)
         if result is None:
@@ -2931,6 +3097,9 @@ class Company:
                 - latestPeriod : str — 최신 기간
             Freshness:
                 docs/finance/report 각각의 c.update() 시점.
+
+        Raises:
+            없음.
         """
         cacheKey = "_topicsDataFrame"
         if cacheKey in self._cache:
@@ -3022,6 +3191,9 @@ class Company:
                 - shape : str — "rows × cols" 표기
             Freshness:
                 rawDocs / rawFinance / rawReport 의 다운로드 시점 기준.
+
+        Raises:
+            없음.
         """
         rows = []
         for source, raw in (
@@ -3178,6 +3350,9 @@ class Company:
                 - value : str — 텍스트 또는 숫자 요약
             Freshness:
                 sections / finance / report 의 c.update() 시점.
+
+        Raises:
+            없음.
         """
         return self._profileAccessor.facts
 
@@ -3212,6 +3387,9 @@ class Company:
 
             c = Company("005930")
             c.retrievalBlocks          # 전체 retrieval 블록
+
+        Raises:
+            없음.
         """
         return self._docs.retrievalBlocks
 
@@ -3246,6 +3424,9 @@ class Company:
 
             c = Company("005930")
             c.contextSlices            # LLM용 context 슬라이스
+
+        Raises:
+            없음.
         """
         return self._docs.contextSlices
 
@@ -3421,6 +3602,9 @@ class Company:
                 KIND 상장사 목록 시점.
             TargetMarkets:
                 - KR
+
+        Raises:
+            없음.
         """
         cacheKey = "_sector"
         if cacheKey in self._cache:
@@ -3466,6 +3650,9 @@ class Company:
         SeeAlso:
             - sector: 섹터 분류 정보 (sectorParams의 기반)
             - valuation: 밸류에이션 (sectorParams를 내부적으로 소비)
+
+        Raises:
+            없음.
         """
         cacheKey = "_sectorParams"
         if cacheKey in self._cache:
@@ -3532,6 +3719,9 @@ class Company:
                 scan 데이터 기준 — 분기 마감 후 갱신.
             TargetMarkets:
                 - KR
+
+        Raises:
+            없음.
         """
         cacheKey = "_rank"
         if cacheKey in self._cache:
@@ -3601,6 +3791,9 @@ class Company:
                 - internalControl : str — 내부회계관리제도 검토의견
             Freshness:
                 report 데이터 기준 — 정기보고서 마감 후 30~45 일.
+
+        Raises:
+            없음.
         """
         from dartlab.analysis.financial.insight.pipeline import analyzeAudit
 
@@ -3620,6 +3813,9 @@ class Company:
 
             c = Company("005930")
             c.market  # "KR"
+
+        Raises:
+            없음.
         """
         return "KR"
 
@@ -3632,6 +3828,12 @@ class Company:
 
         Returns:
             "12-31".
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").fiscalYearEnd()
         """
         return "12-31"
 
@@ -3649,6 +3851,9 @@ class Company:
 
             c = Company("005930")
             c.currency  # "KRW"
+
+        Raises:
+            없음.
         """
         return "KRW"
 
@@ -3714,6 +3919,9 @@ class Company:
                 - view="peers": ego 서브그래프 노드
             Freshness:
                 대량보유/임원 공시 기준.
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanNetwork
 
@@ -3780,6 +3988,9 @@ class Company:
                 정기보고서 마감 후 30~45 일.
             TargetMarkets:
                 - KR (DART)
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanGovernance
 
@@ -3835,6 +4046,9 @@ class Company:
                 정기보고서 마감 후 30~45 일.
             TargetMarkets:
                 - KR
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanWorkforce
 
@@ -3902,6 +4116,9 @@ class Company:
                 정기보고서 마감 후 30~45 일.
             TargetMarkets:
                 - KR
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanCapital
 
@@ -3967,6 +4184,9 @@ class Company:
                 정기보고서 마감 후 30~45 일.
             TargetMarkets:
                 - KR
+
+        Raises:
+            없음.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanDebt
 
@@ -3991,6 +4211,12 @@ class Company:
             dual-access proxy. 호출 시 ``_quantImpl`` 이 axis 따라
             ``pl.DataFrame`` (지표 시계열) 또는 dict (판단/팩터 등) 반환.
             상세는 ``_quantImpl`` docstring.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").quant()
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -4083,6 +4309,12 @@ class Company:
                 - axis 미지정: 가이드 DataFrame
             Freshness:
                 ECOS / FRED 갱신 주기 (월 / 분기).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").macro()
         """
         from dartlab.macro import Macro
 
@@ -4114,6 +4346,12 @@ class Company:
                 - direction : str — amplify / dampen / neutral
             Freshness:
                 finance 시계열 시점.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").causalWeights()
         """
         import importlib
 
@@ -4142,6 +4380,12 @@ class Company:
                 - overrides : dict — analysis(valuation, overrides=...) 호출용
             Freshness:
                 story 인과 체인 기준 — finance 데이터 시점.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").valuationImpact()
         """
         import importlib
 
@@ -4173,6 +4417,9 @@ class Company:
                 - summary : dict — min / max / spread / spreadPct / mean
             Freshness:
                 finance 시계열 시점.
+
+        Raises:
+            없음.
         """
         import importlib
 
@@ -4202,6 +4449,12 @@ class Company:
                 - contribution : float — 기여도 (정규화)
             Freshness:
                 story 인과 체인 시점.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").narrativeDiff()
         """
         import importlib
 
@@ -4237,6 +4490,9 @@ class Company:
                 - peers : list[str] — 같은 stage 종목코드
             Freshness:
                 산업 지도 정의 시점 — 운영자 수동 업데이트.
+
+        Raises:
+            없음.
         """
         from dartlab.industry.calcs.companyCalcs import calcChainPosition
 
@@ -4273,6 +4529,9 @@ class Company:
         SeeAlso:
             - index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)
             - sections: 뷰어의 원본 데이터
+
+        Raises:
+            없음.
         """
         from dartlab.core.viewer import launchViewer
 
@@ -4357,6 +4616,18 @@ class Company:
 
         본 회사 disclosure history 를 수집해 providers/dart/calendar 에 위임.
         intra-package import 라 cycle 0 (gather 의존 X).
+
+        Args:
+            horizonDays: 미래 horizon (기본 30 일).
+
+        Returns:
+            catalyst DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company("005930").calendar()
         """
         from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA, predictCalendar
 
@@ -4386,6 +4657,9 @@ class _DartDisclosureFetcher:
 
         Example:
             >>> _DartDisclosureFetcher().fetch("005930", days=90, limit=10)
+
+        Raises:
+            없음.
         """
         try:
             df = Company(stockCode).disclosure(days=days, type=type)
