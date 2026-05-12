@@ -46,12 +46,6 @@ forbidden:
   - source priority 무시
   - 환율 환산 없이 KRW/USD 직접 비교
   - 비교 대상 회사명/티커 영문/한글 변종 혼용
-capabilityRefs:
-  - dartlab.scan
-  - dartlab.Company.show
-  - dartlab.Company.diff
-apiRefs:
-  - dartlab.scan
 knowledgeRefs:
   - engines.company
   - engines.scan
@@ -60,6 +54,18 @@ linkedSkills:
   - operation.sixActsAnalysis
 sourceRefs:
   - dartlab://skills/operation.compareTargets
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
+    notes: []
 status: observed
 lastUpdated: 2026-05-12
 ---

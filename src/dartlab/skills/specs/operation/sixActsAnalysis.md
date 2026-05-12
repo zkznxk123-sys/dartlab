@@ -47,14 +47,6 @@ forbidden:
   - 비기업 분석 (산업 자체 · 거시 자체) 에 6 막 적용
   - 5 분석 결과를 *나열* 만 하고 인과 연결 없음
   - 결손 데이터를 0 으로 채워 막을 *완성된 척*
-capabilityRefs:
-  - dartlab.Company.story
-  - dartlab.story.Story
-  - dartlab.analysis
-  - dartlab.credit
-  - dartlab.macro
-  - dartlab.quant
-  - dartlab.industry
 knowledgeRefs:
   - engines.story
   - engines.analysis
@@ -66,6 +58,18 @@ linkedSkills:
   - operation.compareTargets
 sourceRefs:
   - dartlab://skills/operation.sixActsAnalysis
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
+    notes: []
 status: observed
 lastUpdated: 2026-05-12
 ---

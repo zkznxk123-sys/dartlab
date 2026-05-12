@@ -45,15 +45,24 @@ forbidden:
   - AI 자율적 status 변경
   - scorecard 점수 조작 (`recipes/_history.jsonl` 직접 편집)
   - tested 건너뛰고 verified 점프
-capabilityRefs:
-  - scripts.dev.recipe_promote
-apiRefs:
-  - scripts/dev/recipe_promote.py
 knowledgeRefs:
   - operation.coreloop
   - operation.philosophy
 sourceRefs:
   - dartlab://skills/operation.recipePromote
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: unsupported
+    notes: CLI 호출 필요 — 브라우저 환경 X
+  pyodide:
+    status: unsupported
+    notes: CLI 호출 필요 — 브라우저 환경 X
 status: observed
 lastUpdated: 2026-05-12
 ---
