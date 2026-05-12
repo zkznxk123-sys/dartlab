@@ -8,6 +8,10 @@ from pathlib import Path
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
+
+_log = getLogger(__name__)
+
 # ── 계정 라벨 SSOT (scan 모듈 공용) ──
 # 같은 회계 개념의 snake_id / 표시명 변형을 한 곳에 통합.
 # 신규 변형 발견 시 여기서만 추가 → scan/{efficiency,growth,profitability,valuation} 자동 반영.
@@ -494,27 +498,210 @@ def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol
     return target.join(latest, on=scCol).filter(pl.col(yearCol) == pl.col("_maxYear")).drop("_maxYear")
 
 
-def _scanFinanceFromMerged(
-    scanPath: Path,
-    sjDivs: list[str],
+_RAW_FINANCE_DEFAULT_COLS: tuple[str, ...] = (
+    "stockCode",
+    "bsns_year",
+    "reprt_nm",
+    "reprt_code",
+    "sj_div",
+    "fs_nm",
+    "account_id",
+    "account_nm",
+    "thstrm_amount",
+    "thstrm_add_amount",
+)
+
+
+def _sqlEscapeLiteral(value: str) -> str:
+    """SQL string literal 안의 ``'`` 를 ``''`` 로 escape.
+
+    DART account_id / account_nm 에는 ``dart_(1)총매출액`` · ``ifrs-full_Revenue`` 같이
+    SQL injection 위험은 없지만 ``'`` 가 포함된 키가 있어 IN 절 파싱이 깨진다.
+    standard SQL 의 doubled-quote escape 만 적용.
+    """
+    return value.replace("'", "''")
+
+
+def _loadRawFinanceViaDuckDb(
+    financeDir: Path,
+    *,
+    sjDivs: list[str] | None = None,
+    sinceYear: int | None = None,
+    accountIds: set[str] | list[str] | None = None,
+    accountNms: set[str] | list[str] | None = None,
+    columns: tuple[str, ...] | list[str] | None = None,
+) -> pl.LazyFrame | None:
+    """raw ``finance/*.parquet`` glob → DuckDB streaming SQL → polars LazyFrame.
+
+    프리빌드 합본 ``finance.parquet`` 이 없을 때 사용하는 fallback path. DuckDB 가
+    parallel parquet scan + predicate pushdown + 자동 spill-to-disk 로 처리하여
+    종목별 ThreadPool 순회 대비 빠르고 메모리 안전 (DuckDB native heap 만 사용,
+    Python/Polars RSS 누적 없음).
+
+    ``scan/finance.parquet`` 와 동일한 스키마로 반환되므로 호출자는 기존 후처리
+    (``_scanFinanceFromLazy`` · ``_scanAccountFromMerged`` lazyFrame 경로) 를 그대로
+    재사용한다.
+
+    SQL 단에는 selectivity 가 높고 SQL injection 안전한 (sj_div / bsns_year) 필터만
+    push-down. ``account_id`` · ``account_nm`` 매칭은 raw 데이터에 ``'`` 같은 특수
+    문자가 포함된 키 (예: ``dart_(1)총매출액``) 가 있어 polars 단에서 ``is_in`` 으로
+    처리한다.
+
+    Parameters
+    ----------
+    financeDir : Path
+        종목별 raw parquet (``{stockCode}.parquet``) 디렉토리.
+    sjDivs : list[str] | None
+        ``sj_div`` 필터 (예: ``["IS", "CIS"]``). None 이면 미적용.
+    sinceYear : int | None
+        ``bsns_year >= sinceYear`` 필터. None 이면 미적용.
+
+    Returns
+    -------
+    pl.LazyFrame | None
+        합본 스키마 (``stockCode`` 포함) LazyFrame. raw 디렉토리 비었거나 DuckDB
+        미설치/실패 시 None.
+
+    Notes
+    -----
+    - 스키마 변동 흡수: ``union_by_name=True`` 로 종목별 컬럼 차이 자동 합산.
+    - ``stockCode`` 컬럼은 raw 의 ``stock_code`` (snake_case) 를 rename. 둘 다 없으면
+      None 반환.
+    - 결산월 캘린더 환원은 적용되지 않음 — fallback path 에서는 빌더 변환을 거치지
+      않으므로 호출자가 필요시 별도 처리.
+    """
+    if not financeDir.exists():
+        return None
+    files = sorted(financeDir.glob("*.parquet"))
+    if not files:
+        return None
+
+    try:
+        import duckdb
+    except ImportError:
+        return None
+
+    pattern = str(financeDir / "*.parquet").replace("\\", "/")
+    where: list[str] = []
+    if sjDivs:
+        # sj_div 는 고정 값셋 (IS/CIS/BS/CF) 이라 escape 불요
+        sjList = ", ".join(f"'{s}'" for s in sjDivs)
+        where.append(f"sj_div IN ({sjList})")
+    if sinceYear is not None:
+        where.append(f"TRY_CAST(bsns_year AS INTEGER) >= {int(sinceYear)}")
+    if accountIds or accountNms:
+        clauses: list[str] = []
+        if accountIds:
+            aiList = ", ".join(f"'{_sqlEscapeLiteral(s)}'" for s in accountIds)
+            clauses.append(f"account_id IN ({aiList})")
+        if accountNms:
+            anList = ", ".join(f"'{_sqlEscapeLiteral(s)}'" for s in accountNms)
+            clauses.append(f"account_nm IN ({anList})")
+        where.append("(" + " OR ".join(clauses) + ")")
+
+    # SELECT 절: 필수 컬럼만 (메모리 절감 — raw 30 컬럼 → 10 컬럼).
+    # stock_code (snake) → stockCode (camel) alias 로 일관화.
+    selectCols = list(columns) if columns else list(_RAW_FINANCE_DEFAULT_COLS)
+    selectExprs = []
+    for c in selectCols:
+        if c == "stockCode":
+            selectExprs.append("stock_code AS stockCode")
+        else:
+            selectExprs.append(c)
+    selectSql = ", ".join(selectExprs)
+
+    whereSql = (" WHERE " + " AND ".join(where)) if where else ""
+    sql = f"SELECT {selectSql} FROM read_parquet('{pattern}', union_by_name=true){whereSql}"
+
+    con = duckdb.connect(":memory:")
+    try:
+        df = con.sql(sql).pl()
+    except Exception as e:
+        _log.warning("[scan/io] DuckDB raw glob 실패: %s", e)
+        return None
+    finally:
+        con.close()
+
+    if df.is_empty():
+        return df.lazy()
+
+    # 캘린더 환원 — prebuild 합본 (buildFinance) 와 스키마 동등화. 비12월 결산
+    # 회사의 bsns_year/reprt_nm 를 결산월 SSOT 기준으로 캘린더 기준으로 환원.
+    if "bsns_year" in df.columns and "reprt_nm" in df.columns:
+        df = _calendarizeWithFmMap(df)
+
+    return df.lazy()
+
+
+def _calendarizeWithFmMap(df: pl.DataFrame) -> pl.DataFrame:
+    """raw 합본 DataFrame 에 결산월 SSOT 기반 캘린더 환원 적용 (polars 벡터).
+
+    ``_fiscalMonthMap()`` (listing + raw 사업보고서 추정) 결과를 join 후 종목별
+    결산월에 맞춰 ``bsns_year`` · ``reprt_nm`` 을 캘린더 기준으로 환원한다. 12월
+    결산은 identity. raw glob fallback path 가 prebuild ``finance.parquet`` 과 동일한
+    period 스키마를 갖도록 보장.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        ``stockCode`` · ``bsns_year`` · ``reprt_nm`` 컬럼을 가진 raw 합본.
+
+    Returns
+    -------
+    pl.DataFrame
+        ``bsns_year`` · ``reprt_nm`` 이 캘린더 기준으로 환원된 동일 schema DataFrame.
+    """
+    from dartlab.scan.builders.kr.core import _FISCAL_Q_MAP, _fiscalMonthMap
+
+    fmMap = _fiscalMonthMap()
+    if not fmMap:
+        return df
+
+    fmDf = pl.DataFrame(
+        {"stockCode": list(fmMap.keys()), "_fm": list(fmMap.values())},
+        schema={"stockCode": pl.Utf8, "_fm": pl.Int32},
+    )
+    df = df.join(fmDf, on="stockCode", how="left").with_columns(pl.col("_fm").fill_null(12))
+
+    bsnsInt = pl.col("bsns_year").cast(pl.Int32, strict=False)
+    fq = pl.col("reprt_nm").replace_strict(_FISCAL_Q_MAP, default=None, return_dtype=pl.Int32)
+    endMonth = ((pl.col("_fm") + fq * 3 - 1) % 12) + 1
+    calQ = ((endMonth - 1) // 3) + 1
+    calYear = pl.when(endMonth > pl.col("_fm")).then(bsnsInt - 1).otherwise(bsnsInt)
+    newBsns = (
+        pl.when(fq.is_not_null() & bsnsInt.is_not_null()).then(calYear.cast(pl.Utf8)).otherwise(pl.col("bsns_year"))
+    )
+    newRept = (
+        pl.when(fq.is_not_null() & bsnsInt.is_not_null())
+        .then(calQ.cast(pl.Utf8) + pl.lit("분기"))
+        .otherwise(pl.col("reprt_nm"))
+    )
+    return df.with_columns(newBsns.alias("bsns_year"), newRept.alias("reprt_nm")).drop("_fm")
+
+
+def _scanFinanceFromLazy(
+    lz: pl.LazyFrame,
     accountIds: set[str],
     accountNms: set[str],
     amountCol: str,
 ) -> dict[str, float]:
-    """합산 finance parquet에서 종목별 최신 연도 값 추출.
+    """LazyFrame (합본 또는 raw glob) → 종목별 최신 연도 매칭 계정 값.
+
+    ``_scanFinanceFromMerged`` (프리빌드 단일 파일) 와 ``_loadRawFinanceViaDuckDb``
+    (raw glob fallback) 가 공유하는 후처리. fs_nm 의 연결 우선 + 종목별 latestYear
+    + 매칭 row 첫 값.
 
     Parameters
     ----------
-    scanPath : Path
-        프리빌드 finance.parquet 경로.
-    sjDivs : list[str]
-        재무제표 구분 코드 (예: ["IS", "CIS"]).
+    lz : pl.LazyFrame
+        sj_div 필터까지 적용된 LazyFrame. ``stockCode`` · ``bsns_year`` ·
+        ``fs_nm`` · ``account_id`` · ``account_nm`` · ``amountCol`` 컬럼 필요.
     accountIds : set[str]
-        매칭할 account_id 집합.
+        매칭할 ``account_id`` 집합.
     accountNms : set[str]
-        매칭할 account_nm 집합.
+        매칭할 ``account_nm`` 집합.
     amountCol : str
-        금액 컬럼명 (예: "thstrm_amount").
+        금액 컬럼명.
 
     Returns
     -------
@@ -523,13 +710,8 @@ def _scanFinanceFromMerged(
     """
     scCol = "stockCode"
 
-    target = (
-        pl.scan_parquet(str(scanPath))
-        .filter(
-            pl.col("sj_div").is_in(sjDivs)
-            & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
-        )
-        .collect(engine="streaming")
+    target = lz.filter(pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표")).collect(
+        engine="streaming"
     )
 
     if target.is_empty() or "account_id" not in target.columns:
@@ -555,6 +737,22 @@ def _scanFinanceFromMerged(
                 result[code] = val
 
     return result
+
+
+def _scanFinanceFromMerged(
+    scanPath: Path,
+    sjDivs: list[str],
+    accountIds: set[str],
+    accountNms: set[str],
+    amountCol: str,
+) -> dict[str, float]:
+    """합산 finance parquet에서 종목별 최신 연도 값 추출 (프리빌드 경로).
+
+    프리빌드 ``finance.parquet`` 을 lazy scan + sj_div 필터 후 ``_scanFinanceFromLazy``
+    로 위임. raw glob fallback 도 동일 후처리를 공유한다.
+    """
+    lz = pl.scan_parquet(str(scanPath)).filter(pl.col("sj_div").is_in(sjDivs))
+    return _scanFinanceFromLazy(lz, accountIds, accountNms, amountCol)
 
 
 _VALUATION_REQUIRED_COLS: tuple[str, ...] = (
@@ -672,45 +870,21 @@ def scanFinanceParquets(
         except (pl.exceptions.PolarsError, OSError):
             pass  # fallback
 
-    # 2순위: 종목별 순회 (fallback)
+    # 2순위: raw glob → DuckDB streaming SQL (fallback)
     from dartlab.core.dataLoader import _dataDir
 
     finance_dir = Path(_dataDir("finance"))
-    parquet_files = sorted(finance_dir.glob("*.parquet"))
+    lz = _loadRawFinanceViaDuckDb(
+        finance_dir,
+        sjDivs=sj_divs,
+        accountIds=accountIds,
+        accountNms=accountNms,
+    )
+    if lz is None:
+        return {}
 
-    result: dict[str, float] = {}
-    for pf in parquet_files:
-        code = pf.stem
-        try:
-            # lazy scan: 필터를 Rust 엔진으로 밀어넣어 메모리 절감
-            target = (
-                pl.scan_parquet(str(pf))
-                .filter(
-                    pl.col("sj_div").is_in(sj_divs)
-                    & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
-                )
-                .collect(engine="streaming")
-            )
-        except (pl.exceptions.PolarsError, OSError):
-            continue
-
-        if target.is_empty() or "account_id" not in target.columns:
-            continue
-
-        cfs = target.filter(pl.col("fs_nm").str.contains("연결"))
-        target = cfs if not cfs.is_empty() else target
-
-        years = sorted(target["bsns_year"].unique().to_list(), reverse=True)
-        if not years:
-            continue
-        latest = target.filter(pl.col("bsns_year") == years[0])
-
-        for row in latest.iter_rows(named=True):
-            aid = row.get("account_id", "")
-            anm = row.get("account_nm", "")
-            val = parseNumStr(row.get(amountCol))
-            if (aid in accountIds or anm in accountNms) and val is not None:
-                result[code] = val
-                break
-
-    return result
+    _log.info("scanFinanceParquets: DuckDB raw glob fallback 사용")
+    try:
+        return _scanFinanceFromLazy(lz, accountIds, accountNms, amountCol)
+    except (pl.exceptions.PolarsError, OSError):
+        return {}
