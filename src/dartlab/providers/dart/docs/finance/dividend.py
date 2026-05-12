@@ -153,26 +153,73 @@ def parseDividendTable(content: str) -> dict:
 
 # pipeline
 def dividend(stockCode: str) -> DividendResult | None:
-    """사업보고서에서 배당지표 시계열 추출.
+    """사업보고서 (annual) 의 배당 섹션에서 7 지표 시계열 ``DividendResult`` 빌드.
+
+    Capabilities:
+        - ``loadData(stockCode)`` 로 전체 정기보고서 parquet 로드 → 연도별 사업보고서 selectReport.
+        - ``section_title`` contains "배당" 필터로 배당 섹션 row 추출.
+        - ``parseDividendTable`` 로 7 지표 [당기/전기/전전기] 3 값 묶음 파싱.
+        - 보고서 연도 - {0, -1, -2} offset → 실제 연도 매핑 (사업보고서 1 개에서 3 년치 데이터 추출).
+        - 동일 (year, field) 중복 등장 시 첫 값 보존 (최신 보고서 우선).
+        - 결과 = year (int) × {netIncome, eps, totalDividend, payoutRatio, dividendYield,
+          dps, dpsPreferred} long-format DataFrame.
 
     Args:
-        stockCode: 종목코드 (6자리)
+        stockCode: KR 종목코드 6 자리 (예 "005930").
 
     Returns:
-        DividendResult 또는 데이터 부족 시 None
-
-    Raises:
-        없음.
+        ``DividendResult`` — corpName / nYears / timeSeries (pl.DataFrame). 배당 섹션 미존재
+        또는 파싱 실패 → None.
 
     Example:
-        >>> dividend(...)
+        >>> from dartlab.providers.dart.docs.finance.dividend import dividend
+        >>> r = dividend("005930")
+        >>> r is None or r.nYears >= 0
+        True
+
+    Guide:
+        - "삼성전자 배당 추세" → ``dividend("005930").timeSeries.select(["year", "dps", "dividendYield"])``.
+        - "5 년 배당성향 변화" → ``timeSeries.select(["year", "payoutRatio"])``.
+        - "보통주 vs 우선주 DPS" → ``["dps", "dpsPreferred"]``.
+        - 정기보고서 batch 미수집 회사 → None — caller fallback "배당 데이터 미수집".
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``parseDividendTable`` — 본 함수의 파싱 단계 (배당 섹션 → 7 지표 dict).
+        - ``DividendResult`` (dataclass) — 본 함수 반환 타입.
+        - ``dartlab.providers.dart.docs.finance.statements.statements`` — 같은 패턴 (재무제표 시계열).
+        - ``dartlab.providers.dart.report.pivot.pivotDividend`` — report API (parquet 기반) 동등 함수.
+        - ``dartlab.core.reportSelector.selectReport`` — 사업보고서 선택.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.core.dataLoader — ``loadData`` + ``extractCorpName``.
+        - dartlab.core.reportSelector — ``selectReport`` + ``extractReportYear``.
+        - dartlab.core.tableParser — ``parseAmount`` (parseDividendTable 경유).
+
+    AIContext:
+        Workbench "이 회사 배당 어떻게 변했냐"/"DPS 추세" 질문의 entry. ``report.pivotDividend``
+        (parquet 기반) 와 본 함수 (text 파싱 기반) 두 경로 — gather 가 어느 쪽을 수집했냐에
+        따라 선택. timeSeries 가 long format 이라 AI 가 직접 시각화 (line plot) 또는 비교 분석
+        제시 가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 사업보고서 배당 섹션 표 변형 (회사별 column 순서/명칭 차이) → ``parseDividendTable``
+              매칭 실패 → 일부 field 누락. timeSeries 의 null 비율로 판정.
+            - 우선주만 발행한 회사 → dpsCommon = None, dpsPreferred 만 채워짐.
+            - 정기보고서 미제출 또는 배당 섹션 비어있음 → None.
+        OutputSchema:
+            - 1 DividendResult instance.
+            - timeSeries: pl.DataFrame — year (Int) + 7 float columns (각 nullable).
+            - nYears: timeSeries.height (year 개수).
+        Prerequisites:
+            - gather (정기보고서) 가 stockCode 의 사업보고서 1 개 이상 수집.
+        Freshness:
+            - gather 의존. 본 함수 무상태.
+        Dataflow:
+            - loadData → selectReport → parseDividendTable → 본 함수 → caller (AI 답변).
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR 의 dividend 는 별도 (Form 4 / 8-K 또는 XBRL).
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
