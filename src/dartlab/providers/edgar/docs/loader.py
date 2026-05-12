@@ -46,6 +46,20 @@ def ensureEdgarDocs(
     - ``local_only`` — 로컬 없으면 ``FileNotFoundError``.
     - ``force_rebuild`` — SEC API 로 전체 재구축.
     - ``force_check``/``auto`` — 로컬 있으면 신선도 비교 후 필요시 증분.
+
+    Args:
+        stockCode: 종목 ticker.
+        path: 로컬 parquet 경로.
+        sinceYear: 시작 연도.
+        asOf: 신선도 기준 시점 (None 이면 latest 기준).
+        refresh: ``auto``/``force_check``/``force_rebuild``/``local_only``.
+
+    Raises:
+        ValueError: 미지원 refresh 정책.
+        FileNotFoundError: ``local_only`` + 로컬 부재.
+
+    Example:
+        >>> ensureEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"), sinceYear=2009, asOf=None, refresh="auto")
     """
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _download
@@ -91,7 +105,20 @@ def ensureEdgarDocs(
 
 
 def isEdgarDocsCheckExpired(path: Path) -> bool:
-    """로컬 docs parquet 의 신선도 체크 TTL 만료 여부."""
+    """로컬 docs parquet 의 신선도 체크 TTL 만료 여부.
+
+    Args:
+        path: 로컬 parquet 경로.
+
+    Returns:
+        ``True`` — 24h TTL 만료 또는 파일 부재. ``False`` — 아직 신선.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isEdgarDocsCheckExpired(Path("data/edgar/docs/AAPL.parquet"))
+    """
     if not path.exists():
         return True
     ageSeconds = time.time() - path.stat().st_mtime
@@ -99,7 +126,21 @@ def isEdgarDocsCheckExpired(path: Path) -> bool:
 
 
 def getLatestRegularEdgarFiling(stockCode: str, *, sinceYear: int) -> dict[str, str] | None:
-    """SEC submissions API 에서 최신 정기 공시 1 건 메타 반환."""
+    """SEC submissions API 에서 최신 정기 공시 1 건 메타 반환.
+
+    Args:
+        stockCode: 종목 ticker.
+        sinceYear: 시작 연도.
+
+    Returns:
+        ``ticker/cik/filing_date/accession_no/form_type`` dict 또는 None (filing 부재).
+
+    Raises:
+        httpx.HTTPError: SEC API 호출 실패.
+
+    Example:
+        >>> getLatestRegularEdgarFiling("AAPL", sinceYear=2024)
+    """
     from dartlab.providers.edgar.docs.fetch import _findFilings, _getSubmissions, _resolveTickerMeta
 
     meta = _resolveTickerMeta(stockCode.upper())
@@ -118,7 +159,20 @@ def getLatestRegularEdgarFiling(stockCode: str, *, sinceYear: int) -> dict[str, 
 
 
 def getLocalEdgarDocsState(path: Path) -> dict[str, str] | None:
-    """로컬 docs parquet 의 최신 filing 상태 (날짜·accession)."""
+    """로컬 docs parquet 의 최신 filing 상태 (날짜·accession).
+
+    Args:
+        path: 로컬 parquet 경로.
+
+    Returns:
+        ``latest_filing_date``/``latest_accession_no`` dict 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getLocalEdgarDocsState(Path("data/edgar/docs/AAPL.parquet"))
+    """
     if not path.exists():
         return None
     df = pl.read_parquet(path, columns=["filing_date", "accession_no"])
@@ -137,7 +191,22 @@ def getLocalEdgarDocsState(path: Path) -> dict[str, str] | None:
 
 
 def isEdgarDocsFresh(localState: dict[str, str], latestRemote: dict[str, str], *, asOf: str | None) -> bool:
-    """로컬 상태 vs 원격 최신 비교."""
+    """로컬 상태 vs 원격 최신 비교.
+
+    Args:
+        localState: ``getLocalEdgarDocsState`` 결과.
+        latestRemote: ``getLatestRegularEdgarFiling`` 결과.
+        asOf: 신선도 기준 시점 (None 이면 latest 비교).
+
+    Returns:
+        ``True`` — 로컬이 원격과 동등 이상.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isEdgarDocsFresh(local, remote, asOf=None)
+    """
     latestAccession = str(localState.get("latest_accession_no") or "")
     latestDate = str(localState.get("latest_filing_date") or "")
     if asOf is not None and latestDate:
@@ -175,7 +244,22 @@ def _callFetchEdgarDocs(
 
 
 def rebuildEdgarDocs(stockCode: str, path: Path, *, sinceYear: int, sourceMode: str) -> None:
-    """SEC API 로 docs parquet 전체 재구축."""
+    """SEC API 로 docs parquet 전체 재구축.
+
+    Args:
+        stockCode: 종목 ticker.
+        path: 저장 경로.
+        sinceYear: 시작 연도.
+        sourceMode: fetch source mode (예: ``"sec_api"``).
+
+    Raises:
+        URLError: SEC API 다운로드 실패.
+        OSError: 파일 쓰기 실패.
+        ValueError: filing 부재.
+
+    Example:
+        >>> rebuildEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"), sinceYear=2009, sourceMode="sec_api")
+    """
     from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
 
     try:
@@ -199,7 +283,21 @@ def incrementalUpdateEdgarDocs(
     sinceYear: int,
     latestRemote: dict[str, str],
 ) -> None:
-    """신규 filing 만 SEC API 로 가져와 기존 parquet 에 append."""
+    """신규 filing 만 SEC API 로 가져와 기존 parquet 에 append.
+
+    Args:
+        stockCode: 종목 ticker.
+        path: 기존 parquet 경로.
+        sinceYear: 시작 연도.
+        latestRemote: 원격 최신 filing 메타.
+
+    Raises:
+        httpx.HTTPError: SEC API 호출 실패.
+        OSError: 파일 쓰기 실패.
+
+    Example:
+        >>> incrementalUpdateEdgarDocs("AAPL", Path("..."), sinceYear=2009, latestRemote=remote)
+    """
     from dartlab.core.messaging import emit
     from dartlab.providers.edgar.docs.fetch import (
         FILING_TIMEOUT_SECONDS,
@@ -285,7 +383,22 @@ class EdgarDocsLoader:
     category = "edgarDocs"
 
     def ensure(self, stockCode, path, *, sinceYear=None, asOf=None, refresh="auto"):
-        """edgarDocs 보장 — ensureEdgarDocs 위임."""
+        """edgarDocs 보장 — ``ensureEdgarDocs`` 위임.
+
+        Args:
+            stockCode: 종목 ticker.
+            path: 저장 경로.
+            sinceYear: 시작 연도 (None 이면 2009).
+            asOf: 신선도 기준 시점.
+            refresh: ``auto``/``force_check``/``force_rebuild``/``local_only``.
+
+        Raises:
+            ValueError: 미지원 refresh 정책.
+            FileNotFoundError: ``local_only`` + 로컬 부재.
+
+        Example:
+            >>> EdgarDocsLoader().ensure("AAPL", Path("..."), sinceYear=2024)
+        """
         ensureEdgarDocs(
             stockCode,
             path,

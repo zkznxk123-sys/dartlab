@@ -20,31 +20,71 @@ def _periodOrderValue(period: str) -> int:
 
 
 def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
-    """기간 문자열 리스트를 연도/분기 순서로 정렬."""
+    """기간 문자열 리스트를 연도/분기 순서로 정렬.
 
-    def key(period: str) -> tuple[int, int]:
-        """key — TODO 한국어 동작 설명."""
+    Args:
+        periods: ``["2024", "2023Q3", ...]`` 기간 리스트.
+        descending: 내림차순 여부.
+
+    Returns:
+        정렬된 기간 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sortPeriods(["2023Q1", "2024", "2023"], descending=True)
+        ['2024', '2023', '2023Q1']
+    """
+
+    def _key(period: str) -> tuple[int, int]:
         if "Q" not in period:
             return int(period), 4
         return int(period[:4]), int(period[-1])
 
-    return sorted(periods, key=key, reverse=descending)
+    return sorted(periods, key=_key, reverse=descending)
 
 
 def sortTopics(topics: list[str], topicOrder: dict[str, int]) -> list[str]:
-    """topic 리스트를 topicOrder 우선순위에 따라 정렬."""
+    """topic 리스트를 topicOrder 우선순위에 따라 정렬.
 
-    def key(topic: str) -> tuple[int, str, str]:
-        """key — TODO 한국어 동작 설명."""
+    Args:
+        topics: topic 리스트.
+        topicOrder: topic → 우선순위 dict.
+
+    Returns:
+        정렬된 topic 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sortTopics(["10-K::item7Mdna", "10-K::item1Business"], {"10-K::item1Business": 1})
+    """
+
+    def _key(topic: str) -> tuple[int, str, str]:
         match = _TOPIC_RE.match(topic)
         formType = match.group(1) if match else ""
         return topicOrder.get(topic, 999999), formType, topic
 
-    return sorted(topics, key=key)
+    return sorted(topics, key=_key)
 
 
 def buildMarkdownWide(df: pl.DataFrame | None) -> str:
-    """sections DataFrame을 마크다운 wide 테이블 문자열로 변환."""
+    """sections DataFrame 을 마크다운 wide 테이블 문자열로 변환.
+
+    Args:
+        df: sections wide DataFrame.
+
+    Returns:
+        마크다운 테이블 문자열 (빈 입력 시 ``""``).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildMarkdownWide(sec)
+    """
     if isEmptyDf(df):
         return ""
     periods = [col for col in df.columns if col != "topic"]
@@ -62,11 +102,20 @@ def buildMarkdownWide(df: pl.DataFrame | None) -> str:
 
 
 def retrievalBlocks(ticker: str) -> pl.DataFrame | None:
-    """sections를 block × period 단위로 unpivot하여 LLM 검색용 DataFrame 반환.
+    """sections 를 block × period 단위로 unpivot 하여 LLM 검색용 DataFrame 반환.
 
-    반환 컬럼:
-        ticker, period, periodOrder, topic, blockType, blockOrder,
-        textNodeType, textLevel, textPath, blockText, chars, blockPriority
+    Args:
+        ticker: 종목 ticker.
+
+    Returns:
+        ``ticker/period/periodOrder/topic/blockType/blockOrder/textNodeType/
+        textLevel/textPath/blockText/chars/blockPriority`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> retrievalBlocks("AAPL")
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
@@ -240,12 +289,21 @@ def _splitTable(text: str, maxChars: int) -> list[str]:
 
 
 def contextSlices(ticker: str, *, maxChars: int = 1800) -> pl.DataFrame | None:
-    """retrievalBlocks를 LLM 컨텍스트 창에 맞게 슬라이스.
+    """retrievalBlocks 를 LLM 컨텍스트 창에 맞게 슬라이스.
 
-    반환 컬럼:
-        ticker, period, periodOrder, topic, cellKey,
-        blockType, textPath, sliceIdx, sliceText, chars,
-        isTable, blockPriority
+    Args:
+        ticker: 종목 ticker.
+        maxChars: 슬라이스당 최대 문자수.
+
+    Returns:
+        ``ticker/period/periodOrder/topic/cellKey/blockType/textPath/sliceIdx/
+        sliceText/chars/isTable/blockPriority`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> contextSlices("AAPL", maxChars=2000)
     """
     blocks = retrievalBlocks(ticker)
     if isEmptyDf(blocks):
@@ -330,10 +388,20 @@ def contextSlices(ticker: str, *, maxChars: int = 1800) -> pl.DataFrame | None:
 
 
 def freq(ticker: str) -> pl.DataFrame | None:
-    """topic별 기간 분포 매트릭스.
+    """topic 별 기간 분포 매트릭스.
 
-    반환 컬럼: topic, {period columns...}
-    각 셀: 해당 (topic, period)에 비어있지 않은 블록 수.
+    Args:
+        ticker: 종목 ticker.
+
+    Returns:
+        ``topic | {period columns...}`` 매트릭스 DataFrame. 각 셀은 비어있지 않은 블록 수.
+        None: docs 부재.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> freq("AAPL")
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
@@ -365,9 +433,19 @@ def freq(ticker: str) -> pl.DataFrame | None:
 
 
 def coverage(ticker: str) -> pl.DataFrame | None:
-    """topic별 커버리지 요약 — 기간 수, 블록 수, 문자 수.
+    """topic 별 커버리지 요약 — 기간 수, 블록 수, 문자 수.
 
-    반환 컬럼: topic, periods, blocks, chars, hasText, hasTable
+    Args:
+        ticker: 종목 ticker.
+
+    Returns:
+        ``topic/periods/blocks/chars/hasText/hasTable`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> coverage("AAPL")
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 

@@ -81,12 +81,34 @@ def _makeProgress(total: int, title: str, *, disable: bool = False):
     class _Bar:
         @property
         def title(self):
-            """title — TODO 한국어 동작 설명."""
+            """진행 막대 description (read-only getter — 빈 문자열).
+
+            Returns:
+                빈 str.
+
+            Raises:
+                없음.
+
+            Example:
+                >>> _, bar = _progress(...)
+                >>> bar.title
+                ''
+            """
             return ""
 
         @title.setter
         def title(self, v):
-            """title — TODO 한국어 동작 설명."""
+            """진행 막대 description 변경.
+
+            Args:
+                v: 새 description.
+
+            Raises:
+                없음.
+
+            Example:
+                >>> bar.title = "downloading..."
+            """
             p.update(tid, description=v)
 
         def __call__(self):
@@ -201,7 +223,27 @@ def fetchEdgarDocs(
     sourceMode: str = "sec_api",
     strictQuality: bool = False,
 ) -> Path:
-    """fetchEdgarDocs — TODO 한국어 동작 설명."""
+    """EDGAR 10-K/10-Q/20-F/40-F 문서를 수집하여 parquet 로 저장.
+
+    Args:
+        ticker: 종목 ticker.
+        outPath: 저장 경로.
+        sinceYear: 시작 연도 (기본 ``SINCE_YEAR``).
+        maxFilings: 최대 filing 수. None 이면 무제한.
+        filingTimeout: 단일 filing fetch 타임아웃 (초).
+        showProgress: progress bar 표시 여부.
+        sourceMode: ``"sec_api"`` (기본).
+        strictQuality: 품질 게이트 strict 모드.
+
+    Returns:
+        저장된 parquet Path.
+
+    Raises:
+        ValueError: filing 부재 또는 section 추출 실패.
+
+    Example:
+        >>> fetchEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"))
+    """
     ticker = ticker.upper()
     meta = _resolveTickerMeta(ticker)
     submissions = _getSubmissions(meta["cik"])
@@ -243,7 +285,21 @@ def fetchEdgarDocs(
 
 
 def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
-    """summarizeEdgarDocsFrame — TODO 한국어 동작 설명."""
+    """EDGAR docs DataFrame 의 품질 요약 통계.
+
+    Args:
+        df: fetchEdgarDocs 결과 DataFrame.
+
+    Returns:
+        ``rows_saved``/``filings_saved``/``forms_found``/``full_document_rows``/
+        ``table_rows``/``quality_flags``/``form_metrics`` 키 dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> summarizeEdgarDocsFrame(df)
+    """
     if df.is_empty():
         return {
             "rows_saved": 0,
@@ -306,7 +362,20 @@ def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
 
 
 def summarizeEdgarDocsParquet(path: Path) -> dict[str, object]:
-    """summarizeEdgarDocsParquet — TODO 한국어 동작 설명."""
+    """parquet 파일에서 EDGAR docs 품질 요약.
+
+    Args:
+        path: parquet 경로.
+
+    Returns:
+        ``summarizeEdgarDocsFrame`` 결과에 ``path``/``ticker`` 추가된 dict.
+
+    Raises:
+        FileNotFoundError: 경로 부재.
+
+    Example:
+        >>> summarizeEdgarDocsParquet(Path("data/edgar/docs/AAPL.parquet"))
+    """
     summary = summarizeEdgarDocsFrame(pl.read_parquet(path))
     summary["path"] = str(path)
     summary["ticker"] = path.stem
@@ -439,7 +508,24 @@ def downloadListedEdgarDocs(
     cooldownSeconds: float = BATCH_COOLDOWN_SECONDS,
     skipExisting: bool = True,
 ) -> pl.DataFrame:
-    """downloadListedEdgarDocs — TODO 한국어 동작 설명."""
+    """EDGAR 상장 기업 universe 전체에 대해 docs parquet 배치 수집.
+
+    Args:
+        limit: 최대 ticker 수.
+        sinceYear: 시작 연도.
+        batchSize: 배치 cooldown 단위 (이 수 단위로 sleep).
+        cooldownSeconds: 배치 간 sleep 초.
+        skipExisting: 기존 parquet 존재 시 skip 여부.
+
+    Returns:
+        ``ticker/status/reason`` 컬럼 결과 DataFrame.
+
+    Raises:
+        없음 (개별 ticker 실패는 status="failed" 로 기록).
+
+    Example:
+        >>> downloadListedEdgarDocs(limit=100)
+    """
     from dartlab import config
 
     docsDir = Path(config.dataDir) / "edgar" / "docs"
@@ -493,7 +579,22 @@ def buildEdgarCollectibleUniverse(
     sinceYear: int = SINCE_YEAR,
     forceRefresh: bool = False,
 ) -> pl.DataFrame:
-    """buildEdgarCollectibleUniverse — TODO 한국어 동작 설명."""
+    """EDGAR 수집 가능 universe 빌더 — ``prepareEdgarCollectibleUniverse`` shortcut.
+
+    Args:
+        limit: 최대 ticker 수.
+        sinceYear: 시작 연도.
+        forceRefresh: 캐시 무시.
+
+    Returns:
+        수집 가능 ticker DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildEdgarCollectibleUniverse(limit=500)
+    """
     return prepareEdgarCollectibleUniverse(
         limit=limit,
         sinceYear=sinceYear,
@@ -510,7 +611,25 @@ def prepareEdgarCollectibleUniverse(
     flushEvery: int = 25,
     heartbeat: Callable[..., None] | None = None,
 ) -> pl.DataFrame:
-    """prepareEdgarCollectibleUniverse — TODO 한국어 동작 설명."""
+    """EDGAR universe 평가 — supported regular filing 보유 여부 검증.
+
+    Args:
+        limit: 최대 평가 ticker 수.
+        sinceYear: 시작 연도.
+        forceRefresh: 캐시 무시 (전수 재평가).
+        progressPath: jsonl progress 저장 경로.
+        flushEvery: 캐시 flush 단위.
+        heartbeat: stage 진행 콜백.
+
+    Returns:
+        수집 가능 ticker DataFrame (``has_supported_regular_filing=True``).
+
+    Raises:
+        httpx.HTTPError: SEC submissions API 호출 실패 시 (개별 ticker 는 skip).
+
+    Example:
+        >>> prepareEdgarCollectibleUniverse(limit=1000, forceRefresh=True)
+    """
     from dartlab import config
     from dartlab.core.dataLoader import loadEdgarListedUniverse
 
@@ -1278,6 +1397,9 @@ def iterEdgarDocs(
 
     Yields:
         섹션 row dict.
+
+    Raises:
+        ValueError: filing 부재 또는 section 추출 실패 (``fetchEdgarDocs`` 위임).
 
     Example:
         >>> for row in iterEdgarDocs("AAPL", Path("apple.parquet"), maxFilings=5):

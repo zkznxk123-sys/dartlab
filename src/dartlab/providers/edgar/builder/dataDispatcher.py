@@ -43,6 +43,20 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
     사용자 진입점은 ``c.show("IS", freq=, scope=)`` 만이다 (api-contract).
     EDGAR 는 ``scope="separate"`` 미지원 (SEC 는 연결만 보고).
     ``freq="YTD"`` 도 미지원 — annual 로 fallback.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+        freq: ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (annual fallback).
+        scope: ``"consolidated"`` (기본) — separate 는 raise.
+
+    Returns:
+        ``(series, periods)`` tuple 또는 None.
+
+    Raises:
+        ValueError: 미지원 freq/scope.
+
+    Example:
+        >>> buildFinanceSeries(c, freq="Q")
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나 (받음: {freq!r})")
@@ -72,7 +86,20 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
 
 
 def buildRatios(company: Company) -> pl.DataFrame | None:
-    """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출."""
+    """[INTERNAL] EDGAR 재무비율 DataFrame 빌더 — show("ratios") 가 호출.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        분류/항목/연도 컬럼 wide DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildRatios(c)
+    """
     from dartlab.providers.edgar.company import _ratioSeriesToDataFrame
 
     rs = company._finance.ratioSeries
@@ -92,7 +119,21 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
 
 def applyPeriodFilter(payload: Any, period: str | None) -> Any:
-    """applyPeriodFilter — TODO 한국어 동작 설명."""
+    """period 단일 지정 시 해당 period 컬럼만 select (Q4 fallback 포함).
+
+    Args:
+        payload: 원본 DataFrame.
+        period: 단일 period (예: ``"2024"``, ``"2024Q3"``). None 이면 noop.
+
+    Returns:
+        period 단일 컬럼만 남은 DataFrame, 또는 원본 그대로.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> applyPeriodFilter(df, "2024")
+    """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
     requestedPeriod = str(period)
@@ -113,14 +154,41 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
 
 
 def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-    """transposeToVertical — TODO 한국어 동작 설명."""
+    """wide 보드를 vertical (period × 항목) 으로 transpose.
+
+    Args:
+        wide: 원본 wide DataFrame.
+        periods: 추출 대상 period 리스트.
+
+    Returns:
+        vertical DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> transposeToVertical(df, ["2024", "2023"])
+    """
     from dartlab.core.show import transposeToVertical as _coreTranspose
 
     return _coreTranspose(wide, periods)
 
 
 def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
-    """topic의 블록 목차 DataFrame."""
+    """topic 의 블록 목차 DataFrame.
+
+    Args:
+        topicRows: 특정 topic 의 sections 행.
+
+    Returns:
+        ``block/blockType/preview`` 컬럼 목차 DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildBlockIndex(sec.filter(pl.col("topic") == "10-K::item7Mdna"))
+    """
     from dartlab.core.show import buildBlockIndex as _coreBuildBlockIndex
 
     return _coreBuildBlockIndex(topicRows)
@@ -130,14 +198,40 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
 
 
 def shapeStr(df: pl.DataFrame | None) -> str:
-    """shapeStr — TODO 한국어 동작 설명."""
+    """DataFrame 모양을 ``"HxW"`` 문자열로.
+
+    Args:
+        df: 원본 DataFrame.
+
+    Returns:
+        ``"5x10"`` 형식 문자열 (None 이면 ``"-"``).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> shapeStr(df)
+    """
     if df is None:
         return "-"
     return f"{df.height}x{df.width}"
 
 
 def periodsStr(df: pl.DataFrame | None) -> str:
-    """periodsStr — TODO 한국어 동작 설명."""
+    """DataFrame period 컬럼 범위를 ``"first..last"`` 문자열로.
+
+    Args:
+        df: 원본 DataFrame.
+
+    Returns:
+        ``"2020..2024"`` 형식 문자열 (없으면 ``"-"``).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> periodsStr(df)
+    """
     if df is None:
         return "-"
     periodCols = [c for c in df.columns if _PERIOD_COLUMN_RE.fullmatch(c)]
@@ -147,14 +241,41 @@ def periodsStr(df: pl.DataFrame | None) -> str:
 
 
 def previewFinance(df: pl.DataFrame | None) -> str:
-    """previewFinance — TODO 한국어 동작 설명."""
+    """finance DataFrame 의 account 수 preview 문자열.
+
+    Args:
+        df: 원본 finance DataFrame.
+
+    Returns:
+        ``"N accounts"`` 형식 (없으면 ``"-"``).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> previewFinance(df)
+    """
     if isEmptyDf(df):
         return "-"
     return f"{df.height} accounts"
 
 
 def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
-    """previewDocsCell — TODO 한국어 동작 설명."""
+    """docs topic 첫 셀의 preview 문자열.
+
+    Args:
+        topicRows: 특정 topic 의 sections 행.
+        periodCols: period 컬럼 리스트.
+
+    Returns:
+        ``"<period>: <text...>"`` 형식 (없으면 ``"-"``).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> previewDocsCell(topicRows, ["2024", "2023"])
+    """
     for row in topicRows.iter_rows(named=True):
         for col in periodCols:
             val = row.get(col)
@@ -179,7 +300,25 @@ def showImpl(
     raw: bool = False,
     **_kw: Any,
 ) -> pl.DataFrame | None:
-    """topic 데이터 조회 — c.show 의 내부 구현 본체."""
+    """topic 데이터 조회 — c.show 의 내부 구현 본체.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+        topic: topic 이름 (finance: BS/IS/CF/CIS/SCE/ratios 또는 docs item).
+        block: 특정 block 인덱스 (None 이면 블록 목차).
+        period: 단일 period (str) 또는 vertical view (list).
+        raw: raw 패스스루 flag (현재 미사용).
+        **_kw: 추가 keyword (freq 등).
+
+    Returns:
+        topic DataFrame 또는 None.
+
+    Raises:
+        ValueError: sections 부재 또는 topic 미존재.
+
+    Example:
+        >>> showImpl(c, "IS", freq="Y")
+    """
     from dartlab.providers.edgar.company import _TOPIC_ALIASES
 
     # alias 해석 (riskFactors → item1ARiskFactors 등)
