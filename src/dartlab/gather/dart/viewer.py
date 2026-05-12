@@ -26,10 +26,11 @@ import re
 
 import polars as pl
 
-from dartlab.providers.dart.parse.viewerPageExtractor import DART_MAIN_BASE, htmlToText, parseSubDocs
-
 from ..infra.http import GatherHttpClient, runAsync
 from .types import DartDocMeta, DocumentNotFoundError, InvalidRceptNoError
+
+# viewerPageExtractor 는 providers/dart 의 raw owner — gather/dart 도 단건 fetch 시 사용.
+# L1 cross import 회피를 위해 함수 본문 lazy. 모듈 load 시 cycle 0.
 
 log = logging.getLogger(__name__)
 
@@ -106,6 +107,8 @@ async def fetchAsync(
     -------
     >>> df = await fetchAsync("20240315000123")
     """
+    from dartlab.providers.dart.parse.viewerPageExtractor import DART_MAIN_BASE, htmlToText, parseSubDocs
+
     _validateRceptNo(rceptNo)
 
     ownClient = client is None
@@ -239,6 +242,8 @@ def docMeta(rceptNo: str, *, client: GatherHttpClient | None = None) -> DartDocM
         fetch : 본 함수가 내부 호출 — 본문까지 추출.
         facade.Dart.meta : 클래스 facade 진입점.
     """
+    from dartlab.providers.dart.parse.viewerPageExtractor import DART_MAIN_BASE
+
     df = fetch(rceptNo, client=client)
     return DartDocMeta(
         rceptNo=rceptNo,

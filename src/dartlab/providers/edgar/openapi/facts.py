@@ -85,7 +85,7 @@ def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str
 
     AIContext:
         Ask Workbench EDGAR XBRL core — LLM 이 US 회사 재무 fact retrieval 시 entry.
-        결과 → ``c.finance.scanAccount`` / ``c.show("IS")`` 등 backend 매핑.
+        결과 → ``scanAccount`` / ``c.show("IS")`` 등 backend 매핑.
 
     LLM Specifications:
         AntiPatterns:

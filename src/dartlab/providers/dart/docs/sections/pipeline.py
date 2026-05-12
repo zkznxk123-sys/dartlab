@@ -771,7 +771,7 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
 
     AIContext:
         Ask Workbench docs core — LLM 이 회사 사업 구조 파악 시 entry.
-        ``c.sections.show("businessOverview")`` 후속 ``c.notes()`` / ``c.docs.search()`` 호출.
+        ``c.sections.show("businessOverview")`` 후속 ``c.notes()`` / ``c.search()`` 호출.
 
     LLM Specifications:
         AntiPatterns:

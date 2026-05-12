@@ -16,8 +16,15 @@ default_whitelist:
   - src/dartlab/core/_generated.py
   - src/dartlab/core/_generatedCapabilities.py
   - src/dartlab/core/capability/_generated.py
+  - src/dartlab/reference/capability/_generated.py  # P-CORE 후 capability 위치
   - src/dartlab/mcp/_generated_tools.py
   - src/dartlab/skills/index.json  # generateSkills 산출 — refactorChecklist 본문 흡수
+  # Skill OS 산출물 — release migration skill 안내문 (rename/폐기 history 포함)
+  - src/dartlab/skills/agent.json
+  - src/dartlab/skills/mcp.json
+  - src/dartlab/skills/web.json
+  - src/dartlab/skills/pyodide.json
+  - src/dartlab/skills/graph.json
   - CAPABILITIES.md
   - landing/static/llms.txt
   - .claude/skills/dartlab/reference.md
@@ -61,6 +68,9 @@ default_whitelist:
   - src/dartlab/providers/dart/company.py
   - src/dartlab/providers/edgar/company.py
   - src/dartlab/company.py
+  # ratios.py 의 docstring 은 "c.ratios 호출 시 backend" 라고 본인이 그 backend 임을
+  # 설명. c.ratios 의 backend 정의 위치라 자기 참조 OK.
+  - src/dartlab/analysis/financial/ratios.py
   # EDINET company.py docstring 안에 폐기 안내 (anti-pattern note) — 사용자가
   # 옛 API 라 오해 안 하도록 모듈 docstring 에 명시.
   - src/dartlab/providers/edinet/company.py

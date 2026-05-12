@@ -590,7 +590,7 @@ def searchNgram(
 
     AIContext:
         Ask Workbench search core — LLM 이 회사 공시 retrieval 시 entry.
-        결과 ``rcept_no`` 로 ``c.docs.sections.read(rcept_no)`` 후속 호출 가능.
+        결과 ``rcept_no`` 로 ``c.show("sections", rceptNo=...)`` 후속 호출 가능.
 
     LLM Specifications:
         AntiPatterns:

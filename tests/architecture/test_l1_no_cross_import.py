@@ -21,7 +21,9 @@ def test_l1_no_cross_import() -> None:
                 tree = ast.parse(pyFile.read_text(encoding="utf-8"))
             except SyntaxError:
                 continue
-            for node in ast.walk(tree):
+            # module-level imports 만 검사 — function body lazy 는 cycle 회피 패턴.
+            # test_import_direction.py 와 동일 정책.
+            for node in tree.body:
                 names: list[str] = []
                 if isinstance(node, ast.ImportFrom):
                     names = [node.module or ""]
@@ -34,9 +36,9 @@ def test_l1_no_cross_import() -> None:
                         if n == f"dartlab.{other}" or n.startswith(f"dartlab.{other}."):
                             rel = pyFile.relative_to(ROOT.parent.parent)
                             violations.append(f"{rel}:{node.lineno}: {n}")
-    # L1 cross import 는 known violation 가능 (gather/entry/providerAdapter 등 DI 패턴).
-    # 본 테스트는 baseline 카운트 검증 — 새 위반 추가만 차단.
-    BASELINE = 100  # 광범위 backward compat shim. 단계 D 정리 후 0 으로 낮춤.
-    assert len(violations) <= BASELINE, f"L1 cross import 신규 위반 ({len(violations)} > {BASELINE}):\n" + "\n".join(
+    # baseline 100 → 0 도달. gather/dart/viewer 의 viewerPageExtractor 의존을 함수 본문
+    # lazy 로 처리 (providers/dart 가 raw owner, gather/dart 는 단건 fetch 시만 사용).
+    BASELINE = 0
+    assert len(violations) <= BASELINE, f"L1 cross import 위반 ({len(violations)} > {BASELINE}):\n" + "\n".join(
         violations[:20]
     )
