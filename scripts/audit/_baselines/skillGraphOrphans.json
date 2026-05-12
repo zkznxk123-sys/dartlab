@@ -1,0 +1,587 @@
+{
+  "totalOrphans": 82,
+  "byAction": {
+    "head-needs-entry": 75,
+    "isolated": 7
+  },
+  "candidates": {
+    "head-needs-entry": [
+      {
+        "id": "engines.company.docsInternals",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "docsInternals — sections 파이프라인 + 테이블 수평화 + Rust 포팅 R&D"
+      },
+      {
+        "id": "engines.company.finance",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 6,
+        "title": "finance — 회사 재무 엔진 (XBRL + 주석 sub-domain)"
+      },
+      {
+        "id": "engines.credit.methodology",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "credit.methodology — 독립 신용분석 방법론 SSOT (사상·등급체계·파이프라인·audit)"
+      },
+      {
+        "id": "engines.dashboard.viewerSpec",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "viewerSpec — 공시뷰어 UI 설계 v1.0"
+      },
+      {
+        "id": "engines.data",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 8,
+        "title": "Data (수집·프리빌드 파이프라인)"
+      },
+      {
+        "id": "engines.edgar.docs",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "edgar.docs — SEC 공시 sections + form-native payload"
+      },
+      {
+        "id": "engines.gather.dividends",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "Gather - 배당"
+      },
+      {
+        "id": "engines.gather.listing",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "listing — 카탈로그 단일 진입점 (companies · filings · topics · dartlist)"
+      },
+      {
+        "id": "engines.gather.sector",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "Gather - 섹터"
+      },
+      {
+        "id": "engines.macro.trade",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Macro - 교역"
+      },
+      {
+        "id": "engines.quant.bab",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Quant - BAB 저베타"
+      },
+      {
+        "id": "engines.quant.divergence",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Quant - 괴리"
+      },
+      {
+        "id": "engines.quant.governanceQuant",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Quant - 거버넌스퀀트"
+      },
+      {
+        "id": "engines.quant.marketContext",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "Quant Market Context 축"
+      },
+      {
+        "id": "engines.quant.pairs",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Quant - 페어"
+      },
+      {
+        "id": "engines.quant.ranking",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 6,
+        "title": "Quant - 순위"
+      },
+      {
+        "id": "engines.quant.residual",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Quant - 잔여수익"
+      },
+      {
+        "id": "engines.quant.scanBacktest",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 6,
+        "title": "Quant scanBacktest top-level helper"
+      },
+      {
+        "id": "engines.quant.worldClass",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 7,
+        "title": "Quant - 세계 수준 quality bar"
+      },
+      {
+        "id": "engines.recipe.cashflowGovernanceDualSignal",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호"
+      },
+      {
+        "id": "engines.recipe.companyMacroPathProjection",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)"
+      },
+      {
+        "id": "engines.recipe.creditCovenantStressTest",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률"
+      },
+      {
+        "id": "engines.recipe.creditDeepDive",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)"
+      },
+      {
+        "id": "engines.recipe.creditMacroStress",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성"
+      },
+      {
+        "id": "engines.recipe.dataAvailabilityFirst",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)"
+      },
+      {
+        "id": "engines.recipe.debtStructureAudit",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)"
+      },
+      {
+        "id": "engines.recipe.disclosureRiskScreen",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)"
+      },
+      {
+        "id": "engines.recipe.disclosureToneToStoryRisk",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)"
+      },
+      {
+        "id": "engines.recipe.distressCandidateScreen",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목"
+      },
+      {
+        "id": "engines.recipe.dividendStressTest",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계"
+      },
+      {
+        "id": "engines.recipe.dividendThesis",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)"
+      },
+      {
+        "id": "engines.recipe.earningsQualityCheck",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)"
+      },
+      {
+        "id": "engines.recipe.esgGovernanceLight",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)"
+      },
+      {
+        "id": "engines.recipe.filingTextSignal",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature"
+      },
+      {
+        "id": "engines.recipe.financialStatementCompare",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "두 회사 재무제표 비교 (peer + show + 분해)"
+      },
+      {
+        "id": "engines.recipe.flowAndPattern",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)"
+      },
+      {
+        "id": "engines.recipe.governanceAudit",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)"
+      },
+      {
+        "id": "engines.recipe.governanceAuditNetwork",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)"
+      },
+      {
+        "id": "engines.recipe.growthScreenToDeepDive",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "성장 스캔 → 상위 후보 → 각 회사 분석"
+      },
+      {
+        "id": "engines.recipe.industryDeepDive",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)"
+      },
+      {
+        "id": "engines.recipe.industryStageScreen",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목"
+      },
+      {
+        "id": "engines.recipe.insiderEarningsLeading",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표"
+      },
+      {
+        "id": "engines.recipe.insiderEventCheck",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)"
+      },
+      {
+        "id": "engines.recipe.inventoryAndCycle",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)"
+      },
+      {
+        "id": "engines.recipe.macroBetaPeerScreen",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출"
+      },
+      {
+        "id": "engines.recipe.macroLiquidityCycle",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)"
+      },
+      {
+        "id": "engines.recipe.macroQuantScenarioBacktest",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest"
+      },
+      {
+        "id": "engines.recipe.macroToCompany",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "매크로 → 섹터 → 회사 영향 (transmission)"
+      },
+      {
+        "id": "engines.recipe.peerBenchmark",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)"
+      },
+      {
+        "id": "engines.recipe.qualityMacroBeta",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주"
+      },
+      {
+        "id": "engines.recipe.quantTechnicalReview",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)"
+      },
+      {
+        "id": "engines.recipe.scenarioAnalysis",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)"
+      },
+      {
+        "id": "engines.recipe.screenAndChart",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)"
+      },
+      {
+        "id": "engines.recipe.sectorRotation",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "섹터 로테이션 분석 (매크로 + scan + industry)"
+      },
+      {
+        "id": "engines.recipe.smallCapDiscovery",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "중소형주 발굴 (성장 + valuation + quality 교집합)"
+      },
+      {
+        "id": "engines.recipe.storyReportBuild",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)"
+      },
+      {
+        "id": "engines.recipe.thesisTracker",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 6,
+        "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)"
+      },
+      {
+        "id": "engines.recipe.usMarketReview",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "미국 종목 review (EDGAR + macro + quant)"
+      },
+      {
+        "id": "engines.recipe.usageAndApi",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "dartlab 사용법·API 설명 (RunPython 우회)"
+      },
+      {
+        "id": "engines.recipe.valuationBandTrack",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)"
+      },
+      {
+        "id": "engines.recipe.workforceAndCapital",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "인력·자본 사이클 (workforce + capital + 자본배분)"
+      },
+      {
+        "id": "operation.aiEngine",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 5,
+        "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)"
+      },
+      {
+        "id": "operation.docstringStandard",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 2,
+        "title": "capability docstring 의 LLM Specifications 섹션 표준"
+      },
+      {
+        "id": "operation.engineAudit",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "Engine Audit — 엔진 기능 점검 규격"
+      },
+      {
+        "id": "operation.intentBoosts",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 2,
+        "title": "Skill 검색 의도 가중치 SSOT"
+      },
+      {
+        "id": "operation.issues",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "이슈 관리"
+      },
+      {
+        "id": "operation.recipePromote",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 2,
+        "title": "Recipe 6-stage lifecycle + status 승급 CLI"
+      },
+      {
+        "id": "operation.refactorChecklist",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "Refactor Checklist — 대규모 rename / API 변경 6 단계"
+      },
+      {
+        "id": "operation.skillDevelopmentLoop",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 4,
+        "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환"
+      },
+      {
+        "id": "runtime.channel",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "Channel"
+      },
+      {
+        "id": "runtime.notebooks",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "Colab · Molab · 로컬 marimo 노트북"
+      },
+      {
+        "id": "runtime.providerProtocol",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 3,
+        "title": "Provider Protocol 동일 surface — 3-regulator drop-in"
+      },
+      {
+        "id": "runtime.pyodide",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "Pyodide"
+      },
+      {
+        "id": "runtime.python",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 2,
+        "title": "RunPython 신뢰 경계"
+      },
+      {
+        "id": "runtime.vscode",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 1,
+        "title": "VSCode Extension"
+      }
+    ],
+    "isolated": [
+      {
+        "id": "engines.scan.krxIndexStrength",
+        "category": "engines",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "KRX 지수 강세 분석"
+      },
+      {
+        "id": "operation.cliMaintenance",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "CLI 유지보수 규칙"
+      },
+      {
+        "id": "operation.methodology",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "검증 방법론 (credit · forecast · search · ai)"
+      },
+      {
+        "id": "operation.stability",
+        "category": "operation",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "API 안정성 정책 (tier · deprecation · semver)"
+      },
+      {
+        "id": "runtime.dataAvailabilityCheck",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "데이터 가용성 확인"
+      },
+      {
+        "id": "runtime.mcpWorkbench",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "MCP 외부 AI Workbench 연결"
+      },
+      {
+        "id": "runtime.pyodideBrowser",
+        "category": "runtime",
+        "inDegree": 0,
+        "outDegree": 0,
+        "title": "Pyodide / Web AI 실행 범위"
+      }
+    ]
+  }
+}
