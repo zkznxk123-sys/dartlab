@@ -41,7 +41,24 @@ def extractTables(content: str) -> list[dict]:
 
 
 def parseAmount(text: str) -> float | None:
-    """금액/숫자 문자열 → float. 음수 마커(△, ▲, 괄호) 처리."""
+    """금액/숫자 문자열 → float. 음수 마커 (△, ▲, 괄호) 처리.
+
+    Args:
+        text: 금액 문자열 (예: ``"1,234"``, ``"△500"``, ``"(100)"``, ``"(주1)"``).
+
+    Returns:
+        파싱된 float. 음수 마커가 있으면 음수. 빈 문자열·주석번호 (``"(주N)"``) ·
+        invalid 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount("1,234")
+        1234.0
+        >>> parseAmount("△500")
+        -500.0
+    """
     if not text or text.strip() in ("", "-", "\u3000", "\u2015", "\u2013"):
         return None
     cleaned = text.strip().replace(",", "").replace(" ", "")
@@ -60,7 +77,21 @@ def parseAmount(text: str) -> float | None:
 
 
 def detectUnit(content: str) -> float:
-    """content에서 단위를 감지. 백만원=1, 천원=0.001, 원=0.000001 반환."""
+    """content 에서 단위 감지 → 백만원 기준 scale factor 반환.
+
+    Args:
+        content: 단위 표시 (``"단위: 백만원"`` 등) 가 포함된 본문.
+
+    Returns:
+        백만원=1.0, 천원=0.001, 원=0.000001. 감지 실패 시 ``DEFAULT_UNIT_SCALE``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectUnit("단위: 백만원")
+        1.0
+    """
     m = re.search(r"단위\s*[：:]\s*(백만원|천원|원)", content)
     if m:
         return UNIT_SCALE.get(m.group(1), DEFAULT_UNIT_SCALE)
@@ -68,7 +99,21 @@ def detectUnit(content: str) -> float:
 
 
 def detectUnitLabel(content: str) -> str | None:
-    """content에서 단위 원문 문자열 반환. 감지 실패 시 None."""
+    """content 에서 단위 원문 문자열 반환.
+
+    Args:
+        content: 단위 표시 포함 본문.
+
+    Returns:
+        단위 라벨 (``"백만원"``/``"천원"``/``"원"``). 감지 실패 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectUnitLabel("단위: 천원")
+        '천원'
+    """
     m = re.search(r"단위\s*[：:]\s*(백만원|천원|원)", content)
     return m.group(1) if m else None
 
