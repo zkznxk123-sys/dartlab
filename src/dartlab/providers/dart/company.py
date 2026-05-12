@@ -3058,17 +3058,20 @@ class Company:
             >>> Company("005930").story()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_storyImpl`` — 실제 구현 + 14 섹션 + preset/template 옵션.
+            - ``analysis`` — 14축 raw 분석 (story 가 합산).
+            - ``dartlab.story.registry.buildStory`` — backend SSOT.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 14 섹션 (수익구조~재무정합성) 통합 보고서 dual-access proxy. preset 5 종 + template 7 종
+              조합으로 톤/관점 조절. call + attr 양식 모두 backend dispatch.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            ``ask`` 가 본 함수 결과를 tool 결과로 받아 AI 답변 합성. 단일 섹션 호출이 토큰 효율.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -3207,17 +3210,20 @@ class Company:
             >>> Company("005930").analysis()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_analysisImpl`` — 실 dispatch (22 축 5 group).
+            - ``story`` — analysis 결과를 보고서로 합산.
+            - ``dartlab.analysis.financial.Analysis`` — backend SSOT.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 5 그룹 22 축 (financial 14 + valuation 1 + governance 3 + forecast 2 + macro 2) 개별
+              분석 dispatch dual-access. axis 미지정 시 카탈로그. self 자동 바인딩.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 분석 도구 entry — 축 미지정 호출로 capability 확인 후 정확 dispatch.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -3351,31 +3357,34 @@ class Company:
             없음.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``storyTree`` / ``causalWeights`` — 검증 대상 story.
+            - ``dartlab.analysis.financial.storyValidation`` — 3 테스트 backend.
 
         Requires:
             - dartlab
             - polars
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 가정 그럴듯하나" → 본 함수 결과 plausibility band.
+            - "valuation 의 위험 신호" → result["rules"] severity = "critical".
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 사용자 valuation 가정 reality check 시 본 함수. critical 이면 강한 경고 의무.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - overall "info" 결과를 "안전" 결론 → severity 는 룰 위반 부재일 뿐 valuation 정답 아님.
+                - precedents 자동 선정 — 사용자 명시 시 다른 결과 가능.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"precedents": dict, "plausibility": dict, "rules": dict, "overall": str}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - storyTree base + 동종 universe.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - precedents+band+sins 3 분석 → severity 종합 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART valuation 검증).
         """
         from dartlab.analysis.financial.storyValidation import (
             calcPlausibilityBand,
@@ -3425,17 +3434,20 @@ class Company:
             >>> Company("005930").credit()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_creditImpl`` — 실 구현 (dCR 20 단계 + 7 축).
+            - ``analysis("financial", "안정성")`` — credit 보완 입력.
+            - ``story(preset="credit")`` — credit 결과 보고서 합성.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - dartlab 독립 dCR 등급 (AAA→D 20 단계) dual-access. 7 축 (채무상환/자본구조/유동성/
+              현금흐름/사업안정성/재무신뢰성/공시리스크) 정량 합산. KIS/NICE 외부 등급과 비교 가능.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            외부 신용평가 미상장 회사도 동일 척도. AI 가 부도위험 답변 시 본 결과 + analysis 결합.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -3662,17 +3674,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - numeric=True 후 변환 실패 row 가 None — caller 가 null 분기 의무.
+                - subtopic 이름 추측 — 정확 이름은 sections 본문 또는 show(topic) 확인.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - ParsedSubtopicTable {df: pl.DataFrame, subtopic: str, columns: list} 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs 본 회사 보유 + 해당 topic 의 markdown table 본문.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.subtables → parseSubtopicTable(numeric) → period filter → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 표).
         """
         result = self._topicSubtables(topic)
         if result is None:
@@ -4005,7 +4018,7 @@ class Company:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame [topic, period, value] 또는 None.
         """
         return self._profileAccessor.facts
 
@@ -4046,17 +4059,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - block_id 의 안정성 가정 X — sections 갱신 시 재산정.
+                - 본 블록 벡터 임베딩 사전 계산 가정 X — 별도 처리.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic, subtopic, period, content] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections → 청킹 → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 RAG).
         """
         return self._docs.retrievalBlocks
 
@@ -4097,17 +4111,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 슬라이스 그대로 컨텍스트 → 토큰 부담. topic 필터링.
+                - 슬라이스 ID 의 안정성 가정 X — sections 갱신 시 재산정.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [sliceId, topic, period, content, tokenCount] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections + slicer (LLM context budget).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections → docs.contextSlices accessor → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 RAG).
         """
         return self._docs.contextSlices
 
@@ -4500,17 +4515,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 시장 세분화 (KOSPI vs KOSDAQ) 필요 시 본 값 부족 — listing 메타에서.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 고정 str "KR".
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (상수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정적.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 본 property → "KR".
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — DART provider 통합 라벨.
         """
         return "KR"
 
@@ -4532,17 +4547,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 모든 KR 회사 12-31 단정 X — 드물지만 다른 회계년도 존재 가능 (실 종목 결산월 확인).
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 고정 str "12-31".
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (관습 상수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정적.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 본 property → "12-31".
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — 한국 회계 관습 표준.
         """
         return "12-31"
 
@@ -4566,17 +4581,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 외화 결산 회사 (드물지만 가능) 도 본 함수 "KRW" 반환 — 실 보고통화 별도 확인.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 고정 str "KRW".
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (상수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정적.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 본 property → "KRW".
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR — 한국 표준 통화.
         """
         return "KRW"
 
@@ -4716,7 +4731,7 @@ class Company:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame [종목코드, 종목명, 최대주주지분율, 사외이사비율, 감사위원회, 종합점수, 등급] 또는 None.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanGovernance
 
@@ -4847,7 +4862,7 @@ class Company:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame [종목코드, 종목명, 배당수익률, 배당성향, 자사주매입, 총환원율, 분류] 또는 None.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanCapital
 
@@ -4918,7 +4933,7 @@ class Company:
             없음.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame [종목코드, 부채비율, 차입금의존도, ICR, 위험등급] 또는 None.
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanDebt
 
@@ -4951,17 +4966,20 @@ class Company:
             >>> Company("005930").quant()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_quantImpl`` — 실 구현 (31 축 dispatch).
+            - ``dartlab.quant.Quant`` — backend SSOT.
+            - ``edgar.Company.quant`` — US 패리티 (Naver vs Yahoo origin 차이).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 31 축 기술 분석 (기술지표/벤치마크/팩터/감성/최적화) dual-access. self.stockCode
+              자동 바인딩. axis 미지정 시 카탈로그 + 한글 axis 한정.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            주가 기반 기술 판단 entry — 재무 (analysis) 와 분리. ``c.quant("판단")`` 종합 verdict.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -5062,23 +5080,25 @@ class Company:
             >>> Company("005930").macro()
 
         Args:
-            axis: <TODO: param desc> (<unannotated>)
-            target: <TODO: param desc> (<unannotated>)
-            overrides: <TODO: param desc> (dict | None)
-            **kwargs: <TODO: param desc> (<unannotated>)
+            axis: 매크로 축 (한글 — "사이클" / "위기" / "시나리오" / "유동성" / "심리"). None 이면 가이드.
+            target: axis="시나리오" 시 시나리오 이름 (예 "2008 금융위기").
+            overrides: 매크로 가정 교체 dict.
+            **kwargs: 축별 추가 인자.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.macro.Macro`` — 매크로 backend SSOT.
+            - ``edgar.Company.macro`` — US 패리티.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - KR 시장 매크로 (ECOS + KRX 데이터) 자동 위임. market="KR" 자동 주입. KR 회사 매크로 영향
+              분석 entry — US 회사는 edgar.macro 별도.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            거시환경 회사 영향 답변 시 본 함수. axis 미지정 시 가이드 반환 — AI 가 카탈로그 먼저 확인.
         """
         from dartlab.macro import Macro
 
@@ -5118,17 +5138,20 @@ class Company:
             >>> Company("005930").causalWeights()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``valuationImpact`` — 본 가중치를 DCF override 로 변환.
+            - ``storyTree`` — 본 가중치 적용한 3 trajectory.
+            - ``dartlab.story.narrative.buildCausalWeights`` — implementation.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 6 막 (수익구조→수익성→현금흐름→자금조달→자산배치→가치평가) 의 인과 가중치 (amplify/
+              dampen/neutral) 계산. 매 막 출발/도착 지표 + delta + weight + direction.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 "이 회사 핵심 인과 chain" 답변 시 본 함수 결과 인용 — 단일 지표가 아닌 chain 구조.
         """
         import importlib
 
