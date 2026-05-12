@@ -643,13 +643,15 @@ def getAllIds() -> list[str]:
     return list(_entries.keys())
 
 
-def search(keyword: str) -> list[CatalogEntry]:
+def search(keyword: str, *, limit: int | None = None) -> list[CatalogEntry]:
     """키워드로 카탈로그 검색 (ID, 라벨, 설명에서 매칭).
 
     Parameters
     ----------
     keyword : str
         검색 키워드 (대소문자 무시).
+    limit : int | None
+        반환 행수 상한. None이면 전체.
 
     Returns
     -------
@@ -658,7 +660,12 @@ def search(keyword: str) -> list[CatalogEntry]:
     """
     _build()
     kw = keyword.lower()
-    return [e for e in _entries.values() if kw in e.id.lower() or kw in e.label.lower() or kw in e.description.lower()]
+    result = [
+        e for e in _entries.values() if kw in e.id.lower() or kw in e.label.lower() or kw in e.description.lower()
+    ]
+    if limit is not None and limit > 0:
+        return result[:limit]
+    return result
 
 
 def toDataframe(group: str | None = None) -> pl.DataFrame:

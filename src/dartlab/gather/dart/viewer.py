@@ -57,7 +57,12 @@ def _decodeKorean(resp) -> str:
     return text
 
 
-async def fetchAsync(rceptNo: str, *, client: GatherHttpClient | None = None) -> pl.DataFrame:
+async def fetchAsync(
+    rceptNo: str,
+    *,
+    client: GatherHttpClient | None = None,
+    limit: int | None = None,
+) -> pl.DataFrame:
     """viewer 무인증 fetch — async.
 
     Parameters
@@ -66,6 +71,8 @@ async def fetchAsync(rceptNo: str, *, client: GatherHttpClient | None = None) ->
         14자리 접수번호.
     client : GatherHttpClient | None
         HTTP 클라이언트. None 이면 자체 생성.
+    limit : int | None
+        반환 섹션 수 상한 (앞쪽 N 섹션). None이면 전체 섹션.
 
     Returns
     -------
@@ -119,6 +126,9 @@ async def fetchAsync(rceptNo: str, *, client: GatherHttpClient | None = None) ->
         if not rows:
             raise DocumentNotFoundError(f"rcept_no {rceptNo} 의 모든 섹션이 빈 응답 또는 fetch 실패")
 
+        if limit is not None and limit > 0:
+            rows = rows[:limit]
+
         return pl.DataFrame(rows).with_columns(
             pl.col("section_order").cast(pl.Int64),
             pl.col("title").cast(pl.Utf8),
@@ -130,12 +140,27 @@ async def fetchAsync(rceptNo: str, *, client: GatherHttpClient | None = None) ->
             await client.close()
 
 
-def fetch(rceptNo: str, *, client: GatherHttpClient | None = None) -> pl.DataFrame:
-    """sync wrapper — :func:`fetchAsync` 의 동기 진입점."""
+def fetch(
+    rceptNo: str,
+    *,
+    client: GatherHttpClient | None = None,
+    limit: int | None = None,
+) -> pl.DataFrame:
+    """sync wrapper — :func:`fetchAsync` 의 동기 진입점.
+
+    Parameters
+    ----------
+    rceptNo : str
+        14자리 접수번호.
+    client : GatherHttpClient | None
+        HTTP 클라이언트. None 이면 자체 생성.
+    limit : int | None
+        반환 섹션 수 상한 (앞쪽 N 섹션). None이면 전체.
+    """
     if client is not None:
         # 이미 외부 client 가 있으면 자체 event loop 안에서 호출됐을 수 있다.
-        return runAsync(fetchAsync(rceptNo, client=client))
-    return runAsync(fetchAsync(rceptNo))
+        return runAsync(fetchAsync(rceptNo, client=client, limit=limit))
+    return runAsync(fetchAsync(rceptNo, limit=limit))
 
 
 def docMeta(rceptNo: str, *, client: GatherHttpClient | None = None) -> DartDocMeta:

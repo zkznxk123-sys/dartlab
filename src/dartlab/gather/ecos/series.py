@@ -140,6 +140,7 @@ def fetchSeries(
     start: str | None = None,
     end: str | None = None,
     enrich: bool = False,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """ECOS 지표 시계열 → Polars DataFrame ``(date, value)``.
 
@@ -155,6 +156,8 @@ def fetchSeries(
         종료일. None이면 최신까지.
     enrich : bool
         True이면 변화율 추가 + Parquet 영구 캐시.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -222,6 +225,8 @@ def fetchSeries(
 
         df = enrichAndCache(indicatorId, df, source="ecos")
 
+    if limit is not None and limit > 0:
+        return df.tail(limit)
     return df
 
 
@@ -231,6 +236,7 @@ def fetchMulti(
     *,
     start: str | None = None,
     end: str | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """복수 지표 → wide DataFrame ``(date, GDP, CPI, ...)``.
 
@@ -246,6 +252,8 @@ def fetchMulti(
         시작일. None이면 2000년부터.
     end : str | None
         종료일. None이면 최신까지.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N). None이면 전체.
 
     Returns
     -------
@@ -266,4 +274,7 @@ def fetchMulti(
     for df in frames[1:]:
         result = result.join(df, on="date", how="full", coalesce=True)
 
-    return result.sort("date").fill_null(strategy="forward")
+    out = result.sort("date").fill_null(strategy="forward")
+    if limit is not None and limit > 0:
+        return out.tail(limit)
+    return out

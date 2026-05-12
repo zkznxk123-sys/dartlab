@@ -20,6 +20,7 @@ def fetchSeries(
     freq: str | None = None,
     aggregation: str = "avg",
     enrich: bool = False,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """FRED 시계열 → Polars DataFrame ``(date, value)``.
 
@@ -39,6 +40,8 @@ def fetchSeries(
         리샘플 집계 방법 (avg/sum/eop).
     enrich : bool
         True이면 변화율 추가 + Parquet 영구 캐시.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -95,6 +98,8 @@ def fetchSeries(
 
         df = enrichAndCache(seriesId, df, source="fred")
 
+    if limit is not None and limit > 0:
+        return df.tail(limit)
     return df
 
 
@@ -105,6 +110,7 @@ def fetchMulti(
     start: str | None = None,
     end: str | None = None,
     freq: str | None = None,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """복수 시계열 → wide DataFrame ``(date, GDP, UNRATE, ...)``.
 
@@ -122,6 +128,8 @@ def fetchMulti(
         종료일. None이면 최신까지.
     freq : str | None
         리샘플 주파수. None이면 원본.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N). None이면 전체.
 
     Returns
     -------
@@ -161,6 +169,8 @@ def fetchMulti(
     else:
         result = result.sort("date")
 
+    if limit is not None and limit > 0:
+        return result.tail(limit)
     return result
 
 
@@ -233,7 +243,7 @@ def searchSeries(
     )
 
 
-def fetchMeta(client: FredClient, seriesId: str) -> SeriesMeta:
+def fetchMeta(client: FredClient, seriesId: str, *, limit: int | None = None) -> SeriesMeta:
     """시계열 메타데이터 조회.
 
     Parameters
@@ -242,6 +252,8 @@ def fetchMeta(client: FredClient, seriesId: str) -> SeriesMeta:
         FRED REST API 클라이언트.
     series_id : str
         FRED 시리즈 ID.
+    limit : int | None
+        단건 SeriesMeta 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -254,6 +266,7 @@ def fetchMeta(client: FredClient, seriesId: str) -> SeriesMeta:
     SeriesNotFoundError
         시리즈를 찾을 수 없을 때.
     """
+    del limit
     data = client.get("/series", seriesId=seriesId)
     serieses = data.get("seriess", [])
     if not serieses:

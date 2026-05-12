@@ -12,15 +12,6 @@
     "src/dartlab/gather/accessors.py::fetchScanProfitability",
     "src/dartlab/gather/accessors.py::fetchTechnicalIndicators",
     "src/dartlab/gather/accessors.py::fetchUniverseBulk",
-    "src/dartlab/gather/dart/viewer.py::fetch",
-    "src/dartlab/gather/dart/viewer.py::fetchAsync",
-    "src/dartlab/gather/ecos/catalog.py::search",
-    "src/dartlab/gather/ecos/facade.py::search",
-    "src/dartlab/gather/ecos/series.py::fetchMulti",
-    "src/dartlab/gather/ecos/series.py::fetchSeries",
-    "src/dartlab/gather/fred/series.py::fetchMeta",
-    "src/dartlab/gather/fred/series.py::fetchMulti",
-    "src/dartlab/gather/fred/series.py::fetchSeries",
     "src/dartlab/gather/macroProvider.py::fetchSeriesLatest",
     "src/dartlab/gather/macroProvider.py::fetchSeriesYoy"
   ]

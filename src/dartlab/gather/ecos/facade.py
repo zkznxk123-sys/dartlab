@@ -105,13 +105,15 @@ class Ecos:
         """
         return _catalog.toDataframe(group)
 
-    def search(self, keyword: str) -> list[CatalogEntry]:
+    def search(self, keyword: str, *, limit: int | None = None) -> list[CatalogEntry]:
         """키워드로 카탈로그 검색.
 
         Parameters
         ----------
         keyword : str
             검색 키워드 (ID, 라벨, 설명에서 매칭).
+        limit : int | None
+            반환 행수 상한. None이면 전체.
 
         Returns
         -------
@@ -119,7 +121,7 @@ class Ecos:
             매칭된 카탈로그 엔트리 리스트. 각 엔트리에
             id, label, group, frequency, unit, description 포함.
         """
-        return _catalog.search(keyword)
+        return _catalog.search(keyword, limit=limit)
 
     def group(self, name: str, *, start: str | None = None, end: str | None = None) -> pl.DataFrame:
         """카탈로그 그룹 일괄 조회.
