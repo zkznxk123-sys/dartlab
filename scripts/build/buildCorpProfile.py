@@ -45,8 +45,11 @@ def _resolveApiKey() -> str:
     raise RuntimeError("OPEN_DART_KEY 또는 DART_API_KEY 환경변수 필요")
 
 
-def _fetchOne(client: DartClient, row: dict, *, retry: int = 2, delay: float = 0.1) -> dict | None:
-    """단일 corp_code 의 companyInfo() 호출 → dict 반환. 실패 시 None."""
+def _fetchOne(client: DartClient, row: dict, *, retry: int = 5, delay: float = 0.5) -> dict | None:
+    """단일 corp_code 의 companyInfo() 호출 → dict 반환. 실패 시 None.
+
+    DART OpenAPI 가 일시적 "Server disconnected" 다발 시 exponential backoff 로 재시도.
+    """
     corpCode = row["corp_code"]
     stockCode = row.get("stock_code", "") or ""
     corpName = row.get("corp_name", "") or ""
@@ -67,43 +70,89 @@ def _fetchOne(client: DartClient, row: dict, *, retry: int = 2, delay: float = 0
             if attempt >= retry:
                 print(f"  ⚠ {corpCode} ({corpName}) 실패: {e}", file=sys.stderr)
                 return None
-            time.sleep(delay * (attempt + 1))
+            # exponential backoff: 0.5s → 1s → 2s → 4s → 8s
+            time.sleep(delay * (2**attempt))
     return None
 
 
-def main() -> int:
-    """전 corp_code 대상 companyInfo() prefetch + parquet 저장."""
-    parser = argparse.ArgumentParser(description="DART corp_profile prefetch 빌드")
-    parser.add_argument("--limit", type=int, default=0, help="처리할 최대 종목 수 (0=무제한, 테스트용)")
-    parser.add_argument("--workers", type=int, default=8, help="동시 호출 수 (rate limit 주의)")
-    parser.add_argument("--stockOnly", action="store_true", help="stock_code 있는 종목만 (상장사)")
-    parser.add_argument("--output", type=str, default="", help="출력 path (기본 data/dart/scan/corpProfile.parquet)")
-    args = parser.parse_args()
+def buildCorpProfile(
+    *,
+    stockOnly: bool = True,
+    workers: int = 5,
+    limit: int = 0,
+    output: Path | None = None,
+    resume: bool = True,
+) -> Path | None:
+    """전 corp_code 대상 companyInfo() prefetch + parquet 저장.
 
-    apiKey = _resolveApiKey()
+    매 prebuild 사이클 (Data Sync 직후) 호출되어 신규 상장 / 상장폐지 / 결산월
+    변경을 즉시 반영하는 corp_profile dataset 갱신. 기존 결과가 있으면 누락된
+    corp_code 만 incremental 호출 (resume=True) 하여 DART OpenAPI rate limit 으로
+    부분 실패한 호출도 누적 완성.
+
+    Parameters
+    ----------
+    stockOnly : bool
+        True 면 ``stock_code`` 있는 종목 (상장사 ~3964) 만. False 면 전종목 (~117K).
+    workers : int
+        ThreadPool 동시 호출 수. DART OpenAPI rate limit 고려 (기본 5 보수).
+    limit : int
+        0 = 무제한, > 0 = 첫 N 종목 (테스트용).
+    output : Path | None
+        결과 parquet 저장 경로. None 이면 ``data/dart/scan/corpProfile.parquet``.
+    resume : bool
+        True (기본) 면 기존 parquet 의 corp_code 는 skip, missing 만 호출. False
+        면 전종목 재호출.
+
+    Returns
+    -------
+    Path | None
+        저장된 parquet 경로. API 키 없거나 결과 0 이면 None.
+    """
+    try:
+        apiKey = _resolveApiKey()
+    except RuntimeError as e:
+        print(f"[corpProfile] {e} — 스킵")
+        return None
+
     client = DartClient(apiKey=apiKey)
 
     print("[corpProfile] corp_code master 로드 ...")
     master = loadCorpCodes(client)
     print(f"[corpProfile] master rows: {master.height}")
 
-    if args.stockOnly:
+    if stockOnly:
         master = master.filter(
             pl.col("stock_code").is_not_null() & (pl.col("stock_code") != "") & (pl.col("stock_code") != " ")
         )
         print(f"[corpProfile] stock_code 있는 종목만: {master.height}")
 
-    if args.limit > 0:
-        master = master.head(args.limit)
+    if limit > 0:
+        master = master.head(limit)
         print(f"[corpProfile] limit 적용: {master.height}")
 
-    rows = master.to_dicts()
+    outPath = output if output else Path(_dataDir("scan")) / "corpProfile.parquet"
+
+    # resume: 기존 결과 있으면 corp_code 매핑 미리 로드, missing 만 호출
+    existing: dict[str, dict] = {}
+    if resume and outPath.exists():
+        try:
+            existDf = pl.read_parquet(str(outPath))
+            existing = {row["corp_code"]: row for row in existDf.to_dicts()}
+            print(f"[corpProfile] resume: 기존 {len(existing)}개 skip, missing 만 호출")
+        except (pl.exceptions.PolarsError, OSError) as e:
+            print(f"[corpProfile] resume 실패 (재시작): {e}")
+            existing = {}
+
+    allRows = master.to_dicts()
+    rows = [r for r in allRows if r["corp_code"] not in existing]
+    print(f"[corpProfile] 호출 대상: {len(rows)} (skip {len(existing)})")
     results: list[dict] = []
     failed = 0
     t0 = time.perf_counter()
 
-    print(f"[corpProfile] companyInfo 병렬 prefetch (workers={args.workers}) ...")
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+    print(f"[corpProfile] companyInfo 병렬 prefetch (workers={workers}) ...")
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = [pool.submit(_fetchOne, client, row) for row in rows]
         for i, fut in enumerate(as_completed(futures), 1):
             result = fut.result()
@@ -119,29 +168,53 @@ def main() -> int:
     elapsed = time.perf_counter() - t0
     print(f"[corpProfile] 완료: {len(results)}ok {failed}fail {elapsed:.0f}초")
 
-    if not results:
+    # 기존 결과 + 신규 결과 union (corp_code 키 기준 신규 우선)
+    combined: dict[str, dict] = dict(existing)
+    for r in results:
+        combined[r["corp_code"]] = r
+
+    if not combined:
         print("[corpProfile] 결과 없음 — 종료")
-        return 1
+        return None
 
-    df = pl.DataFrame(results)
+    df = pl.DataFrame(list(combined.values()))
 
-    outPath = Path(args.output) if args.output else Path(_dataDir("scan")) / "corpProfile.parquet"
     outPath.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(str(outPath), compression="zstd")
     diskKb = outPath.stat().st_size / 1024
     print(f"[corpProfile] saved: {outPath} ({df.height} rows, {diskKb:.0f}KB)")
 
     # 결산월 분포 요약
-    acc_dist = (
+    accDist = (
         df.filter((pl.col("stockCode") != "") & (pl.col("acc_mt") != ""))
         .group_by("acc_mt")
         .agg(pl.len().alias("count"))
         .sort("count", descending=True)
     )
     print("[corpProfile] 상장사 결산월 분포:")
-    print(acc_dist)
+    print(accDist)
 
-    return 0
+    return outPath
+
+
+def main() -> int:
+    """CLI wrapper — argparse + buildCorpProfile()."""
+    parser = argparse.ArgumentParser(description="DART corp_profile prefetch 빌드")
+    parser.add_argument("--limit", type=int, default=0, help="처리할 최대 종목 수 (0=무제한, 테스트용)")
+    parser.add_argument("--workers", type=int, default=5, help="동시 호출 수 (rate limit, 기본 5)")
+    parser.add_argument("--stockOnly", action="store_true", help="stock_code 있는 종목만 (상장사)")
+    parser.add_argument("--output", type=str, default="", help="출력 path (기본 data/dart/scan/corpProfile.parquet)")
+    parser.add_argument("--noResume", action="store_true", help="기존 결과 무시하고 전종목 재호출")
+    args = parser.parse_args()
+
+    result = buildCorpProfile(
+        stockOnly=args.stockOnly,
+        workers=args.workers,
+        limit=args.limit,
+        output=Path(args.output) if args.output else None,
+        resume=not args.noResume,
+    )
+    return 0 if result else 1
 
 
 if __name__ == "__main__":

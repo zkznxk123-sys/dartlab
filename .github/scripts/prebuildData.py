@@ -41,6 +41,32 @@ def _buildScan(dataDir: str) -> dict[str, Path | list[Path] | None]:
     return buildScan(sinceYear=2021, verbose=True)
 
 
+def _buildCorpProfile(dataDir: str) -> Path | None:
+    """corp_profile prefetch — DART acc_mt 권위 SSOT (P-S11, Phase 3).
+
+    Data Sync 직후 매 prebuild 사이클마다 호출되어 신규 상장 / 상장폐지 / 결산월
+    변경을 즉시 반영. ``_fiscalMonthMap()`` 의 1순위 SSOT 로 활용되어 비12월 결산
+    종목의 캘린더 환원 정확도 보장. scan 빌드 *이전* 단계에서 호출해야
+    ``buildFinance`` 가 최신 corp_profile 을 사용한다.
+
+    Args:
+        dataDir: 데이터 디렉토리 (사용 안 함, _dataDir 자동 해석).
+
+    Returns:
+        산출 parquet 경로 또는 None (API 키 없거나 실패).
+    """
+    try:
+        scriptsBuild = Path(__file__).resolve().parents[2] / "scripts" / "build"
+        if str(scriptsBuild) not in sys.path:
+            sys.path.insert(0, str(scriptsBuild))
+        from buildCorpProfile import buildCorpProfile  # type: ignore
+
+        return buildCorpProfile(stockOnly=True, workers=10)
+    except (ImportError, RuntimeError, OSError) as exc:
+        print(f"[prebuild] corpProfile 빌드 실패 (스킵): {exc}")
+        return None
+
+
 def _buildDocsIndex(dataDir: str) -> Path | None:
     """docs 슬림 인덱스 빌드 (P3 — whimsical 흡수).
 
@@ -150,6 +176,10 @@ def main():
 
     # 2단계: scan 프리빌드
     if "scan" in targets:
+        # 2.0단계: corp_profile 갱신 (신규 상장/폐지/결산월 변경 즉시 반영, scan 빌드 전).
+        # buildFinance 의 _fiscalMonthMap 이 corp_profile 을 1순위 SSOT 로 사용한다.
+        _buildCorpProfile(dataDir)
+
         start = time.time()
         results = _buildScan(dataDir)
         elapsed = time.time() - start
