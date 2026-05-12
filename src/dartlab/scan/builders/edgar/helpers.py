@@ -26,6 +26,17 @@ def scanEdgarAccounts(snakeIds: list[str], *, annual: bool = True) -> pl.DataFra
         corpName : str — 회사명
         {snakeId} : float — 해당 계정의 최신 기간 값
         {snakeId}_prev : float — 해당 계정의 전기 값 (YoY 계산용)
+
+    Raises
+    ------
+    polars.PolarsError
+        EDGAR scanAccount 가 반환한 DataFrame join 실패 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.edgar.helpers import scanEdgarAccounts
+    >>> df = scanEdgarAccounts(["sales", "operating_profit"])
+    >>> df.filter(pl.col("operating_profit") > 1e9).head()
     """
     from dartlab.providers.edgar.finance.scanAccount import scanAccount
 
@@ -59,10 +70,28 @@ def scanEdgarAccounts(snakeIds: list[str], *, annual: bool = True) -> pl.DataFra
 def safeDiv(num: pl.Expr, den: pl.Expr) -> pl.Expr:
     """안전한 나눗셈 — 분모 0이면 None.
 
+    Parameters
+    ----------
+    num : pl.Expr
+        분자 표현식.
+    den : pl.Expr
+        분모 표현식.
+
     Returns
     -------
     pl.Expr
         num / den. 분모가 0이면 None.
+
+    Raises
+    ------
+    없음 — Polars when/then chain 으로 0 분모 처리.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> from dartlab.scan.builders.edgar.helpers import safeDiv
+    >>> df = pl.DataFrame({"a": [10, 5], "b": [2, 0]})
+    >>> df.with_columns(ratio=safeDiv(pl.col("a"), pl.col("b")))
     """
     return pl.when(den != 0).then(num / den).otherwise(None)
 
@@ -70,10 +99,28 @@ def safeDiv(num: pl.Expr, den: pl.Expr) -> pl.Expr:
 def pct(num: pl.Expr, den: pl.Expr) -> pl.Expr:
     """백분율 계산 — (num/den)*100, 소수점 2자리.
 
+    Parameters
+    ----------
+    num : pl.Expr
+        분자 표현식.
+    den : pl.Expr
+        분모 표현식.
+
     Returns
     -------
     pl.Expr
         비율 (%). 분모 0이면 None.
+
+    Raises
+    ------
+    없음 — safeDiv 가 0 분모 None 처리.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> from dartlab.scan.builders.edgar.helpers import pct
+    >>> df = pl.DataFrame({"profit": [10, 5], "sales": [100, 50]})
+    >>> df.with_columns(margin=pct(pl.col("profit"), pl.col("sales")))
     """
     return (safeDiv(num, den) * 100).round(2)
 
@@ -94,6 +141,17 @@ def scanEdgarRawTags(tags: list[str], *, annual: bool = True) -> pl.DataFrame:
         stockCode : str — CIK
         corpName : str — 회사명
         {tag} : float — 각 태그의 최신 연도 값 (USD)
+
+    Raises
+    ------
+    polars.exceptions.ComputeError · OSError
+        개별 종목 parquet 손상 시 내부 흡수 (skip).
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.edgar.helpers import scanEdgarRawTags
+    >>> df = scanEdgarRawTags(["AuditFees"])
+    >>> df.filter(pl.col("AuditFees") > 1e6).head()
     """
     from dartlab.core.dataLoader import _getDataRoot
 
@@ -150,6 +208,17 @@ def gradeByValue(val: pl.Expr, thresholds: list[tuple[float, str]], default: str
     -------
     pl.Expr
         등급 문자열 (예: "우수", "양호", ..., default).
+
+    Raises
+    ------
+    없음 — Polars when/then chain, threshold list 비어도 default 만 반환.
+
+    Examples
+    --------
+    >>> import polars as pl
+    >>> from dartlab.scan.builders.edgar.helpers import gradeByValue
+    >>> df = pl.DataFrame({"roe": [25.0, 15.0, 5.0]})
+    >>> df.with_columns(grade=gradeByValue(pl.col("roe"), [(20, "우수"), (10, "양호")]))
     """
     expr = val
     for i, (threshold, label) in enumerate(thresholds):

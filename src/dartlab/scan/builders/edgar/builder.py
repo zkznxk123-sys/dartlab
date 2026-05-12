@@ -46,6 +46,13 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     ------
     FileNotFoundError
         EDGAR finance 디렉토리 또는 parquet 없을 때.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.edgar.builder import buildEdgarFinance
+    >>> path = buildEdgarFinance(sinceYear=2021, verbose=True)
+    >>> path.exists()
+    True
     """
     from dartlab import config as _cfg
 
@@ -232,10 +239,27 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
 def buildEdgarScan(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     """전체 EDGAR scan 프리빌드.
 
+    Parameters
+    ----------
+    sinceYear : int, default 2021
+        시작 연도.
+    verbose : bool, default False
+        진행 로그 출력 여부.
+
     Returns
     -------
     Path
         생성된 scan/finance.parquet 경로.
+
+    Raises
+    ------
+    FileNotFoundError
+        buildEdgarFinance 가 EDGAR finance 디렉토리/parquet 누락 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.edgar.builder import buildEdgarScan
+    >>> path = buildEdgarScan(sinceYear=2020, verbose=True)
     """
     return buildEdgarFinance(sinceYear=sinceYear, verbose=verbose)
 

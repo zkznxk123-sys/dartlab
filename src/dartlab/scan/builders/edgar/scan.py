@@ -31,6 +31,17 @@ def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
     -------
     pl.DataFrame
         축별 전종목 스캔 결과. 미구현 축이면 info 컬럼 1행 DataFrame.
+
+    Raises
+    ------
+    KeyError
+        하위 헬퍼 (scanEdgarAccounts) 가 발생시키는 예외 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.builders.edgar.scan import edgarScan
+    >>> df = edgarScan("profitability")
+    >>> df.filter(pl.col("opMargin") > 20).head()
     """
     fn = _DISPATCH.get(axis)
     if fn is None:
