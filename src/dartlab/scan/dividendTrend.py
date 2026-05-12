@@ -125,6 +125,35 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("dividendTrend")
     >>> df.filter(pl.col("패턴") == "연속증가").select(["종목코드", "DPS성장"])
+
+    Capabilities:
+        - dividend report parquet 에서 종목별 DPS 3 개년 (당/전/전전기) + 성장률 + 배당성향 +
+          배당수익률 추출. 패턴 9 종 (무배당/시작/중단/연속증가/연속감소/안정/증가/감소/불규칙)
+          분류 + 6 단계 등급 (우수/양호/보통/주의/위험/무배당).
+        - 보통주 + Q4 우선 선택. 연결재무 배당성향 우선.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("dividendTrend")`` 호출 시 본 함수 dispatch. "고배당주" 스크리닝,
+        "연속증가 배당주" watchlist, 배당정책 비교 분석 source.
+
+    Guide:
+        - DPS 3 개년 보유한 종목만 패턴 추정 가능. 신규 상장주는 패턴 = "시작" 또는 "무배당".
+        - 등급 매핑: 연속증가 = 우수 / 안정 = 양호 / 무배당 = 무배당 / 중단 = 위험.
+
+    When:
+        대시보드 배당 카드 빌드 시. cross-company 배당 스크리닝 시.
+
+    How:
+        ``scanParquets("dividend", ...)`` → 보통주 + 주당현금배당금 row 필터 → 종목별 3 개년
+        wide pivot → 성장률 + 배당성향 + 수익률 column + 패턴 분기 + 등급 분기.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/dividend.parquet`` (``buildReport`` 산출)
+        - ``stock_knd == "보통주"`` row 필터
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.core.buildReport` — source 빌드
+        - :func:`dartlab.scan.capital.scanCapital` (capital axis) — 배당+자사주 통합 분류
     """
     raw = scanParquets(
         "dividend",

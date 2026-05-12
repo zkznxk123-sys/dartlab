@@ -140,6 +140,35 @@ def scanDisclosureRisk(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("disclosureRisk")
     >>> df.filter(pl.col("등급") == "고위험").select(["종목코드", "활성시그널수"])
+
+    Capabilities:
+        - changes.parquet 의 최신 fromPeriod→toPeriod row 들에서 6 선행 리스크 시그널 추출:
+          우발부채 / 만성적자 / 리스크 키워드 / 감사 구조 변경 / 계열 변화 / 사업 전환.
+        - 6 시그널의 활성 합산으로 4 단계 등급 (안전/관찰/주의/고위험).
+
+    AIContext:
+        Agent 가 ``dartlab.scan("disclosureRisk")`` 호출 시 본 함수 dispatch. 사업보고서 섹션
+        변화 (재무제표 수치 외) 에서 미래 리스크 신호를 조기 발견. AI 가 "최근 우발부채 신고
+        회사" 같은 cross-company 질문 source.
+
+    Guide:
+        - 최신 기간 자동 탐지: ``toPeriod.max()`` 기준. 이전 기간은 키워드 차분 (신규 키워드 출현) 용.
+        - 6 시그널은 독립 — 활성 시그널 ≥ 3 면 고위험. 정책은 본 함수 내부 임계 조절.
+
+    When:
+        대시보드 disclosureRisk 카드 빌드 시. 리스크 스크리닝 (선행 신호 기반 watchlist) 시.
+
+    How:
+        ``_ensureScanData`` 로 changes.parquet 보장 → 최신/이전 period filter → 6 시그널 함수
+        (contingentDebt/chronicYears/...) 호출 → join → activeSignals 합산 → grade 분기.
+
+    Requires:
+        - 로컬 ``data/dart/scan/changes.parquet`` (``buildChanges`` 산출)
+        - 6 시그널 추출 함수 (동 모듈 private)
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.core.buildChanges` — source 빌드
+        - :func:`dartlab.scan.audit.scanAudit` — 감사 단독 axis (본 함수의 보완)
     """
     scanDir = _ensureScanData()
     changesPath = scanDir / "changes.parquet"

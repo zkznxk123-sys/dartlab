@@ -111,6 +111,36 @@ def scanAudit(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("audit")
     >>> df.filter(pl.col("위험등급") == "고위험").select(["종목코드", "감사의견"])
+
+    Capabilities:
+        - 전종목 auditOpinion report parquet 에서 종목별 최신 감사의견 + 감사인 + 특기사항 추출
+          후 감사인 변경 여부와 결합 → 종합 리스크 등급 (안전/관찰/주의/고위험).
+        - 의견 누락 종목은 최신 연도 감사인 정보만으로 partial row.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("audit")`` 호출 시 본 함수가 dispatch. 감사 리스크 횡단 비교
+        (한정/부적정/거절 의견 회사 등) 또는 1 사 위험등급 컨텍스트 source.
+
+    Guide:
+        - 의견 분류 SSOT: ``_normalizeOpinion`` (적정/한정/부적정/거절 표준화).
+        - 감사인 변경 = 최근 2 개 연도 비교. 변경 있으면 riskLevel 상승.
+        - Q4 (분기) 우선 → 분기 없으면 전체 연 단위 fallback.
+
+    When:
+        대시보드 / 화면 audit 카드 빌드 시. cross-company 스크리닝 (한정 의견 종목 추적) 시.
+
+    How:
+        ``scanParquets("auditOpinion", ...)`` lazy load → 종목별 그룹 → 최신 연 + Q4 우선 →
+        ``_normalizeOpinion`` + auditorChanged + hasSpecialMatter 결합 → riskLevel 분기 → wide row.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/auditOpinion.parquet`` (``buildReport`` 산출)
+        - 한글 컬럼 → camelCase mapping (router 가 자동)
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.core.buildReport` — auditOpinion source 빌드
+        - :func:`dartlab.scan.io.parquet.scanParquets` — apiType lazy 로더
+        - :func:`dartlab.scan.disclosureRisk.scanDisclosureRisk` — 보완적 리스크 axis
     """
     raw = scanParquets(
         "auditOpinion",
