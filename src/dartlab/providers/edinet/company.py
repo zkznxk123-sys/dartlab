@@ -116,9 +116,10 @@ class _DocsNamespace:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 빈 DataFrame 반환 — caller 가 empty 분기 의무.
+                - sections 접근 빈도 가정 X — 본 함수가 lazy load, 첫 호출만 비용.
             OutputSchema:
-                - sections wide DataFrame.
+                - sections wide DataFrame [topic, period, text, sourceLabel].
             Prerequisites:
                 - docs parquet 수집 (구현 후).
             Freshness:
@@ -233,30 +234,31 @@ class Company:
             없음.
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - ``self._financeTimeseries`` (dict) 비우기 + Polars 네이티브 힙 cleanup. dart/edgar 와 동일 패턴.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "다음 회사 진입 전 메모리 회수" → 본 함수 또는 ``with Company(c):``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            JP 다종목 batch 안 본 함수 의무 호출. Polars Rust heap 누적 회피.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 호출 없이 다종목 순회 → Rust heap 누적 → OOM.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - int — 비운 entry 수 (0 또는 1).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인스턴스 활성 상태.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - self._financeTimeseries → None → cleanupBetweenCompanies(label).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 클래스 인스턴스.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``memorySnapshot`` — 호출 전/후 RSS 비교.
+            - ``__exit__`` — context manager 자동 호출.
 
         Requires:
             - polars
@@ -283,30 +285,30 @@ class Company:
             없음.
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - ``_financeTimeseries`` 캐시 size + 현 프로세스 RSS dict 합산. MemorySafeProvider entry.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 메모리 얼마" → 본 함수.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            OOM tripwire 시 회사별 메모리 분포 확인 + AI cleanup 결정.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - RSS 절대값 환경 간 비교 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"cacheSize": int, "rssMb": int}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - psutil.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - psutil RSS + _financeTimeseries 상태 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``cleanupCache`` — 본 함수 보여준 RSS 회수.
 
         Requires:
             - polars
@@ -325,7 +327,7 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 미수집 상태 (None) 를 빈 문자열로 변환 X — None 분기 명시.
             OutputSchema:
                 - 1 str 또는 None.
             Prerequisites:
@@ -354,7 +356,7 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - EDINET 코드 ("E00001") 와 증권코드 ("7203") 혼동 X — 본 함수는 후자만.
             OutputSchema:
                 - 1 str (4 자리) 또는 None.
             Prerequisites:
@@ -400,9 +402,9 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections 부재 (현 단계 빈) 를 분석 결과 부재로 단정 X — EDINET API 미연결 상태.
             OutputSchema:
-                - sections wide DataFrame.
+                - sections wide DataFrame [topic, period, text, sourceLabel].
             Prerequisites:
                 - docs.sections 가 채워져 있음.
             Freshness:
@@ -442,30 +444,32 @@ class Company:
             DataFrame 또는 None.
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - finance topic (BS/IS/CF/CIS) → _loadFinanceTimeseries dispatch. 그 외 docs sections filter.
+              현 단계 빈 (EDINET API 미연결).
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "BS / 리스크 / 사업내용" → ``c.show(topic)``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            CompanyProtocol 충족 stub — AI 가 호출 시 None / 빈 결과. EDINET API 부재 명시 의무.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 결과 None 을 "topic 없음" 단정 X — EDINET API 미연결 상태일 수 있음.
+                - alias 추측 X — ``_TOPIC_ALIASES`` 명시 매핑.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - sections / financeTimeseries 수집 (구현 후).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections / finance 수집 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - topic → alias resolve → finance/docs 분기 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``select`` / ``trace`` — show 결과의 필터/origin.
 
         Requires:
             - polars
@@ -513,7 +517,7 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - sections empty 시 빈 schema 반환 — caller height==0 분기 의무.
             OutputSchema:
                 - chapter/label/topic/periods.
             Prerequisites:
@@ -589,7 +593,7 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - resolved topic 이 alias 통과 후 ID 라 가정 — 실 origin (docs/finance) 분기는 source 필드.
             OutputSchema:
                 - dict — 4 키.
             Prerequisites:
@@ -642,30 +646,32 @@ class Company:
             >>> c.select("IS", indList="매출액")
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - show() 결과에 indList/colList 단순 필터 (account 컬럼 + 컬럼명 in cols). EDINET 본 구현 미완 —
+              dart/edgar cascade 매칭 후속 phase.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "EDINET 회사 행/열 필터" → 본 함수 (현재 단순).
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            CompanyProtocol 충족 stub. 본 구현 미완 — 결과 불완전 가능.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - show() None → None 그대로 (caller None 분기 의무).
+                - cascade 매칭 가정 X — 현재 단순 in_ 필터.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (필터된) 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - show(topic) 결과.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - show 와 동일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - show(topic) → indList/colList filter → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``show`` — 본 함수의 입력 source.
 
         Requires:
             - polars
@@ -699,30 +705,30 @@ class Company:
             없음.
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 의 unique topic 정렬 list 반환. 현 단계 빈 DataFrame (sections empty).
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "어떤 topic 있나" → 본 property.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            CompanyProtocol 충족 stub — AI 가 topic 라우팅 결정 시 본 함수 카탈로그.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 결과 empty 를 "data 없음" 단정 X — EDINET API 미연결 상태일 수 있음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic] (1 column).
             Prerequisites:
-                - <TODO: 사전조건>
+                - sections 수집 (구현 후).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 수집 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - sections → unique → sort → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``sections`` / ``index`` — 더 상세한 메타.
 
         Requires:
             - polars
@@ -749,17 +755,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return pl.DataFrame(
             schema={
@@ -797,17 +804,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return None
 
@@ -845,17 +853,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return pl.DataFrame(
             schema={
@@ -902,17 +911,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return pl.DataFrame()
 
@@ -942,17 +952,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return {}
 
@@ -976,17 +987,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return None
 
@@ -1015,17 +1027,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return None
 
@@ -1065,17 +1078,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현 단계 stub — 빈 결과를 "데이터 없음" 단정 X. EDINET API 미연결 상태.
+                - dart/edgar 동등 결과 가정 X — 후속 phase 까지 placeholder.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dart/edgar 동등 컬럼 (현재 빈 schema 또는 빈 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - EDINET API 연결 (후속 phase).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 후속 phase 에서 EDINET API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 후속 EDINET API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - JP (EDINET) — 본 phase 미구현 stub.
         """
         return (
             "EDINET Company.ask 본 구현 미완 — 후속 phase 에서 dartlab.ai.kernel 위임 + "
