@@ -821,6 +821,7 @@ class Scan:
         onlyWithContent: bool = False,
         limit: int = 100,
         market: str = "KR",
+        engine: str | None = None,
     ) -> pl.DataFrame:
         """공시 본문 섹션 메타 cross-company 조회 — 슬림 인덱스 경유 (P3, 룰 8+9).
 
@@ -834,6 +835,9 @@ class Scan:
             onlyWithContent: True 면 contentLength=0 placeholder (헤더-only) 제외.
             limit: 최대 반환 row 수 (룰 8 강제. 0 = 무제한, 권장 X).
             market: KR (dart) / US (edgar) / JP (edinet). P3.5 에서 multi-market.
+            engine: M6 cross-scan 엔진. None (기본) = 환경변수
+                ``DARTLAB_CROSS_SCAN_ENGINE`` 또는 ``"polars"`` (streaming).
+                ``"duckdb"`` 명시 시 OOC SQL 위임 (대용량 cross-company).
 
         Returns:
             pl.DataFrame · 11 컬럼 (stockCode/corpName/year/reportType/periodKey/
@@ -847,8 +851,11 @@ class Scan:
             >>> import dartlab
             >>> df = dartlab.scan.docsSections(sectionTitle="신용평가", year=2024, onlyWithContent=True, limit=50)
             >>> df.select(["stockCode", "corpName", "contentLength"]).head()
+            >>> # M6: cross-company × 대용량은 DuckDB OOC 위임
+            >>> df = dartlab.scan.docsSections(year=2024, engine="duckdb", limit=10000)
         """
         from dartlab.core.dataLoader import _dataDir, _getDataRoot
+        from dartlab.scan.crossScanEngine import pickCrossScanEngine
 
         if market not in ("KR", "US", "JP"):
             raise ValueError(f"지원 안 함 market: {market}. KR/US/JP 만.")
@@ -876,9 +883,10 @@ class Scan:
             lf = lf.filter(pl.col("stockCode").is_in(stockCodes))
         if onlyWithContent:
             lf = lf.filter(pl.col("contentLength") > 0)
-        if limit and limit > 0:
-            lf = lf.limit(limit)
-        return lf.collect(engine="streaming")
+        # M6: cross-scan engine dispatcher — polars (streaming) 또는 duckdb (OOC)
+        return pickCrossScanEngine(engine=engine).aggregate(  # type: ignore[arg-type]
+            lf, limit=limit if limit and limit > 0 else None
+        )
 
     def iterDocsSections(
         self,

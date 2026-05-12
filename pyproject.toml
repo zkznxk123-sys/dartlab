@@ -59,8 +59,14 @@ dependencies = [
     "lxml; sys_platform == 'emscripten'",
     "polars>=1.0.0,<2; sys_platform != 'emscripten'",
     "polars; sys_platform == 'emscripten'",
+    # M6: cross-company × multi-table aggregation 의 OOC god mode — Polars
+    # LazyFrame ↔ DuckDB relation Arrow zero-copy. 환경변수
+    # DARTLAB_CROSS_SCAN_ENGINE=duckdb 또는 large dataset 검출 시 자동 fallback.
+    "duckdb>=1.0,<2; sys_platform != 'emscripten'",
     "numpy>=1.26.0,<3; sys_platform != 'emscripten'",
     "numpy; sys_platform == 'emscripten'",
+    # M6: Polars ↔ DuckDB Arrow zero-copy. pyodide 는 빌트인.
+    "pyarrow>=17,<21; sys_platform != 'emscripten'",
     "pyarrow; sys_platform == 'emscripten'",
     # network
     "httpx>=0.28.1,<1; sys_platform != 'emscripten'",
