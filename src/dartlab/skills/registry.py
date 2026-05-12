@@ -153,15 +153,25 @@ _GRAPH_WARNED = False
 
 
 def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
-    """그래프 정합성 warn-only — 모듈 lifetime 1 회 (phase 1 정책).
+    """그래프 정합성 lint — 모듈 lifetime 1 회.
 
     Description
     -----------
-    listSkills 호출 시 1 회 만 실행. 깨진 ref · 3+ SCC · orphan · unreachable
-    카운트 logger.warning 출력. raise 없음. phase 2 (신규 spec 차단) 또는 phase
-    3 (전수 차단) 은 별도 정책.
+    listSkills 호출 시 1 회만 실행. 깨진 ref · 3+ SCC · orphan · unreachable 카운트
+    출력. 두 모드:
 
-    환경변수 `DARTLAB_SKILL_GRAPH_LINT=0` 으로 명시 비활성 가능.
+    - **phase 1 warn-only (기본)** — `logger.warning` 만 출력. raise 없음.
+    - **phase 2 strict** (`DARTLAB_SKILL_GRAPH_LINT_STRICT=1`) — broken ref 또는
+      3+ SCC 가 1 건이라도 있으면 ``ValueError`` raise. orphan / unreachable 은
+      여전히 warn (사용자 손작업 결).
+
+    환경변수:
+    - `DARTLAB_SKILL_GRAPH_LINT=0` — 전체 비활성 (silence).
+    - `DARTLAB_SKILL_GRAPH_LINT_STRICT=1` — phase 2 활성 (신규/수정 spec 차단).
+
+    phase 2 활성 시 listSkills 호출이 ValueError 로 차단되어 검색 cascade
+    영향. 운영자가 broken / cycle 0 으로 만든 후에만 켤 것 (feedback_skill_os_dogfood
+    메모리 참조).
     """
     global _GRAPH_WARNED
     if _GRAPH_WARNED:
@@ -171,6 +181,7 @@ def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
     if os.environ.get("DARTLAB_SKILL_GRAPH_LINT", "1") == "0":
         _GRAPH_WARNED = True
         return
+    strict = os.environ.get("DARTLAB_SKILL_GRAPH_LINT_STRICT", "0") == "1"
     try:
         from .graph import buildSkillGraph
         from .graphLint import detectThreePlusCycles, reportOrphans, validateReachability, validateRefExistence
@@ -184,15 +195,25 @@ def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
         orphans = reportOrphans(graph)
         unreachable = validateReachability(graph)
         if broken_total or cycles or orphans or unreachable:
+            phase = "phase2 strict" if strict else "phase1 warn"
             logger.warning(
-                "[skill-graph] phase1 warn — broken=%d cycles=%d orphans=%d unreachable=%d (DARTLAB_SKILL_GRAPH_LINT=0 to silence)",
+                "[skill-graph] %s — broken=%d cycles=%d orphans=%d unreachable=%d (DARTLAB_SKILL_GRAPH_LINT=0 to silence)",
+                phase,
                 broken_total,
                 len(cycles),
                 len(orphans),
                 len(unreachable),
             )
+            if strict and (broken_total or cycles):
+                _GRAPH_WARNED = True
+                raise ValueError(
+                    f"[skill-graph] phase2 strict — broken={broken_total} cycles={len(cycles)} "
+                    "blocking listSkills. fix or unset DARTLAB_SKILL_GRAPH_LINT_STRICT."
+                )
+    except ValueError:
+        raise
     except Exception as exc:  # noqa: BLE001
-        logger.warning("[skill-graph] phase1 warn 자체 실패: %s", exc)
+        logger.warning("[skill-graph] lint 자체 실패: %s", exc)
     _GRAPH_WARNED = True
 
 
