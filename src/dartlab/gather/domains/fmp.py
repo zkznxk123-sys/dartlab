@@ -28,7 +28,13 @@ def _getApiKey() -> str | None:
     return os.environ.get("FMP_API_KEY")
 
 
-async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnapshot | None:
+async def fetchPrice(
+    stockCode: str,
+    client,
+    *,
+    market: str = "US",
+    limit: int | None = None,
+) -> PriceSnapshot | None:
     """현재가 — FMP /quote/{ticker}.
 
     Parameters
@@ -39,6 +45,8 @@ async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnap
         비동기 HTTP 클라이언트.
     market : str
         시장 코드 (기본값 ``"US"``).
+    limit : int | None
+        단건 PriceSnapshot 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -57,6 +65,7 @@ async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnap
 
         API 키 미설정이거나 조회 실패 시 None.
     """
+    del limit
     key = _getApiKey()
     if not key:
         return None  # 키 없으면 skip
@@ -110,6 +119,7 @@ async def fetchHistory(
     start: str,
     end: str,
     market: str = "US",
+    limit: int | None = None,
 ) -> list[dict]:
     """히스토리 OHLCV — FMP /historical-price-full/{ticker}.
 
@@ -125,6 +135,8 @@ async def fetchHistory(
         종료일 (YYYY-MM-DD).
     market : str
         시장 코드 (기본값 ``"US"``).
+    limit : int | None
+        반환 행수 상한 (가장 최근 N일). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -176,6 +188,8 @@ async def fetchHistory(
             }
         )
 
+    if limit is not None and limit > 0:
+        return rows[-limit:]
     return rows
 
 
@@ -184,6 +198,7 @@ async def fetchDividends(
     client,
     *,
     market: str = "US",
+    limit: int | None = None,
 ) -> list[dict]:
     """배당 이력 — FMP /historical-price-full/stock_dividend.
 
@@ -195,6 +210,8 @@ async def fetchDividends(
         비동기 HTTP 클라이언트.
     market : str
         시장 코드 (기본값 ``"US"``).
+    limit : int | None
+        반환 행수 상한 (가장 최근 N건). None이면 전체.
 
     Returns
     -------
@@ -231,7 +248,10 @@ async def fetchDividends(
         amount = h.get("dividend", 0.0) or h.get("adjDividend", 0.0)
         if date and amount:
             rows.append({"date": date, "amount": amount})
-    return sorted(rows, key=lambda x: x["date"])
+    out = sorted(rows, key=lambda x: x["date"])
+    if limit is not None and limit > 0:
+        return out[-limit:]
+    return out
 
 
 async def fetchSplits(
@@ -239,6 +259,7 @@ async def fetchSplits(
     client,
     *,
     market: str = "US",
+    limit: int | None = None,
 ) -> list[dict]:
     """분할 이력 — FMP /historical-price-full/stock_split.
 
@@ -250,6 +271,8 @@ async def fetchSplits(
         비동기 HTTP 클라이언트.
     market : str
         시장 코드 (기본값 ``"US"``).
+    limit : int | None
+        반환 행수 상한 (가장 최근 N건). None이면 전체.
 
     Returns
     -------
@@ -288,4 +311,7 @@ async def fetchSplits(
         denominator = h.get("denominator", 1)
         if date:
             rows.append({"date": date, "numerator": numerator, "denominator": denominator})
-    return sorted(rows, key=lambda x: x["date"])
+    out = sorted(rows, key=lambda x: x["date"])
+    if limit is not None and limit > 0:
+        return out[-limit:]
+    return out

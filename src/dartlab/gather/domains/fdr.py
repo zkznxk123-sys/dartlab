@@ -39,6 +39,7 @@ async def fetchHistory(
     start: str = "",
     end: str = "",
     market: str = "KR",
+    limit: int | None = None,
     **kwargs,
 ) -> list[dict]:
     """OHLCV 히스토리 — FDR 경유.
@@ -47,6 +48,7 @@ async def fetchHistory(
         stock_code: 종목코드 (KR: "005930", US: "AAPL").
         start: 시작일 (YYYY-MM-DD). 빈 문자열이면 최대한 과거.
         end: 종료일. 빈 문자열이면 오늘.
+        limit: 반환 행수 상한 (가장 최근 N일). None이면 전체.
 
     Returns:
         [{"date": ..., "open": ..., "high": ..., "low": ..., "close": ..., "volume": ...}, ...]
@@ -66,6 +68,8 @@ async def fetchHistory(
         # 캐시 필터링
         filtered = [r for r in cached if (not start or r["date"] >= start) and (not end or r["date"] <= end)]
         if filtered:
+            if limit is not None and limit > 0:
+                return filtered[-limit:]
             return filtered
 
     try:
@@ -94,6 +98,8 @@ async def fetchHistory(
     # Parquet 캐시 저장
     _saveCache(stockCode, market, rows)
 
+    if limit is not None and limit > 0:
+        return rows[-limit:]
     return rows
 
 

@@ -22,7 +22,12 @@ _NAVER_INDUSTRY_DETAIL = "https://m.stock.naver.com/api/stocks/industry/{code}"
 _NAVER_INTEGRATION = "https://m.stock.naver.com/api/stock/{code}/integration"
 
 
-async def fetchSectorInfo(stockCode: str, client: GatherHttpClient) -> SectorInfo | None:
+async def fetchSectorInfo(
+    stockCode: str,
+    client: GatherHttpClient,
+    *,
+    limit: int | None = None,
+) -> SectorInfo | None:
     """종목의 업종 분류 조회 -- KIND + Naver 조합.
 
     Parameters
@@ -31,6 +36,8 @@ async def fetchSectorInfo(stockCode: str, client: GatherHttpClient) -> SectorInf
         종목코드 (예: ``"005930"``).
     client : GatherHttpClient
         비동기 HTTP 클라이언트.
+    limit : int | None
+        단건 SectorInfo 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -42,6 +49,7 @@ async def fetchSectorInfo(stockCode: str, client: GatherHttpClient) -> SectorInf
         market : str — 시장구분 (코스피/코스닥)
         source : str — ``"kind+naver"``
     """
+    del limit
     # 1) KIND에서 업종명 가져오기 (동기 -- 이미 캐시됨)
     kindSector = _getKindSector(stockCode)
 
@@ -77,7 +85,12 @@ async def fetchSectorInfo(stockCode: str, client: GatherHttpClient) -> SectorInf
     )
 
 
-async def fetchIndustryPeers(industryCode: str, client: GatherHttpClient) -> list[dict]:
+async def fetchIndustryPeers(
+    industryCode: str,
+    client: GatherHttpClient,
+    *,
+    limit: int | None = None,
+) -> list[dict]:
     """업종 내 종목 목록 (시총 포함) -- Naver 업종 API.
 
     Parameters
@@ -86,6 +99,8 @@ async def fetchIndustryPeers(industryCode: str, client: GatherHttpClient) -> lis
         네이버 업종코드 (예: ``"263"``).
     client : GatherHttpClient
         비동기 HTTP 클라이언트.
+    limit : int | None
+        반환 행수 상한 (가장 위 N). None이면 전체.
 
     Returns
     -------
@@ -121,19 +136,27 @@ async def fetchIndustryPeers(industryCode: str, client: GatherHttpClient) -> lis
                     "market": "KOSPI" if s.get("sosok") == "0" else "KOSDAQ",
                 }
             )
+        if limit is not None and limit > 0:
+            return result[:limit]
         return result
     except (SourceUnavailableError, KeyError, ValueError, TypeError) as exc:
         log.warning("fetchIndustryPeers 실패 (%s): %s", industryCode, exc)
         return []
 
 
-async def fetchIndustryList(client: GatherHttpClient) -> list[dict]:
+async def fetchIndustryList(
+    client: GatherHttpClient,
+    *,
+    limit: int | None = None,
+) -> list[dict]:
     """전체 업종 목록 조회 -- Naver.
 
     Parameters
     ----------
     client : GatherHttpClient
         비동기 HTTP 클라이언트.
+    limit : int | None
+        반환 행수 상한. None이면 전체.
 
     Returns
     -------
@@ -151,7 +174,7 @@ async def fetchIndustryList(client: GatherHttpClient) -> list[dict]:
         resp = await client.get(_NAVER_INDUSTRY_LIST)
         data = resp.json()
         groups = data.get("groups", [])
-        return [
+        rows = [
             {
                 "industryCode": str(g.get("no", "")),
                 "industryName": g.get("name", ""),
@@ -161,6 +184,9 @@ async def fetchIndustryList(client: GatherHttpClient) -> list[dict]:
             for g in groups
             if g.get("no") and g.get("name")
         ]
+        if limit is not None and limit > 0:
+            return rows[:limit]
+        return rows
     except (SourceUnavailableError, KeyError, ValueError, TypeError) as exc:
         log.warning("fetchIndustryList 실패: %s", exc)
         return []

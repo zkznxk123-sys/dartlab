@@ -61,7 +61,13 @@ def _buildSymbol(stockCode: str, market: str) -> str:
     return f"{stockCode}{suffix}"
 
 
-async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnapshot | None:
+async def fetchPrice(
+    stockCode: str,
+    client,
+    *,
+    market: str = "US",
+    limit: int | None = None,
+) -> PriceSnapshot | None:
     """Yahoo v8 Chart API → 현재가 스냅샷.
 
     최근 5거래일 데이터를 요청하여 최신 regularMarketPrice를 추출한다.
@@ -77,6 +83,8 @@ async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnap
         비동기 HTTP 클라이언트 (GatherHttpClient).
     market : str
         시장 코드 ("US", "JP", "HK", "UK", "DE", "CN", "IN"). 기본 "US".
+    limit : int | None
+        단건 PriceSnapshot 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -89,6 +97,7 @@ async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnap
         source : str — "yahoo_chart"
         API 실패 또는 데이터 없으면 None → fallback 체인 진행.
     """
+    del limit
     symbol = _buildSymbol(stockCode, market)
     url = f"{_BASE_URL}/{symbol}"
     params = {
@@ -144,6 +153,7 @@ async def fetchHistory(
     start: str = "",
     end: str = "",
     market: str = "US",
+    limit: int | None = None,
     **kwargs,
 ) -> list[dict]:
     """Yahoo v8 Chart API → OHLCV 히스토리 (수정주가).
@@ -164,6 +174,8 @@ async def fetchHistory(
         종료일 ("YYYY-MM-DD"). 빈 문자열이면 오늘.
     market : str
         시장 코드 ("US", "JP", "HK" 등). 기본 "US".
+    limit : int | None
+        반환 행수 상한 (가장 최근 N일). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -260,4 +272,6 @@ async def fetchHistory(
             }
         )
 
+    if limit is not None and limit > 0:
+        return rows[-limit:]
     return rows

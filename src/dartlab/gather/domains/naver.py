@@ -121,7 +121,13 @@ def _cleanSuffix(text: str, *suffixes: str) -> str:
     return text.strip()
 
 
-async def fetchPrice(stockCode: str, client, **kwargs) -> PriceSnapshot | None:
+async def fetchPrice(
+    stockCode: str,
+    client,
+    *,
+    limit: int | None = None,
+    **kwargs,
+) -> PriceSnapshot | None:
     """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총 (KR 전용).
 
     KR 종목코드(6자리 숫자)가 아니면 None 반환 — naver KR API에 잘못된
@@ -133,6 +139,8 @@ async def fetchPrice(stockCode: str, client, **kwargs) -> PriceSnapshot | None:
         종목코드 (예: ``"005930"``). 6자리 숫자만 처리.
     client
         비동기 HTTP 클라이언트.
+    limit : int | None
+        단건 PriceSnapshot 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -153,6 +161,7 @@ async def fetchPrice(stockCode: str, client, **kwargs) -> PriceSnapshot | None:
 
         API 실패 또는 현재가 없으면 None.
     """
+    del limit
     # KR 종목코드 검증 — 6자리 숫자 아니면 차단 (US/글로벌 티커 → naver_global로)
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return None
@@ -213,7 +222,12 @@ async def fetchPrice(stockCode: str, client, **kwargs) -> PriceSnapshot | None:
     )
 
 
-async def fetchFlow(stockCode: str, client) -> list[dict] | None:
+async def fetchFlow(
+    stockCode: str,
+    client,
+    *,
+    limit: int | None = None,
+) -> list[dict] | None:
     """네이버 → 외국인/기관 수급 시계열.
 
     Parameters
@@ -222,6 +236,8 @@ async def fetchFlow(stockCode: str, client) -> list[dict] | None:
         종목코드 (예: ``"005930"``).
     client
         비동기 HTTP 클라이언트.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N건). None이면 전체.
 
     Returns
     -------
@@ -269,6 +285,8 @@ async def fetchFlow(stockCode: str, client) -> list[dict] | None:
             }
             result.append(row)
         if result:
+            if limit is not None and limit > 0:
+                return result[:limit]
             return result
 
     # v1 fallback: foreignSummary + dealTrendByInvestor (스냅샷 1건)
@@ -297,7 +315,7 @@ async def fetchFlow(stockCode: str, client) -> list[dict] | None:
     if foreign_net == 0.0 and institution_net == 0.0 and foreign_holding_ratio == 0.0:
         return None
 
-    return [
+    snapshot = [
         {
             "date": "",
             "foreignNet": foreign_net,
@@ -305,9 +323,17 @@ async def fetchFlow(stockCode: str, client) -> list[dict] | None:
             "foreignHoldingRatio": foreign_holding_ratio,
         }
     ]
+    if limit is not None and limit > 0:
+        return snapshot[:limit]
+    return snapshot
 
 
-async def fetchRevenueConsensus(stockCode: str, client) -> list[RevenueConsensus]:
+async def fetchRevenueConsensus(
+    stockCode: str,
+    client,
+    *,
+    limit: int | None = None,
+) -> list[RevenueConsensus]:
     """네이버 → 연간 매출/영업이익/순이익 컨센서스.
 
     finance/annual API에서 isConsensus='Y'인 기간의 재무 추정치를 추출한다.
@@ -334,6 +360,11 @@ async def fetchRevenueConsensus(stockCode: str, client) -> list[RevenueConsensus
         - source : str — ``"naver_consensus"`` 또는 ``"naver_actual"``
 
         API 실패 또는 데이터 없으면 빈 리스트.
+
+    Other Parameters
+    ----------------
+    limit : int | None
+        반환 행수 상한. None이면 전체.
     """
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
@@ -394,10 +425,17 @@ async def fetchRevenueConsensus(stockCode: str, client) -> list[RevenueConsensus
             )
         )
 
+    if limit is not None and limit > 0:
+        return results[:limit]
     return results
 
 
-async def fetchSectorPer(stockCode: str, client) -> float | None:
+async def fetchSectorPer(
+    stockCode: str,
+    client,
+    *,
+    limit: int | None = None,
+) -> float | None:
     """네이버 → 동종업종 PER.
 
     Parameters
@@ -406,12 +444,15 @@ async def fetchSectorPer(stockCode: str, client) -> float | None:
         종목코드 (예: ``"005930"``).
     client
         비동기 HTTP 클라이언트.
+    limit : int | None
+        단건 float 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
     float | None
         동종업종 평균 PER (배). API 실패 또는 데이터 없으면 None.
     """
+    del limit
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
         return None
@@ -436,7 +477,12 @@ async def fetchSectorPer(stockCode: str, client) -> float | None:
 # ══════════════════════════════════════
 
 
-async def fetchAll(stockCode: str, client) -> GatherResult:
+async def fetchAll(
+    stockCode: str,
+    client,
+    *,
+    limit: int | None = None,
+) -> GatherResult:
     """네이버에서 가져올 수 있는 모든 데이터를 수집.
 
     Parameters
@@ -445,6 +491,8 @@ async def fetchAll(stockCode: str, client) -> GatherResult:
         종목코드 (예: ``"005930"``).
     client
         비동기 HTTP 클라이언트.
+    limit : int | None
+        단건 GatherResult 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -455,6 +503,7 @@ async def fetchAll(stockCode: str, client) -> GatherResult:
         sector_per : float | None — 동종업종 PER (배)
         error : str | None — 수집 실패 시 에러 메시지
     """
+    del limit
     result = GatherResult(domain="naver")
     try:
         result.price = await fetchPrice(stockCode, client)
@@ -479,6 +528,7 @@ async def fetchIntraday(
     client,
     *,
     market: str = "KR",
+    limit: int | None = None,
     **_: object,
 ) -> list[dict]:
     """네이버 → 당일 1분봉 OHLCV.
@@ -495,6 +545,8 @@ async def fetchIntraday(
         비동기 HTTP 클라이언트.
     market : str
         시장 코드. ``"KR"`` 외에는 빈 리스트 반환.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N분). None이면 당일 전체.
 
     Returns
     -------
@@ -545,6 +597,8 @@ async def fetchIntraday(
                 "volume": int(item.get("accumulatedTradingVolume") or 0),
             }
         )
+    if limit is not None and limit > 0:
+        return rows[-limit:]
     return rows
 
 
@@ -555,6 +609,7 @@ async def fetchHistory(
     start: str = "",
     end: str = "",
     market: str = "KR",
+    limit: int | None = None,
 ) -> list[dict]:
     """네이버 차트 API — 한번에 6000일 수정주가 OHLCV (FDR 방식).
 
@@ -570,6 +625,8 @@ async def fetchHistory(
         종료일 (YYYY-MM-DD). 빈 문자열이면 필터 없음.
     market : str
         시장 코드. ``"KR"`` 외에는 빈 리스트 반환.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N일). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -637,4 +694,6 @@ async def fetchHistory(
                 "volume": int(parts[5]) if parts[5] else 0,
             }
         )
+    if limit is not None and limit > 0:
+        return rows[-limit:]  # 날짜 오름차순 (수정주가)
     return rows  # 날짜 오름차순 (수정주가)

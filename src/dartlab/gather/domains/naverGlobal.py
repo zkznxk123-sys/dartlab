@@ -123,7 +123,13 @@ async def _resolveReutersCode(ticker: str, client) -> str | None:
     return None
 
 
-async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnapshot | None:
+async def fetchPrice(
+    stockCode: str,
+    client,
+    *,
+    market: str = "US",
+    limit: int | None = None,
+) -> PriceSnapshot | None:
     """네이버 글로벌 → 현재가 스냅샷.
 
     Parameters
@@ -134,6 +140,8 @@ async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnap
         비동기 HTTP 클라이언트.
     market : str
         시장 코드. 기본값 ``"US"``.
+    limit : int | None
+        단건 PriceSnapshot 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -146,6 +154,7 @@ async def fetchPrice(stockCode: str, client, *, market: str = "US") -> PriceSnap
         source : str — ``"naver_global"``
         매핑 실패 또는 API 오류 시 None.
     """
+    del limit
     code = await _resolveReutersCode(stockCode, client)
     if not code:
         log.warning("naver_global: %s 매핑 실패", stockCode)
@@ -208,6 +217,7 @@ async def fetchHistory(
     start: str = "",
     end: str = "",
     market: str = "US",
+    limit: int | None = None,
     **kwargs,
 ) -> list[dict]:
     """네이버 글로벌 → OHLCV 히스토리.
@@ -231,6 +241,8 @@ async def fetchHistory(
         종료일 (YYYY-MM-DD). 빈 문자열이면 필터 없음.
     market : str
         시장 코드. 기본값 ``"US"``.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N건). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -331,4 +343,6 @@ async def fetchHistory(
     if end:
         unique_rows = [r for r in unique_rows if r["date"] <= end]
 
+    if limit is not None and limit > 0:
+        return unique_rows[-limit:]
     return unique_rows
