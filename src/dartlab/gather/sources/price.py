@@ -9,6 +9,7 @@ import time
 from ..domains import getPriceFallback, loadDomain
 from ..infra.cache import GatherCache
 from ..infra.resilience import circuitBreaker, healthTracker
+from ..infra.telemetry import emitGatherFallback
 from ..marketConfig import getMarketConfig
 from ..types import GatherError, PriceSnapshot
 
@@ -107,7 +108,7 @@ async def fetch(
 
         client = GatherHttpClient()
 
-    for source_name in chain:
+    for i, source_name in enumerate(chain):
         if circuitBreaker.isOpen(source_name):
             log.debug("price skip %s (circuit open)", source_name)
             continue
@@ -139,6 +140,9 @@ async def fetch(
             circuitBreaker.recordFailure(source_name)
             healthTracker.record(source_name, success=False, latency=latency)
             log.debug("price fallback %s 실패: %s", source_name, exc)
+            # fallback 신호 — 다음 source 가 chain 에 존재할 때만 (A 트랙 O2)
+            if i + 1 < len(chain):
+                emitGatherFallback("price", primary=source_name, fallback=chain[i + 1])
             continue
 
     # 모든 소스 실패 → stale cache 시도
