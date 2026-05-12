@@ -34,27 +34,61 @@ _RCEPT_NO_PATTERN = re.compile(r"[?&]rcpNo=(\d{14})")
 
 
 def buildFilings(company: Company) -> pl.DataFrame | None:
-    """이 종목의 공시 문서 목록 + DART 뷰어 링크 (로컬 parquet).
+    """종목의 공시 문서 목록 + DART 뷰어 링크 (로컬 parquet 기반).
+
+    Capabilities:
+        - ``loadData(stockCode)`` 로 docs parquet 로드 → 공시 메타 컬럼만 추출.
+        - ``rcept_no`` 기준 unique (한 보고서당 1 row).
+        - DART 뷰어 URL 자동 조합 (``DART_VIEWER`` + rcept_no).
+        - ``year``/``rceptDate`` 내림차순 정렬 (최신이 먼저).
+        - docs parquet 부재 (``_hasDocs=False``) → 빈 schema DataFrame.
 
     Args:
-        company: Company 인스턴스.
+        company: Company 인스턴스 (Company facade 의 self).
 
     Returns:
-        ``year/rceptDate/rceptNo/reportType/dartUrl`` 컬럼 DataFrame.
-        docs 부재 시 빈 schema DataFrame.
-
-    Raises:
-        없음.
+        pl.DataFrame — 컬럼 ``year`` (Utf8) / ``rceptDate`` (Utf8) / ``rceptNo`` (Utf8) /
+        ``reportType`` (Utf8) / ``dartUrl`` (Utf8). docs 부재 시 빈 schema DataFrame.
 
     Example:
-        >>> buildFilings(c).head()
+        >>> # df = buildFilings(c)
+        >>> # df.head()
+
+    Guide:
+        - "삼성전자 공시 목록" → ``c.filings()`` → 본 함수.
+        - "DART 뷰어로 열기" → ``df.row(0)["dartUrl"]``.
+        - "공시 검색 (OpenDART 직접)" → ``buildDisclosure``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildUpdate`` — 본 함수의 누락 공시 증분 수집 자매.
+        - ``buildDisclosure`` — OpenDART 직접 호출 (로컬 parquet X).
+        - ``Company.filings`` — 본 함수의 facade.
+        - ``dartlab.core.dataLoader.loadData`` / ``DART_VIEWER`` — 데이터/URL source.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.core.dataLoader — loadData + DART_VIEWER 상수.
+
+    AIContext:
+        Workbench "이 회사 공시 목록" / "최근 보고서" 질문 entry. 로컬 parquet 기반이라 빠름.
+        OpenDART rate limit 무관. ``_hasDocs=False`` 회사 (예 비상장/신규 종목) → 빈 결과 →
+        caller 는 ``buildDisclosure`` fallback.
+
+    LLM Specifications:
+        AntiPatterns:
+            - docs parquet 결락 → 빈 schema. caller 는 height 0 검사 후 buildDisclosure 시도.
+            - rcept_no 중복 (gather 버그) → unique 로 자동 1 개만 유지.
+        OutputSchema:
+            - 컬럼 5 (year/rceptDate/rceptNo/reportType/dartUrl).
+            - 정렬: year + rceptDate 내림차순.
+        Prerequisites:
+            - gather (정기보고서 docs) 가 stockCode 수집 완료.
+        Freshness:
+            - parquet 수집 시점 의존. 본 함수 무상태.
+        Dataflow:
+            - gather → parquet → loadData → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR 는 ``edgar`` provider 의 동등 함수.
     """
     if not company._hasDocs:
         return pl.DataFrame(
@@ -89,27 +123,58 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
 
 
 def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dict[str, int]:
-    """누락된 최신 공시를 증분 수집.
+    """누락 공시 증분 수집 — gather 의 1 회용 보수 (회사 1 종목 한정).
+
+    Capabilities:
+        - ``openapi.freshness.collectMissing`` wrapper — 로컬 parquet 와 OpenDART 공시 목록 diff.
+        - 누락 row 만 fetch + parquet append.
+        - categories 로 영역 한정 (예 docs / report / 재무 / executive 등).
 
     Args:
         company: Company 인스턴스.
-        categories: 수집 카테고리 (None 이면 전체).
+        categories: 수집 영역 list. None → 전체 영역 (gather 전체 카테고리).
 
     Returns:
-        ``{category: count}`` 수집 통계 dict.
-
-    Raises:
-        없음 (OpenDART 호출 실패는 ``collectMissing`` 내부 처리).
+        dict[str, int] — ``{category: 수집된 row 수}``.
 
     Example:
-        >>> buildUpdate(c, categories=["docs"])
+        >>> # buildUpdate(c, categories=["docs"])
+        >>> # {"docs": 3}
+
+    Guide:
+        - "삼성전자 최신 공시 따라가기" → ``c.update(categories=["docs"])``.
+        - "전체 영역 갱신" → ``c.update()``.
+        - 정기 batch update → 운영자가 gather 스크립트 사용 (본 함수는 1 종목 단위).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildFilings`` — 갱신 후 결과 조회.
+        - ``buildDisclosure`` — 갱신 없이 OpenDART 직접 호출.
+        - ``Company.update`` — 본 함수의 facade.
+        - ``dartlab.providers.dart.openapi.freshness.collectMissing`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - dartlab.providers.dart.openapi.freshness — collectMissing.
+        - DART_API_KEY 환경변수.
+
+    AIContext:
+        AI 가 "이 회사 어제자 공시 있냐" 같은 freshness 질문 받으면 본 함수 우선 호출 →
+        buildFilings 재조회. category 자동 지정 ("docs") 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - DART_API_KEY 미설정 → ValueError (collectMissing 내부).
+            - OpenDART rate limit 초과 → 일시 차단 (silent retry).
+            - categories 가 정의된 카테고리 외 (예 "foobar") → 0.
+        OutputSchema:
+            - dict[str, int] — 카테고리당 1 키.
+        Prerequisites:
+            - DART_API_KEY. stockCode 가 KR 종목.
+        Freshness:
+            - 본 함수 호출 시점 갱신.
+        Dataflow:
+            - OpenDART → 본 함수 → parquet (append) → 후속 buildFilings 가 갱신 반영.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.openapi.freshness import collectMissing
 
@@ -129,32 +194,69 @@ def buildDisclosure(
     keyword: str | None = None,
     finalOnly: bool = False,
 ) -> pl.DataFrame:
-    """OpenDART 단일 종목 공시 목록.
+    """OpenDART 단일 종목 공시 목록 직접 호출 — 로컬 parquet 무관.
+
+    Capabilities:
+        - ``openapi.dart.Dart`` 클라이언트 → 종목 단위 공시 목록 호출.
+        - type 으로 공시 유형 코드 한정 (A 정기 / B 주요사항 / C 발행 / D 지분 / ...).
+        - keyword 로 report_nm/corp_name/flr_nm 컬럼 substring 필터.
+        - finalOnly 로 최종 보고서만 (정정 제외).
+        - 비어있으면 빈 DataFrame, keyword 매칭 없으면 빈 결과.
 
     Args:
         company: Company 인스턴스.
-        start: 시작일 (YYYYMMDD).
-        end: 종료일.
-        days: 기간 (start/end 미지정 시).
-        type: 공시 유형 코드 (A=정기, B=주요사항, ...).
-        keyword: 키워드 필터.
-        finalOnly: True 면 최종보고서만.
+        start: 시작일 (YYYYMMDD). None → days 기반.
+        end: 종료일 (YYYYMMDD). None → 오늘.
+        days: 기간 (start/end 미지정 시). 기본 365.
+        type: 공시 유형 1 자 코드 (A/B/C/D/E/F/G/H/I/J).
+        keyword: report_nm/corp_name/flr_nm contains 필터 (한국어 substring).
+        finalOnly: True → 최종본만. False → 정정 포함.
 
     Returns:
-        공시 목록 DataFrame (빈 경우 빈 DataFrame).
-
-    Raises:
-        없음 (OpenDART 오류는 빈 DataFrame).
+        pl.DataFrame — OpenDART filings 원본 컬럼 (corp_code/corp_name/stock_code/
+        rcept_no/rcept_dt/report_nm 등). 빈 경우 빈 DataFrame.
 
     Example:
-        >>> buildDisclosure(c, days=90, type="A")
+        >>> # df = buildDisclosure(c, days=90, type="A")  # 정기공시 90 일
+
+    Guide:
+        - "삼성전자 최근 90 일 정기공시" → ``c.disclosure(days=90, type="A")``.
+        - "특정 키워드 공시" → ``c.disclosure(days=365, keyword="배당")``.
+        - "로컬 parquet 만으로 충분 (rate limit 회피)" → ``buildFilings``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildFilings`` — 로컬 parquet 기반 (rate limit X).
+        - ``buildLiveFilings`` — 정규화된 ``filedAt/title/formType`` schema.
+        - ``Company.disclosure`` — 본 함수의 facade.
+        - ``dartlab.providers.filingHelpers.filterFilingsByKeyword`` — 키워드 필터.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.openapi.dart — Dart 클라이언트.
+        - DART_API_KEY 환경변수.
+        - dartlab.providers.filingHelpers — filterFilingsByKeyword.
+
+    AIContext:
+        AI 가 "최근 X 일 공시" / "키워드 검색" / "특정 유형 공시" 질문 entry. 로컬 parquet
+        (``buildFilings``) 의 freshness 한계 시 본 함수가 OpenDART 실시간 호출. rate limit
+        20,000 회/일 — AI 가 여러 회사 batch 호출 시 주의.
+
+    LLM Specifications:
+        AntiPatterns:
+            - DART_API_KEY 미설정 → ValueError.
+            - rate limit 초과 → 일시 차단 (silent 빈 결과).
+            - type 코드 오타 (예 "A1") → 빈 결과.
+            - keyword 가 매우 짧음 (1~2 글자) → 과도 매칭.
+        OutputSchema:
+            - OpenDART 원본 컬럼. 컬럼명 snake_case (corp_code, rcept_no, ...).
+        Prerequisites:
+            - DART_API_KEY.
+        Freshness:
+            - 호출 시점 OpenDART 데이터.
+        Dataflow:
+            - OpenDART API → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR 는 별도 provider.
     """
     from dartlab.providers.dart.openapi.dart import Dart
 
@@ -182,36 +284,75 @@ def buildLiveFilings(
     forms: list[str] | tuple[str, ...] | None = None,
     finalOnly: bool = False,
 ) -> pl.DataFrame:
-    """OpenDART 실시간 공시 정규화 (``docId/filedAt/title/formType/...``).
+    """OpenDART 실시간 공시 + ``docId/filedAt/title/formType/...`` schema 로 정규화.
 
-    ``forms`` 인자는 DART 에 forms 개념이 없어 무시 — liveFilings public API 시그니처
-    호환 위해 유지.
+    Capabilities:
+        - ``openapi.dart.OpenDart`` 클라이언트 → 공시 목록 호출 + 정규화.
+        - 컬럼 매핑 — rcept_no→docId, rcept_dt→filedAt, report_nm→title/formType/reportNm,
+          rcept_no→viewerUrl (DART_VIEWER + rcept_no), market=lit("KR").
+        - BoundedCache 사용 — 동일 (start, end, limit, keyword, finalOnly) 키 → cache hit.
+        - keyword 필터 = report_nm/corp_name/flr_nm contains.
+        - ``forms`` 인자 무시 (DART 에 forms 개념 X). public API liveFilings 시그니처 호환 유지.
+        - limit > 0 시 head(limit).
 
     Args:
         company: Company 인스턴스.
-        start: 시작일.
-        end: 종료일.
-        days: 기간.
-        limit: 최대 행 수.
-        keyword: 키워드 필터.
-        forms: form 유형 리스트 (DART 무시).
-        finalOnly: 최종본만.
+        start: 시작일 (YYYYMMDD). None → days 기반.
+        end: 종료일 (YYYYMMDD). None → 오늘.
+        days: 기간. None → 기본 days.
+        limit: 최대 row 수. 기본 20. 0 이하 → 전체.
+        keyword: report_nm/corp_name/flr_nm contains 필터.
+        forms: DART 미사용 (시그니처 호환). None.
+        finalOnly: True → 최종본만.
 
     Returns:
-        정규화된 공시 DataFrame (BoundedCache 결과).
-
-    Raises:
-        없음.
+        pl.DataFrame — 13 컬럼 ``docId/filedAt/title/formType/docUrl/indexUrl/market/
+        corpName/stockCode/rceptNo/reportNm/viewerUrl/corpCls``. 빈 경우 빈 schema DataFrame.
 
     Example:
-        >>> buildLiveFilings(c, days=30, limit=10)
+        >>> # buildLiveFilings(c, days=30, limit=10)
+
+    Guide:
+        - "삼성전자 최근 30 일 공시 (정규화)" → ``c.liveFilings(days=30, limit=10)``.
+        - "정규화 X, OpenDART raw" → ``buildDisclosure``.
+        - "로컬 parquet 만 사용" → ``buildFilings``.
+        - cross-provider 호환 (edgar.liveFilings 와 동일 schema) → 본 함수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildFilings`` / ``buildDisclosure`` — 다른 schema 의 동등 함수.
+        - ``Company.liveFilings`` — 본 함수의 facade.
+        - ``dartlab.providers.dart.openapi.dart.OpenDart`` — 본 함수 본체.
+        - ``dartlab.providers.filingHelpers.resolveDateWindow`` — 날짜 윈도우 정규화.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.openapi.dart — OpenDart.
+        - dartlab.providers.filingHelpers — filterFilingsByKeyword + resolveDateWindow.
+        - dartlab.core.dataLoader — DART_VIEWER 상수.
+        - dartlab.core.messaging — progress (사용자 알림).
+        - DART_API_KEY.
+
+    AIContext:
+        Cross-provider 통합 코드 (예 KR + US 함께 공시 검색) 에서 본 함수 사용. dart/edgar
+        의 liveFilings 가 동일 schema 라 ``pl.concat`` 으로 통합 가능. AI 가 "오늘자 공시"
+        질문 처리 시 entry.
+
+    LLM Specifications:
+        AntiPatterns:
+            - DART_API_KEY 미설정 → ValueError.
+            - cache hit → OpenDART 무호출 (의도된 동작, freshness 의 양면).
+            - forms 인자 사용 → 무시 (silent). caller 가 dart 한정으로 인지.
+        OutputSchema:
+            - 13 정규화 컬럼.
+            - 정렬: OpenDART 원본 (대체로 최신순).
+        Prerequisites:
+            - DART_API_KEY. stockCode 가 KR 종목.
+        Freshness:
+            - cache TTL 내면 stale 가능. fresh 보장 시 cache key 변경 필요.
+        Dataflow:
+            - OpenDART → 본 함수 (정규화) → cache → AI 답변.
+        TargetMarkets:
+            - KR (DART). cross-provider schema = edgar.liveFilings 와 동일.
     """
     del forms
 
@@ -303,32 +444,69 @@ def buildReadFiling(
     maxChars: int | None = None,
     sections: bool = False,
 ) -> dict[str, Any]:
-    """접수번호 또는 ``liveFilings`` row 로 공시 원문 읽기.
+    """공시 원문 (text / ZIP 섹션) 읽기 — rceptNo / liveFilings row / viewer URL 입력 자동 인식.
 
-    ``filing`` 이 14 자리 숫자면 직접 rceptNo. dict/Series 면 ``rceptNo``/``docId``/
-    ``viewerUrl`` 키 추출. ``sections=True`` 면 ZIP 다운로드 + 섹션 파싱.
+    Capabilities:
+        - filing 입력 3 종 지원: 14 자리 숫자 str (rceptNo) / dict-like (Series/dict) /
+          DART viewer URL (rcpNo query param 자동 추출).
+        - dict 입력 시 ``rceptNo``/``docId``/``viewerUrl`` 키 우선순위 시도.
+        - sections=True → ZIP 다운로드 + 섹션 분리. False → 텍스트 본문.
+        - maxChars 로 본문 truncate (긴 보고서의 메모리 보호).
 
     Args:
         company: Company 인스턴스.
-        filing: 14 자리 rceptNo str / liveFilings row dict / DART viewer URL.
-        maxChars: 본문 최대 문자 (truncate).
-        sections: True 면 ZIP 섹션 분리, False 면 텍스트 본문.
+        filing: 14 자리 rceptNo (str) / liveFilings row (dict|Series) / DART viewer URL.
+        maxChars: 본문 최대 글자 수. None → 무제한 (긴 보고서는 위험).
+        sections: True → ZIP 다운로드 후 섹션 분리. False → 단일 텍스트 본문.
 
     Returns:
-        ``{docId, market, title, docUrl, viewerUrl, ...}`` dict.
+        dict[str, Any] — ``docId``/``market``/``title``/``docUrl``/``viewerUrl``/``text``
+        또는 ``sections`` 키 (sections=True 시).
 
     Raises:
-        ValueError: rceptNo 추출 실패 시.
+        ValueError: rceptNo 추출 실패 (14 자리 숫자도, viewer URL 의 ``rcpNo`` query 도 없음).
 
     Example:
-        >>> buildReadFiling(c, "20240315000123")
+        >>> # buildReadFiling(c, "20240315000123", maxChars=5000)
+        >>> # buildReadFiling(c, row, sections=True)  # liveFilings row 그대로
+
+    Guide:
+        - "특정 공시 본문 보기" → ``c.readFiling(rceptNo)``.
+        - "ZIP 으로 섹션 분리 (긴 사업보고서)" → ``sections=True``.
+        - "긴 보고서 일부만" → ``maxChars=5000``.
+        - liveFilings 결과 row 그대로 → ``buildReadFiling(c, df.row(0, named=True))``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildLiveFilings`` — 본 함수의 filing 입력 source.
+        - ``Company.readFiling`` — 본 함수의 facade.
+        - ``dartlab.providers.filingHelpers.filingRecord`` / ``truncateText`` — 입력/출력 헬퍼.
 
     Requires:
-        - dartlab
-        - polars
+        - polars (입력 Series 처리) + dartlab.providers.filingHelpers — filingRecord / truncateText.
+        - dartlab.core.dataLoader — DART_VIEWER.
+        - dartlab.providers.dart.openapi — ZIP 다운로드 (sections=True 시).
+        - DART_API_KEY (ZIP 다운로드 시).
+
+    AIContext:
+        AI 가 "X 공시 본문 요약" 질문 받으면 본 함수로 텍스트 fetch → 토큰 한계 내에서 요약.
+        긴 사업보고서 (수십만 자) 는 sections=True 후 특정 섹션만 골라 처리 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - rceptNo 추출 실패 → ValueError (raise). caller 가 try/except.
+            - sections=True 인데 ZIP 다운로드 실패 → 부분 결과 또는 예외.
+            - maxChars=None 인데 본문이 수십만 자 → 토큰 폭증.
+        OutputSchema:
+            - dict — 키 ``docId``/``market``/``title``/``docUrl``/``viewerUrl`` + 본문 키
+              (``text`` 또는 ``sections``).
+        Prerequisites:
+            - rceptNo 유효 (DART 에 실제 등록). DART_API_KEY (sections=True 시).
+        Freshness:
+            - DART 등록 후 즉시 (rate limit 외).
+        Dataflow:
+            - rceptNo → DART API → 본 함수 (정규화) → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR 의 readFiling 은 별도 implementation.
     """
     record = filingRecord(filing) or {}
 
