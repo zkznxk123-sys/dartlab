@@ -224,7 +224,36 @@ def _scanPerFile() -> pl.DataFrame:
 
 
 def scanLiquidity(*, verbose: bool = True) -> pl.DataFrame:
-    """전종목 유동성 스캔 -- 유동비율 + 당좌비율 + 등급."""
+    """전종목 유동성 스캔 — 유동비율 + 당좌비율 + 등급.
+
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        currentRatio : float | None — 유동비율 (%, 유동자산/유동부채×100)
+        quickRatio : float | None — 당좌비율 (%, (유동자산-재고)/유동부채×100)
+        grade : str — 유동성 등급 (우수/보통/주의/위험)
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 또는 per-file fallback 실패.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("liquidity")
+    >>> df.sort("유동비율", descending=True).head()
+
+    Notes
+    -----
+    금융업 (은행/보험/증권) 은 유동자산/유동부채 계정 없어 결과 없음.
+    """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"
     if scanPath.exists():

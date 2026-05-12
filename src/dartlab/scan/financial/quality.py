@@ -270,6 +270,17 @@ def scanQuality(*, verbose: bool = True) -> pl.DataFrame:
         - CF/NI : float | None — operatingCf / netIncome (배). 1.0 이상이면 순이익 전부 현금 회수.
           ``|x|>5`` 인 극단값은 분모(NI) 가 극소이므로 None 처리. ``CF/NI=None`` 이면 "이익품질 양호"로 해석 금지.
         - 등급 : str — ``"우수"`` / ``"보통"`` / ``"주의"`` / ``"위험"``
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 또는 per-file fallback 실패.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("quality")
+    >>> df.filter(pl.col("등급") == "우수").select(["종목코드", "발생액비율"]).head()
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

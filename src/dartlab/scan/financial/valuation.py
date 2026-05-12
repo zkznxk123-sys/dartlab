@@ -145,10 +145,28 @@ def fetchValuationRaw(codes: list[str], *, verbose: bool = True) -> pl.DataFrame
 
     ``buildValuation`` (prebuild 생성) 과 ``scanValuation(refresh=True)`` 경로가 공유.
 
+    Parameters
+    ----------
+    codes : list[str]
+        대상 종목코드 목록.
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
     Returns
     -------
     pl.DataFrame
         `_RAW_SCHEMA` 스키마. 수집 실패 종목은 제외.
+
+    Raises
+    ------
+    RuntimeError
+        네이버 rate-limit / 네트워크 실패로 모든 종목 수집 실패 시 빈 DataFrame 반환 (예외 없음).
+
+    Examples
+    --------
+    >>> from dartlab.scan.financial.valuation import fetchValuationRaw
+    >>> df = fetchValuationRaw(["005930", "000660"], verbose=False)
+    >>> df.select(["stockCode", "per", "pbr"]).to_dicts()
     """
     if not codes:
         return pl.DataFrame(schema=_RAW_SCHEMA)
@@ -251,6 +269,20 @@ def scanValuation(*, refresh: bool = False, verbose: bool = True) -> pl.DataFram
           ``quant("valuation", stockCode)`` 사용.
         - scan 은 "전종목 횡단분석" — 단일 종목이면 ``quant("value", stockCode)``.
         - ``snapshotAt`` 이 몇 시간 전인지 사용자에게 명시하면 신뢰도 상승.
+
+    Raises
+    ------
+    polars.PolarsError
+        prebuild snapshot 손상 또는 PSR 계산용 finance.parquet 누락 시.
+    RuntimeError
+        ``refresh=True`` + 네이버 API rate-limit 으로 0 종목 수집 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("valuation")
+    >>> df.sort("PBR").select(["종목코드", "PER", "PBR", "PSR", "등급"]).head()
+    >>> df = dartlab.scan("valuation", refresh=True)  # 네이버 실시간
     """
     if not refresh:
         frame, snapshotAt = loadValuationSnapshot()

@@ -104,7 +104,34 @@ def _classifyPattern(revCagr: float | None, opCagr: float | None, niCagr: float 
 
 
 def scanGrowth(*, verbose: bool = True) -> pl.DataFrame:
-    """전종목 성장성 스캔 -- 3년 CAGR + 등급 + 패턴."""
+    """전종목 성장성 스캔 — 매출/영업이익/순이익 3 년 CAGR + 등급 + 성장 패턴.
+
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        revenueCagr : float | None — 매출 3 년 CAGR (%)
+        opIncomeCagr : float | None — 영업이익 3 년 CAGR (%)
+        netIncomeCagr : float | None — 순이익 3 년 CAGR (%)
+        grade : str — 성장성 등급 (고성장/안정성장/저성장/역성장 등)
+        pattern : str — 성장 패턴 (6 종 분류)
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 또는 per-file fallback 실패.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("growth")
+    >>> df.filter(pl.col("등급") == "고성장").head()
+    """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"
 

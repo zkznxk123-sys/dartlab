@@ -84,7 +84,37 @@ def _gradeEfficiency(ccc: float | None) -> str:
 
 
 def scanEfficiency(*, verbose: bool = True) -> pl.DataFrame:
-    """전종목 운영 효율 스캔 -- 회전율 + CCC + 등급."""
+    """전종목 운영 효율 스캔 — 자산/재고/매출채권 회전율 + CCC + 등급.
+
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        assetTurnover : float — 자산회전율 (배, 매출/총자산)
+        invTurnover : float — 재고회전율 (배, COGS/재고)
+        arTurnover : float — 매출채권회전율 (배, 매출/매출채권)
+        ppeTurnover : float — 유형자산회전율 (배, 매출/PP&E)
+        invDays : float — 재고일수 (일)
+        arDays : float — 매출채권일수 (일)
+        ccc : float — 현금전환주기 (일, 재고일수 + AR일수 - AP일수)
+        grade : str — 효율성 등급
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 누락 또는 손상 시 (Auto-download 로 회복 시도).
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("efficiency")
+    >>> df.sort("자산회전율", descending=True).head()
+    """
     if verbose:
         _log.info("효율성 스캔: 계정 수집 중...")
 

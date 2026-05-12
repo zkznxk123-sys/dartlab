@@ -261,6 +261,17 @@ def scanCashflow(*, verbose: bool = True) -> pl.DataFrame:
         finCf : int | None — 재무활동현금흐름 (원)
         fcf : int — 잉여현금흐름, OCF + ICF (원)
         pattern : str — 라이프사이클 패턴명
+
+    Raises
+    ------
+    polars.PolarsError
+        프리빌드 finance.parquet 손상 또는 per-file fallback 도 실패할 때.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("cashflow")
+    >>> df.filter(pl.col("패턴") == "성장기").select(["종목코드", "종목명"]).head()
     """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

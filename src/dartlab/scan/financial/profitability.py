@@ -81,7 +81,34 @@ def _gradeProfitability(opMargin: float | None, roe: float | None) -> str:
 
 
 def scanProfitability(*, verbose: bool = True) -> pl.DataFrame:
-    """전종목 수익성 스캔 -- 영업이익률/순이익률/ROE/ROA + 등급."""
+    """전종목 수익성 스캔 — 영업이익률/순이익률/ROE/ROA + 등급.
+
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        opMargin : float | None — 영업이익률 (%, 영업이익/매출×100)
+        netMargin : float | None — 순이익률 (%, 당기순이익/매출×100)
+        roe : float | None — 자기자본이익률 (%, 순이익/자본×100)
+        roa : float | None — 총자산이익률 (%, 순이익/자산×100)
+        grade : str — 수익성 등급 (우수/양호/보통/주의/적자)
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 또는 per-file fallback 실패.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("profitability")
+    >>> df.sort("ROE", descending=True).head()
+    """
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"
 
