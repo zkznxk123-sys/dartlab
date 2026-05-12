@@ -43,39 +43,81 @@ def predictCalendar(
     *,
     horizonDays: int = 30,
 ) -> pl.DataFrame:
-    """다가오는 catalyst 일정 추론 → DataFrame.
+    """다가오는 KR 정기공시 catalyst 일정 추론.
 
-    Parameters
-    ----------
-    disclosures : dict[str, pl.DataFrame]
-        ``{stockCode: disclosureHistory}`` — caller 가 type="A" history 미리 수집해 전달.
-    horizonDays : int
-        앞으로 며칠 안의 일정만 반환 (default 30).
-
-    Returns
-    -------
-    pl.DataFrame
-        스키마: date · code · eventType · title · source · impactHint · confidence.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> predictCalendar(...)
+    Capabilities:
+        - 회사별 disclosure history 에서 마지막 정기보고서를 식별하고 KR fiscal cycle
+          (사업 ~3/31, 분기 ~5/15·~11/14, 반기 ~8/14) 으로 다음 due date 예측.
+        - 동일 type 보고서가 history 에 2 회 이상이면 HIGH confidence, 1 회면 MEDIUM.
+        - horizon (default 30 일) 범위 밖 예측은 제외.
 
     Args:
-        disclosures: <TODO: param desc> (dict[str, pl.DataFrame])
-        horizonDays: <TODO: param desc> (int)
+        disclosures: ``{stockCode: disclosureHistory}`` 매핑. history 는 최소
+            ``title`` (보고서 한글 제목) 과 ``filedAt`` (접수일) 컬럼 보유. caller 가
+            ``c.disclosure(type="A")`` 같은 정기공시 history 를 미리 수집해 전달.
+        horizonDays: today 부터 며칠 안의 일정만 반환. default 30. 7~120 권장.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 스키마 ``OUTPUT_SCHEMA``: ``date`` (예측일) · ``code`` (종목코드)
+        · ``eventType`` (ANNUAL_REPORT/SEMI_REPORT/QUARTERLY_REPORT) · ``title`` (한글 제목)
+        · ``source`` (추론 근거) · ``impactHint`` (high/medium 영향) · ``confidence``
+        (HIGH/MEDIUM/LOW). disclosures 가 비어있으면 빈 DataFrame (스키마만 보존).
+
+    Example:
+        >>> import polars as pl
+        >>> from datetime import date
+        >>> hist = pl.DataFrame({
+        ...     "title": ["사업보고서 (2024.12)", "사업보고서 (2023.12)"],
+        ...     "filedAt": [date(2025, 3, 28), date(2024, 3, 27)],
+        ... })
+        >>> df = predictCalendar({"005930": hist}, horizonDays=400)
+        >>> df.shape[0] >= 0  # 다음 ANNUAL_REPORT 예측 (현 today 와 horizon 에 따라)
+        True
+
+    Guide:
+        - "삼성전자 다음 catalyst 언제?" → ``predictCalendar({"005930": history}, horizonDays=90)``
+        - "다가오는 분기보고서 일정" → 결과 ``df.filter(pl.col("eventType")=="QUARTERLY_REPORT")``
+        - 여러 종목 동시 → disclosures dict 에 stockCode 별 history 묶어 1 회 호출.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dartlab.providers.dart.Company.disclosure`` — 본 함수가 받는 history 의 출처.
+        - ``KR_FILING_TYPES`` / ``OUTPUT_SCHEMA`` — 모듈 상수, 분류 + 반환 스키마.
+        - ``_predictNextFiling`` — 종목 1 개에 대한 단일 예측 로직.
 
     Requires:
-        - datetime
-        - polars
+        - polars — DataFrame 입출력.
+        - datetime — date/timedelta 으로 fiscal cycle 계산.
+        - 외부 API 없음 — disclosure history 만으로 추론.
+
+    AIContext:
+        Ask Workbench 의 timing/catalyst 토픽 추론 시 호출. history 가 부재하면 빈
+        DataFrame 반환이므로 caller 는 결과 empty check + fallback (예 "다음 catalyst
+        정보 부족") 필요. confidence=LOW 결과는 evidence 로 인용 시 신뢰도 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - disclosures dict 의 history 에 ``title``/``filedAt`` 컬럼 부재 → 본 함수가
+              해당 종목 skip (전체 fail 아님). 호출자가 schema 검증 의무 없음.
+            - horizonDays 0 또는 음수 → 빈 DataFrame (예측 없음).
+            - history 의 filedAt 가 ISO 외 형식 (예 "2024년 3월 31일") → ``_parseDate``
+              가 fallback 시도, 실패 시 해당 row skip.
+        OutputSchema:
+            - row: 1 종목당 다음 catalyst 1 개 (가장 가까운 due).
+            - column: ``date`` (pl.Date) / ``code`` (pl.Utf8) / ``eventType`` (pl.Utf8)
+              / ``title`` (pl.Utf8) / ``source`` (pl.Utf8) / ``impactHint`` (pl.Utf8)
+              / ``confidence`` (pl.Utf8).
+            - 정렬: ``date`` 오름차순 (가장 가까운 일정 먼저).
+        Prerequisites:
+            - caller 가 stockCode → disclosure history (type="A") 사전 수집.
+            - 정기공시 외 type (Z/I 등) history 는 분류 패턴 미매칭 → skip.
+        Freshness:
+            - 외부 API 미사용. history 가 freshness 결정 — caller 책임.
+            - KR fiscal cycle 가정 (대다수 상장사 calendar year). 12월 결산 외 회사는
+              부정확.
+        Dataflow:
+            - caller (``Company.disclosure`` / ``c.calendar()``) → 본 함수 → DataFrame.
+        TargetMarkets:
+            - KR (DART). EDGAR/EDINET 은 별도 fiscal cycle — 본 함수 미지원.
     """
     if not disclosures:
         return pl.DataFrame(schema=OUTPUT_SCHEMA)

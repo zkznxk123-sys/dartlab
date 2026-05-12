@@ -37,27 +37,71 @@ def _getDart():
 async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) -> list[dict]:
     """임원/주요주주 주식 거래 내역 raw dict — DART elestock.json.
 
+    Capabilities:
+        - DART OpenAPI elestock (임원·주요주주 특정증권등 소유상황보고) 호출.
+        - 응답 row 를 표준화된 dict (date/name/position/tradeType/changeShares/afterShares
+          /reason/source) 로 정규화. gather.types 의존성 없이 raw dict 만 반환 (cycle 회피).
+        - DART API key 미설정 또는 호출 실패 시 silent — 빈 list 반환 + log.warning.
+
     Args:
-        stockCode: 종목코드.
-        limit: 최대 행 수. None 이면 무제한.
+        stockCode: 종목코드 (6 자리, 예 "005930").
+        limit: 최대 행 수 상한 (룰 8). None 이면 무제한. 분석 용도면 20~100 권장.
 
     Returns:
-        각 거래의 표준화된 dict 리스트 (date/name/position/tradeType/changeShares/afterShares/reason/source).
-        호출자 (gather/insider.py) 가 ``InsiderTrade`` dataclass 로 변환.
+        list[dict] — 각 거래 dict 의 표준 key: ``date`` (rcept_dt, 접수일) ·
+        ``name`` (보고자) · ``position`` (직책 ofcps) · ``tradeType`` (장내/장외 거래 구분)
+        · ``changeShares`` (변동 주식수) · ``afterShares`` (변동 후 보유) · ``reason``
+        (변동 사유 ctr_motive) · ``source`` ("dart"). API key 부재 또는 빈 응답 시 ``[]``.
 
     Example:
-        >>> await fetchInsiderTradingRaw("005930", limit=20)
+        >>> import asyncio
+        >>> # DART API key 가 설정된 환경에서:
+        >>> # rows = asyncio.run(fetchInsiderTradingRaw("005930", limit=20))
+        >>> # rows[0].keys()
+        >>> # dict_keys(['date', 'name', 'position', 'tradeType', 'changeShares', 'afterShares', 'reason', 'source'])
 
-    Raises:
-        없음.
+    Guide:
+        - "삼성전자 임원 거래" → ``await fetchInsiderTradingRaw("005930", limit=20)``
+        - streaming pair 필요 시 ``iterInsiderTradingRaw`` (룰 10).
+        - gather pipeline 안에서는 ``gather/insider.py`` 가 결과 dict → ``InsiderTrade``
+          dataclass 변환 후 사용.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``iterInsiderTradingRaw`` — async iterator pair (룰 10).
+        - ``fetchMajorShareholdersRaw`` — 5% 이상 대량보유 별도 endpoint.
+        - ``dartlab.providers.dart.openapi.dart.Dart.executiveShares`` — 본 함수가 호출하는 raw client.
 
     Requires:
-        - asyncio
-        - dartlab
-        - logging
+        - DART OpenAPI API key (환경변수 또는 ``dartKey`` registry).
+        - polars — ``Dart.executiveShares`` 가 DataFrame 반환, ``iter_rows(named=True)`` 사용.
+        - 네트워크 — opendart.fss.or.kr 도메인 접근.
+
+    AIContext:
+        Ask Workbench 의 "내부자 거래" / "임원 매매" 토픽 추론 시 호출. API key 부재 환경
+        (test fixture / pyodide) 에서는 빈 list 반환이므로 caller 는 evidence 부재 메시지
+        준비. 결과 dict 의 ``date`` 는 str (rcept_dt 8자리) — caller 가 date 객체 변환 필요.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 본 함수를 동기 컨텍스트에서 호출 → coroutine 미실행. 반드시 ``await``.
+            - 무제한 limit (limit=None) 으로 분석 파이프라인에서 호출 → 룰 8 위반.
+              분석 용 호출은 명시 limit 권장.
+            - API key 부재 환경에서 결과 empty 를 "거래 0 건" 으로 해석 금지 — log
+              메시지로 키 부재 확인.
+        OutputSchema:
+            - row: 거래 1 건.
+            - column: 8 key dict (위 Returns 명시).
+            - 정렬: DART 응답 순서 (보통 접수일 역순).
+        Prerequisites:
+            - ``DART_API_KEY`` 환경변수 또는 ``CredentialProvider`` 에 등록된 키.
+            - 종목이 elestock 보고 의무 (상장 + 임원 보유) 회사여야 결과 존재.
+        Freshness:
+            - DART OpenAPI 실시간 — 임원 거래 발생 후 보통 5 영업일 이내 접수.
+            - 본 함수는 cache 없음 — 호출자가 caching 책임.
+        Dataflow:
+            - ``Dart.executiveShares`` (OpenAPI) → 본 함수 정규화 → caller (gather/insider).
+        TargetMarkets:
+            - KR (DART). 미국 Form 4 은 ``providers/edgar/disclosure/form4`` (P-PR7).
     """
     dart = _getDart()
     if dart is None:
@@ -91,27 +135,64 @@ async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) ->
 async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None) -> list[dict]:
     """5% 이상 대량보유 변동 raw dict — DART majorstock.json.
 
+    Capabilities:
+        - DART OpenAPI majorstock (대량보유 상황보고) 호출.
+        - 응답 row 를 표준 dict (holderName/shares/ratio/changeDate/changeType/source) 로
+          정규화. gather.types 의존성 없음 (cycle 회피).
+        - 5% 이상 보유 변동 (취득/처분/기타) 사건 추적.
+
     Args:
-        stockCode: 종목코드.
-        limit: 최대 행 수. None 이면 무제한.
+        stockCode: 종목코드 (6 자리).
+        limit: 최대 행 수 상한 (룰 8). None 이면 무제한.
 
     Returns:
-        holderName/shares/ratio/changeDate/changeType/source dict 리스트.
-        호출자가 ``MajorHolder`` dataclass 변환.
+        list[dict] — 각 변동 dict: ``holderName`` (보고서명 또는 보고자) · ``shares``
+        (보유 주식수) · ``ratio`` (지분율 %) · ``changeDate`` (rcept_dt 접수일) ·
+        ``changeType`` (change_on 변동 사유) · ``source`` ("dart"). 빈 응답 시 ``[]``.
 
     Example:
-        >>> await fetchMajorShareholdersRaw("005930", limit=10)
+        >>> import asyncio
+        >>> # rows = asyncio.run(fetchMajorShareholdersRaw("005930", limit=10))
+        >>> # set(rows[0].keys()) >= {"holderName", "shares", "ratio"}
 
-    Raises:
-        없음.
+    Guide:
+        - "삼성전자 대량보유 변동" → ``await fetchMajorShareholdersRaw("005930", limit=20)``
+        - 외국인 지분 추적, M&A 시그널 탐지 — caller 가 holderName 패턴 매칭.
+        - streaming pair 필요 시 ``iterMajorShareholdersRaw``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``iterMajorShareholdersRaw`` — async iterator pair (룰 10).
+        - ``fetchInsiderTradingRaw`` — 임원 거래 별도 endpoint (elestock).
+        - ``dartlab.providers.dart.openapi.dart.Dart.majorShareholders``.
 
     Requires:
-        - asyncio
-        - dartlab
-        - logging
+        - DART OpenAPI API key.
+        - polars — DataFrame iter_rows.
+        - 네트워크.
+
+    AIContext:
+        Ask Workbench 의 "지분 변동" / "외국인 보유" / "M&A" 토픽에서 호출. ratio 가
+        급변하면 (예 5% → 15%) M&A 가능성 시그널. caller 가 인용 시 changeDate +
+        changeType 동행 표시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 비-상장사 종목코드 → 빈 list (보고 의무 없음).
+            - 매우 작은 limit (1~2) 으로 trend 분석 시도 → 데이터 부족.
+            - ratio 의 절대값을 "현재 지분율" 로 해석 금지 — 변동 시점 snapshot 일 뿐.
+        OutputSchema:
+            - row: 변동 보고 1 건.
+            - column: 6 key dict (위 Returns).
+            - 정렬: DART 응답 순서.
+        Prerequisites:
+            - ``DART_API_KEY`` 등록.
+            - 종목이 5% 이상 보유자 보고 사건 발생한 회사.
+        Freshness:
+            - 변동 발생 후 5 영업일 이내 보고 의무 → DART 접수 즉시 반영.
+        Dataflow:
+            - ``Dart.majorShareholders`` (OpenAPI) → 본 함수 정규화 → caller.
+        TargetMarkets:
+            - KR (DART). SC 13D/G (미국) 은 ``providers/edgar`` 별도 (P-PR7+ 후속).
     """
     dart = _getDart()
     if dart is None:
@@ -143,27 +224,57 @@ async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None)
 async def iterInsiderTradingRaw(stockCode: str, *, limit: int | None = None):
     """``fetchInsiderTradingRaw`` 의 async iterator pair (룰 10).
 
+    Capabilities:
+        - 임원 거래 dict 를 한 건씩 streaming yield. 메모리 효율 (rows 한꺼번에 load 안 함).
+        - 룰 10 강제 (collection 반환 함수는 iterator pair 동행).
+        - 내부적으로 ``fetchInsiderTradingRaw`` 호출 후 generator 변환 — 현재는 lazy 효과
+          제한적 (P-PR 후속 phase 에서 true streaming 으로 전환 검토).
+
     Args:
-        stockCode: 종목코드.
-        limit: 최대 행 수. None 이면 무제한.
+        stockCode: 종목코드 (6 자리).
+        limit: 최대 yield 행 수.
 
     Yields:
-        거래 dict.
-
-    Raises:
-        없음 (DART 키 부재 또는 API 실패 시 빈 generator).
+        dict — ``fetchInsiderTradingRaw`` 와 동일 schema (8 key).
 
     Example:
-        >>> async for row in iterInsiderTradingRaw("005930", limit=10):
-        ...     print(row["name"])
+        >>> import asyncio
+        >>> async def _demo():
+        ...     async for row in iterInsiderTradingRaw("005930", limit=10):
+        ...         print(row["name"])
+        >>> # asyncio.run(_demo())
+
+    Guide:
+        - "임원 거래 한 건씩 처리" → ``async for row in iterInsiderTradingRaw(...)``.
+        - 전체 list 가 필요하면 ``fetchInsiderTradingRaw`` 사용.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fetchInsiderTradingRaw`` — list 반환 변종.
+        - ``iterMajorShareholdersRaw`` — 대량보유 streaming pair.
 
     Requires:
-        - asyncio
-        - dartlab
-        - logging
+        - DART OpenAPI API key.
+        - 네트워크.
+
+    AIContext:
+        대량 stockCode 순회 + 거래 필터링 파이프라인에서 메모리 부담 회피용. caller 가
+        조기 break 로 lazy 효과 회수 가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - generator 를 list 로 즉시 캐스팅 (``list(iter...)``) → ``fetchInsiderTradingRaw``
+              직접 호출이 명확.
+            - async iterator 를 동기 ``for`` 로 순회 → TypeError.
+        OutputSchema:
+            - yield item: 8 key dict (fetchInsiderTradingRaw Returns 참조).
+        Prerequisites:
+            - ``DART_API_KEY`` 등록.
+        Freshness:
+            - 실시간 (DART 접수 즉시).
+        Dataflow:
+            - ``fetchInsiderTradingRaw`` 결과 list → 본 함수 yield → caller.
+        TargetMarkets:
+            - KR (DART).
     """
     rows = await fetchInsiderTradingRaw(stockCode, limit=limit)
     for r in rows:
@@ -173,27 +284,53 @@ async def iterInsiderTradingRaw(stockCode: str, *, limit: int | None = None):
 async def iterMajorShareholdersRaw(stockCode: str, *, limit: int | None = None):
     """``fetchMajorShareholdersRaw`` 의 async iterator pair (룰 10).
 
+    Capabilities:
+        - 5% 이상 대량보유 변동 dict 를 streaming yield. 룰 10 강제.
+        - ``fetchMajorShareholdersRaw`` 결과를 generator 로 wrap.
+
     Args:
-        stockCode: 종목코드.
-        limit: 최대 행 수. None 이면 무제한.
+        stockCode: 종목코드 (6 자리).
+        limit: 최대 yield 행 수.
 
     Yields:
-        대량보유 변동 dict.
-
-    Raises:
-        없음 (DART 키 부재 또는 API 실패 시 빈 generator).
+        dict — ``fetchMajorShareholdersRaw`` 와 동일 6 key schema.
 
     Example:
-        >>> async for row in iterMajorShareholdersRaw("005930", limit=10):
-        ...     print(row["holderName"])
+        >>> import asyncio
+        >>> async def _demo():
+        ...     async for row in iterMajorShareholdersRaw("005930", limit=10):
+        ...         print(row["holderName"])
+        >>> # asyncio.run(_demo())
+
+    Guide:
+        - "대량보유 변동 streaming" → ``async for row in iterMajorShareholdersRaw(...)``.
+        - 전체 list 가 필요하면 ``fetchMajorShareholdersRaw`` 사용.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fetchMajorShareholdersRaw`` — list 반환 변종.
+        - ``iterInsiderTradingRaw`` — 임원 거래 streaming pair.
 
     Requires:
-        - asyncio
-        - dartlab
-        - logging
+        - DART OpenAPI API key.
+        - 네트워크.
+
+    AIContext:
+        외국인 지분 / M&A 시그널 탐지 파이프라인에서 메모리 부담 회피용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 동기 ``for`` 순회 → TypeError.
+            - list 캐스팅이 필요하면 ``fetchMajorShareholdersRaw`` 직접 호출 권장.
+        OutputSchema:
+            - yield item: 6 key dict (fetchMajorShareholdersRaw Returns 참조).
+        Prerequisites:
+            - ``DART_API_KEY`` 등록.
+        Freshness:
+            - 실시간 (보고 5 영업일 이내 접수).
+        Dataflow:
+            - ``fetchMajorShareholdersRaw`` 결과 → 본 함수 yield → caller.
+        TargetMarkets:
+            - KR (DART).
     """
     rows = await fetchMajorShareholdersRaw(stockCode, limit=limit)
     for r in rows:
