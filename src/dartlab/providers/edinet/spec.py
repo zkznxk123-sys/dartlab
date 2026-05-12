@@ -4,7 +4,17 @@ from __future__ import annotations
 
 
 def buildSpec() -> dict:
-    """edinet 엔진 스펙 반환."""
+    """edinet 엔진 스펙 반환.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildSpec(...)
+    """
     return {
         "name": "edinet",
         "description": "일본 EDINET 전자공시 — 유가증권보고서 sections + XBRL 재무 정규화",

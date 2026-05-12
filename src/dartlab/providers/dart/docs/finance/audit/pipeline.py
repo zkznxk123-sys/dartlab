@@ -26,6 +26,12 @@ def audit(stockCode: str) -> AuditResult | None:
 
     Returns:
         AuditResult 또는 데이터 부족 시 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> audit(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

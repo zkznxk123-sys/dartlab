@@ -7,7 +7,19 @@ def detectBreakpoints(
     sortedYears: list[str],
     threshold: float = BREAKPOINT_THRESHOLD,
 ) -> tuple[list[Segment], list[BridgeResult]]:
-    """전환점 탐지 + 구간 분리. 매칭률이 threshold 미만이면 전환점으로 판정."""
+    """전환점 탐지 + 구간 분리. 매칭률이 threshold 미만이면 전환점으로 판정.
+
+    Args:
+        pairResults: 인자.
+        sortedYears: 인자.
+        threshold: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectBreakpoints(...)
+    """
     segments: list[dict] = [{"years": [sortedYears[0]], "pairs": []}]
     breakpoints: list[BridgeResult] = []
 

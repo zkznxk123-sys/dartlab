@@ -34,7 +34,17 @@ class ArticlesResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """파이프 구분자로 셀 분리."""
+    """파이프 구분자로 셀 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -44,13 +54,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행 여부 확인."""
+    """구분선 행 여부 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseArticlesChanges(content: str) -> list[dict]:
-    """정관 변경 이력 파싱."""
+    """정관 변경 이력 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseArticlesChanges(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -104,7 +134,17 @@ def parseArticlesChanges(content: str) -> list[dict]:
 
 
 def parseBusinessPurpose(content: str) -> list[dict]:
-    """사업목적 현황 파싱."""
+    """사업목적 현황 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseBusinessPurpose(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -162,7 +202,17 @@ def parseBusinessPurpose(content: str) -> list[dict]:
 
 # pipeline
 def articlesOfIncorporation(stockCode: str) -> ArticlesResult | None:
-    """정관에 관한 사항 분석."""
+    """정관에 관한 사항 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> articlesOfIncorporation(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

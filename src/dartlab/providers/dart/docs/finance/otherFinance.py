@@ -34,7 +34,17 @@ class OtherFinanceResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """파이프 구분자로 셀 분리."""
+    """파이프 구분자로 셀 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -44,13 +54,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행 여부 확인."""
+    """구분선 행 여부 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """금액 문자열을 정수로 변환."""
+    """금액 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip()
@@ -72,7 +102,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def parseBadDebtProvision(content: str) -> list[dict]:
-    """대손충당금 설정내역 파싱."""
+    """대손충당금 설정내역 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseBadDebtProvision(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -143,7 +183,17 @@ def parseBadDebtProvision(content: str) -> list[dict]:
 
 
 def parseInventory(content: str) -> list[dict]:
-    """재고자산 현황 파싱."""
+    """재고자산 현황 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseInventory(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -202,7 +252,17 @@ def parseInventory(content: str) -> list[dict]:
 
 # pipeline
 def otherFinance(stockCode: str) -> OtherFinanceResult | None:
-    """기타 재무에 관한 사항 분석."""
+    """기타 재무에 관한 사항 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> otherFinance(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

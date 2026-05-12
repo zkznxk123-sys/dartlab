@@ -37,7 +37,17 @@ SINGLE_PAGE_RE = re.compile(r"\t\tviewDoc\('(\d+)', '(\d+)', '(\d+)', '(\d+)', '
 
 
 def tableToMarkdown(table) -> str:
-    """HTML 테이블 → 마크다운 테이블."""
+    """HTML 테이블 → 마크다운 테이블.
+
+    Args:
+        table: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> tableToMarkdown(...)
+    """
     rows: list[list[str]] = []
     for tr in table.find_all("tr"):
         cells: list[str] = []
@@ -70,7 +80,17 @@ def tableToMarkdown(table) -> str:
 
 
 def htmlToText(html: str) -> str:
-    """HTML → 텍스트 (테이블은 마크다운으로 보존)."""
+    """HTML → 텍스트 (테이블은 마크다운으로 보존).
+
+    Args:
+        html: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> htmlToText(...)
+    """
     soup = BeautifulSoup(html, "lxml")
 
     for tag in soup(["script", "style", "meta", "link", "header", "footer", "nav"]):
@@ -110,6 +130,12 @@ def parseSubDocs(content: str, rcpNo: str) -> list[dict]:
     list[dict]
         ``title``, ``url`` (viewer.do 절대 URL), ``order``, ``rcept_no`` 키를 가진
         섹션 리스트. 빈 리스트면 sub-doc 없음 (비공개 공시 또는 잘못된 rcept_no).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseSubDocs(...)
     """
     matches = MULTI_PAGE_RE.findall(content)
     if matches:

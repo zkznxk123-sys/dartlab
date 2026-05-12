@@ -62,6 +62,12 @@ def parseSubsidiaryTable(content: str) -> list[dict]:
             acquiredShares, acquiredAmount, valuationGain,
             endShares, endRatio, endBook,
             totalAssets, netIncome
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseSubsidiaryTable(...)
     """
     lines = content.split("\n")
     results = []
@@ -137,6 +143,12 @@ def subsidiary(stockCode: str) -> SubsidiaryResult | None:
 
     Returns:
         SubsidiaryResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> subsidiary(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

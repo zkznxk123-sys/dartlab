@@ -35,7 +35,17 @@ def _parseInt(text: str) -> int | None:
 
 
 def extractTableBlocks(content: str) -> list[list[str]]:
-    """content에서 연속된 파이프라인 블록 추출."""
+    """content에서 연속된 파이프라인 블록 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
+    """
     lines = content.split("\n")
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -55,6 +65,12 @@ def classifyBlock(block: list[str]) -> str:
     """테이블 블록 분류.
 
     Returns: "directorCount" | "boardMeeting" | "committeeActivity" | "committee" | "education" | "independence" | "other"
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyBlock(...)
     """
     allText = ""
     for line in block[:6]:
@@ -91,6 +107,12 @@ def parseDirectorCount(block: list[str]) -> dict | None:
     """이사 수 / 사외이사 수 파싱.
 
     Returns: {"totalDirectors": int, "outsideDirectors": int}
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseDirectorCount(...)
     """
     rows = []
     for line in block:
@@ -153,7 +175,17 @@ def parseDirectorCount(block: list[str]) -> dict | None:
 
 
 def parseDirectorCountFromText(content: str) -> dict | None:
-    """content에서 이사 수 직접 추출 (fallback)."""
+    """content에서 이사 수 직접 추출 (fallback).
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseDirectorCountFromText(...)
+    """
     lines = content.split("\n")
     for i, line in enumerate(lines):
         if re.search(r"이사의\s*수", line) and re.search(r"사외이사\s*수", line):
@@ -183,6 +215,12 @@ def parseBoardMeeting(block: list[str]) -> dict | None:
     """이사회 개최 횟수 + 출석률 파싱.
 
     Returns: {"meetingCount": int, "attendanceRates": {이름: float}}
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseBoardMeeting(...)
     """
     rows = []
     for line in block:
@@ -250,6 +288,12 @@ def parseCommittee(block: list[str]) -> list[dict]:
     """위원회 구성 파싱.
 
     Returns: [{"name": str, "composition": str, "members": str}]
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseCommittee(...)
     """
     rows = []
     for line in block:

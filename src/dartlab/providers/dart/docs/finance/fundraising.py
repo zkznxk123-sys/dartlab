@@ -41,7 +41,17 @@ class FundraisingResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -51,13 +61,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환."""
+    """숫자 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace(",", "").replace(" ", "")
@@ -81,6 +111,15 @@ def parseEquityIssuance(content: str) -> list[dict]:
     | 주식발행(감소)일자 | 발행(감소)형태 | 종류 | 수량 | 주당액면가액 | 주당발행(감소)가액 | 비고 |
     | 2020.01.03 | 전환권행사 | 보통주 | 92,603 | 500 | 118,786 | 발행회차: 제 10회 |
     | 2010년 06월 15일 | 신주인수권행사 | 보통주 | 874,916 | 500 | 598 | - |
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseEquityIssuance(...)
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -161,7 +200,17 @@ def parseEquityIssuance(content: str) -> list[dict]:
 
 # pipeline
 def fundraising(stockCode: str) -> FundraisingResult | None:
-    """증권 발행(증자/감자) 분석."""
+    """증권 발행(증자/감자) 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> fundraising(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

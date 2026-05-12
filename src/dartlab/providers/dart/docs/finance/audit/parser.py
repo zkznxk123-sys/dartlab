@@ -15,7 +15,18 @@ AUDIT_TITLE_KEYWORDS = [
 
 
 def findAuditSections(df: pl.DataFrame, year: str) -> list[str]:
-    """사업보고서에서 감사 관련 섹션 내용 반환. 원본 우선, 기재정정 fallback."""
+    """사업보고서에서 감사 관련 섹션 내용 반환. 원본 우선, 기재정정 fallback.
+
+    Args:
+        df: 인자.
+        year: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> findAuditSections(...)
+    """
     report = df.filter(
         (pl.col("year") == year)
         & (pl.col("report_type").str.contains("사업보고서"))
@@ -52,6 +63,15 @@ def extractTableBlocks(text: str) -> list[dict]:
     """마크다운 테이블 블록 추출.
 
     연속 파이프 라인을 수집한 뒤, 1셀 제목행 기준으로 서브블록 분리.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
     """
     rawGroups: list[list[str]] = []
     currentLines: list[str] = []
@@ -149,7 +169,17 @@ def _parseSubBlock(rows: list[list[str]]) -> dict | None:
 
 
 def classifyBlock(block: dict) -> str:
-    """블록 분류: opinion, fee, nonAuditFee, schedule, communication, unknown."""
+    """블록 분류: opinion, fee, nonAuditFee, schedule, communication, unknown.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyBlock(...)
+    """
     headerStr = " ".join(block["header"])
     metaStr = " ".join(block["meta"]) if block["meta"] else ""
     allText = metaStr + " " + headerStr
@@ -185,7 +215,17 @@ def classifyBlock(block: dict) -> str:
 
 
 def parseOpinionBlock(block: dict) -> list[dict]:
-    """감사의견 블록 파싱."""
+    """감사의견 블록 파싱.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseOpinionBlock(...)
+    """
     header = block["header"]
     nCols = len(header)
     results = []
@@ -245,7 +285,17 @@ def parseOpinionBlock(block: dict) -> list[dict]:
 
 
 def parseFeeBlock(block: dict) -> list[dict]:
-    """감사보수 블록 파싱."""
+    """감사보수 블록 파싱.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseFeeBlock(...)
+    """
     results = []
     currentPeriod = ""
 
@@ -319,7 +369,19 @@ def fiscalPeriodToYear(
     baseYear: str,
     allPeriods: list[str] | None = None,
 ) -> str | None:
-    """제N기(당기/전기) → 실제 연도 변환."""
+    """제N기(당기/전기) → 실제 연도 변환.
+
+    Args:
+        fiscalPeriod: 인자.
+        baseYear: 인자.
+        allPeriods: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> fiscalPeriodToYear(...)
+    """
     base = int(baseYear)
 
     if re.search(r"당기|당분기|당반기", fiscalPeriod):
@@ -345,7 +407,17 @@ def fiscalPeriodToYear(
 
 
 def normalizeOpinion(raw: str) -> str:
-    """감사의견 정규화."""
+    """감사의견 정규화.
+
+    Args:
+        raw: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeOpinion(...)
+    """
     if not raw:
         return ""
     raw = raw.strip()
@@ -361,7 +433,18 @@ def normalizeOpinion(raw: str) -> str:
 
 
 def dedup(items: list[dict], keys: list[str]) -> list[dict]:
-    """중복 제거 (첫 출현 유지)."""
+    """중복 제거 (첫 출현 유지).
+
+    Args:
+        items: 인자.
+        keys: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> dedup(...)
+    """
     seen: set[tuple] = set()
     result = []
     for item in items:

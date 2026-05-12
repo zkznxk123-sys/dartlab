@@ -111,7 +111,17 @@ _END_ALIASES = ("장부금액", "장부금액 합계", "순장부금액", "총�
 
 
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     parts = line.split("|")
     if parts and parts[0].strip() == "":
         parts = parts[1:]
@@ -121,7 +131,17 @@ def splitCells(line: str) -> list[str]:
 
 
 def isAssetCategory(text: str) -> bool:
-    """isAssetCategory — TODO 한국어 동작 설명."""
+    """isAssetCategory — TODO 한국어 동작 설명.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isAssetCategory(...)
+    """
     keywords = [
         "토지",
         "건물",
@@ -149,19 +169,49 @@ def isAssetCategory(text: str) -> bool:
 
 
 def isMovementRow(label: str) -> bool:
-    """isMovementRow — TODO 한국어 동작 설명."""
+    """isMovementRow — TODO 한국어 동작 설명.
+
+    Args:
+        label: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isMovementRow(...)
+    """
     collapsed = label.replace(" ", "")
     return any(kw in collapsed for kw in MOVEMENT_MARKERS)
 
 
 def isDescriptionRow(cells: list[str]) -> bool:
-    """isDescriptionRow — TODO 한국어 동작 설명."""
+    """isDescriptionRow — TODO 한국어 동작 설명.
+
+    Args:
+        cells: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isDescriptionRow(...)
+    """
     text = " ".join(cells)
     return any(kw in text for kw in DESCRIPTION_MARKERS) and len(text) > 100
 
 
 def normalizeLabel(label: str) -> str:
-    """normalizeLabel — TODO 한국어 동작 설명."""
+    """normalizeLabel — TODO 한국어 동작 설명.
+
+    Args:
+        label: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeLabel(...)
+    """
     label = label.strip()
     label = re.sub(r",\s*유형자산$", "", label)
     label = re.sub(r"\s+", " ", label)
@@ -185,7 +235,17 @@ def normalizeLabel(label: str) -> str:
 
 
 def splitPeriodBlocks(content: str) -> list[tuple[str, str]]:
-    """섹션을 당기/전기 블록으로 분리."""
+    """섹션을 당기/전기 블록으로 분리.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitPeriodBlocks(...)
+    """
     lines = content.split("\n")
     blocks = []
     currentPeriod = None
@@ -301,6 +361,16 @@ def parseMovementBlock(block: str, period: str):
 
     복합 블록에서 여러 서브테이블을 발견하면 모두 반환.
     Returns list of parsed dicts, or None.
+
+    Args:
+        block: 인자.
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseMovementBlock(...)
     """
     lines = block.split("\n")
     unit = detectUnit(block)
@@ -422,7 +492,18 @@ def parseMovementBlock(block: str, period: str):
 
 
 def parseTransposedBlock(block: str, period: str):
-    """전치 변동표 파싱. 변동항목이 헤더, 자산 카테고리가 행 라벨."""
+    """전치 변동표 파싱. 변동항목이 헤더, 자산 카테고리가 행 라벨.
+
+    Args:
+        block: 인자.
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTransposedBlock(...)
+    """
     lines = block.split("\n")
     unit = detectUnit(block)
 
@@ -613,6 +694,15 @@ def findMovementTables(content: str):
 
     Returns list of parsed dicts (period, unit, categories, rows)
     and metadata dict with reliability info.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> findMovementTables(...)
     """
     blocks = splitPeriodBlocks(content)
 
@@ -649,7 +739,18 @@ def findMovementTables(content: str):
 
 
 def getTotalValue(row, categories):
-    """합계 카테고리의 값을 반환."""
+    """합계 카테고리의 값을 반환.
+
+    Args:
+        row: 인자.
+        categories: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getTotalValue(...)
+    """
     for cat in categories:
         if "합계" in cat or "합 계" in cat:
             return row["values"].get(cat)

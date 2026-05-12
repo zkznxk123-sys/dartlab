@@ -14,6 +14,12 @@ def parseMajorHolderTable(content: str) -> dict:
             majorHolder: str | None
             majorRatio: float | None
             totalRatio: float | None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseMajorHolderTable(...)
     """
     lines = content.split("\n")
     result = {
@@ -114,6 +120,12 @@ def parseBigHolders(content: str) -> list[dict] | None:
 
     Returns:
         [{"name": str, "shares": float|None, "ratio": float|None}] 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseBigHolders(...)
     """
     lines = content.split("\n")
     inSection = False
@@ -197,6 +209,12 @@ def parseMinority(content: str) -> dict | None:
     Returns:
         {"holders", "totalHolders", "holderPct",
          "shares", "totalShares", "sharePct"} 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseMinority(...)
     """
     lines = content.split("\n")
     inSection = False
@@ -248,6 +266,12 @@ def parseVoting(content: str) -> dict | None:
     Returns:
         {"issuedCommon", "noVoteCommon", "votableCommon",
          "issuedPref", ...} 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseVoting(...)
     """
     lines = content.split("\n")
     inSection = False

@@ -26,6 +26,12 @@ def capitalChange(stockCode: str) -> CapitalChangeResult | None:
 
     Returns:
         CapitalChangeResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> capitalChange(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

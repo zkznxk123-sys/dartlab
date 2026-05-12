@@ -10,7 +10,17 @@ import polars as pl
 
 
 def coerceDate(value: str | date | datetime | None) -> date | None:
-    """입력값을 date로 정규화한다."""
+    """입력값을 date로 정규화한다.
+
+    Args:
+        value: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> coerceDate(...)
+    """
     if value is None:
         return None
     if isinstance(value, datetime):
@@ -38,7 +48,19 @@ def resolveDateWindow(
     *,
     days: int | None = None,
 ) -> tuple[str | None, str | None]:
-    """live filings 조회용 날짜 범위를 결정한다."""
+    """live filings 조회용 날짜 범위를 결정한다.
+
+    Args:
+        start: 인자.
+        end: 인자.
+        days: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> resolveDateWindow(...)
+    """
     startDate = coerceDate(start)
     endDate = coerceDate(end)
 
@@ -57,7 +79,17 @@ def resolveDateWindow(
 
 
 def splitKeywords(keyword: str | None) -> list[str]:
-    """콤마/공백 기반 키워드 분리."""
+    """콤마/공백 기반 키워드 분리.
+
+    Args:
+        keyword: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitKeywords(...)
+    """
     if keyword is None:
         return []
     tokens = [token.strip() for token in re.split(r"[,/|\n]+", str(keyword)) if token.strip()]
@@ -65,7 +97,19 @@ def splitKeywords(keyword: str | None) -> list[str]:
 
 
 def filterFilingsByKeyword(df: pl.DataFrame, *, keyword: str | None, columns: list[str]) -> pl.DataFrame:
-    """지정 컬럼 기준 keyword 포함 행만 남긴다."""
+    """지정 컬럼 기준 keyword 포함 행만 남긴다.
+
+    Args:
+        df: 인자.
+        keyword: 인자.
+        columns: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> filterFilingsByKeyword(...)
+    """
     tokens = splitKeywords(keyword)
     if not tokens or df.is_empty():
         return df
@@ -82,14 +126,35 @@ def filterFilingsByKeyword(df: pl.DataFrame, *, keyword: str | None, columns: li
 
 
 def filingRecord(value: Any) -> dict[str, Any] | None:
-    """row-like filing 입력을 dict로 정규화한다."""
+    """row-like filing 입력을 dict로 정규화한다.
+
+    Args:
+        value: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> filingRecord(...)
+    """
     if isinstance(value, dict):
         return dict(value)
     return None
 
 
 def truncateText(text: str, maxChars: int | None = None) -> tuple[str, bool]:
-    """문자열을 지정 길이로 자른다."""
+    """문자열을 지정 길이로 자른다.
+
+    Args:
+        text: 인자.
+        maxChars: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> truncateText(...)
+    """
     if maxChars is None or maxChars <= 0 or len(text) <= maxChars:
         return text, False
     return text[:maxChars], True

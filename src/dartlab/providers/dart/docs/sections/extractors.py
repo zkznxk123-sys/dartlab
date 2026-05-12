@@ -59,7 +59,18 @@ def _normalizeSubtopic(record: dict[str, object]) -> str:
 
 
 def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | None:
-    """retrievalBlocks에서 해당 topic의 테이블을 추출하여 TopicSubtables로 반환한다."""
+    """retrievalBlocks에서 해당 topic의 테이블을 추출하여 TopicSubtables로 반환한다.
+
+    Args:
+        blocks: 인자.
+        topic: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> topicSubtables(...)
+    """
     if isEmptyDf(blocks):
         return None
 
@@ -307,6 +318,12 @@ def parseSubtopicTable(
 
     Returns:
         ParsedSubtopicTable 또는 파싱 실패 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseSubtopicTable(...)
     """
     wide = subtables.wide
     if wide.is_empty():

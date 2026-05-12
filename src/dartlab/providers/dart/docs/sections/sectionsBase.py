@@ -19,14 +19,34 @@ RE_ANNUAL_Q4_ALIAS = re.compile(r"^(\d{4})Q4$")
 
 
 def detectContentCol(df: pl.DataFrame) -> str:
-    """detectContentCol — TODO 한국어 동작 설명."""
+    """detectContentCol — TODO 한국어 동작 설명.
+
+    Args:
+        df: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectContentCol(...)
+    """
     if "section_content" in df.columns:
         return "section_content"
     return "content"
 
 
 def periodSortKey(period: str) -> tuple[int, int]:
-    """periodSortKey — TODO 한국어 동작 설명."""
+    """periodSortKey — TODO 한국어 동작 설명.
+
+    Args:
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> periodSortKey(...)
+    """
     value = str(period)
     if "Q" in value:
         return int(value[:4]), int(value[-1])
@@ -34,23 +54,64 @@ def periodSortKey(period: str) -> tuple[int, int]:
 
 
 def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
-    """sortPeriods — TODO 한국어 동작 설명."""
+    """sortPeriods — TODO 한국어 동작 설명.
+
+    Args:
+        periods: 인자.
+        descending: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sortPeriods(...)
+    """
     return sorted(periods, key=periodSortKey, reverse=descending)
 
 
 def periodOrderValue(period: str) -> int:
-    """periodOrderValue — TODO 한국어 동작 설명."""
+    """periodOrderValue — TODO 한국어 동작 설명.
+
+    Args:
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> periodOrderValue(...)
+    """
     year, slot = periodSortKey(period)
     return year * 10 + slot
 
 
 def basePath(path: str) -> str:
-    """basePath — TODO 한국어 동작 설명."""
+    """basePath — TODO 한국어 동작 설명.
+
+    Args:
+        path: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> basePath(...)
+    """
     return RE_SPLIT_SUFFIX.sub("", path)
 
 
 def rawPeriod(period: str) -> str:
-    """rawPeriod — TODO 한국어 동작 설명."""
+    """rawPeriod — TODO 한국어 동작 설명.
+
+    Args:
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rawPeriod(...)
+    """
     value = str(period).strip()
     match = RE_ANNUAL_Q4_ALIAS.fullmatch(value)
     if match:
@@ -59,7 +120,18 @@ def rawPeriod(period: str) -> str:
 
 
 def displayPeriod(period: str, *, annualAsQ4: bool = False) -> str:
-    """displayPeriod — TODO 한국어 동작 설명."""
+    """displayPeriod — TODO 한국어 동작 설명.
+
+    Args:
+        period: 인자.
+        annualAsQ4: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> displayPeriod(...)
+    """
     value = rawPeriod(period)
     if annualAsQ4 and RE_PERIOD.fullmatch(value) and "Q" not in value:
         return f"{value}Q4"
@@ -72,7 +144,19 @@ def periodColumns(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> list[str]:
-    """periodColumns — TODO 한국어 동작 설명."""
+    """periodColumns — TODO 한국어 동작 설명.
+
+    Args:
+        columns: 인자.
+        descending: 인자.
+        annualAsQ4: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> periodColumns(...)
+    """
     ordered = sortPeriods([str(col) for col in columns if RE_PERIOD.fullmatch(str(col))], descending=descending)
     return [displayPeriod(period, annualAsQ4=annualAsQ4) for period in ordered]
 
@@ -83,7 +167,19 @@ def formatPeriodRange(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> str:
-    """formatPeriodRange — TODO 한국어 동작 설명."""
+    """formatPeriodRange — TODO 한국어 동작 설명.
+
+    Args:
+        periods: 인자.
+        descending: 인자.
+        annualAsQ4: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> formatPeriodRange(...)
+    """
     ordered = sortPeriods([rawPeriod(period) for period in periods], descending=descending)
     if not ordered:
         return "-"
@@ -97,7 +193,19 @@ def reorderPeriodColumns(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> pl.DataFrame:
-    """reorderPeriodColumns — TODO 한국어 동작 설명."""
+    """reorderPeriodColumns — TODO 한국어 동작 설명.
+
+    Args:
+        df: 인자.
+        descending: 인자.
+        annualAsQ4: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> reorderPeriodColumns(...)
+    """
     periodCols = [str(col) for col in df.columns if RE_PERIOD.fullmatch(str(col))]
     if not periodCols:
         return df

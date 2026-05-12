@@ -30,6 +30,9 @@ def extractRaw(
 
     Returns:
         정제된 DataFrame 또는 None (데이터 없음).
+
+    Raises:
+        없음.
     """
     from dartlab.core.dataLoader import loadData
 
@@ -72,7 +75,19 @@ def extractClean(
     *,
     baseDf: pl.DataFrame | None = None,
 ) -> pl.DataFrame | None:
-    """extractRaw + 숫자 변환 적용."""
+    """extractRaw + 숫자 변환 적용.
+
+    Args:
+        stockCode: 인자.
+        apiType: 인자.
+        baseDf: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractClean(...)
+    """
     df = extractRaw(stockCode, apiType, baseDf=baseDf)
     if df is None:
         return None
@@ -97,6 +112,12 @@ def extractAnnual(
 
     Returns:
         연간 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractAnnual(...)
     """
     df = extractClean(stockCode, apiType, baseDf=baseDf)
     if df is None:
@@ -125,7 +146,20 @@ def extractResult(
     *,
     baseDf: pl.DataFrame | None = None,
 ) -> ReportResult | None:
-    """apiType별 ReportResult 반환."""
+    """apiType별 ReportResult 반환.
+
+    Args:
+        stockCode: 인자.
+        apiType: 인자.
+        quarterNum: 인자.
+        baseDf: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractResult(...)
+    """
     df = extractAnnual(stockCode, apiType, quarterNum, baseDf=baseDf)
     if df is None:
         return None

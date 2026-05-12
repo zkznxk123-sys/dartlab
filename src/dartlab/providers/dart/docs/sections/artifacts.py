@@ -16,7 +16,17 @@ _PROFILE_PACKAGE = "dartlab.providers.dart.docs.sections.profileData"
 
 @contextmanager
 def packagedArtifactPath(name: str) -> Iterator[Path]:
-    """패키지 리소스를 filesystem path로 노출."""
+    """패키지 리소스를 filesystem path로 노출.
+
+    Args:
+        name: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> packagedArtifactPath(...)
+    """
     ref = files(_PROFILE_PACKAGE) / name
     with as_file(ref) as path:
         yield path
@@ -31,6 +41,15 @@ def loadProjectionRules(chapter: str) -> dict[str, list[str]]:
 
     2026-04-19 사고 class 방어: 알려진 chapter 의 JSON 이 누락되면 loud-fail.
     미등록 chapter 이름에 대해서는 기존처럼 빈 dict 리턴 (유효한 "규칙 없음" 상태).
+
+    Args:
+        chapter: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadProjectionRules(...)
     """
     filename = f"projectionRules.{chapter}.json"
     try:
@@ -51,6 +70,15 @@ def loadSectionProfileTable() -> pl.DataFrame | None:
 
     필수 번들 리소스 — 파일 누락은 packaging 사고로 간주해 loud-fail.
     Parquet 로드는 비용 큼 — 호출당 재로드 방지를 위해 @lru_cache(1).
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadSectionProfileTable(...)
     """
     try:
         with packagedArtifactPath("sectionProfileTable.parquet") as path:

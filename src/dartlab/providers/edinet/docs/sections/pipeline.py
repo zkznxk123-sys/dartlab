@@ -24,6 +24,12 @@ def buildSections(docsDf: pl.DataFrame) -> pl.DataFrame:
 
     Returns:
         sections DataFrame (topic, period, text, ...).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildSections(...)
     """
     if docsDf.is_empty():
         return pl.DataFrame(

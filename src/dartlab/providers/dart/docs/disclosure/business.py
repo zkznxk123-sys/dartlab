@@ -62,7 +62,17 @@ class BusinessResult:
 
 
 def classifySection(title: str) -> str | None:
-    """섹션 타이틀을 키로 분류."""
+    """섹션 타이틀을 키로 분류.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifySection(...)
+    """
     for key, keywords in SECTION_KEYS.items():
         for kw in keywords:
             if kw in title:
@@ -71,7 +81,17 @@ def classifySection(title: str) -> str | None:
 
 
 def extractFromSubSections(report: pl.DataFrame) -> dict[str, dict]:
-    """하위 섹션이 분리된 경우 직접 매칭."""
+    """하위 섹션이 분리된 경우 직접 매칭.
+
+    Args:
+        report: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractFromSubSections(...)
+    """
     subSections = report.filter(
         pl.col("section_title").str.contains("사업의 개요")
         | pl.col("section_title").str.contains("주요 제품")
@@ -108,7 +128,17 @@ def extractFromSubSections(report: pl.DataFrame) -> dict[str, dict]:
 
 
 def extractFromUnified(report: pl.DataFrame) -> dict[str, dict]:
-    """통합 텍스트에서 번호 패턴으로 분리."""
+    """통합 텍스트에서 번호 패턴으로 분리.
+
+    Args:
+        report: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractFromUnified(...)
+    """
     mainSection = report.filter(pl.col("section_title").str.contains("사업의 내용"))
     if mainSection.height == 0:
         return {}
@@ -130,7 +160,17 @@ def extractFromUnified(report: pl.DataFrame) -> dict[str, dict]:
 
 
 def splitByNumber(text: str) -> list[tuple[str, str, str]]:
-    """텍스트를 순차 번호 패턴으로 분리."""
+    """텍스트를 순차 번호 패턴으로 분리.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitByNumber(...)
+    """
     allMatches = list(_SPLIT_BY_NUMBER_RE.finditer(text))
 
     topMatches = []
@@ -156,7 +196,17 @@ def splitByNumber(text: str) -> list[tuple[str, str, str]]:
 
 
 def getBusinessText(report: pl.DataFrame) -> str | None:
-    """보고서에서 사업 개요 텍스트 추출 (변경 탐지용)."""
+    """보고서에서 사업 개요 텍스트 추출 (변경 탐지용).
+
+    Args:
+        report: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getBusinessText(...)
+    """
     overview = report.filter(
         pl.col("section_title").str.starts_with("1.") & pl.col("section_title").str.contains("사업의 개요")
     )
@@ -171,7 +221,18 @@ def getBusinessText(report: pl.DataFrame) -> str | None:
 
 
 def computeChanges(df: pl.DataFrame, years: list[str]) -> list[dict]:
-    """연도별 사업 내용 변경률 계산."""
+    """연도별 사업 내용 변경률 계산.
+
+    Args:
+        df: 인자.
+        years: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> computeChanges(...)
+    """
     changes = []
     prevText = None
 
@@ -230,6 +291,9 @@ def business(stockCode: str) -> BusinessResult | None:
 
     Example:
         >>> business("005930")  # 삼성전자
+
+    Raises:
+        없음.
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

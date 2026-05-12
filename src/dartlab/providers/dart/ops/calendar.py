@@ -56,6 +56,12 @@ def predictCalendar(
     -------
     pl.DataFrame
         스키마: date · code · eventType · title · source · impactHint · confidence.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> predictCalendar(...)
     """
     if not disclosures:
         return pl.DataFrame(schema=OUTPUT_SCHEMA)

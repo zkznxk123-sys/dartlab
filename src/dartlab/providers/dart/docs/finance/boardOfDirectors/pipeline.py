@@ -35,6 +35,12 @@ def boardOfDirectors(stockCode: str) -> BoardResult | None:
 
     Returns:
         BoardResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> boardOfDirectors(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

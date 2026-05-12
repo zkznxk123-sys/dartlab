@@ -68,6 +68,12 @@ def detectAccountingStandard(elementIds: list[str]) -> str:
     """element_id prefix로 회계표준 감지.
 
     Returns: 'J-GAAP', 'IFRS', 'US-GAAP', 'unknown'
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectAccountingStandard(...)
     """
     counts = {"jppfs": 0, "jpcrp": 0, "ifrs": 0, "usgaap": 0}
     for eid in elementIds:
@@ -194,6 +200,12 @@ def buildTimeseries(
         (series, periods) 튜플.
         series = {"BS": {"total_assets": [v1, v2, ...], ...}, "IS": {...}, "CF": {...}}
         periods = ["prior2", "prior1", "current"] 등
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildTimeseries(...)
     """
     if financeDf.is_empty():
         return {}, []
@@ -328,7 +340,17 @@ def buildTimeseries(
 
 
 def getAccountingStandard(financeDf: pl.DataFrame) -> str:
-    """finance parquet에서 회계표준 감지."""
+    """finance parquet에서 회계표준 감지.
+
+    Args:
+        financeDf: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getAccountingStandard(...)
+    """
     if financeDf.is_empty():
         return "unknown"
     elementIds = financeDf["element_id"].unique().to_list()
@@ -340,6 +362,12 @@ def getConsolidationInfo(financeDf: pl.DataFrame) -> dict[str, int]:
 
     Returns:
         {"consolidated": N, "nonConsolidated": M, "unknown": K}
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getConsolidationInfo(...)
     """
     counts = {"consolidated": 0, "nonConsolidated": 0, "unknown": 0}
     for ctx in financeDf["context_id"].unique().to_list():

@@ -36,6 +36,12 @@ def parseDividendTable(content: str) -> dict:
         dict with keys: netIncome, eps, totalDividend, payoutRatio,
         dividendYieldCommon, dpsCommon, dpsPreferred.
         각 값은 [당기, 전기, 전전기] 3개 float|None 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseDividendTable(...)
     """
     lines = content.split("\n")
     tableRows: list[list[str]] = []
@@ -144,6 +150,12 @@ def dividend(stockCode: str) -> DividendResult | None:
 
     Returns:
         DividendResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> dividend(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

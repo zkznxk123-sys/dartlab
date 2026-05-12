@@ -28,6 +28,15 @@ def stripUnitHeader(sub: list[str]) -> list[str] | None:
     다중컬럼: | (기준일 : | 2018년 03월 31일 | ) | (단위 : 주) |
     반환: 실제헤더 행부터의 서브테이블 (기존 파서가 그대로 동작).
     해당하지 않으면 None.
+
+    Args:
+        sub: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> stripUnitHeader(...)
     """
     firstRow = None
     for line in sub:
@@ -263,7 +272,17 @@ def _hzFilterJunkItems(allItems: list[str]) -> list[str]:
     """숫자만 있는 항목명 제거."""
 
     def isJunk(name: str) -> bool:
-        """isJunk — TODO 한국어 동작 설명."""
+        """isJunk — TODO 한국어 동작 설명.
+
+        Args:
+            name: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> isJunk(...)
+        """
         stripped = re.sub(r"[,.\-\s]", "", name)
         return stripped.isdigit() or not stripped
 
@@ -344,6 +363,12 @@ def horizontalizeTableBlock(
         항목(행) × 기간(열) DataFrame. 수평화 불가 시 None.
         "항목" : str — 행 라벨
         {period} : str — 기간별 셀 값
+
+    Raises:
+        없음.
+
+    Example:
+        >>> horizontalizeTableBlock(...)
     """
     boRow = topicFrame.filter((pl.col("blockOrder") == blockOrder) & (pl.col("blockType") == "table"))
     if boRow.is_empty():

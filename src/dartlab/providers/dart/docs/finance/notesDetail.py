@@ -83,6 +83,12 @@ def buildTableDf(
         unitByYear: {periodKey: unitScale}
         mapper: NotesMapper (None이면 기본 매퍼 로드)
         maxYears: 최근 N년만 반환 (기본 5)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildTableDf(...)
     """
     import polars as pl
 
@@ -178,6 +184,12 @@ def notesDetail(
 
     Returns:
         NotesDetailResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> notesDetail(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

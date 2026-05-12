@@ -114,6 +114,15 @@ class Notes:
         통합 진입점을 사용하고, 분기/연간 토글은 show 의 freq 파라미터로 제어한다.
 
         분기보고서(Q1/Q3) + 반기보고서 + 사업보고서 주석을 모두 파싱.
+
+        Args:
+            name: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> quarterly(...)
         """
         eng = _KR_MAP.get(name, name)
         if eng not in _REGISTRY:
@@ -121,15 +130,45 @@ class Notes:
         return self._get(eng, period="q")
 
     def all(self, period: str = "y") -> dict[str, pl.DataFrame | None]:
-        """모든 주석 항목을 dict로 반환."""
+        """모든 주석 항목을 dict로 반환.
+
+        Args:
+            period: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> all(...)
+        """
         return {name: self._get(name, period=period) for name in _REGISTRY}
 
     def keys(self) -> list[str]:
-        """지원하는 영문 속성명 목록."""
+        """지원하는 영문 속성명 목록.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> keys(...)
+        """
         return list(_REGISTRY.keys())
 
     def keysKr(self) -> list[str]:
-        """지원하는 한글 키워드 목록."""
+        """지원하는 한글 키워드 목록.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> keysKr(...)
+        """
         return list(_KR_MAP.keys())
 
     def __repr__(self) -> str:

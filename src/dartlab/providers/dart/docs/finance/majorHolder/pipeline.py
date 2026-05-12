@@ -28,6 +28,12 @@ def majorHolder(stockCode: str) -> MajorHolderResult | None:
 
     Returns:
         MajorHolderResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> majorHolder(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
@@ -118,6 +124,12 @@ def holderOverview(stockCode: str) -> HolderOverview | None:
 
     Returns:
         HolderOverview 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> holderOverview(...)
     """
     df = loadData(stockCode)
     if df is None:

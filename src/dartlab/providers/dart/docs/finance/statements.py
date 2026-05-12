@@ -60,6 +60,12 @@ def extractContent(
     Returns:
         (content, scope) — scope은 "consolidated" | "separate"
         추출 불가 시 (None, "none")
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractContent(...)
     """
     if scope != "separate":
         cons = report.filter(
@@ -90,7 +96,17 @@ def extractContent(
 
 
 def extractConsolidatedContent(report: pl.DataFrame) -> str | None:
-    """보고서에서 연결재무제표 섹션 내용을 추출. (하위 호환)"""
+    """보고서에서 연결재무제표 섹션 내용을 추출. (하위 호환)
+
+    Args:
+        report: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractConsolidatedContent(...)
+    """
     content, scope = extractContent(report)
     return content
 
@@ -100,6 +116,12 @@ def splitStatements(content: str) -> dict[str, str]:
 
     Returns:
         {"BS": "...", "PNL": "...", "CI": "...", "SCE": "...", "CF": "..."}
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitStatements(...)
     """
     lines = content.split("\n")
 
@@ -168,6 +190,12 @@ def statements(
 
     Returns:
         StatementsResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> statements(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

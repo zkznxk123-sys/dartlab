@@ -27,7 +27,17 @@ def _findAssetTotalLine(lines: list[str]) -> int:
 
 
 def extractSummaryContent(report: pl.DataFrame) -> str | None:
-    """요약재무정보 섹션 내용 추출. 연결재무 우선, 없으면 별도/개별."""
+    """요약재무정보 섹션 내용 추출. 연결재무 우선, 없으면 별도/개별.
+
+    Args:
+        report: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractSummaryContent(...)
+    """
     content = None
     summary = report.filter(pl.col("section_title").str.contains("요약재무정보"))
     if summary.height > 0:

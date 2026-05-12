@@ -45,21 +45,61 @@ class YearSections:
 
     @property
     def savings(self) -> float:
-        """savings — TODO 한국어 동작 설명."""
+        """savings — TODO 한국어 동작 설명.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> savings(...)
+        """
         if self.totalOriginalChars == 0:
             return 0.0
         return 1 - (self.totalTextChars / self.totalOriginalChars)
 
     def byMajor(self, majorNum: int) -> list[SectionChunk]:
-        """byMajor — TODO 한국어 동작 설명."""
+        """byMajor — TODO 한국어 동작 설명.
+
+        Args:
+            majorNum: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> byMajor(...)
+        """
         return [c for c in self.chunks if c.majorNum == majorNum]
 
     def byKind(self, kind: str) -> list[SectionChunk]:
-        """byKind — TODO 한국어 동작 설명."""
+        """byKind — TODO 한국어 동작 설명.
+
+        Args:
+            kind: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> byKind(...)
+        """
         return [c for c in self.chunks if c.kind == kind]
 
     def textChunks(self) -> list[SectionChunk]:
-        """textChunks — TODO 한국어 동작 설명."""
+        """textChunks — TODO 한국어 동작 설명.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> textChunks(...)
+        """
         return [c for c in self.chunks if c.kind not in ("skipped", "table_only")]
 
     def search(self, keyword: str, *, limit: int | None = None) -> list[SectionChunk]:
@@ -74,6 +114,9 @@ class YearSections:
 
         Example:
             >>> sections.search("매출", limit=5)
+
+        Raises:
+            없음.
         """
         kw = keyword.lower()
         hits = [c for c in self.chunks if kw in c.path.lower() or kw in c.textContent.lower()]
@@ -82,7 +125,17 @@ class YearSections:
         return hits
 
     def toLinesDf(self) -> pl.DataFrame:
-        """텍스트 청크를 줄 단위 DataFrame으로 변환."""
+        """텍스트 청크를 줄 단위 DataFrame으로 변환.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toLinesDf(...)
+        """
         rows: list[dict] = []
         for c in self.textChunks():
             bp = basePath(c.path)
@@ -103,7 +156,17 @@ class YearSections:
         return pl.DataFrame(rows)
 
     def toLeafMap(self) -> dict[str, str]:
-        """leaf title → 병합된 텍스트 dict."""
+        """leaf title → 병합된 텍스트 dict.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toLeafMap(...)
+        """
         merged: dict[str, list[str]] = {}
         for c in self.textChunks():
             bp = basePath(c.path)
@@ -157,19 +220,49 @@ class SectionResult:
 
     @property
     def topics(self) -> list[str]:
-        """topics — TODO 한국어 동작 설명."""
+        """topics — TODO 한국어 동작 설명.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> topics(...)
+        """
         return sorted(self._topicMap.keys())
 
     @property
     def latest(self) -> YearSections | None:
-        """latest — TODO 한국어 동작 설명."""
+        """latest — TODO 한국어 동작 설명.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> latest(...)
+        """
         if not self.periods:
             return None
         return self.yearSections.get(self.periods[0])
 
     @property
     def years(self) -> list[str]:
-        """years — TODO 한국어 동작 설명."""
+        """years — TODO 한국어 동작 설명.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> years(...)
+        """
         return self.periods
 
     def search(self, keyword: str, *, limit: int | None = None) -> dict[str, dict[str, str]]:
@@ -184,6 +277,9 @@ class SectionResult:
 
         Example:
             >>> result.search("매출", limit=5)
+
+        Raises:
+            없음.
         """
         kw = keyword.lower()
         hits = {t: series for t, series in self._topicMap.items() if kw in t.lower()}
@@ -192,7 +288,17 @@ class SectionResult:
         return hits
 
     def overview(self) -> pl.DataFrame:
-        """전체 topic × period 크기 매트릭스."""
+        """전체 topic × period 크기 매트릭스.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> overview(...)
+        """
         records: list[dict] = []
         for topic, series in self._topicMap.items():
             row: dict = {"topic": topic, "count": len(series)}
@@ -207,7 +313,19 @@ class SectionResult:
         periodB: str,
         path: str | None = None,
     ) -> pl.DataFrame:
-        """두 기간의 텍스트 변경사항을 줄 단위로 비교."""
+        """두 기간의 텍스트 변경사항을 줄 단위로 비교.
+
+        Args:
+            periodA: 인자.
+            periodB: 인자.
+            path: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> compare(...)
+        """
         ysA = self.yearSections.get(periodA)
         ysB = self.yearSections.get(periodB)
         if ysA is None or ysB is None:
@@ -262,7 +380,19 @@ class SectionResult:
         periodB: str,
         path: str,
     ) -> pl.DataFrame:
-        """특정 섹션의 줄 단위 diff 반환."""
+        """특정 섹션의 줄 단위 diff 반환.
+
+        Args:
+            periodA: 인자.
+            periodB: 인자.
+            path: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> diff(...)
+        """
         ysA = self.yearSections.get(periodA)
         ysB = self.yearSections.get(periodB)
         if ysA is None or ysB is None:

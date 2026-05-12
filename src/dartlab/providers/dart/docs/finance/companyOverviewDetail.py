@@ -29,7 +29,17 @@ class CompanyOverviewDetailResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """파이프(|)로 구분된 셀을 분리."""
+    """파이프(|)로 구분된 셀을 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -39,13 +49,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행인지 확인."""
+    """구분선 행인지 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseCompanyInfo(content: str) -> dict:
-    """회사 기본정보 테이블 파싱."""
+    """회사 기본정보 테이블 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseCompanyInfo(...)
+    """
     lines = content.split("\n")
     info: dict = {}
 
@@ -82,7 +112,17 @@ def parseCompanyInfo(content: str) -> dict:
 
 
 def parseCompanyInfoFallback(content: str) -> dict:
-    """산문형 콘텐츠에서 regex 기반 회사정보 추출."""
+    """산문형 콘텐츠에서 regex 기반 회사정보 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseCompanyInfoFallback(...)
+    """
     info: dict = {}
     text = content.replace("\xa0", " ")
 
@@ -115,7 +155,17 @@ def parseCompanyInfoFallback(content: str) -> dict:
 
 # pipeline
 def companyOverviewDetail(stockCode: str) -> CompanyOverviewDetailResult | None:
-    """회사의 개요 분석."""
+    """회사의 개요 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> companyOverviewDetail(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

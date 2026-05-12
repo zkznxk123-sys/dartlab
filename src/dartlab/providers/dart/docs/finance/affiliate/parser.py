@@ -395,7 +395,17 @@ def _parseProfileDataRow(
 
 
 def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
-    """투자현황 추출 orchestrator — 2행 헤더 + 카테고리 + fallback 매핑 (Q3.1e)."""
+    """투자현황 추출 orchestrator — 2행 헤더 + 카테고리 + fallback 매핑 (Q3.1e).
+
+    Args:
+        rows: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractProfiles(...)
+    """
     results: list[AffiliateProfile] = []
     headers: list[str] | None = None
     subHeaders: list[str] | None = None
@@ -538,7 +548,17 @@ def _mergeSubHeader(headers: list[str], subHeaders: list[str]) -> list[str]:
 
 
 def extractMovements(rows: list[list[str]]) -> list[AffiliateMovement]:
-    """변동내역 추출. 범용 헤더 매칭."""
+    """변동내역 추출. 범용 헤더 매칭.
+
+    Args:
+        rows: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractMovements(...)
+    """
     results: list[AffiliateMovement] = []
     headers = None
     colMap: dict[int, str] | None = None
@@ -656,7 +676,17 @@ def extractMovements(rows: list[list[str]]) -> list[AffiliateMovement]:
 
 
 def extractSimpleMovement(rows: list[list[str]]) -> list[dict]:
-    """구 분|당기|전기 형태의 간단한 변동표."""
+    """구 분|당기|전기 형태의 간단한 변동표.
+
+    Args:
+        rows: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractSimpleMovement(...)
+    """
     results: list[dict] = []
     inTable = False
 
@@ -865,7 +895,17 @@ def _findTransposedBlocks(rows: list[list[str]]) -> list[dict]:
 
 
 def extractTransposedProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
-    """횡전개 포맷에서 투자현황 추출."""
+    """횡전개 포맷에서 투자현황 추출.
+
+    Args:
+        rows: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTransposedProfiles(...)
+    """
     blocks = _findTransposedBlocks(rows)
     results: list[AffiliateProfile] = []
     seen: set[tuple[str, str]] = set()
@@ -929,7 +969,17 @@ def extractTransposedProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
 
 
 def extractTransposedMovements(rows: list[list[str]]) -> list[AffiliateMovement]:
-    """횡전개 포맷에서 변동내역 추출."""
+    """횡전개 포맷에서 변동내역 추출.
+
+    Args:
+        rows: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTransposedMovements(...)
+    """
     blocks = _findTransposedBlocks(rows)
     results: list[AffiliateMovement] = []
     seen: set[tuple[str, str]] = set()

@@ -19,12 +19,32 @@ RE_MINOR = re.compile(r"^\((\d+)\)\s*(.+)$")
 
 
 def normalizeTitle(title: str) -> str:
-    """section title에서 업종 접두사를 제거하고 정규화한다."""
+    """section title에서 업종 접두사를 제거하고 정규화한다.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeTitle(...)
+    """
     return stripSectionPrefix((title or "").strip())
 
 
 def isBoilerplateTopic(topic: str) -> bool:
-    """보일러플레이트 topic(표지, 확인서 등)인지 판별한다."""
+    """보일러플레이트 topic(표지, 확인서 등)인지 판별한다.
+
+    Args:
+        topic: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isBoilerplateTopic(...)
+    """
     return topic in {
         "사업보고서",
         "분기보고서",
@@ -35,7 +55,17 @@ def isBoilerplateTopic(topic: str) -> bool:
 
 
 def isPlaceholderBlock(blockText: str) -> bool:
-    """분기/반기보고서 미기재 안내 문구인지 판별한다."""
+    """분기/반기보고서 미기재 안내 문구인지 판별한다.
+
+    Args:
+        blockText: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isPlaceholderBlock(...)
+    """
     text = blockText.strip()
     if not text:
         return False
@@ -56,7 +86,21 @@ def blockPriority(
     isBoilerplate: bool,
     isPlaceholder: bool,
 ) -> int:
-    """블록의 정보 가치에 따라 우선순위 점수(0~5)를 반환한다."""
+    """블록의 정보 가치에 따라 우선순위 점수(0~5)를 반환한다.
+
+    Args:
+        blockType: 인자.
+        semanticTopic: 인자.
+        detailTopic: 인자.
+        isBoilerplate: 인자.
+        isPlaceholder: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> blockPriority(...)
+    """
     if isBoilerplate:
         return 0
     if isPlaceholder:
@@ -73,7 +117,17 @@ def blockPriority(
 
 
 def classifyContent(content: str) -> tuple[int, int, int]:
-    """마크다운 콘텐츠의 텍스트/테이블/헤딩 줄 수를 세어 반환한다."""
+    """마크다운 콘텐츠의 텍스트/테이블/헤딩 줄 수를 세어 반환한다.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyContent(...)
+    """
     table_lines = 0
     heading_lines = 0
     text_lines = 0
@@ -92,7 +146,17 @@ def classifyContent(content: str) -> tuple[int, int, int]:
 
 
 def buildMarkdownBlocks(stockCode: str) -> pl.DataFrame:
-    """종목의 전 기간 parquet에서 section별 마크다운 블록 DataFrame을 생성한다."""
+    """종목의 전 기간 parquet에서 section별 마크다운 블록 DataFrame을 생성한다.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildMarkdownBlocks(...)
+    """
     rows: list[dict[str, object]] = []
 
     for period, _reportKind, ccol, subset in iterPeriodSubsets(stockCode):
@@ -121,7 +185,17 @@ def buildMarkdownBlocks(stockCode: str) -> pl.DataFrame:
 
 
 def buildMarkdownWide(blocks: pl.DataFrame) -> pl.DataFrame:
-    """마크다운 블록을 topic x period wide 형태로 피벗한다."""
+    """마크다운 블록을 topic x period wide 형태로 피벗한다.
+
+    Args:
+        blocks: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildMarkdownWide(...)
+    """
     if blocks.height == 0:
         return pl.DataFrame()
 
@@ -142,7 +216,17 @@ def buildMarkdownWide(blocks: pl.DataFrame) -> pl.DataFrame:
 
 
 def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
-    """마크다운 원문을 heading/text/table 블록 단위로 분리한다."""
+    """마크다운 원문을 heading/text/table 블록 단위로 분리한다.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitMarkdownBlocks(...)
+    """
     rows: list[dict[str, object]] = []
     currentLabel = "(root)"
     textBuffer: list[str] = []
@@ -150,7 +234,14 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
     blockIndex = 0
 
     def flushText() -> None:
-        """flushText — TODO 한국어 동작 설명."""
+        """flushText — TODO 한국어 동작 설명.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> flushText(...)
+        """
         nonlocal textBuffer, blockIndex
         text = "\n".join(textBuffer).strip()
         if text:
@@ -167,7 +258,14 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         textBuffer = []
 
     def flushTable() -> None:
-        """flushTable — TODO 한국어 동작 설명."""
+        """flushTable — TODO 한국어 동작 설명.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> flushTable(...)
+        """
         nonlocal tableBuffer, blockIndex
         text = "\n".join(tableBuffer).strip()
         if text:
@@ -184,7 +282,14 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         tableBuffer = []
 
     def flushAll() -> None:
-        """flushAll — TODO 한국어 동작 설명."""
+        """flushAll — TODO 한국어 동작 설명.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> flushAll(...)
+        """
         flushText()
         flushTable()
 
@@ -328,7 +433,17 @@ def _buildDetailExpr() -> pl.Expr:
 
 
 def retrievalBlocks(stockCode: str) -> pl.DataFrame:
-    """종목의 전 기간 블록을 semantic/detail topic과 우선순위가 부여된 검색용 DataFrame으로 생성한다."""
+    """종목의 전 기간 블록을 semantic/detail topic과 우선순위가 부여된 검색용 DataFrame으로 생성한다.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> retrievalBlocks(...)
+    """
     # 1단계: Python에서 split까지 처리 → 컬럼별 리스트 (가장 빠른 경로)
     cPeriod: list[str] = []
     cPeriodOrder: list[int] = []
@@ -448,7 +563,18 @@ def retrievalBlocks(stockCode: str) -> pl.DataFrame:
 
 
 def splitContextText(text: str, maxChars: int) -> list[str]:
-    """텍스트를 maxChars 이하의 줄 단위 청크로 분할한다."""
+    """텍스트를 maxChars 이하의 줄 단위 청크로 분할한다.
+
+    Args:
+        text: 인자.
+        maxChars: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitContextText(...)
+    """
     text = text.strip()
     if not text:
         return []
@@ -473,7 +599,18 @@ def splitContextText(text: str, maxChars: int) -> list[str]:
 
 
 def splitMarkdownTable(text: str, maxChars: int) -> list[str]:
-    """마크다운 테이블을 헤더를 유지하며 maxChars 이하 청크로 분할한다."""
+    """마크다운 테이블을 헤더를 유지하며 maxChars 이하 청크로 분할한다.
+
+    Args:
+        text: 인자.
+        maxChars: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitMarkdownTable(...)
+    """
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
     if not lines:
         return []
@@ -501,7 +638,18 @@ def splitMarkdownTable(text: str, maxChars: int) -> list[str]:
 
 
 def contextSlices(stockCode: str, *, maxChars: int = 1800) -> pl.DataFrame:
-    """retrievalBlocks를 maxChars 이하 슬라이스로 분할한 LLM 컨텍스트용 DataFrame을 생성한다."""
+    """retrievalBlocks를 maxChars 이하 슬라이스로 분할한 LLM 컨텍스트용 DataFrame을 생성한다.
+
+    Args:
+        stockCode: 인자.
+        maxChars: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> contextSlices(...)
+    """
     blocks = retrievalBlocks(stockCode)
     rows: list[dict[str, object]] = []
     for record in blocks.to_dicts():
@@ -567,6 +715,17 @@ def contextSlices(stockCode: str, *, maxChars: int = 1800) -> pl.DataFrame:
 
 
 def saveView(df: pl.DataFrame, path: Path) -> None:
-    """DataFrame을 parquet 파일로 저장한다."""
+    """DataFrame을 parquet 파일로 저장한다.
+
+    Args:
+        df: 인자.
+        path: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> saveView(...)
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(path)

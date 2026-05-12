@@ -13,7 +13,17 @@ _SKIP_KEYWORDS = set(_CBN.get("skipKeywords", []))
 
 
 def normalizeAccountName(raw: str) -> str:
-    """normalizeAccountName — TODO 한국어 동작 설명."""
+    """normalizeAccountName — TODO 한국어 동작 설명.
+
+    Args:
+        raw: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeAccountName(...)
+    """
     cleaned = raw.replace(" ", "")
     for stdName, keywords in NORMALIZE_MAP:
         for kw in keywords:
@@ -23,7 +33,17 @@ def normalizeAccountName(raw: str) -> str:
 
 
 def isTotalRow(name: str) -> bool:
-    """isTotalRow — TODO 한국어 동작 설명."""
+    """isTotalRow — TODO 한국어 동작 설명.
+
+    Args:
+        name: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isTotalRow(...)
+    """
     cleaned = name.replace(" ", "")
     for p in TOTAL_PATTERNS:
         if p in cleaned:
@@ -100,7 +120,17 @@ def _findTableEnd(lines, fromIdx):
 
 
 def findCostByNatureSection(contents: list[str]) -> str | None:
-    """주석 콘텐츠에서 비용의 성격별 분류 섹션 찾기."""
+    """주석 콘텐츠에서 비용의 성격별 분류 섹션 찾기.
+
+    Args:
+        contents: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> findCostByNatureSection(...)
+    """
     for content in contents:
         lines = content.split("\n")
         for i, line in enumerate(lines):
@@ -128,6 +158,12 @@ def parseCostByNature(sectionText: str) -> dict | None:
 
     Returns:
         {"당기": {항목: 금액}, "전기": {항목: 금액}, "order": [항목]} 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseCostByNature(...)
     """
     for fn in [_tryParseInlineTable, _tryParseSplitTable, _tryParseMultiColTable]:
         result = fn(sectionText)

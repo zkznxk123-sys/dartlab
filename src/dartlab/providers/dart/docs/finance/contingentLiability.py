@@ -40,7 +40,17 @@ class ContingentLiabilityResult:
 
 # parser
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환."""
+    """숫자 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace(",", "").replace(" ", "")
@@ -64,7 +74,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def extractTableBlocks(content: str) -> list[list[str]]:
-    """content에서 |(pipe) 구분 테이블 블록들 추출."""
+    """content에서 |(pipe) 구분 테이블 블록들 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
+    """
     lines = content.split("\n")
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -82,7 +102,17 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
 
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -92,13 +122,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def classifyBlock(block: list[str]) -> str:
-    """블록 타입 분류."""
+    """블록 타입 분류.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyBlock(...)
+    """
     text = " ".join(block[:8])
 
     if "소제기일" in text or "소송 당사자" in text or "소송당사자" in text:
@@ -123,7 +173,17 @@ def classifyBlock(block: list[str]) -> str:
 
 
 def parseGuaranteeSummary(block: list[str]) -> dict | None:
-    """채무보증 요약 테이블에서 총 보증금액 추출."""
+    """채무보증 요약 테이블에서 총 보증금액 추출.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseGuaranteeSummary(...)
+    """
     dataRows = [line for line in block if not isSeparatorRow(line)]
 
     totalAmount = 0
@@ -149,7 +209,17 @@ def parseGuaranteeSummary(block: list[str]) -> dict | None:
 
 
 def parseGuaranteeDetail(block: list[str]) -> dict | None:
-    """채무보증 상세 테이블에서 기말 보증금액 합계 추출."""
+    """채무보증 상세 테이블에서 기말 보증금액 합계 추출.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseGuaranteeDetail(...)
+    """
     dataRows = [line for line in block if not isSeparatorRow(line)]
 
     endColIdx = None
@@ -191,7 +261,17 @@ def parseGuaranteeDetail(block: list[str]) -> dict | None:
 
 
 def parseLawsuit(block: list[str]) -> dict | None:
-    """소송 정보 추출 (key-value 형태)."""
+    """소송 정보 추출 (key-value 형태).
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseLawsuit(...)
+    """
     result: dict = {}
 
     for line in block:
@@ -235,6 +315,12 @@ def contingentLiability(stockCode: str) -> ContingentLiabilityResult | None:
 
     Returns:
         ContingentLiabilityResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> contingentLiability(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

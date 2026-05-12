@@ -52,6 +52,16 @@ async def parseRawMarkdownBlock(
 
     현재는 마크다운 테이블의 구조를 직접 파싱하는 규칙 기반 방식을 먼저 시도하고,
     실패 시 AI fallback (향후).
+
+    Args:
+        rawMarkdown: 인자.
+        topic: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseRawMarkdownBlock(...)
     """
     # 최신 기간의 마크다운
     periods = sorted(rawMarkdown.keys())

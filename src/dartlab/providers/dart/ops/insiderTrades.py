@@ -47,6 +47,9 @@ async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) ->
 
     Example:
         >>> await fetchInsiderTradingRaw("005930", limit=20)
+
+    Raises:
+        없음.
     """
     dart = _getDart()
     if dart is None:
@@ -90,6 +93,9 @@ async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None)
 
     Example:
         >>> await fetchMajorShareholdersRaw("005930", limit=10)
+
+    Raises:
+        없음.
     """
     dart = _getDart()
     if dart is None:

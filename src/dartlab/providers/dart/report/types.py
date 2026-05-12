@@ -224,11 +224,31 @@ class DividendResult:
 
     @property
     def nYears(self) -> int:
-        """시계열 연도 수를 반환한다."""
+        """시계열 연도 수를 반환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> nYears(...)
+        """
         return len(self.years)
 
     def toWide(self) -> pl.DataFrame | None:
-        """배당 시계열을 연도별 와이드 테이블로 변환한다."""
+        """배당 시계열을 연도별 와이드 테이블로 변환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toWide(...)
+        """
         return _seriesToWide(
             self.years,
             [
@@ -252,11 +272,31 @@ class EmployeeResult:
 
     @property
     def nYears(self) -> int:
-        """시계열 연도 수를 반환한다."""
+        """시계열 연도 수를 반환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> nYears(...)
+        """
         return len(self.years)
 
     def toWide(self) -> pl.DataFrame | None:
-        """직원 시계열을 연도별 와이드 테이블로 변환한다."""
+        """직원 시계열을 연도별 와이드 테이블로 변환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toWide(...)
+        """
         return _seriesToWide(
             self.years,
             [
@@ -278,11 +318,31 @@ class MajorHolderResult:
 
     @property
     def nYears(self) -> int:
-        """시계열 연도 수를 반환한다."""
+        """시계열 연도 수를 반환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> nYears(...)
+        """
         return len(self.years)
 
     def toWide(self) -> pl.DataFrame | None:
-        """최대주주 시계열을 연도별 와이드 테이블로 변환한다."""
+        """최대주주 시계열을 연도별 와이드 테이블로 변환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toWide(...)
+        """
         return _seriesToWide(
             self.years,
             [
@@ -301,7 +361,17 @@ class ExecutiveResult:
     outsideCount: int = 0
 
     def toWide(self) -> pl.DataFrame | None:
-        """임원현황을 요약 테이블로 변환한다."""
+        """임원현황을 요약 테이블로 변환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toWide(...)
+        """
         rows = [
             {"metric": "총임원수", "latest": self.totalCount},
             {"metric": "사내이사", "latest": self.registeredCount},
@@ -321,11 +391,31 @@ class AuditResult:
 
     @property
     def nYears(self) -> int:
-        """시계열 연도 수를 반환한다."""
+        """시계열 연도 수를 반환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> nYears(...)
+        """
         return len(self.years)
 
     def toWide(self) -> pl.DataFrame | None:
-        """감사의견 시계열을 연도별 와이드 테이블로 변환한다."""
+        """감사의견 시계열을 연도별 와이드 테이블로 변환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toWide(...)
+        """
         return _seriesToWide(
             self.years,
             [

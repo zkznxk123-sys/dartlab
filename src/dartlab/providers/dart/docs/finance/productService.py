@@ -42,7 +42,17 @@ class ProductServiceResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -52,13 +62,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환."""
+    """숫자 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip()
@@ -84,7 +114,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def parseRatio(text: str) -> float | None:
-    """비중(%) 문자열을 float로 변환."""
+    """비중(%) 문자열을 float로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseRatio(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace("%", "").replace(",", "").replace(" ", "")
@@ -104,7 +144,17 @@ def parseRatio(text: str) -> float | None:
 
 
 def detectUnit(content: str) -> str:
-    """단위 감지."""
+    """단위 감지.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectUnit(...)
+    """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
         return m.group(1)
@@ -112,7 +162,17 @@ def detectUnit(content: str) -> str:
 
 
 def parseProductService(content: str) -> list[dict]:
-    """주요 제품/서비스 테이블 파싱."""
+    """주요 제품/서비스 테이블 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseProductService(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
 
@@ -227,7 +287,17 @@ def parseProductService(content: str) -> list[dict]:
 
 # pipeline
 def productService(stockCode: str) -> ProductServiceResult | None:
-    """주요 제품 및 서비스 분석."""
+    """주요 제품 및 서비스 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> productService(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

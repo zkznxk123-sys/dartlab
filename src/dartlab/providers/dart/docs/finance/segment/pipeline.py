@@ -21,6 +21,12 @@ def segments(
 
     Returns:
         SegmentsResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> segments(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

@@ -41,7 +41,17 @@ def _isMetaColumn(name: str) -> bool:
 
 
 def isDataRow(cells: list[str]) -> bool:
-    """셀 중 숫자가 1개 이상이면 데이터 행."""
+    """셀 중 숫자가 1개 이상이면 데이터 행.
+
+    Args:
+        cells: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isDataRow(...)
+    """
     numCount = 0
     for c in cells[1:]:
         s = c.strip().replace(",", "").replace("(", "").replace(")", "")
@@ -51,7 +61,17 @@ def isDataRow(cells: list[str]) -> bool:
 
 
 def isHeaderRow(cells: list[str]) -> bool:
-    """부문명이 포함된 헤더 행 판별."""
+    """부문명이 포함된 헤더 행 판별.
+
+    Args:
+        cells: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isHeaderRow(...)
+    """
     nonEmpty = [c.strip() for c in cells if c.strip()]
     if len(nonEmpty) < 2:
         return False
@@ -78,6 +98,15 @@ def mergeHeaders(headers: list[list[str]]) -> list[str]:
 
     3행+ (2024+): 하위 우선 위치 병합.
       각 위치에서 마지막 비어있지 않은 값을 사용.
+
+    Args:
+        headers: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> mergeHeaders(...)
     """
     if len(headers) == 1:
         return list(headers[0])
@@ -116,7 +145,17 @@ def mergeHeaders(headers: list[list[str]]) -> list[str]:
 
 
 def classifyTable(columns: list[str]) -> str:
-    """컬럼명으로 테이블 유형 분류."""
+    """컬럼명으로 테이블 유형 분류.
+
+    Args:
+        columns: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyTable(...)
+    """
     colStr = " ".join(columns)
     if any(kw in colStr for kw in ["국내", "미주", "유럽", "본사 소재지"]):
         return "region"
@@ -129,7 +168,17 @@ def classifyTable(columns: list[str]) -> str:
 
 
 def parseSegmentTables(text: str) -> list[SegmentTable]:
-    """부문별 보고 전체 텍스트 → 파싱된 SegmentTable 목록."""
+    """부문별 보고 전체 텍스트 → 파싱된 SegmentTable 목록.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseSegmentTables(...)
+    """
     lines = text.split("\n")
     results: list[SegmentTable] = []
 
@@ -141,7 +190,14 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
     hasData = False
 
     def flush():
-        """flush — TODO 한국어 동작 설명."""
+        """flush — TODO 한국어 동작 설명.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> flush(...)
+        """
         nonlocal currentColumns, currentRows, rowOrder, pendingHeaders, hasData
         if currentColumns and currentRows:
             keepIdx = [i for i, c in enumerate(currentColumns) if c and not _isMetaColumn(c)]

@@ -37,7 +37,17 @@ class RndResult:
 
 # parser
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환."""
+    """숫자 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace(",", "").replace(" ", "")
@@ -53,7 +63,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def parseFloat(text: str) -> float | None:
-    """퍼센트 등 소수 파싱."""
+    """퍼센트 등 소수 파싱.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseFloat(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace(",", "").replace("%", "").replace(" ", "")
@@ -66,7 +86,17 @@ def parseFloat(text: str) -> float | None:
 
 
 def extractTableBlocks(content: str) -> list[list[str]]:
-    """content에서 |(pipe) 구분 테이블 블록들 추출."""
+    """content에서 |(pipe) 구분 테이블 블록들 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
+    """
     lines = content.split("\n")
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -84,7 +114,17 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
 
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -94,7 +134,17 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
@@ -110,6 +160,12 @@ def parseRndTable(block: list[str]) -> dict | None:
 
     Returns:
         {"periods": [...], "rndExpense": [...], "revenueRatio": [...]}
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseRndTable(...)
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 3:
@@ -190,6 +246,12 @@ def rnd(stockCode: str) -> RndResult | None:
 
     Returns:
         RndResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rnd(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

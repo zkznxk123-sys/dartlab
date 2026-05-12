@@ -966,6 +966,9 @@ class EdinetMapper:
 
         Returns:
             snakeId 또는 None (미매핑).
+
+        Raises:
+            없음.
         """
         cls._ensureLoaded()
 
@@ -1021,6 +1024,12 @@ class EdinetMapper:
 
         Returns:
             {"total": N, "mapped": M, "rate": M/N} dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> mappingRate(...)
         """
         total = len(elements)
         if total == 0:

@@ -80,7 +80,17 @@ class AnnotatedLine:
 
     @property
     def stability(self) -> str:
-        """안정도: stable / recent / volatile."""
+        """안정도: stable / recent / volatile.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> stability(...)
+        """
         if self.totalPeriods == 0:
             return "stable"
         ratio = self.frequency / self.totalPeriods
@@ -239,7 +249,18 @@ class ViewerTextDocument:
 
 
 def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
-    """topic의 모든 블록을 ViewerBlock 리스트로 반환."""
+    """topic의 모든 블록을 ViewerBlock 리스트로 반환.
+
+    Args:
+        company: 인자.
+        topic: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> viewerBlocks(...)
+    """
     if topic in _FINANCE_TOPICS:
         blk = _buildFinanceBlock(company, topic)
         return [blk] if blk else []
@@ -293,6 +314,16 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
     - heading block → 다음 body의 headingPath로 흡수
     - non-text block → ViewerDocumentEntry(kind="block_ref")로 원본 위치 보존
     - entries가 원본 blockOrder 순서를 그대로 유지
+
+    Args:
+        topic: 인자.
+        blocks: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> viewerTextDocument(...)
     """
     textBlocks = [b for b in blocks if b.kind == "text"]
     if not textBlocks:
@@ -1436,7 +1467,17 @@ def _serializeViewerTextView(view: ViewerTextView | None) -> dict[str, Any] | No
 
 
 def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str, Any] | None:
-    """ViewerTextDocument를 JSON 직렬화 가능한 dict로 변환."""
+    """ViewerTextDocument를 JSON 직렬화 가능한 dict로 변환.
+
+    Args:
+        document: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> serializeViewerTextDocument(...)
+    """
     if document is None:
         return None
 
@@ -1498,7 +1539,17 @@ def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str
 
 
 def serializeViewerBlock(block: ViewerBlock) -> dict[str, Any]:
-    """ViewerBlock을 JSON-직렬화 가능한 dict로 변환."""
+    """ViewerBlock을 JSON-직렬화 가능한 dict로 변환.
+
+    Args:
+        block: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> serializeViewerBlock(...)
+    """
     result: dict[str, Any] = {
         "block": block.block,
         "kind": block.kind,

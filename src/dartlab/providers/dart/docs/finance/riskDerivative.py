@@ -48,7 +48,17 @@ class RiskDerivativeResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -58,13 +68,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환."""
+    """숫자 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip()
@@ -90,7 +120,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def detectUnit(content: str) -> str:
-    """단위 감지."""
+    """단위 감지.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectUnit(...)
+    """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
         return m.group(1)
@@ -98,7 +138,17 @@ def detectUnit(content: str) -> str:
 
 
 def parseFxSensitivity(content: str) -> list[dict]:
-    """환율 민감도 테이블 파싱."""
+    """환율 민감도 테이블 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseFxSensitivity(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
 
@@ -170,6 +220,12 @@ def parseDerivativeContracts(content: str) -> tuple[list[dict], list[str]]:
 
     Returns:
         (rows, valueHeaders) 튜플.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseDerivativeContracts(...)
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -255,7 +311,17 @@ def _buildDerivativeDf(
 
 
 def riskDerivative(stockCode: str) -> RiskDerivativeResult | None:
-    """위험관리 및 파생거래 분석."""
+    """위험관리 및 파생거래 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> riskDerivative(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

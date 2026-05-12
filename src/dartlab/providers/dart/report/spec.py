@@ -4,7 +4,17 @@ from __future__ import annotations
 
 
 def buildSpec() -> dict:
-    """dart/report 엔진 스펙 반환."""
+    """dart/report 엔진 스펙 반환.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildSpec(...)
+    """
     from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES
 
     return {

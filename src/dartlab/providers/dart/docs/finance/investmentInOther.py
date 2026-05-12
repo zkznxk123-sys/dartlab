@@ -32,7 +32,17 @@ class InvestmentInOtherResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """파이프(|)로 구분된 셀을 분리."""
+    """파이프(|)로 구분된 셀을 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -42,13 +52,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행인지 확인."""
+    """구분선 행인지 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """금액 문자열을 정수로 변환."""
+    """금액 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip()
@@ -74,6 +104,12 @@ def parseInvestments(content: str) -> tuple[list[dict], list[str]]:
 
     Returns:
         (rows, headers) — rows: [{"name": str, "values": [int]}], headers: 숫자 컬럼 헤더
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseInvestments(...)
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -148,7 +184,17 @@ def _buildInvestmentDf(rows: list[dict], headers: list[str] | None = None) -> pl
 
 
 def investmentInOther(stockCode: str) -> InvestmentInOtherResult | None:
-    """타법인출자 현황 분석."""
+    """타법인출자 현황 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> investmentInOther(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

@@ -51,7 +51,17 @@ MAX_CHUNK_CHARS = 4000
 
 
 def parseMajorNum(title: str) -> int | None:
-    """section_title에서 대분류 로마 숫자 추출."""
+    """section_title에서 대분류 로마 숫자 추출.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseMajorNum(...)
+    """
     m = re.match(r"^([IVXivx]+)\.\s", title.strip())
     if m:
         return ROMAN_MAP.get(m.group(1).upper())
@@ -59,7 +69,17 @@ def parseMajorNum(title: str) -> int | None:
 
 
 def parseSubNum(title: str) -> int | None:
-    """section_title에서 소분류 아라비아 숫자 추출."""
+    """section_title에서 소분류 아라비아 숫자 추출.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseSubNum(...)
+    """
     m = re.match(r"^(\d+)\.\s", title.strip())
     if m:
         return int(m.group(1))
@@ -67,7 +87,17 @@ def parseSubNum(title: str) -> int | None:
 
 
 def splitByHeadings(text: str) -> list[tuple[str, str]]:
-    """가/나/다 단위로 텍스트 분할."""
+    """가/나/다 단위로 텍스트 분할.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitByHeadings(...)
+    """
     lines = text.split("\n")
     segments: list[tuple[str, str]] = []
     currentHeading = ""
@@ -94,6 +124,12 @@ def separateTableAndText(content: str) -> tuple[str, list[str], int]:
 
     Returns:
         (textOnly, tableHeaders, tableRowCount)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> separateTableAndText(...)
     """
     lines = content.split("\n")
     textLines: list[str] = []
@@ -228,7 +264,20 @@ def chunkSection(
     majorTitle: str,
     subTitle: str,
 ) -> list[SectionChunk]:
-    """단일 섹션을 청크로 분할."""
+    """단일 섹션을 청크로 분할.
+
+    Args:
+        content: 인자.
+        majorNum: 인자.
+        majorTitle: 인자.
+        subTitle: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chunkSection(...)
+    """
     if not content or not content.strip():
         return []
 
@@ -316,6 +365,12 @@ def chunkRows(rows: list[dict], contentCol: str) -> list[SectionChunk]:
     Args:
         rows: selectReport 결과의 dict 목록 (section_title, section_content 포함)
         contentCol: content 컬럼명
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chunkRows(...)
     """
     majorSections: dict[int, dict] = {}
     currentMajorNum: int | None = None

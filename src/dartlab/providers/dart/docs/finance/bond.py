@@ -53,6 +53,12 @@ def parseBondTable(content: str) -> list[dict]:
         list[dict] - 각 dict는 BondIssuance 필드와 동일:
             issuer, bondType, method, issueDate, amount,
             interestRate, rating, maturityDate, redeemed, underwriter
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseBondTable(...)
     """
     lines = content.split("\n")
     results = []
@@ -119,6 +125,12 @@ def bond(stockCode: str) -> BondResult | None:
 
     Returns:
         BondResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> bond(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

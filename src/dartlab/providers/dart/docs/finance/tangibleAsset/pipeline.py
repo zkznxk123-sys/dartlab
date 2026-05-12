@@ -17,6 +17,12 @@ def tangibleAsset(stockCode: str) -> TangibleAssetResult | None:
 
     Returns:
         TangibleAssetResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> tangibleAsset(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

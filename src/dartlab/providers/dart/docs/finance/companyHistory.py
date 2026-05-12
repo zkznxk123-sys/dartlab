@@ -29,7 +29,17 @@ class CompanyHistoryResult:
 
 
 def splitCells(line: str) -> list[str]:
-    """파이프 구분자로 셀 분리."""
+    """파이프 구분자로 셀 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -39,13 +49,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행 여부 확인."""
+    """구분선 행 여부 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseHistory(content: str) -> list[dict]:
-    """연혁 테이블 파싱."""
+    """연혁 테이블 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseHistory(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -87,7 +117,17 @@ def parseHistory(content: str) -> list[dict]:
 
 
 def companyHistory(stockCode: str) -> CompanyHistoryResult | None:
-    """회사의 연혁 분석."""
+    """회사의 연혁 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> companyHistory(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

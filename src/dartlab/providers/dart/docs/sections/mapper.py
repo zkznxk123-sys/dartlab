@@ -271,7 +271,17 @@ def _mappingPath() -> Path:
 
 
 def stripSectionPrefix(title: str) -> str:
-    """섹션 제목에서 번호/기호 접두사를 제거한다."""
+    """섹션 제목에서 번호/기호 접두사를 제거한다.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> stripSectionPrefix(...)
+    """
     return _LEAF_PREFIX_RE.sub("", title.strip())
 
 
@@ -281,6 +291,15 @@ def normalizeSectionTitle(title: str) -> str:
 
     O(n²) 섹션 파이프라인 (mapSectionTitle 루프) 에서 중복 호출 다발 — lru_cache
     로 normalize 연산 (5 regex + 2 replace) 캐싱.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeSectionTitle(...)
     """
     text = stripSectionPrefix(title)
     text = _INDUSTRY_PREFIX_RE.sub("", text)
@@ -300,6 +319,15 @@ def loadSectionMappings() -> dict[str, str]:
     과거 사고 (2026-04-19) 계열: wheel 에 sectionMappings.json 이 누락되면
     silent `{}` → `mapSectionTitle` 이 모든 제목을 매핑 실패로 처리 → section
     분류 붕괴. silent 대신 loud-fail.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadSectionMappings(...)
     """
     path = _mappingPath()
     if not path.exists():
@@ -320,6 +348,15 @@ def mapSectionTitle(title: str) -> str:
     """섹션 제목을 canonical topic 이름으로 매핑한다.
 
     O(n²) 파이프라인 hotpath — 같은 title 반복 조회가 많아 lru_cache.
+
+    Args:
+        title: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> mapSectionTitle(...)
     """
     normalized = normalizeSectionTitle(title)
     mapped = loadSectionMappings().get(normalized)
@@ -356,6 +393,12 @@ def measureMappingRate(titles: list[str]) -> dict:
 
     Returns:
         {"total": N, "mapped": M, "rate": float, "unmapped_top": [...]}
+
+    Raises:
+        없음.
+
+    Example:
+        >>> measureMappingRate(...)
     """
     total = len(titles)
     unmapped: dict[str, int] = {}

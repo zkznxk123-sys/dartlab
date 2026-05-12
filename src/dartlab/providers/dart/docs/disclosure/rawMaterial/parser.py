@@ -6,7 +6,17 @@ from dartlab.core.tableParser import parseAmount
 
 
 def splitCells(line: str) -> list[str]:
-    """파이프로 분리, 빈 셀 유지."""
+    """파이프로 분리, 빈 셀 유지.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     parts = line.strip().split("|")
     if parts and parts[0].strip() == "":
         parts = parts[1:]
@@ -73,6 +83,12 @@ def parseRawMaterials(content: str) -> list[dict] | None:
 
     Returns:
         [{segment, item, usage, amount, ratio, supplier}] 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseRawMaterials(...)
     """
     lines = content.split("\n")
     inTable = False
@@ -323,7 +339,18 @@ def parseRawMaterials(content: str) -> list[dict] | None:
                     shift = 1
 
                 def si(idx: int | None, s: int = shift) -> int | None:
-                    """si — TODO 한국어 동작 설명."""
+                    """si — TODO 한국어 동작 설명.
+
+                    Args:
+                        idx: 인자.
+                        s: 인자.
+
+                    Raises:
+                        없음.
+
+                    Example:
+                        >>> si(...)
+                    """
                     return idx - s if idx is not None and idx - s >= 0 else None
 
                 if si(itemIdx) is not None and si(itemIdx) < len(cells):
@@ -440,6 +467,12 @@ def parseEquipment(content: str) -> dict | None:
 
     Returns:
         {land, buildings, machinery, ..., total, depreciation, capex} 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseEquipment(...)
     """
     lines = content.split("\n")
     inTable = False
@@ -547,6 +580,12 @@ def parseCapex(content: str) -> list[dict] | None:
 
     Returns:
         [{segment, amount}] 또는 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseCapex(...)
     """
     lines = content.split("\n")
     inSection = False

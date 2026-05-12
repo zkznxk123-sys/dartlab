@@ -46,7 +46,17 @@ class SalesOrderResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -56,13 +66,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환. △는 음수."""
+    """숫자 문자열을 정수로 변환. △는 음수.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip()
@@ -88,7 +118,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def detectUnit(content: str) -> str:
-    """단위 감지."""
+    """단위 감지.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectUnit(...)
+    """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
         return m.group(1)
@@ -154,6 +194,9 @@ def parseSalesTable(content: str) -> tuple[list[dict], list[str]]:
     Returns:
         (rows, valueHeaders) 튜플.
         valueHeaders는 값 컬럼의 헤더명 목록 (예: ["제47기", "제46기"]).
+
+    Raises:
+        없음.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -225,6 +268,12 @@ def parseOrderBacklog(content: str) -> tuple[list[dict], list[str]]:
 
     Returns:
         (rows, valueHeaders) 튜플.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseOrderBacklog(...)
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -308,7 +357,17 @@ def _buildDf(rows: list[dict], headers: list[str] | None = None) -> pl.DataFrame
 
 
 def salesOrder(stockCode: str) -> SalesOrderResult | None:
-    """매출 및 수주상황 분석."""
+    """매출 및 수주상황 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> salesOrder(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

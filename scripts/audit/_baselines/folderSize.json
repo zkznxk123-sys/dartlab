@@ -13,6 +13,7 @@
     "src/dartlab/providers/dart/finance/sceMapper.py",
     "src/dartlab/providers/dart/openapi/batch.py",
     "src/dartlab/providers/dart/openapi/dart.py",
+    "src/dartlab/providers/dart/search/ngramIndex.py",
     "src/dartlab/providers/edgar/company.py",
     "src/dartlab/providers/edgar/docs/fetch.py",
     "src/dartlab/providers/edgar/finance/pivot.py",

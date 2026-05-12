@@ -34,7 +34,17 @@ class AuditSystemResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """파이프(|)로 구분된 셀을 분리."""
+    """파이프(|)로 구분된 셀을 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -44,13 +54,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행인지 확인."""
+    """구분선 행인지 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAuditCommittee(content: str) -> list[dict]:
-    """감사위원회 위원 현황 파싱."""
+    """감사위원회 위원 현황 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAuditCommittee(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -93,7 +123,17 @@ def parseAuditCommittee(content: str) -> list[dict]:
 
 
 def parseAuditActivity(content: str) -> list[dict]:
-    """감사 활동 내역 파싱."""
+    """감사 활동 내역 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAuditActivity(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -136,7 +176,17 @@ def parseAuditActivity(content: str) -> list[dict]:
 
 # pipeline
 def auditSystem(stockCode: str) -> AuditSystemResult | None:
-    """감사제도에 관한 사항 분석."""
+    """감사제도에 관한 사항 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> auditSystem(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

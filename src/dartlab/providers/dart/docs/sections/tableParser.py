@@ -17,7 +17,17 @@ import polars as pl
 
 
 def splitSubtables(md: str) -> list[list[str]]:
-    """구분선 기준 서브테이블 분리."""
+    """구분선 기준 서브테이블 분리.
+
+    Args:
+        md: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitSubtables(...)
+    """
     tables: list[list[str]] = []
     current: list[str] = []
 
@@ -269,6 +279,16 @@ def buildTableDataFrame(
     """sections의 table 행 → 수평화된 DataFrame.
 
     구조 타입별로 다른 병합 전략 적용.
+
+    Args:
+        topicFrame: 인자.
+        periodCols: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildTableDataFrame(...)
     """
     if topicFrame.is_empty():
         return None

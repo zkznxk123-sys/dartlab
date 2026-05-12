@@ -17,7 +17,19 @@ def projectFreqRows(
     freqScope: str,
     includeMixed: bool = True,
 ) -> pl.DataFrame:
-    """sections DataFrame를 freq 기준으로 투영한다."""
+    """sections DataFrame를 freq 기준으로 투영한다.
+
+    Args:
+        df: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> projectFreqRows(...)
+    """
     if df.is_empty() or "freqScope" not in df.columns:
         return df
 
@@ -393,7 +405,20 @@ def semanticRegistry(
     freqScope: str = "all",
     includeMixed: bool = True,
 ) -> pl.DataFrame:
-    """textSemanticPathKey 기준 semantic registry를 만든다."""
+    """textSemanticPathKey 기준 semantic registry를 만든다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> semanticRegistry(...)
+    """
     if isEmptyDf(df):
         return _emptySemanticRegistryFrame()
 
@@ -478,7 +503,21 @@ def structureRegistry(
     includeMixed: bool = True,
     nodeType: str | None = None,
 ) -> pl.DataFrame:
-    """Comparable slot spine 기준 structure registry를 만든다."""
+    """Comparable slot spine 기준 structure registry를 만든다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+        nodeType: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> structureRegistry(...)
+    """
     if isEmptyDf(df):
         return _emptyStructureRegistryFrame()
 
@@ -584,7 +623,21 @@ def structureCollisions(
     includeMixed: bool = True,
     nodeType: str | None = None,
 ) -> pl.DataFrame:
-    """structureRegistry에서 경로 충돌이 발생한 항목만 필터링하여 반환한다."""
+    """structureRegistry에서 경로 충돌이 발생한 항목만 필터링하여 반환한다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+        nodeType: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> structureCollisions(...)
+    """
     registry = structureRegistry(
         df,
         topic=topic,
@@ -606,7 +659,21 @@ def structureEvents(
     changedOnly: bool = True,
     nodeType: str | None = None,
 ) -> pl.DataFrame:
-    """기간 간 텍스트 구조 변화 이벤트(추가/삭제/변경)를 감지하여 반환한다."""
+    """기간 간 텍스트 구조 변화 이벤트(추가/삭제/변경)를 감지하여 반환한다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+        changedOnly: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> structureEvents(...)
+    """
     if isEmptyDf(df):
         return _emptyStructureEventsFrame()
 
@@ -714,7 +781,21 @@ def structureSummary(
     includeMixed: bool = True,
     nodeType: str | None = None,
 ) -> pl.DataFrame:
-    """구조 레지스트리와 이벤트를 결합한 경로별 요약 DataFrame을 반환한다."""
+    """구조 레지스트리와 이벤트를 결합한 경로별 요약 DataFrame을 반환한다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+        nodeType: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> structureSummary(...)
+    """
     registry = structureRegistry(
         df,
         topic=topic,
@@ -805,7 +886,21 @@ def structureChanges(
     latestOnly: bool = True,
     changedOnly: bool = True,
 ) -> pl.DataFrame:
-    """구조 변경이 감지된 경로를 최신 기간 기준으로 필터링하여 반환한다."""
+    """구조 변경이 감지된 경로를 최신 기간 기준으로 필터링하여 반환한다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+        nodeType: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> structureChanges(...)
+    """
     summary = structureSummary(
         df,
         topic=topic,
@@ -861,7 +956,20 @@ def semanticCollisions(
     freqScope: str = "all",
     includeMixed: bool = True,
 ) -> pl.DataFrame:
-    """semantic registry에서 raw path 충돌 그룹만 반환한다."""
+    """semantic registry에서 raw path 충돌 그룹만 반환한다.
+
+    Args:
+        df: 인자.
+        topic: 인자.
+        freqScope: 인자.
+        includeMixed: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> semanticCollisions(...)
+    """
     registry = semanticRegistry(df, topic=topic, freqScope=freqScope, includeMixed=includeMixed)
     if registry.is_empty():
         return registry

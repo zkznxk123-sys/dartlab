@@ -32,7 +32,17 @@ class ShareholderMeetingResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """파이프(|)로 구분된 셀을 분리."""
+    """파이프(|)로 구분된 셀을 분리.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -42,13 +52,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """구분선 행인지 확인."""
+    """구분선 행인지 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseAmount(text: str) -> int | None:
-    """금액 문자열을 정수로 변환."""
+    """금액 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace(",", "").replace(" ", "")
@@ -62,7 +92,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def parseMeetingAgenda(content: str) -> list[dict]:
-    """주주총회 안건 파싱."""
+    """주주총회 안건 파싱.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseMeetingAgenda(...)
+    """
     lines = content.split("\n")
     results: list[dict] = []
     headerFound = False
@@ -119,7 +159,17 @@ def parseMeetingAgenda(content: str) -> list[dict]:
 
 # pipeline
 def shareholderMeeting(stockCode: str) -> ShareholderMeetingResult | None:
-    """주주총회 등에 관한 사항 분석."""
+    """주주총회 등에 관한 사항 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> shareholderMeeting(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

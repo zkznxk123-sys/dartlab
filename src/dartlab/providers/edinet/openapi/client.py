@@ -135,6 +135,9 @@ class EdinetClient:
 
         Example:
             >>> client.listDocuments("2026-05-01", docType="120", limit=50)
+
+        Raises:
+            없음.
         """
         params: dict[str, Any] = {
             "period": period,
@@ -168,6 +171,12 @@ class EdinetClient:
 
         Returns:
             저장된 ZIP 파일 경로.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> downloadDocument(...)
         """
         saveDir = Path(saveDir)
         saveDir.mkdir(parents=True, exist_ok=True)
@@ -194,6 +203,9 @@ class EdinetClient:
 
         Example:
             >>> client.listEdinetCodes(limit=100)
+
+        Raises:
+            없음.
         """
         resp = self._get(f"{BASE_URL}/edinetcode.json")
         data = resp.json()
@@ -222,6 +234,9 @@ class EdinetClient:
         Example:
             >>> for doc in client.iterDocuments("2026-05-01", limit=10):
             ...     print(doc["docID"])
+
+        Raises:
+            없음.
         """
         yield from self.listDocuments(period, docType=docType, limit=limit)
 
@@ -237,5 +252,8 @@ class EdinetClient:
         Example:
             >>> for ec in client.iterEdinetCodes(limit=100):
             ...     print(ec["edinetCode"])
+
+        Raises:
+            없음.
         """
         yield from self.listEdinetCodes(limit=limit)

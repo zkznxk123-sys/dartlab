@@ -64,6 +64,12 @@ def parseShareCapitalTable(content: str, *, includePreferred: bool = False) -> d
         includePreferred=True일 때 추가: preferredOutstanding, preferredTreasury,
             preferredFloating, preferredIssued
         또는 발행주식 총수를 추출할 수 없으면 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseShareCapitalTable(...)
     """
     lines = content.split("\n")
     result: dict = {}
@@ -128,6 +134,12 @@ def shareCapital(stockCode: str) -> ShareCapitalResult | None:
 
     Returns:
         ShareCapitalResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> shareCapital(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
@@ -239,6 +251,9 @@ def buildSharesOutstandingScan(
     Raises:
         FileNotFoundError: docs 디렉토리/parquet 부재.
         RuntimeError: 추출 결과 0 건.
+
+    Example:
+        >>> buildSharesOutstandingScan(...)
     """
     import logging
     from pathlib import Path

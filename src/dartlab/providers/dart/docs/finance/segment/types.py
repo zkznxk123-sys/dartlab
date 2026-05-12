@@ -24,6 +24,15 @@ class SegmentTable:
         """테이블 → DataFrame (행=항목명, 열=부문/지역/제품).
 
         중복 컬럼명(연결/개별 반복) 처리: 접미사(_2, _3...) 부여.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toDataFrame(...)
         """
         import polars as pl
 
@@ -69,7 +78,17 @@ class SegmentsResult:
     revenue: pl.DataFrame | None = None
 
     def latestTable(self, tableType: str = "segment") -> SegmentTable | None:
-        """최신 연도의 당기 aligned 테이블 반환."""
+        """최신 연도의 당기 aligned 테이블 반환.
+
+        Args:
+            tableType: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> latestTable(...)
+        """
         if self.tables is None:
             return None
         for year in sorted(self.tables.keys(), reverse=True):

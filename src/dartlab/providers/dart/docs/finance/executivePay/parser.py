@@ -31,7 +31,17 @@ def _parseFloat(text: str) -> float | None:
 
 
 def extractTableBlocks(content: str) -> list[list[str]]:
-    """content에서 연속된 파이프라인 블록 추출."""
+    """content에서 연속된 파이프라인 블록 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
+    """
     lines = content.split("\n")
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -51,6 +61,12 @@ def classifyBlock(block: list[str]) -> str:
     """테이블 블록 분류.
 
     Returns: "payByType" | "payIndividual" | "other"
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyBlock(...)
     """
     allText = ""
     for line in block[:6]:
@@ -79,6 +95,12 @@ def parsePayByTypeBlock(block: list[str]) -> list[dict]:
     """유형별 보수 테이블 파싱.
 
     Returns: [{"category": str, "headcount": int, "totalPay": float, "avgPay": float}]
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parsePayByTypeBlock(...)
     """
     rows = []
     for line in block:
@@ -186,6 +208,12 @@ def parsePayIndividualBlock(block: list[str]) -> list[dict]:
     """5억 초과 개인별 보수 테이블 파싱.
 
     Returns: [{"name": str, "position": str, "totalPay": float}]
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parsePayIndividualBlock(...)
     """
     rows = []
     for line in block:

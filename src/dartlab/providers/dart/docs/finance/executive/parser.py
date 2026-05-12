@@ -39,7 +39,17 @@ def _parseFloat(text: str) -> float | None:
 
 
 def extractTableBlocks(content: str) -> list[list[str]]:
-    """content에서 연속된 파이프라인 블록 추출."""
+    """content에서 연속된 파이프라인 블록 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
+    """
     lines = content.split("\n")
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -59,6 +69,12 @@ def classifyBlock(block: list[str]) -> str:
     """테이블 블록 분류.
 
     Returns: "executive" | "unregisteredPay" | "other"
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyBlock(...)
     """
     allText = ""
     for line in block[:8]:
@@ -112,6 +128,12 @@ def parseExecutiveBlock(block: list[str]) -> list[dict]:
 
     Returns:
         [{name, gender, position, registrationType, fullTime, responsibility, isCeo}]
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseExecutiveBlock(...)
     """
     rows = []
     for line in block:
@@ -216,7 +238,17 @@ def parseExecutiveBlock(block: list[str]) -> list[dict]:
 
 
 def aggregateExecutives(executives: list[dict]) -> dict:
-    """임원 리스트에서 집계 통계 생성."""
+    """임원 리스트에서 집계 통계 생성.
+
+    Args:
+        executives: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> aggregateExecutives(...)
+    """
     total = len(executives)
     inside = sum(1 for e in executives if "사내" in e.get("registrationType", ""))
     outside = sum(1 for e in executives if "사외" in e.get("registrationType", ""))
@@ -254,6 +286,12 @@ def parseUnregisteredPayBlock(block: list[str]) -> dict | None:
             "totalSalary": float,      # 백만원
             "avgSalary": float,        # 백만원
         }
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseUnregisteredPayBlock(...)
     """
     rows = []
     for line in block:

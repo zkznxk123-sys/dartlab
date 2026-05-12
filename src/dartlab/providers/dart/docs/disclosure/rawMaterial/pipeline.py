@@ -77,6 +77,12 @@ def rawMaterial(stockCode: str) -> RawMaterialResult | None:
 
     Returns:
         RawMaterialResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rawMaterial(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

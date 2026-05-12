@@ -4,7 +4,17 @@ import re
 
 
 def parseAmount(text: str) -> int | None:
-    """숫자 문자열을 정수로 변환."""
+    """숫자 문자열을 정수로 변환.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount(...)
+    """
     if not text or not isinstance(text, str):
         return None
     text = text.strip().replace(",", "").replace(" ", "")
@@ -28,7 +38,17 @@ def parseAmount(text: str) -> int | None:
 
 
 def extractTableBlocks(content: str) -> list[list[str]]:
-    """content에서 |(pipe) 구분 테이블 블록들 추출."""
+    """content에서 |(pipe) 구분 테이블 블록들 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTableBlocks(...)
+    """
     lines = content.split("\n")
     blocks: list[list[str]] = []
     current: list[str] = []
@@ -46,7 +66,17 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
 
 def splitCells(line: str) -> list[str]:
-    """파이프 라인을 셀 리스트로 분할."""
+    """파이프 라인을 셀 리스트로 분할.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -56,7 +86,17 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """--- 구분선 행인지 확인."""
+    """--- 구분선 행인지 확인.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
@@ -75,6 +115,12 @@ def parseCapitalChangeTable(block: list[str]) -> dict | None:
             "common": {"발행주식총수": [v1, ...], "액면금액": [...], "자본금": [...]},
             "preferred": {"발행주식총수": [...], ...},
         }
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseCapitalChangeTable(...)
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 4:
@@ -179,6 +225,12 @@ def parseShareTotalTable(block: list[str]) -> dict | None:
             "reducedShares": {"common": int, "preferred": int, "total": int},
             "outstandingShares": {"common": int, "preferred": int, "total": int},
         }
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseShareTotalTable(...)
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 5:
@@ -268,6 +320,12 @@ def parseTreasuryStockTable(block: list[str]) -> dict | None:
             "totalBegin": int,
             "totalEnd": int,
         }
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTreasuryStockTable(...)
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 5:

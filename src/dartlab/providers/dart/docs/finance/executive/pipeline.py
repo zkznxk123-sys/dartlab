@@ -31,6 +31,12 @@ def executive(stockCode: str) -> ExecutiveResult | None:
 
     Returns:
         ExecutiveResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> executive(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

@@ -4,7 +4,17 @@ import re
 
 
 def parseTableRows(text: str) -> list[list[str]]:
-    """마크다운 테이블 행 추출. XBRL 패딩 제거."""
+    """마크다운 테이블 행 추출. XBRL 패딩 제거.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTableRows(...)
+    """
     rows = []
     for line in text.split("\n"):
         s = line.strip()

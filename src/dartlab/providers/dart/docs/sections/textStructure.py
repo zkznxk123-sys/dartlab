@@ -216,14 +216,34 @@ def parseTextStructureWithState(
     topic: str | None = None,
     initialHeadings: list[dict[str, Any]] | None = None,
 ) -> tuple[list[dict[str, object]], list[dict[str, Any]]]:
-    """텍스트를 소제목 계층 구조로 파싱하고, 최종 heading stack도 함께 반환한다."""
+    """텍스트를 소제목 계층 구조로 파싱하고, 최종 heading stack도 함께 반환한다.
+
+    Args:
+        text: 인자.
+        sourceBlockOrder: 인자.
+        topic: 인자.
+        initialHeadings: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTextStructureWithState(...)
+    """
     nodes: list[dict[str, object]] = []
     stack: list[dict[str, object]] = [dict(item) for item in (initialHeadings or [])]
     bodyLines: list[str] = []
     segmentOrder = 0
 
     def flushBody() -> None:
-        """flushBody — TODO 한국어 동작 설명."""
+        """flushBody — TODO 한국어 동작 설명.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> flushBody(...)
+        """
         nonlocal bodyLines, segmentOrder
         body = "\n".join(bodyLines).strip()
         bodyLines = []
@@ -339,7 +359,19 @@ def parseTextStructure(
     sourceBlockOrder: int,
     topic: str | None = None,
 ) -> list[dict[str, object]]:
-    """텍스트를 소제목 계층 구조로 파싱하여 노드 리스트를 반환한다."""
+    """텍스트를 소제목 계층 구조로 파싱하여 노드 리스트를 반환한다.
+
+    Args:
+        text: 인자.
+        sourceBlockOrder: 인자.
+        topic: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTextStructure(...)
+    """
     nodes, _stack = parseTextStructureWithState(text, sourceBlockOrder=sourceBlockOrder, topic=topic)
     return nodes
 

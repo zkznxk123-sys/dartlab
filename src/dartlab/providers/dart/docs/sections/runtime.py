@@ -37,17 +37,47 @@ _DETAIL_TOPIC_KEYWORDS = {k: tuple(v) for k, v in _SEC.get("detailTopicKeywords"
 
 
 def chapterFromMajorNum(majorNum: int) -> str | None:
-    """정수 장번호를 로마숫자 chapter 문자열로 변환한다."""
+    """정수 장번호를 로마숫자 chapter 문자열로 변환한다.
+
+    Args:
+        majorNum: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chapterFromMajorNum(...)
+    """
     return _CHAPTER_BY_MAJOR.get(majorNum)
 
 
 def baseChunkPath(path: str) -> str:
-    """chunk path에서 분할 접미사를 제거하여 기본 경로를 반환한다."""
+    """chunk path에서 분할 접미사를 제거하여 기본 경로를 반환한다.
+
+    Args:
+        path: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> baseChunkPath(...)
+    """
     return RE_SPLIT_SUFFIX.sub("", path)
 
 
 def chapterTeacherTopics(rows: list[dict[str, object]]) -> dict[str, set[str]]:
-    """chapter별로 등장하는 topic 집합을 수집한다."""
+    """chapter별로 등장하는 topic 집합을 수집한다.
+
+    Args:
+        rows: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chapterTeacherTopics(...)
+    """
     teacher: dict[str, set[str]] = {}
     for row in rows:
         chapter = row["chapter"]
@@ -59,7 +89,17 @@ def chapterTeacherTopics(rows: list[dict[str, object]]) -> dict[str, set[str]]:
 
 
 def projectionSuppressedTopics() -> dict[str, set[str]]:
-    """projection 규칙에 의해 억제되는 chapter별 topic 집합을 반환한다."""
+    """projection 규칙에 의해 억제되는 chapter별 topic 집합을 반환한다.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> projectionSuppressedTopics(...)
+    """
     rules = loadProjectionRules("chapterII")
     suppressed = set(rules.keys())
     suppressed.add(_CHAPTER_II_SPLIT_SOURCE)
@@ -67,7 +107,17 @@ def projectionSuppressedTopics() -> dict[str, set[str]]:
 
 
 def splitByMajorHeading(text: str) -> list[tuple[str, str]]:
-    """텍스트를 '가. 나. 다.' 등 주요 heading 기준으로 (label, body) 쌍으로 분리한다."""
+    """텍스트를 '가. 나. 다.' 등 주요 heading 기준으로 (label, body) 쌍으로 분리한다.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitByMajorHeading(...)
+    """
     lines = [line.rstrip() for line in text.splitlines()]
     segments: list[tuple[str, list[str]]] = []
     currentLabel = "(root)"
@@ -92,14 +142,36 @@ def splitByMajorHeading(text: str) -> list[tuple[str, str]]:
 
 
 def extractSemanticUnits(topic: str, text: str) -> list[tuple[str, str]]:
-    """부문/리스크 topic의 텍스트를 의미 단위 (label, body) 쌍으로 추출한다."""
+    """부문/리스크 topic의 텍스트를 의미 단위 (label, body) 쌍으로 추출한다.
+
+    Args:
+        topic: 인자.
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractSemanticUnits(...)
+    """
     if topic in {"segmentOverview", "segmentFinancialSummary", "riskDerivative"}:
         return splitByMajorHeading(text)
     return []
 
 
 def semanticTopicForLabel(topic: str, label: str) -> str | None:
-    """topic과 label 텍스트를 기반으로 세분화된 semantic topic을 판별한다."""
+    """topic과 label 텍스트를 기반으로 세분화된 semantic topic을 판별한다.
+
+    Args:
+        topic: 인자.
+        label: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> semanticTopicForLabel(...)
+    """
     if topic in _ATOMIC_SEMANTIC_TOPICS:
         return topic
     joined = f"{topic}\n{label}"
@@ -159,7 +231,20 @@ def _tableLeadCells(tableText: str) -> list[str]:
 
 
 def semanticTopicForBlock(topic: str, label: str, blockType: str, blockText: str) -> str | None:
-    """label과 블록 본문(테이블 셀 포함)을 종합하여 semantic topic을 판별한다."""
+    """label과 블록 본문(테이블 셀 포함)을 종합하여 semantic topic을 판별한다.
+
+    Args:
+        topic: 인자.
+        label: 인자.
+        blockType: 인자.
+        blockText: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> semanticTopicForBlock(...)
+    """
     direct = semanticTopicForLabel(topic, label)
     if direct:
         return direct
@@ -189,7 +274,17 @@ def semanticTopicForBlock(topic: str, label: str, blockType: str, blockText: str
 
 
 def detailTopicForTopic(topic: str) -> str | None:
-    """topic명이 부속명세서에 해당하면 detail topic을 반환한다."""
+    """topic명이 부속명세서에 해당하면 detail topic을 반환한다.
+
+    Args:
+        topic: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detailTopicForTopic(...)
+    """
     return _DETAIL_TOPIC_MAP.get(topic)
 
 
@@ -200,7 +295,21 @@ def detailTopicForBlock(
     blockType: str,
     blockText: str,
 ) -> str | None:
-    """topic/label/본문 키워드를 종합하여 부속명세서 detail topic을 판별한다."""
+    """topic/label/본문 키워드를 종합하여 부속명세서 detail topic을 판별한다.
+
+    Args:
+        topic: 인자.
+        sourceTopic: 인자.
+        label: 인자.
+        blockType: 인자.
+        blockText: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detailTopicForBlock(...)
+    """
     direct = detailTopicForTopic(topic)
     if direct:
         return direct
@@ -287,7 +396,18 @@ def applyProjections(
     rows: list[dict[str, object]],
     teacherTopics: dict[str, set[str]],
 ) -> list[dict[str, object]]:
-    """chapter II 합산 topic을 학습된 projection 규칙으로 개별 topic에 분배한다."""
+    """chapter II 합산 topic을 학습된 projection 규칙으로 개별 topic에 분배한다.
+
+    Args:
+        rows: 인자.
+        teacherTopics: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> applyProjections(...)
+    """
     if not rows:
         return rows
 

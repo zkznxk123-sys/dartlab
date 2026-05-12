@@ -20,6 +20,12 @@ def loadYearData(
     Args:
         df: 전체 DataFrame
         period: "y" | "q" | "h"
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadYearData(...)
     """
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
     yearData: dict[str, YearAccounts] = {}
@@ -76,6 +82,12 @@ def fsSummary(
 
     Returns:
         AnalysisResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> fsSummary(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

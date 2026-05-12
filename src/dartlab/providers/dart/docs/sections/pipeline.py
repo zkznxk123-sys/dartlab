@@ -101,7 +101,17 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
 
 
 def clearPreparedCache(stockCode: str | None = None) -> None:
-    """Phase 1 캐시 해제. stockCode=None이면 전체 해제."""
+    """Phase 1 캐시 해제. stockCode=None이면 전체 해제.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> clearPreparedCache(...)
+    """
     if stockCode is None:
         _preparedCache.clear()
     else:
@@ -241,6 +251,16 @@ def iterPeriodSubsets(
 
     loadData를 1회만 호출하고, pipeline/views 양쪽이 공유한다.
     sinceYear 이전 기간은 건너뛴다 (finance 없는 기간 제외).
+
+    Args:
+        stockCode: 인자.
+        sinceYear: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> iterPeriodSubsets(...)
     """
     df = loadData(stockCode, sinceYear=sinceYear, columns=_SECTIONS_REQUIRED_COLS)
     ccol = detectContentCol(df)
@@ -640,6 +660,12 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     Returns:
         (topic, blockType, blockOrder)(행) × period(열) DataFrame. 값은 텍스트(str).
         데이터 없으면 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sections(...)
     """
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}

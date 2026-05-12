@@ -28,6 +28,12 @@ def parseOverview(text: str) -> dict:
         - 추출된 필드 값 (founded, address, homepage, ...)
         - missing: list[str] — 원문에 해당 항목 자체가 없는 필드
         - failed: list[str] — 항목은 있지만 파싱 실패한 필드
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseOverview(...)
     """
     result: dict = {}
     missing: list[str] = []

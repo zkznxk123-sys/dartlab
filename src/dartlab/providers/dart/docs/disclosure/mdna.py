@@ -90,6 +90,9 @@ def classifySection(title: str) -> str:
     Example:
         >>> classifySection("1. 개요")
         'overview'
+
+    Raises:
+        없음.
     """
     for key, keywords in SECTION_ALIASES.items():
         for kw in keywords:
@@ -110,6 +113,9 @@ def parseMdna(content: str) -> dict[str, str]:
 
     Example:
         >>> parseMdna("1. 개요\\n...\\n2. 재무상태\\n...")
+
+    Raises:
+        없음.
     """
     lines = content.split("\n")
     sections: dict[str, str] = {}
@@ -141,7 +147,17 @@ def parseMdna(content: str) -> dict[str, str]:
 
 
 def extractOverview(sections: dict[str, str]) -> str | None:
-    """섹션 딕셔너리에서 개요 텍스트 추출."""
+    """섹션 딕셔너리에서 개요 텍스트 추출.
+
+    Args:
+        sections: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractOverview(...)
+    """
     for key, content in sections.items():
         if classifySection(key) == "overview":
             textLines = [l for l in content.split("\n") if l.strip() and not l.strip().startswith("|")]
@@ -161,6 +177,9 @@ def mdna(stockCode: str) -> MdnaResult | None:
 
     Example:
         >>> mdna("005930")  # 삼성전자
+
+    Raises:
+        없음.
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

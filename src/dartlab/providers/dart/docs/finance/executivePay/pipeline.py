@@ -34,6 +34,12 @@ def executivePay(stockCode: str) -> ExecutivePayResult | None:
 
     Returns:
         ExecutivePayResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> executivePay(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

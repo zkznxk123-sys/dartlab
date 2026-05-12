@@ -16,7 +16,17 @@ import polars as pl
 
 
 def extractCsvFromZip(zipPath: str | Path) -> dict[str, str]:
-    """ZIP 내 CSV 파일을 추출하여 {파일명: 내용} dict 반환."""
+    """ZIP 내 CSV 파일을 추출하여 {파일명: 내용} dict 반환.
+
+    Args:
+        zipPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractCsvFromZip(...)
+    """
     result: dict[str, str] = {}
     zipPath = Path(zipPath)
 
@@ -44,6 +54,16 @@ def buildFinanceParquet(csvContent: str, *, edinetCode: str = "") -> pl.DataFram
     - コンテキストID (context_id: 기간+연결/개별)
     - 値 (value: 숫자)
     - 単位 (unit: JPY 등)
+
+    Args:
+        csvContent: 인자.
+        edinetCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildFinanceParquet(...)
     """
     reader = csv.DictReader(io.StringIO(csvContent))
     rows: list[dict] = []
@@ -94,6 +114,16 @@ def buildDocsParquet(csvContent: str, *, edinetCode: str = "") -> pl.DataFrame:
     """EDINET CSV(서술형) → Polars DataFrame.
 
     서술형 블록: 요소ID가 텍스트 타입인 행들.
+
+    Args:
+        csvContent: 인자.
+        edinetCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildDocsParquet(...)
     """
     reader = csv.DictReader(io.StringIO(csvContent))
     rows: list[dict] = []
@@ -139,7 +169,18 @@ def buildDocsParquet(csvContent: str, *, edinetCode: str = "") -> pl.DataFrame:
 
 
 def saveParquet(df: pl.DataFrame, outputPath: str | Path) -> Path:
-    """DataFrame을 parquet 파일로 저장."""
+    """DataFrame을 parquet 파일로 저장.
+
+    Args:
+        df: 인자.
+        outputPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> saveParquet(...)
+    """
     outputPath = Path(outputPath)
     outputPath.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(outputPath)

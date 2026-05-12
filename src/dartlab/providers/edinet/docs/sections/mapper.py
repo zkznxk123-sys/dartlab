@@ -67,6 +67,12 @@ def normalizeSectionTitle(title: str) -> str:
 
     Returns:
         정규화된 title.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeSectionTitle(...)
     """
     if not title:
         return ""
@@ -102,6 +108,12 @@ def mapSectionTitle(title: str) -> str | None:
 
     Returns:
         topicId (camelCase) 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> mapSectionTitle(...)
     """
     mappings = _loadMappings()
 

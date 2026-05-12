@@ -47,7 +47,17 @@ class AffiliateGroupResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명."""
+    """splitCells — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> splitCells(...)
+    """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
         cells.pop(0)
@@ -57,13 +67,33 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명."""
+    """isSeparatorRow — TODO 한국어 동작 설명.
+
+    Args:
+        line: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isSeparatorRow(...)
+    """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
 
 
 def parseGroupSummary(content: str) -> dict | None:
-    """요약 테이블에서 그룹명, 상장수, 비상장수 추출."""
+    """요약 테이블에서 그룹명, 상장수, 비상장수 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseGroupSummary(...)
+    """
     lines = content.split("\n")
 
     skipNames = {"상장", "비상장", "계", "상장여부", "기업집단의 명칭", "---"}
@@ -109,7 +139,17 @@ def _isCompanyName(text: str) -> bool:
 
 
 def parseAffiliateList(content: str) -> list[dict]:
-    """상세표에서 국내 계열사 목록 추출."""
+    """상세표에서 국내 계열사 목록 추출.
+
+    Args:
+        content: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAffiliateList(...)
+    """
     # 해외 섹션 이전까지만 사용
     cutoff = len(content)
     for marker in ["해외계열회사", "해외 계열회사", "나. 해외", "2) 해외법인", "2) 해외"]:
@@ -156,7 +196,17 @@ def parseAffiliateList(content: str) -> list[dict]:
 
 # pipeline
 def affiliateGroup(stockCode: str) -> AffiliateGroupResult | None:
-    """계열회사 현황 분석."""
+    """계열회사 현황 분석.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> affiliateGroup(...)
+    """
     try:
         df = loadData(stockCode)
     except FileNotFoundError:

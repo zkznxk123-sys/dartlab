@@ -34,6 +34,15 @@ def parseTenure(text: str) -> float | None:
     """평균근속연수 문자열 -> float (년 단위).
 
     지원 포맷: "13.0", "3년9개월", "12년 10개월", "6개월", "20"
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTenure(...)
     """
     if not text or text.strip() in ("", "-"):
         return None
@@ -82,6 +91,12 @@ def parseEmployeeTable(content: str) -> dict:
     Returns:
         dict with keys: totalEmployees, avgTenure, totalSalary, avgSalary.
         파싱 실패 시 빈 dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseEmployeeTable(...)
     """
     lines = content.split("\n")
 
@@ -150,6 +165,12 @@ def employee(stockCode: str) -> EmployeeResult | None:
 
     Returns:
         EmployeeResult 또는 데이터 부족 시 None
+
+    Raises:
+        없음.
+
+    Example:
+        >>> employee(...)
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

@@ -13,7 +13,17 @@ _QUARTER_ORDER = {"Q1": 1, "Q2": 2, "Q3": 3, "Q4": 4}
 
 
 def periodToIndex(key: str) -> int:
-    """period key → 정렬용 인덱스. "2024" → 2024*4+4, "2024Q1" → 2024*4+1."""
+    """period key → 정렬용 인덱스. "2024" → 2024*4+4, "2024Q1" → 2024*4+1.
+
+    Args:
+        key: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> periodToIndex(...)
+    """
     m = re.match(r"^(\d{4})(Q[1-4])?$", key)
     if not m:
         return 0
@@ -35,7 +45,18 @@ def _periodGap(cur: str, prev: str) -> int:
 
 
 def nameSimilarity(a: str, b: str) -> float:
-    """두 항목의 유사도 (0~1). 공통 문자 비율 기반."""
+    """두 항목의 유사도 (0~1). 공통 문자 비율 기반.
+
+    Args:
+        a: 인자.
+        b: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> nameSimilarity(...)
+    """
     a = a.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
     b = b.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
     if a == b:
@@ -52,7 +73,20 @@ def numberBridgeMatch(
     curYear: str = "",
     prevYear: str = "",
 ) -> BridgeResult:
-    """숫자 브릿지 매칭. 4단계: 정확→재작성→명칭변경→특수항목."""
+    """숫자 브릿지 매칭. 4단계: 정확→재작성→명칭변경→특수항목.
+
+    Args:
+        accCur: 인자.
+        accPrev: 인자.
+        curYear: 인자.
+        prevYear: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> numberBridgeMatch(...)
+    """
     matched = 0
     total = 0
     usedPrev: set[str] = set()
