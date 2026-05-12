@@ -132,6 +132,12 @@ async def fetchPrice(
 ) -> PriceSnapshot | None:
     """네이버 글로벌 → 현재가 스냅샷.
 
+    Capabilities: US/Global Naver api.stock.naver.com → PriceSnapshot.
+    AIContext: US gather.price fallback chain — Yahoo 첫 시도, naverGlobal 보조.
+    Guide: 한국어 라벨로 표시되는 글로벌 종목 (한국 사용자 친화).
+    When: Yahoo 실패 시 fallback / Naver 사용자 표시 형식 선호 시.
+    How: api.stock.naver.com integration JSON → PriceSnapshot.
+
     Parameters
     ----------
     stock_code : str
@@ -230,6 +236,12 @@ async def fetchHistory(
     **kwargs,
 ) -> list[dict]:
     """네이버 글로벌 → OHLCV 히스토리.
+
+    Capabilities: US/Global Naver chart API → 일/주/월 OHLCV list[dict].
+    AIContext: US gather.history fallback (FMP 보조 + 한국 사용자 표시).
+    Guide: chart API 110개 하드 제한 — 기간 따라 dayCandle/weekCandle/monthCandle 자동.
+    When: US 종목의 한국어 라벨 OHLCV 필요 시.
+    How: api.stock.naver.com chart → periodType 자동 선택 → list[dict].
 
     네이버 글로벌 chart API는 periodType별 110개 하드 제한.
     요청 기간에 따라 자동 선택:

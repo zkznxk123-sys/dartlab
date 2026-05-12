@@ -130,6 +130,12 @@ async def fetchPrice(
 ) -> PriceSnapshot | None:
     """네이버 -> 현재가 + PER/PBR + 52주 범위 + 시총 (KR 전용).
 
+    Capabilities: KR Naver M-Stock API fetch + PriceSnapshot 변환.
+    AIContext: gather.price KR primary source — 가장 풍부한 단건 스냅샷.
+    Guide: KR 종목코드 (6자리 숫자) 만. 외 티커는 None.
+    When: gather("price", stockCode, market="KR") 진입 시 첫 시도.
+    How: m.stock.naver.com integration JSON → PriceSnapshot 매핑.
+
     KR 종목코드(6자리 숫자)가 아니면 None 반환 — naver KR API에 잘못된
     티커를 보내 409 에러가 나는 것을 차단.
 
@@ -238,6 +244,12 @@ async def fetchFlow(
     limit: int | None = None,
 ) -> list[dict] | None:
     """네이버 → 외국인/기관 수급 시계열.
+
+    Capabilities: KR Naver 일별 외국인/기관/개인 순매수 fetch + 표준 dict 변환.
+    AIContext: gather.flow KR 의 backend — sources/flow.fetch 호출자.
+    Guide: KR 종목만. 외 시장은 빈 list. 최근일 우선 (latest first).
+    When: gather("flow", stockCode) 진입 시 fallback chain 첫 시도.
+    How: m.stock.naver.com 일별 deal trend JSON → list[dict].
 
     Parameters
     ----------
@@ -354,6 +366,12 @@ async def fetchRevenueConsensus(
 ) -> list[RevenueConsensus]:
     """네이버 → 연간 매출/영업이익/순이익 컨센서스.
 
+    Capabilities: KR Naver finance/annual API → 연간 재무 컨센서스 list.
+    AIContext: 분석 엔진 (analysis/credit) 의 forward 추정 라인 진입.
+    Guide: isConsensus='Y' 기간만. 일반 history 와 분리.
+    When: gather.revenueConsensus 류 호출 (사용 빈도 낮음) 시.
+    How: finance/annual JSON → list[RevenueConsensus].
+
     finance/annual API에서 isConsensus='Y'인 기간의 재무 추정치를 추출한다.
     실적 확정 기간(isConsensus='N')도 함께 반환하여 시계열 비교 가능.
 
@@ -465,6 +483,12 @@ async def fetchSectorPer(
 ) -> float | None:
     """네이버 → 동종업종 PER.
 
+    Capabilities: KR Naver finance/sector API → 동종업종 평균 PER 단건 float.
+    AIContext: peer-relative valuation 분석 baseline — relativeValuation 진입.
+    Guide: 단건 float 반환 — limit 무시.
+    When: 종목의 동종업종 평균 PER 비교 시.
+    How: finance/sector JSON parse → sector PER float.
+
     Parameters
     ----------
     stock_code : str
@@ -520,6 +544,12 @@ async def fetchAll(
     limit: int | None = None,
 ) -> GatherResult:
     """네이버에서 가져올 수 있는 모든 데이터를 수집.
+
+    Capabilities: 한 종목코드 fetch 1 회로 GatherResult (price + flow + ...) 일괄.
+    AIContext: collect mixin 의 KR 도메인 fan-out 진입.
+    Guide: 부분 결과 가능 — 일부 axis 실패는 다른 axis 결과로 진행.
+    When: gather.collect mixin 호출 시 KR 도메인 진입.
+    How: fetchPrice/fetchFlow 등 병렬 호출 → GatherResult 통합.
 
     Parameters
     ----------
@@ -577,6 +607,12 @@ async def fetchIntraday(
     **_: object,
 ) -> list[dict]:
     """네이버 → 당일 1분봉 OHLCV.
+
+    Capabilities: KR Naver api.stock.naver.com 1분봉 list[dict].
+    AIContext: intraday 분석 (gap/spike 분 단위) 의 raw 원천.
+    Guide: 당일 한정. 과거일 1분봉은 별도 source (daily 만).
+    When: intraday 가격 변동 분석 시.
+    How: api.stock.naver.com intraday JSON → list[dict].
 
     api.stock.naver.com 엔드포인트. minuteType/count 파라미터는 서버가 무시하므로
     당일분 전체가 한 번에 온다. 5/15/30/60분봉은 이 결과를 Polars로 리샘플하여 얻는다.
@@ -666,6 +702,12 @@ async def fetchHistory(
     limit: int | None = None,
 ) -> list[dict]:
     """네이버 차트 API — 한번에 6000일 수정주가 OHLCV (FDR 방식).
+
+    Capabilities: KR Naver fchart 6000일 수정주가 일별 OHLCV bulk fetch.
+    AIContext: gather.history KR primary backend — backtest/timeseries 진입.
+    Guide: 단일 호출로 6000일 수정주가. fchart 의 adjustment 표준.
+    When: KR 종목의 장기 일별 OHLCV 필요 시 (백테스트, 추세 분석).
+    How: fchart.stock.naver.com sise.nhn → text parse → list[dict].
 
     Parameters
     ----------

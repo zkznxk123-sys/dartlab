@@ -70,6 +70,12 @@ async def fetchPrice(
 ) -> PriceSnapshot | None:
     """Yahoo v8 Chart API → 현재가 스냅샷.
 
+    Capabilities: US Yahoo v8 chart API → PriceSnapshot (5일 chunk → latest).
+    AIContext: US gather.price primary source — chain 첫 시도.
+    Guide: 무인증 v8 — rate limit 10rpm. crumb 불필요.
+    When: gather("price", ticker, market="US") 진입 시 chain 우선순위 최상.
+    How: query2.finance.yahoo.com/v8/chart 최근 5일 → regularMarketPrice.
+
     최근 5거래일 데이터를 요청하여 최신 regularMarketPrice를 추출한다.
     429 rate limit 시 http.py가 자동 재시도하며, 3회 실패 시 None 반환 →
     fallback 체인에서 naver_global이 이어받는다.
@@ -166,6 +172,12 @@ async def fetchHistory(
     **kwargs,
 ) -> list[dict]:
     """Yahoo v8 Chart API → OHLCV 히스토리 (수정주가).
+
+    Capabilities: US Yahoo v8 chart 일별 OHLCV + adjclose list[dict].
+    AIContext: US gather.history primary source — chain 첫 시도.
+    Guide: adjclose 우선 (수정주가). 429 시 http.py 백오프 재시도.
+    When: US 종목 장기 OHLCV 필요 시.
+    How: query2.finance.yahoo.com/v8/chart period1/period2 → list[dict].
 
     일봉 기준 최대 ~10년 데이터 수집 가능. adjclose(수정주가) 우선 사용.
     429 rate limit 시 http.py가 지수 백오프 재시도 (최대 3회).

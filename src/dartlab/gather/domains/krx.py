@@ -30,6 +30,12 @@ async def fetchSectorInfo(
 ) -> SectorInfo | None:
     """종목의 업종 분류 조회 -- KIND + Naver 조합.
 
+    Capabilities: KIND industry + Naver sector PER 조합 → SectorInfo.
+    AIContext: gather.sector KR backend — industry 분석의 진짜 진입점.
+    Guide: KIND fetch + Naver enrich 2 단계. KIND 없으면 None.
+    When: gather.sector KR 호출 시.
+    How: KIND industryName → industryCode 변환 + Naver PER 부가.
+
     Parameters
     ----------
     stockCode : str
@@ -102,6 +108,12 @@ async def fetchIndustryPeers(
 ) -> list[dict]:
     """업종 내 종목 목록 (시총 포함) -- Naver 업종 API.
 
+    Capabilities: industryCode 의 peer 종목 + 시총 list[dict].
+    AIContext: industryPeers mixin backend — peer valuation 비교 진입.
+    Guide: industryCode 정확 필요 (fetchSectorInfo 가 먼저).
+    When: 동종업종 peer ranking 분석 시.
+    How: finance.naver.com/sise/sise_group_detail → list[dict].
+
     Parameters
     ----------
     industryCode : str
@@ -168,6 +180,12 @@ async def fetchIndustryList(
     limit: int | None = None,
 ) -> list[dict]:
     """전체 업종 목록 조회 -- Naver.
+
+    Capabilities: KR 전체 업종 코드/이름/평균지표 list[dict].
+    AIContext: industry 분석 / sector rotation 의 universe 진입.
+    Guide: 호출 비용 큼 — caller 측 caching 권장.
+    When: 전체 업종 ranking / sector PER 분포 분석 시.
+    How: finance.naver.com/sise/sise_group → list[dict].
 
     Parameters
     ----------

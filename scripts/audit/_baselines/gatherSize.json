@@ -2,6 +2,7 @@
   "_note": "P-트랙 phase 통과마다 축소",
   "over_split": [],
   "under_split": [
-    "src/dartlab/gather/accessors.py"
+    "src/dartlab/gather/accessors.py",
+    "src/dartlab/gather/domains/naver.py"
   ]
 }

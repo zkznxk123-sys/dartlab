@@ -37,6 +37,12 @@ async def fetchPrice(
 ) -> PriceSnapshot | None:
     """현재가 — FMP /quote/{ticker}.
 
+    Capabilities: US FMP /quote/{ticker} fetch + PriceSnapshot 변환.
+    AIContext: US gather.price fallback chain — Yahoo 다음 single-shot.
+    Guide: FMP_API_KEY env 필요. 미설정 시 None.
+    When: Yahoo 실패 후 fallback / US 가격 보조 source.
+    How: financialmodelingprep.com /quote JSON → PriceSnapshot.
+
     Parameters
     ----------
     stock_code : str
@@ -132,6 +138,12 @@ async def fetchHistory(
 ) -> list[dict]:
     """히스토리 OHLCV — FMP /historical-price-full/{ticker}.
 
+    Capabilities: US FMP 일별 OHLCV history list[dict].
+    AIContext: US history fallback chain — Yahoo 실패 시 backup.
+    Guide: FMP_API_KEY env 필요. start/end YYYY-MM-DD.
+    When: Yahoo 실패 + US 일별 OHLCV 필요 시.
+    How: financialmodelingprep.com /historical-price-full → list[dict].
+
     Parameters
     ----------
     stock_code : str
@@ -220,6 +232,12 @@ async def fetchDividends(
 ) -> list[dict]:
     """배당 이력 — FMP /historical-price-full/stock_dividend.
 
+    Capabilities: US FMP 배당 이력 list[dict] (date, dividend).
+    AIContext: gather.dividends US backend — naverGlobal fallback.
+    Guide: FMP_API_KEY 필요. 미설정 시 빈 list.
+    When: US 종목 배당 이력 분석 시.
+    How: financialmodelingprep.com stock_dividend → list[dict].
+
     Parameters
     ----------
     stock_code : str
@@ -289,6 +307,12 @@ async def fetchSplits(
     limit: int | None = None,
 ) -> list[dict]:
     """분할 이력 — FMP /historical-price-full/stock_split.
+
+    Capabilities: US FMP 액면분할 이력 list[dict] (date, ratio).
+    AIContext: gather.splits US backend — naverGlobal fallback.
+    Guide: FMP_API_KEY 필요.
+    When: US 종목 분할 이력 / 보정 검증 시.
+    How: financialmodelingprep.com stock_split → list[dict].
 
     Parameters
     ----------

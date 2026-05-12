@@ -19,6 +19,12 @@ HISTORY_FALLBACK = ["fdr", "yahooChart", "naverGlobal", "fmp"]
 def getPriceFallback(market: str = "KR") -> list[str]:
     """시장별 주가 fallback 체인.
 
+    Capabilities: marketConfig 에 등록된 시장별 fallback 도메인 list.
+    AIContext: sources/price.fetch 의 chain 순서 SSOT.
+    Guide: list 순서 = 우선순위 (첫 항목 = primary).
+    When: gather.price 진입 시 chain 구성 단계.
+    How: getMarketConfig(market) → config.fallback_chain → list.
+
     Parameters
     ----------
     market : str
@@ -54,6 +60,12 @@ _DOMAIN_ALIASES: dict[str, str] = {
 
 def loadDomain(name: str):
     """도메인 모듈 lazy import.
+
+    Capabilities: 도메인 이름 → Python 모듈 lazy import (snake/camel alias).
+    AIContext: fallback chain 의 dispatch — source 이름 → fetch* 함수 모음 매핑.
+    Guide: snake_case (naver_global) 와 camelCase (naverGlobal) 모두 동일 모듈.
+    When: sources/{price,flow,history}.fetch 의 chain iterate 시.
+    How: _DOMAIN_ALIASES 정규화 → if/elif 분기 → 모듈 import.
 
     Parameters
     ----------

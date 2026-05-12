@@ -44,6 +44,12 @@ async def fetchHistory(
 ) -> list[dict]:
     """OHLCV 히스토리 — FDR 경유.
 
+    Capabilities: FinanceDataReader 일별 OHLCV — KR/US 양쪽 stable backend.
+    AIContext: gather.history fallback 최후 보루 — Yahoo/Naver/FMP 모두 실패 후.
+    Guide: FDR 라이브러리 의존 — 미설치 시 raise.
+    When: primary source 전부 실패 후 last-resort fallback.
+    How: FinanceDataReader.DataReader 호출 → list[dict].
+
     Args:
         stock_code: 종목코드 (KR: "005930", US: "AAPL").
         start: 시작일 (YYYY-MM-DD). 빈 문자열이면 최대한 과거.
