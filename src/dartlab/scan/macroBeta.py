@@ -46,6 +46,18 @@ def scanMacroBeta(
         rSquared : float — 결정계수 R²
         nObs : int — 유효 관측치 수
         confidence : str — 신뢰도 (high/medium/low)
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 또는 macro/ecos series 로드 실패 시 빈 DataFrame 반환.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> dartlab.Ecos().series("GDP", enrich=True)  # 사전 수집
+    >>> df = dartlab.scan("macroBeta")
+    >>> df.filter(pl.col("gdpBeta").abs() > 1.5).select(["stockCode", "gdpBeta"])
     """
     from dartlab.scan.io.parquet import _ensureScanData
 

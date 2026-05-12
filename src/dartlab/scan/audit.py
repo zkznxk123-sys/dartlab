@@ -100,6 +100,17 @@ def scanAudit(*, verbose: bool = True) -> pl.DataFrame:
         auditorChanged : bool — 직전 연도 대비 감사인 변경 여부
         hasSpecialMatter : bool — 감사보고서 특기사항 존재 여부
         riskLevel : str — 종합 리스크 등급 (안전/관찰/주의/고위험)
+
+    Raises
+    ------
+    polars.PolarsError
+        auditOpinion report parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("audit")
+    >>> df.filter(pl.col("위험등급") == "고위험").select(["종목코드", "감사의견"])
     """
     raw = scanParquets(
         "auditOpinion",

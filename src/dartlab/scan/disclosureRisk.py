@@ -107,11 +107,39 @@ def _calcRiskKeyword(latest: pl.DataFrame, prev: pl.DataFrame) -> pl.DataFrame:
 def scanDisclosureRisk(*, verbose: bool = True) -> pl.DataFrame:
     """전종목 공시 변화 리스크 스캔.
 
-    changes.parquet에서 최신 기간의 공시 변화를 분석하여
-    6개 선행 리스크 시그널과 종합 등급을 반환한다.
+    changes.parquet에서 최신 기간의 공시 변화를 분석하여 6 개 선행 리스크 시그널과
+    종합 등급을 반환한다.
 
-    컬럼: stockCode, contingentDebt, chronicYears, riskKeyword,
-          auditStruct, affiliateChange, bizPivot, activeSignals, grade
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        contingentDebt : int — 우발부채 시그널 (0/1)
+        chronicYears : int — 만성 적자 연수
+        riskKeyword : int — 리스크 키워드 출현 횟수
+        auditStruct : int — 감사 구조 변경 시그널
+        affiliateChange : int — 계열 변화 시그널
+        bizPivot : int — 사업 전환 시그널
+        activeSignals : int — 활성 시그널 총 합산
+        grade : str — 종합 등급 (안전/관찰/주의/고위험)
+
+    Raises
+    ------
+    FileNotFoundError
+        changes.parquet 미빌드 (auto-download 로 회복 시도).
+    polars.PolarsError
+        parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("disclosureRisk")
+    >>> df.filter(pl.col("등급") == "고위험").select(["종목코드", "활성시그널수"])
     """
     scanDir = _ensureScanData()
     changesPath = scanDir / "changes.parquet"

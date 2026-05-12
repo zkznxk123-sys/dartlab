@@ -114,6 +114,17 @@ def scanDividendTrend(*, verbose: bool = True) -> pl.DataFrame:
         yieldCurrent : float — 현금배당수익률 (%)
         pattern : str — 배당 패턴 (무배당/시작/중단/연속증가/연속감소/안정/증가/감소/불규칙)
         grade : str — 배당 등급 (우수/양호/보통/주의/위험/무배당)
+
+    Raises
+    ------
+    polars.PolarsError
+        dividend report parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("dividendTrend")
+    >>> df.filter(pl.col("패턴") == "연속증가").select(["종목코드", "DPS성장"])
     """
     raw = scanParquets(
         "dividend",

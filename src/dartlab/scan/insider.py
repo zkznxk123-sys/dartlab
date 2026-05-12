@@ -117,7 +117,30 @@ def _scanTreasuryStock() -> dict[str, dict]:
 def scanInsider(*, verbose: bool = True) -> pl.DataFrame:
     """종목별 내부자 지분 변동 + 자기주식 종합.
 
-    컬럼: stockCode, holderPct, holderChange, treasuryShares, stability
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        holderPct : float | None — 최대주주 지분율 (%)
+        holderChange : float | None — 지분 변동 (%, 직전 연도 대비)
+        treasuryShares : int | None — 자기주식 보유주식수
+        stability : str — 경영권 안정성 등급 (안정/주의/불안정)
+
+    Raises
+    ------
+    polars.PolarsError
+        majorHolder · treasuryStock report parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("insider")
+    >>> df.filter(pl.col("경영권안정성") == "불안정").select(["종목코드", "최대주주지분"])
     """
     holderMap = _scanHolderChange()
     treasuryMap = _scanTreasuryStock()
