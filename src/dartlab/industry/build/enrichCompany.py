@@ -169,7 +169,7 @@ def _getFinancials5y(stockCode: str) -> list[dict]:
             .filter(pl.col("account_id_std").is_in(["sales", "operating_profit", "net_profit", "total_assets"]))
             .filter(pl.col("bsns_year").is_in(years))
             .select(["bsns_year", "fs_div", "account_id_std", "thstrm_amount"])
-            .collect()
+            .collect(engine="streaming")
         )
 
         if df.height == 0:

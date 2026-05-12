@@ -139,7 +139,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
             & (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
             & (pl.col("account_id").is_in(allIds) | pl.col("account_nm").is_in(allNms))
         )
-        .collect()
+        .collect(engine="streaming")
     )
     # 연결 우선
     cfs = df.filter(pl.col("fs_nm").str.contains("연결"))

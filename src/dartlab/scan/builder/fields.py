@@ -650,7 +650,7 @@ def _loadReportExists(apiType: str) -> pl.DataFrame:
     scan_path = _ensureScanData() / "report" / f"{apiType}.parquet"
     if scan_path.exists():
         try:
-            return pl.scan_parquet(str(scan_path)).select("stockCode").collect()
+            return pl.scan_parquet(str(scan_path)).select("stockCode").collect(engine="streaming")
         except (OSError, pl.exceptions.PolarsError):
             return pl.DataFrame()
 
@@ -666,7 +666,7 @@ def _loadReportExists(apiType: str) -> pl.DataFrame:
             continue
     if not frames:
         return pl.DataFrame()
-    return pl.concat(frames).collect()
+    return pl.concat(frames).collect(engine="streaming")
 
 
 def _latestByStock(df: pl.DataFrame) -> pl.DataFrame:

@@ -59,7 +59,7 @@ def _extractYearly(year: str) -> pl.DataFrame:
         .filter(pl.col("reprt_nm") == "4분기")  # 연간 누적만
         .filter(pl.col("sj_div").is_in(["IS", "CIS", "BS"]))
         .select(["stockCode", "fs_div", "account_id_std", "thstrm_amount"])
-        .collect()
+        .collect(engine="streaming")
     )
 
     if df.height == 0:

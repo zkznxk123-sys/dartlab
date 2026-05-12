@@ -50,7 +50,7 @@ def _extractTexts(parquetPath: Path) -> dict[str, str]:
             .select(["section_title", "section_content"])
             .filter(pl.col("section_content").is_not_null())
             .filter(pl.col("section_content").str.len_chars() > 20)
-            .collect()
+            .collect(engine="streaming")
         )
     except (pl.exceptions.PolarsError, OSError, FileNotFoundError):
         return {}

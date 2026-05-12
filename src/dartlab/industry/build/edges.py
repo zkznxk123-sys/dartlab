@@ -234,7 +234,7 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                 .select(["section_title", "section_content"])
                 .filter(pl.col("section_content").is_not_null())
                 .filter(pl.col("section_content").str.len_chars() > 20)
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue
@@ -387,7 +387,7 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
                 .filter(pl.col("section_title").str.contains("원재료"))
                 .filter(pl.col("section_content").is_not_null())
                 .select(["section_title", "section_content", "report_type"])
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             continue

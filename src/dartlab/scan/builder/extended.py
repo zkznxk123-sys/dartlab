@@ -71,7 +71,7 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
             lf.select(select_cols)
             .filter(pl.col("fs_nm").str.contains("연결"))
             .filter(pl.col("reprt_nm").str.contains("4분기"))
-            .collect()
+            .collect(engine="streaming")
         )
     except (pl.exceptions.PolarsError, OSError) as e:
         log.warning("finance.parquet 스캔 실패: %s", e)

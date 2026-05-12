@@ -85,7 +85,7 @@ def _fiscalMonthMap() -> dict[str, int]:
                 lz = pl.scan_parquet(str(pf))
                 if "bsns_year" not in lz.collect_schema().names():
                     continue
-                maxYear = lz.select(pl.col("bsns_year").cast(pl.Utf8).max()).collect().item()
+                maxYear = lz.select(pl.col("bsns_year").cast(pl.Utf8).max()).collect(engine="streaming").item()
                 if maxYear is not None and maxYear > maxBsnsYear12:
                     # 정확한 결산월은 모르지만, 비12월 결산 확정
                     # 보수적으로 6월(가장 흔한 비12월)로 추정
@@ -748,7 +748,7 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
         .filter(pl.col("bsns_year").cast(pl.Int32, strict=False) >= effectiveSinceYear)
         .filter(pl.col("account_id").is_in(keysList) | pl.col("account_nm").is_in(keysList))
         .select(keepCols)
-        .collect()
+        .collect(engine="streaming")
     )
 
     if df.is_empty():
