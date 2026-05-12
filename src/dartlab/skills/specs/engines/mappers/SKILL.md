@@ -63,7 +63,7 @@ procedure:
   - RunPython prelude 의 `normalizeColumn(topic, hint)` 사용 — 한글/snake/alias → 표준 snake_id.
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
-  - 매핑 정의는 `src/dartlab/mappers/{topic}.json` — AI/사람이 JSON 직접 편집해 추가.
+  - 매핑 정의는 `src/dartlab/core/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR) — 사람이 JSON 직접 편집 후 `AccountMapper.release()` 호출.
   - 신규 매핑은 confidence + category + type 메타 함께 등록.
 linkedSkills:
   - engines.company
@@ -71,7 +71,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-08'
+lastUpdated: '2026-05-12'
 ---
 
 ## 엔진 역할
@@ -142,4 +142,67 @@ columnsFor("BS")
 
 ## 기본 검증
 
-매핑 정의 변경은 `src/dartlab/mappers/{topic}.json` 직접 수정 + 본 skill 의 6 매퍼 표 동시 갱신. 신규 매핑 추가 시 `category` · `type` 메타 함께 — AI 가 새 항목을 자동 분류하는 학습 데이터로 작동.
+매핑 정의 변경은 본 skill 의 6 매퍼 표 동시 갱신. 신규 매핑 추가 시 `category` · `type` 메타 함께 — AI 가 새 항목을 자동 분류하는 학습 데이터로 작동.
+
+## 학습 파이프라인 (반자동 사이클)
+
+### 저장 위치 (SSOT 인덱스)
+
+| 자산 | 경로 | 내용 | 갱신 방식 |
+|---|---|---|---|
+| DART 학습 매핑 | `src/dartlab/core/data/accountMappings.json` | `standardAccounts: 3,402` / `learnedSynonyms: 31,489` / `merged: 34,171` / `_metadata.lastUpdate` | 사람 수동 편집 |
+| EDGAR 학습 동의어 | `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` | 11,375 SEC GAAP 태그 | 사람 수동 편집 |
+| Notes 구조 학습 | `src/dartlab/core/data/notesStructure.json` | 2,700 종목 notes 항목 `{type, category, frequency}` | `scanAll()` 자동 갱신 |
+| 라벨 SSOT | `src/dartlab/core/utils/labels.py::_loadAccountMappings` | DART 학습 매핑 로더 | — |
+| 캐시 무효화 | `src/dartlab/providers/dart/finance/mapper.py::AccountMapper.release` | JSON 직접 편집 후 호출 | — |
+
+DART 측 mapper 데이터는 `core/data/` 로 통합 승격 (`providers/dart/finance/mapperData/` 디렉토리 폐기). EDGAR 는 자체 `mapperData/` 보유 — 두 provider 패턴 비대칭 (대칭 작업은 후속 트랙).
+
+### 사이클 4 단계
+
+```
+1. notes 구조 스캔 (자동)
+   core/mappers/scanner.py::scanAll(limit=None)
+   → 2,700 종목 docs parquet 전수 → notesStructure.json 갱신
+   → {항목명: {type, category, frequency, skip}} 학습
+
+2. Alias 후보 탐지 (자동)
+   core/mappers/scanner.py::discoverAliases(stockCodes, minSupport=3)
+   → 다종목 상호배타적 출현 패턴 → suffix 변형 alias 발견
+   → 예: "재고자산" ↔ "재고자산합계" 자동 추천
+
+3. 사람 검토 + JSON patch (수동)
+   - core/data/accountMappings.json 의 `mappings` key 에 한글명 → snakeId 추가
+   - 또는 providers/edgar/finance/mapperData/learnedSynonyms.json
+   - 검토 시 category / type 메타 함께 등록
+
+4. 캐시 무효화 (수동)
+   AccountMapper.release()  # _mappings 캐시 None 처리
+   다음 lookup 부터 새 JSON 반영
+```
+
+### 현황 — 자동 학습 코드 부재
+
+`accountMappings.json` 의 `learnedSynonyms: 31,489` 가 *어떤 코드로 학습됐는지* 의 SSOT 가 추적되지 않는다. git history 마지막 변경 commit (`edbe6bd1e`) 메시지가 **"수동 학습 보강 (78개 추가, 34171→34249)"** — 현재는 사람 손 작업 단계.
+
+자동 학습 복구 후속 트랙 (P-LM 가칭) 예상 단계:
+- (A) 새 종목 docs parquet 들어오면 미매핑 계정 추출
+- (B) `discoverAliases` 응용 → 신규 동의어 후보
+- (C) 사람 검토 큐 (예 — JSON 후보 patch + PR)
+- (D) `accountMappings.json` patch + `release()` 호출
+- (E) `_metadata.lastUpdate` 자동 갱신
+
+본 트랙은 `engines.mappers` 가 capability 가 아닌 *내부 모듈* 이라는 사상과 정합 — 외부 사용자에게 노출되지 않는다.
+
+### 사용자 호출 (학습은 내부, 호출은 prelude)
+
+학습 결과 활용은 위 "공개 호출 방식" 의 `normalizeColumn(topic, hint)` / `columnsFor(topic)` — RunPython prelude 자동 노출. 직접 JSON 편집은 운영자 절차.
+
+### 검증
+
+```python
+from dartlab.core.mappers.accountMapper import AccountMapper
+mapper = AccountMapper()
+print(mapper.stats())  # MapperStats(name='account', totalEntries=34249, coverage=1.0, lastUpdated='2026-03-09')
+print(mapper.lookup("매출액"))  # {'snakeId': 'sales', ...}
+```

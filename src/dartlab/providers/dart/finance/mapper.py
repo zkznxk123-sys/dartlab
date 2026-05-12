@@ -1,6 +1,7 @@
 """항목 → snakeId 매핑.
 
-eddmpython v6+v8 매핑 파이프라인:
+매핑 파이프라인 7 단계:
+
 1. account_id prefix 제거 → normalizedId
 2. ID_SYNONYMS 로 영문 ID 동의어 통합
 3. ACCOUNT_NAME_SYNONYMS 로 한글명 동의어 통합
@@ -9,19 +10,22 @@ eddmpython v6+v8 매핑 파이프라인:
 6. 괄호+공백 제거 후 재조회
 7. 미매핑 → None
 
-snakeId는 standardAccounts.json에 정의된 것을 그대로 사용.
+데이터 SSOT (`engines.mappers` 학습 파이프라인 참조):
+
+- accountMappings.json — `src/dartlab/core/data/accountMappings.json` (core 승격, 34,171 entries)
+- 로더 — `dartlab.core.utils.labels._loadAccountMappings`
+- snakeId 정의 — `standardAccounts` (core/data/accountMappings.json 안 sub-key)
+
+학습 갱신 절차는 운영자 수동 — JSON 직접 patch 후 `AccountMapper.release()` 로 캐시 무효화.
 """
 
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from typing import Optional
 
 from dartlab.core.utils.ordering import levelMap as _commonLevelMap
 from dartlab.core.utils.ordering import sortOrder as _commonSortOrder
-
-_DATA_DIR = Path(__file__).parent / "mapperData"
 
 _PREFIX_RE = re.compile(r"^(?:ifrs-full_|ifrs_|dart_|ifrs-smes_)")
 _PAREN_RE = re.compile(r"\([^)]*\)")
