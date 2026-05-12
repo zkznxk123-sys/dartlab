@@ -44,10 +44,11 @@ class RemoteDartClient:
             >>> getJson(...)
 
         Returns:
-            <TODO: return desc> (dict)
+            dict — DART API JSON 응답 (프록시).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 로컬 키 사용 클라이언트 (본 모듈의 대안).
+            - ``DARTLAB_SERVER_URL`` 환경변수.
 
         Requires:
             - httpx
@@ -55,27 +56,28 @@ class RemoteDartClient:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART API 키 없는 사용자용 — dartlab HF Spaces 서버를 프록시로 사용. DartClient 인터페이스 호환.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 키 없이 사용" → 본 client.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal proxy — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 서버 다운 시 fallback X — caller 가 RuntimeError 분기 의무.
+                - 프록시 latency (네트워크 hop 추가).
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + dartlab 서버 (HF Spaces) 접근.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (프록시 hop 추가).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → dartlab 서버 → DART API → 응답 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) — 프록시 client.
         """
         url = f"{self._base}/api/dart{endpoint}"
         resp = self._session.get(url, params=params)
@@ -97,10 +99,11 @@ class RemoteDartClient:
             >>> getDf(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART API 응답 정규화 (프록시).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DartClient`` — 로컬 키 사용 클라이언트 (본 모듈의 대안).
+            - ``DARTLAB_SERVER_URL`` 환경변수.
 
         Requires:
             - httpx
@@ -108,27 +111,28 @@ class RemoteDartClient:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART API 키 없는 사용자용 — dartlab HF Spaces 서버를 프록시로 사용. DartClient 인터페이스 호환.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 키 없이 사용" → 본 client.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal proxy — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 서버 다운 시 fallback X — caller 가 RuntimeError 분기 의무.
+                - 프록시 latency (네트워크 hop 추가).
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + dartlab 서버 (HF Spaces) 접근.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (프록시 hop 추가).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → dartlab 서버 → DART API → 응답 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) — 프록시 client.
         """
         data = self.getJson(endpoint, params)
         rows = data.get("rows", data.get(listKey, []))
@@ -152,20 +156,20 @@ class RemoteDartClient:
             >>> getDfAll(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — DART API 응답 정규화 (프록시).
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 서버 다운 시 fallback X — caller RuntimeError 분기.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / pl.DataFrame / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + dartlab 서버.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간 (프록시 hop).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → dartlab 서버 → DART API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) — 프록시.
         """
         return self.getDf(endpoint, params, listKey=listKey)

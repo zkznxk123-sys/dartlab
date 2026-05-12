@@ -168,10 +168,11 @@ def checkFreshness(
         >>> checkFreshness(...)
 
     Returns:
-        <TODO: return desc> (FreshnessResult)
+        FreshnessResult — freshness 검사 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``FreshnessResult`` — 본 결과 dataclass.
+        - ``_isFreshnessCheckExpired`` — TTL 게이트.
 
     Requires:
         - datetime
@@ -179,27 +180,28 @@ def checkFreshness(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 freshness 검사 (L3 — DART API 직접 조회). rcept_no 비교로 누락 공시 감지.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 자동 호출 — Company init 단계에서 TTL 만료 시 발동.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal freshness — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 매 호출 freshness 체크 → DART API 부하. TTL 24 h 활용.
+            - localLatest None ≠ 종목 누락 — finance/report 별도.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - FreshnessResult / bool / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 parquet + 인터넷 (L3 체크 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 모듈 자체가 freshness 검사 — TTL 24 h 게이트.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet + DART API → rcept_no 비교 → 본 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) freshness.
     """
     from dartlab.core.messaging import emit
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
@@ -313,10 +315,11 @@ def scanMarketFreshness(
         >>> scanMarketFreshness(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``FreshnessResult`` — 본 결과 dataclass.
+        - ``_isFreshnessCheckExpired`` — TTL 게이트.
 
     Requires:
         - datetime
@@ -324,27 +327,28 @@ def scanMarketFreshness(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 freshness 검사 (L3 — DART API 직접 조회). rcept_no 비교로 누락 공시 감지.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 자동 호출 — Company init 단계에서 TTL 만료 시 발동.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal freshness — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 매 호출 freshness 체크 → DART API 부하. TTL 24 h 활용.
+            - localLatest None ≠ 종목 누락 — finance/report 별도.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - FreshnessResult / bool / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 parquet + 인터넷 (L3 체크 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 모듈 자체가 freshness 검사 — TTL 24 h 게이트.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet + DART API → rcept_no 비교 → 본 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) freshness.
     """
     from dartlab.core.messaging import emit
     from dartlab.frame.dataLoader import _dataDir
@@ -454,10 +458,11 @@ def collectMissing(
         >>> collectMissing(...)
 
     Returns:
-        <TODO: return desc> (dict[str, int])
+        dict[str, int] — 카테고리 별 결과 수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``FreshnessResult`` — 본 결과 dataclass.
+        - ``_isFreshnessCheckExpired`` — TTL 게이트.
 
     Requires:
         - datetime
@@ -465,27 +470,28 @@ def collectMissing(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 정기보고서 freshness 검사 (L3 — DART API 직접 조회). rcept_no 비교로 누락 공시 감지.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 자동 호출 — Company init 단계에서 TTL 만료 시 발동.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal freshness — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 매 호출 freshness 체크 → DART API 부하. TTL 24 h 활용.
+            - localLatest None ≠ 종목 누락 — finance/report 별도.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - FreshnessResult / bool / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 parquet + 인터넷 (L3 체크 시).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 모듈 자체가 freshness 검사 — TTL 24 h 게이트.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet + DART API → rcept_no 비교 → 본 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) freshness.
     """
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 

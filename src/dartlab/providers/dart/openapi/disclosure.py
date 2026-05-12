@@ -105,36 +105,37 @@ def listFilings(
         없음.
 
     Args:
-        client: <TODO: param desc> (DartClient)
-        corp: <TODO: param desc> (str | None)
-        start: <TODO: param desc> (str | None)
-        end: <TODO: param desc> (str | None)
-        filingType: <TODO: param desc> (str | None)
-        finalOnly: <TODO: param desc> (bool)
-        corpClass: <TODO: param desc> (Literal['Y', 'K', 'N', 'E'] | None)
-        sort: <TODO: param desc> (Literal['date', 'crp', 'rpt'])
-        ascending: <TODO: param desc> (bool)
-        fetchAll: <TODO: param desc> (bool)
-        limit: <TODO: param desc> (int | None)
+        client: DartClient 인스턴스.
+        corp: 기업 식별자 (종목코드/회사명/corp_code). None 이면 전체 (start 필수).
+        start: 시작일 YYYYMMDD. corp 없으면 필수.
+        end: 종료일 YYYYMMDD. None 이면 오늘.
+        filingType: 공시유형 코드 (A=정기/B=주요사항/...).
+        finalOnly: True 면 최종보고서만.
+        corpClass: 법인구분 (Y=유가/K=코스닥/N=코넥스/E=기타).
+        sort: 정렬 기준 (date/crp/rpt).
+        ascending: True 면 오름차순.
+        fetchAll: True 면 페이지 모두 fetch.
+        limit: 최대 행 수. None 이면 무제한.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — DART OpenAPI 응답.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``listFilings`` / ``companyInfo`` — 본 모듈 함수.
+        - ``DartClient`` — backend.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 공시 검색 + 기업 개황 endpoint 위임 + 응답 정규화.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 검색" → ``listFilings``. 사용자 facade 는 ``Dart()``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal disclosure search — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
@@ -221,20 +222,21 @@ def iterFilings(
         ...     print(row["report_nm"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``listFilings`` / ``companyInfo`` — 본 모듈 함수.
+        - ``DartClient`` — backend.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 공시 검색 + 기업 개황 endpoint 위임 + 응답 정규화.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 검색" → ``listFilings``. 사용자 facade 는 ``Dart()``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal disclosure search — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
@@ -306,27 +308,28 @@ def companyInfo(
         없음.
 
     Args:
-        client: <TODO: param desc> (DartClient)
-        corp: <TODO: param desc> (str)
+        client: DartClient 인스턴스.
+        corp: 회사명 / 종목코드 / corp_code.
 
     Returns:
-        <TODO: return desc> (dict[str, str])
+        dict[str, str] — 기업 개황 응답.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``listFilings`` / ``companyInfo`` — 본 모듈 함수.
+        - ``DartClient`` — backend.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART 공시 검색 + 기업 개황 endpoint 위임 + 응답 정규화.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 검색" → ``listFilings``. 사용자 facade 는 ``Dart()``.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal disclosure search — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:

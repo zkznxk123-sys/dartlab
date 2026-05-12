@@ -297,10 +297,11 @@ class ZipDocsCollector:
             >>> collect(...)
 
         Returns:
-            <TODO: return desc> (int)
+            int — 수집 건수.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``DocsCollector`` (collector.py) — HTML 기반 대안.
+            - ``_collectOneZip`` — 단일 ZIP 처리 backend.
 
         Requires:
             - bs4
@@ -310,27 +311,29 @@ class ZipDocsCollector:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DART document.xml ZIP 다운로드 + XML → markdown/text + 섹션 분할. collector.py
+              (HTML) 보다 빠르고 품질 동등.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal ZIP collector — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART_API_KEY 일일 한도 초과 시 실패.
+                - ZIP 손상 (BadZipFile) → 빈 결과.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] / int / Path — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + DART_API_KEY + rceptNo.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - DART OpenAPI 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - rceptNo → document.xml ZIP → XML 파싱 → markdown/text → 본 결과.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) docs ZIP.
         """
         from dartlab.core.messaging import emit
 

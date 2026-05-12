@@ -190,37 +190,39 @@ def enrichFinance(
         >>> enrichFinance(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 한글화/추가 컬럼 후 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``enrichFinance`` / ``enrichReport`` / ``saveParquet`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/report DataFrame → 한글 컬럼 + 추가 컬럼 (corp_name/stock_code 등) + parquet 저장.
+          eddmpython 호환 포맷.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - eddmpython 호환 컬럼 가정 X — 본 모듈이 한글화/추가.
+            - 저장 경로 명시 X → 기본 dataDir 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / int / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - finance/report 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 호출 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame → 한글 컬럼 + 추가 컬럼 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 저장.
     """
     if df.height == 0:
         return df
@@ -276,37 +278,39 @@ def enrichReport(
         >>> enrichReport(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 한글화/추가 컬럼 후 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``enrichFinance`` / ``enrichReport`` / ``saveParquet`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/report DataFrame → 한글 컬럼 + 추가 컬럼 (corp_name/stock_code 등) + parquet 저장.
+          eddmpython 호환 포맷.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - eddmpython 호환 컬럼 가정 X — 본 모듈이 한글화/추가.
+            - 저장 경로 명시 X → 기본 dataDir 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / int / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - finance/report 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 호출 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame → 한글 컬럼 + 추가 컬럼 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 저장.
     """
     if df.height == 0:
         return df
@@ -380,41 +384,43 @@ def korColumns(
         없음.
 
     Args:
-        df: <TODO: param desc> (pl.DataFrame)
-        category: <TODO: param desc> (str)
+        df: Polars DataFrame 입력.
+        category: finance/report/docs.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 한글화/추가 컬럼 후 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``enrichFinance`` / ``enrichReport`` / ``saveParquet`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/report DataFrame → 한글 컬럼 + 추가 컬럼 (corp_name/stock_code 등) + parquet 저장.
+          eddmpython 호환 포맷.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - eddmpython 호환 컬럼 가정 X — 본 모듈이 한글화/추가.
+            - 저장 경로 명시 X → 기본 dataDir 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / int / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - finance/report 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 호출 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame → 한글 컬럼 + 추가 컬럼 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 저장.
     """
     mapping = {
         "finance": _FINANCE_KR,
@@ -467,41 +473,43 @@ def save(
         >>> save(...)
 
     Args:
-        df: <TODO: param desc> (pl.DataFrame)
-        path: <TODO: param desc> (str | Path)
+        df: Polars DataFrame 입력.
+        path: 저장 경로.
 
     Returns:
-        <TODO: return desc> (Path)
+        Path — 저장된 parquet 경로.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``enrichFinance`` / ``enrichReport`` / ``saveParquet`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART finance/report DataFrame → 한글 컬럼 + 추가 컬럼 (corp_name/stock_code 등) + parquet 저장.
+          eddmpython 호환 포맷.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - eddmpython 호환 컬럼 가정 X — 본 모듈이 한글화/추가.
+            - 저장 경로 명시 X → 기본 dataDir 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / int / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - finance/report 데이터.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 호출 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - DataFrame → 한글 컬럼 + 추가 컬럼 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 저장.
     """
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)
