@@ -220,8 +220,13 @@ def newsSearch(
     return results
 
 
-def searchAvailable() -> dict[str, bool]:
+def searchAvailable(*, limit: int | None = None) -> dict[str, bool]:
     """검색 백엔드 가용성 확인.
+
+    Parameters
+    ----------
+    limit : int | None
+        백엔드 능력 진단 함수라 무시된다. 인터페이스 호환 목적으로만 존재.
 
     Returns
     -------
@@ -229,6 +234,7 @@ def searchAvailable() -> dict[str, bool]:
         tavily : bool — Tavily 백엔드 사용 가능 여부
         any : bool — 하나 이상의 백엔드 사용 가능 여부
     """
+    del limit
     tavily = _tavilyAvailable()
     return {
         "tavily": tavily,

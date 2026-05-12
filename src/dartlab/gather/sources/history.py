@@ -18,6 +18,7 @@ async def fetch(
     end: str,
     market: str = "KR",
     client=None,
+    limit: int | None = None,
 ) -> list[dict]:
     """히스토리 OHLCV — fallback 체인 (async).
 
@@ -33,6 +34,8 @@ async def fetch(
         시장 코드 ("KR", "US" 등). 기본 "KR".
     client : httpx.AsyncClient | None
         HTTP 클라이언트. None이면 GatherHttpClient 자동 생성.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N일). None이면 [start, end] 전체.
 
     Returns
     -------
@@ -81,6 +84,8 @@ async def fetch(
                     market=market,
                 )
                 if result:
+                    if limit is not None and limit > 0:
+                        return result[-limit:]
                     return result
 
         except (GatherError, ImportError, OSError, ValueError, AttributeError) as exc:

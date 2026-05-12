@@ -23,6 +23,7 @@ async def fetch(
     *,
     market: str = "KR",
     client=None,
+    limit: int | None = None,
 ) -> PriceSnapshot | None:
     """주가 — 시장별 fallback 체인 + circuit breaker + health scoring (async).
 
@@ -39,6 +40,8 @@ async def fetch(
         시장 코드 ("KR", "US", "JP" 등). 기본 "KR".
     client : httpx.AsyncClient | None
         HTTP 클라이언트. None이면 GatherHttpClient 자동 생성.
+    limit : int | None
+        단건 스냅샷 반환 함수라 무시된다. 인터페이스 호환 목적으로만 존재.
 
     Returns
     -------

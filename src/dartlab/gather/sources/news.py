@@ -187,6 +187,7 @@ def fetchNews(
     *,
     market: str = "KR",
     days: int = 30,
+    limit: int | None = None,
 ) -> pl.DataFrame:
     """기업명/티커로 뉴스 검색 (동기 래퍼, 하위호환).
 
@@ -194,6 +195,7 @@ def fetchNews(
         query: 기업명 또는 티커.
         market: "KR" 또는 "US".
         days: 최근 N일.
+        limit: 반환 행수 상한 (가장 최근 N건). None이면 전체.
 
     Returns:
         (date, title, source, url) DataFrame.
@@ -201,4 +203,7 @@ def fetchNews(
     from ..infra.http import runAsync
 
     items = runAsync(_fetchAsync(query, market=market, days=days))
-    return toDataFrame(items)
+    df = toDataFrame(items)
+    if limit is not None and limit > 0:
+        return df.head(limit)
+    return df

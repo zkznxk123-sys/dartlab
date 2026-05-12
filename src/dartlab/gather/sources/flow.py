@@ -15,6 +15,7 @@ async def fetch(
     *,
     market: str = "KR",
     client=None,
+    limit: int | None = None,
 ) -> list[dict] | None:
     """수급 시계열 — fallback 체인 (async). KR만 지원.
 
@@ -26,6 +27,8 @@ async def fetch(
         시장 코드. "KR"만 지원, 그 외 None 반환.
     client : httpx.AsyncClient | None
         HTTP 클라이언트. None이면 도메인 내부에서 생성.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N개). None이면 전체.
 
     Returns
     -------
@@ -47,6 +50,8 @@ async def fetch(
             module = loadDomain(domainName)
             result = await module.fetchFlow(stockCode, client)
             if result:
+                if limit is not None and limit > 0:
+                    return result[:limit]
                 return result
         except (GatherError, ImportError, OSError) as exc:
             log.debug("flow fallback %s 실패: %s", domainName, exc)

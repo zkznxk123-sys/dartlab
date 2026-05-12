@@ -13,6 +13,7 @@ async def fetchInsiderTrading(
     stockCode: str,
     *,
     market: str = "KR",
+    limit: int | None = None,
     **_kwargs,
 ) -> list[InsiderTrade]:
     """내부자(임원/주요주주) 거래 내역 -- KR만 지원.
@@ -23,6 +24,8 @@ async def fetchInsiderTrading(
         종목코드 (예: "005930").
     market : str
         시장 코드. "KR"만 지원, 그 외 빈 리스트 반환.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N건). None이면 전체.
 
     Returns
     -------
@@ -45,7 +48,10 @@ async def fetchInsiderTrading(
         from dartlab.providers.dart.ops.insiderTrades import fetchInsiderTradingRaw
 
         rawRows = await fetchInsiderTradingRaw(stockCode)
-        return [InsiderTrade(**row) for row in rawRows]
+        rows = [InsiderTrade(**row) for row in rawRows]
+        if limit is not None and limit > 0:
+            return rows[:limit]
+        return rows
     except (ImportError, OSError, TypeError) as exc:
         log.warning("insider KR 실패 (%s): %s", stockCode, exc)
         return []
@@ -55,6 +61,7 @@ async def fetchMajorShareholders(
     stockCode: str,
     *,
     market: str = "KR",
+    limit: int | None = None,
     **_kwargs,
 ) -> list[MajorHolder]:
     """5% 이상 대량보유 변동 -- KR(DART).
@@ -65,6 +72,8 @@ async def fetchMajorShareholders(
         종목코드 (예: "005930").
     market : str
         시장 코드. "KR"만 지원, 그 외 빈 리스트 반환.
+    limit : int | None
+        반환 행수 상한 (가장 최근 N건). None이면 전체.
 
     Returns
     -------
@@ -85,7 +94,10 @@ async def fetchMajorShareholders(
         from dartlab.providers.dart.ops.insiderTrades import fetchMajorShareholdersRaw
 
         rawRows = await fetchMajorShareholdersRaw(stockCode)
-        return [MajorHolder(**row) for row in rawRows]
+        rows = [MajorHolder(**row) for row in rawRows]
+        if limit is not None and limit > 0:
+            return rows[:limit]
+        return rows
     except (ImportError, OSError, TypeError) as exc:
         log.warning("majorShareholders 실패 (%s): %s", stockCode, exc)
         return []

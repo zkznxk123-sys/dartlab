@@ -10,7 +10,13 @@ from ..types import SectorInfo, SourceUnavailableError
 log = logging.getLogger(__name__)
 
 
-async def fetch(stockCode: str, *, market: str = "KR", client: GatherHttpClient) -> SectorInfo | None:
+async def fetch(
+    stockCode: str,
+    *,
+    market: str = "KR",
+    client: GatherHttpClient,
+    limit: int | None = None,
+) -> SectorInfo | None:
     """업종 분류 조회 -- KR만 지원.
 
     Parameters
@@ -21,6 +27,8 @@ async def fetch(stockCode: str, *, market: str = "KR", client: GatherHttpClient)
         시장 코드. "KR"만 지원, 그 외 None 반환.
     client : GatherHttpClient
         HTTP 클라이언트.
+    limit : int | None
+        단건 SectorInfo 반환 함수라 무시된다. 인터페이스 호환 목적.
 
     Returns
     -------
@@ -36,6 +44,7 @@ async def fetch(stockCode: str, *, market: str = "KR", client: GatherHttpClient)
 
         KR 외 시장이거나 조회 실패 시 None.
     """
+    del limit
     if market != "KR":
         return None
     try:

@@ -15,6 +15,7 @@ async def fetch(
     *,
     market: str = "KR",
     client: GatherHttpClient,
+    limit: int | None = None,
 ) -> list[InstitutionOwnership]:
     """기관/외국인 지분 보유 조회 -- KR만 지원.
 
@@ -26,6 +27,8 @@ async def fetch(
         시장 코드. "KR"만 지원, 그 외 빈 리스트 반환.
     client : GatherHttpClient
         HTTP 클라이언트.
+    limit : int | None
+        반환 행수 상한. None이면 전체.
 
     Returns
     -------
@@ -58,6 +61,8 @@ async def fetch(
                     source="naver",
                 )
             )
+        if limit is not None and limit > 0:
+            return result[:limit]
         return result
     except (SourceUnavailableError, KeyError, ValueError, TypeError) as exc:
         log.debug("ownership KR 실패 (%s): %s", stockCode, exc)

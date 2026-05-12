@@ -35,8 +35,8 @@
     "src/dartlab/gather/domains/naverGlobal.py::fetchPrice",
     "src/dartlab/gather/domains/yahooChart.py::fetchHistory",
     "src/dartlab/gather/domains/yahooChart.py::fetchPrice",
-    "src/dartlab/gather/ecos/facade.py::search",
     "src/dartlab/gather/ecos/catalog.py::search",
+    "src/dartlab/gather/ecos/facade.py::search",
     "src/dartlab/gather/ecos/series.py::fetchMulti",
     "src/dartlab/gather/ecos/series.py::fetchSeries",
     "src/dartlab/gather/fred/series.py::fetchMeta",
@@ -50,15 +50,6 @@
     "src/dartlab/gather/krx/listing/registry.py::search",
     "src/dartlab/gather/krx/marketCap.py::fetchOhlcv",
     "src/dartlab/gather/macroProvider.py::fetchSeriesLatest",
-    "src/dartlab/gather/macroProvider.py::fetchSeriesYoy",
-    "src/dartlab/gather/sources/flow.py::fetch",
-    "src/dartlab/gather/sources/history.py::fetch",
-    "src/dartlab/gather/sources/insider.py::fetchInsiderTrading",
-    "src/dartlab/gather/sources/insider.py::fetchMajorShareholders",
-    "src/dartlab/gather/sources/news.py::fetchNews",
-    "src/dartlab/gather/sources/ownership.py::fetch",
-    "src/dartlab/gather/sources/price.py::fetch",
-    "src/dartlab/gather/sources/search.py::searchAvailable",
-    "src/dartlab/gather/sources/sector.py::fetch"
+    "src/dartlab/gather/macroProvider.py::fetchSeriesYoy"
   ]
 }
