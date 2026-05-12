@@ -23,6 +23,17 @@ def scanMajorHolderPct() -> dict[str, float]:
     dict[str, float]
         종목코드 : 최대주주 지분율 (%)
         빈 dict — 데이터 없음
+
+    Raises
+    ------
+    polars.PolarsError
+        majorHolder report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scanner import scanMajorHolderPct
+    >>> holder = scanMajorHolderPct()
+    >>> holder.get("005930")
     """
     raw = scanParquets(
         "majorHolder",
@@ -63,6 +74,17 @@ def scanOutsideDirectors() -> dict[str, dict]:
             중도사임 : int — 중도사임 인원 (명)
             겸직 : int — 겸직 인원 (명)
         빈 dict — 데이터 없음
+
+    Raises
+    ------
+    polars.PolarsError
+        outsideDirector · executive report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scanner import scanOutsideDirectors
+    >>> od = scanOutsideDirectors()
+    >>> od.get("005930", {}).get("사외이사비율")
     """
     raw = scanParquets(
         "outsideDirector",
@@ -186,6 +208,17 @@ def scanPayRatio() -> dict[str, float]:
     dict[str, float]
         종목코드 : 임원/직원 보수 배율 (배)
         빈 dict — 데이터 없음
+
+    Raises
+    ------
+    polars.PolarsError
+        executivePayAllTotal · employee report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scanner import scanPayRatio
+    >>> pr = scanPayRatio()
+    >>> pr.get("005930")
     """
     raw_pay = scanParquets(
         "executivePayAllTotal",
@@ -254,6 +287,18 @@ def scanAuditOpinion() -> dict[str, str]:
     dict[str, str]
         종목코드 : 감사의견 문자열 (적정의견 | 한정의견 | 부적정의견 | 의견거절)
         빈 dict — 데이터 없음
+
+    Raises
+    ------
+    polars.PolarsError
+        auditOpinion report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scanner import scanAuditOpinion
+    >>> ao = scanAuditOpinion()
+    >>> ao.get("005930")
+    '적정의견'
     """
     raw = scanParquets(
         "auditOpinion",
@@ -300,6 +345,17 @@ def scanMinorityHolder() -> dict[str, float]:
     dict[str, float]
         종목코드 : 소액주주 지분율 (%)
         빈 dict — 데이터 없음
+
+    Raises
+    ------
+    polars.PolarsError
+        minorityHolder report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scanner import scanMinorityHolder
+    >>> mh = scanMinorityHolder()
+    >>> mh.get("005930")
     """
     raw = scanParquets(
         "minorityHolder",

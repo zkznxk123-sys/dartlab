@@ -42,6 +42,25 @@ def scanSalaryGrowth() -> dict[str, dict]:
     """employee 2개년도 → {종목코드: {급여성장률, 급여_신, 급여_구}}.
 
     급여는 만원/연 단위 가중평균.
+
+    Returns
+    -------
+    dict[str, dict]
+        {종목코드: info}. 각 info:
+            급여성장률 : float — 신/구 평균급여 증감률 (%)
+            급여_신 : float — 최신 연도 평균급여 (만원)
+            급여_구 : float — 직전 연도 평균급여 (만원)
+
+    Raises
+    ------
+    polars.PolarsError
+        employee report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.growth import scanSalaryGrowth
+    >>> sg = scanSalaryGrowth()
+    >>> sg.get("005930", {}).get("급여성장률")
     """
     raw = scanParquets(
         "employee",
@@ -219,6 +238,22 @@ def scanRevenueGrowth() -> dict[str, float]:
     """finance IS 2개 완전연도 → {종목코드: 매출성장률(%)}.
 
     프리빌드 finance.parquet 우선, 없으면 per-file fallback.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 매출성장률(%)}. 직전 연도 매출 0 이거나 매칭 실패 종목 제외.
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 시 per-file fallback 전환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.growth import scanRevenueGrowth
+    >>> rg = scanRevenueGrowth()
+    >>> rg.get("005930")
     """
     from dartlab.scan.io.parquet import _ensureScanData
 
@@ -235,7 +270,32 @@ def computeSalaryVsRevenue(
 ) -> pl.DataFrame:
     """급여성장률 vs 매출성장률 → DataFrame.
 
-    컬럼: 종목코드, 급여성장률, 매출성장률, 급여매출괴리, 급여>매출
+    Parameters
+    ----------
+    salMap : dict[str, dict] | None
+        ``scanSalaryGrowth`` 결과. None 이면 즉시 호출.
+    revMap : dict[str, float] | None
+        ``scanRevenueGrowth`` 결과. None 이면 즉시 호출.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        급여성장률 : float — (%)
+        매출성장률 : float — (%)
+        급여매출괴리 : float — 급여성장률 - 매출성장률 (%p)
+        급여>매출 : bool — 급여매출괴리 > 0
+
+    Raises
+    ------
+    polars.PolarsError
+        하위 scan 호출 실패 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.growth import computeSalaryVsRevenue
+    >>> df = computeSalaryVsRevenue()
+    >>> df.filter(pl.col("급여>매출")).head()
     """
     if salMap is None:
         salMap = scanSalaryGrowth()

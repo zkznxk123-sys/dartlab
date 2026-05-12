@@ -28,10 +28,34 @@ from dartlab.scan.workforce.scanner import (
 def scanWorkforce(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 인력 스캔 → 종합 DataFrame.
 
-    컬럼: 종목코드, 직원수, 평균급여_만원, 남녀격차, 근속_년,
-          직원당매출_억, 인건비율, 1인당부가가치_억,
-          급여성장률, 매출성장률, 급여매출괴리,
-          최고보수_억, 공개인원
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        직원수 : float | None — 정규+계약 합산 (명)
+        평균급여_만원 : float | None — 직원수 가중평균 (만원/연)
+        남녀격차 : float | None — 남여 평균급여 차이 (%)
+        근속_년 : float | None — 평균 근속연수
+        직원당매출_억 : float | None — 매출/직원수 (억)
+        급여성장률 / 매출성장률 / 급여매출괴리 : float | None — 전년 대비 변화 (%)
+        최고보수_억 : float | None — 임원 최고 보수 (억)
+        공개인원 : float | None — 보수 공시 인원 (명)
+
+    Raises
+    ------
+    polars.PolarsError
+        employee · executivePayIndividual · finance.parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("workforce")
+    >>> df.sort("직원당매출_억", descending=True).head()
     """
 
     def _say(msg: str) -> None:

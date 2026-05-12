@@ -33,9 +33,38 @@ from dartlab.scan.governance.scorer import (
 def scanGovernance(*, verbose: bool = True) -> pl.DataFrame:
     """전체 상장사 거버넌스 스캔 → 종합 등급 DataFrame.
 
-    컬럼: 종목코드, 지분율, 사외이사비율, 중도사임, 겸직, pay_ratio,
-          감사의견, 소액주주지분, S_지분, S_사외, S_보수, S_감사, S_분산,
-          총점, 등급, 유효축수
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    pl.DataFrame
+        stockCode : str — 종목코드
+        지분율 : float | None — 최대주주 지분율 (%)
+        사외이사비율 : float | None — 사외이사 비율 (%)
+        중도사임 : int — 중도사임 인원 (명)
+        겸직 : int — 겸직 인원 (명)
+        pay_ratio : float | None — 임원/직원 보수 배율 (배)
+        감사의견 : str | None
+        소액주주지분 : float | None — 소액주주 지분율 (%)
+        S_지분 / S_사외 / S_보수 / S_감사 / S_분산 : float — 5 축별 점수 (점)
+        총점 : float — 100 점 만점 종합 점수
+        등급 : str — A/B/C/D/E
+        유효축수 : int — 점수가 산출된 축 수 (0~5)
+
+    Raises
+    ------
+    polars.PolarsError
+        majorHolder · outsideDirector · executivePayAllTotal · auditOpinion ·
+        minorityHolder report parquet 손상 시.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("governance")
+    >>> df.filter(pl.col("등급") == "A").select(["종목코드", "총점"]).head()
     """
 
     def _say(msg: str) -> None:

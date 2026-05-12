@@ -19,6 +19,17 @@ def scanEmployee() -> dict[str, dict]:
 
     최신 연도 + 최적 분기(Q2) 기준. 급여는 직원수 가중평균.
 
+    Raises
+    ------
+    polars.PolarsError
+        employee report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.scanner import scanEmployee
+    >>> emp = scanEmployee()
+    >>> emp.get("005930", {}).get("직원수")
+
     Returns
     -------
     dict[str, dict]
@@ -106,6 +117,17 @@ def scanTotalPayroll() -> dict[str, float]:
     fyer_salary_totamt 합산 우선, 없으면 sm*jan_salary_am fallback.
     Q4 우선 (연간 누적). Q4 없으면 Q2*2 연환산.
 
+    Raises
+    ------
+    polars.PolarsError
+        employee report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.scanner import scanTotalPayroll
+    >>> tp = scanTotalPayroll()
+    >>> tp.get("005930")
+
     Returns
     -------
     dict[str, float]
@@ -160,6 +182,17 @@ def scanRevenuePerEmployee() -> dict[str, float]:
 
     scan/finance.parquet 프리빌드가 있으면 단일 파일에서 매출 추출,
     없으면 종목별 parquet 순회 fallback.
+
+    Raises
+    ------
+    polars.PolarsError
+        scan finance.parquet 손상 시 per-file fallback 전환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.scanner import scanRevenuePerEmployee
+    >>> rpe = scanRevenuePerEmployee()
+    >>> rpe.get("005930")
 
     Returns
     -------
@@ -332,6 +365,17 @@ def scanTopPay() -> dict[str, dict]:
 
     5억 이상 의무공개 대상. 최신 연도(유효 종목 200개 이상인 해) 기준.
 
+    Raises
+    ------
+    polars.PolarsError
+        executivePayIndividual report parquet 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.scanner import scanTopPay
+    >>> tp = scanTopPay()
+    >>> tp.get("005930", {}).get("최고보수_억")
+
     Returns
     -------
     dict[str, dict]
@@ -434,6 +478,22 @@ def scanLaborRatio() -> dict[str, float]:
     """총급여/매출 → {종목코드: 인건비율(%)}.
 
     인건비율이 높을수록 매출 중 인건비 비중이 크다.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 인건비율(%)}. 0 < 인건비율 < 500 범위만 반환.
+
+    Raises
+    ------
+    polars.PolarsError
+        하위 scan 호출 실패 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.scanner import scanLaborRatio
+    >>> lr = scanLaborRatio()
+    >>> lr.get("005930")
     """
     payrollMap = scanTotalPayroll()
     revMap = _revenueMap()
@@ -452,6 +512,22 @@ def scanValueAdded() -> dict[str, float]:
     """(영업이익+총급여)/직원수 → {종목코드: 1인당부가가치(억)}.
 
     부가가치 = 영업이익 + 인건비.  직원 1명이 만들어내는 가치.
+
+    Returns
+    -------
+    dict[str, float]
+        {종목코드: 1인당부가가치(억)}. 직원수 0 또는 영업이익 None 인 종목 제외.
+
+    Raises
+    ------
+    polars.PolarsError
+        하위 scan 호출 실패 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.workforce.scanner import scanValueAdded
+    >>> va = scanValueAdded()
+    >>> va.get("005930")
     """
     payrollMap = scanTotalPayroll()
     opMap = _opIncomeMap()

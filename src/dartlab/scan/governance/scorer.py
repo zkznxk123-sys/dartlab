@@ -21,6 +21,16 @@ def scoreOwnership(pct: float | None) -> float:
     -------
     float
         지분율 점수 (점, 0~20)
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scorer import scoreOwnership
+    >>> scoreOwnership(35.0)
+    20.0
     """
     if pct is None:
         return 10.0
@@ -60,6 +70,16 @@ def scoreOutsideRatio(
     -------
     float
         사외이사 점수 (점, 0~25)
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scorer import scoreOutsideRatio
+    >>> scoreOutsideRatio(45.0, resign=0, concurrent=0)
+    25.0
     """
     if ratio is None:
         return 12.5
@@ -101,6 +121,16 @@ def scorePayRatio(ratio: float | None) -> float:
     -------
     float
         보수 배율 점수 (점, 0~15)
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scorer import scorePayRatio
+    >>> scorePayRatio(1.5)
+    15.0
     """
     if ratio is None:
         return 7.5
@@ -132,6 +162,16 @@ def scoreAudit(opinion: str | None) -> float:
     -------
     float
         감사의견 점수 (점, 0~25)
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scorer import scoreAudit
+    >>> scoreAudit("적정의견")
+    25.0
     """
     if opinion is None or opinion == "":
         return 12.5
@@ -158,6 +198,16 @@ def scoreMinority(pct: float | None) -> float:
     -------
     float
         소액주주 분산 점수 (점, 0~15)
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scorer import scoreMinority
+    >>> scoreMinority(65.0)
+    15.0
     """
     if pct is None:
         return 7.5
@@ -188,6 +238,16 @@ def grade(score: float) -> str:
     -------
     str
         등급 (A | B | C | D | E)
+
+    Raises
+    ------
+    없음 — 순수 분기 함수.
+
+    Examples
+    --------
+    >>> from dartlab.scan.governance.scorer import grade
+    >>> grade(88.5)
+    'A'
     """
     if score >= 85:
         return "A"
