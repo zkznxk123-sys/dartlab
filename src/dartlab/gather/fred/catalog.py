@@ -219,6 +219,14 @@ def getGroups() -> list[str]:
     -------
     list[str]
         등록된 그룹명 리스트 (예: ["growth", "inflation", "rates", ...]).
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> getGroups()
     """
     return list(CATALOG.keys())
 
@@ -235,6 +243,15 @@ def getGroup(name: str) -> list[CatalogEntry]:
     -------
     list[CatalogEntry]
         해당 그룹의 카탈로그 엔트리 리스트. 그룹이 없으면 빈 리스트.
+
+    Raises
+    ------
+    없음
+        미존재 그룹은 빈 리스트.
+
+    Example
+    -------
+    >>> entries = getGroup("rates")
     """
     return CATALOG.get(name, [])
 
@@ -251,6 +268,15 @@ def getGroupIds(name: str) -> list[str]:
     -------
     list[str]
         해당 그룹의 시리즈 ID 리스트 (예: ["GDP", "GDPC1", "INDPRO", ...]).
+
+    Raises
+    ------
+    없음
+        미존재 그룹은 빈 리스트.
+
+    Example
+    -------
+    >>> ids = getGroupIds("rates")
     """
     return [e.id for e in CATALOG.get(name, [])]
 
@@ -262,6 +288,14 @@ def getAllIds() -> list[str]:
     -------
     list[str]
         카탈로그에 등록된 모든 시리즈 ID 리스트.
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> ids = getAllIds()
     """
     return [e.id for entries in CATALOG.values() for e in entries]
 
@@ -273,6 +307,14 @@ def getAllEntries() -> list[CatalogEntry]:
     -------
     list[CatalogEntry]
         모든 그룹의 CatalogEntry 리스트 (id, label, group, frequency, unit, description).
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> es = getAllEntries()
     """
     return [e for entries in CATALOG.values() for e in entries]
 
@@ -289,6 +331,15 @@ def findEntry(seriesId: str) -> CatalogEntry | None:
     -------
     CatalogEntry | None
         매칭된 카탈로그 엔트리. 없으면 None.
+
+    Raises
+    ------
+    없음
+        미존재 시 None 반환.
+
+    Example
+    -------
+    >>> e = findEntry("GDP")
     """
     for entries in CATALOG.values():
         for e in entries:
@@ -311,6 +362,15 @@ def toDataframe(group: str | None = None) -> pl.DataFrame:
         컬럼: ``id`` (Utf8) — 시리즈 ID, ``label`` (Utf8) — 한글 라벨,
         ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기,
         ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
+
+    Raises
+    ------
+    없음
+        미존재 그룹은 빈 DataFrame.
+
+    Example
+    -------
+    >>> df = toDataframe(group="rates")
     """
     entries = getGroup(group) if group else getAllEntries()
     if not entries:

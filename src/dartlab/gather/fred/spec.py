@@ -22,6 +22,15 @@ def buildSpec() -> dict:
         catalog_groups : dict — 그룹별 시리즈 메타 (count, series)
         total_catalog_series : int — 전체 카탈로그 시리즈 수 (개)
         tools : list[dict] — AI tool 정의 목록 (name, description)
+
+    Raises
+    ------
+    없음
+        카탈로그 비어 있어도 빈 그룹 dict 반환.
+
+    Example
+    -------
+    >>> spec = buildSpec()
     """
     groups = {}
     for name in _catalog.getGroups():

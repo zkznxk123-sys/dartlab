@@ -28,6 +28,14 @@ def yoy(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     -------
     pl.DataFrame
         원본 컬럼 + ``{col}_yoy`` (Float64) — 전년 동기 대비 변화율 (%).
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> df_yoy = yoy(df)
     """
     period = _inferPeriod(df)
     return df.with_columns(((pl.col(col) / pl.col(col).shift(period) - 1) * 100).alias(f"{col}_yoy"))
@@ -47,6 +55,14 @@ def mom(df: pl.DataFrame, col: str = "value") -> pl.DataFrame:
     -------
     pl.DataFrame
         원본 컬럼 + ``{col}_mom`` (Float64) — 전월(전기) 대비 변화율 (%).
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> df_mom = mom(df)
     """
     return df.with_columns(((pl.col(col) / pl.col(col).shift(1) - 1) * 100).alias(f"{col}_mom"))
 
@@ -67,6 +83,14 @@ def diff(df: pl.DataFrame, col: str = "value", periods: int = 1) -> pl.DataFrame
     -------
     pl.DataFrame
         원본 컬럼 + ``{col}_diff{periods}`` (Float64) — 차분값.
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> df_diff = diff(df, periods=4)
     """
     return df.with_columns((pl.col(col) - pl.col(col).shift(periods)).alias(f"{col}_diff{periods}"))
 
@@ -87,6 +111,14 @@ def movingAverage(df: pl.DataFrame, col: str = "value", window: int = 12) -> pl.
     -------
     pl.DataFrame
         원본 컬럼 + ``{col}_ma{window}`` (Float64) — 이동평균값.
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> df_ma = movingAverage(df, window=6)
     """
     return df.with_columns(pl.col(col).rolling_mean(window_size=window).alias(f"{col}_ma{window}"))
 
@@ -108,6 +140,15 @@ def normalize(df: pl.DataFrame, col: str = "value", baseDate: str | None = None)
     pl.DataFrame
         원본 컬럼 + ``{col}_norm`` (Float64) — 기준일 = 100 정규화 값.
         기준값이 0 또는 None이면 ``{col}_norm`` = None.
+
+    Raises
+    ------
+    ValueError
+        baseDate 가 YYYY-MM-DD 포맷이 아닐 때.
+
+    Example
+    -------
+    >>> df_norm = normalize(df, baseDate="2020-01-01")
     """
     if baseDate is not None:
         from datetime import datetime
@@ -148,6 +189,15 @@ def normalizeMulti(df: pl.DataFrame, baseDate: str | None = None) -> pl.DataFram
     -------
     pl.DataFrame
         동일 컬럼 구조에 각 수치 컬럼이 기준일=100으로 정규화된 DataFrame.
+
+    Raises
+    ------
+    ValueError
+        baseDate 가 YYYY-MM-DD 포맷이 아닐 때 (normalize 위임).
+
+    Example
+    -------
+    >>> df_n = normalizeMulti(wide_df, baseDate="2020-01-01")
     """
     result = df.clone()
     for col in df.columns:
@@ -171,6 +221,12 @@ def correlation(df: pl.DataFrame, method: str = "pearson") -> pl.DataFrame:
 
     Returns:
         상관행렬 DataFrame (column, col1, col2, ...).
+
+    Raises:
+        없음 — 컬럼 2개 미만이면 빈 DataFrame.
+
+    Example:
+        >>> corr = correlation(wide_df)
     """
     value_cols = [c for c in df.columns if c != "date"]
     if len(value_cols) < 2:
@@ -208,6 +264,12 @@ def leadLag(
 
     Returns:
         DataFrame (lag, correlation).
+
+    Raises:
+        없음 — 데이터 3행 미만이면 lag 별 None.
+
+    Example:
+        >>> df_ll = leadLag(wide_df, "FEDFUNDS", "UNRATE", maxLag=6)
     """
     clean = df.select(colA, colB).drop_nulls()
     a = clean[colA]

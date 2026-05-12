@@ -113,6 +113,16 @@ class FredClient:
         Returns
         -------
         None
+
+        Raises
+        ------
+        없음
+            httpx 세션 close 는 graceful.
+
+        Example
+        -------
+        >>> c = FredClient()
+        >>> c.close()
         """
         self._session.close()
 

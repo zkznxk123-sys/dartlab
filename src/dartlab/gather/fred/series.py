@@ -48,6 +48,15 @@ def fetchSeries(
     pl.DataFrame
         컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
         enrich=True 시 변화율 컬럼 추가.
+
+    Raises
+    ------
+    FredError
+        FRED API HTTP 오류 또는 인증 실패.
+
+    Example
+    -------
+    >>> df = fetchSeries(client, "GDP", start="2020-01-01")
     """
     cached = _cache.get(seriesId, start, end, freq, aggregation)
     if cached is not None:
@@ -136,6 +145,15 @@ def fetchMulti(
     pl.DataFrame
         컬럼: ``date`` (Date) — 관측일, 각 시리즈 ID (Float64) — 지표값.
         빈 리스트 입력 시 빈 DataFrame.
+
+    Raises
+    ------
+    FredError
+        FRED API HTTP 오류.
+
+    Example
+    -------
+    >>> df = fetchMulti(client, ["GDP", "UNRATE"], start="2020-01-01")
     """
     if not seriesIds:
         return pl.DataFrame()
@@ -200,6 +218,15 @@ def searchSeries(
         ``popularity`` (Int64) — 인기도,
         ``observation_start`` (Utf8) — 시작일,
         ``observation_end`` (Utf8) — 종료일.
+
+    Raises
+    ------
+    FredError
+        FRED API HTTP 오류.
+
+    Example
+    -------
+    >>> df = searchSeries(client, "unemployment", limit=10)
     """
     data = client.get(
         "/series/search",
@@ -265,6 +292,10 @@ def fetchMeta(client: FredClient, seriesId: str, *, limit: int | None = None) ->
     ------
     SeriesNotFoundError
         시리즈를 찾을 수 없을 때.
+
+    Example
+    -------
+    >>> m = fetchMeta(client, "GDP")
     """
     del limit
     data = client.get("/series", seriesId=seriesId)
@@ -303,6 +334,15 @@ def fetchReleases(client: FredClient, *, limit: int = 20) -> pl.DataFrame:
     pl.DataFrame
         컬럼: ``id`` (Int64) — 릴리즈 ID, ``name`` (Utf8) — 릴리즈명,
         ``press_release`` (Boolean) — 보도자료 여부, ``link`` (Utf8) — URL.
+
+    Raises
+    ------
+    FredError
+        FRED API HTTP 오류.
+
+    Example
+    -------
+    >>> df = fetchReleases(client, limit=5)
     """
     data = client.get("/releases", limit=limit, order_by="press_release", sort_order="desc")
     releases = data.get("releases", [])
