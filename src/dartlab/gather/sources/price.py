@@ -16,7 +16,7 @@ from ..types import GatherError, PriceSnapshot
 log = logging.getLogger(__name__)
 
 # 모듈 레벨 stale cache (price.py 단독 사용 시)
-_stale_cache = GatherCache(maxEntries=100)
+_staleCache = GatherCache(maxEntries=100)
 
 
 async def fetch(
@@ -129,7 +129,7 @@ async def fetch(
                 circuitBreaker.recordSuccess(source_name)
                 healthTracker.record(source_name, success=True, latency=latency)
                 # stale cache에도 저장 (fallback용)
-                _stale_cache.putTyped(stockCode, "price", result)
+                _staleCache.putTyped(stockCode, "price", result)
                 return result
 
             # None 반환 = 데이터 없음 (에러는 아님)
@@ -146,7 +146,7 @@ async def fetch(
             continue
 
     # 모든 소스 실패 → stale cache 시도
-    stale = _stale_cache.getTyped(stockCode, "price", allowStale=True)
+    stale = _staleCache.getTyped(stockCode, "price", allowStale=True)
     if stale is not None and isinstance(stale, PriceSnapshot):
         stale_copy = copy.copy(stale)
         stale_copy.is_stale = True

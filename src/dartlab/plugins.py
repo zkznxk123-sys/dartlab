@@ -123,16 +123,16 @@ class PluginContext:
 
 # ── 내부 상태 ──
 
-_loaded_plugins: list[PluginMeta] = []
-_loaded_names: set[str] = set()
+_loadedPlugins: list[PluginMeta] = []
+_loadedNames: set[str] = set()
 _discovered = False
 
 
 def _trackPlugin(meta: PluginMeta) -> None:
     """플러그인 메타데이터 중복 없이 추적."""
-    if meta.name not in _loaded_names:
-        _loaded_plugins.append(meta)
-        _loaded_names.add(meta.name)
+    if meta.name not in _loadedNames:
+        _loadedPlugins.append(meta)
+        _loadedNames.add(meta.name)
 
 
 def discover() -> list[PluginMeta]:
@@ -142,7 +142,7 @@ def discover() -> list[PluginMeta]:
     """
     global _discovered
     if _discovered:
-        return list(_loaded_plugins)
+        return list(_loadedPlugins)
 
     _discovered = True
 
@@ -154,7 +154,7 @@ def discover() -> list[PluginMeta]:
         eps = all_eps.get(_ENTRY_POINT_GROUP, [])  # type: ignore[assignment]
 
     if not eps:
-        return list(_loaded_plugins)
+        return list(_loadedPlugins)
 
     ctx = PluginContext()
     for ep in eps:
@@ -165,7 +165,7 @@ def discover() -> list[PluginMeta]:
             warnings.warn(f"dartlab plugin '{ep.name}' 로드 실패: {e}", stacklevel=2)
 
     # DART Company 모듈 레지스트리 캐시 무효화
-    if _loaded_plugins:
+    if _loadedPlugins:
         try:
             from dartlab.providers.dart.company import rebuildModuleRegistry
 
@@ -173,19 +173,19 @@ def discover() -> list[PluginMeta]:
         except ImportError:
             pass
 
-    return list(_loaded_plugins)
+    return list(_loadedPlugins)
 
 
 def getLoadedPlugins() -> list[PluginMeta]:
     """로드된 플러그인 목록 반환."""
-    return list(_loaded_plugins)
+    return list(_loadedPlugins)
 
 
 def rediscover() -> list[PluginMeta]:
     """플러그인을 다시 스캔. pip install 후 호출하면 재시작 없이 인식."""
     global _discovered
-    _loaded_plugins.clear()
-    _loaded_names.clear()
+    _loadedPlugins.clear()
+    _loadedNames.clear()
     _discovered = False
     return discover()
 
@@ -193,6 +193,6 @@ def rediscover() -> list[PluginMeta]:
 def resetForTesting() -> None:
     """테스트용 — 플러그인 상태 초기화."""
     global _discovered
-    _loaded_plugins.clear()
-    _loaded_names.clear()
+    _loadedPlugins.clear()
+    _loadedNames.clear()
     _discovered = False

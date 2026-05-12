@@ -32,7 +32,7 @@ import polars as pl
 logger = logging.getLogger(__name__)
 
 
-def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
+def _extractByIds(rowSub: pl.DataFrame, idList, nmList) -> float | None:
     """단일 연도 subset 에서 특정 계정의 금액 추출.
 
     scan._helpers.extractAccount 를 래핑하여 account_id 또는 account_nm 으로
@@ -40,11 +40,11 @@ def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
 
     Parameters
     ----------
-    row_sub : pl.DataFrame
+    rowSub : pl.DataFrame
         단일 연도 · 단일 종목의 재무 데이터 subset.
-    id_list : set[str] | list[str]
+    idList : set[str] | list[str]
         매칭할 account_id 목록 (예: _REVENUE_IDS).
-    nm_list : set[str] | list[str]
+    nmList : set[str] | list[str]
         매칭할 account_nm 목록 (예: _REVENUE_NMS).
 
     Returns
@@ -54,7 +54,7 @@ def _extract_by_ids(row_sub: pl.DataFrame, id_list, nm_list) -> float | None:
     """
     from dartlab.scan.io.parquet import extractAccount
 
-    return extractAccount(row_sub, list(id_list), list(nm_list))
+    return extractAccount(rowSub, list(idList), list(nmList))
 
 
 def computeYoyDelta() -> dict[str, dict[str, Any]]:
@@ -153,11 +153,11 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     prior = df.filter(pl.col("bsns_year") == priorYear)
 
     def _ratios(sub: pl.DataFrame) -> tuple:
-        rev = _extract_by_ids(sub, REVENUE_IDS, REVENUE_NMS)
-        op = _extract_by_ids(sub, OP_IDS, OP_NMS)
-        ni = _extract_by_ids(sub, NI_IDS, NI_NMS)
-        eq = _extract_by_ids(sub, EQ_IDS, EQ_NMS)
-        li = _extract_by_ids(sub, LIABILITY_IDS, LIABILITY_NMS)
+        rev = _extractByIds(sub, REVENUE_IDS, REVENUE_NMS)
+        op = _extractByIds(sub, OP_IDS, OP_NMS)
+        ni = _extractByIds(sub, NI_IDS, NI_NMS)
+        eq = _extractByIds(sub, EQ_IDS, EQ_NMS)
+        li = _extractByIds(sub, LIABILITY_IDS, LIABILITY_NMS)
 
         opMargin = (op / rev * 100) if rev and rev != 0 and op is not None else None
         netMargin = (ni / rev * 100) if rev and rev != 0 and ni is not None else None
@@ -182,7 +182,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
                 return None
             return round(a - b, digits)
 
-        def _pct_change(a, b, digits=1):
+        def _pctChange(a, b, digits=1):
             if a is None or b is None or b == 0:
                 return None
             return round((a - b) / abs(b) * 100, digits)
@@ -191,7 +191,7 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
             "roeDelta": _diff(lroe, proe),
             "opMarginDelta": _diff(lop, pop),
             "netMarginDelta": _diff(lnm, pnm),
-            "revenueYoyPct": _pct_change(lrev, prev),
+            "revenueYoyPct": _pctChange(lrev, prev),
             "debtRatioDelta": _diff(ldebt, pdebt),
             "asOfYear": int(latestYear) if latestYear else None,
             "priorYear": int(priorYear) if priorYear else None,

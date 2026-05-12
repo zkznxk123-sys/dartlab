@@ -49,7 +49,7 @@ warnings.filterwarnings(
 )
 
 _DEFAULT_PRICE_COLS = ("TDD_OPNPRC", "TDD_HGPRC", "TDD_LWPRC", "TDD_CLSPRC")
-_warned_no_events = False
+_warnedNoEvents = False
 
 # Stage 1 (가격 자동 감지) 이벤트 임계값 — implied/declared 비율의 1.0 으로부터의 편차.
 # 한국 시장 일일 변동 한계 ±30% 이내라 정상 변동은 implied≈declared (event_factor≈1).
@@ -230,19 +230,19 @@ def applyAdjustment(
         raw DataFrame 의 priceCols 컬럼 가용. events DataFrame schema:
         (dateCol, codeCol, type, ratio, divPerShare).
     """
-    global _warned_no_events
+    global _warnedNoEvents
 
     if mode == "raw" or raw.is_empty():
         return raw
 
     if events is None or events.is_empty():
-        if not _warned_no_events:
+        if not _warnedNoEvents:
             log.warning(
                 "events 데이터 없음 — raw 그대로 반환 (mode=%s 효과 없음). "
                 "events 트랙: gather/dividend.py + gather/capitalEvent.py 별도 작업",
                 mode,
             )
-            _warned_no_events = True
+            _warnedNoEvents = True
         return raw.with_columns(
             [
                 pl.lit(1.0).alias("splitFactor"),

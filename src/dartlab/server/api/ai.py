@@ -50,7 +50,7 @@ router = APIRouter()
 UI_PROVIDERS = publicProviderIds()
 STATIC_MODELS: dict[str, list[str]] = {}
 
-_oauth_state: dict[str, Any] = {}
+_oauthState: dict[str, Any] = {}
 
 
 def _buildOpenDartStatus() -> dict[str, Any]:
@@ -505,10 +505,10 @@ def apiOauthAuthorize():
 
     auth_url, verifier, state = buildAuthUrl()
 
-    _oauth_state["verifier"] = verifier
-    _oauth_state["state"] = state
-    _oauth_state["done"] = False
-    _oauth_state["error"] = None
+    _oauthState["verifier"] = verifier
+    _oauthState["state"] = state
+    _oauthState["done"] = False
+    _oauthState["error"] = None
 
     _startOauthCallbackServer(OAUTH_REDIRECT_PORT)
 
@@ -518,9 +518,9 @@ def apiOauthAuthorize():
 @router.get("/api/oauth/status")
 def apiOauthStatus():
     """OAuth 인증 완료 여부 폴링."""
-    if _oauth_state.get("error"):
-        return {"done": True, "error": _oauth_state["error"]}
-    if _oauth_state.get("done"):
+    if _oauthState.get("error"):
+        return {"done": True, "error": _oauthState["error"]}
+    if _oauthState.get("done"):
         return {"done": True, "error": None}
     return {"done": False}
 
@@ -561,33 +561,33 @@ def _startOauthCallbackServer(port: int):
             error = (params.get("error") or [None])[0]
 
             if error:
-                _oauth_state["error"] = error
-                _oauth_state["done"] = True
+                _oauthState["error"] = error
+                _oauthState["done"] = True
                 self._respondHtml("인증 실패", f"오류: {error}")
                 return
 
-            if state != _oauth_state.get("state"):
-                _oauth_state["error"] = "state_mismatch"
-                _oauth_state["done"] = True
+            if state != _oauthState.get("state"):
+                _oauthState["error"] = "state_mismatch"
+                _oauthState["done"] = True
                 self._respondHtml("인증 실패", "보안 검증 실패 (state mismatch)")
                 return
 
             if not code:
-                _oauth_state["error"] = "no_code"
-                _oauth_state["done"] = True
+                _oauthState["error"] = "no_code"
+                _oauthState["done"] = True
                 self._respondHtml("인증 실패", "인증 코드를 받지 못했습니다")
                 return
 
             try:
                 from dartlab.ai.providers.support.oauthToken import exchangeCode
 
-                exchangeCode(code, _oauth_state["verifier"])
+                exchangeCode(code, _oauthState["verifier"])
                 getProfileManager().update(provider="oauth-codex", updatedBy="ui")
-                _oauth_state["done"] = True
+                _oauthState["done"] = True
                 self._respondHtml("인증 성공", "DartLab 인증이 완료되었습니다. 이 창을 닫아주세요.")
             except _HANDLED_API_ERRORS as exc:
-                _oauth_state["error"] = str(exc)
-                _oauth_state["done"] = True
+                _oauthState["error"] = str(exc)
+                _oauthState["done"] = True
                 self._respondHtml("인증 실패", f"토큰 교환 실패: {exc}")
 
         def _respondHtml(self, title: str, message: str):

@@ -32,7 +32,7 @@ dataDir: str = os.environ.get("DARTLAB_DATA_DIR", str(_DEFAULT_DATA_DIR))
 
 # ── 프로젝트 설정 ──
 
-_project_config: dict | None = None
+_projectConfig: dict | None = None
 
 
 def _findConfigFile() -> Path | None:
@@ -58,35 +58,35 @@ def _findConfigFile() -> Path | None:
 
 def loadProjectConfig() -> dict:
     """프로젝트 설정 로드 (1회만, 이후 캐싱)."""
-    global _project_config
-    if _project_config is not None:
-        return _project_config
+    global _projectConfig
+    if _projectConfig is not None:
+        return _projectConfig
 
     config_path = _findConfigFile()
     if config_path is None:
-        _project_config = {}
-        return _project_config
+        _projectConfig = {}
+        return _projectConfig
 
     try:
         import yaml  # type: ignore[import-untyped]
 
         with open(config_path, encoding="utf-8") as f:
-            _project_config = yaml.safe_load(f) or {}
+            _projectConfig = yaml.safe_load(f) or {}
     except ImportError:
         # PyYAML 없으면 빈 설정
-        _project_config = {}
+        _projectConfig = {}
     except (OSError, ValueError):
-        _project_config = {}
+        _projectConfig = {}
 
     # 설정 반영
-    if _project_config.get("verbose") is not None:
+    if _projectConfig.get("verbose") is not None:
         global verbose
-        verbose = bool(_project_config["verbose"])
-    if _project_config.get("data_dir"):
+        verbose = bool(_projectConfig["verbose"])
+    if _projectConfig.get("data_dir"):
         global dataDir
-        dataDir = str(_project_config["data_dir"])
+        dataDir = str(_projectConfig["data_dir"])
 
-    return _project_config
+    return _projectConfig
 
 
 def getDefaultCompany() -> str | None:

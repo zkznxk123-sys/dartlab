@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     import polars as pl
 
 _console = Console()
-_err_console = Console(stderr=True)
+_errConsole = Console(stderr=True)
 
 
 def getConsole() -> Console:
@@ -26,7 +26,7 @@ def printError(message: str) -> None:
     """오류 메시지를 stderr에 출력."""
     from rich.markup import escape
 
-    _err_console.print(f"[bold red]오류:[/] {escape(message)}")
+    _errConsole.print(f"[bold red]오류:[/] {escape(message)}")
 
 
 def printInfo(message: str = "") -> None:
@@ -36,7 +36,7 @@ def printInfo(message: str = "") -> None:
 
 def printWarning(message: str) -> None:
     """경고 메시지를 stderr에 출력."""
-    _err_console.print(f"[bold yellow]경고:[/] {message}")
+    _errConsole.print(f"[bold yellow]경고:[/] {message}")
 
 
 def _isNumericCol(dtypeStr: str) -> bool:

@@ -38,8 +38,8 @@ _SUFFIXES = ["", ".O", ".N", ".K", ".A"]
 # 서버 보호: 호출 간 2~4초 강제 딜레이 (모듈 전역)
 _MIN_DELAY = 2.0
 _MAX_DELAY = 4.0
-_last_call_time: float = 0.0
-_throttle_lock = asyncio.Lock()
+_lastCallTime: float = 0.0
+_throttleLock = asyncio.Lock()
 
 # Reuters Code 캐시 — 종목당 5번 suffix 시도를 1번으로 줄임
 _REUTERS_CACHE: dict[str, str | None] = {}
@@ -51,17 +51,17 @@ async def _throttle() -> None:
     Returns
     -------
     None
-        대기 완료 후 반환. _last_call_time 갱신.
+        대기 완료 후 반환. _lastCallTime 갱신.
     """
-    global _last_call_time
-    async with _throttle_lock:
+    global _lastCallTime
+    async with _throttleLock:
         now = time.monotonic()
-        elapsed = now - _last_call_time
+        elapsed = now - _lastCallTime
         delay = random.uniform(_MIN_DELAY, _MAX_DELAY)
         if elapsed < delay:
             wait = delay - elapsed
             await asyncio.sleep(wait)
-        _last_call_time = time.monotonic()
+        _lastCallTime = time.monotonic()
 
 
 def _cleanNumber(val) -> float | None:

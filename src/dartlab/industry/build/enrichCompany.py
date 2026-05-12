@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 _BLOG_DIR = Path(__file__).resolve().parents[4] / "blog" / "05-company-reports"
 
 
-def _parseFrontmatter(md_text: str) -> dict:
+def _parseFrontmatter(mdText: str) -> dict:
     """마크다운 파일의 YAML frontmatter 를 dict 로 파싱.
 
     ``---`` 로 감싼 YAML 블록을 추출하여 safe_load 한다.
@@ -24,7 +24,7 @@ def _parseFrontmatter(md_text: str) -> dict:
 
     Parameters
     ----------
-    md_text : str
+    mdText : str
         마크다운 전체 텍스트.
 
     Returns
@@ -34,7 +34,7 @@ def _parseFrontmatter(md_text: str) -> dict:
     """
     import yaml
 
-    m = re.match(r"^---\n(.*?)\n---", md_text, re.DOTALL)
+    m = re.match(r"^---\n(.*?)\n---", mdText, re.DOTALL)
     if not m:
         return {}
     try:

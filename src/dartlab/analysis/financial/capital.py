@@ -55,7 +55,7 @@ def _getRatios(company):
 
 import contextvars
 
-_analysis_currency: contextvars.ContextVar[str] = contextvars.ContextVar("analysis_currency", default="KRW")
+_analysisCurrency: contextvars.ContextVar[str] = contextvars.ContextVar("analysis_currency", default="KRW")
 
 
 def _fmtAmt(value) -> str:
@@ -76,7 +76,7 @@ def _fmtAmt(value) -> str:
         return "-"
     absVal = abs(value)
     sign = "-" if value < 0 else ""
-    if _analysis_currency.get() == "USD":
+    if _analysisCurrency.get() == "USD":
         if absVal >= 1_000_000_000:
             return f"{sign}${absVal / 1_000_000_000:.1f}B"
         if absVal >= 1_000_000:

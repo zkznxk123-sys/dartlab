@@ -56,8 +56,8 @@ _USER_AGENTS = [
 # Event loop 안전 실행 헬퍼
 # ══════════════════════════════════════
 
-_thread_loop: asyncio.AbstractEventLoop | None = None
-_thread_pool = ThreadPoolExecutor(max_workers=1)
+_threadLoop: asyncio.AbstractEventLoop | None = None
+_threadPool = ThreadPoolExecutor(max_workers=1)
 
 
 def _getThreadLoop() -> asyncio.AbstractEventLoop:
@@ -71,10 +71,10 @@ def _getThreadLoop() -> asyncio.AbstractEventLoop:
     asyncio.AbstractEventLoop
         스레드 전용 event loop 인스턴스.
     """
-    global _thread_loop
-    if _thread_loop is None or _thread_loop.is_closed():
-        _thread_loop = asyncio.new_event_loop()
-    return _thread_loop
+    global _threadLoop
+    if _threadLoop is None or _threadLoop.is_closed():
+        _threadLoop = asyncio.new_event_loop()
+    return _threadLoop
 
 
 def _runInThreadLoop(coro):
@@ -131,7 +131,7 @@ def runAsync(coro):
 
     Requires
     --------
-    ``_thread_pool`` (ThreadPoolExecutor) + ``_thread_loop`` (persistent loop).
+    ``_threadPool`` (ThreadPoolExecutor) + ``_threadLoop`` (persistent loop).
 
     See Also
     --------
@@ -143,7 +143,7 @@ def runAsync(coro):
         # loop 없음 — 직접 실행 (persistent loop 사용)
         return _runInThreadLoop(coro)
     # 이미 loop 실행 중 → 별도 스레드의 persistent loop
-    return _thread_pool.submit(_runInThreadLoop, coro).result()
+    return _threadPool.submit(_runInThreadLoop, coro).result()
 
 
 # ══════════════════════════════════════

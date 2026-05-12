@@ -97,7 +97,7 @@ patterns:
   - name: review_currency_var
     regex: '_review_currency\b'
     severity: error
-    message: "v0.9.22: _review_currency → _story_currency rename"
+    message: "v0.9.22: _review_currency → _storyCurrency rename"
     whitelist_paths:
       - CHANGELOG.md
 

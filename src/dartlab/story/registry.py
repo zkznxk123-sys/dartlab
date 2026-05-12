@@ -107,10 +107,10 @@ def _setupCurrency(company) -> None:
     contextvars — 스레드 안전. analysis.financial.capital 의 _analysis_currency
     가 없으면 (구버전) silent skip.
     """
-    from dartlab.story.builders import _story_currency
+    from dartlab.story.builders import _storyCurrency
 
     _currency = getattr(company, "currency", "KRW")
-    _story_currency.set(_currency)
+    _storyCurrency.set(_currency)
     try:
         from dartlab.analysis.financial.capital import _analysis_currency
 
