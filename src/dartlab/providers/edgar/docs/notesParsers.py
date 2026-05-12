@@ -208,7 +208,7 @@ def extractAllNoteCategories(
             catDf = df.filter(pl.col("tag").is_in(catTags))
             if catDf.is_empty():
                 continue
-            pivoted = catDf.pivot(on="fy", index=["tag", "label"], values="val")
+            pivoted = catDf.pivot(on="fy", index=["tag", "label"], values="val")  # polars-streaming-unsupported: pivot
             yearCols = sorted([c for c in pivoted.columns if c not in ("tag", "label")])
             if yearCols:
                 result[cat] = pivoted.select(["tag", "label"] + yearCols)
@@ -268,7 +268,7 @@ def extractNoteCategory(
         df = df.sort("filed", descending=True).unique(subset=["tag", "fy"], keep="first")
 
         # 피벗: tag × fy → value
-        pivoted = df.pivot(
+        pivoted = df.pivot(  # polars-streaming-unsupported: pivot
             on="fy",
             index=["tag", "label"],
             values="val",

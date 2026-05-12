@@ -145,7 +145,7 @@ def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | 
         .sort(["subtopicOrder", "period"], descending=[False, True])
     )
     wide_df = (
-        merged.pivot(
+        merged.pivot(  # polars-streaming-unsupported: pivot
             on="period",
             index=["topic", "sourceTopic", "subtopic", "subtopicOrder"],
             values="tableText",

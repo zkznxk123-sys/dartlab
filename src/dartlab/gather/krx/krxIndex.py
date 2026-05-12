@@ -464,7 +464,9 @@ def gatherKrxIndex(
 
     # target 매핑
     if target in ("close", "open", "high", "low", "volume", "amount", "marketCap"):
-        wide = std_df.pivot(values=target, index="indexName", on="date", aggregate_function="first").sort("indexName")
+        wide = std_df.pivot(values=target, index="indexName", on="date", aggregate_function="first").sort(
+            "indexName"
+        )  # polars-streaming-unsupported: pivot
         return wide
 
     # 보조지표 — 단일 지수 OHLCV 에 addIndicators 적용 시 indexFilter 1개 필수

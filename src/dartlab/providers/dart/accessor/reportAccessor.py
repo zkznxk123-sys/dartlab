@@ -231,7 +231,9 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
     if df.is_empty():
         return None
 
-    pivoted = df.pivot(on="_period", index="se", values="thstrm", aggregate_function="first")
+    pivoted = df.pivot(
+        on="_period", index="se", values="thstrm", aggregate_function="first"
+    )  # polars-streaming-unsupported: pivot
 
     # period 컬럼 역순 정렬
     periodCols = [c for c in pivoted.columns if c != "se"]

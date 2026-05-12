@@ -215,7 +215,7 @@ def scanAccount(
     allDf = pl.concat(chunks)
     allDf = allDf.group_by(["stockCode", "period"]).agg(pl.col("amount").first())
 
-    result = allDf.pivot(on="period", index="stockCode", values="amount")
+    result = allDf.pivot(on="period", index="stockCode", values="amount")  # polars-streaming-unsupported: pivot
     periodCols = sorted(
         (c for c in result.columns if c != "stockCode"),
         reverse=True,

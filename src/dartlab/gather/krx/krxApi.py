@@ -501,6 +501,6 @@ def gatherKrx(
 
     # 7. wide pivot — 행 = stockCode + corpName, 열 = 일자 (descending — 최신 왼쪽).
     # 사람 view 친화 (네이버/Bloomberg 컨벤션). 시계열 분석 시 사용자가 명시 sort.
-    wide = stdDf.pivot(index="stockCode", on="date", values=valueCol)
+    wide = stdDf.pivot(index="stockCode", on="date", values=valueCol)  # polars-streaming-unsupported: pivot
     dateCols = sorted((c for c in wide.columns if c != "stockCode"), reverse=True)
     return wide.join(nameMap, on="stockCode", how="left").select(["stockCode", "corpName"] + dateCols).sort("stockCode")

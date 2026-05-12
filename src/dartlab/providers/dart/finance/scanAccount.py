@@ -617,7 +617,7 @@ def scanAccount(
     # 기간당 첫 값 + pivot
     allDf = allDf.group_by(["stockCode", "period"]).agg(pl.col("amount").first())
 
-    result = allDf.pivot(on="period", index="stockCode", values="amount")
+    result = allDf.pivot(on="period", index="stockCode", values="amount")  # polars-streaming-unsupported: pivot
     periodCols = sorted(c for c in result.columns if c != "stockCode")
 
     # 분기: 첫 연도에 Q4만 존재하면 제거 (불완전 분기)

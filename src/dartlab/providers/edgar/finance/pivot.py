@@ -802,7 +802,7 @@ def _pivotTimeseries(selected: pl.DataFrame) -> pl.DataFrame:
     if selected.height == 0:
         return pl.DataFrame()
 
-    pivoted = selected.pivot(
+    pivoted = selected.pivot(  # polars-streaming-unsupported: pivot
         on="period",
         index="tag",
         values="val",

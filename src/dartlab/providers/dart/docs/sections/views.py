@@ -210,7 +210,9 @@ def buildMarkdownWide(blocks: pl.DataFrame) -> pl.DataFrame:
     )
 
     periods = sortPeriods(merged.get_column("period").unique().to_list())
-    wide = merged.select(["topic", "period", "rawMarkdown"]).pivot(on="period", index="topic", values="rawMarkdown")
+    wide = merged.select(["topic", "period", "rawMarkdown"]).pivot(
+        on="period", index="topic", values="rawMarkdown"
+    )  # polars-streaming-unsupported: pivot
     existing = [period for period in periods if period in wide.columns]
     return wide.select(["topic", *existing])
 

@@ -935,7 +935,9 @@ def calcFactorIC(
     if sub.is_empty():
         return None
 
-    wide = sub.pivot(values="TDD_CLSPRC", index="BAS_DD", on="ISU_CD", aggregate_function="first").sort("BAS_DD")
+    wide = sub.pivot(values="TDD_CLSPRC", index="BAS_DD", on="ISU_CD", aggregate_function="first").sort(
+        "BAS_DD"
+    )  # polars-streaming-unsupported: pivot
     date_col = wide.get_column("BAS_DD").to_numpy()
     stock_cols = [c for c in wide.columns if c != "BAS_DD"]
     if len(stock_cols) < 20:
