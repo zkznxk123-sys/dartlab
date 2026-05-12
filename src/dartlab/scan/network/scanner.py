@@ -48,6 +48,30 @@ def loadListing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, d
         listing_codes : set[str] — 전체 상장사 종목코드
         listing_meta : dict — 종목코드 → {name, market, industry}
 
+    Capabilities:
+        - report 카테고리 (investedCompany / majorHolder / affiliateDocs) raw → 정제 DataFrame
+          또는 회사명↔코드 매핑 dict.
+
+    AIContext:
+        ``buildGraph`` 의 첫 4 단계가 본 함수들을 sequential 호출. AI agent 는 통상 buildGraph
+        만 호출하면 됨 (본 함수들은 implementation detail).
+
+    Guide:
+        - loadListing 결과 (nameToCode/codeToName/listing_codes/listing_meta) 가 후속 매핑의 핵심.
+        - 법인명 정규화 (접두 (주)/㈜ 제거 + 사업자번호 strip) 가 매핑 정확도 핵심.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        report parquet → 정제 → dict/DataFrame 변환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport``) + KRX listing.
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수들 호출자
+
     Raises
     ------
     KeyError
@@ -134,6 +158,30 @@ def scanInvested() -> pl.DataFrame:
         report parquet 의 investedCompany apiType 행 (stockCode/year/inv_prm/
         invstmnt_purps/trmend_blce_qota_rt/trmend_blce_acntbk_amount/trmend_blce_qy).
 
+    Capabilities:
+        - report 카테고리 (investedCompany / majorHolder / affiliateDocs) raw → 정제 DataFrame
+          또는 회사명↔코드 매핑 dict.
+
+    AIContext:
+        ``buildGraph`` 의 첫 4 단계가 본 함수들을 sequential 호출. AI agent 는 통상 buildGraph
+        만 호출하면 됨 (본 함수들은 implementation detail).
+
+    Guide:
+        - loadListing 결과 (nameToCode/codeToName/listing_codes/listing_meta) 가 후속 매핑의 핵심.
+        - 법인명 정규화 (접두 (주)/㈜ 제거 + 사업자번호 strip) 가 매핑 정확도 핵심.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        report parquet → 정제 → dict/DataFrame 변환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport``) + KRX listing.
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수들 호출자
+
     Raises
     ------
     polars.PolarsError
@@ -168,6 +216,30 @@ def scanMajorHolders() -> pl.DataFrame:
     pl.DataFrame
         report parquet 의 majorHolder apiType 행 (stockCode/year/nm/relate/
         trmend_posesn_stock_co/trmend_posesn_stock_qota_rt).
+
+    Capabilities:
+        - report 카테고리 (investedCompany / majorHolder / affiliateDocs) raw → 정제 DataFrame
+          또는 회사명↔코드 매핑 dict.
+
+    AIContext:
+        ``buildGraph`` 의 첫 4 단계가 본 함수들을 sequential 호출. AI agent 는 통상 buildGraph
+        만 호출하면 됨 (본 함수들은 implementation detail).
+
+    Guide:
+        - loadListing 결과 (nameToCode/codeToName/listing_codes/listing_meta) 가 후속 매핑의 핵심.
+        - 법인명 정규화 (접두 (주)/㈜ 제거 + 사업자번호 strip) 가 매핑 정확도 핵심.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        report parquet → 정제 → dict/DataFrame 변환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport``) + KRX listing.
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수들 호출자
 
     Raises
     ------
@@ -220,6 +292,21 @@ class UnionFind:
         str
             루트 노드.
 
+        Capabilities:
+            - UnionFind (DSU) 표준 연산. 경로 압축 / rank 가중 union.
+
+        AIContext:
+            계열회사 그룹핑 (균형 분류 phase) 의 내부 자료구조. 호출자는 ``UnionFind`` 인스턴스만.
+
+        Guide/When/How:
+            계열 그룹핑 시. find = 루트 + 경로 압축, union = rank 비교 후 작은 트리를 큰 트리에 attach.
+
+        Requires:
+            - UnionFind 인스턴스 (parent/rank dict)
+
+        SeeAlso:
+            - :func:`components` — 본 클래스 연산의 결과 컬렉션
+
         Raises
         ------
         없음.
@@ -249,6 +336,21 @@ class UnionFind:
         -------
         None — 내부 상태 변경.
 
+        Capabilities:
+            - UnionFind (DSU) 표준 연산. 경로 압축 / rank 가중 union.
+
+        AIContext:
+            계열회사 그룹핑 (균형 분류 phase) 의 내부 자료구조. 호출자는 ``UnionFind`` 인스턴스만.
+
+        Guide/When/How:
+            계열 그룹핑 시. find = 루트 + 경로 압축, union = rank 비교 후 작은 트리를 큰 트리에 attach.
+
+        Requires:
+            - UnionFind 인스턴스 (parent/rank dict)
+
+        SeeAlso:
+            - :func:`components` — 본 클래스 연산의 결과 컬렉션
+
         Raises
         ------
         없음.
@@ -274,6 +376,21 @@ class UnionFind:
         -------
         dict[str, list[str]]
             루트 노드 → 자식 노드 list.
+
+        Capabilities:
+            - UnionFind (DSU) 표준 연산. 경로 압축 / rank 가중 union.
+
+        AIContext:
+            계열회사 그룹핑 (균형 분류 phase) 의 내부 자료구조. 호출자는 ``UnionFind`` 인스턴스만.
+
+        Guide/When/How:
+            계열 그룹핑 시. find = 루트 + 경로 압축, union = rank 비교 후 작은 트리를 큰 트리에 attach.
+
+        Requires:
+            - UnionFind 인스턴스 (parent/rank dict)
+
+        SeeAlso:
+            - :func:`components` — 본 클래스 연산의 결과 컬렉션
 
         Raises
         ------
@@ -309,6 +426,30 @@ def scanAffiliateDocs(
     -------
     dict[str, str]
         종목코드 → 그룹명 매핑 (계열회사 표 ground truth 기반).
+
+    Capabilities:
+        - report 카테고리 (investedCompany / majorHolder / affiliateDocs) raw → 정제 DataFrame
+          또는 회사명↔코드 매핑 dict.
+
+    AIContext:
+        ``buildGraph`` 의 첫 4 단계가 본 함수들을 sequential 호출. AI agent 는 통상 buildGraph
+        만 호출하면 됨 (본 함수들은 implementation detail).
+
+    Guide:
+        - loadListing 결과 (nameToCode/codeToName/listing_codes/listing_meta) 가 후속 매핑의 핵심.
+        - 법인명 정규화 (접두 (주)/㈜ 제거 + 사업자번호 strip) 가 매핑 정확도 핵심.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        report parquet → 정제 → dict/DataFrame 변환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport``) + KRX listing.
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수들 호출자
 
     Raises
     ------

@@ -47,6 +47,32 @@ def buildInvestEdges(
         - purpose : str — 투자목적 ("경영참여" | "단순투자" | "기타")
         - year : str — 보고 연도
 
+    Capabilities:
+        - raw report row → 정규 엣지 DataFrame. name→code 매핑 + 자기 자신 edge 제거 + 가중치
+          (ratio) 컬럼. 출자 (investEdges) / 지분 (holderEdges) / 순환 (cycles) 별 함수.
+
+    AIContext:
+        ``buildGraph`` 의 edges 빌드 단계. 후속 ``classifyBalanced`` / ``detectCycles`` 의
+        직접 source.
+
+    Guide:
+        - 한 화살표 (from→to) 가중치 = ratio (%). 누적 cycle 탐지 시 최대 6 단계까지.
+        - 모든 엣지 한쪽 노드라도 listing 외 코드면 silent skip.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        raw row → name 정규화 → name→code 매핑 → from/to 컬럼 + ratio 적재 → DataFrame.
+        ``deduplicateEdges`` 는 group_by ratio max 로 중복 제거. ``detectCycles`` 는 DFS.
+
+    Requires:
+        - raw report row + ``nameToCode`` · ``codeToName`` 매핑
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수 호출자
+        - :func:`dartlab.scan.network.classifier.classifyBalanced` — 출자 엣지 소비자
+
     Raises
     ------
     polars.PolarsError
@@ -156,6 +182,32 @@ def deduplicateEdges(edges: pl.DataFrame) -> pl.DataFrame:
         from_code, from_name, to_name, to_name_norm, to_code,
         is_listed, ownership_pct, book_value, purpose, year.
 
+    Capabilities:
+        - raw report row → 정규 엣지 DataFrame. name→code 매핑 + 자기 자신 edge 제거 + 가중치
+          (ratio) 컬럼. 출자 (investEdges) / 지분 (holderEdges) / 순환 (cycles) 별 함수.
+
+    AIContext:
+        ``buildGraph`` 의 edges 빌드 단계. 후속 ``classifyBalanced`` / ``detectCycles`` 의
+        직접 source.
+
+    Guide:
+        - 한 화살표 (from→to) 가중치 = ratio (%). 누적 cycle 탐지 시 최대 6 단계까지.
+        - 모든 엣지 한쪽 노드라도 listing 외 코드면 silent skip.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        raw row → name 정규화 → name→code 매핑 → from/to 컬럼 + ratio 적재 → DataFrame.
+        ``deduplicateEdges`` 는 group_by ratio max 로 중복 제거. ``detectCycles`` 는 DFS.
+
+    Requires:
+        - raw report row + ``nameToCode`` · ``codeToName`` 매핑
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수 호출자
+        - :func:`dartlab.scan.network.classifier.classifyBalanced` — 출자 엣지 소비자
+
     Raises
     ------
     polars.PolarsError
@@ -251,6 +303,32 @@ def buildHolderEdges(
         - relate : str — 관계
         - ownership_pct : float | None — 지분율 (%)
         - year : str — 보고 연도
+
+    Capabilities:
+        - raw report row → 정규 엣지 DataFrame. name→code 매핑 + 자기 자신 edge 제거 + 가중치
+          (ratio) 컬럼. 출자 (investEdges) / 지분 (holderEdges) / 순환 (cycles) 별 함수.
+
+    AIContext:
+        ``buildGraph`` 의 edges 빌드 단계. 후속 ``classifyBalanced`` / ``detectCycles`` 의
+        직접 source.
+
+    Guide:
+        - 한 화살표 (from→to) 가중치 = ratio (%). 누적 cycle 탐지 시 최대 6 단계까지.
+        - 모든 엣지 한쪽 노드라도 listing 외 코드면 silent skip.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서.
+
+    How:
+        raw row → name 정규화 → name→code 매핑 → from/to 컬럼 + ratio 적재 → DataFrame.
+        ``deduplicateEdges`` 는 group_by ratio max 로 중복 제거. ``detectCycles`` 는 DFS.
+
+    Requires:
+        - raw report row + ``nameToCode`` · ``codeToName`` 매핑
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수 호출자
+        - :func:`dartlab.scan.network.classifier.classifyBalanced` — 출자 엣지 소비자
 
     Raises
     ------
@@ -356,6 +434,32 @@ def detectCycles(
     Raises
     ------
     없음 — DFS 내부에서 maxLength 초과 시 즉시 return.
+
+    Capabilities:
+        - investEdges 의 상장사 간 directed graph 에 DFS 적용해 maxLength (기본 6) 이하 순환
+          모두 탐지. 중복 경로 (회전 / 역순) 제거.
+
+    AIContext:
+        ``buildGraph`` 의 6 번째 단계. AI agent 가 "순환출자 watchlist" / "지배구조 risk" 질문 시
+        본 함수 결과 (cycles list) 그대로 인용.
+
+    Guide:
+        - maxLength 6 = 한국 상장사 그룹 평균 깊이. 7+ 는 noise 가 큼.
+        - visited_global 누적으로 같은 노드를 다른 cycle 시작점으로 재탐색 방지.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        listed 엣지 only filter → adj dict 구성 → 모든 노드 시작 DFS → cycle 발견 시 path 복사
+        append → visited_global 누적.
+
+    Requires:
+        - ``invest_edges`` (from_code/to_code/is_listed 컬럼)
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수 호출자
+        - :func:`buildInvestEdges` — 본 함수의 source 엣지 빌더
     """
     adj: dict[str, list[str]] = defaultdict(list)
     listed = investEdges.filter(
@@ -390,6 +494,9 @@ def detectCycles(
         Examples
         --------
         >>> dfs("005930", ["005930"], {"005930"})  # 내부 호출만
+
+        Requires:
+            - adj · cycles · maxLength · visited_global (closure capture)
         """
         if len(path) > maxLength:
             return

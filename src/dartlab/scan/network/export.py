@@ -181,6 +181,31 @@ def exportFull(data: dict) -> dict:
         industries : list[dict] — 업종 클러스터
         cycles : list[dict] — 순환출자 경로
 
+    Capabilities:
+        - ``buildGraph`` 결과 dict → JSON 페이로드 변환. exportFull (전체) / exportOverview
+          (요약) / exportEgo (1 종목 ego) 3 종.
+
+    AIContext:
+        Server API 가 network 시각화 페이로드 빌드 시 본 함수들 사용. AI agent 가 "삼성 출자
+        구조" 같은 ego 질문 시 ``exportEgo`` 직접 호출.
+
+    Guide:
+        - exportFull 은 페이로드 가장 큼. 시각화 라이브러리 (cytoscape/d3) 에 직접 주입.
+        - exportOverview 는 요약 통계 (cycle 수 / 노드 수 / 그룹 수).
+        - exportEgo 는 1 종목 중심 N-hop 이웃.
+
+    When:
+        ``buildGraph`` 결과를 JSON / 시각화에 보낼 때.
+
+    How:
+        ``_buildEnrichedEdges`` · ``_buildEnrichedNodes`` 로 메타 결합 → JSON-safe dict 구성.
+
+    Requires:
+        - ``buildGraph`` 결과 data dict
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — source data 생성
+
     Raises
     ------
     KeyError
@@ -273,6 +298,31 @@ def exportOverview(data: dict, full: dict) -> dict:
         nodes : list[dict] — 그룹 슈퍼노드 (memberCount >= 2)
         edges : list[dict] — 그룹 간 weighted 엣지
 
+    Capabilities:
+        - ``buildGraph`` 결과 dict → JSON 페이로드 변환. exportFull (전체) / exportOverview
+          (요약) / exportEgo (1 종목 ego) 3 종.
+
+    AIContext:
+        Server API 가 network 시각화 페이로드 빌드 시 본 함수들 사용. AI agent 가 "삼성 출자
+        구조" 같은 ego 질문 시 ``exportEgo`` 직접 호출.
+
+    Guide:
+        - exportFull 은 페이로드 가장 큼. 시각화 라이브러리 (cytoscape/d3) 에 직접 주입.
+        - exportOverview 는 요약 통계 (cycle 수 / 노드 수 / 그룹 수).
+        - exportEgo 는 1 종목 중심 N-hop 이웃.
+
+    When:
+        ``buildGraph`` 결과를 JSON / 시각화에 보낼 때.
+
+    How:
+        ``_buildEnrichedEdges`` · ``_buildEnrichedNodes`` 로 메타 결합 → JSON-safe dict 구성.
+
+    Requires:
+        - ``buildGraph`` 결과 data dict
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — source data 생성
+
     Raises
     ------
     KeyError
@@ -356,6 +406,31 @@ def exportEgo(
         meta : dict — center/hops/nodeCount
         nodes : list[dict]
         edges : list[dict]
+
+    Capabilities:
+        - ``buildGraph`` 결과 dict → JSON 페이로드 변환. exportFull (전체) / exportOverview
+          (요약) / exportEgo (1 종목 ego) 3 종.
+
+    AIContext:
+        Server API 가 network 시각화 페이로드 빌드 시 본 함수들 사용. AI agent 가 "삼성 출자
+        구조" 같은 ego 질문 시 ``exportEgo`` 직접 호출.
+
+    Guide:
+        - exportFull 은 페이로드 가장 큼. 시각화 라이브러리 (cytoscape/d3) 에 직접 주입.
+        - exportOverview 는 요약 통계 (cycle 수 / 노드 수 / 그룹 수).
+        - exportEgo 는 1 종목 중심 N-hop 이웃.
+
+    When:
+        ``buildGraph`` 결과를 JSON / 시각화에 보낼 때.
+
+    How:
+        ``_buildEnrichedEdges`` · ``_buildEnrichedNodes`` 로 메타 결합 → JSON-safe dict 구성.
+
+    Requires:
+        - ``buildGraph`` 결과 data dict
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — source data 생성
 
     Raises
     ------

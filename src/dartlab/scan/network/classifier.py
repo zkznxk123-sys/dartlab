@@ -458,6 +458,30 @@ def classifyBalanced(
     ... )
     >>> groups["005930"]
     '삼성'
+
+    Capabilities:
+        - 6 Phase orchestrator: docs ground truth lock → well-known ext lock → 경영참여 확장 →
+          법인주주 → 개인주주 → 이름 키워드 + 독립. 모든 노드 cover 보장.
+
+    AIContext:
+        ``buildGraph`` 의 5 단계. 종목 클러스터링 알고리즘 출력 → 후속 시각화 / 분석의 1 차 라벨.
+
+    Guide:
+        - docs ground truth (공시 affiliateDocs) 가 가장 강한 신호. 없으면 후속 phase 에 의존.
+        - Phase 우선순위 변경 시 본 함수 내부 순서만 수정 — caller 무변경.
+
+    When:
+        ``buildGraph`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        Phase 0~5 순차. 각 phase 는 locked 노드 set 누적 + codeToGroup dict 보강.
+
+    Requires:
+        - invest_edges + corp_edges + person_edges + all_node_ids + code_to_name + docs ground truth
+
+    SeeAlso:
+        - :func:`dartlab.scan.network.buildGraph` — 본 함수 호출자
+        - :func:`dartlab.scan.network.scanner.scanAffiliateDocs` — docs ground truth source
     """
     codeToGroup: dict[str, str] = {}
     locked: set[str] = set()
