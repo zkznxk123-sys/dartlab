@@ -22,6 +22,29 @@ def scanBonds() -> dict[str, dict]:
             단기잔액 : float — 1년 이내 만기 잔액 (백만원)
             단기비중 : float — 단기잔액/사채잔액 (%)
 
+    Capabilities:
+        - 종목별 사채잔액 / 단기사채 (CP 포함) / 부채비율 추출. ``scanDebt`` 의 sub-scanner.
+
+    AIContext:
+        ``scanDebt`` 내부 사용. AI agent 가 직접 호출하지 않음.
+
+    Guide:
+        - 사채잔액 0 인 종목은 결과 dict 에서 제외.
+        - 단기비중 = 단기잔액 / 사채잔액 (%). > 50 % 면 단기 리파이낸싱 리스크.
+
+    When:
+        ``scanDebt`` 진행 단계 안에서.
+
+    How:
+        report parquet → 종목별 group → 합계 row 또는 만기별 row 합산.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{corporateBond,shortTermBond}.parquet`` 또는
+          ``data/dart/scan/finance.parquet``
+
+    SeeAlso:
+        - :func:`dartlab.scan.debt.scanDebt` — sub-scanner 통합
+
     Raises
     ------
     polars.PolarsError
@@ -98,6 +121,29 @@ def scanShortDebt() -> dict[str, dict]:
             CP잔액 : float — 기업어음 잔액 (백만원)
             단기채무합계 : float — 단기사채 + CP 합산 (백만원)
 
+    Capabilities:
+        - 종목별 사채잔액 / 단기사채 (CP 포함) / 부채비율 추출. ``scanDebt`` 의 sub-scanner.
+
+    AIContext:
+        ``scanDebt`` 내부 사용. AI agent 가 직접 호출하지 않음.
+
+    Guide:
+        - 사채잔액 0 인 종목은 결과 dict 에서 제외.
+        - 단기비중 = 단기잔액 / 사채잔액 (%). > 50 % 면 단기 리파이낸싱 리스크.
+
+    When:
+        ``scanDebt`` 진행 단계 안에서.
+
+    How:
+        report parquet → 종목별 group → 합계 row 또는 만기별 row 합산.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{corporateBond,shortTermBond}.parquet`` 또는
+          ``data/dart/scan/finance.parquet``
+
+    SeeAlso:
+        - :func:`dartlab.scan.debt.scanDebt` — sub-scanner 통합
+
     Raises
     ------
     polars.PolarsError
@@ -163,6 +209,29 @@ def scanDebtMix() -> dict[str, dict]:
         {종목코드: info} 매핑. 각 info:
             총부채 : float — 부채총계 (원)
             부채비율 : float | None — 부채비율 (%)
+
+    Capabilities:
+        - 종목별 사채잔액 / 단기사채 (CP 포함) / 부채비율 추출. ``scanDebt`` 의 sub-scanner.
+
+    AIContext:
+        ``scanDebt`` 내부 사용. AI agent 가 직접 호출하지 않음.
+
+    Guide:
+        - 사채잔액 0 인 종목은 결과 dict 에서 제외.
+        - 단기비중 = 단기잔액 / 사채잔액 (%). > 50 % 면 단기 리파이낸싱 리스크.
+
+    When:
+        ``scanDebt`` 진행 단계 안에서.
+
+    How:
+        report parquet → 종목별 group → 합계 row 또는 만기별 row 합산.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{corporateBond,shortTermBond}.parquet`` 또는
+          ``data/dart/scan/finance.parquet``
+
+    SeeAlso:
+        - :func:`dartlab.scan.debt.scanDebt` — sub-scanner 통합
 
     Raises
     ------

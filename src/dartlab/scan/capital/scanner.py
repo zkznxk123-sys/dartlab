@@ -31,6 +31,29 @@ def scanDividend() -> dict[str, dict]:
             배당수익률 : float — 현금배당수익률 (%)
             배당총액_백만 : float — 현금배당금 총액 (백만원)
 
+    Capabilities:
+        - dividend / treasuryStock / capitalChange report → 종목별 주주환원 핵심 지표 추출.
+          ``scanCapital`` 의 sub-scanner.
+
+    AIContext:
+        ``scanCapital`` 의 3 sub-scanner. AI agent 가 단독 호출하지 않음 — scanCapital dispatch.
+
+    Guide:
+        - 각 sub-scanner 가 같은 stockCode key 의 dict 반환. ``scanCapital`` 이 union 후 merge.
+
+    When:
+        ``scanCapital`` 진행 단계 안에서. 단독은 prototype.
+
+    How:
+        report parquet → 종목별 group → 단면 값 추출. 임계 검증 + 최신 연도 우선.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{dividend,treasuryStock,capitalChange}.parquet`` (``buildReport``)
+
+    SeeAlso:
+        - :func:`dartlab.scan.capital.scanCapital` — 3 sub-scanner 통합 호출
+        - :func:`classifyReturn` — 결과를 분류로
+
     Raises
     ------
     polars.PolarsError
@@ -120,6 +143,29 @@ def scanTreasuryStock() -> dict[str, dict]:
             처분수량 : int — 당기 처분 주식수 (주)
             소각수량 : int — 당기 소각 주식수 (주)
 
+    Capabilities:
+        - dividend / treasuryStock / capitalChange report → 종목별 주주환원 핵심 지표 추출.
+          ``scanCapital`` 의 sub-scanner.
+
+    AIContext:
+        ``scanCapital`` 의 3 sub-scanner. AI agent 가 단독 호출하지 않음 — scanCapital dispatch.
+
+    Guide:
+        - 각 sub-scanner 가 같은 stockCode key 의 dict 반환. ``scanCapital`` 이 union 후 merge.
+
+    When:
+        ``scanCapital`` 진행 단계 안에서. 단독은 prototype.
+
+    How:
+        report parquet → 종목별 group → 단면 값 추출. 임계 검증 + 최신 연도 우선.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{dividend,treasuryStock,capitalChange}.parquet`` (``buildReport``)
+
+    SeeAlso:
+        - :func:`dartlab.scan.capital.scanCapital` — 3 sub-scanner 통합 호출
+        - :func:`classifyReturn` — 결과를 분류로
+
     Raises
     ------
     polars.PolarsError
@@ -205,6 +251,29 @@ def scanCapitalChange() -> dict[str, dict]:
     dict[str, dict]
         {종목코드: info} 매핑. 각 info:
             최근증자 : bool — 최근 3년 내 증자 여부
+
+    Capabilities:
+        - dividend / treasuryStock / capitalChange report → 종목별 주주환원 핵심 지표 추출.
+          ``scanCapital`` 의 sub-scanner.
+
+    AIContext:
+        ``scanCapital`` 의 3 sub-scanner. AI agent 가 단독 호출하지 않음 — scanCapital dispatch.
+
+    Guide:
+        - 각 sub-scanner 가 같은 stockCode key 의 dict 반환. ``scanCapital`` 이 union 후 merge.
+
+    When:
+        ``scanCapital`` 진행 단계 안에서. 단독은 prototype.
+
+    How:
+        report parquet → 종목별 group → 단면 값 추출. 임계 검증 + 최신 연도 우선.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{dividend,treasuryStock,capitalChange}.parquet`` (``buildReport``)
+
+    SeeAlso:
+        - :func:`dartlab.scan.capital.scanCapital` — 3 sub-scanner 통합 호출
+        - :func:`classifyReturn` — 결과를 분류로
 
     Raises
     ------

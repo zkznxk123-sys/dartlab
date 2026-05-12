@@ -158,6 +158,26 @@ def scanIcr() -> dict[str, float]:
     dict[str, float]
         {종목코드: ICR(배)}. 이자비용 0 이거나 매칭 실패면 제외.
 
+    Capabilities:
+        - scanIcr: finance IS 의 영업이익 / 이자비용 → ICR (배). 종목별 latest 단면.
+        - classifyRisk: ICR + 단기비중 + 단기채무합계 → 4 단계 위험등급 (안전/관찰/주의/고위험).
+
+    AIContext:
+        ``scanDebt`` 의 sub-scanner + classifier. AI agent 가 단독 호출하지 않음.
+
+    Guide:
+        - ICR < 1 = 영업이익으로 이자조차 못 갚는 상태 (고위험).
+        - 단기비중 50 % 초과 = 리파이낸싱 리스크 신호.
+
+    When/How:
+        ``scanDebt`` 내부에서. scanIcr → finance 단면 추출. classifyRisk → 임계 분기 chain.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (scanIcr 만)
+
+    SeeAlso:
+        - :func:`dartlab.scan.debt.scanDebt` — 본 함수들 통합 호출
+
     Raises
     ------
     polars.PolarsError
@@ -203,6 +223,26 @@ def classifyRisk(
         - 주의:   단기비중 >= 50% OR ICR < 1 OR 단기채무 존재
         - 관찰:   ICR < 3
         - 안전:   그 외
+
+    Capabilities:
+        - scanIcr: finance IS 의 영업이익 / 이자비용 → ICR (배). 종목별 latest 단면.
+        - classifyRisk: ICR + 단기비중 + 단기채무합계 → 4 단계 위험등급 (안전/관찰/주의/고위험).
+
+    AIContext:
+        ``scanDebt`` 의 sub-scanner + classifier. AI agent 가 단독 호출하지 않음.
+
+    Guide:
+        - ICR < 1 = 영업이익으로 이자조차 못 갚는 상태 (고위험).
+        - 단기비중 50 % 초과 = 리파이낸싱 리스크 신호.
+
+    When/How:
+        ``scanDebt`` 내부에서. scanIcr → finance 단면 추출. classifyRisk → 임계 분기 chain.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (scanIcr 만)
+
+    SeeAlso:
+        - :func:`dartlab.scan.debt.scanDebt` — 본 함수들 통합 호출
 
     Raises
     ------
