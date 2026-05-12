@@ -3505,7 +3505,7 @@
       "procedure": [
         "dartlab.Company(code) 컨텍스트 — RSS 회수 의무.",
         "c.show(topic, freq=Q/Y/YTD) — 분기 · 연도 · 누적 시계열.",
-        "c.show("ratios") — 재무비율 (CFS 기본, OFS getRatios(\"OFS\")).",
+        "c.show(\"ratios\") — 재무비율 (CFS 기본, OFS getRatios(\"OFS\")).",
         "from dartlab.finance.{affiliate, segment, summary, majorHolder, costByNature, rawMaterial}.",
         "매핑 SSOT — engines.mappers ↔ reference/data/accountMappings.json (34,171 entries)."
       ],
