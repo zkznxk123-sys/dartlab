@@ -59,10 +59,11 @@ def buildCompanyProfile(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
         >>> buildCompanyProfile(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -70,27 +71,28 @@ def buildCompanyProfile(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     global _cachedProfile
 
@@ -165,10 +167,11 @@ def loadProfile(stockCode: str | None = None) -> dict | pl.DataFrame:
         >>> loadProfile(...)
 
     Returns:
-        <TODO: return desc> (dict | pl.DataFrame)
+        dict 또는 pl.DataFrame — 호출 모드 별.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -176,27 +179,28 @@ def loadProfile(stockCode: str | None = None) -> dict | pl.DataFrame:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     global _cachedProfile
 
@@ -266,10 +270,11 @@ def buildEventTimeline(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
         >>> buildEventTimeline(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -277,27 +282,28 @@ def buildEventTimeline(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     global _cachedTimeline
 
@@ -340,10 +346,11 @@ def loadTimeline(
         >>> loadTimeline(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -351,27 +358,28 @@ def loadTimeline(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     global _cachedTimeline
 
@@ -404,13 +412,14 @@ def pulse(limit: int = 10) -> pl.DataFrame:
         >>> pulse(...)
 
     Args:
-        limit: <TODO: param desc> (int)
+        limit: 최대 결과 수.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -418,27 +427,28 @@ def pulse(limit: int = 10) -> pl.DataFrame:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     tl = loadTimeline()
     if tl.height == 0:
@@ -495,10 +505,11 @@ def buildDna(meta: pl.DataFrame, outDir: Path) -> dict:
         >>> buildDna(...)
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — 결과 dict.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -506,27 +517,28 @@ def buildDna(meta: pl.DataFrame, outDir: Path) -> dict:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     global _cachedDna
 
@@ -606,13 +618,14 @@ def dna(stockCode: str) -> dict:
         >>> dna(...)
 
     Args:
-        stockCode: <TODO: param desc> (str)
+        stockCode: 종목코드 (6 자리).
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — 결과 dict.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -620,27 +633,28 @@ def dna(stockCode: str) -> dict:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     data = _loadDna()
     if stockCode not in data["stockCodes"]:
@@ -676,14 +690,15 @@ def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
         >>> similarCompanies(...)
 
     Args:
-        stockCode: <TODO: param desc> (str)
-        limit: <TODO: param desc> (int)
+        stockCode: 종목코드 (6 자리).
+        limit: 최대 결과 수.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``fieldIndex`` — 본 모듈의 source (역인덱스 build 시).
+        - ``buildCompanyProfile`` / ``buildEventTimeline`` / ``buildCompanyDna`` — 본 모듈.
 
     Requires:
         - dartlab
@@ -691,27 +706,28 @@ def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 역인덱스 메타 → 기업별 공시 프로필 / 이벤트 타임라인 / 회사 DNA 벡터 파생 + cache.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "회사 공시 프로필 / 이벤트 빈도 / 유사 회사" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        workbench 가 검색 외 derived knowledge 활용 시 본 모듈 — 검색 비용 없이 메타 추출.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 역인덱스 빌드 누락 시 빈 결과. ngramIndex/fieldIndex 선행 의무.
+            - 캐시 무효화 시점 명시 X — index 재빌드 후 reload 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / np.ndarray — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 역인덱스 (ngramIndex/fieldIndex) 빌드 완료.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 역인덱스 빌드 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 역인덱스 meta → 집계/벡터화 → 본 모듈 cache.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) derived knowledge.
     """
     data = _loadDna()
     if stockCode not in data["stockCodes"]:

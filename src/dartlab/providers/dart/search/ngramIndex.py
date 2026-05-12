@@ -165,16 +165,17 @@ def buildNgramIndex(
         >>> buildNgramIndex(...)
 
     Args:
-        parquetPaths: <TODO: param desc> (list[str | Path] | None)
-        includeDocs: <TODO: param desc> (bool)
-        docsBatchSize: <TODO: param desc> (int)
-        showProgress: <TODO: param desc> (bool)
+        parquetPaths: 인덱스 source parquet 경로 리스트. None 이면 기본.
+        includeDocs: True 면 docs sections section_title 포함.
+        docsBatchSize: docs 처리 batch 크기.
+        showProgress: True 면 progress 로그.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 인덱스 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fieldIndex`` — content BM25 (본 모듈 보완).
+        - ``derived`` — 검색 후속 처리.
 
     Requires:
         - dartlab
@@ -182,27 +183,28 @@ def buildNgramIndex(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 제목/섹션 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal title ngram — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - title 인덱스만 — content 검색 X.
+            - 동의어 사전 누락 시 자연어 hit rate 저하.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / dict / Path / int — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report_nm + section_title 인덱스 + 동의어 사전.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - title → ngram → CSR → bincount.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) title/section.
     """
     import time
 
@@ -541,10 +543,11 @@ def searchNgram(
         >>> searchNgram(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 검색 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fieldIndex`` — content BM25 (본 모듈 보완).
+        - ``derived`` — 검색 후속 처리.
 
     Requires:
         - dartlab
@@ -552,27 +555,28 @@ def searchNgram(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 제목/섹션 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal title ngram — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - title 인덱스만 — content 검색 X.
+            - 동의어 사전 누락 시 자연어 hit rate 저하.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / dict / Path / int — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report_nm + section_title 인덱스 + 동의어 사전.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - title → ngram → CSR → bincount.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) title/section.
     """
     index, meta = _loadIndex()
     if not index or meta.height == 0:
@@ -733,10 +737,11 @@ def ngramStats() -> dict:
         >>> ngramStats(...)
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — 결과 dict.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fieldIndex`` — content BM25 (본 모듈 보완).
+        - ``derived`` — 검색 후속 처리.
 
     Requires:
         - dartlab
@@ -744,27 +749,28 @@ def ngramStats() -> dict:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 제목/섹션 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal title ngram — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - title 인덱스만 — content 검색 X.
+            - 동의어 사전 누락 시 자연어 hit rate 저하.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / dict / Path / int — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report_nm + section_title 인덱스 + 동의어 사전.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - title → ngram → CSR → bincount.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) title/section.
     """
     outDir = _stemIndexDir()
     npzPath = outDir / "stemIndex.npz"
@@ -809,10 +815,11 @@ def pushStemIndex(*, token: str | None = None) -> str:
         >>> pushStemIndex(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과 문자열.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fieldIndex`` — content BM25 (본 모듈 보완).
+        - ``derived`` — 검색 후속 처리.
 
     Requires:
         - dartlab
@@ -820,27 +827,28 @@ def pushStemIndex(*, token: str | None = None) -> str:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 제목/섹션 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal title ngram — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - title 인덱스만 — content 검색 X.
+            - 동의어 사전 누락 시 자연어 hit rate 저하.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / dict / Path / int — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report_nm + section_title 인덱스 + 동의어 사전.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - title → ngram → CSR → bincount.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) title/section.
     """
     from huggingface_hub import HfApi
 
@@ -876,10 +884,11 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
         >>> pullStemIndex(...)
 
     Returns:
-        <TODO: return desc> (Path)
+        Path — 저장 경로.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fieldIndex`` — content BM25 (본 모듈 보완).
+        - ``derived`` — 검색 후속 처리.
 
     Requires:
         - dartlab
@@ -887,27 +896,28 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 제목/섹션 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal title ngram — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - title 인덱스만 — content 검색 X.
+            - 동의어 사전 누락 시 자연어 hit rate 저하.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / dict / Path / int — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report_nm + section_title 인덱스 + 동의어 사전.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - title → ngram → CSR → bincount.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) title/section.
     """
     from huggingface_hub import snapshot_download
 
@@ -974,7 +984,8 @@ def iterNgram(
         없음.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``fieldIndex`` — content BM25 (본 모듈 보완).
+        - ``derived`` — 검색 후속 처리.
 
     Requires:
         - dartlab
@@ -982,27 +993,28 @@ def iterNgram(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 공시 제목/섹션 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal title ngram — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - title 인덱스만 — content 검색 X.
+            - 동의어 사전 누락 시 자연어 hit rate 저하.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / dict / Path / int — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - report_nm + section_title 인덱스 + 동의어 사전.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - title → ngram → CSR → bincount.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) title/section.
     """
     df = searchNgram(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():

@@ -73,10 +73,10 @@ def tokenizeWord(text: str) -> list[str]:
         >>> tokenizeWord(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 토큰 또는 stems 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -86,27 +86,28 @@ def tokenizeWord(text: str) -> list[str]:
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     if not text:
         return []
@@ -137,7 +138,8 @@ class _IncrementalBuilder:
             >>> addDoc(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``ngramIndex`` — title/section 인덱스 (본 모듈은 content 전용).
+            - ``derived`` — 검색 후속 처리.
 
         Requires:
             - dartlab
@@ -147,27 +149,28 @@ class _IncrementalBuilder:
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - BM25 본문 검색 + 필드 분리. main + delta 세그먼트 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 공시 본문 검색" → 본 모듈.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench keyword 검색 backend — AI 가 search() entry 호출 시 본 모듈 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - main 인덱스 미빌드 → 빈 결과. 월 1 회 리빌드 의무.
+                - delta 인덱스 누적 → 30 일+ 시 main 리빌드 필요.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] / pl.DataFrame — 검색 결과 (rcept_no/score/snippet).
             Prerequisites:
-                - <TODO: 사전조건>
+                - main.npz + main_meta.parquet (월 1 회 빌드).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - main: 월 단위, delta: 일 단위.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - query → BM25 (main + delta) → union → rerank → 본 결과.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) BM25 검색.
         """
         docId = len(self.docLengths)
         if not text:
@@ -198,10 +201,11 @@ class _IncrementalBuilder:
             >>> finalize(...)
 
         Returns:
-            <TODO: return desc> (dict)
+            dict — 인덱스 데이터.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``ngramIndex`` — title/section 인덱스 (본 모듈은 content 전용).
+            - ``derived`` — 검색 후속 처리.
 
         Requires:
             - dartlab
@@ -211,27 +215,28 @@ class _IncrementalBuilder:
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - BM25 본문 검색 + 필드 분리. main + delta 세그먼트 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 공시 본문 검색" → 본 모듈.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench keyword 검색 backend — AI 가 search() entry 호출 시 본 모듈 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - main 인덱스 미빌드 → 빈 결과. 월 1 회 리빌드 의무.
+                - delta 인덱스 누적 → 30 일+ 시 main 리빌드 필요.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] / pl.DataFrame — 검색 결과 (rcept_no/score/snippet).
             Prerequisites:
-                - <TODO: 사전조건>
+                - main.npz + main_meta.parquet (월 1 회 빌드).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - main: 월 단위, delta: 일 단위.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - query → BM25 (main + delta) → union → rerank → 본 결과.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) BM25 검색.
         """
         n = len(self.docLengths)
         nStems = len(self.stemToId)
@@ -289,15 +294,15 @@ def buildContentSegment(
         >>> buildContentSegment(...)
 
     Args:
-        rows: <TODO: param desc> (list[dict])
-        contentLimit: <TODO: param desc> (int)
-        showProgress: <TODO: param desc> (bool)
+        rows: 문서 row dict 리스트.
+        contentLimit: 본문 최대 문자 수.
+        showProgress: True 면 progress 로그.
 
     Returns:
-        <TODO: return desc> (tuple[dict, pl.DataFrame])
+        tuple[dict, pl.DataFrame] — (인덱스, meta).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -307,27 +312,28 @@ def buildContentSegment(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     t0 = time.perf_counter()
     builder = _IncrementalBuilder()
@@ -384,7 +390,7 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
         >>> saveSegment(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -394,27 +400,28 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     outDir = outDir or _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
@@ -456,10 +463,10 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
         >>> loadSegment(...)
 
     Returns:
-        <TODO: return desc> (tuple[dict, pl.DataFrame] | None)
+        tuple[dict, pl.DataFrame] 또는 None — (인덱스, meta).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -469,27 +476,28 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     inDir = inDir or _contentIndexDir()
     npzPath = inDir / f"{name}.npz"
@@ -564,7 +572,7 @@ def clearCache() -> None:
         >>> clearCache(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -574,13 +582,13 @@ def clearCache() -> None:
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
     """
     global _segments
     _segments = None
@@ -608,16 +616,16 @@ def searchContent(
         >>> searchContent(...)
 
     Args:
-        query: <TODO: param desc> (str)
-        corpCode: <TODO: param desc> (str | None)
-        stockCode: <TODO: param desc> (str | None)
-        limit: <TODO: param desc> (int)
+        query: 검색어 (자연어).
+        corpCode: 회사 식별자 corp_code. None 이면 전체.
+        stockCode: 종목코드 (6 자리). None 이면 전체.
+        limit: 최대 결과 행 수.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 검색 결과 (rcept_no/score/snippet 등).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -627,27 +635,28 @@ def searchContent(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     tokens = tokenizeWord(query)
     if not tokens:
@@ -737,16 +746,16 @@ def rebuildMain(
         >>> rebuildMain(...)
 
     Args:
-        includeAllFilings: <TODO: param desc> (bool)
-        includeDocs: <TODO: param desc> (bool)
-        contentLimit: <TODO: param desc> (int)
-        showProgress: <TODO: param desc> (bool)
+        includeAllFilings: True 면 전체 공시 (수시 포함).
+        includeDocs: True 면 docs sections 포함.
+        contentLimit: 본문 최대 문자 수.
+        showProgress: True 면 progress 로그.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 인덱스 빌드 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -756,27 +765,28 @@ def rebuildMain(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     import gc
 
@@ -800,10 +810,11 @@ def rebuildMain(
             >>> feedDf(...)
 
         Returns:
-            <TODO: return desc> (int)
+            int — 인덱스 빌드 건수.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``ngramIndex`` — title/section 인덱스 (본 모듈은 content 전용).
+            - ``derived`` — 검색 후속 처리.
 
         Requires:
             - dartlab
@@ -813,27 +824,28 @@ def rebuildMain(
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - BM25 본문 검색 + 필드 분리. main + delta 세그먼트 통합.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "DART 공시 본문 검색" → 본 모듈.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench keyword 검색 backend — AI 가 search() entry 호출 시 본 모듈 위임.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - main 인덱스 미빌드 → 빈 결과. 월 1 회 리빌드 의무.
+                - delta 인덱스 누적 → 30 일+ 시 main 리빌드 필요.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] / pl.DataFrame — 검색 결과 (rcept_no/score/snippet).
             Prerequisites:
-                - <TODO: 사전조건>
+                - main.npz + main_meta.parquet (월 1 회 빌드).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - main: 월 단위, delta: 일 단위.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - query → BM25 (main + delta) → union → rerank → 본 결과.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) BM25 검색.
         """
         added = 0
         for row in df.iter_rows(named=True):
@@ -932,15 +944,15 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
         >>> rebuildDelta(...)
 
     Args:
-        sinceDate: <TODO: param desc> (str | None)
-        daysBack: <TODO: param desc> (int)
-        showProgress: <TODO: param desc> (bool)
+        sinceDate: 시작일 YYYYMMDD. None 이면 daysBack 사용.
+        daysBack: 과거 N 일 (sinceDate 없을 때).
+        showProgress: True 면 progress 로그.
 
     Returns:
-        <TODO: return desc> (int)
+        int — 인덱스 빌드 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -950,27 +962,28 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     from datetime import datetime, timedelta
 
@@ -1033,7 +1046,7 @@ def pushContentIndex(token: str | None = None) -> None:
         >>> pushContentIndex(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -1043,27 +1056,28 @@ def pushContentIndex(token: str | None = None) -> None:
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     from huggingface_hub import HfApi
 
@@ -1105,10 +1119,10 @@ def pullContentIndex() -> int:
         >>> pullContentIndex(...)
 
     Returns:
-        <TODO: return desc> (int)
+        int — 인덱스 빌드 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -1118,27 +1132,28 @@ def pullContentIndex() -> int:
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     from huggingface_hub import hf_hub_download
 
@@ -1190,10 +1205,10 @@ def contentStats() -> dict:
         >>> contentStats(...)
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — 결과 통계.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -1203,27 +1218,28 @@ def contentStats() -> dict:
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     segments = _getSegments()
     out: dict = {}
@@ -1263,7 +1279,7 @@ def iterContent(
         없음.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
 
     Requires:
         - dartlab
@@ -1273,27 +1289,28 @@ def iterContent(
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - BM25 content 검색 backend.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "DART 본문 검색" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal search backend — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - main 인덱스 미빌드 → 빈 결과.
+            - delta 30 일+ 누적 → main 리빌드 필요.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[dict] / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - main.npz + main_meta.parquet (월 1 회 빌드).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - main: 월 단위, delta: 일 단위.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - query → BM25 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) BM25.
     """
     df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():
