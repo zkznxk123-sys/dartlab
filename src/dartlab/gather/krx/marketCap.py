@@ -68,6 +68,16 @@ def fetchOhlcv(stockCode: str, *, limit: int | None = None, **kwargs):
     Example
     -------
     >>> snap = fetchOhlcv("005930", market="KR")
+
+    Requires
+    --------
+    GatherEntry import 가능 + gather price source 가용 (HF dataset 또는 Naver/Yahoo
+    fallback chain). 위임 실패 시 None — 호출자가 None check 책임.
+
+    See Also
+    --------
+    marketCap : 본 함수가 close 시계열 fetch 용으로 사용.
+    GatherEntry : 4 축 진입점.
     """
     try:
         g = GatherEntry()
@@ -111,6 +121,16 @@ def loadSharesOutstanding(market: str = "KR"):
     Example
     -------
     >>> lf = loadSharesOutstanding("KR")
+
+    Requires
+    --------
+    scan parquet 사전 빌드 — ``dataDir()/{dart|edgar}/scan/sharesOutstanding.parquet``.
+    story/scan 의 ``_ensureScanData`` 가 미리 호출돼 있어야 함. 미빌드 시 None + warning.
+
+    See Also
+    --------
+    marketCap : 본 함수의 LazyFrame 을 close 와 join 해 시총 합성.
+    scan/builders/{kr,edgar}/sharesOutstanding : 본 parquet 의 빌더.
     """
     from pathlib import Path
 
@@ -236,6 +256,16 @@ def marketCap(
     Example
     -------
     >>> df = marketCap("005930", market="KR", start="2024-01-01")
+
+    Requires
+    --------
+    KR: HF dataset ``krx/prices/raw-{YYYY}.parquet`` 빌드. 미수집 종목 None.
+    US: EDGAR XBRL ``sharesOutstanding.parquet`` + close (Yahoo) fallback chain.
+
+    See Also
+    --------
+    marketCapSnapshot : 본 함수의 최신 1 점 dict 추출.
+    marketCapAll : 전종목 wide pivot 진입점.
     """
     market = resolveMarket(stockCode, market)
 
@@ -340,6 +370,15 @@ def marketCapSnapshot(
     Example
     -------
     >>> snap = marketCapSnapshot("005930", market="KR")
+
+    Requires
+    --------
+    marketCap() 가 None 아닌 결과 반환 가능해야 함 (KR HF / US EDGAR + close).
+    start/end 미지정 시 자동 최근 30 일.
+
+    See Also
+    --------
+    marketCap : 본 함수의 시계열 source.
     """
     # 디폴트: 최근 30일 (snapshot 은 최신 한 점만 필요 — 전체 연도 fetch 회피)
     if start is None and end is None:
@@ -408,6 +447,13 @@ def marketCapAll(
 
     Example:
         >>> df = marketCapAll(start="2024-01-01", end="2024-01-31", market="KOSPI")
+
+    Requires:
+        KR HF dataset ``krx/prices`` 빌드 + start 명시. apiKey 없어도 동작 (HF 경로).
+
+    See Also:
+        gatherKrx : 위임 대상 — target="marketCap" 으로 wide pivot.
+        marketCap : 단일 종목 시계열.
     """
     if start is None:
         raise ValueError("marketCapAll: start 필수 (단일일자도 start 만)")

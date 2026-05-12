@@ -169,6 +169,16 @@ async def fetchKrxBydd(
     Example
     -------
     >>> df = await fetchKrxBydd("2024-04-15", market="STK", apiKey="...")
+
+    Requires
+    --------
+    네트워크 (KRX OpenAPI `data-dbg.krx.co.kr`) + 인증키 (`apiKey` 명시) + 확정일자
+    (휴장일 / 미래일자는 빈 DataFrame 반환). 환경변수 `KRX_API_KEY` 자동 read 없음.
+
+    See Also
+    --------
+    fetchKrxRange : 기간 [start, end] 역방향 일별 루프 호출자.
+    gatherKrx : 사용자 진입점 — apiKey 미명시 시 HF dataset fallback.
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키가 필요합니다")
@@ -277,6 +287,15 @@ async def fetchKrxRange(
     Example
     -------
     >>> df = await fetchKrxRange("2024-04-01", "2024-04-15", market="ALL", apiKey="...")
+
+    Requires
+    --------
+    네트워크 (KRX OpenAPI) + 인증키 + 기간 내 거래일 ≥ 1. ALL 시장 시 STK + KSQ 두 번 호출.
+
+    See Also
+    --------
+    fetchKrxBydd : 일별 단일 호출 (본 함수가 루프 안에서 사용).
+    gatherKrx : 사용자 진입점 — 기간 wide pivot 까지 포함.
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키가 필요합니다")

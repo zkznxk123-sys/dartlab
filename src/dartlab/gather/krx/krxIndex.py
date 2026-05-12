@@ -157,6 +157,16 @@ async def fetchKrxIndexBydd(
     Example
     -------
     >>> df = await fetchKrxIndexBydd("2024-04-15", market="KOSPI", apiKey="...")
+
+    Requires
+    --------
+    네트워크 (`data-dbg.krx.co.kr/svc/apis/idx`) + KRX OpenAPI 인증키 (idx 카테고리
+    권한 — sto 키와 분리 발급). 확정 거래일 (휴장일/미래일자는 빈 DataFrame).
+
+    See Also
+    --------
+    fetchKrxIndexRange : 기간 [start, end] 일별 호출자 (concurrency/retry 포함).
+    gatherKrxIndex : 사용자 진입점 — apiKey 미명시 시 HF dataset fallback.
     """
     if not apiKey:
         raise ValueError("apiKey 필수 — KRX OpenAPI 호출에는 키 필요")
@@ -304,6 +314,17 @@ async def fetchKrxIndexRange(
     Example
     -------
     >>> df = await fetchKrxIndexRange("2024-04-01", "2024-04-15", market="KOSPI", apiKey="...")
+
+    Requires
+    --------
+    네트워크 (KRX OpenAPI idx) + 인증키 (idx 카테고리 권한) + 기간 내 거래일 ≥ 1.
+    concurrency 1 권장 (KRX 차단 회피). retries 403/429/5xx 자동 backoff.
+
+    See Also
+    --------
+    fetchKrxIndexBydd : 일별 단일 호출 (본 함수 내부 fan-out 대상).
+    gatherKrxIndex : 사용자 진입점 — apiKey 미명시 시 HF 사용.
+    scripts/build/buildKrxIndexData : 운영자 bulk + HF push 스크립트.
     """
     startD = datetime.strptime(_normalizeDate(start), "%Y%m%d").date()
     endD = datetime.strptime(_normalizeDate(end), "%Y%m%d").date()
@@ -452,6 +473,11 @@ def gatherKrxIndex(
     Verified:
         - 2010-01-01~2026-04-28 KRX/KOSPI/KOSDAQ backfill 완료.
         - HF ``krx/indices`` 17개 parquet, 474,882 rows push 완료.
+
+    Requires
+    --------
+    apiKey 미명시 (기본): 인터넷 연결만. HF dataset 자동 ``krx/indices/raw-{YYYY}.parquet``.
+    apiKey 명시: KRX OpenAPI 인증키 + idx 카테고리 권한. 두 경로 모두 거래일 ≥ 1.
 
     See Also
     --------

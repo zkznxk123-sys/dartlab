@@ -162,6 +162,13 @@ def searchName(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
 
     Example:
         >>> df = searchName("삼성", limit=10)
+
+    Requires:
+        ``getKindList()`` 캐시 가용 — 첫 호출 시 KIND HTTP fetch.
+
+    See Also:
+        fuzzySearch : 초성/오타 허용 4 단계 매칭.
+        registry.codeToName · nameToCode : 정확 매칭 단일 lookup.
     """
     kw = keyword.strip()
     if not kw:
@@ -202,6 +209,14 @@ def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:
 
     Example:
         >>> df = fuzzySearch("삼전", maxResults=5)
+
+    Requires:
+        ``getKindList()`` 캐시 + ``_getSearchCache()`` 사전 계산 (회사명 lowercase
+        + 초성 list). getKindList 갱신 시 cache 자동 invalidate.
+
+    See Also:
+        searchName : substring 정확 매칭 baseline.
+        resolver.fuzzy : Protocol 위임 진입점.
     """
     kw = keyword.strip()
     if not kw:

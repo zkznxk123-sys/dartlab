@@ -87,6 +87,15 @@ class _TableParser(HTMLParser):
 
         Example:
             stdlib HTMLParser 의 콜백 — 사용자는 ``parser.feed(html)`` 만 호출.
+
+        Requires:
+            ``html.parser.HTMLParser`` 부모 클래스 상속. ``_inTable/_inTr/_inCell``
+            플래그 초기화 (``__init__``) 선행.
+
+        See Also:
+            handle_endtag : 짝 콜백 (cell/row commit).
+            handle_data : 텍스트 노드 콜백.
+            _TableParser.__init__ : 플래그 초기화.
         """
         if tag == "table":
             self._inTable = True
@@ -117,6 +126,13 @@ class _TableParser(HTMLParser):
 
         Example:
             stdlib HTMLParser 의 콜백 — 사용자는 ``parser.feed(html)`` 만 호출.
+
+        Requires:
+            handle_starttag 가 _inTable/_inTr/_inCell/_cell 을 사전 갱신해 둠.
+
+        See Also:
+            handle_starttag : 짝 콜백 (cell/row 진입).
+            handle_data : 본 콜백 사이에 텍스트 누적.
         """
         if tag in ("td", "th") and self._inCell:
             self._inCell = False
@@ -148,6 +164,12 @@ class _TableParser(HTMLParser):
 
         Example:
             stdlib HTMLParser 의 콜백 — 사용자는 ``parser.feed(html)`` 만 호출.
+
+        Requires:
+            handle_starttag 가 ``_inCell = True`` 와 ``_cell = ""`` 사전 셋팅.
+
+        See Also:
+            handle_starttag · handle_endtag : 셀 진입/종료 콜백.
         """
         if self._inCell:
             self._cell += data
@@ -273,6 +295,17 @@ def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
     Example
     -------
     >>> df = getKindList()
+
+    Requires
+    --------
+    네트워크 (``kind.krx.co.kr/corpgeneral/corpList.do``) + 파일 쓰기 (``{dataRoot}/
+    kindList/corpList.parquet``). Pyodide 환경에서는 빈 DataFrame fallback.
+
+    See Also
+    --------
+    codeToName · nameToCode : 본 목록의 단일 lookup 진입점.
+    fuzzy.searchName : substring/fuzzy 검색.
+    dartList.getDartList : DART CORPCODE 보강 source.
     """
     global _memory, _memoryTs
 
@@ -352,6 +385,15 @@ def codeToName(stockCode: str) -> str | None:
     -------
     >>> codeToName("005930")
     '삼성전자'
+
+    Requires
+    --------
+    ``getKindList()`` 캐시 가용 — 첫 호출 시 KIND HTTP fetch.
+
+    See Also
+    --------
+    nameToCode : 역방향 — 회사명 → 코드.
+    resolver.codeToName : Protocol 위임 진입점.
     """
     df = getKindList()
     match = df.filter(pl.col("종목코드") == stockCode)
@@ -388,6 +430,16 @@ def nameToCode(corpName: str) -> str | None:
     -------
     >>> nameToCode("삼성전자")
     '005930'
+
+    Requires
+    --------
+    ``getKindList()`` 캐시 가용 + 사용자 입력이 KIND 목록과 *정확* 일치.
+
+    See Also
+    --------
+    codeToName : 역방향 — 코드 → 회사명.
+    fuzzy.searchName : 부분 일치 + 자모 분해 검색.
+    resolver.nameToCode : Protocol 위임 진입점.
     """
     df = getKindList()
     match = df.filter(pl.col("회사명") == corpName)

@@ -161,6 +161,17 @@ def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
     Example
     -------
     >>> df = getKrxList()
+
+    Requires
+    --------
+    네트워크 (``data.krx.co.kr/comm/bldAttendant/getJsonData.cmd``) + ``Referer``
+    헤더 (KRX 가 보내지 않으면 차단). 무인증. 실패 시 빈 DataFrame fallback.
+
+    See Also
+    --------
+    registry.getKindList : KIND 기반 상장 목록 (단축코드 + 회사명 + 업종 등).
+    dartList.getDartList : DART CORPCODE (비상장 포함).
+    resolver.kindList : Protocol 위임 진입점.
     """
     global _krxMemory, _krxMemoryTs
 

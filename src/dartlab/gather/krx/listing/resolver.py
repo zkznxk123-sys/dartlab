@@ -48,6 +48,15 @@ class GatherListingResolver:
         -------
         >>> r = GatherListingResolver()
         >>> df = r.search("삼성", limit=10)
+
+        Requires
+        --------
+        ``fuzzy.searchName`` import 가능 + ``registry.getKindList()`` 캐시 가용.
+
+        See Also
+        --------
+        fuzzy.searchName : 위임 대상.
+        ListingResolver Protocol : ``core/listingResolver.py``.
         """
         try:
             from .fuzzy import searchName
@@ -86,6 +95,15 @@ class GatherListingResolver:
         -------
         >>> r = GatherListingResolver()
         >>> df = r.fuzzy("삼전", maxResults=5)
+
+        Requires
+        --------
+        ``fuzzy.fuzzySearch`` import 가능 + ``getKindList()`` + ``_getSearchCache()``.
+
+        See Also
+        --------
+        fuzzy.fuzzySearch : 위임 대상 — 초성/오타 4 단계 매칭.
+        search : substring baseline.
         """
         try:
             from .fuzzy import fuzzySearch
@@ -122,6 +140,15 @@ class GatherListingResolver:
         -------
         >>> r = GatherListingResolver()
         >>> r.codeToName("005930")
+
+        Requires
+        --------
+        ``registry.codeToName`` import 가능 + KIND 목록 캐시.
+
+        See Also
+        --------
+        registry.codeToName : 위임 대상.
+        nameToCode : 역방향 (회사명 → 코드).
         """
         try:
             return codeToName(stockCode)
@@ -156,6 +183,16 @@ class GatherListingResolver:
         -------
         >>> r = GatherListingResolver()
         >>> r.nameToCode("삼성전자")
+
+        Requires
+        --------
+        ``registry.nameToCode`` import 가능 + KIND 목록 캐시 + 정확 일치 입력.
+
+        See Also
+        --------
+        registry.nameToCode : 위임 대상.
+        fuzzy : 부분 일치 검색.
+        codeToName : 역방향 (코드 → 회사명).
         """
         try:
             return nameToCode(corpName)
@@ -190,6 +227,16 @@ class GatherListingResolver:
         -------
         >>> r = GatherListingResolver()
         >>> df = r.kindList()
+
+        Requires
+        --------
+        ``registry.getKindList`` import 가능 + 첫 호출 시 KIND HTTP fetch 가능.
+
+        See Also
+        --------
+        registry.getKindList : 위임 대상.
+        krxList.getKrxList : ISIN/시장구분 보강.
+        dartList.getDartList : 비상장 포함 매핑.
         """
         return getKindList(forceRefresh=forceRefresh)
 

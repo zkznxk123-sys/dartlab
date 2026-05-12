@@ -86,6 +86,15 @@ def getDartList(*, forceRefresh: bool = False) -> pl.DataFrame:
 
     Example:
         >>> df = getDartList()
+
+    Requires:
+        ``huggingface_hub`` 설치 + 네트워크 (``eddmpython/dartlab-data``). 미설치/네트워크
+        실패 시 캐시 파일 또는 빈 DataFrame fallback. DART API 키 불필요.
+
+    See Also:
+        registry.getKindList : 상장 한정 (KIND).
+        krxList.getKrxList : 상장 한정 (data.krx).
+        resolver.codeToName : Protocol 위임 진입점.
     """
     global _dartMemory, _dartMemoryTs
 
