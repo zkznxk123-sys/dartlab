@@ -30,39 +30,91 @@ def search(
     limit: int = 10,
     scope: str = "auto",
 ) -> pl.DataFrame:
-    """공시 검색.
+    """KR DART 공시 검색 — title (ngram) + content (BM25) 스코프 조합 entry.
 
-    scope 파라미터:
-    - ``"auto"`` (기본): title 먼저 검색, limit 미달이면 content 결과로 보강.
-      제목형/본문형 쿼리 모두 커버. 중복은 rcept_no 기준 제거.
-    - ``"title"``: report_nm + section_title ngram (빠름, 제목형 쿼리용).
-    - ``"content"``: section_content 본문 BM25 (개념/내용형 쿼리용).
-    - ``"both"``: title + content 결과를 scope 컬럼과 함께 합쳐 반환.
-
-    DART 공시 전용 — EDGAR 공시 검색은 SEC EDGAR Full-Text Search 이용.
+    Capabilities:
+        - 4 종 scope: ``"auto"`` (기본, title strict → content 보강) / ``"title"`` (ngram 만) /
+          ``"content"`` (BM25 만) / ``"both"`` (title + content 합치되 scope 컬럼 동행).
+        - corp 파라미터로 회사 한정 — 6 자리 stockCode / 8 자리 corpCode / 회사명 (resolver lookup).
+        - start/end 필터 — ``rcept_dt`` 컬럼 기준 YYYYMMDD 문자열 비교.
+        - corp 가 US ticker (소문자 5 자 이하 영문) → 안내 info DataFrame 반환 (EDGAR 안내).
+        - title strict (정확 매칭) ≥ limit → title 만, 아니면 content 로 보강 (rcept_no 중복 제거).
 
     Args:
-        query: 인자.
-        corp: 인자.
-        start: 인자.
-        end: 인자.
-        limit: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> search(...)
+        query: 검색어 (한국어/영어/숫자 혼합 OK). 공백 strip 후 자체 매칭.
+        corp: 회사 한정. None → 전체 회사. 6 자리 숫자 = stockCode, 8 자리 숫자 = corpCode,
+            그 외 문자열 = 회사명 resolver lookup. lookup 실패 → 전체 검색 fallback.
+        start: ``rcept_dt`` 시작일 (YYYYMMDD). None → 미적용.
+        end: ``rcept_dt`` 종료일 (YYYYMMDD). None → 미적용.
+        limit: 결과 최대 row 수. 기본 10.
+        scope: ``"auto"`` (default) / ``"title"`` / ``"content"`` / ``"both"``. 외 값 → ValueError.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 검색 결과. 일반 컬럼 = ``rcept_no``/``rcept_dt``/``corp_name``/
+        ``report_nm``/``section_title``/``section_content`` 등 (인덱스에 따라 가변).
+        scope=both/auto 결과는 ``scope`` 컬럼 ("title"/"content") 동행. corp 가 US ticker
+        → ``info`` 컬럼만 있는 안내 DataFrame.
+
+    Raises:
+        ValueError: scope 가 4 종 외 값.
+
+    Example:
+        >>> from dartlab.providers.dart.search.api import search
+        >>> df = search("배당", limit=5)
+        >>> df.height >= 0
+        True
+        >>> df2 = search("AAPL", corp="AAPL")  # US ticker 안내
+        >>> "info" in df2.columns
+        True
+
+    Guide:
+        - "최근 공시 중 배당 키워드" → ``search("배당", limit=10)``.
+        - "삼성전자 공시만" → ``search("...", corp="005930")``.
+        - "내용 본문 검색" → ``scope="content"`` (예 "ESG 정책").
+        - "제목 검색 (빠름)" → ``scope="title"``.
+        - "title + content 같이" → ``scope="both"`` + ``scope`` 컬럼으로 source 구분.
+        - 날짜 범위 → ``start="20240101", end="20241231"``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_searchTitle`` / ``_searchContent`` / ``_searchAuto`` (모듈 private) — scope 별 핸들러.
+        - ``_resolveCorp`` (모듈 private) — corp 파라미터 → corpCode/stockCode 변환.
+        - ``dartlab.providers.dart.search.ngramIndex.searchNgram`` — title scope 본체.
+        - ``dartlab.providers.dart.search.fieldIndex.searchContent`` — content scope 본체.
+        - ``SEARCH_SCOPES`` (모듈 상수) — 4 scope 허용값 SSOT.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.search.ngramIndex — title scope ngram 인덱스.
+        - dartlab.providers.dart.search.fieldIndex — content scope BM25 인덱스.
+        - (옵션) dartlab.core.listingResolver — corp 회사명 lookup.
+
+    AIContext:
+        Ask Workbench 의 "공시" / "최근 보고서" / "X 관련 공시" 질문 entry. AI 가 사용자 자연어
+        를 query 로 그대로 전달, scope=auto 가 자동 분기. limit 조정으로 top 결과만 사용자에게
+        제시. corp 가 US 회사명 (예 "Apple") 일 때 본 함수가 안내 info 반환 → caller 는 EDGAR
+        검색 path 로 분기.
+
+    LLM Specifications:
+        AntiPatterns:
+            - corp 회사명 lookup 실패 → 전체 검색 fallback (silent). caller 는 corp_name 컬럼
+              으로 결과 회사 검증 권장.
+            - query 가 매우 짧음 (1~2 글자) → ngram 정밀도 저하 → false positive 많음.
+            - scope="both" 결과에서 동일 rcept_no 가 title/content 양쪽에 등장 (중복 제거 X).
+            - start/end 가 잘못된 형식 (예 "2024-01-01") → 비교 결과 부정확. YYYYMMDD 권장.
+        OutputSchema:
+            - rows: ≤ limit 개 또는 corp 안내 시 3 (info 컬럼만).
+            - columns: 인덱스 의존. 공통 = rcept_no/rcept_dt/corp_name/report_nm.
+            - scope=both/auto 시 ``scope`` 컬럼 추가.
+        Prerequisites:
+            - title index (ngram) + content index (BM25) 가 빌드되어 있어야 함 (``buildIndex``).
+            - 인덱스 미빌드 → 결과 0 또는 KeyError. ``stats()`` 로 확인.
+        Freshness:
+            - ``collectMeta`` + ``fillContent`` + ``rebuildContent`` 운영 후 검색 가능.
+            - 본 함수 자체는 무상태. 인덱스가 freshness 결정.
+        Dataflow:
+            - DART OpenAPI → allFilingsCollector → parquet → 인덱스 빌드 → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR (US) 는 별도 API. US ticker 입력 시 안내 fallback.
     """
     if corp and not str(corp).isdigit() and len(corp) <= 6:
         return pl.DataFrame(
@@ -423,23 +475,61 @@ def pullIndex(**kwargs):
 
 
 def profile(stockCode: str | None = None):
-    """기업별 공시 프로필 조회.
+    """기업별 공시 프로필 조회 — 회사 1 개의 공시 유형 빈도 + 최근 cadence 메타.
+
+    Capabilities:
+        - ``loadProfile`` (derived) wrapper — 사전 빌드된 profile parquet 에서 stockCode 행 조회.
+        - stockCode=None → 전체 프로필 (모든 회사) 반환.
+        - 공시 유형별 누적 건수 + 최근 활동 메트릭 동행.
 
     Args:
-        stockCode: 인자.
+        stockCode: KR 종목코드 6 자리. None → 전체 회사 프로필 반환.
 
-    Raises:
-        없음.
+    Returns:
+        pl.DataFrame 또는 dict — derived.loadProfile 의 반환 그대로 (인덱스 빌드 상태 의존).
 
     Example:
-        >>> profile(...)
+        >>> from dartlab.providers.dart.search.api import profile
+        >>> p = profile("005930")  # 삼성전자 공시 프로필
+        >>> p is not None
+        True
+
+    Guide:
+        - "삼성전자가 어떤 공시 유형을 자주 내냐" → ``profile("005930")``.
+        - "전체 회사 프로필 lookup table" → ``profile()`` (None).
+        - 유사 회사 탐색 → ``similarCompanies(stockCode)`` 사용 (본 함수 결과의 cosine).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dna`` — 회사 1 개의 114 차원 disclosure DNA 벡터.
+        - ``similarCompanies`` — 본 함수 결과 기반 유사도 검색.
+        - ``pulse`` / ``timeline`` — 시계열 메트릭 (회사 무관 또는 type 별).
+        - ``dartlab.providers.dart.search.derived.loadProfile`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.search.derived — ``loadProfile`` SSOT.
+        - profile parquet 가 빌드되어 있어야 (사전 derived pipeline).
+
+    AIContext:
+        Workbench "이 회사 어떤 공시 자주 내냐" / "회사 캐릭터" 질문 처리 시 entry. AI 가 빈도
+        벡터를 자연어로 변환 ("연 N 회 정기보고서 + 분기마다 임시공시"). dna/similarCompanies
+        와 같이 회사 캐릭터 분석 토픽 군에 속함.
+
+    LLM Specifications:
+        AntiPatterns:
+            - stockCode 형식이 6 자리 숫자 외 (예 영문 ticker) → loadProfile 결과 빈 row.
+            - profile parquet 미빌드 → FileNotFoundError 또는 빈 결과. 운영자가 derived
+              pipeline 실행 의무.
+        OutputSchema:
+            - derived.loadProfile 의 반환 형태 의존. 일반적으로 pl.DataFrame 또는 dict.
+        Prerequisites:
+            - derived/profile parquet 가 빌드되어 있어야.
+        Freshness:
+            - derived pipeline 실행 시점. 본 함수 자체는 무상태.
+        Dataflow:
+            - allFilings parquet → derived (profile/dna/pulse 빌드) → 본 함수 → caller.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.derived import loadProfile
 
@@ -447,26 +537,60 @@ def profile(stockCode: str | None = None):
 
 
 def pulse(limit: int = 10) -> pl.DataFrame:
-    """최근 월의 공시 유형별 건수 + 전월 대비 변화.
+    """최근 월의 공시 유형별 건수 + 전월 대비 변화 — 시장 활동 펄스 (heartbeat).
+
+    Capabilities:
+        - ``derived.pulse`` wrapper — 사전 집계된 monthly aggregation 에서 최근 월 + 전월 추출.
+        - 유형별 (114 종) 건수 + diff 컬럼 반환.
+        - limit 으로 top N 유형만 (기본 10).
 
     Args:
-        limit: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> pulse(...)
+        limit: 반환 row 수 (top N 빈도 유형). 기본 10.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — ``["typeCode", "typeName", "currentCount", "prevCount", "diff", ...]``
+        columns. 정렬 = currentCount 내림차순.
+
+    Example:
+        >>> from dartlab.providers.dart.search.api import pulse
+        >>> df = pulse(limit=5)
+        >>> df.height >= 0
+        True
+
+    Guide:
+        - "지난달 가장 많이 나온 공시 유형" → ``pulse(limit=10)``.
+        - "유형별 시계열 (12 개월)" → ``timeline(typeFilter="A")``.
+        - 회사 1 개 펄스 → ``profile(stockCode)`` 또는 ``dna(stockCode)``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``timeline`` — 유형 × 월 빈도 시계열 (본 함수의 시계열 버전).
+        - ``profile`` — 회사 1 개의 누적 프로필 (시장 전체 X).
+        - ``dartlab.providers.dart.search.derived.pulse`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.search.derived — ``pulse`` SSOT.
+        - monthly aggregation parquet 가 빌드되어 있어야.
+
+    AIContext:
+        Workbench "최근 시장 분위기" / "이번 달 무슨 공시 많이 나왔냐" 질문 entry. 결과 row
+        에 diff 컬럼이 있어 AI 가 "전월 대비 X 배 증가/감소" 류 답변 가능. 시장 거시 토픽 군.
+
+    LLM Specifications:
+        AntiPatterns:
+            - monthly aggregation 미빌드 → 빈 결과 또는 FileNotFoundError.
+            - limit 매우 큼 (≥ 114) → 모든 유형 반환, 일부는 currentCount=0.
+        OutputSchema:
+            - rows: ≤ limit.
+            - columns: typeCode/typeName/currentCount/prevCount/diff.
+        Prerequisites:
+            - derived monthly aggregation 빌드.
+        Freshness:
+            - derived 갱신 시점. 본 함수 무상태.
+        Dataflow:
+            - allFilings parquet → derived (monthly aggregate) → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.derived import pulse as _pulse
 
@@ -502,26 +626,59 @@ def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> 
 
 
 def dna(stockCode: str) -> dict:
-    """기업의 Disclosure DNA (114차원 유형 빈도 벡터).
+    """회사 1 개의 Disclosure DNA — 114 차원 공시 유형 빈도 벡터.
+
+    Capabilities:
+        - ``derived.dna`` wrapper — stockCode 의 114 차원 유형 빈도 벡터 반환.
+        - 회사 캐릭터 정량화 — "정기공시 중심형" vs "임시공시 활발형" 등 패턴 분석 base.
+        - similarCompanies 의 cosine 유사도 계산 input.
 
     Args:
-        stockCode: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> dna(...)
+        stockCode: KR 종목코드 6 자리 (필수).
 
     Returns:
-        <TODO: return desc> (dict)
+        dict — ``{"typeCode": count}`` 형태 또는 추가 메타. derived.dna 구현 의존.
+
+    Example:
+        >>> from dartlab.providers.dart.search.api import dna
+        >>> v = dna("005930")
+        >>> v is not None
+        True
+
+    Guide:
+        - "삼성전자가 어떤 공시 패턴" → ``dna("005930")``.
+        - "유사 패턴 회사" → ``similarCompanies("005930")`` (본 함수 결과 cosine).
+        - "회사 캐릭터 시각화" → 본 함수 + radar chart.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``similarCompanies`` — 본 함수 결과 기반 유사도 검색.
+        - ``profile`` — 같은 도메인의 다른 view (frequency + cadence).
+        - ``dartlab.providers.dart.search.derived.dna`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — derived 의 내부 의존.
+        - dartlab.providers.dart.search.derived — ``dna`` SSOT.
+        - DNA parquet 가 빌드되어 있어야.
+
+    AIContext:
+        Workbench "이 회사 공시 패턴 어떻게 되냐" 질문 entry. 결과 벡터를 AI 가 자연어로 변환
+        — "분기/반기/사업보고서 정기 + 인수합병 (M&A) 류 임시공시 활발". 정량 벡터라
+        similarCompanies / profile / pulse 와 dataflow 연결.
+
+    LLM Specifications:
+        AntiPatterns:
+            - stockCode 형식 오류 → 빈 dict 또는 KeyError. 6 자리 숫자 검증 caller 책임.
+            - DNA parquet 미빌드 → FileNotFoundError. 운영자 derived pipeline 의무.
+        OutputSchema:
+            - dict — derived.dna 구현 의존. 일반적으로 typeCode → count.
+        Prerequisites:
+            - derived DNA parquet 빌드.
+        Freshness:
+            - derived 갱신 시점.
+        Dataflow:
+            - allFilings parquet → derived DNA → 본 함수 → similarCompanies / AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     from dartlab.providers.dart.search.derived import dna as _dna
 
@@ -529,27 +686,65 @@ def dna(stockCode: str) -> dict:
 
 
 def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
-    """공시 패턴이 유사한 기업 탐색 (코사인 유사도).
+    """공시 패턴이 유사한 기업 탐색 — DNA 벡터 코사인 유사도 top N.
+
+    Capabilities:
+        - ``derived.similarCompanies`` wrapper — 입력 stockCode 의 DNA 와 모든 회사 DNA cosine 계산.
+        - 자기 자신 제외 + 유사도 내림차순 top N 반환.
+        - 결과 row = 회사 1 개 + similarity score + 공시 빈도 메타.
 
     Args:
-        stockCode: 인자.
-        limit: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> similarCompanies(...)
+        stockCode: 기준 회사 KR 종목코드 6 자리 (필수).
+        limit: 반환 회사 수. 기본 5.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — ``["stockCode", "corpName", "similarity", ...]``. 유사도 내림차순.
+        DNA parquet 미빌드 → 빈 DataFrame.
+
+    Example:
+        >>> from dartlab.providers.dart.search.api import similarCompanies
+        >>> df = similarCompanies("005930", limit=5)
+        >>> df.height <= 5
+        True
+
+    Guide:
+        - "삼성전자와 공시 패턴 비슷한 회사" → ``similarCompanies("005930")``.
+        - "특정 회사 군집 분석" → top N 반복 호출 → graph 구축.
+        - 결과 회사가 같은 산업 (전자) 일 수도 있고, 같은 공시 cadence 회사일 수도 있음
+          (의미 검증 caller 책임).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``dna`` — 본 함수의 cosine 계산 input.
+        - ``profile`` — 본 함수 결과의 각 회사 상세 프로필.
+        - ``dartlab.providers.dart.search.derived.similarCompanies`` — 본 함수 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.search.derived — ``similarCompanies`` SSOT.
+        - DNA parquet + similarity matrix (또는 in-memory cosine).
+
+    AIContext:
+        Workbench "삼성전자 비슷한 공시 패턴 회사" / "similar to X" 질문 entry. 결과는 산업
+        분류 (KSIC) 와 일치하지 않을 수 있음 — 공시 패턴이 유사하면 다른 산업도 등장. AI 가
+        결과를 "공시 빈도/유형이 비슷한" 으로 명시해 의미 혼동 방지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 신규 상장 회사 (공시 적음) → DNA 벡터가 sparse → 유사도 부정확.
+            - limit ≥ 100 → 본 함수가 모든 회사 cosine 계산 → 느림.
+            - DNA parquet 미빌드 → 빈 결과.
+        OutputSchema:
+            - rows: ≤ limit.
+            - columns: stockCode/corpName/similarity (Float, 0~1) 등.
+            - 정렬: similarity 내림차순.
+        Prerequisites:
+            - derived DNA + similarity 빌드.
+        Freshness:
+            - derived 갱신 시점.
+        Dataflow:
+            - allFilings → derived DNA → similarity matrix → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR similarCompanies 는 미지원 (별도 SEC 코퍼스 필요).
     """
     from dartlab.providers.dart.search.derived import similarCompanies as _similar
 
