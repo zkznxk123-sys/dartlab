@@ -16,7 +16,22 @@ def extractNotesContent(report: pl.DataFrame) -> list[str]:
 
 
 def findNumberedSection(contents: list[str], keyword: str) -> str | None:
-    """번호 매긴 섹션에서 keyword 포함 섹션 텍스트."""
+    """번호 매긴 섹션에서 keyword 포함 섹션 텍스트 반환.
+
+    Args:
+        contents: 섹션 본문 목록 (각 원소 = 마크다운 multiline 문자열).
+        keyword: 검색할 키워드 (섹션 제목에 포함되는 substring).
+
+    Returns:
+        매칭 섹션의 본문 multiline 문자열. 매칭 0 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> findNumberedSection(["1. 매출 ..."], "매출")
+        '1. 매출 ...'
+    """
     for content in contents:
         lines = content.split("\n")
         startIdx = None

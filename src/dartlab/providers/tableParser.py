@@ -5,7 +5,21 @@ from dartlab.reference.mappers.common import normalizeName as _normalizeKoSpaces
 
 
 def extractTables(content: str) -> list[dict]:
-    """마크다운 테이블 파싱. DART 중첩 테이블(단위행+본체) 처리."""
+    """마크다운 테이블 파싱. DART 중첩 테이블 (단위행+본체) 처리.
+
+    Args:
+        content: 마크다운 테이블이 포함된 본문 multiline 문자열.
+
+    Returns:
+        파싱된 테이블 dict 목록. 각 = ``{"headers": list, "rows": list[list]}``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractTables("| 항목 | 값 |\\n|---|---|\\n| 매출 | 100 |")
+        [{'headers': ['항목', '값'], 'rows': [['매출', '100']]}]
+    """
     tables = []
     lines = content.split("\n")
     i = 0

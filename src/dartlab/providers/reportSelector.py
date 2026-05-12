@@ -10,9 +10,19 @@ def selectReport(df: pl.DataFrame, year: str, reportKind: str = "annual") -> pl.
     """해당 연도+기간 보고서 선택. 원본 우선, 없으면 기재정정/첨부 중 가장 나중 접수.
 
     Args:
-        df: 전체 DataFrame
-        year: 연도 문자열 (예: "2024")
-        reportKind: "annual" | "Q1" | "semi" | "Q3"
+        df: 전체 DataFrame.
+        year: 연도 문자열 (예: ``"2024"``).
+        reportKind: ``"annual"`` | ``"Q1"`` | ``"semi"`` | ``"Q3"``.
+
+    Returns:
+        해당 기간 보고서 DataFrame. 매칭 0 또는 invalid kind 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> selectReport(df, "2024", "annual")
+        <DataFrame ...>
     """
     kindFilter = _REPORT_KIND_MAP.get(reportKind)
     if kindFilter is None:
@@ -35,8 +45,18 @@ def selectReport(df: pl.DataFrame, year: str, reportKind: str = "annual") -> pl.
 def parsePeriodKey(reportType: str) -> str | None:
     """report_type 문자열에서 period key 추출.
 
+    Args:
+        reportType: DART report_type (예: ``"분기보고서 (2024.03)"``).
+
     Returns:
-        "2024Q1", "2024Q2", "2024Q3", "2024" 등. 파싱 불가 시 None.
+        ``"2024Q1"``, ``"2024Q2"``, ``"2024Q3"``, ``"2024Q4"`` (사업보고서). 파싱 불가 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parsePeriodKey("분기보고서 (2024.03)")
+        '2024Q1'
     """
     m = _RE_YEAR_MONTH.search(reportType)
     if not m:
@@ -58,7 +78,21 @@ def parsePeriodKey(reportType: str) -> str | None:
 
 
 def extractReportYear(reportType: str) -> int | None:
-    """사업보고서 (2024.12) → 2024"""
+    """report_type 에서 연도 (int) 추출.
+
+    Args:
+        reportType: DART report_type (예: ``"사업보고서 (2024.12)"``).
+
+    Returns:
+        연도 int. 패턴 매칭 실패 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractReportYear("사업보고서 (2024.12)")
+        2024
+    """
     m = _RE_YEAR_ONLY.search(reportType)
     if m:
         return int(m.group(1))
@@ -66,13 +100,22 @@ def extractReportYear(reportType: str) -> int | None:
 
 
 def selectEdgarReport(df: pl.DataFrame, periodKey: str) -> pl.DataFrame | None:
-    """EDGAR docs DataFrame에서 특정 period_key에 해당하는 filing 선택.
+    """EDGAR docs DataFrame 에서 특정 period_key 의 filing 선택.
 
-    periodKey 예시:
-    - "2024"   -> annual (10-K/20-F)
-    - "2024Q1" -> 10-Q
-    - "2024Q2" -> 10-Q
-    - "2024Q3" -> 10-Q
+    Args:
+        df: EDGAR docs DataFrame.
+        periodKey: ``"2024"`` (annual=10-K/20-F), ``"2024Q1"``/``Q2``/``Q3`` (10-Q).
+
+    Returns:
+        해당 period 의 가장 최신 filing 의 모든 row. 매칭 0 또는 ``period_key`` 컬럼
+        부재 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> selectEdgarReport(df, "2024Q1")
+        <DataFrame ...>
     """
     if "period_key" not in df.columns:
         return None
@@ -97,14 +140,20 @@ def selectEdgarReport(df: pl.DataFrame, periodKey: str) -> pl.DataFrame | None:
 
 
 def parseEdgarPeriodKey(reportType: str) -> str | None:
-    """EDGAR report_type 문자열에서 period key 추출.
+    """EDGAR report_type 에서 period key 추출.
 
-    Examples:
-        "10-K (2024.12)" -> "2024"
-        "20-F (2024.12)" -> "2024"
-        "10-Q (2024.03)" -> "2024Q1"
-        "10-Q (2024.06)" -> "2024Q2"
-        "10-Q (2024.09)" -> "2024Q3"
+    Args:
+        reportType: EDGAR report_type (예: ``"10-K (2024.12)"``).
+
+    Returns:
+        ``"2024"`` (10-K/20-F), ``"2024Q1"``/``Q2``/``Q3`` (10-Q). 매칭 실패 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseEdgarPeriodKey("10-Q (2024.03)")
+        '2024Q1'
     """
     match = _RE_YEAR_MONTH.search(reportType)
     if not match:
@@ -127,7 +176,21 @@ def parseEdgarPeriodKey(reportType: str) -> str | None:
 
 
 def extractEdgarReportYear(reportType: str) -> int | None:
-    """10-K (2024.12) -> 2024"""
+    """EDGAR report_type 에서 연도 (int) 추출.
+
+    Args:
+        reportType: EDGAR report_type (예: ``"10-K (2024.12)"``).
+
+    Returns:
+        연도 int. 패턴 매칭 실패 시 ``None``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractEdgarReportYear("10-K (2024.12)")
+        2024
+    """
     match = _RE_YEAR_ONLY.search(reportType)
     if match:
         return int(match.group(1))
