@@ -64,36 +64,37 @@ async def parseRawMarkdownBlock(
         >>> parseRawMarkdownBlock(...)
 
     Returns:
-        <TODO: return desc> (dict[str, Any])
+        dict[str, Any] — 변환 결과 (headers/rows/kisuMap/unit).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``parseRawMarkdownBlock`` — 본 모듈 entry.
 
     Requires:
-        - <TODO: external requires>
+        - dartlab.ai.kernel + LLM API 키.
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 마크다운 테이블 → AI 호출 → 구조화 dict (headers/rows/kisuMap/unit).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.table()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal table AI parser — AI 직접 호출 X (본 함수가 LLM 위임).
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - LLM API 키 미설정 → 호출 실패. caller 사전 검증.
+            - 캐시 무효화 미고려 → 동일 입력 매번 LLM 호출 비용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (headers/rows/kisuMap/unit) 또는 None.
         Prerequisites:
-            - <TODO: 사전조건>
+            - LLM API 키 + 마크다운 테이블 입력.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 호출 시점 (LLM 응답) + cache.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - rawMarkdown → LLM → JSON 응답 → 본 dict.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 표 AI 변환.
     """
     # 최신 기간의 마크다운
     periods = sorted(rawMarkdown.keys())

@@ -125,36 +125,37 @@ class Notes:
             >>> quarterly(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame 또는 None — 카테고리 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``c.show("inventory"/...)`` — public surface.
 
         Requires:
             - dartlab
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - K-IFRS notes 카테고리 dispatch — registry 기반.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal notes dispatch — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs notes 본문 + core/_entries.py 등록.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - category → notesDispatch → extractor → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) K-IFRS notes.
         """
         eng = _KR_MAP.get(name, name)
         if eng not in _REGISTRY:
@@ -174,21 +175,22 @@ class Notes:
             >>> all(...)
 
         Returns:
-            <TODO: return desc> (dict[str, pl.DataFrame | None])
+            dict[str, pl.DataFrame | None] — 카테고리 별 결과.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs notes 본문 + core/_entries.py 등록.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - category → notesDispatch → extractor → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) K-IFRS notes.
         """
         return {name: self._get(name, period=period) for name in _REGISTRY}
 
@@ -205,21 +207,22 @@ class Notes:
             >>> keys(...)
 
         Returns:
-            <TODO: return desc> (list[str])
+            list[str] — 카테고리 키 목록.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs notes 본문 + core/_entries.py 등록.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - category → notesDispatch → extractor → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) K-IFRS notes.
         """
         return list(_REGISTRY.keys())
 
@@ -236,21 +239,22 @@ class Notes:
             >>> keysKr(...)
 
         Returns:
-            <TODO: return desc> (list[str])
+            list[str] — 카테고리 키 목록.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X — c.show("inventory"/...) 위임.
+                - notes 카테고리 추측 X — registry 등록 키만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 회사 docs notes 본문 + core/_entries.py 등록.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - docs 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - category → notesDispatch → extractor → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) K-IFRS notes.
         """
         return list(_KR_MAP.keys())
 

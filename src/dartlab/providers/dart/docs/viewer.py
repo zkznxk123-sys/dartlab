@@ -92,10 +92,10 @@ class AnnotatedLine:
             >>> stability(...)
 
         Returns:
-            <TODO: return desc> (str)
+            str — 결과.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.view`` — public surface.
 
         Requires:
             - dartlab
@@ -104,27 +104,27 @@ class AnnotatedLine:
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 블록 viewer 변환 helper.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal viewer helper — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 모듈 직접 호출 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / list / str — 함수별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - sections + finance.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - sections → 블록 분류 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) viewer.
         """
         if self.totalPeriods == 0:
             return "stable"
@@ -297,10 +297,11 @@ def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
         >>> viewerBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[ViewerBlock])
+        list[ViewerBlock] — 블록 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.view`` — public surface.
+        - ``sections/views.py`` — sections 파생 뷰.
 
     Requires:
         - dartlab
@@ -309,27 +310,28 @@ def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal viewer presentation — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
+            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / list[dict] — 함수별 (블록 메타).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 sections + finance/report.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시뷰어.
     """
     if topic in _FINANCE_TOPICS:
         blk = _buildFinanceBlock(company, topic)
@@ -396,10 +398,11 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
         >>> viewerTextDocument(...)
 
     Returns:
-        <TODO: return desc> (ViewerTextDocument | None)
+        ViewerTextDocument 또는 None — 텍스트 문서.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.view`` — public surface.
+        - ``sections/views.py`` — sections 파생 뷰.
 
     Requires:
         - dartlab
@@ -408,27 +411,28 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal viewer presentation — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
+            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / list[dict] — 함수별 (블록 메타).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 sections + finance/report.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시뷰어.
     """
     textBlocks = [b for b in blocks if b.kind == "text"]
     if not textBlocks:
@@ -1584,10 +1588,11 @@ def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str
         >>> serializeViewerTextDocument(...)
 
     Returns:
-        <TODO: return desc> (dict[str, Any] | None)
+        dict[str, Any] 또는 None — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.view`` — public surface.
+        - ``sections/views.py`` — sections 파생 뷰.
 
     Requires:
         - dartlab
@@ -1596,27 +1601,28 @@ def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal viewer presentation — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
+            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / list[dict] — 함수별 (블록 메타).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 sections + finance/report.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시뷰어.
     """
     if document is None:
         return None
@@ -1691,10 +1697,11 @@ def serializeViewerBlock(block: ViewerBlock) -> dict[str, Any]:
         >>> serializeViewerBlock(...)
 
     Returns:
-        <TODO: return desc> (dict[str, Any])
+        dict[str, Any] — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``Company.view`` — public surface.
+        - ``sections/views.py`` — sections 파생 뷰.
 
     Requires:
         - dartlab
@@ -1703,27 +1710,28 @@ def serializeViewerBlock(block: ViewerBlock) -> dict[str, Any]:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal viewer presentation — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
+            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / list[dict] — 함수별 (블록 메타).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 sections + finance/report.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 공시뷰어.
     """
     result: dict[str, Any] = {
         "block": block.block,
