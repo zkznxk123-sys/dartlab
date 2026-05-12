@@ -30,14 +30,38 @@ class RemoteDartClient:
         _log.info("RemoteDartClient: %s", self._base)
 
     def getJson(self, endpoint: str, params: dict, *, emptyOn013: bool = False) -> dict:
-        """서버 프록시를 통한 JSON 조회."""
+        """서버 프록시를 통한 JSON 조회.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            emptyOn013: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getJson(...)
+        """
         url = f"{self._base}/api/dart{endpoint}"
         resp = self._session.get(url, params=params)
         resp.raise_for_status()
         return resp.json()
 
     def getDf(self, endpoint: str, params: dict, listKey: str = "list") -> pl.DataFrame:
-        """서버 프록시를 통한 DataFrame 조회."""
+        """서버 프록시를 통한 DataFrame 조회.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            listKey: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getDf(...)
+        """
         data = self.getJson(endpoint, params)
         rows = data.get("rows", data.get(listKey, []))
         if not rows:
@@ -45,5 +69,18 @@ class RemoteDartClient:
         return pl.DataFrame(rows)
 
     def getDfAll(self, endpoint: str, params: dict, listKey: str = "list", pageSize: int = 100) -> pl.DataFrame:
-        """getDf와 동일 (서버가 페이지네이션 처리)."""
+        """getDf와 동일 (서버가 페이지네이션 처리).
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            listKey: 인자.
+            pageSize: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getDfAll(...)
+        """
         return self.getDf(endpoint, params, listKey=listKey)

@@ -74,6 +74,12 @@ def loadCorpCodes(client: DartClient, refresh: bool = False) -> pl.DataFrame:
     -------
     pl.DataFrame
         columns: corp_code, corp_name, stock_code, modify_date
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadCorpCodes(...)
     """
     global _memCache
 
@@ -112,6 +118,9 @@ def findCorpCode(
     -------
     str | None
         8자리 corp_code. 못 찾으면 None.
+
+    Raises:
+        없음.
     """
     df = loadCorpCodes(client, refresh=refresh)
 
@@ -165,6 +174,9 @@ def searchCompanies(
 
     Example:
         >>> searchCompanies(client, "삼성", listedOnly=True, limit=20)
+
+    Raises:
+        없음.
     """
     df = loadCorpCodes(client)
     result = df.filter(pl.col("corp_name").str.contains(query, literal=True))

@@ -41,6 +41,12 @@ def parseDate(value: str | datetime | date | None, asEnd: bool = False) -> str |
     -------
     str | None
         YYYYMMDD 형식 문자열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseDate(...)
     """
     if value is None:
         return None
@@ -82,7 +88,17 @@ def parseDate(value: str | datetime | date | None, asEnd: bool = False) -> str |
 
 
 def defaultStart() -> str:
-    """기본 시작일: 1년 전 오늘."""
+    """기본 시작일: 1년 전 오늘.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> defaultStart(...)
+    """
     now = datetime.now()
     try:
         oneYearAgo = now.replace(year=now.year - 1)
@@ -93,5 +109,15 @@ def defaultStart() -> str:
 
 
 def defaultEnd() -> str:
-    """기본 종료일: 오늘."""
+    """기본 종료일: 오늘.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> defaultEnd(...)
+    """
     return datetime.now().strftime("%Y%m%d")

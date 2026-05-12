@@ -305,6 +305,9 @@ class Dart:
         >>> d.filings("005930", "2024")
         >>> d.filings("삼성전자", "2024-01", "2024-06")
         >>> d.filings(start="2024-03-14")
+
+        Raises:
+            없음.
         """
         startDate = parseDate(start, asEnd=False) or defaultStart()
         endDate = parseDate(end, asEnd=True) or defaultEnd()
@@ -328,6 +331,12 @@ class Dart:
         --------
         >>> d.company("삼성전자")
         >>> d.company("005930")
+
+        Args:
+            corp: 인자.
+
+        Raises:
+            없음.
         """
         return companyInfo(self._client, corp)
 
@@ -352,6 +361,9 @@ class Dart:
 
         Example:
             >>> d.search("삼성", limit=10)
+
+        Raises:
+            없음.
         """
         return searchCompanies(self._client, query, listedOnly=listed, limit=limit)
 
@@ -364,11 +376,27 @@ class Dart:
         --------
         >>> d.corpCode("005930")    # "00126380"
         >>> d.corpCode("삼성전자")  # "00126380"
+
+        Args:
+            query: 인자.
+
+        Raises:
+            없음.
         """
         return findCorpCode(self._client, query)
 
     def corpCodes(self, refresh: bool = False) -> pl.DataFrame:
-        """corp_code 전체 목록 (11만+건, 24시간 캐시)."""
+        """corp_code 전체 목록 (11만+건, 24시간 캐시).
+
+        Args:
+            refresh: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> corpCodes(...)
+        """
         return loadCorpCodes(self._client, refresh=refresh)
 
     # ── 재무제표 ───────────────────────────────────────────
@@ -407,6 +435,9 @@ class Dart:
         >>> d.finstate("삼성전자", 2020, end=2024)        # 연간 5년
         >>> d.finstate("삼성전자", 2020, end=2024, q=0)   # 분기별 20건
         >>> d.finstate("삼성전자", 2020, end=2024, q=2)   # Q2만 5건
+
+        Raises:
+            없음.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1
@@ -462,6 +493,9 @@ class Dart:
         --------
         >>> d.finstateMulti(["삼성전자", "SK하이닉스"], 2023)
         >>> d.finstateMulti(["삼성전자", "SK하이닉스"], 2023, q=2)
+
+        Raises:
+            없음.
         """
         corpCodes = [_resolveCorpCode(self._client, c) for c in corps]
         bsnsYear = str(year) if year else str(datetime.now().year - 1)
@@ -495,6 +529,9 @@ class Dart:
         >>> d.xbrlTaxonomy("BS1")   # 재무상태표
         >>> d.xbrlTaxonomy("IS1")   # 손익계산서
         >>> d.xbrlTaxonomy("CF1")   # 현금흐름표
+
+        Raises:
+            없음.
         """
         return self._client.getDf(
             "xbrlTaxonomy.json",
@@ -533,6 +570,9 @@ class Dart:
         >>> d.report("삼성전자", "배당", 2020, end=2024)
         >>> d.report("삼성전자", "배당", 2020, end=2024, q=0)   # 분기별
         >>> d.report("삼성전자", "배당", 2020, end=2024, q=2)   # Q2만
+
+        Raises:
+            없음.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1
@@ -574,6 +614,12 @@ class Dart:
         Examples
         --------
         >>> d.majorShareholders("삼성전자")
+
+        Args:
+            corp: 인자.
+
+        Raises:
+            없음.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         return self._client.getDf("majorstock.json", {"corp_code": corpCodeStr})
@@ -584,6 +630,12 @@ class Dart:
         Examples
         --------
         >>> d.executiveShares("삼성전자")
+
+        Args:
+            corp: 인자.
+
+        Raises:
+            없음.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         return self._client.getDf("elestock.json", {"corp_code": corpCodeStr})
@@ -613,6 +665,9 @@ class Dart:
         --------
         >>> path = d.document("20240312000736")
         >>> path = d.document("20240312000736", "~/downloads/samsung.zip")
+
+        Raises:
+            없음.
         """
         raw = self._client.getBytes("document.xml", {"rcept_no": rceptNo})
         dest = Path(savePath) if savePath else Path(f"{rceptNo}.zip")
@@ -636,6 +691,9 @@ class Dart:
         Examples
         --------
         >>> html = d.documentText("20240312000736")
+
+        Raises:
+            없음.
         """
         raw = self._client.getBytes("document.xml", {"rcept_no": rceptNo})
         zf = zipfile.ZipFile(io.BytesIO(raw))
@@ -671,17 +729,47 @@ class Dart:
 
     @staticmethod
     def filingTypes() -> dict[str, str]:
-        """공시유형 코드표."""
+        """공시유형 코드표.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> filingTypes(...)
+        """
         return dict(FILING_TYPES)
 
     @staticmethod
     def markets() -> dict[str, str]:
-        """법인구분 코드표."""
+        """법인구분 코드표.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> markets(...)
+        """
         return dict(CORP_CLASS)
 
     @staticmethod
     def reportTypes() -> list[str]:
-        """사업보고서 API 지원 카테고리."""
+        """사업보고서 API 지원 카테고리.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> reportTypes(...)
+        """
         return sorted(_REPORT_ENDPOINTS.keys())
 
     def __call__(self, corp: str) -> DartCompany:
@@ -789,6 +877,9 @@ class DartCompany:
         >>> s.report("배당", 2022, q=4)       # 2022~현재 사업보고서만
         >>> s.report("배당", 2022, q=2)       # 2022~현재 Q2만
         >>> s.report("직원", 2022, end=2023)  # 2022~2023 Q1~Q4
+
+        Raises:
+            없음.
         """
         if start is not None and end is None:
             end = _autoEnd()
@@ -838,6 +929,9 @@ class DartCompany:
         >>> s.finance(2022, q=2)              # 2022~현재 Q2만
         >>> s.finance(2023, end=2023)         # 2023 Q1~Q4
         >>> s.finance(2020, full=True)        # 전체 계정
+
+        Raises:
+            없음.
         """
         if start is not None and end is None:
             end = _autoEnd()
@@ -870,6 +964,15 @@ class DartCompany:
         >>> s.filings("2024-01", "2024-06")
         >>> s.filings(type="A")          # 정기공시만
         >>> s.filings(final=True)        # 최종보고서만
+
+        Args:
+            start: 인자.
+            end: 인자.
+            type: 인자.
+            final: 인자.
+
+        Raises:
+            없음.
         """
         return self._dart.filings(
             self._corp,
@@ -885,6 +988,12 @@ class DartCompany:
         Examples
         --------
         >>> s.info()
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
         """
         return self._dart.company(self._corp)
 
@@ -904,6 +1013,9 @@ class DartCompany:
         >>> s.shares()                # {"major": ..., "executive": ...}
         >>> s.shares("major")         # 대량보유만
         >>> s.shares("executive")     # 임원만
+
+        Raises:
+            없음.
         """
         if type == "major":
             return self._dart.majorShareholders(self._corp)
@@ -924,6 +1036,13 @@ class DartCompany:
         Examples
         --------
         >>> s.document(filings["rcept_no"][0])
+
+        Args:
+            rceptNo: 인자.
+            savePath: 인자.
+
+        Raises:
+            없음.
         """
         return self._dart.document(rceptNo, savePath)
 
@@ -933,6 +1052,12 @@ class DartCompany:
         Examples
         --------
         >>> s.documentText(filings["rcept_no"][0])
+
+        Args:
+            rceptNo: 인자.
+
+        Raises:
+            없음.
         """
         return self._dart.documentText(rceptNo)
 
@@ -954,6 +1079,15 @@ class DartCompany:
         --------
         >>> s.saveFinance(2020)         # 2020~현재 전분기
         >>> s.saveFinance(2023, q=4)    # 2023 사업보고서만
+
+        Args:
+            start: 인자.
+            end: 인자.
+            q: 인자.
+            full: 인자.
+
+        Raises:
+            없음.
         """
         stockCode = self._resolveStockCode()
         corpName = self._dart._resolveCorpName(self._corp)
@@ -1015,6 +1149,9 @@ class DartCompany:
         >>> s.saveReport(2020)                    # 2020~현재 전분기
         >>> s.saveReport(2023, q=4)               # 2023 사업보고서만
         >>> s.saveReport(2020, categories=["배당","직원"])  # 일부만
+
+        Raises:
+            없음.
         """
         from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
@@ -1065,6 +1202,15 @@ class DartCompany:
         >>> s.saveFilings()               # 최근 1년 공시 목록 저장
         >>> s.saveFilings("2020")         # 2020년~현재 누적
         >>> s.saveFilings("2020", type="A")  # 정기공시만
+
+        Args:
+            start: 인자.
+            end: 인자.
+            type: 인자.
+            final: 인자.
+
+        Raises:
+            없음.
         """
         df = self.filings(start, end, type=type, final=final)
         stockCode = self._resolveStockCode()
@@ -1095,6 +1241,9 @@ class DartCompany:
         --------
         >>> s.xbrl(2023)         # 2023 사업보고서 XBRL
         >>> s.xbrl(2024, q=2)    # 2024 반기 XBRL
+
+        Raises:
+            없음.
         """
         corpCodeStr = _resolveCorpCode(self._dart._client, self._corp)
         bsnsYear = str(year) if year else str(datetime.now().year - 1)

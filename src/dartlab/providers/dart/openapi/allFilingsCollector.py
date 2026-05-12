@@ -141,6 +141,18 @@ def collectMetaDay(
     """하루치 공시 목록만 수집 → _meta.parquet 저장.
 
     이미 목록이 있거나 원문까지 완료된 날짜는 건너뛴다.
+
+    Args:
+        period: 인자.
+        client: 인자.
+        corpClasses: 인자.
+        showProgress: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectMetaDay(...)
     """
     if client is None:
         client = DartClient()
@@ -202,6 +214,12 @@ def collectMetaRange(
     -------
     int
         수집된 날짜 수.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectMetaRange(...)
     """
     from datetime import datetime, timedelta
 
@@ -250,6 +268,17 @@ def fillContent(
     """하루치 목록의 원문을 채운다. _meta.parquet → .parquet 승격.
 
     이미 원문이 있는 날짜는 건너뛴다.
+
+    Args:
+        period: 인자.
+        client: 인자.
+        showProgress: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> fillContent(...)
     """
     if client is None:
         client = DartClient()
@@ -362,6 +391,12 @@ def fillContentAll(
     -------
     int
         원문 수집 완료한 날짜 수.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> fillContentAll(...)
     """
     if client is None:
         client = DartClient()
@@ -400,7 +435,17 @@ def fillContentAll(
 
 
 def collectedDates() -> list[str]:
-    """원문 수집 완료된 날짜 목록 (최신순)."""
+    """원문 수집 완료된 날짜 목록 (최신순).
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectedDates(...)
+    """
     outDir = _allFilingsDir()
     dates = sorted(
         [p.stem for p in outDir.glob("*.parquet") if len(p.stem) == 8 and p.stem.isdigit()],
@@ -410,7 +455,17 @@ def collectedDates() -> list[str]:
 
 
 def pendingDates() -> list[str]:
-    """목록만 있고 원문 미수집인 날짜 목록 (최신순)."""
+    """목록만 있고 원문 미수집인 날짜 목록 (최신순).
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pendingDates(...)
+    """
     outDir = _allFilingsDir()
     dates = sorted(
         [p.stem.replace(_META_SUFFIX, "") for p in outDir.glob(f"*{_META_SUFFIX}.parquet")],
@@ -420,7 +475,17 @@ def pendingDates() -> list[str]:
 
 
 def loadDay(period: str) -> pl.DataFrame | None:
-    """수집된 하루치 데이터 로드."""
+    """수집된 하루치 데이터 로드.
+
+    Args:
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadDay(...)
+    """
     path = _allFilingsDir() / f"{period}.parquet"
     if not path.exists():
         return None
@@ -428,7 +493,17 @@ def loadDay(period: str) -> pl.DataFrame | None:
 
 
 def loadAll() -> pl.DataFrame:
-    """원문 수집 완료된 전체 데이터 로드."""
+    """원문 수집 완료된 전체 데이터 로드.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadAll(...)
+    """
     outDir = _allFilingsDir()
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
     if not files:
@@ -437,7 +512,17 @@ def loadAll() -> pl.DataFrame:
 
 
 def stats() -> dict:
-    """수집 현황 통계."""
+    """수집 현황 통계.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> stats(...)
+    """
     completed = collectedDates()
     pending = pendingDates()
 

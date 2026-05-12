@@ -40,6 +40,19 @@ def search(
     - ``"both"``: title + content 결과를 scope 컬럼과 함께 합쳐 반환.
 
     DART 공시 전용 — EDGAR 공시 검색은 SEC EDGAR Full-Text Search 이용.
+
+    Args:
+        query: 인자.
+        corp: 인자.
+        start: 인자.
+        end: 인자.
+        limit: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> search(...)
     """
     if corp and not str(corp).isdigit() and len(corp) <= 6:
         return pl.DataFrame(
@@ -151,40 +164,102 @@ def _resolveCorp(corp: str | None) -> tuple[str | None, str | None]:
 
 
 def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = False, **kwargs) -> int:
-    """Ngram 인덱스 빌드. allFilings + (선택) docs 통합."""
+    """Ngram 인덱스 빌드. allFilings + (선택) docs 통합.
+
+    Args:
+        parquetPaths: 인자.
+        includeDocs: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildIndex(...)
+    """
     from dartlab.providers.dart.search.ngramIndex import buildNgramIndex
 
     return buildNgramIndex(parquetPaths, includeDocs=includeDocs, **kwargs)
 
 
 def rebuildIndex(**kwargs) -> int:
-    """전체 인덱스 리빌드 — allFilings + docs 통합."""
+    """전체 인덱스 리빌드 — allFilings + docs 통합.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rebuildIndex(...)
+    """
     return buildIndex(includeDocs=True, **kwargs)
 
 
 def rebuildContent(**kwargs) -> int:
-    """content 인덱스 main 세그먼트 풀리빌드 (월 1회)."""
+    """content 인덱스 main 세그먼트 풀리빌드 (월 1회).
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rebuildContent(...)
+    """
     from dartlab.providers.dart.search.fieldIndex import rebuildMain
 
     return rebuildMain(**kwargs)
 
 
 def rebuildContentDelta(**kwargs) -> int:
-    """content 인덱스 delta 세그먼트 빌드 (일 단위 증분)."""
+    """content 인덱스 delta 세그먼트 빌드 (일 단위 증분).
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rebuildContentDelta(...)
+    """
     from dartlab.providers.dart.search.fieldIndex import rebuildDelta
 
     return rebuildDelta(**kwargs)
 
 
 def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
-    """공시 목록 수집 (Phase 1)."""
+    """공시 목록 수집 (Phase 1).
+
+    Args:
+        startDate: 인자.
+        endDate: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectMeta(...)
+    """
     from dartlab.providers.dart.openapi.allFilingsCollector import collectMetaRange
 
     return collectMetaRange(startDate, endDate, **kwargs)
 
 
 def fillContent(period: str | None = None, **kwargs):
-    """공시 원문 채우기 (Phase 2)."""
+    """공시 원문 채우기 (Phase 2).
+
+    Args:
+        period: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> fillContent(...)
+    """
     from dartlab.providers.dart.openapi.allFilingsCollector import (
         fillContent as _fill,
     )
@@ -198,7 +273,17 @@ def fillContent(period: str | None = None, **kwargs):
 
 
 def stats() -> dict:
-    """수집 + 인덱스 통합 통계."""
+    """수집 + 인덱스 통합 통계.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> stats(...)
+    """
     from dartlab.providers.dart.openapi.allFilingsCollector import stats as collectorStats
     from dartlab.providers.dart.search.ngramIndex import ngramStats
 
@@ -209,14 +294,34 @@ def stats() -> dict:
 
 
 def pushIndex(**kwargs) -> str:
-    """stemIndex를 HuggingFace에 업로드."""
+    """stemIndex를 HuggingFace에 업로드.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pushIndex(...)
+    """
     from dartlab.providers.dart.search.ngramIndex import pushStemIndex
 
     return pushStemIndex(**kwargs)
 
 
 def pullIndex(**kwargs):
-    """HuggingFace에서 검색 인덱스 다운로드 (stemIndex + contentIndex)."""
+    """HuggingFace에서 검색 인덱스 다운로드 (stemIndex + contentIndex).
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pullIndex(...)
+    """
     from dartlab.providers.dart.search.fieldIndex import pullContentIndex
     from dartlab.providers.dart.search.ngramIndex import pullStemIndex
 
@@ -231,35 +336,87 @@ def pullIndex(**kwargs):
 
 
 def profile(stockCode: str | None = None):
-    """기업별 공시 프로필 조회."""
+    """기업별 공시 프로필 조회.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> profile(...)
+    """
     from dartlab.providers.dart.search.derived import loadProfile
 
     return loadProfile(stockCode)
 
 
 def pulse(limit: int = 10) -> pl.DataFrame:
-    """최근 월의 공시 유형별 건수 + 전월 대비 변화."""
+    """최근 월의 공시 유형별 건수 + 전월 대비 변화.
+
+    Args:
+        limit: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pulse(...)
+    """
     from dartlab.providers.dart.search.derived import pulse as _pulse
 
     return _pulse(limit=limit)
 
 
 def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> pl.DataFrame:
-    """유형×월 빈도 시계열 조회."""
+    """유형×월 빈도 시계열 조회.
+
+    Args:
+        typeFilter: 인자.
+        periodFilter: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> timeline(...)
+    """
     from dartlab.providers.dart.search.derived import loadTimeline
 
     return loadTimeline(typeFilter=typeFilter, periodFilter=periodFilter)
 
 
 def dna(stockCode: str) -> dict:
-    """기업의 Disclosure DNA (114차원 유형 빈도 벡터)."""
+    """기업의 Disclosure DNA (114차원 유형 빈도 벡터).
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> dna(...)
+    """
     from dartlab.providers.dart.search.derived import dna as _dna
 
     return _dna(stockCode)
 
 
 def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
-    """공시 패턴이 유사한 기업 탐색 (코사인 유사도)."""
+    """공시 패턴이 유사한 기업 탐색 (코사인 유사도).
+
+    Args:
+        stockCode: 인자.
+        limit: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> similarCompanies(...)
+    """
     from dartlab.providers.dart.search.derived import similarCompanies as _similar
 
     return _similar(stockCode, limit=limit)

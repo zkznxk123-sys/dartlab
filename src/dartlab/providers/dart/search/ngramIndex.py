@@ -157,6 +157,12 @@ def buildNgramIndex(
     -------
     int
         인덱싱된 문서 수.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildNgramIndex(...)
     """
     import time
 
@@ -481,6 +487,18 @@ def searchNgram(
     L0: 114개 정규화 유형에서 쿼리 매칭 (비공식 변환 포함)
     L1: BM25F bincount (전체 인덱스에서)
     합산: L0 후보 문서에 가산점, L1 결과와 병합
+
+    Args:
+        query: 인자.
+        corpCode: 인자.
+        stockCode: 인자.
+        limit: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> searchNgram(...)
     """
     index, meta = _loadIndex()
     if not index or meta.height == 0:
@@ -629,7 +647,17 @@ def searchNgram(
 
 
 def ngramStats() -> dict:
-    """ngramStats — TODO 한국어 동작 설명."""
+    """ngramStats — TODO 한국어 동작 설명.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> ngramStats(...)
+    """
     outDir = _stemIndexDir()
     npzPath = outDir / "stemIndex.npz"
     dictPath = outDir / "stemDict.json"
@@ -661,7 +689,17 @@ def ngramStats() -> dict:
 
 
 def pushStemIndex(*, token: str | None = None) -> str:
-    """stemIndex를 HuggingFace에 업로드."""
+    """stemIndex를 HuggingFace에 업로드.
+
+    Args:
+        token: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pushStemIndex(...)
+    """
     from huggingface_hub import HfApi
 
     from dartlab.core.dataConfig import HF_REPO
@@ -683,7 +721,18 @@ def pushStemIndex(*, token: str | None = None) -> str:
 
 
 def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
-    """HuggingFace에서 stemIndex 다운로드 → 즉시 검색 가능."""
+    """HuggingFace에서 stemIndex 다운로드 → 즉시 검색 가능.
+
+    Args:
+        token: 인자.
+        force: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pullStemIndex(...)
+    """
     from huggingface_hub import snapshot_download
 
     from dartlab.core.dataConfig import HF_REPO
@@ -744,6 +793,9 @@ def iterNgram(
     Example:
         >>> for row in iterNgram("유상증자", limit=5):
         ...     print(row.get("rcept_no"))
+
+    Raises:
+        없음.
     """
     df = searchNgram(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():

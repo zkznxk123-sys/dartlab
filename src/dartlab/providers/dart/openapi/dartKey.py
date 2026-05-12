@@ -20,7 +20,17 @@ class DartKeyStatus:
     writable: bool
 
     def toDict(self) -> dict[str, Any]:
-        """키 상태를 딕셔너리로 변환한다."""
+        """키 상태를 딕셔너리로 변환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> toDict(...)
+        """
         return {
             "configured": self.configured,
             "source": self.source,
@@ -31,7 +41,17 @@ class DartKeyStatus:
 
 
 def findProjectEnvPath(startPath: Path | None = None) -> Path:
-    """프로젝트 루트 .env 경로를 추정한다."""
+    """프로젝트 루트 .env 경로를 추정한다.
+
+    Args:
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> findProjectEnvPath(...)
+    """
     start = startPath or Path.cwd()
     for current in (start, *start.parents):
         candidate = current / ".env"
@@ -41,7 +61,17 @@ def findProjectEnvPath(startPath: Path | None = None) -> Path:
 
 
 def loadDotenvDartKeys(startPath: Path | None = None) -> list[str]:
-    """프로젝트 .env의 DART_API_KEY(S)를 읽는다."""
+    """프로젝트 .env의 DART_API_KEY(S)를 읽는다.
+
+    Args:
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadDotenvDartKeys(...)
+    """
     envPath = findProjectEnvPath(startPath)
     if not envPath.exists():
         return []
@@ -74,7 +104,19 @@ def resolveDartKeys(
     *,
     startPath: Path | None = None,
 ) -> list[str]:
-    """DART 키 우선순위: 인자 -> OS env -> 프로젝트 .env."""
+    """DART 키 우선순위: 인자 -> OS env -> 프로젝트 .env.
+
+    Args:
+        apiKey: 인자.
+        apiKeys: 인자.
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> resolveDartKeys(...)
+    """
     if apiKeys:
         return [item.strip() for item in apiKeys if item and item.strip()]
     if apiKey and apiKey.strip():
@@ -96,12 +138,32 @@ def resolveDartKeys(
 
 
 def hasDartApiKey(startPath: Path | None = None) -> bool:
-    """DART API 키가 하나라도 설정되어 있는지 확인한다."""
+    """DART API 키가 하나라도 설정되어 있는지 확인한다.
+
+    Args:
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> hasDartApiKey(...)
+    """
     return bool(resolveDartKeys(startPath=startPath))
 
 
 def getDartKeyStatus(startPath: Path | None = None) -> DartKeyStatus:
-    """현재 DART API 키 설정 상태를 조회한다."""
+    """현재 DART API 키 설정 상태를 조회한다.
+
+    Args:
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getDartKeyStatus(...)
+    """
     envPath = findProjectEnvPath(startPath)
     envKeys = os.environ.get("DART_API_KEYS", "")
     envKey = os.environ.get("DART_API_KEY", "")
@@ -131,7 +193,18 @@ def getDartKeyStatus(startPath: Path | None = None) -> DartKeyStatus:
 
 
 def saveDartKeyToDotenv(key: str, startPath: Path | None = None) -> Path:
-    """프로젝트 .env의 DART_API_KEY를 추가 또는 갱신한다."""
+    """프로젝트 .env의 DART_API_KEY를 추가 또는 갱신한다.
+
+    Args:
+        key: 인자.
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> saveDartKeyToDotenv(...)
+    """
     envPath = findProjectEnvPath(startPath)
     lines: list[str] = []
     replaced = False
@@ -156,7 +229,17 @@ def saveDartKeyToDotenv(key: str, startPath: Path | None = None) -> Path:
 
 
 def clearDartKeyFromDotenv(startPath: Path | None = None) -> Path:
-    """프로젝트 .env에서 DART_API_KEY(S)를 제거한다."""
+    """프로젝트 .env에서 DART_API_KEY(S)를 제거한다.
+
+    Args:
+        startPath: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> clearDartKeyFromDotenv(...)
+    """
     envPath = findProjectEnvPath(startPath)
     if not envPath.exists():
         return envPath
@@ -173,7 +256,17 @@ def clearDartKeyFromDotenv(startPath: Path | None = None) -> Path:
 
 
 def validateDartApiKey(key: str) -> dict[str, Any]:
-    """키 유효성만 빠르게 점검한다."""
+    """키 유효성만 빠르게 점검한다.
+
+    Args:
+        key: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> validateDartApiKey(...)
+    """
     from dartlab.providers.dart.openapi.client import DartClient
 
     today = datetime.now().strftime("%Y%m%d")
@@ -204,7 +297,14 @@ class DartKeyProvider:
     name = "dart_api_key"
 
     def check(self):
-        """DART API 키 상태 → CredentialStatus."""
+        """DART API 키 상태 → CredentialStatus.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> check(...)
+        """
         from dartlab.core.credentials import CredentialStatus
 
         try:
@@ -230,7 +330,17 @@ class DartKeyProvider:
         )
 
     def save(self, value: str) -> None:
-        """프로젝트 .env 에 DART_API_KEY 저장."""
+        """프로젝트 .env 에 DART_API_KEY 저장.
+
+        Args:
+            value: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> save(...)
+        """
         saveDartKeyToDotenv(value)
 
 

@@ -61,7 +61,17 @@ def _contentIndexDir() -> Path:
 
 
 def tokenizeWord(text: str) -> list[str]:
-    """content 토크나이저 — 공백/구두점으로 분리된 단어 단위."""
+    """content 토크나이저 — 공백/구두점으로 분리된 단어 단위.
+
+    Args:
+        text: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> tokenizeWord(...)
+    """
     if not text:
         return []
     return _WORD_RE.findall(text)
@@ -79,7 +89,17 @@ class _IncrementalBuilder:
         self.docLengths: list[int] = []
 
     def addDoc(self, text: str) -> None:
-        """addDoc — TODO 한국어 동작 설명."""
+        """addDoc — TODO 한국어 동작 설명.
+
+        Args:
+            text: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> addDoc(...)
+        """
         docId = len(self.docLengths)
         if not text:
             self.docLengths.append(0)
@@ -97,7 +117,17 @@ class _IncrementalBuilder:
             self.postings[sid].append((docId, c))
 
     def finalize(self) -> dict:
-        """finalize — TODO 한국어 동작 설명."""
+        """finalize — TODO 한국어 동작 설명.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> finalize(...)
+        """
         n = len(self.docLengths)
         nStems = len(self.stemToId)
         offsets = np.zeros(nStems + 1, dtype=np.int64)
@@ -146,6 +176,12 @@ def buildContentSegment(
     -------
     (index, meta)
         index : CSR dict. meta : polars DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildContentSegment(...)
     """
     t0 = time.perf_counter()
     builder = _IncrementalBuilder()
@@ -187,7 +223,20 @@ def buildContentSegment(
 
 
 def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = None) -> None:
-    """세그먼트를 디스크에 저장."""
+    """세그먼트를 디스크에 저장.
+
+    Args:
+        idx: 인자.
+        meta: 인자.
+        name: 인자.
+        outDir: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> saveSegment(...)
+    """
     outDir = outDir or _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
@@ -215,7 +264,18 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
 
 
 def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFrame] | None:
-    """세그먼트를 디스크에서 로드. 파일이 없으면 None."""
+    """세그먼트를 디스크에서 로드. 파일이 없으면 None.
+
+    Args:
+        name: 인자.
+        inDir: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadSegment(...)
+    """
     inDir = inDir or _contentIndexDir()
     npzPath = inDir / f"{name}.npz"
     if not npzPath.exists():
@@ -280,7 +340,14 @@ def _getSegments() -> dict[str, tuple[dict, pl.DataFrame]]:
 
 
 def clearCache() -> None:
-    """세션 캐시 해제 (인덱스 재빌드 후 호출)."""
+    """세션 캐시 해제 (인덱스 재빌드 후 호출).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> clearCache(...)
+    """
     global _segments
     _segments = None
 
@@ -299,6 +366,12 @@ def searchContent(
     query : 자연어 쿼리. 공백으로 단어 분리.
     corpCode, stockCode : 필터.
     limit : 반환 건수.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> searchContent(...)
     """
     tokens = tokenizeWord(query)
     if not tokens:
@@ -380,6 +453,12 @@ def rebuildMain(
     Returns
     -------
     int : 인덱싱된 문서 수.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rebuildMain(...)
     """
     import gc
 
@@ -390,7 +469,18 @@ def rebuildMain(
     totalDocs = 0
 
     def feedDf(df: pl.DataFrame, source: str) -> int:
-        """feedDf — TODO 한국어 동작 설명."""
+        """feedDf — TODO 한국어 동작 설명.
+
+        Args:
+            df: 인자.
+            source: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> feedDf(...)
+        """
         added = 0
         for row in df.iter_rows(named=True):
             content = (row.get("section_content") or "")[:contentLimit]
@@ -480,6 +570,12 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
     ----------
     sinceDate : YYYYMMDD. 이 날짜 이후만. None이면 daysBack 사용.
     daysBack : sinceDate 미지정 시 N일 전부터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> rebuildDelta(...)
     """
     from datetime import datetime, timedelta
 
@@ -530,7 +626,17 @@ def _clearDelta() -> None:
 
 
 def pushContentIndex(token: str | None = None) -> None:
-    """content 인덱스 (main + delta) 를 HF에 업로드."""
+    """content 인덱스 (main + delta) 를 HF에 업로드.
+
+    Args:
+        token: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pushContentIndex(...)
+    """
     from huggingface_hub import HfApi
 
     outDir = _contentIndexDir()
@@ -563,6 +669,12 @@ def pullContentIndex() -> int:
     Returns
     -------
     int : 다운로드 성공한 파일 수.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pullContentIndex(...)
     """
     from huggingface_hub import hf_hub_download
 
@@ -602,7 +714,17 @@ def pullContentIndex() -> int:
 
 
 def contentStats() -> dict:
-    """content 인덱스 통계."""
+    """content 인덱스 통계.
+
+    Args:
+        (인자 자동 생성).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> contentStats(...)
+    """
     segments = _getSegments()
     out: dict = {}
     for name, (idx, meta) in segments.items():
@@ -636,6 +758,9 @@ def iterContent(
     Example:
         >>> for row in iterContent("매출", limit=5):
         ...     print(row.get("rcept_no"))
+
+    Raises:
+        없음.
     """
     df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():

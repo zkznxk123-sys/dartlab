@@ -196,6 +196,12 @@ class DocsCollector:
         -------
         int
             저장된 섹션 수.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> collect(...)
         """
         filings = self._getFilingList(
             quarters=quarters,
@@ -366,6 +372,12 @@ def collectMultiple(
     -------
     dict
         {종목코드: 저장된 섹션 수}. 실패 시 -1.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectMultiple(...)
     """
     sharedClient = client or DartClient()
     results: dict[str, int] = {}
@@ -412,6 +424,9 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
 
     Example:
         >>> listUncollected(limit=50)
+
+    Raises:
+        없음.
     """
     c = client or DartClient()
     codes = loadCorpCodes(c)
@@ -433,7 +448,17 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
 
 
 def collectionStats(*, client: DartClient | None = None) -> dict:
-    """수집 현황 통계."""
+    """수집 현황 통계.
+
+    Args:
+        client: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectionStats(...)
+    """
     c = client or DartClient()
     codes = loadCorpCodes(c)
 
@@ -467,6 +492,12 @@ def listUncollectedKind(
     -------
     list
         [(종목코드, 회사명), ...]
+
+    Raises:
+        없음.
+
+    Example:
+        >>> listUncollectedKind(...)
     """
     from dartlab.core.listingResolver import getListingResolver
 

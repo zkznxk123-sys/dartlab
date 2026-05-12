@@ -86,7 +86,17 @@ class DartClient:
 
     @property
     def currentKey(self) -> str:
-        """현재 사용 중인 DART API 키를 반환한다."""
+        """현재 사용 중인 DART API 키를 반환한다.
+
+        Args:
+            (인자 자동 생성).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> currentKey(...)
+        """
         return self._keys[self._keyIndex]
 
     def _rotateKey(self) -> bool:
@@ -115,6 +125,12 @@ class DartClient:
         ----------
         emptyOn013 : bool
             True면 '013' (데이터 없음) 시 에러 대신 빈 dict 반환.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getJson(...)
         """
         triedKeys = 0
         while triedKeys < len(self._keys):
@@ -152,6 +168,16 @@ class DartClient:
         """바이너리 엔드포인트 호출 (ZIP, XML 다운로드 등).
 
         JSON 에러 응답도 감지하고, rate limit 시 키 로테이션.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getBytes(...)
         """
         triedKeys = 0
         while triedKeys < len(self._keys):
@@ -187,7 +213,19 @@ class DartClient:
         params: dict[str, Any] | None = None,
         listKey: str = "list",
     ) -> pl.DataFrame:
-        """JSON → Polars DataFrame. 데이터 없으면 빈 DataFrame."""
+        """JSON → Polars DataFrame. 데이터 없으면 빈 DataFrame.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            listKey: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getDf(...)
+        """
         data = self.getJson(endpoint, params, emptyOn013=True)
         rows = data.get(listKey, [])
         if not rows:
@@ -201,7 +239,20 @@ class DartClient:
         listKey: str = "list",
         pageSize: int = 100,
     ) -> pl.DataFrame:
-        """자동 페이지네이션 → 전체 결과 Polars DataFrame."""
+        """자동 페이지네이션 → 전체 결과 Polars DataFrame.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            listKey: 인자.
+            pageSize: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getDfAll(...)
+        """
         merged = dict(params) if params else {}
         merged["page_count"] = str(pageSize)
 

@@ -138,7 +138,19 @@ class AsyncDartClient:
         *,
         emptyOn013: bool = False,
     ) -> dict[str, Any] | None:
-        """비동기 JSON 요청. 한도 초과 시 None + exhausted=True."""
+        """비동기 JSON 요청. 한도 초과 시 None + exhausted=True.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            emptyOn013: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getJson(...)
+        """
         await self._throttle()
         merged = {"crtfc_key": self._key}
         if params:
@@ -162,7 +174,19 @@ class AsyncDartClient:
         params: dict[str, Any] | None = None,
         listKey: str = "list",
     ) -> pl.DataFrame | None:
-        """비동기 JSON → DataFrame. 한도 초과 시 None."""
+        """비동기 JSON → DataFrame. 한도 초과 시 None.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+            listKey: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getDf(...)
+        """
         data = await self.getJson(endpoint, params, emptyOn013=True)
         if data is None:
             return None
@@ -170,7 +194,18 @@ class AsyncDartClient:
         return pl.DataFrame(rows) if rows else pl.DataFrame()
 
     async def getBytes(self, endpoint: str, params: dict[str, Any] | None = None) -> bytes | None:
-        """비동기 바이너리 요청. 한도 초과 시 None."""
+        """비동기 바이너리 요청. 한도 초과 시 None.
+
+        Args:
+            endpoint: 인자.
+            params: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> getBytes(...)
+        """
         await self._throttle()
         merged = {"crtfc_key": self._key}
         if params:
@@ -190,7 +225,14 @@ class AsyncDartClient:
         return resp.content
 
     async def close(self) -> None:
-        """HTTP 클라이언트 연결을 닫는다."""
+        """HTTP 클라이언트 연결을 닫는다.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> close(...)
+        """
         await self._client.aclose()
 
 
@@ -803,6 +845,12 @@ def batchCollect(
     Args:
         targetPeriodsByCode: list.json에서 발견한 종목별 정확한 (year, reprt_code).
             지정하면 _collectFinance/_collectReport가 88분기 차집합 우회.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> batchCollect(...)
     """
     cats = categories or ["finance", "report", "docs"]
     keys = resolveDartKeys()
@@ -928,7 +976,18 @@ def batchCollect(
         return tbl
 
     def completeFn(corpName: str, catSummary: str) -> None:
-        """completeFn — TODO 한국어 동작 설명."""
+        """completeFn — TODO 한국어 동작 설명.
+
+        Args:
+            corpName: 인자.
+            catSummary: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> completeFn(...)
+        """
         with lock:
             completedCount[0] += 1
             for wIdx in range(numWorkers):
@@ -938,12 +997,36 @@ def batchCollect(
                     break
 
     def statusFn(workerIdx: int, stockCode: str, corpName: str) -> None:
-        """statusFn — TODO 한국어 동작 설명."""
+        """statusFn — TODO 한국어 동작 설명.
+
+        Args:
+            workerIdx: 인자.
+            stockCode: 인자.
+            corpName: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> statusFn(...)
+        """
         with lock:
             workerLines[workerIdx] = f"{corpName} ({stockCode})"
 
     def periodFn(workerIdx: int, corpName: str, detail: str) -> None:
-        """periodFn — TODO 한국어 동작 설명."""
+        """periodFn — TODO 한국어 동작 설명.
+
+        Args:
+            workerIdx: 인자.
+            corpName: 인자.
+            detail: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> periodFn(...)
+        """
         with lock:
             workerLines[workerIdx] = f"{corpName} | {detail}"
 
@@ -990,6 +1073,19 @@ def batchCollectAll(
     mode:
       "new" — 파일 없는 종목만
       "all" — 전체
+
+    Args:
+        categories: 인자.
+        mode: 인자.
+        maxWorkers: 인자.
+        incremental: 인자.
+        showProgress: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> batchCollectAll(...)
     """
     from dartlab.core.listingResolver import getListingResolver
 

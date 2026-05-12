@@ -153,7 +153,20 @@ def checkFreshness(
     forceCheck: bool = False,
     includeFinanceReport: bool = True,
 ) -> FreshnessResult:
-    """종목의 로컬 데이터가 최신인지 DART API로 확인."""
+    """종목의 로컬 데이터가 최신인지 DART API로 확인.
+
+    Args:
+        stockCode: 인자.
+        ttlHours: 인자.
+        forceCheck: 인자.
+        includeFinanceReport: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> checkFreshness(...)
+    """
     from dartlab.core.messaging import emit
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 
@@ -253,7 +266,18 @@ def scanMarketFreshness(
     stockCodes: list[str] | None = None,
     days: int = 7,
 ) -> pl.DataFrame:
-    """시장 전체 freshness 스캔. 로컬 데이터가 있는 종목 중 새 공시가 있는 것."""
+    """시장 전체 freshness 스캔. 로컬 데이터가 있는 종목 중 새 공시가 있는 것.
+
+    Args:
+        stockCodes: 인자.
+        days: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> scanMarketFreshness(...)
+    """
     from dartlab.core.dataLoader import _dataDir
     from dartlab.core.messaging import emit
     from dartlab.providers.dart.openapi.client import DartClient
@@ -349,7 +373,18 @@ def collectMissing(
     *,
     categories: list[str] | None = None,
 ) -> dict[str, int]:
-    """누락된 공시를 증분 수집. 기존 ZipDocsCollector/batch 인프라 활용."""
+    """누락된 공시를 증분 수집. 기존 ZipDocsCollector/batch 인프라 활용.
+
+    Args:
+        stockCode: 인자.
+        categories: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectMissing(...)
+    """
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 
     if not hasDartApiKey():

@@ -46,7 +46,18 @@ _RARE_TYPES = frozenset(
 
 
 def buildCompanyProfile(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
-    """meta.parquet에서 기업별 공시 프로필을 집계하여 저장."""
+    """meta.parquet에서 기업별 공시 프로필을 집계하여 저장.
+
+    Args:
+        meta: 인자.
+        outDir: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildCompanyProfile(...)
+    """
     global _cachedProfile
 
     af = meta.filter((pl.col("source") == "allFilings") & (pl.col("stock_code") != ""))
@@ -109,6 +120,15 @@ def loadProfile(stockCode: str | None = None) -> dict | pl.DataFrame:
 
     stockCode 지정 시 해당 기업 1행을 dict로 반환.
     미지정 시 전체 DataFrame 반환.
+
+    Args:
+        stockCode: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadProfile(...)
     """
     global _cachedProfile
 
@@ -165,7 +185,18 @@ def loadProfile(stockCode: str | None = None) -> dict | pl.DataFrame:
 
 
 def buildEventTimeline(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
-    """유형×월 빈도 시계열을 집계하여 저장."""
+    """유형×월 빈도 시계열을 집계하여 저장.
+
+    Args:
+        meta: 인자.
+        outDir: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildEventTimeline(...)
+    """
     global _cachedTimeline
 
     af = meta.filter(
@@ -194,7 +225,18 @@ def loadTimeline(
     typeFilter: str | None = None,
     periodFilter: str | None = None,
 ) -> pl.DataFrame:
-    """유형×월 빈도 시계열 로드."""
+    """유형×월 빈도 시계열 로드.
+
+    Args:
+        typeFilter: 인자.
+        periodFilter: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadTimeline(...)
+    """
     global _cachedTimeline
 
     if _cachedTimeline is None:
@@ -218,6 +260,12 @@ def pulse(limit: int = 10) -> pl.DataFrame:
     -------
     pl.DataFrame
         columns: type_norm, current, previous, change_pct, corp_count
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pulse(...)
     """
     tl = loadTimeline()
     if tl.height == 0:
@@ -261,7 +309,18 @@ def pulse(limit: int = 10) -> pl.DataFrame:
 
 
 def buildDna(meta: pl.DataFrame, outDir: Path) -> dict:
-    """114개 유형 빈도 분포를 기업별 114차원 벡터로 인코딩."""
+    """114개 유형 빈도 분포를 기업별 114차원 벡터로 인코딩.
+
+    Args:
+        meta: 인자.
+        outDir: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildDna(...)
+    """
     global _cachedDna
 
     af = meta.filter((pl.col("source") == "allFilings") & (pl.col("stock_code") != ""))
@@ -332,6 +391,12 @@ def dna(stockCode: str) -> dict:
     -------
     dict
         keys: stockCode, vector (list[float]), topTypes (list[tuple[str, float]])
+
+    Raises:
+        없음.
+
+    Example:
+        >>> dna(...)
     """
     data = _loadDna()
     if stockCode not in data["stockCodes"]:
@@ -359,6 +424,12 @@ def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
     -------
     pl.DataFrame
         columns: stock_code, similarity
+
+    Raises:
+        없음.
+
+    Example:
+        >>> similarCompanies(...)
     """
     data = _loadDna()
     if stockCode not in data["stockCodes"]:

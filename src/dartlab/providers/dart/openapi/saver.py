@@ -176,7 +176,19 @@ def enrichFinance(
     stockCode: str,
     corpName: str,
 ) -> pl.DataFrame:
-    """재무제표 DataFrame에 eddmpython 호환 컬럼 추가."""
+    """재무제표 DataFrame에 eddmpython 호환 컬럼 추가.
+
+    Args:
+        df: 인자.
+        stockCode: 인자.
+        corpName: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> enrichFinance(...)
+    """
     if df.height == 0:
         return df
 
@@ -215,7 +227,21 @@ def enrichReport(
     apiType: str,
     apiEndpoint: str,
 ) -> pl.DataFrame:
-    """보고서 DataFrame에 eddmpython 호환 컬럼 추가."""
+    """보고서 DataFrame에 eddmpython 호환 컬럼 추가.
+
+    Args:
+        df: 인자.
+        stockCode: 인자.
+        corpCode: 인자.
+        apiType: 인자.
+        apiEndpoint: 인자.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> enrichReport(...)
+    """
     if df.height == 0:
         return df
 
@@ -283,6 +309,9 @@ def korColumns(
     --------
     >>> df = s.finance(2023)
     >>> korColumns(df, "finance")
+
+    Raises:
+        없음.
     """
     mapping = {
         "finance": _FINANCE_KR,
@@ -327,6 +356,12 @@ def save(
     -------
     Path
         저장된 파일 경로.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> save(...)
     """
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)

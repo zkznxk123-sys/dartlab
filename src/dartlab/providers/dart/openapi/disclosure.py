@@ -100,6 +100,9 @@ def listFilings(
     >>> df = listFilings(client, "005930", "20240101", "20241231")
     >>> df = listFilings(client, "삼성전자", filingType="A")
     >>> df = listFilings(client, start="20240315", end="20240315")
+
+    Raises:
+        없음.
     """
     params: dict[str, str] = {}
 
@@ -218,6 +221,9 @@ def companyInfo(
     >>> info = companyInfo(client, "005930")
     >>> info["ceo_nm"]
     '한종희'
+
+    Raises:
+        없음.
     """
     corpCode = _resolveCorpCode(client, corp)
     data = client.getJson("company.json", {"corp_code": corpCode})

@@ -283,7 +283,19 @@ class ZipDocsCollector:
         showProgress: bool = True,
         onProgress=None,
     ) -> int:
-        """2016Q1부터 전체 정기보고서 수집 → parquet 저장. 반환: 저장된 섹션 수."""
+        """2016Q1부터 전체 정기보고서 수집 → parquet 저장. 반환: 저장된 섹션 수.
+
+        Args:
+            includeQuarterly: 인자.
+            showProgress: 인자.
+            onProgress: 인자.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> collect(...)
+        """
         from dartlab.core.messaging import emit
 
         # 공시 목록 조회 (K-IFRS 전면 도입 이후)
