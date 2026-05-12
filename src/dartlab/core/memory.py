@@ -534,3 +534,57 @@ def memoizedCalc(fn: Callable[..., Any]) -> Callable[..., Any]:
         return result
 
     return wrapper
+
+
+# ── M4: 함수 단위 메모리 예산 가드 ──
+
+
+class MemoryBudgetExceeded(RuntimeError):
+    """함수 단위 RSS delta 예산 초과 — M4.
+
+    Polars Rust heap 누수 등 ``gc.collect()`` 로 회수 안 되는 메모리 폭증을
+    함수 진입/이탈 RSS delta 로 감지. 호출자가 ``try/except`` 로 잡아
+    fallback 또는 명확한 오류 메시지로 변환 가능.
+    """
+
+
+def withMemoryBudget(limitMb: int, *, sampler: Callable[[], float] | None = None) -> Callable[[F], F]:
+    """함수 진입/이탈 RSS delta 가 ``limitMb`` 초과 시 ``MemoryBudgetExceeded`` raise.
+
+    ``sampler`` 는 ``() -> RSS_in_MB`` 콜러블. 기본 ``getMemoryMb`` — 테스트 시
+    fake sampler 주입으로 결정론적 검증 (정공법 B Protocol DIP).
+
+    Args:
+        limitMb: 진입-이탈 delta 한계 (MB).
+        sampler: RSS 측정 함수 (테스트 주입용).
+
+    Returns:
+        데코레이터.
+
+    Raises:
+        없음 (raise 는 데코레이션 받은 함수의 wrapper 안에서).
+
+    Example:
+        >>> @withMemoryBudget(500)
+        ... def buildHeavy() -> dict:
+        ...     return load_lots_of_data()
+    """
+    sample = sampler if sampler is not None else getMemoryMb
+
+    def decorator(fn: F) -> F:
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            before = sample()
+            result = fn(*args, **kwargs)
+            after = sample()
+            delta = after - before
+            if delta > limitMb:
+                raise MemoryBudgetExceeded(
+                    f"{fn.__qualname__}: RSS delta {delta:.0f}MB > budget {limitMb}MB "
+                    f"(before={before:.0f}MB after={after:.0f}MB)"
+                )
+            return result
+
+        return wrapper  # type: ignore[return-value]
+
+    return decorator

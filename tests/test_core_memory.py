@@ -98,6 +98,47 @@ class TestPressureLevels:
         )
 
 
+class TestWithMemoryBudget:
+    """M4: ``withMemoryBudget`` 데코레이터 — 함수 단위 RSS delta 가드."""
+
+    def test_passes_within_budget(self):
+        """delta 가 limit 이하면 정상 반환."""
+        from dartlab.core.memory import withMemoryBudget
+
+        samples = iter([100.0, 200.0])  # delta 100 < 500
+
+        @withMemoryBudget(500, sampler=lambda: next(samples))
+        def heavy():
+            return "ok"
+
+        assert heavy() == "ok"
+
+    def test_raises_when_exceeded(self):
+        """delta 가 limit 초과면 ``MemoryBudgetExceeded`` raise."""
+        import pytest
+
+        from dartlab.core.memory import MemoryBudgetExceeded, withMemoryBudget
+
+        samples = iter([100.0, 800.0])  # delta 700 > 500
+
+        @withMemoryBudget(500, sampler=lambda: next(samples))
+        def heavy():
+            return "ok"
+
+        with pytest.raises(MemoryBudgetExceeded, match=r"delta 700.*budget 500"):
+            heavy()
+
+    def test_default_sampler_uses_real_rss(self):
+        """sampler 미지정 시 기본 ``getMemoryMb`` 사용 — 단순 함수는 1GB 한계 안 넘음."""
+        from dartlab.core.memory import withMemoryBudget
+
+        @withMemoryBudget(1024)
+        def light():
+            return 42
+
+        assert light() == 42
+
+
 class TestCleanupBetweenCompanies:
     def test_returns_before_after_tuple(self):
         """(before, after) 튜플 반환."""
