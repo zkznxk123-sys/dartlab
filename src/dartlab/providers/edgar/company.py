@@ -3743,17 +3743,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 슬라이스 그대로 LLM 컨텍스트 → 회사 한 명당 수십 슬라이스 → 토큰 부담. 필요한 topic 만 필터.
+                - 슬라이스 ID 의 안정성 가정 X — 본 회사 sections 갱신 시 ID 재산정.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [sliceId, topic, period, text, tokenCount] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections + slicer (LLM context budget 적용 chunking).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections → docs.contextSlices accessor → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K/Q LLM RAG.
         """
         return self._docs.contextSlices if hasattr(self._docs, "contextSlices") else None
 
@@ -3772,17 +3773,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - block_id 의 안정성 가정 X — sections 갱신 시 재산정.
+                - 본 블록을 벡터 임베딩 사전 계산 가정 X — provider 별 별도 처리.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [block_id, text, topic, period] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections + retrievalBlocks accessor.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections → 청킹 → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K/Q RAG 검색 인덱스.
         """
         return self._docs.retrievalBlocks if hasattr(self._docs, "retrievalBlocks") else None
 
@@ -3804,20 +3806,23 @@ class Company:
             >>> c.notes.keys()              # 사용 가능 카테고리
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_EdgarNotesWrapper`` — 본 함수의 반환 래퍼 (.all/.keys/.keysKr/.quarterly).
+            - ``dart.providers.dart.company.Company.notes`` — KR 패리티.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - XBRL TextBlock 주석을 카테고리 별로 구조화. DART 의 docs/notes 와 동일 인터페이스 패리티.
+              call 시 본문 검색, attr 시 카테고리 직접 dispatch.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 inventory 주석" → ``c.notes("inventory")``.
+            - "어떤 카테고리 있나" → ``c.notes.keys()``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 가 재무제표 footnote 질문 받을 때 본 함수 entry — DART c.notes 와 동일 API.
         """
         from dartlab.core.memory import _CACHE_MISSING
 
@@ -3842,17 +3847,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 전체 facts 그대로 노출 → 수백 row × 수십 컬럼 토큰 폭증. topic/period 필터 의무.
+                - facts ≠ companyfacts API raw — 본 함수는 dartlab 정규화 결과.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — topic × period 매트릭스 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - profileAccessor + companyfacts/finance 합산.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance + sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts + finance → profileAccessor.facts → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 통합 facts.
         """
         return getattr(self._profileAccessor, "facts", None)
 
@@ -3889,34 +3895,37 @@ class Company:
             >>> c.sources
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``trace`` — topic 별 source 추적.
+            - ``dart.providers.dart.company.Company.sources`` — KR 패리티 (8 소스).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 본 회사의 데이터 source (docs/finance) 가용 상태 + 각 source 의 shape 메타.
+              DART (8 source) 대비 EDGAR 는 2 source — 시그니처 동기 목적.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 어떤 데이터 있나" → 본 property.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 sources 확인 후 정확한 origin (docs vs finance) 로 분기. 빈 source 호출 회피.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 현재 rows/cols/shape 값 0/0/"" 고정 — 향후 실 shape 채울 예정 (skeleton).
+                - DART 8 source 와 비교 시 EDGAR 가 적다고 판단 X — XBRL 통합이라 source 그루핑 다름.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [source, available:bool, rows:int, cols:int, shape:str].
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 Company 인스턴스 (docs/finance accessor 초기화).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - self._docs/_finance → 본 함수 → 정적 dict 합산.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 2 source.
         """
         rows = []
         for src, accessor in [("docs", self._docs), ("finance", self._finance)]:
@@ -3948,34 +3957,36 @@ class Company:
             >>> c.table("BS")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``show`` — 본 함수의 실 backend (현재 단순 위임).
+            - ``dart.providers.dart.company.Company.table`` — KR 패리티 (실 subtopic/numeric 처리).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DartCompany.table 와 동일 시그니처 보존용 wrapper. subtopic/numeric 인자 현재 미사용
+              (skeleton) — show() 결과 단순 전달. 향후 EDGAR subtopic 분해 시 확장.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "BS table" → ``c.table("BS")`` (show 와 동일).
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            DartCompany API 와 동일 시그니처 — AI 가 cross-provider 코드 작성 시 분기 불필요.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - subtopic / numeric 인자 영향 가정 → 현재 무시. show() 사용이 더 명확.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — show() 결과 그대로 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - show() 와 동일.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - show() 와 동일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → show(topic, period) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — DART 호환 시그니처.
         """
         df = self.show(topic, period=period)
         if df is None:
