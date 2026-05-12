@@ -253,7 +253,7 @@ def calcDFV(
         allMethods : dict — 모든 방법론 적정가 (참고용)
         overrideApplied : dict | None — 적용된 override (있으면)
     """
-    from dartlab.core.overrides import applyOverride
+    from dartlab.synth.overrides import applyOverride
 
     ov = overrides or {}
 
@@ -515,7 +515,7 @@ def _calcOpinion(upside: float | None) -> str:
 
 def _calcLiquidationValue(company: Any, overrides: dict) -> float | None:
     """Simple 청산가치 — survival weighting 용 (book × (1-discount))."""
-    from dartlab.core.overrides import applyOverride
+    from dartlab.synth.overrides import applyOverride
 
     explicit = applyOverride(None, "liquidationValue", overrides)
     if explicit is not None:
@@ -635,7 +635,7 @@ def _tsdResolveWacc(company: Any, overrides: dict) -> float:
     """
     try:
         from dartlab.analysis.financial.investmentAnalysis import calcRoicTimeline
-        from dartlab.core.overrides import applyOverride
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return 9.0
 
@@ -717,7 +717,7 @@ def _tsdBuildPhases(lifePhase: str | None, highG: float, overrides: dict) -> tup
         (연수 는 10년 을 len 으로 균등 분할).
     """
     try:
-        from dartlab.core.overrides import applyOverride
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return [5], [highG]
 
@@ -749,8 +749,8 @@ def _tsdResolveTerminalGrowth(lifePhase: str | None, company: Any, overrides: di
         Damodaran ERP riskFreeRate 기준 phase 별 감쇠값. override 있으면 우선.
     """
     try:
-        from dartlab.core.overrides import applyOverride
         from dartlab.macro.rates.riskPremiums import loadDamodaranERP
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return 2.5
 
@@ -915,7 +915,7 @@ def _calcTwoStageDcf(company: Any, lifePhase: str | None, overrides: dict) -> di
     """
     try:
         from dartlab.analysis.valuation.dcf import multiStageDcf
-        from dartlab.core.overrides import applyOverride
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return None
 
@@ -956,9 +956,9 @@ def _applySurvivalAdjustment(company: Any, primaryValue: float, overrides: dict)
     CHS 부도확률 (12M PD) 을 chsFeatures 경로로 실제 추출. 실패 시 safe_default 폴백.
     """
     try:
-        from dartlab.core.overrides import applyOverride
         from dartlab.credit.features.chsFeatures import computeChsProbability
         from dartlab.credit.models.survival import applySurvivalWeight, calcSurvivalWeight
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return None
 
@@ -1015,7 +1015,7 @@ def _buildConsistency(
     """Cash Flow Consistency 검증 — dFV 결과에 consistencyFlags 주입용."""
     try:
         from dartlab.analysis.valuation.consistency import calcCashFlowConsistency
-        from dartlab.core.overrides import applyOverride
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return None
 

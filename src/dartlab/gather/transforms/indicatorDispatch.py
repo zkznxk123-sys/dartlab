@@ -53,7 +53,7 @@ def _resolveIndicator(target: str) -> tuple[Callable, dict, list[str]]:
     Returns
     -------
     (fn, kwargs, inputCols)
-        fn: dartlab.core.indicators 의 함수
+        fn: dartlab.synth.indicators 의 함수
         kwargs: period 등 인자 dict
         inputCols: 함수에 전달할 OHLCV 컬럼 리스트 (예: ["close"], ["high", "low", "close"])
     """
@@ -199,7 +199,7 @@ def addIndicators(
         >>> df = addIndicators(ohlcv, indicators=["ma20", "rsi14"])
 
     Requires:
-        ``dartlab.core.indicators`` 의 v* 함수 가용. OHLCV 컬럼 (closeCol/highCol/lowCol/
+        ``dartlab.synth.indicators`` 의 v* 함수 가용. OHLCV 컬럼 (closeCol/highCol/lowCol/
         volumeCol) 이 ohlcvDf 에 존재.
 
     See Also:
@@ -276,7 +276,7 @@ def computeIndicator(
 
     Requires
     --------
-    ``dartlab.core.indicators`` 가용 + longDf 의 표준 컬럼 (close/open/high/low/volume)
+    ``dartlab.synth.indicators`` 가용 + longDf 의 표준 컬럼 (close/open/high/low/volume)
     + codeCol/dateCol 가 longDf 에 존재.
 
     See Also

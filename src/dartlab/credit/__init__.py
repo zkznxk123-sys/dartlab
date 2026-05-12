@@ -167,7 +167,7 @@ def guide():
     >>> c.credit("등급")                        # 종합 등급
     >>> c.credit("채무상환", detail=True)        # 채무상환 축 상세
     """
-    from dartlab.core.axisGuide import buildAxisGuideDataFrame
+    from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
     df = buildAxisGuideDataFrame(
         _AXIS_REGISTRY,
@@ -418,7 +418,7 @@ def creditCompany(
 
     # assumptions 투명화 — 4 엔진 공통 utility (core/overrides.py)
     if isinstance(result, dict):
-        from dartlab.core.overrides import buildAssumptions
+        from dartlab.synth.overrides import buildAssumptions
 
         assumptions = buildAssumptions(result, engine="credit", overrides=overrides)
         if assumptions:

@@ -87,7 +87,7 @@ def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict |
     result = _evaluate(company, basePeriod)
     # override 적용: 시나리오 부채비율 등으로 등급 재산출
     if result and overrides:
-        from dartlab.core.overrides import validateOverrides
+        from dartlab.synth.overrides import validateOverrides
 
         ov = validateOverrides(overrides)
         if ov:

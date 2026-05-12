@@ -13,7 +13,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import NDArray
 
-from dartlab.core.indicators import vbollinger, vmacd, vsma
+from dartlab.synth.indicators import vbollinger, vmacd, vsma
 
 
 def vcrossover(fast: NDArray[np.float64], slow: NDArray[np.float64]) -> NDArray[np.int8]:

@@ -14,7 +14,7 @@ from __future__ import annotations
 from statistics import mean, pstdev
 from typing import Any
 
-from dartlab.core.overrides import applyOverride
+from dartlab.synth.overrides import applyOverride
 
 _KR_GROWTH_ADJ = -5.0  # KR 상장사 mid-cycle 정체 → 성장 threshold -5%p
 

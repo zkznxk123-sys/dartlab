@@ -3510,8 +3510,8 @@ class Company:
             Freshness:
                 finance 데이터 기준 — 분기 마감 후 45일.
         """
-        from dartlab.core.overrides import validateOverrides
         from dartlab.credit import creditCompany
+        from dartlab.synth.overrides import validateOverrides
 
         clean = validateOverrides(overrides, engine="credit")
         kwargs: dict = {}
@@ -5019,8 +5019,8 @@ class Company:
             Freshness:
                 price 데이터 기준 — T+1 (전일 종가).
         """
-        from dartlab.core.overrides import validateOverrides
         from dartlab.quant import Quant
+        from dartlab.synth.overrides import validateOverrides
 
         if axis is None and metric is not None:
             axis = metric
@@ -5031,7 +5031,7 @@ class Company:
             return q()
         result = q(axis, self.stockCode, **merged)
         if isinstance(result, dict):
-            from dartlab.core.overrides import buildAssumptions
+            from dartlab.synth.overrides import buildAssumptions
 
             enriched = {
                 **result,

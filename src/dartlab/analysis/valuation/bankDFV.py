@@ -65,9 +65,9 @@ def calcBankDFV(company: Any, *, basePeriod: str | None = None, overrides: dict 
     """
     try:
         from dartlab.analysis.valuation.bankValuation import calcBankExcessReturn
-        from dartlab.core.overrides import applyOverride
         from dartlab.core.utils.helpers import toDictBySnakeId
         from dartlab.macro.rates.riskPremiums import loadDamodaranERP
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return None
 

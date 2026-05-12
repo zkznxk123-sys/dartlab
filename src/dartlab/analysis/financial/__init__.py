@@ -1189,7 +1189,7 @@ class Analysis:
             items : int — calc 함수 개수
             apiKey : str — 필요한 API 키 ("불필요" — 모든 축이 DART 공시 기반)
         """
-        from dartlab.core.axisGuide import buildAxisGuideDataFrame
+        from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
         return buildAxisGuideDataFrame(
             _AXIS_REGISTRY,
@@ -1251,7 +1251,7 @@ class Analysis:
                 results[calc.blockKey] = None
 
         # 엔진 투명성 — 4 엔진 공통 utility (core/overrides.py)
-        from dartlab.core.overrides import buildAssumptions
+        from dartlab.synth.overrides import buildAssumptions
 
         assumptions = buildAssumptions(results, engine="analysis", overrides=overrides)
         if assumptions:

@@ -366,7 +366,7 @@ class Macro:
                 - US (FRED)
                 - KR (ECOS)
         """
-        from dartlab.core.overrides import validateOverrides
+        from dartlab.synth.overrides import validateOverrides
 
         if axis is None:
             return self._guide()
@@ -407,7 +407,7 @@ class Macro:
 
         # assumptions 투명화 — 4 엔진 공통 utility (phase → cyclePhase alias 자동)
         if isinstance(result, dict):
-            from dartlab.core.overrides import buildAssumptions
+            from dartlab.synth.overrides import buildAssumptions
 
             assumptions = buildAssumptions(result, engine="macro", overrides=clean)
             if assumptions:
@@ -429,7 +429,7 @@ class Macro:
             - group : str — 6막 내 위치 (예: ``"제1막: 경제는 어디에 있나"``).
             - apiKey : str — 필요한 API 키 안내.
         """
-        from dartlab.core.axisGuide import buildAxisGuideDataFrame
+        from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
         def _group(_key: str, entry) -> str:
             act_label = _ACT_LABELS.get(entry.act, "")

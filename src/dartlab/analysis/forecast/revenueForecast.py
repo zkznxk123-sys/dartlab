@@ -1062,7 +1062,7 @@ def forecastRevenue(
             consensusRevenue.append(revWon)
 
     # ── override 적용 ──
-    from dartlab.core.overrides import validateOverrides
+    from dartlab.synth.overrides import validateOverrides
 
     _ov = validateOverrides(overrides)
 

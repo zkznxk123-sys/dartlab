@@ -49,7 +49,7 @@ def calcRealOptionsValue(
     # lifeCycle phase 추출
     try:
         from dartlab.analysis.financial.lifeCycle import calcLifeCycle
-        from dartlab.core.overrides import applyOverride
+        from dartlab.synth.overrides import applyOverride
     except ImportError:
         return None
 

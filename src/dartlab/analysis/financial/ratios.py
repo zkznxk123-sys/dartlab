@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 from dartlab.core.htmlRenderer import getHtmlRenderer
-from dartlab.core.ratioCategories import RATIO_CATEGORIES as RATIO_CATEGORIES
 from dartlab.core.utils.extract import getLatest, getRevenueGrowth3Y, getTTM
+from dartlab.synth.ratioCategories import RATIO_CATEGORIES as RATIO_CATEGORIES
 
 
 @dataclass

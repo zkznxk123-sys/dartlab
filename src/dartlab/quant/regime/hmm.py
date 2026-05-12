@@ -111,7 +111,7 @@ def calcRegime(stockCode: str, *, market: str = "auto", series: bool = False, **
 
     # ── 추세 강도 (ADX 기반) ──
     if "high" in arr and "low" in arr and n >= 14:
-        from dartlab.core.indicators import vadx
+        from dartlab.synth.indicators import vadx
 
         adx = vadx(arr["high"], arr["low"], close)
         valid_adx = adx[~np.isnan(adx)]

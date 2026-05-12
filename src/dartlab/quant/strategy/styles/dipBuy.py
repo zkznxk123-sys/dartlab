@@ -34,11 +34,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.core.indicators import vema, vrsi
 from dartlab.quant.regime.hmm import _regimeSeries
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays
+from dartlab.synth.indicators import vema, vrsi
 
 
 def build(company, *, emaPeriod: int = 50, rsiLow: float = 50, rsiHigh: float = 65, atrK: float = 2.0) -> Rule:

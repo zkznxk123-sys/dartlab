@@ -709,7 +709,7 @@ class DefaultQuantAccessor:
             - quant 가 종목별 지표 패키지 필요 시 본 accessor 경유
 
         Guide:
-            indicators list 의 각 이름을 ``dartlab.core.indicators`` 의
+            indicators list 의 각 이름을 ``dartlab.synth.indicators`` 의
             함수로 lookup → fn(stockCode) 호출. callable 아니거나 실패한
             지표는 결과에서 제외.
 
@@ -728,7 +728,7 @@ class DefaultQuantAccessor:
             ``{indicatorName: DataFrame}`` 딕셔너리. 위임 import 실패 시 빈 딕셔너리.
 
         Requires:
-            ``dartlab.core.indicators`` 모듈 (각 지표 함수 정의).
+            ``dartlab.synth.indicators`` 모듈 (각 지표 함수 정의).
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/TypeError 는 내부에서 흡수.
@@ -738,7 +738,7 @@ class DefaultQuantAccessor:
             >>> out = a.fetchTechnicalIndicators("005930", ["rsi14"], limit=1)
 
         See Also:
-            ``dartlab.core.indicators`` — 지표 함수 카탈로그.
+            ``dartlab.synth.indicators`` — 지표 함수 카탈로그.
         """
         try:
             from dartlab.core import indicators as ind

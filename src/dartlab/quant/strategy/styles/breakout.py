@@ -37,10 +37,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from dartlab.core.indicators import vdonchian, vobv
 from dartlab.quant.strategy.rule import Rule
 from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays
+from dartlab.synth.indicators import vdonchian, vobv
 
 
 def build(

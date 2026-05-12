@@ -195,7 +195,7 @@ def calcDcf(
         overrideApplied : dict | None — 적용된 override (있으면)
     """
     from dartlab.analysis.valuation.dcf import dcfValuation
-    from dartlab.core.overrides import applyOverride
+    from dartlab.synth.overrides import applyOverride
 
     ov = overrides or {}
 
