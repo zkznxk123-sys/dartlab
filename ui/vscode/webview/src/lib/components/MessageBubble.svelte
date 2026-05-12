@@ -46,6 +46,34 @@
     }
   });
 
+  // mermaid singleton — renderer.ts 가 `<pre class="mermaid mermaid-pending">`
+  // placeholder emit. 본 component 가 message 변경 후 mermaid.run() 호출해
+  // 본문을 SVG 로 교체. 동적 import 로 첫 mermaid 등장 시점까지 lazy load.
+  // data-processed 가드로 이미 처리된 element 자동 skip (idempotent).
+  let mermaidPromise: Promise<any> | null = null;
+  function ensureMermaid(): Promise<any> {
+    if (!mermaidPromise) {
+      mermaidPromise = import("mermaid").then((mod: any) => {
+        const mermaid = mod.default || mod;
+        mermaid.initialize({ startOnLoad: false, theme: "dark", securityLevel: "loose" });
+        return mermaid;
+      });
+    }
+    return mermaidPromise;
+  }
+  $effect(() => {
+    // message 본문 / blocks 변경 reactive — streaming 마다 새 placeholder 가 도착.
+    void message.text;
+    void message.blocks;
+    const pending = Array.from(document.querySelectorAll(".mermaid-pending")).filter(
+      (el) => el.getAttribute("data-processed") !== "true",
+    );
+    if (pending.length === 0) return;
+    ensureMermaid()
+      .then((mermaid) => mermaid.run({ nodes: pending as HTMLElement[] }))
+      .catch((err) => console.error("mermaid render failed", err));
+  });
+
   // Block expand/collapse (기본 접힘)
   let expandedBlocks: Record<number, boolean> = $state({});
   function toggleBlock(idx: number) {

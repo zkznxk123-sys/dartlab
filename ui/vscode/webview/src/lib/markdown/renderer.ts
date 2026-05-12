@@ -43,6 +43,14 @@ function codeSummary(text: string): string {
 
 // Code blocks -- collapsed by default
 renderer.code = function ({ text, lang }: { text: string; lang?: string }) {
+  // mermaid → SVG 자동 변환 placeholder. MessageBubble 가 mount/update 후
+  // mermaid.run({ querySelector: '.mermaid-pending:not([data-processed])' })
+  // 호출해 본문을 SVG 로 교체. data-source 는 retry/복원 용 (URL-encoded).
+  if (lang === "mermaid") {
+    const sourceAttr = encodeURIComponent(text);
+    return `<pre class="mermaid mermaid-pending" data-source="${sourceAttr}">${escapeHtml(text)}</pre>`;
+  }
+
   let highlighted: string;
   if (lang && hljs.getLanguage(lang)) {
     highlighted = hljs.highlight(text, { language: lang }).value;
