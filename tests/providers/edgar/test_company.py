@@ -234,3 +234,24 @@ def test_workforce_callable() -> None:
     from dartlab.providers.edgar.company import Company
 
     assert hasattr(Company, "workforce")
+
+
+def test_network_callable() -> None:
+    """Company.network() callable smoke."""
+    from dartlab.providers.edgar.company import Company
+
+    assert hasattr(Company, "network")
+
+
+def test_topic_summaries_callable() -> None:
+    """Company.topicSummaries() callable smoke."""
+    from dartlab.providers.edgar.company import Company
+
+    assert hasattr(Company, "topicSummaries")
+
+
+def test_update_callable() -> None:
+    """Company.update() callable smoke."""
+    from dartlab.providers.edgar.company import Company
+
+    assert hasattr(Company, "update")

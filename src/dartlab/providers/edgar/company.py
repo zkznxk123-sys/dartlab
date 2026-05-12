@@ -4342,3 +4342,129 @@ class Company:
             for row in debt_accts.iter_rows(named=True):
                 rows[0][row["snakeId"]] = row.get(latest)
         return pl.DataFrame(rows)
+
+    def network(self, view: str | None = None, *, hops: int = 1):
+        """기업 네트워크 그래프 — EDGAR 미구현 (cross-provider symmetry placeholder).
+
+        Capabilities:
+            - SEC ownership / Form 13F filings 기반 향후 구현.
+            - 현 단계 None — dart.network 와 cross-provider symmetric API 보장.
+
+        Args:
+            view: None / "members" / "edges" / "cycles" / "peers".
+            hops: ego 깊이.
+
+        Returns:
+            None — EDGAR 네트워크 prebuild 미구현.
+
+        Guide:
+            - "이 회사 그룹 계열사" → 현 단계 KR (dart) 한정. EDGAR 는 향후.
+
+        SeeAlso:
+            - ``dart.Company.network`` — KR 한정 구현.
+
+        Requires:
+            - 외부 의존 없음 (placeholder).
+
+        AIContext:
+            cross-provider symmetric placeholder. AI 가 호출 시 None 받고 "EDGAR 미지원"
+            fallback. dart 와 동일 시그니처라 batch 코드 unsafe 검출 회피.
+
+        LLM Specifications:
+            AntiPatterns:
+                - view/hops 무관 항상 None.
+            OutputSchema:
+                - None.
+            Prerequisites:
+                - 없음.
+            Freshness:
+                - 정적.
+            Dataflow:
+                - 향후 SEC Form 13F → 본 함수.
+            TargetMarkets:
+                - US (EDGAR) 한정. 현재 미구현.
+        """
+        del view, hops
+        return None
+
+    def topicSummaries(self) -> dict[str, str]:
+        """topic 별 한 줄 요약 dict — cross-provider symmetric placeholder.
+
+        Capabilities:
+            - 현 단계 빈 dict — sections summary 향후 구현.
+            - dart.topicSummaries 와 동일 시그니처.
+
+        Returns:
+            dict[str, str] — 현재 빈 dict.
+
+        Guide:
+            - "이 회사 topic 한 줄씩" → 현 단계 KR (dart) 한정.
+
+        SeeAlso:
+            - ``dart.Company.topicSummaries`` — KR 한정 구현.
+
+        Requires:
+            - 외부 의존 없음 (placeholder).
+
+        AIContext:
+            cross-provider symmetric placeholder.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 항상 빈 dict.
+            OutputSchema:
+                - dict[str, str] (empty).
+            Prerequisites:
+                - 없음.
+            Freshness:
+                - 정적.
+            Dataflow:
+                - 향후 sections → 본 함수.
+            TargetMarkets:
+                - US (EDGAR) 한정. 현재 미구현.
+        """
+        return {}
+
+    def update(self, *, categories: list[str] | None = None) -> dict[str, int]:
+        """누락 공시 증분 수집 — EDGAR bulk re-sync placeholder.
+
+        Capabilities:
+            - dart.update 와 동일 시그니처 — categories 별 수집 통계 dict 반환.
+            - 현 단계 EDGAR bulk pipeline (companyfactsBulk + 분기 datasetBulk) 가 batch
+              처리하므로 종목 1 개 단위 update 는 미구현.
+
+        Args:
+            categories: 수집 영역 list 또는 None.
+
+        Returns:
+            dict[str, int] — 현재 빈 dict (EDGAR bulk 가 일괄 처리).
+
+        Guide:
+            - "이 회사 최신 데이터" → bulk pipeline 의 cron 갱신 대기 또는 ``refreshFromApi()``.
+
+        SeeAlso:
+            - ``Company.refreshFromApi`` — SEC API per-ticker 즉시 갱신.
+            - ``dart.Company.update`` — KR 한정 종목 단위 update.
+
+        Requires:
+            - 외부 의존 없음 (placeholder).
+
+        AIContext:
+            cross-provider symmetric placeholder. EDGAR 사용자는 refreshFromApi 안내.
+
+        LLM Specifications:
+            AntiPatterns:
+                - categories 무관 항상 빈 dict.
+            OutputSchema:
+                - dict[str, int] (empty).
+            Prerequisites:
+                - 없음.
+            Freshness:
+                - 정적.
+            Dataflow:
+                - 향후 SEC bulk → 본 함수.
+            TargetMarkets:
+                - US (EDGAR) 한정. 현재 bulk pipeline 위임.
+        """
+        del categories
+        return {}
