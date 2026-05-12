@@ -43,6 +43,9 @@ def getDefaultGather() -> Gather:
     Returns:
         Gather — 싱글턴 인스턴스 (첫 호출 시 자동 생성).
 
+    Raises:
+        없음 — Gather() 생성자가 lazy 초기화를 보장.
+
     Example::
 
         g = getDefaultGather()

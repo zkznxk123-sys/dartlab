@@ -29,12 +29,24 @@ class DefaultFinanceAccessor:
         end: str | None = None,
         limit: int | None = None,
     ) -> pl.DataFrame | None:
-        """OHLCV 스냅샷 fetch.
+        """OHLCV 스냅샷 fetch — gather("price") 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한. None이면 전체.
+        Args:
+            stockCode: 종목코드/티커.
+            market: 시장 코드 (기본 ``"KR"``).
+            start: 시작일 (YYYY-MM-DD). None이면 자동.
+            end: 종료일. None이면 자동.
+            limit: 반환 행수 상한 (가장 위 N). None이면 전체.
+
+        Returns:
+            OHLCV DataFrame. fetch 실패 시 None.
+
+        Raises:
+            없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultFinanceAccessor()
+            >>> df = a.fetchPriceSnapshot("005930", market="KR", limit=10)
         """
         from dartlab.gather.entry import GatherEntry
 
@@ -55,12 +67,23 @@ class DefaultFinanceAccessor:
         start: str | None = None,
         limit: int | None = None,
     ) -> pl.DataFrame | None:
-        """단일 macro 시계열 fetch.
+        """단일 macro 시계열 fetch — gather("macro") 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한 (가장 최근 N). None이면 전체.
+        Args:
+            seriesId: macro 시리즈 ID (예: "GDP", "UNRATE").
+            source: 데이터 소스 (``"fred"`` | ``"ecos"``). 기본 ``"fred"``.
+            start: 시작일. None이면 자동.
+            limit: 반환 행수 상한 (가장 최근 N). None이면 전체.
+
+        Returns:
+            ``(date, value)`` DataFrame. fetch 실패 시 None.
+
+        Raises:
+            없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultFinanceAccessor()
+            >>> gdp = a.fetchMacroSeries("GDP", source="fred", limit=50)
         """
         from dartlab.gather.entry import GatherEntry
 
@@ -74,12 +97,21 @@ class DefaultFinanceAccessor:
             return None
 
     def fetchExogenousAxes(self, stockCode: str, *, limit: int | None = None) -> list[tuple[str, str]]:
-        """종목별 매크로 축 매핑.
+        """종목별 매크로 축 매핑 — gather.mapping.exogenousAxes 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한. None이면 전체.
+        Args:
+            stockCode: 종목코드.
+            limit: 반환 항목 상한. None이면 전체.
+
+        Returns:
+            ``[(seriesId, source), ...]`` 리스트. 매핑 없거나 실패 시 빈 리스트.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultFinanceAccessor()
+            >>> axes = a.fetchExogenousAxes("005930", limit=5)
         """
         try:
             from dartlab.gather.mapping.exogenousAxes import getExogenousAxes
@@ -100,12 +132,22 @@ class DefaultFinanceAccessor:
         *,
         limit: int | None = None,
     ) -> pl.DataFrame | None:
-        """period 기준 정렬된 매크로 패널.
+        """period 기준 정렬된 매크로 패널 — transforms.macro.loadMacroParquet 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한 (가장 최근 N). None이면 전체.
+        Args:
+            stockCode: 종목코드.
+            periods: 정렬 대상 period 리스트.
+            limit: 반환 행수 상한 (가장 최근 N). None이면 전체.
+
+        Returns:
+            패널 DataFrame. parquet 없거나 실패 시 None.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultFinanceAccessor()
+            >>> panel = a.fetchAlignedMacro("005930", ["2024Q1", "2024Q2"], limit=10)
         """
         try:
             from dartlab.gather.transforms.macro import loadMacroParquet
@@ -120,7 +162,21 @@ class DefaultFinanceAccessor:
             return None
 
     def lookupCompany(self, stockCode: str) -> CompanyProtocol | None:
-        """종목코드 → Company. 실패 시 None."""
+        """종목코드 → Company.
+
+        Args:
+            stockCode: 종목코드/티커.
+
+        Returns:
+            Company 인스턴스. dartlab.company import 실패 또는 생성 실패 시 None.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultFinanceAccessor()
+            >>> c = a.lookupCompany("005930")
+        """
         try:
             from dartlab.company import Company
         except ImportError:
@@ -142,12 +198,23 @@ class DefaultQuantAccessor:
         start: str | None = None,
         limit: int | None = None,
     ) -> pl.DataFrame | None:
-        """단일 종목 OHLCV.
+        """단일 종목 OHLCV — quant.screen.dataAccess.fetchOhlcv 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한 (가장 최근 N일). None이면 전체.
+        Args:
+            stockCode: 종목코드/티커.
+            market: 시장 코드 (기본 ``"KR"``).
+            start: 시작일. None이면 자동.
+            limit: 반환 행수 상한 (가장 최근 N일). None이면 전체.
+
+        Returns:
+            OHLCV DataFrame. fetch 실패 시 None.
+
+        Raises:
+            없음 — 위임 함수의 예외는 호출자가 처리.
+
+        Example:
+            >>> a = DefaultQuantAccessor()
+            >>> df = a.fetchOhlcv("005930", market="KR", limit=20)
         """
         from dartlab.quant.screen.dataAccess import fetchOhlcv
 
@@ -164,12 +231,23 @@ class DefaultQuantAccessor:
         benchmark: str | None = None,
         limit: int | None = None,
     ) -> tuple[pl.DataFrame | None, dict | None]:
-        """벤치마크 OHLCV + meta.
+        """벤치마크 OHLCV + meta — quant.benchmark.data.fetchBenchmarkOhlcv 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한 (가장 최근 N일). None이면 전체.
+        Args:
+            stockCode: 종목코드/티커.
+            market: 시장 코드 (기본 ``"KR"``).
+            benchmark: 벤치마크 ID. None이면 시장별 기본.
+            limit: 반환 행수 상한 (가장 최근 N일). None이면 전체.
+
+        Returns:
+            ``(ohlcv_df | None, meta | None)`` 튜플. fetch 실패 시 ``(None, None)``.
+
+        Raises:
+            없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultQuantAccessor()
+            >>> df, meta = a.fetchBenchmarkOhlcv("005930", limit=10)
         """
         from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
@@ -192,12 +270,22 @@ class DefaultQuantAccessor:
         columns: list[str],
         limit: int | None = None,
     ) -> pl.DataFrame | None:
-        """다종목 bulk 패널.
+        """다종목 bulk 패널 — bulkData.hfBulk.loadFiltered 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한. None이면 전체.
+        Args:
+            stockCodes: 대상 종목코드 리스트.
+            columns: 추출 컬럼 리스트.
+            limit: 반환 행수 상한 (가장 위 N). None이면 전체.
+
+        Returns:
+            bulk 패널 DataFrame. fetch 실패 시 None.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultQuantAccessor()
+            >>> df = a.fetchUniverseBulk(["005930", "000660"], columns=["close"], limit=100)
         """
         try:
             from dartlab.gather.bulkData.hfBulk import loadFiltered
@@ -220,10 +308,20 @@ class DefaultQuantAccessor:
     ) -> dict[str, pl.DataFrame]:
         """지표 번들 — gather.indicators 의 함수 시리즈 호출.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 지표 개수 상한 (앞쪽 N). None이면 전체.
+        Args:
+            stockCode: 종목코드/티커.
+            indicators: 호출할 지표 이름 리스트 (예: ``["rsi14", "ma20"]``).
+            limit: 반환 지표 개수 상한 (앞쪽 N). None이면 전체.
+
+        Returns:
+            ``{indicatorName: DataFrame}`` 딕셔너리. 위임 import 실패 시 빈 딕셔너리.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError/TypeError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultQuantAccessor()
+            >>> out = a.fetchTechnicalIndicators("005930", ["rsi14"], limit=1)
         """
         try:
             from dartlab.core import indicators as ind
@@ -248,10 +346,19 @@ class DefaultIndustryAccessor:
     def fetchListing(self, *, market: str = "KR", limit: int | None = None) -> pl.DataFrame | None:
         """전종목 listing snapshot — KRX 기준 (short_code/marketCode/marketEngName 컬럼).
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한. None이면 전체.
+        Args:
+            market: 시장 코드 (현재 ``"KR"`` 만 지원).
+            limit: 반환 행수 상한 (가장 위 N). None이면 전체.
+
+        Returns:
+            전종목 listing DataFrame. import 실패 또는 fetch 실패 시 None.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError/TypeError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultIndustryAccessor()
+            >>> df = a.fetchListing(market="KR", limit=20)
         """
         try:
             from dartlab.gather.krx.listing import getKrxList
@@ -266,12 +373,20 @@ class DefaultIndustryAccessor:
             return None
 
     def fetchScanProfitability(self, *, limit: int | None = None) -> pl.DataFrame | None:
-        """scan profitability parquet.
+        """scan profitability parquet — scan.parquetLoad 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한. None이면 전체.
+        Args:
+            limit: 반환 행수 상한. None이면 전체 collect.
+
+        Returns:
+            수익성 parquet 의 collect DataFrame. import/scan 실패 시 None.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError/AttributeError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultIndustryAccessor()
+            >>> df = a.fetchScanProfitability(limit=100)
         """
         try:
             from dartlab.scan.parquetLoad import scanFinanceParquets
@@ -288,12 +403,21 @@ class DefaultIndustryAccessor:
             return None
 
     def fetchScanFinanceParquet(self, name: str = "finance", *, limit: int | None = None) -> pl.DataFrame | None:
-        """scan finance parquet.
+        """scan finance parquet — scan.parquetLoad 위임.
 
-        Parameters
-        ----------
-        limit : int | None
-            반환 행수 상한. None이면 전체.
+        Args:
+            name: parquet 카테고리 이름 (기본 ``"finance"``).
+            limit: 반환 행수 상한. None이면 전체 collect.
+
+        Returns:
+            카테고리 parquet 의 collect DataFrame. import/scan 실패 시 None.
+
+        Raises:
+            없음 — ImportError/ValueError/RuntimeError/KeyError/AttributeError 는 내부에서 흡수.
+
+        Example:
+            >>> a = DefaultIndustryAccessor()
+            >>> df = a.fetchScanFinanceParquet("finance", limit=100)
         """
         try:
             from dartlab.scan.parquetLoad import scanFinanceParquets

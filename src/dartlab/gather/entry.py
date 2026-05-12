@@ -725,13 +725,45 @@ class _GatherProviderAdapter:
     """GatherProvider Protocol 구현체 — gather/entry · getDefaultGather 위임체."""
 
     def news(self, query: str, *, market: str = "KR", days: int = 30) -> Any | None:
-        """뉴스 수집 — gather.getDefaultGather().news 위임."""
+        """뉴스 수집 — gather.getDefaultGather().news 위임.
+
+        Args:
+            query: 검색어 (기업명/티커).
+            market: 시장 코드 (``"KR"`` | ``"US"``).
+            days: 최근 N일.
+
+        Returns:
+            ``(date, title, source, url)`` DataFrame. fetch 실패 시 None.
+
+        Raises:
+            없음 — 위임 함수의 예외는 호출자가 처리.
+
+        Example:
+            >>> a = _GatherProviderAdapter()
+            >>> df = a.news("삼성전자", market="KR", days=7)
+        """
         from dartlab.gather import getDefaultGather
 
         return getDefaultGather().news(query, market=market, days=days)
 
     def entry(self, axis: str | None = None, stockCode: str | None = None, **kwargs: Any) -> Any:
-        """4축 entry 위임 — GatherEntry() callable 호출."""
+        """4축 entry 위임 — GatherEntry() callable 호출.
+
+        Args:
+            axis: 축 이름 ("price"/"flow"/"macro"/"news" 등). None이면 가이드.
+            stockCode: 종목코드/티커.
+            **kwargs: market, start, end, days 등 축별 옵션.
+
+        Returns:
+            축별 시계열 DataFrame. axis=None이면 가이드 DataFrame.
+
+        Raises:
+            ValueError: 미등록 축 이름 또는 target 누락.
+
+        Example:
+            >>> a = _GatherProviderAdapter()
+            >>> df = a.entry("price", "005930")
+        """
         gather = GatherEntry()
         if axis is None:
             return gather()
