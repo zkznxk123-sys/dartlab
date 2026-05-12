@@ -18,7 +18,7 @@ class TopicMapper(BaseMapper):
         return "topic"
 
     def _keywords(self) -> dict[str, list[str]]:
-        from dartlab.core.docs.topicGraph import TOPIC_KEYWORDS
+        from dartlab.reference.docs.topicGraph import TOPIC_KEYWORDS
 
         return TOPIC_KEYWORDS
 

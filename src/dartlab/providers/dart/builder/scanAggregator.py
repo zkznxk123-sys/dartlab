@@ -235,12 +235,12 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
         - ``_ensureNetwork`` / ``_networkMembers`` / ``_networkEdges`` / ``_networkCycles`` /
           ``_networkPeers`` (모듈 private) — view 별 본체.
         - ``dartlab.scan.network.buildGraph`` / ``exportFull`` / ``exportEgo`` — 그래프 source.
-        - ``dartlab.core.htmlRenderer.renderNetwork`` — HTML 시각화.
+        - ``dartlab.reference.htmlRenderer.renderNetwork`` — HTML 시각화.
 
     Requires:
         - polars — DataFrame.
         - dartlab.scan.network — 그래프 prebuild (lazy import).
-        - dartlab.core.htmlRenderer — HTML 시각화 (view=None 시).
+        - dartlab.reference.htmlRenderer — HTML 시각화 (view=None 시).
         - dartlab.core.memory._CACHE_MISSING — cache sentinel.
 
     AIContext:
@@ -284,7 +284,7 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
         import importlib
 
         exportEgo = importlib.import_module("dartlab.scan.network").exportEgo
-        from dartlab.core.htmlRenderer import getHtmlRenderer
+        from dartlab.reference.htmlRenderer import getHtmlRenderer
 
         ego = exportEgo(data, full, code, hops=hops)
         center_name = data["code_to_name"].get(code, code)

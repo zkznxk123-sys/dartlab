@@ -249,7 +249,7 @@ def _safeDiffResult(company):
     try:
         docsSections = company._docs.sections
         if docsSections is not None:
-            from dartlab.core.docs.diff import sectionsDiff
+            from dartlab.reference.docs.diff import sectionsDiff
 
             result = sectionsDiff(docsSections)
     except (AttributeError, ValueError, KeyError, TypeError, ImportError):

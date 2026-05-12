@@ -361,7 +361,7 @@ def suggest(funcName: str) -> str | None:
         안내 문자열 또는 매칭 없으면 None.
     """
     try:
-        from dartlab.core.capability._generated import CAPABILITIES
+        from dartlab.reference.capability._generated import CAPABILITIES
     except ImportError:
         return None
 
@@ -430,7 +430,7 @@ def missingDataHint(
 
 def apiKeyMissingHint(provider: str) -> str:
     """provider 별 API 키 발급·설정 안내. ``core/providers.providerGuide`` 위임."""
-    from dartlab.core.providers import providerGuide
+    from dartlab.reference.providers import providerGuide
 
     return providerGuide(provider)
 
@@ -552,7 +552,7 @@ def onKeyRequired(service: str) -> str:
         )
 
     try:
-        from dartlab.core.providers import _PROVIDERS
+        from dartlab.reference.providers import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:
@@ -696,7 +696,7 @@ def promptKeyIfMissing(service: str) -> str | None:
             return None
 
     try:
-        from dartlab.core.providers import _PROVIDERS
+        from dartlab.reference.providers import _PROVIDERS
 
         spec = _PROVIDERS.get(service)
         if spec and spec.auth_kind == "api_key" and spec.env_key:

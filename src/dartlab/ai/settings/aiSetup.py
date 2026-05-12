@@ -8,8 +8,8 @@ _SETUP_GUIDES, _PROVIDER_ALIAS, resolveAlias, providerGuide, noProviderMessage
 
 from __future__ import annotations
 
-from dartlab.core.providers import _PROVIDERS
-from dartlab.core.providers.setupGuide import (
+from dartlab.reference.providers import _PROVIDERS
+from dartlab.reference.providers.setupGuide import (
     _PROVIDER_ALIAS,
     _SETUP_GUIDES,
     DISPLAY_ORDER,

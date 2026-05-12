@@ -847,7 +847,7 @@ class Company:
             _log.info("Company('%s') 준비 완료 (%.1fs)", self.stockCode, _initElapsed)
 
     def __repr__(self):
-        from dartlab.core.htmlRenderer import getHtmlRenderer
+        from dartlab.reference.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
         if renderer is not None:
@@ -2186,7 +2186,7 @@ class Company:
 
     def _buildBlockIndex(self, topicRows: pl.DataFrame) -> pl.DataFrame:
         """topic의 블록 목차 DataFrame."""
-        from dartlab.core.show import buildBlockIndex
+        from dartlab.reference.show import buildBlockIndex
 
         return buildBlockIndex(topicRows)
 
@@ -2575,7 +2575,7 @@ class Company:
             c.select("IS", ["매출액"]).chart()
         """
         from dartlab.core.select import SelectResult
-        from dartlab.core.show import selectFromShow
+        from dartlab.reference.show import selectFromShow
 
         # show() 가 ValueError 발생하면 그대로 propagate (silent None X)
         try:
@@ -2824,7 +2824,7 @@ class Company:
         """
         if topic is not None:
             topic = _resolveTopic(topic)
-        from dartlab.core.docs.diff import (
+        from dartlab.reference.docs.diff import (
             diffSummaryDataFrame,
             lineDiffDataFrame,
             sectionsDiff,
@@ -2901,7 +2901,7 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 텍스트).
         """
-        from dartlab.core.docs.diff import keywordFrequency
+        from dartlab.reference.docs.diff import keywordFrequency
 
         docsSections = self._docs.sections
         if docsSections is None:
@@ -5412,7 +5412,7 @@ class Company:
             OutputSchema:
                 - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - 로컬 표시 가능 환경 + dartlab.core.viewer.
+                - 로컬 표시 가능 환경 + dartlab.reference.viewer.
             Freshness:
                 - 호출 시점 (서버 데이터 별도 fetch X).
             Dataflow:
@@ -5420,7 +5420,7 @@ class Company:
             TargetMarkets:
                 - KR (DART 정기보고서 viewer).
         """
-        from dartlab.core.viewer import launchViewer
+        from dartlab.reference.viewer import launchViewer
 
         launchViewer(self.stockCode, port=port)
 

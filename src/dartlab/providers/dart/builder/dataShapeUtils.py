@@ -5,7 +5,7 @@ Company.show / select 가 호출하는 stateless utility 헬퍼 — facade 의 �
 
 Module-level helpers:
     cleanFinanceDataFrame  — BS/IS/CF/CIS/SCE 후처리 (all-null 행 제거, 중복 병합)
-    transposeToVertical    — wide → long 변환 (delegate to dartlab.core.show)
+    transposeToVertical    — wide → long 변환 (delegate to dartlab.reference.show)
     warnUnknownTopic       — 미등록 topic 경고 (유사 topic 제안)
     applyPeriodFilter      — period 컬럼 필터링 (exact / Q4 fallback / period column)
 """
@@ -93,7 +93,7 @@ def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
 
 
 def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame | None:
-    """wide → long 변환. ``dartlab.core.show.transposeToVertical`` 위임.
+    """wide → long 변환. ``dartlab.reference.show.transposeToVertical`` 위임.
 
     Args:
         wide: 행=계정/열=period wide DataFrame.
@@ -138,7 +138,7 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab.core.show import transposeToVertical as _coreTransposeToVertical
+    from dartlab.reference.show import transposeToVertical as _coreTransposeToVertical
 
     return _coreTransposeToVertical(wide, periods)
 

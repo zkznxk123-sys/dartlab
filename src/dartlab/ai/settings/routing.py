@@ -4,7 +4,7 @@
 0.10 부터 snake alias 제거. 0.11 release 시 본 shim 제거.
 """
 
-from dartlab.core.providers.routing import (  # noqa: F401
+from dartlab.reference.providers.routing import (  # noqa: F401
     AI_ROLES,
     DEFAULT_ROLE,
     normalizeRole,

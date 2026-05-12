@@ -67,7 +67,7 @@ def _apiRef(plan: dict[str, Any]) -> str:
 
 
 def _capabilityExists(apiRef: str) -> bool:
-    from dartlab.core.capability._generated import CAPABILITIES
+    from dartlab.reference.capability._generated import CAPABILITIES
 
     return apiRef in CAPABILITIES
 

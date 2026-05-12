@@ -1,6 +1,6 @@
 """read_capability — generated capability/docstring 검색.
 
-generatedSpecSearch.py 의 후속. dartlab.core.capability.search 래퍼.
+generatedSpecSearch.py 의 후속. dartlab.reference.capability.search 래퍼.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from .types import ToolResult
 
 def readCapability(query: str, *, limit: int = 8) -> ToolResult:
     """readCapability — TODO 한국어 동작 설명."""
-    from dartlab.core.capability.search import searchCapabilities
+    from dartlab.reference.capability.search import searchCapabilities
 
     results = searchCapabilities(query or "", topK=max(1, int(limit or 8)), minScore=0.0)
     refs: list[Ref] = []
@@ -26,7 +26,7 @@ def readCapability(query: str, *, limit: int = 8) -> ToolResult:
                 id=f"api:{apiRef}",
                 kind="apiRef",
                 title=apiRef,
-                source="dartlab.core.capability._generated.CAPABILITIES",
+                source="dartlab.reference.capability._generated.CAPABILITIES",
                 payload=payload,
             )
         )
