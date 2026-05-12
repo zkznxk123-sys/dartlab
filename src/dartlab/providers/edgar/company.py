@@ -3688,17 +3688,20 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 응답 직접 외부 인용 → AI 환각 검증 의무. dartlab tool 결과 인용만 신뢰.
+                - reflect=True 가 항상 더 정확 X — 시간/토큰 비용 2 배. 중요 질문만.
+                - stream=True 결과를 list() 로 즉시 수집 → 메모리 부담. 사용자 출력 stream 목적이면 그대로.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str (stream=False) 또는 Generator[str] (stream=True).
             Prerequisites:
-                - <TODO: 사전조건>
+                - LLM API 키 (DARTLAB_OPENAI_API_KEY 또는 ANTHROPIC_API_KEY 환경변수).
+                - dartlab ai/kernel.ask 모듈.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - LLM 응답 시점 + 본 회사 데이터 (sections+finance) freshness 의 min.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - question + self.stockCode → ai.kernel.ask → tool calling → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — workbench evidence + ask 인터페이스.
         """
         import importlib
 
@@ -4018,37 +4021,41 @@ class Company:
             >>> c.audit()
 
         Returns:
-            <TODO: return desc> (list | None)
+            발견 dict 리스트 또는 None. 각 dict 키 위 Returns 표 참조.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``governance`` — Part III item10/12/11 텍스트.
+            - ``show("10-K::item9AControlsAndProcedures")`` — 본 함수 origin.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 10-K Item 9A (내부통제) + Item 14 (감사 수수료) 텍스트에서 키워드 기반 자동 탐지 —
+              material weakness / going concern / ineffective controls / clean. 감사 수수료 금액 정규식 추출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 내부통제 문제 있나" → 본 함수 결과 severity 확인.
+            - "감사 수수료 추세" → audit_fees 발견 amount 컬럼.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 사용자에게 부정/리스크 신호 답할 때 본 함수 출력 인용. severity 가 critical 이면 강한 경고.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 키워드 매칭만 → false positive (예 "no material weakness") 가능. 본문 컨텍스트 재확인.
+                - "clean" 결과 → 진짜 문제 없다는 보장 X, 키워드 미감지일 뿐.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] 각 dict {type, period, severity, amount?} 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 10-K Item 9A + Item 14 sections 본문.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 10-K 갱신 시점 (연 1 회).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - show("10-K::item9A...") + show("10-K::item14...") → 키워드 매칭 + 정규식 → 본 list.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K Part II/III 한정.
         """
         import re
 
@@ -4108,40 +4115,43 @@ class Company:
             >>> c.governance()
 
         Args:
-            view: <TODO: param desc> (str | None)
+            view: "all" 또는 "market" 시 None (EDGAR 미지원). 그 외 dummy.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            지배구조 텍스트 DataFrame (directors/ownership/compensation 항목) 또는 None.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``audit`` — Item 9A/14 감사 관련.
+            - ``dart.providers.dart.company.Company.governance`` — KR 패리티 (구조화 수치).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 10-K Part III 의 Item 10 (Directors) + Item 11 (Compensation) + Item 12 (Ownership)
+              텍스트 본문 (500 자 truncate) 을 3 항목 DataFrame 으로 합산. KR 과 달리 구조화 수치 X.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 이사회 / 임원 보수 / 소유 구조" → 본 함수 텍스트 본문.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            DART governance 가 정량 수치 반환하는 반면 EDGAR 는 텍스트 origin — AI 가 본문 요약 의무.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 텍스트 500 자 truncate → 본문 전부 가정 X. 원본은 show("10-K::item10...").
+                - view="all"/"market" 호출 시 None — 호출자 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [항목:str, 기간:str, 내용:str≤500] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 10-K Part III sections (Item 10/11/12).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 10-K 갱신 시점 (연 1 회).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - show("10-K::item10/11/12...") → 본문 truncate → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K Part III.
         """
         if view in ("all", "market"):
             return None
@@ -4184,34 +4194,38 @@ class Company:
             >>> c.workforce()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``governance`` / ``audit`` — 10-K Part III/9A 동일 origin 패밀리.
+            - ``dart.providers.dart.company.Company.workforce`` — KR 패리티 (구조화 직원 수).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 10-K Item 1 (Business) 텍스트에서 6 종 정규식 패턴 ("approximately N employees" 등)
+              으로 직원 수 추출. IS Revenue 와 결합해 1 인당 매출 계산. 100 인 이하 매치 무시 (noise).
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 직원 수" → 본 함수 "직원수" 컬럼.
+            - "1 인당 매출 효율" → 본 함수 "1인당매출" 컬럼.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            DART 가 구조화 수치 반환하는 반면 EDGAR 는 텍스트 추출 — 정확도 ~90%. AI 가 환각 vs 실수치 분기.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 텍스트 추출 정확도 100% 가정 X — 본문 표현 변화 시 None 가능.
+                - 1 인당 매출 절대값 회사 간 비교 X — fiscal year 차이/사업부문 차이 큼.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [종목코드, 회사명, 직원수:int, 기간:str, 1인당매출:float|None] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 10-K Item 1 Business sections + IS Revenue (선택).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 10-K 갱신 시점 (연 1 회).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - show("10-K::item1Business") → 정규식 매칭 → IS Revenue → 1 인당 매출 → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K Item 1.
         """
         import re
 
@@ -4310,40 +4324,44 @@ class Company:
             >>> c.capital()
 
         Args:
-            view: <TODO: param desc> (str | None)
+            view: "all"/"market" 시 None. EDGAR 는 단일 회사만.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            자기자본/이익잉여금/배당 DataFrame 또는 None.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``debt`` — 부채구조 (BS 동일 origin).
+            - ``dart.providers.dart.company.Company.capital`` — KR 전종목 횡단 지원.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - BS 의 total_stockholders_equity + retained_earnings + CF 의 dividends_paid 를
+              최신 period 1 행 DataFrame 으로 합산. 주주환원 능력 가늠.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 자본구조" → 본 함수.
+            - "배당 가능성" → result["dividends_paid"] / result["retained_earnings"] 비율.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 주주환원 정책 질문 시 본 함수 인용 + show("CF") 의 배당 추세 추가 결합.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 단일 period 결과로 추세 결론 X — 본 함수는 latest 만, 추세는 show("CF") 사용.
+                - view="all" 호출 → KR 와 달리 None. 횡단비교는 dart 만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 1 행 [종목코드, 회사명, total_stockholders_equity, retained_earnings, dividends_paid].
             Prerequisites:
-                - <TODO: 사전조건>
+                - BS (필수) + CF (선택).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 분기 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - show("BS") + show("CF") → selectFromShow → latest period → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 단일 회사 한정.
         """
         if view in ("all", "market"):
             return None
@@ -4395,40 +4413,44 @@ class Company:
             >>> c.debt()
 
         Args:
-            view: <TODO: param desc> (str | None)
+            view: "all"/"market" 시 None. EDGAR 는 단일 회사만.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            부채구조 DataFrame (total_liabilities/shortterm/longterm/current/noncurrent) 또는 None.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``capital`` — 자본구조 (BS 동일 origin).
+            - ``dart.providers.dart.company.Company.debt`` — KR 패리티 (전종목 횡단 지원).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - BS 의 6 부채 계정 (total/short/long/debentures/current/noncurrent_liabilities) 을
+              최신 period 1 행 DF 로 추출. 부채 만기 구조 파악 + 단기/장기 비율 분석.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 부채 구조" → 본 함수.
+            - "단기 vs 장기 부채 비율" → result.shortterm_borrowings / longterm_borrowings.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 부도/유동성 위험 답변 시 본 함수 + credit() 결합. 단일 period 라 추세는 show("BS") 별도.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - debt ≠ liabilities — borrowings 가 진짜 차입금, liabilities 는 매입채무 포함.
+                - view="all" → KR 와 달리 None. 횡단비교는 dart 만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 1 행 [종목코드, 회사명, total_liabilities, shortterm_borrowings, ...].
             Prerequisites:
-                - <TODO: 사전조건>
+                - BS 의 부채 계정 (XBRL Liabilities/Borrowings 매핑 후).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance 분기 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - show("BS") → selectFromShow(6 accts) → latest period → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 단일 회사.
         """
         if view in ("all", "market"):
             return None
