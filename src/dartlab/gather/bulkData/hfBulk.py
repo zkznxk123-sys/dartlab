@@ -161,6 +161,14 @@ def loadFiltered(
 
     Raises:
         ValueError: year 와 start/end 동시 지정.
+
+    When:
+        엔진 내부 (quant/scan/analysis/gather.krxApi.gatherKrx) 가 KR 시계열 필요 시
+        첫 시도 — apiKey 없는 사용자 path / 재현성 보장 path.
+
+    How:
+        _resolveYears(year, start, end) → 연도별 _loadYear (HF parquet) → concat →
+        stockCode/date filter → adjustPrice.applyAdjustment(adjustment 모드) → DataFrame.
     """
     if year is not None and (start is not None or end is not None):
         raise ValueError("year 와 start/end 는 동시 사용 불가")

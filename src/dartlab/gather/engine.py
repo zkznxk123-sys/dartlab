@@ -76,6 +76,12 @@ class Gather(
     def invalidate(self, stockCode: str) -> None:
         """특정 종목의 캐시 무효화 — live + stale 모두 제거.
 
+        Capabilities: GatherCache.invalidate(stockCode) 위임 — TTL 모든 axis 제거.
+        AIContext: 사용자가 신선 데이터 강제 시 / 외부 API 변경 후 캐시 회수 시 진입.
+        Guide: 종목 한정 — 전체 캐시 비우려면 close() + 새 인스턴스.
+        When: live 가격 / flow 갱신 후 재호출 필요 시.
+        How: ``self._cache.invalidate(stockCode)`` direct forward.
+
         Parameters
         ----------
         stock_code : str
@@ -91,15 +97,30 @@ class Gather(
         없음
             미존재 종목은 silent (cache.invalidate 가 graceful).
 
+        Requires
+        --------
+        Gather instance + ``_cache`` 가용.
+
         Example::
 
             g = getDefaultGather()
             g.invalidate("005930")   # 삼성전자 캐시 제거
+
+        See Also
+        --------
+        close : 모든 리소스 정리.
+        infra.cache.GatherCache.invalidate : 위임 대상.
         """
         self._cache.invalidate(stockCode)
 
     def close(self) -> None:
         """HTTP 클라이언트 등 리소스 정리 — 자체 생성한 클라이언트만 닫는다.
+
+        Capabilities: ``_owns_client`` 분기 → 자체 생성 client 일 경우만 ``aclose`` 호출.
+        AIContext: 외부 주입 client (테스트/CLI) 는 caller 가 close 책임 — 본 함수는 owner 일 때만.
+        Guide: idempotent — 두 번 호출해도 graceful.
+        When: dartlab 종료 / context manager exit / 명시 cleanup 시.
+        How: ``if self._owns_client: runAsync(self._client.aclose())``.
 
         Returns
         -------
@@ -111,10 +132,19 @@ class Gather(
         없음
             클라이언트 close 는 graceful.
 
+        Requires
+        --------
+        ``_client`` (GatherHttpClient) + ``_owns_client`` 필드.
+
         Example
         -------
         >>> g = Gather()
         >>> g.close()
+
+        See Also
+        --------
+        invalidate : 종목 단위 캐시만 제거 (resource 유지).
+        infra.http.GatherHttpClient.aclose : 위임 대상.
         """
         if self._owns_client:
             runAsync(self._client.close())

@@ -86,6 +86,12 @@ PRODUCT_INDICATOR_MAP: dict[str, dict] = {
 def getProductIndicators(stockCode: str) -> list[dict]:
     """kindList 주요제품 → 관련 산업 지표 목록.
 
+    Capabilities: kindList 의 ``주요제품`` 텍스트 keyword 매칭 → FRED/ECOS 시리즈 list.
+    AIContext: calcMacroRegression 의 산업 지표 자동 결정 — 반도체/배터리/화학 등.
+    Guide: PRODUCT_INDICATOR_MAP keyword 매칭 (substring). 중복 seriesId 제거.
+    When: 회사의 산업-특화 외생변수 회귀 분석 시.
+    How: ``_getProductText`` → keyword in product → mapping list 누적 + seen 중복 제거.
+
     Args:
         stockCode: 종목코드 (예: "005930").
 
@@ -96,8 +102,15 @@ def getProductIndicators(stockCode: str) -> list[dict]:
     Raises:
         없음 — kindList 조회 실패 시 빈 리스트.
 
+    Requires:
+        ``getKindList`` 캐시 (KIND HTTP fetch) + ``PRODUCT_INDICATOR_MAP`` 사전.
+
     Example:
         >>> inds = getProductIndicators("005930")
+
+    See Also:
+        getProductSummary : 본 함수 결과 + 메타 dict.
+        exogenousAxes.getExogenousIndicators : 더 넓은 외생변수 매핑 (업종 기반).
     """
     product = _getProductText(stockCode)
     if not product:
@@ -141,6 +154,12 @@ def _getProductText(stockCode: str) -> str:
 def getProductSummary(stockCode: str) -> dict | None:
     """기업의 제품-지표 매핑 요약.
 
+    Capabilities: stockCode → product + indicators + matched keywords dict.
+    AIContext: AI 가 분석 narrative 에서 "왜 이 산업 지표를 봤는지" 보여줄 때 진입.
+    Guide: 사용자 friendly summary (product 전문 + 매칭 keyword set).
+    When: 분석 결과 narrative 의 외생변수 선택 이유 noting 시.
+    How: _getProductText + getProductIndicators → dict + dedup keywords.
+
     Args:
         stockCode: 종목코드.
 
@@ -151,8 +170,15 @@ def getProductSummary(stockCode: str) -> dict | None:
     Raises:
         없음 — kindList 실패 시 None.
 
+    Requires:
+        ``getKindList`` 캐시 + ``getProductIndicators`` 가용.
+
     Example:
         >>> summary = getProductSummary("005930")
+
+    See Also:
+        getProductIndicators : 본 함수의 indicator source.
+        exogenousAxes.getExogenousSummary : 동행 broader summary (업종 기반).
     """
     product = _getProductText(stockCode)
     if not product:

@@ -120,6 +120,10 @@ def loadFiltered(
 ) -> pl.DataFrame:
     """HF ``krx/indices`` 에서 KRX 지수 raw long 데이터를 로드한다.
 
+    Capabilities: 연도별 raw-{year}.parquet 다운로드 + 시장군/기간 필터 + concat.
+    AIContext: gatherKrxIndex (사용자 진입) 의 기본 backend — apiKey 없는 사용자 path.
+    Requires: 인터넷 + ``huggingface-hub`` + HF dataset ``krx/indices`` publish 된 연도.
+
     Summary
     -------
     연도/기간/시장군 조건으로 KRX 지수 raw parquet 을 부분 로드한다.

@@ -483,6 +483,12 @@ class GatherSnapshot:
     def price(self) -> PriceSnapshot | None:
         """첫 번째 가용 주가.
 
+        Capabilities: results dict iterate → 첫 r.price not None 반환.
+        AIContext: gather.collect 결과의 사용자-friendly accessor — multi-source 통합.
+        Guide: results dict 순서 = chain 순서. 첫 성공 source 가 우선.
+        When: gather.collect 후 단일 price 만 필요 시.
+        How: ``for r in results.values(): if r.price: return r.price``.
+
         Returns
         -------
         PriceSnapshot | None
@@ -492,9 +498,18 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` dict 의 ``GatherResult.price`` 필드 가용.
+
         Example
         -------
         >>> snap.price
+
+        See Also
+        --------
+        flow · sectorInfo · insiderTrades : 동행 accessor.
+        toMarketSnapshot : flat 변환.
         """
         for r in self.results.values():
             if r.price:
@@ -505,6 +520,12 @@ class GatherSnapshot:
     def flow(self) -> FlowData | None:
         """수집된 수급 데이터 반환.
 
+        Capabilities: results dict iterate → 첫 r.flow not None 반환.
+        AIContext: gather.collect 결과의 flow accessor — multi-source 통합.
+        Guide: results dict 순서 = chain 순서. 첫 성공 source.
+        When: gather.collect 후 단일 flow 만 필요 시.
+        How: ``for r in results.values(): if r.flow: return r.flow``.
+
         Returns
         -------
         FlowData | None
@@ -514,9 +535,18 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` 의 ``GatherResult.flow`` 필드 가용.
+
         Example
         -------
         >>> snap.flow
+
+        See Also
+        --------
+        price : 가격 동행 accessor.
+        toMarketSnapshot : flat 변환.
         """
         for r in self.results.values():
             if r.flow:
@@ -527,6 +557,12 @@ class GatherSnapshot:
     def news(self) -> list[NewsItem]:
         """수집된 뉴스 항목.
 
+        Capabilities: ``_news`` private 필드 직접 반환.
+        AIContext: gather.collect 결과의 news accessor.
+        Guide: 외부 본문은 untrusted external — 마커 wrap 필요.
+        When: 종목 관련 뉴스 list 접근 시.
+        How: ``return self._news``.
+
         Returns
         -------
         list[NewsItem]
@@ -536,15 +572,29 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``_news`` private 필드.
+
         Example
         -------
         >>> snap.news
+
+        See Also
+        --------
+        formatting.wrap_external_in_result : untrusted 마커 wrap.
         """
         return self._news
 
     @property
     def sectorInfo(self) -> SectorInfo | None:
         """수집된 업종 분류.
+
+        Capabilities: results dict iterate → 첫 r.sectorInfo not None 반환, fallback to private.
+        AIContext: gather.collect 결과의 sector accessor — peer matching 진입.
+        Guide: source 별 sectorInfo 가 다를 수 있음. 첫 성공만 반환.
+        When: 종목의 업종 분류 단건 조회 시.
+        How: results iterate + ``_sectorInfo`` private fallback.
 
         Returns
         -------
@@ -555,9 +605,17 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` dict 또는 ``_sectorInfo`` 필드 가용.
+
         Example
         -------
         >>> snap.sectorInfo
+
+        See Also
+        --------
+        domains/krx.fetchSectorInfo : 실제 sectorInfo 추출 backend.
         """
         for r in self.results.values():
             if r.sectorInfo:
@@ -568,6 +626,12 @@ class GatherSnapshot:
     def insiderTrades(self) -> list[InsiderTrade]:
         """수집된 내부자 거래.
 
+        Capabilities: results dict iterate → 첫 r.insiderTrades not empty 반환, fallback to private.
+        AIContext: gather.collect 결과의 insider accessor — informed trading 분석.
+        Guide: source 별 다를 수 있음. 첫 non-empty 만.
+        When: 단일 종목의 내부자 거래 list 접근 시.
+        How: results iterate + ``_insiderTrades`` private fallback.
+
         Returns
         -------
         list[InsiderTrade]
@@ -577,9 +641,18 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` 또는 ``_insiderTrades`` 필드.
+
         Example
         -------
         >>> snap.insiderTrades
+
+        See Also
+        --------
+        sources/insider.fetchInsiderTrading : 실제 backend.
+        accessors.iterInsiderTrades : streaming 동행.
         """
         for r in self.results.values():
             if r.insiderTrades:
@@ -590,6 +663,12 @@ class GatherSnapshot:
     def shortSelling(self) -> ShortSellingData | None:
         """수집된 공매도 데이터.
 
+        Capabilities: results dict iterate → 첫 r.shortSelling not None, fallback to private.
+        AIContext: gather.collect 결과의 short-selling accessor — bearish signal 분석.
+        Guide: KR 한정. 외 시장 None.
+        When: 단일 종목 공매도 상태 조회 시.
+        How: results iterate + ``_shortSelling`` private fallback.
+
         Returns
         -------
         ShortSellingData | None
@@ -599,9 +678,17 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` 또는 ``_shortSelling`` 필드.
+
         Example
         -------
         >>> snap.shortSelling
+
+        See Also
+        --------
+        domains/krx.fetchShortSelling : 실제 KR backend (있을 경우).
         """
         for r in self.results.values():
             if r.shortSelling:
@@ -612,6 +699,12 @@ class GatherSnapshot:
     def sourcesAvailable(self) -> list[str]:
         """정상 응답한 소스 목록.
 
+        Capabilities: results dict filter → error None 인 source name list.
+        AIContext: gather.collect 의 partial success 추적 — 어느 source 가 살아있나.
+        Guide: error 가 None 인 것만. sourcesFailed 와 짝.
+        When: collect 결과의 source-level diagnostic 필요 시.
+        How: ``[d for d, r in results.items() if r.error is None]``.
+
         Returns
         -------
         list[str]
@@ -621,15 +714,29 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` dict 의 ``GatherResult.error`` 필드.
+
         Example
         -------
         >>> snap.sourcesAvailable
+
+        See Also
+        --------
+        sourcesFailed : 짝 — 실패 소스 list.
         """
         return [d for d, r in self.results.items() if r.error is None]
 
     @property
     def sourcesFailed(self) -> list[str]:
         """오류가 발생한 소스 목록.
+
+        Capabilities: results dict filter → error not None 인 source name list.
+        AIContext: partial failure 진단 — telemetry 신호로 emit 가능한 source list.
+        Guide: error 가 None 아닌 것만. sourcesAvailable 의 짝.
+        When: collect 결과 진단 / 실패 분석 시.
+        How: ``[d for d, r in results.items() if r.error is not None]``.
 
         Returns
         -------
@@ -640,14 +747,28 @@ class GatherSnapshot:
         ------
         없음.
 
+        Requires
+        --------
+        ``results`` dict.
+
         Example
         -------
         >>> snap.sourcesFailed
+
+        See Also
+        --------
+        sourcesAvailable : 짝.
         """
         return [d for d, r in self.results.items() if r.error is not None]
 
     def toMarketSnapshot(self) -> MarketSnapshot:
         """Analyst 엔진 호환 flat 스냅샷으로 변환.
+
+        Capabilities: GatherSnapshot multi-source 결과 → flat MarketSnapshot dataclass.
+        AIContext: analysis/credit 엔진 진입 시 데이터 통합 변환 SSOT.
+        Guide: price 부재 시 빈 multiples / None range — graceful (예외 없음).
+        When: gather.collect 결과를 analysis/credit 가 소비할 때.
+        How: self.price/flow 추출 → multiples dict + 52w range → MarketSnapshot.
 
         Returns
         -------
@@ -659,9 +780,18 @@ class GatherSnapshot:
         없음
             price 부재면 빈 multiples/None price_range 로 graceful 반환.
 
+        Requires
+        --------
+        ``MarketSnapshot`` 타입 정의 가용.
+
         Example
         -------
         >>> snap.toMarketSnapshot()
+
+        See Also
+        --------
+        analysis/* : 본 함수 결과의 caller.
+        price · flow : 본 함수가 호출하는 accessor.
         """
         price = self.price
         flow = self.flow

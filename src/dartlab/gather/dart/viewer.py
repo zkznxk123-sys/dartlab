@@ -65,6 +65,22 @@ async def fetchAsync(
 ) -> pl.DataFrame:
     """viewer 무인증 fetch — async.
 
+    Capabilities: rcept_no → DART viewer index URL → sub-doc list → 각 section text → DataFrame.
+    AIContext: DART 공시 본문 추출 SSOT — DART_API_KEY 불필요 (무인증 viewer).
+    Guide: 비공개 공시는 sub-doc 0 개 → DocumentNotFoundError.
+    When: 단일 공시 원문 분석 / 변경 비교 / 텍스트 검색 시.
+    How: dart.fss.or.kr/dsaf001 index → parseSubDocs → sub-doc HTML fetch → htmlToText.
+
+    Requires
+    --------
+    네트워크 (``dart.fss.or.kr``) + ``GatherHttpClient`` (또는 자체 생성).
+
+    See Also
+    --------
+    fetch : 본 함수의 sync wrapper.
+    docMeta : 본문 없이 메타만 (sectionCount).
+    facade.Dart.doc : 클래스 facade 진입점.
+
     Parameters
     ----------
     rceptNo : str
@@ -152,6 +168,21 @@ def fetch(
 ) -> pl.DataFrame:
     """sync wrapper — :func:`fetchAsync` 의 동기 진입점.
 
+    Capabilities: fetchAsync 의 동기 진입점 — runAsync 으로 event loop 관리.
+    AIContext: 동기 코드에서 DART viewer 호출 — Jupyter/Marimo/CLI 사용자 시점.
+    Guide: 외부 client 명시 시 그 loop 안 호출 가정 (자체 close 안 함).
+    When: 동기 코드 (notebook/CLI) 에서 단일 공시 원문 필요 시.
+    How: runAsync(fetchAsync(...)) → asyncio.run 동등.
+
+    Requires
+    --------
+    동기 컨텍스트 — async loop 외부. ``runAsync`` 가 자체 event loop 관리.
+
+    See Also
+    --------
+    fetchAsync : 본 함수의 async 본체.
+    docMeta : 메타만.
+
     Parameters
     ----------
     rceptNo : str
@@ -181,6 +212,12 @@ def fetch(
 def docMeta(rceptNo: str, *, client: GatherHttpClient | None = None) -> DartDocMeta:
     """viewer fetch + 메타 요약 (sectionCount 만 필요할 때).
 
+    Capabilities: rcept_no → 본문 fetch → sectionCount + indexUrl 메타 추출.
+    AIContext: 공시 인덱싱 / staleness 검증 / size 사전 확인 진입.
+    Guide: 본문 fetch 비용 그대로 — 본문도 필요하면 fetch() 사용.
+    When: 공시 size/sectionCount 만 필요한 가벼운 메타 조회 시.
+    How: fetch(rceptNo) → DataFrame.height → DartDocMeta 패킹.
+
     Args:
         rceptNo: 14자리 접수번호.
         client: HTTP 클라이언트. None 이면 자체 생성.
@@ -192,8 +229,15 @@ def docMeta(rceptNo: str, *, client: GatherHttpClient | None = None) -> DartDocM
         InvalidRceptNoError: rceptNo 가 14자리 숫자 아님.
         DocumentNotFoundError: viewer 가 sub-doc 을 반환하지 않음.
 
+    Requires:
+        fetch 의 요구사항 (네트워크 + GatherHttpClient).
+
     Example:
         >>> m = docMeta("20240315000123")
+
+    See Also:
+        fetch : 본 함수가 내부 호출 — 본문까지 추출.
+        facade.Dart.meta : 클래스 facade 진입점.
     """
     df = fetch(rceptNo, client=client)
     return DartDocMeta(

@@ -39,7 +39,13 @@ def _category(source: str) -> str:
 
 
 def loadManifest(source: str) -> pl.DataFrame:
-    """HF macro manifest 로드.
+    """HF macro manifest 로드 — 사용 가능한 시리즈 카탈로그.
+
+    Capabilities: HF dataset ``macro/{source}/manifest.parquet`` read → DataFrame.
+    AIContext: macro engine 의 시리즈 universe — availableSeries / fetchSeries 의 source-of-truth.
+    Guide: source "fred"/"ecos" 두 값만. 다른 값은 ValueError.
+    When: macro engine 이 사용자 요청 시리즈를 HF 카탈로그와 매칭 시.
+    How: ``loadData("manifest", category=macroFred|macroEcos)`` 직접 forward.
 
     Parameters
     ----------
@@ -61,9 +67,19 @@ def loadManifest(source: str) -> pl.DataFrame:
     ValueError
         source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
 
+    Requires
+    --------
+    HF dataset ``eddmpython/dartlab-data`` 의 ``macro/{source}`` 카탈로그 publish.
+
     Example
     -------
     >>> mf = loadManifest("fred")
+
+    See Also
+    --------
+    availableSeries : 본 함수 결과의 seriesId set 추출.
+    fetchSeries : 실제 시계열 fetch (manifest 매칭 후 호출).
+    latestUpdatedAt : manifest 의 갱신 시각.
     """
     from dartlab.core.dataLoader import loadData
 
@@ -71,7 +87,13 @@ def loadManifest(source: str) -> pl.DataFrame:
 
 
 def loadObservations(source: str) -> pl.DataFrame:
-    """HF macro observations 로드.
+    """HF macro observations 로드 — 전체 시리즈 long DataFrame.
+
+    Capabilities: HF dataset ``macro/{source}/observations.parquet`` read + date 정규화.
+    AIContext: macro engine 의 실제 시계열 source — fetchSeries 가 filter 후 wide pivot.
+    Guide: 전체 시리즈 long DataFrame (수십 MB). 단일 시리즈만 필요하면 fetchSeries 권장.
+    When: macro engine 의 bulk 비교 분석 / fetchSeries 내부 호출 시.
+    How: ``loadData("observations", category=...)`` + ``date`` 컬럼 ``pl.Date`` cast.
 
     Parameters
     ----------
@@ -90,9 +112,19 @@ def loadObservations(source: str) -> pl.DataFrame:
     ValueError
         source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
 
+    Requires
+    --------
+    HF dataset ``macro/{source}/observations.parquet`` publish.
+
     Example
     -------
     >>> obs = loadObservations("ecos")
+
+    See Also
+    --------
+    fetchSeries : 단일 시리즈 filter + wide.
+    fetchMulti : 복수 시리즈 wide pivot.
+    loadManifest : 시리즈 universe.
     """
     from dartlab.core.dataLoader import loadData
 
@@ -104,6 +136,12 @@ def loadObservations(source: str) -> pl.DataFrame:
 
 def availableSeries(source: str) -> set[str]:
     """HF manifest 기준 사용 가능한 시리즈 ID 집합.
+
+    Capabilities: loadManifest → seriesId set 추출.
+    AIContext: fetchSeries 의 진입 가드 — HF 카탈로그 미수록 시리즈 차단.
+    Guide: O(N) 카탈로그 조회 — manifest 캐시 미사용 (호출 비용 작음).
+    When: 사용자 요청 시리즈 ID 가 HF 카탈로그에 있는지 사전 검증 시.
+    How: loadManifest(source) → ``seriesId`` 컬럼 → set.
 
     Parameters
     ----------
@@ -121,9 +159,18 @@ def availableSeries(source: str) -> set[str]:
     ValueError
         source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
 
+    Requires
+    --------
+    loadManifest 의 요구사항 (HF manifest publish).
+
     Example
     -------
     >>> ids = availableSeries("fred")
+
+    See Also
+    --------
+    loadManifest : 본 함수의 source.
+    fetchSeries : 본 함수 결과로 시리즈 ID 검증.
     """
     manifest = loadManifest(source)
     if manifest.is_empty() or "seriesId" not in manifest.columns:
@@ -141,6 +188,12 @@ def fetchSeries(
 ) -> pl.DataFrame:
     """HF macro 단일 시리즈 조회 → ``(date, value)``.
 
+    Capabilities: availableSeries 검증 + loadObservations filter + date 범위 + tail(limit).
+    AIContext: macro engine 의 사용자-facing 단일 시리즈 진입점 (apiKey 없는 path).
+    Guide: HF 카탈로그 미수록 시리즈는 ValueError — apiKey 명시 호출로 fallback.
+    When: ``gather("macro", seriesId, ...)`` 사용자 호출 시 첫 시도.
+    How: availableSeries(source) 검증 → loadObservations filter (seriesId, start, end) → sort + tail.
+
     Parameters
     ----------
     limit : int | None
@@ -151,9 +204,19 @@ def fetchSeries(
     ValueError
         HF 카탈로그에 없는 시리즈일 때. 직접 API가 필요하면 ``apiKey=``를 명시해야 한다.
 
+    Requires
+    --------
+    HF manifest + observations 가용 + seriesId 가 manifest 에 등록.
+
     Example
     -------
     >>> df = fetchSeries("fred", "GDP", start="2020-01-01", limit=20)
+
+    See Also
+    --------
+    fetchMulti : 복수 시리즈 wide pivot.
+    availableSeries : 진입 가드.
+    macroProvider.fetchSeriesLatest : Protocol 위임 (asOf 적용).
     """
     sourceKey = source.lower()
     supported = availableSeries(sourceKey)
@@ -191,6 +254,12 @@ def fetchMulti(
 ) -> pl.DataFrame:
     """HF macro 복수 시리즈 조회 → wide DataFrame.
 
+    Capabilities: 시리즈별 fetchSeries → rename({value→seriesId}) → join + forward_fill.
+    AIContext: macro engine 의 cross-series 비교 진입 (예: GDP + UNRATE 동시 시계열).
+    Guide: 빈 시리즈도 join (null) — 사용자 측 dropna 책임.
+    When: 매크로 종합 분석 (regime/correlation) 시.
+    How: fetchSeries fan-out → outer join on date → forward_fill missing.
+
     Parameters
     ----------
     limit : int | None
@@ -201,9 +270,18 @@ def fetchMulti(
     ValueError
         HF 카탈로그에 없는 시리즈가 ``seriesIds`` 에 포함된 경우.
 
+    Requires
+    --------
+    fetchSeries 의 요구사항 + 모든 ``seriesIds`` 가 manifest 에 등록.
+
     Example
     -------
     >>> df = fetchMulti("fred", ["GDP", "UNRATE"], start="2020-01-01")
+
+    See Also
+    --------
+    fetchSeries : 본 함수의 내부 fan-out 대상.
+    macroProvider.fetchSeriesLatest : asOf 적용 단건 조회.
     """
     if not seriesIds:
         return pl.DataFrame()
@@ -231,7 +309,13 @@ def fetchMulti(
 
 
 def latestUpdatedAt(source: str) -> datetime | None:
-    """manifest 의 최신 갱신 시각 반환.
+    """manifest 의 최신 갱신 시각 반환 — HF 신선도 추적용.
+
+    Capabilities: loadManifest 의 ``updatedAtUtc`` 컬럼 max → datetime.
+    AIContext: macro engine 의 staleness 진단 / 캐시 freshness UI 진입.
+    Guide: ISO 8601 (Z 또는 +00:00) 형식 가정. 파싱 실패 시 None.
+    When: 사용자 dashboard 가 데이터 freshness 표시 / 운영자 cron 진단 시.
+    How: loadManifest → ``updatedAtUtc`` drop_nulls → max → datetime.fromisoformat.
 
     Parameters
     ----------
@@ -248,9 +332,17 @@ def latestUpdatedAt(source: str) -> datetime | None:
     ValueError
         source 가 ``"fred"``/``"ecos"`` 가 아닐 때.
 
+    Requires
+    --------
+    loadManifest 결과에 ``updatedAtUtc`` 컬럼 존재 + ISO 형식 값.
+
     Example
     -------
     >>> ts = latestUpdatedAt("fred")
+
+    See Also
+    --------
+    loadManifest : 본 함수의 source.
     """
     manifest = loadManifest(source)
     if manifest.is_empty() or "updatedAtUtc" not in manifest.columns:

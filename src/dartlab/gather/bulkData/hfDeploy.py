@@ -59,6 +59,20 @@ def deployKrxToHF(
     Raises:
         RuntimeError: HF_TOKEN 부재.
         FileNotFoundError: localDir 없음.
+
+    When:
+        ``.github/workflows/buildKrxData.yml`` cron 마지막 단계 / 로컬 dev 가 새 dataset
+        publish 시.
+
+    How:
+        HF_TOKEN env / token 인자 → create_repo (exist_ok) → HfApi.upload_folder
+        (디렉토리 통째, 변경 파일만 commit) → commit URL 반환.
+
+    Requires:
+        ``HF_TOKEN`` 환경변수 (또는 token 인자) + ``huggingface-hub`` 패키지.
+
+    Example:
+        >>> deployKrxToHF("data/market/prices/kr", token=os.environ["HF_TOKEN"])
     """
     from huggingface_hub import HfApi, create_repo
 
@@ -106,6 +120,12 @@ def deployKrxIndexToHF(
 ) -> dict:
     """KRX 지수 raw parquet 을 HF dataset ``krx/indices`` 로 업로드.
 
+    Capabilities: deployKrxToHF wrapper — 지수 path (``krx/indices``) 만 다름.
+    AIContext: KRX 지수 bulk publish — ``buildKrxIndexData.yml`` cron 마지막 단계.
+    Guide: pathInRepo 기본값만 다르고 본문은 deployKrxToHF 위임.
+    When: 지수 bulk 빌드 + HF push 시.
+    How: pathInRepo 를 ``krx/indices`` 로 고정 후 deployKrxToHF 위임.
+
     Args:
         localDir: 업로드 대상 parquet 들이 모인 로컬 디렉터리.
         repoId: HF dataset repo ID (예: ``"eddmpython/dartlab-data"``).
@@ -119,7 +139,14 @@ def deployKrxIndexToHF(
         FileNotFoundError: ``localDir`` 부재.
         huggingface_hub.HfHubHTTPError: HF API 오류 (인증/권한/네트워크).
 
+    Requires:
+        ``HF_TOKEN`` 환경변수 + ``huggingface-hub`` 패키지.
+
     Example:
         >>> deployKrxIndexToHF("data/krx/indices", token=os.environ["HF_TOKEN"])
+
+    See Also:
+        deployKrxToHF : 위임 대상 (종목 prices path).
+        scripts/build/buildKrxIndexData.py : 호출 caller (운영자 cron).
     """
     return deployKrxToHF(localDir, repoId=repoId, pathInRepo=pathInRepo, token=token)

@@ -104,6 +104,12 @@ _CN_SZ_PREFIXES = ("00", "30")
 def getMarketConfig(market: str) -> MarketConfig:
     """시장 코드 → MarketConfig.
 
+    Capabilities: MARKETS dict lookup → MarketConfig (frozen dataclass) 반환.
+    AIContext: 시장별 fallback chain · ticker suffix · 거래시간 SSOT — gather/sources/* 진입.
+    Guide: 대문자 정식 표기만. case 불일치는 silent reroute 안 함 (typo 사고 차단).
+    When: gather 의 source dispatch / ticker 변환 / benchmark 라우팅 시.
+    How: MARKETS dict ``market`` lookup → raise on KeyError or 반환.
+
     consistency_no_alias 원칙: case-insensitive 매칭 (``market.upper()``) 은
     silent alias 라 인정하지 않는다. 신뢰성 원칙: 미등록 market 을 silent 하게
     US 로 reroute 하지 않고 ValueError 로 명시 — 사용자 typo 가 잘못된 시장
@@ -124,6 +130,20 @@ def getMarketConfig(market: str) -> MarketConfig:
     ------
     ValueError
         미등록 시장 또는 case 불일치 (예: ``"kr"``, ``"Us"``).
+
+    Requires
+    --------
+    MARKETS 사전 등록 (KR/US/JP/HK/UK/DE/CN/IN 8 시장).
+
+    Example
+    -------
+    >>> getMarketConfig("KR").currency
+    'KRW'
+
+    See Also
+    --------
+    resolveTicker : 시장별 ticker suffix 적용.
+    domains.fallback.getPriceFallback : fallback_chain 의 caller.
     """
     if market not in MARKETS:
         available = ", ".join(sorted(MARKETS))
@@ -136,6 +156,12 @@ def getMarketConfig(market: str) -> MarketConfig:
 
 def resolveTicker(stockCode: str, market: str, source: str) -> str:
     """stock_code + market + source → 소스별 ticker 문자열.
+
+    Capabilities: market 별 exchange_suffix 적용 + source 별 분기 (naver KR only / US 무접미).
+    AIContext: domains/* 의 fetch* 함수가 raw ticker → source-specific ticker 변환 시 진입.
+    Guide: CN 심천 (00/30 prefix) 은 .SZ 자동. HK 는 4 자리 zfill.
+    When: source 별 fetch URL 빌드 직전.
+    How: getMarketConfig → source/market 분기 → ticker + suffix.
 
     - naver: 종목코드 그대로 (KR only)
     - naver_global: 종목코드 + 거래소 접미사
@@ -161,10 +187,19 @@ def resolveTicker(stockCode: str, market: str, source: str) -> str:
     ValueError
         등록되지 않은 market 코드.
 
+    Requires
+    --------
+    getMarketConfig(market) 가 ValueError 없이 통과.
+
     Example
     -------
     >>> resolveTicker("005930", "KR", "naver")
     '005930'
+
+    See Also
+    --------
+    getMarketConfig : exchange_suffix 의 source.
+    domains/yahooChart._buildSymbol · domains/fmp._buildSymbol : 동행 source-specific 변환.
     """
     config = getMarketConfig(market)
 

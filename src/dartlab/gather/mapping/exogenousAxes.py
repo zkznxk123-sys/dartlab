@@ -324,6 +324,12 @@ def getExogenousIndicators(
 ) -> list[ExogenousIndicator]:
     """기업의 외생변수 지표 3개 반환.
 
+    Capabilities: stockCode/industry/product → 3 단계 매칭 → ExogenousIndicator list (최대 3).
+    AIContext: analysis/credit 의 매크로 회귀 변수 — 회사별 외생변수 매핑 SSOT.
+    Guide: product (가장 구체) > industry > fallback (IPI/금리/환율) 순.
+    When: 회사별 매크로 변수 자동 매핑 필요 시 (analysis 진입).
+    How: stockCode → kindList 조회 → product 키워드 매칭 → industry 매핑 → fallback.
+
     우선순위:
     1. 주요제품 키워드 오버라이드 (가장 구체적)
     2. 업종 매핑
@@ -340,8 +346,17 @@ def getExogenousIndicators(
     Raises:
         없음 — 매칭 실패 시 fallback ([IPI, BASE_RATE, USDKRW]) 반환.
 
+    Requires:
+        ``_lookupFromKindList`` 의 KIND 캐시 (stockCode 사용 시) + ``_KEYWORD_OVERRIDE`` /
+        ``_INDUSTRY_MAP`` 사전.
+
     Example:
         >>> inds = getExogenousIndicators(stockCode="005930")
+
+    See Also:
+        getExogenousSeriesIds : (seriesId, source) 튜플 변환.
+        getExogenousSummary : 매핑 결과 dict 요약.
+        analysis/regime : 본 함수 결과의 caller.
     """
     # stockCode에서 업종/제품 자동 조회
     # productIndex(공시 원문) 우선, kindList fallback
@@ -374,6 +389,12 @@ def getExogenousSeriesIds(
 ) -> list[tuple[str, str]]:
     """(seriesId, source) 튜플 리스트 반환. ``_loadMacroAligned`` 에서 사용.
 
+    Capabilities: getExogenousIndicators → seriesId/source 튜플 list 단순 변환.
+    AIContext: macro 시계열 fetch 위한 source 라우팅 dict — fetchMulti 호출 직전.
+    Guide: getExogenousIndicators 위임 + tuple 추출만.
+    When: macro 외생변수 시계열 일괄 fetch 시.
+    How: getExogenousIndicators(...) → ``[(ind.seriesId, ind.source) for ind in ...]``.
+
     Args:
         stockCode: 종목코드.
         industry: 업종명.
@@ -385,8 +406,15 @@ def getExogenousSeriesIds(
     Raises:
         없음 — 매칭 실패 시 fallback 반환.
 
+    Requires:
+        getExogenousIndicators 의 요구사항.
+
     Example:
         >>> ids = getExogenousSeriesIds(stockCode="005930")
+
+    See Also:
+        getExogenousIndicators : 본 함수의 source.
+        bulkData/macroHf.fetchMulti : 본 함수 결과의 caller.
     """
     indicators = getExogenousIndicators(stockCode, industry, product)
     return [(ind.seriesId, ind.source) for ind in indicators]
@@ -394,6 +422,12 @@ def getExogenousSeriesIds(
 
 def getExogenousSummary(stockCode: str) -> dict:
     """기업의 외생변수 매핑 요약.
+
+    Capabilities: stockCode 단일 인자 → 매핑 결과 + 메타 (industry/product/axes/isFallback) dict.
+    AIContext: AI 가 사용자에게 "왜 이 외생변수가 선택됐는지" 보여줄 때 진입.
+    Guide: 사용자-friendly summary dict — UI / blog / debug log 용.
+    When: 분석 결과 narrative 에서 외생변수 선택 이유 noting 시.
+    How: _lookupFromKindList → getExogenousIndicators → dict 패킹.
 
     Args:
         stockCode: 종목코드.
@@ -404,8 +438,15 @@ def getExogenousSummary(stockCode: str) -> dict:
     Raises:
         없음 — 매칭 실패 시 fallback indicator 사용.
 
+    Requires:
+        ``_lookupFromKindList`` (KIND 캐시) + ``getExogenousIndicators`` 가용.
+
     Example:
         >>> summary = getExogenousSummary("005930")
+
+    See Also:
+        getExogenousIndicators : 본 함수의 내부 호출.
+        getExogenousSeriesIds : seriesId tuple 단순 변환.
     """
     industry, product = _lookupFromKindList(stockCode)
     indicators = getExogenousIndicators(stockCode=stockCode)
@@ -471,14 +512,27 @@ def _lookupFromKindList(stockCode: str) -> tuple[str | None, str | None]:
 def getAllIndicators() -> list[ExogenousIndicator]:
     """6축 전체 고유 지표 목록.
 
+    Capabilities: _KEYWORD_OVERRIDE + _INDUSTRY_MAP 전체 indicator 합집합 → seriesId 중복 제거.
+    AIContext: macro indicator 수집 스크립트 / 카탈로그 동기화 진입.
+    Guide: 산업/제품 매핑 어디든 등장하는 모든 unique indicator.
+    When: 운영자 cron 이 매크로 universe 빌드 시 / 사용자 catalog 조회 시.
+    How: 모든 매핑 list iterate + seen set 으로 중복 제거.
+
     Returns:
         6축 (커머디티/금리/환율/IPI/PPI/심리) 전체 ExogenousIndicator 리스트 (중복 seriesId 제거).
 
     Raises:
         없음.
 
+    Requires:
+        ``_KEYWORD_OVERRIDE`` + ``_INDUSTRY_MAP`` + ``_FALLBACK`` 사전 정의.
+
     Example:
         >>> all_inds = getAllIndicators()
+
+    See Also:
+        getExogenousIndicators : 회사별 매핑.
+        scripts/build/macroBuild : 본 함수의 caller (운영자 cron).
     """
     seen: set[str] = set()
     result: list[ExogenousIndicator] = []
