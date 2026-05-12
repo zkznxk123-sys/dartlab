@@ -24530,7 +24530,7 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "사람 용 상세 설명·맥락·시각자료."
     },
     {
       "id": "operation.cliMaintenance",
@@ -24733,7 +24733,7 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": null
+      "bodyHuman": "사람 용 상세 설명·맥락·시각자료. 톤 풍부, 인과 서술 가능."
     },
     {
       "id": "operation.compareTargets",

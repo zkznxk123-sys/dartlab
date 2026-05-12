@@ -4426,7 +4426,7 @@
         "4. import 방향 — L0 ← L1 ← L1.5 ← L2 ← L3 하향만 허용한다"
       ],
       "nextSkills": [],
-      "bodyPreview": "## Skill OS 흡수 규칙\n\n- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.\n- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.\n- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.\n\n## 실행 순서\n\n- 1. 레이어 — L0→L4 (L1.5 포함 6 단) 구조로 간다 기준을 확인한다.\n- 2. 5 L2 분석엔진 — 두 소비자를 최고로 지원한다 기준을 확인한다.\n- 소비자별 차이 기준을 확인한다.\n- 3. 모듈 제공 패턴 — analysis 기준 (5 L2 엔진 동일) 기준을 확인한다.\n- 4. import 방향 — L0 ← L1 ← L1.5 ← L2 ← L3 하향만 허용한다 기준을 확인한다.\n- **story 가 쓸 때** — L3 조합기로서 5 L2 분석엔진 + L1.5 scan 의 calc 결과를 블록으로 변환하여 보고서에 배치. 자체 해석·계산 0 — 모든 숫자는 하위 엔진 ref. story 가 단독으로 다중 결합 책임을 짊어져 L2 끼리 직접 import 가 만드는 순환참조를 차단.\n- **AI 가 쓸 때** —"
+      "bodyPreview": "외부 LLM 용 짧은 도입. < 200 토큰."
     },
     {
       "id": "operation.cliMaintenance",
@@ -4458,7 +4458,7 @@
         "3. CAPABILITIES — 단일 진실의 원천으로 간다"
       ],
       "nextSkills": [],
-      "bodyPreview": "## Skill OS 흡수 규칙\n\n- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.\n- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.\n- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.\n\n## 실행 순서\n\n- 1. 네이밍 — camelCase 로 간다 기준을 확인한다.\n- 2. 독스트링 — 9 섹션으로 쓴다 기준을 확인한다.\n- AI 역할 — Guide 에 명시한다 기준을 확인한다.\n- Returns 작성 규칙 — 키 + 타입 + 단위를 명시한다 기준을 확인한다.\n- 3. CAPABILITIES — 단일 진실의 원천으로 간다 기준을 확인한다.\n- 0.10 부터 snake_case 절대금지. 모든 식별자 (함수·메서드·매개변수·모듈변수·**파일명**) camelCase. 클래스 PascalCase. 모듈 상수 ALL_CAPS.\n- 매개변수명은 `core/naming/aliases.json` 표준 사전 준수 (의미 같으면 같은 이름 — AI 추론 단순화). 신규 의미는 PR 로 사전 추가 후 사용.\n- 시그니처 단순화: 인자 5 "
+      "bodyPreview": "외부 LLM 용 짧은 도입 — < 200 토큰. 사실 + 호출 시그니처만."
     },
     {
       "id": "operation.compareTargets",
