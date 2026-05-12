@@ -1,0 +1,286 @@
+"""gather entry — axis registry · alias · 시장지수 fetch · 축 정규화.
+
+GatherEntry 클래스 (main.py) 가 의존하는 공유 데이터 + 헬퍼.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+import polars as pl
+
+# targetType — gather contract 명세 (axis 별 target 의 의미).
+#   stockCode  : 종목코드/티커 (예: "005930", "AAPL")
+#   columnName : OHLCV 또는 보조지표 컬럼 명 (예: "close", "rsi14")
+#   indicator  : 거시지표 코드 (예: "CPI", "FEDFUNDS")
+#   keyword    : 검색어 (자유 문자열)
+#   none       : target 안 받음
+TargetType = Literal["stockCode", "columnName", "indicator", "keyword", "rceptNo", "none"]
+
+
+@dataclass(frozen=True)
+class _GatherAxisEntry:
+    """gather 축 메타데이터.
+
+    targetType 은 axis 가 받는 target 의 의미를 명시 — test_gatherAxisContract 가
+    이 메타데이터로 axis-별 적절 target 을 dispatch.
+
+    hidden=True 인 axis 는 _guide() / __repr__ / 공개 가이드 출력에서 제외.
+    내부 구현·테스트는 가능 (데이터 미준비/베타 axis 용).
+    """
+
+    label: str
+    description: str
+    example: str
+    targetRequired: bool = True
+    targetType: TargetType = "stockCode"
+    hidden: bool = False
+
+
+_AXIS_REGISTRY: dict[str, _GatherAxisEntry] = {
+    "price": _GatherAxisEntry(
+        label="주가",
+        description=(
+            "OHLCV 시계열 (수정주가). "
+            "KR: Naver, US: Yahoo. 기본 1년, 최대 6000거래일. "
+            "시장 지수 (KOSPI/KOSDAQ/KPI200) 도 자동 인식."
+        ),
+        example='gather("price", "005930") / gather("price", "AAPL", market="US")',
+        targetType="stockCode",
+    ),
+    "flow": _GatherAxisEntry(
+        label="수급",
+        description="외국인/기관 순매수 시계열 (KR 전용, Naver).",
+        example='gather("flow", "005930")',
+        targetType="stockCode",
+    ),
+    "macro": _GatherAxisEntry(
+        label="거시지표",
+        description=(
+            "ECOS(KR) / FRED(US) 거시지표 시계열. 기본 HF 벌크 (apiKey 없음), apiKey 명시 시 ECOS/FRED 직접 API."
+        ),
+        example='gather("macro") / gather("macro", "CPI") / gather("macro", "FEDFUNDS")',
+        targetRequired=False,
+        targetType="indicator",
+    ),
+    "news": _GatherAxisEntry(
+        label="뉴스",
+        description="Google News RSS 뉴스 수집 (기본 최근 30일).",
+        example='gather("news", "삼성전자", days=7)',
+        targetType="keyword",
+    ),
+    "sector": _GatherAxisEntry(
+        label="업종",
+        description="업종 분류 (KR KIND+Naver / US sectorCode).",
+        example='gather("sector", "005930")',
+        targetType="stockCode",
+    ),
+    "insider": _GatherAxisEntry(
+        label="내부자거래",
+        description="내부자 (임원·주요주주) 거래 (KR DART · DART_API_KEY 필요).",
+        example='gather("insider", "005930")',
+        targetType="stockCode",
+    ),
+    "ownership": _GatherAxisEntry(
+        label="지분 보유",
+        description="기관/외국인 지분 보유 현황 (KR Naver).",
+        example='gather("ownership", "005930")',
+        targetType="stockCode",
+    ),
+    "peers": _GatherAxisEntry(
+        label="피어",
+        description="동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버",
+        example='gather("peers", "005930")',
+        targetType="stockCode",
+    ),
+    "krx": _GatherAxisEntry(
+        label="KRX 회사별 시계열",
+        description=(
+            "KOSPI/KOSDAQ 전종목 wide pivot — 행=stockCode+corpName, 열=일자. "
+            "target (positional) 으로 raw OHLCV (close/open/high/low/volume/marketCap/...) "
+            "또는 보조지표 (rsi14/ma20/ema60/macd/atr14/obv/...) 28+ 디스패치. "
+            "target='raw' 면 long (KRX 원본 컬럼). "
+            "apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX OpenAPI 직접. 환경변수 자동 read X."
+        ),
+        example='gather("krx", "close", start=, end=) / gather("krx", "rsi14", start=, end=) / gather("krx", "marketCap", date=)',
+        targetRequired=False,
+        targetType="columnName",
+    ),
+    # 미공개 — 데이터 준비 중. _guide() / __repr__ 에서 숨김. 내부 dispatch 는 동작.
+    # 정식 표기: krxIndex (camelCase, dartlab 표준 — 모듈/함수명과 일관).
+    "krxIndex": _GatherAxisEntry(
+        label="KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)",
+        description=(
+            "KRX/KOSPI/KOSDAQ 시장군의 모든 지수 (종합/200/100/섹터/스타일/사이즈/ESG/테마) "
+            "OHLCV + 거래량 + 시가총액. target=close/open/high/low/volume/marketCap/raw. "
+            "indexFilter=[지수명] 으로 특정 지수 (예: 코스피 200 + 보조지표 자동). "
+            "apiKey 없음 (기본): HF SSOT. apiKey 명시: KRX idx OpenAPI 직접. "
+            "직접 호출 시 idx 카테고리 권한 별도 신청 (sto 종목 키와 분리)."
+        ),
+        example='gather("krxIndex", "close", market="KOSPI", start=, end=)',
+        targetRequired=False,
+        targetType="columnName",
+    ),
+    "dartDoc": _GatherAxisEntry(
+        label="DART 공시 원문",
+        description=(
+            "14자리 rcept_no 만으로 DART 공시 viewer 의 원문 본문 fetch (무인증). "
+            "공시 인덱스 페이지에서 sub-doc 목차를 받고 각 섹션 HTML 을 텍스트 "
+            "(테이블 마크다운 보존) 로 변환. API key 불필요 — providers/dart/openapi "
+            "(key 기반 OpenDART) 와 분리된 viewer 단건 fetch 진입점."
+        ),
+        example='gather("dartDoc", "20240315000123")',
+        targetType="rceptNo",
+    ),
+    "calendar": _GatherAxisEntry(
+        label="catalyst 일정",
+        description=(
+            "다가오는 정기공시 (사업/반기/분기보고서) due date 추론. "
+            "한국 fiscal cycle (FY=calendar year) 가정 + DART disclosure 시계열에서 last 보고서 → next due. "
+            "P0: KR 정기공시만. AGM·만기·컨센서스·EDGAR 8-K 미포함 (P1+). "
+            "API 키: DART_API_KEY (Company.disclosure 사용)."
+        ),
+        example='gather("calendar", "005930", horizon_days=30) / gather("calendar", ["005930", "000660"])',
+        targetType="stockCode",
+    ),
+}
+
+
+# axis 별 필요한 API 키 — _guide() 와 test_gatherAxisContract 가 공통 소비.
+# 값이 "불필요" 가 아니면 환경변수에 키가 설정돼야 axis 호출 가능.
+_API_KEY_INFO: dict[str, str] = {
+    "price": "불필요",
+    "flow": "불필요",
+    "macro": "불필요 (기본 HF SSOT, apiKey 명시 시 ECOS/FRED 직접 호출)",
+    "news": "불필요",
+    "sector": "불필요",
+    "insider": "DART_API_KEY",
+    "ownership": "불필요",
+    "peers": "불필요",
+    "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
+    "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
+    "dartDoc": "불필요 (viewer 무인증 단건 fetch)",
+    "calendar": "DART_API_KEY (Company.disclosure 사용)",
+}
+
+_ALIASES: dict[str, str] = {
+    "주가": "price",
+    "수급": "flow",
+    "거시": "macro",
+    "매크로": "macro",
+    "뉴스": "news",
+    "업종": "sector",
+    "내부자": "insider",
+    "지분": "ownership",
+    "피어": "peers",
+    "동종업종": "peers",
+    "일정": "calendar",
+    "캘린더": "calendar",
+}
+
+
+# 시장 지수 심볼 매핑 (네이버 차트 API 직접 수집).
+# 정식 표기 = 네이버 fchart 가 받는 외부 API 심볼 (uppercase). 사용자는 정식 표기
+# 또는 명시 한글 alias 만 사용한다. ``"kospi"`` 같은 case alias 는 인정하지 않음
+# (consistency_no_alias 원칙 — silent case-insensitive lookup 은 alias).
+_INDEX_SYMBOLS: dict[str, str] = {
+    # 정식 외부 API 심볼 (self-map — registry 등록 표시)
+    "KOSPI": "KOSPI",
+    "KOSDAQ": "KOSDAQ",
+    "KPI200": "KPI200",
+    # 명시 한글 alias
+    "코스피": "KOSPI",
+    "코스닥": "KOSDAQ",
+    "코스피200": "KPI200",
+}
+
+
+def _fetchNaverIndex(symbol: str, limit: int = 500) -> pl.DataFrame:
+    """네이버 차트 API로 시장 지수 OHLCV 수집.
+
+    Parameters
+    ----------
+    symbol : str
+        지수 심볼 (예: ``"KOSPI"``, ``"KOSDAQ"``, ``"KPI200"``).
+    limit : int
+        요청 거래일 수 (일). 기본 500.
+
+    Returns
+    -------
+    pl.DataFrame
+        date : date — 거래일
+        open : float — 시가 (포인트)
+        high : float — 고가 (포인트)
+        low : float — 저가 (포인트)
+        close : float — 종가 (포인트)
+        volume : int — 거래량 (주)
+        데이터 없으면 빈 DataFrame.
+    """
+    import re
+
+    import httpx
+
+    url = f"https://fchart.stock.naver.com/sise.nhn?symbol={symbol}&timeframe=day&count={limit}&requestType=0"
+    r = httpx.get(url, timeout=15)
+    items = re.findall(r'data="([^"]+)"', r.text)
+    if not items:
+        return pl.DataFrame()
+
+    rows = []
+    for item in items:
+        parts = item.split("|")
+        if len(parts) < 6:
+            continue
+        try:
+            rows.append(
+                {
+                    "date": f"{parts[0][:4]}-{parts[0][4:6]}-{parts[0][6:8]}",
+                    "open": float(parts[1]),
+                    "high": float(parts[2]),
+                    "low": float(parts[3]),
+                    "close": float(parts[4]),
+                    "volume": int(parts[5]),
+                }
+            )
+        except (ValueError, IndexError):
+            continue
+
+    if not rows:
+        return pl.DataFrame()
+    return pl.DataFrame(rows).with_columns(pl.col("date").str.to_date("%Y-%m-%d"))
+
+
+def _resolveAxis(axis: str) -> str:
+    """축 이름/한글 별칭 → 정규 키.
+
+    consistency_no_alias 원칙: registry key 와 ``_ALIASES`` 의 명시적 한글 매핑만
+    유효. case-insensitive lookup (예: ``"PRICE"`` → ``"price"``) 는 silent
+    alias 라 인정하지 않는다 — 사용자가 정식 표기 (``"price"``, ``"krxIndex"``)
+    를 정확히 쓰도록 유도.
+
+    Parameters
+    ----------
+    axis : str
+        축 정식 이름 (registry key) 또는 명시 한글 별칭 (예: ``"price"``,
+        ``"주가"``, ``"krxIndex"``).
+
+    Returns
+    -------
+    str
+        정규 축 키 (예: ``"price"``, ``"krxIndex"``).
+
+    Raises
+    ------
+    ValueError
+        미등록 축 이름 또는 case 불일치 (``"Price"``, ``"krxindex"``) 일 때.
+    """
+    if axis in _AXIS_REGISTRY:
+        return axis
+    if axis in _ALIASES:
+        return _ALIASES[axis]
+    available = ", ".join(sorted(_AXIS_REGISTRY))
+    raise ValueError(
+        f"알 수 없는 gather 축: '{axis}'. 가용 축: {available}\n"
+        f"  사용법: c.gather() 또는 dartlab.gather() 로 전체 축 가이드를 확인하세요."
+    )
