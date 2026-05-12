@@ -438,10 +438,13 @@ def availableScans() -> list[str]:
     Returns:
         list[str] — 알파벳순 축 이름 목록 (예: ["account", "audit", ...]).
 
+    Raises:
+        없음 — 메모리 dict 정렬만 수행, 외부 호출 없음.
+
     Example::
 
-        from dartlab.scan import available_scans
-        available_scans()   # ['account', 'audit', 'capital', ...]
+        from dartlab.scan import availableScans
+        availableScans()   # ['account', 'audit', 'capital', ...]
     """
     return sorted(_AXIS_REGISTRY.keys())
 

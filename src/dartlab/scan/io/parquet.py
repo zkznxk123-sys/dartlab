@@ -201,6 +201,17 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     pl.DataFrame
         keep_cols 중 존재하는 컬럼만 포함한 전종목 결과.
         데이터 없으면 빈 DataFrame.
+
+    Raises
+    ------
+    없음 — polars.PolarsError · OSError 는 내부에서 흡수해 빈 DataFrame 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import scanParquets
+    >>> df = scanParquets("majorHolder", ["stockCode", "year", "지분율"])
+    >>> df.height > 0
+    True
     """
     # 1순위: 프리빌드 scan parquet (없으면 자동 다운로드 시도)
     scanDir = _ensureScanData()
@@ -281,6 +292,17 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
     -------
     float | None
         첫 매칭 계정의 금액 (원). 매칭 없으면 None.
+
+    Raises
+    ------
+    없음 — row.get 기본값 + parseNumStr None 폴백.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import extractAccount
+    >>> rev = extractAccount(subDf, {"Revenue"}, {"매출액"})
+    >>> rev
+    1000000
     """
     for row in sub.iter_rows(named=True):
         aid = row.get("account_id", "")
@@ -308,6 +330,17 @@ def findLatestYear(raw: pl.DataFrame, checkCol: str, minCount: int = 500) -> str
     -------
     str | None
         가장 최근 유효 연도 문자열 (예: "2024"). 없으면 None.
+
+    Raises
+    ------
+    KeyError
+        ``raw`` 에 ``"year"`` 컬럼 또는 ``check_col`` 컬럼이 없을 때.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import findLatestYear
+    >>> findLatestYear(rawDf, "매출액", minCount=500)
+    "2024"
     """
     years_desc = sorted(raw["year"].unique().to_list(), reverse=True)
     for y in years_desc:
@@ -333,6 +366,17 @@ def pickBestQuarter(df: pl.DataFrame) -> pl.DataFrame:
     -------
     pl.DataFrame
         가장 선호하는 분기 1개만 남긴 DataFrame.
+
+    Raises
+    ------
+    KeyError
+        ``df`` 에 ``"quarter"`` 컬럼이 없을 때.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import pickBestQuarter
+    >>> pickBestQuarter(df)["quarter"].unique().to_list()
+    ["2분기"]
     """
     quarters = df["quarter"].unique().to_list()
     best = sorted(quarters, key=lambda q: QUARTER_ORDER.get(q, 99))
@@ -346,6 +390,17 @@ def loadListing():
     -------
     pl.DataFrame
         종목코드, 종목명, 업종 등 상장사 기본 정보.
+
+    Raises
+    ------
+    network.scanner.loadListing 가 발생시키는 예외 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import loadListing
+    >>> df = loadListing()
+    >>> "stockCode" in df.columns
+    True
 
     Notes
     -----
@@ -368,6 +423,18 @@ def parseDateYear(s) -> int | None:
     -------
     int | None
         연도 (예: 2021). 파싱 불가면 None.
+
+    Raises
+    ------
+    없음 — ValueError 는 내부에서 흡수해 None 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import parseDateYear
+    >>> parseDateYear("2021.06.15")
+    2021
+    >>> parseDateYear(None)
+    None
     """
     if s is None:
         return None
@@ -409,6 +476,17 @@ def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol
     -------
     pl.DataFrame
         각 종목의 자기 최신 연도 행만 남긴 DataFrame.
+
+    Raises
+    ------
+    없음 — 누락 컬럼 시 입력 그대로 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import filterLatestPerStock
+    >>> latest = filterLatestPerStock(df)
+    >>> latest.group_by("stockCode").len()["len"].max()
+    1
     """
     if target.is_empty() or scCol not in target.columns or yearCol not in target.columns:
         return target
@@ -504,6 +582,17 @@ def loadValuationSnapshot() -> tuple[pl.DataFrame | None, datetime | None]:
     snapshotAt : datetime | None
         수집 시각 (UTC). 파일 부재 시 ``None``.
 
+    Raises
+    ------
+    없음 — polars.PolarsError · OSError 는 내부에서 흡수해 ``(None, None)`` 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import loadValuationSnapshot
+    >>> frame, ts = loadValuationSnapshot()
+    >>> frame is None or "stockCode" in frame.columns
+    True
+
     Notes
     -----
     - 호출자는 ``None`` 인 경우 네이버 실시간 수집 (``_fetchAll``) 으로 fallback 한다.
@@ -560,6 +649,17 @@ def scanFinanceParquets(
     -------
     dict[str, float]
         {종목코드: 금액(원)} — 종목별 최신 연도 첫 매칭 계정의 값.
+
+    Raises
+    ------
+    없음 — polars.PolarsError · OSError 는 내부에서 흡수해 per-file fallback 으로 전환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.io.parquet import scanFinanceParquets
+    >>> revMap = scanFinanceParquets("IS", {"Revenue"}, {"매출액"})
+    >>> revMap.get("005930")  # 삼성전자 최신년 매출액
+    250000000000000
     """
     sj_divs = [statement] if statement != "IS" else ["IS", "CIS"]
 
