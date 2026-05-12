@@ -42,11 +42,12 @@ def _fiscalMonthMap() -> dict[str, int]:
 
     데이터 소스 우선순위 (12월 결산도 12 로 명시 포함):
 
-    1. listing (KIND) ``결산월`` 컬럼 — 상장사 권위 SSOT
-    2. raw finance parquet 의 사업보고서 (``reprt_code='11011'``) ``rcept_no``
-       첫 8자 (접수일자) → 접수월 - 3 (mod 12) = 결산월. listing 미포함 종목
-       (비상장·리츠·SPAC·신규상장) 보강.
-    3. fallback: 12 (12월 결산 보수 가정 — 가장 흔한 케이스)
+    1. DART corp_profile prefetch (``data/dart/scan/corpProfile.parquet``) —
+       OpenDART ``companyInfo()`` 의 ``acc_mt`` 권위 SSOT (Phase 3, P-S11)
+    2. listing (KIND) ``결산월`` 컬럼 — 상장사 보조 SSOT
+    3. raw finance parquet 의 사업보고서 (``reprt_code='11011'``) ``rcept_no``
+       첫 8자 (접수일자) → 접수월 - 3 (mod 12) = 결산월. 1·2 미포함 종목 보강.
+    4. fallback: 12 (12월 결산 보수 가정 — 가장 흔한 케이스)
 
     Returns
     -------
@@ -59,12 +60,15 @@ def _fiscalMonthMap() -> dict[str, int]:
     >>> fm = _fiscalMonthMap()
     >>> fm["005930"]   # 삼성전자 (12월 결산)
     12
-    >>> fm["448730"]   # 삼성FN리츠 (10월 결산, listing 누락→raw 추정)
+    >>> fm["448730"]   # 삼성FN리츠 (10월 결산, listing 누락→raw 추정 또는 prefetch)
     10
     """
     result: dict[str, int] = {}
 
-    # 1. listing 기반 (12월 포함 모든 결산월)
+    # 1. DART corp_profile prefetch (권위 SSOT)
+    result.update(_loadCorpProfileMap())
+
+    # 2. listing 기반 (12월 포함 모든 결산월)
     try:
         from dartlab.gather.krx.listing import getKindList
 
@@ -73,7 +77,7 @@ def _fiscalMonthMap() -> dict[str, int]:
             if "결산월" in li.columns and "종목코드" in li.columns:
                 for row in li.select(["종목코드", "결산월"]).iter_rows():
                     code, month_str = row
-                    if not isinstance(month_str, str):
+                    if code in result or not isinstance(month_str, str):
                         continue
                     try:
                         m = int(month_str.replace("월", ""))
@@ -84,7 +88,7 @@ def _fiscalMonthMap() -> dict[str, int]:
     except (ImportError, FileNotFoundError, OSError):
         pass
 
-    # 2. raw 사업보고서 접수일 기반 — listing 미포함 종목 보강
+    # 3. raw 사업보고서 접수일 기반 — listing 미포함 종목 보강
     finDir = _financeDir()
     if finDir.exists():
         for pf in finDir.glob("*.parquet"):
@@ -94,6 +98,50 @@ def _fiscalMonthMap() -> dict[str, int]:
             estimated = _estimateFiscalMonthFromAnnualFiling(pf)
             result[code] = estimated if estimated is not None else 12
 
+    return result
+
+
+def _loadCorpProfileMap() -> dict[str, int]:
+    """corpProfile.parquet → stockCode → acc_mt 매핑 (권위 SSOT, Phase 3).
+
+    DART OpenAPI ``companyInfo()`` 의 ``acc_mt`` (결산월) 를 prefetch 한 정적
+    dataset. ``scripts/build/buildCorpProfile.py`` 가 corp_code 전체 list 를
+    돌며 API 호출 후 ``data/dart/scan/corpProfile.parquet`` 으로 저장한다.
+
+    Returns
+    -------
+    dict[str, int]
+        {stockCode: 결산월 1-12}. 파일 없거나 파싱 실패 시 빈 dict.
+
+    Notes
+    -----
+    - corpProfile.parquet 컬럼 스키마: ``corp_code`` · ``stockCode`` ·
+      ``corp_name`` · ``acc_mt``.
+    - ``stockCode`` 가 빈 문자열 (비상장 corp_code 일부) 인 row 는 제외.
+    """
+    from dartlab.core.dataLoader import _dataDir
+
+    profilePath = Path(_dataDir("scan")) / "corpProfile.parquet"
+    if not profilePath.exists():
+        return {}
+
+    try:
+        df = pl.scan_parquet(str(profilePath)).select(["stockCode", "acc_mt"]).collect(engine="streaming")
+    except (pl.exceptions.PolarsError, OSError):
+        return {}
+
+    result: dict[str, int] = {}
+    for row in df.iter_rows(named=True):
+        code = row.get("stockCode")
+        accMt = row.get("acc_mt")
+        if not code or not accMt:
+            continue
+        try:
+            m = int(str(accMt).replace("월", "").strip())
+        except (ValueError, AttributeError):
+            continue
+        if 1 <= m <= 12:
+            result[code] = m
     return result
 
 

@@ -194,3 +194,52 @@ def test_sanityCheckCalendarYears_silent_on_normal_data(tmp_path, caplog):
 
     sanity_warns = [r for r in caplog.records if "finance/sanity" in r.message]
     assert not sanity_warns, f"정상 데이터에 경고 발생: {sanity_warns}"
+
+
+@pytest.mark.unit
+def test_loadCorpProfileMap_missingFile_returnsEmpty(tmp_path, monkeypatch):
+    """corpProfile.parquet 없으면 빈 dict (다른 SSOT fallback 으로 위임)."""
+    from dartlab.scan.builders.kr.core import _loadCorpProfileMap
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda _cat: tmp_path)
+    assert _loadCorpProfileMap() == {}
+
+
+@pytest.mark.unit
+def test_loadCorpProfileMap_validParquet_extractsMapping(tmp_path, monkeypatch):
+    """corpProfile.parquet 가 있으면 stockCode → acc_mt 매핑 정확 추출."""
+    from dartlab.scan.builders.kr.core import _loadCorpProfileMap
+
+    pf = tmp_path / "corpProfile.parquet"
+    pl.DataFrame(
+        {
+            "corp_code": ["00126380", "00164742", "00149293"],
+            "stockCode": ["005930", "000660", ""],  # 비상장 corp_code 제외 확인
+            "corp_name": ["삼성전자", "SK하이닉스", "ABC법인"],
+            "acc_mt": ["12", "12", "06"],
+        }
+    ).write_parquet(str(pf))
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda _cat: tmp_path)
+    result = _loadCorpProfileMap()
+    assert result == {"005930": 12, "000660": 12}  # stockCode 빈 row 는 제외
+
+
+@pytest.mark.unit
+def test_loadCorpProfileMap_handlesAccMtVariants(tmp_path, monkeypatch):
+    """acc_mt 가 ``"12"`` · ``"12월"`` · ``" 12 "`` 같은 변형도 정상 파싱."""
+    from dartlab.scan.builders.kr.core import _loadCorpProfileMap
+
+    pf = tmp_path / "corpProfile.parquet"
+    pl.DataFrame(
+        {
+            "corp_code": ["A", "B", "C", "D"],
+            "stockCode": ["100001", "100002", "100003", "100004"],
+            "corp_name": ["x"] * 4,
+            "acc_mt": ["12", "12월", " 06 ", "invalid"],
+        }
+    ).write_parquet(str(pf))
+
+    monkeypatch.setattr("dartlab.core.dataLoader._dataDir", lambda _cat: tmp_path)
+    result = _loadCorpProfileMap()
+    assert result == {"100001": 12, "100002": 12, "100003": 6}  # invalid 는 skip
