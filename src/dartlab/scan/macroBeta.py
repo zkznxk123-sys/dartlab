@@ -58,6 +58,38 @@ def scanMacroBeta(
     >>> dartlab.Ecos().series("GDP", enrich=True)  # 사전 수집
     >>> df = dartlab.scan("macroBeta")
     >>> df.filter(pl.col("gdpBeta").abs() > 1.5).select(["stockCode", "gdpBeta"])
+
+    Capabilities:
+        - 전종목 매출 시계열 (연간) vs 거시 3 지표 (GDP/금리/환율) 변화율 간 OLS 베타 계산.
+          R² + 유효 관측치 수 로 신뢰도 등급. 최소 4 개년 연간 데이터 필요.
+        - GDP 베타 > 1.5 = 경기 민감주, < 0.5 = 방어주. 금리/환율 베타도 동일 해석.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("macroBeta")`` 호출 시 본 함수 dispatch. 경기 민감/방어주 분류,
+        매크로 시나리오 분석 source (금리 인상 시 영향 추정 등). 사전 ``Ecos().series("GDP",
+        enrich=True)`` 필요 — 거시지표 캐시 없으면 빈 DataFrame.
+
+    Guide:
+        - 4 개년 미만 시계열은 베타 계산 skip — 신규 상장주는 결과 없음.
+        - R² 낮으면 confidence "low" — 호출자가 신뢰도 명시 사용 권장.
+        - stockCode 인자로 단일 종목만 빠르게 계산도 가능.
+
+    When:
+        매크로 시나리오 분석 시. 경기 민감/방어주 watchlist 작성 시. 단일 종목이면 ``stockCode``
+        인자로.
+
+    How:
+        ``_ensureScanData`` → finance.parquet 매출 시계열 로드 → 연간 컬럼 추출 (4 개년+ 필수) →
+        Ecos 거시지표 캐시 로드 → 변화율 계산 → 종목별 OLS (매출 변화율 vs 3 macro 변화율) →
+        gdpBeta/rateBeta/fxBeta/R² + nObs + confidence 분기.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출)
+        - Ecos series cache (``Ecos().series("GDP", enrich=True)`` 사전 호출)
+
+    SeeAlso:
+        - :class:`dartlab.macro.Ecos` — 거시지표 source
+        - :func:`dartlab.scan.financial.profitability.scanProfitability` — 절대 수익성 (보완)
     """
     from dartlab.scan.io.parquet import _ensureScanData
 

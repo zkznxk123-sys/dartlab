@@ -69,6 +69,39 @@ def buildGraph(*, verbose: bool = True) -> dict:
     >>> from dartlab.scan.network import buildGraph
     >>> data = buildGraph(verbose=True)
     >>> len(data["cycles"])
+
+    Capabilities:
+        - 한국 상장사 출자 (invested_company) + 지분 (major_holder) 관계 → 법인/개인 엣지 +
+          순환출자 탐지 + 균형 분류 (재벌/독립) 통합 파이프라인. 6 단계 sequential.
+        - 종목코드↔회사명 매핑 + 노드 set + cycles list 가 후속 export 함수의 source.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("network")`` 호출 시 본 함수 dispatch. 상장사 관계 시각화, 재벌
+        구조 분석, 순환출자 watchlist source. 후속 `exportFull`/`exportEgo` 가 본 함수 결과로
+        JSON 페이로드 생성.
+
+    Guide:
+        - 6 단계 sequential — 한 단계 실패 시 후속도 불가 (try/except 없음, fail-fast).
+        - cycles max_length=6 — 6 단계 초과 순환은 noise 로 제외.
+        - docs ground truth (affiliateDocs) 가 분류 정확도 향상.
+
+    When:
+        대시보드 network 시각화 빌드 시. 재벌/그룹 관계 분석 시. 매 prebuild 사이클은 아니고
+        별도 cron 또는 수동 호출.
+
+    How:
+        loadListing → scanInvested → buildInvestEdges + deduplicateEdges → scanMajorHolders →
+        buildHolderEdges → all_node_ids 수집 (listing 교집합) → scanAffiliateDocs ground truth →
+        classifyBalanced → detectCycles → data dict 반환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{investedCompany,majorHolder,affiliateDocs?}.parquet``
+        - KRX listing (``loadListing``)
+
+    SeeAlso:
+        - :func:`exportFull` · :func:`exportEgo` · :func:`exportOverview` — 본 함수 결과 소비자
+        - :func:`detectCycles` — 순환출자 핵심 알고리즘
+        - :func:`classifyBalanced` — 재벌/독립 분류
     """
     t0 = time.perf_counter()
 

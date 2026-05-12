@@ -141,6 +141,34 @@ def scanInsider(*, verbose: bool = True) -> pl.DataFrame:
     >>> import dartlab
     >>> df = dartlab.scan("insider")
     >>> df.filter(pl.col("경영권안정성") == "불안정").select(["종목코드", "최대주주지분"])
+
+    Capabilities:
+        - 2 sub-scanner (_scanHolderChange / _scanTreasuryStock) → 종목별 최대주주 지분 + 변동
+          + 자기주식 보유 결합. 경영권 안정성 등급 (안정/보통/취약/위험/미확인/경고).
+        - 지분 -5 %p 이상 급감 시 "경고" 자동 격상.
+
+    AIContext:
+        Agent 가 ``dartlab.scan("insider")`` 호출 시 본 함수 dispatch. "최대주주 지분 급감" watchlist,
+        경영권 분쟁 사전 감지, M&A 표적 스크리닝 source.
+
+    Guide:
+        - 50 % 이상 = 안정, 30~50 % = 보통, 20~30 % = 취약, < 20 % = 위험.
+        - 자기주식 보유 자체는 안정성 판정에 직접 반영 안 됨 (capital axis 가 변동 분석).
+
+    When:
+        대시보드 insider 카드 빌드 시. 경영권 변동 cross-company 추적 시.
+
+    How:
+        ``_scanHolderChange`` (majorHolder 2 개년 최대주주 지분 비교) + ``_scanTreasuryStock``
+        (treasuryStock 자기주식 수) → all_codes union → 종목별 dict merge → stability 분기 +
+        대규모 변동 경고 → wide row.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{majorHolder,treasuryStock}.parquet`` (``buildReport``)
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 지배구조 종합 (지분율 포함)
+        - :func:`dartlab.scan.capital.scanCapital` — 자기주식 정책 분석 (취득/처분/소각)
     """
     holderMap = _scanHolderChange()
     treasuryMap = _scanTreasuryStock()

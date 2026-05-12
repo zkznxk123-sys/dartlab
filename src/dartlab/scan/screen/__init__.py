@@ -337,6 +337,22 @@ def scanScreen(target: str | None = None, *, spec: dict | None = None, verbose: 
     등)을 조합한 뒤, 후보만 Company/analysis 로 심층 검증한다.
     Verified: 기존 프리셋 경로와 spec 경로가 같은 `scan("screen")` 진입점을 공유한다.
 
+    Capabilities:
+        - 8 프리셋 (value/dividend/growth/risk/quality/cycle_recovery/cycle_defensive/all) 또는
+          custom spec 으로 멀티팩터 스크리닝. 프리셋은 여러 axis (profitability/quality/debt/
+          valuation 등) 결과를 교집합으로 줄임.
+        - spec 경로는 `executeScreenSpec` 위임 (`scan("fields")` 의 field 키 사용).
+
+    AIContext:
+        Agent 가 "저PBR + 부채 안전" 같은 multi-factor 질문 시 본 함수 dispatch. 프리셋
+        있으면 그것 사용 — 새 조건이면 spec 으로 직접 구성 (먼저 `scan("fields")` 로
+        field 가용성 확인 권장).
+
+    Requires:
+        - target 프리셋이 호출하는 모든 axis 의 prebuild parquet (profitability/quality/debt/
+          valuation/...)
+        - spec 사용 시 추가로 `scan("fields")` 카탈로그.
+
     See Also
     --------
     dartlab.scan("fields") : 조건에 사용할 field 검색.
