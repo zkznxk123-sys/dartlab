@@ -33,14 +33,15 @@ def _mock_kind_list(monkeypatch):
     """모든 테스트에서 getKindList()를 mock 데이터로 대체."""
     mock_df = _mock_listing_df()
 
-    # dartlab.gather is a lazy entry object; import the real module directly
-    from dartlab.gather.krx import listing as listing_mod
+    # listing 은 패키지 — registry 가 _memory/_memoryTs, fuzzy 가 _searchCache 보유
+    from dartlab.gather.krx.listing import fuzzy as fuzzy_mod
+    from dartlab.gather.krx.listing import registry as registry_mod
 
-    monkeypatch.setattr(listing_mod, "_memory", mock_df)
-    monkeypatch.setattr(listing_mod, "_memoryTs", 9999999999.0)  # 만료 안 됨
+    monkeypatch.setattr(registry_mod, "_memory", mock_df)
+    monkeypatch.setattr(registry_mod, "_memoryTs", 9999999999.0)  # 만료 안 됨
 
     # fuzzySearch 캐시 무효화 (새 데이터 반영)
-    monkeypatch.setattr(listing_mod, "_searchCache", None)
+    monkeypatch.setattr(fuzzy_mod, "_searchCache", None)
 
     yield
 
@@ -235,38 +236,38 @@ class TestFuzzySearch:
 
 class TestKoreanUtils:
     def test_decompose_char_hangul(self):
-        from dartlab.gather.krx.listing import _decomposeChar
+        from dartlab.gather.krx.listing.fuzzy import _decomposeChar
 
         assert _decomposeChar("삼") == "ㅅ"
         assert _decomposeChar("전") == "ㅈ"
         assert _decomposeChar("자") == "ㅈ"
 
     def test_decompose_char_already_jamo(self):
-        from dartlab.gather.krx.listing import _decomposeChar
+        from dartlab.gather.krx.listing.fuzzy import _decomposeChar
 
         assert _decomposeChar("ㅅ") == "ㅅ"
         assert _decomposeChar("ㄱ") == "ㄱ"
 
     def test_decompose_char_non_korean(self):
-        from dartlab.gather.krx.listing import _decomposeChar
+        from dartlab.gather.krx.listing.fuzzy import _decomposeChar
 
         assert _decomposeChar("A") == "A"
         assert _decomposeChar("1") == "1"
 
     def test_extract_chosung(self):
-        from dartlab.gather.krx.listing import _extractChosung
+        from dartlab.gather.krx.listing.fuzzy import _extractChosung
 
         assert _extractChosung("삼성") == "ㅅㅅ"
         assert _extractChosung("카카오") == "ㅋㅋㅇ"
 
     def test_extract_chosung_mixed(self):
-        from dartlab.gather.krx.listing import _extractChosung
+        from dartlab.gather.krx.listing.fuzzy import _extractChosung
 
         result = _extractChosung("LG화학")
         assert result.startswith("LG")
 
     def test_is_all_chosung(self):
-        from dartlab.gather.krx.listing import _isAllChosung
+        from dartlab.gather.krx.listing.fuzzy import _isAllChosung
 
         assert _isAllChosung("ㅅㅅ") is True
         assert _isAllChosung("ㅅㅅㅈㅈ") is True
@@ -274,30 +275,30 @@ class TestKoreanUtils:
         assert _isAllChosung("AB") is False
 
     def test_levenshtein_identical(self):
-        from dartlab.gather.krx.listing import _levenshtein
+        from dartlab.gather.krx.listing.fuzzy import _levenshtein
 
         assert _levenshtein("abc", "abc") == 0
 
     def test_levenshtein_one_edit(self):
-        from dartlab.gather.krx.listing import _levenshtein
+        from dartlab.gather.krx.listing.fuzzy import _levenshtein
 
         assert _levenshtein("abc", "abd") == 1
         assert _levenshtein("abc", "ab") == 1
         assert _levenshtein("abc", "abcd") == 1
 
     def test_levenshtein_empty(self):
-        from dartlab.gather.krx.listing import _levenshtein
+        from dartlab.gather.krx.listing.fuzzy import _levenshtein
 
         assert _levenshtein("abc", "") == 3
         assert _levenshtein("", "") == 0
 
     def test_levenshtein_symmetric(self):
-        from dartlab.gather.krx.listing import _levenshtein
+        from dartlab.gather.krx.listing.fuzzy import _levenshtein
 
         assert _levenshtein("abc", "xyz") == _levenshtein("xyz", "abc")
 
     def test_levenshtein_korean(self):
-        from dartlab.gather.krx.listing import _levenshtein
+        from dartlab.gather.krx.listing.fuzzy import _levenshtein
 
         assert _levenshtein("카카오", "카카옹") == 1
         assert _levenshtein("삼성", "삼성전자") == 2
@@ -310,7 +311,7 @@ class TestKoreanUtils:
 
 class TestTableParser:
     def test_parse_simple_table(self):
-        from dartlab.gather.krx.listing import _TableParser
+        from dartlab.gather.krx.listing.registry import _TableParser
 
         parser = _TableParser()
         html = "<table><tr><th>종목코드</th><th>회사명</th></tr><tr><td>005930</td><td>삼성전자</td></tr></table>"
@@ -320,14 +321,14 @@ class TestTableParser:
         assert parser._rows[1] == ["005930", "삼성전자"]
 
     def test_parse_empty_table(self):
-        from dartlab.gather.krx.listing import _TableParser
+        from dartlab.gather.krx.listing.registry import _TableParser
 
         parser = _TableParser()
         parser.feed("<table></table>")
         assert len(parser._rows) == 0
 
     def test_parse_no_table(self):
-        from dartlab.gather.krx.listing import _TableParser
+        from dartlab.gather.krx.listing.registry import _TableParser
 
         parser = _TableParser()
         parser.feed("<div>No table here</div>")
@@ -343,9 +344,9 @@ class TestFetchKind:
     def test_returns_empty_on_timeout(self):
         import httpx
 
-        from dartlab.gather.krx.listing import _fetchKind
+        from dartlab.gather.krx.listing.registry import _fetchKind
 
-        with patch("dartlab.gather.krx.listing.httpx.post", side_effect=httpx.TimeoutException("timeout")):
+        with patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=httpx.TimeoutException("timeout")):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             assert df.height == 0
@@ -354,21 +355,21 @@ class TestFetchKind:
     def test_returns_empty_on_connect_error(self):
         import httpx
 
-        from dartlab.gather.krx.listing import _fetchKind
+        from dartlab.gather.krx.listing.registry import _fetchKind
 
-        with patch("dartlab.gather.krx.listing.httpx.post", side_effect=httpx.ConnectError("refused")):
+        with patch("dartlab.gather.krx.listing.registry.httpx.post", side_effect=httpx.ConnectError("refused")):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             assert df.height == 0
 
     def test_parses_valid_html(self):
-        from dartlab.gather.krx.listing import _fetchKind
+        from dartlab.gather.krx.listing.registry import _fetchKind
 
         html = "<table><tr><th>회사명</th><th>종목코드</th></tr><tr><td>테스트</td><td>123456</td></tr></table>"
         mock_response = MagicMock()
         mock_response.content = html.encode("euc-kr")
 
-        with patch("dartlab.gather.krx.listing.httpx.post", return_value=mock_response):
+        with patch("dartlab.gather.krx.listing.registry.httpx.post", return_value=mock_response):
             df = _fetchKind()
             assert isinstance(df, pl.DataFrame)
             if df.height > 0:
@@ -382,7 +383,7 @@ class TestFetchKind:
 
 class TestSearchCache:
     def test_cache_populated(self):
-        from dartlab.gather.krx.listing import _getSearchCache
+        from dartlab.gather.krx.listing.fuzzy import _getSearchCache
 
         cache = _getSearchCache()
         assert "names" in cache
@@ -391,7 +392,7 @@ class TestSearchCache:
         assert len(cache["names"]) == 6
 
     def test_cache_reused(self):
-        from dartlab.gather.krx.listing import _getSearchCache
+        from dartlab.gather.krx.listing.fuzzy import _getSearchCache
 
         cache1 = _getSearchCache()
         cache2 = _getSearchCache()

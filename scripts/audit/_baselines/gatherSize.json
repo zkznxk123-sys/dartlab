@@ -3,7 +3,5 @@
   "over_split": [
     "src/dartlab/gather/dart"
   ],
-  "under_split": [
-    "src/dartlab/gather/krx/listing.py"
-  ]
+  "under_split": []
 }
