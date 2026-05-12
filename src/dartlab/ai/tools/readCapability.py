@@ -14,7 +14,7 @@ def readCapability(query: str, *, limit: int = 8) -> ToolResult:
     """readCapability — TODO 한국어 동작 설명."""
     from dartlab.reference.capability.search import searchCapabilities
 
-    results = searchCapabilities(query or "", topK=max(1, int(limit or 8)), minScore=0.0)
+    results = searchCapabilities(query or "", limit=max(1, int(limit or 8)), minScore=0.0)
     refs: list[Ref] = []
     rows: list[dict] = []
     for apiRef, entry, score in results:
