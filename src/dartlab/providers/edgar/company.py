@@ -70,21 +70,64 @@ class _EdgarNotesWrapper:
         raise AttributeError(f"EDGAR notes에 '{name}' 카테고리 없음. 지원: {availableCategories()}")
 
     def all(self) -> pl.DataFrame | None:
-        """all — TODO 한국어 동작 설명."""
+        """전체 TextBlock 주석을 단일 DataFrame 으로 반환.
+
+        Returns:
+            TextBlock 주석 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.notes.all()
+        """
         return self._company.docs.notes(None)
 
     def keys(self) -> list[str]:
-        """데이터가 있는 카테고리 목록."""
+        """데이터가 있는 notes 카테고리 목록.
+
+        Returns:
+            카테고리 str 리스트 (예: ``["inventory", "leases", ...]``).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.notes.keys()
+        """
         return self._company.docs.noteCategories()
 
     def keysKr(self) -> list[str]:
-        """한국어 카테고리 목록."""
+        """한국어 라벨로 변환된 notes 카테고리 목록.
+
+        Returns:
+            한국어 라벨 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.notes.keysKr()
+        """
         from dartlab.providers.edgar.docs.notesParsers import CATEGORY_LABELS
 
         return [CATEGORY_LABELS.get(k, k) for k in self.keys()]
 
     def quarterly(self, query: str | None = None) -> pl.DataFrame | None:
-        """quarterly — TODO 한국어 동작 설명."""
+        """분기 단위 TextBlock 주석 검색 — ``notes()`` alias.
+
+        Args:
+            query: 검색어 (None 이면 전체).
+
+        Returns:
+            주석 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.notes.quarterly("revenue")
+        """
         return self._company.docs.notes(query)
 
 
@@ -218,8 +261,7 @@ _10Q_ORDER: dict[str, int] = {
 def _sortDocTopics(topics: list[str]) -> list[str]:
     """docs topics를 form별 → item 순으로 정렬."""
 
-    def sortKey(topic: str) -> tuple[int, int, str]:
-        """sortKey — TODO 한국어 동작 설명."""
+    def _sortKey(topic: str) -> tuple[int, int, str]:
         if "::" not in topic:
             return (99, 0, topic)
         formType, itemId = topic.split("::", 1)
@@ -229,11 +271,10 @@ def _sortDocTopics(topics: list[str]) -> list[str]:
         elif formType == "10-Q":
             itemOrder = _10Q_ORDER.get(itemId, 99)
         else:
-            # 20-F, 40-F 등 — itemId에서 숫자 추출하여 정렬
             itemOrder = _extractItemNumber(itemId)
         return (formOrder, itemOrder, itemId)
 
-    return sorted(topics, key=sortKey)
+    return sorted(topics, key=_sortKey)
 
 
 def _extractItemNumber(itemId: str) -> int:
@@ -432,7 +473,23 @@ class Company:
 
     @staticmethod
     def canHandle(code: str) -> bool:
-        """US ticker (영문 1~5자) 또는 CIK (숫자) 판별."""
+        """US ticker (영문 1~5자) 또는 CIK (숫자) 판별.
+
+        Args:
+            code: ticker 또는 CIK 후보 문자열.
+
+        Returns:
+            ``True`` — EDGAR provider 가 처리 가능. ``False`` — 다른 provider 시도.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company.canHandle("AAPL")
+            True
+            >>> Company.canHandle("0000320193")
+            True
+        """
         s = code.strip()
         if s.isdigit() and len(s) <= 10:
             return True
@@ -440,7 +497,18 @@ class Company:
 
     @staticmethod
     def priority() -> int:
-        """provider 우선순위 — 낮을수록 먼저 시도. EDGAR=20."""
+        """provider 우선순위 — 낮을수록 먼저 시도. EDGAR=20.
+
+        Returns:
+            우선순위 int (DART=10, EDGAR=20, EDINET=30).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> Company.priority()
+            20
+        """
         return 20
 
     def __init__(self, ticker: str):
@@ -606,6 +674,9 @@ class Company:
         Returns:
             "MM-DD" 형식 문자열, 데이터 없으면 None.
 
+        Raises:
+            없음 (내부 IO 예외는 잡아서 None 반환).
+
         Example::
 
             c = Company("AAPL")
@@ -682,6 +753,9 @@ class Company:
         Returns:
             str — ticker 심볼 (예: "AAPL").
 
+        Raises:
+            없음.
+
         Example::
 
             c = Company("AAPL")
@@ -712,6 +786,9 @@ class Company:
 
         Returns:
             str — "US".
+
+        Raises:
+            없음.
 
         Example::
 
@@ -744,6 +821,9 @@ class Company:
         Returns:
             str — "USD".
 
+        Raises:
+            없음.
+
         Example::
 
             c = Company("AAPL")
@@ -753,7 +833,21 @@ class Company:
 
     @property
     def quant(self):
-        """주가 기술적 분석 — dual access (Phase 8 A3)."""
+        """주가 기술적 분석 — dual access (Phase 8 A3).
+
+        ``c.quant`` (object) 또는 ``c.quant(axis, ...)`` (call) 양식 모두 지원.
+
+        Returns:
+            ``CallableAccessor`` — ``c.quant.SMA(...)`` 또는 ``c.quant("SMA")`` 사용.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.quant()              # 사용 가능한 축 목록
+            >>> c.quant("returns")     # 주가 수익률
+        """
         from dartlab.core.dualAccess import CallableAccessor
 
         if "_quantAccessor" not in self._cache:
@@ -772,7 +866,24 @@ class Company:
         return q(axis, self.stockCode, **kwargs)
 
     def macro(self, axis=None, target=None, *, overrides: dict | None = None, **kwargs):
-        """시장 매크로 분석 — EDGAR 회사는 US 시장 위임 (Phase 8 A2)."""
+        """시장 매크로 분석 — EDGAR 회사는 US 시장 위임 (Phase 8 A2).
+
+        Args:
+            axis: 매크로 축 (None 이면 가이드).
+            target: 분석 target.
+            overrides: 매크로 override dict.
+            **kwargs: 축별 추가 인자.
+
+        Returns:
+            ``Macro()`` 결과 객체.
+
+        Raises:
+            ValueError: 미지원 axis.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.macro("yield_curve")
+        """
         from dartlab.macro import Macro
 
         return Macro()(axis, target, market="US", overrides=overrides, **kwargs)
@@ -780,28 +891,78 @@ class Company:
     # ── Phase 10 H2: story 2차 가공 직접 노출 ──
 
     def causalWeights(self) -> list[dict]:
-        """6막 인과 가중치 (Phase 9 B2)."""
+        """6막 인과 가중치 (Phase 9 B2).
+
+        Returns:
+            인과 weight dict 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.causalWeights()
+        """
         import importlib
 
         buildCausalWeights = importlib.import_module("dartlab.story.narrative").buildCausalWeights
         return buildCausalWeights(self, {})
 
     def valuationImpact(self) -> dict:
-        """인과 체인 → DCF override 힌트 (Phase 9 B3)."""
+        """인과 체인 → DCF override 힌트 (Phase 9 B3).
+
+        Returns:
+            DCF override dict (revenueGrowth, margin, wacc 등).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.valuationImpact()
+        """
         import importlib
 
         _narrative = importlib.import_module("dartlab.story.narrative")
         return _narrative.buildValuationImpact(_narrative.buildCausalWeights(self, {}))
 
     def storyTree(self, *, basePeriod: str | None = None) -> dict:
-        """3 trajectory DCF (Phase 10 G2)."""
+        """3 trajectory DCF (Phase 10 G2).
+
+        Args:
+            basePeriod: 기준 fiscal period. None 이면 최신.
+
+        Returns:
+            ``{base, bull, bear}`` trajectory dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.storyTree()
+        """
         import importlib
 
         buildStoryTree = importlib.import_module("dartlab.story.storyTree").buildStoryTree
         return buildStoryTree(self, basePeriod=basePeriod)
 
     def narrativeDiff(self, *, claims: list[str] | None = None) -> list[dict]:
-        """claim 제거 시 dFV 변화 (Phase 10 G3)."""
+        """claim 제거 시 dFV 변화 (Phase 10 G3).
+
+        Args:
+            claims: 영향 분석 대상 claim 리스트. None 이면 전체.
+
+        Returns:
+            ``[{claim, dFV, ...}]`` 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.narrativeDiff(claims=["margin_expansion"])
+        """
         import importlib
 
         computeImpact = importlib.import_module("dartlab.story.narrativeDiff").computeImpact
@@ -813,7 +974,18 @@ class Company:
     def listing(*, forceRefresh: bool = False) -> pl.DataFrame:
         """NASDAQ/NYSE 상장 기업 목록 (EDGAR universe).
 
-        forceRefresh 는 DartCompany.listing 과 시그니처 동기 — 현재 EDGAR 는 자동 캐시.
+        Args:
+            forceRefresh: 캐시 무시 — 현재 EDGAR 는 자동 캐시라 noop.
+                DartCompany.listing 과 시그니처 동기 목적.
+
+        Returns:
+            종목코드/회사명/시장구분/cik 컬럼 DataFrame.
+
+        Raises:
+            FileNotFoundError: EDGAR universe parquet 부재.
+
+        Example:
+            >>> Company.listing().head()
         """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
@@ -837,6 +1009,9 @@ class Company:
 
         Returns:
             종목코드/회사명/시장구분/cik 컬럼 DataFrame.
+
+        Raises:
+            FileNotFoundError: EDGAR universe parquet 부재.
 
         Example:
             >>> Company.search("apple", limit=10)
@@ -905,6 +1080,9 @@ class Company:
         Returns:
             None — 브라우저가 자동으로 열림.
 
+        Raises:
+            OSError: 포트 점유 시.
+
         Example::
 
             c = Company("AAPL")
@@ -965,6 +1143,9 @@ class Company:
         Returns:
             pl.DataFrame — topic | blockType | blockOrder | 2024 | 2023 | ... 또는 None.
 
+        Raises:
+            없음.
+
         Example::
 
             c = Company("AAPL")
@@ -982,7 +1163,21 @@ class Company:
 
     @property
     def story(self):
-        """재무 검토 보고서 — dual access."""
+        """재무 검토 보고서 — dual access.
+
+        ``c.story`` (Story 객체) 또는 ``c.story(section=...)`` (call) 양식 모두 지원.
+
+        Returns:
+            ``CallableAccessor`` — 14 섹션 보고서 빌더.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.story()              # 전체 검토서
+            >>> c.story("수익성")       # 특정 섹션
+        """
         from dartlab.core.dualAccess import CallableAccessor
 
         if "_storyAccessor" not in self._cache:
@@ -1066,7 +1261,19 @@ class Company:
 
     @property
     def analysis(self):
-        """분석 엔진 실행 — dual access."""
+        """분석 엔진 실행 — dual access.
+
+        Returns:
+            ``CallableAccessor`` — 22 축 분석 엔트리.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.analysis()                            # 축 목록
+            >>> c.analysis("financial", "수익성")        # 수익성 분석
+        """
         from dartlab.core.dualAccess import CallableAccessor
 
         if "_analysisAccessor" not in self._cache:
@@ -1135,8 +1342,18 @@ class Company:
     def validateStory(self, overrides: dict | None = None) -> dict:
         """Damodaran 스토리 검증 — Possible / Plausible / Probable.
 
+        Args:
+            overrides: DCF override dict (선택).
+
         Returns:
-            dict {precedents, plausibility, rules, overall}
+            dict {precedents, plausibility, rules, overall}.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.validateStory()
         """
         import importlib
 
@@ -1164,7 +1381,18 @@ class Company:
 
     @property
     def credit(self):
-        """독립 신용평가 — dual access."""
+        """독립 신용평가 — dual access.
+
+        Returns:
+            ``CallableAccessor`` — dCR 20단계 등급 빌더.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.credit()
+        """
         from dartlab.core.dualAccess import CallableAccessor
 
         if "_creditAccessor" not in self._cache:
@@ -1226,6 +1454,9 @@ class Company:
                 지표별 컬럼 : float — FRED 거시지표 값
             데이터 없으면 None.
 
+        Raises:
+            httpx.HTTPError: 외부 API 호출 실패.
+
         Example::
 
             c = Company("AAPL")
@@ -1245,6 +1476,19 @@ class Company:
         현재 정기공시 cycle 추론은 KR DART 전용 (분기/반기/사업보고서 패턴 기반).
         SEC 의 10-K/10-Q 패턴은 별도 추론기 필요 — 미구현. 빈 DataFrame 반환.
         DartCompany.calendar 와 시그니처 일치 (CompanyProtocol 일관성).
+
+        Args:
+            horizonDays: 미래 horizon (기본 30 일). 현재 미사용.
+
+        Returns:
+            빈 DataFrame (calendar SCHEMA 형식).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.calendar(horizonDays=60)
         """
         from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA
 
@@ -1274,6 +1518,9 @@ class Company:
 
         Returns:
             pl.DataFrame — docId | filedAt | formType | ... 또는 None.
+
+        Raises:
+            없음.
 
         Example::
 
@@ -1312,6 +1559,9 @@ class Company:
 
         Returns:
             저장된 parquet 행 수. 실패 시 0.
+
+        Raises:
+            없음 (내부 IO 예외는 잡아서 0 반환).
 
         Example::
 
@@ -1381,6 +1631,9 @@ class Company:
         Returns:
             pl.DataFrame — docId | filedAt | title | formType | docUrl | ...
 
+        Raises:
+            httpx.HTTPError: SEC EDGAR API 호출 실패.
+
         Example::
 
             c = Company("AAPL")
@@ -1435,6 +1688,9 @@ class Company:
 
         Returns:
             pl.DataFrame — docId | filedAt | title | formType | docUrl | ...
+
+        Raises:
+            httpx.HTTPError: SEC EDGAR API 호출 실패.
 
         Example::
 
@@ -1565,6 +1821,9 @@ class Company:
         Returns:
             dict — docId, market, title, docUrl, raw, text, truncated 키 포함.
 
+        Raises:
+            ValueError: filing URL/accessionNo 부재.
+
         Example::
 
             c = Company("AAPL")
@@ -1650,6 +1909,9 @@ class Company:
 
         Returns:
             pl.DataFrame — topic | source | blocks | periods.
+
+        Raises:
+            없음.
 
         Example::
 
@@ -2249,6 +2511,9 @@ class Company:
         Returns:
             pl.DataFrame — 변경 요약/이력/줄단위 diff. 없으면 None.
 
+        Raises:
+            없음.
+
         Example::
 
             c = Company("AAPL")
@@ -2307,6 +2572,9 @@ class Company:
         Returns:
             pl.DataFrame — topic | period | keyword | count. 없으면 None.
 
+        Raises:
+            없음.
+
         Example::
 
             c = Company("AAPL")
@@ -2354,6 +2622,9 @@ class Company:
         Returns:
             pl.DataFrame — 뉴스 제목, 날짜, URL 등 포함.
 
+        Raises:
+            httpx.HTTPError: 외부 뉴스 API 호출 실패.
+
         Example::
 
             c = Company("AAPL")
@@ -2396,6 +2667,9 @@ class Company:
 
         Returns:
             pl.DataFrame — topic | score | summary 등. 없으면 None.
+
+        Raises:
+            없음.
 
         Example::
 
@@ -2496,17 +2770,51 @@ class Company:
 
     @property
     def contextSlices(self) -> pl.DataFrame | None:
-        """contextSlices — TODO 한국어 동작 설명."""
+        """LLM context window 단위 슬라이스.
+
+        Returns:
+            슬라이스 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.contextSlices
+        """
         return self._docs.contextSlices if hasattr(self._docs, "contextSlices") else None
 
     @property
     def retrievalBlocks(self) -> pl.DataFrame | None:
-        """retrievalBlocks — TODO 한국어 동작 설명."""
+        """RAG 검색용 chunk 블록.
+
+        Returns:
+            ``block_id/text/topic/period`` 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.retrievalBlocks
+        """
         return self._docs.retrievalBlocks if hasattr(self._docs, "retrievalBlocks") else None
 
     @property
     def notes(self):
-        """주석 접근자 — EDGAR docs.notes를 래핑하여 DART Notes와 동일 인터페이스 제공."""
+        """주석 접근자 — EDGAR docs.notes 래핑.
+
+        ``c.notes("inventory")`` (call) 또는 ``c.notes.inventory`` (attr) 양식 지원.
+
+        Returns:
+            ``_EdgarNotesWrapper`` 인스턴스.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.notes("inventory")        # 카테고리별 구조화
+            >>> c.notes.keys()              # 사용 가능 카테고리
+        """
         from dartlab.core.memory import _CACHE_MISSING
 
         val = self._cache.get("_notes_wrapper", _CACHE_MISSING)
@@ -2517,7 +2825,17 @@ class Company:
 
     @property
     def facts(self) -> pl.DataFrame | None:
-        """topic × period 형태의 통합 facts 테이블."""
+        """topic × period 형태의 통합 facts 테이블.
+
+        Returns:
+            facts DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.facts
+        """
         return getattr(self._profileAccessor, "facts", None)
 
     # c.ratioSeries property 제거 (Plan v10 P1) — show("ratios") 사용
@@ -2525,12 +2843,33 @@ class Company:
 
     @property
     def rank(self):
-        """rank — TODO 한국어 동작 설명."""
-        return None  # US 피어 랭킹 미지원 (향후 구현 예정)
+        """피어 그룹 내 랭킹 — EDGAR 는 현재 미지원.
+
+        Returns:
+            None (US 피어 랭킹 미구현).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c.rank  # None
+        """
+        return None
 
     @property
     def sources(self) -> pl.DataFrame:
-        """데이터 소스 현황 — EDGAR는 docs + finance 2개 소스."""
+        """데이터 소스 현황 — EDGAR 는 docs + finance 2 소스.
+
+        Returns:
+            source/available/rows/cols/shape 컬럼 DataFrame.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.sources
+        """
         rows = []
         for src, accessor in [("docs", self._docs), ("finance", self._finance)]:
             available = accessor is not None
@@ -2542,7 +2881,24 @@ class Company:
     def table(
         self, topic: str, subtopic: str | None = None, *, numeric: bool = False, period: str | None = None
     ) -> Any:
-        """topic 데이터를 테이블 형태로 반환."""
+        """topic 데이터를 테이블 형태로 반환.
+
+        Args:
+            topic: topic 이름.
+            subtopic: subtopic (현재 미사용).
+            numeric: 숫자만 추출 (현재 미사용).
+            period: 특정 기간 필터.
+
+        Returns:
+            topic DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.table("BS")
+        """
         df = self.show(topic, period=period)
         if df is None:
             return None
@@ -2564,6 +2920,13 @@ class Company:
                 severity : str — 심각도 (critical/warning/ok)
                 amount : str — 감사 수수료 금액 (audit_fees 유형만)
             발견 없으면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.audit()
         """
         import re
 
@@ -2614,6 +2977,13 @@ class Company:
             내용 : str — 10-K 텍스트 요약 (최대 500자)
             view="all"/"market"이면 None (EDGAR 미지원).
             데이터 없으면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.governance()
         """
         if view in ("all", "market"):
             return None
@@ -2641,6 +3011,19 @@ class Company:
 
         10-K Item 1(Business)에서 직원 수를 추출하고, IS 매출 대비
         1인당 매출을 계산한다.
+
+        Args:
+            view: ``"all"``/``"market"`` 이면 None (EDGAR 미지원).
+
+        Returns:
+            종목코드/회사명/직원수/기간/1인당매출 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.workforce()
         """
         import re
 
@@ -2730,9 +3113,16 @@ class Company:
             retained_earnings : float — 이익잉여금 (USD)
             dividends_paid : float — 배당금 지급액 (USD, 있을 때만)
             view="all"/"market"이면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.capital()
         """
         if view in ("all", "market"):
-            return None  # 전종목 횡단비교 미지원
+            return None
         bs = self.show("BS")
         cf = self.show("CF")
         if bs is None:
@@ -2772,6 +3162,13 @@ class Company:
             current_liabilities : float — 유동부채 (USD)
             noncurrent_liabilities : float — 비유동부채 (USD)
             view="all"/"market"이면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c = Company("AAPL")
+            >>> c.debt()
         """
         if view in ("all", "market"):
             return None
