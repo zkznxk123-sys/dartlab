@@ -82,6 +82,13 @@ def downloadCompanyfactsBulk(
         로컬 freshness TTL. SEC companyfacts 는 매일 04:25 UTC 갱신되므로 24h 기본.
     progress : bool
         tqdm 진행률 표시 (stderr).
+
+    Raises:
+        httpx.HTTPError: SEC bulk endpoint 호출 실패.
+        OSError: 파일 쓰기 실패.
+
+    Example:
+        >>> downloadCompanyfactsBulk(force=False)
     """
     zipPath = _bulkDir() / "companyfacts.zip"
     tag = "companyfacts"
@@ -150,6 +157,20 @@ def extractCompanyfactsZip(zipPath: Path) -> Iterator[tuple[str, dict]]:
 
     zip 안의 파일명은 `CIK{10자리}.json` 형식. cik 는 0-padded 10자리 문자열로
     반환된다. 손상된 JSON 항목은 로깅 후 건너뛴다.
+
+    Args:
+        zipPath: companyfacts.zip 경로.
+
+    Yields:
+        ``(cik, payload)`` tuple.
+
+    Raises:
+        zipfile.BadZipFile: zip 손상.
+        OSError: 파일 IO 실패.
+
+    Example:
+        >>> for cik, payload in extractCompanyfactsZip(Path("companyfacts.zip")):
+        ...     print(cik)
     """
     with zipfile.ZipFile(zipPath, "r") as zf:
         for info in zf.infolist():
@@ -196,6 +217,13 @@ def convertBulkToParquets(
     Returns
     -------
     dict {"converted": N, "skipped": M, "failed": K, "stampSkipped": bool}
+
+    Raises:
+        FileNotFoundError: zip 경로 부재.
+        httpx.HTTPError: 자동 다운로드 시 SEC API 호출 실패.
+
+    Example:
+        >>> convertBulkToParquets(force=False)
     """
     if zipPath is None:
         zipPath = downloadCompanyfactsBulk(progress=progress)
@@ -366,10 +394,18 @@ def ensureFinanceParquet(stockCode: str, path: Path, *, refresh: bool = False) -
     - refresh=True + zip 갱신: 전체 재변환 (daily 갱신 반영)
     - refresh=True + zip 미갱신: 아무것도 안 함 (낭비 방지)
 
+    Args:
+        stockCode: 종목 ticker.
+        path: 결과 parquet 경로 (CIK 기반).
+        refresh: zip 갱신 시 재변환 여부.
+
     Raises
     ------
     FileNotFoundError
         zip 변환 후에도 해당 CIK parquet 이 없으면 (상장 폐지/비공시 기업).
+
+    Example:
+        >>> ensureFinanceParquet("AAPL", Path("data/edgar/finance/0000320193.parquet"))
     """
     zipPath = downloadCompanyfactsBulk(force=False)  # ETag + TTL 기반 재사용
     # convertBulkToParquets 자체가 zip mtime vs stamp 비교로 skip 가드.

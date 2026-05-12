@@ -118,7 +118,20 @@ def checkEdgarFreshness(ticker: str, *, forceCheck: bool = False) -> EdgarFreshn
 
     L1: TTL 게이트 (24h)
     L2: 로컬 파일 존재 확인
-    L3: SEC submissions API로 원격 accession_no 비교
+    L3: SEC submissions API 로 원격 accession_no 비교
+
+    Args:
+        ticker: 종목 ticker.
+        forceCheck: TTL 무시.
+
+    Returns:
+        ``EdgarFreshnessResult`` dataclass.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> checkEdgarFreshness("AAPL")
     """
     normalized = ticker.upper()
 
@@ -207,7 +220,21 @@ def scanEdgarMarketFreshness(
     tier: str = "sp500",
     limit: int | None = None,
 ) -> pl.DataFrame:
-    """tier 내 ticker 전체 freshness 일괄 스캔."""
+    """tier 내 ticker 전체 freshness 일괄 스캔.
+
+    Args:
+        tier: 종목 universe 계층 (``"sp500"``/``"nasdaq"``/...).
+        limit: 최대 ticker 수.
+
+    Returns:
+        ``ticker/cik/hasDocs/hasFinance/status`` 컬럼 DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> scanEdgarMarketFreshness(tier="sp500", limit=10)
+    """
     from dartlab.core.dataLoader import loadEdgarTargetUniverse
 
     universe = loadEdgarTargetUniverse(tier)
@@ -250,7 +277,21 @@ def collectEdgarMissing(
     *,
     categories: list[str] | None = None,
 ) -> dict[str, int]:
-    """누락된 데이터만 수집. 반환: {"finance": N, "docs": N}."""
+    """누락된 데이터만 수집.
+
+    Args:
+        ticker: 종목 ticker.
+        categories: ``["finance", "docs"]`` 기본.
+
+    Returns:
+        ``{"finance": N, "docs": N}`` 수집된 row 수 dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> collectEdgarMissing("AAPL")
+    """
     from dartlab.providers.edgar.openapi.batch import batchCollectEdgar
 
     cats = categories or ["finance", "docs"]

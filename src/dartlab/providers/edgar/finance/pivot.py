@@ -56,6 +56,12 @@ def buildTimeseries(
         (series, periods) 또는 None.
         series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}, "CI": {...}}
         periods = ["2020-Q1", "2020-Q2", ..., "2024-Q4"]
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildTimeseries("0000320193")
     """
     if edgarDir is None:
         edgarDir = _getEdgarDir()
@@ -194,6 +200,12 @@ def buildAnnual(
 
     Returns:
         (series, years) 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildAnnual("0000320193")
     """
     if edgarDir is None:
         edgarDir = _getEdgarDir()
@@ -799,8 +811,7 @@ def _pivotTimeseries(selected: pl.DataFrame) -> pl.DataFrame:
 
     periodCols = [c for c in pivoted.columns if c != "tag"]
 
-    def sortKey(col: str) -> tuple:
-        """sortKey — TODO 한국어 동작 설명."""
+    def _sortKey(col: str) -> tuple:
         parts = col.split("-")
         if len(parts) == 2:
             fy = int(parts[0])
@@ -808,7 +819,7 @@ def _pivotTimeseries(selected: pl.DataFrame) -> pl.DataFrame:
             return (fy, fpOrder.get(parts[1], 9))
         return (9999, 9)
 
-    sortedCols = sorted(periodCols, key=sortKey)
+    sortedCols = sorted(periodCols, key=_sortKey)
     return pivoted.select(["tag"] + sortedCols)
 
 
@@ -844,8 +855,7 @@ def _computeQ4(pivoted: pl.DataFrame, stmtType: str) -> pl.DataFrame:
 
     allCols = [c for c in pivoted.columns if c != "tag"]
 
-    def sortKey(col: str) -> tuple:
-        """sortKey — TODO 한국어 동작 설명."""
+    def _sortKey(col: str) -> tuple:
         parts = col.split("-")
         if len(parts) == 2:
             fy = int(parts[0])
@@ -853,7 +863,7 @@ def _computeQ4(pivoted: pl.DataFrame, stmtType: str) -> pl.DataFrame:
             return (fy, fpOrder.get(parts[1], 9))
         return (9999, 9)
 
-    sortedCols = sorted(allCols, key=sortKey)
+    sortedCols = sorted(allCols, key=_sortKey)
     return pivoted.select(["tag"] + sortedCols)
 
 
@@ -916,15 +926,14 @@ def _sanitizeQ4(pivoted: pl.DataFrame, years: list[str]) -> pl.DataFrame:
 
 
 def _sortPeriods(periods: set[str]) -> list[str]:
-    def sortKey(p: str) -> tuple:
-        """sortKey — TODO 한국어 동작 설명."""
+    def _sortKey(p: str) -> tuple:
         try:
             year, q = parsePeriod(p)
             return (int(year), q)
         except (ValueError, IndexError):
             return (9999, 9)
 
-    return sorted(periods, key=sortKey)
+    return sorted(periods, key=_sortKey)
 
 
 def _computeEquity(
@@ -1039,9 +1048,19 @@ def buildSce(
 ) -> pl.DataFrame | None:
     """BS equity 컴포넌트 연간 변화 + CF equity 거래로 SCE 구성.
 
+    Args:
+        cik: SEC CIK 번호.
+        edgarDir: EDGAR 데이터 디렉토리 (None 이면 config 기본).
+
     Returns:
         DataFrame with columns: component, label, {year columns...}
         각 셀은 해당 연도의 변화량 (당기말 - 전기말). 첫 연도는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildSce("0000320193")
     """
     annual = buildAnnual(cik, edgarDir=edgarDir)
     if annual is None:
@@ -1133,7 +1152,21 @@ def buildSce(
 
 
 def getSharesOutstanding(cik: str, *, edgarDir: Path | None = None) -> Optional[int]:
-    """SEC DEI에서 최신 발행주식수 추출."""
+    """SEC DEI 에서 최신 발행주식수 추출.
+
+    Args:
+        cik: SEC CIK 번호.
+        edgarDir: EDGAR 데이터 디렉토리 (None 이면 config 기본).
+
+    Returns:
+        발행주식수 int 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getSharesOutstanding("0000320193")
+    """
     if edgarDir is None:
         edgarDir = _getEdgarDir()
     path = edgarDir / f"{cik}.parquet"

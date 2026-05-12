@@ -134,7 +134,17 @@ CATEGORY_LABELS: dict[str, str] = {
 
 
 def availableCategories() -> list[str]:
-    """사용 가능한 notes 카테고리 목록."""
+    """사용 가능한 notes 카테고리 목록.
+
+    Returns:
+        카테고리 문자열 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> availableCategories()
+    """
     return list(_CATEGORY_TAGS.keys())
 
 
@@ -143,7 +153,21 @@ def extractAllNoteCategories(
     *,
     edgarDir: Path | None = None,
 ) -> dict[str, pl.DataFrame]:
-    """한 번의 parquet 로드로 모든 카테고리를 추출. 12번 I/O → 1번."""
+    """한 번의 parquet 로드로 모든 카테고리를 추출. 12번 I/O → 1번.
+
+    Args:
+        cik: SEC CIK 번호.
+        edgarDir: EDGAR 데이터 디렉토리.
+
+    Returns:
+        ``{category: DataFrame}`` dict. 데이터 부재 시 빈 dict.
+
+    Raises:
+        없음 (Polars 예외는 빈 dict 로 흡수).
+
+    Example:
+        >>> extractAllNoteCategories("0000320193")
+    """
     if edgarDir is None:
         from dartlab.providers.edgar.report import edgarFinancePath
 
@@ -204,6 +228,12 @@ def extractNoteCategory(
 
     Returns: tag, label, period(fy), value 컬럼.
     연도별로 피벗된 형태 (tag × fy).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractNoteCategory("0000320193", "inventory")
     """
     if category not in _CATEGORY_TAGS:
         return None

@@ -102,6 +102,12 @@ def sections(stockCode: str, *, sinceYear: int | None = None) -> pl.DataFrame | 
     Returns:
         (topic, blockType)(행) × period(열) DataFrame. 값은 텍스트(str).
         데이터 없으면 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sections("AAPL", sinceYear=2020)
     """
     df = loadData(stockCode, category="edgarDocs", sinceYear=sinceYear)
     if "period_key" not in df.columns:

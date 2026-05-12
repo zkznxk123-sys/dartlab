@@ -24,7 +24,22 @@ def loadTickers(
     *,
     refresh: bool = False,
 ) -> pl.DataFrame:
-    """SEC company_tickers를 다운로드하고 로컬 캐시된 DataFrame으로 반환."""
+    """SEC company_tickers 를 다운로드하고 로컬 캐시된 DataFrame 으로 반환.
+
+    Args:
+        client: EdgarClient 인스턴스.
+        refresh: 캐시 무시 + 강제 재다운로드.
+
+    Returns:
+        ``ticker/cik/title`` 컬럼 + listed/exchange/is_otc 옵션 DataFrame.
+
+    Raises:
+        EdgarApiError: SEC API 호출 실패.
+        OSError: 캐시 파일 쓰기 실패.
+
+    Example:
+        >>> loadTickers().head()
+    """
     path = _tickersPath()
     if path.exists() and not refresh:
         return pl.read_parquet(path)
@@ -64,7 +79,22 @@ def resolveIssuer(
     *,
     refresh: bool = False,
 ) -> dict[str, Any]:
-    """티커 또는 CIK를 기업 identity dict(ticker, cik, title 등)로 해석."""
+    """티커 또는 CIK 를 기업 identity dict 로 해석.
+
+    Args:
+        query: ticker 또는 CIK 문자열.
+        client: EdgarClient 인스턴스.
+        refresh: 캐시 무시.
+
+    Returns:
+        ``{ticker, cik, title, exchange, is_exchange_listed, is_otc}`` dict.
+
+    Raises:
+        ValueError: query 빈 문자열 또는 매칭 없음.
+
+    Example:
+        >>> resolveIssuer("AAPL")
+    """
     if not query or not str(query).strip():
         raise ValueError("tickerOrCik가 비어 있음")
 
@@ -115,6 +145,9 @@ def searchIssuers(
     Returns:
         매칭 DataFrame.
 
+    Raises:
+        없음.
+
     Example:
         >>> searchIssuers("apple", limit=10)
     """
@@ -155,6 +188,9 @@ def iterIssuers(
 
     Yields:
         issuer row dict.
+
+    Raises:
+        없음.
 
     Example:
         >>> for row in iterIssuers("apple", limit=10):

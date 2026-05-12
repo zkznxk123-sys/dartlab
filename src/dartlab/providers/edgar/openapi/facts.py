@@ -29,7 +29,21 @@ EDGAR_COMPANYFACTS_SCHEMA = {
 
 
 def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str, Any]:
-    """CIK로 SEC companyfacts API를 호출하여 전체 XBRL fact JSON을 반환."""
+    """CIK 로 SEC companyfacts API 를 호출하여 전체 XBRL fact JSON 을 반환.
+
+    Args:
+        cik: SEC CIK 번호.
+        client: EdgarClient 인스턴스 (None 이면 기본).
+
+    Returns:
+        companyfacts API 원본 JSON dict.
+
+    Raises:
+        EdgarApiError: API 호출 실패.
+
+    Example:
+        >>> getCompanyFactsJson("0000320193")
+    """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
     return api.getJson(f"{DEFAULT_BASE_URL}/api/xbrl/companyfacts/CIK{normalized}.json")
@@ -41,7 +55,23 @@ def getCompanyConceptJson(
     tag: str,
     client: EdgarClient | None = None,
 ) -> dict[str, Any]:
-    """특정 회사의 taxonomy/tag 조합에 대한 concept JSON을 반환."""
+    """특정 회사의 taxonomy/tag 조합에 대한 concept JSON 을 반환.
+
+    Args:
+        cik: SEC CIK 번호.
+        taxonomy: XBRL taxonomy (예: ``"us-gaap"``).
+        tag: XBRL tag (예: ``"Revenues"``).
+        client: EdgarClient 인스턴스.
+
+    Returns:
+        concept API 원본 JSON dict.
+
+    Raises:
+        EdgarApiError: API 호출 실패.
+
+    Example:
+        >>> getCompanyConceptJson("0000320193", "us-gaap", "Revenues")
+    """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
     return api.getJson(f"{DEFAULT_BASE_URL}/api/xbrl/companyconcept/CIK{normalized}/{taxonomy}/{tag}.json")
@@ -54,13 +84,43 @@ def getFrameJson(
     period: str,
     client: EdgarClient | None = None,
 ) -> dict[str, Any]:
-    """특정 기간의 전체 기업 XBRL frame 데이터를 JSON으로 반환."""
+    """특정 기간의 전체 기업 XBRL frame 데이터를 JSON 으로 반환.
+
+    Args:
+        taxonomy: XBRL taxonomy.
+        tag: XBRL tag.
+        unit: unit (예: ``"USD"``).
+        period: 기간 (예: ``"CY2024Q4I"``).
+        client: EdgarClient 인스턴스.
+
+    Returns:
+        frame API 원본 JSON dict (cross-sectional, 전 기업).
+
+    Raises:
+        EdgarApiError: API 호출 실패.
+
+    Example:
+        >>> getFrameJson("us-gaap", "Revenues", "USD", "CY2024Q4I")
+    """
     api = client or EdgarClient()
     return api.getJson(f"{DEFAULT_BASE_URL}/api/xbrl/frames/{taxonomy}/{tag}/{unit}/{period}.json")
 
 
 def companyFactsToRows(payload: dict[str, Any]) -> pl.DataFrame:
-    """companyfacts JSON을 flat한 행 단위 DataFrame으로 변환."""
+    """companyfacts JSON 을 flat 한 행 단위 DataFrame 으로 변환.
+
+    Args:
+        payload: companyfacts API JSON dict.
+
+    Returns:
+        ``EDGAR_COMPANYFACTS_SCHEMA`` 형식 flat DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> companyFactsToRows(getCompanyFactsJson("0000320193"))
+    """
     rows: list[dict[str, Any]] = []
     cik = str(payload.get("cik") or "").zfill(10)
     entityName = str(payload.get("entityName") or "")

@@ -11,7 +11,20 @@ if TYPE_CHECKING:
 
 
 def extractCorporateBond(company: "Company") -> pl.DataFrame | None:
-    """사채/부채 구조 추출."""
+    """사채/부채 구조 추출.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/longTermDebt/shortTermDebt/faceAmount/interestRate`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractCorporateBond(Company("AAPL"))
+    """
     from dartlab.providers.edgar.report import loadXbrlTags
 
     df = loadXbrlTags(

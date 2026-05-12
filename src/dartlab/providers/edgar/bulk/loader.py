@@ -15,12 +15,33 @@ class EdgarBulkLoader:
     category = "edgar"
 
     def ensure(self, stockCode, path, *, sinceYear=None, asOf=None, refresh="auto"):
-        """SEC 벌크 finance parquet 보장 — ensureFinanceParquet 위임."""
+        """SEC 벌크 finance parquet 보장 — ``ensureFinanceParquet`` 위임.
+
+        Args:
+            stockCode: 종목 ticker.
+            path: 결과 parquet 경로.
+            sinceYear: 시작 연도 (현재 미사용).
+            asOf: 신선도 기준 시점 (현재 미사용).
+            refresh: ``"auto"`` 외 truthy 면 강제 재변환.
+
+        Raises:
+            FileNotFoundError: 변환 후에도 CIK parquet 부재.
+
+        Example:
+            >>> EdgarBulkLoader().ensure("AAPL", Path("..."))
+        """
         ensureFinanceParquet(stockCode, path, refresh=bool(refresh and refresh != "auto"))
 
 
 def registerEdgarBulkLoader() -> None:
-    """edgar/bulk LoaderProvider 등록 — circular import 회피용 함수 lazy import."""
+    """edgar/bulk LoaderProvider 등록 — circular import 회피용 함수 lazy import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> registerEdgarBulkLoader()
+    """
     from dartlab.core.loaders import registerLoader
 
     registerLoader(EdgarBulkLoader())

@@ -249,6 +249,9 @@ class _FinanceAccessor:
         Returns:
             태그 목록 DataFrame 또는 None.
 
+        Raises:
+            없음.
+
         Example:
             >>> c.finance.listTags(limit=50)
         """
@@ -264,6 +267,9 @@ class _FinanceAccessor:
 
         Yields:
             태그 row dict.
+
+        Raises:
+            없음.
 
         Example:
             >>> for row in c.finance.iterTags(limit=20):

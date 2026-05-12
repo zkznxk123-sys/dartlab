@@ -85,12 +85,22 @@ def parseTextStructure(
 ) -> list[dict[str, Any]]:
     """텍스트를 줄 단위로 파싱하여 heading/body 구조 메타를 반환.
 
+    Args:
+        text: 입력 텍스트.
+        topic: topic 라벨 (path prefix 용).
+
     Returns:
         list of dicts with keys:
             - text: str
             - textNodeType: "heading" | "body"
             - textLevel: int (0=body, 1=major heading, 2=sub heading)
             - textPath: str (heading 계층 경로)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseTextStructure("# Risk Factors\\n\\nText...")
     """
     lines = text.split("\n")
     results: list[dict[str, Any]] = []

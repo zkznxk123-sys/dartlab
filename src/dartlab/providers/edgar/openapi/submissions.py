@@ -14,7 +14,21 @@ SUPPORTED_REGULAR_FORMS = ("10-K", "10-Q", "20-F", "40-F")
 
 
 def getSubmissionsJson(cik: str, client: EdgarClient | None = None) -> dict[str, Any]:
-    """CIK로 SEC submissions API를 호출하여 원본 JSON을 반환."""
+    """CIK 로 SEC submissions API 를 호출하여 원본 JSON 을 반환.
+
+    Args:
+        cik: SEC CIK 번호.
+        client: EdgarClient 인스턴스.
+
+    Returns:
+        submissions API 원본 JSON dict.
+
+    Raises:
+        EdgarApiError: API 호출 실패.
+
+    Example:
+        >>> getSubmissionsJson("0000320193")
+    """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
     return api.getJson(f"{DEFAULT_BASE_URL}/submissions/CIK{normalized}.json")
@@ -26,7 +40,22 @@ def mergeSubmissionFilings(
     sinceYear: int = 2009,
     client: EdgarClient | None = None,
 ) -> dict[str, list[Any]]:
-    """recent filings와 추가 파일들을 병합하여 전체 filing 목록을 구성."""
+    """recent filings 와 추가 파일들을 병합하여 전체 filing 목록을 구성.
+
+    Args:
+        submissions: ``getSubmissionsJson`` 결과 dict.
+        sinceYear: 시작 연도.
+        client: EdgarClient 인스턴스 (추가 페이지 fetch 용).
+
+    Returns:
+        병합된 filing column dict (``{form, filingDate, ...}``).
+
+    Raises:
+        EdgarApiError: 추가 페이지 fetch 실패.
+
+    Example:
+        >>> mergeSubmissionFilings(getSubmissionsJson("0000320193"), sinceYear=2024)
+    """
     recent = submissions.get("filings", {}).get("recent", {})
     merged = {k: list(v) for k, v in recent.items()}
     api = client or EdgarClient()
@@ -72,7 +101,25 @@ def findRegularFilings(
     until: str | date | datetime | None = None,
     client: EdgarClient | None = None,
 ) -> list[dict[str, Any]]:
-    """병합된 submissions에서 정기보고서(10-K/10-Q/20-F/40-F)만 필터링하여 반환."""
+    """병합된 submissions 에서 정기보고서 (10-K/10-Q/20-F/40-F) 만 필터링하여 반환.
+
+    Args:
+        submissions: ``getSubmissionsJson`` 결과.
+        sinceYear: 시작 연도.
+        forms: form 유형 필터 (None 이면 전체).
+        since: 시작일.
+        until: 종료일.
+        client: EdgarClient 인스턴스.
+
+    Returns:
+        필터링된 filing dict 리스트.
+
+    Raises:
+        EdgarApiError: 추가 페이지 fetch 실패.
+
+    Example:
+        >>> findRegularFilings(subs, sinceYear=2024, forms=["10-K"])
+    """
     merged = mergeSubmissionFilings(submissions, sinceYear=sinceYear, client=client)
     reportDates = merged.get("reportDate", [""] * len(merged.get("form", [])))
     acceptanceDates = merged.get("acceptanceDateTime", [""] * len(merged.get("form", [])))
@@ -135,7 +182,27 @@ def filingsFrame(
     until: str | date | datetime | None = None,
     client: EdgarClient | None = None,
 ) -> pl.DataFrame:
-    """정기보고서 목록을 ticker/title 포함 Polars DataFrame으로 반환."""
+    """정기보고서 목록을 ticker/title 포함 Polars DataFrame 으로 반환.
+
+    Args:
+        submissions: ``getSubmissionsJson`` 결과.
+        ticker: ticker 라벨.
+        title: 회사명 라벨.
+        sinceYear: 시작 연도.
+        forms: form 유형 필터.
+        since: 시작일.
+        until: 종료일.
+        client: EdgarClient 인스턴스.
+
+    Returns:
+        ``ticker/cik/title/form/filing_date/...`` 컬럼 DataFrame.
+
+    Raises:
+        EdgarApiError: 추가 페이지 fetch 실패.
+
+    Example:
+        >>> filingsFrame(getSubmissionsJson("0000320193"), ticker="AAPL", title="Apple Inc.")
+    """
     rows = findRegularFilings(
         submissions,
         sinceYear=sinceYear,

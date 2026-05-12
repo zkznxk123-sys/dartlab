@@ -11,7 +11,20 @@ if TYPE_CHECKING:
 
 
 def extractMinorityHolder(company: "Company") -> pl.DataFrame | None:
-    """비지배지분(NoncontrollingInterest) 시계열 추출."""
+    """비지배지분(NoncontrollingInterest) 시계열 추출.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/noncontrollingInterest`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractMinorityHolder(Company("AAPL"))
+    """
     from dartlab.providers.edgar.report import loadXbrlTags
 
     df = loadXbrlTags(

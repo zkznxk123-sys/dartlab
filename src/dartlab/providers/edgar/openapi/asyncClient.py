@@ -59,7 +59,17 @@ class AsyncEdgarClient:
 
     @property
     def headers(self) -> dict[str, str]:
-        """headers — TODO 한국어 동작 설명."""
+        """SEC API 호출에 사용되는 HTTP headers.
+
+        Returns:
+            ``{"User-Agent": ...}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> AsyncEdgarClient().headers
+        """
         return {"User-Agent": self._userAgent}
 
     async def _throttle(self) -> None:
@@ -111,7 +121,20 @@ class AsyncEdgarClient:
         raise EdgarApiError(f"SEC API 요청 실패 (재시도 초과): {url}") from lastErr
 
     async def getJson(self, url: str) -> dict[str, Any]:
-        """URL에서 JSON 반환."""
+        """URL 에서 JSON 반환.
+
+        Args:
+            url: SEC API endpoint URL.
+
+        Returns:
+            JSON dict.
+
+        Raises:
+            EdgarApiError: API 호출 실패 또는 JSON object 아님.
+
+        Example:
+            >>> await AsyncEdgarClient().getJson("https://data.sec.gov/...")
+        """
         resp = await self._requestWithRetry(url)
         data = resp.json()
         if not isinstance(data, dict):
@@ -119,10 +142,30 @@ class AsyncEdgarClient:
         return data
 
     async def getBytes(self, url: str) -> bytes:
-        """URL에서 바이너리 반환."""
+        """URL 에서 바이너리 반환.
+
+        Args:
+            url: SEC endpoint URL.
+
+        Returns:
+            raw bytes.
+
+        Raises:
+            EdgarApiError: API 호출 실패.
+
+        Example:
+            >>> await AsyncEdgarClient().getBytes("https://...")
+        """
         resp = await self._requestWithRetry(url, timeout=60)
         return resp.content
 
     async def close(self) -> None:
-        """HTTP 클라이언트 연결을 닫는다."""
+        """HTTP 클라이언트 연결을 닫는다.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> await AsyncEdgarClient().close()
+        """
         await self._client.aclose()

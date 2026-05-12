@@ -11,7 +11,20 @@ if TYPE_CHECKING:
 
 
 def extractAuditOpinion(company: "Company") -> pl.DataFrame | None:
-    """감사의견 + 감사법인 + 감사비용 추출."""
+    """감사의견 + 감사법인 + 감사비용 추출.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/auditorName/auditorLocation/auditFees/nonAuditFees`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractAuditOpinion(Company("AAPL"))
+    """
     from dartlab.providers.edgar.report import loadXbrlTags
 
     df = loadXbrlTags(company, "(?i)Auditor|AuditFee")

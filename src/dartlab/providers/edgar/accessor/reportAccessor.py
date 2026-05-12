@@ -39,12 +39,32 @@ class _ReportAccessor:
 
     @property
     def apiTypes(self) -> list[str]:
-        """지원 apiType 목록."""
+        """지원 apiType 목록.
+
+        Returns:
+            apiType 문자열 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._report.apiTypes
+        """
         return list(_SUPPORTED.keys())
 
     @property
     def availableApiTypes(self) -> list[str]:
-        """데이터가 실제 존재하는 apiType."""
+        """데이터가 실제 존재하는 apiType.
+
+        Returns:
+            데이터 있는 apiType 리스트.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._report.availableApiTypes
+        """
         available = []
         for apiType in _SUPPORTED:
             df = self.extract(apiType)
@@ -53,7 +73,20 @@ class _ReportAccessor:
         return available
 
     def extract(self, apiType: str) -> pl.DataFrame | None:
-        """apiType별 데이터 추출. 개별 extractor 실패 시 None 반환."""
+        """apiType 별 데이터 추출. 개별 extractor 실패 시 None 반환.
+
+        Args:
+            apiType: 14 종 apiType 중 하나.
+
+        Returns:
+            DataFrame 또는 None.
+
+        Raises:
+            없음 (개별 extractor 예외는 None 으로 흡수).
+
+        Example:
+            >>> c._report.extract("dividend")
+        """
         if apiType in self._cache:
             return self._cache[apiType]
         fn = _SUPPORTED.get(apiType)

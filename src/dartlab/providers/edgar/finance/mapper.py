@@ -86,13 +86,40 @@ class EdgarMapper:
 
     @classmethod
     def isCommonTag(cls, tag: str) -> bool:
-        """태그가 standardAccounts의 commonTags에 포함되는지 확인."""
+        """태그가 standardAccounts 의 commonTags 에 포함되는지 확인.
+
+        Args:
+            tag: XBRL 태그.
+
+        Returns:
+            ``True`` — common 태그.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.isCommonTag("Revenues")
+        """
         cls._ensureLoaded()
         return tag.lower() in cls._commonTags
 
     @classmethod
     def map(cls, tag: str, stmtType: str = "") -> Optional[str]:
-        """EDGAR 태그를 snakeId로 매핑하고, stmt 충돌 시 오버라이드 적용."""
+        """EDGAR 태그를 snakeId 로 매핑하고, stmt 충돌 시 오버라이드 적용.
+
+        Args:
+            tag: XBRL 태그.
+            stmtType: 재무제표 유형 (BS/IS/CF/CI), 충돌 해소용.
+
+        Returns:
+            snakeId 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.map("Revenues", "IS")
+        """
         cls._ensureLoaded()
 
         overrideKey = (tag, stmtType)
@@ -110,7 +137,21 @@ class EdgarMapper:
 
     @classmethod
     def mapToDart(cls, tag: str, stmtType: str = "") -> Optional[str]:
-        """EDGAR 태그를 DART 호환 snakeId로 변환 (alias 적용 포함)."""
+        """EDGAR 태그를 DART 호환 snakeId 로 변환 (alias 적용 포함).
+
+        Args:
+            tag: XBRL 태그.
+            stmtType: 재무제표 유형.
+
+        Returns:
+            DART snakeId 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.mapToDart("CostOfGoodsSold", "IS")
+        """
         sid = cls.map(tag, stmtType)
         if sid is None:
             return None
@@ -118,7 +159,17 @@ class EdgarMapper:
 
     @classmethod
     def classifyTagsByStmt(cls) -> dict[str, set[str]]:
-        """재무제표 유형(IS/BS/CF/CI)별로 commonTags를 분류하여 반환."""
+        """재무제표 유형 (IS/BS/CF/CI) 별로 commonTags 분류 반환.
+
+        Returns:
+            ``{"IS": {tags...}, ...}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.classifyTagsByStmt()
+        """
         cls._ensureLoaded()
         stmtTags: dict[str, set[str]] = {"IS": set(), "BS": set(), "CF": set(), "CI": set()}
         for acct in cls._accounts:
@@ -130,7 +181,18 @@ class EdgarMapper:
 
     @classmethod
     def getPrimaryStmtMap(cls) -> dict[str, str]:
-        """commonTag → 해당 계정의 primary stmt (1:1). 충돌 태그는 계정의 stmt 우선."""
+        """commonTag → 해당 계정의 primary stmt (1:1). 충돌 태그는 계정의 stmt 우선.
+
+        Returns:
+            ``{tag: stmt}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.getPrimaryStmtMap()["Revenues"]
+            'IS'
+        """
         cls._ensureLoaded()
         result: dict[str, str] = {}
         for acct in cls._accounts:
@@ -144,7 +206,17 @@ class EdgarMapper:
 
     @classmethod
     def getLineOrder(cls) -> dict[str, int]:
-        """snakeId → line 번호 (재무제표 표준 순서). SNAKEID_ALIASES 변환 후 snakeId도 포함."""
+        """snakeId → line 번호 (재무제표 표준 순서). SNAKEID_ALIASES 변환 후 snakeId 도 포함.
+
+        Returns:
+            ``{snakeId: lineNumber}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.getLineOrder()["revenue"]
+        """
         cls._ensureLoaded()
         result = {a["snakeId"]: a.get("line", 9999) for a in cls._accounts}
         # SNAKEID_ALIASES로 변환된 snakeId에도 원본 line 적용
@@ -157,7 +229,21 @@ class EdgarMapper:
 
     @classmethod
     def getAccountStmt(cls, snakeId: str) -> str | None:
-        """snakeId의 정식 재무제표 유형 (BS/IS/CF/CI/NT/EQ). SNAKEID_ALIASES 역참조 포함."""
+        """snakeId 의 정식 재무제표 유형 (BS/IS/CF/CI/NT/EQ). SNAKEID_ALIASES 역참조 포함.
+
+        Args:
+            snakeId: dartlab 표준 snake_case 계정 ID.
+
+        Returns:
+            stmt 유형 ``"BS"``/``"IS"``/``"CF"``/``"CI"``/``"NT"``/``"EQ"`` 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.getAccountStmt("revenue")
+            'IS'
+        """
         cls._ensureLoaded()
         for acct in cls._accounts:
             if acct["snakeId"] == snakeId:
@@ -173,13 +259,25 @@ class EdgarMapper:
 
     @classmethod
     def getTagsForSnakeIds(cls, snakeIds: list[str]) -> set[str]:
-        """지정한 snakeId에 매핑된 모든 원본 태그를 반환.
+        """지정한 snakeId 에 매핑된 모든 원본 태그를 반환.
 
         SNAKEID_ALIASES 양방향 확장:
         - 입력 snakeId 가 alias 의 key → value(primary) 도 검색
         - 입력 snakeId 가 alias 의 value → key(alias) 도 검색
         이렇게 하면 DART 식 이름("cost_of_goods_sold") 을 넣어도
         EDGAR primary ("cost_of_sales") 의 commonTags 를 수집한다.
+
+        Args:
+            snakeIds: snake_case 계정 ID 리스트.
+
+        Returns:
+            매핑된 XBRL 태그 set.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarMapper.getTagsForSnakeIds(["revenue", "operating_income"])
         """
         cls._ensureLoaded()
         sidSet = set(snakeIds)

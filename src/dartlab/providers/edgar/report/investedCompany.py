@@ -11,7 +11,20 @@ if TYPE_CHECKING:
 
 
 def extractInvestedCompany(company: "Company") -> pl.DataFrame | None:
-    """타법인 출자/투자 시계열 추출."""
+    """타법인 출자/투자 시계열 추출.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/equityMethod/longTermInvestments/marketableSecurities`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractInvestedCompany(Company("AAPL"))
+    """
     from dartlab.providers.edgar.report import loadXbrlTags
 
     df = loadXbrlTags(

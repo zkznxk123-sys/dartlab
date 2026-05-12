@@ -25,6 +25,18 @@ def extractExecutive(company: "Company") -> pl.DataFrame | None:
 
     1순위: 10-K Item 10 섹션 텍스트 파싱
     2순위: XBRL에서 officer 관련 태그 (제한적)
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/name/title`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractExecutive(Company("AAPL"))
     """
     sections = company._docs.sections
     if isEmptyDf(sections):

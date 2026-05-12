@@ -51,7 +51,17 @@ class EdgarClient:
 
     @property
     def headers(self) -> dict[str, str]:
-        """SEC API 요청에 사용할 HTTP 헤더."""
+        """SEC API 요청에 사용할 HTTP 헤더.
+
+        Returns:
+            ``{"User-Agent": ...}`` dict.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> EdgarClient().headers
+        """
         return {"User-Agent": self.userAgent}
 
     def _wait(self) -> None:
@@ -63,7 +73,20 @@ class EdgarClient:
             time.sleep(self.minInterval - elapsed)
 
     def getJson(self, url: str) -> dict[str, Any]:
-        """URL에서 JSON을 가져오고, 속도 제한과 재시도를 자동 처리."""
+        """URL 에서 JSON 을 가져오고, 속도 제한과 재시도를 자동 처리.
+
+        Args:
+            url: SEC endpoint URL.
+
+        Returns:
+            JSON dict.
+
+        Raises:
+            EdgarApiError: API 호출 실패 또는 JSON object 아님.
+
+        Example:
+            >>> EdgarClient().getJson("https://data.sec.gov/...")
+        """
         lastErr: Exception | None = None
         for attempt in range(self.maxRetries):
             self._wait()

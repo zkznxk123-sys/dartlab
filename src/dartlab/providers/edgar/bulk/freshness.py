@@ -45,7 +45,18 @@ def _etagPath(tag: str) -> Path:
 
 
 def touchBulkFreshness(tag: str, *, etag: str | None = None) -> None:
-    """다운로드 성공 직후 호출 — 현재 시각과 ETag 기록."""
+    """다운로드 성공 직후 호출 — 현재 시각과 ETag 기록.
+
+    Args:
+        tag: 벌크 식별자 (``companyfacts`` / ``quarterly_2024Q3`` 등).
+        etag: 원격 ETag (저장 안 할 거면 None).
+
+    Raises:
+        OSError: 파일 쓰기 실패.
+
+    Example:
+        >>> touchBulkFreshness("companyfacts", etag="abc123")
+    """
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     _freshnessPath(tag).write_text(now, encoding="utf-8")
     if etag:
@@ -53,7 +64,20 @@ def touchBulkFreshness(tag: str, *, etag: str | None = None) -> None:
 
 
 def readSavedEtag(tag: str) -> str | None:
-    """저장된 ETag 읽기. 없으면 None."""
+    """저장된 ETag 읽기. 없으면 None.
+
+    Args:
+        tag: 벌크 식별자.
+
+    Returns:
+        ETag 문자열 또는 None.
+
+    Raises:
+        없음 (OSError 는 None 으로 회수).
+
+    Example:
+        >>> readSavedEtag("companyfacts")
+    """
     p = _etagPath(tag)
     if not p.exists():
         return None
@@ -64,7 +88,20 @@ def readSavedEtag(tag: str) -> str | None:
 
 
 def inspectBulkFreshness(tag: str) -> BulkFreshness:
-    """freshness 스냅샷 반환."""
+    """freshness 스냅샷 반환.
+
+    Args:
+        tag: 벌크 식별자.
+
+    Returns:
+        ``BulkFreshness`` dataclass.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> inspectBulkFreshness("companyfacts")
+    """
     p = _freshnessPath(tag)
     etag = readSavedEtag(tag)
     if not p.exists():
@@ -82,7 +119,21 @@ def inspectBulkFreshness(tag: str) -> BulkFreshness:
 
 
 def isBulkFresh(tag: str, *, ttlHours: int = 24) -> bool:
-    """TTL 내에 마지막 체크 기록이 있고 freshness 파일이 존재하면 True."""
+    """TTL 내에 마지막 체크 기록이 있고 freshness 파일이 존재하면 True.
+
+    Args:
+        tag: 벌크 식별자.
+        ttlHours: 신선도 한계 (시간).
+
+    Returns:
+        True — 아직 fresh. False — TTL 만료/파일 부재.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isBulkFresh("companyfacts", ttlHours=24)
+    """
     snap = inspectBulkFreshness(tag)
     if not snap.exists or snap.lastChecked is None:
         return False
@@ -92,7 +143,17 @@ def isBulkFresh(tag: str, *, ttlHours: int = 24) -> bool:
 
 
 def invalidateBulkFreshness(tag: str) -> None:
-    """freshness + etag 파일 제거 (강제 재다운로드)."""
+    """freshness + etag 파일 제거 (강제 재다운로드).
+
+    Args:
+        tag: 벌크 식별자.
+
+    Raises:
+        없음 (OSError 는 warning 으로 흡수).
+
+    Example:
+        >>> invalidateBulkFreshness("companyfacts")
+    """
     for p in (_freshnessPath(tag), _etagPath(tag)):
         try:
             p.unlink(missing_ok=True)

@@ -30,7 +30,17 @@ class _ProfileAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
-        """sections — docs + finance 통합 지도."""
+        """sections — docs + finance 통합 지도.
+
+        Returns:
+            ``chapter/topic/blockType/blockOrder/source/{period...}`` 컬럼 DataFrame 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._profileAccessor.sections
+        """
         cacheKey = "_sections"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -95,7 +105,17 @@ class _ProfileAccessor:
 
     @property
     def sharesOutstanding(self) -> int | None:
-        """최신 발행주식수 (SEC DEI)."""
+        """최신 발행주식수 (SEC DEI).
+
+        Returns:
+            발행주식수 int 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._profileAccessor.sharesOutstanding
+        """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:
             return self._company._cache[cacheKey]
@@ -107,5 +127,19 @@ class _ProfileAccessor:
         return val
 
     def trace(self, topic: str, period: str | None = None) -> dict[str, Any] | None:
-        """source provenance — 해당 topic이 어디서 왔는지."""
+        """source provenance — 해당 topic 이 어디서 왔는지.
+
+        Args:
+            topic: topic 이름.
+            period: 단일 period (선택).
+
+        Returns:
+            ``{source, topic, period, ...}`` provenance dict 또는 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> c._profileAccessor.trace("IS")
+        """
         return self._company.trace(topic, period=period)

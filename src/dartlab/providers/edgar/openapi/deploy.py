@@ -64,6 +64,12 @@ def deployEdgarToHF(
     Returns
     -------
     dict : {"finance": N, ...} 업로드한 카테고리별 파일 수.
+
+    Raises:
+        ValueError: HF_TOKEN 부재 + dryRun=False.
+
+    Example:
+        >>> deployEdgarToHF(categories=["scan"], dryRun=True)
     """
     from huggingface_hub import HfApi
 

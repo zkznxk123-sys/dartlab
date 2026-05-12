@@ -32,6 +32,12 @@ def explore(
 
     Returns:
         DataFrame with columns: tag, snakeId, period, value, unit, form, filed
+
+    Raises:
+        없음.
+
+    Example:
+        >>> explore("0000320193", "Revenue")
     """
     if edgarDir is None:
         from dartlab.core.dataLoader import _dataDir
@@ -106,6 +112,9 @@ def listTags(
     Returns:
         ``tag/snakeId/count/stmt`` 컬럼 DataFrame 또는 None.
 
+    Raises:
+        없음.
+
     Example:
         >>> listTags("0000320193", limit=50)
     """
@@ -165,6 +174,9 @@ def iterTags(
 
     Yields:
         태그 row dict.
+
+    Raises:
+        없음.
 
     Example:
         >>> for row in iterTags("0000320193", limit=20):

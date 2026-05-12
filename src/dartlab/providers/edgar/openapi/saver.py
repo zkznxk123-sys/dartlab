@@ -130,7 +130,20 @@ def _validateSavedFinanceParquet(path: Path, cik: str) -> None:
 
 
 def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
-    """저장된 EDGAR 데이터가 Company 파이프라인과 호환되는지 검증."""
+    """저장된 EDGAR 데이터가 Company 파이프라인과 호환되는지 검증.
+
+    Args:
+        ticker: 종목 ticker.
+
+    Returns:
+        ``ticker/corpName/hasTimeseries/...`` 검증 결과 dict.
+
+    Raises:
+        ValueError: ticker resolve 실패.
+
+    Example:
+        >>> verifyOpenEdgarSaveCompatibility("AAPL")
+    """
     from dartlab.providers.edgar.company import Company
 
     company = Company(ticker)
@@ -168,7 +181,22 @@ def saveDocs(
     client: EdgarClient | None = None,
     sinceYear: int = 2009,
 ) -> Path:
-    """10-K/10-Q 문서를 SEC에서 수집하여 검증 후 parquet로 저장."""
+    """10-K/10-Q 문서를 SEC 에서 수집하여 검증 후 parquet 로 저장.
+
+    Args:
+        ticker: 종목 ticker.
+        client: EdgarClient 인스턴스.
+        sinceYear: 시작 연도.
+
+    Returns:
+        저장된 parquet Path.
+
+    Raises:
+        ValueError: filing 부재 (``fetchEdgarDocs`` 위임).
+
+    Example:
+        >>> saveDocs("AAPL", sinceYear=2020)
+    """
     normalized = str(ticker).upper().strip()
     _ensureIdentityCaches(client)
     dest = _dataPath("edgarDocs", normalized)
@@ -186,7 +214,21 @@ def saveFinance(
     *,
     client: EdgarClient | None = None,
 ) -> Path:
-    """XBRL companyfacts를 SEC에서 수집하여 검증 후 parquet로 저장."""
+    """XBRL companyfacts 를 SEC 에서 수집하여 검증 후 parquet 로 저장.
+
+    Args:
+        cik: SEC CIK 번호.
+        client: EdgarClient 인스턴스.
+
+    Returns:
+        저장된 parquet Path.
+
+    Raises:
+        EdgarApiError: SEC API 호출 실패.
+
+    Example:
+        >>> saveFinance("0000320193")
+    """
     normalized = str(cik).zfill(10)
     _ensureIdentityCaches(client)
     payload = getCompanyFactsJson(normalized, client)

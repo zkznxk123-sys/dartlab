@@ -22,6 +22,12 @@ def edgarFinancePath(cik: str) -> Path:
 
     Returns:
         Path 객체 (실제 존재 여부는 별도 검사).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> edgarFinancePath("0000320193")
     """
     from dartlab.core.dataLoader import _getDataRoot
 

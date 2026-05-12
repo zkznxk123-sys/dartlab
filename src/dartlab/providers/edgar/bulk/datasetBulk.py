@@ -106,6 +106,18 @@ def discoverLatestQuarter(maxYear: int | None = None) -> tuple[int, int] | None:
 
     maxYear=None 이면 현재 연도까지 체크. 공개된 (year, quarter) 튜플 반환.
     분기말 +2~3개월 지연이 있으므로 일반적으로 현재 분기-1 이 최신.
+
+    Args:
+        maxYear: 탐색 상한 연도 (None 이면 현재).
+
+    Returns:
+        ``(year, quarter)`` tuple 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> discoverLatestQuarter()
     """
     if maxYear is None:
         maxYear = datetime.now(timezone.utc).year
@@ -130,9 +142,24 @@ def downloadQuarterlyDataset(
     force: bool = False,
     ttlHours: int = 24 * 30,
 ) -> Path | None:
-    """`{Y}q{Q}.zip` 다운로드. 존재하지 않으면 None.
+    """``{Y}q{Q}.zip`` 다운로드. 존재하지 않으면 None.
 
-    분기 벌크는 한 번 공개 후 변동이 적으므로 기본 TTL 30일.
+    분기 벌크는 한 번 공개 후 변동이 적으므로 기본 TTL 30 일.
+
+    Args:
+        year: 연도.
+        quarter: 분기 (1~4).
+        force: 캐시 무시.
+        ttlHours: 신선도 TTL.
+
+    Returns:
+        다운로드된 zip Path 또는 None (해당 분기 부재).
+
+    Raises:
+        없음 (httpx 예외는 잡아서 None 반환).
+
+    Example:
+        >>> downloadQuarterlyDataset(2024, 3)
     """
     tag = _quarterTag(year, quarter)
     zipPath = _bulkDir() / f"{year}q{quarter}.zip"
@@ -317,6 +344,12 @@ def convertQuarterlyToParquets(
     Returns
     -------
     dict { "sub": Path, "pre": Path, "tag": Path }
+
+    Raises:
+        없음.
+
+    Example:
+        >>> convertQuarterlyToParquets(2024, 3)
     """
     if zipPath is None:
         zipPath = downloadQuarterlyDataset(year, quarter)
@@ -351,6 +384,9 @@ def listLocalQuarters(*, kind: str = "sub", limit: int | None = None) -> list[tu
     Returns:
         ``(year, quarter)`` 정렬 리스트.
 
+    Raises:
+        없음.
+
     Example:
         >>> listLocalQuarters(kind="sub", limit=8)
     """
@@ -375,6 +411,9 @@ def iterLocalQuarters(*, kind: str = "sub", limit: int | None = None):
 
     Yields:
         ``(year, quarter)`` 튜플.
+
+    Raises:
+        없음.
 
     Example:
         >>> for y, q in iterLocalQuarters(limit=8):

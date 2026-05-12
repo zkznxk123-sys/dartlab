@@ -51,6 +51,18 @@ def extractEmployee(company: "Company") -> pl.DataFrame | None:
 
     1순위: XBRL EntityNumberOfEmployees
     2순위: 10-K Item 1 텍스트 regex
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/headcount/source`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractEmployee(Company("AAPL"))
     """
     rows: list[dict] = []
 

@@ -57,7 +57,13 @@ def notes(
         edgarDir: EDGAR 데이터 디렉토리.
 
     Returns:
-        DataFrame with columns: tag, label, period, text (truncated), chars
+        DataFrame with columns: tag, label, period, text (truncated), chars.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> notes("0000320193", "inventory")
     """
     if edgarDir is None:
         from dartlab.core.dataLoader import _dataDir
@@ -126,6 +132,12 @@ def notesByCategory(
     Returns:
         category 지정 시: 피벗된 DataFrame (tag × year).
         category=None: 데이터 있는 카테고리 dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> notesByCategory("0000320193", "inventory")
     """
     from dartlab.providers.edgar.docs.notesParsers import (
         extractNoteCategory,
@@ -141,7 +153,21 @@ def notesByCategory(
 
 
 def noteCategories(cik: str, *, edgarDir: Path | None = None) -> list[str]:
-    """이 기업에서 데이터가 있는 notes 카테고리 목록."""
+    """이 기업에서 데이터가 있는 notes 카테고리 목록.
+
+    Args:
+        cik: SEC CIK 번호.
+        edgarDir: EDGAR 데이터 디렉토리.
+
+    Returns:
+        카테고리 문자열 리스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> noteCategories("0000320193")
+    """
     from dartlab.providers.edgar.docs.notesParsers import extractAllNoteCategories
 
     allCats = extractAllNoteCategories(cik, edgarDir=edgarDir)

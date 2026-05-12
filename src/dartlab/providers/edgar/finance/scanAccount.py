@@ -167,6 +167,12 @@ def scanAccount(
 
     Returns:
         stockCode(=ticker) | corpName | 기간컬럼들... (최신 먼저)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> scanAccount("sales", freq="Y")
     """
     from dartlab.core.dataLoader import _dataDir
 
@@ -238,6 +244,15 @@ def scanRatio(
     Args:
         ratioName: 비율 식별자. scanRatioList() 참조.
         freq: "Q" 분기 (기본) · "Y" 연간. Company 엔진과 일치.
+
+    Returns:
+        stockCode | corpName | 기간컬럼들... DataFrame.
+
+    Raises:
+        ValueError: 지원하지 않는 ratioName.
+
+    Example:
+        >>> scanRatio("debt_ratio", freq="Y")
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))

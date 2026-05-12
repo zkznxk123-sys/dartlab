@@ -27,6 +27,18 @@ def extractOutsideDirector(company: "Company") -> pl.DataFrame | None:
 
     10-K Item 10 (Directors and Corporate Governance) 섹션에서
     independent director 언급을 파싱.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/independentCount/totalDirectors`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractOutsideDirector(Company("AAPL"))
     """
     sections = company._docs.sections
     if isEmptyDf(sections):

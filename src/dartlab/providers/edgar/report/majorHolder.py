@@ -11,7 +11,20 @@ if TYPE_CHECKING:
 
 
 def extractMajorHolder(company: "Company") -> pl.DataFrame | None:
-    """주요 주주 정보 추출."""
+    """주요 주주 정보 추출.
+
+    Args:
+        company: EDGAR Company 인스턴스.
+
+    Returns:
+        ``period/sharesOutstanding/publicFloat`` 컬럼 DataFrame 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractMajorHolder(Company("AAPL"))
+    """
     from dartlab.providers.edgar.report import loadXbrlTags
 
     df = loadXbrlTags(

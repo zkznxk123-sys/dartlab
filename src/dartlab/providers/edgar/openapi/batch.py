@@ -305,7 +305,21 @@ def batchCollectEdgar(
 ) -> dict[str, dict[str, int]]:
     """병렬 배치 수집. 워커 N개 → ticker 분배.
 
-    Returns: {"AAPL": {"finance": 12000, "docs": 450}, ...}
+    Args:
+        tickers: 대상 ticker 리스트.
+        categories: ``["finance", "docs"]`` 기본. None 이면 동일.
+        maxWorkers: 동시 워커 수.
+        incremental: 기존 파일 skip 여부.
+        showProgress: Rich live progress 표시.
+
+    Returns:
+        ``{"AAPL": {"finance": 12000, "docs": 450}, ...}`` dict.
+
+    Raises:
+        없음 (KeyboardInterrupt 는 정상 종료).
+
+    Example:
+        >>> batchCollectEdgar(["AAPL", "MSFT"], categories=["finance"])
     """
     import time as _time
 
@@ -409,8 +423,7 @@ def batchCollectEdgar(
         tbl.add_row("", barText)
         return tbl
 
-    def completeFn(title: str, catSummary: str) -> None:
-        """completeFn — TODO 한국어 동작 설명."""
+    def _completeFn(title: str, catSummary: str) -> None:
         with lock:
             completedCount[0] += 1
             for wIdx in range(numWorkers):
@@ -419,20 +432,18 @@ def batchCollectEdgar(
                     workerLines[wIdx] = f"✓ {title}{summary}"
                     break
 
-    def statusFn(workerIdx: int, ticker: str, title: str) -> None:
-        """statusFn — TODO 한국어 동작 설명."""
+    def _statusFn(workerIdx: int, ticker: str, title: str) -> None:
         with lock:
             workerLines[workerIdx] = f"{title} ({ticker})"
 
-    def periodFn(workerIdx: int, title: str, detail: str) -> None:
-        """periodFn — TODO 한국어 동작 설명."""
+    def _periodFn(workerIdx: int, title: str, detail: str) -> None:
         with lock:
             workerLines[workerIdx] = f"{title} | {detail}"
 
     def _threadTarget():
         try:
             nonlocal result
-            result = asyncio.run(_run(completeFn, statusFn, periodFn))
+            result = asyncio.run(_run(_completeFn, _statusFn, _periodFn))
         except KeyboardInterrupt:
             pass
         except BaseException as exc:
@@ -471,7 +482,24 @@ def batchCollectEdgarAll(
     """전체 상장 ticker 배치 수집.
 
     tier: "all" | "nasdaq" | "nyse" | "sp500"
-    mode: "new" — 파일 없는 ticker만 / "all" — 전체 증분
+    mode: "new" — 파일 없는 ticker 만 / "all" — 전체 증분
+
+    Args:
+        tier: 종목 universe 계층.
+        categories: ``["finance", "docs"]`` 기본.
+        mode: ``"new"`` 또는 ``"all"``.
+        maxWorkers: 동시 워커 수.
+        incremental: 기존 파일 skip 여부.
+        showProgress: Rich live progress 표시.
+
+    Returns:
+        ``{"AAPL": {"finance": N, "docs": M}, ...}`` dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> batchCollectEdgarAll(tier="sp500", mode="new")
     """
     from dartlab.core.dataLoader import loadEdgarTargetUniverse
 

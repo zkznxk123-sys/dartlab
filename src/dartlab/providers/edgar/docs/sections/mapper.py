@@ -181,7 +181,21 @@ def _normalizePartItem(text: str) -> str:
 
 
 def normalizeSectionTitle(title: str) -> str:
-    """SEC filing section title을 정규화 (오타 보정, Part-Item 통합, Regulation S-K 수렴)."""
+    """SEC filing section title 을 정규화 (오타 보정, Part-Item 통합, Regulation S-K 수렴).
+
+    Args:
+        title: 원본 section title.
+
+    Returns:
+        정규화된 ``"Item NN. Label"`` 형식 문자열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeSectionTitle("ITEM 1A. RISK FACTORS")
+        'Item 1A. Risk Factors'
+    """
     text = _MULTISPACE_RE.sub(" ", title.strip())
     text = text.replace("§", "section")
     text = _DASH_CHARS_RE.sub("-", text)
@@ -353,9 +367,18 @@ def normalizeSectionTitle(title: str) -> str:
 
 @lru_cache(maxsize=1)
 def loadSectionMappings() -> dict[str, str]:
-    """sectionMappings.json을 로드하여 정규화된 키-값 매핑 dict를 반환.
+    """sectionMappings.json 을 로드하여 정규화된 키-값 매핑 dict 를 반환.
 
-    2026-04-19 계열 사고 방지 — wheel 누락 시 silent `{}` 대신 loud-fail.
+    2026-04-19 계열 사고 방지 — wheel 누락 시 silent ``{}`` 대신 loud-fail.
+
+    Returns:
+        ``{normalizedTitle: topicId}`` dict.
+
+    Raises:
+        FileNotFoundError: 번들 리소스 부재.
+
+    Example:
+        >>> loadSectionMappings()["Item 1A. Risk Factors"]
     """
     path = _mappingPath()
     if not path.exists():
@@ -376,7 +399,22 @@ def _lowercaseMappings() -> dict[str, str]:
 
 
 def mapSectionTitle(formType: str, title: str) -> str:
-    """section title을 정규화하고 매핑을 적용하여 'formType::topic' 형태로 반환."""
+    """section title 을 정규화하고 매핑을 적용하여 ``"formType::topic"`` 형태로 반환.
+
+    Args:
+        formType: ``"10-K"``/``"10-Q"``/``"20-F"`` 등.
+        title: 원본 section title.
+
+    Returns:
+        ``"10-K::item1ARiskFactors"`` 형식 문자열.
+
+    Raises:
+        FileNotFoundError: 번들 리소스 부재.
+
+    Example:
+        >>> mapSectionTitle("10-K", "ITEM 1A. RISK FACTORS")
+        '10-K::item1ARiskFactors'
+    """
     normalized = normalizeSectionTitle(title)
     mappings = loadSectionMappings()
     mapped = mappings.get(normalized)
