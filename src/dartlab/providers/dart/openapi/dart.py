@@ -282,53 +282,65 @@ class Dart:
         final: bool = False,
         market: Literal["Y", "K", "N", "E"] | None = None,
     ) -> pl.DataFrame:
-        """공시 목록 조회.
+        """OpenDART 공시 목록 조회 — corp/start/end/type/final/market 다축 필터.
 
-        Parameters
-        ----------
-        corp : str | None
-            기업 (종목코드 / 회사명 / corp_code). None이면 전체 시장.
-        start : 유연한 날짜 | None
-            시작일. None이면 1년 전.
-        end : 유연한 날짜 | None
-            종료일. None이면 오늘.
-        type : str | None
-            공시유형 (A=정기, B=주요사항, C=발행, D=지분, E=기타 등).
-        final : bool
-            최종보고서만.
-        market : str | None
-            법인구분 (Y=유가증권, K=코스닥, N=코넥스, E=기타).
-
-        Examples
-        --------
-        >>> d.filings("삼성전자")
-        >>> d.filings("005930", "2024")
-        >>> d.filings("삼성전자", "2024-01", "2024-06")
-        >>> d.filings(start="2024-03-14")
-
-        Raises:
-            없음.
+        Capabilities:
+            - corp: 종목코드 6 / 회사명 / corp_code 8 자리 자동 인식 (resolver 위임).
+            - start/end: str/datetime/date 유연 입력. None → start=1년전, end=오늘.
+            - type 공시 유형 1 자 코드: A 정기 / B 주요사항 / C 발행 / D 지분 / E 기타 등.
+            - market 법인구분: Y/K/N/E.
+            - final=True → 최종본만, 정정 제외.
 
         Args:
-            corp: <TODO: param desc> (str | None)
-            start: <TODO: param desc> (str | datetime | date | None)
-            end: <TODO: param desc> (str | datetime | date | None)
-            type: <TODO: param desc> (str | None)
-            final: <TODO: param desc> (bool)
-            market: <TODO: param desc> (Literal['Y', 'K', 'N', 'E'] | None)
+            corp: 기업 식별자 또는 None (전체 시장).
+            start: 시작일 (str/datetime/date) 또는 None.
+            end: 종료일 또는 None.
+            type: 공시 유형 코드 또는 None.
+            final: 최종본만. 기본 False.
+            market: 법인구분 또는 None.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — OpenDART list endpoint 원본 컬럼.
+
+        Example:
+            >>> # d.filings("삼성전자", "2024-01", "2024-06")
+
+        Guide:
+            - "삼성전자 정기공시" → ``d.filings("삼성전자", type="A")``.
+            - "특정 일자 시장 전체" → ``d.filings(start="2024-03-14")``.
+            - "유가증권 시장 정기공시" → ``type="A", market="Y"``.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Dart.search`` — 회사명 검색.
+            - ``Dart.corpCode`` — 코드 변환.
+            - ``DartCompany.filings`` — 종목 한정 wrapper.
+            - ``listFilings`` (모듈) — 본 함수 본체.
 
         Requires:
-            - dartlab
-            - datetime
-            - io
-            - polars
-            - zipfile
+            - polars — DataFrame.
+            - dartlab.providers.dart.openapi.client — _client (HTTP).
+            - DART_API_KEY 환경변수.
+
+        AIContext:
+            AI 가 "최근 공시 X" 질문 처리 시 호출. corp 없이 전체 시장 호출 → 결과 큼, AI 가
+            limit/필터 추가 권장. type 코드 자동 매핑 (사용자 "정기" → type="A").
+
+        LLM Specifications:
+            AntiPatterns:
+                - DART_API_KEY 미설정 → ValueError.
+                - rate limit (20K/일) 초과 → 차단.
+                - start > end → 빈 결과.
+                - corp 가 lookup 실패 → 전체 시장 fallback.
+            OutputSchema:
+                - OpenDART filings 원본 컬럼 (snake_case).
+            Prerequisites:
+                - DART_API_KEY.
+            Freshness:
+                - 호출 시점 OpenDART 데이터.
+            Dataflow:
+                - OpenDART API → 본 함수 → caller.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         startDate = parseDate(start, asEnd=False) or defaultStart()
         endDate = parseDate(end, asEnd=True) or defaultEnd()
@@ -373,42 +385,112 @@ class Dart:
         *,
         limit: int | None = None,
     ) -> pl.DataFrame:
-        """회사명 검색.
+        """OpenDART 회사명 검색 — substring 매칭 (corpCode + name + ticker).
+
+        Capabilities:
+            - ``searchCompanies`` wrapper — corp_code parquet 의 회사명/종목코드 검색.
+            - listed=True → 종목코드 보유 회사 (상장사) 만.
+            - limit=None → 전체.
 
         Args:
-            query: 검색어.
-            listed: True면 상장사만.
-            limit: 최대 행 수. None 이면 무제한.
+            query: 검색어 (한국어/영문/숫자).
+            listed: 상장사만 필터. 기본 False.
+            limit: 최대 row 수. None → 무제한.
 
         Returns:
-            매칭 DataFrame.
+            pl.DataFrame — 매칭된 회사 메타 (corp_code/corp_name/stock_code/modify_date).
 
         Example:
-            >>> d.search("삼성", limit=10)
+            >>> # d.search("삼성", limit=10)
+            >>> # d.search("LG", listed=True)
 
-        Raises:
-            없음.
+        Guide:
+            - "삼성 들어가는 모든 회사" → ``d.search("삼성")``.
+            - "상장사만" → ``listed=True``.
+            - "단일 종목코드 찾기" → ``d.corpCode("...")`` 사용.
+
+        SeeAlso:
+            - ``Dart.corpCode`` — 단일 매칭 lookup.
+            - ``Dart.corpCodes`` — 전체 corp_code 테이블.
+            - ``searchCompanies`` (모듈 private) — 본 함수 본체.
+
+        Requires:
+            - polars — DataFrame.
+            - corp_code parquet (OpenDART 의 corpCode.zip 파싱).
+
+        AIContext:
+            "회사 검색" / "회사명 lookup" 질문 entry. listed=True 가 default 권장 (비상장사
+            제외).
+
+        LLM Specifications:
+            AntiPatterns:
+                - query 가 매우 짧음 (1 자) → 과도 매칭 (수천 row).
+                - corp_code parquet 미빌드 → 빈 결과.
+            OutputSchema:
+                - pl.DataFrame — corp_code/corp_name/stock_code/modify_date.
+            Prerequisites:
+                - corp_code parquet.
+            Freshness:
+                - parquet 갱신 시점.
+            Dataflow:
+                - OpenDART corpCode.zip → parquet → 본 함수 → AI.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         return searchCompanies(self._client, query, listedOnly=listed, limit=limit)
 
     # ── corp_code ──────────────────────────────────────────
 
     def corpCode(self, query: str) -> str | None:
-        """종목코드 / 회사명 → 8자리 corp_code.
+        """종목코드 / 회사명 → 8 자리 corp_code 1 매칭 변환.
 
-        Examples
-        --------
-        >>> d.corpCode("005930")    # "00126380"
-        >>> d.corpCode("삼성전자")  # "00126380"
+        Capabilities:
+            - ``findCorpCode`` wrapper — corp_code parquet 에서 query 1 매칭 lookup.
+            - 매칭 없음 → None.
+            - 다중 매칭 가능성 — findCorpCode 의 best match 1 개만.
 
         Args:
-            query: 인자.
-
-        Raises:
-            없음.
+            query: 종목코드 6 / 회사명 (한국어/영문).
 
         Returns:
-            <TODO: return desc> (str | None)
+            str | None — 8 자리 corp_code 또는 매칭 없음 시 None.
+
+        Example:
+            >>> # d.corpCode("005930")  # "00126380"
+            >>> # d.corpCode("삼성전자")  # "00126380"
+
+        Guide:
+            - "종목코드 → corp_code" → 본 함수.
+            - "여러 매칭" → ``Dart.search``.
+            - 신규 회사 (parquet 갱신 안 됨) → ``corpCodes(refresh=True)``.
+
+        SeeAlso:
+            - ``Dart.search`` — 다중 매칭.
+            - ``Dart.corpCodes`` — 전체 테이블.
+            - ``findCorpCode`` (모듈) — 본 함수 본체.
+
+        Requires:
+            - polars — DataFrame (간접).
+            - corp_code parquet.
+
+        AIContext:
+            AI 가 "종목코드 → corp_code" 내부 변환 시 호출. None 시 회사명 typo / 비상장사
+            의심.
+
+        LLM Specifications:
+            AntiPatterns:
+                - corp_code parquet 신규 회사 누락 (24 h 캐시) → refresh 필요.
+                - 동명이인 회사 → best match 1 개만 (other 회사는 search 사용).
+            OutputSchema:
+                - 1 str (8 자리) 또는 None.
+            Prerequisites:
+                - corp_code parquet.
+            Freshness:
+                - parquet 갱신 시점 (24 h 캐시).
+            Dataflow:
+                - corp_code parquet → findCorpCode → 본 함수 → caller.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         return findCorpCode(self._client, query)
 
@@ -441,54 +523,64 @@ class Dart:
         consolidated: bool = True,
         full: bool = False,
     ) -> pl.DataFrame:
-        """재무제표 조회 — 단건 또는 연속.
+        """OpenDART 재무제표 조회 — 단건 또는 연속 기간 (연간/분기 자동).
 
-        Parameters
-        ----------
-        corp : str
-            종목코드 / 회사명 / corp_code.
-        start : str | int | None
-            사업연도. None이면 최근 연도.
-        end : int | None
-            종료 연도. start~end 연속 조회.
-        q : int | None
-            분기 선택. None=연간, 0=Q1~Q4 전부, 1=Q1, 2=Q2, 3=Q3, 4=사업보고서.
-        consolidated : bool
-            True=연결, False=별도.
-        full : bool
-            True면 전체 계정.
-
-        Examples
-        --------
-        >>> d.finstate("삼성전자")                        # 최근 연간
-        >>> d.finstate("삼성전자", 2023, q=2)             # 2023 Q2
-        >>> d.finstate("삼성전자", 2020, end=2024)        # 연간 5년
-        >>> d.finstate("삼성전자", 2020, end=2024, q=0)   # 분기별 20건
-        >>> d.finstate("삼성전자", 2020, end=2024, q=2)   # Q2만 5건
-
-        Raises:
-            없음.
+        Capabilities:
+            - endpoint 자동 선택: full=True → ``fnlttSinglAcntAll`` (전체 계정) / False → ``fnlttSinglAcnt`` (주요 계정만).
+            - q 분기 선택: None=연간 (사업보고서), 0=Q1~Q4 전부, 1~4=특정 분기.
+            - start~end 범위 → 연속 조회 + 자동 concat.
+            - consolidated: True=연결 (CFS), False=별도 (OFS) — full=True 시만 적용.
+            - corp 입력 3 종 (종목코드/회사명/corp_code) 자동 인식.
 
         Args:
-            corp: <TODO: param desc> (str)
-            start: <TODO: param desc> (str | int | None)
-            end: <TODO: param desc> (int | None)
-            q: <TODO: param desc> (int | None)
-            consolidated: <TODO: param desc> (bool)
-            full: <TODO: param desc> (bool)
+            corp: 종목코드 6 / 회사명 / corp_code 8.
+            start: 사업연도 (int 또는 str). None → 최근 연도.
+            end: 종료 연도 (int). None → start 만.
+            q: 분기 선택. None=연간, 0~4.
+            consolidated: True=CFS, False=OFS. full=True 시만 의미.
+            full: True → 전체 계정. False → 주요 계정만.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — OpenDART finstate 원본 컬럼 (account_id, account_nm, thstrm_amount 등).
+
+        Example:
+            >>> # d.finstate("삼성전자")  # 최근 연간
+            >>> # d.finstate("삼성전자", 2020, end=2024, q=0)  # 분기별 20건
+
+        Guide:
+            - "최근 연간 재무제표" → ``d.finstate(corp)``.
+            - "5 년 시계열 (분기)" → ``start=2020, end=2024, q=0``.
+            - "별도 전체 계정" → ``consolidated=False, full=True``.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Dart.finstateMulti`` — 여러 회사 동시.
+            - ``Dart.xbrlTaxonomy`` — XBRL 분류체계.
+            - ``DartCompany.finance`` — 종목 한정 wrapper.
+            - ``Dart.report`` — 정기보고서 metadata.
 
         Requires:
-            - dartlab
-            - datetime
-            - io
-            - polars
-            - zipfile
+            - polars + DART_API_KEY + dartlab.providers.dart.openapi.client.
+
+        AIContext:
+            AI 가 "이 회사 재무제표" / "5 년 BS/IS/CF" 질문 entry. full=True 시 row 수 많음
+            (수백 항목). 분기별 연속은 OpenDART rate limit 주의 (20K/일).
+
+        LLM Specifications:
+            AntiPatterns:
+                - corp 가 lookup 실패 → ValueError (resolveCorpCode 내부).
+                - q=0 + 연속 기간 → 호출 N × 4 → rate limit 빠르게 소진.
+                - start > end → 빈 결과.
+                - 사업연도가 최신 (예 2025) 인데 OpenDART 미등록 → 빈 결과.
+            OutputSchema:
+                - pl.DataFrame — OpenDART finstate 원본 컬럼.
+            Prerequisites:
+                - DART_API_KEY. corp_code 매핑 가능.
+            Freshness:
+                - 호출 시점 OpenDART 데이터.
+            Dataflow:
+                - OpenDART API → 본 함수 → caller (또는 DartCompany 경유).
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1
@@ -624,50 +716,64 @@ class Dart:
         end: int | None = None,
         q: int | None = None,
     ) -> pl.DataFrame:
-        """사업보고서 주요정보 API — 단건 또는 연속.
+        """사업보고서 주요정보 API — 28 reportType × 단건/연속 기간 자동.
 
-        Parameters
-        ----------
-        corp : str
-            종목코드 / 회사명 / corp_code.
-        reportType : str
-            카테고리명. ``Dart.reportTypes()``로 목록 확인.
-        start : str | int | None
-            사업연도. None이면 최근 연도.
-        end : int | None
-            종료 연도. start~end 연속 조회.
-        q : int | None
-            분기 선택. None=연간, 0=Q1~Q4 전부, 1=Q1, 2=Q2, 3=Q3, 4=사업보고서.
-
-        Examples
-        --------
-        >>> d.report("삼성전자", "배당")
-        >>> d.report("삼성전자", "배당", 2020, end=2024)
-        >>> d.report("삼성전자", "배당", 2020, end=2024, q=0)   # 분기별
-        >>> d.report("삼성전자", "배당", 2020, end=2024, q=2)   # Q2만
-
-        Raises:
-            없음.
+        Capabilities:
+            - ``_REPORT_ENDPOINTS`` lookup 으로 reportType → endpoint 변환.
+            - 알 수 없는 reportType → ValueError + 사용 가능 목록.
+            - start~end 연속 → 자동 concat.
+            - q=0 → Q1~Q4 전체. q=1~4 → 특정 분기. q=None → 연간 (사업보고서).
+            - 단일 period → single GET, 다중 → ``_fetchSeries`` (rate limit 보호).
 
         Args:
-            corp: <TODO: param desc> (str)
-            reportType: <TODO: param desc> (str)
-            start: <TODO: param desc> (str | int | None)
-            end: <TODO: param desc> (int | None)
-            q: <TODO: param desc> (int | None)
+            corp: 종목코드 / 회사명 / corp_code.
+            reportType: 28 종 중 1 (배당/직원/임원/...). ``Dart.reportTypes()`` 로 확인.
+            start: 사업연도. None → 최근 연도.
+            end: 종료 연도. None → start 만.
+            q: 분기 선택. None=연간, 0~4.
+
+        Raises:
+            ValueError: reportType 이 28 종 외.
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — reportType 별 컬럼 가변 (DART API 원본).
+
+        Example:
+            >>> # d.report("삼성전자", "배당", 2020, end=2024, q=2)  # 5 년 Q2
+
+        Guide:
+            - "배당 5 년 연간" → ``d.report(corp, "배당", 2020, end=2024)``.
+            - "임원 분기별 20 건" → ``q=0``.
+            - "reportType 목록" → ``Dart.reportTypes()`` (정적 메서드).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Dart.reportTypes`` (정적) — 28 종 목록.
+            - ``DartCompany.report`` — 종목 한정 wrapper.
+            - ``Dart.finstate`` — 재무제표 (별도 API).
+            - ``_REPORT_ENDPOINTS`` (모듈) — reportType ↔ endpoint 매핑.
 
         Requires:
-            - dartlab
-            - datetime
-            - io
-            - polars
-            - zipfile
+            - polars + DART_API_KEY + dartlab.providers.dart.openapi.client.
+
+        AIContext:
+            AI 가 "배당 / 직원 / 임원 / 자기주식 / 감사 등" 카테고리 데이터 질문 entry. 28 종
+            카테고리명을 사용자 자연어에 매핑 (예 "배당금" → reportType="배당").
+
+        LLM Specifications:
+            AntiPatterns:
+                - reportType 영문 표기 사용 (예 "dividend") → ValueError. 한국어만.
+                - 신규 회사 (사업보고서 미제출) → 빈 결과.
+                - rate limit 초과 → 차단.
+            OutputSchema:
+                - pl.DataFrame — DART API 원본 컬럼 (reportType 마다 다름).
+            Prerequisites:
+                - DART_API_KEY + corp_code 매핑.
+            Freshness:
+                - 호출 시점 OpenDART 데이터.
+            Dataflow:
+                - OpenDART API → 본 함수 → caller.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1
