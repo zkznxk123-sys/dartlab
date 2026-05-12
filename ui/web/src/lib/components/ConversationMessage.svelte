@@ -1,6 +1,6 @@
 <script>
 	import { AlertTriangle, ChevronDown, Loader2, Maximize2, X } from "lucide-svelte";
-	import { renderMarkdown } from "$lib/markdown.js";
+	import { renderMarkdown, highlightCode } from "$lib/markdown.js";
 	import { groupLoops } from "$lib/agent/conversationModel.js";
 	import { isWideTable, countTableColumns } from "$lib/utils/widthThreshold.js";
 	import SuggestedQuestions from "./SuggestedQuestions.svelte";
@@ -170,7 +170,7 @@
 														<span>입력</span>
 													</div>
 													{#if isRunPython(row.name) && typeof row.args.code === "string"}
-														<div class="loop-row-out prose-dartlab">{@html renderMarkdown(fenceCode(shortText(row.args.code, ROW_LONG_THRESHOLD), "python"))}</div>
+														<pre class="loop-row-pre"><code class="hljs language-python">{@html highlightCode(shortText(row.args.code, ROW_LONG_THRESHOLD), "python")}</code></pre>
 													{:else if isRead(row.name) && row.args.target}
 														<div class="loop-row-meta-line">
 															{row.args.target}
@@ -346,7 +346,7 @@
 				{#if modalRow.args && Object.keys(modalRow.args).length}
 					<div class="text-[11px] font-medium text-dl-text-muted">입력</div>
 					{#if isRunPython(modalRow.name) && typeof modalRow.args.code === "string"}
-						<div class="prose-dartlab">{@html renderMarkdown(fenceCode(modalRow.args.code, "python"))}</div>
+						<pre class="loop-row-pre"><code class="hljs language-python">{@html highlightCode(modalRow.args.code, "python")}</code></pre>
 					{:else}
 						<pre class="loop-row-pre">{jsonPretty(modalRow.args, 8000)}</pre>
 					{/if}
