@@ -95,7 +95,7 @@ def test_promote_rejects_when_scorecard_fails(tmp_path: Path, cli_module, monkey
     monkeypatch.setenv("DARTLAB_RECIPE_RUNS_DIR", str(tmp_path / "runs"))
 
     args = type("Args", (), {})()
-    args.skillId = "recipes.creditDistressDual"
+    args.skillId = "recipes.credit.creditDistressDual"
     args.toStatus = "verified"
     args.force = False
     rc = cli_module.cmd_promote(args)

@@ -140,294 +140,294 @@
         "title": "Quant - 세계 수준 quality bar"
       },
       {
-        "id": "recipes.cashflowGovernanceDualSignal",
+        "id": "recipes.quality.cashflowGovernanceDualSignal",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호"
       },
       {
-        "id": "recipes.companyMacroPathProjection",
+        "id": "recipes.macro.companyMacroPathProjection",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)"
       },
       {
-        "id": "recipes.creditCovenantStressTest",
+        "id": "recipes.credit.creditCovenantStressTest",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률"
       },
       {
-        "id": "recipes.creditDeepDive",
+        "id": "recipes.credit.creditDeepDive",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)"
       },
       {
-        "id": "recipes.creditMacroStress",
+        "id": "recipes.credit.creditMacroStress",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성"
       },
       {
-        "id": "recipes.dataAvailabilityFirst",
+        "id": "recipes.etc.dataAvailabilityFirst",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)"
       },
       {
-        "id": "recipes.debtStructureAudit",
+        "id": "recipes.credit.debtStructureAudit",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)"
       },
       {
-        "id": "recipes.disclosureRiskScreen",
+        "id": "recipes.disclosure.disclosureRiskScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)"
       },
       {
-        "id": "recipes.disclosureToneToStoryRisk",
+        "id": "recipes.disclosure.disclosureToneToStoryRisk",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)"
       },
       {
-        "id": "recipes.distressCandidateScreen",
+        "id": "recipes.credit.distressCandidateScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목"
       },
       {
-        "id": "recipes.dividendStressTest",
+        "id": "recipes.dividend.dividendStressTest",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계"
       },
       {
-        "id": "recipes.dividendThesis",
+        "id": "recipes.dividend.dividendThesis",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)"
       },
       {
-        "id": "recipes.earningsQualityCheck",
+        "id": "recipes.quality.earningsQualityCheck",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)"
       },
       {
-        "id": "recipes.esgGovernanceLight",
+        "id": "recipes.governance.esgGovernanceLight",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)"
       },
       {
-        "id": "recipes.filingTextSignal",
+        "id": "recipes.disclosure.filingTextSignal",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature"
       },
       {
-        "id": "recipes.financialStatementCompare",
+        "id": "recipes.quality.financialStatementCompare",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "두 회사 재무제표 비교 (peer + show + 분해)"
       },
       {
-        "id": "recipes.flowAndPattern",
+        "id": "recipes.etc.flowAndPattern",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)"
       },
       {
-        "id": "recipes.governanceAudit",
+        "id": "recipes.governance.governanceAudit",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)"
       },
       {
-        "id": "recipes.governanceAuditNetwork",
+        "id": "recipes.governance.governanceAuditNetwork",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)"
       },
       {
-        "id": "recipes.growthScreenToDeepDive",
+        "id": "recipes.screen.growthScreenToDeepDive",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "성장 스캔 → 상위 후보 → 각 회사 분석"
       },
       {
-        "id": "recipes.industryDeepDive",
+        "id": "recipes.screen.industryDeepDive",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)"
       },
       {
-        "id": "recipes.industryStageScreen",
+        "id": "recipes.screen.industryStageScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목"
       },
       {
-        "id": "recipes.insiderEarningsLeading",
+        "id": "recipes.disclosure.insiderEarningsLeading",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표"
       },
       {
-        "id": "recipes.insiderEventCheck",
+        "id": "recipes.disclosure.insiderEventCheck",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)"
       },
       {
-        "id": "recipes.inventoryAndCycle",
+        "id": "recipes.quality.inventoryAndCycle",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)"
       },
       {
-        "id": "recipes.macroBetaPeerScreen",
+        "id": "recipes.macro.macroBetaPeerScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출"
       },
       {
-        "id": "recipes.macroLiquidityCycle",
+        "id": "recipes.macro.macroLiquidityCycle",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)"
       },
       {
-        "id": "recipes.macroQuantScenarioBacktest",
+        "id": "recipes.macro.macroQuantScenarioBacktest",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest"
       },
       {
-        "id": "recipes.macroToCompany",
+        "id": "recipes.macro.macroToCompany",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "매크로 → 섹터 → 회사 영향 (transmission)"
       },
       {
-        "id": "recipes.peerBenchmark",
+        "id": "recipes.screen.peerBenchmark",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)"
       },
       {
-        "id": "recipes.qualityMacroBeta",
+        "id": "recipes.macro.qualityMacroBeta",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주"
       },
       {
-        "id": "recipes.quantTechnicalReview",
+        "id": "recipes.etc.quantTechnicalReview",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)"
       },
       {
-        "id": "recipes.scenarioAnalysis",
+        "id": "recipes.macro.scenarioAnalysis",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)"
       },
       {
-        "id": "recipes.screenAndChart",
+        "id": "recipes.screen.screenAndChart",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)"
       },
       {
-        "id": "recipes.sectorRotation",
+        "id": "recipes.macro.sectorRotation",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "섹터 로테이션 분석 (매크로 + scan + industry)"
       },
       {
-        "id": "recipes.smallCapDiscovery",
+        "id": "recipes.screen.smallCapDiscovery",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "중소형주 발굴 (성장 + valuation + quality 교집합)"
       },
       {
-        "id": "recipes.storyReportBuild",
+        "id": "recipes.report.storyReportBuild",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)"
       },
       {
-        "id": "recipes.thesisTracker",
+        "id": "recipes.report.thesisTracker",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 6,
         "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)"
       },
       {
-        "id": "recipes.usMarketReview",
+        "id": "recipes.report.usMarketReview",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "미국 종목 review (EDGAR + macro + quant)"
       },
       {
-        "id": "recipes.usageAndApi",
+        "id": "recipes.etc.usageAndApi",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 1,
         "title": "dartlab 사용법·API 설명 (RunPython 우회)"
       },
       {
-        "id": "recipes.valuationBandTrack",
+        "id": "recipes.valuation.valuationBandTrack",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)"
       },
       {
-        "id": "recipes.workforceAndCapital",
+        "id": "recipes.governance.workforceAndCapital",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

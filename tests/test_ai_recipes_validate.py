@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 
 def test_returns_ok_when_all_required_kinds_present():
     refs = [
-        {"id": "skill:recipes.creditDistressDual", "kind": "skillRef"},
+        {"id": "skill:recipes.credit.creditDistressDual", "kind": "skillRef"},
         {"id": "table:bs_2025", "kind": "tableRef"},
         {"id": "value:zpp_2025", "kind": "valueRef"},
         {"id": "date:2025-12-31", "kind": "dateRef"},
