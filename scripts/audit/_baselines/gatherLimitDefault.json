@@ -35,7 +35,7 @@
     "src/dartlab/gather/domains/naverGlobal.py::fetchPrice",
     "src/dartlab/gather/domains/yahooChart.py::fetchHistory",
     "src/dartlab/gather/domains/yahooChart.py::fetchPrice",
-    "src/dartlab/gather/ecos/__init__.py::search",
+    "src/dartlab/gather/ecos/facade.py::search",
     "src/dartlab/gather/ecos/catalog.py::search",
     "src/dartlab/gather/ecos/series.py::fetchMulti",
     "src/dartlab/gather/ecos/series.py::fetchSeries",
