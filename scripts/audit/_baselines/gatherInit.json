@@ -1,0 +1,10 @@
+{
+  "_note": "AST 기반 — 함수/클래스 정의 0 + 본문 노드 화이트리스트",
+  "violations": [
+    "src/dartlab/gather/__init__.py",
+    "src/dartlab/gather/dart/__init__.py",
+    "src/dartlab/gather/domains/__init__.py",
+    "src/dartlab/gather/ecos/__init__.py",
+    "src/dartlab/gather/fred/__init__.py"
+  ]
+}

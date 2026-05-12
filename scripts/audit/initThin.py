@@ -103,9 +103,9 @@ def _scan(target: Path) -> list[dict]:
     return sorted(violations, key=lambda x: x["path"])
 
 
-def _loadBaseline() -> dict:
-    if _BASELINE.exists():
-        return json.loads(_BASELINE.read_text(encoding="utf-8"))
+def _loadBaseline(path: Path) -> dict:
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
     return {"violations": [], "_note": "P0.5 baseline"}
 
 
@@ -114,7 +114,9 @@ def main() -> int:
     parser.add_argument("target", nargs="?", default=str(_DEFAULT_TARGET.relative_to(_REPO).as_posix()))
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--update-baseline", action="store_true")
+    parser.add_argument("--baseline", default=None, help="baseline JSON path (기본 _baselines/initThin.json)")
     args = parser.parse_args()
+    baselinePath = (_REPO / args.baseline).resolve() if args.baseline else _BASELINE
 
     target = (_REPO / args.target).resolve()
     if not target.exists():
@@ -126,8 +128,8 @@ def main() -> int:
     print(f"위반 {len(violations)} 건 (함수/클래스 정의 존재 또는 비-허용 노드)")
 
     if args.update_baseline:
-        _BASELINE.parent.mkdir(parents=True, exist_ok=True)
-        _BASELINE.write_text(
+        baselinePath.parent.mkdir(parents=True, exist_ok=True)
+        baselinePath.write_text(
             json.dumps(
                 {
                     "_note": "AST 기반 — 함수/클래스 정의 0 + 본문 노드 화이트리스트",
@@ -138,10 +140,10 @@ def main() -> int:
             ),
             encoding="utf-8",
         )
-        print(f"\nbaseline 갱신: {_BASELINE.relative_to(_REPO)}")
+        print(f"\nbaseline 갱신: {baselinePath.relative_to(_REPO)}")
         return 0
 
-    baseline = _loadBaseline()
+    baseline = _loadBaseline(baselinePath)
     allowed = set(baseline.get("violations", []))
     new_violations = [v for v in violations if v["path"] not in allowed]
 

@@ -110,9 +110,9 @@ def _scan(target: Path) -> dict[str, list[dict]]:
     return violations
 
 
-def _loadBaseline() -> dict:
-    if _BASELINE.exists():
-        return json.loads(_BASELINE.read_text(encoding="utf-8"))
+def _loadBaseline(path: Path) -> dict:
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
     return {"over_split": [], "under_split": [], "_note": "P0.5 baseline"}
 
 
@@ -126,7 +126,13 @@ def main() -> int:
     )
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--update-baseline", action="store_true")
+    parser.add_argument(
+        "--baseline",
+        default=None,
+        help="baseline JSON path (기본 _baselines/folderSize.json — gather 같은 별도 target 은 _baselines/gatherSize.json 권장)",
+    )
     args = parser.parse_args()
+    baselinePath = (_REPO / args.baseline).resolve() if args.baseline else _BASELINE
 
     target = (_REPO / args.target).resolve()
     if not target.exists():
@@ -143,18 +149,18 @@ def main() -> int:
     print(f"under_split (분할 부족): {len(violations['under_split'])} 건")
 
     if args.update_baseline:
-        _BASELINE.parent.mkdir(parents=True, exist_ok=True)
+        baselinePath.parent.mkdir(parents=True, exist_ok=True)
         # baseline 에는 path 만 기록 (단순화)
         baseline_data = {
             "_note": "P-트랙 phase 통과마다 축소",
             "over_split": sorted(v["path"] for v in violations["over_split"]),
             "under_split": sorted(v["path"] for v in violations["under_split"]),
         }
-        _BASELINE.write_text(json.dumps(baseline_data, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"\nbaseline 갱신: {_BASELINE.relative_to(_REPO)}")
+        baselinePath.write_text(json.dumps(baseline_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"\nbaseline 갱신: {baselinePath.relative_to(_REPO)}")
         return 0
 
-    baseline = _loadBaseline()
+    baseline = _loadBaseline(baselinePath)
     allowed_over = set(baseline.get("over_split", []))
     allowed_under = set(baseline.get("under_split", []))
 
