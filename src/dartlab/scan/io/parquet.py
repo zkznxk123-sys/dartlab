@@ -228,6 +228,35 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     >>> df = scanParquets("majorHolder", ["stockCode", "year", "지분율"])
     >>> df.height > 0
     True
+
+    Capabilities:
+        - prebuild ``scan/report/{apiType}.parquet`` 우선 lazy scan → 없으면 종목별 raw report
+          parquet 순회로 자동 fallback. apiType 매칭 + keep_cols 동적 적응 (스키마 변화 흡수).
+
+    AIContext:
+        scan 비재무 axis (governance/workforce/capital/audit/...) 가 모두 본 함수로 LazyFrame
+        획득. AI agent 가 호출 시 빈 결과는 raw 데이터 부재 → ``hint:market_data_needed`` 이벤트
+        emit (UI 가 사용자에게 다운로드 안내).
+
+    Guide:
+        - keepCols 에 stockCode/year/quarter 외 axis 핵심 컬럼이 최소 1 개 있어야 (없으면 skip).
+        - 종목별 fallback 은 메모리 부담 — prebuild 우선.
+
+    When:
+        scan 비재무 axis 가 호출. 사용자 직접 호출은 prototype 한정.
+
+    How:
+        ``_ensureScanData`` → prebuild file 존재 시 lazy scan + keep_cols select → 없으면 raw
+        report 디렉토리 종목별 lazy + apiType filter → vertical_relaxed concat.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출) 또는
+          ``data/dart/report/{stockCode}.parquet`` (fallback)
+
+    SeeAlso:
+        - :func:`scanFinanceParquets` — finance 전용 (sj_div 필터 + 계정 매칭)
+        - :func:`dartlab.scan.builders.kr.core.buildReport` — source 빌드
+        - :data:`SCAN_API_TYPES` — 처리 apiType 12 종 list
     """
     # 1순위: 프리빌드 scan parquet (없으면 자동 다운로드 시도)
     scanDir = _ensureScanData()
@@ -319,6 +348,25 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
     >>> rev = extractAccount(subDf, {"Revenue"}, {"매출액"})
     >>> rev
     1000000
+
+    Capabilities:
+        - account_id (XBRL tag) 또는 account_nm (한글 표시명) 매칭 row 중 첫 유효 amount 반환.
+          ``parseNumStr`` 로 콤마/문자열 정수 변환.
+
+    AIContext:
+        scan financial 7 axis 의 per-file fallback 경로가 본 함수로 단일 종목 단면에서 계정 값
+        추출. industry/delta 도 같은 패턴.
+
+    When/How:
+        scan/finance.parquet 합본 없거나 종목별 처리 필요할 때. row iterate → 첫 매칭 row 의
+        amount → parseNumStr → 반환.
+
+    Requires:
+        - ``account_id`` · ``account_nm`` · ``amtCol`` 컬럼
+
+    SeeAlso:
+        - :func:`scanFinanceParquets` — 횡단 합본 dict 반환 (본 함수의 wide 버전)
+        - :data:`REVENUE_IDS` · :data:`OP_IDS` · :data:`NI_IDS` · ... — ids/nms SSOT
     """
     for row in sub.iter_rows(named=True):
         aid = row.get("account_id", "")
@@ -357,6 +405,24 @@ def findLatestYear(raw: pl.DataFrame, checkCol: str, minCount: int = 500) -> str
     >>> from dartlab.scan.io.parquet import findLatestYear
     >>> findLatestYear(rawDf, "매출액", minCount=500)
     "2024"
+
+    Capabilities:
+        - 연도별 유효 데이터 (non-null, ``"-"`` / ``""`` 제외) 카운트 → minCount 이상이면 그 연도
+          채택. 최신 → 과거 순회로 가장 최근 유효 연도 1 개만 반환.
+
+    AIContext:
+        scan axis 가 "최신 연 단면" 분석 시 본 함수로 latest year 확정. 데이터 누락이 큰 연도는
+        skip 해서 통계 안정성 확보.
+
+    When/How:
+        scan governance/workforce/capital 등이 연 단위 단면을 뽑을 때. years_desc 순회 + non-null
+        count → minCount 충족 첫 연도.
+
+    Requires:
+        - ``raw["year"]`` 컬럼 + ``check_col`` 컬럼
+
+    SeeAlso:
+        - :func:`pickBestQuarter` · :func:`filterLatestPerStock` — 같은 latest 컨셉의 다른 차원
     """
     years_desc = sorted(raw["year"].unique().to_list(), reverse=True)
     for y in years_desc:
@@ -393,6 +459,23 @@ def pickBestQuarter(df: pl.DataFrame) -> pl.DataFrame:
     >>> from dartlab.scan.io.parquet import pickBestQuarter
     >>> pickBestQuarter(df)["quarter"].unique().to_list()
     ["2분기"]
+
+    Capabilities:
+        - QUARTER_ORDER (2분기→4분기→3분기→1분기) 우선순위로 단일 분기 선택. Q2 가 보통
+          반기 보고서로 가장 신뢰도 높아 우선.
+
+    AIContext:
+        scan 비재무 axis 가 종목별 단일 분기 단면 필요 시. AI 가 횡단 비교 시 분기 혼합 noise
+        제거.
+
+    When/How:
+        ``df["quarter"].unique()`` → ``QUARTER_ORDER`` 정렬 → 첫 분기로 filter.
+
+    Requires:
+        - ``df["quarter"]`` 컬럼 (예: "1분기"/"2분기"/...)
+
+    SeeAlso:
+        - :func:`findLatestYear` · :func:`filterLatestPerStock` — latest 단면 관련 helpers
     """
     quarters = df["quarter"].unique().to_list()
     best = sorted(quarters, key=lambda q: QUARTER_ORDER.get(q, 99))
@@ -451,6 +534,22 @@ def parseDateYear(s) -> int | None:
     2021
     >>> parseDateYear(None)
     None
+
+    Capabilities:
+        - 다양한 separator (``.``/``-``/``/``) 의 날짜 문자열에서 연도 정수 추출. None/빈
+          문자열/포맷 어긋남은 모두 None.
+
+    AIContext:
+        scan 모듈이 raw report row 의 date 컬럼에서 연도 단위 비교를 위해 사용.
+
+    When/How:
+        ``isinstance(str)`` 체크 → 첫 4 자 정수 변환 시도 → ValueError 흡수 후 None.
+
+    Requires:
+        - 표준 라이브러리만
+
+    SeeAlso:
+        - :func:`findLatestYear` — 연도 단위 latest 추출의 호출자
     """
     if s is None:
         return None
@@ -503,6 +602,28 @@ def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol
     >>> latest = filterLatestPerStock(df)
     >>> latest.group_by("stockCode").len()["len"].max()
     1
+
+    Capabilities:
+        - 종목별 최신 ``bsns_year`` 행만 남기는 per-stock latest 필터. 글로벌 latest year cut 의
+          회귀 패턴 (2026 Q1 조기 제출 3 종목 → 2025 자 2895 종목 손실) 차단 SSOT.
+
+    AIContext:
+        scan financial / governance 등 모든 axis 가 본 함수를 사용해 종목별 latest 단면을 안전하게
+        추출. AI agent 가 횡단 비교 시 매년 다른 결산월 회사들의 단면 일관성 보장.
+
+    Guide:
+        - 13 개 axis 파일에 분산되어 있던 잘못된 글로벌 cut 패턴을 본 함수로 SSOT 통합.
+        - 누락 컬럼 / 빈 df 는 원본 그대로 반환 (silent skip — 호출자 무중단).
+
+    When/How:
+        axis 의 단면 추출 직전. ``group_by(scCol).agg(max yearCol)`` → join → filter → drop.
+
+    Requires:
+        - ``scCol`` · ``yearCol`` 컬럼 (둘 다 있어야 동작)
+
+    SeeAlso:
+        - :func:`findLatestYear` — 데이터 가용성 검사 (포함된 latest year 탐지)
+        - :func:`pickBestQuarter` — 분기 차원 latest
     """
     if target.is_empty() or scCol not in target.columns or yearCol not in target.columns:
         return target
@@ -816,6 +937,29 @@ def loadValuationSnapshot() -> tuple[pl.DataFrame | None, datetime | None]:
     -----
     - 호출자는 ``None`` 인 경우 네이버 실시간 수집 (``_fetchAll``) 으로 fallback 한다.
     - 스냅샷이 1일 이상 오래된 경우 상위 경로 ``_maybeWarnStale("scan")`` 가 경고.
+
+    Capabilities:
+        - ``data/dart/scan/valuation.parquet`` 로드 + 필수 컬럼 (``stockCode/marketCap/per/pbr/
+          dividendYield/current/snapshotAt``) 검증 + snapshotAt UTC 타입 normalize.
+
+    AIContext:
+        ``scanValuation`` (refresh=False 경로) 가 본 함수로 prebuild 시도. AI agent 가 valuation
+        axis 호출 시 1 차 ≤1 초 응답의 데이터 source.
+
+    Guide:
+        - 필수 7 컬럼 중 하나라도 누락 시 (None, None) — 호출자가 fallback path 로 전환.
+        - snapshotAt 으로 데이터 freshness 명시 (호출자가 사용자에게 "N 시간 전 수집" 안내).
+
+    When/How:
+        ``_ensureScanData`` → valuation.parquet 존재 시 read → 필수 컬럼 + 빈 df 가드 →
+        snapshotAt datetime/string → datetime 변환 → tuple 반환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/valuation.parquet`` (``buildValuation`` cron 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.core.buildValuation` — prebuild 빌더
+        - :func:`dartlab.scan.financial.valuation.scanValuation` — 본 함수 호출자
     """
     scanDir = _ensureScanData()
     path = scanDir / "valuation.parquet"
@@ -879,6 +1023,39 @@ def scanFinanceParquets(
     >>> revMap = scanFinanceParquets("IS", {"Revenue"}, {"매출액"})
     >>> revMap.get("005930")  # 삼성전자 최신년 매출액
     250000000000000
+
+    Capabilities:
+        - prebuild ``scan/finance.parquet`` 우선 LazyFrame scan + sj_div + 계정 ID/이름 필터 →
+          종목별 최신 연도 첫 매칭 값. 없으면 raw glob DuckDB streaming SQL fallback.
+        - 연결재무 우선 (fs_nm contains "연결") + 최신 bsns_year per stock + accountIds 또는
+          accountNms 중 어느 한쪽 매치.
+
+    AIContext:
+        scan financial axis (profitability/growth/quality/...) 와 ``scanAccount`` 가 본 함수로
+        종목별 매출/영업이익/순이익 등의 latest 값을 dict 로 받는다. AI 가 횡단 재무 지표 매핑이
+        필요할 때 본 함수가 1 차 source.
+
+    Guide:
+        - accountIds (XBRL tag) + accountNms (한글 표시명) 중 어느 한쪽이 매칭되면 통과.
+          ``REVENUE_IDS`` / ``REVENUE_NMS`` 같이 module 상수가 SSOT.
+        - prebuild 없으면 자동으로 raw glob DuckDB 경로 — 메모리 안전 (네이티브 spill-to-disk).
+
+    When:
+        scan financial 7 axis 함수 내부에서. 직접 사용은 prototype.
+
+    How:
+        ``_ensureScanData`` → prebuild scan/finance.parquet 시도 ``_scanFinanceFromMerged`` →
+        실패 시 ``_loadRawFinanceViaDuckDb`` (raw glob streaming SQL) + ``_scanFinanceFromLazy``.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (``buildFinance`` 산출) 또는
+          ``data/dart/finance/{stockCode}.parquet`` (DuckDB fallback)
+        - DuckDB 패키지 (fallback 경로)
+
+    SeeAlso:
+        - :func:`scanParquets` — report 전용 (apiType 매칭)
+        - :func:`_loadRawFinanceViaDuckDb` · :func:`_scanFinanceFromLazy` · :func:`_scanFinanceFromMerged`
+        - :data:`REVENUE_IDS` · :data:`OP_IDS` · :data:`NI_IDS` · :data:`TA_IDS` · :data:`EQ_IDS`
     """
     sj_divs = [statement] if statement != "IS" else ["IS", "CIS"]
 

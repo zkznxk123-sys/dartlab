@@ -47,6 +47,21 @@ class CrossScanEngine(Protocol):
         Example:
             >>> engine = pickCrossScanEngine()
             >>> engine.aggregate(lf, limit=100)
+
+        Capabilities:
+            - LazyFrame → DataFrame 변환의 통일 surface. polars streaming / duckdb 두 구현이
+              같은 시그니처라 caller 무중단 swap.
+
+        AIContext:
+            cross-company aggregation 이 메모리 압박 환경에서도 안전하게 돌도록 caller 가
+            엔진 선택 logic 없이 ``pickCrossScanEngine().aggregate(lf)`` 한 번에 처리.
+
+        Requires:
+            - LazyFrame (filter/select 적용 후)
+
+        SeeAlso:
+            - :class:`PolarsCrossScan` · :class:`DuckDbCrossScan` — 두 구현
+            - :func:`pickCrossScanEngine` — dispatcher
         """
         ...
 
@@ -74,6 +89,21 @@ class PolarsCrossScan:
 
         Example:
             >>> PolarsCrossScan().aggregate(lf, limit=100)
+
+        Capabilities:
+            - polars streaming engine 으로 LazyFrame collect. M2-1 이후 dartlab 의 표준 (filter/
+              select/group_by 단순 chain 은 O(batch) 메모리).
+
+        AIContext:
+            기본 cross-scan 엔진. 미지원 연산 (asof/window 일부) 만나면 caller 가 catch 후
+            ``DuckDbCrossScan`` 으로 fallback.
+
+        Requires:
+            - polars (필수, 표준 의존)
+
+        SeeAlso:
+            - :class:`DuckDbCrossScan` — streaming 미지원 연산 fallback
+            - :func:`pickCrossScanEngine`
         """
         if limit and limit > 0:
             lf = lf.limit(limit)
@@ -115,6 +145,21 @@ class DuckDbCrossScan:
 
         Example:
             >>> DuckDbCrossScan().aggregate(lf, limit=100)
+
+        Capabilities:
+            - polars LazyFrame → DuckDB relation 등록 → SQL SELECT → polars DataFrame 복귀
+              (Arrow zero-copy). DuckDB 가 자동 disk-spill 로 OOC.
+            - streaming 미지원 polars 연산 (asof/window 일부) 의 fallback.
+
+        AIContext:
+            폴라스 streaming 한계 만나면 본 엔진. caller 는 별도 SQL 작성 안 함 — 동일 인터페이스.
+
+        Requires:
+            - duckdb 패키지 (없으면 ImportError)
+
+        SeeAlso:
+            - :class:`PolarsCrossScan` — 기본 엔진
+            - :func:`pickCrossScanEngine`
         """
         import duckdb
 
@@ -146,6 +191,21 @@ def pickCrossScanEngine(*, engine: Literal["polars", "duckdb"] | None = None) ->
 
     Example:
         >>> pickCrossScanEngine(engine="duckdb").aggregate(lf)
+
+    Capabilities:
+        - caller 우선 → 환경변수 ``DARTLAB_CROSS_SCAN_ENGINE`` 보조 → 기본 polars 의 3 단 우선
+          순위 엔진 dispatcher.
+
+    AIContext:
+        cross-scan 엔진 선택을 caller 의 한 줄 호출로 해결. AI agent 가 메모리 압박 환경 (서버
+        cron 등) 에 환경변수 "duckdb" 만 설정하면 본 함수가 자동 swap.
+
+    Requires:
+        - polars (필수). duckdb 는 ``engine="duckdb"`` 선택 시 import 시점에 필요.
+
+    SeeAlso:
+        - :class:`PolarsCrossScan` · :class:`DuckDbCrossScan` — 두 구현
+        - :class:`CrossScanEngine` — Protocol surface
     """
     name = (engine or os.environ.get("DARTLAB_CROSS_SCAN_ENGINE") or "polars").lower()
     if name == "duckdb":
