@@ -6,6 +6,22 @@
 	import SuggestedQuestions from "./SuggestedQuestions.svelte";
 	import ViewSpecRenderer from "$lib/ai/ViewSpecRenderer.svelte";
 
+	// mermaid singleton — markdown.js 가 `<pre class="mermaid mermaid-pending">` placeholder 를
+	// emit. 본 component 가 mount/update 후 mermaid.run() 호출해 SVG 로 교체. 동적 import 로
+	// 첫 mermaid 등장 시점까지 번들에서 lazy load. mermaid 가 처리한 element 는 자동으로
+	// data-processed="true" attribute 부착 → idempotent.
+	let mermaidPromise = null;
+	function ensureMermaid() {
+		if (!mermaidPromise) {
+			mermaidPromise = import("mermaid").then((mod) => {
+				const mermaid = mod.default || mod;
+				mermaid.initialize({ startOnLoad: false, theme: "dark", securityLevel: "loose" });
+				return mermaid;
+			});
+		}
+		return mermaidPromise;
+	}
+
 	let {
 		message,
 		onRegenerate,
@@ -25,6 +41,21 @@
 	let openLoops = $state({});
 	let openRows = $state({});
 	let modalRow = $state(null);
+
+	// 메시지 본문 변경 시 mermaid 코드펜스를 SVG 로 변환. text/parts 가 reactive deps —
+	// streaming 으로 텍스트가 늘어날 때마다 새 mermaid placeholder 가 도착할 수 있다.
+	// mermaid.run() 의 data-processed 가드로 같은 element 재처리는 자동 skip.
+	$effect(() => {
+		text;
+		parts;
+		const pending = Array.from(document.querySelectorAll(".mermaid-pending")).filter(
+			(el) => el.getAttribute("data-processed") !== "true",
+		);
+		if (pending.length === 0) return;
+		ensureMermaid()
+			.then((mermaid) => mermaid.run({ nodes: pending }))
+			.catch((err) => console.error("mermaid render failed", err));
+	});
 
 	function toggleLoop(id) {
 		openLoops = { ...openLoops, [id]: !openLoops[id] };

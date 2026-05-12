@@ -115,6 +115,16 @@ export function highlightCode(code, lang = "") {
 }
 
 function renderCodeBlock(lang, code) {
+	// mermaid 코드펜스 → mermaid 라이브러리가 자동 SVG 변환할 placeholder.
+	// 호출처 (ConversationMessage 등) 가 mount 후 mermaid.run({ querySelector: '.mermaid-pending' })
+	// 호출해 placeholder 본문을 SVG 로 교체. data-source 는 mermaid 가 사용하지 않고
+	// 호출처가 retry/복원 시 원본 텍스트 확보 용.
+	if (lang === "mermaid") {
+		const escaped = String(code || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		const sourceAttr = encodeURIComponent(code || "");
+		return `<pre class="mermaid mermaid-pending" data-source="${sourceAttr}">${escaped}</pre>`;
+	}
+
 	let highlighted;
 	try {
 		if (lang && hljs.getLanguage(lang)) {
