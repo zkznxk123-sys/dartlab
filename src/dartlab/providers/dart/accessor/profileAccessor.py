@@ -91,27 +91,64 @@ class _ProfileAccessor:
 
     @property
     def facts(self) -> pl.DataFrame | None:
-        """기업 facts 통합 long-format — finance + CIS + SCE + report + docs.
+        """기업 facts 통합 long-format — finance + CIS + SCE + report + docs 4 source merge.
 
-        4 source 의 facts 를 ``topic/period/source/valueType/valueKey/value/payloadRef/priority/summary``
-        통합 long DataFrame 으로 머지. priority 는 source 우선순위 (finance=300, report=200, docs=100).
+        Capabilities:
+            - finance series (BS/IS/CF) annual → "finance" source, priority 300.
+            - financeCisAnnual (CIS) → "finance" source, priority 300.
+            - sceSeriesAnnual (SCE) → "finance" source, priority 300.
+            - report 28 apiType → "report" source, priority 200.
+            - docs retrievalBlocks → "docs" source, priority 100, semanticTopic/detailTopic 자동 coalesce.
+            - cacheKey = ``"_profileFacts"`` — 한 번 빌드 후 재사용.
 
         Returns:
-            long-format facts DataFrame 또는 None (모든 source 부재).
-
-        Raises:
-            없음 (개별 source 부재 시 해당 부분만 누락).
+            pl.DataFrame | None — long format. 컬럼 ``topic`` (str) / ``period`` (str) /
+            ``source`` (finance/report/docs) / ``valueType`` (number/field/text/table 등) /
+            ``valueKey`` (str) / ``value`` (Union) / ``payloadRef`` (str) / ``priority`` (Int) /
+            ``summary`` (str). 모든 source 부재 → None.
 
         Example:
-            >>> facts = c._profileAccessor.facts
-            >>> facts.filter(pl.col("topic") == "BS").head()
+            >>> # facts = c._profileAccessor.facts
+            >>> # facts.filter(pl.col("topic") == "BS").head()
+
+        Guide:
+            - "이 회사의 모든 facts 한 테이블" → ``c._profileAccessor.facts``.
+            - "특정 topic 다 출처 모음" → ``facts.filter(pl.col("topic")==X)``.
+            - "최우선 source 만" → priority 내림차순 정렬 + topic groupby first.
+            - "summary 만 LLM 입력" → ``facts.select("summary")`` head.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``sections`` — docs spine 캐노니컬 sections (본 함수와 보완).
+            - ``availableTopics`` — facts + sections topic 합집합.
+            - ``trace`` — 단일 topic 의 출처 우선순위 분석.
+            - ``Company._buildFinanceSeries`` / ``_financeCisAnnual`` / ``_sceSeriesAnnual`` —
+              finance source.
 
         Requires:
-            - dartlab
-            - polars
+            - polars — DataFrame.
+            - dartlab.core.polarsUtil.isEmptyDf.
+
+        AIContext:
+            Workbench "이 회사 무슨 데이터 있냐" / "모든 출처 보여줘" 질문 entry. priority 컬럼
+            으로 finance > report > docs 자동 ranking. AI 가 summary 컬럼만 추려 토큰 절약.
+            None 시 회사 데이터 미수집.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 모든 source 부재 → None (silent). caller 는 None 시 "데이터 없음" fallback.
+                - cache hit → 신규 데이터 미반영. fresh 보장 필요 시 cache invalidate.
+                - vertical_relaxed concat → 컬럼 형식 다양 (value 가 Float / str 혼재).
+            OutputSchema:
+                - 9 컬럼 long format.
+                - row count: source 별 facts 합. 회사 1 개 당 수백~수천.
+            Prerequisites:
+                - 어느 source 라도 1 개 수집되어 있음.
+            Freshness:
+                - source 의 freshness 의존 + cache.
+            Dataflow:
+                - 4 source → 본 함수 (long merge) → caller (AI / trace / availableTopics).
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         cacheKey = "_profileFacts"
         if cacheKey in self._company._cache:
@@ -286,38 +323,97 @@ class _ProfileAccessor:
 
     @property
     def sections(self) -> pl.DataFrame | None:
-        """merged canonical sections — docs spine + finance/report 통합 보드.
+        """merged canonical sections — docs spine + finance/report 통합 wide 보드.
+
+        Capabilities:
+            - ``Company._getPrimary("sections")`` 위임 — docs sections + finance/report merge.
+            - facts 는 long, 본 함수는 wide (topic × period).
+            - sections 결과의 period 컬럼은 ``_isPeriodColumn`` 매칭 (예 "2024Q1").
 
         Returns:
-            ``topic/period/sectionTitle/...`` 등 컬럼 DataFrame 또는 None.
-
-        Raises:
-            없음.
+            pl.DataFrame | None — wide DataFrame. 컬럼 ``topic`` + period N + meta.
+            sections 미수집 → None.
 
         Example:
-            >>> c._profileAccessor.sections.head()
+            >>> # c._profileAccessor.sections.head()
+
+        Guide:
+            - "이 회사 topic × 시간 매트릭스" → 본 함수.
+            - long format 으로 → ``facts`` 사용.
+
+        SeeAlso:
+            - ``facts`` — 본 함수의 long format 자매.
+            - ``Company._getPrimary("sections")`` — 본 함수 본체.
+
+        Requires:
+            - polars — DataFrame.
+
+        AIContext:
+            Workbench "이 회사 토픽 매트릭스" 질문 처리. AI 가 wide → 각 topic row 의 period
+            컬럼 lookup → 자연어 답변.
+
+        LLM Specifications:
+            AntiPatterns:
+                - sections 미수집 (docs 또는 finance 모두 부재) → None.
+            OutputSchema:
+                - wide DataFrame — topic + period + meta.
+            Prerequisites:
+                - docs sections parquet 또는 finance 수집.
+            Freshness:
+                - source 의존.
+            Dataflow:
+                - docs / finance → _getPrimary → 본 함수 → AI.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         return self._company._getPrimary("sections")
 
     @property
     def availableTopics(self) -> list[str]:
-        """profile 에서 접근 가능한 topic 목록 — sections + facts union.
+        """profile 에서 접근 가능한 topic 목록 — sections 컬럼 + facts topic 합집합 정렬.
+
+        Capabilities:
+            - sections 의 ``topic`` 컬럼 to_list + facts 의 ``topic`` unique to_list 합집합.
+            - None 값 제외 + 알파벳 정렬.
 
         Returns:
-            정렬된 topic str 리스트.
-
-        Raises:
-            없음.
+            list[str] — 정렬된 topic 이름들. 데이터 부재 시 빈 list.
 
         Example:
-            >>> c._profileAccessor.availableTopics[:10]
+            >>> # topics = c._profileAccessor.availableTopics
+            >>> # "BS" in topics
+            >>> # True
+
+        Guide:
+            - "이 회사 어떤 topic 분석 가능한가" → 본 함수.
+            - "topic 1 개 데이터 보기" → ``c.show(topic)``.
+            - "출처 우선순위" → ``trace(topic)``.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``facts`` / ``sections`` — 본 함수의 source.
+            - ``trace`` — 단일 topic 출처 분석.
 
         Requires:
-            - dartlab
-            - polars
+            - polars — DataFrame to_list.
+
+        AIContext:
+            Workbench "이 회사에서 분석 가능한 항목" 질문 entry. 결과 list 가 짧으면 회사 데이터
+            부족, 길면 분석 가능 범위 넓음. AI 가 list 를 검토하여 다음 질문 추천.
+
+        LLM Specifications:
+            AntiPatterns:
+                - sections/facts 모두 부재 → 빈 list.
+                - topic 이름이 한국어/영문 혼재 가능 (apiType 가 영문, docs topic 이 한국어 변형).
+            OutputSchema:
+                - list[str] — 알파벳 정렬.
+            Prerequisites:
+                - facts 또는 sections 1 개 이상.
+            Freshness:
+                - source 의존.
+            Dataflow:
+                - facts + sections → union → 본 함수.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         topics = set()
         if self.sections is not None and "topic" in self.sections.columns:
@@ -328,27 +424,57 @@ class _ProfileAccessor:
         return sorted(str(t) for t in topics if t is not None)
 
     def get(self, topic: str) -> Any:
-        """topic 데이터 조회 — deprecated alias (``c.show(topic)`` 권장).
+        """topic 데이터 조회 — DEPRECATED alias (``c.show(topic)`` 권장).
+
+        Capabilities:
+            - DeprecationWarning 항상 발생.
+            - BS/IS/CF/CIS → finance attribute lookup.
+            - SCE → ``_finance.SCE``.
+            - report authoritative topic → report attribute lookup.
+            - 그 외 → sections row filter.
 
         Args:
-            topic: topic 이름 (BS/IS/CF/CIS/SCE 또는 report topic).
+            topic: topic 이름.
 
         Returns:
-            DataFrame / dict 또는 None.
+            pl.DataFrame | dict | None — topic 의 source 의존.
 
         Raises:
-            DeprecationWarning: 호출 시 발생 (alias 패턴 — ``c.show(topic)`` 사용 권장).
+            없음 (warnings.warn 만 발생). 신규 코드는 ``c.show(topic)`` 사용.
 
         Example:
-            >>> c._profileAccessor.get("BS")  # deprecated
-            >>> c.show("BS")  # 권장
+            >>> # c._profileAccessor.get("BS")  # DEPRECATED
+            >>> # c.show("BS")  # 권장
+
+        Guide:
+            - 본 함수 사용 X → ``c.show(topic)`` 또는 ``c.select(topic, [...])``.
+            - profile 페이지의 raw access 가 필요하면 ``facts`` / ``sections`` 직접.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.show`` / ``Company.select`` — 권장 API.
+            - ``facts`` / ``sections`` — long/wide raw access.
 
         Requires:
-            - dartlab
-            - polars
+            - polars — DataFrame (sections 경로).
+            - warnings (stdlib).
+
+        AIContext:
+            AI 가 본 함수 호출 X. 발견 시 c.show 로 migrate.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 본 함수 새로 호출 → DeprecationWarning 누적. show 로 마이그.
+                - report topic 이 _REPORT_AUTHORITATIVE_TOPICS 외 → sections fallback.
+            OutputSchema:
+                - DataFrame / dict / None (topic 의 source 의존).
+            Prerequisites:
+                - finance / report / docs 중 1.
+            Freshness:
+                - source 의존.
+            Dataflow:
+                - 본 함수 → finance / report / sections attribute.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         import warnings
 
@@ -367,28 +493,60 @@ class _ProfileAccessor:
         return sections.filter(pl.col("topic") == topic)
 
     def trace(self, topic: str, period: str | None = None) -> pl.DataFrame | dict[str, Any] | None:
-        """topic 출처 추적 — finance/report/docs 우선순위 + payloadRef.
+        """topic 출처 추적 — 4 source 우선순위 + payloadRef + whySelected 메타.
+
+        Capabilities:
+            - facts (long) 에서 topic 별 row 추출 → source 별 group_by + priority max.
+            - docs sections 의 wide row 추가 ("docs-sections:topic:period" payload).
+            - period 명시 시 ``rawPeriod`` 정규화 후 filter.
+            - 출처 list 를 (priority, source) 내림차순 정렬 → primary + fallback 분리.
+            - 출처 1 개 이상 있으면 dict, 없으면 None.
 
         Args:
             topic: topic 이름.
-            period: 특정 기간 (None 이면 전체).
+            period: 특정 기간 또는 None (전체).
 
         Returns:
-            ``{topic, period, primarySource, fallbackSources, selectedPayloadRef,
-            availableSources, whySelected}`` dict 또는 None (출처 없음).
-
-        Raises:
-            없음.
+            dict | None — 키 ``topic`` / ``period`` / ``primarySource`` /
+            ``fallbackSources`` (list) / ``selectedPayloadRef`` / ``availableSources`` (list[dict]) /
+            ``whySelected``.
 
         Example:
-            >>> c._profileAccessor.trace("BS", period="2024")
+            >>> # c._profileAccessor.trace("BS", period="2024")
+
+        Guide:
+            - "이 값 어디서 왔냐" 디버깅 → 본 함수.
+            - "finance vs docs 값 차이" → availableSources 의 row 들 비교.
+            - "여러 period 한 번에" → period=None 후 availableSources 그룹 분석.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``facts`` / ``sections`` — 본 함수의 source.
+            - ``_sourcePriority`` (모듈 private) — whySelected 의 priority 로직.
+            - ``dartlab.providers.dart.docs.sections.rawPeriod`` — period 정규화.
 
         Requires:
-            - dartlab
-            - polars
+            - polars — DataFrame group_by + filter.
+            - dartlab.providers.dart.docs.sections — rawPeriod.
+
+        AIContext:
+            AI 가 "이 값이 어디서 나온 거냐" 출처 질문 처리 시 entry. primarySource 만 사용자
+            에게 노출, availableSources 는 디버깅 컨텍스트. whySelected 가 priority 규칙
+            (finance > report > docs) 설명.
+
+        LLM Specifications:
+            AntiPatterns:
+                - topic 존재 X → None (silent).
+                - period 형식 다양 ("2024" / "2024-Q1" / "2024Q1") → rawPeriod 정규화 한계.
+            OutputSchema:
+                - dict — 7 키 또는 None.
+            Prerequisites:
+                - facts 또는 sections 중 1 개 이상.
+            Freshness:
+                - source 의존.
+            Dataflow:
+                - facts + sections → 본 함수 → AI 디버그 응답.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -452,25 +610,55 @@ class _ProfileAccessor:
 
     @property
     def sharesOutstanding(self) -> int | None:
-        """발행주식수 (유통중 보통주 기준, ``stockTotal`` report).
+        """발행주식수 (유통중 보통주, 최신 ``stockTotal`` report 의 ``istc_totqy``).
 
-        ``se='보통주'`` 필터 + 최신 ``stlm_dt`` 의 ``istc_totqy`` (유통중주식총수) 추출.
+        Capabilities:
+            - ``stockTotal`` apiType 의 annual report 추출.
+            - ``se='보통주'`` 필터.
+            - ``stlm_dt`` 최신순 정렬 후 1 번째 row 의 ``istc_totqy`` 추출.
+            - 모든 예외 (AttributeError/KeyError/IndexError/ValueError/TypeError) → None.
+            - cacheKey = ``"_sharesOutstanding"``.
 
         Returns:
-            발행주식수 (정수) 또는 None (report 부재 / 추출 실패).
-
-        Raises:
-            없음 (모든 예외 잡아 None 반환).
+            int | None — 발행주식수 (정수). report 부재 / 추출 실패 → None.
 
         Example:
-            >>> c._profileAccessor.sharesOutstanding
+            >>> # c._profileAccessor.sharesOutstanding
+            >>> # 7234500000  # 삼성전자 보통주
+
+        Guide:
+            - "삼성전자 발행주식수" → 본 함수 (보통주 한정).
+            - "우선주까지" → ``c._report.extractAnnual("stockTotal")`` 직접 (se filter X).
+            - 시가총액 계산 = 본 함수 × 현재 주가.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.providers.dart.report.extract.extractAnnual`` — report 추출 backend.
+            - ``stockTotal`` apiType — 발행주식수 source.
 
         Requires:
-            - dartlab
-            - polars
+            - polars — DataFrame filter + sort.
+            - report parquet 수집.
+
+        AIContext:
+            AI 가 "시가총액 계산" / "유통주식수" 질문 entry. None 시 "report 미수집" fallback.
+            우선주 회사 (예 삼성전자 우) 의 경우 보통주 + 우선주 별도 처리 필요 — 본 함수는
+            보통주만.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 우선주만 있는 회사 → 보통주 row 0 → None.
+                - report parquet 미수집 → None.
+                - istc_totqy 컬럼이 신규/이전 양식 차이로 부재 → None.
+            OutputSchema:
+                - 1 int 또는 None.
+            Prerequisites:
+                - report parquet 의 stockTotal apiType 1 회 이상 수집.
+            Freshness:
+                - report 수집 시점 + cache. 갱신 후 invalidate 필요.
+            Dataflow:
+                - report parquet (stockTotal) → extractAnnual → 본 함수 → 시가총액 계산.
+            TargetMarkets:
+                - KR (DART) 한정.
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:
