@@ -36,11 +36,15 @@ def test_gather_empty_axis_raises():
 
 
 def test_gather_price_empty_result_has_validation():
-    """R30-1: gather entry.py 에 빈 DataFrame 검증 코드 있음."""
+    """R30-1: gather price handler 에 빈 DataFrame 검증 코드 있음.
+
+    G+ P-Q2.2 table-driven dispatch 이후 검증 위치가 handlers.handlePrice
+    로 이동. ValueError 메시지에 "비어" 포함 확인.
+    """
     import inspect
 
-    from dartlab.gather.entry import GatherEntry
+    from dartlab.gather.entry.handlers import handlePrice
 
-    src = inspect.getsource(GatherEntry._run)
+    src = inspect.getsource(handlePrice)
     assert "ValueError" in src
     assert "비어" in src or "empty" in src.lower()

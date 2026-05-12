@@ -13,12 +13,42 @@ import polars as pl
 
 from .dispatch import (
     API_KEY_INFO,
-    AXIS_ALIASES,
     AXIS_REGISTRY,
-    INDEX_SYMBOLS,
-    _fetchNaverIndex,
     _resolveAxis,
 )
+from .handlers import (
+    handleCalendar,
+    handleDartDoc,
+    handleFlow,
+    handleInsider,
+    handleKrx,
+    handleKrxIndex,
+    handleMacro,
+    handleNews,
+    handleOwnership,
+    handlePeers,
+    handlePrice,
+    handleSector,
+)
+
+# axis → handler dispatch 테이블 (G+ P-Q2.2). 새 axis 추가 시:
+#   1. dispatch.AXIS_REGISTRY 메타 추가
+#   2. handlers.py 에 handle<Axis>(g, target, *, market, ...) 정의
+#   3. 본 dict 에 한 줄 추가
+_AXIS_DISPATCH: dict[str, Any] = {
+    "price": handlePrice,
+    "flow": handleFlow,
+    "macro": handleMacro,
+    "news": handleNews,
+    "sector": handleSector,
+    "insider": handleInsider,
+    "ownership": handleOwnership,
+    "peers": handlePeers,
+    "krx": handleKrx,
+    "krxIndex": handleKrxIndex,
+    "calendar": handleCalendar,
+    "dartDoc": handleDartDoc,
+}
 
 
 class GatherEntry:
@@ -189,7 +219,12 @@ class GatherEntry:
         return self._run(resolved, target, **kwargs)
 
     def _run(self, axis: str, target: str | None, **kwargs: Any) -> pl.DataFrame:
-        """축별 실행 디스패치.
+        """축별 실행 디스패치 — table-driven (G+ P-Q2.2).
+
+        ``_AXIS_DISPATCH`` 테이블 lookup 후 handler 호출. 인자 흐름
+        (market/start/end + marketExplicit) 은 모든 handler 가 균일 시그니처로
+        받음. 새 axis 추가 시 ``handlers.py`` + ``_AXIS_DISPATCH`` + ``AXIS_REGISTRY``
+        세 곳만 갱신.
 
         Parameters
         ----------
@@ -198,172 +233,39 @@ class GatherEntry:
         target : str | None
             종목코드/지표코드/검색어.
         **kwargs
-            market, start, end, days 등 축별 옵션.
+            market, start, end, days, apiKey 등 축별 옵션.
 
         Returns
         -------
         pl.DataFrame
             축별 시계열 데이터. 스키마는 ``__call__`` 독스트링 참조.
+
+        Raises
+        ------
+        ValueError
+            미등록 axis 또는 handler 가 던지는 axis-specific 오류.
         """
         from dartlab.gather import getDefaultGather
 
-        g = getDefaultGather()
+        handler = _AXIS_DISPATCH.get(axis)
+        if handler is None:
+            raise ValueError(f"미지원 gather 축: {axis}")
 
-        _marketExplicit = "market" in kwargs
+        g = getDefaultGather()
+        marketExplicit = "market" in kwargs
         market = kwargs.pop("market", "KR")
         start = kwargs.pop("start", None)
         end = kwargs.pop("end", None)
 
-        if axis == "price":
-            # 시장 지수 심볼이면 네이버 차트 API 직접 수집
-            if target and target in INDEX_SYMBOLS:
-                result = _fetchNaverIndex(INDEX_SYMBOLS[target])
-            else:
-                result = g.price(target, market=market, start=start, end=end)
-            # R30-1: 빈 DataFrame silent → 명시적 ValueError
-            if result is None or (hasattr(result, "shape") and result.shape == (0, 0)):
-                raise ValueError(
-                    f"gather('price', '{target}') 결과가 비어 있습니다. "
-                    f"종목코드/티커를 확인하세요 (market={market}). "
-                    f"네트워크 또는 외부 API 일시적 오류일 수도 있습니다."
-                )
-            # indicators 옵션 — 단일 종목/지수 OHLCV 에 보조지표 컬럼 추가
-            #   default "basic": 9 핵심 지표 자동 (사용자 편의 — 호출 한번에 분석 가능)
-            #   False: raw OHLCV 만
-            #   True: 30 표준 지표 모두
-            #   list[str]: 지정한 지표만 (예: ["rsi14", "ma20"])
-            indicators = kwargs.pop("indicators", "basic")
-            if indicators == "basic":
-                indicators = [
-                    "sma5",
-                    "sma20",
-                    "sma60",
-                    "ema12",
-                    "ema26",
-                    "rsi14",
-                    "macd",
-                    "atr14",
-                    "obv",
-                ]
-            elif indicators is False:
-                indicators = None
-            if indicators:
-                from dartlab.gather.transforms.indicatorDispatch import addIndicators
-
-                result = addIndicators(result, indicators=indicators)
-            return result
-        if axis == "flow":
-            return g.flow(target, market=market)
-        if axis == "macro":
-            apiKey = kwargs.pop("apiKey", None)
-            scope = kwargs.pop("scope", "default")
-            if target is None:
-                return g.macro(market, start=start, end=end, apiKey=apiKey, scope=scope)
-            if _marketExplicit:
-                return g.macro(market, target, start=start, end=end, apiKey=apiKey, scope=scope)
-            return g.macro(target, start=start, end=end, apiKey=apiKey, scope=scope)
-        if axis == "news":
-            days = kwargs.pop("days", 30)
-            return g.news(target, market=market, days=days)
-        if axis == "sector":
-            result = g.sector(target, market=market)
-            if result is None:
-                return pl.DataFrame()
-            return pl.DataFrame(
-                [
-                    {
-                        "sectorCode": result.sectorCode,
-                        "sectorName": result.sectorName,
-                        "industryCode": result.industryCode,
-                        "industryName": result.industryName,
-                        "market": result.market,
-                    }
-                ]
-            )
-        if axis == "insider":
-            trades = g.insiderTrading(target, market=market)
-            if not trades:
-                return pl.DataFrame()
-            return pl.DataFrame(
-                [
-                    {
-                        "date": t.date,
-                        "name": t.name,
-                        "position": t.position,
-                        "tradeType": t.tradeType,
-                        "changeShares": t.changeShares,
-                    }
-                    for t in trades
-                ]
-            )
-        if axis == "ownership":
-            owners = g.ownership(target, market=market)
-            if not owners:
-                return pl.DataFrame()
-            return pl.DataFrame(
-                [
-                    {
-                        "holderName": o.holderName,
-                        "ratio": o.ratio,
-                        "shares": o.shares,
-                        "value": o.value,
-                    }
-                    for o in owners
-                ]
-            )
-        if axis == "peers":
-            peers = g.industryPeers(target, market=market)
-            if not peers:
-                return pl.DataFrame()
-            return pl.DataFrame(peers)
-        if axis == "krx":
-            from dartlab.gather.krx.krxApi import gatherKrx
-
-            apiKey = kwargs.pop("apiKey", None)
-            stockCodes = kwargs.pop("stockCodes", None)
-            # date legacy alias — 단일일자 호출의 호환성 (start 로 매핑 후 폐기)
-            legacyDate = kwargs.pop("date", None)
-            if legacyDate is not None and start is None:
-                start = legacyDate
-            return gatherKrx(
-                target or "close",
-                start=start,
-                end=end,
-                market=market,
-                stockCodes=stockCodes,
-                apiKey=apiKey,
-            )
-        if axis == "krxIndex":
-            from dartlab.gather.krx.krxIndex import gatherKrxIndex
-
-            apiKey = kwargs.pop("apiKey", None)
-            indexFilter = kwargs.pop("indexFilter", None)
-            indicators = kwargs.pop("indicators", "basic")
-            # market 디폴트는 "KOSPI" — entry 수준 market="KR" 와 별개
-            idx_market = kwargs.pop("indexMarket", None) or ("KOSPI" if market in ("KR", "KOSPI") else market)
-            return gatherKrxIndex(
-                target or "close",
-                market=idx_market,
-                start=start,
-                end=end,
-                apiKey=apiKey,
-                indexFilter=indexFilter,
-                indicators=indicators,
-            )
-        if axis == "calendar":
-            raise ValueError(
-                "gather('calendar') 는 0.10 부터 폐기됨. Company.calendar() 사용. "
-                "예: c = dartlab.Company('005930'); c.calendar(horizonDays=30). "
-                "이유: gather → providers cycle 회피 (책임 분리)."
-            )
-        if axis == "dartDoc":
-            if not target:
-                raise ValueError("gather('dartDoc') 는 rcept_no (14자리) target 필요")
-            from dartlab.gather.dart.viewer import fetch as _fetchDartDoc
-
-            return _fetchDartDoc(target)
-
-        raise ValueError(f"미지원 gather 축: {axis}")
+        return handler(
+            g,
+            target,
+            market=market,
+            start=start,
+            end=end,
+            marketExplicit=marketExplicit,
+            **kwargs,
+        )
 
     def _guide(self) -> pl.DataFrame:
         """가이드 DataFrame — 축 목록 + 설명 + 사용 예시 + API 키 안내.
