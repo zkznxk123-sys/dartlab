@@ -101,7 +101,8 @@ lastUpdated: '2026-05-03'
 | **L1.5 (가공 4 형제)** | `scan` · `frame` · `synth` · `reference` | raw 생산 0, 책임 분리 가공기. core·L1 만 import. **4 형제끼리 cross import 금지** ([tests/architecture/test_l15_no_cross_import.py](../../../../../tests/architecture/test_l15_no_cross_import.py) 강제). 책임: scan=횡단면 (한 metric × 다수 회사), frame=raw 결합 (panel/시계열 view), synth=분석 후처리·매칭·시나리오, reference=정적 JSON 룩업+매핑 엔진 |
 | **L2 분석엔진 (5)** | `analysis` · `credit` · `macro` · `quant` · `industry` | 단일 도메인 분석. core·L1.5 만 import. L1 직접 import 는 L1.5 에 없는 raw 가 필요할 때만 예외. **다른 L2 직접 import 금지** (도메인 격리 + 순환참조 방지) |
 | **L3 조합기** | `story` | 분석엔진 X. L2 5 엔진 + L1.5 결과를 블록 단위로 결합해 6 막 보고서 직조. 자체 계산 0, 모든 숫자는 하위 엔진 ref. **L2 다중 소비 책임을 단독으로 짊어져 L2 끼리의 import 순환을 차단** |
-| L4 | AI (`dartlab.ask`), 사람 (`dartlab.Company`) | 소비자 — 엔진 결과를 의심·검증·재계산 |
+| L4 소비자 | `ai` · `mcp` | dartlab 라이브러리 직접 호출 — AI 자율 추론 + tool 사용 (ai) · 외부 LLM 진입 (mcp). 엔진 결과를 의심·검증·재계산 |
+| 표현/전송 헬퍼 | `viz` · `cli` · `server` · `channel` | 비즈니스 로직 0 — 모든 계층 결과를 다른 매체로 표현. viz=차트·excel·html 렌더, cli=스크립트 wrapper, server=HTTP host, channel=외부 공유. import 룰은 L4 와 동일 (모든 하위 OK) 이지만 책임 분리 |
 
 import 정책 (P-CORE B 정리 결과):
 
