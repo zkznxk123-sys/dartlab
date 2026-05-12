@@ -17,7 +17,7 @@ pytestmark = pytest.mark.unit
 
 # ── imports ──
 
-from dartlab.scan import _COLUMN_RENAME, _enrichWithKorean
+from dartlab.scan.rename import _COLUMN_RENAME, _enrichWithKorean
 
 # The function does `import dartlab as _dl; _dl.listing()` internally.
 # We patch `dartlab.listing` on the top-level dartlab module.
