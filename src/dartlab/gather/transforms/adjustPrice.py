@@ -120,7 +120,7 @@ def detectEventsFromPrices(
 
     detected = (
         raw.sort([codeCol, dateCol])
-        .with_columns(pl.col(closeCol).shift(1).over(codeCol).alias("_prevClose"))
+        .with_columns(pl.col(closeCol).shift(1).over(codeCol).alias("_prevClose"))  # polars-streaming-unsupported: over
         .filter(pl.col("_prevClose").is_not_null() & (pl.col("_prevClose") > 0))
         .with_columns(
             [
@@ -264,7 +264,9 @@ def _applySplitFactor(
                 pl.col(dateCol).alias("_evDate"),
             ]
         )
-        .with_columns(pl.col("_priceAdj").cum_prod(reverse=True).over(codeCol).alias("_revCum"))
+        .with_columns(
+            pl.col("_priceAdj").cum_prod(reverse=True).over(codeCol).alias("_revCum")
+        )  # polars-streaming-unsupported: over
         .select([codeCol, dateCol, "_evDate", "_priceAdj", "_revCum"])
     )
     rawSorted = raw.sort([codeCol, dateCol])
@@ -320,7 +322,9 @@ def _applyDivFactor(
                 pl.col(dateCol).alias("_evDate"),
             ]
         )
-        .with_columns(pl.col("_divAdj").cum_prod(reverse=True).over(codeCol).alias("_revCumDiv"))
+        .with_columns(
+            pl.col("_divAdj").cum_prod(reverse=True).over(codeCol).alias("_revCumDiv")
+        )  # polars-streaming-unsupported: over
         .select([codeCol, dateCol, "_evDate", "_divAdj", "_revCumDiv"])
     )
     rawSorted = raw.sort([codeCol, dateCol])

@@ -339,7 +339,9 @@ def _normalizeQ4(df: pl.DataFrame) -> pl.DataFrame:
     groupKey = ["bsns_year", "sj_div", "account_id"]
     df = df.sort(groupKey + ["_qOrd"])
 
-    df = df.with_columns(pl.col("thstrm_add_amount").shift(1).over(groupKey).alias("_prevAdd"))
+    df = df.with_columns(
+        pl.col("thstrm_add_amount").shift(1).over(groupKey).alias("_prevAdd")
+    )  # polars-streaming-unsupported: over
 
     # Q4 IS/CIS: thstrm_add_amount가 null이면 thstrm_amount를 연간 누적으로 간주
     df = df.with_columns(
@@ -354,8 +356,12 @@ def _normalizeQ4(df: pl.DataFrame) -> pl.DataFrame:
     )
 
     # prevAdd/prevAmount 재계산 (Q4 fallback 적용 후)
-    df = df.with_columns(pl.col("thstrm_add_amount").shift(1).over(groupKey).alias("_prevAdd"))
-    df = df.with_columns(pl.col("thstrm_amount").shift(1).over(groupKey).alias("_prevAmount"))
+    df = df.with_columns(
+        pl.col("thstrm_add_amount").shift(1).over(groupKey).alias("_prevAdd")
+    )  # polars-streaming-unsupported: over
+    df = df.with_columns(
+        pl.col("thstrm_amount").shift(1).over(groupKey).alias("_prevAmount")
+    )  # polars-streaming-unsupported: over
 
     df = df.with_columns(
         # BS: 시점 잔액 그대로
