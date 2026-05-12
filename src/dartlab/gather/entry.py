@@ -775,3 +775,31 @@ class _GatherProviderAdapter:
 from dartlab.core.gatherProvider import registerGatherProvider as _registerGatherProvider
 
 _registerGatherProvider(_GatherProviderAdapter())
+
+
+# ── Gather 싱글턴 진입점 (룰 4 thin: __init__.py 의 함수 정의를 모듈로 이동) ──
+
+_defaultGather: object | None = None
+
+
+def getDefaultGather():
+    """Gather 싱글턴 반환 — 같은 세션 내 캐시/HTTP 클라이언트 재사용.
+
+    Returns:
+        Gather — 싱글턴 인스턴스 (첫 호출 시 자동 생성).
+
+    Raises:
+        없음 — Gather() 생성자가 lazy 초기화를 보장.
+
+    Example::
+
+        from dartlab.gather import getDefaultGather
+        g = getDefaultGather()
+        g.price("005930")
+    """
+    global _defaultGather
+    if _defaultGather is None:
+        from .engine import Gather
+
+        _defaultGather = Gather()
+    return _defaultGather

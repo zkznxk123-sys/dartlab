@@ -1,7 +1,7 @@
 """Gather 엔진 — 통합 멀티소스 비동기 병렬 수집.
 
 thin facade. 본체는 `engine.py` 의 Gather 클래스. 모듈-level 싱글턴
-`getDefaultGather()` 진입점.
+`getDefaultGather()` 는 `entry.py` 에 정의 (룰 4 thin).
 
 Usage::
 
@@ -18,6 +18,7 @@ Usage::
 from __future__ import annotations
 
 from .engine import Gather
+from .entry import getDefaultGather
 from .types import (
     FlowData,
     GatherResult,
@@ -33,29 +34,6 @@ from .types import (
     SectorInfo,
     SourceUnavailableError,
 )
-
-_defaultGather: Gather | None = None
-
-
-def getDefaultGather() -> Gather:
-    """Gather 싱글턴 반환 — 같은 세션 내 캐시/HTTP 클라이언트 재사용.
-
-    Returns:
-        Gather — 싱글턴 인스턴스 (첫 호출 시 자동 생성).
-
-    Raises:
-        없음 — Gather() 생성자가 lazy 초기화를 보장.
-
-    Example::
-
-        g = getDefaultGather()
-        g.price("005930")
-    """
-    global _defaultGather
-    if _defaultGather is None:
-        _defaultGather = Gather()
-    return _defaultGather
-
 
 __all__ = [
     "FlowData",
