@@ -43,9 +43,32 @@ from dartlab.scan.network.scanner import (
 def buildGraph(*, verbose: bool = True) -> dict:
     """전체 파이프라인 실행 → data dict.
 
-    Returns:
-        dict with keys: listing_meta, code_to_name, code_to_group,
-        invest_edges, corp_edges, person_edges, all_node_ids, cycles
+    Parameters
+    ----------
+    verbose : bool, default True
+        진행 라인을 ``logger.info`` 로 출력.
+
+    Returns
+    -------
+    dict
+        listing_meta : dict — 상장사 메타데이터
+        code_to_name : dict — 종목코드 → 회사명
+        code_to_group : dict — 종목코드 → 그룹명 (재벌/독립)
+        invest_edges : pl.DataFrame — 출자 엣지
+        corp_edges / person_edges : pl.DataFrame — 법인/개인 엣지
+        all_node_ids : set[str] — 분류 대상 종목코드
+        cycles : list[list[str]] — 순환출자 경로 목록
+
+    Raises
+    ------
+    polars.PolarsError
+        report parquet (investedCompany · majorHolder) 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network import buildGraph
+    >>> data = buildGraph(verbose=True)
+    >>> len(data["cycles"])
     """
     t0 = time.perf_counter()
 

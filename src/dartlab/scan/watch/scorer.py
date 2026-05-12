@@ -98,6 +98,17 @@ def scoreChanges(
         - latestToPeriod : str | None — 비교 종료 기간
         - deltaBytes : int — 최근 변화의 바이트 크기 차이 (바이트)
         - reason : str — 점수 주요 근거 요약
+
+    Raises
+    ------
+    polars.PolarsError
+        sections DataFrame 의 필수 컬럼 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.watch.scorer import scoreChanges
+    >>> scored = scoreChanges(diffResult, sections=docs.sections)
+    >>> scored[0].score
     """
     {s.topic: s for s in diffResult.summaries}
 
@@ -218,6 +229,17 @@ def scoredToDataframe(scored: list[ScoredChange]) -> pl.DataFrame:
         - deltaBytes : int — 바이트 크기 변화 (바이트)
         - latestPeriod : str — "fromPeriod→toPeriod" 형식 기간 문자열
         - reason : str — 점수 주요 근거
+
+    Raises
+    ------
+    polars.PolarsError
+        scored list 의 dataclass 필드 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.watch.scorer import scoredToDataframe
+    >>> df = scoredToDataframe(scored)
+    >>> df.height
     """
     if not scored:
         return pl.DataFrame(

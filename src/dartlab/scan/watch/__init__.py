@@ -23,7 +23,32 @@ from dartlab.scan.watch.scorer import scoreChanges
 
 
 def scanDigest(*, format: str = "dataframe", topN: int = 30, **kwargs) -> object:
-    """시장 전체 공시 변화 다이제스트 (scan_market + build_digest 래핑)."""
+    """시장 전체 공시 변화 다이제스트 (scan_market + build_digest 래핑).
+
+    Parameters
+    ----------
+    format : str, default "dataframe"
+        출력 형식. "dataframe" | "markdown" | "json".
+    topN : int, default 30
+        포함할 최대 항목 수.
+    **kwargs
+        ``scanMarket`` 에 전달할 추가 인자.
+
+    Returns
+    -------
+    pl.DataFrame | str | dict
+        format 에 따라 반환 타입이 달라진다.
+
+    Raises
+    ------
+    polars.PolarsError
+        scanMarket / buildDigest 가 발생시키는 예외 전파.
+
+    Examples
+    --------
+    >>> import dartlab
+    >>> df = dartlab.scan("digest", format="dataframe", topN=10)
+    """
     df = scanMarket(topN=topN, **kwargs)
     return buildDigest(df, format=format, topN=topN)
 

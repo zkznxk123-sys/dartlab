@@ -46,6 +46,17 @@ def buildInvestEdges(
         - book_value : float | None — 장부가액 (원)
         - purpose : str — 투자목적 ("경영참여" | "단순투자" | "기타")
         - year : str — 보고 연도
+
+    Raises
+    ------
+    polars.PolarsError
+        raw DataFrame schema 불일치 또는 cast 실패 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.edges import buildInvestEdges
+    >>> edges = buildInvestEdges(raw, nameToCode, codeToName)
+    >>> edges.filter(pl.col("is_listed")).head()
     """
     noise_names = {"-", "합계", "소계", "", " "}
     df = raw.filter(pl.col("inv_prm").is_not_null() & ~pl.col("inv_prm").is_in(list(noise_names)))
@@ -144,6 +155,18 @@ def deduplicateEdges(edges: pl.DataFrame) -> pl.DataFrame:
         중복 제거된 DataFrame. 컬럼 구조는 입력과 동일:
         from_code, from_name, to_name, to_name_norm, to_code,
         is_listed, ownership_pct, book_value, purpose, year.
+
+    Raises
+    ------
+    polars.PolarsError
+        edges DataFrame 가 필수 컬럼 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.edges import deduplicateEdges
+    >>> dedup = deduplicateEdges(edges)
+    >>> dedup.height < edges.height
+    True
     """
     latest_year = edges["year"].max()
     return (
@@ -228,6 +251,17 @@ def buildHolderEdges(
         - relate : str — 관계
         - ownership_pct : float | None — 지분율 (%)
         - year : str — 보고 연도
+
+    Raises
+    ------
+    polars.PolarsError
+        raw DataFrame schema 불일치 또는 cast 실패 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.edges import buildHolderEdges
+    >>> corp, person = buildHolderEdges(rawDf, nameToCode)
+    >>> corp.height, person.height
     """
     df = raw.filter(pl.col("nm").is_not_null() & ~pl.col("nm").is_in(list(_NOISE_NAMES)))
     latest_year = df["year"].max()
@@ -318,6 +352,10 @@ def detectCycles(
         순환출자 경로 리스트. 각 경로는 종목코드 리스트이며
         마지막 원소 == 첫 원소 (순환 표시). 중복 경로는 제거된다.
         예: ``[["005930", "006400", "005930"]]``
+
+    Raises
+    ------
+    없음 — DFS 내부에서 maxLength 초과 시 즉시 return.
     """
     adj: dict[str, list[str]] = defaultdict(list)
     listed = investEdges.filter(
@@ -330,7 +368,29 @@ def detectCycles(
     visited_global: set[str] = set()
 
     def dfs(node: str, path: list[str], pathSet: set[str]) -> None:
-        """dfs — TODO 한국어 동작 설명."""
+        """순환출자 경로 탐색 (재귀).
+
+        Parameters
+        ----------
+        node : str
+            현재 노드.
+        path : list[str]
+            진행 경로.
+        pathSet : set[str]
+            중복 방지 set.
+
+        Returns
+        -------
+        None — 외부 cycles list 에 결과 append.
+
+        Raises
+        ------
+        없음 — 길이 제한 시 즉시 return.
+
+        Examples
+        --------
+        >>> dfs("005930", ["005930"], {"005930"})  # 내부 호출만
+        """
         if len(path) > maxLength:
             return
         for nb in adj.get(node, []):

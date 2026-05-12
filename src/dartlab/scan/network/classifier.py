@@ -443,6 +443,21 @@ def classifyBalanced(
     dict[str, str]
         종목코드 → 그룹명 매핑. all_node_ids 전체를 커버한다.
         그룹에 1개만 속하면 독립 기업(회사명이 그룹명).
+
+    Raises
+    ------
+    polars.PolarsError
+        Phase 2~5 의 폴라스 연산 실패 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.classifier import classifyBalanced
+    >>> groups = classifyBalanced(
+    ...     investEdges, corpEdges, personEdges, allNodeIds,
+    ...     codeToName, docsGroundTruth, verbose=False
+    ... )
+    >>> groups["005930"]
+    '삼성'
     """
     codeToGroup: dict[str, str] = {}
     locked: set[str] = set()

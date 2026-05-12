@@ -163,7 +163,37 @@ def _buildPersonData(data: dict) -> tuple[list[dict], list[dict]]:
 
 
 def exportFull(data: dict) -> dict:
-    """full JSON — 전체 노드+엣지+그룹+업종+인물+순환출자."""
+    """full JSON — 전체 노드+엣지+그룹+업종+인물+순환출자.
+
+    Parameters
+    ----------
+    data : dict
+        ``buildGraph`` 결과 dict (all_node_ids, code_to_name, code_to_group,
+        invest_edges, corp_edges, person_edges, listing_meta, cycles).
+
+    Returns
+    -------
+    dict
+        meta : dict — nodeCount/edgeCount/groupCount/cycleCount 등
+        nodes : list[dict] — company + person 노드
+        edges : list[dict] — investment + shareholder + person_shareholder
+        groups : list[dict] — 그룹 메타 (rank/memberCount/members)
+        industries : list[dict] — 업종 클러스터
+        cycles : list[dict] — 순환출자 경로
+
+    Raises
+    ------
+    KeyError
+        data dict 에 필수 키 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network import buildGraph
+    >>> from dartlab.scan.network.export import exportFull
+    >>> data = buildGraph(verbose=False)
+    >>> j = exportFull(data)
+    >>> j["meta"]["nodeCount"]
+    """
     edges = _buildEnrichedEdges(data)
     nodes = _buildEnrichedNodes(data, edges)
 
@@ -227,7 +257,33 @@ def exportFull(data: dict) -> dict:
 
 
 def exportOverview(data: dict, full: dict) -> dict:
-    """overview JSON — 그룹 슈퍼노드."""
+    """overview JSON — 그룹 슈퍼노드.
+
+    Parameters
+    ----------
+    data : dict
+        ``buildGraph`` 결과 dict.
+    full : dict
+        ``exportFull(data)`` 결과 dict.
+
+    Returns
+    -------
+    dict
+        meta : dict — type/groupCount/edgeCount
+        nodes : list[dict] — 그룹 슈퍼노드 (memberCount >= 2)
+        edges : list[dict] — 그룹 간 weighted 엣지
+
+    Raises
+    ------
+    KeyError
+        data/full 에 필수 키 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.export import exportOverview
+    >>> ov = exportOverview(data, full)
+    >>> ov["meta"]["groupCount"]
+    """
     gi: dict[str, dict] = {}
     for node in full["nodes"]:
         if node["type"] != "company":
@@ -277,7 +333,41 @@ def exportEgo(
     includeIndustry: bool = True,
     maxIndustryPeers: int = 10,
 ) -> dict:
-    """ego 뷰 — 독립 회사면 같은 업종 이웃도 포함."""
+    """ego 뷰 — 독립 회사면 같은 업종 이웃도 포함.
+
+    Parameters
+    ----------
+    data : dict
+        ``buildGraph`` 결과 dict.
+    full : dict
+        ``exportFull(data)`` 결과 dict.
+    code : str
+        ego 중심 종목코드.
+    hops : int, default 1
+        BFS 단계 수.
+    includeIndustry : bool, default True
+        독립 회사면 동일 업종 이웃 포함.
+    maxIndustryPeers : int, default 10
+        업종 peer 최대 수.
+
+    Returns
+    -------
+    dict
+        meta : dict — center/hops/nodeCount
+        nodes : list[dict]
+        edges : list[dict]
+
+    Raises
+    ------
+    KeyError
+        data/full 에 필수 키 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.export import exportEgo
+    >>> ego = exportEgo(data, full, "005930", hops=1)
+    >>> ego["meta"]["nodeCount"]
+    """
     # BFS ego
     adj: dict[str, set[str]] = defaultdict(set)
     for edge in full["edges"]:

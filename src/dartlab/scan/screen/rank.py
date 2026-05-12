@@ -128,6 +128,18 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     -------
     dict[str, RankInfo]
         {종목코드: RankInfo} — 매출/자산/성장 순위 + 섹터 내 순위 + sizeClass.
+
+    Raises
+    ------
+    polars.PolarsError
+        finance pivot 또는 KIND listing 손상 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.screen.rank import buildSnapshot
+    >>> snap = buildSnapshot(verbose=False)
+    >>> snap["005930"].sizeClass
+    'large'
     """
     import importlib
 
@@ -331,6 +343,16 @@ def getRank(stockCode: str) -> RankInfo | None:
     -------
     RankInfo | None
         랭크 정보. 스냅샷 없거나 종목 없으면 None.
+
+    Raises
+    ------
+    없음 — 스냅샷 미존재 시 None 반환.
+
+    Examples
+    --------
+    >>> from dartlab.scan.screen.rank import getRank
+    >>> r = getRank("005930")
+    >>> r.sizeClass if r else "no snapshot"
     """
     snap = _ensureSnapshot()
     if snap is None:
@@ -352,6 +374,17 @@ def getRankOrBuild(stockCode: str, *, verbose: bool = True) -> RankInfo | None:
     -------
     RankInfo | None
         랭크 정보. 빌드 후에도 종목 없으면 None.
+
+    Raises
+    ------
+    polars.PolarsError
+        buildSnapshot 빌드 실패 시 전파.
+
+    Examples
+    --------
+    >>> from dartlab.scan.screen.rank import getRankOrBuild
+    >>> r = getRankOrBuild("005930")
+    >>> r.sizeClass if r else "unknown"
     """
     global _SNAPSHOT
     snap = _ensureSnapshot()

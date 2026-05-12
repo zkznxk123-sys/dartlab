@@ -48,6 +48,18 @@ def buildDigest(
     top_n : int
         다이제스트에 포함할 최대 항목 수.
 
+    Raises
+    ------
+    polars.PolarsError
+        scanDf 의 score 컬럼 누락 또는 정렬 실패 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.watch.digest import buildDigest
+    >>> md = buildDigest(scanDf, format="markdown", topN=10)
+    >>> isinstance(md, str)
+    True
+
     Returns
     -------
     str | dict | pl.DataFrame

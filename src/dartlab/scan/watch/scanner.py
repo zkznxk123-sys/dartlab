@@ -40,13 +40,44 @@ class ScanResult:
 
     @property
     def topScore(self) -> float:
-        """감지된 변화 중 최고 점수 반환."""
+        """감지된 변화 중 최고 점수 반환.
+
+        Returns
+        -------
+        float
+            scored list 의 첫 원소 (정렬 후 최고) 의 score. 비어 있으면 0.0.
+
+        Raises
+        ------
+        없음.
+
+        Examples
+        --------
+        >>> result.topScore
+        85.0
+        """
         if not self.scored:
             return 0.0
         return self.scored[0].score
 
     def toDataframe(self) -> pl.DataFrame:
-        """스코어링 결과를 DataFrame으로."""
+        """스코어링 결과를 DataFrame으로.
+
+        Returns
+        -------
+        pl.DataFrame
+            stockCode/corpName 컬럼 + ScoredChange 컬럼 (topic, score, reason, ...).
+
+        Raises
+        ------
+        polars.PolarsError
+            scoredToDataframe 가 발생시키는 예외 전파.
+
+        Examples
+        --------
+        >>> df = result.toDataframe()
+        >>> df.columns
+        """
         df = scoredToDataframe(self.scored)
         if df.height > 0:
             df = df.with_columns(
@@ -69,6 +100,15 @@ def scanCompany(
 
     Returns:
         ScanResult 또는 sections가 없으면 None.
+
+    Raises:
+        없음 — sections 누락 시 None 반환.
+
+    Example:
+        >>> import dartlab
+        >>> c = dartlab.Company("005930")
+        >>> result = scanCompany(c, topic="riskManagement")
+        >>> result.topScore if result else "no diff"
     """
     docs_sections = getattr(getattr(company, "docs", None), "sections", None)
     if docs_sections is None:
@@ -135,6 +175,14 @@ def scanMarket(
 
     Returns:
         stockCode, corpName, topic, score, changeRate, reason 등 컬럼의 DataFrame.
+
+    Raises:
+        polars.PolarsError: docs parquet 손상 시.
+
+    Example:
+        >>> import dartlab
+        >>> df = dartlab.scan("digest", sector="반도체", topN=30)
+        >>> df.sort("score", descending=True).head()
     """
     if stockCodes is None:
         codes = _listLocalDocs()
@@ -265,6 +313,17 @@ def buildSpec() -> dict:
             - highWeightTopics : list[str] — 고가중 topic 목록
             - lowWeightTopics : list[str] — 저가중 topic 목록
             - publicAPI : list[str] — 공개 API 사용법
+
+    Raises
+    ------
+    없음 — scorer constants 만 참조.
+
+    Examples
+    --------
+    >>> from dartlab.scan.watch.scanner import buildSpec
+    >>> spec = buildSpec()
+    >>> spec["name"]
+    'watch'
     """
     from dartlab.scan.watch.scorer import _HIGH_WEIGHT_TOPICS, _LOW_WEIGHT_TOPICS
 

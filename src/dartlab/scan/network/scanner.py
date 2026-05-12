@@ -39,8 +39,26 @@ def _normalizeCompanyName(name: str) -> str:
 def loadListing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, dict]]:
     """상장사 목록 로드.
 
-    Returns:
+    Returns
+    -------
+    tuple
         (name_to_code, code_to_name, listing_codes, listing_meta)
+        name_to_code : dict — 회사명 (정규화 포함) → 종목코드
+        code_to_name : dict — 종목코드 → 회사명
+        listing_codes : set[str] — 전체 상장사 종목코드
+        listing_meta : dict — 종목코드 → {name, market, industry}
+
+    Raises
+    ------
+    KeyError
+        listing DataFrame 에 "회사명" · "종목코드" 컬럼 누락 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.scanner import loadListing
+    >>> n2c, c2n, codes, meta = loadListing()
+    >>> c2n["005930"]
+    '삼성전자'
     """
     import dartlab
 
@@ -108,7 +126,26 @@ def _scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
 
 
 def scanInvested() -> pl.DataFrame:
-    """전종목 investedCompany 스캔."""
+    """전종목 investedCompany 스캔.
+
+    Returns
+    -------
+    pl.DataFrame
+        report parquet 의 investedCompany apiType 행 (stockCode/year/inv_prm/
+        invstmnt_purps/trmend_blce_qota_rt/trmend_blce_acntbk_amount/trmend_blce_qy).
+
+    Raises
+    ------
+    polars.PolarsError
+        report parquet 손상 또는 schema 불일치 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.scanner import scanInvested
+    >>> df = scanInvested()
+    >>> df.height > 0
+    True
+    """
     return _scanParquets(
         "investedCompany",
         [
@@ -124,7 +161,26 @@ def scanInvested() -> pl.DataFrame:
 
 
 def scanMajorHolders() -> pl.DataFrame:
-    """전종목 majorHolder 스캔."""
+    """전종목 majorHolder 스캔.
+
+    Returns
+    -------
+    pl.DataFrame
+        report parquet 의 majorHolder apiType 행 (stockCode/year/nm/relate/
+        trmend_posesn_stock_co/trmend_posesn_stock_qota_rt).
+
+    Raises
+    ------
+    polars.PolarsError
+        report parquet 손상 또는 schema 불일치 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.scanner import scanMajorHolders
+    >>> df = scanMajorHolders()
+    >>> df.height > 0
+    True
+    """
     return _scanParquets(
         "majorHolder",
         [
@@ -152,7 +208,28 @@ class UnionFind:
         self.rank: dict[str, int] = {}
 
     def find(self, x: str) -> str:
-        """루트 노드 탐색 (경로 압축 적용)."""
+        """루트 노드 탐색 (경로 압축 적용).
+
+        Parameters
+        ----------
+        x : str
+            대상 노드.
+
+        Returns
+        -------
+        str
+            루트 노드.
+
+        Raises
+        ------
+        없음.
+
+        Examples
+        --------
+        >>> uf = UnionFind()
+        >>> uf.find("A")
+        'A'
+        """
         if x not in self.parent:
             self.parent[x] = x
             self.rank[x] = 0
@@ -161,7 +238,26 @@ class UnionFind:
         return self.parent[x]
 
     def union(self, a: str, b: str) -> None:
-        """두 노드를 같은 집합으로 병합."""
+        """두 노드를 같은 집합으로 병합.
+
+        Parameters
+        ----------
+        a, b : str
+            병합할 노드 쌍.
+
+        Returns
+        -------
+        None — 내부 상태 변경.
+
+        Raises
+        ------
+        없음.
+
+        Examples
+        --------
+        >>> uf = UnionFind()
+        >>> uf.union("A", "B")
+        """
         ra, rb = self.find(a), self.find(b)
         if ra == rb:
             return
@@ -172,7 +268,24 @@ class UnionFind:
             self.rank[ra] += 1
 
     def components(self) -> dict[str, list[str]]:
-        """연결 요소별 노드 목록 반환."""
+        """연결 요소별 노드 목록 반환.
+
+        Returns
+        -------
+        dict[str, list[str]]
+            루트 노드 → 자식 노드 list.
+
+        Raises
+        ------
+        없음.
+
+        Examples
+        --------
+        >>> uf = UnionFind()
+        >>> uf.union("A", "B")
+        >>> uf.components()
+        {'A': ['A', 'B']}
+        """
         groups: dict[str, list[str]] = defaultdict(list)
         for x in self.parent:
             groups[self.find(x)].append(x)
@@ -183,7 +296,32 @@ def scanAffiliateDocs(
     nameToCode: dict[str, str],
     codeToName: dict[str, str],
 ) -> dict[str, str]:
-    """docs parquet의 '계열회사 현황'에서 ground truth 그룹 매핑 추출."""
+    """docs parquet의 '계열회사 현황'에서 ground truth 그룹 매핑 추출.
+
+    Parameters
+    ----------
+    nameToCode : dict[str, str]
+        회사명 → 종목코드 매핑.
+    codeToName : dict[str, str]
+        종목코드 → 회사명 매핑.
+
+    Returns
+    -------
+    dict[str, str]
+        종목코드 → 그룹명 매핑 (계열회사 표 ground truth 기반).
+
+    Raises
+    ------
+    polars.PolarsError
+        docs parquet 손상 또는 schema 불일치 시.
+
+    Examples
+    --------
+    >>> from dartlab.scan.network.scanner import loadListing, scanAffiliateDocs
+    >>> n2c, c2n, _, _ = loadListing()
+    >>> gt = scanAffiliateDocs(n2c, c2n)
+    >>> gt.get("005930")
+    """
     from dartlab.core.dataLoader import _dataDir
 
     docs_dir = Path(_dataDir("docs"))
