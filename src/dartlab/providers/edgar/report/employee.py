@@ -125,7 +125,7 @@ def _getEmployeeFacts(company: "Company") -> list[dict]:
             pl.scan_parquet(path)
             .filter(pl.col("tag").str.contains("(?i)NumberOfEmployees") & pl.col("form").is_in(["10-K", "20-F"]))
             .select("fy", "val", "filed")
-            .collect()
+            .collect(engine="streaming")
         )
 
         if df.is_empty():

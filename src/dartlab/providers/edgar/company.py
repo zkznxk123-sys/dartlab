@@ -716,7 +716,7 @@ class Company:
                 .len()
                 .sort("len", descending=True)
                 .head(1)
-                .collect()
+                .collect(engine="streaming")
             )
             if df.height == 0:
                 self._cache[cacheKey] = None

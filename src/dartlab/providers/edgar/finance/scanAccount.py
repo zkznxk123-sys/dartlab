@@ -83,7 +83,7 @@ class _EdgarFileProcessor:
                     & (pl.col("fy") <= 2030)
                 )
                 .select(["tag", "val", "fy", "fp"])
-                .collect()
+                .collect(engine="streaming")
             )
         except (pl.exceptions.PolarsError, OSError):
             return None

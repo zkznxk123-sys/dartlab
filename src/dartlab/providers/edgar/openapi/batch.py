@@ -66,7 +66,7 @@ def _existingDocsAccessions(path: Path) -> set[str]:
         schema = pl.read_parquet_schema(path)
         if "accession_no" not in schema:
             return set()
-        df = pl.scan_parquet(path).select("accession_no").unique().collect()
+        df = pl.scan_parquet(path).select("accession_no").unique().collect(engine="streaming")
         return set(df["accession_no"].drop_nulls().to_list())
     except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):
         return set()
@@ -80,7 +80,7 @@ def _existingFinanceLatestFiled(path: Path) -> str | None:
         schema = pl.read_parquet_schema(path)
         if "filed" not in schema:
             return None
-        df = pl.scan_parquet(path).select(pl.col("filed").max()).collect()
+        df = pl.scan_parquet(path).select(pl.col("filed").max()).collect(engine="streaming")
         val = df[0, 0]
         return str(val) if val is not None else None
     except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):

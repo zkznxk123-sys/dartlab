@@ -90,7 +90,7 @@ def _loadLocalAccessionNos(ticker: str) -> tuple[set[str], str | None]:
         if hasFilingDate:
             selectCols.append("filing_date")
 
-        df = pl.scan_parquet(path).select(selectCols).unique(subset=["accession_no"]).collect()
+        df = pl.scan_parquet(path).select(selectCols).unique(subset=["accession_no"]).collect(engine="streaming")
         if df.is_empty():
             return set(), None
         accessions = set(df["accession_no"].drop_nulls().to_list())

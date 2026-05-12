@@ -69,7 +69,7 @@ def loadXbrlTags(
         expr = pl.col("tag").str.contains(tagPattern) & pl.col("form").is_in(forms)
         if unitFilter:
             expr = expr & pl.col("unit").str.contains(unitFilter)
-        df = pl.scan_parquet(path).filter(expr).collect()
+        df = pl.scan_parquet(path).filter(expr).collect(engine="streaming")
         return df if not df.is_empty() else None
     except (pl.exceptions.ComputeError, OSError):
         return None

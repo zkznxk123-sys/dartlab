@@ -194,7 +194,7 @@ def extractAllNoteCategories(
                 & pl.col("form").is_in(["10-K", "20-F"])
             )
             .select("tag", "label", "fy", "val", "filed")
-            .collect()
+            .collect(engine="streaming")
         )
 
         if df.is_empty():
@@ -258,7 +258,7 @@ def extractNoteCategory(
                 & pl.col("form").is_in(["10-K", "20-F"])
             )
             .select("tag", "label", "fy", "val", "filed")
-            .collect()
+            .collect(engine="streaming")
         )
 
         if df.is_empty():
