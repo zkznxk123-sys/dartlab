@@ -95,6 +95,14 @@ def handlePrice(
     Example::
 
         df = handlePrice(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 (g) + dispatch.INDEX_SYMBOLS 매핑 + 시장별 price source 가용.
+
+    See Also:
+        main.GatherEntry._run : 본 handler 의 dispatch caller.
+        dispatch.AXIS_REGISTRY : axis 메타.
+        transforms/indicatorDispatch.addIndicators : 보조지표 후처리.
     """
     if target and target in INDEX_SYMBOLS:
         result = _fetchNaverIndex(INDEX_SYMBOLS[target])
@@ -151,6 +159,13 @@ def handleFlow(
     Example::
 
         df = handleFlow(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + KR 시장 (Naver flow API). 외 시장 빈 결과.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/info.flow : 본 handler 가 호출하는 backend.
     """
     return g.flow(target, market=market)
 
@@ -191,6 +206,14 @@ def handleMacro(
     Example::
 
         df = handleMacro(g, "CPI", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + market 분기에 따라 ECOS/FRED API 키 (env). marketExplicit 분기.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/macro : 본 handler 가 호출하는 backend.
+        macroProvider : MacroProvider Protocol 위임 진입점.
     """
     apiKey = kwargs.pop("apiKey", None)
     scope = kwargs.pop("scope", "default")
@@ -235,6 +258,14 @@ def handleNews(
     Example::
 
         df = handleNews(g, "삼성전자", market="KR", start=None, end=None, marketExplicit=False, days=7)
+
+    Requires:
+        Gather 인스턴스 + 네트워크 (Google News RSS). 결과 본문은 untrusted external.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/news.news : 본 handler 가 호출하는 backend.
+        formatting.wrap_external_in_result : 본문 untrusted 마커 wrap.
     """
     days = kwargs.pop("days", 30)
     return g.news(target, market=market, days=days)
@@ -273,6 +304,14 @@ def handleSector(
     Example::
 
         df = handleSector(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + KR 시장 (KIND+Naver). g.sector 가 SectorInfo 반환.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/info.sector : 본 handler 가 호출하는 backend.
+        domains/krx.fetchSectorInfo : 실제 KIND+Naver fetch.
     """
     result = g.sector(target, market=market)
     if result is None:
@@ -323,6 +362,14 @@ def handleInsider(
     Example::
 
         df = handleInsider(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + KR 의 경우 ``DART_API_KEY`` env 필요.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/info.insiderTrading : 본 handler 가 호출하는 backend.
+        accessors.fetchInsiderTrades / iterInsiderTrades : 신규 streaming 동행.
     """
     trades = g.insiderTrading(target, market=market)
     if not trades:
@@ -374,6 +421,14 @@ def handleOwnership(
     Example::
 
         df = handleOwnership(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + 시장별 ownership source (KR: Naver, US: SEC 13F).
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/info.ownership : 본 handler 가 호출하는 backend.
+        accessors.fetchOwnership / iterOwnership : 신규 streaming 동행.
     """
     owners = g.ownership(target, market=market)
     if not owners:
@@ -424,6 +479,14 @@ def handlePeers(
     Example::
 
         df = handlePeers(g, "005930", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        Gather 인스턴스 + KR 시장 + 종목의 industryCode 가 sector 결과로 식별 가능.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        mixins/info.industryPeers : 본 handler 가 호출하는 backend.
+        domains/krx.fetchIndustryPeers : 실제 Naver peer fetch.
     """
     peers = g.industryPeers(target, market=market)
     if not peers:
@@ -468,6 +531,14 @@ def handleKrx(
     Example::
 
         df = handleKrx(g, "close", market="KR", start="2024-01-01", end=None, marketExplicit=False)
+
+    Requires:
+        ``krx.krxApi.gatherKrx`` import 가능. apiKey 미명시 시 HF dataset fallback.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        krx.krxApi.gatherKrx : 위임 대상.
+        handleKrxIndex : 시장군 지수 axis 동행.
     """
     from dartlab.gather.krx.krxApi import gatherKrx
 
@@ -523,6 +594,14 @@ def handleKrxIndex(
     Example::
 
         df = handleKrxIndex(g, "close", market="KOSPI", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        ``krx.krxIndex.gatherKrxIndex`` import 가능. apiKey idx 카테고리 권한 (명시 시).
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        krx.krxIndex.gatherKrxIndex : 위임 대상.
+        handleKrx : 종목 axis 동행.
     """
     from dartlab.gather.krx.krxIndex import gatherKrxIndex
 
@@ -553,6 +632,12 @@ def handleCalendar(
 ) -> pl.DataFrame:
     """calendar axis — 0.10 부터 폐기. Company.calendar() 사용 유도.
 
+    Capabilities: 즉시 ValueError + 이주 안내 메시지.
+    AIContext: 0.10 마이그레이션 가드 — gather → providers cycle 회피 책임 분리.
+    Guide: 호출하면 raise. Company.calendar() 로 이주.
+    When: 사용자가 옛 ``gather('calendar', ...)`` 호출 시.
+    How: ValueError raise + 마이그레이션 안내 메시지.
+
     Args:
         g/target/market/start/end/marketExplicit/**kwargs: 모두 무시 (즉시 raise).
 
@@ -570,6 +655,9 @@ def handleCalendar(
         # 사용자 측 마이그레이션:
         c = dartlab.Company('005930')
         c.calendar(horizonDays=30)
+
+    See Also:
+        providers.dart.Company.calendar : 이주 대상.
     """
     raise ValueError(
         "gather('calendar') 는 0.10 부터 폐기됨. Company.calendar() 사용. "
@@ -610,6 +698,15 @@ def handleDartDoc(
     Example::
 
         df = handleDartDoc(None, "20240315000123", market="KR", start=None, end=None, marketExplicit=False)
+
+    Requires:
+        ``dart.viewer.fetch`` import 가능. 무인증 viewer (DART_API_KEY 불필요).
+        target 14 자리 rcept_no 필수.
+
+    See Also:
+        main.GatherEntry._run : dispatch caller.
+        dart.viewer.fetch : 위임 대상 — 공시 본문 sub-doc 파싱.
+        formatting.wrap_external_in_result : 본문 untrusted 마커 wrap.
     """
     if not target:
         raise ValueError("gather('dartDoc') 는 rcept_no (14자리) target 필요")

@@ -39,6 +39,14 @@ class _GatherProviderAdapter:
         Example:
             >>> a = _GatherProviderAdapter()
             >>> df = a.news("삼성전자", market="KR", days=7)
+
+        Requires:
+            getDefaultGather 가 Gather 인스턴스 가용. 본문은 untrusted external.
+
+        See Also:
+            getDefaultGather : 위임 대상 singleton.
+            mixins/news.news : 실제 RSS fetch.
+            core.gatherProvider.GatherProvider : 본 메서드의 Protocol 정의.
         """
         return getDefaultGather().news(query, market=market, days=days)
 
@@ -65,6 +73,14 @@ class _GatherProviderAdapter:
         Example:
             >>> a = _GatherProviderAdapter()
             >>> df = a.entry("price", "005930")
+
+        Requires:
+            ``GatherEntry`` import 가능. axis 등록은 dispatch.AXIS_REGISTRY.
+
+        See Also:
+            main.GatherEntry : 위임 대상 callable.
+            dispatch.AXIS_REGISTRY : 등록 axis 메타.
+            core.gatherProvider.GatherProvider : 본 메서드의 Protocol 정의.
         """
         gather = GatherEntry()
         if axis is None:
@@ -103,6 +119,14 @@ def getDefaultGather():
         from dartlab.gather import getDefaultGather
         g = getDefaultGather()
         g.price("005930")
+
+    Requires:
+        ``dartlab.gather.engine.Gather`` import 가능 (lazy in lock block 으로 circular
+        회피). ``_defaultGatherLock`` 가 module-level 에 단일 존재.
+
+    See Also:
+        engine.Gather : 본 함수의 lazy 인스턴스화 대상.
+        _GatherProviderAdapter.news · entry : 본 singleton 의 caller (Protocol 위임).
     """
     global _defaultGather
     if _defaultGather is None:

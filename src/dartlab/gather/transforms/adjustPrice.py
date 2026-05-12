@@ -112,6 +112,17 @@ def detectEventsFromPrices(
 
     Example:
         >>> events = detectEventsFromPrices(raw)
+
+    When:
+        DART events parquet 부재 시 Stage 1 백본으로 split-adj 생성 / Stage 2 도착 후
+        cross-check (false positive 검출) 시.
+
+    How:
+        sort by (codeCol, dateCol) → implied vs declared ratio 비교 → eventFactor 가
+        임계 (1±threshold) 벗어난 row 만 events 추출.
+
+    Requires:
+        raw DataFrame 에 closeCol/flucCol 컬럼 + 동일 codeCol 의 시계열 ≥ 2 row.
     """
     if raw.is_empty() or closeCol not in raw.columns or flucCol not in raw.columns:
         return pl.DataFrame(
@@ -206,6 +217,18 @@ def applyAdjustment(
 
     Raises:
         없음 — events 부재나 raw 빈 DataFrame 모두 graceful 처리.
+
+    When:
+        ``_hfBulk.loadFiltered`` 가 raw + events parquet 을 load 후 adjusted 시계열
+        반환 시 / mode="tr" 로 dividend reinvested 분석 필요 시.
+
+    How:
+        events.type 분기 → ``_applySplitFactor`` (split/bonus/rights) + mode=="tr" 시
+        ``_applyDivFactor`` chain 적용 → priceCols 덮어씀 + splitFactor/divFactor 컬럼 부착.
+
+    Requires:
+        raw DataFrame 의 priceCols 컬럼 가용. events DataFrame schema:
+        (dateCol, codeCol, type, ratio, divPerShare).
     """
     global _warned_no_events
 

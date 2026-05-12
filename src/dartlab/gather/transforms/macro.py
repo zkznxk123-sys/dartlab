@@ -55,6 +55,15 @@ def addChangeRate(df: pl.DataFrame, *, valueName: str = "value") -> pl.DataFrame
     Example
     -------
     >>> out = addChangeRate(df)
+
+    Requires
+    --------
+    df 에 ``date`` + valueName 컬럼. 8 row 이상이어야 YoY 컬럼 추가 (날짜 간격 자동 감지).
+
+    See Also
+    --------
+    enrichAndCache : 본 함수 + Parquet 저장 일괄.
+    resampleToQuarterly · resampleToAnnual : 시간 단위 변환 동행 함수.
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -125,6 +134,16 @@ def resampleToQuarterly(df: pl.DataFrame, *, valueName: str = "value", method: s
     Example
     -------
     >>> q = resampleToQuarterly(df)
+
+    Requires
+    --------
+    df 에 ``date`` (Date or castable) + valueName 컬럼. method 는 "last"/"mean"/"sum" 만 허용.
+
+    See Also
+    --------
+    resampleToAnnual : 연간 변환 동행.
+    addChangeRate : 변화율 추가.
+    alignToFinancialPeriods : 분기 EDGAR 10-Q 매칭.
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -173,6 +192,16 @@ def resampleToAnnual(df: pl.DataFrame, *, valueName: str = "value", method: str 
     Example
     -------
     >>> a = resampleToAnnual(df)
+
+    Requires
+    --------
+    df 에 ``date`` (Date or castable) + valueName 컬럼. method 는 "last"/"mean"/"sum".
+
+    See Also
+    --------
+    resampleToQuarterly : 분기 변환 동행.
+    addChangeRate : 변화율 추가.
+    alignToFinancialPeriods : EDGAR 10-K 연결.
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -222,6 +251,16 @@ def saveMacroParquet(indicatorId: str, df: pl.DataFrame, *, source: str = "ecos"
     Example
     -------
     >>> p = saveMacroParquet("GDP", df, source="fred")
+
+    Requires
+    --------
+    ``~/.dartlab/cache/macro/{source}/`` 디렉토리 쓰기 권한. Pyodide 환경 불가
+    (영속 FS 없음 — saveMacroParquet 호출 자체 회피 필요).
+
+    See Also
+    --------
+    loadMacroParquet : 본 함수의 역방향 (Parquet read).
+    enrichAndCache : addChangeRate + 본 함수 일괄.
     """
     dirPath = _CACHE_DIR / source
     dirPath.mkdir(parents=True, exist_ok=True)
@@ -264,6 +303,16 @@ def loadMacroParquet(indicatorId: str, *, source: str = "ecos") -> pl.DataFrame 
     Example
     -------
     >>> df = loadMacroParquet("GDP", source="fred")
+
+    Requires
+    --------
+    ``~/.dartlab/cache/macro/{source}/{indicatorId}.parquet`` 파일 존재. 파일 부재
+    시 None — caller 가 fetch + saveMacroParquet 으로 후행.
+
+    See Also
+    --------
+    saveMacroParquet : 본 함수의 역방향 (Parquet write).
+    enrichAndCache : addChangeRate + saveMacroParquet 일괄.
     """
     path = _CACHE_DIR / source / f"{indicatorId}.parquet"
     if not path.exists():
@@ -322,6 +371,16 @@ def enrichAndCache(
     Example
     -------
     >>> out = enrichAndCache("GDP", df, source="fred")
+
+    Requires
+    --------
+    addChangeRate 의 요구사항 + saveMacroParquet 의 디스크 쓰기 권한.
+
+    See Also
+    --------
+    addChangeRate : 변화율 컬럼 추가 (본 함수 내부 호출).
+    saveMacroParquet : 본 함수 내부 호출 — 영구 캐시 저장.
+    loadMacroParquet : 본 함수 결과의 후속 hit.
     """
     enriched = addChangeRate(df, valueName=valueName)
     saveMacroParquet(indicatorId, enriched, source=source)
@@ -372,6 +431,16 @@ def alignToFinancialPeriods(
     Example
     -------
     >>> aligned = alignToFinancialPeriods(macroDf, ["2024A", "2024Q3"])
+
+    Requires
+    --------
+    macroDf 에 ``date`` (Date 또는 castable) + valueName 컬럼. periods 형식
+    ``YYYYA`` (연간) 또는 ``YYYYQq`` (분기) — 4 자리 연도 필수.
+
+    See Also
+    --------
+    resampleToQuarterly · resampleToAnnual : period 단위 사전 변환.
+    analysis/regime : 본 함수 결과의 caller (재무-거시 결합).
     """
     if macroDf.is_empty():
         return pl.DataFrame({"period": periods, "value": [None] * len(periods)})

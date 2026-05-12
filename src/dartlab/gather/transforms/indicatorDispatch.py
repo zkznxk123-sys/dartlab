@@ -197,6 +197,15 @@ def addIndicators(
 
     Example:
         >>> df = addIndicators(ohlcv, indicators=["ma20", "rsi14"])
+
+    Requires:
+        ``dartlab.core.indicators`` 의 v* 함수 가용. OHLCV 컬럼 (closeCol/highCol/lowCol/
+        volumeCol) 이 ohlcvDf 에 존재.
+
+    See Also:
+        computeIndicator : 전종목 long DataFrame group 단위 계산.
+        _resolveIndicator : target 문자열 → 함수 dispatch.
+        gather/krxApi.gatherKrx : 본 함수의 caller (target 분기 시 호출).
     """
     if not indicators or ohlcvDf.is_empty():
         return ohlcvDf
@@ -264,6 +273,17 @@ def computeIndicator(
     Example
     -------
     >>> s = computeIndicator(longDf, "rsi14")
+
+    Requires
+    --------
+    ``dartlab.core.indicators`` 가용 + longDf 의 표준 컬럼 (close/open/high/low/volume)
+    + codeCol/dateCol 가 longDf 에 존재.
+
+    See Also
+    --------
+    addIndicators : 단일 종목 wide DataFrame 보조지표 추가.
+    _resolveIndicator : target 문자열 dispatch.
+    gatherKrx : 본 함수의 caller — wide pivot 전 단계.
     """
     fn, kwargs, inputCols = _resolveIndicator(target)
     missing = [c for c in inputCols if c not in longDf.columns]
