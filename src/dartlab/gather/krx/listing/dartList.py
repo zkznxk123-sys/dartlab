@@ -66,6 +66,12 @@ def _loadDartListFromHf() -> pl.DataFrame | None:
 def getDartList(*, forceRefresh: bool = False) -> pl.DataFrame:
     """OpenDART 전체 법인 목록 (corp_code 8자리 매핑 포함).
 
+    Capabilities: KIND (상장) 와 별개로 비상장 포함 DART 전수 법인 목록 + HF 캐시.
+    AIContext: DART 공시 lookup, EDGAR 와 대비되는 KR 1차 출처 mapping SSOT.
+    Guide: forceRefresh=True 시 HF 강제 재다운로드 (TTL 무시).
+    When: DART corp_code ↔ 회사명 mapping 필요 (공시 조회, 비상장 포함) 시.
+    How: 메모리 → 파일 → HuggingFace 3-tier fetch 후 캐시 저장.
+
     캐시 우선순위: 메모리 → 파일(24h TTL) → HuggingFace.
     DART API 키 불필요 — HuggingFace에서 자동 다운로드.
 

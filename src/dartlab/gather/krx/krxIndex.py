@@ -125,6 +125,12 @@ async def fetchKrxIndexBydd(
 ) -> pl.DataFrame:
     """KRX OpenAPI - 하루치 시장군 전체 지수 OHLCV (raw, async).
 
+    Capabilities: 하루치 KRX/KOSPI/KOSDAQ 시장군 전체 지수 OHLCV raw fetch.
+    AIContext: KRX bulk 지수 빌드 source — gatherKrxIndex HF dataset 원본.
+    Guide: apiKey 명시 필수. 미래 일자는 _isFinalized 분기로 빈 응답.
+    When: 일별 지수 bulk build / KRX OpenAPI idx endpoint 직접 호출 필요 시.
+    How: KRX OpenAPI _BASE_URL + market endpoint → JSON → schema cast → DataFrame.
+
     Parameters
     ----------
     basDd : str
@@ -253,6 +259,12 @@ async def fetchKrxIndexRange(
 ) -> pl.DataFrame:
     """KRX 지수 범위를 일자별로 직접 수집한다.
 
+    Capabilities: 기간 [start, end] 일별 KRX 지수 fetch + concurrency/retry/sleep 정책.
+    AIContext: 운영자 cron 의 KRX bulk index build 진입 (조건부 wait/backoff).
+    Guide: KRX 차단 회피 위해 concurrency=1 권장. retries 403/429/5xx 재시도.
+    When: HF dataset 누락 기간 backfill / cron 신규 build 시.
+    How: 역방향 일별 fetchKrxIndexBydd + asyncio.Semaphore + concat.
+
     Parameters
     ----------
     start : str
@@ -352,6 +364,12 @@ def gatherKrxIndex(
     indicators: list[str] | bool | str | None = "basic",
 ) -> pl.DataFrame:
     """KRX 시장군별 전체 지수 일별 매매현황을 반환한다.
+
+    Capabilities: KRX/KOSPI/KOSDAQ 공식 지수 wide matrix 또는 raw long DataFrame.
+    AIContext: dartlab.gather("krxIndex", target, ...) 사용자/AI 진입점.
+    Guide: apiKey None 이면 HF dataset 자동 fallback. indexFilter+indicators 조합 가능.
+    When: KOSPI/KOSDAQ 지수 시계열 분석 / 단일 지수 + 보조지표 분석 시.
+    How: apiKey 분기 (직접 KRX OpenAPI vs HF) → wide pivot 또는 raw long.
 
     Summary
     -------

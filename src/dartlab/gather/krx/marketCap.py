@@ -42,6 +42,12 @@ from dartlab.gather.entry import GatherEntry
 def fetchOhlcv(stockCode: str, *, limit: int | None = None, **kwargs):
     """gather("price") 직접 호출 — quant._helpers wrapper 우회 (단방향 정책).
 
+    Capabilities: GatherEntry("price") 위임 + 예외 흡수 → None fail-soft.
+    AIContext: quant.screen 의 OHLCV 데이터 원천 — gather 위 layer 직접 진입.
+    Guide: 단방향 layer 정책 — quant 가 gather 호출은 OK, gather 가 quant 호출 금지.
+    When: quant._helpers 가 OHLCV 시계열 필요 시.
+    How: GatherEntry() 인스턴스 생성 → ("price", stockCode, **kwargs) callable.
+
     Parameters
     ----------
     stockCode : str
@@ -76,6 +82,12 @@ def fetchOhlcv(stockCode: str, *, limit: int | None = None, **kwargs):
 
 def loadSharesOutstanding(market: str = "KR"):
     """발행주식수 LazyFrame — scan parquet 직접 로드.
+
+    Capabilities: dart/edgar scan parquet read-only LazyFrame 진입.
+    AIContext: marketCap 합성 (sharesOutstanding × close) 의 sharesOutstanding 원천.
+    Guide: 파일 부재 = scan auto-download 미실행 → 호출자가 ensureScanData 선행 필요.
+    When: marketCap KR/US wide 시계열 합성 시.
+    How: dataDir() / dart|edgar / scan / sharesOutstanding.parquet → scan_parquet.
 
     KR/US 모두 dataDir 의 표준 경로에서 read-only 로드 (auto-download 책임은
     호출자 측 — story/scan 이 미리 _ensureScanData 호출). gather 는 scan 위
@@ -182,6 +194,12 @@ def marketCap(
 ) -> pl.DataFrame | None:
     """시가총액 일별 시계열.
 
+    Capabilities: KR 은 KRX MKTCAP 직접 / US 는 sharesOutstanding × close 합성.
+    AIContext: quant valuation/scan/macro 의 회사 규모 baseline.
+    Guide: KR 은 HF 빌드 필요 — 미빌드 종목은 None. US 는 EDGAR XBRL 필요.
+    When: 시총 시계열 분석 (cycle/relative size) 또는 wide DF 합성 시.
+    How: market 라우팅 → KR HF.loadFiltered / US sharesOutstanding × close.
+
     KR (2026-04-24 정정 — Phase A): KRX OpenAPI ``MKTCAP`` + ``LIST_SHRS`` 컬럼 직접 사용.
     이전엔 DART 분기 sharesOutstanding × 일별 close 합성 (분기-일별 mismatch 로 부정확).
     이제 KRX 가 일별로 정확히 계산한 시총 그대로 — `gather/_hfBulk.loadFiltered` 경유.
@@ -285,6 +303,12 @@ def marketCapSnapshot(
 ) -> dict | None:
     """최신 시가총액 한 점.
 
+    Capabilities: marketCap 시계열 → 최신 1 점 dict 스냅샷.
+    AIContext: scan 결과 카드 / Company 표시 / dashboard tile 진입.
+    Guide: start/end 미지정 시 최근 30일 (전체 fetch 회피 → 비용 ↓).
+    When: 단일 시점 시총 (latest) 만 필요할 때.
+    How: marketCap() 호출 → drop_nulls → sort → 마지막 row 추출.
+
     Parameters
     ----------
     stockCode : str
@@ -361,6 +385,10 @@ def marketCapAll(
     AIContext:
         - Phase A2 — Phase B (FF5 size proxy → 진짜 시총) 의 전제
         - 호출자: `quant/factorBuild.py`, `quant/valueFactor.py`, `scan/valuation/`
+
+    Guide: market 인자로 KOSPI/KOSDAQ/ALL 분기. start 필수, end None 이면 단일일자.
+    When: cross-section size factor / scan universe ranking 필요 시.
+    How: gatherKrx("marketCap", ...) 위임 → KRX OpenAPI 일별 raw → wide pivot.
 
     Args:
         start: 기간 시작 (YYYY-MM-DD).

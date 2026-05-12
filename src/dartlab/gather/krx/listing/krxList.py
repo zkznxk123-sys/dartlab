@@ -131,6 +131,12 @@ def _saveKrxCache(df: pl.DataFrame) -> None:
 def getKrxList(*, forceRefresh: bool = False) -> pl.DataFrame:
     """KRX data.krx.co.kr 상장법인 전체 목록.
 
+    Capabilities: ISIN full_code + short_code + marketName (KOSPI/KOSDAQ/KONEX) 제공.
+    AIContext: KIND 보다 상세한 시장구분 + ISIN — quant/scan universe 빌더 진입.
+    Guide: forceRefresh=True 시 KRX HTTP 강제 재요청. JSON API 무인증.
+    When: KIND 와 별개 KRX ISIN/시장구분 매핑 필요 시.
+    How: 메모리 → 파일 → KRX data API JSON 호출 → DataFrame.
+
     캐시 우선순위: 메모리 -> 파일(24h TTL) -> KRX API.
     KIND 목록보다 상세 컬럼(full_code, short_code, marketName 등) 제공.
 

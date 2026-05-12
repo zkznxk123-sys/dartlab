@@ -69,6 +69,12 @@ class _TableParser(HTMLParser):
     def handle_starttag(self, tag: str, _attrs):
         """HTML 여는 태그 처리 (stdlib HTMLParser hook).
 
+        Capabilities: table/tr/td/th 진입 추적.
+        AIContext: KIND HTML 응답을 polars DataFrame 으로 변환하는 첫 단계.
+        Guide: stdlib HTMLParser 가 자동 콜백, 직접 호출 금지.
+        When: parser.feed(html) 가 여는 태그 발견 시.
+        How: 태그명 분기 + 내부 _inTable/_inTr/_inCell 플래그 갱신.
+
         Args:
             tag: 태그 이름 (소문자).
             _attrs: 태그 속성 리스트 — 본 파서에서 사용 안 함.
@@ -94,6 +100,12 @@ class _TableParser(HTMLParser):
     def handle_endtag(self, tag: str):
         """HTML 닫는 태그 처리 (stdlib HTMLParser hook).
 
+        Capabilities: cell 누적 텍스트 commit + row 누적.
+        AIContext: KIND HTML 응답 변환의 row commit 단계.
+        Guide: stdlib HTMLParser 자동 콜백, 직접 호출 금지.
+        When: parser.feed(html) 가 닫는 태그 발견 시.
+        How: 태그명 분기 + _cell strip → _row append.
+
         Args:
             tag: 태그 이름 (소문자).
 
@@ -118,6 +130,12 @@ class _TableParser(HTMLParser):
 
     def handle_data(self, data: str):
         """HTML 텍스트 데이터 처리 (stdlib HTMLParser hook).
+
+        Capabilities: cell 내 텍스트 누적 (다중 텍스트 노드 대응).
+        AIContext: KIND 응답의 EUC-KR 텍스트 cell 본문 수집.
+        Guide: stdlib HTMLParser 자동 콜백, 직접 호출 금지.
+        When: parser.feed(html) 가 텍스트 노드 발견 시 + _inCell True.
+        How: _cell 문자열 concat — handle_endtag 가 strip + commit.
 
         Args:
             data: 태그 사이의 텍스트.
@@ -222,6 +240,12 @@ def _saveCache(df: pl.DataFrame) -> None:
 def getKindList(*, forceRefresh: bool = False) -> pl.DataFrame:
     """KRX KIND 상장법인 전체 목록.
 
+    Capabilities: 메모리 → 파일(24h TTL) → KIND API 3-tier 캐시 + SPAC/리츠 제외.
+    AIContext: 종목코드 ↔ 회사명 매핑의 SSOT — Company/Search/Scan 진입점.
+    Guide: forceRefresh=True 시 KIND HTTP 강제 호출 (TTL 무시).
+    When: 종목코드 ↔ 회사명 lookup, 새 종목 등장 점검 시.
+    How: 메모리 cache check → file cache check → _fetchKind() → 저장.
+
     캐시 우선순위: 메모리 → 파일(24h TTL) → KIND API.
     SPAC·리츠 제외, 6자리 종목코드만 포함.
 
@@ -303,6 +327,12 @@ def _invalidateSearchCache() -> None:
 def codeToName(stockCode: str) -> str | None:
     """종목코드 → 회사명.
 
+    Capabilities: 6자리 종목코드 lookup → 한국 법인명 변환.
+    AIContext: Company/Scan/Search 가 사용자 표시용 회사명 얻을 때 진입.
+    Guide: getKindList() 캐시 hit 이면 O(1) 근사 — 첫 호출만 KIND fetch.
+    When: 분석 결과에 회사명 라벨 필요 시.
+    How: getKindList() → 종목코드 == filter → 첫 행 회사명.
+
     Parameters
     ----------
     stockCode : str
@@ -332,6 +362,12 @@ def codeToName(stockCode: str) -> str | None:
 
 def nameToCode(corpName: str) -> str | None:
     """회사명 → 종목코드. 정확히 일치하는 첫 번째 결과.
+
+    Capabilities: 한국 회사명 → 6자리 종목코드 정확 매칭.
+    AIContext: 사용자 자연어 (회사명) 입력 → 코드 정규화 진입.
+    Guide: 정확히 일치만 — fuzzy 검색은 fuzzy.searchName 사용.
+    When: "삼성전자 분석해" 류 자연어 → 종목코드 추출 필요 시.
+    How: getKindList() → 회사명 == filter → 첫 행 종목코드.
 
     Parameters
     ----------

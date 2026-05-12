@@ -128,7 +128,6 @@
     "src/dartlab/gather/infra/resilience.py::state",
     "src/dartlab/gather/krx/krxApi.py::fetchKrxBydd",
     "src/dartlab/gather/krx/krxApi.py::fetchKrxRange",
-    "src/dartlab/gather/krx/krxApi.py::gatherKrx",
     "src/dartlab/gather/krx/krxIndex.py::fetchKrxIndexBydd",
     "src/dartlab/gather/krx/krxIndex.py::fetchKrxIndexRange",
     "src/dartlab/gather/krx/krxIndex.py::gatherKrxIndex",

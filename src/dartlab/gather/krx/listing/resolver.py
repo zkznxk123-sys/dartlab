@@ -21,6 +21,12 @@ class GatherListingResolver:
     def search(self, query: str, *, limit: int | None = None) -> pl.DataFrame | None:
         """회사명 검색 — searchName 위임.
 
+        Capabilities: ListingResolver Protocol 구현 — fuzzy.searchName 정확 substring 매칭.
+        AIContext: core 가 gather/listing 직접 의존 안 하도록 DIP 격리 진입점.
+        Guide: 위임만 — 본문 변경 시 fuzzy.searchName 본체 수정 필요.
+        When: core.resolve 또는 providers.Company 가 검색 API 호출 시.
+        How: try/except 으로 ValueError/OSError 흡수 → None.
+
         Parameters
         ----------
         query : str
@@ -52,6 +58,12 @@ class GatherListingResolver:
 
     def fuzzy(self, query: str, *, maxResults: int = 5) -> pl.DataFrame | None:
         """fuzzy 검색 — fuzzySearch 위임.
+
+        Capabilities: ListingResolver Protocol — fuzzy 4 단계 매칭 (초성/약칭/오타).
+        AIContext: core 가 fuzzy 본체 의존 안 하도록 DIP 격리.
+        Guide: 위임만 — 매칭 알고리즘은 fuzzy.fuzzySearch 본체.
+        When: 사용자 자연어 검색 (Skill OS / chat) 진입 시.
+        How: try/except 으로 ValueError/OSError 흡수 → None.
 
         Parameters
         ----------
@@ -85,6 +97,12 @@ class GatherListingResolver:
     def codeToName(self, stockCode: str) -> str | None:
         """stockCode → 회사명 변환.
 
+        Capabilities: ListingResolver Protocol — registry.codeToName 위임.
+        AIContext: core 가 registry 본체 의존 안 하도록 격리.
+        Guide: 위임만 — KIND 캐시 hit 이면 O(1) 근사.
+        When: 분석 결과 라벨링 / Company 표시명 진입 시.
+        How: try/except 으로 ValueError/OSError 흡수 → None.
+
         Parameters
         ----------
         stockCode : str
@@ -113,6 +131,12 @@ class GatherListingResolver:
     def nameToCode(self, corpName: str) -> str | None:
         """회사명 → stockCode 변환.
 
+        Capabilities: ListingResolver Protocol — registry.nameToCode 위임.
+        AIContext: core 가 registry 본체 의존 안 하도록 격리.
+        Guide: 정확 매칭만 — fuzzy 는 별도 메서드.
+        When: 사용자 회사명 입력 → 종목코드 정규화 진입 시.
+        How: try/except 으로 ValueError/OSError 흡수 → None.
+
         Parameters
         ----------
         corpName : str
@@ -140,6 +164,12 @@ class GatherListingResolver:
 
     def kindList(self, *, forceRefresh: bool = False) -> pl.DataFrame:
         """KIND 상장법인 목록.
+
+        Capabilities: ListingResolver Protocol — registry.getKindList 위임.
+        AIContext: core 가 KRX KIND HTML fetch 의존 안 하도록 격리.
+        Guide: forceRefresh=True 시 KIND HTTP 강제 재요청.
+        When: 전체 KR 상장법인 universe 필요 시.
+        How: registry.getKindList(forceRefresh=...) 직접 위임.
 
         Parameters
         ----------

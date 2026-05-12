@@ -143,6 +143,12 @@ def _getSearchCache() -> dict[str, object]:
 def searchName(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
     """회사명 부분 검색.
 
+    Capabilities: substring 정확 매칭 (대소문자 구분 폴라스 literal).
+    AIContext: fuzzy 검색 전 baseline — 사용자 키워드 정확 substring 회사 lookup.
+    Guide: fuzzy 매칭 필요 시 fuzzySearch 사용. 본 함수는 literal substring 만.
+    When: 키워드가 회사명 일부 (정확) 와 일치 가정 시.
+    How: getKindList() → 회사명.str.contains(keyword) → limit slice.
+
     Args:
         keyword: 검색 키워드 (예: "삼성", "반도체").
         limit: 반환 행수 상한 (가장 위 N). None이면 매칭 전체.
@@ -169,6 +175,12 @@ def searchName(keyword: str, *, limit: int | None = None) -> pl.DataFrame:
 
 def fuzzySearch(keyword: str, *, maxResults: int = 10) -> pl.DataFrame:
     """한글 fuzzy 종목 검색 — 초성 매칭 + Levenshtein 거리.
+
+    Capabilities: 초성/약칭/오타/영문 fuzzy 4 단계 점수 매칭 + 관련도 정렬.
+    AIContext: 사용자 자연어 입력 ("삼전", "ㅅㅅ", "samsun") → 회사 추론 진입.
+    Guide: maxResults 가 None 없음 — 기본 10. 큰 값은 성능 비용 ↑.
+    When: AI 챗 / search bar / Skill OS 자연어 입력 처리 시.
+    How: 정확 일치 → substring → 초성 subsequence → Levenshtein 거리 4 단계.
 
     지원:
     - 초성 검색: "ㅅㅅ" → 삼성전자, 삼성물산, ...

@@ -131,6 +131,12 @@ async def fetchKrxBydd(
 ) -> pl.DataFrame:
     """KRX OpenAPI - 하루치 전종목 OHLCV (raw, async).
 
+    Capabilities: 하루치 STK/KSQ 전종목 OHLCV + 시총 + 발행주식수 raw fetch.
+    AIContext: 운영자 cron 의 KRX bulk 빌드 source — HF dataset 원본.
+    Guide: apiKey 환경변수 자동 read 안 함. 명시 필수 (운영자 cron 만).
+    When: 일별 KRX bulk 누적 build / 미래 _isFinalized 분기.
+    How: KRX OpenAPI _BASE_URL/_ENDPOINT post → JSON → schema cast → DataFrame.
+
     apiKey 는 명시 필수 — 환경변수 자동 read 없음. 운영자 cron 은
     `scripts/build/buildKrxData.py` 가 ``KRX_API_KEY`` 환경변수 read 후 명시 전달.
 
@@ -247,6 +253,12 @@ async def fetchKrxRange(
 ) -> pl.DataFrame:
     """KRX OpenAPI - 기간 루프 (역방향 일별, async).
 
+    Capabilities: 기간 [start, end] 역방향 일별 호출 + sleepSec 간격 + concat.
+    AIContext: 운영자 cron / scripts/build/buildKrxData 가 기간 bulk 빌드 진입.
+    Guide: ALL 이면 STK + KSQ 각각 호출 (2 배 비용). apiKey 미지정 시 raise.
+    When: HF dataset 빌드 / 누락 기간 backfill 시.
+    How: 역방향 (end → start) 일별 fetchKrxBydd 호출 + diagonal_relaxed concat.
+
     최근일자 → 과거일자 순서. 휴장일/미확정일은 직접 호출 후 빈 응답으로 제외.
     한 일자당 시장당 1 호출. ALL 이면 STK + KSQ 각각.
 
@@ -309,6 +321,12 @@ def gatherKrx(
     apiKey: str | None = None,
 ) -> pl.DataFrame:
     """KRX 일별 전종목 — **회사별 wide 시계열** (행 = 회사, 열 = 일자) 또는 long raw.
+
+    Capabilities: target 하나로 raw OHLCV / 시총 / 발행주식수 / 28+ 보조지표 진입.
+    AIContext: dartlab.gather("krx", target, ...) 의 본체 — 사용자/AI 모두 진입.
+    Guide: apiKey None 이면 HF dataset 자동 fallback. wide pivot 이 기본.
+    When: KRX 단일 axis 호출 + 시계열 wide 분석 / 횡단면 ranking 시.
+    How: apiKey 분기 (직접 OpenAPI vs HF) → long raw → _indicatorDispatch (옵션) → wide pivot.
 
     target 하나로 raw OHLCV / 시총 / 발행주식수 / 28+ 보조지표 모두 동일 진입점.
     저장 (HF parquet) 은 long SSOT, 사용자 view 는 wide pivot — scan 의 횡단면 표준과 일관.
