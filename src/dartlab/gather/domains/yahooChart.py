@@ -111,6 +111,17 @@ async def fetchPrice(
     Example
     -------
     >>> snap = await fetchPrice("AAPL", client, market="US")
+
+    Requires
+    --------
+    네트워크 (``query2.finance.yahoo.com/v8/finance/chart``). 무인증 비공식 API.
+    rate limit 시 http.py 가 지수 backoff 자동 재시도 (최대 3 회).
+
+    See Also
+    --------
+    sources/price.fetch : 호출 체인 (US primary).
+    naverGlobal.fetchPrice · fmp.fetchPrice : fallback source.
+    fetchHistory : 일별 OHLCV 동행 endpoint.
     """
     del limit
     symbol = _buildSymbol(stockCode, market)
@@ -224,6 +235,16 @@ async def fetchHistory(
     Example
     -------
     >>> rows = await fetchHistory("AAPL", client, start="2024-01-01")
+
+    Requires
+    --------
+    네트워크 + Yahoo v8 chart 가용 (비공식). 일봉 최대 ~10 년. adjclose 우선 사용.
+
+    See Also
+    --------
+    sources/history.fetch : 호출 체인 (US primary).
+    naverGlobal.fetchHistory · fdr.fetchHistory · fmp.fetchHistory : fallback.
+    fetchPrice : 단일 시점 동행 endpoint.
     """
     from datetime import datetime as _dt
 

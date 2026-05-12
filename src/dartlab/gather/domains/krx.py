@@ -63,6 +63,17 @@ async def fetchSectorInfo(
     Example
     -------
     >>> info = await fetchSectorInfo("005930", client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com``) + KIND 캐시 (``listing.getKindList``).
+    Naver 차단 시 KIND 단독 fallback (sectorCode 빈 문자열).
+
+    See Also
+    --------
+    mixins/info.sector : 본 함수의 caller.
+    fetchIndustryPeers : industryCode 후속 peer 조회.
+    listing.getKindList : KIND 업종명 source.
     """
     del limit
     # 1) KIND에서 업종명 가져오기 (동기 -- 이미 캐시됨)
@@ -145,6 +156,17 @@ async def fetchIndustryPeers(
     Example
     -------
     >>> peers = await fetchIndustryPeers("263", client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com/api/stocks/industry/{code}``) + industryCode
+    정확 명시 (``fetchSectorInfo`` 결과의 ``industryCode``).
+
+    See Also
+    --------
+    mixins/info.industryPeers : 본 함수의 caller.
+    fetchSectorInfo : industryCode 추출 source.
+    fetchIndustryList : 전체 universe.
     """
     try:
         url = _NAVER_INDUSTRY_DETAIL.format(code=industryCode)
@@ -214,6 +236,16 @@ async def fetchIndustryList(
     Example
     -------
     >>> inds = await fetchIndustryList(client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com/api/stocks/industry``). 호출 비용 큼 — caller 측
+    caching 권장 (``_industryNameCache``).
+
+    See Also
+    --------
+    fetchIndustryPeers : 본 list 의 industryCode 로 peer 조회.
+    fetchSectorInfo : 단일 종목의 sectorCode 진입.
     """
     try:
         resp = await client.get(_NAVER_INDUSTRY_LIST)

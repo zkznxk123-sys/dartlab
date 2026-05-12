@@ -79,6 +79,15 @@ async def fetchPrice(
     Example
     -------
     >>> snap = await fetchPrice("AAPL", client, market="US")
+
+    Requires
+    --------
+    ``FMP_API_KEY`` 환경변수 + 무료 플랜 250 req/day rate limit. 키 미설정 시 None.
+
+    See Also
+    --------
+    sources/price.fetch : 호출 체인 (Yahoo → FMP 순서).
+    fetchHistory · fetchDividends · fetchSplits : 본 모듈의 동행 endpoint.
     """
     del limit
     key = _getApiKey()
@@ -181,6 +190,16 @@ async def fetchHistory(
     Example
     -------
     >>> rows = await fetchHistory("AAPL", client, start="2024-01-01", end="2024-12-31")
+
+    Requires
+    --------
+    ``FMP_API_KEY`` 환경변수 + start/end YYYY-MM-DD. 무료 플랜 rate limit.
+
+    See Also
+    --------
+    sources/history.fetch : 호출 체인 (Yahoo → FMP).
+    fetchPrice : 단일 시점 (현재가).
+    yahooChart.fetchHistory : 무인증 동행 source.
     """
     key = _getApiKey()
     if not key:
@@ -267,6 +286,16 @@ async def fetchDividends(
     Example
     -------
     >>> divs = await fetchDividends("AAPL", client)
+
+    Requires
+    --------
+    ``FMP_API_KEY`` 환경변수. 무료 플랜 rate limit (250 req/day).
+
+    See Also
+    --------
+    mixins/info.dividends : 본 함수의 caller.
+    naverGlobal.fetchDividends : KR 또는 fallback 대응 source.
+    fetchSplits : 동행 corporate action 이력.
     """
     key = _getApiKey()
     if not key:
@@ -344,6 +373,16 @@ async def fetchSplits(
     Example
     -------
     >>> splits = await fetchSplits("AAPL", client)
+
+    Requires
+    --------
+    ``FMP_API_KEY`` 환경변수. 무료 플랜 rate limit.
+
+    See Also
+    --------
+    mixins/info.splits : 본 함수의 caller.
+    transforms/adjustPrice.applyAdjustment : 본 함수 결과로 split 보정 적용.
+    fetchDividends : 동행 corporate action.
     """
     key = _getApiKey()
     if not key:

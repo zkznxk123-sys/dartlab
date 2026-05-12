@@ -168,6 +168,17 @@ async def fetchPrice(
     Example
     -------
     >>> snap = await fetchPrice("AAPL", client, market="US")
+
+    Requires
+    --------
+    네트워크 (``api.stock.naver.com``) + Reuters Code 매핑 가능. 호출 간 2~4 초 throttle
+    (asyncio.Lock 으로 경쟁 방지). 비공식 API — 차단 가능성 있음.
+
+    See Also
+    --------
+    sources/price.fetch : 호출 체인 (Yahoo → naverGlobal → fmp).
+    yahooChart.fetchPrice : primary US source.
+    fmp.fetchPrice : 다음 fallback.
     """
     del limit
     code = await _resolveReutersCode(stockCode, client)
@@ -287,6 +298,16 @@ async def fetchHistory(
     Example
     -------
     >>> rows = await fetchHistory("AAPL", client, start="2024-01-01")
+
+    Requires
+    --------
+    네트워크 + Reuters Code 매핑 + 호출 간 2~4 초 throttle. dayCandle 110 일 하드 제한 —
+    endTime 페이징 (최대 10 회 = 1100 일).
+
+    See Also
+    --------
+    sources/history.fetch : 호출 체인 (Yahoo primary → naverGlobal fallback).
+    yahooChart.fetchHistory · fdr.fetchHistory · fmp.fetchHistory : 동행 source.
     """
     code = await _resolveReutersCode(stockCode, client)
     if not code:

@@ -45,6 +45,15 @@ def getPriceFallback(market: str = "KR") -> list[str]:
     -------
     >>> getPriceFallback("KR")
     ['naver', 'naverGlobal']
+
+    Requires
+    --------
+    ``marketConfig.MARKET_REGISTRY`` 에 해당 market 등록. 미등록 시 KeyError.
+
+    See Also
+    --------
+    loadDomain : 본 list 의 각 source name 을 모듈 객체로 dispatch.
+    sources/price.fetch : 본 chain 을 순회하며 실제 fetch.
     """
     config = getMarketConfig(market)
     return list(config.fallback_chain)
@@ -87,6 +96,16 @@ def loadDomain(name: str):
     Example
     -------
     >>> mod = loadDomain("naver")
+
+    Requires
+    --------
+    해당 도메인 모듈 (``naver`` / ``fmp`` / ``krx`` / ``fdr`` / ``naverGlobal`` /
+    ``yahooChart``) 이 import 가능. lazy import 라 미사용 도메인은 메모리 0.
+
+    See Also
+    --------
+    getPriceFallback : 호출자 — chain 의 source name list 제공.
+    sources/{price,flow,history}.fetch : 본 함수 호출 → ``mod.fetch*`` 실행.
     """
     canonical = _DOMAIN_ALIASES.get(name, name)
     if canonical == "naver":

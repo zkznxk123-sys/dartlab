@@ -64,6 +64,14 @@ async def fetchHistory(
 
     Example:
         >>> rows = await fetchHistory("005930", start="2024-01-01", end="2024-12-31")
+
+    Requires:
+        ``finance-datareader`` optional install (미설치 시 빈 list). Parquet 캐시
+        디렉토리 (``~/.dartlab/cache/history/``) 쓰기 권한.
+
+    See Also:
+        sources/history.fetch : 본 함수의 호출 체인.
+        yahooChart.fetchHistory · naverGlobal.fetchHistory · fmp.fetchHistory : 동행 source.
     """
     if not _available():
         log.debug("FDR 미설치 — skip")

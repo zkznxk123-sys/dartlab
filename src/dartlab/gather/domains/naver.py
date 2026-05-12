@@ -175,6 +175,16 @@ async def fetchPrice(
     Example
     -------
     >>> snap = await fetchPrice("005930", client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com/api/stock``) + KR 6 자리 종목코드. 30 RPM 이하 권장.
+
+    See Also
+    --------
+    sources/price.fetch : 호출 체인 (KR primary).
+    naverGlobal.fetchPrice : 외 시장 동행 source.
+    fetchAll : 본 함수를 포함한 일괄 fetch.
     """
     del limit
     # KR 종목코드 검증 — 6자리 숫자 아니면 차단 (US/글로벌 티커 → naver_global로)
@@ -281,6 +291,16 @@ async def fetchFlow(
     Example
     -------
     >>> flow = await fetchFlow("005930", client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com``) + KR 6 자리 종목코드. v2 (dealTrendInfos) 우선,
+    v1 (foreignSummary 스냅샷) fallback.
+
+    See Also
+    --------
+    sources/flow.fetch : 호출 체인 (KR primary).
+    fetchAll : 본 함수의 FlowData 변환 caller.
     """
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
@@ -410,6 +430,15 @@ async def fetchRevenueConsensus(
     Example
     -------
     >>> rows = await fetchRevenueConsensus("005930", client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com/api/stock/{code}/finance/annual``) + KR 6 자리 종목코드.
+    Naver financeInfo 미존재 시 빈 list.
+
+    See Also
+    --------
+    analysis/forecast : 본 함수 결과의 caller (forward 추정 라인).
     """
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
@@ -511,6 +540,15 @@ async def fetchSectorPer(
     Example
     -------
     >>> per = await fetchSectorPer("005930", client)
+
+    Requires
+    --------
+    네트워크 (``m.stock.naver.com``) + KR 6 자리 종목코드. industryInfo 없으면 None.
+
+    See Also
+    --------
+    fetchPrice : PER 자체 (peer-relative 비교 baseline 으로 본 함수 결과와 비교).
+    fetchAll : 본 함수 호출 caller.
     """
     del limit
     # KR 종목코드 검증
@@ -577,6 +615,16 @@ async def fetchAll(
     Example
     -------
     >>> r = await fetchAll("005930", client)
+
+    Requires
+    --------
+    네트워크 + KR 6 자리 종목코드. fetchPrice/fetchFlow/fetchSectorPer 모두 호출.
+    부분 실패 OK — GatherResult.error 로 흡수.
+
+    See Also
+    --------
+    mixins/collect : 본 함수의 fan-out caller.
+    fetchPrice · fetchFlow · fetchSectorPer : 본 함수가 호출하는 backend.
     """
     del limit
     result = GatherResult(domain="naver")
@@ -651,6 +699,16 @@ async def fetchIntraday(
     Example
     -------
     >>> rows = await fetchIntraday("005930", client, market="KR")
+
+    Requires
+    --------
+    네트워크 (``api.stock.naver.com/chart/domestic/item/{code}/minute``) + KR 6 자리
+    종목코드 + 당일 (과거 분봉 미제공).
+
+    See Also
+    --------
+    fetchHistory : 일별 OHLCV (장기).
+    transforms/indicatorDispatch : 분봉 리샘플 + 보조지표.
     """
     if market != "KR":
         return []
@@ -746,6 +804,17 @@ async def fetchHistory(
     Example
     -------
     >>> rows = await fetchHistory("005930", client, start="2024-01-01")
+
+    Requires
+    --------
+    네트워크 (``fchart.stock.naver.com/sise.nhn``) + KR 6 자리 종목코드 또는 지수 심볼
+    (KOSPI/KOSDAQ/KPI200). 단일 호출 6000 일 수정주가.
+
+    See Also
+    --------
+    sources/history.fetch : 호출 체인 (KR primary).
+    fdr.fetchHistory · yahooChart.fetchHistory · fmp.fetchHistory : 동행 source.
+    fetchIntraday : 당일 분봉 진입.
     """
     if market != "KR":
         return []
