@@ -201,7 +201,7 @@ DART 측 mapper 데이터는 `core/data/` 로 통합 승격 (`providers/dart/fin
 ### 검증
 
 ```python
-from dartlab.core.mappers.accountMapper import AccountMapper
+from dartlab.reference.mappers.accountMapper import AccountMapper
 mapper = AccountMapper()
 print(mapper.stats())  # MapperStats(name='account', totalEntries=34249, coverage=1.0, lastUpdated='2026-03-09')
 print(mapper.lookup("매출액"))  # {'snakeId': 'sales', ...}

@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 
 def test_engine_singleton():
     """getEngine()이 싱글턴을 반환."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     e1 = getEngine()
     e2 = getEngine()
@@ -25,7 +25,7 @@ def test_engine_singleton():
 
 def test_engine_has_6_mappers():
     """엔진에 6개 매퍼 등록."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     engine = getEngine()
     assert set(engine.mappers.keys()) == {"account", "topic", "alias", "flow", "notes", "parser"}
@@ -33,7 +33,7 @@ def test_engine_has_6_mappers():
 
 def test_engine_summary():
     """summary()가 문자열 반환."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     s = getEngine().summary()
     assert "[MapperEngine]" in s
@@ -42,7 +42,7 @@ def test_engine_summary():
 
 def test_engine_allStats():
     """allStats()가 5개 MapperStats 반환."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     stats = getEngine().allStats()
     assert len(stats) == 6
@@ -55,7 +55,7 @@ def test_engine_allStats():
 
 def test_account_lookup_korean():
     """한국어 계정명으로 snakeId 조회."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("account")
     assert m is not None
@@ -67,7 +67,7 @@ def test_account_lookup_korean():
 
 def test_account_lookup_snakeid():
     """snakeId로 직접 조회."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("account")
     result = m.lookup("sales")
@@ -77,7 +77,7 @@ def test_account_lookup_snakeid():
 
 def test_account_stats():
     """계정 매퍼 통계."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("account")
     s = m.stats()
@@ -87,7 +87,7 @@ def test_account_stats():
 
 def test_account_korToSnakeId():
     """한국어 → snakeId 변환."""
-    from dartlab.core.mappers.accountMapper import AccountMapper
+    from dartlab.reference.mappers.accountMapper import AccountMapper
 
     m = AccountMapper()
     # 매핑 존재하면 문자열, 없으면 None
@@ -100,7 +100,7 @@ def test_account_korToSnakeId():
 
 def test_topic_lookup_english():
     """영문 topic key로 키워드 조회."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("topic")
     result = m.lookup("dividend")
@@ -111,7 +111,7 @@ def test_topic_lookup_english():
 
 def test_topic_lookup_korean():
     """한국어 키워드로 topic 역방향 조회."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("topic")
     result = m.lookup("배당")
@@ -121,7 +121,7 @@ def test_topic_lookup_korean():
 
 def test_topic_stats():
     """topic 매퍼 통계."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("topic")
     s = m.stats()
@@ -131,7 +131,7 @@ def test_topic_stats():
 
 def test_topic_allKeys():
     """33개 topic key."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("topic")
     keys = m.allKeys()
@@ -141,7 +141,7 @@ def test_topic_allKeys():
 
 def test_topic_topicForKeyword():
     """키워드 → topic 이름."""
-    from dartlab.core.mappers.topicMapper import TopicMapper
+    from dartlab.reference.mappers.topicMapper import TopicMapper
 
     m = TopicMapper()
     assert m.topicForKeyword("사업의 개요") == "businessOverview"
@@ -153,7 +153,7 @@ def test_topic_topicForKeyword():
 
 def test_alias_resolve():
     """variant → canonical 정규화."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("alias")
     assert m.resolve("revenue") == "sales"
@@ -163,7 +163,7 @@ def test_alias_resolve():
 
 def test_alias_lookup_variant():
     """variant 조회 → canonical 반환."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("alias")
     result = m.lookup("revenue")
@@ -173,7 +173,7 @@ def test_alias_lookup_variant():
 
 def test_alias_lookup_canonical():
     """canonical 조회 → variant 목록 반환."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("alias")
     result = m.lookup("sales")
@@ -184,7 +184,7 @@ def test_alias_lookup_canonical():
 
 def test_alias_stats():
     """alias 매퍼 통계."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("alias")
     s = m.stats()
@@ -194,7 +194,7 @@ def test_alias_stats():
 
 def test_alias_canonicals():
     """canonical 목록."""
-    from dartlab.core.mappers.aliasMapper import AliasMapper
+    from dartlab.reference.mappers.aliasMapper import AliasMapper
 
     m = AliasMapper()
     canonicals = m.canonicals()
@@ -207,7 +207,7 @@ def test_alias_canonicals():
 
 def test_flow_isEvent():
     """이벤트성 계정 판별."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("flow")
     assert m.isEvent("dividends_paid")
@@ -217,7 +217,7 @@ def test_flow_isEvent():
 
 def test_flow_lookup_event():
     """이벤트 계정 조회."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("flow")
     result = m.lookup("dividends_paid")
@@ -227,7 +227,7 @@ def test_flow_lookup_event():
 
 def test_flow_lookup_regular():
     """일반 계정 조회."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("flow")
     result = m.lookup("sales")
@@ -237,7 +237,7 @@ def test_flow_lookup_regular():
 
 def test_flow_stats():
     """flow 매퍼 통계."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("flow")
     s = m.stats()
@@ -247,7 +247,7 @@ def test_flow_stats():
 
 def test_flow_eventAccounts():
     """이벤트 계정 목록."""
-    from dartlab.core.mappers.flowMapper import FlowMapper
+    from dartlab.reference.mappers.flowMapper import FlowMapper
 
     m = FlowMapper()
     accounts = m.eventAccounts()
@@ -260,7 +260,7 @@ def test_flow_eventAccounts():
 
 def test_snapshot_and_diff(tmp_path):
     """스냅샷 저장 + diff."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     engine = getEngine()
     engine.setHistoryDir(tmp_path)
@@ -278,7 +278,7 @@ def test_snapshot_and_diff(tmp_path):
 
 def test_diff_missing_quarter(tmp_path):
     """존재하지 않는 분기 diff → error."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     engine = getEngine()
     engine.setHistoryDir(tmp_path)
@@ -291,7 +291,7 @@ def test_diff_missing_quarter(tmp_path):
 
 def test_missing():
     """미매핑 항목 탐지."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("topic")
     missing = m.missing(["dividend", "존재하지않는topic", "businessOverview"])
@@ -304,7 +304,7 @@ def test_missing():
 
 def test_notes_lookup_amount():
     """금액 항목 조회."""
-    from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     result = m.lookup("완제품")
@@ -315,7 +315,7 @@ def test_notes_lookup_amount():
 
 def test_notes_lookup_rate():
     """비율 항목 → skip."""
-    from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     result = m.lookup("연이자율")
@@ -326,7 +326,7 @@ def test_notes_lookup_rate():
 
 def test_notes_isAmount():
     """isAmount 판별."""
-    from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     assert m.isAmount("완제품")
@@ -336,7 +336,7 @@ def test_notes_isAmount():
 
 def test_notes_isSkip():
     """isSkip 판별."""
-    from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     assert m.isSkip("연이자율")
@@ -346,7 +346,7 @@ def test_notes_isSkip():
 
 def test_notes_hasForeignCurrency():
     """외화 항목 판별."""
-    from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     assert m.hasForeignCurrency("외화대출")
@@ -355,7 +355,7 @@ def test_notes_hasForeignCurrency():
 
 def test_notes_byCategory():
     """카테고리별 항목 조회."""
-    from dartlab.core.mappers.notesMapper import NotesMapper
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     m = NotesMapper()
     inventory = m.byCategory("inventory")
@@ -365,7 +365,7 @@ def test_notes_byCategory():
 
 def test_notes_stats():
     """notes 매퍼 통계."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("notes")
     s = m.stats()
@@ -378,7 +378,7 @@ def test_notes_stats():
 
 def test_scanner_classifyType():
     """항목 유형 자동 분류."""
-    from dartlab.core.mappers.scanner import _classifyType
+    from dartlab.reference.mappers.scanner import _classifyType
 
     assert _classifyType("연이자율(%)", []) == "rate"
     assert _classifyType("할인율", []) == "rate"
@@ -389,7 +389,7 @@ def test_scanner_classifyType():
 
 def test_scanner_hasForeignInName():
     """항목명 외화 판별."""
-    from dartlab.core.mappers.scanner import _hasForeignInName
+    from dartlab.reference.mappers.scanner import _hasForeignInName
 
     assert _hasForeignInName("외화대출")
     assert _hasForeignInName("USD차입금")
@@ -401,7 +401,7 @@ def test_scanner_hasForeignInName():
 
 def test_common_pickValue():
     """common.pickValue 값 선택."""
-    from dartlab.core.mappers.common import pickValue
+    from dartlab.reference.mappers.common import pickValue
 
     # 원화 값 우선
     assert pickValue(["USD 1,000", "1,234,567"]) == "1,234,567"
@@ -411,7 +411,7 @@ def test_common_pickValue():
 
 def test_common_isCurrentPeriod():
     """당기 판정."""
-    from dartlab.core.mappers.common import isCurrentPeriod
+    from dartlab.reference.mappers.common import isCurrentPeriod
 
     assert isCurrentPeriod("당기말")
     assert isCurrentPeriod("당기")
@@ -421,7 +421,7 @@ def test_common_isCurrentPeriod():
 
 def test_common_normalizeName():
     """한글 사이 공백 제거."""
-    from dartlab.core.mappers.common import normalizeName
+    from dartlab.reference.mappers.common import normalizeName
 
     assert normalizeName("기 초") == "기초"
     assert normalizeName("  기 말  ") == "기말"
@@ -433,7 +433,7 @@ def test_common_normalizeName():
 
 def test_parser_affiliateMovement():
     """affiliate 변동내역 매핑."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     assert m.affiliateMovement("기초") == "opening"
@@ -444,7 +444,7 @@ def test_parser_affiliateMovement():
 
 def test_parser_affiliateProfile():
     """affiliate 프로파일 매핑."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     assert m.affiliateProfile("지분율") == "ownership"
@@ -453,7 +453,7 @@ def test_parser_affiliateProfile():
 
 def test_parser_costNormalize():
     """비용 항목 정규화."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     assert m.costNormalize("원재료") == "원재료사용"
@@ -463,7 +463,7 @@ def test_parser_costNormalize():
 
 def test_parser_isCostTotal():
     """합계 행 판별."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     assert m.isCostTotal("합계")
@@ -473,7 +473,7 @@ def test_parser_isCostTotal():
 
 def test_parser_sectionTopic():
     """sections topic 매핑."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     assert m.sectionTopic("재고자산명세서") == "noteInventoryDetail"
@@ -483,7 +483,7 @@ def test_parser_sectionTopic():
 
 def test_parser_chapterFromMajor():
     """장번호 → 로마숫자."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     assert m.chapterFromMajor(1) == "I"
@@ -493,7 +493,7 @@ def test_parser_chapterFromMajor():
 
 def test_parser_stats():
     """parser 매퍼 통계."""
-    from dartlab.core.mappers import getEngine
+    from dartlab.reference.mappers import getEngine
 
     m = getEngine().get("parser")
     s = m.stats()

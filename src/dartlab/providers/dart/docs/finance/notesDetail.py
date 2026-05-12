@@ -15,12 +15,12 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from dartlab.core.dataLoader import PERIOD_KINDS, extractCorpName, loadData
-from dartlab.core.mappers.common import isCurrentPeriod, normalizeName, pickValue
-from dartlab.core.mappers.notesMapper import NOTES_KEYWORDS, NotesMapper
 from dartlab.core.notesExtractor import extractNotesContent, findNumberedSection
 from dartlab.core.reportSelector import selectReport
 from dartlab.core.tableParser import detectUnit, parseAmount, parseNotesTable
 from dartlab.core.utils.unitNormalize import normalizeFromUnitScale
+from dartlab.reference.mappers.common import isCurrentPeriod, normalizeName, pickValue
+from dartlab.reference.mappers.notesMapper import NOTES_KEYWORDS, NotesMapper
 
 if TYPE_CHECKING:
     import polars as pl
@@ -312,8 +312,8 @@ def notesDetail(
     if not allTables:
         return None
 
-    from dartlab.core.mappers.notesMapper import NotesMapper
     from dartlab.providers.dart.docs.finance.notesDetail.tableBuilder import buildTableDf
+    from dartlab.reference.mappers.notesMapper import NotesMapper
 
     tableDf = buildTableDf(allTables, unitByYear, mapper=NotesMapper())
 

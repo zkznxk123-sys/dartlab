@@ -127,7 +127,7 @@ def test_sectionMappings_isNonEmpty():
 
 def test_loadSections_returnsPopulatedDict():
     """loadSections() 가 빈 dict 가 아닌 chapterByMajor 포함 dict 반환."""
-    from dartlab.core.mappers.parserMapper import loadSections
+    from dartlab.reference.mappers.parserMapper import loadSections
 
     result = loadSections()
     assert isinstance(result, dict)
@@ -150,7 +150,7 @@ def test_chapterFromMajorNum_mapsKnownRange():
 
 
 def test_loadAffiliate_returnsPopulatedDict():
-    from dartlab.core.mappers.parserMapper import loadAffiliate
+    from dartlab.reference.mappers.parserMapper import loadAffiliate
 
     result = loadAffiliate()
     assert isinstance(result, dict)
@@ -158,7 +158,7 @@ def test_loadAffiliate_returnsPopulatedDict():
 
 
 def test_loadCostByNature_returnsPopulatedDict():
-    from dartlab.core.mappers.parserMapper import loadCostByNature
+    from dartlab.reference.mappers.parserMapper import loadCostByNature
 
     result = loadCostByNature()
     assert isinstance(result, dict)
@@ -190,7 +190,7 @@ def test_loadEdgarStandardAccounts_returnsPopulatedDict():
 
 def test_loadNotesStructureKeywords_returnsPopulatedDict():
     """notesStructure.json 이 번들되어 정상 로드."""
-    from dartlab.core.mappers.notesMapper import _loadKeywords
+    from dartlab.reference.mappers.notesMapper import _loadKeywords
 
     result = _loadKeywords()
     assert isinstance(result, dict)
