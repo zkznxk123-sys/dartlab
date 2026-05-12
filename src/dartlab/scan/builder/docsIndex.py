@@ -139,7 +139,7 @@ def buildDocsIndex(
                         pl.col("section_content").str.len_chars().cast(pl.UInt32).alias("contentLength"),
                         pl.col("section_content").str.contains(r"\|").alias("hasTable"),
                     ]
-                ).collect(streaming=True)
+                ).collect(engine="streaming")
             except (pl.exceptions.PolarsError, OSError):
                 failedFiles += 1
                 continue
