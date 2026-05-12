@@ -2289,17 +2289,20 @@ class Company:
             없음 (topic 미존재 시 ``_showImpl`` 이 None 반환).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_showImpl`` — 실제 구현 + 120+ topic dispatch.
+            - ``select`` / ``trace`` — show 결과 필터 / origin 추적.
+            - ``topics`` — 사용 가능 topic 카탈로그.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - finance + docs + report 3 source 의 120+ topic 통합 dispatch entry. call (c.show("BS"))
+              + attr (c.show.BS()) dual access. freq/scope/period/block 4 토글로 view 변환.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 의 핵심 단일 진입점 — 모든 topic 데이터 조회가 본 함수를 통과.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2506,20 +2509,24 @@ class Company:
             없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_selectImpl`` — 실제 필터 구현.
+            - ``show`` — 본 함수의 입력 source.
+            - ``dartlab.core.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - show() 결과의 indList (행/계정) × colList (열/기간) 동시 필터. SelectResult 로 감싸
+              ``.chart()`` 체이닝 + export. strict=True 시 매치 0 면 ValueError.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "매출액만 2024" → ``c.select("IS", "매출액", "2024")``.
+            - "여러 계정 + 여러 연도" → ``c.select("IS", ["매출액", "당기순이익"], ["2024", "2023"])``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            show() 전체 노출 비용 회피 — 필요 행/열만 정밀 추출 후 LLM 컨텍스트 주입.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2679,17 +2686,19 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 결과 없이 show() 인용 → AI 환각 위험. trace 결과 source 명시 의무.
+                - period 인자는 metadata 만 — 실 row 필터는 show() 가 처리.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {topic, period, primarySource, fallbackSources, selectedPayloadRef,
+                  availableSources:list, whySelected, template?, rowCount?, yearCount?, coverage?} 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs/finance/report origin 중 최소 1 보유.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 (sections + finance index 기준).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - topic → resolveTopic → ratios/finance/docs 분기 → source priority 결정 → 본 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART provenance).
         """
         topic = _resolveTopic(topic)
         if topic == "docsStatus" and not self._hasDocs:
@@ -2800,17 +2809,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 줄 단위 diff (3 인자) 결과를 그대로 LLM → 거대 본문 토큰 폭증. 변경 줄만.
+                - period 형식 변형 ("2023Q4" vs "2023") → sections 컬럼명 매칭 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 호출 모드별 — (1) 전체 요약 (2) topic 히스토리 (3) 줄 단위 diff DataFrame.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections (2 기간 이상).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections → 모드 별 diff (summary/history/lineDiff) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 변경).
         """
         if topic is not None:
             topic = _resolveTopic(topic)
@@ -2878,17 +2888,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 짧은 keyword ("AI") → 단어 경계 무시 매칭 ("RAID" 도 hit). 정확 매칭 시 정규식.
+                - 빈도 절대값 비교 X — 본문 길이 차이 무시. 정규화 별도.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic, period, keyword, count] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections + keywords → keywordFrequency → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 텍스트).
         """
         from dartlab.core.docs.diff import keywordFrequency
 
@@ -2941,17 +2952,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본문 그대로 인용 → external untrusted 룰 위반. wrap_external_in_result 마커 후.
+                - days 큰 값 (>90) → 외부 API 부하/pagination 비용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [title, date, source, link] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + 뉴스 origin (gatherProvider — Naver/Google).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 외부 origin 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - getGatherProvider().news(corpName, market="KR", days) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (한국어 뉴스 위주).
         """
         from dartlab.core.gatherProvider import getGatherProvider
 
@@ -3000,17 +3012,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - score 임계 hard-code 후 "큰 변화" 결론 X — 회사별 base score 분포 다름.
+                - 결과 None ≠ "변화 없음" — sections 부재로 분석 불가일 수 있음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic, score, changeType, fromPeriod, toPeriod, details] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections (정기보고서 본문 2 기간+).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - scan.watch.scanner.scanCompany(self, topic) → toDataframe → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 변경 감지).
         """
         import importlib
 
