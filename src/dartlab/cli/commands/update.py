@@ -56,6 +56,8 @@ def _updateCodes(console, args) -> int:
     cats = _parseCategories(args)
     updated = 0
 
+    from dartlab.core.memory import cleanupBetweenCompanies
+
     for code in args.codes:
         for cat in cats:
             console.print(f"  {code}/{cat}: 확인 중...")
@@ -65,6 +67,8 @@ def _updateCodes(console, args) -> int:
                 updated += 1
             except (RuntimeError, FileNotFoundError, ValueError) as e:
                 console.print(f"  {code}/{cat}: [red]{e}[/]")
+        # M8: 회사 사이마다 누적 캐시 회수 — 다중 회사 force_check 시 RSS 누적 차단
+        cleanupBetweenCompanies(label=code)
 
     console.print(f"\n확인 완료: {updated}건")
     return 0

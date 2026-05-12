@@ -1,0 +1,4 @@
+{
+  "_note": "M8 strict: violations 0. 다중 회사 loop 진입점은 cleanupBetweenCompanies() 또는 with Company(code) as c: 사용.",
+  "violations": []
+}
