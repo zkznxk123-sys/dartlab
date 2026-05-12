@@ -49,8 +49,13 @@ _AUDIT_SCRIPTS = [
     ("룰 8 — limit keyword", "scripts/audit/limitDefault.py", "scripts/audit/_baselines/gatherLimitDefault.json"),
 ]
 
-# P-G7 / P-G8 완료 후 활성화 — 현재는 placeholder.
-_TEST_GATES: list[tuple[str, str]] = []
+# 룰 7 (src↔tests mirror) / 룰 9 (raw cross-scan) — pytest 기반 gate.
+# test_structureMirror.py 가 gather scope 함수 (test_gather_have_test_mirrors) 보유.
+# test_no_raw_cross_scan.py 가 gather scope 함수 (test_gather_no_raw_cross_company_scan) 보유.
+_TEST_GATES: list[tuple[str, str]] = [
+    ("룰 7 — src↔tests mirror (gather scope)", "tests/test_structureMirror.py::test_gather_have_test_mirrors"),
+    ("룰 9 — raw cross-scan (gather scope)", "tests/test_no_raw_cross_scan.py::test_gather_no_raw_cross_company_scan"),
+]
 
 
 def _runAudit(scriptPath: str, baselinePath: str, strict: bool) -> tuple[bool, str]:
