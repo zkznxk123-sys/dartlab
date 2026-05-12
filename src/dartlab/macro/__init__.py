@@ -266,6 +266,14 @@ def _resolve(axis: str) -> str:
     available = list(_AXIS_REGISTRY.keys()) + list(_ALIASES.keys())
     hint = ", ".join(sorted(set(available)))
     msg = f"'{axis}' 축을 찾을 수 없습니다. 사용 가능: {hint}"
+    # market 코드 오용 가드 — 'KR'/'US' 류 ISO 시장 코드를 axis 자리에 넣은 경우
+    # 친절한 호출 예 동봉. LLM agent 가 KeyError 메시지 안 hint 로 자가 교정.
+    if axis.strip().upper() in {"KR", "US", "JP", "JPN", "EU", "CN", "UK", "DE", "FR"}:
+        msg += (
+            f". 힌트: '{axis}' 는 market 코드입니다. 첫 인자는 axis 이름 "
+            f"(예: 'cycle'/'사이클'/'rates'/'금리'), 시장은 market='{axis.strip().upper()}' "
+            f"keyword 로 넘기세요 — dartlab.macro('사이클', market='{axis.strip().upper()}')"
+        )
     raise KeyError(msg)
 
 
