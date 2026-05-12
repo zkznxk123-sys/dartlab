@@ -293,6 +293,24 @@
       ]
     },
     {
+      "id": "engines.company.docsInternals",
+      "title": "docsInternals — sections 파이프라인 + 테이블 수평화 + Rust 포팅 R&D",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.company.finance",
+      "title": "finance — 회사 재무 엔진 (XBRL + 주석 sub-domain)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.company.researchStarter",
       "title": "기업 분석 시작 라우터",
       "category": "engines",
@@ -357,8 +375,26 @@
       ]
     },
     {
+      "id": "engines.credit.methodology",
+      "title": "credit.methodology — 독립 신용분석 방법론 SSOT (사상·등급체계·파이프라인·audit)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "engines.dashboard",
       "title": "Dashboard (회사 종합 스냅샷)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.dashboard.viewerSpec",
+      "title": "viewerSpec — 공시뷰어 UI 설계 v1.0",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -391,6 +427,15 @@
     {
       "id": "engines.edgar",
       "title": "EDGAR (US 공시·재무)",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.edgar.docs",
+      "title": "edgar.docs — SEC 공시 sections + form-native payload",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -454,6 +499,15 @@
     {
       "id": "engines.gather.insiderTrading",
       "title": "Gather - 내부자 거래",
+      "category": "engines",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "engines.gather.listing",
+      "title": "listing — 카탈로그 단일 진입점 (companies · filings · topics · dartlist)",
       "category": "engines",
       "status": "limited",
       "dataSources": [],
@@ -2136,6 +2190,15 @@
       ]
     },
     {
+      "id": "operation.aiEngine",
+      "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.aiProductReplatform",
       "title": "DartLab AI 제품 바탕 교체",
       "category": "operation",
@@ -2165,6 +2228,15 @@
     {
       "id": "operation.code",
       "title": "코드 규칙",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "operation.compareTargets",
+      "title": "여러 종목 토픽-기간 그리드 비교",
       "category": "operation",
       "status": "supported",
       "dataSources": [],
@@ -2262,6 +2334,15 @@
       "limitations": []
     },
     {
+      "id": "operation.sixActsAnalysis",
+      "title": "6 막 인과 서사 분석 절차",
+      "category": "operation",
+      "status": "supported",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "operation.skillDevelopmentLoop",
       "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
@@ -2335,6 +2416,15 @@
     {
       "id": "runtime.notebooks",
       "title": "Colab · Molab · 로컬 marimo 노트북",
+      "category": "runtime",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "runtime.providerProtocol",
+      "title": "Provider Protocol 동일 surface — 3-regulator drop-in",
       "category": "runtime",
       "status": "limited",
       "dataSources": [],
