@@ -117,26 +117,55 @@ def sceSeriesAnnual(company: Company):
 
 
 def sce(company: Company) -> pl.DataFrame | None:
-    """SCE DataFrame — 분기/연도 정렬 + 메타 컬럼 우선.
+    """SCE (자본변동표) DataFrame — meta 컬럼 + 연도 역순 정렬.
+
+    Capabilities:
+        - ``sceSeriesAnnual(company)`` 결과를 ``_sceToDataFrame`` 으로 wide 변환.
+        - 4 자리 연도 컬럼만 역순 정렬, meta 컬럼은 앞쪽 보존.
+        - IS/BS/CF 와 컬럼 정렬 일관성 (사용자 비교 편의).
+        - cacheKey = ``"_sceDataFrame_CFS"``.
 
     Args:
         company: Company 인스턴스.
 
     Returns:
-        SCE wide DataFrame (연도 역순 정렬) 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None — SCE wide DataFrame. finance 미수집 시 None.
 
     Example:
-        >>> sce(c)
+        >>> # df = sce(c)
+        >>> # df.select(["항목", "2024", "2023"])
+
+    Guide:
+        - "삼성전자 자본 변동 (이익잉여금/자본금)" → ``c.show("SCE")`` → 본 함수.
+        - "BS 와 비교" → ``c.show("BS")`` 후 동일 연도 col 선택.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``sceMatrix`` / ``sceSeriesAnnual`` — 본 함수의 raw input.
+        - ``_sceToDataFrame`` (financeMappers) — 변환 단계.
+        - ``Company.show("SCE")`` — 사용자 entry.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.financeMappers._sceToDataFrame.
+
+    AIContext:
+        SCE 는 자본 항목 (자본금/이익잉여금/기타포괄손익) 추이 — IS 의 당기순이익과 BS 자본
+        의 다리. AI 가 "이익잉여금 증가" 류 질문 처리 시 본 함수 결과 활용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 일부 회사가 SCE 미작성 (소규모) → None.
+            - cache 의 _CFS 만 (separate scope X) — 별도 SCE 는 미지원.
+        OutputSchema:
+            - wide DataFrame — meta + 연도 역순.
+        Prerequisites:
+            - finance parquet 의 SCE 항목 존재.
+        Freshness:
+            - finance 수집 시점 + cache.
+        Dataflow:
+            - finance → sceSeriesAnnual → 본 함수 → c.show("SCE").
+        TargetMarkets:
+            - KR (DART) 한정. EDGAR 의 statement of equity 는 별도.
     """
     cacheKey = "_sceDataFrame_CFS"
     if cacheKey in company._cache:
@@ -314,29 +343,57 @@ def ratioSeries(company: Company):
 
 
 def buildRatios(company: Company) -> pl.DataFrame | None:
-    """[INTERNAL] 재무비율 DataFrame 빌더.
+    """[INTERNAL] 재무비율 DataFrame 빌더 — period 컬럼 역순 정렬 wide format.
 
-    사용자는 ``c.show("ratios")`` 호출. show() 가 finance topic dispatch 에서
-    이 빌더를 호출.
+    Capabilities:
+        - ``ratioSeries(company)`` 결과를 받아 ``_ratioSeriesToDataFrame`` 으로 wide 변환.
+        - period 컬럼 (예 "2024Q1") 만 정렬 — meta 컬럼은 앞쪽 보존.
+        - 정렬 키 = (year:int, quarter:int) 내림차순.
+        - ratioSeries None → 본 함수 None.
 
     Args:
         company: Company 인스턴스.
 
     Returns:
-        비율 wide DataFrame (period 컬럼 역순 정렬) 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None — 비율 wide DataFrame. 컬럼 = meta + period N (역순). None 시 finance/
+        ratios 미수집.
 
     Example:
-        >>> buildRatios(c)  # 내부 — 사용자는 c.show("ratios")
+        >>> # buildRatios(c)  # 내부 — 사용자는 c.show("ratios")
+
+    Guide:
+        - "사용자는 ``c.show('ratios')`` 호출" — 본 함수는 dispatch 내부.
+        - "분기별 ROE 추세" → c.show("ratios").filter(pl.col("항목")=="ROE").
+        - "industryGroup override" → ``ratioSeries`` 에서 자동 적용 (본 함수 무관).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``ratioSeries`` — 본 함수의 (series, periods) source.
+        - ``_ratioSeriesToDataFrame`` (financeMappers) — 본 함수 변환 단계.
+        - ``Company.show("ratios")`` — 사용자 entry.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.financeMappers — _ratioSeriesToDataFrame.
+        - dartlab.providers.dart.checks — _isPeriodColumn.
+
+    AIContext:
+        AI 가 "삼성전자 ROE 추세" 류 질문 받으면 c.show("ratios") 호출 → 본 함수 dispatch.
+        결과 DataFrame 에서 항목 row + period 컬럼 lookup → 자연어 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ratioSeries 가 finance 미수집 → 본 함수 None.
+            - period 컬럼 형식 가정 (year + quarter) — 다른 형식 (예 월별) 은 _isPeriodColumn 미매칭.
+        OutputSchema:
+            - wide DataFrame — meta + period (역순).
+        Prerequisites:
+            - finance parquet + ratios 계산 가능 (Series 충분).
+        Freshness:
+            - ratioSeries / finance 의존.
+        Dataflow:
+            - finance → buildFinanceSeries → ratioSeries → 본 함수 → c.show("ratios").
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     rs = ratioSeries(company)
     if rs is None:
@@ -355,31 +412,64 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
 
 def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated") -> pl.DataFrame | None:
-    """finance 시계열에서 ``sjDiv`` DataFrame 생성 (캐싱).
+    """finance 시계열에서 ``sjDiv`` DataFrame 빌드 — Q/Y/YTD × CFS/OFS 조합 (캐싱).
 
-    Internal helper. ``c.show("IS", freq=, scope=)`` 진입점이 호출.
+    Capabilities:
+        - ``buildFinanceSeries(freq, scope)`` 호출 → (series, periods) 튜플 받아 wide DataFrame 변환.
+        - period 포맷 정규화 ("2016-Q1" → "2016Q1").
+        - cacheKey = ``"_financeStmt_{sjDiv}_{freq}_{scope}"``.
+        - 5 sjDiv 지원: BS (재무상태) / IS (손익) / CF (현금흐름) / CIS (포괄손익) / SCE (자본변동).
 
     Args:
         company: Company 인스턴스.
-        sjDiv: BS/IS/CF/CIS/SCE 중 하나.
-        freq: ``"Q"`` (분기) / ``"Y"`` (연간) / ``"YTD"`` (누적).
-        scope: ``"consolidated"`` (연결) / ``"separate"`` (별도).
+        sjDiv: ``"BS"``/``"IS"``/``"CF"``/``"CIS"``/``"SCE"``.
+        freq: ``"Q"`` (분기) / ``"Y"`` (연간) / ``"YTD"`` (누적). 기본 ``"Q"``.
+        scope: ``"consolidated"`` (CFS) / ``"separate"`` (OFS). 기본 ``"consolidated"``.
 
     Returns:
-        wide DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None — wide format ("항목" + period 컬럼 N 개). finance 미수집 또는
+        series 빈 결과 → None.
 
     Example:
-        >>> financeStmt(c, "IS", freq="Y")
+        >>> # df = financeStmt(c, "IS", freq="Y")
+        >>> # df.select(["항목", "2024", "2023"])
+
+    Guide:
+        - "삼성전자 IS 연간" → ``c.show("IS", freq="Y")`` → ``financeStmt(c, "IS", freq="Y")``.
+        - "별도 BS 분기" → ``c.show("BS", scope="separate")``.
+        - docs fallback 까지 → ``financeOrDocsStatement``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``financeOrDocsStatement`` — 본 함수 None 시 docs fallback 까지 시도.
+        - ``buildFinanceSeries`` — 본 함수의 (series, periods) source.
+        - ``Company.show("IS", freq=, scope=)`` — 사용자 entry.
+        - ``dartlab.providers.dart.financeMappers._financeToDataFrame`` — 변환 단계.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.providers.dart.financeMappers — _financeToDataFrame.
+
+    AIContext:
+        Workbench 재무 토픽 가장 빈번한 backend. AI 가 c.show("IS") 호출 → 본 함수 → DataFrame.
+        None 반환 = finance parquet 미수집 → caller 는 docs fallback (``financeOrDocsStatement``)
+        또는 미수집 안내.
+
+    LLM Specifications:
+        AntiPatterns:
+            - sjDiv 가 5 종 외 (예 "PNL") → ``_financeToDataFrame`` 내부에서 빈 결과 또는 KeyError.
+            - cache hit → series rebuild 안 됨 (freshness 가 cache TTL 의존).
+            - freq="YTD" 인데 데이터 부재 → None.
+        OutputSchema:
+            - wide DataFrame — "항목" + 연도/분기 컬럼.
+            - 정렬: caller (``buildFinanceSeries``) 의 periods 순.
+        Prerequisites:
+            - finance parquet 가 stockCode 에 수집됨 (``_hasFinance=True``).
+        Freshness:
+            - finance 수집 시점 + cache TTL.
+        Dataflow:
+            - finance parquet → buildFinanceSeries → 본 함수 → AI 답변.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     cacheKey = f"_financeStmt_{sjDiv}_{freq}_{scope}"
     if cacheKey in company._cache:
@@ -398,32 +488,63 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
 def financeOrDocsStatement(
     company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "consolidated"
 ) -> pl.DataFrame | None:
-    """finance 우선, docs fallback dispatch — ``sjDiv`` wide DataFrame.
+    """finance 우선 + docs fallback dispatch — finance 미수집 회사도 docs 로 폴백.
 
-    CIS + consolidated 는 별도 quarterly 캐시 경로. 그 외는 ``financeStmt`` → ``docs``
-    순. docs fallback 은 분기 연결만 지원.
+    Capabilities:
+        - CIS + consolidated → ``financeCisQuarterly`` 우선 (별도 캐시 경로). ``freq="Y"``
+          이면 ``aggregateCisAnnual`` 적용 (4 분기 합).
+        - 그 외 → ``financeStmt(sjDiv, freq, scope)`` 우선 시도.
+        - 위 모두 None + ``freq="Q"`` + ``scope="consolidated"`` → docs fallback
+          (``company._callModule("statements")``) 에서 sjDiv 추출.
+        - docs fallback 은 분기 연결만 (다른 조합은 None).
 
     Args:
         company: Company 인스턴스.
-        sjDiv: BS/IS/CF/CIS/SCE 중 하나.
+        sjDiv: ``"BS"``/``"IS"``/``"CF"``/``"CIS"``/``"SCE"``.
         freq: ``"Q"``/``"Y"``/``"YTD"``.
         scope: ``"consolidated"``/``"separate"``.
 
     Returns:
-        wide DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None — wide DataFrame. 모든 경로 실패 시 None.
 
     Example:
-        >>> financeOrDocsStatement(c, "BS")
+        >>> # df = financeOrDocsStatement(c, "BS")  # finance 없으면 docs.statements
+
+    Guide:
+        - "finance / docs 어느 쪽이든" → 본 함수.
+        - "finance only" → ``financeStmt``.
+        - "docs only" → ``c.docs.statements`` 직접.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``financeStmt`` — 본 함수의 1 차 시도.
+        - ``financeCisQuarterly`` / ``aggregateCisAnnual`` — CIS 경로.
+        - ``Company._callModule("statements")`` — docs fallback source.
+        - ``Company.show("IS")`` — 사용자 entry.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - 다른 builder/docs 모듈에 의존 (lazy import).
+
+    AIContext:
+        finance parquet 미수집 회사 (예 비상장/이상한 형태) 도 docs 로 대답 가능하게 하는
+        safety net. AI 가 cross-company 비교 시 결과 비균질 (어떤 회사는 finance, 어떤 회사는
+        docs) 가능 — caller 는 데이터 출처 명시 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - sjDiv 가 5 종 외 → 모든 경로 None.
+            - docs fallback 의 분기 연결 한정 → docs.statements 결과의 sjDiv attr 가 None 일 수 있음.
+            - CIS+consolidated 경로의 aggregateCisAnnual 은 4 분기 모두 있는 연도만 (strict).
+        OutputSchema:
+            - financeStmt 와 동일 (wide DataFrame).
+        Prerequisites:
+            - finance parquet 또는 docs.statements 중 하나 이상 존재.
+        Freshness:
+            - 각 backend 의 freshness 의존.
+        Dataflow:
+            - financeStmt → 본 함수 → docs.statements (fallback).
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
     if sjDiv == "CIS" and scope == "consolidated":
@@ -447,34 +568,66 @@ def financeOrDocsStatement(
 
 
 def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "consolidated"):
-    """[INTERNAL] finance series-tuple 빌더.
+    """[INTERNAL] finance series-tuple 빌더 — analysis/forecast/credit/story 의 raw input.
 
-    사용자는 직접 호출하지 않는다. 사용자 진입점은 ``c.show("IS", freq=, scope=)``
-    / ``c.select("IS", [...], freq=, scope=)`` 만이다 (api-contract).
-
-    analysis / forecast / valuation / credit / story 등 calc 모듈이
-    ``(series, periods)`` 튜플 형태가 필요할 때만 호출한다.
+    Capabilities:
+        - ``company._getFinanceBuild(periodKey, scopeKey)`` 위임 (Company facade).
+        - freq → periodKey 매핑: Q→q / Y→y / YTD→cum.
+        - scope → scopeKey: consolidated→CFS / separate→OFS.
+        - 시그니처 검증 — freq/scope 허용 값 외 → ValueError.
+        - ``_hasFinance=False`` → None (silent).
+        - 사용자 직접 호출 X (api-contract). c.show / c.select / analysis 모듈만 사용.
 
     Args:
         company: Company 인스턴스.
         freq: ``"Q"`` (분기, 기본) / ``"Y"`` (연간) / ``"YTD"`` (누적).
-        scope: ``"consolidated"`` (연결, 기본) / ``"separate"`` (별도).
+        scope: ``"consolidated"`` (CFS, 기본) / ``"separate"`` (OFS).
 
     Returns:
-        ``(series, periods)`` 또는 None.
+        tuple[dict, list[str]] | None — ``(series, periods)``. series 는 항목명 → 값 매핑 dict,
+        periods 는 정렬된 period list.
 
     Raises:
-        ValueError: ``freq`` / ``scope`` 가 허용 값 외일 때.
+        ValueError: freq 가 ``"Q"``/``"Y"``/``"YTD"`` 외, 또는 scope 가 ``"consolidated"``/
+            ``"separate"`` 외.
 
     Example:
-        >>> buildFinanceSeries(c, freq="Y", scope="separate")
+        >>> # series, periods = buildFinanceSeries(c, freq="Y", scope="separate")
+        >>> # periods  # ["2024", "2023", ...]
+
+    Guide:
+        - "사용자는 직접 호출 X" — c.show / c.select / analysis 모듈만.
+        - "DataFrame 형태 필요" → ``financeStmt`` 또는 ``c.show``.
+        - "ratios 계산 input" → 본 함수 → ``calcRatioSeries``.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``financeStmt`` — 본 함수 결과를 DataFrame 으로 변환.
+        - ``ratioSeries`` — 본 함수 결과를 비율 계산에 사용.
+        - ``Company._getFinanceBuild`` — 본 함수 본체 (facade).
+        - operation.apiContract — 사용자 entry 규약 SSOT.
 
     Requires:
-        - dartlab
-        - polars
+        - polars (간접) — periods/series 의 source 가 finance parquet.
+        - dartlab.providers.dart.company.Company — _getFinanceBuild 메서드.
+
+    AIContext:
+        AI 가 직접 호출 X. analysis / forecast / credit / story 등 calc 엔진이 series 형태
+        필요할 때 사용. caller 는 본 함수 None 결과를 "finance 미수집" 으로 처리.
+
+    LLM Specifications:
+        AntiPatterns:
+            - freq/scope 형식 오류 → ValueError (raise). caller 는 try/except 없으면 panic.
+            - cache 미적용 — 매번 _getFinanceBuild 호출. caller 가 caching 책임.
+        OutputSchema:
+            - (series: dict[str, dict|list], periods: list[str]).
+        Prerequisites:
+            - _hasFinance=True.
+        Freshness:
+            - finance parquet 수집 시점.
+        Dataflow:
+            - finance parquet → _getFinanceBuild → 본 함수 → calc 엔진.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나여야 합니다 (받음: {freq!r})")
