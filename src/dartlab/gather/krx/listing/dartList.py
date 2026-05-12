@@ -13,9 +13,9 @@ from pathlib import Path
 
 import polars as pl
 
-log = logging.getLogger(__name__)
+from dartlab.gather.infra.ttl import TTL_LISTING as CACHE_TTL
 
-CACHE_TTL = 86400
+log = logging.getLogger(__name__)
 
 
 def _dartListCacheFile() -> Path:

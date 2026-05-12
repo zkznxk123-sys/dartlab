@@ -7,23 +7,25 @@ import time
 from collections import OrderedDict
 from dataclasses import dataclass
 
-# TTL 기본값 (초)
-TTL_PRICE = 300  # 5분
-TTL_FLOW = 3600  # 1시간
-TTL_SECTOR = 24 * 3600  # 24시간
-TTL_HISTORY = 6 * 3600  # 6시간
-TTL_SNAPSHOT = 300  # 5분 (전체 수집 결과)
-TTL_NEWS = 1800  # 30분
-TTL_DIVIDENDS = 24 * 3600  # 24시간
-TTL_SPLITS = 24 * 3600  # 24시간
-TTL_MACRO = 6 * 3600  # 6시간
-TTL_SHORT_SELLING = 3600  # 1시간
-TTL_INSIDER = 6 * 3600  # 6시간
-TTL_MAJOR_HOLDER = 24 * 3600  # 24시간
-TTL_INDEX_MEMBERS = 24 * 3600  # 24시간
-TTL_MARKET_CAP = 3600  # 1시간
-TTL_OWNERSHIP = 6 * 3600  # 6시간
-TTL_DEFAULT = 3600  # 1시간
+# TTL 상수 — `infra.ttl` SSOT 에서 import (G+ P-Q4, env override 가능)
+from .ttl import (
+    TTL_DEFAULT,
+    TTL_DIVIDENDS,
+    TTL_FLOW,
+    TTL_HISTORY,
+    TTL_INDEX_MEMBERS,
+    TTL_INSIDER,
+    TTL_MACRO,
+    TTL_MAJOR_HOLDER,
+    TTL_MARKET_CAP,
+    TTL_NEWS,
+    TTL_OWNERSHIP,
+    TTL_PRICE,
+    TTL_SECTOR,
+    TTL_SHORT_SELLING,
+    TTL_SNAPSHOT,
+    TTL_SPLITS,
+)
 
 # 데이터 유형 → TTL 매핑
 _TTL_MAP: dict[str, int] = {

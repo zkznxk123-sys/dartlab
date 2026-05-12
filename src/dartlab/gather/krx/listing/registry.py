@@ -16,6 +16,8 @@ from pathlib import Path
 import httpx
 import polars as pl
 
+from dartlab.gather.infra.ttl import TTL_LISTING as CACHE_TTL
+
 
 def _cacheFile() -> Path:
     """KIND 상장법인 캐시 파일 경로 반환.
@@ -29,8 +31,6 @@ def _cacheFile() -> Path:
 
     return _getDataRoot() / "kindList" / "corpList.parquet"
 
-
-CACHE_TTL = 86400
 
 KIND_URL = "https://kind.krx.co.kr/corpgeneral/corpList.do"
 KIND_DATA = {
