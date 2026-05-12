@@ -655,7 +655,7 @@ def financeOrDocsStatement(
     Guide:
         - "finance / docs 어느 쪽이든" → 본 함수.
         - "finance only" → ``financeStmt``.
-        - "docs only" → ``c.docs.statements`` 직접.
+        - "docs only" → ``c.show("statements")`` (Plan v10 단일 진입).
 
     SeeAlso:
         - ``financeStmt`` — 본 함수의 1 차 시도.

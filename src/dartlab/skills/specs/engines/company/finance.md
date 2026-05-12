@@ -70,8 +70,8 @@ examples:
   - fsSummary('005930') → 158 기업 구간 내 97.7% 매칭
 procedure:
   - dartlab.Company(code) 컨텍스트 — RSS 회수 의무.
-  - c.timeseries / c.annual / c.cumulative — 분기 · 연도 · 누적 시계열.
-  - c.ratios — 재무비율 (CFS 기본, OFS getRatios("OFS")).
+  - c.show(topic, freq="Q"|"Y"|"YTD") — finance topic 시계열 (Plan v10 단일 진입).
+  - c.show("ratios") / c.show("ratios", scope="separate") — 재무비율 (CFS 기본, OFS scope="separate").
   - 6 sub-domain 진입: from dartlab.finance.{affiliate, segment, summary, majorHolder, costByNature, rawMaterial}.
   - 매핑 SSOT — engines.mappers ↔ reference/data/accountMappings.json (34,171 entries).
 linkedSkills:
@@ -96,17 +96,14 @@ lastUpdated: '2026-05-12'
 import dartlab
 
 with dartlab.Company("005930") as c:
-    # 시계열 (분기 / 연도 / 누적)
-    q = c.timeseries
-    y = c.annual
-    cum = c.cumulative
+    # 시계열 (분기 / 연도 / 누적) — Plan v10: c.show 단일 진입
+    q = c.show("IS", freq="Q")
+    y = c.show("IS", freq="Y")
+    cum = c.show("IS", freq="YTD")
 
     # 재무비율
-    r = c.ratios               # CFS 기본
-    rOfs = c.getRatios("OFS")  # 별도
-
-    # 커스텀 시계열
-    sQ_OFS = c.getTimeseries(period="q", fsDivPref="OFS")
+    r = c.show("ratios")                       # CFS 기본
+    rOfs = c.show("ratios", scope="separate")  # OFS
 
 # 6 sub-domain — 주석 영역 파서
 from dartlab.finance.summary import fsSummary
@@ -206,19 +203,18 @@ majorHolder(stockCode)
 
 ### Company 통합
 
-| 접근자 | 설명 |
+| 호출 | 설명 |
 |--------|------|
-| `c.timeseries` | 분기별 standalone (CFS) |
-| `c.annual` | 연도별 (CFS) |
-| `c.cumulative` | 분기별 누적 (CFS) |
-| `c.ratios` | 재무비율 (CFS) |
-| `c.getTimeseries(period, fsDivPref)` | 커스텀 조회 (q/y/cum × CFS/OFS) |
-| `c.getRatios(fsDivPref)` | 커스텀 비율 (CFS/OFS) |
+| `c.show(topic, freq="Q")` | 분기별 (CFS) — topic ∈ BS·IS·CF·CIS·SCE·ratios |
+| `c.show(topic, freq="Y")` | 연도별 (CFS) |
+| `c.show(topic, freq="YTD")` | 분기별 누적 (CFS) |
+| `c.show("ratios")` | 재무비율 (CFS) |
+| `c.show(topic, freq=..., scope="separate")` | 커스텀 (CFS/OFS scope) |
 
-### fsDivPref 파라미터
+### scope 파라미터
 
-- `"CFS"` — 연결재무제표 (기본값). 없으면 OFS fallback.
-- `"OFS"` — 별도재무제표. 없으면 CFS fallback.
+- `"consolidated"` — 연결재무제표 (기본값). 없으면 separate fallback.
+- `"separate"` — 별도재무제표. 없으면 consolidated fallback.
 
 ### 검증 결과 (삼성전자 005930, 2024)
 
@@ -372,8 +368,8 @@ DART 공시 요약재무정보에서 숫자 브릿지 매칭으로 계정명을 
 ```python
 import dartlab
 with dartlab.Company("005930") as c:
-    print(c.ratios.roe)             # 8.29 (CFS)
-    print(c.getRatios("OFS").roe)   # 5.19 (OFS)
+    print(c.show("ratios").roe)                       # 8.29 (CFS)
+    print(c.show("ratios", scope="separate").roe)     # 5.19 (OFS)
 
 from dartlab.finance.summary import fsSummary
 result = fsSummary("data/docsData/005930.parquet")

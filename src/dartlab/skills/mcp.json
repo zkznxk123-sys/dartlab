@@ -627,7 +627,7 @@
         "engines.mappers",
         "engines.company.sections"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`company.finance` 는 사용자 capability 가 아니라 *Company 엔진 내부 sub-module* 이다. XBRL 표준 계정 매핑 + 주석 영역 6 sub-domain 파서를 묶어 단일 회사의 재무 시계열을 빌드한다. dartlab 공개 호출은 Company facade 경유.\n\n본 sub-spec 은 운영 SSOT — 파일 구조 · 6 sub-domain 책임 · 검증 결과 · 매핑 사이클을 한 곳에서 관리.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nwith dartlab.Company(\"005930\") as c:\n    # 시계열 (분기 / 연도 / 누적)\n    q = c.timeseries\n    y = c.annual\n    cum = c.cumulative\n\n    # 재무비율\n    r = c.ratios               # CFS 기본\n    rOfs = c.getRatios(\"OFS\")  # 별도\n\n    # 커스텀 시계열\n    sQ_OFS = c.getTimeseries(period=\"q\", fsDivPref=\"OFS\")\n\n# 6 sub-domain — 주석 "
+      "bodyPreview": "## 엔진 역할\n\n`company.finance` 는 사용자 capability 가 아니라 *Company 엔진 내부 sub-module* 이다. XBRL 표준 계정 매핑 + 주석 영역 6 sub-domain 파서를 묶어 단일 회사의 재무 시계열을 빌드한다. dartlab 공개 호출은 Company facade 경유.\n\n본 sub-spec 은 운영 SSOT — 파일 구조 · 6 sub-domain 책임 · 검증 결과 · 매핑 사이클을 한 곳에서 관리.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nwith dartlab.Company(\"005930\") as c:\n    # 시계열 (분기 / 연도 / 누적)\n    q = c.show("IS", freq="Q")\n    y = c.show("IS", freq="Y")\n    cum = c.show("IS", freq="YTD")\n\n    # 재무비율\n    r = c.show("ratios")               # CFS 기본\n    rOfs = c.getRatios(\"OFS\")  # 별도\n\n    # 커스텀 시계열\n    sQ_OFS = c.getTimeseries(period=\"q\", fsDivPref=\"OFS\")\n\n# 6 sub-domain — 주석 "
     },
     {
       "id": "engines.company.researchStarter",
@@ -4662,7 +4662,7 @@
         "3. Skills/ 문서 변경"
       ],
       "nextSkills": [],
-      "bodyPreview": "## Skill OS 흡수 규칙\n\n- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.\n- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.\n- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.\n\n## 실행 순서\n\n- 자동 게이트 — 사람이 빠뜨려도 막히는 안전망 기준을 확인한다.\n- 6 단계 점검 기준을 확인한다.\n- 1. src 변경 기준을 확인한다.\n- 2. tests 변경 기준을 확인한다.\n- 3. Skills/ 문서 변경 기준을 확인한다.\n- 공개 API 메서드/함수/클래스 rename (예: `c.review()` → `c.story()`)\n- 모듈 경로 이전 (예: `dartlab.engines.X` → `dartlab.providers.X`)\n- 폐기 (예: `c.docs.X` namespace → `c.show(topic)` 단일 진입)\n- registry/dataclass 필드 rename, 변수/contextvar rename"
+      "bodyPreview": "## Skill OS 흡수 규칙\n\n- 이 skill이 공식 진입점이다. 삭제된 운영 문서 경로를 다시 안내하지 않는다.\n- 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.\n- 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.\n\n## 실행 순서\n\n- 자동 게이트 — 사람이 빠뜨려도 막히는 안전망 기준을 확인한다.\n- 6 단계 점검 기준을 확인한다.\n- 1. src 변경 기준을 확인한다.\n- 2. tests 변경 기준을 확인한다.\n- 3. Skills/ 문서 변경 기준을 확인한다.\n- 공개 API 메서드/함수/클래스 rename (예: `c.review()` → `c.story()`)\n- 모듈 경로 이전 (예: `dartlab.{providers,analysis,credit,quant,macro,industry}` 분산 (옛 dartlab.engines.X 폐기)`)\n- 폐기 (예: `c.docs.X` namespace → `c.show(topic)` 단일 진입)\n- registry/dataclass 필드 rename, 변수/contextvar rename"
     },
     {
       "id": "operation.sixActsAnalysis",

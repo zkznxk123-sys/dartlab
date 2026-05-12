@@ -3418,8 +3418,8 @@
       ],
       "procedure": [
         "dartlab.Company(code) 컨텍스트 — RSS 회수 의무.",
-        "c.timeseries / c.annual / c.cumulative — 분기 · 연도 · 누적 시계열.",
-        "c.ratios — 재무비율 (CFS 기본, OFS getRatios(\"OFS\")).",
+        "c.show(topic, freq=Q/Y/YTD) — 분기 · 연도 · 누적 시계열.",
+        "c.show("ratios") — 재무비율 (CFS 기본, OFS getRatios(\"OFS\")).",
         "from dartlab.finance.{affiliate, segment, summary, majorHolder, costByNature, rawMaterial}.",
         "매핑 SSOT — engines.mappers ↔ reference/data/accountMappings.json (34,171 entries)."
       ],
@@ -25126,7 +25126,7 @@
         "2. tests 변경 기준을 확인한다.",
         "3. Skills/ 문서 변경 기준을 확인한다.",
         "공개 API 메서드/함수/클래스 rename (예: `c.review()` → `c.story()`)",
-        "모듈 경로 이전 (예: `dartlab.engines.X` → `dartlab.providers.X`)",
+        "모듈 경로 이전 (예: `dartlab.{providers,analysis,credit,quant,macro,industry}` 분산 (옛 dartlab.engines.X 폐기)`)",
         "폐기 (예: `c.docs.X` namespace → `c.show(topic)` 단일 진입)",
         "registry/dataclass 필드 rename, 변수/contextvar rename"
       ],
