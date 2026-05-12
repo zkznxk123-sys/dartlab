@@ -70,7 +70,7 @@ examples:
 linkedSkills:
   - engines.analysis.cashflow
   - engines.analysis.investmentEfficiency
-  - recipes.dividendCapitalReturn
+  - recipes.dividend.dividendCapitalReturn
   - engines.scan.capital
 source:
   type: manual_skill
