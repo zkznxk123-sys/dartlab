@@ -253,7 +253,7 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> c.finance.listTags(limit=50)
+            >>> c._finance.listTags(limit=50)
         """
         from dartlab.providers.edgar.finance.explore import listTags
 
@@ -272,7 +272,7 @@ class _FinanceAccessor:
             없음.
 
         Example:
-            >>> for row in c.finance.iterTags(limit=20):
+            >>> for row in c._finance.iterTags(limit=20):
             ...     print(row["tag"], row["count"])
         """
         df = self.listTags(limit=limit)

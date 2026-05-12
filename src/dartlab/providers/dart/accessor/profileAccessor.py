@@ -103,7 +103,7 @@ class _ProfileAccessor:
             없음 (개별 source 부재 시 해당 부분만 누락).
 
         Example:
-            >>> facts = c.profile.facts
+            >>> facts = c._profileAccessor.facts
             >>> facts.filter(pl.col("topic") == "BS").head()
         """
         cacheKey = "_profileFacts"
@@ -288,7 +288,7 @@ class _ProfileAccessor:
             없음.
 
         Example:
-            >>> c.profile.sections.head()
+            >>> c._profileAccessor.sections.head()
         """
         return self._company._getPrimary("sections")
 
@@ -303,7 +303,7 @@ class _ProfileAccessor:
             없음.
 
         Example:
-            >>> c.profile.availableTopics[:10]
+            >>> c._profileAccessor.availableTopics[:10]
         """
         topics = set()
         if self.sections is not None and "topic" in self.sections.columns:
@@ -326,7 +326,7 @@ class _ProfileAccessor:
             DeprecationWarning: 호출 시 발생 (alias 패턴 — ``c.show(topic)`` 사용 권장).
 
         Example:
-            >>> c.profile.get("BS")  # deprecated
+            >>> c._profileAccessor.get("BS")  # deprecated
             >>> c.show("BS")  # 권장
         """
         import warnings
@@ -360,7 +360,7 @@ class _ProfileAccessor:
             없음.
 
         Example:
-            >>> c.profile.trace("BS", period="2024")
+            >>> c._profileAccessor.trace("BS", period="2024")
         """
         from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -435,7 +435,7 @@ class _ProfileAccessor:
             없음 (모든 예외 잡아 None 반환).
 
         Example:
-            >>> c.profile.sharesOutstanding
+            >>> c._profileAccessor.sharesOutstanding
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:

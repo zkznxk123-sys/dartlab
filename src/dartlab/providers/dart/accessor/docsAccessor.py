@@ -1,6 +1,6 @@
 """docs source namespace accessor.
 
-``company.py`` 에서 분리된 accessor 클래스. ``c.docs.X`` 모든 접근의 본체.
+``company.py`` 에서 분리된 accessor 클래스. ``c._docs.X`` 모든 접근의 본체.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.raw.head()
+            >>> c._docs.raw.head()
         """
         return self._company.rawDocs
 
@@ -47,13 +47,13 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.filings().head(10)
+            >>> c._docs.filings().head(10)
         """
         return self._company._filings()
 
     @property
     def sections(self) -> "_SectionsSource | None":
-        """sections sub-namespace — ``c.docs.sections.X`` 진입점.
+        """sections sub-namespace — ``c._docs.sections.X`` 진입점.
 
         Returns:
             ``_SectionsSource`` 또는 None (docs 부재).
@@ -62,7 +62,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sections.frame()
+            >>> c._docs.sections.frame()
         """
         return self._sectionsAccessor if self._company._hasDocs else None
 
@@ -80,7 +80,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsOrdered(recentFirst=True)
+            >>> c._docs.sectionsOrdered(recentFirst=True)
         """
         sections = self.sections
         return None if sections is None else sections.ordered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
@@ -106,7 +106,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsCoverage()
+            >>> c._docs.sectionsCoverage()
         """
         sections = self.sections
         return (
@@ -127,7 +127,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsFreq("annual")
+            >>> c._docs.sectionsFreq("annual")
         """
         sections = self.sections
         return None if sections is None else sections.freq(freqScope, includeMixed=includeMixed)
@@ -153,7 +153,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsSemanticRegistry(freqScope="annual")
+            >>> c._docs.sectionsSemanticRegistry(freqScope="annual")
         """
         sections = self.sections
         return (
@@ -183,7 +183,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsSemanticCollisions()
+            >>> c._docs.sectionsSemanticCollisions()
         """
         sections = self.sections
         return (
@@ -215,7 +215,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsStructureRegistry(nodeType="section")
+            >>> c._docs.sectionsStructureRegistry(nodeType="section")
         """
         sections = self.sections
         return (
@@ -252,7 +252,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsStructureCollisions()
+            >>> c._docs.sectionsStructureCollisions()
         """
         sections = self.sections
         return (
@@ -291,7 +291,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsStructureEvents(changedOnly=True)
+            >>> c._docs.sectionsStructureEvents(changedOnly=True)
         """
         sections = self.sections
         return (
@@ -329,7 +329,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsStructureSummary()
+            >>> c._docs.sectionsStructureSummary()
         """
         sections = self.sections
         return (
@@ -370,7 +370,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sectionsStructureChanges(latestOnly=True)
+            >>> c._docs.sectionsStructureChanges(latestOnly=True)
         """
         sections = self.sections
         return (
@@ -397,7 +397,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.retrievalBlocks.head()
+            >>> c._docs.retrievalBlocks.head()
         """
         return self._company._retrievalBlocks()
 
@@ -412,7 +412,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.contextSlices.head()
+            >>> c._docs.contextSlices.head()
         """
         return self._company._contextSlices()
 
@@ -427,7 +427,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.notes.text("commitments")
+            >>> c._docs.notes.text("commitments")
         """
         return self._company._notesAccessor
 
@@ -442,7 +442,7 @@ class _DocsAccessor:
             DeprecationWarning: 호출 시 발생 (alias 패턴).
 
         Example:
-            >>> c.docs.business  # deprecated
+            >>> c._docs.business  # deprecated
             >>> c.show("business")  # 권장
         """
         import warnings
@@ -461,7 +461,7 @@ class _DocsAccessor:
             DeprecationWarning: 호출 시 발생 (alias 패턴).
 
         Example:
-            >>> c.docs.mdna  # deprecated
+            >>> c._docs.mdna  # deprecated
             >>> c.show("mdna")  # 권장
         """
         import warnings
@@ -480,7 +480,7 @@ class _DocsAccessor:
             DeprecationWarning: 호출 시 발생.
 
         Example:
-            >>> c.docs.rawMaterial  # deprecated
+            >>> c._docs.rawMaterial  # deprecated
             >>> c.show("rawMaterial")  # 권장
         """
         import warnings
@@ -502,6 +502,6 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.subtables("rawMaterial", raw=False)
+            >>> c._docs.subtables("rawMaterial", raw=False)
         """
         return self._company._sectionsSubtopicLong(topic) if raw else self._company._sectionsSubtopicWide(topic)

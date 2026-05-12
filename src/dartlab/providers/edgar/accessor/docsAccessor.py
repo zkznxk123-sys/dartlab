@@ -36,7 +36,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.sections.head()
+            >>> c._docs.sections.head()
         """
         key = "_docs_sections"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -58,7 +58,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.retrievalBlocks.head()
+            >>> c._docs.retrievalBlocks.head()
         """
         key = "_docs_retrievalBlocks"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -80,7 +80,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.contextSlices.head()
+            >>> c._docs.contextSlices.head()
         """
         key = "_docs_contextSlices"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -104,7 +104,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.notes("inventory")
+            >>> c._docs.notes("inventory")
         """
         from dartlab.providers.edgar.docs.notes import notes
 
@@ -125,7 +125,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.notesByCategory("inventory")
+            >>> c._docs.notesByCategory("inventory")
         """
         from dartlab.providers.edgar.docs.notes import notesByCategory
 
@@ -141,7 +141,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.noteCategories()
+            >>> c._docs.noteCategories()
         """
         from dartlab.providers.edgar.docs.notes import noteCategories
 
@@ -157,7 +157,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.freq()
+            >>> c._docs.freq()
         """
         key = "_docs_freq"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -178,7 +178,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.coverage()
+            >>> c._docs.coverage()
         """
         key = "_docs_coverage"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -199,7 +199,7 @@ class _DocsAccessor:
             없음.
 
         Example:
-            >>> c.docs.filings().head()
+            >>> c._docs.filings().head()
         """
         key = "_docs_filings"
         if key in self._company._cache:

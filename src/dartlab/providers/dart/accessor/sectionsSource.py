@@ -41,7 +41,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.raw.head()
+            >>> c._docs.sections.raw.head()
         """
         return self._company._getPrimary("sections")
 
@@ -56,7 +56,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.frame
+            >>> c._docs.sections.frame
         """
         return self.raw
 
@@ -73,7 +73,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.forTopics({"BS", "IS"})
+            >>> c._docs.sections.forTopics({"BS", "IS"})
         """
         return self._company._getPrimary("sections", topics=frozenset(topics))
 
@@ -87,7 +87,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.topics()[:5]
+            >>> c._docs.sections.topics()[:5]
         """
         return self._company._docsSectionTopics()
 
@@ -104,7 +104,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.outline("BS")
+            >>> c._docs.sections.outline("BS")
         """
         return self._company._docsTopicOutline(topic=topic)
 
@@ -122,7 +122,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.periods(recentFirst=True)
+            >>> c._docs.sections.periods(recentFirst=True)
         """
         frame = self.raw
         if frame is None:
@@ -145,7 +145,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.ordered()
+            >>> c._docs.sections.ordered()
         """
         return self._company._docsSectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
@@ -170,7 +170,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.coverage()
+            >>> c._docs.sections.coverage()
         """
         return self._company._docsSectionsCoverage(
             topic=topic,
@@ -192,7 +192,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.freq("annual")
+            >>> c._docs.sections.freq("annual")
         """
         return self._company._docsSectionsFreq(freqScope, includeMixed=includeMixed)
 
@@ -217,7 +217,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.semanticRegistry()
+            >>> c._docs.sections.semanticRegistry()
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -247,7 +247,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.semanticCollisions()
+            >>> c._docs.sections.semanticCollisions()
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -279,7 +279,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.structureRegistry()
+            >>> c._docs.sections.structureRegistry()
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -312,7 +312,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.structureCollisions()
+            >>> c._docs.sections.structureCollisions()
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -347,7 +347,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.structureEvents()
+            >>> c._docs.sections.structureEvents()
         """
         return self._company._docsSectionsStructureEvents(
             topic=topic,
@@ -380,7 +380,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.structureSummary()
+            >>> c._docs.sections.structureSummary()
         """
         return self._company._docsSectionsStructureSummary(
             topic=topic,
@@ -416,7 +416,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.structureChanges()
+            >>> c._docs.sections.structureChanges()
         """
         return self._company._docsSectionsStructureChanges(
             topic=topic,
@@ -451,7 +451,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.changes(topic="riskFactors")
+            >>> c._docs.sections.changes(topic="riskFactors")
         """
         frame = self.raw
         if frame is None:
@@ -471,7 +471,7 @@ class _SectionsSource:
             없음.
 
         Example:
-            >>> c.docs.sections.changeSummary(topN=5)
+            >>> c._docs.sections.changeSummary(topN=5)
         """
         ch = self.changes()
         if isEmptyDf(ch):

@@ -84,7 +84,7 @@ _FINANCE_LABELS: dict[str, tuple[str, str]] = {
 class _DocsNamespace:
     """docs namespace — pure docs source.
 
-    내부 보조 namespace. 외부 사용자는 ``c.docs.X`` 직접 접근 대신
+    내부 보조 namespace. 외부 사용자는 ``c._docs.X`` 직접 접근 대신
     ``c.show(topic)`` 또는 ``c.sections`` (merged view) 사용.
     """
 
