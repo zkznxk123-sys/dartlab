@@ -100,28 +100,60 @@ def _ensureDebt(company: Company) -> pl.DataFrame | None:
 
 
 def companyScanView(company: Company, df: pl.DataFrame | None, view: str | None) -> pl.DataFrame | None:
-    """scan DataFrame 에서 view 별 필터.
+    """scan DataFrame 의 view 별 필터 공통 헬퍼 — governance/workforce/capital/debt 4 builder 공용.
+
+    Capabilities:
+        - view=None → ``종목코드``/``stockCode`` 컬럼으로 본 회사 row 만 필터.
+        - view="all" → 전체 DataFrame 그대로.
+        - view="market" → 시장 (KOSPI/KOSDAQ/기타) 별 요약 통계 (``_scanMarketSummary`` 위임).
+        - df 가 None 또는 비어있음 → None.
 
     Args:
-        company: Company 인스턴스 (stockCode 추출용).
-        df: scan DataFrame (None 또는 빈 DF 면 None 반환).
-        view: ``None`` 이면 본 회사 행만 / ``"all"`` 이면 전체 / ``"market"`` 이면 시장별 요약.
+        company: Company 인스턴스 (stockCode 추출).
+        df: scan DataFrame. None/empty → None.
+        view: None / "all" / "market".
 
     Returns:
-        필터된 DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None — 필터된 결과. df 빈 경우 None.
 
     Example:
-        >>> companyScanView(c, df, view="market")
+        >>> # companyScanView(c, df, view="market")
+
+    Guide:
+        - "이 회사 governance 한 row" → view=None.
+        - "전체 상장사 governance" → view="all".
+        - "시장 별 평균/중간값" → view="market".
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``buildScanGovernance`` / ``buildScanWorkforce`` / ``buildScanCapital`` /
+          ``buildScanDebt`` — 본 함수의 호출자.
+        - ``_scanMarketSummary`` — view="market" 의 본체.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.core.polarsUtil — isEmptyDf.
+
+    AIContext:
+        4 scan builder 의 view 분기 표준화. AI 가 cross-market 비교 ("KOSPI vs KOSDAQ 인력
+        평균") 시 view="market" 호출. None view 는 회사 1 행 — 단일 회사 답변 표준.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 종목코드 컬럼이 한국어 ("종목코드") 또는 영문 ("stockCode") 혼재 — 본 함수가
+              자동 인식. 다른 컬럼명은 미지원.
+            - view 가 정의된 3 외 (예 "industry") → 본 회사 row fallback.
+        OutputSchema:
+            - view=None: 1 row DataFrame.
+            - view="all": 입력 그대로.
+            - view="market": 시장 별 요약 (시장 + 종목수 + 컬럼별 평균/중간값).
+        Prerequisites:
+            - df 가 stockCode 또는 종목코드 컬럼 보유.
+        Freshness:
+            - df 의 source (scan 모듈 prebuild) 시점.
+        Dataflow:
+            - scan prebuild → ensure* → 본 함수 → builder → c.governance/workforce/...
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     if isEmptyDf(df):
         return None
@@ -166,28 +198,74 @@ def _scanMarketSummary(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1):
-    """``c.network()`` 구현 — 그룹 내 회사들의 네트워크 그래프 빌드.
+    """``c.network()`` 구현 — 그룹 내 회사 네트워크 그래프 빌드 + view 별 표현.
+
+    Capabilities:
+        - ``_ensureNetwork(company)`` 로 그래프 prebuild (cache) → (data, full).
+        - view=None → 회사 중심 ego 그래프 → ``htmlRenderer.renderNetwork`` 로 HTML 시각화.
+        - view="members" → 같은 그룹 계열사 목록 DataFrame.
+        - view="edges" → 이 회사의 출자/피출자 연결 DataFrame.
+        - view="cycles" → 이 회사가 포함된 순환출자 경로 list.
+        - view="peers" → ego 그래프 노드 list DataFrame.
+        - hops 로 ego 깊이 조절 (None/peers view 한정).
 
     Args:
         company: Company 인스턴스.
-        view: 필터 view (``None``/``"all"``/``"market"`` 또는 ``"members"``/``"edges"``).
-        hops: 그래프 hop 깊이.
+        view: None / "members" / "edges" / "cycles" / "peers". None 은 HTML 시각화.
+        hops: ego 깊이. 기본 1.
 
     Returns:
-        view 에 따라 DataFrame/dict 반환 또는 None.
-
-    Raises:
-        없음.
+        view 에 따라 가변 — HTML 문자열 (None) / DataFrame (members/edges/peers) / DataFrame
+        (cycles) / None.
 
     Example:
-        >>> buildScanNetwork(c, view="members")
+        >>> # html = buildScanNetwork(c)  # view=None → HTML 시각화
+        >>> # df = buildScanNetwork(c, view="members")  # 그룹 계열사
+
+    Guide:
+        - "삼성 그룹 계열사 목록" → ``c.network(view="members")``.
+        - "출자/피출자 관계" → ``c.network(view="edges")``.
+        - "순환출자 여부" → ``c.network(view="cycles")``.
+        - "이 회사 중심 네트워크 시각화" → ``c.network()`` (HTML 반환).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_ensureNetwork`` / ``_networkMembers`` / ``_networkEdges`` / ``_networkCycles`` /
+          ``_networkPeers`` (모듈 private) — view 별 본체.
+        - ``dartlab.scan.network.buildGraph`` / ``exportFull`` / ``exportEgo`` — 그래프 source.
+        - ``dartlab.core.htmlRenderer.renderNetwork`` — HTML 시각화.
 
     Requires:
-        - dartlab
-        - polars
+        - polars — DataFrame.
+        - dartlab.scan.network — 그래프 prebuild (lazy import).
+        - dartlab.core.htmlRenderer — HTML 시각화 (view=None 시).
+        - dartlab.core.memory._CACHE_MISSING — cache sentinel.
+
+    AIContext:
+        Workbench "삼성그룹/LG그룹 어떤 회사 있냐" / "순환출자 있냐" 질문 entry. view=None 은
+        HTML 반환 — 노트북 또는 Workbench UI 에서만 의미. text 답변 필요 시 view="members"
+        등 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - view=None + 비 노트북 (text only) 환경 → HTML 문자열 그대로 답변 → 사용자 혼란.
+              AI 가 view="members" 등 자동 선택 권장.
+            - 회사가 그룹에 속하지 않음 (단독) → group = corpName, members 비어있음 가능.
+            - cycles 가 없는 회사 → 빈 DataFrame.
+            - view 가 정의된 5 외 → None.
+        OutputSchema:
+            - view=None: HTML str.
+            - view="members": DataFrame (종목코드/회사명/시장/업종/자기).
+            - view="edges": DataFrame (종목코드/회사명/유형/방향/목적/지분율/그룹).
+            - view="cycles": DataFrame (번호/경로/길이).
+            - view="peers": DataFrame (종목코드/회사명/그룹/업종/연결수/자기).
+        Prerequisites:
+            - dartlab.scan.network prebuild 가능 (KR 상장사 지분 데이터 수집).
+        Freshness:
+            - scan.network prebuild 시점 + cache.
+        Dataflow:
+            - 지분 데이터 → scan.network.buildGraph → cache → 본 함수 → AI/UI.
+        TargetMarkets:
+            - KR (DART) 상장사 한정.
     """
     result = _ensureNetwork(company)
     if result is None:
@@ -344,76 +422,193 @@ def _networkPeers(data: dict, full: dict, code: str, *, hops: int = 1) -> pl.Dat
 
 
 def buildScanGovernance(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """``c.governance()`` 구현 — 지배구조 scan view.
+    """``c.governance()`` 구현 — 지배구조 scan view (이사회/지분 구조).
+
+    Capabilities:
+        - ``_ensureGovernance(company)`` 로 prebuild DataFrame 로드 (cache).
+        - ``companyScanView`` 로 view 분기 (회사 row / 전체 / 시장 별 요약).
+        - 빈 결과 → None.
 
     Args:
         company: Company 인스턴스.
-        view: 필터 view (``None``/``"all"``/``"market"``).
+        view: None / "all" / "market".
 
     Returns:
-        필터된 DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None.
 
     Example:
-        >>> buildScanGovernance(c, view="market")
+        >>> # df = buildScanGovernance(c, view="market")
+
+    Guide:
+        - "이 회사 지배구조" → ``c.governance()``.
+        - "시장 별 거버넌스 평균" → ``c.governance(view="market")``.
+
+    SeeAlso:
+        - ``_ensureGovernance`` — prebuild cache 헬퍼.
+        - ``companyScanView`` — view 분기 공통.
+        - ``dartlab.scan.governance.scanGovernance`` — prebuild source.
+
+    Requires:
+        - polars — DataFrame.
+        - dartlab.scan.governance — scanGovernance (lazy import).
+
+    AIContext:
+        Workbench "이 회사 거버넌스" / "이사회 구성" 질문 entry. None view 1 row → 자연어 변환.
+
+    LLM Specifications:
+        AntiPatterns:
+            - scanGovernance prebuild 결락 → None. 운영자 의무.
+            - view="market" 결과는 통계 — 개별 회사 데이터 손실.
+        OutputSchema:
+            - companyScanView 결과 의존.
+        Prerequisites:
+            - dartlab.scan.governance prebuild 가능.
+        Freshness:
+            - prebuild + cache 시점.
+        Dataflow:
+            - dartlab.scan.governance → ensure cache → 본 함수 → c.governance().
+        TargetMarkets:
+            - KR (DART) 상장사 한정.
     """
     return companyScanView(company, _ensureGovernance(company), view)
 
 
 def buildScanWorkforce(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """``c.workforce()`` 구현 — 인력 scan view.
+    """``c.workforce()`` 구현 — 인력 scan view (직원 수/평균 급여/연봉 분포).
+
+    Capabilities:
+        - ``_ensureWorkforce(company)`` prebuild → ``companyScanView`` view 분기.
 
     Args:
         company: Company 인스턴스.
-        view: 필터 view.
+        view: None / "all" / "market".
 
     Returns:
-        필터된 DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None.
 
     Example:
-        >>> buildScanWorkforce(c)
+        >>> # buildScanWorkforce(c, view="market")
+
+    Guide:
+        - "이 회사 직원 수" → ``c.workforce()``.
+        - "시장 별 평균 급여" → ``c.workforce(view="market")``.
+
+    SeeAlso:
+        - ``_ensureWorkforce`` / ``companyScanView``.
+        - ``dartlab.scan.workforce.scanWorkforce``.
+
+    Requires:
+        - polars + dartlab.scan.workforce.
+
+    AIContext:
+        "이 회사 직원수 / 인건비" 질문 entry.
+
+    LLM Specifications:
+        AntiPatterns:
+            - scanWorkforce 미빌드 → None.
+        OutputSchema:
+            - companyScanView 결과 의존.
+        Prerequisites:
+            - dartlab.scan.workforce prebuild.
+        Freshness:
+            - prebuild + cache.
+        Dataflow:
+            - dartlab.scan.workforce → ensure → 본 함수 → c.workforce().
+        TargetMarkets:
+            - KR 상장사 한정.
     """
     return companyScanView(company, _ensureWorkforce(company), view)
 
 
 def buildScanCapital(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """``c.capital()`` 구현 — 자본 scan view.
+    """``c.capital()`` 구현 — 자본 scan view (자본금/자본총계/이익잉여금).
+
+    Capabilities:
+        - ``_ensureCapital(company)`` prebuild → ``companyScanView``.
 
     Args:
         company: Company 인스턴스.
-        view: 필터 view.
+        view: None / "all" / "market".
 
     Returns:
-        필터된 DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None.
 
     Example:
-        >>> buildScanCapital(c)
+        >>> # buildScanCapital(c)
+
+    Guide:
+        - "이 회사 자본 규모" → ``c.capital()``.
+        - "시장 별 자본금 분포" → ``c.capital(view="market")``.
+
+    SeeAlso:
+        - ``_ensureCapital`` / ``companyScanView``.
+        - ``dartlab.scan.capital.scanCapital``.
+
+    Requires:
+        - polars + dartlab.scan.capital.
+
+    AIContext:
+        "자본총계 / 이익잉여금" 질문 entry. BS 의 자본 항목과 일관.
+
+    LLM Specifications:
+        AntiPatterns:
+            - scanCapital 미빌드 → None.
+        OutputSchema:
+            - companyScanView 결과 의존.
+        Prerequisites:
+            - dartlab.scan.capital prebuild.
+        Freshness:
+            - prebuild + cache.
+        Dataflow:
+            - dartlab.scan.capital → ensure → 본 함수 → c.capital().
+        TargetMarkets:
+            - KR 상장사 한정.
     """
     return companyScanView(company, _ensureCapital(company), view)
 
 
 def buildScanDebt(company: Company, view: str | None = None) -> pl.DataFrame | None:
-    """``c.debt()`` 구현 — 부채 scan view.
+    """``c.debt()`` 구현 — 부채 scan view (부채총계/장단기/이자보상배율).
+
+    Capabilities:
+        - ``_ensureDebt(company)`` prebuild → ``companyScanView``.
 
     Args:
         company: Company 인스턴스.
-        view: 필터 view.
+        view: None / "all" / "market".
 
     Returns:
-        필터된 DataFrame 또는 None.
-
-    Raises:
-        없음.
+        pl.DataFrame | None.
 
     Example:
-        >>> buildScanDebt(c)
+        >>> # buildScanDebt(c)
+
+    Guide:
+        - "이 회사 부채 비율" → ``c.debt()``.
+        - "시장 별 평균 부채" → ``c.debt(view="market")``.
+
+    SeeAlso:
+        - ``_ensureDebt`` / ``companyScanView``.
+        - ``dartlab.scan.debt.scanDebt``.
+
+    Requires:
+        - polars + dartlab.scan.debt.
+
+    AIContext:
+        "부채 비율 / 신용 위험" 질문 entry. credit 엔진과 보완.
+
+    LLM Specifications:
+        AntiPatterns:
+            - scanDebt 미빌드 → None.
+        OutputSchema:
+            - companyScanView 결과 의존.
+        Prerequisites:
+            - dartlab.scan.debt prebuild.
+        Freshness:
+            - prebuild + cache.
+        Dataflow:
+            - dartlab.scan.debt → ensure → 본 함수 → c.debt().
+        TargetMarkets:
+            - KR 상장사 한정.
     """
     return companyScanView(company, _ensureDebt(company), view)
