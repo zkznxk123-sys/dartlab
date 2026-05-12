@@ -83,17 +83,19 @@ class _EdgarNotesWrapper:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 카테고리 키 알면 `c.notes.<카테고리>` 호출이 더 빠름 — `.all()` 은 회사
+                  전체 TextBlock 일괄 fetch 라 메모리 사용 크다.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — `concept` (us-gaap tag) / `value` (XBRL TextBlock 본문) /
+                  `period` (분기 키) / `dimensions` (axis 정보). 주석 없으면 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 Company 인스턴스에 `companyfacts.json` (SEC XBRL) 캐시 존재.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR `data.sec.gov/api/xbrl/companyfacts/CIK*.json` 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - SEC companyfacts → notesParsers TextBlock 추출 → docs.notes(None) → 본 wrapper.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return self._company.docs.notes(None)
 
@@ -111,17 +113,17 @@ class _EdgarNotesWrapper:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 list 외 카테고리 호출 → `AttributeError`. caller 가 list 검사 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[str] — 본 회사가 disclose 한 카테고리만. 모든 회사 공통 set 아님.
             Prerequisites:
-                - <TODO: 사전조건>
+                - companyfacts.json 캐시 + notesParsers 의 `CATEGORY_LABELS` 매핑.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점 (분기 마감 후 ~45 일).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → docs.noteCategories() → 본 wrapper.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return self._company.docs.noteCategories()
 
@@ -138,34 +140,38 @@ class _EdgarNotesWrapper:
             >>> c.notes.keysKr()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``keys`` — 영어 카테고리 ID 버전. cross-provider 라벨 dispatch 는 본 함수.
+            - ``dart.providers.dart.docs.notes`` — KR 패리티.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - ``keys()`` 의 영어 카테고리 ID 를 `CATEGORY_LABELS` 매핑으로 한국어 라벨화.
+              누락된 카테고리는 원본 영문 그대로 통과 — Workbench UI 라벨링 용도.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 어떤 주석 있나 한국어로" → 본 함수.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            Workbench UI 가 EDGAR notes 카테고리 chip 표시 시 본 함수 사용.
+            영문 ID 그대로 노출 시 사용자 인지 비용 → 한국어 매핑 표시.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 라벨 값으로 다시 ``c.notes.<라벨>`` 호출 → AttributeError. 라벨은 표시용,
+                  실 API 는 ``keys()`` 의 영문 ID 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[str] — 한국어 라벨 또는 매핑 없는 원본 영문.
             Prerequisites:
-                - <TODO: 사전조건>
+                - notesParsers.CATEGORY_LABELS 정적 매핑.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → keys() 영문 ID → CATEGORY_LABELS → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         from dartlab.providers.edgar.docs.notesParsers import CATEGORY_LABELS
 
@@ -188,17 +194,18 @@ class _EdgarNotesWrapper:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 함수는 alias — 실제로는 10-K + 10-Q 모두 포함, 분기로 필터링 X.
+                  엄밀 분기만 원하면 ``c.docs.notes(query)`` 후 period 컬럼 직접 필터.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — `concept` / `value` / `period` / `dimensions`. 매치 없으면 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - companyfacts.json 캐시.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC companyfacts 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts → docs.notes(query) → 본 wrapper.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 한정.
         """
         return self._company.docs.notes(query)
 
@@ -622,17 +629,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 값을 외부에서 hard-code 비교 → 라우터 순서 변경 시 회귀. ``priority()`` 호출만.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - int 상수 20.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (정적 상수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 라우터 SSOT 변경 시 갱신 (드물다).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - Company 팩토리 → 본 함수 → provider 순위 정렬 → canHandle 시도.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — 본 provider 식별자.
         """
         return 20
 
@@ -772,34 +779,40 @@ class Company:
             없음.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``__exit__`` — context manager 종료 시 본 함수 자동 호출.
+            - ``memorySnapshot`` — 호출 전/후 RSS 비교.
+            - ``dartlab.core.memory.cleanupBetweenCompanies`` — Polars Rust heap 회수 트리거.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 인스턴스 ``self._cache`` (BoundedCache) 의 모든 entry evict + Polars 네이티브 힙
+              `cleanupBetweenCompanies` 호출. multi-company loop 사이에 호출 의무.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "다음 회사 진입 전 메모리 정리" → 본 함수 또는 ``with Company(c):`` 컨텍스트.
+            - "OOM 위험 회피" → multi-company loop 안 끝마다 호출.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 다종목 batch 처리 (`for ticker in tickers:`) 안에서 본 함수 호출 의무.
+            누락 시 Polars Rust heap 누적으로 OOM.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 호출 없이 다종목 순회 → Rust heap 누적 → OOM.
+                - ``gc.collect()`` 만 호출 → Polars 힙은 Python gc 회수 X. 본 함수 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - int — evict 된 cache entry 수 (0 가능).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 본 Company 인스턴스 활성 상태.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 즉시.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - self._cache → clear → cleanupBetweenCompanies → Rust heap 회수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — 본 클래스의 cache 정리.
         """
         from dartlab.core.memory import cleanupBetweenCompanies
 
@@ -823,34 +836,39 @@ class Company:
             없음.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``cleanupCache`` — 본 함수가 보여준 RSS 회수.
+            - ``dartlab.core.memory.getMemoryMb`` — psutil 기반 RSS 추정.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - ``self._cache`` (BoundedCache) entry 수 + 현 프로세스 RSS (MB) 를 dict 로 합산 반환.
+              MemorySafeProvider Protocol 의 측정 entry point.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "지금 이 Company 가 얼마나 메모리 쓰나" → 본 함수.
+            - "cleanupCache 효과 확인" → 호출 전/후 비교.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 가 OOM tripwire 발동 직전 본 함수로 회사별 메모리 분포 표시.
+            AI 가 "메모리 어디 쓰나" 답변 시 인용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - RSS 값을 절대값으로 비교 시 환경 차이 (Windows vs WSL) — 추세만 사용.
+                - cacheSize 0 == 메모리 정리 완료 X. Polars Rust heap 은 별도 영역.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"cacheSize": int, "rssMb": int}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - psutil (`getMemoryMb` 의존).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 즉시.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - psutil RSS + self._cache len → 본 함수 → dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — 본 클래스 인스턴스 추적.
         """
         from dartlab.core.memory import getMemoryMb
 
@@ -878,34 +896,39 @@ class Company:
             c.fiscalYearEnd  # "09-26" (마지막 토요일 변형 가능)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.providers.dart.company.Company.fiscalYearEnd`` — KR 패리티 (12-31 고정).
+            - ``finance/scanAccount`` — 본 값을 활용한 분기→연도 매칭.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - companyfacts.parquet 의 fp='FY' 분기 row 들에서 (1) fy 별 mode end 추출
+              (2) mode 들의 month-day 다시 mode → 진짜 회계 연말일. 토요일 변형 (52/53 week) 포함.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 회계연말이 언제냐" → 본 property.
+            - "fiscal year 가 calendar year 와 다르냐" → 본 값이 "12-31" 아니면 다름.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 EDGAR 회사를 DART 회사와 비교할 때 매핑 기준. 12-31 가정 시 잘못된
+            분기 매칭 (예: 9 월 FY 회사의 Q4 ↔ 12 월 FY 회사의 Q3) 발생.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 모든 US 회사가 12-31 가정 → AAPL/CSCO/ORCL 등 변형 FY 회사 비교 시 wrong period.
+                - 본 값을 ISO date 로 사용 X — "MM-DD" 만, 연도 정보 없음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str "MM-DD" 또는 None (companyfacts 없음).
             Prerequisites:
-                - <TODO: 사전조건>
+                - data/edgar/finance/{CIK}.parquet (companyfacts dump).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - companyfacts.parquet 갱신 시점. cache 후 인스턴스 lifetime 동안 고정.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - companyfacts.parquet → fp='FY' filter → fy 별 mode → mode of mode → month-day.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — XBRL 회계 연도 SSOT.
         """
         cacheKey = "_fiscalYearEnd"
         if cacheKey in self._cache:
@@ -988,17 +1011,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART 종목코드 6 자리 형식 가정 → US ticker 는 영문 1~5 자. 자릿수 검사 X.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str ticker (예 "AAPL"). 비어있을 수 없음.
             Prerequisites:
-                - <TODO: 사전조건>
+                - Company 인스턴스 생성 완료.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 인스턴스 lifetime 동안 불변.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - __init__ ticker 정규화 → self.ticker → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — ticker SSOT.
         """
         return self.ticker
 
@@ -1036,17 +1059,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 시장 세분화 (NYSE vs NASDAQ) 필요 시 본 값으로는 부족 — listing 메타에서 추출.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 고정 str "US".
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (상수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정적. SEC primary market 변경 시 별도 정의.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 본 property → "US" 상수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 통합 라벨.
         """
         return "US"
 
@@ -1084,17 +1107,17 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 외국 등록 (ADR) 회사도 본 함수 "USD" 반환 — 보고통화 vs 결산통화 차이는 별도 추출 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - 고정 str "USD".
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (상수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 정적. SEC 회사는 USD reporting 강제.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 본 property → "USD" 상수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) reporting currency.
         """
         return "USD"
 
@@ -1116,20 +1139,24 @@ class Company:
             >>> c.quant("returns")     # 주가 수익률
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.quant.Quant`` — 30 축 SSOT.
+            - ``dart.providers.dart.company.Company.quant`` — KR 패리티 (동일 인터페이스).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - ``dartlab.quant.Quant`` 의 30 축 (SMA/EMA/RSI/MACD/Bollinger/ATR/returns 등) 을
+              본 회사 ticker 기준으로 호출. property 접근/call 호환 — ``CallableAccessor`` 가
+              두 양식 모두 동일 backend dispatch.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 주가 SMA50" → ``c.quant("SMA", window=50)``.
+            - "사용 가능 quant 축" → ``c.quant()`` 빈 호출.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 주가 분석 entry. 본 함수는 주가 시계열 origin 만 — 재무 시계열은 ``finance``.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1168,34 +1195,38 @@ class Company:
             >>> c.macro("yield_curve")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.macro.Macro`` — 매크로 axis 카탈로그 SSOT.
+            - ``dart.providers.dart.company.Company.macro`` — KR 패리티 (market="KR" 위임).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 본 회사의 시장 매크로 (yield_curve / inflation / fx / fedFunds 등) 를 US 기준으로
+              조회. dart 와 동일 시그니처 — `market="US"` 자동 주입.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "US yield curve 영향" → ``c.macro("yield_curve")``.
+            - "사용 가능 매크로 축" → ``c.macro()`` 빈 호출.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            매크로 변수 회사 영향 질문 entry. axis 미정 시 가이드 반환 — AI 가 미지원 axis 추측 대신 빈 호출로 카탈로그 확인.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - market="KR" 강제 시도 → 본 함수는 US 고정. KR 회사는 dart provider 사용.
+                - overrides 무한 중첩 → Macro 가 dict 평탄화만 지원.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - Macro 결과 (axis 별 DataFrame 또는 dict).
             Prerequisites:
-                - <TODO: 사전조건>
+                - FRED / ECOS / KRX 데이터 셋업 (Macro 모듈 의존).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - Macro 모듈의 origin 별 freshness 위임 (FRED 일/월, 회사 변경 무관).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - Macro(axis, target, market="US") → 본 함수 → axis 결과.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 회사 매크로 매핑.
         """
         from dartlab.macro import Macro
 
@@ -1217,34 +1248,38 @@ class Company:
             >>> c.causalWeights()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.story.narrative.buildCausalWeights`` — 본 함수의 implementation.
+            - ``valuationImpact`` — 본 가중치를 DCF override 로 변환.
+            - ``storyTree`` — 가중치 적용한 3 trajectory DCF.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 본 회사의 story 6 막 (도입/전개/위기/반전/절정/결말) 각 막에 대한 인과 가중치
+              산출. 매출/마진/투자/규제 등 driver 별 weight (총 1.0 normalize).
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 이야기의 핵심 driver" → 본 함수 결과 + ``storyTree`` 결합.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench narrative 분석 entry. AI 가 사용자에게 "이 회사 핵심 변수는 X" 답할 때 본 함수의 weight 인용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - weight 의 절대값 비교 X — 회사 간 비교는 정성적 해석만.
+                - 가중치 합 1.0 가정 → narrative override 시 깨질 수 있음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] — 각 dict {"act": str, "driver": str, "weight": float}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - finance + sections 데이터 (story.narrative 가 합산).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 (finance + sections origin 의 latest 기준).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance/sections → story.narrative.buildCausalWeights → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) story 매핑.
         """
         import importlib
 
@@ -1265,34 +1300,37 @@ class Company:
             >>> c.valuationImpact()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``causalWeights`` — 본 함수의 입력.
+            - ``storyTree`` — 본 override 적용한 3 trajectory DCF.
+            - ``dartlab.story.narrative.buildValuationImpact`` — implementation.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - causalWeights 결과를 DCF 파라미터 (revenueGrowth / operatingMargin /
+              wacc / terminalGrowth) override 후보로 변환. narrative-driven valuation.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 narrative 가 valuation 어떻게 바꾸나" → 본 함수 + storyTree 비교.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            DCF base case 와 narrative 반영 case 의 격차 설명에 본 dict 인용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - override 값을 절대 정답으로 가정 → narrative 자체가 가설. base/bull/bear 비교 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"revenueGrowth": float, "operatingMargin": float, "wacc": float, ...}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - causalWeights origin (finance + sections).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance/sections → causalWeights → buildValuationImpact → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) narrative-DCF 매핑.
         """
         import importlib
 
@@ -1316,34 +1354,39 @@ class Company:
             >>> c.storyTree()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``causalWeights`` / ``valuationImpact`` — 본 함수의 입력 가중치.
+            - ``dartlab.story.dcf`` — 3 trajectory 계산 모듈.
+            - ``narrativeDiff`` — 사용자 가설과 본 tree 비교.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - base / bull / bear 3 시나리오 DCF 시뮬레이션. valuationImpact override 를
+              ±1σ 변동시켜 시나리오 별 fair value 산출. basePeriod 미지정 시 최신 분기.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 가치 시나리오 비교" → 본 함수 결과 dict 3 trajectory.
+            - "지금 가격이 base 대비 어느 위치" → result["base"]["fairPrice"] / 현재가.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 "이 회사 비싸냐 싸냐" 답할 때 본 함수 base/bull/bear range 인용. 단일 값 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - bull/bear range 좁다고 안전하다 결론 — narrative 가 우상향 편향이면 bear 도 낙관적.
+                - basePeriod 가정 (예 분기 마지막) 없이 호출 → 최신 자동, 의도 명확하면 명시.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"base": {fairPrice, revenueGrowth, ...}, "bull": ..., "bear": ...}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - causalWeights 산출 가능 (finance + sections).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - causalWeights → valuationImpact → DCF 3 시나리오 → 본 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 회사 valuation 매핑.
         """
         import importlib
 
