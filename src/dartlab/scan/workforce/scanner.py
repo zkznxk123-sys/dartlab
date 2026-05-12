@@ -19,6 +19,31 @@ def scanEmployee() -> dict[str, dict]:
 
     최신 연도 + 최적 분기(Q2) 기준. 급여는 직원수 가중평균.
 
+    Capabilities:
+        - 해당 report 카테고리 prebuild parquet → 종목별 인력/급여 단면 추출. 직원수 가중평균
+          + 최적 분기 + 임계 검증으로 noise 제거.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner. AI agent 가 인력 효율 / 급여 / 고액 보수 횡단 비교 시
+        본 함수 dict 결과를 그대로 사용.
+
+    Guide:
+        - 임계 (예: 평균급여 > 100 만원, 직원수 > 0) 미달 row 는 skip — 잘못된 단위 / 분식 데이터
+          방어.
+
+    When:
+        ``scanWorkforce`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy → ``findLatestYear`` 단면 → 종목별 group → ``pickBestQuarter``
+        선택 → 값 검증 후 dict 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.workforce.scanWorkforce` — sub-scanner 통합 호출
+
     Raises
     ------
     polars.PolarsError
@@ -117,6 +142,31 @@ def scanTotalPayroll() -> dict[str, float]:
     fyer_salary_totamt 합산 우선, 없으면 sm*jan_salary_am fallback.
     Q4 우선 (연간 누적). Q4 없으면 Q2*2 연환산.
 
+    Capabilities:
+        - 해당 report 카테고리 prebuild parquet → 종목별 인력/급여 단면 추출. 직원수 가중평균
+          + 최적 분기 + 임계 검증으로 noise 제거.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner. AI agent 가 인력 효율 / 급여 / 고액 보수 횡단 비교 시
+        본 함수 dict 결과를 그대로 사용.
+
+    Guide:
+        - 임계 (예: 평균급여 > 100 만원, 직원수 > 0) 미달 row 는 skip — 잘못된 단위 / 분식 데이터
+          방어.
+
+    When:
+        ``scanWorkforce`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy → ``findLatestYear`` 단면 → 종목별 group → ``pickBestQuarter``
+        선택 → 값 검증 후 dict 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.workforce.scanWorkforce` — sub-scanner 통합 호출
+
     Raises
     ------
     polars.PolarsError
@@ -182,6 +232,31 @@ def scanRevenuePerEmployee() -> dict[str, float]:
 
     scan/finance.parquet 프리빌드가 있으면 단일 파일에서 매출 추출,
     없으면 종목별 parquet 순회 fallback.
+
+    Capabilities:
+        - 해당 report 카테고리 prebuild parquet → 종목별 인력/급여 단면 추출. 직원수 가중평균
+          + 최적 분기 + 임계 검증으로 noise 제거.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner. AI agent 가 인력 효율 / 급여 / 고액 보수 횡단 비교 시
+        본 함수 dict 결과를 그대로 사용.
+
+    Guide:
+        - 임계 (예: 평균급여 > 100 만원, 직원수 > 0) 미달 row 는 skip — 잘못된 단위 / 분식 데이터
+          방어.
+
+    When:
+        ``scanWorkforce`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy → ``findLatestYear`` 단면 → 종목별 group → ``pickBestQuarter``
+        선택 → 값 검증 후 dict 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.workforce.scanWorkforce` — sub-scanner 통합 호출
 
     Raises
     ------
@@ -365,6 +440,31 @@ def scanTopPay() -> dict[str, dict]:
 
     5억 이상 의무공개 대상. 최신 연도(유효 종목 200개 이상인 해) 기준.
 
+    Capabilities:
+        - 해당 report 카테고리 prebuild parquet → 종목별 인력/급여 단면 추출. 직원수 가중평균
+          + 최적 분기 + 임계 검증으로 noise 제거.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner. AI agent 가 인력 효율 / 급여 / 고액 보수 횡단 비교 시
+        본 함수 dict 결과를 그대로 사용.
+
+    Guide:
+        - 임계 (예: 평균급여 > 100 만원, 직원수 > 0) 미달 row 는 skip — 잘못된 단위 / 분식 데이터
+          방어.
+
+    When:
+        ``scanWorkforce`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy → ``findLatestYear`` 단면 → 종목별 group → ``pickBestQuarter``
+        선택 → 값 검증 후 dict 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.workforce.scanWorkforce` — sub-scanner 통합 호출
+
     Raises
     ------
     polars.PolarsError
@@ -484,6 +584,31 @@ def scanLaborRatio() -> dict[str, float]:
     dict[str, float]
         {종목코드: 인건비율(%)}. 0 < 인건비율 < 500 범위만 반환.
 
+    Capabilities:
+        - 해당 report 카테고리 prebuild parquet → 종목별 인력/급여 단면 추출. 직원수 가중평균
+          + 최적 분기 + 임계 검증으로 noise 제거.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner. AI agent 가 인력 효율 / 급여 / 고액 보수 횡단 비교 시
+        본 함수 dict 결과를 그대로 사용.
+
+    Guide:
+        - 임계 (예: 평균급여 > 100 만원, 직원수 > 0) 미달 row 는 skip — 잘못된 단위 / 분식 데이터
+          방어.
+
+    When:
+        ``scanWorkforce`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy → ``findLatestYear`` 단면 → 종목별 group → ``pickBestQuarter``
+        선택 → 값 검증 후 dict 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.workforce.scanWorkforce` — sub-scanner 통합 호출
+
     Raises
     ------
     polars.PolarsError
@@ -517,6 +642,31 @@ def scanValueAdded() -> dict[str, float]:
     -------
     dict[str, float]
         {종목코드: 1인당부가가치(억)}. 직원수 0 또는 영업이익 None 인 종목 제외.
+
+    Capabilities:
+        - 해당 report 카테고리 prebuild parquet → 종목별 인력/급여 단면 추출. 직원수 가중평균
+          + 최적 분기 + 임계 검증으로 noise 제거.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner. AI agent 가 인력 효율 / 급여 / 고액 보수 횡단 비교 시
+        본 함수 dict 결과를 그대로 사용.
+
+    Guide:
+        - 임계 (예: 평균급여 > 100 만원, 직원수 > 0) 미달 row 는 skip — 잘못된 단위 / 분식 데이터
+          방어.
+
+    When:
+        ``scanWorkforce`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy → ``findLatestYear`` 단면 → 종목별 group → ``pickBestQuarter``
+        선택 → 값 검증 후 dict 적재.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.workforce.scanWorkforce` — sub-scanner 통합 호출
 
     Raises
     ------

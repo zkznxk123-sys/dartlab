@@ -51,6 +51,31 @@ def scanSalaryGrowth() -> dict[str, dict]:
             급여_신 : float — 최신 연도 평균급여 (만원)
             급여_구 : float — 직전 연도 평균급여 (만원)
 
+    Capabilities:
+        - employee 2 개년 가중평균 급여 또는 finance IS 2 개년 매출 비교 → 성장률 dict.
+          가중평균 → 분기 노이즈 흡수.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner 또는 ``computeSalaryVsRevenue`` 의 source. AI agent 가
+        "급여가 매출보다 빨리 늘어난 회사" 같은 인건비 부담 분석 시 본 함수 결과 사용.
+
+    Guide:
+        - 직전 연도 데이터 부족 (직원수 < 500 / 매출 0) 종목은 결과 제외.
+        - 클램핑 ±500 % (전기 ~0 인 경우 발생하는 수만% noise 차단).
+
+    When:
+        ``scanWorkforce`` 진행 또는 ``computeSalaryVsRevenue`` 호출 시.
+
+    How:
+        ``scanParquets`` / ``_ensureScanData`` → 2 개년 데이터 추출 → 가중평균 또는 최대값 →
+        성장률 계산 → dict / DataFrame 반환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/employee.parquet`` 또는 ``data/dart/scan/finance.parquet``
+
+    SeeAlso:
+        - :func:`computeSalaryVsRevenue` — 본 두 함수의 결합 비교
+
     Raises
     ------
     polars.PolarsError
@@ -244,6 +269,31 @@ def scanRevenueGrowth() -> dict[str, float]:
     dict[str, float]
         {종목코드: 매출성장률(%)}. 직전 연도 매출 0 이거나 매칭 실패 종목 제외.
 
+    Capabilities:
+        - employee 2 개년 가중평균 급여 또는 finance IS 2 개년 매출 비교 → 성장률 dict.
+          가중평균 → 분기 노이즈 흡수.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner 또는 ``computeSalaryVsRevenue`` 의 source. AI agent 가
+        "급여가 매출보다 빨리 늘어난 회사" 같은 인건비 부담 분석 시 본 함수 결과 사용.
+
+    Guide:
+        - 직전 연도 데이터 부족 (직원수 < 500 / 매출 0) 종목은 결과 제외.
+        - 클램핑 ±500 % (전기 ~0 인 경우 발생하는 수만% noise 차단).
+
+    When:
+        ``scanWorkforce`` 진행 또는 ``computeSalaryVsRevenue`` 호출 시.
+
+    How:
+        ``scanParquets`` / ``_ensureScanData`` → 2 개년 데이터 추출 → 가중평균 또는 최대값 →
+        성장률 계산 → dict / DataFrame 반환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/employee.parquet`` 또는 ``data/dart/scan/finance.parquet``
+
+    SeeAlso:
+        - :func:`computeSalaryVsRevenue` — 본 두 함수의 결합 비교
+
     Raises
     ------
     polars.PolarsError
@@ -285,6 +335,31 @@ def computeSalaryVsRevenue(
         매출성장률 : float — (%)
         급여매출괴리 : float — 급여성장률 - 매출성장률 (%p)
         급여>매출 : bool — 급여매출괴리 > 0
+
+    Capabilities:
+        - employee 2 개년 가중평균 급여 또는 finance IS 2 개년 매출 비교 → 성장률 dict.
+          가중평균 → 분기 노이즈 흡수.
+
+    AIContext:
+        ``scanWorkforce`` 의 sub-scanner 또는 ``computeSalaryVsRevenue`` 의 source. AI agent 가
+        "급여가 매출보다 빨리 늘어난 회사" 같은 인건비 부담 분석 시 본 함수 결과 사용.
+
+    Guide:
+        - 직전 연도 데이터 부족 (직원수 < 500 / 매출 0) 종목은 결과 제외.
+        - 클램핑 ±500 % (전기 ~0 인 경우 발생하는 수만% noise 차단).
+
+    When:
+        ``scanWorkforce`` 진행 또는 ``computeSalaryVsRevenue`` 호출 시.
+
+    How:
+        ``scanParquets`` / ``_ensureScanData`` → 2 개년 데이터 추출 → 가중평균 또는 최대값 →
+        성장률 계산 → dict / DataFrame 반환.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/employee.parquet`` 또는 ``data/dart/scan/finance.parquet``
+
+    SeeAlso:
+        - :func:`computeSalaryVsRevenue` — 본 두 함수의 결합 비교
 
     Raises
     ------
