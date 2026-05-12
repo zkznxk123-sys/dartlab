@@ -53,7 +53,9 @@ def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[Tra
         from dartlab.ai.tools.readCapability import readCapability
         from dartlab.ai.tools.readSkill import readSkill
 
-        skill_result = readSkill(state.question, limit=5, includeBody=True)
+        # includeBody 는 *선택적* — phase 1 토큰 절약을 위해 False 폴백.
+        # 본문이 정말 필요하면 LLM 이 별도 GetSkillBody 또는 후속 ReadSkill(includeBody=True) 호출.
+        skill_result = readSkill(state.question, limit=5, includeBody=False)
         for ref in skill_result.refs:
             state.refs.append(ref)
             if ref not in state.selectedSkillRefs:
