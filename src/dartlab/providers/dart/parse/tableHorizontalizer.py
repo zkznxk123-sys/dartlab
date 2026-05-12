@@ -22,30 +22,66 @@ _DATE_ONLY_RE = re.compile(r"^\(?\s*기준일\s*:")
 
 
 def stripUnitHeader(sub: list[str]) -> list[str] | None:
-    """단위행/기준일행이 헤더인 서브테이블 → 단위행 제거 + 나머지 반환.
+    """단위행/기준일행 헤더 서브테이블 → 실제 헤더부터 잘라낸 list 반환.
 
-    패턴: | (단위:천원) | | | → sep → 실제헤더 → 데이터
-    다중컬럼: | (기준일 : | 2018년 03월 31일 | ) | (단위 : 주) |
-    반환: 실제헤더 행부터의 서브테이블 (기존 파서가 그대로 동작).
-    해당하지 않으면 None.
+    Capabilities:
+        - DART 공시 표의 첫 행이 "(단위:천원)" 또는 "(기준일 : YYYY년 MM월 DD일)" 같은
+          메타 라벨일 때, 이 메타 행을 제거하고 실 헤더부터 시작하는 markdown table
+          서브셋 반환.
+        - 다중 컬럼 패턴 ("| (기준일 : | 2018-03-31 | ) | (단위 : 주) |") 도 처리.
+        - 메타 행 없으면 None 반환 (기존 파서가 그대로 사용).
 
     Args:
-        sub: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> stripUnitHeader(...)
+        sub: markdown table 의 라인 list. 각 라인은 ``"| col1 | col2 |"`` 형식.
 
     Returns:
-        <TODO: return desc> (list[str] | None)
+        list[str] | None — 메타 헤더 제거 후 실 헤더부터 시작하는 라인 list. 메타 헤더가
+        없거나 separator 패턴이 부적합하면 None. separator (``---``) 부재면 자동 생성.
+
+    Example:
+        >>> sub = [
+        ...     "| (단위:천원) |",
+        ...     "| --- |",
+        ...     "| 자산총계 |",
+        ...     "| --- |",
+        ...     "| 100 |",
+        ... ]
+        >>> stripUnitHeader(sub)  # doctest: +ELLIPSIS
+        ['| 자산총계 |', ...]
+
+    Guide:
+        - "공시 표 단위 행 자동 제거" → 본 함수 호출 후 ``horizontalizeTableBlock`` 입력.
+        - 단위/기준일 메타가 없는 표 → None 반환, caller 가 sub 원본 그대로 사용.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``horizontalizeTableBlock`` — 본 함수 결과를 받아 행/열 매트릭스화하는 후속.
+        - ``_UNIT_ONLY_RE`` / ``_DATE_ONLY_RE`` — 메타 헤더 패턴 정규식.
 
     Requires:
-        - polars
+        - re — 메타 헤더 패턴 매칭.
+        - 외부 의존성 없음 (pure string manipulation).
+
+    AIContext:
+        DART 공시 본문 → sections 파싱 파이프라인의 전처리 단계. table block parser 가
+        본 함수를 호출해 메타 행 영향 받지 않는 깨끗한 헤더 받음. Ask Workbench 의
+        finance topic 추출 시 background.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 빈 list 입력 → None (FirstRow 식별 실패).
+            - separator (``|--|``) 가 모든 행에서 부재 → None (table 형식 아님).
+            - 메타 라벨이 본문 중간에 있으면 미감지 (첫 데이터 행만 검사).
+        OutputSchema:
+            - list[str] — markdown table 라인 (헤더 + separator + 데이터).
+            - None — 메타 헤더 부재 또는 형식 부적합.
+        Prerequisites:
+            - sub 는 이미 cell-split 가능한 markdown table 형식.
+        Freshness:
+            - pure function — 입력만 의존, freshness 무관.
+        Dataflow:
+            - DART 공시 HTML → table block split → 본 함수 → horizontalizeTableBlock.
+        TargetMarkets:
+            - KR (DART 공시 표). EDGAR 10-K table 은 별도 ``providers/edgar/parse``.
     """
     firstRow = None
     for line in sub:
@@ -362,46 +398,73 @@ def horizontalizeTableBlock(
     periodCols: list[str],
     period: str | None = None,
 ) -> pl.DataFrame | None:
-    """table 블록을 기간 간 수평화 — 항목×기간 매트릭스 (Q3.1f split).
+    """table 블록을 기간 간 수평화 — 항목 × 기간 매트릭스 (Q3.1f split).
 
-    Parameters
-    ----------
-    topicFrame : pl.DataFrame
-        sections 에서 해당 topic 의 행.
-    blockOrder : int
-        블록 인덱스.
-    periodCols : list[str]
-        기간 컬럼 목록.
-    period : str, optional
-        특정 기간 필터 (현재 미사용).
-
-    Returns
-    -------
-    pl.DataFrame | None
-        항목(행) × 기간(열) DataFrame. 수평화 불가 시 None.
-        "항목" : str — 행 라벨
-        {period} : str — 기간별 셀 값
-
-    Raises:
-        없음.
-
-    Example:
-        >>> horizontalizeTableBlock(...)
+    Capabilities:
+        - sections topic 의 동일 blockOrder table 들을 기간별로 모아 항목 (행) ×
+          기간 (열) DataFrame 으로 정규화.
+        - 헤더 그룹 (사업부문 등) 자동 감지 — 가장 많은 period 를 가진 헤더를 선택해
+          노이즈 헤더 (단일 기간 부수 표) 제거.
+        - junk item 필터 (단위 행, 단일 라벨 등) + history shape (시계열 단순 나열) +
+          sparse (50% 미만 채움) 케이스는 None 반환 — 노이즈 표 차단.
 
     Args:
-        topicFrame: <TODO: param desc> (pl.DataFrame)
-        blockOrder: <TODO: param desc> (int)
-        periodCols: <TODO: param desc> (list[str])
-        period: <TODO: param desc> (str | None)
+        topicFrame: 해당 topic 의 sections row (각 행은 한 기간의 table block).
+            ``blockOrder``, ``blockType``, ``periodCols`` 컬럼 필수.
+        blockOrder: table block 인덱스 (같은 topic 안 여러 block 구분).
+        periodCols: 처리할 기간 컬럼 list (예 ``["2024Q1", "2024Q2", "2024Q3"]``).
+        period: 특정 기간 한정 필터. 현재 미사용 — 호환성 보존 인자.
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame | None — 행: ``항목`` (str, 라벨) + 각 기간 컬럼 (str, 셀 값).
+        수평화 불가 (item 0 / history shape / sparse / >50 items) 시 None.
+
+    Example:
+        >>> import polars as pl
+        >>> # 실 호출은 topicFrame schema 가 복잡 — sections 빌더 통한 간접 호출.
+        >>> # 단순 빈 DataFrame 케이스:
+        >>> df = pl.DataFrame({"blockOrder": [], "blockType": []})
+        >>> horizontalizeTableBlock(df, 0, ["2024Q1"]) is None
+        True
+
+    Guide:
+        - "공시 표를 항목 × 기간 매트릭스로" → 본 함수가 본체 (Company.show("BS") 가 내부 사용).
+        - 시계열 1 행 표 (history shape) 는 자동 거부 — caller 가 다른 파서 시도.
+        - DataFrame 반환 시 캐스팅 ``.with_columns(pl.col("항목").cast(pl.Utf8))`` 권장.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``stripUnitHeader`` — 사전 메타 헤더 제거.
+        - ``_hzCollectHeaderGroups`` / ``_hzProcessPeriod`` / ``_hzBuildDataFrame`` —
+          내부 단계 헬퍼.
+        - ``_hzFilterJunkItems`` / ``_hzIsSparse`` / ``_hzIsHistoryShape`` — 노이즈 가드.
 
     Requires:
-        - polars
+        - polars — DataFrame 입출력.
+        - re (모듈 상수 정규식).
+
+    AIContext:
+        ``Company.show("IS")`` / ``c.show("BS")`` 가 내부 사용. evidence 로 반환 시
+        ``항목`` 컬럼 + 가장 최근 period 컬럼 head 5 가 표준. None 반환 시 caller 는
+        topic-level 패널 (sections row 자체) 로 fallback.
+
+    LLM Specifications:
+        AntiPatterns:
+            - periodCols 가 빈 list → bestPeriods 빈 set → ``allItems`` 0 → None.
+            - topicFrame 에 ``blockType`` 컬럼 부재 → 본문이 빈 DataFrame 필터 결과 →
+              None.
+            - 50 items 초과 표 → None (보고서 부속 표일 가능성).
+        OutputSchema:
+            - row: 항목 1 개 (단일 라벨 또는 정규화된 item).
+            - column: ``항목`` (pl.Utf8) + periodCols 각 (pl.Utf8 — 셀 값 raw).
+            - 정렬: 입력 순서 (allItems 의 등장 순).
+        Prerequisites:
+            - topicFrame 이 동일 topic 의 여러 period 행 묶음.
+        Freshness:
+            - pure function (DataFrame 변환만). 입력 freshness 에 의존.
+        Dataflow:
+            - sections (provider builder) → topicFrame → 본 함수 → Company.show.
+        TargetMarkets:
+            - KR (DART 공시 표 markdown). EDGAR 10-K 표는 별도.
     """
     boRow = topicFrame.filter((pl.col("blockOrder") == blockOrder) & (pl.col("blockType") == "table"))
     if boRow.is_empty():
