@@ -24,6 +24,30 @@ def scanMajorHolderPct() -> dict[str, float]:
         종목코드 : 최대주주 지분율 (%)
         빈 dict — 데이터 없음
 
+    Capabilities:
+        - 해당 report 카테고리의 prebuild parquet → 종목별 단면 추출. None 값 / 범위 외 값
+          silent skip.
+
+    AIContext:
+        ``scanGovernance`` 의 5 sub-scanner 중 한 호출. AI agent 가 governance 지표 횡단 비교 시
+        본 함수의 dict 반환을 그대로 사용 가능.
+
+    Guide:
+        - 최신 연도 데이터가 minCount 미달 (예: 사외이사 1000 행 미만) 이면 빈 dict.
+
+    When:
+        ``scanGovernance`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy load → ``findLatestYear`` 최신 단면 → 종목별 group → 값 검증 후
+        dict 누적.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 sub-scanner 통합
+
     Raises
     ------
     polars.PolarsError
@@ -74,6 +98,30 @@ def scanOutsideDirectors() -> dict[str, dict]:
             중도사임 : int — 중도사임 인원 (명)
             겸직 : int — 겸직 인원 (명)
         빈 dict — 데이터 없음
+
+    Capabilities:
+        - 해당 report 카테고리의 prebuild parquet → 종목별 단면 추출. None 값 / 범위 외 값
+          silent skip.
+
+    AIContext:
+        ``scanGovernance`` 의 5 sub-scanner 중 한 호출. AI agent 가 governance 지표 횡단 비교 시
+        본 함수의 dict 반환을 그대로 사용 가능.
+
+    Guide:
+        - 최신 연도 데이터가 minCount 미달 (예: 사외이사 1000 행 미만) 이면 빈 dict.
+
+    When:
+        ``scanGovernance`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy load → ``findLatestYear`` 최신 단면 → 종목별 group → 값 검증 후
+        dict 누적.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 sub-scanner 통합
 
     Raises
     ------
@@ -209,6 +257,30 @@ def scanPayRatio() -> dict[str, float]:
         종목코드 : 임원/직원 보수 배율 (배)
         빈 dict — 데이터 없음
 
+    Capabilities:
+        - 해당 report 카테고리의 prebuild parquet → 종목별 단면 추출. None 값 / 범위 외 값
+          silent skip.
+
+    AIContext:
+        ``scanGovernance`` 의 5 sub-scanner 중 한 호출. AI agent 가 governance 지표 횡단 비교 시
+        본 함수의 dict 반환을 그대로 사용 가능.
+
+    Guide:
+        - 최신 연도 데이터가 minCount 미달 (예: 사외이사 1000 행 미만) 이면 빈 dict.
+
+    When:
+        ``scanGovernance`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy load → ``findLatestYear`` 최신 단면 → 종목별 group → 값 검증 후
+        dict 누적.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 sub-scanner 통합
+
     Raises
     ------
     polars.PolarsError
@@ -288,6 +360,30 @@ def scanAuditOpinion() -> dict[str, str]:
         종목코드 : 감사의견 문자열 (적정의견 | 한정의견 | 부적정의견 | 의견거절)
         빈 dict — 데이터 없음
 
+    Capabilities:
+        - 해당 report 카테고리의 prebuild parquet → 종목별 단면 추출. None 값 / 범위 외 값
+          silent skip.
+
+    AIContext:
+        ``scanGovernance`` 의 5 sub-scanner 중 한 호출. AI agent 가 governance 지표 횡단 비교 시
+        본 함수의 dict 반환을 그대로 사용 가능.
+
+    Guide:
+        - 최신 연도 데이터가 minCount 미달 (예: 사외이사 1000 행 미만) 이면 빈 dict.
+
+    When:
+        ``scanGovernance`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy load → ``findLatestYear`` 최신 단면 → 종목별 group → 값 검증 후
+        dict 누적.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 sub-scanner 통합
+
     Raises
     ------
     polars.PolarsError
@@ -345,6 +441,30 @@ def scanMinorityHolder() -> dict[str, float]:
     dict[str, float]
         종목코드 : 소액주주 지분율 (%)
         빈 dict — 데이터 없음
+
+    Capabilities:
+        - 해당 report 카테고리의 prebuild parquet → 종목별 단면 추출. None 값 / 범위 외 값
+          silent skip.
+
+    AIContext:
+        ``scanGovernance`` 의 5 sub-scanner 중 한 호출. AI agent 가 governance 지표 횡단 비교 시
+        본 함수의 dict 반환을 그대로 사용 가능.
+
+    Guide:
+        - 최신 연도 데이터가 minCount 미달 (예: 사외이사 1000 행 미만) 이면 빈 dict.
+
+    When:
+        ``scanGovernance`` 진행 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        ``scanParquets`` lazy load → ``findLatestYear`` 최신 단면 → 종목별 group → 값 검증 후
+        dict 누적.
+
+    Requires:
+        - 로컬 ``data/dart/scan/report/{apiType}.parquet`` (``buildReport`` 산출)
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 sub-scanner 통합
 
     Raises
     ------

@@ -319,6 +319,22 @@ class Scan:
             >>> df.select(["stockCode", "corpName", "contentLength"]).head()
             >>> # M6: cross-company × 대용량은 DuckDB OOC 위임
             >>> df = dartlab.scan.docsSections(year=2024, engine="duckdb", limit=10000)
+
+        Capabilities:
+            - market 별 (KR/US/JP) docsIndex.parquet lazy scan + 4 필터 (sectionTitle 부분 일치 /
+              year / stockCodes / onlyWithContent) + ``pickCrossScanEngine`` 위임. 룰 8 (limit) +
+              룰 9 (raw cross-scan 차단) 강제.
+
+        AIContext:
+            Agent 가 "X 섹션 가진 회사" cross-company 질문 시 본 메서드 dispatch. 본문이 아닌 메타
+            인덱스라 1~2 초 응답 (RSS <100 MB). 본문이 필요하면 :func:`Company.section` 으로 후속.
+
+        Requires:
+            - 로컬 ``data/{provider}/scan/docsIndex.parquet`` (``buildDocsIndex`` 산출)
+
+        SeeAlso:
+            - :meth:`iterDocsSections` — 본 메서드의 streaming pair (룰 10)
+            - :func:`dartlab.scan.builders.kr.docsIndex.buildDocsIndex` — source 빌더
         """
         from dartlab.core.dataLoader import _dataDir, _getDataRoot
         from dartlab.scan.io.cross import pickCrossScanEngine
@@ -382,6 +398,20 @@ class Scan:
         Example:
             >>> for row in dartlab.scan.iterDocsSections(sectionTitle="신용평가", year=2024):
             ...     print(row["stockCode"], row["corpName"])
+
+        Capabilities:
+            - :meth:`docsSections` 결과를 메모리에 모두 모으지 않고 row dict 로 한 개씩 yield.
+              대량 cross-company 처리에 메모리 안전.
+
+        AIContext:
+            Agent 가 streaming 처리 (예: 1000+ row 를 score 후 sort 만 필요) 시 본 메서드 사용.
+            limit 인자 없음 — 전체 순회.
+
+        Requires:
+            - :meth:`docsSections` 와 동일
+
+        SeeAlso:
+            - :meth:`docsSections` — 본 메서드의 DataFrame pair (룰 10)
         """
         df = self.docsSections(
             sectionTitle=sectionTitle,

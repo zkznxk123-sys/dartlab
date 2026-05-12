@@ -22,6 +22,28 @@ def scoreOwnership(pct: float | None) -> float:
     float
         지분율 점수 (점, 0~20)
 
+    Capabilities:
+        - 입력 값 임계 분기로 점수 / 등급 산출. None 입력은 중립 (중간값 또는 D 등급) 처리.
+
+    AIContext:
+        ``scanGovernance`` 가 5 축 점수 합산 + grade 계산 시 본 함수 사용. AI agent 가 governance
+        세부 항목 점수 인용 시 본 함수 결과를 그대로 사용.
+
+    Guide:
+        - 임계값 변경 시 본 함수 내부 분기만 수정 — scanGovernance 호출자는 무변경.
+
+    When:
+        ``scanGovernance`` 의 종목별 5 axis 점수 합산 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        입력값 None 가드 → 임계 분기 chain → 점수 또는 grade 반환.
+
+    Requires:
+        - 순수 분기 함수 — 외부 의존 없음.
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 축 통합 호출
+
     Raises
     ------
     없음 — 순수 분기 함수.
@@ -70,6 +92,28 @@ def scoreOutsideRatio(
     -------
     float
         사외이사 점수 (점, 0~25)
+
+    Capabilities:
+        - 입력 값 임계 분기로 점수 / 등급 산출. None 입력은 중립 (중간값 또는 D 등급) 처리.
+
+    AIContext:
+        ``scanGovernance`` 가 5 축 점수 합산 + grade 계산 시 본 함수 사용. AI agent 가 governance
+        세부 항목 점수 인용 시 본 함수 결과를 그대로 사용.
+
+    Guide:
+        - 임계값 변경 시 본 함수 내부 분기만 수정 — scanGovernance 호출자는 무변경.
+
+    When:
+        ``scanGovernance`` 의 종목별 5 axis 점수 합산 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        입력값 None 가드 → 임계 분기 chain → 점수 또는 grade 반환.
+
+    Requires:
+        - 순수 분기 함수 — 외부 의존 없음.
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 축 통합 호출
 
     Raises
     ------
@@ -122,6 +166,28 @@ def scorePayRatio(ratio: float | None) -> float:
     float
         보수 배율 점수 (점, 0~15)
 
+    Capabilities:
+        - 입력 값 임계 분기로 점수 / 등급 산출. None 입력은 중립 (중간값 또는 D 등급) 처리.
+
+    AIContext:
+        ``scanGovernance`` 가 5 축 점수 합산 + grade 계산 시 본 함수 사용. AI agent 가 governance
+        세부 항목 점수 인용 시 본 함수 결과를 그대로 사용.
+
+    Guide:
+        - 임계값 변경 시 본 함수 내부 분기만 수정 — scanGovernance 호출자는 무변경.
+
+    When:
+        ``scanGovernance`` 의 종목별 5 axis 점수 합산 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        입력값 None 가드 → 임계 분기 chain → 점수 또는 grade 반환.
+
+    Requires:
+        - 순수 분기 함수 — 외부 의존 없음.
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 축 통합 호출
+
     Raises
     ------
     없음 — 순수 분기 함수.
@@ -163,6 +229,28 @@ def scoreAudit(opinion: str | None) -> float:
     float
         감사의견 점수 (점, 0~25)
 
+    Capabilities:
+        - 입력 값 임계 분기로 점수 / 등급 산출. None 입력은 중립 (중간값 또는 D 등급) 처리.
+
+    AIContext:
+        ``scanGovernance`` 가 5 축 점수 합산 + grade 계산 시 본 함수 사용. AI agent 가 governance
+        세부 항목 점수 인용 시 본 함수 결과를 그대로 사용.
+
+    Guide:
+        - 임계값 변경 시 본 함수 내부 분기만 수정 — scanGovernance 호출자는 무변경.
+
+    When:
+        ``scanGovernance`` 의 종목별 5 axis 점수 합산 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        입력값 None 가드 → 임계 분기 chain → 점수 또는 grade 반환.
+
+    Requires:
+        - 순수 분기 함수 — 외부 의존 없음.
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 축 통합 호출
+
     Raises
     ------
     없음 — 순수 분기 함수.
@@ -198,6 +286,28 @@ def scoreMinority(pct: float | None) -> float:
     -------
     float
         소액주주 분산 점수 (점, 0~15)
+
+    Capabilities:
+        - 입력 값 임계 분기로 점수 / 등급 산출. None 입력은 중립 (중간값 또는 D 등급) 처리.
+
+    AIContext:
+        ``scanGovernance`` 가 5 축 점수 합산 + grade 계산 시 본 함수 사용. AI agent 가 governance
+        세부 항목 점수 인용 시 본 함수 결과를 그대로 사용.
+
+    Guide:
+        - 임계값 변경 시 본 함수 내부 분기만 수정 — scanGovernance 호출자는 무변경.
+
+    When:
+        ``scanGovernance`` 의 종목별 5 axis 점수 합산 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        입력값 None 가드 → 임계 분기 chain → 점수 또는 grade 반환.
+
+    Requires:
+        - 순수 분기 함수 — 외부 의존 없음.
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 축 통합 호출
 
     Raises
     ------
@@ -238,6 +348,28 @@ def grade(score: float) -> str:
     -------
     str
         등급 (A | B | C | D | E)
+
+    Capabilities:
+        - 입력 값 임계 분기로 점수 / 등급 산출. None 입력은 중립 (중간값 또는 D 등급) 처리.
+
+    AIContext:
+        ``scanGovernance`` 가 5 축 점수 합산 + grade 계산 시 본 함수 사용. AI agent 가 governance
+        세부 항목 점수 인용 시 본 함수 결과를 그대로 사용.
+
+    Guide:
+        - 임계값 변경 시 본 함수 내부 분기만 수정 — scanGovernance 호출자는 무변경.
+
+    When:
+        ``scanGovernance`` 의 종목별 5 axis 점수 합산 단계 안에서. 단독 호출은 prototype.
+
+    How:
+        입력값 None 가드 → 임계 분기 chain → 점수 또는 grade 반환.
+
+    Requires:
+        - 순수 분기 함수 — 외부 의존 없음.
+
+    SeeAlso:
+        - :func:`dartlab.scan.governance.scanGovernance` — 5 축 통합 호출
 
     Raises
     ------
