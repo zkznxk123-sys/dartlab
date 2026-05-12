@@ -376,6 +376,12 @@ class GatherCache:
     def clear(self) -> None:
         """전체 캐시 초기화 — live + stale 모두 비운다.
 
+        Capabilities: store + stale dict 모두 비움.
+        AIContext: 테스트 fixture / dartlab 종료 시 진입.
+        Guide: invalidate(stockCode) 와 다름 — 모든 종목 영향.
+        When: 테스트 setup/teardown / 메모리 회수 시.
+        How: lock → ``self._store.clear()`` + ``self._stale.clear()``.
+
         Returns
         -------
         None
@@ -385,9 +391,17 @@ class GatherCache:
         ------
         없음.
 
+        Requires
+        --------
+        ``self._lock`` + ``self._store`` + ``self._stale``.
+
         Example
         -------
         >>> cache.clear()
+
+        See Also
+        --------
+        invalidate : 종목 단위 제거.
         """
         with self._lock:
             self._store.clear()

@@ -1,24 +1,4 @@
 {
   "_note": "G+ 트랙 P-D 에서 docstring 채우며 축소",
-  "violations": [
-    "src/dartlab/gather/infra/cache.py::get",
-    "src/dartlab/gather/infra/cache.py::getStale",
-    "src/dartlab/gather/infra/cache.py::getTyped",
-    "src/dartlab/gather/infra/cache.py::invalidate",
-    "src/dartlab/gather/infra/cache.py::put",
-    "src/dartlab/gather/infra/cache.py::putTyped",
-    "src/dartlab/gather/infra/cache.py::size",
-    "src/dartlab/gather/infra/http.py::acquire",
-    "src/dartlab/gather/infra/http.py::get",
-    "src/dartlab/gather/infra/http.py::post",
-    "src/dartlab/gather/infra/http.py::runAsync",
-    "src/dartlab/gather/infra/resilience.py::isOpen",
-    "src/dartlab/gather/infra/resilience.py::record",
-    "src/dartlab/gather/infra/resilience.py::recordFailure",
-    "src/dartlab/gather/infra/resilience.py::recordSuccess",
-    "src/dartlab/gather/infra/resilience.py::reorder",
-    "src/dartlab/gather/infra/resilience.py::score",
-    "src/dartlab/gather/infra/resilience.py::score",
-    "src/dartlab/gather/infra/resilience.py::state"
-  ]
+  "violations": []
 }

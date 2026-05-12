@@ -418,6 +418,12 @@ class GatherHttpClient:
     ) -> httpx.Response:
         """POST 요청 -- rate limit + semaphore + 재시도 (async).
 
+        Capabilities: GET 동행 — POST 메서드 + form/json body 지원.
+        AIContext: KRX OpenAPI 같은 POST 전용 도메인 진입.
+        Guide: data (form) 또는 json 둘 중 하나만 사용 권장.
+        When: KRX bulk fetch / 인증 토큰 POST 등 시.
+        How: jitter → limiter → semaphore → httpx POST → 429/5xx retry.
+
         Parameters
         ----------
         url : str
@@ -443,9 +449,17 @@ class GatherHttpClient:
         SourceUnavailableError
             모든 재시도 실패 시.
 
+        Requires
+        --------
+        DOMAIN_POLICY 등록 + httpx.AsyncClient.
+
         Example
         -------
         >>> resp = await client.post("https://example.com/api", json={"k": "v"})
+
+        See Also
+        --------
+        get : GET 변형.
         """
         domain = urlparse(url).netloc
         policy = self._getPolicy(domain)
@@ -494,6 +508,12 @@ class GatherHttpClient:
     async def close(self) -> None:
         """HTTP 클라이언트 종료. 내부 httpx.AsyncClient의 커넥션 풀을 정리.
 
+        Capabilities: httpx.AsyncClient.aclose 위임 — connection pool 정리.
+        AIContext: GatherHttpClient 리소스 회수 — Gather.close 의 backend.
+        Guide: async — await 필요. context manager exit 위치 적절.
+        When: dartlab 종료 / 명시 cleanup 시.
+        How: ``await self._client.aclose()``.
+
         Returns
         -------
         None
@@ -503,8 +523,16 @@ class GatherHttpClient:
         없음
             aclose 는 graceful.
 
+        Requires
+        --------
+        ``self._client`` (httpx.AsyncClient) 가용.
+
         Example
         -------
         >>> await client.close()
+
+        See Also
+        --------
+        engine.Gather.close : 본 메서드 caller.
         """
         await self._client.aclose()
