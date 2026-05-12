@@ -71,6 +71,12 @@ def handlePrice(
 ) -> pl.DataFrame:
     """price axis dispatch — OHLCV 시계열 + 보조지표 옵션.
 
+    Capabilities: target → 종목/지수 자동 인식 → g.price 또는 _fetchNaverIndex.
+    AIContext: gather("price", ...) 의 본체 — handler dispatch 진입 첫 axis.
+    Guide: target 이 INDEX_SYMBOLS 매핑되면 시장 지수, 아니면 종목.
+    When: GatherEntry._run("price", target, ...) lookup 시.
+    How: target 분기 → g.price() 또는 _fetchNaverIndex() → DataFrame.
+
     Args:
         g: Gather 싱글턴 인스턴스.
         target: 종목코드/티커 또는 시장 지수 심볼.
@@ -124,6 +130,12 @@ def handleFlow(
 ) -> pl.DataFrame:
     """flow axis dispatch — 외국인/기관 수급.
 
+    Capabilities: target → g.flow → 일별 외국인/기관/개인 순매수 DataFrame.
+    AIContext: gather("flow", ...) 본체 — flow mixin 위임 + reshape.
+    Guide: KR 만. 외 시장 target 은 None / 빈 결과.
+    When: GatherEntry._run("flow", target, ...) lookup 시.
+    How: g.flow(target, market="KR") → list[dict] → pl.DataFrame.
+
     Args:
         g: Gather 싱글턴.
         target: 종목코드/티커.
@@ -154,6 +166,12 @@ def handleMacro(
     **kwargs: Any,
 ) -> pl.DataFrame:
     """macro axis dispatch — ECOS/FRED 거시지표.
+
+    Capabilities: target → market 자동 감지 → g.macro 위임.
+    AIContext: gather("macro", ...) 본체 — ECOS/FRED 라우팅 진입.
+    Guide: marketExplicit=False 시 target → _detectMarket 으로 KR/US 자동.
+    When: GatherEntry._run("macro", indicator|market, ...) lookup 시.
+    How: marketExplicit 분기 → g.macro(market, indicator) 또는 (indicator).
 
     Args:
         g: Gather 싱글턴.
@@ -195,6 +213,12 @@ def handleNews(
 ) -> pl.DataFrame:
     """news axis dispatch — Google News RSS.
 
+    Capabilities: target query → g.news → 뉴스 DataFrame (title/link/published).
+    AIContext: gather("news", ...) 본체 — RSS 결과 untrusted external 마커.
+    Guide: market KR/US 검색 지역. days kwarg 로 기간 조정.
+    When: GatherEntry._run("news", query, ...) lookup 시.
+    How: g.news(query, market=market, days=days) → pl.DataFrame.
+
     Args:
         g: Gather 싱글턴.
         target: 검색어 (기업명/키워드).
@@ -227,6 +251,12 @@ def handleSector(
     **kwargs: Any,  # noqa: ARG001
 ) -> pl.DataFrame:
     """sector axis dispatch — 업종 분류 (SectorInfo → DataFrame).
+
+    Capabilities: target → g.sector → SectorInfo → 1-row DataFrame.
+    AIContext: gather("sector", ...) 본체 — peer matching / industry 분석 진입.
+    Guide: 단일 SectorInfo 라 DataFrame 1행. None 이면 ValueError.
+    When: GatherEntry._run("sector", stockCode, ...) lookup 시.
+    How: g.sector(target, market=market) → SectorInfo → DataFrame.
 
     Args:
         g: Gather 싱글턴.
@@ -271,6 +301,12 @@ def handleInsider(
     **kwargs: Any,  # noqa: ARG001
 ) -> pl.DataFrame:
     """insider axis dispatch — 내부자 거래 (list → DataFrame).
+
+    Capabilities: target → g.insiderTrading → InsiderTrade list → DataFrame.
+    AIContext: gather("insider", ...) 본체 — informed trading 분석 진입.
+    Guide: KR 의 경우 DART_API_KEY 필요.
+    When: GatherEntry._run("insider", stockCode, ...) lookup 시.
+    How: g.insiderTrading(target, market) → list[InsiderTrade] → DataFrame.
 
     Args:
         g: Gather 싱글턴.
@@ -317,6 +353,12 @@ def handleOwnership(
 ) -> pl.DataFrame:
     """ownership axis dispatch — 기관/외국인 지분 (list → DataFrame).
 
+    Capabilities: target → g.ownership → InstitutionOwnership list → DataFrame.
+    AIContext: gather("ownership", ...) 본체 — 기관/외국인 보유 분포 진입.
+    Guide: KR/US 모두 지원. 빈 list 면 빈 DataFrame.
+    When: GatherEntry._run("ownership", stockCode, ...) lookup 시.
+    How: g.ownership(target, market) → list[InstitutionOwnership] → DataFrame.
+
     Args:
         g: Gather 싱글턴.
         target: 종목코드.
@@ -361,6 +403,12 @@ def handlePeers(
 ) -> pl.DataFrame:
     """peers axis dispatch — 동종업종 피어 종목.
 
+    Capabilities: target → g.industryPeers → 같은 업종 종목 + 시총 DataFrame.
+    AIContext: gather("peers", ...) 본체 — peer-relative 비교 진입.
+    Guide: KR 만 (KRX 카테고리). sector() 가 먼저 정상 결과 필요.
+    When: GatherEntry._run("peers", stockCode, ...) lookup 시.
+    How: g.industryPeers(target) → list[dict] → DataFrame.
+
     Args:
         g: Gather 싱글턴.
         target: 종목코드.
@@ -394,6 +442,12 @@ def handleKrx(
     **kwargs: Any,
 ) -> pl.DataFrame:
     """krx axis dispatch — KOSPI/KOSDAQ 전종목 wide pivot.
+
+    Capabilities: target/start/end → gatherKrx → 전종목 wide DataFrame.
+    AIContext: gather("krx", target, ...) 본체 — KRX bulk 진입.
+    Guide: legacyDate alias (date= → start=) 호환. apiKey None 시 HF fallback.
+    When: GatherEntry._run("krx", target|"close", ...) lookup 시.
+    How: krx.krxApi.gatherKrx(target, start, end, market) 위임.
 
     legacyDate alias (date= → start=) 호환 처리.
 
@@ -443,6 +497,12 @@ def handleKrxIndex(
     **kwargs: Any,
 ) -> pl.DataFrame:
     """krxIndex axis dispatch — 시장군별 전체 지수 패키지.
+
+    Capabilities: target/market → gatherKrxIndex → 지수 wide DataFrame.
+    AIContext: gather("krxIndex", ...) 본체 — KOSPI/KOSDAQ 지수 분석 진입.
+    Guide: indexMarket alias (market= → 지수 그룹). apiKey None 시 HF fallback.
+    When: GatherEntry._run("krxIndex", target, ...) lookup 시.
+    How: krx.krxIndex.gatherKrxIndex(target, market, start, end) 위임.
 
     indexMarket 인자가 entry 의 market="KR" 과 별개 — KOSPI 기본.
 
@@ -529,6 +589,12 @@ def handleDartDoc(
     **kwargs: Any,  # noqa: ARG001
 ) -> pl.DataFrame:
     """dartDoc axis dispatch — DART 공시 viewer 원문 fetch.
+
+    Capabilities: rcept_no → viewer.fetch → 공시 본문 DataFrame (section_order/title/text).
+    AIContext: gather("dartDoc", rceptNo) 본체 — untrusted external 본문 마커 대상.
+    Guide: API key 불필요 (무인증 viewer). target 14자리 rcept_no.
+    When: GatherEntry._run("dartDoc", rceptNo) lookup 시.
+    How: dart.viewer.fetch(rceptNo) → pl.DataFrame (sub-doc 목차 + 텍스트).
 
     Args:
         g: 무시 (viewer.fetch 직접 호출).

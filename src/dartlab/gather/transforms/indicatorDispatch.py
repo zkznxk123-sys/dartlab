@@ -180,6 +180,10 @@ def addIndicators(
         - 단일 종목이라 group_by 불필요 — close/high/low/volume 직접 NumPy 배열로 함수 호출
         - 입력 OHLCV 컬럼명은 quant 표준 (open/high/low/close/volume)
 
+    Guide: indicators=True 시 모든 표준 지표 일괄. 일부만이면 list.
+    When: gather("price", code, indicators=...) 호출 또는 quant.screen 처리 시.
+    How: 컬럼별 vsma/vema/vrsi/... 호출 후 with_columns 로 wide expand.
+
     Args:
         ohlcvDf: 단일 종목 OHLCV (날짜 asc 정렬 가정).
         indicators: True (모두) 또는 지표 이름 리스트.
@@ -238,6 +242,12 @@ def computeIndicator(
     precision: int | None = 2,
 ) -> pl.Series:
     """전종목 group 에서 indicator 계산 → date 순 Series 반환 (longDf 와 같은 길이).
+
+    Capabilities: target → _resolveIndicator → over(stockCode) + map_groups SIMD.
+    AIContext: gatherKrx 의 target 분기 — 전종목 동시 indicator 계산 진입.
+    Guide: longDf 는 normalize 된 표준 컬럼 (close/open/...) 필수.
+    When: gather("krx", "rsi14", ...) 호출 시 long DataFrame 처리.
+    How: _resolveIndicator → over(codeCol) + map_groups → Series.
 
     longDf 는 이미 quant 표준 컬럼명 (close/open/high/...) 으로 normalize 되어야 함.
     (gatherKrx 가 raw KRX 컬럼 → 표준 컬럼 변환 후 호출)

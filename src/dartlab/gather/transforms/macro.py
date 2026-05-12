@@ -23,6 +23,12 @@ _CACHE_DIR = Path.home() / ".dartlab" / "cache" / "macro"
 def addChangeRate(df: pl.DataFrame, *, valueName: str = "value") -> pl.DataFrame:
     """시계열 DataFrame에 변화율 컬럼 추가.
 
+    Capabilities: (date, value) → ΔPercent / Δlog / Δabs 3 변화율 컬럼 추가.
+    AIContext: macro 시계열 분석 baseline — regime/trend 진입.
+    Guide: 입력 (date asc) 정렬 가정. value 컬럼 missing 시 raise.
+    When: macro indicator 시계열 후처리 (regime 변화 감지) 시.
+    How: pl.col(valueName).pct_change / diff → with_columns 추가.
+
     Parameters
     ----------
     df : pl.DataFrame
@@ -89,6 +95,12 @@ def addChangeRate(df: pl.DataFrame, *, valueName: str = "value") -> pl.DataFrame
 def resampleToQuarterly(df: pl.DataFrame, *, valueName: str = "value", method: str = "last") -> pl.DataFrame:
     """시계열을 분기별로 리샘플링.
 
+    Capabilities: 일/월별 시계열 → 분기 (last/mean/first) 리샘플.
+    AIContext: macro indicator 와 분기 재무 align 진입 (alignToFinancialPeriods).
+    Guide: method "last"/"mean"/"first" 셋. 다른 값 raise.
+    When: macro 변수와 분기 재무 결합 분석 (credit/regime) 시.
+    How: pl.group_by_dynamic("1q") → method aggregation.
+
     Parameters
     ----------
     df : pl.DataFrame
@@ -130,6 +142,12 @@ def resampleToQuarterly(df: pl.DataFrame, *, valueName: str = "value", method: s
 
 def resampleToAnnual(df: pl.DataFrame, *, valueName: str = "value", method: str = "last") -> pl.DataFrame:
     """시계열을 연간으로 리샘플링.
+
+    Capabilities: 시계열 → 연간 (last/mean/first/sum) 리샘플.
+    AIContext: 연간 macro 변수와 EDGAR 10-K 연결 진입.
+    Guide: method "last"/"mean"/"first"/"sum" 4 가지.
+    When: 연간 매출/이익 vs 연간 macro indicator 분석 시.
+    How: pl.group_by_dynamic("1y") → method aggregation.
 
     Parameters
     ----------
@@ -176,6 +194,12 @@ def resampleToAnnual(df: pl.DataFrame, *, valueName: str = "value", method: str 
 def saveMacroParquet(indicatorId: str, df: pl.DataFrame, *, source: str = "ecos") -> Path:
     """거시지표 시계열을 Parquet으로 영구 저장.
 
+    Capabilities: indicatorId + source (ecos/fred) → 표준 경로 Parquet 영구 저장.
+    AIContext: macro indicator 캐시 SSOT — 후속 loadMacroParquet hit.
+    Guide: source "ecos"/"fred" 분기 → dataDir 하위 경로. 부재 시 mkdir.
+    When: ECOS/FRED fetch 완료 후 영구 캐시 저장 시.
+    How: dataDir / macro / source / indicatorId.parquet → df.write_parquet.
+
     Parameters
     ----------
     indicatorId : str
@@ -209,6 +233,12 @@ def saveMacroParquet(indicatorId: str, df: pl.DataFrame, *, source: str = "ecos"
 
 def loadMacroParquet(indicatorId: str, *, source: str = "ecos") -> pl.DataFrame | None:
     """Parquet 영구 캐시에서 거시지표 로드.
+
+    Capabilities: indicatorId + source → 영구 Parquet read → DataFrame.
+    AIContext: ECOS/FRED 재호출 회피 — local SSOT 직접 read.
+    Guide: 파일 부재 시 None (cache miss). 호출자 측 fallback (fetch + save).
+    When: macro indicator 시계열 필요 시 첫 시도 (network 호출 전).
+    How: dataDir / macro / source / indicatorId.parquet → pl.read_parquet.
 
     Parameters
     ----------
@@ -253,6 +283,12 @@ def enrichAndCache(
     valueName: str = "value",
 ) -> pl.DataFrame:
     """변화율 추가 + Parquet 저장을 한 번에 처리.
+
+    Capabilities: addChangeRate + saveMacroParquet 2 단계 일괄.
+    AIContext: ECOS/FRED fetch 직후 표준 전처리 + 캐시 → 후속 hit 가속.
+    Guide: 영구 캐시 라 부수 효과 (디스크 write). 캐시 안 원하면 addChangeRate 만.
+    When: 새 macro indicator fetch 직후 enrich + 저장 일괄 필요 시.
+    How: addChangeRate(df) → saveMacroParquet(indicatorId, enriched, source).
 
     ``addChangeRate`` 로 변화율 컬럼을 추가한 뒤
     ``saveMacroParquet`` 로 영구 캐시에 저장한다.
@@ -302,6 +338,12 @@ def alignToFinancialPeriods(
     valueName: str = "value",
 ) -> pl.DataFrame:
     """거시지표 시계열을 재무 기간에 맞춰 정렬.
+
+    Capabilities: macro indicator → 재무 분기/연간 period 매핑 (last 값).
+    AIContext: 분기 EDGAR 10-Q 와 macro 환율/금리 결합 분석 진입.
+    Guide: periods 형식 "2024A"/"2024Q3" — 분기 또는 연간.
+    When: credit/regime 분석 시 분기 재무와 macro 변수 align 필요 시.
+    How: period 파싱 → 해당 기간 last 값 lookup → DataFrame 매칭.
 
     재무 기간 "2024A" → 2024년 기말값으로 매핑.
     재무 기간 "2024Q3" → 해당 분기 기말값으로 매핑.

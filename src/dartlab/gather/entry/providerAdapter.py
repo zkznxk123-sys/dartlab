@@ -19,6 +19,12 @@ class _GatherProviderAdapter:
     def news(self, query: str, *, market: str = "KR", days: int = 30) -> Any | None:
         """뉴스 수집 — gather.getDefaultGather().news 위임.
 
+        Capabilities: GatherProvider Protocol — gather 본체 직접 의존 회피.
+        AIContext: providers/edgar/dart 측이 gather/listing 직접 import 안 하도록 격리.
+        Guide: 위임만 — 본문은 mixins.news.news 가 수행.
+        When: provider 코드가 GatherProvider 경유 뉴스 호출 시.
+        How: getDefaultGather().news(query, market, days) 직접 forward.
+
         Args:
             query: 검색어 (기업명/티커).
             market: 시장 코드 (``"KR"`` | ``"US"``).
@@ -38,6 +44,12 @@ class _GatherProviderAdapter:
 
     def entry(self, axis: str | None = None, stockCode: str | None = None, **kwargs: Any) -> Any:
         """4축 entry 위임 — GatherEntry() callable 호출.
+
+        Capabilities: GatherProvider Protocol — provider 측 entry 위임 진입.
+        AIContext: providers 가 GatherEntry 본체 직접 의존 안 하도록 격리.
+        Guide: axis=None 가이드 / 스톡코드 분기 / **kwargs forward.
+        When: provider 코드가 GatherProvider 경유 axis 진입 시.
+        How: GatherEntry() 인스턴스 생성 → axis/stockCode/**kwargs callable.
 
         Args:
             axis: 축 이름 ("price"/"flow"/"macro"/"news" 등). None이면 가이드.
@@ -70,6 +82,12 @@ _defaultGatherLock: threading.Lock = threading.Lock()
 
 def getDefaultGather():
     """Gather 싱글턴 반환 — 같은 세션 내 캐시/HTTP 클라이언트 재사용.
+
+    Capabilities: module-level singleton + double-checked locking thread-safe.
+    AIContext: gather mixin/source 전체의 단일 진입점 — cache/HTTP 재사용 핵심.
+    Guide: 캐시/HTTP 공유로 같은 세션 호출 시 성능 최적. 새 instance 필요하면 Gather() 직접.
+    When: dartlab.gather.* 호출 시 lazy 첫 진입 + 후속 캐시 hit.
+    How: _defaultGather is None 분기 + with _defaultGatherLock → Gather() 인스턴스.
 
     Thread-safe — double-checked locking 으로 멀티스레드 환경에서도 단일 인스턴스
     보장. lock 미보유 fast-path 가 정상 케이스 (이미 초기화) latency 무시 가능.
