@@ -184,3 +184,36 @@ cross-company query 는 raw parquet lazy scan 금지. 모든 provider 가 `data/
 
 상세는 `operation.code` "11 룰" 섹션 참조.
 
+## Skill OS 그래프 산출물 6 종
+
+`scripts/build/generateSkills.py` 가 자동 산출 (직접 편집 금지):
+
+| 산출물 | 대상 | 결 |
+|---|---|---|
+| `src/dartlab/skills/index.json` | 호환 alias (= agent.json) | 5 인덱스 + body preview 1500 자 |
+| `src/dartlab/skills/agent.json` | 내부 AI (dartlab.ask) | frontmatter + body preview |
+| `src/dartlab/skills/mcp.json` | 외부 LLM (MCP first hop) | < 300 토큰 + nextSkills max 5 |
+| `src/dartlab/skills/web.json` | 사람 (랜딩) | humanIntro + visualRefs + bodyHuman directive 분리 |
+| `src/dartlab/skills/pyodide.json` | 브라우저 Pyodide | 경량 lookup |
+| `src/dartlab/skills/graph.json` | 그래프 시각화 (`/skills/graph`) | nodes 257 + edges 1337 + cycles + orphans + unreachable |
+
+graph 산출은 `dartlab.skills.graph.buildSkillGraph(specs)` 의 직렬화. 진단 결과 (cycle/orphan/unreachable) 는 `dartlab.skills.graphLint` 가 `listSkills` 1 회 warn-only 로 노출 (env `DARTLAB_SKILL_GRAPH_LINT=0` 으로 silence). phase 1 (warn) → phase 2 (신규/수정 차단, env `DARTLAB_SKILL_GRAPH_LINT_STRICT=1`) → phase 3 (전수 차단).
+
+본문 directive 마커 (3 주체 분기):
+
+```markdown
+:::for-llm
+외부 LLM 용 짧은 도입. < 200 토큰.
+:::end
+
+:::for-agent
+내부 AI 엔진 용 절차·예시.
+:::end
+
+:::for-human
+사람 용 상세 설명·맥락·시각자료.
+:::end
+```
+
+마커 없는 본문은 3 주체 모두에게 동일 노출 (fallback). 상세: `operation.code` "frontmatter 8 신규 필드" 섹션 + [.claude/skills/skill-os-add/SKILL.md](file://./.claude/skills/skill-os-add/SKILL.md).
+

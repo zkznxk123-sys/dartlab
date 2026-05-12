@@ -97,3 +97,67 @@ SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpd
 
 기존 skill 일괄 audit 은 `scripts/dev/audit_trigger_phrases.py` (idempotent, dry-run 지원).
 
+## 자동화 CLI — 1 명령 cascading
+
+신규 엔진·axis·recipe 추가는 수동 5 단계 대신 1 명령 cascading CLI 우선:
+
+```bash
+# 새 엔진 (engines.{name})
+uv run python -X utf8 scripts/dev/addEngine.py myEngine \
+    --title "My Engine" \
+    --purpose "myEngine 엔진은 ..."
+
+# 새 axis · recipe 는 동일 패턴 (확장 예정)
+```
+
+`addEngine.py` 가 자동 산출:
+
+- `src/dartlab/{name}/__init__.py` 스켈레톤 + `__all__`
+- `src/dartlab/skills/specs/engines/{name}/SKILL.md` frontmatter 5 필수 + 3 강제 섹션 placeholder
+- `validateSkills.py` + `generateSkills.py` 자동 호출
+
+운영자 수동 잔여 (CLI 가 안내 출력):
+
+1. `src/dartlab/__init__.py` re-export
+2. `pyproject.toml [tool.importlinter]` contract 추가
+3. `operation.architecture` L2 계층 표 1 줄
+4. SKILL.md 3 강제 섹션 본문 채우기
+
+`--dry-run` 으로 미리보기. axis / recipe / operation / start / runtime sub-spec 은 수동 4 단계 절차 ([skill-os-add](file://./.claude/skills/skill-os-add/SKILL.md)) 따름.
+
+## 신규 frontmatter 필드 8 종 (Skill Graph 모델)
+
+`SkillSpec` 에 다음 필드 추가됨 (모두 default 값, backward-compatible):
+
+| 필드 | 타입 | 의미 |
+|---|---|---|
+| `predecessors` | `list[str]` | 본 skill 호출 전 거쳐야 할 skill id (역방향 successors) |
+| `successors` | `list[str]` | 본 skill 후 자연 호출 후속 skill id (linkedSkills 의 의미 분리) |
+| `audiences` | `dict[str, str]` | `{"llm": "...", "agent": "...", "human": "..."}` 주체별 한 줄 도입 |
+| `isLeafNode` | `bool` | true 면 의도적 leaf — orphan lint 면제 |
+| `entryHint` | `bool` | true 면 외부 LLM 첫 진입 후보 — MCP `start.*` 외 보강 |
+| `graphTier` | `str` | L0~L4 계층 hint — 그래프 클러스터링 색상 |
+| `cluster` | `str` | 자동 도출 외 수동 그룹핑 (e.g. `gather.history`) |
+| `humanIntro` | `str` | 사람용 본문 도입 1~2 문단 (랜딩 페이지 상단 별도 영역) |
+
+작성 가이드:
+
+- `successors[]` · `predecessors[]` 는 *recipe* 의 linkedSkills 와 다르다 — recipe step 흐름이 아닌 일반 skill 간 후속 관계.
+- `audiences[]` 3 키는 본문 directive (`:::for-llm` · `:::for-agent` · `:::for-human` · `:::end`) 와 함께 3 인덱스 분기 (mcp.json · agent.json · web.json) 에 사용.
+- `isLeafNode: true` 는 자연스러운 종점 (e.g. `engines.gather.collect` 단순 호출) 만 — orphan 분류와 구분.
+
+## 3 주체 인덱스 산출물
+
+`scripts/build/generateSkills.py` 가 6 산출:
+
+| 산출물 | 대상 | 크기 (skill 당) |
+|---|---|---|
+| `index.json` | 호환 alias (= agent.json) | ~500 토큰 |
+| `agent.json` | 내부 AI 엔진 (dartlab.ask) | ~500 토큰 |
+| `mcp.json` | 외부 LLM (MCP first hop) | < 300 토큰 |
+| `web.json` | 사람 (랜딩) | ~1500 토큰 + humanIntro |
+| `pyodide.json` | 브라우저 Pyodide | ~400 토큰 |
+| `graph.json` | 그래프 시각화 (`/skills/graph`) | nodes + edges + cycles + orphans |
+
+직접 편집 금지 — `scripts/build/generateSkills.py` 가 SSOT. 별도 commit "정리: 동기화" ([commit-self-change](file://./.claude/skills/commit-self-change/SKILL.md)).
+
