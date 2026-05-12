@@ -562,6 +562,15 @@ def getEntry(indicatorId: str) -> CatalogEntry | None:
     -------
     CatalogEntry | None
         매칭된 카탈로그 엔트리. 없으면 None.
+
+    Raises
+    ------
+    없음
+        미존재 시 None 반환.
+
+    Example
+    -------
+    >>> e = getEntry("GDP")
     """
     _build()
     canonical = resolveId(indicatorId)
@@ -576,7 +585,27 @@ def getEntry(indicatorId: str) -> CatalogEntry | None:
 
 
 def resolveId(indicatorId: str | None) -> str | None:
-    """사용자/AI 표기 지표명을 ECOS 정식 ID 로 정규화한다."""
+    """사용자/AI 표기 지표명을 ECOS 정식 ID 로 정규화한다.
+
+    Parameters
+    ----------
+    indicatorId : str | None
+        사용자/AI 가 입력한 지표명 또는 alias.
+
+    Returns
+    -------
+    str | None
+        정규화된 ECOS 카탈로그 ID. None/빈 문자열 입력은 그대로 반환.
+
+    Raises
+    ------
+    없음
+        매칭 실패 시 원본 그대로 반환 (대문자/공백 제거 후).
+
+    Example
+    -------
+    >>> resolveId("기준금리")
+    """
     if indicatorId is None:
         return None
     key = str(indicatorId).strip()
@@ -593,6 +622,14 @@ def getGroups() -> list[str]:
     -------
     list[str]
         등록된 그룹명 리스트 (예: ["국민계정", "물가", "금리", ...]).
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> getGroups()
     """
     _build()
     return list(_groups.keys())
@@ -610,6 +647,15 @@ def getGroup(name: str) -> list[CatalogEntry]:
     -------
     list[CatalogEntry]
         해당 그룹의 카탈로그 엔트리 리스트. 그룹이 없으면 빈 리스트.
+
+    Raises
+    ------
+    없음
+        미존재 그룹은 빈 리스트.
+
+    Example
+    -------
+    >>> entries = getGroup("물가")
     """
     _build()
     return _groups.get(name, [])
@@ -627,6 +673,15 @@ def getGroupIds(name: str) -> list[str]:
     -------
     list[str]
         해당 그룹의 지표 ID 리스트 (예: ["BASE_RATE", "TREASURY_3Y", ...]).
+
+    Raises
+    ------
+    없음
+        미존재 그룹은 빈 리스트.
+
+    Example
+    -------
+    >>> ids = getGroupIds("금리")
     """
     return [e.id for e in getGroup(name)]
 
@@ -638,6 +693,14 @@ def getAllIds() -> list[str]:
     -------
     list[str]
         카탈로그에 등록된 모든 지표 ID 리스트.
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> ids = getAllIds()
     """
     _build()
     return list(_entries.keys())
@@ -657,6 +720,15 @@ def search(keyword: str, *, limit: int | None = None) -> list[CatalogEntry]:
     -------
     list[CatalogEntry]
         매칭된 카탈로그 엔트리 리스트.
+
+    Raises
+    ------
+    없음
+        매칭 0건은 빈 리스트.
+
+    Example
+    -------
+    >>> hits = search("물가", limit=5)
     """
     _build()
     kw = keyword.lower()
@@ -682,6 +754,15 @@ def toDataframe(group: str | None = None) -> pl.DataFrame:
         컬럼: ``id`` (Utf8) — 지표 ID, ``label`` (Utf8) — 한글 라벨,
         ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기 코드,
         ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
+
+    Raises
+    ------
+    없음
+        미존재 그룹은 빈 DataFrame.
+
+    Example
+    -------
+    >>> df = toDataframe(group="물가")
     """
     _build()
     entries = getGroup(group) if group else list(_entries.values())

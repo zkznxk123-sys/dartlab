@@ -64,6 +64,14 @@ class EcosClient:
 
         Returns:
             row 딕셔너리 리스트.
+
+        Raises:
+            EcosError: HTTP 4xx 응답 또는 최대 재시도 초과.
+            RateLimitError: 429 rate limit (재시도 후에도 회복 안 됨).
+
+        Example:
+            >>> c = EcosClient()
+            >>> rows = c.get("722Y001", "D", "20240101", "20241231", "0101000")
         """
         # URL 경로 방식: /서비스/키/json/kr/시작/종료/테이블/주기/시작일/종료일/항목
         url = (
@@ -109,6 +117,16 @@ class EcosClient:
         Returns
         -------
         None
+
+        Raises
+        ------
+        없음
+            httpx 세션 close 는 graceful.
+
+        Example
+        -------
+        >>> c = EcosClient()
+        >>> c.close()
         """
         self._session.close()
 

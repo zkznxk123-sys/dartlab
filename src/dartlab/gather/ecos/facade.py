@@ -57,6 +57,16 @@ class Ecos:
         pl.DataFrame
             컬럼: ``date`` (Date) — 관측일, ``value`` (Float64) — 지표값.
             enrich=True 시 변화율 컬럼 추가.
+
+        Raises
+        ------
+        SeriesNotFoundError
+            카탈로그에 없는 ``indicatorId``.
+
+        Example
+        -------
+        >>> e = Ecos()
+        >>> df = e.series("CPI", start="2020-01-01")
         """
         return fetchSeries(self._client, indicatorId, start=start, end=end, enrich=enrich)
 
@@ -83,6 +93,16 @@ class Ecos:
         pl.DataFrame
             컬럼: ``date`` (Date) — 관측일, 각 지표 ID (Float64) — 지표값.
             주기가 다른 지표는 outer join 후 forward-fill.
+
+        Raises
+        ------
+        SeriesNotFoundError
+            ``indicatorIds`` 중 하나라도 카탈로그에 없을 때.
+
+        Example
+        -------
+        >>> e = Ecos()
+        >>> df = e.compare(["CPI", "BASE_RATE"])
         """
         return fetchMulti(self._client, indicatorIds, start=start, end=end)
 
@@ -102,6 +122,16 @@ class Ecos:
             컬럼: ``id`` (Utf8) — 지표 ID, ``label`` (Utf8) — 한글 라벨,
             ``group`` (Utf8) — 그룹명, ``frequency`` (Utf8) — 주기 코드,
             ``unit`` (Utf8) — 단위, ``description`` (Utf8) — 설명.
+
+        Raises
+        ------
+        없음
+            존재하지 않는 그룹명은 빈 DataFrame.
+
+        Example
+        -------
+        >>> e = Ecos()
+        >>> cat = e.catalog(group="물가")
         """
         return _catalog.toDataframe(group)
 
@@ -120,6 +150,16 @@ class Ecos:
         list[CatalogEntry]
             매칭된 카탈로그 엔트리 리스트. 각 엔트리에
             id, label, group, frequency, unit, description 포함.
+
+        Raises
+        ------
+        없음
+            매칭 0건은 빈 리스트.
+
+        Example
+        -------
+        >>> e = Ecos()
+        >>> hits = e.search("물가", limit=5)
         """
         return _catalog.search(keyword, limit=limit)
 
@@ -145,6 +185,11 @@ class Ecos:
         ------
         ValueError
             존재하지 않는 그룹명.
+
+        Example
+        -------
+        >>> e = Ecos()
+        >>> df = e.group("물가")
         """
         ids = _catalog.getGroupIds(name)
         if not ids:
@@ -160,6 +205,16 @@ class Ecos:
         Returns
         -------
         None
+
+        Raises
+        ------
+        없음
+            세션이 이미 종료된 경우에도 graceful.
+
+        Example
+        -------
+        >>> e = Ecos()
+        >>> e.close()
         """
         self._client.close()
 

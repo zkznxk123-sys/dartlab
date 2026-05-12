@@ -260,6 +260,15 @@ def fetchMulti(
     pl.DataFrame
         컬럼: ``date`` (Date) — 관측일, 각 지표 ID (Float64) — 지표값.
         빈 리스트 입력 시 빈 DataFrame.
+
+    Raises
+    ------
+    SeriesNotFoundError
+        indicatorIds 중 하나라도 카탈로그에 없을 때.
+
+    Example
+    -------
+    >>> df = fetchMulti(client, ["CPI", "BASE_RATE"], start="2020-01-01")
     """
     if not indicatorIds:
         return pl.DataFrame()
