@@ -132,7 +132,7 @@ def findSimilarPatterns(
     queryStart: int,
     *,
     window: int = 30,
-    topK: int = 5,
+    limit: int = 5,
     excludeFraction: float = 0.5,
 ) -> dict:
     """현재 (또는 지정) 시점의 패턴과 가장 유사한 과거 시점 top-K.
@@ -141,14 +141,14 @@ def findSimilarPatterns(
         series: 전체 시계열.
         queryStart: 쿼리 시작 index. ``len(series) - window`` = 최근 패턴.
         window: 부분수열 길이.
-        topK: 상위 유사도 개수.
+        limit: 상위 유사도 개수.
         excludeFraction: 자기 근방 trivial 제외.
 
     Returns:
         dict
             queryRange : tuple[int, int]
             window : int
-            topK : list[tuple[int, float]] — (start_idx, distance) 거리 오름차순
+            limit : list[tuple[int, float]] — (start_idx, distance) 거리 오름차순
             interpretation : str
     """
     series = np.asarray(series, dtype=np.float64)
@@ -166,13 +166,13 @@ def findSimilarPatterns(
     hi = min(len(d), queryStart + excl + 1)
     d[lo:hi] = np.inf
 
-    top_idx = np.argsort(d)[:topK]
+    top_idx = np.argsort(d)[:limit]
     top_pairs = [(int(i), round(float(d[i]), 4)) for i in top_idx if np.isfinite(d[i])]
 
     return {
         "queryRange": (int(queryStart), int(queryStart + window)),
         "window": window,
-        "topK": top_pairs,
+        "limit": top_pairs,
         "interpretation": (
             f"쿼리 t={queryStart}~{queryStart + window} 와 가장 유사한 과거 패턴 top-{len(top_pairs)}: {top_pairs[:3]}"
         ),

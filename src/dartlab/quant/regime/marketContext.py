@@ -196,7 +196,7 @@ def calcMarketContext(
     stockCode: str,
     *,
     market: str = "auto",
-    lookbackDays: int = 252,
+    lookback: int = 252,
     macroVars: list[str] | None = None,
     **kwargs,
 ) -> dict:
@@ -211,7 +211,7 @@ def calcMarketContext(
         종목코드 또는 ticker.
     market : str
         "KR" / "US" / "auto".
-    lookbackDays : int
+    lookback : int
         회귀 윈도우 (일). 기본 252 (1 거래년).
     macroVars : list[str] | None
         거시 변수 명시. None 이면 KR 기본 ``("USDKRW", "BASE_RATE", "CPI", "M2")`` /
@@ -222,7 +222,7 @@ def calcMarketContext(
     Returns
     -------
     dict
-        stockCode, market, lookbackDays, dateRef, lastClose,
+        stockCode, market, lookback, dateRef, lastClose,
         marketBeta, marketAlpha (annualized), marketR2, nObsCAPM,
         usdkrwBeta / baseRateBeta / cpiBeta / m2Beta (KR) 또는
         fedFundsBeta / dgs10Beta / oilBeta / cpiBeta (US) + 각 _r2,
@@ -239,7 +239,7 @@ def calcMarketContext(
     ---
     >>> import dartlab
     >>> dartlab.quant("marketContext", "005930")
-    >>> dartlab.quant("시장맥락", "035420", lookbackDays=504)
+    >>> dartlab.quant("시장맥락", "035420", lookback=504)
     >>> dartlab.quant("marketContext", "AAPL", macroVars=["FEDFUNDS", "DGS10"])
 
     Verified
@@ -279,19 +279,19 @@ def calcMarketContext(
             "nObs": int(len(close)) if close is not None else 0,
         }
 
-    n_use = min(int(lookbackDays), len(close))
+    n_use = min(int(lookback), len(close))
     last_close = float(close[-1])
     last_date = str(dates[-1]) if dates else None
     start_date = str(dates[-n_use]) if dates else None
     end_date = last_date
 
-    # 종목 DataFrame 슬라이스 (lookbackDays)
+    # 종목 DataFrame 슬라이스 (lookback)
     stockDf = ohlcv.tail(n_use).select(["date", "close"]).sort("date")
 
     result: dict[str, Any] = {
         "stockCode": stockCode,
         "market": market,
-        "lookbackDays": int(n_use),
+        "lookback": int(n_use),
         "dateRef": last_date,
         "lastClose": round(last_close, 4),
     }

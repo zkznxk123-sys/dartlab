@@ -408,7 +408,7 @@ def contextForQuestion(question: str, stockCode: str | None = None) -> dict[str,
     }
 
 
-def queryAnalysisGraph(query: str, *, kind: str | None = None, topK: int = 10) -> list[dict[str, Any]]:
+def queryAnalysisGraph(query: str, *, kind: str | None = None, limit: int = 10) -> list[dict[str, Any]]:
     """Simple graph search over node labels, ids, contract ids, and sources."""
     q = query.lower().strip()
     if not q:
@@ -449,7 +449,7 @@ def queryAnalysisGraph(query: str, *, kind: str | None = None, topK: int = 10) -
                     "source": process.get("questionType"),
                 }
             )
-    return rows[: max(1, min(int(topK or 10), 50))]
+    return rows[: max(1, min(int(limit or 10), 50))]
 
 
 def impactForGraphNode(nodeId: str) -> dict[str, Any]:

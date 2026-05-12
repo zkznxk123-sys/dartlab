@@ -249,7 +249,7 @@ def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", r
         return None, None
 
 
-def loadAllfilingsForStock(stockCode: str, *, lookbackDays: int | None = None):
+def loadAllfilingsForStock(stockCode: str, *, lookback: int | None = None):
     """allFilings parquet 에서 단일 종목 데이터 로드.
 
     `data/dart/allFilings/*.parquet` 일자별 전종목 파일에서 stock_code 로 필터.
@@ -279,8 +279,8 @@ def loadAllfilingsForStock(stockCode: str, *, lookbackDays: int | None = None):
     if not parquets:
         return None
 
-    if lookbackDays is not None and lookbackDays > 0:
-        parquets = parquets[-lookbackDays:]
+    if lookback is not None and lookback > 0:
+        parquets = parquets[-lookback:]
 
     # 컬럼명 우선순위: STOCK_CODE_COLUMNS SSOT (snake_case 우선이라 별도 순서 — 그러나
     # SSOT 의 후보 셋과 동일). allFilings parquet 은 stock_code 가 일반적이라 첫 시도.

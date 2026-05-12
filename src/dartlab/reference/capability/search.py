@@ -165,14 +165,14 @@ def _ensureIndex() -> None:
 def searchCapabilities(
     query: str,
     *,
-    topK: int = 10,
+    limit: int = 10,
     minScore: float = 0.5,
 ) -> list[tuple[str, dict, float]]:
     """질문에서 관련 CAPABILITIES를 검색.
 
     Args:
         query: 자연어 질문.
-        topK: 최대 반환 수.
+        limit: 최대 반환 수.
         minScore: 최소 점수 (이하 제외).
 
     Returns:
@@ -202,7 +202,7 @@ def searchCapabilities(
     # 정렬 + 필터
     ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     results: list[tuple[str, dict, float]] = []
-    for keyIdx, score in ranked[:topK]:
+    for keyIdx, score in ranked[:limit]:
         if score < minScore:
             break
         key = _keys[keyIdx]
