@@ -627,7 +627,51 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     if verbose:
         _say(f"  완료: {success}종목, {totalRows:,}행, {diskMb:.1f}MB, {elapsed:.0f}초")
 
+    _sanityCheckCalendarYears(outputPath)
+
     return outputPath
+
+
+def _sanityCheckCalendarYears(outputPath: Path) -> None:
+    """빌드 결과 finance.parquet 의 캘린더 환원 sanity check.
+
+    2026Q4 같은 misplace (결산월 환원 누락) 회귀를 빌드 직후 검출. raw 의 회계
+    ``bsns_year`` 는 결산월 환원 후 캘린더 연도가 되어야 하므로 ``today.year`` 보다
+    크면 비정상.
+
+    Parameters
+    ----------
+    outputPath : Path
+        빌드된 ``finance.parquet`` 경로.
+
+    Notes
+    -----
+    - 위반 발견 시 warning 로그만 emit. 빌드 실패시키지 않음 — 사용자가 finance.parquet
+      을 활용하면서 fallback 수정으로 후속 처리.
+    - 정상 케이스: bsns_year ≤ today.year 모두 통과.
+    """
+    from datetime import date
+
+    today = date.today()
+    try:
+        bad = (
+            pl.scan_parquet(str(outputPath))
+            .filter(pl.col("bsns_year").cast(pl.Int32, strict=False) > today.year)
+            .select(["stockCode", "bsns_year", "reprt_nm"])
+            .unique()
+            .collect(engine="streaming")
+        )
+    except (pl.exceptions.PolarsError, OSError) as e:
+        _log.warning(f"[finance/sanity] 검증 실패 (skip): {e}")
+        return
+
+    if bad.height > 0:
+        _log.warning(
+            f"[finance/sanity] bsns_year > {today.year} row {bad.height}개 발견 — "
+            "결산월 환원 실패 의심. 비12월 결산 SSOT (_fiscalMonthMap) 확인 필요."
+        )
+        sample = bad.head(5).to_dicts()
+        _log.warning(f"[finance/sanity] 비정상 샘플: {sample}")
 
 
 # ── report ───────────────────────────────────────────────────────────

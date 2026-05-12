@@ -146,3 +146,51 @@ def test_calendarizeFiscalColumns_nonQuarter_preserved():
     # 연간 row 는 변환 skip (bsns_year 원본 유지), 1분기는 환원
     assert result["bsns_year"].to_list() == ["2025", "2024"]
     assert result["reprt_nm"].to_list() == ["연간", "2분기"]
+
+
+@pytest.mark.unit
+def test_sanityCheckCalendarYears_emits_warning_for_future_year(tmp_path, caplog):
+    """``bsns_year > today.year`` row 가 있으면 sanity check warning emit."""
+    import logging
+    from datetime import date
+
+    from dartlab.scan.builders.kr.core import _sanityCheckCalendarYears
+
+    future_year = str(date.today().year + 1)
+    bad = pl.DataFrame(
+        {
+            "stockCode": ["005930", "000660"],
+            "bsns_year": [future_year, future_year],
+            "reprt_nm": ["4분기", "1분기"],
+        }
+    )
+    pf = tmp_path / "finance.parquet"
+    bad.write_parquet(str(pf))
+
+    with caplog.at_level(logging.WARNING):
+        _sanityCheckCalendarYears(pf)
+
+    warnings = " ".join(r.message for r in caplog.records)
+    assert "finance/sanity" in warnings
+    assert f"bsns_year > {date.today().year}" in warnings
+    assert "2개 발견" in warnings
+
+
+@pytest.mark.unit
+def test_sanityCheckCalendarYears_silent_on_normal_data(tmp_path, caplog):
+    """정상 데이터 (bsns_year <= today.year) 에는 경고 안 emit."""
+    import logging
+    from datetime import date
+
+    from dartlab.scan.builders.kr.core import _sanityCheckCalendarYears
+
+    current_year = str(date.today().year)
+    good = pl.DataFrame({"stockCode": ["005930"], "bsns_year": [current_year], "reprt_nm": ["4분기"]})
+    pf = tmp_path / "finance.parquet"
+    good.write_parquet(str(pf))
+
+    with caplog.at_level(logging.WARNING):
+        _sanityCheckCalendarYears(pf)
+
+    sanity_warns = [r for r in caplog.records if "finance/sanity" in r.message]
+    assert not sanity_warns, f"정상 데이터에 경고 발생: {sanity_warns}"
