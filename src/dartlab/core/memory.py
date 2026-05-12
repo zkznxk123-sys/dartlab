@@ -588,3 +588,79 @@ def withMemoryBudget(limitMb: int, *, sampler: Callable[[], float] | None = None
         return wrapper  # type: ignore[return-value]
 
     return decorator
+
+
+# ── M5: OomTripwire — background watcher + 응급 정지 ──
+
+
+class OomTripwire:
+    """RSS 가 임계 (기본 EMERGENCY=2500MB) 초과 시 kernel OOM-kill 전에
+    Python 측에서 graceful 종료 — stack trace 덤프 + ``os._exit(137)``.
+
+    Company ``__enter__`` 에서 자동 ``start()``, ``__exit__`` 에서 ``stop()``
+    (정공법 C — Company 가 Tripwire 호출, Tripwire 는 Company 모름).
+
+    Args:
+        thresholdMb: 발화 임계 (기본 ``PRESSURE_EMERGENCY_MB`` = 2500).
+        intervalSec: 폴링 간격 (기본 0.5 초).
+        sampler: RSS 측정 함수 (기본 ``getMemoryMb``, 테스트 fake 주입용).
+        exiter: 발화 시 호출 (기본 ``os._exit(137)``, 테스트 fake 주입용).
+
+    Example:
+        >>> tw = OomTripwire()
+        >>> tw.start()
+        >>> # ... heavy work
+        >>> tw.stop()
+    """
+
+    def __init__(
+        self,
+        *,
+        thresholdMb: float = PRESSURE_EMERGENCY_MB,
+        intervalSec: float = 0.5,
+        sampler: Callable[[], float] | None = None,
+        exiter: Callable[[float], None] | None = None,
+    ) -> None:
+        import threading
+
+        self._thresholdMb = thresholdMb
+        self._intervalSec = intervalSec
+        self._sampler = sampler if sampler is not None else getMemoryMb
+        self._exiter = exiter if exiter is not None else self._defaultExiter
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    @staticmethod
+    def _defaultExiter(rss: float) -> None:
+        import os
+        import sys
+        import traceback
+
+        sys.stderr.write(f"\n[OomTripwire] RSS {rss:.0f}MB > EMERGENCY threshold — graceful exit (137).\n")
+        traceback.print_stack(file=sys.stderr)
+        os._exit(137)
+
+    def start(self) -> None:
+        """daemon thread 시작."""
+        import threading
+
+        if self._thread is not None and self._thread.is_alive():
+            return
+        self._stop.clear()
+        self._thread = threading.Thread(target=self._loop, daemon=True, name="OomTripwire")
+        self._thread.start()
+
+    def stop(self, *, timeout: float = 2.0) -> None:
+        """thread 정지 신호 + join."""
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=timeout)
+            self._thread = None
+
+    def _loop(self) -> None:
+        while not self._stop.is_set():
+            rss = self._sampler()
+            if rss > self._thresholdMb:
+                self._exiter(rss)
+                return
+            self._stop.wait(self._intervalSec)

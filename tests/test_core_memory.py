@@ -139,6 +139,56 @@ class TestWithMemoryBudget:
         assert light() == 42
 
 
+class TestOomTripwire:
+    """M5: ``OomTripwire`` — RSS background watcher + 응급 graceful 종료."""
+
+    def test_does_not_fire_below_threshold(self):
+        """RSS < threshold 면 exiter 호출 안 함."""
+        import time
+
+        from dartlab.core.memory import OomTripwire
+
+        exitedRss: list[float] = []
+        tw = OomTripwire(
+            thresholdMb=2500,
+            intervalSec=0.02,
+            sampler=lambda: 100.0,  # 항상 100
+            exiter=lambda rss: exitedRss.append(rss),
+        )
+        tw.start()
+        time.sleep(0.1)  # 여러 poll
+        tw.stop()
+        assert exitedRss == []
+
+    def test_fires_when_threshold_exceeded(self):
+        """RSS > threshold 면 exiter 호출."""
+        import time
+
+        from dartlab.core.memory import OomTripwire
+
+        exitedRss: list[float] = []
+        tw = OomTripwire(
+            thresholdMb=1000,
+            intervalSec=0.02,
+            sampler=lambda: 3000.0,  # 항상 초과
+            exiter=lambda rss: exitedRss.append(rss),
+        )
+        tw.start()
+        time.sleep(0.1)
+        tw.stop()
+        assert len(exitedRss) >= 1 and exitedRss[0] == 3000.0
+
+    def test_start_stop_idempotent(self):
+        """double start/stop 안전."""
+        from dartlab.core.memory import OomTripwire
+
+        tw = OomTripwire(sampler=lambda: 100.0, exiter=lambda _: None)
+        tw.start()
+        tw.start()  # 이미 alive — noop
+        tw.stop()
+        tw.stop()  # 이미 정지 — noop
+
+
 class TestCleanupBetweenCompanies:
     def test_returns_before_after_tuple(self):
         """(before, after) 튜플 반환."""
