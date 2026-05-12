@@ -2309,17 +2309,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 자동 파이프라인 안에서 호출 → SEC rate limit 위반. 사용자 즉시 새로고침만.
+                - 본 함수 반환 0 = 실패 — caller 가 분기. exception 던지지 않음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - int — 저장된 parquet 행 수 (성공) 또는 0 (실패).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + data.sec.gov 접근 + SEC 표준 User-Agent.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 SEC companyfacts API (분기 마감 후 ~45 일 latency).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - SEC companyfacts API → EdgarClient → saveFinance → 본 parquet → 캐시 무효화.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — 자체 벌크 vs API 두 origin 중 후자 (사용자 명시).
         """
         import polars as _pl
 
@@ -2396,17 +2397,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - DART finalOnly 인자 사용 시도 → EDGAR 는 무시 (raise X). 시그니처 호환 목적만.
+                - type 단일 form 지정 — 여러 form 조합 시 liveFilings(forms=[...]) 직접 호출.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [docId/filedAt/title/formType/docUrl/...] — liveFilings 와 동일.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR submissions API.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC submissions 실시간 (~분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 사용자 인자 → liveFilings(start, end, days, keyword, forms) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — DART 동등 disclosure 인터페이스 패리티.
         """
         return self.liveFilings(start, end, days=days, keyword=keyword, forms=[type] if type else None)
 
@@ -2467,17 +2469,19 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - limit 큰 값 (>100) → SEC API 응답 지연 + 토큰 비용 증가. 보통 20~50.
+                - 동일 cacheKey 중복 호출 — 캐시 활용 OK. 다른 시간대 호출 시 cacheKey 자동 갱신.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [docId, filedAt, title, formType, docUrl, indexUrl, market, ticker,
+                  cik, accessionNo, filingUrl, filingIndexUrl, primaryDocument, reportDate].
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC submissions API + EdgarClient.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC submissions 실시간. cache 는 인스턴스 lifetime 동안만.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - resolveDateWindow + forms → OpenEdgar(ticker).filings → filterFilingsByKeyword → 정규화 → head(limit).
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — SUPPORTED_REGULAR_FORMS 의 10-K/Q/8-K/DEF 14A 등.
         """
         del finalOnly  # EDGAR regular filings에는 finalOnly 개념이 없다.
 
@@ -2614,17 +2618,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - maxChars 없이 10-K 호출 → 본문 1MB+ → 토큰 폭증. 항상 maxChars 명시.
+                - filing 인자 dict 변형 (예 raw API 응답) → filingRecord 정규화 실패. liveFilings row 사용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {docId, market, title, docUrl, indexUrl, raw, text, truncated:bool}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC Archives 접근 + filing URL 또는 accessionNo.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC filed 시점 (한 번 filed 후 immutable).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - filing 인자 → URL 정규화 → _downloadFilingSource → _htmlToText → truncate → 본 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) Archives 본문.
         """
         record = filingRecord(filing) or {}
 
@@ -2715,17 +2720,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 전체 DataFrame 그대로 LLM 컨텍스트 — 보통 50~100 행이라 OK 지만 source 필터로 줄이는 게 효율.
+                - blocks/periods 정수 → topic 깊이 단순 비교 가능, 하지만 docs vs finance 척도 다름.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic, source, blocks:int, periods:int].
             Prerequisites:
-                - <TODO: 사전조건>
+                - companyfacts + 10-K sections (둘 다 부재면 빈 DF).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - finance/docs 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - finance.{BS,IS,CF,CIS,ratios} + docs.sections.topic → 합산 + 정렬 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K/10-Q topic 카탈로그.
         """
         cacheKey = "_topicsDataFrame"
         if cacheKey in self._cache:
@@ -2798,20 +2804,24 @@ class Company:
             없음 (topic 부재 시 ``_showImpl`` 이 None 반환).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_showImpl`` — 실제 구현 + 상세 docstring.
+            - ``select`` — 행/열 필터 후속.
+            - ``trace`` — 본 결과의 source 추적.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - finance topic (BS/IS/CF/CIS/ratios) + docs topic (10-K Items + 단축 alias) 통합 조회의
+              dual-access 진입점. call/attr 양식 동일 backend.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "재무상태표" → ``c.show("BS")``.
+            - "Risk Factors 본문" → ``c.show("risk")``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 의 핵심 entry — finance + docs 단일 인터페이스. AI 가 topic 별로 다른 함수 호출 불필요.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2920,20 +2930,24 @@ class Company:
             없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``_selectImpl`` — 실제 구현.
+            - ``show`` — 본 함수의 입력 소스.
+            - ``dartlab.core.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - show() 결과에서 indList (행/항목) × colList (열/기간) 동시 필터. SelectResult 로 감싸
+              ``.chart()`` / export 체이닝. strict=True 시 매치 0 면 ValueError.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "Revenue 만 2024" → ``c.select("IS", "Revenue", "2024")``.
+            - "여러 계정 + 여러 연도" → ``c.select("IS", ["Revenue", "Net Income"], ["2024", "2023"])``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 show() 결과 전부 노출 비용 회피용 — 필요 행/열만 정밀 추출 후 LLM 컨텍스트.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -3088,17 +3102,19 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 함수 결과 없이 show() 값만 인용 → AI 환각 위험. 데이터 origin 명시 의무.
+                - period 필터는 트레이스 결과에 metadata 만 — 실 row 필터링은 show() 가 처리.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {topic, period, chapter, label, primarySource, fallbackSources,
+                  selectedPayloadRef, availableSources:list, whySelected} 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - show 와 동일 (finance/docs origin).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 (sections + finance index 기준).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - topic → alias 해석 → finance 우선 → docs fallback → source priority 결정 → 본 dict.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) provenance.
         """
         topic = _TOPIC_ALIASES.get(topic, topic)
         if topic in _FINANCE_TOPICS:
@@ -3215,17 +3231,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - preview 컬럼을 본문 대용으로 사용 X — 100 자 미만 잘림. 실 본문은 show() 호출.
+                - source 컬럼은 origin priority 결정 후 결과 — 미정의 시 None.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [chapter, topic, label, kind, source, periods, shape, preview] 또는 빈.
             Prerequisites:
-                - <TODO: 사전조건>
+                - topics + trace + finance/docs sections.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 (cached after first build).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - topics → trace 별 source → finance/docs branching → shape/preview 계산 → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) topic 메타 보드.
         """
         cacheKey = "_index"
         if cacheKey in self._cache:
@@ -3392,17 +3409,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 줄 단위 diff (3-인자 호출) 결과를 그대로 LLM 컨텍스트 → 거대 본문 토큰 폭증. 변경 줄만 추출.
+                - period 라벨 형식 변형 ("2023Q4" vs "2023") 매칭 X — sections 컬럼명 일치 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — 호출 모드에 따라 다름: (1) 전체 요약 (2) topic 이력 (3) 줄 단위 diff.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections (10-K/10-Q 본문 + period 컬럼).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections → 모드 별 diff 함수 (summary/history/lineDiff) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K/Q 변경 추적.
         """
         from dartlab.core.docs.diff import (
             diffSummaryDataFrame,
@@ -3467,17 +3485,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 짧은 키워드 (예 "AI") → 단어 경계 무시 매칭 — "RAID" 도 hit. 정확 매칭 의무 시 정규식.
+                - 빈도 절대값 비교 X — 본문 길이 차이 무시. 정규화 (per 1k tokens) 별도.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic, period, keyword, count] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections (10-K/10-Q text 본문).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - docs.sections + keywords → keywordFrequency → 본 DF.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K/Q 텍스트 분석.
         """
         from dartlab.core.docs.diff import keywordFrequency
 
@@ -3530,17 +3549,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본문 그대로 인용 → external untrusted 룰 위반. wrap_external_in_result 마커 후 검증 인용.
+                - days 큰 값 (>90) → API rate limit / pagination 비용.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — 뉴스 제목/날짜/URL/요약 컬럼. provider 부재 시 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + 뉴스 origin (gatherProvider — Naver/Yahoo/etc).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 외부 origin 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - getGatherProvider().news(ticker, market="US", days) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — ticker 기반, English news 위주.
         """
         from dartlab.core.gatherProvider import getGatherProvider
 
@@ -3590,17 +3610,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - score 임계 hard-code 후 "큰 변화" 결론 X — 회사별 base score 분포 다름.
+                - 결과 None ≠ "변화 없음" — sections 부재로 분석 불가일 수 있음.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [topic, score, summary, fromPeriod, toPeriod, ...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - docs.sections (10-K/10-Q 본문).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - sections 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - scan.watch.scanner.scanCompany(self, topic) → toDataframe → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 공시 변화 감지.
         """
         import importlib
 
