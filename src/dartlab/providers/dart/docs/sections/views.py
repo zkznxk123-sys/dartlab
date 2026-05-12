@@ -31,21 +31,21 @@ def normalizeTitle(title: str) -> str:
         >>> normalizeTitle(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     return stripSectionPrefix((title or "").strip())
 
@@ -63,21 +63,21 @@ def isBoilerplateTopic(topic: str) -> bool:
         >>> isBoilerplateTopic(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 판정 결과.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     return topic in {
         "사업보고서",
@@ -101,37 +101,38 @@ def isPlaceholderBlock(blockText: str) -> bool:
         >>> isPlaceholderBlock(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 판정 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     text = blockText.strip()
     if not text:
@@ -169,37 +170,38 @@ def blockPriority(
         >>> blockPriority(...)
 
     Returns:
-        <TODO: return desc> (int)
+        int — 결과 수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     if isBoilerplate:
         return 0
@@ -229,37 +231,38 @@ def classifyContent(content: str) -> tuple[int, int, int]:
         >>> classifyContent(...)
 
     Returns:
-        <TODO: return desc> (tuple[int, int, int])
+        tuple[int, int, int] — 3 정수 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     table_lines = 0
     heading_lines = 0
@@ -291,37 +294,38 @@ def buildMarkdownBlocks(stockCode: str) -> pl.DataFrame:
         >>> buildMarkdownBlocks(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     rows: list[dict[str, object]] = []
 
@@ -363,37 +367,38 @@ def buildMarkdownWide(blocks: pl.DataFrame) -> pl.DataFrame:
         >>> buildMarkdownWide(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     if blocks.height == 0:
         return pl.DataFrame()
@@ -429,37 +434,38 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         >>> splitMarkdownBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[dict[str, object]])
+        list[dict[str, object]] — 결과 dict 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     rows: list[dict[str, object]] = []
     currentLabel = "(root)"
@@ -477,20 +483,20 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
             >>> flushText(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생 뷰 helper — title 정규화 / major/minor 분할 / 마크다운 빌드.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal views helper — AI 직접 호출 X.
         """
         nonlocal textBuffer, blockIndex
         text = "\n".join(textBuffer).strip()
@@ -517,20 +523,20 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
             >>> flushTable(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생 뷰 helper — title 정규화 / major/minor 분할 / 마크다운 빌드.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal views helper — AI 직접 호출 X.
         """
         nonlocal tableBuffer, blockIndex
         text = "\n".join(tableBuffer).strip()
@@ -557,20 +563,20 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
             >>> flushAll(...)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - sections 파생 뷰 helper — title 정규화 / major/minor 분할 / 마크다운 빌드.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal views helper — AI 직접 호출 X.
         """
         flushText()
         flushTable()
@@ -622,34 +628,35 @@ def saveView(df: pl.DataFrame, path: Path) -> None:
         >>> saveView(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리 위임.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 파생 뷰 (마크다운 빌더 / 청크 / 컨텍스트 슬라이스 / 검색 블록) helpers.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal views — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 파생 뷰 (마크다운 빌더 / 청크 분할 등).
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생 뷰.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(path)

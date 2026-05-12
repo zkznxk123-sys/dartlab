@@ -31,36 +31,38 @@ def detectContentCol(df: pl.DataFrame) -> str:
         >>> detectContentCol(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     if "section_content" in df.columns:
         return "section_content"
@@ -80,36 +82,38 @@ def periodSortKey(period: str) -> tuple[int, int]:
         >>> periodSortKey(...)
 
     Returns:
-        <TODO: return desc> (tuple[int, int])
+        tuple[int, int] — (year, quarter).
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     value = str(period)
     if "Q" in value:
@@ -131,21 +135,22 @@ def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
         >>> sortPeriods(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과 목록.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     return sorted(periods, key=periodSortKey, reverse=descending)
 
@@ -163,36 +168,38 @@ def periodOrderValue(period: str) -> int:
         >>> periodOrderValue(...)
 
     Returns:
-        <TODO: return desc> (int)
+        int — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     year, slot = periodSortKey(period)
     return year * 10 + slot
@@ -211,21 +218,22 @@ def basePath(path: str) -> str:
         >>> basePath(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     return RE_SPLIT_SUFFIX.sub("", path)
 
@@ -243,36 +251,38 @@ def rawPeriod(period: str) -> str:
         >>> rawPeriod(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     value = str(period).strip()
     match = RE_ANNUAL_Q4_ALIAS.fullmatch(value)
@@ -295,36 +305,38 @@ def displayPeriod(period: str, *, annualAsQ4: bool = False) -> str:
         >>> displayPeriod(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     value = rawPeriod(period)
     if annualAsQ4 and RE_PERIOD.fullmatch(value) and "Q" not in value:
@@ -352,36 +364,38 @@ def periodColumns(
         >>> periodColumns(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과 목록.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     ordered = sortPeriods([str(col) for col in columns if RE_PERIOD.fullmatch(str(col))], descending=descending)
     return [displayPeriod(period, annualAsQ4=annualAsQ4) for period in ordered]
@@ -407,36 +421,38 @@ def formatPeriodRange(
         >>> formatPeriodRange(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     ordered = sortPeriods([rawPeriod(period) for period in periods], descending=descending)
     if not ordered:
@@ -465,36 +481,38 @@ def reorderPeriodColumns(
         >>> reorderPeriodColumns(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
+        - ``pipeline.py`` — sections 빌더 owner.
 
     Requires:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections base — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
+            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / bool / pl.DataFrame / list — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 입력 → stateless 변환 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections base.
     """
     periodCols = [str(col) for col in df.columns if RE_PERIOD.fullmatch(str(col))]
     if not periodCols:

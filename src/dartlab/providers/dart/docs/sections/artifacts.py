@@ -28,10 +28,10 @@ def packagedArtifactPath(name: str) -> Iterator[Path]:
         >>> packagedArtifactPath(...)
 
     Returns:
-        <TODO: return desc> (Iterator[Path])
+        Iterator[Path] — 결과 path.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``runtime.py`` / ``loadProjectionRules`` — 본 모듈 호출자.
 
     Requires:
         - contextlib
@@ -40,27 +40,27 @@ def packagedArtifactPath(name: str) -> Iterator[Path]:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 패키지 내장 sections 학습 산출물 (projection rules / profile data) 로드.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal artifacts loader — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — runtime 가 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / pl.DataFrame / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 패키지 내 profileData/ 산출물.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 패키지 빌드 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - profileData → 본 함수 → 학습 rules.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 학습 산출물.
     """
     ref = files(_PROFILE_PACKAGE) / name
     with as_file(ref) as path:
@@ -87,10 +87,10 @@ def loadProjectionRules(chapter: str) -> dict[str, list[str]]:
         >>> loadProjectionRules(...)
 
     Returns:
-        <TODO: return desc> (dict[str, list[str]])
+        dict[str, list[str]] — 결과 dict.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``runtime.py`` / ``loadProjectionRules`` — 본 모듈 호출자.
 
     Requires:
         - contextlib
@@ -99,27 +99,27 @@ def loadProjectionRules(chapter: str) -> dict[str, list[str]]:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 패키지 내장 sections 학습 산출물 (projection rules / profile data) 로드.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal artifacts loader — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — runtime 가 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / pl.DataFrame / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 패키지 내 profileData/ 산출물.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 패키지 빌드 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - profileData → 본 함수 → 학습 rules.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 학습 산출물.
     """
     filename = f"projectionRules.{chapter}.json"
     try:
@@ -151,10 +151,10 @@ def loadSectionProfileTable() -> pl.DataFrame | None:
         >>> loadSectionProfileTable(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame 또는 None — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``runtime.py`` / ``loadProjectionRules`` — 본 모듈 호출자.
 
     Requires:
         - contextlib
@@ -163,27 +163,27 @@ def loadSectionProfileTable() -> pl.DataFrame | None:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 패키지 내장 sections 학습 산출물 (projection rules / profile data) 로드.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal artifacts loader — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — runtime 가 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / pl.DataFrame / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 패키지 내 profileData/ 산출물.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 패키지 빌드 시점 (정적).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - profileData → 본 함수 → 학습 rules.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 학습 산출물.
     """
     try:
         with packagedArtifactPath("sectionProfileTable.parquet") as path:

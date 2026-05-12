@@ -113,7 +113,7 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
         >>> clearPreparedCache(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``chunker`` / ``runtime`` / ``views`` / ``analysis`` — sections sub modules.
 
     Requires:
         - dartlab
@@ -121,27 +121,28 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업/분기/반기 보고서 sections 청킹 + 수평화 (topic × period 보드).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections pipeline — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.sections 위임.
+            - period key 형식 변형 ("2024-Q1") → 매칭 X. "2024Q1" strict.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame (topic × period 보드) / Iterator — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - docs parquet → 청킹 → 수평화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections pipeline.
     """
     if stockCode is None:
         _preparedCache.clear()
@@ -294,10 +295,10 @@ def iterPeriodSubsets(
         >>> iterPeriodSubsets(...)
 
     Returns:
-        <TODO: return desc> (Iterator[tuple[str, str, str, pl.DataFrame]])
+        Iterator — (period, reportKind, sectionTitle, DataFrame) 튜플.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``chunker`` / ``runtime`` / ``views`` / ``analysis`` — sections sub modules.
 
     Requires:
         - dartlab
@@ -305,27 +306,28 @@ def iterPeriodSubsets(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업/분기/반기 보고서 sections 청킹 + 수평화 (topic × period 보드).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections pipeline — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.sections 위임.
+            - period key 형식 변형 ("2024-Q1") → 매칭 X. "2024Q1" strict.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame (topic × period 보드) / Iterator — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - docs parquet → 청킹 → 수평화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections pipeline.
     """
     df = loadData(stockCode, sinceYear=sinceYear, columns=_SECTIONS_REQUIRED_COLS)
     ccol = detectContentCol(df)
@@ -733,7 +735,7 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         >>> sections(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``chunker`` / ``runtime`` / ``views`` / ``analysis`` — sections sub modules.
 
     Requires:
         - dartlab
@@ -741,27 +743,28 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업/분기/반기 보고서 sections 청킹 + 수평화 (topic × period 보드).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections pipeline — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — Company.sections 위임.
+            - period key 형식 변형 ("2024-Q1") → 매칭 X. "2024Q1" strict.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame (topic × period 보드) / Iterator — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs parquet.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - docs parquet → 청킹 → 수평화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections pipeline.
     """
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}

@@ -26,37 +26,38 @@ def splitContextText(text: str, maxChars: int) -> list[str]:
         >>> splitContextText(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 슬라이스 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``views.py`` — 분할 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections retrievalBlocks → maxChars 슬라이스 분할 → contextSlices DataFrame.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.contextSlices`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal context slice view — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections contextSlices 분리.
+            - maxChars 너무 작음 (< 500) → 슬라이스 너무 많음.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - retrievalBlocks 결과.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - retrievalBlocks → maxChars 슬라이스 → contextSlices DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) context slice.
     """
     text = text.strip()
     if not text:
@@ -95,37 +96,38 @@ def splitMarkdownTable(text: str, maxChars: int) -> list[str]:
         >>> splitMarkdownTable(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 슬라이스 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``views.py`` — 분할 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections retrievalBlocks → maxChars 슬라이스 분할 → contextSlices DataFrame.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.contextSlices`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal context slice view — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections contextSlices 분리.
+            - maxChars 너무 작음 (< 500) → 슬라이스 너무 많음.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - retrievalBlocks 결과.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - retrievalBlocks → maxChars 슬라이스 → contextSlices DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) context slice.
     """
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
     if not lines:
@@ -167,37 +169,38 @@ def contextSlices(stockCode: str, *, maxChars: int = 1800) -> pl.DataFrame:
         >>> contextSlices(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — contextSlices 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``viewsRetrieval`` / ``views.py`` — 분할 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections retrievalBlocks → maxChars 슬라이스 분할 → contextSlices DataFrame.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.contextSlices`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal context slice view — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections contextSlices 분리.
+            - maxChars 너무 작음 (< 500) → 슬라이스 너무 많음.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[str] / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - retrievalBlocks 결과.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - retrievalBlocks → maxChars 슬라이스 → contextSlices DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) context slice.
     """
     blocks = retrievalBlocks(stockCode)
     rows: list[dict[str, object]] = []

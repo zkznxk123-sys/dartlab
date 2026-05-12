@@ -283,21 +283,22 @@ def stripSectionPrefix(title: str) -> str:
         >>> stripSectionPrefix(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정규식 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - section_title → 정규식 매칭 → topic 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) section title 매핑.
     """
     return _LEAF_PREFIX_RE.sub("", title.strip())
 
@@ -319,37 +320,39 @@ def normalizeSectionTitle(title: str) -> str:
         >>> normalizeSectionTitle(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``mapSectionTitle`` / ``stripSectionPrefix`` — 본 모듈.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - functools
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal section mapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정규식 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - section_title → 정규식 매칭 → topic 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) section title 매핑.
     """
     text = stripSectionPrefix(title)
     text = _INDUSTRY_PREFIX_RE.sub("", text)
@@ -380,37 +383,39 @@ def loadSectionMappings() -> dict[str, str]:
         >>> loadSectionMappings(...)
 
     Returns:
-        <TODO: return desc> (dict[str, str])
+        dict[str, str] — title → topic 매핑.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``mapSectionTitle`` / ``stripSectionPrefix`` — 본 모듈.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - functools
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal section mapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정규식 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - section_title → 정규식 매칭 → topic 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) section title 매핑.
     """
     path = _mappingPath()
     if not path.exists():
@@ -442,37 +447,39 @@ def mapSectionTitle(title: str) -> str:
         >>> mapSectionTitle(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``mapSectionTitle`` / ``stripSectionPrefix`` — 본 모듈.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - functools
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal section mapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정규식 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - section_title → 정규식 매칭 → topic 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) section title 매핑.
     """
     normalized = normalizeSectionTitle(title)
     mapped = loadSectionMappings().get(normalized)
@@ -517,37 +524,39 @@ def measureMappingRate(titles: list[str]) -> dict:
         >>> measureMappingRate(...)
 
     Args:
-        titles: <TODO: param desc> (list[str])
+        titles: section_title 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``mapSectionTitle`` / ``stripSectionPrefix`` — 본 모듈.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - functools
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - section_title → topic 정규화 (정규식 매핑). 산업 접두사 제거 + 잎 노드 추출.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal section mapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - _PATTERN_MAPPINGS 외 정규식 추측 X — 명시 매핑만.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - str / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 정규식 매핑 정적.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - section_title → 정규식 매칭 → topic 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) section title 매핑.
     """
     total = len(titles)
     unmapped: dict[str, int] = {}

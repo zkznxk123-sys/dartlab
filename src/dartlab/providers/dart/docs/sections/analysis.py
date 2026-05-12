@@ -31,37 +31,38 @@ def projectFreqRows(
         >>> projectFreqRows(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     if df.is_empty() or "freqScope" not in df.columns:
         return df
@@ -453,37 +454,38 @@ def semanticRegistry(
         >>> semanticRegistry(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     if isEmptyDf(df):
         return _emptySemanticRegistryFrame()
@@ -585,37 +587,38 @@ def structureRegistry(
         >>> structureRegistry(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     if isEmptyDf(df):
         return _emptyStructureRegistryFrame()
@@ -738,37 +741,38 @@ def structureCollisions(
         >>> structureCollisions(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     registry = structureRegistry(
         df,
@@ -807,37 +811,38 @@ def structureEvents(
         >>> structureEvents(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     if isEmptyDf(df):
         return _emptyStructureEventsFrame()
@@ -962,37 +967,38 @@ def structureSummary(
         >>> structureSummary(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     registry = structureRegistry(
         df,
@@ -1100,37 +1106,38 @@ def structureChanges(
         >>> structureChanges(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     summary = structureSummary(
         df,
@@ -1202,37 +1209,38 @@ def semanticCollisions(
         >>> semanticCollisions(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``_SectionsSource`` accessor — 본 모듈 호출자.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal sections analysis — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections DataFrame → freq 투영 / semantic registry / structure registry.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 파생.
     """
     registry = semanticRegistry(df, topic=topic, freqScope=freqScope, includeMixed=includeMixed)
     if registry.is_empty():

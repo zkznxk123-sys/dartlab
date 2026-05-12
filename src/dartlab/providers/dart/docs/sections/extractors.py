@@ -72,37 +72,37 @@ def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | 
         >>> topicSubtables(...)
 
     Returns:
-        <TODO: return desc> (TopicSubtables | None)
+        TopicSubtables 또는 None — 세분화 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``analysis`` / ``views`` — sections 파생 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 표 세분화 (segments / costByNature 등 selector 별).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal extractor — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections analysis 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections wide DataFrame + _TOPIC_SELECTORS 정의.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections + selector → 표 세분화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 표 extractor.
     """
     if isEmptyDf(blocks):
         return None
@@ -359,34 +359,34 @@ def parseSubtopicTable(
         >>> parseSubtopicTable(...)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``analysis`` / ``views`` — sections 파생 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections 표 세분화 (segments / costByNature 등 selector 별).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal extractor — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections analysis 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections wide DataFrame + _TOPIC_SELECTORS 정의.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections + selector → 표 세분화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 표 extractor.
     """
     wide = subtables.wide
     if wide.is_empty():

@@ -63,36 +63,38 @@ def parseMajorNum(title: str) -> int | None:
         >>> parseMajorNum(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int 또는 None — 결과 값.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``types.py`` — SectionChunk dataclass.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업보고서 섹션 청킹 (소분류 / 세분화 / 테이블 비율 / MAX 초과 분할). LLM 친화적 청크 생성.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal chunker — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - MAX_CHUNK_CHARS 초과 시 자동 분할 — 호출자 수동 split X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[SectionChunk] / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections 본문 → 소분류/세분화 분할 → SectionChunk 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 청킹.
     """
     m = re.match(r"^([IVXivx]+)\.\s", title.strip())
     if m:
@@ -113,36 +115,38 @@ def parseSubNum(title: str) -> int | None:
         >>> parseSubNum(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int 또는 None — 결과 값.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``types.py`` — SectionChunk dataclass.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업보고서 섹션 청킹 (소분류 / 세분화 / 테이블 비율 / MAX 초과 분할). LLM 친화적 청크 생성.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal chunker — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - MAX_CHUNK_CHARS 초과 시 자동 분할 — 호출자 수동 split X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[SectionChunk] / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections 본문 → 소분류/세분화 분할 → SectionChunk 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 청킹.
     """
     m = re.match(r"^(\d+)\.\s", title.strip())
     if m:
@@ -163,36 +167,38 @@ def splitByHeadings(text: str) -> list[tuple[str, str]]:
         >>> splitByHeadings(...)
 
     Returns:
-        <TODO: return desc> (list[tuple[str, str]])
+        list[tuple[str, str]] — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``types.py`` — SectionChunk dataclass.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업보고서 섹션 청킹 (소분류 / 세분화 / 테이블 비율 / MAX 초과 분할). LLM 친화적 청크 생성.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal chunker — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - MAX_CHUNK_CHARS 초과 시 자동 분할 — 호출자 수동 split X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[SectionChunk] / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections 본문 → 소분류/세분화 분할 → SectionChunk 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 청킹.
     """
     lines = text.split("\n")
     segments: list[tuple[str, str]] = []
@@ -228,36 +234,38 @@ def separateTableAndText(content: str) -> tuple[str, list[str], int]:
         >>> separateTableAndText(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: 본문 텍스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``types.py`` — SectionChunk dataclass.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업보고서 섹션 청킹 (소분류 / 세분화 / 테이블 비율 / MAX 초과 분할). LLM 친화적 청크 생성.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal chunker — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - MAX_CHUNK_CHARS 초과 시 자동 분할 — 호출자 수동 split X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[SectionChunk] / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections 본문 → 소분류/세분화 분할 → SectionChunk 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 청킹.
     """
     lines = content.split("\n")
     textLines: list[str] = []
@@ -407,36 +415,38 @@ def chunkSection(
         >>> chunkSection(...)
 
     Returns:
-        <TODO: return desc> (list[SectionChunk])
+        list[SectionChunk] — 청크 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``types.py`` — SectionChunk dataclass.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업보고서 섹션 청킹 (소분류 / 세분화 / 테이블 비율 / MAX 초과 분할). LLM 친화적 청크 생성.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal chunker — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - MAX_CHUNK_CHARS 초과 시 자동 분할 — 호출자 수동 split X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[SectionChunk] / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections 본문 → 소분류/세분화 분할 → SectionChunk 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 청킹.
     """
     if not content or not content.strip():
         return []
@@ -533,36 +543,38 @@ def chunkRows(rows: list[dict], contentCol: str) -> list[SectionChunk]:
         >>> chunkRows(...)
 
     Returns:
-        <TODO: return desc> (list[SectionChunk])
+        list[SectionChunk] — 청크 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``types.py`` — SectionChunk dataclass.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 사업보고서 섹션 청킹 (소분류 / 세분화 / 테이블 비율 / MAX 초과 분할). LLM 친화적 청크 생성.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal chunker — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
+            - MAX_CHUNK_CHARS 초과 시 자동 분할 — 호출자 수동 split X.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - list[SectionChunk] / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 회사 docs sections 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections 본문 → 소분류/세분화 분할 → SectionChunk 리스트.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) 청킹.
     """
     majorSections: dict[int, dict] = {}
     currentMajorNum: int | None = None

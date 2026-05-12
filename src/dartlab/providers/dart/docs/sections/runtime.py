@@ -109,21 +109,21 @@ def baseChunkPath(path: str) -> str:
         >>> baseChunkPath(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 변환 결과.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections projection rules (artifacts) + section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - rules 갱신 시점 + docs.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 학습된 rules 적용 → 수평화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 수평화.
     """
     return RE_SPLIT_SUFFIX.sub("", path)
 
@@ -141,36 +141,37 @@ def chapterTeacherTopics(rows: list[dict[str, object]]) -> dict[str, set[str]]:
         >>> chapterTeacherTopics(...)
 
     Returns:
-        <TODO: return desc> (dict[str, set[str]])
+        dict[str, set[str]] — topic → 자식 set.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``artifacts.py`` — projection rules 빌더.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 학습된 projection rules + chapter II 분할 + 원자적 semantic topics → sections 수평화 runtime.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal runtime — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections projection rules (artifacts) + section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - rules 갱신 시점 + docs.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 학습된 rules 적용 → 수평화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 수평화.
     """
     teacher: dict[str, set[str]] = {}
     for row in rows:
@@ -195,36 +196,37 @@ def projectionSuppressedTopics() -> dict[str, set[str]]:
         >>> projectionSuppressedTopics(...)
 
     Returns:
-        <TODO: return desc> (dict[str, set[str]])
+        dict[str, set[str]] — topic → 자식 set.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``artifacts.py`` — projection rules 빌더.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 학습된 projection rules + chapter II 분할 + 원자적 semantic topics → sections 수평화 runtime.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal runtime — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections projection rules (artifacts) + section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - rules 갱신 시점 + docs.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 학습된 rules 적용 → 수평화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 수평화.
     """
     rules = loadProjectionRules("chapterII")
     suppressed = set(rules.keys())
@@ -332,36 +334,37 @@ def extractSemanticUnits(topic: str, text: str) -> list[tuple[str, str]]:
         >>> extractSemanticUnits(...)
 
     Returns:
-        <TODO: return desc> (list[tuple[str, str]])
+        list[tuple[str, str]] — 결과 페어.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``artifacts.py`` — projection rules 빌더.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 학습된 projection rules + chapter II 분할 + 원자적 semantic topics → sections 수평화 runtime.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal runtime — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections projection rules (artifacts) + section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - rules 갱신 시점 + docs.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 학습된 rules 적용 → 수평화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 수평화.
     """
     if topic in {"segmentOverview", "segmentFinancialSummary", "riskDerivative"}:
         return splitByMajorHeading(text)
@@ -506,36 +509,37 @@ def semanticTopicForBlock(topic: str, label: str, blockType: str, blockText: str
         >>> semanticTopicForBlock(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str 또는 None — 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``artifacts.py`` — projection rules 빌더.
+        - ``pipeline.py`` — sections 빌더.
 
     Requires:
         - dartlab
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - 학습된 projection rules + chapter II 분할 + 원자적 semantic topics → sections 수평화 runtime.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal runtime — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections projection rules (artifacts) + section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - rules 갱신 시점 + docs.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 학습된 rules 적용 → 수평화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 수평화.
     """
     direct = semanticTopicForLabel(topic, label)
     if direct:
@@ -578,21 +582,21 @@ def detailTopicForTopic(topic: str) -> str | None:
         >>> detailTopicForTopic(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str 또는 None — 결과.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections pipeline 내부.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / dict / str — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections projection rules (artifacts) + section_title 본문.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - rules 갱신 시점 + docs.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → 학습된 rules 적용 → 수평화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections 수평화.
     """
     return _DETAIL_TOPIC_MAP.get(topic)
 

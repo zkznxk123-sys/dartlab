@@ -29,10 +29,10 @@ def splitSubtables(md: str) -> list[list[str]]:
         >>> splitSubtables(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 서브테이블 라인 리스트.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``analysis`` / ``extractors`` — sections table 호출자.
 
     Requires:
         - polars
@@ -48,17 +48,17 @@ def splitSubtables(md: str) -> list[list[str]]:
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections analysis 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections 본문 markdown.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - markdown table → 구조 분류 → 수평화 DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections table parser.
     """
     tables: list[list[str]] = []
     current: list[str] = []
@@ -323,10 +323,10 @@ def buildTableDataFrame(
         >>> buildTableDataFrame(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame 또는 None — 수평화 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``analysis`` / ``extractors`` — sections table 호출자.
 
     Requires:
         - polars
@@ -342,17 +342,17 @@ def buildTableDataFrame(
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections analysis 위임.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / list / dict — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections 본문 markdown.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - docs 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - markdown table → 구조 분류 → 수평화 DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) sections table parser.
     """
     if topicFrame.is_empty():
         return None

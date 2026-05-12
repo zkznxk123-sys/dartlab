@@ -133,37 +133,37 @@ def retrievalBlocks(stockCode: str) -> pl.DataFrame:
         >>> retrievalBlocks(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — retrievalBlocks 결과.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``views.py`` / ``viewsContext`` — 분할 모듈.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - sections retrieval 뷰 빌더 — semantic topic + detail expr + retrievalBlocks DataFrame.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 사용자 API 는 ``c.retrievalBlocks`` — 본 모듈 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal retrieval view — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 본 모듈 직접 호출 X — sections retrievalBlocks 분리.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame / pl.Expr — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - sections wide DataFrame.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - sections 갱신 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - sections → semantic topic 분류 + 우선순위 → retrievalBlocks DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - KR (DART) retrieval 뷰.
     """
     # 1단계: Python에서 split까지 처리 → 컬럼별 리스트 (가장 빠른 경로)
     cPeriod: list[str] = []
