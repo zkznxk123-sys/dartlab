@@ -7,6 +7,12 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.scan.io.parquet import (
+    EQ_IDS as _EQ_IDS,
+)
+from dartlab.scan.io.parquet import (
+    EQ_NMS as _EQ_NMS,
+)
+from dartlab.scan.io.parquet import (
     NI_IDS as _NI_IDS,
 )
 from dartlab.scan.io.parquet import (
@@ -35,17 +41,6 @@ from dartlab.scan.io.parquet import (
     extractAccount,
     filterLatestPerStock,
 )
-
-# ── 계정 매핑 (모듈 고유) ──
-
-_EQ_IDS = {
-    "Equity",
-    "equity",
-    "ifrs-full_Equity",
-    "EquityAttributableToOwnersOfParent",
-    "ifrs-full_EquityAttributableToOwnersOfParent",
-}
-_EQ_NMS = {"자본총계", "자본 총계", "지배기업 소유주지분"}
 
 
 def _gradeProfitability(opMargin: float | None, roe: float | None) -> str:

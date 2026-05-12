@@ -39,6 +39,18 @@ NI_NMS = {"당기순이익", "당기순이익(손실)"}
 TA_IDS = {"Assets", "totalAssets", "ifrs-full_Assets", "dart_Assets"}
 TA_NMS = {"자산총계", "자산 총계"}
 
+EQ_IDS = {
+    "Equity",
+    "equity",
+    "ifrs-full_Equity",
+    "EquityAttributableToOwnersOfParent",
+    "ifrs-full_EquityAttributableToOwnersOfParent",
+}
+EQ_NMS = {"자본총계", "자본 총계", "지배기업 소유주지분"}
+
+LIABILITY_IDS = {"Liabilities", "ifrs-full_Liabilities", "ifrs_Liabilities", "dart_Liabilities"}
+LIABILITY_NMS = {"부채총계", "총부채", "부채 총계"}
+
 _scanDownloaded = False
 
 # scan 프리빌드 freshness — HF 수집 주기(일 1회)에 맞춰 24h TTL

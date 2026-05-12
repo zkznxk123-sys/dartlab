@@ -99,26 +99,21 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     """
     from pathlib import Path
 
-    from dartlab.scan.financial.profitability import (
-        _EQ_IDS,
-        _EQ_NMS,
-        _NI_IDS,
-        _NI_NMS,
-        _OP_IDS,
-        _OP_NMS,
-        _REVENUE_IDS,
-        _REVENUE_NMS,
-        _TA_IDS,
-        _TA_NMS,
+    from dartlab.scan.io.parquet import (
+        EQ_IDS,
+        EQ_NMS,
+        LIABILITY_IDS,
+        LIABILITY_NMS,
+        NI_IDS,
+        NI_NMS,
+        OP_IDS,
+        OP_NMS,
+        REVENUE_IDS,
+        REVENUE_NMS,
+        TA_IDS,
+        TA_NMS,
+        _ensureScanData,
     )
-    from dartlab.scan.io.parquet import _ensureScanData
-
-    # 부채 계정 — scan.debt 에서 재사용 (없으면 fallback)
-    try:
-        from dartlab.scan.debt.risk import _LIABILITY_IDS, _LIABILITY_NMS  # type: ignore
-    except Exception:
-        _LIABILITY_IDS = {"ifrs-full_Liabilities", "ifrs_Liabilities"}
-        _LIABILITY_NMS = {"부채총계", "총부채"}
 
     scanDir = _ensureScanData()
     scanPath = Path(scanDir) / "finance.parquet"
@@ -126,9 +121,9 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
         logger.warning(f"finance.parquet 없음: {scanPath}")
         return {}
 
-    # 로드 — scanProfitability 와 동일 필터
-    allIds = list(_REVENUE_IDS | _OP_IDS | _NI_IDS | _TA_IDS | _EQ_IDS | _LIABILITY_IDS)
-    allNms = list(_REVENUE_NMS | _OP_NMS | _NI_NMS | _TA_NMS | _EQ_NMS | _LIABILITY_NMS)
+    # 로드 — scanProfitability 와 동일 필터 (SSOT: scan/io/parquet 상수)
+    allIds = list(REVENUE_IDS | OP_IDS | NI_IDS | TA_IDS | EQ_IDS | LIABILITY_IDS)
+    allNms = list(REVENUE_NMS | OP_NMS | NI_NMS | TA_NMS | EQ_NMS | LIABILITY_NMS)
     schemaNames = pl.scan_parquet(str(scanPath)).collect_schema().names()
     scCol = "stockCode" if "stockCode" in schemaNames else "stock_code"
 
@@ -158,36 +153,11 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     prior = df.filter(pl.col("bsns_year") == priorYear)
 
     def _ratios(sub: pl.DataFrame) -> tuple:
-        from dartlab.scan.financial.profitability import (
-            _EQ_IDS as EQ_IDS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _EQ_NMS as EQ_NMS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _NI_IDS as NI_IDS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _NI_NMS as NI_NMS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _OP_IDS as OP_IDS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _OP_NMS as OP_NMS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _REVENUE_IDS as R_IDS,
-        )
-        from dartlab.scan.financial.profitability import (
-            _REVENUE_NMS as R_NMS,
-        )
-
-        rev = _extract_by_ids(sub, R_IDS, R_NMS)
+        rev = _extract_by_ids(sub, REVENUE_IDS, REVENUE_NMS)
         op = _extract_by_ids(sub, OP_IDS, OP_NMS)
         ni = _extract_by_ids(sub, NI_IDS, NI_NMS)
         eq = _extract_by_ids(sub, EQ_IDS, EQ_NMS)
-        li = _extract_by_ids(sub, _LIABILITY_IDS, _LIABILITY_NMS)
+        li = _extract_by_ids(sub, LIABILITY_IDS, LIABILITY_NMS)
 
         opMargin = (op / rev * 100) if rev and rev != 0 and op is not None else None
         netMargin = (ni / rev * 100) if rev and rev != 0 and ni is not None else None
