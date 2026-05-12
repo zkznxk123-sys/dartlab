@@ -47,6 +47,11 @@ _AUDIT_SCRIPTS = [
         "scripts/audit/_baselines/gatherDocstring4Section.json",
     ),
     ("룰 8 — limit keyword", "scripts/audit/limitDefault.py", "scripts/audit/_baselines/gatherLimitDefault.json"),
+    (
+        "룰 6b — docstring 9-섹션",
+        "scripts/audit/docstring9Section.py",
+        "scripts/audit/_baselines/gatherDocstring9Section.json",
+    ),
 ]
 
 # 룰 7 (src↔tests mirror) / 룰 9 (raw cross-scan) — pytest 기반 gate.
