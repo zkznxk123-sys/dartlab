@@ -5188,17 +5188,20 @@ class Company:
             >>> Company("005930").valuationImpact()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``causalWeights`` — 본 함수의 입력 chain.
+            - ``storyTree`` — 본 override 적용 3 시나리오.
+            - ``analysis("valuation")`` — 본 overrides 직접 주입 가능.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - causalWeights chain → DCF 파라미터 (terminalGrowth/WACC) 가산 + narrative 근거.
+              narrative → 숫자 피드백 — AI 가 직접 override 적용 가능한 hint dict.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            narrative 가 valuation 어떻게 바꾸나 답변 시 본 함수. base/adjusted 비교 의무.
         """
         import importlib
 
@@ -5235,20 +5238,22 @@ class Company:
             없음.
 
         Args:
-            basePeriod: <TODO: param desc> (str | None)
+            basePeriod: 기준 fiscal period. None 이면 최신 분기.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``causalWeights`` / ``valuationImpact`` — 본 함수의 입력 시나리오.
+            - ``validateStory`` — 본 결과의 plausibility 검증.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - possible (낙관) / plausible (중도) / probable (보수) 3 DCF 계산 + spread/mean 요약.
+              Damodaran 3P 방법론.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 "이 회사 가치 시나리오" 답변 시 본 함수 3 trajectory 인용. 단일 값 X.
         """
         import importlib
 
@@ -5286,20 +5291,22 @@ class Company:
             >>> Company("005930").narrativeDiff()
 
         Args:
-            claims: <TODO: param desc> (list[str] | None)
+            claims: 영향 분석 대상 claim 리스트. None 이면 전체 default claims.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``storyTree`` — base trajectory.
+            - ``causalWeights`` — claim 가중치.
+            - ``dartlab.story.narrativeDiff.computeImpact`` — implementation.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 각 claim 제거 후 FV 재계산 → contribution 측정. Thought Anchors 기반 정량 기여도.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 "이 valuation 핵심 가정" 답변 시 본 함수 결과 contribution 큰 순 인용.
         """
         import importlib
 
@@ -5340,20 +5347,24 @@ class Company:
             없음.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``sector`` — WICS 11 대 섹터 분류 (industry 와 다른 차원).
+            - ``sectorParams`` — 섹터별 valuation 파라미터.
+            - ``dartlab.industry.calcs.companyCalcs.calcChainPosition`` — 본 함수 backend.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 회사의 산업 밸류체인 내 위치 (upstream/midstream/downstream/fab/equipment 등) 분류 +
+              같은 stage peer 종목코드 list 반환. sector vs industry 분리 — 후자는 가치사슬 차원.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 가치사슬 어디" → 본 함수.
+            - "같은 stage peer" → result["peers"].
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            동종 비교 시 sector (11 대) 보다 chain stage 가 더 정밀 — AI 가 peer 선정에 본 함수 활용.
         """
         from dartlab.industry.calcs.companyCalcs import calcChainPosition
 
@@ -5396,17 +5407,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - headless 환경 (CI/docker) 호출 → 브라우저 launch 실패. notebooks/JupyterLab 전용.
+                - 점유된 포트 → OSError. caller port 변경 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 로컬 표시 가능 환경 + dartlab.core.viewer.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 (서버 데이터 별도 fetch X).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - self.stockCode → launchViewer → FastAPI 서버 + 브라우저 open.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기보고서 viewer).
         """
         from dartlab.core.viewer import launchViewer
 
@@ -5475,17 +5487,19 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 응답 직접 외부 인용 → AI 환각 검증 의무. dartlab tool 결과만 신뢰.
+                - reflect=True 항상 정확 X — 시간/토큰 2 배.
+                - stream=True 결과 list() 즉시 변환 → stream 의미 사라짐.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - str (stream=False) 또는 Generator[str] (stream=True).
             Prerequisites:
-                - <TODO: 사전조건>
+                - LLM API 키 (OPENAI_API_KEY / ANTHROPIC_API_KEY 환경변수).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - LLM 응답 + 본 회사 데이터 freshness 의 min.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - question + self.stockCode → ai.kernel.ask → tool calling → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART) — workbench evidence + ask 인터페이스.
         """
         import importlib
 
@@ -5519,34 +5533,37 @@ class Company:
             >>> Company("005930").calendar()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.providers.dart.ops.calendar.predictCalendar`` — backend cycle 추론.
+            - ``edgar.Company.calendar`` — US 패리티 (현재 미구현 stub).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 본 회사 disclosure history (최근 400 일 정기공시) → predictCalendar 위임 → 정기보고서
+              cycle 추론 (분기/반기/사업보고서 패턴). horizonDays 내 예상 공시일 리스트.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "다음 정기공시 언제" → 본 함수.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 "다음 공시 catalyst" 답변 시 본 함수 결과 인용. 예상일 ± 며칠 명시 의무.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - history 부재 회사 (신규 상장) → 빈 DataFrame. caller 분기 의무.
+                - horizon 큰 값 (>180) → 예측 정확도 낮음 — 분기 1 회 cycle 한정.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (OUTPUT_SCHEMA) — [stockCode, expectedDate, reportType, confidence].
             Prerequisites:
-                - <TODO: 사전조건>
+                - disclosure history (최근 400 일).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 (disclosure() API 실시간).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - disclosure(days=400, type="A") → predictCalendar(history, horizonDays) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART 정기공시 cycle).
         """
         from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA, predictCalendar
 
@@ -5581,34 +5598,37 @@ class _DartDisclosureFetcher:
             없음.
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.disclosure`` — 본 함수가 호출하는 backend.
+            - ``dartlab.core.disclosureFetcher.registerDisclosureFetcher`` — gather/Calendar 의존성 주입.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - gather/Calendar 의 DisclosureFetcher 어댑터 — Company.disclosure() 위임 + 예외 silent.
+              DIP (정공법 B) 패턴 — Calendar 가 직접 Company import 회피.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 자동 등록 (import 시점) — 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            본 어댑터는 인프라 layer — AI 가 직접 사용 X. gather/calendar 가 내부 사용.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 클래스 직접 인스턴스화 → 무의미. registerDisclosureFetcher 가 자동 등록.
+                - 예외 silent (None 반환) → caller 가 None 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame 또는 None (예외 시).
             Prerequisites:
-                - <TODO: 사전조건>
+                - Company.disclosure 가용 (DART_API_KEY).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - Company.disclosure 와 동일 (DART API 실시간).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - stockCode → Company(stockCode).disclosure(days, type) → head(limit) → 본 어댑터.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - KR (DART).
         """
         try:
             df = Company(stockCode).disclosure(days=days, type=type)
