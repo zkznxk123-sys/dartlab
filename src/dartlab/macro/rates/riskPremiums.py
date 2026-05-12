@@ -4,7 +4,7 @@
 
 데이터 경로:
 1. 월별 갱신 parquet (`data/riskPremiums.parquet`) — scripts/dataSync/updateDamodaranERP.py 가 생성
-2. 오프라인 fallback — `core/data/damodaranDefaults.json` (패키지 내장 2024-07 스냅샷)
+2. 오프라인 fallback — `reference/data/damodaranDefaults.json` (패키지 내장 2024-07 스냅샷)
 
 근거:
 - Damodaran NYU Stern — Country Risk Premiums (ctryprem.html), 월 1회 갱신
@@ -18,7 +18,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-_DEFAULTS_PATH = Path(__file__).resolve().parent.parent.parent / "core" / "data" / "damodaranDefaults.json"
+_DEFAULTS_PATH = Path(__file__).resolve().parent.parent.parent / "reference" / "data" / "damodaranDefaults.json"
 
 
 @lru_cache(maxsize=1)

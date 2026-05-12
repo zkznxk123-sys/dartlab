@@ -6,7 +6,7 @@ Reinhart, C. & Rogoff, K. (2009), *This Time Is Different* — 4 crisis types:
 한 에피소드가 여러 유형을 동반할 수 있음 ("triple crisis" = banking + currency + debt).
 현재 매크로 시그널을 유형별 임계치와 비교해 분류.
 
-데이터: `core/data/rrCrises800y.json` — 1800-present 주요 ~21 케이스 (subset).
+데이터: `reference/data/rrCrises800y.json` — 1800-present 주요 ~21 케이스 (subset).
 """
 
 from __future__ import annotations
@@ -94,11 +94,11 @@ def _loadRrCrises() -> list[dict]:
     2026-04-19 사고 class 방어 — silent `[]` 대신 loud-fail.
     """
     try:
-        with resources.files("dartlab.core.data").joinpath("rrCrises800y.json").open("r", encoding="utf-8") as f:
+        with resources.files("dartlab.reference.data").joinpath("rrCrises800y.json").open("r", encoding="utf-8") as f:
             return json.load(f).get("crises", [])
     except (FileNotFoundError, OSError) as e:
         raise FileNotFoundError(
-            f"필수 번들 리소스 누락: dartlab/core/data/rrCrises800y.json ({e})\n"
+            f"필수 번들 리소스 누락: dartlab/reference/data/rrCrises800y.json ({e})\n"
             f"  → pip install -U --force-reinstall dartlab"
         ) from e
     except json.JSONDecodeError as e:

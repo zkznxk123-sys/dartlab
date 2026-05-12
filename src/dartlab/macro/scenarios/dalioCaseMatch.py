@@ -4,7 +4,7 @@ Ray Dalio *Big Debt Crises* Part 2 — 3 detailed case studies (Weimar, Great De
 Subprime). 각 사례의 연도별 매크로 시그니처와 **현재 상태** 를 코사인 유사도로 비교해
 "지금 어느 역사 국면에 가까운가" + "다음 단계 진행 경로 힌트" 를 반환.
 
-데이터: `core/data/dalioDetailCases.json`.
+데이터: `reference/data/dalioDetailCases.json`.
 """
 
 from __future__ import annotations
@@ -37,11 +37,13 @@ def _loadCases() -> dict:
     알리지 않음. loud-fail 로 전환.
     """
     try:
-        with resources.files("dartlab.core.data").joinpath("dalioDetailCases.json").open("r", encoding="utf-8") as f:
+        with (
+            resources.files("dartlab.reference.data").joinpath("dalioDetailCases.json").open("r", encoding="utf-8") as f
+        ):
             return json.load(f)
     except (FileNotFoundError, OSError) as e:
         raise FileNotFoundError(
-            f"필수 번들 리소스 누락: dartlab/core/data/dalioDetailCases.json ({e})\n"
+            f"필수 번들 리소스 누락: dartlab/reference/data/dalioDetailCases.json ({e})\n"
             f"  → pip install -U --force-reinstall dartlab"
         ) from e
     except json.JSONDecodeError as e:

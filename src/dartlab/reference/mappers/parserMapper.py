@@ -20,7 +20,7 @@ _DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "parserMappings"
 def _loadRequired(filename: str) -> dict:
     """필수 파서 매핑 JSON 로드. 누락 = 빌드/패키징 사고이므로 즉시 예외.
 
-    과거 사고 (2026-04-19): PyPI wheel 0.9.15 에서 `core/data/parserMappings/`
+    과거 사고 (2026-04-19): PyPI wheel 0.9.15 에서 `reference/data/parserMappings/`
     디렉토리가 통째로 누락된 채 배포됨. loadSections() 가 빈 dict 를 리턴했고,
     sections runtime 의 `_CHAPTER_BY_MAJOR` 가 빈 상태로 초기화되어 모든
     `chapterFromMajorNum(N)` 이 None → _reportRowsToTopicRows 빈 리스트 →

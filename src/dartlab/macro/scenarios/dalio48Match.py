@@ -4,7 +4,7 @@ Ray Dalio *Big Debt Crises* Part 3 — 48 historical deleveraging episodes compe
 현재 상태를 48 케이스와 특성 공간 거리로 비교해 **가장 근접한 N 케이스** +
 **archetype (deflationary/inflationary)** 분포를 반환.
 
-데이터: `core/data/dalio48Cases.json`. 공개 가능한 20+ 케이스 수록 (subset),
+데이터: `reference/data/dalio48Cases.json`. 공개 가능한 20+ 케이스 수록 (subset),
 미수록은 향후 데이터 세션으로.
 """
 
@@ -35,11 +35,11 @@ def _loadCases() -> list[dict]:
     감지 파이프라인이 정상 동작하는 줄 착각. silent-fail 대신 loud-fail.
     """
     try:
-        with resources.files("dartlab.core.data").joinpath("dalio48Cases.json").open("r", encoding="utf-8") as f:
+        with resources.files("dartlab.reference.data").joinpath("dalio48Cases.json").open("r", encoding="utf-8") as f:
             return json.load(f).get("cases", [])
     except (FileNotFoundError, OSError) as e:
         raise FileNotFoundError(
-            f"필수 번들 리소스 누락: dartlab/core/data/dalio48Cases.json ({e})\n"
+            f"필수 번들 리소스 누락: dartlab/reference/data/dalio48Cases.json ({e})\n"
             f"  → pip install -U --force-reinstall dartlab\n"
             f"  (wheel 패키징 사고 시 이 파일이 빠질 수 있음)"
         ) from e

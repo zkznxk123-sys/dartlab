@@ -3507,7 +3507,7 @@
         "c.timeseries / c.annual / c.cumulative — 분기 · 연도 · 누적 시계열.",
         "c.ratios — 재무비율 (CFS 기본, OFS getRatios(\"OFS\")).",
         "from dartlab.finance.{affiliate, segment, summary, majorHolder, costByNature, rawMaterial}.",
-        "매핑 SSOT — engines.mappers ↔ core/data/accountMappings.json (34,171 entries)."
+        "매핑 SSOT — engines.mappers ↔ reference/data/accountMappings.json (34,171 entries)."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -8469,7 +8469,7 @@
         "RunPython prelude 의 `normalizeColumn(topic, hint)` 사용 — 한글/snake/alias → 표준 snake_id.",
         "가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.",
         "topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).",
-        "매핑 정의는 `src/dartlab/core/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR) — 사람이 JSON 직접 편집 후 `AccountMapper.release()` 호출.",
+        "매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR) — 사람이 JSON 직접 편집 후 `AccountMapper.release()` 호출.",
         "신규 매핑은 confidence + category + type 메타 함께 등록."
       ],
       "recipeSteps": [],

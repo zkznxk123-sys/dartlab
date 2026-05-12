@@ -1,7 +1,7 @@
 """reference — L1.5 JSON 룩업 + 매핑 엔진.
 
 정적 reference dataset (JSON) + 매핑 엔진 (BaseMapper 등). 현
-dartlab.core.data (JSON 8 종) + dartlab.reference.mappers (코드 8 종) 이 본
+dartlab.reference.data (JSON 8 종) + dartlab.reference.mappers (코드 8 종) 이 본
 위치로 이동 예정 (P-CORE B). 본 단계는 골격만.
 
 룰 (operation.architecture SSOT):
