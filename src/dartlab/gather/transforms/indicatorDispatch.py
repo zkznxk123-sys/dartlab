@@ -187,6 +187,12 @@ def addIndicators(
 
     Returns:
         pl.DataFrame — 입력 컬럼 + 지표 컬럼 추가.
+
+    Raises:
+        없음 — 미등록 지표나 컬럼 부족은 warning 후 스킵.
+
+    Example:
+        >>> df = addIndicators(ohlcv, indicators=["ma20", "rsi14"])
     """
     if not indicators or ohlcvDf.is_empty():
         return ohlcvDf
@@ -239,6 +245,15 @@ def computeIndicator(
     Returns
     -------
     pl.Series — longDf 의 row 순서와 동일한 indicator 값 (NaN 포함).
+
+    Raises
+    ------
+    ValueError
+        ``target`` 이 미등록 indicator 이거나 필요 컬럼이 longDf 에 없을 때.
+
+    Example
+    -------
+    >>> s = computeIndicator(longDf, "rsi14")
     """
     fn, kwargs, inputCols = _resolveIndicator(target)
     missing = [c for c in inputCols if c not in longDf.columns]

@@ -333,6 +333,15 @@ def getExogenousIndicators(
         stockCode: 종목코드. 있으면 kindList에서 업종/제품 자동 조회.
         industry: 업종명 (직접 지정).
         product: 주요제품 텍스트 (직접 지정).
+
+    Returns:
+        외생변수 ExogenousIndicator 리스트 (최대 3개).
+
+    Raises:
+        없음 — 매칭 실패 시 fallback ([IPI, BASE_RATE, USDKRW]) 반환.
+
+    Example:
+        >>> inds = getExogenousIndicators(stockCode="005930")
     """
     # stockCode에서 업종/제품 자동 조회
     # productIndex(공시 원문) 우선, kindList fallback
@@ -363,13 +372,41 @@ def getExogenousSeriesIds(
     industry: str | None = None,
     product: str | None = None,
 ) -> list[tuple[str, str]]:
-    """(seriesId, source) 튜플 리스트 반환. _loadMacroAligned에서 사용."""
+    """(seriesId, source) 튜플 리스트 반환. ``_loadMacroAligned`` 에서 사용.
+
+    Args:
+        stockCode: 종목코드.
+        industry: 업종명.
+        product: 주요제품 텍스트.
+
+    Returns:
+        ``[(seriesId, source), ...]`` 튜플 리스트 (최대 3개).
+
+    Raises:
+        없음 — 매칭 실패 시 fallback 반환.
+
+    Example:
+        >>> ids = getExogenousSeriesIds(stockCode="005930")
+    """
     indicators = getExogenousIndicators(stockCode, industry, product)
     return [(ind.seriesId, ind.source) for ind in indicators]
 
 
 def getExogenousSummary(stockCode: str) -> dict:
-    """기업의 외생변수 매핑 요약."""
+    """기업의 외생변수 매핑 요약.
+
+    Args:
+        stockCode: 종목코드.
+
+    Returns:
+        ``{stockCode, industry, product, indicators, axes, isFallback}`` 딕셔너리.
+
+    Raises:
+        없음 — 매칭 실패 시 fallback indicator 사용.
+
+    Example:
+        >>> summary = getExogenousSummary("005930")
+    """
     industry, product = _lookupFromKindList(stockCode)
     indicators = getExogenousIndicators(stockCode=stockCode)
 
@@ -432,7 +469,17 @@ def _lookupFromKindList(stockCode: str) -> tuple[str | None, str | None]:
 
 
 def getAllIndicators() -> list[ExogenousIndicator]:
-    """6축 전체 고유 지표 목록."""
+    """6축 전체 고유 지표 목록.
+
+    Returns:
+        6축 (커머디티/금리/환율/IPI/PPI/심리) 전체 ExogenousIndicator 리스트 (중복 seriesId 제거).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> all_inds = getAllIndicators()
+    """
     seen: set[str] = set()
     result: list[ExogenousIndicator] = []
     for ind in [

@@ -92,6 +92,12 @@ def getProductIndicators(stockCode: str) -> list[dict]:
     Returns:
         [{"seriesId": "IPG3344S", "source": "fred", "label": "반도체 생산"}, ...]
         빈 리스트이면 매핑 실패.
+
+    Raises:
+        없음 — kindList 조회 실패 시 빈 리스트.
+
+    Example:
+        >>> inds = getProductIndicators("005930")
     """
     product = _getProductText(stockCode)
     if not product:
@@ -135,8 +141,18 @@ def _getProductText(stockCode: str) -> str:
 def getProductSummary(stockCode: str) -> dict | None:
     """기업의 제품-지표 매핑 요약.
 
+    Args:
+        stockCode: 종목코드.
+
     Returns:
-        {"product": "반도체...", "indicators": [...], "keywords": ["반도체", "메모리"]}
+        {"product": "반도체...", "indicators": [...], "keywords": ["반도체", "메모리"]}.
+        kindList 조회 실패 시 None.
+
+    Raises:
+        없음 — kindList 실패 시 None.
+
+    Example:
+        >>> summary = getProductSummary("005930")
     """
     product = _getProductText(stockCode)
     if not product:

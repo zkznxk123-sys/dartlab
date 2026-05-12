@@ -106,6 +106,12 @@ def detectEventsFromPrices(
     Returns:
         pl.DataFrame — applyAdjustment 가 받는 events schema:
             BAS_DD, ISU_CD, type ("split"), ratio (newShares/oldShares), divPerShare (None).
+
+    Raises:
+        없음 — 빈 입력은 빈 events DataFrame 반환.
+
+    Example:
+        >>> events = detectEventsFromPrices(raw)
     """
     if raw.is_empty() or closeCol not in raw.columns or flucCol not in raw.columns:
         return pl.DataFrame(
@@ -197,6 +203,9 @@ def applyAdjustment(
     Notes:
         events.ratio 컨벤션: newShares/oldShares (50:1 split → 50.0).
         가격 조정 factor = 1 / ratio (가격 하향).
+
+    Raises:
+        없음 — events 부재나 raw 빈 DataFrame 모두 graceful 처리.
     """
     global _warned_no_events
 

@@ -40,6 +40,15 @@ def addChangeRate(df: pl.DataFrame, *, valueName: str = "value") -> pl.DataFrame
         yoyChange : float — 전년동기대비 변화량 (8행 이상 시)
         yoyChangePct : float — 전년동기대비 변화율 (%) (8행 이상 시)
         빈 DataFrame 또는 valueName 컬럼 미존재 시 원본 그대로 반환.
+
+    Raises
+    ------
+    없음
+        빈 입력은 원본 그대로 반환.
+
+    Example
+    -------
+    >>> out = addChangeRate(df)
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -95,6 +104,15 @@ def resampleToQuarterly(df: pl.DataFrame, *, valueName: str = "value", method: s
         date : date — 분기 시작일
         {valueName} : float — 집계된 지표값
         빈 DataFrame 또는 valueName 컬럼 미존재 시 원본 그대로 반환.
+
+    Raises
+    ------
+    KeyError
+        ``method`` 가 ``"last"``/``"mean"``/``"sum"`` 외일 때.
+
+    Example
+    -------
+    >>> q = resampleToQuarterly(df)
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -128,6 +146,15 @@ def resampleToAnnual(df: pl.DataFrame, *, valueName: str = "value", method: str 
         date : date — 연도 시작일
         {valueName} : float — 집계된 지표값
         빈 DataFrame 또는 valueName 컬럼 미존재 시 원본 그대로 반환.
+
+    Raises
+    ------
+    KeyError
+        ``method`` 가 ``"last"``/``"mean"``/``"sum"`` 외일 때.
+
+    Example
+    -------
+    >>> a = resampleToAnnual(df)
     """
     if df.is_empty() or valueName not in df.columns:
         return df
@@ -162,6 +189,15 @@ def saveMacroParquet(indicatorId: str, df: pl.DataFrame, *, source: str = "ecos"
     -------
     Path
         저장된 Parquet 파일 경로 (``~/.dartlab/cache/macro/{source}/{indicatorId}.parquet``).
+
+    Raises
+    ------
+    OSError
+        디렉터리 생성/파일 쓰기 실패.
+
+    Example
+    -------
+    >>> p = saveMacroParquet("GDP", df, source="fred")
     """
     dirPath = _CACHE_DIR / source
     dirPath.mkdir(parents=True, exist_ok=True)
@@ -189,6 +225,15 @@ def loadMacroParquet(indicatorId: str, *, source: str = "ecos") -> pl.DataFrame 
         changePct : float — 전기대비 변화율 (%), enrichAndCache 사용 시
         yoyChangePct : float — 전년동기대비 변화율 (%), enrichAndCache 사용 시
         캐시 파일 없거나 읽기 실패 시 None.
+
+    Raises
+    ------
+    없음
+        파일 부재 또는 읽기 오류 (OSError/ValueError/ImportError) 는 None 반환 + warning.
+
+    Example
+    -------
+    >>> df = loadMacroParquet("GDP", source="fred")
     """
     path = _CACHE_DIR / source / f"{indicatorId}.parquet"
     if not path.exists():
@@ -232,6 +277,15 @@ def enrichAndCache(
         changePct : float — 전기대비 변화율 (%)
         yoyChange : float — 전년동기대비 변화량 (8행 이상 시)
         yoyChangePct : float — 전년동기대비 변화율 (%) (8행 이상 시)
+
+    Raises
+    ------
+    OSError
+        saveMacroParquet 의 파일 쓰기 실패 시.
+
+    Example
+    -------
+    >>> out = enrichAndCache("GDP", df, source="fred")
     """
     enriched = addChangeRate(df, valueName=valueName)
     saveMacroParquet(indicatorId, enriched, source=source)
@@ -267,6 +321,15 @@ def alignToFinancialPeriods(
     pl.DataFrame
         period : str — 재무 기간 레이블
         value : float | None — 해당 기간 기말 지표값
+
+    Raises
+    ------
+    ValueError
+        ``period`` 가 4자리 연도로 시작하지 않을 때 (int 변환 실패).
+
+    Example
+    -------
+    >>> aligned = alignToFinancialPeriods(macroDf, ["2024A", "2024Q3"])
     """
     if macroDf.is_empty():
         return pl.DataFrame({"period": periods, "value": [None] * len(periods)})
