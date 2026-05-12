@@ -692,7 +692,7 @@ def _docsConditionValues(cond: dict[str, Any], spec: dict[str, Any]) -> pl.DataF
     hits = search(query, limit=top_k, scope=scope)
     if hits is None or hits.is_empty() or "info" in hits.columns:
         return pl.DataFrame({"stockCode": [], field: []})
-    sc_col = "stockCode" if "stockCode" in hits.columns else None
+    sc_col = "stock_code" if "stock_code" in hits.columns else "stockCode" if "stockCode" in hits.columns else None
     if sc_col is None:
         return pl.DataFrame({"stockCode": [], field: []})
     text_col = "text" if "text" in hits.columns else "section_title" if "section_title" in hits.columns else sc_col
