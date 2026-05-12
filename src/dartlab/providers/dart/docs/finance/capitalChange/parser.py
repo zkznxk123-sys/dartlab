@@ -14,6 +14,15 @@ def parseAmount(text: str) -> int | None:
 
     Example:
         >>> parseAmount(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     if not text or not isinstance(text, str):
         return None
@@ -48,6 +57,15 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -76,6 +94,15 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -96,6 +123,15 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -121,6 +157,15 @@ def parseCapitalChangeTable(block: list[str]) -> dict | None:
 
     Example:
         >>> parseCapitalChangeTable(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 4:
@@ -231,6 +276,15 @@ def parseShareTotalTable(block: list[str]) -> dict | None:
 
     Example:
         >>> parseShareTotalTable(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 5:
@@ -326,6 +380,15 @@ def parseTreasuryStockTable(block: list[str]) -> dict | None:
 
     Example:
         >>> parseTreasuryStockTable(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 5:

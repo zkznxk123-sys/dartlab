@@ -19,6 +19,15 @@ def detectBreakpoints(
 
     Example:
         >>> detectBreakpoints(...)
+
+    Returns:
+        <TODO: return desc> (tuple[list[Segment], list[BridgeResult]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     segments: list[dict] = [{"years": [sortedYears[0]], "pairs": []}]
     breakpoints: list[BridgeResult] = []

@@ -154,6 +154,19 @@ def collectMetaDay(
 
     Example:
         >>> collectMetaDay(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     if client is None:
         client = DartClient()
@@ -221,6 +234,26 @@ def collectMetaRange(
 
     Example:
         >>> collectMetaRange(...)
+
+    Args:
+        startDate: <TODO: param desc> (str)
+        endDate: <TODO: param desc> (str)
+        client: <TODO: param desc> (DartClient | None)
+        corpClasses: <TODO: param desc> (list[str] | None)
+        showProgress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     from datetime import datetime, timedelta
 
@@ -280,6 +313,19 @@ def fillContent(
 
     Example:
         >>> fillContent(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     if client is None:
         client = DartClient()
@@ -398,6 +444,23 @@ def fillContentAll(
 
     Example:
         >>> fillContentAll(...)
+
+    Args:
+        client: <TODO: param desc> (DartClient | None)
+        showProgress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     if client is None:
         client = DartClient()
@@ -446,6 +509,19 @@ def collectedDates() -> list[str]:
 
     Example:
         >>> collectedDates(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     outDir = _allFilingsDir()
     dates = sorted(
@@ -466,6 +542,19 @@ def pendingDates() -> list[str]:
 
     Example:
         >>> pendingDates(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     outDir = _allFilingsDir()
     dates = sorted(
@@ -486,6 +575,19 @@ def loadDay(period: str) -> pl.DataFrame | None:
 
     Example:
         >>> loadDay(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     path = _allFilingsDir() / f"{period}.parquet"
     if not path.exists():
@@ -505,6 +607,19 @@ def loadAll() -> pl.DataFrame:
 
     Example:
         >>> loadAll(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     outDir = _allFilingsDir()
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
@@ -524,6 +639,19 @@ def stats() -> dict:
 
     Example:
         >>> stats(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - io
+        - polars
+        - zipfile
     """
     completed = collectedDates()
     pending = pendingDates()

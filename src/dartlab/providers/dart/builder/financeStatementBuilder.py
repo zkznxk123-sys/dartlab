@@ -62,6 +62,13 @@ def sceMatrix(company: Company):
 
     Example:
         >>> sceMatrix(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not company._hasFinance:
         return None
@@ -89,6 +96,13 @@ def sceSeriesAnnual(company: Company):
 
     Example:
         >>> sceSeriesAnnual(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not company._hasFinance:
         return None
@@ -116,6 +130,13 @@ def sce(company: Company) -> pl.DataFrame | None:
 
     Example:
         >>> sce(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cacheKey = "_sceDataFrame_CFS"
     if cacheKey in company._cache:
@@ -152,6 +173,13 @@ def financeCisAnnual(company: Company):
 
     Example:
         >>> financeCisAnnual(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not company._hasFinance:
         return None
@@ -177,6 +205,13 @@ def financeCisQuarterly(company: Company):
 
     Example:
         >>> financeCisQuarterly(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not company._hasFinance:
         return None
@@ -204,6 +239,13 @@ def aggregateCisAnnual(qDf: pl.DataFrame) -> pl.DataFrame | None:
 
     Example:
         >>> aggregateCisAnnual(cis_quarterly_df)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     yearGroups: dict[str, list[str]] = {}
     for col in qDf.columns:
@@ -243,6 +285,13 @@ def ratioSeries(company: Company):
 
     Example:
         >>> ratioSeries(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not company._hasFinance:
         return None
@@ -281,6 +330,13 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
     Example:
         >>> buildRatios(c)  # 내부 — 사용자는 c.show("ratios")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     rs = ratioSeries(company)
     if rs is None:
@@ -317,6 +373,13 @@ def financeStmt(company: Company, sjDiv: str, *, freq: str = "Q", scope: str = "
 
     Example:
         >>> financeStmt(c, "IS", freq="Y")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cacheKey = f"_financeStmt_{sjDiv}_{freq}_{scope}"
     if cacheKey in company._cache:
@@ -354,6 +417,13 @@ def financeOrDocsStatement(
 
     Example:
         >>> financeOrDocsStatement(c, "BS")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     # CIS 는 별도 quarterly 캐시 — annual 은 4분기 합산 합성
     if sjDiv == "CIS" and scope == "consolidated":
@@ -398,6 +468,13 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
 
     Example:
         >>> buildFinanceSeries(c, freq="Y", scope="separate")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나여야 합니다 (받음: {freq!r})")

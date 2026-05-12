@@ -28,6 +28,16 @@ def pivotDividend(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> Divi
 
     Example:
         >>> pivotDividend(...)
+
+    Returns:
+        <TODO: return desc> (DividendResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractAnnual(stockCode, "dividend", quarterNum=4, baseDf=baseDf)
     if df is None:
@@ -71,6 +81,16 @@ def pivotEmployee(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> Empl
 
     Example:
         >>> pivotEmployee(...)
+
+    Returns:
+        <TODO: return desc> (EmployeeResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractAnnual(stockCode, "employee", quarterNum=2, baseDf=baseDf)
     if df is None:
@@ -129,6 +149,16 @@ def pivotMajorHolder(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> M
 
     Example:
         >>> pivotMajorHolder(...)
+
+    Returns:
+        <TODO: return desc> (MajorHolderResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractAnnual(stockCode, "majorHolder", quarterNum=2, baseDf=baseDf)
     if df is None:
@@ -199,6 +229,16 @@ def pivotExecutive(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> Exe
 
     Example:
         >>> pivotExecutive(...)
+
+    Returns:
+        <TODO: return desc> (ExecutiveResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractClean(stockCode, "executive", baseDf=baseDf)
     if df is None:
@@ -235,6 +275,16 @@ def pivotAudit(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> AuditRe
 
     Example:
         >>> pivotAudit(...)
+
+    Returns:
+        <TODO: return desc> (AuditResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractAnnual(stockCode, "auditOpinion", quarterNum=4, baseDf=baseDf)
     if df is None:

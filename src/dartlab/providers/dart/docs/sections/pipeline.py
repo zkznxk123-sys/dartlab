@@ -111,6 +111,14 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
 
     Example:
         >>> clearPreparedCache(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - gc
+        - polars
     """
     if stockCode is None:
         _preparedCache.clear()
@@ -261,6 +269,17 @@ def iterPeriodSubsets(
 
     Example:
         >>> iterPeriodSubsets(...)
+
+    Returns:
+        <TODO: return desc> (Iterator[tuple[str, str, str, pl.DataFrame]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - gc
+        - polars
     """
     df = loadData(stockCode, sinceYear=sinceYear, columns=_SECTIONS_REQUIRED_COLS)
     ccol = detectContentCol(df)
@@ -666,6 +685,14 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
 
     Example:
         >>> sections(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - gc
+        - polars
     """
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}

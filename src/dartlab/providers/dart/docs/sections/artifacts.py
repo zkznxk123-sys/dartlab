@@ -26,6 +26,18 @@ def packagedArtifactPath(name: str) -> Iterator[Path]:
 
     Example:
         >>> packagedArtifactPath(...)
+
+    Returns:
+        <TODO: return desc> (Iterator[Path])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - functools
+        - importlib
+        - polars
     """
     ref = files(_PROFILE_PACKAGE) / name
     with as_file(ref) as path:
@@ -50,6 +62,18 @@ def loadProjectionRules(chapter: str) -> dict[str, list[str]]:
 
     Example:
         >>> loadProjectionRules(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - functools
+        - importlib
+        - polars
     """
     filename = f"projectionRules.{chapter}.json"
     try:
@@ -79,6 +103,18 @@ def loadSectionProfileTable() -> pl.DataFrame | None:
 
     Example:
         >>> loadSectionProfileTable(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - functools
+        - importlib
+        - polars
     """
     try:
         with packagedArtifactPath("sectionProfileTable.parquet") as path:

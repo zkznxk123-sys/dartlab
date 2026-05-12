@@ -70,6 +70,13 @@ def parseShareCapitalTable(content: str, *, includePreferred: bool = False) -> d
 
     Example:
         >>> parseShareCapitalTable(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     result: dict = {}
@@ -140,6 +147,13 @@ def shareCapital(stockCode: str) -> ShareCapitalResult | None:
 
     Example:
         >>> shareCapital(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
@@ -254,6 +268,13 @@ def buildSharesOutstandingScan(
 
     Example:
         >>> buildSharesOutstandingScan(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     import logging
     from pathlib import Path

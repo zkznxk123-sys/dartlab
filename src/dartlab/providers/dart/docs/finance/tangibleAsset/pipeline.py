@@ -23,6 +23,13 @@ def tangibleAsset(stockCode: str) -> TangibleAssetResult | None:
 
     Example:
         >>> tangibleAsset(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

@@ -43,6 +43,16 @@ def parseTenure(text: str) -> float | None:
 
     Example:
         >>> parseTenure(...)
+
+    Returns:
+        <TODO: return desc> (float | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not text or text.strip() in ("", "-"):
         return None
@@ -97,6 +107,16 @@ def parseEmployeeTable(content: str) -> dict:
 
     Example:
         >>> parseEmployeeTable(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
 
@@ -171,6 +191,13 @@ def employee(stockCode: str) -> EmployeeResult | None:
 
     Example:
         >>> employee(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

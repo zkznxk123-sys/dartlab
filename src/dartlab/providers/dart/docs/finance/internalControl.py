@@ -47,6 +47,16 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -75,6 +85,16 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -95,6 +115,16 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -118,6 +148,16 @@ def parseInternalControlTable(block: list[str]) -> list[dict]:
 
     Example:
         >>> parseInternalControlTable(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 3:
@@ -222,6 +262,13 @@ def internalControl(stockCode: str) -> InternalControlResult | None:
 
     Example:
         >>> internalControl(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

@@ -227,6 +227,12 @@ class AccountMapper:
         Example:
             >>> mapper = AccountMapper.get()
             >>> mapper.map("ifrs-full_Revenue", "매출액")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         if cls._instance is None:
             cls._instance = cls()
@@ -244,6 +250,12 @@ class AccountMapper:
 
         Example:
             >>> AccountMapper.release()  # accountMappings.json 갱신 후
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         cls._instance = None
         cls._mappings = None
@@ -294,6 +306,12 @@ class AccountMapper:
         Example:
             >>> mapper.map("ifrs-full_Revenue", "매출액")
             'sales'
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         stripped = _stripPrefix(accountId) if accountId else ""
         normalizedId = ID_SYNONYMS.get(stripped, stripped)
@@ -340,6 +358,12 @@ class AccountMapper:
         Example:
             >>> mapper.labelMap()["sales"]
             '매출액'
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.core.utils.labels import getKoreanLabels
 

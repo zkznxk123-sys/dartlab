@@ -29,6 +29,9 @@ def normalizeTitle(title: str) -> str:
 
     Example:
         >>> normalizeTitle(...)
+
+    Returns:
+        <TODO: return desc> (str)
     """
     return stripSectionPrefix((title or "").strip())
 
@@ -44,6 +47,9 @@ def isBoilerplateTopic(topic: str) -> bool:
 
     Example:
         >>> isBoilerplateTopic(...)
+
+    Returns:
+        <TODO: return desc> (bool)
     """
     return topic in {
         "사업보고서",
@@ -65,6 +71,16 @@ def isPlaceholderBlock(blockText: str) -> bool:
 
     Example:
         >>> isPlaceholderBlock(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     text = blockText.strip()
     if not text:
@@ -100,6 +116,16 @@ def blockPriority(
 
     Example:
         >>> blockPriority(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isBoilerplate:
         return 0
@@ -127,6 +153,16 @@ def classifyContent(content: str) -> tuple[int, int, int]:
 
     Example:
         >>> classifyContent(...)
+
+    Returns:
+        <TODO: return desc> (tuple[int, int, int])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     table_lines = 0
     heading_lines = 0
@@ -156,6 +192,16 @@ def buildMarkdownBlocks(stockCode: str) -> pl.DataFrame:
 
     Example:
         >>> buildMarkdownBlocks(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     rows: list[dict[str, object]] = []
 
@@ -195,6 +241,16 @@ def buildMarkdownWide(blocks: pl.DataFrame) -> pl.DataFrame:
 
     Example:
         >>> buildMarkdownWide(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if blocks.height == 0:
         return pl.DataFrame()
@@ -228,6 +284,16 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
 
     Example:
         >>> splitMarkdownBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[dict[str, object]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     rows: list[dict[str, object]] = []
     currentLabel = "(root)"
@@ -243,6 +309,13 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
 
         Example:
             >>> flushText(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         nonlocal textBuffer, blockIndex
         text = "\n".join(textBuffer).strip()
@@ -267,6 +340,13 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
 
         Example:
             >>> flushTable(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         nonlocal tableBuffer, blockIndex
         text = "\n".join(tableBuffer).strip()
@@ -291,6 +371,13 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
 
         Example:
             >>> flushAll(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         flushText()
         flushTable()
@@ -445,6 +532,16 @@ def retrievalBlocks(stockCode: str) -> pl.DataFrame:
 
     Example:
         >>> retrievalBlocks(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     # 1단계: Python에서 split까지 처리 → 컬럼별 리스트 (가장 빠른 경로)
     cPeriod: list[str] = []
@@ -576,6 +673,16 @@ def splitContextText(text: str, maxChars: int) -> list[str]:
 
     Example:
         >>> splitContextText(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     text = text.strip()
     if not text:
@@ -612,6 +719,16 @@ def splitMarkdownTable(text: str, maxChars: int) -> list[str]:
 
     Example:
         >>> splitMarkdownTable(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
     if not lines:
@@ -651,6 +768,16 @@ def contextSlices(stockCode: str, *, maxChars: int = 1800) -> pl.DataFrame:
 
     Example:
         >>> contextSlices(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     blocks = retrievalBlocks(stockCode)
     rows: list[dict[str, object]] = []
@@ -728,6 +855,13 @@ def saveView(df: pl.DataFrame, path: Path) -> None:
 
     Example:
         >>> saveView(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     df.write_parquet(path)

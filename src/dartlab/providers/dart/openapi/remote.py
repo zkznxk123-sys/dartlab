@@ -42,6 +42,17 @@ class RemoteDartClient:
 
         Example:
             >>> getJson(...)
+
+        Returns:
+            <TODO: return desc> (dict)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - logging
+            - polars
         """
         url = f"{self._base}/api/dart{endpoint}"
         resp = self._session.get(url, params=params)
@@ -61,6 +72,17 @@ class RemoteDartClient:
 
         Example:
             >>> getDf(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - logging
+            - polars
         """
         data = self.getJson(endpoint, params)
         rows = data.get("rows", data.get(listKey, []))
@@ -82,5 +104,8 @@ class RemoteDartClient:
 
         Example:
             >>> getDfAll(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
         """
         return self.getDf(endpoint, params, listKey=listKey)

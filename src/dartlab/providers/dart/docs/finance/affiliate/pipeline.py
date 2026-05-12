@@ -39,6 +39,13 @@ def affiliates(
 
     Example:
         >>> affiliates(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

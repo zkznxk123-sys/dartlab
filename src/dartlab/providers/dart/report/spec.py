@@ -14,6 +14,15 @@ def buildSpec() -> dict:
 
     Example:
         >>> buildSpec(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES
 

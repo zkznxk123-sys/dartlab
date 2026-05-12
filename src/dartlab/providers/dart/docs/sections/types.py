@@ -55,6 +55,17 @@ class YearSections:
 
         Example:
             >>> savings(...)
+
+        Returns:
+            <TODO: return desc> (float)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         if self.totalOriginalChars == 0:
             return 0.0
@@ -71,6 +82,9 @@ class YearSections:
 
         Example:
             >>> byMajor(...)
+
+        Returns:
+            <TODO: return desc> (list[SectionChunk])
         """
         return [c for c in self.chunks if c.majorNum == majorNum]
 
@@ -85,6 +99,9 @@ class YearSections:
 
         Example:
             >>> byKind(...)
+
+        Returns:
+            <TODO: return desc> (list[SectionChunk])
         """
         return [c for c in self.chunks if c.kind == kind]
 
@@ -99,6 +116,9 @@ class YearSections:
 
         Example:
             >>> textChunks(...)
+
+        Returns:
+            <TODO: return desc> (list[SectionChunk])
         """
         return [c for c in self.chunks if c.kind not in ("skipped", "table_only")]
 
@@ -117,6 +137,14 @@ class YearSections:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         kw = keyword.lower()
         hits = [c for c in self.chunks if kw in c.path.lower() or kw in c.textContent.lower()]
@@ -135,6 +163,17 @@ class YearSections:
 
         Example:
             >>> toLinesDf(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         rows: list[dict] = []
         for c in self.textChunks():
@@ -166,6 +205,17 @@ class YearSections:
 
         Example:
             >>> toLeafMap(...)
+
+        Returns:
+            <TODO: return desc> (dict[str, str])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         merged: dict[str, list[str]] = {}
         for c in self.textChunks():
@@ -230,6 +280,9 @@ class SectionResult:
 
         Example:
             >>> topics(...)
+
+        Returns:
+            <TODO: return desc> (list[str])
         """
         return sorted(self._topicMap.keys())
 
@@ -245,6 +298,17 @@ class SectionResult:
 
         Example:
             >>> latest(...)
+
+        Returns:
+            <TODO: return desc> (YearSections | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         if not self.periods:
             return None
@@ -262,6 +326,9 @@ class SectionResult:
 
         Example:
             >>> years(...)
+
+        Returns:
+            <TODO: return desc> (list[str])
         """
         return self.periods
 
@@ -280,6 +347,14 @@ class SectionResult:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         kw = keyword.lower()
         hits = {t: series for t, series in self._topicMap.items() if kw in t.lower()}
@@ -298,6 +373,17 @@ class SectionResult:
 
         Example:
             >>> overview(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         records: list[dict] = []
         for topic, series in self._topicMap.items():
@@ -325,6 +411,17 @@ class SectionResult:
 
         Example:
             >>> compare(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         ysA = self.yearSections.get(periodA)
         ysB = self.yearSections.get(periodB)
@@ -392,6 +489,17 @@ class SectionResult:
 
         Example:
             >>> diff(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - hashlib
+            - polars
         """
         ysA = self.yearSections.get(periodA)
         ysB = self.yearSections.get(periodB)

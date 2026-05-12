@@ -29,6 +29,15 @@ def detectContentCol(df: pl.DataFrame) -> str:
 
     Example:
         >>> detectContentCol(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if "section_content" in df.columns:
         return "section_content"
@@ -46,6 +55,15 @@ def periodSortKey(period: str) -> tuple[int, int]:
 
     Example:
         >>> periodSortKey(...)
+
+    Returns:
+        <TODO: return desc> (tuple[int, int])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     value = str(period)
     if "Q" in value:
@@ -65,6 +83,9 @@ def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
 
     Example:
         >>> sortPeriods(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
     """
     return sorted(periods, key=periodSortKey, reverse=descending)
 
@@ -80,6 +101,15 @@ def periodOrderValue(period: str) -> int:
 
     Example:
         >>> periodOrderValue(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     year, slot = periodSortKey(period)
     return year * 10 + slot
@@ -96,6 +126,9 @@ def basePath(path: str) -> str:
 
     Example:
         >>> basePath(...)
+
+    Returns:
+        <TODO: return desc> (str)
     """
     return RE_SPLIT_SUFFIX.sub("", path)
 
@@ -111,6 +144,15 @@ def rawPeriod(period: str) -> str:
 
     Example:
         >>> rawPeriod(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     value = str(period).strip()
     match = RE_ANNUAL_Q4_ALIAS.fullmatch(value)
@@ -131,6 +173,15 @@ def displayPeriod(period: str, *, annualAsQ4: bool = False) -> str:
 
     Example:
         >>> displayPeriod(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     value = rawPeriod(period)
     if annualAsQ4 and RE_PERIOD.fullmatch(value) and "Q" not in value:
@@ -156,6 +207,15 @@ def periodColumns(
 
     Example:
         >>> periodColumns(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     ordered = sortPeriods([str(col) for col in columns if RE_PERIOD.fullmatch(str(col))], descending=descending)
     return [displayPeriod(period, annualAsQ4=annualAsQ4) for period in ordered]
@@ -179,6 +239,15 @@ def formatPeriodRange(
 
     Example:
         >>> formatPeriodRange(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     ordered = sortPeriods([rawPeriod(period) for period in periods], descending=descending)
     if not ordered:
@@ -205,6 +274,15 @@ def reorderPeriodColumns(
 
     Example:
         >>> reorderPeriodColumns(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     periodCols = [str(col) for col in df.columns if RE_PERIOD.fullmatch(str(col))]
     if not periodCols:

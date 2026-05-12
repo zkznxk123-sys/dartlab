@@ -23,6 +23,12 @@ def buildSpec() -> dict:
         >>> spec = buildSpec()
         >>> spec["summary"]["statements"]
         ['IS', 'BS', 'CF', 'SCE']
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     import dataclasses
 

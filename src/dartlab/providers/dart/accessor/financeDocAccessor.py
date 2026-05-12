@@ -31,6 +31,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().sanction("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.docs.finance.sanction import sanction
 
@@ -53,6 +59,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().contingentLiability("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.docs.finance.contingentLiability import contingentLiability
 
@@ -75,6 +87,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().executive("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.docs.finance.executive import executive
 
@@ -97,6 +115,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().relatedPartyTx("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.docs.finance.relatedPartyTx import relatedPartyTx
 
@@ -119,6 +143,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().pivotDividend("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.report.pivot import pivotDividend
 
@@ -141,6 +171,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().buildAnnual("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.finance.pivot import buildAnnual
 
@@ -163,6 +199,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().buildTimeseries("005930")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         from dartlab.providers.dart.finance.pivot import buildTimeseries
 
@@ -182,6 +224,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().accountLabels()["sales"]
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         try:
             from dartlab.providers.dart.finance.mapper import AccountMapper
@@ -201,6 +249,12 @@ class DartFinanceDocAccessor:
 
         Example:
             >>> DartFinanceDocAccessor().exportModules()[:5]
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         try:
             from dartlab.providers.dart.company import listExportModules

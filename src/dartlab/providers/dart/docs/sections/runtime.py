@@ -47,6 +47,9 @@ def chapterFromMajorNum(majorNum: int) -> str | None:
 
     Example:
         >>> chapterFromMajorNum(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
     """
     return _CHAPTER_BY_MAJOR.get(majorNum)
 
@@ -62,6 +65,9 @@ def baseChunkPath(path: str) -> str:
 
     Example:
         >>> baseChunkPath(...)
+
+    Returns:
+        <TODO: return desc> (str)
     """
     return RE_SPLIT_SUFFIX.sub("", path)
 
@@ -77,6 +83,15 @@ def chapterTeacherTopics(rows: list[dict[str, object]]) -> dict[str, set[str]]:
 
     Example:
         >>> chapterTeacherTopics(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, set[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     teacher: dict[str, set[str]] = {}
     for row in rows:
@@ -99,6 +114,15 @@ def projectionSuppressedTopics() -> dict[str, set[str]]:
 
     Example:
         >>> projectionSuppressedTopics(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, set[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     rules = loadProjectionRules("chapterII")
     suppressed = set(rules.keys())
@@ -117,6 +141,15 @@ def splitByMajorHeading(text: str) -> list[tuple[str, str]]:
 
     Example:
         >>> splitByMajorHeading(...)
+
+    Returns:
+        <TODO: return desc> (list[tuple[str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = [line.rstrip() for line in text.splitlines()]
     segments: list[tuple[str, list[str]]] = []
@@ -153,6 +186,15 @@ def extractSemanticUnits(topic: str, text: str) -> list[tuple[str, str]]:
 
     Example:
         >>> extractSemanticUnits(...)
+
+    Returns:
+        <TODO: return desc> (list[tuple[str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     if topic in {"segmentOverview", "segmentFinancialSummary", "riskDerivative"}:
         return splitByMajorHeading(text)
@@ -171,6 +213,15 @@ def semanticTopicForLabel(topic: str, label: str) -> str | None:
 
     Example:
         >>> semanticTopicForLabel(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     if topic in _ATOMIC_SEMANTIC_TOPICS:
         return topic
@@ -244,6 +295,15 @@ def semanticTopicForBlock(topic: str, label: str, blockType: str, blockText: str
 
     Example:
         >>> semanticTopicForBlock(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     direct = semanticTopicForLabel(topic, label)
     if direct:
@@ -284,6 +344,9 @@ def detailTopicForTopic(topic: str) -> str | None:
 
     Example:
         >>> detailTopicForTopic(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
     """
     return _DETAIL_TOPIC_MAP.get(topic)
 
@@ -309,6 +372,15 @@ def detailTopicForBlock(
 
     Example:
         >>> detailTopicForBlock(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     direct = detailTopicForTopic(topic)
     if direct:
@@ -407,6 +479,15 @@ def applyProjections(
 
     Example:
         >>> applyProjections(...)
+
+    Returns:
+        <TODO: return desc> (list[dict[str, object]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     if not rows:
         return rows

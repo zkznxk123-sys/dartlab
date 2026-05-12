@@ -96,6 +96,9 @@ class DartClient:
 
         Example:
             >>> currentKey(...)
+
+        Returns:
+            <TODO: return desc> (str)
         """
         return self._keys[self._keyIndex]
 
@@ -131,6 +134,23 @@ class DartClient:
 
         Example:
             >>> getJson(...)
+
+        Args:
+            endpoint: <TODO: param desc> (str)
+            params: <TODO: param desc> (dict[str, Any] | None)
+            emptyOn013: <TODO: param desc> (bool)
+
+        Returns:
+            <TODO: return desc> (dict[str, Any])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - httpx
+            - polars
+            - time
         """
         triedKeys = 0
         while triedKeys < len(self._keys):
@@ -178,6 +198,18 @@ class DartClient:
 
         Example:
             >>> getBytes(...)
+
+        Returns:
+            <TODO: return desc> (bytes)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - httpx
+            - polars
+            - time
         """
         triedKeys = 0
         while triedKeys < len(self._keys):
@@ -225,6 +257,18 @@ class DartClient:
 
         Example:
             >>> getDf(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - httpx
+            - polars
+            - time
         """
         data = self.getJson(endpoint, params, emptyOn013=True)
         rows = data.get(listKey, [])
@@ -252,6 +296,18 @@ class DartClient:
 
         Example:
             >>> getDfAll(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - httpx
+            - polars
+            - time
         """
         merged = dict(params) if params else {}
         merged["page_count"] = str(pageSize)

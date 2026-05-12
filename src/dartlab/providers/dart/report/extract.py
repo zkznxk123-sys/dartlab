@@ -33,6 +33,13 @@ def extractRaw(
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.dataLoader import loadData
 
@@ -87,6 +94,16 @@ def extractClean(
 
     Example:
         >>> extractClean(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractRaw(stockCode, apiType, baseDf=baseDf)
     if df is None:
@@ -118,6 +135,13 @@ def extractAnnual(
 
     Example:
         >>> extractAnnual(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractClean(stockCode, apiType, baseDf=baseDf)
     if df is None:
@@ -159,6 +183,16 @@ def extractResult(
 
     Example:
         >>> extractResult(...)
+
+    Returns:
+        <TODO: return desc> (ReportResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = extractAnnual(stockCode, apiType, quarterNum, baseDf=baseDf)
     if df is None:

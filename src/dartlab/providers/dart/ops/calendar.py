@@ -62,6 +62,20 @@ def predictCalendar(
 
     Example:
         >>> predictCalendar(...)
+
+    Args:
+        disclosures: <TODO: param desc> (dict[str, pl.DataFrame])
+        horizonDays: <TODO: param desc> (int)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - polars
     """
     if not disclosures:
         return pl.DataFrame(schema=OUTPUT_SCHEMA)

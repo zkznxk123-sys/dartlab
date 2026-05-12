@@ -29,6 +29,16 @@ def projectFreqRows(
 
     Example:
         >>> projectFreqRows(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if df.is_empty() or "freqScope" not in df.columns:
         return df
@@ -418,6 +428,16 @@ def semanticRegistry(
 
     Example:
         >>> semanticRegistry(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(df):
         return _emptySemanticRegistryFrame()
@@ -517,6 +537,16 @@ def structureRegistry(
 
     Example:
         >>> structureRegistry(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(df):
         return _emptyStructureRegistryFrame()
@@ -637,6 +667,16 @@ def structureCollisions(
 
     Example:
         >>> structureCollisions(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     registry = structureRegistry(
         df,
@@ -673,6 +713,16 @@ def structureEvents(
 
     Example:
         >>> structureEvents(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(df):
         return _emptyStructureEventsFrame()
@@ -795,6 +845,16 @@ def structureSummary(
 
     Example:
         >>> structureSummary(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     registry = structureRegistry(
         df,
@@ -900,6 +960,16 @@ def structureChanges(
 
     Example:
         >>> structureChanges(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     summary = structureSummary(
         df,
@@ -969,6 +1039,16 @@ def semanticCollisions(
 
     Example:
         >>> semanticCollisions(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     registry = semanticRegistry(df, topic=topic, freqScope=freqScope, includeMixed=includeMixed)
     if registry.is_empty():

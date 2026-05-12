@@ -163,6 +163,23 @@ def buildNgramIndex(
 
     Example:
         >>> buildNgramIndex(...)
+
+    Args:
+        parquetPaths: <TODO: param desc> (list[str | Path] | None)
+        includeDocs: <TODO: param desc> (bool)
+        docsBatchSize: <TODO: param desc> (int)
+        showProgress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     import time
 
@@ -499,6 +516,17 @@ def searchNgram(
 
     Example:
         >>> searchNgram(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     index, meta = _loadIndex()
     if not index or meta.height == 0:
@@ -657,6 +685,17 @@ def ngramStats() -> dict:
 
     Example:
         >>> ngramStats(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     outDir = _stemIndexDir()
     npzPath = outDir / "stemIndex.npz"
@@ -699,6 +738,17 @@ def pushStemIndex(*, token: str | None = None) -> str:
 
     Example:
         >>> pushStemIndex(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     from huggingface_hub import HfApi
 
@@ -732,6 +782,17 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
 
     Example:
         >>> pullStemIndex(...)
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     from huggingface_hub import snapshot_download
 
@@ -796,6 +857,14 @@ def iterNgram(
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     df = searchNgram(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():

@@ -89,6 +89,16 @@ def buildTableDf(
 
     Example:
         >>> buildTableDf(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     import polars as pl
 
@@ -190,6 +200,13 @@ def notesDetail(
 
     Example:
         >>> notesDetail(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

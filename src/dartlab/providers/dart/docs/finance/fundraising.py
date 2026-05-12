@@ -51,6 +51,16 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -71,6 +81,16 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -87,6 +107,16 @@ def parseAmount(text: str) -> int | None:
 
     Example:
         >>> parseAmount(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not text or not isinstance(text, str):
         return None
@@ -120,6 +150,16 @@ def parseEquityIssuance(content: str) -> list[dict]:
 
     Example:
         >>> parseEquityIssuance(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -210,6 +250,16 @@ def fundraising(stockCode: str) -> FundraisingResult | None:
 
     Example:
         >>> fundraising(...)
+
+    Returns:
+        <TODO: return desc> (FundraisingResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     try:
         df = loadData(stockCode)

@@ -56,6 +56,16 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -76,6 +86,16 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -92,6 +112,16 @@ def parseAmount(text: str) -> int | None:
 
     Example:
         >>> parseAmount(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not text or not isinstance(text, str):
         return None
@@ -128,6 +158,16 @@ def detectUnit(content: str) -> str:
 
     Example:
         >>> detectUnit(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
@@ -197,6 +237,16 @@ def parseSalesTable(content: str) -> tuple[list[dict], list[str]]:
 
     Raises:
         없음.
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -274,6 +324,16 @@ def parseOrderBacklog(content: str) -> tuple[list[dict], list[str]]:
 
     Example:
         >>> parseOrderBacklog(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -367,6 +427,16 @@ def salesOrder(stockCode: str) -> SalesOrderResult | None:
 
     Example:
         >>> salesOrder(...)
+
+    Returns:
+        <TODO: return desc> (SalesOrderResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     try:
         df = loadData(stockCode)

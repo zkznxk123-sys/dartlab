@@ -115,6 +115,13 @@ def companyScanView(company: Company, df: pl.DataFrame | None, view: str | None)
 
     Example:
         >>> companyScanView(c, df, view="market")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(df):
         return None
@@ -174,6 +181,13 @@ def buildScanNetwork(company: Company, view: str | None = None, *, hops: int = 1
 
     Example:
         >>> buildScanNetwork(c, view="members")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     result = _ensureNetwork(company)
     if result is None:

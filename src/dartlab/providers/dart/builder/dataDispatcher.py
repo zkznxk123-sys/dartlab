@@ -66,6 +66,13 @@ def showFinanceTopic(
 
     Example:
         >>> showFinanceTopic(c, "IS", freq="Y")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if topic == "ratios":
         return company._applyPeriodFilter(company._buildRatios(), period)
@@ -100,6 +107,13 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
 
     Example:
         >>> traceFinanceTopic(c, "BS", period="2024")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -122,6 +136,13 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
 
         Example:
             >>> collect({"sales": [1000]}, [2024], "IS")  # nested function example
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not series:
             return
@@ -220,6 +241,13 @@ def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFr
 
     Example:
         >>> reportFrame(c, "dividend")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if company._report is None:
         return None
@@ -256,6 +284,13 @@ def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = 
 
     Example:
         >>> reportFrameInner(c, "dividend", "dividend")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.accessor.reportAccessor import reportFrameInner as _reportFrameInner
 
@@ -280,6 +315,13 @@ def showSegmentsSub(company: Company, sub: str) -> pl.DataFrame | None:
 
     Example:
         >>> showSegmentsSub(c, "region")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     segResult = company._callModule("segments")
     if segResult is None:
@@ -318,6 +360,13 @@ def showDirectTopic(
 
     Example:
         >>> showDirectTopic(c, "dividend")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if company._hasReport:
         try:
@@ -378,6 +427,13 @@ def showSectionBlock(
 
     Example:
         >>> showSectionBlock(c, topic_df, block=0)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if "blockType" not in topicFrame.columns or "blockOrder" not in topicFrame.columns:
         return company._applyPeriodFilter(topicFrame, period)
@@ -435,6 +491,13 @@ def horizontalizeTableBlock(
 
     Example:
         >>> horizontalizeTableBlock(c, topic_df, 0, ["2024", "2023"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.parse.tableHorizontalizer import (
         horizontalizeTableBlock as _horizontalize,
@@ -481,6 +544,13 @@ def showImpl(
 
     Example:
         >>> showImpl(c, "IS", freq="Y", scope="separate")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
@@ -536,6 +606,13 @@ def showFinanceStatement(
 
     Example:
         >>> showFinanceStatement(c, "IS", None, period="2024Q4", freq="Q", scope="consolidated")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame
 
@@ -579,6 +656,13 @@ def showSectionsTopic(
 
     Example:
         >>> showSectionsTopic(c, "executive", None, period="2024", raw=False, freq="Q", scope="consolidated")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex

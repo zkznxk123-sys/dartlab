@@ -72,6 +72,17 @@ def classifySection(title: str) -> str | None:
 
     Example:
         >>> classifySection(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     for key, keywords in SECTION_KEYS.items():
         for kw in keywords:
@@ -91,6 +102,17 @@ def extractFromSubSections(report: pl.DataFrame) -> dict[str, dict]:
 
     Example:
         >>> extractFromSubSections(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     subSections = report.filter(
         pl.col("section_title").str.contains("사업의 개요")
@@ -138,6 +160,17 @@ def extractFromUnified(report: pl.DataFrame) -> dict[str, dict]:
 
     Example:
         >>> extractFromUnified(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     mainSection = report.filter(pl.col("section_title").str.contains("사업의 내용"))
     if mainSection.height == 0:
@@ -170,6 +203,17 @@ def splitByNumber(text: str) -> list[tuple[str, str, str]]:
 
     Example:
         >>> splitByNumber(...)
+
+    Returns:
+        <TODO: return desc> (list[tuple[str, str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     allMatches = list(_SPLIT_BY_NUMBER_RE.finditer(text))
 
@@ -206,6 +250,17 @@ def getBusinessText(report: pl.DataFrame) -> str | None:
 
     Example:
         >>> getBusinessText(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     overview = report.filter(
         pl.col("section_title").str.starts_with("1.") & pl.col("section_title").str.contains("사업의 개요")
@@ -232,6 +287,17 @@ def computeChanges(df: pl.DataFrame, years: list[str]) -> list[dict]:
 
     Example:
         >>> computeChanges(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     changes = []
     prevText = None
@@ -294,6 +360,14 @@ def business(stockCode: str) -> BusinessResult | None:
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

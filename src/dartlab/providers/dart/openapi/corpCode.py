@@ -80,6 +80,23 @@ def loadCorpCodes(client: DartClient, refresh: bool = False) -> pl.DataFrame:
 
     Example:
         >>> loadCorpCodes(...)
+
+    Args:
+        client: <TODO: param desc> (DartClient)
+        refresh: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - io
+        - polars
+        - threading
     """
     global _memCache
 
@@ -121,6 +138,24 @@ def findCorpCode(
 
     Raises:
         없음.
+
+    Args:
+        client: <TODO: param desc> (DartClient)
+        query: <TODO: param desc> (str)
+        refresh: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - io
+        - polars
+        - threading
     """
     df = loadCorpCodes(client, refresh=refresh)
 
@@ -177,6 +212,16 @@ def searchCompanies(
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - io
+        - polars
+        - threading
     """
     df = loadCorpCodes(client)
     result = df.filter(pl.col("corp_name").str.contains(query, literal=True))
@@ -213,6 +258,16 @@ def iterCompanies(
     Example:
         >>> for row in iterCompanies(client, "삼성", limit=10):
         ...     print(row["corp_name"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - io
+        - polars
+        - threading
     """
     df = searchCompanies(client, query, listedOnly, limit=limit)
     yield from df.iter_rows(named=True)

@@ -26,6 +26,15 @@ def findAuditSections(df: pl.DataFrame, year: str) -> list[str]:
 
     Example:
         >>> findAuditSections(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     report = df.filter(
         (pl.col("year") == year)
@@ -72,6 +81,15 @@ def extractTableBlocks(text: str) -> list[dict]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     rawGroups: list[list[str]] = []
     currentLines: list[str] = []
@@ -179,6 +197,15 @@ def classifyBlock(block: dict) -> str:
 
     Example:
         >>> classifyBlock(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     headerStr = " ".join(block["header"])
     metaStr = " ".join(block["meta"]) if block["meta"] else ""
@@ -225,6 +252,15 @@ def parseOpinionBlock(block: dict) -> list[dict]:
 
     Example:
         >>> parseOpinionBlock(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     header = block["header"]
     nCols = len(header)
@@ -295,6 +331,15 @@ def parseFeeBlock(block: dict) -> list[dict]:
 
     Example:
         >>> parseFeeBlock(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     results = []
     currentPeriod = ""
@@ -381,6 +426,15 @@ def fiscalPeriodToYear(
 
     Example:
         >>> fiscalPeriodToYear(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     base = int(baseYear)
 
@@ -417,6 +471,15 @@ def normalizeOpinion(raw: str) -> str:
 
     Example:
         >>> normalizeOpinion(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if not raw:
         return ""
@@ -444,6 +507,15 @@ def dedup(items: list[dict], keys: list[str]) -> list[dict]:
 
     Example:
         >>> dedup(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     seen: set[tuple] = set()
     result = []

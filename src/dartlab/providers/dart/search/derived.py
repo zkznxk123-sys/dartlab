@@ -57,6 +57,17 @@ def buildCompanyProfile(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
 
     Example:
         >>> buildCompanyProfile(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     global _cachedProfile
 
@@ -129,6 +140,17 @@ def loadProfile(stockCode: str | None = None) -> dict | pl.DataFrame:
 
     Example:
         >>> loadProfile(...)
+
+    Returns:
+        <TODO: return desc> (dict | pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     global _cachedProfile
 
@@ -196,6 +218,17 @@ def buildEventTimeline(meta: pl.DataFrame, outDir: Path) -> pl.DataFrame:
 
     Example:
         >>> buildEventTimeline(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     global _cachedTimeline
 
@@ -236,6 +269,17 @@ def loadTimeline(
 
     Example:
         >>> loadTimeline(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     global _cachedTimeline
 
@@ -266,6 +310,20 @@ def pulse(limit: int = 10) -> pl.DataFrame:
 
     Example:
         >>> pulse(...)
+
+    Args:
+        limit: <TODO: param desc> (int)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     tl = loadTimeline()
     if tl.height == 0:
@@ -320,6 +378,17 @@ def buildDna(meta: pl.DataFrame, outDir: Path) -> dict:
 
     Example:
         >>> buildDna(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     global _cachedDna
 
@@ -397,6 +466,20 @@ def dna(stockCode: str) -> dict:
 
     Example:
         >>> dna(...)
+
+    Args:
+        stockCode: <TODO: param desc> (str)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     data = _loadDna()
     if stockCode not in data["stockCodes"]:
@@ -430,6 +513,21 @@ def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
 
     Example:
         >>> similarCompanies(...)
+
+    Args:
+        stockCode: <TODO: param desc> (str)
+        limit: <TODO: param desc> (int)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - numpy
+        - polars
     """
     data = _loadDna()
     if stockCode not in data["stockCodes"]:

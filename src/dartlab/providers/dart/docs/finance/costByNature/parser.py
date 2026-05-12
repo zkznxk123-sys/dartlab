@@ -23,6 +23,15 @@ def normalizeAccountName(raw: str) -> str:
 
     Example:
         >>> normalizeAccountName(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     cleaned = raw.replace(" ", "")
     for stdName, keywords in NORMALIZE_MAP:
@@ -43,6 +52,15 @@ def isTotalRow(name: str) -> bool:
 
     Example:
         >>> isTotalRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     cleaned = name.replace(" ", "")
     for p in TOTAL_PATTERNS:
@@ -130,6 +148,15 @@ def findCostByNatureSection(contents: list[str]) -> str | None:
 
     Example:
         >>> findCostByNatureSection(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     for content in contents:
         lines = content.split("\n")
@@ -164,6 +191,15 @@ def parseCostByNature(sectionText: str) -> dict | None:
 
     Example:
         >>> parseCostByNature(...)
+
+    Args:
+        sectionText: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     for fn in [_tryParseInlineTable, _tryParseSplitTable, _tryParseMultiColTable]:
         result = fn(sectionText)

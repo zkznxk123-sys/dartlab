@@ -23,6 +23,15 @@ def periodToIndex(key: str) -> int:
 
     Example:
         >>> periodToIndex(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     m = re.match(r"^(\d{4})(Q[1-4])?$", key)
     if not m:
@@ -56,6 +65,15 @@ def nameSimilarity(a: str, b: str) -> float:
 
     Example:
         >>> nameSimilarity(...)
+
+    Returns:
+        <TODO: return desc> (float)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     a = a.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
     b = b.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
@@ -86,6 +104,15 @@ def numberBridgeMatch(
 
     Example:
         >>> numberBridgeMatch(...)
+
+    Returns:
+        <TODO: return desc> (BridgeResult)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     matched = 0
     total = 0

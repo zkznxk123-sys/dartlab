@@ -166,6 +166,17 @@ def checkFreshness(
 
     Example:
         >>> checkFreshness(...)
+
+    Returns:
+        <TODO: return desc> (FreshnessResult)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - polars
+        - time
     """
     from dartlab.core.messaging import emit
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
@@ -277,6 +288,17 @@ def scanMarketFreshness(
 
     Example:
         >>> scanMarketFreshness(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - polars
+        - time
     """
     from dartlab.core.dataLoader import _dataDir
     from dartlab.core.messaging import emit
@@ -384,6 +406,17 @@ def collectMissing(
 
     Example:
         >>> collectMissing(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, int])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - polars
+        - time
     """
     from dartlab.providers.dart.openapi.dartKey import hasDartApiKey
 

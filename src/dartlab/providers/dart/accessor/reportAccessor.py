@@ -171,6 +171,13 @@ def reportFrameInner(stockCode: str, apiType: str, topic: str, *, raw: bool = Fa
 
     Example:
         >>> reportFrameInner("005930", "stockTotal", "stockTotal")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.report.extract import extractClean
 
@@ -223,6 +230,13 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
 
     Example:
         >>> reportPivotBySe(extracted_df)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = df.with_columns((pl.col("year").cast(pl.Utf8) + "Q" + pl.col("quarterNum").cast(pl.Utf8)).alias("_period"))
     # null-only 행 제외
@@ -300,6 +314,13 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.extract("dividend")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = f"_extract_{apiType}"
         if cacheKey in self._cache:
@@ -328,6 +349,13 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.extractAnnual("stockTotal")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = f"_annual_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
@@ -356,6 +384,13 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.result("dividend")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = f"_result_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
@@ -391,6 +426,13 @@ class _ReportAccessor:
         Example:
             >>> c._report.status("dividend")
             >>> c._report.status()  # 전체 28 종
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES, PREFERRED_QUARTER
 
@@ -422,6 +464,13 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("dividend")  # 권장
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -440,6 +489,13 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("employee")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -458,6 +514,13 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("majorHolder")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -476,6 +539,13 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("executive")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -494,6 +564,13 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("audit")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -522,6 +599,13 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.apiTypes
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.dart.report.types import API_TYPES
 
@@ -540,6 +624,13 @@ class _ReportAccessor:
         Example:
             >>> c._report.labels["dividend"]
             '배당'
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS
 
@@ -557,6 +648,13 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.availableApiTypes
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_availableApiTypes"
         if cacheKey in self._cache:

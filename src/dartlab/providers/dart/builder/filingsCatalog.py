@@ -48,6 +48,13 @@ def buildFilings(company: Company) -> pl.DataFrame | None:
 
     Example:
         >>> buildFilings(c).head()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not company._hasDocs:
         return pl.DataFrame(
@@ -96,6 +103,13 @@ def buildUpdate(company: Company, *, categories: list[str] | None = None) -> dic
 
     Example:
         >>> buildUpdate(c, categories=["docs"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.openapi.freshness import collectMissing
 
@@ -134,6 +148,13 @@ def buildDisclosure(
 
     Example:
         >>> buildDisclosure(c, days=90, type="A")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.openapi.dart import Dart
 
@@ -184,6 +205,13 @@ def buildLiveFilings(
 
     Example:
         >>> buildLiveFilings(c, days=30, limit=10)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     del forms
 
@@ -294,6 +322,13 @@ def buildReadFiling(
 
     Example:
         >>> buildReadFiling(c, "20240315000123")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     record = filingRecord(filing) or {}
 

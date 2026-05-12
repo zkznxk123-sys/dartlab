@@ -308,6 +308,27 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            corp: <TODO: param desc> (str | None)
+            start: <TODO: param desc> (str | datetime | date | None)
+            end: <TODO: param desc> (str | datetime | date | None)
+            type: <TODO: param desc> (str | None)
+            final: <TODO: param desc> (bool)
+            market: <TODO: param desc> (Literal['Y', 'K', 'N', 'E'] | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         startDate = parseDate(start, asEnd=False) or defaultStart()
         endDate = parseDate(end, asEnd=True) or defaultEnd()
@@ -337,6 +358,9 @@ class Dart:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (dict[str, str])
         """
         return companyInfo(self._client, corp)
 
@@ -382,6 +406,9 @@ class Dart:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (str | None)
         """
         return findCorpCode(self._client, query)
 
@@ -396,6 +423,9 @@ class Dart:
 
         Example:
             >>> corpCodes(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
         """
         return loadCorpCodes(self._client, refresh=refresh)
 
@@ -438,6 +468,27 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            corp: <TODO: param desc> (str)
+            start: <TODO: param desc> (str | int | None)
+            end: <TODO: param desc> (int | None)
+            q: <TODO: param desc> (int | None)
+            consolidated: <TODO: param desc> (bool)
+            full: <TODO: param desc> (bool)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1
@@ -496,6 +547,24 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            corps: <TODO: param desc> (list[str])
+            year: <TODO: param desc> (str | int | None)
+            q: <TODO: param desc> (int | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         corpCodes = [_resolveCorpCode(self._client, c) for c in corps]
         bsnsYear = str(year) if year else str(datetime.now().year - 1)
@@ -532,6 +601,12 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            category: <TODO: param desc> (str)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
         """
         return self._client.getDf(
             "xbrlTaxonomy.json",
@@ -573,6 +648,26 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            corp: <TODO: param desc> (str)
+            reportType: <TODO: param desc> (str)
+            start: <TODO: param desc> (str | int | None)
+            end: <TODO: param desc> (int | None)
+            q: <TODO: param desc> (int | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         startYear = int(start) if start else datetime.now().year - 1
@@ -620,6 +715,19 @@ class Dart:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         return self._client.getDf("majorstock.json", {"corp_code": corpCodeStr})
@@ -636,6 +744,19 @@ class Dart:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         corpCodeStr = _resolveCorpCode(self._client, corp)
         return self._client.getDf("elestock.json", {"corp_code": corpCodeStr})
@@ -668,6 +789,23 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            rceptNo: <TODO: param desc> (str)
+            savePath: <TODO: param desc> (str | Path | None)
+
+        Returns:
+            <TODO: return desc> (Path)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         raw = self._client.getBytes("document.xml", {"rcept_no": rceptNo})
         dest = Path(savePath) if savePath else Path(f"{rceptNo}.zip")
@@ -694,6 +832,22 @@ class Dart:
 
         Raises:
             없음.
+
+        Args:
+            rceptNo: <TODO: param desc> (str)
+
+        Returns:
+            <TODO: return desc> (str)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         raw = self._client.getBytes("document.xml", {"rcept_no": rceptNo})
         zf = zipfile.ZipFile(io.BytesIO(raw))
@@ -739,6 +893,9 @@ class Dart:
 
         Example:
             >>> filingTypes(...)
+
+        Returns:
+            <TODO: return desc> (dict[str, str])
         """
         return dict(FILING_TYPES)
 
@@ -754,6 +911,9 @@ class Dart:
 
         Example:
             >>> markets(...)
+
+        Returns:
+            <TODO: return desc> (dict[str, str])
         """
         return dict(CORP_CLASS)
 
@@ -769,6 +929,9 @@ class Dart:
 
         Example:
             >>> reportTypes(...)
+
+        Returns:
+            <TODO: return desc> (list[str])
         """
         return sorted(_REPORT_ENDPOINTS.keys())
 
@@ -880,6 +1043,25 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Args:
+            category: <TODO: param desc> (str)
+            start: <TODO: param desc> (str | int | None)
+            end: <TODO: param desc> (int | None)
+            q: <TODO: param desc> (int | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         if start is not None and end is None:
             end = _autoEnd()
@@ -932,6 +1114,26 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Args:
+            start: <TODO: param desc> (str | int | None)
+            end: <TODO: param desc> (int | None)
+            q: <TODO: param desc> (int | None)
+            consolidated: <TODO: param desc> (bool)
+            full: <TODO: param desc> (bool)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         if start is not None and end is None:
             end = _autoEnd()
@@ -973,6 +1175,9 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
         """
         return self._dart.filings(
             self._corp,
@@ -994,6 +1199,9 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (dict[str, str])
         """
         return self._dart.company(self._corp)
 
@@ -1016,6 +1224,22 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Args:
+            type: <TODO: param desc> (Literal['major', 'executive', 'all'])
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | dict[str, pl.DataFrame])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         if type == "major":
             return self._dart.majorShareholders(self._corp)
@@ -1043,6 +1267,9 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (Path)
         """
         return self._dart.document(rceptNo, savePath)
 
@@ -1058,6 +1285,9 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (str)
         """
         return self._dart.documentText(rceptNo)
 
@@ -1088,6 +1318,19 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (Path)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         stockCode = self._resolveStockCode()
         corpName = self._dart._resolveCorpName(self._corp)
@@ -1152,6 +1395,25 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Args:
+            start: <TODO: param desc> (str | int | None)
+            end: <TODO: param desc> (int | None)
+            q: <TODO: param desc> (int | None)
+            categories: <TODO: param desc> (list[str] | None)
+
+        Returns:
+            <TODO: return desc> (Path)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
@@ -1211,6 +1473,19 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (Path)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         df = self.filings(start, end, type=type, final=final)
         stockCode = self._resolveStockCode()
@@ -1244,6 +1519,23 @@ class DartCompany:
 
         Raises:
             없음.
+
+        Args:
+            year: <TODO: param desc> (str | int | None)
+            q: <TODO: param desc> (int | None)
+
+        Returns:
+            <TODO: return desc> (Path)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - io
+            - polars
+            - zipfile
         """
         corpCodeStr = _resolveCorpCode(self._dart._client, self._corp)
         bsnsYear = str(year) if year else str(datetime.now().year - 1)

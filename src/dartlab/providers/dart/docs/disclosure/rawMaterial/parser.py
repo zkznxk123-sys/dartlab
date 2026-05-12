@@ -16,6 +16,15 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     parts = line.strip().split("|")
     if parts and parts[0].strip() == "":
@@ -89,6 +98,15 @@ def parseRawMaterials(content: str) -> list[dict] | None:
 
     Example:
         >>> parseRawMaterials(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     inTable = False
@@ -350,6 +368,9 @@ def parseRawMaterials(content: str) -> list[dict] | None:
 
                     Example:
                         >>> si(...)
+
+                    Returns:
+                        <TODO: return desc> (int | None)
                     """
                     return idx - s if idx is not None and idx - s >= 0 else None
 
@@ -473,6 +494,15 @@ def parseEquipment(content: str) -> dict | None:
 
     Example:
         >>> parseEquipment(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     inTable = False
@@ -586,6 +616,15 @@ def parseCapex(content: str) -> list[dict] | None:
 
     Example:
         >>> parseCapex(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     inSection = False

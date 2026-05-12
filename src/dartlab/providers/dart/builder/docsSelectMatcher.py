@@ -36,6 +36,13 @@ def buildDocsItemIndex(company: Company, topic: str) -> dict[str, list[tuple[int
 
     Example:
         >>> idx = buildDocsItemIndex(c, "BS")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.show import normalizeItemKey
 
@@ -120,6 +127,13 @@ def selectFromDocsTopic(
 
     Example:
         >>> selectFromDocsTopic(c, "BS", ["총자산"], colList=["2024", "2023"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.show import normalizeItemKey, selectFromShow
 
@@ -203,6 +217,13 @@ def selectFromDocsTopicAll(
 
     Example:
         >>> selectFromDocsTopicAll(c, "executive", indList=None, colList=["2024"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.show import selectFromShow
 

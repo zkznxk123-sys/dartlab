@@ -202,6 +202,25 @@ class DocsCollector:
 
         Example:
             >>> collect(...)
+
+        Args:
+            quarters: <TODO: param desc> (int)
+            includeQuarterly: <TODO: param desc> (bool)
+            minDelay: <TODO: param desc> (float)
+            maxDelay: <TODO: param desc> (float)
+
+        Returns:
+            <TODO: return desc> (int)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - datetime
+            - httpx
+            - polars
+            - random
         """
         filings = self._getFilingList(
             quarters=quarters,
@@ -378,6 +397,28 @@ def collectMultiple(
 
     Example:
         >>> collectMultiple(...)
+
+    Args:
+        stockCodes: <TODO: param desc> (list[str])
+        quarters: <TODO: param desc> (int)
+        includeQuarterly: <TODO: param desc> (bool)
+        minDelay: <TODO: param desc> (float)
+        maxDelay: <TODO: param desc> (float)
+        stockDelay: <TODO: param desc> (tuple[float, float])
+        client: <TODO: param desc> (DartClient | None)
+
+    Returns:
+        <TODO: return desc> (dict[str, int])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - polars
+        - random
     """
     sharedClient = client or DartClient()
     results: dict[str, int] = {}
@@ -427,6 +468,16 @@ def listUncollected(*, client: DartClient | None = None, limit: int | None = Non
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - polars
+        - random
     """
     c = client or DartClient()
     codes = loadCorpCodes(c)
@@ -458,6 +509,19 @@ def collectionStats(*, client: DartClient | None = None) -> dict:
 
     Example:
         >>> collectionStats(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - polars
+        - random
     """
     c = client or DartClient()
     codes = loadCorpCodes(c)
@@ -498,6 +562,22 @@ def listUncollectedKind(
 
     Example:
         >>> listUncollectedKind(...)
+
+    Args:
+        limit: <TODO: param desc> (int | None)
+
+    Returns:
+        <TODO: return desc> (list[tuple[str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - polars
+        - random
     """
     from dartlab.core.listingResolver import getListingResolver
 
@@ -541,6 +621,16 @@ def iterUncollected(*, client: DartClient | None = None, limit: int | None = Non
     Example:
         >>> for code, name in iterUncollected(limit=10):
         ...     print(code, name)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - polars
+        - random
     """
     yield from listUncollected(client=client, limit=limit)
 
@@ -560,5 +650,15 @@ def iterUncollectedKind(*, limit: int | None = None):
     Example:
         >>> for code, name in iterUncollectedKind(limit=10):
         ...     print(code, name)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - polars
+        - random
     """
     yield from listUncollectedKind(limit=limit)

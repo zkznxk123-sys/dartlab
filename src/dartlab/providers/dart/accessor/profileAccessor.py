@@ -105,6 +105,13 @@ class _ProfileAccessor:
         Example:
             >>> facts = c._profileAccessor.facts
             >>> facts.filter(pl.col("topic") == "BS").head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_profileFacts"
         if cacheKey in self._company._cache:
@@ -304,6 +311,13 @@ class _ProfileAccessor:
 
         Example:
             >>> c._profileAccessor.availableTopics[:10]
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         topics = set()
         if self.sections is not None and "topic" in self.sections.columns:
@@ -328,6 +342,13 @@ class _ProfileAccessor:
         Example:
             >>> c._profileAccessor.get("BS")  # deprecated
             >>> c.show("BS")  # 권장
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -361,6 +382,13 @@ class _ProfileAccessor:
 
         Example:
             >>> c._profileAccessor.trace("BS", period="2024")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -436,6 +464,13 @@ class _ProfileAccessor:
 
         Example:
             >>> c._profileAccessor.sharesOutstanding
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:

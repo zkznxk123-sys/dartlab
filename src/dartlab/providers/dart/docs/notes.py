@@ -123,6 +123,15 @@ class Notes:
 
         Example:
             >>> quarterly(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         eng = _KR_MAP.get(name, name)
         if eng not in _REGISTRY:
@@ -140,6 +149,9 @@ class Notes:
 
         Example:
             >>> all(...)
+
+        Returns:
+            <TODO: return desc> (dict[str, pl.DataFrame | None])
         """
         return {name: self._get(name, period=period) for name in _REGISTRY}
 
@@ -154,6 +166,9 @@ class Notes:
 
         Example:
             >>> keys(...)
+
+        Returns:
+            <TODO: return desc> (list[str])
         """
         return list(_REGISTRY.keys())
 
@@ -168,6 +183,9 @@ class Notes:
 
         Example:
             >>> keysKr(...)
+
+        Returns:
+            <TODO: return desc> (list[str])
         """
         return list(_KR_MAP.keys())
 

@@ -641,6 +641,12 @@ def normalizeCause(accountNm: str) -> str:
     Example:
         >>> normalizeCause("당기순이익")
         'net_income'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     nm = accountNm.strip()
     if nm in CAUSE_SYNONYMS:
@@ -845,6 +851,12 @@ def normalizeDetail(detail: str | None) -> str:
     Example:
         >>> normalizeDetail("자본의 구성요소 | 이익잉여금")
         'retained_earnings'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     if not detail:
         return "unknown"

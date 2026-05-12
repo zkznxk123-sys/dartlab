@@ -56,6 +56,13 @@ def indexFinanceRows(company: Company) -> list[dict[str, Any]]:
 
     Example:
         >>> indexFinanceRows(c)[:5]
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - gc
     """
     rows: list[dict[str, Any]] = []
     _STMT_ORDER = {"BS": 0, "IS": 1, "CIS": 2, "CF": 3, "SCE": 4}
@@ -125,6 +132,13 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
 
     Example:
         >>> indexDocsRows(c)[:5]
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - gc
     """
     if not company._hasDocs:
         return []
@@ -177,6 +191,13 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
         Example:
             >>> representativePeriodRank("2024Q4")
             20244
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - gc
         """
         if not isinstance(period, str):
             return -1
@@ -276,6 +297,13 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
 
         Example:
             >>> topicRowSortKey(("BS", "0"))  # nested function example
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - gc
         """
         topic, segmentKey = key
         majorNum, firstSeq = topicFirstSeq.get(topic, (99, 999999))
@@ -353,6 +381,13 @@ def indexReportRows(company: Company, *, existingTopics: set[str] | None = None)
 
     Example:
         >>> indexReportRows(c, existingTopics={"BS", "IS"})
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - gc
     """
     rows: list[dict[str, Any]] = []
     if not company._hasReport:

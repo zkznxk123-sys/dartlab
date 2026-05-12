@@ -34,6 +34,13 @@ def majorHolder(stockCode: str) -> MajorHolderResult | None:
 
     Example:
         >>> majorHolder(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
@@ -130,6 +137,13 @@ def holderOverview(stockCode: str) -> HolderOverview | None:
 
     Example:
         >>> holderOverview(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     if df is None:

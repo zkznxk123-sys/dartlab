@@ -62,6 +62,15 @@ async def parseRawMarkdownBlock(
 
     Example:
         >>> parseRawMarkdownBlock(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, Any])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     # 최신 기간의 마크다운
     periods = sorted(rawMarkdown.keys())

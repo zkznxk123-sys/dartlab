@@ -33,6 +33,15 @@ class SegmentTable:
 
         Example:
             >>> toDataFrame(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - <TODO: external requires>
         """
         import polars as pl
 
@@ -88,6 +97,15 @@ class SegmentsResult:
 
         Example:
             >>> latestTable(...)
+
+        Returns:
+            <TODO: return desc> (SegmentTable | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - <TODO: external requires>
         """
         if self.tables is None:
             return None

@@ -42,6 +42,16 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -62,6 +72,16 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -78,6 +98,16 @@ def parseAmount(text: str) -> int | None:
 
     Example:
         >>> parseAmount(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not text or not isinstance(text, str):
         return None
@@ -110,6 +140,16 @@ def parseInvestments(content: str) -> tuple[list[dict], list[str]]:
 
     Example:
         >>> parseInvestments(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -194,6 +234,16 @@ def investmentInOther(stockCode: str) -> InvestmentInOtherResult | None:
 
     Example:
         >>> investmentInOther(...)
+
+    Returns:
+        <TODO: return desc> (InvestmentInOtherResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     try:
         df = loadData(stockCode)

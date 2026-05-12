@@ -27,6 +27,15 @@ def splitSubtables(md: str) -> list[list[str]]:
 
     Example:
         >>> splitSubtables(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     tables: list[list[str]] = []
     current: list[str] = []
@@ -289,6 +298,15 @@ def buildTableDataFrame(
 
     Example:
         >>> buildTableDataFrame(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if topicFrame.is_empty():
         return None

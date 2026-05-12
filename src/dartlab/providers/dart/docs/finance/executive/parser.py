@@ -49,6 +49,15 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -75,6 +84,15 @@ def classifyBlock(block: list[str]) -> str:
 
     Example:
         >>> classifyBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     allText = ""
     for line in block[:8]:
@@ -134,6 +152,15 @@ def parseExecutiveBlock(block: list[str]) -> list[dict]:
 
     Example:
         >>> parseExecutiveBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:
@@ -248,6 +275,15 @@ def aggregateExecutives(executives: list[dict]) -> dict:
 
     Example:
         >>> aggregateExecutives(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     total = len(executives)
     inside = sum(1 for e in executives if "사내" in e.get("registrationType", ""))
@@ -292,6 +328,15 @@ def parseUnregisteredPayBlock(block: list[str]) -> dict | None:
 
     Example:
         >>> parseUnregisteredPayBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:

@@ -186,6 +186,15 @@ def clearFinanceCache() -> None:
 
     Example:
         >>> clearFinanceCache()  # parquet 재로드 강제
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - logging
+        - polars
     """
     _buildTimeseriesCached.cache_clear()
 
@@ -214,6 +223,15 @@ def buildAnnual(
 
     Example:
         >>> series, years = buildAnnual("005930")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - logging
+        - polars
     """
     qResult = buildTimeseries(stockCode, fsDivPref)
     if qResult is None:
@@ -247,6 +265,15 @@ def buildCumulative(
 
     Example:
         >>> series, periods = buildCumulative("005930")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - logging
+        - polars
     """
     qResult = buildTimeseries(stockCode, fsDivPref)
     if qResult is None:
@@ -680,6 +707,15 @@ def buildSceMatrix(
 
     Example:
         >>> matrix, years = buildSceMatrix("005930")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - logging
+        - polars
     """
     from dartlab.core.dataLoader import loadData
 
@@ -797,6 +833,15 @@ def buildSceAnnual(
 
     Example:
         >>> series, years = buildSceAnnual("005930")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - logging
+        - polars
     """
     result = buildSceMatrix(stockCode, fsDivPref)
     if result is None:

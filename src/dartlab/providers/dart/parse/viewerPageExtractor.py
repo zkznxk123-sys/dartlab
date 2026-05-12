@@ -47,6 +47,15 @@ def tableToMarkdown(table) -> str:
 
     Example:
         >>> tableToMarkdown(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
     """
     rows: list[list[str]] = []
     for tr in table.find_all("tr"):
@@ -90,6 +99,15 @@ def htmlToText(html: str) -> str:
 
     Example:
         >>> htmlToText(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
     """
     soup = BeautifulSoup(html, "lxml")
 
@@ -136,6 +154,19 @@ def parseSubDocs(content: str, rcpNo: str) -> list[dict]:
 
     Example:
         >>> parseSubDocs(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+        rcpNo: <TODO: param desc> (str)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
     """
     matches = MULTI_PAGE_RE.findall(content)
     if matches:

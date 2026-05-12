@@ -44,6 +44,16 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -64,6 +74,16 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -80,6 +100,16 @@ def parseAuditCommittee(content: str) -> list[dict]:
 
     Example:
         >>> parseAuditCommittee(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -133,6 +163,16 @@ def parseAuditActivity(content: str) -> list[dict]:
 
     Example:
         >>> parseAuditActivity(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -186,6 +226,16 @@ def auditSystem(stockCode: str) -> AuditSystemResult | None:
 
     Example:
         >>> auditSystem(...)
+
+    Returns:
+        <TODO: return desc> (AuditSystemResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     try:
         df = loadData(stockCode)

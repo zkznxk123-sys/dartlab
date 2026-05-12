@@ -121,6 +121,15 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     parts = line.split("|")
     if parts and parts[0].strip() == "":
@@ -141,6 +150,15 @@ def isAssetCategory(text: str) -> bool:
 
     Example:
         >>> isAssetCategory(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     keywords = [
         "토지",
@@ -179,6 +197,15 @@ def isMovementRow(label: str) -> bool:
 
     Example:
         >>> isMovementRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     collapsed = label.replace(" ", "")
     return any(kw in collapsed for kw in MOVEMENT_MARKERS)
@@ -195,6 +222,15 @@ def isDescriptionRow(cells: list[str]) -> bool:
 
     Example:
         >>> isDescriptionRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     text = " ".join(cells)
     return any(kw in text for kw in DESCRIPTION_MARKERS) and len(text) > 100
@@ -211,6 +247,15 @@ def normalizeLabel(label: str) -> str:
 
     Example:
         >>> normalizeLabel(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     label = label.strip()
     label = re.sub(r",\s*유형자산$", "", label)
@@ -245,6 +290,15 @@ def splitPeriodBlocks(content: str) -> list[tuple[str, str]]:
 
     Example:
         >>> splitPeriodBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[tuple[str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     blocks = []
@@ -371,6 +425,12 @@ def parseMovementBlock(block: str, period: str):
 
     Example:
         >>> parseMovementBlock(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = block.split("\n")
     unit = detectUnit(block)
@@ -503,6 +563,12 @@ def parseTransposedBlock(block: str, period: str):
 
     Example:
         >>> parseTransposedBlock(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = block.split("\n")
     unit = detectUnit(block)
@@ -703,6 +769,12 @@ def findMovementTables(content: str):
 
     Example:
         >>> findMovementTables(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     blocks = splitPeriodBlocks(content)
 
@@ -750,6 +822,12 @@ def getTotalValue(row, categories):
 
     Example:
         >>> getTotalValue(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     for cat in categories:
         if "합계" in cat or "합 계" in cat:

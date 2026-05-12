@@ -71,6 +71,19 @@ def tokenizeWord(text: str) -> list[str]:
 
     Example:
         >>> tokenizeWord(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     if not text:
         return []
@@ -99,6 +112,16 @@ class _IncrementalBuilder:
 
         Example:
             >>> addDoc(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - math
+            - numpy
+            - polars
+            - time
         """
         docId = len(self.docLengths)
         if not text:
@@ -127,6 +150,19 @@ class _IncrementalBuilder:
 
         Example:
             >>> finalize(...)
+
+        Returns:
+            <TODO: return desc> (dict)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - math
+            - numpy
+            - polars
+            - time
         """
         n = len(self.docLengths)
         nStems = len(self.stemToId)
@@ -182,6 +218,24 @@ def buildContentSegment(
 
     Example:
         >>> buildContentSegment(...)
+
+    Args:
+        rows: <TODO: param desc> (list[dict])
+        contentLimit: <TODO: param desc> (int)
+        showProgress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (tuple[dict, pl.DataFrame])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     t0 = time.perf_counter()
     builder = _IncrementalBuilder()
@@ -236,6 +290,16 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
 
     Example:
         >>> saveSegment(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     outDir = outDir or _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
@@ -275,6 +339,19 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
 
     Example:
         >>> loadSegment(...)
+
+    Returns:
+        <TODO: return desc> (tuple[dict, pl.DataFrame] | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     inDir = inDir or _contentIndexDir()
     npzPath = inDir / f"{name}.npz"
@@ -347,6 +424,16 @@ def clearCache() -> None:
 
     Example:
         >>> clearCache(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     global _segments
     _segments = None
@@ -372,6 +459,25 @@ def searchContent(
 
     Example:
         >>> searchContent(...)
+
+    Args:
+        query: <TODO: param desc> (str)
+        corpCode: <TODO: param desc> (str | None)
+        stockCode: <TODO: param desc> (str | None)
+        limit: <TODO: param desc> (int)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     tokens = tokenizeWord(query)
     if not tokens:
@@ -459,6 +565,25 @@ def rebuildMain(
 
     Example:
         >>> rebuildMain(...)
+
+    Args:
+        includeAllFilings: <TODO: param desc> (bool)
+        includeDocs: <TODO: param desc> (bool)
+        contentLimit: <TODO: param desc> (int)
+        showProgress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     import gc
 
@@ -480,6 +605,19 @@ def rebuildMain(
 
         Example:
             >>> feedDf(...)
+
+        Returns:
+            <TODO: return desc> (int)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - math
+            - numpy
+            - polars
+            - time
         """
         added = 0
         for row in df.iter_rows(named=True):
@@ -576,6 +714,24 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
 
     Example:
         >>> rebuildDelta(...)
+
+    Args:
+        sinceDate: <TODO: param desc> (str | None)
+        daysBack: <TODO: param desc> (int)
+        showProgress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     from datetime import datetime, timedelta
 
@@ -636,6 +792,16 @@ def pushContentIndex(token: str | None = None) -> None:
 
     Example:
         >>> pushContentIndex(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     from huggingface_hub import HfApi
 
@@ -675,6 +841,19 @@ def pullContentIndex() -> int:
 
     Example:
         >>> pullContentIndex(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     from huggingface_hub import hf_hub_download
 
@@ -724,6 +903,19 @@ def contentStats() -> dict:
 
     Example:
         >>> contentStats(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     segments = _getSegments()
     out: dict = {}
@@ -761,6 +953,16 @@ def iterContent(
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - math
+        - numpy
+        - polars
+        - time
     """
     df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():

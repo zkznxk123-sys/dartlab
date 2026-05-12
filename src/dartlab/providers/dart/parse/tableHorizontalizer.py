@@ -37,6 +37,15 @@ def stripUnitHeader(sub: list[str]) -> list[str] | None:
 
     Example:
         >>> stripUnitHeader(...)
+
+    Returns:
+        <TODO: return desc> (list[str] | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     firstRow = None
     for line in sub:
@@ -282,6 +291,15 @@ def _hzFilterJunkItems(allItems: list[str]) -> list[str]:
 
         Example:
             >>> isJunk(...)
+
+        Returns:
+            <TODO: return desc> (bool)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - polars
         """
         stripped = re.sub(r"[,.\-\s]", "", name)
         return stripped.isdigit() or not stripped
@@ -369,6 +387,21 @@ def horizontalizeTableBlock(
 
     Example:
         >>> horizontalizeTableBlock(...)
+
+    Args:
+        topicFrame: <TODO: param desc> (pl.DataFrame)
+        blockOrder: <TODO: param desc> (int)
+        periodCols: <TODO: param desc> (list[str])
+        period: <TODO: param desc> (str | None)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     boRow = topicFrame.filter((pl.col("blockOrder") == blockOrder) & (pl.col("blockType") == "table"))
     if boRow.is_empty():

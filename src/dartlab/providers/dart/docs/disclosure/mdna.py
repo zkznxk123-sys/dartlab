@@ -93,6 +93,13 @@ def classifySection(title: str) -> str:
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     for key, keywords in SECTION_ALIASES.items():
         for kw in keywords:
@@ -116,6 +123,13 @@ def parseMdna(content: str) -> dict[str, str]:
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     sections: dict[str, str] = {}
@@ -157,6 +171,16 @@ def extractOverview(sections: dict[str, str]) -> str | None:
 
     Example:
         >>> extractOverview(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     for key, content in sections.items():
         if classifySection(key) == "overview":
@@ -180,6 +204,13 @@ def mdna(stockCode: str) -> MdnaResult | None:
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

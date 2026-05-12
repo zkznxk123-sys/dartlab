@@ -188,6 +188,16 @@ def enrichFinance(
 
     Example:
         >>> enrichFinance(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if df.height == 0:
         return df
@@ -241,6 +251,16 @@ def enrichReport(
 
     Example:
         >>> enrichReport(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if df.height == 0:
         return df
@@ -312,6 +332,20 @@ def korColumns(
 
     Raises:
         없음.
+
+    Args:
+        df: <TODO: param desc> (pl.DataFrame)
+        category: <TODO: param desc> (str)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     mapping = {
         "finance": _FINANCE_KR,
@@ -362,6 +396,20 @@ def save(
 
     Example:
         >>> save(...)
+
+    Args:
+        df: <TODO: param desc> (pl.DataFrame)
+        path: <TODO: param desc> (str | Path)
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)

@@ -123,6 +123,13 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.periods(recentFirst=True)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         frame = self.raw
         if frame is None:
@@ -452,6 +459,13 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.changes(topic="riskFactors")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         frame = self.raw
         if frame is None:
@@ -472,6 +486,13 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.changeSummary(topN=5)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         ch = self.changes()
         if isEmptyDf(ch):

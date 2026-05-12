@@ -41,6 +41,15 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -67,6 +76,15 @@ def classifyBlock(block: list[str]) -> str:
 
     Example:
         >>> classifyBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     allText = ""
     for line in block[:6]:
@@ -101,6 +119,15 @@ def parsePayByTypeBlock(block: list[str]) -> list[dict]:
 
     Example:
         >>> parsePayByTypeBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:
@@ -214,6 +241,15 @@ def parsePayIndividualBlock(block: list[str]) -> list[dict]:
 
     Example:
         >>> parsePayIndividualBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:

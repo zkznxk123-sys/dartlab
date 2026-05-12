@@ -90,6 +90,18 @@ class AnnotatedLine:
 
         Example:
             >>> stability(...)
+
+        Returns:
+            <TODO: return desc> (str)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - difflib
+            - hashlib
+            - polars
         """
         if self.totalPeriods == 0:
             return "stable"
@@ -260,6 +272,18 @@ def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
 
     Example:
         >>> viewerBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[ViewerBlock])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - hashlib
+        - polars
     """
     if topic in _FINANCE_TOPICS:
         blk = _buildFinanceBlock(company, topic)
@@ -324,6 +348,18 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
 
     Example:
         >>> viewerTextDocument(...)
+
+    Returns:
+        <TODO: return desc> (ViewerTextDocument | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - hashlib
+        - polars
     """
     textBlocks = [b for b in blocks if b.kind == "text"]
     if not textBlocks:
@@ -1477,6 +1513,18 @@ def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str
 
     Example:
         >>> serializeViewerTextDocument(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, Any] | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - hashlib
+        - polars
     """
     if document is None:
         return None
@@ -1549,6 +1597,18 @@ def serializeViewerBlock(block: ViewerBlock) -> dict[str, Any]:
 
     Example:
         >>> serializeViewerBlock(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, Any])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - difflib
+        - hashlib
+        - polars
     """
     result: dict[str, Any] = {
         "block": block.block,

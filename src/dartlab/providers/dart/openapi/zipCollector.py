@@ -295,6 +295,19 @@ class ZipDocsCollector:
 
         Example:
             >>> collect(...)
+
+        Returns:
+            <TODO: return desc> (int)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - bs4
+            - dartlab
+            - io
+            - lxml
+            - polars
         """
         from dartlab.core.messaging import emit
 

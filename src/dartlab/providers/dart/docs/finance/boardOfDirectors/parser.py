@@ -45,6 +45,15 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -71,6 +80,15 @@ def classifyBlock(block: list[str]) -> str:
 
     Example:
         >>> classifyBlock(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     allText = ""
     for line in block[:6]:
@@ -113,6 +131,15 @@ def parseDirectorCount(block: list[str]) -> dict | None:
 
     Example:
         >>> parseDirectorCount(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:
@@ -185,6 +212,15 @@ def parseDirectorCountFromText(content: str) -> dict | None:
 
     Example:
         >>> parseDirectorCountFromText(...)
+
+    Returns:
+        <TODO: return desc> (dict | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     lines = content.split("\n")
     for i, line in enumerate(lines):
@@ -221,6 +257,15 @@ def parseBoardMeeting(block: list[str]) -> dict | None:
 
     Example:
         >>> parseBoardMeeting(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:
@@ -294,6 +339,15 @@ def parseCommittee(block: list[str]) -> list[dict]:
 
     Example:
         >>> parseCommittee(...)
+
+    Args:
+        block: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in block:

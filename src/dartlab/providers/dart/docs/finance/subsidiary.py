@@ -68,6 +68,16 @@ def parseSubsidiaryTable(content: str) -> list[dict]:
 
     Example:
         >>> parseSubsidiaryTable(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results = []
@@ -149,6 +159,13 @@ def subsidiary(stockCode: str) -> SubsidiaryResult | None:
 
     Example:
         >>> subsidiary(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

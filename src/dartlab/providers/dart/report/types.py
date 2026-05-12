@@ -234,6 +234,9 @@ class DividendResult:
 
         Example:
             >>> nYears(...)
+
+        Returns:
+            <TODO: return desc> (int)
         """
         return len(self.years)
 
@@ -248,6 +251,9 @@ class DividendResult:
 
         Example:
             >>> toWide(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         return _seriesToWide(
             self.years,
@@ -282,6 +288,9 @@ class EmployeeResult:
 
         Example:
             >>> nYears(...)
+
+        Returns:
+            <TODO: return desc> (int)
         """
         return len(self.years)
 
@@ -296,6 +305,9 @@ class EmployeeResult:
 
         Example:
             >>> toWide(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         return _seriesToWide(
             self.years,
@@ -328,6 +340,9 @@ class MajorHolderResult:
 
         Example:
             >>> nYears(...)
+
+        Returns:
+            <TODO: return desc> (int)
         """
         return len(self.years)
 
@@ -342,6 +357,9 @@ class MajorHolderResult:
 
         Example:
             >>> toWide(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         return _seriesToWide(
             self.years,
@@ -371,6 +389,15 @@ class ExecutiveResult:
 
         Example:
             >>> toWide(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - polars
         """
         rows = [
             {"metric": "총임원수", "latest": self.totalCount},
@@ -401,6 +428,9 @@ class AuditResult:
 
         Example:
             >>> nYears(...)
+
+        Returns:
+            <TODO: return desc> (int)
         """
         return len(self.years)
 
@@ -415,6 +445,9 @@ class AuditResult:
 
         Example:
             >>> toWide(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         return _seriesToWide(
             self.years,

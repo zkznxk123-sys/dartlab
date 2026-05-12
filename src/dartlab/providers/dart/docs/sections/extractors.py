@@ -70,6 +70,16 @@ def topicSubtables(blocks: pl.DataFrame | None, topic: str) -> TopicSubtables | 
 
     Example:
         >>> topicSubtables(...)
+
+    Returns:
+        <TODO: return desc> (TopicSubtables | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(blocks):
         return None
@@ -324,6 +334,13 @@ def parseSubtopicTable(
 
     Example:
         >>> parseSubtopicTable(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     wide = subtables.wide
     if wide.is_empty():

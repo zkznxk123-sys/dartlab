@@ -39,6 +39,15 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -59,6 +68,15 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -75,6 +93,15 @@ def parseCompanyInfo(content: str) -> dict:
 
     Example:
         >>> parseCompanyInfo(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     info: dict = {}
@@ -122,6 +149,15 @@ def parseCompanyInfoFallback(content: str) -> dict:
 
     Example:
         >>> parseCompanyInfoFallback(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     info: dict = {}
     text = content.replace("\xa0", " ")
@@ -165,6 +201,15 @@ def companyOverviewDetail(stockCode: str) -> CompanyOverviewDetailResult | None:
 
     Example:
         >>> companyOverviewDetail(...)
+
+    Returns:
+        <TODO: return desc> (CompanyOverviewDetailResult | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     try:
         df = loadData(stockCode)

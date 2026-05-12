@@ -53,6 +53,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.topicManifest().head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_docsTopicManifest"
         if cacheKey in self._cache:
@@ -189,6 +196,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionTopics()[:5]
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         manifest = self.topicManifest()
         if manifest.is_empty() or "topic" not in manifest.columns:
@@ -211,6 +225,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.topicOutline("executive")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if topic is None:
             return self.topicManifest()
@@ -340,6 +361,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsFreq("annual")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -377,6 +405,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsOrdered()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -417,6 +452,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsCoverage(topic="executive")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -502,6 +544,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsSemanticRegistry(collisionsOnly=True)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -565,6 +614,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsStructureRegistry(nodeType="section")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -629,6 +685,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsStructureEvents()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -681,6 +744,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsStructureSummary()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -738,6 +808,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.sectionsStructureChanges()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if not self._hasDocs:
             return None
@@ -786,6 +863,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.topicSubtables("rawMaterial")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = f"_topicSubtables:{topic}"
         if cacheKey in self._cache:
@@ -814,6 +898,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.subtopicWide("rawMaterial")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         result = self.topicSubtables(topic)
         return None if result is None else result.wide
@@ -832,6 +923,13 @@ class SectionsAnalyzer:
 
         Example:
             >>> analyzer.subtopicLong("rawMaterial")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         result = self.topicSubtables(topic)
         return None if result is None else result.long

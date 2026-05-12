@@ -119,6 +119,13 @@ def searchName(keyword, *, limit: int | None = None):
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = _listingResolver().search(keyword)
     if df is not None and limit is not None:
@@ -142,6 +149,13 @@ def iterName(keyword, *, limit: int | None = None):
     Example:
         >>> for row in iterName("삼성", limit=10):
         ...     print(row["corp_name"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = searchName(keyword, limit=limit)
     if df is None:
@@ -220,6 +234,13 @@ def rebuildModuleRegistry() -> None:
 
     Example:
         >>> rebuildModuleRegistry()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     global _MODULE_REGISTRY, _MODULE_INDEX, _ALL_PROPERTIES
     _MODULE_REGISTRY = None
@@ -414,6 +435,13 @@ def listExportModules(*, limit: int | None = None) -> list[tuple[str, str]]:
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     items = list(_getAllProperties())
     if limit is not None:
@@ -436,6 +464,13 @@ def iterExportModules(*, limit: int | None = None):
     Example:
         >>> for prop, label in iterExportModules(limit=20):
         ...     print(prop, label)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     for i, item in enumerate(_getAllProperties()):
         if limit is not None and i >= limit:
@@ -509,6 +544,19 @@ class Company:
 
         Example:
             >>> Company("005930").canHandle()
+
+        Args:
+            code: <TODO: param desc> (str)
+
+        Returns:
+            <TODO: return desc> (bool)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if re.match(r"^[0-9A-Za-z]{6}$", code):
             return True
@@ -530,6 +578,9 @@ class Company:
 
         Example:
             >>> Company("005930").priority()
+
+        Returns:
+            <TODO: return desc> (int)
         """
         return 10
 
@@ -687,6 +738,13 @@ class Company:
 
         Raises:
             없음 (cleanupBetweenCompanies 가 내부 silent).
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.memory import cleanupBetweenCompanies
 
@@ -710,6 +768,13 @@ class Company:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.memory import getMemoryMb
 
@@ -729,6 +794,16 @@ class Company:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (dict[str, str])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_topicSummaries"
         if cacheKey in self._cache:
@@ -922,6 +997,13 @@ class Company:
 
         Example:
             >>> Company("005930").resolve()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         normalized = stockCode.strip()
         if re.match(r"^[0-9A-Za-z]{6}$", normalized):
@@ -1842,6 +1924,13 @@ class Company:
 
         Raises:
             없음 (topic 미존재 시 ``_showImpl`` 이 None 반환).
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2046,6 +2135,13 @@ class Company:
 
         Raises:
             없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2499,6 +2595,13 @@ class Company:
 
         Example:
             >>> Company("005930").story()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2635,6 +2738,13 @@ class Company:
 
         Example:
             >>> Company("005930").analysis()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2766,6 +2876,13 @@ class Company:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.analysis.financial.storyValidation import (
             calcPlausibilityBand,
@@ -2813,6 +2930,13 @@ class Company:
 
         Example:
             >>> Company("005930").credit()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -3366,6 +3490,9 @@ class Company:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         return self._profileAccessor.facts
 
@@ -4004,6 +4131,9 @@ class Company:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanGovernance
 
@@ -4132,6 +4262,9 @@ class Company:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanCapital
 
@@ -4200,6 +4333,9 @@ class Company:
 
         Raises:
             없음.
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
         """
         from dartlab.providers.dart.builder.scanAggregator import buildScanDebt
 
@@ -4230,6 +4366,13 @@ class Company:
 
         Example:
             >>> Company("005930").quant()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -4328,6 +4471,19 @@ class Company:
 
         Example:
             >>> Company("005930").macro()
+
+        Args:
+            axis: <TODO: param desc> (<unannotated>)
+            target: <TODO: param desc> (<unannotated>)
+            overrides: <TODO: param desc> (dict | None)
+            **kwargs: <TODO: param desc> (<unannotated>)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.macro import Macro
 
@@ -4365,6 +4521,13 @@ class Company:
 
         Example:
             >>> Company("005930").causalWeights()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -4399,6 +4562,13 @@ class Company:
 
         Example:
             >>> Company("005930").valuationImpact()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -4433,6 +4603,16 @@ class Company:
 
         Raises:
             없음.
+
+        Args:
+            basePeriod: <TODO: param desc> (str | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -4468,6 +4648,16 @@ class Company:
 
         Example:
             >>> Company("005930").narrativeDiff()
+
+        Args:
+            claims: <TODO: param desc> (list[str] | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -4506,6 +4696,13 @@ class Company:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.industry.calcs.companyCalcs import calcChainPosition
 
@@ -4641,6 +4838,13 @@ class Company:
 
         Example:
             >>> Company("005930").calendar()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA, predictCalendar
 
@@ -4673,6 +4877,13 @@ class _DartDisclosureFetcher:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         try:
             df = Company(stockCode).disclosure(days=days, type=type)

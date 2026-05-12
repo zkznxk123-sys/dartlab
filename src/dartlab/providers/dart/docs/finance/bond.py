@@ -59,6 +59,16 @@ def parseBondTable(content: str) -> list[dict]:
 
     Example:
         >>> parseBondTable(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     results = []
@@ -131,6 +141,13 @@ def bond(stockCode: str) -> BondResult | None:
 
     Example:
         >>> bond(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

@@ -61,6 +61,15 @@ def parseMajorNum(title: str) -> int | None:
 
     Example:
         >>> parseMajorNum(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     m = re.match(r"^([IVXivx]+)\.\s", title.strip())
     if m:
@@ -79,6 +88,15 @@ def parseSubNum(title: str) -> int | None:
 
     Example:
         >>> parseSubNum(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     m = re.match(r"^(\d+)\.\s", title.strip())
     if m:
@@ -97,6 +115,15 @@ def splitByHeadings(text: str) -> list[tuple[str, str]]:
 
     Example:
         >>> splitByHeadings(...)
+
+    Returns:
+        <TODO: return desc> (list[tuple[str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = text.split("\n")
     segments: list[tuple[str, str]] = []
@@ -130,6 +157,15 @@ def separateTableAndText(content: str) -> tuple[str, list[str], int]:
 
     Example:
         >>> separateTableAndText(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     textLines: list[str] = []
@@ -277,6 +313,15 @@ def chunkSection(
 
     Example:
         >>> chunkSection(...)
+
+    Returns:
+        <TODO: return desc> (list[SectionChunk])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     if not content or not content.strip():
         return []
@@ -371,6 +416,15 @@ def chunkRows(rows: list[dict], contentCol: str) -> list[SectionChunk]:
 
     Example:
         >>> chunkRows(...)
+
+    Returns:
+        <TODO: return desc> (list[SectionChunk])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     majorSections: dict[int, dict] = {}
     currentMajorNum: int | None = None

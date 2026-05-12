@@ -37,6 +37,16 @@ def extractSummaryContent(report: pl.DataFrame) -> str | None:
 
     Example:
         >>> extractSummaryContent(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     content = None
     summary = report.filter(pl.col("section_title").str.contains("요약재무정보"))

@@ -281,6 +281,9 @@ def stripSectionPrefix(title: str) -> str:
 
     Example:
         >>> stripSectionPrefix(...)
+
+    Returns:
+        <TODO: return desc> (str)
     """
     return _LEAF_PREFIX_RE.sub("", title.strip())
 
@@ -300,6 +303,16 @@ def normalizeSectionTitle(title: str) -> str:
 
     Example:
         >>> normalizeSectionTitle(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
+        - logging
     """
     text = stripSectionPrefix(title)
     text = _INDUSTRY_PREFIX_RE.sub("", text)
@@ -328,6 +341,16 @@ def loadSectionMappings() -> dict[str, str]:
 
     Example:
         >>> loadSectionMappings(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
+        - logging
     """
     path = _mappingPath()
     if not path.exists():
@@ -357,6 +380,16 @@ def mapSectionTitle(title: str) -> str:
 
     Example:
         >>> mapSectionTitle(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
+        - logging
     """
     normalized = normalizeSectionTitle(title)
     mapped = loadSectionMappings().get(normalized)
@@ -399,6 +432,16 @@ def measureMappingRate(titles: list[str]) -> dict:
 
     Example:
         >>> measureMappingRate(...)
+
+    Args:
+        titles: <TODO: param desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
+        - logging
     """
     total = len(titles)
     unmapped: dict[str, int] = {}

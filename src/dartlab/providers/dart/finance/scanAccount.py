@@ -549,6 +549,24 @@ def scanAccount(
     Raises
     ------
     없음 (지원되지 않는 snakeId 또는 데이터 부재 시 빈 DataFrame).
+
+    Args:
+        snakeId: <TODO: param desc> (str)
+        sjDiv: <TODO: param desc> (str | None)
+        fsPref: <TODO: param desc> (str)
+        freq: <TODO: param desc> (str)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - concurrent
+        - dartlab
+        - logging
+        - polars
     """
     from dartlab.core.dataLoader import _dataDir
 
@@ -911,6 +929,23 @@ def scanRatio(
     ------
     ValueError
         지원하지 않는 ``ratioName`` 일 때 (사용 가능 목록 + hint 포함).
+
+    Args:
+        ratioName: <TODO: param desc> (str)
+        fsPref: <TODO: param desc> (str)
+        freq: <TODO: param desc> (str)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - concurrent
+        - dartlab
+        - logging
+        - polars
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
@@ -979,6 +1014,9 @@ def scanRatioList() -> list[dict[str, str]]:
     --------
     scanRatio : 전종목 비율 시계열.
     scanFields : 조건형 스크리닝 필드 카탈로그.
+
+    Returns:
+        <TODO: return desc> (list[dict[str, str]])
     """
     return [{"name": k, "label": v["label"], "unit": "%" if v.get("pct") else "배"} for k, v in _RATIO_DEFS.items()]
 
@@ -1031,6 +1069,18 @@ def scanAccountList() -> list[dict[str, str]]:
     --------
     scanAccount : 전종목 계정 시계열.
     scanFields : 조건형 스크리닝 필드 카탈로그.
+
+    Returns:
+        <TODO: return desc> (list[dict[str, str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - concurrent
+        - dartlab
+        - logging
+        - polars
     """
     from dartlab.core.utils.ordering import _ensureLoaded
 

@@ -26,6 +26,16 @@ def loadYearData(
 
     Example:
         >>> loadYearData(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, YearAccounts])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
     yearData: dict[str, YearAccounts] = {}
@@ -88,6 +98,13 @@ def fsSummary(
 
     Example:
         >>> fsSummary(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

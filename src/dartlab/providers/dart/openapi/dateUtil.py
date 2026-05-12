@@ -47,6 +47,20 @@ def parseDate(value: str | datetime | date | None, asEnd: bool = False) -> str |
 
     Example:
         >>> parseDate(...)
+
+    Args:
+        value: <TODO: param desc> (str | datetime | date | None)
+        asEnd: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - calendar
+        - datetime
     """
     if value is None:
         return None
@@ -98,6 +112,16 @@ def defaultStart() -> str:
 
     Example:
         >>> defaultStart(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - calendar
+        - datetime
     """
     now = datetime.now()
     try:
@@ -119,5 +143,8 @@ def defaultEnd() -> str:
 
     Example:
         >>> defaultEnd(...)
+
+    Returns:
+        <TODO: return desc> (str)
     """
     return datetime.now().strftime("%Y%m%d")

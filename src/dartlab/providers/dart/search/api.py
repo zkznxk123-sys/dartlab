@@ -53,6 +53,16 @@ def search(
 
     Example:
         >>> search(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if corp and not str(corp).isdigit() and len(corp) <= 6:
         return pl.DataFrame(
@@ -175,6 +185,16 @@ def buildIndex(parquetPaths: list[str] | None = None, *, includeDocs: bool = Fal
 
     Example:
         >>> buildIndex(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.ngramIndex import buildNgramIndex
 
@@ -192,6 +212,9 @@ def rebuildIndex(**kwargs) -> int:
 
     Example:
         >>> rebuildIndex(...)
+
+    Returns:
+        <TODO: return desc> (int)
     """
     return buildIndex(includeDocs=True, **kwargs)
 
@@ -207,6 +230,16 @@ def rebuildContent(**kwargs) -> int:
 
     Example:
         >>> rebuildContent(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.fieldIndex import rebuildMain
 
@@ -224,6 +257,16 @@ def rebuildContentDelta(**kwargs) -> int:
 
     Example:
         >>> rebuildContentDelta(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.fieldIndex import rebuildDelta
 
@@ -242,6 +285,16 @@ def collectMeta(startDate: str, endDate: str, **kwargs) -> int:
 
     Example:
         >>> collectMeta(...)
+
+    Returns:
+        <TODO: return desc> (int)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import collectMetaRange
 
@@ -259,6 +312,13 @@ def fillContent(period: str | None = None, **kwargs):
 
     Example:
         >>> fillContent(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import (
         fillContent as _fill,
@@ -283,6 +343,16 @@ def stats() -> dict:
 
     Example:
         >>> stats(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.openapi.allFilingsCollector import stats as collectorStats
     from dartlab.providers.dart.search.ngramIndex import ngramStats
@@ -304,6 +374,16 @@ def pushIndex(**kwargs) -> str:
 
     Example:
         >>> pushIndex(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.ngramIndex import pushStemIndex
 
@@ -321,6 +401,13 @@ def pullIndex(**kwargs):
 
     Example:
         >>> pullIndex(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.fieldIndex import pullContentIndex
     from dartlab.providers.dart.search.ngramIndex import pullStemIndex
@@ -346,6 +433,13 @@ def profile(stockCode: str | None = None):
 
     Example:
         >>> profile(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.derived import loadProfile
 
@@ -363,6 +457,16 @@ def pulse(limit: int = 10) -> pl.DataFrame:
 
     Example:
         >>> pulse(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.derived import pulse as _pulse
 
@@ -381,6 +485,16 @@ def timeline(typeFilter: str | None = None, periodFilter: str | None = None) -> 
 
     Example:
         >>> timeline(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.derived import loadTimeline
 
@@ -398,6 +512,16 @@ def dna(stockCode: str) -> dict:
 
     Example:
         >>> dna(...)
+
+    Returns:
+        <TODO: return desc> (dict)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.derived import dna as _dna
 
@@ -416,6 +540,16 @@ def similarCompanies(stockCode: str, limit: int = 5) -> pl.DataFrame:
 
     Example:
         >>> similarCompanies(...)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.search.derived import similarCompanies as _similar
 

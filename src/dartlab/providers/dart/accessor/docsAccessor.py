@@ -81,6 +81,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsOrdered(recentFirst=True)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return None if sections is None else sections.ordered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
@@ -107,6 +114,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsCoverage()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -128,6 +142,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsFreq("annual")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return None if sections is None else sections.freq(freqScope, includeMixed=includeMixed)
@@ -154,6 +175,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsSemanticRegistry(freqScope="annual")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -184,6 +212,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsSemanticCollisions()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -216,6 +251,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureRegistry(nodeType="section")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -253,6 +295,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureCollisions()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -292,6 +341,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureEvents(changedOnly=True)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -330,6 +386,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureSummary()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -371,6 +434,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureChanges(latestOnly=True)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         sections = self.sections
         return (
@@ -444,6 +514,13 @@ class _DocsAccessor:
         Example:
             >>> c._docs.business  # deprecated
             >>> c.show("business")  # 권장
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -463,6 +540,13 @@ class _DocsAccessor:
         Example:
             >>> c._docs.mdna  # deprecated
             >>> c.show("mdna")  # 권장
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 
@@ -482,6 +566,13 @@ class _DocsAccessor:
         Example:
             >>> c._docs.rawMaterial  # deprecated
             >>> c.show("rawMaterial")  # 권장
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import warnings
 

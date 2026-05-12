@@ -34,6 +34,15 @@ def parseOverview(text: str) -> dict:
 
     Example:
         >>> parseOverview(...)
+
+    Args:
+        text: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     result: dict = {}
     missing: list[str] = []

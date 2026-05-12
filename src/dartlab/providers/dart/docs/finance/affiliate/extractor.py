@@ -14,6 +14,15 @@ def parseTableRows(text: str) -> list[list[str]]:
 
     Example:
         >>> parseTableRows(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     rows = []
     for line in text.split("\n"):

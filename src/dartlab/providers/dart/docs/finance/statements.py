@@ -66,6 +66,13 @@ def extractContent(
 
     Example:
         >>> extractContent(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if scope != "separate":
         cons = report.filter(
@@ -106,6 +113,16 @@ def extractConsolidatedContent(report: pl.DataFrame) -> str | None:
 
     Example:
         >>> extractConsolidatedContent(...)
+
+    Returns:
+        <TODO: return desc> (str | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     content, scope = extractContent(report)
     return content
@@ -122,6 +139,16 @@ def splitStatements(content: str) -> dict[str, str]:
 
     Example:
         >>> splitStatements(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
 
@@ -196,6 +223,13 @@ def statements(
 
     Example:
         >>> statements(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

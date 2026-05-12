@@ -53,6 +53,16 @@ def parseAmount(text: str) -> int | None:
 
     Example:
         >>> parseAmount(...)
+
+    Returns:
+        <TODO: return desc> (int | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not text or not isinstance(text, str):
         return None
@@ -90,6 +100,16 @@ def extractTableBlocks(content: str) -> list[list[str]]:
 
     Example:
         >>> extractTableBlocks(...)
+
+    Returns:
+        <TODO: return desc> (list[list[str]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -118,6 +138,16 @@ def splitCells(line: str) -> list[str]:
 
     Example:
         >>> splitCells(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -138,6 +168,16 @@ def isSeparatorRow(line: str) -> bool:
 
     Example:
         >>> isSeparatorRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -154,6 +194,16 @@ def classifyBlock(block: list[str]) -> str:
 
     Example:
         >>> classifyBlock(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     text = " ".join(block[:8])
 
@@ -182,6 +232,16 @@ def parseGuaranteeBlock(block: list[str]) -> list[dict]:
 
     Example:
         >>> parseGuaranteeBlock(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     results = []
@@ -230,6 +290,16 @@ def parseRevenueTxBlock(block: list[str]) -> list[dict]:
 
     Example:
         >>> parseRevenueTxBlock(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     results = []
@@ -280,6 +350,13 @@ def relatedPartyTx(stockCode: str) -> RelatedPartyTxResult | None:
 
     Example:
         >>> relatedPartyTx(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)

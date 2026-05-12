@@ -20,6 +20,15 @@ def parseMajorHolderTable(content: str) -> dict:
 
     Example:
         >>> parseMajorHolderTable(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     result = {
@@ -126,6 +135,15 @@ def parseBigHolders(content: str) -> list[dict] | None:
 
     Example:
         >>> parseBigHolders(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     inSection = False
@@ -215,6 +233,15 @@ def parseMinority(content: str) -> dict | None:
 
     Example:
         >>> parseMinority(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     inSection = False
@@ -272,6 +299,15 @@ def parseVoting(content: str) -> dict | None:
 
     Example:
         >>> parseVoting(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = content.split("\n")
     inSection = False

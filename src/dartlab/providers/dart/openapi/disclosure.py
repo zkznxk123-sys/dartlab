@@ -103,6 +103,29 @@ def listFilings(
 
     Raises:
         없음.
+
+    Args:
+        client: <TODO: param desc> (DartClient)
+        corp: <TODO: param desc> (str | None)
+        start: <TODO: param desc> (str | None)
+        end: <TODO: param desc> (str | None)
+        filingType: <TODO: param desc> (str | None)
+        finalOnly: <TODO: param desc> (bool)
+        corpClass: <TODO: param desc> (Literal['Y', 'K', 'N', 'E'] | None)
+        sort: <TODO: param desc> (Literal['date', 'crp', 'rpt'])
+        ascending: <TODO: param desc> (bool)
+        fetchAll: <TODO: param desc> (bool)
+        limit: <TODO: param desc> (int | None)
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     params: dict[str, str] = {}
 
@@ -171,6 +194,13 @@ def iterFilings(
     Example:
         >>> for row in iterFilings(client, "005930", limit=10):
         ...     print(row["report_nm"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = listFilings(
         client,
@@ -224,6 +254,20 @@ def companyInfo(
 
     Raises:
         없음.
+
+    Args:
+        client: <TODO: param desc> (DartClient)
+        corp: <TODO: param desc> (str)
+
+    Returns:
+        <TODO: return desc> (dict[str, str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     corpCode = _resolveCorpCode(client, corp)
     data = client.getJson("company.json", {"corp_code": corpCode})

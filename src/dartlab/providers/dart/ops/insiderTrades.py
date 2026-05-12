@@ -50,6 +50,14 @@ async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) ->
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - dartlab
+        - logging
     """
     dart = _getDart()
     if dart is None:
@@ -96,6 +104,14 @@ async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None)
 
     Raises:
         없음.
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - dartlab
+        - logging
     """
     dart = _getDart()
     if dart is None:
@@ -140,6 +156,14 @@ async def iterInsiderTradingRaw(stockCode: str, *, limit: int | None = None):
     Example:
         >>> async for row in iterInsiderTradingRaw("005930", limit=10):
         ...     print(row["name"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - dartlab
+        - logging
     """
     rows = await fetchInsiderTradingRaw(stockCode, limit=limit)
     for r in rows:
@@ -162,6 +186,14 @@ async def iterMajorShareholdersRaw(stockCode: str, *, limit: int | None = None):
     Example:
         >>> async for row in iterMajorShareholdersRaw("005930", limit=10):
         ...     print(row["holderName"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - dartlab
+        - logging
     """
     rows = await fetchMajorShareholdersRaw(stockCode, limit=limit)
     for r in rows:

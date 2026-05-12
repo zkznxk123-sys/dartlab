@@ -78,6 +78,13 @@ def profileTable(company: Company) -> pl.DataFrame | None:
 
     Example:
         >>> profileTable(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cacheKey = "_sectionProfileTable"
     if cacheKey in company._cache:
@@ -104,6 +111,13 @@ def chapterMap(company: Company) -> dict[str, str]:
     Example:
         >>> chapterMap(c)["BS"]
         'III'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cacheKey = "_chapterMap"
     if cacheKey in company._cache:
@@ -146,6 +160,13 @@ def chapterForTopic(company: Company, topic: str) -> str:
     Example:
         >>> chapterForTopic(c, "executive")
         'VIII'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     cm = chapterMap(company)
     if topic in cm:
@@ -174,6 +195,13 @@ def topicLabel(company: Company, topic: str) -> str:
     Example:
         >>> topicLabel(c, "CIS")
         '포괄손익계산서'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.registry import getEntry as _getEntry
     from dartlab.providers.dart.company import _TOPIC_LABELS, _getAllProperties
@@ -211,6 +239,13 @@ def buildSections(company: Company) -> pl.DataFrame | None:
 
     Example:
         >>> sections = buildSections(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.dart.company import _CHAPTER_TITLES, _topicForApiType
     from dartlab.providers.dart.docs.sections import reorderPeriodColumns

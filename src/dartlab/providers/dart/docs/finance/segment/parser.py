@@ -51,6 +51,15 @@ def isDataRow(cells: list[str]) -> bool:
 
     Example:
         >>> isDataRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     numCount = 0
     for c in cells[1:]:
@@ -71,6 +80,15 @@ def isHeaderRow(cells: list[str]) -> bool:
 
     Example:
         >>> isHeaderRow(...)
+
+    Returns:
+        <TODO: return desc> (bool)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     nonEmpty = [c.strip() for c in cells if c.strip()]
     if len(nonEmpty) < 2:
@@ -107,6 +125,15 @@ def mergeHeaders(headers: list[list[str]]) -> list[str]:
 
     Example:
         >>> mergeHeaders(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     if len(headers) == 1:
         return list(headers[0])
@@ -155,6 +182,15 @@ def classifyTable(columns: list[str]) -> str:
 
     Example:
         >>> classifyTable(...)
+
+    Returns:
+        <TODO: return desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     colStr = " ".join(columns)
     if any(kw in colStr for kw in ["국내", "미주", "유럽", "본사 소재지"]):
@@ -178,6 +214,15 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
 
     Example:
         >>> parseSegmentTables(...)
+
+    Returns:
+        <TODO: return desc> (list[SegmentTable])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     lines = text.split("\n")
     results: list[SegmentTable] = []
@@ -197,6 +242,12 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
 
         Example:
             >>> flush(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         nonlocal currentColumns, currentRows, rowOrder, pendingHeaders, hasData
         if currentColumns and currentRows:

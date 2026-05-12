@@ -405,6 +405,15 @@ def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
 
     Example:
         >>> extractProfiles(...)
+
+    Returns:
+        <TODO: return desc> (list[AffiliateProfile])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     results: list[AffiliateProfile] = []
     headers: list[str] | None = None
@@ -558,6 +567,15 @@ def extractMovements(rows: list[list[str]]) -> list[AffiliateMovement]:
 
     Example:
         >>> extractMovements(...)
+
+    Returns:
+        <TODO: return desc> (list[AffiliateMovement])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     results: list[AffiliateMovement] = []
     headers = None
@@ -686,6 +704,15 @@ def extractSimpleMovement(rows: list[list[str]]) -> list[dict]:
 
     Example:
         >>> extractSimpleMovement(...)
+
+    Returns:
+        <TODO: return desc> (list[dict])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     results: list[dict] = []
     inTable = False
@@ -905,6 +932,15 @@ def extractTransposedProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
 
     Example:
         >>> extractTransposedProfiles(...)
+
+    Returns:
+        <TODO: return desc> (list[AffiliateProfile])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     blocks = _findTransposedBlocks(rows)
     results: list[AffiliateProfile] = []
@@ -979,6 +1015,15 @@ def extractTransposedMovements(rows: list[list[str]]) -> list[AffiliateMovement]
 
     Example:
         >>> extractTransposedMovements(...)
+
+    Returns:
+        <TODO: return desc> (list[AffiliateMovement])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     blocks = _findTransposedBlocks(rows)
     results: list[AffiliateMovement] = []

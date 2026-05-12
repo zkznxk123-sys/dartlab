@@ -38,6 +38,13 @@ def cleanFinanceDataFrame(df: pl.DataFrame, sjDiv: str) -> pl.DataFrame:
 
     Example:
         >>> cleanFinanceDataFrame(df, "CF")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     periodCols = [c for c in df.columns if _isPeriodColumn(c)]
     if not periodCols:
@@ -77,6 +84,13 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
 
     Example:
         >>> transposeToVertical(wide_df, ["2024Q4", "2024Q3"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.show import transposeToVertical as _coreTransposeToVertical
 
@@ -100,6 +114,13 @@ def warnUnknownTopic(topic: str, sec: pl.DataFrame) -> None:
 
     Example:
         >>> warnUnknownTopic("majorShareholders", sections_df)  # majorHolder 제안
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     import difflib
     import warnings
@@ -137,6 +158,13 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
 
     Example:
         >>> applyPeriodFilter(df, "2024Q4")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload

@@ -30,6 +30,9 @@ class DartKeyStatus:
 
         Example:
             >>> toDict(...)
+
+        Returns:
+            <TODO: return desc> (dict[str, Any])
         """
         return {
             "configured": self.configured,
@@ -51,6 +54,15 @@ def findProjectEnvPath(startPath: Path | None = None) -> Path:
 
     Example:
         >>> findProjectEnvPath(...)
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     start = startPath or Path.cwd()
     for current in (start, *start.parents):
@@ -71,6 +83,15 @@ def loadDotenvDartKeys(startPath: Path | None = None) -> list[str]:
 
     Example:
         >>> loadDotenvDartKeys(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     envPath = findProjectEnvPath(startPath)
     if not envPath.exists():
@@ -116,6 +137,15 @@ def resolveDartKeys(
 
     Example:
         >>> resolveDartKeys(...)
+
+    Returns:
+        <TODO: return desc> (list[str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     if apiKeys:
         return [item.strip() for item in apiKeys if item and item.strip()]
@@ -148,6 +178,9 @@ def hasDartApiKey(startPath: Path | None = None) -> bool:
 
     Example:
         >>> hasDartApiKey(...)
+
+    Returns:
+        <TODO: return desc> (bool)
     """
     return bool(resolveDartKeys(startPath=startPath))
 
@@ -163,6 +196,15 @@ def getDartKeyStatus(startPath: Path | None = None) -> DartKeyStatus:
 
     Example:
         >>> getDartKeyStatus(...)
+
+    Returns:
+        <TODO: return desc> (DartKeyStatus)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     envPath = findProjectEnvPath(startPath)
     envKeys = os.environ.get("DART_API_KEYS", "")
@@ -204,6 +246,15 @@ def saveDartKeyToDotenv(key: str, startPath: Path | None = None) -> Path:
 
     Example:
         >>> saveDartKeyToDotenv(...)
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     envPath = findProjectEnvPath(startPath)
     lines: list[str] = []
@@ -239,6 +290,15 @@ def clearDartKeyFromDotenv(startPath: Path | None = None) -> Path:
 
     Example:
         >>> clearDartKeyFromDotenv(...)
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     envPath = findProjectEnvPath(startPath)
     if not envPath.exists():
@@ -266,6 +326,15 @@ def validateDartApiKey(key: str) -> dict[str, Any]:
 
     Example:
         >>> validateDartApiKey(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, Any])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
     """
     from dartlab.providers.dart.openapi.client import DartClient
 
@@ -304,6 +373,12 @@ class DartKeyProvider:
 
         Example:
             >>> check(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - datetime
         """
         from dartlab.core.credentials import CredentialStatus
 
@@ -340,6 +415,12 @@ class DartKeyProvider:
 
         Example:
             >>> save(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - datetime
         """
         saveDartKeyToDotenv(value)
 

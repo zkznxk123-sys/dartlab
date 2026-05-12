@@ -229,6 +229,17 @@ def parseTextStructureWithState(
 
     Example:
         >>> parseTextStructureWithState(...)
+
+    Returns:
+        <TODO: return desc> (tuple[list[dict[str, object]], list[dict[str, Any]]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - hashlib
     """
     nodes: list[dict[str, object]] = []
     stack: list[dict[str, object]] = [dict(item) for item in (initialHeadings or [])]
@@ -243,6 +254,14 @@ def parseTextStructureWithState(
 
         Example:
             >>> flushBody(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - functools
+            - hashlib
         """
         nonlocal bodyLines, segmentOrder
         body = "\n".join(bodyLines).strip()
@@ -371,6 +390,17 @@ def parseTextStructure(
 
     Example:
         >>> parseTextStructure(...)
+
+    Returns:
+        <TODO: return desc> (list[dict[str, object]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - functools
+        - hashlib
     """
     nodes, _stack = parseTextStructureWithState(text, sourceBlockOrder=sourceBlockOrder, topic=topic)
     return nodes

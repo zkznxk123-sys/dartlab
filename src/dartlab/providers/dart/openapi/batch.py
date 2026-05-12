@@ -150,6 +150,19 @@ class AsyncDartClient:
 
         Example:
             >>> getJson(...)
+
+        Returns:
+            <TODO: return desc> (dict[str, Any] | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         await self._throttle()
         merged = {"crtfc_key": self._key}
@@ -186,6 +199,19 @@ class AsyncDartClient:
 
         Example:
             >>> getDf(...)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         data = await self.getJson(endpoint, params, emptyOn013=True)
         if data is None:
@@ -205,6 +231,19 @@ class AsyncDartClient:
 
         Example:
             >>> getBytes(...)
+
+        Returns:
+            <TODO: return desc> (bytes | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         await self._throttle()
         merged = {"crtfc_key": self._key}
@@ -232,6 +271,16 @@ class AsyncDartClient:
 
         Example:
             >>> close(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         await self._client.aclose()
 
@@ -851,6 +900,16 @@ def batchCollect(
 
     Example:
         >>> batchCollect(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - dartlab
+        - datetime
+        - httpx
+        - io
     """
     cats = categories or ["finance", "report", "docs"]
     keys = resolveDartKeys()
@@ -987,6 +1046,16 @@ def batchCollect(
 
         Example:
             >>> completeFn(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         with lock:
             completedCount[0] += 1
@@ -1009,6 +1078,16 @@ def batchCollect(
 
         Example:
             >>> statusFn(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         with lock:
             workerLines[workerIdx] = f"{corpName} ({stockCode})"
@@ -1026,6 +1105,16 @@ def batchCollect(
 
         Example:
             >>> periodFn(...)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - datetime
+            - httpx
+            - io
         """
         with lock:
             workerLines[workerIdx] = f"{corpName} | {detail}"
@@ -1086,6 +1175,19 @@ def batchCollectAll(
 
     Example:
         >>> batchCollectAll(...)
+
+    Returns:
+        <TODO: return desc> (dict[str, dict[str, int]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - dartlab
+        - datetime
+        - httpx
+        - io
     """
     from dartlab.core.listingResolver import getListingResolver
 

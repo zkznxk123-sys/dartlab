@@ -42,6 +42,16 @@ def parseDividendTable(content: str) -> dict:
 
     Example:
         >>> parseDividendTable(...)
+
+    Args:
+        content: <TODO: param desc> (str)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     lines = content.split("\n")
     tableRows: list[list[str]] = []
@@ -156,6 +166,13 @@ def dividend(stockCode: str) -> DividendResult | None:
 
     Example:
         >>> dividend(...)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode)
     corpName = extractCorpName(df)
