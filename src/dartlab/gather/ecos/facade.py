@@ -67,6 +67,23 @@ class Ecos:
         -------
         >>> e = Ecos()
         >>> df = e.series("CPI", start="2020-01-01")
+
+        Capabilities
+        ------------
+        series.fetchSeries 위임 — 캐시 hit / ECOS API / DataFrame 변환.
+        AIContext: macro engine 의 한국 시계열 진입 facade — gather.macro(seriesId, market="KR") 와 짝.
+        Guide: enrich=True 시 변화율 + Parquet 저장.
+        When: 사용자가 한국 매크로 단일 시계열 분석 시.
+        How: ``fetchSeries(self._client, indicatorId, start, end, enrich=enrich)``.
+
+        Requires
+        --------
+        ``ECOS_API_KEY`` 환경변수.
+
+        See Also
+        --------
+        compare : 복수 시리즈 wide.
+        catalog : 사용 가능한 indicatorId 카탈로그.
         """
         return fetchSeries(self._client, indicatorId, start=start, end=end, enrich=enrich)
 
@@ -103,6 +120,23 @@ class Ecos:
         -------
         >>> e = Ecos()
         >>> df = e.compare(["CPI", "BASE_RATE"])
+
+        Capabilities
+        ------------
+        series.fetchMulti 위임 — fan-out + outer join + forward_fill.
+        AIContext: 한국 매크로 cross-series 분석 진입 (예: CPI vs 기준금리).
+        Guide: 주기 다르면 outer join 후 forward_fill.
+        When: 매크로 regime / correlation 분석 시.
+        How: ``fetchMulti(self._client, indicatorIds, start, end)``.
+
+        Requires
+        --------
+        ``ECOS_API_KEY`` 환경변수.
+
+        See Also
+        --------
+        series : 단일 시리즈.
+        group : 카탈로그 그룹 일괄.
         """
         return fetchMulti(self._client, indicatorIds, start=start, end=end)
 
@@ -132,6 +166,22 @@ class Ecos:
         -------
         >>> e = Ecos()
         >>> cat = e.catalog(group="물가")
+
+        Capabilities
+        ------------
+        catalog.toDataframe 위임 — 정적 카탈로그 DataFrame.
+        AIContext: 사용자 universe 탐색 진입 — API 호출 0 (정적).
+        Guide: group 미명시 시 전체.
+        When: 분석 시작 전 universe 확인 / UI dropdown.
+        How: ``_catalog.toDataframe(group)``.
+
+        Requires
+        --------
+        catalog._INDICATORS 정적 사전.
+
+        See Also
+        --------
+        group · search.
         """
         return _catalog.toDataframe(group)
 
@@ -160,6 +210,22 @@ class Ecos:
         -------
         >>> e = Ecos()
         >>> hits = e.search("물가", limit=5)
+
+        Capabilities
+        ------------
+        catalog.search 위임 — substring 매칭.
+        AIContext: 사용자 자연어 키워드 탐색 진입.
+        Guide: case-insensitive substring. 한글/영문 모두.
+        When: 카탈로그에서 특정 키워드 탐색 시.
+        How: ``_catalog.search(keyword, limit=limit)``.
+
+        Requires
+        --------
+        catalog 정적 사전.
+
+        See Also
+        --------
+        catalog : DataFrame 형식.
         """
         return _catalog.search(keyword, limit=limit)
 
@@ -190,6 +256,22 @@ class Ecos:
         -------
         >>> e = Ecos()
         >>> df = e.group("물가")
+
+        Capabilities
+        ------------
+        catalog.getGroupIds → fetchMulti 위임.
+        AIContext: 그룹 단위 한국 매크로 분석 진입 (예: 물가 그룹 일괄).
+        Guide: 미존재 그룹 ValueError + 가용 list.
+        When: 카테고리 단위 매크로 dashboard / regime 분석 시.
+        How: ``getGroupIds(name)`` → ``fetchMulti(self._client, ids, ...)``.
+
+        Requires
+        --------
+        ``ECOS_API_KEY`` + ``name`` 이 등록된 그룹.
+
+        See Also
+        --------
+        catalog · compare.
         """
         ids = _catalog.getGroupIds(name)
         if not ids:
@@ -202,6 +284,12 @@ class Ecos:
     def close(self) -> None:
         """HTTP 세션 종료.
 
+        Capabilities: EcosClient.close 위임.
+        AIContext: Ecos facade 리소스 정리 진입.
+        Guide: idempotent.
+        When: dartlab 종료 / context manager exit 시.
+        How: ``self._client.close()``.
+
         Returns
         -------
         None
@@ -211,10 +299,18 @@ class Ecos:
         없음
             세션이 이미 종료된 경우에도 graceful.
 
+        Requires
+        --------
+        ``self._client`` (EcosClient).
+
         Example
         -------
         >>> e = Ecos()
         >>> e.close()
+
+        See Also
+        --------
+        client.EcosClient.close : 위임 대상.
         """
         self._client.close()
 

@@ -144,6 +144,12 @@ def fetchSeries(
 ) -> pl.DataFrame:
     """ECOS 지표 시계열 → Polars DataFrame ``(date, value)``.
 
+    Capabilities: 캐시 확인 → catalog entry lookup → ECOS StatisticSearch GET → DataFrame.
+    AIContext: ECOS 단일 시계열의 단일 진입점 — facade.Ecos.series 의 본체.
+    Guide: 카탈로그 미등록 indicatorId 는 SeriesNotFoundError + 가용 list 안내.
+    When: 한국 매크로 단일 시계열 분석 시 (가장 빈번한 호출 path).
+    How: catalog.getEntry → freq별 default date 보강 → client.get → date/value parse.
+
     Parameters
     ----------
     client : EcosClient
@@ -169,6 +175,19 @@ def fetchSeries(
     ------
     SeriesNotFoundError
         카탈로그에 없는 indicatorId.
+
+    Requires
+    --------
+    EcosClient (``ECOS_API_KEY``) + indicatorId 가 카탈로그에 등록.
+
+    Example
+    -------
+    >>> df = fetchSeries(client, "CPI", start="2020-01-01")
+
+    See Also
+    --------
+    fetchMulti : 복수 지표 wide.
+    facade.Ecos.series : 클래스 facade.
     """
     cached = _cache.get(indicatorId, start, end)
     if cached is not None:
@@ -240,6 +259,12 @@ def fetchMulti(
 ) -> pl.DataFrame:
     """복수 지표 → wide DataFrame ``(date, GDP, CPI, ...)``.
 
+    Capabilities: fetchSeries fan-out → outer join + forward_fill.
+    AIContext: 한국 매크로 cross-series 분석 진입 — facade.Ecos.compare 의 본체.
+    Guide: 주기 다르면 outer join 후 forward_fill — caller dropna 권장.
+    When: 한국 매크로 regime / correlation 분석 시.
+    How: ``[fetchSeries(...).rename({'value': iid}) for iid in ids]`` → join chain → sort + fill.
+
     주기가 다른 지표를 합칠 때 outer join 후 forward-fill.
 
     Parameters
@@ -266,9 +291,18 @@ def fetchMulti(
     SeriesNotFoundError
         indicatorIds 중 하나라도 카탈로그에 없을 때.
 
+    Requires
+    --------
+    EcosClient + 모든 indicatorIds 가 카탈로그 등록.
+
     Example
     -------
     >>> df = fetchMulti(client, ["CPI", "BASE_RATE"], start="2020-01-01")
+
+    See Also
+    --------
+    fetchSeries : 본 함수의 내부 fan-out 대상.
+    facade.Ecos.compare : 클래스 facade.
     """
     if not indicatorIds:
         return pl.DataFrame()

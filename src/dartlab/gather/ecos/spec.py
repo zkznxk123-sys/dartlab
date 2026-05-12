@@ -8,6 +8,12 @@ from . import catalog as _catalog
 def buildSpec() -> dict:
     """AI spec 수집기용 ECOS 엔진 스펙 메타데이터 생성.
 
+    Capabilities: catalog 그룹 + 시리즈 list + capabilities + tools 종합 dict.
+    AIContext: Skill OS auto-discover / dartlab.skills/specs build 진입.
+    Guide: 정적 카탈로그 기반 — ECOS API 호출 없음.
+    When: ``scripts/build/generateSkills.py`` 가 spec 빌드 시.
+    How: catalog.getGroups iterate → 각 entry meta dict 패킹.
+
     카탈로그 그룹·시리즈 목록을 순회하여 AI 자동 발견(autoDiscover)용
     구조화된 dict 를 반환한다.
 
@@ -28,9 +34,18 @@ def buildSpec() -> dict:
     없음
         카탈로그 비어 있어도 빈 그룹 dict 반환.
 
+    Requires
+    --------
+    catalog._INDICATORS 정적 사전.
+
     Example
     -------
     >>> spec = buildSpec()
+
+    See Also
+    --------
+    catalog.toDataframe : 카탈로그 DataFrame 형식.
+    skills/specs : 본 함수 결과의 caller (Skill OS build).
     """
     groups = {}
     for name in _catalog.getGroups():

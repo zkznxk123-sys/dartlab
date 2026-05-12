@@ -571,6 +571,16 @@ def getEntry(indicatorId: str) -> CatalogEntry | None:
     Example
     -------
     >>> e = getEntry("GDP")
+
+    Capabilities
+    ------------
+    indicator ID 또는 한글 label 양쪽 매칭 → CatalogEntry.
+    AIContext: AI 가 "기준금리" 같은 자연어 입력해도 정확 매칭.
+    Guide: resolveId alias 우선 → 정확 ID lookup → label scan.
+    When: 사용자/AI 입력의 indicator 정규화 진입 시.
+    How: resolveId → _entries[canonical] → label 매칭 fallback.
+    Requires: _build() 가 카탈로그 인덱스 사전 빌드.
+    See Also: resolveId · getAllIds · search.
     """
     _build()
     canonical = resolveId(indicatorId)
@@ -605,6 +615,16 @@ def resolveId(indicatorId: str | None) -> str | None:
     Example
     -------
     >>> resolveId("기준금리")
+
+    Capabilities
+    ------------
+    _INDICATOR_ALIASES dict 매칭 → canonical ID. uppercase + space 제거.
+    AIContext: USDKRW 별칭 (DEXKOUS, KRWUSD, 원/달러 등) 정규화 진입.
+    Guide: 매칭 안 되면 strip + upper 원본 반환.
+    When: getEntry / facade 진입 직전.
+    How: ``key.upper().replace(' ', '')`` → ``_INDICATOR_ALIASES.get(aliasKey, key)``.
+    Requires: _INDICATOR_ALIASES dict.
+    See Also: getEntry · _INDICATOR_ALIASES.
     """
     if indicatorId is None:
         return None
@@ -630,6 +650,16 @@ def getGroups() -> list[str]:
     Example
     -------
     >>> getGroups()
+
+    Capabilities
+    ------------
+    _groups dict keys → list.
+    AIContext: ECOS 카테고리 universe 노출 — UI dropdown / catalog 진입.
+    Guide: dict 순서 보장.
+    When: 카탈로그 그룹 list 필요 시.
+    How: ``list(_groups.keys())``.
+    Requires: _build() 사전 호출.
+    See Also: getGroup · getGroupIds.
     """
     _build()
     return list(_groups.keys())
@@ -656,6 +686,16 @@ def getGroup(name: str) -> list[CatalogEntry]:
     Example
     -------
     >>> entries = getGroup("물가")
+
+    Capabilities
+    ------------
+    _groups[name] → CatalogEntry list.
+    AIContext: 그룹 단위 fetch 직전 entry detail 확인 진입.
+    Guide: 미존재 그룹 빈 list — silent.
+    When: facade.group 의 사용자/AI 입력 dispatch 시.
+    How: ``_groups.get(name, [])``.
+    Requires: _build() 사전 호출.
+    See Also: getGroupIds · facade.group.
     """
     _build()
     return _groups.get(name, [])
@@ -682,6 +722,16 @@ def getGroupIds(name: str) -> list[str]:
     Example
     -------
     >>> ids = getGroupIds("금리")
+
+    Capabilities
+    ------------
+    getGroup → [e.id for e in entries].
+    AIContext: 그룹 단위 fetchMulti 직전 ID list 추출.
+    Guide: 미존재 그룹 빈 list.
+    When: facade.group 의 bulk fetch 직전.
+    How: ``[e.id for e in getGroup(name)]``.
+    Requires: getGroup 동작.
+    See Also: series.fetchMulti.
     """
     return [e.id for e in getGroup(name)]
 
@@ -701,6 +751,16 @@ def getAllIds() -> list[str]:
     Example
     -------
     >>> ids = getAllIds()
+
+    Capabilities
+    ------------
+    _entries dict keys → list.
+    AIContext: 운영자 cron 의 ECOS publish universe / 사용자 catalog.
+    Guide: 중복 ID 없음 — dict key unique.
+    When: bulk publish / 카탈로그 동기화 시.
+    How: ``list(_entries.keys())``.
+    Requires: _build() 사전 호출.
+    See Also: getGroupIds · scripts/build/macroBuild.
     """
     _build()
     return list(_entries.keys())
@@ -729,6 +789,16 @@ def search(keyword: str, *, limit: int | None = None) -> list[CatalogEntry]:
     Example
     -------
     >>> hits = search("물가", limit=5)
+
+    Capabilities
+    ------------
+    id/label/description substring 매칭 (lowercase) → entry list.
+    AIContext: 카탈로그 fuzzy 탐색 — 한글/영문 키워드.
+    Guide: case-insensitive substring 만. fuzzy (자모) 미지원.
+    When: 사용자가 카탈로그에서 특정 키워드 탐색 시.
+    How: ``[e for e in _entries.values() if kw in e.id|label|description]``.
+    Requires: _build() 사전 호출.
+    See Also: getEntry : 정확 매칭.
     """
     _build()
     kw = keyword.lower()
@@ -763,6 +833,16 @@ def toDataframe(group: str | None = None) -> pl.DataFrame:
     Example
     -------
     >>> df = toDataframe(group="물가")
+
+    Capabilities
+    ------------
+    entries → DataFrame (id/label/group/frequency/unit/description).
+    AIContext: facade.catalog 의 본체 — 사용자 catalog UI 표시.
+    Guide: group 미명시 시 전체.
+    When: catalog UI / dashboard / 외부 export 시.
+    How: getGroup or _entries.values() → list[dict] → pl.DataFrame.
+    Requires: polars + _build().
+    See Also: facade.Ecos.catalog.
     """
     _build()
     entries = getGroup(group) if group else list(_entries.values())

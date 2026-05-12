@@ -53,6 +53,12 @@ class EcosClient:
     ) -> list[dict]:
         """StatisticSearch 조회 → row 리스트 반환.
 
+        Capabilities: ECOS StatisticSearch endpoint GET + 30 RPM rate limit + 429/5xx 재시도.
+        AIContext: ECOS 모든 시계열 조회의 단일 HTTP 진입점.
+        Guide: URL path 방식 (key/json/kr/start/end/table/freq/startDate/endDate/item).
+        When: series.fetchSeries / catalog 모든 ECOS API 호출 시.
+        How: rate limit 대기 → GET → 200 parseResponse / 429 retry / 4xx raise.
+
         Args:
             tableCode: 통계표코드 (예: "722Y001").
             freq: 주기 (D/M/Q/A).
@@ -69,9 +75,16 @@ class EcosClient:
             EcosError: HTTP 4xx 응답 또는 최대 재시도 초과.
             RateLimitError: 429 rate limit (재시도 후에도 회복 안 됨).
 
+        Requires:
+            ``ECOS_API_KEY`` 환경변수 — 무료 발급 ``https://ecos.bok.or.kr/api/``.
+
         Example:
             >>> c = EcosClient()
             >>> rows = c.get("722Y001", "D", "20240101", "20241231", "0101000")
+
+        See Also:
+            close : 세션 정리.
+            series.fetchSeries : 본 메서드의 caller.
         """
         # URL 경로 방식: /서비스/키/json/kr/시작/종료/테이블/주기/시작일/종료일/항목
         url = (
@@ -114,6 +127,12 @@ class EcosClient:
     def close(self) -> None:
         """HTTP 세션 종료.
 
+        Capabilities: httpx.Client.close 위임.
+        AIContext: EcosClient 리소스 정리 진입.
+        Guide: idempotent — 두 번 호출 graceful.
+        When: dartlab 종료 / Ecos facade close 시.
+        How: ``self._session.close()``.
+
         Returns
         -------
         None
@@ -123,10 +142,18 @@ class EcosClient:
         없음
             httpx 세션 close 는 graceful.
 
+        Requires
+        --------
+        ``self._session`` (httpx.Client) 가용.
+
         Example
         -------
         >>> c = EcosClient()
         >>> c.close()
+
+        See Also
+        --------
+        facade.Ecos.close : 본 메서드의 caller.
         """
         self._session.close()
 

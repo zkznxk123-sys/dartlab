@@ -12,6 +12,12 @@ _cache = TimeseriesCache(ttlDaily=6 * 3600, ttlOther=24 * 3600)
 def get(indicatorId: str, start: str | None, end: str | None) -> Any | None:
     """캐시 조회. TTL 만료 시 None.
 
+    Capabilities: TimeseriesCache.get 위임 — (indicatorId, start, end) 키.
+    AIContext: ECOS API 호출 직전 캐시 hit 확인 — rate limit 회피.
+    Guide: TTL daily=6h / other=24h.
+    When: series.fetchSeries / facade 호출의 첫 단계.
+    How: ``_cache.get(indicatorId, start, end)``.
+
     Parameters
     ----------
     indicatorId : str — ECOS 카탈로그 지표 ID (예: "GDP", "CPI").
@@ -28,9 +34,18 @@ def get(indicatorId: str, start: str | None, end: str | None) -> Any | None:
     없음
         키 부재는 None 반환.
 
+    Requires
+    --------
+    core.cache.TimeseriesCache 가용.
+
     Example
     -------
     >>> v = get("GDP", "2020-01-01", "2024-12-31")
+
+    See Also
+    --------
+    put : 동행 write.
+    clear : 전체 invalidate.
     """
     return _cache.get(indicatorId, start, end)
 
@@ -44,6 +59,12 @@ def put(
     daily: bool = False,
 ) -> None:
     """캐시 저장. daily=True 면 TTL 6시간, 아니면 24시간.
+
+    Capabilities: TimeseriesCache.put 위임 — daily 분기 TTL.
+    AIContext: ECOS fetch 직후 저장 — 후속 동일 호출 latency 감소.
+    Guide: 일별 시리즈만 짧은 TTL.
+    When: series.fetchSeries / facade 결과 cache 저장 시.
+    How: ``_cache.put(value, indicatorId, start, end, daily=daily)``.
 
     Parameters
     ----------
@@ -65,15 +86,29 @@ def put(
     없음
         ``TimeseriesCache.put`` 위임 — 내부 오류는 흡수.
 
+    Requires
+    --------
+    core.cache.TimeseriesCache 가용.
+
     Example
     -------
     >>> put("GDP", "2020-01-01", "2024-12-31", df)
+
+    See Also
+    --------
+    get : 동행 read.
     """
     _cache.put(value, indicatorId, start, end, daily=daily)
 
 
 def clear() -> None:
     """ECOS 캐시 전체 비우기.
+
+    Capabilities: TimeseriesCache.clear 위임.
+    AIContext: 사용자가 최신 ECOS 데이터 강제 / 테스트 isolation 시 진입.
+    Guide: 모든 indicatorId 영향.
+    When: 데이터 freshness 강제 / 테스트 fixture / 디버깅 시.
+    How: ``_cache.clear()``.
 
     Returns
     -------
@@ -83,8 +118,16 @@ def clear() -> None:
     ------
     없음.
 
+    Requires
+    --------
+    core.cache.TimeseriesCache 가용.
+
     Example
     -------
     >>> clear()
+
+    See Also
+    --------
+    get · put : 영향 받는 cache operation.
     """
     _cache.clear()
