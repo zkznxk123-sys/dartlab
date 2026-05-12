@@ -1410,34 +1410,38 @@ class Company:
             >>> c.narrativeDiff(claims=["margin_expansion"])
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``storyTree`` — claim 적용된 trajectory.
+            - ``causalWeights`` — claim 의 사전 가중치.
+            - ``dartlab.story.narrativeDiff.computeImpact`` — implementation.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 각 narrative claim 을 한 번씩 제거하고 다시 DCF 돌려 fair value 변화 (dFV)
+              측정. claim 별 valuation 기여도 정량화. "이 claim 이 valuation 의 X% 설명".
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 valuation 의 핵심 claim 뭐냐" → 본 함수 결과 dFV 큰 순 정렬.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 가 narrative 분해 답변 시 claim 별 dFV 인용 — AI 가 "margin expansion 이 valuation 의 30%" 류 정량 진술 가능.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - claim list 일부만 넣고 "주요 claim" 결론 → 전체 list 필수.
+                - dFV 의 절대값 외부 비교 → 회사 별 base FV 차이로 직접 비교 무의미.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - list[dict] — 각 {"claim": str, "dFV": float, "dFVpct": float, ...}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - storyTree base trajectory + claims 카탈로그.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - claims → storyTree base ↔ claim-removed → dFV 계산 → 본 list.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) narrative valuation 매핑.
         """
         import importlib
 
@@ -1464,34 +1468,40 @@ class Company:
             >>> Company.listing().head()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``search`` — keyword 부분 매칭 검색.
+            - ``dart.providers.dart.company.Company.listing`` — KR 패리티.
+            - ``dartlab.core.dataLoader.loadEdgarListedUniverse`` — origin.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - EDGAR 상장 기업 universe parquet 을 폼별 정규화 컬럼 (종목코드/회사명/시장구분/cik) 으로
+              반환. NASDAQ/NYSE/AMEX 통합. forceRefresh 인자는 dart 와 시그니처 동기용.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "전체 US 상장 종목 목록" → 본 함수.
+            - "특정 회사 찾기" → ``search`` 더 빠름.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench universe 탐색 시 본 함수 origin. DataFrame 그대로 LLM 에 노출하면 토큰
+            낭비 — ``head``/``filter`` 후 보내야.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 전체 universe 그대로 LLM 컨텍스트 주입 → ~10K 행 토큰 초과.
+                - forceRefresh=True 가 실제 fetch 한다고 가정 — EDGAR 는 정적 parquet.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — 컬럼 ["종목코드", "회사명", "시장구분", "cik"].
             Prerequisites:
-                - <TODO: 사전조건>
+                - data/edgar/listed.parquet (`scripts/build/buildEdgarUniverse.py` 산출).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - parquet 빌드 시점 (월 1 회 정도). SEC tickers.json 갱신 시 재빌드.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - SEC tickers.json → buildEdgarUniverse → listed.parquet → loadEdgarListedUniverse → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) NASDAQ/NYSE/AMEX.
         """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
@@ -1523,34 +1533,39 @@ class Company:
             >>> Company.search("apple", limit=10)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``listing`` — 전체 universe.
+            - ``dart.providers.dart.company.Company.search`` — KR 패리티 (회사명 한글 부분).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 3-단계 매칭 — (1) ticker 정확 (대문자) (2) ticker 부분 (3) 회사명 부분 (대소무시).
+              앞 단계에서 매치 발견 시 뒤 단계 skip. limit 으로 head N.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "ticker 모르고 회사 이름만" → 본 함수 + 회사명 일부.
+            - "유사 ticker 묶어 찾기" → 본 함수 + 짧은 prefix.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 사용자 입력 "Apple" / "AAPL" / "Inc" 등 모호한 키워드 받았을 때 본 함수로 후보 추출.
+            여러 매치 시 첫 N 만 보고 사용자 확인.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - limit 없이 흔한 단어 (예 "Inc", "Corp") 검색 → 수천 row 반환 → 토큰 폭증.
+                - 한글 회사명 입력 → US universe 에는 없음 → 빈 결과.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — 컬럼 ["종목코드", "회사명", "시장구분", "cik"]. 매치 없으면 빈 DF.
             Prerequisites:
-                - <TODO: 사전조건>
+                - listing 과 동일 (data/edgar/listed.parquet).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - listing 과 동일.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - keyword → 3-단계 filter → universe → head(limit) → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR).
         """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
@@ -1627,17 +1642,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - headless 환경 (CI / docker) 에서 호출 → 브라우저 launch 실패. notebooks/JupyterLab 전용.
+                - 이미 점유된 포트 → OSError. caller 가 port 변경 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - None — side effect (브라우저 자동 open).
             Prerequisites:
-                - <TODO: 사전조건>
+                - 로컬 표시 가능 환경 + `dartlab.core.viewer` 의존.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점 즉시 (서버 별도 데이터 fetch X).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - self.ticker → launchViewer → FastAPI 서버 + 브라우저 open.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — viewer 는 ticker 별 디스패치.
         """
         from dartlab.core.viewer import launchViewer
 
@@ -1703,17 +1719,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 전체 DataFrame 그대로 LLM 컨텍스트 노출 → 토큰 폭증. topic 필터 후 또는 head 후 사용.
+                - 본 결과 없음 (None) 시 caller 가 10-K 본 회사 미존재 또는 fetch 실패 분기 의무.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame — 컬럼 [topic, blockType, blockOrder, period 별 셀] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - companyfacts + 10-K HTML 본문 (profileAccessor 가 합산).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC 10-K/Q 갱신 시점 + profile cache.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 10-K HTML + companyfacts → profileAccessor.sections → 본 property.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 10-K/10-Q/20-F.
         """
         return self._profileAccessor.sections
 
@@ -1743,20 +1760,26 @@ class Company:
             >>> c.story("수익성")       # 특정 섹션
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``analysis`` — 14 섹션 raw 분석 결과 (본 함수가 합산).
+            - ``dartlab.story.registry.buildStory`` — implementation.
+            - ``dart.providers.dart.company.Company.story`` — KR 패리티.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 14 개 보고서 섹션 (수익구조/자금조달/자산구조/현금흐름/수익성/성장성/안정성/효율성/
+              종합평가/이익품질/비용구조/자본배분/투자효율/재무정합성) 을 SEC EDGAR 데이터로
+              구축. preset (executive/audit/credit/growth/valuation) 으로 톤 조절.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 재무 통째 검토" → ``c.story()``.
+            - "수익성만" → ``c.story("수익성")``.
+            - "감사 관점 검토" → ``c.story(preset="audit")``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            ``ask`` workbench 가 본 함수 결과를 tool 결과로 받아 AI 답변. 단일 섹션 호출이 토큰 효율.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1855,20 +1878,24 @@ class Company:
             >>> c.analysis("financial", "수익성")        # 수익성 분석
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``story`` — 22 축 결과를 보고서로 합산.
+            - ``dartlab.analysis.financial.Analysis`` — 분석 backend SSOT.
+            - ``dart.providers.dart.company.Company.analysis`` — KR 패리티.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 5 그룹 22 축 (financial 14 + valuation 1 + governance 3 + forecast 2 + macro 2)
+              개별 분석 dispatch. axis 미지정 시 카탈로그 반환. 본 회사 자동 바인딩.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "수익성 분석" → ``c.analysis("financial", "수익성")``.
+            - "가능 분석 축 목록" → ``c.analysis()`` 빈 호출.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            workbench 가 분석 도구 dispatch 시 본 entry. 축 미지정 호출로 capability 먼저 확인.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1952,34 +1979,38 @@ class Company:
             >>> c.validateStory()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``storyTree`` / ``causalWeights`` — 검증 대상 story.
+            - ``dartlab.analysis.financial.storyValidation`` — 검증 backend.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - Damodaran 의 3 단계 검증 — Possible (precedents) / Plausible (band) / Probable (rules).
+              과거 동종 회사 사례 / valuation 범위 / valuation sins 룰 종합 후 overall severity 산출.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 가정이 그럴듯한가" → 본 함수 결과 plausibility band 확인.
+            - "valuation 의 위험 신호" → result["rules"] severity = "critical".
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 사용자의 valuation 가정 검토 시 본 함수 결과로 reality check. critical 이면 강한 경고.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - overall "info" 결과를 "안전" 결론 → severity 는 룰 위반 부재일 뿐 valuation 정답 아님.
+                - precedents 비교군 자동 선정 — 사용자가 명시 시 다른 결과 가능.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict {"precedents": list, "plausibility": dict, "rules": dict, "overall": str}.
             Prerequisites:
-                - <TODO: 사전조건>
+                - storyTree base trajectory + 동종 universe 데이터.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 호출 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - storyTree → precedents+band+sins 3 분석 → severity 종합 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) valuation 검증.
         """
         import importlib
 
@@ -2020,20 +2051,23 @@ class Company:
             >>> c.credit()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dartlab.credit.creditCompany`` — implementation.
+            - ``dart.providers.dart.company.Company.credit`` — KR 패리티 (KIS/NICE 와 비교).
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - 본 회사를 dartlab 의 독립 dCR 20 단계 등급 (AAA→D) 으로 매핑. S&P/Moody 외부 등급 없이
+              finance + leverage + cashflow 자체 분석. detail=True 시 sub-axis breakdown.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "이 회사 신용등급" → ``c.credit()`` 또는 ``c.credit("rating")``.
+            - "등급 산정 근거" → ``c.credit(detail=True)``.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            외부 신용평가 미상장/소형 회사도 본 함수로 동일 척도 비교 가능. AI 가 부도위험 답변 시 인용.
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2107,17 +2141,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 본 함수는 외부 API origin — rate limit / network 실패 가능. caller 가 retry 분기.
+                - "price" 축 대량 종목 일괄 호출 → 외부 API 차단. 종목당 sequential.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - axis 별로 다름 — guide 시 dict / price 시 OHLCV DataFrame / news 시 metadata 등.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + axis 별 origin 키 (FRED/yfinance/Naver/etc).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 외부 origin 시점 (price 실시간 + 15 min, news 분 단위, FRED 일 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - getGatherProvider() → entry(axis, ticker, market="US") → 외부 API → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — market="US" 자동 주입.
         """
         from dartlab.core.gatherProvider import getGatherProvider
 
@@ -2147,34 +2182,37 @@ class Company:
             >>> c.calendar(horizonDays=60)
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``dart.providers.dart.company.Company.calendar`` — KR 패리티 (real cycle 추론).
+            - ``dartlab.providers.dart.ops.calendar.OUTPUT_SCHEMA`` — 공통 스키마.
 
         Requires:
             - dartlab
             - polars
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - DartCompany.calendar 와 동일 시그니처 보존용 stub. SEC 10-K/10-Q cycle 추론기 미구현
+              상태라 빈 DataFrame 반환. CompanyProtocol 일관성 보장 목적.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - "EDGAR catalyst 일정" → 본 함수 (현재 빈 결과 — 향후 SEC cycle 추론기 도입 후 구현).
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            AI 가 본 함수 결과 비어있어도 "데이터 없음" 으로 그대로 답해야 — 추정/허위 일정 답변 금지.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC 회사도 12-31 결산 가정해 분기 일정 추정 → fiscalYearEnd 다른 회사 false.
+                - 빈 결과 → "공시 없음" 으로 잘못 해석. 본 함수가 미구현이라 빈 반환.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame (OUTPUT_SCHEMA) — 현 빈 행, 컬럼만 보존.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 없음 (현재 stub).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - 현재 N/A. 향후 SEC submissions API 갱신 시점.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 현재 빈 → 향후 SEC submissions cycle 추론.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) — 향후 cycle 추론기 구현 영역.
         """
         from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA
 
@@ -2215,17 +2253,18 @@ class Company:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - 전체 filings 그대로 AI 컨텍스트 노출 → 회사당 수백 건 → 토큰 폭증. formType 필터 의무.
+                - filedAt 정렬 없이 사용 → SEC 응답이 순서 보장 X, caller 가 sort.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - pl.DataFrame [docId, filedAt, formType, accessionNo, ...] 또는 None.
             Prerequisites:
-                - <TODO: 사전조건>
+                - SEC submissions API origin (자동 cache).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC submissions 갱신 시점 (실시간 ~ 분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - SEC submissions API → docs.filings() → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 정기/수시공시 목록.
         """
         return self._docs.filings()
 
