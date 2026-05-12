@@ -34,6 +34,20 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.raw.head()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company.rawDocs
 
@@ -48,6 +62,20 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.filings().head(10)
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._filings()
 
@@ -63,6 +91,20 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sections.frame()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._sectionsAccessor if self._company._hasDocs else None
 
@@ -88,6 +130,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return None if sections is None else sections.ordered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
@@ -121,6 +186,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -149,6 +237,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return None if sections is None else sections.freq(freqScope, includeMixed=includeMixed)
@@ -182,6 +293,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -219,6 +353,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -258,6 +415,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -302,6 +482,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -348,6 +551,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -393,6 +619,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -441,6 +690,29 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         sections = self.sections
         return (
@@ -468,6 +740,20 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.retrievalBlocks.head()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._retrievalBlocks()
 
@@ -483,6 +769,20 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.contextSlices.head()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._contextSlices()
 
@@ -521,6 +821,15 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
         """
         import warnings
 
@@ -547,6 +856,15 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
         """
         import warnings
 
@@ -573,6 +891,15 @@ class _DocsAccessor:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
         """
         import warnings
 
@@ -594,5 +921,19 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.subtables("rawMaterial", raw=False)
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._sectionsSubtopicLong(topic) if raw else self._company._sectionsSubtopicWide(topic)

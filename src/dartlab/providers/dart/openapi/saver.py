@@ -198,6 +198,29 @@ def enrichFinance(
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if df.height == 0:
         return df
@@ -261,6 +284,29 @@ def enrichReport(
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if df.height == 0:
         return df
@@ -346,6 +392,29 @@ def korColumns(
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     mapping = {
         "finance": _FINANCE_KR,
@@ -410,6 +479,29 @@ def save(
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)

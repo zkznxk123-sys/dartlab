@@ -51,6 +51,29 @@ def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str
         - dartlab
         - datetime
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -87,6 +110,29 @@ def getCompanyConceptJson(
         - dartlab
         - datetime
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -125,6 +171,29 @@ def getFrameJson(
         - dartlab
         - datetime
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     api = client or EdgarClient()
     return api.getJson(f"{DEFAULT_BASE_URL}/api/xbrl/frames/{taxonomy}/{tag}/{unit}/{period}.json")
@@ -152,6 +221,29 @@ def companyFactsToRows(payload: dict[str, Any]) -> pl.DataFrame:
         - dartlab
         - datetime
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     rows: list[dict[str, Any]] = []
     cik = str(payload.get("cik") or "").zfill(10)

@@ -63,6 +63,29 @@ def indexFinanceRows(company: Company) -> list[dict[str, Any]]:
     Requires:
         - dartlab
         - gc
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     rows: list[dict[str, Any]] = []
     _STMT_ORDER = {"BS": 0, "IS": 1, "CIS": 2, "CF": 3, "SCE": 4}
@@ -139,6 +162,29 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
     Requires:
         - dartlab
         - gc
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if not company._hasDocs:
         return []
@@ -198,6 +244,29 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
         Requires:
             - dartlab
             - gc
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         if not isinstance(period, str):
             return -1
@@ -304,6 +373,29 @@ def indexDocsRows(company: Company) -> list[dict[str, Any]]:
         Requires:
             - dartlab
             - gc
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         topic, segmentKey = key
         majorNum, firstSeq = topicFirstSeq.get(topic, (99, 999999))
@@ -388,6 +480,29 @@ def indexReportRows(company: Company, *, existingTopics: set[str] | None = None)
     Requires:
         - dartlab
         - gc
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     rows: list[dict[str, Any]] = []
     if not company._hasReport:

@@ -46,6 +46,29 @@ class _ProfileAccessor:
 
         Requires:
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         cacheKey = "_sections"
         if cacheKey in self._company._cache:
@@ -127,6 +150,29 @@ class _ProfileAccessor:
 
         Requires:
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:
@@ -153,5 +199,19 @@ class _ProfileAccessor:
 
         Example:
             >>> c._profileAccessor.trace("IS")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company.trace(topic, period=period)

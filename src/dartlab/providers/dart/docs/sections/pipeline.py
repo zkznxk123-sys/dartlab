@@ -119,6 +119,29 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
         - dartlab
         - gc
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if stockCode is None:
         _preparedCache.clear()
@@ -280,6 +303,29 @@ def iterPeriodSubsets(
         - dartlab
         - gc
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     df = loadData(stockCode, sinceYear=sinceYear, columns=_SECTIONS_REQUIRED_COLS)
     ccol = detectContentCol(df)
@@ -693,6 +739,29 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         - dartlab
         - gc
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}

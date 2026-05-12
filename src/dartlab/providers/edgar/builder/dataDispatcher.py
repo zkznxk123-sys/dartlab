@@ -64,6 +64,29 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나 (받음: {freq!r})")
@@ -113,6 +136,29 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.company import _ratioSeriesToDataFrame
 
@@ -154,6 +200,29 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
@@ -196,6 +265,29 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     from dartlab.core.show import transposeToVertical as _coreTranspose
 
@@ -223,6 +315,29 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     from dartlab.core.show import buildBlockIndex as _coreBuildBlockIndex
 
@@ -253,6 +368,29 @@ def shapeStr(df: pl.DataFrame | None) -> str:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if df is None:
         return "-"
@@ -280,6 +418,29 @@ def periodsStr(df: pl.DataFrame | None) -> str:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if df is None:
         return "-"
@@ -310,6 +471,29 @@ def previewFinance(df: pl.DataFrame | None) -> str:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if isEmptyDf(df):
         return "-"
@@ -338,6 +522,29 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     for row in topicRows.iter_rows(named=True):
         for col in periodCols:
@@ -388,6 +595,29 @@ def showImpl(
     Requires:
         - dartlab
         - polars
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.company import _TOPIC_ALIASES
 

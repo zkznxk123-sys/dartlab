@@ -42,6 +42,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.raw.head()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._getPrimary("sections")
 
@@ -57,6 +71,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.frame
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self.raw
 
@@ -74,6 +102,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.forTopics({"BS", "IS"})
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._getPrimary("sections", topics=frozenset(topics))
 
@@ -88,6 +130,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.topics()[:5]
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionTopics()
 
@@ -105,6 +161,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.outline("BS")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsTopicOutline(topic=topic)
 
@@ -130,6 +200,29 @@ class _SectionsSource:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         frame = self.raw
         if frame is None:
@@ -153,6 +246,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.ordered()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
@@ -178,6 +285,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.coverage()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsCoverage(
             topic=topic,
@@ -200,6 +321,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.freq("annual")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsFreq(freqScope, includeMixed=includeMixed)
 
@@ -225,6 +360,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.semanticRegistry()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -255,6 +404,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.semanticCollisions()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -287,6 +450,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.structureRegistry()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -320,6 +497,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.structureCollisions()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -355,6 +546,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.structureEvents()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsStructureEvents(
             topic=topic,
@@ -388,6 +593,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.structureSummary()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsStructureSummary(
             topic=topic,
@@ -424,6 +643,20 @@ class _SectionsSource:
 
         Example:
             >>> c._docs.sections.structureChanges()
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._docsSectionsStructureChanges(
             topic=topic,
@@ -466,6 +699,29 @@ class _SectionsSource:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         frame = self.raw
         if frame is None:
@@ -493,6 +749,29 @@ class _SectionsSource:
         Requires:
             - dartlab
             - polars
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         ch = self.changes()
         if isEmptyDf(ch):

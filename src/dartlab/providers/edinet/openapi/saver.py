@@ -26,6 +26,41 @@ def extractCsvFromZip(zipPath: str | Path) -> dict[str, str]:
 
     Example:
         >>> extractCsvFromZip(...)
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
+
+    Returns:
+        <TODO: return desc> (dict[str, str])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - csv
+        - io
+        - polars
+        - zipfile
     """
     result: dict[str, str] = {}
     zipPath = Path(zipPath)
@@ -64,6 +99,41 @@ def buildFinanceParquet(csvContent: str, *, edinetCode: str = "") -> pl.DataFram
 
     Example:
         >>> buildFinanceParquet(...)
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - csv
+        - io
+        - polars
+        - zipfile
     """
     reader = csv.DictReader(io.StringIO(csvContent))
     rows: list[dict] = []
@@ -124,6 +194,41 @@ def buildDocsParquet(csvContent: str, *, edinetCode: str = "") -> pl.DataFrame:
 
     Example:
         >>> buildDocsParquet(...)
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
+
+    Returns:
+        <TODO: return desc> (pl.DataFrame)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - csv
+        - io
+        - polars
+        - zipfile
     """
     reader = csv.DictReader(io.StringIO(csvContent))
     rows: list[dict] = []
@@ -180,6 +285,41 @@ def saveParquet(df: pl.DataFrame, outputPath: str | Path) -> Path:
 
     Example:
         >>> saveParquet(...)
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - csv
+        - io
+        - polars
+        - zipfile
     """
     outputPath = Path(outputPath)
     outputPath.parent.mkdir(parents=True, exist_ok=True)

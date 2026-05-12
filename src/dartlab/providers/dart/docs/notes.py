@@ -132,6 +132,29 @@ class Notes:
 
         Requires:
             - dartlab
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         eng = _KR_MAP.get(name, name)
         if eng not in _REGISTRY:
@@ -152,6 +175,20 @@ class Notes:
 
         Returns:
             <TODO: return desc> (dict[str, pl.DataFrame | None])
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return {name: self._get(name, period=period) for name in _REGISTRY}
 
@@ -169,6 +206,20 @@ class Notes:
 
         Returns:
             <TODO: return desc> (list[str])
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return list(_REGISTRY.keys())
 
@@ -186,6 +237,20 @@ class Notes:
 
         Returns:
             <TODO: return desc> (list[str])
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return list(_KR_MAP.keys())
 

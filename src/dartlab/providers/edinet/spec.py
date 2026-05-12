@@ -14,6 +14,23 @@ def buildSpec() -> dict:
 
     Example:
         >>> buildSpec(...)
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
+
+    Returns:
+        <TODO: return desc> (dict)
     """
     return {
         "name": "edinet",

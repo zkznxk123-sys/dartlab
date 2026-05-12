@@ -37,6 +37,20 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.raw.head()  # 내부 호출만
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company.rawFinance
 
@@ -52,6 +66,20 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.BS  # 내부 — 사용자는 c.show("BS")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._financeOrDocsStatement("BS")
 
@@ -67,6 +95,20 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.IS  # 내부 — 사용자는 c.show("IS")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._financeOrDocsStatement("IS")
 
@@ -82,6 +124,20 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.CIS  # 내부 — 사용자는 c.show("CIS")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._financeOrDocsStatement("CIS")
 
@@ -97,6 +153,20 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.CF  # 내부 — 사용자는 c.show("CF")
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
         """
         return self._company._financeOrDocsStatement("CF")
 

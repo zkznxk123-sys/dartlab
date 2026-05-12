@@ -118,6 +118,29 @@ def _makeProgress(total: int, title: str, *, disable: bool = False):
                 - httpx
                 - polars
                 - rich
+
+            Capabilities:
+                - <TODO: 함수 핵심 책임 요약>
+
+            Guide:
+                - <TODO: 사용 시나리오>
+
+            AIContext:
+                <TODO: AI 호출 컨텍스트>
+
+            LLM Specifications:
+                AntiPatterns:
+                    - <TODO: 안티패턴>
+                OutputSchema:
+                    - <TODO: 출력 형태>
+                Prerequisites:
+                    - <TODO: 사전조건>
+                Freshness:
+                    - <TODO: 데이터 freshness>
+                Dataflow:
+                    - <TODO: 데이터 흐름>
+                TargetMarkets:
+                    - <TODO: 대상 시장>
             """
             p.update(tid, description=v)
 
@@ -263,6 +286,29 @@ def fetchEdgarDocs(
         - httpx
         - polars
         - rich
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     ticker = ticker.upper()
     meta = _resolveTickerMeta(ticker)
@@ -329,6 +375,29 @@ def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
         - httpx
         - polars
         - rich
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     if df.is_empty():
         return {
@@ -415,6 +484,29 @@ def summarizeEdgarDocsParquet(path: Path) -> dict[str, object]:
         - httpx
         - polars
         - rich
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     summary = summarizeEdgarDocsFrame(pl.read_parquet(path))
     summary["path"] = str(path)
@@ -575,6 +667,29 @@ def downloadListedEdgarDocs(
         - httpx
         - polars
         - rich
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     from dartlab import config
 
@@ -644,6 +759,20 @@ def buildEdgarCollectibleUniverse(
 
     Example:
         >>> buildEdgarCollectibleUniverse(limit=500)
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     return prepareEdgarCollectibleUniverse(
         limit=limit,
@@ -689,6 +818,29 @@ def prepareEdgarCollectibleUniverse(
         - httpx
         - polars
         - rich
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     from dartlab import config
     from dartlab.core.dataLoader import loadEdgarListedUniverse
@@ -1474,6 +1626,29 @@ def iterEdgarDocs(
         - httpx
         - polars
         - rich
+
+    Capabilities:
+        - <TODO: 함수 핵심 책임 요약>
+
+    Guide:
+        - <TODO: 사용 시나리오>
+
+    AIContext:
+        <TODO: AI 호출 컨텍스트>
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     fetchEdgarDocs(
         ticker,

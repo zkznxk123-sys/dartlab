@@ -138,6 +138,36 @@ class EdinetClient:
 
         Raises:
             없음.
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - time
         """
         params: dict[str, Any] = {
             "period": period,
@@ -177,6 +207,36 @@ class EdinetClient:
 
         Example:
             >>> downloadDocument(...)
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - time
         """
         saveDir = Path(saveDir)
         saveDir.mkdir(parents=True, exist_ok=True)
@@ -206,6 +266,36 @@ class EdinetClient:
 
         Raises:
             없음.
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - time
         """
         resp = self._get(f"{BASE_URL}/edinetcode.json")
         data = resp.json()
@@ -237,6 +327,36 @@ class EdinetClient:
 
         Raises:
             없음.
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - time
         """
         yield from self.listDocuments(period, docType=docType, limit=limit)
 
@@ -255,5 +375,35 @@ class EdinetClient:
 
         Raises:
             없음.
+
+        Capabilities:
+            - <TODO: 함수 핵심 책임 요약>
+
+        Guide:
+            - <TODO: 사용 시나리오>
+
+        AIContext:
+            <TODO: AI 호출 컨텍스트>
+
+        LLM Specifications:
+            AntiPatterns:
+                - <TODO: 안티패턴>
+            OutputSchema:
+                - <TODO: 출력 형태>
+            Prerequisites:
+                - <TODO: 사전조건>
+            Freshness:
+                - <TODO: 데이터 freshness>
+            Dataflow:
+                - <TODO: 데이터 흐름>
+            TargetMarkets:
+                - <TODO: 대상 시장>
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - time
         """
         yield from self.listEdinetCodes(limit=limit)

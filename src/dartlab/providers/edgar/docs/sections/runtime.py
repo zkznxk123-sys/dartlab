@@ -20,6 +20,20 @@ def topicNamespace(formType: str, topicId: str) -> str:
     Example:
         >>> topicNamespace("10-K", "item1Business")
         '10-K::item1Business'
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     return f"{formType}::{topicId}"
 
@@ -39,5 +53,19 @@ def fallbackTopic(formType: str) -> str:
     Example:
         >>> fallbackTopic("10-K")
         '10-K::fullDocument'
+
+    LLM Specifications:
+        AntiPatterns:
+            - <TODO: 안티패턴>
+        OutputSchema:
+            - <TODO: 출력 형태>
+        Prerequisites:
+            - <TODO: 사전조건>
+        Freshness:
+            - <TODO: 데이터 freshness>
+        Dataflow:
+            - <TODO: 데이터 흐름>
+        TargetMarkets:
+            - <TODO: 대상 시장>
     """
     return topicNamespace(formType, FALLBACK_TOPIC_ID)
