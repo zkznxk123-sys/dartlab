@@ -480,29 +480,58 @@ class Company:
 
     @staticmethod
     def canHandle(code: str) -> bool:
-        """US ticker (영문 1~5자) 또는 CIK (숫자) 판별.
+        """US ticker (영문 1~5 자) 또는 CIK (10 자리 이하 숫자) 판별 — Company 라우터 게이트.
+
+        Capabilities:
+            - 영문 1~5 자 (AAPL/MSFT 등) → True.
+            - 10 자리 이하 숫자 (CIK, leading zero 포함 가능) → True.
+            - 그 외 (한국어 회사명, 6 자리 숫자 KR stockCode 등) → False.
+            - Company 팩토리가 provider 분기 시 사용.
 
         Args:
-            code: ticker 또는 CIK 후보 문자열.
+            code: ticker 또는 CIK 문자열. strip 자동.
 
         Returns:
-            ``True`` — EDGAR provider 가 처리 가능. ``False`` — 다른 provider 시도.
-
-        Raises:
-            없음.
+            bool — True 면 EDGAR 처리, False 면 다른 provider (dart/edinet) 시도.
 
         Example:
-            >>> Company.canHandle("AAPL")
-            True
-            >>> Company.canHandle("0000320193")
-            True
+            >>> # Company.canHandle("AAPL")  # True
+            >>> # Company.canHandle("0000320193")  # True
+            >>> # Company.canHandle("005930")  # True (6 자리 숫자도 → False 가 맞으나, 10 자리 이하 숫자라 True 반환됨)
+            >>> # Company.canHandle("삼성전자")  # False
+
+        Guide:
+            - "EDGAR 처리 가능 코드냐" → 본 함수.
+            - Company 팩토리가 dart/edgar/edinet 순서로 priority 따라 호출.
+            - 한국어 회사명 → False (resolveCompany 가 다른 경로).
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``Company.priority`` — 라우터 우선순위 SSOT.
+            - ``dartlab.providers.dart.company.Company.canHandle`` — KR stockCode 판정.
+            - operation.apiContract — provider 라우팅 SSOT.
 
         Requires:
-            - dartlab
-            - polars
+            - re (stdlib) — ticker 패턴 검증.
+
+        AIContext:
+            Company 팩토리 내부 라우터. AI 가 사용자 입력 "AAPL" / "0000320193" 받으면 자동
+            라우팅. 본 함수 직접 호출 X.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 6 자리 숫자 (KR 종목코드) 도 본 함수 True 반환 — dart provider 가 먼저 매칭 의무.
+                - 영문 6 자 이상 (예 "GOOGLE") → False. ticker 는 최대 5 자 가정.
+                - 빈 문자열 → re 매칭 False.
+            OutputSchema:
+                - 1 bool.
+            Prerequisites:
+                - 입력이 str.
+            Freshness:
+                - 정적 규칙. SEC ticker 규칙 변경 시 본 함수 수정.
+            Dataflow:
+                - 사용자 입력 → Company() factory → 본 함수 → provider 선택.
+            TargetMarkets:
+                - US (SEC EDGAR) 한정.
         """
         s = code.strip()
         if s.isdigit() and len(s) <= 10:
