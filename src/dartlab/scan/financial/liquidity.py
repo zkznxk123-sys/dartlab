@@ -223,7 +223,7 @@ def _scanPerFile() -> pl.DataFrame:
     return pl.DataFrame(rows) if rows else pl.DataFrame()
 
 
-def scanLiquidity() -> pl.DataFrame:
+def scanLiquidity(*, verbose: bool = True) -> pl.DataFrame:
     """전종목 유동성 스캔 -- 유동비율 + 당좌비율 + 등급."""
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

@@ -85,7 +85,7 @@ def _sortedYears(years: list) -> list[str]:
     return sorted(numeric, key=lambda y: int(y), reverse=True) + sorted(other, reverse=True)
 
 
-def scanAudit() -> pl.DataFrame:
+def scanAudit(*, verbose: bool = True) -> pl.DataFrame:
     """종목별 감사 리스크 종합 분석.
 
     프리빌드 auditOpinion parquet에서 전종목 감사의견·감사인·특기사항을 추출하고,

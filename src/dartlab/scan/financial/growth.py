@@ -103,7 +103,7 @@ def _classifyPattern(revCagr: float | None, opCagr: float | None, niCagr: float 
     return "혼합"
 
 
-def scanGrowth() -> pl.DataFrame:
+def scanGrowth(*, verbose: bool = True) -> pl.DataFrame:
     """전종목 성장성 스캔 -- 3년 CAGR + 등급 + 패턴."""
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

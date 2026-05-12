@@ -80,7 +80,7 @@ def _gradeProfitability(opMargin: float | None, roe: float | None) -> str:
     return "적자"
 
 
-def scanProfitability() -> pl.DataFrame:
+def scanProfitability(*, verbose: bool = True) -> pl.DataFrame:
     """전종목 수익성 스캔 -- 영업이익률/순이익률/ROE/ROA + 등급."""
     scanDir = _ensureScanData()
     scanPath = scanDir / "finance.parquet"

@@ -114,7 +114,7 @@ def _scanTreasuryStock() -> dict[str, dict]:
     return result
 
 
-def scanInsider() -> pl.DataFrame:
+def scanInsider(*, verbose: bool = True) -> pl.DataFrame:
     """종목별 내부자 지분 변동 + 자기주식 종합.
 
     컬럼: stockCode, holderPct, holderChange, treasuryShares, stability

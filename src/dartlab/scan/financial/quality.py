@@ -247,7 +247,7 @@ def _scanPerFile() -> pl.DataFrame:
     return pl.DataFrame(rows) if rows else pl.DataFrame()
 
 
-def scanQuality() -> pl.DataFrame:
+def scanQuality(*, verbose: bool = True) -> pl.DataFrame:
     """전종목 이익의 질 스캔 -- Accrual Ratio + CF/NI 비율 + 등급 (**KR 전용**).
 
     AI 사용 가이드:

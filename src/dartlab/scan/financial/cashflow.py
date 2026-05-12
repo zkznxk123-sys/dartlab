@@ -247,7 +247,7 @@ def _scanPerFile() -> pl.DataFrame:
     return pl.DataFrame(rows) if rows else pl.DataFrame()
 
 
-def scanCashflow() -> pl.DataFrame:
+def scanCashflow(*, verbose: bool = True) -> pl.DataFrame:
     """종목별 OCF/ICF/FCF + 현금흐름 패턴 분류.
 
     프리빌드 finance.parquet 우선, 없으면 per-file fallback.
