@@ -53,6 +53,38 @@ def buildEdgarFinance(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     >>> path = buildEdgarFinance(sinceYear=2021, verbose=True)
     >>> path.exists()
     True
+
+    Capabilities:
+        - EDGAR raw CIK parquet 컬렉션 → 종목별 최신 연간 BS/IS/CF 주요 계정을 wide DataFrame
+          으로 합산. DART scan ``buildFinance`` 와 같은 정공법 (200 단위 배치 + 중간 파일 병합).
+        - SnakeId → XBRL primary tag 변환은 ``EdgarMapper.getTagsForSnakeIds()`` 가 자동.
+
+    AIContext:
+        EDGAR scan 11 axis 의 source. AI agent 가 미국 종목 분석 시 본 빌드 산출 parquet 을
+        ``scan_account``/``scan_*`` 함수들이 lazy scan. DART 와 같은 schema 라 cross-market union.
+
+    Guide:
+        - REIT (Funds From Operations / Rental Income) · 은행 특례 (interest_income/expense)
+          계정도 포함 → 업종 특례 axis 처리 가능.
+        - ebitda 같은 파생 계산 대상 계정은 raw 빌드에 없음. scan axis 가 계산.
+
+    When:
+        EDGAR Data Sync 직후 (별도 cron). DART prebuild 와 같은 일일 사이클.
+
+    How:
+        edgar finance 디렉토리 종목별 parquet glob → 200 단위 배치 → 종목당 최신 연간 row +
+        주요 계정 select + wide pivot → 임시 청크 file write → 종료 시 single 파일 merge.
+        gc 명시 호출로 RSS 가드.
+
+    Requires:
+        - ``data/edgar/finance/{ticker}.parquet`` (EDGAR Data Sync 결과)
+        - ``data/edgar/scan/`` 출력 디렉토리 쓰기 권한
+        - ``dartlab.reference.mappers.EdgarMapper`` (snakeId → XBRL tag 해석)
+
+    SeeAlso:
+        - :func:`buildEdgarScan` — 본 함수의 alias-free public facade
+        - :func:`dartlab.scan.builders.kr.core.buildFinance` — DART 대칭
+        - :func:`dartlab.scan.builders.edgar.scan.edgarScan` — 본 빌드 산출 소비자
     """
     from dartlab import config as _cfg
 
@@ -260,6 +292,9 @@ def buildEdgarScan(*, sinceYear: int = 2021, verbose: bool = False) -> Path:
     --------
     >>> from dartlab.scan.builders.edgar.builder import buildEdgarScan
     >>> path = buildEdgarScan(sinceYear=2020, verbose=True)
+
+    Requires:
+        - :func:`buildEdgarFinance` (위임 대상) 와 동일 — EDGAR Data Sync 결과 + 출력 디렉토리.
     """
     return buildEdgarFinance(sinceYear=sinceYear, verbose=verbose)
 

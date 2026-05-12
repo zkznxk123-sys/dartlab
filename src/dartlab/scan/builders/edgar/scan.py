@@ -18,7 +18,10 @@ from dartlab.scan.builders.edgar.helpers import pct, safeDiv, scanEdgarAccounts
 
 
 def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
-    """EDGAR 전종목 scan 디스패치.
+    """EDGAR XBRL 기반 미국 상장사 11 scan 축 (profitability/growth/.../debt/valuation/audit) 디스패치.
+
+    DART scan 의 EDGAR 대칭 진입점. 종목별 CIK parquet 에서 XBRL 계정을 스캔해 각 축별
+    비율/등급/패턴을 계산. ``_DISPATCH`` table 로 축 이름 → ``_scan*`` 함수 매핑.
 
     Parameters
     ----------
@@ -42,6 +45,38 @@ def edgarScan(axis: str, **kwargs) -> pl.DataFrame:
     >>> from dartlab.scan.builders.edgar.scan import edgarScan
     >>> df = edgarScan("profitability")
     >>> df.filter(pl.col("opMargin") > 20).head()
+
+    Capabilities:
+        - 11 axis (profitability/growth/quality/liquidity/efficiency/cashflow/dividendTrend/
+          capital/debt/valuation/audit) 디스패치. 각 축 함수는 ``scanEdgarAccounts`` 로 종목별
+          계정 단면 추출 후 ``safeDiv``/``pct``/등급 분기.
+        - 미구현 axis 는 info 컬럼 1 행 DataFrame fallback (silent fail 회피).
+
+    AIContext:
+        ``dartlab.scan.router._edgarDispatch`` 의 호출 진입점. AI agent 가
+        ``dartlab.scan("profitability", market="us")`` 호출 시 본 함수 → ``_scanProfitability``
+        실행. DART 와 같은 schema (stockCode/corpName + 축별 지표 + grade) 라 cross-market
+        union 분석 가능.
+
+    Guide:
+        - axis 이름은 DART 와 동일 — 'profitability', 'growth' 등 11 축 SSOT.
+        - 미구현 축은 fallback dict — production 사용 전 ``_DISPATCH`` 키 확인 권장.
+
+    When:
+        scan router 가 market="us" 분기 시. DART scan 과 같은 정공법으로 동일 사용 패턴.
+
+    How:
+        ``_DISPATCH.get(axis)`` → 미존재 시 info fallback → 존재 시 ``fn(**kwargs)`` 호출.
+        각 ``_scan*`` 함수 내부는 동일 패턴: scanEdgarAccounts → 비율 계산 → 등급 분기 → sort.
+
+    Requires:
+        - 로컬 ``data/edgar/finance/{ticker}.parquet`` (EDGAR Data Sync 결과)
+        - ``scanEdgarAccounts`` · ``scanEdgarRawTags`` · ``safeDiv`` · ``pct`` 헬퍼
+
+    SeeAlso:
+        - :func:`dartlab.scan.router._edgarDispatch` — 본 함수의 라우터 호출자
+        - :data:`_DISPATCH` — 11 axis 매핑 table
+        - :mod:`dartlab.scan.builders.edgar.helpers` — 공통 계산 헬퍼
     """
     fn = _DISPATCH.get(axis)
     if fn is None:
