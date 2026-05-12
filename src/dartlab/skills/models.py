@@ -28,10 +28,12 @@ SkillStatus = Literal[
     "deprecated",
 ]
 SkillCategory = Literal[
+    # 강제 4 종 (SCHEMA.md §1 + lintSkill 기준)
     "start",
     "runtime",
     "operation",
     "engines",
+    # deprecated alias — 기존 spec 호환용. 새 spec 은 위 4 종만 사용 권장.
     "screens",
     "finance",
     "visuals",

@@ -1,6 +1,16 @@
 # Skill SSOT 작성 규약
 
-> 본 문서는 `src/dartlab/skills/specs/**/*.md` 에 새 skill 을 추가하거나 기존 skill 의 frontmatter 를 갱신할 때 참고하는 운영자 가이드. **수동 SSOT 정책** 위에서 동작 — capability/docstring 으로부터 자동 생성하지 않는다. 인덱스 (`index.json`·`pyodide.json`·`llms.txt`·`sitemap.xml`) 는 `scripts/build/generateSkills.py` 가 본문에서 빌드 시점 자동 추출.
+> 본 문서는 `src/dartlab/skills/specs/**/*.md` 에 새 skill 을 추가하거나 기존 skill 의 frontmatter 를 갱신할 때 참고하는 운영자 가이드. **수동 SSOT 정책** 위에서 동작 — capability/docstring 으로부터 자동 생성하지 않는다.
+>
+> **자동 산출물 6 종** (빌드 시점 `scripts/build/generateSkills.py` 가 갱신):
+> - `index.json` — 기존 다운스트림 호환 (agent.json alias).
+> - `agent.json` — 내부 AI 엔진 용 (frontmatter + bodyPreview).
+> - `mcp.json` — 외부 LLM (MCP) 용 경량 (5 핵심 필드 + nextSkills max 5).
+> - `web.json` — 사람 (랜딩) 용 풍부 (humanIntro · visualRefs · bodyHuman).
+> - `pyodide.json` — Pyodide 런타임 manifest.
+> - `graph.json` — 257 노드 + 1337 엣지 + cycle/orphan/unreachable 메타.
+>
+> `llms.txt` · `sitemap.xml` 은 별도 `scripts/build/generateSpec.py` 책임.
 
 ## 1. 4 카테고리 + 디렉토리
 
@@ -25,6 +35,25 @@
 | `purpose` | `string` | 1~2 문장. 이 skill 이 무엇을 하는지. 카드 미리보기·메타 디스크립션·llms.txt 에 직접 노출. |
 | `whenToUse` | `string[]` | 어떤 질문/작업에 매칭되는 키워드. 검색·필터의 핵심. 비어있지 않게. |
 
+### lint 강제 (게이트 통과 필수) — `src/dartlab/skills/registry.py::lintSkill`
+
+| 필드 | 강제 조건 | 차단 |
+|---|---|---|
+| `runtimeCompatibility.pyodide` | `kind="curated"` skill 은 반드시 선언 | `_validateRuntimeCompatibility` 가 ValueError |
+| `capabilityRefs[]` | 등록된 capability id 만 | `_validateCapabilityRefs:577-583` 가 ValueError |
+| `id` 점 분리 | `category.name` 또는 `engines.group.axis` | `validateSkills.py` |
+| `purpose` · `title` | 비어있지 않음 | `lintSkill:202-203` |
+| (engines 카테고리) 본문 강제 섹션 3 종 | `## 공개 호출 방식` · `## 호출 동작` · `## 대표 반환 형태` | `_validateExecutionSkillContract` |
+
+### Graph lint (phase 1 warn-only, phase 2-3 차단 예정) — `src/dartlab/skills/graphLint.py`
+
+| 필드 | 검증 | 정책 |
+|---|---|---|
+| `knowledgeRefs[]` · `sourceRefs[]` · `toolRefs[]` · `datasetRefs[]` | id 가 listSkills 셋에 존재 | phase 1 warn / phase 2 신규 차단 |
+| `successors[]` · `predecessors[]` | 양방향 일관성 | phase 2 부터 |
+| `linkedSkills[]` cycle | 3+ 노드 SCC | phase 2 부터 |
+| in-degree 0 + entry 아님 | `isLeafNode: true` 명시 권장 | warn-only |
+
 ### 권장 (`/skills/[id]` 페이지가 명시 섹션으로 렌더)
 
 | 필드 | 타입 | 페이지 렌더 위치 |
@@ -40,6 +69,12 @@
 | `capabilityRefs` / `apiRefs` / `toolRefs` | `string[]` | 코드 원천. |
 | `knowledgeRefs` | `string[]` | 다른 skill id (예: `engines.company`) — **참조용** (읽으면 도움). 클릭 가능한 chip 으로 링크. |
 | `linkedSkills` | `string[]` | 다른 skill id — **실행 절차의 일부** (recipe 가 순서대로 거치는 step). `knowledgeRefs` 와 의미 분리. `kind: recipe` 에서 핵심. |
+| `predecessors` / `successors` | `string[]` | 작업 흐름 path — 이전/다음 단계. graph 빌드 시 양방향 자동 도출. recipe 외 sub-spec 의 진입 path 명시. |
+| `audiences` | `dict[str, str]` | 본문 주체별 분기 — `llm` / `agent` / `human` 키 → 짧은 한글 설명. mcp.json/web.json 빌드 시 매핑. |
+| `isLeafNode` | `bool` | True 면 *의도적 leaf* — orphan warn 면제. |
+| `entryHint` | `bool` | True 면 진입 노드 — graph 시각화에서 강조. |
+| `graphTier` · `cluster` | `string` | graph 시각화 그룹화 키 (선택). 기본 cluster = engines.{group} 또는 category. |
+| `humanIntro` | `string` | 사람용 도입 1~2 문단 — web.json 의 `bodyHuman` 또는 별도 필드로 노출. |
 | `sourceRefs` | `string[]` | `dartlab://skills/{id}` 형식의 표준 출처. |
 | `status` | `observed` \| `unverified` \| `archived` | 검증 상태. 카드 배지. |
 | `lastUpdated` | `YYYY-MM-DD` | 본문 변경 날짜. 운영자 수동 갱신. |
