@@ -64,6 +64,13 @@ def buildTimeseries(
 
     Example:
         >>> buildTimeseries("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if edgarDir is None:
         edgarDir = _getEdgarDir()
@@ -208,6 +215,13 @@ def buildAnnual(
 
     Example:
         >>> buildAnnual("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if edgarDir is None:
         edgarDir = _getEdgarDir()
@@ -1063,6 +1077,13 @@ def buildSce(
 
     Example:
         >>> buildSce("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     annual = buildAnnual(cik, edgarDir=edgarDir)
     if annual is None:
@@ -1168,6 +1189,13 @@ def getSharesOutstanding(cik: str, *, edgarDir: Path | None = None) -> Optional[
 
     Example:
         >>> getSharesOutstanding("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if edgarDir is None:
         edgarDir = _getEdgarDir()

@@ -132,6 +132,13 @@ def checkEdgarFreshness(ticker: str, *, forceCheck: bool = False) -> EdgarFreshn
 
     Example:
         >>> checkEdgarFreshness("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
+        - time
     """
     normalized = ticker.upper()
 
@@ -234,6 +241,13 @@ def scanEdgarMarketFreshness(
 
     Example:
         >>> scanEdgarMarketFreshness(tier="sp500", limit=10)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
+        - time
     """
     from dartlab.core.dataLoader import loadEdgarTargetUniverse
 
@@ -291,6 +305,13 @@ def collectEdgarMissing(
 
     Example:
         >>> collectEdgarMissing("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
+        - time
     """
     from dartlab.providers.edgar.openapi.batch import batchCollectEdgar
 

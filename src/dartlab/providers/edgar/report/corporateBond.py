@@ -24,6 +24,12 @@ def extractCorporateBond(company: "Company") -> pl.DataFrame | None:
 
     Example:
         >>> extractCorporateBond(Company("AAPL"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     from dartlab.providers.edgar.report import loadXbrlTags
 

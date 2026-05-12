@@ -108,6 +108,13 @@ class _EdgarNotesWrapper:
 
         Example:
             >>> c.notes.keysKr()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.edgar.docs.notesParsers import CATEGORY_LABELS
 
@@ -489,6 +496,13 @@ class Company:
             True
             >>> Company.canHandle("0000320193")
             True
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         s = code.strip()
         if s.isdigit() and len(s) <= 10:
@@ -645,6 +659,13 @@ class Company:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.memory import cleanupBetweenCompanies
 
@@ -666,6 +687,13 @@ class Company:
 
         Raises:
             없음.
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.memory import getMemoryMb
 
@@ -691,6 +719,13 @@ class Company:
 
             c = Company("AAPL")
             c.fiscalYearEnd  # "09-26" (마지막 토요일 변형 가능)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_fiscalYearEnd"
         if cacheKey in self._cache:
@@ -857,6 +892,13 @@ class Company:
             >>> c = Company("AAPL")
             >>> c.quant()              # 사용 가능한 축 목록
             >>> c.quant("returns")     # 주가 수익률
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -893,6 +935,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.macro("yield_curve")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.macro import Macro
 
@@ -912,6 +961,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.causalWeights()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -930,6 +986,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.valuationImpact()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -951,6 +1014,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.storyTree()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -972,6 +1042,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.narrativeDiff(claims=["margin_expansion"])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -996,6 +1073,13 @@ class Company:
 
         Example:
             >>> Company.listing().head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
@@ -1025,6 +1109,13 @@ class Company:
 
         Example:
             >>> Company.search("apple", limit=10)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dataLoader import loadEdgarListedUniverse
 
@@ -1187,6 +1278,13 @@ class Company:
             >>> c = Company("AAPL")
             >>> c.story()              # 전체 검토서
             >>> c.story("수익성")       # 특정 섹션
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1283,6 +1381,13 @@ class Company:
             >>> c = Company("AAPL")
             >>> c.analysis()                            # 축 목록
             >>> c.analysis("financial", "수익성")        # 수익성 분석
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1364,6 +1469,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.validateStory()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import importlib
 
@@ -1402,6 +1514,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.credit()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -1499,6 +1618,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.calendar(horizonDays=60)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.dart.ops.calendar import OUTPUT_SCHEMA
 
@@ -1997,6 +2123,13 @@ class Company:
 
         Raises:
             없음 (topic 부재 시 ``_showImpl`` 이 None 반환).
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2103,6 +2236,13 @@ class Company:
 
         Raises:
             없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.dualAccess import CallableAccessor
 
@@ -2824,6 +2964,13 @@ class Company:
             >>> c = Company("AAPL")
             >>> c.notes("inventory")        # 카테고리별 구조화
             >>> c.notes.keys()              # 사용 가능 카테고리
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.core.memory import _CACHE_MISSING
 
@@ -2879,6 +3026,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.sources
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         rows = []
         for src, accessor in [("docs", self._docs), ("finance", self._finance)]:
@@ -2908,6 +3062,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.table("BS")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         df = self.show(topic, period=period)
         if df is None:
@@ -2937,6 +3098,16 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.audit()
+
+        Returns:
+            <TODO: return desc> (list | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import re
 
@@ -2994,6 +3165,19 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.governance()
+
+        Args:
+            view: <TODO: param desc> (str | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if view in ("all", "market"):
             return None
@@ -3034,6 +3218,13 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.workforce()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         import re
 
@@ -3130,6 +3321,19 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.capital()
+
+        Args:
+            view: <TODO: param desc> (str | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if view in ("all", "market"):
             return None
@@ -3179,6 +3383,19 @@ class Company:
         Example:
             >>> c = Company("AAPL")
             >>> c.debt()
+
+        Args:
+            view: <TODO: param desc> (str | None)
+
+        Returns:
+            <TODO: return desc> (pl.DataFrame | None)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         if view in ("all", "market"):
             return None

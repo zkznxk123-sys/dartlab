@@ -86,6 +86,13 @@ class EdgarClient:
 
         Example:
             >>> EdgarClient().getJson("https://data.sec.gov/...")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - httpx
+            - time
         """
         lastErr: Exception | None = None
         for attempt in range(self.maxRetries):

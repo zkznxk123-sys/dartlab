@@ -40,6 +40,12 @@ class _ProfileAccessor:
 
         Example:
             >>> c._profileAccessor.sections
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - polars
         """
         cacheKey = "_sections"
         if cacheKey in self._company._cache:
@@ -115,6 +121,12 @@ class _ProfileAccessor:
 
         Example:
             >>> c._profileAccessor.sharesOutstanding
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - polars
         """
         cacheKey = "_sharesOutstanding"
         if cacheKey in self._company._cache:

@@ -118,6 +118,16 @@ def discoverLatestQuarter(maxYear: int | None = None) -> tuple[int, int] | None:
 
     Example:
         >>> discoverLatestQuarter()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - io
+        - logging
     """
     if maxYear is None:
         maxYear = datetime.now(timezone.utc).year
@@ -160,6 +170,16 @@ def downloadQuarterlyDataset(
 
     Example:
         >>> downloadQuarterlyDataset(2024, 3)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - io
+        - logging
     """
     tag = _quarterTag(year, quarter)
     zipPath = _bulkDir() / f"{year}q{quarter}.zip"
@@ -350,6 +370,24 @@ def convertQuarterlyToParquets(
 
     Example:
         >>> convertQuarterlyToParquets(2024, 3)
+
+    Args:
+        year: <TODO: param desc> (int)
+        quarter: <TODO: param desc> (int)
+        zipPath: <TODO: param desc> (Path | None)
+
+    Returns:
+        <TODO: return desc> (dict[str, Path])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - io
+        - logging
     """
     if zipPath is None:
         zipPath = downloadQuarterlyDataset(year, quarter)
@@ -389,6 +427,16 @@ def listLocalQuarters(*, kind: str = "sub", limit: int | None = None) -> list[tu
 
     Example:
         >>> listLocalQuarters(kind="sub", limit=8)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - io
+        - logging
     """
     d = _metaDir(kind)
     out: list[tuple[int, int]] = []
@@ -418,6 +466,16 @@ def iterLocalQuarters(*, kind: str = "sub", limit: int | None = None):
     Example:
         >>> for y, q in iterLocalQuarters(limit=8):
         ...     print(y, q)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - io
+        - logging
     """
     yield from listLocalQuarters(kind=kind, limit=limit)
 

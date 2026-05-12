@@ -38,6 +38,12 @@ def explore(
 
     Example:
         >>> explore("0000320193", "Revenue")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if edgarDir is None:
         from dartlab.core.dataLoader import _dataDir
@@ -117,6 +123,12 @@ def listTags(
 
     Example:
         >>> listTags("0000320193", limit=50)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if edgarDir is None:
         from dartlab.core.dataLoader import _dataDir
@@ -181,6 +193,12 @@ def iterTags(
     Example:
         >>> for row in iterTags("0000320193", limit=20):
         ...     print(row["tag"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     df = listTags(cik, edgarDir=edgarDir, limit=limit)
     if df is None:

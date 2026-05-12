@@ -64,6 +64,12 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.availableApiTypes
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - polars
         """
         available = []
         for apiType in _SUPPORTED:
@@ -86,6 +92,12 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.extract("dividend")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - polars
         """
         if apiType in self._cache:
             return self._cache[apiType]

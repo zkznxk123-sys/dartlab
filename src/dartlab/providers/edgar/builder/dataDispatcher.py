@@ -57,6 +57,13 @@ def buildFinanceSeries(company: Company, *, freq: str = "Q", scope: str = "conso
 
     Example:
         >>> buildFinanceSeries(c, freq="Q")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if freq not in ("Q", "Y", "YTD"):
         raise ValueError(f"freq 는 'Q' / 'Y' / 'YTD' 중 하나 (받음: {freq!r})")
@@ -99,6 +106,13 @@ def buildRatios(company: Company) -> pl.DataFrame | None:
 
     Example:
         >>> buildRatios(c)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.edgar.company import _ratioSeriesToDataFrame
 
@@ -133,6 +147,13 @@ def applyPeriodFilter(payload: Any, period: str | None) -> Any:
 
     Example:
         >>> applyPeriodFilter(df, "2024")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if period is None or not isinstance(payload, pl.DataFrame) or payload.is_empty():
         return payload
@@ -168,6 +189,13 @@ def transposeToVertical(wide: pl.DataFrame, periods: list[str]) -> pl.DataFrame 
 
     Example:
         >>> transposeToVertical(df, ["2024", "2023"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.show import transposeToVertical as _coreTranspose
 
@@ -188,6 +216,13 @@ def buildBlockIndex(topicRows: pl.DataFrame) -> pl.DataFrame:
 
     Example:
         >>> buildBlockIndex(sec.filter(pl.col("topic") == "10-K::item7Mdna"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.core.show import buildBlockIndex as _coreBuildBlockIndex
 
@@ -211,6 +246,13 @@ def shapeStr(df: pl.DataFrame | None) -> str:
 
     Example:
         >>> shapeStr(df)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if df is None:
         return "-"
@@ -231,6 +273,13 @@ def periodsStr(df: pl.DataFrame | None) -> str:
 
     Example:
         >>> periodsStr(df)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if df is None:
         return "-"
@@ -254,6 +303,13 @@ def previewFinance(df: pl.DataFrame | None) -> str:
 
     Example:
         >>> previewFinance(df)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(df):
         return "-"
@@ -275,6 +331,13 @@ def previewDocsCell(topicRows: pl.DataFrame, periodCols: list[str]) -> str:
 
     Example:
         >>> previewDocsCell(topicRows, ["2024", "2023"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     for row in topicRows.iter_rows(named=True):
         for col in periodCols:
@@ -318,6 +381,13 @@ def showImpl(
 
     Example:
         >>> showImpl(c, "IS", freq="Y")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.edgar.company import _TOPIC_ALIASES
 

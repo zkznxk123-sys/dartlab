@@ -173,6 +173,15 @@ def scanAccount(
 
     Example:
         >>> scanAccount("sales", freq="Y")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - concurrent
+        - dartlab
+        - logging
+        - polars
     """
     from dartlab.core.dataLoader import _dataDir
 
@@ -253,6 +262,15 @@ def scanRatio(
 
     Example:
         >>> scanRatio("debt_ratio", freq="Y")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - concurrent
+        - dartlab
+        - logging
+        - polars
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))

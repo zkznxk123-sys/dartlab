@@ -134,6 +134,14 @@ class AsyncEdgarClient:
 
         Example:
             >>> await AsyncEdgarClient().getJson("https://data.sec.gov/...")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - httpx
         """
         resp = await self._requestWithRetry(url)
         data = resp.json()
@@ -155,6 +163,14 @@ class AsyncEdgarClient:
 
         Example:
             >>> await AsyncEdgarClient().getBytes("https://...")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - httpx
         """
         resp = await self._requestWithRetry(url, timeout=60)
         return resp.content
@@ -167,5 +183,13 @@ class AsyncEdgarClient:
 
         Example:
             >>> await AsyncEdgarClient().close()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - asyncio
+            - dartlab
+            - httpx
         """
         await self._client.aclose()

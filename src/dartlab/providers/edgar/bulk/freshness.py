@@ -56,6 +56,13 @@ def touchBulkFreshness(tag: str, *, etag: str | None = None) -> None:
 
     Example:
         >>> touchBulkFreshness("companyfacts", etag="abc123")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - logging
     """
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     _freshnessPath(tag).write_text(now, encoding="utf-8")
@@ -77,6 +84,13 @@ def readSavedEtag(tag: str) -> str | None:
 
     Example:
         >>> readSavedEtag("companyfacts")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - logging
     """
     p = _etagPath(tag)
     if not p.exists():
@@ -101,6 +115,13 @@ def inspectBulkFreshness(tag: str) -> BulkFreshness:
 
     Example:
         >>> inspectBulkFreshness("companyfacts")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - logging
     """
     p = _freshnessPath(tag)
     etag = readSavedEtag(tag)
@@ -133,6 +154,13 @@ def isBulkFresh(tag: str, *, ttlHours: int = 24) -> bool:
 
     Example:
         >>> isBulkFresh("companyfacts", ttlHours=24)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - logging
     """
     snap = inspectBulkFreshness(tag)
     if not snap.exists or snap.lastChecked is None:
@@ -153,6 +181,13 @@ def invalidateBulkFreshness(tag: str) -> None:
 
     Example:
         >>> invalidateBulkFreshness("companyfacts")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - datetime
+        - logging
     """
     for p in (_freshnessPath(tag), _etagPath(tag)):
         try:

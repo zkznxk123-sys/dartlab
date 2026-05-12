@@ -320,6 +320,16 @@ def batchCollectEdgar(
 
     Example:
         >>> batchCollectEdgar(["AAPL", "MSFT"], categories=["finance"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - concurrent
+        - dartlab
+        - httpx
+        - logging
     """
     import time as _time
 
@@ -500,6 +510,16 @@ def batchCollectEdgarAll(
 
     Example:
         >>> batchCollectEdgarAll(tier="sp500", mode="new")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - asyncio
+        - concurrent
+        - dartlab
+        - httpx
+        - logging
     """
     from dartlab.core.dataLoader import loadEdgarTargetUniverse
 

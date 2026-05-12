@@ -28,6 +28,14 @@ def getSubmissionsJson(cik: str, client: EdgarClient | None = None) -> dict[str,
 
     Example:
         >>> getSubmissionsJson("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -55,6 +63,14 @@ def mergeSubmissionFilings(
 
     Example:
         >>> mergeSubmissionFilings(getSubmissionsJson("0000320193"), sinceYear=2024)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     recent = submissions.get("filings", {}).get("recent", {})
     merged = {k: list(v) for k, v in recent.items()}
@@ -119,6 +135,14 @@ def findRegularFilings(
 
     Example:
         >>> findRegularFilings(subs, sinceYear=2024, forms=["10-K"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     merged = mergeSubmissionFilings(submissions, sinceYear=sinceYear, client=client)
     reportDates = merged.get("reportDate", [""] * len(merged.get("form", [])))
@@ -202,6 +226,14 @@ def filingsFrame(
 
     Example:
         >>> filingsFrame(getSubmissionsJson("0000320193"), ticker="AAPL", title="Apple Inc.")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     rows = findRegularFilings(
         submissions,

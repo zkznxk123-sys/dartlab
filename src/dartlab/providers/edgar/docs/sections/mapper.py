@@ -195,6 +195,12 @@ def normalizeSectionTitle(title: str) -> str:
     Example:
         >>> normalizeSectionTitle("ITEM 1A. RISK FACTORS")
         'Item 1A. Risk Factors'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
     """
     text = _MULTISPACE_RE.sub(" ", title.strip())
     text = text.replace("§", "section")
@@ -379,6 +385,12 @@ def loadSectionMappings() -> dict[str, str]:
 
     Example:
         >>> loadSectionMappings()["Item 1A. Risk Factors"]
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
     """
     path = _mappingPath()
     if not path.exists():
@@ -414,6 +426,12 @@ def mapSectionTitle(formType: str, title: str) -> str:
     Example:
         >>> mapSectionTitle("10-K", "ITEM 1A. RISK FACTORS")
         '10-K::item1ARiskFactors'
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - functools
     """
     normalized = normalizeSectionTitle(title)
     mappings = loadSectionMappings()

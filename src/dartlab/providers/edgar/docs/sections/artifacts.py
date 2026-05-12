@@ -27,6 +27,17 @@ def packagedArtifactPath(name: str) -> Iterator[Path]:
     Example:
         >>> with packagedArtifactPath("canonicalRows.parquet") as p:
         ...     df = pl.read_parquet(p)
+
+    Returns:
+        <TODO: return desc> (Iterator[Path])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - importlib
+        - polars
     """
     ref = files(_ARTIFACT_PACKAGE) / name
     with as_file(ref) as path:
@@ -48,6 +59,14 @@ def loadCanonicalRows() -> pl.DataFrame | None:
 
     Example:
         >>> loadCanonicalRows()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - importlib
+        - polars
     """
     try:
         with packagedArtifactPath("canonicalRows.parquet") as path:
@@ -70,6 +89,14 @@ def loadCoverageSnapshot() -> dict[str, object] | None:
 
     Example:
         >>> loadCoverageSnapshot()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - importlib
+        - polars
     """
     try:
         ref = files(_ARTIFACT_PACKAGE) / "mappingCoverage.latest.json"
@@ -92,6 +119,14 @@ def loadTopicDrafts() -> dict[str, object] | None:
 
     Example:
         >>> loadTopicDrafts()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - contextlib
+        - importlib
+        - polars
     """
     try:
         ref = files(_ARTIFACT_PACKAGE) / "formTopicDrafts.json"

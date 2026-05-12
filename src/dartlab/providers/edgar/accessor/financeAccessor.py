@@ -158,6 +158,13 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.ratios  # 내부 — 사용자는 c.show("ratios")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         val = self._company._cache.get("_ratios", _CACHE_MISSING)
         if val is _CACHE_MISSING:
@@ -184,6 +191,13 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.ratioSeries  # 내부 — 사용자는 c.show("ratioSeries")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_ratioSeries"
         if cacheKey in self._company._cache:
@@ -211,6 +225,13 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.SCE  # 내부 — 사용자는 c.show("SCE")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cacheKey = "_finance_SCE"
         if cacheKey in self._company._cache:
@@ -235,6 +256,13 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.explore("Revenue")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.edgar.finance.explore import explore
 
@@ -254,6 +282,13 @@ class _FinanceAccessor:
 
         Example:
             >>> c._finance.listTags(limit=50)
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.edgar.finance.explore import listTags
 
@@ -274,6 +309,13 @@ class _FinanceAccessor:
         Example:
             >>> for row in c._finance.iterTags(limit=20):
             ...     print(row["tag"], row["count"])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         df = self.listTags(limit=limit)
         if df is None:

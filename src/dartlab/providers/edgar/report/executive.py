@@ -37,6 +37,13 @@ def extractExecutive(company: "Company") -> pl.DataFrame | None:
 
     Example:
         >>> extractExecutive(Company("AAPL"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     sections = company._docs.sections
     if isEmptyDf(sections):

@@ -167,6 +167,12 @@ def extractAllNoteCategories(
 
     Example:
         >>> extractAllNoteCategories("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if edgarDir is None:
         from dartlab.providers.edgar.report import edgarFinancePath
@@ -234,6 +240,17 @@ def extractNoteCategory(
 
     Example:
         >>> extractNoteCategory("0000320193", "inventory")
+
+    Args:
+        cik: <TODO: param desc> (str)
+        category: <TODO: param desc> (str)
+        edgarDir: <TODO: param desc> (Path | None)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if category not in _CATEGORY_TAGS:
         return None

@@ -89,6 +89,13 @@ class OpenEdgar:
 
         Example:
             >>> OpenEdgar().submissionsJson("AAPL")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cik = self.company(tickerOrCik)["cik"]
         return getSubmissionsJson(cik, self._client)
@@ -117,6 +124,13 @@ class OpenEdgar:
 
         Example:
             >>> OpenEdgar().filings("AAPL", forms=["10-K"])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         info = self.company(tickerOrCik)
         submissions = getSubmissionsJson(info["cik"], self._client)
@@ -144,6 +158,13 @@ class OpenEdgar:
 
         Example:
             >>> OpenEdgar().companyFactsJson("AAPL")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cik = self.company(tickerOrCik)["cik"]
         return getCompanyFactsJson(cik, self._client)
@@ -169,6 +190,13 @@ class OpenEdgar:
 
         Example:
             >>> OpenEdgar().companyConceptJson("AAPL", "us-gaap", "Revenues")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         cik = self.company(tickerOrCik)["cik"]
         return getCompanyConceptJson(cik, taxonomy, tag, self._client)
@@ -295,6 +323,13 @@ class OpenEdgarCompany:
 
         Example:
             >>> e("AAPL").filings(forms=["10-K"])
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         submissions = self.submissionsJson()
         return filingsFrame(

@@ -28,6 +28,12 @@ def edgarFinancePath(cik: str) -> Path:
 
     Example:
         >>> edgarFinancePath("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     from dartlab.core.dataLoader import _getDataRoot
 
@@ -53,6 +59,12 @@ def loadXbrlTags(
 
     Raises:
         없음 (parquet 부재·읽기 실패 시 None 반환).
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     cik = getattr(company, "cik", None)
     if not cik:

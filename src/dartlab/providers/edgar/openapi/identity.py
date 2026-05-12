@@ -39,6 +39,13 @@ def loadTickers(
 
     Example:
         >>> loadTickers().head()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     path = _tickersPath()
     if path.exists() and not refresh:
@@ -94,6 +101,13 @@ def resolveIssuer(
 
     Example:
         >>> resolveIssuer("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not query or not str(query).strip():
         raise ValueError("tickerOrCik가 비어 있음")
@@ -150,6 +164,13 @@ def searchIssuers(
 
     Example:
         >>> searchIssuers("apple", limit=10)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if not query or not str(query).strip():
         return pl.DataFrame(schema={"ticker": pl.Utf8, "cik": pl.Utf8, "title": pl.Utf8})
@@ -195,6 +216,13 @@ def iterIssuers(
     Example:
         >>> for row in iterIssuers("apple", limit=10):
         ...     print(row["ticker"])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = searchIssuers(query, client, refresh=refresh, limit=limit)
     yield from df.iter_rows(named=True)

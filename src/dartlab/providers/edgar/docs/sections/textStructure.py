@@ -101,6 +101,12 @@ def parseTextStructure(
 
     Example:
         >>> parseTextStructure("# Risk Factors\\n\\nText...")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - <TODO: external requires>
     """
     lines = text.split("\n")
     results: list[dict[str, Any]] = []

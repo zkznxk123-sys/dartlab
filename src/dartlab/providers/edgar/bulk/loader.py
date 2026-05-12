@@ -29,6 +29,12 @@ class EdgarBulkLoader:
 
         Example:
             >>> EdgarBulkLoader().ensure("AAPL", Path("..."))
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
         """
         ensureFinanceParquet(stockCode, path, refresh=bool(refresh and refresh != "auto"))
 
@@ -41,6 +47,12 @@ def registerEdgarBulkLoader() -> None:
 
     Example:
         >>> registerEdgarBulkLoader()
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
     """
     from dartlab.core.loaders import registerLoader
 

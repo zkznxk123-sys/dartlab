@@ -70,6 +70,22 @@ def deployEdgarToHF(
 
     Example:
         >>> deployEdgarToHF(categories=["scan"], dryRun=True)
+
+    Args:
+        categories: <TODO: param desc> (list[str] | None)
+        token: <TODO: param desc> (str | None)
+        dryRun: <TODO: param desc> (bool)
+        commitMessage: <TODO: param desc> (str | None)
+
+    Returns:
+        <TODO: return desc> (dict[str, int])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - logging
     """
     from huggingface_hub import HfApi
 

@@ -63,6 +63,12 @@ def extractEmployee(company: "Company") -> pl.DataFrame | None:
 
     Example:
         >>> extractEmployee(Company("AAPL"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     rows: list[dict] = []
 

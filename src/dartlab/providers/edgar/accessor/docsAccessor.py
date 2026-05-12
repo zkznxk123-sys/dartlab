@@ -37,6 +37,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sections.head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         key = "_docs_sections"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -59,6 +66,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.retrievalBlocks.head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         key = "_docs_retrievalBlocks"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -81,6 +95,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.contextSlices.head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         key = "_docs_contextSlices"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -105,6 +126,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.notes("inventory")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.edgar.docs.notes import notes
 
@@ -126,6 +154,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.notesByCategory("inventory")
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.edgar.docs.notes import notesByCategory
 
@@ -142,6 +177,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.noteCategories()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         from dartlab.providers.edgar.docs.notes import noteCategories
 
@@ -158,6 +200,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.freq()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         key = "_docs_freq"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -179,6 +228,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.coverage()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         key = "_docs_coverage"
         val = self._company._cache.get(key, _CACHE_MISSING)
@@ -200,6 +256,13 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.filings().head()
+
+        SeeAlso:
+            - <TODO: 관련 함수/엔진>
+
+        Requires:
+            - dartlab
+            - polars
         """
         key = "_docs_filings"
         if key in self._company._cache:

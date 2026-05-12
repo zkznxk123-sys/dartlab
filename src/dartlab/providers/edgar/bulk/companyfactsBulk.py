@@ -89,6 +89,24 @@ def downloadCompanyfactsBulk(
 
     Example:
         >>> downloadCompanyfactsBulk(force=False)
+
+    Args:
+        force: <TODO: param desc> (bool)
+        ttlHours: <TODO: param desc> (int)
+        progress: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (Path)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - logging
+        - polars
     """
     zipPath = _bulkDir() / "companyfacts.zip"
     tag = "companyfacts"
@@ -171,6 +189,19 @@ def extractCompanyfactsZip(zipPath: Path) -> Iterator[tuple[str, dict]]:
     Example:
         >>> for cik, payload in extractCompanyfactsZip(Path("companyfacts.zip")):
         ...     print(cik)
+
+    Returns:
+        <TODO: return desc> (Iterator[tuple[str, dict]])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - logging
+        - polars
     """
     with zipfile.ZipFile(zipPath, "r") as zf:
         for info in zf.infolist():
@@ -224,6 +255,26 @@ def convertBulkToParquets(
 
     Example:
         >>> convertBulkToParquets(force=False)
+
+    Args:
+        zipPath: <TODO: param desc> (Path | None)
+        outDir: <TODO: param desc> (Path | None)
+        onlyCiks: <TODO: param desc> (set[str] | None)
+        progress: <TODO: param desc> (bool)
+        force: <TODO: param desc> (bool)
+
+    Returns:
+        <TODO: return desc> (dict[str, int])
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - logging
+        - polars
     """
     if zipPath is None:
         zipPath = downloadCompanyfactsBulk(progress=progress)
@@ -406,6 +457,16 @@ def ensureFinanceParquet(stockCode: str, path: Path, *, refresh: bool = False) -
 
     Example:
         >>> ensureFinanceParquet("AAPL", Path("data/edgar/finance/0000320193.parquet"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - httpx
+        - logging
+        - polars
     """
     zipPath = downloadCompanyfactsBulk(force=False)  # ETag + TTL 기반 재사용
     # convertBulkToParquets 자체가 zip mtime vs stamp 비교로 skip 가드.

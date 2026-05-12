@@ -108,6 +108,13 @@ def sections(stockCode: str, *, sinceYear: int | None = None) -> pl.DataFrame | 
 
     Example:
         >>> sections("AAPL", sinceYear=2020)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     df = loadData(stockCode, category="edgarDocs", sinceYear=sinceYear)
     if "period_key" not in df.columns:

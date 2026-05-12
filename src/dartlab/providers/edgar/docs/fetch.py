@@ -108,6 +108,16 @@ def _makeProgress(total: int, title: str, *, disable: bool = False):
 
             Example:
                 >>> bar.title = "downloading..."
+
+            SeeAlso:
+                - <TODO: 관련 함수/엔진>
+
+            Requires:
+                - bs4
+                - dartlab
+                - httpx
+                - polars
+                - rich
             """
             p.update(tid, description=v)
 
@@ -243,6 +253,16 @@ def fetchEdgarDocs(
 
     Example:
         >>> fetchEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - httpx
+        - polars
+        - rich
     """
     ticker = ticker.upper()
     meta = _resolveTickerMeta(ticker)
@@ -299,6 +319,16 @@ def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
 
     Example:
         >>> summarizeEdgarDocsFrame(df)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - httpx
+        - polars
+        - rich
     """
     if df.is_empty():
         return {
@@ -375,6 +405,16 @@ def summarizeEdgarDocsParquet(path: Path) -> dict[str, object]:
 
     Example:
         >>> summarizeEdgarDocsParquet(Path("data/edgar/docs/AAPL.parquet"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - httpx
+        - polars
+        - rich
     """
     summary = summarizeEdgarDocsFrame(pl.read_parquet(path))
     summary["path"] = str(path)
@@ -525,6 +565,16 @@ def downloadListedEdgarDocs(
 
     Example:
         >>> downloadListedEdgarDocs(limit=100)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - httpx
+        - polars
+        - rich
     """
     from dartlab import config
 
@@ -629,6 +679,16 @@ def prepareEdgarCollectibleUniverse(
 
     Example:
         >>> prepareEdgarCollectibleUniverse(limit=1000, forceRefresh=True)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - httpx
+        - polars
+        - rich
     """
     from dartlab import config
     from dartlab.core.dataLoader import loadEdgarListedUniverse
@@ -1404,6 +1464,16 @@ def iterEdgarDocs(
     Example:
         >>> for row in iterEdgarDocs("AAPL", Path("apple.parquet"), maxFilings=5):
         ...     print(row.get("section_title"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - bs4
+        - dartlab
+        - httpx
+        - polars
+        - rich
     """
     fetchEdgarDocs(
         ticker,

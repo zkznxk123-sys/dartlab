@@ -43,6 +43,14 @@ def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str
 
     Example:
         >>> getCompanyFactsJson("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -71,6 +79,14 @@ def getCompanyConceptJson(
 
     Example:
         >>> getCompanyConceptJson("0000320193", "us-gaap", "Revenues")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -101,6 +117,14 @@ def getFrameJson(
 
     Example:
         >>> getFrameJson("us-gaap", "Revenues", "USD", "CY2024Q4I")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     api = client or EdgarClient()
     return api.getJson(f"{DEFAULT_BASE_URL}/api/xbrl/frames/{taxonomy}/{tag}/{unit}/{period}.json")
@@ -120,6 +144,14 @@ def companyFactsToRows(payload: dict[str, Any]) -> pl.DataFrame:
 
     Example:
         >>> companyFactsToRows(getCompanyFactsJson("0000320193"))
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - datetime
+        - polars
     """
     rows: list[dict[str, Any]] = []
     cik = str(payload.get("cik") or "").zfill(10)

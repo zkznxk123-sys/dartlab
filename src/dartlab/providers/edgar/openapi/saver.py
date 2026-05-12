@@ -143,6 +143,14 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
 
     Example:
         >>> verifyOpenEdgarSaveCompatibility("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
+        - uuid
     """
     from dartlab.providers.edgar.company import Company
 
@@ -196,6 +204,14 @@ def saveDocs(
 
     Example:
         >>> saveDocs("AAPL", sinceYear=2020)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
+        - uuid
     """
     normalized = str(ticker).upper().strip()
     _ensureIdentityCaches(client)
@@ -228,6 +244,14 @@ def saveFinance(
 
     Example:
         >>> saveFinance("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
+        - uuid
     """
     normalized = str(cik).zfill(10)
     _ensureIdentityCaches(client)

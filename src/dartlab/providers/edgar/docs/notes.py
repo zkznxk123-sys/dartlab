@@ -64,6 +64,12 @@ def notes(
 
     Example:
         >>> notes("0000320193", "inventory")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     if edgarDir is None:
         from dartlab.core.dataLoader import _dataDir
@@ -138,6 +144,12 @@ def notesByCategory(
 
     Example:
         >>> notesByCategory("0000320193", "inventory")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     from dartlab.providers.edgar.docs.notesParsers import (
         extractNoteCategory,
@@ -167,6 +179,12 @@ def noteCategories(cik: str, *, edgarDir: Path | None = None) -> list[str]:
 
     Example:
         >>> noteCategories("0000320193")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - polars
     """
     from dartlab.providers.edgar.docs.notesParsers import extractAllNoteCategories
 

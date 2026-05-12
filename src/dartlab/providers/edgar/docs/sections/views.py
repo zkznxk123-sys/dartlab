@@ -35,6 +35,13 @@ def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
     Example:
         >>> sortPeriods(["2023Q1", "2024", "2023"], descending=True)
         ['2024', '2023', '2023Q1']
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
 
     def _key(period: str) -> tuple[int, int]:
@@ -60,6 +67,13 @@ def sortTopics(topics: list[str], topicOrder: dict[str, int]) -> list[str]:
 
     Example:
         >>> sortTopics(["10-K::item7Mdna", "10-K::item1Business"], {"10-K::item1Business": 1})
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
 
     def _key(topic: str) -> tuple[int, str, str]:
@@ -84,6 +98,13 @@ def buildMarkdownWide(df: pl.DataFrame | None) -> str:
 
     Example:
         >>> buildMarkdownWide(sec)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     if isEmptyDf(df):
         return ""
@@ -116,6 +137,13 @@ def retrievalBlocks(ticker: str) -> pl.DataFrame | None:
 
     Example:
         >>> retrievalBlocks("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
@@ -304,6 +332,13 @@ def contextSlices(ticker: str, *, maxChars: int = 1800) -> pl.DataFrame | None:
 
     Example:
         >>> contextSlices("AAPL", maxChars=2000)
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     blocks = retrievalBlocks(ticker)
     if isEmptyDf(blocks):
@@ -402,6 +437,13 @@ def freq(ticker: str) -> pl.DataFrame | None:
 
     Example:
         >>> freq("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
@@ -446,6 +488,13 @@ def coverage(ticker: str) -> pl.DataFrame | None:
 
     Example:
         >>> coverage("AAPL")
+
+    SeeAlso:
+        - <TODO: 관련 함수/엔진>
+
+    Requires:
+        - dartlab
+        - polars
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
