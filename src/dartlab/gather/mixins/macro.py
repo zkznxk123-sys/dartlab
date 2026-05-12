@@ -8,10 +8,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import polars as pl
 
+from .context import GatherMixinContext
+
 log = logging.getLogger(__name__)
 
 
-class _GatherMacroMixin:
+class _GatherMacroMixin(GatherMixinContext):
     """거시지표 메서드 모음 — Gather 클래스 4 메서드 + 2 클래스 상수."""
 
     _KNOWN_MARKETS = {"KR", "US"}

@@ -9,11 +9,12 @@ from ..sources import insider as _insider
 from ..sources import ownership as _ownership
 from ..sources import sector as _sector
 from ..types import InsiderTrade, InstitutionOwnership, MajorHolder, SectorInfo, SourceUnavailableError
+from .context import GatherMixinContext
 
 log = logging.getLogger(__name__)
 
 
-class _GatherInfoMixin:
+class _GatherInfoMixin(GatherMixinContext):
     """회사 정보 조회 메서드 모음 — Gather 클래스 7 메서드."""
 
     def dividends(self, stockCode: str, *, market: str = "KR") -> list[dict]:

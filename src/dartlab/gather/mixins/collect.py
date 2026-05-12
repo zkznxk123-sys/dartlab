@@ -13,11 +13,12 @@ from ..sources import insider as _insider
 from ..sources import news as _news
 from ..sources import sector as _sector
 from ..types import GatherResult, GatherSnapshot, SectorInfo
+from .context import GatherMixinContext
 
 log = logging.getLogger(__name__)
 
 
-class _GatherCollectMixin:
+class _GatherCollectMixin(GatherMixinContext):
     """전체 병렬 수집 메서드 모음 — Gather 클래스 3 메서드."""
 
     def collect(self, stockCode: str, *, market: str = "KR") -> GatherSnapshot:

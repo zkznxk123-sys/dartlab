@@ -9,9 +9,10 @@ if TYPE_CHECKING:
 
 from ..infra.http import runAsync
 from ..sources import news as _news
+from .context import GatherMixinContext
 
 
-class _GatherNewsMixin:
+class _GatherNewsMixin(GatherMixinContext):
     """뉴스 + DART 공시 원문 메서드 모음 — Gather 클래스 2 메서드."""
 
     def news(self, query: str, *, market: str = "KR", days: int = 30) -> "pl.DataFrame":

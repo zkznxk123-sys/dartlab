@@ -15,11 +15,12 @@ from ..sources import flow as _flow
 from ..sources import history as _history
 from ..sources import price as _price
 from ..types import FlowData, PriceSnapshot, RevenueConsensus, SourceUnavailableError
+from .context import GatherMixinContext
 
 log = logging.getLogger(__name__)
 
 
-class _GatherPriceMixin:
+class _GatherPriceMixin(GatherMixinContext):
     """가격·수급·히스토리·컨센서스 메서드 모음 — Gather 클래스 6 메서드."""
 
     def price(
