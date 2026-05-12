@@ -29,6 +29,16 @@ def getPriceFallback(market: str = "KR") -> list[str]:
     list[str]
         도메인 이름 목록 (우선순위 순).
         예: ``["naver", "naverGlobal"]`` (KR), ``["fmp"]`` (US).
+
+    Raises
+    ------
+    KeyError
+        marketConfig 에 등록되지 않은 market 코드일 때.
+
+    Example
+    -------
+    >>> getPriceFallback("KR")
+    ['naver', 'naverGlobal']
     """
     config = getMarketConfig(market)
     return list(config.fallback_chain)
@@ -61,6 +71,10 @@ def loadDomain(name: str):
     ------
     ValueError
         등록되지 않은 도메인 이름일 때.
+
+    Example
+    -------
+    >>> mod = loadDomain("naver")
     """
     canonical = _DOMAIN_ALIASES.get(name, name)
     if canonical == "naver":

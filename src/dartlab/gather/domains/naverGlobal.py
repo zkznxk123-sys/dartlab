@@ -153,6 +153,15 @@ async def fetchPrice(
         market_cap : float — 시가총액 (USD)
         source : str — ``"naver_global"``
         매핑 실패 또는 API 오류 시 None.
+
+    Raises
+    ------
+    없음
+        Naver global API 내부 예외 (SourceUnavailableError/ValueError) 는 흡수.
+
+    Example
+    -------
+    >>> snap = await fetchPrice("AAPL", client, market="US")
     """
     del limit
     code = await _resolveReutersCode(stockCode, client)
@@ -257,6 +266,15 @@ async def fetchHistory(
         - volume : int — 거래량 (주)
 
         매핑 실패 또는 조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Naver global chart API 내부 예외 (SourceUnavailableError/ValueError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetchHistory("AAPL", client, start="2024-01-01")
     """
     code = await _resolveReutersCode(stockCode, client)
     if not code:

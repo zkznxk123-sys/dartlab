@@ -64,6 +64,15 @@ async def fetchPrice(
         - source : str — ``"fmp"``
 
         API 키 미설정이거나 조회 실패 시 None.
+
+    Raises
+    ------
+    없음
+        GatherError/ValueError 등 내부 예외는 None 반환으로 흡수.
+
+    Example
+    -------
+    >>> snap = await fetchPrice("AAPL", client, market="US")
     """
     del limit
     key = _getApiKey()
@@ -151,6 +160,15 @@ async def fetchHistory(
         - volume : int — 거래량 (주)
 
         API 키 미설정이거나 조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        GatherError 등 내부 예외는 빈 리스트로 흡수.
+
+    Example
+    -------
+    >>> rows = await fetchHistory("AAPL", client, start="2024-01-01", end="2024-12-31")
     """
     key = _getApiKey()
     if not key:
@@ -222,6 +240,15 @@ async def fetchDividends(
         - amount : float — 주당 배당금 (해당 통화 단위)
 
         API 키 미설정이거나 조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        GatherError 등 내부 예외는 빈 리스트로 흡수.
+
+    Example
+    -------
+    >>> divs = await fetchDividends("AAPL", client)
     """
     key = _getApiKey()
     if not key:
@@ -284,6 +311,15 @@ async def fetchSplits(
         - denominator : int — 분할 비율 분모
 
         API 키 미설정이거나 조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        GatherError 등 내부 예외는 빈 리스트로 흡수.
+
+    Example
+    -------
+    >>> splits = await fetchSplits("AAPL", client)
     """
     key = _getApiKey()
     if not key:

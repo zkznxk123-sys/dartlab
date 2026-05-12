@@ -160,6 +160,15 @@ async def fetchPrice(
         - source : str — ``"naver"``
 
         API 실패 또는 현재가 없으면 None.
+
+    Raises
+    ------
+    없음
+        Naver API 내부 예외 (SourceUnavailableError/ValueError 등) 는 흡수.
+
+    Example
+    -------
+    >>> snap = await fetchPrice("005930", client)
     """
     del limit
     # KR 종목코드 검증 — 6자리 숫자 아니면 차단 (US/글로벌 티커 → naver_global로)
@@ -251,6 +260,15 @@ async def fetchFlow(
         - foreignHoldingRatio : float — 외국인 보유 비율 (%)
 
         데이터 없으면 None.
+
+    Raises
+    ------
+    없음
+        Naver API 내부 예외 (SourceUnavailableError/ValueError) 는 흡수.
+
+    Example
+    -------
+    >>> flow = await fetchFlow("005930", client)
     """
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
@@ -365,6 +383,15 @@ async def fetchRevenueConsensus(
     ----------------
     limit : int | None
         반환 행수 상한. None이면 전체.
+
+    Raises
+    ------
+    없음
+        Naver finance/annual API 내부 예외 (SourceUnavailableError/ValueError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetchRevenueConsensus("005930", client)
     """
     # KR 종목코드 검증
     if not (stockCode and stockCode.strip().isdigit() and len(stockCode.strip()) == 6):
@@ -451,6 +478,15 @@ async def fetchSectorPer(
     -------
     float | None
         동종업종 평균 PER (배). API 실패 또는 데이터 없으면 None.
+
+    Raises
+    ------
+    없음
+        Naver integration API 내부 예외 (SourceUnavailableError/ValueError) 는 흡수.
+
+    Example
+    -------
+    >>> per = await fetchSectorPer("005930", client)
     """
     del limit
     # KR 종목코드 검증
@@ -502,6 +538,15 @@ async def fetchAll(
         flow : FlowData | None — 외국인/기관 수급 스냅샷
         sector_per : float | None — 동종업종 PER (배)
         error : str | None — 수집 실패 시 에러 메시지
+
+    Raises
+    ------
+    없음
+        SourceUnavailableError 는 GatherResult.error 로 흡수.
+
+    Example
+    -------
+    >>> r = await fetchAll("005930", client)
     """
     del limit
     result = GatherResult(domain="naver")
@@ -561,6 +606,15 @@ async def fetchIntraday(
         - volume : int — 누적 거래량 (주)
 
         KR 외 시장이거나 조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Naver intraday API 내부 예외 (SourceUnavailableError/ValueError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetchIntraday("005930", client, market="KR")
     """
     if market != "KR":
         return []
@@ -641,6 +695,15 @@ async def fetchHistory(
         - volume : int — 거래량 (주)
 
         KR 외 시장이거나 조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Naver chart API 내부 예외 (SourceUnavailableError/OSError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetchHistory("005930", client, start="2024-01-01")
     """
     if market != "KR":
         return []

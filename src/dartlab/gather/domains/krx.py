@@ -48,6 +48,15 @@ async def fetchSectorInfo(
         industryName : str — 산업명 (네이버)
         market : str — 시장구분 (코스피/코스닥)
         source : str — ``"kind+naver"``
+
+    Raises
+    ------
+    없음
+        KIND/Naver 내부 예외 (SourceUnavailableError/KeyError/ValueError/TypeError) 는 흡수.
+
+    Example
+    -------
+    >>> info = await fetchSectorInfo("005930", client)
     """
     del limit
     # 1) KIND에서 업종명 가져오기 (동기 -- 이미 캐시됨)
@@ -115,6 +124,15 @@ async def fetchIndustryPeers(
         - market : str — ``"KOSPI"`` | ``"KOSDAQ"``
 
         조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Naver API 내부 예외 (SourceUnavailableError/KeyError/ValueError/TypeError) 는 흡수.
+
+    Example
+    -------
+    >>> peers = await fetchIndustryPeers("263", client)
     """
     try:
         url = _NAVER_INDUSTRY_DETAIL.format(code=industryCode)
@@ -169,6 +187,15 @@ async def fetchIndustryList(
         - changeRate : float — 업종 등락률 (%)
 
         조회 실패 시 빈 리스트.
+
+    Raises
+    ------
+    없음
+        Naver API 내부 예외 (SourceUnavailableError/KeyError/ValueError/TypeError) 는 흡수.
+
+    Example
+    -------
+    >>> inds = await fetchIndustryList(client)
     """
     try:
         resp = await client.get(_NAVER_INDUSTRY_LIST)

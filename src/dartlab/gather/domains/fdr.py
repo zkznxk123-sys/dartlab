@@ -52,6 +52,12 @@ async def fetchHistory(
 
     Returns:
         [{"date": ..., "open": ..., "high": ..., "low": ..., "close": ..., "volume": ...}, ...]
+
+    Raises:
+        없음 — FDR 내부 예외 (ImportError/OSError/ValueError/KeyError/TypeError) 는 흡수.
+
+    Example:
+        >>> rows = await fetchHistory("005930", start="2024-01-01", end="2024-12-31")
     """
     if not _available():
         log.debug("FDR 미설치 — skip")

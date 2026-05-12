@@ -96,6 +96,15 @@ async def fetchPrice(
         currency : str — 통화 (USD/JPY/HKD 등, Yahoo 응답 기준)
         source : str — "yahoo_chart"
         API 실패 또는 데이터 없으면 None → fallback 체인 진행.
+
+    Raises
+    ------
+    없음
+        Yahoo v8 API 내부 예외 (SourceUnavailableError/ValueError/OSError) 는 흡수.
+
+    Example
+    -------
+    >>> snap = await fetchPrice("AAPL", client, market="US")
     """
     del limit
     symbol = _buildSymbol(stockCode, market)
@@ -194,6 +203,15 @@ async def fetchHistory(
     Yahoo v8 API는 비공식이므로 차단 위험이 있다.
     dartlab은 yahoo_chart → naver_global → fmp 3단계 fallback으로
     어느 한 소스가 실패해도 데이터 수집을 보장한다.
+
+    Raises
+    ------
+    없음
+        Yahoo v8 API 내부 예외 (SourceUnavailableError/ValueError/OSError) 는 흡수.
+
+    Example
+    -------
+    >>> rows = await fetchHistory("AAPL", client, start="2024-01-01")
     """
     from datetime import datetime as _dt
 
