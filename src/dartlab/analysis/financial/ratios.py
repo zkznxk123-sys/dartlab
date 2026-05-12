@@ -708,18 +708,110 @@ def calcRatios(
     shares: int | None = None,
     currency: str = "KRW",
 ) -> RatioResult:
-    """시계열에서 재무비율 계산 (최신 단일 시점).
+    """시계열 → 재무비율 단일 시점 계산 — DART/EDGAR 공통 백엔드.
+
+    분기 시계열 (annual=False) 은 IS/CF 에 TTM (trailing 4Q 합) 적용, 연간 시계열
+    (annual=True) 은 latest 단일 시점. BS 는 항상 latest 시점 잔액.
+
+    계산 범주 (각 ``_calc*`` helper 위임):
+      - **Profitability**: GPM / OPM / NPM / ROA / ROE / ROIC / DuPont.
+      - **Stability**: 부채비율 / 자기자본비율 / 유동비율 / 당좌비율 / 이자보상.
+      - **Efficiency**: 자산회전율 / 재고회전 / 매출채권회전 / CCC.
+      - **Cashflow**: OCF / FCF / Capex 비율 / 배당성향.
+      - **Composite**: Altman Z / Altman Z'' / Piotroski F / Ohlson O / Beneish M / Springate / Zmijewski / Sloan Accrual.
+      - **PerShare**: EPS / BPS / DPS (shares 제공 시).
+      - **Valuation**: PER / PBR / PSR / EV/EBITDA (marketCap 제공 시).
+      - **Archetype Policy**: detected archetype (industrial/bank/insurance/holding/etc.) 별
+        부적용 ratio 자동 None 처리 — ``_applyArchetypePolicyResult``.
 
     Args:
-            series: buildTimeseries() 또는 buildAnnual() 결과.
-            marketCap: 시가총액 (원 단위). None이면 밸류에이션 멀티플 건너뜀.
-            annual: True면 IS/CF에 getLatest 사용 (연간 시계열).
-                    False면 getTTM 사용 (분기 시계열, 기본값).
-            shares: 발행주식수. None이면 주당지표(EPS/BPS/DPS) 건너뜀.
-            currency: 통화 코드. grading에서 시장별 임계값 분기에 사용.
+        series: ``buildTimeseries()`` 또는 ``buildAnnual()`` 결과
+            (``{"BS"|"IS"|"CF": {snakeId: list[float|None]}}``). dart provider 산출.
+            edgar 도 동일 schema 로 정규화 (us-gaap concept → snakeId).
+        marketCap: 시가총액 (원 단위, KR) 또는 USD (US). None 이면 밸류에이션 멀티플 skip.
+        annual: True 면 IS/CF 에 ``getLatest`` (연간 시계열), False (default) 면 ``getTTM``
+            (분기 시계열의 trailing 4Q 합, ``maxTrailingNones=0`` strict).
+        archetypeOverride: archetype 자동 감지 (``_detectArchetype``) override. None 이면
+            BS/IS 구성으로 industrial/bank/insurance/holding/reit/etc 추론.
+        shares: 발행주식수. None 이면 EPS / BPS / DPS skip.
+        currency: 통화 코드 ("KRW" / "USD" / "JPY"). grading 시장별 임계값 분기에 사용.
 
     Returns:
-            RatioResult.
+        RatioResult — dataclass with 60+ float|None fields + ``currency`` / ``warnings``.
+        Archetype 부적용 field 는 None.
+
+    Raises:
+        없음. 데이터 결측은 None 반환 (예외 X). caller 가 None 체크 의무.
+
+    Example:
+        >>> series, _ = buildTimeseries("005930")
+        >>> r = calcRatios(series, marketCap=400e12, shares=5969782550)
+        >>> r.roe, r.debtRatio
+        (..., ...)
+
+    SeeAlso:
+        - ``RatioResult`` — dataclass 출력 schema.
+        - ``calcRatioSeries`` — 시계열 전체 반환 (본 함수 N 회 호출).
+        - ``_detectArchetype`` — archetype 자동 감지 룰.
+        - ``_applyArchetypePolicyResult`` — archetype 별 N/A 처리.
+        - ``_calcProfitability`` / ``_calcStability`` / ``_calcEfficiency`` / ``_calcCashflow``
+          / ``_calcComposite`` / ``_calcPiotroski`` / ``_calcAltmanZ`` / ``_calcBeneish`` 등 helper.
+        - ``getTTM`` / ``getLatest`` — flow vs stock 추출 헬퍼.
+
+    Requires:
+        - dataclasses (RatioResult)
+        - dartlab.analysis.financial._constants (임계값 / archetype 룰)
+
+    Capabilities:
+        - DART KR + EDGAR US 공통 재무비율 60+ 계산 백엔드.
+        - Archetype-aware — 업종별 부적용 ratio 자동 None.
+        - TTM / Annual mode 양방향 — 분기 시계열 + 연간 시계열 모두.
+        - Composite score (Piotroski/Altman/Beneish/Ohlson/Springate/Zmijewski/Sloan) 5+ 종.
+
+    Guide:
+        - 사용자 API 는 ``c.show("ratios")`` — 본 함수는 backend.
+        - 다종목 batch 발굴 시 ``scanRatio("roe").sort(...).head(N)`` 가 빠름 (parquet vectorized).
+        - 단일 종목 deep dive 시 ``c.ratios`` (본 함수 결과) 60+ field 전부 access.
+
+    AIContext:
+        Ask Workbench finance core — ``c.ratios`` 호출 시 backend. archetype 처리로
+        은행/보험/지주 회사에서 부적절 ratio (제조업 기준 OPM 등) 자동 마스킹.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 본 함수 직접 호출 X — ``c.ratios`` / ``c.show("ratios")`` 위임.
+            - ``annual=False`` 인데 분기 시계열이 4 분기 미만 → TTM 계산 불가 → None.
+            - ``archetypeOverride`` 강제 후 결과 신뢰 X — 자동 감지 우선, override 는 예외.
+            - 다종목 발굴에 본 함수 N 회 X — ``scanRatio`` (vectorized parquet) 사용.
+            - currency 누락 → "KRW" default, US 종목 호출 시 잘못된 grading 분기.
+        OutputSchema:
+            - RatioResult dataclass — 60+ ``float|None`` field
+              (``revenueTTM`` / ``operatingIncomeTTM`` / ``netIncomeTTM`` / ``roa`` / ``roe`` /
+              ``roic`` / ``debtRatio`` / ``currentRatio`` / ``quickRatio`` /
+              ``operatingMargin`` / ``netMargin`` / ``grossMargin`` / ``assetTurnover`` /
+              ``inventoryTurnover`` / ``ccc`` / ``fcf`` / ``payoutRatio`` /
+              ``altmanZ`` / ``piotroskiF`` / ``beneishM`` / ``ohlsonO`` / ``springate`` /
+              ``zmijewski`` / ``sloanAccrual`` / ``eps`` / ``bps`` / ``per`` / ``pbr`` / ``psr`` /
+              ``evEbitda`` 등) + ``currency`` (str) + ``warnings`` (list).
+        Prerequisites:
+            - series schema = ``{"BS"|"IS"|"CF": {snakeId(str): list[float|None]}}``.
+            - 분기 시계열 = ``buildTimeseries()``, 연간 = ``buildAnnual()`` 출력.
+            - marketCap / shares 는 gather 의 listing 모듈 또는 외부 origin.
+        Freshness:
+            - series 는 DART 분기 마감 후 ~45 일 (반기 60 일).
+            - marketCap 은 일 단위 갱신 — caller 가 trade date 명시.
+        Dataflow:
+            - series (raw 시계열) → archetype 감지 → ``getTTM`` / ``getLatest`` 분기
+            - → ``_calcProfitability`` / ``_calcStability`` / ``_calcEfficiency`` / ``_calcCashflow``
+            - → ``_calcComposite`` / ``_calcRoic`` / ``_calcDupont`` / ``_calcDebtToEbitda`` / ``_calcCCC``
+            - → ``_calcPiotroski`` / ``_calcAltmanZ`` / ``_calcSloanAccrual`` / ``_calcOhlsonO``
+              / ``_calcSpringate`` / ``_calcZmijewski`` / ``_calcBeneish``
+            - → ``_calcPerShare`` (shares 있을 때) / ``_calcValuation`` (marketCap 있을 때)
+            - → ``_applyArchetypePolicyResult`` (부적용 field None 처리)
+            - → RatioResult dataclass.
+        TargetMarkets:
+            - KR (DART) — 제조/금융/보험/지주/리츠 전체.
+            - US (SEC EDGAR) — us-gaap 정규화 시 동일 함수 호출 가능 (currency="USD").
     """
     r = RatioResult()
     r.currency = currency

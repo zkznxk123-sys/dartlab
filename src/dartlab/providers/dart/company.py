@@ -783,6 +783,78 @@ class Company:
         return 10
 
     def __init__(self, stockCode: str):
+        """DART KR Company 인스턴스 초기화 — stockCode 해석 + parquet 캐시 + accessor 5 종 셋업.
+
+        Args:
+            stockCode: 6 자리 종목코드 (``"005930"``) 또는 한글 회사명 (``"삼성전자"``).
+                회사명은 ``nameToCode`` 가 KIND 매핑으로 6 자리 코드로 해석. 6 자리
+                ``[0-9A-Za-z]`` 직매칭이 우선이며, 그 외 입력은 회사명 path 로 fallback.
+
+        Returns:
+            None (생성자).
+
+        Raises:
+            ValueError: ``stockCode`` 가 KIND 매핑/parquet 어디에도 없을 때
+                (``"'X'에 해당하는 종목을 찾을 수 없음"``) 또는 docs/finance/report
+                parquet 셋 다 부재 시 ``emit("error:no_data", raiseAs=ValueError)``.
+
+        Example:
+            >>> from dartlab.providers.dart.company import Company
+            >>> c = Company("005930")
+            >>> c.corpName
+            '삼성전자'
+
+        SeeAlso:
+            - ``nameToCode`` — 한글명 → 6 자리 코드 매핑 (ListingResolver).
+            - ``__enter__`` / ``__exit__`` — context manager + OomTripwire + cleanupCache.
+            - ``_ensureAllData`` — docs/finance/report parquet 셋 verify.
+
+        Requires:
+            - polars
+            - dartlab.core.memory.BoundedCache (30 entry cap)
+            - dartlab.providers.dart.accessor.* (Notes/Profile/Docs/Finance/Report)
+            - dartlab.frame.dataLoader.loadData (corpName 추출)
+
+        Capabilities:
+            - 단일 한국 상장사 facade 진입점 — docs/finance/report 통합 access.
+            - lazy finance — 첫 ``c.finance.*`` 접근 시 parquet load.
+            - pyodide-aware — emscripten 에선 corpName 을 stockCode 로 폴백 (네트워크 비용 회피).
+
+        Guide:
+            - "삼성전자 분석" → ``Company("005930")``.
+            - "회사명만 알 때" → ``Company("삼성전자")``.
+            - "다종목 순회" → ``with Company(code) as c: ...`` 패턴 강제 (OomTripwire).
+
+        AIContext:
+            Ask Workbench Company facade — LLM 이 첫 호출하는 KR provider 엔트리.
+            ``co.show(topic)`` / ``co.search(query)`` 등 모든 후속 호출의 self.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 4 자리/7 자리/8 자리 코드 호출 → ValueError. KR stockCode 는 6 자리 strict.
+                - ``Company(code)`` 한 인스턴스로 다종목 처리 시도 — 종목당 신규 Company 강제.
+                - ``with`` 누락 다종목 루프 → Polars Rust heap 누적 → OOM (cleanupCache 미호출).
+                - 한글 외 다국어 회사명 (Samsung/サムスン) → KIND 미매치 → ValueError.
+            OutputSchema:
+                - Company 인스턴스 — ``stockCode`` (str 6 upper) / ``corpName`` (str)
+                  / ``_cache`` (BoundedCache 30) / ``_hasDocs/_hasFinanceParquet/_hasReport`` (bool).
+                - 내부 accessor: ``_docs`` (DocsAccessor) / ``_finance`` (FinanceAccessor)
+                  / ``_report`` (ReportAccessor) / ``_profileAccessor`` / ``_notesAccessor`` (docs 있을 때만).
+            Prerequisites:
+                - KIND 룩업 캐시 또는 HuggingFace origin 다운로드 권한 (cold start 가능).
+                - ``_ensureAllData`` 가 docs/finance/report parquet 확인 — 하나라도 있으면 통과.
+            Freshness:
+                - 초기화 wall-clock ≥ 2.0s 시 INFO log (HF cold start 추적).
+                - docs freshness 는 ``_checkDartDocsFreshness`` 가 trailing date 와 비교 후
+                  stale 시 ``_freshnessResult`` 에 warning record.
+                - KIND 매핑은 ListingResolver TTL (일 단위).
+            Dataflow:
+                - stockCode (raw) → ``nameToCode`` (회사명 path) → 6 자리 정규화
+                - → ``_ensureAllData`` (docs/finance/report parquet existence check)
+                - → BoundedCache(30) + 5 accessor 인스턴스화 → Company.
+            TargetMarkets:
+                - KR (DART) — KOSPI/KOSDAQ/KONEX 등록 종목 한정. 비상장/외국주 X.
+        """
         import time as _time
 
         _initStart = _time.perf_counter()

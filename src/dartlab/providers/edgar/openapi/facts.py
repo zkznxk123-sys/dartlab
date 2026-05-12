@@ -29,53 +29,94 @@ EDGAR_COMPANYFACTS_SCHEMA = {
 
 
 def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str, Any]:
-    """CIK 로 SEC companyfacts API 를 호출하여 전체 XBRL fact JSON 을 반환.
+    """CIK → SEC companyfacts API 호출 → 전체 XBRL fact JSON 반환 — EDGAR XBRL 본진.
+
+    SEC ``data.sec.gov/api/xbrl/companyfacts/CIK{CIK_10_padded}.json`` endpoint 호출.
+    응답은 회사의 **전체 us-gaap concept × 분기 fact** 매트릭스 — 한 회사당 수 MB~수십 MB
+    JSON. 100+ concept × 10+ 년 × 4 분기 = ~수만 fact.
+
+    응답 구조:
+      - ``cik`` / ``entityName`` (str).
+      - ``facts``: ``{taxonomy: {tag: {label, description, units: {unit: [fact dict]}}}}``.
+      - 각 fact dict: ``{end, val, accn, fy, fp, form, filed, frame, ...}``.
+      - taxonomy: ``"us-gaap"`` (표준) / ``"dei"`` (entity 메타) / ``"ifrs-full"`` (외국 발행자).
+      - unit: ``"USD"`` / ``"USD/shares"`` / ``"shares"`` / ``"pure"`` / ``"USD/CFB"`` 등.
 
     Args:
-        cik: SEC CIK 번호.
-        client: EdgarClient 인스턴스 (None 이면 기본).
+        cik: SEC CIK (zero-padded 10 권장, 짧으면 자동 ``zfill(10)``).
+            예: ``"0000320193"`` (Apple) / ``"320193"`` (동치).
+        client: ``EdgarClient`` 인스턴스. None 이면 default (User-Agent header 자동).
 
     Returns:
-        companyfacts API 원본 JSON dict.
+        dict — SEC companyfacts JSON 원본 (가공 X).
+        ``companyFactsToRows`` 로 정규화 → ``EDGAR_COMPANYFACTS_SCHEMA`` 따르는 pl.DataFrame.
 
     Raises:
-        EdgarApiError: API 호출 실패.
+        EdgarApiError: HTTP 호출 실패 (403 User-Agent / 404 CIK 미등록 / 429 rate limit).
 
     Example:
-        >>> getCompanyFactsJson("0000320193")
+        >>> json = getCompanyFactsJson("0000320193")  # Apple
+        >>> revenues = json["facts"]["us-gaap"]["Revenues"]["units"]["USD"]
+        >>> len(revenues)  # 분기 × 연 fact 수
 
     SeeAlso:
-        - ``EDGAR_COMPANYFACTS_SCHEMA`` — 정규화 schema.
-        - ``EdgarClient`` — HTTP backend.
+        - ``companyFactsToRows`` — 본 함수 결과 → pl.DataFrame 정규화.
+        - ``getCompanyConceptJson`` — 단일 (taxonomy, tag) 조합 조회 (가벼움).
+        - ``getFrameJson`` — 횡단 발굴 (단일 concept × 분기 × 전종목).
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` — 정규화 schema 정의.
+        - ``EdgarClient`` — HTTP backend (User-Agent / retry / rate limit).
+        - ``providers.edgar.finance.xbrlConcepts.normalizeConcept`` — concept 정규화 후속.
 
     Requires:
-        - dartlab
-        - datetime
-        - polars
+        - dartlab.providers.edgar.openapi.client (``EdgarClient``)
+        - datetime / polars (downstream 정규화)
+        - SEC EDGAR public API 접근 (User-Agent header 필수).
 
     Capabilities:
-        - SEC companyfacts / companyconcept / frames API 위임 + JSON 정규화 → 정규화된 fact schema.
+        - 회사 전체 XBRL fact bulk fetch — 분석/scan/concept 매핑 backend.
+        - ``companyfactsBulk`` 가 본 함수 multi-CIK 병렬 호출로 universe 구축.
+        - JSON 원본 반환 — caller 가 schema 정규화 또는 raw 분석 선택.
 
     Guide:
-        - "SEC XBRL fact 조회" → 본 모듈 함수.
+        - 단일 종목 deep dive → 본 함수 + ``companyFactsToRows``.
+        - 단일 concept 만 필요 시 ``getCompanyConceptJson`` (더 가벼움).
+        - 횡단 발굴 시 ``getFrameJson`` (분기 × 전종목, 본 함수보다 효율적).
+        - 본 함수 + caller-side cache → SEC rate limit 회피 (10 req/sec).
 
     AIContext:
-        internal facts wrapper — AI 직접 호출 X.
+        Ask Workbench EDGAR XBRL core — LLM 이 US 회사 재무 fact retrieval 시 entry.
+        결과 → ``c.finance.scanAccount`` / ``c.show("IS")`` 등 backend 매핑.
 
     LLM Specifications:
         AntiPatterns:
-            - User-Agent 미설정 → 403.
-            - 대량 fact 그대로 LLM 노출 → 토큰 폭증.
+            - SEC User-Agent header 미설정 → HTTP 403. ``DARTLAB_USER_AGENT`` 환경변수 설정.
+            - 본 함수 N 회 짧은 간격 호출 → 10 req/sec rate limit → 429. EdgarClient 가 back-off.
+            - 대량 fact JSON 그대로 LLM context 주입 X — 토큰 폭증. ``companyFactsToRows`` 후 필터 의무.
+            - CIK 미등록 호출 → 404. ``identity.resolveIssuer`` 사전 검증.
+            - JSON 원본을 그대로 분석 X — schema 정규화 (``companyFactsToRows``) 후 polars 처리.
+            - 외국 발행자 (``ifrs-full`` taxonomy) 처리 시 us-gaap 가정 X — taxonomy 명시 분기.
         OutputSchema:
-            - dict (raw JSON) 또는 pl.DataFrame (EDGAR_COMPANYFACTS_SCHEMA).
+            - dict — ``{"cik": str, "entityName": str, "facts": {taxonomy: {tag: ...}}}``.
+            - ``facts.<taxonomy>.<tag>.units.<unit>`` = list of fact dict
+              (``end`` / ``val`` / ``accn`` / ``fy`` / ``fp`` / ``form`` / ``filed`` / ``frame``).
+            - ``companyFactsToRows`` 변환 시 pl.DataFrame — ``cik`` / ``taxonomy`` / ``tag``
+              / ``unit`` / ``end`` (Date) / ``val`` (Float) / ``accn`` / ``fy`` / ``fp`` / ``form``.
         Prerequisites:
-            - 인터넷 + SEC EDGAR public API.
+            - 인터넷 + SEC EDGAR public API 접근 권한.
+            - User-Agent header (SEC 정책 — "name email" 형식 권장).
+            - ``EdgarClient`` retry / rate limit / cache backend.
         Freshness:
-            - SEC EDGAR 실시간.
+            - SEC EDGAR XBRL 실시간 갱신 — 10-K / 10-Q 제출 후 즉시 반영.
+            - 분기 마감 → 10-Q 제출 ~45 일 / 연 마감 → 10-K ~60-90 일 cadence.
+            - companyfacts JSON 은 회사가 새 fact 제출 시 즉시 변경.
         Dataflow:
-            - CIK/tag/frame → EdgarClient → SEC API → 정규화 → 본 함수.
+            - CIK (raw) → ``.zfill(10)`` 정규화
+            - → ``EdgarClient.getJson`` (HTTP GET + User-Agent + retry + rate limit)
+            - → SEC API ``data.sec.gov/api/xbrl/companyfacts/CIK{padded}.json``
+            - → JSON dict (raw, 가공 X) → caller.
         TargetMarkets:
-            - US (SEC EDGAR XBRL).
+            - US (SEC EDGAR XBRL) — NYSE/NASDAQ/AMEX/OTC SEC 등록 + XBRL 제출 종목.
+            - 외국 발행자 (``ifrs-full`` taxonomy) 도 지원하나 본 함수는 taxonomy 무관 raw.
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)

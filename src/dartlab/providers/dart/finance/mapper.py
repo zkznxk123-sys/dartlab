@@ -320,53 +320,83 @@ class AccountMapper:
         return AccountMapper._noHyphenIndex
 
     def map(self, accountId: str, accountNm: str) -> Optional[str]:
-        """``account_id`` + ``account_nm`` → snakeId.
+        """``account_id`` + ``account_nm`` → snakeId — DART XBRL 정규화 핵심 함수.
 
-        v8 방식: 한글명 우선 조회 → 영문 ID 조회 → 공백제거 → 괄호제거 fallback.
-        ``accountMappings.json`` 의 ``snakeId`` (= standardAccounts 기준) 그대로 반환.
+        v8 매핑 순서 (한글명 우선 — 공시 표기 안정):
+          1. ``_stripPrefix`` — IFRS/dart prefix 제거 (``ifrs-full_Revenue`` → ``Revenue``).
+          2. ``ID_SYNONYMS`` 적용 — 동의어 ID 변환.
+          3. ``ACCOUNT_NAME_SYNONYMS`` 적용 — 동의어 한글명 변환.
+          4. 한글명 직접 조회 (``self._mappings`` = accountMappings.json 34,171 entry).
+          5. 영문 ID 조회.
+          6. 공백 제거 fallback.
+          7. 괄호 제거 fallback (``매출액(연결)`` → ``매출액``).
+          8. 하이픈/대시 제거 양방향 (입력 + 사전 index) — 미매핑 98.5% 가 하이픈 차이 (실험 081-001).
 
         Args:
-            accountId: XBRL account_id (예: ``"ifrs-full_Revenue"``).
-            accountNm: 한글 account name (예: ``"매출액"``).
+            accountId: XBRL ``account_id`` (예: ``"ifrs-full_Revenue"``).
+                prefix 포함 raw — 본 함수가 ``_stripPrefix`` 로 제거.
+            accountNm: 한글 ``account_nm`` (예: ``"매출액"`` / ``"매출액(연결)"``).
+                공시 원본 표기 — 동의어/공백/괄호/하이픈 모두 본 함수에서 정규화.
 
         Returns:
-            snakeId 또는 None (미매핑).
+            str — snakeId (예: ``"sales"`` / ``"operating_profit"``) 또는 None (8 단계 모두 미매핑).
 
         Raises:
-            없음.
+            없음. 미매핑은 None 반환 (예외 X).
 
         Example:
+            >>> mapper = AccountMapper.get()
             >>> mapper.map("ifrs-full_Revenue", "매출액")
             'sales'
 
         SeeAlso:
-            - ``accountMappings.json`` / ``AccountMapper`` — 본 모듈 origin.
+            - ``accountMappings.json`` — 34,171 entry mapping (한글명+영문ID).
+            - ``ID_SYNONYMS`` / ``ACCOUNT_NAME_SYNONYMS`` — 동의어 사전.
+            - ``_stripPrefix`` / ``_PAREN_RE`` — 정규화 헬퍼.
+            - ``labelMap`` / ``sortOrder`` / ``levelMap`` — 매핑 결과의 후속 사용처.
 
         Requires:
-            - dartlab
+            - re (정규식 컴파일)
+            - dartlab.providers.dart.finance.accountMappings (JSON origin)
 
         Capabilities:
-            - account_id / 한글명 → snakeId 매핑 helper.
+            - DART XBRL account_id/account_nm → 표준 snakeId 정규화.
+            - 동의어/공백/괄호/하이픈 변종 8 단계 fallback.
+            - singleton AccountMapper.get() — JSON parse 1 회만.
 
         Guide:
-            - 사용자 API 는 ``c.show()`` — 본 모듈 직접 호출 X.
+            - 사용자 API 는 ``c.show("IS")`` — 본 함수는 내부 정규화 단.
+            - 신규 종목 미매핑 신호 시 ``accountMappings.json`` 에 한글명 추가.
+            - 매핑 율 측정 = ``map() != None`` 비율 (현재 ~99.7%).
 
         AIContext:
-            internal mapper — AI 직접 호출 X.
+            internal mapper — AI 직접 호출 X. scanAccount/Company.show 내부 호출만.
 
         LLM Specifications:
             AntiPatterns:
-                - 본 모듈 직접 호출 X.
+                - 본 함수 직접 호출 X — ``c.show("IS")`` / ``scanAccount(...)`` 사용.
+                - 미매핑 None 무시 → 데이터 손실. caller 가 None 카운트 모니터링 의무.
+                - 매핑 실패 시 정규식 1 개 추가 X — ``accountMappings.json`` 직접 갱신.
+                - 한 회사 미매핑 1 건 = 전 회사 영향 (singleton). 신중 추가.
             OutputSchema:
-                - str / dict / None.
+                - str — snakeId (소문자 영문 + underscore, 예: ``"net_income"``).
+                - None — 8 단계 모두 매핑 실패 시.
             Prerequisites:
-                - accountMappings.json.
+                - ``accountMappings.json`` (~34,171 entry, ~2MB) 로드 완료.
+                - ``AccountMapper.get()`` singleton 인스턴스 (lazy init).
+                - ``ID_SYNONYMS`` / ``ACCOUNT_NAME_SYNONYMS`` 동의어 사전.
             Freshness:
-                - 매핑 학습 갱신 시점.
+                - accountMappings.json 은 신규 회사 공시 등록 시 수동 추가.
+                - DART 분기 마감 후 신종 계정 등장 cadence.
             Dataflow:
-                - account_id → 7 단계 매핑 → snakeId.
+                - (accountId, accountNm) raw
+                - → ``_stripPrefix`` (IFRS/dart prefix 제거)
+                - → ``ID_SYNONYMS`` (영문 ID 동의어)
+                - → ``ACCOUNT_NAME_SYNONYMS`` (한글명 동의어)
+                - → 한글명 직접 조회 → 영문 ID 조회 → 공백 제거 → 괄호 제거 → 하이픈 양방향
+                - → snakeId 또는 None.
             TargetMarkets:
-                - KR (DART) 항목 매핑.
+                - KR (DART) — IFRS 한국 적용 회사 + K-IFRS 별도/연결 모두.
         """
         stripped = _stripPrefix(accountId) if accountId else ""
         normalizedId = ID_SYNONYMS.get(stripped, stripped)

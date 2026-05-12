@@ -159,52 +159,92 @@ def scanAccount(
     *,
     freq: str = "Q",
 ) -> pl.DataFrame:
-    """전종목 EDGAR 단일 계정 시계열.
+    """전종목 EDGAR 단일 계정 시계열 — US 패리티 atomic primitive.
+
+    DART ``scanAccount`` 와 동치 — 동일 snakeId 호출 시 동일 schema 의 wide DataFrame
+    반환. 내부적으로 ``_buildEdgarTagKeys`` 가 DART snakeId → us-gaap concept set
+    매핑 (``sales`` → ``{"Revenues", "RevenueFromContractWithCustomer*", "SalesRevenueNet"}`` 등).
+
+    parquet 병렬 처리:
+      - ``edgar/*.parquet`` glob → ThreadPoolExecutor (8 workers) 로 분산 scan.
+      - 파일당 ``_EdgarFileProcessor`` 가 tagKeys 매칭 → ``(stockCode, period, amount)`` row 추출.
+      - 전체 chunks ``pl.concat`` 후 ``group_by(stockCode, period).agg(first)`` 중복 제거.
+      - period pivot wide → ``stockCode + 기간 컬럼들`` (최신 period 좌측).
+      - ``_joinCorpName`` 으로 corpName 추가.
 
     Args:
-        dartSnakeId: DART canonical snakeId (예: "sales", "total_assets").
-        freq: "Q" 분기 (기본) · "Y" 연간. Company 엔진과 일치.
+        dartSnakeId: DART canonical snakeId (예: ``"sales"`` / ``"operating_profit"`` /
+            ``"total_assets"``). DART scanAccount 와 호환되는 키 사용 — provider 간 동일
+            호출 가능. 미매핑 snakeId 호출 시 빈 DataFrame + warning.
+        freq: ``"Q"`` 분기 wide (default) / ``"Y"`` 연간 wide. Company 엔진 freq 와 일치.
 
     Returns:
-        stockCode(=ticker) | corpName | 기간컬럼들... (최신 먼저)
+        pl.DataFrame — ``stockCode`` (=ticker) / ``corpName`` (str) + 기간 컬럼들
+        (``"2025Q4"`` / ... / ``"2019Q1"``, 최신 좌측). row ~10K (SEC 등록 ticker 전체).
 
     Raises:
-        없음.
+        없음. parquet 부재 또는 tagKeys 매칭 0 시 빈 DataFrame.
 
     Example:
-        >>> scanAccount("sales", freq="Y")
+        >>> df = scanAccount("sales", freq="Y")
+        >>> df.sort("2025", descending=True).head(10)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``providers.dart.finance.scanAccount.scanAccount`` — KR 동치 (동일 schema).
+        - ``_buildEdgarTagKeys`` — DART snakeId → us-gaap concept set 매핑.
+        - ``_EdgarFileProcessor`` — parquet 파일별 처리 callable.
+        - ``providers.edgar.finance.xbrlConcepts`` — us-gaap concept 정규화.
+        - ``providers.edgar.openapi.identity.loadTickers`` — CIK → ticker 매핑.
+        - ``scanRatio`` (edgar) — 비율 primitive (본 함수와 join).
 
     Requires:
-        - concurrent
-        - dartlab
-        - logging
         - polars
+        - concurrent.futures.ThreadPoolExecutor
+        - dartlab.frame.dataLoader (``_dataDir``)
+        - dartlab.providers.edgar.openapi.identity (``loadTickers``)
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - DART scanAccount 와 동치 schema — provider 간 횡단 비교 가능.
+        - us-gaap concept set 자동 매핑 — 다중 동의어 (``Revenues`` / ``RevenueFromContractWithCustomer``) 통합.
+        - ThreadPoolExecutor 8 worker 병렬 parquet scan.
+        - ticker (=stockCode) 정규화로 KR + US 동일 DataFrame join 가능.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "Apple 매출 시계열" → ``scanAccount("sales", freq="Y").filter(pl.col("stockCode")=="AAPL")``.
+        - "US 매출 상위 100" → ``scanAccount("sales", freq="Y").sort("2025", descending=True).head(100)``.
+        - "KR + US 횡단 비교" → KR scanAccount + US scanAccount union (동일 schema).
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        Ask Workbench cross-market scan — KR scanAccount 와 동일 호출로 US 시계열 추출.
+        Apple vs Samsung 비교 시 ``scanAccount("sales")`` 양 provider 호출 후 join.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 단일 종목 호출 X — 전종목 batch primitive. 단일 종목 = ``c.show("IS")``.
+            - DART snakeId 외 us-gaap concept 직접 호출 X — ``_buildEdgarTagKeys`` 가 매핑.
+            - ``dartSnakeId`` 오타 → 빈 DataFrame + warning (예외 X). 사전 ``scanAccountList()`` 확인.
+            - SEC User-Agent 미설정 → parquet origin 다운로드 실패 (HTTP 403).
+            - parquet glob 부재 → ``"EDGAR finance parquet 없음"`` warning + 빈 DataFrame.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame — ``stockCode`` (str, ticker) / ``corpName`` (str)
+              / 가변 기간 컬럼 (float). freq="Q": ``"YYYYQn"`` / freq="Y": ``"YYYY"``.
+            - row ≤ SEC 등록 ticker 수 (~10K).
+            - 빈 DataFrame — parquet 부재 또는 tagKeys 매칭 0.
         Prerequisites:
-            - <TODO: 사전조건>
+            - ``edgar/*.parquet`` (companyfacts XBRL 정규화본).
+            - ``_buildEdgarTagKeys`` 의 us-gaap concept 매핑 사전.
+            - SEC tickers.parquet 또는 SEC API origin (CIK ↔ ticker).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR XBRL 분기 마감 후 ~45 일 (10-Q) / ~60 일 (10-K).
+            - parquet 은 SEC ``data.sec.gov/api/xbrl/companyfacts`` nightly pull.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - dartSnakeId → ``_buildEdgarTagKeys`` (us-gaap concept set)
+            - → ``edgar/*.parquet`` glob → ``ThreadPoolExecutor`` (8 workers)
+            - → ``_EdgarFileProcessor`` 파일별 (stockCode, period, amount) row 추출
+            - → pl.concat → group_by(stockCode, period) first 중복 제거
+            - → period pivot wide (latest 좌측) → ``_joinCorpName`` → pl.DataFrame.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) — NYSE/NASDAQ/AMEX/OTC SEC 등록 + 10-K/10-Q 정기공시.
     """
     from dartlab.frame.dataLoader import _dataDir
 

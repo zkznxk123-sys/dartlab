@@ -625,51 +625,82 @@ DETAIL_MAP: dict[str, str] = {
 
 
 def normalizeCause(accountNm: str) -> str:
-    """``account_nm`` → 변동사유 snakeId.
+    """SCE ``account_nm`` → 변동사유 snakeId — 2-tier 매트릭스 행축 정규화.
 
-    3-tier 매칭: 정확 → 공백 제거 → fallback 패턴. 미매핑 시 ``"unmapped:{원본}"`` 반환.
+    SCE (자본변동표) 는 행 = 변동사유 (당기순이익/배당/유상증자/...) × 열 = 자본항목
+    (자본금/자본잉여금/이익잉여금/...) 2-tier 매트릭스. 본 함수는 **행축** (cause) 만 담당,
+    열축은 ``normalizeDetail`` 이 처리.
+
+    3-tier 매칭 (정공법 — 직접 매치 → 공백 제거 → fallback 패턴):
+      1. ``CAUSE_SYNONYMS`` 정확 매치 (~200 entry 동의어 사전).
+      2. 공백 제거 후 ``_CAUSE_NOSPACE`` 매치 (공시별 띄어쓰기 변종 흡수).
+      3. ``CAUSE_FALLBACK_PATTERNS`` substring 매치 (~50 패턴, 정렬 순서 중요).
+      4. 모두 실패 시 ``"unmapped:{원본}"`` 마커 반환 — caller 가 미매핑 비율 측정.
 
     Args:
-        accountNm: SCE 변동사유 원문 (예: ``"당기순이익"``).
+        accountNm: SCE 변동사유 원문 (DART XBRL ``account_nm`` 그대로). 예: ``"당기순이익"``
+            / ``"연결당기순이익"`` / ``"배당금지급"`` / ``"유상증자 (현금출자)"``.
 
     Returns:
-        변동사유 snakeId (예: ``"net_income"``) 또는 ``"unmapped:{원본}"``.
+        str — 변동사유 snakeId (예: ``"net_income"`` / ``"dividends_paid"`` /
+        ``"capital_increase"``) 또는 ``"unmapped:{원본}"`` (미매핑).
 
     Raises:
-        없음.
+        없음. ``accountNm=None`` 호출 시 AttributeError 가능 — caller 가 보장.
 
     Example:
         >>> normalizeCause("당기순이익")
         'net_income'
+        >>> normalizeCause("배당금 지급")
+        'dividends_paid'
 
     SeeAlso:
-        - ``CAUSE_SYNONYMS`` / ``DETAIL_MAP`` — 본 모듈 매핑.
+        - ``normalizeDetail`` — SCE 매트릭스 **열축** (자본항목) 정규화.
+        - ``CAUSE_SYNONYMS`` / ``_CAUSE_NOSPACE`` / ``CAUSE_FALLBACK_PATTERNS`` — 매핑 origin.
+        - ``finance.pivot.buildSceMatrix`` — 본 함수 호출하는 SCE 피벗 빌더.
 
     Requires:
-        - stdlib only.
+        - stdlib only (str / dict — 외부 의존 0).
 
     Capabilities:
-        - SCE account_nm → 변동사유 snakeId 2-tier 매핑.
+        - SCE 매트릭스 행축 정규화 — 변동사유 자유 텍스트 → 표준 snakeId.
+        - 미매핑 ``"unmapped:..."`` 마커로 추적 가능 (회귀 가드).
+        - 공시별 띄어쓰기/괄호 변종 흡수.
 
     Guide:
-        - 사용자 API 는 ``c.show("SCE")`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.show("SCE")`` — 본 함수는 ``buildSceMatrix`` 내부 호출.
+        - 신규 변동사유 등장 시 ``CAUSE_SYNONYMS`` 직접 추가 (코드 변경 X).
+        - "unmapped:" prefix 결과 monitoring → 매핑 사전 갱신 시그널.
 
     AIContext:
-        internal SCE mapper — AI 직접 호출 X.
+        internal SCE 정규화 — AI 직접 호출 X. ``c.show("SCE")`` 출력 컬럼이 본 함수 산출물.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — finance pivot.SCE 위임.
+            - 본 함수 직접 호출 X — ``c.show("SCE")`` 위임.
+            - ``"unmapped:..."`` 반환을 매핑 실패 0 으로 가정 X — caller 가 prefix 카운트 의무.
+            - 신규 fallback 패턴 추가 시 순서 무관 X — substring 매치라 정렬 순서가 우선순위.
+            - 매핑 사전 갱신 후 본 모듈 reload 필요 X — 함수 호출 시 직접 dict 조회 (캐시 X).
+            - 동의어 추가 시 ``CAUSE_SYNONYMS`` + ``_CAUSE_NOSPACE`` 양쪽 동기화 의무.
         OutputSchema:
-            - str (snakeId) 또는 None.
+            - str — snakeId (예: ``"net_income"`` / ``"dividends_paid"`` /
+              ``"capital_increase"`` / ``"acquisition_treasury"``) 또는 ``"unmapped:{원본}"``.
+            - None 반환 X — 항상 str.
         Prerequisites:
-            - CAUSE_SYNONYMS / DETAIL_MAP 매핑.
+            - ``CAUSE_SYNONYMS`` 사전 (모듈 상수, ~200 entry).
+            - ``_CAUSE_NOSPACE`` 공백 제거 인덱스 (자동 생성).
+            - ``CAUSE_FALLBACK_PATTERNS`` 정렬된 패턴 리스트.
         Freshness:
-            - 매핑 정적.
+            - 매핑 사전은 정적 — 신규 변동사유 등장 시 수동 갱신.
+            - DART 분기 마감 후 신종 변동사유 cadence (드물게).
         Dataflow:
-            - account_nm → 2-tier 매칭 → snakeId.
+            - account_nm (raw XBRL) → ``.strip()`` 정규화
+            - → (tier 1) ``CAUSE_SYNONYMS`` 직접 매치
+            - → (tier 2) 공백 제거 후 ``_CAUSE_NOSPACE`` 매치
+            - → (tier 3) ``CAUSE_FALLBACK_PATTERNS`` substring 매치
+            - → snakeId 또는 ``"unmapped:{원본}"`` 마커.
         TargetMarkets:
-            - KR (DART) SCE 매핑.
+            - KR (DART) — IFRS 한국 적용 회사 SCE 공시 한정.
     """
     nm = accountNm.strip()
     if nm in CAUSE_SYNONYMS:

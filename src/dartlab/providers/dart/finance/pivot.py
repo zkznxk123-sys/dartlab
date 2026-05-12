@@ -137,42 +137,92 @@ def buildTimeseries(
     stockCode: str,
     fsDivPref: str = "CFS",
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
-    """finance parquet → 분기별 standalone 시계열 (캐시: 종목 × fsDiv 조합 8).
+    """finance parquet → 분기별 standalone 시계열 — DART 정규화 본진.
 
-    같은 종목/fsDiv 를 한 process 안에서 반복 호출해도 1 회만 매핑. 결과는 작은 dict
-    (수 MB) 라 process-wide LRU 안전. 무효화: parquet 갱신 시 server 재기동 필요.
+    DART 공시 IS/CF 는 **누적 (year-to-date)** 표기 — Q1 = 1Q / Q2 = 1H / Q3 = 9M / Q4 = FY.
+    본 함수가 ``thstrm_add_amount`` 차분으로 **분기 standalone** 으로 변환.
+    BS 는 시점 잔액 그대로, SCE 는 별도 ``buildSceMatrix`` 가 2-tier pivot.
+
+    캐시: ``@lru_cache(maxsize=8)`` — 종목 × fsDiv 조합 8 LRU. 같은 process 안 반복
+    호출 시 1 회만 매핑. 결과는 작은 dict (~수 MB). 무효화 = parquet 갱신 시
+    ``clearFinanceCache()`` 또는 server 재기동.
 
     Args:
-        stockCode: 종목코드 (예: ``"005930"``).
-        fsDivPref: ``"CFS"`` (연결) 또는 ``"OFS"`` (별도). CFS 없으면 OFS fallback.
+        stockCode: 종목코드 (6 자리, 예: ``"005930"``). 정규화 (strip) 후 cache key.
+        fsDivPref: ``"CFS"`` (연결재무제표 우선) 또는 ``"OFS"`` (별도). CFS 부재 시
+            OFS fallback 자동. 공시 형식 변경 회사는 caller 가 명시 권장.
 
     Returns:
-        ``(series, periods)`` 또는 None.
+        tuple — ``(series, periods)`` 또는 None.
 
-        - ``series = {"BS": {"snakeId": [값...]}, "IS": {...}, "CF": {...}}``
-        - ``periods = ["2016-Q1", "2016-Q2", ..., "2024-Q4"]``
+        - ``series``: ``{"BS": {snakeId: [값..., None]}, "IS": {...}, "CF": {...}}``.
+          값 ``None`` = 해당 분기 미공시. dict 키 = snakeId 정규화 (``"sales"``,
+          ``"operating_profit"``, ``"net_income"``, ``"total_assets"`` 등).
+        - ``periods``: ``["2019-Q1", "2019-Q2", ..., "2025-Q4"]`` (정렬, 결측 없음).
 
     Raises:
-        없음 (데이터 부재 시 None 반환).
+        없음. 데이터 부재 / parquet 부재 시 None 반환 (예외 X).
 
     Example:
         >>> series, periods = buildTimeseries("005930")
-        >>> series["IS"]["sales"][-1]
+        >>> series["IS"]["sales"][-1]  # 최신 분기 매출
+        ...
+
+    SeeAlso:
+        - ``_loadAndNormalize`` — parquet load + sjDiv 분리.
+        - ``_normalizeQ4`` — Q4 = FY − 9M 차분 변환.
+        - ``_pivotToSeries`` — long → wide series dict.
+        - ``buildAnnual`` — 연간 집계 (본 함수의 분기 → 연 합산).
+        - ``buildSceMatrix`` — SCE 2-tier 매트릭스 (별도 경로).
+        - ``clearFinanceCache`` — LRU 무효화 (dev/test).
+
+    Requires:
+        - polars
+        - functools.lru_cache (maxsize=8)
+        - dartlab.providers.dart.finance.mapper (snakeId 정규화)
+
+    Capabilities:
+        - DART IS/CF 누적 → 분기 standalone 정규화 (핵심 가치).
+        - BS 시점 잔액 + IS/CF 분기 차분 통합 series dict.
+        - LRU 캐시 — 다회 호출 안전.
+        - CFS / OFS 우선순위 자동 fallback.
+
+    Guide:
+        - 사용자 API 는 ``c.show("IS")`` / ``c.show("BS")`` — 본 함수는 backend.
+        - 다종목 batch 시 stockCode 반복 호출해도 LRU 8 종목까지 cache hit.
+        - parquet 갱신 후 결과 stale 시 ``clearFinanceCache()`` 명시 호출.
+
+    AIContext:
+        internal pivot — AI 직접 호출 X. ``c.show("IS")`` 호출 시 backend 매핑.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.show 위임.
-            - CFS/OFS 우선순위 가정 X — CFS 우선.
+            - 본 함수 직접 호출 X — ``c.show("IS")`` / ``c.show("BS")`` 위임.
+            - IS/CF 원본을 누적이 아닌 standalone 으로 가정 X — 본 함수 출력만 standalone.
+            - parquet 갱신 후 ``clearFinanceCache()`` 누락 → 8 lru slot 안에서 stale 결과.
+            - CFS 부재 회사 ``fsDivPref="CFS"`` 강제 호출 → 자동 OFS fallback, 결과는 OFS.
+            - ``fsDivPref`` 임의 값 (예: ``"BOTH"``) → "CFS" 기본 처리.
         OutputSchema:
-            - dict / tuple / pl.DataFrame — 함수별.
+            - tuple (series dict, periods list).
+            - series — ``{"BS"|"IS"|"CF": {snakeId(str): list[float|None]}}``.
+            - periods — ``list[str]`` 형식 ``"YYYY-Qn"`` (정렬 ascending).
+            - None 반환 — finance parquet 부재 또는 load 실패.
         Prerequisites:
-            - 본 회사 finance parquet (XBRL 원본).
+            - ``finance/{stockCode}.parquet`` (DART XBRL 원본 정규화본).
+            - ``mapper.AccountMapper`` singleton 로드.
+            - ``sortOrder.json`` 의 sjDiv 분리 룰.
         Freshness:
-            - finance 갱신 시점.
+            - finance parquet 은 DART 분기 마감 후 ~45 일 + parser ETL 후 publish.
+            - LRU 캐시는 process lifetime — 갱신 후 ``clearFinanceCache()`` 또는 restart.
         Dataflow:
-            - finance parquet → CFS 우선 + 누적/standalone 변환 → 분기별 series dict.
+            - stockCode → ``_loadAndNormalize`` (parquet load + sjDiv 분리)
+            - → CFS / OFS 우선순위 적용 (``_applyCfsPriority``)
+            - → ``_normalizeQ4`` (IS/CF 누적 → 분기 차분, Q4 = FY − 9M)
+            - → ``_buildPeriods`` (정렬된 분기 키 리스트)
+            - → ``_pivotToSeries`` (long → wide series dict)
+            - → (series, periods) tuple — LRU(8) cache.
         TargetMarkets:
-            - KR (DART) finance pivot.
+            - KR (DART) — IS / BS / CF 통합. SCE 는 ``buildSceMatrix`` 별도.
     """
     return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS")
 

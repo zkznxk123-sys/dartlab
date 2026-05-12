@@ -427,43 +427,69 @@ def scanAccount(
     없음 (지원되지 않는 snakeId 또는 데이터 부재 시 빈 DataFrame).
 
     Args:
-        snakeId: 계정 식별자.
-        sjDiv: 재무제표 종류 (BS/IS/CF). None 이면 전체.
-        fsPref: 연결 우선 ("CFS") 또는 별도 ("OFS").
-        freq: "Q" (분기) 또는 "Y" (연간).
+        snakeId: 계정 식별자 (영문 snake_case 또는 한글). ``scanAccountList()`` 목록.
+        sjDiv: 재무제표 구분 ("IS"/"CIS"/"BS"/"CF"). None 이면 sortOrder.json 자동 판정.
+        fsPref: 연결 우선 ("CFS") 또는 별도 ("OFS"). 연결 부재 시 별도 fallback.
+        freq: "Q" (분기 wide) 또는 "Y" (연간 wide). Company.show 의 freq 와 동치.
 
     Returns:
-        pl.DataFrame — 전종목 시계열.
+        pl.DataFrame — ``stockCode`` (str 6) + 가변 기간 컬럼 (float 원).
 
     SeeAlso:
-        - ``AccountMapper`` / ``scanAccount``.
+        - ``scanRatio`` — 비율 primitive (본 함수와 join 해 무한 조합).
+        - ``scanAccountList`` — 지원 snakeId 목록.
+        - ``_resolveSnakeId`` / ``_resolveSjDiv`` — 입력 정규화 헬퍼.
+        - ``scan.io.parquet._ensureScanData`` — prebuilt parquet origin 보장.
 
     Requires:
-        - concurrent
-        - dartlab
-        - logging
         - polars
+        - dartlab.frame.dataLoader (``_dataDir``)
+        - dartlab.scan.io.parquet (``_ensureScanData`` + DuckDB fallback)
+        - withMemoryBudget decorator (500MB cap).
 
     Capabilities:
-        - 전종목 단일 계정/비율 연간 시계열 추출.
+        - dartlab scan 의 **원자 primitive** — 전종목 단일 계정 시계열 추출.
+        - DuckDB streaming SQL fallback — prebuilt parquet 부재 시.
+        - pyodide-aware — 브라우저에선 finance-lite.parquet (~18MB) 자동.
+
+    Guide:
+        - "영업이익 상위 10" → ``scanAccount("operating_profit").sort(...).head(10)``.
+        - "광역 발굴" 단일 호출 X — Guide 의 "광역 발굴 경고" 준수.
+        - "계정 2 개 join 으로 미구현 ratio 대체" → docstring Guide 표 참조.
 
     AIContext:
-        AI 가 횡단 비교 분석 시 entry.
+        횡단 발굴의 atomic 원자. scanRatio 와 join 해 무한 조합 (FCF / R&D 집약도 / 재고/매출 등).
 
     LLM Specifications:
         AntiPatterns:
-            - 단일 종목 호출 X — 전종목 배치만. 단일 종목은 ``c.show()`` 사용.
-            - limit 없이 호출 시 ~25K row + 135MB 메모리.
+            - 단일 종목 호출 X — 전종목 배치 primitive. 단일 종목 = ``c.show("IS")``.
+            - 횡단 발굴 ("좋은 회사") 에 본 함수 1 회만 호출 → 1 차원 랭킹만. 최소 3~4 축
+              (계정 + 비율 + macro + sector) 조합 강제 — Guide 의 "광역 발굴" 경고 준수.
+            - ``snakeId`` 오타 → 빈 DataFrame (예외 X). ``scanAccountList()`` 사전 확인.
+            - 다회 호출 시 ``finance.parquet`` 매번 lazy scan — 같은 snakeId 재사용 시 caller cache.
+            - ``freq="M"`` 등 비표준 X — Q / Y strict.
         OutputSchema:
-            - pl.DataFrame [stockCode × 연도 시계열].
+            - pl.DataFrame — ``stockCode`` (str 6) + 가변 기간 컬럼 (float 원).
+            - freq="Q": ``"2025Q4"`` / ``"2025Q3"`` / ... / ``"2019Q1"`` (분기 wide).
+            - freq="Y": ``"2025"`` / ``"2024"`` / ... / ``"2019"`` (연간 wide).
+            - 종목별 최신 기간만 채워짐, 결측 null. row ~2,664 (전종목).
         Prerequisites:
-            - 본 회사 finance parquet (전종목).
+            - prebuilt ``scan/finance.parquet`` (~307MB) 또는 pyodide ``finance-lite.parquet`` (~18MB).
+            - parquet 부재 시 ``finance/*.parquet`` raw glob → DuckDB streaming SQL fallback.
+            - 둘 다 없으면 ``emit("hint:market_data_needed")`` + 빈 DataFrame.
         Freshness:
-            - finance 갱신 시점 (분기 마감 후 ~45 일).
+            - DART 분기 마감 후 ~45 일 (반기 60 일) 공시 cadence.
+            - scan 가속 parquet 은 nightly rebuild — HuggingFace origin.
         Dataflow:
-            - finance/*.parquet (병렬) → snakeId filter → 연간 시계열 DataFrame.
+            - snakeId → ``_resolveSnakeId`` (한글/영문 → snake_case 정규화)
+            - → ``_resolveSjDiv`` (sjDiv None 시 sortOrder.json 로 IS/BS/CF/CIS 자동 판정)
+            - → ``_buildFastKeys`` (가속 룩업 set)
+            - → (tier 1) ``scan/finance.parquet`` lazy scan + push-down filter
+            - → (tier 2) ``finance/*.parquet`` raw glob → DuckDB streaming SQL
+            - → freq 별 pivot wide (Q: YYYYQn / Y: YYYY) → pl.DataFrame.
+            - withMemoryBudget(500MB) decorator — RSS 초과 시 mid-stream abort.
         TargetMarkets:
-            - KR (DART) 전종목 스캔.
+            - KR (DART) 전종목 — KOSPI/KOSDAQ/KONEX 연결재무제표 우선 (별도 fallback).
     """
     from dartlab.frame.dataLoader import _dataDir
 

@@ -644,6 +644,77 @@ class Company:
         return 20
 
     def __init__(self, ticker: str):
+        """EDGAR US Company 인스턴스 초기화 — ticker/CIK 3-tier 해석 + accessor 4 종 셋업.
+
+        Args:
+            ticker: 영문 ticker (``"AAPL"`` / ``"BRK.B"``) 또는 SEC CIK 숫자
+                (``"0000320193"`` / ``"320193"``). 영문 정규식 ``[A-Z][A-Z0-9./-]{0,9}``,
+                숫자는 길이 ≤ 10. 대소문자 무관 (내부 ``upper()`` 정규화).
+
+        Returns:
+            None (생성자).
+
+        Raises:
+            ValueError: ``ticker`` 가 빈/비문자열/포맷 위반 또는 SEC tickers/listed universe/
+                identity 3 tier 모두 미매치. 메시지에 가능 원인 3 종 포함 (오타/미등록/네트워크).
+
+        Example:
+            >>> from dartlab.providers.edgar.company import Company
+            >>> c = Company("AAPL")
+            >>> c.cik
+            '0000320193'
+
+        SeeAlso:
+            - ``_resolveTickerRow`` — parquet → listed universe → SEC identity 3-tier 해석.
+            - ``providers.edgar.openapi.identity.resolveIssuer`` — SEC ``company_tickers.json`` 조회.
+            - ``frame.dataLoader.loadEdgarListedUniverse`` — HF listed universe parquet.
+
+        Requires:
+            - polars
+            - dartlab.core.memory.BoundedCache (30 entry cap)
+            - dartlab.providers.edgar.accessor.* (Docs/Finance/Profile)
+            - dartlab.providers.edgar.openapi.identity (lazy SEC API fallback)
+
+        Capabilities:
+            - 단일 미국 상장사 facade 진입점 — docs/finance/profile 통합 access.
+            - ticker / CIK 양방향 입력 — 사용자 편의.
+            - lazy SEC API — local parquet 우선 hit, 미스 시에만 네트워크.
+
+        Guide:
+            - "Apple 재무" → ``Company("AAPL").show("IS")``.
+            - "CIK 만 알 때" → ``Company("0000320193")`` (zero-padded 또는 정수 모두 OK).
+            - "다종목 순회" → ``with Company(t) as c: ...`` (OomTripwire 보호).
+
+        AIContext:
+            Ask Workbench Company facade — LLM 이 첫 호출하는 US provider 엔트리.
+            ``co.show("BS")`` / ``co.notes("inventory")`` 등 모든 후속 호출의 self.
+
+        LLM Specifications:
+            AntiPatterns:
+                - 회사명 입력 X — EDGAR 는 ticker / CIK strict ("Apple" → ValueError).
+                - SEC User-Agent header 미설정 → HTTP 403 (dartlab.core.http 가 처리하나 환경 변수 ``DARTLAB_USER_AGENT`` 권장).
+                - ``Company(t)`` 한 인스턴스 다종목 재사용 X — 종목당 신규 Company 강제.
+                - ``with`` 누락 다종목 루프 → Polars Rust heap 누적 → OOM.
+                - 11 자리 이상 CIK 호출 → 포맷 위반 ValueError.
+            OutputSchema:
+                - Company 인스턴스 — ``ticker`` (str upper) / ``cik`` (str zero-padded 10)
+                  / ``corpName`` (str, tickers.json title) / ``_cache`` (BoundedCache 30).
+                - 내부 accessor: ``_docs`` (DocsAccessor) / ``_finance`` (FinanceAccessor)
+                  / ``_profileAccessor`` (ProfileAccessor) / ``_reportAccessor`` (lazy None).
+            Prerequisites:
+                - ``edgar/tickers.parquet`` 캐시 또는 SEC EDGAR API 연결 (User-Agent header 필수).
+                - HF listed universe parquet 또는 SEC company_tickers.json origin.
+            Freshness:
+                - SEC ``company_tickers.json`` 일 단위 갱신. parquet 캐시는 lazy refresh.
+                - companyfacts (XBRL) 는 분기 마감 후 ~45 일 지연 (10-Q/10-K 제출 cadence).
+            Dataflow:
+                - ticker (raw) → ``strip().upper()`` 정규화 → ``_resolveTickerRow``
+                - → (tier 1) ``edgar/tickers.parquet`` → (tier 2) listed universe →
+                  (tier 3) ``identity.resolveIssuer`` SEC API
+                - → ``cik`` zfill(10) + BoundedCache(30) + 3 accessor 인스턴스화 → Company.
+            TargetMarkets:
+                - US (SEC EDGAR) — NYSE/NASDAQ/AMEX/OTC SEC 등록 종목 한정. 비등록/외국 X.
+        """
         if not ticker or not isinstance(ticker, str):
             raise ValueError("ticker는 비어있지 않은 문자열이어야 합니다.")
         cleaned = ticker.strip().upper()

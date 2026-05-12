@@ -716,55 +716,91 @@ def _rowFreqMeta(periodMap: dict[str, str]) -> dict[str, object]:
 
 
 def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | None:
-    """전 기간 보고서 섹션 — (topic, blockType, blockOrder) × period DataFrame.
+    """전 기간 사업/분기/반기 보고서 섹션 보드 — (topic, blockType, blockOrder) × period.
 
-    텍스트와 테이블을 분리하여 같은 topic이라도 text 행과 table 행으로 나뉜다.
+    DART 정기공시 (사업보고서/분기보고서/반기보고서) 의 16 topic (사업개요/주요제품/원재료/
+    매출실적/생산능력/주요계약/연구개발/기타투자/임직원/주주/배당/이사회/감사/계열사/
+    공시정책/위험) 을 **수평화 (wide) 보드** 로 반환. 행 = topic × blockType (text/table) ×
+    blockOrder, 열 = period (``"2024Q4"`` / ``"2024Q3"`` / ...).
+
+    텍스트와 테이블을 ``blockType`` 으로 분리 — 같은 topic 이라도 text 행과 table 행이
+    별도 row. table 은 markdown table syntax (cell ``|`` separator) 그대로 보존.
 
     Args:
-        stockCode: 종목코드
-        topics: 필요한 topic 집합. None이면 전체.
+        stockCode: 종목코드 (6 자리, 예: ``"005930"``).
+        topics: 필요한 topic 집합 (예: ``{"businessOverview", "mainProducts"}``).
+            None 이면 16 topic 전체. set 으로 명시 시 처리 비용 절감.
 
     Returns:
-        (topic, blockType, blockOrder)(행) × period(열) DataFrame. 값은 텍스트(str).
-        데이터 없으면 None.
+        pl.DataFrame — 행 = ``(topic, blockType, blockOrder)`` 멀티 키, 열 = period 컬럼들.
+        값 = str (텍스트 또는 markdown table). period 미공시 분기 cell = None.
+
+        데이터 부재 (parquet 없음 / period 0) 시 None.
 
     Raises:
-        없음.
+        없음. parquet 부재 시 None 반환 (예외 X).
 
     Example:
-        >>> sections(...)
+        >>> df = sections("005930", topics={"businessOverview"})
+        >>> df.select(["topic", "blockType", "blockOrder", "2024Q4"]).head()
 
     SeeAlso:
-        - ``chunker`` / ``runtime`` / ``views`` / ``analysis`` — sections sub modules.
+        - ``_getPrepared`` — period × topic 정규화 캐시.
+        - ``chunker`` — text 블록 청킹.
+        - ``views.buildMarkdownBlocks`` — markdown block builder.
+        - ``analysis`` — sections 후속 분석.
+        - ``runtime`` / ``runtimeProjection`` — runtime topic 매핑.
+        - ``mapper`` — chapter/title → topic 16 매핑.
 
     Requires:
-        - dartlab
-        - gc
         - polars
+        - gc (대량 row 처리 후 회수)
+        - dartlab.providers.dart.docs.sections.* (chunker/views/runtime/mapper)
 
     Capabilities:
-        - 사업/분기/반기 보고서 sections 청킹 + 수평화 (topic × period 보드).
+        - DART 사업/분기/반기 보고서 16 topic 정형화 + 수평화 wide 보드.
+        - text + table 분리 — caller 가 blockType 으로 필터 가능.
+        - period 별 변화 추적 — YoY/QoQ disclosure delta 분석 기반.
+        - 다회 호출 시 ``_getPrepared`` LRU 캐시.
 
     Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
+        - 사용자 API 는 ``c.sections`` / ``c.show("businessOverview")`` — 본 함수 backend.
+        - 다종목 batch 시 stockCode 반복 호출해도 ``_getPrepared`` cache hit.
+        - 특정 topic 만 필요 시 ``topics={"X"}`` 명시 — 전체 16 topic 처리 비용 절감.
+        - "최신 분기 사업개요" → ``df.select([..., latestPeriod])`` 컬럼 선택.
 
     AIContext:
-        internal sections pipeline — AI 직접 호출 X.
+        Ask Workbench docs core — LLM 이 회사 사업 구조 파악 시 entry.
+        ``c.sections.show("businessOverview")`` 후속 ``c.notes()`` / ``c.docs.search()`` 호출.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.sections 위임.
-            - period key 형식 변형 ("2024-Q1") → 매칭 X. "2024Q1" strict.
+            - 본 함수 직접 호출 X — ``c.sections`` / ``c.show("X")`` 위임.
+            - period key 형식 변형 ("2024-Q1") → 매칭 X. "2024Q1" strict (no dash).
+            - 16 topic 외 키 호출 → 빈 결과. mapper 의 ``CHAPTER_TO_TOPIC`` 매핑 사전 확인.
+            - ``topics=None`` 다종목 발굴 호출 → 16 topic 전수 처리 비용 → 폭주. 명시 필수.
+            - period 컬럼 cell 이 None 인 경우 = 해당 분기 미공시 (분기보고서 미출원).
+              caller 가 None 체크 또는 ``fill_null`` 처리 의무.
         OutputSchema:
-            - pl.DataFrame (topic × period 보드) / Iterator — 함수별.
+            - pl.DataFrame — 행 키 (``topic`` / ``blockType`` / ``blockOrder``) +
+              period 컬럼들 (``"2024Q4"`` / ``"2024Q3"`` / ... 가변).
+            - 셀 = str (텍스트 또는 markdown table syntax).
+            - None — parquet 부재 / period 0.
         Prerequisites:
-            - 본 회사 docs parquet.
+            - ``docs/{stockCode}.parquet`` (DART 사업보고서 raw + chunked).
+            - ``mapper.CHAPTER_TO_TOPIC`` 매핑 사전 (16 topic 정의).
+            - ``runtimeProjection.projectionSuppressedTopics`` (suppress list).
         Freshness:
-            - docs 갱신 시점.
+            - DART 정기공시 cadence: 사업보고서 (연 1 회, 3 월), 반기 (8 월), 분기 (5/11 월).
+            - parquet 은 공시 후 ETL ~ 24h 지연.
         Dataflow:
-            - docs parquet → 청킹 → 수평화 → 본 함수.
+            - stockCode → ``_getPrepared`` (LRU, period × topic row 정규화)
+            - → 16 topic chapter 매핑 (``mapper`` 의 정렬된 chapter 룰)
+            - → text/table blockType 분리 (``_splitContentBlocks``)
+            - → period × topic × blockOrder pivot (``_reportRowsToTopicRows``)
+            - → suppressed topic 제거 + 정렬 → wide pl.DataFrame.
         TargetMarkets:
-            - KR (DART) sections pipeline.
+            - KR (DART) — 사업/분기/반기 보고서 정기공시 한정.
     """
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}

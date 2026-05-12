@@ -167,57 +167,114 @@ def findRegularFilings(
     until: str | date | datetime | None = None,
     client: EdgarClient | None = None,
 ) -> list[dict[str, Any]]:
-    """병합된 submissions 에서 정기보고서 (10-K/10-Q/20-F/40-F) 만 필터링하여 반환.
+    """병합된 submissions → 정기보고서 (10-K/10-Q/20-F/40-F) 필터 — EDGAR 공시 검색 본진.
+
+    SEC EDGAR submissions API 응답에서 정기보고서만 필터링 — KR provider 의
+    ``searchNgram`` 과 동치 역할 (회사 공시 retrieval). 정기보고서만 ``SUPPORTED_REGULAR_FORMS``
+    (10-K / 10-Q / 20-F / 40-F) 매칭. 수시공시 (8-K / DEF 14A) 는 별도 함수.
+
+    필터 단계:
+      1. ``mergeSubmissionFilings`` — recent + older paginated 병합 (필요 시 추가 페이지 fetch).
+      2. ``SUPPORTED_REGULAR_FORMS`` 매칭 (10-K/10-Q/20-F/40-F).
+      3. ``forms`` 사용자 명시 시 추가 set 필터 (예: ``["10-K"]`` 만).
+      4. ``filingDate`` 연도 ≥ ``sinceYear`` (default 2009).
+      5. ``since`` / ``until`` 일 단위 bound (``YYYYMMDD`` / date / datetime 자동 정규화).
+      6. accession_no 별 ``filing_url`` 구성 (``sec.gov/Archives/edgar/data/{CIK}/{accNoDash}/{primaryDoc}``).
+      7. ``filing_date`` ASC 정렬 → list.
 
     Args:
-        submissions: ``getSubmissionsJson`` 결과.
-        sinceYear: 시작 연도.
-        forms: form 유형 필터 (None 이면 전체).
-        since: 시작일.
-        until: 종료일.
-        client: EdgarClient 인스턴스.
+        submissions: ``getSubmissionsJson(cik)`` 결과 dict (raw SEC JSON).
+        sinceYear: 시작 연도 (default 2009 — SEC XBRL 의무화 시점).
+        forms: form 유형 필터 (예: ``["10-K"]`` / ``["10-Q", "20-F"]``). None 이면
+            ``SUPPORTED_REGULAR_FORMS`` (10-K/10-Q/20-F/40-F) 전체.
+        since: 시작일 (``"YYYY-MM-DD"`` / ``"YYYYMMDD"`` / date / datetime).
+        until: 종료일 (동일 형식).
+        client: ``EdgarClient`` 인스턴스 (``mergeSubmissionFilings`` 의 페이지 fetch 에 사용).
 
     Returns:
-        필터링된 filing dict 리스트.
+        list[dict] — filing dict 리스트 (filing_date ASC 정렬). 각 dict 키:
+
+        - ``cik`` (str 10): CIK zero-padded.
+        - ``form`` (str): ``"10-K"`` / ``"10-Q"`` / ``"20-F"`` / ``"40-F"``.
+        - ``filing_date`` (str ``YYYY-MM-DD``): 제출일자.
+        - ``report_date`` (str|None ``YYYY-MM-DD``): 보고 기준일.
+        - ``acceptance_datetime`` (str|None): SEC 접수 datetime.
+        - ``accession_no`` (str): ``YYYYMMDD-NN-NNNNNN`` SEC 접수번호.
+        - ``primary_document`` (str|None): 메인 문서 파일명.
+        - ``primary_doc_description`` (str|None).
+        - ``filing_url`` (str): 메인 문서 URL.
+        - ``filing_index_url`` (str): ``index.json`` URL (전체 attachment 목록).
+        - ``year`` (str ``YYYY``).
 
     Raises:
-        EdgarApiError: 추가 페이지 fetch 실패.
+        EdgarApiError: ``mergeSubmissionFilings`` 의 paginated fetch 실패 (HTTP 403/404/429).
 
     Example:
-        >>> findRegularFilings(subs, sinceYear=2024, forms=["10-K"])
+        >>> subs = getSubmissionsJson("0000320193")  # Apple
+        >>> filings = findRegularFilings(subs, sinceYear=2024, forms=["10-K"])
+        >>> filings[0]["filing_url"]
+        'https://www.sec.gov/Archives/edgar/data/0000320193/...'
 
     SeeAlso:
-        - ``filingsFrame`` — submissions → DataFrame 변환.
-        - ``SUPPORTED_REGULAR_FORMS`` — 10-K/10-Q/20-F/40-F.
+        - ``getSubmissionsJson`` — 본 함수 input (raw SEC submissions JSON).
+        - ``mergeSubmissionFilings`` — recent + older paginated 병합.
+        - ``filingsFrame`` — 본 함수 결과 pl.DataFrame 변환.
+        - ``SUPPORTED_REGULAR_FORMS`` — 4 form 정의.
+        - ``_coerceDateBound`` — date/datetime 정규화 헬퍼.
+        - ``providers.dart.search.ngramIndex.searchNgram`` — KR 공시 검색 동치.
 
     Requires:
-        - dartlab
-        - datetime
-        - polars
+        - datetime / date
+        - dartlab.providers.edgar.openapi.client (``EdgarClient``)
+        - SEC EDGAR API ``data.sec.gov/submissions/CIK*.json``.
 
     Capabilities:
-        - SEC submissions API 위임 — 회사 별 정기보고서 + 수시공시 메타 + accession_no list.
+        - SEC 정기보고서 검색 — 회사 × form × 기간 3 축 필터.
+        - paginated submissions 자동 병합 (``mergeSubmissionFilings``).
+        - filing_url / index_url 자동 구성 — 후속 fetch 즉시 가능.
+        - filing_date ASC 정렬 — 시계열 분석 입력 schema.
 
     Guide:
-        - "SEC 공시 목록 조회" → 본 모듈.
+        - "Apple 최근 5 년 10-K" → ``findRegularFilings(subs, sinceYear=2020, forms=["10-K"])``.
+        - "10-Q 만 분기별" → ``forms=["10-Q"]``.
+        - 결과 ``accession_no`` 로 ``docs.fetch`` / ``sections`` 후속 호출.
+        - 다종목 batch → ``filingsFrame`` 으로 pl.DataFrame 변환 후 횡단 비교.
 
     AIContext:
-        internal submissions wrapper — AI 직접 호출 X.
+        Ask Workbench EDGAR filings core — LLM 이 US 회사 공시 retrieval 시 entry.
+        결과 → ``c.docs.sections`` / ``c.docs.search`` 후속 호출의 accession_no 공급.
 
     LLM Specifications:
         AntiPatterns:
-            - User-Agent 미설정 → 403.
-            - 전체 submissions 그대로 LLM 노출 → 토큰 폭증. form/since 필터.
+            - SEC User-Agent header 미설정 → HTTP 403 (``EdgarClient`` 기본 처리, 환경변수 ``DARTLAB_USER_AGENT`` 권장).
+            - 전체 submissions 그대로 LLM context 주입 X — 토큰 폭증. ``forms`` / ``since`` 필터 의무.
+            - 본 함수 결과를 raw 로 분석 X — ``filingsFrame`` pl.DataFrame 변환 후 polars 처리.
+            - 8-K (수시공시) / DEF 14A (위임장) 호출 시 본 함수 X — ``SUPPORTED_REGULAR_FORMS`` 외 form 은 별도.
+            - paginated submissions 의 추가 fetch 실패 시 부분 결과 반환 X — EdgarApiError 전파.
+            - ``filing_url`` 은 메인 문서만 — 첨부 (exhibit / xbrl) 는 ``filing_index_url`` 의 index.json 참조.
         OutputSchema:
-            - dict (raw JSON) 또는 pl.DataFrame (filings).
+            - list[dict] — 각 dict ``cik`` / ``form`` / ``filing_date`` / ``report_date``
+              / ``acceptance_datetime`` / ``accession_no`` / ``primary_document``
+              / ``primary_doc_description`` / ``filing_url`` / ``filing_index_url`` / ``year``.
+            - 정렬: filing_date ASC → form ASC → accession_no ASC.
+            - 빈 list — 매칭 0 (form/date 필터 너무 좁음 또는 회사 미제출).
         Prerequisites:
-            - 인터넷 + SEC EDGAR public API + CIK.
+            - ``submissions`` dict (``getSubmissionsJson`` 결과).
+            - 인터넷 + SEC EDGAR API 접근 (paginated 페이지 fetch 시).
+            - User-Agent header (``EdgarClient``).
         Freshness:
-            - SEC EDGAR 실시간 (분 단위).
+            - SEC EDGAR submissions API 실시간 갱신 (제출 후 분 단위 반영).
+            - 정기보고서 cadence: 10-K (연 1 회, 회계년도 마감 후 60-90 일) /
+              10-Q (분기, 마감 후 45 일) / 20-F (외국 발행자 연 1 회) / 40-F (캐나다 연 1 회).
         Dataflow:
-            - CIK → EdgarClient → submissions API → JSON → 정규화.
+            - submissions (raw JSON) → ``mergeSubmissionFilings`` (recent + older 병합)
+            - → ``SUPPORTED_REGULAR_FORMS`` 매칭 + forms 사용자 set 필터
+            - → ``sinceYear`` 연도 cut + ``_coerceDateBound`` since/until 일 bound
+            - → accession_no → filing_url 구성 (sec.gov/Archives/edgar/data 패턴)
+            - → filing_date ASC 정렬 → list[dict].
         TargetMarkets:
-            - US (SEC EDGAR) submissions.
+            - US (SEC EDGAR) — NYSE/NASDAQ/AMEX/OTC SEC 등록 + 정기보고서 제출 종목.
+            - 외국 발행자 (20-F / 40-F) 포함 — 신흥 시장 ADR 분석 가능.
     """
     merged = mergeSubmissionFilings(submissions, sinceYear=sinceYear, client=client)
     reportDates = merged.get("reportDate", [""] * len(merged.get("form", [])))

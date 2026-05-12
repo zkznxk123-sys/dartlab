@@ -524,59 +524,102 @@ def searchNgram(
     stockCode: str | None = None,
     limit: int = 10,
 ) -> pl.DataFrame:
-    """계층적 검색 — L0 유형 라우팅 + BM25F bincount.
+    """계층적 검색 — L0 유형 라우팅 + L1 BM25F bincount 융합.
 
-    L0: 114개 정규화 유형에서 쿼리 매칭 (비공식 변환 포함)
-    L1: BM25F bincount (전체 인덱스에서)
-    합산: L0 후보 문서에 가산점, L1 결과와 병합
+    DART 공시 제목/섹션 검색의 **메인 엔트리**. 2-tier 검색 전략으로 동의어/오타 견고:
+
+    **L0 (유형 라우팅)**: 114 개 정규화 보고서 유형 (사업보고서/분기보고서/감사보고서/...)
+    에서 쿼리 매칭. 비공식 표기 (``"분기"`` → ``"분기보고서"``) 변환 포함. 임계값 0.2
+    이상만 채택. exact substring match 시 3 배 boost (``in reportNm``) 또는 2 배
+    (``in sectionTitle``).
+
+    **L1 (BM25F bincount)**: 전체 인덱스에서 bigram/trigram 토큰 매칭. CSR (Compressed
+    Sparse Row) 구조로 ``offsets`` / ``docIds`` 배열 직접 슬라이싱 + ``numpy.bincount``
+    로 전종목 동시 ranking. Python loop 0.
+
+    **L0 ∪ L1 병합**: L0 결과 우선 삽입, L1 은 L0 미포함 문서만 추가 (중복 ``rcept_no`` 제외).
 
     Args:
-        query: 인자.
-        corpCode: 인자.
-        stockCode: 인자.
-        limit: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> searchNgram(...)
+        query: 검색 쿼리 자연어 (예: ``"삼성전자 분기보고서 2024"`` / ``"감사의견 한정"``).
+            ``_tokenize`` 가 공백 분리 후 bigram/trigram 생성.
+        corpCode: 8 자리 corp_code 로 결과 필터 (선택).
+        stockCode: 6 자리 종목코드로 결과 필터 (선택). corpCode 와 동시 지정 가능.
+        limit: 반환 문서 수 (default 10). L0 후보는 ``limit * 3`` 까지 스캔.
 
     Returns:
-        pl.DataFrame — 검색 결과.
+        pl.DataFrame — 검색 결과 (점수 내림차순). 컬럼:
+
+        - ``score`` (float): 정규화 점수 (L0 boost 적용).
+        - ``rcept_no`` (str): 접수번호 (유일 키).
+        - ``corp_name`` / ``stock_code`` / ``corp_code`` (str).
+        - ``rcept_dt`` (str ``YYYYMMDD``): 접수일자.
+        - ``report_nm`` / ``section_title`` / ``text`` (str): 매칭 본문.
+        - ``dartUrl`` (str): DART 공시뷰어 URL (``DART_VIEWER + rcept_no``).
+
+    Raises:
+        없음. 인덱스 부재 / meta empty 시 빈 DataFrame 반환.
+
+    Example:
+        >>> df = searchNgram("분기보고서 2024", stockCode="005930", limit=20)
+        >>> df.select(["score", "rcept_dt", "report_nm"]).head(5)
 
     SeeAlso:
-        - ``fieldIndex`` — content BM25 (본 모듈 보완).
-        - ``derived`` — 검색 후속 처리.
+        - ``buildNgramIndex`` — 인덱스 빌더 (offsets/docIds CSR origin).
+        - ``_loadIndex`` — 인덱스 + meta lazy load (singleton).
+        - ``_buildTypeIndex`` / ``_matchTypes`` — L0 유형 매칭.
+        - ``_tokenize`` — bigram/trigram 토크나이저.
+        - ``fieldIndex.searchField`` — 본문 (content) 전체 검색 (본 모듈 보완).
+        - ``derived.searchDocs`` — 본 함수 wrap 후속 처리.
+        - ``pushStemIndex`` / ``pullStemIndex`` — HF 인덱스 publish/sync.
 
     Requires:
-        - dartlab
-        - numpy
         - polars
+        - numpy (``bincount`` / CSR 슬라이싱)
+        - dartlab.frame.dataLoader (``DART_VIEWER`` URL 상수)
 
     Capabilities:
-        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
+        - 자연어 쿼리 → DART 공시 제목/섹션 ranked retrieval.
+        - 114 유형 동의어 라우팅 — 비공식 표기 (``"분기"``) 정규화 (``"분기보고서"``).
+        - CSR + numpy bincount — Python loop 없이 전종목 동시 ranking.
+        - corpCode / stockCode 필터 — 특정 회사 한정 검색.
 
     Guide:
-        - "DART 공시 제목/섹션 검색" → 본 모듈.
+        - "삼성전자 분기보고서" → ``searchNgram("분기보고서", stockCode="005930")``.
+        - "감사보고서 한정 의견" → ``searchNgram("감사 한정")``.
+        - 본 함수는 title 검색 전용 — 본문 (text) 검색은 ``fieldIndex.searchField``.
 
     AIContext:
-        internal title ngram — AI 직접 호출 X.
+        Ask Workbench search core — LLM 이 회사 공시 retrieval 시 entry.
+        결과 ``rcept_no`` 로 ``c.docs.sections.read(rcept_no)`` 후속 호출 가능.
 
     LLM Specifications:
         AntiPatterns:
-            - title 인덱스만 — content 검색 X.
-            - 동의어 사전 누락 시 자연어 hit rate 저하.
+            - 본문 (text) 검색 X — 제목/섹션만. 본문은 ``fieldIndex.searchField``.
+            - ``limit`` 매우 크게 (>1000) 호출 X — L0 ``limit*3`` 스캔 비용 증가.
+            - corpCode 와 stockCode 동시 지정 시 AND 필터 — OR 가정 X.
+            - 빈 결과 = 인덱스 stale 가능성 → ``pullStemIndex(force=True)``.
+            - 한국어 외 쿼리 (영문) → 동의어 사전 미적용, hit rate 저하.
         OutputSchema:
-            - list[dict] / dict / Path / int — 함수별.
+            - pl.DataFrame — ``score`` (float) / ``rcept_no`` (str) / ``corp_name`` (str)
+              / ``stock_code`` (str) / ``rcept_dt`` (str YYYYMMDD) / ``report_nm`` (str)
+              / ``section_title`` (str) / ``text`` (str) / ``dartUrl`` (str).
+            - row 수 ≤ limit (L0 ∪ L1 병합 후).
+            - 빈 DataFrame — 인덱스 부재 / 매칭 0.
         Prerequisites:
-            - report_nm + section_title 인덱스 + 동의어 사전.
+            - stem index (``stemToId`` / ``offsets`` / ``docIds`` / ``meta``) 로드 완료.
+            - HuggingFace origin 또는 local cache (``pushStemIndex`` / ``pullStemIndex``).
         Freshness:
-            - 일 단위.
+            - 인덱스는 일 단위 rebuild (DART 일일 공시 cadence).
+            - L0 type index 는 ``_buildTypeIndex`` 가 호출 시 derive (캐시 X).
         Dataflow:
-            - title → ngram → CSR → bincount.
+            - query → ``_tokenize`` (bigram/trigram 토큰)
+            - → (L0) ``_buildTypeIndex`` + ``_matchTypes`` (114 유형 매칭, 임계값 0.2)
+            - → exact substring boost (reportNm 3x / sectionTitle 2x)
+            - → (L1) stemToId lookup → offsets/docIds CSR slice → ``np.bincount``
+            - → L0 ∪ L1 병합 (중복 rcept_no 제거) → corpCode / stockCode 필터
+            - → score 내림차순 정렬 → top-limit pl.DataFrame.
         TargetMarkets:
-            - KR (DART) title/section.
+            - KR (DART) — 공시 보고서 제목 + 섹션 제목 전수 인덱스.
     """
     index, meta = _loadIndex()
     if not index or meta.height == 0:
