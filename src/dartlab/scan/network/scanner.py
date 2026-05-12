@@ -118,7 +118,7 @@ def loadListing() -> tuple[dict[str, str], dict[str, str], set[str], dict[str, d
 
 def _scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     """report parquet에서 특정 apiType만 LazyFrame 스캔."""
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     report_dir = Path(_dataDir("report"))
     parquet_files = sorted(report_dir.glob("*.parquet"))
@@ -298,7 +298,13 @@ class UnionFind:
         AIContext:
             계열회사 그룹핑 (균형 분류 phase) 의 내부 자료구조. 호출자는 ``UnionFind`` 인스턴스만.
 
-        Guide/When/How:
+        Guide:
+            -
+
+        When:
+            호출 컨텍스트.
+
+        How:
             계열 그룹핑 시. find = 루트 + 경로 압축, union = rank 비교 후 작은 트리를 큰 트리에 attach.
 
         Requires:
@@ -342,7 +348,13 @@ class UnionFind:
         AIContext:
             계열회사 그룹핑 (균형 분류 phase) 의 내부 자료구조. 호출자는 ``UnionFind`` 인스턴스만.
 
-        Guide/When/How:
+        Guide:
+            -
+
+        When:
+            호출 컨텍스트.
+
+        How:
             계열 그룹핑 시. find = 루트 + 경로 압축, union = rank 비교 후 작은 트리를 큰 트리에 attach.
 
         Requires:
@@ -383,7 +395,13 @@ class UnionFind:
         AIContext:
             계열회사 그룹핑 (균형 분류 phase) 의 내부 자료구조. 호출자는 ``UnionFind`` 인스턴스만.
 
-        Guide/When/How:
+        Guide:
+            -
+
+        When:
+            호출 컨텍스트.
+
+        How:
             계열 그룹핑 시. find = 루트 + 경로 압축, union = rank 비교 후 작은 트리를 큰 트리에 attach.
 
         Requires:
@@ -463,7 +481,7 @@ def scanAffiliateDocs(
     >>> gt = scanAffiliateDocs(n2c, c2n)
     >>> gt.get("005930")
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     docs_dir = Path(_dataDir("docs"))
     parquet_files = sorted(docs_dir.glob("*.parquet"))

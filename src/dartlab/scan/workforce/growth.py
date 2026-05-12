@@ -200,7 +200,7 @@ def _scanRevenueGrowthFromMerged(scanPath: Path) -> dict[str, float]:
 
 def _scanRevenueGrowthPerFile() -> dict[str, float]:
     """종목별 finance parquet 순회 fallback."""
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

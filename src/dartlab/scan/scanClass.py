@@ -329,6 +329,17 @@ class Scan:
             Agent 가 "X 섹션 가진 회사" cross-company 질문 시 본 메서드 dispatch. 본문이 아닌 메타
             인덱스라 1~2 초 응답 (RSS <100 MB). 본문이 필요하면 :func:`Company.section` 으로 후속.
 
+        Guide:
+            - market KR/US/JP 의 docsIndex.parquet 미빌드면 FileNotFoundError — prebuild 단계 점검.
+            - limit=0 무제한 — 권장 X (메모리/페이로드 폭증).
+
+        When:
+            cross-company 섹션 보유 회사 검색 시. AI agent dispatch 가장 빈번.
+
+        How:
+            market → docsIndex.parquet 경로 결정 → lazy scan + 4 필터 → ``pickCrossScanEngine`` 으로
+            polars/duckdb 위임 → collect.
+
         Requires:
             - 로컬 ``data/{provider}/scan/docsIndex.parquet`` (``buildDocsIndex`` 산출)
 
@@ -336,7 +347,7 @@ class Scan:
             - :meth:`iterDocsSections` — 본 메서드의 streaming pair (룰 10)
             - :func:`dartlab.scan.builders.kr.docsIndex.buildDocsIndex` — source 빌더
         """
-        from dartlab.core.dataLoader import _dataDir, _getDataRoot
+        from dartlab.reference.dataLoader import _dataDir, _getDataRoot
         from dartlab.scan.io.cross import pickCrossScanEngine
 
         if market not in ("KR", "US", "JP"):

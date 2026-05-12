@@ -15,7 +15,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-from dartlab.core.dataConfig import DATA_RELEASES
+from dartlab.reference.dataConfig import DATA_RELEASES
 
 
 @dataclass
@@ -128,6 +128,30 @@ def buildSnapshot(*, verbose: bool = True) -> dict[str, RankInfo]:
     -------
     dict[str, RankInfo]
         {종목코드: RankInfo} — 매출/자산/성장 순위 + 섹터 내 순위 + sizeClass.
+
+    Capabilities:
+        - buildSnapshot: 전종목 finance pivot → 매출/자산/성장 + 섹터내 순위 + sizeClass 캐시.
+        - getRank: 캐시에서 1 종목 RankInfo 조회. getRankOrBuild: 없으면 build 후 조회.
+
+    AIContext:
+        Story / Insight builder 가 1 사 분석에서 "시장 순위" / "섹터 위치" 언급 source. 캐시
+        hit 시 즉시 응답.
+
+    Guide:
+        - importlib 우회로 industry(L2) → scan(L1.5) 단방향 정책 유지.
+        - 캐시 stale 정책 없음 — caller 가 명시 rebuild.
+
+    When:
+        Story 빌더가 종목별 시장 순위 인용 시. cron 으로 캐시 사전 빌드 권장.
+
+    How:
+        KIND listing → 종목 iterate → finance pivot → RankInfo dict 적재 → 캐시 write.
+
+    Requires:
+        - 로컬 ``data/dart/finance/{stockCode}.parquet`` + KIND listing
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.snapshot.buildScanSnapshot` — 4 axis snapshot (보완)
 
     Raises
     ------
@@ -353,6 +377,28 @@ def getRank(stockCode: str) -> RankInfo | None:
     >>> from dartlab.scan.screen.rank import getRank
     >>> r = getRank("005930")
     >>> r.sizeClass if r else "no snapshot"
+
+    Capabilities:
+        - 캐시된 RankInfo 1 종목 조회. 캐시 없으면 None — caller 가 ``getRankOrBuild`` 또는
+          ``buildSnapshot`` 으로 보강.
+
+    AIContext:
+        Story 빌더가 1 사 분석에서 시장 순위 인용 시. 캐시 hit 시 즉시 응답.
+
+    Guide:
+        - 캐시 stale 정책 없음 — caller 가 명시 rebuild.
+
+    When:
+        Story/Insight 빌더 안에서.
+
+    How:
+        ``_ensureSnapshot`` → dict get.
+
+    Requires:
+        - ``data/dart/scan/rank_snapshot.pickle`` (캐시 파일)
+
+    SeeAlso:
+        - :func:`getRankOrBuild` · :func:`buildSnapshot`
     """
     snap = _ensureSnapshot()
     if snap is None:
@@ -374,6 +420,30 @@ def getRankOrBuild(stockCode: str, *, verbose: bool = True) -> RankInfo | None:
     -------
     RankInfo | None
         랭크 정보. 빌드 후에도 종목 없으면 None.
+
+    Capabilities:
+        - buildSnapshot: 전종목 finance pivot → 매출/자산/성장 + 섹터내 순위 + sizeClass 캐시.
+        - getRank: 캐시에서 1 종목 RankInfo 조회. getRankOrBuild: 없으면 build 후 조회.
+
+    AIContext:
+        Story / Insight builder 가 1 사 분석에서 "시장 순위" / "섹터 위치" 언급 source. 캐시
+        hit 시 즉시 응답.
+
+    Guide:
+        - importlib 우회로 industry(L2) → scan(L1.5) 단방향 정책 유지.
+        - 캐시 stale 정책 없음 — caller 가 명시 rebuild.
+
+    When:
+        Story 빌더가 종목별 시장 순위 인용 시. cron 으로 캐시 사전 빌드 권장.
+
+    How:
+        KIND listing → 종목 iterate → finance pivot → RankInfo dict 적재 → 캐시 write.
+
+    Requires:
+        - 로컬 ``data/dart/finance/{stockCode}.parquet`` + KIND listing
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.snapshot.buildScanSnapshot` — 4 axis snapshot (보완)
 
     Raises
     ------

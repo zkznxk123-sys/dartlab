@@ -99,7 +99,7 @@ def _scanIcrPerFile() -> dict[str, float]:
     dict[str, float]
         {종목코드: ICR(배)} — 영업이익/이자비용.
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))
@@ -169,7 +169,10 @@ def scanIcr() -> dict[str, float]:
         - ICR < 1 = 영업이익으로 이자조차 못 갚는 상태 (고위험).
         - 단기비중 50 % 초과 = 리파이낸싱 리스크 신호.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         ``scanDebt`` 내부에서. scanIcr → finance 단면 추출. classifyRisk → 임계 분기 chain.
 
     Requires:
@@ -235,7 +238,10 @@ def classifyRisk(
         - ICR < 1 = 영업이익으로 이자조차 못 갚는 상태 (고위험).
         - 단기비중 50 % 초과 = 리파이낸싱 리스크 신호.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         ``scanDebt`` 내부에서. scanIcr → finance 단면 추출. classifyRisk → 임계 분기 chain.
 
     Requires:

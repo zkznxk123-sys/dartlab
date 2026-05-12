@@ -74,6 +74,31 @@ def buildDigest(
               score(점), changeRate(비율), deltaBytes(바이트),
               latestPeriod, reason)
         - ``"dataframe"`` → pl.DataFrame — score 내림차순 상위 top_n행
+
+    Capabilities:
+        - score 내림차순 정렬 + top N + 3 format (markdown/json/dataframe) 변환. 빈 입력 시
+          빈 페이로드 graceful fallback.
+
+    AIContext:
+        ``scanDigest`` 의 마지막 단계. AI agent 가 markdown 또는 json 페이로드를 그대로 인용.
+
+    Guide:
+        - markdown 은 기업별 그룹핑 + 배지 + 가독성 강조 — 사람용.
+        - json 은 API 페이로드.
+        - dataframe 은 추가 polars chain 분석용.
+
+    When:
+        ``scanDigest`` 내부에서. 단독 호출은 prototype.
+
+    How:
+        empty 가드 → score 내림차순 sort → head(topN) → format 별 builder (_toMarkdown/_toJson).
+
+    Requires:
+        - ``scanDf`` (score 컬럼 필수)
+
+    SeeAlso:
+        - :func:`dartlab.scan.watch.scanDigest` — 본 함수 호출자
+        - :func:`scoreChanges` — score 컬럼 source
     """
     if scanDf.height == 0:
         if format == "dataframe":

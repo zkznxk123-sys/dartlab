@@ -109,6 +109,33 @@ def scoreChanges(
     >>> from dartlab.scan.watch.scorer import scoreChanges
     >>> scored = scoreChanges(diffResult, sections=docs.sections)
     >>> scored[0].score
+
+    Capabilities:
+        - DiffResult.summaries 각 topic 에 4 요소 점수 (changeRate / topic weight / text size /
+          keyword) 합산 → 100 점 만점 ScoredChange. 내림차순 정렬.
+
+    AIContext:
+        ``scanCompany`` / ``scanMarket`` 의 중요도 SSOT. AI agent 가 변화 중요도 인용 시 본
+        함수 score 그대로 사용. TOPIC_WEIGHTS / KEYWORDS 가 정책 SSOT.
+
+    Guide:
+        - 정책 변경 시 본 모듈 상수만 수정 (TOPIC_WEIGHTS · TREND_KEYWORDS 등).
+        - sections=None 이면 키워드 가중치 skip — 점수 낮아질 수 있음.
+
+    When:
+        ``scanCompany`` / ``scanMarket`` 내부에서. 단독은 prototype.
+
+    How:
+        diffResult.entries 에서 topic 최신 entry 추출 → 4 요소 점수 계산 → 합산 → ScoredChange
+        list → score sort.
+
+    Requires:
+        - DiffResult (sectionsDiff 결과)
+        - sections DataFrame (선택, 키워드 매칭용)
+
+    SeeAlso:
+        - :func:`scoredToDataframe` — list → DataFrame 변환
+        - :data:`TOPIC_WEIGHTS` — 정책 SSOT
     """
     {s.topic: s for s in diffResult.summaries}
 
@@ -240,6 +267,9 @@ def scoredToDataframe(scored: list[ScoredChange]) -> pl.DataFrame:
     >>> from dartlab.scan.watch.scorer import scoredToDataframe
     >>> df = scoredToDataframe(scored)
     >>> df.height
+
+    Requires:
+        - polars (라이브러리)
     """
     if not scored:
         return pl.DataFrame(

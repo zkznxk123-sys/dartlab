@@ -37,7 +37,10 @@ def classifyReturn(
         - 점수 산식: 배당 +1 / 자사주 +1 / 증자 -1. 합산 ≥2 적극환원 / ≥1 환원형 / 0 중립 / 음수 희석형.
         - 모순형 (배당+증자) 은 자본정책 일관성 결여 신호.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         ``scanCapital`` 내부 종목별 row 처리 시. 단독 호출은 prototype.
 
     Requires:

@@ -52,6 +52,15 @@ class CrossScanEngine(Protocol):
             - LazyFrame → DataFrame 변환의 통일 surface. polars streaming / duckdb 두 구현이
               같은 시그니처라 caller 무중단 swap.
 
+        Guide:
+            -
+
+        When:
+            호출 컨텍스트.
+
+        How:
+            구현.
+
         AIContext:
             cross-company aggregation 이 메모리 압박 환경에서도 안전하게 돌도록 caller 가
             엔진 선택 logic 없이 ``pickCrossScanEngine().aggregate(lf)`` 한 번에 처리.
@@ -93,6 +102,15 @@ class PolarsCrossScan:
         Capabilities:
             - polars streaming engine 으로 LazyFrame collect. M2-1 이후 dartlab 의 표준 (filter/
               select/group_by 단순 chain 은 O(batch) 메모리).
+
+        Guide:
+            -
+
+        When:
+            호출 컨텍스트.
+
+        How:
+            구현.
 
         AIContext:
             기본 cross-scan 엔진. 미지원 연산 (asof/window 일부) 만나면 caller 가 catch 후
@@ -151,6 +169,15 @@ class DuckDbCrossScan:
               (Arrow zero-copy). DuckDB 가 자동 disk-spill 로 OOC.
             - streaming 미지원 polars 연산 (asof/window 일부) 의 fallback.
 
+        Guide:
+            -
+
+        When:
+            호출 컨텍스트.
+
+        How:
+            구현.
+
         AIContext:
             폴라스 streaming 한계 만나면 본 엔진. caller 는 별도 SQL 작성 안 함 — 동일 인터페이스.
 
@@ -199,6 +226,15 @@ def pickCrossScanEngine(*, engine: Literal["polars", "duckdb"] | None = None) ->
     AIContext:
         cross-scan 엔진 선택을 caller 의 한 줄 호출로 해결. AI agent 가 메모리 압박 환경 (서버
         cron 등) 에 환경변수 "duckdb" 만 설정하면 본 함수가 자동 swap.
+
+    Guide:
+        - 명시 engine > env > 기본 polars 순. env 값은 case-insensitive.
+
+    When:
+        cross-company aggregation 호출 직전.
+
+    How:
+        engine 인자 또는 env var lookup → "duckdb" 이면 DuckDbCrossScan, 아니면 PolarsCrossScan.
 
     Requires:
         - polars (필수). duckdb 는 ``engine="duckdb"`` 선택 시 import 시점에 필요.

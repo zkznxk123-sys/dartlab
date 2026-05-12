@@ -141,8 +141,8 @@ def _ensureScanData() -> Path:
     Path
         scan 프리빌드 디렉토리 경로 (~/.dartlab/data/scan/).
     """
-    from dartlab.core.dataLoader import _IS_PYODIDE, _dataDir
     from dartlab.core.messaging import emit
+    from dartlab.reference.dataLoader import _IS_PYODIDE, _dataDir
 
     scanDir = Path(_dataDir("scan"))
 
@@ -158,7 +158,7 @@ def _ensureScanData() -> Path:
             return scanDir
         emit("scan:prebuild_missing")
         try:
-            from dartlab.core.dataLoader import downloadAll
+            from dartlab.reference.dataLoader import downloadAll
 
             downloadAll("scan")  # pyodide 분기에서 _pyodideFetchScanLite 호출
             _scanDownloaded = True
@@ -176,7 +176,7 @@ def _ensureScanData() -> Path:
             return scanDir
         # TTL 초과 — 갱신 시도하되 실패해도 기존 파일 사용
         try:
-            from dartlab.core.dataLoader import downloadAll
+            from dartlab.reference.dataLoader import downloadAll
 
             downloadAll("scan")
         except (ImportError, RuntimeError, ValueError):
@@ -187,7 +187,7 @@ def _ensureScanData() -> Path:
     # 루트 필수 파일 누락 (신규 사용자 또는 과거 버그로 불완전 캐시) → HF 다운로드
     emit("scan:prebuild_missing")
     try:
-        from dartlab.core.dataLoader import downloadAll
+        from dartlab.reference.dataLoader import downloadAll
 
         downloadAll("scan")
         _scanDownloaded = True
@@ -228,6 +228,9 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     >>> df = scanParquets("majorHolder", ["stockCode", "year", "지분율"])
     >>> df.height > 0
     True
+
+    Guide:
+        - 호출 컨텍스트 가이드.
 
     Capabilities:
         - prebuild ``scan/report/{apiType}.parquet`` 우선 lazy scan → 없으면 종목별 raw report
@@ -273,7 +276,7 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
             pass  # fallback to per-file scan
 
     # 2순위: 종목별 순회 (fallback)
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     report_dir = Path(_dataDir("report"))
     parquet_files = sorted(report_dir.glob("*.parquet"))
@@ -349,6 +352,9 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
     >>> rev
     1000000
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - account_id (XBRL tag) 또는 account_nm (한글 표시명) 매칭 row 중 첫 유효 amount 반환.
           ``parseNumStr`` 로 콤마/문자열 정수 변환.
@@ -357,7 +363,10 @@ def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_
         scan financial 7 axis 의 per-file fallback 경로가 본 함수로 단일 종목 단면에서 계정 값
         추출. industry/delta 도 같은 패턴.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         scan/finance.parquet 합본 없거나 종목별 처리 필요할 때. row iterate → 첫 매칭 row 의
         amount → parseNumStr → 반환.
 
@@ -406,6 +415,9 @@ def findLatestYear(raw: pl.DataFrame, checkCol: str, minCount: int = 500) -> str
     >>> findLatestYear(rawDf, "매출액", minCount=500)
     "2024"
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - 연도별 유효 데이터 (non-null, ``"-"`` / ``""`` 제외) 카운트 → minCount 이상이면 그 연도
           채택. 최신 → 과거 순회로 가장 최근 유효 연도 1 개만 반환.
@@ -414,7 +426,10 @@ def findLatestYear(raw: pl.DataFrame, checkCol: str, minCount: int = 500) -> str
         scan axis 가 "최신 연 단면" 분석 시 본 함수로 latest year 확정. 데이터 누락이 큰 연도는
         skip 해서 통계 안정성 확보.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         scan governance/workforce/capital 등이 연 단위 단면을 뽑을 때. years_desc 순회 + non-null
         count → minCount 충족 첫 연도.
 
@@ -460,6 +475,9 @@ def pickBestQuarter(df: pl.DataFrame) -> pl.DataFrame:
     >>> pickBestQuarter(df)["quarter"].unique().to_list()
     ["2분기"]
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - QUARTER_ORDER (2분기→4분기→3분기→1분기) 우선순위로 단일 분기 선택. Q2 가 보통
           반기 보고서로 가장 신뢰도 높아 우선.
@@ -468,7 +486,10 @@ def pickBestQuarter(df: pl.DataFrame) -> pl.DataFrame:
         scan 비재무 axis 가 종목별 단일 분기 단면 필요 시. AI 가 횡단 비교 시 분기 혼합 noise
         제거.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         ``df["quarter"].unique()`` → ``QUARTER_ORDER`` 정렬 → 첫 분기로 filter.
 
     Requires:
@@ -535,6 +556,9 @@ def parseDateYear(s) -> int | None:
     >>> parseDateYear(None)
     None
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - 다양한 separator (``.``/``-``/``/``) 의 날짜 문자열에서 연도 정수 추출. None/빈
           문자열/포맷 어긋남은 모두 None.
@@ -542,7 +566,10 @@ def parseDateYear(s) -> int | None:
     AIContext:
         scan 모듈이 raw report row 의 date 컬럼에서 연도 단위 비교를 위해 사용.
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         ``isinstance(str)`` 체크 → 첫 4 자 정수 변환 시도 → ValueError 흡수 후 None.
 
     Requires:
@@ -603,6 +630,9 @@ def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol
     >>> latest.group_by("stockCode").len()["len"].max()
     1
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - 종목별 최신 ``bsns_year`` 행만 남기는 per-stock latest 필터. 글로벌 latest year cut 의
           회귀 패턴 (2026 Q1 조기 제출 3 종목 → 2025 자 2895 종목 손실) 차단 SSOT.
@@ -615,7 +645,10 @@ def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol
         - 13 개 axis 파일에 분산되어 있던 잘못된 글로벌 cut 패턴을 본 함수로 SSOT 통합.
         - 누락 컬럼 / 빈 df 는 원본 그대로 반환 (silent skip — 호출자 무중단).
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         axis 의 단면 추출 직전. ``group_by(scCol).agg(max yearCol)`` → join → filter → drop.
 
     Requires:
@@ -938,6 +971,9 @@ def loadValuationSnapshot() -> tuple[pl.DataFrame | None, datetime | None]:
     - 호출자는 ``None`` 인 경우 네이버 실시간 수집 (``_fetchAll``) 으로 fallback 한다.
     - 스냅샷이 1일 이상 오래된 경우 상위 경로 ``_maybeWarnStale("scan")`` 가 경고.
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - ``data/dart/scan/valuation.parquet`` 로드 + 필수 컬럼 (``stockCode/marketCap/per/pbr/
           dividendYield/current/snapshotAt``) 검증 + snapshotAt UTC 타입 normalize.
@@ -950,7 +986,10 @@ def loadValuationSnapshot() -> tuple[pl.DataFrame | None, datetime | None]:
         - 필수 7 컬럼 중 하나라도 누락 시 (None, None) — 호출자가 fallback path 로 전환.
         - snapshotAt 으로 데이터 freshness 명시 (호출자가 사용자에게 "N 시간 전 수집" 안내).
 
-    When/How:
+    When:
+        호출 컨텍스트 안에서.
+
+    How:
         ``_ensureScanData`` → valuation.parquet 존재 시 read → 필수 컬럼 + 빈 df 가드 →
         snapshotAt datetime/string → datetime 변환 → tuple 반환.
 
@@ -1024,6 +1063,9 @@ def scanFinanceParquets(
     >>> revMap.get("005930")  # 삼성전자 최신년 매출액
     250000000000000
 
+    Guide:
+        - 호출 컨텍스트 가이드.
+
     Capabilities:
         - prebuild ``scan/finance.parquet`` 우선 LazyFrame scan + sj_div + 계정 ID/이름 필터 →
           종목별 최신 연도 첫 매칭 값. 없으면 raw glob DuckDB streaming SQL fallback.
@@ -1069,7 +1111,7 @@ def scanFinanceParquets(
             pass  # fallback
 
     # 2순위: raw glob → DuckDB streaming SQL (fallback)
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     finance_dir = Path(_dataDir("finance"))
     lz = _loadRawFinanceViaDuckDb(

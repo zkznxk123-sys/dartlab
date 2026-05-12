@@ -167,6 +167,33 @@ def fetchValuationRaw(codes: list[str], *, verbose: bool = True) -> pl.DataFrame
     >>> from dartlab.scan.financial.valuation import fetchValuationRaw
     >>> df = fetchValuationRaw(["005930", "000660"], verbose=False)
     >>> df.select(["stockCode", "per", "pbr"]).to_dicts()
+
+    Capabilities:
+        - 네이버 finance API 병렬 호출 (asyncio) → marketCap/per/pbr/dividendYield/current/
+          snapshotAt 6 컬럼 raw DataFrame. 실패 종목 silent 제외.
+
+    AIContext:
+        ``buildValuation`` cron + ``scanValuation(refresh=True)`` 둘 다 본 함수로 raw 수집.
+        AI agent 가 실시간 가치평가 요청 시 본 함수가 1 차 source.
+
+    Guide:
+        - rate-limit 의식 — 1 호출당 ~50 초 (KR ~2700 종목). 짧은 시간 반복 호출 금지.
+        - 빈 DataFrame 반환 = 전부 실패 (예외 안 던짐).
+
+    When:
+        ``buildValuation`` cron (KST 04:00) 또는 ``scanValuation(refresh=True)`` 경로.
+
+    How:
+        asyncio.run(_fetchAll(codes)) → priceMap 누적 → snapshotAt timestamp 추가 → 6 컬럼 row
+        적재 → DataFrame.
+
+    Requires:
+        - 네이버 finance API 접근 (네트워크)
+        - codes list (KRX listing)
+
+    SeeAlso:
+        - :func:`dartlab.scan.builders.kr.core.buildValuation` — prebuild 빌더 (본 함수 호출자)
+        - :func:`scanValuation` — refresh=True 경로 호출자
     """
     if not codes:
         return pl.DataFrame(schema=_RAW_SCHEMA)

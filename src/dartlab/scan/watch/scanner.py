@@ -47,6 +47,21 @@ class ScanResult:
         float
             scored list 의 첫 원소 (정렬 후 최고) 의 score. 비어 있으면 0.0.
 
+        Capabilities:
+            - ScanResult method. 단일 기업 변화 결과 → 최고 점수 또는 DataFrame 변환.
+
+        AIContext:
+            ``scanCompany`` 결과 인스턴스 method. 호출자가 후속 사용.
+
+        Guide/When/How:
+            ScanResult 인스턴스에서 직접. 빈 list → 0.0 또는 빈 df.
+
+        Requires:
+            - ScanResult.scored list
+
+        SeeAlso:
+            - :func:`scanCompany` — ScanResult 생성
+
         Raises
         ------
         없음.
@@ -72,6 +87,27 @@ class ScanResult:
         ------
         polars.PolarsError
             scoredToDataframe 가 발생시키는 예외 전파.
+
+        Capabilities:
+            - ScanResult.scored 를 DataFrame 으로. stockCode/corpName 컬럼 추가.
+
+        AIContext:
+            ``scanMarket`` aggregation 시 종목별 row 통합 source.
+
+        Guide:
+            ScanResult 후처리. 빈 scored → 빈 df.
+
+        When:
+            ScanResult 인스턴스에서 직접.
+
+        How:
+            ``scoredToDataframe`` 위임 → stockCode/corpName 컬럼 추가.
+
+        Requires:
+            - :func:`scoredToDataframe`
+
+        SeeAlso:
+            - :func:`scanMarket` — 본 메서드 호출자
 
         Examples
         --------
@@ -103,6 +139,30 @@ def scanCompany(
 
     Raises:
         없음 — sections 누락 시 None 반환.
+
+    Capabilities:
+        - 단일 기업 docs.sections → diff → 중요도 score 통합. topic 필터로 특정 영역 한정.
+
+    AIContext:
+        ``Company.watch()`` 의 entry. AI agent 가 "이 기업 변화" 단일 종목 질문 시 본 함수 dispatch.
+
+    Guide:
+        - sections 없으면 (raw docs 미보유 종목) None — caller 가 안내.
+
+    When:
+        Company.watch() 호출 시. scanMarket 의 inner iteration.
+
+    How:
+        ``docs_sections`` 추출 → topic 필터 (선택) → ``sectionsDiff`` → ``scoreChanges`` →
+        ScanResult.
+
+    Requires:
+        - ``Company.docs.sections`` accessor
+        - ``sectionsDiff`` · ``scoreChanges``
+
+    SeeAlso:
+        - :func:`scanMarket` — 전종목 버전 (본 함수 반복 호출)
+        - :func:`scoreChanges` — 중요도 SSOT
 
     Example:
         >>> import dartlab
@@ -144,8 +204,8 @@ def _listLocalDocs() -> list[str]:
     list[str]
         정렬된 종목코드 목록 (6자리). 디렉토리 없으면 빈 리스트.
     """
-    from dartlab.core.dataConfig import DATA_RELEASES
-    from dartlab.core.dataLoader import _getDataRoot
+    from dartlab.reference.dataConfig import DATA_RELEASES
+    from dartlab.reference.dataLoader import _getDataRoot
 
     docs_dir = _getDataRoot() / DATA_RELEASES["docs"]["dir"]
     if not docs_dir.exists():
@@ -183,6 +243,32 @@ def scanMarket(
         >>> import dartlab
         >>> df = dartlab.scan("digest", sector="반도체", topN=30)
         >>> df.sort("score", descending=True).head()
+
+    Capabilities:
+        - 로컬 docs parquet glob → 종목별 ``scanCompany`` 반복 → minScore 이상 row aggregate
+          → score 내림차순 topN. sector 필터 또는 명시 stockCodes 지원.
+
+    AIContext:
+        ``scanDigest`` 의 source. AI agent 가 시장 전체 변화 다이제스트 빌드 시 본 함수가 raw
+        scan 단계.
+
+    Guide:
+        - sector / stockCodes 둘 다 None 이면 전체 로컬 docs 종목 대상 (~수천 종목, 분 단위).
+        - minScore 임계 조정으로 noise 제거.
+
+    When:
+        ``scanDigest`` 진행 또는 manual 시장 분석 시.
+
+    How:
+        codes 결정 → 각 종목 ``scanCompany`` → ScanResult.toDataframe → 누적 → score 필터 →
+        sort + topN.
+
+    Requires:
+        - 로컬 ``data/dart/docs/{stockCode}.parquet`` 들
+
+    SeeAlso:
+        - :func:`scanCompany` — 종목당 inner scan
+        - :func:`dartlab.scan.watch.scanDigest` — 본 함수 호출자
     """
     if stockCodes is None:
         codes = _listLocalDocs()
@@ -313,6 +399,9 @@ def buildSpec() -> dict:
             - highWeightTopics : list[str] — 고가중 topic 목록
             - lowWeightTopics : list[str] — 저가중 topic 목록
             - publicAPI : list[str] — 공개 API 사용법
+
+    Requires:
+        - scorer 모듈 (TOPIC_WEIGHTS / SCORING_FACTORS) 만 참조 — 외부 의존 없음.
 
     Raises
     ------

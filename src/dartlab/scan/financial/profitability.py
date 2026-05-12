@@ -198,7 +198,7 @@ def _scanPerFile() -> pl.DataFrame:
         컬럼 상세는 ``_computeProfitability`` 독스트링 참조.
         데이터가 없으면 빈 DataFrame.
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     financeDir = Path(_dataDir("finance"))
     parquetFiles = sorted(financeDir.glob("*.parquet"))

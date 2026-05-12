@@ -393,7 +393,7 @@ def _revenueFallback(revIds: set[str], revNms: set[str]) -> dict[str, float]:
     dict[str, float]
         {종목코드: 매출액(원)}.
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     finance_dir = Path(_dataDir("finance"))
     parquet_files = sorted(finance_dir.glob("*.parquet"))

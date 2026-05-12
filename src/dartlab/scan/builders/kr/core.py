@@ -119,7 +119,7 @@ def _loadCorpProfileMap() -> dict[str, int]:
       ``corp_name`` · ``acc_mt``.
     - ``stockCode`` 가 빈 문자열 (비상장 corp_code 일부) 인 row 는 제외.
     """
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     profilePath = Path(_dataDir("scan")) / "corpProfile.parquet"
     if not profilePath.exists():
@@ -266,25 +266,25 @@ def _calendarizeFiscalColumns(df: pl.DataFrame, fiscalMonth: int) -> pl.DataFram
 
 def _scanDir() -> Path:
     """scan 출력 디렉토리."""
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     return Path(_dataDir("scan"))
 
 
 def _docsDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     return Path(_dataDir("docs"))
 
 
 def _financeDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     return Path(_dataDir("finance"))
 
 
 def _reportDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
+    from dartlab.reference.dataLoader import _dataDir
 
     return Path(_dataDir("report"))
 
@@ -653,7 +653,7 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
     Requires:
         - 로컬 ``data/dart/finance/{stockCode}.parquet`` (Data Sync 가 채움)
         - ``data/dart/scan/corpProfile.parquet`` (선택 — buildCorpProfile 가 갱신)
-        - ``src/dartlab/core/data/accountMappings.json`` (snakeId SSOT)
+        - ``src/dartlab/reference/data/accountMappings.json`` (snakeId SSOT)
 
     SeeAlso:
         - :func:`_fiscalMonthMap` · :func:`_calendarizeFiscalColumns` · :func:`_sanityCheckCalendarYears`
