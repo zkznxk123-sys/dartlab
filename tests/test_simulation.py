@@ -88,7 +88,7 @@ HEALTHY_SERIES = _make_series(
 
 @pytest.fixture
 def sectorParams():
-    from dartlab.core.sector.types import SectorParams
+    from dartlab.frame.sector.types import SectorParams
 
     return SectorParams(
         discountRate=10.0,

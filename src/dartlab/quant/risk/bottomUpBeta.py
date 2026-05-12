@@ -55,7 +55,7 @@ def calcBottomUpBeta(
 
     if len(peers) < 5:
         # sector_default fallback
-        from dartlab.core.sector import getSectorParamsByName
+        from dartlab.frame.sector import getSectorParamsByName
 
         sector_beta: float | None = None
         try:
@@ -226,7 +226,7 @@ def _extractKrPeers(sector: str, limit: int) -> list[dict[str, Any]]:
 
 def _sectorBetaFallback(sector: str) -> float:
     """sectorParams 에서 섹터 β 조회. 없으면 1.0."""
-    from dartlab.core.sector import getSectorParamsByName
+    from dartlab.frame.sector import getSectorParamsByName
 
     try:
         sp = getSectorParamsByName(sector)

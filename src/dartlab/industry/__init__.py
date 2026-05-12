@@ -25,40 +25,40 @@ from typing import Any
 
 import polars as pl
 
-from dartlab.core.sector import (  # noqa: F401 — public re-export
+from dartlab.frame.sector import (  # noqa: F401 — public re-export
     MARKET_KR as MARKET_KR,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     MARKET_PARAMS as MARKET_PARAMS,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     MARKET_US as MARKET_US,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     IndustryGroup as IndustryGroup,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     MarketParams as MarketParams,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     Sector as Sector,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     SectorInfo as SectorInfo,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     SectorParams as SectorParams,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     classify as classify,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     getMarketParams as getMarketParams,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     getParams as getParams,
 )
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     getThresholds as getThresholds,
 )
 

@@ -40,7 +40,7 @@ from dartlab.analysis.financial.insight.types import (
     InsightResult,
 )
 from dartlab.analysis.financial.ratios import RatioResult
-from dartlab.core.sector.types import Sector
+from dartlab.frame.sector.types import Sector
 from dartlab.scan.screen.rank import RankInfo
 
 

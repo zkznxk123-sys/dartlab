@@ -640,7 +640,7 @@ def computeCompanyWacc(
     implied_erp : True 면 Damodaran Gordon 역산 (시장 내재). 실패 시 historical fallback.
     bottom_up_beta : True 면 섹터 peer unlever/relever (Hamada). 실패 시 기본 beta.
     """
-    from dartlab.core.sector import getMarketParams
+    from dartlab.frame.sector import getMarketParams
 
     damodaran = None
     if country or countryRiskPremium is not None or impliedErp:

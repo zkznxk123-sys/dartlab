@@ -4,7 +4,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-from dartlab.core.sector import (
+from dartlab.frame.sector import (
     IndustryGroup,
     Sector,
     SectorInfo,
