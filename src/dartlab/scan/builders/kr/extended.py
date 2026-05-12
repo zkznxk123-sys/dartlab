@@ -18,10 +18,11 @@ log = logging.getLogger(__name__)
 
 
 def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
-    """전종목 횡단 → 이 종목의 시장 내 위치 (2~3축 교차 조합 관점).
+    """전종목 횡단 → 이 종목의 시장 내 위치 (수익성×성장성×이익품질×부채 4 축 백분위 + 교차 관점).
 
     scan/finance.parquet 에서 수익성/성장성/이익품질/부채 4축 백분위 산출 후
-    교차 조합으로 관점 (crossViews) 생성.
+    교차 조합으로 관점 (crossViews) 생성. single-company 뷰가 놓치는 횡단 콘텍스트를
+    Story / Insight 빌더 단계에서 주입.
 
     Parameters
     ----------
@@ -59,6 +60,41 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     >>> c = dartlab.Company("005930")
     >>> pos = calcPeerPosition(c)
     >>> pos["profitability_pct"] if pos else "no data"
+
+    Capabilities:
+        - 전종목 finance.parquet 의 연결재무제표 4 분기 단면을 추출하여 종목별 4 축 (수익성/
+          성장성/이익품질/부채) 백분위 계산. 같은 단면 안에서 교차 관점 (예: "성숙기 캐시카우",
+          "고성장 고마진") narrative 자동 생성.
+        - 단일 종목 분석이 못 보는 시장 내 상대 위치를 비교 가능 지표로 제공.
+
+    AIContext:
+        Story / Insight builder 가 기업 1 사 보고서를 작성할 때 호출. Narrative 첫 단락의
+        횡단 콘텍스트 ("전 종목 중 영업이익률 상위 12 %") source. 4 분기 연결 단면 기준이라
+        본 함수 결과는 연 1 회 refresh — buildFinance 후 즉시 갱신.
+
+    Guide:
+        - basePeriod None → 최신 (가장 흔한 사용). 과거 시점 비교는 명시.
+        - crossViews 는 4 축 백분위 임계 조합으로 결정. 임계 변경 시 본 함수 내부 분기 수정.
+        - 종목이 scan/finance.parquet 에 없으면 (신규 상장 / 결산월 변경 직후) None 반환.
+
+    When:
+        Story / Insight 빌더가 기업 1 사 종합 분석 시. 단일 호출당 약 1~2 초 (전종목 scan).
+        같은 단면에서 여러 회사 비교가 필요하면 본 함수 반복 호출보다 batch 형 scan 권장.
+
+    How:
+        ``_ensureScanData()`` → ``finance.parquet`` lazy scan → 연결재무제표 4 분기 필터 →
+        종목별 매출/영업이익/순이익/자산/자본/부채 합산 → 4 축 ratio 계산 → 백분위 (rank/total)
+        → ``_buildCrossViews`` 로 교차 관점 narrative.
+
+    Requires:
+        - 로컬 ``data/dart/scan/finance.parquet`` (`buildFinance` 산출)
+        - ``dartlab.scan.io.parquet._ensureScanData`` · ``parseNumStr``
+        - ``company.stockCode`` 속성
+
+    SeeAlso:
+        - :func:`calcGovernanceSummary` — 비재무 보조 (지배구조 등급)
+        - :func:`dartlab.scan.builders.kr.core.buildFinance` — 본 함수의 source 빌드
+        - :mod:`dartlab.story` — 본 함수 결과를 narrative 로 조립
     """
     import polars as pl
 
@@ -215,9 +251,10 @@ def calcPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
 
 
 def calcGovernanceSummary(company) -> dict | None:
-    """scan governance → 종목의 지배구조 5축 점수/등급.
+    """scan governance → 종목의 지배구조 5 축 종합 점수/등급 1 줄 요약.
 
-    c.governance() 가 이미 구현돼 있으면 위임, 아니면 scan report 에서 추출.
+    `Company.governance()` 가 구현되어 있으면 위임 (DataFrame 첫 row 의 totalScore/grade),
+    아니면 narrative-only dict 반환. Story/Insight 의 governance 단락 source.
 
     Parameters
     ----------
@@ -245,6 +282,36 @@ def calcGovernanceSummary(company) -> dict | None:
     >>> c = dartlab.Company("005930")
     >>> g = calcGovernanceSummary(c)
     >>> g.get("grade") if g else "no data"
+
+    Capabilities:
+        - `Company.governance()` 결과 (지배구조 5 축 - 지분율/사외이사/보수비율/감사독립/소액주주분산
+          점수) 의 종합 점수·등급 1 줄 요약. ``narrative`` 필드는 "지배구조 B등급 (72점)." 같은
+          insertable phrase.
+
+    AIContext:
+        Story builder 가 1 사 분석에서 governance 단락 도입부 narrative 추출. AI 가 길게 풀어
+        쓰지 않고 본 함수의 ``narrative`` 를 바로 인용 가능.
+
+    Guide:
+        - Company.governance() 미구현 환경에서는 narrative-only dict 반환 — 호출자는 grade 누락
+          가능성 항상 대비.
+        - 종목코드 없으면 None — 빈 Company 인스턴스 방어.
+
+    When:
+        Story/Insight 빌더 1 사 분석 시. 횡단 비교용은 아니라 `Scan` 의 governance axis 직접 호출
+        권장.
+
+    How:
+        ``getattr(company, 'stockCode', ...)`` → ``Company.governance()`` 호출 (있을 때만) →
+        DataFrame 첫 row 의 totalScore/grade dict 화 → narrative 포맷팅. 실패 시 fallback dict.
+
+    Requires:
+        - ``company.stockCode`` 속성
+        - ``Company.governance()`` (선택 — 없으면 narrative-only)
+
+    SeeAlso:
+        - :func:`calcPeerPosition` — 본 함수의 재무 sibling
+        - :mod:`dartlab.scan.governance` — `Company.governance()` 의 source axis
     """
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", None)
     if not code:

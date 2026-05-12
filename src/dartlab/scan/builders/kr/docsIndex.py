@@ -74,7 +74,12 @@ def buildDocsIndex(
     outputPath: str | Path | None = None,
     verbose: bool = False,
 ) -> Path:
-    """전 종목 docs parquet → 슬림 메타 인덱스 통합 빌드.
+    """전 종목 docs parquet → 슬림 메타 인덱스 통합 빌드 (P3, cross-company 1~2 초 응답).
+
+    ``section_content`` 같은 본문 컬럼을 제외하고 메타만 (~제목·길이·URL·section_order)
+    추출한 슬림 인덱스. cross-company 질문 ("X 섹션 보유 회사") 를 RSS <100 MB 로 1~2 초
+    내 답하는 게 목표 — `Scan.docsSections()` 가 본 인덱스 경유 (룰 8 limit + 룰 9 raw
+    cross-scan 차단).
 
     Args:
         sinceYear: 시작 연도. 이전 보고서 제외 (volume 축소).
@@ -95,6 +100,40 @@ def buildDocsIndex(
         >>> path = buildDocsIndex(sinceYear=2020, batchSize=200, verbose=True)
         >>> print(path)
         .../data/dart/scan/docsIndex.parquet
+
+    Capabilities:
+        - 종목별 docs parquet (수십~수백 MB) → 단일 슬림 parquet (~수십 MB) 으로 통합.
+          ``_OUTPUT_SCHEMA`` 11 컬럼 — 본문 글자수 + 테이블 존재 여부만 보유.
+        - ``withMemoryBudget(1000MB)`` 데코레이터로 RSS 한도 가드. ``batchSize`` 단위 chunked
+          concat → 전체 단일 sink.
+
+    AIContext:
+        ``Scan.docsSections(market, sections, ...)`` 의 1 차 source. 사용자가 "이 섹션 가진
+        회사 어디?" · "사외이사 정보 들어간 사업보고서 N건" 류 cross-company 질문 시 본 인덱스
+        경유. 본문은 별도 `dartlab.providers.dart.docs.section` 호출로 필요시에만 fetch.
+
+    Guide:
+        - 출력 경로 default 는 dart-specific. EDGAR/EDINET 는 `buildEdgarDocsIndex` ·
+          `buildEdinetDocsIndex` 가 동일 schema 로 별도 출력.
+        - ``contentLength`` 컬럼이 header-only 섹션 (정의 없음) 판별의 필터 키.
+        - 시계열 비교는 ``year`` 또는 ``periodKey`` 로.
+
+    When:
+        매 prebuild 사이클 (``buildScan`` 직후 별도 단계). `prebuildData.py` 의 `_buildDocsIndex`
+        가 docs 캐시 있을 때만 호출. 로컬 직접 호출은 디버깅 / cross-company 분석 prototype 용.
+
+    How:
+        docs 종목별 parquet 정렬 → `batchSize` 단위 chunk → 각 chunk read + 메타만 select →
+        polars concat → 최종 sink_parquet (single output). 빈 결과는 RuntimeError 로 fail-fast.
+
+    Requires:
+        - 로컬 ``data/dart/docs/{stockCode}.parquet`` 들 (Data Sync 가 채움)
+        - ``dartlab.core.memory.withMemoryBudget`` (RSS 가드)
+
+    SeeAlso:
+        - :func:`buildEdgarDocsIndex` · :func:`buildEdinetDocsIndex` — 다국가 동일 schema
+        - :func:`dartlab.scan.scanClass.Scan.docsSections` — 본 인덱스 소비자
+        - :data:`_OUTPUT_SCHEMA` — 컬럼 contract
     """
     from dartlab.core.dataLoader import _dataDir
 
@@ -216,10 +255,10 @@ def buildEdgarDocsIndex(
     outputPath: str | Path | None = None,
     verbose: bool = False,
 ) -> Path:
-    """EDGAR docs parquet → 슬림 메타 인덱스 (P3.5).
+    """EDGAR docs parquet → 슬림 메타 인덱스 (P3.5, DART 와 schema 동일).
 
-    DART 와 동일 schema (stockCode / corpName / year / reportType / periodKey /
-    sectionOrder / sectionTitle / sectionUrl / contentLength / hasTable / docId).
+    `buildDocsIndex` 의 EDGAR provider wrapper. docsDir/outputPath default 만 다르고
+    실제 추출 로직은 동일. ticker 단위 stockCode + accession 단위 docId.
 
     Args:
         sinceYear: 시작 연도. 이전 filing 제외.
@@ -238,6 +277,32 @@ def buildEdgarDocsIndex(
     Example:
         >>> from dartlab.scan.builders.kr.docsIndex import buildEdgarDocsIndex
         >>> path = buildEdgarDocsIndex(sinceYear=2020, verbose=True)
+
+    Capabilities:
+        - EDGAR docs parquet 컬렉션을 동일 11-컬럼 슬림 schema 로 통합.
+        - `buildDocsIndex` 로 위임 — 컬럼 schema 단일화 (cross-market 횡단 query 호환).
+
+    AIContext:
+        ``Scan.docsSections("us", ...)`` 의 EDGAR source. AI agent 가 한국/미국 비교 분석 시
+        동일 schema 라 양쪽 인덱스를 union 으로 다룰 수 있다.
+
+    Guide:
+        - DART 와 schema 호환되지만 stockCode 의미는 다름 (ticker vs 6 자리). corpName 으로 매핑.
+        - filing 단위 = 10-K / 10-Q / 8-K, reportType 으로 구분.
+
+    When:
+        EDGAR provider prebuild 단계. dart 와 별도 cron / 별도 raw download 흐름.
+
+    How:
+        docsDir·outputPath default 보정 후 `buildDocsIndex` 위임. EDGAR raw schema 는 이미
+        `_OUTPUT_SCHEMA` 와 호환되도록 EDGAR provider extractor 가 정규화.
+
+    Requires:
+        - ``data/edgar/docs/`` 디렉토리 (EDGAR Data Sync 결과)
+
+    SeeAlso:
+        - :func:`buildDocsIndex` — 본 wrapper 의 위임 대상
+        - :func:`buildEdinetDocsIndex` — 일본 시장 동일 schema
     """
     from dartlab.core.dataLoader import _getDataRoot
 
@@ -265,9 +330,7 @@ def buildEdinetDocsIndex(
     outputPath: str | Path | None = None,
     verbose: bool = False,
 ) -> Path:
-    """EDINET docs parquet → 슬림 메타 인덱스 (P3.5).
-
-    DART/EDGAR 와 동일 schema.
+    """EDINET docs parquet → 슬림 메타 인덱스 (P3.5, DART/EDGAR 와 schema 동일).
 
     Args:
         sinceYear: 시작 연도.
@@ -286,6 +349,30 @@ def buildEdinetDocsIndex(
     Example:
         >>> from dartlab.scan.builders.kr.docsIndex import buildEdinetDocsIndex
         >>> path = buildEdinetDocsIndex(sinceYear=2020, verbose=True)
+
+    Capabilities:
+        - EDINET docs parquet → 동일 11-컬럼 슬림 schema. 4 자리 종목코드 + EDINET docId.
+
+    AIContext:
+        ``Scan.docsSections("jp", ...)`` 의 source. 한국·미국·일본 cross-market 비교 분석 시
+        union 으로 다룰 수 있는 동일 schema 보장.
+
+    Guide:
+        - 메모리 룰 ``feedback_edinet_api_unavailable`` 참조 — EDINET API 통신 불가 환경에서는
+          호출 자체가 의미 없다 (raw docs 자체가 없음). prebuild 도 skip.
+
+    When:
+        EDINET raw docs 가 채워진 환경에서만. 현재 통신 불가 (대부분 환경) 라 prebuild 에서
+        실질 미실행.
+
+    How:
+        docsDir·outputPath default 보정 후 `buildDocsIndex` 위임.
+
+    Requires:
+        - ``data/edinet/docs/`` 디렉토리 (EDINET Data Sync — 현재 미작동)
+
+    SeeAlso:
+        - :func:`buildDocsIndex` · :func:`buildEdgarDocsIndex` — 동일 schema sibling
     """
     from dartlab.core.dataLoader import _getDataRoot
 
