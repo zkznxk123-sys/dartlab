@@ -408,7 +408,7 @@ def _buildAndSaveTypeIndex(meta: pl.DataFrame, outDir: Path) -> None:
         .filter(pl.col("_norm") != "")
         .group_by("_norm")
         .agg(pl.col("_docId"))
-        .collect()
+        .collect(engine="streaming")
     )
 
     typeToDocIds: dict[str, list[int]] = {row[0]: row[1] for row in norm.iter_rows()}
@@ -440,7 +440,7 @@ def _buildTypeIndex(meta: pl.DataFrame) -> tuple[dict, dict]:
             .filter(pl.col("_norm") != "")
             .group_by("_norm")
             .agg(pl.col("_docId"))
-            .collect()
+            .collect(engine="streaming")
         )
         typeToDocIds = {row[0]: row[1] for row in norm.iter_rows()}
 
@@ -675,7 +675,7 @@ def ngramStats() -> dict:
         sizeMb += dictPath.stat().st_size / 1024 / 1024
     if metaPath.exists():
         sizeMb += metaPath.stat().st_size / 1024 / 1024
-        documents = pl.scan_parquet(metaPath).select(pl.len()).collect().item()
+        documents = pl.scan_parquet(metaPath).select(pl.len()).collect(engine="streaming").item()
 
     return {
         "stems": stems,

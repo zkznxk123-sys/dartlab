@@ -143,7 +143,7 @@ class _FileProcessor:
                     & (pl.col("account_nm").is_in(self.fastKeysNm) | pl.col("account_id").is_in(self.fastKeysId))
                 )
             )
-            df = lz.collect()
+            df = lz.collect(engine="streaming")
         except (pl.exceptions.PolarsError, OSError):
             return None
 
@@ -302,7 +302,7 @@ def _scanAccountFromMerged(
             if freq == "Y":
                 lz = lz.filter(pl.col("reprt_nm") == "4분기")
 
-            df = lz.collect()
+            df = lz.collect(engine="streaming")
     except (pl.exceptions.PolarsError, OSError, FileNotFoundError):
         return None
 

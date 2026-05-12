@@ -272,7 +272,7 @@ def _existingFinancePeriods(path: Path) -> set[tuple[str, str]]:
             .select("bsns_year", "reprt_code")
             .filter(pl.col("bsns_year").is_not_null() & pl.col("reprt_code").is_not_null())
             .unique()
-            .collect()
+            .collect(engine="streaming")
         )
         return set(zip(df["bsns_year"].cast(pl.Utf8).to_list(), df["reprt_code"].cast(pl.Utf8).to_list()))
     except (pl.exceptions.ComputeError, pl.exceptions.SchemaError, OSError):
@@ -293,7 +293,7 @@ def _existingReportPeriods(path: Path) -> set[tuple[str, str, str]]:
             .select("year", "quarter", "apiType")
             .filter(pl.col("year").is_not_null() & pl.col("quarter").is_not_null() & pl.col("apiType").is_not_null())
             .unique()
-            .collect()
+            .collect(engine="streaming")
         )
         return set(
             zip(
@@ -539,7 +539,7 @@ async def _collectDocs(
     existingReports: set[str] = set()
     if parquetPath.exists():
         try:
-            df = pl.scan_parquet(parquetPath).select("rcept_no").collect()
+            df = pl.scan_parquet(parquetPath).select("rcept_no").collect(engine="streaming")
             existingReports = set(df["rcept_no"].unique().to_list())
         except (pl.exceptions.ComputeError, OSError):
             pass

@@ -72,7 +72,7 @@ def _loadLocalRceptNos(stockCode: str) -> tuple[set[str], str | None]:
     if not path.exists():
         return set(), None
 
-    df = pl.scan_parquet(path).select("rcept_no", "rcept_date").unique(subset=["rcept_no"]).collect()
+    df = pl.scan_parquet(path).select("rcept_no", "rcept_date").unique(subset=["rcept_no"]).collect(engine="streaming")
     if df.is_empty():
         return set(), None
 

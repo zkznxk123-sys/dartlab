@@ -271,7 +271,7 @@ class ZipDocsCollector:
         """기존 parquet에서 이미 수집된 rcept_no 세트 로드."""
         if self._parquetPath.exists():
             try:
-                df = pl.scan_parquet(self._parquetPath).select("rcept_no").collect()
+                df = pl.scan_parquet(self._parquetPath).select("rcept_no").collect(engine="streaming")
                 self._existingReports = set(df["rcept_no"].unique().to_list())
             except (pl.exceptions.ComputeError, OSError):
                 self._existingReports = set()

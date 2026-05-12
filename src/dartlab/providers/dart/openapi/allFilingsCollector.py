@@ -508,7 +508,7 @@ def loadAll() -> pl.DataFrame:
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
     if not files:
         return pl.DataFrame()
-    return pl.scan_parquet(files).collect()
+    return pl.scan_parquet(files).collect(engine="streaming")
 
 
 def stats() -> dict:
@@ -534,14 +534,14 @@ def stats() -> dict:
     for d in completed:
         path = outDir / f"{d}.parquet"
         totalSize += path.stat().st_size
-        df = pl.scan_parquet(path).select("rcept_no").collect()
+        df = pl.scan_parquet(path).select("rcept_no").collect(engine="streaming")
         totalRows += df.height
         totalFilings += df["rcept_no"].n_unique()
 
     pendingFilings = 0
     for d in pending:
         path = outDir / f"{d}{_META_SUFFIX}.parquet"
-        df = pl.scan_parquet(path).select("rcept_no").collect()
+        df = pl.scan_parquet(path).select("rcept_no").collect(engine="streaming")
         pendingFilings += df["rcept_no"].n_unique()
 
     return {

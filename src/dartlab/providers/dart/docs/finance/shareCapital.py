@@ -288,7 +288,12 @@ def buildSharesOutstandingScan(
     sectionRows = 0
     for idx, pf in enumerate(parquetFiles):
         try:
-            sub = pl.scan_parquet(str(pf)).filter(pl.col("section_title") == _SECTION_TITLE).select(keepCols).collect()
+            sub = (
+                pl.scan_parquet(str(pf))
+                .filter(pl.col("section_title") == _SECTION_TITLE)
+                .select(keepCols)
+                .collect(engine="streaming")
+            )
         except (pl.exceptions.PolarsError, OSError):
             failedFiles += 1
             continue
