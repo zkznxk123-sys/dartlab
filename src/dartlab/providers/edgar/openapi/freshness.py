@@ -134,34 +134,36 @@ def checkEdgarFreshness(ticker: str, *, forceCheck: bool = False) -> EdgarFreshn
         >>> checkEdgarFreshness("AAPL")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarFreshnessResult`` — 본 결과 dataclass.
+        - ``_isFreshnessCheckExpired`` — TTL 게이트.
 
     Requires:
         - polars
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 기반 freshness 검사 (L3). TTL 24 h 게이트 + accession_no 비교.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 자동 호출 — Company init 시 TTL 만료 시 발동.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal freshness — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 매 호출 → SEC API 부하. TTL 24 h 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - EdgarFreshnessResult / bool / Path.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 ticker parquet + 인터넷 (L3).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 모듈이 검사 — TTL 24 h.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet + SEC submissions → accession_no 비교 → 본 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) freshness.
     """
     normalized = ticker.upper()
 
@@ -266,34 +268,36 @@ def scanEdgarMarketFreshness(
         >>> scanEdgarMarketFreshness(tier="sp500", limit=10)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarFreshnessResult`` — 본 결과 dataclass.
+        - ``_isFreshnessCheckExpired`` — TTL 게이트.
 
     Requires:
         - polars
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 기반 freshness 검사 (L3). TTL 24 h 게이트 + accession_no 비교.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 자동 호출 — Company init 시 TTL 만료 시 발동.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal freshness — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 매 호출 → SEC API 부하. TTL 24 h 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - EdgarFreshnessResult / bool / Path.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 ticker parquet + 인터넷 (L3).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 모듈이 검사 — TTL 24 h.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet + SEC submissions → accession_no 비교 → 본 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) freshness.
     """
     from dartlab.frame.dataLoader import loadEdgarTargetUniverse
 
@@ -353,34 +357,36 @@ def collectEdgarMissing(
         >>> collectEdgarMissing("AAPL")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EdgarFreshnessResult`` — 본 결과 dataclass.
+        - ``_isFreshnessCheckExpired`` — TTL 게이트.
 
     Requires:
         - polars
         - time
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 기반 freshness 검사 (L3). TTL 24 h 게이트 + accession_no 비교.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 자동 호출 — Company init 시 TTL 만료 시 발동.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal freshness — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 매 호출 → SEC API 부하. TTL 24 h 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - EdgarFreshnessResult / bool / Path.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 본 ticker parquet + 인터넷 (L3).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 모듈이 검사 — TTL 24 h.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet + SEC submissions → accession_no 비교 → 본 결과.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) freshness.
     """
     from dartlab.providers.edgar.openapi.batch import batchCollectEdgar
 

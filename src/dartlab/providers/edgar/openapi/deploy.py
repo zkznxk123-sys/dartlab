@@ -72,43 +72,44 @@ def deployEdgarToHF(
         >>> deployEdgarToHF(categories=["scan"], dryRun=True)
 
     Args:
-        categories: <TODO: param desc> (list[str] | None)
-        token: <TODO: param desc> (str | None)
-        dryRun: <TODO: param desc> (bool)
-        commitMessage: <TODO: param desc> (str | None)
+        categories: 배포 카테고리 ("scan"/"docs"). None 이면 전체.
+        token: HF API 토큰. None 이면 HF_TOKEN 환경변수.
+        dryRun: True 면 실제 업로드 X, 검증만.
+        commitMessage: HF commit message. None 이면 자동.
 
     Returns:
-        <TODO: return desc> (dict[str, int])
+        dict[str, int] — 카테고리 별 업로드 건수.
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``DATA_RELEASES`` (frame.dataConfig) — HF 대상 카테고리.
 
     Requires:
         - dartlab
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR dartlab 파생물 (scan/docs) → HuggingFace 데이터셋 배포. finance/meta 차단.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 배포 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal deploy — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - finance/meta 업로드 시도 → 정책 차단.
+            - HF_TOKEN 미설정 → 업로드 실패.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict[str, int] — 카테고리 별 업로드 건수.
         Prerequisites:
-            - <TODO: 사전조건>
+            - HF_TOKEN + dartlab 파생물 (scan/docs).
         Freshness:
-            - <TODO: 데이터 freshness>
+            - 본 함수 호출 시점.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - 로컬 parquet → HuggingFace API → HF 데이터셋.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (EDGAR) HF 배포.
     """
     from huggingface_hub import HfApi
 

@@ -30,7 +30,8 @@ def getSubmissionsJson(cik: str, client: EdgarClient | None = None) -> dict[str,
         >>> getSubmissionsJson("0000320193")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``filingsFrame`` — submissions → DataFrame 변환.
+        - ``SUPPORTED_REGULAR_FORMS`` — 10-K/10-Q/20-F/40-F.
 
     Requires:
         - dartlab
@@ -38,27 +39,28 @@ def getSubmissionsJson(cik: str, client: EdgarClient | None = None) -> dict[str,
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 위임 — 회사 별 정기보고서 + 수시공시 메타 + accession_no list.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC 공시 목록 조회" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal submissions wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 전체 submissions 그대로 LLM 노출 → 토큰 폭증. form/since 필터.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (filings).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API + CIK.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK → EdgarClient → submissions API → JSON → 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) submissions.
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -88,7 +90,8 @@ def mergeSubmissionFilings(
         >>> mergeSubmissionFilings(getSubmissionsJson("0000320193"), sinceYear=2024)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``filingsFrame`` — submissions → DataFrame 변환.
+        - ``SUPPORTED_REGULAR_FORMS`` — 10-K/10-Q/20-F/40-F.
 
     Requires:
         - dartlab
@@ -96,27 +99,28 @@ def mergeSubmissionFilings(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 위임 — 회사 별 정기보고서 + 수시공시 메타 + accession_no list.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC 공시 목록 조회" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal submissions wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 전체 submissions 그대로 LLM 노출 → 토큰 폭증. form/since 필터.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (filings).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API + CIK.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK → EdgarClient → submissions API → JSON → 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) submissions.
     """
     recent = submissions.get("filings", {}).get("recent", {})
     merged = {k: list(v) for k, v in recent.items()}
@@ -183,7 +187,8 @@ def findRegularFilings(
         >>> findRegularFilings(subs, sinceYear=2024, forms=["10-K"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``filingsFrame`` — submissions → DataFrame 변환.
+        - ``SUPPORTED_REGULAR_FORMS`` — 10-K/10-Q/20-F/40-F.
 
     Requires:
         - dartlab
@@ -191,27 +196,28 @@ def findRegularFilings(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 위임 — 회사 별 정기보고서 + 수시공시 메타 + accession_no list.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC 공시 목록 조회" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal submissions wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 전체 submissions 그대로 LLM 노출 → 토큰 폭증. form/since 필터.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (filings).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API + CIK.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK → EdgarClient → submissions API → JSON → 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) submissions.
     """
     merged = mergeSubmissionFilings(submissions, sinceYear=sinceYear, client=client)
     reportDates = merged.get("reportDate", [""] * len(merged.get("form", [])))
@@ -297,7 +303,8 @@ def filingsFrame(
         >>> filingsFrame(getSubmissionsJson("0000320193"), ticker="AAPL", title="Apple Inc.")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``filingsFrame`` — submissions → DataFrame 변환.
+        - ``SUPPORTED_REGULAR_FORMS`` — 10-K/10-Q/20-F/40-F.
 
     Requires:
         - dartlab
@@ -305,27 +312,28 @@ def filingsFrame(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC submissions API 위임 — 회사 별 정기보고서 + 수시공시 메타 + accession_no list.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC 공시 목록 조회" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal submissions wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 전체 submissions 그대로 LLM 노출 → 토큰 폭증. form/since 필터.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (filings).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API + CIK.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간 (분 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK → EdgarClient → submissions API → JSON → 정규화.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) submissions.
     """
     rows = findRegularFilings(
         submissions,

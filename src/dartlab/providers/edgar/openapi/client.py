@@ -64,17 +64,18 @@ class EdgarClient:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - User-Agent 미설정 → 403. _buildUserAgent 가 기본 주입.
+                - minInterval 너무 짧음 (< 0.1) → rate limit. 0.2 권장.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / bytes / pl.DataFrame — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 인자 → httpx → SEC API → 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR).
         """
         return {"User-Agent": self.userAgent}
 
@@ -102,34 +103,36 @@ class EdgarClient:
             >>> EdgarClient().getJson("https://data.sec.gov/...")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``AsyncEdgarClient`` — 비동기 버전.
+            - ``OpenEdgar`` — facade.
 
         Requires:
             - httpx
             - time
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC EDGAR public API 호출 + User-Agent 자동 주입 + polite pacing.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 사용자 facade 는 ``OpenEdgar()`` — 본 클래스 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal SEC client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - User-Agent 미설정 → 403. _buildUserAgent 가 기본 주입.
+                - minInterval 너무 짧음 (< 0.1) → rate limit. 0.2 권장.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / bytes / pl.DataFrame — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API.
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간.
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 인자 → httpx → SEC API → 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR).
         """
         lastErr: Exception | None = None
         for attempt in range(self.maxRetries):

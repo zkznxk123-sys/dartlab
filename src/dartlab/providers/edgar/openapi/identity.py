@@ -41,34 +41,35 @@ def loadTickers(
         >>> loadTickers().head()
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``loadTickers`` / ``resolveIssuer`` / ``searchIssuers`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC company_tickers.json 다운로드 + 정규화 + 검색 (ticker / CIK / 회사명 lookup).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "ticker / CIK 변환" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal identity — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 일 1 회 이상 SEC tickers fetch 시도 → 24 h 캐시 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [cik, ticker, title, exchange] 또는 dict.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 (cache 부재 시) + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC company_tickers 갱신 (일 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - SEC company_tickers → loadTickers parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) identity.
     """
     path = _tickersPath()
     if path.exists() and not refresh:
@@ -126,34 +127,35 @@ def resolveIssuer(
         >>> resolveIssuer("AAPL")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``loadTickers`` / ``resolveIssuer`` / ``searchIssuers`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC company_tickers.json 다운로드 + 정규화 + 검색 (ticker / CIK / 회사명 lookup).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "ticker / CIK 변환" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal identity — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 일 1 회 이상 SEC tickers fetch 시도 → 24 h 캐시 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [cik, ticker, title, exchange] 또는 dict.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 (cache 부재 시) + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC company_tickers 갱신 (일 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - SEC company_tickers → loadTickers parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) identity.
     """
     if not query or not str(query).strip():
         raise ValueError("tickerOrCik가 비어 있음")
@@ -212,34 +214,35 @@ def searchIssuers(
         >>> searchIssuers("apple", limit=10)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``loadTickers`` / ``resolveIssuer`` / ``searchIssuers`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC company_tickers.json 다운로드 + 정규화 + 검색 (ticker / CIK / 회사명 lookup).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "ticker / CIK 변환" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal identity — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 일 1 회 이상 SEC tickers fetch 시도 → 24 h 캐시 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [cik, ticker, title, exchange] 또는 dict.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 (cache 부재 시) + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC company_tickers 갱신 (일 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - SEC company_tickers → loadTickers parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) identity.
     """
     if not query or not str(query).strip():
         return pl.DataFrame(schema={"ticker": pl.Utf8, "cik": pl.Utf8, "title": pl.Utf8})
@@ -287,34 +290,35 @@ def iterIssuers(
         ...     print(row["ticker"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``loadTickers`` / ``resolveIssuer`` / ``searchIssuers`` — 본 모듈 함수.
 
     Requires:
         - dartlab
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC company_tickers.json 다운로드 + 정규화 + 검색 (ticker / CIK / 회사명 lookup).
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "ticker / CIK 변환" → 본 모듈.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal identity — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - 일 1 회 이상 SEC tickers fetch 시도 → 24 h 캐시 활용.
+            - User-Agent 미설정 → 403.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - pl.DataFrame [cik, ticker, title, exchange] 또는 dict.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 (cache 부재 시) + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC company_tickers 갱신 (일 단위).
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - SEC company_tickers → loadTickers parquet → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) identity.
     """
     df = searchIssuers(query, client, refresh=refresh, limit=limit)
     yield from df.iter_rows(named=True)

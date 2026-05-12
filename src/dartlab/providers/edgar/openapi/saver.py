@@ -145,7 +145,8 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
         >>> verifyOpenEdgarSaveCompatibility("AAPL")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``saveFinance`` / ``saveDocs`` — 본 모듈 saver 함수.
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` / ``EDGAR_DOCS_SCHEMA`` — 정규화 schema.
 
     Requires:
         - dartlab
@@ -153,27 +154,28 @@ def verifyOpenEdgarSaveCompatibility(ticker: str) -> dict[str, object]:
         - uuid
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / docs → parquet 저장 + dartlab Company API 호환 검증. ticker→cik 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 저장 경로 명시 X → 기본 dataDir.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC API + ticker/cik.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - ticker → SEC API → 정규화 + 저장 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) saver.
     """
     from dartlab.providers.edgar.company import Company
 
@@ -229,7 +231,8 @@ def saveDocs(
         >>> saveDocs("AAPL", sinceYear=2020)
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``saveFinance`` / ``saveDocs`` — 본 모듈 saver 함수.
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` / ``EDGAR_DOCS_SCHEMA`` — 정규화 schema.
 
     Requires:
         - dartlab
@@ -237,27 +240,28 @@ def saveDocs(
         - uuid
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / docs → parquet 저장 + dartlab Company API 호환 검증. ticker→cik 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 저장 경로 명시 X → 기본 dataDir.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC API + ticker/cik.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - ticker → SEC API → 정규화 + 저장 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) saver.
     """
     normalized = str(ticker).upper().strip()
     _ensureIdentityCaches(client)
@@ -292,7 +296,8 @@ def saveFinance(
         >>> saveFinance("0000320193")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``saveFinance`` / ``saveDocs`` — 본 모듈 saver 함수.
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` / ``EDGAR_DOCS_SCHEMA`` — 정규화 schema.
 
     Requires:
         - dartlab
@@ -300,27 +305,28 @@ def saveFinance(
         - uuid
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / docs → parquet 저장 + dartlab Company API 호환 검증. ticker→cik 변환.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 수집 파이프라인 — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal saver — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 저장 경로 명시 X → 기본 dataDir.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - Path / pl.DataFrame — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC API + ticker/cik.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - ticker → SEC API → 정규화 + 저장 → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) saver.
     """
     normalized = str(cik).zfill(10)
     _ensureIdentityCaches(client)

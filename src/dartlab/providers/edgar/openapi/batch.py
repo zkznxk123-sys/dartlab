@@ -322,7 +322,7 @@ def batchCollectEdgar(
         >>> batchCollectEdgar(["AAPL", "MSFT"], categories=["finance"])
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``AsyncEdgarClient`` / ``batchCollectEdgar`` / ``batchCollectEdgarAll`` — 본 모듈.
 
     Requires:
         - asyncio
@@ -332,27 +332,28 @@ def batchCollectEdgar(
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR 배치 수집 — ticker list × 카테고리 ($workers=3) 분배 + parquet 저장.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 batch — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal batch — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 워커 > 3 (_MAX_WORKERS) → rate limit.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - ticker list → asyncio Queue → SEC API → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) 배치.
     """
     import time as _time
 
@@ -535,7 +536,7 @@ def batchCollectEdgarAll(
         >>> batchCollectEdgarAll(tier="sp500", mode="new")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``AsyncEdgarClient`` / ``batchCollectEdgar`` / ``batchCollectEdgarAll`` — 본 모듈.
 
     Requires:
         - asyncio
@@ -545,27 +546,28 @@ def batchCollectEdgarAll(
         - logging
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - EDGAR 배치 수집 — ticker list × 카테고리 ($workers=3) 분배 + parquet 저장.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - 운영자 batch — 사용자 API 직접 호출 X.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal batch — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 워커 > 3 (_MAX_WORKERS) → rate limit.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict / pl.DataFrame / Path — 함수별.
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - ticker list → asyncio Queue → SEC API → parquet.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR) 배치.
     """
     from dartlab.frame.dataLoader import loadEdgarTargetUniverse
 

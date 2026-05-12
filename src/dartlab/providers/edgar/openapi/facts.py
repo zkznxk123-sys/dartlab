@@ -45,7 +45,8 @@ def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str
         >>> getCompanyFactsJson("0000320193")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` — 정규화 schema.
+        - ``EdgarClient`` — HTTP backend.
 
     Requires:
         - dartlab
@@ -53,27 +54,28 @@ def getCompanyFactsJson(cik: str, client: EdgarClient | None = None) -> dict[str
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / companyconcept / frames API 위임 + JSON 정규화 → 정규화된 fact schema.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC XBRL fact 조회" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal facts wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 대량 fact 그대로 LLM 노출 → 토큰 폭증.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (EDGAR_COMPANYFACTS_SCHEMA).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK/tag/frame → EdgarClient → SEC API → 정규화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR XBRL).
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -104,7 +106,8 @@ def getCompanyConceptJson(
         >>> getCompanyConceptJson("0000320193", "us-gaap", "Revenues")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` — 정규화 schema.
+        - ``EdgarClient`` — HTTP backend.
 
     Requires:
         - dartlab
@@ -112,27 +115,28 @@ def getCompanyConceptJson(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / companyconcept / frames API 위임 + JSON 정규화 → 정규화된 fact schema.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC XBRL fact 조회" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal facts wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 대량 fact 그대로 LLM 노출 → 토큰 폭증.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (EDGAR_COMPANYFACTS_SCHEMA).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK/tag/frame → EdgarClient → SEC API → 정규화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR XBRL).
     """
     api = client or EdgarClient()
     normalized = str(cik).zfill(10)
@@ -165,7 +169,8 @@ def getFrameJson(
         >>> getFrameJson("us-gaap", "Revenues", "USD", "CY2024Q4I")
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` — 정규화 schema.
+        - ``EdgarClient`` — HTTP backend.
 
     Requires:
         - dartlab
@@ -173,27 +178,28 @@ def getFrameJson(
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / companyconcept / frames API 위임 + JSON 정규화 → 정규화된 fact schema.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC XBRL fact 조회" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal facts wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 대량 fact 그대로 LLM 노출 → 토큰 폭증.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (EDGAR_COMPANYFACTS_SCHEMA).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK/tag/frame → EdgarClient → SEC API → 정규화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR XBRL).
     """
     api = client or EdgarClient()
     return api.getJson(f"{DEFAULT_BASE_URL}/api/xbrl/frames/{taxonomy}/{tag}/{unit}/{period}.json")
@@ -215,7 +221,8 @@ def companyFactsToRows(payload: dict[str, Any]) -> pl.DataFrame:
         >>> companyFactsToRows(getCompanyFactsJson("0000320193"))
 
     SeeAlso:
-        - <TODO: 관련 함수/엔진>
+        - ``EDGAR_COMPANYFACTS_SCHEMA`` — 정규화 schema.
+        - ``EdgarClient`` — HTTP backend.
 
     Requires:
         - dartlab
@@ -223,27 +230,28 @@ def companyFactsToRows(payload: dict[str, Any]) -> pl.DataFrame:
         - polars
 
     Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
+        - SEC companyfacts / companyconcept / frames API 위임 + JSON 정규화 → 정규화된 fact schema.
 
     Guide:
-        - <TODO: 사용 시나리오>
+        - "SEC XBRL fact 조회" → 본 모듈 함수.
 
     AIContext:
-        <TODO: AI 호출 컨텍스트>
+        internal facts wrapper — AI 직접 호출 X.
 
     LLM Specifications:
         AntiPatterns:
-            - <TODO: 안티패턴>
+            - User-Agent 미설정 → 403.
+            - 대량 fact 그대로 LLM 노출 → 토큰 폭증.
         OutputSchema:
-            - <TODO: 출력 형태>
+            - dict (raw JSON) 또는 pl.DataFrame (EDGAR_COMPANYFACTS_SCHEMA).
         Prerequisites:
-            - <TODO: 사전조건>
+            - 인터넷 + SEC EDGAR public API.
         Freshness:
-            - <TODO: 데이터 freshness>
+            - SEC EDGAR 실시간.
         Dataflow:
-            - <TODO: 데이터 흐름>
+            - CIK/tag/frame → EdgarClient → SEC API → 정규화 → 본 함수.
         TargetMarkets:
-            - <TODO: 대상 시장>
+            - US (SEC EDGAR XBRL).
     """
     rows: list[dict[str, Any]] = []
     cik = str(payload.get("cik") or "").zfill(10)

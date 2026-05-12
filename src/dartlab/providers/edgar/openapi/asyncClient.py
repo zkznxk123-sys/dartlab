@@ -72,17 +72,19 @@ class AsyncEdgarClient:
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. 본 클래스 자동 주입.
+                - rate limit (10 req/s) 초과 → 차단. minInterval 0.12 기본.
+                - 동시 워커 >> 세마포어 (8) → 추가 wait, 효율 손실.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 인자 → 세마포어 → httpx → SEC API → 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 배치 수집.
         """
         return {"User-Agent": self._userAgent}
 
@@ -150,7 +152,7 @@ class AsyncEdgarClient:
             >>> await AsyncEdgarClient().getJson("https://data.sec.gov/...")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 동기 버전 (단건 호출용).
 
         Requires:
             - asyncio
@@ -158,27 +160,29 @@ class AsyncEdgarClient:
             - httpx
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC API 비동기 호출 + 세마포어 기반 rate limit. asyncio batch 수집 backend.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 — 사용자 API 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal async client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. 본 클래스 자동 주입.
+                - rate limit (10 req/s) 초과 → 차단. minInterval 0.12 기본.
+                - 동시 워커 >> 세마포어 (8) → 추가 wait, 효율 손실.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 인자 → 세마포어 → httpx → SEC API → 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 배치 수집.
         """
         resp = await self._requestWithRetry(url)
         data = resp.json()
@@ -202,7 +206,7 @@ class AsyncEdgarClient:
             >>> await AsyncEdgarClient().getBytes("https://...")
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 동기 버전 (단건 호출용).
 
         Requires:
             - asyncio
@@ -210,27 +214,29 @@ class AsyncEdgarClient:
             - httpx
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC API 비동기 호출 + 세마포어 기반 rate limit. asyncio batch 수집 backend.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 — 사용자 API 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal async client — AI 직접 호출 X.
 
         LLM Specifications:
             AntiPatterns:
-                - <TODO: 안티패턴>
+                - SEC User-Agent 헤더 미설정 → 403 Forbidden. 본 클래스 자동 주입.
+                - rate limit (10 req/s) 초과 → 차단. minInterval 0.12 기본.
+                - 동시 워커 >> 세마포어 (8) → 추가 wait, 효율 손실.
             OutputSchema:
-                - <TODO: 출력 형태>
+                - dict / bytes — endpoint 별.
             Prerequisites:
-                - <TODO: 사전조건>
+                - 인터넷 + SEC EDGAR public API (키 불요).
             Freshness:
-                - <TODO: 데이터 freshness>
+                - SEC EDGAR 실시간 (분 단위).
             Dataflow:
-                - <TODO: 데이터 흐름>
+                - 인자 → 세마포어 → httpx → SEC API → 정규화 → 본 함수.
             TargetMarkets:
-                - <TODO: 대상 시장>
+                - US (SEC EDGAR) 배치 수집.
         """
         resp = await self._requestWithRetry(url, timeout=60)
         return resp.content
@@ -245,7 +251,7 @@ class AsyncEdgarClient:
             >>> await AsyncEdgarClient().close()
 
         SeeAlso:
-            - <TODO: 관련 함수/엔진>
+            - ``EdgarClient`` — 동기 버전 (단건 호출용).
 
         Requires:
             - asyncio
@@ -253,12 +259,12 @@ class AsyncEdgarClient:
             - httpx
 
         Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
+            - SEC API 비동기 호출 + 세마포어 기반 rate limit. asyncio batch 수집 backend.
 
         Guide:
-            - <TODO: 사용 시나리오>
+            - 운영자 batch 수집 — 사용자 API 직접 호출 X.
 
         AIContext:
-            <TODO: AI 호출 컨텍스트>
+            internal async client — AI 직접 호출 X.
         """
         await self._client.aclose()
