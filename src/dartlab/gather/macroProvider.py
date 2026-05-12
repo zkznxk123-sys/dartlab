@@ -25,8 +25,15 @@ class DefaultMacroProvider:
             return dataFrame
         return dataFrame.filter(pl.col("date") <= asOf)
 
-    def fetchSeriesLatest(self, seriesId: str) -> float | None:
-        """seriesId 의 최신 값."""
+    def fetchSeriesLatest(self, seriesId: str, *, limit: int | None = None) -> float | None:
+        """seriesId 의 최신 값.
+
+        Parameters
+        ----------
+        limit : int | None
+            단건 float 반환 함수라 무시된다. 인터페이스 호환 목적.
+        """
+        del limit
         from dartlab.macro.seriesFetch import fetchLatest, getGather
 
         try:
@@ -34,8 +41,15 @@ class DefaultMacroProvider:
         except (ValueError, RuntimeError, KeyError):
             return None
 
-    def fetchSeriesYoy(self, seriesId: str) -> float | None:
-        """seriesId 의 YoY 변화율."""
+    def fetchSeriesYoy(self, seriesId: str, *, limit: int | None = None) -> float | None:
+        """seriesId 의 YoY 변화율.
+
+        Parameters
+        ----------
+        limit : int | None
+            단건 float 반환 함수라 무시된다. 인터페이스 호환 목적.
+        """
+        del limit
         from dartlab.macro.seriesFetch import fetchYoy, getGather
 
         try:
