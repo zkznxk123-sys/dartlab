@@ -1,7 +1,6 @@
 """데이터 로딩 및 공통 유틸."""
 
 import json
-import re
 import sys
 import time
 from collections import OrderedDict
@@ -15,6 +14,8 @@ from dartlab.core.dataConfig import (
     HF_REPO,
     hfBaseUrl,
 )
+from dartlab.core.dataLoaderNormalize import CATEGORICAL_COLS as _CATEGORICAL_COLS
+from dartlab.core.dataLoaderNormalize import DOWNCAST_INT_COLS as _DOWNCAST_INT_COLS
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
@@ -106,21 +107,9 @@ def _dataDir(category: str = "docs") -> Path:
 
 def _downloadWithRetry(url: str, dest: Path) -> None:
     """URL → dest 다운로드. 최대 3회 재시도 (2초, 4초 대기)."""
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    lastErr = None
-    for attempt in range(_MAX_RETRIES):
-        try:
-            with _socketTimeout():
-                urlretrieve(url, dest)
-            return
-        except (URLError, socket.timeout, OSError) as e:
-            lastErr = e
-            if dest.exists():
-                dest.unlink()
-            if attempt < _MAX_RETRIES - 1:
-                wait = 2 ** (attempt + 1)
-                time.sleep(wait)
-    raise lastErr
+    from dartlab.core.dataLoaderFreshness import downloadWithRetry
+
+    downloadWithRetry(url, dest, maxRetries=_MAX_RETRIES, socketTimeout=_socketTimeout, urlretrieve=urlretrieve)
 
 
 def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "docs") -> bool | None:
@@ -142,39 +131,22 @@ def _checkRemoteFreshness(stockCode: str, localPath: Path, category: str = "docs
     - 수정: etag 없으면 stale(True) 반환하여 다운로드를 강제. _saveEtag가 다운로드
       성공 직후 etag를 기록한다.
     """
-    hfUrl = f"{hfBaseUrl(category)}/{stockCode}.parquet"
-    etagPath = localPath.with_suffix(".parquet.etag")
-    try:
-        remoteEtag, remoteSize = _fetchRemoteEtagAndSize(hfUrl)
-        if not remoteEtag:
-            return None
-        # 1) Content-Length 손상 검증 — 로컬 parquet 크기와 HF 크기가 다르면 stale
-        if remoteSize > 0 and localPath.exists():
-            try:
-                if localPath.stat().st_size != remoteSize:
-                    return True
-            except OSError:
-                pass
-        # 2) ETag 비교
-        if etagPath.exists():
-            localEtag = etagPath.read_text(encoding="utf-8").strip()
-            return remoteEtag != localEtag
-        # etag 파일 없음 → 다운로드 이력 미상. stale로 간주하여 다운로드 강제.
-        return True
-    except (URLError, socket.timeout, OSError, ValueError):
-        return None
+    from dartlab.core.dataLoaderFreshness import checkRemoteFreshness
+
+    return checkRemoteFreshness(
+        stockCode,
+        localPath,
+        category,
+        hfBaseUrl=hfBaseUrl,
+        fetchRemoteEtagAndSize=_fetchRemoteEtagAndSize,
+    )
 
 
 def _saveEtag(stockCode: str, dest: Path, category: str = "docs") -> None:
     """다운로드 성공 후 HF ETag를 사이드카 파일에 저장."""
-    hfUrl = f"{hfBaseUrl(category)}/{stockCode}.parquet"
-    etagPath = dest.with_suffix(".parquet.etag")
-    try:
-        etag = _fetchRemoteEtag(hfUrl)
-        if etag:
-            etagPath.write_text(etag, encoding="utf-8")
-    except (URLError, socket.timeout, OSError):
-        pass
+    from dartlab.core.dataLoaderFreshness import saveEtag
+
+    saveEtag(stockCode, dest, category, hfBaseUrl=hfBaseUrl, fetchRemoteEtag=_fetchRemoteEtag)
 
 
 def _fetchRemoteEtag(url: str) -> str:
@@ -214,107 +186,51 @@ _staleWarnedPaths: set[str] = set()  # 세션당 경로별 1회만 경고
 
 def _maybeWarnStale(path: Path) -> None:
     """로컬 데이터가 매우 오래됐으면(7일+) 한 번 경고. 같은 세션에서 같은 경로는 중복 안 함."""
-    key = str(path)
-    if key in _staleWarnedPaths:
-        return
-    try:
-        age = time.time() - path.stat().st_mtime
-    except OSError:
-        return
-    ageDays = int(age // 86400)
-    if ageDays >= _STALE_WARN_DAYS:
-        _staleWarnedPaths.add(key)
-        try:
-            from dartlab.core.messaging import emit
+    from dartlab.core.dataLoaderFreshness import maybeWarnStale
 
-            emit("data:stale_warning", ageDays=ageDays)
-        except ImportError:
-            pass
+    maybeWarnStale(path, warnedPaths=_staleWarnedPaths, staleWarnDays=_STALE_WARN_DAYS)
 
 
 def _shouldRefreshDart(path: Path, refresh: str) -> bool:
     """DART 카테고리 로컬 파일의 갱신 필요 여부 판단."""
-    if refresh == "local_only":
-        return False
-    if refresh == "force_check":
-        return True
-    # auto: TTL 기반 — etag 파일의 mtime이 TTL보다 오래됐으면 체크
-    etagPath = path.with_suffix(".parquet.etag")
-    if not etagPath.exists():
-        # collect로 수집한 데이터도 7일 후 HF 최신본 확인
-        try:
-            age = time.time() - path.stat().st_mtime
-            if age > _STALE_WARN_DAYS * 86400:
-                _maybeWarnStale(path)
-            return age > _DART_FRESHNESS_TTL_HOURS * 3600 * 7
-        except OSError:
-            return False
-    try:
-        age = time.time() - etagPath.stat().st_mtime
-        if age > _STALE_WARN_DAYS * 86400:
-            _maybeWarnStale(etagPath)
-        return age > _DART_FRESHNESS_TTL_HOURS * 3600
-    except OSError:
-        return False
+    from dartlab.core.dataLoaderFreshness import shouldRefreshDart
+
+    return shouldRefreshDart(
+        path,
+        refresh,
+        staleWarnDays=_STALE_WARN_DAYS,
+        dartFreshnessTtlHours=_DART_FRESHNESS_TTL_HOURS,
+        warnStale=_maybeWarnStale,
+    )
 
 
 def _shouldRefreshHfCategory(path: Path, category: str, refresh: str) -> bool:
     """HF 공개 parquet 카테고리별 freshness 정책."""
-    if category not in {"krxPrices", "krxIndices"}:
-        return _shouldRefreshDart(path, refresh)
-    if refresh == "local_only":
-        return False
-    if refresh == "force_check":
-        return True
-    etagPath = path.with_suffix(".parquet.etag")
-    if not etagPath.exists():
-        return True
-    try:
-        age = time.time() - etagPath.stat().st_mtime
-        return age > _KRX_FRESHNESS_TTL_HOURS * 3600
-    except OSError:
-        return True
+    from dartlab.core.dataLoaderFreshness import shouldRefreshHfCategory
+
+    return shouldRefreshHfCategory(
+        path,
+        category,
+        refresh,
+        krxFreshnessTtlHours=_KRX_FRESHNESS_TTL_HOURS,
+        shouldRefreshDartFunc=_shouldRefreshDart,
+    )
 
 
 def _refreshFromHf(stockCode: str, path: Path, category: str) -> None:
     """ETag 비교 후 HF가 최신이면 다운로드로 갱신. 실패 시 기존 파일 유지."""
-    stale = _checkRemoteFreshness(stockCode, path, category)
-    if stale is None:
-        # 네트워크 오류 — etag mtime만 갱신하여 다음 TTL까지 재시도 방지
-        etagPath = path.with_suffix(".parquet.etag")
-        if etagPath.exists():
-            etagPath.touch()
-        return
-    if stale is not True:
-        # fresh — etag mtime touch하여 다음 TTL 동안 skip
-        # (이게 없으면 매 호출마다 HTTP HEAD 요청 발생 → 0.27초 × N개 카테고리)
-        etagPath = path.with_suffix(".parquet.etag")
-        if etagPath.exists():
-            etagPath.touch()
-        return
-    from dartlab.core.messaging import emit
+    from dartlab.core.dataLoaderFreshness import refreshFromHf
 
-    label = DATA_RELEASES[category]["label"]
-    tmpPath = path.with_suffix(".tmp")
-    try:
-        emit("download:start", stockCode=stockCode, label=label)
-        hfUrl = f"{hfBaseUrl(category)}/{stockCode}.parquet"
-        _downloadWithRetry(hfUrl, tmpPath)
-        tmpPath.replace(path)
-        _saveEtag(stockCode, path, category)
-        size = path.stat().st_size
-        sizeStr = f"{size / 1024:.0f}KB" if size < 1024 * 1024 else f"{size / 1024 / 1024:.1f}MB"
-        emit("download:done_short", sizeStr=sizeStr)
-    except (URLError, socket.timeout, OSError) as e:
-        if tmpPath.exists():
-            tmpPath.unlink()
-        # 갱신 실패는 사용자가 알아야 함 — progress(verbose-only) → emit으로 승격
-        emit(
-            "download:failed_single",
-            stockCode=stockCode,
-            label=label,
-            error=str(e),
-        )
+    refreshFromHf(
+        stockCode,
+        path,
+        category,
+        dataReleases=DATA_RELEASES,
+        hfBaseUrl=hfBaseUrl,
+        checkRemoteFreshness=_checkRemoteFreshness,
+        downloadWithRetry=_downloadWithRetry,
+        saveEtag=_saveEtag,
+    )
 
 
 def repairLocalCache(category: str = "finance", *, dryRun: bool = False) -> dict[str, int]:
@@ -692,39 +608,16 @@ def buildIndex(category: str = "docs") -> pl.DataFrame:
 
 def updateEdgarListedUniverse(*, force: bool = False) -> Path:
     """SEC exchange ticker 원본으로 listed universe 캐시 갱신."""
-    path = _getDataRoot() / "edgar" / "listedUniverse.parquet"
-    if not force and path.exists() and not _isLocalCacheExpired(path, _EDGAR_UNIVERSE_TTL_HOURS):
-        return path
+    from dartlab.core.dataLoaderUniverse import updateEdgarListedUniverse as _impl
 
-    from dartlab.core.messaging import emit
-
-    emit("edgar:universe_update")
-    data = _fetchJson(EDGAR_LISTED_UNIVERSE_URL)
-
-    records = []
-    for row in data.get("data", []):
-        if len(row) < 4:
-            continue
-        cik, name, ticker, exchange = row[:4]
-        tickerStr = str(ticker or "").upper().strip()
-        exchangeStr = str(exchange or "").strip()
-        if not tickerStr:
-            continue
-        records.append(
-            {
-                "cik": str(cik).zfill(10),
-                "ticker": tickerStr,
-                "title": str(name or "").strip(),
-                "exchange": exchangeStr,
-                "is_exchange_listed": exchangeStr in _LISTED_EXCHANGES,
-                "is_otc": exchangeStr == "OTC",
-            }
-        )
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    pl.DataFrame(records).write_parquet(path)
-    emit("edgar:universe_save", path=str(path))
-    return path
+    return _impl(
+        force=force,
+        dataRoot=_getDataRoot(),
+        ttlHours=_EDGAR_UNIVERSE_TTL_HOURS,
+        listedUniverseUrl=EDGAR_LISTED_UNIVERSE_URL,
+        fetchJson=_fetchJson,
+        isLocalCacheExpired=_isLocalCacheExpired,
+    )
 
 
 def loadEdgarListedUniverse(*, forceUpdate: bool = False) -> pl.DataFrame:
@@ -749,36 +642,16 @@ def loadEdgarTargetUniverse(tier: str = "all") -> pl.DataFrame:
     pl.DataFrame
         cik, ticker, title, exchange 컬럼.
     """
-    universe = loadEdgarListedUniverse()
-    listed = universe.filter(pl.col("is_exchange_listed"))
+    from dartlab.core.dataLoaderUniverse import loadEdgarTargetUniverse as _impl
 
-    if tier == "all":
-        return listed
-    if tier == "nasdaq":
-        return listed.filter(pl.col("exchange") == "Nasdaq")
-    if tier == "nyse":
-        return listed.filter(pl.col("exchange") == "NYSE")
-    if tier == "sp500":
-        sp500 = _loadSp500Tickers()
-        if sp500 is not None:
-            return listed.filter(pl.col("ticker").is_in(sp500))
-        return listed
-    return listed
+    return _impl(loadEdgarListedUniverse(), tier, _loadSp500Tickers())
 
 
 def _loadSp500Tickers() -> list[str] | None:
     """정적 S&P 500 ticker 목록 로드 (edgarTickers.json fallback)."""
-    import json as _json
+    from dartlab.core.dataLoaderUniverse import loadSp500Tickers
 
-    candidates = [
-        Path(__file__).resolve().parents[3] / ".github" / "data" / "edgarTickers.json",
-    ]
-    for fp in candidates:
-        if fp.exists():
-            data = _json.loads(fp.read_text(encoding="utf-8"))
-            tickers = data.get("sp500", [])
-            return tickers if tickers else None
-    return None
+    return loadSp500Tickers(Path(__file__).resolve().parents[3])
 
 
 def extractCorpName(df: pl.DataFrame) -> str | None:
@@ -812,191 +685,50 @@ def _fetchJson(url: str) -> dict:
             return json.loads(resp.read())
 
 
-# ── 메모리 최적화: Categorical + 다운캐스트 ──────────────
-
-# 반복 빈도 높은 문자열 컬럼 → Categorical (정수 인덱스로 90%+ 절감)
-_CATEGORICAL_COLS = frozenset(
-    {
-        "source",  # dart/edgar (== 비교만 사용)
-        "account_id",  # XBRL 계정 ID (수백 종류, 수만 행, == 비교만)
-        "blockType",  # text/table/heading 등 (== 비교만)
-        "form_type",  # 10-K/10-Q 등 (== 비교만)
-        # 제외: report_type, section_title, sj_div, topic → .str 연산 사용
-    }
-)
-
-# 작은 정수 컬럼 → Int32 (Int64 대비 50% 절감 + CPU 캐시 친화)
-_DOWNCAST_INT_COLS = frozenset(
-    {
-        "year",
-        "section_order",
-        "bsns_year",
-    }
-)
+# ── 메모리 최적화 + docs 표준화 ────────────────────────────────────
 
 
 def _optimizeMemory(df: pl.DataFrame) -> pl.DataFrame:
     """Categorical 전환 + Int 다운캐스트로 메모리 절감."""
-    exprs: list[pl.Expr] = []
-    schema = df.schema
-    for col, dtype in schema.items():
-        if col in _CATEGORICAL_COLS and dtype == pl.Utf8:
-            exprs.append(pl.col(col).cast(pl.Categorical))
-        elif col in _DOWNCAST_INT_COLS and dtype == pl.Int64:
-            exprs.append(pl.col(col).cast(pl.Int32))
-    if exprs:
-        return df.with_columns(exprs)
-    return df
+    from dartlab.core.dataLoaderNormalize import optimizeMemory
+
+    return optimizeMemory(df)
 
 
 def _normalizeLoadedFrame(df: pl.DataFrame, category: str) -> pl.DataFrame:
-    # pandas 레거시 인덱스 컬럼 제거
-    if "__index_level_0__" in df.columns:
-        df = df.drop("__index_level_0__")
-    if category == "docs":
-        df = _normalizeDartDocs(df)
-    elif category == "edgarDocs":
-        df = _normalizeEdgarDocs(df)
-    return _optimizeMemory(df)
+    from dartlab.core.dataLoaderNormalize import normalizeLoadedFrame
+
+    return normalizeLoadedFrame(df, category)
 
 
 def _normalizeDartDocs(df: pl.DataFrame) -> pl.DataFrame:
-    cols = set(df.columns)
-    exprs: list[pl.Expr] = []
+    from dartlab.core.dataLoaderNormalize import normalizeDartDocs
 
-    if "source" not in cols:
-        exprs.append(pl.lit("dart").alias("source"))
-    if "entity_id" not in cols and "stock_code" in cols:
-        exprs.append(pl.col("stock_code").alias("entity_id"))
-    if "doc_id" not in cols and "rcept_no" in cols:
-        exprs.append(pl.col("rcept_no").alias("doc_id"))
-    if "doc_date" not in cols and "rcept_date" in cols:
-        exprs.append(pl.col("rcept_date").alias("doc_date"))
-    if "doc_url" not in cols and "section_url" in cols:
-        exprs.append(pl.col("section_url").alias("doc_url"))
-    if "period_key" not in cols and "report_type" in cols:
-        from dartlab.providers.reportSelector import parsePeriodKey
-
-        exprs.append(pl.col("report_type").map_elements(parsePeriodKey, return_dtype=pl.Utf8).alias("period_key"))
-
-    if exprs:
-        return df.with_columns(exprs)
-    return df
+    return normalizeDartDocs(df)
 
 
 def _normalizeEdgarDocs(df: pl.DataFrame) -> pl.DataFrame:
-    cols = set(df.columns)
-    exprs: list[pl.Expr] = []
+    from dartlab.core.dataLoaderNormalize import normalizeEdgarDocs
 
-    if "report_type" not in cols and "form_type" in cols:
-        exprs.append(
-            pl.struct([col for col in ("form_type", "period_end", "year") if col in cols])
-            .map_elements(_edgarReportTypeFromRow, return_dtype=pl.Utf8)
-            .alias("report_type")
-        )
-
-    if "source" not in cols:
-        exprs.append(pl.lit("edgar").alias("source"))
-    if "entity_id" not in cols and "ticker" in cols:
-        exprs.append(pl.col("ticker").alias("entity_id"))
-    if "doc_id" not in cols and "accession_no" in cols:
-        exprs.append(pl.col("accession_no").alias("doc_id"))
-    if "doc_date" not in cols and "filing_date" in cols:
-        exprs.append(pl.col("filing_date").alias("doc_date"))
-    if "doc_url" not in cols and "filing_url" in cols:
-        exprs.append(pl.col("filing_url").alias("doc_url"))
-
-    result = df.with_columns(exprs) if exprs else df
-    return _applyEdgarPeriodKeys(result)
+    return normalizeEdgarDocs(df)
 
 
 def _edgarReportTypeFromRow(row: dict) -> str | None:
-    formType = row.get("form_type")
-    periodEnd = row.get("period_end")
-    year = row.get("year")
-    if not formType:
-        return None
-    if not periodEnd:
-        if formType in ("10-K", "20-F", "40-F") and year:
-            return f"{formType} ({year}.12)"
-        return str(formType)
+    from dartlab.core.dataLoaderNormalize import edgarReportTypeFromRow
 
-    match = re.match(r"(\d{4})-(\d{2})", str(periodEnd))
-    if not match:
-        return str(formType)
-    year, month = match.groups()
-    return f"{formType} ({year}.{month})"
+    return edgarReportTypeFromRow(row)
 
 
 def _applyEdgarPeriodKeys(df: pl.DataFrame) -> pl.DataFrame:
-    if "accession_no" not in df.columns or "form_type" not in df.columns:
-        return df
+    from dartlab.core.dataLoaderNormalize import applyEdgarPeriodKeys
 
-    cols = [col for col in ("accession_no", "form_type", "filing_date", "period_end", "year") if col in df.columns]
-    filingDf = df.select(cols).unique(subset=["accession_no"]).sort(["filing_date", "accession_no"])
-    filings = filingDf.to_dicts()
-    periodMap = _inferEdgarPeriodKeyMap(filings)
-    if not periodMap:
-        return df
-
-    return df.with_columns(
-        pl.col("accession_no")
-        .map_elements(lambda accession: periodMap.get(str(accession)), return_dtype=pl.Utf8)
-        .alias("period_key")
-    )
+    return applyEdgarPeriodKeys(df)
 
 
 def _inferEdgarPeriodKeyMap(filings: list[dict]) -> dict[str, str | None]:
-    annualForms = {"10-K", "20-F", "40-F"}
-    enriched = []
-    for filing in filings:
-        accession = str(filing.get("accession_no") or "")
-        formType = str(filing.get("form_type") or "")
-        filingDate = str(filing.get("filing_date") or "")
-        periodEnd = filing.get("period_end")
-        periodEndStr = str(periodEnd) if periodEnd else ""
-        sortKey = periodEndStr or filingDate
-        enriched.append(
-            {
-                "accession_no": accession,
-                "form_type": formType,
-                "filing_date": filingDate,
-                "period_end": periodEndStr,
-                "year": str(filing.get("year") or ""),
-                "sort_key": sortKey,
-            }
-        )
+    from dartlab.core.dataLoaderNormalize import inferEdgarPeriodKeyMap
 
-    enriched.sort(key=lambda row: (row["sort_key"], row["filing_date"], row["accession_no"]))
-    periodMap: dict[str, str | None] = {}
-
-    annualIdx = [i for i, row in enumerate(enriched) if row["form_type"] in annualForms and row["period_end"]]
-
-    for idx in annualIdx:
-        annual = enriched[idx]
-        periodMap[annual["accession_no"]] = annual["period_end"][:4]
-
-    for pos in range(1, len(annualIdx)):
-        prevAnnual = annualIdx[pos - 1]
-        curAnnual = annualIdx[pos]
-        fy = enriched[curAnnual]["period_end"][:4]
-        qRows = [row for row in enriched[prevAnnual + 1 : curAnnual] if row["form_type"] == "10-Q"]
-        for qNum, row in enumerate(qRows[:3], start=1):
-            periodMap[row["accession_no"]] = f"{fy}Q{qNum}"
-
-    if annualIdx:
-        lastAnnual = annualIdx[-1]
-        lastFy = int(enriched[lastAnnual]["period_end"][:4])
-        qRows = [row for row in enriched[lastAnnual + 1 :] if row["form_type"] == "10-Q"]
-        for qNum, row in enumerate(qRows[:3], start=1):
-            periodMap[row["accession_no"]] = f"{lastFy + 1}Q{qNum}"
-
-    if not annualIdx:
-        for row in enriched:
-            if row["form_type"] in annualForms and row["year"]:
-                periodMap[row["accession_no"]] = row["year"]
-
-    return periodMap
+    return inferEdgarPeriodKeyMap(filings)
 
 
 # ── Pyodide (emscripten) 전용 경로 ──────────────────────────────────
@@ -1015,54 +747,9 @@ def _loadDataPyodide(
     Python은 로컬 파일처럼 pyarrow로 읽는다.
     polars WASM wheel은 read_parquet 비활성이므로 pyarrow 경유.
     """
-    import io
+    from dartlab.core.dataLoaderPyodide import loadDataPyodide
 
-    import pyarrow.parquet as pq
-
-    dirPath = DATA_RELEASES[category]["dir"]
-    path = Path(f"/data/{dirPath}/{stockCode}.parquet")
-
-    if not path.exists():
-        _pyodideFetchToFS(stockCode, category, dirPath, path)
-
-    arrow_table = pq.read_table(io.BytesIO(path.read_bytes()))
-    # polars WASM에서 from_arrow 시 pyarrow 미인식 문제 우회:
-    # polars.dependencies의 lazy import 캐시를 강제 갱신
-    try:
-        df = pl.from_arrow(arrow_table)
-    except (ModuleNotFoundError, ImportError):
-        import pyarrow as _pa  # noqa: F811 — 이미 import됐지만 polars에 인식시키기 위해
-
-        try:
-            import polars.dependencies as _pdeps
-
-            _pdeps._lazy_import.cache_clear() if hasattr(_pdeps._lazy_import, "cache_clear") else None
-            _pdeps.pyarrow = _pa  # type: ignore[attr-defined]
-        except (AttributeError, TypeError):
-            pass
-        try:
-            df = pl.from_arrow(arrow_table)
-        except (ModuleNotFoundError, ImportError):
-            # 최종 fallback: pydict 경유 (데이터 타입 손실 가능)
-            df = pl.DataFrame(arrow_table.to_pydict())
-
-    # sinceYear 필터
-    if sinceYear is not None:
-        for colName in ("year", "bsns_year"):
-            if colName in df.columns:
-                yearCol = pl.col(colName)
-                if df.schema[colName] == pl.Utf8:
-                    yearCol = yearCol.cast(pl.Int32, strict=False)
-                df = df.filter(yearCol >= sinceYear)
-                break
-
-    # 컬럼 프로젝션
-    if columns:
-        available = [c for c in columns if c in df.columns]
-        if available:
-            df = df.select(available)
-
-    return _normalizeLoadedFrame(df, category)
+    return loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
 
 
 def _pyodideFetchScanLite() -> None:
@@ -1073,27 +760,9 @@ def _pyodideFetchScanLite() -> None:
     경량본 1 파일만 선별 수신한다. 실패 시 명시적 에러를 emit 하여 fallback 이 조용히
     부분 결과를 돌려주는 상황을 차단한다.
     """
-    from dartlab.core.messaging import emit
+    from dartlab.core.dataLoaderPyodide import pyodideFetchScanLite
 
-    scanDir = _dataDir("scan")
-    scanDir.mkdir(parents=True, exist_ok=True)
-    dest = scanDir / "finance-lite.parquet"
-
-    try:
-        _pyodideFetchToFS("finance-lite", "scan", "dart/scan", dest)
-    except (RuntimeError, OSError) as exc:
-        emit("scan:prebuild_failed", error=str(exc))
-        raise
-
-    if not dest.exists() or dest.stat().st_size < 1024 * 1024:
-        emit(
-            "scan:prebuild_incomplete",
-            missing=["finance-lite.parquet (수신 실패 또는 1MB 미만)"],
-        )
-        raise RuntimeError("scan finance-lite 수신 실패. 네트워크/HF 응답 확인 후 재시도하세요.")
-
-    sizeMb = dest.stat().st_size / 1024 / 1024
-    emit("scan:prebuild_ready", fileCount=f"{sizeMb:.1f}MB (finance-lite)")
+    pyodideFetchScanLite(_dataDir)
 
 
 def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -> None:
@@ -1102,79 +771,6 @@ def _pyodideFetchToFS(stockCode: str, category: str, dirPath: str, path: Path) -
     여러 pyodide 환경(브라우저/xlwings lite/JupyterLite/Node)을 지원하기 위해
     3가지 방법을 순차 시도한다.
     """
-    url = f"{hfBaseUrl(category)}/{stockCode}.parquet"
-    path.parent.mkdir(parents=True, exist_ok=True)
+    from dartlab.core.dataLoaderPyodide import pyodideFetchToFS
 
-    buf = None
-
-    # 방법 0: JSPI (pyodide.ffi.run_sync + pyfetch) — Chrome 137+ / Node --experimental-wasm-stack-switching.
-    # async context 여도 동기 wrap 가능하므로 xlwings Lite 등 async 셀에서 Company() 자동 fetch 복원.
-    try:
-        from pyodide.ffi import run_sync  # type: ignore[import-not-found]
-        from pyodide.http import pyfetch  # type: ignore[import-not-found]
-
-        resp = run_sync(pyfetch(url))
-        if resp.status == 200:
-            buf = bytes(run_sync(resp.bytes()))
-    except Exception:
-        pass
-
-    # 방법 1: pyodide.http.pyfetch (async → run_until_complete) — 동기 컨텍스트 전용
-    if buf is None:
-        try:
-            import asyncio
-
-            from pyodide.http import pyfetch  # type: ignore[import-not-found]
-
-            async def _fetch():
-                resp = await pyfetch(url)
-                if resp.status != 200:
-                    raise RuntimeError(f"HTTP {resp.status}")
-                return await resp.bytes()
-
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # 이미 async context — coroutine을 직접 await할 수 없으므로 방법 2로
-                raise RuntimeError("event loop running")
-            buf = loop.run_until_complete(_fetch())
-        except Exception:
-            pass
-
-    # 방법 2: JS XMLHttpRequest sync + overrideMimeType
-    if buf is None:
-        try:
-            from js import XMLHttpRequest  # type: ignore[import-not-found]
-
-            xhr = XMLHttpRequest.new()
-            xhr.open("GET", url, False)
-            xhr.overrideMimeType("text/plain; charset=x-user-defined")
-            xhr.send()
-            if xhr.status == 200:
-                raw = xhr.responseText
-                buf = bytes(ord(c) & 0xFF for c in raw)
-        except Exception:
-            pass
-
-    # 방법 3: pyodide.http.open_url (텍스트 전용이지만 최후 수단)
-    if buf is None:
-        try:
-            from pyodide.http import open_url  # type: ignore[import-not-found]
-
-            resp = open_url(url)
-            raw = resp.read()
-            buf = raw.encode("latin-1") if isinstance(raw, str) else raw
-        except Exception:
-            pass
-
-    if buf is None:
-        raise RuntimeError(
-            f"Pyodide fetch 실패: {url}\n"
-            "데이터를 수동으로 로드하세요:\n"
-            "  from pyodide.http import pyfetch\n"
-            f"  resp = await pyfetch('{url}')\n"
-            f"  buf = await resp.bytes()\n"
-            "  import os; os.makedirs('/data/{dirPath}', exist_ok=True)\n"
-            f"  open('/data/{dirPath}/{stockCode}.parquet', 'wb').write(buf)"
-        )
-
-    path.write_bytes(buf)
+    pyodideFetchToFS(stockCode, category, dirPath, path)
