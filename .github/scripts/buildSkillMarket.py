@@ -4,6 +4,8 @@ The script is safe for local builds without a token: it writes empty market
 indexes so the static site can prerender.  In GitHub Actions, it reads the
 `Skill Market` discussion category through GraphQL and optionally posts or
 updates a Forge draft comment on the discussion that triggered the workflow.
+If the repository has not created the dedicated category yet, it reads
+`[Skill Market]` discussions from the Ideas category as a bootstrap path.
 """
 
 from __future__ import annotations
@@ -42,6 +44,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     parser.add_argument("--category", default="Skill Market")
+    parser.add_argument("--fallback-category", default="Ideas")
+    parser.add_argument("--fallback-title-prefix", default="[Skill Market]")
     parser.add_argument("--write-comment", action="store_true")
     parser.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY", ""))
     args = parser.parse_args(argv)
@@ -56,13 +60,35 @@ def main(argv: list[str] | None = None) -> int:
 
     owner, repoName = args.repo.split("/", 1)
     client = GraphqlClient(token)
+    sourceCategory = args.category
     try:
         categoryId = fetchCategoryId(client, owner, repoName, args.category)
         discussions = fetchDiscussions(client, owner, repoName, categoryId)
     except Exception as exc:  # noqa: BLE001 - workflow should keep Pages buildable.
-        print(f"[skill-market] GitHub fetch failed: {exc}", file=sys.stderr)
-        writeMarketFiles(outDir, emptyPayload(generatedAt, reason=f"github fetch failed: {type(exc).__name__}"))
-        return 0
+        if "discussion category not found" not in str(exc) or not args.fallback_category:
+            print(f"[skill-market] GitHub fetch failed: {exc}", file=sys.stderr)
+            writeMarketFiles(outDir, emptyPayload(generatedAt, reason=f"github fetch failed: {type(exc).__name__}"))
+            return 0
+        try:
+            fallbackId = fetchCategoryId(client, owner, repoName, args.fallback_category)
+            fetched = fetchDiscussions(client, owner, repoName, fallbackId)
+            discussions = [
+                discussion
+                for discussion in fetched
+                if isMarketDiscussion(discussion, args.category, args.fallback_title_prefix)
+            ]
+            sourceCategory = f"{args.fallback_category}:{args.fallback_title_prefix}"
+            print(
+                f"[skill-market] category {args.category!r} not found; "
+                f"using {args.fallback_category!r} discussions with prefix {args.fallback_title_prefix!r}"
+            )
+        except Exception as fallbackExc:  # noqa: BLE001 - workflow should keep Pages buildable.
+            print(f"[skill-market] GitHub fallback fetch failed: {fallbackExc}", file=sys.stderr)
+            writeMarketFiles(
+                outDir,
+                emptyPayload(generatedAt, reason=f"github fallback failed: {type(fallbackExc).__name__}"),
+            )
+            return 0
 
     curatorLogins = curatorSet(owner)
     skills = [buildMarketSkill(discussion, curatorLogins=curatorLogins) for discussion in discussions]
@@ -72,7 +98,7 @@ def main(argv: list[str] | None = None) -> int:
             "meta": {
                 "schemaVersion": "1",
                 "source": "github-discussions",
-                "category": args.category,
+                "category": sourceCategory,
                 "generatedAt": generatedAt,
                 "skillCount": len(skills),
                 "trustPolicy": "community market entries are untrusted until curated",
@@ -86,7 +112,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.write_comment:
         eventDiscussion = loadEventDiscussion()
-        if eventDiscussion and (eventDiscussion.get("category") or {}).get("name") == args.category:
+        if eventDiscussion and isMarketDiscussion(eventDiscussion, args.category, args.fallback_title_prefix):
             skill = next(
                 (item for item in skills if item.get("discussionNumber") == eventDiscussion.get("number")), None
             )
@@ -96,6 +122,14 @@ def main(argv: list[str] | None = None) -> int:
                 except Exception as exc:  # noqa: BLE001 - comment failure should not block index.
                     print(f"[skill-market] forge comment failed: {exc}", file=sys.stderr)
     return 0
+
+
+def isMarketDiscussion(discussion: dict[str, Any], categoryName: str, titlePrefix: str) -> bool:
+    category = ((discussion.get("category") or {}).get("name")) or ""
+    title = str(discussion.get("title") or "")
+    if category == categoryName:
+        return True
+    return bool(titlePrefix and title.lower().startswith(titlePrefix.lower()))
 
 
 class GraphqlClient:
@@ -246,9 +280,9 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
 def parseSkillText(title: str, body: str) -> dict[str, Any]:
     text = normalizeText(body)
     inputs = extractList(text, ("입력", "inputs", "input"))
-    outputs = extractList(text, ("결과", "출력", "outputs", "output"))
-    criteria = extractList(text, ("기준", "판단", "criteria", "threshold"))
-    examples = extractList(text, ("예시", "example", "examples"))
+    outputs = extractList(text, ("기대 결과", "결과", "출력", "outputs", "output"))
+    criteria = extractList(text, ("판단 기준", "기준", "판단", "criteria", "threshold"))
+    examples = extractList(text, ("예시 질문", "예시", "example", "examples"))
     if not inputs:
         inputs = inferInputs(text)
     if not outputs:
@@ -350,6 +384,9 @@ def mapBuiltinSkills(text: str) -> list[str]:
         (("peer", "비교", "횡단"), "engines.scan"),
         (("신용", "부도", "credit"), "engines.credit"),
         (("거시", "금리", "macro"), "engines.macro"),
+        (("cpi", "fomc", "금통위", "경제 이벤트", "서프라이즈"), "engines.macro.rates"),
+        (("고용", "실업률", "침체확률"), "engines.macro.forecast"),
+        (("섹터", "업종", "sector"), "recipes.macro.sectorRotation"),
         (("퀀트", "팩터", "quant"), "engines.quant"),
         (("산업", "밸류체인", "industry"), "engines.industry"),
         (("공시", "disclosure", "filing"), "engines.search"),
@@ -372,6 +409,10 @@ def inferTags(text: str) -> list[str]:
         ("peer", "peer"),
         ("공시", "disclosure"),
         ("거시", "macro"),
+        ("cpi", "macro-event"),
+        ("fomc", "policy"),
+        ("금통위", "policy"),
+        ("서프라이즈", "surprise"),
         ("퀀트", "quant"),
     ]:
         if key.lower() in lowered:
@@ -386,17 +427,21 @@ def readModeratorState(comments: list[dict[str, Any]], curatorLogins: set[str]) 
         author = ((comment.get("author") or {}).get("login")) or ""
         if author not in curatorLogins:
             continue
-        body = str(comment.get("body") or "").lower()
-        if "/market curated" in body:
+        commands = {
+            line.strip().lower()
+            for line in str(comment.get("body") or "").splitlines()
+            if line.strip().startswith("/market ")
+        }
+        if any(command.startswith("/market curated") for command in commands):
             state = "curated"
             curators.add(author)
-        elif "/market builtin-candidate" in body:
+        elif any(command.startswith("/market builtin-candidate") for command in commands):
             state = "builtin-candidate"
             curators.add(author)
-        elif "/market runnable" in body:
+        elif any(command.startswith("/market runnable") for command in commands):
             state = "runnable"
             curators.add(author)
-        elif "/market blocked" in body:
+        elif any(command.startswith("/market blocked") for command in commands):
             state = "blocked"
             curators.add(author)
     trustTier = {
@@ -628,7 +673,8 @@ def dedupeClean(values: list[str]) -> list[str]:
 
 def firstParagraph(text: str) -> str:
     for part in re.split(r"\n\s*\n", text):
-        clean = re.sub(r"\s+", " ", part).strip()
+        lines = [line for line in part.splitlines() if not line.strip().startswith("#")]
+        clean = re.sub(r"\s+", " ", "\n".join(lines)).strip()
         if clean:
             return clean[:500]
     return ""

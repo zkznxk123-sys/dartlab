@@ -2390,7 +2390,9 @@
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
-      "limitations": []
+      "limitations": [
+        "Pyodide 는 정적 market index 조회만 수행하고 GitHub Discussion 재색인은 하지 않는다."
+      ]
     },
     {
       "id": "runtime.channel",
