@@ -32,8 +32,60 @@ export interface GraphPayload {
 	unreachable: string[];
 }
 
+export interface GraphRegion {
+	id: string;
+	title: string;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	count: number;
+}
+
+export const graphCategoryOrder = ['start', 'runtime', 'operation', 'engines', 'recipes'] as const;
+
+export const graphCategoryTitle: Record<string, string> = {
+	start: 'Start',
+	runtime: 'Runtime',
+	operation: 'Operation',
+	engines: 'Engines',
+	recipes: 'Recipes'
+};
+
 export function loadGraph(): GraphPayload {
 	return graphPayload as GraphPayload;
+}
+
+export function buildCategoryRegions(
+	graph: GraphPayload,
+	opts: { width: number; height: number }
+): GraphRegion[] {
+	const margin = 28;
+	const gap = 18;
+	const topHeight = Math.round(opts.height * 0.32);
+	const bottomY = margin + topHeight + gap;
+	const bottomHeight = opts.height - bottomY - margin;
+	const topWidth = (opts.width - margin * 2 - gap * 2) / 3;
+	const bottomWidth = (opts.width - margin * 2 - gap) / 2;
+	const counts = graph.nodes.reduce<Record<string, number>>((acc, node) => {
+		acc[node.category] = (acc[node.category] ?? 0) + 1;
+		return acc;
+	}, {});
+
+	const rects: Record<string, Omit<GraphRegion, 'id' | 'title' | 'count'>> = {
+		start: { x: margin, y: margin, width: topWidth, height: topHeight },
+		runtime: { x: margin + topWidth + gap, y: margin, width: topWidth, height: topHeight },
+		operation: { x: margin + (topWidth + gap) * 2, y: margin, width: topWidth, height: topHeight },
+		engines: { x: margin, y: bottomY, width: bottomWidth, height: bottomHeight },
+		recipes: { x: margin + bottomWidth + gap, y: bottomY, width: bottomWidth, height: bottomHeight }
+	};
+
+	return graphCategoryOrder.map((id) => ({
+		id,
+		title: graphCategoryTitle[id],
+		count: counts[id] ?? 0,
+		...rects[id]
+	}));
 }
 
 // d3-hierarchy 트리 변환 — 카테고리 → cluster → skill 3 단계 트리.
@@ -70,6 +122,8 @@ export function buildForceSimulation(
 	graph: GraphPayload,
 	opts: { width: number; height: number }
 ) {
+	const regions = buildCategoryRegions(graph, opts);
+	const regionById = new Map(regions.map((region) => [region.id, region]));
 	const nodes = graph.nodes.map((n) => ({ ...n }));
 	const links = graph.edges
 		.filter((e) => e.kind === 'successor' || e.kind === 'linkedRecipe' || e.kind === 'knowledge')
@@ -82,12 +136,33 @@ export function buildForceSimulation(
 			d3
 				.forceLink(links as d3.SimulationLinkDatum<d3.SimulationNodeDatum>[])
 				.id((d: any) => d.id)
-				.distance(60)
-				.strength(0.4)
+				.distance((link: any) => (link.kind === 'knowledge' ? 140 : 96))
+				.strength((link: any) => (link.kind === 'knowledge' ? 0.08 : 0.18))
 		)
-		.force('charge', d3.forceManyBody().strength(-200))
-		.force('collide', d3.forceCollide(28))
-		.force('center', d3.forceCenter(opts.width / 2, opts.height / 2));
+		.force('charge', d3.forceManyBody().strength(-105))
+		.force('collide', d3.forceCollide(17))
+		.force(
+			'x',
+			d3
+				.forceX((node: any) => {
+					const region = regionById.get(node.category);
+					return region ? region.x + region.width / 2 : opts.width / 2;
+				})
+				.strength(0.22)
+		)
+		.force(
+			'y',
+			d3
+				.forceY((node: any) => {
+					const region = regionById.get(node.category);
+					return region ? region.y + region.height / 2 : opts.height / 2;
+				})
+				.strength(0.24)
+		)
+		.force('center', d3.forceCenter(opts.width / 2, opts.height / 2).strength(0.02));
+
+	for (let i = 0; i < 260; i += 1) sim.tick();
+	sim.stop();
 
 	return { nodes, links, simulation: sim };
 }

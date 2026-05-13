@@ -75,6 +75,13 @@
 				<ArrowRight size={14} />
 			</a>
 		</p>
+		<p class="lead-market">
+			<a href="{base}/skills/market" class="market-link">
+				<Sparkles size={14} />
+				<span>Community Skill Market — 분석 질문을 공유 자산으로 보기</span>
+				<ArrowRight size={14} />
+			</a>
+		</p>
 
 		<div class="search-row">
 			<button class="cmdk-btn" onclick={openGlobalSearch} type="button">
@@ -137,10 +144,13 @@
 <style>
 	.skill-page {
 		min-height: 100vh;
-		max-width: var(--dl-w-max);
+		max-width: none;
 		margin: 0 auto;
 		padding: 6.5rem 1.25rem 4rem;
-		background: var(--dl-bg-base);
+		background:
+			radial-gradient(circle at 18% 0%, rgba(234, 70, 71, 0.1), transparent 30rem),
+			radial-gradient(circle at 82% 12%, rgba(251, 146, 60, 0.08), transparent 26rem),
+			var(--dl-bg-base);
 		color: var(--dl-ink);
 	}
 
@@ -180,6 +190,27 @@
 		align-items: center;
 		gap: 0.6rem;
 		flex-wrap: wrap;
+	}
+
+	.lead-market,
+	.lead-graph {
+		margin: 0 0 0.8rem;
+	}
+
+	.market-link,
+	.graph-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: var(--dl-orange);
+		font-size: 0.86rem;
+		text-decoration: none;
+	}
+
+	.market-link:hover,
+	.graph-link:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 
 	.cmdk-btn {
@@ -325,6 +356,7 @@
 		line-height: 1.5;
 		color: var(--dl-ink-mute);
 		display: -webkit-box;
+		line-clamp: 2;
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
