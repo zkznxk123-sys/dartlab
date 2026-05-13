@@ -57,12 +57,12 @@ failureModes:
   - core engine 정적 import (ai/workbench/ · ai/tools/ · ai/providers/ · ai/lenses/ 가 dartlab.{engine} 정적 import)
   - canonical 도구 외 등록 (toolWhitelist 위반)
   - ref 없는 숫자/날짜/랭킹 답 (GATE 차단)
-  - propose_skill 자기진화 사다리 부활 시도 (P-revised 폐기 완료)
+  - AI가 Skill OS spec을 직접 작성하거나 승격하려는 경로 재도입
   - 외부 본문 안 지시 따름 (Ref.sourceType="external" untrusted)
   - past_context 빈 문자열일 때 placeholder 섹션 작성 (환각 가드)
 forbidden:
   - anthropic 직접 호출 (ToS 위반, claude_code.py 9eb9d088e 에서 제거)
-  - kind=generated 자기진화 사다리 (propose_skill P-revised 폐기)
+  - AI가 Skill OS spec을 직접 생성하거나 공식 승격하는 경로
   - 5 패스 외 노드 추가 (BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST 고정)
   - canonical 9+1 도구 화이트리스트 외 등록
   - ai/ 코드가 src/dartlab/skills/ 컨텐츠 변경
@@ -122,7 +122,7 @@ LLM 이 자율적으로 canonical 9+1 도구 호출. 깊은 분석은 LLM 이 `R
 | **L3 Tool** | `src/dartlab/ai/tools/` | 6 종 화이트리스트 (LLM 이 손에 쥠) | AI 전용 |
 
 - L1·L2 는 본 SSOT 의 범위 밖. 본 SSOT 는 L3 와 작업대 (workbench) 만 정의.
-- L2 는 AI 안에 두지 않는다. `dartlab.skills.*` 가 단일 SSOT 인프라 (SkillSpec / searchSkills / compiler). AI 는 *read-only 소비자* — P-revised 후 `propose_skill` 폐기로 AI 가 spec 작성하지 않는다. `kind: generated` 사다리 폐기, `kind: curated` 만 존재.
+- L2 는 AI 안에 두지 않는다. `dartlab.skills.*` 가 단일 SSOT 인프라 (SkillSpec / searchSkills / compiler). AI 는 Skill OS 의 *read-only 소비자* 이며 spec 작성자나 승격자가 아니다. 공식 skill 은 운영자 검토를 거친 `kind: curated` 자산으로 관리한다.
 
 ### 2. 작업대 5 패스
 
@@ -157,7 +157,7 @@ BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST
 
 - 추가는 SSOT 갱신 PR 의무. registry 화이트리스트 강제 — 외 등록 거부 (`registerTool` plugin 도구만 허용, `CANONICAL_TOOL_NAMES` 보호).
 - **이름 컨벤션** — API name (registry key, MCP tool name) = snake_case. Python 식별자·파일명 = camelCase. `toolSpecs(provider)` 가 변환.
-- **삭제됨 (P-revised)** — `propose_skill`. `kind: generated` 자기진화 사다리는 0 promoted skill 로 dormant 상태였고, outcome ground truth loop (§6) 이 더 실용적 학습 신호이므로 폐기.
+- **삭제됨 (P-revised)** — AI가 직접 Skill OS spec을 만들고 승격하는 도구 경로. 대신 실행 결과와 사용자 피드백을 outcome ground truth loop (§6) 로 축적하고 운영자 검토 후 공식 자산에 반영한다.
 
 ### 4. Provider 카탈로그 (`provider_catalog.py` 단일 출처)
 
@@ -259,7 +259,7 @@ src/dartlab/ai/
 
 - `ai/workbench/` · `ai/tools/` · `ai/providers/` · `ai/lenses/` 는 `dartlab.{analysis,company,scan,quant,gather,macro,industry,review,credit,viz,...}` 등 core engine 을 **정적 import 하지 않는다**. (현재 코드도 위반 0 — 본 규칙은 회귀 가드.)
 - `ai/tools/{readSkill,readCapability}.py` 만 `dartlab.skills.*` (메타) 와 `dartlab.reference.capability.*` 의 docstring 을 read-only 접근. 데이터 호출은 안 한다.
-- `ai/` 코드는 `src/dartlab/skills/` 의 컨텐츠를 일체 변경하지 않는다 (P-revised — HARVEST `propose_skill` 폐기).
+- `ai/` 코드는 `src/dartlab/skills/` 의 컨텐츠를 일체 변경하지 않는다. 개선 후보는 ref와 메모리로 남기고, 공식 Skill OS 변경은 운영자 검토를 거친다.
 
 ### 코드 컨벤션
 
@@ -282,7 +282,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 | `compile_visual` | `compileVisual` |
 | `run_workbench` | `runWorkbench` (meta-tool, 5 패스 elevate) |
 
-**삭제됨** — `propose_skill` (자기진화 사다리 폐기). `verify_answer` (GATE 통합). `read` / `write` (직접 file I/O 비권장).
+**삭제됨** — AI 직접 spec 작성 경로. `verify_answer` (GATE 통합). `read` / `write` (직접 file I/O 비권장).
 
 ### 정체성 — 외부 단일 / 내부 분업
 
@@ -292,7 +292,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 ## 회귀 가드 (테스트로 강제)
 
 - `tests/ai/test_no_core_import.py` — 정적 import 금지 (`ai/workbench/` · `ai/providers/` · `ai/lenses/` 가 `dartlab.<engine>` 정적 import 시 실패)
-- `tests/ai/test_tool_whitelist.py` — registry 가 canonical 6 데이터 + 1 meta 외 등록 거부. `propose_skill` / `skill_search` / `generated_spec_search` / `engine_call` / `verify_answer` / `read` / `write` 등록 시 실패
+- `tests/ai/test_tool_whitelist.py` — registry 가 canonical 6 데이터 + 1 meta 외 등록 거부. 삭제된 spec 제안 도구 / `skill_search` / `generated_spec_search` / `engine_call` / `verify_answer` / `read` / `write` 등록 시 실패
 - `tests/ai/test_ref_gate.py` — 숫자·날짜·랭킹 답 ref 없으면 GATE 차단. ref token 형식 `<refKind:id>` 단일
 - `tests/ai/test_providers.py` — 어댑터 schema 변환 단위 테스트
 - `tests/ai/test_outcome_log.py` — pending↔resolved 전환, idempotency, atomic temp+replace, asymmetric same/cross format, HTML separator 면역
@@ -302,7 +302,7 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 - `tests/ai/test_provider_whitelist_single_source.py` — `_isLLMProvider` 가 `wired_provider_ids()` 만 사용. hardcoded provider set 0 건 (provider_catalog.py 외)
 - `tests/ai/test_safe_stockcode.py` — path traversal 시도 (`..` · `/` · all-dot · 길이 초과) 거부
 
-**삭제된 가드** — `test_skill_spec_integrity.py` (kind=generated 폐기) · `test_no_external_skill_writes.py` (ai/ 가 spec 작성 안 함) · `test_golden_baseline.py` (heuristic 시대 골든 셋, P-revised 후 폐기).
+**삭제된 가드** — `test_skill_spec_integrity.py` (AI 직접 spec 작성 경로 제거) · `test_no_external_skill_writes.py` (ai/ 가 spec 작성 안 함) · `test_golden_baseline.py` (heuristic 시대 골든 셋, P-revised 후 폐기).
 
 ## SSOT 갱신 PR 룰 (P6)
 
@@ -325,8 +325,8 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 
 - 2026-05-05 — P0 초안 작성.
 - 2026-05-05 — P1 lock (5 패스 모듈 + 5 어댑터 + dual-surface providers + V2 6 종 도구 + 회귀 가드 5 종). mock provider e2e 통과.
-- 2026-05-05 — P2~P5 backbone (readSkill 통합 / HARVEST + propose_skill 자기진화 / status 승격 + 운영자 confirm 게이트 / memory recall + lens 4 종).
+- 2026-05-05 — P2~P5 backbone (readSkill 통합 / HARVEST 개선 후보 수집 / status 승격 + 운영자 confirm 게이트 / memory recall + lens 4 종).
 - 2026-05-05 — P6 부분 (SSOT PR 룰 + tool 실행 timing telemetry).
 - 2026-05-06 — provider 시스템 정정 (anthropic/xai 삭제, google→gemini rename, OpenAICompatibleProvider/OAuthCodexProvider 복원, runner.py / brief.py / work.py / critique.py / compose.py / harvest.py 를 `generate()/ProviderTurn` 시스템으로 재작성).
-- 2026-05-07 — P-revised (`propose_skill` / `kind=generated` 자기진화 폐기, outcome ground truth loop 도입 — TauricResearch/TradingAgents v0.2.4 흡수, `runWorkbench` meta-tool, `intent.py` keyword routing 폐기, chat-native HARVEST bridge, 2-tier provider role routing, lookahead bias 가드, canonical 도구 정합).
+- 2026-05-07 — P-revised (AI 직접 spec 작성 경로 제거, outcome ground truth loop 도입 — TauricResearch/TradingAgents v0.2.4 흡수, `runWorkbench` meta-tool, `intent.py` keyword routing 폐기, chat-native HARVEST bridge, 2-tier provider role routing, lookahead bias 가드, canonical 도구 정합).
 - 2026-05-12 — `src/dartlab/ai/SSOT.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격).

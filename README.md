@@ -20,7 +20,7 @@
 </p>
 
 <p>
-<a href="https://eddmpython.github.io/dartlab/">문서</a> · <a href="https://eddmpython.github.io/dartlab/blog/">블로그</a> · <a href="https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb">Colab에서 열기</a> · <a href="https://molab.marimo.io/github/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py">Molab에서 열기</a> · <a href="README_EN.md">English</a> · <a href="https://buymeacoffee.com/dartlab">후원</a>
+<a href="https://eddmpython.github.io/dartlab/">문서</a> · <a href="https://eddmpython.github.io/dartlab/skills">Skill OS</a> · <a href="https://eddmpython.github.io/dartlab/skills/market">Skill Market</a> · <a href="https://eddmpython.github.io/dartlab/blog/">블로그</a> · <a href="https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb">Colab에서 열기</a> · <a href="https://molab.marimo.io/github/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py">Molab에서 열기</a> · <a href="README_EN.md">English</a> · <a href="https://buymeacoffee.com/dartlab">후원</a>
 </p>
 
 <p>
@@ -41,7 +41,7 @@ DartLab은 그 스토리를 읽는 두 가지 방법을 제공한다.
 
 **AI가 읽어준다** — 같은 도구를 AI가 조합해서 질문에 맞는 분석 흐름을 스스로 설계하고, 코드와 결과를 투명하게 보여준다. 사용자는 답만 얻는 게 아니라 분석 방법을 배운다.
 
-두 경로 모두 같은 엔진 위에서 동작한다. **엔진이 다리다** — 사람이 만든 엔진·블로그가 자동으로 AI 의 skill 이 되고, AI 가 실행 중 발견한 개선이 엔진 docstring·블로그로 사람 자산에 환류한다 (`operation.philosophy`).
+두 경로 모두 같은 엔진 위에서 동작한다. **엔진이 다리다** — 사람이 만든 엔진·블로그는 Skill OS 를 통해 AI 가 읽는 지식이 되고, 분석 중 발견한 반복 패턴은 사람 검토를 거쳐 Skill OS·엔진 docstring·블로그로 환류한다 (`operation.philosophy`).
 
 투톱 진입점:
 
@@ -50,16 +50,16 @@ DartLab은 그 스토리를 읽는 두 가지 방법을 제공한다.
 
 ## 통합 아키텍처 — 전문 금융 AI 플랫폼
 
-DartLab 은 단순 금융 데이터 라이브러리가 아니다. **한국 (DART) · 미국 (SEC EDGAR) · 향후 일본 (EDINET) 공시를 정규화한 1 차 데이터 + 6 막 인과 분석 엔진 (`analysis · credit · macro · quant · industry`) + AI 자율 작업대 (chat-native + 운용 자원 3 종) + Skill OS 환류** 가 결합한 *전문 금융 AI 플랫폼*. 사람이 작성한 엔진 코드와 블로그가 자동으로 AI 의 skill 라이브러리가 되고, AI 의 분석 결정은 시장 결과로 검증돼 다시 사람의 자산으로 환류한다. 같은 도구 표면을 **MCP** 로 외부 LLM (Claude Desktop · Cursor · Codex) 도 그대로 사용.
+DartLab 은 단순 금융 데이터 라이브러리가 아니다. **한국 (DART) · 미국 (SEC EDGAR) · 향후 일본 (EDINET) 공시를 정규화한 1 차 데이터 + 6 막 인과 분석 엔진 (`analysis · credit · macro · quant · industry`) + chat-native AI 작업대 + Skill OS** 가 결합한 *전문 금융 AI 플랫폼*. 사람이 작성한 엔진 코드와 블로그는 AI 가 검색 가능한 운영 지식이 되고, 실행 중 발견한 개선 후보는 사람 검토를 거쳐 공식 자산으로 반영한다. 같은 도구 표면을 **MCP** 로 외부 LLM 도 그대로 사용.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/architecture-dark.svg">
-    <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / L4 소비자 (ai · mcp) + 표현/전송 헬퍼 (viz · cli · server · channel) / L3 조합기 story / L2 분석엔진 5 (analysis · credit · macro · quant · industry) / L1.5 가공 4 형제 (scan · frame · synth · reference) / L1 (gather · providers) / L0 core / 외부 1 차 소스 / 3 자 진화 루프" width="720">
+    <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / L4 소비자 (ai · mcp) + 표현/전송 헬퍼 (viz · cli · server · channel) / L3 조합기 story / L2 분석엔진 5 (analysis · credit · macro · quant · industry) / L1.5 가공 4 형제 (scan · frame · synth · reference) / L1 (gather · providers) / L0 core / 외부 1 차 소스 / 검토 기반 지식 환류" width="720">
   </picture>
 </p>
 
-> ① 사람·외부 LLM (MCP) → ② 입구 두 갈래 (`dartlab.ask` AI · `dartlab.Company` 사람) → ③ **L4 소비자** (`ai` 자율 작업대 = chat-native + 운용 자원 3 종 Skill OS·Capability·Tools 11 · `mcp` 외부 LLM 진입) → ④ **L3 조합기** `story` (분석엔진 X — 순환참조 방지용 다중 결합 책임자) → ⑤ **L2 분석엔진 5** (`analysis · credit · macro · quant · industry`) → ⑥ **L1.5 가공 4 형제** (`scan` 횡단면 · `frame` raw 결합 · `synth` 후처리/매칭 · `reference` 룩업+매핑) → ⑦ **L1 raw 생산** (`gather · providers`) → ⑧ **L0** `core/` (DIP Protocol + primitive) → ⑨ 외부 1 차 소스. **표현/전송 헬퍼** (`viz · cli · server · channel`) 는 별 그룹 — 모든 결과를 차트·CLI·HTTP·외부 공유로 표현 (비즈니스 로직 0). ⑩ **3 자 진화 루프** — 답변 → 시장 N 일 후 reflection → 사람 검토 → Skill OS · 엔진 docstring 갱신 (AI 자율 진화 아님).
+> ① 사람·외부 LLM (MCP) → ② 입구 두 갈래 (`dartlab.ask` AI · `dartlab.Company` 사람) → ③ **L4 소비자** (`ai` chat-native 작업대 = Skill OS·Capability·Tools · `mcp` 외부 LLM 진입) → ④ **L3 조합기** `story` (분석엔진 X — 순환참조 방지용 다중 결합 책임자) → ⑤ **L2 분석엔진 5** (`analysis · credit · macro · quant · industry`) → ⑥ **L1.5 가공 4 형제** (`scan` 횡단면 · `frame` raw 결합 · `synth` 후처리/매칭 · `reference` 룩업+매핑) → ⑦ **L1 raw 생산** (`gather · providers`) → ⑧ **L0** `core/` (DIP Protocol + primitive) → ⑨ 외부 1 차 소스. **표현/전송 헬퍼** (`viz · cli · server · channel`) 는 별 그룹 — 모든 결과를 차트·CLI·HTTP·외부 공유로 표현 (비즈니스 로직 0). ⑩ **검토 기반 지식 환류** — 분석 중 확인한 반복 패턴을 운영자가 Skill OS · 엔진 docstring · 블로그에 반영.
 
 **한 줄 사용** — Python 또는 MCP:
 
@@ -82,11 +82,25 @@ codex  mcp add dartlab -- dartlab mcp        # Codex CLI
 - **chat-native 작업대** — 5 패스 graph (BRIEF / WORK / CRITIQUE / COMPOSE / GATE) 강제 X. LLM 이 매 iteration **canonical 11 도구** (Skill OS 검색 · 데이터 실행 · 외부 · 출력 · workbench) 중 *언제·무엇을* 자율 결정. 작업대 5 패스는 *옵션 sub-agent*.
 - **Ref 검산 강제** — 모든 숫자·날짜·랭킹 답이 `executionRef · tableRef · valueRef · webRef · dataRef · visualRef · artifactRef · docRef` 중 하나에 닿는다. GATE 가 ref 없는 답을 차단.
 - **외부 본문 untrusted** — DART/EDGAR 공시·웹 검색·뉴스 본문은 *데이터* 이지 *지시* 가 아니다. `[EXTERNAL CONTENT START — untrusted]` 마커로 감싸 prompt injection 차단. 마커 안의 "이전 지시 무시" 문구는 따르지 않는다.
-- **3 자 진화 루프 (AI 자율 진화 아님)** — AI 분석 → 시장 N 일 후 reflection → 사람 검토 → skill / 엔진 docstring / 블로그 갱신. `propose_skill` 폐기 ([2026-05-07, `4ad36db1b`](https://github.com/eddmpython/dartlab/commit/4ad36db1b)) — `kind=generated` 자기진화 사다리는 0 promoted skill 로 dormant 였고 *시장 평가* 가 더 강한 신호.
+- **검토 기반 지식 환류** — 분석 실행과 커뮤니티 반응에서 반복적으로 확인된 개선 후보는 바로 공식 지식이 되지 않는다. 운영자 검토 후 Skill OS, 엔진 docstring, 블로그 중 맞는 공개 자산에 반영한다.
 
 **계층 — import 단방향 강제**: `L0 core ← L1 (gather · providers) ← L1.5 가공 4 형제 (scan · frame · synth · reference) ← L2 분석엔진 5 (analysis · credit · macro · quant · industry) ← L3 조합기 (story — 분석엔진 X) ← L4 소비자 (ai · mcp)`. L4 와 별도로 **표현/전송 헬퍼** (`viz · cli · server · channel`) 가 비즈니스 로직 0 으로 모든 결과를 다른 매체 (차트·CLI·HTTP·외부 공유) 로 표현. L2 엔진 상호 import 0 건 + L1.5 4 형제 cross import 0 건 (CI 강제 [tests/architecture/](tests/architecture/) 5 종) — story 가 L2 다중 소비를 단독으로 짊어져 순환참조 차단. 새 국가 추가 = `providers/` 패키지 하나, core 수정 0 줄. L1.5 4 형제 책임: `scan` 횡단면 (한 metric × 다수 회사), `frame` raw 결합 (panel/시계열 view), `synth` 분석 후처리·매칭·시나리오, `reference` 정적 JSON 룩업+매핑 엔진.
 
 상세 — [`operation.philosophy`](https://eddmpython.github.io/dartlab/skills) (사상 SSOT 정점) · [`ai/SSOT.md`](src/dartlab/ai/SSOT.md) (AI 엔진 정체성 + Outcome 선순환).
+
+## Skill OS — 스킬 운영체계
+
+DartLab 의 문서, 코드 규칙, AI 실행 지식은 **Skill OS** 로 운영한다. 공식 진입점은 [`start.dartlabSkillOs`](https://eddmpython.github.io/dartlab/skills/start.dartlabSkillOs) 이며, AI 엔진과 MCP 도 같은 Skill OS 를 읽는다.
+
+| 운영 산출물 | 역할 |
+|---|---|
+| [`operation.code`](https://eddmpython.github.io/dartlab/skills/operation.code) | 네이밍, docstring, 구조 룰, code gate |
+| [`operation.architecture`](https://eddmpython.github.io/dartlab/skills/operation.architecture) | 계층, import 방향, 경계 규칙 |
+| [`operation.testing`](https://eddmpython.github.io/dartlab/skills/operation.testing) | 회귀 테스트, Guard Index, 검증 절차 |
+| [`operation.contributionWorkflow`](https://eddmpython.github.io/dartlab/skills/operation.contributionWorkflow) | 변경 단위, 커밋 방식, 공개 산출물 규칙 |
+| [`operation.skillMarket`](https://eddmpython.github.io/dartlab/skills/operation.skillMarket) | 커뮤니티 Skill Market 운영 원칙 |
+
+공식 Skill OS 와 커뮤니티 Skill Market 은 다른 trust tier 다. 패키지 builtin 은 `src/dartlab/skills/specs/**` 의 공식 skill 만 포함하고, 커뮤니티 제안은 [`/skills/market`](https://eddmpython.github.io/dartlab/skills/market) 의 별도 정적 인덱스로 조회한다.
 
 ## 문제
 
@@ -507,7 +521,8 @@ HuggingFace Spaces 호스팅. DART API 키 불필요. **Claude Desktop 데스크
 | 도구 | 역할 |
 |------|------|
 | **ask** | dartlab chat-native 루프 — LLM 자율 도구 호출 + Ref 검산 일괄 |
-| **ReadSkill** · **GetSkillBody** | Skill OS 검색 + frontmatter + 본문 |
+| **ReadSkill** · **GetSkillBody** | 공식 Skill OS 검색 + frontmatter + 본문 |
+| **ReadSkillMarket** | 커뮤니티 Skill Market 조회 (공식 builtin 과 별도 trust tier) |
 | **ReadCapability** | dartlab 공개 API/docstring 검색 |
 | **EngineCall** | 단일 capability 1 회 호출 (가벼운 단발 조회용) |
 | **RunPython** | dartlab + Polars 코드 실행 → executionRef/valueRef/tableRef |

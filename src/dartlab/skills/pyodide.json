@@ -2205,7 +2205,9 @@
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
-      "limitations": []
+      "limitations": [
+        "Product replatform contract is readable in Pyodide; server-side Agent Gateway execution is not available in-browser."
+      ]
     },
     {
       "id": "operation.apiContract",
@@ -2488,9 +2490,7 @@
       "status": "limited",
       "dataSources": [],
       "requiredSetup": [],
-      "limitations": [
-        "브라우저에서는 선택한 skill과 dataset snapshot 범위 안에서만 실행한다."
-      ]
+      "limitations": []
     },
     {
       "id": "start.dartlabSkillOs",

@@ -116,12 +116,12 @@ DartLab App
   - `critique` — 반대가설 / 누락 lens / 데이터 신선도 점검
   - `compose` — 답안 + claim 별 [refId] 묶음
   - `gate` — claim ↔ ref 매칭 검증 (programmatic)
-  - `harvest` — propose_skill 후보 + decision remember
+  - `harvest` — 개선 후보 + decision remember
 - `brief` 는 질문별 답변 분기자가 아니라 target, 비교 여부, 필요한 evidence 같은 profile 만 만들고, 선택 skill 의 `requiredEvidence` 를 그대로 GATE 동적 체크리스트로 주입한다. 옛 `routeIntent / selectSkill / searchCapability / planEvidence` 4 단계는 본 패스 안에 흡수되었다.
 - 최종 실행 계획은 반드시 `dartlab.skills` 검색 결과와 generated capability/docstring 검색 결과로 만든다.
 - 질문 문구별 if/else 라우팅, 종목/엔진별 임시 helper, 템플릿 답변은 production 경로에 두지 않는다.
 - 정체성 prompt 에 6 막 인과 같은 분석 단계를 모든 질문에 강제하는 한 줄을 박지 않는다. 단계가 필요한 skill 은 그 skill 의 `requiredEvidence` 로 표현한다.
-- LLM 에게 DartLab API 수십 개를 직접 tool 로 노출하지 않는다. LLM 은 `ReadSkill`, `ReadCapability`, `RunPython`, `EngineCall`, `InspectDataset`, `WebSearch`, `SaveArtifact`, `propose_skill` 수준의 작은 도구만 본다.
+- LLM 에게 DartLab API 수십 개를 직접 tool 로 노출하지 않는다. LLM 은 `ReadSkill`, `ReadCapability`, `RunPython`, `EngineCall`, `InspectDataset`, `WebSearch`, `SaveArtifact` 같은 작은 도구만 본다.
 - `RunPython` 은 금융 데이터 계산의 중심 작업공간이다. Company, scan, macro, quant, analysis 는 Python 코드에서 조합하는 DartLab library 다.
 - 모든 중간 산출물은 ref 로 남긴다. 최소 ref 종류는 `skillRef`, `apiRef`, `executionRef`, `tableRef`, `valueRef`, `dateRef`, `webRef`, `artifactRef`, `verifyRef` 다. ref kind 발급 책임은 `runtime.workbenchEvidenceFlow` 의 표가 SSOT.
 

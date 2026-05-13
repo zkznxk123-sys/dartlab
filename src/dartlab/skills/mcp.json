@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 267,
+    "skillCount": 268,
     "categories": [
       {
         "id": "start",
@@ -20,7 +20,7 @@
         "id": "operation",
         "title": "Operation",
         "description": "ops 원문을 skill 절차로 묶어 테스트, 문서, 릴리즈, 확장 규칙을 찾는 운영 지도.",
-        "count": 24
+        "count": 25
       },
       {
         "id": "engines",
@@ -4382,7 +4382,7 @@
         "engines.company",
         "operation.philosophy"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답.\n\nP1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 진입점 — chat-native\nresult = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None)\n\n# 진입점 — workbench (mode=analyze)\nresult = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\")\n\n# MCP 표면\n# ask · run_python · read_skill · read_capability ·\n# web_search · save_artifact · compile_visual · run_workbench\n```\n\nLLM 이 자율적으로 canonical 9+1 도구 호출. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate.\n\n## 호출 동작\n\n##"
+      "bodyPreview": "## 엔진 역할 `src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답. P1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무. ## 공개 호출 방식 ```python import dartlab # 진입점 — chat-native result = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None) # 진입점 — workbench (mode=analyze) result = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\") # MCP 표면 # ask · run_python · read_skill · read_capability · # web_search · save_artifact · compile_visual · run_workbench ``` LLM 이 자율적으로 canonical 9+1 도구 호출. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate. ## 호출 동작 ### 1. 3 층 능력 모델 — 모두 dartlab 전역 자산, AI 는 소비자 | 층 | 위치 | 표현 | 누가 쓰나 | |---|---|---|---| | **L1 Capability** | `s"
     },
     {
       "id": "operation.aiProductReplatform",
@@ -4396,7 +4396,7 @@
         "LibreChat-derived UI를 DartLab shell에 연결할 때"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 확정 방향\n\n- DartLab 제품은 유지한다. 교체 대상은 기존 `ui/web` 채팅 표면과 기존 `src/dartlab/ai` 엔진 구현이다.\n- 기존 구현은 백업으로 분리한다.\n  - UI 백업: `ui/web_legacy_backup_20260504`\n  - AI 백업: `src/dartlab/ai_legacy_backup_20260504`\n- 새 UI 바탕은 LibreChat repository를 `ui/web`에 vendoring한다. DartLab은 LibreChat 서버/auth/provider stack을 그대로 운영하지 않고, client data model과 ChatGPT-like surface를 DartLab shell에 붙인다.\n- 공개 AI 답변 진입점은 `dartlab.ask(...)`와 `/api/ask`다. UI도 `/api/ask` stream을 사용한다.\n- 새 production 엔진 경계는 `DartLabResearchGraph`다. `runAsk`는 public export로 유지하지 않는다.\n\n## 외부 기준\n\n- LibreChat은 self-hosted ChatGPT-like 제품 바탕, agents, tool"
+      "bodyPreview": "## 확정 방향 - DartLab 제품은 유지한다. 교체 대상은 기존 `ui/web` 채팅 표면과 기존 `src/dartlab/ai` 엔진 구현이다. - 기존 구현은 백업으로 분리한다. - UI 백업: `ui/web_legacy_backup_20260504` - AI 백업: `src/dartlab/ai_legacy_backup_20260504` - 새 UI 바탕은 LibreChat repository를 `ui/web`에 vendoring한다. DartLab은 LibreChat 서버/auth/provider stack을 그대로 운영하지 않고, client data model과 ChatGPT-like surface를 DartLab shell에 붙인다. - 공개 AI 답변 진입점은 `dartlab.ask(...)`와 `/api/ask`다. UI도 `/api/ask` stream을 사용한다. - 새 production 엔진 경계는 `DartLabResearchGraph`다. `runAsk`는 public export로 유지하지 않는다. ## 외부 기준 - LibreChat은 self-hosted ChatGPT-like 제품 바탕, agents, tools, artifacts 개념을 제공한다. - AG-UI는 `TEXT_MESSAGE_*`, `TOOL_CALL_*`, `STATE_*`, `ACTIVITY_*`, `RUN_FINISHED`, `"
     },
     {
       "id": "operation.apiContract",
@@ -4466,6 +4466,20 @@
       ],
       "nextSkills": [],
       "bodyPreview": "외부 LLM 용 짧은 도입 — < 200 토큰. 사실 + 호출 시그니처만."
+    },
+    {
+      "id": "operation.contributionWorkflow",
+      "title": "기여 작업 흐름과 커밋 규칙",
+      "category": "operation",
+      "purpose": "DartLab 변경 작업에서 코드 규칙, 검증 범위, 커밋 방식을 일관되게 적용한다.",
+      "whenToUse": [
+        "기여 작업 흐름",
+        "커밋 규칙",
+        "코드 변경 전 운영 규칙 확인",
+        "공개 산출물 작성 규칙"
+      ],
+      "nextSkills": [],
+      "bodyPreview": "## 원칙 기여 작업은 Skill OS에서 시작한다. 저장소의 공식 규칙은 `start.dartlabSkillOs`를 통해 찾고, 변경 범위에 맞는 `operation.*` skill을 확인한 뒤 작업한다. 코드 변경은 기존 구조와 책임 경계를 우선한다. 새 abstraction은 중복이나 복잡도를 실제로 줄일 때만 추가하고, unrelated 정리 작업은 같은 변경에 섞지 않는다. ## 코드 규칙 - 식별자와 파일명은 기존 DartLab 규칙을 따른다. Python 함수·메서드·변수·파일명은 camelCase, 클래스는 PascalCase, 모듈 상수는 ALL_CAPS를 기본으로 한다. - 공개 API, 대표 반환 형태, 오류·제한 동작은 Skill OS와 capability/docstring이 어긋나지 않게 유지한다. - 계층 경계는 `operation.architecture`를 따른다. L2 엔진 간 직접 import, L1.5 sibling cross import, 표현/전송 helper의 비즈니스 로직 유입을 회귀로 본다. - provider와 대용량 데이터 경로는 `operation.code`의 메모리-safe 룰을 따른다. eager cross-scan, full dataframe 기본 반환, baseline 증가를 새 코드에 만들지 않는다. ## 검증 규칙 - 테스트는 변경 범위에 맞게 좁게 시작하고, shared be"
     },
     {
       "id": "operation.compareTargets",
@@ -4641,7 +4655,7 @@
       "id": "operation.recipePromote",
       "title": "Recipe 6-stage lifecycle + status 승급 CLI",
       "category": "operation",
-      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `scripts/dev/recipe_promote.py` CLI 단독 권한. AI · 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 자기개선 사다리 회귀 차단.",
+      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `scripts/dev/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
       "whenToUse": [
         "recipe 승급",
         "status 변경",
@@ -4652,7 +4666,7 @@
         "deprecated 표시"
       ],
       "nextSkills": [],
-      "bodyPreview": "# Recipe 6-stage lifecycle — 자기개선 사다리 회귀 차단\n\n## 무엇을 하나\n\n`src/dartlab/skills/specs/engines/recipe/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `scripts/dev/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 자기개선 사다리 (AI 가 recipe 를 자동 승급) 회귀 차단의 코드화.\n\n배경: dartlab 의 진화 루프는 *3 자* (AI 분석 → 시장 reflection → 사람 검토) 다. AI 자율 진화 아니다. `propose_skill` 자기진화 사다리는 0 promoted 로 dormant 였고 폐기 ([2026-05-07 `4ad36db1b`](https://github.com/eddmpython/dartlab/commit/4ad36db1b)). recipe 도 동일 룰.\n\n## 6 단계\n\n| Status | 의미 | 승급 조건 |\n|---|---|---|\n| `drafted` | 신규 작성, 미검증 | validateRecipe sweep 통과 |\n"
+      "bodyPreview": "# Recipe 6-stage lifecycle — 검토 없는 승격 차단 ## 무엇을 하나 `src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `scripts/dev/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다. 배경: dartlab 의 지식 환류는 분석 실행과 커뮤니티 반응에서 나온 개선 후보를 운영자가 검토한 뒤 공식 자산에 반영하는 방식이다. recipe 도 같은 원칙을 따른다. ## 6 단계 | Status | 의미 | 승급 조건 | |---|---|---| | `drafted` | 신규 작성, 미검증 | validateRecipe sweep 통과 | | `unverified` | 골격 통과, 실행 미테스트 | 실 데이터 fixture 동행 테스트 통과 | | `tested` | 실행 OK, 시장 검증 전 | 후속 시장 반응 확인 + scorecard 6 신호 | | `verified` | 시장 결과 양호, 검증 완료 | 사람 검토 + 블로그/영상 흡수 | | `curated` | 사람 검토 + 콘텐츠 환류 | (안정 상태) | | `deprecated` | 무효화 — API 변경 · 시장 결과"
     },
     {
       "id": "operation.refactorChecklist",
@@ -4937,7 +4951,7 @@
         "RunPython 결과를 답변 근거로 쓰기"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 5 패스 단일 SSOT\n\nask 작업대는 LLM 인지 단위와 1:1 대응하는 5 패스 (+ HARVEST 회수) 로 구성된다. 옛 9 노드 절차 (`routeIntent → selectSkill → ... → repairOrFail`) 는 본 SSOT 로 흡수되었으며, 절차 SSOT 의 단일 원천이다.\n\n| 패스 | 역할 | LLM | 발급 ref kind |\n|---|---|---|---|\n| **BRIEF** | 질문 해석 + skill/capability 후보 + recall + 검증 기준 + lens 분기 | yes | skillRef, apiRef |\n| **WORK** | RunPython / InspectDataset / EngineCall / WebSearch / SaveArtifact 반복 실행 | yes | executionRef, valueRef, tableRef, dateRef, webRef, artifactRef |\n| **CRITIQUE** | 반대가설 / 누락 lens / 데이터 신선도 / 단위 일치 점검 | yes | (text → state.critiques) |\n| **COMPOSE** | 답안 + claim 별 [ref"
+      "bodyPreview": "## 5 패스 단일 SSOT ask 작업대는 LLM 인지 단위와 1:1 대응하는 5 패스 (+ HARVEST 회수) 로 구성된다. 옛 9 노드 절차 (`routeIntent → selectSkill → ... → repairOrFail`) 는 본 SSOT 로 흡수되었으며, 절차 SSOT 의 단일 원천이다. | 패스 | 역할 | LLM | 발급 ref kind | |---|---|---|---| | **BRIEF** | 질문 해석 + skill/capability 후보 + recall + 검증 기준 + lens 분기 | yes | skillRef, apiRef | | **WORK** | RunPython / InspectDataset / EngineCall / WebSearch / SaveArtifact 반복 실행 | yes | executionRef, valueRef, tableRef, dateRef, webRef, artifactRef | | **CRITIQUE** | 반대가설 / 누락 lens / 데이터 신선도 / 단위 일치 점검 | yes | (text → state.critiques) | | **COMPOSE** | 답안 + claim 별 [refId] 묶음 | yes | answerText (refs 인용) | | **GATE** | claim ↔ ref 매칭 검증 (programmatic) | no | verifyRef |"
     },
     {
       "id": "start.dartlabSkillOs",
