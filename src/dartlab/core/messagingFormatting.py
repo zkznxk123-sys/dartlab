@@ -1,0 +1,143 @@
+"""Formatting helpers for DartLab user-facing messages.
+
+Capabilities:
+    - Formats simple and structured message catalog entries.
+    - Builds capability suggestion text from generated capability metadata.
+
+Args:
+    Formatting helpers accept catalog keys and template variables.
+
+Returns:
+    Plain text messages ready for logging, exceptions, or UI transport.
+
+Example:
+    >>> formatMessage("download:done_short", sizeStr="1MB")
+    '✓ 다운로드 완료 (1MB)'
+
+Guide:
+    Keep side effects out of this module. Emission belongs to ``dartlab.core.messaging``.
+
+SeeAlso:
+    ``messagingCatalog`` and ``messagingContext``.
+
+Requires:
+    Static message templates from ``messagingCatalog``.
+
+AIContext:
+    Lets server, CLI, and provider code share identical wording without duplicating templates.
+
+LLM Specifications:
+    AntiPatterns: Do not log, print, or raise from formatting helpers.
+    OutputSchema: ``str`` or ``None`` for suggestions.
+    Prerequisites: Key exists in ``SIMPLE`` or ``STRUCTURED`` for ``formatMessage``.
+    Freshness: Capability suggestions follow generated capability metadata.
+    Dataflow: catalog key -> template expansion -> formatted message.
+    TargetMarkets: All DartLab user-facing surfaces.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from dartlab.core.messagingCatalog import SIMPLE as _SIMPLE
+from dartlab.core.messagingCatalog import STRUCTURED as _STRUCTURED
+from dartlab.core.messagingCatalog import StructuredMsg as _StructuredMsg
+from dartlab.core.messagingContext import ctx as _ctx
+
+
+def formatMessage(key: str, **kwargs: Any) -> str:
+    """Format a message without emitting it.
+
+    Args:
+        key: Message key registered in the simple or structured catalog.
+        **kwargs: Template variables such as ``stockCode`` or ``label``.
+
+    Returns:
+        Formatted message text.
+
+    Raises:
+        ``KeyError`` when ``key`` is not registered or a required template variable is missing.
+
+    Example:
+        >>> formatMessage("download:done_short", sizeStr="1MB")
+        '✓ 다운로드 완료 (1MB)'
+    """
+    if key in _STRUCTURED:
+        return _formatStructured(_STRUCTURED[key], **kwargs)
+    return _formatSimple(key, **kwargs)
+
+
+def suggest(funcName: str) -> str | None:
+    """Return capability guidance for a function or method.
+
+    Args:
+        funcName: Name such as ``"valuation"``, ``"Company.BS"``, or ``"scan.governance"``.
+
+    Returns:
+        Guidance text, or ``None`` when no generated capability entry matches.
+
+    Raises:
+        No public exception; missing generated capability module returns ``None``.
+
+    Example:
+        >>> suggest("__missing__") is None
+        True
+    """
+    try:
+        import importlib
+
+        capabilities = importlib.import_module("dartlab.reference.capability._generated").CAPABILITIES
+    except ImportError:
+        return None
+
+    entry = capabilities.get(funcName)
+    if entry is None:
+        entry = capabilities.get(f"Company.{funcName}")
+    if entry is None:
+        for prefix in ("scan.", "gather."):
+            entry = capabilities.get(f"{prefix}{funcName}")
+            if entry:
+                break
+    if entry is None:
+        return None
+
+    lines = [f"[{funcName}] {entry.get('summary', '')}"]
+
+    capText = entry.get("capabilities")
+    if capText:
+        lines.append("")
+        for item in capText.split("\n"):
+            item = item.strip()
+            if item:
+                lines.append(f"  - {item}")
+
+    reqText = entry.get("requires")
+    if reqText:
+        lines.append(f"\n  필요: {reqText}")
+
+    return "\n".join(lines)
+
+
+def _formatSimple(key: str, **kwargs: Any) -> str:
+    return _SIMPLE[key].format(**kwargs)
+
+
+def _formatStructured(msg: _StructuredMsg, **kwargs: Any) -> str:
+    lines = [msg.template.format(**kwargs)]
+
+    actions: list[str] = list(msg.actions)
+    if msg.actionsWithKey or msg.actionsWithoutKey:
+        if _ctx.hasDartKey:
+            actions.extend(msg.actionsWithKey)
+        else:
+            actions.extend(msg.actionsWithoutKey)
+
+    if actions:
+        lines.append("")
+        for action in actions:
+            lines.append(f"  • {action.format(**kwargs)}")
+
+    return "\n".join(lines)
+
+
+__all__ = ["formatMessage", "suggest"]

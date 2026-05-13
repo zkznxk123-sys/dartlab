@@ -1,19 +1,37 @@
-"""dartlab 매퍼 통합 엔진.
+"""Reference mapper public exports.
 
-기존 매퍼 데이터를 읽기 전용으로 래핑하여 통합 인터페이스 제공.
-원본 코드 수정 0줄 — 검증 완료 후 순차 교체.
+Capabilities:
+    - Re-exports the unified mapper engine factory and core mapper protocol classes.
 
-사용법::
+Args:
+    This package exposes imports only.
 
-    from dartlab.reference.mappers import getEngine
+Returns:
+    Mapper classes and the cached engine factory from submodules.
 
-    engine = getEngine()
-    engine.summary()                          # 전체 매퍼 통계
+Example:
+    >>> from dartlab.reference.mappers import getEngine
+    >>> engine = getEngine()
 
-    engine.get("account").lookup("매출액")     # 계정 매핑
-    engine.get("topic").lookup("dividend")     # topic 키워드
-    engine.get("alias").resolve("revenue")     # snakeId 정규화
-    engine.get("flow").isEvent("dividends_paid")  # 이벤트 계정 판별
+Guide:
+    Keep this package thin. Registration logic belongs in ``engine.py``.
+
+SeeAlso:
+    ``engine`` and ``dartlab.core.mapperEngine``.
+
+Requires:
+    Mapper engine modules import successfully.
+
+AIContext:
+    Maintains the historical public import path while keeping package init free of logic.
+
+LLM Specifications:
+    AntiPatterns: Do not instantiate or register mappers in this file.
+    OutputSchema: Re-exported mapper protocol classes and factory.
+    Prerequisites: Caller imports concrete functions/classes.
+    Freshness: No data access in package init.
+    Dataflow: package import -> engine/protocol re-export.
+    TargetMarkets: Reference mapper consumers.
 """
 
 from __future__ import annotations

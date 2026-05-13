@@ -14,7 +14,24 @@ class TopicMapper(BaseMapper):
 
     @property
     def name(self) -> str:
-        """name — TODO 한국어 동작 설명."""
+        """Return mapper registry name.
+
+        Args:
+            None.
+
+        Returns:
+            Registry key for this mapper.
+
+        Requires:
+            None.
+
+        Raises:
+            None.
+
+        Example:
+            >>> TopicMapper().name
+            'topic'
+        """
         return "topic"
 
     def _keywords(self) -> dict[str, list[str]]:
@@ -26,6 +43,30 @@ class TopicMapper(BaseMapper):
         """topic 이름으로 키워드 목록 조회.
 
         영문 topic key 또는 한국어 키워드 역방향 조회.
+
+        Capabilities:
+            Looks up topic keyword sets and reverse-maps Korean keywords to topics.
+        AIContext:
+            Gives disclosure and narrative flows a stable topic vocabulary.
+        Guide:
+            Use ``topicForKeyword`` when only reverse topic id is needed.
+        When:
+            Called while matching user topics or disclosure section labels.
+        How:
+            Checks direct topic key first, then scans keyword lists for a Korean match.
+        Args:
+            key: Topic id or Korean keyword.
+        Returns:
+            Topic detail dict or ``None``.
+        Requires:
+            ``TOPIC_KEYWORDS`` from reference topic graph.
+        Raises:
+            Propagates topic graph import errors.
+        Example:
+            >>> TopicMapper().lookup("__missing__") is None
+            True
+        SeeAlso:
+            ``topicForKeyword`` and ``keywordsFor``.
         """
         kw = self._keywords()
 
@@ -41,7 +82,32 @@ class TopicMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
-        """stats — TODO 한국어 동작 설명."""
+        """Return topic mapper statistics.
+
+        Capabilities:
+            Reports topic and keyword counts.
+        AIContext:
+            Helps audits inspect disclosure topic coverage.
+        Guide:
+            Use for diagnostics, not per-token matching.
+        When:
+            Called by mapper summaries and tests.
+        How:
+            Counts topic keys and nested keyword values.
+        Args:
+            None.
+        Returns:
+            ``MapperStats`` for topic mappings.
+        Requires:
+            ``TOPIC_KEYWORDS`` from reference topic graph.
+        Raises:
+            Propagates topic graph import errors.
+        Example:
+            >>> TopicMapper().stats().name
+            'topic'
+        SeeAlso:
+            ``MapperStats``.
+        """
         kw = self._keywords()
         total_keywords = sum(len(v) for v in kw.values())
         return MapperStats(
@@ -53,16 +119,67 @@ class TopicMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
-        """allKeys — TODO 한국어 동작 설명."""
+        """Return all topic keys.
+
+        Args:
+            None.
+
+        Returns:
+            Topic key list.
+
+        Requires:
+            ``TOPIC_KEYWORDS`` from reference topic graph.
+
+        Raises:
+            Propagates topic graph import errors.
+
+        Example:
+            >>> isinstance(TopicMapper().allKeys(), list)
+            True
+        """
         return list(self._keywords().keys())
 
     def topicForKeyword(self, keyword: str) -> str | None:
-        """한국어 키워드 → topic 이름."""
+        """한국어 키워드 → topic 이름.
+
+        Args:
+            keyword: Korean keyword.
+
+        Returns:
+            Topic id or ``None``.
+
+        Requires:
+            ``TOPIC_KEYWORDS`` from reference topic graph.
+
+        Raises:
+            Propagates topic graph import errors.
+
+        Example:
+            >>> TopicMapper().topicForKeyword("__missing__") is None
+            True
+        """
         for topic, words in self._keywords().items():
             if keyword in words:
                 return topic
         return None
 
     def keywordsFor(self, topic: str) -> list[str]:
-        """topic → 키워드 목록."""
+        """topic → 키워드 목록.
+
+        Args:
+            topic: Topic id.
+
+        Returns:
+            Keyword list, or an empty list for unknown topics.
+
+        Requires:
+            ``TOPIC_KEYWORDS`` from reference topic graph.
+
+        Raises:
+            Propagates topic graph import errors.
+
+        Example:
+            >>> TopicMapper().keywordsFor("__missing__")
+            []
+        """
         return self._keywords().get(topic, [])

@@ -17,7 +17,24 @@ class FlowMapper(BaseMapper):
 
     @property
     def name(self) -> str:
-        """name — TODO 한국어 동작 설명."""
+        """Return mapper registry name.
+
+        Args:
+            None.
+
+        Returns:
+            Registry key for this mapper.
+
+        Requires:
+            None.
+
+        Raises:
+            None.
+
+        Example:
+            >>> FlowMapper().name
+            'flow'
+        """
         return "flow"
 
     def _eventAccounts(self) -> frozenset:
@@ -30,6 +47,30 @@ class FlowMapper(BaseMapper):
 
         event: 비정기 계정 (배당, 자사주 등) — 부분 합산 허용.
         regular: 매 분기 발생 — 4분기 strict 합산.
+
+        Capabilities:
+            Classifies accounts as event or regular flow accounts.
+        AIContext:
+            Prevents incorrect quarterly strict aggregation for non-recurring accounts.
+        Guide:
+            Use ``isEvent`` when only a boolean decision is needed.
+        When:
+            Called before annualizing or aggregating flow-statement accounts.
+        How:
+            Tests membership in the bundled event-account set.
+        Args:
+            key: Account snakeId.
+        Returns:
+            Flow classification dict.
+        Requires:
+            ``_EVENT_ACCOUNTS`` from core flow utilities.
+        Raises:
+            Propagates flow utility import errors.
+        Example:
+            >>> FlowMapper().lookup("__missing__")["flowType"]
+            'regular'
+        SeeAlso:
+            ``isEvent`` and ``eventAccounts``.
         """
         events = self._eventAccounts()
         if key in events:
@@ -37,11 +78,45 @@ class FlowMapper(BaseMapper):
         return {"account": key, "flowType": "regular"}
 
     def isEvent(self, key: str) -> bool:
-        """이벤트성 계정인지 판별."""
+        """이벤트성 계정인지 판별.
+
+        Args:
+            key: Account snakeId.
+
+        Returns:
+            ``True`` when the account is event-like.
+
+        Requires:
+            ``_EVENT_ACCOUNTS`` from core flow utilities.
+
+        Raises:
+            Propagates flow utility import errors.
+
+        Example:
+            >>> FlowMapper().isEvent("__missing__")
+            False
+        """
         return key in self._eventAccounts()
 
     def stats(self) -> MapperStats:
-        """stats — TODO 한국어 동작 설명."""
+        """Return flow mapper statistics.
+
+        Args:
+            None.
+
+        Returns:
+            ``MapperStats`` for event account mappings.
+
+        Requires:
+            ``_EVENT_ACCOUNTS`` from core flow utilities.
+
+        Raises:
+            Propagates flow utility import errors.
+
+        Example:
+            >>> FlowMapper().stats().name
+            'flow'
+        """
         events = self._eventAccounts()
         return MapperStats(
             name=self.name,
@@ -52,9 +127,43 @@ class FlowMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
-        """allKeys — TODO 한국어 동작 설명."""
+        """Return all event account keys.
+
+        Args:
+            None.
+
+        Returns:
+            Sorted event account key list.
+
+        Requires:
+            ``_EVENT_ACCOUNTS`` from core flow utilities.
+
+        Raises:
+            Propagates flow utility import errors.
+
+        Example:
+            >>> isinstance(FlowMapper().allKeys(), list)
+            True
+        """
         return sorted(self._eventAccounts())
 
     def eventAccounts(self) -> list[str]:
-        """이벤트성 계정 목록."""
+        """이벤트성 계정 목록.
+
+        Args:
+            None.
+
+        Returns:
+            Sorted event account list.
+
+        Requires:
+            ``_EVENT_ACCOUNTS`` from core flow utilities.
+
+        Raises:
+            Propagates flow utility import errors.
+
+        Example:
+            >>> isinstance(FlowMapper().eventAccounts(), list)
+            True
+        """
         return sorted(self._eventAccounts())
