@@ -10,6 +10,9 @@ whenToUse:
   - API Contract — dartlab 호출 규칙 단일 진실의 원천
   - api contract
   - 1. 단일 진입점 — Dual Access (call form + attr form) 로 간다
+  - 공개 진입점 정책
+  - 엔진명 축 dispatch
+  - provider facade 예외
   - 구현
   - 좋은 예
   - 내부 series-tuple 빌더
@@ -30,6 +33,9 @@ knowledgeRefs:
 sourceRefs:
   - dartlab://skills/operation.apiContract
 procedure:
+  - 공개 진입점은 provider facade 예외를 제외하면 엔진명/축 dispatch 로만 노출한다.
+  - provider facade 신규 추가는 장기 유지 가치와 회사/시장 단위 안정 surface 인지 먼저 검토한다.
+  - 내부 helper/ops/recipe/builder 함수는 공개 API, migration target, 사용자 예시로 안내하지 않는다.
   - 1. 단일 진입점 — Dual Access (call form + attr form) 로 간다 기준을 확인한다.
   - 구현 기준을 확인한다.
   - 좋은 예 기준을 확인한다.
@@ -64,6 +70,8 @@ failureModes:
 forbidden:
   - 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다.
   - 공개 호출 방식, 대표 반환 형태, 오류/제한 동작을 skill과 불일치한 채 방치하지 않는다.
+  - provider facade 밖에서 엔진명/축 dispatch 가 아닌 새 공개 진입점을 만들지 않는다.
+  - 내부 helper/ops/recipe/builder 함수를 사용자 migration 대상이나 공식 사용 예시로 노출하지 않는다.
 examples:
   - API Contract — dartlab 호출 규칙 단일 진실의 원천 규칙 확인
   - api-contract 작업을 Skill OS에서 시작
@@ -80,8 +88,18 @@ lastUpdated: '2026-05-03'
 - 공개 호출 방식과 대표 반환 형태는 skill에서 확인하고, 세부 필드는 capability/docstring으로 검산한다.
 - 분석이나 변경 결과는 ref, 실행 로그, 테스트 결과로 검증한다.
 
+## 공개 진입점 정책
+
+- 기본 원칙: 공개 진입점은 엔진명/축 dispatch 방식으로만 만든다.
+- provider facade 는 예외적으로 허용하지만, 새 메서드는 장기 유지 가치가 있는 회사/시장 단위 안정 surface 일 때만 추가한다.
+- provider facade 밖에서는 별도 공개 함수, 편의 wrapper, migration target 을 만들지 않는다.
+- 내부 helper, ops, builder, recipe 실행 함수는 구현 세부사항이다. 사용자 문서, CHANGELOG, Skill 예시에서 직접 호출 대상으로 안내하지 않는다.
+- 새 기능은 먼저 기존 엔진의 축으로 수용 가능한지 판단한다. 축으로 표현할 수 없고 회사 객체의 자연스러운 장기 기능일 때만 provider facade 승격을 검토한다.
+- 공개 문서에서 허용되는 표현은 `dartlab.{engine}("{axis}", ...)`, `Company.{method}(...)`, 또는 이미 정의된 provider facade 뿐이다.
+
 ## 실행 순서
 
+- 공개 진입점 변경이면 먼저 위 공개 진입점 정책을 통과하는지 검토한다.
 - 1. 단일 진입점 — Dual Access (call form + attr form) 로 간다 기준을 확인한다.
 - 구현 기준을 확인한다.
 - 좋은 예 기준을 확인한다.

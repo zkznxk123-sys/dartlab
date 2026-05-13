@@ -114,6 +114,38 @@ import 정책 (P-CORE B 정리 결과):
 6. **양방향 cycle 절대금지**: `scripts/audit/cycleScan.py` CI 강제 (양방향 2-cycle + 3+ 모듈 cycle 검출).
 7. story 가 다중 L2 소비 책임 잔존 (조합기) — 그러나 단방향 sibling import 도 도메인적 자연 의존이면 허용.
 
+### L0~L1.5 완료 게이트 (2026-05-13)
+
+L0~L1.5 는 "정리했다" 가 아니라 다음 gate 가 모두 통과해야 완료다.
+
+- `tests/architecture/*` 는 repo root 의 실제 `src/dartlab` 를 검사한다. 빈 경로 통과 금지.
+- `tests/architecture/test_core_l0_only.py` — core 의 상위 계층 import 0.
+- `tests/architecture/test_l1_no_cross_import.py` — gather/providers module-level cross import 0.
+- `tests/architecture/test_l15_no_cross_import.py` — scan/frame/synth/reference sibling import 0.
+- `tests/architecture/test_import_direction.py::test_l0_l15_import_direction_strict` — L0~L1.5 가 상위 계층을 직접 import 하지 않는다.
+- `scripts/audit/cycleScan.py --strict-toplevel` — top-level package cycle 0.
+- provider strict scope 는 `dart,edgar` 이다. `edinet` 은 API 통신 불가 상태라 복구 전까지 deferred provider 로 제외한다.
+
+### Guard Index architecture 수집 항목
+
+Guard Index 는 기존 architecture pytest, import-linter, audit scripts 를 같은 graph 로 묶는 공식 실행 표면이다. 현재 v1 은 stdlib AST index 와 기존 audit wrapper 로 구성하며, 최소한 다음 항목을 전수 수집한다.
+
+- module path, layer, owner
+- import graph
+- L1 cross import
+- L1.5 sibling import
+- core upper import
+- public re-export surface
+- provider folder mirror
+- tests mirror
+- stable API manifest
+
+`tests/architecture/*`, `pyproject [tool.importlinter]`, `scripts/audit/*Gate.py` 는 같은 architecture graph 를 바라보는 방향으로 유지한다. L0~L1.5 완료 확인은 다음 명령을 기본 entry 로 쓴다.
+
+```bash
+python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
+```
+
 ### 5 L2 분석엔진 도메인 격리
 
 | Engine | 담당 질문 | 범위 |
@@ -190,7 +222,7 @@ cross-company query 는 raw parquet lazy scan 금지. 모든 provider 가 `data/
 
 ## Skill OS 그래프 산출물 6 종
 
-`scripts/build/generateSkills.py` 가 자동 산출 (직접 편집 금지):
+Skill 은 운영자·사용자·사용자가 명시적으로 위임한 AI 가 관리하고 개발한다. 산출물 6 종은 spec 변경 의도에 맞춰 같은 변경 단위에서 명시적으로 갱신한다.
 
 | 산출물 | 대상 | 결 |
 |---|---|---|
@@ -201,7 +233,7 @@ cross-company query 는 raw parquet lazy scan 금지. 모든 provider 가 `data/
 | `src/dartlab/skills/pyodide.json` | 브라우저 Pyodide | 경량 lookup |
 | `src/dartlab/skills/graph.json` | 그래프 시각화 (`/skills/graph`) | nodes 257 + edges 1337 + cycles + orphans + unreachable |
 
-graph 산출은 `dartlab.skills.graph.buildSkillGraph(specs)` 의 직렬화. 진단 결과 (cycle/orphan/unreachable) 는 `dartlab.skills.graphLint` 가 `listSkills` 1 회 warn-only 로 노출 (env `DARTLAB_SKILL_GRAPH_LINT=0` 으로 silence). phase 1 (warn) → phase 2 (신규/수정 차단, env `DARTLAB_SKILL_GRAPH_LINT_STRICT=1`) → phase 3 (전수 차단).
+`graph.json` 은 `dartlab.skills.graph.buildSkillGraph(specs)` 직렬화 형태와 정합해야 한다. 진단 결과 (cycle/orphan/unreachable) 는 `dartlab.skills.graphLint` 가 `listSkills` 1 회 warn-only 로 노출 (env `DARTLAB_SKILL_GRAPH_LINT=0` 으로 silence). phase 1 (warn) → phase 2 (신규/수정 차단, env `DARTLAB_SKILL_GRAPH_LINT_STRICT=1`) → phase 3 (전수 차단).
 
 본문 directive 마커 (3 주체 분기):
 

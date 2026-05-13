@@ -76,7 +76,7 @@ def main() -> int:
 
     if not GRAPH_JSON.exists():
         print(
-            f"[error] {GRAPH_JSON} 없음. 먼저 scripts/build/generateSkills.py 실행하라.",
+            f"[error] {GRAPH_JSON} 없음. Skill OS 산출물을 먼저 명시적으로 관리하라.",
             file=sys.stderr,
         )
         return 1

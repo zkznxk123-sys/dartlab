@@ -61,7 +61,7 @@ procedure:
   - protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시.
   - selfRun — 같은 세션에서 ReadSkill 로 재로드 후 capabilityRefs 를 EngineCall/RunPython 으로 3 케이스 전부 실행. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).
   - redTeam — RunWorkbench 의 CRITIQUE 패스로 (a) 반대 가설 (b) 누락 데이터/edge case (c) 다른 axis 와 중복성 점검. 통과 못하면 protoSkill 재집필 1 회 회귀.
-  - graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + generateSkills.py 로 index.json 갱신 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.
+  - graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + 산출물 동기화 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.
   - auditFeedback — 운영 중 같은 skill 이 audit P 반복 또는 docstring 보강 후보 적발 시, public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis 로 승격, 관련 SkillSpec 의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신.
 requiredEvidence:
   - skillRef
@@ -125,7 +125,7 @@ lastUpdated: "2026-05-08"
 DartLab 의 analysis 엔진은 25 axis 로 *재무 인과* 영역을 두텁게 덮고 있지만, Company/gather/scan 이 노출하는 원천 데이터 (가격·수급·뉴스·컨센서스·내부자거래·배당이벤트·공시텍스트·거시지표) 의 *시장신호·이벤트추적·시계열 누적* 관점은 빈칸이 많다. 또 운영 중 audit 결과가 *공개 API 의 새 축을 요구* 하는 신호로 누적될 때가 있다.
 
 이 skill 은 두 흐름을 한 곳에서 다룬다:
-1. **인큐베이션 사이클 (gapSpot → graduate)** — AI 자율 6 단계로 신규 분석 skill 을 발굴·검증·등재.
+1. **인큐베이션 사이클 (gapSpot → graduate)** — 사용자 의도에 따라 AI 가 보조하는 6 단계로 신규 분석 skill 을 발굴·검증·등재.
 2. **audit 회환 (auditFeedback)** — 운영 중 audit P 반복 또는 docstring 갭 적발 시 엔진 skill·docstring 으로 환류.
 
 책임 경계:
@@ -191,7 +191,7 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
   - `mv .dartlab/skills/incubating/{category}.{slug}.md src/dartlab/skills/specs/{category}/{slug}.md`
   - facade `_AXIS_REGISTRY` 등록 + 모듈 작성 (예: `src/dartlab/scan/{slug}.py`)
   - `uv run python -X utf8 scripts/build/validateSkills.py src/dartlab/skills/specs/{category}/{slug}.md`
-  - `uv run python -X utf8 scripts/build/generateSkills.py` — index.json 갱신
+  - 산출물 6 종 중 노출 표면에 영향을 받는 파일을 명시적으로 동기화
 - `reject` 사유 시: incubating 에 머무르며 회귀 카운트 +1.
 
 ## 7 단계 — auditFeedback (운영 회환)

@@ -14,7 +14,7 @@ Description
 
 검증 자동 동행:
 - `uv run python -X utf8 scripts/build/validateSkills.py {new_skill}.md`
-- (도구 폐기 — `scripts/build/generateSkills.py` 와 `src/dartlab/skills/compiler.py` 모두 삭제됨. JSON 산출물 6 종은 운영자가 직접 작성)
+- JSON 산출물 6 종은 운영자·사용자·사용자가 위임한 AI 가 명시적으로 관리하고 검토한다.
 
 사용법:
     uv run python -X utf8 scripts/dev/addEngine.py myEngine \\

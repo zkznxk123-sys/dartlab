@@ -11,7 +11,7 @@ def buildSpec() -> dict:
     Capabilities: catalog 그룹 + 시리즈 list + capabilities + tools 종합 dict.
     AIContext: Skill OS auto-discover / dartlab.skills/specs build 진입.
     Guide: 정적 카탈로그 기반 — ECOS API 호출 없음.
-    When: ``scripts/build/generateSkills.py`` 가 spec 빌드 시.
+    When: Skill OS 산출물 명시 관리 시.
     How: catalog.getGroups iterate → 각 entry meta dict 패킹.
 
     카탈로그 그룹·시리즈 목록을 순회하여 AI 자동 발견(autoDiscover)용

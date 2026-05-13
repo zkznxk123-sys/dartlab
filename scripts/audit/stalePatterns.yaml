@@ -18,7 +18,7 @@ default_whitelist:
   - src/dartlab/core/capability/_generated.py
   - src/dartlab/reference/capability/_generated.py  # P-CORE 후 capability 위치
   - src/dartlab/mcp/_generated_tools.py
-  - src/dartlab/skills/index.json  # generateSkills 산출 — refactorChecklist 본문 흡수
+  - src/dartlab/skills/index.json  # Skill OS 산출물 — refactorChecklist 본문 흡수
   # Skill OS 산출물 — release migration skill 안내문 (rename/폐기 history 포함)
   - src/dartlab/skills/agent.json
   - src/dartlab/skills/mcp.json

@@ -97,9 +97,9 @@ SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpd
 
 기존 skill 일괄 audit 은 `scripts/dev/audit_trigger_phrases.py` (idempotent, dry-run 지원).
 
-## 자동화 CLI — 1 명령 cascading
+## Skill 확장 보조 CLI
 
-신규 엔진·axis·recipe 추가는 수동 5 단계 대신 1 명령 cascading CLI 우선:
+신규 엔진·axis·recipe 추가는 사용자가 선택한 작업 범위에 맞춰 보조 CLI 로 스켈레톤을 만든 뒤, 운영자·사용자·사용자가 명시적으로 위임한 AI 가 SkillSpec 과 산출물을 함께 정리한다.
 
 ```bash
 # 새 엔진 (engines.{name})
@@ -110,13 +110,12 @@ uv run python -X utf8 scripts/dev/addEngine.py myEngine \
 # 새 axis · recipe 는 동일 패턴 (확장 예정)
 ```
 
-`addEngine.py` 가 자동 산출:
+`addEngine.py` 가 준비하는 스켈레톤:
 
 - `src/dartlab/{name}/__init__.py` 스켈레톤 + `__all__`
 - `src/dartlab/skills/specs/engines/{name}/SKILL.md` frontmatter 5 필수 + 3 강제 섹션 placeholder
-- `validateSkills.py` + `generateSkills.py` 자동 호출
 
-운영자 수동 잔여 (CLI 가 안내 출력):
+후속 정리 항목:
 
 1. `src/dartlab/__init__.py` re-export
 2. `pyproject.toml [tool.importlinter]` contract 추가
@@ -148,7 +147,7 @@ uv run python -X utf8 scripts/dev/addEngine.py myEngine \
 
 ## 3 주체 인덱스 산출물
 
-`scripts/build/generateSkills.py` 가 6 산출:
+Skill 산출물은 운영자·사용자·사용자가 명시적으로 위임한 AI 가 spec 변경 의도에 맞춰 갱신한다.
 
 | 산출물 | 대상 | 크기 (skill 당) |
 |---|---|---|
@@ -159,5 +158,5 @@ uv run python -X utf8 scripts/dev/addEngine.py myEngine \
 | `pyodide.json` | 브라우저 Pyodide | ~400 토큰 |
 | `graph.json` | 그래프 시각화 (`/skills/graph`) | nodes + edges + cycles + orphans |
 
-직접 편집 금지 — `scripts/build/generateSkills.py` 가 SSOT. 별도 commit "정리: 동기화" ([commit-self-change](file://./.claude/skills/commit-self-change/SKILL.md)).
+산출물 동기화는 별도 commit "정리: 동기화" ([commit-self-change](file://./.claude/skills/commit-self-change/SKILL.md)) 으로 분리한다.
 

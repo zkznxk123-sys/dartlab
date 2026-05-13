@@ -1231,6 +1231,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.skillMarket</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/runtime.channel</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

@@ -92,3 +92,35 @@ lastUpdated: '2026-05-03'
 - **function scope** — 필요하면 사용, `gc.collect()` 권장.
 - root `dartlab` logger 에 stderr `StreamHandler` 자동 부착 (최초 1 회).
 
+## L0~L1.5 완료 게이트
+
+core/gather/providers(dart,edgar)/scan/frame/synth/reference 경계 변경은 Guard strict 명령을
+통과해야 완료다. `edinet` 은 API 통신 불가 deferred provider 로 provider strict scope 에서 제외한다.
+
+```bash
+python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
+```
+
+Guard strict 는 cycle scan, architecture pytest, provider mirror, gather gate, provider gate, public API smoke 를 순서대로 실행하고 `externalGates[]` 에 원 명령과 결과를 남긴다. CI Fast 의 `architecture-l0-l15` job 은 이 gate 를 warning 이 아니라 failure 로 다룬다.
+
+## Guard Index 회귀 방지 체계
+
+pytest 는 회귀를 실패시키는 표면이고, 전수조사는 AST/import graph/baseline scanner 가 맡는다. 전체 `pytest tests/ -v` 실행은 메모리·시간 비용이 커서 품질 증명의 기본값으로 쓰지 않는다.
+
+공식 gate 는 3 단계다.
+
+- `quick` — 변경 파일과 reverse dependency 영향 테스트만 실행한다. 목표 5~15 초. 개발 중 기본 확인.
+- `strict-l0-l15` — L0~L1.5 architecture/provider/gather/public API gate. PR 필수 fail gate.
+- `full-census` — 전체 repo 전수조사. nightly/release 전 확인.
+
+Guard Index 공식 interface:
+
+```bash
+python -X utf8 scripts/audit/dartlabGuard.py quick
+python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
+python -X utf8 scripts/audit/dartlabGuard.py full --baseline scripts/audit/_baselines/dartlabGuard.json
+python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar --json
+```
+
+기존 audit script 는 제거하지 않는다. Guard Index 는 기존 script 를 rule source 로 사용하고, AST index 와 baseline ledger 결과를 같은 실행 표면으로 묶는다. `full-census` 는 nightly/release 용 전수조사이며 `scripts/audit/_baselines/dartlabGuard.json` 을 대표 원장으로 사용한다.
+

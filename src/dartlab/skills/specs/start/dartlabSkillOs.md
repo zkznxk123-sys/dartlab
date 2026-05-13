@@ -64,6 +64,7 @@ runtimeCompatibility:
     status: supported
 procedure:
   - 작업 목적을 5 카테고리 (start · runtime · operation · engines · recipes) 중 하나로 분류한다.
+  - 공개 API 또는 새 호출 경로를 다루면 먼저 operation.apiContract 의 공개 진입점 정책을 확인한다.
   - whenToUse 키워드로 skill 을 검색하고 후보 1~3 개로 좁힌다.
   - 후보 skill 의 frontmatter (purpose · inputs · outputs · runtimeCompatibility) 와 본문 (공개 호출 방식 · 호출 동작) 을 읽는다.
   - 답변에 묶을 evidence (target · period · tableRef · valueRef · dateRef · executionRef) 를 미리 고정한다.
@@ -71,12 +72,14 @@ procedure:
 failureModes:
   - 삭제된 ops 폴더 경로를 직접 순회하다가 적용 규칙 누락
   - 엔진 실행 skill (engines.*) 과 운영 skill (operation.*) 을 구분 못 함
+  - provider facade 밖 내부 함수/ops/helper 를 공개 진입점처럼 안내함
   - sourceRef 없이 규칙 요약
   - 공개 API 변경 후 관련 skill 동기화 누락
   - 후보 / 상위 / 랭킹 답변을 bullet 로만 내고 입력 / 필터 / 계산식 / 표 근거 누락
 forbidden:
   - skills 검색 없이 임의 문서를 시작점으로 삼지 않는다.
   - skill 의 공개 API 호출 방식과 실제 코드 동작 불일치를 방치하지 않는다.
+  - operation.apiContract 확인 없이 provider facade 밖 새 공개 진입점을 만들지 않는다.
   - sourceRef 없는 규칙 설명을 공식 절차로 취급하지 않는다.
   - 결손값을 0 으로 채우지 않는다.
 examples:
@@ -109,6 +112,10 @@ DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가
 | `recipes` | 여러 엔진을 조합해 깊은 분석 품질을 강제하는 절차 | `recipes.credit.deepDive`, `recipes.governance.workforceAndCapital`, `recipes.macro.sixActs` |
 
 엔진 응용 skill 의 `id` 는 `engines.{group}.{axis}` 형식 (`engines.analysis.cashflow`). 기본 skill 은 `engines.{group}` (`engines.company`).
+
+## 공개 진입점 원칙
+
+외부 사용자와 AI 에게 안내하는 호출 경로는 `operation.apiContract` 를 따른다. provider facade 는 예외적으로 허용하지만, 장기 유지 가치가 있는 회사/시장 단위 surface 일 때만 추가한다. provider facade 밖 기능은 엔진명/축 dispatch 로만 노출한다. 내부 helper, ops, builder, recipe 실행 함수는 구현 세부사항이며 migration target 이나 사용자 예시로 안내하지 않는다.
 
 ## 검색 패턴
 
