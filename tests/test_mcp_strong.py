@@ -35,7 +35,9 @@ async def _run_probe() -> dict:
     # progress notification 테스트 빠르게 — 임계 1 s · 간격 0.4 s 로 override.
     env["DARTLAB_PROGRESS_THRESHOLD_SEC"] = "1.0"
     env["DARTLAB_PROGRESS_INTERVAL_SEC"] = "0.4"
-    server = StdioServerParameters(command="dartlab", args=["mcp"], env=env)
+    # 로컬 회귀 테스트는 PATH 의 전역 dartlab.exe 가 아니라 현재 checkout 의 모듈을 띄운다.
+    # 사용자 설치 경로는 tests/test_mcp_tools.py 의 설정 출력 테스트가 별도로 고정한다.
+    server = StdioServerParameters(command=sys.executable, args=["-X", "utf8", "-m", "dartlab.mcp"], env=env)
 
     out: dict = {}
     async with stdio_client(server) as (read, write):

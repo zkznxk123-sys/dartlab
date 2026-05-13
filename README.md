@@ -518,19 +518,21 @@ HuggingFace Spaces 호스팅. DART API 키 불필요. **Claude Desktop 데스크
 
 ### 도구 표면
 
+실제 `tools/list` 표면은 아래 11 개입니다. Skill 본문 전체 조회는 별도 advertised tool 이 아니라 `ReadSkill` 결과와 `dartlab://skills/{id}` resource 경로로 처리합니다.
+
 | 도구 | 역할 |
 |------|------|
 | **ask** | dartlab chat-native 루프 — LLM 자율 도구 호출 + Ref 검산 일괄 |
-| **ReadSkill** · **GetSkillBody** | 공식 Skill OS 검색 + frontmatter + 본문 |
-| **ReadSkillMarket** | 커뮤니티 Skill Market 조회 (공식 builtin 과 별도 trust tier) |
+| **ReadSkill** | 공식 Skill OS 검색 + frontmatter + 본문 preview |
 | **ReadCapability** | dartlab 공개 API/docstring 검색 |
-| **EngineCall** | 단일 capability 1 회 호출 (가벼운 단발 조회용) |
 | **RunPython** | dartlab + Polars 코드 실행 → executionRef/valueRef/tableRef |
-| **Read** | 디스크 파일 직접 인용 (큰 결과 persist 후 회수) |
 | **WebSearch** | 외부 최신 정보 → webRef (untrusted 마커 자동 적용) |
 | **SaveArtifact** | 큰 표·차트 별도 저장 → artifactRef |
 | **CompileVisual** | 차트 spec codegen → visualRef |
-| **RunWorkbench** | 명시적 deep analysis sub-agent (옵션 — 사용자 `/analyze` 또는 LLM 자율 elevate) |
+| **OutcomeLog** | 분석 중 판단·결과를 정형 로그로 남김 |
+| **LookAheadGuard** | 답변 전 누락된 다음 질문·검산 포인트 점검 |
+| **GroundingCheck** | 숫자·날짜·출처 grounding 검산 |
+| **RequestUserInput** | MCP elicit 지원 클라이언트에서 사용자 입력 요청 |
 
 > 옛 33 generated 도구 (`companyAnalysis`/`companyStory`/`marketScan` 등) 는 0.10 부터 폐기 — 모두 `RunPython` 안에서 `dartlab.Company / dartlab.scan / dartlab.macro` 직접 호출. 마이그레이션은 [CHANGELOG](https://github.com/eddmpython/dartlab/releases) 참조.
 

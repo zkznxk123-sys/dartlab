@@ -429,7 +429,17 @@ def _advertisedTools() -> list[dict[str, Any]]:
 
 
 def createServer():
-    """MCP 서버 인스턴스 생성."""
+    """MCP 서버 인스턴스 생성.
+
+    Returns:
+        mcp.server.Server: dartlab tools/resources/prompts handler 가 등록된 서버.
+
+    Example:
+        `app = createServer()`
+
+    Raises:
+        ImportError: MCP SDK 가 설치되어 있지 않을 때.
+    """
     try:
         from mcp.server import Server
         from mcp.server.lowlevel.server import ReadResourceContents
@@ -456,7 +466,17 @@ def createServer():
 
     @app.list_tools()
     async def listTools() -> list[Tool]:
-        """tools/list — advertise 된 tool list (annotation 포함)."""
+        """tools/list 요청에 대해 advertise 된 tool list 를 반환한다.
+
+        Returns:
+            list[Tool]: inputSchema 와 ToolAnnotations 를 포함한 MCP 도구 목록.
+
+        Example:
+            `tools = await listTools()`
+
+        Raises:
+            RuntimeError: 등록된 registry spec 이 MCP Tool 로 변환될 수 없을 때.
+        """
         tools: list[Tool] = []
         for t in _advertisedTools():
             tools.append(
@@ -475,7 +495,21 @@ def createServer():
 
     @app.call_tool()
     async def callTool(name: str, arguments: dict) -> dict[str, Any]:
-        """tools/call — tool name + arguments 를 받아 dispatch + structuredContent 반환."""
+        """tools/call 요청을 dispatch 하고 structuredContent 로 반환한다.
+
+        Args:
+            name: 호출할 MCP 도구 이름.
+            arguments: MCP 클라이언트가 전달한 JSON arguments.
+
+        Returns:
+            dict[str, Any]: ToolResult 호환 structured payload.
+
+        Example:
+            `result = await callTool("ReadSkill", {"query": "MCP"})`
+
+        Raises:
+            RuntimeError: request context 가 손상되어 progress/session 처리가 불가능할 때.
+        """
         # SDK 가 dict 반환을 받으면 structuredContent + serialized text 양쪽 모두 자동 채움.
         # 외부 LLM 은 ref/values/table 등을 structured 로 파싱 가능 + 텍스트 클라이언트 호환.
         _log.info("call_tool: %s(%s)", name, list(arguments.keys()))
@@ -505,7 +539,17 @@ def createServer():
 
     @app.list_resources()
     async def listResources() -> list[Resource]:
-        """resources/list — dartlab 노출 가능한 resource list (skill spec 등)."""
+        """resources/list 요청에 대해 dartlab resource 목록을 반환한다.
+
+        Returns:
+            list[Resource]: info, ask-workbench, datasets, reference, skills resource.
+
+        Example:
+            `resources = await listResources()`
+
+        Raises:
+            RuntimeError: Resource 객체 생성이 SDK schema 와 맞지 않을 때.
+        """
         return [
             Resource(
                 uri="dartlab://info",
@@ -541,7 +585,20 @@ def createServer():
 
     @app.read_resource()
     async def readResource(uri: str) -> list[ReadResourceContents]:
-        """resources/read — uri 로 resource 본문 읽기."""
+        """resources/read 요청의 uri 본문을 읽는다.
+
+        Args:
+            uri: `dartlab://...` resource URI.
+
+        Returns:
+            list[ReadResourceContents]: content 와 mime type 을 담은 단일 항목 list.
+
+        Example:
+            `payload = await readResource("dartlab://skills/start.dartlabSkillOs")`
+
+        Raises:
+            RuntimeError: resource payload 를 SDK response 로 감쌀 수 없을 때.
+        """
         uriStr = str(uri)
         content, mime_type = _resourcePayload(uriStr)
         return [ReadResourceContents(content=content, mime_type=mime_type)]
@@ -552,7 +609,17 @@ def createServer():
 
     @app.list_prompts()
     async def listPrompts() -> list[Prompt]:
-        """prompts/list — recipe 카테고리 기반 prompt list."""
+        """prompts/list 요청에 대해 recipe skill 기반 prompt 목록을 반환한다.
+
+        Returns:
+            list[Prompt]: Skill OS recipe 카테고리에서 파생한 prompt 목록.
+
+        Example:
+            `prompts = await listPrompts()`
+
+        Raises:
+            RuntimeError: skill frontmatter 가 Prompt schema 로 변환될 수 없을 때.
+        """
         prompts: list[Prompt] = []
         for spec in _recipeSkillsForPrompts():
             args = [
@@ -571,7 +638,20 @@ def createServer():
     # ── logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정 ─────────
     @app.set_logging_level()
     async def setLoggingLevel(level: str) -> None:
-        """logging/setLevel — 클라이언트가 dartlab logger 레벨 동적 조정."""
+        """logging/setLevel 요청으로 dartlab MCP logger 레벨을 조정한다.
+
+        Args:
+            level: MCP LoggingLevel 문자열.
+
+        Returns:
+            None: logger level 변경만 수행한다.
+
+        Example:
+            `await setLoggingLevel("debug")`
+
+        Raises:
+            RuntimeError: logger level 변경 중 logging backend 가 실패할 때.
+        """
         # MCP LoggingLevel 은 RFC5424 (debug/info/notice/warning/error/critical/alert/emergency).
         # Python logging 은 이 중 일부만 매칭. 그 외는 가장 가까운 표준 레벨로 매핑.
         mapping = {
@@ -590,7 +670,21 @@ def createServer():
 
     @app.get_prompt()
     async def getPrompt(name: str, arguments: dict[str, str] | None = None) -> GetPromptResult:
-        """prompts/get — recipe name + arguments 로 prompt 본문 반환."""
+        """prompts/get 요청으로 recipe prompt 본문을 반환한다.
+
+        Args:
+            name: Skill OS recipe id.
+            arguments: prompt 본문 앞에 붙일 사용자 입력 mapping.
+
+        Returns:
+            GetPromptResult: user role PromptMessage 를 포함한 MCP prompt 응답.
+
+        Example:
+            `prompt = await getPrompt("recipes.report.dailyMorningNote", {"tickers": "005930"})`
+
+        Raises:
+            ValueError: name 에 해당하는 prompt skill 이 없을 때.
+        """
         from dartlab.skills import getSkill
 
         try:
@@ -622,8 +716,17 @@ def createServer():
 def installMcpConfig(targetDir: str | None = None) -> str:
     """프로젝트에 .mcp.json을 자동 생성한다.
 
+    Args:
+        targetDir: `.mcp.json` 을 생성할 디렉터리. None 이면 현재 작업 디렉터리.
+
     Returns:
-        생성된 파일 경로.
+        str: 생성 또는 기존 등록 상태 메시지.
+
+    Example:
+        `message = installMcpConfig(".")`
+
+    Raises:
+        OSError: `.mcp.json` 쓰기에 실패할 때.
     """
     from pathlib import Path
 
@@ -659,7 +762,17 @@ def installMcpConfig(targetDir: str | None = None) -> str:
 
 
 def runStdio():
-    """stdio 모드로 MCP 서버 실행."""
+    """stdio 모드로 MCP 서버를 실행한다.
+
+    Returns:
+        None: 서버 event loop 를 종료될 때까지 실행한다.
+
+    Example:
+        `runStdio()`
+
+    Raises:
+        ImportError: MCP stdio transport 를 import 할 수 없을 때.
+    """
     import asyncio
 
     try:
@@ -678,7 +791,17 @@ def runStdio():
 
 
 def createSseApp():
-    """SSE 전송 기반 ASGI 앱 생성. FastAPI에 마운트하거나 독립 실행 가능."""
+    """SSE 전송 기반 ASGI 앱을 생성한다.
+
+    Returns:
+        Starlette: `/sse` 와 `/messages/` route 를 가진 ASGI 앱.
+
+    Example:
+        `app = createSseApp()`
+
+    Raises:
+        ImportError: MCP SSE transport 또는 Starlette 를 import 할 수 없을 때.
+    """
     from mcp.server.sse import SseServerTransport
     from starlette.applications import Starlette
     from starlette.routing import Mount, Route
@@ -687,7 +810,20 @@ def createSseApp():
     sse = SseServerTransport("/messages/")
 
     async def handleSse(request):
-        """SSE 연결 handshake — 클라이언트 → mcp_server 양방향 stream."""
+        """SSE 연결 handshake 로 MCP 양방향 stream 을 연다.
+
+        Args:
+            request: Starlette Request 객체.
+
+        Returns:
+            None: 연결 생명주기 동안 MCP server run 을 수행한다.
+
+        Example:
+            `await handleSse(request)`
+
+        Raises:
+            RuntimeError: SSE transport 연결 또는 MCP server run 이 실패할 때.
+        """
         async with sse.connect_sse(request.scope, request.receive, request._send) as (read, write):
             await mcp_server.run(read, write, mcp_server.create_initialization_options())
 
@@ -700,7 +836,21 @@ def createSseApp():
 
 
 def runSse(host: str = "0.0.0.0", port: int = 8001):
-    """SSE 모드로 MCP 서버 실행 (HTTP)."""
+    """SSE 모드로 MCP HTTP 서버를 실행한다.
+
+    Args:
+        host: bind host.
+        port: bind port.
+
+    Returns:
+        None: uvicorn 서버를 종료될 때까지 실행한다.
+
+    Example:
+        `runSse(host="127.0.0.1", port=8001)`
+
+    Raises:
+        ImportError: uvicorn 또는 SSE app 의 의존성을 import 할 수 없을 때.
+    """
     import uvicorn
 
     _log.info("DartLab MCP 서버 시작 (SSE http://%s:%d/sse)", host, port)
