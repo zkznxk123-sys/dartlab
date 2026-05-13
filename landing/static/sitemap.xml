@@ -1301,6 +1301,76 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.cycleStressMap</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.dollarFundingStress</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.globalLiquidityPulse</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.historicalPositioning</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.inflationBreadthWatch</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.koreaExportCycleNowcast</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.koreaMacroStressMap</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.laborMarketTurningPoint</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.scenarioDiagram</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.sixActs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.stressMatrixChart</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.tailRiskScenarioScan</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.timeSeriesChart</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.yieldCurveStress</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/scan</loc>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>

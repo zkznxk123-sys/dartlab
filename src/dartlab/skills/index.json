@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 257,
+    "skillCount": 271,
     "categories": [
       {
         "id": "start",
@@ -25353,7 +25353,7 @@
         "protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시.",
         "selfRun — 같은 세션에서 ReadSkill 로 재로드 후 사용 기능 를 EngineCall/RunPython 으로 3 케이스 전부 실행. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).",
         "redTeam — RunWorkbench 의 CRITIQUE 패스로 (a) 반대 가설 (b) 누락 데이터/edge case (c) 다른 axis 와 중복성 점검. 통과 못하면 protoSkill 재집필 1 회 회귀.",
-        "graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + generateSkills.py 로 index.json 갱신 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.",
+        "graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + 산출물 동기화 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.",
         "auditFeedback — 운영 중 같은 skill 이 audit P 반복 또는 docstring 보강 후보 적발 시, public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis 로 승격, 관련 SkillSpec 의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신."
       ],
       "recipeSteps": [],
@@ -27347,6 +27347,1169 @@
           ]
         }
       }
+    },
+    {
+      "id": "recipes.credit.cycleStressMap",
+      "title": "신용사이클 스트레스 지도",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "BIS Credit-to-GDP gap, Minsky phase, Koo balance sheet recession, Fisher debt deflation, HY spread 등 macro.crisis의 신용 관련 출력을 묶어 신용사이클 위치와 tipping point를 읽는 절차. 트리거 — '신용사이클', 'credit stress', 'Minsky', '부채 디플레이션', '금융위기 신호'.",
+      "whenToUse": [
+        "신용사이클",
+        "credit cycle",
+        "credit stress",
+        "Minsky phase",
+        "부채 디플레이션",
+        "금융위기 신호"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.crisis",
+        "engines.macro.liquidity",
+        "engines.macro.rates",
+        "engines.macro.summary",
+        "engines.credit"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: creditGap, ghsScore, minskyPhase, recessionDashboard, Koo/Fisher, EBP, creditCycle.",
+        "`valueRef`: liquidityRegime, rateDirection, summaryOverall.",
+        "답변 본문: 신용사이클 위치, tipping 신호, 결손 지표, 확인해야 할 다음 데이터.",
+        "신용 신호는 최소 2개 이상 교차 확인한다.",
+        "결손 지표는 “없음”이 아니라 “현재 데이터로 판정 불가”로 표시한다.",
+        "빠른 시장 스트레스와 느린 신용갭 지표를 구분한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "creditGap은 느린 분기 지표라 단기 market stress와 시차가 큼.",
+        "Koo/Fisher 일부 신호는 US 데이터 중심이라 KR에서는 결손 가능.",
+        "유동성 풍부와 신용위험 확대가 동시에 나올 수 있음."
+      ],
+      "forbidden": [
+        "신용위험을 주가 하락 가능성과 동일시하지 않는다.",
+        "HY spread 하나만으로 위기 임박을 단정하지 않는다.",
+        "US 전용 지표를 KR 판단에 그대로 전용하지 않는다."
+      ],
+      "examples": [
+        "지금 신용사이클은 Minsky 몇 단계인가",
+        "Credit-to-GDP gap과 HY spread로 위기 신호 봐줘",
+        "부채 디플레이션 위험이 있는지 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.dollarFundingStress",
+      "title": "달러 펀딩 스트레스 원자료 점검",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "달러인덱스, 원달러 환율, VIX, HY spread, 금융상태지수 원자료를 gather로 확인해 글로벌 위험회피와 달러 펀딩 압력이 커지는지 판단하는 절차. 트리거 — '달러 스트레스', '달러 펀딩', 'DXY', 'USDKRW', '위험회피'.",
+      "whenToUse": [
+        "달러 스트레스",
+        "달러 펀딩",
+        "DXY",
+        "USDKRW",
+        "위험회피",
+        "dollar funding stress"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.macro.crisis",
+        "engines.macro.assets",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: dollar/funding indicator별 원자료.",
+        "`valueRef`: usDollarSafeHaven, krOverall, krScore.",
+        "답변 본문: 글로벌 달러 압력, 한국 환율 압력, 위험회피 여부.",
+        "글로벌 지표와 KR 양자 환율을 분리해 표시한다.",
+        "VIX/HY가 안정적인데 USDKRW만 오르면 한국/금리차 요인 가능성을 남긴다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "DXY, VIX, HY spread는 US/글로벌 지표이고 USDKRW는 KR 양자 환율.",
+        "환율 데이터 source별 기준시각 차이.",
+        "달러 강세가 성장 호조와 위험회피 양쪽에서 발생 가능."
+      ],
+      "forbidden": [
+        "원달러 상승을 항상 한국 고유 위험으로 해석하지 않는다.",
+        "DXY와 USDKRW를 같은 지표처럼 합산하지 않는다.",
+        "위험회피와 금리차 요인을 구분하지 않고 결론 내리지 않는다."
+      ],
+      "examples": [
+        "달러 펀딩 스트레스 확인",
+        "DXY와 원달러가 같이 오르는 이유 점검",
+        "위험회피성 달러 강세인지 봐줘"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.globalLiquidityPulse",
+      "title": "글로벌 유동성 펄스 원자료 점검",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "macro 축의 유동성 판정에 아직 직접 드러나지 않는 Fed balance sheet, reverse repo, M2, 정책금리 원자료를 gather로 모아 글로벌 달러 유동성의 방향을 점검하는 절차. 트리거 — '글로벌 유동성', '달러 유동성', 'Fed balance sheet', 'RRP', 'M2'.",
+      "whenToUse": [
+        "글로벌 유동성",
+        "달러 유동성",
+        "Fed balance sheet",
+        "reverse repo",
+        "M2",
+        "liquidity pulse"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.macro.liquidity",
+        "engines.macro.rates",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: indicator별 원자료 조회 결과와 실패 사유.",
+        "`valueRef`: liquidityRegime, rateDirection, summaryOverall.",
+        "`dateRef`: 원자료의 latestAsOf/date 또는 summary 기준일.",
+        "원자료 2개 이상이 성공해야 방향성을 말한다.",
+        "서로 다른 빈도의 지표는 최근값만 단순 비교하지 않고 기준일을 병기한다.",
+        "macro 유동성 판정과 raw 지표 방향이 충돌하면 충돌을 그대로 표시한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "FRED/HF 카탈로그에 없는 지표는 apiKey 또는 직접 provider가 필요할 수 있음.",
+        "주간/월간/일간 지표의 빈도 차이.",
+        "정책금리 방향과 유동성 잔액 방향이 충돌할 수 있음."
+      ],
+      "forbidden": [
+        "Fed balance sheet 증가를 곧바로 주식시장 상승으로 단정하지 않는다.",
+        "RRP 감소를 단독 유동성 완화로 해석하지 않는다.",
+        "기준일과 source 없는 유동성 판단 금지."
+      ],
+      "examples": [
+        "글로벌 유동성 펄스 확인",
+        "Fed balance sheet와 RRP를 같이 봐줘",
+        "M2와 금리로 달러 유동성 방향 점검"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.historicalPositioning",
+      "title": "현재 매크로 위치의 역사적 비교",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "현재 거시 상태를 1997 아시아 위기, 2008 금융위기, 2020 COVID, 2022 인플레 긴축 같은 역사적 충격과 나란히 비교해 지금의 위치를 설명하는 절차. 트리거 — '2008과 비교', '과거 위기 대비', '현재 위치', '역사적 percentile'.",
+      "whenToUse": [
+        "과거 위기 비교",
+        "2008 대비 현재",
+        "2020 COVID 대비",
+        "현재 매크로 위치",
+        "historical positioning"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.summary",
+        "engines.macro.cycle",
+        "engines.macro.crisis",
+        "engines.macro.scenario",
+        "engines.macro.assets"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: 역사적 사건별 scenario 결과와 delta.",
+        "`valueRef`: 현재 overall/score, cyclePhase, crisisZone.",
+        "`dateRef`: 현재 macro 기준일과 scenario period.",
+        "답변 본문: 닮은 점, 다른 점, 현재 판단에서 버려야 할 과거 아날로그.",
+        "현재 데이터와 scenario override를 같은 행에 두되 `current` / `scenario` 라벨을 분리한다.",
+        "비교 결과에는 최소 2개 이상의 역사적 사건을 포함한다.",
+        "가장 유사한 사건을 말할 때도 “완전 동일” 표현은 금지한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "사건별 기간이 다르고 지표 빈도가 달라 직접 수치 비교가 왜곡됨.",
+        "1997 KR 위기와 2008 US 위기를 같은 시장 기준으로 섞음.",
+        "scenario 결과의 delta와 현재 summary를 구분하지 못함."
+      ],
+      "forbidden": [
+        "역사적 사건을 현재와 동일하다고 단정하지 않는다.",
+        "시나리오 override 결과를 실제 현재 데이터로 말하지 않는다.",
+        "단일 사건 하나만 골라 결론을 고정하지 않는다."
+      ],
+      "examples": [
+        "지금은 2008 금융위기와 얼마나 비슷한가",
+        "현재 한국 거시 상황을 1997/2008/2020과 비교",
+        "2022 인플레 긴축과 지금 금리 환경 비교"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.inflationBreadthWatch",
+      "title": "인플레이션 확산성 원자료 점검",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "CPI, PPI, 유가, 기대인플레이션, 정책금리 원자료를 gather로 모아 인플레이션이 단일 품목 충격인지 광범위한 압력인지 확인하는 절차. 트리거 — '인플레 확산', '물가 압력', 'CPI PPI 유가', '기대인플레이션'.",
+      "whenToUse": [
+        "인플레이션 확산",
+        "물가 압력",
+        "CPI PPI",
+        "기대인플레이션",
+        "inflation breadth"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.macro.rates",
+        "engines.macro.scenario",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: inflation indicator별 원자료.",
+        "`valueRef`: rateDirection, scenarioType, summaryOverall.",
+        "답변 본문: 확산성, 공급충격/수요압력 구분, 정책 압력.",
+        "CPI 계열과 상품/생산자 계열을 최소 하나씩 확인한다.",
+        "확산성은 “넓음/좁음/혼재/판정불가” 중 하나로 표현한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "CPI/PPI/유가의 빈도와 발표 지연 차이.",
+        "headline과 core inflation의 방향 차이.",
+        "기대인플레이션 지표의 시장 유동성 왜곡."
+      ],
+      "forbidden": [
+        "CPI 하나만으로 인플레이션 확산성을 단정하지 않는다.",
+        "유가 상승을 항상 core inflation 상승으로 연결하지 않는다.",
+        "명목/실질 금리 구분 없이 정책 압력을 말하지 않는다."
+      ],
+      "examples": [
+        "물가 압력이 넓게 퍼지고 있나",
+        "CPI와 PPI와 유가를 같이 봐줘",
+        "인플레 재가속 위험 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.koreaExportCycleNowcast",
+      "title": "한국 수출 사이클 원자료 나우캐스트",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "ECOS/FRED/KRX 원자료와 macro.trade 해석을 묶어 한국 수출 경기의 현재 방향을 빠르게 점검하는 절차. macro 축에 없는 반도체·원화·KOSPI 반응 proxy를 gather로 보강한다. 트리거 — '한국 수출', '수출 사이클', '반도체 경기', '교역조건'.",
+      "whenToUse": [
+        "한국 수출",
+        "수출 사이클",
+        "반도체 경기",
+        "교역조건",
+        "export nowcast"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.gather.price",
+        "engines.macro.trade",
+        "engines.macro.corporate",
+        "engines.macro.summary",
+        "engines.scan.macroBeta"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: KR export proxy와 KOSPI 원자료.",
+        "`valueRef`: tradeDirection, summaryOverall, summaryScore.",
+        "답변 본문: 수출 사이클 방향, 환율/교역조건 영향, 주식시장 반응 proxy.",
+        "원자료 코드 실패는 실패 행으로 남긴다.",
+        "`macro.trade` 결과 없이 KOSPI만으로 수출 사이클을 판단하지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "ECOS 지표 코드별 제공 기간/빈도 차이.",
+        "반도체 proxy와 전체 수출의 시차.",
+        "환율 효과가 수출 물량과 원화 매출에 반대로 작용할 수 있음."
+      ],
+      "forbidden": [
+        "KOSPI 지수만으로 수출 경기를 단정하지 않는다.",
+        "반도체 proxy를 전체 한국 경제로 과잉 일반화하지 않는다.",
+        "교역조건과 수출금액을 같은 의미로 쓰지 않는다."
+      ],
+      "examples": [
+        "한국 수출 사이클 지금 개선 중인가",
+        "반도체 경기와 교역조건 같이 확인",
+        "원달러와 KOSPI로 수출주 환경 봐줘"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.koreaMacroStressMap",
+      "title": "한국 매크로 스트레스 지도",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "한국 시장을 기준으로 환율, 교역, 금리, 유동성, 위기, 자산/심리 축을 묶어 외국인 수급과 수출 민감도가 큰 시장의 거시 스트레스를 판단하는 절차. 트리거 — '한국 매크로', 'KR 스트레스', '원달러', 'KOSPI 위험', '수출 경기'.",
+      "whenToUse": [
+        "한국 매크로",
+        "KR macro stress",
+        "원달러 스트레스",
+        "KOSPI 위험",
+        "수출 경기",
+        "외국인 수급과 환율"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.trade",
+        "engines.macro.rates",
+        "engines.macro.liquidity",
+        "engines.macro.crisis",
+        "engines.macro.assets",
+        "engines.macro.sentiment",
+        "engines.macro.summary",
+        "engines.scan"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: KR macro 축별 결과.",
+        "`valueRef`: overall, score, tradeDirection, crisisZone.",
+        "`dateRef`: 각 축의 최신 관측일.",
+        "답변 본문: 환율/교역, 금리/유동성, 신용/위기, 자산/심리의 스트레스 지도.",
+        "KR 시장 판단에는 모든 호출에 `market=\"KR\"` 를 명시한다.",
+        "데이터 결손이 있는 축은 결론에서 제외하거나 낮은 신뢰도로 표시한다.",
+        "환율/교역/자산 반응의 기준일이 다를 수 있음을 병기한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "KR macro 축의 일부 데이터 결손.",
+        "환율, 교역조건, 주식시장 반응의 기준일 차이.",
+        "수출주와 내수주의 macro 민감도 차이를 무시함."
+      ],
+      "forbidden": [
+        "US macro 결과를 한국 시장 결론으로 전용하지 않는다.",
+        "환율 하나만으로 한국 시장 스트레스를 단정하지 않는다.",
+        "KOSPI 방향 예측을 직접 투자 권고로 쓰지 않는다."
+      ],
+      "examples": [
+        "한국 매크로 스트레스 지금 어느 정도야",
+        "원달러와 교역조건으로 수출 경기 봐줘",
+        "한국 시장이 신용/환율/심리 중 어디가 취약한가"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.laborMarketTurningPoint",
+      "title": "노동시장 전환점 원자료 점검",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "실업률, 신규실업수당, 비농업고용, 임금, Sahm rule 관련 원자료를 gather로 확인하고 macro.forecast와 대조해 노동시장 둔화의 전환점을 찾는 절차. 트리거 — '노동시장 둔화', '실업률', '고용 전환점', 'Sahm rule'.",
+      "whenToUse": [
+        "노동시장 둔화",
+        "실업률",
+        "신규실업수당",
+        "고용 전환점",
+        "Sahm rule"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.macro.forecast",
+        "engines.macro.cycle",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: 노동시장 indicator별 원자료.",
+        "`valueRef`: sahmRule, cyclePhase, summaryOverall.",
+        "답변 본문: 노동시장 전환 신호와 아직 버티는 신호.",
+        "한 지표만 성공하면 결론 대신 추가 데이터 필요로 표시한다.",
+        "신규실업수당과 실업률의 시차를 분리한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "고용지표 revision이 커서 최신 발표치가 바뀔 수 있음.",
+        "실업률과 신규실업수당의 선후행 차이.",
+        "임금은 인플레이션과 노동수요를 동시에 반영."
+      ],
+      "forbidden": [
+        "고용지표 한 달치 변화로 추세 전환을 단정하지 않는다.",
+        "임금 상승을 항상 경기 호조로만 해석하지 않는다.",
+        "Sahm rule 신호와 recession nowcast를 혼동하지 않는다."
+      ],
+      "examples": [
+        "미국 노동시장 전환점 확인",
+        "신규실업수당과 실업률로 경기 둔화 봐줘",
+        "Sahm rule 위험 점검"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.scenarioDiagram",
+      "title": "경제 시나리오 인과 다이어그램",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "macro.scenario 또는 경제분석 결과를 Mermaid 인과 그래프로 emit 하여 충격 전파 경로를 시각화하는 절차. 트리거 — '시나리오 그래프', '인과 다이어그램', '충격 전파', '경제 흐름도'.",
+      "whenToUse": [
+        "시나리오 그래프",
+        "인과 다이어그램",
+        "충격 전파",
+        "경제 흐름도",
+        "mermaid"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.scenario",
+        "engines.viz",
+        "recipes.macro.tailRiskScenarioScan",
+        "recipes.macro.historicalPositioning"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "\"2008 금융위기형 신용 충격은 KR 시장 peak-to-trough -38% (18 개월), 회복 +15 개월. 방어 (현금흐름 안정 + 부채비율 50% 이하) 가 상대 -15%p 우위, 취약 (부동산·리츠·고부채 성장주) 가 -28%p 열위.\"",
+        "**skillRef**: `engines.macro.scenario` (이 recipe 진입점), `engines.macro.crisis` (역사 위기 사례), `engines.scan.capital` (방어/취약 섹터 현재 분포). 답변 결론·메커니즘 단에서 *어느 skill 출처* 인지 명시.",
+        "**sourceRef**: `dartlab.macro(\"scenario\", ...)` 가 반환한 시나리오 meta (description / type / transmission / historicalCases). 시점 (asOf) 포함.",
+        "**executionRef**: RunPython 안 계산 결과 (위 monitoring 표·values dict). 답변에 \"RunPython 실행 결과: ref:N\" 형식 인용.",
+        "**Falsifier**: 시나리오 이름 또는 충격 경로 (type/transmission) 가 없으면 다이어그램을 만들지 않는다. type 도 추정 못 하면 \"조건부 충격\" 중립 레이블로 emit 후 답변에 한계 명시.",
+        "**역사 평균 경로 한계**: 다이어그램은 *과거 평균 transmission* 이라 현 사이클 미반영. 예 — Fed 조기 피벗 시 충격이 단기 (1 quarter) 로 마감, 다이어그램의 T+2Q~T+4Q 단계가 압축됨.",
+        "**확률 단정 금지**: edge \"A → B\" 는 *조건부 경로* 이지 *확률 예측* 아님. \"B 가 반드시 일어난다\" 식 답변 금지.",
+        "**노드 수 가드**: 6 개 초과 시 가독성 손실. 더 세분화는 별도 `recipes.macro.tailRiskScenarioScan` 으로 분리.",
+        "**장식화 회피**: 다이어그램이 *설명 보조* 가 아니라 *답변 채우기 장식* 으로 쓰임 — 본문 텍스트가 다이어그램과 같은 정보만 담으면 다이어그램 생략하고 표·텍스트로 답.",
+        "여러 시나리오 정량 비교 → `recipes.macro.tailRiskScenarioScan`",
+        "역사적 유사 사례 비교 → `recipes.macro.historicalPositioning`",
+        "차트형 수치 (PER 압축·섹터 베타) 비교 → `recipes.macro.stressMatrixChart`"
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "scenario meta에 transmission이 없어 일반 경로를 사용해야 함.",
+        "다이어그램이 설명보다 장식으로 쓰임.",
+        "조건부 충격 경로를 확률 예측으로 오해."
+      ],
+      "forbidden": [
+        "원인과 결과가 검증되지 않은 임의 노드를 추가하지 않는다.",
+        "시나리오 다이어그램을 실제 예측 경로로 단정하지 않는다.",
+        "너무 많은 노드로 읽기 어려운 그래프를 만들지 않는다."
+      ],
+      "examples": [
+        "2008 금융위기 충격 전파를 다이어그램으로 보여줘",
+        "인플레이션 충격이 금리와 신용으로 가는 흐름도",
+        "달러 스트레스 인과 그래프"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.sixActs",
+      "title": "경제분석 6막 진입 절차",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "종목 없이 경제분석을 시작할 때 macro 12축을 6막 인과 순서로 호출해 현재 경기 위치, 정책, 금융시스템, 시장 반응, 향후 시나리오를 한 번에 정리하는 절차. 트리거 — '경제분석 시작', '거시 전체', '매크로 6막', '경제 상황 요약'.",
+      "whenToUse": [
+        "경제분석 시작",
+        "매크로 전체",
+        "거시 6막",
+        "경기 정책 유동성 시장 종합",
+        "economic six acts"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro",
+        "engines.macro.cycle",
+        "engines.macro.rates",
+        "engines.macro.liquidity",
+        "engines.macro.crisis",
+        "engines.macro.assets",
+        "engines.macro.sentiment",
+        "engines.macro.forecast",
+        "engines.macro.scenario",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "\"KR 매크로는 후반 확장 (cycle phase=expansion / score 60), 정책금리 +25bp 인상 후 보유 (rates outlook=tight), 가계신용 138%·기업부채 KOSDAQ 평균 부채비율 95% (crisis flag=elevated), 자산가격 KOSPI PER 11.2 ×·KRX 채권 변동성 +18% (assets repricing=moderate), 향후 분기 forecast PMI 47 → 49 회복 (forecast=bottoming).\"",
+        "\"US 매크로는 침체 직전 (cycle phase=late expansion / score -10), Fed 동결 + dot plot 2 회 인하 시사 (rates outlook=pivoting), ISM 47 / 신용스프레드 BBB 165bp (crisis flag=watch), assets S&P PER 22 ×·VIX 18 (assets=stretched), forecast cycle bottom T+2Q.\"",
+        "**skillRef**: `engines.macro.summary` (1 막 진입) + `engines.macro.{cycle,rates,liquidity,crisis,assets,sentiment,forecast}` 7 축 각각. 답변에 \"skill: engines.macro.cycle 의 phase\" 식 인용.",
+        "**sourceRef**: 각 axis 의 reference 원자료 (예: 한국은행 ECOS / 국가통계청 / Fed FRED). axis result 의 `sourceUrl`·`provider` 명시.",
+        "**tableRef**: 6 막별 (act / axis / 핵심값 / 방향) 4 컬럼 표 한 개. 답변 본체 시각화.",
+        "**dateRef**: 각 axis 의 `asOf` (최신 관측일) — quarterly 기준 정합 권장.",
+        "**valueRef**: `overall` · `score` + 각 axis 의 핵심 수치 (cycle.score / rates.policyRate / crisis.flag 등).",
+        "**executionRef**: RunPython 실행 결과 id — 답변에 \"ref:N\" 으로 직접 인용.",
+        "**Falsifier**: `summary` 가 `cycle/rates/liquidity/crisis` 중 2 축 이상을 포함 못 하면 6 막 진입에 부적합 — 단일 axis 답변으로 fallback 하고 한계 명시.",
+        "**시장 혼합 금지**: KR 분석 중 US 지표 (예: Fed funds rate) 단독 인용 금지. KR↔US 비교가 필요하면 *별도 컬럼* 으로 표기.",
+        "**summary score 한계**: `overall`/`score` 가 0~100 단일 수치라 위기 신호 조기 감지에 lag. crisis flag 와 병기.",
+        "**forecast 단정 금지**: forecast 는 *현 추세 연장* 이지 *예측* 아님. \"다음 분기 X 가 일어난다\" 단정 표현 X."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "KR/US 시장을 섞어 기준일과 지표 단위가 어긋남.",
+        "6막 순서가 아닌 단편 축 나열로 끝남.",
+        "scenario를 현재 상태처럼 오해함."
+      ],
+      "forbidden": [
+        "모든 경제 질문에 6막을 강제하지 않는다. 사용자가 단일 축을 원하면 해당 macro 축만 호출한다.",
+        "기준일 없는 수치 판단 금지.",
+        "summary 점수만 보고 결론 금지 — cycle/rates/liquidity/crisis의 근거를 함께 확인한다."
+      ],
+      "examples": [
+        "한국 경제 지금 어디에 있나",
+        "미국 매크로 전체 상황 6막으로 정리",
+        "경기와 금리와 위기 신호를 한 번에 봐줘"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.stressMatrixChart",
+      "title": "경제 스트레스 매트릭스 차트",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "금리, 인플레이션, 노동시장, 달러, 신용 스트레스 지표를 gather 원자료로 모아 bar chart 또는 heatmap 형태로 emit 하는 절차. 트리거 — '스트레스 그래프', '경제 위험 차트', '리스크 매트릭스', 'stress matrix'.",
+      "whenToUse": [
+        "스트레스 그래프",
+        "경제 위험 차트",
+        "리스크 매트릭스",
+        "stress matrix",
+        "macro stress chart"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.viz",
+        "recipes.macro.tailRiskScenarioScan",
+        "recipes.macro.dollarFundingStress",
+        "recipes.credit.cycleStressMap"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`chartSpec`: bar chart.",
+        "`tableRef`: indicator/latest/change/ok/reason.",
+        "`valueRef`: indicatorCount, chartCount.",
+        "단위가 다르므로 `change`는 순위 힌트이지 통합 점수가 아니다.",
+        "성공 지표 3개 미만이면 차트를 emit 하지 않는다.",
+        "bar chart 뒤에는 어떤 지표가 어떤 단위인지 표로 함께 설명한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "evidenceBinding"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "지표 단위가 bp, %, index 로 섞임.",
+        "최신값만 쓰면 방향성이 사라짐.",
+        "일부 지표 결손 시 전체 스트레스 점수가 왜곡."
+      ],
+      "forbidden": [
+        "정규화 기준 없이 서로 다른 단위 값을 그대로 합산하지 않는다.",
+        "임계값을 투자 권고로 표현하지 않는다.",
+        "evidence 없는 bar/heatmap emit 금지."
+      ],
+      "examples": [
+        "경제 위험 지표를 그래프로 보여줘",
+        "VIX HY 금리차 실업률을 한 번에 차트화",
+        "스트레스 높은 순서 bar chart"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.tailRiskScenarioScan",
+      "title": "꼬리위험 시나리오 스캔",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "2008 금융위기, 2020 COVID, 인플레이션 충격, 신용 충격 같은 macro.scenario 결과를 나란히 실행해 현재 macro summary 대비 하방 시나리오의 손실 경로와 취약 축을 찾는 절차. 트리거 — 'tail risk', '꼬리위험', '최악 시나리오', '5시그마 이벤트'.",
+      "whenToUse": [
+        "tail risk",
+        "꼬리위험",
+        "최악 시나리오",
+        "하방 시나리오",
+        "scenario scan"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.macro.scenario",
+        "engines.macro.crisis",
+        "engines.macro.assets",
+        "engines.macro.summary",
+        "engines.quant.tailrisk"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: scenarioName, meta, delta, scenario.",
+        "`valueRef`: currentScore, scenario별 score/delta.",
+        "답변 본문: 하방 시나리오 순위, 반복 취약 축, 현재 기준선과의 차이.",
+        "최소 3개 이상의 scenario를 실행한다.",
+        "`severity`를 명시하고, 역사적 사건과 유형별 stress를 구분한다.",
+        "scenario 결과는 확률이 아니라 “조건부 충격 경로”라고 설명한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "scenario override가 현재 시장 데이터와 섞여 기준일이 모호해짐.",
+        "severe/extreme 심각도 비교가 유형별로 동일한 확률을 의미하지 않음.",
+        "꼬리위험 스캔을 투자 권고로 오해함."
+      ],
+      "forbidden": [
+        "시나리오 결과를 확률 예측으로 말하지 않는다.",
+        "극단 시나리오 하나만 보고 기본 전망을 뒤집지 않는다.",
+        "quant tailrisk와 혼동해 실제 포트폴리오 CVaR처럼 표현하지 않는다."
+      ],
+      "examples": [
+        "지금 가장 위험한 꼬리 시나리오는 뭐야",
+        "2008/COVID/인플레 충격을 현재와 비교",
+        "신용 충격과 금리 충격 중 어느 쪽이 더 취약한가"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.timeSeriesChart",
+      "title": "경제 원자료 시계열 차트",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "gather.macro 로 가져온 경제 원자료를 line chart 로 emit 하여 AI 답변에 인라인 그래프를 붙이는 절차. 트리거 — '경제 그래프', '거시 시계열', '차트로 보여줘', '금리 추이', '물가 추이'.",
+      "whenToUse": [
+        "경제 그래프",
+        "거시 시계열",
+        "차트로 보여줘",
+        "금리 추이",
+        "물가 추이",
+        "macro time series chart"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.viz",
+        "recipes.macro.yieldCurveStress",
+        "recipes.macro.inflationBreadthWatch"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`chartSpec`: line chart.",
+        "`tableRef`: date/value rows.",
+        "`valueRef`: indicator, points, latest.",
+        "`dateRef`: 최신 관측일.",
+        "`rows` 가 비어 있으면 차트를 emit 하지 않는다.",
+        "`evidenceIds` 는 반드시 `gather:macro:{indicator}` 형식으로 남긴다.",
+        "차트와 `emit_result.table` 의 행이 같은 원자료에서 나온 것인지 확인한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef",
+        "executionRef",
+        "evidenceBinding"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "지표 코드가 HF 카탈로그에 없어 빈 DataFrame 또는 예외가 발생.",
+        "일별/월별/분기별 지표가 한 차트에 섞여 축 해석이 왜곡.",
+        "너무 긴 시계열을 그대로 emit 해 UI가 무거워짐."
+      ],
+      "forbidden": [
+        "추측 데이터로 차트를 만들지 않는다.",
+        "evidenceIds 또는 evidenceBinding 없는 차트 emit 금지.",
+        "단일 최신값만 있는 데이터는 line chart 로 만들지 않는다."
+      ],
+      "examples": [
+        "FEDFUNDS 추이를 그래프로 보여줘",
+        "CPIAUCSL 최근 5년 차트",
+        "T10Y2Y 금리차 그래프"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
+    },
+    {
+      "id": "recipes.macro.yieldCurveStress",
+      "title": "수익률곡선 스트레스 원자료 점검",
+      "category": "recipes",
+      "kind": "recipe",
+      "status": "drafted",
+      "purpose": "장단기 금리차, 정책금리, 장기금리 원자료를 gather로 직접 확인하고 macro.rates 해석과 대조해 경기침체 선행 신호와 정책 압력을 점검하는 절차. 트리거 — '수익률곡선', '장단기 금리차', 'yield curve', '금리 역전'.",
+      "whenToUse": [
+        "수익률곡선",
+        "장단기 금리차",
+        "yield curve",
+        "금리 역전",
+        "recession signal"
+      ],
+      "inputs": [],
+      "requiredInputs": [],
+      "outputs": [],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [],
+      "linkedSkills": [
+        "engines.gather",
+        "engines.gather.macro",
+        "engines.macro.rates",
+        "engines.macro.forecast",
+        "engines.macro.summary"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [],
+      "procedure": [
+        "`tableRef`: 금리 지표별 원자료.",
+        "`valueRef`: rateDirection, recessionProb, summaryOverall.",
+        "답변 본문: 역전 여부, 곡선 정상화 여부, 침체 신호의 lag 위험.",
+        "`T10Y2Y`와 `T10Y3M` 중 적어도 하나가 있어야 곡선 판단을 한다.",
+        "forecast와 rates가 충돌하면 “시장금리 선행 vs macro forecast 지연”으로 분리한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "tableRef",
+        "dateRef",
+        "valueRef"
+      ],
+      "expectedOutputs": [],
+      "visualGuidance": [],
+      "failureModes": [
+        "일별 금리와 월별 macro forecast의 기준일 불일치.",
+        "장단기 스프레드가 정상화되어도 recession lag가 남을 수 있음.",
+        "FRED 코드 외 시장에서는 별도 provider 필요."
+      ],
+      "forbidden": [
+        "금리 역전만으로 즉시 침체를 단정하지 않는다.",
+        "정책금리와 시장금리의 시차를 무시하지 않는다.",
+        "KR/US 금리 코드를 섞어 같은 곡선으로 계산하지 않는다."
+      ],
+      "examples": [
+        "미국 장단기 금리차 지금 역전인가",
+        "T10Y2Y와 T10Y3M으로 침체 신호 확인",
+        "금리곡선과 macro rates 결과 비교"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "apiRefs": [],
+      "categoryTitle": "Recipes"
     }
   ]
 }
