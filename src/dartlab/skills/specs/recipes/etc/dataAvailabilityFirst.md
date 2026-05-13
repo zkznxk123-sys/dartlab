@@ -24,6 +24,11 @@ toolRefs:
 requiredEvidence:
   - skillRef
   - datasetRef
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+visualGuidance:
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -49,7 +54,7 @@ examples:
   - 결손 데이터 발견 시 gather 트리거
   - InspectDataset + schema 검증
   - 데이터 점검 → 분석 → 결과
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

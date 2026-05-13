@@ -360,6 +360,69 @@ def test_skill_search_routes_to_engine_owned_application_skills() -> None:
     assert skills.search("기업 신용 위험", includeUser=False)[0].skill.id == "engines.credit.creditRisk"
 
 
+def test_recipe_visual_guidance_is_optional_but_executable() -> None:
+    """recipe 시각화는 의무 차트가 아니라 실행 가능한 선택 계약이다."""
+    recipe_specs = [item for item in skills.list(includeUser=False) if item.category == "recipes"]
+    known_ids = {item.id for item in skills.list(includeUser=False)}
+
+    assert recipe_specs
+    visual_recipe_count = 0
+    for spec in recipe_specs:
+        if not spec.visualGuidance:
+            continue
+        visual_recipe_count += 1
+        assert spec.visualRefs, f"{spec.id} has visualGuidance without visualRefs"
+        for visual_ref in spec.visualRefs:
+            assert visual_ref in known_ids, f"{spec.id} references unknown visual skill {visual_ref}"
+            assert visual_ref.startswith("engines.viz."), f"{spec.id} visualRef must be engines.viz.*"
+        joined = " ".join(spec.visualGuidance).lower()
+        assert any(
+            token in joined
+            for token in (
+                "chart",
+                "table",
+                "diagram",
+                "mermaid",
+                "heatmap",
+                "matrix",
+                "price-chart",
+                "시각화",
+                "차트",
+                "표",
+                "다이어그램",
+            )
+        ), f"{spec.id} visualGuidance does not name a concrete visual surface"
+    assert visual_recipe_count < len(recipe_specs)
+    assert skills.get("recipes.etc.usageAndApi", includeUser=False).visualGuidance == []
+
+
+def test_read_skill_exposes_recipe_visual_guidance() -> None:
+    from dartlab.ai.tools.readSkill import readSkill
+
+    result = readSkill("기업 깊이 분석", limit=5, includeUser=False)
+
+    assert result.ok
+    rows = result.data["skills"]
+    recipe_rows = [row for row in rows if str(row["id"]).startswith("recipes.")]
+    assert recipe_rows
+    assert any(row.get("visualGuidance") for row in recipe_rows)
+
+
+def test_skill_artifacts_keep_recipe_category_separate_from_engines() -> None:
+    """랜딩/외부 산출물에서 recipes.* 가 engines sidebar 로 섞이지 않아야 한다."""
+    artifact_dir = Path("src/dartlab/skills")
+    for name in ("index.json", "agent.json", "web.json", "mcp.json", "pyodide.json"):
+        rows = json.loads((artifact_dir / name).read_text(encoding="utf-8")).get("skills", [])
+        bad = [
+            row["id"]
+            for row in rows
+            if isinstance(row, dict)
+            and str(row.get("id", "")).startswith("recipes.")
+            and row.get("category") != "recipes"
+        ]
+        assert not bad, f"{name} has recipes categorized outside recipes: {bad[:5]}"
+
+
 def test_data_engine_foundation_references_manual_engine_skills() -> None:
     spec = skills.get("engines.data.foundation", includeUser=False)
 
@@ -523,9 +586,9 @@ def test_skill_evidence_check_reports_missing() -> None:
     assert "table" in result.missing
 
 
-# test_skill_compiler_builds_web_index 폐기 — `buildSkillArtifacts` 도구 폐기
-# (skills/compiler.py + scripts/build/generateSkills.py 삭제). 산출물 6 종은
-# 운영자 직접 작성 — 별 검증 (validateSkills) 으로 대체.
+# test_skill_compiler_builds_web_index 폐기. 산출물 6 종은
+# 운영자·사용자·사용자가 위임한 AI 가 명시적으로 관리하고,
+# 별도 검증 (validateSkills) 으로 확인한다.
 
 
 def test_builtin_skill_specs_are_package_sources() -> None:

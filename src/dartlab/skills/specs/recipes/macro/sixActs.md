@@ -32,6 +32,15 @@ requiredEvidence:
   - dateRef
   - valueRef
   - executionRef
+visualRefs:
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -64,7 +73,7 @@ examples:
   - 한국 경제 지금 어디에 있나
   - 미국 매크로 전체 상황 6막으로 정리
   - 경기와 금리와 위기 신호를 한 번에 봐줘
-lastUpdated: '2026-05-12'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

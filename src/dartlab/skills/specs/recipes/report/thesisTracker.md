@@ -37,6 +37,15 @@ expectedOutputs:
   - thesis 파일 (markdown, gitignore)
   - pillar scorecard
   - 한국어 점검 결과
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.priceChart"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+  - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -75,7 +84,7 @@ procedure:
 sourceRefs:
   - dartlab://skills/engines.company
   - dartlab://skills/recipes.report.companyDeepAnalysis
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## thesis 파일 schema (~/.dartlab/thesis/`{ticker}.md`)

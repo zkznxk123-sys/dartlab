@@ -24,6 +24,13 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -53,7 +60,7 @@ gap:
   primary:
     - scan
     - analysis
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

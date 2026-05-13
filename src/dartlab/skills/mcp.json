@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 257,
+    "skillCount": 266,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 218
+        "count": 164
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -176,7 +176,7 @@
     {
       "id": "recipes.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.",
       "whenToUse": [
         "배당 매력 분석",
@@ -287,7 +287,7 @@
     {
       "id": "recipes.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.",
       "whenToUse": [
         "지배구조 리스크",
@@ -2491,7 +2491,7 @@
     {
       "id": "recipes.quality.capitalAllocationScorecard",
       "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Buffett-style 자본배분 평가 — FCF 의 5 사용처 (재투자·배당·자사주·M&A·부채상환) 비중 + 증분자본수익률 (ROIIC) + 지속가능성장률 (SGR) 을 L1 raw 시계열에서 직접 계산해 경영진의 자본배분 효율을 평가하는 절차. analysis axis 미사용. 트리거 — '자본배분 평가', 'FCF 사용처', 'ROIIC', 'Buffett 자본배분'.",
       "whenToUse": [
         "자본배분 평가",
@@ -2513,7 +2513,7 @@
     {
       "id": "recipes.quality.cashflowGovernanceDualSignal",
       "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "accrual ratio (현금흐름 vs 회계이익 갭) + governance amber (이사회 독립성 / 특수관계자) + audit-change (감사인 변경) 3 신호 동시 발현 시 분식 / 회계 신뢰도 적신호. Dechow et al (2011) \"Predicting Material Accounting Misstatements\" 학술 결과 적용. analysis ↔ scan 격리 메우는 조합. 트리거 — '분식 의심', '회계 신뢰도', 'accrual governance audit'.",
       "whenToUse": [
         "분식 의심 종목",
@@ -2532,7 +2532,7 @@
     {
       "id": "recipes.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "커버리지 종목들의 다가오는 catalyst (정기공시 due · 분기/반기/사업보고서) 일정을 fiscal cycle 추론으로 미리 정리하는 절차. 트리거 — '실적 일정', '다가오는 catalyst', 'catalyst calendar', '정기공시 예정'.",
       "whenToUse": [
         "다가오는 일정",
@@ -2553,7 +2553,7 @@
     {
       "id": "recipes.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료. 트리거 — '기업 깊이 분석', '6 막 종합', '단일 종목 deep dive'.",
       "whenToUse": [
         "회사 종합 분석",
@@ -2574,7 +2574,7 @@
     {
       "id": "recipes.macro.companyMacroPathProjection",
       "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "기존 base/bull/bear 3 path DCF 가 아니라 매크로 146 시나리오 (rate × FX × 사이클 × 침체) grid × 회사 elasticity → 146 P&L path → 146 fair value → 분포 (p25/p50/p75 + 현재가 대비 확률) 산출. 단일 점추정의 한계 보완. company ↔ macro ↔ analysis 격리 메우는 조합. 트리거 — '시나리오 적정가치 분포', 'fair value distribution', '146 시나리오 valuation'.",
       "whenToUse": [
         "시나리오 적정가치 분포",
@@ -2594,7 +2594,7 @@
     {
       "id": "recipes.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차. 트리거 — 'compounder 발굴', 'quality 일관 종목', 'Buffett 스타일 횡단'.",
       "whenToUse": [
         "장기 복리 종목 발굴",
@@ -2616,7 +2616,7 @@
     {
       "id": "recipes.credit.covenantStressTest",
       "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "차입금 covenant (DSCR ≥ 1.2 / Debt/Equity ≤ 2.0 등) 가 매크로 충격 (금리 path Monte Carlo) 에서 위반될 확률 추정. 비금융기업 quasi-CCAR. 단순 신용등급보다 covenant breach 가 더 정밀한 default 선행지표. analysis ↔ macro ↔ credit 격리 메우는 조합. 트리거 — 'covenant stress', 'DSCR 충격', '차입약정 위반'.",
       "whenToUse": [
         "covenant stress test",
@@ -2635,7 +2635,7 @@
     {
       "id": "recipes.credit.deepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사의 신용 위험을 dCR 등급 + 재무 안정성/현금흐름 분해 + 매크로 금리 환경 3 단으로 종합 평가하는 절차. 트리거 — '신용 깊이 분석', '단일 회사 신용', '부도 위험 종합'.",
       "whenToUse": [
         "신용 위험 분석",
@@ -2657,7 +2657,7 @@
     {
       "id": "recipes.credit.distressDual",
       "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Altman + Ohlson', '부도 위험 2 모델 합의', 'Z-Score O-Score'.",
       "whenToUse": [
         "Altman Z-Score 부도 위험",
@@ -2679,7 +2679,7 @@
     {
       "id": "recipes.credit.macroStress",
       "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사의 신용등급 (dCR + 7 axis) 가 매크로 충격 (금리 +200bp / 환율 +10% / 영업이익 -20%) 에서 유지 가능한지, 어떤 axis 가 먼저 깨지는지 판정. credit ↔ macro 격리 메우는 조합 — 정상 보고 dCR 은 시점 1 회 산출이라 미래 시나리오에서 어떻게 변하는지 보여주지 못한다. 트리거 — '신용 매크로 스트레스', '금리 충격 dCR', 'credit stress'.",
       "whenToUse": [
         "신용 매크로 스트레스",
@@ -2700,7 +2700,7 @@
     {
       "id": "recipes.credit.quantConsensus",
       "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사 부도 위험을 dCR (정성·정량 종합) + Altman Z″ + Ohlson O + Beneish M 4-source 동시 평가. 단일 모델 false positive 줄이고 triple-agreement 시 강한 위험 신호. credit ↔ quant 격리 메우는 조합. 트리거 — '신용 퀀트 합의', '부도 4 모델', 'distress consensus'.",
       "whenToUse": [
         "신용 퀀트 합의",
@@ -2720,7 +2720,7 @@
     {
       "id": "recipes.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "야간/새벽 사이 신규 DART 공시 + 커버리지 종목 변동률 + 시장 마감/개장 +주요 macro 이벤트를 1 페이지 morning note 로 묶는 일일 cadence 절차. 트리거 — '오늘 아침', '야간 공시 정리', 'morning note', '오버나잇 정리'.",
       "whenToUse": [
         "오늘 아침",
@@ -2739,7 +2739,7 @@
     {
       "id": "recipes.etc.dataAvailabilityFirst",
       "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방. 트리거 — '데이터 있나 확인', '분석 전 데이터 점검', '수집 누락 체크'.",
       "whenToUse": [
         "데이터 가용성",
@@ -2760,7 +2760,7 @@
     {
       "id": "recipes.credit.debtStructureAudit",
       "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차. 트리거 — '부채 구조 audit', '만기 분포', '이자보상배율', '신용 등급 횡단'.",
       "whenToUse": [
         "부채 구조",
@@ -2782,7 +2782,7 @@
     {
       "id": "recipes.disclosure.event",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사의 최근 공시 이벤트를 목록 + 원문 + 기간간 변화 3 축으로 분석하는 절차. 신규 공시/주요사항 발생 시 thesis 영향 평가. 트리거 — '최근 공시', '신규 공시 영향', '공시 본문 변화', 'thesis 영향 평가'.",
       "whenToUse": [
         "최근 공시 분석",
@@ -2805,7 +2805,7 @@
     {
       "id": "recipes.disclosure.riskScreen",
       "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차. 트리거 — '공시 위험 스캔', '정정 빈도 횡단', '공시 위험 후보'.",
       "whenToUse": [
         "공시 위험",
@@ -2825,7 +2825,7 @@
     {
       "id": "recipes.disclosure.toneToStoryRisk",
       "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "MD&A tone change + 뉴스 헤드라인 tone + 공시 fundamental shift 3 신호 composite \"narrative risk\" 점수 임계 초과 시 storyboard 신설 부담 없이 story.risk 섹션에 injection 가능한 markdown 블럭 자동 발행. storyboard 추가 부담 회피하면서 기존 story 의 risk 부분 보강. quant ↔ gather ↔ analysis ↔ story 격리 메우는 4-engine 조합. 트리거 — 'story risk auto', '공시 tone story 발행', 'narrative risk score'.",
       "whenToUse": [
         "story risk auto",
@@ -2844,7 +2844,7 @@
     {
       "id": "recipes.credit.distressCandidateScreen",
       "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "KOSPI200 universe 안에서 (1) dCR 등급이 전월 대비 1 notch 이상 하락 (credit migration) + (2) quant sentiment z-score ≤ -1.5 (시장 신호 약세) 동시 발현 종목 발굴. 단일 신호는 false positive 많지만 cross-source 합의는 강함. credit ↔ quant ↔ scan 격리 메우는 조합. 트리거 — 'distress candidate', '신용 sentiment 약세', 'credit migration screen'.",
       "whenToUse": [
         "distress candidate",
@@ -2863,7 +2863,7 @@
     {
       "id": "recipes.credit.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Altman Z-Score (1968) 5 변수 중 dartlab 으로 가능한 4 변수 + 음수 영업CF 게이트 를 결합해 부도 위험 종목을 횡단으로 식별하고 다른 스크리너 결과의 블랙리스트로 사용하는 회피 절차. 트리거 — '부도 위험 필터', 'Altman Z 횡단', '블랙리스트', '회피 절차'.",
       "whenToUse": [
         "부도 위험 회피",
@@ -2885,7 +2885,7 @@
     {
       "id": "recipes.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "배당 정책 회사가 1997 IMF / 2008 GFC / 2020 COVID 시나리오에서 FCF 커버리지가 무너지는 임계 + 배당 cut/suspend 가능성 산출. 정상 시점 dividend yield 만 보고 매수하는 전략의 매크로 위험 가시화. analysis ↔ macro 격리 메우는 조합. 트리거 — '배당 스트레스', 'dividend cut 위험', '경기침체 배당'.",
       "whenToUse": [
         "배당 스트레스 테스트",
@@ -2904,7 +2904,7 @@
     {
       "id": "recipes.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사의 배당 매력도를 자본배분 의지 + 현금흐름 quality + 과거 배당 정책 3 축으로 평가하는 절차. 트리거 — '배당 매력도', '배당 정책', '배당 thesis'.",
       "whenToUse": [
         "배당 매력 평가",
@@ -2925,7 +2925,7 @@
     {
       "id": "recipes.quality.dupontDriver",
       "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "ROE 변동의 진짜 원인을 5 동인 (세부담·이자부담·영업마진·자산회전·재무레버리지) 으로 분리해 단일 회사 5 년 시계열에서 어떤 요소가 ROE 를 끌고 갔는지 정량화하는 절차. L1 raw (`c.show(\"BS\"|\"IS\")`) 만 사용. 트리거 — 'ROE 분해', 'DuPont 5 동인', 'ROE 추적'.",
       "whenToUse": [
         "DuPont 5-step 분해",
@@ -2947,7 +2947,7 @@
     {
       "id": "recipes.quality.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사 발표 이익의 quality 를 발생주의 vs 현금흐름 괴리 + 재무 항목 정합성 + 일회성 비중 3 축으로 점검하는 절차. 트리거 — '이익 quality 점검', '발생주의 vs 현금흐름', '일회성 비중'.",
       "whenToUse": [
         "이익 quality",
@@ -2969,7 +2969,7 @@
     {
       "id": "recipes.quality.earningsQualityTriad",
       "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "이익 quality 를 3 학술 모델 (Sloan accruals · Beneish M-Score · Novy-Marx GP/A) 동시 적용으로 합의 점수화. analysis axis 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Sloan accruals', 'Beneish M-Score', 'Novy-Marx GP/A', '이익 quality 3 모델'.",
       "whenToUse": [
         "Sloan accruals 분식 신호",
@@ -2991,7 +2991,7 @@
     {
       "id": "recipes.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "정식 ESG 데이터 부재 시 dartlab 보유 신호 (지배구조 + 감사 + 종업원 + 자본배분 일관성) 만으로 가벼운 ESG audit 을 만드는 절차. 트리거 — 'ESG light', '거버넌스 audit', 'ESG 데이터 부재 시'.",
       "whenToUse": [
         "ESG 분석",
@@ -3013,7 +3013,7 @@
     {
       "id": "recipes.disclosure.filingTextSignal",
       "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "최근 365 일 공시 본문에서 \"going concern\" / \"의견거절\" / \"거짓서명\" / \"계속기업\" 같은 위험 키워드 빈도가 trailing 3y baseline 대비 z-score ≥ 2 이면 비정상 신호. predictionSignal feature 로 입력. Loughran-McDonald sentiment 의 일반 dictionary 와 다른 anomaly-on-rare-keywords 접근. search/edgar ↔ analysis 격리 메우는 조합. 트리거 — 'filing text signal', '공시 키워드 anomaly', '사업보고서 위험 신호'.",
       "whenToUse": [
         "filing text signal",
@@ -3031,7 +3031,7 @@
     {
       "id": "recipes.quality.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차. 트리거 — '재무제표 비교', '두 회사 차이', '회사 간 비교'.",
       "whenToUse": [
         "두 회사 재무제표 비교",
@@ -3052,7 +3052,7 @@
     {
       "id": "recipes.etc.flowAndPattern",
       "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차. 트리거 — '수급', '외인 기관 매매', '차트 패턴', '단기 entry/exit'.",
       "whenToUse": [
         "수급 분석",
@@ -3073,7 +3073,7 @@
     {
       "id": "recipes.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차. 트리거 — 'GARP', 'PEG', 'Lynch 성장가치', 'PEG ≤ 1'.",
       "whenToUse": [
         "GARP 성장+가치 결합",
@@ -3095,7 +3095,7 @@
     {
       "id": "recipes.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사의 지배구조 위험을 이사회 독립성 + 지배력 집중 + 감사 신호 + 분식 가능성 4 축으로 종합 점검하는 절차. 트리거 — '지배구조 위험', '이사회 독립성', '감사 신호', '분식 가능성'.",
       "whenToUse": [
         "지배구조 audit",
@@ -3118,7 +3118,7 @@
     {
       "id": "recipes.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "KOSPI universe 안에서 (1) governance composite (이사회 독립성·특수관계자) + (2) network density (계열사·affiliate ratio) + (3) audit-change (최근 2 년 감사인 변경) 3 신호 동시 적신호 종목 발굴. 한국 chaebol 구조 특유의 transfer-pricing / 일감몰아주기 위험을 단일 신호로 못 잡는 한계 보완. analysis ↔ scan 격리 메우는 cross-sectional 조합. 트리거 — 'governance audit network', 'chaebol risk screen'.",
       "whenToUse": [
         "governance audit network",
@@ -3135,7 +3135,7 @@
     {
       "id": "recipes.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Benjamin Graham (1949) 안전마진 framework 을 ratio 4 게이트 + 5 년 흑자 후처리로 근사해 한국 chaebol discount 트랩을 회피한 deep value 후보를 횡단으로 발굴하는 절차. 트리거 — 'Graham deep value', '안전마진', 'chaebol discount 회피'.",
       "whenToUse": [
         "Graham deep value",
@@ -3157,7 +3157,7 @@
     {
       "id": "recipes.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "전종목 성장 스캔으로 후보를 추리고 상위 N 종에 대해 회사별 깊이 분석을 진행하는 절차. 트리거 — '성장 스캔 후 깊이 분석', '상위 N 깊이 분석'.",
       "whenToUse": [
         "성장하는 회사 찾기",
@@ -3179,7 +3179,7 @@
     {
       "id": "recipes.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능. 트리거 — '산업 깊이 분석', '가치 사슬', '핵심 종목', '업종 분석'.",
       "whenToUse": [
         "산업 분석",
@@ -3201,7 +3201,7 @@
     {
       "id": "recipes.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "도입기 / 후행기 산업 안에서 PER < 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.",
       "whenToUse": [
         "산업 stage 가치 screen",
@@ -3220,7 +3220,7 @@
     {
       "id": "recipes.disclosure.insiderEarningsLeading",
       "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "내부자 (임원·5% 이상 주주) 매수 거래가 *클러스터* 형태 (180 일 안 ≥ 3 명 동시) 일 때만 다음 분기 EPS surprise 와 양의 IC 가진다는 Cohen-Malloy-Pomorski (2012) \"Decoding Inside Information\" 결과 적용. 단순 net-buy 가 아닌 *집단 매수 동시성* 이 핵심. gather ↔ quant ↔ analysis 격리 메우는 조합. 트리거 — '내부자 매수 클러스터', 'insider cluster signal'.",
       "whenToUse": [
         "내부자 매수 클러스터",
@@ -3239,7 +3239,7 @@
     {
       "id": "recipes.disclosure.insiderEventCheck",
       "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사의 내부자 거래·자본변동·임원 변경 같은 이벤트 신호를 시계열로 점검하는 절차. 거버넌스 점검의 보완. 트리거 — '내부자 거래', '임원 변경', '자본변동 이벤트'.",
       "whenToUse": [
         "내부자 거래",
@@ -3261,7 +3261,7 @@
     {
       "id": "recipes.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 회사 본질가치를 Graham 수정공식 + EVA spread + CFROI proxy 3 anchor 로 동시 추정해 시장가와 비교한 가치 판정 band 를 만드는 절차. analysis valuation axis 미사용, L1 raw (`c.show(\"IS\"|\"BS\"|\"CF\"|\"PRICE\"|\"FQ\")`) 만 사용. 트리거 — '본질가치 band', 'Graham + EVA + CFROI', 'fair value 3 anchor'.",
       "whenToUse": [
         "본질가치 3 anchor",
@@ -3283,7 +3283,7 @@
     {
       "id": "recipes.quality.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "산업 재고 사이클 + 회사 재고 회전 + 매크로 수요 신호 결합으로 사이클 위치를 진단하는 절차. 반도체·석유화학·철강 등에 유용. 트리거 — '재고 사이클', '회전 진단', '반도체/석유화학 사이클'.",
       "whenToUse": [
         "재고 사이클",
@@ -3304,7 +3304,7 @@
     {
       "id": "recipes.credit.leverageSensitivity",
       "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "매출 변동이 영업이익·순이익에 얼마나 증폭되는지 영업레버리지 (DOL) · 재무레버리지 (DFL) · 결합레버리지 (DCL) 로 정량화하고 매크로 충격 시나리오에서 본 회사가 얼마나 민감한지 평가하는 절차. L1 raw (`c.show(\"IS\")`) 시계열만 사용. 트리거 — '영업레버리지', '재무레버리지', 'DOL DFL DCL', '매크로 충격 민감도'.",
       "whenToUse": [
         "DOL 영업레버리지",
@@ -3327,7 +3327,7 @@
     {
       "id": "recipes.macro.betaPeerScreen",
       "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "동일 산업 peer set 안에서 회사 별 macro beta (rate / FX / oil) 가 within-industry z ≥ |2| 인 outlier 식별. cross-market 단순 macro beta 는 \"유가 상승 = 정유주\" 같은 trivial 매핑만 잡지만, 같은 산업 안 outlier 는 회사 specifics (FX 헤지 / 변동금리 차입 / 원자재 다변화) 가 만든 idiosyncratic 노출을 드러냄. industry ↔ scan 격리 메우는 조합. 트리거 — 'macroBeta peer', 'idiosyncratic 매크로 노출', '같은 산업 outlier'.",
       "whenToUse": [
         "macroBeta peer",
@@ -3345,7 +3345,7 @@
     {
       "id": "recipes.macro.liquidityCycle",
       "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "매크로 유동성 환경을 금리 + 환율 + 유동성 지표 + 위기 신호 4 축으로 종합 판정하는 절차. 종목 없이 매크로 분석 가능. 트리거 — '매크로 유동성', '금리 환율 위기 신호', '거시 사이클'.",
       "whenToUse": [
         "매크로 유동성",
@@ -3368,7 +3368,7 @@
     {
       "id": "recipes.macro.quantScenarioBacktest",
       "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단순 full-sample 평균 IR 이 아니라 매크로 regime 별 (1997 IMF / 2008 GFC / 2020 COVID) 팩터 (value / quality / momentum) 의 walk-forward IR / Sharpe / max drawdown 산출. 투자자가 \"이번 사이클\" 에서의 팩터 작동 여부를 알 수 있게. macro ↔ quant 격리 메우는 조합. 트리거 — 'macro scenario backtest', '시나리오 별 팩터', 'regime backtest'.",
       "whenToUse": [
         "macro scenario backtest",
@@ -3386,7 +3386,7 @@
     {
       "id": "recipes.macro.toCompany",
       "title": "매크로 → 섹터 → 회사 영향 (transmission)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "매크로 환경 변화가 특정 회사의 매출·영업이익·이자비용·환산손익에 어떻게 전이되는지 단계별로 추적하는 절차. 트리거 — '매크로 → 회사 전이', '금리 환율 회사 영향', '단계별 추적'.",
       "whenToUse": [
         "금리가 회사에 미치는 영향",
@@ -3409,7 +3409,7 @@
     {
       "id": "recipes.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사를 같은 산업 peer 5~10 종과 핵심 ratio (수익성/안정성/성장성/valuation) 4 축으로 벤치마크하는 절차. 트리거 — 'peer 비교', '동종 5~10 종 벤치마크', 'ratio 4 축'.",
       "whenToUse": [
         "peer 비교",
@@ -3431,7 +3431,7 @@
     {
       "id": "recipes.quality.piotroskiLite",
       "title": "Piotroski F-Score 7 항목 횡단 점수카드",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Piotroski (2000) F-Score 의 9 항목 중 dartlab ratio 로 가능한 7 항목을 횡단 계산해 저평가 종목군에서 우량 회사를 골라내는 점수카드 절차. 트리거 — 'F-Score', 'Piotroski 7 항목', '저평가 우량 발굴'.",
       "whenToUse": [
         "Piotroski F-Score",
@@ -3453,7 +3453,7 @@
     {
       "id": "recipes.macro.qualityMacroBeta",
       "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "quality 팩터 (QMJ — Asness/Frazzini/Pedersen) 점수가 매크로 사이클 phase (early-recovery / mid-expansion / late-cycle / contraction) 별로 다르게 작동한다는 검증된 패턴을 단일 회사에 적용. quant ↔ macro 격리 메우는 조합. 트리거 — '퀄리티 사이클', 'QMJ 매크로', 'quality phase'.",
       "whenToUse": [
         "퀄리티 사이클",
@@ -3472,7 +3472,7 @@
     {
       "id": "recipes.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Novy-Marx (2013) gross profitability factor (Gross Profit / Total Assets) 와 단순 가치 (PER/PBR) 를 결합해 한국 chaebol discount 트랩을 회피한 quality value 후보를 횡단으로 발굴하는 절차. 트리거 — 'gross profitability', 'Novy-Marx 2013', 'quality value 횡단'.",
       "whenToUse": [
         "저평가 종목 함정 회피",
@@ -3494,7 +3494,7 @@
     {
       "id": "recipes.etc.quantTechnicalReview",
       "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차. 트리거 — '기술적 신호', '모멘텀 변동성', '차트 패턴 4 축'.",
       "whenToUse": [
         "기술적 분석",
@@ -3517,7 +3517,7 @@
     {
       "id": "recipes.macro.scenarioAnalysis",
       "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사 forecast 를 base/bull/bear 3 시나리오 + 매크로 시나리오 가정 + 시장 regime 판정 3 축으로 묶어 불확실성을 정량화하는 절차. 트리거 — 'base/bull/bear', '3 시나리오', '시장 regime', '불확실성 정량화'.",
       "whenToUse": [
         "시나리오 분석",
@@ -3540,7 +3540,7 @@
     {
       "id": "recipes.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계. 트리거 — '스캔 후 차트', 'table-backed chart', '보고서 직전 시각화'.",
       "whenToUse": [
         "스캔 차트",
@@ -3560,7 +3560,7 @@
     {
       "id": "recipes.macro.sectorRotation",
       "title": "섹터 로테이션 분석 (매크로 + scan + industry)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "매크로 사이클 위치 + 섹터 횡단 스캔 + 산업 위치 3 축으로 섹터 로테이션 후보를 평가하는 절차. 종목 없이도 가능. 트리거 — '섹터 로테이션', '업종 순환', '경기 사이클별 섹터'.",
       "whenToUse": [
         "섹터 로테이션",
@@ -3582,7 +3582,7 @@
     {
       "id": "recipes.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "시가총액 하위 종목 중 성장 + 저평가 + 회계 quality 가 양호한 후보를 발굴하는 절차. small-cap value+growth thesis. 트리거 — '중소형주 발굴', 'small cap discovery', '소외 종목'.",
       "whenToUse": [
         "중소형주",
@@ -3605,7 +3605,7 @@
     {
       "id": "recipes.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사 종합 보고서를 14 축 분석 + 6 막 인과 + story 섹션 조립으로 만드는 절차. review 엔진의 표준 출력. 트리거 — '보고서 작성', '기업 이야기 조립', 'story 빌드'.",
       "whenToUse": [
         "종합 보고서",
@@ -3627,7 +3627,7 @@
     {
       "id": "recipes.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "종목별 투자 thesis 본문 + pillar 3~5 + risk 3~5 + catalyst N + falsifiable 게이트 (반증 불가능 thesis 거부) 를 로컬 파일로 관리하는 cadence 절차. 트리거 — '논거 점검', 'thesis check', 'X 종목 thesis 갱신', '논거 추적'.",
       "whenToUse": [
         "thesis tracker",
@@ -3648,7 +3648,7 @@
     {
       "id": "recipes.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근. 트리거 — '미국 시장 점검', 'US market review', 'EDGAR 분기'.",
       "whenToUse": [
         "미국 종목 분석",
@@ -3670,7 +3670,7 @@
     {
       "id": "recipes.etc.usageAndApi",
       "title": "dartlab 사용법·API 설명 (RunPython 우회)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "dartlab 의 기능·사용법·API 를 설명하는 질문에서 ReadSkill + ReadCapability 만 사용하고 RunPython 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.",
       "whenToUse": [
         "dartlab 사용법",
@@ -3690,7 +3690,7 @@
     {
       "id": "recipes.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사 valuation multiple (PER/PBR/EV/EBITDA) 의 역사 평균 ±σ 밴드 안 현재 위치를 추적하는 절차. 단순 스냅샷이 아닌 시계열 추적. 트리거 — '밸류에이션 band 추적', '시계열 valuation', '멀티플 변천'.",
       "whenToUse": [
         "valuation 밴드",
@@ -3711,7 +3711,7 @@
     {
       "id": "recipes.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차. 트리거 — '밸류에이션 점검', 'fair value', '저평가 판단'.",
       "whenToUse": [
         "가치평가",
@@ -3734,7 +3734,7 @@
     {
       "id": "recipes.governance.workforceAndCapital",
       "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차. 트리거 — '인력 자본', '종업원 신호', 'workforce'.",
       "whenToUse": [
         "인력 분석",
@@ -3757,7 +3757,7 @@
     {
       "id": "recipes.quality.workingCapitalQuality",
       "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
-      "category": "engines",
+      "category": "recipes",
       "purpose": "Cash Conversion Cycle (DSO + DIO − DPO) + 매출채권·재고·매입채무 회전율 5 년 추세를 L1 raw (`c.show(\"BS\"|\"IS\")`) 에서 직접 계산해 매출 신뢰도와 운전자본 효율을 정량화하는 절차. analysis axis 미사용. 트리거 — '운전자본 quality', '재고 매출채권', 'CCC 진단'.",
       "whenToUse": [
         "운전자본 효율",
@@ -4327,7 +4327,7 @@
       "id": "engines.viz",
       "title": "Viz (차트·다이어그램 spec)",
       "category": "engines",
-      "purpose": "Viz 는 분석 결과를 16 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + 신규 6 종) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
+      "purpose": "Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
       "whenToUse": [
         "viz",
         "시각화",
@@ -4338,13 +4338,17 @@
         "line / bar / radar / waterfall / heatmap",
         "landing 차트 빌드",
         "시계열 시각화",
-        "peer 비교 차트"
+        "peer 비교 차트",
+        "주가차트"
       ],
       "nextSkills": [
         "engines.analysis",
-        "engines.dashboard"
+        "engines.dashboard",
+        "engines.viz.balanceStructureTrend",
+        "engines.viz.priceChart",
+        "engines.viz.financialStructureCharts"
       ],
-      "bodyPreview": "## 엔진 역할\n\n`viz` 는 분석 결과를 차트 spec 으로 변환한다. 직접 차트 이미지를 그리지 않고 — *spec dict* 를 만들어 (a) `emit_chart(spec)` 로 stdout 마커 출력 → AI tool result 로 인라인 렌더 또는 (b) `landing/static/charts/{code}/manifest.json` 정적 빌드 → svelte `ChartRenderer` 가 16 종 chartType 단일 분기 렌더.\n\n**evidence 회로 강제** — 모든 ChartSpec 은 `evidenceBinding` 또는 `evidenceIds` 가 채워져야 emit. drill-back 으로 차트 점 클릭 시 source 데이터 패널 진입.\n\n## 공개 호출 방식\n\n```python\n# RunPython 안에서\nfrom dartlab.viz import emit_chart, emit_diagram\nimport dartlab\n\nc = dartlab.Company(\"005930\")\nratios = c.show(\"ratios\", freq=\"Q\")\n\n# 1. 시계열 line\nemit_chart({\n    \"chartType\": \"li"
+      "bodyPreview": "## 엔진 역할\n\n`viz` 는 분석 결과를 차트 spec 으로 변환한다. 직접 차트 이미지를 그리지 않고 — *spec dict* 를 만들어 (a) `emit_chart(spec)` 로 stdout 마커 출력 → AI tool result 로 인라인 렌더 또는 (b) `landing/static/charts/{code}/manifest.json` 정적 빌드 → svelte `ChartRenderer` 가 등록 chartType 단일 분기 렌더.\n\n**evidence 회로 강제** — 모든 ChartSpec 은 `evidenceBinding` 또는 `evidenceIds` 가 채워져야 emit. drill-back 으로 차트 점 클릭 시 source 데이터 패널 진입.\n\n## 공개 호출 방식\n\n```python\n# RunPython 안에서\nfrom dartlab.viz import emit_chart, emit_diagram\nimport dartlab\n\nc = dartlab.Company(\"005930\")\nratios = c.show(\"ratios\", freq=\"Q\")\n\n# 1. 시계열 line\nemit_chart({\n    \"chartType\": \"line\",\n    \"title\": \"영업이익률 추이\",\n    \"data\": [{\"period\": p, \"value\": v}\n             for p, v in zip(ratios[\"period\"], ratios[\"operatingMargin\"])],\n    \"xAxis\": \"period\",\n    \"yAxis\": \"value\",\n    \"unit\": \"%\",\n    \"evidenceBinding\": {\n        \"tableRef\": \"table:005930:ratios:Q\",\n        \"source\": \"dart\",\n        \"stockCode\": \"005930\",\n        \"topic\": \"ratios\",\n    },\n})\n\n# 2. peer 비교 bar\nemit_chart({\n    \"chartType\": \"bar\",\n    \"title\": \"peer ROE\",\n    \"data\": peer_rows,\n    \"xAxis\": \"stockCode\",\n    \"yAxis\": \"roe\",\n    \"evidenceIds\": [\"scan:profitability:2025Q3\"],\n})\n\n# 3. 다이어그램 (mermaid)\nemit_di"
     },
     {
       "id": "engines.viz.tableBackedChart",
@@ -4357,7 +4361,7 @@
         "시각 설명이 필요한 분석"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 절차\n\n- 먼저 실행 결과에서 tableRef가 있는지 확인한다.\n- category와 metric이 각각 2개 이상 비교 가능한지 확인한다.\n- `CompileVisual`은 tableRef 기반으로만 호출한다.\n- visual이 실패하면 답변에 차트를 주장하지 않는다.\n- ChartSpec 직접 만들 때는 `dartlab.viz.refs.chartEvidenceBinding(...)` 으로 `evidenceBinding` 을 채운다 — `emit_chart` 는 evidence 회로 진입점이 없는 spec 을 거부한다.\n- datapoint 단위 drill-back 이 필요한 series 는 `seriesPointRefs(...)` 로 `series[i].pointRefs` 를 채운다.\n\n## 공개 호출 방식\n\n- `result = c.analysis(\"financial\", \"수익성\")`\n- `chart = result.chart() 또는 dartlab.viz.tableBackedChart(table)`\n\n## 호출 동작\n\n- 표에서 파생 가능한 차트만 만든다. 단일값/근거 없는 장식 시각화는 만들지 않는다.\n- 실행 전에 target, period"
+      "bodyPreview": "## 절차\n\n- 먼저 실행 결과에서 tableRef가 있는지 확인한다.\n- category와 metric이 각각 2개 이상 비교 가능한지 확인한다.\n- `CompileVisual`은 tableRef 기반으로만 호출한다.\n- visual이 실패하면 답변에 차트를 주장하지 않는다.\n- ChartSpec 직접 만들 때는 `dartlab.viz.refs.chartEvidenceBinding(...)` 으로 `evidenceBinding` 을 채운다 — `emit_chart` 는 evidence 회로 진입점이 없는 spec 을 거부한다.\n- datapoint 단위 drill-back 이 필요한 series 는 `seriesPointRefs(...)` 로 `series[i].pointRefs` 를 채운다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.ai.tools.compileVisual import compileVisual\n\nchart = compileVisual(\n    chartType=\"bar\",\n    title=\"peer ROE 비교\",\n    data=peer_rows,\n    xAxis=\"corpName\",\n    yAxis=\"roe\",\n    evidenceBinding={\n        \"tableRef\": \"table:peer:roe:latest\",\n        \"source\": \"scan\",\n        \"topic\": \"peerComparison\",\n    },\n)\n```\n\n## 호출 동작\n\n- 표에서 파생 가능한 차트만 만든다. 단일값/근거 없는 장식 시각화는 만들지 않는다.\n- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.\n- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.\n\n## 대표 반환 형태\n\n- ChartResult 또는 visual spec dict를 반환한다. 핵심 키는 data/tableRef, marks, x, y, unit, title, warnings다.\n- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.\n\n## 기본 검증\n\n- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남"
     },
     {
       "id": "operation.aiEngine",
@@ -4403,6 +4407,9 @@
         "API Contract — dartlab 호출 규칙 단일 진실의 원천",
         "api contract",
         "1. 단일 진입점 — Dual Access (call form + attr form) 로 간다",
+        "공개 진입점 정책",
+        "엔진명 축 dispatch",
+        "provider facade 예외",
         "구현",
         "좋은 예",
         "내부 series-tuple 빌더",
@@ -4928,7 +4935,7 @@
         "외부 LLM 이 dartlab 작업을 시작할 때",
         "문서 · API 사용법 · 분석 절차가 흩어져 보일 때",
         "전체 체계와 확장 규칙을 한 번에 확인할 때",
-        "4 카테고리 (start · runtime · operation · engines) 의 의미 파악",
+        "5 카테고리 (start · runtime · operation · engines · recipes) 의 의미 파악",
         "skill 검색 패턴 익히기"
       ],
       "nextSkills": [
@@ -4936,7 +4943,16 @@
         "start.quickStart",
         "start.useSkillsCatalog"
       ],
-      "bodyPreview": "DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가 직접 다루는 데이터로 만든다. 외부에서 처음 만나는 LLM·사람·기여자는 흩어진 API 문서나 ops 폴더가 아니라 **Skills 카탈로그** 하나에서 시작한다.\n\n각 skill 은 `id` · `purpose` · `whenToUse` · `inputs` · `outputs` · `procedure` · `examples` · `runtimeCompatibility` · `requiredEvidence` 를 frontmatter 에 갖고, 본문에 `## 공개 호출 방식` · `## 호출 동작` · `## 대표 반환 형태` 를 둔다. 사람이 그대로 실행할 수 있고, AI 가 도구로 호출할 수 있다.\n\n## 4 카테고리\n\n| 카테고리 | 의미 | 대표 skill |\n|---|---|---|\n| `start` | 첫 진입 — 설치 · walkthrough · 카탈로그 사용법 | `start.installUv`, `start.quickStart`, `start.useSkillsCatalog` |\n| `runtime` | 실행 환경 — Pyodide · MCP · Web AI · "
+      "bodyPreview": "DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가 직접 다루는 데이터로 만든다. 외부에서 처음 만나는 LLM·사람·기여자는 흩어진 API 문서나 ops 폴더가 아니라 **Skills 카탈로그** 하나에서 시작한다.\n\n각 skill 은 `id` · `purpose` · `whenToUse` · `inputs` · `outputs` · `procedure` · `examples` · `runtimeCompatibility` · `requiredEvidence` 를 frontmatter 에 갖고, 본문에 `## 공개 호출 방식` · `## 호출 동작` · `## 대표 반환 형태` 를 둔다. 사람이 그대로 실행할 수 있고, AI 가 도구로 호출할 수 있다.\n\n## 4 카테고리\n\n| 카테고리 | 의미 | 대표 skill |\n|---|---|---|\n| `start` | 첫 진입 — 설치 · walkthrough · 카탈로그 사용법 | `start.installUv`, `start.quickStart`, `start.useSkillsCatalog` |\n| `runtime` | 실행 환경 — Pyodide · MCP · Web AI · ",
+      "procedure": [
+        "공개 API 또는 새 호출 경로를 다루면 먼저 operation.apiContract 의 공개 진입점 정책을 확인한다."
+      ],
+      "failureModes": [
+        "provider facade 밖 내부 함수/ops/helper 를 공개 진입점처럼 안내함"
+      ],
+      "forbidden": [
+        "operation.apiContract 확인 없이 provider facade 밖 새 공개 진입점을 만들지 않는다."
+      ]
     },
     {
       "id": "start.firstAnalysisRecipe",
@@ -5011,6 +5027,178 @@
         "start.quickStart"
       ],
       "bodyPreview": "dartlab 의 모든 기능은 **`/skills` 카탈로그** 에 진입한다. 사람과 AI 가 같은 표면을 본다. 외부 API 문서나 코드 트리 직접 탐색 대신 skill frontmatter 와 본문으로 시작한다.\n\n## 검색 → 선택 → 검증 → 실행\n\n### 1. 검색\n\n자연어 질문을 그대로 검색어로. dartlab skill 의 `whenToUse[]` 에 한국어 + 영문 키워드가 풍부하게 들어있어 매칭이 직접 일어난다.\n\n```\n\"삼성전자 재무 분석\"  →  engines.company / engines.analysis\n\"시장 ROE 횡단\"      →  engines.scan / engines.scan.ratio\n\"신용 등급 분석\"      →  engines.credit.creditRisk\n\"공시 변경 추적\"      →  engines.company.disclosureEvent\n\"매크로 분석\"        →  engines.macro 군 (12 개)\n\"AI workflow\"       →  runtime.workbenchEvidenceFlow\n```\n\n### 2. 선택\n\n후보 1~3 개를 frontmatter 만 보고 좁힌다.\n\n- **`pu"
+    },
+    {
+      "id": "engines.viz.balanceStructureTrend",
+      "title": "Viz - 자산·조달 구조 추이",
+      "category": "engines",
+      "purpose": "재무상태표의 자산 배치와 부채+자본 조달 구조를 `balance-structure-trend` ChartSpec 으로 변환해 연도별 100% 누적 구조와 총자산 정합성을 함께 보여주는 시각화 실행 스킬이다.",
+      "whenToUse": [
+        "자산구조 차트",
+        "부채 자본 구조",
+        "balance structure trend",
+        "재무상태표 시각화",
+        "운전자산 비영업자산",
+        "영업부채 차입금 자본",
+        "자산 = 부채 + 자본"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.analysis.assetStructure",
+        "engines.dashboard",
+        "engines.mappers"
+      ],
+      "bodyPreview": "## 엔진 역할\n\n`engines.viz.balanceStructureTrend` 는 재무상태표를 단순 총액 표로 끝내지 않고, 같은 총자산을 두 관점으로 본다.\n\n- 자산 배치: 현금, 매출채권, 재고, 유형자산, 무형자산, 기타/비영업 자산.\n- 조달 구조: 영업부채, 차입금/사채, 기타부채, 자본.\n- 자본 세부: 자본금, 자본잉여금, 이익잉여금, 자기주식, 기타자본.\n\n렌더러는 `ChartRenderer` 의 `balance-structure-trend` 분기로 들어가며, shared chart 에서는 자산/조달/자본 band 를 연도별 100% stack 으로 표시한다. 회사 대시보드의 원본 `BalanceStructureTrend.svelte` 는 같은 view 로 총자산 추이, 자산 구성 100%, 조달 구성 100%, 최신 자산 증감을 함께 보여준다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.viz import emit_chart\nfrom dartlab.viz.generators import specBalanceStructureTrend\n\nc = dartlab.Company(\"005930\")\n\n# dashboard/model 경로가 만든 BalanceStructureView 를 우선 사용한다.\n# view 는 periods, totalAssetsSeries, totalFundingSeries,\n# assetTrendParts, fundingTrendParts, equityTrendParts 를 포함해야 한다.\nview = c.dashboard(\"balanceStructure\")  # 프로젝트 런타임에서 노출된 경우\n\nspec = specBalanceStructureTrend(\n    view,\n    stockCode=\"005930\",\n    corpName=\"삼성전자\",\n)\n\nif spec is not None:\n    emit_chart(spec)\n```\n\n대시보드 helper 가 없는 실행 환경에서는 BS 원자료에서 view dict 를 구성한 뒤 같은 generator 로 넘긴다. share 는 반드시 같은 기간의 `assets` 또는 `equity` denominator 로 계산한다.\n\n```python\nview = {\n    \"title\": \"삼성전자 자산 배치와 조달 구조\",\n    \"periods\": [\"2023\", \"2024\", "
+    },
+    {
+      "id": "engines.viz.priceChart",
+      "title": "Viz - 주가차트",
+      "category": "engines",
+      "purpose": "OHLCV 가격 시계열을 `price-chart` ChartSpec 으로 변환해 Svelte ChartRenderer 에서 캔들·종가선·거래량·이동평균·벤치마크를 함께 그리는 시각화 실행 스킬이다.",
+      "whenToUse": [
+        "주가차트",
+        "price chart",
+        "candlestick",
+        "캔들차트",
+        "OHLCV",
+        "거래량 차트",
+        "이동평균선",
+        "시장 대비 주가"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.gather.price",
+        "engines.gather.flow",
+        "engines.quant.momentum",
+        "engines.quant.chartPatterns"
+      ],
+      "bodyPreview": "## 엔진 역할\n\n`engines.viz.priceChart` 는 가격 원자료를 일반 line chart 로 뭉개지 않고 주가 분석에 맞는 시각화 계약으로 바꾼다. `price-chart` 는 같은 spec 안에 OHLCV row, 종가 series, 이동평균, 거래량, 벤치마크 상대지수, 이벤트 마커를 담는다.\n\n이 skill 은 가격 데이터를 해석하지 않는다. 추세 판단은 `engines.quant.momentum`, 패턴 판단은 `engines.quant.chartPatterns`, 수급 결합은 `engines.gather.flow`, 최종 투자 문맥은 상위 recipe 또는 story 가 담당한다.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.gather import getDefaultGather\nfrom dartlab.viz import emit_chart\nfrom dartlab.viz.generators import specPriceChart\n\ng = getDefaultGather()\n\n# 1. 개별 종목 OHLCV\nprice = g.history(\"005930\", start=\"2025-01-01\", end=\"2025-12-31\", market=\"KR\")\n\n# 2. 선택 벤치마크. 데이터가 없으면 benchmarkRows 없이 진행한다.\nkospi = dartlab.gather(\"krxIndex\", \"raw\", market=\"KOSPI\", start=\"2025-01-01\", end=\"2025-12-31\")\n\nspec = specPriceChart(\n    price,\n    stockCode=\"005930\",\n    corpName=\"삼성전자\",\n    market=\"KR\",\n    benchmarkRows=kospi,\n    benchmarkName=\"KOSPI\",\n)\n\nif spec is not None:\n    emit_chart(spec)\n```\n\n`CompileVisual` 경로에서는 이미 확보한 row list 를 그대로 넘긴다.\n\n```python\nCompileVisual(\n    chartType=\"price-chart\",\n    title=\"삼성전자 주가\",\n    data=[\n        {\"date\": \"2025-01-02\", \"open\": 53000, \"high\": 54500, \"low\": 52800, \"close\": 54200,"
+    },
+    {
+      "id": "engines.viz.financialStructureCharts",
+      "title": "Viz - 재무제표 구조 차트 묶음",
+      "category": "engines",
+      "purpose": "손익·재무상태·현금흐름 표를 `income-trend-matrix`, `balance-structure-trend`, `cashflow-signed-matrix` ChartSpec 으로 바꿔 재무제표 구조와 기간 변화를 설명하는 시각화 실행 스킬이다.",
+      "whenToUse": [
+        "재무제표 구조 시각화",
+        "손익 추이 matrix",
+        "자산 부채 자본 구조",
+        "현금흐름 부호 matrix",
+        "이익품질 시각화"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.viz.balanceStructureTrend",
+        "engines.analysis.earningsQuality",
+        "engines.analysis.cashflow"
+      ],
+      "bodyPreview": "## 절차\n\n1. 원표 기준을 먼저 고정한다. 연결/별도, 연간/분기, 결산기, 통화를 섞지 않는다.\n2. 손익 구조는 `specIncomeTrendMatrix(view)` 로 만들고, 기간별 매출·영업이익·순이익·마진의 같은 방향성을 검산한다.\n3. 재무상태 구조는 `specBalanceStructureTrend(view)` 로 만들고, 각 기간 `자산총계 = 부채총계 + 자본총계` 정합성을 확인한다.\n4. 현금흐름은 `specCashflowSignedMatrix(view)` 로 만들고, 영업CF·투자CF·재무CF의 부호와 규모를 같이 보여준다.\n5. 데이터가 2개 기간 미만이면 chart 대신 원표 요약과 coverage note 로 낮춘다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz.generators import (\n    specIncomeTrendMatrix,\n    specBalanceStructureTrend,\n    specCashflowSignedMatrix,\n)\n\nincome_spec = specIncomeTrendMatrix(income_view)\nbalance_spec = specBalanceStructureTrend(balance_view)\ncashflow_spec = specCashflowSignedMatrix(cashflow_view)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- 각 spec 에 `evidenceBinding.topic` 이 `IS` / `BS` / `CF` 중 실제 원표와 맞는지 확인한다.\n- missing 계정은 0 으로 대체하지 않고 `warnings` 또는 answer coverage note 에 남긴다.\n- 차트 "
+    },
+    {
+      "id": "engines.viz.peerMatrix",
+      "title": "Viz - Peer Matrix",
+      "category": "engines",
+      "purpose": "동종 기업 × 지표 행렬을 `peer-matrix` ChartSpec 으로 만들어 밸류에이션, 수익성, 성장성, 안정성의 상대 위치를 한 번에 비교한다.",
+      "whenToUse": [
+        "peer 비교",
+        "업종 benchmark",
+        "상대 valuation",
+        "후보군 비교"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.analysis.peerComparison",
+        "engines.scan"
+      ],
+      "bodyPreview": "## 절차\n\n1. 비교 universe 와 industry 기준을 먼저 답변에 고정한다.\n2. peer rows 에 target 포함 여부와 metric 결손 수를 확인한다.\n3. `specPeerMatrix(rows, metrics)` 를 사용하고 `categories` 는 회사명, `series` 는 metric 으로 둔다.\n4. 결손 metric 이 많으면 chart 대신 coverage table 로 낮춘다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz.generators import specPeerMatrix\n\nspec = specPeerMatrix(peer_rows, metrics=[\"roe\", \"operatingMargin\", \"per\", \"pbr\", \"debtRatio\"])\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- target 과 peer 모두 같은 기간·같은 metric 정의인지 확인한다.\n- ranking 해석은 universe size 와 결손률을 같이 표기한다."
+    },
+    {
+      "id": "engines.viz.evidenceCoverage",
+      "title": "Viz - Evidence Coverage",
+      "category": "engines",
+      "purpose": "분석 답변의 핵심 주장별 근거 충족 여부를 `evidence-coverage` ChartSpec 또는 coverage table 로 표현해 빈 주장과 검산 누락을 드러낸다.",
+      "whenToUse": [
+        "근거 커버리지",
+        "데이터 가용성",
+        "보고서 검산",
+        "claim evidence matrix"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "runtime.workbenchEvidenceFlow"
+      ],
+      "bodyPreview": "## 절차\n\n1. 답변에서 material claim 후보를 뽑고, 각 claim 에 필요한 `requiredEvidence` 를 붙인다.\n2. 실제 수집된 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `sourceRef`, `executionRef` 를 매칭한다.\n3. `specEvidenceCoverage(items)` 를 사용해 pass/missing/warning 을 만들거나, 차트가 과하면 표로만 남긴다.\n4. missing 이 있는 claim 은 최종 답변에서 단정 표현을 낮춘다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz.generators import specEvidenceCoverage\n\nspec = specEvidenceCoverage(coverage_items)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- coverage item 은 claim text, required evidence, matched refs 를 모두 포함해야 한다.\n- 차트는 결론 보강용이 아니라 검산/한계 섹션에 배치한다."
+    },
+    {
+      "id": "engines.viz.kpiRibbon",
+      "title": "Viz - KPI Ribbon",
+      "category": "engines",
+      "purpose": "보고서 첫 화면에 필요한 핵심 KPI 4~8개를 `kpi-ribbon` ChartSpec 으로 묶어 결론 요약과 근거 drill-back 을 동시에 제공한다.",
+      "whenToUse": [
+        "보고서 KPI",
+        "핵심지표 요약",
+        "dashboard ribbon",
+        "종합 분석 첫 화면"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.dashboard"
+      ],
+      "bodyPreview": "## 절차\n\n1. 결론 문단에서 실제로 쓰일 KPI 만 고른다.\n2. 각 KPI 의 기간, 단위, source, evidenceRef 를 붙인다.\n3. `specKpiRibbon(items)` 로 만든다.\n4. 한계나 결손 KPI 는 ribbon 에 넣지 않고 coverage note 에 남긴다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz.generators import specKpiRibbon\n\nspec = specKpiRibbon(kpi_items)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- KPI 는 결론 문단 하나 이상을 직접 뒷받침해야 한다.\n- KPI 사이 기간이 다르면 카드에 기간을 노출한다."
+    },
+    {
+      "id": "engines.viz.scenarioVisuals",
+      "title": "Viz - 시나리오·민감도 시각화",
+      "category": "engines",
+      "purpose": "매크로 충격, valuation 민감도, stress test 결과를 `six-act-radar`, `heatmap`, Mermaid graph 로 표현해 충격 전파와 민감도를 분리해서 보여준다.",
+      "whenToUse": [
+        "시나리오 분석",
+        "stress matrix",
+        "민감도 heatmap",
+        "6막 radar",
+        "충격 전파 diagram"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.macro",
+        "engines.analysis.valuationBand"
+      ],
+      "bodyPreview": "## 절차\n\n1. 충격 변수, 전파 경로, 회사 metric 을 분리한다.\n2. grid 가 있으면 `specSensitivityHeatmap(grid)` 를 우선한다.\n3. 6막 점수는 `specSixActRadar(score)` 로 만들되, 각 축 score 근거를 붙인다.\n4. 인과 설명은 Mermaid `graph LR` 로 6~8노드 이하만 작성한다.\n5. 가정이 부족하면 chart 대신 scenario table 로 낮춘다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz.generators import specSensitivityHeatmap, specSixActRadar\n\nheatmap = specSensitivityHeatmap(grid)\nradar = specSixActRadar(score)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- 모든 scenario visual 은 가정값과 결과값을 함께 노출한다.\n- Mermaid diagram 은 수치 임계 또는 방향성을 노드 라벨에 넣는다."
+    },
+    {
+      "id": "engines.viz.cashflowWaterfall",
+      "title": "Viz - Cashflow Waterfall",
+      "category": "engines",
+      "purpose": "영업·투자·재무활동 현금흐름과 배당/차입 변화가 현금 잔고를 어떻게 설명하는지 `waterfall` ChartSpec 으로 만든다.",
+      "whenToUse": [
+        "현금흐름 waterfall",
+        "배당 지속성",
+        "FCF bridge",
+        "자본배분 bridge"
+      ],
+      "nextSkills": [
+        "engines.viz",
+        "engines.analysis.cashflow",
+        "engines.gather.dividends"
+      ],
+      "bodyPreview": "## 절차\n\n1. CF 표에서 영업·투자·재무활동 현금흐름과 현금성자산 증감을 같은 기간으로 맞춘다.\n2. `specCashflowWaterfall(company)` 또는 직접 waterfall ChartSpec 을 사용한다.\n3. dividend 분석이면 배당 지급액과 FCF 를 같은 기간으로 맞춘다.\n4. bridge 합계가 기말 현금 변화와 맞지 않으면 chart 대신 reconciliation table 을 낸다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz.generators import specCashflowWaterfall\n\nspec = specCashflowWaterfall(company)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- waterfall 합계가 cash delta 또는 FCF bridge 와 맞는지 검산한다.\n- 부호 convention 을 차트 제목 또는 note 에 명시한다."
+    },
+    {
+      "id": "engines.viz.mermaidDiagram",
+      "title": "Viz - Mermaid 인과 다이어그램",
+      "category": "engines",
+      "purpose": "숫자 표로만 설명하기 어려운 충격 전파, 공시 변화, 지배구조 연결, thesis falsifier 경로를 Mermaid diagram 으로 제한적으로 표현한다.",
+      "whenToUse": [
+        "Mermaid diagram",
+        "인과 다이어그램",
+        "충격 전파",
+        "지배구조 network",
+        "thesis path"
+      ],
+      "nextSkills": [
+        "engines.viz"
+      ],
+      "bodyPreview": "## 절차\n\n1. edge 마다 근거 문장, 수치, 또는 분석 결과 ref 를 붙인다.\n2. `graph LR` 을 기본으로 쓰고 6~8노드 이하로 제한한다.\n3. 노드 라벨에는 가능한 한 방향성 또는 임계값을 포함한다.\n4. 관계 근거가 부족하면 diagram 을 만들지 않고 bullet path 로 낮춘다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz import emit_diagram\n\nsource = \"graph LR\\n  A[금리 +100bp] --> B[이자비용 증가]\\n  B --> C[ICR 하락]\"\nemit_diagram(\"mermaid\", source)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- diagram 의 모든 edge 가 answer claim 또는 evidence ref 로 되짚어져야 한다.\n- Mermaid 는 설명을 대체하지 않고 메커니즘 섹션에만 배치한다."
     }
   ]
 }

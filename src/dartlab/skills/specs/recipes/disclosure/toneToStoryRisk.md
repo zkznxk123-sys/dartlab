@@ -24,6 +24,15 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
+visualGuidance:
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -63,7 +72,7 @@ failureModes:
 examples:
   - 삼성전자 narrative risk composite
   - HMM 공시 tone + 뉴스 + 펀더멘털 동시 약화
-lastUpdated: '2026-05-10'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

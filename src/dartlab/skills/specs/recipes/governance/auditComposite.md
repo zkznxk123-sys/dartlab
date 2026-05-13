@@ -57,8 +57,13 @@ expectedOutputs:
   - 공시 근거
   - 반대 근거
   - 한계
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
 visualGuidance:
-  - 연도별 감사/지배구조 신호 표가 있을 때만 chart를 만든다.
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -105,7 +110,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 엔진 역할

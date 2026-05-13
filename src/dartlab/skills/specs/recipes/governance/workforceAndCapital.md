@@ -31,6 +31,13 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -60,9 +67,6 @@ expectedOutputs:
   - 인력 생산성·인건비 부담·자본 환원/희석을 한 표로 묶은 stewardship verdict
   - 5년 또는 최신 가용 기간 기준 핵심 metric table
   - 결론을 깨뜨릴 수 있는 falsifier와 재분석 trigger
-visualGuidance:
-  - 인당 매출·인건비/매출·총환원율 시계열이 3개 이상 있으면 line chart를 만든다.
-  - 최신 단일 행만 있으면 chart를 만들지 않고 table + flag로 제한한다.
 falsifier:
   description: 직원수 변화와 자본 환원 신호가 같은 방향이어도 인당 생산성 또는 희석 지표가 반대면 stewardship 결론을 보류한다.
   pythonCheck: "assert table is not None"
@@ -70,7 +74,7 @@ gap:
   primary:
     - scan
     - analysis
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

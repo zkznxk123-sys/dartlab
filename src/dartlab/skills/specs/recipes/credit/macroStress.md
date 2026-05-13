@@ -26,6 +26,17 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.cashflowWaterfall"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+  - "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다."
+  - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -70,7 +81,7 @@ examples:
   - 삼성전자 금리 +200bp 충격에서 dCR 유지?
   - 현대차 환율 +10% 시 신용 axis 어디 깨지나
   - HMM 영업이익 -20% 시 dCR 등급 변동
-lastUpdated: '2026-05-10'
+lastUpdated: '2026-05-13'
 ---
 
 ## 학술 근거

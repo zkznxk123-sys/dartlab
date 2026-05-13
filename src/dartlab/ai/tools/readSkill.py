@@ -86,6 +86,9 @@ def readSkill(
                 "whenToUse": list(spec.whenToUse),
                 "capabilityRefs": list(spec.capabilityRefs),
                 "requiredEvidence": list(spec.requiredEvidence),
+                "expectedOutputs": list(spec.expectedOutputs),
+                "visualGuidance": list(spec.visualGuidance),
+                "visualRefs": list(spec.visualRefs),
                 "nextSkills": next_skills,
                 "bodyPreview": body[:600] if body else "",
             }

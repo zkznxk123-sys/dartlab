@@ -24,6 +24,13 @@ requiredEvidence:
   - skillRef
   - sourceRef
   - executionRef
+visualRefs:
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported

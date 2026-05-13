@@ -50,8 +50,15 @@ expectedOutputs:
   - shareholder return thesis
   - 배당/자사주 근거
   - 지속 가능성 한계
+visualRefs:
+  - "engines.viz.cashflowWaterfall"
+  - "engines.viz.tableBackedChart"
+  - "engines.viz.kpiRibbon"
 visualGuidance:
-  - 배당성향, 배당수익률, 총환원율 시계열 표가 있을 때만 chart를 만든다.
+  - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+  - "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -98,7 +105,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 엔진 역할

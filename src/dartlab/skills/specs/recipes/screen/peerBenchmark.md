@@ -26,6 +26,15 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+visualRefs:
+  - "engines.viz.peerMatrix"
+  - "engines.viz.priceChart"
+  - "engines.viz.tableBackedChart"
+visualGuidance:
+  - "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다."
+  - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -64,7 +73,7 @@ testUniverse:
   asOfPolicy: latest
 falsifier:
   description: "peer 후보가 없거나 peerComparison/valuation 근거가 비어 있으면 benchmark 결론으로 사용하지 않는다."
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

@@ -24,6 +24,13 @@ requiredEvidence:
   - skillRef
   - tableRef
   - artifactRef
+visualRefs:
+  - "engines.viz.priceChart"
+  - "engines.viz.tableBackedChart"
+visualGuidance:
+  - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -49,7 +56,7 @@ examples:
   - 수익성 scan 결과 시각화
   - 산업별 색상 분류 chart
   - 시계열 + scan 결합 chart
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

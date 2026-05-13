@@ -43,7 +43,7 @@ examples:
   - Company.show API 도움말
   - quant axis 호출 방법
   - dartlab 능력 / 기능 안내
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

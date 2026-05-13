@@ -29,6 +29,15 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.priceChart"
+  - "engines.viz.tableBackedChart"
+visualGuidance:
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+  - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -65,7 +74,7 @@ testUniverse:
   asOfPolicy: latest
 falsifier:
   description: "band 산출이 단일 multiple 또는 단일 연도 값에만 의존하면 intrinsic value band 로 사용하지 않는다."
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 학술 근거

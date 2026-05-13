@@ -41,6 +41,15 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.cashflowWaterfall"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다."
+  - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -66,7 +75,7 @@ examples:
   - Sloan + Beneish + Novy-Marx 결합
   - 시계열 + 3 모델 합의
   - 분식 의심 신호 (3 모델 일관)
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 학술 근거

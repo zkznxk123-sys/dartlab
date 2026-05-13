@@ -1,5 +1,7 @@
 <script lang="ts">
 	import {
+		canonicalEngineSubGroups,
+		canonicalEngineSubGroupSet,
 		getSkillSubGroup,
 		skillCategoryOrder,
 		skillCategoryTitle,
@@ -46,7 +48,13 @@
 		for (const s of skills) {
 			if (s.category !== category) continue;
 			const sg = getSkillSubGroup(s);
+			if (category === 'engines' && (!sg || !canonicalEngineSubGroupSet.has(sg))) continue;
 			if (sg) grouped.set(sg, (grouped.get(sg) ?? 0) + 1);
+		}
+		if (category === 'engines') {
+			return canonicalEngineSubGroups
+				.map((id) => ({ id, count: grouped.get(id) ?? 0 }))
+				.filter((group) => group.count > 0);
 		}
 		return [...grouped.entries()]
 			.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))

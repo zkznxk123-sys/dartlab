@@ -29,6 +29,13 @@ requiredEvidence:
   - valueRef
   - executionRef
   - evidenceBinding
+visualRefs:
+  - "engines.viz.tableBackedChart"
+  - "engines.viz.scenarioVisuals"
+visualGuidance:
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -61,7 +68,7 @@ examples:
   - FEDFUNDS 추이를 그래프로 보여줘
   - CPIAUCSL 최근 5년 차트
   - T10Y2Y 금리차 그래프
-lastUpdated: '2026-05-12'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

@@ -10,6 +10,19 @@ export const skillCategoryTitle: Record<string, string> = {
 	recipes: 'Recipes'
 };
 
+export const canonicalEngineSubGroups = [
+	'company',
+	'gather',
+	'scan',
+	'analysis',
+	'credit',
+	'macro',
+	'quant',
+	'industry'
+] as const;
+
+export const canonicalEngineSubGroupSet = new Set<string>(canonicalEngineSubGroups);
+
 export interface RuntimeEntry {
 	status?: string;
 	notes?: string[];

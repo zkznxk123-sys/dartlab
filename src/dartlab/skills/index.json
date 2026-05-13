@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 271,
+    "skillCount": 280,
     "categories": [
       {
         "id": "start",
@@ -26,7 +26,7 @@
         "id": "engines",
         "title": "Engines",
         "description": "엔진별 기본 사용법과 그 엔진이 소유한 응용 실행 스킬.",
-        "count": 218
+        "count": 164
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -765,8 +765,8 @@
     {
       "id": "recipes.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.",
@@ -845,7 +845,9 @@
         "지속 가능성 한계"
       ],
       "visualGuidance": [
-        "배당성향, 배당수익률, 총환원율 시계열 표가 있을 때만 chart를 만든다."
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
       ],
       "failureModes": [
         "배당수익률만 보고 매력 단정 — payout ratio + FCF 커버리지 동반",
@@ -895,7 +897,12 @@
             "공시 당일 신규 주주환원 이벤트는 live filings가 가능한 서버 경로에서 보강한다."
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.tableBackedChart",
+        "engines.viz.kpiRibbon"
+      ]
     },
     {
       "id": "engines.analysis.earningsQuality",
@@ -1459,8 +1466,8 @@
     {
       "id": "recipes.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.",
@@ -1547,7 +1554,8 @@
         "한계"
       ],
       "visualGuidance": [
-        "연도별 감사/지배구조 신호 표가 있을 때만 chart를 만든다."
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
       ],
       "failureModes": [
         "감사의견 (적정 / 한정 / 의견거절 / 부적정) 하나로 분식 단정",
@@ -1597,7 +1605,11 @@
             "본문 미조회 상태에서는 제목/프리빌드 기준 위험 신호로만 제한한다."
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "engines.analysis.growth",
@@ -14080,8 +14092,8 @@
     {
       "id": "recipes.quality.capitalAllocationScorecard",
       "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Buffett-style 자본배분 평가 — FCF 의 5 사용처 (재투자·배당·자사주·M&A·부채상환) 비중 + 증분자본수익률 (ROIIC) + 지속가능성장률 (SGR) 을 L1 raw 시계열에서 직접 계산해 경영진의 자본배분 효율을 평가하는 절차. analysis axis 미사용. 트리거 — '자본배분 평가', 'FCF 사용처', 'ROIIC', 'Buffett 자본배분'.",
@@ -14138,7 +14150,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "FCF 정의 (OCF - CAPEX vs OCF - 총투자) 차이로 사용처 비중 변동",
         "ROIIC 분모 (NOPAT vs NI) 정의 모호",
@@ -14171,13 +14188,19 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.financialStructureCharts",
+        "engines.viz.kpiRibbon",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.quality.cashflowGovernanceDualSignal",
       "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "accrual ratio (현금흐름 vs 회계이익 갭) + governance amber (이사회 독립성 / 특수관계자) + audit-change (감사인 변경) 3 신호 동시 발현 시 분식 / 회계 신뢰도 적신호. Dechow et al (2011) \"Predicting Material Accounting Misstatements\" 학술 결과 적용. analysis ↔ scan 격리 메우는 조합. 트리거 — '분식 의심', '회계 신뢰도', 'accrual governance audit'.",
@@ -14223,7 +14246,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "accrual ratio 가 산업 평균 (제조업 vs 서비스) 차이 무시.",
         "governance amber 정의가 회사 size / industry 별 thresholds 다름."
@@ -14246,13 +14274,19 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.financialStructureCharts",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "커버리지 종목들의 다가오는 catalyst (정기공시 due · 분기/반기/사업보고서) 일정을 fiscal cycle 추론으로 미리 정리하는 절차. 트리거 — '실적 일정', '다가오는 catalyst', 'catalyst calendar', '정기공시 예정'.",
@@ -14363,13 +14397,14 @@
             "DART API 호출 — 인증 키 필요"
           ]
         }
-      }
+      },
+      "visualRefs": []
     },
     {
       "id": "recipes.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료. 트리거 — '기업 깊이 분석', '6 막 종합', '단일 종목 deep dive'.",
@@ -14447,7 +14482,15 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다.",
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "6 단 중 일부 step 실패 시 다음 step 으로 silent skip",
         "peer scan 결과 5 미만일 때 통계 의미 부족 무시",
@@ -14480,13 +14523,22 @@
             "browser 안에서는 macro/scan dataset snapshot 범위 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.kpiRibbon",
+        "engines.viz.financialStructureCharts",
+        "engines.viz.priceChart",
+        "engines.viz.peerMatrix",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.companyMacroPathProjection",
       "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "기존 base/bull/bear 3 path DCF 가 아니라 매크로 146 시나리오 (rate × FX × 사이클 × 침체) grid × 회사 elasticity → 146 P&L path → 146 fair value → 분포 (p25/p50/p75 + 현재가 대비 확률) 산출. 단일 점추정의 한계 보완. company ↔ macro ↔ analysis 격리 메우는 조합. 트리거 — '시나리오 적정가치 분포', 'fair value distribution', '146 시나리오 valuation'.",
@@ -14533,7 +14585,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "146 시나리오가 너무 corner case 지향이면 분포 fat-tail 으로 왜곡.",
         "DCF discount rate (WACC) 가 시나리오 별 변동 — 단순 일정 가정 시 분포 좁아짐."
@@ -14556,13 +14612,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차. 트리거 — 'compounder 발굴', 'quality 일관 종목', 'Buffett 스타일 횡단'.",
@@ -14621,7 +14682,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "5 년 윈도우의 시작점 (2020 코로나 vs 2019) 별 결과 차이",
         "사업부 개편 / 분할로 인한 역사 연속성 단절",
@@ -14654,13 +14719,18 @@
             "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.credit.covenantStressTest",
       "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "차입금 covenant (DSCR ≥ 1.2 / Debt/Equity ≤ 2.0 등) 가 매크로 충격 (금리 path Monte Carlo) 에서 위반될 확률 추정. 비금융기업 quasi-CCAR. 단순 신용등급보다 covenant breach 가 더 정밀한 default 선행지표. analysis ↔ macro ↔ credit 격리 메우는 조합. 트리거 — 'covenant stress', 'DSCR 충격', '차입약정 위반'.",
@@ -14706,7 +14776,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "covenant 정의 (보고서 안에 직접 기술 vs 차입 약정서) 차이.",
         "rate path 가 단조 가정 (충격 후 회복 X) 시 conservative 편향."
@@ -14729,13 +14804,19 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.credit.deepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 회사의 신용 위험을 dCR 등급 + 재무 안정성/현금흐름 분해 + 매크로 금리 환경 3 단으로 종합 평가하는 절차. 트리거 — '신용 깊이 분석', '단일 회사 신용', '부도 위험 종합'.",
@@ -14806,7 +14887,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "dCR 등급 산정의 가중치 / 임계 명시 누락",
         "안정성 / 현금흐름 분해의 일회성 효과 미보정",
@@ -14839,13 +14925,19 @@
             "browser 안에서는 macro 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.credit.distressDual",
       "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Altman + Ohlson', '부도 위험 2 모델 합의', 'Z-Score O-Score'.",
@@ -14902,7 +14994,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "산업 (제조업 / 비제조업 / 금융업) 별 모델 적합성 차이 무시",
         "1980 미국 logit (Ohlson) thresholds 의 KR reproducibility",
@@ -14935,13 +15032,19 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.credit.macroStress",
       "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "단일 회사의 신용등급 (dCR + 7 axis) 가 매크로 충격 (금리 +200bp / 환율 +10% / 영업이익 -20%) 에서 유지 가능한지, 어떤 axis 가 먼저 깨지는지 판정. credit ↔ macro 격리 메우는 조합 — 정상 보고 dCR 은 시점 1 회 산출이라 미래 시나리오에서 어떻게 변하는지 보여주지 못한다. 트리거 — '신용 매크로 스트레스', '금리 충격 dCR', 'credit stress'.",
@@ -14996,7 +15099,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "금리 sensitivity 가 회사 specifics (변동/고정 비율) 무시한 단순 평균.",
         "dCR 7 axis 중 어느 axis 가 binding 인지 분석 없이 등급만 보고.",
@@ -15025,13 +15133,19 @@
             "매크로 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.credit.quantConsensus",
       "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "단일 회사 부도 위험을 dCR (정성·정량 종합) + Altman Z″ + Ohlson O + Beneish M 4-source 동시 평가. 단일 모델 false positive 줄이고 triple-agreement 시 강한 위험 신호. credit ↔ quant 격리 메우는 조합. 트리거 — '신용 퀀트 합의', '부도 4 모델', 'distress consensus'.",
@@ -15080,7 +15194,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "dCR 등급과 quant model 의 시간 frequency 차이 (분기 vs 연간).",
         "Beneish M 의 원자재기업 false positive (정상 inventory 변동을 분식 신호로 오인)."
@@ -15104,13 +15222,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.tableBackedChart",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "야간/새벽 사이 신규 DART 공시 + 커버리지 종목 변동률 + 시장 마감/개장 +주요 macro 이벤트를 1 페이지 morning note 로 묶는 일일 cadence 절차. 트리거 — '오늘 아침', '야간 공시 정리', 'morning note', '오버나잇 정리'.",
@@ -15195,7 +15318,11 @@
         "종목별 변동률 표",
         "1 페이지 한국어 본문"
       ],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+      ],
       "failureModes": [
         "커버리지 종목 list 없이 morning note 시도",
         "공시 시점 (filedAt) 검증 없이 \"어제 야간\" 으로 판정",
@@ -15227,13 +15354,18 @@
             "브라우저 안에서는 커버리지 list 가 작을 때만 (메모리 부담)"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.kpiRibbon",
+        "engines.viz.priceChart",
+        "engines.viz.evidenceCoverage"
+      ]
     },
     {
       "id": "recipes.etc.dataAvailabilityFirst",
       "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방. 트리거 — '데이터 있나 확인', '분석 전 데이터 점검', '수집 누락 체크'.",
@@ -15293,7 +15425,9 @@
         "datasetRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+      ],
       "failureModes": [
         "가용 토픽 list 만 보고 실제 데이터 결손 무시\"",
         "schema 변경 (snakeId 매핑) 시점 차이로 mapping 실패",
@@ -15326,13 +15460,16 @@
             "browser 안에서는 update() 호출 제약"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage"
+      ]
     },
     {
       "id": "recipes.credit.debtStructureAudit",
       "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차. 트리거 — '부채 구조 audit', '만기 분포', '이자보상배율', '신용 등급 횡단'.",
@@ -15399,7 +15536,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "부채 정의 (총부채 vs 이자부 부채) 차이로 비율 변동",
         "단기 부채의 roll-over 가정 명시 없이 만기 위험 단정\"",
@@ -15432,13 +15574,19 @@
             "browser 안에서는 finance 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.disclosure.event",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 회사의 최근 공시 이벤트를 목록 + 원문 + 기간간 변화 3 축으로 분석하는 절차. 신규 공시/주요사항 발생 시 thesis 영향 평가. 트리거 — '최근 공시', '신규 공시 영향', '공시 본문 변화', 'thesis 영향 평가'.",
@@ -15508,7 +15656,10 @@
         "executionRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "readFiling 본문 안의 외부 본문 가드 (EXTERNAL CONTENT 마커) 무시 — untrusted 데이터로만 인용",
         "단일 공시 헤드라인 읽고 thesis 영향 단정 — 본문 + 기간간 변화 (diff) 동반",
@@ -15541,13 +15692,17 @@
             "browser 안에서는 readFiling 본문 길이 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.disclosure.riskScreen",
       "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차. 트리거 — '공시 위험 스캔', '정정 빈도 횡단', '공시 위험 후보'.",
@@ -15607,7 +15762,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "정정 공시 vs 정상 공시의 분류 모호",
         "자기자본 변동 (자사주 매입 / 증자) 의 위험 의도 분류 어려움",
@@ -15640,13 +15798,17 @@
             "browser 안에서는 전종목 스캔 메모리 부담"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.disclosure.toneToStoryRisk",
       "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "MD&A tone change + 뉴스 헤드라인 tone + 공시 fundamental shift 3 신호 composite \"narrative risk\" 점수 임계 초과 시 storyboard 신설 부담 없이 story.risk 섹션에 injection 가능한 markdown 블럭 자동 발행. storyboard 추가 부담 회피하면서 기존 story 의 risk 부분 보강. quant ↔ gather ↔ analysis ↔ story 격리 메우는 4-engine 조합. 트리거 — 'story risk auto', '공시 tone story 발행', 'narrative risk score'.",
@@ -15693,7 +15855,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "tone change 정의 (LM dictionary vs FinBERT) 차이.",
         "뉴스 sentiment 가 공시 tone 과 시차 (lead/lag) 무시한 단순 합산."
@@ -15716,13 +15882,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.credit.distressCandidateScreen",
       "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "KOSPI200 universe 안에서 (1) dCR 등급이 전월 대비 1 notch 이상 하락 (credit migration) + (2) quant sentiment z-score ≤ -1.5 (시장 신호 약세) 동시 발현 종목 발굴. 단일 신호는 false positive 많지만 cross-source 합의는 강함. credit ↔ quant ↔ scan 격리 메우는 조합. 트리거 — 'distress candidate', '신용 sentiment 약세', 'credit migration screen'.",
@@ -15766,7 +15937,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "1 개월 dCR archive 가 매번 운영자 manual 실행 (자동 monthly snapshot 필요).",
         "sentiment z 의 lookback (60m vs 36m) 차이."
@@ -15789,13 +15965,19 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.credit.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Altman Z-Score (1968) 5 변수 중 dartlab 으로 가능한 4 변수 + 음수 영업CF 게이트 를 결합해 부도 위험 종목을 횡단으로 식별하고 다른 스크리너 결과의 블랙리스트로 사용하는 회피 절차. 트리거 — '부도 위험 필터', 'Altman Z 횡단', '블랙리스트', '회피 절차'.",
@@ -15854,7 +16036,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "X5 (Sales / TA) 변수 누락 (5 변수 중 4 변수 사용) 의 정확도 영향",
         "음수 OCF 가 일회성 (M&A) vs 반복 (영업 부실) 구분 어려움",
@@ -15887,13 +16074,19 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "배당 정책 회사가 1997 IMF / 2008 GFC / 2020 COVID 시나리오에서 FCF 커버리지가 무너지는 임계 + 배당 cut/suspend 가능성 산출. 정상 시점 dividend yield 만 보고 매수하는 전략의 매크로 위험 가시화. analysis ↔ macro 격리 메우는 조합. 트리거 — '배당 스트레스', 'dividend cut 위험', '경기침체 배당'.",
@@ -15940,7 +16133,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
+      ],
       "failureModes": [
         "revenue 충격 일정 비율 가정 — 실제는 산업 별 매출 노출 다름 (금융 < 자동차 < 항공).",
         "배당 정책 (target payout vs progressive) 별 cut threshold 차이."
@@ -15963,13 +16160,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.tableBackedChart",
+        "engines.viz.kpiRibbon"
+      ]
     },
     {
       "id": "recipes.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사의 배당 매력도를 자본배분 의지 + 현금흐름 quality + 과거 배당 정책 3 축으로 평가하는 절차. 트리거 — '배당 매력도', '배당 정책', '배당 thesis'.",
@@ -16036,7 +16238,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
+      ],
       "failureModes": [
         "배당수익률 산정의 주가 기준일 모호 (당일 vs 평균)",
         "일회성 자사주 매입을 반복 정책으로 단정",
@@ -16069,13 +16275,18 @@
             "browser 안에서는 dividend topic 단일 호출만"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.tableBackedChart",
+        "engines.viz.kpiRibbon"
+      ]
     },
     {
       "id": "recipes.quality.dupontDriver",
       "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "ROE 변동의 진짜 원인을 5 동인 (세부담·이자부담·영업마진·자산회전·재무레버리지) 으로 분리해 단일 회사 5 년 시계열에서 어떤 요소가 ROE 를 끌고 갔는지 정량화하는 절차. L1 raw (`c.show(\"BS\"|\"IS\")`) 만 사용. 트리거 — 'ROE 분해', 'DuPont 5 동인', 'ROE 추적'.",
@@ -16132,7 +16343,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "earnings_before_tax snakeId 가용성 차이로 InterestBurden 추정 실패",
         "평균자산 (전년말 + 당년말 / 2) 보다 분기 가중평균이 정확",
@@ -16165,13 +16380,18 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.quality.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사 발표 이익의 quality 를 발생주의 vs 현금흐름 괴리 + 재무 항목 정합성 + 일회성 비중 3 축으로 점검하는 절차. 트리거 — '이익 quality 점검', '발생주의 vs 현금흐름', '일회성 비중'.",
@@ -16239,7 +16459,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "일회성 손익 (자산매각 / 평가이익 / 환산이익 / 소송충당) 분리 누락",
         "CFO / 영업이익 비율의 산업별 정상 수준 차이 무시\"",
@@ -16272,13 +16496,18 @@
             "browser 안에서는 분기별 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.quality.earningsQualityTriad",
       "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "이익 quality 를 3 학술 모델 (Sloan accruals · Beneish M-Score · Novy-Marx GP/A) 동시 적용으로 합의 점수화. analysis axis 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Sloan accruals', 'Beneish M-Score', 'Novy-Marx GP/A', '이익 quality 3 모델'.",
@@ -16335,7 +16564,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "3 모델의 산업별 적합성 (제조업 vs 서비스업) 차이\"",
         "Sloan accruals 정의 (BS-OCF approach) 차이",
@@ -16368,13 +16601,18 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "정식 ESG 데이터 부재 시 dartlab 보유 신호 (지배구조 + 감사 + 종업원 + 자본배분 일관성) 만으로 가벼운 ESG audit 을 만드는 절차. 트리거 — 'ESG light', '거버넌스 audit', 'ESG 데이터 부재 시'.",
@@ -16445,7 +16683,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "환경 (E) 신호의 dartlab 부재로 ESG 의 \"S + G\" 만 평가",
         "종업원 (workforce) 데이터의 시점 / 빈도 차이\"",
@@ -16478,13 +16719,17 @@
             "browser 안에서는 docs/finance 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.disclosure.filingTextSignal",
       "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "최근 365 일 공시 본문에서 \"going concern\" / \"의견거절\" / \"거짓서명\" / \"계속기업\" 같은 위험 키워드 빈도가 trailing 3y baseline 대비 z-score ≥ 2 이면 비정상 신호. predictionSignal feature 로 입력. Loughran-McDonald sentiment 의 일반 dictionary 와 다른 anomaly-on-rare-keywords 접근. search/edgar ↔ analysis 격리 메우는 조합. 트리거 — 'filing text signal', '공시 키워드 anomaly', '사업보고서 위험 신호'.",
@@ -16529,7 +16774,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "한국 공시 본문 OCR / parsing 품질이 회사 별 차이 — 키워드 매칭 누락.",
         "보일러플레이트 (감사보고서 표준 문구) 가 안전 공시에서도 등장 — false positive."
@@ -16552,13 +16801,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.quality.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차. 트리거 — '재무제표 비교', '두 회사 차이', '회사 간 비교'.",
@@ -16630,7 +16884,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "같은 분기 (Q1 vs Q1) 정렬 누락",
         "연결 vs 별도 회계 scope 혼용",
@@ -16663,13 +16921,18 @@
             "browser 안에서는 두 회사 dataset snapshot 동시 로드 부담"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.etc.flowAndPattern",
       "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차. 트리거 — '수급', '외인 기관 매매', '차트 패턴', '단기 entry/exit'.",
@@ -16735,7 +16998,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "프로그램 매매 / 차익거래 / 자기자본 매매 분리 누락",
         "외국인 비중 변화의 인덱스 리밸런싱 영향 미반영",
@@ -16768,13 +17034,17 @@
             "browser 안에서는 flow KR 전용"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차. 트리거 — 'GARP', 'PEG', 'Lynch 성장가치', 'PEG ≤ 1'.",
@@ -16833,7 +17103,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "성장률 추정의 윈도우 (1Y vs 5Y) 별 PEG 변동",
         "사이클성 종목의 분기별 성장률 변동성 무시",
@@ -16866,13 +17140,18 @@
             "브라우저 안에서는 valuation snapshot prebuild 의존"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사의 지배구조 위험을 이사회 독립성 + 지배력 집중 + 감사 신호 + 분식 가능성 4 축으로 종합 점검하는 절차. 트리거 — '지배구조 위험', '이사회 독립성', '감사 신호', '분식 가능성'.",
@@ -16944,7 +17223,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "감사의견 4 단계 (적정 / 한정 / 의견거절 / 부적정) 단일 결과로 분식 단정\"",
         "본문 미조회 상태에서 제목 / 프리빌드 기준 위험 신호로만 제한",
@@ -16977,13 +17259,17 @@
             "browser 안에서는 governance topic 단일 호출 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "KOSPI universe 안에서 (1) governance composite (이사회 독립성·특수관계자) + (2) network density (계열사·affiliate ratio) + (3) audit-change (최근 2 년 감사인 변경) 3 신호 동시 적신호 종목 발굴. 한국 chaebol 구조 특유의 transfer-pricing / 일감몰아주기 위험을 단일 신호로 못 잡는 한계 보완. analysis ↔ scan 격리 메우는 cross-sectional 조합. 트리거 — 'governance audit network', 'chaebol risk screen'.",
@@ -17025,7 +17311,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "network density 정의 (단순 affiliate 매출 비중 vs 다층 지배 구조 정량화) 차이.",
         "감사인 rotation 의무 (2018 도입) 시점 이후 감사인 변경이 normal 화 — 임계 재조정."
@@ -17048,13 +17337,17 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Benjamin Graham (1949) 안전마진 framework 을 ratio 4 게이트 + 5 년 흑자 후처리로 근사해 한국 chaebol discount 트랩을 회피한 deep value 후보를 횡단으로 발굴하는 절차. 트리거 — 'Graham deep value', '안전마진', 'chaebol discount 회피'.",
@@ -17113,7 +17406,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "한국 지주사 (holding) 의 PBR 디스카운트 + 자회사 가치 합산 차이",
         "Current Ratio 의 산업 (금융업 vs 제조업) 적합성 차이",
@@ -17146,13 +17443,18 @@
             "브라우저 안에서는 scanAccount 5 기간 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "전종목 성장 스캔으로 후보를 추리고 상위 N 종에 대해 회사별 깊이 분석을 진행하는 절차. 트리거 — '성장 스캔 후 깊이 분석', '상위 N 깊이 분석'.",
@@ -17225,7 +17527,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "성장 스캔의 universe (전종목 vs KOSPI200) 차이로 결과 변동",
         "신규 상장 / 지정 종목의 시계열 길이 부족",
@@ -17258,13 +17564,18 @@
             "browser 안에서는 scan dataset snapshot 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능. 트리거 — '산업 깊이 분석', '가치 사슬', '핵심 종목', '업종 분석'.",
@@ -17329,7 +17640,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "가치 사슬 stage 정의 (KRX 산업 분류 vs 사업) 차이\"",
         "산업 sub-segment (반도체 메모리 vs 비메모리) 무시한 단일 평균",
@@ -17362,13 +17677,18 @@
             "browser 안에서는 industry stage 단일 호출만"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "도입기 / 후행기 산업 안에서 PER < 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.",
@@ -17413,7 +17733,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "산업 stage 분류 (taxonomy.json) 가 외부 정의와 차이.",
         "PER thresholds 가 KR 시장 평균 변동 미반영."
@@ -17436,13 +17760,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.disclosure.insiderEarningsLeading",
       "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "내부자 (임원·5% 이상 주주) 매수 거래가 *클러스터* 형태 (180 일 안 ≥ 3 명 동시) 일 때만 다음 분기 EPS surprise 와 양의 IC 가진다는 Cohen-Malloy-Pomorski (2012) \"Decoding Inside Information\" 결과 적용. 단순 net-buy 가 아닌 *집단 매수 동시성* 이 핵심. gather ↔ quant ↔ analysis 격리 메우는 조합. 트리거 — '내부자 매수 클러스터', 'insider cluster signal'.",
@@ -17490,7 +17819,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "내부자 정의 (임원만 vs 임원+주주) 별 cluster 임계 다름.",
         "분기 surprise 정의 (consensus vs trailing) 차이."
@@ -17513,13 +17845,17 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.disclosure.insiderEventCheck",
       "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사의 내부자 거래·자본변동·임원 변경 같은 이벤트 신호를 시계열로 점검하는 절차. 거버넌스 점검의 보완. 트리거 — '내부자 거래', '임원 변경', '자본변동 이벤트'.",
@@ -17584,7 +17920,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "임원 매수 / 매도 사유 (스톡옵션 / 상속 / 증여) 미구분",
         "단발성 매매로 추세 단정 — 6 개월~1 년 시계열 동반\"",
@@ -17617,13 +17956,17 @@
             "browser 안에서는 disclosure 단일 호출만"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 회사 본질가치를 Graham 수정공식 + EVA spread + CFROI proxy 3 anchor 로 동시 추정해 시장가와 비교한 가치 판정 band 를 만드는 절차. analysis valuation axis 미사용, L1 raw (`c.show(\"IS\"|\"BS\"|\"CF\"|\"PRICE\"|\"FQ\")`) 만 사용. 트리거 — '본질가치 band', 'Graham + EVA + CFROI', 'fair value 3 anchor'.",
@@ -17681,7 +18024,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "Graham 수정공식 (1974 Y10 + 4.4) 의 KR 시장 적합성 차이",
         "EVA 의 WACC 추정 (CAPM 기반) 가정 의존성",
@@ -17714,13 +18061,18 @@
             "브라우저 안에서는 다년 시계열 + 가격 snapshot 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.priceChart",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.quality.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "산업 재고 사이클 + 회사 재고 회전 + 매크로 수요 신호 결합으로 사이클 위치를 진단하는 절차. 반도체·석유화학·철강 등에 유용. 트리거 — '재고 사이클', '회전 진단', '반도체/석유화학 사이클'.",
@@ -17786,7 +18138,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "회사 재고 (BS) 와 산업 재고 (ISM) 단위 / scope 혼동",
         "산업 (반도체 / 화학 / 철강) 별 사이클 길이 / 진폭 차이\"",
@@ -17819,13 +18175,18 @@
             "browser 안에서는 macro inventory 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.credit.leverageSensitivity",
       "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "매출 변동이 영업이익·순이익에 얼마나 증폭되는지 영업레버리지 (DOL) · 재무레버리지 (DFL) · 결합레버리지 (DCL) 로 정량화하고 매크로 충격 시나리오에서 본 회사가 얼마나 민감한지 평가하는 절차. L1 raw (`c.show(\"IS\")`) 시계열만 사용. 트리거 — '영업레버리지', '재무레버리지', 'DOL DFL DCL', '매크로 충격 민감도'.",
@@ -17882,7 +18243,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "VC vs FC 분리 (회계상 모호) 의 추정 의존성",
         "단년도 DOL 의 사이클성 종목 변동성\"",
@@ -17915,13 +18281,19 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.betaPeerScreen",
       "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "동일 산업 peer set 안에서 회사 별 macro beta (rate / FX / oil) 가 within-industry z ≥ |2| 인 outlier 식별. cross-market 단순 macro beta 는 \"유가 상승 = 정유주\" 같은 trivial 매핑만 잡지만, 같은 산업 안 outlier 는 회사 specifics (FX 헤지 / 변동금리 차입 / 원자재 다변화) 가 만든 idiosyncratic 노출을 드러냄. industry ↔ scan 격리 메우는 조합. 트리거 — 'macroBeta peer', 'idiosyncratic 매크로 노출', '같은 산업 outlier'.",
@@ -17966,7 +18338,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "peer set 이 너무 좁으면 (3-4 개) z 통계 신뢰도 약함.",
         "60m rolling beta 가 regime change 가 있으면 평균 이동."
@@ -17989,13 +18365,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.liquidityCycle",
       "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "매크로 유동성 환경을 금리 + 환율 + 유동성 지표 + 위기 신호 4 축으로 종합 판정하는 절차. 종목 없이 매크로 분석 가능. 트리거 — '매크로 유동성', '금리 환율 위기 신호', '거시 사이클'.",
@@ -18066,7 +18447,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "금리 (정책 vs 시장 vs 회사 조달) 별 단계 차이",
         "환율 (USDKRW vs DXY) 의 글로벌 / 양자 차이",
@@ -18099,13 +18484,18 @@
             "browser 안에서는 macro 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.quantScenarioBacktest",
       "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "단순 full-sample 평균 IR 이 아니라 매크로 regime 별 (1997 IMF / 2008 GFC / 2020 COVID) 팩터 (value / quality / momentum) 의 walk-forward IR / Sharpe / max drawdown 산출. 투자자가 \"이번 사이클\" 에서의 팩터 작동 여부를 알 수 있게. macro ↔ quant 격리 메우는 조합. 트리거 — 'macro scenario backtest', '시나리오 별 팩터', 'regime backtest'.",
@@ -18150,7 +18540,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "시나리오 date range 정의 (예 1997 IMF 11~12월 vs 1997 7~12월) 차이.",
         "factor 정의 (book/price vs ROE) 별 Sharpe 차이."
@@ -18173,13 +18567,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.toCompany",
       "title": "매크로 → 섹터 → 회사 영향 (transmission)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "매크로 환경 변화가 특정 회사의 매출·영업이익·이자비용·환산손익에 어떻게 전이되는지 단계별로 추적하는 절차. 트리거 — '매크로 → 회사 전이', '금리 환율 회사 영향', '단계별 추적'.",
@@ -18251,7 +18650,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "elasticity 추정 윈도우 (1Y vs 5Y) 임의 선택\"",
         "매크로 변수 (금리 / 환율 / 유가) 간 상관 (금리 ↑ → 환율) 무시",
@@ -18284,13 +18687,18 @@
             "browser 안에서는 macro snapshot 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사를 같은 산업 peer 5~10 종과 핵심 ratio (수익성/안정성/성장성/valuation) 4 축으로 벤치마크하는 절차. 트리거 — 'peer 비교', '동종 5~10 종 벤치마크', 'ratio 4 축'.",
@@ -18356,7 +18764,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "산업 분류 (KRX) 와 실제 사업 동질성 차이 무시",
         "peer 시총 격차 (1 조 vs 10 조) 큰 경우의 비교 왜곡",
@@ -18389,13 +18801,18 @@
             "browser 안에서는 multi-company 동시 로드 메모리 부담"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.priceChart",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.quality.piotroskiLite",
       "title": "Piotroski F-Score 7 항목 횡단 점수카드",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Piotroski (2000) F-Score 의 9 항목 중 dartlab ratio 로 가능한 7 항목을 횡단 계산해 저평가 종목군에서 우량 회사를 골라내는 점수카드 절차. 트리거 — 'F-Score', 'Piotroski 7 항목', '저평가 우량 발굴'.",
@@ -18453,7 +18870,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "9 항목 중 2 항목 (CFO 부호 / 외부자금조달) 누락 시 score 분포 변동",
         "F-Score 의 산업 (제조업 vs 서비스업) 적용성 차이",
@@ -18486,13 +18907,18 @@
             "브라우저 안에서는 freq=\"Y\" 5 기간 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.qualityMacroBeta",
       "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "drafted",
       "purpose": "quality 팩터 (QMJ — Asness/Frazzini/Pedersen) 점수가 매크로 사이클 phase (early-recovery / mid-expansion / late-cycle / contraction) 별로 다르게 작동한다는 검증된 패턴을 단일 회사에 적용. quant ↔ macro 격리 메우는 조합. 트리거 — '퀄리티 사이클', 'QMJ 매크로', 'quality phase'.",
@@ -18538,7 +18964,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "사이클 phase 분류가 60-month rolling 등 lookback window 의존.",
         "quality 측정 → ROE / 부채비율 / 매출 안정성 weighting 차이."
@@ -18561,13 +18991,18 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Novy-Marx (2013) gross profitability factor (Gross Profit / Total Assets) 와 단순 가치 (PER/PBR) 를 결합해 한국 chaebol discount 트랩을 회피한 quality value 후보를 횡단으로 발굴하는 절차. 트리거 — 'gross profitability', 'Novy-Marx 2013', 'quality value 횡단'.",
@@ -18626,7 +19061,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "GP/A 분모 (총자산 vs 영업자산) 정의 모호",
         "한국 지주사 (holding) 의 PBR 디스카운트로 false positive",
@@ -18659,13 +19098,18 @@
             "브라우저 안에서는 valuation snapshot prebuild 의존, refresh=True 호출 불가"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.etc.quantTechnicalReview",
       "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차. 트리거 — '기술적 신호', '모멘텀 변동성', '차트 패턴 4 축'.",
@@ -18738,7 +19182,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "지표 파라미터 (RSI 14 vs 7) 별 신호 차이\"",
         "사이드웨이 시장에서 추세추종 지표의 false signal",
@@ -18771,13 +19218,17 @@
             "browser 안에서는 price 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.macro.scenarioAnalysis",
       "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사 forecast 를 base/bull/bear 3 시나리오 + 매크로 시나리오 가정 + 시장 regime 판정 3 축으로 묶어 불확실성을 정량화하는 절차. 트리거 — 'base/bull/bear', '3 시나리오', '시장 regime', '불확실성 정량화'.",
@@ -18850,7 +19301,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "시나리오 확률 (base 50% / bull 30% / bear 20%) 임의 부여",
         "매크로 시나리오 (146 프리셋) 임의 선택",
@@ -18883,13 +19338,18 @@
             "browser 안에서는 forecast scenario 가정 grid 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계. 트리거 — '스캔 후 차트', 'table-backed chart', '보고서 직전 시각화'.",
@@ -18949,7 +19409,10 @@
         "artifactRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "상위 N 의 sample size 통계 의미 부족 (N < 5)",
         "chart axis 의 시간 (분기 vs 연간) 차이로 시계열 왜곡",
@@ -18982,13 +19445,17 @@
             "browser 안에서는 chart artifact 저장 제약"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.macro.sectorRotation",
       "title": "섹터 로테이션 분석 (매크로 + scan + industry)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "매크로 사이클 위치 + 섹터 횡단 스캔 + 산업 위치 3 축으로 섹터 로테이션 후보를 평가하는 절차. 종목 없이도 가능. 트리거 — '섹터 로테이션', '업종 순환', '경기 사이클별 섹터'.",
@@ -19054,7 +19521,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "사이클 phase 식별의 시점 (확장 / 둔화 경계) 모호",
         "KRX 산업 분류와 실제 섹터 동질성 차이",
@@ -19087,13 +19558,18 @@
             "browser 안에서는 macro 사이클 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "시가총액 하위 종목 중 성장 + 저평가 + 회계 quality 가 양호한 후보를 발굴하는 절차. small-cap value+growth thesis. 트리거 — '중소형주 발굴', 'small cap discovery', '소외 종목'.",
@@ -19165,7 +19641,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "small-cap 의 유동성 부족으로 거래 비용 폭증",
         "신규 / 비공시 / 폐업 종목의 시계열 길이 부족",
@@ -19198,13 +19678,18 @@
             "browser 안에서는 multi-scan 메모리 부담"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.peerMatrix",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사 종합 보고서를 14 축 분석 + 6 막 인과 + story 섹션 조립으로 만드는 절차. review 엔진의 표준 출력. 트리거 — '보고서 작성', '기업 이야기 조립', 'story 빌드'.",
@@ -19271,7 +19756,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다.",
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "14 섹션 중 일부 결손 시 silent skip",
         "causal weights 임의 가정 vs 실제 모델 가중치 차이",
@@ -19304,13 +19793,18 @@
             "browser 안에서는 story 전체 조립 메모리 부담 (개별 섹션만)"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.kpiRibbon",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "종목별 투자 thesis 본문 + pillar 3~5 + risk 3~5 + catalyst N + falsifiable 게이트 (반증 불가능 thesis 거부) 를 로컬 파일로 관리하는 cadence 절차. 트리거 — '논거 점검', 'thesis check', 'X 종목 thesis 갱신', '논거 추적'.",
@@ -19395,7 +19889,11 @@
         "pillar scorecard",
         "한국어 점검 결과"
       ],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "반증 불가능한 thesis 를 수용 (\"회사가 좋아진다\" 같은 vague claim)",
         "pillar 의 expectation 을 정량 (숫자/구간/기한) 으로 명시하지 않음",
@@ -19432,13 +19930,18 @@
             "브라우저 file system 격리 — IndexedDB 등 별도 저장 필요"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.priceChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근. 트리거 — '미국 시장 점검', 'US market review', 'EDGAR 분기'.",
@@ -19506,7 +20009,12 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "미국 회계 기준 (US GAAP) vs IFRS 차이 무시",
         "미국 분기 (10-Q) vs 연간 (10-K) 빈도 차이\"",
@@ -19539,13 +20047,19 @@
             "browser 안에서는 EDGAR API 직접 호출 제한"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.kpiRibbon",
+        "engines.viz.priceChart",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.etc.usageAndApi",
       "title": "dartlab 사용법·API 설명 (RunPython 우회)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "dartlab 의 기능·사용법·API 를 설명하는 질문에서 ReadSkill + ReadCapability 만 사용하고 RunPython 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.",
@@ -19623,13 +20137,14 @@
         "pyodide": {
           "status": "supported"
         }
-      }
+      },
+      "visualRefs": []
     },
     {
       "id": "recipes.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사 valuation multiple (PER/PBR/EV/EBITDA) 의 역사 평균 ±σ 밴드 안 현재 위치를 추적하는 절차. 단순 스냅샷이 아닌 시계열 추적. 트리거 — '밸류에이션 band 추적', '시계열 valuation', '멀티플 변천'.",
@@ -19695,7 +20210,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "역사 평균 윈도우 시작점 (코로나 / 금융위기 포함 여부) 의 영향",
         "분기 vs 연간 multiple 빈도 차이로 변동성 차이\"",
@@ -19728,13 +20247,18 @@
             "browser 안에서는 historic 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차. 트리거 — '밸류에이션 점검', 'fair value', '저평가 판단'.",
@@ -19807,7 +20331,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
+      ],
       "failureModes": [
         "DCF terminal value 가 전체 가치의 70%+ 일 때 가정 의존성 무시",
         "peer multiple 의 산업 / 단계 차이 무시한 단순 평균",
@@ -19840,13 +20368,18 @@
             "browser 안에서는 quant value 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.priceChart"
+      ]
     },
     {
       "id": "recipes.governance.workforceAndCapital",
       "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차. 트리거 — '인력 자본', '종업원 신호', 'workforce'.",
@@ -19914,7 +20447,10 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "정규직 / 비정규직 / 외주 분리 누락",
         "인건비 (총액 vs 인당) 정의 차이",
@@ -19947,13 +20483,17 @@
             "browser 안에서는 docs 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.quality.workingCapitalQuality",
       "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
-      "category": "engines",
-      "categoryTitle": "Engines",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "unverified",
       "purpose": "Cash Conversion Cycle (DSO + DIO − DPO) + 매출채권·재고·매입채무 회전율 5 년 추세를 L1 raw (`c.show(\"BS\"|\"IS\")`) 에서 직접 계산해 매출 신뢰도와 운전자본 효율을 정량화하는 절차. analysis axis 미사용. 트리거 — '운전자본 quality', '재고 매출채권', 'CCC 진단'.",
@@ -20010,7 +20550,11 @@
         "dateRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "DSO 분모 (매출 / 매출원가) 정의 모호",
         "분기 환산 (×91 vs ×365 / 4) 차이",
@@ -20043,7 +20587,12 @@
             "브라우저 안에서는 다년 시계열 일부 한정"
           ]
         }
-      }
+      },
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "engines.scan",
@@ -23249,7 +23798,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "Viz 는 분석 결과를 16 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + 신규 6 종) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
+      "purpose": "Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
       "whenToUse": [
         "viz",
         "시각화",
@@ -23263,7 +23812,7 @@
         "peer 비교 차트"
       ],
       "inputs": [
-        "chartType (16 종 중 하나)",
+        "chartType (등록 chartType 중 하나)",
         "data (행 list 또는 series dict)",
         "title · xAxis · yAxis",
         "evidenceBinding 또는 evidenceIds (필수)"
@@ -23289,7 +23838,16 @@
       ],
       "linkedSkills": [
         "engines.analysis",
-        "engines.dashboard"
+        "engines.dashboard",
+        "engines.viz.balanceStructureTrend",
+        "engines.viz.priceChart",
+        "engines.viz.financialStructureCharts",
+        "engines.viz.peerMatrix",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.kpiRibbon",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.mermaidDiagram"
       ],
       "requires": [],
       "alternatives": [],
@@ -23321,7 +23879,7 @@
       "failureModes": [
         "evidenceBinding · evidenceIds 둘 다 없는 spec — emit_chart 가 거부",
         "단일값 또는 근거 없는 장식 시각화 시도",
-        "ChartRenderer 미등록 chartType 사용 — 16 종만 허용",
+        "ChartRenderer 미등록 chartType 사용 — 등록 chartType 만 허용",
         "period 없는 시계열 차트 (x 축 라벨 없음)"
       ],
       "forbidden": [
@@ -23336,6 +23894,14 @@
         "현금흐름 waterfall",
         "peer-matrix 다축 비교",
         "kpi-ribbon 스냅샷",
+        "balance-structure-trend 자산·조달 구조",
+        "price-chart 주가와 거래량",
+        "financial-structure 재무제표 구조 묶음",
+        "peer-matrix 업종 비교 행렬",
+        "evidence-coverage 근거 커버리지",
+        "kpi-ribbon 보고서 KPI 요약",
+        "scenario visuals 시나리오·민감도",
+        "cashflow waterfall 현금 bridge",
         "mermaid 다이어그램"
       ],
       "runtimeCompatibility": {
@@ -23354,7 +23920,262 @@
         "pyodide": {
           "status": "limited"
         }
-      }
+      },
+      "lastUpdated": null
+    },
+    {
+      "id": "engines.viz.balanceStructureTrend",
+      "title": "Viz - 자산·조달 구조 추이",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "재무상태표의 자산 배치와 부채+자본 조달 구조를 `balance-structure-trend` ChartSpec 으로 변환해 연도별 100% 누적 구조와 총자산 정합성을 함께 보여주는 시각화 실행 스킬이다.",
+      "whenToUse": [
+        "자산구조 차트",
+        "부채 자본 구조",
+        "balance structure trend",
+        "재무상태표 시각화",
+        "운전자산 비영업자산",
+        "영업부채 차입금 자본",
+        "자산 = 부채 + 자본"
+      ],
+      "inputs": [
+        "BalanceStructureView dict",
+        "stockCode",
+        "corpName",
+        "periods",
+        "assetTrendParts / fundingTrendParts / equityTrendParts"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType balance-structure-trend ChartSpec",
+        "asset/funding/equity stacked series",
+        "totalAssetsSeries / totalFundingSeries",
+        "finance:BS evidenceBinding"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.analysis.assetStructure",
+        "engines.dashboard",
+        "engines.mappers"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.analysis.assetStructure",
+        "engines.dashboard",
+        "engines.mappers"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.balanceStructureTrend"
+      ],
+      "procedure": [
+        "`periods` 가 2개 이상인지 확인한다.",
+        "`assetTrendParts` 와 `fundingTrendParts` 가 모두 있는지 확인한다.",
+        "각 기간의 자산 share 합계와 조달 share 합계가 대체로 100% 인지 확인한다.",
+        "`totalAssetsSeries` 와 `totalFundingSeries` 가 같은 기간 순서인지 확인한다.",
+        "자본 세부 `shares` 는 자기자본 denominator 로 계산될 수 있으므로 총자산 share 와 섞어 설명하지 않는다.",
+        "`evidenceBinding.topic == \"BS\"` 또는 `evidenceIds` 에 `finance:BS` 가 있어야 한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "target",
+        "period",
+        "finance:BS",
+        "totalAssetsSeries",
+        "totalFundingSeries",
+        "evidenceBinding"
+      ],
+      "expectedOutputs": [
+        "balance-structure-trend spec",
+        "자산 배치 변화 설명",
+        "부채+자본 조달 구조 설명"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "자산총계와 부채+자본 총계가 다른 기간을 섞어 비교함",
+        "결손 계정을 0 으로 채워 구조 변화처럼 그림",
+        "자본 세부 항목을 총자산 기준 share 와 자기자본 기준 share 로 혼동함",
+        "단일 최신 분기만 보고 장기 자산구조 변화를 단정함"
+      ],
+      "forbidden": [
+        "BS 원자료 또는 BalanceStructureView 없이 임의 stack 생성 금지",
+        "evidenceBinding 또는 finance:BS evidenceIds 없는 차트 emit 금지",
+        "자산 = 부채 + 자본 정합성 검산 없이 해석 금지"
+      ],
+      "examples": [
+        "삼성전자 5년 자산 배치와 조달 구조",
+        "현금·매출채권·재고·유형자산 비중 변화",
+        "영업부채·차입금·기타부채·자본 조달 구성 변화",
+        "이익잉여금이 자본 구조에서 차지하는 비중"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저에서는 사전 구성된 BalanceStructureView 또는 landing dashboard model 이 노출한 view 만 사용한다."
+          ]
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": []
+    },
+    {
+      "id": "engines.viz.priceChart",
+      "title": "Viz - 주가차트",
+      "category": "engines",
+      "categoryTitle": "Engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "OHLCV 가격 시계열을 `price-chart` ChartSpec 으로 변환해 Svelte ChartRenderer 에서 캔들·종가선·거래량·이동평균·벤치마크를 함께 그리는 시각화 실행 스킬이다.",
+      "whenToUse": [
+        "주가차트",
+        "price chart",
+        "candlestick",
+        "캔들차트",
+        "OHLCV",
+        "거래량 차트",
+        "이동평균선",
+        "시장 대비 주가"
+      ],
+      "inputs": [
+        "종목코드 또는 ticker",
+        "market (KR / US)",
+        "start / end 기간",
+        "선택 벤치마크 KOSPI / KOSDAQ / KOSPI200 / S&P500"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType price-chart ChartSpec",
+        "data rows (date/open/high/low/close/volume)",
+        "overlays (ma20/ma60 등)",
+        "evidenceBinding"
+      ],
+      "apiRefs": [],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.gather.price",
+        "engines.gather.flow",
+        "engines.quant.momentum",
+        "engines.quant.chartPatterns"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.gather.price",
+        "engines.gather.flow",
+        "engines.quant.momentum",
+        "engines.quant.chartPatterns"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.priceChart"
+      ],
+      "procedure": [
+        "`rows` 가 2개 미만이면 차트를 만들지 않는다.",
+        "최신 종가를 답변에 쓰면 `latestAsOf` 를 직전 거래일로 명시한다.",
+        "벤치마크는 종목 가격과 같은 기간으로 정렬하고, 원 단위와 상대지수 축을 혼동하지 않는다.",
+        "캔들 차트가 필요한 경우 `open/high/low/close` 가 모두 있는지 확인한다. close-only 데이터는 line mode 로 fallback 한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 `emit_chart` 하지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "target",
+        "period",
+        "latestAsOf",
+        "provider",
+        "evidenceBinding",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "price-chart spec",
+        "주가 추세와 거래량 설명",
+        "벤치마크 대비 상대 성과"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "수정주가와 raw 가격을 섞어 수익률을 계산함",
+        "휴장일을 최신 거래일로 착각함",
+        "가격 차트를 투자 권고 신호로 단정함",
+        "벤치마크를 같은 기간으로 정렬하지 않고 상대 성과를 그림",
+        "거래량 없는 close-only 데이터에 캔들 차트를 강제함"
+      ],
+      "forbidden": [
+        "가격 row 없이 임의 캔들 생성 금지",
+        "evidenceBinding 또는 evidenceIds 없는 차트 emit 금지",
+        "최신 종가를 말할 때 기준 거래일 누락 금지",
+        "캔들 패턴만으로 매수/매도 판단 금지"
+      ],
+      "examples": [
+        "삼성전자 1년 주가와 거래량",
+        "AAPL 주가와 MA20/MA60",
+        "종목 주가와 KOSPI200 상대 성과",
+        "공시 이벤트와 주가 반응"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저에서는 사전 제공된 HF 가격 parquet 또는 landing priceRuntime 이 노출한 row 범위만 사용한다."
+          ]
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": []
     },
     {
       "id": "engines.viz.tableBackedChart",
@@ -27400,7 +28221,12 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다.",
+        "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "creditGap은 느린 분기 지표라 단기 market stress와 시차가 큼.",
         "Koo/Fisher 일부 신호는 US 데이터 중심이라 KR에서는 결손 가능.",
@@ -27428,7 +28254,13 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.cashflowWaterfall",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.dollarFundingStress",
@@ -27481,7 +28313,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "DXY, VIX, HY spread는 US/글로벌 지표이고 USDKRW는 KR 양자 환율.",
         "환율 데이터 source별 기준시각 차이.",
@@ -27509,7 +28345,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.globalLiquidityPulse",
@@ -27564,7 +28405,11 @@
         "executionRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "FRED/HF 카탈로그에 없는 지표는 apiKey 또는 직접 provider가 필요할 수 있음.",
         "주간/월간/일간 지표의 빈도 차이.",
@@ -27592,7 +28437,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.historicalPositioning",
@@ -27646,7 +28496,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "사건별 기간이 다르고 지표 빈도가 달라 직접 수치 비교가 왜곡됨.",
         "1997 KR 위기와 2008 US 위기를 같은 시장 기준으로 섞음.",
@@ -27674,7 +28528,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.inflationBreadthWatch",
@@ -27726,7 +28585,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "CPI/PPI/유가의 빈도와 발표 지연 차이.",
         "headline과 core inflation의 방향 차이.",
@@ -27754,7 +28617,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.koreaExportCycleNowcast",
@@ -27808,7 +28676,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "ECOS 지표 코드별 제공 기간/빈도 차이.",
         "반도체 proxy와 전체 수출의 시차.",
@@ -27836,7 +28708,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.koreaMacroStressMap",
@@ -27894,7 +28771,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "KR macro 축의 일부 데이터 결손.",
         "환율, 교역조건, 주식시장 반응의 기준일 차이.",
@@ -27922,7 +28803,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.laborMarketTurningPoint",
@@ -27974,7 +28860,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "고용지표 revision이 커서 최신 발표치가 바뀔 수 있음.",
         "실업률과 신규실업수당의 선후행 차이.",
@@ -28002,7 +28892,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.scenarioDiagram",
@@ -28059,7 +28954,10 @@
         "executionRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "scenario meta에 transmission이 없어 일반 경로를 사용해야 함.",
         "다이어그램이 설명보다 장식으로 쓰임.",
@@ -28087,7 +28985,11 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.sixActs",
@@ -28152,7 +29054,11 @@
         "executionRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "KR/US 시장을 섞어 기준일과 지표 단위가 어긋남.",
         "6막 순서가 아닌 단편 축 나열로 끝남.",
@@ -28180,7 +29086,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.stressMatrixChart",
@@ -28235,7 +29146,10 @@
         "evidenceBinding"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+      ],
       "failureModes": [
         "지표 단위가 bp, %, index 로 섞임.",
         "최신값만 쓰면 방향성이 사라짐.",
@@ -28263,7 +29177,11 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart"
+      ]
     },
     {
       "id": "recipes.macro.tailRiskScenarioScan",
@@ -28316,7 +29234,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "scenario override가 현재 시장 데이터와 섞여 기준일이 모호해짐.",
         "severe/extreme 심각도 비교가 유형별로 동일한 확률을 의미하지 않음.",
@@ -28344,7 +29266,12 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
     },
     {
       "id": "recipes.macro.timeSeriesChart",
@@ -28401,7 +29328,10 @@
         "evidenceBinding"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+      ],
       "failureModes": [
         "지표 코드가 HF 카탈로그에 없어 빈 DataFrame 또는 예외가 발생.",
         "일별/월별/분기별 지표가 한 차트에 섞여 축 해석이 왜곡.",
@@ -28429,7 +29359,11 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.tableBackedChart",
+        "engines.viz.scenarioVisuals"
+      ]
     },
     {
       "id": "recipes.macro.yieldCurveStress",
@@ -28481,7 +29415,11 @@
         "valueRef"
       ],
       "expectedOutputs": [],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다.",
+        "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다.",
+        "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+      ],
       "failureModes": [
         "일별 금리와 월별 macro forecast의 기준일 불일치.",
         "장단기 스프레드가 정상화되어도 recession lag가 남을 수 있음.",
@@ -28509,7 +29447,784 @@
         }
       },
       "apiRefs": [],
-      "categoryTitle": "Recipes"
+      "categoryTitle": "Recipes",
+      "visualRefs": [
+        "engines.viz.scenarioVisuals",
+        "engines.viz.tableBackedChart",
+        "engines.viz.mermaidDiagram"
+      ]
+    },
+    {
+      "id": "engines.viz.evidenceCoverage",
+      "title": "Viz - Evidence Coverage",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "분석 답변의 핵심 주장별 근거 충족 여부를 `evidence-coverage` ChartSpec 또는 coverage table 로 표현해 빈 주장과 검산 누락을 드러낸다.",
+      "whenToUse": [
+        "근거 커버리지",
+        "데이터 가용성",
+        "보고서 검산",
+        "claim evidence matrix"
+      ],
+      "inputs": [
+        "claims",
+        "evidence refs",
+        "requiredEvidence",
+        "coverage status"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType evidence-coverage ChartSpec",
+        "claim별 pass/missing/warning",
+        "coverage note"
+      ],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "runtime.workbenchEvidenceFlow"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "runtime.workbenchEvidenceFlow"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.evidenceCoverage"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "coverage item 은 claim text, required evidence, matched refs 를 모두 포함해야 한다.",
+        "차트는 결론 보강용이 아니라 검산/한계 섹션에 배치한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "claim",
+        "evidenceRef",
+        "requiredEvidence"
+      ],
+      "expectedOutputs": [
+        "evidence coverage spec",
+        "missing evidence list"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "근거 없는 claim 을 chart 에서 pass 로 표시함",
+        "coverage chart 를 본문 결론처럼 해석함"
+      ],
+      "forbidden": [
+        "evidenceRef 없는 claim 을 pass 처리 금지",
+        "coverage 를 투자 판단 지표로 단정 금지"
+      ],
+      "examples": [
+        "종합 보고서 claim별 근거 충족표",
+        "데이터 가용성 우선 점검 coverage"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
+    },
+    {
+      "id": "engines.viz.financialStructureCharts",
+      "title": "Viz - 재무제표 구조 차트 묶음",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "손익·재무상태·현금흐름 표를 `income-trend-matrix`, `balance-structure-trend`, `cashflow-signed-matrix` ChartSpec 으로 바꿔 재무제표 구조와 기간 변화를 설명하는 시각화 실행 스킬이다.",
+      "whenToUse": [
+        "재무제표 구조 시각화",
+        "손익 추이 matrix",
+        "자산 부채 자본 구조",
+        "현금흐름 부호 matrix",
+        "이익품질 시각화"
+      ],
+      "inputs": [
+        "IncomeTrendView 또는 BalanceStructureView 또는 CashflowSignedView",
+        "stockCode",
+        "corpName",
+        "periods",
+        "tableRef / evidenceBinding"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType income-trend-matrix ChartSpec",
+        "chartType balance-structure-trend ChartSpec",
+        "chartType cashflow-signed-matrix ChartSpec"
+      ],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.analysis.earningsQuality",
+        "engines.analysis.assetStructure",
+        "engines.analysis.cashflow"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.viz.balanceStructureTrend",
+        "engines.analysis.earningsQuality",
+        "engines.analysis.cashflow"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.financialStructureCharts"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "각 spec 에 `evidenceBinding.topic` 이 `IS` / `BS` / `CF` 중 실제 원표와 맞는지 확인한다.",
+        "missing 계정은 0 으로 대체하지 않고 `warnings` 또는 answer coverage note 에 남긴다.",
+        "차트 해석 문단은 기간·계정·값을 하나 이상 직접 인용해야 한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "finance:IS",
+        "finance:BS",
+        "finance:CF",
+        "periods",
+        "evidenceBinding"
+      ],
+      "expectedOutputs": [
+        "손익 추이 matrix",
+        "자산·조달 구조 stack",
+        "현금흐름 부호 matrix"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "서로 다른 결산기 또는 연결/별도 기준을 섞어 한 차트에 배치함",
+        "결손 계정을 0 으로 채워 구조 변화처럼 보이게 함",
+        "총자산과 부채+자본 정합성 검산 없이 balance-structure-trend 를 그림"
+      ],
+      "forbidden": [
+        "finance 원표 또는 view dict 없이 임의 stack 생성 금지",
+        "evidenceBinding 없는 ChartSpec emit 금지",
+        "단일 기간 숫자를 구조 추세 chart 로 승격 금지"
+      ],
+      "examples": [
+        "최근 5년 매출·영업이익·순이익 추이 matrix",
+        "자산 구조와 부채+자본 구조 stack 비교",
+        "영업·투자·재무현금흐름 부호 matrix"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저에서는 사전 구성된 view dict 또는 landing dashboard model 이 노출한 범위만 사용한다."
+          ]
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
+    },
+    {
+      "id": "engines.viz.mermaidDiagram",
+      "title": "Viz - Mermaid 인과 다이어그램",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "숫자 표로만 설명하기 어려운 충격 전파, 공시 변화, 지배구조 연결, thesis falsifier 경로를 Mermaid diagram 으로 제한적으로 표현한다.",
+      "whenToUse": [
+        "Mermaid diagram",
+        "인과 다이어그램",
+        "충격 전파",
+        "지배구조 network",
+        "thesis path"
+      ],
+      "inputs": [
+        "nodes",
+        "edges",
+        "node evidence refs",
+        "diagram title"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "mermaid source",
+        "diagramRef"
+      ],
+      "toolRefs": [
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz"
+      ],
+      "linkedSkills": [
+        "engines.viz"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.mermaidDiagram"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "diagram 의 모든 edge 가 answer claim 또는 evidence ref 로 되짚어져야 한다.",
+        "Mermaid 는 설명을 대체하지 않고 메커니즘 섹션에만 배치한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "node",
+        "edge",
+        "evidenceRef"
+      ],
+      "expectedOutputs": [
+        "Mermaid graph LR source",
+        "인과 경로 설명"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "근거 없는 관계를 edge 로 그림",
+        "노드가 많아져 diagram 이 분석이 아니라 장식이 됨"
+      ],
+      "forbidden": [
+        "근거 없는 edge 금지",
+        "8노드 초과 diagram 금지",
+        "수치나 문서 근거가 없는 thesis impact 단정 금지"
+      ],
+      "examples": [
+        "금리 상승 → 차입비용 → 이자보상배율 path",
+        "공시 tone 변화 → 회계 리스크 → thesis risk path"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
+    },
+    {
+      "id": "engines.viz.cashflowWaterfall",
+      "title": "Viz - Cashflow Waterfall",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "영업·투자·재무활동 현금흐름과 배당/차입 변화가 현금 잔고를 어떻게 설명하는지 `waterfall` ChartSpec 으로 만든다.",
+      "whenToUse": [
+        "현금흐름 waterfall",
+        "배당 지속성",
+        "FCF bridge",
+        "자본배분 bridge"
+      ],
+      "inputs": [
+        "cashflow rows",
+        "beginning cash / ending cash",
+        "OCF / Capex / Financing / Dividend",
+        "evidenceBinding"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType waterfall ChartSpec",
+        "cash bridge",
+        "coverage warnings"
+      ],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.analysis.cashflow",
+        "engines.gather.dividends"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.analysis.cashflow",
+        "engines.gather.dividends"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.cashflowWaterfall"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "waterfall 합계가 cash delta 또는 FCF bridge 와 맞는지 검산한다.",
+        "부호 convention 을 차트 제목 또는 note 에 명시한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "finance:CF",
+        "period",
+        "cashflow metric",
+        "evidenceBinding"
+      ],
+      "expectedOutputs": [
+        "cashflow waterfall spec",
+        "현금 bridge 설명"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "발생주의 이익 항목과 현금흐름 항목을 같은 bridge 에 섞음",
+        "Capex 부호를 뒤집어 FCF 를 과대 표시함",
+        "현금성자산 기초/기말 검산 없이 waterfall 을 그림"
+      ],
+      "forbidden": [
+        "finance:CF 근거 없는 waterfall 금지",
+        "단일 기간 OCF 하나로 지속성 단정 금지"
+      ],
+      "examples": [
+        "영업CF에서 FCF와 배당까지 bridge",
+        "자사주/차입/배당 자본환원 bridge"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
+    },
+    {
+      "id": "engines.viz.scenarioVisuals",
+      "title": "Viz - 시나리오·민감도 시각화",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "매크로 충격, valuation 민감도, stress test 결과를 `six-act-radar`, `heatmap`, Mermaid graph 로 표현해 충격 전파와 민감도를 분리해서 보여준다.",
+      "whenToUse": [
+        "시나리오 분석",
+        "stress matrix",
+        "민감도 heatmap",
+        "6막 radar",
+        "충격 전파 diagram"
+      ],
+      "inputs": [
+        "scenario score",
+        "sensitivity grid",
+        "shock/transmission/company impact nodes",
+        "evidenceBinding"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType six-act-radar ChartSpec",
+        "chartType heatmap ChartSpec",
+        "Mermaid graph LR"
+      ],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.macro",
+        "engines.analysis.valuationBand"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.macro",
+        "engines.analysis.valuationBand"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.scenarioVisuals"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "모든 scenario visual 은 가정값과 결과값을 함께 노출한다.",
+        "Mermaid diagram 은 수치 임계 또는 방향성을 노드 라벨에 넣는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "scenario",
+        "assumption",
+        "metric",
+        "evidenceBinding"
+      ],
+      "expectedOutputs": [
+        "scenario visual spec",
+        "stress matrix",
+        "mechanism diagram"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "단일 숫자 결론을 heatmap 으로 과장함",
+        "Mermaid 노드가 많아져 인과가 읽히지 않음",
+        "가정 grid 없이 민감도 chart 를 만듦"
+      ],
+      "forbidden": [
+        "assumption 없는 scenario chart 금지",
+        "Mermaid 8노드 초과 금지",
+        "충격 방향과 회사 영향의 부호를 검산하지 않은 diagram 금지"
+      ],
+      "examples": [
+        "금리 +100bp valuation sensitivity",
+        "환율 충격 → 매출/마진 전파 Mermaid",
+        "6막 macro regime radar"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
+    },
+    {
+      "id": "engines.viz.peerMatrix",
+      "title": "Viz - Peer Matrix",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "동종 기업 × 지표 행렬을 `peer-matrix` ChartSpec 으로 만들어 밸류에이션, 수익성, 성장성, 안정성의 상대 위치를 한 번에 비교한다.",
+      "whenToUse": [
+        "peer 비교",
+        "업종 benchmark",
+        "상대 valuation",
+        "후보군 비교"
+      ],
+      "inputs": [
+        "peer rows",
+        "metrics",
+        "universe / industry",
+        "tableRef 또는 evidenceIds"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType peer-matrix ChartSpec",
+        "peer별 metric cell",
+        "pointRefs"
+      ],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.analysis.peerComparison",
+        "engines.scan"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.analysis.peerComparison",
+        "engines.scan"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.peerMatrix"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "target 과 peer 모두 같은 기간·같은 metric 정의인지 확인한다.",
+        "ranking 해석은 universe size 와 결손률을 같이 표기한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "universe",
+        "peerCount",
+        "metric",
+        "tableRef"
+      ],
+      "expectedOutputs": [
+        "peer-matrix spec",
+        "peer 대비 강점/약점 요약"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "업종이 다른 회사를 같은 peer matrix 에 넣음",
+        "결손 metric 을 0 점으로 처리함",
+        "universe size 를 숨기고 ranking 만 제시함"
+      ],
+      "forbidden": [
+        "peerCount 2 미만 matrix 금지",
+        "tableRef 또는 evidenceIds 없는 peer chart 금지",
+        "원자료 기준일이 다른 peer 값을 최신 비교처럼 표시 금지"
+      ],
+      "examples": [
+        "반도체 peer ROE/PER/PBR/부채비율 비교",
+        "배터리 업종 성장성과 수익성 matrix"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
+    },
+    {
+      "id": "engines.viz.kpiRibbon",
+      "title": "Viz - KPI Ribbon",
+      "category": "engines",
+      "kind": "curated",
+      "status": "observed",
+      "purpose": "보고서 첫 화면에 필요한 핵심 KPI 4~8개를 `kpi-ribbon` ChartSpec 으로 묶어 결론 요약과 근거 drill-back 을 동시에 제공한다.",
+      "whenToUse": [
+        "보고서 KPI",
+        "핵심지표 요약",
+        "dashboard ribbon",
+        "종합 분석 첫 화면"
+      ],
+      "inputs": [
+        "KPI items",
+        "value / unit / period",
+        "evidenceRef"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "chartType kpi-ribbon ChartSpec",
+        "KPI cards",
+        "evidenceBinding"
+      ],
+      "toolRefs": [
+        "RunPython",
+        "CompileVisual"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "engines.dashboard"
+      ],
+      "linkedSkills": [
+        "engines.viz",
+        "engines.dashboard"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/engines.viz.kpiRibbon"
+      ],
+      "procedure": [
+        "입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.",
+        "`evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.",
+        "데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.",
+        "`dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.",
+        "Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.",
+        "KPI 는 결론 문단 하나 이상을 직접 뒷받침해야 한다.",
+        "KPI 사이 기간이 다르면 카드에 기간을 노출한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "metric",
+        "value",
+        "period",
+        "evidenceRef"
+      ],
+      "expectedOutputs": [
+        "kpi-ribbon spec",
+        "KPI 요약 문단"
+      ],
+      "visualGuidance": [],
+      "failureModes": [
+        "서로 다른 기준일의 KPI 를 한 줄에 최신값처럼 배치함",
+        "단일 KPI 를 ribbon 으로 과장함"
+      ],
+      "forbidden": [
+        "evidenceRef 없는 KPI 카드 금지",
+        "KPI 3개 미만 ribbon 금지"
+      ],
+      "examples": [
+        "매출 성장률, 영업이익률, ROE, FCF, 순차입금 KPI"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "supported"
+        }
+      },
+      "humanIntro": null,
+      "predecessors": [],
+      "successors": [],
+      "audiences": {},
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": null,
+      "cluster": null,
+      "visualRefs": [],
+      "categoryTitle": "Engines",
+      "apiRefs": []
     }
   ]
 }

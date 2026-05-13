@@ -23,6 +23,15 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+visualRefs:
+  - "engines.viz.peerMatrix"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
+visualGuidance:
+  - "동종 비교는 engines.viz.peerMatrix를 사용하고 universe·peerCount·metric 결손률을 답변에 함께 노출한다."
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+  - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -61,7 +70,7 @@ failureModes:
 examples:
   - 도입기 산업 가치 + 퀄리티 KOSPI screen
   - 후행기 KOSPI200 underfollowed
-lastUpdated: '2026-05-10'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

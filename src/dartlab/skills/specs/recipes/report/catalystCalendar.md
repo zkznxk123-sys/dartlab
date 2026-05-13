@@ -69,7 +69,7 @@ procedure:
   - 미국 종목 포함 시 빈 결과 + "P0 KR 정기공시만 지원" 안내.
 sourceRefs:
   - dartlab://skills/engines.gather
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

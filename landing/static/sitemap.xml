@@ -1101,6 +1101,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.balanceStructureTrend</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.priceChart</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.tableBackedChart</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1367,6 +1377,41 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.yieldCurveStress</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.evidenceCoverage</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.financialStructureCharts</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.mermaidDiagram</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.cashflowWaterfall</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.scenarioVisuals</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.peerMatrix</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.viz.kpiRibbon</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

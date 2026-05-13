@@ -24,6 +24,17 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.cashflowWaterfall"
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
+  - "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다."
+  - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -60,7 +71,7 @@ failureModes:
 examples:
   - 삼성전자 accrual + governance + audit triple
   - HMM 회계 신뢰도 적신호
-lastUpdated: '2026-05-10'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식

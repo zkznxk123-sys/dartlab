@@ -27,6 +27,17 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.cashflowWaterfall"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.mermaidDiagram"
+visualGuidance:
+  - "재무제표 구조는 engines.viz.financialStructureCharts를 사용하고 IS/BS/CF 원표와 결산기·연결 기준이 맞을 때만 emit한다."
+  - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
+  - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
+  - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
+
 runtimeCompatibility:
   server:
     status: supported
@@ -65,7 +76,7 @@ testUniverse:
   asOfPolicy: latest
 falsifier:
   description: "credit 축만 통과하고 stability/cashflow/macro 중 하나라도 누락되면 신용 deep-dive 결론으로 사용하지 않는다."
-lastUpdated: '2026-05-07'
+lastUpdated: '2026-05-13'
 ---
 
 ## 공개 호출 방식
