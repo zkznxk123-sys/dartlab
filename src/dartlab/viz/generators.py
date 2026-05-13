@@ -43,6 +43,82 @@ def _safeVal(v: Any) -> float:
         return 0.0
 
 
+def _nullableNum(v: Any) -> float | None:
+    """가격 row 용 숫자 변환. 결손은 0 이 아니라 None 으로 보존."""
+    if v is None:
+        return None
+    if isinstance(v, str):
+        v = v.replace(",", "").strip()
+        if not v or v in {"-", "—"}:
+            return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _rowValue(row: dict[str, Any], *keys: str) -> Any:
+    """대소문자/원천별 컬럼 alias 를 흡수해 row 값을 읽는다."""
+    if not row:
+        return None
+    lower_map = {str(k).lower(): v for k, v in row.items()}
+    for key in keys:
+        if key in row:
+            return row[key]
+        lowered = key.lower()
+        if lowered in lower_map:
+            return lower_map[lowered]
+    return None
+
+
+def _rowsFromAny(rows: Any) -> list[dict[str, Any]]:
+    """Polars/Pandas/list[dict] 를 price-chart generator 입력으로 정규화."""
+    if rows is None:
+        return []
+    if hasattr(rows, "to_dicts"):
+        return list(rows.to_dicts())
+    if hasattr(rows, "to_dict"):
+        try:
+            return list(rows.to_dict("records"))
+        except TypeError:
+            pass
+    if isinstance(rows, list):
+        return [dict(row) for row in rows if isinstance(row, dict)]
+    return []
+
+
+def _movingAverage(values: list[float | None], window: int) -> list[float | None]:
+    out: list[float | None] = []
+    for i in range(len(values)):
+        chunk = values[max(0, i - window + 1) : i + 1]
+        nums = [v for v in chunk if v is not None]
+        if len(nums) < window:
+            out.append(None)
+        else:
+            out.append(sum(nums) / len(nums))
+    return out
+
+
+def _normalizePriceRows(rows: Any) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for row in _rowsFromAny(rows):
+        date = _rowValue(row, "date", "Date", "BAS_DD", "basDd", "날짜")
+        close = _nullableNum(_rowValue(row, "close", "Close", "TDD_CLSPRC", "CLSPRC_IDX", "종가"))
+        if date is None or close is None:
+            continue
+        normalized.append(
+            {
+                "date": str(date),
+                "open": _nullableNum(_rowValue(row, "open", "Open", "TDD_OPNPRC", "OPNPRC_IDX", "시가")),
+                "high": _nullableNum(_rowValue(row, "high", "High", "TDD_HGPRC", "HGPRC_IDX", "고가")),
+                "low": _nullableNum(_rowValue(row, "low", "Low", "TDD_LWPRC", "LWPRC_IDX", "저가")),
+                "close": close,
+                "volume": _nullableNum(_rowValue(row, "volume", "Volume", "ACC_TRDVOL", "거래량")),
+            }
+        )
+    return sorted(normalized, key=lambda item: item["date"])
+
+
 def _meta(company: Any, source: str) -> dict:
     """ChartSpec meta 블록 생성."""
     return {
@@ -1086,6 +1162,104 @@ def specCashflowSignedMatrix(
             periodKind="MIXED",
             periods=periods,
             extra={"viewId": view.get("id")},
+        ),
+    }
+
+
+def specPriceChart(
+    rows: Any,
+    *,
+    stockCode: str,
+    corpName: str = "",
+    market: str = "KR",
+    benchmarkRows: Any | None = None,
+    benchmarkName: str = "",
+    events: list[dict[str, Any]] | None = None,
+    movingAverages: tuple[int, ...] = (20, 60),
+) -> dict | None:
+    """OHLCV 가격 row 를 ``price-chart`` ChartSpec 으로 변환.
+
+    rows 는 ``g.history(...)`` / ``dartlab.gather("price", ...)`` 결과처럼
+    date/open/high/low/close/volume 컬럼을 가진 Polars/Pandas/DataFrame 또는
+    list[dict] 를 받는다. KRX index raw 컬럼 (BAS_DD, CLSPRC_IDX 등) 도 흡수한다.
+    """
+    price_rows = _normalizePriceRows(rows)
+    if len(price_rows) < 2:
+        return None
+
+    dates = [row["date"] for row in price_rows]
+    closes = [row["close"] for row in price_rows]
+    series = [
+        {
+            "name": "종가",
+            "data": closes,
+            "color": COLORS[2],
+            "type": "line",
+        }
+    ]
+    overlays = []
+    for i, window in enumerate(movingAverages):
+        if window <= 1:
+            continue
+        ma = _movingAverage(closes, window)
+        if any(v is not None for v in ma):
+            key = f"ma{window}"
+            for row, value in zip(price_rows, ma, strict=False):
+                row[key] = value
+            overlays.append(key)
+            series.append(
+                {
+                    "name": f"MA{window}",
+                    "data": ma,
+                    "color": COLORS[(i + 4) % len(COLORS)],
+                    "type": "line",
+                    "overlay": True,
+                }
+            )
+
+    benchmark_series: list[dict[str, Any]] = []
+    benchmark_rows = _normalizePriceRows(benchmarkRows)
+    if benchmark_rows:
+        benchmark_by_date = {row["date"]: row["close"] for row in benchmark_rows}
+        values = [benchmark_by_date.get(date) for date in dates]
+        base = next((v for v in values if v not in (None, 0)), None)
+        if base:
+            benchmark_series = [
+                {"date": date, "value": (value / base * 100) if value else None}
+                for date, value in zip(dates, values, strict=False)
+            ]
+
+    source = "gather.price"
+    return {
+        "chartType": "price-chart",
+        "title": f"{corpName or stockCode} 주가 · 거래량",
+        "data": price_rows,
+        "series": series,
+        "categories": dates,
+        "options": {
+            "mode": "candlestick",
+            "unit": "원" if market.upper() == "KR" else "USD",
+            "volumeUnit": "주",
+            "overlays": overlays,
+            "benchmarkName": benchmarkName,
+            "benchmarkSeries": benchmark_series,
+            "events": events or [],
+        },
+        "purpose": "market_context",
+        "evidenceIds": [f"gather:price:{market}:{stockCode}"],
+        "meta": {
+            "source": source,
+            "stockCode": stockCode,
+            "corpName": corpName,
+            "market": market,
+        },
+        "evidenceBinding": chartEvidenceBinding(
+            stockCode=stockCode,
+            source="gather",
+            topic="price",
+            periodKind="D",
+            periods=dates,
+            extra={"market": market, "rowCount": len(price_rows)},
         ),
     }
 

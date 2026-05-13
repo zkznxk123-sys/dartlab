@@ -70,6 +70,7 @@ examples:
   - "원형 패턴 형성 + 시장 환경"
 linkedSkills:
   - engines.quant
+  - engines.viz.priceChart
   - engines.quant.pattern
   - engines.quant.indicators
   - engines.quant.signals

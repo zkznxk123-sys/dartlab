@@ -191,7 +191,19 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {
                 "chartType": {
                     "type": "string",
-                    "enum": ["line", "bar", "table", "radar", "waterfall", "heatmap", "histogram"],
+                    "enum": [
+                        "line",
+                        "bar",
+                        "table",
+                        "radar",
+                        "waterfall",
+                        "heatmap",
+                        "histogram",
+                        "combo",
+                        "sparkline",
+                        "pie",
+                        "price-chart",
+                    ],
                 },
                 "data": {
                     "type": "array",

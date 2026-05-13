@@ -12,6 +12,9 @@ export function isMeaningfulVisualSpec(spec: unknown): boolean {
   if (chartType === "radar") {
     return cleanCategories(obj.categories).length >= 3 && hasNumericSeries(obj, 3);
   }
+  if (chartType === "price-chart") {
+    return hasPriceRows(obj.data) || hasNumericSeries(obj, 2);
+  }
   return isMeaningfulCategorySeriesChart(obj);
 }
 
@@ -36,6 +39,20 @@ function hasNumericSeries(spec: Record<string, unknown>, minValues: number, maxL
 function cleanCategories(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value.map((item) => String(item ?? "").trim()).filter(Boolean);
+}
+
+function hasPriceRows(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  let count = 0;
+  for (const row of value) {
+    if (!row || typeof row !== "object") continue;
+    const item = row as Record<string, unknown>;
+    const hasDate = String(item.date ?? item.BAS_DD ?? "").trim().length > 0;
+    const hasClose = Number.isFinite(toNumber(item.close ?? item.TDD_CLSPRC ?? item.CLSPRC_IDX));
+    if (hasDate && hasClose) count += 1;
+    if (count >= 2) return true;
+  }
+  return false;
 }
 
 function toNumber(value: unknown): number {

@@ -127,6 +127,74 @@ def test_vizspec_from_dict_chart():
     assert spec.chartType == "combo"
 
 
+def test_spec_price_chart_normalizes_ohlcv_rows():
+    from dartlab.viz.generators import specPriceChart
+
+    rows = [
+        {"date": "2026-01-02", "open": "10,000", "high": "10,500", "low": "9,900", "close": "10,200", "volume": "1000"},
+        {"date": "2026-01-03", "open": 10200, "high": 10800, "low": 10100, "close": 10700, "volume": 1500},
+    ]
+
+    spec = specPriceChart(rows, stockCode="005930", corpName="삼성전자")
+
+    assert spec is not None
+    assert spec["chartType"] == "price-chart"
+    assert spec["data"][0]["close"] == 10200.0
+    assert spec["series"][0]["name"] == "종가"
+    assert spec["evidenceBinding"]["tableRef"] == "gather:price:D"
+
+
+def test_compile_visual_accepts_price_chart():
+    from dartlab.ai.tools.compileVisual import compileVisual
+
+    result = compileVisual(
+        chartType="price-chart",
+        title="삼성전자 주가",
+        data=[
+            {"date": "2026-01-02", "open": 100, "high": 110, "low": 95, "close": 108, "volume": 1000},
+            {"date": "2026-01-03", "open": 108, "high": 111, "low": 101, "close": 103, "volume": 1200},
+        ],
+        source="gather:price:KR:005930",
+    )
+
+    assert result.ok
+    assert result.data["spec"]["chartType"] == "price-chart"
+    assert len(result.data["spec"]["data"]) == 2
+
+
+def test_spec_balance_structure_trend_preserves_stacks():
+    from dartlab.viz.generators import specBalanceStructureTrend
+
+    view = {
+        "title": "자산 배치와 조달 구조",
+        "periods": ["2024", "2025"],
+        "totalAssetsSeries": [100.0, 120.0],
+        "totalFundingSeries": [100.0, 120.0],
+        "assetTrendParts": [
+            {"id": "cash", "label": "현금", "values": [20, 24], "shares": [20, 20], "color": "#60a5fa"},
+            {"id": "tangible", "label": "유형자산", "values": [40, 48], "shares": [40, 40], "color": "#94a3b8"},
+        ],
+        "fundingTrendParts": [
+            {"id": "tradePayables", "label": "영업부채", "values": [15, 18], "shares": [15, 15]},
+            {"id": "equity", "label": "자본", "values": [70, 84], "shares": [70, 70]},
+        ],
+        "equityTrendParts": [
+            {"id": "retainedEarnings", "label": "이익잉여금", "values": [55, 66], "shares": [78.6, 78.6]},
+        ],
+        "debtRatio": 42.8,
+    }
+
+    spec = specBalanceStructureTrend(view, stockCode="005930", corpName="삼성전자")
+
+    assert spec is not None
+    assert spec["chartType"] == "balance-structure-trend"
+    assert spec["categories"] == ["2024", "2025"]
+    assert spec["options"]["totalAssetsSeries"] == [100.0, 120.0]
+    assert spec["options"]["totalFundingSeries"] == [100.0, 120.0]
+    assert {s["stack"] for s in spec["series"]} == {"assetTrendParts", "fundingTrendParts", "equityTrendParts"}
+    assert spec["evidenceBinding"]["topic"] == "BS"
+
+
 def test_vizspec_from_dict_diagram():
     from dartlab.viz.spec import VizSpec
 

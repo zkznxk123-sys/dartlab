@@ -121,6 +121,14 @@
       {:catch}
         <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
       {/await}
+    {:else if spec.chartType === 'price-chart'}
+      {#await import('./PriceChart.svelte')}
+        <p class="chart-loading">차트 준비 중</p>
+      {:then { default: PriceChart }}
+        <PriceChart {spec} {onPointClick} />
+      {:catch}
+        <p class="chart-unsupported">차트를 표시할 수 없습니다.</p>
+      {/await}
     {:else}
       <p class="chart-unsupported">지원하지 않는 차트 타입: {spec.chartType ?? spec.vizType}</p>
     {/if}

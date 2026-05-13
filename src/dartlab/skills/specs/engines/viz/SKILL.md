@@ -5,7 +5,7 @@ kind: curated
 scope: builtin
 status: observed
 category: engines
-purpose: Viz 는 분석 결과를 16 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + 신규 6 종) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.
+purpose: Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.
 whenToUse:
   - viz
   - 시각화
@@ -17,8 +17,9 @@ whenToUse:
   - landing 차트 빌드
   - 시계열 시각화
   - peer 비교 차트
+  - 주가차트
 inputs:
-  - chartType (16 종 중 하나)
+  - chartType (등록 chartType 중 하나)
   - data (행 list 또는 series dict)
   - title · xAxis · yAxis
   - evidenceBinding 또는 evidenceIds (필수)
@@ -60,7 +61,7 @@ runtimeCompatibility:
 failureModes:
   - evidenceBinding · evidenceIds 둘 다 없는 spec — emit_chart 가 거부
   - 단일값 또는 근거 없는 장식 시각화 시도
-  - ChartRenderer 미등록 chartType 사용 — 16 종만 허용
+  - ChartRenderer 미등록 chartType 사용 — 등록 chartType 만 허용
   - period 없는 시계열 차트 (x 축 라벨 없음)
 forbidden:
   - evidenceBinding 또는 evidenceIds 누락된 ChartSpec emit 금지.
@@ -73,6 +74,14 @@ examples:
   - 현금흐름 waterfall
   - peer-matrix 다축 비교
   - kpi-ribbon 스냅샷
+  - balance-structure-trend 자산·조달 구조
+  - price-chart 주가와 거래량
+  - financial-structure 재무제표 구조 묶음
+  - peer-matrix 업종 비교 행렬
+  - evidence-coverage 근거 커버리지
+  - kpi-ribbon 보고서 KPI 요약
+  - scenario visuals 시나리오·민감도
+  - cashflow waterfall 현금 bridge
   - mermaid 다이어그램
 procedure:
   - RunPython 안에서 `from dartlab.viz import emit_chart, emit_diagram`.
@@ -83,6 +92,15 @@ procedure:
 linkedSkills:
   - engines.analysis
   - engines.dashboard
+  - engines.viz.balanceStructureTrend
+  - engines.viz.priceChart
+  - engines.viz.financialStructureCharts
+  - engines.viz.peerMatrix
+  - engines.viz.evidenceCoverage
+  - engines.viz.kpiRibbon
+  - engines.viz.scenarioVisuals
+  - engines.viz.cashflowWaterfall
+  - engines.viz.mermaidDiagram
 source:
   type: manual_skill
   format: markdown
@@ -91,7 +109,7 @@ lastUpdated: '2026-05-08'
 
 ## 엔진 역할
 
-`viz` 는 분석 결과를 차트 spec 으로 변환한다. 직접 차트 이미지를 그리지 않고 — *spec dict* 를 만들어 (a) `emit_chart(spec)` 로 stdout 마커 출력 → AI tool result 로 인라인 렌더 또는 (b) `landing/static/charts/{code}/manifest.json` 정적 빌드 → svelte `ChartRenderer` 가 16 종 chartType 단일 분기 렌더.
+`viz` 는 분석 결과를 차트 spec 으로 변환한다. 직접 차트 이미지를 그리지 않고 — *spec dict* 를 만들어 (a) `emit_chart(spec)` 로 stdout 마커 출력 → AI tool result 로 인라인 렌더 또는 (b) `landing/static/charts/{code}/manifest.json` 정적 빌드 → svelte `ChartRenderer` 가 등록 chartType 단일 분기 렌더.
 
 **evidence 회로 강제** — 모든 ChartSpec 은 `evidenceBinding` 또는 `evidenceIds` 가 채워져야 emit. drill-back 으로 차트 점 클릭 시 source 데이터 패널 진입.
 
@@ -153,23 +171,24 @@ uv run python -X utf8 scripts/build/buildCompanyCharts.py --code 005930
 
 CompileVisual tool (registry) — LLM 이 분석 결과를 자율적으로 차트로 elevate. `chartType` + `data` 인자 받아 visualRef 발급, agent 가 VIEW_SPEC 이벤트로 인라인.
 
-## 등록 chartType (16 종)
+## 등록 chartType (19 종)
 
 | 그룹 | chartType | 용도 |
 | --- | --- | --- |
 | 기본 (10) | `line` `bar` `table` `radar` `waterfall` `heatmap` `histogram` `combo` `sparkline` `pie` | 시계열 · 비교 · 분포 등 표준 |
 | Phase 1.5 (6) | `six-act-radar` `peer-matrix` `kpi-ribbon` `hover-spark` `evidence-coverage` `income-trend-matrix` | dartlab 특화 — 6막 인과 / peer 비교 / KPI 스냅샷 |
 | Phase 1.5 (계속) | `balance-structure-trend` `cashflow-signed-matrix` | 재무구조 추이 / 현금흐름 부호 |
+| Market | `price-chart` | OHLCV 주가 · 거래량 · 이동평균 · 벤치마크 |
 
-ChartRenderer (`ui/shared/chart/ChartRenderer.svelte`) 가 16 종 단일 분기. 등록 외 chartType 은 매칭 실패.
+ChartRenderer (`ui/shared/chart/ChartRenderer.svelte`) 가 등록 chartType 을 단일 분기한다. 등록 외 chartType 은 매칭 실패.
 
-## 등록 generator (22 종)
+## 등록 generator (23 종)
 
 | 그룹 | 함수 | 입력 |
 | --- | --- | --- |
 | 8 핵심 | `spec_revenue_trend` · `spec_balance_sheet` · `spec_profitability` · `spec_cashflow_waterfall` · `spec_dividend` · `spec_insight_radar` · `spec_ratio_sparklines` · `spec_diff_heatmap` | Company 객체 |
 | 6 추가 | `spec_peer_radar` · `spec_sensitivity_heatmap` · `spec_margin_trend` · `spec_leverage_trend` · `spec_growth_yoy_bar` · `spec_revenue_scenario_band` | history dict |
-| 8 신규 | `spec_six_act_radar(score)` · `spec_peer_matrix(rows, metrics)` · `spec_kpi_ribbon(items)` · `spec_hover_spark(...)` · `spec_evidence_coverage(items)` · `spec_income_trend_matrix(view)` · `spec_balance_structure_trend(view)` · `spec_cashflow_signed_matrix(view)` | view dict / raw |
+| 9 신규 | `spec_six_act_radar(score)` · `spec_peer_matrix(rows, metrics)` · `spec_kpi_ribbon(items)` · `spec_hover_spark(...)` · `spec_evidence_coverage(items)` · `spec_income_trend_matrix(view)` · `spec_balance_structure_trend(view)` · `spec_cashflow_signed_matrix(view)` · `specPriceChart(rows)` | view dict / raw |
 
 `auto_chart(c)` 가 Company 입력에서 핵심 generator 일괄 실행 → ChartSpec list. `buildCompanyCharts.py` 가 landing 정적 빌드.
 
@@ -243,4 +262,4 @@ EvidencePanel (pointRef 또는 evidenceBinding 패널)
 
 ## 기본 검증
 
-16 종 chartType · 22 종 generator · evidence 회로 강제 정책이 바뀌면 본 skill + ChartRenderer 단일 진입 + buildCompanyCharts 빌드 스크립트 동시 갱신.
+등록 chartType · generator · evidence 회로 강제 정책이 바뀌면 본 skill + ChartRenderer 단일 진입 + buildCompanyCharts 빌드 스크립트 동시 갱신.

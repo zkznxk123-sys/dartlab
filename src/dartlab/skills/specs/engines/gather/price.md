@@ -65,12 +65,14 @@ examples:
   - 삼성전자 1년 OHLCV
   - AAPL US 종가 + 모멘텀 지표
   - KOSPI 시장 지수 추세
+  - OHLCV 를 price-chart 로 시각화
   - 보조지표 30 종 자동 (indicators=True)
   - 휴장일 처리 + 직전 거래일
   - 수정주가 vs raw 비교
 linkedSkills:
   - engines.gather.history
   - engines.gather.flow
+  - engines.viz.priceChart
   - engines.quant.signalReview
   - engines.quant.momentum
 source:

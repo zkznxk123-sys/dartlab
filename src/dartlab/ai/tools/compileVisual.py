@@ -13,6 +13,7 @@ agent.py 가 tool 결과의 visualRef 감지 시 VIEW_SPEC event 발행 → Char
 - "waterfall" : 증감 누적
 - "heatmap"   : 매트릭스
 - "histogram" : 분포
+- "price-chart": OHLCV 주가 + 거래량
 """
 
 from __future__ import annotations
@@ -24,7 +25,19 @@ from dartlab.ai.contracts import Ref
 
 from .types import ToolResult
 
-_VALID_CHART_TYPES = {"line", "bar", "table", "radar", "waterfall", "heatmap", "histogram"}
+_VALID_CHART_TYPES = {
+    "line",
+    "bar",
+    "table",
+    "radar",
+    "waterfall",
+    "heatmap",
+    "histogram",
+    "combo",
+    "sparkline",
+    "pie",
+    "price-chart",
+}
 
 
 def compileVisual(
@@ -48,10 +61,14 @@ def compileVisual(
             error="invalid_chart_type",
         )
 
-    spec: dict[str, Any] = {
-        "type": chart,
-        "data": data,
-    }
+    if chart == "price-chart":
+        spec = _priceChartSpec(data, title=title, source=source)
+    else:
+        spec = {
+            "chartType": chart,
+            "type": chart,
+            "data": data,
+        }
     if xAxis or yAxis:
         spec["axis"] = {"x": xAxis, "y": yAxis}
     if title:
@@ -73,3 +90,46 @@ def compileVisual(
     if title:
         summary = f"{title} — {summary}"
     return ToolResult(True, summary, refs=[ref], data={"spec": spec})
+
+
+def _num(value: Any) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = value.replace(",", "").strip()
+        if not value:
+            return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _priceChartSpec(data: list[dict[str, Any]], *, title: str | None, source: str | None) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+    for row in data:
+        date = row.get("date") or row.get("BAS_DD")
+        close = _num(row.get("close", row.get("TDD_CLSPRC", row.get("CLSPRC_IDX"))))
+        if not date or close is None:
+            continue
+        rows.append(
+            {
+                "date": str(date),
+                "open": _num(row.get("open", row.get("TDD_OPNPRC", row.get("OPNPRC_IDX")))),
+                "high": _num(row.get("high", row.get("TDD_HGPRC", row.get("HGPRC_IDX")))),
+                "low": _num(row.get("low", row.get("TDD_LWPRC", row.get("LWPRC_IDX")))),
+                "close": close,
+                "volume": _num(row.get("volume", row.get("ACC_TRDVOL"))),
+            }
+        )
+    rows.sort(key=lambda item: item["date"])
+    return {
+        "chartType": "price-chart",
+        "title": title or "주가 · 거래량",
+        "data": rows,
+        "series": [{"name": "종가", "data": [row["close"] for row in rows], "type": "line"}],
+        "categories": [row["date"] for row in rows],
+        "options": {"mode": "candlestick", "unit": "원", "volumeUnit": "주"},
+        "meta": {"source": source or "CompileVisual"},
+        "evidenceIds": [source] if source else ["compileVisual:price-chart"],
+    }

@@ -11,7 +11,7 @@ ChartSpec JSON 프로토콜::
                      | "income-trend-matrix" | "cashflow-signed-matrix"
                      | "balance-structure-trend" | "kpi-ribbon"
                      | "peer-matrix" | "six-act-radar" | "hover-spark"
-                     | "evidence-coverage",
+                     | "evidence-coverage" | "price-chart",
         "title": str,
         "series": [
             {

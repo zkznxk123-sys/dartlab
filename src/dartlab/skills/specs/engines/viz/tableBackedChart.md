@@ -61,8 +61,22 @@ lastUpdated: "2026-05-02"
 
 ## 공개 호출 방식
 
-- `result = c.analysis("financial", "수익성")`
-- `chart = result.chart() 또는 dartlab.viz.tableBackedChart(table)`
+```python
+from dartlab.ai.tools.compileVisual import compileVisual
+
+chart = compileVisual(
+    chartType="bar",
+    title="peer ROE 비교",
+    data=peer_rows,
+    xAxis="corpName",
+    yAxis="roe",
+    evidenceBinding={
+        "tableRef": "table:peer:roe:latest",
+        "source": "scan",
+        "topic": "peerComparison",
+    },
+)
+```
 
 ## 호출 동작
 
