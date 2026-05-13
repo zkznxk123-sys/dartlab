@@ -46,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Windows 격리 wheel 검증에서 pip 설치 실패 메시지가 인코딩 문제로 다시 예외를 내던
   문제를 수정했다.
 - silent-fail 검사에서 실제 선택적 데이터 경로와 필수 리소스 로더를 구분하도록 보강했다.
+- 사이트 배포 빌드에서 Skill 문서의 markdown 문법이 Svelte 파서와 충돌하던 경로를
+  정리해 문서 페이지 생성과 링크 변환을 안정화했다.
+- finance fixture 검증에서 테스트 로더 캐시가 이전 데이터와 섞일 수 있던 경로를 분리해
+  Python 3.13 CI에서도 분기별 현금흐름 기준이 일관되게 검증되도록 했다.
 
 ### Migration
 
@@ -406,7 +410,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 ### Changed
 
 - **모든 엔진 `_Impl` 시그니처 통일** — `overrides: dict | None = None` 명시. credit/quant/macro 추가 (이전엔 analysis 만 수용).
-- **src/dartlab/ai/README.md 전면 재작성** (596줄 → ~280줄): 4축 사상 + 7+1 원칙 (P1~P7 + P4.5) + override 매커니즘 + 경험 자산화 순환 단일 출처. 메모리 (MEMORY.md, ai_identity.md) 는 포인터만.
+- **src/dartlab/ai/README.md 구조 정리** (596줄 → ~280줄): 4축 사상 + 7+1 원칙 (P1~P7 + P4.5) + override 매커니즘 + 경험 자산화 순환 단일 출처. 메모리 (MEMORY.md, ai_identity.md) 는 포인터만.
 - **시스템 프롬프트** — override 재호출 예시 명확화, "verbal stress 금지, 반드시 overrides 인자로 재호출" 명시.
 - **macro 모듈 callable 패치** — import 순서 무관 callable 보장.
 - **Node.js 24 대응** — actions 메이저 버전 일괄 bump (checkout@v5, setup-python@v6, setup-node@v5, upload-artifact@v5, attest-build-provenance@v3).
@@ -991,7 +995,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 
 ### Added
 
-- **시맨틱 검색 엔진(alpha)**: `dartlab.search("대표이사 변경")` — n-gram + vector hybrid 검색. core/search 모듈 신규, ngramIndex 전면 개선
+- **시맨틱 검색 엔진(alpha)**: `dartlab.search("대표이사 변경")` — n-gram + vector hybrid 검색. core/search 모듈 신규, ngramIndex 정리
 - **AI 프롬프트 패턴 3종**: growth, quick_check, value_investor 패턴 추가. 기존 패턴(financial, prediction, risk, valuation) 보강
 - **review 6막 구조 확장**: builders/templates 대폭 강화, registry 축-보고서 매핑 보강
 - **analysis predictionSignals 확장**: 예측 신호 12→15축 (consensusDirection, flowDirection, revenueDirection)
@@ -1159,7 +1163,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 ### Added
 
 - **Gemini OAuth 2.0 브라우저 로그인**: API key 없이 Google 계정 로그인으로 Gemini 사용 가능. GPT OAuth와 동일한 GUI 플로우. `google-auth-oauthlib` 제거, 표준 라이브러리 + httpx만 사용
-- **Gather 엔진 시계열 전면 개선**: `price()`, `flow()`, `macro()` 모두 Polars DataFrame 시계열 반환. `macro("KR")`, `macro("US")`, `macro("CPI")` 직관적 호출 지원
+- **Gather 엔진 시계열 정리**: `price()`, `flow()`, `macro()` 모두 Polars DataFrame 시계열 반환. `macro("KR")`, `macro("US")`, `macro("CPI")` 직관적 호출 지원
 - **네이버 차트 API 전환 (FDR 방식)**: 모바일 페이징 API(1000일) → `fchart.stock.naver.com` 차트 API(6000일, 수정주가). 요청 20회 → 1회
 - **Gather 인프라 강화**: Yahoo Direct consensus, FMP consensus/sector PER, circuit breaker(3회→60초 차단), stale-while-revalidate 캐시, persistent event loop, Yahoo RPM 30→5 조정
 - **`scanAccount()` / `scanRatio()` README 문서화**: 시장 전수 재무 스크리닝 섹션 추가 (EN/KR 양쪽)
@@ -1770,7 +1774,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - IS/BS/CF/SCE와 동일한 패턴으로 재무비율 접근 가능
 
 **Excel 재무비율 시트 개선**
-- 단일시점 세로나열 → 연도별 피벗 테이블로 전면 재작성
+- 단일시점 세로나열 → 연도별 피벗 테이블로 구조 정리
 - 카테고리별 섹션 헤더 (수익성, 안정성, 성장성, 효율성, 현금흐름, 절대값) + 색상 구분
 - 35개 비율 한글 라벨 매핑 (`_RATIO_LABELS`)
 - freeze panes (좌측 지표명 고정)
@@ -1892,7 +1896,7 @@ unit tests: 2065 → 2066 passed (Plan v10 전체).
 - 독스/블로그 하단에 랜딩 Footer 추가 (Buy Me a Coffee 포함)
 - 데이터 릴리즈 태그 `data-v1` → `data-docs` 변경 반영
 
-**노트북 전면 재작성**
+**노트북 구조 정리**
 - `print(df)` 제거, Jupyter/Colab rich 렌더링 활용 (셀 마지막 줄에 변수만 배치)
 - 한 셀에 하나의 DataFrame만 표시
 - pip install 셀에 Colab 의존성 경고 안내 추가
