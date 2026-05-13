@@ -144,7 +144,7 @@ jobs:
       - name: Build EDGAR scan prebuild
         run: |
           uv run python -X utf8 -c "
-          from dartlab.scan.edgarBuilder import buildEdgarFinance
+          from dartlab.scan.builders.edgar import buildEdgarFinance
           buildEdgarFinance(sinceYear=2021, verbose=True)
           "
         env:
