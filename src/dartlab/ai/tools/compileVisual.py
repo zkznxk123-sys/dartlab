@@ -48,9 +48,10 @@ def compileVisual(
     yAxis: str | None = None,
     subtitle: str | None = None,
     source: str | None = None,
-    **_extra: Any,
+    **extra: Any,
 ) -> ToolResult:
     """data + chartType → visualRef. ChartRenderer 가 인라인 렌더."""
+    del extra
     if not data or not isinstance(data, list):
         return ToolResult(False, "data 가 비어 있거나 list 가 아닙니다", error="invalid_data")
     chart = (chartType or "line").lower()

@@ -127,7 +127,7 @@ def test_vizspec_from_dict_chart():
     assert spec.chartType == "combo"
 
 
-def test_spec_price_chart_normalizes_ohlcv_rows():
+def testSpecPriceChartNormalizesOhlcvRows():
     from dartlab.viz.generators import specPriceChart
 
     rows = [
@@ -144,7 +144,7 @@ def test_spec_price_chart_normalizes_ohlcv_rows():
     assert spec["evidenceBinding"]["tableRef"] == "gather:price:D"
 
 
-def test_compile_visual_accepts_price_chart():
+def testCompileVisualAcceptsPriceChart():
     from dartlab.ai.tools.compileVisual import compileVisual
 
     result = compileVisual(
@@ -162,7 +162,7 @@ def test_compile_visual_accepts_price_chart():
     assert len(result.data["spec"]["data"]) == 2
 
 
-def test_spec_balance_structure_trend_preserves_stacks():
+def testSpecBalanceStructureTrendPreservesStacks():
     from dartlab.viz.generators import specBalanceStructureTrend
 
     view = {
