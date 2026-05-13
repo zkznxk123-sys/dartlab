@@ -146,10 +146,11 @@ emit_result(table=[{"metric": "consensus", "value": 0.42}], values={"consensus":
     return ToolResult(
         True,
         "ok",
+        refs=[Ref(id=f"skill:{skill_id}", kind="skillRef", title=skill_id)],
         data={
             "id": skill_id,
             "body": body,
-            "requiredEvidence": ["executionRef", "tableRef", "valueRef", "dateRef"],
+            "requiredEvidence": ["skillRef", "executionRef", "tableRef", "valueRef", "dateRef"],
             "expectedNovelty": ["consensus"],
             "falsifier": {"description": "test"},
             "testUniverse": {"market": "KR", "stockCodes": ["005930", "000660"]},
@@ -196,6 +197,7 @@ def test_validate_recipe_runs_on_test_universe(tmp_path: Path, monkeypatch: pyte
     assert result.data["scorecard"]["executionPassRate"] == 1.0
     # 모든 ref kind 등장 → completeness = 1.0
     assert result.data["scorecard"]["evidenceCompleteness"] == 1.0
+    assert "skillRef" in result.data["runs"][0]["evidenceKinds"]
 
 
 def test_validate_recipe_caps_targets_at_five(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):

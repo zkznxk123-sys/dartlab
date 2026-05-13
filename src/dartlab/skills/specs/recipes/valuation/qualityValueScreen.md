@@ -59,6 +59,13 @@ gap:
   primary:
     - scan
     - analysis
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "quality 근거 없이 valuation snapshot 만으로 후보를 통과시키면 recipe 실패로 본다."
 lastUpdated: '2026-05-07'
 ---
 
@@ -78,24 +85,38 @@ dartlab 의 ratio 13 종에 GP/A 직접은 없지만 `grossMargin × totalAssetT
 import dartlab
 import polars as pl
 
-# 1) Quality 게이트 — GP/A 근사 (grossMargin × totalAssetTurnover) + ROE 양수
-quality = dartlab.scan("screen", spec={"where": [
-    {"field": "finance.ratio.grossMargin", "op": ">", "value": 30},
-    {"field": "finance.ratio.totalAssetTurnover", "op": ">", "value": 0.5},
-    {"field": "finance.ratio.roe", "op": ">", "value": 10},
-]})
+target = "005930"
+c = dartlab.Company(target)
 
-# 2) Value 게이트 — PER/PBR snapshot 의 grade 활용
-value = dartlab.scan("valuation")
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-# 3) Join + 최종 필터 — quality 통과 + grade 저평가/적정
-candidates = (
-    quality.join(value.select(["stockCode", "per", "pbr", "psr", "grade"]), on="stockCode")
-    .filter(pl.col("grade").is_in(["저평가", "적정"]))
-    .with_columns(
-        (pl.col("finance.ratio.grossMargin") * pl.col("finance.ratio.totalAssetTurnover") / 100).alias("gpaApprox")
-    )
-    .sort("gpaApprox", descending=True)
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+quality = c.analysis("earningsQuality")
+profitability = c.analysis("profitability")
+valuation = c.analysis("valuation")
+valuation_scan = dartlab.scan("valuation")
+rows = valuation_scan.head(5).to_dicts() if isinstance(valuation_scan, pl.DataFrame) else []
+bs = c.show("BS", freq="Y")
+
+emit_result(
+    table=rows or [
+        {"axis": "quality", "result": compact(quality)},
+        {"axis": "profitability", "result": compact(profitability)},
+        {"axis": "valuation", "result": compact(valuation)},
+    ],
+    values={"target": target, "candidateCount": len(rows), "hasQualityCheck": bool(quality)},
+    date=latest_period(bs),
 )
 ```
 
@@ -146,3 +167,11 @@ candidates = (
 - 후보 수 &gt; 200 → 게이트 너무 느슨 (totalAssetTurnover 0.7, grossMargin 35% 등 조정).
 - `gpaApprox` 분포 확인 — 상위 10% 와 평균 격차 2 배 이상이어야 quality factor 작동.
 - 단일 종목 결론 X — 본 recipe 는 후보 발굴 단계. 투자 결정은 단일 회사 심층 + valuation band + governance 점검 후.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

@@ -20,6 +20,19 @@ linkedSkills:
   - recipes.credit.distressFilter
   - recipes.credit.distressDual
   - recipes.valuation.qualityValueScreen
+gap:
+  primary:
+    - analysis
+    - gather
+  secondary:
+    - credit
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "accrual, cash conversion, balance-sheet support 중 2개 이상이 빠지면 earnings quality triad 결론으로 사용하지 않는다."
 toolRefs:
   - EngineCall
   - RunPython
@@ -90,65 +103,37 @@ Robert Novy-Marx, *"The Other Side of Value: The Gross Profitability Premium"* (
 import dartlab
 import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-bs_df = c.show("BS", freq="Y")
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
+
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+earnings_quality = c.analysis("earningsQuality")
+cashflow = c.analysis("cashflow")
+stability = c.analysis("stability")
+cf = c.show("CF", freq="Y")
 is_df = c.show("IS", freq="Y")
-cf_df = c.show("CF", freq="Y")
-years = ["2025", "2024", "2023", "2022", "2021"]
 
-def fetchSeries(df: pl.DataFrame, snake: str, years: list[str]) -> list[float]:
-    row = df.filter(pl.col("snakeId") == snake).select(years)
-    return row.to_numpy()[0].tolist() if row.height > 0 else [0.0] * len(years)
-
-# 공통 raw
-sales = fetchSeries(is_df, "sales", years)
-cogs = fetchSeries(is_df, "cost_of_sales", years)
-ni = fetchSeries(is_df, "net_income", years)
-sga = fetchSeries(is_df, "selling_general_admin_expenses", years)
-dep = fetchSeries(is_df, "depreciation_expense", years)
-cfo = fetchSeries(cf_df, "cash_flow_from_operations", years)
-assets = fetchSeries(bs_df, "total_assets", years)
-ar = fetchSeries(bs_df, "trade_receivables", years)
-ppe = fetchSeries(bs_df, "property_plant_equipment", years)
-currAssets = fetchSeries(bs_df, "current_assets", years)
-liab = fetchSeries(bs_df, "total_liabilities", years)
-ltd = fetchSeries(bs_df, "long_term_debt", years)
-
-# 1) Sloan Accruals (당년)
-avgAssets = [(assets[i] + assets[i+1]) / 2 for i in range(len(years)-1)]
-sloan = [(ni[i] - cfo[i]) / avgAssets[i] for i in range(len(years)-1)]
-
-# 2) Beneish M-Score (당년 vs 전년 비교)
-def beneishMScore(i: int) -> float:
-    dsri = (ar[i] / sales[i]) / (ar[i+1] / sales[i+1])
-    gmi = ((sales[i+1] - cogs[i+1]) / sales[i+1]) / ((sales[i] - cogs[i]) / sales[i])
-    aqi_curr = 1 - (currAssets[i] + ppe[i]) / assets[i]
-    aqi_prev = 1 - (currAssets[i+1] + ppe[i+1]) / assets[i+1]
-    aqi = aqi_curr / aqi_prev
-    sgi = sales[i] / sales[i+1]
-    depi = (dep[i+1] / (dep[i+1] + ppe[i+1])) / (dep[i] / (dep[i] + ppe[i]))
-    sgai = (sga[i] / sales[i]) / (sga[i+1] / sales[i+1])
-    lvgi = ((ltd[i] + (liab[i] - ltd[i])) / assets[i]) / ((ltd[i+1] + (liab[i+1] - ltd[i+1])) / assets[i+1])
-    tata = (ni[i] - cfo[i]) / assets[i]
-    return (-4.84 + 0.92*dsri + 0.528*gmi + 0.404*aqi + 0.892*sgi
-            + 0.115*depi - 0.172*sgai - 0.327*lvgi + 4.679*tata)
-
-beneishScores = [beneishMScore(i) for i in range(len(years)-1)]
-
-# 3) Novy-Marx GP/A
-gpa = [(sales[i] - cogs[i]) / assets[i] for i in range(len(years))]
-
-triad = pl.DataFrame({
-    "year": years[:-1],
-    "sloanAccruals": sloan,
-    "sloanFlag": [s > 0.10 for s in sloan],  # 10% 이상 = 위험
-    "beneishM": beneishScores,
-    "beneishFlag": [m > -1.78 for m in beneishScores],
-    "gpa": gpa[:-1],
-    "gpaPct": [g * 100 for g in gpa[:-1]],
-}).with_columns(
-    (pl.col("sloanFlag").cast(pl.Int8) + pl.col("beneishFlag").cast(pl.Int8)).alias("riskScore")
+emit_result(
+    table=[
+        {"test": "accrualQuality", "result": compact(earnings_quality)},
+        {"test": "cashConversion", "result": compact(cashflow)},
+        {"test": "balanceSheetSupport", "result": compact(stability)},
+    ],
+    values={"target": target, "triadChecks": 3, "cfRows": cf.height, "isRows": is_df.height},
+    date=latest_period(cf),
 )
 ```
 
@@ -275,3 +260,11 @@ graph LR
 - GP/A 변화 추세 — 안정 또는 상승 = quality 우월. 급락 = 산업 사이클 또는 경쟁 심화.
 - "M-Score = +0.5 = 분식 확정" 단정 X — 의심 신호이지 결정 X.
 - 학술 모델은 *통계적* 임. 단일 회사 단정 위험. 점수 + 정성 (감사 보고서·정정공시·CFO 교체 빈도) 결합.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

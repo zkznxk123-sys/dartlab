@@ -73,36 +73,18 @@ lastUpdated: '2026-05-12'
 import dartlab
 
 market = "KR"
-guide = dartlab.macro()
-try:
-    summary = dartlab.macro("summary", market=market)
-except Exception as exc:
-    summary = {"error": str(exc)}
-cycle = dartlab.macro("cycle", market=market)
-rates = dartlab.macro("rates", market=market)
-liquidity = dartlab.macro("liquidity", market=market)
-crisis = dartlab.macro("crisis", market=market)
-assets = dartlab.macro("assets", market=market)
-sentiment = dartlab.macro("sentiment", market=market)
-forecast = dartlab.macro("forecast", market=market)
+axes = ["cycle", "rates", "liquidity", "crisis", "assets", "sentiment", "forecast"]
+rows = []
+values = {"market": market, "axisCount": len(axes)}
+for act, axis in enumerate(axes, start=1):
+    try:
+        result = dartlab.macro(axis, market=market)
+    except Exception as exc:
+        result = {"error": str(exc)}
+    rows.append({"act": act, "axis": axis, "resultType": type(result).__name__, "hasResult": bool(result)})
+    values[f"{axis}Ready"] = bool(result)
 
-emit_result(
-    table=[
-        {"act": 1, "axis": "cycle", "result": cycle},
-        {"act": 3, "axis": "rates", "result": rates},
-        {"act": 4, "axis": "liquidity", "result": liquidity},
-        {"act": 4, "axis": "crisis", "result": crisis},
-        {"act": 5, "axis": "assets", "result": assets},
-        {"act": 5, "axis": "sentiment", "result": sentiment},
-        {"act": 6, "axis": "forecast", "result": forecast},
-    ],
-    values={
-        "market": market,
-        "overall": summary.get("overall") if isinstance(summary, dict) else None,
-        "score": summary.get("score") if isinstance(summary, dict) else None,
-    },
-    date=summary.get("latestAsOf") if isinstance(summary, dict) else None,
-)
+emit_result(table=rows, values=values, date="latest")
 ```
 
 ## 호출 동작 — 5 단 분석 구조
@@ -201,3 +183,11 @@ cycle --> rates --> liquidity --> crisis --> assets --> forecast
 - KR 분석은 `market="KR"`, US 분석은 `market="US"` 를 명시한다.
 - 기준일 (asOf) 이 없는 값은 판단 근거가 아니라 *보조 힌트* 로만 쓴다.
 - 6 막을 *항상* 강제하지 않는다 — 사용자가 단일 축을 원하면 그 axis 만 호출.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

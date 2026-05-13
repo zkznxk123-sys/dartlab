@@ -58,6 +58,13 @@ gap:
   primary:
     - gather
     - scan
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "band 산출이 단일 multiple 또는 단일 연도 값에만 의존하면 intrinsic value band 로 사용하지 않는다."
 lastUpdated: '2026-05-07'
 ---
 
@@ -114,58 +121,39 @@ maintenance CAPEX ≈ depreciation expense (가정)
 import dartlab
 import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-is_df = c.show("IS", freq="Y")
-bs_df = c.show("BS", freq="Y")
-cf_df = c.show("CF", freq="Y")
-fq_df = c.show("FQ", freq="Y")  # EPS 등 비율
-years = ["2025", "2024", "2023", "2022", "2021"]
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-def fetchSeries(df: pl.DataFrame, snake: str, years: list[str]) -> list[float]:
-    row = df.filter(pl.col("snakeId") == snake).select(years)
-    return row.to_numpy()[0].tolist() if row.height > 0 else [0.0] * len(years)
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
 
-ni = fetchSeries(is_df, "net_income", years)
-op = fetchSeries(is_df, "operating_profit", years)
-ebt = fetchSeries(is_df, "earnings_before_tax", years)
-sales = fetchSeries(is_df, "sales", years)
-equity = fetchSeries(bs_df, "total_stockholders_equity", years)
-ltd = fetchSeries(bs_df, "long_term_debt", years)
-cfo = fetchSeries(cf_df, "cash_flow_from_operations", years)
-dep = fetchSeries(is_df, "depreciation_expense", years)
-eps = fetchSeries(fq_df, "eps_basic", years)
+valuation = c.analysis("valuation")
+valuation_band = c.analysis("valuationBand")
+profitability = c.analysis("profitability")
+capital_allocation = c.analysis("capitalAllocation")
+bs = c.show("BS", freq="Y")
 
-# 1) Graham 수정공식 — EPS 5 년 평균, 성장률 = 5 년 CAGR
-epsAvg = sum(eps[:5]) / 5
-epsCagr = ((eps[0] / eps[4]) ** (1/4) - 1) * 100 if eps[4] > 0 else 0
-yAaa = 4.5  # 한국 회사채 AAA yield 가정 (외부 fetch 필요)
-grahamV = epsAvg * (8.5 + 2 * epsCagr) * 4.4 / yAaa
-
-# 2) EVA spread — 당년
-taxRate = 1 - (ni[0] / ebt[0]) if ebt[0] > 0 else 0.25
-nopat = op[0] * (1 - taxRate)
-investedCapital = equity[0] + ltd[0]
-roic = nopat / investedCapital * 100 if investedCapital > 0 else None
-waccProxy = 7.0  # 한국 평균 가정
-evaSpread = roic - waccProxy if roic is not None else None
-
-# 3) CFROI proxy — 5 년 평균
-cfroiSeries = [
-    (cfo[i] - dep[i]) / (equity[i] + ltd[i]) * 100 if (equity[i] + ltd[i]) > 0 else None
-    for i in range(len(years))
-]
-cfroi5y = sum(c for c in cfroiSeries if c is not None) / len([c for c in cfroiSeries if c is not None])
-
-valueBand = pl.DataFrame({
-    "anchor": ["Graham_V", "EVA_spread", "CFROI_5y_avg"],
-    "value": [grahamV, evaSpread, cfroi5y],
-    "interpretation": [
-        f"본질가치 EPS 기준 = {grahamV:.0f}원 / 시장가와 비교",
-        f"ROIC − WACC = {evaSpread:.1f}%p (양수 = 가치 창출)",
-        f"5 년 평균 CFROI = {cfroi5y:.1f}% (WACC 7% 와 비교)",
+emit_result(
+    table=[
+        {"method": "relativeMultiple", "result": compact(valuation)},
+        {"method": "valuationBand", "result": compact(valuation_band)},
+        {"method": "profitabilityQuality", "result": compact(profitability)},
+        {"method": "capitalAllocation", "result": compact(capital_allocation)},
     ],
-})
+    values={"target": target, "bandMethods": 4, "period": latest_period(bs)},
+    date=latest_period(bs),
+)
 ```
 
 ## 호출 동작 — 5 단 분석 구조
@@ -292,3 +280,11 @@ graph LR
 - 5 년 추세 확인 — 단년도 spread 는 일시적, 5 년 평균이 본질.
 - AAA yield + WACC 가정의 민감도 점검 — yield ±1%, WACC ±2% 변화 시 결과 변화 검증.
 - "V = 100,000 원 = 매수" 단정 X — 본질가치는 추정. 시장가 &lt; V × 0.5 의 안전마진 게이트 필수.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

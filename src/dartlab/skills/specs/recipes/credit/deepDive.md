@@ -58,6 +58,13 @@ gap:
     - credit
   secondary:
     - macro
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "credit 축만 통과하고 stability/cashflow/macro 중 하나라도 누락되면 신용 deep-dive 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-07'
 ---
 
@@ -65,13 +72,46 @@ lastUpdated: '2026-05-07'
 
 ```python
 import dartlab
+import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-credit = c.credit(detail=True)
-stability = c.analysis("financial", "안정성")
-cashflow = c.analysis("financial", "현금흐름")
-rates = dartlab.macro("rates")
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
+
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+repayment = c.credit("repayment")
+leverage = c.credit("leverage")
+liquidity = c.credit("liquidity")
+credit_cashflow = c.credit("cashflow")
+stability = c.analysis("stability")
+cashflow = c.analysis("cashflow")
+rates = dartlab.macro("rates", market="KR")
+bs = c.show("BS", freq="Y")
+
+emit_result(
+    table=[
+        {"axis": "repayment", "result": compact(repayment)},
+        {"axis": "leverage", "result": compact(leverage)},
+        {"axis": "liquidity", "result": compact(liquidity)},
+        {"axis": "credit_cashflow", "result": compact(credit_cashflow)},
+        {"axis": "stability", "result": compact(stability)},
+        {"axis": "macro_rates", "result": compact(rates)},
+    ],
+    values={"target": target, "creditAxes": 4, "balanceSheetRows": bs.height},
+    date=latest_period(bs),
+)
 ```
 
 ## 호출 동작 — 5 단 분석 구조
@@ -176,3 +216,11 @@ graph LR
 - 시나리오 스트레스 (overrides 적용) 결과는 *가정 명시* (예: "+100bp 가정").
 - 금리 +100bp 시 ICR 변동 추정 — *historic* 데이터 (실제 회사 사채 yield 추이) 뒷받침.
 - 결론 단은 정량 (등급·점수·수치) — 추상 평어 단독 금지.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

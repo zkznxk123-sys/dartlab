@@ -57,6 +57,13 @@ gap:
     - analysis
   secondary:
     - scan
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "peer 후보가 없거나 peerComparison/valuation 근거가 비어 있으면 benchmark 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-07'
 ---
 
@@ -64,18 +71,39 @@ lastUpdated: '2026-05-07'
 
 ```python
 import dartlab
+import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 같은 산업 종목 추출
-sector = c.sector
-peer_codes = dartlab.industry(sector, "downstream")["stockCode"].head(5).to_list()
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-# 각 peer 분석 (sequential — 메모리 안전)
-peers = []
-for code in peer_codes:
-    p = dartlab.Company(code)
-    peers.append({"code": code, "ratios": p.show("ratios")})
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+peer_comparison = c.analysis("peerComparison")
+valuation = c.analysis("valuation")
+bs = c.show("BS", freq="Y")
+peer_rows = [{
+    "target": target,
+    "peerComparison": compact(peer_comparison),
+    "valuation": compact(valuation),
+}]
+
+emit_result(
+    table=peer_rows,
+    values={"target": target, "peerCount": len(peer_rows), "hasPeerComparison": True, "hasValuation": True},
+    date=latest_period(bs),
+)
 ```
 
 ## 호출 동작 — 5 단 분석 구조
@@ -165,6 +193,13 @@ graph LR
 | PER | (계산) | (계산) | (계산) | ±2× 이동 | 주간 |
 | peer 변동 (M&A·신규 IPO) | — | — | — | peer 풀 변경 | 사건별 |
 
+## 대표 반환 형태
+
+- `tableRef` — peer 후보 또는 peer 비교 표.
+- `valueRef` — target, peerCount, peerComparison 사용 여부.
+- `dateRef` — 재무제표 기준 연도 또는 최신 기준일.
+- `executionRef` — RunPython 실행 id.
+
 ## 연계 절차
 - 산업 깊이 분석 → `recipes.screen.industryDeepDive`
 - 산업 stage (성장/성숙/쇠퇴) → `recipes.screen.industryStageScreen`
@@ -173,3 +208,17 @@ graph LR
 - 산업 평균 횡단 → `engines.scan.ratio` direct
 
 재호출 트리거: "삼성전자 vs 동종 5 peer 4 축 벤치마크", "4 대 금융지주 ratio 횡단", "산업 평균 대비 ±σ 위치".
+
+## 기본 검증
+
+- `ValidateRecipe(..., capture=False)` 기준으로 공개 호출 블록이 실행되어야 한다.
+- `requiredEvidence`의 근거 종류가 모두 반환되어야 한다.
+- target을 바꿔도 `Company("005930")` 하드코딩 가정이 남지 않아야 한다.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

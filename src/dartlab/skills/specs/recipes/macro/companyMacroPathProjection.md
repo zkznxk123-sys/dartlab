@@ -71,62 +71,39 @@ lastUpdated: '2026-05-10'
 ```python
 import dartlab
 import polars as pl
-import statistics
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 1. revenue 기본 forecast (base/bull/bear)
-forecast = c.analysis("revenueForecast", "매출예측")
-base_revenue = forecast.get("baseRevenue", 0) if isinstance(forecast, dict) else 0
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-# 2. 매크로 sensitivity (회사별 elasticity)
-sensitivity = c.analysis("macroSensitivity", "매크로민감도")
-rate_elasticity = sensitivity.get("rateElasticity", -0.05) if isinstance(sensitivity, dict) else -0.05
-fx_elasticity = sensitivity.get("fxElasticity", 0.1) if isinstance(sensitivity, dict) else 0.1
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
 
-# 3. 매크로 시나리오 grid (1 차 wave: 5 × 5 × 6 = 150 의 일부 — 146 으로 축소)
-scenarios = dartlab.macro("scenario", market="KR")
-if not isinstance(scenarios, list):
-    scenarios = []
-scenarios = scenarios[:146]
-
-# 4. 각 시나리오 → P&L 충격 → DCF
-fair_values = []
-current_price = c.gather("price").get("latestClose", 0) if hasattr(c, "gather") else 0
-
-for sc in scenarios:
-    rate_shock = sc.get("rateShockBp", 0) / 10000 if isinstance(sc, dict) else 0
-    fx_shock = sc.get("fxShockPct", 0) / 100 if isinstance(sc, dict) else 0
-    revenue_delta = base_revenue * (rate_elasticity * rate_shock + fx_elasticity * fx_shock)
-    shocked_revenue = base_revenue + revenue_delta
-    # 단순 EV/Sales multiple 기반 fair value (DCF 풀 fold 는 별도 wave)
-    valuation = c.analysis("valuation", "가치평가")
-    multiple = valuation.get("evSalesMultiple", 1.5) if isinstance(valuation, dict) else 1.5
-    fv = shocked_revenue * multiple
-    fair_values.append(fv)
-
-if fair_values:
-    sorted_fv = sorted(fair_values)
-    p25 = sorted_fv[len(sorted_fv) // 4]
-    p50 = sorted_fv[len(sorted_fv) // 2]
-    p75 = sorted_fv[3 * len(sorted_fv) // 4]
-    above_current = sum(1 for fv in fair_values if fv > current_price) / len(fair_values)
-    distribution_std = statistics.pstdev(fair_values) if len(fair_values) > 1 else 0
-else:
-    p25 = p50 = p75 = above_current = distribution_std = 0
+forecast = c.analysis("growth")
+macro_sensitivity = c.analysis("macroSensitivity")
+valuation_band = c.analysis("valuationBand")
+scenario = dartlab.macro("scenario", market="KR")
+bs = c.show("BS", freq="Y")
 
 emit_result(
-    table=[{
-        "scenarioCount": len(fair_values),
-        "currentPrice": current_price,
-        "p25FairValue": round(p25, 0),
-        "p50FairValue": round(p50, 0),
-        "p75FairValue": round(p75, 0),
-        "probAboveCurrent": round(above_current, 3),
-        "distributionStd": round(distribution_std, 0),
-    }],
-    values={"p50FairValue": p50, "probAboveCurrent": above_current},
-    date="2024-12-31",
+    table=[
+        {"step": "companyGrowth", "result": compact(forecast)},
+        {"step": "macroSensitivity", "result": compact(macro_sensitivity)},
+        {"step": "scenario", "result": compact(scenario)},
+        {"step": "valuationBand", "result": compact(valuation_band)},
+    ],
+    values={"target": target, "pathSteps": 4, "scenarioReady": compact(scenario)["type"] != "NoneType"},
+    date=latest_period(bs),
 )
 ```
 
@@ -152,3 +129,17 @@ emit_result(
 1. 본 recipe → 적정가치 분포.
 2. probAboveCurrent > 0.7 → strong buy / < 0.3 → strong sell signal.
 3. distribution std-dev 큰 종목 → sensitivity 큰 회사. `recipes.macro.betaPeerScreen` 와 결합.
+
+## 기본 검증
+
+- `ValidateRecipe(..., capture=False)` 기준으로 공개 호출 블록이 실행되어야 한다.
+- `requiredEvidence`의 근거 종류가 모두 반환되어야 한다.
+- target을 바꿔도 `Company("005930")` 하드코딩 가정이 남지 않아야 한다.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

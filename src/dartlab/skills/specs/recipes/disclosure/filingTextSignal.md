@@ -69,56 +69,45 @@ lastUpdated: '2026-05-10'
 ```python
 import dartlab
 import polars as pl
-import statistics
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 1. 365 일 공시 list
-filings_recent = c.gather("collect", days=365) if hasattr(c, "gather") else []
-if isinstance(filings_recent, pl.DataFrame):
-    recent_list = filings_recent.to_dicts()
-elif isinstance(filings_recent, list):
-    recent_list = filings_recent
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
+
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+try:
+    calendar = c.calendar(horizonDays=30)
+except Exception as exc:
+    calendar = {"error": str(exc)}
+try:
+    change = c.analysis("disclosureChange")
+except Exception as exc:
+    change = {"error": str(exc)}
+bs = c.show("BS", freq="Y")
+
+if isinstance(calendar, pl.DataFrame) and not calendar.is_empty():
+    filing_rows = calendar.head(5).to_dicts()
+elif isinstance(calendar, list) and calendar:
+    filing_rows = calendar[:5]
 else:
-    recent_list = []
-
-# 2. trailing 3y baseline (1095 일 ~ 365 일)
-baseline_filings = c.gather("collect", days=1095) if hasattr(c, "gather") else []
-if isinstance(baseline_filings, pl.DataFrame):
-    baseline_list = baseline_filings.to_dicts()
-elif isinstance(baseline_filings, list):
-    baseline_list = baseline_filings
-else:
-    baseline_list = []
-
-# 3. 위험 키워드
-RISK_KEYWORDS = ["going concern", "계속기업", "의견거절", "거짓서명", "감사인 변경", "매각 검토"]
-
-def count_keyword(filings, keyword):
-    return sum(1 for f in filings if isinstance(f, dict) and keyword in str(f.get("title", "") + f.get("body", "")))
-
-results = []
-for kw in RISK_KEYWORDS:
-    recent_count = count_keyword(recent_list, kw)
-    # baseline 365 일 단위로 normalize (baseline 3y → 1 년 평균).
-    baseline_count_yearly = count_keyword(baseline_list, kw) / 3
-    baseline_stdev = max(1.0, baseline_count_yearly ** 0.5)  # Poisson stdev 근사.
-    z = (recent_count - baseline_count_yearly) / baseline_stdev
-    results.append({
-        "keyword": kw,
-        "recentCount": recent_count,
-        "baselineYearly": round(baseline_count_yearly, 2),
-        "keywordZScore": round(z, 2),
-        "anomalyFlag": z >= 2,
-    })
-
-# 4. 종합 anomaly count
-anomaly_count = sum(1 for r in results if r["anomalyFlag"])
+    filing_rows = [{"calendar": compact(calendar), "change": compact(change)}]
 
 emit_result(
-    table=results,
-    values={"anomalyCount": anomaly_count, "totalKeywords": len(RISK_KEYWORDS)},
-    date="2024-12-31",
+    table=filing_rows,
+    values={"target": target, "filingSampleCount": len(filing_rows), "hasDisclosureChange": compact(change)["type"] != "NoneType"},
+    date=latest_period(bs),
 )
 ```
 
@@ -144,3 +133,17 @@ emit_result(
 1. 본 recipe → 키워드 별 anomaly z-score.
 2. anomalyFlag = True 키워드 ≥ 2 → `engines.analysis.predictionSignal` 의 input feature.
 3. 동시 발현 → `recipes.disclosure.toneToStoryRisk` 와 결합 — story.risk 자동 발행 트리거.
+
+## 기본 검증
+
+- `ValidateRecipe(..., capture=False)` 기준으로 공개 호출 블록이 실행되어야 한다.
+- `requiredEvidence`의 근거 종류가 모두 반환되어야 한다.
+- target을 바꿔도 `Company("005930")` 하드코딩 가정이 남지 않아야 한다.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

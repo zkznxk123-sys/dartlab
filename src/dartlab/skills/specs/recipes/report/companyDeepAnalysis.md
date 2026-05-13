@@ -60,6 +60,13 @@ gap:
     - macro
   secondary:
     - scan
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "valuation 또는 quality 단계가 빠지면 회사 종합 분석 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-07'
 ---
 
@@ -67,18 +74,43 @@ lastUpdated: '2026-05-07'
 
 ```python
 import dartlab
+import polars as pl
 
-# 회사 진입
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 6 단 절차: 매크로 → peer → 회사 → 분해 → quality → valuation
-macro = dartlab.macro()
-peers = dartlab.scan("profitability")
-bs = c.show("BS")
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
+
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+bs = c.show("BS", freq="Y")
+is_df = c.show("IS", freq="Y")
 ratios = c.show("ratios")
-roe_decomp = c.analysis("financial", "수익성")
-quality = c.analysis("financial", "이익품질")
-valuation = c.analysis("가치평가", "가치평가")
+profitability = c.analysis("profitability")
+quality = c.analysis("earningsQuality")
+valuation = c.analysis("valuation")
+
+emit_result(
+    table=[
+        {"step": "macro", "skill": "engines.macro.marketReview", "result": "read before company conclusion"},
+        {"step": "company", "skill": "engines.company.researchStarter", "result": compact(bs)},
+        {"step": "profitability", "skill": "engines.analysis.profitability", "result": compact(profitability)},
+        {"step": "quality", "skill": "engines.analysis.earningsQuality", "result": compact(quality)},
+        {"step": "valuation", "skill": "engines.analysis.valuation", "result": compact(valuation)},
+    ],
+    values={"target": target, "bsRows": bs.height, "isRows": is_df.height, "ratioRows": ratios.height},
+    date=latest_period(bs),
+)
 ```
 
 ## 호출 동작
@@ -114,3 +146,11 @@ valuation = c.analysis("가치평가", "가치평가")
 - 분기 기준은 dateRef 명시.
 - peer 비교는 tableRef + 답변 본문에 evidence table 동시 노출.
 - "12 조" 같은 절대값 단독 노출 금지 — peer median / 5 년 평균과 함께.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

@@ -217,10 +217,11 @@ def validateRecipe(
         duration_ms = int((time.monotonic() - start) * 1000)
 
         emitted = (rp_result.data or {}).get("result") or {}
-        evidence_kinds = _evidenceKindsFromRefs(rp_result.refs or [])
-        ref_ids = _refsToIdList(rp_result.refs or [])
+        refs = list(body_result.refs or []) + list(rp_result.refs or [])
+        evidence_kinds = _evidenceKindsFromRefs(refs)
+        ref_ids = _refsToIdList(refs)
 
-        validation = validateRefs(rp_result.refs or [], required_evidence)
+        validation = validateRefs(refs, required_evidence)
         missing_evidence_overall.update(validation.missing)
 
         ok = bool(rp_result.ok and validation.ok)

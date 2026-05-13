@@ -20,6 +20,19 @@ linkedSkills:
   - recipes.screen.compounderCandidates
   - recipes.valuation.intrinsicValueBand
   - recipes.quality.workingCapitalQuality
+gap:
+  primary:
+    - analysis
+    - gather
+  secondary:
+    - valuation
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+  asOfPolicy: latest
+falsifier:
+  description: "cash-use buckets와 ROIC/재투자 효율을 함께 보지 않으면 자본배분 scorecard 로 사용하지 않는다."
 toolRefs:
   - EngineCall
   - RunPython
@@ -87,58 +100,37 @@ FCF (자유현금흐름) = `cash_flow_from_operations − capital_expenditures` 
 import dartlab
 import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-cf_df = c.show("CF", freq="Y")
-bs_df = c.show("BS", freq="Y")
-is_df = c.show("IS", freq="Y")
-years = ["2025", "2024", "2023", "2022", "2021"]
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-def fetchSeries(df: pl.DataFrame, snake: str, years: list[str]) -> list[float]:
-    row = df.filter(pl.col("snakeId") == snake).select(years)
-    return row.to_numpy()[0].tolist() if row.height > 0 else [0.0] * len(years)
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
 
-cfo = fetchSeries(cf_df, "cash_flow_from_operations", years)
-capex = fetchSeries(cf_df, "capital_expenditures", years)
-dividends = fetchSeries(cf_df, "cash_dividends_paid", years)
-buyback = fetchSeries(cf_df, "repurchase_of_treasury_stock", years)
-acq = fetchSeries(cf_df, "acquisitions_net_of_cash_acquired", years)
-debtRepay = fetchSeries(cf_df, "repayment_of_long_term_debt", years)
-debtIssue = fetchSeries(cf_df, "issuance_of_long_term_debt", years)
+capital_allocation = c.analysis("capitalAllocation")
+investment_efficiency = c.analysis("investmentEfficiency")
+profitability = c.analysis("profitability")
+cf = c.show("CF", freq="Y")
 
-ni = fetchSeries(is_df, "net_income", years)
-equity = fetchSeries(bs_df, "total_stockholders_equity", years)
-investedCapital = [
-    fetchSeries(bs_df, "total_stockholders_equity", years)[i]
-    + fetchSeries(bs_df, "long_term_debt", years)[i]
-    for i in range(len(years))
-]
-
-rows = []
-for i, y in enumerate(years[:-1]):
-    fcf = cfo[i] - abs(capex[i])
-    totalUse = abs(capex[i]) + abs(dividends[i]) + abs(buyback[i]) + abs(acq[i]) + (debtRepay[i] - debtIssue[i])
-    payoutRatio = (abs(dividends[i]) + abs(buyback[i])) / ni[i] if ni[i] > 0 else None
-    sgr = (ni[i] / equity[i]) * (1 - payoutRatio) if payoutRatio is not None else None
-
-    deltaNopat = ni[i] - ni[i+1]
-    deltaInvested = investedCapital[i] - investedCapital[i+1]
-    roiic = deltaNopat / deltaInvested if deltaInvested != 0 else None
-
-    rows.append({
-        "year": y,
-        "fcf": fcf,
-        "reinvestPct": abs(capex[i]) / totalUse if totalUse > 0 else None,
-        "dividendPct": abs(dividends[i]) / totalUse if totalUse > 0 else None,
-        "buybackPct": abs(buyback[i]) / totalUse if totalUse > 0 else None,
-        "acquisitionPct": abs(acq[i]) / totalUse if totalUse > 0 else None,
-        "debtRepayPct": (debtRepay[i] - debtIssue[i]) / totalUse if totalUse > 0 else None,
-        "payoutRatio": payoutRatio,
-        "sgr": sgr,
-        "roiic": roiic,
-    })
-
-scorecard = pl.DataFrame(rows)
+emit_result(
+    table=[
+        {"useOfCash": "shareholderReturn", "result": compact(capital_allocation)},
+        {"useOfCash": "reinvestment", "result": compact(investment_efficiency)},
+        {"useOfCash": "profitability", "result": compact(profitability)},
+    ],
+    values={"target": target, "cashUseBuckets": 5, "cfRows": cf.height},
+    date=latest_period(cf),
+)
 ```
 
 ## 호출 동작
@@ -187,3 +179,11 @@ scorecard = pl.DataFrame(rows)
 - SGR 와 actual revenue growth 비교 — actual &gt; SGR + 5%p = 외부 자본 의존.
 - payoutRatio 60% 이상 = 성장 기회 부재 또는 보수적 경영 — 사업 단계 (성숙) 점검.
 - "buyback = 좋다" 단정 X — 비싼 시점 자사주 매입 = 자본 파괴.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

@@ -130,6 +130,7 @@ def getSkillBody(skillId: str, *, includeUser: bool = True) -> ToolResult:
         body = ""
     payload = spec.toDict()
     payload["body"] = body
+    payload["bodyChars"] = len(body)
     return ToolResult(
         ok=True,
         summary=f"Skill 본문: {spec.id}",
@@ -142,11 +143,5 @@ def getSkillBody(skillId: str, *, includeUser: bool = True) -> ToolResult:
                 payload=payload,
             )
         ],
-        data={
-            "id": spec.id,
-            "title": spec.title,
-            "category": spec.category,
-            "body": body,
-            "bodyChars": len(body),
-        },
+        data=payload,
     )

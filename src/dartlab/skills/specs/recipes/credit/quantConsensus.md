@@ -73,87 +73,42 @@ lastUpdated: '2026-05-10'
 ```python
 import dartlab
 import polars as pl
-import math
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 1. dCR 등급 + 7 axis (정성 + 정량 종합)
-credit = c.credit(detail=True)
-dcr_grade = credit["grade"]
-dcr_distress = dcr_grade in ("CCC", "CC", "C", "D", "BB-")
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-# 2. Altman Z″ (비제조업 변형) — recipes.credit.distressDual 본문 참조
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
+
+repayment = c.credit("repayment")
+leverage = c.credit("leverage")
+liquidity = c.credit("liquidity")
 bs = c.show("BS", freq="Y")
 is_df = c.show("IS", freq="Y")
+cf = c.show("CF", freq="Y")
 
-def fetch(df, snake, year="2024"):
-    row = df.filter(pl.col("snakeId") == snake).select(year)
-    return float(row.to_numpy()[0][0]) if row.height > 0 else 0.0
-
-ca = fetch(bs, "current_assets")
-cl = fetch(bs, "current_liabilities")
-ta = fetch(bs, "total_assets")
-re = fetch(bs, "retained_earnings")
-liab = fetch(bs, "total_liabilities")
-equity = fetch(bs, "total_stockholders_equity")
-ebit = fetch(is_df, "operating_profit")
-ni = fetch(is_df, "net_income")
-
-z_score = (
-    6.56 * ((ca - cl) / ta if ta else 0)
-    + 3.26 * (re / ta if ta else 0)
-    + 6.72 * (ebit / ta if ta else 0)
-    + 1.05 * (equity / liab if liab else 0)
-)
-altman_distress = z_score < 1.10
-
-# 3. Ohlson O (1980 logit 휴리스틱)
-size = math.log(ta) if ta > 0 else 0
-tlta = liab / ta if ta else 0
-nita = ni / ta if ta else 0
-ohlson_o = -1.32 - 0.407 * size + 6.03 * tlta - 2.37 * nita
-ohlson_prob = 1 / (1 + math.exp(-ohlson_o)) if ohlson_o > -50 else 0
-ohlson_flag = ohlson_prob > 0.5
-
-# 4. Beneish M-Score 휴리스틱 (간이 — 5 변수)
-ar = fetch(bs, "trade_receivables")
-sales = fetch(is_df, "revenue")
-ar_prev = fetch(bs, "trade_receivables", "2023")
-sales_prev = fetch(is_df, "revenue", "2023")
-
-dsri = (ar / sales) / (ar_prev / sales_prev) if sales and sales_prev and ar_prev else 1
-gmi = 1.0  # 간이 — 본 wave 에서는 placeholder.
-m_score = -4.84 + 0.92 * dsri + 0.528 * gmi
-beneish_flag = m_score > -1.78
-
-# 5. 합의 — 4 source 중 몇 개 동시 적신호?
-sources_flagged = sum([dcr_distress, altman_distress, ohlson_flag, beneish_flag])
-if sources_flagged >= 3:
-    consensus = "TripleAgreement"
-elif sources_flagged == 2:
-    consensus = "DualAgreement"
-elif sources_flagged == 1:
-    consensus = "SingleAgreement"
-else:
-    consensus = "Safe"
-
+period = latest_period(bs)
+consensus_sources = ["dCR.repayment", "dCR.leverage", "balanceSheet", "incomeStatement", "cashFlow"]
 emit_result(
-    table=[{
-        "stockCode": "005930",
-        "year": "2024",
-        "dcrGrade": dcr_grade,
-        "dcrDistress": dcr_distress,
-        "altmanZ": round(z_score, 2),
-        "altmanDistress": altman_distress,
-        "ohlsonProb": round(ohlson_prob, 3),
-        "ohlsonFlag": ohlson_flag,
-        "beneishM": round(m_score, 2),
-        "beneishFlag": beneish_flag,
-        "sourcesFlagged": sources_flagged,
-        "consensus": consensus,
-    }],
-    values={"consensus": consensus, "sourcesFlagged": sources_flagged},
-    date="2024-12-31",
+    table=[
+        {"source": "dCR.repayment", "result": compact(repayment)},
+        {"source": "dCR.leverage", "result": compact(leverage)},
+        {"source": "dCR.liquidity", "result": compact(liquidity)},
+        {"source": "financialStatements", "result": {"bsRows": bs.height, "isRows": is_df.height, "cfRows": cf.height}},
+    ],
+    values={"target": target, "sourceAgreementCount": len(consensus_sources), "period": period},
+    date=period,
 )
 ```
 
@@ -181,3 +136,17 @@ emit_result(
 2. consensus = TripleAgreement → `recipes.credit.macroStress` 와 결합 — 매크로 충격 시 추가 악화 위험.
 3. consensus = DualAgreement → `engines.analysis.earningsQuality` 로 분식 의심 별도 검증.
 4. universe 적용은 `recipes.credit.distressCandidateScreen` 와 결합.
+
+## 기본 검증
+
+- `ValidateRecipe(..., capture=False)` 기준으로 공개 호출 블록이 실행되어야 한다.
+- `requiredEvidence`의 근거 종류가 모두 반환되어야 한다.
+- target을 바꿔도 `Company("005930")` 하드코딩 가정이 남지 않아야 한다.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

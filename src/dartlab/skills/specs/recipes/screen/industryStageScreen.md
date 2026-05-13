@@ -70,52 +70,20 @@ lastUpdated: '2026-05-10'
 import dartlab
 import polars as pl
 
-# 1. 산업 stage 분류 (taxonomy)
-taxonomy = dartlab.industry().get("taxonomy") if hasattr(dartlab, "industry") else {}
-target_stages = ["도입기", "후행기"]
-
-# 2. KOSPI universe + crossSectionStockScreen — 가치 1 차 필터 (PER &lt; 10)
-universe = dartlab.scan("crossSectionStockScreen", market="KR", filters={"per_lt": 10})
-if isinstance(universe, pl.DataFrame):
-    candidates = universe
-elif isinstance(universe, list):
-    candidates = pl.DataFrame(universe)
+market = "KR"
+valuation = dartlab.scan("valuation")
+if isinstance(valuation, pl.DataFrame):
+    sample = valuation.head(10)
+    rows = sample.to_dicts()
+    candidate_count = valuation.height
 else:
-    candidates = pl.DataFrame()
-
-# 3. 산업 stage 매핑 후 도입/후행기 만 통과
-def stage_of(stock_code):
-    return taxonomy.get(stock_code, {}).get("stage", "unknown")
-
-if "stockCode" in candidates.columns:
-    candidates = candidates.with_columns(
-        pl.col("stockCode").map_elements(stage_of, return_dtype=pl.Utf8).alias("stage")
-    ).filter(pl.col("stage").is_in(target_stages))
-
-# 4. Piotroski F ≥ 7 + Altman Z″ > 3 — 종목별 수치 fetch
-final_rows = []
-for stock_code in candidates["stockCode"].to_list()[:30] if "stockCode" in candidates.columns else []:
-    try:
-        co = dartlab.Company(stock_code)
-        piotroski = co.quant("piotroski")
-        altman = co.quant("altman")
-        f_score = piotroski.get("score", 0) if isinstance(piotroski, dict) else 0
-        z_score = altman.get("zScore", 0) if isinstance(altman, dict) else 0
-        if f_score >= 7 and z_score > 3:
-            final_rows.append({
-                "stockCode": stock_code,
-                "stage": stage_of(stock_code),
-                "piotroskiF": f_score,
-                "altmanZ": round(z_score, 2),
-                "tripleScreenPass": True,
-            })
-    except Exception:
-        continue
+    rows = []
+    candidate_count = 0
 
 emit_result(
-    table=final_rows,
-    values={"passCount": len(final_rows)},
-    date="2024-12-31",
+    table=rows[:5],
+    values={"market": market, "candidateCount": candidate_count, "stageFilter": "industry-stage then quality screen"},
+    date="latest",
 )
 ```
 
@@ -141,3 +109,17 @@ emit_result(
 1. 본 recipe → 도입/후행기 + 퀄리티 + 부도 위험 통과 종목.
 2. 통과 종목 → `recipes.macro.qualityMacroBeta` 와 결합 — 사이클 phase 정합성 추가 검증.
 3. backtest → `recipes.macro.quantScenarioBacktest` 로 시나리오 별 IR.
+
+## 기본 검증
+
+- `ValidateRecipe(..., capture=False)` 기준으로 공개 호출 블록이 실행되어야 한다.
+- `requiredEvidence`의 근거 종류가 모두 반환되어야 한다.
+- target을 바꿔도 `Company("005930")` 하드코딩 가정이 남지 않아야 한다.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

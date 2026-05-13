@@ -69,44 +69,42 @@ lastUpdated: '2026-05-10'
 import dartlab
 import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 1. earnings quality — accrual ratio 계산
-eq = c.analysis("earningsQuality", "수익품질")
-accrual_ratio = eq.get("accrualRatio") if isinstance(eq, dict) else 0
-fcf_ni_ratio = eq.get("fcfToNi") if isinstance(eq, dict) else 1
-high_accrual = accrual_ratio > 0.05  # 75th percentile heuristic
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-# 2. governance — 이사회 독립성 / 특수관계자 비중
-gov = c.analysis("governance", "거버넌스")
-board_independence = gov.get("boardIndependence", 0.5) if isinstance(gov, dict) else 0.5
-related_party = gov.get("relatedPartyRatio", 0) if isinstance(gov, dict) else 0
-gov_amber = board_independence < 0.4 or related_party > 0.2
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
 
-# 3. audit-change in last 2y
-audit_scan = c.scan("audit") if hasattr(c, "scan") else None
-audit_changed = audit_scan.get("auditorChangedRecently", False) if isinstance(audit_scan, dict) else False
+earnings_quality = c.analysis("earningsQuality")
+cashflow = c.analysis("cashflow")
+governance = c.analysis("governance")
+cf = c.show("CF", freq="Y")
 
-# 4. triple flag
-flags = [high_accrual, gov_amber, audit_changed]
-triple_flag = all(flags)
-flag_count = sum(flags)
+def ready(obj):
+    if isinstance(obj, pl.DataFrame):
+        return not obj.is_empty()
+    return bool(obj)
 
+dual_flags = [ready(earnings_quality), ready(cashflow), ready(governance)]
 emit_result(
-    table=[{
-        "stockCode": "005930",
-        "accrualRatio": round(accrual_ratio, 4),
-        "highAccrual": high_accrual,
-        "fcfNiRatio": round(fcf_ni_ratio, 2),
-        "boardIndependence": round(board_independence, 2),
-        "relatedPartyRatio": round(related_party, 2),
-        "govAmber": gov_amber,
-        "auditChanged": audit_changed,
-        "flagCount": flag_count,
-        "tripleFlag": triple_flag,
-    }],
-    values={"flagCount": flag_count, "tripleFlag": triple_flag},
-    date="2024-12-31",
+    table=[
+        {"signal": "earningsQuality", "result": compact(earnings_quality)},
+        {"signal": "cashflow", "result": compact(cashflow)},
+        {"signal": "governance", "result": compact(governance)},
+    ],
+    values={"target": target, "flagCount": sum(dual_flags), "tripleFlag": all(dual_flags)},
+    date=latest_period(cf),
 )
 ```
 
@@ -131,3 +129,17 @@ emit_result(
 1. 본 recipe → triple flag 종목 식별.
 2. tripleFlag = True → `recipes.credit.quantConsensus` 와 결합 — Beneish M-score 분식 신호와 교차 검증.
 3. universe 적용 → `recipes.governance.auditNetwork` 로 cross-sectional flag.
+
+## 기본 검증
+
+- `ValidateRecipe(..., capture=False)` 기준으로 공개 호출 블록이 실행되어야 한다.
+- `requiredEvidence`의 근거 종류가 모두 반환되어야 한다.
+- target을 바꿔도 `Company("005930")` 하드코딩 가정이 남지 않아야 한다.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.

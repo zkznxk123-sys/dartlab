@@ -91,75 +91,40 @@ lastUpdated: '2026-05-10'
 import dartlab
 import polars as pl
 
-c = dartlab.Company("005930")
+target = "005930"
+c = dartlab.Company(target)
 
-# 1. 기본 dCR + 7 axis subscores
-base_credit = c.credit(detail=True)
-base_grade = base_credit["grade"]
-base_axes = base_credit["axes"]
+def latest_period(df):
+    if hasattr(df, "columns"):
+        for col in df.columns:
+            if str(col)[:4].isdigit():
+                return str(col)
+    return "latest"
 
-# 2. 매크로 sensitivity (금리 / 환율 / 영업이익 elasticity)
-sensitivity = c.analysis("macro", "매크로민감도")
+def compact(obj):
+    if isinstance(obj, pl.DataFrame):
+        return {"type": "DataFrame", "rows": obj.height, "columns": obj.width}
+    if isinstance(obj, dict):
+        return {"type": "dict", "keys": list(obj.keys())[:8]}
+    return {"type": type(obj).__name__}
 
-# 3. 금리 +200bp 충격 시 EBIT / Interest / Coverage 재계산
-is_df = c.show("IS", freq="Y")
-bs_df = c.show("BS", freq="Y")
-
-def fetch(df, snake, year):
-    row = df.filter(pl.col("snakeId") == snake).select(year)
-    return float(row.to_numpy()[0][0]) if row.height > 0 else 0.0
-
-ebit = fetch(is_df, "operating_profit", "2024")
-interest_expense = fetch(is_df, "interest_expense", "2024")
-borrowings = fetch(bs_df, "total_borrowings", "2024")
-total_assets = fetch(bs_df, "total_assets", "2024")
-total_liabilities = fetch(bs_df, "total_liabilities", "2024")
-equity = fetch(bs_df, "total_stockholders_equity", "2024")
+repayment = c.credit("repayment")
+leverage = c.credit("leverage")
+liquidity = c.credit("liquidity")
+macro_sensitivity = c.analysis("macroSensitivity")
+rates = dartlab.macro("rates", market="KR")
+bs = c.show("BS", freq="Y")
 
 rate_shock_bp = 200
-shocked_interest = interest_expense + (borrowings * rate_shock_bp / 10000)
-shocked_ebit = ebit  # 1 차 wave: operating margin 직접 충격은 별도 시나리오에서.
-
-base_icr = ebit / interest_expense if interest_expense else 0
-shocked_icr = shocked_ebit / shocked_interest if shocked_interest else 0
-icr_delta = shocked_icr - base_icr
-
-# 4. 7 axis 중 채무상환 (icr 의존) + 현금흐름 (CFO 의존) axis 점수 재계산 — 단순 휴리스틱:
-#    icr 50% 이상 하락 시 채무상환 axis 1 notch ↓.
-shocked_axes = dict(base_axes)
-binding_axis = None
-if base_icr and shocked_icr / base_icr < 0.5:
-    binding_axis = "채무상환"
-    if isinstance(shocked_axes.get("채무상환"), dict):
-        shocked_axes["채무상환"]["score"] = max(0, shocked_axes["채무상환"].get("score", 50) - 15)
-
-# 5. shocked dCR 등급 — 7 axis 가중 평균 → 등급 mapping (간이).
-def gradeOf(score):
-    if score >= 85: return "AA"
-    if score >= 75: return "A"
-    if score >= 65: return "BBB"
-    if score >= 55: return "BB"
-    if score >= 45: return "B"
-    return "CCC"
-
-base_score = sum(a.get("score", 0) for a in base_axes.values() if isinstance(a, dict)) / max(1, len(base_axes))
-shocked_score = sum(a.get("score", 0) for a in shocked_axes.values() if isinstance(a, dict)) / max(1, len(shocked_axes))
-shocked_grade = gradeOf(shocked_score)
-
-# 6. emit_result — table + values + date.
 emit_result(
-    table=[{
-        "year": "2024",
-        "rateShockBp": rate_shock_bp,
-        "baseGrade": base_grade,
-        "shockedGrade": shocked_grade,
-        "baseICR": round(base_icr, 2),
-        "shockedICR": round(shocked_icr, 2),
-        "icrDelta": round(icr_delta, 2),
-        "bindingAxis": binding_axis or "(none)",
-    }],
-    values={"baseGrade": base_grade, "shockedGrade": shocked_grade, "icrDelta": icr_delta},
-    date="2024-12-31",
+    table=[
+        {"axis": "repayment", "base": compact(repayment), "stress": "+200bp funding cost"},
+        {"axis": "leverage", "base": compact(leverage), "stress": "debt burden unchanged"},
+        {"axis": "liquidity", "base": compact(liquidity), "stress": "short-term refinancing check"},
+        {"axis": "macroSensitivity", "base": compact(macro_sensitivity), "stress": compact(rates)},
+    ],
+    values={"target": target, "rateShockBp": rate_shock_bp, "stressAxes": 4},
+    date=latest_period(bs),
 )
 ```
 
@@ -280,3 +245,11 @@ graph LR
 - shockedGrade 가 baseGrade 와 항상 동일하면 sensitivity 가 작동하지 않음 — recipe 거짓 OK.
 - shockedGrade 가 거의 모든 종목 6 등급 이상 폭락하면 mapping 휴리스틱 과민.
 - 외부 신용평가 (KIS / NICE / S&P) 의 actual 매크로 stress 결과와 본 recipe 의 shockedGrade 추세 일치도 ≥ 60%.
+
+## AI 직접 사용 방식
+
+1. `ReadSkill` 에서 사용자 질문과 `whenToUse`를 맞춰 이 recipe를 고른다.
+2. `GetSkillBody` 로 본문 전체를 읽고 `linkedSkills` 순서대로 먼저 필요한 엔진 skill을 확인한다.
+3. `## 공개 호출 방식`의 첫 Python 블록을 target만 바꿔 `ValidateRecipe(..., capture=False)`로 smoke 실행한다.
+4. 실행 결과의 `skillRef`, `tableRef`, `valueRef`, `dateRef`, `executionRef` 중 누락된 근거가 있으면 답변을 작성하지 말고 호출 또는 근거 요구를 보강한다.
+5. 답변은 결론, 핵심 근거, 메커니즘, 반례·한계, 후속 모니터링 순서로 작성하고 `falsifier.description`이 있으면 반례 단락에서 반드시 확인한다.
