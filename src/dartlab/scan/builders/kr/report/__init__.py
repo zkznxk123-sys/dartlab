@@ -10,14 +10,14 @@ Returns:
     Imported report builder and field-screen functions from submodules.
 
 Example:
-    >>> from dartlab.scan.builders.kr.report.fields import scanFields
+    >>> from dartlab.scan.builders.kr.report import buildReport, scanFields
 
 Guide:
     Put report schema/catalog/screen field code here. Keep docs and finance prebuilds in
     their own packages.
 
 SeeAlso:
-    ``report.fields`` and ``report.fieldCatalog``.
+    ``report.build``, ``report.fields``, and ``report.fieldCatalog``.
 
 Requires:
     Optional report prebuild parquet files for schema-derived catalog rows.
@@ -36,4 +36,7 @@ LLM Specifications:
 
 from __future__ import annotations
 
-__all__: list[str] = []
+from dartlab.scan.builders.kr.report.build import SCAN_API_TYPES, buildReport
+from dartlab.scan.builders.kr.report.fields import scanFields
+
+__all__ = ["SCAN_API_TYPES", "buildReport", "scanFields"]
