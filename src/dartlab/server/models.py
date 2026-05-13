@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 
 class HistoryMeta(BaseModel):
@@ -116,15 +116,19 @@ class AiProfileUpdateRequest(BaseModel):
 class AiSecretUpdateRequest(BaseModel):
     """Provider API 키 저장/삭제 요청."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     provider: str
-    apiKey: str | None = None
+    apiKey: str | None = Field(None, validation_alias=AliasChoices("apiKey", "api_key"))
     clear: bool = False
 
 
 class DartKeyUpdateRequest(BaseModel):
     """OpenDART API 키 저장/삭제 요청."""
 
-    apiKey: str | None = Field(None, max_length=500)
+    model_config = ConfigDict(populate_by_name=True)
+
+    apiKey: str | None = Field(None, validation_alias=AliasChoices("apiKey", "api_key"), max_length=500)
 
 
 class ChannelConnectRequest(BaseModel):

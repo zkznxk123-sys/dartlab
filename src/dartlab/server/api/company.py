@@ -29,6 +29,9 @@ from .common import (
 
 router = APIRouter()
 
+get_company = getCompany
+stream_topic_summary = streamTopicSummary
+
 
 @router.get("/api/search")
 def apiSearch(q: str = Query(..., min_length=1)):
@@ -64,7 +67,7 @@ def apiSearch(q: str = Query(..., min_length=1)):
 def apiCompany(code: str):
     """종목 기본 정보 + 사용 가능 API surface 목록."""
     try:
-        company = getCompany(code)
+        company = get_company(code)
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
@@ -86,7 +89,7 @@ def apiCompany(code: str):
 def apiCompanyIndex(code: str, request: Request, response: Response):
     """회사 데이터 구조 인덱스 DataFrame."""
     try:
-        company = getCompany(code)
+        company = get_company(code)
         data = {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
@@ -360,7 +363,7 @@ async def apiCompanyTopicSummary(
 ):
     """topic 데이터를 LLM으로 요약하여 SSE 스트리밍 반환."""
     try:
-        company = getCompany(code)
+        company = get_company(code)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
 
@@ -372,7 +375,7 @@ async def apiCompanyTopicSummary(
         raise HTTPException(status_code=404, detail=f"topic '{topic}' 데이터 없음")
 
     return EventSourceResponse(
-        streamTopicSummary(
+        stream_topic_summary(
             company,
             topic,
             provider=normalizeProviderName(provider) or provider,

@@ -136,6 +136,9 @@ class ConsensusData:
 
     target_price: float | None = None
     analyst_count: int = 0
+    buy_ratio: float = 0.0
+    high: float = 0.0
+    low: float = 0.0
     source: str = ""
 
 

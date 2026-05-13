@@ -11,6 +11,8 @@ from dartlab.server.chat import buildTopicSummaryQuestion
 from dartlab.server.models import AskRequest
 from dartlab.server.streaming import AnalysisStreamError, collectAnalysisResult, streamAnalysis
 
+collect_analysis_result = collectAnalysisResult
+
 
 def buildTopicSummaryViewContext(company: Company, topic: str) -> dict:
     """topic 요약용 뷰 컨텍스트를 구성한다."""
@@ -63,7 +65,7 @@ async def runPlainChat(req: AskRequest) -> dict:
         if not hintCode and req.viewContext and req.viewContext.company:
             vc = req.viewContext.company
             hintCode = vc.stockCode or vc.corpName or vc.company
-        result = await collectAnalysisResult(
+        result = await collect_analysis_result(
             req.question,
             role=req.role or "summary",
             stockCode=hintCode,

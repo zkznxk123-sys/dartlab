@@ -46,6 +46,7 @@ class MarketSnapshot:
 
     stockCode: str = ""
     currentPrice: float = 0.0
+    consensus: object | None = None
     multiples: dict[str, float] = field(default_factory=dict)
     peer_multiples: list[PeerData] = field(default_factory=list)
     supply_demand: dict[str, float] = field(default_factory=dict)

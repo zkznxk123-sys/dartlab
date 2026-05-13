@@ -24,6 +24,9 @@ def getCompany(code: str) -> Company:
     return company
 
 
+get_company = getCompany
+
+
 def safeTopicLabel(company, topic: str) -> str:
     """topic의 한글 라벨을 안전하게 반환한다."""
     try:

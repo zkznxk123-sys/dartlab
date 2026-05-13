@@ -27,6 +27,11 @@ class ToolSpec:
         """toDict — TODO 한국어 동작 설명."""
         return asdict(self)
 
+    @property
+    def parameters(self) -> dict[str, Any]:
+        """OpenAI-style compatibility alias for legacy tool callers."""
+        return self.inputSchema
+
 
 @dataclass
 class ToolResult:

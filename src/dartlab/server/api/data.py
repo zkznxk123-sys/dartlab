@@ -238,14 +238,14 @@ def apiExportTemplates():
 
 
 @router.get("/api/export/templates/{template_id}")
-def apiExportTemplateGet(templateId: str):
+def apiExportTemplateGet(template_id: str):
     """단일 템플릿 조회."""
     from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
-    t = store.get(templateId)
+    t = store.get(template_id)
     if t is None:
-        raise HTTPException(status_code=404, detail=f"템플릿 '{templateId}'을 찾을 수 없습니다")
+        raise HTTPException(status_code=404, detail=f"템플릿 '{template_id}'을 찾을 수 없습니다")
     return t.toDict()
 
 
@@ -262,12 +262,12 @@ def apiExportTemplateSave(req: dict):
 
 
 @router.delete("/api/export/templates/{template_id}")
-def apiExportTemplateDelete(templateId: str):
+def apiExportTemplateDelete(template_id: str):
     """템플릿 삭제."""
     from dartlab.viz.export.store import TemplateStore
 
     store = TemplateStore()
-    deleted = store.delete(templateId)
+    deleted = store.delete(template_id)
     if not deleted:
         raise HTTPException(status_code=400, detail="프리셋 템플릿은 삭제할 수 없습니다")
     return {"ok": True}

@@ -62,6 +62,10 @@ class CompanyCache:
         except ImportError:
             pass
 
+    def _check_memory_pressure(self) -> None:
+        """Compatibility alias for tests and older server extensions."""
+        self._checkMemoryPressure()
+
     def get(self, stockCode: str) -> tuple[Company, dict | None] | None:
         """캐시에서 Company와 snapshot을 조회한다."""
         entry = self._store.get(stockCode)
@@ -76,7 +80,7 @@ class CompanyCache:
 
     def put(self, stockCode: str, company: Company, snapshot: dict | None) -> None:
         """Company와 snapshot을 캐시에 저장한다."""
-        self._checkMemoryPressure()
+        self._check_memory_pressure()
         if stockCode in self._store:
             old = self._store[stockCode]
             new_entry = _CacheEntry(company, snapshot)

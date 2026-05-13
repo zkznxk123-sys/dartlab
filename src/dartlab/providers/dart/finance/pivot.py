@@ -224,14 +224,18 @@ def buildTimeseries(
         TargetMarkets:
             - KR (DART) — IS / BS / CF 통합. SCE 는 ``buildSceMatrix`` 별도.
     """
-    return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS")
+    from dartlab.core import dataLoader
+
+    return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS", id(dataLoader.loadData))
 
 
 @functools.lru_cache(maxsize=8)
 def _buildTimeseriesCached(
     stockCode: str,
     fsDivPref: str,
+    loadDataFingerprint: int,
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
+    _ = loadDataFingerprint
     result = _loadAndNormalize(stockCode, fsDivPref)
     if result is None:
         return None

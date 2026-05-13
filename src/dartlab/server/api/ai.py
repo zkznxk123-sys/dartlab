@@ -52,6 +52,9 @@ STATIC_MODELS: dict[str, list[str]] = {}
 
 _oauthState: dict[str, Any] = {}
 
+probe_provider_availability = probeProviderAvailability
+build_ollama_detail = buildOllamaDetail
+
 
 def _buildOpenDartStatus() -> dict[str, Any]:
     from dartlab.providers.dart.openapi.dartKey import getDartKeyStatus
@@ -118,7 +121,7 @@ def apiStatus(
             info["freeTierHint"] = meta["freeTierHint"]
         should_probe = probe and (target_provider is None or prov == target_provider)
         if should_probe:
-            available, model, checked = probeProviderAvailability(prov)
+            available, model, checked = probe_provider_availability(prov)
             info["available"] = available
             info["model"] = model
             info["checked"] = checked
@@ -129,7 +132,7 @@ def apiStatus(
             info["available"] = info["secretConfigured"]
         results[prov] = info
 
-    ollama_detail = buildOllamaDetail(probe=probe and (target_provider is None or target_provider == "ollama"))
+    ollama_detail = build_ollama_detail(probe=probe and (target_provider is None or target_provider == "ollama"))
     oauth_codex_detail = buildOauthCodexDetail(
         probe=probe and (target_provider is None or target_provider == "oauth-codex")
     )
@@ -181,9 +184,9 @@ def apiStatus(
 def apiSuggest(stockCode: str = Query(..., description="추천 질문을 생성할 종목코드")):
     """회사 데이터 상태에 맞는 추천 질문 목록을 반환한다."""
     try:
-        from ..services.companyApi import getCompany
+        from ..services.companyApi import get_company
 
-        company = getCompany(stockCode)
+        company = get_company(stockCode)
         return {
             "stockCode": getattr(company, "stockCode", stockCode),
             "company": getattr(company, "corpName", stockCode),
@@ -492,7 +495,8 @@ def apiCodexLogout():
     except ImportError:
         return {"ok": True}
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=_guideDetail(exc)) from exc
+        logger.info("Codex CLI logout skipped: %s", exc)
+        return {"ok": True}
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=_guideDetail(exc)) from exc
     return {"ok": True}
