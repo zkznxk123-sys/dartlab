@@ -7,107 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-gather 엔진 production-grade 격상 — observability · 메모리 효율 · 진입점 문서 일관화.
+다음 릴리스 준비 항목 없음.
+
+## [0.10.0] - 2026-05-13
+
+패키징 검증, 데이터 리소스 로딩, 분석 진입점 일관성을 중심으로 한 안정화 릴리스.
 
 ### Added
 
-- `getDefaultGather()` 가 멀티스레드 환경에서도 단일 인스턴스 보장 (double-checked locking).
-  웹 서버 / 워커 풀 / Jupyter parallel 컨텍스트에서 캐시·HTTP 클라이언트 중복 생성 없음.
-- 메모리 효율 스트리밍 — Finance accessor 에 내부자 거래 / 기관 보유 / 뉴스 3 종 batch 진입점 추가.
-  큰 결과를 한 번에 메모리로 못 올릴 때 batchSize 단위 iter 처리 가능.
-- 캐시 상태 스냅샷 노출 — telemetry 모듈에서 누적 hit/miss/evict 카운터 read API.
-  SRE/관측 도구가 캐시 효율 모니터링 가능.
-- TTL 환경변수 16 종 (`DARTLAB_TTL_PRICE`/`FLOW`/`MACRO`/`SECTOR`/`LISTING` 등) —
-  배포 환경별 캐시 만료 조정 (0 설정 시 캐시 즉시 만료).
+- 수집 엔진에 캐시 상태 스냅샷과 axis별 telemetry 신호를 추가했다. 서버나 노트북에서
+  데이터 수집 지연, 캐시 hit/miss, fallback 발생 여부를 관측하기 쉬워졌다.
+- 내부자 거래, 기관 보유, 뉴스 조회에 batch/iterator 진입점을 추가했다. 큰 결과를 한 번에
+  메모리에 올리지 않고 순차 처리할 수 있다.
+- `Company.gather()`, `Company.news()`, `Company.calendar()` 등 회사 단위 진입점의 provider
+  연결을 안정화했다.
+- 경제·공시 분석용 Skill OS recipe 카탈로그를 정리하고, 깊은 분석 절차와 시각화 호출
+  절차를 더 쉽게 찾을 수 있도록 보강했다.
 
 ### Changed
 
-- 회사 정보 / 뉴스 / 거시지표 axis 의 fetch 종료 시점에 telemetry 신호 emit —
-  외부 listener 가 axis 별 latency / cacheHit / market 메트릭 자동 수집.
-  변경 전엔 price/flow/macro 만 신호 송신, 이제 dividends/splits/sector/
-  insider/majorHolder/ownership/peers/news/dartDoc 도 동일하게 신호.
-- KR 가격 source fallback 발동 시 (Naver → Yahoo 등) telemetry 신호 송신 —
-  primary 안정성 추적 + circuit breaker 동작 감사 자동화.
-- 캐시 get/put/eviction 매 호출마다 누적 카운터 갱신 — 매 100 회마다 자동 스냅샷 emit.
-
-### Internal
-
-- gather 진입점 문서 일관화 — KRX listing/api/index/marketCap, 외부 API
-  wrapper (Naver/FMP/Yahoo/FDR), entry handlers, transforms 총 70+ public
-  함수에 Capabilities/AIContext/Guide/When/How 5 섹션 보강. 외부 호출 시그니처 0 변동.
-- 테스트 placeholder smoke → functional 격상 — 진입점·인프라·소스·KRX 영역
-  19 모듈 (`tests/gather/entry/`, `tests/gather/infra/`, `tests/gather/sources/`,
-  `tests/gather/krx/`) 의 단위 테스트가 실제 동작 검증으로 전환.
-
-### Migration
-
-호환 변경 없음. 새 API (iter 메서드, telemetry snapshot) 는 추가 only —
-기존 코드 수정 불필요.
-
-## [0.10.0] - 2026-05-10
-
-라이브러리 수준 아키텍처 정합화 — 양방향 cycle 0, layer 단방향 strict, snake_case 정리.
-
-### Added
-
-- 7 신규 Protocol — CredentialProvider · LoaderProvider · ListingResolver · DisclosureFetcher
-  · FinanceDocAccessor · HtmlRenderer · GatherProvider. core/ 안 정의 + auto-discovery
-  registry. analysis/scan/viz 가 provider 직접 의존 0 (정공법 B Protocol DIP).
-- core/ratioCategories.py — RATIO_CATEGORIES 데이터 (analysis/financial/ratios.py 에서
-  이전, 정공법 A Hierarchy + D Facade re-export).
-- core/htmlRenderer.py + viz/display/htmlRenderer.py — Jupyter mime/repr 추상화.
-- core/gatherProvider.py + gather/entry.py 의 _GatherProviderAdapter — Company.gather()
-  / Company.news() 의 provider 측 lazy 의존 제거.
-- providers/dart/calendar.py + providers/dart/insiderTrades.py — gather/calendar.py +
-  gather/domains/dartApi.py 본체 이전. KR 정기공시 catalyst 추론은 DART 도메인 적합.
-- core/financeDocAccessor.py — analysis/financial 이 사용하는 단발 doc 호출 통합 추상화.
-- 5 엔진 (analysis · credit · macro · quant · industry) `__all__` 명시.
-- 회귀 가드: tests/test_stdlib_camel_violation.py — asyncio · subprocess · threading ·
-  multiprocessing · mcp app/server/session 의 무차별 카멜 변환 검출.
-
-### Changed
-
-- 양방향 import cycle 5 → 0. core ↔ providers · analysis ↔ providers · analysis ↔ viz ·
-  cli ↔ server · gather ↔ providers · providers ↔ viz 모두 정공법 적용.
-- inferFeature 함수 cli/services/errors.py → core/messaging.py 이전 (server 가 cli 호출
-  못 하도록 — 정공법 A Hierarchy).
-- dartlab/__init__.py 의 TYPE_CHECKING import block 제거 — PEP 562 lazy 만 사용.
-- macro 의 _AXIS_REGISTRY fn 9 곳 동기화 (analyze_X → analyzeX).
-- gather domain fallback (snake) → loadDomain 의 _DOMAIN_ALIASES 매핑 (yahoo_chart →
-  yahooChart 등).
-
-### Removed
-
-- gather/calendar.py + gather/domains/dartApi.py 폐기 (providers/dart/* 로 본체 이전).
-- gather('calendar') axis dispatch deprecated → ValueError. Company.calendar() 사용.
-- deprecated snake_case alias 25 곳 (sizing/benchmark/factor/factorBuild/attribution/
-  strategy/* + quant/_helpers 의 12 alias + _deprecatedAlias 본체).
+- DART/EDGAR/수집/분석 모듈의 import 방향을 정리해 공개 API import 시점의 순환 의존
+  가능성을 줄였다.
+- 데이터 매핑 리소스 위치를 `providers/data`와 `reference/data` 기준으로 정리하고,
+  wheel 검증·단위 테스트·런타임 로더가 같은 경로 계약을 보도록 맞췄다.
+- `dartlab.frame`에서 기존 `from dartlab.frame import dataLoader` 사용 패턴이 계속
+  동작하도록 호환 export를 유지했다.
+- 수집 캐시 TTL을 환경변수로 조정할 수 있는 범위를 넓혔다.
 
 ### Fixed
 
-- stdlib 무차별 카멜 변환 회귀 30+ fix (P6 codemod sequels):
-  - asyncio.create_task 6 곳, mcp Server/ClientSession 7 데코레이터 + send_progress_
-    notification kwarg, HTMLParser.handle_starttag/endtag/data 3 곳
-  - hasattr fetch_* 4 곳 — silent fallback 운영 회귀
-  - industry/build/edges.py try/except 안 lazy import 4 곳 codemod miss
-- EdgarCompany.calendar 메서드 누락 (CompanyProtocol 일관성).
-
-### Internal
-
-- docstring 432 → 0 (자동 도구 + 수작업 16 곳).
-- var-snake 62 → 0 (private prefix 면제 13, deprecated alias 제거 25, public sed 8).
-- 자동 생성물 동기화.
+- PyPI wheel에서 parser mapping, account mapping, notes structure 같은 필수 JSON 리소스가
+  누락되면 CI와 release workflow가 즉시 실패하도록 검증을 보강했다.
+- `predictionSignals`의 sector prior 로딩이 이전 리소스 위치를 참조하던 문제를 수정했다.
+- KR scan builder의 계정 매핑 로더가 필수 번들 리소스 누락을 빈 결과로 숨기지 않고
+  명확한 오류로 드러내도록 수정했다.
+- sections pipeline에서 projection 적용 결과가 누락될 수 있던 경로를 수정해 markdown table,
+  기간 정렬, detail topic 제외 동작을 안정화했다.
+- Windows 격리 wheel 검증에서 pip 설치 실패 메시지가 인코딩 문제로 다시 예외를 내던
+  문제를 수정했다.
+- silent-fail 검사에서 실제 선택적 데이터 경로와 필수 리소스 로더를 구분하도록 보강했다.
 
 ### Migration
 
-본 릴리스는 의도된 BC 깸 — 다음 사용처 갱신 필요:
-
-- snake_case alias 사용한 quant 함수: `fetch_ohlcv` → `fetchOhlcv` 등
-- `from dartlab.gather.calendar import gatherCalendar` → `Company.calendar()` 또는
-  `from dartlab.providers.dart.calendar import predictCalendar`
-- 8 public 모듈 변수 rename: provider_guide/no_provider_message/circuit_breaker/
-  health_tracker/company_cache/room_manager/channel_runtime/dev_channel_runtime
-  → camelCase
+대부분 기존 코드 수정 없이 동작한다. 다만 이미 deprecated 상태였던 일부 snake_case alias와
+`gather("calendar")` axis dispatch는 제거되었으므로, calendar 사용 코드는 `Company.calendar()`
+또는 `dartlab.providers.dart.calendar.predictCalendar`를 사용해야 한다.
 
 ## [0.9.27] - 2026-04-30
 

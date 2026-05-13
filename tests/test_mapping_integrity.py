@@ -11,8 +11,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-_CORE_DATA = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "core" / "data"
-_MAPPINGS_PATH = _CORE_DATA / "accountMappings.json"
+_REFERENCE_DATA = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "reference" / "data"
+_MAPPINGS_PATH = _REFERENCE_DATA / "accountMappings.json"
 
 
 # ══════════════════════════════════════

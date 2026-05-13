@@ -49,6 +49,7 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "providers/dart/openapi/dartKey.py",
         "providers/dart/accessor/financeDocAccessor.py",
         "providers/dart/ops/insiderTrades.py",
+        "providers/mappers/scanner.py",
         "providers/edgar/openapi/batch.py",
         "providers/edgar/docs/notesParsers.py",
         "providers/edgar/report/employee.py",
@@ -64,7 +65,9 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "credit/monitoring/history.py",
         # scan builder — 프리빌드 runtime 상태 (데이터 없으면 스킵)
         "scan/builder/core.py",
+        "scan/builders/edgar/builder.py",
         "scan/edgar/builder.py",
+        "scan/io/parquet.py",
         # AI 런타임 상태 저장 (없으면 첫 실행)
         "ai/__init__.py",
         "skills/registry.py",

@@ -75,17 +75,17 @@ spec = importlib.util.find_spec('dartlab')
 root = pathlib.Path(spec.submodule_search_locations[0])
 # 필수 디렉토리 (없으면 sections 파이프라인 통째로 silent-fail)
 mustHaveDirs = [
-    'core/data/parserMappings',
-    'core/data',
+    'providers/data/parserMappings',
+    'reference/data',
     'providers/dart/docs/sections/mapperData',
     'providers/dart/docs/sections/profileData',
 ]
 # 필수 JSON (silent-fail 의 근원 파일들)
 mustHaveFiles = [
-    'core/data/parserMappings/sections.json',
-    'core/data/parserMappings/affiliate.json',
-    'core/data/parserMappings/costByNature.json',
-    'core/data/accountMappings.json',
+    'providers/data/parserMappings/sections.json',
+    'providers/data/parserMappings/affiliate.json',
+    'providers/data/parserMappings/costByNature.json',
+    'reference/data/accountMappings.json',
     'providers/dart/docs/sections/mapperData/sectionMappings.json',
     'providers/dart/docs/sections/mapperData/tableMappings.json',
 ]
@@ -94,7 +94,7 @@ if missing:
     raise SystemExit(f'wheel 번들 누락 (2026-04-19 사고 재현): {missing}')
 
 # sections 런타임 실제 로드 검증 — silent-fail 경로가 살아있는지
-from dartlab.core.mappers.parserMapper import loadSections
+from dartlab.providers.mappers.parserMapper import loadSections
 sec = loadSections()
 if not sec.get('chapterByMajor'):
     raise SystemExit(

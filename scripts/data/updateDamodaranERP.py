@@ -6,7 +6,7 @@
 동작:
     1. pages.stern.nyu.edu/~adamodar/ 의 ctryprem.html 파싱
     2. 국가별 Moody's rating + adj default spread + total ERP 추출
-    3. src/dartlab/core/data/damodaranDefaults.json 업데이트
+    3. src/dartlab/reference/data/damodaranDefaults.json 업데이트
     4. 실패 시 기존 스냅샷 보존 (폴백 안전)
 
 Damodaran 이 매년 1월/7월 갱신하므로 월 1회 cron 적합.

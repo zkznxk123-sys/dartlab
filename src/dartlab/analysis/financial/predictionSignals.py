@@ -32,7 +32,7 @@ import json
 from pathlib import Path as _Path
 
 _SECTOR_DATA = json.loads(
-    (_Path(__file__).resolve().parents[2] / "core" / "data" / "parserMappings" / "sectorPriors.json").read_text(
+    (_Path(__file__).resolve().parents[2] / "providers" / "data" / "parserMappings" / "sectorPriors.json").read_text(
         encoding="utf-8"
     )
 )

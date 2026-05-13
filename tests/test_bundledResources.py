@@ -41,13 +41,13 @@ _PKG_ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
 # git 에 커밋되지 않고 wheel 에도 포함되지 않음 — 필수 목록 제외.
 _REQUIRED_FILES = [
     # core parserMappings — 2026-04-19 사고 발생 위치
-    "reference/data/parserMappings/sections.json",
-    "reference/data/parserMappings/affiliate.json",
-    "reference/data/parserMappings/costByNature.json",
-    "reference/data/parserMappings/sectorPriors.json",
+    "providers/data/parserMappings/sections.json",
+    "providers/data/parserMappings/affiliate.json",
+    "providers/data/parserMappings/costByNature.json",
+    "providers/data/parserMappings/sectorPriors.json",
     # core data (git-tracked)
     "reference/data/accountMappings.json",
-    "reference/data/notesStructure.json",
+    "providers/data/notesStructure.json",
     "reference/data/labelSupplements.json",
     # sections runtime 의존 JSON
     "providers/dart/docs/sections/mapperData/sectionMappings.json",
@@ -81,7 +81,7 @@ def test_parserMappingsSections_hasChapterByMajor():
     이 필드가 비면 chapterFromMajorNum() 모두 None 리턴 → sections() 파이프라인
     전체가 silent-fail. wheel 에 파일은 있어도 내용이 깨졌을 때를 잡는다.
     """
-    path = _PKG_ROOT / "reference/data/parserMappings/sections.json"
+    path = _PKG_ROOT / "providers/data/parserMappings/sections.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(data, dict), "sections.json 루트가 dict 아님"
 
@@ -97,7 +97,7 @@ def test_parserMappingsSections_hasChapterByMajor():
 
 def test_parserMappingsSections_hasDetailTopicMap():
     """sections.json 의 detailTopicMap — 상세 토픽 라우팅 테이블."""
-    path = _PKG_ROOT / "reference/data/parserMappings/sections.json"
+    path = _PKG_ROOT / "providers/data/parserMappings/sections.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     dtm = data.get("detailTopicMap")
     assert dtm, "sections.json 에 detailTopicMap 키 누락"

@@ -183,3 +183,5 @@ def applyProjections(
             }
         )
         existing.add(key)
+
+    return out

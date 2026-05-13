@@ -143,7 +143,7 @@ def test_sections_pipeline_hides_detail_topics_from_core_view(monkeypatch):
 
 
 def test_context_slices_skip_placeholder_blocks(monkeypatch):
-    views = importlib.import_module("dartlab.providers.dart.docs.sections.views")
+    viewsContext = importlib.import_module("dartlab.providers.dart.docs.sections.viewsContext")
     fake = pl.DataFrame(
         {
             "stockCode": ["TEST", "TEST"],
@@ -175,7 +175,7 @@ def test_context_slices_skip_placeholder_blocks(monkeypatch):
     def fakeRetrievalBlocks(stockCode: str):
         return fake
 
-    monkeypatch.setattr(views, "retrievalBlocks", fakeRetrievalBlocks)
+    monkeypatch.setattr(viewsContext, "retrievalBlocks", fakeRetrievalBlocks)
 
     result = contextSlices("TEST")
 

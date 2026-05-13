@@ -122,13 +122,14 @@ def _loadCorpProfileMap() -> dict[str, int]:
     from dartlab.core.dataLoader import _dataDir
 
     profilePath = Path(_dataDir("scan")) / "corpProfile.parquet"
+    empty: dict[str, int] = {}
     if not profilePath.exists():
-        return {}
+        return empty
 
     try:
         df = pl.scan_parquet(str(profilePath)).select(["stockCode", "acc_mt"]).collect(engine="streaming")
     except (pl.exceptions.PolarsError, OSError):
-        return {}
+        return empty
 
     result: dict[str, int] = {}
     for row in df.iter_rows(named=True):
@@ -581,14 +582,14 @@ def _loadAccountMap() -> dict[str, str]:
     import json
 
     # parents[3] = src/dartlab (scan/builders/kr/core.py → 3 단계 up)
-    mapPath = Path(__file__).resolve().parents[3] / "core" / "data" / "accountMappings.json"
+    mapPath = Path(__file__).resolve().parents[3] / "reference" / "data" / "accountMappings.json"
     if not mapPath.exists():
-        return {}
-    try:
-        data = json.loads(mapPath.read_text(encoding="utf-8"))
-        return data.get("mappings", {})
-    except (json.JSONDecodeError, OSError):
-        return {}
+        raise FileNotFoundError(f"필수 번들 리소스 누락: dartlab/reference/data/accountMappings.json ({mapPath})")
+    data = json.loads(mapPath.read_text(encoding="utf-8"))
+    mappings = data.get("mappings", {})
+    if not isinstance(mappings, dict):
+        raise ValueError(f"accountMappings.json mappings 필드가 dict 아님: {mapPath}")
+    return mappings
 
 
 def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:

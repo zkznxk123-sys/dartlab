@@ -11,4 +11,6 @@ normalized view 제공. raw 생산 0 — 가공만. 본 단계 (P-CORE A) 에서
 - 비즈니스 로직 금지 (지표 계산·점수화·랭킹·룰 매칭은 synth/L2 영역)
 """
 
-__all__: list[str] = []
+from dartlab.core import dataLoader as dataLoader
+
+__all__ = ["dataLoader"]

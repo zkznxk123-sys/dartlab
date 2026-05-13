@@ -32,19 +32,19 @@ from pathlib import Path
 # 필수 번들 리소스 — 2026-04-19 사고 class 직접 방어.
 # `tests/test_wheelPackaging.py::test_parserMappings_inWheel` 와 동기화.
 _REQUIRED_BUNDLE_FILES = [
-    # core parserMappings
-    "dartlab/core/data/parserMappings/sections.json",
-    "dartlab/core/data/parserMappings/affiliate.json",
-    "dartlab/core/data/parserMappings/costByNature.json",
-    "dartlab/core/data/parserMappings/sectorPriors.json",
-    # core data
-    "dartlab/core/data/accountMappings.json",
-    "dartlab/core/data/labelSupplements.json",
-    "dartlab/core/data/notesStructure.json",
-    "dartlab/core/data/dalio48Cases.json",
-    "dartlab/core/data/dalioDetailCases.json",
-    "dartlab/core/data/damodaranDefaults.json",
-    "dartlab/core/data/rrCrises800y.json",
+    # parserMappings
+    "dartlab/providers/data/parserMappings/sections.json",
+    "dartlab/providers/data/parserMappings/affiliate.json",
+    "dartlab/providers/data/parserMappings/costByNature.json",
+    "dartlab/providers/data/parserMappings/sectorPriors.json",
+    # reference data
+    "dartlab/reference/data/accountMappings.json",
+    "dartlab/reference/data/labelSupplements.json",
+    "dartlab/providers/data/notesStructure.json",
+    "dartlab/reference/data/dalio48Cases.json",
+    "dartlab/reference/data/dalioDetailCases.json",
+    "dartlab/reference/data/damodaranDefaults.json",
+    "dartlab/reference/data/rrCrises800y.json",
     # DART sections runtime
     "dartlab/providers/dart/docs/sections/mapperData/sectionMappings.json",
     "dartlab/providers/dart/docs/sections/mapperData/tableMappings.json",
@@ -77,15 +77,21 @@ def checkRuntime(whl: Path) -> int:
         venvDir = Path(tmp) / "venv"
         venv.create(venvDir, with_pip=True)
         py = venvDir / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+        env = os.environ.copy()
+        env.setdefault("PYTHONUTF8", "1")
+        env.setdefault("PIP_DISABLE_PIP_VERSION_CHECK", "1")
 
         install = subprocess.run(
             [str(py), "-m", "pip", "install", "--quiet", str(whl)],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
         )
         if install.returncode != 0:
             print("FAIL — 격리 venv 에 wheel 설치 실패:")
-            print(install.stderr[-800:])
+            print((install.stderr or install.stdout or "")[-800:])
             return 2
 
         check = subprocess.run(
@@ -95,7 +101,7 @@ def checkRuntime(whl: Path) -> int:
                 "utf8",
                 "-c",
                 (
-                    "from dartlab.core.mappers.parserMapper import loadSections;"
+                    "from dartlab.providers.mappers.parserMapper import loadSections;"
                     " s = loadSections();"
                     " assert s.get('chapterByMajor'), 'chapterByMajor empty';"
                     " print('OK chapterByMajor:', len(s['chapterByMajor']))"
@@ -103,6 +109,9 @@ def checkRuntime(whl: Path) -> int:
             ],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
         )
         if check.returncode != 0:
             print("FAIL — 설치된 wheel 에서 loadSections 런타임 체인 실패:")
