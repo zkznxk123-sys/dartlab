@@ -9,107 +9,89 @@ from pathlib import Path
 import polars as pl
 
 from dartlab.core.logger import getLogger
+from dartlab.core.utils.helpers import parseNumStr
+from dartlab.scan.io.accounts import (
+    EQ_IDS as EQ_IDS,
+)
+from dartlab.scan.io.accounts import (
+    EQ_NMS as EQ_NMS,
+)
+from dartlab.scan.io.accounts import (
+    LIABILITY_IDS as LIABILITY_IDS,
+)
+from dartlab.scan.io.accounts import (
+    LIABILITY_NMS as LIABILITY_NMS,
+)
+from dartlab.scan.io.accounts import (
+    NI_IDS as NI_IDS,
+)
+from dartlab.scan.io.accounts import (
+    NI_NMS as NI_NMS,
+)
+from dartlab.scan.io.accounts import (
+    OP_IDS as OP_IDS,
+)
+from dartlab.scan.io.accounts import (
+    OP_NMS as OP_NMS,
+)
+from dartlab.scan.io.accounts import (
+    REVENUE_IDS as REVENUE_IDS,
+)
+from dartlab.scan.io.accounts import (
+    REVENUE_NMS as REVENUE_NMS,
+)
+from dartlab.scan.io.accounts import (
+    TA_IDS as TA_IDS,
+)
+from dartlab.scan.io.accounts import (
+    TA_NMS as TA_NMS,
+)
+from dartlab.scan.io.accounts import (
+    extractAccount as extractAccount,
+)
+from dartlab.scan.io.calendar import (
+    QUARTER_ORDER as QUARTER_ORDER,
+)
+from dartlab.scan.io.calendar import (
+    _calendarizeWithFmMap,
+)
+from dartlab.scan.io.calendar import (
+    filterLatestPerStock as filterLatestPerStock,
+)
+from dartlab.scan.io.calendar import (
+    findLatestYear as findLatestYear,
+)
+from dartlab.scan.io.calendar import (
+    parseDateYear as parseDateYear,
+)
+from dartlab.scan.io.calendar import (
+    pickBestQuarter as pickBestQuarter,
+)
+from dartlab.scan.io.lite import (
+    _LITE_ACCOUNTS_BS as _LITE_ACCOUNTS_BS,
+)
+from dartlab.scan.io.lite import (
+    _LITE_ACCOUNTS_CF as _LITE_ACCOUNTS_CF,
+)
+from dartlab.scan.io.lite import (
+    _LITE_ACCOUNTS_IS as _LITE_ACCOUNTS_IS,
+)
+from dartlab.scan.io.lite import (
+    LITE_ACCOUNTS as LITE_ACCOUNTS,
+)
+from dartlab.scan.io.lite import (
+    LITE_SINCE_YEAR as LITE_SINCE_YEAR,
+)
+from dartlab.scan.io.lite import (
+    LITE_SJ_DIVS as LITE_SJ_DIVS,
+)
 
 _log = getLogger(__name__)
-
-# ── 계정 라벨 SSOT (scan 모듈 공용) ──
-# 같은 회계 개념의 snake_id / 표시명 변형을 한 곳에 통합.
-# 신규 변형 발견 시 여기서만 추가 → scan/{efficiency,growth,profitability,valuation} 자동 반영.
-
-REVENUE_IDS = {"Revenue", "revenue", "ifrs-full_Revenue", "dart_Revenue"}
-REVENUE_NMS = {"매출액", "수익(매출액)", "영업수익"}
-
-OP_IDS = {
-    "ProfitLossFromOperatingActivities",
-    "operatingIncome",
-    "ifrs-full_ProfitLossFromOperatingActivities",
-    "dart_OperatingIncomeLoss",
-}
-OP_NMS = {"영업이익", "영업이익(손실)"}
-
-NI_IDS = {
-    "ProfitLoss",
-    "netIncome",
-    "ifrs-full_ProfitLoss",
-    "dart_ProfitLoss",
-    "ProfitLossAttributableToOwnersOfParent",
-}
-NI_NMS = {"당기순이익", "당기순이익(손실)"}
-
-TA_IDS = {"Assets", "totalAssets", "ifrs-full_Assets", "dart_Assets"}
-TA_NMS = {"자산총계", "자산 총계"}
-
-EQ_IDS = {
-    "Equity",
-    "equity",
-    "ifrs-full_Equity",
-    "EquityAttributableToOwnersOfParent",
-    "ifrs-full_EquityAttributableToOwnersOfParent",
-}
-EQ_NMS = {"자본총계", "자본 총계", "지배기업 소유주지분"}
-
-LIABILITY_IDS = {"Liabilities", "ifrs-full_Liabilities", "ifrs_Liabilities", "dart_Liabilities"}
-LIABILITY_NMS = {"부채총계", "총부채", "부채 총계"}
 
 _scanDownloaded = False
 
 # scan 프리빌드 freshness — HF 수집 주기(일 1회)에 맞춰 24h TTL
 _SCAN_FRESHNESS_TTL_SECONDS = 24 * 3600
-
-
-# ── finance-lite 스펙 (pyodide/브라우저 용 경량 프리빌드) ──────────────
-#
-# 원본 `finance.parquet`(307MB) 을 아래 30 개 snakeId 로 필터하고 2022년부터만
-# 남긴 경량본. 실측 18MB 수준. 브라우저 pyodide 에서 `pl.scan_parquet` 미지원이라
-# pyarrow 로 전체 로드 → `pl.from_arrow` 로 변환해 쓴다.
-#
-# 선정 기준: scan 하위 모듈(profitability/growth/quality/liquidity/efficiency/
-# cashflow/dividendTrend/capital/debt)과 analysis 엔진이 실사용하는 계정 union.
-# 전부 sortOrder.json 에 등록된 정규 snakeId.
-
-_LITE_ACCOUNTS_IS: tuple[str, ...] = (
-    "sales",
-    "cost_of_sales",
-    "gross_profit",
-    "operating_expenses",
-    "operating_profit",
-    "finance_income",
-    "finance_costs",
-    "profit_before_tax",
-    "income_tax_expense",
-    "net_income",
-)
-_LITE_ACCOUNTS_BS: tuple[str, ...] = (
-    "cash_and_cash_equivalents",
-    "current_assets",
-    "inventories",
-    "trade_receivables",
-    "noncurrent_assets",
-    "property_plant_and_equipment",
-    "intangible_assets",
-    "current_liabilities",
-    "trade_payables",
-    "noncurrent_liabilities",
-    "total_stockholders_equity",
-    "retained_earnings",
-)
-_LITE_ACCOUNTS_CF: tuple[str, ...] = (
-    "operating_cashflow",
-    "investing_cashflow",
-    "financing_cashflow",
-    "cash_and_cash_equivalents_at_the_end_of_year",
-    "cash_and_cash_equivalents_beginning",
-    "changes_in_operating_assets_and_liabilities",
-    "depreciation",
-    "net_increase_decrease_in_cash_and_cash_equivalents",
-)
-LITE_ACCOUNTS: tuple[str, ...] = _LITE_ACCOUNTS_IS + _LITE_ACCOUNTS_BS + _LITE_ACCOUNTS_CF
-
-# lite 빌드에 포함할 재무제표 구분 (SCE 제외 — 용량 27.8% 차지, scan 미사용)
-LITE_SJ_DIVS: tuple[str, ...] = ("IS", "BS", "CIS", "CF")
-
-# lite 기본 시작 연도 (5년치 분기 보장: 2022Q1 ~ 최신)
-LITE_SINCE_YEAR: int = 2022
 
 # scan 프리빌드 루트 필수 파일 — HF `dart/scan/` 루트에 있어야 하는 산출물.
 # 과거 `allow_patterns="dart/scan/**/*.parquet"` 버그로 루트 파일이 누락된
@@ -319,190 +301,6 @@ def scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
     return pl.concat(unified).collect(engine="streaming")
 
 
-from dartlab.core.utils.helpers import parseNumStr  # noqa: E402
-
-
-def extractAccount(sub: pl.DataFrame, ids: set, nms: set, amtCol: str = "thstrm_amount") -> float | None:
-    """DataFrame에서 account_id/account_nm 매칭 → 금액 추출.
-
-    Parameters
-    ----------
-    sub : pl.DataFrame
-        단일 종목의 재무 데이터.
-    ids : set
-        매칭할 account_id 집합.
-    nms : set
-        매칭할 account_nm 집합.
-    amtCol : str
-        금액 컬럼명 (기본 "thstrm_amount").
-
-    Returns
-    -------
-    float | None
-        첫 매칭 계정의 금액 (원). 매칭 없으면 None.
-
-    Raises
-    ------
-    없음 — row.get 기본값 + parseNumStr None 폴백.
-
-    Examples
-    --------
-    >>> from dartlab.scan.io.parquet import extractAccount
-    >>> rev = extractAccount(subDf, {"Revenue"}, {"매출액"})
-    >>> rev
-    1000000
-
-    Guide:
-        - 호출 컨텍스트 가이드.
-
-    Capabilities:
-        - account_id (XBRL tag) 또는 account_nm (한글 표시명) 매칭 row 중 첫 유효 amount 반환.
-          ``parseNumStr`` 로 콤마/문자열 정수 변환.
-
-    AIContext:
-        scan financial 7 axis 의 per-file fallback 경로가 본 함수로 단일 종목 단면에서 계정 값
-        추출. industry/delta 도 같은 패턴.
-
-    When:
-        호출 컨텍스트 안에서.
-
-    How:
-        scan/finance.parquet 합본 없거나 종목별 처리 필요할 때. row iterate → 첫 매칭 row 의
-        amount → parseNumStr → 반환.
-
-    Requires:
-        - ``account_id`` · ``account_nm`` · ``amtCol`` 컬럼
-
-    SeeAlso:
-        - :func:`scanFinanceParquets` — 횡단 합본 dict 반환 (본 함수의 wide 버전)
-        - :data:`REVENUE_IDS` · :data:`OP_IDS` · :data:`NI_IDS` · ... — ids/nms SSOT
-    """
-    for row in sub.iter_rows(named=True):
-        aid = row.get("account_id", "")
-        anm = row.get("account_nm", "")
-        if aid in ids or anm in nms:
-            val = parseNumStr(row.get(amtCol))
-            if val is not None:
-                return val
-    return None
-
-
-def findLatestYear(raw: pl.DataFrame, checkCol: str, minCount: int = 500) -> str | None:
-    """check_col에 유효 데이터가 min_count 이상인 가장 최근 연도 반환.
-
-    Parameters
-    ----------
-    raw : pl.DataFrame
-        year 컬럼을 포함한 전종목 데이터.
-    check_col : str
-        유효성 검사 대상 컬럼명.
-    min_count : int
-        해당 연도에 필요한 최소 유효 행 수.
-
-    Returns
-    -------
-    str | None
-        가장 최근 유효 연도 문자열 (예: "2024"). 없으면 None.
-
-    Raises
-    ------
-    KeyError
-        ``raw`` 에 ``"year"`` 컬럼 또는 ``check_col`` 컬럼이 없을 때.
-
-    Examples
-    --------
-    >>> from dartlab.scan.io.parquet import findLatestYear
-    >>> findLatestYear(rawDf, "매출액", minCount=500)
-    "2024"
-
-    Guide:
-        - 호출 컨텍스트 가이드.
-
-    Capabilities:
-        - 연도별 유효 데이터 (non-null, ``"-"`` / ``""`` 제외) 카운트 → minCount 이상이면 그 연도
-          채택. 최신 → 과거 순회로 가장 최근 유효 연도 1 개만 반환.
-
-    AIContext:
-        scan axis 가 "최신 연 단면" 분석 시 본 함수로 latest year 확정. 데이터 누락이 큰 연도는
-        skip 해서 통계 안정성 확보.
-
-    When:
-        호출 컨텍스트 안에서.
-
-    How:
-        scan governance/workforce/capital 등이 연 단위 단면을 뽑을 때. years_desc 순회 + non-null
-        count → minCount 충족 첫 연도.
-
-    Requires:
-        - ``raw["year"]`` 컬럼 + ``check_col`` 컬럼
-
-    SeeAlso:
-        - :func:`pickBestQuarter` · :func:`filterLatestPerStock` — 같은 latest 컨셉의 다른 차원
-    """
-    years_desc = sorted(raw["year"].unique().to_list(), reverse=True)
-    for y in years_desc:
-        sub = raw.filter(pl.col("year") == y)
-        ok = sub.filter(pl.col(checkCol).is_not_null() & (pl.col(checkCol) != "-") & (pl.col(checkCol) != "")).shape[0]
-        if ok >= minCount:
-            return y
-    return None
-
-
-QUARTER_ORDER = {"2분기": 1, "4분기": 2, "3분기": 3, "1분기": 4}
-
-
-def pickBestQuarter(df: pl.DataFrame) -> pl.DataFrame:
-    """가장 선호하는 분기만 필터 (Q2 > Q4 > Q3 > Q1).
-
-    Parameters
-    ----------
-    df : pl.DataFrame
-        quarter 컬럼을 포함한 전종목 데이터.
-
-    Returns
-    -------
-    pl.DataFrame
-        가장 선호하는 분기 1개만 남긴 DataFrame.
-
-    Raises
-    ------
-    KeyError
-        ``df`` 에 ``"quarter"`` 컬럼이 없을 때.
-
-    Examples
-    --------
-    >>> from dartlab.scan.io.parquet import pickBestQuarter
-    >>> pickBestQuarter(df)["quarter"].unique().to_list()
-    ["2분기"]
-
-    Guide:
-        - 호출 컨텍스트 가이드.
-
-    Capabilities:
-        - QUARTER_ORDER (2분기→4분기→3분기→1분기) 우선순위로 단일 분기 선택. Q2 가 보통
-          반기 보고서로 가장 신뢰도 높아 우선.
-
-    AIContext:
-        scan 비재무 axis 가 종목별 단일 분기 단면 필요 시. AI 가 횡단 비교 시 분기 혼합 noise
-        제거.
-
-    When:
-        호출 컨텍스트 안에서.
-
-    How:
-        ``df["quarter"].unique()`` → ``QUARTER_ORDER`` 정렬 → 첫 분기로 filter.
-
-    Requires:
-        - ``df["quarter"]`` 컬럼 (예: "1분기"/"2분기"/...)
-
-    SeeAlso:
-        - :func:`findLatestYear` · :func:`filterLatestPerStock` — latest 단면 관련 helpers
-    """
-    quarters = df["quarter"].unique().to_list()
-    best = sorted(quarters, key=lambda q: QUARTER_ORDER.get(q, 99))
-    return df.filter(pl.col("quarter") == best[0]) if best else df
-
-
 def loadListing():
     """상장사 목록 로드.
 
@@ -529,139 +327,6 @@ def loadListing():
     from dartlab.scan.network.scanner import loadListing as _ll
 
     return _ll()
-
-
-def parseDateYear(s) -> int | None:
-    """날짜 문자열에서 연도 추출.
-
-    Parameters
-    ----------
-    s : str | None
-        날짜 문자열 (예: "2021.06.15", "2021-06-15").
-
-    Returns
-    -------
-    int | None
-        연도 (예: 2021). 파싱 불가면 None.
-
-    Raises
-    ------
-    없음 — ValueError 는 내부에서 흡수해 None 반환.
-
-    Examples
-    --------
-    >>> from dartlab.scan.io.parquet import parseDateYear
-    >>> parseDateYear("2021.06.15")
-    2021
-    >>> parseDateYear(None)
-    None
-
-    Guide:
-        - 호출 컨텍스트 가이드.
-
-    Capabilities:
-        - 다양한 separator (``.``/``-``/``/``) 의 날짜 문자열에서 연도 정수 추출. None/빈
-          문자열/포맷 어긋남은 모두 None.
-
-    AIContext:
-        scan 모듈이 raw report row 의 date 컬럼에서 연도 단위 비교를 위해 사용.
-
-    When:
-        호출 컨텍스트 안에서.
-
-    How:
-        ``isinstance(str)`` 체크 → 첫 4 자 정수 변환 시도 → ValueError 흡수 후 None.
-
-    Requires:
-        - 표준 라이브러리만
-
-    SeeAlso:
-        - :func:`findLatestYear` — 연도 단위 latest 추출의 호출자
-    """
-    if s is None:
-        return None
-    s = str(s).strip()
-    if s in ("", "-"):
-        return None
-    for sep in (".", "-"):
-        if sep in s:
-            parts = s.split(sep)
-            if parts:
-                try:
-                    y = int(parts[0])
-                    if 1990 <= y <= 2030:
-                        return y
-                except ValueError:
-                    pass
-    return None
-
-
-def filterLatestPerStock(target: pl.DataFrame, scCol: str = "stockCode", yearCol: str = "bsns_year") -> pl.DataFrame:
-    """종목별 최신 ``bsns_year`` 행만 남긴다.
-
-    scan 축이 ``target.filter(bsns_year == latestYear)`` 처럼 **글로벌 최신 연도** 로
-    커트하면, 2026 Q1 조기 제출 3 종목 때문에 2025 자 2895 종목이 전부 버려지는 버그가
-    발생 (2026-04-23 확인). 해당 버그는 13 개 축 파일에 분산 존재.
-
-    올바른 패턴: 종목별 ``group_by`` 로 **각자 최신 연도** 선택.
-
-    Parameters
-    ----------
-    target : pl.DataFrame
-        scan 대상 (finance parquet filter 결과). 반드시 ``scCol`` · ``yearCol`` 컬럼 포함.
-    scCol : str, default ``"stockCode"``
-        종목코드 컬럼명.
-    yearCol : str, default ``"bsns_year"``
-        사업년도 컬럼명.
-
-    Returns
-    -------
-    pl.DataFrame
-        각 종목의 자기 최신 연도 행만 남긴 DataFrame.
-
-    Raises
-    ------
-    없음 — 누락 컬럼 시 입력 그대로 반환.
-
-    Examples
-    --------
-    >>> from dartlab.scan.io.parquet import filterLatestPerStock
-    >>> latest = filterLatestPerStock(df)
-    >>> latest.group_by("stockCode").len()["len"].max()
-    1
-
-    Guide:
-        - 호출 컨텍스트 가이드.
-
-    Capabilities:
-        - 종목별 최신 ``bsns_year`` 행만 남기는 per-stock latest 필터. 글로벌 latest year cut 의
-          회귀 패턴 (2026 Q1 조기 제출 3 종목 → 2025 자 2895 종목 손실) 차단 SSOT.
-
-    AIContext:
-        scan financial / governance 등 모든 axis 가 본 함수를 사용해 종목별 latest 단면을 안전하게
-        추출. AI agent 가 횡단 비교 시 매년 다른 결산월 회사들의 단면 일관성 보장.
-
-    Guide:
-        - 13 개 axis 파일에 분산되어 있던 잘못된 글로벌 cut 패턴을 본 함수로 SSOT 통합.
-        - 누락 컬럼 / 빈 df 는 원본 그대로 반환 (silent skip — 호출자 무중단).
-
-    When:
-        호출 컨텍스트 안에서.
-
-    How:
-        axis 의 단면 추출 직전. ``group_by(scCol).agg(max yearCol)`` → join → filter → drop.
-
-    Requires:
-        - ``scCol`` · ``yearCol`` 컬럼 (둘 다 있어야 동작)
-
-    SeeAlso:
-        - :func:`findLatestYear` — 데이터 가용성 검사 (포함된 latest year 탐지)
-        - :func:`pickBestQuarter` — 분기 차원 latest
-    """
-    if target.is_empty() or scCol not in target.columns or yearCol not in target.columns:
-        return target
-    latest = target.group_by(scCol).agg(pl.col(yearCol).max().alias("_maxYear"))
-    return target.join(latest, on=scCol).filter(pl.col(yearCol) == pl.col("_maxYear")).drop("_maxYear")
 
 
 _RAW_FINANCE_DEFAULT_COLS: tuple[str, ...] = (
@@ -806,52 +471,6 @@ def _loadRawFinanceViaDuckDb(
         df = _calendarizeWithFmMap(df)
 
     return df.lazy()
-
-
-def _calendarizeWithFmMap(df: pl.DataFrame) -> pl.DataFrame:
-    """raw 합본 DataFrame 에 결산월 SSOT 기반 캘린더 환원 적용 (polars 벡터).
-
-    ``_fiscalMonthMap()`` (listing + raw 사업보고서 추정) 결과를 join 후 종목별
-    결산월에 맞춰 ``bsns_year`` · ``reprt_nm`` 을 캘린더 기준으로 환원한다. 12월
-    결산은 identity. raw glob fallback path 가 prebuild ``finance.parquet`` 과 동일한
-    period 스키마를 갖도록 보장.
-
-    Parameters
-    ----------
-    df : pl.DataFrame
-        ``stockCode`` · ``bsns_year`` · ``reprt_nm`` 컬럼을 가진 raw 합본.
-
-    Returns
-    -------
-    pl.DataFrame
-        ``bsns_year`` · ``reprt_nm`` 이 캘린더 기준으로 환원된 동일 schema DataFrame.
-    """
-    from dartlab.scan.builders.kr.core import _FISCAL_Q_MAP, _fiscalMonthMap
-
-    fmMap = _fiscalMonthMap()
-    if not fmMap:
-        return df
-
-    fmDf = pl.DataFrame(
-        {"stockCode": list(fmMap.keys()), "_fm": list(fmMap.values())},
-        schema={"stockCode": pl.Utf8, "_fm": pl.Int32},
-    )
-    df = df.join(fmDf, on="stockCode", how="left").with_columns(pl.col("_fm").fill_null(12))
-
-    bsnsInt = pl.col("bsns_year").cast(pl.Int32, strict=False)
-    fq = pl.col("reprt_nm").replace_strict(_FISCAL_Q_MAP, default=None, return_dtype=pl.Int32)
-    endMonth = ((pl.col("_fm") + fq * 3 - 1) % 12) + 1
-    calQ = ((endMonth - 1) // 3) + 1
-    calYear = pl.when(endMonth > pl.col("_fm")).then(bsnsInt - 1).otherwise(bsnsInt)
-    newBsns = (
-        pl.when(fq.is_not_null() & bsnsInt.is_not_null()).then(calYear.cast(pl.Utf8)).otherwise(pl.col("bsns_year"))
-    )
-    newRept = (
-        pl.when(fq.is_not_null() & bsnsInt.is_not_null())
-        .then(calQ.cast(pl.Utf8) + pl.lit("분기"))
-        .otherwise(pl.col("reprt_nm"))
-    )
-    return df.with_columns(newBsns.alias("bsns_year"), newRept.alias("reprt_nm")).drop("_fm")
 
 
 def _scanFinanceFromLazy(
