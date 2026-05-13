@@ -3134,6 +3134,23 @@
       "audiences": []
     },
     {
+      "id": "operation.skillMarket",
+      "title": "Skill Market 운영 규칙",
+      "category": "operation",
+      "purpose": "DartLab Skill Market 을 공식 Skill OS 와 분리된 커뮤니티 지식층으로 운영하는 규칙이다. GitHub Discussions 기반 등록, Forge 자동 초안, trust tier, credit 원장, 랜딩 노출, AI 조회 경계를 정의한다.",
+      "inDegree": 0,
+      "outDegree": 4,
+      "cluster": "operation",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "공식 Skill OS 검색 후 community 후보를 보조로 읽되 trust tier 와 sourceUrl 을 함께 제시한다.",
+        "marketDraft 는 실행하지 않고 marketRunnable 이상도 사용자에게 출처와 신뢰 경계를 보여준 뒤 사용한다.",
+        "분석 질문을 GitHub Discussion 에 적으면 DartLab Forge 가 스킬 카드 초안을 만든다."
+      ]
+    },
+    {
       "id": "runtime.channel",
       "title": "Channel",
       "category": "runtime",
@@ -10037,6 +10054,26 @@
       "src": "start.useSkillsCatalog",
       "dst": "start.quickStart",
       "kind": "linkedRecipe"
+    },
+    {
+      "src": "operation.skillMarket",
+      "dst": "start.dartlabSkillOs",
+      "kind": "knowledge"
+    },
+    {
+      "src": "operation.skillMarket",
+      "dst": "operation.code",
+      "kind": "knowledge"
+    },
+    {
+      "src": "operation.skillMarket",
+      "dst": "operation.testing",
+      "kind": "knowledge"
+    },
+    {
+      "src": "operation.skillMarket",
+      "dst": "operation.architecture",
+      "kind": "knowledge"
     }
   ],
   "entries": [

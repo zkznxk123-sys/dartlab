@@ -2382,6 +2382,15 @@
       "limitations": []
     },
     {
+      "id": "operation.skillMarket",
+      "title": "Skill Market 운영 규칙",
+      "category": "operation",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
       "id": "runtime.channel",
       "title": "Channel",
       "category": "runtime",
