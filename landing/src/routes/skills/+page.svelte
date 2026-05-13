@@ -34,6 +34,11 @@
 		window.dispatchEvent(new Event('open-command-palette'));
 	}
 
+	function selectSkillFilter(category: string, subGroup: string | null) {
+		selectedCategory = category;
+		selectedSubGroup = subGroup;
+	}
+
 	const pageTitle = 'DartLab Skills — 작업 체계 카탈로그';
 	const pageDesc =
 		'DartLab 분석 절차 · 엔진 능력 · 운영 규칙 · 확장 절차를 카테고리로 골라 입력 · 출력 · 검증 · 실행 순서를 한 화면에서 읽는 skill catalog. 사람과 LLM 이 같은 표면을 본다.';
@@ -133,7 +138,7 @@
 		</header>
 
 		<div class="layout">
-			<CategorySidebar bind:selectedCategory bind:selectedSubGroup />
+			<CategorySidebar bind:selectedCategory bind:selectedSubGroup onSelect={selectSkillFilter} />
 			<SkillCardGrid {skills} {selectedCategory} {selectedSubGroup} {query} />
 		</div>
 	</section>

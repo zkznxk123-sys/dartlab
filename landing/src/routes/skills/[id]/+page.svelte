@@ -70,11 +70,20 @@
 
 	onMount(() => {
 		let cleanup: (() => void) | undefined;
-		tick().then(() => {
+		let retryTimer: ReturnType<typeof setTimeout> | undefined;
+		const refreshToc = () => {
+			cleanup?.();
 			extractToc();
 			cleanup = observeHeadings();
+		};
+		tick().then(() => {
+			refreshToc();
+			retryTimer = setTimeout(refreshToc, 250);
 		});
-		return () => cleanup?.();
+		return () => {
+			if (retryTimer) clearTimeout(retryTimer);
+			cleanup?.();
+		};
 	});
 
 	const pageTitle = $derived(`${meta.title} — DartLab Skills`);
@@ -104,6 +113,14 @@
 			return { href: `${base}/skills/${value}`, label: value };
 		}
 		return { href: null, label: value };
+	}
+
+	function scrollToSection(sectionId: string) {
+		const target = document.getElementById(sectionId);
+		if (!target) return;
+		target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		history.replaceState(null, '', `#${sectionId}`);
+		activeId = sectionId;
 	}
 </script>
 
@@ -155,7 +172,13 @@
 					<ul class="toc">
 						{#each tocItems as item}
 							<li class="toc-l{item.level}">
-								<a href="#{item.id}" class:active={activeId === item.id}>{item.text}</a>
+								<button
+									type="button"
+									class:active={activeId === item.id}
+									onclick={() => scrollToSection(item.id)}
+								>
+									{item.text}
+								</button>
 							</li>
 						{/each}
 					</ul>
@@ -624,29 +647,36 @@
 		margin: 0.18rem 0;
 	}
 
-	.toc a {
+	.toc button {
 		display: block;
+		width: 100%;
 		padding: 0.18rem 0.4rem;
 		border-left: 2px solid transparent;
+		border-top: 0;
+		border-right: 0;
+		border-bottom: 0;
+		background: transparent;
 		color: var(--dl-ink-mute);
 		font-size: 0.8rem;
 		line-height: 1.45;
+		text-align: left;
 		text-decoration: none;
+		cursor: pointer;
 		transition: color 180ms ease, border-color 180ms ease;
 	}
 
-	.toc a:hover {
+	.toc button:hover {
 		color: var(--dl-orange);
 	}
 
-	.toc a.active {
+	.toc button.active {
 		color: var(--dl-orange);
 		border-left-color: var(--dl-orange);
 		background: rgba(251, 146, 60, 0.06);
 	}
 
-	.toc .toc-l2 a { padding-left: 0.85rem; }
-	.toc .toc-l3 a { padding-left: 1.4rem; font-size: 0.74rem; }
+	.toc .toc-l2 button { padding-left: 0.85rem; }
+	.toc .toc-l3 button { padding-left: 1.4rem; font-size: 0.74rem; }
 
 	.prose {
 		margin: 0.5rem 0;

@@ -25,10 +25,12 @@
 
 	let {
 		selectedCategory = $bindable('all'),
-		selectedSubGroup = $bindable<string | null>(null)
+		selectedSubGroup = $bindable<string | null>(null),
+		onSelect
 	}: {
 		selectedCategory?: string;
 		selectedSubGroup?: string | null;
+		onSelect?: (category: string, subGroup: string | null) => void;
 	} = $props();
 
 	const categories = $derived.by(() => {
@@ -70,6 +72,7 @@
 	function selectCategory(id: string) {
 		selectedCategory = id;
 		selectedSubGroup = null;
+		onSelect?.(id, null);
 		if (id === 'engines') enginesExpanded = true;
 		if (id === 'recipes') recipesExpanded = true;
 	}
@@ -83,6 +86,7 @@
 	function selectSubGroup(category: string, sg: string) {
 		selectedCategory = category;
 		selectedSubGroup = sg;
+		onSelect?.(category, sg);
 		if (category === 'engines') enginesExpanded = true;
 		if (category === 'recipes') recipesExpanded = true;
 	}
@@ -90,6 +94,7 @@
 	function selectAll() {
 		selectedCategory = 'all';
 		selectedSubGroup = null;
+		onSelect?.('all', null);
 	}
 
 	const totalCount = $derived(skills.length);
@@ -102,7 +107,7 @@
 	</div>
 
 	<div class="cat-row all-row" class:active={selectedCategory === 'all'}>
-		<button class="cat-main" onclick={selectAll}>
+		<button class="cat-main" type="button" onclick={selectAll} aria-pressed={selectedCategory === 'all'}>
 			<Layers size={14} class="row-icon" />
 			<span class="cat-name">All</span>
 			<span class="cat-count">{totalCount}</span>
@@ -117,7 +122,9 @@
 			>
 				<button
 					class="cat-main"
+					type="button"
 					onclick={() => selectCategory(cat.id)}
+					aria-pressed={selectedCategory === cat.id && !selectedSubGroup}
 					title={cat.description ?? ''}
 				>
 					{#if cat.id === 'engines' || cat.id === 'recipes'}
@@ -131,6 +138,7 @@
 				{#if cat.id === 'engines' || cat.id === 'recipes'}
 					<button
 						class="expand-btn"
+						type="button"
 						class:recipes={cat.id === 'recipes'}
 						onclick={(e) => toggleGroup(cat.id, e)}
 						aria-label={(cat.id === 'engines' ? enginesExpanded : recipesExpanded) ? `Collapse ${cat.id}` : `Expand ${cat.id}`}
@@ -150,7 +158,9 @@
 						<li>
 							<button
 								class="sub-row"
+								type="button"
 								class:active={selectedCategory === 'engines' && selectedSubGroup === sg.id}
+								aria-pressed={selectedCategory === 'engines' && selectedSubGroup === sg.id}
 								onclick={() => selectSubGroup('engines', sg.id)}
 							>
 								<span class="sub-name">{sg.id}</span>
@@ -167,7 +177,9 @@
 						<li>
 							<button
 								class="sub-row recipes"
+								type="button"
 								class:active={selectedCategory === 'recipes' && selectedSubGroup === sg.id}
+								aria-pressed={selectedCategory === 'recipes' && selectedSubGroup === sg.id}
 								onclick={() => selectSubGroup('recipes', sg.id)}
 							>
 								<span class="sub-name">{sg.id}</span>
