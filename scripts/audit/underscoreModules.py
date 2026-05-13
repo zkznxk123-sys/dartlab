@@ -3,7 +3,7 @@
 generic helper 파일명 (`_helpers.py`/`_utils.py`/`_*.py`) 폐지. 도메인 명시 이름 또는
 사용처 안으로 흡수.
 
-면제: `__init__.py`, `__main__.py` 같은 dunder.
+면제: `__init__.py`, `__main__.py` 같은 dunder, 명시 generated artifact.
 
 baseline (`_baselines/underscoreModules.json`) 외 위반만 fail.
 """
@@ -31,9 +31,17 @@ def _scan(target: Path) -> list[str]:
         if p.name.startswith("__") and p.name.endswith("__.py"):
             # dunder (`__init__.py`, `__main__.py`) 면제
             continue
+        if _isGeneratedArtifact(p):
+            continue
         if p.name.startswith("_"):
             violations.append(str(p.relative_to(_REPO).as_posix()))
     return sorted(violations)
+
+
+def _isGeneratedArtifact(path: Path) -> bool:
+    """운영 산출물로 명시된 generated module 예외."""
+    rel = path.relative_to(_REPO).as_posix()
+    return rel.startswith("src/dartlab/reference/capability/_generated") and path.name.endswith(".py")
 
 
 def _loadBaseline(path: Path) -> dict:

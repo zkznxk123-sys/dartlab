@@ -120,11 +120,12 @@ class StatementsResult:
 
 
 @runtime_checkable
-class CompanyProtocol(Protocol):
-    """Company 공통 인터페이스.
+class RawProviderCompanyProtocol(Protocol):
+    """L1 provider Company raw surface.
 
-    DART Company와 EDGAR Company 모두 이 Protocol을 만족한다.
-    P-트랙 룰 11: context manager + cleanup 의무.
+    DART/EDGAR provider 가 직접 소유해야 하는 안정 표면이다. 공시·재무·프로필
+    원자료 조회와 lifecycle 만 포함한다. analysis/credit/quant/macro/story/ask
+    같은 상위 엔진 편의 진입점은 public facade debt 로 분리 추적한다.
     """
 
     corpName: str
@@ -255,6 +256,21 @@ class CompanyProtocol(Protocol):
         """웹 뷰어 실행."""
         ...
 
+
+@runtime_checkable
+class CompanyProtocol(RawProviderCompanyProtocol, Protocol):
+    """현재 공개 Company 공통 인터페이스.
+
+    DART Company와 EDGAR Company 모두 이 Protocol을 만족한다.
+    P-트랙 룰 11: context manager + cleanup 의무.
+
+    Notes:
+        0.10 전환 중에는 provider Company 가 public facade 편의 메서드까지 함께
+        제공한다. 신규 L1 구현은 RawProviderCompanyProtocol 을 먼저 만족하고,
+        상위 엔진 편의 메서드는 PublicCompanyFacadeProtocol 으로 분리하는 방향을
+        따른다.
+    """
+
     def quant(
         self,
         metric: str | None = None,
@@ -275,6 +291,55 @@ class CompanyProtocol(Protocol):
         **kwargs: Any,
     ) -> str | Any:
         """LLM에게 기업 분석 질문."""
+        ...
+
+
+@runtime_checkable
+class PublicCompanyFacadeProtocol(CompanyProtocol, Protocol):
+    """사용자 공개 Company facade surface.
+
+    현재는 provider Company 가 이 표면을 직접 구현하지만, 후속 구조개선에서는
+    `dartlab.company.Company()` 가 provider raw 객체를 감싼 wrapper 를 반환하고
+    본 Protocol 의 상위 엔진 dispatch 를 wrapper 가 담당한다.
+    """
+
+    @property
+    def analysis(self) -> Any:
+        """재무 분석 dual access facade."""
+        ...
+
+    @property
+    def credit(self) -> Any:
+        """신용 분석 dual access facade."""
+        ...
+
+    @property
+    def story(self) -> Any:
+        """story 조합기 dual access facade."""
+        ...
+
+    def macro(self, axis: Any = None, target: Any = None, **kwargs: Any) -> Any:
+        """macro 엔진 facade."""
+        ...
+
+    def network(self, view: str | None = None, *, hops: int = 1) -> Any:
+        """network scan facade."""
+        ...
+
+    def governance(self, view: str | None = None) -> pl.DataFrame | None:
+        """governance scan facade."""
+        ...
+
+    def workforce(self, view: str | None = None) -> pl.DataFrame | None:
+        """workforce scan facade."""
+        ...
+
+    def capital(self, view: str | None = None) -> pl.DataFrame | None:
+        """capital scan facade."""
+        ...
+
+    def debt(self, view: str | None = None) -> pl.DataFrame | None:
+        """debt scan facade."""
         ...
 
 

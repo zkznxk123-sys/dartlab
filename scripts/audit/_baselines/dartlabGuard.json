@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "policy": "no_new_violations",
+  "known": {
+    "architecture.lazyL1CrossImport": [
+      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/dart/viewer.py:110",
+      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/dart/viewer.py:245",
+      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:118",
+      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:60"
+    ],
+    "architecture.lazyRootFacadeImport": [
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/company.py:1271",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/docs/notes.py:89",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/openapi/batch.py:1085",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/openapi/batch.py:445",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/search/fieldIndex.py:1160",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/search/fieldIndex.py:53",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/search/fieldIndex.py:892",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/companyfactsBulk.py:50",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/companyfactsBulk.py:58",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/datasetBulk.py:58",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/datasetBulk.py:66",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/freshness.py:32",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/company.py:781",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/docs/fetch.py:694",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/docs/fetch.py:845",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/batch.py:52",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/deploy.py:147",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/freshness.py:37",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/identity.py:17"
+    ],
+    "architecture.lazyUpperImport": [
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:606",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:642",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:744",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:839",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:873",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/macroProvider.py:110",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/macroProvider.py:147",
+      "architecture.lazyUpperImport:lazy:src/dartlab/gather/transforms/indicatorDispatch.py:60",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/docsIndexBuilder.py:120",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/financeStatementBuilder.py:472",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:2649",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3389",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3461",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3585",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3586",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:4269",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:4380",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:4428",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:4566",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5094",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5095",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5106",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5175",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5441",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/scanAccount.py:549",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/spec.py:58",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:223",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:240",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:291",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:242",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:291",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:1240",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:1302",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:2151",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:3078",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:471"
+    ]
+  },
+  "deferred": {
+    "provider.edinet": {
+      "reason": "API connection unavailable",
+      "owner": "providers",
+      "restoreWhen": "EDINET API connection is restored"
+    }
+  }
+}
