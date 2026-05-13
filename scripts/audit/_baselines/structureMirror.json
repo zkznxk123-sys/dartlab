@@ -1,4 +1,17 @@
 {
-  "_note": "P6 strict: providers/ src ↔ tests/providers/ 1:1 mirror 완전.",
-  "missingMirrors": []
+  "_note": "P6 strict: providers/ src must have tests/providers/ 1:1 mirrors. Existing gaps are frozen here; new gaps fail.",
+  "missingMirrors": [
+    "dart/docs/sections/tableParser.py",
+    "dart/docs/viewer.py",
+    "docs/diff.py",
+    "mappers/common.py",
+    "mappers/notesMapper.py",
+    "mappers/parserMapper.py",
+    "mappers/scanner.py",
+    "notesExtractor.py",
+    "reportSelector.py",
+    "show.py",
+    "tableParser.py",
+    "viewer.py"
+  ]
 }

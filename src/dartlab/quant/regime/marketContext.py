@@ -292,6 +292,7 @@ def calcMarketContext(
         "stockCode": stockCode,
         "market": market,
         "lookback": int(n_use),
+        "lookbackDays": int(n_use),
         "dateRef": last_date,
         "lastClose": round(last_close, 4),
     }
