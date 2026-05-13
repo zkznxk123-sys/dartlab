@@ -10,6 +10,7 @@ P-G7 점진: gather/ 잔여 미러 누락은 _baselines/gatherStructureMirror.js
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,12 @@ _PROVIDERS_SRC = _REPO / "src" / "dartlab" / "providers"
 _PROVIDERS_TEST = _REPO / "tests" / "providers"
 _GATHER_SRC = _REPO / "src" / "dartlab" / "gather"
 _GATHER_TEST = _REPO / "tests" / "gather"
+
+
+def _providerScope() -> tuple[str, ...]:
+    raw = os.environ.get("DARTLAB_PROVIDER_SCOPE", "dart,edgar")
+    providers = tuple(p.strip() for p in raw.split(",") if p.strip())
+    return providers or ("dart", "edgar")
 
 
 def _loadBaseline(path: Path) -> dict:
@@ -49,6 +56,15 @@ def _scanSrc(root: Path) -> list[str]:
     return sorted(paths)
 
 
+def _scanProviderSrc() -> list[str]:
+    paths: list[str] = []
+    for provider in _providerScope():
+        providerRoot = _PROVIDERS_SRC / provider
+        for srcRel in _scanSrc(providerRoot):
+            paths.append(f"{provider}/{srcRel}")
+    return sorted(paths)
+
+
 def _mirrorPath(srcRel: str) -> str:
     """src/dartlab/X/Y/Z.py → tests/X/Y/test_Z.py."""
     parts = srcRel.split("/")
@@ -61,7 +77,7 @@ def test_providers_have_test_mirrors() -> None:
 
     baseline 외 신규 미러 누락만 fail (회귀 가드).
     """
-    srcFiles = _scanSrc(_PROVIDERS_SRC)
+    srcFiles = _scanProviderSrc()
     missing: list[str] = []
     for srcRel in srcFiles:
         mirrorRel = _mirrorPath(srcRel)

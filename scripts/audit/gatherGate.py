@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -80,7 +81,10 @@ def _runAudit(scriptPath: str, baselinePath: str, strict: bool) -> tuple[bool, s
 
 def _runTest(testPath: str) -> tuple[bool, str]:
     cmd = [sys.executable, "-X", "utf8", "-m", "pytest", testPath, "-v", "--tb=short"]
-    result = subprocess.run(cmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8")
+    env = os.environ.copy()
+    srcPath = str(_REPO / "src")
+    env["PYTHONPATH"] = srcPath + os.pathsep + env.get("PYTHONPATH", "")
+    result = subprocess.run(cmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8", env=env)
     return result.returncode == 0, result.stdout + result.stderr
 
 

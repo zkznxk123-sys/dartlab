@@ -1,10 +1,12 @@
-"""providers/ 3-provider 폴더 mirror 검증 — P-트랙 룰 2.
+"""providers/ 폴더 mirror 검증 — P-트랙 룰 2.
 
-dart/edgar/edinet 가 동일 sub-folder set 보유하는지 검증.
+기본 strict 대상은 dart/edgar 이다. edinet 은 API 통신 불가 deferred provider 라서
+명시적으로 --providers 에 넣을 때만 검사한다.
 baseline (`_baselines/folderMirror.json`) 외 갭만 fail. --strict 면 baseline 무시.
 
 사용법:
     uv run python -X utf8 scripts/audit/folderMirror.py
+    uv run python -X utf8 scripts/audit/folderMirror.py --providers dart,edgar
     uv run python -X utf8 scripts/audit/folderMirror.py --strict
     uv run python -X utf8 scripts/audit/folderMirror.py --update-baseline
 
@@ -26,7 +28,17 @@ if hasattr(sys.stdout, "reconfigure"):
 _REPO = Path(__file__).resolve().parents[2]
 _PROVIDERS = _REPO / "src" / "dartlab" / "providers"
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "folderMirror.json"
-_TARGETS = ("dart", "edgar", "edinet")
+_DEFAULT_TARGETS = ("dart", "edgar")
+
+
+def _parseProviders(raw: str) -> tuple[str, ...]:
+    providers = tuple(p.strip() for p in raw.split(",") if p.strip())
+    if len(providers) < 2:
+        raise SystemExit("--providers 는 2개 이상이어야 합니다. 예: --providers dart,edgar")
+    missing = [p for p in providers if not (_PROVIDERS / p).exists()]
+    if missing:
+        raise SystemExit(f"알 수 없는 provider: {missing}")
+    return providers
 
 
 def _subfolders(providerName: str) -> set[str]:
@@ -42,14 +54,14 @@ def _loadBaseline() -> dict:
     return {"asymmetry": {}, "_note": "P0.5 baseline"}
 
 
-def _computeAsymmetry() -> dict[str, dict[str, list[str]]]:
+def _computeAsymmetry(targets: tuple[str, ...]) -> dict[str, dict[str, list[str]]]:
     """각 provider 가 보유한 폴더 vs 다른 provider 와 비교한 갭."""
-    sets = {name: _subfolders(name) for name in _TARGETS}
+    sets = {name: _subfolders(name) for name in targets}
     union = set().union(*sets.values())
     asymmetry: dict[str, dict[str, list[str]]] = {}
-    for name in _TARGETS:
+    for name in targets:
         missing = sorted(union - sets[name])
-        extra = sorted(sets[name] - set().union(*(sets[o] for o in _TARGETS if o != name)))
+        extra = sorted(sets[name] - set().union(*(sets[o] for o in targets if o != name)))
         if missing or extra:
             asymmetry[name] = {"missing": missing, "extra": extra}
     return asymmetry
@@ -57,14 +69,21 @@ def _computeAsymmetry() -> dict[str, dict[str, list[str]]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--providers",
+        default=",".join(_DEFAULT_TARGETS),
+        help="쉼표 구분 provider 목록. 기본 dart,edgar. edinet 은 API 불가 deferred 로 기본 제외.",
+    )
     parser.add_argument("--strict", action="store_true", help="baseline 무시, 모든 갭 fail")
     parser.add_argument("--update-baseline", action="store_true", help="현 상태로 baseline 덮어쓰기")
     args = parser.parse_args()
+    targets = _parseProviders(args.providers)
 
-    asymmetry = _computeAsymmetry()
+    asymmetry = _computeAsymmetry(targets)
 
     print("=== providers/ folder mirror audit (룰 2) ===")
-    for name in _TARGETS:
+    print(f"대상 provider: {', '.join(targets)}")
+    for name in targets:
         folders = sorted(_subfolders(name))
         print(f"  {name}: {folders}")
 

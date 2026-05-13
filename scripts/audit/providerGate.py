@@ -4,6 +4,7 @@
 
 사용법:
     uv run python -X utf8 scripts/audit/providerGate.py
+    uv run python -X utf8 scripts/audit/providerGate.py --providers dart,edgar
     uv run python -X utf8 scripts/audit/providerGate.py --strict   # baseline 무시
     uv run python -X utf8 scripts/audit/providerGate.py --json     # 결과 JSON 출력
 """
@@ -12,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -39,32 +41,60 @@ _TEST_GATES = [
 ]
 
 
-def _runAudit(scriptPath: str, strict: bool) -> tuple[bool, str]:
+def _providerList(providers: str) -> tuple[str, ...]:
+    return tuple(p.strip() for p in providers.split(",") if p.strip())
+
+
+def _runAudit(scriptPath: str, strict: bool, providers: str) -> tuple[bool, str]:
     cmd = [sys.executable, "-X", "utf8", scriptPath]
-    if strict:
-        cmd.append("--strict")
-    result = subprocess.run(cmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8")
-    return result.returncode == 0, result.stdout + result.stderr
+    if scriptPath.endswith("folderMirror.py"):
+        cmd.extend(["--providers", providers])
+        if strict:
+            cmd.append("--strict")
+        result = subprocess.run(cmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8")
+        return result.returncode == 0, result.stdout + result.stderr
+
+    outputs: list[str] = []
+    passed = True
+    for provider in _providerList(providers):
+        providerPath = f"src/dartlab/providers/{provider}"
+        providerCmd = [*cmd, providerPath]
+        if strict:
+            providerCmd.append("--strict")
+        result = subprocess.run(providerCmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8")
+        outputs.append(result.stdout + result.stderr)
+        passed = passed and result.returncode == 0
+    return passed, "\n".join(outputs)
 
 
-def _runTest(testPath: str) -> tuple[bool, str]:
+def _runTest(testPath: str, providers: str) -> tuple[bool, str]:
     cmd = [sys.executable, "-X", "utf8", "-m", "pytest", testPath, "-v", "--tb=short"]
-    result = subprocess.run(cmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8")
+    env = os.environ.copy()
+    env["DARTLAB_PROVIDER_SCOPE"] = providers
+    srcPath = str(_REPO / "src")
+    env["PYTHONPATH"] = srcPath + os.pathsep + env.get("PYTHONPATH", "")
+    result = subprocess.run(cmd, cwd=_REPO, capture_output=True, text=True, encoding="utf-8", env=env)
     return result.returncode == 0, result.stdout + result.stderr
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--providers",
+        default="dart,edgar",
+        help="쉼표 구분 provider scope. 기본 dart,edgar. edinet 은 API 불가 deferred 로 기본 제외.",
+    )
     parser.add_argument("--strict", action="store_true", help="모든 audit --strict")
     parser.add_argument("--json", action="store_true", help="JSON 결과 출력")
     args = parser.parse_args()
 
     results: list[dict] = []
 
-    print("=== P-트랙 11 룰 게이트 (providers/) ===\n")
+    print("=== P-트랙 11 룰 게이트 (providers/) ===")
+    print(f"대상 provider: {args.providers}\n")
 
     for label, script in _AUDIT_SCRIPTS:
-        passed, output = _runAudit(script, args.strict)
+        passed, output = _runAudit(script, args.strict, args.providers)
         results.append({"rule": label, "type": "audit", "script": script, "passed": passed})
         status = "PASS" if passed else "FAIL"
         print(f"  [{status}] {label}")
@@ -72,7 +102,7 @@ def main() -> int:
             print("    " + output.split("\n")[-3] if output else "    (no output)")
 
     for label, test in _TEST_GATES:
-        passed, output = _runTest(test)
+        passed, output = _runTest(test, args.providers)
         results.append({"rule": label, "type": "test", "script": test, "passed": passed})
         status = "PASS" if passed else "FAIL"
         print(f"  [{status}] {label}")

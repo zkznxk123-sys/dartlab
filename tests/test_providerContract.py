@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -27,6 +28,13 @@ pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "providerContract.json"
+_DEFERRED_PROVIDERS = {"edinet"}
+
+
+def _providerScope() -> tuple[str, ...]:
+    raw = os.environ.get("DARTLAB_PROVIDER_SCOPE", "dart,edgar")
+    providers = tuple(p.strip() for p in raw.split(",") if p.strip())
+    return providers or ("dart", "edgar")
 
 
 def _loadBaseline() -> dict:
@@ -70,7 +78,7 @@ def test_provider_company_isinstance_baseline() -> None:
     from dartlab.core.protocols import CompanyProtocol
 
     violations: list[str] = []
-    for providerName in ("dart", "edgar", "edinet"):
+    for providerName in _providerScope():
         try:
             mod = importlib.import_module(f"dartlab.providers.{providerName}.company")
             if not hasattr(mod, "Company"):
@@ -93,11 +101,15 @@ def test_provider_company_isinstance_baseline() -> None:
 
 # ── P-PR0 추가: 실 인스턴스 isinstance runtime 검증 (baseline 모드) ──
 
-_PROVIDER_PROBES: tuple[tuple[str, str], ...] = (
-    ("dart", "005930"),
-    ("edgar", "AAPL"),
-    ("edinet", "7203"),
-)
+_PROBE_CODES = {
+    "dart": "005930",
+    "edgar": "AAPL",
+    "edinet": "7203",
+}
+
+
+def _providerProbes() -> tuple[tuple[str, str], ...]:
+    return tuple((provider, _PROBE_CODES[provider]) for provider in _providerScope() if provider in _PROBE_CODES)
 
 
 def test_company_isinstance_runtime() -> None:
@@ -112,7 +124,7 @@ def test_company_isinstance_runtime() -> None:
     from dartlab.core.protocols import CompanyProtocol
 
     violations: list[str] = []
-    for providerName, stockCode in _PROVIDER_PROBES:
+    for providerName, stockCode in _providerProbes():
         try:
             mod = importlib.import_module(f"dartlab.providers.{providerName}.company")
             company = mod.Company(stockCode)
@@ -150,7 +162,7 @@ def test_provider_namespaces_isinstance() -> None:
     from dartlab.core.protocols import DocsProvider, FinanceProvider
 
     violations: list[str] = []
-    for providerName, stockCode in _PROVIDER_PROBES:
+    for providerName, stockCode in _providerProbes():
         try:
             mod = importlib.import_module(f"dartlab.providers.{providerName}.company")
             company = mod.Company(stockCode)
@@ -180,3 +192,10 @@ def test_provider_namespaces_isinstance() -> None:
         f"Namespace Protocol isinstance 회귀 {len(new_violations)} 건: {new_violations}. "
         "P-PR0 baseline 에 등록하거나 namespace 구현 보강 필요."
     )
+
+
+def test_edinet_is_deferred_by_default() -> None:
+    """EDINET 은 API 통신 불가 provider 이므로 기본 strict scope 에 포함하지 않는다."""
+    if "edinet" in _providerScope():
+        pytest.skip("edinet 명시 scope — deferred 확인 생략")
+    assert _DEFERRED_PROVIDERS == {"edinet"}

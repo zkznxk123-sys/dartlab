@@ -11,12 +11,18 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
+ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 L15_PEERS = ("scan", "frame", "synth", "reference")
+
+
+def _assertRealSourceRoot() -> None:
+    assert ROOT.exists(), f"dartlab source root not found: {ROOT}"
+    assert any(ROOT.rglob("*.py")), f"dartlab source root has no Python files: {ROOT}"
 
 
 def test_l15_no_cross_import() -> None:
     """L1.5 4 형제 상호 import 0 건 강제."""
+    _assertRealSourceRoot()
     violations: list[str] = []
     for peer in L15_PEERS:
         peerDir = ROOT / peer

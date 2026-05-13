@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,12 @@ _PROVIDERS = _REPO / "src" / "dartlab" / "providers"
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "iterPairs.json"
 
 _PAIRING_PREFIXES = ("fetch", "list", "search")
+
+
+def _providerScope() -> tuple[str, ...]:
+    raw = os.environ.get("DARTLAB_PROVIDER_SCOPE", "dart,edgar")
+    providers = tuple(p.strip() for p in raw.split(",") if p.strip())
+    return providers or ("dart", "edgar")
 
 
 def _loadBaseline() -> dict:
@@ -66,10 +73,14 @@ def _scanFile(path: Path) -> list[str]:
 
 def _scanAll() -> list[str]:
     all_violations: list[str] = []
-    for p in _PROVIDERS.rglob("*.py"):
-        if "__pycache__" in p.parts:
+    for provider in _providerScope():
+        providerRoot = _PROVIDERS / provider
+        if not providerRoot.exists():
             continue
-        all_violations.extend(_scanFile(p))
+        for p in providerRoot.rglob("*.py"):
+            if "__pycache__" in p.parts:
+                continue
+            all_violations.extend(_scanFile(p))
     return sorted(all_violations)
 
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
+ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 UPPER_LAYERS = (
     "gather",
     "providers",
@@ -26,8 +26,14 @@ UPPER_LAYERS = (
 )
 
 
+def _assertRealSourceRoot() -> None:
+    assert ROOT.exists(), f"dartlab source root not found: {ROOT}"
+    assert any(ROOT.rglob("*.py")), f"dartlab source root has no Python files: {ROOT}"
+
+
 def test_core_l0_only_no_upper_import() -> None:
     """core/ 의 모듈이 상위 계층 import 시 위반."""
+    _assertRealSourceRoot()
     violations: list[str] = []
     coreDir = ROOT / "core"
     for pyFile in coreDir.rglob("*.py"):

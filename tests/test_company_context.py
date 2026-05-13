@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -18,6 +19,12 @@ pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent
 _BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "companyContext.json"
+
+
+def _providerScope() -> tuple[str, ...]:
+    raw = os.environ.get("DARTLAB_PROVIDER_SCOPE", "dart,edgar")
+    providers = tuple(p.strip() for p in raw.split(",") if p.strip())
+    return providers or ("dart", "edgar")
 
 
 def _loadBaseline() -> dict:
@@ -55,7 +62,7 @@ def test_provider_companies_have_context_manager() -> None:
     allowed = set(baseline.get("missingContextManagers", []))
 
     missing: list[str] = []
-    for providerName in ("dart", "edgar", "edinet"):
+    for providerName in _providerScope():
         try:
             mod = importlib.import_module(f"dartlab.providers.{providerName}.company")
             CompanyCls = getattr(mod, "Company", None)

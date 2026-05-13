@@ -8,13 +8,19 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
+ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 L15_PEERS = ("frame", "synth", "reference")
 L2_PEERS = ("analysis", "macro", "quant", "industry", "credit")
 
 
+def _assertRealSourceRoot() -> None:
+    assert ROOT.exists(), f"dartlab source root not found: {ROOT}"
+    assert any(ROOT.rglob("*.py")), f"dartlab source root has no Python files: {ROOT}"
+
+
 def test_l15_entry_rule_baseline() -> None:
     """L1.5 모듈이 ≥ 2 분석엔진에서 쓰이는지 정적 추적 (baseline only)."""
+    _assertRealSourceRoot()
     usage: dict[str, set[str]] = {}
     for l2 in L2_PEERS:
         l2Dir = ROOT / l2

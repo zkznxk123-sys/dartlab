@@ -175,6 +175,8 @@ ignore = ["E402", "E501", "E741", "F841", "F401"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py", "test*.py", "bench_*.py", "bench*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*", "test*"]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
 markers = [
@@ -356,6 +358,18 @@ layers = [
 ]
 exhaustive = false  # L2 5 엔진은 이 contract 에서 무시 (sibling 단방향 허용)
 ignore_imports = []  # 후속 정리 — 진행하며 한 줄씩 비움
+
+# ── Contract 1b: L0~L1.5 완료 게이트 전용 (tests/architecture 와 동일 범위)
+[[tool.importlinter.contracts]]
+name = "L0-L1.5 architecture boundary"
+type = "layers"
+layers = [
+    "dartlab.scan | dartlab.frame | dartlab.synth | dartlab.reference",
+    "dartlab.gather | dartlab.providers",
+    "dartlab.core",
+]
+exhaustive = false
+ignore_imports = []
 
 # ── Contract 2: L2 가 상위 (L3/L4) import 금지 (direct only)
 # allow_indirect_imports: true — direct 만 차단. transitive 는 root facade 정공법 D

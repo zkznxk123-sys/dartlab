@@ -23,6 +23,26 @@ concurrency:
   cancel-in-progress: false  # nightly 는 cron 자연 간격 → 중첩 거의 없음
 
 jobs:
+  guard-full-census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package and test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-benchmark hypothesis
+          pip install -e .
+      - name: Run Guard full census
+        env:
+          DARTLAB_PROVIDER_SCOPE: dart,edgar
+        run: |
+          python -X utf8 scripts/audit/dartlabGuard.py full --baseline scripts/audit/_baselines/dartlabGuard.json
+
   # realData 20 shard 전수 — planRealdata 우회 (infra 변경 여부 무관).
   realdata-suite-full:
     if: ${{ github.event.inputs.skip_realdata != 'true' }}

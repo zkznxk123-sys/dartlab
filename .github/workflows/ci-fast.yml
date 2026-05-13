@@ -79,6 +79,25 @@ jobs:
       - name: Naming consistency (parameter aliases)
         run: python -X utf8 scripts/audit/namingConsistency.py
 
+  architecture-l0-l15:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package and test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio pytest-benchmark hypothesis
+          pip install -e .
+      - name: L0-L1.5 architecture gates
+        env:
+          DARTLAB_PROVIDER_SCOPE: dart,edgar
+        run: |
+          python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
+
   typecheck:
     runs-on: ubuntu-latest
     steps:

@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-다음 릴리스 준비 항목 없음.
+### Changed
+
+- core, gather, DART/EDGAR provider, L1.5 가공 계층의 아키텍처 검증을 강화했다.
+  architecture 테스트가 실제 `src/dartlab` 경로를 검사하도록 고치고, L1/L1.5 import
+  경계와 provider gate가 CI에서 실패로 드러나도록 정리했다.
+- EDINET provider는 API 통신 불가 상태를 반영해 이번 provider strict gate 대상에서 제외했다.
+  DART/EDGAR mirror와 protocol 검증은 유지한다.
+- Guard Index 실행 표면을 추가해 빠른 변경 영향도 확인, L0~L1.5 strict gate,
+  nightly 전수조사를 같은 명령 체계에서 실행할 수 있게 했다.
 
 ## [0.10.0] - 2026-05-13
 

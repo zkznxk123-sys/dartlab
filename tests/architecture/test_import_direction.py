@@ -8,7 +8,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
+ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 
 LAYER_OF: dict[str, float] = {
     "core": 0.0,
@@ -30,6 +30,20 @@ LAYER_OF: dict[str, float] = {
 # sink 헬퍼 — CLAUDE.md "표현/전송 헬퍼: 모든 계층 결과를 다른 매체로". 호출 방향 룰 예외.
 # 어디서도 import 가능 (L0~L3 → viz/cli/server/channel OK). 단 sink 끼리 cross 는 별 룰 미적용.
 SINK_HELPERS = {"viz", "cli", "server", "channel"}
+STRICT_L0_L15 = {
+    "core",
+    "gather",
+    "providers",
+    "scan",
+    "frame",
+    "synth",
+    "reference",
+}
+
+
+def _assertRealSourceRoot() -> None:
+    assert ROOT.exists(), f"dartlab source root not found: {ROOT}"
+    assert any(ROOT.rglob("*.py")), f"dartlab source root has no Python files: {ROOT}"
 
 
 def _topLevel(modName: str) -> str | None:
@@ -42,6 +56,7 @@ def _topLevel(modName: str) -> str | None:
 
 def test_import_direction_downward_only() -> None:
     """상위 계층이 하위만 import — 역방향 0 건."""
+    _assertRealSourceRoot()
     violations: list[str] = []
     for ownerName, ownerLayer in LAYER_OF.items():
         ownerDir = ROOT / ownerName
@@ -85,3 +100,36 @@ def test_import_direction_downward_only() -> None:
     assert len(violations) <= BASELINE, f"역방향 import 신규 위반 ({len(violations)} > {BASELINE}):\n" + "\n".join(
         violations[:20]
     )
+
+
+def test_l0_l15_import_direction_strict() -> None:
+    """L0~L1.5 완료 게이트 — 상위 계층 직접 import 금지."""
+    _assertRealSourceRoot()
+    violations: list[str] = []
+    for ownerName in STRICT_L0_L15:
+        ownerLayer = LAYER_OF[ownerName]
+        ownerDir = ROOT / ownerName
+        if not ownerDir.exists():
+            continue
+        for pyFile in ownerDir.rglob("*.py"):
+            if pyFile.name == "di.py":
+                continue
+            try:
+                tree = ast.parse(pyFile.read_text(encoding="utf-8"))
+            except SyntaxError:
+                continue
+            for node in tree.body:
+                names: list[str] = []
+                if isinstance(node, ast.ImportFrom):
+                    names = [node.module or ""]
+                elif isinstance(node, ast.Import):
+                    names = [a.name for a in node.names]
+                for n in names:
+                    target = _topLevel(n)
+                    if target is None or target in SINK_HELPERS or target not in LAYER_OF:
+                        continue
+                    targetLayer = LAYER_OF[target]
+                    if targetLayer > ownerLayer:
+                        rel = pyFile.relative_to(ROOT.parent.parent)
+                        violations.append(f"{rel}:{node.lineno}: L{ownerLayer} {ownerName} → L{targetLayer} {target}")
+    assert not violations, "L0~L1.5 import direction 위반:\n" + "\n".join(violations[:30])
