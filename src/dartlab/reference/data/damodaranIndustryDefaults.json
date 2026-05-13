@@ -1,0 +1,148 @@
+{
+  "_meta": {
+    "source": "Damodaran NYU Stern industry datasets",
+    "asOfDate": "2026-01-01",
+    "maxStaleDays": 240,
+    "coverageStatus": "seed-subset",
+    "notes": "Initial L1.5 reference seed for Damodaran-style recipe incubation. Use only with explicit fallback reason until the full industry table is synchronized.",
+    "sourceUrls": {
+      "betas": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/Betas.html",
+      "costOfCapital": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/wacc.html",
+      "cashFlowDrivers": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/cfbasics.html",
+      "margins": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/margin.html"
+    }
+  },
+  "industries": {
+    "semiconductor": {
+      "label": "Semiconductor",
+      "numberOfFirms": 66,
+      "beta": 1.52,
+      "unleveredBeta": 1.49,
+      "debtToEquityPct": 2.59,
+      "effectiveTaxRatePct": 5.11,
+      "costOfEquityPct": 10.72,
+      "preTaxCostOfDebtPct": 5.29,
+      "afterTaxCostOfDebtPct": 3.97,
+      "debtToCapitalPct": 2.53,
+      "costOfCapitalPct": 10.55,
+      "preTaxOperatingMarginPct": 35.33,
+      "nonCashWorkingCapitalToRevenuePct": 27.98,
+      "netCapexToRevenuePct": 4.41,
+      "salesToInvestedCapital": 1.21,
+      "sourceNote": "Damodaran January 2026 US industry rows."
+    },
+    "semiconductorEquipment": {
+      "label": "Semiconductor Equip",
+      "numberOfFirms": 31,
+      "beta": 1.40,
+      "unleveredBeta": 1.35,
+      "debtToEquityPct": 4.86,
+      "effectiveTaxRatePct": 9.96,
+      "preTaxOperatingMarginPct": 26.17,
+      "nonCashWorkingCapitalToRevenuePct": 34.06,
+      "netCapexToRevenuePct": 4.14,
+      "salesToInvestedCapital": 1.85,
+      "sourceNote": "Damodaran January 2026 US industry rows."
+    },
+    "softwareInternet": {
+      "label": "Software (Internet)",
+      "numberOfFirms": 29,
+      "beta": 1.69,
+      "unleveredBeta": 1.55,
+      "debtToEquityPct": 12.30,
+      "effectiveTaxRatePct": 3.05,
+      "preTaxOperatingMarginPct": 3.69,
+      "nonCashWorkingCapitalToRevenuePct": 17.49,
+      "netCapexToRevenuePct": 26.01,
+      "salesToInvestedCapital": 1.35,
+      "sourceNote": "Damodaran January 2026 US industry rows."
+    },
+    "softwareSystemApplication": {
+      "label": "Software (System & Application)",
+      "numberOfFirms": 309,
+      "beta": 1.28,
+      "unleveredBeta": 1.23,
+      "debtToEquityPct": 5.58,
+      "effectiveTaxRatePct": 5.51,
+      "preTaxOperatingMarginPct": 32.98,
+      "nonCashWorkingCapitalToRevenuePct": 26.79,
+      "netCapexToRevenuePct": 17.82,
+      "salesToInvestedCapital": 1.54,
+      "sourceNote": "Damodaran January 2026 US industry rows."
+    },
+    "aerospaceDefense": {
+      "label": "Aerospace/Defense",
+      "numberOfFirms": 79,
+      "beta": 0.95,
+      "unleveredBeta": 0.85,
+      "debtToEquityPct": 15.56,
+      "effectiveTaxRatePct": 11.58,
+      "costOfEquityPct": 8.17,
+      "preTaxCostOfDebtPct": 5.29,
+      "afterTaxCostOfDebtPct": 3.97,
+      "debtToCapitalPct": 13.47,
+      "costOfCapitalPct": 7.60,
+      "preTaxOperatingMarginPct": 8.65,
+      "nonCashWorkingCapitalToRevenuePct": 45.62,
+      "netCapexToRevenuePct": 0.82,
+      "salesToInvestedCapital": 2.74,
+      "sourceNote": "Damodaran January 2026 US industry rows."
+    },
+    "banksRegional": {
+      "label": "Banks (Regional)",
+      "numberOfFirms": 568,
+      "modelFit": "financialFirmOnly",
+      "beta": 0.40,
+      "unleveredBeta": 0.29,
+      "debtToEquityPct": 52.10,
+      "effectiveTaxRatePct": 17.61,
+      "costOfCapitalPct": 4.98,
+      "salesToInvestedCapital": 0.33,
+      "sourceNote": "Financial firms are blocked from generic FCFF DCF recipes."
+    },
+    "totalMarketWithoutFinancials": {
+      "label": "Total Market (without financials)",
+      "numberOfFirms": 4822,
+      "effectiveTaxRatePct": 7.10,
+      "preTaxOperatingMarginPct": 13.14,
+      "nonCashWorkingCapitalToRevenuePct": 13.77,
+      "netCapexToRevenuePct": 4.29,
+      "salesToInvestedCapital": 1.43,
+      "sourceNote": "Fallback only when industry mapping is missing."
+    }
+  },
+  "aliases": {
+    "semiconductor": "semiconductor",
+    "semiconductors": "semiconductor",
+    "반도체": "semiconductor",
+    "semiconductor equipment": "semiconductorEquipment",
+    "semicap": "semiconductorEquipment",
+    "internet software": "softwareInternet",
+    "software internet": "softwareInternet",
+    "system software": "softwareSystemApplication",
+    "application software": "softwareSystemApplication",
+    "aerospace": "aerospaceDefense",
+    "defense": "aerospaceDefense",
+    "은행": "banksRegional",
+    "bank": "banksRegional",
+    "regional bank": "banksRegional",
+    "fallback": "totalMarketWithoutFinancials"
+  },
+  "gapLedger": [
+    {
+      "id": "fullIndustryCoverage",
+      "status": "deferredWithBlocker",
+      "reason": "Full official table sync has not been implemented yet. Recipes must mark industry fallback when aliases miss."
+    },
+    {
+      "id": "globalIndustryDataset",
+      "status": "deferredWithBlocker",
+      "reason": "Initial seed uses US industry tables. Global/KR industry defaults require separate official source lock."
+    },
+    {
+      "id": "companyIndustryMapping",
+      "status": "fallbackAccepted",
+      "reason": "Use explicit operator-provided industry key or totalMarketWithoutFinancials fallback until L1.5 industry alias mapping is complete."
+    }
+  ]
+}

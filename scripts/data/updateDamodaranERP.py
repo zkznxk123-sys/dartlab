@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-_TARGET = _REPO_ROOT / "src" / "dartlab" / "core" / "data" / "damodaranDefaults.json"
+_TARGET = _REPO_ROOT / "src" / "dartlab" / "reference" / "data" / "damodaranDefaults.json"
 _URL = "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html"
 
 

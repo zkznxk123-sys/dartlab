@@ -1,0 +1,167 @@
+---
+id: recipes.valuation.damodaran.deepDive
+title: Damodaran L1.5 딥다이브
+category: recipes
+kind: recipe
+scope: builtin
+status: unverified
+purpose: L2 분석 엔진 없이 L1/L1.5 데이터와 Damodaran식 가정 검증만으로 가치평가 memo, DCF 밴드, reverse DCF, 반증, storyboardReady 초안을 만드는 최종 오케스트레이터. 트리거 — 'Damodaran deep dive', 'L1.5 가치평가 memo', '다모다란 딥다이브'.
+whenToUse:
+  - Damodaran deep dive
+  - L1.5 가치평가 memo
+  - 다모다란 딥다이브
+  - DCF band reverse DCF
+  - story engine 전 단계 valuation memo
+linkedSkills:
+  - recipes.valuation.damodaran.dataAudit
+  - recipes.valuation.damodaran.businessModelFit
+  - recipes.valuation.damodaran.normalizedFinancials
+  - recipes.valuation.damodaran.reinvestmentRoc
+  - recipes.valuation.damodaran.costOfCapital
+  - recipes.valuation.damodaran.fcffDcf
+  - recipes.valuation.damodaran.relativeCheck
+  - recipes.valuation.damodaran.scenarioFalsifier
+toolRefs:
+  - RunPython
+requiredEvidence:
+  - skillRef
+  - sourceRef
+  - tableRef
+  - valueRef
+  - dateRef
+  - executionRef
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  pyodide:
+    status: limited
+forbidden:
+  - L3 story 호출 금지. storyboardReady는 초안 구조만 만든다.
+  - L2 엔진 호출 금지.
+  - 데이터 갭이 남아 있는데 완성 선언 금지.
+failureModes:
+  - sub-skill 하나가 blocked인데 최종 memo를 complete로 표시
+  - valuation number만 출력하고 falsifier 누락
+  - story 엔진에 보낼 근거 구조 없이 문장만 생성
+examples:
+  - 삼성전자 Damodaran L1.5 딥다이브
+  - AAPL L1.5 가치평가 memo
+  - INTC reverse DCF 반증 포함
+gap:
+  primary:
+    - gather
+    - reference
+testUniverse:
+  market: KR+US
+  stockCodes:
+    - "005930"
+    - "000660"
+    - "138930"
+    - "AAPL"
+    - "INTC"
+  asOfPolicy: latest
+falsifier:
+  description: "dataAudit, modelFit, falsifier 중 하나라도 blocked인데 complete memo로 선언하면 실패로 본다."
+lastUpdated: "2026-05-13"
+---
+
+## 공개 호출 방식
+
+```python
+import dartlab
+import importlib.resources as resources
+import json
+
+target = "005930"
+c = dartlab.Company(target)
+market = getattr(c, "market", "KR")
+
+country_defaults = json.loads(
+    resources.files("dartlab.reference.data").joinpath("damodaranDefaults.json").read_text(encoding="utf-8")
+)
+industry_defaults = json.loads(
+    resources.files("dartlab.reference.data").joinpath("damodaranIndustryDefaults.json").read_text(encoding="utf-8")
+)
+
+steps = [
+    {"step": "dataAudit", "required": True, "status": "pending"},
+    {"step": "businessModelFit", "required": True, "status": "pending"},
+    {"step": "normalizedFinancials", "required": True, "status": "pending"},
+    {"step": "reinvestmentRoc", "required": True, "status": "pending"},
+    {"step": "costOfCapital", "required": True, "status": "pending"},
+    {"step": "fcffDcf", "required": True, "status": "pending"},
+    {"step": "relativeCheck", "required": False, "status": "pending"},
+    {"step": "scenarioFalsifier", "required": True, "status": "pending"},
+]
+
+emit_result(
+    table=steps,
+    values={
+        "target": target,
+        "market": market,
+        "countryReferenceStatus": country_defaults["_meta"].get("freshnessStatus", "unknown"),
+        "industryReferenceStatus": industry_defaults["_meta"].get("coverageStatus", "unknown"),
+        "storyboardReady": False,
+    },
+    date=country_defaults["_meta"].get("asOfDate"),
+)
+```
+
+## 호출 동작
+
+### 1. 결론 도출
+
+최종 출력은 투자 의견이 아니라 valuation memo다. `valueBand`, `priceImpliedStory`, `breakConditions`, `missingEvidence`, `storyboardReady`를 함께 낸다.
+
+### 2. 핵심 근거 수집
+
+8개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 호출 또는 recipe 내부 RunPython 계산에서 나온다.
+
+### 3. 메커니즘 분석
+
+데이터 가능성, 모델 적합성, 재무 정규화, 재투자와 ROC, WACC, DCF, 상대가치 검산, reverse DCF 반증을 하나의 인과 흐름으로 묶는다.
+
+```mermaid
+graph LR
+  A["dataAudit"] --> B["businessModelFit"]
+  B --> C["normalizedFinancials"]
+  C --> D["reinvestmentRoc"]
+  D --> E["costOfCapital"]
+  E --> F["fcffDcf"]
+  F --> G["relativeCheck"]
+  F --> H["scenarioFalsifier"]
+  H --> I["storyboardReady draft"]
+```
+
+### 4. 반례·한계
+
+하위 단계의 `blocked`가 하나라도 있으면 memo는 `incomplete`다. US peer valuation, stale ERP, industry fallback, financial-firm blocker는 빠짐없이 노출한다.
+
+### 5. 후속 모니터링
+
+매출 성장, 정상 마진, reinvestment rate, ROC-WACC spread, terminal value share, reverse DCF 요구 성장률을 다음 분기 모니터링 지표로 남긴다.
+
+## 대표 반환 형태
+
+`damodaranMemo : dict` — `decisionStatus`, `valueBand`, `assumptionTable`, `reverseDcf`, `falsifiers`, `gapLedger`, `storyboardReady`를 담는다.
+
+## 연계 절차
+
+1. recipes.valuation.damodaran.dataAudit - 데이터 가능성.
+2. recipes.valuation.damodaran.businessModelFit - 모델 적합성.
+3. recipes.valuation.damodaran.normalizedFinancials - 재무 패널.
+4. recipes.valuation.damodaran.reinvestmentRoc - value driver.
+5. recipes.valuation.damodaran.costOfCapital - WACC.
+6. recipes.valuation.damodaran.fcffDcf - 가치 밴드.
+7. recipes.valuation.damodaran.relativeCheck - 상대가치 검산.
+8. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF 반증.
+
+## 기본 검증
+
+- 5개 고정 타깃에서 self-run 표를 남긴다.
+- KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.
+- L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.
+- verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다.
+
