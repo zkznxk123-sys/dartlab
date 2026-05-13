@@ -56,7 +56,7 @@ def _buildEnrichedNodes(data: dict, edges: list[dict]) -> list[dict]:
     Parameters
     ----------
     data : dict
-        build_graph 결과 (all_node_ids, listing_meta, code_to_group 등).
+        buildGraph 결과 (all_node_ids, listing_meta, code_to_group 등).
     edges : list[dict]
         엣지 목록 (source, target, type).
 

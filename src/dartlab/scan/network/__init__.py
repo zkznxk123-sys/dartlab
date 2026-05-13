@@ -1,10 +1,10 @@
 """한국 상장사 관계 지도 — 출자/지분/인적 관계 그래프.
 
 Public API:
-    build_graph()        → data dict (전체 파이프라인)
-    export_full(data)    → full JSON dict
-    export_overview(data, full) → overview JSON dict
-    export_ego(data, full, code) → ego JSON dict
+    buildGraph()        → data dict (전체 파이프라인)
+    exportFull(data)    → full JSON dict
+    exportOverview(data, full) → overview JSON dict
+    exportEgo(data, full, code) → ego JSON dict
 """
 
 from __future__ import annotations
@@ -172,8 +172,8 @@ def buildGraph(*, verbose: bool = True) -> dict:
 
 
 __all__ = [
-    "build_graph",
-    "export_full",
-    "export_overview",
-    "export_ego",
+    "buildGraph",
+    "exportFull",
+    "exportOverview",
+    "exportEgo",
 ]

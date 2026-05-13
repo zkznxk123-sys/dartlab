@@ -44,6 +44,16 @@ def _estimateWacc(company) -> float | None:
     None 결과도 캐시해야 외부 API 재호출 방지.
     memoized_calc은 None 결과를 캐시 안 함 → 자체 sentinel 캐시 사용.
     """
+
+    def _isOptionalMarketDataError(exc: Exception) -> bool:
+        try:
+            import httpx
+
+            from dartlab.gather.types import SourceUnavailableError
+        except ImportError:
+            return False
+        return isinstance(exc, (httpx.HTTPError, SourceUnavailableError))
+
     cache = getattr(company, "_cache", None)
     _KEY = "_estimateWacc_v2"
     _SENTINEL = "__NONE__"
@@ -71,6 +81,9 @@ def _estimateWacc(company) -> float | None:
                     marketCap = snapshot.marketCap
             except (ImportError, OSError, RuntimeError):
                 pass
+            except Exception as exc:
+                if not _isOptionalMarketDataError(exc):
+                    raise
             # 개별 beta
             betaCalc = None
             try:
@@ -79,6 +92,9 @@ def _estimateWacc(company) -> float | None:
                 betaCalc = _fetchBeta(getattr(company, "stockCode", ""), getattr(company, "currency", "KRW"))
             except (ImportError, OSError, RuntimeError):
                 pass
+            except Exception as exc:
+                if not _isOptionalMarketDataError(exc):
+                    raise
             wacc, _ = computeCompanyWacc(
                 series,
                 sectorParams=sectorParams,

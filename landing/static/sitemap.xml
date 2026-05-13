@@ -46,7 +46,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.analysis.dividendCapitalReturn</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.dividend.capitalReturn</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -76,7 +76,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.analysis.governanceAudit</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.auditComposite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -151,6 +151,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.company.docsInternals</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.company.finance</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.company.researchStarter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -176,7 +186,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.credit.methodology</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.dashboard</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.dashboard.viewerSpec</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -196,17 +216,17 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.edgar.docs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.gather</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.gather.collect</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.gather.consensus</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -232,6 +252,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.gather.insiderTrading</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.gather.listing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -441,6 +466,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.quant.forecast</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.quant.fundmom</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -457,6 +487,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.quant.liquidity</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.quant.marketContext</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -527,6 +562,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/engines.quant.riskparity</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/engines.quant.scanBacktest</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -606,232 +646,307 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.capitalAllocationScorecard</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.capitalAllocationScorecard</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.catalystCalendar</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.cashflowGovernanceDualSignal</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.companyDeepAnalysis</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.catalystCalendar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.compounderCandidates</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.companyDeepAnalysis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.creditDeepDive</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.companyMacroPathProjection</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.creditDistressDual</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.compounderCandidates</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.dailyMorningNote</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.covenantStressTest</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.dataAvailabilityFirst</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.deepDive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.debtStructureAudit</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.distressDual</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.disclosureEvent</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.macroStress</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.disclosureRiskScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.quantConsensus</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.distressFilter</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.dailyMorningNote</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.dividendThesis</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.dataAvailabilityFirst</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.dupontDriver</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.debtStructureAudit</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.earningsQualityCheck</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.event</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.earningsQualityTriad</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.riskScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.esgGovernanceLight</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.toneToStoryRisk</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.financialStatementCompare</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.distressCandidateScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.flowAndPattern</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.distressFilter</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.garpScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.dividend.stressTest</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.governanceAudit</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.dividend.thesis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.grahamDeepValue</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.dupontDriver</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.growthScreenToDeepDive</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.earningsQualityCheck</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.industryDeepDive</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.earningsQualityTriad</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.insiderEventCheck</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.esgGovernanceLight</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.intrinsicValueBand</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.filingTextSignal</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.inventoryAndCycle</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.financialStatementCompare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.leverageSensitivity</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.flowAndPattern</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.macroLiquidityCycle</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.garpScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.macroToCompany</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.audit</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.peerBenchmark</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.auditNetwork</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.piotroskiLite</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.grahamDeepValue</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.qualityValueScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.growthScreenToDeepDive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.quantTechnicalReview</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.industryDeepDive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.scenarioAnalysis</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.industryStageScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.screenAndChart</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.insiderEarningsLeading</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.sectorRotation</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.insiderEventCheck</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.smallCapDiscovery</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.intrinsicValueBand</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.storyReportBuild</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.inventoryAndCycle</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.thesisTracker</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.credit.leverageSensitivity</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.usMarketReview</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.betaPeerScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.usageAndApi</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.liquidityCycle</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.valuationBandTrack</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.quantScenarioBacktest</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.valuationCheck</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.toCompany</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.workforceAndCapital</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.peerBenchmark</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/engines.recipe.workingCapitalQuality</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.piotroskiLite</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.qualityMacroBeta</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.qualityValueScreen</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.quantTechnicalReview</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.scenarioAnalysis</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.chart</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.macro.sectorRotation</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.smallCapDiscovery</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.storyReportBuild</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.thesisTracker</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.usMarketReview</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.usageAndApi</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.bandTrack</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.check</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.workforceAndCapital</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.workingCapitalQuality</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -991,6 +1106,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.aiEngine</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/operation.aiProductReplatform</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1012,6 +1132,11 @@
   </url>
   <url>
     <loc>https://eddmpython.github.io/dartlab/skills/operation.code</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.compareTargets</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1061,12 +1186,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.recipePromote</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/operation.refactorChecklist</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/operation.skillIncubator</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.sixActsAnalysis</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/operation.skillDevelopmentLoop</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1111,6 +1246,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://eddmpython.github.io/dartlab/skills/runtime.providerProtocol</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://eddmpython.github.io/dartlab/skills/runtime.pyodide</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1121,7 +1261,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/runtime.skillDevelopmentLoop</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/runtime.python</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

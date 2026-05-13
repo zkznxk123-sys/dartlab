@@ -79,7 +79,7 @@
       "audiences": []
     },
     {
-      "id": "engines.analysis.dividendCapitalReturn",
+      "id": "recipes.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
       "category": "engines",
       "purpose": "배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.",
@@ -157,7 +157,7 @@
       "audiences": []
     },
     {
-      "id": "engines.analysis.governanceAudit",
+      "id": "recipes.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
       "category": "engines",
       "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.",
@@ -1639,7 +1639,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.capitalAllocationScorecard",
+      "id": "recipes.quality.capitalAllocationScorecard",
       "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
       "category": "engines",
       "purpose": "Buffett-style 자본배분 평가 — FCF 의 5 사용처 (재투자·배당·자사주·M&A·부채상환) 비중 + 증분자본수익률 (ROIIC) + 지속가능성장률 (SGR) 을 L1 raw 시계열에서 직접 계산해 경영진의 자본배분 효율을 평가하는 절차. analysis axis 미사용. 트리거 — '자본배분 평가', 'FCF 사용처', 'ROIIC', 'Buffett 자본배분'.",
@@ -1652,7 +1652,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.cashflowGovernanceDualSignal",
+      "id": "recipes.quality.cashflowGovernanceDualSignal",
       "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
       "category": "engines",
       "purpose": "accrual ratio (현금흐름 vs 회계이익 갭) + governance amber (이사회 독립성 / 특수관계자) + audit-change (감사인 변경) 3 신호 동시 발현 시 분식 / 회계 신뢰도 적신호. Dechow et al (2011) \"Predicting Material Accounting Misstatements\" 학술 결과 적용. analysis ↔ scan 격리 메우는 조합. 트리거 — '분식 의심', '회계 신뢰도', 'accrual governance audit'.",
@@ -1665,7 +1665,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.catalystCalendar",
+      "id": "recipes.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "engines",
       "purpose": "커버리지 종목들의 다가오는 catalyst (정기공시 due · 분기/반기/사업보고서) 일정을 fiscal cycle 추론으로 미리 정리하는 절차. 트리거 — '실적 일정', '다가오는 catalyst', 'catalyst calendar', '정기공시 예정'.",
@@ -1678,7 +1678,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.companyDeepAnalysis",
+      "id": "recipes.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "engines",
       "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료. 트리거 — '기업 깊이 분석', '6 막 종합', '단일 종목 deep dive'.",
@@ -1691,7 +1691,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.companyMacroPathProjection",
+      "id": "recipes.macro.companyMacroPathProjection",
       "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)",
       "category": "engines",
       "purpose": "기존 base/bull/bear 3 path DCF 가 아니라 매크로 146 시나리오 (rate × FX × 사이클 × 침체) grid × 회사 elasticity → 146 P&L path → 146 fair value → 분포 (p25/p50/p75 + 현재가 대비 확률) 산출. 단일 점추정의 한계 보완. company ↔ macro ↔ analysis 격리 메우는 조합. 트리거 — '시나리오 적정가치 분포', 'fair value distribution', '146 시나리오 valuation'.",
@@ -1704,7 +1704,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.compounderCandidates",
+      "id": "recipes.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "engines",
       "purpose": "Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차. 트리거 — 'compounder 발굴', 'quality 일관 종목', 'Buffett 스타일 횡단'.",
@@ -1717,7 +1717,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.creditCovenantStressTest",
+      "id": "recipes.credit.covenantStressTest",
       "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
       "category": "engines",
       "purpose": "차입금 covenant (DSCR ≥ 1.2 / Debt/Equity ≤ 2.0 등) 가 매크로 충격 (금리 path Monte Carlo) 에서 위반될 확률 추정. 비금융기업 quasi-CCAR. 단순 신용등급보다 covenant breach 가 더 정밀한 default 선행지표. analysis ↔ macro ↔ credit 격리 메우는 조합. 트리거 — 'covenant stress', 'DSCR 충격', '차입약정 위반'.",
@@ -1730,7 +1730,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.creditDeepDive",
+      "id": "recipes.credit.deepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
       "category": "engines",
       "purpose": "단일 회사의 신용 위험을 dCR 등급 + 재무 안정성/현금흐름 분해 + 매크로 금리 환경 3 단으로 종합 평가하는 절차. 트리거 — '신용 깊이 분석', '단일 회사 신용', '부도 위험 종합'.",
@@ -1743,7 +1743,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.creditDistressDual",
+      "id": "recipes.credit.distressDual",
       "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
       "category": "engines",
       "purpose": "단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Altman + Ohlson', '부도 위험 2 모델 합의', 'Z-Score O-Score'.",
@@ -1756,7 +1756,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.creditMacroStress",
+      "id": "recipes.credit.macroStress",
       "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
       "category": "engines",
       "purpose": "단일 회사의 신용등급 (dCR + 7 axis) 가 매크로 충격 (금리 +200bp / 환율 +10% / 영업이익 -20%) 에서 유지 가능한지, 어떤 axis 가 먼저 깨지는지 판정. credit ↔ macro 격리 메우는 조합 — 정상 보고 dCR 은 시점 1 회 산출이라 미래 시나리오에서 어떻게 변하는지 보여주지 못한다. 트리거 — '신용 매크로 스트레스', '금리 충격 dCR', 'credit stress'.",
@@ -1769,7 +1769,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.creditQuantConsensus",
+      "id": "recipes.credit.quantConsensus",
       "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
       "category": "engines",
       "purpose": "단일 회사 부도 위험을 dCR (정성·정량 종합) + Altman Z″ + Ohlson O + Beneish M 4-source 동시 평가. 단일 모델 false positive 줄이고 triple-agreement 시 강한 위험 신호. credit ↔ quant 격리 메우는 조합. 트리거 — '신용 퀀트 합의', '부도 4 모델', 'distress consensus'.",
@@ -1782,7 +1782,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.dailyMorningNote",
+      "id": "recipes.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
       "category": "engines",
       "purpose": "야간/새벽 사이 신규 DART 공시 + 커버리지 종목 변동률 + 시장 마감/개장 +주요 macro 이벤트를 1 페이지 morning note 로 묶는 일일 cadence 절차. 트리거 — '오늘 아침', '야간 공시 정리', 'morning note', '오버나잇 정리'.",
@@ -1795,7 +1795,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.dataAvailabilityFirst",
+      "id": "recipes.etc.dataAvailabilityFirst",
       "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
       "category": "engines",
       "purpose": "분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방. 트리거 — '데이터 있나 확인', '분석 전 데이터 점검', '수집 누락 체크'.",
@@ -1808,7 +1808,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.debtStructureAudit",
+      "id": "recipes.credit.debtStructureAudit",
       "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
       "category": "engines",
       "purpose": "회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차. 트리거 — '부채 구조 audit', '만기 분포', '이자보상배율', '신용 등급 횡단'.",
@@ -1821,7 +1821,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.disclosureEvent",
+      "id": "recipes.disclosure.event",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
       "category": "engines",
       "purpose": "단일 회사의 최근 공시 이벤트를 목록 + 원문 + 기간간 변화 3 축으로 분석하는 절차. 신규 공시/주요사항 발생 시 thesis 영향 평가. 트리거 — '최근 공시', '신규 공시 영향', '공시 본문 변화', 'thesis 영향 평가'.",
@@ -1834,7 +1834,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.disclosureRiskScreen",
+      "id": "recipes.disclosure.riskScreen",
       "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
       "category": "engines",
       "purpose": "전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차. 트리거 — '공시 위험 스캔', '정정 빈도 횡단', '공시 위험 후보'.",
@@ -1847,7 +1847,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.disclosureToneToStoryRisk",
+      "id": "recipes.disclosure.toneToStoryRisk",
       "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
       "category": "engines",
       "purpose": "MD&A tone change + 뉴스 헤드라인 tone + 공시 fundamental shift 3 신호 composite \"narrative risk\" 점수 임계 초과 시 storyboard 신설 부담 없이 story.risk 섹션에 injection 가능한 markdown 블럭 자동 발행. storyboard 추가 부담 회피하면서 기존 story 의 risk 부분 보강. quant ↔ gather ↔ analysis ↔ story 격리 메우는 4-engine 조합. 트리거 — 'story risk auto', '공시 tone story 발행', 'narrative risk score'.",
@@ -1860,7 +1860,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.distressCandidateScreen",
+      "id": "recipes.credit.distressCandidateScreen",
       "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
       "category": "engines",
       "purpose": "KOSPI200 universe 안에서 (1) dCR 등급이 전월 대비 1 notch 이상 하락 (credit migration) + (2) quant sentiment z-score ≤ -1.5 (시장 신호 약세) 동시 발현 종목 발굴. 단일 신호는 false positive 많지만 cross-source 합의는 강함. credit ↔ quant ↔ scan 격리 메우는 조합. 트리거 — 'distress candidate', '신용 sentiment 약세', 'credit migration screen'.",
@@ -1873,7 +1873,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.distressFilter",
+      "id": "recipes.credit.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
       "category": "engines",
       "purpose": "Altman Z-Score (1968) 5 변수 중 dartlab 으로 가능한 4 변수 + 음수 영업CF 게이트 를 결합해 부도 위험 종목을 횡단으로 식별하고 다른 스크리너 결과의 블랙리스트로 사용하는 회피 절차. 트리거 — '부도 위험 필터', 'Altman Z 횡단', '블랙리스트', '회피 절차'.",
@@ -1886,7 +1886,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.dividendStressTest",
+      "id": "recipes.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
       "category": "engines",
       "purpose": "배당 정책 회사가 1997 IMF / 2008 GFC / 2020 COVID 시나리오에서 FCF 커버리지가 무너지는 임계 + 배당 cut/suspend 가능성 산출. 정상 시점 dividend yield 만 보고 매수하는 전략의 매크로 위험 가시화. analysis ↔ macro 격리 메우는 조합. 트리거 — '배당 스트레스', 'dividend cut 위험', '경기침체 배당'.",
@@ -1899,7 +1899,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.dividendThesis",
+      "id": "recipes.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
       "category": "engines",
       "purpose": "회사의 배당 매력도를 자본배분 의지 + 현금흐름 quality + 과거 배당 정책 3 축으로 평가하는 절차. 트리거 — '배당 매력도', '배당 정책', '배당 thesis'.",
@@ -1912,7 +1912,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.dupontDriver",
+      "id": "recipes.quality.dupontDriver",
       "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
       "category": "engines",
       "purpose": "ROE 변동의 진짜 원인을 5 동인 (세부담·이자부담·영업마진·자산회전·재무레버리지) 으로 분리해 단일 회사 5 년 시계열에서 어떤 요소가 ROE 를 끌고 갔는지 정량화하는 절차. L1 raw (`c.show(\"BS\"|\"IS\")`) 만 사용. 트리거 — 'ROE 분해', 'DuPont 5 동인', 'ROE 추적'.",
@@ -1925,7 +1925,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.earningsQualityCheck",
+      "id": "recipes.quality.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
       "category": "engines",
       "purpose": "회사 발표 이익의 quality 를 발생주의 vs 현금흐름 괴리 + 재무 항목 정합성 + 일회성 비중 3 축으로 점검하는 절차. 트리거 — '이익 quality 점검', '발생주의 vs 현금흐름', '일회성 비중'.",
@@ -1938,7 +1938,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.earningsQualityTriad",
+      "id": "recipes.quality.earningsQualityTriad",
       "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
       "category": "engines",
       "purpose": "이익 quality 를 3 학술 모델 (Sloan accruals · Beneish M-Score · Novy-Marx GP/A) 동시 적용으로 합의 점수화. analysis axis 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Sloan accruals', 'Beneish M-Score', 'Novy-Marx GP/A', '이익 quality 3 모델'.",
@@ -1951,7 +1951,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.esgGovernanceLight",
+      "id": "recipes.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
       "category": "engines",
       "purpose": "정식 ESG 데이터 부재 시 dartlab 보유 신호 (지배구조 + 감사 + 종업원 + 자본배분 일관성) 만으로 가벼운 ESG audit 을 만드는 절차. 트리거 — 'ESG light', '거버넌스 audit', 'ESG 데이터 부재 시'.",
@@ -1964,7 +1964,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.filingTextSignal",
+      "id": "recipes.disclosure.filingTextSignal",
       "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
       "category": "engines",
       "purpose": "최근 365 일 공시 본문에서 \"going concern\" / \"의견거절\" / \"거짓서명\" / \"계속기업\" 같은 위험 키워드 빈도가 trailing 3y baseline 대비 z-score ≥ 2 이면 비정상 신호. predictionSignal feature 로 입력. Loughran-McDonald sentiment 의 일반 dictionary 와 다른 anomaly-on-rare-keywords 접근. search/edgar ↔ analysis 격리 메우는 조합. 트리거 — 'filing text signal', '공시 키워드 anomaly', '사업보고서 위험 신호'.",
@@ -1977,7 +1977,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.financialStatementCompare",
+      "id": "recipes.quality.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "engines",
       "purpose": "두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차. 트리거 — '재무제표 비교', '두 회사 차이', '회사 간 비교'.",
@@ -1990,7 +1990,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.flowAndPattern",
+      "id": "recipes.etc.flowAndPattern",
       "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
       "category": "engines",
       "purpose": "단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차. 트리거 — '수급', '외인 기관 매매', '차트 패턴', '단기 entry/exit'.",
@@ -2003,7 +2003,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.garpScreen",
+      "id": "recipes.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
       "category": "engines",
       "purpose": "Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차. 트리거 — 'GARP', 'PEG', 'Lynch 성장가치', 'PEG ≤ 1'.",
@@ -2016,7 +2016,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.governanceAudit",
+      "id": "recipes.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "engines",
       "purpose": "회사의 지배구조 위험을 이사회 독립성 + 지배력 집중 + 감사 신호 + 분식 가능성 4 축으로 종합 점검하는 절차. 트리거 — '지배구조 위험', '이사회 독립성', '감사 신호', '분식 가능성'.",
@@ -2029,7 +2029,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.governanceAuditNetwork",
+      "id": "recipes.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
       "category": "engines",
       "purpose": "KOSPI universe 안에서 (1) governance composite (이사회 독립성·특수관계자) + (2) network density (계열사·affiliate ratio) + (3) audit-change (최근 2 년 감사인 변경) 3 신호 동시 적신호 종목 발굴. 한국 chaebol 구조 특유의 transfer-pricing / 일감몰아주기 위험을 단일 신호로 못 잡는 한계 보완. analysis ↔ scan 격리 메우는 cross-sectional 조합. 트리거 — 'governance audit network', 'chaebol risk screen'.",
@@ -2042,7 +2042,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.grahamDeepValue",
+      "id": "recipes.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "engines",
       "purpose": "Benjamin Graham (1949) 안전마진 framework 을 ratio 4 게이트 + 5 년 흑자 후처리로 근사해 한국 chaebol discount 트랩을 회피한 deep value 후보를 횡단으로 발굴하는 절차. 트리거 — 'Graham deep value', '안전마진', 'chaebol discount 회피'.",
@@ -2055,7 +2055,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.growthScreenToDeepDive",
+      "id": "recipes.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
       "category": "engines",
       "purpose": "전종목 성장 스캔으로 후보를 추리고 상위 N 종에 대해 회사별 깊이 분석을 진행하는 절차. 트리거 — '성장 스캔 후 깊이 분석', '상위 N 깊이 분석'.",
@@ -2068,7 +2068,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.industryDeepDive",
+      "id": "recipes.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
       "category": "engines",
       "purpose": "단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능. 트리거 — '산업 깊이 분석', '가치 사슬', '핵심 종목', '업종 분석'.",
@@ -2081,7 +2081,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.industryStageScreen",
+      "id": "recipes.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
       "category": "engines",
       "purpose": "도입기 / 후행기 산업 안에서 PER < 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.",
@@ -2094,7 +2094,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.insiderEarningsLeading",
+      "id": "recipes.disclosure.insiderEarningsLeading",
       "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
       "category": "engines",
       "purpose": "내부자 (임원·5% 이상 주주) 매수 거래가 *클러스터* 형태 (180 일 안 ≥ 3 명 동시) 일 때만 다음 분기 EPS surprise 와 양의 IC 가진다는 Cohen-Malloy-Pomorski (2012) \"Decoding Inside Information\" 결과 적용. 단순 net-buy 가 아닌 *집단 매수 동시성* 이 핵심. gather ↔ quant ↔ analysis 격리 메우는 조합. 트리거 — '내부자 매수 클러스터', 'insider cluster signal'.",
@@ -2107,7 +2107,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.insiderEventCheck",
+      "id": "recipes.disclosure.insiderEventCheck",
       "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
       "category": "engines",
       "purpose": "회사의 내부자 거래·자본변동·임원 변경 같은 이벤트 신호를 시계열로 점검하는 절차. 거버넌스 점검의 보완. 트리거 — '내부자 거래', '임원 변경', '자본변동 이벤트'.",
@@ -2120,7 +2120,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.intrinsicValueBand",
+      "id": "recipes.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
       "category": "engines",
       "purpose": "단일 회사 본질가치를 Graham 수정공식 + EVA spread + CFROI proxy 3 anchor 로 동시 추정해 시장가와 비교한 가치 판정 band 를 만드는 절차. analysis valuation axis 미사용, L1 raw (`c.show(\"IS\"|\"BS\"|\"CF\"|\"PRICE\"|\"FQ\")`) 만 사용. 트리거 — '본질가치 band', 'Graham + EVA + CFROI', 'fair value 3 anchor'.",
@@ -2133,7 +2133,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.inventoryAndCycle",
+      "id": "recipes.quality.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
       "category": "engines",
       "purpose": "산업 재고 사이클 + 회사 재고 회전 + 매크로 수요 신호 결합으로 사이클 위치를 진단하는 절차. 반도체·석유화학·철강 등에 유용. 트리거 — '재고 사이클', '회전 진단', '반도체/석유화학 사이클'.",
@@ -2146,7 +2146,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.leverageSensitivity",
+      "id": "recipes.credit.leverageSensitivity",
       "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
       "category": "engines",
       "purpose": "매출 변동이 영업이익·순이익에 얼마나 증폭되는지 영업레버리지 (DOL) · 재무레버리지 (DFL) · 결합레버리지 (DCL) 로 정량화하고 매크로 충격 시나리오에서 본 회사가 얼마나 민감한지 평가하는 절차. L1 raw (`c.show(\"IS\")`) 시계열만 사용. 트리거 — '영업레버리지', '재무레버리지', 'DOL DFL DCL', '매크로 충격 민감도'.",
@@ -2159,7 +2159,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.macroBetaPeerScreen",
+      "id": "recipes.macro.betaPeerScreen",
       "title": "같은 산업 동종업체 macroBeta outlier — idiosyncratic 매크로 노출",
       "category": "engines",
       "purpose": "동일 산업 peer set 안에서 회사 별 macro beta (rate / FX / oil) 가 within-industry z ≥ |2| 인 outlier 식별. cross-market 단순 macro beta 는 \"유가 상승 = 정유주\" 같은 trivial 매핑만 잡지만, 같은 산업 안 outlier 는 회사 specifics (FX 헤지 / 변동금리 차입 / 원자재 다변화) 가 만든 idiosyncratic 노출을 드러냄. industry ↔ scan 격리 메우는 조합. 트리거 — 'macroBeta peer', 'idiosyncratic 매크로 노출', '같은 산업 outlier'.",
@@ -2172,7 +2172,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.macroLiquidityCycle",
+      "id": "recipes.macro.liquidityCycle",
       "title": "매크로 유동성 사이클 (금리 + 환율 + 유동성)",
       "category": "engines",
       "purpose": "매크로 유동성 환경을 금리 + 환율 + 유동성 지표 + 위기 신호 4 축으로 종합 판정하는 절차. 종목 없이 매크로 분석 가능. 트리거 — '매크로 유동성', '금리 환율 위기 신호', '거시 사이클'.",
@@ -2185,7 +2185,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.macroQuantScenarioBacktest",
+      "id": "recipes.macro.quantScenarioBacktest",
       "title": "매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward backtest",
       "category": "engines",
       "purpose": "단순 full-sample 평균 IR 이 아니라 매크로 regime 별 (1997 IMF / 2008 GFC / 2020 COVID) 팩터 (value / quality / momentum) 의 walk-forward IR / Sharpe / max drawdown 산출. 투자자가 \"이번 사이클\" 에서의 팩터 작동 여부를 알 수 있게. macro ↔ quant 격리 메우는 조합. 트리거 — 'macro scenario backtest', '시나리오 별 팩터', 'regime backtest'.",
@@ -2198,7 +2198,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.macroToCompany",
+      "id": "recipes.macro.toCompany",
       "title": "매크로 → 섹터 → 회사 영향 (transmission)",
       "category": "engines",
       "purpose": "매크로 환경 변화가 특정 회사의 매출·영업이익·이자비용·환산손익에 어떻게 전이되는지 단계별로 추적하는 절차. 트리거 — '매크로 → 회사 전이', '금리 환율 회사 영향', '단계별 추적'.",
@@ -2211,7 +2211,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.peerBenchmark",
+      "id": "recipes.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
       "category": "engines",
       "purpose": "회사를 같은 산업 peer 5~10 종과 핵심 ratio (수익성/안정성/성장성/valuation) 4 축으로 벤치마크하는 절차. 트리거 — 'peer 비교', '동종 5~10 종 벤치마크', 'ratio 4 축'.",
@@ -2224,7 +2224,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.piotroskiLite",
+      "id": "recipes.quality.piotroskiLite",
       "title": "Piotroski F-Score 7 항목 횡단 점수카드",
       "category": "engines",
       "purpose": "Piotroski (2000) F-Score 의 9 항목 중 dartlab ratio 로 가능한 7 항목을 횡단 계산해 저평가 종목군에서 우량 회사를 골라내는 점수카드 절차. 트리거 — 'F-Score', 'Piotroski 7 항목', '저평가 우량 발굴'.",
@@ -2237,7 +2237,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.qualityMacroBeta",
+      "id": "recipes.macro.qualityMacroBeta",
       "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주",
       "category": "engines",
       "purpose": "quality 팩터 (QMJ — Asness/Frazzini/Pedersen) 점수가 매크로 사이클 phase (early-recovery / mid-expansion / late-cycle / contraction) 별로 다르게 작동한다는 검증된 패턴을 단일 회사에 적용. quant ↔ macro 격리 메우는 조합. 트리거 — '퀄리티 사이클', 'QMJ 매크로', 'quality phase'.",
@@ -2250,7 +2250,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.qualityValueScreen",
+      "id": "recipes.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
       "category": "engines",
       "purpose": "Novy-Marx (2013) gross profitability factor (Gross Profit / Total Assets) 와 단순 가치 (PER/PBR) 를 결합해 한국 chaebol discount 트랩을 회피한 quality value 후보를 횡단으로 발굴하는 절차. 트리거 — 'gross profitability', 'Novy-Marx 2013', 'quality value 횡단'.",
@@ -2263,7 +2263,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.quantTechnicalReview",
+      "id": "recipes.etc.quantTechnicalReview",
       "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
       "category": "engines",
       "purpose": "단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차. 트리거 — '기술적 신호', '모멘텀 변동성', '차트 패턴 4 축'.",
@@ -2276,7 +2276,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.scenarioAnalysis",
+      "id": "recipes.macro.scenarioAnalysis",
       "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)",
       "category": "engines",
       "purpose": "회사 forecast 를 base/bull/bear 3 시나리오 + 매크로 시나리오 가정 + 시장 regime 판정 3 축으로 묶어 불확실성을 정량화하는 절차. 트리거 — 'base/bull/bear', '3 시나리오', '시장 regime', '불확실성 정량화'.",
@@ -2289,7 +2289,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.screenAndChart",
+      "id": "recipes.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
       "category": "engines",
       "purpose": "scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계. 트리거 — '스캔 후 차트', 'table-backed chart', '보고서 직전 시각화'.",
@@ -2302,7 +2302,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.sectorRotation",
+      "id": "recipes.macro.sectorRotation",
       "title": "섹터 로테이션 분석 (매크로 + scan + industry)",
       "category": "engines",
       "purpose": "매크로 사이클 위치 + 섹터 횡단 스캔 + 산업 위치 3 축으로 섹터 로테이션 후보를 평가하는 절차. 종목 없이도 가능. 트리거 — '섹터 로테이션', '업종 순환', '경기 사이클별 섹터'.",
@@ -2315,7 +2315,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.smallCapDiscovery",
+      "id": "recipes.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
       "category": "engines",
       "purpose": "시가총액 하위 종목 중 성장 + 저평가 + 회계 quality 가 양호한 후보를 발굴하는 절차. small-cap value+growth thesis. 트리거 — '중소형주 발굴', 'small cap discovery', '소외 종목'.",
@@ -2328,7 +2328,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.storyReportBuild",
+      "id": "recipes.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
       "category": "engines",
       "purpose": "회사 종합 보고서를 14 축 분석 + 6 막 인과 + story 섹션 조립으로 만드는 절차. review 엔진의 표준 출력. 트리거 — '보고서 작성', '기업 이야기 조립', 'story 빌드'.",
@@ -2341,7 +2341,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.thesisTracker",
+      "id": "recipes.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
       "category": "engines",
       "purpose": "종목별 투자 thesis 본문 + pillar 3~5 + risk 3~5 + catalyst N + falsifiable 게이트 (반증 불가능 thesis 거부) 를 로컬 파일로 관리하는 cadence 절차. 트리거 — '논거 점검', 'thesis check', 'X 종목 thesis 갱신', '논거 추적'.",
@@ -2354,7 +2354,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.usMarketReview",
+      "id": "recipes.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
       "category": "engines",
       "purpose": "미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근. 트리거 — '미국 시장 점검', 'US market review', 'EDGAR 분기'.",
@@ -2367,7 +2367,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.usageAndApi",
+      "id": "recipes.etc.usageAndApi",
       "title": "dartlab 사용법·API 설명 (RunPython 우회)",
       "category": "engines",
       "purpose": "dartlab 의 기능·사용법·API 를 설명하는 질문에서 ReadSkill + ReadCapability 만 사용하고 RunPython 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.",
@@ -2380,7 +2380,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.valuationBandTrack",
+      "id": "recipes.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
       "category": "engines",
       "purpose": "회사 valuation multiple (PER/PBR/EV/EBITDA) 의 역사 평균 ±σ 밴드 안 현재 위치를 추적하는 절차. 단순 스냅샷이 아닌 시계열 추적. 트리거 — '밸류에이션 band 추적', '시계열 valuation', '멀티플 변천'.",
@@ -2393,7 +2393,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.valuationCheck",
+      "id": "recipes.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "engines",
       "purpose": "회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차. 트리거 — '밸류에이션 점검', 'fair value', '저평가 판단'.",
@@ -2406,7 +2406,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.workforceAndCapital",
+      "id": "recipes.governance.workforceAndCapital",
       "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
       "category": "engines",
       "purpose": "회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차. 트리거 — '인력 자본', '종업원 신호', 'workforce'.",
@@ -2419,7 +2419,7 @@
       "audiences": []
     },
     {
-      "id": "engines.recipe.workingCapitalQuality",
+      "id": "recipes.quality.workingCapitalQuality",
       "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
       "category": "engines",
       "purpose": "Cash Conversion Cycle (DSO + DIO − DPO) + 매출채권·재고·매입채무 회전율 5 년 추세를 L1 raw (`c.show(\"BS\"|\"IS\")`) 에서 직접 계산해 매출 신뢰도와 운전자본 효율을 정량화하는 절차. analysis axis 미사용. 트리거 — '운전자본 quality', '재고 매출채권', 'CCC 진단'.",
@@ -3430,7 +3430,7 @@
     },
     {
       "src": "engines.analysis.capitalAllocation",
-      "dst": "engines.analysis.dividendCapitalReturn",
+      "dst": "recipes.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -3510,7 +3510,7 @@
     },
     {
       "src": "engines.analysis.disclosureChange",
-      "dst": "engines.recipe.disclosureEvent",
+      "dst": "recipes.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
@@ -3544,47 +3544,47 @@
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.scan.capital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.scan.dividendTrend",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis.cashflow",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.capitalReturn",
       "dst": "engines.analysis.profitability",
       "kind": "knowledge"
     },
@@ -3720,7 +3720,7 @@
     },
     {
       "src": "engines.analysis.governance",
-      "dst": "engines.analysis.governanceAudit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -3754,52 +3754,52 @@
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.financialConsistency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.governance",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.earningsQuality",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.financialConsistency",
       "kind": "knowledge"
     },
     {
-      "src": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.auditComposite",
       "dst": "engines.analysis.disclosureChange",
       "kind": "knowledge"
     },
@@ -4620,7 +4620,7 @@
     },
     {
       "src": "engines.gather.dividends",
-      "dst": "engines.analysis.dividendCapitalReturn",
+      "dst": "recipes.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -5790,7 +5790,7 @@
     },
     {
       "src": "engines.quant.beneish",
-      "dst": "engines.analysis.governanceAudit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -6175,7 +6175,7 @@
     },
     {
       "src": "engines.quant.governanceQuant",
-      "dst": "engines.analysis.governanceAudit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -7319,1468 +7319,1468 @@
       "kind": "knowledge"
     },
     {
-      "src": "engines.recipe.capitalAllocationScorecard",
+      "src": "recipes.quality.capitalAllocationScorecard",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.capitalAllocationScorecard",
+      "src": "recipes.quality.capitalAllocationScorecard",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.capitalAllocationScorecard",
-      "dst": "engines.recipe.dupontDriver",
+      "src": "recipes.quality.capitalAllocationScorecard",
+      "dst": "recipes.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.capitalAllocationScorecard",
-      "dst": "engines.recipe.compounderCandidates",
+      "src": "recipes.quality.capitalAllocationScorecard",
+      "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.capitalAllocationScorecard",
-      "dst": "engines.recipe.intrinsicValueBand",
+      "src": "recipes.quality.capitalAllocationScorecard",
+      "dst": "recipes.valuation.intrinsicValueBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.capitalAllocationScorecard",
-      "dst": "engines.recipe.workingCapitalQuality",
+      "src": "recipes.quality.capitalAllocationScorecard",
+      "dst": "recipes.quality.workingCapitalQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.cashflowGovernanceDualSignal",
+      "src": "recipes.quality.cashflowGovernanceDualSignal",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.cashflowGovernanceDualSignal",
+      "src": "recipes.quality.cashflowGovernanceDualSignal",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.cashflowGovernanceDualSignal",
+      "src": "recipes.quality.cashflowGovernanceDualSignal",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.cashflowGovernanceDualSignal",
+      "src": "recipes.quality.cashflowGovernanceDualSignal",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.catalystCalendar",
+      "src": "recipes.report.catalystCalendar",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.catalystCalendar",
-      "dst": "engines.recipe.dailyMorningNote",
+      "src": "recipes.report.catalystCalendar",
+      "dst": "recipes.report.dailyMorningNote",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.catalystCalendar",
-      "dst": "engines.recipe.disclosureEvent",
+      "src": "recipes.report.catalystCalendar",
+      "dst": "recipes.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.catalystCalendar",
+      "src": "recipes.report.catalystCalendar",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.catalystCalendar",
+      "src": "recipes.report.catalystCalendar",
       "dst": "engines.gather",
       "kind": "source"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.companyDeepAnalysis",
       "dst": "engines.analysis.valuationBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyMacroPathProjection",
+      "src": "recipes.macro.companyMacroPathProjection",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyMacroPathProjection",
+      "src": "recipes.macro.companyMacroPathProjection",
       "dst": "engines.analysis.revenueForecast",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyMacroPathProjection",
+      "src": "recipes.macro.companyMacroPathProjection",
       "dst": "engines.analysis.macroSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyMacroPathProjection",
+      "src": "recipes.macro.companyMacroPathProjection",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.companyMacroPathProjection",
+      "src": "recipes.macro.companyMacroPathProjection",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
+      "src": "recipes.screen.compounderCandidates",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
+      "src": "recipes.screen.compounderCandidates",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
+      "src": "recipes.screen.compounderCandidates",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.screen.compounderCandidates",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
-      "dst": "engines.recipe.garpScreen",
+      "src": "recipes.screen.compounderCandidates",
+      "dst": "recipes.valuation.garpScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.screen.compounderCandidates",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
+      "src": "recipes.screen.compounderCandidates",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.compounderCandidates",
+      "src": "recipes.screen.compounderCandidates",
       "dst": "engines.analysis.efficiency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditCovenantStressTest",
+      "src": "recipes.credit.covenantStressTest",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditCovenantStressTest",
+      "src": "recipes.credit.covenantStressTest",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditCovenantStressTest",
+      "src": "recipes.credit.covenantStressTest",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditCovenantStressTest",
+      "src": "recipes.credit.covenantStressTest",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDeepDive",
+      "src": "recipes.credit.deepDive",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDeepDive",
+      "src": "recipes.credit.deepDive",
       "dst": "engines.credit.creditRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDeepDive",
+      "src": "recipes.credit.deepDive",
       "dst": "engines.analysis.stability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDeepDive",
+      "src": "recipes.credit.deepDive",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDeepDive",
+      "src": "recipes.credit.deepDive",
       "dst": "engines.macro.rates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDistressDual",
+      "src": "recipes.credit.distressDual",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDistressDual",
+      "src": "recipes.credit.distressDual",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDistressDual",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.credit.distressDual",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDistressDual",
-      "dst": "engines.recipe.earningsQualityTriad",
+      "src": "recipes.credit.distressDual",
+      "dst": "recipes.quality.earningsQualityTriad",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDistressDual",
-      "dst": "engines.recipe.leverageSensitivity",
+      "src": "recipes.credit.distressDual",
+      "dst": "recipes.credit.leverageSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditDistressDual",
+      "src": "recipes.credit.distressDual",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditMacroStress",
+      "src": "recipes.credit.macroStress",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditMacroStress",
+      "src": "recipes.credit.macroStress",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditMacroStress",
+      "src": "recipes.credit.macroStress",
       "dst": "engines.macro",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditMacroStress",
+      "src": "recipes.credit.macroStress",
       "dst": "engines.analysis.macroSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditMacroStress",
+      "src": "recipes.credit.macroStress",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditQuantConsensus",
+      "src": "recipes.credit.quantConsensus",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditQuantConsensus",
+      "src": "recipes.credit.quantConsensus",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditQuantConsensus",
-      "dst": "engines.recipe.creditDistressDual",
+      "src": "recipes.credit.quantConsensus",
+      "dst": "recipes.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditQuantConsensus",
+      "src": "recipes.credit.quantConsensus",
       "dst": "engines.quant.altman",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditQuantConsensus",
+      "src": "recipes.credit.quantConsensus",
       "dst": "engines.quant.beneish",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.creditQuantConsensus",
+      "src": "recipes.credit.quantConsensus",
       "dst": "engines.quant.piotroski",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dailyMorningNote",
-      "dst": "engines.recipe.disclosureEvent",
+      "src": "recipes.report.dailyMorningNote",
+      "dst": "recipes.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dailyMorningNote",
-      "dst": "engines.recipe.catalystCalendar",
+      "src": "recipes.report.dailyMorningNote",
+      "dst": "recipes.report.catalystCalendar",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dailyMorningNote",
+      "src": "recipes.report.dailyMorningNote",
       "dst": "engines.gather",
       "kind": "source"
     },
     {
-      "src": "engines.recipe.dailyMorningNote",
+      "src": "recipes.report.dailyMorningNote",
       "dst": "engines.company",
       "kind": "source"
     },
     {
-      "src": "engines.recipe.dataAvailabilityFirst",
+      "src": "recipes.etc.dataAvailabilityFirst",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dataAvailabilityFirst",
+      "src": "recipes.etc.dataAvailabilityFirst",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dataAvailabilityFirst",
+      "src": "recipes.etc.dataAvailabilityFirst",
       "dst": "engines.data.foundation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.debtStructureAudit",
+      "src": "recipes.credit.debtStructureAudit",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.debtStructureAudit",
+      "src": "recipes.credit.debtStructureAudit",
       "dst": "engines.scan.debt",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.debtStructureAudit",
+      "src": "recipes.credit.debtStructureAudit",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.debtStructureAudit",
+      "src": "recipes.credit.debtStructureAudit",
       "dst": "engines.credit.creditRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureEvent",
+      "src": "recipes.disclosure.event",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureEvent",
+      "src": "recipes.disclosure.event",
       "dst": "engines.company.disclosureEvent",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureEvent",
+      "src": "recipes.disclosure.event",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureEvent",
+      "src": "recipes.disclosure.event",
       "dst": "engines.scan.disclosureRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureEvent",
+      "src": "recipes.disclosure.event",
       "dst": "engines.gather.news",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureEvent",
+      "src": "recipes.disclosure.event",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureRiskScreen",
+      "src": "recipes.disclosure.riskScreen",
       "dst": "engines.scan.disclosureRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureRiskScreen",
+      "src": "recipes.disclosure.riskScreen",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureRiskScreen",
+      "src": "recipes.disclosure.riskScreen",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureToneToStoryRisk",
+      "src": "recipes.disclosure.toneToStoryRisk",
       "dst": "engines.quant.toneChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureToneToStoryRisk",
+      "src": "recipes.disclosure.toneToStoryRisk",
       "dst": "engines.gather.news",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureToneToStoryRisk",
+      "src": "recipes.disclosure.toneToStoryRisk",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.disclosureToneToStoryRisk",
+      "src": "recipes.disclosure.toneToStoryRisk",
       "dst": "engines.story",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressCandidateScreen",
+      "src": "recipes.credit.distressCandidateScreen",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressCandidateScreen",
+      "src": "recipes.credit.distressCandidateScreen",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressCandidateScreen",
+      "src": "recipes.credit.distressCandidateScreen",
       "dst": "engines.quant.sentiment",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressCandidateScreen",
-      "dst": "engines.recipe.creditQuantConsensus",
+      "src": "recipes.credit.distressCandidateScreen",
+      "dst": "recipes.credit.quantConsensus",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
+      "src": "recipes.credit.distressFilter",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
+      "src": "recipes.credit.distressFilter",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
+      "src": "recipes.credit.distressFilter",
       "dst": "engines.scan.account",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.credit.distressFilter",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
-      "dst": "engines.recipe.garpScreen",
+      "src": "recipes.credit.distressFilter",
+      "dst": "recipes.valuation.garpScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
-      "dst": "engines.recipe.grahamDeepValue",
+      "src": "recipes.credit.distressFilter",
+      "dst": "recipes.valuation.grahamDeepValue",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
+      "src": "recipes.credit.distressFilter",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.distressFilter",
+      "src": "recipes.credit.distressFilter",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendStressTest",
+      "src": "recipes.dividend.stressTest",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendStressTest",
-      "dst": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.stressTest",
+      "dst": "recipes.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendStressTest",
+      "src": "recipes.dividend.stressTest",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendStressTest",
+      "src": "recipes.dividend.stressTest",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendThesis",
+      "src": "recipes.dividend.thesis",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendThesis",
-      "dst": "engines.analysis.dividendCapitalReturn",
+      "src": "recipes.dividend.thesis",
+      "dst": "recipes.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendThesis",
+      "src": "recipes.dividend.thesis",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dividendThesis",
+      "src": "recipes.dividend.thesis",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dupontDriver",
+      "src": "recipes.quality.dupontDriver",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dupontDriver",
+      "src": "recipes.quality.dupontDriver",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dupontDriver",
+      "src": "recipes.quality.dupontDriver",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dupontDriver",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.quality.dupontDriver",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dupontDriver",
-      "dst": "engines.recipe.compounderCandidates",
+      "src": "recipes.quality.dupontDriver",
+      "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.dupontDriver",
-      "dst": "engines.recipe.capitalAllocationScorecard",
+      "src": "recipes.quality.dupontDriver",
+      "dst": "recipes.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityCheck",
+      "src": "recipes.quality.earningsQualityCheck",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityCheck",
+      "src": "recipes.quality.earningsQualityCheck",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityCheck",
+      "src": "recipes.quality.earningsQualityCheck",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityCheck",
+      "src": "recipes.quality.earningsQualityCheck",
       "dst": "engines.analysis.financialConsistency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityTriad",
+      "src": "recipes.quality.earningsQualityTriad",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityTriad",
+      "src": "recipes.quality.earningsQualityTriad",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityTriad",
-      "dst": "engines.recipe.workingCapitalQuality",
+      "src": "recipes.quality.earningsQualityTriad",
+      "dst": "recipes.quality.workingCapitalQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityTriad",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.quality.earningsQualityTriad",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityTriad",
-      "dst": "engines.recipe.creditDistressDual",
+      "src": "recipes.quality.earningsQualityTriad",
+      "dst": "recipes.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.earningsQualityTriad",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.quality.earningsQualityTriad",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.esgGovernanceLight",
+      "src": "recipes.governance.esgGovernanceLight",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.esgGovernanceLight",
+      "src": "recipes.governance.esgGovernanceLight",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.esgGovernanceLight",
-      "dst": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.esgGovernanceLight",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.esgGovernanceLight",
+      "src": "recipes.governance.esgGovernanceLight",
       "dst": "engines.scan.workforce",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.esgGovernanceLight",
+      "src": "recipes.governance.esgGovernanceLight",
       "dst": "engines.analysis.financialConsistency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.filingTextSignal",
+      "src": "recipes.disclosure.filingTextSignal",
       "dst": "engines.gather.collect",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.filingTextSignal",
+      "src": "recipes.disclosure.filingTextSignal",
       "dst": "engines.search",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.filingTextSignal",
+      "src": "recipes.disclosure.filingTextSignal",
       "dst": "engines.analysis.predictionSignal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.financialStatementCompare",
+      "src": "recipes.quality.financialStatementCompare",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.financialStatementCompare",
+      "src": "recipes.quality.financialStatementCompare",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.financialStatementCompare",
+      "src": "recipes.quality.financialStatementCompare",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.financialStatementCompare",
+      "src": "recipes.quality.financialStatementCompare",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.flowAndPattern",
+      "src": "recipes.etc.flowAndPattern",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.flowAndPattern",
+      "src": "recipes.etc.flowAndPattern",
       "dst": "engines.quant.chartPatterns",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.flowAndPattern",
+      "src": "recipes.etc.flowAndPattern",
       "dst": "engines.quant.momentum",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.flowAndPattern",
+      "src": "recipes.etc.flowAndPattern",
       "dst": "engines.quant.flow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
+      "src": "recipes.valuation.garpScreen",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
+      "src": "recipes.valuation.garpScreen",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
+      "src": "recipes.valuation.garpScreen",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
+      "src": "recipes.valuation.garpScreen",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.garpScreen",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.valuation.garpScreen",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
-      "dst": "engines.recipe.compounderCandidates",
+      "src": "recipes.valuation.garpScreen",
+      "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.garpScreen",
+      "src": "recipes.valuation.garpScreen",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAudit",
+      "src": "recipes.governance.audit",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAudit",
-      "dst": "engines.analysis.governanceAudit",
+      "src": "recipes.governance.audit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAudit",
+      "src": "recipes.governance.audit",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAudit",
+      "src": "recipes.governance.audit",
       "dst": "engines.scan.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAudit",
+      "src": "recipes.governance.audit",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAuditNetwork",
+      "src": "recipes.governance.auditNetwork",
       "dst": "engines.scan.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAuditNetwork",
+      "src": "recipes.governance.auditNetwork",
       "dst": "engines.scan.network",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.governanceAuditNetwork",
+      "src": "recipes.governance.auditNetwork",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
+      "src": "recipes.valuation.grahamDeepValue",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
+      "src": "recipes.valuation.grahamDeepValue",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
+      "src": "recipes.valuation.grahamDeepValue",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
+      "src": "recipes.valuation.grahamDeepValue",
       "dst": "engines.scan.account",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.grahamDeepValue",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.valuation.grahamDeepValue",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
-      "dst": "engines.recipe.piotroskiLite",
+      "src": "recipes.valuation.grahamDeepValue",
+      "dst": "recipes.quality.piotroskiLite",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.grahamDeepValue",
+      "src": "recipes.valuation.grahamDeepValue",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.growthScreenToDeepDive",
+      "src": "recipes.screen.growthScreenToDeepDive",
       "dst": "engines.scan.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.growthScreenToDeepDive",
+      "src": "recipes.screen.growthScreenToDeepDive",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.growthScreenToDeepDive",
+      "src": "recipes.screen.growthScreenToDeepDive",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.growthScreenToDeepDive",
+      "src": "recipes.screen.growthScreenToDeepDive",
       "dst": "engines.analysis.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.growthScreenToDeepDive",
+      "src": "recipes.screen.growthScreenToDeepDive",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryDeepDive",
+      "src": "recipes.screen.industryDeepDive",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryDeepDive",
+      "src": "recipes.screen.industryDeepDive",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryDeepDive",
+      "src": "recipes.screen.industryDeepDive",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryDeepDive",
+      "src": "recipes.screen.industryDeepDive",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryStageScreen",
+      "src": "recipes.screen.industryStageScreen",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryStageScreen",
+      "src": "recipes.screen.industryStageScreen",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryStageScreen",
+      "src": "recipes.screen.industryStageScreen",
       "dst": "engines.quant.piotroski",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.industryStageScreen",
+      "src": "recipes.screen.industryStageScreen",
       "dst": "engines.quant.altman",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEarningsLeading",
+      "src": "recipes.disclosure.insiderEarningsLeading",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEarningsLeading",
+      "src": "recipes.disclosure.insiderEarningsLeading",
       "dst": "engines.gather.insiderTrading",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEarningsLeading",
+      "src": "recipes.disclosure.insiderEarningsLeading",
       "dst": "engines.quant.surprise",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEarningsLeading",
+      "src": "recipes.disclosure.insiderEarningsLeading",
       "dst": "engines.analysis.predictionSignal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEventCheck",
+      "src": "recipes.disclosure.insiderEventCheck",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEventCheck",
+      "src": "recipes.disclosure.insiderEventCheck",
       "dst": "engines.scan.insider",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEventCheck",
+      "src": "recipes.disclosure.insiderEventCheck",
       "dst": "engines.scan.capital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.insiderEventCheck",
+      "src": "recipes.disclosure.insiderEventCheck",
       "dst": "engines.company.disclosureEvent",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
+      "src": "recipes.valuation.intrinsicValueBand",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
+      "src": "recipes.valuation.intrinsicValueBand",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
+      "src": "recipes.valuation.intrinsicValueBand",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
-      "dst": "engines.recipe.dupontDriver",
+      "src": "recipes.valuation.intrinsicValueBand",
+      "dst": "recipes.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
-      "dst": "engines.recipe.capitalAllocationScorecard",
+      "src": "recipes.valuation.intrinsicValueBand",
+      "dst": "recipes.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
-      "dst": "engines.recipe.compounderCandidates",
+      "src": "recipes.valuation.intrinsicValueBand",
+      "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.intrinsicValueBand",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.intrinsicValueBand",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.inventoryAndCycle",
+      "src": "recipes.quality.inventoryAndCycle",
       "dst": "engines.macro.inventory",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.inventoryAndCycle",
+      "src": "recipes.quality.inventoryAndCycle",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.inventoryAndCycle",
+      "src": "recipes.quality.inventoryAndCycle",
       "dst": "engines.analysis.efficiency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.inventoryAndCycle",
+      "src": "recipes.quality.inventoryAndCycle",
       "dst": "engines.macro.cycle",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.leverageSensitivity",
+      "src": "recipes.credit.leverageSensitivity",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.leverageSensitivity",
+      "src": "recipes.credit.leverageSensitivity",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.leverageSensitivity",
-      "dst": "engines.recipe.dupontDriver",
+      "src": "recipes.credit.leverageSensitivity",
+      "dst": "recipes.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.leverageSensitivity",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.credit.leverageSensitivity",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.leverageSensitivity",
-      "dst": "engines.recipe.creditDistressDual",
+      "src": "recipes.credit.leverageSensitivity",
+      "dst": "recipes.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroBetaPeerScreen",
+      "src": "recipes.macro.betaPeerScreen",
       "dst": "engines.gather.industryPeers",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroBetaPeerScreen",
+      "src": "recipes.macro.betaPeerScreen",
       "dst": "engines.scan.macroBeta",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroBetaPeerScreen",
+      "src": "recipes.macro.betaPeerScreen",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroLiquidityCycle",
+      "src": "recipes.macro.liquidityCycle",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroLiquidityCycle",
+      "src": "recipes.macro.liquidityCycle",
       "dst": "engines.macro.rates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroLiquidityCycle",
+      "src": "recipes.macro.liquidityCycle",
       "dst": "engines.macro.liquidity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroLiquidityCycle",
+      "src": "recipes.macro.liquidityCycle",
       "dst": "engines.macro.crisis",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroLiquidityCycle",
+      "src": "recipes.macro.liquidityCycle",
       "dst": "engines.macro.summary",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroQuantScenarioBacktest",
+      "src": "recipes.macro.quantScenarioBacktest",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroQuantScenarioBacktest",
+      "src": "recipes.macro.quantScenarioBacktest",
       "dst": "engines.quant.walkforward",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroQuantScenarioBacktest",
+      "src": "recipes.macro.quantScenarioBacktest",
       "dst": "engines.quant.backtest",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroToCompany",
+      "src": "recipes.macro.toCompany",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroToCompany",
+      "src": "recipes.macro.toCompany",
       "dst": "engines.macro.rates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroToCompany",
+      "src": "recipes.macro.toCompany",
       "dst": "engines.analysis.macroSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroToCompany",
+      "src": "recipes.macro.toCompany",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.macroToCompany",
+      "src": "recipes.macro.toCompany",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.peerBenchmark",
+      "src": "recipes.screen.peerBenchmark",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.peerBenchmark",
+      "src": "recipes.screen.peerBenchmark",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.peerBenchmark",
+      "src": "recipes.screen.peerBenchmark",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.peerBenchmark",
+      "src": "recipes.screen.peerBenchmark",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
+      "src": "recipes.quality.piotroskiLite",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
+      "src": "recipes.quality.piotroskiLite",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
+      "src": "recipes.quality.piotroskiLite",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
+      "src": "recipes.quality.piotroskiLite",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
-      "dst": "engines.recipe.qualityValueScreen",
+      "src": "recipes.quality.piotroskiLite",
+      "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
-      "dst": "engines.recipe.grahamDeepValue",
+      "src": "recipes.quality.piotroskiLite",
+      "dst": "recipes.valuation.grahamDeepValue",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.piotroskiLite",
+      "src": "recipes.quality.piotroskiLite",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityMacroBeta",
+      "src": "recipes.macro.qualityMacroBeta",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityMacroBeta",
+      "src": "recipes.macro.qualityMacroBeta",
       "dst": "engines.quant.qmj",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityMacroBeta",
+      "src": "recipes.macro.qualityMacroBeta",
       "dst": "engines.scan.macroBeta",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityMacroBeta",
+      "src": "recipes.macro.qualityMacroBeta",
       "dst": "engines.macro.cycle",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.qualityValueScreen",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.qualityValueScreen",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.qualityValueScreen",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.qualityValueScreen",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.qualityValueScreen",
       "dst": "engines.scan.undervaluedQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
-      "dst": "engines.recipe.valuationCheck",
+      "src": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.valuation.check",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.qualityValueScreen",
+      "src": "recipes.valuation.qualityValueScreen",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.quantTechnicalReview",
+      "src": "recipes.etc.quantTechnicalReview",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.quantTechnicalReview",
+      "src": "recipes.etc.quantTechnicalReview",
       "dst": "engines.quant.indicators",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.quantTechnicalReview",
+      "src": "recipes.etc.quantTechnicalReview",
       "dst": "engines.quant.momentum",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.quantTechnicalReview",
+      "src": "recipes.etc.quantTechnicalReview",
       "dst": "engines.quant.volatility",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.quantTechnicalReview",
+      "src": "recipes.etc.quantTechnicalReview",
       "dst": "engines.quant.chartPatterns",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.scenarioAnalysis",
+      "src": "recipes.macro.scenarioAnalysis",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.scenarioAnalysis",
+      "src": "recipes.macro.scenarioAnalysis",
       "dst": "engines.analysis.revenueForecast",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.scenarioAnalysis",
+      "src": "recipes.macro.scenarioAnalysis",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.scenarioAnalysis",
+      "src": "recipes.macro.scenarioAnalysis",
       "dst": "engines.quant.regime",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.scenarioAnalysis",
+      "src": "recipes.macro.scenarioAnalysis",
       "dst": "engines.analysis.macroSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.screenAndChart",
+      "src": "recipes.screen.chart",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.screenAndChart",
+      "src": "recipes.screen.chart",
       "dst": "engines.viz.tableBackedChart",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.screenAndChart",
+      "src": "recipes.screen.chart",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.sectorRotation",
+      "src": "recipes.macro.sectorRotation",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.sectorRotation",
+      "src": "recipes.macro.sectorRotation",
       "dst": "engines.macro.cycle",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.sectorRotation",
+      "src": "recipes.macro.sectorRotation",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.sectorRotation",
+      "src": "recipes.macro.sectorRotation",
       "dst": "engines.scan.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.smallCapDiscovery",
+      "src": "recipes.screen.smallCapDiscovery",
       "dst": "engines.scan.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.smallCapDiscovery",
+      "src": "recipes.screen.smallCapDiscovery",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.smallCapDiscovery",
+      "src": "recipes.screen.smallCapDiscovery",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.smallCapDiscovery",
+      "src": "recipes.screen.smallCapDiscovery",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.smallCapDiscovery",
+      "src": "recipes.screen.smallCapDiscovery",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.storyReportBuild",
+      "src": "recipes.report.storyReportBuild",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.storyReportBuild",
+      "src": "recipes.report.storyReportBuild",
       "dst": "engines.story.companyCausal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.storyReportBuild",
+      "src": "recipes.report.storyReportBuild",
       "dst": "engines.story.dartlabStory",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.storyReportBuild",
+      "src": "recipes.report.storyReportBuild",
       "dst": "engines.analysis.scorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.thesisTracker",
+      "src": "recipes.report.thesisTracker",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.thesisTracker",
+      "src": "recipes.report.thesisTracker",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.thesisTracker",
-      "dst": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.thesisTracker",
+      "dst": "recipes.report.companyDeepAnalysis",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.thesisTracker",
-      "dst": "engines.recipe.dailyMorningNote",
+      "src": "recipes.report.thesisTracker",
+      "dst": "recipes.report.dailyMorningNote",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.thesisTracker",
+      "src": "recipes.report.thesisTracker",
       "dst": "engines.company",
       "kind": "source"
     },
     {
-      "src": "engines.recipe.thesisTracker",
-      "dst": "engines.recipe.companyDeepAnalysis",
+      "src": "recipes.report.thesisTracker",
+      "dst": "recipes.report.companyDeepAnalysis",
       "kind": "source"
     },
     {
-      "src": "engines.recipe.usMarketReview",
+      "src": "recipes.report.usMarketReview",
       "dst": "engines.company.usEdgarReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.usMarketReview",
+      "src": "recipes.report.usMarketReview",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.usMarketReview",
+      "src": "recipes.report.usMarketReview",
       "dst": "engines.quant.verdict",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.usMarketReview",
+      "src": "recipes.report.usMarketReview",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.usageAndApi",
+      "src": "recipes.etc.usageAndApi",
       "dst": "start.dartlabSkillOs",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationBandTrack",
+      "src": "recipes.valuation.bandTrack",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationBandTrack",
+      "src": "recipes.valuation.bandTrack",
       "dst": "engines.analysis.valuationBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationBandTrack",
+      "src": "recipes.valuation.bandTrack",
       "dst": "engines.quant.value",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationBandTrack",
+      "src": "recipes.valuation.bandTrack",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationCheck",
+      "src": "recipes.valuation.check",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationCheck",
+      "src": "recipes.valuation.check",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationCheck",
+      "src": "recipes.valuation.check",
       "dst": "engines.analysis.valuationBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationCheck",
+      "src": "recipes.valuation.check",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.valuationCheck",
+      "src": "recipes.valuation.check",
       "dst": "engines.quant.value",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workforceAndCapital",
+      "src": "recipes.governance.workforceAndCapital",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workforceAndCapital",
+      "src": "recipes.governance.workforceAndCapital",
       "dst": "engines.scan.workforce",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workforceAndCapital",
+      "src": "recipes.governance.workforceAndCapital",
       "dst": "engines.scan.capital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workforceAndCapital",
+      "src": "recipes.governance.workforceAndCapital",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workingCapitalQuality",
+      "src": "recipes.quality.workingCapitalQuality",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workingCapitalQuality",
+      "src": "recipes.quality.workingCapitalQuality",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workingCapitalQuality",
-      "dst": "engines.recipe.dupontDriver",
+      "src": "recipes.quality.workingCapitalQuality",
+      "dst": "recipes.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workingCapitalQuality",
-      "dst": "engines.recipe.earningsQualityTriad",
+      "src": "recipes.quality.workingCapitalQuality",
+      "dst": "recipes.quality.earningsQualityTriad",
       "kind": "linkedRecipe"
     },
     {
-      "src": "engines.recipe.workingCapitalQuality",
-      "dst": "engines.recipe.distressFilter",
+      "src": "recipes.quality.workingCapitalQuality",
+      "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
@@ -8855,7 +8855,7 @@
     },
     {
       "src": "engines.scan.audit",
-      "dst": "engines.analysis.governanceAudit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -8890,7 +8890,7 @@
     },
     {
       "src": "engines.scan.capital",
-      "dst": "engines.analysis.dividendCapitalReturn",
+      "dst": "recipes.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -8990,12 +8990,12 @@
     },
     {
       "src": "engines.scan.disclosureRisk",
-      "dst": "engines.analysis.governanceAudit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
       "src": "engines.scan.disclosureRisk",
-      "dst": "engines.recipe.disclosureEvent",
+      "dst": "recipes.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
@@ -9015,7 +9015,7 @@
     },
     {
       "src": "engines.scan.dividendTrend",
-      "dst": "engines.analysis.dividendCapitalReturn",
+      "dst": "recipes.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -9115,7 +9115,7 @@
     },
     {
       "src": "engines.scan.governance",
-      "dst": "engines.analysis.governanceAudit",
+      "dst": "recipes.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -10042,12 +10042,12 @@
       "engines.analysis.capitalAllocation",
       "engines.analysis.cashflow",
       "engines.analysis.disclosureChange",
-      "engines.analysis.dividendCapitalReturn",
+      "recipes.dividend.capitalReturn",
       "engines.analysis.earningsQuality",
       "engines.analysis.financialConsistency",
       "engines.analysis.financing",
       "engines.analysis.governance",
-      "engines.analysis.governanceAudit",
+      "recipes.governance.auditComposite",
       "engines.analysis.growth",
       "engines.analysis.investmentEfficiency",
       "engines.analysis.macroSensitivity",
@@ -10117,7 +10117,7 @@
       "engines.quant.verdict",
       "engines.quant.volatility",
       "engines.quant.walkforward",
-      "engines.recipe.disclosureEvent",
+      "recipes.disclosure.event",
       "engines.scan",
       "engines.scan.account",
       "engines.scan.audit",
@@ -10146,21 +10146,21 @@
       "engines.scan.efficiency"
     ],
     [
-      "engines.recipe.compounderCandidates",
-      "engines.recipe.distressFilter",
-      "engines.recipe.garpScreen",
-      "engines.recipe.grahamDeepValue",
-      "engines.recipe.piotroskiLite",
-      "engines.recipe.qualityValueScreen"
+      "recipes.screen.compounderCandidates",
+      "recipes.credit.distressFilter",
+      "recipes.valuation.garpScreen",
+      "recipes.valuation.grahamDeepValue",
+      "recipes.quality.piotroskiLite",
+      "recipes.valuation.qualityValueScreen"
     ],
     [
-      "engines.recipe.capitalAllocationScorecard",
-      "engines.recipe.creditDistressDual",
-      "engines.recipe.dupontDriver",
-      "engines.recipe.earningsQualityTriad",
-      "engines.recipe.intrinsicValueBand",
-      "engines.recipe.leverageSensitivity",
-      "engines.recipe.workingCapitalQuality"
+      "recipes.quality.capitalAllocationScorecard",
+      "recipes.credit.distressDual",
+      "recipes.quality.dupontDriver",
+      "recipes.quality.earningsQualityTriad",
+      "recipes.valuation.intrinsicValueBand",
+      "recipes.credit.leverageSensitivity",
+      "recipes.quality.workingCapitalQuality"
     ]
   ],
   "orphans": [
@@ -10183,48 +10183,48 @@
     "engines.quant.residual",
     "engines.quant.scanBacktest",
     "engines.quant.worldClass",
-    "engines.recipe.cashflowGovernanceDualSignal",
-    "engines.recipe.companyMacroPathProjection",
-    "engines.recipe.creditCovenantStressTest",
-    "engines.recipe.creditDeepDive",
-    "engines.recipe.creditMacroStress",
-    "engines.recipe.dataAvailabilityFirst",
-    "engines.recipe.debtStructureAudit",
-    "engines.recipe.disclosureRiskScreen",
-    "engines.recipe.disclosureToneToStoryRisk",
-    "engines.recipe.distressCandidateScreen",
-    "engines.recipe.dividendStressTest",
-    "engines.recipe.dividendThesis",
-    "engines.recipe.earningsQualityCheck",
-    "engines.recipe.esgGovernanceLight",
-    "engines.recipe.filingTextSignal",
-    "engines.recipe.financialStatementCompare",
-    "engines.recipe.flowAndPattern",
-    "engines.recipe.governanceAudit",
-    "engines.recipe.governanceAuditNetwork",
-    "engines.recipe.growthScreenToDeepDive",
-    "engines.recipe.industryDeepDive",
-    "engines.recipe.industryStageScreen",
-    "engines.recipe.insiderEarningsLeading",
-    "engines.recipe.insiderEventCheck",
-    "engines.recipe.inventoryAndCycle",
-    "engines.recipe.macroBetaPeerScreen",
-    "engines.recipe.macroLiquidityCycle",
-    "engines.recipe.macroQuantScenarioBacktest",
-    "engines.recipe.macroToCompany",
-    "engines.recipe.peerBenchmark",
-    "engines.recipe.qualityMacroBeta",
-    "engines.recipe.quantTechnicalReview",
-    "engines.recipe.scenarioAnalysis",
-    "engines.recipe.screenAndChart",
-    "engines.recipe.sectorRotation",
-    "engines.recipe.smallCapDiscovery",
-    "engines.recipe.storyReportBuild",
-    "engines.recipe.thesisTracker",
-    "engines.recipe.usMarketReview",
-    "engines.recipe.usageAndApi",
-    "engines.recipe.valuationBandTrack",
-    "engines.recipe.workforceAndCapital",
+    "recipes.quality.cashflowGovernanceDualSignal",
+    "recipes.macro.companyMacroPathProjection",
+    "recipes.credit.covenantStressTest",
+    "recipes.credit.deepDive",
+    "recipes.credit.macroStress",
+    "recipes.etc.dataAvailabilityFirst",
+    "recipes.credit.debtStructureAudit",
+    "recipes.disclosure.riskScreen",
+    "recipes.disclosure.toneToStoryRisk",
+    "recipes.credit.distressCandidateScreen",
+    "recipes.dividend.stressTest",
+    "recipes.dividend.thesis",
+    "recipes.quality.earningsQualityCheck",
+    "recipes.governance.esgGovernanceLight",
+    "recipes.disclosure.filingTextSignal",
+    "recipes.quality.financialStatementCompare",
+    "recipes.etc.flowAndPattern",
+    "recipes.governance.audit",
+    "recipes.governance.auditNetwork",
+    "recipes.screen.growthScreenToDeepDive",
+    "recipes.screen.industryDeepDive",
+    "recipes.screen.industryStageScreen",
+    "recipes.disclosure.insiderEarningsLeading",
+    "recipes.disclosure.insiderEventCheck",
+    "recipes.quality.inventoryAndCycle",
+    "recipes.macro.betaPeerScreen",
+    "recipes.macro.liquidityCycle",
+    "recipes.macro.quantScenarioBacktest",
+    "recipes.macro.toCompany",
+    "recipes.screen.peerBenchmark",
+    "recipes.macro.qualityMacroBeta",
+    "recipes.etc.quantTechnicalReview",
+    "recipes.macro.scenarioAnalysis",
+    "recipes.screen.chart",
+    "recipes.macro.sectorRotation",
+    "recipes.screen.smallCapDiscovery",
+    "recipes.report.storyReportBuild",
+    "recipes.report.thesisTracker",
+    "recipes.report.usMarketReview",
+    "recipes.etc.usageAndApi",
+    "recipes.valuation.bandTrack",
+    "recipes.governance.workforceAndCapital",
     "engines.scan.krxIndexStrength",
     "operation.aiEngine",
     "operation.cliMaintenance",
@@ -10312,67 +10312,67 @@
     "engines.quant.volume",
     "engines.quant.walkforward",
     "engines.quant.worldClass",
-    "engines.recipe.capitalAllocationScorecard",
-    "engines.recipe.cashflowGovernanceDualSignal",
-    "engines.recipe.catalystCalendar",
-    "engines.recipe.companyDeepAnalysis",
-    "engines.recipe.companyMacroPathProjection",
-    "engines.recipe.compounderCandidates",
-    "engines.recipe.creditCovenantStressTest",
-    "engines.recipe.creditDeepDive",
-    "engines.recipe.creditDistressDual",
-    "engines.recipe.creditMacroStress",
-    "engines.recipe.creditQuantConsensus",
-    "engines.recipe.dailyMorningNote",
-    "engines.recipe.dataAvailabilityFirst",
-    "engines.recipe.debtStructureAudit",
-    "engines.recipe.disclosureEvent",
-    "engines.recipe.disclosureRiskScreen",
-    "engines.recipe.disclosureToneToStoryRisk",
-    "engines.recipe.distressCandidateScreen",
-    "engines.recipe.distressFilter",
-    "engines.recipe.dividendStressTest",
-    "engines.recipe.dividendThesis",
-    "engines.recipe.dupontDriver",
-    "engines.recipe.earningsQualityCheck",
-    "engines.recipe.earningsQualityTriad",
-    "engines.recipe.esgGovernanceLight",
-    "engines.recipe.filingTextSignal",
-    "engines.recipe.financialStatementCompare",
-    "engines.recipe.flowAndPattern",
-    "engines.recipe.garpScreen",
-    "engines.recipe.governanceAudit",
-    "engines.recipe.governanceAuditNetwork",
-    "engines.recipe.grahamDeepValue",
-    "engines.recipe.growthScreenToDeepDive",
-    "engines.recipe.industryDeepDive",
-    "engines.recipe.industryStageScreen",
-    "engines.recipe.insiderEarningsLeading",
-    "engines.recipe.insiderEventCheck",
-    "engines.recipe.intrinsicValueBand",
-    "engines.recipe.inventoryAndCycle",
-    "engines.recipe.leverageSensitivity",
-    "engines.recipe.macroBetaPeerScreen",
-    "engines.recipe.macroLiquidityCycle",
-    "engines.recipe.macroQuantScenarioBacktest",
-    "engines.recipe.macroToCompany",
-    "engines.recipe.peerBenchmark",
-    "engines.recipe.piotroskiLite",
-    "engines.recipe.qualityMacroBeta",
-    "engines.recipe.qualityValueScreen",
-    "engines.recipe.quantTechnicalReview",
-    "engines.recipe.scenarioAnalysis",
-    "engines.recipe.screenAndChart",
-    "engines.recipe.sectorRotation",
-    "engines.recipe.smallCapDiscovery",
-    "engines.recipe.storyReportBuild",
-    "engines.recipe.thesisTracker",
-    "engines.recipe.usMarketReview",
-    "engines.recipe.usageAndApi",
-    "engines.recipe.valuationBandTrack",
-    "engines.recipe.valuationCheck",
-    "engines.recipe.workforceAndCapital",
-    "engines.recipe.workingCapitalQuality",
+    "recipes.quality.capitalAllocationScorecard",
+    "recipes.quality.cashflowGovernanceDualSignal",
+    "recipes.report.catalystCalendar",
+    "recipes.report.companyDeepAnalysis",
+    "recipes.macro.companyMacroPathProjection",
+    "recipes.screen.compounderCandidates",
+    "recipes.credit.covenantStressTest",
+    "recipes.credit.deepDive",
+    "recipes.credit.distressDual",
+    "recipes.credit.macroStress",
+    "recipes.credit.quantConsensus",
+    "recipes.report.dailyMorningNote",
+    "recipes.etc.dataAvailabilityFirst",
+    "recipes.credit.debtStructureAudit",
+    "recipes.disclosure.event",
+    "recipes.disclosure.riskScreen",
+    "recipes.disclosure.toneToStoryRisk",
+    "recipes.credit.distressCandidateScreen",
+    "recipes.credit.distressFilter",
+    "recipes.dividend.stressTest",
+    "recipes.dividend.thesis",
+    "recipes.quality.dupontDriver",
+    "recipes.quality.earningsQualityCheck",
+    "recipes.quality.earningsQualityTriad",
+    "recipes.governance.esgGovernanceLight",
+    "recipes.disclosure.filingTextSignal",
+    "recipes.quality.financialStatementCompare",
+    "recipes.etc.flowAndPattern",
+    "recipes.valuation.garpScreen",
+    "recipes.governance.audit",
+    "recipes.governance.auditNetwork",
+    "recipes.valuation.grahamDeepValue",
+    "recipes.screen.growthScreenToDeepDive",
+    "recipes.screen.industryDeepDive",
+    "recipes.screen.industryStageScreen",
+    "recipes.disclosure.insiderEarningsLeading",
+    "recipes.disclosure.insiderEventCheck",
+    "recipes.valuation.intrinsicValueBand",
+    "recipes.quality.inventoryAndCycle",
+    "recipes.credit.leverageSensitivity",
+    "recipes.macro.betaPeerScreen",
+    "recipes.macro.liquidityCycle",
+    "recipes.macro.quantScenarioBacktest",
+    "recipes.macro.toCompany",
+    "recipes.screen.peerBenchmark",
+    "recipes.quality.piotroskiLite",
+    "recipes.macro.qualityMacroBeta",
+    "recipes.valuation.qualityValueScreen",
+    "recipes.etc.quantTechnicalReview",
+    "recipes.macro.scenarioAnalysis",
+    "recipes.screen.chart",
+    "recipes.macro.sectorRotation",
+    "recipes.screen.smallCapDiscovery",
+    "recipes.report.storyReportBuild",
+    "recipes.report.thesisTracker",
+    "recipes.report.usMarketReview",
+    "recipes.etc.usageAndApi",
+    "recipes.valuation.bandTrack",
+    "recipes.valuation.check",
+    "recipes.governance.workforceAndCapital",
+    "recipes.quality.workingCapitalQuality",
     "engines.scan.debt",
     "engines.scan.disclosureRisk",
     "engines.scan.efficiency",

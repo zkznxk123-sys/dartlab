@@ -597,6 +597,16 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
         return runAsync(_calc())
     except (ImportError, OSError, RuntimeError, AttributeError):
         return None
+    except Exception as exc:
+        try:
+            import httpx
+
+            from dartlab.gather.types import SourceUnavailableError
+        except ImportError:
+            raise
+        if isinstance(exc, (httpx.HTTPError, SourceUnavailableError)):
+            return None
+        raise
 
 
 # 회사 고유 WACC

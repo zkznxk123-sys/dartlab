@@ -226,16 +226,32 @@ def buildTimeseries(
     """
     from dartlab.core import dataLoader
 
-    return _buildTimeseriesCached(str(stockCode).strip(), str(fsDivPref).strip() or "CFS", id(dataLoader.loadData))
+    stockCode = str(stockCode).strip()
+    fsDivPref = str(fsDivPref).strip() or "CFS"
+    loader = dataLoader.loadData
+    loaderFingerprint = (
+        id(loader),
+        getattr(loader, "__module__", ""),
+        getattr(loader, "__qualname__", ""),
+        repr(loader),
+    )
+    return _buildTimeseriesCached(stockCode, fsDivPref, loaderFingerprint)
 
 
 @functools.lru_cache(maxsize=8)
 def _buildTimeseriesCached(
     stockCode: str,
     fsDivPref: str,
-    loadDataFingerprint: int,
+    loadDataFingerprint: tuple[int, str, str, str],
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
     _ = loadDataFingerprint
+    return _buildTimeseriesUncached(stockCode, fsDivPref)
+
+
+def _buildTimeseriesUncached(
+    stockCode: str,
+    fsDivPref: str,
+) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
     result = _loadAndNormalize(stockCode, fsDivPref)
     if result is None:
         return None

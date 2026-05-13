@@ -1,7 +1,7 @@
 """거버넌스 전수 스캔 — 지분율, 사외이사, pay ratio, 감사의견, 소액주주 → 종합 등급.
 
 Public API:
-    scan_governance()  → pl.DataFrame (전체 상장사 거버넌스 등급)
+    scanGovernance()  → pl.DataFrame (전체 상장사 거버넌스 등급)
 """
 
 from __future__ import annotations
@@ -168,4 +168,4 @@ def scanGovernance(*, verbose: bool = True) -> pl.DataFrame:
     return df
 
 
-__all__ = ["scan_governance"]
+__all__ = ["scanGovernance"]

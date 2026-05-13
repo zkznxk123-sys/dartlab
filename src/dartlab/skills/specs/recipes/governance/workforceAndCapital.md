@@ -166,9 +166,9 @@ emit_result(
 - **skillRef**: `engines.scan.workforce` (직원수·인건비 횡단), `engines.scan.capital` (자본 변동 횡단), `engines.analysis.capitalAllocation` (배분 우선순위), `engines.company.workforce()` + `engines.company.capital()` (개별 회사).
 - **sourceRef**: DART 사업보고서 — 종업원 명세 (정규/비정규/외주 분리), 임원 보수, 인건비 시계열. 자사주 변동 보고. 분기·연간.
 - **tableRef** (3 표):
-  1. workforce — year × {직원수, 인건비 총액, 인당 매출, 인당 영업이익, 인건비/매출}
-  2. capital — year × {자사주 매입, 자사주 소각, 자사주 잔액, 신주 발행, 배당총액}
-  3. capital allocation — year × {배당%, 자사주%, CAPEX%, R&D%, M&A%, 차입상환%}
+  1. workforce — year × (직원수, 인건비 총액, 인당 매출, 인당 영업이익, 인건비/매출)
+  2. capital — year × (자사주 매입, 자사주 소각, 자사주 잔액, 신주 발행, 배당총액)
+  3. capital allocation — year × (배당%, 자사주%, CAPEX%, R&D%, M&A%, 차입상환%)
 - **valueRef**: 5 년 직원수 변화 · 인당 매출 변화 · 인건비/매출 비중 · 자사주 소각 비중 · CAPEX/FCF 비율.
 - **dateRef**: 5 년 사업연도.
 

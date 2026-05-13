@@ -77,7 +77,7 @@ lastUpdated: '2026-05-07'
 
 ## 엔진 역할
 
-scan 엔진의 거버넌스 축 응용 skill — 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산). SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `scan_governance()` 함수 docstring.
+scan 엔진의 거버넌스 축 응용 skill — 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산). SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `scanGovernance()` 함수 docstring.
 
 ## 공개 호출 방식
 
@@ -93,7 +93,7 @@ df = dartlab.scan.governance()
 
 ## 호출 동작
 
-전종목 finance / disclosure / market universe 를 읽어 거버넌스 축 지표를 산출한다. 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산). 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `scan_governance()` docstring 참조.
+전종목 finance / disclosure / market universe 를 읽어 거버넌스 축 지표를 산출한다. 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산). 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `scanGovernance()` docstring 참조.
 
 ## 대표 반환 형태
 
@@ -102,10 +102,10 @@ DataFrame 반환. 공통 column:
 - `stockCode` / `corpName`: 종목 식별자
 - `market`: KOSPI / KOSDAQ / KONEX
 - `latestAsOf` / `asOf`: 데이터 기준일
-- 축 고유 metric / score / rank / grade column (정확한 spec 은 `scan_governance()` docstring 검산)
+- 축 고유 metric / score / rank / grade column (정확한 spec 은 `scanGovernance()` docstring 검산)
 - `flags`: 결손 / 이상 / 비교 불가 신호
 
-전체 column 은 `scan_governance()` docstring 으로 검산. 코드 변경 시 본 skill 도 같이 갱신.
+전체 column 은 `scanGovernance()` docstring 으로 검산. 코드 변경 시 본 skill 도 같이 갱신.
 
 ## 기본 실행 순서
 
@@ -117,4 +117,4 @@ DataFrame 반환. 공통 column:
 
 ## 기본 검증
 
-이 skill 은 공개 실행 문서다. 본 axis 호출 방식, 반환 column, 오류 / 제한 동작이 변경되면 같은 변경에서 본 파일을 갱신한다. SSOT 는 `_AXIS_REGISTRY` + `scan_governance()` docstring.
+이 skill 은 공개 실행 문서다. 본 axis 호출 방식, 반환 column, 오류 / 제한 동작이 변경되면 같은 변경에서 본 파일을 갱신한다. SSOT 는 `_AXIS_REGISTRY` + `scanGovernance()` docstring.

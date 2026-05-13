@@ -42,6 +42,7 @@ if not _IS_PYODIDE:
     _LAZY_ATTRS.update(
         {
             "llm": ("dartlab.ai", None),  # 모듈 alias
+            "story": ("dartlab.story", None),
             "Fred": ("dartlab.gather.fred", "Fred"),
             "codeToName": ("dartlab.gather.krx.listing", "codeToName"),
             "nameToCode": ("dartlab.gather.krx.listing", "nameToCode"),

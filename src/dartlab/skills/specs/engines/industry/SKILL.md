@@ -134,7 +134,7 @@ position = c.industry()
 
 `dartlab.industry(industryId)` → 해당 산업의 공정·종목 DataFrame. `stage` 로 특정 공정만 필터.
 
-`summary=True` → year 기준 공정별 매출/영업이익 집계. `timeline=True` → 연도별 공정 매출 시계열. `lifecycle=True` → 산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴 — 도입 ≥30% / 성장 10~30% / 성숙 0~10% / 쇠퇴 <0% YoY). 셋 동시 사용 X — 우선순위 summary > timeline > lifecycle.
+`summary=True` → year 기준 공정별 매출/영업이익 집계. `timeline=True` → 연도별 공정 매출 시계열. `lifecycle=True` → 산업 라이프사이클 phase 시계열 (Vernon 3-phase + 쇠퇴 — 도입 ≥30% / 성장 10~30% / 성숙 0~10% / 쇠퇴 0% 미만 YoY). 셋 동시 사용 X — 우선순위 summary > timeline > lifecycle.
 
 `Company.industry()` → 단일 종목의 밸류체인 위치 dict — `chainId` (산업 ID), `stage` (공정), `confidence` (0~1 매칭 신뢰도), `peers` (같은 stage 종목코드 list). 매칭 실패 시 `None`.
 

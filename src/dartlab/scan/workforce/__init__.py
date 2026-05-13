@@ -1,7 +1,7 @@
 """인력/급여 전수 스캔 — 직원 현황, 인건비 효율, 급여 성장, 고액 보수.
 
 Public API:
-    scan_workforce()  → pl.DataFrame (전체 상장사 인력 현황)
+    scanWorkforce()  → pl.DataFrame (전체 상장사 인력 현황)
 """
 
 from __future__ import annotations
@@ -159,4 +159,4 @@ def scanWorkforce(*, verbose: bool = True) -> pl.DataFrame:
     return df
 
 
-__all__ = ["scan_workforce"]
+__all__ = ["scanWorkforce"]

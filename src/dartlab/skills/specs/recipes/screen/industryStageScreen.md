@@ -5,7 +5,7 @@ category: recipes
 kind: recipe
 scope: builtin
 status: drafted
-purpose: 도입기 / 후행기 산업 안에서 PER < 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.
+purpose: 도입기 / 후행기 산업 안에서 PER &lt; 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.
 whenToUse:
   - 산업 stage 가치 screen
   - 도입기 종목 발굴
@@ -74,7 +74,7 @@ import polars as pl
 taxonomy = dartlab.industry().get("taxonomy") if hasattr(dartlab, "industry") else {}
 target_stages = ["도입기", "후행기"]
 
-# 2. KOSPI universe + crossSectionStockScreen — 가치 1 차 필터 (PER < 10)
+# 2. KOSPI universe + crossSectionStockScreen — 가치 1 차 필터 (PER &lt; 10)
 universe = dartlab.scan("crossSectionStockScreen", market="KR", filters={"per_lt": 10})
 if isinstance(universe, pl.DataFrame):
     candidates = universe
@@ -122,7 +122,7 @@ emit_result(
 ## 호출 동작
 
 1. `dartlab.industry()` — 산업 stage 분류.
-2. `dartlab.scan("crossSectionStockScreen")` — PER < 10 가치 필터.
+2. `dartlab.scan("crossSectionStockScreen")` — PER &lt; 10 가치 필터.
 3. 도입기 / 후행기 산업 만 통과.
 4. 종목별 `c.quant("piotroski")` + `c.quant("altman")` — F ≥ 7 + Z > 3 동시.
 5. 최종 통과 종목 목록 반환.

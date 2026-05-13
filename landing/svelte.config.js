@@ -3,9 +3,11 @@ import { mdsvex } from 'mdsvex';
 import { createHighlighter } from 'shiki';
 import { visit } from 'unist-util-visit';
 import { readdirSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 
 const basePath = process.env.BASE_PATH || '';
+const projectRoot = resolve('..');
+const repoBlobBase = 'https://github.com/eddmpython/dartlab/blob/master';
 
 // 산업지도: static/map/companies/*.json 이 있으면 해당 경로 prerender
 const mapCompaniesDir = resolve('./static/map/companies');
@@ -46,10 +48,80 @@ function rehypeBaseUrl() {
 					node.properties.src = basePath + src;
 				}
 			}
-			if (node.tagName === 'a' && node.properties?.href?.startsWith('/')) {
-				node.properties.href = basePath + node.properties.href;
+			if (node.tagName === 'a' && node.properties?.href) {
+				const href = node.properties.href;
+				if (isSkillFile && (href.startsWith('../') || href.startsWith('./'))) {
+					const target = resolve(dirname(filePath), href);
+					if (target.startsWith(projectRoot)) {
+						const rel = relative(projectRoot, target).replace(/\\/g, '/');
+						node.properties.href = `${repoBlobBase}/${rel}`;
+					}
+					return;
+				}
+				if (
+					isSkillFile &&
+					(href.startsWith('/tests/') || href.startsWith('/src/') || href.startsWith('/scripts/'))
+				) {
+					node.properties.href = `${repoBlobBase}${href}`;
+					return;
+				}
+				if (href.startsWith('/')) {
+					node.properties.href = basePath + href;
+				}
 			}
 		});
+	};
+}
+
+function escapeSkillMarkdownForSvelte() {
+	const isSkillSpec = (filename) =>
+		filename?.endsWith('.md') &&
+		(filename.includes('/skills/specs/') || filename.includes('\\skills\\specs\\'));
+
+	const escapeLine = (line) =>
+		line
+			.replace(/<(?![A-Za-z/!][^>]*>)(?!!--)(?!\?)(?!&[a-zA-Z#0-9]+;)/g, '&lt;')
+			.replace(/\{/g, '\uE000')
+			.replace(/\}/g, '\uE001')
+			.replace(/\uE000/g, '{@html String.fromCharCode(123)}')
+			.replace(/\uE001/g, '{@html String.fromCharCode(125)}');
+
+	return {
+		name: 'escape-skill-markdown-for-svelte',
+		markup({ content, filename }) {
+			if (!isSkillSpec(filename)) {
+				return;
+			}
+
+			const lines = content.split('\n');
+			let inFence = false;
+			let inFrontmatter = lines[0]?.trim() === '---';
+			let frontmatterClosed = false;
+
+			const code = lines
+				.map((line, index) => {
+					const trimmed = line.trim();
+					if (index > 0 && inFrontmatter && trimmed === '---') {
+						inFrontmatter = false;
+						frontmatterClosed = true;
+						return line;
+					}
+					if (inFrontmatter && !frontmatterClosed) {
+						return line;
+					}
+					if (/^(```|~~~)/.test(trimmed)) {
+						inFence = !inFence;
+						return line;
+					}
+					if (inFence) {
+						return line;
+					}
+					return escapeLine(line);
+				})
+				.join('\n');
+
+			return { code };
+		}
 	};
 }
 
@@ -62,6 +134,7 @@ const highlighter = await createHighlighter({
 const config = {
 	extensions: ['.svelte', '.md'],
 	preprocess: [
+		escapeSkillMarkdownForSvelte(),
 		mdsvex({
 			extensions: ['.md'],
 			rehypePlugins: [rehypeBaseUrl],

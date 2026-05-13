@@ -49,28 +49,28 @@ class _AxisEntry:
 _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     "governance": _AxisEntry(
         module="dartlab.scan.governance",
-        fn="scan_governance",
+        fn="scanGovernance",
         label="거버넌스",
         description="지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산)",
         example='scan("governance")',
     ),
     "workforce": _AxisEntry(
         module="dartlab.scan.workforce",
-        fn="scan_workforce",
+        fn="scanWorkforce",
         label="인력/급여",
         description="직원수, 평균급여, 인건비율, 1인당부가가치, 성장률, 고액보수",
         example='scan("workforce")',
     ),
     "capital": _AxisEntry(
         module="dartlab.scan.capital",
-        fn="scan_capital",
+        fn="scanCapital",
         label="주주환원",
         description="배당, 자사주(취득/처분/소각), 증자/감자, 환원 분류",
         example='scan("capital")',
     ),
     "debt": _AxisEntry(
         module="dartlab.scan.debt",
-        fn="scan_debt",
+        fn="scanDebt",
         label="부채구조",
         description="사채만기, 부채비율, ICR, 위험등급",
         example='scan("debt")',
@@ -99,7 +99,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "network": _AxisEntry(
         module="dartlab.scan.network",
-        fn="build_graph",
+        fn="buildGraph",
         label="네트워크",
         description="상장사 관계 네트워크 (출자/지분/계열)",
         example='scan("network")',

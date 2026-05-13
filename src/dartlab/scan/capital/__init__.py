@@ -1,7 +1,7 @@
 """주주환원 전수 스캔 — 배당, 자사주, 증자/감자 → 순환원 분류.
 
 Public API:
-    scan_capital()  → pl.DataFrame (전체 상장사 주주환원 현황)
+    scanCapital()  → pl.DataFrame (전체 상장사 주주환원 현황)
 """
 
 from __future__ import annotations
@@ -152,4 +152,4 @@ def scanCapital(*, verbose: bool = True) -> pl.DataFrame:
     return df
 
 
-__all__ = ["scan_capital"]
+__all__ = ["scanCapital"]

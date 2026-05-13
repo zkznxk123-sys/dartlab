@@ -178,7 +178,7 @@ valueBand = pl.DataFrame({
 
 좋은 결론 예시:
 - "005930 (삼성전자) 본질가치 band 60,000~85,000 원 (Graham V 72,000 / EVA spread +3.2%p 가치 창출 / CFROI 9.8% > WACC 7%), 현재가 71,500 원 = band 중앙 +1%. **3 anchor 일관 가치 창출** — fair value 근방, 안전마진 부재."
-- "OOOOOO band 18,000~32,000 원 (Graham 22,000 / EVA -1.5%p 가치 파괴 / CFROI 5.2% < WACC 7%), 현재가 14,500 원 = band 하단 -19%. **2/3 anchor 약세 + 시장가 하단 이탈** — value trap 가능성, 보수적 접근."
+- "OOOOOO band 18,000~32,000 원 (Graham 22,000 / EVA -1.5%p 가치 파괴 / CFROI 5.2% &lt; WACC 7%), 현재가 14,500 원 = band 하단 -19%. **2/3 anchor 약세 + 시장가 하단 이탈** — value trap 가능성, 보수적 접근."
 
 금지 — 단일 anchor (Graham 만 또는 EVA 만) 결과로 fair value 단정. 반드시 **3 anchor 모두 산출 + band 형태**.
 
@@ -189,7 +189,7 @@ valueBand = pl.DataFrame({
 - **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS/CF/FQ), `engines.scan.valuation` (PER/PBR snapshot 비교용). analysis valuation axis 의존 X.
 - **sourceRef**: DART 공시 — IS (sales, operating_profit, earnings_before_tax, net_income, depreciation), BS (total_stockholders_equity, long_term_debt), CF (cash_flow_from_operations), FQ (eps_basic). 5 년 연간 시계열.
 - **외부 가정**: AAA yield (Y_AAA 4.0~5.0%), WACC_proxy (KR 7% / US 8%) — 답변에 가정 명시 + 민감도 (±1%) 동반.
-- **tableRef** (3 행 anchor): anchor × {value, interpretation, marketPriceComparison}.
+- **tableRef** (3 행 anchor): anchor × (value, interpretation, marketPriceComparison).
 - **valueRef**: Graham V · EVA spread · CFROI 5y avg · 현재 시장가 · 안전마진 비율 (V/Market).
 - **dateRef**: 5 회계년도 + 시장가 snapshot date.
 
@@ -213,7 +213,7 @@ graph LR
 ```
 
 각 anchor *해석* (답변 본문):
-- **Graham V**: 회계 EPS·성장률 + AAA yield 보정. 시장가 < V × 0.5 = deep value 안전마진. Graham 1962-2000 백테스트 +6%p 초과수익.
+- **Graham V**: 회계 EPS·성장률 + AAA yield 보정. 시장가 &lt; V × 0.5 = deep value 안전마진. Graham 1962-2000 백테스트 +6%p 초과수익.
 - **EVA spread**: ROIC − WACC. +값 = 자본 효율 우월 (자본 창출). -값 = 자본 파괴 (장기 deteriorate). Stewart 1991 correlation 0.50-0.65.
 - **CFROI proxy**: 현금 ROIC. 회계 ROE 보다 noise 적음. HOLT 1950-2020 — CFROI > WACC 회사 미래 stock return 우월.
 
@@ -238,16 +238,16 @@ graph LR
 
 | 신호 | 현재값 | 임계값 | 리뷰 주기 |
 |---|---|---|---|
-| Graham V vs 시장가 | (계산) | 시장가 < V × 0.5 = 매수 | 분기 |
+| Graham V vs 시장가 | (계산) | 시장가 &lt; V × 0.5 = 매수 | 분기 |
 | EVA spread | (계산) | > 0 (가치 창출) | 분기 |
 | CFROI − WACC | (계산) | > 0 (자본 효율) | 분기 |
 | AAA yield (Y_AAA) | (gather) | ±50bp | 월간 |
 | WACC 추정 (CAPM) | (계산) | beta 재계산 시 | 연간 |
-| 시장가 / V (안전마진) | (계산) | < 50% = 강한 매수 | 일간 |
+| 시장가 / V (안전마진) | (계산) | &lt; 50% = 강한 매수 | 일간 |
 
 연계 절차:
 - EVA spread > 0 + CFROI > WACC → `recipes.screen.compounderCandidates` 합의 (진짜 quality)
-- EVA spread < 0 + CFROI < WACC → `recipes.credit.distressFilter` (자본 파괴)
+- EVA spread &lt; 0 + CFROI &lt; WACC → `recipes.credit.distressFilter` (자본 파괴)
 - 5 년 EVA spread 안정 양수 = quality compounder → `recipes.quality.dupontDriver` 결합
 - PER/PBR 정량 매트릭스 → `engines.scan.valuation` snapshot 비교
 - 자본 배분 효율 → `recipes.quality.capitalAllocationScorecard`

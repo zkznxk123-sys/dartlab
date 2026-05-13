@@ -7,11 +7,11 @@ scan 엔진(governance/workforce/capital/debt) 결과를 insight 7영역과
 사용법::
 
     from dartlab.scan.builders.kr.payload import (
-        build_scan_payload, build_unified_payload,
+        buildScanPayload, buildUnifiedPayload,
     )
 
-    scan = build_scan_payload(company)
-    unified = build_unified_payload(company)
+    scan = buildScanPayload(company)
+    unified = buildUnifiedPayload(company)
 """
 
 from __future__ import annotations
@@ -538,7 +538,7 @@ def buildUnifiedPayload(company) -> dict[str, dict | None]:
         governance : dict | None — 지배구조 insight (insight 기준)
         risk : dict | None — 리스크 insight
         opportunity : dict | None — 기회 insight
-        scan_governance : dict | None — scan 지배구조 (insight와 키 충돌 시)
+        scanGovernance : dict | None — scan 지배구조 (insight와 키 충돌 시)
         workforce : dict | None — 인력 insight
         capital : dict | None — 주주환원 insight
         debt : dict | None — 부채구조 insight
@@ -558,9 +558,9 @@ def buildUnifiedPayload(company) -> dict[str, dict | None]:
 
     Capabilities:
         - insight 7 영역 (performance / profitability / health / cashflow / governance / risk
-          / opportunity) + scan 4 축 (workforce / capital / debt / scan_governance) 통합.
+          / opportunity) + scan 4 축 (workforce / capital / debt / scanGovernance) 통합.
         - 075-001 실험에서 3 사 11/11 영역 유효 + 3.2~4.0 KB 페이로드 + null 0 검증.
-        - governance 키 충돌 시 ``scan_governance`` 로 자동 rename.
+        - governance 키 충돌 시 ``scanGovernance`` 로 자동 rename.
 
     AIContext:
         Server API 대시보드 엔드포인트 (e.g. ``/api/company/{code}/payload``) 의 메인 출력.
@@ -619,11 +619,11 @@ def buildUnifiedPayload(company) -> dict[str, dict | None]:
     # scan 4축
     scan_areas = buildScanPayload(company)
 
-    # 통합 (insight.governance와 scan.governance 충돌 → scan_governance)
+    # 통합 (insight.governance와 scan.governance 충돌 -> scanGovernance)
     unified: dict[str, dict | None] = {}
     unified.update(insight_areas)
     for axis, data in scan_areas.items():
-        key = f"scan_{axis}" if axis in insight_areas else axis
+        key = f"scan{axis[:1].upper()}{axis[1:]}" if axis in insight_areas else axis
         unified[key] = data
 
     return unified

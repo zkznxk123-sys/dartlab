@@ -132,6 +132,7 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         ),
         example='gather("dartDoc", "20240315000123")',
         targetType="rceptNo",
+        hidden=True,
     ),
     "calendar": GatherAxisEntry(
         label="catalyst 일정",
@@ -143,6 +144,7 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         ),
         example='gather("calendar", "005930", horizon_days=30) / gather("calendar", ["005930", "000660"])',
         targetType="stockCode",
+        hidden=True,
     ),
 }
 

@@ -269,7 +269,7 @@ class TestScanPayload(unittest.TestCase):
         self.assertIsNone(debtToInsight({}))
 
     def test_unified_payload_keys(self):
-        """build_unified_payload가 올바른 키 구조를 반환하는지 (mock)."""
+        """buildUnifiedPayload가 올바른 키 구조를 반환하는지 (mock)."""
         from dartlab.scan.builders.kr.payload import buildScanPayload
 
         # Mock company

@@ -1,7 +1,7 @@
 """부채 구조 전수 스캔 — 사채 만기, 부채비율, ICR, 위험등급.
 
 Public API:
-    scan_debt()  → pl.DataFrame (전체 상장사 부채 현황)
+    scanDebt()  → pl.DataFrame (전체 상장사 부채 현황)
 """
 
 from __future__ import annotations
@@ -136,4 +136,4 @@ def scanDebt(*, verbose: bool = True) -> pl.DataFrame:
     return df
 
 
-__all__ = ["scan_debt"]
+__all__ = ["scanDebt"]

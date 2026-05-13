@@ -9,21 +9,21 @@ def test_imports():
     import dartlab.providers.dart.builder.scanAggregator  # noqa: F401
 
 
-def test_build_scan_capital_callable() -> None:
+def testBuildScanCapitalCallable() -> None:
     """buildScanCapital() callable smoke."""
     from dartlab.providers.dart.builder.scanAggregator import buildScanCapital
 
     assert callable(buildScanCapital)
 
 
-def test_build_scan_debt_callable() -> None:
+def testBuildScanDebtCallable() -> None:
     """buildScanDebt() callable smoke."""
     from dartlab.providers.dart.builder.scanAggregator import buildScanDebt
 
     assert callable(buildScanDebt)
 
 
-def test_build_scan_governance_callable() -> None:
+def testBuildScanGovernanceCallable() -> None:
     """buildScanGovernance() callable smoke."""
     from dartlab.providers.dart.builder.scanAggregator import buildScanGovernance
 
@@ -37,7 +37,7 @@ def test_build_scan_network_callable() -> None:
     assert callable(buildScanNetwork)
 
 
-def test_build_scan_workforce_callable() -> None:
+def testBuildScanWorkforceCallable() -> None:
     """buildScanWorkforce() callable smoke."""
     from dartlab.providers.dart.builder.scanAggregator import buildScanWorkforce
 
