@@ -29,6 +29,8 @@ from __future__ import annotations
 
 import functools
 import logging
+from collections.abc import Callable
+from typing import Any
 
 import polars as pl
 
@@ -40,6 +42,19 @@ from dartlab.providers.dart.finance.mapper import AccountMapper
 _log = logging.getLogger(__name__)
 
 QUARTER_ORDER = {"1분기": 1, "2분기": 2, "3분기": 3, "4분기": 4}
+
+
+def _loaderFingerprint(loader: Callable[..., Any]) -> tuple[int, str, str, str, int, int]:
+    returnValue = getattr(loader, "return_value", None)
+    sideEffect = getattr(loader, "side_effect", None)
+    return (
+        id(loader),
+        getattr(loader, "__module__", ""),
+        getattr(loader, "__qualname__", ""),
+        repr(loader),
+        id(returnValue),
+        id(sideEffect),
+    )
 
 
 def _preserveUnmapped(label: str, prefix: str) -> str:
@@ -229,12 +244,7 @@ def buildTimeseries(
     stockCode = str(stockCode).strip()
     fsDivPref = str(fsDivPref).strip() or "CFS"
     loader = dataLoader.loadData
-    loaderFingerprint = (
-        id(loader),
-        getattr(loader, "__module__", ""),
-        getattr(loader, "__qualname__", ""),
-        repr(loader),
-    )
+    loaderFingerprint = _loaderFingerprint(loader)
     return _buildTimeseriesCached(stockCode, fsDivPref, loaderFingerprint)
 
 
@@ -242,7 +252,7 @@ def buildTimeseries(
 def _buildTimeseriesCached(
     stockCode: str,
     fsDivPref: str,
-    loadDataFingerprint: tuple[int, str, str, str],
+    loadDataFingerprint: tuple[int, str, str, str, int, int],
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]] | None:
     _ = loadDataFingerprint
     return _buildTimeseriesUncached(stockCode, fsDivPref)
