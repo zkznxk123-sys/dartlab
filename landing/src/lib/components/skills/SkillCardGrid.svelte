@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { getSkillSubGroup } from '$lib/skills/catalog';
 	import { ArrowUpRight } from 'lucide-svelte';
 
 	interface RuntimeEntry {
@@ -28,17 +29,11 @@
 		query?: string;
 	} = $props();
 
-	function getSubGroup(skill: SkillDoc): string | null {
-		if (skill.category !== 'engines') return null;
-		const parts = skill.id.split('.');
-		return parts.length >= 2 ? parts[1] : null;
-	}
-
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		return skills.filter((s) => {
 			if (selectedCategory !== 'all' && s.category !== selectedCategory) return false;
-			if (selectedSubGroup && getSubGroup(s) !== selectedSubGroup) return false;
+			if (selectedSubGroup && getSkillSubGroup(s) !== selectedSubGroup) return false;
 			if (q) {
 				const haystack = `${s.title} ${s.id} ${s.purpose}`.toLowerCase();
 				if (!haystack.includes(q)) return false;
@@ -74,7 +69,7 @@
 	<header class="grid-meta">
 		<p class="count"><strong>{filtered.length}</strong> skills</p>
 		{#if selectedSubGroup}
-			<p class="filter-tag">filter: <code>engines.{selectedSubGroup}</code></p>
+			<p class="filter-tag">filter: <code>{selectedCategory}.{selectedSubGroup}</code></p>
 		{:else if selectedCategory !== 'all'}
 			<p class="filter-tag">filter: <code>{selectedCategory}</code></p>
 		{/if}
@@ -191,6 +186,8 @@
 	.card.cat-operation:hover { border-color: var(--dl-cat-operation); }
 	.card.cat-engines { border-left-color: var(--dl-cat-engines); }
 	.card.cat-engines:hover { border-color: var(--dl-cat-engines); }
+	.card.cat-recipes { border-left-color: var(--dl-cat-recipes); }
+	.card.cat-recipes:hover { border-color: var(--dl-cat-recipes); }
 
 	.card-head {
 		display: flex;
@@ -210,6 +207,7 @@
 	.card.cat-runtime .card-cat { color: var(--dl-cat-runtime); }
 	.card.cat-operation .card-cat { color: var(--dl-cat-operation); }
 	.card.cat-engines .card-cat { color: var(--dl-cat-engines); }
+	.card.cat-recipes .card-cat { color: var(--dl-cat-recipes); }
 
 	.card-status {
 		padding: 0.04rem 0.4rem;

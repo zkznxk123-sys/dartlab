@@ -1,11 +1,12 @@
 // Skill 카테고리 색상 SSOT — graph 시각화 + 카드 그리드 공통 사용.
-// SCHEMA.md §3 "start blue · runtime purple · operation green · engines orange" 와 정합.
+// SCHEMA.md §1 "start · runtime · operation · engines · recipes" 와 정합.
 
 export const categoryColor: Record<string, string> = {
 	start: '#3b82f6', // blue
 	runtime: '#a855f7', // purple
 	operation: '#22c55e', // green
 	engines: '#f97316', // orange
+	recipes: '#f472b6', // pink
 	// deprecated alias 폴백
 	screens: '#64748b',
 	finance: '#64748b',

@@ -4,7 +4,7 @@
 	import Footer from '$lib/components/sections/Footer.svelte';
 	import CategorySidebar from '$lib/components/skills/CategorySidebar.svelte';
 	import SkillCardGrid from '$lib/components/skills/SkillCardGrid.svelte';
-	import skillIndex from '$skills/index.json';
+	import { skills } from '$lib/skills/catalog';
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildWebsiteJsonLd } from '$lib/seo';
 	import { brand } from '$lib/brand';
 	import { Search, Sparkles, ArrowRight } from 'lucide-svelte';
@@ -19,10 +19,6 @@
 		purpose: string;
 		runtimeCompatibility?: Record<string, RuntimeEntry>;
 	}
-
-	const skills = ((skillIndex as { skills?: SkillDoc[] }).skills ?? []).filter(
-		(s) => s.category !== 'capability'
-	);
 
 	// 진입 skill — 처음 방문자가 어디부터 봐야 하는지 명시.
 	const entryIds = ['start.dartlabSkillOs', 'start.installUv', 'start.quickStart'];
@@ -125,7 +121,7 @@
 		<header class="catalog-head">
 			<h2>전체 카탈로그</h2>
 			<p class="catalog-sub">
-				4 카테고리 · 시작 (Start) · 실행 환경 (Runtime) · 운영 규칙 (Operation) · 엔진 (Engines)
+				5 카테고리 · 시작 (Start) · 실행 환경 (Runtime) · 운영 규칙 (Operation) · 엔진 (Engines) · 레시피 (Recipes)
 			</p>
 		</header>
 

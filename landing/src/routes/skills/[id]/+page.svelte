@@ -68,11 +68,13 @@
 		return () => observer.disconnect();
 	}
 
-	onMount(async () => {
-		await tick();
-		extractToc();
-		const cleanup = observeHeadings();
-		return cleanup;
+	onMount(() => {
+		let cleanup: (() => void) | undefined;
+		tick().then(() => {
+			extractToc();
+			cleanup = observeHeadings();
+		});
+		return () => cleanup?.();
 	});
 
 	const pageTitle = $derived(`${meta.title} — DartLab Skills`);

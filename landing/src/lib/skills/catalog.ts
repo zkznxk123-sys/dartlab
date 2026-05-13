@@ -1,5 +1,15 @@
 import skillIndex from '$skills/index.json';
 
+export const skillCategoryOrder = ['start', 'runtime', 'operation', 'engines', 'recipes'] as const;
+
+export const skillCategoryTitle: Record<string, string> = {
+	start: 'Start',
+	runtime: 'Runtime',
+	operation: 'Operation',
+	engines: 'Engines',
+	recipes: 'Recipes'
+};
+
 export interface RuntimeEntry {
 	status?: string;
 	notes?: string[];
@@ -105,11 +115,26 @@ if (skippedPaths.length > 0 && typeof console !== 'undefined') {
 }
 
 export const skillsMeta: SkillIndexMeta = (skillIndex as { meta?: SkillIndexMeta }).meta ?? {};
-export const skills: SkillDoc[] = ((skillIndex as { skills?: SkillDoc[] }).skills ?? []).filter(
-	(skill) => skill.category !== 'capability'
-);
+export const skills: SkillDoc[] = ((skillIndex as { skills?: SkillDoc[] }).skills ?? [])
+	.filter((skill) => skill.category !== 'capability')
+	.map(normalizeSkillCategory);
 
 const skillById = new Map<string, SkillDoc>(skills.map((skill) => [skill.id, skill]));
+
+export function normalizeSkillCategory(skill: SkillDoc): SkillDoc {
+	if (!skill.id.startsWith('recipes.')) return skill;
+	return {
+		...skill,
+		category: 'recipes',
+		categoryTitle: skillCategoryTitle.recipes
+	};
+}
+
+export function getSkillSubGroup(skill: Pick<SkillDoc, 'id' | 'category'>): string | null {
+	if (skill.category !== 'engines' && skill.category !== 'recipes') return null;
+	const parts = skill.id.split('.');
+	return parts.length >= 2 ? parts[1] : null;
+}
 
 export function getSkillMeta(id: string): SkillDoc | undefined {
 	return skillById.get(id);

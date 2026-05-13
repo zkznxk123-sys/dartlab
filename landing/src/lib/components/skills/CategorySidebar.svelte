@@ -1,5 +1,10 @@
 <script lang="ts">
-	import skillIndex from '$skills/index.json';
+	import {
+		getSkillSubGroup,
+		skillCategoryOrder,
+		skillCategoryTitle,
+		skills
+	} from '$lib/skills/catalog';
 	import { ChevronDown, ChevronRight, Layers } from 'lucide-svelte';
 
 	interface SkillDoc {
@@ -24,62 +29,54 @@
 		selectedSubGroup?: string | null;
 	} = $props();
 
-	const skills = ((skillIndex as { skills?: SkillDoc[] }).skills ?? []).filter(
-		(s) => s.category !== 'capability'
-	);
-
-	const indexMeta =
-		(skillIndex as { meta?: { categories?: CategoryMeta[] } }).meta ?? {};
-
-	const categoryOrder = ['start', 'runtime', 'operation', 'engines'];
-
 	const categories = $derived.by(() => {
-		return categoryOrder.map((id) => {
+		return skillCategoryOrder.map((id) => {
 			const items = skills.filter((s) => s.category === id);
-			const metaEntry = indexMeta.categories?.find((c) => c.id === id);
 			return {
 				id,
-				title: metaEntry?.title ?? id,
-				description: metaEntry?.description,
+				title: skillCategoryTitle[id] ?? id,
+				description: undefined,
 				count: items.length
 			};
 		});
 	});
 
-	function getSubGroup(skill: SkillDoc): string | null {
-		if (skill.category !== 'engines') return null;
-		const parts = skill.id.split('.');
-		return parts.length >= 2 ? parts[1] : null;
-	}
-
-	const engineSubGroups = $derived.by(() => {
+	function getSubGroups(category: string) {
 		const grouped = new Map<string, number>();
 		for (const s of skills) {
-			const sg = getSubGroup(s);
+			if (s.category !== category) continue;
+			const sg = getSkillSubGroup(s);
 			if (sg) grouped.set(sg, (grouped.get(sg) ?? 0) + 1);
 		}
 		return [...grouped.entries()]
 			.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
 			.map(([id, count]) => ({ id, count }));
-	});
+	}
+
+	const engineSubGroups = $derived(getSubGroups('engines'));
+	const recipeSubGroups = $derived(getSubGroups('recipes'));
 
 	let enginesExpanded = $state(true);
+	let recipesExpanded = $state(true);
 
 	function selectCategory(id: string) {
 		selectedCategory = id;
 		selectedSubGroup = null;
 		if (id === 'engines') enginesExpanded = true;
+		if (id === 'recipes') recipesExpanded = true;
 	}
 
-	function toggleEngines(e: MouseEvent) {
+	function toggleGroup(category: string, e: MouseEvent) {
 		e.stopPropagation();
-		enginesExpanded = !enginesExpanded;
+		if (category === 'engines') enginesExpanded = !enginesExpanded;
+		if (category === 'recipes') recipesExpanded = !recipesExpanded;
 	}
 
-	function selectSubGroup(sg: string) {
-		selectedCategory = 'engines';
+	function selectSubGroup(category: string, sg: string) {
+		selectedCategory = category;
 		selectedSubGroup = sg;
-		enginesExpanded = true;
+		if (category === 'engines') enginesExpanded = true;
+		if (category === 'recipes') recipesExpanded = true;
 	}
 
 	function selectAll() {
@@ -93,7 +90,7 @@
 <aside class="sidebar" aria-label="Skill categories">
 	<div class="head">
 		<p class="head-kicker">Catalog</p>
-		<p class="head-title">{totalCount} skills · 4 카테고리</p>
+		<p class="head-title">{totalCount} skills · 5 카테고리</p>
 	</div>
 
 	<div class="cat-row all-row" class:active={selectedCategory === 'all'}>
@@ -115,7 +112,7 @@
 					onclick={() => selectCategory(cat.id)}
 					title={cat.description ?? ''}
 				>
-					{#if cat.id === 'engines'}
+					{#if cat.id === 'engines' || cat.id === 'recipes'}
 						<span class="cat-chevron-spacer"></span>
 					{:else}
 						<span class="cat-dot"></span>
@@ -123,13 +120,14 @@
 					<span class="cat-name">{cat.title}</span>
 					<span class="cat-count">{cat.count}</span>
 				</button>
-				{#if cat.id === 'engines'}
+				{#if cat.id === 'engines' || cat.id === 'recipes'}
 					<button
 						class="expand-btn"
-						onclick={toggleEngines}
-						aria-label={enginesExpanded ? 'Collapse engines' : 'Expand engines'}
+						class:recipes={cat.id === 'recipes'}
+						onclick={(e) => toggleGroup(cat.id, e)}
+						aria-label={(cat.id === 'engines' ? enginesExpanded : recipesExpanded) ? `Collapse ${cat.id}` : `Expand ${cat.id}`}
 					>
-						{#if enginesExpanded}
+						{#if cat.id === 'engines' ? enginesExpanded : recipesExpanded}
 							<ChevronDown size={14} />
 						{:else}
 							<ChevronRight size={14} />
@@ -144,8 +142,25 @@
 						<li>
 							<button
 								class="sub-row"
-								class:active={selectedSubGroup === sg.id}
-								onclick={() => selectSubGroup(sg.id)}
+								class:active={selectedCategory === 'engines' && selectedSubGroup === sg.id}
+								onclick={() => selectSubGroup('engines', sg.id)}
+							>
+								<span class="sub-name">{sg.id}</span>
+								<span class="sub-count">{sg.count}</span>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+
+			{#if cat.id === 'recipes' && recipesExpanded}
+				<ul class="sub-list recipes">
+					{#each recipeSubGroups as sg}
+						<li>
+							<button
+								class="sub-row recipes"
+								class:active={selectedCategory === 'recipes' && selectedSubGroup === sg.id}
+								onclick={() => selectSubGroup('recipes', sg.id)}
 							>
 								<span class="sub-name">{sg.id}</span>
 								<span class="sub-count">{sg.count}</span>
@@ -276,6 +291,7 @@
 	.cat-start .cat-dot { background: var(--dl-cat-start); }
 	.cat-runtime .cat-dot { background: var(--dl-cat-runtime); }
 	.cat-operation .cat-dot { background: var(--dl-cat-operation); }
+	.cat-recipes .cat-dot { background: var(--dl-cat-recipes); }
 
 	.expand-btn {
 		display: inline-flex;
@@ -295,6 +311,14 @@
 
 	.expand-btn:hover {
 		background: var(--dl-cat-engines-soft);
+	}
+
+	.expand-btn.recipes {
+		color: var(--dl-cat-recipes);
+	}
+
+	.expand-btn.recipes:hover {
+		background: var(--dl-cat-recipes-soft);
 	}
 
 	.sub-list {
@@ -336,6 +360,16 @@
 		background: var(--dl-cat-engines-soft);
 		color: var(--dl-cat-engines);
 		font-weight: 600;
+	}
+
+	.sub-row.recipes:hover {
+		background: var(--dl-cat-recipes-soft);
+		color: var(--dl-cat-recipes);
+	}
+
+	.sub-row.recipes.active {
+		background: var(--dl-cat-recipes-soft);
+		color: var(--dl-cat-recipes);
 	}
 
 	.sub-name { flex: 1; }
