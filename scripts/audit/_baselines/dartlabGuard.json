@@ -30,11 +30,6 @@
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/identity.py:17"
     ],
     "architecture.lazyUpperImport": [
-      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:606",
-      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:642",
-      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:744",
-      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:839",
-      "architecture.lazyUpperImport:lazy:src/dartlab/gather/accessors.py:873",
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/macroProvider.py:110",
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/macroProvider.py:147",
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/transforms/indicatorDispatch.py:60",

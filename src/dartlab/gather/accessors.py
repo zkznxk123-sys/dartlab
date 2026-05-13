@@ -562,18 +562,18 @@ class DefaultQuantAccessor:
         start: str | None = None,
         limit: int | None = None,
     ) -> pl.DataFrame | None:
-        """단일 종목 OHLCV — quant.screen.dataAccess.fetchOhlcv 위임.
+        """단일 종목 OHLCV — gather price axis 위임.
 
         Capabilities:
-            - quant 모듈 OHLCV 진입점 (단일 종목)
+            - L2가 gather 직접 import 없이 OHLCV 접근
             - limit 으로 최근 N 일 슬라이스
 
         AIContext:
             - quant/screen/regime 같은 L2 가 OHLCV 데이터 접근 시
 
         Guide:
-            QuantDataAccessor Protocol 의 default 구현. fetchOhlcv 는
-            quant.screen.dataAccess 의 wrapper.
+            QuantDataAccessor Protocol 의 default 구현. fetchOhlcv 는 gather 의
+            raw price axis 만 호출하고 quant 계산 owner 로 역진입하지 않는다.
 
         When:
             quant 함수가 단일 종목 시계열 필요 시.
@@ -591,7 +591,7 @@ class DefaultQuantAccessor:
             OHLCV DataFrame. fetch 실패 시 None.
 
         Requires:
-            네트워크 (quant.screen.dataAccess 가 gather 위임).
+            네트워크 (gather price source). API 키 불필요.
 
         Raises:
             없음 — 위임 함수의 예외는 호출자가 처리.
@@ -601,11 +601,11 @@ class DefaultQuantAccessor:
             >>> df = a.fetchOhlcv("005930", market="KR", limit=20)
 
         See Also:
-            ``dartlab.quant.screen.dataAccess.fetchOhlcv`` — 본 위임의 backend.
+            ``dartlab.gather("price", ...)`` — 본 위임의 backend.
         """
-        from dartlab.quant.screen.dataAccess import fetchOhlcv
+        from dartlab.gather.entry import GatherEntry
 
-        df = fetchOhlcv(stockCode, market=market, start=start)
+        df = GatherEntry()("price", stockCode, market=market, start=start)
         if df is not None and limit is not None and limit > 0 and hasattr(df, "tail"):
             return df.tail(limit)
         return df
@@ -618,7 +618,7 @@ class DefaultQuantAccessor:
         benchmark: str | None = None,
         limit: int | None = None,
     ) -> tuple[pl.DataFrame | None, dict | None]:
-        """벤치마크 OHLCV + meta — quant.benchmark.data.fetchBenchmarkOhlcv 위임.
+        """벤치마크 OHLCV + meta — gather 경계에서는 제공하지 않음.
 
         Args:
             stockCode: 종목코드/티커.
@@ -627,10 +627,10 @@ class DefaultQuantAccessor:
             limit: 반환 행수 상한 (가장 최근 N일). None이면 전체.
 
         Returns:
-            ``(ohlcv_df | None, meta | None)`` 튜플. fetch 실패 시 ``(None, None)``.
+            ``(None, None)``. benchmark 매핑과 계산 owner 는 L2 quant 이다.
 
         Requires:
-            ``dartlab.quant.benchmark.data`` 모듈 + 종목별 benchmark 매핑.
+            없음. caller 가 quant benchmark API 에서 수행해야 한다.
 
         Raises:
             없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
@@ -639,19 +639,7 @@ class DefaultQuantAccessor:
             >>> a = DefaultQuantAccessor()
             >>> df, meta = a.fetchBenchmarkOhlcv("005930", limit=10)
         """
-        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
-
-        try:
-            res = fetchBenchmarkOhlcv(stockCode, market=market, benchmark=benchmark, returnMeta=True)
-            if isinstance(res, tuple):
-                df, meta = res[0], res[1]
-            else:
-                df, meta = res, None
-            if df is not None and limit is not None and limit > 0 and hasattr(df, "tail"):
-                df = df.tail(limit)
-            return df, meta
-        except (ValueError, RuntimeError, KeyError):
-            return None, None
+        return None, None
 
     def fetchUniverseBulk(
         self,
@@ -699,7 +687,7 @@ class DefaultQuantAccessor:
         *,
         limit: int | None = None,
     ) -> dict[str, pl.DataFrame]:
-        """지표 번들 — gather.indicators 의 함수 시리즈 호출.
+        """지표 번들 — gather raw 경계 밖 계산은 호출 측으로 위임.
 
         Capabilities:
             - 다중 보조지표 한 번에 fetch (rsi/ma/macd 등)
@@ -709,9 +697,8 @@ class DefaultQuantAccessor:
             - quant 가 종목별 지표 패키지 필요 시 본 accessor 경유
 
         Guide:
-            indicators list 의 각 이름을 ``dartlab.synth.indicators`` 의
-            함수로 lookup → fn(stockCode) 호출. callable 아니거나 실패한
-            지표는 결과에서 제외.
+            gather accessor 는 raw/collection fetch 만 소유한다. 기술지표 계산은
+            caller 가 OHLCV 를 받은 뒤 ``dartlab.synth`` 또는 L2 quant 에서 수행한다.
 
         When:
             screen/regime 등이 ad-hoc 지표 조합 필요 시.
@@ -725,10 +712,10 @@ class DefaultQuantAccessor:
             limit: 반환 지표 개수 상한 (앞쪽 N). None이면 전체.
 
         Returns:
-            ``{indicatorName: DataFrame}`` 딕셔너리. 위임 import 실패 시 빈 딕셔너리.
+            빈 딕셔너리. 기존 호출 표면은 유지하되 L1 → L1.5 lazy import 는 하지 않는다.
 
         Requires:
-            ``dartlab.synth.indicators`` 모듈 (각 지표 함수 정의).
+            없음. 계산 owner 는 synth/quant caller.
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/TypeError 는 내부에서 흡수.
@@ -738,23 +725,9 @@ class DefaultQuantAccessor:
             >>> out = a.fetchTechnicalIndicators("005930", ["rsi14"], limit=1)
 
         See Also:
-            ``dartlab.synth.indicators`` — 지표 함수 카탈로그.
+            ``dartlab.synth.indicators`` — caller 가 직접 사용할 지표 함수 카탈로그.
         """
-        try:
-            from dartlab.synth import indicators as ind
-        except ImportError:
-            return {}
-        if limit is not None and limit > 0:
-            indicators = indicators[:limit]
-        out: dict[str, Any] = {}
-        for name in indicators:
-            fn = getattr(ind, name, None)
-            if callable(fn):
-                try:
-                    out[name] = fn(stockCode)
-                except (ValueError, RuntimeError, KeyError, TypeError):
-                    pass
-        return out
+        return {}
 
     # ── iter pair (G+ P-Q6) ──
 
@@ -817,16 +790,16 @@ class DefaultIndustryAccessor:
             return None
 
     def fetchScanProfitability(self, *, limit: int | None = None) -> pl.DataFrame | None:
-        """scan profitability parquet — scan.parquetLoad 위임.
+        """scan profitability parquet — gather 경계에서는 제공하지 않음.
 
         Args:
             limit: 반환 행수 상한. None이면 전체 collect.
 
         Returns:
-            수익성 parquet 의 collect DataFrame. import/scan 실패 시 None.
+            None. scan parquet owner 는 L1.5 scan 이며 gather 는 직접 호출하지 않는다.
 
         Requires:
-            ``data/<provider>/scan/profitability.parquet`` 사전 빌드 + scan engine.
+            없음. caller 가 L1.5 scan API 를 직접 호출해야 한다.
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/AttributeError 는 내부에서 흡수.
@@ -835,32 +808,20 @@ class DefaultIndustryAccessor:
             >>> a = DefaultIndustryAccessor()
             >>> df = a.fetchScanProfitability(limit=100)
         """
-        try:
-            from dartlab.scan.io.parquet import scanFinanceParquets
-        except ImportError:
-            return None
-        try:
-            lf = scanFinanceParquets("profitability")
-            if lf is None:
-                return None
-            if limit is not None and limit > 0:
-                return lf.head(limit).collect(engine="streaming")
-            return lf.collect(engine="streaming")
-        except (ValueError, RuntimeError, KeyError, AttributeError):
-            return None
+        return None
 
     def fetchScanFinanceParquet(self, name: str = "finance", *, limit: int | None = None) -> pl.DataFrame | None:
-        """scan finance parquet — scan.parquetLoad 위임.
+        """scan finance parquet — gather 경계에서는 제공하지 않음.
 
         Args:
             name: parquet 카테고리 이름 (기본 ``"finance"``).
             limit: 반환 행수 상한. None이면 전체 collect.
 
         Returns:
-            카테고리 parquet 의 collect DataFrame. import/scan 실패 시 None.
+            None. scan parquet owner 는 L1.5 scan 이며 gather 는 직접 호출하지 않는다.
 
         Requires:
-            ``data/<provider>/scan/<name>.parquet`` 사전 빌드 + scan engine.
+            없음. caller 가 L1.5 scan API 를 직접 호출해야 한다.
 
         Raises:
             없음 — ImportError/ValueError/RuntimeError/KeyError/AttributeError 는 내부에서 흡수.
@@ -869,19 +830,7 @@ class DefaultIndustryAccessor:
             >>> a = DefaultIndustryAccessor()
             >>> df = a.fetchScanFinanceParquet("finance", limit=100)
         """
-        try:
-            from dartlab.scan.io.parquet import scanFinanceParquets
-        except ImportError:
-            return None
-        try:
-            lf = scanFinanceParquets(name)
-            if lf is None:
-                return None
-            if limit is not None and limit > 0:
-                return lf.head(limit).collect(engine="streaming")
-            return lf.collect(engine="streaming")
-        except (ValueError, RuntimeError, KeyError, AttributeError):
-            return None
+        return None
 
     # ── iter pair (G+ P-Q6) ──
 
