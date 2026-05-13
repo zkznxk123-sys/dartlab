@@ -230,12 +230,12 @@ def _calendarizeWithFmMap(df: pl.DataFrame) -> pl.DataFrame:
         ``_fiscalMonthMap`` + ``_FISCAL_Q_MAP`` 기반 polars expression 적용.
 
     Requires:
-        ``dartlab.scan.builders.kr.core`` 의 결산월 SSOT.
+        ``dartlab.scan.builders.kr.fiscal`` 의 결산월 SSOT.
 
     SeeAlso:
         ``_loadRawFinanceViaDuckDb``.
     """
-    from dartlab.scan.builders.kr.core import _FISCAL_Q_MAP, _fiscalMonthMap
+    from dartlab.scan.builders.kr.fiscal import _FISCAL_Q_MAP, _fiscalMonthMap
 
     fmMap = _fiscalMonthMap()
     if not fmMap:
