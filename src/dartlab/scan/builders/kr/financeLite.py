@@ -7,19 +7,7 @@ from pathlib import Path
 
 import polars as pl
 
-from dartlab.core.logger import getLogger
-
-_log = getLogger(__name__)
-
-
-def _scanDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("scan"))
-
-
-def _say(msg: str) -> None:
-    _log.info(msg)
+from dartlab.scan.builders.kr.common import say, scanDir
 
 
 def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> Path | None:
@@ -63,14 +51,14 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     from dartlab.scan.io.parquet import LITE_ACCOUNTS, LITE_SINCE_YEAR, LITE_SJ_DIVS
 
     effectiveSinceYear = LITE_SINCE_YEAR if sinceYear is None else sinceYear
-    outDir = _scanDir()
+    outDir = scanDir()
     outDir.mkdir(parents=True, exist_ok=True)
     outputPath = outDir / "finance-lite.parquet"
     srcPath = outDir / "finance.parquet"
 
     if not srcPath.exists():
         if verbose:
-            _say("[finance-lite] finance.parquet 없음 → buildFinance 먼저 실행 필요")
+            say("[finance-lite] finance.parquet 없음 → buildFinance 먼저 실행 필요")
         return None
 
     allKeys: set[str] = set()
@@ -79,7 +67,7 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     keysList = list(allKeys)
 
     if verbose:
-        _say(f"[finance-lite] {len(LITE_ACCOUNTS)}계정 → {len(keysList)}키, sinceYear={effectiveSinceYear}")
+        say(f"[finance-lite] {len(LITE_ACCOUNTS)}계정 → {len(keysList)}키, sinceYear={effectiveSinceYear}")
 
     t0 = time.perf_counter()
     keepCols = [
@@ -112,13 +100,13 @@ def buildFinanceLite(*, sinceYear: int | None = None, verbose: bool = True) -> P
     if rows == 0:
         outputPath.unlink(missing_ok=True)
         if verbose:
-            _say("[finance-lite] 결과 없음")
+            say("[finance-lite] 결과 없음")
         return None
 
     elapsed = time.perf_counter() - t0
     diskMb = outputPath.stat().st_size / 1024 / 1024
     stocks = int(summary["stocks"][0])
     if verbose:
-        _say(f"[finance-lite] 완료: {stocks}종목, {rows:,}행, {diskMb:.1f}MB, {elapsed:.1f}초 → {outputPath.name}")
+        say(f"[finance-lite] 완료: {stocks}종목, {rows:,}행, {diskMb:.1f}MB, {elapsed:.1f}초 → {outputPath.name}")
 
     return outputPath

@@ -7,11 +7,7 @@ from pathlib import Path
 
 import polars as pl
 
-
-def _financeDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("finance"))
+from dartlab.scan.builders.kr.common import financeDir
 
 
 def _fiscalMonthMap() -> dict[str, int]:
@@ -72,7 +68,7 @@ def _fiscalMonthMap() -> dict[str, int]:
     except (ImportError, FileNotFoundError, OSError):
         pass
 
-    finDir = _financeDir()
+    finDir = financeDir()
     if finDir.exists():
         for pf in finDir.glob("*.parquet"):
             code = pf.stem

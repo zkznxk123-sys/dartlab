@@ -18,8 +18,14 @@ _log = getLogger(__name__)
 
 import polars as pl
 
-from dartlab.scan.builders.kr.changes import _buildRawChanges as _buildRawChanges
-from dartlab.scan.builders.kr.changes import buildChanges as buildChanges
+from dartlab.scan.builders.kr.common import BATCH_SIZE as _BATCH
+from dartlab.scan.builders.kr.common import financeDir as _financeDir
+from dartlab.scan.builders.kr.common import mergeBatchFiles as _mergeBatchFiles
+from dartlab.scan.builders.kr.common import reportDir as _reportDir
+from dartlab.scan.builders.kr.common import say as _say
+from dartlab.scan.builders.kr.common import scanDir as _scanDir
+from dartlab.scan.builders.kr.docs.changes import _buildRawChanges as _buildRawChanges
+from dartlab.scan.builders.kr.docs.changes import buildChanges as buildChanges
 from dartlab.scan.builders.kr.financeLite import buildFinanceLite as buildFinanceLite
 from dartlab.scan.builders.kr.fiscal import (
     _FISCAL_Q_MAP as _FISCAL_Q_MAP,
@@ -55,64 +61,6 @@ SCAN_API_TYPES = [
     "outsideDirector",
     "minorityHolder",
 ]
-
-_BATCH = 200
-
-
-def _scanDir() -> Path:
-    """scan 출력 디렉토리."""
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("scan"))
-
-
-def _docsDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("docs"))
-
-
-def _financeDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("finance"))
-
-
-def _reportDir() -> Path:
-    from dartlab.core.dataLoader import _dataDir
-
-    return Path(_dataDir("report"))
-
-
-def _say(msg: str) -> None:
-    _log.info(msg)
-
-
-def _mergeBatchFiles(batchDir: Path, outputPath: Path, *, how: str = "vertical") -> int:
-    """배치 parquet 파일들을 1개로 합산.
-
-    Parameters
-    ----------
-    batchDir : Path
-        배치 파일 디렉토리 (batch_*.parquet).
-    outputPath : Path
-        합산 결과 저장 경로.
-    how : str
-        concat 방식 ("vertical" | "diagonal").
-
-    Returns
-    -------
-    int
-        합산된 총 행 수.
-    """
-    batchFiles = sorted(batchDir.glob("batch_*.parquet"))
-    if not batchFiles:
-        return 0
-
-    lazyParts = [pl.scan_parquet(str(f)) for f in batchFiles]
-    merged = pl.concat(lazyParts, how=how)
-    merged.sink_parquet(str(outputPath), compression="zstd")
-    return pl.scan_parquet(str(outputPath)).select(pl.len()).collect().item()
 
 
 # ── finance ──────────────────────────────────────────────────────────
