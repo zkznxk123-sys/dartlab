@@ -449,7 +449,7 @@ class Scan:
             - example : str — 호출 예시 코드 문자열.
             - apiKey : str — 필요한 API 키 (scan은 전부 불필요).
         """
-        from dartlab.synth.axisGuide import buildAxisGuideDataFrame
+        from dartlab.core.utils.axisGuide import buildAxisGuideDataFrame
 
         financial_axes = set(_SCAN_GROUPS.get("financial", []))
         _EDGAR_AXES = {

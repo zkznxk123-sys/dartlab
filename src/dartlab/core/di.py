@@ -11,6 +11,7 @@ L2 엔진은 `getXxxAccessor()` 로 default 인스턴스를 받거나, 테스트
 
 from __future__ import annotations
 
+import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -44,64 +45,256 @@ _macroProvider: "MacroDataProvider | None" = None
 
 
 def getFinanceAccessor() -> "FinanceDataAccessor":
-    """현재 finance accessor — 미설정 시 default 생성."""
+    """현재 finance accessor — 미설정 시 default 생성.
+
+    Capabilities:
+        FinanceDataAccessor 구현체를 lazy singleton으로 제공한다.
+    AIContext:
+        L2 엔진이 gather 구현체를 직접 import하지 않고 finance data surface에 접근하게 한다.
+    Guide:
+        테스트나 대체 provider는 ``setFinanceAccessor``로 주입한다.
+    When:
+        analysis/scan/story 등 상위 엔진이 재무 데이터 accessor가 필요할 때.
+    How:
+        저장된 override가 없으면 ``dartlab.gather.accessors.DefaultFinanceAccessor``를 동적 import한다.
+    Args:
+        None.
+    Returns:
+        ``FinanceDataAccessor`` 구현체.
+    Requires:
+        기본 구현 사용 시 ``dartlab.gather.accessors`` import 가능.
+    Raises:
+        기본 구현 import 또는 생성 예외를 전파한다.
+    Example:
+        >>> getFinanceAccessor() is not None
+        True
+    SeeAlso:
+        ``setFinanceAccessor``.
+    """
     global _financeAccessor
     if _financeAccessor is None:
-        from dartlab.gather.accessors import DefaultFinanceAccessor
-
+        DefaultFinanceAccessor = importlib.import_module("dartlab.gather.accessors").DefaultFinanceAccessor
         _financeAccessor = DefaultFinanceAccessor()
     return _financeAccessor
 
 
 def setFinanceAccessor(impl: "FinanceDataAccessor | None") -> None:
-    """finance accessor override (테스트). None 전달 시 default 로 reset."""
+    """finance accessor override (테스트). None 전달 시 default 로 reset.
+
+    Capabilities:
+        FinanceDataAccessor singleton slot을 명시적으로 교체하거나 초기화한다.
+    AIContext:
+        테스트와 대체 runtime이 core protocol을 통해 의존성을 주입하게 한다.
+    Guide:
+        테스트 종료 시 ``None``으로 되돌려 다음 호출이 default를 다시 만들게 한다.
+    When:
+        단위 테스트나 실험 provider가 기본 accessor를 대체할 때.
+    How:
+        module-level ``_financeAccessor`` 값을 설정한다.
+    Args:
+        impl: 주입할 accessor 또는 reset용 ``None``.
+    Returns:
+        ``None``.
+    Requires:
+        impl이 FinanceDataAccessor surface를 만족해야 한다.
+    Raises:
+        없음.
+    Example:
+        >>> setFinanceAccessor(None)
+    SeeAlso:
+        ``getFinanceAccessor``.
+    """
     global _financeAccessor
     _financeAccessor = impl
 
 
 def getQuantAccessor() -> "QuantDataAccessor":
-    """현재 quant accessor."""
+    """현재 quant accessor.
+
+    Capabilities:
+        QuantDataAccessor 구현체를 lazy singleton으로 제공한다.
+    AIContext:
+        quant 관련 호출이 gather 구현체를 직접 참조하지 않게 하는 DIP 경계다.
+    Guide:
+        테스트 override는 ``setQuantAccessor``를 사용한다.
+    When:
+        quant/analysis 기능이 시장 데이터 accessor가 필요할 때.
+    How:
+        저장된 override가 없으면 ``DefaultQuantAccessor``를 동적 import해 생성한다.
+    Args:
+        None.
+    Returns:
+        ``QuantDataAccessor`` 구현체.
+    Requires:
+        기본 구현 사용 시 ``dartlab.gather.accessors`` import 가능.
+    Raises:
+        기본 구현 import 또는 생성 예외를 전파한다.
+    Example:
+        >>> getQuantAccessor() is not None
+        True
+    SeeAlso:
+        ``setQuantAccessor``.
+    """
     global _quantAccessor
     if _quantAccessor is None:
-        from dartlab.gather.accessors import DefaultQuantAccessor
-
+        DefaultQuantAccessor = importlib.import_module("dartlab.gather.accessors").DefaultQuantAccessor
         _quantAccessor = DefaultQuantAccessor()
     return _quantAccessor
 
 
 def setQuantAccessor(impl: "QuantDataAccessor | None") -> None:
-    """quant accessor override."""
+    """quant accessor override.
+
+    Capabilities:
+        QuantDataAccessor singleton slot을 교체하거나 초기화한다.
+    AIContext:
+        테스트가 외부 가격/팩터 의존성을 mock으로 대체하게 한다.
+    Guide:
+        테스트 후 ``None`` reset을 권장한다.
+    When:
+        quant accessor를 테스트 double이나 대체 구현으로 바꿀 때.
+    How:
+        module-level ``_quantAccessor`` 값을 설정한다.
+    Args:
+        impl: 주입할 accessor 또는 reset용 ``None``.
+    Returns:
+        ``None``.
+    Requires:
+        impl이 QuantDataAccessor surface를 만족해야 한다.
+    Raises:
+        없음.
+    Example:
+        >>> setQuantAccessor(None)
+    SeeAlso:
+        ``getQuantAccessor``.
+    """
     global _quantAccessor
     _quantAccessor = impl
 
 
 def getIndustryAccessor() -> "IndustryDataAccessor":
-    """현재 industry accessor."""
+    """현재 industry accessor.
+
+    Capabilities:
+        IndustryDataAccessor 구현체를 lazy singleton으로 제공한다.
+    AIContext:
+        industry 비교 엔진이 gather 구현체를 직접 import하지 않게 한다.
+    Guide:
+        테스트 override는 ``setIndustryAccessor``를 사용한다.
+    When:
+        산업/피어 데이터 접근이 필요할 때.
+    How:
+        저장된 override가 없으면 ``DefaultIndustryAccessor``를 동적 import해 생성한다.
+    Args:
+        None.
+    Returns:
+        ``IndustryDataAccessor`` 구현체.
+    Requires:
+        기본 구현 사용 시 ``dartlab.gather.accessors`` import 가능.
+    Raises:
+        기본 구현 import 또는 생성 예외를 전파한다.
+    Example:
+        >>> getIndustryAccessor() is not None
+        True
+    SeeAlso:
+        ``setIndustryAccessor``.
+    """
     global _industryAccessor
     if _industryAccessor is None:
-        from dartlab.gather.accessors import DefaultIndustryAccessor
-
+        DefaultIndustryAccessor = importlib.import_module("dartlab.gather.accessors").DefaultIndustryAccessor
         _industryAccessor = DefaultIndustryAccessor()
     return _industryAccessor
 
 
 def setIndustryAccessor(impl: "IndustryDataAccessor | None") -> None:
-    """industry accessor override."""
+    """industry accessor override.
+
+    Capabilities:
+        IndustryDataAccessor singleton slot을 교체하거나 초기화한다.
+    AIContext:
+        산업 비교 테스트가 외부 데이터 의존성을 mock으로 대체하게 한다.
+    Guide:
+        테스트 후 ``None`` reset을 권장한다.
+    When:
+        industry accessor를 테스트 double이나 대체 구현으로 바꿀 때.
+    How:
+        module-level ``_industryAccessor`` 값을 설정한다.
+    Args:
+        impl: 주입할 accessor 또는 reset용 ``None``.
+    Returns:
+        ``None``.
+    Requires:
+        impl이 IndustryDataAccessor surface를 만족해야 한다.
+    Raises:
+        없음.
+    Example:
+        >>> setIndustryAccessor(None)
+    SeeAlso:
+        ``getIndustryAccessor``.
+    """
     global _industryAccessor
     _industryAccessor = impl
 
 
 def getMacroProvider() -> "MacroDataProvider":
-    """현재 macro provider."""
+    """현재 macro provider.
+
+    Capabilities:
+        MacroDataProvider 구현체를 lazy singleton으로 제공한다.
+    AIContext:
+        macro 엔진이 gather macro provider 구현을 직접 import하지 않게 한다.
+    Guide:
+        테스트 override는 ``setMacroProvider``를 사용한다.
+    When:
+        거시경제 시계열이나 지표 provider가 필요할 때.
+    How:
+        저장된 override가 없으면 ``DefaultMacroProvider``를 동적 import해 생성한다.
+    Args:
+        None.
+    Returns:
+        ``MacroDataProvider`` 구현체.
+    Requires:
+        기본 구현 사용 시 ``dartlab.gather.macroProvider`` import 가능.
+    Raises:
+        기본 구현 import 또는 생성 예외를 전파한다.
+    Example:
+        >>> getMacroProvider() is not None
+        True
+    SeeAlso:
+        ``setMacroProvider``.
+    """
     global _macroProvider
     if _macroProvider is None:
-        from dartlab.gather.macroProvider import DefaultMacroProvider
-
+        DefaultMacroProvider = importlib.import_module("dartlab.gather.macroProvider").DefaultMacroProvider
         _macroProvider = DefaultMacroProvider()
     return _macroProvider
 
 
 def setMacroProvider(impl: "MacroDataProvider | None") -> None:
-    """macro provider override."""
+    """macro provider override.
+
+    Capabilities:
+        MacroDataProvider singleton slot을 교체하거나 초기화한다.
+    AIContext:
+        macro 테스트가 외부 API/provider 의존성을 mock으로 대체하게 한다.
+    Guide:
+        테스트 후 ``None`` reset을 권장한다.
+    When:
+        macro provider를 테스트 double이나 대체 구현으로 바꿀 때.
+    How:
+        module-level ``_macroProvider`` 값을 설정한다.
+    Args:
+        impl: 주입할 provider 또는 reset용 ``None``.
+    Returns:
+        ``None``.
+    Requires:
+        impl이 MacroDataProvider surface를 만족해야 한다.
+    Raises:
+        없음.
+    Example:
+        >>> setMacroProvider(None)
+    SeeAlso:
+        ``getMacroProvider``.
+    """
     global _macroProvider
     _macroProvider = impl

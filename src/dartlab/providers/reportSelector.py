@@ -2,6 +2,8 @@ import re
 
 import polars as pl
 
+from dartlab.core.utils.periodKey import parsePeriodKey
+
 _RE_YEAR_MONTH = re.compile(r"\((\d{4})\.(\d{2})\)")
 _RE_YEAR_ONLY = re.compile(r"\((\d{4})\.\d{2}\)")
 
@@ -40,41 +42,6 @@ def selectReport(df: pl.DataFrame, year: str, reportKind: str = "annual") -> pl.
     latest = reports.sort("rcept_date", descending=True).head(1)
     latestType = latest["report_type"][0]
     return reports.filter(pl.col("report_type") == latestType)
-
-
-def parsePeriodKey(reportType: str) -> str | None:
-    """report_type 문자열에서 period key 추출.
-
-    Args:
-        reportType: DART report_type (예: ``"분기보고서 (2024.03)"``).
-
-    Returns:
-        ``"2024Q1"``, ``"2024Q2"``, ``"2024Q3"``, ``"2024Q4"`` (사업보고서). 파싱 불가 시 ``None``.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> parsePeriodKey("분기보고서 (2024.03)")
-        '2024Q1'
-    """
-    m = _RE_YEAR_MONTH.search(reportType)
-    if not m:
-        return None
-
-    year = m.group(1)
-    month = m.group(2)
-
-    if "분기보고서" in reportType:
-        if month == "03":
-            return f"{year}Q1"
-        elif month == "09":
-            return f"{year}Q3"
-    elif "반기보고서" in reportType:
-        return f"{year}Q2"
-    elif "사업보고서" in reportType:
-        return f"{year}Q4"
-    return None
 
 
 def extractReportYear(reportType: str) -> int | None:

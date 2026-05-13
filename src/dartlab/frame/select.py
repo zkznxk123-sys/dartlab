@@ -400,7 +400,7 @@ class ChartResult:
         """
         if not self._select.isNumeric:
             return self._select.render("html")
-        from dartlab.reference.render import getRenderer
+        from dartlab.core.render import getRenderer
 
         renderer = getRenderer()
         if renderer is None:
