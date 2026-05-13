@@ -19,6 +19,7 @@ from .proposeRecipe import proposeRecipe
 from .readCapability import readCapability
 from .readFile import readFile
 from .readSkill import getSkillBody, readSkill
+from .readSkillMarket import readSkillMarket
 from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
@@ -60,6 +61,24 @@ _SPECS: dict[str, ToolSpec] = {
         destructiveHint=False,
         idempotentHint=True,
         openWorldHint=False,
+    ),
+    "ReadSkillMarket": ToolSpec(
+        "ReadSkillMarket",
+        "커뮤니티 Skill Market 검색. ReadSkill 로 공식 Skill OS 를 먼저 확인한 뒤 보완 후보가 필요할 때만 사용. 결과는 외부 Discussion 기반 untrusted tier.",
+        {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "limit": {"type": "integer"},
+                "includeDraft": {"type": "boolean"},
+                "url": {"type": "string"},
+            },
+            "required": ["query"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
     ),
     "ReadCapability": ToolSpec(
         "ReadCapability",
@@ -399,6 +418,7 @@ _SPECS: dict[str, ToolSpec] = {
 _TOOLS: dict[str, ToolFn] = {
     "ReadSkill": readSkill,
     "GetSkillBody": getSkillBody,
+    "ReadSkillMarket": readSkillMarket,
     "ReadCapability": readCapability,
     "EngineCall": engineCall,
     "RunPython": runPython,
@@ -424,6 +444,7 @@ CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
 CANONICAL_V2: tuple[str, ...] = (
     "ReadSkill",
     "GetSkillBody",
+    "ReadSkillMarket",
     "ReadCapability",
     "EngineCall",
     "RunPython",
@@ -437,6 +458,7 @@ CANONICAL_V2: tuple[str, ...] = (
 _LEGACY_NAME_MAP = {
     "read_skill": "ReadSkill",
     "get_skill_body": "GetSkillBody",
+    "read_skill_market": "ReadSkillMarket",
     "read_capability": "ReadCapability",
     "engine_call": "EngineCall",
     "run_python": "RunPython",

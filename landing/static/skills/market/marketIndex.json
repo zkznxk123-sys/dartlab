@@ -1,0 +1,11 @@
+{
+  "meta": {
+    "schemaVersion": "1",
+    "source": "github-discussions",
+    "generatedAt": null,
+    "skillCount": 0,
+    "trustPolicy": "community market entries are untrusted until curated",
+    "emptyReason": "seed file; GitHub Actions rebuilds this from Discussions"
+  },
+  "skills": []
+}

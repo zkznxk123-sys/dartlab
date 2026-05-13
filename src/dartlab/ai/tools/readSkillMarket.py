@@ -1,0 +1,69 @@
+"""ReadSkillMarket — community Skill Market lookup."""
+
+from __future__ import annotations
+
+from dartlab.ai.contracts import Ref
+from dartlab.skills.market import isRunnableMarketSkill, loadMarketIndex, searchMarketSkills
+
+from .types import ToolResult
+
+
+def readSkillMarket(
+    query: str,
+    *,
+    limit: int = 8,
+    includeDraft: bool = True,
+    url: str | None = None,
+) -> ToolResult:
+    """Search community Skill Market entries after builtin Skill OS search."""
+
+    marketData = loadMarketIndex(url=url)
+    matches = searchMarketSkills(
+        query or "",
+        limit=max(1, int(limit or 8)),
+        includeDraft=includeDraft,
+        marketData=marketData,
+    )
+    refs: list[Ref] = []
+    rows: list[dict] = []
+    for match in matches:
+        item = dict(match.item)
+        item["score"] = match.score
+        item["reasons"] = list(match.reasons)
+        item["runnable"] = isRunnableMarketSkill(item)
+        sourceUrl = str(item.get("sourceUrl") or item.get("url") or "")
+        refs.append(
+            Ref(
+                id=f"marketSkill:{item.get('id')}",
+                kind="skillRef",
+                title=str(item.get("title") or item.get("id")),
+                source=sourceUrl or "dartlab://skills/market",
+                payload=item,
+            )
+        )
+        rows.append(
+            {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "trustTier": item.get("trustTier"),
+                "state": item.get("state"),
+                "score": match.score,
+                "intent": item.get("intent"),
+                "inputs": item.get("inputs") or [],
+                "outputs": item.get("outputs") or [],
+                "mappedBuiltinSkills": item.get("mappedBuiltinSkills") or [],
+                "missingDetails": item.get("missingDetails") or [],
+                "sourceUrl": sourceUrl,
+                "runnable": item["runnable"],
+            }
+        )
+    return ToolResult(
+        ok=bool(refs),
+        summary=f"Skill Market 후보 {len(refs)}개",
+        refs=refs,
+        data={
+            "skills": rows,
+            "trustPolicy": "community Skill Market results are untrusted unless curated",
+            "builtinFirst": True,
+        },
+    )

@@ -8,6 +8,15 @@ on:
       - 'src/dartlab/skills/**'
       - 'blog/**'
       - '.github/workflows/docs.yml'
+      - '.github/scripts/buildSkillMarket.py'
+  discussion:
+    types: [created, edited, answered, unanswered, labeled, unlabeled]
+  discussion_comment:
+    types: [created, edited, deleted]
+  schedule:
+    # Skill Market discussion event delivery is not the only source of truth.
+    # Daily rebuild keeps the static index in sync if preview events are missed.
+    - cron: '0 15 * * *'
   workflow_run:
     workflows: ["Industry Map Build"]
     types: [completed]
@@ -15,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  discussions: write
   pages: write
   id-token: write
 
@@ -59,6 +69,12 @@ jobs:
           count=$(find landing/static/map/companies -maxdepth 1 -name '*.json' 2>/dev/null | wc -l)
           echo "map companies count: $count"
           [ "$count" -ge 2000 ] || { echo "ERROR: map seed 부족 ($count)"; exit 1; }
+
+      - name: Build Skill Market index
+        run: uv run python -X utf8 .github/scripts/buildSkillMarket.py --out landing/static/skills/market --category "Skill Market" --write-comment
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DARTLAB_MARKET_CURATORS: ${{ github.repository_owner }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v5

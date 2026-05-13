@@ -7,6 +7,7 @@ of maintaining separate skill resolvers.
 
 from __future__ import annotations
 
+from .market import MarketSkillMatch, loadMarketIndex, searchMarketSkills
 from .models import EvidenceCheckResult, SkillCategory, SkillMatch, SkillSpec
 from .registry import checkEvidence, describeSkill, getSkill, lintSkill, listSkills, searchSkills
 
@@ -15,6 +16,7 @@ __all__ = [
     "SkillCategory",
     "SkillMatch",
     "EvidenceCheckResult",
+    "MarketSkillMatch",
     "list",
     "search",
     "get",
@@ -25,6 +27,8 @@ __all__ = [
     "getSkill",
     "describeSkill",
     "lintSkill",
+    "loadMarketIndex",
+    "searchMarketSkills",
 ]
 
 
