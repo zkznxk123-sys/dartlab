@@ -23,8 +23,8 @@ def loadForgeModule():
 
 
 @pytest.mark.unit
-def testForgeParserBuildsRunnableDraftFromFreeformDiscussion() -> None:
-    """자유형 Discussion 본문을 runnable market draft 로 구조화한다."""
+def testForgeParserKeepsIncompleteFreeformDiscussionSpecified() -> None:
+    """자유형 Discussion 은 실행 계획과 예시가 없으면 specified 로 유지한다."""
 
     forge = loadForgeModule()
     parsed = forge.parseSkillText(
@@ -43,6 +43,41 @@ def testForgeParserBuildsRunnableDraftFromFreeformDiscussion() -> None:
 
         기준:
         - 매출채권 증가율이 매출 증가율보다 2배 이상이면 warning
+        """,
+    )
+
+    assert parsed["state"] == "specified"
+    assert parsed["missingDetails"] == ["DartLab 엔진별 executionPlan", "예시 입력과 기대 출력"]
+    assert "engines.analysis.cashflow" in parsed["mappedBuiltinSkills"]
+
+
+@pytest.mark.unit
+def testForgeParserBuildsRunnableDraftWithExecutionPlanAndExample() -> None:
+    """executionPlan 과 예시가 있는 Discussion 은 runnable draft 로 구조화한다."""
+
+    forge = loadForgeModule()
+    parsed = forge.parseSkillText(
+        "매출채권 급증 위험 점검",
+        """
+        매출은 늘었는데 영업현금흐름이 따라오지 않는 회사를 보고 싶다.
+
+        입력:
+        - company
+        - period
+
+        DartLab 실행 계획:
+        - engines.analysis.cashflow 로 매출 성장과 CFO/NI를 계산한다.
+
+        결과:
+        - 매출 증가율
+        - 매출채권 증가율
+        - CFO/NI
+
+        기준:
+        - 매출채권 증가율이 매출 증가율보다 2배 이상이면 warning
+
+        예시:
+        - company=005930, period=2025Q2 -> warning 여부와 근거 지표 표
         """,
     )
 
