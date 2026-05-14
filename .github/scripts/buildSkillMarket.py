@@ -322,6 +322,11 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
         outputSchema = inferOutputSchema(text, outputs)
     if not criteria:
         criteria = inferCriteria(text)
+    mappedBuiltinSkills = mapBuiltinSkills(f"{title}\n{text}")
+    if not hasExecutablePlan(executionPlan):
+        executionPlan = inferExecutionPlan(mappedBuiltinSkills, outputs, criteria)
+    if not examples:
+        examples = inferExamples(title, inputs, outputs, criteria)
     explicitMissingDetails = extractList(text, ("보완 필요", "남은 질문", "needs detail", "missing details"))
     warnings = [pattern for pattern in BLOCK_PATTERNS if pattern.lower() in text.lower()]
     missingDetails: list[str] = []
@@ -336,7 +341,6 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
     if not examples:
         missingDetails.append("예시 입력과 기대 출력")
     missingDetails = dedupeClean([*missingDetails, *explicitMissingDetails])
-    mappedBuiltinSkills = mapBuiltinSkills(f"{title}\n{text}")
     isExplicitDraft = any(
         marker in text.lower()
         for marker in (
@@ -446,6 +450,28 @@ def hasExecutablePlan(executionPlan: list[dict[str, Any]]) -> bool:
     return any(step.get("engine") for step in executionPlan)
 
 
+def inferExecutionPlan(
+    mappedBuiltinSkills: list[str],
+    outputs: list[str],
+    criteria: list[str],
+) -> list[dict[str, Any]]:
+    if not mappedBuiltinSkills:
+        return []
+    purposeBits = [*outputs[:3], *criteria[:1]]
+    purpose = " / ".join(purposeBits) if purposeBits else "discussion criteria"
+    return [
+        {
+            "step": index,
+            "engine": engine,
+            "purpose": f"{purpose} 산출",
+            "inputs": [],
+            "outputs": outputs[:4],
+            "failureMode": None,
+        }
+        for index, engine in enumerate(mappedBuiltinSkills[:4], start=1)
+    ]
+
+
 def inferInputs(text: str) -> list[str]:
     found: list[str] = []
     if any(term in text for term in ("회사", "종목", "티커", "stock", "company")):
@@ -495,6 +521,12 @@ def inferCriteria(text: str) -> list[str]:
         if any(term in line for term in ("이상", "이하", "미만", "초과", "배", "%", "warning", "위험")):
             candidates.append(line.strip(" -*"))
     return dedupeClean(candidates)[:6]
+
+
+def inferExamples(title: str, inputs: list[str], outputs: list[str], criteria: list[str]) -> list[str]:
+    if not (inputs and outputs and criteria):
+        return []
+    return [(f"{title}: inputs={', '.join(inputs[:3])} -> outputs={', '.join(outputs[:3])}; criteria={criteria[0]}")]
 
 
 def mapBuiltinSkills(text: str) -> list[str]:
