@@ -30,8 +30,11 @@ outputs:
 linkedSkills:
   - recipes.valuation.damodaran.dataAudit
   - recipes.valuation.damodaran.businessModelFit
+  - recipes.valuation.damodaran.lifeCycleClassifier
   - recipes.valuation.damodaran.normalizedFinancials
+  - recipes.valuation.damodaran.accountTraceAudit
   - recipes.valuation.damodaran.reinvestmentRoc
+  - recipes.valuation.damodaran.growthFeasibility
   - recipes.valuation.damodaran.costOfCapital
   - recipes.valuation.damodaran.fcffDcf
   - recipes.valuation.damodaran.relativeCheck
@@ -174,7 +177,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-`damodaranAnalysisSystem.json`, `damodaranDefaults.json`, `damodaranIndustryDefaults.json`, 그리고 9개 Damodaran recipe를 함께 본다. 이 진입점은 계산을 대신하지 않고 다음 스킬로 라우팅한다.
+`damodaranAnalysisSystem.json`, `damodaranDefaults.json`, `damodaranIndustryDefaults.json`, 그리고 12개 Damodaran recipe를 함께 본다. 이 진입점은 계산을 대신하지 않고 다음 스킬로 라우팅한다.
 
 ### 3. 메커니즘 분석
 
@@ -191,7 +194,7 @@ graph LR
   H --> I
 ```
 
-Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무제표와 산업 default, 현재 가격의 내재 가정으로 반증하는 반복 구조다. `deepDive`는 실행 오케스트레이터이고, `index`는 체계·데이터 계약·gap 관리판이다.
+Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무제표, 기업 수명주기, 자본투입·ROC, 산업 default, 현재 가격의 내재 가정으로 반증하는 반복 구조다. `deepDive`는 실행 오케스트레이터이고, `index`는 체계·데이터 계약·gap 관리판이다.
 
 ### 4. 반례·한계
 
@@ -199,7 +202,7 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 
 ### 5. 후속 모니터링
 
-다음 보강 순서는 narrative alias, life cycle classifier, R&D/lease/one-off 조정, full industry reference sync, US peer valuation primitive, financial firm model이다. 모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 유지한다.
+다음 보강 순서는 narrative alias, cycle-normalized margins, R&D/lease/one-off 조정, full industry reference sync, US peer valuation primitive, financial firm model이다. 모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 유지한다.
 
 ## 대표 반환 형태
 
@@ -209,18 +212,21 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 
 1. recipes.valuation.damodaran.dataAudit - L1/L1.5 데이터 가능성 확인.
 2. recipes.valuation.damodaran.businessModelFit - 일반 FCFF 가능 여부와 특수상황 차단.
-3. recipes.valuation.damodaran.normalizedFinancials - valuation용 재무 패널.
-4. recipes.valuation.damodaran.reinvestmentRoc - 성장·재투자·ROC 정합성.
-5. recipes.valuation.damodaran.costOfCapital - WACC와 reference fallback.
-6. recipes.valuation.damodaran.fcffDcf - FCFF 가치 밴드.
-7. recipes.valuation.damodaran.relativeCheck - 상대가치 sanity check.
-8. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF와 반증.
-9. recipes.valuation.damodaran.deepDive - 최종 valuation memo.
+3. recipes.valuation.damodaran.lifeCycleClassifier - 성장·마진·ROC-WACC spread 기반 수명주기 분류.
+4. recipes.valuation.damodaran.normalizedFinancials - valuation용 재무 패널.
+5. recipes.valuation.damodaran.accountTraceAudit - valuation 입력값의 계정 trace 감사.
+6. recipes.valuation.damodaran.reinvestmentRoc - 성장·재투자·ROC 정합성.
+7. recipes.valuation.damodaran.growthFeasibility - 성장률이 재투자율과 ROC로 설명되는지 반증.
+8. recipes.valuation.damodaran.costOfCapital - WACC와 reference fallback.
+9. recipes.valuation.damodaran.fcffDcf - FCFF 가치 밴드.
+10. recipes.valuation.damodaran.relativeCheck - 상대가치 sanity check.
+11. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF와 반증.
+12. recipes.valuation.damodaran.deepDive - 최종 valuation memo.
 
 ## 기본 검증
 
 - `damodaranAnalysisSystem.json`의 개념 트리는 10개 축을 모두 포함해야 한다.
 - 모든 concept는 구현 스킬, 계획 스킬, 데이터 요구사항, gap id를 가져야 한다.
 - 모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 분류되어야 한다.
-- 9개 실행 recipe는 5개 고정 타깃에서 `ValidateRecipe` evidence completeness 1.00을 통과해야 한다.
+- 12개 실행 recipe는 5개 고정 타깃에서 `ValidateRecipe` evidence completeness 1.00을 통과해야 한다.
 - `strict-l0-l15` guard 통과 전에는 complete 선언 금지.

@@ -21,7 +21,7 @@
     "currentStrength": "Core FCFF valuation memo path runs across KR and US test targets with data audit, model fit, normalized financials, value drivers, WACC, DCF, relative sanity check, reverse DCF, and gap ledger.",
     "notCompleteBecause": [
       "Narrative-to-driver extraction is specified but not yet implemented as a standalone executable skill.",
-      "Business life cycle classification is basic and still mostly inferred from financial panels.",
+      "Business life cycle classification is executable, but cycle-normalized margin references are still deferred.",
       "Special situation models beyond financial-firm blocking are deferred.",
       "US peer valuation primitive and full Damodaran industry reference coverage are not filled."
     ]
@@ -31,8 +31,11 @@
     "currentExecutablePath": [
       "recipes.valuation.damodaran.dataAudit",
       "recipes.valuation.damodaran.businessModelFit",
+      "recipes.valuation.damodaran.lifeCycleClassifier",
       "recipes.valuation.damodaran.normalizedFinancials",
+      "recipes.valuation.damodaran.accountTraceAudit",
       "recipes.valuation.damodaran.reinvestmentRoc",
+      "recipes.valuation.damodaran.growthFeasibility",
       "recipes.valuation.damodaran.costOfCapital",
       "recipes.valuation.damodaran.fcffDcf",
       "recipes.valuation.damodaran.relativeCheck",
@@ -42,12 +45,9 @@
     "nextSkillTargets": [
       "recipes.valuation.damodaran.narrativeMap",
       "recipes.valuation.damodaran.storyToDrivers",
-      "recipes.valuation.damodaran.lifeCycleClassifier",
-      "recipes.valuation.damodaran.accountTraceAudit",
       "recipes.valuation.damodaran.rdCapitalization",
       "recipes.valuation.damodaran.leaseDebtAdjustment",
       "recipes.valuation.damodaran.oneOffAdjustment",
-      "recipes.valuation.damodaran.growthFeasibility",
       "recipes.valuation.damodaran.peerMultipleDecomposition",
       "recipes.valuation.damodaran.financialFirmExcessReturn",
       "recipes.valuation.damodaran.sumOfParts",
@@ -88,10 +88,10 @@
       "label": "Business Life Cycle",
       "question": "기업이 고성장, 전환, 성숙, 쇠퇴, 턴어라운드 중 어디에 있는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.businessModelFit"
+        "recipes.valuation.damodaran.businessModelFit",
+        "recipes.valuation.damodaran.lifeCycleClassifier"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.lifeCycleClassifier",
         "recipes.valuation.damodaran.cyclicalNormalizer",
         "recipes.valuation.damodaran.turnaroundGate"
       ],
@@ -104,8 +104,7 @@
       ],
       "status": "partial",
       "gapIds": [
-        "cycleNormalizedMargins",
-        "lifeCycleClassifier"
+        "cycleNormalizedMargins"
       ]
     },
     {
@@ -115,10 +114,10 @@
       "question": "회계 숫자를 valuation용 영업 현금흐름과 invested capital로 재구성했는가.",
       "implementedSkills": [
         "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.dataAudit"
+        "recipes.valuation.damodaran.dataAudit",
+        "recipes.valuation.damodaran.accountTraceAudit"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.accountTraceAudit",
         "recipes.valuation.damodaran.rdCapitalization",
         "recipes.valuation.damodaran.leaseDebtAdjustment",
         "recipes.valuation.damodaran.oneOffAdjustment"
@@ -147,10 +146,10 @@
       "label": "Growth, Margin, Reinvestment, ROC",
       "question": "성장률이 재투자율과 자본수익성으로 설명되는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.reinvestmentRoc"
+        "recipes.valuation.damodaran.reinvestmentRoc",
+        "recipes.valuation.damodaran.growthFeasibility"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.growthFeasibility",
         "recipes.valuation.damodaran.incrementalRoc",
         "recipes.valuation.damodaran.salesToCapitalBenchmark"
       ],
@@ -421,6 +420,24 @@
     }
   },
   "gapLedger": [
+    {
+      "id": "lifeCycleClassifier",
+      "status": "filled",
+      "layer": "L1.5 synth/recipes",
+      "fillMethod": "Classify life cycle from normalized revenue growth, margin, ROC-WACC spread, FCFF positive ratio, and the financial-firm blocker."
+    },
+    {
+      "id": "accountTraceAudit",
+      "status": "filled",
+      "layer": "L1.5 synth/recipes",
+      "fillMethod": "Audit valuation input lineages from Company.show financial statement snakeId matches captured by buildDamodaranMemo trace."
+    },
+    {
+      "id": "growthFeasibility",
+      "status": "filled",
+      "layer": "L1.5 synth/recipes",
+      "fillMethod": "Test growth feasibility from reinvestment rate times ROC, required reinvestment rate, incremental ROC, and reverse DCF comparison."
+    },
     {
       "id": "narrativeTopicAlias",
       "status": "deferredWithBlocker",

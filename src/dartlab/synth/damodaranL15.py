@@ -121,8 +121,11 @@ def buildDamodaranMemo(
     tables = {
         "dataAudit": _dataAuditTable(statements, countryDefaults, industryDefaults, market_data, panel, gaps),
         "modelFit": [model_fit],
+        "lifeCycleClassifier": _lifeCycleTable(panel, assumptions, model_fit),
         "normalizedFinancials": panel[:maxYears],
+        "accountTraceAudit": _accountTraceTable(trace, panel),
         "reinvestmentRoc": _valueDriverTable(panel, assumptions),
+        "growthFeasibility": _growthFeasibilityTable(panel, assumptions, reverse, model_fit),
         "costOfCapital": _costOfCapitalTable(assumptions),
         "fcffDcf": _dcfTable(dcf),
         "relativeCheck": [relative],
@@ -745,6 +748,108 @@ def _dataAuditTable(
     return rows
 
 
+def _lifeCycleTable(
+    panel: list[dict[str, Any]], assumptions: dict[str, Any], modelFit: dict[str, Any]
+) -> list[dict[str, Any]]:
+    if not modelFit.get("genericFcffEligible"):
+        return [
+            {
+                "metric": "lifeCyclePhase",
+                "value": "financialFirmOnly",
+                "status": "blocked",
+                "reason": "generic FCFF life-cycle path is not valid for financial firms",
+            }
+        ]
+    if len(panel) < 3:
+        return [
+            {
+                "metric": "lifeCyclePhase",
+                "value": "insufficientPanel",
+                "status": "blocked",
+                "reason": f"{len(panel)} years",
+            }
+        ]
+
+    latest = _latestUsable(panel) or {}
+    growth = _number(assumptions.get("recentGrowthPct")) or 0.0
+    margin = _number(assumptions.get("normalizedMarginPct")) or 0.0
+    roc = _number(assumptions.get("normalizedRocPct")) or 0.0
+    wacc = _number(assumptions.get("waccPct")) or 0.0
+    fcff_values = [_number(row.get("fcff")) for row in panel[:5]]
+    fcff_clean = [value for value in fcff_values if value is not None]
+    fcff_positive_ratio = sum(1 for value in fcff_clean if value > 0) / len(fcff_clean) if fcff_clean else None
+
+    if growth < -2.0:
+        phase = "decline"
+    elif margin < 0 or (fcff_positive_ratio is not None and fcff_positive_ratio < 0.4):
+        phase = "turnaround"
+    elif growth >= 12.0:
+        phase = "highGrowth"
+    elif growth >= 5.0 and roc > wacc:
+        phase = "matureGrowth"
+    else:
+        phase = "matureStable"
+
+    confidence = "high" if len(panel) >= 5 and fcff_positive_ratio is not None else "medium"
+    return [
+        {"metric": "lifeCyclePhase", "value": phase, "status": "usable", "confidence": confidence},
+        {"metric": "recentGrowthPct", "value": _round(growth, 2), "status": "evidence", "source": "medianRecent"},
+        {"metric": "normalizedMarginPct", "value": _round(margin, 2), "status": "evidence", "source": "panelMedian"},
+        {
+            "metric": "rocWaccSpreadPct",
+            "value": _round(roc - wacc, 2),
+            "status": "evidence",
+            "source": "panelMinusWacc",
+        },
+        {
+            "metric": "fcffPositiveRatio",
+            "value": _round(fcff_positive_ratio, 3),
+            "status": "evidence",
+            "source": f"{len(fcff_clean)} years",
+        },
+        {"metric": "latestYear", "value": latest.get("year"), "status": "evidence", "source": "normalizedPanel"},
+    ]
+
+
+def _accountTraceTable(trace: dict[str, Any], panel: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    latest_year = str(panel[0].get("year")) if panel else None
+    latest_trace = trace.get(latest_year, {}) if latest_year else {}
+    account_labels = {
+        "revenue": "sales/revenue",
+        "ebit": "operating profit",
+        "pretax": "pretax income",
+        "tax": "income tax",
+        "cfo": "operating cash flow",
+        "capex": "capital expenditure",
+        "depreciation": "depreciation",
+        "cash": "cash",
+        "debt": "debt",
+        "equity": "equity",
+        "nwc": "non-cash working capital",
+    }
+    rows: list[dict[str, Any]] = []
+    for key, label in account_labels.items():
+        source = latest_trace.get(key)
+        if isinstance(source, list):
+            source_text = ";".join(str(item) for item in source if item)
+        else:
+            source_text = str(source) if source else ""
+        status = "usable" if source_text else "missing"
+        if key == "debt" and not source_text:
+            status = "fallbackAccepted"
+            source_text = "zeroDebtOrNoDebtLine"
+        rows.append(
+            {
+                "year": latest_year,
+                "account": label,
+                "traceKey": key,
+                "status": status,
+                "source": source_text,
+            }
+        )
+    return rows
+
+
 def _valueDriverTable(panel: list[dict[str, Any]], assumptions: dict[str, Any]) -> list[dict[str, Any]]:
     latest = _latestUsable(panel) or {}
     return [
@@ -765,6 +870,68 @@ def _valueDriverTable(panel: list[dict[str, Any]], assumptions: dict[str, Any]) 
             "source": latest.get("year"),
         },
         {"metric": "recentGrowthPct", "value": _round(assumptions.get("recentGrowthPct"), 2), "source": "medianRecent"},
+    ]
+
+
+def _growthFeasibilityTable(
+    panel: list[dict[str, Any]],
+    assumptions: dict[str, Any],
+    reverse: dict[str, Any],
+    modelFit: dict[str, Any],
+) -> list[dict[str, Any]]:
+    if not modelFit.get("genericFcffEligible"):
+        return [
+            {
+                "metric": "growthFeasibility",
+                "value": "blocked",
+                "status": "blocked",
+                "reason": modelFit.get("modelType"),
+            }
+        ]
+    latest = _latestUsable(panel) or {}
+    recent_growth = _number(assumptions.get("recentGrowthPct"))
+    normalized_roc = _number(assumptions.get("normalizedRocPct"))
+    sales_to_capital = _number(assumptions.get("salesToCapital"))
+    latest_reinvestment = _number(latest.get("reinvestmentRatePct"))
+    latest_roc = _number(latest.get("rocPct"))
+    reverse_growth = _number(reverse.get("requiredGrowthPct"))
+    implied_by_latest = (
+        latest_reinvestment * latest_roc / 100.0 if latest_reinvestment is not None and latest_roc is not None else None
+    )
+    required_reinvestment = (
+        recent_growth / normalized_roc * 100.0
+        if recent_growth is not None and normalized_roc is not None and normalized_roc > 0
+        else None
+    )
+    incremental_roc = _incrementalRoc(panel)
+
+    status = "usable"
+    if reverse.get("status") == "blocked":
+        status = "partialNoMarketCap"
+    elif reverse_growth is not None and recent_growth is not None and reverse_growth - recent_growth > 5.0:
+        status = "stretched"
+
+    return [
+        {"metric": "growthFeasibility", "value": status, "status": status},
+        {"metric": "recentGrowthPct", "value": _round(recent_growth, 2), "status": "evidence"},
+        {
+            "metric": "growthFromLatestReinvestmentPct",
+            "value": _round(implied_by_latest, 2),
+            "status": "evidence",
+        },
+        {
+            "metric": "requiredReinvestmentRatePct",
+            "value": _round(required_reinvestment, 2),
+            "status": "evidence",
+        },
+        {"metric": "normalizedRocPct", "value": _round(normalized_roc, 2), "status": "evidence"},
+        {"metric": "incrementalRocPct", "value": _round(incremental_roc, 2), "status": "evidence"},
+        {"metric": "salesToCapital", "value": _round(sales_to_capital, 3), "status": "evidence"},
+        {
+            "metric": "reverseRequiredGrowthPct",
+            "value": _round(reverse_growth, 2),
+            "status": reverse.get("status", "unknown"),
+        },
     ]
 
 
@@ -870,6 +1037,23 @@ def _median(values: list[Any]) -> float | None:
     if not clean:
         return None
     return float(statistics.median(clean))
+
+
+def _incrementalRoc(panel: list[dict[str, Any]]) -> float | None:
+    chronological = sorted(panel, key=lambda row: str(row.get("year") or ""))
+    values: list[float] = []
+    for previous, current in zip(chronological, chronological[1:]):
+        current_nopat = _number(current.get("nopat"))
+        previous_nopat = _number(previous.get("nopat"))
+        current_capital = _number(current.get("investedCapital"))
+        previous_capital = _number(previous.get("investedCapital"))
+        if None in (current_nopat, previous_nopat, current_capital, previous_capital):
+            continue
+        delta_capital = current_capital - previous_capital
+        if delta_capital <= 0:
+            continue
+        values.append((current_nopat - previous_nopat) / delta_capital * 100.0)
+    return _median(values)
 
 
 def _clamp(value: float, low: float, high: float) -> float:

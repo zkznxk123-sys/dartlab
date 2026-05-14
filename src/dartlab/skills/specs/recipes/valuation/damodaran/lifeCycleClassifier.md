@@ -1,29 +1,21 @@
 ---
-id: recipes.valuation.damodaran.deepDive
-title: Damodaran L1.5 딥다이브
+id: recipes.valuation.damodaran.lifeCycleClassifier
+title: Damodaran 생애주기 분류
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: L2 분석 엔진 없이 L1/L1.5 데이터와 Damodaran식 가정 검증만으로 가치평가 memo, DCF 밴드, reverse DCF, 반증, storyboardReady 초안을 만드는 최종 오케스트레이터. 트리거 — 'Damodaran deep dive', 'L1.5 가치평가 memo', '다모다란 딥다이브'.
+purpose: L1 재무 패널만으로 Damodaran식 기업 생애주기(highGrowth, matureGrowth, matureStable, decline, turnaround, financialFirmOnly)를 분류하고 DCF 가정의 출발점을 고정하는 절차. 트리거 — 'Damodaran life cycle', '기업 생애주기 분류', '성장 단계 판정'.
 whenToUse:
-  - Damodaran deep dive
-  - L1.5 가치평가 memo
-  - 다모다란 딥다이브
-  - DCF band reverse DCF
-  - story engine 전 단계 valuation memo
+  - Damodaran life cycle
+  - 기업 생애주기 분류
+  - 성장 단계 판정
+  - mature growth stable decline
+  - DCF 가정 출발점
 linkedSkills:
   - recipes.valuation.damodaran.dataAudit
   - recipes.valuation.damodaran.businessModelFit
-  - recipes.valuation.damodaran.lifeCycleClassifier
   - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.accountTraceAudit
-  - recipes.valuation.damodaran.reinvestmentRoc
-  - recipes.valuation.damodaran.growthFeasibility
-  - recipes.valuation.damodaran.costOfCapital
-  - recipes.valuation.damodaran.fcffDcf
-  - recipes.valuation.damodaran.relativeCheck
-  - recipes.valuation.damodaran.scenarioFalsifier
 toolRefs:
   - RunPython
 requiredEvidence:
@@ -34,9 +26,9 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedNovelty:
-  - damodaranL15Memo
-  - reverseDcfFalsifier
-  - l15GapLedger
+  - lifeCyclePhase
+  - growthMarginRocEvidence
+  - financialFirmBlocker
 runtimeCompatibility:
   server:
     status: supported
@@ -45,20 +37,20 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - L3 story 호출 금지. storyboardReady는 초안 구조만 만든다.
+  - 금융업을 generic FCFF 생애주기로 통과시키지 않는다.
+  - 단일 연도 성장률만으로 highGrowth 또는 decline을 확정하지 않는다.
   - L2 엔진 호출 금지.
-  - 데이터 갭이 남아 있는데 완성 선언 금지.
 failureModes:
-  - sub-skill 하나가 blocked인데 최종 memo를 complete로 표시
-  - valuation number만 출력하고 falsifier 누락
-  - story 엔진에 보낼 근거 구조 없이 문장만 생성
+  - 경기순환 저점의 적자를 영구 decline으로 오판
+  - FCF 전환 여부 없이 turnaround를 놓침
+  - ROC-WACC spread를 보지 않고 성장률만으로 단계 분류
 examples:
-  - 삼성전자 Damodaran L1.5 딥다이브
-  - AAPL L1.5 가치평가 memo
-  - INTC reverse DCF 반증 포함
+  - 삼성전자 Damodaran 생애주기 분류
+  - INTC turnaround gate
+  - 138930 금융업 generic FCFF 차단
 gap:
   primary:
-    - gather
+    - synth
     - reference
 testUniverse:
   market: KR+US
@@ -70,7 +62,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "dataAudit, modelFit, falsifier 중 하나라도 blocked인데 complete memo로 선언하면 실패로 본다."
+  description: "금융업 또는 FCF 결손 기업을 정상 matureStable로 통과시키면 실패로 본다."
 lastUpdated: "2026-05-14"
 ---
 
@@ -191,7 +183,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["deepDive"],
+    table=memo["tables"]["lifeCycleClassifier"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -203,61 +195,36 @@ emit_result(
 
 ### 1. 결론 도출
 
-최종 출력은 투자 의견이 아니라 valuation memo다. `valueBand`, `priceImpliedStory`, `breakConditions`, `missingEvidence`, `storyboardReady`를 함께 낸다.
+최근 성장률, 정상 마진, ROC-WACC spread, FCFF 양수 비율로 생애주기 phase를 낸다. 금융업은 `financialFirmOnly`로 분리하고 generic FCFF phase를 부여하지 않는다.
 
 ### 2. 핵심 근거 수집
 
-11개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 호출 또는 recipe 내부 RunPython 계산에서 나온다.
+`normalizedFinancials`의 매출 성장, 영업마진, FCFF, `reinvestmentRoc`의 ROC, `costOfCapital`의 WACC를 사용한다.
 
 ### 3. 메커니즘 분석
 
-데이터 가능성, 모델 적합성, 수명주기, 재무 정규화, 계정 trace, 재투자와 ROC, 성장 가능성, WACC, DCF, 상대가치 검산, reverse DCF 반증을 하나의 인과 흐름으로 묶는다.
-
-```mermaid
-graph LR
-  A["dataAudit"] --> B["businessModelFit"]
-  B --> C["lifeCycleClassifier"]
-  C --> D["normalizedFinancials"]
-  D --> E["accountTraceAudit"]
-  E --> F["reinvestmentRoc"]
-  F --> G["growthFeasibility"]
-  G --> H["costOfCapital"]
-  H --> I["fcffDcf"]
-  I --> J["relativeCheck"]
-  I --> K["scenarioFalsifier"]
-  K --> L["storyboardReady draft"]
-```
+성장률이 높고 ROC가 WACC를 넘으면 growth 단계, 성장률이 낮고 현금흐름이 안정되면 stable 단계, 성장률이 음수거나 FCFF 전환 근거가 약하면 decline/turnaround로 낮춘다.
 
 ### 4. 반례·한계
 
-하위 단계의 `blocked`가 하나라도 있으면 memo는 `incomplete`다. US peer valuation, stale ERP, industry fallback, financial-firm blocker는 빠짐없이 노출한다.
+순환주는 단순 최근 5년 성장률만으로 안정 단계로 확정하지 않는다. cycle-normal margin은 별도 `cyclicalNormalizer`가 채워질 때까지 fallback이다.
 
 ### 5. 후속 모니터링
 
-매출 성장, 정상 마진, reinvestment rate, ROC-WACC spread, terminal value share, reverse DCF 요구 성장률을 다음 분기 모니터링 지표로 남긴다.
+다음 단계는 phase별 성장률 상한, terminal margin, reinvestment rate를 `growthFeasibility`와 `fcffDcf`에 넘긴다.
 
 ## 대표 반환 형태
 
-`damodaranMemo : dict` — `decisionStatus`, `valueBand`, `assumptionTable`, `reverseDcf`, `falsifiers`, `gapLedger`, `storyboardReady`를 담는다.
+`lifeCycleClassifier : list[dict]` — `metric`, `value`, `status`, `confidence`, `source`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.dataAudit - 데이터 가능성.
-2. recipes.valuation.damodaran.businessModelFit - 모델 적합성.
-3. recipes.valuation.damodaran.lifeCycleClassifier - 수명주기.
-4. recipes.valuation.damodaran.normalizedFinancials - 재무 패널.
-5. recipes.valuation.damodaran.accountTraceAudit - 계정 trace.
-6. recipes.valuation.damodaran.reinvestmentRoc - value driver.
-7. recipes.valuation.damodaran.growthFeasibility - 성장 가능성 반증.
-8. recipes.valuation.damodaran.costOfCapital - WACC.
-9. recipes.valuation.damodaran.fcffDcf - 가치 밴드.
-10. recipes.valuation.damodaran.relativeCheck - 상대가치 검산.
-11. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF 반증.
+1. recipes.valuation.damodaran.businessModelFit - 금융업/특수상황 차단.
+2. recipes.valuation.damodaran.normalizedFinancials - 성장률과 FCFF 패널.
+3. recipes.valuation.damodaran.growthFeasibility - phase와 성장 가정 정합성 검증.
 
 ## 기본 검증
 
-- 5개 고정 타깃에서 self-run 표를 남긴다.
-- KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.
-- L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.
-- verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다.
-
+- 5개 고정 타깃에서 실행되어야 한다.
+- `138930`은 generic FCFF phase가 아니라 financial-firm blocker로 남아야 한다.
+- 최소 3년 미만 패널은 phase 확정 금지.

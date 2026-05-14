@@ -20,8 +20,11 @@ DAMODARAN_IDS = {
     "recipes.valuation.damodaran.index",
     "recipes.valuation.damodaran.dataAudit",
     "recipes.valuation.damodaran.businessModelFit",
+    "recipes.valuation.damodaran.lifeCycleClassifier",
     "recipes.valuation.damodaran.normalizedFinancials",
+    "recipes.valuation.damodaran.accountTraceAudit",
     "recipes.valuation.damodaran.reinvestmentRoc",
+    "recipes.valuation.damodaran.growthFeasibility",
     "recipes.valuation.damodaran.costOfCapital",
     "recipes.valuation.damodaran.fcffDcf",
     "recipes.valuation.damodaran.relativeCheck",
@@ -197,7 +200,21 @@ def testDamodaranSynthBuildsFullMemoFromL15Inputs() -> None:
     assert memo["headline"]["baseEquityValue"] is not None
     assert memo["reverseDcf"]["status"] == "usable"
     assert memo["tables"]["normalizedFinancials"][0]["fcff"] is not None
-    assert {"dataAudit", "modelFit", "fcffDcf", "scenarioFalsifier", "deepDive"} <= set(memo["tables"])
+    assert {
+        "dataAudit",
+        "modelFit",
+        "lifeCycleClassifier",
+        "normalizedFinancials",
+        "accountTraceAudit",
+        "reinvestmentRoc",
+        "growthFeasibility",
+        "fcffDcf",
+        "scenarioFalsifier",
+        "deepDive",
+    } <= set(memo["tables"])
+    assert memo["tables"]["lifeCycleClassifier"][0]["metric"] == "lifeCyclePhase"
+    assert any(row["traceKey"] == "revenue" for row in memo["tables"]["accountTraceAudit"])
+    assert any(row["metric"] == "growthFeasibility" for row in memo["tables"]["growthFeasibility"])
     assert any(source["id"] == "damodaranCountryRiskPremiums" for source in memo["sources"])
 
 
@@ -252,6 +269,16 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
 
     assert system["_meta"]["coverageStatus"] == "system-contract-v1"
     assert system["skillTree"]["entrySkill"] == "recipes.valuation.damodaran.index"
+    assert {
+        "recipes.valuation.damodaran.lifeCycleClassifier",
+        "recipes.valuation.damodaran.accountTraceAudit",
+        "recipes.valuation.damodaran.growthFeasibility",
+    } <= set(system["skillTree"]["currentExecutablePath"])
+    assert {
+        "recipes.valuation.damodaran.lifeCycleClassifier",
+        "recipes.valuation.damodaran.accountTraceAudit",
+        "recipes.valuation.damodaran.growthFeasibility",
+    }.isdisjoint(system["skillTree"]["nextSkillTargets"])
     assert len(system["concepts"]) == 10
     assert {concept["id"] for concept in system["concepts"]} == {
         "narrativeAndNumbers",
@@ -273,6 +300,8 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
 
     allowed_gap_status = {"filled", "fallbackAccepted", "deferredWithBlocker"}
     assert {gap["status"] for gap in system["gapLedger"]} <= allowed_gap_status
+    filled_gap_ids = {gap["id"] for gap in system["gapLedger"] if gap["status"] == "filled"}
+    assert {"lifeCycleClassifier", "accountTraceAudit", "growthFeasibility"} <= filled_gap_ids
     assert system["dataContract"]["financialStatements"]["minimumPanelYears"] >= 5
     assert "peerValuation" in system["dataContract"]
 

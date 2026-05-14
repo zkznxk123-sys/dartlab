@@ -1,28 +1,21 @@
 ---
-id: recipes.valuation.damodaran.deepDive
-title: Damodaran L1.5 딥다이브
+id: recipes.valuation.damodaran.growthFeasibility
+title: Damodaran 성장 실현가능성 검증
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: L2 분석 엔진 없이 L1/L1.5 데이터와 Damodaran식 가정 검증만으로 가치평가 memo, DCF 밴드, reverse DCF, 반증, storyboardReady 초안을 만드는 최종 오케스트레이터. 트리거 — 'Damodaran deep dive', 'L1.5 가치평가 memo', '다모다란 딥다이브'.
+purpose: 성장률이 reinvestment rate와 ROC로 설명되는지, 현재 가격이 요구하는 성장률이 정규화 재무와 맞는지 검증하는 Damodaran식 value driver 반증 절차. 트리거 — 'growth feasibility', '성장률 실현가능성', 'reinvestment ROC consistency'.
 whenToUse:
-  - Damodaran deep dive
-  - L1.5 가치평가 memo
-  - 다모다란 딥다이브
-  - DCF band reverse DCF
-  - story engine 전 단계 valuation memo
+  - growth feasibility
+  - 성장률 실현가능성
+  - reinvestment ROC consistency
+  - 내재 성장률 검증
+  - Damodaran growth driver
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - recipes.valuation.damodaran.businessModelFit
-  - recipes.valuation.damodaran.lifeCycleClassifier
   - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.accountTraceAudit
   - recipes.valuation.damodaran.reinvestmentRoc
-  - recipes.valuation.damodaran.growthFeasibility
   - recipes.valuation.damodaran.costOfCapital
-  - recipes.valuation.damodaran.fcffDcf
-  - recipes.valuation.damodaran.relativeCheck
   - recipes.valuation.damodaran.scenarioFalsifier
 toolRefs:
   - RunPython
@@ -34,9 +27,9 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedNovelty:
-  - damodaranL15Memo
-  - reverseDcfFalsifier
-  - l15GapLedger
+  - growthFromReinvestmentRoc
+  - requiredReinvestmentRate
+  - reverseGrowthComparison
 runtimeCompatibility:
   server:
     status: supported
@@ -45,19 +38,20 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - L3 story 호출 금지. storyboardReady는 초안 구조만 만든다.
+  - 성장률을 임의 입력값으로만 두지 않는다.
+  - reverse DCF 없이 현재 가격이 요구하는 성장 스토리를 단정하지 않는다.
   - L2 엔진 호출 금지.
-  - 데이터 갭이 남아 있는데 완성 선언 금지.
 failureModes:
-  - sub-skill 하나가 blocked인데 최종 memo를 complete로 표시
-  - valuation number만 출력하고 falsifier 누락
-  - story 엔진에 보낼 근거 구조 없이 문장만 생성
+  - 재투자율이 음수인데 고성장을 통과
+  - ROC가 WACC보다 낮은데 terminal growth를 높게 둠
+  - marketCap 결손인데 reverse growth를 usable로 표시
 examples:
-  - 삼성전자 Damodaran L1.5 딥다이브
-  - AAPL L1.5 가치평가 memo
-  - INTC reverse DCF 반증 포함
+  - 삼성전자 성장률이 ROC와 재투자로 설명되는지
+  - AAPL 현재가 내재 성장률 검증
+  - INTC turnaround 성장 가정 반증
 gap:
   primary:
+    - synth
     - gather
     - reference
 testUniverse:
@@ -70,7 +64,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "dataAudit, modelFit, falsifier 중 하나라도 blocked인데 complete memo로 선언하면 실패로 본다."
+  description: "성장률이 reinvestment x ROC로 설명되지 않는데 DCF 가정을 통과시키면 실패로 본다."
 lastUpdated: "2026-05-14"
 ---
 
@@ -191,7 +185,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["deepDive"],
+    table=memo["tables"]["growthFeasibility"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -203,61 +197,37 @@ emit_result(
 
 ### 1. 결론 도출
 
-최종 출력은 투자 의견이 아니라 valuation memo다. `valueBand`, `priceImpliedStory`, `breakConditions`, `missingEvidence`, `storyboardReady`를 함께 낸다.
+최근 성장률이 normalized ROC와 required reinvestment rate로 설명되는지 판정한다. 가격과 시총이 있으면 reverse DCF의 요구 성장률도 함께 비교한다.
 
 ### 2. 핵심 근거 수집
 
-11개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 호출 또는 recipe 내부 RunPython 계산에서 나온다.
+정규화 매출 성장률, 최신 reinvestment rate, latest/normalized ROC, sales-to-capital, marketCap 기반 reverse growth를 사용한다.
 
 ### 3. 메커니즘 분석
 
-데이터 가능성, 모델 적합성, 수명주기, 재무 정규화, 계정 trace, 재투자와 ROC, 성장 가능성, WACC, DCF, 상대가치 검산, reverse DCF 반증을 하나의 인과 흐름으로 묶는다.
-
-```mermaid
-graph LR
-  A["dataAudit"] --> B["businessModelFit"]
-  B --> C["lifeCycleClassifier"]
-  C --> D["normalizedFinancials"]
-  D --> E["accountTraceAudit"]
-  E --> F["reinvestmentRoc"]
-  F --> G["growthFeasibility"]
-  G --> H["costOfCapital"]
-  H --> I["fcffDcf"]
-  I --> J["relativeCheck"]
-  I --> K["scenarioFalsifier"]
-  K --> L["storyboardReady draft"]
-```
+Damodaran식 성장 가정은 `growth = reinvestment rate x ROC`로 닫혀야 한다. 성장률이 높아도 reinvestment와 ROC가 뒷받침하지 못하면 DCF 가정은 stretched로 낮춘다.
 
 ### 4. 반례·한계
 
-하위 단계의 `blocked`가 하나라도 있으면 memo는 `incomplete`다. US peer valuation, stale ERP, industry fallback, financial-firm blocker는 빠짐없이 노출한다.
+적자 또는 턴어라운드 기업은 과거 reinvestment rate가 왜곡될 수 있다. 이 경우 status를 `partialNoMarketCap` 또는 `stretched`로 낮추고 별도 turnaround gate를 요구한다.
 
 ### 5. 후속 모니터링
 
-매출 성장, 정상 마진, reinvestment rate, ROC-WACC spread, terminal value share, reverse DCF 요구 성장률을 다음 분기 모니터링 지표로 남긴다.
+다음 분기 매출 성장률, 영업마진, capex, 운전자본 증감, ROC-WACC spread를 추적한다.
 
 ## 대표 반환 형태
 
-`damodaranMemo : dict` — `decisionStatus`, `valueBand`, `assumptionTable`, `reverseDcf`, `falsifiers`, `gapLedger`, `storyboardReady`를 담는다.
+`growthFeasibility : list[dict]` — `metric`, `value`, `status`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.dataAudit - 데이터 가능성.
-2. recipes.valuation.damodaran.businessModelFit - 모델 적합성.
-3. recipes.valuation.damodaran.lifeCycleClassifier - 수명주기.
-4. recipes.valuation.damodaran.normalizedFinancials - 재무 패널.
-5. recipes.valuation.damodaran.accountTraceAudit - 계정 trace.
-6. recipes.valuation.damodaran.reinvestmentRoc - value driver.
-7. recipes.valuation.damodaran.growthFeasibility - 성장 가능성 반증.
-8. recipes.valuation.damodaran.costOfCapital - WACC.
-9. recipes.valuation.damodaran.fcffDcf - 가치 밴드.
-10. recipes.valuation.damodaran.relativeCheck - 상대가치 검산.
-11. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF 반증.
+1. recipes.valuation.damodaran.reinvestmentRoc - value driver 입력.
+2. recipes.valuation.damodaran.costOfCapital - ROC-WACC 비교.
+3. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF 요구 성장률 비교.
+4. recipes.valuation.damodaran.fcffDcf - 통과한 성장 가정만 DCF로 전달.
 
 ## 기본 검증
 
-- 5개 고정 타깃에서 self-run 표를 남긴다.
-- KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.
-- L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.
-- verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다.
-
+- growth, reinvestment, ROC 중 하나라도 없으면 usable로 확정하지 않는다.
+- marketCap이 없으면 reverse growth는 blocked/partial이어야 한다.
+- 5개 고정 타깃에서 evidence completeness 1.00을 통과해야 한다.
