@@ -66,6 +66,8 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         # scan builder — 프리빌드 runtime 상태 (데이터 없으면 스킵)
         "scan/builder/core.py",
         "scan/builders/edgar/builder.py",
+        # corpProfile.parquet 는 선택 prebuild 데이터. 없으면 raw finance 추정으로 보강.
+        "scan/builders/kr/fiscal.py",
         "scan/edgar/builder.py",
         "scan/io/parquet.py",
         # AI 런타임 상태 저장 (없으면 첫 실행)
