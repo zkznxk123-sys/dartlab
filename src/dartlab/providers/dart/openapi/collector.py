@@ -31,7 +31,7 @@ from pathlib import Path
 import httpx
 import polars as pl
 
-from dartlab import config as _cfg
+import dartlab.config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.core.logger import getLogger
 from dartlab.providers.dart.openapi.client import DartClient
