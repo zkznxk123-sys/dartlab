@@ -136,6 +136,41 @@ jobs:
         shell: bash
         run: python -X utf8 scripts/dev/checkSilentFail.py
 
+  product-smoke-wheel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        run: pip install uv
+      - name: Build wheel
+        run: |
+          uv run --with build python -m build --wheel --outdir dist
+      - name: Install wheel in isolated venv
+        run: |
+          uv venv /tmp/dartlab-product-smoke --python 3.12
+          WHL=$(ls dist/*.whl | head -n1)
+          uv pip install --python /tmp/dartlab-product-smoke "$WHL"
+      - name: Run product smoke quick on wheel
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          /tmp/dartlab-product-smoke/bin/python -X utf8 scripts/audit/productSmoke.py \
+            --suite quick \
+            --data-mode empty \
+            --json-out product-smoke-wheel-quick.json
+      - name: Upload product smoke wheel report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: product-smoke-wheel-quick
+          path: product-smoke-wheel-quick.json
+          retention-days: 30
+
   # realData 스위트 path-filter matrix — master push 에만 실행.
   # PR 에서는 돌지 않음 (ci-fast 책임은 smoke + unit 까지).
   realdata-plan:

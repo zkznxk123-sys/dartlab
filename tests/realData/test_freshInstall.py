@@ -47,6 +47,30 @@ def freshSectionsCache():
         yield
 
 
+@pytest.fixture(scope="class")
+def freshScanDataDir(tmp_path_factory):
+    """scan 프리빌드 데이터 디렉터리를 빈 경로로 바꿔 첫 호출을 재현한다."""
+    import dartlab
+    from dartlab.core.dataLoader import _clearLoadCache
+
+    oldDataDir = dartlab.config.dataDir
+    dataRoot = tmp_path_factory.mktemp("dartlab-fresh-scan-data")
+    dartlab.config.dataDir = str(dataRoot)
+    _clearLoadCache()
+    try:
+        yield dataRoot
+    finally:
+        _clearLoadCache()
+        dartlab.config.dataDir = oldDataDir
+
+
+def _assertScanFrame(result, name: str, *, minHeight: int = 1) -> pl.DataFrame:
+    assert result is not None, f"{name} 결과가 None — fresh install silent fail"
+    assert isinstance(result, pl.DataFrame), f"{name} 결과 타입 오류: {type(result).__name__}"
+    assert result.height >= minHeight, f"{name} 결과가 너무 작음: {result.height} < {minHeight}"
+    return result
+
+
 @pytest.mark.realData
 @pytest.mark.freshInstall
 @pytest.mark.integration
@@ -101,3 +125,29 @@ class TestFreshInstallSmoke:
 
         periods = re.findall(r"20\d\dQ[1-4]", html)
         assert len(set(periods)) >= 4, f"HTML 렌더에 기간 컬럼이 {len(set(periods))}개 — Rich width 고정 회귀"
+
+    def test_scanAccountSales_coldPrebuild(self, freshScanDataDir):
+        """빈 데이터 디렉터리에서 scan("account", "매출액") 첫 호출이 성공해야 한다."""
+        import dartlab
+        from dartlab.core.memory import MemoryBudgetExceeded
+
+        try:
+            result = dartlab.scan("account", "매출액")
+        except MemoryBudgetExceeded as e:
+            pytest.fail(f"scan('account', '매출액') fresh install 메모리 예산 회귀: {e}")
+        df = _assertScanFrame(result, "fresh scan.account.sales", minHeight=1000)
+        periodCols = [col for col in df.columns if str(col)[:4].isdigit()]
+        assert periodCols, "fresh scan.account.sales 기간 컬럼 없음"
+
+    def test_scanRatioRoe_coldPrebuild(self, freshScanDataDir):
+        """빈 데이터 디렉터리에서 scan("ratio", "roe") 첫 호출이 성공해야 한다."""
+        import dartlab
+        from dartlab.core.memory import MemoryBudgetExceeded
+
+        try:
+            result = dartlab.scan("ratio", "roe")
+        except MemoryBudgetExceeded as e:
+            pytest.fail(f"scan('ratio', 'roe') fresh install 메모리 예산 회귀: {e}")
+        df = _assertScanFrame(result, "fresh scan.ratio.roe", minHeight=1000)
+        periodCols = [col for col in df.columns if str(col)[:4].isdigit()]
+        assert periodCols, "fresh scan.ratio.roe 기간 컬럼 없음"

@@ -1,0 +1,104 @@
+{
+  "default": {
+    "maxElapsedSec": 60,
+    "maxRssDeltaMb": 900,
+    "maxRssPeakMb": 1800
+  },
+  "scenarios": {
+    "public.access.all": {
+      "maxElapsedSec": 20,
+      "maxRssDeltaMb": 350,
+      "maxRssPeakMb": 900
+    },
+    "capabilities.index": {
+      "maxElapsedSec": 20,
+      "maxRssDeltaMb": 400,
+      "maxRssPeakMb": 1000
+    },
+    "search.name.samsung": {
+      "maxElapsedSec": 30,
+      "maxRssDeltaMb": 500,
+      "maxRssPeakMb": 1200
+    },
+    "scan.guide": {
+      "maxElapsedSec": 20,
+      "maxRssDeltaMb": 500,
+      "maxRssPeakMb": 1200
+    },
+    "scan.axis.default": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 1000,
+      "maxRssPeakMb": 2200
+    },
+    "scan.account.sales": {
+      "maxElapsedSec": 120,
+      "maxRssDeltaMb": 900,
+      "maxRssPeakMb": 1800
+    },
+    "scan.ratio.roe": {
+      "maxElapsedSec": 150,
+      "maxRssDeltaMb": 1200,
+      "maxRssPeakMb": 2200
+    },
+    "scan.valuation": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 900,
+      "maxRssPeakMb": 1800
+    },
+    "company.create": {
+      "maxElapsedSec": 30,
+      "maxRssDeltaMb": 700,
+      "maxRssPeakMb": 1500
+    },
+    "company.show.IS": {
+      "maxElapsedSec": 45,
+      "maxRssDeltaMb": 900,
+      "maxRssPeakMb": 1800
+    },
+    "company.sections": {
+      "maxElapsedSec": 60,
+      "maxRssDeltaMb": 1100,
+      "maxRssPeakMb": 2200
+    },
+    "company.topics": {
+      "maxElapsedSec": 45,
+      "maxRssDeltaMb": 900,
+      "maxRssPeakMb": 1800
+    },
+    "company.select.IS": {
+      "maxElapsedSec": 60,
+      "maxRssDeltaMb": 1100,
+      "maxRssPeakMb": 2200
+    },
+    "company.analysis.valuation": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 1400,
+      "maxRssPeakMb": 2600
+    },
+    "company.credit": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 1400,
+      "maxRssPeakMb": 2600
+    },
+    "company.quant": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 1400,
+      "maxRssPeakMb": 2600
+    },
+    "company.macro": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 1400,
+      "maxRssPeakMb": 2600
+    },
+    "company.industry": {
+      "maxElapsedSec": 90,
+      "maxRssDeltaMb": 1400,
+      "maxRssPeakMb": 2600
+    },
+    "company.story": {
+      "maxElapsedSec": 150,
+      "maxRssDeltaMb": 1800,
+      "maxRssPeakMb": 3400
+    }
+  }
+}

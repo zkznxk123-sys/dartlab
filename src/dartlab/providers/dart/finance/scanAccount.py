@@ -27,6 +27,24 @@ _log = logging.getLogger(__name__)
 
 
 _REPRT_TO_Q = {"1분기": "Q1", "2분기": "Q2", "3분기": "Q3", "4분기": "Q4"}
+_SCAN_ACCOUNT_MEMORY_BUDGET_MB = 800
+_SCAN_ACCOUNT_BASE_COLS = (
+    "bsns_year",
+    "reprt_nm",
+    "sj_div",
+    "fs_nm",
+    "account_id",
+    "account_nm",
+    "thstrm_amount",
+    "thstrm_add_amount",
+)
+
+
+def _scanAccountColumns(columnNames: list[str], scCol: str) -> list[str]:
+    """scanAccount 경로에서 필요한 컬럼만 반환한다."""
+    available = set(columnNames)
+    cols = [scCol, *_SCAN_ACCOUNT_BASE_COLS]
+    return [col for col in cols if col in available]
 
 
 def _resolveSjDiv(snakeId: str) -> str:
@@ -149,7 +167,9 @@ def _scanAccountFromMerged(
             # account 매칭은 polars 단에서 (fastKeys 에 `'` 등 SQL 특수문자 포함 안전)
             scCol = "stockCode"
             fastKeysList = list(fastKeys)
-            lz = lazyFrame.filter(pl.col("account_nm").is_in(fastKeysList) | pl.col("account_id").is_in(fastKeysList))
+            lz = lazyFrame.select(_scanAccountColumns(lazyFrame.collect_schema().names(), scCol)).filter(
+                pl.col("account_nm").is_in(fastKeysList) | pl.col("account_id").is_in(fastKeysList)
+            )
             if freq == "Y":
                 lz = lz.filter(pl.col("reprt_nm") == "4분기")
             df = lz.collect(engine="streaming")
@@ -159,8 +179,9 @@ def _scanAccountFromMerged(
             fastKeysList = list(fastKeys)
             # finance-lite 스키마 고정: stockCode, bsns_year, reprt_nm, sj_div, fs_nm,
             # account_id, account_nm, thstrm_amount, thstrm_add_amount
-            tbl = pq.read_table(str(scanPath))
-            scCol = "stockCode" if "stockCode" in tbl.column_names else "stock_code"
+            schemaNames = pq.read_schema(str(scanPath)).names
+            scCol = "stockCode" if "stockCode" in schemaNames else "stock_code"
+            tbl = pq.read_table(str(scanPath), columns=_scanAccountColumns(schemaNames, scCol))
             df = pl.from_arrow(tbl).filter(
                 pl.col("sj_div").is_in(filterDivs)
                 & (pl.col("account_nm").is_in(fastKeysList) | pl.col("account_id").is_in(fastKeysList))
@@ -171,9 +192,13 @@ def _scanAccountFromMerged(
             schema = pl.scan_parquet(str(scanPath)).collect_schema()
             scCol = "stockCode" if "stockCode" in schema.names() else "stock_code"
 
-            lz = pl.scan_parquet(str(scanPath)).filter(
-                pl.col("sj_div").is_in(filterDivs)
-                & (pl.col("account_nm").is_in(list(fastKeys)) | pl.col("account_id").is_in(list(fastKeys)))
+            lz = (
+                pl.scan_parquet(str(scanPath))
+                .select(_scanAccountColumns(schema.names(), scCol))
+                .filter(
+                    pl.col("sj_div").is_in(filterDivs)
+                    & (pl.col("account_nm").is_in(list(fastKeys)) | pl.col("account_id").is_in(list(fastKeys)))
+                )
             )
 
             if freq == "Y":
@@ -268,7 +293,7 @@ def _scanAccountFromMerged(
     return result
 
 
-@withMemoryBudget(limitMb=500)
+@withMemoryBudget(limitMb=_SCAN_ACCOUNT_MEMORY_BUDGET_MB)
 def scanAccount(
     snakeId: str,
     *,
@@ -445,7 +470,7 @@ def scanAccount(
         - polars
         - dartlab.core.dataLoader (``_dataDir``)
         - dartlab.scan.io.parquet (``_ensureScanData`` + DuckDB fallback)
-        - withMemoryBudget decorator (500MB cap).
+        - withMemoryBudget decorator (800MB cap).
 
     Capabilities:
         - dartlab scan 의 **원자 primitive** — 전종목 단일 계정 시계열 추출.
@@ -487,7 +512,7 @@ def scanAccount(
             - → (tier 1) ``scan/finance.parquet`` lazy scan + push-down filter
             - → (tier 2) ``finance/*.parquet`` raw glob → DuckDB streaming SQL
             - → freq 별 pivot wide (Q: YYYYQn / Y: YYYY) → pl.DataFrame.
-            - withMemoryBudget(500MB) decorator — RSS 초과 시 mid-stream abort.
+            - withMemoryBudget(800MB) decorator — RSS 초과 시 mid-stream abort.
         TargetMarkets:
             - KR (DART) 전종목 — KOSPI/KOSDAQ/KONEX 연결재무제표 우선 (별도 fallback).
     """
@@ -546,7 +571,7 @@ def scanAccount(
             len(parquetFiles),
         )
 
-        from dartlab.scan.io.parquet import _loadRawFinanceViaDuckDb
+        _loadRawFinanceViaDuckDb = importlib.import_module("dartlab.scan.io.parquet")._loadRawFinanceViaDuckDb
 
         # sinceYear=2021 — prebuild 합본과 동일 cutoff (buildFinance default)
         # account 매칭은 SQL push-down (raw 3M row → 매칭 row 만 polars 통과)

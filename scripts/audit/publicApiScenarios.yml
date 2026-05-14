@@ -1,0 +1,320 @@
+version: 1
+description: >
+  사용자 공개 API 전수점검 매니페스트. dartlab.__all__, dartlab.api.__all__,
+  scan.availableScans(), Company 핵심 표면이 이 파일과 어긋나면 배포 게이트가 실패해야 한다.
+
+public_api:
+  dartlab_symbols:
+    - Company
+    - Fred
+    - OpenDart
+    - OpenEdgar
+    - Story
+    - SelectResult
+    - ChartResult
+    - analysis
+    - ask
+    - capabilities
+    - codeToName
+    - collect
+    - collectAll
+    - config
+    - credit
+    - dataDir
+    - downloadAll
+    - gather
+    - industry
+    - listing
+    - macro
+    - nameToCode
+    - pastInsight
+    - quant
+    - scan
+    - search
+    - searchName
+    - sectorInsights
+    - setup
+    - topdown
+    - verbose
+  dartlab_api_symbols:
+    - analysis
+    - credit
+    - industry
+    - macro
+    - quant
+    - scan
+  scan_axes:
+    - account
+    - audit
+    - capital
+    - cashflow
+    - debt
+    - disclosureRisk
+    - dividendTrend
+    - efficiency
+    - fields
+    - governance
+    - growth
+    - insider
+    - liquidity
+    - macroBeta
+    - network
+    - profitability
+    - quality
+    - ratio
+    - screen
+    - valuation
+    - workforce
+  company_members:
+    - analysis
+    - credit
+    - industry
+    - macro
+    - quant
+    - sections
+    - select
+    - show
+    - story
+    - topics
+
+scenarios:
+  public.access.all:
+    suites: [quick, release, nightly]
+    budget: public.access.all
+    covers:
+      - dartlab.Company
+      - dartlab.Fred
+      - dartlab.OpenDart
+      - dartlab.OpenEdgar
+      - dartlab.Story
+      - dartlab.SelectResult
+      - dartlab.ChartResult
+      - dartlab.analysis
+      - dartlab.ask
+      - dartlab.capabilities
+      - dartlab.codeToName
+      - dartlab.collect
+      - dartlab.collectAll
+      - dartlab.config
+      - dartlab.credit
+      - dartlab.dataDir
+      - dartlab.downloadAll
+      - dartlab.gather
+      - dartlab.industry
+      - dartlab.listing
+      - dartlab.macro
+      - dartlab.nameToCode
+      - dartlab.pastInsight
+      - dartlab.quant
+      - dartlab.scan
+      - dartlab.search
+      - dartlab.searchName
+      - dartlab.sectorInsights
+      - dartlab.setup
+      - dartlab.topdown
+      - dartlab.verbose
+      - dartlab.api.analysis
+      - dartlab.api.credit
+      - dartlab.api.industry
+      - dartlab.api.macro
+      - dartlab.api.quant
+      - dartlab.api.scan
+
+  capabilities.index:
+    suites: [quick, release, nightly]
+    budget: capabilities.index
+    covers:
+      - dartlab.capabilities.call
+
+  search.name.samsung:
+    suites: [release, nightly]
+    budget: search.name.samsung
+    covers:
+      - dartlab.searchName.call
+
+  scan.guide:
+    suites: [quick, release, nightly]
+    budget: scan.guide
+    covers:
+      - dartlab.scan.call
+
+  scan.account.sales:
+    suites: [release, nightly]
+    budget: scan.account.sales
+    covers:
+      - scan.axis.account
+      - dartlab.scan.account.target
+
+  scan.ratio.roe:
+    suites: [release, nightly]
+    budget: scan.ratio.roe
+    covers:
+      - scan.axis.ratio
+      - dartlab.scan.ratio.target
+
+  scan.valuation:
+    suites: [release, nightly]
+    budget: scan.valuation
+    covers:
+      - scan.axis.valuation
+
+  scan.axis.audit:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.audit]
+  scan.axis.capital:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.capital]
+  scan.axis.cashflow:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.cashflow]
+  scan.axis.debt:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.debt]
+  scan.axis.disclosureRisk:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.disclosureRisk]
+  scan.axis.dividendTrend:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.dividendTrend]
+  scan.axis.efficiency:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.efficiency]
+  scan.axis.fields:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.fields]
+  scan.axis.governance:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.governance]
+  scan.axis.growth:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.growth]
+  scan.axis.insider:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.insider]
+  scan.axis.liquidity:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.liquidity]
+  scan.axis.macroBeta:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.macroBeta]
+  scan.axis.network:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.network]
+  scan.axis.profitability:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.profitability]
+  scan.axis.quality:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.quality]
+  scan.axis.screen:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.screen]
+  scan.axis.workforce:
+    suites: [nightly]
+    budget: scan.axis.default
+    covers: [scan.axis.workforce]
+
+  company.create:
+    suites: [quick, release, nightly]
+    budget: company.create
+    covers:
+      - dartlab.Company.call
+
+  company.show.IS:
+    suites: [release, nightly]
+    budget: company.show.IS
+    covers:
+      - Company.show
+
+  company.sections:
+    suites: [release, nightly]
+    budget: company.sections
+    covers:
+      - Company.sections
+
+  company.topics:
+    suites: [release, nightly]
+    budget: company.topics
+    covers:
+      - Company.topics
+
+  company.select.IS:
+    suites: [nightly]
+    budget: company.select.IS
+    covers:
+      - Company.select
+
+  company.analysis.valuation:
+    suites: [release, nightly]
+    budget: company.analysis.valuation
+    covers:
+      - Company.analysis
+
+  company.credit:
+    suites: [release, nightly]
+    budget: company.credit
+    covers:
+      - Company.credit
+
+  company.quant:
+    suites: [release, nightly]
+    budget: company.quant
+    covers:
+      - Company.quant
+
+  company.macro:
+    suites: [release, nightly]
+    budget: company.macro
+    covers:
+      - Company.macro
+
+  company.industry:
+    suites: [nightly]
+    budget: company.industry
+    covers:
+      - Company.industry
+
+  company.story:
+    suites: [release, nightly]
+    budget: company.story
+    covers:
+      - Company.story
+
+waivers:
+  dartlab.ask.call:
+    owner: release
+    expires: "2026-12-31"
+    reason: "provider API key와 외부 LLM 네트워크가 필요하므로 접근 smoke만 필수로 둔다."
+  dartlab.collect.call:
+    owner: release
+    expires: "2026-12-31"
+    reason: "DART API key가 필요한 수집 side effect. dry-run 계약 추가 전까지 접근 smoke와 릴리스 문서로 관리."
+  dartlab.collectAll.call:
+    owner: release
+    expires: "2026-12-31"
+    reason: "대량 수집 side effect. 운영자 전용 경로라 productSmoke 실행 대상에서 제외."
+  dartlab.downloadAll.call:
+    owner: release
+    expires: "2026-12-31"
+    reason: "대량 다운로드 side effect. productSmoke는 자동 다운로드를 scan/company 호출로 검증한다."
+  dartlab.setup.call:
+    owner: release
+    expires: "2026-12-31"
+    reason: "interactive credential setup. 접근 smoke만 필수."

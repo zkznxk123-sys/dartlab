@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+import polars as pl
 import pytest
+
+
+def _assertFrame(result, name: str, *, minHeight: int = 1):
+    """scan 결과가 실제 DataFrame 이고 비어 있지 않은지 확인."""
+    assert result is not None, f"{name} 결과가 None"
+    assert isinstance(result, pl.DataFrame), f"{name} 결과 타입이 DataFrame 아님: {type(result).__name__}"
+    assert result.height >= minHeight, f"{name} 결과가 너무 작음: {result.height} < {minHeight}"
+    return result
 
 
 @pytest.mark.realData
@@ -33,3 +42,36 @@ class TestScanEngine:
             assert result.height > 0
         else:
             assert result, f"{sampleAxis} 축이 빈 결과"
+
+    def test_scanAccountSales_explicit(self):
+        """사용자 대표 호출: dartlab.scan("account", "매출액")."""
+        import dartlab
+        from dartlab.core.memory import MemoryBudgetExceeded
+
+        try:
+            result = dartlab.scan("account", "매출액")
+        except MemoryBudgetExceeded as e:
+            pytest.fail(f"scan('account', '매출액') 메모리 예산 회귀: {e}")
+        df = _assertFrame(result, "scan.account.sales", minHeight=1000)
+        periodCols = [col for col in df.columns if str(col)[:4].isdigit()]
+        assert periodCols, "scan.account.sales 기간 컬럼 없음"
+
+    def test_scanRatioRoe_explicit(self):
+        """사용자 대표 호출: dartlab.scan("ratio", "roe")."""
+        import dartlab
+        from dartlab.core.memory import MemoryBudgetExceeded
+
+        try:
+            result = dartlab.scan("ratio", "roe")
+        except MemoryBudgetExceeded as e:
+            pytest.fail(f"scan('ratio', 'roe') 메모리 예산 회귀: {e}")
+        df = _assertFrame(result, "scan.ratio.roe", minHeight=1000)
+        periodCols = [col for col in df.columns if str(col)[:4].isdigit()]
+        assert periodCols, "scan.ratio.roe 기간 컬럼 없음"
+
+    def test_scanValuation_explicit(self):
+        """사용자 대표 호출: dartlab.scan("valuation")."""
+        import dartlab
+
+        result = dartlab.scan("valuation")
+        _assertFrame(result, "scan.valuation", minHeight=100)

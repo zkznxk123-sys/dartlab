@@ -72,8 +72,6 @@ jobs:
         run: pip install uv
 
       - name: Build wheel + verify bundled resources
-        env:
-          WHEEL_SMOKE_SKIP_FRESH_INSTALL: "1"
         run: bash scripts/build/testWheelSmoke.sh
 
   build:
@@ -114,11 +112,11 @@ jobs:
           mkdir -p src/dartlab/ui/build
           cp -r ui/web/build/* src/dartlab/ui/build/
 
-      - name: Install build tools
-        run: pip install build
+      - name: Install uv
+        run: pip install uv
 
       - name: Build sdist and wheel
-        run: python -m build
+        run: uv run --with build python -m build
 
       # PyPI 에 업로드될 "바로 그" wheel 을 검증.
       # scripts/build/verifyWheel.py — ci.yml 의 wheel-smoke 잡과 공통 로직.

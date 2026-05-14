@@ -141,6 +141,19 @@ jobs:
           assert callable(Company), 'Company is not callable'
           print(f'dartlab smoke OK — {len(dartlab.__all__)} public symbols, Company callable')
           "
+      - name: Public API scenario coverage
+        run: python -X utf8 scripts/audit/publicApiCoverage.py
+      - name: Memory budget scenario mapping
+        run: python -X utf8 scripts/audit/memoryBudgetAudit.py
+      - name: Product smoke quick
+        run: python -X utf8 scripts/audit/productSmoke.py --suite quick --data-mode existing --json-out product-smoke-quick.json
+      - name: Upload product smoke quick report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: product-smoke-quick
+          path: product-smoke-quick.json
+          retention-days: 30
 
   # Tier 1 의 핵심 — unit marker 만. 이전 test job 이 모든 non-realData 를 돌렸으나
   # 그 때문에 PR feedback 이 5~10분. unit 만 돌리면 ~90초 예상.
@@ -185,10 +198,10 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install build tool
-        run: pip install build
+      - name: Install uv
+        run: pip install uv
       - name: Build wheel
-        run: python -m build --wheel --outdir dist
+        run: uv run --with build python -m build --wheel --outdir dist
       - name: Verify wheel (bundle + install runtime)
         run: |
           set -euo pipefail

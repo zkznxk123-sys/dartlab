@@ -503,24 +503,29 @@ def _scanFinanceFromLazy(
         {종목코드: 금액(원)} — 종목별 최신 연도 첫 매칭 계정의 값.
     """
     scCol = "stockCode"
-
-    target = lz.filter(pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표")).collect(
-        engine="streaming"
-    )
-
-    if target.is_empty() or "account_id" not in target.columns:
+    schemaNames = set(lz.collect_schema().names())
+    required = [scCol, "bsns_year", "fs_nm", "account_id", "account_nm", amountCol]
+    if any(col not in schemaNames for col in required):
         return {}
 
-    # 연결 우선
-    cfs = target.filter(pl.col("fs_nm").str.contains("연결"))
-    target = cfs if not cfs.is_empty() else target
+    base = lz.select(required).filter(
+        (pl.col("fs_nm").str.contains("연결") | pl.col("fs_nm").str.contains("재무제표"))
+        & (pl.col("account_id").is_in(list(accountIds)) | pl.col("account_nm").is_in(list(accountNms)))
+    )
 
-    # 종목별 최신 연도만
-    latestYear = target.group_by(scCol).agg(pl.col("bsns_year").max().alias("_maxYear"))
-    target = target.join(latestYear, on=scCol).filter(pl.col("bsns_year") == pl.col("_maxYear")).drop("_maxYear")
+    def _collectLatest(source: pl.LazyFrame) -> pl.DataFrame:
+        latestYear = source.group_by(scCol).agg(pl.col("bsns_year").max().alias("_maxYear"))
+        return (
+            source.join(latestYear, on=scCol)
+            .filter(pl.col("bsns_year") == pl.col("_maxYear"))
+            .drop("_maxYear")
+            .collect(engine="streaming")
+        )
 
-    # 계정 매칭
-    matched = target.filter(pl.col("account_id").is_in(list(accountIds)) | pl.col("account_nm").is_in(list(accountNms)))
+    # 연결 우선. 연결 매칭이 하나도 없을 때만 별도 재무제표까지 fallback.
+    matched = _collectLatest(base.filter(pl.col("fs_nm").str.contains("연결")))
+    if matched.is_empty():
+        matched = _collectLatest(base)
 
     result: dict[str, float] = {}
     for row in matched.iter_rows(named=True):

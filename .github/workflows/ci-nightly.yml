@@ -92,27 +92,38 @@ jobs:
         run: |
           bash scripts/dev/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
 
-  # 최신 PyPI wheel 을 빈 venv 에 설치 후 8 엔진 smoke.
+  # 최신 PyPI wheel 을 빈 venv 에 설치 후 제품 smoke.
   # 본 세션에서 수동 실행하던 것 자동화 — 사용자 실제 경험 재현.
   external-venv-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+      - name: Install uv
+        run: pip install uv
       - name: Install latest PyPI wheel in fresh venv
         run: |
-          python -m venv /tmp/smoke-venv
-          /tmp/smoke-venv/bin/python -m pip install --upgrade pip
-          /tmp/smoke-venv/bin/python -m pip install dartlab
-      - name: Run 8-engine smoke
+          uv venv /tmp/smoke-venv --python 3.12
+          uv pip install --python /tmp/smoke-venv dartlab
+      - name: Run product smoke release on latest PyPI
         run: |
-          /tmp/smoke-venv/bin/python -X utf8 scripts/audit/externalVenvSmoke.py
+          /tmp/smoke-venv/bin/python -X utf8 scripts/audit/productSmoke.py \
+            --suite release \
+            --data-mode empty \
+            --json-out product-smoke-pypi-release.json
         env:
           PYTHONUNBUFFERED: "1"
+      - name: Upload product smoke report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: product-smoke-pypi-release
+          path: product-smoke-pypi-release.json
+          retention-days: 30
 
   # freshInstall — 빈 캐시에서 HF 자동 다운로드 경로 검증.
   freshInstall:

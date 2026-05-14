@@ -28,15 +28,14 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 echo "[wheel-smoke] 작업 디렉토리: $WORK_DIR"
 
 # 1. wheel 빌드 (지정 안 된 경우)
-# `python -m build` 를 사용 — publish.yml 과 동일한 빌드 경로로 맞춤.
+# `python -m build` 를 uv 로 실행 — publish.yml 과 동일한 빌드 경로로 맞춤.
 # 과거 사고 (2026-04-19): `uv build` 로 wheel-smoke 검증은 통과했으나
 # publish.yml 의 `python -m build` 가 다른 wheel 을 생산해 PyPI 에 깨진 wheel
-# 업로드. 이제 동일 도구로 빌드해서 CI/publish 불일치 제거.
+# 업로드. build frontend 은 유지하고, 의존성 설치/격리는 uv 로 통일한다.
 if [ -z "$WHEEL_PATH" ]; then
-    echo "[wheel-smoke] wheel 빌드 (python -m build)..."
-    pip install --quiet build 2>&1 | tail -1
+    echo "[wheel-smoke] wheel 빌드 (uv run python -m build)..."
     mkdir -p "$WORK_DIR/dist"
-    python -m build --wheel --outdir "$WORK_DIR/dist" "$REPO_ROOT"
+    uv run --with build python -m build --wheel --outdir "$WORK_DIR/dist" "$REPO_ROOT"
     WHEEL_PATH="$(ls "$WORK_DIR/dist"/*.whl | head -n 1)"
 fi
 
@@ -104,25 +103,14 @@ if not sec.get('chapterByMajor'):
 print('[wheel-smoke] 번들 OK — parserMappings + sections.chapterByMajor 정상')
 "
 
-# 4. (optional) freshInstall 스모크 — 실제 HF 데이터 접근 필요.
-#    CI 에서는 네트워크/용량 제약으로 skip. 로컬 릴리즈 전 실행 권장.
-if [ "${WHEEL_SMOKE_SKIP_FRESH_INSTALL:-0}" = "1" ]; then
-    echo "[wheel-smoke] freshInstall 스모크 skip (WHEEL_SMOKE_SKIP_FRESH_INSTALL=1)"
-    EXIT_CODE=0
-else
-    echo "[wheel-smoke] freshInstall 스모크 실행..."
-    cp -r "$REPO_ROOT/tests" "$WORK_DIR/tests"
-    cd "$WORK_DIR"
-    export DARTLAB_TEST_LOCKED=1
-    if "$VENV_PYTHON" -m pytest tests/realData/test_freshInstall.py -m freshInstall -v --tb=short 2>&1; then
-        EXIT_CODE=0
-    else
-        # freshInstall 네트워크/데이터 의존이므로 실패해도 wheel 자체는 OK 판정
-        # 번들 검증(step 3) 만 통과하면 packaging 사고는 차단됨
-        echo "[wheel-smoke] freshInstall 실패 (네트워크/데이터 의존). 번들 검증은 통과했으므로 packaging OK."
-        EXIT_CODE=0
-    fi
-fi
+# 4. 제품 스모크 — 배포될 wheel 을 빈 데이터 디렉터리에서 사용자 대표 API로 실행.
+#    네트워크/데이터 실패도 publish 실패로 처리한다. 여기서 실패하면 사용자 첫 실행도 실패한다.
+echo "[wheel-smoke] product smoke release 실행 (빈 데이터 디렉터리)..."
+"$VENV_PYTHON" -X utf8 "$REPO_ROOT/scripts/audit/productSmoke.py" \
+    --suite release \
+    --data-mode empty \
+    --json-out "$WORK_DIR/product-smoke-release.json"
+EXIT_CODE=$?
 
 echo "[wheel-smoke] 완료 (exit=$EXIT_CODE)"
 exit $EXIT_CODE
