@@ -625,24 +625,6 @@ c.show("IS")
 
 스레드 없음 · MEMFS 휘발 · CORS 미허용 API 불가 — 이 세 제약이 근본이다. 상세와 빌드 파이프라인은 [pyodide/README.md](pyodide/README.md), 설치 5단계 스크린샷은 [블로그 글](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite)을 본다.
 
-## REST API — 키 없이 공시 조회
-
-HuggingFace Spaces에서 DART API 프록시 제공. API 키 없이 실시간 공시 데이터 접근:
-
-```bash
-# 공시 목록
-curl "https://eddmpython-dartlab.hf.space/api/dart/filings?corp=005930&start=20260101"
-
-# 기업 정보
-curl "https://eddmpython-dartlab.hf.space/api/dart/company/005930"
-
-# 재무제표
-curl "https://eddmpython-dartlab.hf.space/api/dart/finance/005930?year=2024"
-
-# 보고서 (배당, 직원, 임원 등 56개 카테고리)
-curl "https://eddmpython-dartlab.hf.space/api/dart/report/005930/배당?year=2023"
-```
-
 ## OpenAPI — 원본 공공 API
 
 ```python

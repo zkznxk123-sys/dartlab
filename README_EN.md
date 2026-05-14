@@ -595,24 +595,6 @@ Or add `dartlab` as a single line to the `requirements.txt` tab in the xlwings L
 
 Three fundamentals: no threads, MEMFS is volatile, no access to CORS-blocked APIs. Build pipeline in [pyodide/README.md](pyodide/README.md); step-by-step install screenshots in the [blog post](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite).
 
-## REST API — No API Key Required
-
-DART API proxy on HuggingFace Spaces. Access real-time disclosure data without an API key:
-
-```bash
-# Filing list
-curl "https://eddmpython-dartlab.hf.space/api/dart/filings?corp=005930&start=20260101"
-
-# Company info
-curl "https://eddmpython-dartlab.hf.space/api/dart/company/005930"
-
-# Financial statements
-curl "https://eddmpython-dartlab.hf.space/api/dart/finance/005930?year=2024"
-
-# Reports (dividend, employee, executive — 56 categories)
-curl "https://eddmpython-dartlab.hf.space/api/dart/report/005930/배당?year=2023"
-```
-
 ## OpenAPI — Raw Public APIs
 
 ```python
