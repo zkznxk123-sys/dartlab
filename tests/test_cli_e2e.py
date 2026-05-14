@@ -7,6 +7,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -40,7 +41,8 @@ def test_cli_help_contract():
     # 핵심 명령이 모두 존재하는지 확인 (새 명령 추가 시 깨지지 않도록 개별 체크)
     for cmd in ("show", "search", "ask", "excel", "ai", "status", "setup", "mcp"):
         assert cmd in result.stdout, f"핵심 명령 '{cmd}'이 help에 없음"
-    assert "ui" not in result.stdout
+    # 옛 `ui` 서브커맨드 잔존 검사 — quickstart · guide 등 substring false positive 방지.
+    assert re.search(r"\bui\b", result.stdout) is None
     assert result.stderr == ""
 
 
