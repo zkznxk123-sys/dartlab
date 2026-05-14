@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-05-14
+
+DART 정기공시 증분 수집과 기본 설치 의존성을 중심으로 한 안정화 릴리스.
+
 ### Changed
 
+- 기본 설치 의존성에서 노트북 실행용 marimo와 미사용 터미널 차트 의존성을 제외했다. 노트북은 필요할 때
+  실행 명령에서 marimo를 함께 설치해 사용할 수 있다.
 - core, gather, DART/EDGAR provider, L1.5 가공 계층의 아키텍처 검증을 강화했다.
   architecture 테스트가 실제 `src/dartlab` 경로를 검사하도록 고치고, L1/L1.5 import
   경계와 provider gate가 CI에서 실패로 드러나도록 정리했다.
@@ -16,6 +22,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   DART/EDGAR mirror와 protocol 검증은 유지한다.
 - Guard Index 실행 표면을 추가해 빠른 변경 영향도 확인, L0~L1.5 strict gate,
   nightly 전수조사를 같은 명령 체계에서 실행할 수 있게 했다.
+- Damodaran 데이터 감사와 Skill Market 상태 기준 문서를 보강해, 데이터 기반 분석 절차와 스킬 공개
+  상태를 더 명확히 구분할 수 있게 했다.
+
+### Fixed
+
+- DART 정기공시 증분 수집에서 `[기재정정]` 사업·반기·분기보고서가 기존 기간 데이터 때문에
+  건너뛰어질 수 있던 문제를 수정했다.
+- DART finance/report 증분 재수집 시 같은 기간의 이전 행과 새 행이 섞이지 않도록 논리 키 기준
+  교체 병합을 적용했다.
+- 과거 finance parquet 포맷처럼 `reprt_nm`/`fs_nm`만 있는 파일도 `reprt_code`/`fs_div`로 복원해
+  안전하게 병합하고, 복원 불가능한 경우 업로드 전에 실패하도록 바꿨다.
+- 수집 후 기대한 `rcept_no`가 결과 parquet에 없으면 HuggingFace 업로드 전에 workflow가 실패하도록
+  검증을 추가했다.
+- 공개 API 제품 스모크와 scan 메모리 회귀 테스트를 보강해 CI에서 사용자 진입점 문제가 더 빨리
+  드러나도록 했다.
 
 ## [0.10.0] - 2026-05-13
 
