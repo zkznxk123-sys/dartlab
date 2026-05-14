@@ -1,0 +1,495 @@
+{
+  "_meta": {
+    "source": "DartLab Damodaran L1.5 analysis system contract",
+    "asOfDate": "2026-05-14",
+    "coverageStatus": "system-contract-v1",
+    "notes": "Defines the concept tree, skill routing, data contract, and gap ledger for Damodaran-style analysis without L2/L3 engine calls.",
+    "officialSourceUrls": {
+      "home": "https://pages.stern.nyu.edu/~adamodar/",
+      "countryRiskPremiums": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/ctryprem.html",
+      "industryBetas": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/Betas.html",
+      "industryCostOfCapital": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/wacc.html",
+      "industryCashFlowDrivers": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/cfbasics.html",
+      "industryMargins": "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/margin.html"
+    }
+  },
+  "readiness": {
+    "status": "incubatingExecutable",
+    "decisionScore": 0.4,
+    "implementedBoundary": "L1/L1.5 data plus recipe-local RunPython calculation",
+    "verifiedBoundary": "Not promoted to verified until operator review, full industry reference sync, and special-situation model expansion.",
+    "currentStrength": "Core FCFF valuation memo path runs across KR and US test targets with data audit, model fit, normalized financials, value drivers, WACC, DCF, relative sanity check, reverse DCF, and gap ledger.",
+    "notCompleteBecause": [
+      "Narrative-to-driver extraction is specified but not yet implemented as a standalone executable skill.",
+      "Business life cycle classification is basic and still mostly inferred from financial panels.",
+      "Special situation models beyond financial-firm blocking are deferred.",
+      "US peer valuation primitive and full Damodaran industry reference coverage are not filled."
+    ]
+  },
+  "skillTree": {
+    "entrySkill": "recipes.valuation.damodaran.index",
+    "currentExecutablePath": [
+      "recipes.valuation.damodaran.dataAudit",
+      "recipes.valuation.damodaran.businessModelFit",
+      "recipes.valuation.damodaran.normalizedFinancials",
+      "recipes.valuation.damodaran.reinvestmentRoc",
+      "recipes.valuation.damodaran.costOfCapital",
+      "recipes.valuation.damodaran.fcffDcf",
+      "recipes.valuation.damodaran.relativeCheck",
+      "recipes.valuation.damodaran.scenarioFalsifier",
+      "recipes.valuation.damodaran.deepDive"
+    ],
+    "nextSkillTargets": [
+      "recipes.valuation.damodaran.narrativeMap",
+      "recipes.valuation.damodaran.storyToDrivers",
+      "recipes.valuation.damodaran.lifeCycleClassifier",
+      "recipes.valuation.damodaran.accountTraceAudit",
+      "recipes.valuation.damodaran.rdCapitalization",
+      "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "recipes.valuation.damodaran.oneOffAdjustment",
+      "recipes.valuation.damodaran.growthFeasibility",
+      "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "recipes.valuation.damodaran.sumOfParts",
+      "recipes.valuation.damodaran.distressAdjustedDcf"
+    ]
+  },
+  "concepts": [
+    {
+      "id": "narrativeAndNumbers",
+      "order": 1,
+      "label": "Narrative & Numbers",
+      "question": "회사의 스토리가 어떤 성장, 마진, 재투자, ROC 가정으로 번역되는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.scenarioFalsifier",
+        "recipes.valuation.damodaran.deepDive"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.narrativeMap",
+        "recipes.valuation.damodaran.storyToDrivers"
+      ],
+      "dataRequirements": [
+        "businessOverviewText",
+        "productServiceText",
+        "segmentText",
+        "managementNarrative",
+        "revenueBySegment",
+        "marketSizeEvidence"
+      ],
+      "status": "partial",
+      "gapIds": [
+        "narrativeTopicAlias",
+        "storyToDriverParser"
+      ]
+    },
+    {
+      "id": "businessLifeCycle",
+      "order": 2,
+      "label": "Business Life Cycle",
+      "question": "기업이 고성장, 전환, 성숙, 쇠퇴, 턴어라운드 중 어디에 있는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.businessModelFit"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.lifeCycleClassifier",
+        "recipes.valuation.damodaran.cyclicalNormalizer",
+        "recipes.valuation.damodaran.turnaroundGate"
+      ],
+      "dataRequirements": [
+        "revenueGrowthPanel",
+        "marginStabilityPanel",
+        "rocTrend",
+        "capexIntensity",
+        "cycleReference"
+      ],
+      "status": "partial",
+      "gapIds": [
+        "cycleNormalizedMargins",
+        "lifeCycleClassifier"
+      ]
+    },
+    {
+      "id": "financialStatementNormalization",
+      "order": 3,
+      "label": "Financial Statement Normalization",
+      "question": "회계 숫자를 valuation용 영업 현금흐름과 invested capital로 재구성했는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.normalizedFinancials",
+        "recipes.valuation.damodaran.dataAudit"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.accountTraceAudit",
+        "recipes.valuation.damodaran.rdCapitalization",
+        "recipes.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.valuation.damodaran.oneOffAdjustment"
+      ],
+      "dataRequirements": [
+        "incomeStatementAnnual",
+        "balanceSheetAnnual",
+        "cashFlowAnnual",
+        "accountTrace",
+        "rdExpense",
+        "operatingLeaseCommitments",
+        "impairmentAndRestructuring",
+        "nonOperatingAssets"
+      ],
+      "status": "partial",
+      "gapIds": [
+        "rdCapitalization",
+        "leaseAdjustment",
+        "oneOffAdjustment",
+        "nonOperatingAssetSplit"
+      ]
+    },
+    {
+      "id": "valueDrivers",
+      "order": 4,
+      "label": "Growth, Margin, Reinvestment, ROC",
+      "question": "성장률이 재투자율과 자본수익성으로 설명되는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.reinvestmentRoc"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.growthFeasibility",
+        "recipes.valuation.damodaran.incrementalRoc",
+        "recipes.valuation.damodaran.salesToCapitalBenchmark"
+      ],
+      "dataRequirements": [
+        "salesToCapital",
+        "reinvestmentRate",
+        "roc",
+        "incrementalInvestedCapital",
+        "industrySalesToCapital",
+        "industryRoc"
+      ],
+      "status": "partial",
+      "gapIds": [
+        "fullIndustryCashFlowDrivers",
+        "incrementalRoc"
+      ]
+    },
+    {
+      "id": "riskAndCostOfCapital",
+      "order": 5,
+      "label": "Risk & Cost of Capital",
+      "question": "통화, 국가 ERP, beta, debt cost, tax가 같은 기준으로 정합적인가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.costOfCapital"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.countryRiskPremium",
+        "recipes.valuation.damodaran.currencyConsistency",
+        "recipes.valuation.damodaran.betaDebtFallbackAudit"
+      ],
+      "dataRequirements": [
+        "countryErp",
+        "riskFreeRate",
+        "industryBeta",
+        "defaultSpread",
+        "debtRatio",
+        "marginalTaxRate",
+        "currency"
+      ],
+      "status": "partial",
+      "gapIds": [
+        "countryReferenceStale",
+        "companyDebtSpread",
+        "currencyRiskFreeCurve"
+      ]
+    },
+    {
+      "id": "intrinsicValuation",
+      "order": 6,
+      "label": "Intrinsic Valuation",
+      "question": "기업 유형에 맞는 내재가치 모델이 쓰였는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.fcffDcf"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.fcfeDcf",
+        "recipes.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.valuation.damodaran.sumOfParts",
+        "recipes.valuation.damodaran.distressAdjustedDcf"
+      ],
+      "dataRequirements": [
+        "fcffPanel",
+        "netDebt",
+        "shares",
+        "marketCap",
+        "segmentFinancials",
+        "financialFirmBookCapital",
+        "distressProbability"
+      ],
+      "status": "implemented-core",
+      "gapIds": [
+        "financialFirmModel",
+        "sumOfPartsSegments",
+        "distressAdjustment"
+      ]
+    },
+    {
+      "id": "relativeValuation",
+      "order": 7,
+      "label": "Relative Valuation",
+      "question": "multiple이 성장, 마진, risk 차이를 반영해 sanity check로만 쓰였는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.relativeCheck"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.valuation.damodaran.multipleNarrativeCheck"
+      ],
+      "dataRequirements": [
+        "peerUniverse",
+        "evSales",
+        "evEbit",
+        "pe",
+        "pb",
+        "growthDifferentials",
+        "marginDifferentials"
+      ],
+      "status": "partial",
+      "gapIds": [
+        "usPeerValuationPrimitive",
+        "peerUniverseMapping"
+      ]
+    },
+    {
+      "id": "specialSituations",
+      "order": 8,
+      "label": "Special Situations",
+      "question": "금융업, 순환주, 원자재, 적자 성장주, 지주, distress 같은 예외 모델이 분리됐는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.businessModelFit"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.specialSituationClassifier",
+        "recipes.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.valuation.damodaran.cyclicalNormalizer",
+        "recipes.valuation.damodaran.sumOfParts",
+        "recipes.valuation.damodaran.distressAdjustedDcf"
+      ],
+      "dataRequirements": [
+        "financialFirmCapital",
+        "cycleReference",
+        "commodityPriceExposure",
+        "holdingCompanyNav",
+        "distressIndicators"
+      ],
+      "status": "partial-block-only",
+      "gapIds": [
+        "financialFirmModel",
+        "cyclicalModel",
+        "commodityModel",
+        "holdingCompanyNav",
+        "distressAdjustment"
+      ]
+    },
+    {
+      "id": "falsificationReverseDcf",
+      "order": 9,
+      "label": "Falsification / Reverse DCF",
+      "question": "현재 가격이 요구하는 성장, 마진, ROC가 성립 가능한가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.scenarioFalsifier"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.breakCondition",
+        "recipes.valuation.damodaran.sensitivityGrid"
+      ],
+      "dataRequirements": [
+        "marketCap",
+        "shares",
+        "price",
+        "dcfBand",
+        "normalizedGrowth",
+        "normalizedMargin",
+        "salesToCapital",
+        "wacc"
+      ],
+      "status": "implemented-core",
+      "gapIds": [
+        "marginReverseDcf",
+        "rocReverseDcf"
+      ]
+    },
+    {
+      "id": "valuationMemoStoryboard",
+      "order": 10,
+      "label": "Valuation Memo / Storyboard",
+      "question": "결론이 단일 적정가가 아니라 가정, 반증, 결손, storyboardReady로 남는가.",
+      "implementedSkills": [
+        "recipes.valuation.damodaran.deepDive"
+      ],
+      "plannedSkills": [
+        "recipes.valuation.damodaran.storyboardSchema",
+        "recipes.valuation.damodaran.memoQualityGate"
+      ],
+      "dataRequirements": [
+        "dataAudit",
+        "modelFit",
+        "normalizedFinancials",
+        "assumptionTable",
+        "dcfBand",
+        "reverseDcf",
+        "relativeCheck",
+        "gapLedger"
+      ],
+      "status": "implemented-core",
+      "gapIds": [
+        "storyEngineIntegrationDeferred",
+        "memoQualityGate"
+      ]
+    }
+  ],
+  "dataContract": {
+    "financialStatements": {
+      "owner": "Company.show",
+      "topics": [
+        "IS",
+        "BS",
+        "CF"
+      ],
+      "minimumPanelYears": 5,
+      "requiredAccounts": [
+        "sales/revenue",
+        "operating_profit/operating_income",
+        "profit_before_tax",
+        "income_taxes",
+        "operating_cashflow",
+        "purchase_of_property_plant_and_equipment",
+        "depreciation",
+        "cash_and_cash_equivalents",
+        "debt",
+        "equity",
+        "nonCashWorkingCapital"
+      ]
+    },
+    "marketData": {
+      "owner": "dartlab.gather plus local market snapshots",
+      "requiredFields": [
+        "price",
+        "priceDate",
+        "marketCap",
+        "shares"
+      ],
+      "krPreferredPath": "data/krx/prices/raw-2026.parquet",
+      "usPreferredPath": "dartlab.gather(\"price\", market=\"US\") plus data/edgar/finance/{cik}.parquet shares"
+    },
+    "referenceData": {
+      "owner": "dartlab.reference.data JSON snapshots",
+      "files": [
+        "damodaranDefaults.json",
+        "damodaranIndustryDefaults.json",
+        "damodaranAnalysisSystem.json"
+      ],
+      "requiredFields": [
+        "country ERP",
+        "risk-free rate",
+        "marginal tax rate",
+        "industry beta",
+        "industry WACC",
+        "sales-to-capital",
+        "operating margin",
+        "ROC proxy"
+      ]
+    },
+    "textEvidence": {
+      "owner": "Company.topics / Company.show text topics",
+      "requiredAliases": [
+        "businessOverview",
+        "productService",
+        "segments",
+        "riskFactors",
+        "managementDiscussion"
+      ],
+      "status": "deferredWithBlocker"
+    },
+    "peerValuation": {
+      "owner": "scan/reference primitive",
+      "requiredFields": [
+        "peerUniverse",
+        "EV/Sales",
+        "EV/EBIT",
+        "PE",
+        "PB",
+        "growth",
+        "margin",
+        "risk"
+      ],
+      "status": "deferredWithBlocker"
+    }
+  },
+  "gapLedger": [
+    {
+      "id": "narrativeTopicAlias",
+      "status": "deferredWithBlocker",
+      "layer": "L1.5 frame/reference",
+      "fillMethod": "Map KR and EDGAR business overview, product/service, segment, MD&A, and risk-factor topics to stable aliases."
+    },
+    {
+      "id": "storyToDriverParser",
+      "status": "deferredWithBlocker",
+      "layer": "recipes/synth",
+      "fillMethod": "Extract narrative claims and map them to growth, margin, reinvestment, and ROC driver ranges without calling L3 story."
+    },
+    {
+      "id": "cycleNormalizedMargins",
+      "status": "deferredWithBlocker",
+      "layer": "L1.5 reference/synth",
+      "fillMethod": "Build cycle reference tables and margin normalization rules for semiconductors, commodities, and industrial cyclicals."
+    },
+    {
+      "id": "countryReferenceStale",
+      "status": "fallbackAccepted",
+      "layer": "L1.5 reference",
+      "fillMethod": "Run and verify scripts/data/updateDamodaranERP.py against official Stern country risk premium data before verified promotion."
+    },
+    {
+      "id": "fullIndustryCashFlowDrivers",
+      "status": "deferredWithBlocker",
+      "layer": "L1.5 reference",
+      "fillMethod": "Synchronize full Damodaran industry tables for beta, WACC, margins, sales-to-capital, and ROC."
+    },
+    {
+      "id": "companyDebtSpread",
+      "status": "deferredWithBlocker",
+      "layer": "L1.5 reference/frame",
+      "fillMethod": "Add company default-spread fallback from rating, interest coverage, or bond spread evidence."
+    },
+    {
+      "id": "financialFirmModel",
+      "status": "deferredWithBlocker",
+      "layer": "recipes",
+      "fillMethod": "Add excess-return or dividend/FCFE model for banks, insurers, and brokers; keep generic FCFF blocked."
+    },
+    {
+      "id": "usPeerValuationPrimitive",
+      "status": "deferredWithBlocker",
+      "layer": "L1.5 scan/reference",
+      "fillMethod": "Add US peer valuation scan for EV/Sales, EV/EBIT, PE, PB, growth, margin, and risk."
+    },
+    {
+      "id": "sumOfPartsSegments",
+      "status": "deferredWithBlocker",
+      "layer": "L1.5 frame/recipes",
+      "fillMethod": "Normalize segment revenue, margin, and capital allocation for sum-of-parts valuation."
+    },
+    {
+      "id": "storyEngineIntegrationDeferred",
+      "status": "deferredWithBlocker",
+      "layer": "L3 story",
+      "fillMethod": "Connect storyboard schema only after the L1.5 skill pack reaches verified status."
+    }
+  ],
+  "completionGates": [
+    "L2/L3 banned-call static check passes.",
+    "strict-l0-l15 guard passes for dart and edgar.",
+    "ValidateRecipe execution pass rate is at least 0.80 for every implemented Damodaran recipe.",
+    "Evidence completeness is 1.00 for every implemented Damodaran recipe.",
+    "KR and US both have at least one full path through deepDive.",
+    "Financial-firm target remains blocked from generic FCFF.",
+    "All gap ledger entries are classified as filled, fallbackAccepted, or deferredWithBlocker.",
+    "Operator review promotes the recipe status; no skill auto-promotes itself."
+  ]
+}

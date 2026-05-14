@@ -17,6 +17,7 @@ DAMODARAN_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" /
 REFERENCE_DATA = REPO_ROOT / "src" / "dartlab" / "reference" / "data"
 
 DAMODARAN_IDS = {
+    "recipes.valuation.damodaran.index",
     "recipes.valuation.damodaran.dataAudit",
     "recipes.valuation.damodaran.businessModelFit",
     "recipes.valuation.damodaran.normalizedFinancials",
@@ -104,6 +105,12 @@ def testDamodaranPublicCallBlocksUseL15MemoBuilder() -> None:
     failures: list[str] = []
     for path in sorted(DAMODARAN_DIR.glob("*.md")):
         section = _publicCallSection(path.read_text(encoding="utf-8"))
+        if path.name == "index.md":
+            if "damodaranAnalysisSystem.json" not in section:
+                failures.append(f"{path.name}: missing analysis system reference")
+            if "sources=sources" not in section:
+                failures.append(f"{path.name}: missing sourceRef payload")
+            continue
         if 'target = "005930"' not in section:
             failures.append(f"{path.name}: missing default target placeholder")
         if "buildDamodaranMemo" not in section:
@@ -230,6 +237,7 @@ def testRunPythonEmitResultCreatesSourceRefs() -> None:
 def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
     country = json.loads((REFERENCE_DATA / "damodaranDefaults.json").read_text(encoding="utf-8"))
     industry = json.loads((REFERENCE_DATA / "damodaranIndustryDefaults.json").read_text(encoding="utf-8"))
+    system = json.loads((REFERENCE_DATA / "damodaranAnalysisSystem.json").read_text(encoding="utf-8"))
 
     assert country["_meta"]["freshnessStatus"] in {"fresh", "stale"}
     assert country["_meta"]["maxStaleDays"] > 0
@@ -241,6 +249,44 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
     assert "semiconductor" in industry["industries"]
     assert "totalMarketWithoutFinancials" in industry["industries"]
     assert industry["gapLedger"], "industry defaults must expose remaining L1.5 gaps"
+
+    assert system["_meta"]["coverageStatus"] == "system-contract-v1"
+    assert system["skillTree"]["entrySkill"] == "recipes.valuation.damodaran.index"
+    assert len(system["concepts"]) == 10
+    assert {concept["id"] for concept in system["concepts"]} == {
+        "narrativeAndNumbers",
+        "businessLifeCycle",
+        "financialStatementNormalization",
+        "valueDrivers",
+        "riskAndCostOfCapital",
+        "intrinsicValuation",
+        "relativeValuation",
+        "specialSituations",
+        "falsificationReverseDcf",
+        "valuationMemoStoryboard",
+    }
+    for concept in system["concepts"]:
+        assert concept["implementedSkills"]
+        assert concept["plannedSkills"]
+        assert concept["dataRequirements"]
+        assert concept["gapIds"]
+
+    allowed_gap_status = {"filled", "fallbackAccepted", "deferredWithBlocker"}
+    assert {gap["status"] for gap in system["gapLedger"]} <= allowed_gap_status
+    assert system["dataContract"]["financialStatements"]["minimumPanelYears"] >= 5
+    assert "peerValuation" in system["dataContract"]
+
+
+def testDamodaranIndexIsEntrySkillForAnalysisSystem() -> None:
+    index_text = (DAMODARAN_DIR / "index.md").read_text(encoding="utf-8")
+
+    assert "entryHint: true" in index_text
+    assert "Narrative & Numbers" in index_text
+    assert "Business Life Cycle" in index_text
+    assert "Financial Normalization" in index_text
+    assert "Reverse DCF" in index_text
+    for skill_id in DAMODARAN_IDS - {"recipes.valuation.damodaran.index"}:
+        assert skill_id in index_text
 
 
 def testDamodaranErpUpdaterTargetsReferenceData() -> None:
