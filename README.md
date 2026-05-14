@@ -693,6 +693,35 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 자세한 기준은 [operation.stability](https://eddmpython.github.io/dartlab/skills/operation.stability) 를 본다.
 
+## 설계 선택
+
+다른 재무 라이브러리와 다른 의식적 결정 — 사용자가 설치 후 마주칠 차이를 미리 명시한다.
+
+| 결정 | 의미 | 이유 |
+|---|---|---|
+| **단일 base install — `[extras]` 분리 없음** | `pip install dartlab` 한 번에 분석·서버·MCP·viz·AI provider 가 함께 들어온다 | 분석 도구에 "이것도 설치하세요" 가 누적되면 첫 사용까지 마찰이 늘어난다. 단일 진입 SSOT 가 우선. wheel 크기·cold start 비용은 PEP 562 lazy load 와 pyodide 분기로 흡수한다. |
+| **사전 구축 데이터, API 키 0 으로 시작** | `Company("005930")` 호출 시 HuggingFace 에서 자동 다운로드 → 로컬 캐시. DART API 키는 *재수집* 만 필요 | "키 만들고 환경변수 세팅" 단계를 1순위 사용 경로에서 제거. 키 발급은 `dartlab collect` 같은 raw 재수집 흐름에서만 등장. |
+| **공시 본문은 데이터, 지시 아님** | 외부 본문은 직렬화 시 `[EXTERNAL CONTENT START — untrusted ...]` 마커로 자동 감쌈 | DART/EDGAR/뉴스 본문 안의 "이전 지시 무시" 같은 패턴이 AI 동작을 바꾸지 못하도록 직렬화 단에서 강제. 마커 안 숫자·날짜·고유명사는 1차 출처 재검증 후 인용. |
+| **AI 엔진 = chat-native + LLM 자율 tool calling** | `BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST` 식 고정 노드 그래프 없음. 본체는 `ai/agent.py`, 능력은 `ai/tools/` | 0.7.15 에서 15,420 줄 삭제로 회귀 차단. graph 식 강박은 verify 강제·workbench 본체화 회귀를 부르고 LLM 자율성을 잠근다. |
+| **L0~L4 단방향 import (4 형제 cross 금지)** | core ← gather/providers ← scan/frame/synth/reference ← analysis 5종 ← story ← ai/mcp | `import-linter` + `dartlabGuard.py strict --scope l0-l15` 가 PR 게이트. 외부 기여자가 어디에 코드를 더할지 한 그림으로 판단 가능. |
+| **테스트 직렬화 강제 (Polars OOM 가드)** | `pytest -v` 전체 호출 금지. `scripts/dev/test-lock.sh tests/ -m "<marker>"` 경유 | Company 1개 ≈ 200~500 MB Rust 힙은 `gc.collect()` 회수 불가. CI 와 로컬을 같은 lock wrapper 명령으로 통일. |
+| **메시지 한국어 우선, API 영어** | `Company`, `pastInsight`, `analysis` 등 symbol 은 영어. CLI 에러·진행 메시지는 한국어 | classifier 에 `Natural Language :: Korean / English` 둘 다 선언. PyPI 영어 사용자 대상 영문 진입은 [README_EN.md](README_EN.md) 와 영문 docstring 으로 별도 트랙. |
+| **단일 SSOT — Skill OS** | 외부 LLM·사용자가 `capabilities()` 한 줄로 304 specs 카탈로그 질의 | 코드·문서·계약을 같은 파일 (`src/dartlab/skills/specs/**`) 로 운영. README ↔ docs ↔ 코드 drift 를 SSOT 한 곳에서 방지. |
+
+### 30초 안에 첫 결과
+
+```bash
+pip install dartlab
+```
+
+```python
+import dartlab
+c = dartlab.Company("005930")   # HuggingFace 자동 다운로드 (최초 ~수십 MB, 로컬 캐시)
+c.show("IS")                    # 손익계산서, 분기 기본
+```
+
+세 줄 — API 키 0, 환경변수 0. 영문 사용자는 [README_EN.md](README_EN.md), 다른 진입 경로 (CLI · AI · MCP) 는 위 ["두 가지 시작점"](#두-가지-시작점) 참조.
+
 ## 기여
 
 기여는 무엇이든 환영합니다. 버그 리포트, 기능 제안, 문서 개선, 예제 추가, 데이터 매핑 수정처럼 작은 변경도 dartlab을 더 좋게 만듭니다.

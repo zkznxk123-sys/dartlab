@@ -644,6 +644,35 @@ Pipeline: local cache (instant) → HuggingFace (auto-download) → DART API (wi
 
 See [operation.stability](https://eddmpython.github.io/dartlab/skills/operation.stability).
 
+## Design Choices
+
+Conscious decisions that differ from other financial libraries — surface them up front so you know what you're installing.
+
+| Decision | What it means | Why |
+|---|---|---|
+| **Single base install — no `[extras]`** | `pip install dartlab` ships analysis · server · MCP · viz · AI providers together | "Install this extra first" steps compound and raise the time-to-first-result. A single SSOT entry point matters more than wheel size. Cold start and footprint are absorbed by PEP 562 lazy loading and a pyodide branch. |
+| **Prebuilt data, zero API keys to start** | `Company("005930")` auto-downloads from HuggingFace into a local cache; DART API keys are only needed for *recollection* | Key provisioning is moved off the first-use path. Keys appear only in `dartlab collect` style raw-recollection flows. |
+| **External content is data, not instructions** | Serialized external bodies are wrapped with an `[EXTERNAL CONTENT START — untrusted ...]` marker | "Ignore previous instructions" patterns inside DART/EDGAR/news bodies cannot steer the agent. Numbers, dates, and proper nouns inside the marker must be re-verified against primary sources before citing. |
+| **AI engine = chat-native + autonomous tool calling** | No `BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST` fixed-node graph. Core is `ai/agent.py`; capabilities live in `ai/tools/` | Graph-style obsession invites verify-forcing and workbench coupling regressions and locks LLM autonomy. The 0.7.15 release removed 15,420 lines for this reason. |
+| **L0~L4 one-way imports (no L1.5 cross-import)** | core ← gather/providers ← scan/frame/synth/reference ← 5 analysis engines ← story ← ai/mcp | `import-linter` plus `dartlabGuard.py strict --scope l0-l15` gate every PR. New contributors can decide where to add code from a single picture. |
+| **Serialized tests (Polars OOM guard)** | `pytest -v` against the whole suite is forbidden; use `scripts/dev/test-lock.sh tests/ -m "<marker>"` | One Company is 200–500 MB of native Polars heap that `gc.collect()` cannot reclaim. Local and CI share the exact same lock wrapper command. |
+| **Korean-first messages, English API surface** | Symbols (`Company`, `pastInsight`, `analysis`) are English. CLI errors and progress messages are Korean | `Natural Language :: Korean / English` are both declared. English users get a separate track via this `README_EN.md` and English docstrings. |
+| **Single SSOT — Skill OS** | `capabilities()` exposes 304 specs as a queryable catalogue | Code, docs, and contracts live in `src/dartlab/skills/specs/**`. Drift between README, docs, and code is prevented at the source. |
+
+### First result in 30 seconds
+
+```bash
+pip install dartlab
+```
+
+```python
+import dartlab
+c = dartlab.Company("005930")   # auto-download from HuggingFace (a few tens of MB on first run, cached locally)
+c.show("IS")                    # income statement, quarterly by default
+```
+
+Three lines — zero API keys, zero environment variables. Korean readers: see [README.md](README.md). Other entry points (CLI · AI · MCP) are documented in the [Quick Start](#quick-start) section above.
+
 ## Contributing
 
 **Contributors are very welcome.** Whether it's a bug report, a new analysis axis, a mapping fix, or a documentation improvement — every contribution makes dartlab better for everyone.
