@@ -604,8 +604,11 @@ def findForgeCommentId(client: GraphqlClient, discussionId: str) -> str | None:
 
 def forgeCommentBody(skill: dict[str, Any]) -> str:
     missing = skill.get("missingDetails") or []
-    missingText = ", ".join(missing) if missing else "없음"
-    mapped = ", ".join(skill.get("mappedBuiltinSkills") or []) or "아직 없음"
+    missingText = ", ".join(missing) if missing else "없습니다."
+    mapped = ", ".join(skill.get("mappedBuiltinSkills") or []) or "없습니다."
+    inputs = ", ".join(skill.get("inputs") or []) or "정해지지 않았습니다."
+    outputs = ", ".join(skill.get("outputs") or []) or "정해지지 않았습니다."
+    criteria = ", ".join(skill.get("criteria") or []) or "정해지지 않았습니다."
     return textwrap.dedent(
         f"""\
         {FORGE_MARKER}
@@ -616,9 +619,9 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
         - 상태: `{skill.get("state")}`
         - trust tier: `{skill.get("trustTier")}`
         - 추정 의도: {skill.get("intent")}
-        - 입력 후보: {", ".join(skill.get("inputs") or []) or "미정"}
-        - 출력 후보: {", ".join(skill.get("outputs") or []) or "미정"}
-        - 판단 기준: {", ".join(skill.get("criteria") or []) or "미정"}
+        - 입력 후보: {inputs}
+        - 출력 후보: {outputs}
+        - 판단 기준: {criteria}
         - 매핑된 builtin skill: {mapped}
         - 보완 필요: {missingText}
 
