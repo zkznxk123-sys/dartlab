@@ -14,8 +14,6 @@ from dartlab.core.dataConfig import (
     HF_REPO,
     hfBaseUrl,
 )
-from dartlab.core.dataLoaderNormalize import CATEGORICAL_COLS as _CATEGORICAL_COLS
-from dartlab.core.dataLoaderNormalize import DOWNCAST_INT_COLS as _DOWNCAST_INT_COLS
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
