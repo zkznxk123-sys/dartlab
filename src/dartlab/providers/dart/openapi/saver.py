@@ -523,6 +523,38 @@ def saveReplacingByKeys(
 
     Example:
         >>> saveReplacingByKeys(df, "data/dart/finance/005930.parquet", ["bsns_year", "reprt_code", "fs_div"])
+
+    SeeAlso:
+        - ``save`` — 단순 overwrite 저장.
+        - ``enrichFinance`` / ``enrichReport`` — 증분 수집 후 safe replacement 호출 지점.
+
+    Requires:
+        - ``df`` 와 기존 parquet 모두 ``keyColumns`` 를 직접 갖거나 legacy alias로 복원 가능해야 한다.
+        - key 컬럼은 null 없이 완전해야 한다.
+
+    Capabilities:
+        - DART finance/report 증분 refresh 에서 새로 수집한 정기공시 기간만 교체 병합한다.
+
+    Guide:
+        - 수집 대상 기간이 명확한 증분 저장에만 사용한다. 키 검증 실패 시 append fallback 없이 중단한다.
+
+    AIContext:
+        internal DART saver helper — 기존 HF parquet 전체를 보존하면서 동일 logical key 행만 교체한다.
+
+    LLM Specifications:
+        AntiPatterns:
+            - key 컬럼 누락 시 append 로 우회.
+            - 기존 parquet schema 를 검증하지 않고 overwrite.
+        OutputSchema:
+            - ``Path`` — 저장된 parquet 경로.
+        Prerequisites:
+            - polars DataFrame, parquet path, logical replacement key columns.
+        Freshness:
+            - DART OpenAPI 증분 수집 직후 현재 공시 기간 기준.
+        Dataflow:
+            - new df → key materialize/validate → existing parquet read → matching keys remove → concat → atomic write.
+        TargetMarkets:
+            - KR (DART).
     """
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)
