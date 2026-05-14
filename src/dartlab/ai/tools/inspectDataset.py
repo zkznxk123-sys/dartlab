@@ -73,29 +73,30 @@ def _resolveDataset(target: str) -> tuple[Any, str]:
         _, code, topic = target.split(":", 2) if target.count(":") >= 2 else (None, None, None)
         if not code:
             raise ValueError("Company.show target 은 'Company.show:<stockCode>:<topic>' 형식")
-        from dartlab import Company
+        from dartlab.company import Company
 
         c = Company(code)
         df = c.show(topic or "BS")
         return df, f"Company({code}).show({topic or 'BS'})"
     if target.startswith("scan:"):
         axis = target.split(":", 1)[1]
-        import dartlab
+        from dartlab.scan import Scan
 
-        df = dartlab.scan(axis)
+        df = Scan()(axis)
         return df, f"scan({axis})"
     if target == "macro":
-        import dartlab
+        from dartlab.macro import Macro
 
-        df = dartlab.macro()
+        df = Macro()()
         return df, "macro()"
     if target.startswith("gather:"):
         parts = target.split(":", 2)
         axis = parts[1] if len(parts) > 1 else None
         sub = parts[2] if len(parts) > 2 else None
-        import dartlab
+        from dartlab.gather.entry import GatherEntry
 
-        df = dartlab.gather(axis, sub) if (axis and sub) else dartlab.gather(axis) if axis else dartlab.gather()
+        g = GatherEntry()
+        df = g(axis, sub) if (axis and sub) else g(axis) if axis else g()
         return df, f"gather({axis}{', ' + sub if sub else ''})"
     raise ValueError(f"알 수 없는 target 형식: {target}")
 
