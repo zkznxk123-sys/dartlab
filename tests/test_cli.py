@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -49,7 +50,9 @@ def test_main_without_command_prints_help(capsys):
     assert "setup" in captured.out
     assert "mcp" in captured.out
     assert "plugin" in captured.out
-    assert "ui" not in captured.out
+    # 옛 `ui` 서브커맨드 제거 후 잔존 검사 — substring 'ui' (quickstart · guide 등) 가 아닌
+    # 단독 토큰만 검출하도록 word boundary 사용.
+    assert re.search(r"\bui\b", captured.out) is None
 
 
 def test_main_invalid_command_returns_usage_code(capsys):
