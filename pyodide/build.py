@@ -32,6 +32,7 @@ _PYODIDE_STRIP = {
     "sse-starlette",
     "sse_starlette",
     "mcp",
+    "qrcode",
     "huggingface-hub",
     "huggingface_hub",
     "google-genai",
