@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "landing" / "static" / "skills" / "market"
 FORGE_MARKER = "<!-- dartlab-skill-market-forge -->"
 BOT_LOGINS = {"github-actions[bot]", "dependabot[bot]"}
+ACCEPTED_SNAPSHOT_STATES = {"curated", "builtin-candidate"}
 BLOCK_PATTERNS = (
     "ignore previous instructions",
     "이전 지시",
@@ -243,6 +244,9 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
     revision = revisionState(discussion, comments, moderation)
     itemId = f"market.{stableSlug(title)}.{discussion.get('number')}"
     itemPath = f"items/{itemId}.json"
+    hasAcceptedSnapshot = (
+        state in ACCEPTED_SNAPSHOT_STATES and bool(revision["acceptedAt"]) and not parsed["missingDetails"]
+    )
     reviewers = sorted(
         {
             ((comment.get("author") or {}).get("login"))
@@ -272,9 +276,9 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
         "missingDetails": parsed["missingDetails"],
         "warnings": parsed["warnings"],
         "mappedBuiltinSkills": parsed["mappedBuiltinSkills"],
-        "canonicalSource": "marketItemSnapshot",
-        "itemPath": itemPath,
-        "acceptedAt": revision["acceptedAt"],
+        "canonicalSource": "marketItemSnapshot" if hasAcceptedSnapshot else "githubDiscussion",
+        "itemPath": itemPath if hasAcceptedSnapshot else None,
+        "acceptedAt": revision["acceptedAt"] if hasAcceptedSnapshot else None,
         "canonicalUpdatedAt": revision["canonicalUpdatedAt"],
         "finalizedAt": revision["finalizedAt"],
         "revisionStatus": revision["revisionStatus"],
@@ -317,6 +321,7 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
         outputSchema = inferOutputSchema(text, outputs)
     if not criteria:
         criteria = inferCriteria(text)
+    explicitMissingDetails = extractList(text, ("보완 필요", "남은 질문", "needs detail", "missing details"))
     warnings = [pattern for pattern in BLOCK_PATTERNS if pattern.lower() in text.lower()]
     missingDetails: list[str] = []
     if not inputs:
@@ -325,9 +330,28 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
         missingDetails.append("outputs")
     if not criteria:
         missingDetails.append("criteria")
+    missingDetails = dedupeClean([*missingDetails, *explicitMissingDetails])
     mappedBuiltinSkills = mapBuiltinSkills(f"{title}\n{text}")
+    isExplicitDraft = any(
+        marker in text.lower()
+        for marker in (
+            "초안 상태",
+            "아직 최종 스킬이 아닙니다",
+            "아직 완성 스킬이 아닙니다",
+            "needs detail",
+            "missing details",
+        )
+    )
     state = (
-        "blocked" if warnings else "runnable" if not missingDetails else "specified" if inputs or outputs else "idea"
+        "blocked"
+        if warnings
+        else "specified"
+        if isExplicitDraft
+        else "runnable"
+        if not missingDetails
+        else "specified"
+        if inputs or outputs
+        else "idea"
     )
     return {
         "summary": firstSentence(text) or title,
@@ -620,6 +644,9 @@ def prepareMarketSnapshots(
     indexed: list[dict[str, Any]] = []
     snapshots: list[dict[str, Any]] = []
     for skill in skills:
+        if not skill.get("itemPath"):
+            indexed.append(skill)
+            continue
         previous = readPreviousSnapshot(outDir / str(skill.get("itemPath") or ""))
         if skill.get("revisionStatus") == "pendingReview" and previous:
             snapshot = dict(previous)
@@ -689,6 +716,11 @@ def writeMarketFiles(outDir: Path, payload: dict[str, Any]) -> None:
     }
     for name, data in files.items():
         (outDir / name).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    currentItemPaths = {str(item.get("itemPath") or "") for item in payload.get("items") or []}
+    for stalePath in itemDir.glob("*.json"):
+        rel = stalePath.relative_to(outDir).as_posix()
+        if rel not in currentItemPaths:
+            stalePath.unlink()
     for item in payload.get("items") or []:
         itemPath = outDir / str(item.get("itemPath") or "")
         if itemPath.parent != itemDir:
@@ -808,12 +840,22 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
         else "후속 댓글 검토 대기는 없습니다."
     )
     itemPath = skill.get("itemPath") or "아직 없습니다."
-    acceptedAt = skill.get("acceptedAt") or "아직 없습니다."
-    version = skill.get("version") or "draft"
+    hasAcceptedSnapshot = bool(skill.get("itemPath") and skill.get("acceptedAt"))
+    acceptedAt = skill.get("acceptedAt") if hasAcceptedSnapshot else "없습니다."
+    version = skill.get("version") if hasAcceptedSnapshot else "없습니다."
+    finalRule = (
+        "랜딩과 AI가 읽는 최종 스킬은 accepted item snapshot입니다."
+        if hasAcceptedSnapshot
+        else "아직 랜딩과 AI가 실행 후보로 읽을 최종 스킬 snapshot이 없습니다."
+    )
     nextAction = (
-        "새 댓글은 최종본을 바로 바꾸지 않습니다. maintainer 검토 뒤 `/market curated`로 다시 확정합니다."
-        if revisionStatus == "pendingReview"
-        else "최종본 변경이 필요하면 댓글로 보강한 뒤 maintainer가 `/market curated`로 다시 확정합니다."
+        "토론에서 입력, 출력, 데이터 소스, 실행 절차, 검증 기준을 더 채워야 합니다."
+        if not hasAcceptedSnapshot
+        else (
+            "새 댓글은 최종본을 바로 바꾸지 않습니다. maintainer 검토 뒤 `/market curated`로 다시 확정합니다."
+            if revisionStatus == "pendingReview"
+            else "최종본 변경이 필요하면 댓글로 보강한 뒤 maintainer가 `/market curated`로 다시 확정합니다."
+        )
     )
     body = f"""\
 ## DartLab Forge 상태판
@@ -832,7 +874,7 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
 
 ### 최종본 규칙
 - Discussion 본문과 댓글은 토론 기록입니다.
-- 랜딩과 AI가 읽는 최종 스킬은 accepted item snapshot입니다.
+- {finalRule}
 - 패키지 builtin Skill OS에는 포함하지 않습니다.
 
 ### 스킬 요약
@@ -882,7 +924,7 @@ def trustRank(tier: str) -> int:
 
 
 def normalizeText(text: str) -> str:
-    return text.replace("\r\n", "\n").strip()
+    return text.replace("\r\n", "\n").lstrip("\ufeff").strip()
 
 
 def splitItems(text: str) -> list[str]:

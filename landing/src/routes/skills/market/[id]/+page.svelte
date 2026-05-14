@@ -66,8 +66,11 @@
 	<section class="notice">
 		<ShieldAlert size={16} />
 		<span>
-			이 항목은 커뮤니티 Skill Market 자산이다. marketCurated 는 Skill Market 안에서 완성된 상태이며,
-			공식 builtin Skill OS 로 포함된다는 뜻이 아니다.
+			{#if skill.itemPath}
+				이 항목은 커뮤니티 Skill Market accepted snapshot 이다. 공식 builtin Skill OS 로 포함된다는 뜻이 아니다.
+			{:else}
+				이 항목은 아직 최종 스킬 snapshot 이 없는 커뮤니티 초안이다. 랜딩과 AI의 실행 후보로 취급하지 않는다.
+			{/if}
 			{#if skill.revisionStatus === 'pendingReview'}
 				후속 댓글 {skill.pendingCommentCount ?? 0}개는 검토 대기 중이며 현재 화면은 accepted item snapshot 기준 최종본이다.
 			{/if}
@@ -202,7 +205,7 @@
 					<h2>Pending Comments</h2>
 					<p class="muted">
 						후속 댓글은 자동으로 최종 스킬을 바꾸지 않는다. Maintainer가 revision draft를 검토하고 다시 상태를
-						확정해야 accepted item snapshot과 market index가 갱신된다.
+						승격해야 accepted item snapshot과 market index가 갱신된다.
 					</p>
 					<ul>
 						{#each (skill.pendingCommentUrls ?? []) as url}
