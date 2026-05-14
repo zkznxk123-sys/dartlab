@@ -1,12 +1,12 @@
 {
   "meta": {
     "schemaVersion": "1",
-    "generatedAt": "2026-05-14T01:48:38Z",
+    "generatedAt": "2026-05-14T02:05:44Z",
     "policy": "DartLab credit ledger, independent from GitHub repository contributors graph"
   },
   "skills": [
     {
-      "skillId": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "skillId": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "sourceUrl": "https://github.com/eddmpython/dartlab/discussions/31",
       "credits": {
         "originator": [

@@ -387,6 +387,7 @@ def mapBuiltinSkills(text: str) -> list[str]:
         (("cpi", "fomc", "금통위", "경제 이벤트", "서프라이즈"), "engines.macro.rates"),
         (("고용", "실업률", "침체확률"), "engines.macro.forecast"),
         (("섹터", "업종", "sector"), "recipes.macro.sectorRotation"),
+        (("시계열", "차트", "그래프", "time series"), "recipes.macro.timeSeriesChart"),
         (("퀀트", "팩터", "quant"), "engines.quant"),
         (("산업", "밸류체인", "industry"), "engines.industry"),
         (("공시", "disclosure", "filing"), "engines.search"),
@@ -396,7 +397,7 @@ def mapBuiltinSkills(text: str) -> list[str]:
     for terms, skillId in mapping:
         if any(term.lower() in lowered for term in terms):
             out.append(skillId)
-    return out[:6]
+    return out[:8]
 
 
 def inferTags(text: str) -> list[str]:
@@ -417,7 +418,7 @@ def inferTags(text: str) -> list[str]:
     ]:
         if key.lower() in lowered:
             tags.append(tag)
-    return tags[:6]
+    return dedupeClean(tags)[:6]
 
 
 def readModeratorState(comments: list[dict[str, Any]], curatorLogins: set[str]) -> dict[str, Any]:

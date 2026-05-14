@@ -3,22 +3,22 @@
     "schemaVersion": "1",
     "source": "github-discussions",
     "category": "Ideas:[Skill Market]",
-    "generatedAt": "2026-05-14T01:48:38Z",
+    "generatedAt": "2026-05-14T02:05:44Z",
     "skillCount": 1,
     "trustPolicy": "community market entries are untrusted until curated"
   },
   "skills": [
     {
-      "id": "market.skill-market-경제-이벤트-반응함수-스킬.31",
-      "title": "[Skill Market] 경제 이벤트 반응함수 스킬",
-      "summary": "이 스킬은 CPI, 고용, FOMC, 금통위 같은 경제 이벤트가 발표될 때 시장이 왜 그렇게 반응하는지 분석합니다.",
-      "intent": "이 스킬은 CPI, 고용, FOMC, 금통위 같은 경제 이벤트가 발표될 때 시장이 왜 그렇게 반응하는지 분석합니다.",
+      "id": "market.skill-market-경제-이벤트-반응함수-분석.31",
+      "title": "[Skill Market] 경제 이벤트 반응함수 분석",
+      "summary": "이 항목은 DartLab Skill Market의 완성형 커뮤니티 스킬 카드입니다.",
+      "intent": "이 항목은 DartLab Skill Market의 완성형 커뮤니티 스킬 카드입니다. 현재 목표 상태는 `marketCurated`입니다. 공식 builtin Skill OS가 아니라 커뮤니티 공유 자산입니다.",
       "inputs": [
         "국가/시장: US, KR",
         "이벤트: CPI, 고용, FOMC, 금통위, GDP, PMI 등",
         "발표치, 예상치, 직전치",
-        "발표 전후 금리, 환율, 주가지수, 섹터 수익률",
-        "분석 기간: 이벤트 전후 1일, 5일, 20일"
+        "발표 시각과 기준일",
+        "발표 전후 금리, 환율, 주가지수, 섹터 수익률"
       ],
       "outputs": [
         "지표 서프라이즈 방향과 크기",
@@ -31,38 +31,41 @@
         "발표치와 예상치의 차이를 surprise score로 정규화합니다.",
         "금리·환율·주식 반응은 이벤트 전후 윈도우를 고정해 비교합니다.",
         "중앙은행 반응은 물가, 고용, 성장, 금융여건을 함께 봅니다.",
-        "단일 이벤트 결론은 금지하고 과거 유사 이벤트 분포와 비교합니다."
+        "단일 이벤트 결론은 금지하고 과거 유사 이벤트 분포와 비교합니다.",
+        "consensus source가 없으면 `marketCurated` 실행 예시가 아니라 `marketRunnable` 후보로만 취급합니다."
       ],
       "examples": [
         "미국 CPI가 예상보다 높게 나오면 성장주와 원달러 환율은 어떻게 반응합니까?",
         "고용은 강한데 물가가 둔화되면 Fed는 어떤 선택을 할 가능성이 있습니까?",
         "금통위 전후로 은행주, 건설주, 성장주의 반응이 다릅니까?",
-        "이번 주 경제 이벤트 중 시장 변동성을 키울 만한 것은 무엇입니까?"
+        "이번 주 경제 이벤트 중 시장 변동성을 키울 만한 것은 무엇입니까?",
+        "한국 CPI와 원달러 환율 반응이 과거 평균보다 강합니까?"
       ],
       "tags": [
         "macro-event",
         "policy",
-        "policy",
         "surprise"
       ],
-      "state": "runnable",
-      "trustTier": "marketRunnable",
+      "state": "curated",
+      "trustTier": "marketCurated",
       "missingDetails": [],
       "warnings": [],
       "mappedBuiltinSkills": [
         "engines.analysis.growth",
         "engines.scan",
+        "engines.credit",
         "engines.macro",
         "engines.macro.rates",
         "engines.macro.forecast",
-        "recipes.macro.sectorRotation"
+        "recipes.macro.sectorRotation",
+        "recipes.macro.timeSeriesChart"
       ],
       "sourceType": "githubDiscussion",
       "sourceUrl": "https://github.com/eddmpython/dartlab/discussions/31",
       "discussionNumber": 31,
       "author": "eddmpython",
       "createdAt": "2026-05-13T14:41:09Z",
-      "updatedAt": "2026-05-14T01:48:24Z",
+      "updatedAt": "2026-05-14T02:04:52Z",
       "credits": {
         "originator": [
           "eddmpython"

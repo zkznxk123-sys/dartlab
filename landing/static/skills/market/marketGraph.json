@@ -1,15 +1,15 @@
 {
   "meta": {
     "schemaVersion": "1",
-    "generatedAt": "2026-05-14T01:48:38Z"
+    "generatedAt": "2026-05-14T02:05:44Z"
   },
   "nodes": [
     {
-      "id": "market.skill-market-경제-이벤트-반응함수-스킬.31",
-      "title": "[Skill Market] 경제 이벤트 반응함수 스킬",
+      "id": "market.skill-market-경제-이벤트-반응함수-분석.31",
+      "title": "[Skill Market] 경제 이벤트 반응함수 분석",
       "kind": "marketSkill",
-      "trustTier": "marketRunnable",
-      "state": "runnable"
+      "trustTier": "marketCurated",
+      "state": "curated"
     },
     {
       "id": "engines.analysis.growth",
@@ -19,6 +19,11 @@
     {
       "id": "engines.scan",
       "title": "engines.scan",
+      "kind": "builtinSkill"
+    },
+    {
+      "id": "engines.credit",
+      "title": "engines.credit",
       "kind": "builtinSkill"
     },
     {
@@ -40,37 +45,52 @@
       "id": "recipes.macro.sectorRotation",
       "title": "recipes.macro.sectorRotation",
       "kind": "builtinSkill"
+    },
+    {
+      "id": "recipes.macro.timeSeriesChart",
+      "title": "recipes.macro.timeSeriesChart",
+      "kind": "builtinSkill"
     }
   ],
   "edges": [
     {
-      "src": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "engines.analysis.growth",
       "kind": "mapsToBuiltin"
     },
     {
-      "src": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "engines.scan",
       "kind": "mapsToBuiltin"
     },
     {
-      "src": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
+      "dst": "engines.credit",
+      "kind": "mapsToBuiltin"
+    },
+    {
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "engines.macro",
       "kind": "mapsToBuiltin"
     },
     {
-      "src": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "engines.macro.rates",
       "kind": "mapsToBuiltin"
     },
     {
-      "src": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "engines.macro.forecast",
       "kind": "mapsToBuiltin"
     },
     {
-      "src": "market.skill-market-경제-이벤트-반응함수-스킬.31",
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "recipes.macro.sectorRotation",
+      "kind": "mapsToBuiltin"
+    },
+    {
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
+      "dst": "recipes.macro.timeSeriesChart",
       "kind": "mapsToBuiltin"
     }
   ]
