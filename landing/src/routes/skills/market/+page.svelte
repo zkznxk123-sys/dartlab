@@ -27,6 +27,8 @@
 			return tierOk && marketSkillMatches(skill, query);
 		})
 	);
+	const acceptedCount = $derived(skills.filter((skill) => skill.itemPath).length);
+	const draftCount = $derived(skills.length - acceptedCount);
 
 	function countTier(tier: string): number {
 		return skills.filter((skill) => displayTier(skill) === tier).length;
@@ -111,6 +113,14 @@
 			<span>Count</span>
 			<strong>{market.meta?.skillCount ?? skills.length}</strong>
 		</div>
+		<div>
+			<span>Accepted</span>
+			<strong>{acceptedCount}</strong>
+		</div>
+		<div>
+			<span>Draft</span>
+			<strong>{draftCount}</strong>
+		</div>
 	</section>
 
 	{#if visibleSkills.length === 0}
@@ -121,10 +131,10 @@
 	{:else}
 		<section class="grid" aria-label="Market skills">
 			{#each visibleSkills as skill}
-				<a class="skill-card" href="{base}/skills/market/{skill.id}">
+				<a class="skill-card" class:draft={!skill.itemPath} href="{base}/skills/market/{skill.id}">
 					<div class="card-head">
 						<span class="tier">{displayTier(skill)}</span>
-						<span class="author">@{skill.author ?? 'unknown'}</span>
+						<span class="author">{skill.itemPath ? 'accepted snapshot' : 'discussion draft'} · @{skill.author ?? 'unknown'}</span>
 					</div>
 					<h2>{skill.title}</h2>
 					<p>{skill.summary ?? skill.intent}</p>
@@ -134,7 +144,7 @@
 						{/each}
 					</div>
 					<div class="card-foot">
-						<span>{skill.missingDetails?.length ? '보완 필요' : '구조화 완료'}</span>
+						<span>{skill.itemPath ? 'Skill Market snapshot' : '아직 실행 후보 아님'}</span>
 						<ArrowRight size={14} />
 					</div>
 				</a>
@@ -294,7 +304,7 @@
 
 	.meta-strip {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(5, 1fr);
 		gap: 0.75rem;
 		margin-bottom: 1.1rem;
 	}
@@ -335,6 +345,11 @@
 		background: var(--dl-bg-raised);
 		color: inherit;
 		text-decoration: none;
+	}
+
+	.skill-card.draft {
+		border-style: dashed;
+		background: rgba(255, 255, 255, 0.025);
 	}
 
 	.card-head,

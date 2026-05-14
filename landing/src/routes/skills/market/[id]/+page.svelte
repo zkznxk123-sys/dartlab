@@ -101,9 +101,9 @@
 					<dt>Updated</dt>
 					<dd>{skill.updatedAt ?? 'unknown'}</dd>
 					<dt>Accepted</dt>
-					<dd>{skill.acceptedAt ?? 'unknown'}{skill.version ? ` · v${skill.version}` : ''}</dd>
+					<dd>{skill.acceptedAt ? `${skill.acceptedAt}${skill.version ? ` · v${skill.version}` : ''}` : 'snapshot 없음'}</dd>
 					<dt>Canonical</dt>
-					<dd>{skill.canonicalSource ?? 'marketItemSnapshot'} · {skill.itemPath ?? 'unknown'}</dd>
+					<dd>{skill.canonicalSource ?? 'githubDiscussion'} · {skill.itemPath ?? 'Discussion draft'}</dd>
 					<dt>Revision</dt>
 					<dd>{skill.revisionStatus ?? 'current'}{skill.pendingCommentCount ? ` · pending ${skill.pendingCommentCount}` : ''}</dd>
 					<dt>Discussion</dt>

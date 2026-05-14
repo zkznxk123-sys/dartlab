@@ -3,7 +3,7 @@
     "schemaVersion": "1",
     "source": "github-discussions",
     "category": "Ideas:[Skill Market]",
-    "generatedAt": "2026-05-14T06:07:25Z",
+    "generatedAt": "2026-05-14T09:01:28Z",
     "skillCount": 1,
     "trustPolicy": "community market entries are untrusted until curated"
   },
@@ -70,6 +70,10 @@
       ],
       "state": "specified",
       "trustTier": "marketDraft",
+      "requestedState": null,
+      "acceptanceAccepted": false,
+      "commandRejected": false,
+      "snapshotEligible": false,
       "missingDetails": [
         "DartLab 엔진별 executionPlan",
         "예시 입력과 기대 출력",
@@ -93,6 +97,7 @@
       ],
       "canonicalSource": "githubDiscussion",
       "itemPath": null,
+      "candidateItemPath": "items/market.skill-market-경제-이벤트-반응함수-분석.31.json",
       "acceptedAt": null,
       "canonicalUpdatedAt": "2026-05-14T04:41:03Z",
       "finalizedAt": "2026-05-14T04:41:03Z",

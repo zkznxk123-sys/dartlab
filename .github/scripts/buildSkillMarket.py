@@ -27,7 +27,8 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "landing" / "static" / "skills" / "market"
 FORGE_MARKER = "<!-- dartlab-skill-market-forge -->"
 BOT_LOGINS = {"github-actions[bot]", "dependabot[bot]"}
-ACCEPTED_SNAPSHOT_STATES = {"curated", "builtin-candidate"}
+ACCEPTED_SNAPSHOT_STATES = {"runnable", "curated", "builtin-candidate"}
+ACCEPT_COMMAND_STATES = {"runnable", "curated", "builtin-candidate"}
 BLOCK_PATTERNS = (
     "ignore previous instructions",
     "이전 지시",
@@ -238,14 +239,27 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
     originator = ((discussion.get("author") or {}).get("login")) or "unknown"
     parsed = parseSkillText(title, body)
     moderation = readModeratorState(comments, curatorLogins)
-    state = moderation.get("state") or parsed["state"]
-    trustTier = moderation.get("trustTier") or trustTierForState(state, parsed)
+    requestedState = moderation.get("state")
+    acceptanceAccepted = bool(requestedState in ACCEPT_COMMAND_STATES and not parsed["missingDetails"])
+    state = requestedState if acceptanceAccepted or requestedState == "blocked" else parsed["state"]
+    trustTier = (
+        moderation.get("trustTier")
+        if acceptanceAccepted or requestedState == "blocked"
+        else trustTierForState(state, parsed)
+    )
     revision = revisionState(discussion, comments, moderation)
     itemId = f"market.{stableSlug(title)}.{discussion.get('number')}"
     itemPath = f"items/{itemId}.json"
-    hasAcceptedSnapshot = (
-        state in ACCEPTED_SNAPSHOT_STATES and bool(revision["acceptedAt"]) and not parsed["missingDetails"]
-    )
+    hasAcceptedSnapshot = state in ACCEPTED_SNAPSHOT_STATES and acceptanceAccepted and bool(revision["acceptedAt"])
+    commandRejected = bool(requestedState and requestedState != "blocked" and not acceptanceAccepted)
+    missingDetails = list(parsed["missingDetails"])
+    if commandRejected:
+        missingDetails = dedupeClean(
+            [
+                *missingDetails,
+                f"/market {requestedState} 확정은 최종 스킬 조건을 충족한 뒤에만 반영됩니다.",
+            ]
+        )
     reviewers = sorted(
         {
             ((comment.get("author") or {}).get("login"))
@@ -273,11 +287,16 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
         "tags": parsed["tags"],
         "state": state,
         "trustTier": trustTier,
-        "missingDetails": parsed["missingDetails"],
+        "requestedState": requestedState,
+        "acceptanceAccepted": acceptanceAccepted,
+        "commandRejected": commandRejected,
+        "snapshotEligible": hasAcceptedSnapshot,
+        "missingDetails": missingDetails,
         "warnings": parsed["warnings"],
         "mappedBuiltinSkills": parsed["mappedBuiltinSkills"],
         "canonicalSource": "marketItemSnapshot" if hasAcceptedSnapshot else "githubDiscussion",
         "itemPath": itemPath if hasAcceptedSnapshot else None,
+        "candidateItemPath": itemPath,
         "acceptedAt": revision["acceptedAt"] if hasAcceptedSnapshot else None,
         "canonicalUpdatedAt": revision["canonicalUpdatedAt"],
         "finalizedAt": revision["finalizedAt"],
@@ -323,10 +342,6 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
     if not criteria:
         criteria = inferCriteria(text)
     mappedBuiltinSkills = mapBuiltinSkills(f"{title}\n{text}")
-    if not hasExecutablePlan(executionPlan):
-        executionPlan = inferExecutionPlan(mappedBuiltinSkills, outputs, criteria)
-    if not examples:
-        examples = inferExamples(title, inputs, outputs, criteria)
     explicitMissingDetails = extractList(text, ("보완 필요", "남은 질문", "needs detail", "missing details"))
     warnings = [pattern for pattern in BLOCK_PATTERNS if pattern.lower() in text.lower()]
     missingDetails: list[str] = []
@@ -450,28 +465,6 @@ def hasExecutablePlan(executionPlan: list[dict[str, Any]]) -> bool:
     return any(step.get("engine") for step in executionPlan)
 
 
-def inferExecutionPlan(
-    mappedBuiltinSkills: list[str],
-    outputs: list[str],
-    criteria: list[str],
-) -> list[dict[str, Any]]:
-    if not mappedBuiltinSkills:
-        return []
-    purposeBits = [*outputs[:3], *criteria[:1]]
-    purpose = " / ".join(purposeBits) if purposeBits else "discussion criteria"
-    return [
-        {
-            "step": index,
-            "engine": engine,
-            "purpose": f"{purpose} 산출",
-            "inputs": [],
-            "outputs": outputs[:4],
-            "failureMode": None,
-        }
-        for index, engine in enumerate(mappedBuiltinSkills[:4], start=1)
-    ]
-
-
 def inferInputs(text: str) -> list[str]:
     found: list[str] = []
     if any(term in text for term in ("회사", "종목", "티커", "stock", "company")):
@@ -521,12 +514,6 @@ def inferCriteria(text: str) -> list[str]:
         if any(term in line for term in ("이상", "이하", "미만", "초과", "배", "%", "warning", "위험")):
             candidates.append(line.strip(" -*"))
     return dedupeClean(candidates)[:6]
-
-
-def inferExamples(title: str, inputs: list[str], outputs: list[str], criteria: list[str]) -> list[str]:
-    if not (inputs and outputs and criteria):
-        return []
-    return [(f"{title}: inputs={', '.join(inputs[:3])} -> outputs={', '.join(outputs[:3])}; criteria={criteria[0]}")]
 
 
 def mapBuiltinSkills(text: str) -> list[str]:
@@ -714,8 +701,18 @@ def prepareMarketSnapshots(
     indexed: list[dict[str, Any]] = []
     snapshots: list[dict[str, Any]] = []
     for skill in skills:
-        if not skill.get("itemPath"):
-            indexed.append(skill)
+        candidateItemPath = str(skill.get("candidateItemPath") or skill.get("itemPath") or "")
+        previous = readPreviousSnapshot(outDir / candidateItemPath) if candidateItemPath else None
+        if not skill.get("snapshotEligible"):
+            if previous and skill.get("revisionStatus") == "pendingReview":
+                snapshot = dict(previous)
+                for key in REVISION_FIELDS:
+                    snapshot[key] = skill.get(key)
+                snapshot["sourceDiscussionUpdatedAt"] = skill.get("updatedAt")
+                indexed.append(snapshot)
+                snapshots.append(snapshot)
+            else:
+                indexed.append(skill)
             continue
         previous = readPreviousSnapshot(outDir / str(skill.get("itemPath") or ""))
         if skill.get("revisionStatus") == "pendingReview" and previous:
@@ -903,6 +900,37 @@ def markdownExecutionPlan(values: list[dict[str, Any]], *, limit: int = 5) -> st
     return "\n".join(lines)
 
 
+def markdownNextWork(skill: dict[str, Any]) -> str:
+    if skill.get("commandRejected"):
+        requested = skill.get("requestedState") or "requested"
+        return "\n".join(
+            [
+                f"- `/market {requested}` 명령은 기록됐지만 최종 조건 미달이라 snapshot으로 반영하지 않았습니다.",
+                "- 먼저 Caller Audit으로 실제 DartLab caller와 입력 파라미터를 확인합니다.",
+                "- 확인한 caller로 `DartLab 실행 계획` 섹션을 작성합니다.",
+                "- 예시 입력, 기대 출력, 실패 조건, ref payload를 채운 뒤 다시 `/market runnable` 또는 `/market curated`로 확정합니다.",
+            ]
+        )
+    if not skill.get("itemPath"):
+        return "\n".join(
+            [
+                "- Caller Audit으로 실제 DartLab caller와 입력 파라미터를 확인합니다.",
+                "- `DartLab 실행 계획`에 caller 호출 순서, 입력, 출력, 실패 조건을 적습니다.",
+                "- 예시 입력 1개와 기대 출력 1개를 Discussion 본문에 추가합니다.",
+                "- 위 조건이 채워진 뒤 maintainer가 `/market runnable` 또는 `/market curated`로 현재 revision을 snapshot으로 확정합니다.",
+            ]
+        )
+    if skill.get("revisionStatus") == "pendingReview":
+        return "\n".join(
+            [
+                "- 기존 accepted snapshot은 그대로 유지합니다.",
+                "- 후속 댓글을 반영할지 토론합니다.",
+                "- 변경된 executionPlan과 예시 출력이 검토되면 maintainer가 `/market curated`로 다음 snapshot을 확정합니다.",
+            ]
+        )
+    return "- 최종본 변경이 필요하면 댓글로 보강한 뒤 maintainer가 `/market curated`로 다음 snapshot을 확정합니다."
+
+
 def forgeCommentBody(skill: dict[str, Any]) -> str:
     missing = skill.get("missingDetails") or []
     missingText = markdownInline(missing, emptyText="없습니다.", limit=8)
@@ -932,15 +960,7 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
         if hasAcceptedSnapshot
         else "아직 랜딩과 AI가 실행 후보로 읽을 최종 스킬 snapshot이 없습니다."
     )
-    nextAction = (
-        "토론에서 입력, 출력, 데이터 소스, 실행 절차, 검증 기준을 더 채워야 합니다."
-        if not hasAcceptedSnapshot
-        else (
-            "새 댓글은 최종본을 바로 바꾸지 않습니다. maintainer 검토 뒤 `/market curated`로 다시 확정합니다."
-            if revisionStatus == "pendingReview"
-            else "최종본 변경이 필요하면 댓글로 보강한 뒤 maintainer가 `/market curated`로 다시 확정합니다."
-        )
-    )
+    nextAction = markdownNextWork(skill)
     body = f"""\
 ## DartLab Forge 상태판
 
@@ -977,8 +997,8 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
 **완료 기준**
 {completionCriteria}
 
-### 다음 액션
-- {nextAction}
+### 다음 작업
+{nextAction}
 """
     return f"{FORGE_MARKER}\n{body.strip()}"
 
