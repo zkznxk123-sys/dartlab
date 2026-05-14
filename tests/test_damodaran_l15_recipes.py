@@ -302,6 +302,19 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
     assert {gap["status"] for gap in system["gapLedger"]} <= allowed_gap_status
     filled_gap_ids = {gap["id"] for gap in system["gapLedger"] if gap["status"] == "filled"}
     assert {"lifeCycleClassifier", "accountTraceAudit", "growthFeasibility"} <= filled_gap_ids
+    engine_backlog = system["engineSupplementBacklog"]
+    assert len(engine_backlog) >= 5
+    assert {item["id"] for item in engine_backlog} >= {
+        "storyboardSchemaBridge",
+        "valuationMemoAdapter",
+        "nonGenericFcffModelRouter",
+        "industryPeerValuationPrimitive",
+        "assumptionProvenanceSurface",
+    }
+    for item in engine_backlog:
+        assert item["engineArea"]
+        assert item["requiredBeforeEngineWork"]
+        assert item["doNotImplementInSkillPhase"] is True
     assert system["dataContract"]["financialStatements"]["minimumPanelYears"] >= 5
     assert "peerValuation" in system["dataContract"]
 
@@ -314,6 +327,8 @@ def testDamodaranIndexIsEntrySkillForAnalysisSystem() -> None:
     assert "Business Life Cycle" in index_text
     assert "Financial Normalization" in index_text
     assert "Reverse DCF" in index_text
+    assert "engineSupplementBacklog" in index_text
+    assert "엔진 보강 후보" in index_text
     for skill_id in DAMODARAN_IDS - {"recipes.valuation.damodaran.index"}:
         assert skill_id in index_text
 

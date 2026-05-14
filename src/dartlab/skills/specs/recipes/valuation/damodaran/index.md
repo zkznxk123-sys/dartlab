@@ -139,6 +139,17 @@ gap_rows = [
     }
     for idx, gap in enumerate(system["gapLedger"], start=1)
 ]
+engine_rows = [
+    {
+        "order": 200 + idx,
+        "concept": item["id"],
+        "status": item["status"],
+        "implementedSkills": None,
+        "plannedSkills": len(item["requiredBeforeEngineWork"]),
+        "gapCount": 1,
+    }
+    for idx, item in enumerate(system["engineSupplementBacklog"], start=1)
+]
 sources = [
     {
         "id": "damodaranAnalysisSystemContract",
@@ -154,7 +165,7 @@ route_score = 0.0 if target == "138930" else system["readiness"]["decisionScore"
 route_status = "financialFirmRouteBlocked" if target == "138930" else system["readiness"]["status"]
 
 emit_result(
-    table=concept_rows + gap_rows,
+    table=concept_rows + gap_rows + engine_rows,
     values={
         "decisionScore": route_score,
         "target": target,
@@ -162,6 +173,7 @@ emit_result(
         "entrySkill": system["skillTree"]["entrySkill"],
         "executableSkillCount": len(system["skillTree"]["currentExecutablePath"]),
         "gapCount": len(system["gapLedger"]),
+        "engineSupplementCount": len(system["engineSupplementBacklog"]),
     },
     date=system["_meta"]["asOfDate"],
     units={"decisionScore": "score"},
@@ -206,7 +218,17 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 
 ## 대표 반환 형태
 
-`damodaranAnalysisSystem : dict` — `concepts`, `skillTree`, `dataContract`, `gapLedger`, `completionGates`, `readiness`를 담는다.
+`damodaranAnalysisSystem : dict` — `concepts`, `skillTree`, `dataContract`, `gapLedger`, `engineSupplementBacklog`, `completionGates`, `readiness`를 담는다.
+
+## 엔진 보강 후보
+
+스킬 안정화 전에는 엔진을 손대지 않는다. 현재 엔진 보강 후보는 `damodaranAnalysisSystem.json`의 `engineSupplementBacklog`에 고정한다.
+
+1. `storyboardSchemaBridge` - `deepDive.storyboardReady`를 Story 엔진 schema로 연결.
+2. `valuationMemoAdapter` - L1.5 memo를 valuation 엔진의 provenance-rich 입력으로 소비.
+3. `nonGenericFcffModelRouter` - 금융업, 지주, distress, 원자재, 순환주 모델 라우팅.
+4. `industryPeerValuationPrimitive` - peer universe와 comparable multiple primitive 보강.
+5. `assumptionProvenanceSurface` - source trace, fallback reason, confidence, falsifier status를 API/UI/Story 표면에 노출.
 
 ## 연계 절차
 
@@ -228,5 +250,6 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 - `damodaranAnalysisSystem.json`의 개념 트리는 10개 축을 모두 포함해야 한다.
 - 모든 concept는 구현 스킬, 계획 스킬, 데이터 요구사항, gap id를 가져야 한다.
 - 모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 분류되어야 한다.
+- 엔진 보강 후보는 `engineSupplementBacklog`에 남기되, 스킬 phase에서는 `doNotImplementInSkillPhase`를 유지해야 한다.
 - 12개 실행 recipe는 5개 고정 타깃에서 `ValidateRecipe` evidence completeness 1.00을 통과해야 한다.
 - `strict-l0-l15` guard 통과 전에는 complete 선언 금지.

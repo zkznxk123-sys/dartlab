@@ -419,6 +419,69 @@
       "status": "deferredWithBlocker"
     }
   },
+  "engineSupplementBacklog": [
+    {
+      "id": "storyboardSchemaBridge",
+      "engineArea": "story",
+      "status": "deferredUntilSkillVerified",
+      "whyEngineNeedsIt": "deepDive already emits storyboardReady draft, but the story engine needs a stable schema adapter before it can render valuation narratives.",
+      "requiredBeforeEngineWork": [
+        "recipes.valuation.damodaran.deepDive evidenceCompleteness 1.00",
+        "operator promotion to verified",
+        "storyboardReady schema fixture for KR and US nonfinancial targets"
+      ],
+      "doNotImplementInSkillPhase": true
+    },
+    {
+      "id": "valuationMemoAdapter",
+      "engineArea": "valuation",
+      "status": "deferredUntilSkillVerified",
+      "whyEngineNeedsIt": "The valuation engine should consume the L1.5 memo as a provenance-rich input instead of recomputing assumptions from L2 shortcuts.",
+      "requiredBeforeEngineWork": [
+        "stable damodaranMemo contract",
+        "confidence and fallback reason fields for every major assumption",
+        "KR and US full-path regression fixtures"
+      ],
+      "doNotImplementInSkillPhase": true
+    },
+    {
+      "id": "nonGenericFcffModelRouter",
+      "engineArea": "valuation",
+      "status": "deferredWithBlocker",
+      "whyEngineNeedsIt": "Financial firms, holding companies, distress cases, commodities, and deep cyclicals need explicit model routing instead of generic FCFF.",
+      "requiredBeforeEngineWork": [
+        "financialFirmExcessReturn skill",
+        "sumOfParts skill",
+        "distressAdjustedDcf skill",
+        "cyclicalNormalizer skill"
+      ],
+      "doNotImplementInSkillPhase": true
+    },
+    {
+      "id": "industryPeerValuationPrimitive",
+      "engineArea": "scan/reference before valuation engine",
+      "status": "deferredWithBlocker",
+      "whyEngineNeedsIt": "relativeCheck is currently a sanity check; engine-grade peer valuation needs a stable peer universe and comparable multiples.",
+      "requiredBeforeEngineWork": [
+        "US peer valuation primitive",
+        "KR and US peer universe mapping",
+        "EV/Sales, EV/EBIT, PE, PB, growth, margin, and risk fields"
+      ],
+      "doNotImplementInSkillPhase": true
+    },
+    {
+      "id": "assumptionProvenanceSurface",
+      "engineArea": "API/UI/story",
+      "status": "deferredUntilSkillVerified",
+      "whyEngineNeedsIt": "End-user outputs need to show source trace, fallback reason, confidence, and falsifier status for each valuation assumption.",
+      "requiredBeforeEngineWork": [
+        "accountTraceAudit stable table",
+        "gapLedger stable status vocabulary",
+        "confidence field coverage across costOfCapital, fcffDcf, and scenarioFalsifier"
+      ],
+      "doNotImplementInSkillPhase": true
+    }
+  ],
   "gapLedger": [
     {
       "id": "lifeCycleClassifier",
