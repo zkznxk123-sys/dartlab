@@ -85,6 +85,53 @@ def testDamodaranRecipeSpecsLoadAsUnverifiedRecipes() -> None:
         assert spec.linkedSkills or "## 연계 절차" in spec.source.get("body", "")
 
 
+def testDamodaranSkillsAreExposedThroughAiEntryPoints() -> None:
+    from dartlab.ai.tools.readSkill import getSkillBody, readSkill
+
+    entry = readSkill("다모다란 분석 최초 진입점 L1 L1.5", limit=6, includeUser=False)
+    narrative = readSkill("Damodaran narrative and numbers story drivers", limit=6, includeUser=False)
+    financial = readSkill("금융업 은행 보험 Damodaran excess return 가치평가", limit=6, includeUser=False)
+    peer = readSkill("peer multiple decomposition 다모다란 상대가치", limit=6, includeUser=False)
+
+    assert entry.ok
+    assert entry.data["skills"][0]["id"] == "recipes.valuation.damodaran.index"
+    assert narrative.ok
+    assert narrative.data["skills"][0]["id"] == "recipes.valuation.damodaran.storyToDrivers"
+    assert financial.ok
+    assert financial.data["skills"][0]["id"] == "recipes.valuation.damodaran.financialFirmExcessReturn"
+    assert peer.ok
+    assert peer.data["skills"][0]["id"] == "recipes.valuation.damodaran.peerMultipleDecomposition"
+
+    body = getSkillBody("recipes.valuation.damodaran.deepDive", includeUser=False)
+    assert body.ok
+    raw = body.data["body"]
+    assert "recipes.valuation.damodaran.storyToDrivers" in raw
+    assert "recipes.valuation.damodaran.distressAdjustedDcf" in raw
+
+
+def testDamodaranSkillsAreInPublicSkillArtifacts() -> None:
+    artifact_dir = REPO_ROOT / "src" / "dartlab" / "skills"
+
+    for name in ("index.json", "agent.json", "web.json", "mcp.json", "pyodide.json"):
+        payload = json.loads((artifact_dir / name).read_text(encoding="utf-8"))
+        rows = payload.get("skills", [])
+        by_id = {row["id"]: row for row in rows}
+
+        assert DAMODARAN_IDS <= set(by_id), f"{name} missing Damodaran skill rows"
+        if name != "pyodide.json":
+            assert payload["meta"]["skillCount"] == len(rows)
+            recipe_meta = [row for row in payload["meta"]["categories"] if row["id"] == "recipes"]
+            assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
+        if name in {"index.json", "agent.json", "mcp.json"}:
+            assert by_id["recipes.valuation.damodaran.index"]["bodyPreview"]
+        if name == "web.json":
+            assert by_id["recipes.valuation.damodaran.index"]["bodyHuman"]
+
+    graph = json.loads((artifact_dir / "graph.json").read_text(encoding="utf-8"))
+    graph_ids = {node["id"] for node in graph.get("nodes", [])}
+    assert DAMODARAN_IDS <= graph_ids
+
+
 def testDamodaranPublicCallBlocksStayBelowL2() -> None:
     failures: list[str] = []
     for path in sorted(DAMODARAN_DIR.glob("*.md")):
