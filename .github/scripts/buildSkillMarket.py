@@ -20,6 +20,7 @@ import sys
 import textwrap
 import urllib.error
 import urllib.request
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -768,56 +769,89 @@ def findForgeCommentId(client: GraphqlClient, discussionId: str) -> str | None:
     return None
 
 
+def markdownBullets(values: list[Any], *, emptyText: str, limit: int = 5) -> str:
+    clean = dedupeClean(str(value).strip() for value in values if str(value).strip())
+    if not clean:
+        return f"- {emptyText}"
+    lines = [f"- {value}" for value in clean[:limit]]
+    if len(clean) > limit:
+        lines.append(f"- 외 {len(clean) - limit}개")
+    return "\n".join(lines)
+
+
+def markdownInline(values: list[Any], *, emptyText: str, limit: int = 6) -> str:
+    clean = dedupeClean(str(value).strip() for value in values if str(value).strip())
+    if not clean:
+        return emptyText
+    shown = clean[:limit]
+    suffix = f", 외 {len(clean) - limit}개" if len(clean) > limit else ""
+    return ", ".join(f"`{value}`" for value in shown) + suffix
+
+
 def forgeCommentBody(skill: dict[str, Any]) -> str:
     missing = skill.get("missingDetails") or []
-    missingText = ", ".join(missing) if missing else "없습니다."
-    mapped = ", ".join(skill.get("mappedBuiltinSkills") or []) or "없습니다."
-    inputs = ", ".join(skill.get("inputs") or []) or "정해지지 않았습니다."
-    dataSources = ", ".join(skill.get("dataSources") or []) or "정해지지 않았습니다."
-    procedure = ", ".join(skill.get("procedure") or []) or "정해지지 않았습니다."
-    outputs = ", ".join(skill.get("outputs") or []) or "정해지지 않았습니다."
-    outputSchema = ", ".join(skill.get("outputSchema") or []) or "정해지지 않았습니다."
-    criteria = ", ".join(skill.get("criteria") or []) or "정해지지 않았습니다."
-    forbidden = ", ".join(skill.get("forbidden") or []) or "정해지지 않았습니다."
-    completionCriteria = ", ".join(skill.get("completionCriteria") or []) or "정해지지 않았습니다."
+    missingText = markdownInline(missing, emptyText="없습니다.", limit=8)
+    mapped = markdownInline(skill.get("mappedBuiltinSkills") or [], emptyText="없습니다.", limit=5)
+    inputs = markdownBullets(skill.get("inputs") or [], emptyText="정해지지 않았습니다.", limit=5)
+    outputs = markdownBullets(skill.get("outputs") or [], emptyText="정해지지 않았습니다.", limit=5)
+    criteria = markdownBullets(skill.get("criteria") or [], emptyText="정해지지 않았습니다.", limit=4)
+    completionCriteria = markdownBullets(
+        skill.get("completionCriteria") or [],
+        emptyText="정해지지 않았습니다.",
+        limit=4,
+    )
     revisionStatus = str(skill.get("revisionStatus") or "current")
     pendingCount = int(skill.get("pendingCommentCount") or 0)
     revisionText = (
-        f"후속 댓글 {pendingCount}개가 검토 대기 중입니다. 최종 스킬은 기존 accepted item snapshot 기준입니다."
+        f"후속 댓글 {pendingCount}개가 검토 대기 중입니다."
         if revisionStatus == "pendingReview"
-        else "후속 댓글 검토 대기는 없습니다. 최종 스킬은 accepted item snapshot 기준입니다."
+        else "후속 댓글 검토 대기는 없습니다."
     )
-    completeText = (
-        "Skill Market 안에서 완성된 공유스킬입니다. 패키지 builtin Skill OS 에 포함하지 않습니다."
-        if skill.get("trustTier") == "marketCurated" and not missing
-        else "아직 Skill Market 완성 상태가 아닙니다."
+    itemPath = skill.get("itemPath") or "아직 없습니다."
+    acceptedAt = skill.get("acceptedAt") or "아직 없습니다."
+    version = skill.get("version") or "draft"
+    nextAction = (
+        "새 댓글은 최종본을 바로 바꾸지 않습니다. maintainer 검토 뒤 `/market curated`로 다시 확정합니다."
+        if revisionStatus == "pendingReview"
+        else "최종본 변경이 필요하면 댓글로 보강한 뒤 maintainer가 `/market curated`로 다시 확정합니다."
     )
-    return textwrap.dedent(
-        f"""\
-        {FORGE_MARKER}
-        **DartLab Forge 자동 초안**
+    body = f"""\
+## DartLab Forge 상태판
 
-        이 댓글은 커뮤니티 Skill Market 후보를 자동 구조화한 초안입니다. 공식 Skill OS 승인이나 curated 판정이 아닙니다.
-        {completeText}
+이 댓글은 Skill Market 자동 상태판입니다. 공식 builtin Skill OS 승인이 아닙니다.
 
-        - 상태: `{skill.get("state")}`
-        - trust tier: `{skill.get("trustTier")}`
-        - 추정 의도: {skill.get("intent")}
-        - 입력 후보: {inputs}
-        - 데이터 소스: {dataSources}
-        - 실행 절차: {procedure}
-        - 출력 후보: {outputs}
-        - 출력 스키마: {outputSchema}
-        - 판단 기준: {criteria}
-        - 금지와 한계: {forbidden}
-        - 완료 기준: {completionCriteria}
-        - revision status: `{revisionStatus}` — {revisionText}
-        - 매핑된 builtin skill: {mapped}
-        - 보완 필요: {missingText}
+### 현재 상태
+- 상태: `{skill.get("state")}`
+- trust tier: `{skill.get("trustTier")}`
+- revision status: `{revisionStatus}` - {revisionText}
+- accepted snapshot: `{version}`
+- accepted at: `{acceptedAt}`
+- snapshot path: `{itemPath}`
+- 보완 필요: {missingText}
+- 매핑된 builtin skill: {mapped}
 
-        작성자와 커뮤니티는 댓글로 입력, 출력, 판단 기준, 예시를 보완할 수 있습니다. 후속 댓글은 곧바로 최종 스킬을 바꾸지 않으며, maintainer가 revision draft를 검토하고 `/market curated`, `/market runnable`, `/market builtin-candidate`, `/market blocked` 명령으로 accepted item snapshot을 확정합니다.
-        """
-    ).strip()
+### 최종본 규칙
+- Discussion 본문과 댓글은 토론 기록입니다.
+- 랜딩과 AI가 읽는 최종 스킬은 accepted item snapshot입니다.
+- 패키지 builtin Skill OS에는 포함하지 않습니다.
+
+### 스킬 요약
+**입력**
+{inputs}
+
+**출력**
+{outputs}
+
+**판단 기준**
+{criteria}
+
+**완료 기준**
+{completionCriteria}
+
+### 다음 액션
+- {nextAction}
+"""
+    return f"{FORGE_MARKER}\n{body.strip()}"
 
 
 def loadEventDiscussion() -> dict[str, Any] | None:
@@ -855,7 +889,7 @@ def splitItems(text: str) -> list[str]:
     return [item.strip(" ,;") for item in re.split(r"[,;/]| · |ㆍ", text) if item.strip(" ,;")]
 
 
-def dedupeClean(values: list[str]) -> list[str]:
+def dedupeClean(values: Iterable[str]) -> list[str]:
     out: list[str] = []
     for value in values:
         clean = re.sub(r"\s+", " ", value).strip(" -*")
