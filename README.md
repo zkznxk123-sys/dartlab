@@ -707,6 +707,7 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 | **테스트 직렬화 강제 (Polars OOM 가드)** | `pytest -v` 전체 호출 금지. `scripts/dev/test-lock.sh tests/ -m "<marker>"` 경유 | Company 1개 ≈ 200~500 MB Rust 힙은 `gc.collect()` 회수 불가. CI 와 로컬을 같은 lock wrapper 명령으로 통일. |
 | **메시지 한국어 우선, API 영어** | `Company`, `pastInsight`, `analysis` 등 symbol 은 영어. CLI 에러·진행 메시지는 한국어 | classifier 에 `Natural Language :: Korean / English` 둘 다 선언. PyPI 영어 사용자 대상 영문 진입은 [README_EN.md](README_EN.md) 와 영문 docstring 으로 별도 트랙. |
 | **단일 SSOT — Skill OS** | 외부 LLM·사용자가 `capabilities()` 한 줄로 304 specs 카탈로그 질의 | 코드·문서·계약을 같은 파일 (`src/dartlab/skills/specs/**`) 로 운영. README ↔ docs ↔ 코드 drift 를 SSOT 한 곳에서 방지. |
+| **부채 시계열 공개** | `uv run python -X utf8 scripts/audit/measureProgress.py` 로 baseline · docstring backlog · pytest marker 분포 3 축 추세 측정. master push 마다 [`_progress/measureHistory.jsonl`](scripts/audit/_progress/measureHistory.jsonl) 한 줄 적재 | "신규 회귀 0" 가드 외에 *상환* 도 정량으로 본다. 외부 기여자가 "부채를 줄이고 있는가" 를 시계열 한 파일에서 확인 가능. |
 
 ### 30초 안에 첫 결과
 

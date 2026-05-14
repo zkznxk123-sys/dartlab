@@ -658,6 +658,7 @@ Conscious decisions that differ from other financial libraries — surface them 
 | **Serialized tests (Polars OOM guard)** | `pytest -v` against the whole suite is forbidden; use `scripts/dev/test-lock.sh tests/ -m "<marker>"` | One Company is 200–500 MB of native Polars heap that `gc.collect()` cannot reclaim. Local and CI share the exact same lock wrapper command. |
 | **Korean-first messages, English API surface** | Symbols (`Company`, `pastInsight`, `analysis`) are English. CLI errors and progress messages are Korean | `Natural Language :: Korean / English` are both declared. English users get a separate track via this `README_EN.md` and English docstrings. |
 | **Single SSOT — Skill OS** | `capabilities()` exposes 304 specs as a queryable catalogue | Code, docs, and contracts live in `src/dartlab/skills/specs/**`. Drift between README, docs, and code is prevented at the source. |
+| **Public debt time-series** | `uv run python -X utf8 scripts/audit/measureProgress.py` reports trends across baseline debt, docstring backlog, and pytest marker coverage. Each master push appends a row to [`_progress/measureHistory.jsonl`](scripts/audit/_progress/measureHistory.jsonl) | The "no new violations" guard is complemented by a *repayment* signal. External contributors can verify whether debt is shrinking from a single file. |
 
 ### First result in 30 seconds
 
