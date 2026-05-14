@@ -1268,7 +1268,7 @@ class Company:
 
     def _getPrimary(self, name: str, **kwargs) -> Any:
         """모듈 호출 후 primary DataFrame 추출."""
-        from dartlab import config
+        import dartlab.config as config
 
         cacheKey = f"{name}:{sorted(kwargs.items())}" if kwargs else name
         idx = _getModuleIndex()[name]

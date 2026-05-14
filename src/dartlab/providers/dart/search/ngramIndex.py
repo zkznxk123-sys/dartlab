@@ -20,7 +20,7 @@ _log = getLogger(__name__)
 import numpy as np
 import polars as pl
 
-from dartlab import config as _cfg
+import dartlab.config as _cfg
 from dartlab.core.dataConfig import DATA_RELEASES
 
 # ── 동의어 테이블 ──

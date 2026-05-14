@@ -778,7 +778,7 @@ class Company:
             return None
 
     def _getTickerPath(self) -> Path | None:
-        from dartlab import config
+        import dartlab.config as config
 
         return Path(config.dataDir) / "edgar" / "tickers.parquet"
 
