@@ -471,18 +471,14 @@ async def _collectFinance(
             지정하면 88분기 차집합 우회. 누락 검사도 이 리스트로만 한정.
             None이면 기존 _buildAllPeriods 88분기 전체 + 차집합 (heavy fallback).
     """
-    from dartlab.providers.dart.openapi.saver import enrichFinance, save
+    from dartlab.providers.dart.openapi.saver import enrichFinance, save, saveReplacingByKeys
 
     path = _dataPath("finance", stockCode)
 
     if targetPeriods is not None:
-        # list.json 기반 가벼운 경로: 정확한 (year, code)만 시도.
-        # 그 중에서도 이미 로컬에 있는 건 skip.
-        if incremental:
-            existing = _existingFinancePeriods(path)
-            periods = [(y, c) for y, c in targetPeriods if (y, c) not in existing]
-        else:
-            periods = list(targetPeriods)
+        # list.json 기반 경로: 발견된 (year, code)는 기존 period가 있어도 다시 수집한다.
+        # 정정 공시는 rcept_no가 새롭지만 period는 동일하므로 period 존재 여부로 skip하면 안 된다.
+        periods = list(targetPeriods)
     else:
         # 기존 fallback: 88분기 전체 차집합 (heavy)
         allPeriods = _buildAllPeriods()
@@ -529,7 +525,13 @@ async def _collectFinance(
 
     combined = pl.concat(frames, how="diagonal_relaxed")
     enriched = enrichFinance(combined, stockCode, corpName)
-    save(enriched, path)
+    if targetPeriods is not None:
+        keyColumns = ["bsns_year", "reprt_code"]
+        if "fs_div" in enriched.columns:
+            keyColumns.append("fs_div")
+        saveReplacingByKeys(enriched, path, keyColumns)
+    else:
+        save(enriched, path)
     return enriched.height
 
 
@@ -549,12 +551,12 @@ async def _collectReport(
         targetPeriods: list.json에서 발견한 정확한 (bsns_year, reprt_code).
             지정하면 88분기 차집합 우회.
     """
-    from dartlab.providers.dart.openapi.saver import enrichReport, save
+    from dartlab.providers.dart.openapi.saver import enrichReport, save, saveReplacingByKeys
 
     path = _dataPath("report", stockCode)
     allPeriods = list(targetPeriods) if targetPeriods is not None else _buildAllPeriods()
 
-    if incremental:
+    if incremental and targetPeriods is None:
         existing = _existingReportPeriods(path)
     else:
         existing = set()
@@ -592,7 +594,10 @@ async def _collectReport(
         return 0
 
     combined = pl.concat(frames, how="diagonal_relaxed")
-    save(combined, path)
+    if targetPeriods is not None:
+        saveReplacingByKeys(combined, path, ["year", "quarter", "apiType"])
+    else:
+        save(combined, path)
     return combined.height
 
 

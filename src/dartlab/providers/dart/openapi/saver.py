@@ -6,6 +6,7 @@ report 추가 컬럼:  apiType, apiName, stockCode, corpCode, year, quarter, col
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 import polars as pl
@@ -446,6 +447,55 @@ def korColumns(
 # ── 저장 ───────────────────────────────────────────────────
 
 
+def _writeParquetAtomic(df: pl.DataFrame, dest: Path) -> None:
+    """Write parquet through a temp file so a failed write cannot corrupt dest."""
+    tmp = dest.with_name(f"{dest.name}.tmp")
+    df.write_parquet(tmp)
+    tmp.replace(dest)
+
+
+def _keyExpr(columns: Sequence[str]) -> pl.Expr:
+    return pl.concat_str([pl.col(c).cast(pl.Utf8).fill_null("") for c in columns], separator="\x1f")
+
+
+def saveReplacingByKeys(
+    df: pl.DataFrame,
+    path: str | Path,
+    keyColumns: Sequence[str],
+) -> Path:
+    """Save by replacing existing rows that share logical keys with ``df``.
+
+    This is for DART incremental refreshes where a corrected filing maps to an
+    already-collected period. It removes only the exact logical keys present in
+    the newly collected rows, then appends those new rows.
+    """
+    dest = Path(path)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    if df.height == 0:
+        if not dest.exists():
+            _writeParquetAtomic(df, dest)
+        return dest
+
+    keys = [c for c in keyColumns if c in df.columns]
+    if not dest.exists():
+        _writeParquetAtomic(df.unique(), dest)
+        return dest
+
+    existing = pl.read_parquet(dest)
+    if not keys or any(c not in existing.columns for c in keys):
+        combined = pl.concat([existing, df], how="diagonal_relaxed").unique()
+        _writeParquetAtomic(combined, dest)
+        return dest
+
+    keyCol = "__dartlab_replace_key"
+    newKeys = df.with_columns(_keyExpr(keys).alias(keyCol)).select(keyCol).unique().get_column(keyCol).to_list()
+    keep = existing.with_columns(_keyExpr(keys).alias(keyCol)).filter(~pl.col(keyCol).is_in(newKeys)).drop(keyCol)
+    combined = pl.concat([keep, df], how="diagonal_relaxed").unique()
+    _writeParquetAtomic(combined, dest)
+    return dest
+
+
 def save(
     df: pl.DataFrame,
     path: str | Path,
@@ -520,8 +570,8 @@ def save(
         combined = pl.concat([existing, df], how="diagonal_relaxed")
         # 중복 제거: 모든 컬럼 기준 unique
         combined = combined.unique()
-        combined.write_parquet(dest)
+        _writeParquetAtomic(combined, dest)
     else:
-        df.write_parquet(dest)
+        _writeParquetAtomic(df, dest)
 
     return dest

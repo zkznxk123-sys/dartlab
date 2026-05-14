@@ -17,6 +17,20 @@ import pytest
 from dartlab.core.dataLoader import _checkRemoteFreshness
 
 
+def _load_sync_recent_module():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "syncRecent",
+        Path(__file__).parent.parent / ".github" / "scripts" / "syncRecent.py",
+    )
+    if spec is None or spec.loader is None:
+        pytest.skip("syncRecent.py 로드 실패")
+    syncRecent = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(syncRecent)
+    return syncRecent
+
+
 @pytest.mark.unit
 def test_etag_missing_should_be_stale(tmp_path):
     """P0 회귀: etag 사이드카가 없으면 stale로 판정해야 한다.
@@ -115,16 +129,7 @@ def test_remote_etag_unavailable_returns_none(tmp_path):
 @pytest.mark.unit
 def test_reportNm_to_finance_key():
     """syncRecent의 _reportNmToFinanceKey: 보고서명 → (year, reprt_code) 매핑."""
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "syncRecent",
-        Path(__file__).parent.parent / ".github" / "scripts" / "syncRecent.py",
-    )
-    if spec is None or spec.loader is None:
-        pytest.skip("syncRecent.py 로드 실패")
-    syncRecent = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(syncRecent)
+    syncRecent = _load_sync_recent_module()
 
     fn = syncRecent._reportNmToFinanceKey
 
@@ -136,9 +141,59 @@ def test_reportNm_to_finance_key():
     assert fn("분기보고서 (2025.03)") == ("2025", "11013")
     # 분기보고서 Q3
     assert fn("분기보고서 (2025.09)") == ("2025", "11014")
+    # 정정류 prefix는 같은 정기보고서 기간으로 매핑해야 한다.
+    assert fn("[기재정정]사업보고서 (2025.12)") == ("2025", "11011")
+    assert fn("[첨부정정]반기보고서 (2025.06)") == ("2025", "11012")
+    assert fn("[첨부추가]분기보고서 (2025.03)") == ("2025", "11013")
     # 매칭 안 됨
     assert fn("기타 공시") is None
     assert fn("사업보고서") is None  # 연도 없음
+    assert fn("사업보고서제출기한연장신고서 (2025.12)") is None
+
+
+@pytest.mark.unit
+def test_sync_recent_verifies_expected_rcept_after_collection(tmp_path):
+    """수집 대상 rcept_no가 parquet에 없으면 업로드 전 실패로 잡아야 한다."""
+    import polars as pl
+
+    syncRecent = _load_sync_recent_module()
+
+    dataDir = tmp_path / "data"
+    financeDir = dataDir / "dart" / "finance"
+    financeDir.mkdir(parents=True)
+    pl.DataFrame(
+        {
+            "stock_code": ["005930"],
+            "bsns_year": ["2025"],
+            "reprt_code": ["11013"],
+            "rcept_no": ["new-rcept"],
+        }
+    ).write_parquet(financeDir / "005930.parquet")
+
+    targetFilings = {
+        "005930": {
+            "finance": [
+                {
+                    "rcept_no": "new-rcept",
+                    "report_nm": "[기재정정]분기보고서 (2025.03)",
+                    "rcept_dt": "20260514",
+                }
+            ]
+        }
+    }
+    assert syncRecent._verifyCollectedRcepts(targetFilings, str(dataDir), ["finance"]) == []
+
+    targetFilings["005930"]["finance"][0]["rcept_no"] = "missing-rcept"
+    failures = syncRecent._verifyCollectedRcepts(targetFilings, str(dataDir), ["finance"])
+    assert failures == [
+        {
+            "category": "finance",
+            "stockCode": "005930",
+            "rceptNo": "missing-rcept",
+            "reportNm": "[기재정정]분기보고서 (2025.03)",
+            "rceptDt": "20260514",
+        }
+    ]
 
 
 @pytest.mark.unit

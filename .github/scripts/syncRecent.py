@@ -136,10 +136,7 @@ def _appendDocsFailures(dataDir: str, entries: list) -> None:
             existing = []
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=7)
-    fresh = [
-        r for r in existing
-        if r.get("ts") and datetime.fromisoformat(r["ts"]) > cutoff
-    ]
+    fresh = [r for r in existing if r.get("ts") and datetime.fromisoformat(r["ts"]) > cutoff]
 
     ts = datetime.now(timezone.utc).isoformat(timespec="seconds")
     for stockCode, rceptNo, reason in entries:
@@ -165,11 +162,7 @@ def _loadRecentDocsFailures(dataDir: str) -> set[str]:
     except (json.JSONDecodeError, OSError):
         return set()
     cutoff = datetime.now(timezone.utc) - timedelta(days=7)
-    return {
-        r["rceptNo"]
-        for r in data
-        if r.get("ts") and datetime.fromisoformat(r["ts"]) > cutoff and r.get("rceptNo")
-    }
+    return {r["rceptNo"] for r in data if r.get("ts") and datetime.fromisoformat(r["ts"]) > cutoff and r.get("rceptNo")}
 
 
 def _existingRceptNos(directory: Path, stockCode: str) -> set[str]:
@@ -211,16 +204,20 @@ def _reportNmToFinanceKey(reportNm: str) -> tuple[str, str] | None:
     """
     import re
 
-    yearMatch = re.search(r"\((\d{4})\.(\d{2})\)", reportNm)
+    normalized = re.sub(r"^(?:\[(?:기재정정|첨부정정|첨부추가)\]\s*)+", "", reportNm).strip()
+    if "사업보고서제출기한연장신고서" in normalized:
+        return None
+
+    yearMatch = re.search(r"\((\d{4})\.(\d{2})\)", normalized)
     if not yearMatch:
         return None
     year = yearMatch.group(1)
 
-    if reportNm.startswith("사업보고서"):
+    if normalized.startswith("사업보고서"):
         return (year, "11011")
-    if reportNm.startswith("반기보고서"):
+    if normalized.startswith("반기보고서"):
         return (year, "11012")
-    if reportNm.startswith("분기보고서"):
+    if normalized.startswith("분기보고서"):
         # 분기는 (2025.03) → Q1, (2025.09) → Q3
         month = yearMatch.group(2)
         if month == "03":
@@ -276,9 +273,10 @@ def _discoverNewFilings(keys: str, lookbackDays: int, dataDir: str) -> tuple[set
         print("[syncRecent] 최근 정기공시 없음")
         return set(), {}
 
-    reportFilter = r"^(사업보고서|반기보고서|분기보고서|\[기재정정\]|\[첨부정정\]|\[첨부추가\])"
+    reportFilter = r"^(?:\[(?:기재정정|첨부정정|첨부추가)\]\s*)*(사업보고서|반기보고서|분기보고서)"
     filtered = filings.filter(
         pl.col("report_nm").str.contains(reportFilter)
+        & ~pl.col("report_nm").str.contains("사업보고서제출기한연장신고서")
         & pl.col("stock_code").is_not_null()
         & (pl.col("stock_code") != "")
         & (pl.col("stock_code") != " ")
@@ -576,6 +574,61 @@ async def _collectDocsDirect(
     return results
 
 
+def _verifyCollectedRcepts(
+    targetFilings: dict[str, dict[str, list[dict]]],
+    dataDir: str,
+    categories: list[str],
+) -> list[dict[str, str]]:
+    """수집 대상 rcept_no가 실제 parquet에 들어갔는지 확인한다.
+
+    실패 시 업로드 전에 workflow를 실패시켜 HF 기존 데이터를 보호한다.
+    """
+    from dartlab.core.dataConfig import DATA_RELEASES
+
+    docsSkipped = _loadDocsSkipped(dataDir)
+    failures: list[dict[str, str]] = []
+
+    for cat in categories:
+        if cat not in DATA_RELEASES:
+            continue
+        localDir = Path(dataDir) / DATA_RELEASES[cat]["dir"]
+        for stockCode, perCat in targetFilings.items():
+            rows = perCat.get(cat, [])
+            if not rows:
+                continue
+
+            expected: list[dict] = []
+            for row in rows:
+                rceptNo = str(row.get("rcept_no", "") or "")
+                if not rceptNo:
+                    continue
+                if cat == "docs" and rceptNo in docsSkipped:
+                    continue
+                if cat in ("finance", "report") and _reportNmToFinanceKey(str(row.get("report_nm", ""))) is None:
+                    continue
+                expected.append(row)
+
+            if not expected:
+                continue
+
+            existing = _existingRceptNos(localDir, stockCode)
+            for row in expected:
+                rceptNo = str(row.get("rcept_no", "") or "")
+                if rceptNo in existing:
+                    continue
+                failures.append(
+                    {
+                        "category": cat,
+                        "stockCode": stockCode,
+                        "rceptNo": rceptNo,
+                        "reportNm": str(row.get("report_nm", "")),
+                        "rceptDt": str(row.get("rcept_dt", "")),
+                    }
+                )
+
+    return failures
+
+
 def main():
     keys = os.environ.get("DART_API_KEYS", "")
     if not keys:
@@ -613,6 +666,7 @@ def main():
     if failuresPath.exists():
         try:
             import json as _json
+
             prevFailures = _json.loads(failuresPath.read_text(encoding="utf-8"))
             if isinstance(prevFailures, dict):
                 retryCodes = set(prevFailures.keys())
@@ -696,6 +750,21 @@ def main():
                 showProgress=False,
                 targetPeriodsByCode=periods,
             )
+
+    verifyFailures = _verifyCollectedRcepts(targetFilings, dataDir, categories)
+    if verifyFailures:
+        import json
+
+        distDir = Path("dist")
+        distDir.mkdir(exist_ok=True)
+        failPath = distDir / "sync_verification_failed.json"
+        failPath.write_text(json.dumps(verifyFailures, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[syncRecent] 수집 후 검증 실패: {len(verifyFailures)}건 — HF 업로드 중단")
+        for item in verifyFailures[:20]:
+            print(f"[syncRecent] missing {item['category']} {item['stockCode']} {item['rceptNo']} {item['reportNm']}")
+        if len(verifyFailures) > 20:
+            print(f"[syncRecent] ... 외 {len(verifyFailures) - 20}건")
+        sys.exit(1)
 
     elapsed = time.time() - startTime
 
