@@ -3,7 +3,7 @@
     "schemaVersion": "1",
     "source": "github-discussions",
     "category": "Ideas:[Skill Market]",
-    "generatedAt": "2026-05-14T04:41:10Z",
+    "generatedAt": "2026-05-14T06:07:25Z",
     "skillCount": 1,
     "trustPolicy": "community market entries are untrusted until curated"
   },
@@ -40,6 +40,7 @@
         "물가, 고용, 성장, 금융여건을 함께 보고 중앙은행 반응함수 방향을 해석합니다.",
         "과거 유사 이벤트 분포와 비교해 정상 반응과 이상 반응을 분리합니다."
       ],
+      "executionPlan": [],
       "outputSchema": [
         "`surpriseScore`: 숫자 또는 결손 사유",
         "`policyImpact`: 중앙은행 반응함수 영향 설명",
@@ -70,6 +71,8 @@
       "state": "specified",
       "trustTier": "marketDraft",
       "missingDetails": [
+        "DartLab 엔진별 executionPlan",
+        "예시 입력과 기대 출력",
         "실제 실행 가능한 DartLab 호출 경로를 정해야 합니다.",
         "consensus source를 어떻게 수집하고 `webRef`로 고정할지 정해야 합니다.",
         "발표 전후 시장 반응을 계산할 기준 시각과 거래시간 보정 규칙이 필요합니다.",

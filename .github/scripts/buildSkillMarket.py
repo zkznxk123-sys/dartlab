@@ -17,7 +17,6 @@ import json
 import os
 import re
 import sys
-import textwrap
 import urllib.error
 import urllib.request
 from collections.abc import Iterable
@@ -265,6 +264,7 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
         "outputs": parsed["outputs"],
         "dataSources": parsed["dataSources"],
         "procedure": parsed["procedure"],
+        "executionPlan": parsed["executionPlan"],
         "outputSchema": parsed["outputSchema"],
         "criteria": parsed["criteria"],
         "forbidden": parsed["forbidden"],
@@ -307,6 +307,7 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
     inputs = extractList(text, ("입력", "inputs", "input"))
     dataSources = extractList(text, ("데이터 소스 후보", "데이터 소스", "자료", "data sources", "sources"))
     procedure = extractList(text, ("실행 절차", "절차", "procedure", "steps"))
+    executionPlan = extractExecutionPlan(text)
     outputs = extractList(text, ("기대 결과", "결과", "출력", "outputs", "output"))
     outputSchema = extractList(text, ("출력 스키마", "스키마", "output schema", "schema"))
     criteria = extractList(text, ("판단 기준", "기준", "판단", "criteria", "threshold"))
@@ -330,6 +331,10 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
         missingDetails.append("outputs")
     if not criteria:
         missingDetails.append("criteria")
+    if not hasExecutablePlan(executionPlan):
+        missingDetails.append("DartLab 엔진별 executionPlan")
+    if not examples:
+        missingDetails.append("예시 입력과 기대 출력")
     missingDetails = dedupeClean([*missingDetails, *explicitMissingDetails])
     mappedBuiltinSkills = mapBuiltinSkills(f"{title}\n{text}")
     isExplicitDraft = any(
@@ -359,6 +364,7 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
         "inputs": inputs,
         "dataSources": dataSources,
         "procedure": procedure,
+        "executionPlan": executionPlan,
         "outputs": outputs,
         "outputSchema": outputSchema,
         "criteria": criteria,
@@ -406,6 +412,38 @@ def extractList(text: str, labels: tuple[str, ...]) -> list[str]:
             elif values:
                 values.extend(splitItems(item))
     return dedupeClean(values)[:8]
+
+
+def extractExecutionPlan(text: str) -> list[dict[str, Any]]:
+    steps = extractList(
+        text,
+        (
+            "DartLab 실행 계획",
+            "실행 계획",
+            "엔진 호출",
+            "엔진 실행",
+            "execution plan",
+            "engine calls",
+        ),
+    )
+    out: list[dict[str, Any]] = []
+    for index, step in enumerate(steps, start=1):
+        engineMatch = re.search(r"\b(?:engines|recipes|runtime|start|operation)\.[A-Za-z0-9_.]+", step)
+        out.append(
+            {
+                "step": index,
+                "engine": engineMatch.group(0) if engineMatch else None,
+                "purpose": step,
+                "inputs": [],
+                "outputs": [],
+                "failureMode": None,
+            }
+        )
+    return out
+
+
+def hasExecutablePlan(executionPlan: list[dict[str, Any]]) -> bool:
+    return any(step.get("engine") for step in executionPlan)
 
 
 def inferInputs(text: str) -> list[str]:
@@ -820,11 +858,25 @@ def markdownInline(values: list[Any], *, emptyText: str, limit: int = 6) -> str:
     return ", ".join(f"`{value}`" for value in shown) + suffix
 
 
+def markdownExecutionPlan(values: list[dict[str, Any]], *, limit: int = 5) -> str:
+    if not values:
+        return "- 정해지지 않았습니다."
+    lines: list[str] = []
+    for step in values[:limit]:
+        engine = step.get("engine") or "엔진 미정"
+        purpose = step.get("purpose") or "목적 미정"
+        lines.append(f"- `{engine}` - {purpose}")
+    if len(values) > limit:
+        lines.append(f"- 외 {len(values) - limit}개")
+    return "\n".join(lines)
+
+
 def forgeCommentBody(skill: dict[str, Any]) -> str:
     missing = skill.get("missingDetails") or []
     missingText = markdownInline(missing, emptyText="없습니다.", limit=8)
     mapped = markdownInline(skill.get("mappedBuiltinSkills") or [], emptyText="없습니다.", limit=5)
     inputs = markdownBullets(skill.get("inputs") or [], emptyText="정해지지 않았습니다.", limit=5)
+    executionPlan = markdownExecutionPlan(skill.get("executionPlan") or [], limit=5)
     outputs = markdownBullets(skill.get("outputs") or [], emptyText="정해지지 않았습니다.", limit=5)
     criteria = markdownBullets(skill.get("criteria") or [], emptyText="정해지지 않았습니다.", limit=4)
     completionCriteria = markdownBullets(
@@ -880,6 +932,9 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
 ### 스킬 요약
 **입력**
 {inputs}
+
+**DartLab 실행 계획**
+{executionPlan}
 
 **출력**
 {outputs}

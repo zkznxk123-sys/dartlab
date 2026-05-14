@@ -24,6 +24,15 @@ export interface MarketCredits {
 	implementer?: string[];
 }
 
+export interface MarketExecutionStep {
+	step?: number;
+	engine?: string | null;
+	purpose?: string;
+	inputs?: string[];
+	outputs?: string[];
+	failureMode?: string | null;
+}
+
 export interface MarketSkill {
 	id: string;
 	title: string;
@@ -32,6 +41,7 @@ export interface MarketSkill {
 	inputs?: string[];
 	dataSources?: string[];
 	procedure?: string[];
+	executionPlan?: MarketExecutionStep[];
 	outputs?: string[];
 	outputSchema?: string[];
 	criteria?: string[];
@@ -99,6 +109,12 @@ export function marketSkillMatches(skill: MarketSkill, query: string): boolean {
 		...(skill.inputs ?? []),
 		...(skill.dataSources ?? []),
 		...(skill.procedure ?? []),
+		...(skill.executionPlan ?? []).flatMap((step) => [
+			step.engine ?? '',
+			step.purpose ?? '',
+			...(step.inputs ?? []),
+			...(step.outputs ?? [])
+		]),
 		...(skill.outputs ?? []),
 		...(skill.outputSchema ?? []),
 		...(skill.criteria ?? []),

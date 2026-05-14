@@ -555,7 +555,9 @@ DartLab 에는 두 가지 스킬 층이 있습니다.
 | **builtin Skill OS** | `src/dartlab/skills/specs/**` · `/skills` | 공식 운영·엔진·분석 절차입니다. 패키지와 함께 배포되며 AI 가 먼저 검색합니다. |
 | **community Skill Market** | GitHub Discussions · `/skills/market` · 정적 `marketIndex.json` | 사용자가 공유한 분석 질문을 Forge 가 구조화한 커뮤니티 스킬입니다. 패키지 builtin 에 포함되지 않습니다. |
 
-운영 흐름은 단순합니다. 사용자가 GitHub Discussions 에 분석 질문을 씁니다. DartLab Forge 가 원문과 댓글을 읽고 `intent`, `inputs`, `dataSources`, `procedure`, `outputs`, `outputSchema`, `criteria`, `forbidden`, `completionCriteria` 를 구조화합니다. 초안과 보완 중인 항목은 `marketIndex.json` 에만 남고 최종 스킬 snapshot 을 만들지 않습니다. Maintainer 가 완성 조건을 충족한다고 검토해 `marketCurated` 또는 `builtinCandidate` 로 승격할 때만 GitHub Action 이 `items/{id}.json` accepted snapshot 을 생성합니다. 랜딩의 [Skill Market](https://eddmpython.github.io/dartlab/skills/market) 과 AI 도구 `ReadSkillMarket` 이 이 정적 artifact 를 검색합니다.
+운영 흐름은 단순합니다. 사용자가 GitHub Discussions 에 분석 질문을 씁니다. DartLab Forge 가 원문과 댓글을 읽고 `intent`, `inputs`, `dataSources`, `procedure`, `executionPlan`, `outputs`, `outputSchema`, `criteria`, `forbidden`, `completionCriteria` 를 구조화합니다. 초안과 보완 중인 항목은 `marketIndex.json` 에만 남고 최종 스킬 snapshot 을 만들지 않습니다. Maintainer 가 완성 조건을 충족한다고 검토해 `marketCurated` 또는 `builtinCandidate` 로 승격할 때만 GitHub Action 이 `items/{id}.json` accepted snapshot 을 생성합니다. 랜딩의 [Skill Market](https://eddmpython.github.io/dartlab/skills/market) 과 AI 도구 `ReadSkillMarket` 이 이 정적 artifact 를 검색합니다.
+
+여기서 스킬은 카드가 아니라 반복 가능한 분석 행위의 계약입니다. 최종 공유스킬은 어떤 DartLab 엔진이나 recipe 를 어떤 순서로 호출하는지 `executionPlan` 에 포함해야 합니다. `mappedBuiltinSkills` 는 참고 연결일 뿐이며, `executionPlan` 이 없으면 `marketCurated` 댓글이 있어도 최종 snapshot 을 만들지 않습니다.
 
 `marketCurated` 는 Skill Market 안에서 완성된 공유스킬입니다. builtin 편입을 뜻하지 않습니다. 완성된 공유스킬은 Discussion 과 accepted item snapshot 에 남고, AI 는 `sourceUrl` 과 `trustTier` 를 표시한 뒤 보조 절차로 사용할 수 있습니다. `builtinCandidate` 는 예외적인 장기 검토 상태입니다. 기본 운영 경로는 토론에서 완성한 공유스킬을 Skill Market 에 남기는 것입니다.
 

@@ -134,6 +134,25 @@
 			</section>
 
 			<section>
+				<h2>DartLab Execution Plan</h2>
+				{#if skill.executionPlan?.length}
+					<ol class="execution-plan">
+						{#each skill.executionPlan as step}
+							<li>
+								<strong>{step.engine ?? '엔진 미정'}</strong>
+								<span>{step.purpose ?? '목적 미정'}</span>
+								{#if step.failureMode}
+									<small>실패 조건: {step.failureMode}</small>
+								{/if}
+							</li>
+						{/each}
+					</ol>
+				{:else}
+					<p class="muted">실제 DartLab 엔진 호출 계획이 아직 없다.</p>
+				{/if}
+			</section>
+
+			<section>
 				<h2>Procedure</h2>
 				{#if skill.procedure?.length}
 					<ol>{#each skill.procedure as item}<li>{item}</li>{/each}</ol>
@@ -401,6 +420,31 @@
 		text-decoration: none;
 		font-family: var(--dl-font-mono);
 		font-size: 0.72rem;
+	}
+
+	.execution-plan {
+		display: grid;
+		gap: 0.75rem;
+		padding-left: 1.2rem;
+	}
+
+	.execution-plan li {
+		padding: 0.75rem;
+		border: 1px solid var(--dl-line);
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.03);
+	}
+
+	.execution-plan strong,
+	.execution-plan span,
+	.execution-plan small {
+		display: block;
+	}
+
+	.execution-plan strong {
+		font-family: var(--dl-font-mono);
+		font-size: 0.8rem;
+		color: var(--dl-orange);
 	}
 
 	.muted {
