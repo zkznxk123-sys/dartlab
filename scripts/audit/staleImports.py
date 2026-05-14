@@ -55,6 +55,12 @@ _EXEMPT_FILES: tuple[str, ...] = (
     "src/dartlab/_aiEntries.py",  # F6.1 ask/templates/saveTemplate 본체
     "src/dartlab/server/__init__.py",  # server 가 dartlab 전체를 노출하는 facade
     "src/dartlab/api.py",  # 공개 API 단축 모듈 (필요 시 별도 정리)
+    # RunPython sandbox 는 사용자 코드 globals 에 dartlab top-level 을 노출하는
+    # 의도된 facade entry — 본문 안 ``import dartlab`` 은 sandbox 환경 구성.
+    "src/dartlab/ai/tools/runPython.py",
+    # LLM prompt 텍스트 안 사용자용 코드 예시 (markdown 코드 블록) — 실제
+    # 패키지 내부 import 가 아니라 사용자에게 보여주는 권장 사용법.
+    "src/dartlab/ai/workbench/prompts.py",
 )
 
 
