@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - EV/Sales ? EV/EBIT ? P/B ? ???? sanity check
+  - DCF ??? multiple implied story ??
+  - US/KR peer availability? partial fallback
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier

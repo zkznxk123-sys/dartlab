@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - 5-10? normalized financial panel
+  - revenue ? EBIT ? tax ? NOPAT ? FCFF? source trace
+  - ?? ??? ??? fallback ??
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier

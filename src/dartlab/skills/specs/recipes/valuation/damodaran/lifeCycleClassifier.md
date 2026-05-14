@@ -25,6 +25,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - growth ? margin ? ROC-WACC spread ?? life-cycle phase
+  - phase? valuation assumption ??
+  - ?? confidence? ?? ??
+
 expectedNovelty:
   - lifeCyclePhase
   - growthMarginRocEvidence

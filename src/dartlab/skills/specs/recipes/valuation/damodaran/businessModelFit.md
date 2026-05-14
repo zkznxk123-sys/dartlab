@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - generic FCFF ?? ??? ?? ??
+  - ???????distress???? fallback route
+  - ?? ?? confidence? ?? valuation path
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier

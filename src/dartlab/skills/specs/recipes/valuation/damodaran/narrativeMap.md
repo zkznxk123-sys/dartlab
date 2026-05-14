@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - ?? narrative? growth ? margin ? reinvestment ? risk driver? ??? ?
+  - text evidence ?? ? fallback note
+  - story-to-driver ??? ?? narrative hypothesis
+
 expectedNovelty:
   - narrativeDriverMap
 runtimeCompatibility:

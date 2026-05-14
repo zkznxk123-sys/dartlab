@@ -66,6 +66,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - Damodaran 10? ?? ?? 21? ?? ?? ??
+  - L1/L1.5 ??? ??? gap ledger ???
+  - official ?? ? ??? ?????? ?? ???
+
 expectedNovelty:
   - damodaranConceptTree
   - damodaranDataContract
@@ -159,6 +164,24 @@ engine_rows = [
     }
     for idx, item in enumerate(system["engineSupplementBacklog"], start=1)
 ]
+promotion_rows = [
+    {
+        "order": 300,
+        "concept": "promotionReadiness",
+        "status": system["promotionReadiness"]["status"],
+        "implementedSkills": system["promotionReadiness"]["skillCount"],
+        "plannedSkills": len(system["promotionReadiness"]["promotionBlockers"]),
+        "gapCount": len(system["promotionReadiness"]["promotionBlockers"]),
+    },
+    {
+        "order": 301,
+        "concept": "validateRecipeMinimums",
+        "status": "pass",
+        "implementedSkills": system["promotionReadiness"]["validationSummary"]["minimumExecutionPassRate"],
+        "plannedSkills": system["promotionReadiness"]["validationSummary"]["minimumEvidenceCompleteness"],
+        "gapCount": system["promotionReadiness"]["validationSummary"]["missingEvidenceCount"],
+    },
+]
 sources = [
     {
         "id": "damodaranAnalysisSystemContract",
@@ -174,15 +197,17 @@ route_score = 0.0 if target == "138930" else system["readiness"]["decisionScore"
 route_status = "financialFirmRouteBlocked" if target == "138930" else system["readiness"]["status"]
 
 emit_result(
-    table=concept_rows + gap_rows + engine_rows,
+    table=concept_rows + gap_rows + engine_rows + promotion_rows,
     values={
         "decisionScore": route_score,
         "target": target,
         "readinessStatus": route_status,
+        "promotionReadiness": system["promotionReadiness"]["status"],
         "entrySkill": system["skillTree"]["entrySkill"],
         "executableSkillCount": len(system["skillTree"]["currentExecutablePath"]),
         "gapCount": len(system["gapLedger"]),
         "engineSupplementCount": len(system["engineSupplementBacklog"]),
+        "promotionBlockerCount": len(system["promotionReadiness"]["promotionBlockers"]),
     },
     date=system["_meta"]["asOfDate"],
     units={"decisionScore": "score"},
@@ -194,11 +219,11 @@ emit_result(
 
 ### 1. 결론 도출
 
-이 진입점은 Damodaran식 분석체계가 어디까지 실행 가능하고 어디가 아직 gap인지 먼저 판정한다. 현재의 핵심 결론은 `incubatingExecutable`이다. 즉, FCFF 중심 valuation memo 경로는 L1/L1.5 데이터만으로 실행되지만 narrative extraction, full industry defaults, peer valuation, 특수상황 모델은 별도 보강 전까지 complete로 선언하지 않는다.
+이 진입점은 Damodaran식 분석체계가 어디까지 실행 가능하고 어디가 아직 gap인지 먼저 판정한다. 현재 실행 상태는 `incubatingExecutable`이고, 공식 승격 준비 상태는 `operatorReviewReady`다. 즉, FCFF 중심 valuation memo 경로는 L1/L1.5 데이터만으로 실행되고 검증 점수도 충족하지만, verified/curated 승격은 운영자 리뷰와 시장 결과 이력이 붙을 때만 가능하다.
 
 ### 2. 핵심 근거 수집
 
-`damodaranAnalysisSystem.json`, `damodaranDefaults.json`, `damodaranIndustryDefaults.json`, 그리고 21개 Damodaran recipe를 함께 본다. 이 진입점은 계산을 대신하지 않고 다음 스킬로 라우팅한다.
+`damodaranAnalysisSystem.json`, `damodaranDefaults.json`, `damodaranIndustryDefaults.json`, 21개 Damodaran 실행 recipe, 그리고 `promotionReadiness` scorecard를 함께 본다. 이 진입점은 계산을 대신하지 않고 다음 스킬로 라우팅하되, 공식 승격 전 남은 blocker를 표로 드러낸다.
 
 ### 3. 메커니즘 분석
 
@@ -219,7 +244,7 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 
 ### 4. 반례·한계
 
-현재 스킬팩은 generic FCFF 모델이 가능한 비금융 기업에 가장 강하다. 금융업은 generic FCFF에서 차단되고, 별도 excess-return 모델이 필요하다. 순환주, 원자재, 지주회사, distress, segment sum-of-parts는 gap ledger에 남긴다.
+현재 스킬팩은 generic FCFF 모델이 가능한 비금융 기업에 가장 강하다. 금융업은 generic FCFF에서 차단되고, 별도 excess-return 모델이 필요하다. 순환주, 원자재, 지주회사, distress, segment sum-of-parts는 gap ledger에 남긴다. `promotionReadiness.status`가 `operatorReviewReady`라도 스킬이 스스로 official/curated로 승격되지는 않는다.
 
 ### 5. 후속 모니터링
 
@@ -227,7 +252,7 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 
 ## 대표 반환 형태
 
-`damodaranAnalysisSystem : dict` — `concepts`, `skillTree`, `dataContract`, `gapLedger`, `engineSupplementBacklog`, `completionGates`, `readiness`를 담는다.
+`damodaranAnalysisSystem : dict` — `concepts`, `skillTree`, `dataContract`, `gapLedger`, `engineSupplementBacklog`, `completionGates`, `readiness`, `promotionReadiness`를 담는다.
 
 ## 엔진 보강 후보
 

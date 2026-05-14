@@ -42,6 +42,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - 21?? Damodaran execution status table
+  - DCF band ? reverse DCF ? gap ledger ? storyboardReady headline
+  - KR/US/??? route? final decision status
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
@@ -212,11 +217,11 @@ emit_result(
 
 ### 1. 결론 도출
 
-최종 출력은 투자 의견이 아니라 valuation memo다. `valueBand`, `priceImpliedStory`, `breakConditions`, `missingEvidence`, `storyboardReady`를 함께 낸다.
+최종 출력은 투자 의견이 아니라 valuation memo다. `valueBand`, `priceImpliedStory`, `breakConditions`, `missingEvidence`, `storyboardReady`를 함께 낸다. 공개 실행 표는 21단계 status table이어야 하며, 각 단계는 `status`, `evidence`, `fallbackCount`, `blockerCount`, `nextAction`을 포함한다.
 
 ### 2. 핵심 근거 수집
 
-20개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 호출 또는 recipe 내부 RunPython 계산에서 나온다.
+20개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 호출 또는 recipe 내부 RunPython 계산에서 나온다. 공식 승격 후보 검토에서는 `finalDecision.blockerCount == 0` 또는 blocker가 의도된 모델 차단인지 확인해야 한다.
 
 ### 3. 메커니즘 분석
 
@@ -252,7 +257,7 @@ graph LR
 
 ## 대표 반환 형태
 
-`damodaranMemo : dict` — `decisionStatus`, `valueBand`, `assumptionTable`, `reverseDcf`, `falsifiers`, `gapLedger`, `storyboardReady`를 담는다.
+`damodaranMemo : dict` — `decisionStatus`, `valueBand`, `assumptionTable`, `reverseDcf`, `falsifiers`, `gapLedger`, `storyboardReady`를 담는다. `memo["tables"]["deepDive"]`는 `order`, `step`, `status`, `evidence`, `fallbackCount`, `blockerCount`, `nextAction` 열을 가진 21행 execution status table이다.
 
 ## 연계 절차
 
@@ -282,5 +287,6 @@ graph LR
 - 5개 고정 타깃에서 self-run 표를 남긴다.
 - KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.
 - L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.
+- deepDive execution status table은 21행이어야 하며 finalDecision과 scenarioFalsifier를 포함해야 한다.
 - verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다.
 

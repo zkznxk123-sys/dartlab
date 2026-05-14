@@ -23,6 +23,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - narrative hypothesis? ?? driver mapping
+  - driver source ? fallback ? confidence ?
+  - DCF ???? ?? growth/margin/ROC/risk ??
+
 expectedNovelty:
   - storyDriverTranslation
 runtimeCompatibility:

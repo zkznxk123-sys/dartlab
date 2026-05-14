@@ -1,7 +1,7 @@
 {
   "_meta": {
     "source": "DartLab Damodaran L1/L1.5 analysis system contract",
-    "asOfDate": "2026-05-14",
+    "asOfDate": "2026-05-15",
     "coverageStatus": "system-contract-v1",
     "notes": "Defines the concept tree, skill routing, data contract, and gap ledger for Damodaran-style analysis without L2/L3 engine calls.",
     "officialSourceUrls": {
@@ -23,6 +23,68 @@
       "The skill procedures are executable, but verified promotion still requires operator review and market-result history.",
       "Some procedure skills intentionally return fallbackAccepted or deferredWithBlocker rows when L1 data lacks segment, lease maturity, distress probability, or full peer universe evidence.",
       "Full engine integration remains deferred until the L1/L1.5 skill pack is stable."
+    ]
+  },
+  "promotionReadiness": {
+    "status": "operatorReviewReady",
+    "scope": "official-promotion candidate, not auto-promoted",
+    "lastValidationDate": "2026-05-15",
+    "skillCount": 22,
+    "executionSkillCount": 21,
+    "validationSummary": {
+      "validateRecipeTargets": [
+        "005930",
+        "000660",
+        "138930",
+        "AAPL",
+        "INTC"
+      ],
+      "minimumExecutionPassRate": 1.0,
+      "minimumEvidenceCompleteness": 1.0,
+      "missingEvidenceCount": 0,
+      "strictL0L15Guard": "pass",
+      "artifactSurfaces": [
+        "index.json",
+        "agent.json",
+        "web.json",
+        "mcp.json",
+        "pyodide.json",
+        "graph.json"
+      ]
+    },
+    "dogfoodRoutes": [
+      {
+        "target": "005930",
+        "market": "KR",
+        "expectedStatus": "usableWithFallback",
+        "route": "generic FCFF with reverse DCF and KRX market-cap evidence"
+      },
+      {
+        "target": "AAPL",
+        "market": "US",
+        "expectedStatus": "usableWithFallback",
+        "route": "generic FCFF with EDGAR shares-outstanding and US price evidence"
+      },
+      {
+        "target": "138930",
+        "market": "KR",
+        "expectedStatus": "blockedFinancialFirm",
+        "route": "generic FCFF blocked; financial-firm excess-return route required"
+      }
+    ],
+    "promotionBlockers": [
+      {
+        "id": "operatorReviewRequired",
+        "reason": "operation.recipePromote requires human/operator review before verified or curated status."
+      },
+      {
+        "id": "marketResultHistoryRequired",
+        "reason": "verified promotion requires post-run market/result stability evidence, not only same-day execution."
+      },
+      {
+        "id": "curatedStatusRequiresContentFeedback",
+        "reason": "curated promotion requires human review plus blog/video/community absorption."
+      }
     ]
   },
   "skillTree": {

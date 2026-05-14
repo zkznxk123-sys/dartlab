@@ -22,6 +22,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - ??? generic FCFF ?? ??
+  - ROE ? cost of equity ? excess return proxy table
+  - ??/?? ?? ?? ?? ? fallback route
+
 expectedNovelty:
   - financialFirmRoute
 runtimeCompatibility:

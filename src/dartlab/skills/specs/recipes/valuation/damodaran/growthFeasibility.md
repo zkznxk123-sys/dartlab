@@ -26,6 +26,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - ?? ?? ? normalized growth ? reverse DCF ?? ?? ??
+  - growth feasibility status? break condition
+  - ?? ??? ???/ROC? ???? ??
+
 expectedNovelty:
   - growthFromReinvestmentRoc
   - requiredReinvestmentRate

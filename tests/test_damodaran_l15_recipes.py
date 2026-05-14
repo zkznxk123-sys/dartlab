@@ -83,6 +83,7 @@ def testDamodaranRecipeSpecsLoadAsUnverifiedRecipes() -> None:
         assert spec.category == "recipes"
         assert spec.status == "unverified"
         assert spec.linkedSkills or "## 연계 절차" in spec.source.get("body", "")
+        assert spec.expectedOutputs, f"{skillId} must declare expectedOutputs before promotion review"
 
 
 def testDamodaranSkillsAreExposedThroughAiEntryPoints() -> None:
@@ -95,8 +96,10 @@ def testDamodaranSkillsAreExposedThroughAiEntryPoints() -> None:
 
     assert entry.ok
     assert entry.data["skills"][0]["id"] == "recipes.valuation.damodaran.index"
+    assert entry.data["skills"][0]["expectedOutputs"]
     assert narrative.ok
     assert narrative.data["skills"][0]["id"] == "recipes.valuation.damodaran.storyToDrivers"
+    assert narrative.data["skills"][0]["expectedOutputs"]
     assert financial.ok
     assert financial.data["skills"][0]["id"] == "recipes.valuation.damodaran.financialFirmExcessReturn"
     assert peer.ok
@@ -124,6 +127,8 @@ def testDamodaranSkillsAreInPublicSkillArtifacts() -> None:
             assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
         if name in {"index.json", "agent.json", "mcp.json"}:
             assert by_id["recipes.valuation.damodaran.index"]["bodyPreview"]
+        if name in {"index.json", "agent.json", "web.json"}:
+            assert by_id["recipes.valuation.damodaran.deepDive"]["expectedOutputs"]
         if name == "web.json":
             assert by_id["recipes.valuation.damodaran.index"]["bodyHuman"]
 
@@ -277,6 +282,21 @@ def testDamodaranSynthBuildsFullMemoFromL15Inputs() -> None:
         "scenarioFalsifier",
         "deepDive",
     } <= set(memo["tables"])
+    assert len(memo["tables"]["deepDive"]) == 21
+    deep_dive_steps = {row["step"] for row in memo["tables"]["deepDive"]}
+    assert {
+        "dataAudit",
+        "businessModelFit",
+        "narrativeMap",
+        "storyToDrivers",
+        "normalizedFinancials",
+        "fcffDcf",
+        "scenarioFalsifier",
+        "finalDecision",
+    } <= deep_dive_steps
+    assert {"order", "step", "status", "evidence", "fallbackCount", "blockerCount", "nextAction"} <= set(
+        memo["tables"]["deepDive"][0]
+    )
     assert memo["tables"]["lifeCycleClassifier"][0]["metric"] == "lifeCyclePhase"
     assert any(row["traceKey"] == "revenue" for row in memo["tables"]["accountTraceAudit"])
     assert any(row["metric"] == "growthFeasibility" for row in memo["tables"]["growthFeasibility"])
@@ -334,6 +354,14 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
 
     assert system["_meta"]["coverageStatus"] == "system-contract-v1"
     assert system["skillTree"]["entrySkill"] == "recipes.valuation.damodaran.index"
+    assert system["promotionReadiness"]["status"] == "operatorReviewReady"
+    assert system["promotionReadiness"]["skillCount"] == len(DAMODARAN_IDS)
+    assert system["promotionReadiness"]["executionSkillCount"] == len(DAMODARAN_IDS) - 1
+    assert system["promotionReadiness"]["validationSummary"]["minimumExecutionPassRate"] >= 1.0
+    assert system["promotionReadiness"]["validationSummary"]["minimumEvidenceCompleteness"] >= 1.0
+    assert system["promotionReadiness"]["validationSummary"]["missingEvidenceCount"] == 0
+    assert {route["target"] for route in system["promotionReadiness"]["dogfoodRoutes"]} >= {"005930", "AAPL", "138930"}
+    assert system["promotionReadiness"]["promotionBlockers"]
     assert {
         "recipes.valuation.damodaran.lifeCycleClassifier",
         "recipes.valuation.damodaran.accountTraceAudit",

@@ -25,6 +25,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - bear/base/bull scenario table
+  - reverse DCF ?? ???? plausibility
+  - ?? ??? ??? story? break condition
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier

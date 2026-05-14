@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - risk-free ? ERP ? beta ? debt cost ? tax ? WACC assumption table
+  - country/industry reference freshness? fallback reason
+  - WACC ???? confidence
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier

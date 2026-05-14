@@ -29006,7 +29006,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "Damodaran 10? ?? ?? 21? ?? ?? ??",
+        "L1/L1.5 ??? ??? gap ledger ???",
+        "official ?? ? ??? ?????? ?? ???"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "value만 계산하고 narrative와 driver 연결을 누락",
@@ -29051,7 +29055,7 @@
       "graphTier": "L1.5",
       "cluster": "valuation.damodaran",
       "humanIntro": "Damodaran식 분석은 적정가 계산기가 아니라 스토리와 숫자를 서로 반증하는 체계다. 이 진입점은 현재 실행 가능한 L1.5 가치평가 경로와 아직 메꿔야 할 narrative, life cycle, 특수상황, peer valuation 데이터 계약을 한곳에 묶는다.",
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\nsources = [\n    {\n        \"id\": \"damodaranAnalysisSystemContract\",\n        \"title\": \"DartLab Damodaran L1.5 analysis system contract\",\n        \"url\": \"dartlab://reference/damodaranAnalysisSystem.json\",\n    }\n]\nsources.extend(\n    {\"id\": f\"damodaranOfficial_{key}\", \"title\": f\"Damodaran official {key}\", \"url\": url}\n    for key, url in sy"
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionReadiness\"][\"status\"],\n        \"implementedSkills\": system[\"promotionReadiness\"][\"skillCount\"],\n        \"plannedSkills\": len(system[\"promotionReadiness\"][\"promotionBlockers\"]),\n        \"gapCount\": len(system[\"promo"
     },
     {
       "id": "recipes.valuation.damodaran.dataAudit",
@@ -29100,7 +29104,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "IS/BS/CF/??/??/reference ?? ??? ?",
+        "usable ? usableWithFallback ? blocked ??",
+        "missing evidence? fallback reason ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "DART와 EDGAR의 topic alias 차이를 coverage 부족이 아니라 사업 변화로 오판",
@@ -29188,7 +29196,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "generic FCFF ?? ??? ?? ??",
+        "???????distress???? fallback route",
+        "?? ?? confidence? ?? valuation path"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "은행의 예금부채를 영업부채처럼 취급",
@@ -29275,7 +29287,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "growth ? margin ? ROC-WACC spread ?? life-cycle phase",
+        "phase? valuation assumption ??",
+        "?? confidence? ?? ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "경기순환 저점의 적자를 영구 decline으로 오판",
@@ -29360,7 +29376,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "?? narrative? growth ? margin ? reinvestment ? risk driver? ??? ?",
+        "text evidence ?? ? fallback note",
+        "story-to-driver ??? ?? narrative hypothesis"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "사업 설명을 숫자 driver로 연결하지 않음",
@@ -29440,7 +29460,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "narrative hypothesis? ?? driver mapping",
+        "driver source ? fallback ? confidence ?",
+        "DCF ???? ?? growth/margin/ROC/risk ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "성장률과 재투자율/ROC의 연결 누락",
@@ -29522,7 +29546,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "5-10? normalized financial panel",
+        "revenue ? EBIT ? tax ? NOPAT ? FCFF? source trace",
+        "?? ??? ??? fallback ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "DART/EDGAR 계정명 차이를 같은 snakeId로 정규화하지 못함",
@@ -29607,7 +29635,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "valuation input? ?? ?? trace",
+        "?? ?? ?? ??? fallback reason",
+        "?? ?? ?? ??? ???"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "capex 부호를 확인하지 않고 FCFF에 반영",
@@ -29687,7 +29719,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "R&D ?? ?? ?? ??? ??? ???",
+        "?? L1/L1.5 ?? ?? ? fallbackAccepted ?? blocker",
+        "normalized EBIT/FCFF ?? ? ?? ?"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "연구개발비 결손을 정상 비용 구조로 오판"
@@ -29759,7 +29795,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "lease/right-of-use ?? ?? ??",
+        "debt/WACC/FCFF ?? ??? ??",
+        "?? ?? ?? ? blocker ?? fallback note"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "리스부채를 순부채에서 누락"
@@ -29831,7 +29871,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "impairment/restructuring/discontinued ? ??? ?? ??",
+        "normalized EBIT ?? ??? ??",
+        "?? ??? ? ??? fallback ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "손상차손을 반복 영업마진으로 반영"
@@ -29907,7 +29951,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "sales-to-capital ? reinvestment rate ? ROIC/ROC ?",
+        "???? ????? ????? ????? ??",
+        "incremental ROC ?? ?? ?? ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "음수 invested capital에서 ROC 폭주",
@@ -29995,7 +30043,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "?? ?? ? normalized growth ? reverse DCF ?? ?? ??",
+        "growth feasibility status? break condition",
+        "?? ??? ???/ROC? ???? ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "재투자율이 음수인데 고성장을 통과",
@@ -30080,7 +30132,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "risk-free ? ERP ? beta ? debt cost ? tax ? WACC assumption table",
+        "country/industry reference freshness? fallback reason",
+        "WACC ???? confidence"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "국가 ERP와 기업 통화를 혼동",
@@ -30168,7 +30224,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "bear/base/bull FCFF DCF ?? ??",
+        "terminal value share? terminal growth/ROC consistency check",
+        "per-share/upside ?? ?? ??? blocker"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "terminal value가 전체 가치의 대부분인데 민감도 누락",
@@ -30253,7 +30313,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "EV/Sales ? EV/EBIT ? P/B ? ???? sanity check",
+        "DCF ??? multiple implied story ??",
+        "US/KR peer availability? partial fallback"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "peer group 없이 market-wide multiple만 비교",
@@ -30335,7 +30399,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "peer multiple? margin ? growth ? ROC ? risk driver? ??? ?",
+        "peer universe ??? ? market coverage status",
+        "multiple ?? ?? ?? ?? ??"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "peer 차이를 성장·마진·리스크로 분해하지 않음"
@@ -30407,7 +30475,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "??? generic FCFF ?? ??",
+        "ROE ? cost of equity ? excess return proxy table",
+        "??/?? ?? ?? ?? ? fallback route"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "은행을 FCFF DCF로 평가"
@@ -30479,7 +30551,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "reported company ?? ???? fallback? segment blocker",
+        "SOTP ??? ??? ?? segment evidence",
+        "???? ?? ?? ? deferredWithBlocker"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "복합기업을 단일 마진으로만 평가"
@@ -30552,7 +30628,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "debt-to-equity ? negative FCFF ratio ?? distress route",
+        "base DCF ?? ?? ??? distress ?? ???",
+        "distress model ?? ? blocker/fallback status"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "FCFF 지속 음수 기업을 정상 terminal value로만 평가"
@@ -30630,7 +30710,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "bear/base/bull scenario table",
+        "reverse DCF ?? ???? plausibility",
+        "?? ??? ??? story? break condition"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "WACC 민감도만 보고 마진·재투자 민감도 누락",
@@ -30724,6 +30808,7 @@
         "5개 고정 타깃에서 self-run 표를 남긴다.",
         "KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.",
         "L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.",
+        "deepDive execution status table은 21행이어야 하며 finalDecision과 scenarioFalsifier를 포함해야 한다.",
         "verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다."
       ],
       "recipeSteps": [],
@@ -30735,7 +30820,11 @@
         "dateRef",
         "executionRef"
       ],
-      "expectedOutputs": [],
+      "expectedOutputs": [
+        "21?? Damodaran execution status table",
+        "DCF band ? reverse DCF ? gap ledger ? storyboardReady headline",
+        "KR/US/??? route? final decision status"
+      ],
       "visualGuidance": [],
       "failureModes": [
         "sub-skill 하나가 blocked인데 최종 memo를 complete로 표시",

@@ -22,6 +22,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - peer multiple? margin ? growth ? ROC ? risk driver? ??? ?
+  - peer universe ??? ? market coverage status
+  - multiple ?? ?? ?? ?? ??
+
 expectedNovelty:
   - peerMultipleDriverMap
 runtimeCompatibility:

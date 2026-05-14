@@ -23,6 +23,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - debt-to-equity ? negative FCFF ratio ?? distress route
+  - base DCF ?? ?? ??? distress ?? ???
+  - distress model ?? ? blocker/fallback status
+
 expectedNovelty:
   - distressDcfRoute
 runtimeCompatibility:

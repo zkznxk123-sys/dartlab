@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - IS/BS/CF/??/??/reference ?? ??? ?
+  - usable ? usableWithFallback ? blocked ??
+  - missing evidence? fallback reason ??
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier

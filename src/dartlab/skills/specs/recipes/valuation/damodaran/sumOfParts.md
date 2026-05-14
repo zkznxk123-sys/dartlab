@@ -22,6 +22,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - reported company ?? ???? fallback? segment blocker
+  - SOTP ??? ??? ?? segment evidence
+  - ???? ?? ?? ? deferredWithBlocker
+
 expectedNovelty:
   - sumOfPartsRoute
 runtimeCompatibility:

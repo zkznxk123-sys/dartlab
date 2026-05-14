@@ -22,6 +22,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - lease/right-of-use ?? ?? ??
+  - debt/WACC/FCFF ?? ??? ??
+  - ?? ?? ?? ? blocker ?? fallback note
+
 expectedNovelty:
   - leaseDebtAudit
 runtimeCompatibility:

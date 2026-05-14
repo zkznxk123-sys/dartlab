@@ -22,6 +22,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - impairment/restructuring/discontinued ? ??? ?? ??
+  - normalized EBIT ?? ??? ??
+  - ?? ??? ? ??? fallback ??
+
 expectedNovelty:
   - oneOffNormalizationAudit
 runtimeCompatibility:

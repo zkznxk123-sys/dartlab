@@ -24,6 +24,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - valuation input? ?? ?? trace
+  - ?? ?? ?? ??? fallback reason
+  - ?? ?? ?? ??? ???
+
 expectedNovelty:
   - valuationAccountTrace
   - missingAccountGate

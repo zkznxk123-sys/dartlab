@@ -26,6 +26,11 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedOutputs:
+  - bear/base/bull FCFF DCF ?? ??
+  - terminal value share? terminal growth/ROC consistency check
+  - per-share/upside ?? ?? ??? blocker
+
 expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
