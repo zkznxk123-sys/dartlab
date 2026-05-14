@@ -298,9 +298,10 @@ class CompanyProtocol(RawProviderCompanyProtocol, Protocol):
 class PublicCompanyFacadeProtocol(CompanyProtocol, Protocol):
     """사용자 공개 Company facade surface.
 
-    현재는 provider Company 가 이 표면을 직접 구현하지만, 후속 구조개선에서는
-    `dartlab.company.Company()` 가 provider raw 객체를 감싼 wrapper 를 반환하고
-    본 Protocol 의 상위 엔진 dispatch 를 wrapper 가 담당한다.
+    `dartlab.Company(...)` 와 provider Company 의 공개 호출 표면을 보존하기 위한
+    Protocol 이다. 내부 의존 debt 는 Guard baseline 으로 추적하되, 사용자 호출 방식
+    (`c.show(...)`, `c.select(...)`, `c.analysis(...)` 등) 은 이 Protocol 을 기준으로
+    깨지지 않게 유지한다.
     """
 
     @property

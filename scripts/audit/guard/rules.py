@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import ast
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
 
 from guard.indexer import LAYER_OF, ROOT_FACADE, ModuleRecord
@@ -12,6 +14,130 @@ STRICT_L0_L15 = {"core", "gather", "providers", "scan", "frame", "synth", "refer
 L1_PEERS = {"gather", "providers"}
 L15_PEERS = {"scan", "frame", "synth", "reference"}
 L2_PEERS = {"analysis", "macro", "quant", "industry", "credit"}
+PROVIDER_COMPANY_FILES = {
+    "src/dartlab/providers/dart/company.py": "dart",
+    "src/dartlab/providers/edgar/company.py": "edgar",
+}
+FROZEN_PROVIDER_COMPANY_SURFACE = {
+    "dart": {
+        "analysis",
+        "ask",
+        "audit",
+        "calendar",
+        "canHandle",
+        "capital",
+        "causalWeights",
+        "cleanupCache",
+        "codeName",
+        "contextSlices",
+        "credit",
+        "currency",
+        "debt",
+        "diff",
+        "disclosure",
+        "facts",
+        "filings",
+        "fiscalYearEnd",
+        "gather",
+        "governance",
+        "industry",
+        "index",
+        "keywordTrend",
+        "listing",
+        "liveFilings",
+        "macro",
+        "market",
+        "memorySnapshot",
+        "narrativeDiff",
+        "network",
+        "news",
+        "priority",
+        "quant",
+        "rank",
+        "rawDocs",
+        "rawFinance",
+        "rawReport",
+        "readFiling",
+        "resolve",
+        "retrievalBlocks",
+        "search",
+        "sections",
+        "sector",
+        "sectorParams",
+        "select",
+        "show",
+        "sources",
+        "status",
+        "story",
+        "storyTree",
+        "table",
+        "topicSummaries",
+        "topics",
+        "trace",
+        "update",
+        "validateStory",
+        "valuationImpact",
+        "view",
+        "watch",
+        "workforce",
+    },
+    "edgar": {
+        "analysis",
+        "ask",
+        "audit",
+        "calendar",
+        "canHandle",
+        "capital",
+        "causalWeights",
+        "cleanupCache",
+        "contextSlices",
+        "credit",
+        "currency",
+        "debt",
+        "diff",
+        "disclosure",
+        "facts",
+        "filings",
+        "fiscalYearEnd",
+        "gather",
+        "governance",
+        "index",
+        "keywordTrend",
+        "listing",
+        "liveFilings",
+        "macro",
+        "market",
+        "memorySnapshot",
+        "narrativeDiff",
+        "network",
+        "news",
+        "notes",
+        "priority",
+        "quant",
+        "rank",
+        "readFiling",
+        "refreshFromApi",
+        "retrievalBlocks",
+        "search",
+        "sections",
+        "select",
+        "show",
+        "sources",
+        "stockCode",
+        "story",
+        "storyTree",
+        "table",
+        "topicSummaries",
+        "topics",
+        "trace",
+        "update",
+        "validateStory",
+        "valuationImpact",
+        "view",
+        "watch",
+        "workforce",
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -37,6 +163,7 @@ def evaluateL0L15(records: list[ModuleRecord]) -> list[Violation]:
     violations.extend(checkL1CrossImport(records))
     violations.extend(checkL15SiblingImport(records))
     violations.extend(checkLazyBoundaryDebt(records))
+    violations.extend(checkProviderCompanyFrozenSurface(records))
     return sorted(violations, key=lambda item: (item.rule, item.path, item.line, item.message))
 
 
@@ -161,6 +288,111 @@ def checkLazyBoundaryDebt(records: list[ModuleRecord]) -> list[Violation]:
                         importKind="lazy",
                     )
                 )
+    return violations
+
+
+def checkProviderCompanyFrozenSurface(records: list[ModuleRecord]) -> list[Violation]:
+    """provider Company public surface 변경을 frozen manifest로 차단한다.
+
+    Capabilities:
+        DART/EDGAR provider `Company` 클래스의 public method 추가와 제거를
+        둘 다 Guard 신규 위반으로 보고한다.
+
+    Args:
+        records: Guard Index module record 목록.
+
+    Returns:
+        `api.companyFacadeFrozenSurface` 위반 목록. 현재 공개 surface는 보존되고,
+        신규 추가·삭제는 API Contract 검토 전까지 실패한다.
+
+    Example:
+        >>> violations = checkProviderCompanyFrozenSurface(records)
+        >>> all(v.rule == "api.companyFacadeFrozenSurface" for v in violations)
+        True
+
+    Guide:
+        Company facade 공개 호출은 보존한다. 이 rule은 facade를 쪼개거나 rename하지 않고,
+        provider class 공개 surface가 조용히 늘거나 줄어드는 일을 막는다.
+
+    SeeAlso:
+        `operation.apiContract` 공개 진입점 정책, `core.protocols.PublicCompanyFacadeProtocol`.
+
+    Requires:
+        repo root에서 실행되어 `src/dartlab/providers/{dart,edgar}/company.py`를 읽을 수 있어야 한다.
+
+    AIContext:
+        신규 surface가 필요하면 먼저 API Contract와 Protocol에 명시한 뒤 의도적으로 검토한다.
+
+    LLM Specifications:
+        AntiPatterns: facade method를 자동 이동하거나 삭제하지 않는다.
+        OutputSchema: rule/path/line/message/baselineKey를 가진 Violation.
+        Prerequisites: AST parse 가능한 Python source.
+        Freshness: frozen manifest는 현재 public facade surface snapshot이다.
+        Dataflow: provider company AST -> public method inventory -> frozen manifest diff.
+        TargetMarkets: KR DART, US EDGAR.
+    """
+    violations: list[Violation] = []
+    indexedPaths = {record.path for record in records}
+    for path, providerName in PROVIDER_COMPANY_FILES.items():
+        if path not in indexedPaths:
+            continue
+        violations.extend(checkProviderCompanyFile(Path(path), providerName))
+    return violations
+
+
+def checkProviderCompanyFile(path: Path, providerName: str) -> list[Violation]:
+    """provider company.py 1개를 frozen public surface와 비교한다."""
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    except (OSError, UnicodeDecodeError, SyntaxError):
+        return []
+    companyClass = next(
+        (node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "Company"),
+        None,
+    )
+    if companyClass is None:
+        return []
+
+    actual = {
+        node.name
+        for node in companyClass.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and not node.name.startswith("_")
+    }
+    expected = FROZEN_PROVIDER_COMPANY_SURFACE[providerName]
+    violations: list[Violation] = []
+    lineByName = {
+        node.name: node.lineno
+        for node in companyClass.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and not node.name.startswith("_")
+    }
+    for methodName in sorted(actual - expected):
+        violations.append(
+            Violation(
+                rule="api.companyFacadeFrozenSurface",
+                path=path.as_posix(),
+                line=lineByName.get(methodName, 0),
+                message=(
+                    "[public] provider Company public surface added without API Contract review: "
+                    f"{providerName}.Company.{methodName}"
+                ),
+                severity="error",
+                baselineKey=f"api.companyFacadeFrozenSurface:added:{path.as_posix()}:{methodName}",
+            )
+        )
+    for methodName in sorted(expected - actual):
+        violations.append(
+            Violation(
+                rule="api.companyFacadeFrozenSurface",
+                path=path.as_posix(),
+                line=0,
+                message=(
+                    "[public] provider Company public surface removed without compatibility review: "
+                    f"{providerName}.Company.{methodName}"
+                ),
+                severity="error",
+                baselineKey=f"api.companyFacadeFrozenSurface:removed:{path.as_posix()}:{methodName}",
+            )
+        )
     return violations
 
 
