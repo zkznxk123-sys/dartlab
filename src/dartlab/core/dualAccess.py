@@ -56,7 +56,23 @@ class CallableAccessor:
         fn = self._fn
 
         def bound(*args: Any, **kwargs: Any) -> Any:
-            """bound — TODO 한국어 동작 설명."""
+            """attribute 이름을 첫 인자로 고정해 원 함수 호출.
+
+            Requires:
+                감싼 함수가 ``fn(attr, *args, **kwargs)`` 호출 형태를 받아야 한다.
+            Raises:
+                원 함수가 발생시키는 예외를 그대로 전달한다.
+            Args:
+                *args: attr 뒤에 전달할 위치 인자.
+                **kwargs: 원 함수에 전달할 키워드 인자.
+            Returns:
+                원 함수가 반환한 값을 그대로 반환한다.
+            Example:
+                >>> def pick(topic):
+                ...     return topic
+                >>> CallableAccessor(pick).BS()
+                'BS'
+            """
             return fn(attr, *args, **kwargs)
 
         bound.__name__ = attr

@@ -47,6 +47,18 @@ from dartlab.core.messagingShare import (
 def inferFeature(error: Exception) -> str | None:
     """Infer the related feature from an exception.
 
+    Capabilities:
+        예외 타입과 메시지 키워드로 ai, finance, data 같은 기능 영역을 추정한다.
+    AIContext:
+        에이전트와 CLI가 원 예외를 사용자 복구 가이드로 바꾸기 전 feature hint를 얻는다.
+    Guide:
+        caller가 feature를 이미 알고 있으면 handleError(feature=...)에 직접 넘긴다.
+    When:
+        공통 error boundary에서 어떤 안내 문구를 선택할지 사전 분류가 필요할 때.
+    How:
+        예외 문자열을 소문자로 정규화하고 provider, finance, parquet, 연결 오류 키워드를
+        순서대로 검사한다.
+
     Args:
         error: Original exception.
 
@@ -55,10 +67,14 @@ def inferFeature(error: Exception) -> str | None:
 
     Raises:
         None.
+    Requires:
+        원본 예외 객체. 외부 서비스나 설정은 필요하지 않다.
 
     Example:
         >>> inferFeature(FileNotFoundError("missing"))
         'data'
+    SeeAlso:
+        handleError: feature 추정 결과를 사용자 안내 문구로 변환한다.
     """
     errStr = str(error).lower()
 
@@ -80,6 +96,18 @@ def inferFeature(error: Exception) -> str | None:
 def handleError(error: Exception, *, feature: str | None = None) -> str:
     """Convert an exception to user-friendly guidance.
 
+    Capabilities:
+        파일, 권한, AI provider, Cloudflare tunnel, 네트워크 오류를 한국어 복구 안내로 변환한다.
+    AIContext:
+        서버/CLI/노트북이 서로 다른 예외를 같은 사용자 메시지 체계로 표시하도록 만드는
+        공통 error formatting boundary다.
+    Guide:
+        예외를 삼키지 않는다. 이 함수는 표시할 문자열만 만들고 raise/log는 caller가 결정한다.
+    When:
+        사용자에게 원 예외 대신 다음 행동이 포함된 안내 문구를 보여줄 때.
+    How:
+        feature hint와 예외 타입/문자열을 함께 검사해 가장 구체적인 handler부터 적용한다.
+
     Args:
         error: Original exception.
         feature: Optional feature id supplied by caller.
@@ -89,10 +117,15 @@ def handleError(error: Exception, *, feature: str | None = None) -> str:
 
     Raises:
         None.
+    Requires:
+        원본 예외 객체. share feature의 cloudflared 안내는 platform 모듈을 사용한다.
 
     Example:
         >>> "파일을 찾을 수 없습니다" in handleError(FileNotFoundError("x"))
         True
+    SeeAlso:
+        inferFeature: feature hint 자동 추정.
+        dartlab.core.messagingShare: tunnel/share 전용 안내 문구.
     """
     errType = type(error).__name__
     errStr = str(error)

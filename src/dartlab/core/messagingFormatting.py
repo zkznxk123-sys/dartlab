@@ -57,6 +57,8 @@ def formatMessage(key: str, **kwargs: Any) -> str:
 
     Raises:
         ``KeyError`` when ``key`` is not registered or a required template variable is missing.
+    Requires:
+        key가 ``messagingCatalog.SIMPLE`` 또는 ``STRUCTURED``에 등록되어 있어야 한다.
 
     Example:
         >>> formatMessage("download:done_short", sizeStr="1MB")
@@ -70,6 +72,19 @@ def formatMessage(key: str, **kwargs: Any) -> str:
 def suggest(funcName: str) -> str | None:
     """Return capability guidance for a function or method.
 
+    Capabilities:
+        generated capability metadata에서 함수/메서드 요약, capabilities, requires를 찾아
+        사람이 읽을 안내 문장으로 조립한다.
+    AIContext:
+        사용자가 기능명을 잘못 쓰거나 다음 호출법을 물을 때 AI/CLI가 같은 capability
+        원장을 참조하게 한다.
+    Guide:
+        direct key, ``Company.<name>``, ``scan.<name>``, ``gather.<name>`` 순서로 찾는다.
+    When:
+        메시징 레이어가 함수별 도움말이나 대체 호출 안내를 제안할 때.
+    How:
+        ``dartlab.reference.capability._generated``를 lazy import하고 CAPABILITIES dict를 조회한다.
+
     Args:
         funcName: Name such as ``"valuation"``, ``"Company.BS"``, or ``"scan.governance"``.
 
@@ -78,10 +93,15 @@ def suggest(funcName: str) -> str | None:
 
     Raises:
         No public exception; missing generated capability module returns ``None``.
+    Requires:
+        생성된 capability 모듈이 있으면 사용한다. 없으면 ``None``을 반환한다.
 
     Example:
         >>> suggest("__missing__") is None
         True
+    SeeAlso:
+        dartlab.reference.capability._generated: capability metadata source.
+        formatMessage: catalog message formatting.
     """
     try:
         import importlib

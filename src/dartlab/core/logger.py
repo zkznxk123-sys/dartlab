@@ -83,6 +83,20 @@ def _ensureDefaultHandler() -> None:
 def getLogger(name: str | None = None) -> logging.Logger:
     """dartlab 네임스페이스 로거.
 
+    Capabilities:
+        dartlab root logger의 기본 stderr handler를 보장하고 모듈별 logger를 반환한다.
+    AIContext:
+        다운로드, provider fetch, Guard 실행 등 라이브러리 내부 진단 메시지를 사용자
+        설정 가능한 logging 흐름에 남기는 표준 entry point다.
+    Guide:
+        라이브러리 코드는 print 대신 ``getLogger(__name__)``를 사용한다. CLI 사용자
+        출력만 별도 print를 허용한다.
+    When:
+        모듈 로거가 필요하거나 Windows 터미널 한글 로그 인코딩을 안전하게 맞춰야 할 때.
+    How:
+        _ensureDefaultHandler를 먼저 호출한 뒤, name이 dartlab prefix를 갖는지에 따라
+        root 또는 하위 logger 이름을 만든다.
+
     Parameters
     ----------
     name : str | None
@@ -92,6 +106,17 @@ def getLogger(name: str | None = None) -> logging.Logger:
     -------
     logging.Logger
         ``dartlab`` 또는 ``dartlab.<name>`` 로거. 기본 핸들러 부착됨.
+    Requires:
+        표준 logging 모듈과 sys.stderr가 사용 가능해야 한다.
+    Raises:
+        없음. stream 재구성 실패는 내부에서 무시한다.
+    Example:
+        >>> log = getLogger("example")
+        >>> log.name
+        'dartlab.example'
+    SeeAlso:
+        _ensureDefaultHandler: root logger handler 초기화.
+        _ensureUtf8Stream: Windows UTF-8 stream 보정.
     """
     _ensureDefaultHandler()
     if name is None or name == _ROOT_NAME:

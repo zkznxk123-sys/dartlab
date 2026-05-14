@@ -63,18 +63,20 @@ class Context:
     def hasDartKey(self) -> bool:
         """Return whether a DART API key is configured.
 
-        Args:
-            None.
+            Args:
+                None.
 
-        Returns:
-            ``True`` when the credential registry reports a configured DART key.
+            Returns:
+                ``True`` when the credential registry reports a configured DART key.
 
         Raises:
             No public exception; missing credential provider import is treated as ``False``.
+        Requires:
+            선택적으로 ``dartlab.core.credentials``가 import 가능하면 credential registry를 확인한다.
 
         Example:
             >>> isinstance(Context().hasDartKey, bool)
-            True
+                True
         """
         if self._dart_key is None:
             try:
@@ -90,18 +92,20 @@ class Context:
     def verbose(self) -> bool:
         """Return current verbose mode.
 
-        Args:
-            None.
+            Args:
+                None.
 
-        Returns:
-            ``dartlab.config.verbose`` cached as a boolean.
+            Returns:
+                ``dartlab.config.verbose`` cached as a boolean.
 
         Raises:
             Propagates unexpected config import/runtime errors.
+        Requires:
+            ``dartlab.config``가 import 가능해야 한다.
 
         Example:
             >>> isinstance(Context().verbose, bool)
-            True
+                True
         """
         if self._verbose is None:
             from dartlab import config

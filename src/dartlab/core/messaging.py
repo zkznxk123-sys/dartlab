@@ -153,6 +153,8 @@ def format(key: str, **kwargs: Any) -> str:
 
     Raises:
         ``KeyError`` when the key or template variable is missing.
+    Requires:
+        key가 ``messagingCatalog``의 simple 또는 structured catalog에 등록되어 있어야 한다.
 
     Example:
         >>> format("download:done_short", sizeStr="1MB")
@@ -172,6 +174,8 @@ def progress(text: str) -> None:
 
     Raises:
         Logger backend errors, if configured logger raises.
+    Requires:
+        dartlab logger가 초기화 가능해야 한다. verbose가 꺼져 있으면 로그를 남기지 않는다.
 
     Example:
         >>> progress("KRX KIND 상장법인 목록 다운로드 중...")

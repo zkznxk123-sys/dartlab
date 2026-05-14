@@ -107,6 +107,32 @@ DATA_RELEASES: dict[str, dict] = {
 
 
 def hfBaseUrl(category: str = "docs") -> str:
-    """HuggingFace 데이터셋 base URL."""
+    """HuggingFace 데이터셋 base URL.
+
+    Capabilities:
+        DATA_RELEASES에 등록된 데이터 카테고리를 HuggingFace resolve URL로 변환한다.
+    AIContext:
+        데이터 다운로드 경로를 설명하거나 캐시 출처를 추적할 때 사용하는 L0 설정 함수다.
+    Guide:
+        새 데이터 카테고리는 DATA_RELEASES에 먼저 추가하고, 호출자는 카테고리 키만 넘긴다.
+    When:
+        dataLoader가 원격 parquet, zip, json 경로의 base URL을 만들 때 호출한다.
+    How:
+        HF_BASE_URL 뒤에 DATA_RELEASES[category]["dir"] 값을 붙여 반환한다.
+    Requires:
+        category가 DATA_RELEASES에 등록되어 있어야 한다.
+    Raises:
+        KeyError: category가 DATA_RELEASES에 없을 때.
+    Args:
+        category: DATA_RELEASES에 등록된 데이터 카테고리 키.
+    Returns:
+        HuggingFace resolve URL의 카테고리별 base 경로.
+    Example:
+        >>> hfBaseUrl("finance").endswith("/dart/finance")
+        True
+    SeeAlso:
+        DATA_RELEASES: 카테고리별 원격 디렉터리와 공개 여부.
+        dartlab.core.dataLoader.download: 반환 URL을 실제 다운로드에 사용한다.
+    """
     dirPath = DATA_RELEASES[category]["dir"]
     return f"{HF_BASE_URL}/{dirPath}"
