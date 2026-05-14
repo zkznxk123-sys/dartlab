@@ -219,34 +219,34 @@ def _ratioTemplateKeyForIndustryGroup(industryGroup: Any) -> str | None:
     if industryGroup is None:
         return None
 
-    try:
-        from dartlab.industry import IndustryGroup
-    except ImportError:
-        return None
-
     mapping = {
-        IndustryGroup.BANK: "bank",
-        IndustryGroup.INSURANCE: "insurance",
-        IndustryGroup.DIVERSIFIED_FINANCIALS: "diversified_financials",
+        "BANK": "bank",
+        "은행": "bank",
+        "INSURANCE": "insurance",
+        "보험": "insurance",
+        "DIVERSIFIED_FINANCIALS": "diversified_financials",
+        "다각화된금융": "diversified_financials",
     }
-    return mapping.get(industryGroup)
+    return mapping.get(getattr(industryGroup, "name", str(industryGroup))) or mapping.get(
+        getattr(industryGroup, "value", str(industryGroup))
+    )
 
 
 def _ratioArchetypeOverrideForIndustryGroup(industryGroup: Any) -> str | None:
     if industryGroup is None:
         return None
 
-    try:
-        from dartlab.industry import IndustryGroup
-    except ImportError:
-        return None
-
     mapping = {
-        IndustryGroup.BANK: "bank",
-        IndustryGroup.INSURANCE: "insurance",
-        IndustryGroup.DIVERSIFIED_FINANCIALS: "securities",
+        "BANK": "bank",
+        "은행": "bank",
+        "INSURANCE": "insurance",
+        "보험": "insurance",
+        "DIVERSIFIED_FINANCIALS": "securities",
+        "다각화된금융": "securities",
     }
-    return mapping.get(industryGroup)
+    return mapping.get(getattr(industryGroup, "name", str(industryGroup))) or mapping.get(
+        getattr(industryGroup, "value", str(industryGroup))
+    )
 
 
 def _ratioResultHasHeadlineSignal(result: Any) -> bool:

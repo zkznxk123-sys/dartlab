@@ -12,9 +12,6 @@
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/transforms/indicatorDispatch.py:60",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/financeStatementBuilder.py:472",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/scanAccount.py:549",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/spec.py:58",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:223",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:240",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:242",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:291"
     ]

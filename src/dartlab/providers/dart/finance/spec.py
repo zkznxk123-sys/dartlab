@@ -53,11 +53,7 @@ def buildSpec() -> dict:
         TargetMarkets:
             - KR (DART).
     """
-    import dataclasses
-
-    from dartlab.analysis.financial.ratios import RatioResult
-
-    ratioFields = [f.name for f in dataclasses.fields(RatioResult) if f.name != "warnings"]
+    from dartlab.core.ratioCategories import RATIO_SPEC_FIELDS
 
     return {
         "name": "dart.finance",
@@ -66,7 +62,7 @@ def buildSpec() -> dict:
             "statements": ["IS", "BS", "CF", "SCE"],
             "period": "2019~2024 (분기별)",
             "mappedAccounts": 34171,
-            "ratioCount": len(ratioFields),
+            "ratioCount": len(RATIO_SPEC_FIELDS),
         },
         "detail": {
             "normalization": {
@@ -83,6 +79,6 @@ def buildSpec() -> dict:
                 "accountMappings.json 조회 (34,171개)",
                 "괄호 제거 fallback",
             ],
-            "ratios": ratioFields,
+            "ratios": RATIO_SPEC_FIELDS,
         },
     }
