@@ -52,7 +52,7 @@ def _ensurePlotly():
 
         return go
     except ImportError:
-        raise ImportError("plotly 패키지가 필요합니다.\n  pip install plotly") from None
+        raise ImportError("plotly 패키지가 필요합니다.\n  pip install --upgrade dartlab") from None
 
 
 def _applyTheme(fig) -> None:

@@ -83,6 +83,8 @@ dependencies = [
     "mcp[cli]>=1.0; sys_platform != 'emscripten'",
     "qrcode>=7.0,<9; sys_platform != 'emscripten'",
     "PyYAML>=6.0.0,<7; sys_platform != 'emscripten'",
+    # viz
+    "plotly>=5.0.0,<6; sys_platform != 'emscripten'",
 ]
 
 [project.scripts]

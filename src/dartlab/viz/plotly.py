@@ -26,7 +26,7 @@ def _ensurePlotly():
 
         return go
     except ImportError:
-        raise ImportError("plotly 패키지가 필요합니다.\n  pip install plotly") from None
+        raise ImportError("plotly 패키지가 필요합니다.\n  pip install --upgrade dartlab") from None
 
 
 def _applyTheme(fig) -> None:
@@ -56,7 +56,7 @@ class PlotlyChartRenderer:
     """ChartHtmlRenderer Protocol 구현 — viz/__init__.py 가 등록.
 
     core/render registry 가 보유. core/select.py 가 lookup 후 호출.
-    plotly 미설치 환경에서는 실제 렌더 호출 시 설치 안내 오류를 낸다.
+    plotly 미설치 환경 (pyodide 등) 에서는 viz import 자체가 실패해 등록 안 됨.
     """
 
     def htmlFromSpec(self, spec: dict) -> str:
