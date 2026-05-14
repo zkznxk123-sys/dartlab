@@ -59,13 +59,9 @@ dependencies = [
     "lxml; sys_platform == 'emscripten'",
     "polars>=1.0.0,<2; sys_platform != 'emscripten'",
     "polars; sys_platform == 'emscripten'",
-    # M6: cross-company × multi-table aggregation 의 OOC god mode — Polars
-    # LazyFrame ↔ DuckDB relation Arrow zero-copy. 환경변수
-    # DARTLAB_CROSS_SCAN_ENGINE=duckdb 또는 large dataset 검출 시 자동 fallback.
-    "duckdb>=1.0,<2; sys_platform != 'emscripten'",
     "numpy>=1.26.0,<3; sys_platform != 'emscripten'",
     "numpy; sys_platform == 'emscripten'",
-    # M6: Polars ↔ DuckDB Arrow zero-copy. pyodide 는 빌트인.
+    # parquet fallback / pyodide bridge. pyodide 는 빌트인.
     "pyarrow>=17,<21; sys_platform != 'emscripten'",
     "pyarrow; sys_platform == 'emscripten'",
     # network
@@ -81,12 +77,7 @@ dependencies = [
     "uvicorn[standard]>=0.30.0,<1; sys_platform != 'emscripten'",
     "sse-starlette>=2.0.0,<3; sys_platform != 'emscripten'",
     "mcp[cli]>=1.0; sys_platform != 'emscripten'",
-    "qrcode>=7.0,<9; sys_platform != 'emscripten'",
     "PyYAML>=6.0.0,<7; sys_platform != 'emscripten'",
-    # viz
-    "plotly>=5.0.0,<6; sys_platform != 'emscripten'",
-    "plotext>=5.2.8,<6; sys_platform != 'emscripten'",  # 터미널 ASCII 차트 (toAscii)
-    "marimo>=0.23.5",
 ]
 
 [project.scripts]
@@ -311,7 +302,6 @@ DEP002 = [
 [dependency-groups]
 dev = [
     "build>=1.4.0",
-    "dartlab[all]",
     "hatchling>=1.29.0",
     "hypothesis>=6.100.0",
     "import-linter>=2.0",  # scripts/audit/cycleScan.py + pyproject [tool.importlinter] — 레이어 단방향 강제 (P0 가드)

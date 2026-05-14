@@ -27,7 +27,7 @@
 	const molabBase =
 		'https://molab.marimo.io/github/eddmpython/dartlab/blob/master/notebooks/marimo/';
 
-	const localCmd = 'uv run marimo edit notebooks/marimo/01_company.py';
+	const localCmd = 'uv run --with marimo marimo edit notebooks/marimo/01_company.py';
 
 	let copied = $state(false);
 

@@ -48,7 +48,7 @@ runtimeCompatibility:
   localPython:
     status: supported
     notes:
-      - "uv run marimo edit notebooks/marimo/{name}.py 로 실행."
+      - "uv run --with marimo marimo edit notebooks/marimo/{name}.py 로 실행."
   mcp:
     status: limited
   webAi:
@@ -95,7 +95,7 @@ Colab 은 브라우저에서 바로 실행 (Google 계정). Molab 은 marimo 클
 ## 로컬 marimo 실행
 
 ```bash
-uv run marimo edit notebooks/marimo/01_company.py
+uv run --with marimo marimo edit notebooks/marimo/01_company.py
 ```
 
 같은 코드 (`notebooks/marimo/{name}.py`) 가 Molab 클라우드에서도 동작한다.

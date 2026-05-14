@@ -26,15 +26,12 @@ def build_wheel() -> Path:
 
 
 _PYODIDE_STRIP = {
-    # server / AI / viz — pyodide 불필요
+    # server / AI / MCP — pyodide 불필요
     "fastapi",
     "uvicorn",
     "sse-starlette",
     "sse_starlette",
     "mcp",
-    "marimo",
-    "qrcode",
-    "plotly",
     "huggingface-hub",
     "huggingface_hub",
     "google-genai",

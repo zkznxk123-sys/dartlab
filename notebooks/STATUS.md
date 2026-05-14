@@ -12,7 +12,7 @@
 ```
 notebooks/
 ├── colab/            # 11 ipynb — 마크다운 + 코드
-├── marimo/           # 11 .py   — 코드만 (uv run marimo edit 로 편집)
+├── marimo/           # 11 .py   — 코드만 (uv run --with marimo marimo edit 로 편집)
 │   └── samples/      # 내부 검증용 노트북
 └── STATUS.md
 ```
@@ -23,4 +23,4 @@ notebooks/
 
 - Colab: `https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/{file}`
 - Molab: `https://molab.marimo.io/github/eddmpython/dartlab/blob/master/notebooks/marimo/{file}`
-- 로컬 마리모 편집: `uv run marimo edit notebooks/marimo/{file}`
+- 로컬 마리모 편집: `uv run --with marimo marimo edit notebooks/marimo/{file}`

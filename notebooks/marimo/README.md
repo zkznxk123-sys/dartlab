@@ -29,6 +29,12 @@ pip install marimo dartlab
 marimo edit notebooks/marimo/05_analysis.py
 ```
 
+uv 사용 시 프로젝트 의존성에 marimo를 추가하지 말고 일회성 실행으로 연다:
+
+```bash
+uv run --with marimo marimo edit notebooks/marimo/05_analysis.py
+```
+
 또는 marimo.app 에서 바로 열기:
 
 [![Open in marimo](https://marimo.io/shield.svg)](https://marimo.app/github.com/eddmpython/dartlab/blob/master/notebooks/marimo)

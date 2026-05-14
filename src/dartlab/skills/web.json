@@ -27653,7 +27653,7 @@
         "localPython": {
           "status": "supported",
           "notes": [
-            "uv run marimo edit notebooks/marimo/{name}.py 로 실행."
+            "uv run --with marimo marimo edit notebooks/marimo/{name}.py 로 실행."
           ]
         },
         "mcp": {
