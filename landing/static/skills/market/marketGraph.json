@@ -1,7 +1,7 @@
 {
   "meta": {
     "schemaVersion": "1",
-    "generatedAt": "2026-05-14T02:05:44Z"
+    "generatedAt": "2026-05-14T03:48:35Z"
   },
   "nodes": [
     {
@@ -29,6 +29,11 @@
     {
       "id": "engines.macro",
       "title": "engines.macro",
+      "kind": "builtinSkill"
+    },
+    {
+      "id": "engines.gather.macro",
+      "title": "engines.gather.macro",
       "kind": "builtinSkill"
     },
     {
@@ -71,6 +76,11 @@
     {
       "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "dst": "engines.macro",
+      "kind": "mapsToBuiltin"
+    },
+    {
+      "src": "market.skill-market-경제-이벤트-반응함수-분석.31",
+      "dst": "engines.gather.macro",
       "kind": "mapsToBuiltin"
     },
     {

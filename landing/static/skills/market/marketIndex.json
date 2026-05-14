@@ -3,7 +3,7 @@
     "schemaVersion": "1",
     "source": "github-discussions",
     "category": "Ideas:[Skill Market]",
-    "generatedAt": "2026-05-14T02:05:44Z",
+    "generatedAt": "2026-05-14T03:48:35Z",
     "skillCount": 1,
     "trustPolicy": "community market entries are untrusted until curated"
   },
@@ -18,21 +18,61 @@
         "이벤트: CPI, 고용, FOMC, 금통위, GDP, PMI 등",
         "발표치, 예상치, 직전치",
         "발표 시각과 기준일",
-        "발표 전후 금리, 환율, 주가지수, 섹터 수익률"
+        "발표 전후 금리, 환율, 주가지수, 섹터 수익률",
+        "분석 기간: 이벤트 전후 1일, 5일, 20일",
+        "비교 기준: 과거 유사 이벤트, 직전 이벤트, 최근 1년 이벤트 분포"
       ],
       "outputs": [
         "지표 서프라이즈 방향과 크기",
         "중앙은행 정책 경로에 주는 영향",
         "금리·환율·주식 반응 요약",
         "어떤 섹터가 수혜/피해를 받는지",
-        "다음 이벤트에서 확인해야 할 체크포인트"
+        "다음 이벤트에서 확인해야 할 체크포인트",
+        "`webRef`, `tableRef`, `valueRef`, `skillRef`가 붙은 재현 가능한 근거"
+      ],
+      "dataSources": [
+        "경제 원자료: FRED, ECOS, BOK, 통계청, 각국 통계기관",
+        "시장 반응: `dartlab.gather(price)`, 금리·환율·지수 시계열, 섹터 수익률",
+        "이벤트 일정과 예상치: 경제 캘린더 또는 consensus source를 `webRef`로 고정합니다.",
+        "기존 DartLab 연결: `engines.macro.rates`, `engines.macro.forecast`, `recipes.macro.sectorRotation`, `recipes.macro.timeSeriesChart`"
+      ],
+      "procedure": [
+        "이벤트의 발표치, 예상치, 직전치를 고정합니다.",
+        "`surpriseScore = (actual - consensus) / recentEventStd`로 지표 서프라이즈를 표준화합니다.",
+        "발표 전후 1일, 5일, 20일의 금리·환율·지수·섹터 반응을 계산합니다.",
+        "물가, 고용, 성장, 금융여건을 함께 보고 중앙은행 반응함수 방향을 판정합니다.",
+        "과거 유사 이벤트 분포와 비교해 이번 반응이 정상 범위인지 이상 반응인지 분리합니다.",
+        "섹터별 수혜·피해 후보와 다음 이벤트 체크포인트를 정리합니다."
+      ],
+      "outputSchema": [
+        "`surpriseScore`: 발표치와 예상치 차이를 표준화한 숫자",
+        "`policyImpact`: 중앙은행 반응함수에 주는 영향 설명",
+        "`assetReaction`: 금리, 환율, 주가지수의 이벤트 윈도우별 반응 표",
+        "`sectorReaction`: 섹터별 수혜/피해 후보와 근거 표",
+        "`nextChecks`: 다음 이벤트에서 확인할 체크포인트 목록",
+        "`refs`: `webRef`, `tableRef`, `valueRef`, `skillRef`"
       ],
       "criteria": [
         "발표치와 예상치의 차이를 surprise score로 정규화합니다.",
         "금리·환율·주식 반응은 이벤트 전후 윈도우를 고정해 비교합니다.",
         "중앙은행 반응은 물가, 고용, 성장, 금융여건을 함께 봅니다.",
         "단일 이벤트 결론은 금지하고 과거 유사 이벤트 분포와 비교합니다.",
-        "consensus source가 없으면 `marketCurated` 실행 예시가 아니라 `marketRunnable` 후보로만 취급합니다."
+        "consensus source가 없으면 `marketCurated` 실행 예시가 아니라 `marketRunnable` 후보로만 취급합니다.",
+        "국가와 시장을 섞을 때는 기준일, 통화, 거래시간 차이를 명시합니다."
+      ],
+      "forbidden": [
+        "발표치가 높습니다/낮습니다만으로 시장 반응을 단정하지 않습니다.",
+        "이벤트 직후 1일 반응을 장기 추세로 일반화하지 않습니다.",
+        "consensus source가 불명확하면 surprise score를 확정하지 않습니다.",
+        "KR과 US 이벤트를 같은 시간축으로 비교할 때 거래시간 차이를 무시하지 않습니다.",
+        "공식 builtin Skill OS와 같은 신뢰 계층으로 취급하지 않습니다."
+      ],
+      "completionCriteria": [
+        "입력, 출력, 판단 기준, 데이터 소스 후보가 있습니다.",
+        "기존 builtin Skill OS 매핑이 있습니다.",
+        "실행 전제와 금지 조건이 있습니다.",
+        "credit 원장에 originator와 curator가 남습니다.",
+        "현재 상태는 `marketCurated`로 운영할 수 있습니다."
       ],
       "examples": [
         "미국 CPI가 예상보다 높게 나오면 성장주와 원달러 환율은 어떻게 반응합니까?",
@@ -55,6 +95,7 @@
         "engines.scan",
         "engines.credit",
         "engines.macro",
+        "engines.gather.macro",
         "engines.macro.rates",
         "engines.macro.forecast",
         "recipes.macro.sectorRotation",
@@ -65,7 +106,7 @@
       "discussionNumber": 31,
       "author": "eddmpython",
       "createdAt": "2026-05-13T14:41:09Z",
-      "updatedAt": "2026-05-14T02:04:52Z",
+      "updatedAt": "2026-05-14T03:46:17Z",
       "credits": {
         "originator": [
           "eddmpython"

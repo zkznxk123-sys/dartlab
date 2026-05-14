@@ -63,9 +63,12 @@
 		</div>
 	</header>
 
-	<section class="notice">
-		<ShieldAlert size={16} />
-		<span>이 항목은 커뮤니티 Skill Market 자산이다. 공식 Skill OS 가 아니며 실행 전 출처와 trust tier 를 확인해야 한다.</span>
+			<section class="notice">
+				<ShieldAlert size={16} />
+		<span>
+			이 항목은 커뮤니티 Skill Market 자산이다. marketCurated 는 Skill Market 안에서 완성된 상태이며,
+			공식 builtin Skill OS 로 포함된다는 뜻이 아니다.
+		</span>
 	</section>
 
 	<div class="layout">
@@ -109,8 +112,36 @@
 					<ul>{#each (skill.inputs ?? []) as item}<li>{item}</li>{/each}</ul>
 				</div>
 				<div>
+					<h2>Data Sources</h2>
+					{#if skill.dataSources?.length}
+						<ul>{#each skill.dataSources as item}<li>{item}</li>{/each}</ul>
+					{:else}
+						<p class="muted">데이터 소스가 아직 부족하다.</p>
+					{/if}
+				</div>
+			</section>
+
+			<section>
+				<h2>Procedure</h2>
+				{#if skill.procedure?.length}
+					<ol>{#each skill.procedure as item}<li>{item}</li>{/each}</ol>
+				{:else}
+					<p class="muted">실행 절차가 아직 부족하다.</p>
+				{/if}
+			</section>
+
+			<section class="spec-grid">
+				<div>
 					<h2>Outputs</h2>
 					<ul>{#each (skill.outputs ?? []) as item}<li>{item}</li>{/each}</ul>
+				</div>
+				<div>
+					<h2>Output Schema</h2>
+					{#if skill.outputSchema?.length}
+						<ul>{#each skill.outputSchema as item}<li>{item}</li>{/each}</ul>
+					{:else}
+						<p class="muted">출력 스키마가 아직 부족하다.</p>
+					{/if}
 				</div>
 			</section>
 
@@ -122,6 +153,20 @@
 					<p class="muted">판단 기준이 아직 부족하다.</p>
 				{/if}
 			</section>
+
+			{#if skill.forbidden?.length}
+				<section>
+					<h2>Forbidden</h2>
+					<ul>{#each skill.forbidden as item}<li>{item}</li>{/each}</ul>
+				</section>
+			{/if}
+
+			{#if skill.completionCriteria?.length}
+				<section>
+					<h2>Completion Criteria</h2>
+					<ul>{#each skill.completionCriteria as item}<li>{item}</li>{/each}</ul>
+				</section>
+			{/if}
 
 			<section>
 				<h2>Mapped Builtin Skills</h2>

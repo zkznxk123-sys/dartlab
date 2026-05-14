@@ -546,6 +546,19 @@ HuggingFace Spaces 호스팅. DART API 키 불필요. **Claude Desktop 데스크
 
 > 옛 33 generated 도구 (`companyAnalysis`/`companyStory`/`marketScan` 등) 는 0.10 부터 폐기 — 모두 `RunPython` 안에서 `dartlab.Company / dartlab.scan / dartlab.macro` 직접 호출. 마이그레이션은 [CHANGELOG](https://github.com/eddmpython/dartlab/releases) 참조.
 
+## Skill OS 와 Skill Market
+
+DartLab 에는 두 가지 스킬 층이 있습니다.
+
+| 층 | 위치 | 역할 |
+|---|---|---|
+| **builtin Skill OS** | `src/dartlab/skills/specs/**` · `/skills` | 공식 운영·엔진·분석 절차입니다. 패키지와 함께 배포되며 AI 가 먼저 검색합니다. |
+| **community Skill Market** | GitHub Discussions · `/skills/market` · 정적 `marketIndex.json` | 사용자가 공유한 분석 질문을 Forge 가 구조화한 커뮤니티 스킬입니다. 패키지 builtin 에 포함되지 않습니다. |
+
+운영 흐름은 단순합니다. 사용자가 GitHub Discussions 에 분석 질문을 씁니다. DartLab Forge 가 원문과 댓글을 읽고 `intent`, `inputs`, `dataSources`, `procedure`, `outputs`, `outputSchema`, `criteria`, `forbidden`, `completionCriteria` 를 구조화합니다. GitHub Action 이 정적 `marketIndex.json` 을 갱신합니다. 랜딩의 [Skill Market](https://eddmpython.github.io/dartlab/skills/market) 과 AI 도구 `ReadSkillMarket` 이 이 index 를 검색합니다.
+
+`marketCurated` 는 Skill Market 안에서 완성된 공유스킬입니다. builtin 편입을 뜻하지 않습니다. 완성된 공유스킬은 Discussion 과 정적 market index 에 남고, AI 는 `sourceUrl` 과 `trustTier` 를 표시한 뒤 보조 절차로 사용할 수 있습니다. `builtinCandidate` 는 예외적인 장기 검토 상태입니다. 기본 운영 경로는 토론에서 완성한 공유스킬을 Skill Market 에 남기는 것입니다.
+
 ## dartlab-lite — 브라우저·엑셀에서 설치 없이 (Pyodide)
 
 > 상세: [블로그 — 엑셀·브라우저·노트북에서 설치 없이 dartlab 쓰기 (Pyodide)](https://eddmpython.github.io/dartlab/blog/pyodide-dartlab-lite)

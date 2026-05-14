@@ -152,8 +152,13 @@ def _scoreMarketItem(item: dict[str, Any], terms: list[str], *, query: str) -> t
         "intent": item.get("intent"),
         "summary": item.get("summary"),
         "inputs": item.get("inputs"),
+        "dataSources": item.get("dataSources"),
+        "procedure": item.get("procedure"),
         "outputs": item.get("outputs"),
+        "outputSchema": item.get("outputSchema"),
         "criteria": item.get("criteria"),
+        "forbidden": item.get("forbidden"),
+        "completionCriteria": item.get("completionCriteria"),
         "tags": item.get("tags"),
         "mappedBuiltinSkills": item.get("mappedBuiltinSkills"),
         "missingDetails": item.get("missingDetails"),
@@ -182,7 +187,17 @@ def _fieldWeight(name: str) -> float:
         return 3.5
     if name in {"intent", "summary"}:
         return 2.75
-    if name in {"inputs", "outputs", "criteria", "mappedBuiltinSkills"}:
+    if name in {
+        "inputs",
+        "dataSources",
+        "procedure",
+        "outputs",
+        "outputSchema",
+        "criteria",
+        "forbidden",
+        "completionCriteria",
+        "mappedBuiltinSkills",
+    }:
         return 1.75
     return 1.0
 

@@ -253,7 +253,12 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
         "intent": parsed["intent"],
         "inputs": parsed["inputs"],
         "outputs": parsed["outputs"],
+        "dataSources": parsed["dataSources"],
+        "procedure": parsed["procedure"],
+        "outputSchema": parsed["outputSchema"],
         "criteria": parsed["criteria"],
+        "forbidden": parsed["forbidden"],
+        "completionCriteria": parsed["completionCriteria"],
         "examples": parsed["examples"],
         "tags": parsed["tags"],
         "state": state,
@@ -280,13 +285,20 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
 def parseSkillText(title: str, body: str) -> dict[str, Any]:
     text = normalizeText(body)
     inputs = extractList(text, ("입력", "inputs", "input"))
+    dataSources = extractList(text, ("데이터 소스 후보", "데이터 소스", "자료", "data sources", "sources"))
+    procedure = extractList(text, ("실행 절차", "절차", "procedure", "steps"))
     outputs = extractList(text, ("기대 결과", "결과", "출력", "outputs", "output"))
+    outputSchema = extractList(text, ("출력 스키마", "스키마", "output schema", "schema"))
     criteria = extractList(text, ("판단 기준", "기준", "판단", "criteria", "threshold"))
+    forbidden = extractList(text, ("금지와 한계", "금지", "한계", "forbidden", "limitations"))
+    completionCriteria = extractList(text, ("완료 기준", "완성 기준", "completion criteria", "done criteria"))
     examples = extractList(text, ("예시 질문", "예시", "example", "examples"))
     if not inputs:
         inputs = inferInputs(text)
     if not outputs:
         outputs = inferOutputs(text)
+    if not outputSchema:
+        outputSchema = inferOutputSchema(text, outputs)
     if not criteria:
         criteria = inferCriteria(text)
     warnings = [pattern for pattern in BLOCK_PATTERNS if pattern.lower() in text.lower()]
@@ -305,8 +317,13 @@ def parseSkillText(title: str, body: str) -> dict[str, Any]:
         "summary": firstSentence(text) or title,
         "intent": firstParagraph(text) or title,
         "inputs": inputs,
+        "dataSources": dataSources,
+        "procedure": procedure,
         "outputs": outputs,
+        "outputSchema": outputSchema,
         "criteria": criteria,
+        "forbidden": forbidden,
+        "completionCriteria": completionCriteria,
         "examples": examples,
         "tags": inferTags(f"{title}\n{text}"),
         "missingDetails": missingDetails,
@@ -322,22 +339,30 @@ def extractList(text: str, labels: tuple[str, ...]) -> list[str]:
     labelPattern = "|".join(re.escape(label) for label in labels)
     for index, line in enumerate(lines):
         stripped = line.strip()
-        match = re.match(rf"^(?:#+\s*)?(?:{labelPattern})\s*[:：]?\s*(.*)$", stripped, flags=re.IGNORECASE)
+        match = re.match(
+            rf"^(?:#+\s*)?(?:{labelPattern})(?:\s*[:：]\s*(.*)|\s*)$",
+            stripped,
+            flags=re.IGNORECASE,
+        )
         if not match:
             continue
-        inline = match.group(1).strip(" -")
+        inline = (match.group(1) or "").strip(" -")
         if inline:
             values.extend(splitItems(inline))
-        for follow in lines[index + 1 : index + 7]:
+        for follow in lines[index + 1 : index + 20]:
             item = follow.strip()
             if not item:
                 if values:
                     break
                 continue
+            if item.startswith("#"):
+                break
             if re.match(r"^(?:#+\s*)?[\w가-힣 ]+\s*[:：]\s*", item) and not item.startswith(("-", "*")):
                 break
             if item.startswith(("-", "*")):
                 values.append(item[1:].strip())
+            elif re.match(r"^\d+[.)]\s+", item):
+                values.append(re.sub(r"^\d+[.)]\s+", "", item).strip())
             elif values:
                 values.extend(splitItems(item))
     return dedupeClean(values)[:8]
@@ -368,6 +393,24 @@ def inferOutputs(text: str) -> list[str]:
     return [value for key, value in pairs if key.lower() in text.lower()]
 
 
+def inferOutputSchema(text: str, outputs: list[str]) -> list[str]:
+    haystack = f"{text}\n{' '.join(outputs)}".lower()
+    schema: list[str] = []
+    if any(term in haystack for term in ("서프라이즈", "surprise")):
+        schema.append("surpriseScore: number")
+    if any(term in haystack for term in ("정책", "policy", "중앙은행", "fed", "금통위")):
+        schema.append("policyImpact: string")
+    if any(term in haystack for term in ("금리", "환율", "주식", "수익률", "asset", "market")):
+        schema.append("assetReaction: table")
+    if any(term in haystack for term in ("섹터", "업종", "sector")):
+        schema.append("sectorReaction: table")
+    if any(term in haystack for term in ("체크포인트", "다음", "next")):
+        schema.append("nextChecks: list[str]")
+    if schema:
+        schema.append("refs: {skillRef, sourceRef, tableRef, valueRef}")
+    return dedupeClean(schema)[:8]
+
+
 def inferCriteria(text: str) -> list[str]:
     candidates = []
     for line in text.splitlines():
@@ -384,6 +427,7 @@ def mapBuiltinSkills(text: str) -> list[str]:
         (("peer", "비교", "횡단"), "engines.scan"),
         (("신용", "부도", "credit"), "engines.credit"),
         (("거시", "금리", "macro"), "engines.macro"),
+        (("fred", "ecos", "bok", "한국은행", "경제 원자료", "gather"), "engines.gather.macro"),
         (("cpi", "fomc", "금통위", "경제 이벤트", "서프라이즈"), "engines.macro.rates"),
         (("고용", "실업률", "침체확률"), "engines.macro.forecast"),
         (("섹터", "업종", "sector"), "recipes.macro.sectorRotation"),
@@ -397,7 +441,7 @@ def mapBuiltinSkills(text: str) -> list[str]:
     for terms, skillId in mapping:
         if any(term.lower() in lowered for term in terms):
             out.append(skillId)
-    return out[:8]
+    return dedupeClean(out)[:12]
 
 
 def inferTags(text: str) -> list[str]:
@@ -608,21 +652,37 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
     missingText = ", ".join(missing) if missing else "없습니다."
     mapped = ", ".join(skill.get("mappedBuiltinSkills") or []) or "없습니다."
     inputs = ", ".join(skill.get("inputs") or []) or "정해지지 않았습니다."
+    dataSources = ", ".join(skill.get("dataSources") or []) or "정해지지 않았습니다."
+    procedure = ", ".join(skill.get("procedure") or []) or "정해지지 않았습니다."
     outputs = ", ".join(skill.get("outputs") or []) or "정해지지 않았습니다."
+    outputSchema = ", ".join(skill.get("outputSchema") or []) or "정해지지 않았습니다."
     criteria = ", ".join(skill.get("criteria") or []) or "정해지지 않았습니다."
+    forbidden = ", ".join(skill.get("forbidden") or []) or "정해지지 않았습니다."
+    completionCriteria = ", ".join(skill.get("completionCriteria") or []) or "정해지지 않았습니다."
+    completeText = (
+        "Skill Market 안에서 완성된 공유스킬입니다. 패키지 builtin Skill OS 에 포함하지 않습니다."
+        if skill.get("trustTier") == "marketCurated" and not missing
+        else "아직 Skill Market 완성 상태가 아닙니다."
+    )
     return textwrap.dedent(
         f"""\
         {FORGE_MARKER}
         **DartLab Forge 자동 초안**
 
         이 댓글은 커뮤니티 Skill Market 후보를 자동 구조화한 초안입니다. 공식 Skill OS 승인이나 curated 판정이 아닙니다.
+        {completeText}
 
         - 상태: `{skill.get("state")}`
         - trust tier: `{skill.get("trustTier")}`
         - 추정 의도: {skill.get("intent")}
         - 입력 후보: {inputs}
+        - 데이터 소스: {dataSources}
+        - 실행 절차: {procedure}
         - 출력 후보: {outputs}
+        - 출력 스키마: {outputSchema}
         - 판단 기준: {criteria}
+        - 금지와 한계: {forbidden}
+        - 완료 기준: {completionCriteria}
         - 매핑된 builtin skill: {mapped}
         - 보완 필요: {missingText}
 
@@ -669,7 +729,7 @@ def splitItems(text: str) -> list[str]:
 def dedupeClean(values: list[str]) -> list[str]:
     out: list[str] = []
     for value in values:
-        clean = re.sub(r"\s+", " ", value).strip(" -*`")
+        clean = re.sub(r"\s+", " ", value).strip(" -*")
         if clean and clean not in out:
             out.append(clean)
     return out

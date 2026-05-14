@@ -30,8 +30,13 @@ export interface MarketSkill {
 	summary?: string;
 	intent?: string;
 	inputs?: string[];
+	dataSources?: string[];
+	procedure?: string[];
 	outputs?: string[];
+	outputSchema?: string[];
 	criteria?: string[];
+	forbidden?: string[];
+	completionCriteria?: string[];
 	examples?: string[];
 	tags?: string[];
 	state?: string;
@@ -81,8 +86,13 @@ export function marketSkillMatches(skill: MarketSkill, query: string): boolean {
 		skill.summary,
 		skill.intent,
 		...(skill.inputs ?? []),
+		...(skill.dataSources ?? []),
+		...(skill.procedure ?? []),
 		...(skill.outputs ?? []),
+		...(skill.outputSchema ?? []),
 		...(skill.criteria ?? []),
+		...(skill.forbidden ?? []),
+		...(skill.completionCriteria ?? []),
 		...(skill.tags ?? []),
 		...(skill.mappedBuiltinSkills ?? [])
 	]
