@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import textwrap
 import threading
 import time
@@ -280,6 +281,25 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                 title=str(date_value),
                 source=refs[0].id,
                 payload={"value": str(date_value)},
+            )
+        )
+    sources_raw = emitted.get("sources") or emitted.get("sourceRefs")
+    if isinstance(sources_raw, dict):
+        sources_iter = [sources_raw]
+    elif isinstance(sources_raw, list):
+        sources_iter = [item for item in sources_raw if isinstance(item, dict)]
+    else:
+        sources_iter = []
+    for idx, source_payload in enumerate(sources_iter):
+        source_id = str(source_payload.get("id") or f"source_{idx}")
+        safe_id = re.sub(r"[^A-Za-z0-9_.:-]+", "_", source_id)[:96]
+        refs.append(
+            Ref(
+                id=f"source:{runId or 'local'}:{safe_id}",
+                kind="sourceRef",
+                title=str(source_payload.get("title") or source_id),
+                source=source_payload.get("url") or refs[0].id,
+                payload=source_payload,
             )
         )
     summary = "run_python 실행 완료"

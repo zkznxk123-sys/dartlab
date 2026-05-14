@@ -26,6 +26,10 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+expectedNovelty:
+  - damodaranL15Memo
+  - reverseDcfFalsifier
+  - l15GapLedger
 runtimeCompatibility:
   server:
     status: supported
@@ -54,6 +58,7 @@ testUniverse:
   stockCodes:
     - "005930"
     - "000660"
+    - "138930"
     - "AAPL"
     - "INTC"
   asOfPolicy: latest
@@ -68,35 +73,122 @@ lastUpdated: "2026-05-13"
 import dartlab
 import importlib.resources as resources
 import json
+from pathlib import Path
+
+import polars as pl
+from dartlab.synth.damodaranL15 import buildDamodaranMemo
 
 target = "005930"
 c = dartlab.Company(target)
-market = getattr(c, "market", "KR")
+market = getattr(c, "market", "US" if not target.isdigit() else "KR")
+currency = getattr(c, "currency", "USD" if market == "US" else "KRW")
+company_name = getattr(c, "corpName", getattr(c, "companyName", target))
 
-country_defaults = json.loads(
-    resources.files("dartlab.reference.data").joinpath("damodaranDefaults.json").read_text(encoding="utf-8")
+
+def _loadReference(name):
+    return json.loads(resources.files("dartlab.reference.data").joinpath(name).read_text(encoding="utf-8"))
+
+
+def _safeShow(topic):
+    try:
+        table = c.show(topic, freq="Y")
+    except TypeError:
+        table = c.show(topic)
+    except Exception:
+        return pl.DataFrame()
+    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()
+
+
+def _latestPrice(frame):
+    if not isinstance(frame, pl.DataFrame) or frame.height == 0:
+        return {}
+    date_col = "date" if "date" in frame.columns else "Date" if "Date" in frame.columns else None
+    close_col = "close" if "close" in frame.columns else "Close" if "Close" in frame.columns else None
+    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]
+    out = {}
+    if close_col and latest.get(close_col) is not None:
+        out["price"] = latest.get(close_col)
+    if date_col and latest.get(date_col) is not None:
+        out["priceDate"] = str(latest.get(date_col))
+    return out
+
+
+def _marketData():
+    out = {}
+    try:
+        price_frame = dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
+        out.update(_latestPrice(price_frame))
+    except Exception as exc:
+        out["priceError"] = type(exc).__name__
+
+    if market == "KR":
+        krx_path = Path("data/krx/prices/raw-2026.parquet")
+        if krx_path.exists():
+            try:
+                krx = (
+                    pl.scan_parquet(str(krx_path))
+                    .filter(pl.col("ISU_CD") == target)
+                    .select(["BAS_DD", "TDD_CLSPRC", "MKTCAP", "LIST_SHRS"])
+                    .sort("BAS_DD")
+                    .tail(1)
+                    .collect()
+                )
+                if krx.height:
+                    row = krx.to_dicts()[0]
+                    out.update(
+                        {
+                            "price": row.get("TDD_CLSPRC") or out.get("price"),
+                            "priceDate": str(row.get("BAS_DD") or out.get("priceDate")),
+                            "marketCap": row.get("MKTCAP"),
+                            "shares": row.get("LIST_SHRS"),
+                        }
+                    )
+            except Exception as exc:
+                out["marketCapError"] = type(exc).__name__
+
+    if market == "US" and out.get("price") is not None:
+        cik = str(getattr(c, "cik", "") or "")
+        for path in (Path(f"data/edgar/finance/{cik}.parquet"), Path(f"data/edgar/finance/{target}.parquet")):
+            if not path.exists():
+                continue
+            try:
+                shares = (
+                    pl.scan_parquet(str(path))
+                    .filter((pl.col("unit") == "shares") & pl.col("tag").str.contains("SharesOutstanding"))
+                    .select(["val", "filed"])
+                    .sort("filed")
+                    .tail(1)
+                    .collect()
+                )
+                if shares.height:
+                    out["shares"] = shares["val"][0]
+                    out["marketCap"] = float(out["price"]) * float(out["shares"])
+                    break
+            except Exception as exc:
+                out["marketCapError"] = type(exc).__name__
+    return out
+
+
+country_defaults = _loadReference("damodaranDefaults.json")
+industry_defaults = _loadReference("damodaranIndustryDefaults.json")
+statements = {topic: _safeShow(topic) for topic in ("IS", "BS", "CF")}
+memo = buildDamodaranMemo(
+    target=target,
+    market=market,
+    currency=currency,
+    companyName=company_name,
+    statements=statements,
+    countryDefaults=country_defaults,
+    industryDefaults=industry_defaults,
+    marketData=_marketData(),
 )
-currency = getattr(c, "currency", "KRW")
-country_code = country_defaults.get("currencyToCountry", {}).get(currency, "KR")
-country = country_defaults["countries"].get(country_code, country_defaults["countries"]["KR"])
-
-try:
-    price = dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
-    price_status = "usable"
-except Exception as exc:
-    price = None
-    price_status = type(exc).__name__
-
-rows = [
-    {"assumption": "riskFreeRatePct", "value": country.get("riskFreeRate")},
-    {"assumption": "terminalGrowthCeilingPct", "value": country.get("riskFreeRate")},
-    {"assumption": "pricePath", "value": price_status},
-]
 
 emit_result(
-    table=rows,
-    values={"target": target, "market": market, "dcfStatus": "assumptionReady" if price is not None else "blocked"},
-    date=country_defaults["_meta"].get("asOfDate"),
+    table=memo["tables"]["fcffDcf"],
+    values=memo["headline"],
+    date=memo.get("asOf"),
+    units=memo["units"],
+    sources=memo["sources"],
 )
 ```
 
