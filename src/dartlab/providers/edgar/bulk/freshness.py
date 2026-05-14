@@ -29,9 +29,9 @@ class BulkFreshness:
 
 
 def _bulkDir() -> Path:
-    from dartlab import config as _cfg
+    from dartlab.core.dataLoader import _getDataRoot
 
-    d = Path(_cfg.dataDir) / "edgar" / "_bulk"
+    d = _getDataRoot() / "edgar" / "_bulk"
     d.mkdir(parents=True, exist_ok=True)
     return d
 

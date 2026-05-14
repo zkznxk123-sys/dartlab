@@ -691,9 +691,9 @@ def downloadListedEdgarDocs(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab import config
+    from dartlab.core.dataLoader import _getDataRoot
 
-    docsDir = Path(config.dataDir) / "edgar" / "docs"
+    docsDir = _getDataRoot() / "edgar" / "docs"
     docsDir.mkdir(parents=True, exist_ok=True)
 
     universe = buildEdgarCollectibleUniverse(limit=limit, sinceYear=sinceYear)
@@ -842,10 +842,9 @@ def prepareEdgarCollectibleUniverse(
         TargetMarkets:
             - <TODO: 대상 시장>
     """
-    from dartlab import config
-    from dartlab.core.dataLoader import loadEdgarListedUniverse
+    from dartlab.core.dataLoader import _getDataRoot, loadEdgarListedUniverse
 
-    cachePath = Path(config.dataDir) / "edgar" / "docsCollectibleUniverse.parquet"
+    cachePath = _getDataRoot() / "edgar" / "docsCollectibleUniverse.parquet"
     cacheDf = _loadCollectibleUniverseCache(cachePath, forceRefresh=forceRefresh)
 
     listed = (

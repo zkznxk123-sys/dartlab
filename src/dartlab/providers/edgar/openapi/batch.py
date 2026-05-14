@@ -49,11 +49,11 @@ async def _getTickerLock(key: str) -> asyncio.Lock:
 
 def _edgarDataPath(category: str, key: str) -> Path:
     """EDGAR parquet 저장 경로."""
-    from dartlab import config as _cfg
     from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     subDir = DATA_RELEASES[category]["dir"]
-    dest = Path(_cfg.dataDir) / subDir / f"{key}.parquet"
+    dest = _getDataRoot() / subDir / f"{key}.parquet"
     dest.parent.mkdir(parents=True, exist_ok=True)
     return dest
 

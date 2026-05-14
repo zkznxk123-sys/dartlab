@@ -86,9 +86,9 @@ class Notes:
         spec = _REGISTRY[name]
         module, krName, extractor = spec
 
-        from dartlab import config
+        from dartlab.core.messagingContext import Context
 
-        if config.verbose:
+        if Context().verbose:
             periodLabel = {"y": "", "q": " (분기)", "h": " (반기)"}.get(period, "")
             _log.info("  ▶ %s · %s%s", self._company.corpName, krName, periodLabel)
 

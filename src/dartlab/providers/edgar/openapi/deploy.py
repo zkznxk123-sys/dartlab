@@ -144,9 +144,9 @@ def deployEdgarToHF(
         configKey = _CATEGORY_MAP.get(cat, cat)
         config = DATA_RELEASES[configKey]
 
-        from dartlab import config as _cfg
+        from dartlab.core.dataLoader import _getDataRoot
 
-        localDir = Path(_cfg.dataDir) / config["dir"]
+        localDir = _getDataRoot() / config["dir"]
         if not localDir.exists():
             _log.info(f"[deploy] {localDir} 없음. 스킵.")
             result[cat] = 0

@@ -8,25 +8,6 @@
       "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:118",
       "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:60"
     ],
-    "architecture.lazyRootFacadeImport": [
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/docs/notes.py:89",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/openapi/batch.py:1085",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/openapi/batch.py:445",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/search/fieldIndex.py:1160",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/search/fieldIndex.py:53",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/search/fieldIndex.py:892",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/companyfactsBulk.py:50",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/companyfactsBulk.py:58",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/datasetBulk.py:58",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/datasetBulk.py:66",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/freshness.py:32",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/docs/fetch.py:694",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/docs/fetch.py:845",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/batch.py:52",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/deploy.py:147",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/freshness.py:37",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/identity.py:17"
-    ],
     "architecture.lazyUpperImport": [
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/macroProvider.py:110",
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/macroProvider.py:147",

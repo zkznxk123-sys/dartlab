@@ -34,11 +34,11 @@ class EdgarFreshnessResult:
 
 def _edgarDataDir(category: str) -> Path:
     """EDGAR 데이터 디렉토리."""
-    from dartlab import config as _cfg
     from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     subDir = DATA_RELEASES[category]["dir"]
-    return Path(_cfg.dataDir) / subDir
+    return _getDataRoot() / subDir
 
 
 def _freshnessPath(ticker: str, category: str = "edgarDocs") -> Path:

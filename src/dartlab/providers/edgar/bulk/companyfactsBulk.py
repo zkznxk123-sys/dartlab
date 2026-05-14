@@ -47,18 +47,18 @@ _DEFAULT_TIMEOUT = httpx.Timeout(60.0, read=None, write=60.0, connect=30.0)
 
 
 def _bulkDir() -> Path:
-    from dartlab import config as _cfg
+    from dartlab.core.dataLoader import _getDataRoot
 
-    d = Path(_cfg.dataDir) / "edgar" / "_bulk"
+    d = _getDataRoot() / "edgar" / "_bulk"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
 def _financeDir() -> Path:
-    from dartlab import config as _cfg
     from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
-    d = Path(_cfg.dataDir) / DATA_RELEASES["edgar"]["dir"]
+    d = _getDataRoot() / DATA_RELEASES["edgar"]["dir"]
     d.mkdir(parents=True, exist_ok=True)
     return d
 

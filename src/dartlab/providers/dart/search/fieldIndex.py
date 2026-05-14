@@ -50,9 +50,9 @@ _WORD_RE = re.compile(r"[가-힣a-zA-Z0-9]+")
 
 
 def _contentIndexDir() -> Path:
-    from dartlab import config as _cfg
+    from dartlab.core.dataLoader import _getDataRoot
 
-    base = Path(_cfg.dataDir) / "dart" / "contentIndex"
+    base = _getDataRoot() / "dart" / "contentIndex"
     base.mkdir(parents=True, exist_ok=True)
     return base
 
@@ -889,9 +889,9 @@ def rebuildMain(
                     _log.info(f"  allFilings {i + 1}/{len(files)}: {totalDocs:,} docs, {elapsed:.0f}초")
 
     if includeDocs:
-        from dartlab import config as _cfg
+        from dartlab.core.dataLoader import _getDataRoot
 
-        docsDir = Path(_cfg.dataDir) / "dart" / "docs"
+        docsDir = _getDataRoot() / "dart" / "docs"
         docsFiles = sorted(docsDir.glob("*.parquet"))
         if showProgress:
             _log.info(f"[main] docs 스트리밍: {len(docsFiles)}개 파일")
@@ -1157,11 +1157,11 @@ def pullContentIndex() -> int:
     """
     from huggingface_hub import hf_hub_download
 
-    from dartlab import config as _cfg
+    from dartlab.core.dataLoader import _getDataRoot
 
     outDir = _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
-    dataDir = Path(_cfg.dataDir)  # dart/contentIndex/ 앞의 루트
+    dataDir = _getDataRoot()  # dart/contentIndex/ 앞의 루트
 
     names = [
         "main.npz",

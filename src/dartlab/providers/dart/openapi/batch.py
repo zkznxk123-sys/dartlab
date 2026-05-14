@@ -442,11 +442,11 @@ def _existingReportPeriods(path: Path) -> set[tuple[str, str, str]]:
 
 def _dataPath(category: str, stockCode: str) -> Path:
     """parquet 저장 경로."""
-    from dartlab import config as _cfg
     from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     subDir = DATA_RELEASES.get(category, {}).get("dir", f"dart/{category}")
-    dest = Path(_cfg.dataDir) / subDir / f"{stockCode}.parquet"
+    dest = _getDataRoot() / subDir / f"{stockCode}.parquet"
     dest.parent.mkdir(parents=True, exist_ok=True)
     return dest
 
@@ -1082,11 +1082,11 @@ def batchCollect(
         if pending or failures:
             import os
 
-            from dartlab import config as _cfg
+            from dartlab.core.dataLoader import _getDataRoot
 
             # 병렬 Job (sync-finance-report / sync-docs) 간 동시 쓰기 경쟁 회피 —
             # env SYNC_STATE_SCOPE 로 하위 디렉토리 분리 (fr / docs).
-            baseDir = Path(_cfg.dataDir) / "dart" / "_collect_state"
+            baseDir = _getDataRoot() / "dart" / "_collect_state"
             scope = os.environ.get("SYNC_STATE_SCOPE", "").strip()
             stateDir = baseDir / scope if scope else baseDir
             stateDir.mkdir(parents=True, exist_ok=True)

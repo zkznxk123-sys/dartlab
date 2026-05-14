@@ -14,9 +14,9 @@ _TICKERS_URL = f"{DEFAULT_SEC_URL}/files/company_tickers.json"
 
 
 def _tickersPath() -> Path:
-    from dartlab import config
+    from dartlab.core.dataLoader import _getDataRoot
 
-    return Path(config.dataDir) / "edgar" / "tickers.parquet"
+    return _getDataRoot() / "edgar" / "tickers.parquet"
 
 
 def loadTickers(

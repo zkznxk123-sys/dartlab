@@ -55,19 +55,19 @@ DATASET_FILES = ("sub", "pre", "tag")
 
 
 def _bulkDir() -> Path:
-    from dartlab import config as _cfg
+    from dartlab.core.dataLoader import _getDataRoot
 
-    d = Path(_cfg.dataDir) / "edgar" / "_bulk" / "quarterly"
+    d = _getDataRoot() / "edgar" / "_bulk" / "quarterly"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
 
 def _metaDir(sub: str) -> Path:
-    from dartlab import config as _cfg
     from dartlab.core.dataConfig import DATA_RELEASES
+    from dartlab.core.dataLoader import _getDataRoot
 
     base = DATA_RELEASES.get("edgarMeta", {}).get("dir", "edgar/meta")
-    d = Path(_cfg.dataDir) / base / sub
+    d = _getDataRoot() / base / sub
     d.mkdir(parents=True, exist_ok=True)
     return d
 
