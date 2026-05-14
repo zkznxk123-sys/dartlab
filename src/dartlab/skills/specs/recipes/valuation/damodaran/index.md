@@ -1,6 +1,6 @@
 ---
 id: recipes.valuation.damodaran.index
-title: Damodaran L1.5 분석체계 진입점
+title: Damodaran L1/L1.5 분석체계 진입점
 category: recipes
 kind: recipe
 scope: builtin
@@ -8,11 +8,11 @@ status: unverified
 entryHint: true
 graphTier: L1.5
 cluster: valuation.damodaran
-purpose: Damodaran식 분석을 DCF 계산 하나가 아니라 narrative, life cycle, 재무 정규화, value driver, risk, intrinsic/relative valuation, 특수상황, reverse DCF, memo까지 이어지는 L1.5 스킬 체계로 라우팅하는 최초 진입점이다. 트리거 — '다모다란 분석', 'Damodaran valuation system', 'L1.5 가치평가 스킬팩'.
+purpose: Damodaran식 분석을 DCF 계산 하나가 아니라 narrative, life cycle, 재무 정규화, value driver, risk, intrinsic/relative valuation, 특수상황, reverse DCF, memo까지 이어지는 L1/L1.5 스킬 체계로 라우팅하는 최초 진입점이다. 트리거 — '다모다란 분석', 'Damodaran valuation system', 'L1/L1.5 가치평가 스킬팩'.
 whenToUse:
   - 다모다란 분석
   - Damodaran valuation system
-  - L1.5 가치평가 스킬팩
+  - L1/L1.5 가치평가 스킬팩
   - narrative and numbers
   - valuation memo skill tree
   - 다모다란 최초 진입점
@@ -31,13 +31,22 @@ linkedSkills:
   - recipes.valuation.damodaran.dataAudit
   - recipes.valuation.damodaran.businessModelFit
   - recipes.valuation.damodaran.lifeCycleClassifier
+  - recipes.valuation.damodaran.narrativeMap
+  - recipes.valuation.damodaran.storyToDrivers
   - recipes.valuation.damodaran.normalizedFinancials
   - recipes.valuation.damodaran.accountTraceAudit
+  - recipes.valuation.damodaran.rdCapitalization
+  - recipes.valuation.damodaran.leaseDebtAdjustment
+  - recipes.valuation.damodaran.oneOffAdjustment
   - recipes.valuation.damodaran.reinvestmentRoc
   - recipes.valuation.damodaran.growthFeasibility
   - recipes.valuation.damodaran.costOfCapital
   - recipes.valuation.damodaran.fcffDcf
   - recipes.valuation.damodaran.relativeCheck
+  - recipes.valuation.damodaran.peerMultipleDecomposition
+  - recipes.valuation.damodaran.financialFirmExcessReturn
+  - recipes.valuation.damodaran.sumOfParts
+  - recipes.valuation.damodaran.distressAdjustedDcf
   - recipes.valuation.damodaran.scenarioFalsifier
   - recipes.valuation.damodaran.deepDive
 successors:
@@ -189,7 +198,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-`damodaranAnalysisSystem.json`, `damodaranDefaults.json`, `damodaranIndustryDefaults.json`, 그리고 12개 Damodaran recipe를 함께 본다. 이 진입점은 계산을 대신하지 않고 다음 스킬로 라우팅한다.
+`damodaranAnalysisSystem.json`, `damodaranDefaults.json`, `damodaranIndustryDefaults.json`, 그리고 21개 Damodaran recipe를 함께 본다. 이 진입점은 계산을 대신하지 않고 다음 스킬로 라우팅한다.
 
 ### 3. 메커니즘 분석
 
@@ -235,15 +244,24 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 1. recipes.valuation.damodaran.dataAudit - L1/L1.5 데이터 가능성 확인.
 2. recipes.valuation.damodaran.businessModelFit - 일반 FCFF 가능 여부와 특수상황 차단.
 3. recipes.valuation.damodaran.lifeCycleClassifier - 성장·마진·ROC-WACC spread 기반 수명주기 분류.
-4. recipes.valuation.damodaran.normalizedFinancials - valuation용 재무 패널.
-5. recipes.valuation.damodaran.accountTraceAudit - valuation 입력값의 계정 trace 감사.
-6. recipes.valuation.damodaran.reinvestmentRoc - 성장·재투자·ROC 정합성.
-7. recipes.valuation.damodaran.growthFeasibility - 성장률이 재투자율과 ROC로 설명되는지 반증.
-8. recipes.valuation.damodaran.costOfCapital - WACC와 reference fallback.
-9. recipes.valuation.damodaran.fcffDcf - FCFF 가치 밴드.
-10. recipes.valuation.damodaran.relativeCheck - 상대가치 sanity check.
-11. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF와 반증.
-12. recipes.valuation.damodaran.deepDive - 최종 valuation memo.
+4. recipes.valuation.damodaran.narrativeMap - 사업 스토리와 valuation driver 연결.
+5. recipes.valuation.damodaran.storyToDrivers - narrative를 수치 가정으로 변환.
+6. recipes.valuation.damodaran.normalizedFinancials - valuation용 재무 패널.
+7. recipes.valuation.damodaran.accountTraceAudit - valuation 입력값의 계정 trace 감사.
+8. recipes.valuation.damodaran.rdCapitalization - R&D 자본화 감사.
+9. recipes.valuation.damodaran.leaseDebtAdjustment - 리스부채 조정 감사.
+10. recipes.valuation.damodaran.oneOffAdjustment - 일회성 항목 정규화 감사.
+11. recipes.valuation.damodaran.reinvestmentRoc - 성장·재투자·ROC 정합성.
+12. recipes.valuation.damodaran.growthFeasibility - 성장률이 재투자율과 ROC로 설명되는지 반증.
+13. recipes.valuation.damodaran.costOfCapital - WACC와 reference fallback.
+14. recipes.valuation.damodaran.fcffDcf - FCFF 가치 밴드.
+15. recipes.valuation.damodaran.relativeCheck - 상대가치 sanity check.
+16. recipes.valuation.damodaran.peerMultipleDecomposition - multiple을 driver로 분해.
+17. recipes.valuation.damodaran.financialFirmExcessReturn - 금융업 excess-return 경로.
+18. recipes.valuation.damodaran.sumOfParts - 세그먼트/SOTP 경로.
+19. recipes.valuation.damodaran.distressAdjustedDcf - distress 조정 DCF 경로.
+20. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF와 반증.
+21. recipes.valuation.damodaran.deepDive - 최종 valuation memo.
 
 ## 기본 검증
 
@@ -251,5 +269,5 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 - 모든 concept는 구현 스킬, 계획 스킬, 데이터 요구사항, gap id를 가져야 한다.
 - 모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 분류되어야 한다.
 - 엔진 보강 후보는 `engineSupplementBacklog`에 남기되, 스킬 phase에서는 `doNotImplementInSkillPhase`를 유지해야 한다.
-- 12개 실행 recipe는 5개 고정 타깃에서 `ValidateRecipe` evidence completeness 1.00을 통과해야 한다.
+- 21개 실행 recipe는 5개 고정 타깃에서 `ValidateRecipe` evidence completeness 1.00을 통과해야 한다.
 - `strict-l0-l15` guard 통과 전에는 complete 선언 금지.

@@ -59,6 +59,20 @@ _RECEIVABLES = (
 )
 _INVENTORY = ("inventories", "inventory")
 _PAYABLES = ("trade_and_other_payables", "trade_payables", "accounts_payable")
+_RD_TOKENS = ("research", "development", "r&d", "rnd", "연구", "개발")
+_LEASE_TOKENS = ("lease", "right_of_use", "right-of-use", "리스", "사용권")
+_ONE_OFF_TOKENS = (
+    "impairment",
+    "restructuring",
+    "discontinued",
+    "extraordinary",
+    "litigation",
+    "gain_loss",
+    "손상",
+    "구조조정",
+    "중단영업",
+    "소송",
+)
 
 
 def buildDamodaranMemo(
@@ -122,13 +136,24 @@ def buildDamodaranMemo(
         "dataAudit": _dataAuditTable(statements, countryDefaults, industryDefaults, market_data, panel, gaps),
         "modelFit": [model_fit],
         "lifeCycleClassifier": _lifeCycleTable(panel, assumptions, model_fit),
+        "narrativeMap": _narrativeMapTable(
+            target, companyName, market, resolved_industry_key, panel, assumptions, model_fit
+        ),
+        "storyToDrivers": _storyToDriversTable(assumptions, reverse, model_fit),
         "normalizedFinancials": panel[:maxYears],
         "accountTraceAudit": _accountTraceTable(trace, panel),
+        "rdCapitalization": _lineItemAdjustmentTable("rdCapitalization", statements, _RD_TOKENS),
+        "leaseDebtAdjustment": _lineItemAdjustmentTable("leaseDebtAdjustment", statements, _LEASE_TOKENS),
+        "oneOffAdjustment": _lineItemAdjustmentTable("oneOffAdjustment", statements, _ONE_OFF_TOKENS),
         "reinvestmentRoc": _valueDriverTable(panel, assumptions),
         "growthFeasibility": _growthFeasibilityTable(panel, assumptions, reverse, model_fit),
         "costOfCapital": _costOfCapitalTable(assumptions),
         "fcffDcf": _dcfTable(dcf),
         "relativeCheck": [relative],
+        "peerMultipleDecomposition": _peerMultipleTable(relative, assumptions, market),
+        "financialFirmExcessReturn": _financialFirmExcessReturnTable(panel, assumptions, market_data, model_fit),
+        "sumOfParts": _sumOfPartsTable(panel, model_fit),
+        "distressAdjustedDcf": _distressAdjustedDcfTable(panel, assumptions, dcf, model_fit),
         "scenarioFalsifier": _scenarioTable(dcf, reverse),
         "deepDive": _deepDiveTable(decision_status, model_fit, dcf, reverse, gaps),
     }
@@ -850,6 +875,120 @@ def _accountTraceTable(trace: dict[str, Any], panel: list[dict[str, Any]]) -> li
     return rows
 
 
+def _narrativeMapTable(
+    target: str,
+    companyName: str,
+    market: str,
+    industryKey: str,
+    panel: list[dict[str, Any]],
+    assumptions: dict[str, Any],
+    modelFit: dict[str, Any],
+) -> list[dict[str, Any]]:
+    latest = _latestUsable(panel) or {}
+    return [
+        {
+            "narrativeElement": "businessIdentity",
+            "evidence": companyName or target,
+            "driver": "industryContext",
+            "value": industryKey,
+            "status": "usable",
+            "source": "Company metadata plus reference industry mapping",
+        },
+        {
+            "narrativeElement": "lifeCycle",
+            "evidence": modelFit.get("modelType"),
+            "driver": "modelRoute",
+            "value": "financialFirmRoute" if not modelFit.get("genericFcffEligible") else "genericFcffRoute",
+            "status": "usable",
+            "source": "businessModelFit",
+        },
+        {
+            "narrativeElement": "growthStory",
+            "evidence": latest.get("year"),
+            "driver": "recentGrowthPct",
+            "value": _round(assumptions.get("recentGrowthPct"), 2),
+            "status": "usableWithFallback",
+            "source": "normalized financial panel",
+        },
+        {
+            "narrativeElement": "profitabilityStory",
+            "evidence": latest.get("year"),
+            "driver": "normalizedMarginPct",
+            "value": _round(assumptions.get("normalizedMarginPct"), 2),
+            "status": "usableWithFallback",
+            "source": "normalized financial panel",
+        },
+        {
+            "narrativeElement": "marketContext",
+            "evidence": market,
+            "driver": "countryRisk",
+            "value": assumptions.get("erpPct"),
+            "status": "usableWithFallback",
+            "source": "Damodaran country reference",
+        },
+    ]
+
+
+def _storyToDriversTable(
+    assumptions: dict[str, Any], reverse: dict[str, Any], modelFit: dict[str, Any]
+) -> list[dict[str, Any]]:
+    if not modelFit.get("genericFcffEligible"):
+        return [
+            {
+                "storyClaim": "financialFirmRoute",
+                "driver": "model",
+                "value": modelFit.get("fallbackModel"),
+                "status": "blockedForGenericFcff",
+            }
+        ]
+    rows = [
+        ("growth", "recentGrowthPct", assumptions.get("recentGrowthPct")),
+        ("margin", "normalizedMarginPct", assumptions.get("normalizedMarginPct")),
+        ("reinvestment", "salesToCapital", assumptions.get("salesToCapital")),
+        ("risk", "waccPct", assumptions.get("waccPct")),
+        ("terminal", "terminalGrowthPct", assumptions.get("terminalGrowthPct")),
+        ("reversePriceStory", "requiredGrowthPct", reverse.get("requiredGrowthPct")),
+    ]
+    return [
+        {
+            "storyClaim": claim,
+            "driver": driver,
+            "value": _round(value, 3 if driver == "salesToCapital" else 2),
+            "status": reverse.get("status", "usable") if claim == "reversePriceStory" else "usable",
+        }
+        for claim, driver, value in rows
+    ]
+
+
+def _lineItemAdjustmentTable(
+    adjustmentName: str, statements: dict[str, pl.DataFrame], tokens: tuple[str, ...]
+) -> list[dict[str, Any]]:
+    matches = _statementMatches(statements, tokens)
+    if not matches:
+        return [
+            {
+                "adjustment": adjustmentName,
+                "status": "fallbackAccepted",
+                "reason": "no explicit matching line item in L1 financial statements",
+                "action": "leave normalized financials unchanged and expose missing evidence",
+            }
+        ]
+    rows: list[dict[str, Any]] = []
+    for match in matches[:8]:
+        rows.append(
+            {
+                "adjustment": adjustmentName,
+                "status": "usable",
+                "topic": match["topic"],
+                "lineItem": match["lineItem"],
+                "latestYear": match["latestYear"],
+                "latestValue": _round(match["latestValue"]),
+                "action": "review capitalization or normalization impact before DCF",
+            }
+        )
+    return rows
+
+
 def _valueDriverTable(panel: list[dict[str, Any]], assumptions: dict[str, Any]) -> list[dict[str, Any]]:
     latest = _latestUsable(panel) or {}
     return [
@@ -949,6 +1088,129 @@ def _costOfCapitalTable(assumptions: dict[str, Any]) -> list[dict[str, Any]]:
     return [{"assumption": key, "value": _round(assumptions.get(key), 3)} for key in keys]
 
 
+def _peerMultipleTable(relative: dict[str, Any], assumptions: dict[str, Any], market: str) -> list[dict[str, Any]]:
+    rows = [
+        {
+            "multiple": "EV/Sales",
+            "companyValue": relative.get("evSales"),
+            "driverLink": "growth and sales-to-capital",
+            "driverValue": _round(assumptions.get("salesToCapital"), 3),
+            "status": relative.get("status", "unknown"),
+        },
+        {
+            "multiple": "EV/EBIT",
+            "companyValue": relative.get("evEbit"),
+            "driverLink": "operating margin",
+            "driverValue": _round(assumptions.get("normalizedMarginPct"), 2),
+            "status": relative.get("status", "unknown"),
+        },
+        {
+            "multiple": "P/B",
+            "companyValue": relative.get("priceBook"),
+            "driverLink": "ROC versus cost of capital",
+            "driverValue": _round((assumptions.get("normalizedRocPct") or 0) - (assumptions.get("waccPct") or 0), 2),
+            "status": relative.get("status", "unknown"),
+        },
+    ]
+    rows.append(
+        {
+            "multiple": "peerUniverse",
+            "companyValue": None,
+            "driverLink": "scan/reference primitive",
+            "driverValue": market,
+            "status": "partial" if market == "US" else "usableWithFallback",
+            "note": relative.get("note"),
+        }
+    )
+    return rows
+
+
+def _financialFirmExcessReturnTable(
+    panel: list[dict[str, Any]],
+    assumptions: dict[str, Any],
+    marketData: dict[str, Any],
+    modelFit: dict[str, Any],
+) -> list[dict[str, Any]]:
+    latest = _latestUsable(panel) or {}
+    equity = _number(latest.get("equity"))
+    market_cap = _number(marketData.get("marketCap"))
+    roe = None
+    if latest.get("nopat") is not None and equity and equity > 0:
+        roe = latest["nopat"] / equity * 100.0
+    cost_of_equity = _number(assumptions.get("costOfEquityPct"))
+    excess = roe - cost_of_equity if roe is not None and cost_of_equity is not None else None
+    route_status = "usableWithFallback" if not modelFit.get("genericFcffEligible") else "notApplicable"
+    return [
+        {
+            "metric": "modelRoute",
+            "value": modelFit.get("fallbackModel")
+            if not modelFit.get("genericFcffEligible")
+            else "genericFcffPreferred",
+            "status": route_status,
+        },
+        {"metric": "bookEquity", "value": _round(equity), "status": "evidence"},
+        {"metric": "marketCap", "value": _round(market_cap), "status": "evidence" if market_cap else "missing"},
+        {"metric": "roePctProxy", "value": _round(roe, 2), "status": "fallbackAccepted"},
+        {"metric": "costOfEquityPct", "value": _round(cost_of_equity, 2), "status": "reference"},
+        {"metric": "excessReturnPctProxy", "value": _round(excess, 2), "status": "fallbackAccepted"},
+    ]
+
+
+def _sumOfPartsTable(panel: list[dict[str, Any]], modelFit: dict[str, Any]) -> list[dict[str, Any]]:
+    latest = _latestUsable(panel) or {}
+    return [
+        {
+            "part": "reportedCompany",
+            "revenue": latest.get("revenue"),
+            "ebit": latest.get("ebit"),
+            "status": "singleSegmentFallback",
+            "source": "Company financial statements",
+        },
+        {
+            "part": "segmentDisclosure",
+            "revenue": None,
+            "ebit": None,
+            "status": "deferredWithBlocker",
+            "source": "Company segment topic or frame segment table required",
+        },
+        {
+            "part": "modelRoute",
+            "revenue": None,
+            "ebit": None,
+            "status": modelFit.get("modelType"),
+            "source": "businessModelFit",
+        },
+    ]
+
+
+def _distressAdjustedDcfTable(
+    panel: list[dict[str, Any]],
+    assumptions: dict[str, Any],
+    dcf: dict[str, Any],
+    modelFit: dict[str, Any],
+) -> list[dict[str, Any]]:
+    latest = _latestUsable(panel) or {}
+    debt = _number(latest.get("debt")) or 0.0
+    equity = _number(latest.get("equity"))
+    fcff_values = [_number(row.get("fcff")) for row in panel[:5]]
+    fcff_clean = [value for value in fcff_values if value is not None]
+    negative_ratio = sum(1 for value in fcff_clean if value < 0) / len(fcff_clean) if fcff_clean else None
+    debt_to_equity = debt / equity * 100.0 if equity and equity > 0 else None
+    wacc = _number(assumptions.get("waccPct"))
+    status = "notApplicable" if not modelFit.get("genericFcffEligible") else "usable"
+    if negative_ratio is not None and negative_ratio >= 0.6:
+        status = "distressReviewRequired"
+    if debt_to_equity is not None and debt_to_equity > 200:
+        status = "distressReviewRequired"
+    return [
+        {"metric": "distressRoute", "value": status, "status": status},
+        {"metric": "debtToEquityPct", "value": _round(debt_to_equity, 2), "status": "evidence"},
+        {"metric": "negativeFcffRatio", "value": _round(negative_ratio, 3), "status": "evidence"},
+        {"metric": "waccPct", "value": _round(wacc, 2), "status": "reference"},
+        {"metric": "baseDcfStatus", "value": dcf.get("status"), "status": dcf.get("status", "unknown")},
+    ]
+
+
 def _dcfTable(dcf: dict[str, Any]) -> list[dict[str, Any]]:
     if dcf.get("status") == "blocked":
         return [{"case": "blocked", "reason": dcf.get("reason")}]
@@ -1037,6 +1299,38 @@ def _median(values: list[Any]) -> float | None:
     if not clean:
         return None
     return float(statistics.median(clean))
+
+
+def _statementMatches(statements: dict[str, pl.DataFrame], tokens: tuple[str, ...]) -> list[dict[str, Any]]:
+    matches: list[dict[str, Any]] = []
+    lowered_tokens = tuple(token.lower() for token in tokens)
+    for topic, df in statements.items():
+        if not isinstance(df, pl.DataFrame) or df.height == 0:
+            continue
+        years = _years(df)
+        if not years:
+            continue
+        id_col = "snakeId" if "snakeId" in df.columns else "account_id" if "account_id" in df.columns else None
+        label_col = next(
+            (col for col in ("항목", "account_nm", "label", "name", "accountName") if col in df.columns), None
+        )
+        if id_col is None and label_col is None:
+            continue
+        for row in df.to_dicts():
+            line_text = " ".join(str(row.get(col) or "") for col in (id_col, label_col) if col)
+            lower = line_text.lower()
+            if not any(token in lower for token in lowered_tokens):
+                continue
+            latest_year = next((year for year in years if _number(row.get(year)) is not None), years[0])
+            matches.append(
+                {
+                    "topic": topic,
+                    "lineItem": line_text.strip(),
+                    "latestYear": latest_year,
+                    "latestValue": _number(row.get(latest_year)),
+                }
+            )
+    return matches
 
 
 def _incrementalRoc(panel: list[dict[str, Any]]) -> float | None:

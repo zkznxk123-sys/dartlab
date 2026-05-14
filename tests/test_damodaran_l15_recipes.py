@@ -21,13 +21,22 @@ DAMODARAN_IDS = {
     "recipes.valuation.damodaran.dataAudit",
     "recipes.valuation.damodaran.businessModelFit",
     "recipes.valuation.damodaran.lifeCycleClassifier",
+    "recipes.valuation.damodaran.narrativeMap",
+    "recipes.valuation.damodaran.storyToDrivers",
     "recipes.valuation.damodaran.normalizedFinancials",
     "recipes.valuation.damodaran.accountTraceAudit",
+    "recipes.valuation.damodaran.rdCapitalization",
+    "recipes.valuation.damodaran.leaseDebtAdjustment",
+    "recipes.valuation.damodaran.oneOffAdjustment",
     "recipes.valuation.damodaran.reinvestmentRoc",
     "recipes.valuation.damodaran.growthFeasibility",
     "recipes.valuation.damodaran.costOfCapital",
     "recipes.valuation.damodaran.fcffDcf",
     "recipes.valuation.damodaran.relativeCheck",
+    "recipes.valuation.damodaran.peerMultipleDecomposition",
+    "recipes.valuation.damodaran.financialFirmExcessReturn",
+    "recipes.valuation.damodaran.sumOfParts",
+    "recipes.valuation.damodaran.distressAdjustedDcf",
     "recipes.valuation.damodaran.scenarioFalsifier",
     "recipes.valuation.damodaran.deepDive",
 }
@@ -204,11 +213,20 @@ def testDamodaranSynthBuildsFullMemoFromL15Inputs() -> None:
         "dataAudit",
         "modelFit",
         "lifeCycleClassifier",
+        "narrativeMap",
+        "storyToDrivers",
         "normalizedFinancials",
         "accountTraceAudit",
+        "rdCapitalization",
+        "leaseDebtAdjustment",
+        "oneOffAdjustment",
         "reinvestmentRoc",
         "growthFeasibility",
         "fcffDcf",
+        "peerMultipleDecomposition",
+        "financialFirmExcessReturn",
+        "sumOfParts",
+        "distressAdjustedDcf",
         "scenarioFalsifier",
         "deepDive",
     } <= set(memo["tables"])
@@ -273,12 +291,31 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
         "recipes.valuation.damodaran.lifeCycleClassifier",
         "recipes.valuation.damodaran.accountTraceAudit",
         "recipes.valuation.damodaran.growthFeasibility",
+        "recipes.valuation.damodaran.narrativeMap",
+        "recipes.valuation.damodaran.storyToDrivers",
+        "recipes.valuation.damodaran.rdCapitalization",
+        "recipes.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.valuation.damodaran.oneOffAdjustment",
+        "recipes.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.valuation.damodaran.sumOfParts",
+        "recipes.valuation.damodaran.distressAdjustedDcf",
     } <= set(system["skillTree"]["currentExecutablePath"])
     assert {
         "recipes.valuation.damodaran.lifeCycleClassifier",
         "recipes.valuation.damodaran.accountTraceAudit",
         "recipes.valuation.damodaran.growthFeasibility",
+        "recipes.valuation.damodaran.narrativeMap",
+        "recipes.valuation.damodaran.storyToDrivers",
+        "recipes.valuation.damodaran.rdCapitalization",
+        "recipes.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.valuation.damodaran.oneOffAdjustment",
+        "recipes.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.valuation.damodaran.sumOfParts",
+        "recipes.valuation.damodaran.distressAdjustedDcf",
     }.isdisjoint(system["skillTree"]["nextSkillTargets"])
+    assert system["skillTree"]["nextSkillTargets"] == []
     assert len(system["concepts"]) == 10
     assert {concept["id"] for concept in system["concepts"]} == {
         "narrativeAndNumbers",
@@ -294,14 +331,27 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
     }
     for concept in system["concepts"]:
         assert concept["implementedSkills"]
-        assert concept["plannedSkills"]
+        assert isinstance(concept["plannedSkills"], list)
         assert concept["dataRequirements"]
         assert concept["gapIds"]
 
     allowed_gap_status = {"filled", "fallbackAccepted", "deferredWithBlocker"}
     assert {gap["status"] for gap in system["gapLedger"]} <= allowed_gap_status
     filled_gap_ids = {gap["id"] for gap in system["gapLedger"] if gap["status"] == "filled"}
-    assert {"lifeCycleClassifier", "accountTraceAudit", "growthFeasibility"} <= filled_gap_ids
+    assert {
+        "lifeCycleClassifier",
+        "accountTraceAudit",
+        "growthFeasibility",
+        "narrativeMap",
+        "storyToDrivers",
+        "rdCapitalization",
+        "leaseDebtAdjustment",
+        "oneOffAdjustment",
+        "peerMultipleDecomposition",
+        "financialFirmExcessReturn",
+        "sumOfParts",
+        "distressAdjustedDcf",
+    } <= filled_gap_ids
     engine_backlog = system["engineSupplementBacklog"]
     assert len(engine_backlog) >= 5
     assert {item["id"] for item in engine_backlog} >= {
