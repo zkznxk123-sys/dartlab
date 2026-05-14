@@ -37,6 +37,17 @@ export interface MarketSkill {
 	criteria?: string[];
 	forbidden?: string[];
 	completionCriteria?: string[];
+	canonicalSource?: string;
+	itemPath?: string;
+	acceptedAt?: string;
+	version?: number;
+	canonicalUpdatedAt?: string;
+	finalizedAt?: string;
+	revisionStatus?: string;
+	pendingCommentCount?: number;
+	pendingCommentUrls?: string[];
+	pendingSince?: string | null;
+	revisionPolicy?: string;
 	examples?: string[];
 	tags?: string[];
 	state?: string;

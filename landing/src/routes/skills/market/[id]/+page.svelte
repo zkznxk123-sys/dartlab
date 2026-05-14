@@ -63,11 +63,14 @@
 		</div>
 	</header>
 
-			<section class="notice">
-				<ShieldAlert size={16} />
+	<section class="notice">
+		<ShieldAlert size={16} />
 		<span>
 			이 항목은 커뮤니티 Skill Market 자산이다. marketCurated 는 Skill Market 안에서 완성된 상태이며,
 			공식 builtin Skill OS 로 포함된다는 뜻이 아니다.
+			{#if skill.revisionStatus === 'pendingReview'}
+				후속 댓글 {skill.pendingCommentCount ?? 0}개는 검토 대기 중이며 현재 화면은 accepted item snapshot 기준 최종본이다.
+			{/if}
 		</span>
 	</section>
 
@@ -94,6 +97,12 @@
 					<dd>@{skill.author ?? 'unknown'}</dd>
 					<dt>Updated</dt>
 					<dd>{skill.updatedAt ?? 'unknown'}</dd>
+					<dt>Accepted</dt>
+					<dd>{skill.acceptedAt ?? 'unknown'}{skill.version ? ` · v${skill.version}` : ''}</dd>
+					<dt>Canonical</dt>
+					<dd>{skill.canonicalSource ?? 'marketItemSnapshot'} · {skill.itemPath ?? 'unknown'}</dd>
+					<dt>Revision</dt>
+					<dd>{skill.revisionStatus ?? 'current'}{skill.pendingCommentCount ? ` · pending ${skill.pendingCommentCount}` : ''}</dd>
 					<dt>Discussion</dt>
 					<dd>{skill.discussionNumber ? `#${skill.discussionNumber}` : 'unknown'}</dd>
 				</dl>
@@ -185,6 +194,21 @@
 				<section>
 					<h2>Missing Details</h2>
 					<ul>{#each skill.missingDetails as item}<li>{item}</li>{/each}</ul>
+				</section>
+			{/if}
+
+			{#if skill.revisionStatus === 'pendingReview'}
+				<section>
+					<h2>Pending Comments</h2>
+					<p class="muted">
+						후속 댓글은 자동으로 최종 스킬을 바꾸지 않는다. Maintainer가 revision draft를 검토하고 다시 상태를
+						확정해야 accepted item snapshot과 market index가 갱신된다.
+					</p>
+					<ul>
+						{#each (skill.pendingCommentUrls ?? []) as url}
+							<li><a href={url} target="_blank" rel="noopener noreferrer">{url}</a></li>
+						{/each}
+					</ul>
 				</section>
 			{/if}
 

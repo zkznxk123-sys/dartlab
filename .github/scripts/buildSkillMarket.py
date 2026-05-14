@@ -92,6 +92,7 @@ def main(argv: list[str] | None = None) -> int:
 
     curatorLogins = curatorSet(owner)
     skills = [buildMarketSkill(discussion, curatorLogins=curatorLogins) for discussion in discussions]
+    skills, items = prepareMarketSnapshots(skills, outDir=outDir, generatedAt=generatedAt)
     skills.sort(key=lambda item: (trustRank(item["trustTier"]), item.get("updatedAt") or ""), reverse=True)
     payload = {
         "index": {
@@ -107,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         },
         "credits": buildCredits(skills, generatedAt),
         "graph": buildGraph(skills, generatedAt),
+        "items": items,
     }
     writeMarketFiles(outDir, payload)
 
@@ -196,6 +198,7 @@ def fetchDiscussions(client: GraphqlClient, owner: str, repoName: str, categoryI
             url
             createdAt
             updatedAt
+            lastEditedAt
             author { login }
             category { name }
             comments(first:50) {
@@ -236,7 +239,9 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
     moderation = readModeratorState(comments, curatorLogins)
     state = moderation.get("state") or parsed["state"]
     trustTier = moderation.get("trustTier") or trustTierForState(state, parsed)
+    revision = revisionState(discussion, comments, moderation)
     itemId = f"market.{stableSlug(title)}.{discussion.get('number')}"
+    itemPath = f"items/{itemId}.json"
     reviewers = sorted(
         {
             ((comment.get("author") or {}).get("login"))
@@ -266,6 +271,16 @@ def buildMarketSkill(discussion: dict[str, Any], *, curatorLogins: set[str]) -> 
         "missingDetails": parsed["missingDetails"],
         "warnings": parsed["warnings"],
         "mappedBuiltinSkills": parsed["mappedBuiltinSkills"],
+        "canonicalSource": "marketItemSnapshot",
+        "itemPath": itemPath,
+        "acceptedAt": revision["acceptedAt"],
+        "canonicalUpdatedAt": revision["canonicalUpdatedAt"],
+        "finalizedAt": revision["finalizedAt"],
+        "revisionStatus": revision["revisionStatus"],
+        "pendingCommentCount": revision["pendingCommentCount"],
+        "pendingCommentUrls": revision["pendingCommentUrls"],
+        "pendingSince": revision["pendingSince"],
+        "revisionPolicy": "Accepted market item snapshots are canonical. Later comments do not change the final skill until reviewed and accepted.",
         "sourceType": "githubDiscussion",
         "sourceUrl": discussion.get("url"),
         "discussionNumber": discussion.get("number"),
@@ -468,6 +483,7 @@ def inferTags(text: str) -> list[str]:
 def readModeratorState(comments: list[dict[str, Any]], curatorLogins: set[str]) -> dict[str, Any]:
     state = None
     curators: set[str] = set()
+    updatedAt = ""
     for comment in comments:
         author = ((comment.get("author") or {}).get("login")) or ""
         if author not in curatorLogins:
@@ -480,22 +496,69 @@ def readModeratorState(comments: list[dict[str, Any]], curatorLogins: set[str]) 
         if any(command.startswith("/market curated") for command in commands):
             state = "curated"
             curators.add(author)
+            updatedAt = max(updatedAt, str(comment.get("updatedAt") or ""))
         elif any(command.startswith("/market builtin-candidate") for command in commands):
             state = "builtin-candidate"
             curators.add(author)
+            updatedAt = max(updatedAt, str(comment.get("updatedAt") or ""))
         elif any(command.startswith("/market runnable") for command in commands):
             state = "runnable"
             curators.add(author)
+            updatedAt = max(updatedAt, str(comment.get("updatedAt") or ""))
         elif any(command.startswith("/market blocked") for command in commands):
             state = "blocked"
             curators.add(author)
+            updatedAt = max(updatedAt, str(comment.get("updatedAt") or ""))
     trustTier = {
         "curated": "marketCurated",
         "builtin-candidate": "builtinCandidate",
         "runnable": "marketRunnable",
         "blocked": "blocked",
     }.get(state or "")
-    return {"state": state, "trustTier": trustTier, "curators": curators}
+    return {"state": state, "trustTier": trustTier, "curators": curators, "updatedAt": updatedAt}
+
+
+def revisionState(
+    discussion: dict[str, Any],
+    comments: list[dict[str, Any]],
+    moderation: dict[str, Any],
+) -> dict[str, Any]:
+    canonicalUpdatedAt = str(discussion.get("lastEditedAt") or discussion.get("updatedAt") or "")
+    acceptedAt = str(moderation.get("updatedAt") or "")
+    finalizedAt = acceptedAt or canonicalUpdatedAt
+    pending = [
+        comment
+        for comment in comments
+        if isRevisionComment(comment) and str(comment.get("updatedAt") or "") > finalizedAt
+    ]
+    bodyPending = bool(acceptedAt and canonicalUpdatedAt > acceptedAt)
+    pending.sort(key=lambda item: str(item.get("updatedAt") or ""))
+    return {
+        "canonicalUpdatedAt": canonicalUpdatedAt or None,
+        "acceptedAt": acceptedAt or None,
+        "finalizedAt": finalizedAt or None,
+        "revisionStatus": "pendingReview" if pending or bodyPending else "current",
+        "pendingCommentCount": len(pending),
+        "pendingCommentUrls": [str(comment.get("url") or "") for comment in pending[:8] if comment.get("url")],
+        "pendingSince": str(pending[0].get("updatedAt") or "")
+        if pending
+        else canonicalUpdatedAt
+        if bodyPending
+        else None,
+    }
+
+
+def isRevisionComment(comment: dict[str, Any]) -> bool:
+    author = ((comment.get("author") or {}).get("login")) or ""
+    body = str(comment.get("body") or "")
+    if not author or author in BOT_LOGINS:
+        return False
+    if FORGE_MARKER in body:
+        return False
+    stripped = body.strip().lower()
+    if stripped.startswith("/market "):
+        return False
+    return bool(stripped)
 
 
 def trustTierForState(state: str, parsed: dict[str, Any]) -> str:
@@ -536,6 +599,57 @@ def buildCredits(skills: list[dict[str, Any]], generatedAt: str) -> dict[str, An
     }
 
 
+REVISION_FIELDS = (
+    "revisionStatus",
+    "pendingCommentCount",
+    "pendingCommentUrls",
+    "pendingSince",
+    "revisionPolicy",
+    "canonicalUpdatedAt",
+    "finalizedAt",
+)
+
+
+def prepareMarketSnapshots(
+    skills: list[dict[str, Any]],
+    *,
+    outDir: Path,
+    generatedAt: str,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    indexed: list[dict[str, Any]] = []
+    snapshots: list[dict[str, Any]] = []
+    for skill in skills:
+        previous = readPreviousSnapshot(outDir / str(skill.get("itemPath") or ""))
+        if skill.get("revisionStatus") == "pendingReview" and previous:
+            snapshot = dict(previous)
+            for key in REVISION_FIELDS:
+                snapshot[key] = skill.get(key)
+            snapshot["sourceDiscussionUpdatedAt"] = skill.get("updatedAt")
+        else:
+            previousVersion = int(previous.get("version") or 0) if previous else 0
+            previousAcceptedAt = str(previous.get("acceptedAt") or "") if previous else ""
+            acceptedAt = str(skill.get("acceptedAt") or "")
+            version = previousVersion if previousVersion and previousAcceptedAt == acceptedAt else previousVersion + 1
+            snapshot = {
+                "schemaVersion": "1",
+                "snapshotType": "marketSkill",
+                "version": max(1, version),
+                "snapshotGeneratedAt": generatedAt,
+                **skill,
+            }
+        indexed.append(snapshot)
+        snapshots.append(snapshot)
+    return indexed, snapshots
+
+
+def readPreviousSnapshot(path: Path) -> dict[str, Any] | None:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return data if isinstance(data, dict) and data.get("id") else None
+
+
 def buildGraph(skills: list[dict[str, Any]], generatedAt: str) -> dict[str, Any]:
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, str]] = []
@@ -565,6 +679,8 @@ def buildGraph(skills: list[dict[str, Any]], generatedAt: str) -> dict[str, Any]
 
 def writeMarketFiles(outDir: Path, payload: dict[str, Any]) -> None:
     outDir.mkdir(parents=True, exist_ok=True)
+    itemDir = outDir / "items"
+    itemDir.mkdir(parents=True, exist_ok=True)
     files = {
         "marketIndex.json": payload["index"],
         "marketCredits.json": payload["credits"],
@@ -572,7 +688,12 @@ def writeMarketFiles(outDir: Path, payload: dict[str, Any]) -> None:
     }
     for name, data in files.items():
         (outDir / name).write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"[skill-market] wrote {len(files)} files to {outDir}")
+    for item in payload.get("items") or []:
+        itemPath = outDir / str(item.get("itemPath") or "")
+        if itemPath.parent != itemDir:
+            continue
+        itemPath.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"[skill-market] wrote {len(files)} index files and {len(payload.get('items') or [])} item files to {outDir}")
 
 
 def emptyPayload(generatedAt: str, *, reason: str) -> dict[str, Any]:
@@ -659,6 +780,13 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
     criteria = ", ".join(skill.get("criteria") or []) or "정해지지 않았습니다."
     forbidden = ", ".join(skill.get("forbidden") or []) or "정해지지 않았습니다."
     completionCriteria = ", ".join(skill.get("completionCriteria") or []) or "정해지지 않았습니다."
+    revisionStatus = str(skill.get("revisionStatus") or "current")
+    pendingCount = int(skill.get("pendingCommentCount") or 0)
+    revisionText = (
+        f"후속 댓글 {pendingCount}개가 검토 대기 중입니다. 최종 스킬은 기존 accepted item snapshot 기준입니다."
+        if revisionStatus == "pendingReview"
+        else "후속 댓글 검토 대기는 없습니다. 최종 스킬은 accepted item snapshot 기준입니다."
+    )
     completeText = (
         "Skill Market 안에서 완성된 공유스킬입니다. 패키지 builtin Skill OS 에 포함하지 않습니다."
         if skill.get("trustTier") == "marketCurated" and not missing
@@ -683,10 +811,11 @@ def forgeCommentBody(skill: dict[str, Any]) -> str:
         - 판단 기준: {criteria}
         - 금지와 한계: {forbidden}
         - 완료 기준: {completionCriteria}
+        - revision status: `{revisionStatus}` — {revisionText}
         - 매핑된 builtin skill: {mapped}
         - 보완 필요: {missingText}
 
-        작성자와 커뮤니티는 댓글로 입력, 출력, 판단 기준, 예시를 보완할 수 있습니다. Maintainer만 `/market curated`, `/market runnable`, `/market builtin-candidate`, `/market blocked` 명령으로 상태를 확정합니다.
+        작성자와 커뮤니티는 댓글로 입력, 출력, 판단 기준, 예시를 보완할 수 있습니다. 후속 댓글은 곧바로 최종 스킬을 바꾸지 않으며, maintainer가 revision draft를 검토하고 `/market curated`, `/market runnable`, `/market builtin-candidate`, `/market blocked` 명령으로 accepted item snapshot을 확정합니다.
         """
     ).strip()
 

@@ -15,6 +15,16 @@ function readMarketIndex(): MarketIndex {
 	}
 }
 
+function readMarketItem(skill: MarketSkill): MarketSkill {
+	if (!skill.itemPath) return skill;
+	const filePath = path.resolve(process.cwd(), 'static', 'skills', 'market', skill.itemPath);
+	try {
+		return { ...skill, ...(JSON.parse(fs.readFileSync(filePath, 'utf-8')) as MarketSkill) };
+	} catch {
+		return skill;
+	}
+}
+
 export const entries: EntryGenerator = () => {
 	return (readMarketIndex().skills ?? []).map((skill) => ({ id: skill.id }));
 };
@@ -25,5 +35,5 @@ export function load({ params }: { params: { id: string } }) {
 	if (!skill) {
 		throw error(404, `unknown market skill: ${params.id}`);
 	}
-	return { skill };
+	return { skill: readMarketItem(skill) };
 }

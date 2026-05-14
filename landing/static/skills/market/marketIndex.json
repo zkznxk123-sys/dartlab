@@ -3,12 +3,16 @@
     "schemaVersion": "1",
     "source": "github-discussions",
     "category": "Ideas:[Skill Market]",
-    "generatedAt": "2026-05-14T03:48:35Z",
+    "generatedAt": "2026-05-14T04:14:57Z",
     "skillCount": 1,
     "trustPolicy": "community market entries are untrusted until curated"
   },
   "skills": [
     {
+      "schemaVersion": "1",
+      "snapshotType": "marketSkill",
+      "version": 1,
+      "snapshotGeneratedAt": "2026-05-14T04:14:57Z",
       "id": "market.skill-market-경제-이벤트-반응함수-분석.31",
       "title": "[Skill Market] 경제 이벤트 반응함수 분석",
       "summary": "이 항목은 DartLab Skill Market의 완성형 커뮤니티 스킬 카드입니다.",
@@ -101,12 +105,22 @@
         "recipes.macro.sectorRotation",
         "recipes.macro.timeSeriesChart"
       ],
+      "canonicalSource": "marketItemSnapshot",
+      "itemPath": "items/market.skill-market-경제-이벤트-반응함수-분석.31.json",
+      "acceptedAt": "2026-05-14T04:14:53Z",
+      "canonicalUpdatedAt": "2026-05-14T03:46:17Z",
+      "finalizedAt": "2026-05-14T04:14:53Z",
+      "revisionStatus": "current",
+      "pendingCommentCount": 0,
+      "pendingCommentUrls": [],
+      "pendingSince": null,
+      "revisionPolicy": "Accepted market item snapshots are canonical. Later comments do not change the final skill until reviewed and accepted.",
       "sourceType": "githubDiscussion",
       "sourceUrl": "https://github.com/eddmpython/dartlab/discussions/31",
       "discussionNumber": 31,
       "author": "eddmpython",
       "createdAt": "2026-05-13T14:41:09Z",
-      "updatedAt": "2026-05-14T03:46:17Z",
+      "updatedAt": "2026-05-14T04:14:54Z",
       "credits": {
         "originator": [
           "eddmpython"
