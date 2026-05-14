@@ -32,105 +32,101 @@
 
 </div>
 
-## 회사에는 이야기가 있다
+## 무엇을 해주는가
 
-숫자를 나열하면 대시보드가 되지만, 숫자의 인과를 연결하면 스토리가 된다.
-DartLab은 그 스토리를 읽는 두 가지 방법을 제공한다.
+DartLab은 DART와 EDGAR 공시를 **종목코드 하나로 비교 가능한 데이터**로 바꾸는 Python 라이브러리다. 재무제표, 사업보고서 본문, 공시 목록, 비율, 신용위험, 산업 맵, 매크로 맥락을 같은 `Company` 인터페이스로 읽는다.
 
-**사람이 직접 읽는다** — 종목코드 하나로 재무제표, 공시, 비율을 꺼내고, 6막 인과 구조로 "왜 이 회사의 마진이 이 수준인가"를 추적한다. 코드 한 줄이면 데이터가 나오고, 그 데이터가 이야기를 만든다.
+핵심은 단순 수집이 아니다. 회사마다 다른 계정명과 공시 목차를 `topic × period`, `account × period` 형태로 수평화해서 **작년과 올해, 삼성전자와 애플, 한 종목과 전체 시장을 같은 질문으로 비교**하게 만든다.
 
-**AI가 읽어준다** — 같은 도구를 AI가 조합해서 질문에 맞는 분석 흐름을 스스로 설계하고, 코드와 결과를 투명하게 보여준다. 사용자는 답만 얻는 게 아니라 분석 방법을 배운다.
+| Before | After |
+|---|---|
+| 사업보고서 여러 해를 열고 목차를 맞춘다 | `c.sections` |
+| XBRL 계정명과 한글 항목명을 직접 매핑한다 | `c.show("IS")` |
+| 전 종목 재무비율을 직접 수집·정규화한다 | `dartlab.scan("profitability")` |
+| AI 답변의 숫자를 다시 검산한다 | `dartlab.ask(...)` + 실행 근거 ref |
 
-두 경로 모두 같은 엔진 위에서 동작한다. **엔진이 다리다** — 사람이 만든 엔진·블로그는 Skill OS 를 통해 AI 가 읽는 지식이 되고, 분석 중 발견한 반복 패턴은 사람 검토를 거쳐 Skill OS·엔진 docstring·블로그로 환류한다 (`operation.philosophy`).
+## 두 가지 시작점
 
-투톱 진입점:
+DartLab은 **AI로 바로 분석하는 길**과 **Python 코드로 직접 다루는 길**을 분리해서 제공한다. 두 길은 같은 데이터와 같은 엔진을 쓴다.
 
-- `dartlab.ask("...")` — AI 의 입구. 자연어 한 줄.
-- `dartlab.Company(code)` — 사람의 입구. 종목 파사드 하나로 `c.story()` · `c.analysis(...)` · `c.credit()` · `c.quant()` 등 전 엔진 접근.
+| 사용 방식 | 이런 사람에게 맞다 | 첫 실행 |
+|---|---|---|
+| [AI로 바로 사용](#ai로-바로-사용) | 질문을 던지고 근거 있는 기업분석 답변을 받고 싶은 사람 | Desktop 또는 `dartlab.ask()` |
+| [Python 코드로 사용](#python-코드로-사용) | 재무제표·공시·스캔 데이터를 직접 분석하고 싶은 개발자 | `dartlab.Company("005930")` |
 
-## 통합 아키텍처 — 전문 금융 AI 플랫폼
+## AI로 바로 사용
 
-DartLab 은 단순 금융 데이터 라이브러리가 아니다. **한국 (DART) · 미국 (SEC EDGAR) · 향후 일본 (EDINET) 공시를 정규화한 1 차 데이터 + 6 막 인과 분석 엔진 (`analysis · credit · macro · quant · industry`) + chat-native AI 작업대 + Skill OS** 가 결합한 *전문 금융 AI 플랫폼*. 사람이 작성한 엔진 코드와 블로그는 AI 가 검색 가능한 운영 지식이 되고, 실행 중 발견한 개선 후보는 사람 검토를 거쳐 공식 자산으로 반영한다. 같은 도구 표면을 **MCP** 로 외부 LLM 도 그대로 사용.
+기업 이름이나 종목코드를 넣고 자연어로 물어보면, DartLab AI는 내부에서 `Company`, `analysis`, `credit`, `scan`, `macro` 같은 도구를 직접 실행한다. 답변만 만드는 것이 아니라 어떤 데이터와 계산을 썼는지 추적 가능한 ref를 함께 남긴다.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/architecture-dark.svg">
-    <img src=".github/assets/architecture-light.svg" alt="DartLab 아키텍처 — 전문 금융 AI 플랫폼. 사용자 / 입구 (ask · Company) / L4 소비자 (ai · mcp) + 표현/전송 헬퍼 (viz · cli · server · channel) / L3 조합기 story / L2 분석엔진 5 (analysis · credit · macro · quant · industry) / L1.5 가공 4 형제 (scan · frame · synth · reference) / L1 (gather · providers) / L0 core / 외부 1 차 소스 / 검토 기반 지식 환류" width="720">
-  </picture>
+<p>
+  <a href="https://github.com/eddmpython/dartlab-desktop/releases/latest/download/DartLab.exe">
+    <img src="https://img.shields.io/badge/Windows_Desktop-Download-2563eb?style=for-the-badge&labelColor=050811&logo=windows&logoColor=white" alt="Windows Desktop Download">
+  </a>
+  <a href="https://eddmpython.github.io/dartlab/skills">
+    <img src="https://img.shields.io/badge/Skill_OS-Open-38bdf8?style=for-the-badge&labelColor=050811" alt="Skill OS">
+  </a>
 </p>
-
-> ① 사람·외부 LLM (MCP) → ② 입구 두 갈래 (`dartlab.ask` AI · `dartlab.Company` 사람) → ③ **L4 소비자** (`ai` chat-native 작업대 = Skill OS·Capability·Tools · `mcp` 외부 LLM 진입) → ④ **L3 조합기** `story` (분석엔진 X — 순환참조 방지용 다중 결합 책임자) → ⑤ **L2 분석엔진 5** (`analysis · credit · macro · quant · industry`) → ⑥ **L1.5 가공 4 형제** (`scan` 횡단면 · `frame` raw 결합 · `synth` 후처리/매칭 · `reference` 룩업+매핑) → ⑦ **L1 raw 생산** (`gather · providers`) → ⑧ **L0** `core/` (DIP Protocol + primitive) → ⑨ 외부 1 차 소스. **표현/전송 헬퍼** (`viz · cli · server · channel`) 는 별 그룹 — 모든 결과를 차트·CLI·HTTP·외부 공유로 표현 (비즈니스 로직 0). ⑩ **검토 기반 지식 환류** — 분석 중 확인한 반복 패턴을 운영자가 Skill OS · 엔진 docstring · 블로그에 반영.
-
-**한 줄 사용** — Python 또는 MCP:
 
 ```python
 import dartlab
+
 dartlab.ask("삼성전자 재무건전성 분석해줘")
-# → AI 가 RunPython 으로 c.analysis("수익성") · c.credit("등급") 등 직접 호출
-#   답변 안의 모든 숫자는 executionRef / tableRef 로 검산 가능
+# AI가 필요한 데이터를 직접 조회하고, 계산 결과와 근거 ref를 함께 반환
 ```
+
+AI 경로의 장점:
+
+- **분석 흐름을 직접 설계** — 질문에 맞춰 공시, 재무제표, 신용, 매크로, peer 비교 도구를 조합한다.
+- **숫자 검산 가능** — 답변 속 숫자와 표는 실행 결과 ref에 연결된다.
+- **공시 본문은 데이터로만 처리** — DART/EDGAR/웹 본문 안의 지시는 따르지 않고 분석 근거로만 쓴다.
+- **외부 LLM 연동 가능** — MCP로 Claude Code, Codex CLI, Cursor 같은 도구에서 같은 표면을 호출한다.
 
 ```bash
-claude mcp add dartlab -- dartlab mcp        # Claude Code
-codex  mcp add dartlab -- dartlab mcp        # Codex CLI
+claude mcp add dartlab -- dartlab mcp
+codex  mcp add dartlab -- dartlab mcp
 ```
 
-> Claude Desktop · 원격 SSE · 절대 경로 옵션은 [아래 MCP 섹션](#mcp--ai-어시스턴트-연동) 참조.
+> Claude Desktop · 원격 SSE · 절대 경로 옵션은 [MCP 섹션](#mcp--ai-어시스턴트-연동) 참조.
 
-**전문 금융 AI 의 4 가지 차별점**:
+## Python 코드로 사용
 
-- **chat-native 작업대** — 5 패스 graph (BRIEF / WORK / CRITIQUE / COMPOSE / GATE) 강제 X. LLM 이 매 iteration **canonical 11 도구** (Skill OS 검색 · 데이터 실행 · 외부 · 출력 · workbench) 중 *언제·무엇을* 자율 결정. 작업대 5 패스는 *옵션 sub-agent*.
-- **Ref 검산 강제** — 모든 숫자·날짜·랭킹 답이 `executionRef · tableRef · valueRef · webRef · dataRef · visualRef · artifactRef · docRef` 중 하나에 닿는다. GATE 가 ref 없는 답을 차단.
-- **외부 본문 untrusted** — DART/EDGAR 공시·웹 검색·뉴스 본문은 *데이터* 이지 *지시* 가 아니다. `[EXTERNAL CONTENT START — untrusted]` 마커로 감싸 prompt injection 차단. 마커 안의 "이전 지시 무시" 문구는 따르지 않는다.
-- **검토 기반 지식 환류** — 분석 실행과 커뮤니티 반응에서 반복적으로 확인된 개선 후보는 바로 공식 지식이 되지 않는다. 운영자 검토 후 Skill OS, 엔진 docstring, 블로그 중 맞는 공개 자산에 반영한다.
-
-**계층 — import 단방향 강제**: `L0 core ← L1 (gather · providers) ← L1.5 가공 4 형제 (scan · frame · synth · reference) ← L2 분석엔진 5 (analysis · credit · macro · quant · industry) ← L3 조합기 (story — 분석엔진 X) ← L4 소비자 (ai · mcp)`. L4 와 별도로 **표현/전송 헬퍼** (`viz · cli · server · channel`) 가 비즈니스 로직 0 으로 모든 결과를 다른 매체 (차트·CLI·HTTP·외부 공유) 로 표현. L2 엔진 상호 import 0 건 + L1.5 4 형제 cross import 0 건 (CI 강제 [tests/architecture/](tests/architecture/) 5 종) — story 가 L2 다중 소비를 단독으로 짊어져 순환참조 차단. 새 국가 추가 = `providers/` 패키지 하나, core 수정 0 줄. L1.5 4 형제 책임: `scan` 횡단면 (한 metric × 다수 회사), `frame` raw 결합 (panel/시계열 view), `synth` 분석 후처리·매칭·시나리오, `reference` 정적 JSON 룩업+매핑 엔진.
-
-상세 — [`operation.philosophy`](https://eddmpython.github.io/dartlab/skills) (사상 SSOT 정점) · [`ai/SSOT.md`](src/dartlab/ai/SSOT.md) (AI 엔진 정체성 + Outcome 선순환).
-
-## Skill OS — 스킬 운영체계
-
-DartLab 의 문서, 코드 규칙, AI 실행 지식은 **Skill OS** 로 운영한다. 공식 진입점은 [`start.dartlabSkillOs`](https://eddmpython.github.io/dartlab/skills/start.dartlabSkillOs) 이며, AI 엔진과 MCP 도 같은 Skill OS 를 읽는다.
-
-| 운영 산출물 | 역할 |
-|---|---|
-| [`operation.code`](https://eddmpython.github.io/dartlab/skills/operation.code) | 네이밍, docstring, 구조 룰, code gate |
-| [`operation.architecture`](https://eddmpython.github.io/dartlab/skills/operation.architecture) | 계층, import 방향, 경계 규칙 |
-| [`operation.testing`](https://eddmpython.github.io/dartlab/skills/operation.testing) | 회귀 테스트, Guard Index, 검증 절차 |
-| [`operation.contributionWorkflow`](https://eddmpython.github.io/dartlab/skills/operation.contributionWorkflow) | 변경 단위, 커밋 방식, 공개 산출물 규칙 |
-| [`operation.skillMarket`](https://eddmpython.github.io/dartlab/skills/operation.skillMarket) | 커뮤니티 Skill Market 운영 원칙 |
-
-공식 Skill OS 와 커뮤니티 Skill Market 은 다른 trust tier 다. 패키지 builtin 은 `src/dartlab/skills/specs/**` 의 공식 skill 만 포함하고, 커뮤니티 제안은 [`/skills/market`](https://eddmpython.github.io/dartlab/skills/market) 의 별도 정적 인덱스로 조회한다.
-
-### 아이디어 공유와 운영
-
-사용자는 완성된 코드나 PR이 아니라 **분석 질문**을 공유하면 된다. GitHub Discussions 에 `[Skill Market]` 제목으로 아이디어를 쓰면 Forge 가 원문을 읽어 `intent`, `inputs`, `outputs`, `criteria`, `examples`, `mappedBuiltinSkills`, `missingDetails` 로 구조화한다.
-
-| 단계 | 하는 일 | 산출물 |
-|---|---|---|
-| 아이디어 공유 | “CPI 발표가 금리·환율·섹터에 어떻게 전이되는가”처럼 자연어 질문 작성 | Discussion 원문 |
-| Forge 초안 | 기존 Skill OS 와 매핑하고 부족한 입력·기준을 질문 | 자동 초안 댓글 |
-| 커뮤니티 보강 | 예시, 반례, 데이터 소스, 판단 기준을 댓글로 보완 | credit 원장 |
-| 운영자 검토 | `marketRunnable` · `marketCurated` · `builtinCandidate` 여부 판단 | 정적 market index |
-| 지식 환류 | 검토된 패턴만 Skill OS, 엔진 docstring, 블로그로 반영 | 공식 지식 자산 |
-
-현재 공유 입구는 [Discussions Ideas](https://github.com/eddmpython/dartlab/discussions/categories/ideas) 의 `[Skill Market]` 글이다. 전용 `Skill Market` 카테고리가 생기면 같은 Forge 가 그 카테고리를 우선 읽는다.
-
-## 문제
-
-삼성전자의 "매출액"을 5년간 비교하려고 한 적 있는가?
-
-DART에서 사업보고서를 열면 같은 숫자가 `ifrs-full_Revenue`, `dart_Revenue`, `매출액`, `영업수익` 네 가지 이름으로 나온다. 작년과 올해의 목차 구조가 다르다. SK하이닉스와 비교하려면 같은 작업을 처음부터 다시 해야 한다.
-
-**진짜 문제는 데이터가 없는 게 아니다. 같은 데이터가 너무 많은 이름으로 존재하는 것이다.**
-
-DartLab은 하나의 전제 위에 서 있다: **모든 기간은 비교 가능해야 하고, 모든 회사는 비교 가능해야 한다.** 공시 섹션을 토픽-기간 그리드로 정규화하고(~95% 매핑율), XBRL 계정을 표준 이름으로 통일한다(~97% 매핑율) — 양식이 아니라 기업을 비교한다.
-
-## 빠른 시작
+코드 경로는 `Company`가 중심이다. 종목코드 하나로 재무제표, 공시 본문, 정형 보고서, 비율, 분석 엔진을 같은 방식으로 호출한다.
 
 ```bash
 uv add dartlab
 ```
+
+```python
+import dartlab
+
+c = dartlab.Company("005930")       # 삼성전자
+
+c.show("IS")                        # 손익계산서
+c.show("businessOverview")          # 사업 개요
+c.diff("businessOverview")          # 전년 대비 본문 변화
+c.show("ratios")                    # 계산된 재무비율
+c.filings()                         # 원문 공시 링크
+```
+
+```python
+# 같은 인터페이스, 다른 시장
+kr = dartlab.Company("005930")
+us = dartlab.Company("AAPL")
+
+kr.show("IS")
+us.show("IS")
+```
+
+Python 경로의 장점:
+
+- **API 키 없이 시작** — 사전 구축 데이터는 HuggingFace에서 자동 다운로드하고 로컬에 캐시한다.
+- **기간 비교가 기본** — 공시 본문과 재무제표를 기간 축으로 맞춘다.
+- **한국과 미국을 같은 인터페이스로 조회** — DART와 EDGAR의 차이는 provider가 흡수한다.
+- **엔진 결과를 재사용 가능** — analysis, credit, macro, quant, industry, story 결과를 코드에서 직접 다룬다.
+
+## 결과 예시
+
+아래는 Python 경로에서 바로 얻는 대표 결과다. 공시 본문, 재무제표, 원문 링크가 같은 `Company` 객체에서 나온다.
 
 ```python
 import dartlab
