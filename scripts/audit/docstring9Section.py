@@ -194,6 +194,8 @@ def _scanFile(path: Path) -> list[dict]:
 
 
 def _scan(target: Path) -> list[dict]:
+    if target.is_file():
+        return sorted(_scanFile(target), key=lambda v: (v["path"], v["line"]))
     all_violations: list[dict] = []
     for p in target.rglob("*.py"):
         if "__pycache__" in p.parts:

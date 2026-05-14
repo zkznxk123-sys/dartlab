@@ -80,6 +80,8 @@ def runGuard(args: argparse.Namespace) -> dict[str, Any]:
             "filesScanned": len(records),
             "rulesPassed": 1 + len(externalGates) - len(failedExternal),
             "rulesFailed": failedRuleCount,
+            "activeKnownDebt": len(baselineResult.activeKnownViolations),
+            "protectedCompanyFacadeDebt": len(baselineResult.protectedCompanyFacadeDebt),
         },
         "modules": [record.toDict() for record in records],
         "violations": [item.toDict() for item in baselineResult.newViolations],

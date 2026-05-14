@@ -9,7 +9,6 @@
       "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:60"
     ],
     "architecture.lazyRootFacadeImport": [
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/company.py:1271",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/docs/notes.py:89",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/openapi/batch.py:1085",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/openapi/batch.py:445",
@@ -21,7 +20,6 @@
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/datasetBulk.py:58",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/datasetBulk.py:66",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/bulk/freshness.py:32",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/company.py:781",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/docs/fetch.py:694",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/docs/fetch.py:845",
       "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/openapi/batch.py:52",
@@ -35,6 +33,22 @@
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/transforms/indicatorDispatch.py:60",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/docsIndexBuilder.py:120",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/financeStatementBuilder.py:472",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/scanAccount.py:549",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/spec.py:58",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:223",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:240",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:291",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:242",
+      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:291"
+    ]
+  },
+  "protectedCompanyFacadeDebt": {
+    "_note": "Company facade 공개 표면 보호 원장. providers/{dart,edgar}/company.py 내부 lazy 상위 의존은 사용자 호출 표면을 보존하기 위해 active cleanup 대상에서 제외하고 신규 증가만 차단한다.",
+    "architecture.lazyRootFacadeImport": [
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/company.py:1271",
+      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/company.py:781"
+    ],
+    "architecture.lazyUpperImport": [
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:2649",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3389",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3461",
@@ -49,13 +63,6 @@
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5106",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5175",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:5441",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/scanAccount.py:549",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/spec.py:58",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:223",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:240",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/financeMappers.py:291",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:242",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:291",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:1240",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:1302",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/company.py:2151",

@@ -16,7 +16,10 @@ class BaselineResult:
 
     newViolations: tuple[Violation, ...]
     knownViolations: tuple[Violation, ...]
+    activeKnownViolations: tuple[Violation, ...]
+    protectedCompanyFacadeDebt: tuple[Violation, ...]
     staleKnown: tuple[str, ...]
+    staleProtectedCompanyFacadeDebt: tuple[str, ...]
     deferred: dict[str, Any]
 
     def toDict(self) -> dict[str, Any]:
@@ -24,7 +27,10 @@ class BaselineResult:
         return {
             "newViolations": [item.toDict() for item in self.newViolations],
             "knownViolations": [item.toDict() for item in self.knownViolations],
+            "activeKnownViolations": [item.toDict() for item in self.activeKnownViolations],
+            "protectedCompanyFacadeDebt": [item.toDict() for item in self.protectedCompanyFacadeDebt],
             "staleKnown": list(self.staleKnown),
+            "staleProtectedCompanyFacadeDebt": list(self.staleProtectedCompanyFacadeDebt),
             "deferred": self.deferred,
         }
 
@@ -41,6 +47,9 @@ def loadBaseline(path: Path) -> dict[str, Any]:
     known = data.get("known", {})
     if not isinstance(known, dict):
         raise ValueError(f"baseline known must be object: {path}")
+    protected = data.get("protectedCompanyFacadeDebt", {})
+    if not isinstance(protected, dict):
+        raise ValueError(f"baseline protectedCompanyFacadeDebt must be object: {path}")
     deferred = data.get("deferred", {})
     if not isinstance(deferred, dict):
         raise ValueError(f"baseline deferred must be object: {path}")
@@ -50,14 +59,22 @@ def loadBaseline(path: Path) -> dict[str, Any]:
 def compareBaseline(violations: list[Violation], baseline: dict[str, Any]) -> BaselineResult:
     """신규/기존/stale known 위반을 분류한다."""
     knownKeys = flattenKnownKeys(baseline.get("known", {}))
+    protectedKeys = flattenKnownKeys(baseline.get("protectedCompanyFacadeDebt", {}))
+    allowedKeys = knownKeys | protectedKeys
     foundKeys = {item.baselineKey for item in violations}
-    knownViolations = tuple(item for item in violations if item.baselineKey in knownKeys)
-    newViolations = tuple(item for item in violations if item.baselineKey not in knownKeys)
+    knownViolations = tuple(item for item in violations if item.baselineKey in allowedKeys)
+    activeKnownViolations = tuple(item for item in violations if item.baselineKey in knownKeys)
+    protectedCompanyFacadeDebt = tuple(item for item in violations if item.baselineKey in protectedKeys)
+    newViolations = tuple(item for item in violations if item.baselineKey not in allowedKeys)
     staleKnown = tuple(sorted(knownKeys - foundKeys))
+    staleProtectedCompanyFacadeDebt = tuple(sorted(protectedKeys - foundKeys))
     return BaselineResult(
         newViolations=newViolations,
         knownViolations=knownViolations,
+        activeKnownViolations=activeKnownViolations,
+        protectedCompanyFacadeDebt=protectedCompanyFacadeDebt,
         staleKnown=staleKnown,
+        staleProtectedCompanyFacadeDebt=staleProtectedCompanyFacadeDebt,
         deferred=baseline.get("deferred", {}),
     )
 

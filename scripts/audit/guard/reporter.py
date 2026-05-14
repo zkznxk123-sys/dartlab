@@ -18,11 +18,16 @@ def printConsole(result: dict[str, Any]) -> None:
     print(f"rules failed : {summary['rulesFailed']}")
     baseline = result.get("baseline", {})
     staleKnown = baseline.get("staleKnown") or []
-    knownViolations = baseline.get("knownViolations") or []
-    if knownViolations:
-        print(f"known debt   : {len(knownViolations)} (baseline ledger)")
+    staleProtected = baseline.get("staleProtectedCompanyFacadeDebt") or []
+    activeKnown = baseline.get("activeKnownViolations") or []
+    protectedCompany = baseline.get("protectedCompanyFacadeDebt") or []
+    totalKnown = len(activeKnown) + len(protectedCompany)
+    if totalKnown:
+        print(f"known debt   : {totalKnown} (active {len(activeKnown)} / protected Company {len(protectedCompany)})")
     if staleKnown:
-        print(f"stale known  : {len(staleKnown)} (baseline shrink 필요)")
+        print(f"stale active : {len(staleKnown)} (baseline shrink 필요)")
+    if staleProtected:
+        print(f"stale protected Company: {len(staleProtected)} (facade ledger 검토 필요)")
     if result["violations"]:
         print("\n[violations]")
         for item in result["violations"][:20]:
