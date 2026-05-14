@@ -509,6 +509,20 @@ def saveReplacingByKeys(
     This is for DART incremental refreshes where a corrected filing maps to an
     already-collected period. It removes only the exact logical keys present in
     the newly collected rows, then appends those new rows.
+
+    Args:
+        df: 새로 수집한 행. ``keyColumns`` 를 직접 갖거나 복원 가능한 legacy alias를 가져야 한다.
+        path: 교체 병합할 parquet 경로.
+        keyColumns: 기존 행 제거 범위를 결정하는 논리 키 컬럼 목록.
+
+    Returns:
+        Path — 저장된 parquet 경로.
+
+    Raises:
+        ValueError: 새 데이터나 기존 parquet에서 병합 키를 구성할 수 없거나 null 키가 있을 때.
+
+    Example:
+        >>> saveReplacingByKeys(df, "data/dart/finance/005930.parquet", ["bsns_year", "reprt_code", "fs_div"])
     """
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)
