@@ -9,8 +9,8 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-def test_polars_max_threads_capped_when_cpu_gt_8():
-    """CPU > 8 환경에서 dartlab import 가 POLARS_MAX_THREADS=8 을 박는지 확인.
+def test_polars_max_threads_capped_when_cpu_gt_4():
+    """CPU > 4 환경에서 dartlab import 가 POLARS_MAX_THREADS=4 를 박는지 확인.
 
     이미 사용자가 설정한 경우는 존중한다 (이 테스트는 dartlab import 가 끝난
     후 시점이라 우리가 확인하는 건 결과 상태).
@@ -18,20 +18,20 @@ def test_polars_max_threads_capped_when_cpu_gt_8():
     cpu = os.cpu_count() or 4
     val = os.environ.get("POLARS_MAX_THREADS")
 
-    if cpu > 8:
-        assert val is not None, "CPU > 8 인데 POLARS_MAX_THREADS 가 설정되지 않았다"
-        assert val == "8", f"기본 cap 은 8 이어야 한다. 실제: {val}"
+    if cpu > 4:
+        assert val is not None, "CPU > 4 인데 POLARS_MAX_THREADS 가 설정되지 않았다"
+        assert val == "4", f"기본 cap 은 4 이어야 한다. 실제: {val}"
 
 
 def test_polars_thread_pool_respects_cap():
-    """POLARS_MAX_THREADS=8 이 실제 polars 런타임에 반영됐는지 확인."""
+    """POLARS_MAX_THREADS=4 가 실제 polars 런타임에 반영됐는지 확인."""
     import polars as pl
 
     cpu = os.cpu_count() or 4
     pool = pl.thread_pool_size()
 
-    if cpu > 8:
-        assert pool <= 8, f"CPU > 8 환경에서 polars thread pool 이 {pool} — 8 이하여야 한다"
+    if cpu > 4:
+        assert pool <= 4, f"CPU > 4 환경에서 polars thread pool 이 {pool} — 4 이하여야 한다"
 
 
 class TestGetMemoryMb:
