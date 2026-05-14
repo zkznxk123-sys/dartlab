@@ -231,6 +231,20 @@ jobs:
           name: quality-history
           path: scripts/audit/qualityHistory.jsonl
           retention-days: 90
+      # 진척 측정 — baseline 부채 + docstring backlog + marker 분포 한 jsonl 행에 적재.
+      # memory/baseline_quota.md 의 분기별 quota (2026-Q2/Q3/Q4) 가시화 인프라.
+      - name: Measure progress (baseline + docstring + marker)
+        run: python -X utf8 scripts/audit/measureProgress.py
+      - name: Record progress history
+        if: github.ref == 'refs/heads/master'
+        run: python -X utf8 scripts/audit/measureProgress.py --record
+      - name: Upload progress history
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v5
+        with:
+          name: progress-history
+          path: scripts/audit/_progress/measureHistory.jsonl
+          retention-days: 90
 
   security:
     runs-on: ubuntu-latest
