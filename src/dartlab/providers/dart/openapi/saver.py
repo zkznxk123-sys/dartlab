@@ -24,6 +24,8 @@ _FS_NM_TO_DIV: dict[str, str] = {
     "재무제표": "OFS",
 }
 
+_REPRT_NM_TO_CODE: dict[str, str] = {v: k for k, v in _REPRT_NM.items()}
+
 _API_NAMES: dict[str, str] = {
     "irdsSttus": "증자(감자)현황",
     "alotMatter": "배당에관한사항",
@@ -458,6 +460,45 @@ def _keyExpr(columns: Sequence[str]) -> pl.Expr:
     return pl.concat_str([pl.col(c).cast(pl.Utf8).fill_null("") for c in columns], separator="\x1f")
 
 
+def _materializeReplacementKeys(df: pl.DataFrame, keyColumns: Sequence[str]) -> pl.DataFrame:
+    """Fill known legacy aliases for replacement keys before safe merge."""
+    enriched = df
+    expressions: list[pl.Expr] = []
+
+    if "reprt_code" in keyColumns and "reprt_code" not in enriched.columns and "reprt_nm" in enriched.columns:
+        expressions.append(pl.col("reprt_nm").replace_strict(_REPRT_NM_TO_CODE, default=None).alias("reprt_code"))
+    if "fs_div" in keyColumns and "fs_div" not in enriched.columns and "fs_nm" in enriched.columns:
+        expressions.append(pl.col("fs_nm").replace_strict(_FS_NM_TO_DIV, default=None).alias("fs_div"))
+    if "year" in keyColumns and "year" not in enriched.columns and "bsns_year" in enriched.columns:
+        expressions.append(pl.col("bsns_year").alias("year"))
+    if "quarter" in keyColumns and "quarter" not in enriched.columns and "reprt_code" in enriched.columns:
+        expressions.append(pl.col("reprt_code").replace_strict(_REPRT_NM, default=None).alias("quarter"))
+    if "stock_code" in keyColumns and "stock_code" not in enriched.columns and "stockCode" in enriched.columns:
+        expressions.append(pl.col("stockCode").alias("stock_code"))
+    if "stockCode" in keyColumns and "stockCode" not in enriched.columns and "stock_code" in enriched.columns:
+        expressions.append(pl.col("stock_code").alias("stockCode"))
+    if "corp_code" in keyColumns and "corp_code" not in enriched.columns and "corpCode" in enriched.columns:
+        expressions.append(pl.col("corpCode").alias("corp_code"))
+    if "corpCode" in keyColumns and "corpCode" not in enriched.columns and "corp_code" in enriched.columns:
+        expressions.append(pl.col("corp_code").alias("corpCode"))
+
+    if expressions:
+        enriched = enriched.with_columns(expressions)
+    return enriched
+
+
+def _validateReplacementKeys(df: pl.DataFrame, keyColumns: Sequence[str], *, label: str) -> None:
+    missing = [c for c in keyColumns if c not in df.columns]
+    if missing:
+        raise ValueError(f"safe replacement requires {label} key columns: {missing}")
+
+    nullCounts = df.select(pl.any_horizontal([pl.col(c).is_null() for c in keyColumns]).sum().alias("nullKeys"))[
+        "nullKeys"
+    ][0]
+    if nullCounts:
+        raise ValueError(f"safe replacement found null {label} key values: {keyColumns}")
+
+
 def saveReplacingByKeys(
     df: pl.DataFrame,
     path: str | Path,
@@ -472,25 +513,25 @@ def saveReplacingByKeys(
     dest = Path(path)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
+    keyColumns = list(keyColumns)
+    df = _materializeReplacementKeys(df, keyColumns)
+    _validateReplacementKeys(df, keyColumns, label="new")
+
     if df.height == 0:
         if not dest.exists():
             _writeParquetAtomic(df, dest)
         return dest
 
-    keys = [c for c in keyColumns if c in df.columns]
     if not dest.exists():
         _writeParquetAtomic(df.unique(), dest)
         return dest
 
-    existing = pl.read_parquet(dest)
-    if not keys or any(c not in existing.columns for c in keys):
-        combined = pl.concat([existing, df], how="diagonal_relaxed").unique()
-        _writeParquetAtomic(combined, dest)
-        return dest
+    existing = _materializeReplacementKeys(pl.read_parquet(dest), keyColumns)
+    _validateReplacementKeys(existing, keyColumns, label="existing")
 
     keyCol = "__dartlab_replace_key"
-    newKeys = df.with_columns(_keyExpr(keys).alias(keyCol)).select(keyCol).unique().get_column(keyCol).to_list()
-    keep = existing.with_columns(_keyExpr(keys).alias(keyCol)).filter(~pl.col(keyCol).is_in(newKeys)).drop(keyCol)
+    newKeys = df.with_columns(_keyExpr(keyColumns).alias(keyCol)).select(keyCol).unique().get_column(keyCol).to_list()
+    keep = existing.with_columns(_keyExpr(keyColumns).alias(keyCol)).filter(~pl.col(keyCol).is_in(newKeys)).drop(keyCol)
     combined = pl.concat([keep, df], how="diagonal_relaxed").unique()
     _writeParquetAtomic(combined, dest)
     return dest
