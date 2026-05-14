@@ -10,6 +10,28 @@ from typing import Any
 import polars as pl
 
 
+def _latestValue(dataFrame: pl.DataFrame | None) -> float | None:
+    if dataFrame is None or len(dataFrame) == 0:
+        return None
+    vals = dataFrame.get_column("value").drop_nulls()
+    if len(vals) == 0:
+        return None
+    return float(vals[-1])
+
+
+def _yoyValue(dataFrame: pl.DataFrame | None) -> float | None:
+    if dataFrame is None or len(dataFrame) == 0:
+        return None
+    vals = dataFrame.get_column("value").drop_nulls()
+    if len(vals) < 13:
+        return None
+    current = float(vals[-1])
+    prev = float(vals[-13])
+    if prev == 0:
+        return None
+    return ((current - prev) / abs(prev)) * 100
+
+
 class DefaultMacroProvider:
     """MacroDataProvider 기본 구현 — gather/entry + macro/seriesFetch 우회."""
 
@@ -79,11 +101,11 @@ class DefaultMacroProvider:
     def fetchSeriesLatest(self, seriesId: str, *, limit: int | None = None) -> float | None:
         """seriesId 의 최신 값.
 
-        Capabilities: macro.seriesFetch.fetchLatest 위임 + 예외 흡수 → None fail-soft.
+        Capabilities: gather.macro 시계열에서 최신 non-null value 추출 + 예외 흡수.
         AIContext: 단건 매크로 값 표시 (UI tile, narrative 단순 인용).
         Guide: 실패 시 None — caller 가 None check.
         When: 단일 시점 매크로 값 표시 / KPI 대시보드 / narrative 인용 시.
-        How: ``getGather(None)`` + ``fetchLatest(g, seriesId)`` try/except → None.
+        How: ``getDefaultGather().macro(seriesId)`` + 마지막 non-null value 추출.
 
         Args:
             seriesId: macro 시리즈 ID (예: "GDP").
@@ -96,7 +118,7 @@ class DefaultMacroProvider:
             없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
 
         Requires:
-            ``dartlab.macro.seriesFetch`` import 가능.
+            GatherEntry.macro(seriesId)가 ``value`` 컬럼을 가진 DataFrame 반환.
 
         Example:
             >>> p = DefaultMacroProvider()
@@ -107,21 +129,20 @@ class DefaultMacroProvider:
             applyAsOf : 시계열 cutoff.
         """
         del limit
-        from dartlab.macro.seriesFetch import fetchLatest, getGather
 
         try:
-            return fetchLatest(getGather(None), seriesId)
-        except (ValueError, RuntimeError, KeyError):
+            return _latestValue(self.getDefaultGather().macro(seriesId))
+        except (ValueError, RuntimeError, KeyError, TypeError, AttributeError):
             return None
 
     def fetchSeriesYoy(self, seriesId: str, *, limit: int | None = None) -> float | None:
         """seriesId 의 YoY 변화율.
 
-        Capabilities: macro.seriesFetch.fetchYoy 위임 + 예외 흡수.
+        Capabilities: gather.macro 시계열에서 12개월 전 대비 YoY 계산 + 예외 흡수.
         AIContext: 인플레이션/생산 YoY 비교 분석 진입 (CPI/IPI/PPI 등).
         Guide: 단건 float — 시계열 필요 시 macro entry.
         When: 단일 YoY 값 표시 / regime classifier 입력 시.
-        How: ``getGather(None)`` + ``fetchYoy(g, seriesId)`` try/except → None.
+        How: ``getDefaultGather().macro(seriesId)`` + 마지막 값과 13번째 이전 값 비교.
 
         Args:
             seriesId: macro 시리즈 ID (예: "CPI").
@@ -134,7 +155,7 @@ class DefaultMacroProvider:
             없음 — ValueError/RuntimeError/KeyError 는 내부에서 흡수.
 
         Requires:
-            ``dartlab.macro.seriesFetch`` import 가능.
+            GatherEntry.macro(seriesId)가 ``value`` 컬럼을 가진 DataFrame 반환.
 
         Example:
             >>> p = DefaultMacroProvider()
@@ -144,9 +165,8 @@ class DefaultMacroProvider:
             fetchSeriesLatest : 동행 단건 latest.
         """
         del limit
-        from dartlab.macro.seriesFetch import fetchYoy, getGather
 
         try:
-            return fetchYoy(getGather(None), seriesId)
-        except (ValueError, RuntimeError, KeyError):
+            return _yoyValue(self.getDefaultGather().macro(seriesId))
+        except (ValueError, RuntimeError, KeyError, TypeError, AttributeError):
             return None

@@ -1,0 +1,101 @@
+"""재무비율 카테고리 SSOT.
+
+RATIO_CATEGORIES는 계산 엔진이 아니라 재무비율 결과를 분류하는 순수 메타데이터다.
+providers, analysis, viz가 모두 참조하므로 L1.5 synth가 아니라 L0 core에 둔다.
+"""
+
+from __future__ import annotations
+
+RATIO_CATEGORIES: list[tuple[str, list[str]]] = [
+    (
+        "profitability",
+        [
+            "roe",
+            "roa",
+            "roce",
+            "operatingMargin",
+            "netMargin",
+            "preTaxMargin",
+            "grossMargin",
+            "ebitdaMargin",
+            "costOfSalesRatio",
+            "sgaRatio",
+            "effectiveTaxRate",
+            "incomeQualityRatio",
+        ],
+    ),
+    (
+        "stability",
+        [
+            "debtRatio",
+            "currentRatio",
+            "quickRatio",
+            "cashRatio",
+            "equityRatio",
+            "interestCoverage",
+            "netDebtRatio",
+            "noncurrentRatio",
+            "workingCapital",
+        ],
+    ),
+    (
+        "growth",
+        [
+            "revenueGrowth",
+            "operatingProfitGrowth",
+            "netProfitGrowth",
+            "assetGrowth",
+            "equityGrowthRate",
+        ],
+    ),
+    (
+        "efficiency",
+        [
+            "totalAssetTurnover",
+            "fixedAssetTurnover",
+            "inventoryTurnover",
+            "receivablesTurnover",
+            "payablesTurnover",
+            "operatingCycle",
+        ],
+    ),
+    (
+        "cashflow",
+        [
+            "fcf",
+            "operatingCfMargin",
+            "operatingCfToNetIncome",
+            "operatingCfToCurrentLiab",
+            "capexRatio",
+            "dividendPayoutRatio",
+            "fcfToOcfRatio",
+        ],
+    ),
+    (
+        "composite",
+        [
+            "roic",
+            "dupontMargin",
+            "dupontTurnover",
+            "dupontLeverage",
+            "debtToEbitda",
+            "ccc",
+            "dso",
+            "dio",
+            "dpo",
+            "piotroskiFScore",
+            "altmanZScore",
+        ],
+    ),
+    (
+        "absolute",
+        [
+            "revenue",
+            "operatingProfit",
+            "netProfit",
+            "totalAssets",
+            "totalEquity",
+            "operatingCashflow",
+        ],
+    ),
+]

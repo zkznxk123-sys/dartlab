@@ -117,7 +117,7 @@ def indexFinanceRows(company: Company) -> list[dict[str, Any]]:
     if rsPair is not None:
         series, years = rsPair
         ratioData = series.get("RATIO", {})
-        from dartlab.synth.ratioCategories import RATIO_CATEGORIES
+        from dartlab.core.ratioCategories import RATIO_CATEGORIES
 
         metricCount = sum(
             1

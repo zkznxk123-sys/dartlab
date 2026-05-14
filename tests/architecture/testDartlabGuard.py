@@ -33,7 +33,7 @@ def testDartlabGuardStrictJson() -> None:
     assert result.returncode == 0, result.stdout + result.stderr
     payload = json.loads(result.stdout)
     assert payload["summary"]["status"] == "pass"
-    assert payload["summary"]["activeKnownDebt"] == 33
+    assert payload["summary"]["activeKnownDebt"] == 12
     assert payload["summary"]["protectedCompanyFacadeDebt"] == 21
     known = payload["baseline"]["knownViolations"]
     active = payload["baseline"]["activeKnownViolations"]
@@ -41,7 +41,7 @@ def testDartlabGuardStrictJson() -> None:
     rules = {item["rule"] for item in known}
     assert "architecture.lazyUpperImport" in rules
     assert "architecture.lazyRootFacadeImport" in rules
-    assert len(active) == 33
+    assert len(active) == 12
     assert len(protected) == 21
     assert all("/company.py" not in item["path"] for item in active)
     assert all(item["path"].endswith("/company.py") for item in protected)
