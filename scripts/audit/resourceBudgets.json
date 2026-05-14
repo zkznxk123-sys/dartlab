@@ -55,6 +55,16 @@
       "maxRssDeltaMb": 900,
       "maxRssPeakMb": 1800
     },
+    "company.show.BS": {
+      "maxElapsedSec": 45,
+      "maxRssDeltaMb": 900,
+      "maxRssPeakMb": 1800
+    },
+    "company.show.ratios": {
+      "maxElapsedSec": 45,
+      "maxRssDeltaMb": 900,
+      "maxRssPeakMb": 1800
+    },
     "company.sections": {
       "maxElapsedSec": 60,
       "maxRssDeltaMb": 1100,

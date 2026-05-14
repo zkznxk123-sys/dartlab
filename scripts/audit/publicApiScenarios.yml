@@ -243,6 +243,18 @@ scenarios:
     covers:
       - Company.show
 
+  company.show.BS:
+    suites: [release, nightly]
+    budget: company.show.BS
+    covers:
+      - Company.show
+
+  company.show.ratios:
+    suites: [release, nightly]
+    budget: company.show.ratios
+    covers:
+      - Company.show
+
   company.sections:
     suites: [release, nightly]
     budget: company.sections

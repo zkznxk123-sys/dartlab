@@ -114,6 +114,7 @@ jobs:
           /tmp/smoke-venv/bin/python -X utf8 scripts/audit/productSmoke.py \
             --suite release \
             --data-mode empty \
+            --import-mode installed \
             --json-out product-smoke-pypi-release.json
         env:
           PYTHONUNBUFFERED: "1"

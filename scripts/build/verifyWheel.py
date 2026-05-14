@@ -119,6 +119,32 @@ def checkRuntime(whl: Path) -> int:
             print("STDERR:", check.stderr)
             return 2
         print(check.stdout.strip())
+
+        smoke = subprocess.run(
+            [
+                str(py),
+                "-X",
+                "utf8",
+                str(Path(__file__).resolve().parents[1] / "audit" / "productSmoke.py"),
+                "--suite",
+                "quick",
+                "--data-mode",
+                "empty",
+                "--import-mode",
+                "installed",
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        if smoke.returncode != 0:
+            print("FAIL — 설치된 wheel 에서 사용자 API quick smoke 실패:")
+            print("STDOUT:", smoke.stdout[-4000:])
+            print("STDERR:", smoke.stderr[-4000:])
+            return 2
+        print(smoke.stdout.strip())
     return 0
 
 

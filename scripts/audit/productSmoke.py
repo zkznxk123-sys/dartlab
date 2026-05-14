@@ -136,6 +136,30 @@ def _ensureNonEmpty(name: str, result: Any, *, minHeight: int = 1) -> dict[str, 
     }
 
 
+def _packageInfo() -> dict[str, str]:
+    import dartlab
+
+    return {
+        "version": str(getattr(dartlab, "__version__", "")),
+        "file": str(Path(dartlab.__file__).resolve()),
+    }
+
+
+def _assertImportMode(importMode: str) -> dict[str, str]:
+    info = _packageInfo()
+    packageFile = Path(info["file"])
+    repoSrc = (REPO_ROOT / "src" / "dartlab").resolve()
+    try:
+        underRepoSrc = packageFile.is_relative_to(repoSrc)
+    except AttributeError:
+        underRepoSrc = str(packageFile).startswith(str(repoSrc))
+    if importMode == "installed" and underRepoSrc:
+        raise AssertionError(f"installed smoke 가 source tree 를 import 함: {packageFile}")
+    if importMode == "source" and not underRepoSrc:
+        raise AssertionError(f"source smoke 가 source tree 밖 패키지를 import 함: {packageFile}")
+    return info
+
+
 def _company():
     import dartlab
 
@@ -216,6 +240,10 @@ def _runScenario(scenarioId: str) -> dict[str, Any]:
         return {"type": type(company).__name__, "height": 1}
     if scenarioId == "company.show.IS":
         return _ensureNonEmpty("company.show.IS", _company().show("IS"), minHeight=1)
+    if scenarioId == "company.show.BS":
+        return _ensureNonEmpty("company.show.BS", _company().show("BS"), minHeight=1)
+    if scenarioId == "company.show.ratios":
+        return _ensureNonEmpty("company.show.ratios", _company().show("ratios"), minHeight=1)
     if scenarioId == "company.sections":
         return _ensureNonEmpty("company.sections", _company().sections, minHeight=1)
     if scenarioId == "company.topics":
@@ -259,6 +287,7 @@ def _childMain(args: argparse.Namespace) -> int:
     started = time.monotonic()
     payload: dict[str, Any] = {"scenario": args.run_scenario, "ok": False}
     try:
+        payload["package"] = _assertImportMode(args.import_mode)
         details = _runScenario(args.run_scenario)
         payload.update({"ok": True, "details": details})
     except BaseException as exc:
@@ -301,7 +330,14 @@ def _dataEnv(dataMode: str, tmp: tempfile.TemporaryDirectory[str] | None) -> dic
     return env
 
 
-def _runChild(scenarioId: str, env: dict[str, str], timeoutSec: float) -> dict[str, Any]:
+def _runChild(
+    scenarioId: str,
+    env: dict[str, str],
+    timeoutSec: float,
+    *,
+    importMode: str,
+    runCwd: Path,
+) -> dict[str, Any]:
     cmd = [
         sys.executable,
         "-X",
@@ -309,10 +345,12 @@ def _runChild(scenarioId: str, env: dict[str, str], timeoutSec: float) -> dict[s
         str(Path(__file__).resolve()),
         "--run-scenario",
         scenarioId,
+        "--import-mode",
+        importMode,
     ]
     proc = subprocess.run(
         cmd,
-        cwd=str(REPO_ROOT),
+        cwd=str(runCwd),
         env=env,
         text=True,
         capture_output=True,
@@ -362,15 +400,27 @@ def runSuite(args: argparse.Namespace) -> int:
     results: list[dict[str, Any]] = []
     failures: list[str] = []
     tmpCtx: tempfile.TemporaryDirectory[str] | None = None
+    cwdCtx: tempfile.TemporaryDirectory[str] | None = None
     if args.data_mode == "empty":
         tmpCtx = tempfile.TemporaryDirectory(prefix="dartlab-product-smoke-")
+    if args.cwd_mode == "temp":
+        cwdCtx = tempfile.TemporaryDirectory(prefix="dartlab-product-cwd-")
     try:
         env = _dataEnv(args.data_mode, tmpCtx)
+        runCwd = Path(cwdCtx.name) if cwdCtx is not None else REPO_ROOT
         for scenarioId in scenarioIds:
             budget = _budgetFor(scenarioId, manifest, budgets)
-            result = _runChild(scenarioId, env, budget.get("maxElapsedSec", 60))
+            result = _runChild(
+                scenarioId,
+                env,
+                budget.get("maxElapsedSec", 60),
+                importMode=args.import_mode,
+                runCwd=runCwd,
+            )
             result["budget"] = budget
             result["dataMode"] = args.data_mode
+            result["cwdMode"] = args.cwd_mode
+            result["importMode"] = args.import_mode
             results.append(result)
             budgetFailures = _checkBudget(result, budget)
             mark = "OK" if not budgetFailures else "FAIL"
@@ -383,6 +433,8 @@ def runSuite(args: argparse.Namespace) -> int:
             if budgetFailures:
                 failures.append(f"{scenarioId}: " + "; ".join(budgetFailures))
     finally:
+        if cwdCtx is not None:
+            cwdCtx.cleanup()
         if tmpCtx is not None:
             tmpCtx.cleanup()
 
@@ -407,6 +459,18 @@ def buildParser() -> argparse.ArgumentParser:
     parser.add_argument("--suite", choices=["quick", "release", "nightly"], default="quick")
     parser.add_argument("--scenario", action="append", help="특정 scenario id만 실행. 여러 번 지정 가능")
     parser.add_argument("--data-mode", choices=["existing", "fixtures", "empty"], default="existing")
+    parser.add_argument(
+        "--import-mode",
+        choices=["any", "source", "installed"],
+        default="any",
+        help="source tree 또는 설치된 wheel 중 어느 패키지를 import 해야 하는지 검증",
+    )
+    parser.add_argument(
+        "--cwd-mode",
+        choices=["temp", "repo"],
+        default="temp",
+        help="사용자 실행처럼 repo 밖 임시 cwd 에서 child scenario 를 실행",
+    )
     parser.add_argument("--json-out", type=Path)
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--run-scenario", help=argparse.SUPPRESS)

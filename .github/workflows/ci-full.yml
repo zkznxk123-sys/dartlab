@@ -155,20 +155,21 @@ jobs:
           uv venv /tmp/dartlab-product-smoke --python 3.12
           WHL=$(ls dist/*.whl | head -n1)
           uv pip install --python /tmp/dartlab-product-smoke "$WHL"
-      - name: Run product smoke quick on wheel
+      - name: Run product smoke release on wheel
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           /tmp/dartlab-product-smoke/bin/python -X utf8 scripts/audit/productSmoke.py \
-            --suite quick \
+            --suite release \
             --data-mode empty \
-            --json-out product-smoke-wheel-quick.json
+            --import-mode installed \
+            --json-out product-smoke-wheel-release.json
       - name: Upload product smoke wheel report
         if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: product-smoke-wheel-quick
-          path: product-smoke-wheel-quick.json
+          name: product-smoke-wheel-release
+          path: product-smoke-wheel-release.json
           retention-days: 30
 
   # realData 스위트 path-filter matrix — master push 에만 실행.

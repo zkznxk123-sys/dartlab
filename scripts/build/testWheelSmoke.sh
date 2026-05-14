@@ -109,6 +109,7 @@ echo "[wheel-smoke] product smoke release 실행 (빈 데이터 디렉터리)...
 "$VENV_PYTHON" -X utf8 "$REPO_ROOT/scripts/audit/productSmoke.py" \
     --suite release \
     --data-mode empty \
+    --import-mode installed \
     --json-out "$WORK_DIR/product-smoke-release.json"
 EXIT_CODE=$?
 
