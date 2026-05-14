@@ -116,7 +116,7 @@ class TestPivotWithFixture:
         assert ratios.roe is not None or ratios.operatingMargin is not None
 
     def test_q1_cf_stays_standalone(self):
-        from dartlab.providers.dart.finance.pivot import buildTimeseries
+        from dartlab.providers.dart.finance.pivot import buildTimeseries, clearFinanceCache
 
         df = pl.DataFrame(
             {
@@ -134,8 +134,12 @@ class TestPivotWithFixture:
             }
         )
 
-        with patch("dartlab.core.dataLoader.loadData", return_value=df):
-            result = buildTimeseries("005930")
+        clearFinanceCache()
+        try:
+            with patch("dartlab.core.dataLoader.loadData", return_value=df):
+                result = buildTimeseries("000001")
+        finally:
+            clearFinanceCache()
 
         assert result is not None
         series, periods = result
