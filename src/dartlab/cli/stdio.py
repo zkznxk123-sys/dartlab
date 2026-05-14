@@ -414,7 +414,7 @@ def run() -> None:
     """stdio REPL loop. Exits on stdin EOF or exit message."""
     import io
 
-    import dartlab
+    import dartlab.config as config
 
     # Force UTF-8 on Windows cp949 environments
     if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
@@ -422,7 +422,7 @@ def run() -> None:
     if sys.stdin.encoding and sys.stdin.encoding.lower() not in ("utf-8", "utf8"):
         sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="replace")
 
-    dartlab.verbose = False
+    config.verbose = False
 
     _emit({"event": "ready", "data": _buildReadyDiag()})
 
@@ -465,9 +465,9 @@ def run() -> None:
 
 def _getVersion() -> str:
     try:
-        import dartlab
+        from importlib.metadata import version as _pkg_version
 
-        return dartlab.__version__
+        return _pkg_version("dartlab")
     except Exception:  # noqa: BLE001
         return "unknown"
 
@@ -484,7 +484,7 @@ def _buildReadyDiag() -> dict[str, Any]:
     except (ImportError, AttributeError, OSError):
         diag["aiProvider"] = "none"
     try:
-        from dartlab import config
+        import dartlab.config as config
 
         diag["dataDir"] = str(config.dataDir)
     except (ImportError, AttributeError):
