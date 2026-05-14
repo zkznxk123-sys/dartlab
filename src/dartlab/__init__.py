@@ -922,6 +922,7 @@ if not _IS_PYODIDE:
     importlib.import_module("dartlab.scan")
 
     _makeCallableModule("dartlab.scan", _scanFactory)
+    _makeCallableModule("dartlab.analysis", _analysisFactory)
     _makeCallableModule("dartlab.analysis.financial", _analysisFactory)
     _makeCallableModule("dartlab.quant", _quantFactory)
     _makeCallableModule("dartlab.macro", _macroFactory)
