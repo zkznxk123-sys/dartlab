@@ -28,35 +28,35 @@ BUDGET_PATH = REPO_ROOT / "scripts" / "audit" / "resourceBudgets.json"
 SAMSUNG = "005930"
 
 
+class _ProcessMemoryCounters(ctypes.Structure):
+    _fields_ = [
+        ("cb", ctypes.wintypes.DWORD),
+        ("PageFaultCount", ctypes.wintypes.DWORD),
+        ("PeakWorkingSetSize", ctypes.c_size_t),
+        ("WorkingSetSize", ctypes.c_size_t),
+        ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+        ("QuotaPagedPoolUsage", ctypes.c_size_t),
+        ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+        ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+        ("PagefileUsage", ctypes.c_size_t),
+        ("PeakPagefileUsage", ctypes.c_size_t),
+    ]
+
+
 def _rssMb() -> float:
     if os.name == "nt":
         try:
-
-            class PMC(ctypes.Structure):
-                _fields_ = [
-                    ("cb", ctypes.wintypes.DWORD),
-                    ("PageFaultCount", ctypes.wintypes.DWORD),
-                    ("PeakWorkingSetSize", ctypes.c_size_t),
-                    ("WorkingSetSize", ctypes.c_size_t),
-                    ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
-                    ("QuotaPagedPoolUsage", ctypes.c_size_t),
-                    ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
-                    ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
-                    ("PagefileUsage", ctypes.c_size_t),
-                    ("PeakPagefileUsage", ctypes.c_size_t),
-                ]
-
             getCurrentProcess = ctypes.windll.kernel32.GetCurrentProcess  # type: ignore[attr-defined]
             getCurrentProcess.restype = ctypes.wintypes.HANDLE
             getProcessMemoryInfo = ctypes.windll.psapi.GetProcessMemoryInfo  # type: ignore[attr-defined]
             getProcessMemoryInfo.argtypes = [
                 ctypes.wintypes.HANDLE,
-                ctypes.POINTER(PMC),
+                ctypes.POINTER(_ProcessMemoryCounters),
                 ctypes.wintypes.DWORD,
             ]
             getProcessMemoryInfo.restype = ctypes.wintypes.BOOL
-            pmc = PMC()
-            pmc.cb = ctypes.sizeof(PMC)
+            pmc = _ProcessMemoryCounters()
+            pmc.cb = ctypes.sizeof(_ProcessMemoryCounters)
             if getProcessMemoryInfo(getCurrentProcess(), ctypes.byref(pmc), pmc.cb):
                 return pmc.WorkingSetSize / (1024 * 1024)
         except (AttributeError, OSError):
