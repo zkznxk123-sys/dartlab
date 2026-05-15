@@ -29,6 +29,7 @@
 		Menu, PanelLeftClose, Coffee, Github, FileText, Cog,
 	} from "lucide-svelte";
 	import ProviderDropdown from "$lib/components/ProviderDropdown.svelte";
+	import SocialIcons from "$lib/components/SocialIcons.svelte";
 	import { isVSCode } from "$lib/api/transport.js";
 
 	// ── Stores ──
@@ -471,26 +472,15 @@
 			</div>
 		{/if}
 
-		<!-- Top-right controls — Ask 모드만 (Dashboard 는 자체 TopBar 가 stockCode/AskBtn 가짐) -->
-		{#if uiMode.value !== "dashboard"}
-			<div class="absolute top-2 right-3 z-20 flex items-center gap-1 pointer-events-auto">
-				{#if !isVSCode}
-					<a href="https://eddmpython.github.io/dartlab/" target="_blank" rel="noopener noreferrer"
-						class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="Documentation">
-						<FileText size={14} />
-					</a>
-					<a href="https://github.com/eddmpython/dartlab" target="_blank" rel="noopener noreferrer"
-						class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="GitHub">
-						<Github size={14} />
-					</a>
-					<a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer"
-						class="p-1.5 rounded-lg text-[#ffdd00]/60 hover:text-[#ffdd00] hover:bg-white/5 transition-colors" title="Buy me a coffee">
-						<Coffee size={14} />
-					</a>
-				{/if}
+		<!-- Top-right controls -->
+		<div class="absolute top-2 right-3 z-20 flex items-center gap-1 pointer-events-auto">
+			{#if !isVSCode}
+				<SocialIcons />
+			{/if}
+			{#if uiMode.value !== "dashboard"}
 				<ProviderDropdown {ui} onOpenSettings={(section) => ui.openSettings(section)} />
-			</div>
-		{/if}
+			{/if}
+		</div>
 
 		<!-- Content: Ask 모드 ⇄ Dashboard 모드 -->
 		<div class="flex flex-1 min-h-0">

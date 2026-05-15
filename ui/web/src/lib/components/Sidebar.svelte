@@ -5,8 +5,16 @@
 	import { getUiMode } from "$lib/stores/uiMode.svelte.js";
 	import ModeToggle from "$lib/dashboard/ModeToggle.svelte";
 	import ThemeToggle from "$lib/dashboard/ThemeToggle.svelte";
-	import EngineNav from "$lib/dashboard/EngineNav.svelte";
 	import CompanySwitcher from "$lib/dashboard/CompanySwitcher.svelte";
+	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
+
+	const dash = getDashboardStore();
+	const FINANCIAL_NAV = [
+		{ key: "is", label: "손익계산서", desc: "매출 · 이익률 · 비용" },
+		{ key: "bs", label: "재무상태표", desc: "자산 · 부채 · 자본" },
+		{ key: "cf", label: "현금흐름표", desc: "영업 · 투자 · 재무" },
+		{ key: "ratios", label: "재무비율", desc: "수익성 · 안정성 · 효율성 · 성장성" },
+	];
 
 	const ui = getUiMode();
 
@@ -149,12 +157,20 @@
 					{/if}
 				</div>
 			{:else}
-				<!-- Dashboard 모드 — 회사 스위처 + 엔진 nav -->
+				<!-- Dashboard 모드 — 회사 스위처 + 재무제표 4 탭 -->
 				<div class="px-3 pb-3">
 					<CompanySwitcher />
 				</div>
-				<div class="flex-1 overflow-y-auto">
-					<EngineNav />
+				<div class="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
+					{#each FINANCIAL_NAV as item}
+						<button
+							class="w-full flex flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left transition-colors {dash.section === item.key ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
+							onclick={() => dash.setSection(item.key)}
+						>
+							<span class="text-sm font-medium">{item.label}</span>
+							<span class="text-[10px] opacity-70">{item.desc}</span>
+						</button>
+					{/each}
 				</div>
 			{/if}
 
