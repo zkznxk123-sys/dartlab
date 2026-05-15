@@ -109,11 +109,19 @@ def _computeDiff(
     return additions, conflicts
 
 
-def _writeJsonAtomic(path: Path, data: dict) -> None:
-    """atomic write — tempfile + replace."""
+def _writeJsonAtomic(path: Path, data: dict, *, compact: bool = True) -> None:
+    """atomic write — tempfile + replace.
+
+    원본이 single-line 컴팩트 JSON (DART accountMappings.json) 인 경우
+    diff 폭증 회피 위해 동일 형식 유지. ``compact=False`` 시 indent=2.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    if compact:
+        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    else:
+        payload = json.dumps(data, ensure_ascii=False, indent=2)
+    tmp.write_text(payload, encoding="utf-8")
     tmp.replace(path)
 
 
