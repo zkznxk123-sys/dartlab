@@ -132,13 +132,11 @@ def loadSharesOutstanding(market: str = "KR"):
     marketCap : 본 함수의 LazyFrame 을 close 와 join 해 시총 합성.
     scan/builders/{kr,edgar}/sharesOutstanding : 본 parquet 의 빌더.
     """
-    from pathlib import Path
-
     import polars as pl
 
-    from dartlab.core.dataConfig import dataDir
+    from dartlab.core.dataLoader import _dataDir
 
-    base = Path(dataDir()) / ("dart" if market == "KR" else "edgar") / "scan"
+    base = _dataDir("scan" if market == "KR" else "edgarScan")
     path = base / "sharesOutstanding.parquet"
 
     if not path.exists():
