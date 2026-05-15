@@ -7,6 +7,7 @@
 	import * as Card from "$lib/ui/card";
 	import * as Table from "$lib/ui/table";
 	import { Skeleton } from "$lib/ui/skeleton";
+	import HistoryChart from "$lib/dashboard/cards/HistoryChart.svelte";
 	import { cn } from "$lib/utils.js";
 
 	let { payload = null, loading = false } = $props();
@@ -119,26 +120,34 @@
 				<Card.Content>
 					{#if isHistoryShape(value)}
 						{@const cols = collectColumns(value.history)}
-						<Table.Root>
-							<Table.Header>
-								<Table.Row>
-									{#each cols as col}
-										<Table.Head class={cn("text-[10px] uppercase tracking-wide", col === "period" && "sticky left-0 bg-card")}>{col}</Table.Head>
-									{/each}
-								</Table.Row>
-							</Table.Header>
-							<Table.Body>
-								{#each value.history as r}
-									<Table.Row>
-										{#each cols as col}
-											<Table.Cell class={cn("text-[12px] font-mono tabular-nums", col === "period" && "sticky left-0 bg-card font-medium text-foreground")}>
-												{formatCell(r[col])}
-											</Table.Cell>
+						<div class="mb-4">
+							<HistoryChart history={value.history} chartType="line" />
+						</div>
+						<details class="border-t border-border pt-2">
+							<summary class="cursor-pointer text-[11px] text-muted-foreground hover:text-foreground select-none">상세 데이터 표 ({value.history.length} 분기)</summary>
+							<div class="mt-2 overflow-x-auto">
+								<Table.Root>
+									<Table.Header>
+										<Table.Row>
+											{#each cols as col}
+												<Table.Head class={cn("text-[10px] uppercase tracking-wide whitespace-nowrap", col === "period" && "sticky left-0 bg-card")}>{col}</Table.Head>
+											{/each}
+										</Table.Row>
+									</Table.Header>
+									<Table.Body>
+										{#each value.history as r}
+											<Table.Row>
+												{#each cols as col}
+													<Table.Cell class={cn("text-[12px] font-mono tabular-nums whitespace-nowrap", col === "period" && "sticky left-0 bg-card font-medium text-foreground")}>
+														{formatCell(r[col])}
+													</Table.Cell>
+												{/each}
+											</Table.Row>
 										{/each}
-									</Table.Row>
-								{/each}
-							</Table.Body>
-						</Table.Root>
+									</Table.Body>
+								</Table.Root>
+							</div>
+						</details>
 						{#if value.summary}
 							<div class="mt-3 text-[11px] text-muted-foreground border-t border-border pt-2">
 								{typeof value.summary === "string" ? value.summary : JSON.stringify(value.summary)}
