@@ -19,77 +19,13 @@ if TYPE_CHECKING:
     from dartlab.core.protocols import CompanyProtocol as Company
 
 
-def _scoreToGrade(score: int, maxScore: int) -> str:
-    """점수를 A~F 등급으로 변환.
-
-    Parameters
-    ----------
-    score : int
-        획득 점수.
-    maxScore : int
-        만점 기준.
-
-    Returns
-    -------
-    str
-        grade : str — 'A' (>=80%) | 'B' (>=50%) | 'C' (>=20%) | 'D' (>=0%) | 'F'
-    """
-    ratio = score / maxScore if maxScore > 0 else 0
-    if ratio >= 0.8:
-        return "A"
-    if ratio >= 0.5:
-        return "B"
-    if ratio >= 0.2:
-        return "C"
-    if ratio >= 0:
-        return "D"
-    return "F"
-
-
-def _getGrowthYoY(annualVals: list[float | None]) -> float | None:
-    """최근 2개 유효값의 YoY 성장률 계산.
-
-    Parameters
-    ----------
-    annualVals : list[float | None]
-        연간 시계열 값 리스트.
-
-    Returns
-    -------
-    float | None
-        yoyPct : float | None — YoY 변화율 (%). 유효값 2개 미만이면 None.
-    """
-    from dartlab.analysis.financial.ratios import yoyPct
-
-    valid = [(i, v) for i, v in enumerate(annualVals) if v is not None]
-    if len(valid) < 2:
-        return None
-    _, prev = valid[-2]
-    _, curr = valid[-1]
-    return yoyPct(curr, prev)
-
-
-def _getVolatility(qVals: list[float | None]) -> float | None:
-    """최근 4분기 최대 변동률 계산.
-
-    Parameters
-    ----------
-    qVals : list[float | None]
-        분기 시계열 값 리스트.
-
-    Returns
-    -------
-    float | None
-        maxChange : float | None — 최근 4분기 중 최대 QoQ 변동률 (%). 유효값 2개 미만이면 None.
-    """
-    recent = [v for v in qVals[-4:] if v is not None]
-    if len(recent) < 2:
-        return None
-    changes = []
-    for i in range(len(recent) - 1):
-        if recent[i] != 0:
-            changes.append(abs((recent[i + 1] - recent[i]) / recent[i]) * 100)
-    return max(changes) if changes else None
+from dartlab.analysis.financial.insight._gradingHelpers import (
+    _getGrowthYoY,
+    _getVolatility,
+    _predictabilityGrade,
+    _scoreToGrade,
+    _uncertaintyGrade,
+)
 
 
 def analyzePerformance(
@@ -1128,30 +1064,6 @@ def analyzePredictability(
     return InsightResult(grade, summary, details)
 
 
-def _predictabilityGrade(score: float) -> str:
-    """예측가능성 점수 → 등급.
-
-    Parameters
-    ----------
-    score : float
-        예측가능성 점수 (0~10) (점).
-
-    Returns
-    -------
-    str
-        grade : str — 'A' (>=8) | 'B' (>=6) | 'C' (>=4) | 'D' (>=2) | 'F'
-    """
-    if score >= 8:
-        return "A"
-    if score >= 6:
-        return "B"
-    if score >= 4:
-        return "C"
-    if score >= 2:
-        return "D"
-    return "F"
-
-
 def analyzeUncertainty(
     aSeries: dict,
     aYears: list[str],
@@ -1239,22 +1151,6 @@ def analyzeUncertainty(
     grade = _uncertaintyGrade(rating)
     summary = f"불확실성 {rating} — Fair Value 밴드 {margin}"
     return InsightResult(grade, summary, details)
-
-
-def _uncertaintyGrade(rating: str) -> str:
-    """불확실성 등급 → insight 등급 (낮은 불확실성 = 좋은 등급).
-
-    Parameters
-    ----------
-    rating : str
-        불확실성 등급 ('Low' | 'Medium' | 'High' | 'Very High' | 'Extreme').
-
-    Returns
-    -------
-    str
-        grade : str — 'A'~'F' 등급
-    """
-    return {"Low": "A", "Medium": "B", "High": "C", "Very High": "D", "Extreme": "F"}.get(rating, "C")
 
 
 def analyzeCoreEarnings(
