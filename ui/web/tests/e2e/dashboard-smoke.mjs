@@ -205,17 +205,96 @@ async function main() {
 		assert(rowCount > 5, `scan section: 표 row 가 너무 적음 (${rowCount})`);
 	}
 
+	// Helper: 섹션 전환 (localStorage + reload)
+	async function gotoSection(section, axis = null) {
+		await page.evaluate(({ s, a }) => {
+			const cur = JSON.parse(localStorage.getItem("dartlab-dashboard-state") || "{}");
+			cur.section = s;
+			cur.axis = a;
+			localStorage.setItem("dartlab-dashboard-state", JSON.stringify(cur));
+		}, { s: section, a: axis });
+		await page.reload({ waitUntil: "domcontentloaded" });
+	}
+
 	// Company.profile
-	await page.evaluate(() => {
-		const cur = JSON.parse(localStorage.getItem("dartlab-dashboard-state") || "{}");
-		cur.section = "company.profile";
-		localStorage.setItem("dartlab-dashboard-state", JSON.stringify(cur));
-	});
-	await page.reload({ waitUntil: "domcontentloaded" });
+	await gotoSection("company.profile");
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	await page.screenshot({ path: path.join(OUT, "dashboard-company-profile.png"), fullPage: true });
+
+	// Company.governance — 등급/총점 hero + 16 지표 scorecard
+	await gotoSection("company.governance");
+	try {
+		await page.waitForResponse((r) => r.url().includes("/api/dl/call") && r.request().method() === "POST", { timeout: 60000 });
+	} catch (e) {}
 	await page.waitForSelector("main .ed-card", { timeout: 30000 });
 	await page.waitForTimeout(800);
 	{
-		await page.screenshot({ path: path.join(OUT, "dashboard-company-profile.png"), fullPage: true });
+		const text = await page.locator("main").innerText();
+		const hasGovKpi = text.includes("Governance") || text.includes("등급") || text.includes("총점") || text.includes("Scorecard");
+		console.log(`[governance] hasKpi=${hasGovKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-governance.png"), fullPage: true });
+		assert(hasGovKpi, "governance: 등급/총점/Scorecard 텍스트 못 찾음");
+	}
+
+	// Company.filings — DART 공시 표
+	await gotoSection("company.filings");
+	try {
+		await page.waitForResponse((r) => r.url().includes("/api/dl/call") && r.request().method() === "POST", { timeout: 60000 });
+	} catch (e) {}
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasFilingsKpi = text.includes("DART Filings") || text.includes("정기") || text.includes("수시") || text.includes("접수일");
+		console.log(`[filings] hasKpi=${hasFilingsKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-filings.png"), fullPage: true });
+		assert(hasFilingsKpi, "filings: DART Filings / 정기 / 수시 / 접수일 텍스트 못 찾음");
+	}
+
+	// Industry — peers specialized
+	await gotoSection("industry");
+	try {
+		await page.waitForResponse((r) => r.url().includes("/api/dl/call") && r.request().method() === "POST", { timeout: 60000 });
+	} catch (e) {}
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasIndKpi = text.includes("Industry") || text.includes("산업") || text.includes("Peer") || text.includes("View");
+		console.log(`[industry] hasKpi=${hasIndKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-industry.png"), fullPage: true });
+		assert(hasIndKpi, "industry: Industry/산업/Peer/View 텍스트 못 찾음");
+	}
+
+	// Macro
+	await gotoSection("macro");
+	try {
+		await page.waitForResponse((r) => r.url().includes("/api/dl/call") && r.request().method() === "POST", { timeout: 60000 });
+	} catch (e) {}
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasMacroKpi = text.includes("Macro Sub") || text.includes("금리") || text.includes("macro.");
+		console.log(`[macro] hasKpi=${hasMacroKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-macro.png"), fullPage: true });
+		assert(hasMacroKpi, "macro: Macro Sub/금리/macro. 텍스트 못 찾음");
+	}
+
+	// Story — perspective tabs + axis list
+	await gotoSection("story");
+	try {
+		await page.waitForResponse((r) => r.url().includes("/api/dl/call") && r.request().method() === "POST", { timeout: 60000 });
+	} catch (e) {}
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasStoryKpi = text.includes("Perspective") || text.includes("투자") || text.includes("14 분석 축") || text.includes("신용");
+		console.log(`[story] hasKpi=${hasStoryKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-story.png"), fullPage: true });
+		assert(hasStoryKpi, "story: Perspective/투자/14 분석 축 텍스트 못 찾음");
 	}
 
 	// 본문 카드 검증

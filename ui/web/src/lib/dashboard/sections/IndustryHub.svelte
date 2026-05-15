@@ -2,7 +2,7 @@
 	Industry Hub — Editorial 톤. Company.industry / Company.rank / Company.network 통합.
 -->
 <script>
-	import { onMount } from "svelte";
+	import { onMount, untrack } from "svelte";
 	import { dlCall } from "$lib/api/dlCall.js";
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
@@ -49,7 +49,7 @@
 
 	$effect(() => {
 		dash.stockCode;
-		fetchView(selected);
+		untrack(() => fetchView(selected));
 	});
 
 	onMount(() => fetchView(selected));

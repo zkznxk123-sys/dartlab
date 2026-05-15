@@ -3,7 +3,7 @@
 	Phase E: grade specialized. 나머지 7 (repayment/leverage/liquidity/cashflow/business/reliability/disclosure) generic fallback — metrics nested array 가 generic 으로 표 표시.
 -->
 <script>
-	import { onMount } from "svelte";
+	import { onMount, untrack } from "svelte";
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 	import { loadEngineAxis } from "$lib/dashboard/data/loaders.js";
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
@@ -59,9 +59,12 @@
 
 	$effect(() => {
 		dash.stockCode;
-		fetchCatalogue();
-		const currentAxis = dash.axis && CORE_AXES.includes(dash.axis) ? dash.axis : "grade";
-		if (currentAxis) fetchAxis(currentAxis);
+		dash.axis;
+		untrack(() => {
+			fetchCatalogue();
+			const a = dash.axis && CORE_AXES.includes(dash.axis) ? dash.axis : "grade";
+			if (a) fetchAxis(a);
+		});
 	});
 
 	onMount(() => {

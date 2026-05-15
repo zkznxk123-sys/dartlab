@@ -2,7 +2,7 @@
 	Company > Profile — 회사 메타 + market summary KPI strip. Editorial 톤.
 -->
 <script>
-	import { onMount } from "svelte";
+	import { onMount, untrack } from "svelte";
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 	import { loadMarket, loadWorkforce } from "$lib/dashboard/data/loaders.js";
 	import KpiTile from "$lib/dashboard/chart/KpiTile.svelte";
@@ -28,7 +28,7 @@
 
 	$effect(() => {
 		dash.stockCode;
-		fetchAll();
+		untrack(() => fetchAll());
 	});
 
 	onMount(() => fetchAll());
