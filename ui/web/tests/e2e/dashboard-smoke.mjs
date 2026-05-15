@@ -20,17 +20,16 @@ async function setLocalStorage(page) {
 		localStorage.setItem("dartlab-theme", "dark");
 		localStorage.setItem(
 			"dartlab-dashboard-state",
-			JSON.stringify({ section: "analysis", stockCode: "000660", axis: "수익구조", period: "TTM" })
+			JSON.stringify({ section: "analysis", stockCode: "035720", axis: "수익구조", period: "TTM" })
 		);
 	});
 }
 
 async function waitForAxisCards(page, label) {
-	// 카드 영역 — DashboardShell main 안의 [data-slot="card"] (shadcn).
-	// AnalysisHub 는 상단 axis tab card + 본문 N 개 card. 본문 카드 ≥ 1 보여야 함.
-	await page.waitForSelector('main [data-slot="card"]', { timeout: 30000 });
-	const count = await page.locator('main [data-slot="card"]').count();
-	const texts = await page.locator('main [data-slot="card"]').allInnerTexts();
+	// Editorial 톤 카드 (.ed-card) 또는 shadcn 잔존 카드 ([data-slot="card"]) 둘 다 허용.
+	await page.waitForSelector('main .ed-card, main [data-slot="card"]', { timeout: 30000 });
+	const count = await page.locator('main .ed-card, main [data-slot="card"]').count();
+	const texts = await page.locator('main .ed-card, main [data-slot="card"]').allInnerTexts();
 	const joined = texts.join("\n");
 	console.log(`[${label}] cards=${count}, total text length=${joined.length}`);
 	console.log(`[${label}] first 800 chars of card content:\n${joined.slice(0, 800)}`);
@@ -114,14 +113,17 @@ async function main() {
 	assert(dark.count >= 2, `dark: too few cards (${dark.count})`);
 	assert(dark.text.length > 100, `dark: card text too short`);
 	// 빈 박스 회귀 — "분석 결과 없음" 만 나오는 상태 차단 (axis tabs 카드 1 + dashed 1 = count 2 인데 text 짧음)
-	// 정상이면 "profile" 또는 "revenueQuality" 또는 "growth" 같은 metric key 가 있어야
+	// 수익구조 RevenueStructure specialized 카드의 알려진 텍스트 포함.
 	const hasMetricKey =
+		dark.text.includes("CAGR") ||
+		dark.text.includes("현금전환율") ||
+		dark.text.includes("GPM") ||
+		dark.text.includes("Business profile") ||
+		dark.text.includes("매출 세그먼트") ||
+		// 폴백 generic 도 허용 (다른 axis 호환)
 		dark.text.includes("profile") ||
-		dark.text.includes("revenueQuality") ||
-		dark.text.includes("growth") ||
-		dark.text.includes("cashConversion") ||
-		dark.text.includes("grossMargin");
-	assert(hasMetricKey, "dark: 수익구조 axis 의 알려진 metric key 가 카드에 보이지 않음 — 빈 박스 회귀");
+		dark.text.includes("growth");
+	assert(hasMetricKey, "dark: 수익구조 RevenueStructure 의 specialized 텍스트가 보이지 않음 — 빈 박스 회귀");
 
 	console.log("\n✓ dashboard smoke passed");
 	console.log(`  screenshots → ${OUT}\\dashboard-{dark,light,profitability}.png`);
