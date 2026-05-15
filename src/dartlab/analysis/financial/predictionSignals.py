@@ -19,6 +19,12 @@ _getF = _getF2 = _getF3 = _getF4 = _get
 import logging
 import math
 
+from dartlab.analysis.financial._predictionUtils import (
+    _DIRECTION_SCORES,
+    _bayesUpdate,
+    _calibrate,
+    _clamp,
+)
 from dartlab.core.financeDocAccessor import getFinanceDocAccessor
 from dartlab.core.memory import memoizedCalc
 from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
@@ -1771,11 +1777,6 @@ def calcSupplyChainSignal(company, *, basePeriod: str | None = None) -> dict | N
     }
 
 
-def _clamp(v: float, lo: float = -1.0, hi: float = 1.0) -> float:
-    """값을 [lo, hi] 범위로 클램핑."""
-    return max(lo, min(hi, v))
-
-
 def _getLinkedCompanies(company, stockCode: str) -> list[dict]:
     """관계사/투자회사 목록 추출."""
     linked = []
@@ -1871,24 +1872,6 @@ def _loadGrowthMap() -> dict[str, float]:
 # ══════════════════════════════════════
 # calc 6: 다중 신호 종합
 # ══════════════════════════════════════
-
-
-_DIRECTION_SCORES = {
-    "up": 1.0,
-    "accelerating": 1.0,
-    "bullish": 1.0,
-    "positive": 0.5,
-    "flat": 0.0,
-    "stable": 0.0,
-    "neutral": 0.0,
-    "down": -1.0,
-    "decelerating": -0.5,
-    "bearish": -1.0,
-    "negative": -0.5,
-    "reversing": 0.0,
-    "transitioning": -0.2,
-    "volatile": -0.5,
-}
 
 
 # ══════════════════════════════════════
@@ -2217,45 +2200,6 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
         "confidence": confidence,
         "history": directions[:4],
     }
-
-
-def _calibrate(rawPosterior: float) -> float:
-    """원시 베이즈 확률을 실측 기반으로 재보정.
-
-    walk-forward 564건 캘리브레이션 결과:
-    - 원시 78% → 실측 62%
-    - 원시 83% → 실측 73%
-    - 원시 86% → 실측 88%
-
-    선형 보간으로 과신 제거. 원시 확률이 높을수록 실측에 가깝게 보정.
-    """
-    # 보정: posterior를 72% 기저 방향으로 수축 (shrinkage)
-    # calibrated = base + (raw - base) * shrinkage_factor
-    base = 0.72  # 모멘텀 기저 정확도
-    shrinkage = 0.6  # 60%만 반영
-    calibrated = base + (rawPosterior - base) * shrinkage
-    return max(0.50, min(0.95, calibrated))
-
-
-def _bayesUpdate(prior: float, evidence: float, damping: float = 0.3) -> float:
-    """베이즈 사후확률 갱신 (감쇠 적용).
-
-    Args:
-        prior: 현재 P(매출↑)
-        evidence: P(매출↑ | 이 신호)
-        damping: 갱신 강도 감쇠 (0~1). 1.0 = 완전 갱신, 0.3 = 30% 갱신.
-            신호 간 독립성 가정 위반을 보정. 0.3이 과신 방지 + 변별력 유지의 균형.
-
-    나이브 베이즈 + 감쇠: lr^damping
-    """
-    if evidence <= 0 or evidence >= 1:
-        return prior
-    lr = evidence / (1 - evidence)
-    # 감쇠: lr의 damping 거듭제곱
-    lr_damped = lr**damping
-    prior_odds = prior / (1 - prior)
-    posterior_odds = prior_odds * lr_damped
-    return posterior_odds / (1 + posterior_odds)
 
 
 @memoizedCalc
