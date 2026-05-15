@@ -68,24 +68,54 @@ def calcCHS(
     excessReturn: float | None = None,
     stockPrice: float | None = None,
 ) -> CHSResult | None:
-    """CHS 부도확률 계산.
+    """Campbell-Hilscher-Szilagyi (2008) 부도확률 — 12 개월 PD.
+
+    Capabilities:
+        - 재무 (NI/TL/Cash/TA) + 주가 (MktCap/Vol/ExRet/Price) 결합 logit
+        - Table IV Panel B (Campbell 2008) 계수 적용
+        - 입력 부족 시 None (보수적 fallback 없음, 호출자가 결정)
+        - zone 분류 (safe < 0.5% < gray < 2% < distress)
 
     Parameters
     ----------
-    netIncome : 당기순이익
-    totalLiabilities : 부채총계
-    cash : 현금및현금성자산
-    totalAssets : 자산총계
-    marketCap : 시가총액
+    netIncome : 당기순이익 (원)
+    totalLiabilities : 부채총계 (원)
+    cash : 현금및현금성자산 (원)
+    totalAssets : 자산총계 (원)
+    marketCap : 시가총액 (원)
     equityVolatility : 주가 변동성 (연환산, 0-1 스케일)
-    marketTotal : 시장 전체 시가총액 (RSIZE 계산용, None이면 기본값)
+    marketTotal : 시장 전체 시가총액 (RSIZE 계산용, None이면 한국 시장 ~2000조 가정)
     excessReturn : 12개월 초과수익률 (주가수익률 - 시장수익률, None이면 0)
-    stockPrice : 주가 (원, None이면 기본값)
+    stockPrice : 주가 (원, None이면 cap 15)
 
     Returns
     -------
     CHSResult | None
         부도확률 결과. 입력 부족 시 None.
+
+    Guide:
+        주가 시계열이 있는 상장 회사에만 적용. 비상장은 None 반환.
+        survival weight 계산의 hazard 입력으로 사용 — `applySurvivalWeight` 참조.
+
+    SeeAlso:
+        - `extractChsFeatures`: company 객체 → 본 함수 입력 dict
+        - `computeChsProbability`: extract + calcCHS facade
+        - `calcSurvivalWeight`: PD → going-concern weight
+
+    Requires:
+        math (stdlib only)
+
+    AIContext:
+        AI 가 부도확률 인용 시 "12 개월 PD" 명시. zone 라벨 (safe/gray/distress) 은
+        절대 임계 기반 — sector adjustment 없음. 보수적 해석 권장.
+
+    LLM Specifications:
+        AntiPatterns: 비상장 회사 입력 (주가 0/None) — None 반환, 0% 로 해석 X.
+        OutputSchema: CHSResult dataclass (probability, logitScore, zone, interpretation, inputs).
+        Prerequisites: 5 필수 입력 (NI/TL/Cash/TA/MktCap) 모두 not None + MktCap/TA > 0.
+        Freshness: stateless — 입력 시점에 의존, model 자체는 2008 paper 계수.
+        Dataflow: 재무 + 주가 → 8 변수 (NIMTA/TLMTA/CASHMTA/SIGMA/RSIZE/EXRET/MB/PRICE) → logit → PD.
+        TargetMarkets: 상장 회사 (한국/미국). 비상장 부적용.
     """
     if any(v is None for v in [netIncome, totalLiabilities, cash, totalAssets, marketCap]):
         return None
