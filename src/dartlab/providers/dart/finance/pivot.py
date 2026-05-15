@@ -34,6 +34,7 @@ from typing import Any
 
 import polars as pl
 
+from dartlab.core.observability import mapping_ledger
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.ordering import sortSeries
 from dartlab.core.utils.period import extractYear, formatPeriod
@@ -266,7 +267,7 @@ def _buildTimeseriesUncached(
     if result is None:
         return None
     df, periods = result
-    series = _pivotToSeries(df, periods)
+    series = _pivotToSeries(df, periods, stockCode=stockCode)
     return series, periods
 
 
@@ -678,12 +679,16 @@ def _accountIdPriority(accountId: str) -> int:
 def _pivotToSeries(
     df: pl.DataFrame,
     periods: list[str],
+    stockCode: str | None = None,
 ) -> dict[str, dict[str, list[float | None]]]:
     """DataFrame → {sjDiv: {snakeId: [값...]}} 피벗.
 
     같은 (sjDiv, snakeId, period) 슬롯에 여러 값이 들어올 경우 account_id
     우선순위(IFRS 표준 > DART 사내 > 기타)로 선택. 사유는
     ``_accountIdPriority`` docstring 참조.
+
+    ``stockCode`` 는 ENV ``DARTLAB_MAPPING_LEDGER`` 가 활성일 때
+    ledger ndjson 에 함께 기록 (prod 동작 0 영향).
     """
     mapper = AccountMapper.get()
     periodIdx = {p: i for i, p in enumerate(periods)}
@@ -700,6 +705,8 @@ def _pivotToSeries(
     totalRows = 0
     unmappedRows = 0
     unmappedAccounts: dict[str, int] = {}
+    # ledger 옵트인 — 미매핑 한 건당 (accountId, accountNm, sjDiv) 기준 누적.
+    ledgerKeys: dict[tuple[str, str, str], int] = {}
 
     for row in df.iter_rows(named=True):
         sjDiv = row.get("sj_div", "")
@@ -716,6 +723,8 @@ def _pivotToSeries(
             # fallback — DART 회사 사내 계정 (account_id 표준 X) 도 한글명으로 살린다.
             # nonstd_ 접두로 표준 컬럼과 명시 구분. 데이터 손실 0.
             snakeId = _fallbackSnakeId(accountNm)
+            ledgerKey = (accountId, accountNm, sjDiv)
+            ledgerKeys[ledgerKey] = ledgerKeys.get(ledgerKey, 0) + 1
             if snakeId is None:
                 unmappedRows += 1
                 key = f"{accountId}|{accountNm}"
@@ -766,6 +775,22 @@ def _pivotToSeries(
         # accountMappings.json 에 추가하면 표준 snake_id 로 승격되어 회사간 비교 가능.
         for acct, cnt in sorted(unmappedAccounts.items(), key=lambda x: -x[1])[:5]:
             _log.info("  표준화 후보: %s (%d회)", acct, cnt)
+
+    # ENV gated — ledger append (옵트인). ENV OFF 기본 = no-op.
+    if ledgerKeys and mapping_ledger.isEnabled():
+        records = [
+            {
+                "accountId": aId,
+                "accountNm": aNm,
+                "sjDiv": sj,
+                "occurrenceCount": cnt,
+            }
+            for (aId, aNm, sj), cnt in ledgerKeys.items()
+        ]
+        try:
+            mapping_ledger.append(records, stockCode=stockCode)
+        except OSError as exc:  # pragma: no cover - 디스크/권한 실패 시 prod 영향 0
+            _log.warning("mapping_ledger append 실패: %s", exc)
 
     _fillSnakeIdGaps(result)
     sortSeries(result)
