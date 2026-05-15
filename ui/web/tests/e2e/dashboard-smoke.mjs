@@ -93,20 +93,53 @@ async function main() {
 	console.log(`[after 3rd click] data-theme = ${themeAttr3}`);
 	assert(themeAttr3 === null, `expected data-theme cleared (dark) after third click, got ${themeAttr3}`);
 
-	// 다른 axis: 수익성 클릭 (history shape — 차트 가 떠야)
+	// 다른 axis: 수익성 — localStorage axis 갱신 + reload (button click race 회피)
+	async function gotoAxis(axis) {
+		await page.evaluate((a) => {
+			const cur = JSON.parse(localStorage.getItem("dartlab-dashboard-state") || "{}");
+			cur.axis = a;
+			localStorage.setItem("dartlab-dashboard-state", JSON.stringify(cur));
+		}, axis);
+		await page.reload({ waitUntil: "domcontentloaded" });
+	}
+	await gotoAxis("수익성");
 	const profitabilityBtn = page.locator('button:has-text("수익성")').first();
-	if ((await profitabilityBtn.count()) > 0) {
-		await profitabilityBtn.click();
-		await page.waitForResponse(
-			(r) => r.url().includes("/api/dl/call") && r.request().method() === "POST",
-			{ timeout: 30000 }
-		);
-		await page.waitForTimeout(800);
+	if (true) {
+		try {
+			await page.waitForResponse(
+				(r) => r.url().includes("/api/dl/call") && r.request().method() === "POST",
+				{ timeout: 60000 }
+			);
+		} catch (e) {
+			console.log("[profitability] waitForResponse timeout (already-cached?), proceeding");
+		}
+		await page.waitForSelector("main svg path[d^='M']", { timeout: 30000 });
+		await page.waitForTimeout(600);
 		const profitText = await page.locator("main").innerText();
 		const hasSvg = (await page.locator("main svg").count()) > 0;
-		console.log(`[profitability] svg=${hasSvg}, text contains marginTrend=${profitText.includes("marginTrend")}`);
+		const hasGpmKpi = profitText.includes("매출총이익률") || profitText.includes("OPM") || profitText.includes("Margin Trend");
+		console.log(`[profitability] svg=${hasSvg}, has Profitability KPI=${hasGpmKpi}`);
 		await page.screenshot({ path: path.join(OUT, "dashboard-profitability.png"), fullPage: true });
 		assert(hasSvg, "수익성 axis: SVG chart not found");
+		assert(hasGpmKpi, "수익성 Profitability specialized KPI text not found");
+	}
+
+	// 현금흐름 axis: CashFlow specialized
+	await gotoAxis("현금흐름");
+	if (true) {
+		try {
+			await page.waitForResponse(
+				(r) => r.url().includes("/api/dl/call") && r.request().method() === "POST",
+				{ timeout: 60000 }
+			);
+		} catch (e) {}
+		await page.waitForSelector("main svg path[d^='M']", { timeout: 30000 });
+		await page.waitForTimeout(600);
+		await page.screenshot({ path: path.join(OUT, "dashboard-cashflow.png"), fullPage: true });
+		const text = await page.locator("main").innerText();
+		const hasOcfKpi = text.includes("OCF") || text.includes("영업현금흐름") || text.includes("FCF");
+		console.log(`[cashflow] hasOcfKpi=${hasOcfKpi}`);
+		assert(hasOcfKpi, "현금흐름 CashFlow specialized KPI text not found");
 	}
 
 	// 본문 카드 검증

@@ -10,6 +10,10 @@
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
 	import Profitability from "$lib/dashboard/sections/analysis/Profitability.svelte";
 	import RevenueStructure from "$lib/dashboard/sections/analysis/RevenueStructure.svelte";
+	import CashFlow from "$lib/dashboard/sections/analysis/CashFlow.svelte";
+	import Stability from "$lib/dashboard/sections/analysis/Stability.svelte";
+	import Growth from "$lib/dashboard/sections/analysis/Growth.svelte";
+	import Efficiency from "$lib/dashboard/sections/analysis/Efficiency.svelte";
 
 	const dash = getDashboardStore();
 
@@ -34,6 +38,10 @@
 	const SPECIALIZED = {
 		수익성: Profitability,
 		수익구조: RevenueStructure,
+		현금흐름: CashFlow,
+		안정성: Stability,
+		성장성: Growth,
+		효율성: Efficiency,
 	};
 
 	let catalogue = $state([]);
