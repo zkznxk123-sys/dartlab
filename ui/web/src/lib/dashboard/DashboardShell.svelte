@@ -13,6 +13,9 @@
 	import AnalysisHub from "$lib/dashboard/sections/AnalysisHub.svelte";
 	import QuantHub from "$lib/dashboard/sections/QuantHub.svelte";
 	import CreditHub from "$lib/dashboard/sections/CreditHub.svelte";
+	import MacroHub from "$lib/dashboard/sections/MacroHub.svelte";
+	import IndustryHub from "$lib/dashboard/sections/IndustryHub.svelte";
+	import StoryHub from "$lib/dashboard/sections/StoryHub.svelte";
 
 	const dash = getDashboardStore();
 
@@ -82,6 +85,12 @@
 			<QuantHub />
 		{:else if dash.section === "credit"}
 			<CreditHub />
+		{:else if dash.section === "macro"}
+			<MacroHub />
+		{:else if dash.section === "industry"}
+			<IndustryHub />
+		{:else if dash.section === "story"}
+			<StoryHub />
 		{:else}
 			<Card.Root class="border-dashed">
 				<Card.Header>
