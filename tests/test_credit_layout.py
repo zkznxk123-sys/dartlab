@@ -20,7 +20,7 @@ CREDIT = Path(__file__).resolve().parent.parent / "src" / "dartlab" / "credit"
 ROOT_ALLOWED: set[str] = {"__init__.py", "engine.py", "_engineConfig.py", "_engineNotch.py"}
 
 EXPECTED_LAYOUT: dict[str, set[str]] = {
-    "scoring": {"metrics.py", "gradeTable.py", "creditScorecard.py", "migration.py", "calcs.py"},
+    "scoring": {"metrics.py", "gradeTable.py", "creditScorecard.py", "migration.py", "calcs.py", "_metricsHelpers.py"},
     "models": {"chsModel.py", "merton.py", "survival.py", "excessBondPremium.py"},
     "monitoring": {"crisisDetector.py", "creditCycle.py", "audit.py", "history.py"},
     "features": {"chsFeatures.py", "sectorThresholds.py", "narrative.py", "_narrativeTypes.py"},

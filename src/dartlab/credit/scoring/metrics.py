@@ -29,107 +29,18 @@ def _sumBorrowingsKorean(*args, **kwargs):
 sumBorrowingsKorean = _sumBorrowingsKorean
 
 
-def _div(a, b, pct: bool = False) -> float | None:
-    """안전한 나눗셈 (None / 0 가드).
-
-    Args:
-        a: 분자.
-        b: 분모. None 또는 0 이면 None 반환.
-        pct: True 면 결과를 ×100 (백분율).
-
-    Returns:
-        ``round(a / abs(b), 2)``. 분모가 음수여도 부호 없이 비율만 산출 (절대값 분모).
-        분자나 분모가 None 또는 분모가 0 이면 None.
-
-    Examples:
-        >>> _div(100, 50)
-        2.0
-        >>> _div(50, 100, pct=True)
-        50.0
-        >>> _div(10, 0)  # 분모 0 → None
-    """
-    if a is None or b is None or b == 0:
-        return None
-    result = a / abs(b)
-    if pct:
-        result *= 100
-    return round(result, 2)
-
-
-def _cv(values: list) -> float | None:
-    """변동계수 (Coefficient of Variation) = 표준편차 / |평균| × 100.
-
-    이익 변동성, 마진 안정성 등 시계열의 상대적 흩어짐을 측정.
-    변동계수가 작을수록 안정적, 클수록 변동 큼.
-
-    Args:
-        values: 수치 리스트. None 은 자동으로 제외.
-
-    Returns:
-        백분율 변동계수 (소수점 둘째 자리). 다음 경우 None:
-        - 유효 값이 3개 미만 (통계 의미 없음)
-        - 평균이 0 (CV 계산 불가)
-
-    Examples:
-        >>> _cv([10, 11, 12, 9, 10])  # 안정 시계열
-        9.78
-        >>> _cv([10, 50, 5, 80, 1])  # 큰 변동
-        93.61
-    """
-    nums = [v for v in values if v is not None]
-    if len(nums) < 3:
-        return None
-    mean = sum(nums) / len(nums)
-    if mean == 0:
-        return None
-    variance = sum((x - mean) ** 2 for x in nums) / len(nums)
-    return round((variance**0.5) / abs(mean) * 100, 2)
-
+from dartlab.credit.scoring._metricsHelpers import (
+    _cv,
+    _div,
+    _getRatios,
+    _isQuarterlyFallback,
+    _ttmSum,
+)
 
 # SSOT 위임: _toDict / _annualCols 는 analysis/_helpers 의 함수와 동일 로직.
 # 호환을 위한 alias — 신규 코드는 toDictBySnakeId / annualColsFromPeriods 직접 호출.
 _toDict = toDictBySnakeId
 _annualCols = annualColsFromPeriods
-
-
-def _isQuarterlyFallback(cols: list[str]) -> bool:
-    """``_annualCols`` 결과가 4자리 연도가 아닌 Q4 fallback 인지 판별.
-
-    DART 의 분기 데이터만 있고 연간 합산 컬럼이 없는 종목 (예: 신규상장)에서는
-    ``_annualCols`` 가 ``["2024Q4", "2023Q4", ...]`` 같은 분기 컬럼 fallback 을 반환.
-    이 경우 calc 가 추가로 ``annualSumFlow`` 를 호출해 4분기 합산해야 한다.
-
-    Args:
-        cols: ``_annualCols`` 의 결과.
-
-    Returns:
-        True 면 cols[0] 이 "YYYYQ4" 형태의 분기 컬럼 (fallback).
-        False 면 "YYYY" 4자리 연도 (정상 연간).
-
-    Examples:
-        >>> _isQuarterlyFallback(["2024", "2023"])
-        False
-        >>> _isQuarterlyFallback(["2024Q4", "2023Q4"])
-        True
-        >>> _isQuarterlyFallback([])
-        False
-    """
-    return bool(cols) and "Q" in cols[0]
-
-
-# credit 차입금 산출용 TTM 합산 — annualSumFlow credit 모드 alias.
-# 1~2 분기도 부분 데이터로 연환산 (부정확하지만 credit 안정성 보수).
-def _ttmSum(flowData: dict, qCol: str, allPeriods: list[str]) -> float | None:
-    from dartlab.core.utils.flow import annualSumFlow
-
-    return annualSumFlow(flowData, qCol, allPeriods, withFallback=False)
-
-
-def _getRatios(company):
-    try:
-        return company._finance.ratios
-    except (ValueError, KeyError, AttributeError):
-        return None
 
 
 # ═══════════════════════════════════════════════════════════
