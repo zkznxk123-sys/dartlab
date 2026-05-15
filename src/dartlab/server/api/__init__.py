@@ -5,6 +5,7 @@ from .ask import router as ask_router
 from .company import router as company_router
 from .dart import router as dart_router
 from .data import router as data_router
+from .dl import router as dl_router
 from .macro import router as macro_router
 from .room import router as room_router
 
@@ -16,6 +17,7 @@ __all__ = [
     "company_router",
     "dart_router",
     "data_router",
+    "dl_router",
     "macro_router",
     "room_router",
 ]

@@ -15,9 +15,12 @@
 	import { createConversationsStore } from "$lib/stores/conversations.svelte.js";
 	import { createWorkspaceStore } from "$lib/stores/workspace.svelte.js";
 	import { getUiStore } from "$lib/stores/ui.svelte.js";
+	import { getUiMode } from "$lib/stores/uiMode.svelte.js";
+	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 	import Sidebar from "$lib/components/Sidebar.svelte";
 	import EmptyState from "$lib/components/EmptyState.svelte";
 	import ChatArea from "$lib/components/ChatArea.svelte";
+	import DashboardShell from "$lib/dashboard/DashboardShell.svelte";
 	import DeleteDialog from "$lib/components/DeleteDialog.svelte";
 	import ToastNotification from "$lib/components/ToastNotification.svelte";
 	import PanelResizer from "$lib/components/PanelResizer.svelte";
@@ -29,6 +32,8 @@
 
 	// ── Stores ──
 	const ui = getUiStore();
+	const uiMode = getUiMode();
+	const dashboard = getDashboardStore();
 	const store = createConversationsStore();
 	const workspace = createWorkspaceStore();
 
@@ -478,10 +483,12 @@
 			<ProviderDropdown {ui} onOpenSettings={(section) => ui.openSettings(section)} />
 		</div>
 
-		<!-- Content: Chat only -->
+		<!-- Content: Ask 모드 ⇄ Dashboard 모드 -->
 		<div class="flex flex-1 min-h-0">
 			<div class="min-w-0 flex-1 flex flex-col">
-				{#if hasConversation}
+				{#if uiMode.value === "dashboard"}
+					<DashboardShell />
+				{:else if hasConversation}
 					<ChatArea
 						messages={activeMessages}
 						{isLoading}

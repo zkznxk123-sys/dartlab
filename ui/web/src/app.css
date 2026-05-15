@@ -60,6 +60,37 @@
 	--text-body: 15px;          --text-body--line-height: 24px;
 	--text-body-sm: 13px;       --text-body-sm--line-height: 20px;
 	--text-meta: 11px;          --text-meta--line-height: 16px;
+
+	/* ── shadcn-svelte token alias — dl-* primitives 위의 표준 surface ──
+	   shadcn 컴포넌트가 기대하는 표준 토큰 이름을 dl-* 에 alias.
+	   alias 한 곳만 손대면 신규 shadcn + 기존 dl-* 양쪽 같은 시각 결과. */
+	--color-background: var(--color-dl-bg-dark);
+	--color-foreground: var(--color-dl-text);
+	--color-card: var(--color-dl-bg-card);
+	--color-card-foreground: var(--color-dl-text);
+	--color-popover: var(--color-dl-bg-darker);
+	--color-popover-foreground: var(--color-dl-text);
+	--color-primary: var(--color-dl-primary);
+	--color-primary-foreground: #ffffff;
+	--color-secondary: var(--color-dl-bg-card-hover);
+	--color-secondary-foreground: var(--color-dl-text);
+	--color-muted: var(--color-dl-bg-card);
+	--color-muted-foreground: var(--color-dl-text-muted);
+	--color-accent: var(--color-dl-bg-card-hover);
+	--color-accent-foreground: var(--color-dl-text);
+	--color-destructive: #ef4444;
+	--color-destructive-foreground: #ffffff;
+	--color-border: var(--color-dl-border);
+	--color-input: var(--color-dl-border);
+	--color-ring: var(--color-dl-ring);
+	--radius: 0.5rem;
+
+	/* ── chart palette — 8 색 폐기, 3 + 신호색 2 만 ── */
+	--color-chart-1: var(--color-dl-primary);
+	--color-chart-2: var(--color-dl-text-muted);
+	--color-chart-3: #818cf8;
+	--color-chart-4: var(--color-dl-success);
+	--color-chart-5: var(--color-dl-warning);
 }
 
 /* ── VSCode webview theme mapping ── */
