@@ -367,3 +367,66 @@ def _safeFloat(val) -> float:
         return float(str(val).replace(",", "").replace("+", "").strip() or "0")
     except (ValueError, TypeError):
         return 0.0
+
+
+class _ModuleInsiderRawProvider:
+    """Module 함수를 InsiderRawProvider Protocol 로 어댑팅.
+
+    Args:
+        없음 — module-level singleton.
+
+    Returns:
+        instance — InsiderRawProvider Protocol 호환.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.core.insiderRawProvider import getInsiderRawProvider
+        >>> getInsiderRawProvider()  # _ModuleInsiderRawProvider singleton
+    """
+
+    @staticmethod
+    async def fetchInsiderTradingRaw(stockCode: str, *, limit: int | None = None) -> list[dict]:
+        """임원/주요주주 거래 raw dict 위임 — module 동명 함수 호출.
+
+        Args:
+            stockCode: 종목코드 (6 자리).
+            limit: 최대 행 수 상한.
+
+        Returns:
+            list[dict] — module 함수 결과 그대로.
+
+        Raises:
+            없음 — module 함수가 흡수.
+
+        Example:
+            >>> # await provider.fetchInsiderTradingRaw("005930", limit=20)
+        """
+        return await fetchInsiderTradingRaw(stockCode, limit=limit)
+
+    @staticmethod
+    async def fetchMajorShareholdersRaw(stockCode: str, *, limit: int | None = None) -> list[dict]:
+        """5% 이상 대량보유 변동 raw dict 위임 — module 동명 함수 호출.
+
+        Args:
+            stockCode: 종목코드 (6 자리).
+            limit: 최대 행 수 상한.
+
+        Returns:
+            list[dict] — module 함수 결과 그대로.
+
+        Raises:
+            없음 — module 함수가 흡수.
+
+        Example:
+            >>> # await provider.fetchMajorShareholdersRaw("005930", limit=10)
+        """
+        return await fetchMajorShareholdersRaw(stockCode, limit=limit)
+
+
+# DIP: gather/sources/insider 가 core.insiderRawProvider 통해 본 모듈 사용 — gather → providers
+# cross 회피. import 시점 register.
+from dartlab.core.insiderRawProvider import registerInsiderRawProvider  # noqa: E402
+
+registerInsiderRawProvider(_ModuleInsiderRawProvider())

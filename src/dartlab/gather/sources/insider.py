@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 
+from dartlab.core.insiderRawProvider import getInsiderRawProvider
+
 from ..types import InsiderTrade, MajorHolder
 
 log = logging.getLogger(__name__)
@@ -18,53 +20,79 @@ async def fetchInsiderTrading(
 ) -> list[InsiderTrade]:
     """내부자(임원/주요주주) 거래 내역 -- KR만 지원.
 
-    Parameters
-    ----------
-    stockCode : str
-        종목코드 (예: "005930").
-    market : str
-        시장 코드. "KR"만 지원, 그 외 빈 리스트 반환.
-    limit : int | None
-        반환 행수 상한 (가장 최근 N건). None이면 전체.
+    Capabilities:
+        - DART OpenAPI elestock raw → ``InsiderTrade`` dataclass 변환.
+        - KR 외 시장은 빈 list (provider 부재).
+        - DIP — ``core.insiderRawProvider`` 통해 ``providers/dart/ops/insiderTrades``
+          호출. gather → providers 직접 의존 0.
 
-    Returns
-    -------
-    list[InsiderTrade]
-        내부자 거래 리스트. 각 InsiderTrade 필드:
+    Args:
+        stockCode: 종목코드 (예: "005930").
+        market: 시장 코드. "KR" 외엔 빈 리스트.
+        limit: 반환 행수 상한 (가장 최근 N건). None 이면 전체.
+        **_kwargs: 미사용 — facade signature 일관성.
 
-        - date : str — 거래일 (YYYY-MM-DD)
-        - name : str — 거래자 이름
-        - position : str — 직위/관계
-        - tradeType : str — 거래 유형 (취득/처분/장내매수/장내매도)
-        - changeShares : int — 변동 주식수 (주)
-        - afterShares : int — 변동 후 보유 주식수 (주)
-        - reason : str — 변동 사유
+    Returns:
+        list[InsiderTrade] — 거래 내역. 필드 (date / name / position / tradeType /
+        changeShares / afterShares / reason). KR 외 시장이거나 provider 부재 / 조회
+        실패 시 빈 리스트 [].
 
-        KR 외 시장이거나 조회 실패 시 빈 리스트 [].
+    Raises:
+        없음 — provider 내부 예외 (OSError/TypeError) 는 흡수.
+
+    Example:
+        >>> trades = await fetchInsiderTrading("005930", market="KR", limit=10)
+
+    Guide:
+        - "삼성전자 내부자 매매" → ``await fetchInsiderTrading("005930", limit=20)``.
+        - DART API key 부재 환경 (CI / pyodide) 에서는 silent 빈 list.
+
+    When:
+        - gather pipeline 의 internal-trades axis 호출 시점.
+
+    How:
+        - ``getInsiderRawProvider()`` lookup → raw fetch → ``InsiderTrade(**row)`` 변환.
+
+    SeeAlso:
+        - ``fetchMajorShareholders`` — 5% 이상 대량보유 변동 별도 endpoint.
+        - ``dartlab.core.insiderRawProvider`` — DIP Protocol.
+        - ``dartlab.providers.dart.ops.insiderTrades`` — DART OpenAPI 본체.
 
     Requires:
-        KR: DART_API_KEY env (providers/dart/ops/insiderTrades).
+        - KR: DART_API_KEY env (DART OpenAPI 키).
 
-    Raises
-    ------
-    없음
-        provider 내부 예외 (ImportError/OSError/TypeError) 는 흡수.
+    AIContext:
+        Ask Workbench 의 "내부자 거래" / "임원 매매" 토픽 추론 시 호출. KR 한정이라
+        US (Form 4) 회사는 빈 list — caller 가 evidence 부재 메시지 준비.
 
-    Example
-    -------
-    >>> trades = await fetchInsiderTrading("005930", market="KR", limit=10)
+    LLM Specifications:
+        AntiPatterns:
+            - market 미지정 호출 → KR 기본 — US 종목은 빈 list 반환. caller 가 market
+              명시 권장.
+            - 무제한 limit (limit=None) 으로 분석 파이프라인에서 호출 → 룰 8 위반.
+        OutputSchema:
+            - list[InsiderTrade] — 빈 list 가능.
+        Prerequisites:
+            - ``DART_API_KEY`` 등록 + ``providers/dart/ops/insiderTrades`` 모듈 import 가능.
+        Freshness:
+            - DART OpenAPI 실시간 (접수 후 5 영업일 이내).
+        Dataflow:
+            - InsiderRawProvider → raw dict → InsiderTrade.
+        TargetMarkets:
+            - KR (DART). US (Form 4) 은 별도 트랙.
     """
     if market != "KR":
         return []
+    provider = getInsiderRawProvider()
+    if provider is None:
+        return []
     try:
-        from dartlab.providers.dart.ops.insiderTrades import fetchInsiderTradingRaw
-
-        rawRows = await fetchInsiderTradingRaw(stockCode)
+        rawRows = await provider.fetchInsiderTradingRaw(stockCode)
         rows = [InsiderTrade(**row) for row in rawRows]
         if limit is not None and limit > 0:
             return rows[:limit]
         return rows
-    except (ImportError, OSError, TypeError) as exc:
+    except (OSError, TypeError) as exc:
         log.warning("insider KR 실패 (%s): %s", stockCode, exc)
         return []
 
@@ -78,51 +106,76 @@ async def fetchMajorShareholders(
 ) -> list[MajorHolder]:
     """5% 이상 대량보유 변동 -- KR(DART).
 
-    Parameters
-    ----------
-    stockCode : str
-        종목코드 (예: "005930").
-    market : str
-        시장 코드. "KR"만 지원, 그 외 빈 리스트 반환.
-    limit : int | None
-        반환 행수 상한 (가장 최근 N건). None이면 전체.
+    Capabilities:
+        - DART OpenAPI majorstock raw → ``MajorHolder`` dataclass 변환.
+        - 5% 이상 보유 변동 (취득/처분/변동) 사건 추적.
+        - DIP — ``core.insiderRawProvider`` 통해 호출. gather → providers 직접 의존 0.
 
-    Returns
-    -------
-    list[MajorHolder]
-        대량보유 주주 리스트. 각 MajorHolder 필드:
+    Args:
+        stockCode: 종목코드 (예: "005930").
+        market: 시장 코드. "KR" 외엔 빈 리스트.
+        limit: 반환 행수 상한 (가장 최근 N건). None 이면 전체.
+        **_kwargs: 미사용 — facade signature 일관성.
 
-        - holderName : str — 보유자 이름
-        - shares : int — 보유 주식수 (주)
-        - ratio : float — 보유비율 (%)
-        - changeDate : str — 변동일 (YYYY-MM-DD)
-        - changeType : str — 변동 유형 (취득/처분/변동)
+    Returns:
+        list[MajorHolder] — 보유 변동. 필드 (holderName / shares / ratio /
+        changeDate / changeType). KR 외 시장이거나 provider 부재 / 조회 실패
+        시 빈 리스트 [].
 
-        KR 외 시장이거나 조회 실패 시 빈 리스트 [].
+    Raises:
+        없음 — provider 내부 예외 (OSError/TypeError) 는 흡수.
+
+    Example:
+        >>> holders = await fetchMajorShareholders("005930", market="KR", limit=10)
+
+    Guide:
+        - "삼성전자 외국인/대주주 변동" → ``await fetchMajorShareholders("005930")``.
+        - DART API key 부재 시 silent 빈 list.
+
+    When:
+        - gather pipeline 의 major-holders axis 호출 시점.
+
+    How:
+        - ``getInsiderRawProvider()`` lookup → raw fetch → ``MajorHolder(**row)`` 변환.
+
+    SeeAlso:
+        - ``fetchInsiderTrading`` — 임원 거래 별도 endpoint.
+        - ``dartlab.core.insiderRawProvider`` — DIP Protocol.
 
     Requires:
-        KR: DART_API_KEY env (providers/dart/ops/insiderTrades).
+        - KR: DART_API_KEY env.
 
-    Raises
-    ------
-    없음
-        provider 내부 예외 (ImportError/OSError/TypeError) 는 흡수.
+    AIContext:
+        외국인 지분 / M&A 시그널 탐지 파이프라인 호출. ratio 급변 (예 5% → 15%) =
+        M&A 가능성 시그널.
 
-    Example
-    -------
-    >>> holders = await fetchMajorShareholders("005930", market="KR", limit=10)
+    LLM Specifications:
+        AntiPatterns:
+            - ratio 의 절대값을 "현재 지분율" 로 해석 금지 — 변동 시점 snapshot.
+            - 매우 작은 limit (1~2) 으로 trend 분석 시도 → 데이터 부족.
+        OutputSchema:
+            - list[MajorHolder] — 빈 list 가능.
+        Prerequisites:
+            - ``DART_API_KEY`` 등록.
+        Freshness:
+            - 변동 발생 후 5 영업일 이내 보고 의무.
+        Dataflow:
+            - InsiderRawProvider → raw dict → MajorHolder.
+        TargetMarkets:
+            - KR (DART). US SC 13D/G 는 별도 트랙.
     """
     if market != "KR":
         return []
+    provider = getInsiderRawProvider()
+    if provider is None:
+        return []
     try:
-        from dartlab.providers.dart.ops.insiderTrades import fetchMajorShareholdersRaw
-
-        rawRows = await fetchMajorShareholdersRaw(stockCode)
+        rawRows = await provider.fetchMajorShareholdersRaw(stockCode)
         rows = [MajorHolder(**row) for row in rawRows]
         if limit is not None and limit > 0:
             return rows[:limit]
         return rows
-    except (ImportError, OSError, TypeError) as exc:
+    except (OSError, TypeError) as exc:
         log.warning("majorShareholders 실패 (%s): %s", stockCode, exc)
         return []
 

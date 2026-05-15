@@ -2,10 +2,7 @@
   "version": 1,
   "policy": "no_new_violations",
   "known": {
-    "architecture.lazyL1CrossImport": [
-      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:118",
-      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:60"
-    ],
+    "architecture.lazyL1CrossImport": [],
     "architecture.lazyUpperImport": []
   },
   "protectedCompanyFacadeDebt": {
