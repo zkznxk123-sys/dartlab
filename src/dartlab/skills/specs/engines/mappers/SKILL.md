@@ -63,15 +63,16 @@ procedure:
   - RunPython prelude 의 `normalizeColumn(topic, hint)` 사용 — 한글/snake/alias → 표준 snake_id.
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
-  - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR) — 사람이 JSON 직접 편집 후 `AccountMapper.release()` 호출.
-  - 신규 매핑은 confidence + category + type 메타 함께 등록.
+  - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR).
+  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `.claude/skills/mapping-refresh/SKILL.md` 4 단계 — 관측 ledger → `scripts/audit/mappingLedgerCompact.py` → `scripts/dev/mappingReview.py` confirm/reject/alias/defer → `scripts/dev/mappingPromote.py` apply.
+  - prod JSON 단독 권한 진입점은 `scripts/dev/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
 linkedSkills:
   - engines.company
   - engines.data.foundation
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-12'
+lastUpdated: '2026-05-15'
 ---
 
 ## 엔진 역할
@@ -158,41 +159,54 @@ columnsFor("BS")
 
 DART 측 mapper 데이터는 `reference/data/` 로 통합 승격 (`providers/dart/finance/mapperData/` 디렉토리 폐기). EDGAR 는 자체 `mapperData/` 보유 — 두 provider 패턴 비대칭 (대칭 작업은 후속 트랙).
 
-### 사이클 4 단계
+### 사이클 4 단계 — 운영자 트리거 발동 (cron 없음)
 
 ```
-1. notes 구조 스캔 (자동)
-   core/mappers/scanner.py::scanAll(limit=None)
-   → 2,700 종목 docs parquet 전수 → notesStructure.json 갱신
-   → {항목명: {type, category, frequency, skip}} 학습
+1. 관측 ledger (옵트인, ENV 켤 때만)
+   DARTLAB_MAPPING_LEDGER=1 환경에서 Company.show / scan / pivot 호출 시
+   pivot._pivotToSeries 가 미커버 (accountId, accountNm, sjDiv) 그룹을
+   data/mapping_candidates_raw.ndjson 에 append. ENV OFF 면 사용자 영향 0.
+   본체: src/dartlab/core/observability/mapping_ledger.py.
 
-2. Alias 후보 탐지 (자동)
-   core/mappers/scanner.py::discoverAliases(stockCodes, minSupport=3)
-   → 다종목 상호배타적 출현 패턴 → suffix 변형 alias 발견
-   → 예: "재고자산" ↔ "재고자산합계" 자동 추천
+2. 재구성 + 5 신호 평가 (수동)
+   uv run python -X utf8 scripts/audit/mappingLedgerCompact.py
+   → 그룹화 + S1 빈도 / S2 회사 분산 / S3 한글 정규화 / S4 IFRS 동의어 1 hop /
+     S5 오타 거부 적용
+   → data/mapping_candidates.parquet (15 컬럼) 산출
+   본체: src/dartlab/core/observability/mapping_signals.py.
 
-3. 사람 검토 + JSON patch (수동)
-   - reference/data/accountMappings.json 의 `mappings` key 에 한글명 → snakeId 추가
-   - 또는 providers/edgar/finance/mapperData/learnedSynonyms.json
-   - 검토 시 category / type 메타 함께 등록
+3. 운영자 review (수동)
+   uv run python -X utf8 scripts/dev/mappingReview.py list/inspect/confirm/
+     reject/alias/defer/export-pr
+   → staging parquet 의 status / suggestedSnakeId / operatorNote / decidedAt
+     컬럼만 갱신. accountMappings.json 미수정.
 
-4. 캐시 무효화 (수동)
-   AccountMapper.release()  # _mappings 캐시 None 처리
-   다음 lookup 부터 새 JSON 반영
+4. Prod patch (수동, 단독 권한)
+   uv run python -X utf8 scripts/dev/mappingPromote.py dryrun → apply
+   → confirmed 행을 accountMappings.json::mappings 에 atomic write 로 추가.
+     _metadata.{lastUpdate,addedCount,promoteCommit} 갱신.
+     AccountMapper.release() + labels._loadAccountMappings.cache_clear() 호출.
 ```
 
-### 현황 — 자동 학습 코드 부재
+운영자 트리거 발화 ("매퍼 정리해줘"/"분기 매퍼 업데이트"/"mapping refresh") 시
+`.claude/skills/mapping-refresh/SKILL.md` 절차서가 4 단계를 안내. 각 단계
+사이에 운영자 결정 필수 — 어떤 자동화도 prod JSON 을 직접 수정하지 않는다.
 
-`accountMappings.json` 의 `learnedSynonyms: 31,489` 가 *어떤 코드로 학습됐는지* 의 SSOT 가 추적되지 않는다. git history 마지막 변경 commit (`edbe6bd1e`) 메시지가 **"수동 학습 보강 (78개 추가, 34171→34249)"** — 현재는 사람 손 작업 단계.
+### 안전 자동학습의 정의 (5 신호)
 
-자동 학습 복구 후속 트랙 (P-LM 가칭) 예상 단계:
-- (A) 새 종목 docs parquet 들어오면 미매핑 계정 추출
-- (B) `discoverAliases` 응용 → 신규 동의어 후보
-- (C) 사람 검토 큐 (예 — JSON 후보 patch + PR)
-- (D) `accountMappings.json` patch + `release()` 호출
-- (E) `_metadata.lastUpdate` 자동 갱신
+"자동 적용 가능" 의 객관 기준은 `mapping_signals.evaluate` 의 5 신호 모두
+통과 (`autoEligible: true`):
 
-본 트랙은 `engines.mappers` 가 capability 가 아닌 *내부 모듈* 이라는 사상과 정합 — 외부 사용자에게 노출되지 않는다.
+| 신호 | 기준 | 거부 시그널 |
+|---|---|---|
+| S1 빈도 | occurrenceCount ≥ 5 | < 5 = singleton 노이즈 |
+| S2 회사 분산 | 고유 stockCode ≥ 3 | 1 사 전용 = 사내 계정 |
+| S3 한글 정규화 매칭 | standardAccounts.korName Levenshtein 유사도 ≥ 0.85 | < 0.85 = 의미 모호 |
+| S4 IFRS 동의어 1 hop | accountId/accountNm 정규화 후 mappings 직 hit | 1 hop 안에 없음 |
+| S5 오타 거부 | jamo 분해 → 1 자모 차이 IFRS korName 존재 시 거부 | 오타 의심 = false + suggestedFix 노출 |
+
+`autoEligible=True` 도 *자동 반영* 이 아니다 — 운영자 `mappingReview.py
+confirm` 후 `mappingPromote.py apply` 까지 사람 결정 2 번 필요.
 
 ### 사용자 호출 (학습은 내부, 호출은 prelude)
 
