@@ -13,26 +13,37 @@
 
 	let {
 		rows = [],
+		history = null, // alias — Analysis 컴포넌트들이 history={...} 로 호출
 		xKey = "period",
 		series = [],
 		height = 220,
 		unit = "",
+		yIsPercent = false, // alias — true 면 fmtPct
 		format = null,
 	} = $props();
+
+	// rows 우선, history fallback
+	const _rows = $derived(rows.length > 0 ? rows : (Array.isArray(history) ? history : []));
 
 	const W = 800;
 	const PAD = { top: 18, right: 60, bottom: 28, left: 56 };
 
-	const fmt = $derived(format || (unit === "%" ? fmtPct : fmtKrw));
-	const sortedRows = $derived([...rows].reverse()); // dartlab response: 최신→과거. 차트: 과거→최신.
-	const labels = $derived(sortedRows.map((r) => String(r?.[xKey] ?? "")));
-	const N = $derived(sortedRows.length);
+	const _sortedRows = $derived([..._rows].reverse()); // dartlab response: 최신→과거. 차트: 과거→최신.
+	const labels = $derived(_sortedRows.map((r) => String(r?.[xKey] ?? "")));
+	const N = $derived(_sortedRows.length);
+	const fmt = $derived(format || ((unit === "%" || yIsPercent) ? fmtPct : fmtKrw));
+
+	function _scaled(s, v) {
+		if (!isFiniteNum(v)) return v;
+		const sc = s?.scale;
+		return isFiniteNum(sc) ? v * sc : v;
+	}
 
 	const yDomain = $derived.by(() => {
 		const vals = [];
-		for (const r of sortedRows) {
+		for (const r of _sortedRows) {
 			for (const s of series) {
-				const v = r?.[s.key];
+				const v = _scaled(s, r?.[s.key]);
 				if (isFiniteNum(v)) vals.push(v);
 			}
 		}
@@ -46,11 +57,11 @@
 	const xScale = $derived(linearScale([0, Math.max(1, N - 1)], [PAD.left, W - PAD.right]));
 	const yScale = $derived(linearScale(yDomain, [height - PAD.bottom, PAD.top]));
 
-	function pathFor(seriesKey) {
+	function pathFor(s) {
 		let d = "";
 		let pen = false;
-		sortedRows.forEach((r, i) => {
-			const v = r?.[seriesKey];
+		_sortedRows.forEach((r, i) => {
+			const v = _scaled(s, r?.[s.key]);
 			if (!isFiniteNum(v)) {
 				pen = false;
 				return;
@@ -63,9 +74,9 @@
 		return d;
 	}
 
-	function lastFinite(seriesKey) {
-		for (let i = sortedRows.length - 1; i >= 0; i--) {
-			const v = sortedRows[i]?.[seriesKey];
+	function lastFinite(s) {
+		for (let i = _sortedRows.length - 1; i >= 0; i--) {
+			const v = _scaled(s, _sortedRows[i]?.[s.key]);
 			if (isFiniteNum(v)) return { i, v };
 		}
 		return null;
@@ -80,7 +91,7 @@
 
 	// X축 ticks — 5개 까지만 (period 라벨이 많을 때 thin out).
 	const xTickIndices = $derived.by(() => {
-		if (N <= 6) return sortedRows.map((_, i) => i);
+		if (N <= 6) return _sortedRows.map((_, i) => i);
 		const step = Math.ceil(N / 6);
 		const arr = [];
 		for (let i = 0; i < N; i += step) arr.push(i);
@@ -115,14 +126,15 @@
 
 		<!-- Series -->
 		{#each series as s, si}
-			{@const d = pathFor(s.key)}
+			{@const d = pathFor(s)}
 			<path d={d} fill="none" stroke={s.color} stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
-			{#each sortedRows as r, ri}
-				{#if isFiniteNum(r?.[s.key])}
-					<circle cx={xScale(ri)} cy={yScale(r[s.key])} r="1.6" fill={s.color} />
+			{#each _sortedRows as r, ri}
+				{@const sv = _scaled(s, r?.[s.key])}
+				{#if isFiniteNum(sv)}
+					<circle cx={xScale(ri)} cy={yScale(sv)} r="1.6" fill={s.color} />
 				{/if}
 			{/each}
-			{@const last = lastFinite(s.key)}
+			{@const last = lastFinite(s)}
 			{#if last}
 				<circle cx={xScale(last.i)} cy={yScale(last.v)} r="2.6" fill={s.color} />
 				<text x={xScale(last.i) + 5} y={yScale(last.v) + 3} font-size="9.5" fill={s.color} font-family="var(--font-num)" font-weight="500">
