@@ -21,63 +21,16 @@ from dataclasses import dataclass
 
 import numpy as np
 
-# ── NBER 침체 기간 (미국, 월 단위) ──
-
-_NBER_RECESSIONS: list[tuple[str, str]] = [
-    ("1980-01", "1980-07"),
-    ("1981-07", "1982-11"),
-    ("1990-07", "1991-03"),
-    ("2001-03", "2001-11"),
-    ("2007-12", "2009-06"),
-    ("2020-02", "2020-04"),
-]
-
-
-def _isRecession(month: str) -> bool:
-    for start, end in _NBER_RECESSIONS:
-        if start <= month <= end:
-            return True
-    return False
-
-
-def _monthsToNextRecession(month: str) -> int:
-    """다음 침체 시작까지 남은 개월 수. 침체 중이면 0. 이후 침체 없으면 999."""
-    if _isRecession(month):
-        return 0
-    for start, _ in _NBER_RECESSIONS:
-        if month < start:
-            y1, m1 = int(month[:4]), int(month[5:7])
-            y2, m2 = int(start[:4]), int(start[5:7])
-            return (y2 - y1) * 12 + (m2 - m1)
-    return 999
-
-
-def _deltaN(d: dict[str, float], n: int = 3) -> dict[str, float]:
-    """N개월 전 대비 변화량."""
-    months = sorted(d.keys())
-    idx = {m: i for i, m in enumerate(months)}
-    result: dict[str, float] = {}
-    for m in months:
-        i = idx[m]
-        if i >= n:
-            result[m] = d[m] - d[months[i - n]]
-    return result
-
-
-def _yoy(d: dict[str, float]) -> dict[str, float]:
-    """YoY 변화율 (%)."""
-    result: dict[str, float] = {}
-    for m, v in d.items():
-        y, mo = int(m[:4]), int(m[5:7])
-        prev = f"{y - 1:04d}-{mo:02d}"
-        if prev in d and abs(d[prev]) > 1e-10:
-            result[m] = ((v - d[prev]) / abs(d[prev])) * 100
-    return result
-
+# 헬퍼 (분리: _historicalContextHelpers.py SSOT, re-export 으로 BC 보존)
+from dartlab.macro.corporate._historicalContextHelpers import (
+    _NBER_RECESSIONS,
+    _deltaN,
+    _isRecession,
+    _monthsToNextRecession,
+    _yoy,
+)
 
 # ── Dataclass ──
-
-
 # 결과 타입 (분리: _historicalContextTypes.py SSOT, re-export 으로 BC 보존)
 from dartlab.macro.corporate._historicalContextTypes import (
     BullishSignals,
