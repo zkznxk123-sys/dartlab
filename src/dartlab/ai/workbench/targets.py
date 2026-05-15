@@ -98,12 +98,23 @@ def _inferShowTopic(question: str) -> str:
 
 
 def _planEvidence(state: WorkbenchState) -> list[dict[str, Any]]:
+    targets = list(state.profile.get("targets") or [])
+    if _hasForensicsRecipe(state.selectedSkillRefs) and targets:
+        return [
+            {
+                "tool": "ForensicsMemo",
+                "args": {
+                    "target": targets[0],
+                    "question": state.question,
+                },
+            }
+        ]
+
     recipe_plans = _expandRecipe(state)
     if recipe_plans:
         return recipe_plans
 
     candidates = _candidateApiRefs(state)
-    targets = list(state.profile.get("targets") or [])
     plans: list[dict[str, Any]] = []
 
     scan_ref = _firstScanRef(candidates, state.selectedSkillRefs)
@@ -293,6 +304,11 @@ def _hasRecipe(state: WorkbenchState) -> bool:
         if payload.get("recipeSteps"):
             return True
     return False
+
+
+def _hasForensicsRecipe(skillRefs: list[Ref]) -> bool:
+    """L1.5 forensics recipe는 RunPython helper 기반이라 workbench 전용 plan으로 실행한다."""
+    return any(_skillId(ref).startswith("recipes.incubator.forensics.") for ref in skillRefs)
 
 
 def _recipeRefForState(state: WorkbenchState) -> Ref | None:

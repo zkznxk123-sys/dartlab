@@ -10,10 +10,14 @@ plan 실행 + GATE 검증은 LLM 도구 노출과 무관한 내부 helper 다.
 
 from __future__ import annotations
 
+import logging
+import os
 from collections.abc import Iterator
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from io import StringIO
 from typing import Any
 
-from dartlab.ai.contracts import TraceEvent
+from dartlab.ai.contracts import Ref, TraceEvent
 from dartlab.ai.tools.engineCall import engineCall
 from dartlab.ai.tools.readCapability import readCapability
 from dartlab.ai.tools.readSkill import readSkill
@@ -223,7 +227,233 @@ def _executePlan(plan: dict[str, Any]) -> ToolResult:
     tool = plan["tool"]
     if tool in ("EngineCall", "engine_call"):
         return engineCall(plan["args"].get("plan") or plan["args"])
+    if tool == "ForensicsMemo":
+        return _forensicsMemo(plan["args"])
     raise ValueError(f"unsupported workbench tool: {tool}")
+
+
+def _forensicsMemo(args: dict[str, Any]) -> ToolResult:
+    target = str(args.get("target") or "").strip()
+    if not target:
+        return ToolResult(False, "종목을 먼저 특정해야 포렌식 memo를 실행할 수 있습니다.", error="company_not_resolved")
+    try:
+        import polars as pl
+
+        import dartlab
+        from dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo
+    except Exception as exc:  # noqa: BLE001
+        return ToolResult(False, f"forensics helper import 실패: {type(exc).__name__}", error="import_failed")
+
+    try:
+        with _quietForensicsExecution():
+            company = dartlab.Company(target)
+    except Exception as exc:  # noqa: BLE001
+        return ToolResult(False, f"{target} Company 객체 생성 실패: {type(exc).__name__}", error="company_failed")
+
+    statements: dict[str, pl.DataFrame] = {}
+    for topic in ("IS", "BS", "CF"):
+        table = _safeShow(company, topic, pl=pl)
+        if isinstance(table, pl.DataFrame) and table.height:
+            statements[topic] = table
+
+    section_texts: dict[str, str] = {}
+    for topic in ("businessOverview", "riskFactors", "mdna", "notesDetail"):
+        text = _safeTopicText(company, topic)
+        if text:
+            section_texts[topic] = text[:20000]
+
+    events = _safeDisclosureEvents(company)
+    scan_rows = _safeForensicsScanRows(dartlab)
+    memo = buildEvidenceForensicsMemo(
+        target=target,
+        market=str(getattr(company, "market", "KR")),
+        companyName=str(getattr(company, "corpName", getattr(company, "companyName", target))),
+        statements=statements,
+        sectionTexts=section_texts,
+        events=events,
+        scanRows=scan_rows,
+    )
+    refs = _forensicsRefs(target, memo)
+    return ToolResult(
+        True,
+        f"{memo['companyName']} L1.5 포렌식 memo 실행",
+        refs=refs,
+        data={"memo": memo, "markdown": _forensicsMarkdown(memo)},
+    )
+
+
+def _safeShow(company: Any, topic: str, *, pl: Any) -> Any:
+    try:
+        with _quietForensicsExecution():
+            table = company.show(topic, freq="Y")
+    except TypeError:
+        try:
+            with _quietForensicsExecution():
+                table = company.show(topic)
+        except Exception:  # noqa: BLE001
+            return pl.DataFrame()
+    except Exception:  # noqa: BLE001
+        return pl.DataFrame()
+    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()
+
+
+def _safeTopicText(company: Any, topic: str) -> str:
+    try:
+        with _quietForensicsExecution():
+            value = company.show(topic)
+    except Exception:  # noqa: BLE001
+        return ""
+    return "" if value is None else str(value)
+
+
+def _safeDisclosureEvents(company: Any) -> list[dict[str, Any]]:
+    try:
+        with _quietForensicsExecution():
+            disclosure = company.disclosure()
+    except Exception:  # noqa: BLE001
+        return []
+    if hasattr(disclosure, "head") and hasattr(disclosure, "to_dicts"):
+        try:
+            with _quietForensicsExecution():
+                return list(disclosure.head(20).to_dicts())
+        except Exception:  # noqa: BLE001
+            return []
+    try:
+        return [row for row in list(disclosure)[:20] if isinstance(row, dict)]
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def _safeForensicsScanRows(dartlab_module: Any) -> list[dict[str, Any]]:
+    if os.environ.get("DARTLAB_FORENSICS_SCAN", "0") not in {"1", "true", "True"}:
+        return []
+    rows: list[dict[str, Any]] = []
+    for axis in ("quality", "audit", "disclosureRisk"):
+        try:
+            with _quietForensicsExecution():
+                frame = dartlab_module.scan(axis)
+                if not hasattr(frame, "head") or not hasattr(frame, "to_dicts"):
+                    continue
+                axis_rows = frame.head(3).to_dicts()
+        except Exception:  # noqa: BLE001
+            continue
+        for row in axis_rows:
+            if isinstance(row, dict):
+                item = dict(row)
+                item["axis"] = axis
+                rows.append(item)
+    return rows
+
+
+@contextmanager
+def _quietForensicsExecution() -> Iterator[None]:
+    previous_disable = logging.root.manager.disable
+    logging.disable(logging.INFO)
+    try:
+        with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+            yield
+    finally:
+        logging.disable(previous_disable)
+
+
+def _forensicsRefs(target: str, memo: dict[str, Any]) -> list[Ref]:
+    as_of = str(memo.get("asOf") or "unknown")
+    refs: list[Ref] = []
+    for table_name, rows in (memo.get("tables") or {}).items():
+        if not isinstance(rows, list):
+            continue
+        refs.append(
+            Ref(
+                id=f"table:forensics:{target}:{table_name}:{as_of}",
+                kind="tableRef",
+                title=f"{memo.get('companyName') or target} {table_name}",
+                source="buildEvidenceForensicsMemo",
+                payload={"table": table_name, "rows": rows, "period": as_of},
+            )
+        )
+    headline = memo.get("headline") or {}
+    for key in ("riskScore", "signalCount", "candidateCount"):
+        refs.append(
+            Ref(
+                id=f"value:forensics:{target}:{key}:{as_of}",
+                kind="valueRef",
+                title=f"{key} {headline.get(key)}",
+                source=f"table:forensics:{target}:deepDive:{as_of}",
+                payload={"metric": key, "value": headline.get(key), "period": as_of},
+            )
+        )
+    refs.append(
+        Ref(
+            id=f"date:forensics:{target}:{as_of}",
+            kind="dateRef",
+            title="forensics memo 기준시점",
+            source=f"table:forensics:{target}:deepDive:{as_of}",
+            payload={"period": as_of},
+        )
+    )
+    for source in memo.get("sources") or []:
+        if isinstance(source, dict):
+            refs.append(
+                Ref(
+                    id=f"source:forensics:{target}:{source.get('id')}",
+                    kind="sourceRef",
+                    title=str(source.get("title") or source.get("id") or "source"),
+                    source=str(source.get("url") or ""),
+                    payload=source,
+                )
+            )
+    return refs
+
+
+def _forensicsMarkdown(memo: dict[str, Any]) -> str:
+    headline = memo.get("headline") or {}
+    tables = memo.get("tables") or {}
+    cash = (tables.get("revenueToCashBridge") or [{}])[0]
+    wc = (tables.get("workingCapitalPressureMap") or [{}])[0]
+    note_risks = [row for row in tables.get("noteSignalExtractor", []) if row.get("status") in {"watch", "risk"}][:5]
+    falsifiers = tables.get("falsifierLedger") or []
+    candidates = tables.get("engineCandidateMemo") or []
+    deep = tables.get("deepDive") or []
+
+    lines = [
+        f"{memo.get('companyName') or memo.get('target')} L1.5 포렌식 deep dive 결과입니다.",
+        "",
+        "L2 분석엔진은 호출하지 않았고, Company.show 원표, 공시/섹션 텍스트, optional scan primitive와 L1.5 helper만 사용했습니다.",
+        f"기준시점은 {memo.get('asOf')}이며, 이 결과는 투자 결론이 아니라 원표 기반 검산 ledger입니다.",
+        "",
+        "## Headline",
+        f"- riskScore: {headline.get('riskScore')}",
+        f"- signalCount: {headline.get('signalCount')}",
+        f"- candidateCount: {headline.get('candidateCount')}",
+        f"- decisionStatus: {headline.get('decisionStatus')}",
+        "",
+        "## 원표 신호",
+        f"- revenue-cash: {cash.get('status')} / 매출채권 증가율-매출 증가율 {cash.get('receivableGrowthMinusRevenueGrowth')}",
+        f"- working capital: {wc.get('status')} / CCC {wc.get('cccDays')}, 재고 gap {wc.get('inventoryGrowthMinusRevenueGrowth')}",
+        "",
+        "## 공시 텍스트 신호",
+    ]
+    if note_risks:
+        for row in note_risks:
+            lines.append(f"- {row.get('signal')}: {row.get('status')} / hitCount {row.get('hitCount')}")
+    else:
+        lines.append("- watch/risk 키워드 신호는 현재 입력 범위에서 확인되지 않았습니다.")
+
+    lines.extend(["", "## Falsifier Ledger"])
+    for row in falsifiers:
+        lines.append(f"- {row.get('claim')}: {row.get('status')} / 필요한 반증: {row.get('counterEvidenceNeeded')}")
+
+    lines.extend(["", "## Engine Candidate Memo"])
+    for row in candidates:
+        lines.append(f"- {row.get('signalId')}: {row.get('status')} / owner 후보 {row.get('recommendedEngineOwner')}")
+
+    lines.extend(["", "## Deep Dive 단계"])
+    for row in deep:
+        lines.append(f"- {row.get('order')}. {row.get('step')}: {row.get('status')} / {row.get('nextAction')}")
+
+    lines.append("")
+    lines.append("답변 근거는 tableRef, valueRef, dateRef, sourceRef로 분리해 남겼습니다.")
+    return "\n".join(lines)
 
 
 def _composeAnswer(state: WorkbenchState, results: list[dict[str, Any]]) -> str:

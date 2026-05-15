@@ -2830,6 +2830,107 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.index",
+      "title": "Evidence Forensics Incubator 진입점",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 snapshot 범위에서는 Company.show 원표와 section text가 제한될 수 있다."
+      ]
+    },
+    {
+      "id": "recipes.incubator.forensics.dataCoverageAudit",
+      "title": "Forensics Data Coverage Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.accountTraceLedger",
+      "title": "Forensics Account Trace Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.revenueToCashBridge",
+      "title": "Revenue To Cash Bridge",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "title": "Working Capital Pressure Map",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.noteSignalExtractor",
+      "title": "Filing Note Signal Extractor",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.eventToStatementMatcher",
+      "title": "Event To Statement Matcher",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "title": "Cross Section Anomaly Rank",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.falsifierLedger",
+      "title": "Forensics Falsifier Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.engineCandidateMemo",
+      "title": "Forensics Engine Candidate Memo",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.forensics.deepDive",
+      "title": "Evidence Forensics Deep Dive",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     }
   ]
 }

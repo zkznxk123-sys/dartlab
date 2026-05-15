@@ -304,7 +304,7 @@
       "title": "Company",
       "category": "engines",
       "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.show'.",
-      "inDegree": 78,
+      "inDegree": 79,
       "outDegree": 12,
       "cluster": "company",
       "isEntry": false,
@@ -1617,7 +1617,7 @@
       "title": "Scan",
       "category": "engines",
       "purpose": "Scan 엔진은 시장/유니버스 횡단면에서 후보를 발굴하고 순위를 계산하는 실행 스킬이다. 트리거 — '스캔', '종목 발굴', '후보 추출', '랭킹'.",
-      "inDegree": 49,
+      "inDegree": 50,
       "outDegree": 8,
       "cluster": "scan",
       "isEntry": false,
@@ -2176,7 +2176,7 @@
       "title": "dartlab 아키텍처 — 전체 청사진",
       "category": "operation",
       "purpose": "dartlab 아키텍처 — 전체 청사진 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
-      "inDegree": 5,
+      "inDegree": 6,
       "outDegree": 1,
       "cluster": "operation",
       "isEntry": false,
@@ -2397,12 +2397,12 @@
       "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
       "purpose": "AI 가 분석 빈칸을 발굴해 신규 skill 초안을 만들고 같은 세션에서 자가 실행으로 검증해 정식 등재까지 가는 6 단계 사이클과, 운영 중 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 회환 절차를 합쳐 한 곳에서 관리한다. 트리거 — 신규 분석 skill 만들자 / 분석 빈칸 메우기 / audit 결과 반영.",
-      "inDegree": 0,
+      "inDegree": 3,
       "outDegree": 4,
       "cluster": "operation",
       "isEntry": false,
       "isLeaf": false,
-      "isOrphan": true,
+      "isOrphan": false,
       "audiences": []
     },
     {
@@ -2823,6 +2823,157 @@
       "isEntry": false,
       "isLeaf": false,
       "isOrphan": true,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.accountTraceLedger",
+      "title": "Forensics Account Trace Ledger",
+      "category": "recipes",
+      "purpose": "매출, CFO, 매출채권, 재고, 매입채무 같은 포렌식 핵심 metric이 어떤 raw statement row에서 왔는지 추적해 엔진 승격 전 계정 매핑 품질을 검증한다. 트리거 — '계정 trace ledger', 'raw 계정 매핑 검산'.",
+      "inDegree": 3,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "title": "Cross Section Anomaly Rank",
+      "category": "recipes",
+      "purpose": "scan.quality, scan.audit, scan.disclosureRisk 같은 L1.5 횡단 primitive를 포렌식 후보 발굴에만 사용하고, 단일 기업 결론은 원표 selfRun으로 다시 검증하게 만든다. 트리거 — '포렌식 이상치 랭킹', 'scan primitive 이상치'.",
+      "inDegree": 2,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.dataCoverageAudit",
+      "title": "Forensics Data Coverage Audit",
+      "category": "recipes",
+      "purpose": "포렌식 분석 전에 Company.show 원표와 L1.5 helper가 실제로 어떤 기간·계정 coverage를 갖는지 확인해 결손을 0으로 채우는 회귀를 막는다. 트리거 — '포렌식 데이터 coverage', '원표 결손 점검'.",
+      "inDegree": 2,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.deepDive",
+      "title": "Evidence Forensics Deep Dive",
+      "category": "recipes",
+      "purpose": "L2 분석엔진 없이 data coverage, account trace, revenue-cash bridge, working capital, note/event signal, falsifier, engine candidate memo를 한 번에 실행하는 깊은 포렌식 팩 최종 절차다. 트리거 — '포렌식 deep dive', 'analysis 없이 깊게 검증'.",
+      "inDegree": 3,
+      "outDegree": 11,
+      "cluster": "recipes",
+      "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.forensics.engineCandidateMemo",
+      "title": "Forensics Engine Candidate Memo",
+      "category": "recipes",
+      "purpose": "포렌식 스킬 실행 결과에서 반복 가능하고 반증 조건이 명확한 신호를 L2 엔진 후보로 정리하되, 승격 후에도 recipe 검산 경로로 계속 남기는 계약을 만든다. 트리거 — '엔진 후보 memo', '스킬에서 엔진 환류'.",
+      "inDegree": 7,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.eventToStatementMatcher",
+      "title": "Event To Statement Matcher",
+      "category": "recipes",
+      "purpose": "유상증자, 전환사채, 정정공시, 감사의견, 소송 같은 공시 이벤트를 같은 기간의 원표 압력과 맞춰 이벤트가 재무제표 변화와 연결되는지 검증한다. 트리거 — '이벤트 재무제표 매칭', '공시 이벤트 포렌식'.",
+      "inDegree": 3,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.falsifierLedger",
+      "title": "Forensics Falsifier Ledger",
+      "category": "recipes",
+      "purpose": "revenue-to-cash, working capital, note signal, event match에서 나온 의심 신호마다 반대 설명과 추가 확인 항목을 열어 스킬이 과잉 결론으로 흐르지 않게 한다. 트리거 — '포렌식 반증 ledger', '의심 신호 반례'.",
+      "inDegree": 6,
+      "outDegree": 1,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.index",
+      "title": "Evidence Forensics Incubator 진입점",
+      "category": "recipes",
+      "purpose": "L2 분석엔진을 호출하지 않고 Company.show 원표, DART/EDGAR 공시 원문, scan primitive, synth helper만으로 회계·공시 포렌식 신호를 실험하고 엔진 승격 후보를 남기는 L1/L1.5 스킬팩 진입점이다. 트리거 — '포렌식 팩', 'L1.5 회계 검증', '엔진 후보 인큐베이터'.",
+      "inDegree": 0,
+      "outDegree": 15,
+      "cluster": "recipes",
+      "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.forensics.noteSignalExtractor",
+      "title": "Filing Note Signal Extractor",
+      "category": "recipes",
+      "purpose": "사업보고서·주석 원문에서 대손, 재고평가, 특수관계자, 계속기업, 소송, 파생상품, 정정, 팩토링 같은 rare keyword 신호를 추출해 원표 신호의 설명력을 보강한다. 트리거 — '주석 포렌식 신호', '공시 rare keyword', '대손 재고평가 주석'.",
+      "inDegree": 2,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.revenueToCashBridge",
+      "title": "Revenue To Cash Bridge",
+      "category": "recipes",
+      "purpose": "L2 이익품질 엔진 없이 raw IS/BS/CF만으로 매출 성장, 매출채권 성장, CFO/순이익 괴리를 연결해 매출이 현금으로 회수되는지 검증한다. 트리거 — '매출 현금 bridge', 'revenue to cash', '매출채권 괴리'.",
+      "inDegree": 4,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": []
+    },
+    {
+      "id": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "title": "Working Capital Pressure Map",
+      "category": "recipes",
+      "purpose": "raw BS/IS만으로 DSO, DIO, DPO, CCC와 재고 성장 gap을 계산해 운전자본 압력이 이익품질·유동성 신호로 승격 가능한지 실험한다. 트리거 — '운전자본 pressure', 'CCC 원표 계산', '재고 매출 gap'.",
+      "inDegree": 3,
+      "outDegree": 2,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
       "audiences": []
     },
     {
@@ -3883,7 +4034,7 @@
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
       "purpose": "ask 작업대의 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 와 각 패스에서 발급해야 할 ref kind 를 단일 SSOT 로 못박는다.",
-      "inDegree": 7,
+      "inDegree": 8,
       "outDegree": 0,
       "cluster": "runtime",
       "isEntry": false,
@@ -3896,7 +4047,7 @@
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
       "purpose": "사람과 LLM 이 DartLab 을 처음 볼 때 Skills 카탈로그 하나에서 분석 · 엔진 능력 · 운영 규칙 · 확장 절차를 찾는 공식 시작점이다. 외부 API 문서나 흩어진 ops 폴더 대신 skill 검색 → frontmatter 확인 → 본문 절차 → 검증 게이트 순서를 따른다.",
-      "inDegree": 36,
+      "inDegree": 37,
       "outDegree": 7,
       "cluster": "start",
       "isEntry": true,
@@ -9994,6 +10145,221 @@
       "kind": "linkedRecipe"
     },
     {
+      "src": "recipes.incubator.forensics.accountTraceLedger",
+      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.accountTraceLedger",
+      "dst": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "dst": "recipes.incubator.forensics.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.dataCoverageAudit",
+      "dst": "recipes.incubator.forensics.accountTraceLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.dataCoverageAudit",
+      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.dataCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.accountTraceLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.noteSignalExtractor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.eventToStatementMatcher",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.deepDive",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.engineCandidateMemo",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.engineCandidateMemo",
+      "dst": "recipes.incubator.forensics.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.eventToStatementMatcher",
+      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.eventToStatementMatcher",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.falsifierLedger",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.dataCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.accountTraceLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.noteSignalExtractor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.eventToStatementMatcher",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "recipes.incubator.forensics.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "start.dartlabSkillOs",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "operation.architecture",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.index",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.forensics.noteSignalExtractor",
+      "dst": "recipes.incubator.forensics.eventToStatementMatcher",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.noteSignalExtractor",
+      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.revenueToCashBridge",
+      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.revenueToCashBridge",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
       "src": "recipes.macro.betaPeerScreen",
       "dst": "engines.gather.industryPeers",
       "kind": "linkedRecipe"
@@ -11940,6 +12306,8 @@
     }
   ],
   "entries": [
+    "recipes.incubator.forensics.deepDive",
+    "recipes.incubator.forensics.index",
     "recipes.valuation.damodaran.index",
     "start.dartlabSkillOs",
     "start.firstAnalysisRecipe",
@@ -12088,6 +12456,18 @@
       "recipes.quality.earningsQualityTriad",
       "recipes.quality.workingCapitalQuality",
       "recipes.valuation.intrinsicValueBand"
+    ],
+    [
+      "recipes.incubator.forensics.accountTraceLedger",
+      "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "recipes.incubator.forensics.dataCoverageAudit",
+      "recipes.incubator.forensics.deepDive",
+      "recipes.incubator.forensics.engineCandidateMemo",
+      "recipes.incubator.forensics.eventToStatementMatcher",
+      "recipes.incubator.forensics.falsifierLedger",
+      "recipes.incubator.forensics.noteSignalExtractor",
+      "recipes.incubator.forensics.revenueToCashBridge",
+      "recipes.incubator.forensics.workingCapitalPressureMap"
     ]
   ],
   "orphans": [
@@ -12119,7 +12499,6 @@
     "operation.methodology",
     "operation.recipePromote",
     "operation.refactorChecklist",
-    "operation.skillDevelopmentLoop",
     "operation.skillMarket",
     "operation.stability",
     "recipes.credit.covenantStressTest",
@@ -12289,7 +12668,6 @@
     "operation.recipePromote",
     "operation.refactorChecklist",
     "operation.sixActsAnalysis",
-    "operation.skillDevelopmentLoop",
     "operation.skillMarket",
     "operation.stability",
     "operation.testing",
