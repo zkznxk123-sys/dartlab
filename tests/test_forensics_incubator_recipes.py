@@ -307,12 +307,15 @@ def testForensicsAskWorkbenchRunsL15Memo(monkeypatch: pytest.MonkeyPatch) -> Non
         provider="heuristic",
     )
 
-    assert "L1.5 포렌식 deep dive 결과" in answer
-    assert "L2 분석엔진은 호출하지 않았고" in answer
+    assert "L1.5 포렌식 deep dive입니다" in answer
+    assert "L2 분석엔진은 호출하지 않았습니다" in answer
     assert "Falsifier Ledger" in answer
     assert "Engine Candidate Memo" in answer
-    assert "finalDecision" in answer
+    assert "최종 검산 판정" in answer
     assert "tableRef, valueRef, dateRef, sourceRef" in answer
     assert "stream_provider failed" not in answer
+    assert "analysis." not in answer
+    assert "revenueCashDivergence" not in answer
+    assert "open falsifier" not in answer
     for token in BANNED_L2_CALLS:
         assert token not in answer

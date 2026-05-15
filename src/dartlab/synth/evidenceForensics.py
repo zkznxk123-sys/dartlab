@@ -66,19 +66,22 @@ def buildEvidenceForensicsMemo(
 
     statement_map = dict(statements or {})
     panel = _buildPanel(statement_map)
-    latest_period = panel[0]["period"] if panel else "unknown"
+    analysis_panel = _analysisPanel(panel)
+    latest_period = analysis_panel[0]["period"] if analysis_panel else "unknown"
     coverage_rows = _coverageRows(statement_map, panel)
     trace_rows = _traceRows(statement_map)
-    cash_rows = _revenueCashBridge(panel)
-    wc_rows = _workingCapitalRows(panel)
+    cash_rows = _revenueCashBridge(analysis_panel)
+    wc_rows = _workingCapitalRows(analysis_panel)
     note_rows = _noteSignalRows(sectionTexts or {})
-    event_rows = _eventRows(events or (), note_rows=note_rows, panel=panel)
+    event_rows = _eventRows(events or (), note_rows=note_rows, panel=analysis_panel)
     anomaly_rows = _anomalyRows(scanRows or ())
     falsifier_rows = _falsifierRows(cash_rows, wc_rows, note_rows, event_rows)
     candidate_rows = _engineCandidateRows(cash_rows, wc_rows, note_rows, event_rows, anomaly_rows)
     risk_score = _riskScore(cash_rows, wc_rows, note_rows, event_rows)
-    decision_status = "usable" if panel else "insufficientStatements"
-    if panel and any(row["status"] == "missing" for row in coverage_rows if row["dataset"] in {"IS", "BS", "CF"}):
+    decision_status = "usable" if analysis_panel else "insufficientStatements"
+    if analysis_panel and any(
+        row["status"] == "missing" for row in coverage_rows if row["dataset"] in {"IS", "BS", "CF"}
+    ):
         decision_status = "usableWithGaps"
     deep_rows = _deepDiveRows(
         dataCoverageAudit=coverage_rows,
@@ -106,6 +109,7 @@ def buildEvidenceForensicsMemo(
             "riskScore": risk_score,
             "signalCount": sum(1 for row in deep_rows if row["status"] in {"watch", "risk"}),
             "candidateCount": len(candidate_rows),
+            "openFalsifierCount": sum(1 for row in falsifier_rows if row["status"] == "open"),
             "decisionStatus": decision_status,
         },
         "tables": {
@@ -149,6 +153,14 @@ def _buildPanel(statements: Mapping[str, pl.DataFrame]) -> list[dict[str, Any]]:
             row[metric] = _valueForMetric(statements, aliases, period)
         rows.append(row)
     return rows
+
+
+def _analysisPanel(panel: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Skip partial latest periods that cannot support revenue-cash checks."""
+    for idx, row in enumerate(panel):
+        if row.get("revenue") is not None and (row.get("cfo") is not None or row.get("netIncome") is not None):
+            return panel[idx:]
+    return panel
 
 
 def _periods(frames: Iterable[pl.DataFrame]) -> list[str]:
@@ -456,15 +468,15 @@ def _engineCandidateRows(
     anomaly_rows: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     candidates = [
-        ("revenueCashDivergence", _latestStatus(cash_rows), "analysis.earningsQuality or new forensics axis"),
+        ("revenueCashDivergence", _latestStatus(cash_rows), "이익품질/매출채권 회수 축 후보"),
         (
             "workingCapitalPressure",
             _latestStatus(wc_rows),
-            "analysis.financialConsistency or credit liquidity precheck",
+            "운전자본 압력/유동성 사전점검 축 후보",
         ),
-        ("noteRiskSignal", _maxStatus(note_rows), "analysis.disclosureChange or disclosure L2 axis"),
-        ("eventStatementLink", _maxStatus(event_rows), "analysis.disclosureChange"),
-        ("crossSectionAnomaly", _maxStatus(anomaly_rows), "scan or quant candidate"),
+        ("noteRiskSignal", _maxStatus(note_rows), "공시 문구 변화/주석 위험 축 후보"),
+        ("eventStatementLink", _maxStatus(event_rows), "공시 이벤트-재무제표 연결 축 후보"),
+        ("crossSectionAnomaly", _maxStatus(anomaly_rows), "횡단면 이상치 후보"),
     ]
     rows: list[dict[str, Any]] = []
     for signal_id, status, owner in candidates:
@@ -473,7 +485,7 @@ def _engineCandidateRows(
                 "signalId": signal_id,
                 "status": status,
                 "recommendedEngineOwner": owner,
-                "promotionGate": "3+ targets selfRun, false-positive ledger, ask answer quality P twice",
+                "promotionGate": "3개 이상 target selfRun, false-positive ledger, ask 답변 품질 2회 통과",
                 "keepAsSkillAfterPromotion": True,
             }
         )
@@ -488,28 +500,36 @@ def _deepDiveRows(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for order, (name, table) in enumerate(tables.items(), start=1):
+        table_status = _maxStatus(table)
         rows.append(
             {
                 "order": order,
                 "step": name,
-                "status": _maxStatus(table),
+                "status": table_status,
                 "rowCount": len(table),
                 "evidence": _evidenceSummary(table),
-                "nextAction": _nextAction(name, _maxStatus(table)),
+                "nextAction": _nextAction(name, table_status),
             }
         )
     open_falsifiers = sum(1 for row in tables.get("falsifierLedger", []) if row.get("status") == "open")
+    panel_alert = any(row["status"] in {"watch", "risk", "open"} for row in rows)
     rows.append(
         {
             "order": len(rows) + 1,
             "step": "finalDecision",
-            "status": "watch" if open_falsifiers else "ok" if decision_status.startswith("usable") else "missing",
+            "status": (
+                "watch"
+                if open_falsifiers or panel_alert
+                else "ok"
+                if decision_status.startswith("usable")
+                else "missing"
+            ),
             "rowCount": len(rows),
             "evidence": f"riskScore={risk_score}; openFalsifiers={open_falsifiers}; decisionStatus={decision_status}",
             "nextAction": (
-                "answer with falsifier ledger and engine candidate memo"
-                if open_falsifiers
-                else "retain as L1/L1.5 evidence check"
+                "반증 ledger와 엔진 후보 memo를 함께 제시"
+                if open_falsifiers or panel_alert
+                else "L1/L1.5 검산 경로로 보존"
             ),
         }
     )
@@ -551,10 +571,10 @@ def _evidenceSummary(rows: list[dict[str, Any]]) -> str:
 
 def _nextAction(step: str, status: str) -> str:
     if status in {"risk", "watch"}:
-        return f"open falsifier for {step}"
+        return f"{step} 반증 조건 확인"
     if status == "missing":
-        return f"supply missing L1/L1.5 input for {step}"
-    return "retain evidence row and continue"
+        return f"{step}에 필요한 L1/L1.5 입력 보강"
+    return "근거 행 보존 후 다음 단계 진행"
 
 
 def _growth(current: Any, previous: Any) -> float | None:

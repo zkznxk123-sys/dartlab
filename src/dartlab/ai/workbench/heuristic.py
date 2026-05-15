@@ -405,6 +405,64 @@ def _forensicsRefs(target: str, memo: dict[str, Any]) -> list[Ref]:
     return refs
 
 
+_STATUS_LABELS = {
+    "risk": "위험",
+    "watch": "관찰",
+    "open": "반증 필요",
+    "ok": "정상",
+    "mapped": "매핑됨",
+    "candidate": "후보",
+    "missing": "입력 부족",
+    "notTriggered": "비발동",
+    "usable": "사용 가능",
+    "usableWithGaps": "일부 결손",
+    "insufficientStatements": "원표 부족",
+}
+
+_SIGNAL_LABELS = {
+    "revenueCashDivergence": "매출-현금 괴리",
+    "workingCapitalPressure": "운전자본 압력",
+    "noteRiskSignal": "공시/주석 위험 문구",
+    "eventStatementLink": "공시 이벤트-재무제표 연결",
+    "crossSectionAnomaly": "횡단면 이상치",
+    "allowancePressure": "대손/손상 압력",
+    "inventoryWriteDown": "재고평가손 신호",
+    "relatedParty": "특수관계자 거래",
+    "goingConcern": "계속기업 위험",
+    "litigation": "소송/우발부채",
+    "derivatives": "파생상품 노출",
+    "restatement": "정정/재작성",
+    "factoring": "매출채권 유동화",
+}
+
+_CLAIM_LABELS = {
+    "revenue-to-cash divergence": "매출 증가가 현금 회수로 이어지는지",
+    "working-capital pressure": "운전자본이 과도하게 묶이는지",
+    "note text risk signal": "공시/주석 문구가 실제 위험 신호인지",
+    "event-to-statement linkage": "공시 이벤트가 현재 재무 압력과 연결되는지",
+}
+
+_COUNTER_EVIDENCE_LABELS = {
+    "large new customer, billing-cycle change, or seasonal receivable pattern": "신규 대형 고객, 청구 주기 변화, 계절적 매출채권 패턴",
+    "inventory build for contracted backlog or supplier payment normalization": "수주잔고 대응 재고 축적, 공급업체 결제 정상화",
+    "boilerplate-only wording or one-off legal disclosure without financial impact": "상투적 문구, 재무 영향 없는 일회성 법무 공시",
+    "event is unrelated to current financial-statement pressure": "해당 이벤트가 현재 재무제표 압력과 무관하다는 근거",
+}
+
+_STEP_LABELS = {
+    "dataCoverageAudit": "데이터 커버리지",
+    "accountTraceLedger": "계정 추적",
+    "revenueToCashBridge": "매출-현금 브리지",
+    "workingCapitalPressureMap": "운전자본 압력",
+    "noteSignalExtractor": "공시/주석 신호",
+    "eventToStatementMatcher": "이벤트 매칭",
+    "crossSectionAnomalyRank": "횡단면 이상치",
+    "falsifierLedger": "반증 ledger",
+    "engineCandidateMemo": "엔진 환류 후보",
+    "finalDecision": "최종 검산 판정",
+}
+
+
 def _forensicsMarkdown(memo: dict[str, Any]) -> str:
     headline = memo.get("headline") or {}
     tables = memo.get("tables") or {}
@@ -414,46 +472,142 @@ def _forensicsMarkdown(memo: dict[str, Any]) -> str:
     falsifiers = tables.get("falsifierLedger") or []
     candidates = tables.get("engineCandidateMemo") or []
     deep = tables.get("deepDive") or []
+    open_falsifiers = [row for row in falsifiers if row.get("status") == "open"]
+    cash_worst = _worstStatus(tables.get("revenueToCashBridge") or [])
+    wc_worst = _worstStatus(tables.get("workingCapitalPressureMap") or [])
+    decision = _forensicsDecision(headline, open_falsifiers, deep)
 
     lines = [
-        f"{memo.get('companyName') or memo.get('target')} L1.5 포렌식 deep dive 결과입니다.",
+        f"{memo.get('companyName') or memo.get('target')} L1.5 포렌식 deep dive입니다.",
         "",
-        "L2 분석엔진은 호출하지 않았고, Company.show 원표, 공시/섹션 텍스트, optional scan primitive와 L1.5 helper만 사용했습니다.",
-        f"기준시점은 {memo.get('asOf')}이며, 이 결과는 투자 결론이 아니라 원표 기반 검산 ledger입니다.",
+        "L2 분석엔진은 호출하지 않았습니다. Company.show 원표, 공시/섹션 텍스트, optional scan primitive와 L1.5 helper만 썼습니다.",
+        f"기준시점은 {memo.get('asOf')}입니다. 이 결과는 투자 의견이 아니라 원표 기반 검산과 반증 목록입니다.",
         "",
-        "## Headline",
-        f"- riskScore: {headline.get('riskScore')}",
-        f"- signalCount: {headline.get('signalCount')}",
-        f"- candidateCount: {headline.get('candidateCount')}",
-        f"- decisionStatus: {headline.get('decisionStatus')}",
+        "## 핵심 판정",
+        f"- 판정: {decision}",
+        f"- 위험 점수: {headline.get('riskScore')} / 열린 반증: {len(open_falsifiers)}개 / 엔진 후보: {headline.get('candidateCount')}개",
+        f"- 데이터 상태: {_statusLabel(headline.get('decisionStatus'))}",
         "",
         "## 원표 신호",
-        f"- revenue-cash: {cash.get('status')} / 매출채권 증가율-매출 증가율 {cash.get('receivableGrowthMinusRevenueGrowth')}",
-        f"- working capital: {wc.get('status')} / CCC {wc.get('cccDays')}, 재고 gap {wc.get('inventoryGrowthMinusRevenueGrowth')}",
+        (
+            "- 매출-현금: "
+            f"최신 {_statusLabel(cash.get('status'))}, 패널 최대 {_statusLabel(cash_worst)} / "
+            f"매출채권 증가율-매출 증가율 {_formatPctPoint(cash.get('receivableGrowthMinusRevenueGrowth'))}, "
+            f"CFO/순이익 {_formatRatio(cash.get('cfoToNetIncome'))}"
+        ),
+        (
+            "- 운전자본: "
+            f"최신 {_statusLabel(wc.get('status'))}, 패널 최대 {_statusLabel(wc_worst)} / "
+            f"CCC {_formatDays(wc.get('cccDays'))}, 재고 gap {_formatPctPoint(wc.get('inventoryGrowthMinusRevenueGrowth'))}"
+        ),
         "",
         "## 공시 텍스트 신호",
     ]
     if note_risks:
         for row in note_risks:
-            lines.append(f"- {row.get('signal')}: {row.get('status')} / hitCount {row.get('hitCount')}")
+            lines.append(
+                f"- {_signalLabel(row.get('signal'))}: {_statusLabel(row.get('status'))} / hitCount {row.get('hitCount')}"
+            )
     else:
-        lines.append("- watch/risk 키워드 신호는 현재 입력 범위에서 확인되지 않았습니다.")
+        lines.append("- 현재 입력 범위에서는 관찰/위험 키워드가 뚜렷하게 잡히지 않았습니다.")
 
-    lines.extend(["", "## Falsifier Ledger"])
+    lines.extend(["", "## 반증 Ledger (Falsifier Ledger)"])
     for row in falsifiers:
-        lines.append(f"- {row.get('claim')}: {row.get('status')} / 필요한 반증: {row.get('counterEvidenceNeeded')}")
+        lines.append(
+            f"- {_claimLabel(row.get('claim'))}: {_statusLabel(row.get('status'))} / "
+            f"확인할 반증: {_counterEvidenceLabel(row.get('counterEvidenceNeeded'))}"
+        )
 
-    lines.extend(["", "## Engine Candidate Memo"])
+    lines.extend(["", "## 엔진 환류 후보 (Engine Candidate Memo)"])
     for row in candidates:
-        lines.append(f"- {row.get('signalId')}: {row.get('status')} / owner 후보 {row.get('recommendedEngineOwner')}")
+        lines.append(
+            f"- {_signalLabel(row.get('signalId'))}: {_statusLabel(row.get('status'))} / "
+            f"후보 축: {row.get('recommendedEngineOwner')}"
+        )
 
     lines.extend(["", "## Deep Dive 단계"])
     for row in deep:
-        lines.append(f"- {row.get('order')}. {row.get('step')}: {row.get('status')} / {row.get('nextAction')}")
+        lines.append(
+            f"- {row.get('order')}. {_stepLabel(row.get('step'))}: "
+            f"{_statusLabel(row.get('status'))} / {_nextActionLabel(row.get('nextAction'))}"
+        )
 
     lines.append("")
     lines.append("답변 근거는 tableRef, valueRef, dateRef, sourceRef로 분리해 남겼습니다.")
     return "\n".join(lines)
+
+
+def _forensicsDecision(
+    headline: dict[str, Any],
+    open_falsifiers: list[dict[str, Any]],
+    deep_rows: list[dict[str, Any]],
+) -> str:
+    risk_score = _asFloat(headline.get("riskScore")) or 0
+    panel_alert = any(row.get("status") in {"watch", "risk"} for row in deep_rows if row.get("step") != "finalDecision")
+    if risk_score >= 4 or len(open_falsifiers) >= 3:
+        return "위험 신호 우선 검토"
+    if risk_score >= 1 or open_falsifiers:
+        return "관찰 필요"
+    if panel_alert:
+        return "최신연도는 안정, 과거 패널 경보는 관찰"
+    return "현재 입력 기준 큰 경보 없음"
+
+
+def _statusLabel(value: Any) -> str:
+    return _STATUS_LABELS.get(str(value), str(value or "알 수 없음"))
+
+
+def _signalLabel(value: Any) -> str:
+    return _SIGNAL_LABELS.get(str(value), str(value or "알 수 없음"))
+
+
+def _claimLabel(value: Any) -> str:
+    return _CLAIM_LABELS.get(str(value), str(value or "알 수 없음"))
+
+
+def _counterEvidenceLabel(value: Any) -> str:
+    return _COUNTER_EVIDENCE_LABELS.get(str(value), str(value or "알 수 없음"))
+
+
+def _stepLabel(value: Any) -> str:
+    return _STEP_LABELS.get(str(value), str(value or "알 수 없음"))
+
+
+def _nextActionLabel(value: Any) -> str:
+    text = str(value or "")
+    for step, label in _STEP_LABELS.items():
+        text = text.replace(step, label)
+    return text
+
+
+def _worstStatus(rows: list[dict[str, Any]]) -> str:
+    rank = {"missing": 0, "candidate": 1, "ok": 1, "mapped": 1, "notTriggered": 1, "watch": 2, "open": 2, "risk": 3}
+    if not rows:
+        return "missing"
+    return max((str(row.get("status") or "missing") for row in rows), key=lambda status: rank.get(status, 0))
+
+
+def _formatPctPoint(value: Any) -> str:
+    number = _asFloat(value)
+    return "계산 불가" if number is None else f"{number * 100:.1f}%p"
+
+
+def _formatRatio(value: Any) -> str:
+    number = _asFloat(value)
+    return "계산 불가" if number is None else f"{number:.2f}x"
+
+
+def _formatDays(value: Any) -> str:
+    number = _asFloat(value)
+    return "계산 불가" if number is None else f"{number:.1f}일"
+
+
+def _asFloat(value: Any) -> float | None:
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return None if number != number else number
 
 
 def _composeAnswer(state: WorkbenchState, results: list[dict[str, Any]]) -> str:
