@@ -201,6 +201,15 @@ class TestSystemPrompt:
 
         assert "외부 본문" in ANALYST_IDENTITY
 
+    def test_answer_quality_contract_is_shared_by_chat_and_compose(self):
+        from dartlab.ai.workbench.prompts import ANSWER_QUALITY_CONTRACT, COMPOSE_PROMPT, DARTLAB_CHAT_SYSTEM
+
+        required = ("비어있는 근거", "비발동 신호", "섹션을 만들었으면", "내부 단계명")
+        for token in required:
+            assert token in ANSWER_QUALITY_CONTRACT
+            assert token in DARTLAB_CHAT_SYSTEM
+            assert token in COMPOSE_PROMPT
+
 
 class TestSerializationE2E:
     """agent.py + runner.py 의 직렬화 단계에서 외부 본문이 마커로 감싸지는지 E2E."""
