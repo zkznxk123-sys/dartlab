@@ -18,7 +18,12 @@
 		valueFormat || (unit === "%" ? fmtPct : unit === "KRW" ? fmtKrw : (v) => isFiniteNum(v) ? v.toLocaleString() : "—")
 	);
 	const dFmt = $derived(
-		deltaFormat || (unit === "%" ? fmtPp : (v) => isFiniteNum(v) ? (v > 0 ? "+" : "") + v.toFixed(1) : "—")
+		deltaFormat ||
+			(unit === "%"
+				? fmtPp
+				: unit === "KRW"
+					? (v) => (isFiniteNum(v) ? (v > 0 ? "+" : "") + fmtKrw(v) : "—")
+					: (v) => (isFiniteNum(v) ? (v > 0 ? "+" : "") + v.toFixed(1) : "—"))
 	);
 
 	const deltaSign = $derived(isFiniteNum(delta) ? (delta > 0 ? "up" : delta < 0 ? "down" : "flat") : "flat");

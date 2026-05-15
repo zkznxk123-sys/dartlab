@@ -93,13 +93,14 @@ async function main() {
 	console.log(`[after 3rd click] data-theme = ${themeAttr3}`);
 	assert(themeAttr3 === null, `expected data-theme cleared (dark) after third click, got ${themeAttr3}`);
 
-	// 다른 axis: 수익성 — localStorage axis 갱신 + reload (button click race 회피)
-	async function gotoAxis(axis) {
-		await page.evaluate((a) => {
+	// 다른 axis — localStorage section+axis 갱신 + reload (button click race 회피)
+	async function gotoAxis(axis, section) {
+		await page.evaluate(({ a, s }) => {
 			const cur = JSON.parse(localStorage.getItem("dartlab-dashboard-state") || "{}");
 			cur.axis = a;
+			if (s) cur.section = s;
 			localStorage.setItem("dartlab-dashboard-state", JSON.stringify(cur));
-		}, axis);
+		}, { a: axis, s: section });
 		await page.reload({ waitUntil: "domcontentloaded" });
 	}
 	await gotoAxis("수익성");
@@ -140,6 +141,42 @@ async function main() {
 		const hasOcfKpi = text.includes("OCF") || text.includes("영업현금흐름") || text.includes("FCF");
 		console.log(`[cashflow] hasOcfKpi=${hasOcfKpi}`);
 		assert(hasOcfKpi, "현금흐름 CashFlow specialized KPI text not found");
+	}
+
+	// Quant verdict specialized
+	await gotoAxis("verdict", "quant");
+	try {
+		await page.waitForResponse(
+			(r) => r.url().includes("/api/dl/call") && r.request().method() === "POST",
+			{ timeout: 60000 }
+		);
+	} catch (e) {}
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasVerdictKpi = text.includes("Technical Verdict") || text.includes("RSI") || text.includes("Signals");
+		console.log(`[quant.verdict] hasKpi=${hasVerdictKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-quant-verdict.png"), fullPage: true });
+		assert(hasVerdictKpi, "quant verdict specialized text not found");
+	}
+
+	// Credit grade specialized
+	await gotoAxis("grade", "credit");
+	try {
+		await page.waitForResponse(
+			(r) => r.url().includes("/api/dl/call") && r.request().method() === "POST",
+			{ timeout: 60000 }
+		);
+	} catch (e) {}
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasGradeKpi = text.includes("Credit Grade") || text.includes("dCR") || text.includes("Health Score");
+		console.log(`[credit.grade] hasKpi=${hasGradeKpi}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-credit-grade.png"), fullPage: true });
+		assert(hasGradeKpi, "credit grade specialized text not found");
 	}
 
 	// 본문 카드 검증
