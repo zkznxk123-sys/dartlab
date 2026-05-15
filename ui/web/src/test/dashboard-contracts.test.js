@@ -42,11 +42,10 @@ describe("Dashboard foundation — Phase 0", () => {
 			expect(source).toContain("export function getDashboardStore");
 		});
 
-		it("tracks section / stockCode / axis / period state", () => {
+		it("tracks section / stockCode / mode state (v2)", () => {
 			expect(source).toContain("section = $state");
 			expect(source).toContain("stockCode = $state");
-			expect(source).toContain("axis = $state");
-			expect(source).toContain("period = $state");
+			expect(source).toContain("mode = $state");
 		});
 
 		it("exposes snapshot() for Phase 8 artifact attachment", () => {
@@ -95,20 +94,12 @@ describe("Dashboard foundation — Phase 0", () => {
 			expect(source).toMatch(/setMode\("dashboard"\)/);
 		});
 
-		it("EngineNav aligns with dartlab L1.5+L2+L3 taxonomy", () => {
-			const source = read("src/lib/dashboard/EngineNav.svelte");
-			// L1.5 Company
-			expect(source).toContain("company.profile");
-			expect(source).toContain("company.governance");
-			expect(source).toContain("company.filings");
-			// L2 engines
-			expect(source).toMatch(/key: "analysis"/);
-			expect(source).toMatch(/key: "quant"/);
-			expect(source).toMatch(/key: "credit"/);
-			expect(source).toMatch(/key: "macro"/);
-			expect(source).toMatch(/key: "industry"/);
-			// L3 Story
-			expect(source).toMatch(/key: "story"/);
+		it("Sidebar 4 탭 nav 항목 (재무제표 IS/BS/CF/Ratios)", () => {
+			const source = read("src/lib/components/Sidebar.svelte");
+			expect(source).toContain('key: "is"');
+			expect(source).toContain('key: "bs"');
+			expect(source).toContain('key: "cf"');
+			expect(source).toContain('key: "ratios"');
 		});
 
 		it("CompanySwitcher includes 16 KOSPI seed (Phase E 교체 대상)", () => {
@@ -122,7 +113,7 @@ describe("Dashboard foundation — Phase 0", () => {
 		it("DashboardShell routes by dashboardStore.section", () => {
 			const source = read("src/lib/dashboard/DashboardShell.svelte");
 			expect(source).toContain("getDashboardStore");
-			expect(source).toContain("SECTION_LABELS");
+			expect(source).toContain("FinancialView");
 		});
 	});
 
@@ -134,26 +125,28 @@ describe("Dashboard foundation — Phase 0", () => {
 			expect(source).toMatch(/uiMode\.value\s*===\s*"dashboard"/);
 		});
 
-		it("Sidebar.svelte hosts ModeToggle + EngineNav + CompanySwitcher", () => {
+		it("Sidebar.svelte hosts ModeToggle + 4 탭 nav + CompanySwitcher", () => {
 			const source = read("src/lib/components/Sidebar.svelte");
 			expect(source).toContain("ModeToggle");
-			expect(source).toContain("EngineNav");
+			expect(source).toContain("FINANCIAL_NAV");
 			expect(source).toContain("CompanySwitcher");
 			expect(source).toContain("getUiMode");
 		});
 	});
 
-	describe("shadcn token alias (담백한 색감)", () => {
+	describe("shadcn HSL 토큰 layer (Editorial 폐기 후)", () => {
 		const source = read("src/app.css");
 
-		it("aliases shadcn standard tokens to dl-* primitives", () => {
-			expect(source).toContain("--color-background: var(--color-dl-bg-dark)");
-			expect(source).toContain("--color-primary: var(--color-dl-primary)");
-			expect(source).toContain("--color-card: var(--color-dl-bg-card)");
-			expect(source).toContain("--color-border: var(--color-dl-border)");
+		it("defines shadcn HSL tokens (light + dark)", () => {
+			expect(source).toContain("--background:");
+			expect(source).toContain("--card:");
+			expect(source).toContain("--primary:");
+			expect(source).toContain("--border:");
+			expect(source).toContain("--chart-1:");
+			expect(source).toContain("--chart-6:");
 		});
 
-		it("retains brand red as primary (single accent)", () => {
+		it("retains dl-* primitives for Ask/chat surface", () => {
 			expect(source).toContain("--color-dl-primary: #ea4647");
 		});
 	});
