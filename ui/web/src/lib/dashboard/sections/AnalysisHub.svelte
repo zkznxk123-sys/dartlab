@@ -14,6 +14,14 @@
 	import Stability from "$lib/dashboard/sections/analysis/Stability.svelte";
 	import Growth from "$lib/dashboard/sections/analysis/Growth.svelte";
 	import Efficiency from "$lib/dashboard/sections/analysis/Efficiency.svelte";
+	import EarningsQuality from "$lib/dashboard/sections/analysis/EarningsQuality.svelte";
+	import AssetStructure from "$lib/dashboard/sections/analysis/AssetStructure.svelte";
+	import Funding from "$lib/dashboard/sections/analysis/Funding.svelte";
+	import CostStructure from "$lib/dashboard/sections/analysis/CostStructure.svelte";
+	import CapitalAllocation from "$lib/dashboard/sections/analysis/CapitalAllocation.svelte";
+	import InvestmentEfficiency from "$lib/dashboard/sections/analysis/InvestmentEfficiency.svelte";
+	import Summary from "$lib/dashboard/sections/analysis/Summary.svelte";
+	import Integrity from "$lib/dashboard/sections/analysis/Integrity.svelte";
 
 	const dash = getDashboardStore();
 
@@ -42,6 +50,14 @@
 		안정성: Stability,
 		성장성: Growth,
 		효율성: Efficiency,
+		이익품질: EarningsQuality,
+		자산구조: AssetStructure,
+		자금조달: Funding,
+		비용구조: CostStructure,
+		자본배분: CapitalAllocation,
+		투자효율: InvestmentEfficiency,
+		종합평가: Summary,
+		재무정합성: Integrity,
 	};
 
 	let catalogue = $state([]);

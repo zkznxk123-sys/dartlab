@@ -8,6 +8,7 @@
 	import { loadEngineAxis } from "$lib/dashboard/data/loaders.js";
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
 	import Grade from "$lib/dashboard/sections/credit/Grade.svelte";
+	import CreditAxisCard from "$lib/dashboard/sections/credit/CreditAxisCard.svelte";
 
 	const dash = getDashboardStore();
 
@@ -22,7 +23,16 @@
 		"disclosure",
 	];
 
-	const SPECIALIZED = { grade: Grade };
+	const SPECIALIZED = {
+		grade: Grade,
+		repayment: CreditAxisCard,
+		leverage: CreditAxisCard,
+		liquidity: CreditAxisCard,
+		cashflow: CreditAxisCard,
+		business: CreditAxisCard,
+		reliability: CreditAxisCard,
+		disclosure: CreditAxisCard,
+	};
 
 	let catalogue = $state([]);
 	let axisPayload = $state(null);

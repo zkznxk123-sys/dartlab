@@ -9,6 +9,11 @@
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
 	import Verdict from "$lib/dashboard/sections/quant/Verdict.svelte";
 	import Momentum from "$lib/dashboard/sections/quant/Momentum.svelte";
+	import QuantSignals from "$lib/dashboard/sections/quant/QuantSignals.svelte";
+	import QuantVolatility from "$lib/dashboard/sections/quant/QuantVolatility.svelte";
+	import QuantForecast from "$lib/dashboard/sections/quant/QuantForecast.svelte";
+	import QuantMarketContext from "$lib/dashboard/sections/quant/QuantMarketContext.svelte";
+	import QuantScores from "$lib/dashboard/sections/quant/QuantScores.svelte";
 
 	const dash = getDashboardStore();
 
@@ -28,6 +33,13 @@
 	const SPECIALIZED = {
 		verdict: Verdict,
 		momentum: Momentum,
+		signals: QuantSignals,
+		volatility: QuantVolatility,
+		forecast: QuantForecast,
+		marketContext: QuantMarketContext,
+		"Z스코어": QuantScores,
+		"F스코어": QuantScores,
+		"M스코어": QuantScores,
 	};
 
 	let catalogue = $state([]);
