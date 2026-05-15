@@ -1,13 +1,11 @@
 <!--
-	DashboardShell — Dashboard 모드의 메인 영역.
-	dashboardStore.section 으로 라우팅. Phase 0 은 placeholder, Phase 1~7 에서
-	각 section 의 실 컨텐츠 mount.
+	DashboardShell — Editorial Financial Terminal main wrapper.
+	좌측 사이드바는 App.svelte 가 mount 하는 외부 Sidebar 담당.
+	본 컴포넌트 = topbar(category/section/desc/stockCode) + main(section route) + toc rail.
 -->
 <script>
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
-	import { LayoutDashboard, AlertCircle } from "lucide-svelte";
-	import * as Card from "$lib/ui/card";
-	import AskFromDashboardButton from "$lib/dashboard/AskFromDashboardButton.svelte";
+	import { LayoutDashboard, Search } from "lucide-svelte";
 	import CompanyProfile from "$lib/dashboard/sections/CompanyProfile.svelte";
 	import CompanyGovernance from "$lib/dashboard/sections/CompanyGovernance.svelte";
 	import CompanyFilings from "$lib/dashboard/sections/CompanyFilings.svelte";
@@ -17,110 +15,90 @@
 	import MacroHub from "$lib/dashboard/sections/MacroHub.svelte";
 	import IndustryHub from "$lib/dashboard/sections/IndustryHub.svelte";
 	import StoryHub from "$lib/dashboard/sections/StoryHub.svelte";
+	import AskFromDashboardButton from "$lib/dashboard/AskFromDashboardButton.svelte";
 
 	const dash = getDashboardStore();
 
-	const SECTION_LABELS = {
-		"company.profile": {
-			label: "Company · Profile",
-			desc: "회사 메타 (CEO · 섹터 · 직원수 · 시총)",
-		},
-		"company.governance": {
-			label: "Company · Governance",
-			desc: "주요주주 · 임원 · 자사주 · 임직원",
-		},
-		"company.filings": {
-			label: "Company · Filings",
-			desc: "DART 공시 (정기 · 수시)",
-		},
-		analysis: {
-			label: "Analysis",
-			desc: "재무 22 axes — 수익구조 · 자금조달 · 자산구조 · 수익성 · 성장성 · 안정성 · 효율성 · ...",
-		},
-		quant: {
-			label: "Quant",
-			desc: "주가 · 시장 시계열 · 밸류에이션 · 캔들 · OHLCV",
-		},
-		credit: {
-			label: "Credit",
-			desc: "신용등급 · 부도위험 · Altman-Z",
-		},
-		macro: {
-			label: "Macro",
-			desc: "거시 환경 — 금리 · 환율 · 자산군 · 사이클 · sentiment · scenario",
-		},
-		industry: {
-			label: "Industry",
-			desc: "동종업계 비교 · peer 분포 · 공급망 network",
-		},
-		story: {
-			label: "Story",
-			desc: "관점별 묶음 — 투자 · 신용 · M&A · ESG · 거시충격",
-		},
+	const SECTIONS = {
+		"company.profile": { label: "Profile", category: "Company", desc: "회사 메타 · 임원 · 시총 · 사업 description" },
+		"company.governance": { label: "Governance", category: "Company", desc: "주주 · 임원 · 자사주 · 거버넌스 score" },
+		"company.filings": { label: "Filings", category: "Company", desc: "DART 공시 timeline · 정기 · 수시" },
+		analysis: { label: "Analysis", category: "Engine", desc: "재무 14 axes — 수익구조 · 수익성 · 현금흐름 · ..." },
+		quant: { label: "Quant", category: "Engine", desc: "주가 · 시장 · 시계열 · 캔들 · 변동성 · forecast" },
+		credit: { label: "Credit", category: "Engine", desc: "dCR · 7축 가중 · 부도위험 · metrics gauge" },
+		macro: { label: "Macro", category: "Engine", desc: "거시 환경 — 금리 · 환율 · 사이클 · sentiment · scenario" },
+		industry: { label: "Industry", category: "Engine", desc: "동종업계 · peer rank · 공급망 network" },
+		story: { label: "Story", category: "Composed", desc: "perspective 별 6 막 narrative" },
+		scan: { label: "Scan", category: "Discover", desc: "다중 종목 멀티 axis 스크리너" },
 	};
 
-	const current = $derived(SECTION_LABELS[dash.section] || { label: dash.section, desc: "" });
+	const current = $derived(SECTIONS[dash.section] || { label: dash.section, category: "", desc: "" });
 </script>
 
-<div class="flex flex-col h-full min-h-0 bg-background">
-	<header class="border-b border-border px-6 py-3 flex items-center justify-between gap-4">
-		<div class="min-w-0">
-			<h1 class="text-[16px] font-semibold text-foreground truncate">{current.label}</h1>
-			<p class="text-[11px] text-muted-foreground mt-0.5 truncate">{current.desc}</p>
+<div class="editorial editorial-grain h-full flex flex-col min-h-0 relative">
+	<header class="editorial-topbar">
+		<div class="flex items-center gap-2 min-w-0">
+			<LayoutDashboard size={14} class="shrink-0" style="color: var(--ed-text-3);" />
+			<span class="ed-eyebrow whitespace-nowrap">{current.category}</span>
+			<span class="text-[11px]" style="color: var(--ed-text-3);">/</span>
+			<h2 class="ed-display text-[15px] font-semibold whitespace-nowrap" style="color: var(--ed-text);">
+				{current.label}
+			</h2>
 		</div>
-		<div class="flex items-center gap-3 shrink-0">
-			<div class="text-[11px] text-muted-foreground font-mono">
-				{dash.stockCode}
+		<div class="flex-1 flex items-center gap-2 min-w-0 px-4">
+			<div class="flex items-center gap-2 px-2.5 py-1 rounded border text-[11px] select-none w-full max-w-[420px]"
+				style="border-color: var(--ed-line); color: var(--ed-text-3); background: var(--ed-surface);">
+				<Search size={12} class="shrink-0" />
+				<span class="truncate">{current.desc}</span>
 			</div>
+		</div>
+		<div class="flex items-center gap-2 shrink-0">
+			<div class="ed-num text-[11px]" style="color: var(--ed-text-3);">{dash.stockCode}</div>
 			<AskFromDashboardButton />
 		</div>
 	</header>
 
-	<main class="flex-1 overflow-auto p-6">
-		{#if dash.section === "company.profile"}
-			<CompanyProfile />
-		{:else if dash.section === "company.governance"}
-			<CompanyGovernance />
-		{:else if dash.section === "company.filings"}
-			<CompanyFilings />
-		{:else if dash.section === "analysis"}
-			<AnalysisHub />
-		{:else if dash.section === "quant"}
-			<QuantHub />
-		{:else if dash.section === "credit"}
-			<CreditHub />
-		{:else if dash.section === "macro"}
-			<MacroHub />
-		{:else if dash.section === "industry"}
-			<IndustryHub />
-		{:else if dash.section === "story"}
-			<StoryHub />
-		{:else}
-			<Card.Root class="border-dashed">
-				<Card.Header>
-					<Card.Title class="flex items-center gap-2 text-[14px]">
-						<LayoutDashboard size={16} />
-						<span>{current.label}</span>
-					</Card.Title>
-					<Card.Description class="text-[12px]">
-						본 섹션의 컨텐츠는 후속 Phase 에서 직조 (Phase 2~7).
-					</Card.Description>
-				</Card.Header>
-				<Card.Content>
-					<div class="flex items-start gap-2 rounded-md bg-muted/40 p-3 text-[12px] text-muted-foreground">
-						<AlertCircle size={14} class="shrink-0 mt-0.5" />
-						<div class="min-w-0">
-							<div class="font-medium text-foreground mb-0.5">{current.label}</div>
-							<div>{current.desc}</div>
-							<div class="mt-2 font-mono text-[10px] text-muted-foreground">
-								section <span class="text-primary">{dash.section}</span> ·
-								stockCode <span class="text-primary">{dash.stockCode}</span> ·
-								period <span class="text-primary">{dash.period}</span>
-							</div>
-						</div>
-					</div>
-				</Card.Content>
-			</Card.Root>
-		{/if}
-	</main>
+	<div class="flex-1 min-h-0 flex">
+		<main class="editorial-main editorial-stagger flex-1 min-w-0">
+			{#if dash.section === "company.profile"}
+				<CompanyProfile />
+			{:else if dash.section === "company.governance"}
+				<CompanyGovernance />
+			{:else if dash.section === "company.filings"}
+				<CompanyFilings />
+			{:else if dash.section === "analysis"}
+				<AnalysisHub />
+			{:else if dash.section === "quant"}
+				<QuantHub />
+			{:else if dash.section === "credit"}
+				<CreditHub />
+			{:else if dash.section === "macro"}
+				<MacroHub />
+			{:else if dash.section === "industry"}
+				<IndustryHub />
+			{:else if dash.section === "story"}
+				<StoryHub />
+			{:else if dash.section === "scan"}
+				<div class="ed-card">
+					<div class="ed-eyebrow mb-2">Discover</div>
+					<h2 class="mb-2">Scan — 다중 종목 스크리너</h2>
+					<p style="color: var(--ed-text-2); font-size: 13px;">
+						Phase G 에서 landing 의 scan workbench 를 복제 + dlCall scan.* 호출로 강화. (현재 placeholder)
+					</p>
+				</div>
+			{:else}
+				<div class="ed-card">
+					<div class="ed-eyebrow mb-2">Unknown section</div>
+					<p style="color: var(--ed-text-2);">section <span class="ed-num">{dash.section}</span> · stockCode <span class="ed-num">{dash.stockCode}</span></p>
+				</div>
+			{/if}
+		</main>
+
+		<aside class="editorial-toc hidden xl:block w-[180px] shrink-0">
+			<div class="ed-eyebrow mb-3">On this page</div>
+			<div class="text-[11px]" style="color: var(--ed-text-3);">
+				본 section 의 anchor 목록은 Phase C~G 에서 자동 수집.
+			</div>
+		</aside>
+	</div>
 </div>

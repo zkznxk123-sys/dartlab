@@ -1,6 +1,6 @@
 <!--
-	EngineNav — Dashboard 모드의 사이드바 nav.
-	dartlab L1.5 Company + L2 5 engines + L3 Story 와 1:1 정렬.
+	EngineNav — Dashboard 사이드바 nav.
+	Editorial 톤. dartlab L1.5 Company + L2 5 engines + L1.5 scan + L3 Story.
 -->
 <script>
 	import {
@@ -13,9 +13,9 @@
 		BookOpen,
 		Users,
 		FileText,
+		Filter,
 	} from "lucide-svelte";
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
-	import { cn } from "$lib/utils.js";
 
 	const dash = getDashboardStore();
 
@@ -40,29 +40,32 @@
 		},
 		{
 			label: "Composed",
-			items: [{ key: "story", label: "Story", icon: BookOpen }],
+			items: [
+				{ key: "story", label: "Story", icon: BookOpen },
+			],
+		},
+		{
+			label: "Discover",
+			items: [
+				{ key: "scan", label: "Scan", icon: Filter },
+			],
 		},
 	];
 </script>
 
-<nav class="flex flex-col gap-3 py-1">
+<nav class="flex flex-col gap-1 py-2">
 	{#each GROUPS as group}
-		<div>
-			<div class="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-				{group.label}
-			</div>
-			<ul class="flex flex-col gap-0.5 px-2">
+		<div class="editorial-nav-group">
+			<div class="editorial-nav-group-label">{group.label}</div>
+			<ul class="flex flex-col gap-px">
 				{#each group.items as item}
 					{@const Icon = item.icon}
 					<li>
 						<button
 							type="button"
-							class={cn(
-								"flex items-center gap-2 w-full rounded px-2 py-1.5 text-left text-[13px] transition-colors",
-								dash.section === item.key
-									? "bg-secondary text-foreground"
-									: "text-muted-foreground hover:bg-muted hover:text-foreground"
-							)}
+							class="editorial-nav-item"
+							class:active={dash.section === item.key}
+							aria-current={dash.section === item.key ? "page" : undefined}
 							onclick={() => dash.setSection(item.key)}
 						>
 							<Icon size={14} class="shrink-0" />
