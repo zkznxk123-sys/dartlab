@@ -80,13 +80,36 @@ def _validateApiRef(apiRef: str) -> tuple[bool, str | None]:
 # ── Dispatch (direct call, JSON-safe 직렬화) ──────────────────────────
 
 
+# Company 인스턴스 process-level 캐시 — 매 요청 새 인스턴스 생성 시
+# accessor (.finance/.market/...) 의 collect 결과가 인스턴스에 캐싱되는 이점을
+# 잃어 매번 cold start 1.8 초 + Polars heap 200~500MB 누적 → BoundedCache 5GB
+# emergency flush 무한 루프. 같은 target 은 single instance 재사용.
+# 메모리 폭발 회피: 최대 8 stockCode (Polars heap 약 2~4GB ceiling).
+from collections import OrderedDict
+
+_COMPANY_CACHE: "OrderedDict[str, Any]" = OrderedDict()
+_COMPANY_CACHE_LIMIT = 8
+
+
+def _getCompany(target: str) -> Any:
+    """target 별 Company 인스턴스 LRU 캐시 — 2회차부터 < 50ms."""
+    if target in _COMPANY_CACHE:
+        _COMPANY_CACHE.move_to_end(target)
+        return _COMPANY_CACHE[target]
+    company = dartlab.Company(target)
+    _COMPANY_CACHE[target] = company
+    while len(_COMPANY_CACHE) > _COMPANY_CACHE_LIMIT:
+        _COMPANY_CACHE.popitem(last=False)
+    return company
+
+
 def _dispatch(apiRef: str, target: str | None, args: list[Any], kwargs: dict[str, Any]) -> Any:
     """capability 를 직접 호출. raw Python 결과 반환 (직렬화 X)."""
     if apiRef.startswith("Company."):
         method = apiRef.split(".", 1)[1]
         if not target:
             raise ValueError("Company API 는 target (stockCode) 가 필요합니다.")
-        company = dartlab.Company(target)
+        company = _getCompany(target)
         if not hasattr(company, method):
             raise ValueError(f"공개 Company API 를 찾지 못했습니다: Company.{method}")
         func = getattr(company, method)

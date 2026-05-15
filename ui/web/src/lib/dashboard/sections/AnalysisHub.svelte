@@ -98,9 +98,8 @@
 	}
 
 	$effect(() => {
-		// react to stockCode OR axis change. writes are untracked to avoid loop.
+		// stockCode 만 트래킹 — axis 는 selectAxis 단일 경로로 fetch (race 차단).
 		dash.stockCode;
-		dash.axis;
 		untrack(() => {
 			fetchCatalogue();
 			const a = dash.axis && CORE_AXES.includes(dash.axis) ? dash.axis : CORE_AXES[0];

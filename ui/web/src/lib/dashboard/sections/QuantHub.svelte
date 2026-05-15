@@ -76,8 +76,8 @@
 	}
 
 	$effect(() => {
+		// stockCode 만 트래킹 — axis 는 selectAxis 단일 경로.
 		dash.stockCode;
-		dash.axis;
 		untrack(() => {
 			fetchCatalogue();
 			const a = dash.axis && CORE_AXES.includes(dash.axis) ? dash.axis : "verdict";
