@@ -38,9 +38,20 @@
 		return String(v);
 	}
 
-	// payload entries 정렬 — history 있는 metric 먼저
+	function isDataFrameEnvelope(v) {
+		return (
+			v &&
+			typeof v === "object" &&
+			v._type === "DataFrame" &&
+			Array.isArray(v.rows) &&
+			Array.isArray(v.columns)
+		);
+	}
+
+	// payload entries 정렬 — history 있는 metric 먼저. DataFrame envelope 는 별도 분기.
+	const dfEnvelope = $derived(isDataFrameEnvelope(payload) ? payload : null);
 	const entries = $derived(
-		payload && typeof payload === "object"
+		!dfEnvelope && payload && typeof payload === "object"
 			? Object.entries(payload).sort(([, a], [, b]) => {
 					const aH = isHistoryShape(a) ? 0 : 1;
 					const bH = isHistoryShape(b) ? 0 : 1;
@@ -57,6 +68,39 @@
 		</Card.Header>
 		<Card.Content>
 			<Skeleton class="h-40 w-full" />
+		</Card.Content>
+	</Card.Root>
+{:else if dfEnvelope}
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="text-[14px]">{dfEnvelope.rowCount} 행 × {dfEnvelope.columns.length} 열</Card.Title>
+		</Card.Header>
+		<Card.Content>
+			<div class="overflow-x-auto">
+				<Table.Root>
+					<Table.Header>
+						<Table.Row>
+							{#each dfEnvelope.columns as col}
+								<Table.Head class="text-[10px] uppercase tracking-wide whitespace-nowrap">{col}</Table.Head>
+							{/each}
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
+						{#each dfEnvelope.rows as r}
+							<Table.Row>
+								{#each dfEnvelope.columns as col}
+									<Table.Cell class="text-[12px] font-mono tabular-nums whitespace-nowrap">{formatCell(r[col])}</Table.Cell>
+								{/each}
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</div>
+			{#if dfEnvelope.rowCount > dfEnvelope.rows.length}
+				<div class="mt-2 text-[10px] text-muted-foreground">
+					{dfEnvelope.rows.length} / {dfEnvelope.rowCount} 행 표시
+				</div>
+			{/if}
 		</Card.Content>
 	</Card.Root>
 {:else if entries.length === 0}

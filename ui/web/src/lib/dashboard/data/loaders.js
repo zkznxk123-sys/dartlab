@@ -99,6 +99,35 @@ export async function loadMarket(stockCode, opts = {}) {
 	};
 }
 
+// ── Generic engine axis loader — analysis / quant / credit / industry / macro ──
+//    apiRef 별 axis 호출. axis 없으면 catalogue DataFrame, 있으면 axis-specific.
+//    응답 shape 는 dl.py 의 _toJsonSafe 가 정규화 (DataFrame envelope 또는 dict).
+export async function loadEngineAxis(apiRef, stockCode, axis, opts = {}) {
+	const kwargs = axis ? { axis } : {};
+	const { ok, response, error } = await safeCall(apiRef, {
+		target: stockCode,
+		kwargs,
+		signal: opts.signal,
+	});
+	if (!ok) return { ok: false, data: null, error, raw: null };
+
+	if (axis) {
+		return {
+			ok: true,
+			data: { apiRef, axis, payload: unwrapData(response), stockCode },
+			error: null,
+			raw: response,
+		};
+	}
+	const { rows, columns } = unwrapRows(response);
+	return {
+		ok: true,
+		data: { apiRef, axis: null, axes: rows, columns, stockCode },
+		error: null,
+		raw: response,
+	};
+}
+
 // ── Company.analysis — axis 별 구조화 분석 ──
 //    axis 없으면 catalogue DataFrame (22 axes meta) 반환.
 //    axis 있으면 dict — { <metricName>: { history: [...], ... } } 구조.

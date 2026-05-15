@@ -11,6 +11,7 @@
 	import CompanyGovernance from "$lib/dashboard/sections/CompanyGovernance.svelte";
 	import CompanyFilings from "$lib/dashboard/sections/CompanyFilings.svelte";
 	import AnalysisHub from "$lib/dashboard/sections/AnalysisHub.svelte";
+	import QuantHub from "$lib/dashboard/sections/QuantHub.svelte";
 
 	const dash = getDashboardStore();
 
@@ -76,6 +77,8 @@
 			<CompanyFilings />
 		{:else if dash.section === "analysis"}
 			<AnalysisHub />
+		{:else if dash.section === "quant"}
+			<QuantHub />
 		{:else}
 			<Card.Root class="border-dashed">
 				<Card.Header>
