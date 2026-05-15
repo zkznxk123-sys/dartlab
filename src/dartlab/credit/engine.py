@@ -6,6 +6,21 @@ Layer 1 (metrics.py) → Layer 2 (scorecard) → Layer 3 (등급 결정)
 
 from __future__ import annotations
 
+# ═══════════════════════════════════════════════════════════
+# 설정 (분리: _engineConfig.py SSOT, re-export 으로 BC 보존)
+# ═══════════════════════════════════════════════════════════
+from dartlab.credit._engineConfig import _CHS_PD_BRACKETS, _CONFIG, _WEIGHTS
+from dartlab.credit._engineNotch import (
+    _NOTCH_RULES,
+    _calcNotchAdjustment,
+    _notchForCapex,
+    _notchForCaptive,
+    _notchForConsecutiveProfit,
+    _notchForHolding,
+    _notchForMarketCap,
+    _notchForPublicCorp,
+    _notchForRevenue,
+)
 from dartlab.credit.features.sectorThresholds import getSectorLabel, getThresholds
 from dartlab.credit.scoring.creditScorecard import (
     axisScore,
@@ -18,55 +33,6 @@ from dartlab.credit.scoring.creditScorecard import (
     weightedScore,
 )
 from dartlab.credit.scoring.metrics import calcAllMetrics
-
-# ═══════════════════════════════════════════════════════════
-# 설정 — 모든 매직 넘버를 여기서 관리
-# ═══════════════════════════════════════════════════════════
-
-_CONFIG = {
-    # Notch Adjustment
-    "notch_gate_score": 10,
-    "notch_a_range_score": 19,
-    "notch_a_range_cap": 4,
-    "notch_cap_large": 7,
-    "notch_cap_medium": 4,
-    "notch_cap_small": 2,
-    "revenue_large": 10e12,
-    "revenue_mega": 50e12,
-    "mktcap_top30": 30e12,
-    "mktcap_top100": 10e12,
-    "public_corps": {"한국전력", "한국가스공사", "한국수력원자력", "한국도로공사", "한국토지주택공사"},
-    "holding_keywords": ("지주", "홀딩스", "Holdings"),
-    "holding_investment_ratio": 0.5,
-    # CHS
-    "chs_safe_max_down": 1.0,
-    "chs_weak_max_up": -3.0,
-    # 시계열 안정화
-    "ts_weights": (0.60, 0.25, 0.15),
-    # 축1 압축
-    "axis1_compress_threshold": 20,
-    "axis1_compress_ratio": 0.6,
-    # OFS 블렌딩
-    "ofs_advantage_threshold": 10,
-    "ofs_strong_weight": 0.65,
-    "ofs_default_weight": 0.50,
-}
-
-_WEIGHTS = {
-    "default": [0.25, 0.20, 0.15, 0.15, 0.10, 0.10, 0.05],
-    "captive": [0.30, 0.15, 0.15, 0.15, 0.10, 0.10, 0.05],
-    "holding": [0.15, 0.25, 0.15, 0.15, 0.15, 0.10, 0.05],
-    "financial": [0.35, 0.35, 0.15, 0.00, 0.15],
-}
-
-_CHS_PD_BRACKETS = [
-    (0.001, 3),  # AAA 급
-    (0.01, 10),  # AA 급
-    (0.05, 25),  # A 급
-    (0.1, 40),  # BBB 급
-    (0.3, 60),  # BB 급
-    (1.0, 80),  # B 이하
-]
 
 
 def _chsPdToScore(pd: float) -> int:
@@ -334,150 +300,6 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict:
 # ═══════════════════════════════════════════════════════════
 # Notch Adjustment — 개별 규칙
 # ═══════════════════════════════════════════════════════════
-
-
-def _notchForRevenue(latest, **_) -> list[tuple[int, str]]:
-    """규칙 1: 기업 규모 (매출 기준)."""
-    revenue = latest.get("revenue") or 0
-    if revenue > _CONFIG["revenue_mega"]:
-        return [(3, f"대형기업 (매출 {revenue / 1e12:.0f}조)")]
-    if revenue > _CONFIG["revenue_large"]:
-        return [(1, f"중대형기업 (매출 {revenue / 1e12:.0f}조)")]
-    return []
-
-
-def _notchForPublicCorp(company, **_) -> list[tuple[int, str]]:
-    """규칙 2: 공기업/정부 보호."""
-    corpName = getattr(company, "corpName", "") or ""
-    if any(k in corpName for k in _CONFIG["public_corps"]) or "한국전력" in corpName:
-        return [(3, "공기업 (정부 보증/규제 보호)")]
-    return []
-
-
-def _notchForCaptive(captive, sepMetrics, **_) -> list[tuple[int, str]]:
-    """규칙 3: 캡티브 금융 — 별도 D/EBITDA가 양호하면 상향."""
-    if captive and sepMetrics:
-        sepDE = sepMetrics.get("separateDebtToEbitda")
-        if sepDE is not None and sepDE < 3:
-            return [(2, f"캡티브금융 별도 D/EBITDA {sepDE:.1f}x (양호)")]
-    return []
-
-
-def _notchForHolding(holding, sepMetrics, **_) -> list[tuple[int, str]]:
-    """규칙 4: 지주사 — 별도 부채비율이 양호하면 상향."""
-    if holding and sepMetrics:
-        sepDR = sepMetrics.get("separateDebtRatio")
-        if sepDR is not None and sepDR < 100:
-            return [(2, f"지주사 별도 부채비율 {sepDR:.0f}% (양호)")]
-    return []
-
-
-def _notchForCapex(latest, **_) -> list[tuple[int, str]]:
-    """규칙 5: CAPEX 집약 but OCF 양수."""
-    ocf = latest.get("ocf") or 0
-    fcf = latest.get("fcf") or 0
-    if ocf > 0 and fcf < 0 and abs(fcf) > 0:  # OCF+, FCF- = CAPEX 집약
-        return [(1, "CAPEX집약 OCF양수 (투자 사이클)")]
-    return []
-
-
-def _notchForMarketCap(company, **_) -> list[tuple[int, str]]:
-    """규칙 6: 시가총액 상위 = 시장이 인정한 시장 지위."""
-    try:
-        priceData = company.gather("price") if hasattr(company, "gather") else None
-        if priceData is None or len(priceData) == 0:
-            return []
-        epsResult = company.select("IS", ["기본주당이익", "당기순이익"])
-        from dartlab.core.utils.helpers import toDict as _tdNotch
-
-        epsParsed = _tdNotch(epsResult)
-        if not epsParsed:
-            return []
-        ed, ep = epsParsed
-        eps = (ed.get("기본주당이익", {}) or {}).get(ep[0] if ep else "")
-        niE = (ed.get("당기순이익", {}) or {}).get(ep[0] if ep else "")
-        closeCol = "close" if "close" in priceData.columns else "종가"
-        if not (eps and abs(eps) > 0 and niE and closeCol in priceData.columns):
-            return []
-        shares = abs(niE / eps)
-        latestClose = priceData[closeCol].drop_nulls().to_list()[-1]
-        mktCap = shares * latestClose
-        if mktCap > _CONFIG["mktcap_top30"]:
-            return [(3, f"시가총액 {mktCap / 1e12:.0f}조 (시장 지위)")]
-        if mktCap > _CONFIG["mktcap_top100"]:
-            return [(1, f"시가총액 {mktCap / 1e12:.0f}조")]
-    except (TypeError, ValueError, KeyError, AttributeError, IndexError, ZeroDivisionError):
-        pass
-    return []
-
-
-def _notchForConsecutiveProfit(metrics, **_) -> list[tuple[int, str]]:
-    """규칙 7: 장기 상장 + 연속 흑자 = 경영 역량 대리."""
-    histLen = len(metrics.get("history", []))
-    if histLen >= 5:
-        niHistory = [h.get("operatingIncome") for h in metrics["history"][:5]]
-        allPositive = all(v is not None and v > 0 for v in niHistory)
-        if allPositive:
-            return [(1, f"연속 {histLen}기 영업흑자 (경영 안정성)")]
-    return []
-
-
-_NOTCH_RULES = [
-    _notchForRevenue,
-    _notchForPublicCorp,
-    _notchForCaptive,
-    _notchForHolding,
-    _notchForCapex,
-    _notchForMarketCap,
-    _notchForConsecutiveProfit,
-]
-
-
-def _calcNotchAdjustment(
-    company,
-    grade: str,
-    score: float,
-    latest: dict,
-    metrics: dict,
-    holding: bool,
-    captive: bool,
-    sepMetrics: dict | None,
-) -> dict:
-    """v3 Notch Adjustment — 기업 특성 기반 등급 보정.
-
-    정량 점수만으로는 반영 불가능한 요소를 notch 단위로 보정:
-    - 기업 규모/시장 지위
-    - 공기업/규제 보호
-    - 캡티브 금융 별도 부채 양호
-    - 지주사 별도 부채 양호
-    - CAPEX 집약 OCF 양수
-
-    총 ±5 notch cap. score notch_gate_score 이하에는 미적용 (퇴행 방지).
-    """
-    if score <= _CONFIG["notch_gate_score"]:
-        return {"totalNotch": 0, "reasons": []}
-
-    ctx = dict(company=company, latest=latest, metrics=metrics, holding=holding, captive=captive, sepMetrics=sepMetrics)
-    notches: list[tuple[int, str]] = []
-    for rule in _NOTCH_RULES:
-        notches.extend(rule(**ctx))
-
-    # 총 notch 합산 — 규모별 cap 차등 (과대평가 방지)
-    revenue = latest.get("revenue") or 0
-    if revenue > _CONFIG["revenue_large"]:
-        sizeCap = _CONFIG["notch_cap_large"]
-    elif revenue > 1e12:
-        sizeCap = _CONFIG["notch_cap_medium"]
-    else:
-        sizeCap = _CONFIG["notch_cap_small"]
-
-    totalNotch = min(sum(n for n, _ in notches), sizeCap)
-
-    # A 범위: 과보정 방지
-    if score <= _CONFIG["notch_a_range_score"]:
-        totalNotch = min(totalNotch, _CONFIG["notch_a_range_cap"])
-
-    return {"totalNotch": totalNotch, "reasons": [r for _, r in notches]}
 
 
 # ═══════════════════════════════════════════════════════════
