@@ -63,6 +63,9 @@ class DlCallRequest(BaseModel):
 # ── Capability 화이트리스트 (engineCall 과 동일 ACL) ───────────────────
 
 
+_VIZ_DASHBOARD_PREFIXES = ("viz.dashboard.", "viz.rich.")
+
+
 def _validateApiRef(apiRef: str) -> tuple[bool, str | None]:
     """capability registry 와 private prefix 로 ACL.
 
@@ -72,35 +75,21 @@ def _validateApiRef(apiRef: str) -> tuple[bool, str | None]:
         return False, "missing_api_ref"
     if apiRef.startswith("_") or "._" in apiRef or "internal" in apiRef.lower():
         return False, "private_api_blocked"
-    if apiRef not in CAPABILITIES:
-        return False, "unknown_api_ref"
-    return True, None
+    if apiRef in CAPABILITIES:
+        return True, None
+    if any(apiRef.startswith(p) for p in _VIZ_DASHBOARD_PREFIXES):
+        return True, None
+    return False, "unknown_api_ref"
 
 
 # ── Dispatch (direct call, JSON-safe 직렬화) ──────────────────────────
 
 
-# Company 인스턴스 process-level 캐시 — 매 요청 새 인스턴스 생성 시
-# accessor (.finance/.market/...) 의 collect 결과가 인스턴스에 캐싱되는 이점을
-# 잃어 매번 cold start 1.8 초 + Polars heap 200~500MB 누적 → BoundedCache 5GB
-# emergency flush 무한 루프. 같은 target 은 single instance 재사용.
-# 메모리 폭발 회피: 최대 8 stockCode (Polars heap 약 2~4GB ceiling).
-from collections import OrderedDict
-
-_COMPANY_CACHE: "OrderedDict[str, Any]" = OrderedDict()
-_COMPANY_CACHE_LIMIT = 8
-
-
-def _getCompany(target: str) -> Any:
-    """target 별 Company 인스턴스 LRU 캐시 — 2회차부터 < 50ms."""
-    if target in _COMPANY_CACHE:
-        _COMPANY_CACHE.move_to_end(target)
-        return _COMPANY_CACHE[target]
-    company = dartlab.Company(target)
-    _COMPANY_CACHE[target] = company
-    while len(_COMPANY_CACHE) > _COMPANY_CACHE_LIMIT:
-        _COMPANY_CACHE.popitem(last=False)
-    return company
+# Company 인스턴스 LRU 캐시는 viz.dashboard.companyCache 로 위임 — rich / story /
+# dashboard / mcp 모두 공유. 매 요청 새 인스턴스 생성 시 collect 결과를 잃어
+# cold start 1.8 초 + Polars heap 200~500MB 누적 → BoundedCache 5GB emergency
+# flush 무한 루프. 같은 target 은 single instance 재사용 (최대 8 종목).
+from dartlab.viz.dashboard.companyCache import getCompany as _getCompany  # noqa: E402,F401
 
 
 def _dispatch(apiRef: str, target: str | None, args: list[Any], kwargs: dict[str, Any]) -> Any:
@@ -122,11 +111,26 @@ def _dispatch(apiRef: str, target: str | None, args: list[Any], kwargs: dict[str
     if parts[0] == "dartlab":
         parts = parts[1:]
     obj: Any = dartlab
+    walked: list[str] = []
     for p in parts:
         if not hasattr(obj, p):
+            # submodule lazy import — dartlab.viz.dashboard.financial 등
+            import importlib
+
+            modPath = ".".join(["dartlab", *walked, p]) if walked else f"dartlab.{p}"
+            try:
+                obj = importlib.import_module(modPath)
+                walked.append(p)
+                continue
+            except ImportError:
+                pass
             raise ValueError(f"공개 API 를 찾지 못했습니다: {apiRef}")
         obj = getattr(obj, p)
+        walked.append(p)
     if callable(obj):
+        # viz.dashboard.* / viz.rich.* — 첫 positional 은 target (stockCode)
+        if target and any(apiRef.startswith(pref) for pref in _VIZ_DASHBOARD_PREFIXES):
+            return obj(target, *args, **kwargs)
         return obj(*args, **kwargs)
     return obj
 
