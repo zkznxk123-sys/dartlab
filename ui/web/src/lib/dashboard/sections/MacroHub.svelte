@@ -7,6 +7,15 @@
 	import { onMount } from "svelte";
 	import { dlCall } from "$lib/api/dlCall.js";
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
+	import MacroForecast from "$lib/dashboard/sections/macro/MacroForecast.svelte";
+	import MacroLiquidity from "$lib/dashboard/sections/macro/MacroLiquidity.svelte";
+	import MacroSentiment from "$lib/dashboard/sections/macro/MacroSentiment.svelte";
+
+	const SPECIALIZED = {
+		"macro.forecast": MacroForecast,
+		"macro.liquidity": MacroLiquidity,
+		"macro.sentiment": MacroSentiment,
+	};
 
 	const SUB_ENGINES = [
 		{ apiRef: "macro.rates", label: "금리", desc: "기준금리 · 국고채 · 수익률곡선" },
@@ -53,6 +62,7 @@
 	onMount(() => fetchSub(selected));
 
 	const currentMeta = $derived(SUB_ENGINES.find((s) => s.apiRef === selected) || SUB_ENGINES[0]);
+	const SpecializedComp = $derived(SPECIALIZED[selected] || null);
 </script>
 
 <div class="flex flex-col gap-4">
@@ -67,11 +77,15 @@
 		<div class="text-[12px] mb-3" style="color: var(--ed-text-2);">{currentMeta.desc}</div>
 		<div class="flex flex-wrap gap-1">
 			{#each SUB_ENGINES as eng}
+				{@const isSpecial = SPECIALIZED[eng.apiRef]}
 				<button type="button"
 					class="px-2.5 py-1 rounded-md border text-[11.5px] font-medium transition-colors"
 					style="background: {selected === eng.apiRef ? 'color-mix(in srgb, var(--ed-brand) 12%, transparent)' : 'transparent'}; border-color: {selected === eng.apiRef ? 'var(--ed-brand)' : 'var(--ed-line)'}; color: {selected === eng.apiRef ? 'var(--ed-text)' : 'var(--ed-text-2)'};"
 					onclick={() => select(eng.apiRef)}
-					title={eng.desc}>{eng.label}</button>
+					title={eng.desc}>
+					{eng.label}
+					{#if isSpecial}<span class="ed-num text-[8.5px] ml-1" style="color: var(--ed-brand); opacity: 0.7;">●</span>{/if}
+				</button>
 			{/each}
 		</div>
 	</div>
@@ -82,6 +96,8 @@
 			<div class="text-[12px]" style="color: var(--ed-text-2);">{error.message}</div>
 			<button class="mt-2 px-3 py-1 rounded border text-[11px]" style="border-color: var(--ed-line); color: var(--ed-text);" onclick={() => fetchSub(selected)}>retry</button>
 		</div>
+	{:else if SpecializedComp}
+		<SpecializedComp {payload} {loading} />
 	{:else}
 		<AnalysisAxisCard {payload} {loading} />
 	{/if}
