@@ -355,16 +355,20 @@ def calcSectorCycle(company: Any) -> dict | None:
     }
 
 
-def calcSectorDynamics(company: Any) -> dict | None:
-    """이 회사가 속한 산업의 순풍/역풍 — macro 사이클과 교차.
+def calcSectorDynamics(company: Any, *, macroPhase: str | None = None) -> dict | None:
+    """이 회사가 속한 산업의 순풍/역풍 — 매크로 국면과 교차.
 
-    매크로 경기 국면(macro 엔진)과 산업 특성(경기민감/방어)을 교차하여
-    현재 섹터가 순풍인지 역풍인지 판정한다.
+    매크로 경기 국면과 산업 특성(경기민감/방어)을 교차하여 현재 섹터가
+    순풍인지 역풍인지 판정한다. industry 는 L2 ↔ L2 의존을 피하기 위해
+    macroPhase 를 외부 주입으로 받는다 — None 이면 "미확인" fallback.
 
     Parameters
     ----------
     company : Company
         분석 대상 기업.
+    macroPhase : str | None
+        매크로 사이클 국면 ("회복"/"확장"/"둔화"/"침체"). None 이면
+        호출자가 매크로 정보를 모르는 상태로 간주, "미확인" fallback.
 
     Returns
     -------
@@ -373,13 +377,13 @@ def calcSectorDynamics(company: Any) -> dict | None:
         industryName : str — 산업명
         tailwind : list[str] — 순풍 요인 (예: ["경기 회복기", "수출 호조"])
         headwind : list[str] — 역풍 요인 (예: ["금리 상승", "원자재 비용"])
-        macroPhase : str — 매크로 사이클 국면 ("회복"/"확장"/"둔화"/"침체")
+        macroPhase : str — 매크로 사이클 국면 ("회복"/"확장"/"둔화"/"침체"/"미확인")
         cycleSensitivity : str — "high" | "moderate" | "defensive"
         summary : str — 1줄 요약
 
     Notes
     -----
-    - macro 엔진 호출 실패 시 순풍/역풍 빈 리스트로 반환
+    - macroPhase 미주입 시 순풍/역풍 빈 리스트로 반환
     - 경기민감도: 제조업/반도체/건설 = high, 유통/소프트웨어 = moderate, 의료/식품 = defensive
     - 순풍/역풍은 규칙 기반 (매크로 국면 × 경기민감도 조합)
 
@@ -428,31 +432,20 @@ def calcSectorDynamics(company: Any) -> dict | None:
     else:
         sensitivity = "moderate"
 
-    # 매크로 국면 가져오기 (실패 시 fallback)
-    macroPhase = "미확인"
-    try:
-        from dartlab.macro.cycles.cycle import analyzeCycle
-
-        macro_result = analyzeCycle()
-        if hasattr(macro_result, "iter_rows"):
-            for r in macro_result.iter_rows(named=True):
-                if r.get("국면"):
-                    macroPhase = r["국면"]
-                    break
-    except Exception:
-        pass
+    # 매크로 국면 — 외부 주입 (None 이면 "미확인" fallback)
+    phase = macroPhase if macroPhase else "미확인"
 
     # 순풍/역풍 규칙 기반 판정
     tailwind: list[str] = []
     headwind: list[str] = []
 
-    if macroPhase in ("회복", "확장"):
+    if phase in ("회복", "확장"):
         if sensitivity == "high":
             tailwind.append("경기 회복기 — 경기민감 업종 수혜")
         elif sensitivity == "moderate":
             tailwind.append("경기 확장기 — 완만한 수혜")
         # defensive 는 경기와 무관
-    elif macroPhase in ("둔화", "침체"):
+    elif phase in ("둔화", "침체"):
         if sensitivity == "high":
             headwind.append("경기 둔화 — 경기민감 업종 직격")
         elif sensitivity == "defensive":
@@ -460,14 +453,14 @@ def calcSectorDynamics(company: Any) -> dict | None:
 
     # 요약 문장
     wind = "순풍" if len(tailwind) > len(headwind) else "역풍" if len(headwind) > len(tailwind) else "중립"
-    summary = f"{industryName}: {macroPhase} · {wind}"
+    summary = f"{industryName}: {phase} · {wind}"
 
     return {
         "industryId": industryId,
         "industryName": industryName,
         "tailwind": tailwind,
         "headwind": headwind,
-        "macroPhase": macroPhase,
+        "macroPhase": phase,
         "cycleSensitivity": sensitivity,
         "summary": summary,
     }
