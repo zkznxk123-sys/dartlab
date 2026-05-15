@@ -7,6 +7,7 @@
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 	import { LayoutDashboard, AlertCircle } from "lucide-svelte";
 	import * as Card from "$lib/ui/card";
+	import AskFromDashboardButton from "$lib/dashboard/AskFromDashboardButton.svelte";
 	import CompanyProfile from "$lib/dashboard/sections/CompanyProfile.svelte";
 	import CompanyGovernance from "$lib/dashboard/sections/CompanyGovernance.svelte";
 	import CompanyFilings from "$lib/dashboard/sections/CompanyFilings.svelte";
@@ -62,13 +63,16 @@
 </script>
 
 <div class="flex flex-col h-full min-h-0 bg-background">
-	<header class="border-b border-border px-6 py-3 flex items-center justify-between">
+	<header class="border-b border-border px-6 py-3 flex items-center justify-between gap-4">
 		<div class="min-w-0">
 			<h1 class="text-[16px] font-semibold text-foreground truncate">{current.label}</h1>
 			<p class="text-[11px] text-muted-foreground mt-0.5 truncate">{current.desc}</p>
 		</div>
-		<div class="text-[11px] text-muted-foreground font-mono shrink-0">
-			{dash.stockCode}
+		<div class="flex items-center gap-3 shrink-0">
+			<div class="text-[11px] text-muted-foreground font-mono">
+				{dash.stockCode}
+			</div>
+			<AskFromDashboardButton />
 		</div>
 	</header>
 

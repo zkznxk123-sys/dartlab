@@ -374,23 +374,65 @@ def runAgent(
 
 
 def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> str:
-    """kwargs.stockCode 가 있으면 outcome_log past_context 를 system prompt 에 부착.
+    """kwargs 의 보조 컨텍스트를 system prompt 에 부착.
 
-    빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드 (CHANGELOG #572 패턴).
+    두 블록 추가 가능:
+        1. stockCode 가 있으면 outcome_log past_context (CHANGELOG #572 패턴)
+        2. dashboardSnapshot 이 있으면 "현재 화면" 블록 (Phase 8 bridge)
+
+    빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드.
     """
     stockCode = kwargs.get("stockCode")
-    if not stockCode:
-        return systemPrompt
-    market = kwargs.get("market") or "KR"
-    try:
-        from .memory.wiring import fetchPastContext
+    if stockCode:
+        market = kwargs.get("market") or "KR"
+        try:
+            from .memory.wiring import fetchPastContext
 
-        past = fetchPastContext(str(stockCode), market=str(market))
-    except Exception:  # noqa: BLE001
-        past = ""
-    if not past:
-        return systemPrompt
-    return f"{systemPrompt}\n\n## 과거 결정 회고 (참고 — 환각 금지, 위 사실에만 의존하라)\n{past}\n"
+            past = fetchPastContext(str(stockCode), market=str(market))
+        except Exception:  # noqa: BLE001
+            past = ""
+        if past:
+            systemPrompt = f"{systemPrompt}\n\n## 과거 결정 회고 (참고 — 환각 금지, 위 사실에만 의존하라)\n{past}\n"
+
+    snapshot = kwargs.get("dashboardSnapshot")
+    if isinstance(snapshot, dict):
+        block = _formatDashboardSnapshotBlock(snapshot)
+        if block:
+            systemPrompt = f"{systemPrompt}\n\n## 현재 대시보드 화면 (사용자 시야, 신뢰)\n{block}\n"
+
+    return systemPrompt
+
+
+def _formatDashboardSnapshotBlock(snapshot: dict[str, Any]) -> str:
+    """dashboardStore.snapshot() 페이로드를 markdown bullet 으로 변환.
+
+    페이로드 shape: {dashboardView, stockCode, axis, period, visibleKpis: [...]}
+    사용자 시야 데이터라 외부 untrusted 마커 없이 trusted block 으로 삽입.
+    """
+    lines: list[str] = []
+    view = snapshot.get("dashboardView")
+    if view:
+        lines.append(f"- 탭: `{view}`")
+    code = snapshot.get("stockCode")
+    if code:
+        lines.append(f"- 회사: `{code}`")
+    axis = snapshot.get("axis")
+    if axis:
+        lines.append(f"- 분석 axis: `{axis}`")
+    period = snapshot.get("period")
+    if period:
+        lines.append(f"- 기간: `{period}`")
+    kpis = snapshot.get("visibleKpis")
+    if isinstance(kpis, list) and kpis:
+        kpi_strs = []
+        for kpi in kpis:
+            if isinstance(kpi, dict) and "name" in kpi and "value" in kpi:
+                kpi_strs.append(f"{kpi['name']}={kpi['value']}")
+            else:
+                kpi_strs.append(str(kpi))
+        if kpi_strs:
+            lines.append(f"- 보이는 KPI: {', '.join(kpi_strs)}")
+    return "\n".join(lines)
 
 
 def _wireChatNativeMemory(

@@ -359,6 +359,11 @@ def _kernelKwargs(req: AgentRunRequest) -> dict[str, Any]:
         hint = company.get("stockCode") or company.get("corpName") or company.get("company")
         if hint:
             kwargs["stockCode"] = hint
+    # Dashboard snapshot artifact (Phase 8 — "보면서 질문" bridge).
+    # 사용자가 dashboard 에서 "AI 에게 첨부" 누르면 frontend 가 보내는 dict.
+    snapshot = context.get("dashboardSnapshot") if isinstance(context, dict) else None
+    if isinstance(snapshot, dict):
+        kwargs["dashboardSnapshot"] = snapshot
     return {k: v for k, v in kwargs.items() if v is not None}
 
 

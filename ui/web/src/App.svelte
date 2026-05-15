@@ -21,6 +21,7 @@
 	import EmptyState from "$lib/components/EmptyState.svelte";
 	import ChatArea from "$lib/components/ChatArea.svelte";
 	import DashboardShell from "$lib/dashboard/DashboardShell.svelte";
+	import SnapshotChip from "$lib/dashboard/SnapshotChip.svelte";
 	import DeleteDialog from "$lib/components/DeleteDialog.svelte";
 	import ToastNotification from "$lib/components/ToastNotification.svelte";
 	import PanelResizer from "$lib/components/PanelResizer.svelte";
@@ -259,6 +260,12 @@
 				: companyHint ? { stockCode: companyHint } : null,
 			selectedModules,
 		};
+		// Phase 8 — dashboard 에서 첨부한 화면 snapshot 을 함께 전송 (있을 때만).
+		if (dashboard.pendingSnapshot) {
+			workspaceContext.dashboardSnapshot = dashboard.pendingSnapshot;
+			// 한 번 보내고 제거 — 사용자가 의도적으로 두 번째 질문 시 다시 첨부.
+			dashboard.clearPendingSnapshot();
+		}
 
 		const updateAgentMessage = (updater) => {
 			if (store.activeId !== streamConvId) return;
@@ -489,6 +496,7 @@
 				{#if uiMode.value === "dashboard"}
 					<DashboardShell />
 				{:else if hasConversation}
+					<SnapshotChip />
 					<ChatArea
 						messages={activeMessages}
 						{isLoading}
@@ -513,6 +521,7 @@
 						bind:selectedModules
 					/>
 				{:else}
+					<SnapshotChip />
 					<EmptyState
 						bind:inputText
 						onSend={sendMessage}
