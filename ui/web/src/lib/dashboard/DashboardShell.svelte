@@ -7,6 +7,9 @@
 	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 	import { LayoutDashboard, AlertCircle } from "lucide-svelte";
 	import * as Card from "$lib/ui/card";
+	import CompanyProfile from "$lib/dashboard/sections/CompanyProfile.svelte";
+	import CompanyGovernance from "$lib/dashboard/sections/CompanyGovernance.svelte";
+	import CompanyFilings from "$lib/dashboard/sections/CompanyFilings.svelte";
 
 	const dash = getDashboardStore();
 
@@ -64,30 +67,38 @@
 	</header>
 
 	<main class="flex-1 overflow-auto p-6">
-		<Card.Root class="border-dashed">
-			<Card.Header>
-				<Card.Title class="flex items-center gap-2 text-[14px]">
-					<LayoutDashboard size={16} />
-					<span>{current.label}</span>
-				</Card.Title>
-				<Card.Description class="text-[12px]">
-					Phase 0 골격 — 본 섹션의 컨텐츠는 후속 Phase 에서 직조.
-				</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<div class="flex items-start gap-2 rounded-md bg-muted/40 p-3 text-[12px] text-muted-foreground">
-					<AlertCircle size={14} class="shrink-0 mt-0.5" />
-					<div class="min-w-0">
-						<div class="font-medium text-foreground mb-0.5">{current.label}</div>
-						<div>{current.desc}</div>
-						<div class="mt-2 font-mono text-[10px] text-muted-foreground">
-							section <span class="text-primary">{dash.section}</span> ·
-							stockCode <span class="text-primary">{dash.stockCode}</span> ·
-							period <span class="text-primary">{dash.period}</span>
+		{#if dash.section === "company.profile"}
+			<CompanyProfile />
+		{:else if dash.section === "company.governance"}
+			<CompanyGovernance />
+		{:else if dash.section === "company.filings"}
+			<CompanyFilings />
+		{:else}
+			<Card.Root class="border-dashed">
+				<Card.Header>
+					<Card.Title class="flex items-center gap-2 text-[14px]">
+						<LayoutDashboard size={16} />
+						<span>{current.label}</span>
+					</Card.Title>
+					<Card.Description class="text-[12px]">
+						본 섹션의 컨텐츠는 후속 Phase 에서 직조 (Phase 2~7).
+					</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<div class="flex items-start gap-2 rounded-md bg-muted/40 p-3 text-[12px] text-muted-foreground">
+						<AlertCircle size={14} class="shrink-0 mt-0.5" />
+						<div class="min-w-0">
+							<div class="font-medium text-foreground mb-0.5">{current.label}</div>
+							<div>{current.desc}</div>
+							<div class="mt-2 font-mono text-[10px] text-muted-foreground">
+								section <span class="text-primary">{dash.section}</span> ·
+								stockCode <span class="text-primary">{dash.stockCode}</span> ·
+								period <span class="text-primary">{dash.period}</span>
+							</div>
 						</div>
 					</div>
-				</div>
-			</Card.Content>
-		</Card.Root>
+				</Card.Content>
+			</Card.Root>
+		{/if}
 	</main>
 </div>
