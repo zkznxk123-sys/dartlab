@@ -32,7 +32,15 @@ EXPECTED_LAYOUT: dict[str, set[str]] = {
         "liquidity.py",  # F2.1: root → cycles
         "sentiment.py",  # F2.1: root → cycles
     },
-    "crisis": {"crisis.py", "fci.py", "growthAtRisk.py", "rrCrisisDB.py"},
+    "crisis": {
+        "crisis.py",
+        "fci.py",
+        "growthAtRisk.py",
+        "rrCrisisDB.py",
+        "creditCycleDetect.py",
+        "detectors.py",
+        "excessBondPremium.py",
+    },
     "forecast": {"forecast.py", "nowcast.py", "macroBacktest.py"},
     "corporate": {
         "corporate.py",
@@ -59,7 +67,8 @@ def test_macro_subfolder_layout(subfolder: str, expected: set[str]) -> None:
     sub = MACRO / subfolder
     assert sub.is_dir(), f"macro/{subfolder}/ 누락"
     assert (sub / "__init__.py").exists(), f"macro/{subfolder}/__init__.py 누락"
-    actual = {p.name for p in sub.glob("*.py")} - {"__init__.py"}
+    # private split file (`_*.py`) 은 layout 검사 제외 — public API 표면만 강제.
+    actual = {p.name for p in sub.glob("*.py") if not p.name.startswith("_")} - {"__init__.py"}
     assert actual == expected, f"macro/{subfolder}/ 모듈 불일치: 기대 {expected}, 실제 {actual}"
 
 
