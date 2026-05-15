@@ -1,16 +1,13 @@
 <!--
-	Macro Hub — dartlab.macro.* 12 sub-engines (회사 무관).
-	각 sub-engine 이 별도 capability — 클릭 시 dlCall(apiRef) 직접 호출.
+	Macro Hub — Editorial 톤. dartlab.macro.* 12 sub-engines (회사 무관).
+	각 sub-engine 별 dlCall 직접. 응답은 generic AnalysisAxisCard 가 dispatch
+	(history shape / DataFrame envelope / flat dict 자동 분기).
 -->
 <script>
 	import { onMount } from "svelte";
-	import { Globe, Info } from "lucide-svelte";
 	import { dlCall } from "$lib/api/dlCall.js";
 	import AnalysisAxisCard from "$lib/dashboard/cards/AnalysisAxisCard.svelte";
-	import * as Card from "$lib/ui/card";
-	import { cn } from "$lib/utils.js";
 
-	// 12 macro sub-engines (capability registry 일치)
 	const SUB_ENGINES = [
 		{ apiRef: "macro.rates", label: "금리", desc: "기준금리 · 국고채 · 수익률곡선" },
 		{ apiRef: "macro.assets", label: "자산", desc: "자산군별 수익률 · 상관" },
@@ -30,16 +27,19 @@
 	let payload = $state(null);
 	let loading = $state(true);
 	let error = $state(null);
+	let abortCtrl = null;
 
-	async function fetch(apiRef) {
+	async function fetchSub(apiRef) {
+		if (abortCtrl) abortCtrl.abort();
+		abortCtrl = new AbortController();
 		loading = true;
 		error = null;
 		payload = null;
 		try {
-			const r = await dlCall(apiRef);
+			const r = await dlCall(apiRef, { signal: abortCtrl.signal });
 			payload = r?.data ?? null;
 		} catch (e) {
-			error = { message: e?.message || String(e) };
+			if (e?.name !== "AbortError") error = { message: e?.message || String(e) };
 		} finally {
 			loading = false;
 		}
@@ -47,56 +47,41 @@
 
 	function select(apiRef) {
 		selected = apiRef;
-		fetch(apiRef);
+		fetchSub(apiRef);
 	}
 
-	onMount(() => {
-		fetch(selected);
-	});
+	onMount(() => fetchSub(selected));
 
 	const currentMeta = $derived(SUB_ENGINES.find((s) => s.apiRef === selected) || SUB_ENGINES[0]);
 </script>
 
 <div class="flex flex-col gap-4">
-	<Card.Root>
-		<Card.Header>
-			<Card.Title class="flex items-center gap-2 text-[14px]">
-				<Globe size={15} />
-				Macro — 거시 환경 12 sub-engines
-			</Card.Title>
-			<Card.Description class="text-[11px] flex items-start gap-1.5 mt-1">
-				<Info size={11} class="shrink-0 mt-0.5" />
-				<span>{currentMeta.desc}</span>
-			</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			<div class="flex flex-wrap gap-1">
-				{#each SUB_ENGINES as eng}
-					<button
-						type="button"
-						class={cn(
-							"px-2.5 py-1 rounded-md border text-[12px] font-medium transition-colors",
-							selected === eng.apiRef
-								? "border-primary bg-primary/10 text-foreground"
-								: "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
-						)}
-						onclick={() => select(eng.apiRef)}
-						title={eng.desc}
-					>
-						{eng.label}
-					</button>
-				{/each}
+	<div class="ed-card">
+		<div class="flex items-baseline justify-between mb-2">
+			<div class="flex items-baseline gap-2 min-w-0">
+				<div class="ed-eyebrow whitespace-nowrap">Macro Sub</div>
+				<h2 class="text-[15px] font-semibold truncate" style="color: var(--ed-text); font-family: var(--font-display);">{currentMeta.label}</h2>
 			</div>
-		</Card.Content>
-	</Card.Root>
+			<div class="text-[10.5px] ed-num" style="color: var(--ed-text-3);">{currentMeta.apiRef}</div>
+		</div>
+		<div class="text-[12px] mb-3" style="color: var(--ed-text-2);">{currentMeta.desc}</div>
+		<div class="flex flex-wrap gap-1">
+			{#each SUB_ENGINES as eng}
+				<button type="button"
+					class="px-2.5 py-1 rounded-md border text-[11.5px] font-medium transition-colors"
+					style="background: {selected === eng.apiRef ? 'color-mix(in srgb, var(--ed-brand) 12%, transparent)' : 'transparent'}; border-color: {selected === eng.apiRef ? 'var(--ed-brand)' : 'var(--ed-line)'}; color: {selected === eng.apiRef ? 'var(--ed-text)' : 'var(--ed-text-2)'};"
+					onclick={() => select(eng.apiRef)}
+					title={eng.desc}>{eng.label}</button>
+			{/each}
+		</div>
+	</div>
 
 	{#if error}
-		<Card.Root class="border-destructive/30">
-			<Card.Header>
-				<Card.Title class="text-[14px] text-destructive">{currentMeta.label} 로드 실패</Card.Title>
-				<Card.Description class="text-[11px]">{error.message}</Card.Description>
-			</Card.Header>
-		</Card.Root>
+		<div class="ed-card" style="border-color: var(--ed-down);">
+			<div class="ed-eyebrow mb-1" style="color: var(--ed-down);">{currentMeta.label} 로드 실패</div>
+			<div class="text-[12px]" style="color: var(--ed-text-2);">{error.message}</div>
+			<button class="mt-2 px-3 py-1 rounded border text-[11px]" style="border-color: var(--ed-line); color: var(--ed-text);" onclick={() => fetchSub(selected)}>retry</button>
+		</div>
 	{:else}
 		<AnalysisAxisCard {payload} {loading} />
 	{/if}
