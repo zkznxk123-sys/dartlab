@@ -96,8 +96,8 @@ _KNOWN_VIOLATIONS = {
     # core/finance → scan (L0→L1) — lazy import (함수 내부)
     ("dartlab.quant.bottomUpBeta", "dartlab.scan"),
     ("dartlab.macro.rates.impliedERP", "dartlab.scan"),
-    # core/finance → analysis (L0→L2) — lazy import (함수 내부, calc 함수에서 분석 호출)
-    ("dartlab.credit.features.chsFeatures", "dartlab.analysis"),
+    # synth/distress → analysis (L1.5→L2) — lazy import via importlib (_estimateShares → calcDcf)
+    ("dartlab.synth.distress.chsFeatures", "dartlab.analysis"),
     # analysis → ai (L2→L3) — lazy import (storyValidation → KnowledgeDB 조회)
     ("dartlab.analysis.financial.storyValidation", "dartlab.ai"),
     # core/_generated → analysis (L0→L2) — generateSpec 자동 생성 (CAPABILITIES JSON 안 example 문자열 매칭)

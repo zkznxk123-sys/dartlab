@@ -204,7 +204,7 @@ def _calcCHSAdjustment(company, baseScore: float) -> dict:
         adjustment : float — ok 시 적용 조정치 (0 if unavailable).
     """
     try:
-        from dartlab.credit.models.chsModel import calcCHS
+        from dartlab.synth.distress import calcCHS
 
         priceData = company.gather("price") if hasattr(company, "gather") else None
         if priceData is None or len(priceData) < 20:
