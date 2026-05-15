@@ -286,7 +286,7 @@ def _estimateCoe(
     float
         추정 자기자본비용 (%).
     """
-    from dartlab.industry import getMarketParams
+    from dartlab.frame.sector import getMarketParams
 
     mkt = getMarketParams(currency)
     b = beta if beta is not None else 1.0

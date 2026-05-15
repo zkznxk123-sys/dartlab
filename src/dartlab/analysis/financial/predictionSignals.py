@@ -552,7 +552,7 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
         axisImpact : dict | None — 업종별 축 영향도
         netMacroEffect : float | None — 순 매크로 효과 합산
     """
-    from dartlab.macro.scenarios.scenario import getElasticity
+    from dartlab.synth.scenario import getElasticity
 
     sectorKey = _getSectorKey(company)
     elasticity = getElasticity(sectorKey)
@@ -725,7 +725,7 @@ def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | Non
     marginBetas, marginR2, _ = _fitOLS(marginChange, macroData, cols)
 
     # 정적 탄성치 비교
-    from dartlab.macro.scenarios.scenario import getElasticity
+    from dartlab.synth.scenario import getElasticity
 
     sectorKey = _getSectorKey(company)
     staticEl = getElasticity(sectorKey)

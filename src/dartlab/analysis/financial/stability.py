@@ -27,7 +27,7 @@ def _isHoldingOrFinancial(company) -> bool:
             return True
         sector = getattr(company, "sector", None)
         if sector is not None:
-            from dartlab.industry import Sector
+            from dartlab.frame.sector import Sector
 
             if sector.sector == Sector.FINANCIALS:
                 return True
@@ -150,7 +150,7 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     result: dict = {"history": history}
 
     # Phase 8 A5
-    from dartlab.macro.cycles.turningPoint import injectTurningPoints
+    from dartlab.synth.turningPoint import injectTurningPoints
 
     result["turningPoints"] = injectTurningPoints(history, seriesKey="debtRatio", minDeltaPct=25.0)
 

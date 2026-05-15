@@ -18,7 +18,7 @@ from dartlab.core.utils.extract import (
 )
 
 if TYPE_CHECKING:
-    from dartlab.macro.scenarios.scenario import SectorElasticity
+    from dartlab.synth.scenario import SectorElasticity
 
 # ══════════════════════════════════════
 # 데이터 구조
@@ -616,7 +616,7 @@ def _fetchBeta(stockCode: str, currency: str = "KRW") -> float | None:
 def _resolveCountryFromCurrency(currency: str) -> str:
     """currency → ISO2 fallback. riskPremiums.resolveCountryCode 재사용."""
     try:
-        from dartlab.macro.rates.riskPremiums import resolveCountryCode
+        from dartlab.synth.riskPremiums import resolveCountryCode
 
         return resolveCountryCode(currency=currency)
     except ImportError:
@@ -655,11 +655,11 @@ def computeCompanyWacc(
     damodaran = None
     if country or countryRiskPremium is not None or impliedErp:
         if impliedErp:
-            from dartlab.macro.rates.impliedERP import calcImpliedERP
+            from dartlab.synth.impliedERP import calcImpliedERP
 
             damodaran = calcImpliedERP(country=country or _resolveCountryFromCurrency(currency))
         else:
-            from dartlab.macro.rates.riskPremiums import loadDamodaranERP
+            from dartlab.synth.riskPremiums import loadDamodaranERP
 
             damodaran = loadDamodaranERP(countryCode=country, currency=currency)
 
@@ -684,7 +684,7 @@ def computeCompanyWacc(
     beta = betaOverride
     if beta is None and bottomUpBeta:
         try:
-            from dartlab.quant.risk.bottomUpBeta import calcBottomUpBeta
+            from dartlab.synth.bottomUpBeta import calcBottomUpBeta
 
             stb_bu = getLatest(series, "BS", "shortterm_borrowings") or 0
             ltb_bu = getLatest(series, "BS", "longterm_borrowings") or 0

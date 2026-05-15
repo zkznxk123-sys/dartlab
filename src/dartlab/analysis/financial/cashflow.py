@@ -143,7 +143,7 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
         pass
 
     # Phase 8 A5
-    from dartlab.macro.cycles.turningPoint import injectTurningPoints
+    from dartlab.synth.turningPoint import injectTurningPoints
 
     return {"history": history, "turningPoints": injectTurningPoints(history, seriesKey="fcf", minDeltaPct=40.0)}
 

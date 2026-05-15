@@ -880,7 +880,7 @@ def _isFinancialCompany(company) -> bool:
     try:
         sector = getattr(company, "sector", None)
         if sector is not None:
-            from dartlab.industry import Sector
+            from dartlab.frame.sector import Sector
 
             if sector.sector == Sector.FINANCIALS:
                 return True

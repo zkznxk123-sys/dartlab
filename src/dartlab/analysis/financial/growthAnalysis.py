@@ -118,7 +118,7 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
     n = len(yCols) - 1
 
     # Phase 8 A5
-    from dartlab.macro.cycles.turningPoint import injectTurningPoints
+    from dartlab.synth.turningPoint import injectTurningPoints
 
     turning_points = injectTurningPoints(history, seriesKey="revenueYoy", minDeltaPct=30.0)
 

@@ -19,7 +19,7 @@ from dartlab.analysis.financial.proforma import (
 )
 from dartlab.analysis.forecast.prediction import adjustProbabilities
 from dartlab.core.utils.extract import getLatest, getTTM
-from dartlab.macro.scenarios.scenario import (
+from dartlab.synth.scenario import (
     PRESET_SCENARIOS,
     MacroScenario,
     SectorElasticity,

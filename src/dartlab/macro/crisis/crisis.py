@@ -12,7 +12,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-from dartlab.credit.monitoring.crisisDetector import (
+from dartlab.macro.crisis.detectors import (
     creditToGDPGap,
     dalioDebtCyclePhase,
     dalioPolicyLeverStatus,
@@ -498,7 +498,7 @@ def _crisisKrCreditRisk(data: dict) -> dict | None:
 def _crisisExcessBondPremium(asOf: str | None) -> dict | None:
     """Gilchrist-Zakrajšek EBP. 반환: classifyEBP dict or None."""
     try:
-        from dartlab.credit.models.excessBondPremium import approximateEBP, classifyEBP
+        from dartlab.macro.crisis.excessBondPremium import approximateEBP, classifyEBP
         from dartlab.macro.seriesFetch import fetchLatest as _fl
         from dartlab.macro.seriesFetch import getGather as _gg
 
@@ -518,7 +518,7 @@ def _crisisExcessBondPremium(asOf: str | None) -> dict | None:
 def _crisisCreditCycle(asOf: str | None) -> dict | None:
     """Verdad Credit Cycle 4단계 (Greenwood-Hanson-Jin 2019). 반환: classifyCreditCycle dict."""
     try:
-        from dartlab.credit.monitoring.creditCycle import classifyCreditCycle
+        from dartlab.macro.crisis.creditCycleDetect import classifyCreditCycle
         from dartlab.macro.seriesFetch import fetchLatest as _fl2
         from dartlab.macro.seriesFetch import getGather as _gg2
 

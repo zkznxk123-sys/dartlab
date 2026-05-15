@@ -11,7 +11,7 @@ from dartlab.core.utils.ols import (
     _detectStructuralBreak,
     _ols,
 )
-from dartlab.industry import SectorParams
+from dartlab.frame.sector import SectorParams
 
 # ── 결과 타입 ──────────────────────────────────────────────
 

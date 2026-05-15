@@ -20,8 +20,8 @@ from dartlab.core.utils.extract import (
     getTTM,
 )
 from dartlab.core.utils.fmt import fmtBig, fmtPrice
-from dartlab.industry import SectorParams
-from dartlab.macro.scenarios.scenario import (
+from dartlab.frame.sector import SectorParams
+from dartlab.synth.scenario import (
     BASELINE_FX,
     BASELINE_RATE,
     DEFAULT_ELASTICITY,

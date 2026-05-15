@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from dartlab.industry import Sector
+from dartlab.frame.sector import Sector
 
 
 @dataclass

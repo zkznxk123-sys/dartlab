@@ -24,7 +24,7 @@ from dartlab.analysis.financial.insight.summary import classifyProfile, generate
 from dartlab.analysis.financial.insight.types import AnalysisResult, Anomaly, AuditDataForAnomaly, MarketDataForDistress
 from dartlab.analysis.financial.ratios import calcRatios
 from dartlab.core.financeDocAccessor import getFinanceDocAccessor
-from dartlab.industry import Sector
+from dartlab.frame.sector import Sector
 
 if TYPE_CHECKING:
     from dartlab.core.protocols import CompanyProtocol as Company
@@ -138,7 +138,7 @@ def _ratioArchetypeOverride(company: Company | None) -> str | None:
         return None
 
     try:
-        from dartlab.industry import IndustryGroup
+        from dartlab.frame.sector import IndustryGroup
     except ImportError:
         return None
 
@@ -248,7 +248,7 @@ def analyzeFinancial(
     mertonDict: dict | None = None
     if not isFinancial and marketData is not None:
         try:
-            from dartlab.credit.models.merton import calcEquityVolatility, solveMerton
+            from dartlab.synth.distress.merton import calcEquityVolatility, solveMerton
 
             vol = calcEquityVolatility(marketData.dailyReturns)
             if vol > 0:

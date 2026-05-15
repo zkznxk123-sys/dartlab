@@ -42,7 +42,7 @@ def _isFinancialSector(company) -> bool:
     try:
         sector = getattr(company, "sector", None)
         if sector is not None:
-            from dartlab.industry import Sector
+            from dartlab.frame.sector import Sector
 
             if sector.sector == Sector.FINANCIALS:
                 return True
@@ -182,7 +182,7 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
             pass
 
     # Phase 8 A5: turningPoints 헬퍼 1줄
-    from dartlab.macro.cycles.turningPoint import injectTurningPoints
+    from dartlab.synth.turningPoint import injectTurningPoints
 
     result["turningPoints"] = injectTurningPoints(history, seriesKey="operatingMargin", minDeltaPct=25.0)
 
