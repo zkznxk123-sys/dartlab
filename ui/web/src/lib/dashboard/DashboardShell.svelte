@@ -10,6 +10,7 @@
 	import CompanyProfile from "$lib/dashboard/sections/CompanyProfile.svelte";
 	import CompanyGovernance from "$lib/dashboard/sections/CompanyGovernance.svelte";
 	import CompanyFilings from "$lib/dashboard/sections/CompanyFilings.svelte";
+	import AnalysisHub from "$lib/dashboard/sections/AnalysisHub.svelte";
 
 	const dash = getDashboardStore();
 
@@ -73,6 +74,8 @@
 			<CompanyGovernance />
 		{:else if dash.section === "company.filings"}
 			<CompanyFilings />
+		{:else if dash.section === "analysis"}
+			<AnalysisHub />
 		{:else}
 			<Card.Root class="border-dashed">
 				<Card.Header>

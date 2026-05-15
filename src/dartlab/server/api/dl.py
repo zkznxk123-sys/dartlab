@@ -1,9 +1,12 @@
 """Master API dispatch — dartlab capability registry 의 HTTP face.
 
-기존 EngineCall 도구 (src/dartlab/ai/tools/engineCall.py) 의 reflection-based
-dispatch 로직을 HTTP 로 노출. capability registry (_generated.py) 화이트리스트로
-보안. ui/web dashboard 의 모든 data fetch 가 본 엔드포인트를 통과해 dartlab
-코드 변경 시 자동 따라감.
+dartlab.ai.tools.engineCall 의 dispatch 패턴을 참고하되, **JSON-safe 직렬화 강행**
+(engineCall 의 `_resultToRefs` 가 dict 결과를 `str(...)[:4000]` 으로 stringify
+하므로 structured 데이터 손실 발생). dashboard 가 사용할 master entry 는 dict /
+list / DataFrame 모두 구조 보존이 필수.
+
+capability 화이트리스트 + private 차단은 capability registry (_generated.py) 와
+공유 — engineCall 과 같은 ACL.
 
 엔드포인트:
     POST /api/dl/call          — capability 호출
@@ -15,29 +18,34 @@ Sig:
 Args:
     apiRef: str — "Company.show" / "Company.analysis" / "macro.rates" 등
     target: str | None — stockCode 등 1차 식별자
-    args: list — positional args (보통 비움)
-    kwargs: dict — keyword args (topic / axis / period / ...)
+    args: list — positional args
+    kwargs: dict — keyword args (axis / topic / period / ...)
 
 Returns:
-    {ok, apiRef, target, message, data, refs}
+    {ok, apiRef, target, data}
+    data 는 JSON-safe — DataFrame 은 {_type, rowCount, columns, rows} 로 unwrap,
+    dict/list 는 재귀 변환, datetime 은 isoformat, NaN 은 null.
 
 Example:
     POST /api/dl/call
-    {"apiRef": "Company.show", "target": "035720", "kwargs": {"topic": "is"}}
+    {"apiRef": "Company.analysis", "target": "035720", "kwargs": {"axis": "수익성"}}
 
 Raises:
-    HTTPException(400) — apiRef 없음 / private API / registry 부재
+    HTTPException(400) — apiRef 없음 / private API / registry 부재 / target 없음
     HTTPException(500) — capability 실행 내부 오류
 """
 
 from __future__ import annotations
 
+import math
+from datetime import date, datetime
 from typing import Any
 
+import polars as pl
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from dartlab.ai.tools.engineCall import engineCall
+import dartlab
 from dartlab.reference.capability._generated import CAPABILITIES
 
 router = APIRouter(prefix="/api/dl", tags=["dl"])
@@ -52,40 +60,128 @@ class DlCallRequest(BaseModel):
     kwargs: dict[str, Any] = Field(default_factory=dict)
 
 
+# ── Capability 화이트리스트 (engineCall 과 동일 ACL) ───────────────────
+
+
+def _validateApiRef(apiRef: str) -> tuple[bool, str | None]:
+    """capability registry 와 private prefix 로 ACL.
+
+    Returns (allowed, error_code).
+    """
+    if not apiRef:
+        return False, "missing_api_ref"
+    if apiRef.startswith("_") or "._" in apiRef or "internal" in apiRef.lower():
+        return False, "private_api_blocked"
+    if apiRef not in CAPABILITIES:
+        return False, "unknown_api_ref"
+    return True, None
+
+
+# ── Dispatch (direct call, JSON-safe 직렬화) ──────────────────────────
+
+
+def _dispatch(apiRef: str, target: str | None, args: list[Any], kwargs: dict[str, Any]) -> Any:
+    """capability 를 직접 호출. raw Python 결과 반환 (직렬화 X)."""
+    if apiRef.startswith("Company."):
+        method = apiRef.split(".", 1)[1]
+        if not target:
+            raise ValueError("Company API 는 target (stockCode) 가 필요합니다.")
+        company = dartlab.Company(target)
+        if not hasattr(company, method):
+            raise ValueError(f"공개 Company API 를 찾지 못했습니다: Company.{method}")
+        func = getattr(company, method)
+        if not callable(func):
+            return func  # property / attribute
+        return func(*args, **kwargs)
+
+    # dartlab top-level 또는 nested attr (analysis / quant / macro.rates 등)
+    parts = apiRef.split(".")
+    if parts[0] == "dartlab":
+        parts = parts[1:]
+    obj: Any = dartlab
+    for p in parts:
+        if not hasattr(obj, p):
+            raise ValueError(f"공개 API 를 찾지 못했습니다: {apiRef}")
+        obj = getattr(obj, p)
+    if callable(obj):
+        return obj(*args, **kwargs)
+    return obj
+
+
+# ── JSON-safe 직렬화 ──────────────────────────────────────────────────
+
+
+def _toJsonSafe(obj: Any, _depth: int = 0) -> Any:
+    """recursively 변환 — DataFrame / dict / list / numpy / datetime → JSON.
+
+    DataFrame 은 {_type: 'DataFrame', rowCount, columns, rows} 로 unwrap.
+    NaN / inf 는 null (JSON 호환). 깊이 제한 50.
+    """
+    if _depth > 50:
+        return f"<truncated depth>: {type(obj).__name__}"
+
+    if obj is None or isinstance(obj, (str, bool, int)):
+        return obj
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    if isinstance(obj, pl.DataFrame):
+        return {
+            "_type": "DataFrame",
+            "rowCount": obj.height,
+            "columns": list(obj.columns),
+            "rows": [_toJsonSafe(r, _depth + 1) for r in obj.to_dicts()],
+        }
+    if isinstance(obj, pl.Series):
+        return obj.to_list()
+    if isinstance(obj, dict):
+        return {str(k): _toJsonSafe(v, _depth + 1) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_toJsonSafe(v, _depth + 1) for v in obj]
+    # numpy 타입 / 기타 — fallback to str
+    try:
+        # numpy scalars 등
+        if hasattr(obj, "item") and callable(obj.item):
+            return _toJsonSafe(obj.item(), _depth + 1)
+    except Exception:
+        pass
+    return str(obj)
+
+
+# ── HTTP 엔드포인트 ──────────────────────────────────────────────────
+
+
 @router.post("/call")
 async def apiDlCall(req: DlCallRequest) -> dict[str, Any]:
-    """Capability dispatch — EngineCall 의 HTTP face."""
-    plan = {
-        "apiRef": req.apiRef,
-        "target": req.target or "",
-        "args": req.args,
-        "kwargs": req.kwargs,
-    }
-    result = engineCall(plan=plan)
-
-    if not result.ok:
-        code = result.error or ""
-        bad_request_codes = {
-            "missing_api_ref",
-            "unknown_api_ref",
-            "private_api_blocked",
-            "unsupported_api_ref",
-            "company_not_resolved",
-            "not_callable",
-        }
-        status = 400 if code in bad_request_codes else 500
+    """Capability dispatch — JSON-safe 직렬화 강행."""
+    allowed, errCode = _validateApiRef(req.apiRef)
+    if not allowed:
         raise HTTPException(
-            status_code=status,
-            detail={"error": code or "internal", "message": result.summary},
+            status_code=400,
+            detail={"error": errCode, "message": f"capability 거부: {req.apiRef} ({errCode})"},
         )
+
+    try:
+        raw = _dispatch(req.apiRef, req.target, req.args, req.kwargs)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "invalid_request", "message": str(e)},
+        ) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={"error": "internal", "message": str(e)},
+        ) from e
 
     return {
         "ok": True,
         "apiRef": req.apiRef,
         "target": req.target,
-        "message": result.summary,
-        "data": result.data,
-        "refs": [ref.toDict() for ref in result.refs],
+        "data": _toJsonSafe(raw),
     }
 
 

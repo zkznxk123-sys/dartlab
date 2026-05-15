@@ -81,8 +81,10 @@
 						</div>
 					{/each}
 				</div>
+			{:else if market.raw}
+				<pre class="text-[11px] text-muted-foreground whitespace-pre-wrap font-mono">{JSON.stringify(market.raw, null, 2).slice(0, 1500)}</pre>
 			{:else}
-				<pre class="text-[11px] text-muted-foreground whitespace-pre-wrap font-mono">{market.preview || "데이터 없음"}</pre>
+				<div class="text-[11px] text-muted-foreground">데이터 없음</div>
 			{/if}
 		</Card.Content>
 	</Card.Root>

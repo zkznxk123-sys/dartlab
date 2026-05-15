@@ -7,22 +7,21 @@
 import { dlCall } from "$lib/api/dlCall.js";
 
 function unwrapRows(response) {
-	// engineCall 이 DataFrame 결과를 ref.payload.rows (head 20) 로 직렬화.
-	const ref = response?.refs?.[0];
-	if (ref?.payload?.rows && Array.isArray(ref.payload.rows)) {
+	// dl.py 가 DataFrame 을 {_type:'DataFrame', rowCount, columns, rows} 로 직렬화.
+	const d = response?.data;
+	if (d && d._type === "DataFrame" && Array.isArray(d.rows)) {
 		return {
-			rows: ref.payload.rows,
-			columns: ref.payload.columns || [],
-			rowCount: ref.payload.rowCount || ref.payload.rows.length,
+			rows: d.rows,
+			columns: d.columns || [],
+			rowCount: d.rowCount || d.rows.length,
 		};
 	}
 	return { rows: [], columns: [], rowCount: 0 };
 }
 
-function unwrapPreview(response) {
-	// DataFrame 이 아닌 일반 객체 결과: refs[0].payload.preview (string)
-	const ref = response?.refs?.[0];
-	return ref?.payload?.preview || response?.data?.result || "";
+function unwrapData(response) {
+	// dict / list 결과는 response.data 가 직접 payload.
+	return response?.data ?? null;
 }
 
 async function safeCall(apiRef, opts) {
@@ -91,9 +90,41 @@ export async function loadMarket(stockCode, opts = {}) {
 	});
 	if (!ok) return { ok: false, data: null, error, raw: null };
 	const { rows, columns } = unwrapRows(response);
+	const raw = unwrapData(response);
 	return {
 		ok: true,
-		data: { rows, columns, preview: unwrapPreview(response), stockCode },
+		data: { rows, columns, raw, stockCode },
+		error: null,
+		raw: response,
+	};
+}
+
+// ── Company.analysis — axis 별 구조화 분석 ──
+//    axis 없으면 catalogue DataFrame (22 axes meta) 반환.
+//    axis 있으면 dict — { <metricName>: { history: [...], ... } } 구조.
+export async function loadAnalysis(stockCode, axis, opts = {}) {
+	const kwargs = axis ? { axis } : {};
+	const { ok, response, error } = await safeCall("Company.analysis", {
+		target: stockCode,
+		kwargs,
+		signal: opts.signal,
+	});
+	if (!ok) return { ok: false, data: null, error, raw: null };
+
+	if (axis) {
+		// dict shape: { metricKey: { history: [...] } }
+		return {
+			ok: true,
+			data: { axis, payload: unwrapData(response), stockCode },
+			error: null,
+			raw: response,
+		};
+	}
+	// axis 없음: 22-axis catalogue DataFrame
+	const { rows, columns } = unwrapRows(response);
+	return {
+		ok: true,
+		data: { axis: null, axes: rows, columns, stockCode },
 		error: null,
 		raw: response,
 	};
