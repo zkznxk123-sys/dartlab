@@ -179,6 +179,45 @@ async function main() {
 		assert(hasGradeKpi, "credit grade specialized text not found");
 	}
 
+	// Scan section
+	await page.evaluate(() => {
+		const cur = JSON.parse(localStorage.getItem("dartlab-dashboard-state") || "{}");
+		cur.section = "scan";
+		cur.axis = null;
+		localStorage.setItem("dartlab-dashboard-state", JSON.stringify(cur));
+	});
+	await page.reload({ waitUntil: "domcontentloaded" });
+	try {
+		await page.waitForResponse(
+			(r) => r.url().includes("/api/dl/call") && r.request().method() === "POST",
+			{ timeout: 60000 }
+		);
+	} catch (e) {}
+	await page.waitForSelector("main table", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		const text = await page.locator("main").innerText();
+		const hasScanColumns = text.includes("종목코드") || text.includes("종목명") || text.includes("영업이익률") || text.includes("등급");
+		const rowCount = await page.locator("main table tbody tr").count();
+		console.log(`[scan] hasScanColumns=${hasScanColumns}, rowCount=${rowCount}`);
+		await page.screenshot({ path: path.join(OUT, "dashboard-scan.png"), fullPage: true });
+		assert(hasScanColumns, "scan section: column 헤더 못 찾음");
+		assert(rowCount > 5, `scan section: 표 row 가 너무 적음 (${rowCount})`);
+	}
+
+	// Company.profile
+	await page.evaluate(() => {
+		const cur = JSON.parse(localStorage.getItem("dartlab-dashboard-state") || "{}");
+		cur.section = "company.profile";
+		localStorage.setItem("dartlab-dashboard-state", JSON.stringify(cur));
+	});
+	await page.reload({ waitUntil: "domcontentloaded" });
+	await page.waitForSelector("main .ed-card", { timeout: 30000 });
+	await page.waitForTimeout(800);
+	{
+		await page.screenshot({ path: path.join(OUT, "dashboard-company-profile.png"), fullPage: true });
+	}
+
 	// 본문 카드 검증
 	assert(dark.count >= 2, `dark: too few cards (${dark.count})`);
 	assert(dark.text.length > 100, `dark: card text too short`);

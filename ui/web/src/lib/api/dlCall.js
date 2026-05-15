@@ -2,6 +2,8 @@
 // 모든 dashboard data fetch 의 단일 진입점. capability registry 화이트리스트
 // 위에서 reflection dispatch 되므로 dartlab 새 capability 추가 시 자동 따라감.
 
+import { getLoadingCounter } from "$lib/stores/loadingCounter.svelte.js";
+
 const CALL_ENDPOINT = "/api/dl/call";
 const CAPS_ENDPOINT = "/api/dl/capabilities";
 
@@ -19,26 +21,29 @@ export async function dlCall(apiRef, opts = {}) {
 	if (args && args.length) body.args = args;
 	if (kwargs && Object.keys(kwargs).length) body.kwargs = kwargs;
 
-	const res = await fetch(CALL_ENDPOINT, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(body),
-		signal,
-	});
+	const counter = getLoadingCounter();
+	counter.begin();
+	try {
+		const res = await fetch(CALL_ENDPOINT, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+			signal,
+		});
 
-	if (!res.ok) {
-		let msg = `dlCall ${apiRef} failed: ${res.status}`;
-		try {
-			const err = await res.json();
-			const detail = err.detail || err;
-			msg += ` — ${detail.message || detail.error || JSON.stringify(detail)}`;
-		} catch {
-			/* JSON parse 실패 — status 만으로 throw */
+		if (!res.ok) {
+			let msg = `dlCall ${apiRef} failed: ${res.status}`;
+			try {
+				const err = await res.json();
+				const detail = err.detail || err;
+				msg += ` — ${detail.message || detail.error || JSON.stringify(detail)}`;
+			} catch {}
+			throw new Error(msg);
 		}
-		throw new Error(msg);
+		return await res.json();
+	} finally {
+		counter.end();
 	}
-
-	return res.json();
 }
 
 /**

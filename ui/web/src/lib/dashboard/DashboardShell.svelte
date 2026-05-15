@@ -15,7 +15,9 @@
 	import MacroHub from "$lib/dashboard/sections/MacroHub.svelte";
 	import IndustryHub from "$lib/dashboard/sections/IndustryHub.svelte";
 	import StoryHub from "$lib/dashboard/sections/StoryHub.svelte";
+	import Scan from "$lib/dashboard/sections/Scan.svelte";
 	import AskFromDashboardButton from "$lib/dashboard/AskFromDashboardButton.svelte";
+	import LoadingBar from "$lib/dashboard/LoadingBar.svelte";
 
 	const dash = getDashboardStore();
 
@@ -36,6 +38,7 @@
 </script>
 
 <div class="editorial editorial-grain h-full flex flex-col min-h-0 relative">
+	<LoadingBar />
 	<header class="editorial-topbar">
 		<div class="flex items-center gap-2 min-w-0">
 			<LayoutDashboard size={14} class="shrink-0" style="color: var(--ed-text-3);" />
@@ -79,13 +82,7 @@
 			{:else if dash.section === "story"}
 				<StoryHub />
 			{:else if dash.section === "scan"}
-				<div class="ed-card">
-					<div class="ed-eyebrow mb-2">Discover</div>
-					<h2 class="mb-2">Scan — 다중 종목 스크리너</h2>
-					<p style="color: var(--ed-text-2); font-size: 13px;">
-						Phase G 에서 landing 의 scan workbench 를 복제 + dlCall scan.* 호출로 강화. (현재 placeholder)
-					</p>
-				</div>
+				<Scan />
 			{:else}
 				<div class="ed-card">
 					<div class="ed-eyebrow mb-2">Unknown section</div>

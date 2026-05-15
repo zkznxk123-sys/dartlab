@@ -455,8 +455,8 @@
 
 	<!-- Main -->
 	<div class="relative flex flex-col flex-1 min-w-0 min-h-0 glow-bg">
-		<!-- Top-left: sidebar toggle (브라우저에서만) -->
-		{#if !isVSCode}
+		<!-- Top-left: sidebar toggle (Ask 모드만 — Dashboard 는 자체 TopBar 가짐) -->
+		{#if !isVSCode && uiMode.value !== "dashboard"}
 			<div class="absolute top-2 left-3 z-20 pointer-events-auto flex items-center gap-1">
 				<button
 					class="p-1.5 rounded-lg text-dl-text-muted hover:text-dl-text hover:bg-white/5 transition-colors"
@@ -471,24 +471,26 @@
 			</div>
 		{/if}
 
-		<!-- Top-right controls — 회사 검색 제거 (AI 채팅이 대체) -->
-		<div class="absolute top-2 right-3 z-20 flex items-center gap-1 pointer-events-auto">
-			{#if !isVSCode}
-				<a href="https://eddmpython.github.io/dartlab/" target="_blank" rel="noopener noreferrer"
-					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="Documentation">
-					<FileText size={14} />
-				</a>
-				<a href="https://github.com/eddmpython/dartlab" target="_blank" rel="noopener noreferrer"
-					class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="GitHub">
-					<Github size={14} />
-				</a>
-				<a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer"
-					class="p-1.5 rounded-lg text-[#ffdd00]/60 hover:text-[#ffdd00] hover:bg-white/5 transition-colors" title="Buy me a coffee">
-					<Coffee size={14} />
-				</a>
-			{/if}
-			<ProviderDropdown {ui} onOpenSettings={(section) => ui.openSettings(section)} />
-		</div>
+		<!-- Top-right controls — Ask 모드만 (Dashboard 는 자체 TopBar 가 stockCode/AskBtn 가짐) -->
+		{#if uiMode.value !== "dashboard"}
+			<div class="absolute top-2 right-3 z-20 flex items-center gap-1 pointer-events-auto">
+				{#if !isVSCode}
+					<a href="https://eddmpython.github.io/dartlab/" target="_blank" rel="noopener noreferrer"
+						class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="Documentation">
+						<FileText size={14} />
+					</a>
+					<a href="https://github.com/eddmpython/dartlab" target="_blank" rel="noopener noreferrer"
+						class="p-1.5 rounded-lg text-dl-text-dim hover:text-dl-text-muted hover:bg-white/5 transition-colors" title="GitHub">
+						<Github size={14} />
+					</a>
+					<a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer"
+						class="p-1.5 rounded-lg text-[#ffdd00]/60 hover:text-[#ffdd00] hover:bg-white/5 transition-colors" title="Buy me a coffee">
+						<Coffee size={14} />
+					</a>
+				{/if}
+				<ProviderDropdown {ui} onOpenSettings={(section) => ui.openSettings(section)} />
+			</div>
+		{/if}
 
 		<!-- Content: Ask 모드 ⇄ Dashboard 모드 -->
 		<div class="flex flex-1 min-h-0">
