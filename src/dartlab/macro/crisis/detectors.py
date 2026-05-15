@@ -13,57 +13,18 @@ core/ 계층 소속 — macro(시장 해석) 엔진에서 소비.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-# ══════════════════════════════════════
-# 데이터 구조
-# ══════════════════════════════════════
-
-
-@dataclass(frozen=True)
-class CreditGapResult:
-    """Credit-to-GDP Gap (BIS 방법)."""
-
-    gap: float  # 갭 (실제 - 추세, %p)
-    trend: float  # HP 필터 추세 값
-    actual: float  # 실제 신용/GDP 비율
-    zone: str  # "normal" | "watch" | "warning" | "danger"
-    zoneLabel: str  # "정상" | "주의" | "경고" | "위험"
-    ccybBuffer: float  # CCyB 완충자본 (0~2.5%)
-    description: str
-
-
-@dataclass(frozen=True)
-class GHSResult:
-    """GHS 금융위기 예측 점수 (Greenwood-Hanson-Shleifer 2022).
-
-    regime 확장 (Dalio): 같은 GHS 점수라도 실질금리에 따라
-    deflationary (실질금리 높음 + 신용 수축) vs inflationary
-    (실질금리 음수 + 신용 확장) 위기 성격이 다르다.
-    """
-
-    score: float  # 종합 점수 (0-100)
-    zone: str  # "normal" | "caution" | "elevated" | "danger"
-    zoneLabel: str  # "정상" | "주의" | "경계" | "위험"
-    components: dict[str, float]  # credit3y, asset3y
-    crisisProb: float  # 3년 내 위기 확률 추정 (0-1)
-    description: str
-    regime: str | None = None  # "deflation" | "inflation" | None (중립/불충분)
-    regimeLabel: str | None = None  # "디플레이션형" | "인플레이션형" | None
-
-
-@dataclass(frozen=True)
-class RecessionDashboard:
-    """침체 확률 종합 대시보드."""
-
-    composite: float  # 종합 침체 확률 (0-1)
-    zone: str  # "low" | "moderate" | "elevated" | "high"
-    zoneLabel: str  # "낮음" | "보통" | "경계" | "높음"
-    components: dict[str, float | None]  # 개별 신호 확률/점수
-    historicalMatch: str | None  # "resembles_2001" | "resembles_2008" | "normal" 등
-    description: str
-    historicalFacts: dict | None = None  # 역사적 팩트 (HistoricalContext 결과)
-
+# 결과 타입 (분리: _detectorTypes.py SSOT, re-export 으로 BC 보존)
+from dartlab.macro.crisis._detectorTypes import (
+    CreditGapResult,
+    DalioPhaseResult,
+    DalioPolicyLeverResult,
+    FisherDeflationResult,
+    GHSResult,
+    KooRecessionResult,
+    KRHousingStressResult,
+    MinskyPhaseResult,
+    RecessionDashboard,
+)
 
 # ══════════════════════════════════════
 # Credit-to-GDP Gap (BIS 방법)
@@ -375,17 +336,6 @@ def recessionDashboard(
 # ══════════════════════════════════════
 
 
-@dataclass(frozen=True)
-class MinskyPhaseResult:
-    """Minsky 금융 불안정 순환 5단계 판별."""
-
-    phase: str  # "displacement" | "boom" | "overtrading" | "discredit" | "revulsion"
-    phaseLabel: str  # "이전" | "호황" | "과열" | "공황" | "전염"
-    confidence: str  # "high" | "medium" | "low"
-    signals: list[str]
-    description: str
-
-
 def minskyPhase(
     creditGap: float | None = None,
     assetReturn3y: float | None = None,
@@ -483,16 +433,6 @@ def minskyPhase(
 # ══════════════════════════════════════
 
 
-@dataclass(frozen=True)
-class KooRecessionResult:
-    """Koo Balance Sheet Recession 감지."""
-
-    privateSurplus: float  # 민간 금융 잉여 (GDP 대비 %)
-    policyRate: float  # 정책금리 (%)
-    isBSR: bool  # Balance Sheet Recession 상태
-    description: str
-
-
 def kooBalanceSheetRecession(
     privateSaving: float,
     privateInvestment: float,
@@ -530,18 +470,6 @@ def kooBalanceSheetRecession(
 # ══════════════════════════════════════
 # Fisher Debt-Deflation
 # ══════════════════════════════════════
-
-
-@dataclass(frozen=True)
-class FisherDeflationResult:
-    """Fisher 부채 디플레이션 위험 평가."""
-
-    dsr: float  # 부채서비스비율 (%)
-    nplRate: float | None  # 부실대출비율 (%)
-    cpiYoy: float  # CPI YoY (%)
-    risk: str  # "high" | "moderate" | "low"
-    riskLabel: str  # "높음" | "보통" | "낮음"
-    description: str
 
 
 def fisherDebtDeflation(
@@ -594,17 +522,6 @@ def fisherDebtDeflation(
 # ══════════════════════════════════════
 
 
-@dataclass(frozen=True)
-class KRHousingStressResult:
-    """한국 부동산-금융 스트레스 지표."""
-
-    housePriceYoy: float  # 주택가격 YoY (%)
-    householdDebtYoy: float | None  # 가계부채 YoY (%)
-    stress: str  # "high" | "moderate" | "low"
-    stressLabel: str  # "높음" | "보통" | "낮음"
-    description: str
-
-
 def krHousingFinancialStress(
     housePriceYoy: float,
     householdDebtYoy: float | None = None,
@@ -654,38 +571,6 @@ def krHousingFinancialStress(
 # ══════════════════════════════════════
 # Dalio — Big Debt Crises Part 1 템플릿
 # ══════════════════════════════════════
-
-
-@dataclass(frozen=True)
-class DalioPhaseResult:
-    """Dalio 부채사이클 단계 (Big Debt Crises Part 1).
-
-    subPhase 와 regimeVariant 는 phase 에 따라 선택적으로 채워진다:
-    - subPhase: beautifulDeleveraging 상태에서만 4단계 (austerity/defaultRestructuring/
-      moneyPrinting/wealthTransfer) 세분화
-    - regimeVariant: deflationary | inflationary — 환율/기축통화/외화부채 기반
-    """
-
-    phase: str  # earlyBoom | lateBoom | topBubble | deflationaryDepression | beautifulDeleveraging | reflationary
-    phaseLabel: str  # 한국어 라벨
-    signals: list[str]  # 판정 근거 문장들
-    description: str  # 종합 설명
-    subPhase: str | None = None  # austerity | defaultRestructuring | moneyPrinting | wealthTransfer
-    subPhaseLabel: str | None = None
-    regimeVariant: str | None = None  # deflationary | inflationary
-    regimeVariantLabel: str | None = None
-
-
-@dataclass(frozen=True)
-class DalioPolicyLeverResult:
-    """Dalio 정책 4 레버 소진도."""
-
-    monetary: str  # spare | partial | maxed
-    fiscal: str
-    credit: str
-    fx: str
-    exhaustionScore: int  # 0~12 (maxed=3, partial=2, spare=1 합산; fx 는 가중치 동일)
-    signals: list[str]
 
 
 _DALIO_PHASE_LABELS = {
