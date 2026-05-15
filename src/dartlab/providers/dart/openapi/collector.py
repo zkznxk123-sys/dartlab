@@ -45,15 +45,15 @@ _log = getLogger(__name__)
 _MIN_CONTENT_LENGTH = 50
 _REQUEST_TIMEOUT = 30
 
-# viewer 페이지 파싱 헬퍼는 providers/dart/viewerPageExtractor SSOT 사용.
-# gather/dart/viewer (key 무관) 와 본 collector (key 기반 bulk) 양쪽이 import.
-from dartlab.providers.dart.parse.viewerPageExtractor import (  # noqa: E402
+# viewer 페이지 파싱 헬퍼는 dartlab.core.parse.dartViewerPage SSOT 사용.
+# gather/dart/viewer (key 무관) 와 본 collector (key 기반 bulk) 양쪽이 import — L0 공유.
+from dartlab.core.parse.dartViewerPage import (  # noqa: E402
     DART_MAIN_BASE as _DART_MAIN_BASE,
 )
-from dartlab.providers.dart.parse.viewerPageExtractor import (
+from dartlab.core.parse.dartViewerPage import (
     htmlToText as _htmlToText,
 )
-from dartlab.providers.dart.parse.viewerPageExtractor import (
+from dartlab.core.parse.dartViewerPage import (
     parseSubDocs as _parseSubDocs,
 )
 

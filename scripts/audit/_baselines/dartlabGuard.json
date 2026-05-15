@@ -3,8 +3,6 @@
   "policy": "no_new_violations",
   "known": {
     "architecture.lazyL1CrossImport": [
-      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/dart/viewer.py:110",
-      "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/dart/viewer.py:245",
       "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:118",
       "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:60"
     ],
