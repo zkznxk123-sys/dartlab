@@ -29,6 +29,15 @@ import polars as pl
 from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
 
 BASE_URL = "https://opendart.fss.or.kr/api"
+_CLIENT_TIMEOUT = httpx.Timeout(60.0, connect=10.0, read=60.0, write=30.0, pool=10.0)
+_CLIENT_LIMITS = httpx.Limits(max_connections=4, max_keepalive_connections=2)
+_TRANSIENT_HTTP_ERRORS = (
+    httpx.ConnectError,
+    httpx.ReadError,
+    httpx.RemoteProtocolError,
+    httpx.TimeoutException,
+)
+_RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 # ── 상수 ──
 
@@ -116,11 +125,20 @@ START_YEAR = 2016
 class AsyncDartClient:
     """비동기 DART API 클라이언트 (배치 수집 전용)."""
 
-    def __init__(self, apiKey: str, *, requestsPerMinute: int = 580):
+    def __init__(
+        self,
+        apiKey: str,
+        *,
+        requestsPerMinute: int = 580,
+        maxRetries: int = 3,
+        retryBaseDelay: float = 0.5,
+    ):
         self._key = apiKey
-        self._client = httpx.AsyncClient(timeout=30)
+        self._client = httpx.AsyncClient(timeout=_CLIENT_TIMEOUT, limits=_CLIENT_LIMITS)
         self._minInterval = 60.0 / requestsPerMinute
         self._lastRequest = 0.0
+        self._maxRetries = max(0, maxRetries)
+        self._retryBaseDelay = max(0.0, retryBaseDelay)
         self.exhausted = False
 
     async def _throttle(self) -> None:
@@ -130,6 +148,35 @@ class AsyncDartClient:
         if elapsed < self._minInterval:
             await asyncio.sleep(self._minInterval - elapsed)
         self._lastRequest = asyncio.get_event_loop().time()
+
+    async def _getWithRetry(
+        self,
+        endpoint: str,
+        params: dict[str, Any],
+        *,
+        timeout: float | httpx.Timeout | None = None,
+    ) -> httpx.Response:
+        """DART 전송 계층 오류를 같은 요청 단위로 재시도한다."""
+        lastError: BaseException | None = None
+        for attempt in range(self._maxRetries + 1):
+            await self._throttle()
+            try:
+                kwargs: dict[str, Any] = {"params": params}
+                if timeout is not None:
+                    kwargs["timeout"] = timeout
+                resp = await self._client.get(f"{BASE_URL}/{endpoint}", **kwargs)
+                if resp.status_code in _RETRYABLE_STATUS_CODES and attempt < self._maxRetries:
+                    await resp.aclose()
+                    await asyncio.sleep(self._retryBaseDelay * (2**attempt))
+                    continue
+                return resp
+            except _TRANSIENT_HTTP_ERRORS as exc:
+                lastError = exc
+                if attempt >= self._maxRetries:
+                    raise
+                await asyncio.sleep(self._retryBaseDelay * (2**attempt))
+
+        raise RuntimeError("unreachable DART retry loop") from lastError
 
     async def getJson(
         self,
@@ -193,7 +240,7 @@ class AsyncDartClient:
         merged = {"crtfc_key": self._key}
         if params:
             merged.update(params)
-        resp = await self._client.get(f"{BASE_URL}/{endpoint}", params=merged)
+        resp = await self._getWithRetry(endpoint, merged)
         resp.raise_for_status()
         data = resp.json()
         status = data.get("status", "000")
@@ -324,11 +371,7 @@ class AsyncDartClient:
         merged = {"crtfc_key": self._key}
         if params:
             merged.update(params)
-        resp = await self._client.get(
-            f"{BASE_URL}/{endpoint}",
-            params=merged,
-            timeout=60,
-        )
+        resp = await self._getWithRetry(endpoint, merged, timeout=60)
         resp.raise_for_status()
         ct = resp.headers.get("Content-Type", "")
         if "application/json" in ct or "text/json" in ct:

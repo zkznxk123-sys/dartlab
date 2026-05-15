@@ -629,6 +629,20 @@ def _verifyCollectedRcepts(
     return failures
 
 
+def _syncMaxWorkers(default: int = 4) -> int | None:
+    """최근 동기화에서 DART report API 동시성을 제한한다."""
+    raw = os.environ.get("SYNC_MAX_WORKERS", "").strip()
+    if not raw:
+        return default
+    if raw.lower() in {"0", "none", "all"}:
+        return None
+    try:
+        workers = int(raw)
+    except ValueError:
+        return default
+    return workers if workers > 0 else default
+
+
 def main():
     keys = os.environ.get("DART_API_KEYS", "")
     if not keys:
@@ -735,6 +749,8 @@ def main():
     if nonDocsCats:
         from dartlab.providers.dart.openapi.batch import batchCollect
 
+        maxWorkers = _syncMaxWorkers()
+
         # finance/report 각각 독립적으로 누락 종목만 수집.
         # 한 카테고리만 누락이면 다른 카테고리는 건드리지 않는다.
         for cat in nonDocsCats:
@@ -749,6 +765,7 @@ def main():
                 incremental=True,
                 showProgress=False,
                 targetPeriodsByCode=periods,
+                maxWorkers=maxWorkers,
             )
 
     verifyFailures = _verifyCollectedRcepts(targetFilings, dataDir, categories)

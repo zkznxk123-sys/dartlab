@@ -40,6 +40,47 @@ def test_get_json_callable() -> None:
     assert hasattr(AsyncDartClient, "getJson")
 
 
+def test_get_json_retries_transient_read_error(monkeypatch) -> None:
+    """DART ReadError는 같은 요청 단위에서 재시도한다."""
+    import asyncio
+
+    import httpx
+
+    from dartlab.providers.dart.openapi import batch
+    from dartlab.providers.dart.openapi.batch import AsyncDartClient
+
+    class FakeResponse:
+        status_code = 200
+
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"status": "000", "list": [{"ok": True}]}
+
+    class FakeAsyncClient:
+        def __init__(self, *args, **kwargs) -> None:
+            self.calls = 0
+
+        async def get(self, *args, **kwargs):
+            self.calls += 1
+            if self.calls == 1:
+                raise httpx.ReadError("server closed connection")
+            return FakeResponse()
+
+        async def aclose(self) -> None:
+            return None
+
+    fakeClient = FakeAsyncClient()
+    monkeypatch.setattr(batch.httpx, "AsyncClient", lambda *args, **kwargs: fakeClient)
+
+    client = AsyncDartClient("key", maxRetries=1, retryBaseDelay=0)
+    result = asyncio.run(client.getJson("list.json", {"corp_code": "00126380"}))
+
+    assert result == {"status": "000", "list": [{"ok": True}]}
+    assert fakeClient.calls == 2
+
+
 def test_batch_collect_callable() -> None:
     """batchCollect() callable smoke."""
     from dartlab.providers.dart.openapi.batch import batchCollect

@@ -221,6 +221,21 @@ def test_collectFinance_targetPeriods_skips_88_diff():
 
 
 @pytest.mark.unit
+def test_syncRecent_recent_mode_caps_max_workers(monkeypatch):
+    """recent 동기화는 기본적으로 DART report API 동시성을 제한한다."""
+    syncRecent = _load_sync_recent_module()
+
+    monkeypatch.delenv("SYNC_MAX_WORKERS", raising=False)
+    assert syncRecent._syncMaxWorkers() == 4
+
+    monkeypatch.setenv("SYNC_MAX_WORKERS", "2")
+    assert syncRecent._syncMaxWorkers() == 2
+
+    monkeypatch.setenv("SYNC_MAX_WORKERS", "all")
+    assert syncRecent._syncMaxWorkers() is None
+
+
+@pytest.mark.unit
 def test_buildAllPeriods_newest_first():
     """_buildAllPeriods는 최신 분기부터 반환해야 한다.
 
