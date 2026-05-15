@@ -7,7 +7,6 @@
       "architecture.lazyL1CrossImport:lazy:src/dartlab/gather/sources/insider.py:60"
     ],
     "architecture.lazyUpperImport": [
-      "architecture.lazyUpperImport:lazy:src/dartlab/gather/transforms/indicatorDispatch.py:60",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/financeStatementBuilder.py:472",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:242",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:291"

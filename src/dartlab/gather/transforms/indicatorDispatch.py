@@ -37,6 +37,8 @@ from typing import Callable
 import numpy as np
 import polars as pl
 
+from dartlab.core import indicators as ind
+
 log = logging.getLogger(__name__)
 
 # 표준 컬럼명 (KRX raw → quant 표준 매핑은 gatherKrx 가 처리, 여기선 quant 표준만)
@@ -53,12 +55,10 @@ def _resolveIndicator(target: str) -> tuple[Callable, dict, list[str]]:
     Returns
     -------
     (fn, kwargs, inputCols)
-        fn: dartlab.synth.indicators 의 함수
+        fn: dartlab.core.indicators 의 함수
         kwargs: period 등 인자 dict
         inputCols: 함수에 전달할 OHLCV 컬럼 리스트 (예: ["close"], ["high", "low", "close"])
     """
-    from dartlab.synth import indicators as ind
-
     # camelCase / 대소문자 정규화 — "williamsR14" → "williamsr14", "ForceIndex13" → "forceindex13"
     t = target.strip().lower()
     m = re.match(r"^([a-z]+)(\d+)?$", t)
