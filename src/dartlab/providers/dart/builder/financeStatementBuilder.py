@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import polars as pl
 
+from dartlab.core.ratios import calcRatioSeries, toSeriesDict
 from dartlab.providers.dart.checks import _isPeriodColumn
 from dartlab.providers.dart.financeMappers import (
     _financeCisAnnual,
@@ -469,8 +470,6 @@ def ratioSeries(company: Company):
     qSeries, periods = qResult
     # 2016-Q1 → 2016Q1 포맷 통일
     normalizedPeriods = [p.replace("-", "") for p in periods]
-    from dartlab.analysis.financial.ratios import calcRatioSeries, toSeriesDict
-
     archetypeOverride = _ratioArchetypeOverrideForIndustryGroup(getattr(company.sector, "industryGroup", None))
     rs = calcRatioSeries(qSeries, normalizedPeriods, archetypeOverride=archetypeOverride, yoyLag=4)
     result = toSeriesDict(rs)

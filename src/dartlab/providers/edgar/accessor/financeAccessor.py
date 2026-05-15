@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 
 from dartlab.core.memory import _CACHE_MISSING
+from dartlab.core.ratios import calcRatios, calcRatioSeries, toSeriesDict
 
 if TYPE_CHECKING:
     from dartlab.providers.edgar.company import Company
@@ -239,8 +240,6 @@ class _FinanceAccessor:
         """
         val = self._company._cache.get("_ratios", _CACHE_MISSING)
         if val is _CACHE_MISSING:
-            from dartlab.analysis.financial.ratios import calcRatios
-
             annual = self._company._buildFinanceSeries(freq="Y")
             if annual is None:
                 val = None
@@ -288,8 +287,6 @@ class _FinanceAccessor:
         if annual is None:
             return None
         aSeries, years = annual
-        from dartlab.analysis.financial.ratios import calcRatioSeries, toSeriesDict
-
         rs = calcRatioSeries(aSeries, years)
         result = toSeriesDict(rs)
         self._company._cache[cacheKey] = result
