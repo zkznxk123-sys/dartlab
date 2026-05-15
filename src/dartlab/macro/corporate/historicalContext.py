@@ -78,114 +78,17 @@ def _yoy(d: dict[str, float]) -> dict[str, float]:
 # ── Dataclass ──
 
 
-@dataclass(frozen=True)
-class HYSpikeHistory:
-    """HY 스프레드 급등 → 침체 통계."""
-
-    totalSpikes: int
-    recessionWithin12m: int
-    recessionRate12m: float
-    nearestMatch: str | None
-    nearestMatchDelta: float | None
-    nearestMatchOutcome: str | None
-    currentDelta: float | None
-    description: str
-
-
-@dataclass(frozen=True)
-class YCInversionHistory:
-    """Yield Curve 역전 → 침체 통계."""
-
-    totalInversions: int
-    avgLeadMonths: float | None
-    medianLeadMonths: float | None
-    rangeLeadMonths: tuple[int, int] | None
-    currentInversionStart: str | None
-    currentDurationMonths: int | None
-    description: str
-
-
-@dataclass(frozen=True)
-class URBounceHistory:
-    """실업률 저점 반등 → 침체 통계."""
-
-    totalBounces: int
-    recessionWithin12m: int
-    recessionRate12m: float
-    currentBounce: float | None
-    description: str
-
-
-@dataclass(frozen=True)
-class SimultaneousWarnings:
-    """동시 경고등 판정."""
-
-    activeFlags: list[str]
-    flagCount: int
-    historicalOccurrences: int
-    recessionRate18m: float
-    similarPeriods: list[dict]
-    description: str
-
-
-@dataclass(frozen=True)
-class BullishSignals:
-    """호황/회복 신호 — 위기의 반대."""
-
-    activeSignals: list[str]
-    signalCount: int
-    historicalOccurrences: int
-    avgExpansionMonths: float | None
-    similarPeriods: list[dict]
-    description: str
-
-
-@dataclass(frozen=True)
-class HYCompressionHistory:
-    """HY 스프레드 급락 (신용 완화) → 확장 통계."""
-
-    totalCompressions: int
-    avgExpansionMonths: float | None
-    currentDelta: float | None
-    description: str
-
-
-@dataclass(frozen=True)
-class HistoricalEvent:
-    """현재와 유사한 역사적 사건."""
-
-    eventName: str
-    eventDate: str
-    similarity: str  # "높음" | "보통"
-    context: str
-    outcome: str
-
-
-@dataclass(frozen=True)
-class HistoricalContext:
-    """종합 역사적 맥락 — 위기 + 호황 양방향."""
-
-    # 위기 신호
-    hySpike: HYSpikeHistory | None = None
-    yieldCurveInversion: YCInversionHistory | None = None
-    unemploymentBounce: URBounceHistory | None = None
-    cpiAcceleration: dict | None = None
-    simultaneousWarnings: SimultaneousWarnings | None = None
-    # 호황 신호
-    bullishSignals: BullishSignals | None = None
-    hyCompression: HYCompressionHistory | None = None
-    # 역사적 사건 매칭
-    historicalEvents: list[HistoricalEvent] | None = None
-    # "다음 장" — 역사는 다음 장이 있다
-    suggestedScenario: str | None = None
-    suggestedScenarioReason: str | None = None
-    # 종합
-    riskLevel: str = "low"
-    riskLabel: str = "양호"
-    opportunityLevel: str = "neutral"
-    opportunityLabel: str = "중립"
-    description: str = ""
-
+# 결과 타입 (분리: _historicalContextTypes.py SSOT, re-export 으로 BC 보존)
+from dartlab.macro.corporate._historicalContextTypes import (
+    BullishSignals,
+    HistoricalContext,
+    HistoricalEvent,
+    HYCompressionHistory,
+    HYSpikeHistory,
+    SimultaneousWarnings,
+    URBounceHistory,
+    YCInversionHistory,
+)
 
 # ── 순수함수 ──
 
