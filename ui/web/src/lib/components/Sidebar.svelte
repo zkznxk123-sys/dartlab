@@ -4,6 +4,7 @@
 	import { MoreHorizontal, Pin, Plus, Search, Settings, Trash2 } from "lucide-svelte";
 	import { getUiMode } from "$lib/stores/uiMode.svelte.js";
 	import ModeToggle from "$lib/dashboard/ModeToggle.svelte";
+	import ThemeToggle from "$lib/dashboard/ThemeToggle.svelte";
 	import EngineNav from "$lib/dashboard/EngineNav.svelte";
 	import CompanySwitcher from "$lib/dashboard/CompanySwitcher.svelte";
 
@@ -81,10 +82,11 @@
 >
 	{#if open}
 		<div class="flex flex-col h-full" style="min-width: {width}px">
-			<!-- Brand: 아바타 + 워드마크 (height-matched). -->
+			<!-- Brand: 아바타 + 워드마크 (height-matched) + 테마 토글. -->
 			<div class="flex items-center gap-2 px-4 pt-4 pb-3">
 				<img src="/avatar.png" alt="" class="w-5 h-5 rounded-full flex-shrink-0" />
 				<div class="text-[15px] font-bold text-dl-text tracking-tight leading-none">DartLab</div>
+				<div class="ml-auto"><ThemeToggle /></div>
 			</div>
 
 			<!-- Mode Toggle: Ask ⇄ Dashboard -->
