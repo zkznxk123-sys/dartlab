@@ -11,17 +11,13 @@
     "architecture.lazyUpperImport": [
       "architecture.lazyUpperImport:lazy:src/dartlab/gather/transforms/indicatorDispatch.py:60",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/builder/financeStatementBuilder.py:472",
-      "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/finance/scanAccount.py:549",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:242",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/edgar/accessor/financeAccessor.py:291"
     ]
   },
   "protectedCompanyFacadeDebt": {
     "_note": "Company facade 공개 표면 보호 원장. providers/{dart,edgar}/company.py 내부 lazy 상위 의존은 사용자 호출 표면을 보존하기 위해 active cleanup 대상에서 제외하고 신규 증가만 차단한다.",
-    "architecture.lazyRootFacadeImport": [
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/dart/company.py:1271",
-      "architecture.lazyRootFacadeImport:root-facade:src/dartlab/providers/edgar/company.py:781"
-    ],
+    "architecture.lazyRootFacadeImport": [],
     "architecture.lazyUpperImport": [
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:2649",
       "architecture.lazyUpperImport:lazy:src/dartlab/providers/dart/company.py:3389",
