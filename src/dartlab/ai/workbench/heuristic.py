@@ -468,69 +468,47 @@ def _forensicsMarkdown(memo: dict[str, Any]) -> str:
     tables = memo.get("tables") or {}
     cash = (tables.get("revenueToCashBridge") or [{}])[0]
     wc = (tables.get("workingCapitalPressureMap") or [{}])[0]
+    cash_worst_row = _worstRow(tables.get("revenueToCashBridge") or [])
+    wc_worst_row = _worstRow(tables.get("workingCapitalPressureMap") or [])
     note_risks = [row for row in tables.get("noteSignalExtractor", []) if row.get("status") in {"watch", "risk"}][:5]
     falsifiers = tables.get("falsifierLedger") or []
     candidates = tables.get("engineCandidateMemo") or []
     deep = tables.get("deepDive") or []
     open_falsifiers = [row for row in falsifiers if row.get("status") == "open"]
-    cash_worst = _worstStatus(tables.get("revenueToCashBridge") or [])
-    wc_worst = _worstStatus(tables.get("workingCapitalPressureMap") or [])
+    active_candidates = [row for row in candidates if row.get("status") in {"watch", "risk", "open"}]
+    missing_steps = [row for row in deep if row.get("status") == "missing"]
+    alert_steps = [row for row in deep if row.get("status") in {"watch", "risk", "open"}]
     decision = _forensicsDecision(headline, open_falsifiers, deep)
 
     lines = [
         f"{memo.get('companyName') or memo.get('target')} L1.5 포렌식 deep dive입니다.",
         "",
-        "L2 분석엔진은 호출하지 않았습니다. Company.show 원표, 공시/섹션 텍스트, optional scan primitive와 L1.5 helper만 썼습니다.",
-        f"기준시점은 {memo.get('asOf')}입니다. 이 결과는 투자 의견이 아니라 원표 기반 검산과 반증 목록입니다.",
-        "",
-        "## 핵심 판정",
-        f"- 판정: {decision}",
-        f"- 위험 점수: {headline.get('riskScore')} / 열린 반증: {len(open_falsifiers)}개 / 엔진 후보: {headline.get('candidateCount')}개",
-        f"- 데이터 상태: {_statusLabel(headline.get('decisionStatus'))}",
-        "",
-        "## 원표 신호",
         (
-            "- 매출-현금: "
-            f"최신 {_statusLabel(cash.get('status'))}, 패널 최대 {_statusLabel(cash_worst)} / "
-            f"매출채권 증가율-매출 증가율 {_formatPctPoint(cash.get('receivableGrowthMinusRevenueGrowth'))}, "
-            f"CFO/순이익 {_formatRatio(cash.get('cfoToNetIncome'))}"
+            f"판정은 **{decision}**입니다. 기준시점은 {memo.get('asOf')}이고, "
+            "L2 분석엔진 없이 Company.show 원표와 공시/섹션 텍스트만으로 검산했습니다."
         ),
         (
-            "- 운전자본: "
-            f"최신 {_statusLabel(wc.get('status'))}, 패널 최대 {_statusLabel(wc_worst)} / "
-            f"CCC {_formatDays(wc.get('cccDays'))}, 재고 gap {_formatPctPoint(wc.get('inventoryGrowthMinusRevenueGrowth'))}"
+            f"위험 점수는 {headline.get('riskScore')}이고 열린 반증은 {len(open_falsifiers)}개입니다. "
+            f"데이터 상태는 {_statusLabel(headline.get('decisionStatus'))}입니다."
         ),
         "",
-        "## 공시 텍스트 신호",
+        "## 왜 이렇게 봤나",
+        f"- 매출-현금: {_cashInterpretation(cash, cash_worst_row)}",
+        f"- 운전자본: {_workingCapitalInterpretation(wc, wc_worst_row)}",
+        f"- 공시 텍스트: {_noteInterpretation(note_risks)}",
+        "",
+        "## 비어있는 근거",
     ]
-    if note_risks:
-        for row in note_risks:
-            lines.append(
-                f"- {_signalLabel(row.get('signal'))}: {_statusLabel(row.get('status'))} / hitCount {row.get('hitCount')}"
-            )
-    else:
-        lines.append("- 현재 입력 범위에서는 관찰/위험 키워드가 뚜렷하게 잡히지 않았습니다.")
+    lines.extend(_missingEvidenceLines(missing_steps))
 
-    lines.extend(["", "## 반증 Ledger (Falsifier Ledger)"])
-    for row in falsifiers:
-        lines.append(
-            f"- {_claimLabel(row.get('claim'))}: {_statusLabel(row.get('status'))} / "
-            f"확인할 반증: {_counterEvidenceLabel(row.get('counterEvidenceNeeded'))}"
-        )
+    lines.extend(["", "## 반증 우선순위"])
+    lines.extend(_falsifierLines(open_falsifiers, falsifiers))
 
-    lines.extend(["", "## 엔진 환류 후보 (Engine Candidate Memo)"])
-    for row in candidates:
-        lines.append(
-            f"- {_signalLabel(row.get('signalId'))}: {_statusLabel(row.get('status'))} / "
-            f"후보 축: {row.get('recommendedEngineOwner')}"
-        )
+    lines.extend(["", "## 엔진 환류 후보"])
+    lines.extend(_candidateLines(active_candidates, candidates))
 
-    lines.extend(["", "## Deep Dive 단계"])
-    for row in deep:
-        lines.append(
-            f"- {row.get('order')}. {_stepLabel(row.get('step'))}: "
-            f"{_statusLabel(row.get('status'))} / {_nextActionLabel(row.get('nextAction'))}"
-        )
+    lines.extend(["", "## 다음 확인"])
+    lines.extend(_nextCheckLines(open_falsifiers, alert_steps, missing_steps))
 
     lines.append("")
     lines.append("답변 근거는 tableRef, valueRef, dateRef, sourceRef로 분리해 남겼습니다.")
@@ -578,6 +556,131 @@ def _nextActionLabel(value: Any) -> str:
     for step, label in _STEP_LABELS.items():
         text = text.replace(step, label)
     return text
+
+
+def _cashInterpretation(latest: dict[str, Any], worst: dict[str, Any] | None) -> str:
+    latest_status = _statusLabel(latest.get("status"))
+    latest_gap = _formatPctPoint(latest.get("receivableGrowthMinusRevenueGrowth"))
+    cfo_to_net = _formatRatio(latest.get("cfoToNetIncome"))
+    worst_part = _periodStatus(worst, latest_period=latest.get("period"))
+    if latest.get("status") in {"watch", "risk"}:
+        return (
+            f"최신연도부터 {latest_status}입니다. 매출채권 증가율이 매출 증가율보다 {latest_gap} 높고, "
+            f"CFO/순이익은 {cfo_to_net}입니다. {worst_part}"
+        )
+    return (
+        f"최신연도는 {latest_status}입니다. 매출채권 증가율-매출 증가율은 {latest_gap}, "
+        f"CFO/순이익은 {cfo_to_net}이라 최신 구간의 현금 회수 자체는 크게 깨지지 않았습니다. {worst_part}"
+    )
+
+
+def _workingCapitalInterpretation(latest: dict[str, Any], worst: dict[str, Any] | None) -> str:
+    latest_status = _statusLabel(latest.get("status"))
+    ccc = _formatDays(latest.get("cccDays"))
+    inventory_gap = _formatPctPoint(latest.get("inventoryGrowthMinusRevenueGrowth"))
+    worst_part = _periodStatus(worst, latest_period=latest.get("period"))
+    if latest.get("status") in {"watch", "risk"}:
+        return f"최신연도부터 {latest_status}입니다. CCC가 {ccc}이고 재고 gap은 {inventory_gap}입니다. {worst_part}"
+    return f"최신연도는 {latest_status}입니다. CCC는 {ccc}, 재고 gap은 {inventory_gap}입니다. {worst_part}"
+
+
+def _noteInterpretation(note_risks: list[dict[str, Any]]) -> str:
+    if not note_risks:
+        return "현재 확보한 텍스트 범위에서는 관찰/위험 키워드가 뚜렷하지 않습니다."
+    parts = [
+        f"{_signalLabel(row.get('signal'))} {_statusLabel(row.get('status'))}(hit {row.get('hitCount')})"
+        for row in note_risks
+    ]
+    return "; ".join(parts)
+
+
+def _periodStatus(row: dict[str, Any] | None, *, latest_period: Any = None) -> str:
+    if not row:
+        return "패널 최대 경보는 계산하지 못했습니다."
+    period = row.get("period") or "unknown"
+    status = _statusLabel(row.get("status"))
+    if row.get("status") in {"watch", "risk"}:
+        if str(period) == str(latest_period):
+            return f"패널 최대 상태도 최신연도 {period}년 {status}입니다."
+        return f"다만 패널 안에서는 {period}년에 {status} 구간이 있어 과거 원인을 확인해야 합니다."
+    return f"패널 전체에서도 최대 상태는 {period}년 {status}입니다."
+
+
+def _missingEvidenceLines(missing_steps: list[dict[str, Any]]) -> list[str]:
+    if not missing_steps:
+        return ["- 필수 원표와 현재 섹션 입력 기준으로 큰 결손은 없습니다."]
+    lines: list[str] = []
+    for row in missing_steps[:4]:
+        step = _stepLabel(row.get("step"))
+        if row.get("step") == "crossSectionAnomalyRank":
+            lines.append(
+                "- 횡단면 이상치는 기본 실행에서 제외했습니다. 필요하면 scan primitive를 켜서 peer/시장 내 위치를 보강해야 합니다."
+            )
+        elif row.get("step") == "eventToStatementMatcher":
+            lines.append(
+                "- 이벤트 공시 매칭 입력이 부족합니다. 특정 공시 이벤트와 재무제표 변동을 아직 연결하지 못했습니다."
+            )
+        else:
+            lines.append(f"- {step} 입력이 부족합니다.")
+    return lines
+
+
+def _falsifierLines(open_falsifiers: list[dict[str, Any]], all_falsifiers: list[dict[str, Any]]) -> list[str]:
+    if open_falsifiers:
+        return [
+            (
+                f"- {_claimLabel(row.get('claim'))}: 확인할 반증은 "
+                f"{_counterEvidenceLabel(row.get('counterEvidenceNeeded'))}입니다."
+            )
+            for row in open_falsifiers
+        ]
+    inactive = [row for row in all_falsifiers if row.get("status") == "notTriggered"]
+    if inactive:
+        return ["- 최신 입력 기준 열린 반증은 없습니다. 비발동 항목은 결론 근거로 쓰지 않고 감시 목록에만 남깁니다."]
+    return ["- 반증 ledger가 비어 있습니다. 이 경우 위험 결론을 만들지 않습니다."]
+
+
+def _candidateLines(active_candidates: list[dict[str, Any]], all_candidates: list[dict[str, Any]]) -> list[str]:
+    if active_candidates:
+        return [
+            f"- {_signalLabel(row.get('signalId'))}: {_statusLabel(row.get('status'))}. 후보 축은 {row.get('recommendedEngineOwner')}입니다."
+            for row in active_candidates
+        ]
+    if all_candidates:
+        return ["- 이번 실행에서 바로 엔진화할 강한 후보는 없습니다. 정상/입력 부족 후보는 skill 검산 경로에 남깁니다."]
+    return ["- 엔진 후보 memo가 생성되지 않았습니다."]
+
+
+def _nextCheckLines(
+    open_falsifiers: list[dict[str, Any]],
+    alert_steps: list[dict[str, Any]],
+    missing_steps: list[dict[str, Any]],
+) -> list[str]:
+    lines: list[str] = []
+    if open_falsifiers:
+        lines.append("- 열린 반증부터 확인합니다. 반증이 해소되지 않으면 위험 점수를 낮추지 않습니다.")
+    if alert_steps:
+        evidence_alerts = [
+            row
+            for row in alert_steps
+            if row.get("step") not in {"falsifierLedger", "engineCandidateMemo", "finalDecision"}
+        ]
+        labels = ", ".join(_stepLabel(row.get("step")) for row in evidence_alerts[:3])
+        if not labels:
+            labels = ", ".join(_stepLabel(row.get("step")) for row in alert_steps[:3])
+        lines.append(f"- 경보가 걸린 단계는 {labels}입니다. 이 단계의 원표 row와 기간별 변화를 먼저 봅니다.")
+    if missing_steps:
+        lines.append("- 입력 부족 단계는 결론에서 제외하고, 보강 전에는 엔진 후보로 승격하지 않습니다.")
+    if not lines:
+        lines.append("- 다음 실행에서는 같은 기준으로 분기별 갱신 여부만 확인하면 됩니다.")
+    return lines
+
+
+def _worstRow(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    rank = {"missing": 0, "candidate": 1, "ok": 1, "mapped": 1, "notTriggered": 1, "watch": 2, "open": 2, "risk": 3}
+    if not rows:
+        return None
+    return max(rows, key=lambda row: rank.get(str(row.get("status") or "missing"), 0))
 
 
 def _worstStatus(rows: list[dict[str, Any]]) -> str:
