@@ -377,25 +377,71 @@ def _analyzeProfitabilityFinancial(
 
 
 def analyzeHealth(ratios: RatioResult, isFinancial: bool = False, currency: str = "KRW") -> InsightResult:
-    """재무건전성 분석.
+    """재무건전성 분석 — 부채비율 + 유동비율 + O-Score + Z''-Score + Piotroski.
 
-    Parameters
-    ----------
-    ratios : RatioResult
-        재무비율 계산 결과.
-    isFinancial : bool
-        금융업 여부. True이면 금융업 부채비율 기준 적용.
-    currency : str
-        통화 코드 ('KRW' | 'USD'). USD이면 미국 기준 적용.
+    Capabilities:
+        재무비율 + Altman Z''-Score (회사 부도예측) + Ohlson O-Score
+        (10 변수) + Piotroski F-Score (9 가지) 결합하여 재무건전성 5 등급
+        분류. 금융업/비금융업 분기, KRW/USD 통화별 다른 임계값 적용.
 
-    Returns
-    -------
-    InsightResult
-        grade : str — 'A'~'F' 등급
-        summary : str — 재무건전성 요약
-        details : list[str] — 부채비율, 유동비율, O-Score, Z''-Score 등
-        risks : list[Flag] — 건전성 리스크
-        opportunities : list[Flag] — 건전성 강점
+    Args:
+        ratios: RatioResult dataclass — debtRatio, currentRatio, quickRatio,
+            zScore, oScore, fScore, interestCoverage 등 포함.
+        isFinancial: 금융업 여부. True 면 부채비율 기준 완화 (은행 BIS 8% 등).
+        currency: ``"KRW"`` 또는 ``"USD"``. 임계값 분기 (예 부채비율 200%
+            기준이 미국 시장에선 다름).
+
+    Returns:
+        InsightResult dataclass:
+            - ``grade`` (str): A/B/C/D/F
+            - ``summary`` (str): 한국어 요약
+            - ``details`` (list[str]): 5+ 지표 분석 라인
+            - ``risks`` (list[Flag]): 건전성 리스크 (warning/danger)
+            - ``opportunities`` (list[Flag]): 건전성 강점
+
+    Raises:
+        없음. ratios=None 시 grade='N' 반환.
+
+    Example:
+        >>> from dartlab.core.ratios import calcRatios
+        >>> ratios = calcRatios(company.finance.timeseries)
+        >>> r = analyzeHealth(ratios)
+        >>> r.grade, r.summary
+        ('A', '재무건전성 우수 — 부채비율 80%, 유동비율 250%')
+
+    Guide:
+        Altman Z''-Score: > 2.9 = safe, 1.23~2.9 = grey, < 1.23 = distress.
+        Piotroski F-Score: 9 = 최고, 0~3 = 부실. Ohlson O-Score 0.5 이상 =
+        부도 확률 50%+. 본 함수는 3 모델 합산 + 부채비율 정성 평가.
+
+    SeeAlso:
+        - ``analyzeCashflow``: 현금흐름 (건전성과 보완)
+        - ``credit.engine.evaluateCompany``: 종합 신용등급
+        - ``dartlab.synth.distress.chsModel.calcCHS``: CHS 부도확률
+
+    Requires:
+        ratios = ``calcRatios(finance.timeseries)`` 결과.
+
+    AIContext:
+        grade + risks 함께 인용. F 등급 결과는 distress 신호 — credit 엔진
+        호출 권장 (Track A 7 축 분해). 금융업 (은행/보험) 은 부채비율 1000%+
+        가 정상이므로 isFinancial=True 명시 필수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 비금융업 부채비율 200%+ → automatic F 단정 — 영업 부담 (예
+              항공/조선) 고려 필요. 본 함수는 업종 보정 별도 적용.
+            - O-Score 단독 인용 — Altman + Piotroski 와 cross-check 필수.
+        OutputSchema:
+            InsightResult ``{grade, summary, details, risks, opportunities}``.
+        Prerequisites:
+            ratios 가 calcRatios 출력 (RatioResult 인스턴스).
+        Freshness:
+            ratios = 최신 분기 (마감 후 30~45 일).
+        Dataflow:
+            ratios → 부채비율 + 유동/당좌비율 + Altman Z''-Score + Ohlson
+            O-Score + Piotroski F-Score → 가중 score → grade 매핑.
+        TargetMarkets: KR (DART), US (EDGAR). 통화별 임계값 분기.
     """
     details: list[str] = []
     risks: list[Flag] = []
