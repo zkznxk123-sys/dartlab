@@ -127,6 +127,13 @@ def auditCredit(
         - ``credit.monitoring.crisisDetector``: 위기 신호
         - ``auditToMarkdown``: 본 결과 → 보고서
 
+    When:
+        분기 1 회 운영자 audit 시 / 외부 등급 변동 후 dCR 와의 정합성 검증.
+
+    How:
+        result 부재 시 evaluate 호출 → externalGrades.json 룩업 → notch 차이 → 동의/비동의/
+        structuralNotes 합성 → CreditAuditResult.
+
     Requires:
         ``data/credit/externalGrades.json`` 로드 + credit.evaluate 호출 가능.
 
@@ -268,6 +275,10 @@ def _findDisagreementReasons(result: dict, direction: str) -> str:
 def auditToMarkdown(audit: CreditAuditResult, *, sectionNum: int = 8) -> str:
     """audit 결과를 마크다운 문자열로 변환.
 
+    Capabilities:
+        CreditAuditResult dataclass 를 보고서 삽입용 마크다운 단일 문자열로 변환. 등급 대조 표 +
+        동의/비동의/구조 참고 섹션 자동 생성.
+
     신평사 등급 대조표, 동의/비동의 근거, 구조적 참고사항을
     보고서에 삽입 가능한 마크다운 형식으로 변환한다.
 
@@ -284,6 +295,33 @@ def auditToMarkdown(audit: CreditAuditResult, *, sectionNum: int = 8) -> str:
     str
         마크다운 형식의 audit 보고서 문자열. 등급 대조표,
         동의/비동의 항목, 구조적 참고사항 섹션을 포함한다.
+
+    Raises:
+        없음 — externalGrades 비면 표 섹션 자동 skip.
+
+    Example:
+        >>> from dartlab.credit.monitoring.audit import auditToMarkdown
+        >>> md = auditToMarkdown(audit, sectionNum=8)
+
+    Guide:
+        Story / Blog 신용평가 섹션에 그대로 삽입 가능. sectionNum 으로 헤더 레벨 조정.
+
+    When:
+        ``saveAudit`` 가 본 함수 결과를 파일에 직렬화. 운영자/AI 보고서 작성 시.
+
+    How:
+        헤더 → 등급 대조 표 (조건부) → 동의/비동의/구조 참고 섹션 추가 → "\\n" join.
+
+    Requires:
+        - 입력 audit (CreditAuditResult)
+
+    See Also:
+        - ``dartlab.credit.monitoring.audit.auditCredit`` : 본 함수 입력 산출
+        - ``dartlab.credit.monitoring.audit.saveAudit`` : 본 함수 결과 저장
+
+    AIContext:
+        AI 답변에 audit 마크다운 그대로 인용 가능. 보고서 다른 섹션과 충돌 없도록 sectionNum
+        조정.
     """
     lines = []
     lines.append(f"## {sectionNum}. 신평사 등급 대조")
@@ -323,6 +361,10 @@ def auditToMarkdown(audit: CreditAuditResult, *, sectionNum: int = 8) -> str:
 def saveAudit(audit: CreditAuditResult) -> Path:
     """audit 결과를 마크다운 파일로 저장.
 
+    Capabilities:
+        CreditAuditResult 를 ``data/credit/audit/{stockCode}_{corpName}.md`` 파일로 직렬화. 등급
+        점수 + audit 일자 + ``auditToMarkdown`` 본문 결합 저장.
+
     ``data/credit/audit/{stockCode}_{corpName}.md`` 경로에
     등급·점수·audit 일자 + 마크다운 본문을 저장한다.
 
@@ -335,6 +377,36 @@ def saveAudit(audit: CreditAuditResult) -> Path:
     -------
     Path
         저장된 파일의 절대 경로.
+
+    Raises:
+        OSError: 디스크 쓰기 실패 시.
+
+    Example:
+        >>> from dartlab.credit.monitoring.audit import auditCredit, saveAudit
+        >>> path = saveAudit(auditCredit("005930", "삼성전자"))
+        >>> path.exists()
+        True
+
+    Guide:
+        파일명에 한글 회사명 포함. 같은 종목 재실행 시 덮어쓰기. archive 필요하면 호출자가
+        별도 처리.
+
+    When:
+        분기 audit 실행 후 결과 보존. CI 에서 audit 마크다운 비교에 사용 가능.
+
+    How:
+        _AUDIT_DIR.mkdir → 파일 경로 결정 → 헤더 + 메타 + ``auditToMarkdown`` 결합 → write_text.
+
+    Requires:
+        - ``data/credit/audit/`` 쓰기 가능
+        - 입력 audit (CreditAuditResult)
+
+    See Also:
+        - ``dartlab.credit.monitoring.audit.auditCredit`` : 본 함수 입력 산출
+        - ``dartlab.credit.monitoring.audit.auditToMarkdown`` : 본문 포맷
+
+    AIContext:
+        AI 직접 호출하지 않는다 (운영자 archive 용도).
     """
     _AUDIT_DIR.mkdir(parents=True, exist_ok=True)
     name = audit.corpName or audit.stockCode
