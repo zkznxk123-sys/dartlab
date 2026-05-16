@@ -625,6 +625,19 @@ def listToolNames() -> tuple[str, ...]:
     return tuple(_SPECS.keys())
 
 
+def isToolReadOnly(name: str) -> bool:
+    """도구가 read-only 인지 (ToolSpec.readOnlyHint True). agent 의 병렬 fan-out 분기 판단.
+
+    snake/PascalCase 양쪽 인식. 미등록 도구는 보수적 False (병렬 X).
+    readOnlyHint=None (미선언) 도 보수적 False — 명시 True 인 경우만 병렬 그룹.
+    """
+    canonical = _LEGACY_NAME_MAP.get(name, name)
+    spec = _SPECS.get(canonical)
+    if spec is None:
+        return False
+    return spec.readOnlyHint is True
+
+
 def registerTool(
     name: str,
     func: Callable[..., Any],
