@@ -182,21 +182,63 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcGrowthQuality(company, *, basePeriod: str | None = None) -> dict | None:
-    """성장 품질 -- 매출 성장이 이익으로 이어지는가.
+    """성장 품질 — 매출 성장이 이익으로 이어지는가.
 
-    매출 vs 영업이익 성장률 괴리를 본다.
-    매출만 크고 이익이 안 따라오면 외형 위주.
+    Capabilities:
+        매출 CAGR vs 영업이익 CAGR 비교 → 품질 판정 (균형/내실/외형/개선/
+        역성장). 연도별 YoY 비교로 operating leverage 시계열 산출. 외형
+        위주 (이익 < 매출 성장 절반) 식별.
 
-    Returns
-    -------
-    dict
-        quality : str — 성장 품질 판단 ("고품질"|"개선 중"|"외형 위주"|"둔화")
-        cagr : dict — 3년 CAGR (revenue, operatingIncome, netIncome) (%)
-        leverageEffect : list[dict]
-            period : str — 기간
-            revenueYoy : float — 매출 전기대비 (%)
-            operatingIncomeYoy : float — 영업이익 전기대비 (%)
-            operatingLeverage : float — 영업레버리지 (배)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``quality`` (str): "역성장"|"이익 역성장"|"외형 위주"|"개선 중"|
+              "내실 위주"|"균형"|"판단 불가"
+            - ``cagr`` (dict): 3 년 CAGR (revenue/operatingIncome/netIncome).
+            - ``leverageEffect`` (list[dict]): 연도별 op-leverage 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcGrowthQuality(Company("005930"))
+        >>> r["quality"], r["cagr"]["revenue"]
+        ('균형', 8.5)
+
+    Guide:
+        "외형 위주" (이익 CAGR < 매출 CAGR × 0.5) 가 2~3 년 연속이면 마진
+        압박 경고. 최근 영업이익 YoY > 10% 면 "개선 중" 으로 완화 (턴어라운드
+        기업 배려). "내실 위주" = 이익 CAGR > 매출 CAGR × 1.5.
+
+    SeeAlso:
+        - ``calcGrowthTrend``: 본 함수의 입력 (CAGR + 시계열)
+        - ``calcSustainableGrowthRate``: SGR vs 실제 갭
+        - ``calcOperatingLeverage``: DOL 시계열
+
+    Requires:
+        IS (매출/영업이익/순이익) ≥ 2 년 (calcGrowthTrend 결과 사용).
+
+    AIContext:
+        quality 라벨 + cagr 절대값 + leverage 추세 함께 인용. KR 회사 흔한
+        함정: 매출 성장 강조 후 이익 정체 (외형 위주). 본 함수가 자동 라벨링.
+
+    LLM Specifications:
+        AntiPatterns:
+            - quality 라벨 단독 인용 — CAGR 절대값 함께.
+            - "외형 위주" 단년도 판정 — 본 함수가 3 년 CAGR 기반 자동.
+        OutputSchema:
+            ``{quality: str, cagr: dict, leverageEffect: list[dict 4키]}``.
+        Prerequisites:
+            IS 시계열 ≥ 2 년 (calcGrowthTrend 결과).
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            calcGrowthTrend → CAGR + YoY → 매출 vs 이익 비교 → quality 라벨 +
+            op-leverage 시계열.
+        TargetMarkets: KR (DART), US (EDGAR — IS 표준).
     """
     trend = calcGrowthTrend(company, basePeriod=basePeriod)
     if trend is None or len(trend["history"]) < 2:
@@ -427,24 +469,65 @@ from dartlab.core.utils.calc import cagr as _cagr  # noqa: E402
 
 @memoizedCalc
 def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None:
-    """계정별 CAGR 비교 — 절대값 장기 추세로 구조적 변화 감지.
+    """계정별 CAGR 비교 — 장기 구조 변화 감지.
 
-    매출 CAGR vs 영업이익 CAGR → 마진 방향
-    자산 CAGR vs 매출 CAGR → 자산 효율 방향
-    부채 CAGR vs 자본 CAGR → 레버리지 방향
+    Capabilities:
+        매출/영업이익/자산/부채/자본 5 계정의 CAGR (Compound Annual Growth
+        Rate) 산출 + 3 쌍 비교 (매출 vs 영업이익 = 마진 방향, 자산 vs 매출 =
+        효율 방향, 부채 vs 자본 = 레버리지 방향). 각 쌍에 양호/주의/경고
+        signal 자동 라벨.
 
-    Returns
-    -------
-    dict
-        comparisons : list[dict]
-            label : str — 비교 레이블 ("매출 vs 영업이익")
-            item1 : str — 첫 번째 항목명
-            cagr1 : float — 첫 번째 CAGR (%)
-            item2 : str — 두 번째 항목명
-            cagr2 : float — 두 번째 CAGR (%)
-            gap : float — cagr1-cagr2 (%)
-            signal : str — 판단 ("양호"|"주의"|"경고")
-        period : str — CAGR 산출 기간 ("2017 → 2025")
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``comparisons`` (list[dict]): 3 쌍 비교 (label, item1/cagr1,
+              item2/cagr2, gap, signal).
+            - ``period`` (str): CAGR 산출 기간 ("2017 → 2025").
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCagrComparison(Company("005930"))
+        >>> r["comparisons"][0]["signal"]
+        '양호'  # 영업이익 > 매출 CAGR
+
+    Guide:
+        - 자산 CAGR > 매출 CAGR + 5pp = 자산 효율 악화 (놀고 있는 자산 증가).
+        - 부채 CAGR > 자본 CAGR + 10pp = 레버리지 확대 (유의).
+        - 영업이익 CAGR < 매출 CAGR - 5pp = 마진 압박.
+        Damodaran "intrinsic growth" 평가 시 매출 CAGR 가 출발점.
+
+    SeeAlso:
+        - ``calcGrowthTrend``: 단기 YoY + 3y CAGR
+        - ``calcGrowthQuality``: 매출/이익 CAGR 정성 판정
+        - ``calcAssetStructure``: 자산 영업/비영업 분리
+
+    Requires:
+        IS (매출/영업이익) + BS (자산/부채/자본) ≥ 3 년.
+
+    AIContext:
+        gap + signal 함께 인용. 단년도 비교 아님 — 장기 (3+ 년) 구조 변화
+        진단. 산업 사이클 (반도체/조선) 회사는 단기 CAGR 왜곡 가능 — 사이클
+        포함 7~10 년 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 1~2 년 CAGR 인용 — 사이클 왜곡, 최소 3 년 (본 함수가 강제).
+            - signal "경고" 단독 인용 — gap 절대값 + 산업 평균 함께.
+        OutputSchema:
+            ``{comparisons: list[dict 7키], period: str}``.
+        Prerequisites:
+            IS + BS 시계열 ≥ 3 년.
+        Freshness:
+            연간 (CAGR 의 본질).
+        Dataflow:
+            IS/BS → 매출/영업이익/자산/부채/자본 → CAGR 5 종 → 3 쌍 비교 →
+            gap → signal 라벨.
+        TargetMarkets: KR (DART), US (EDGAR — 표준).
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     bsResult = company.select("BS", ["자산총계", "부채총계", "자본총계"])
