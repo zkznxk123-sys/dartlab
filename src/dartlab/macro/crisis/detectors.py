@@ -14,6 +14,11 @@ core/ 계층 소속 — macro(시장 해석) 엔진에서 소비.
 from __future__ import annotations
 
 # 결과 타입 (분리: _detectorTypes.py SSOT, re-export 으로 BC 보존)
+from dartlab.macro.crisis._detectorsHelpers import (
+    _beautifulDeleveragingSubPhase,
+    _dalioRegimeVariant,
+    _oneSidedHpTrend,
+)
 from dartlab.macro.crisis._detectorTypes import (
     CreditGapResult,
     DalioPhaseResult,
@@ -26,30 +31,11 @@ from dartlab.macro.crisis._detectorTypes import (
     RecessionDashboard,
 )
 
+__all_helpers__ = ["_beautifulDeleveragingSubPhase", "_dalioRegimeVariant", "_oneSidedHpTrend"]
+
 # ══════════════════════════════════════
 # Credit-to-GDP Gap (BIS 방법)
 # ══════════════════════════════════════
-
-
-def _oneSidedHpTrend(series: list[float], lamb: float = 400_000.0) -> list[float]:
-    """단측 HP 필터 (재귀적, numpy 불필요).
-
-    BIS 기준 lambda=400,000 (분기 데이터).
-    Kalman 필터 재귀 방식으로 구현.
-    """
-    n = len(series)
-    if n < 4:
-        return list(series)
-
-    # 단순 재귀 HP 근사: 각 시점에서 해당 시점까지만 사용
-    # 완전한 HP는 행렬 풀이가 필요하지만, 단측 근사로 EMA 기반 구현
-    # BIS WP 878: one-sided HP ≈ EMA with appropriate smoothing
-    # alpha = 1 / (1 + sqrt(lambda))  (근사)
-    alpha = 1.0 / (1.0 + (lamb**0.5))
-    trend = [series[0]]
-    for i in range(1, n):
-        trend.append(alpha * series[i] + (1 - alpha) * trend[-1])
-    return trend
 
 
 def creditToGDPGap(creditGDPSeries: list[float]) -> CreditGapResult:
@@ -605,73 +591,6 @@ _VARIANT_LABELS = {
     "deflationary": "디플레이션형",
     "inflationary": "인플레이션형",
 }
-
-
-def _beautifulDeleveragingSubPhase(
-    *,
-    realRate: float | None = None,
-    m2GrowthYoy: float | None = None,
-    debtServiceYoY: float | None = None,
-    npl: float | None = None,
-    hySpread: float | None = None,
-    fiscalDeficitPctGdp: float | None = None,
-) -> str | None:
-    """Beautiful Deleveraging 내부 4단계 판정."""
-    available = sum(x is not None for x in [realRate, m2GrowthYoy, debtServiceYoY, npl, hySpread, fiscalDeficitPctGdp])
-    if available < 3:
-        return None
-    # 2. defaultRestructuring — 신용시장 극한 스트레스 우선
-    if (hySpread is not None and hySpread > 800) or (npl is not None and npl > 5.0):
-        return "defaultRestructuring"
-    # 3. moneyPrinting
-    if m2GrowthYoy is not None and m2GrowthYoy > 8.0 and (realRate is None or realRate < 0):
-        return "moneyPrinting"
-    # 4. wealthTransfer
-    if fiscalDeficitPctGdp is not None and fiscalDeficitPctGdp > 6.0:
-        return "wealthTransfer"
-    # 1. austerity
-    if realRate is not None and realRate > 1.0 and debtServiceYoY is not None and debtServiceYoY >= 0:
-        return "austerity"
-    return None
-
-
-def _dalioRegimeVariant(
-    *,
-    fxFlexibility: str | None = None,
-    reserveCurrency: bool | None = None,
-    realRate: float | None = None,
-    foreignDebtPct: float | None = None,
-) -> str | None:
-    """Deflationary vs Inflationary regime 판정 (Dalio Part 1)."""
-    if fxFlexibility is None and reserveCurrency is None and realRate is None:
-        return None
-    score_deflation = 0
-    score_inflation = 0
-    if fxFlexibility == "pegged":
-        score_deflation += 2
-    elif fxFlexibility == "managed":
-        score_deflation += 1
-    elif fxFlexibility == "flexible":
-        score_inflation += 1
-    if reserveCurrency is True:
-        score_inflation += 2
-    elif reserveCurrency is False:
-        score_deflation += 1
-    if foreignDebtPct is not None:
-        if foreignDebtPct > 30:
-            score_deflation += 2
-        elif foreignDebtPct > 15:
-            score_deflation += 1
-    if realRate is not None:
-        if realRate < -2.0:
-            score_inflation += 1
-        elif realRate > 2.0:
-            score_deflation += 1
-    if score_deflation > score_inflation:
-        return "deflationary"
-    if score_inflation > score_deflation:
-        return "inflationary"
-    return None
 
 
 def dalioDebtCyclePhase(
