@@ -16,12 +16,19 @@ fi
 # 2) staged Python 파일 ruff format + check (experiments / notebooks 제외)
 STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$' | grep -vE '^(experiments|notebooks)/' | tr '\n' ' ')
 if [ -n "$STAGED_PY" ]; then
-  if command -v uv >/dev/null 2>&1; then
-    RUFF="uv run ruff"
-  elif [ -x .venv/bin/ruff ]; then
+  # uv run 은 dartlab 패키지 자동 rebuild 를 트리거 — Windows 에서 .venv/Scripts/dartlab.exe
+  # 가 잡혀 있으면 OS error 32 로 hook 실패. .venv 안의 ruff 직접 호출이 가장 안정.
+  if [ -x .venv/bin/ruff ]; then
     RUFF=".venv/bin/ruff"
-  else
+  elif [ -x .venv/Scripts/ruff.exe ]; then
+    RUFF=".venv/Scripts/ruff.exe"
+  elif command -v ruff >/dev/null 2>&1; then
     RUFF="ruff"
+  elif command -v uv >/dev/null 2>&1; then
+    RUFF="uv run ruff"
+  else
+    echo "[ruff] ruff not found in .venv or PATH." >&2
+    exit 1
   fi
 
   $RUFF format --check $STAGED_PY || {
