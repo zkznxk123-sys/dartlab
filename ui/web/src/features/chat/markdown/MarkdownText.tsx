@@ -19,6 +19,19 @@ function fixCjkBold(text: string): string {
 	return out;
 }
 
+// 모델이 원문에 raw tool call id (`call_5xjEfPtFobt9...`) 를 쓰는 회귀 차단.
+// WorkLoop 카드가 이미 도구 호출을 보여주므로 본문 인용은 중복 + hash 만 노출되어 사용자에게 의미 X.
+// 양식: `근거: call_xxxx` 또는 `[근거] call_xxxx` — 줄 단위 제거.
+function stripRawCallIds(text: string): string {
+	let out = text.replace(/^[\s\-*•]*근거[\s:：][\s]*call_[A-Za-z0-9_]+\s*$/gm, '');
+	out = out.replace(/^[\s\-*•]*\[?근거\]?\s*[:：]?\s*call_[A-Za-z0-9_]+\s*$/gm, '');
+	// 인라인 (문장 안) — `... 근거: call_xxx ...` → `근거` 단어만 남기고 id 제거.
+	out = out.replace(/근거[\s:：]+call_[A-Za-z0-9_]+/g, '근거');
+	// 보수적: 줄바꿈 3 개 이상 연속이면 2 개로 축약 (제거된 줄 자리).
+	out = out.replace(/\n{3,}/g, '\n\n');
+	return out;
+}
+
 // dartlab ref ID 양식 — kind:value 형태. kind 는 알려진 12 종.
 const REF_KINDS = [
 	'doc',
@@ -168,8 +181,10 @@ function walkChildren(
 }
 
 export function MarkdownText({ text }: { text: string }) {
+	// 0) raw tool call id 누출 차단 (모델 회귀 방어)
+	const t0 = stripRawCallIds(text);
 	// 1) external 본문 sentinel
-	const { text: t1, blocks: extBlocks } = injectExternalSentinels(text);
+	const { text: t1, blocks: extBlocks } = injectExternalSentinels(t0);
 	// 2) ref ID sentinel
 	const { text: t2, refOrder } = injectRefSentinels(t1);
 	// 3) CJK bold 보정
