@@ -237,27 +237,62 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """ROE 구조 분해 -- 수익을 어떻게 만드는가.
+    """ROE 5 요소 듀퐁 분해 시계열 — 수익을 어떻게 만드는가.
 
-    IS + BS에서 원본 계정을 가져와서 듀퐁 5요소를 직접 계산.
-    ROE = (NI/EBT) x (EBT/EBIT) x (EBIT/Rev) x (Rev/TA) x (TA/Equity)
-        = 세금부담 x 이자부담 x 영업마진 x 자산회전 x 레버리지
+    Capabilities:
+        ROE = 세금부담 × 이자부담 × 영업마진 × 자산회전 × 레버리지 5 요소
+        분해 (Penman 듀퐁) + ROE/ROA 절대값. IS/BS 원본 계정에서 직접 산출.
+        ROE 변화를 5 요인 중 어디에서 왔는지 attribution.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            netIncome : float — 당기순이익 (원)
-            equity : float — 자기자본 (원)
-            totalAssets : float — 총자산 (원)
-            roe : float — 자기자본이익률 (%)
-            roa : float — 총자산이익률 (%)
-            taxBurden : float — 세금부담률 (배)
-            interestBurden : float — 이자부담률 (배)
-            operatingMargin : float — 영업이익률 (%)
-            assetTurnover : float — 자산회전율 (배)
-            leverage : float — 재무레버리지 (배)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 11 키 (period + netIncome +
+              equity + totalAssets + roe + roa + 5 듀퐁 요소).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcReturnTrend(Company("005930"))
+        >>> r["history"][0]["roe"], r["history"][0]["leverage"]
+        (15.0, 2.1)
+
+    Guide:
+        ROE 동일 (15%) 이라도 (영업마진 10% × 자산회전 1.5 × 레버리지 1.0)
+        vs (영업마진 5% × 자산회전 1.5 × 레버리지 2.0) 는 질이 다르다 —
+        후자는 레버리지 의존. 듀퐁 attribution 으로 ROE 변화 원인 추적.
+
+    SeeAlso:
+        - ``calcMarginTrend``: 5 마진 단계 시계열
+        - ``calcPenmanDecomposition``: Penman RNOA + 재무레버리지 분해
+        - ``calcRoicTree``: ROIC = NOPAT/InvestedCapital
+        - Damodaran "Investment Valuation" Ch.5
+
+    Requires:
+        IS (매출/영업이익/법인세차감전순이익/당기순이익) + BS (자산총계/자본총계).
+
+    AIContext:
+        ROE 단년도 + 5 요소 분해 함께. ROE 상승 원인이 영업마진 (질) vs
+        레버리지 (위험) 인지 명시. KR 대기업 평균 ROE ~ 10%, US S&P500 ~ 17%.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ROE 단독 인용 — 듀퐁 5 요소 분해로 질 분리 필요.
+            - 금융업에 일반 듀퐁 적용 — NIM/리스크가중자산이익률 별도.
+        OutputSchema:
+            ``{history: list[dict 11키]}``.
+        Prerequisites:
+            IS + BS 시계열 ≥ 2 년.
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            IS → 매출/영업이익/PBT/NI → BS → 자산/자본 → 듀퐁 5 요소 =
+            (NI/PBT) × (PBT/OP) × (OP/Rev) × (Rev/TA) × (TA/Eq).
+        TargetMarkets: KR (DART), US (EDGAR — 듀퐁 원형 최적).
     """
     isResult = company.select("IS", ["매출액", "영업이익", "법인세차감전순이익", "당기순이익"])
     bsResult = company.select("BS", ["자산총계", "자본총계"])
