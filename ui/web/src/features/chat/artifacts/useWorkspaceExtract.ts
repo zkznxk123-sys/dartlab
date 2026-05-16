@@ -13,7 +13,15 @@ function extractStockCode(tool: ToolPart): string | null {
 	const args = tool.args;
 	if (!isObj(args)) return null;
 	if (typeof args.stockCode === 'string') return args.stockCode;
+	if (typeof args.target === 'string' && /^[0-9]{6}$|^[A-Z]{1,6}$/.test(args.target)) {
+		return args.target;
+	}
 	if (isObj(args.args) && typeof args.args.stockCode === 'string') return args.args.stockCode;
+	// EngineCall 의 apiRef 가 'Company.show TSLA IS freq=Q' 처럼 합쳐진 회귀 케이스 — apiRef 안 ticker 추출.
+	if (typeof args.apiRef === 'string') {
+		const m = args.apiRef.match(/\b([0-9]{6}|[A-Z]{2,6})\b/);
+		if (m) return m[1] ?? null;
+	}
 	if (tool.name === 'RunPython' && typeof args.code === 'string') {
 		const m =
 			args.code.match(/Company\(\s*['"]([0-9]{6}|[A-Z]{1,6})['"]/) ||
