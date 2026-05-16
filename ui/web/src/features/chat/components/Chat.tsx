@@ -7,12 +7,14 @@ import {
 	streamAsk,
 	type AskStreamControl,
 } from '@/features/chat/streaming/streamAsk';
+import { useWorkspaceAutoExtract } from '@/features/chat/artifacts/useWorkspaceExtract';
 import { ChatMessage } from './Message';
 import { Composer } from './Composer';
 import { EmptyState } from './EmptyState';
 import { ScrollToBottomButton } from './ScrollToBottomButton';
 
 export function Chat() {
+	useWorkspaceAutoExtract();
 	const conversations = useChat((s) => s.conversations);
 	const activeId = useChat((s) => s.activeId);
 	const newConversation = useChat((s) => s.newConversation);
