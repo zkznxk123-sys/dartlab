@@ -15,17 +15,66 @@ log = logging.getLogger(__name__)
 
 
 def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
-    """기관/외국인 수급 분석.
+    """기관/외국인 수급 분석 — KR 전용 (KRX 투자자별 거래).
+
+    Capabilities:
+        외국인/기관/개인 일별 순매수 + 5d/20d 누적 + flowMomentum (최근 5d /
+        20d 비율) + streak (연속 매수/매도 일수) 산출. KRX 가 공시하는
+        투자자별 거래대금 기반. US 는 별도 데이터 (13F 분기) 라 본 함수 미지원.
 
     Args:
-        stockCode: 종목코드 (KR 전용).
-        market: "KR" | "US" | "auto".
-        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 누적 시계열.
+        stockCode: 종목코드 (KR 6 자리 전용).
+        market: "KR" 만 정상 처리, 그 외는 error.
+        series: True 면 ``_series`` 추가 (foreign_cum5, foreign_cum20,
+            inst_cum5, inst_cum20).
 
     Returns:
-        dict with foreignNetBuy, instNetBuy, flowMomentum, streak.
-        series=True (KR only) 시: _series = {foreign_cum5, foreign_cum20, inst_cum5, inst_cum20}.
-        US 면 _series = None.
+        dict:
+            - ``foreignNetBuy``/``instNetBuy``/``individualNetBuy`` (dict):
+              일별/5d/20d/streak.
+            - ``flowMomentum`` (float): 최근 5d vs 20d 비율.
+            - 또는 ``error`` (str): KR 외 또는 수급 데이터 부재.
+
+    Raises:
+        없음 (error 키).
+
+    Example:
+        >>> r = calcFlow("005930")
+        >>> r["foreignNetBuy"]["streak"]
+        5  # 외국인 5 일 연속 순매수
+
+    Guide:
+        - 외국인 + 기관 동시 순매수 + streak ≥ 3 = 강한 매수 시그널.
+        - 외국인↑ vs 기관↓ 분기 = 의견 분기 (단기 변동성 큼).
+        - 누적 20d 절대값 + 시가총액 대비 비율 함께 인용 (절대값만 보면
+          대형주 편향).
+
+    SeeAlso:
+        - ``calcVolume``: 거래량 (수급 = 거래 주체별 분해)
+        - ``calcMomentum``: 가격 모멘텀
+        - ``calcEventSignal``: 공시 이벤트와 결합
+
+    Requires:
+        gather("flow") 데이터 — KR 만 가능.
+
+    AIContext:
+        외국인 / 기관 분리 인용. 단일 day 액수 단독 인용 금지 — 5d/20d 누적
+        + streak 함께. US 종목에 본 함수 호출 시 error 즉시 반환.
+
+    LLM Specifications:
+        AntiPatterns:
+            - US 종목에 본 함수 호출 — error.
+            - 1 일 순매수만 인용 — 5d/20d 누적 + streak 함께 필수.
+        OutputSchema:
+            ``{foreignNetBuy: dict, instNetBuy: dict, individualNetBuy: dict,
+              flowMomentum: float}`` 또는 ``{..., error: str}``.
+        Prerequisites:
+            gather("flow") 데이터 (KR 전용).
+        Freshness:
+            일별 (KRX 마감 후).
+        Dataflow:
+            gather flow → 일별 순매수 → 5d/20d 누적 → flowMomentum → streak.
+        TargetMarkets: KR (KRX), US 미지원.
     """
     market = resolveMarket(stockCode, market)
 
