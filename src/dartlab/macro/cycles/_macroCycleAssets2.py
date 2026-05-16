@@ -64,6 +64,12 @@ def interpretFxDrivers(
         - ``interpretGoldDrivers``: 금 3 요인 (달러와 cross-check)
         - ``rateOutlook``: 금리 방향 전망
 
+    When:
+        ``macro("cycle", "fx")``. AI 답변 USDKRW 변동 원인 분해 시.
+
+    How:
+        3 요인 임계 분기 → 원화강세/약세/중립 → fxChangePct 방향과 일치 요인 → dominant.
+
     Requires:
         없음 — 4 입력 모두 옵션. fxChangePct 만 필수.
 
@@ -190,6 +196,12 @@ def marketLevelValuation(
         - ``classifyCycle``: 매크로 사이클 (밸류에이션과 함께 종합)
         - ``copperGoldRatio``: 위험선호 (다른 시장 척도)
         - Buffett, W. (2001) Fortune Magazine
+
+    When:
+        ``macro("cycle", "buffett")``. 시장 전체 valuation 답변 시.
+
+    How:
+        ratio = (시총/GDP) × 100 → 5 구간 (70/100/140/180) 분류.
 
     Requires:
         Wilshire 5000 시가총액 + 명목 GDP (FRED).

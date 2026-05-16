@@ -112,6 +112,15 @@ def calcFearGreedProxy(
         - ``classifyVixRegime``: VIX 단독 regime 판별
         - CNN Fear & Greed Index 공식 페이지
 
+    When:
+        ``macro("cycle", "sentiment")``. AI 답변 "공포 / 탐욕 어디" 시.
+
+    How:
+        4~5 지표 각각 ``_normalize`` (0~100) → 가중 평균 → 0~25/45/55/75 임계 → label.
+
+    Raises:
+        없음 — 순수 산술.
+
     Requires:
         FRED 시리즈 VIXCLS + S&P500 + BAMLH0A0HYM2 (+ GOLDAMGBD228NLBM
         옵션). API key 불필요.
@@ -191,6 +200,10 @@ def estimateRateExpectation(
 ) -> RateExpectation:
     """2Y-FF 스프레드로 시장 금리 기대 방향 근사.
 
+    Capabilities:
+        2Y 국채 수익률 - Fed Funds Rate 스프레드 부호/크기로 시장의 정책금리 인하 / 인상 / 동결
+        기대 방향과 강도 (mild / moderate / strong) 판정. CME FedWatch 의 단순 대안.
+
     2Y 국채는 향후 2년간 정책금리 경로 기대를 반영.
     2Y < FF → 시장은 인하를 기대.
     2Y > FF → 시장은 인상을 기대.
@@ -202,6 +215,34 @@ def estimateRateExpectation(
 
     Returns:
         RateExpectation
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.macro.cycles.sentiment import estimateRateExpectation
+        >>> r = estimateRateExpectation(ffRate=5.25, dgs2=4.5)
+        >>> r.direction
+        'cut_expected'
+
+    Guide:
+        spread = dgs2 - ffRate. 임계 ±0.10/0.25/0.50 으로 mild/moderate/strong.
+
+    When:
+        ``macro("cycle")`` 정책금리 기대 분기. AI 답변 "시장은 인하를 기대" 류.
+
+    How:
+        spread = dgs2 - ffRate → 임계 분기 → direction/strength → RateExpectation dataclass.
+
+    Requires:
+        - FRED 시리즈 DGS2 + DFF (+ DGS10 옵션)
+
+    See Also:
+        - ``dartlab.macro.cycles.macroCycle.decomposeLongRate`` : 장기금리 분해
+        - ``dartlab.macro.cycles.macroCycle.rateOutlook`` : 정책 방향 종합
+
+    AIContext:
+        AI 답변 시 spread2yFf 값 + direction 함께 인용. 절대 spread 만으로는 모호.
     """
     spread = dgs2 - ffRate
     spread_10y2y = (dgs10 - dgs2) if dgs10 is not None else None
@@ -332,6 +373,13 @@ def calcSentiment(*, market: str = "US", asOf: str | None = None, overrides: dic
         - ``calcFearGreedProxy``: 5 컴포넌트 단독
         - ``classifyVixRegime``: VIX 구간 라벨
         - ``calcLiquidity``: HY spread 함께
+
+    When:
+        ``macro("cycle", "sentiment")`` 진입점. AI 가 시장 심리 종합 답변 시.
+
+    How:
+        ``_fetchSentimentData`` → overrides → ``calcFearGreedProxy`` + classifyVixRegime + JLN
+        합성 → dict.
 
     Requires:
         FRED VIX (VIXCLS) + S&P 500 + HY OAS + (옵션) JLN.

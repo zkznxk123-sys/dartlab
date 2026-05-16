@@ -75,6 +75,12 @@ def interpretGoldDrivers(
         - ``copperGoldRatio``: 구리/금 비율 (위험선호)
         - ``classifyCycle``: 사이클 종합
 
+    When:
+        ``macro("cycle", "gold")``. 금 가격 변동 원인 분해 답변 시.
+
+    How:
+        3 요인 각각 임계 분기 → 상승/하락/중립 라벨 → 다수결로 dominant.
+
     Requires:
         4 입력 모두 필요 (옵션 아님).
 
@@ -186,6 +192,12 @@ def classifyVixRegime(vix: float) -> VixRegime:
         - ``classifyCycle``: 사이클 종합 (VIX 입력)
         - ``copperGoldRatio``: 위험선호 (반대 척도)
 
+    When:
+        ``macro("cycle", "vix")``. AI 답변 시장 공포 단계 / DCA 신호 시.
+
+    How:
+        VIX 임계 6 단계 (40/30/25/20/15/<15) 매핑.
+
     Requires:
         VIX 일별 (FRED VIXCLS 또는 CBOE).
 
@@ -272,6 +284,12 @@ def copperGoldRatio(
         - ``interpretGoldDrivers``: 금 가격 3 요인 분해
         - ``classifyVixRegime``: VIX 공포 (반대 척도)
         - ``classifyCycle``: 사이클 종합
+
+    When:
+        ``macro("cycle", "copperGold")``. 채권 yield 예측 / 위험선호 답변 시.
+
+    How:
+        ratio = copper / gold → prev 대비 변화율 ±3% 임계 → trend + implication.
 
     Requires:
         구리/금 가격 (Yahoo Finance HG=F + GC=F).
