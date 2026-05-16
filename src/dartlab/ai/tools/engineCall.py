@@ -14,6 +14,7 @@ import polars as pl
 from dartlab.ai.contracts import Ref
 
 from .creditBadge import getDcrBadge
+from .filingDeepLink import attachDocRef, buildPeriodToFiling
 from .formatting import formatMoney, formatPercent
 from .types import ToolResult
 
@@ -139,31 +140,34 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         return ToolResult(
             False, f"{companyName or stockCode} {topic} 표를 요약하지 못했습니다.", error="unreadable_table"
         )
+    filingMap = buildPeriodToFiling(company)
+    latestPeriod = summary["latestPeriod"]
+    tablePayload = attachDocRef(summary, latestPeriod, filingMap)
     table_ref = Ref(
-        id=f"table:{stockCode}:{topic}:{summary['latestPeriod']}",
+        id=f"table:{stockCode}:{topic}:{latestPeriod}",
         kind="tableRef",
-        title=f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']}",
+        title=f"{companyName or stockCode} {_STMT_LABELS[topic]} {latestPeriod}",
         source=f"Company({stockCode}).show('{topic}')",
-        payload=summary,
+        payload=tablePayload,
     )
     refs = [table_ref]
     refs.extend(
         Ref(
-            id=f"value:{stockCode}:{topic}:{summary['latestPeriod']}:{row['snakeId']}",
+            id=f"value:{stockCode}:{topic}:{latestPeriod}:{row['snakeId']}",
             kind="valueRef",
-            title=f"{row['item']} {summary['latestPeriod']}",
+            title=f"{row['item']} {latestPeriod}",
             source=table_ref.id,
-            payload=row,
+            payload=attachDocRef(row, latestPeriod, filingMap),
         )
         for row in summary["rows"]
     )
     refs.append(
         Ref(
-            id=f"date:{stockCode}:{topic}:{summary['latestPeriod']}",
+            id=f"date:{stockCode}:{topic}:{latestPeriod}",
             kind="dateRef",
             title=f"{_STMT_LABELS[topic]} 기준시점",
             source=table_ref.id,
-            payload={"period": summary["latestPeriod"]},
+            payload=attachDocRef({"period": latestPeriod}, latestPeriod, filingMap),
         )
     )
     summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인"

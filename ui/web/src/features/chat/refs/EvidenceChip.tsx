@@ -2,7 +2,7 @@
 // hover/click 시 Popover 에 ref 의 title + payload preview.
 // "↪ 도구 호출" 클릭 시 store.flashTool 으로 ToolCallRow 강조 (Track 5).
 import { useMemo } from 'react';
-import { CornerDownRight, FileBarChart, FileText, Globe, Hash, Settings2, Sparkles } from 'lucide-react';
+import { CornerDownRight, ExternalLink, FileBarChart, FileText, Globe, Hash, Settings2, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -53,6 +53,9 @@ export function EvidenceChip({ refId, index }: Props) {
 	const flashTool = useChat((s) => s.flashTool);
 
 	const body = useMemo(() => (ref ? previewBody(ref) : null), [ref]);
+	const docId = ref?.payload && typeof ref.payload.docId === 'string' ? (ref.payload.docId as string) : null;
+	const sourcePath = ref?.payload && typeof ref.payload.sourcePath === 'string' ? (ref.payload.sourcePath as string) : null;
+	const reportType = ref?.payload && typeof ref.payload.reportType === 'string' ? (ref.payload.reportType as string) : null;
 
 	if (!ref) {
 		// refDetail 못 받았으면 작은 plain chip 만 표시 (id 잘림).
@@ -97,6 +100,21 @@ export function EvidenceChip({ refId, index }: Props) {
 					</div>
 					{ref.title && <div className="text-sm font-medium leading-snug">{ref.title}</div>}
 					<div className="font-mono text-[10px] text-muted-foreground truncate">{ref.id}</div>
+					{docId && sourcePath && (
+						<a
+							href={sourcePath}
+							target="_blank"
+							rel="noreferrer noopener"
+							className="flex items-center justify-between gap-2 rounded border border-border bg-muted/30 px-2 py-1.5 text-[11px] hover:bg-muted transition-colors"
+						>
+							<span className="flex items-center gap-1.5">
+								<ExternalLink className="size-3 text-muted-foreground" />
+								<span className="font-medium">DART 원문</span>
+								{reportType && <span className="text-muted-foreground">· {reportType}</span>}
+							</span>
+							<span className="font-mono text-[9px] text-muted-foreground">{docId}</span>
+						</a>
+					)}
 					{body && (
 						<pre className="tiny-scroll max-h-[200px] overflow-auto rounded border border-border bg-muted/20 p-2 text-[11px] font-mono whitespace-pre-wrap break-words">
 							{body}
