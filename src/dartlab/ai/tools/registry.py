@@ -503,7 +503,7 @@ def toolSpecs(provider: Any = None) -> list[dict[str, Any]]:
 
 
 def listToolNames() -> tuple[str, ...]:
-    """listToolNames — TODO 한국어 동작 설명."""
+    """현재 등록된 모든 tool name (canonical + plugin) tuple."""
     return tuple(_SPECS.keys())
 
 
@@ -514,7 +514,7 @@ def registerTool(
     description: str | None = None,
     inputSchema: dict[str, Any] | None = None,
 ) -> None:
-    """registerTool — TODO 한국어 동작 설명."""
+    """plugin tool 등록 — name + 함수 + schema (canonical 이름 덮어쓰기 차단)."""
     # Legacy snake 이름 (read_skill 등) 도 canonical PascalCase 로 정규화해 보호 — plugin
     # 이 옛 이름으로 우회 등록하면 canonical 도구가 silently 덮어씌워지는 회귀 가능.
     canonical = _LEGACY_NAME_MAP.get(name, name)
@@ -539,7 +539,7 @@ def registerTool(
 
 
 def unregisterTool(name: str) -> None:
-    """unregisterTool — TODO 한국어 동작 설명."""
+    """plugin tool 등록 해제 (canonical 이름은 보호 — ValueError)."""
     canonical = _LEGACY_NAME_MAP.get(name, name)
     if canonical in CANONICAL_TOOL_NAMES:
         raise ValueError(f"canonical tool은 해제할 수 없습니다: {name} (-> {canonical})")
@@ -548,7 +548,7 @@ def unregisterTool(name: str) -> None:
 
 
 def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]:
-    """executeTool — TODO 한국어 동작 설명."""
+    """tool name + args → 등록된 함수 호출 → ToolResult.toDict() 반환."""
     canonical = _LEGACY_NAME_MAP.get(name, name)
     if canonical not in _TOOLS:
         return ToolResult(False, f"Unknown tool: {name}", error="unknown_tool").toDict()

@@ -25,7 +25,7 @@ _HTML_TAG_RE = re.compile(r"<[^<>]+>")
 
 
 def formatMoney(value: Any) -> str:
-    """formatMoney — TODO 한국어 동작 설명."""
+    """원 → 자동 단위 변환 ("12.3조원" / "456억원" / "789원")."""
     try:
         number = float(value)
     except (TypeError, ValueError):
@@ -40,7 +40,7 @@ def formatMoney(value: Any) -> str:
 
 
 def formatPercent(value: Any) -> str:
-    """formatPercent — TODO 한국어 동작 설명."""
+    """숫자 → "12.3%" 표기 (변환 실패/NaN 은 "n/a")."""
     try:
         number = float(value)
     except (TypeError, ValueError):
@@ -51,7 +51,7 @@ def formatPercent(value: Any) -> str:
 
 
 def shortText(value: Any, *, limit: int = 500) -> str:
-    """shortText — TODO 한국어 동작 설명."""
+    """공백 정리 후 limit 자 이내로 ellipsis 절단."""
     text = " ".join(str(value or "").split())
     if len(text) <= limit:
         return text
