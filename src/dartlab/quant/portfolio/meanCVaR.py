@@ -71,7 +71,7 @@ def optimizeMeanCVaR(
     w = np.ones(N) / N
 
     def cvar(weights: np.ndarray) -> float:
-        """cvar — TODO 한국어 동작 설명."""
+        """포트폴리오 weights 의 CVaR (alpha 분위 tail loss 평균)."""
         port = R @ weights
         var_thresh = np.quantile(port, alpha)
         tail = port[port <= var_thresh]

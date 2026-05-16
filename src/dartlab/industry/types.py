@@ -29,7 +29,7 @@ class IndustryDef:
     stages: list[StageInfo]
 
     def stageByKey(self, key: str) -> StageInfo | None:
-        """stageByKey — TODO 한국어 동작 설명."""
+        """stage key 로 StageInfo 조회. 없으면 None."""
         for s in self.stages:
             if s.key == key:
                 return s
@@ -57,7 +57,7 @@ class IndustryNode:
     revenue: float | None = None  # 매출액 (원)
 
     def toDict(self) -> dict:
-        """toDict — TODO 한국어 동작 설명."""
+        """dataclass → nodes.json 행 dict 직렬화."""
         return {
             "stockCode": self.stockCode,
             "corpName": self.corpName,

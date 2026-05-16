@@ -27,7 +27,7 @@ class PeerRow:
     isSelf: bool = False
 
     def asDict(self) -> dict[str, Any]:
-        """asDict — TODO 한국어 동작 설명."""
+        """dataclass → dict 직렬화 (values 는 얕은 복사)."""
         return {
             "stockCode": self.stockCode,
             "corpName": self.corpName,
