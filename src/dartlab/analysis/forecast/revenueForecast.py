@@ -608,7 +608,7 @@ def forecastRevenue(
     Example:
         >>> from dartlab import Company
         >>> c = Company("005930")
-        >>> r = forecastRevenue(c.finance.timeseries, stockCode="005930",
+        >>> r = forecastRevenue(c.show("timeseries"), stockCode="005930",
         ...                     sectorKey="IT", horizon=3)
         >>> r.projected, r.confidence
 

@@ -771,15 +771,15 @@ def calcRatios(
     Guide:
         - 사용자 API 는 ``c.show("ratios")`` — 본 함수는 backend.
         - 다종목 batch 발굴 시 ``scanRatio("roe").sort(...).head(N)`` 가 빠름 (parquet vectorized).
-        - 단일 종목 deep dive 시 ``c.ratios`` (본 함수 결과) 60+ field 전부 access.
+        - 단일 종목 deep dive 시 ``c.show("ratios")`` (본 함수 결과) 60+ field 전부 access.
 
     AIContext:
-        Ask Workbench finance core — ``c.ratios`` 호출 시 backend. archetype 처리로
+        Ask Workbench finance core — ``c.show("ratios")`` 호출 시 backend. archetype 처리로
         은행/보험/지주 회사에서 부적절 ratio (제조업 기준 OPM 등) 자동 마스킹.
 
     LLM Specifications:
         AntiPatterns:
-            - 본 함수 직접 호출 X — ``c.ratios`` / ``c.show("ratios")`` 위임.
+            - 본 함수 직접 호출 X — ``c.show("ratios")`` 위임.
             - ``annual=False`` 인데 분기 시계열이 4 분기 미만 → TTM 계산 불가 → None.
             - ``archetypeOverride`` 강제 후 결과 신뢰 X — 자동 감지 우선, override 는 예외.
             - 다종목 발굴에 본 함수 N 회 X — ``scanRatio`` (vectorized parquet) 사용.
