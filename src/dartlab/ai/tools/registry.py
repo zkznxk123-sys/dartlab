@@ -25,6 +25,7 @@ from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
+from .storyTemplate import pickStoryTemplate
 from .types import ToolResult, ToolSpec
 from .validateRecipe import validateRecipe
 from .webSearch import webSearch
@@ -289,6 +290,21 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "PickStoryTemplate": ToolSpec(
+        "PickStoryTemplate",
+        "기업유형 (growth/value/credit_risk 등 9 enum) 자동 분류 + 추천 story 섹션 묶음. '이 회사 어떻게 봐?' 종합 분석 의도면 답변 흐름 잡기 전에 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "question": {"type": "string"},
+            },
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "EvidenceGate": ToolSpec(
         "EvidenceGate",
         "Skill OS spec 의 requiredEvidence ↔ 누적 refs 비교. 답변 합성 직전 호출 — missing ref kind 있으면 답변에 ⚠ + 한계 문장 추가 권장.",
@@ -439,6 +455,7 @@ _TOOLS: dict[str, ToolFn] = {
     "ReadCapability": readCapability,
     "EngineCall": engineCall,
     "EvidenceGate": evidenceGate,
+    "PickStoryTemplate": pickStoryTemplate,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
     "Read": readFile,
@@ -480,6 +497,7 @@ _LEGACY_NAME_MAP = {
     "read_capability": "ReadCapability",
     "engine_call": "EngineCall",
     "evidence_gate": "EvidenceGate",
+    "pick_story_template": "PickStoryTemplate",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",
     "read": "Read",
