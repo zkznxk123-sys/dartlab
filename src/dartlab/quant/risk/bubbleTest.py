@@ -94,15 +94,19 @@ def calcSADF(
     Phillips-Shi-Yu 2015 Table 1 critical values 사용. finite-sample 보정으로 작은 n 에서
     +50/n 보수 가산. 단일 버블만 탐지 — 다중 버블/시작-종료 시점은 calcGSADF 사용.
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.risk.bubbleTest.calcGSADF`` : 다중 버블 + 시작/종료 spans
-    - ``dartlab.quant.risk.tailrisk.calcTailrisk`` : 꼬리 위험
+    See Also:
+        - ``dartlab.quant.risk.bubbleTest.calcGSADF`` : 다중 버블 + 시작/종료 spans
+        - ``dartlab.quant.risk.tailrisk.calcTailrisk`` : 꼬리 위험
 
-    Requires
-    --------
-    - 시계열 길이 ≥ 30
-    - 모든 가격 > 0 (log 변환 가능)
+    When:
+        Quant risk + AI "지금 버블인가" 답변 1 차.
+
+    How:
+        log(price) → sliding right-end window ADF stat 시리즈 → max (SADF) →
+        critical 5% 대비.
+
+    Requires:
+        시계열 길이 ≥ 30, 모든 가격 > 0 (log 변환 가능).
 
     AIContext
     ---------
@@ -190,14 +194,18 @@ def calcGSADF(
     SADF 가 "전체 시계열 중 단일 버블" 만 잡는다면 GSADF 는 multi-episode 감지에 강함. 한
     series 안의 여러 버블·진정 사이클 분석에 적합.
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.risk.bubbleTest.calcSADF`` : 단일 버블
+    See Also:
+        - ``dartlab.quant.risk.bubbleTest.calcSADF`` : 단일 버블
 
-    Requires
-    --------
-    - 시계열 길이 ≥ 50
-    - 모든 가격 > 0
+    When:
+        다중 버블 탐지 + AI 여러 거품 시기 답변.
+
+    How:
+        각 right-end r_2 에서 left-end r_1 sweep → ADF 최대 → BSADF 시리즈 →
+        5% 초과 구간 묶기.
+
+    Requires:
+        시계열 길이 ≥ 50, 모든 가격 > 0.
 
     AIContext
     ---------

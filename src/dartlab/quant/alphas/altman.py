@@ -78,10 +78,23 @@ def calcAltmanFactor(
         - Z'' (제조업 외 포함) : calcAltmanFactor(variant="zpp")
         - 원본 Z (제조업 상장) : calcAltmanFactor(variant="z")
 
-    SeeAlso:
+    See Also:
         - credit.metrics : 단일 종목 altmanZScore 필드
         - core.finance.ratios._calcAltmanZ : 원 공식 구현
         - calcPiotroskiFactor : 같은 Sprint 2 재무 건강 축
+
+    When:
+        Quant 재무 알파 9 축 + AI 부실 위험 답변 1 차.
+
+    How:
+        scan finance.parquet 연결 → 최신 연도 → Z/Z'' 계산 → safe/grey/distress
+        분포 + top/bottom 10.
+
+    Requires:
+        scan finance.parquet + (Z 사용 시) 시가총액 데이터.
+
+    Raises:
+        없음 — 실패는 None.
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

@@ -204,15 +204,18 @@ def calcVECM(Y: np.ndarray, *, lag: int = 1, cointRank: int | None = None) -> di
     ΔY_t = αβ^T Y_{t-1} + Σ Γ ΔY_{t-i} + ε 의 1 차 근사. α 작을수록 회귀 느림. spread 의
     표준편차가 작으면 페어 트레이드 후보 (mean-reverting strong).
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.risk.johansen.johansenTest`` : 공적분 rank 검정
-    - ``dartlab.quant.risk.bubbleTest.calcGSADF`` : 비정상성 (버블) 진단
+    See Also:
+        - ``dartlab.quant.risk.johansen.johansenTest`` : 공적분 rank 검정
+        - ``dartlab.quant.risk.bubbleTest.calcGSADF`` : 비정상성 (버블) 진단
 
-    Requires
-    --------
-    - 시계열 T > 50 (rank 추정 신뢰성)
-    - 변수 간 공적분 가능성 (단위근 변수)
+    When:
+        페어 트레이딩 + 환율-금리 균형 진단 + AI 균형 관계 답변.
+
+    How:
+        johansenTest → β/α 추정 → spreads = β^T Y → 평균 회귀 속도 평가.
+
+    Requires:
+        시계열 T > 50 + 변수 간 공적분 가능성 (단위근 변수).
 
     AIContext
     ---------
