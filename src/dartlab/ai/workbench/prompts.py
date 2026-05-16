@@ -86,8 +86,9 @@ __ANSWER_QUALITY_CONTRACT__
 
 1. **ReadSkill** — 적합한 분석 절차 (skill spec) 1~3 개 식별. 종목 분석·재무 비율·시계열 등 잘 알려진 패턴은 거의 항상 skill 이 있다.
 2. **ReadCapability** — skill 안 호출할 dartlab 공개 API (apiRef) 확인. 무엇을 부를지 정한다.
-3. **EngineCall** (단일 호출) **또는 RunPython** (다단 계산) — 실제 실행.
-4. **CompileVisual** — 시계열·비교·분포는 텍스트보다 차트가 명확.
+3. **EngineCall — dartlab 데이터는 무조건 1 차**. 단일 capability 호출 (scan, Company.show, macro 등) 은 모두 여기로. **RunPython 으로 dartlab API 단일 호출 금지** — `dartlab.scan(...)` 같은 1 회 호출은 EngineCall 의 일.
+4. **RunPython — 다단 결합·랭킹·외부 라이브러리 가공 한정**. EngineCall 결과 여러 개를 합치거나 Polars 로 group_by / sort / 시계열 연산이 필요할 때만. 단일 호출은 절대 여기서 X.
+5. **CompileVisual** — 시계열·비교·분포는 텍스트보다 차트가 명확.
 
 skill 없으면 LLM 이 알아서 capability 로 fallback. 강제 X. 메타·chitchat·능력 질문은 도구 없이 답변.
 
@@ -112,6 +113,7 @@ skill 없으면 LLM 이 알아서 capability 로 fallback. 강제 X. 메타·chi
 1. **scan() / show() / Company.* 결과 컬럼은 rename 없이 그대로 select**. `df.columns` 로 실제 이름 먼저 확인. `.alias("새 이름")` 이 필요할 때 *기존 컬럼명과 충돌하지 않는* 새 이름만 부여 — 같은 이름 두 번이면 `polars.exceptions.DuplicateError`.
 2. **탐색·추세·랭킹 query** ("최근 섹터", "성장성 상위", "ROE 높은 종목") 는 WebSearch 가 아니라 **ReadSkill → engines.scan / engines.quant / engines.analysis** 의 적합 skill 식별 → EngineCall 또는 RunPython.
 3. **같은 도구 같은 에러 2 회 연속 실패 시 즉시 다른 접근**. 본 도구로 같은 query 다시 호출 금지 — 시스템이 자동 차단함. 차단 메시지 받으면 다른 도구로 전환하거나 지금까지 모은 정보로 답변.
+3-1. **도구 결과에 `cached: true` 가 있으면 같은 인자 재호출 금지**. 이미 호출된 결과라 시스템이 새로 실행하지 않고 캐시 반환했다. 동일 결과를 한 번 더 확인하려고 부르지 마라 — 다음 단계 (다른 도구·답변 작성) 로 진행. 같은 (도구, 인자) 가 2 회 이상 cached 면 시스템이 그 인자를 영구 차단 (`duplicate_cache_call_blocked`).
 4. **RunPython 코드는 0 indent 부터 시작**. 들여쓰기는 `def`/`for`/`if` 본체 한정. 단일 statement series 면 모든 줄 0 indent — leading space 면 IndentationError.
 5. **dartlab API 가 확실하지 않으면 ReadCapability 먼저** — `dartlab.scan('growth')` 같은 호출 전에 `ReadCapability("scan growth")` 로 정확한 ref 와 반환 컬럼 확인.
 

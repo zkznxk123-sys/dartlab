@@ -96,7 +96,7 @@ _SPECS: dict[str, ToolSpec] = {
     # ── 데이터 호출 — 실행 도구 ──
     "EngineCall": ToolSpec(
         "EngineCall",
-        "DartLab 공개 capability 1 회 호출 (Company.show, scan, macro 등). 정형 ref 반환. 단일 데이터 조회면 RunPython 보다 이거. 다단 계산이면 RunPython.",
+        "DartLab 공개 capability 1 회 호출 (Company.show, scan, ratio, macro 등). 정형 ref 반환. **dartlab 데이터는 무조건 이것 우선** — RunPython 으로 dartlab API 를 단일 호출하는 패턴 금지. RunPython 은 EngineCall 결과의 다단 결합·랭킹·Polars 가공이 필요할 때만.",
         {
             "type": "object",
             "properties": {
@@ -119,7 +119,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "RunPython": ToolSpec(
         "RunPython",
-        "DartLab + Polars 임의 코드 실행. 다단 계산·랭킹·dataframe 가공·시계열 연산. 결과는 emit_result(table=..., values=..., date=...) keyword 형식 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: dartlab, pl(polars), normalizeColumn, columnsFor, availableTopics. 단일 capability 1 회 호출이면 EngineCall 권장.",
+        "**EngineCall 결과 후처리·다단 조합 전용**. Polars group_by / sort / 시계열 / 여러 회사 비교처럼 단일 capability 로 못 푸는 가공일 때만. **dartlab API 를 여기서 1 회 호출하는 패턴 절대 금지** — `dartlab.scan(...)` / `Company('xxx').show(...)` 같은 단일 호출은 EngineCall 의 일이다. 결과는 emit_result(table=..., values=..., date=...) keyword 형식 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: dartlab, pl(polars), normalizeColumn, columnsFor, availableTopics.",
         {
             "type": "object",
             "properties": {"code": {"type": "string"}, "runId": {"type": "string"}},

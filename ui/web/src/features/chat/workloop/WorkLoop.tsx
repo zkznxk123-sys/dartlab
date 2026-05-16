@@ -48,6 +48,7 @@ export function WorkLoop({ parts }: { parts: LoopPart[] }) {
 	// 단순화: 사용자 토글 우선. 자동 닫지 않음.
 
 	const toolCount = parts.filter((p) => p.type === 'tool').length;
+	const errorCount = parts.filter((p) => p.type === 'tool' && p.status === 'error').length;
 	const cur = currentToolName(parts);
 	const dur = durationLabel(parts);
 
@@ -56,7 +57,7 @@ export function WorkLoop({ parts }: { parts: LoopPart[] }) {
 	) : errored ? (
 		<Sparkles className="size-3.5 text-destructive" />
 	) : (
-		<Sparkles className="size-3.5 text-[#ea4647]" />
+		<Sparkles className="size-3.5 text-emerald-500" />
 	);
 
 	const label = running
@@ -64,7 +65,7 @@ export function WorkLoop({ parts }: { parts: LoopPart[] }) {
 			? `분석 중 · ${cur}`
 			: '분석 중'
 		: errored
-			? `분석 일부 실패 · ${toolCount}건`
+			? `분석 실패 · ${errorCount}/${toolCount}건`
 			: `분석 완료 · ${toolCount}건`;
 
 	return (

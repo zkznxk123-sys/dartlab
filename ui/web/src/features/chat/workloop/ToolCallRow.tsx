@@ -45,7 +45,7 @@ export function ToolCallRow({ tool }: { tool: ToolPart }) {
 		) : tool.status === 'error' ? (
 			<AlertCircle className="size-3.5 text-destructive" />
 		) : (
-			<CircleCheck className="size-3.5 text-[#ea4647]" />
+			<CircleCheck className="size-3.5 text-emerald-500" />
 		);
 
 	// Click-to-trace 강조 ring — flashTool 액션이 1.5 초 동안 set.

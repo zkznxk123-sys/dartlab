@@ -94,6 +94,10 @@ def runAgent(
     # cached 결과 즉시 반환 + LLM 메시지에 "이미 호출됐음, 다시 부르지 마라" 명시.
     # 사용자 audit 에서 ReadCapability 2 회 / 같은 Read 3 회 같은 비효율 루프 차단.
     call_cache: dict[tuple[str, str], dict[str, Any]] = {}
+    # 같은 (name, args) 가 cache_hit 임계 회 반복되면 강제 차단 — LLM 이 자연어 가드 무시하고
+    # 계속 부르는 회귀 (사용자 audit: scan.ratio 4 회 연속 cached) 방지.
+    cache_hit_count: dict[tuple[str, str], int] = {}
+    _CACHE_HIT_BLOCK_LIMIT = 2
 
     for iteration in range(maxIterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
@@ -201,19 +205,37 @@ def runAgent(
                 cache_key = (tc.name, json.dumps(tc.args or {}, ensure_ascii=False, sort_keys=True, default=str))
                 cached = call_cache.get(cache_key)
                 if cached is not None:
+                    cache_hit_count[cache_key] = cache_hit_count.get(cache_key, 0) + 1
+                    hit_n = cache_hit_count[cache_key]
+                    is_blocked = hit_n >= _CACHE_HIT_BLOCK_LIMIT
                     cached_summary = str(cached.get("summary") or "")
-                    note = f"(cached) 같은 인자로 이미 호출됨 — 다시 부르지 마라. 직전 결과: {cached_summary[:120]}"
+                    # LLM 가드 메시지 (LLM context 전용) — UI 에 직접 노출 X.
+                    if is_blocked:
+                        llmGuardNote = (
+                            f"{tc.name} 가 같은 인자로 {hit_n} 회 반복 호출됨 — 본 인자 재호출 영구 차단. "
+                            f"다른 도구나 답변 작성으로 진행."
+                        )
+                    else:
+                        llmGuardNote = (
+                            f"(cached) 같은 인자로 이미 호출됨 — 다시 부르지 마라. 직전 결과: {cached_summary[:120]}"
+                        )
+                    # UI 채널 — 사용자 친화 요약. 가드 텍스트와 분리.
+                    uiSummary = (
+                        f"(반복 차단) 같은 인자 {hit_n} 회 — 더 부르지 않음"
+                        if is_blocked
+                        else f"(캐시됨) {cached_summary[:80]}"
+                    )
                     yield TraceEvent(
                         "tool_result",
                         {
                             "id": tc.id,
                             "tool": tc.name,
-                            "status": "done" if cached.get("ok") else "error",
-                            "outputSummary": note,
+                            "status": "done" if cached.get("ok") and not is_blocked else "error",
+                            "outputSummary": uiSummary,
                             "evidenceRefs": [ref.get("id") for ref in cached.get("refs") or [] if ref.get("id")],
                             "artifacts": [r for r in cached.get("refs") or [] if r.get("kind") == "artifactRef"],
-                            "error": cached.get("error"),
-                            "data": cached.get("data"),
+                            "error": cached.get("error") if not is_blocked else "duplicate_cache_call_blocked",
+                            "data": cached.get("data") if not is_blocked else None,
                             "cached": True,
                         },
                     )
@@ -223,10 +245,11 @@ def runAgent(
                             "tool_call_id": tc.id,
                             "content": json.dumps(
                                 {
-                                    "ok": cached.get("ok"),
-                                    "summary": note,
+                                    "ok": cached.get("ok") if not is_blocked else False,
+                                    "cached": True,
+                                    "summary": llmGuardNote,
                                     "data": None,
-                                    "error": cached.get("error"),
+                                    "error": cached.get("error") if not is_blocked else "duplicate_cache_call_blocked",
                                 },
                                 ensure_ascii=False,
                             ),
