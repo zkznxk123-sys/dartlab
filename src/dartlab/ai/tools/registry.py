@@ -102,11 +102,11 @@ _SPECS: dict[str, ToolSpec] = {
             "properties": {
                 "apiRef": {
                     "type": "string",
-                    "description": "예: 'Company.show', 'scan', 'macro.kospi', 'dartlab.scan'",
+                    "description": "API 이름만. **인자는 절대 합쳐 쓰지 마라** (X: 'Company.show TSLA IS freq=Q'). 예: 'Company.show', 'scan', 'macro.kospi', 'dartlab.scan'",
                 },
                 "args": {
                     "type": "object",
-                    "description": "capability 인자 (예: {'stockCode': '005930', 'topic': 'IS'})",
+                    "description": "인자 dict — 모든 인자는 여기. 예: Company.show → {'stockCode': '005930', 'topic': 'IS'} / scan → {'axis': 'growth'} / macro → {}",
                     "additionalProperties": True,
                 },
             },

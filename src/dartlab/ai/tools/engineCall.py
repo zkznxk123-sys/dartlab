@@ -55,8 +55,31 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
 
 
 def _apiRef(plan: dict[str, Any]) -> str:
-    if plan.get("apiRef"):
-        return str(plan["apiRef"])
+    raw = str(plan.get("apiRef") or "").strip()
+    # 방어적 파서 — 모델이 'Company.show TSLA IS freq=Q' 처럼 인자까지 apiRef 에 합쳐
+    # 보내는 회귀 케이스. 첫 토큰을 apiRef 로, 나머지는 args/kwargs 로 흡수.
+    if raw and " " in raw:
+        parts = raw.split()
+        apiRef = parts[0]
+        plan["apiRef"] = apiRef
+        existing_args: list[Any] = list(plan.get("args") or [])
+        existing_kwargs: dict[str, Any] = dict(plan.get("kwargs") or {})
+        # 첫 인자가 종목코드 또는 ticker 면 target 으로 우선 흡수.
+        target_set = bool(plan.get("target") or plan.get("stockCode"))
+        for token in parts[1:]:
+            if "=" in token:
+                key, value = token.split("=", 1)
+                existing_kwargs[key.strip()] = value.strip()
+            elif not target_set and _looksLikeStockOrTicker(token):
+                plan["target"] = token
+                target_set = True
+            else:
+                existing_args.append(token)
+        plan["args"] = existing_args
+        plan["kwargs"] = existing_kwargs
+        return apiRef
+    if raw:
+        return raw
     engine = str(plan.get("engine") or "").strip()
     method = str(plan.get("method") or "").strip()
     if engine.lower() == "company" and method:
@@ -64,6 +87,14 @@ def _apiRef(plan: dict[str, Any]) -> str:
     if engine.lower() == "dartlab" and method:
         return f"dartlab.{method}"
     return ""
+
+
+def _looksLikeStockOrTicker(token: str) -> bool:
+    if not token:
+        return False
+    if re.match(r"^\d{6}$", token):
+        return True
+    return bool(re.match(r"^[A-Z]{1,6}$", token))
 
 
 def _capabilityExists(apiRef: str) -> bool:
