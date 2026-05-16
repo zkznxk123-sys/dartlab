@@ -233,10 +233,68 @@ def copperGoldRatio(
     prevCopper: float | None = None,
     prevGold: float | None = None,
 ) -> CopperGoldSignal:
-    """Copper/Gold Ratio → 경기 선행.
+    """Copper/Gold Ratio → 위험선호 + 경기 선행 (10Y 국채 수익률과 강한 상관).
 
-    구리 = 산업수요, 금 = 안전자산. 비율 상승 = 경기 낙관.
-    10Y 국채 수익률과 강한 상관.
+    Capabilities:
+        구리 (산업수요 = 위험자산) ÷ 금 (안전자산) 비율의 수준 + 변화로
+        위험선호 / 안전선호 진단. 학술적 발견: Copper/Gold ratio 와 10Y
+        Treasury yield 의 상관 0.75+ (Stanley Druckenmiller).
+
+    Args:
+        copper: 구리 가격 ($/ton 또는 ¢/lb).
+        gold: 금 가격 ($/oz). 0 이하 시 빈 결과.
+        prevCopper: 이전 구리 가격 (옵션). 변화율 계산.
+        prevGold: 이전 금 가격 (옵션). 변화율 계산.
+
+    Returns:
+        CopperGoldSignal dataclass:
+            - ``ratio`` (float): copper/gold
+            - ``trend`` (str): ``"rising"``/``"falling"``/``"stable"``
+            - ``trendLabel`` (str): 한국어
+            - ``implication`` (str): ``"riskOn"``/``"riskOff"``/``"neutral"``
+            - ``description`` (str): 한국어 해석
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = copperGoldRatio(copper=8500, gold=2000,
+        ...                     prevCopper=8000, prevGold=2050)
+        >>> r.trend, r.implication
+        ('rising', 'riskOn')
+
+    Guide:
+        ratio 상승 (>3% 변화) = riskOn (경기 낙관, 채권 매도). ratio 하락
+        (<-3%) = riskOff (안전선호, 채권 매수). 10Y Treasury 와 강한 상관
+        — copper/gold 상승 시 10Y yield 동반 상승 예측.
+
+    SeeAlso:
+        - ``interpretGoldDrivers``: 금 가격 3 요인 분해
+        - ``classifyVixRegime``: VIX 공포 (반대 척도)
+        - ``classifyCycle``: 사이클 종합
+
+    Requires:
+        구리/금 가격 (Yahoo Finance HG=F + GC=F).
+
+    AIContext:
+        본 비율은 경기 선행 (6 개월) — 단기 (1 개월) 변동성 큼. 분기 평균
+        사용 권장. KR 시장에는 직접 적용 어렵고 글로벌 위험선호 proxy.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ratio 절대값 인용 — 상대 변화율 (vs prev) 가 더 신뢰. 비율
+              자체는 단위 일치 의존.
+            - 일별 변화 (>3%) 로 trend 판정 — 본 함수는 분기 변화 권장.
+        OutputSchema:
+            CopperGoldSignal ``{ratio, trend, trendLabel, implication,
+            description}``.
+        Prerequisites:
+            copper/gold 현재 가격 + 이전 가격 (변화율 계산).
+        Freshness:
+            구리/금 일 (FRED + Yahoo Finance).
+        Dataflow:
+            ratio = copper / gold → change vs prev → trend 임계 → implication.
+        TargetMarkets: Global (FRED + Yahoo). KR 도 적용 가능 (글로벌 risk).
     """
     if gold <= 0:
         return CopperGoldSignal(0, "stable", "판별불가", "neutral", "금 가격 데이터 없음")
