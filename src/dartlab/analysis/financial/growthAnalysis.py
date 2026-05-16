@@ -48,24 +48,63 @@ def _cagrFromList(values: list[float | None], periods: int) -> float | None:
 
 @memoizedCalc
 def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """성장 추이 -- 매출/영업이익/순이익/자산의 금액과 YoY.
+    """성장 추이 — 매출/영업이익/순이익/자산 금액 + YoY + 3 년 CAGR.
 
-    IS + BS에서 원본 금액을 가져와 규모감과 방향을 동시에 본다.
+    Capabilities:
+        IS + BS 의 4 핵심 지표 (revenue, operatingIncome, netIncome,
+        totalAssets) 의 절대값 + YoY 변화 시계열 + 3 년 CAGR 산출. 성장 vs
+        규모 동시 관찰. analysis() 성장성 축의 핵심 함수.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            revenue : float — 매출 (원)
-            revenueYoy : float — 매출 전기대비 (%)
-            operatingIncome : float — 영업이익 (원)
-            operatingIncomeYoy : float — 영업이익 전기대비 (%)
-            netIncome : float — 당기순이익 (원)
-            netIncomeYoy : float — 순이익 전기대비 (%)
-            totalAssets : float — 총자산 (원)
-            totalAssetsYoy : float — 총자산 전기대비 (%)
-        cagr : dict — 3년 CAGR (revenue, operatingIncome, netIncome) (%)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 9 키 (period + 4 지표 ×
+              절대값/YoY)
+            - ``cagr`` (dict): ``{revenue, operatingIncome, netIncome}`` 3 년 CAGR
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcGrowthTrend(Company("005930"))
+        >>> r["cagr"]["revenue"], r["history"][0]["revenueYoy"]
+        (8.5, 12.3)  # 3 년 CAGR 8.5%, 최근 YoY 12.3%
+
+    Guide:
+        revenue CAGR > 15% = 고성장, 5~15% = 중간, < 5% = 성숙. operatingIncome
+        CAGR 이 revenue CAGR 보다 높으면 마진 개선 (operating leverage), 반대면
+        마진 압박. totalAssets CAGR > revenue CAGR = 효율성 저하 신호.
+
+    SeeAlso:
+        - ``calcGrowthQuality``: 성장의 품질 (organic vs M&A 등)
+        - ``calcSustainableGrowthRate``: ROE × (1-payout) sustainable rate
+        - ``calcCagrComparison``: 동종 업종 CAGR 비교
+
+    Requires:
+        IS/매출액/영업이익/당기순이익 + BS/자산총계 시계열 ≥ 4 년 (CAGR 3 년).
+
+    AIContext:
+        cagr dict 의 3 지표 모두 양수 + 균형 = 우수 성장. cagr.revenue 만
+        높고 operatingIncome 저조 = 외형 성장 + 마진 압박 (분석 깊이 필요).
+
+    LLM Specifications:
+        AntiPatterns:
+            - YoY 1 년 변화만 보고 추세 단정 — CAGR 3 년 함께 확인 필수.
+            - revenue CAGR 음수 단정 → "쇠퇴" — turnaround 시기 가능, 3 년
+              vs 5 년 CAGR 비교.
+        OutputSchema:
+            ``{history: list[dict 9키], cagr: dict 3키}``.
+        Prerequisites:
+            IS + BS 시계열 ≥ 4 년.
+        Freshness:
+            최신 분기 + 시계열.
+        Dataflow:
+            IS → revenue/operatingIncome/netIncome 시계열 + BS → totalAssets
+            → YoY + CAGR.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     isResult = company.select("IS", ["매출액", "영업이익", "당기순이익"])
     bsResult = company.select("BS", ["자산총계"])
