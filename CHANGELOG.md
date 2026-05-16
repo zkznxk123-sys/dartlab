@@ -42,6 +42,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   screen/strategyRules, portfolio/mapping), credit 32 (creditScorecard 10 함수),
   analysis 17 (분리 모듈 BC re-export 검증). macro 모듈 참조율 21%→38%,
   industry 18%→41% 로 증가.
+- analysis/financial/research/types 1099→127 — 26 dataclass 를 도메인별 3 파일로
+  분리하고 ResearchResult 의 rich rendering 13 메서드 + summary + toDict 를
+  모듈 함수로 추출 (_typesResearchRender.py). L2 엔진에 1000 줄 이상 파일 0 종 달성.
+- macro/quant 핵심 공개 함수 10 종 (Macro, analyzeCycle, analyzeCrisis,
+  analyzeForecast, analyzeTrade, decomposeLongRate, calcFearGreedProxy, Quant,
+  enrichWithIndicators, technicalVerdict) 의 docstring 을 9 섹션 표준으로
+  격상 — Capabilities + Args + Returns + Example + Guide + SeeAlso + Requires
+  + AIContext + 외부 호출자 명세 (AntiPatterns/OutputSchema/Prerequisites/
+  Freshness/Dataflow/TargetMarkets). 자동 도구 사용 없이 함수 단위 수동 작성.
 - 신용등급 표 SSOT 를 L1.5 (`synth/creditGradeTable.py`) 본체로 이동. credit/scoring 의
   옛 위치는 shim 으로 재노출. L2↔L2 우회 호출 패턴 제거.
 
