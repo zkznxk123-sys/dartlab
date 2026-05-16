@@ -213,29 +213,68 @@ def analyzeProfitability(
     sector: Sector = Sector.UNKNOWN,
     market: str = "KR",
 ) -> InsightResult:
-    """수익성 분석.
+    """수익성 분석 — 영업이익률 + ROE + ROA + 섹터 보정 + DuPont 분해.
 
-    Parameters
-    ----------
-    ratios : RatioResult
-        재무비율 계산 결과.
-    aSeries : dict
-        연간 재무 시계열.
-    isFinancial : bool
-        금융업 여부. True이면 금융업 전용 분석으로 분기.
-    sector : Sector
-        GICS 섹터. 섹터 벤치마크 보정에 사용.
-    market : str
-        시장 ('KR' | 'US'). 벤치마크 선택에 사용.
+    Capabilities:
+        영업이익률 + 순이익률 (NM-OM 갭으로 영업외 영향 분석) + ROE + ROA
+        + 섹터 벤치마크 보정 (sectorAdjustment) 결합. 금융업은 별도 함수
+        (_analyzeProfitabilityFinancial). GICS 섹터별 다른 임계값 (IT 30%+,
+        utility 5%+ 등).
 
-    Returns
-    -------
-    InsightResult
-        grade : str — 'A'~'F' 등급
-        summary : str — 수익성 요약
-        details : list[str] — 영업이익률, ROE, 레버리지 등 세부 항목
-        risks : list[Flag] — 수익성 리스크
-        opportunities : list[Flag] — 수익성 강점
+    Args:
+        ratios: RatioResult dataclass (operatingMargin, netMargin, roe, roa).
+        aSeries: 연간 재무 시계열 dict.
+        isFinancial: 금융업 여부. True 면 분기.
+        sector: GICS 섹터 (Sector enum). 섹터 벤치마크 보정 입력.
+        market: ``"KR"``/``"US"``. 벤치마크 선택 (KR/US 시장 ROE 평균 다름).
+
+    Returns:
+        InsightResult dataclass:
+            - ``grade`` (str): A~F
+            - ``summary`` (str)
+            - ``details`` (list[str]): 영업이익률 + ROE + 레버리지 + 갭
+            - ``risks``/``opportunities`` (list[Flag])
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = analyzeProfitability(ratios, aSeries, sector=Sector.IT, market="KR")
+        >>> r.grade
+        'A'  # IT 섹터 영업이익률 28%, ROE 22%
+
+    Guide:
+        영업이익률 임계 (비금융): > 20% = 우수 (+3), 10~20% = 양호 (+2),
+        5~10% = 보통 (+1), 0~5% = 저조 (-1), < 0% = 적자 (-2). ROE > 15% =
+        우수, > 10% = 양호. 섹터 보정으로 IT/utility 차이 반영.
+
+    SeeAlso:
+        - ``analyzePerformance``: 성장성 (수익성과 보완)
+        - ``analyzeHealth``: 재무건전성 (ROE/레버리지 cross-check)
+        - ``getBenchmark``: 섹터 벤치마크 룩업
+
+    Requires:
+        ratios = calcRatios 결과. sector enum (Sector.UNKNOWN 도 가능).
+
+    AIContext:
+        섹터별 임계값 차이 큼 — IT 영업이익률 20%+ 가 평균이지만 utility 는
+        5%+ 가 우수. grade 만 인용 금지, 섹터 벤치마크 비교 함께.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 섹터 무시하고 절대 임계값 사용 — IT 의 5% 영업이익률을 "보통"
+              평가하는 건 부정확 (IT 평균 25%+ 대비 매우 낮음).
+            - 적자 회사를 자동 F — 신규 IPO 또는 turnaround 회사는 분기마다
+              개선 추세 확인 필수.
+        OutputSchema:
+            InsightResult ``{grade, summary, details, risks, opportunities}``.
+        Prerequisites:
+            ratios (operatingMargin, netMargin, roe, roa) + sector enum.
+        Freshness:
+            최신 분기.
+        Dataflow:
+            ratios → 임계 + 섹터 보정 (getBenchmark) → score 누적 → grade.
+        TargetMarkets: KR (DART), US (EDGAR). 섹터/market 별 분기.
     """
     details: list[str] = []
     risks: list[Flag] = []
