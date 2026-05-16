@@ -27,10 +27,22 @@ Verbose::
 from __future__ import annotations
 
 import logging
+import os
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from rich.console import Console
+    from rich.progress import Progress
 
 _ROOT_NAME = "dartlab"
 _DEFAULT_CONFIGURED = False
+_RICH_INSTALLED = False
+_console: Console | None = None
+_errConsole: Console | None = None
+_progress: Progress | None = None
+# installRichHandler 가 외부 logger 까지 흡수할 대상 — propagate=False + 같은 handler.
+_EXTERNAL_LOGGERS = ("huggingface_hub", "urllib3", "httpx", "httpcore", "filelock")
 
 
 def _ensureUtf8Stream() -> None:
@@ -127,3 +139,118 @@ def getLogger(name: str | None = None) -> logging.Logger:
     if name.startswith(_ROOT_NAME):
         return logging.getLogger(name)
     return logging.getLogger(f"{_ROOT_NAME}.{name}")
+
+
+# ── 출력 채널 SSOT (rich Console + Progress) ──────────────
+
+
+def getConsole() -> Console:
+    """공용 rich Console (stdout) — 모든 CLI/Progress/Live 가 공유."""
+    global _console
+    if _console is None:
+        from rich.console import Console as _Console
+
+        _console = _Console()
+    return _console
+
+
+def getErrConsole() -> Console:
+    """공용 rich Console (stderr) — 오류·경고 전용."""
+    global _errConsole
+    if _errConsole is None:
+        from rich.console import Console as _Console
+
+        _errConsole = _Console(stderr=True)
+    return _errConsole
+
+
+def getProgress() -> Progress:
+    """공용 rich.Progress singleton — 다운로드/수집 진행 바.
+
+    같은 Console 을 공유하여 Live/Progress 가 동일 frame buffer 위에서
+    경합 없이 갱신된다. 호출처는 ``with getProgress() as p:`` 형태로 사용.
+    """
+    global _progress
+    if _progress is None:
+        from rich.progress import BarColumn, MofNCompleteColumn, TextColumn, TimeRemainingColumn
+        from rich.progress import Progress as _Progress
+
+        _progress = _Progress(
+            TextColumn("[cyan]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            TimeRemainingColumn(),
+            console=getConsole(),
+            transient=False,
+        )
+    return _progress
+
+
+def installRichHandler(*, level: int = logging.INFO) -> None:
+    """CLI 부트스트랩 — dartlab + 외부 로거를 rich Console 로 흡수.
+
+    Capabilities:
+        dartlab root logger 와 외부 라이브러리 logger 의 handler 를 RichHandler
+        로 교체하고, huggingface_hub 의 내장 tqdm 진행률 바를 차단한다.
+    Args:
+        level: dartlab root logger 의 기본 레벨 (외부 로거는 WARNING 고정).
+    Example:
+        >>> from dartlab.core.logger import installRichHandler
+        >>> installRichHandler()  # idempotent
+    Returns:
+        None. 호출 시 전역 _RICH_INSTALLED 플래그가 True 로 고정된다.
+    Guide:
+        ``dartlab.cli.main.main`` 진입 직후 1 회만 호출. import 만 한 노트북
+        사용자는 호출하지 않으므로 기본 stderr handler + HF 본래 tqdm 그대로.
+    SeeAlso:
+        getConsole · getProgress · getLogger.
+    Requires:
+        rich 라이브러리. huggingface_hub 는 optional.
+    AIContext:
+        4 갈래 출력 채널을 한 Console 로 모으는 SSOT 진입점.
+    """
+    global _RICH_INSTALLED
+    if _RICH_INSTALLED:
+        return
+    _RICH_INSTALLED = True
+
+    from rich.logging import RichHandler
+
+    handler = RichHandler(
+        console=getConsole(),
+        show_path=False,
+        markup=True,
+        rich_tracebacks=True,
+        show_time=False,
+    )
+    handler.setFormatter(logging.Formatter("%(message)s"))
+
+    # (1) dartlab root logger — 기존 stderr StreamHandler 교체.
+    _ensureUtf8Stream()
+    root = logging.getLogger(_ROOT_NAME)
+    root.handlers = [handler]
+    if root.level == logging.NOTSET:
+        root.setLevel(level)
+
+    # (2) huggingface_hub 내장 tqdm 차단 — 외부 logger 부착 *전* 에 호출해
+    # huggingface_hub.utils 의 self-attach (StreamHandler 추가) 가 먼저 끝나도록 한다.
+    os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+    try:
+        from huggingface_hub.utils import disable_progress_bars
+
+        disable_progress_bars()
+    except ImportError:
+        pass
+
+    # (3) 외부 로거 — 같은 handler 부착 + propagate 차단 (중복 출력 방지).
+    # 라이브러리가 import 시점에 자체 StreamHandler 를 추가하므로, 부착 전에
+    # 명시적으로 import 해 self-attach 를 끝낸 뒤 [handler] 로 덮어쓴다.
+    for extName in _EXTERNAL_LOGGERS:
+        try:
+            __import__(extName)
+        except ImportError:
+            pass
+        extLog = logging.getLogger(extName)
+        extLog.handlers = [handler]
+        extLog.propagate = False
+        extLog.setLevel(logging.WARNING)

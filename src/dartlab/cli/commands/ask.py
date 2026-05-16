@@ -38,14 +38,16 @@ def configureParser(subparsers) -> None:
 
 def run(args) -> int:
     """질문에서 종목을 추출하고 AI 분석 결과를 Rich 스트리밍으로 출력한다."""
-    from rich.console import Console, Group
+    from rich.console import Group
     from rich.live import Live
     from rich.markdown import Markdown
     from rich.spinner import Spinner
     from rich.text import Text
 
+    from dartlab.core.logger import getConsole
+
     dartlab = configureDartlab()
-    console = Console()
+    console = getConsole()
 
     # ── 종목 추출 ──
     fullQuery = " ".join(args.query)

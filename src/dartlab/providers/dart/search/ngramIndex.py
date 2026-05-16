@@ -979,6 +979,7 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
                 return outDir
 
     emit("stemindex:hf_start", repo=HF_REPO)
+    _log.info("[cyan]⬇ HF[/] stemIndex (%s/%s)", HF_REPO, hfDir)
     try:
         snapshot_download(
             repo_id=HF_REPO,
@@ -989,7 +990,9 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
         )
     except (OSError, RuntimeError, ValueError) as e:
         emit("stemindex:hf_fail", error=str(e))
+        _log.warning("[red]✗[/] stemIndex 다운로드 실패: %s", e)
         raise
+    _log.info("[green]✓[/] stemIndex 다운로드 완료")
 
     global _cachedIndex, _cachedMeta
     _cachedIndex = None

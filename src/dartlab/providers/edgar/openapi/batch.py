@@ -486,8 +486,10 @@ def batchCollectEdgar(
     t = threading.Thread(target=_threadTarget, daemon=True)
     t.start()
 
+    from dartlab.core.logger import getConsole
+
     try:
-        with Live(_buildDisplay(), refresh_per_second=8) as live:
+        with Live(_buildDisplay(), refresh_per_second=8, console=getConsole()) as live:
             while t.is_alive():
                 with lock:
                     live.update(_buildDisplay())

@@ -468,9 +468,12 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
     label = DATA_RELEASES[category]["label"]
     hfDir = DATA_RELEASES[category]["dir"]
 
+    from dartlab.core.logger import getLogger
     from dartlab.core.messaging import emit
 
+    _log = getLogger(__name__)
     emit("download_all:hf_start", label=label, repo=HF_REPO, dir=hfDir)
+    _log.info("[cyan]⬇ HF[/] %s (%s/%s)", label, HF_REPO, hfDir)
 
     # rate limit 방지: 동시 다운로드 workers를 보수적으로 설정
     if "HF_HUB_DOWNLOAD_WORKERS" not in os.environ:
@@ -510,6 +513,7 @@ def downloadAll(category: str = "docs", *, forceUpdate: bool = False) -> None:
     # scan은 테마별 parquet (안에 전종목 포함) → 파일 수 ≠ 종목 수
     countLabel = f"{fileCount}파일" if category == "scan" else f"{fileCount}종목"
     emit("download_all:hf_done", label=label, count=countLabel, dataDir=str(dataDir))
+    _log.info("[green]✓[/] %s (%s)", label, countLabel)
 
     # scan 은 finance.parquet 이 핵심 산출물. allow_patterns 회귀 등으로
     # 조용히 누락되면 상위 fallback 경로가 부분 결과(예: 종목 2개)를 전수인 양
@@ -579,8 +583,10 @@ def buildIndex(category: str = "docs") -> pl.DataFrame:
 
     from rich.progress import Progress
 
+    from dartlab.core.logger import getConsole
+
     records = []
-    with Progress() as progress:
+    with Progress(console=getConsole()) as progress:
         _task = progress.add_task("종목 스캔", total=len(files))
         for f in files:
             df = _normalizeLoadedFrame(pl.read_parquet(str(f)), category)

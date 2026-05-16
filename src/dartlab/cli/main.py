@@ -30,6 +30,9 @@ def _looksLikeCompany(token: str) -> bool:
 def main(argv: list[str] | None = None) -> int:
     """CLI 메인 함수 -- 인자 파싱 후 서브커맨드 실행."""
     _ensureUtf8()
+    from dartlab.core.logger import installRichHandler
+
+    installRichHandler()
 
     raw = argv if argv is not None else sys.argv[1:]
 

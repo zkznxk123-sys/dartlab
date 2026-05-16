@@ -363,6 +363,8 @@ class ZipDocsCollector:
         # ZIP 수집
         from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
+        from dartlab.core.logger import getConsole
+
         allSections: list[dict] = []
         failCount = 0
         total = newFilings.height
@@ -372,6 +374,7 @@ class ZipDocsCollector:
             TextColumn("[bold blue]{task.description}"),
             BarColumn(),
             MofNCompleteColumn(),
+            console=getConsole(),
             disable=not showProgress,
         )
         _task = _progress.add_task(f"docs 수집 | {self._corpName}", total=total)

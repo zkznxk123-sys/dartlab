@@ -6,16 +6,16 @@ DART API 키 불필요 — eddmpython/dartlab-data HF dataset 에서 사전 빌�
 
 from __future__ import annotations
 
-import logging
 import threading
 import time
 from pathlib import Path
 
 import polars as pl
 
+from dartlab.core.logger import getLogger
 from dartlab.gather.infra.ttl import TTL_LISTING as CACHE_TTL
 
-log = logging.getLogger(__name__)
+log = getLogger(__name__)
 
 
 def _dartListCacheFile() -> Path:
@@ -53,11 +53,14 @@ def _loadDartListFromHf() -> pl.DataFrame | None:
     try:
         from huggingface_hub import hf_hub_download
 
+        log.info("[cyan]⬇ HF[/] metadata/dartList.parquet")
         path = hf_hub_download(
             repo_id="eddmpython/dartlab-data",
             repo_type="dataset",
             filename="metadata/dartList.parquet",
         )
+        sizeMb = Path(path).stat().st_size / (1024 * 1024)
+        log.info("[green]✓[/] dartList.parquet (%.1f MB)", sizeMb)
         return pl.read_parquet(path)
     except (ImportError, OSError, ValueError, KeyError):
         return None

@@ -214,9 +214,17 @@ def _fetchSeries(
     """여러 기간 연속 조회 → concat + rich.progress."""
     from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
+    from dartlab.core.logger import getConsole
+
     frames: list[pl.DataFrame] = []
 
-    progress = Progress(SpinnerColumn(), TextColumn("[bold blue]{task.description}"), BarColumn(), MofNCompleteColumn())
+    progress = Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        console=getConsole(),
+    )
     _task = progress.add_task(f"{title} | {corpName}", total=len(periods))
     with progress:
         for bsnsYear, reprtCode in periods:
@@ -1961,6 +1969,8 @@ class DartCompany:
         """
         from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
+        from dartlab.core.logger import getConsole
+
         targets = categories or _PERIODIC_REPORT_CATEGORIES
         stockCode = self._resolveStockCode()
         corpCodeStr = _resolveCorpCode(self._dart._client, self._corp)
@@ -1968,7 +1978,11 @@ class DartCompany:
         frames: list[pl.DataFrame] = []
 
         _progress = Progress(
-            SpinnerColumn(), TextColumn("[bold blue]{task.description}"), BarColumn(), MofNCompleteColumn()
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=getConsole(),
         )
         _task = _progress.add_task(f"보고서 저장 | {corpName}", total=len(targets))
         with _progress:

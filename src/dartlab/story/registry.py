@@ -1651,11 +1651,12 @@ def buildStory(
 
     useSpinner = isTerminal()
     if useSpinner:
-        from rich.console import Console
         from rich.live import Live
         from rich.spinner import Spinner
 
-        console = Console(stderr=True)
+        from dartlab.core.logger import getErrConsole
+
+        console = getErrConsole()
         spinner = Spinner("dots", text="분석 준비 중...")
         ctx = Live(spinner, console=console, transient=True)
     else:
