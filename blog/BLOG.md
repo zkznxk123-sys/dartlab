@@ -338,7 +338,7 @@ SVG **최소 5개** Write → FLUX 2~3 (12 초 간격) → 본문 참조 → SEO
 - `blog/05-company-reports/{nn}-{code}-{slug}/`
 - `ai:` 블록 필수
 - dartlab `c.show("IS/BS/CF")` 숫자 교차검증
-- `uv run python -X utf8 scripts/blog/audit_seo.py` — SEO **95 점 이상**
+- `uv run python -X utf8 blog/_scripts/audit_seo.py` — SEO **95 점 이상**
 - `TOPIC_ROADMAP.md` 갱신
 - 빌드 확인 + 커밋 + 푸시
 
@@ -634,7 +634,7 @@ cr["grade"]; cr["score"]; cr["healthScore"]; cr["divergenceExplanation"]
 
 ### 공시·Filings — AUTO 블록으로만 생성한다
 
-`## 공시 / Filings` 와 `## 재무제표 — 최근 5 개년` 은 수동으로 쓰지 않는다. 본문 끝에 `<!-- AUTO:START -->` · `<!-- AUTO:END -->` 마커만 두고 `uv run python -X utf8 scripts/blog/sync_financials.py {stockCode}` 실행. `sync_financials.py` 가 AUTO 블록 안에 2 H2 자동 생성.
+`## 공시 / Filings` 와 `## 재무제표 — 최근 5 개년` 은 수동으로 쓰지 않는다. 본문 끝에 `<!-- AUTO:START -->` · `<!-- AUTO:END -->` 마커만 두고 `uv run python -X utf8 blog/_scripts/sync_financials.py {stockCode}` 실행. `sync_financials.py` 가 AUTO 블록 안에 2 H2 자동 생성.
 
 **발행 전 체크**: `grep -c "^## 공시 / Filings" 파일명` → 결과 **1** 이어야 함 (AUTO 블록 안의 1 개).
 
@@ -786,7 +786,7 @@ https://eddmpython.github.io/dartlab/
   - 예: #08 Pyodide → "Excel web interface with Python sidebar panel, spreadsheet cells glowing".
   - 예: #07 dataset-auto-sync → "cloud data pipeline flowing into a laptop terminal, dark theme".
   - `no text, no logos, no watermark, no brand marks` 유지.
-- **생성 스크립트**: [scripts/blog/gen_news_flux.py](scripts/blog/gen_news_flux.py) (배경) + [scripts/blog/gen_news_thumbnails.py](scripts/blog/gen_news_thumbnails.py) (합성).
+- **생성 스크립트**: [blog/_scripts/gen_news_flux.py](_scripts/gen_news_flux.py) (배경) + [blog/_scripts/gen_news_thumbnails.py](_scripts/gen_news_thumbnails.py) (합성).
 
 ### 썸네일 (og:image) — 회사분석보고서 (MNST 풀블리드 스타일)
 
@@ -794,7 +794,7 @@ https://eddmpython.github.io/dartlab/
 
 - 배경: FLUX 이미지가 캔버스 전체 채움 (비율 유지 crop, 좌우 텍스트 박스 없음).
 - 전체 어두운 필터 `(10,14,26,70)` + 좌측 가로 그라데이션 `alpha = 200*(1-x/900)`.
-- 합성: Pillow. 레퍼런스 스크립트 [gen_thumbnails.py](scripts/blog/gen_thumbnails.py).
+- 합성: Pillow. 레퍼런스 스크립트 [gen_thumbnails.py](_scripts/gen_thumbnails.py).
 - 사이즈: 1200×630, WebP (quality 90).
 - 텍스트 레이어:
   - 좌상단 `{회사명 (종목코드)}` malgun.ttf 24px `#94a3b8`
@@ -882,7 +882,7 @@ https://eddmpython.github.io/dartlab/
 
 | 조건 | 기준 | 측정 |
 |---|---|---|
-| SEO | **95%+** | `uv run python -X utf8 scripts/blog/audit_seo.py` |
+| SEO | **95%+** | `uv run python -X utf8 blog/_scripts/audit_seo.py` |
 | 독자 점수 | **95 점+** | opus 독자 에이전트 정식 평가 |
 | 글자수 | **20,000 자+** | SEO audit 의 chars 컬럼 |
 

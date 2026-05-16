@@ -6,7 +6,7 @@
 - 저장: landing/static/thumbnails/news-{slug}.webp
 - 배경 원본: blog/02-dartlab-news/{NN}-{slug}/assets/{NN}-thumbnail-bg.webp
 
-실행: uv run python -X utf8 scripts/blog/gen_news_thumbnails.py
+실행: uv run python -X utf8 blog/_scripts/gen_news_thumbnails.py
 """
 
 from __future__ import annotations

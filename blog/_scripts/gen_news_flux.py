@@ -5,7 +5,7 @@
 - 저장: blog/02-dartlab-news/{NN}-{slug}/assets/{NN}-thumbnail-bg.webp
 - Rate limit: 분당 6건 → 12초 간격 순차
 
-실행: uv run python -X utf8 scripts/blog/gen_news_flux.py
+실행: uv run python -X utf8 blog/_scripts/gen_news_flux.py
 """
 
 from __future__ import annotations

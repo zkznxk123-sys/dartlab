@@ -2,7 +2,7 @@
 블로그 글 SEO 자동 스코어링.
 전체 기업이야기 글을 순회하며 SEO 품질을 점수화한다.
 
-사용: uv run python -X utf8 scripts/blog/audit_seo.py
+사용: uv run python -X utf8 blog/_scripts/audit_seo.py
 """
 
 import os

@@ -5,9 +5,9 @@
 AUTO:START ~ AUTO:END 영역을 교체한다. 본문은 절대 건드리지 않는다.
 
 사용:
-  uv run python -X utf8 scripts/blog/sync_financials.py              # 전체
-  uv run python -X utf8 scripts/blog/sync_financials.py 000660       # 단일 종목
-  uv run python -X utf8 scripts/blog/sync_financials.py --dry-run    # 미리보기
+  uv run python -X utf8 blog/_scripts/sync_financials.py              # 전체
+  uv run python -X utf8 blog/_scripts/sync_financials.py 000660       # 단일 종목
+  uv run python -X utf8 blog/_scripts/sync_financials.py --dry-run    # 미리보기
 """
 
 import gc

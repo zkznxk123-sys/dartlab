@@ -5,7 +5,7 @@ KnowledgeDB에 자동 저장. GitHub Actions(하루 1회) 또는 수동 실행.
 
 사용법::
 
-    uv run python -X utf8 scripts/blog/sync_blog_insights.py
+    uv run python -X utf8 blog/_scripts/sync_blog_insights.py
 """
 
 from __future__ import annotations

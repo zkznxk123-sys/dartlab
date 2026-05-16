@@ -46,7 +46,7 @@
 
 ## 고립 감지
 
-글을 추가/개선할 때마다 `scripts/blog/audit_seo.py`로 inbound 링크 수를 체크. inbound 0인 글은 다른 글에서 링크 삽입.
+글을 추가/개선할 때마다 `blog/_scripts/audit_seo.py`로 inbound 링크 수를 체크. inbound 0인 글은 다른 글에서 링크 삽입.
 
 ## 규칙
 
