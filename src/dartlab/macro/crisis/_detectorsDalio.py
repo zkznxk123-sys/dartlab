@@ -75,24 +75,86 @@ def dalioDebtCyclePhase(
     reserveCurrency: bool | None = None,
     foreignDebtPct: float | None = None,
 ) -> DalioPhaseResult:
-    """Dalio 부채사이클 6단계 판정 (Big Debt Crises Part 1 템플릿).
+    """Dalio Big Debt Cycle 6 단계 + Beautiful Deleveraging 4 sub + Regime variant.
 
-    실험 053 검증: 8개 역사 케이스 중 7개 (88%) 정확.
-    팬데믹급 급전환은 transition — 단일 enum 한계. 해석 시
-    `policyLeverStatus` 와 조합 권장.
+    Capabilities:
+        Ray Dalio (2018) "Principles for Navigating Big Debt Crises" Part 1
+        의 6 단계 (earlyBoom → lateBoom → topBubble → deflationaryDepression
+        → beautifulDeleveraging → reflationary) 판정. beautifulDeleveraging
+        진입 시 4 sub-phase (austerity/default/printing/wealthTransfer)
+        + regime variant (deflationary/inflationary) 추가. 8 역사 케이스 88%
+        정확 (실험 053).
 
-    Parameters
-    ----------
-    totalDebtToGdp : 총부채/GDP (%). 일반 선진국 100~300.
-    debtServiceYoY : 부채서비스(이자/소득) YoY 변화 (%p).
-    creditGap : BIS Credit-to-GDP gap (%p). >8 과열.
-    realRate : 실질금리 (%).
-    gdpGrowth : 실질 GDP 성장률 (%).
+    Args:
+        totalDebtToGdp: 총부채/GDP (%). 일반 선진국 100~300%.
+        debtServiceYoY: 부채서비스 (이자/소득) YoY 변화 (%p).
+        creditGap: BIS Credit-to-GDP gap (%p). > 8 = 과열.
+        realRate: 실질금리 (%).
+        gdpGrowth: 실질 GDP 성장률 (%).
+        m2GrowthYoy/npl/hySpread/fiscalDeficitPctGdp: beautifulDeleveraging
+            sub-phase 판정용.
+        fxFlexibility/reserveCurrency/foreignDebtPct: regime variant 판정용.
 
-    Returns
-    -------
-    DalioPhaseResult
-        phase enum + 한국어 라벨 + 판정 신호 + 종합 설명.
+    Returns:
+        DalioPhaseResult dataclass:
+            - ``phase`` (str): 6 단계 enum
+            - ``phaseLabel`` (str): 한국어
+            - ``signals`` (list[str]): 판정 근거
+            - ``subPhase`` (str|None): beautifulDeleveraging 시 4 sub
+            - ``regimeVariant`` (str|None): deflationary/inflationary
+            - ``description`` (str)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = dalioDebtCyclePhase(totalDebtToGdp=250, creditGap=12,
+        ...                          realRate=1.5, gdpGrowth=3.2)
+        >>> r.phase
+        'topBubble'
+
+    Guide:
+        6 단계 시간 순서:
+        - earlyBoom: 신용 시작 (creditGap 음수→양수)
+        - lateBoom: 가속 (creditGap > 2)
+        - topBubble: 과열 (creditGap > 8 + 자산 가격 거품)
+        - deflationaryDepression: 거품 붕괴 (creditGap 급락)
+        - beautifulDeleveraging: 정책 개입 후 회복 (Dalio 의 핵심 단계)
+        - reflationary: 새 사이클 시작
+
+        팬데믹급 (2020) 같은 급전환은 transition (단일 enum 한계). 호출자는
+        ``policyLeverStatus`` 와 조합 권장.
+
+    SeeAlso:
+        - ``dalioPolicyLeverStatus``: 정책 4 레버 소진도
+        - ``minskyPhase``: Minsky 5 단계 (Dalio 와 유사하지만 시장 중심)
+        - ``ghsCrisisScore``: 3 년 horizon 위기 확률
+        - Dalio, R. (2018) "Principles for Navigating Big Debt Crises"
+
+    Requires:
+        gdpGrowth + creditGap + realRate 중 최소 1 개.
+
+    AIContext:
+        phase + signals + description 함께 인용. beautifulDeleveraging 결과
+        는 정책 개입 후 회복 단계 — "위기" 신호로 오해 금지. 한국은 lateBoom
+        (2024) 으로 분류되는 경향.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 한국 회사를 deflationaryDepression 으로 단정 (실험상 한국은
+              아직 본격 진입 안 함).
+            - 단일 지표 (creditGap 만) 로 단계 판정 — 4~5 지표 결합 필수.
+        OutputSchema:
+            DalioPhaseResult ``{phase, phaseLabel, signals, subPhase,
+            regimeVariant, description}``.
+        Prerequisites:
+            gdpGrowth + creditGap + realRate (1 개 이상). 결측 시 earlyBoom 기본.
+        Freshness:
+            BIS 분기, 실질금리 일/월.
+        Dataflow:
+            지표 → 6 단계 룰 → phase → subPhase (beautifulDeleveraging) →
+            regime variant (fxFlexibility/reserve currency).
+        TargetMarkets: Global (Dalio 원형). 한국 + 미국 + EU + 일본 모두.
     """
     signals: list[str] = []
 
