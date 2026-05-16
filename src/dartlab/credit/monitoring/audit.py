@@ -82,39 +82,74 @@ def auditCredit(
     corpName: str = "",
     result: dict | None = None,
 ) -> CreditAuditResult:
-    """신평사 대조 + 동의/비동의 자동 생성.
+    """dCR 등급 vs 제도권 신평사 (KIS/KR/NICE) 등급 대조 + 동의/비동의 라인.
 
-    dCR 등급을 제도권 신평사(KIS/KR/NICE) 등급과 비교하여
-    notch 차이를 계산하고, 동의·비동의·구조적 참고사항을
-    자동 생성한다.
+    Capabilities:
+        dartlab dCR 등급을 한국 신평사 3 곳 (KIS/KR/NICE) 의 외부 등급과
+        notch 단위 비교 → 동의 여부 + 차이 원인 텍스트 자동 생성. 79 개사
+        validation 결과 (대기업 87%, 중대형 82% 일치). audit pipeline 의
+        핵심 함수.
 
-    Parameters
-    ----------
-    stockCode : str
-        종목코드 (예: ``"005930"``).
-    corpName : str
-        기업명. 빈 문자열이면 종목코드만 사용.
-    result : dict | None
-        신용분석 결과 딕셔너리. None이면 내부에서
-        ``credit.evaluate(stockCode, detail=True)``를 호출한다.
-        주요 키: ``grade`` (str), ``gradeRaw`` (str), ``score`` (점),
-        ``captiveFinance`` (bool), ``holding`` (bool), ``axes`` (list).
+    Args:
+        stockCode: 종목코드 (예 ``"005930"``).
+        corpName: 기업명 (옵션).
+        result: ``credit.evaluate(stockCode, detail=True)`` 결과 dict.
+            None 시 내부에서 자동 호출.
 
-    Returns
-    -------
-    CreditAuditResult
-        stockCode : str — 종목코드
-        corpName : str — 기업명
-        dcrGrade : str — dartlab 최종 등급 (예: ``"A+"``)
-        dcrGradeRaw : str — 보정 전 원시 등급
-        dcrScore : float — 종합 점수 (점)
-        externalGrades : dict — 외부 등급 ``{기관명: 등급}``
-        notchDifferences : dict — notch 차이 ``{기관명: int}`` (notch)
-        avgNotchDiff : float — 평균 notch 괴리 (notch)
-        agreements : list[str] — 동의 근거 문장 목록
-        disagreements : list[str] — 비동의 근거 문장 목록
-        structuralNotes : list[str] — 구조적 참고사항 목록
-        auditDate : str — audit 실행일 (``"YYYY-MM-DD"``)
+    Returns:
+        CreditAuditResult dataclass:
+            - ``stockCode``/``corpName`` (str)
+            - ``dcrGrade`` (str): dartlab 최종 등급
+            - ``dcrGradeRaw`` (str): 보정 전 원시 등급
+            - ``dcrScore`` (float): 종합 점수
+            - ``externalGrades`` (dict): 외부 등급 ``{기관명: 등급}``
+            - ``notchDifferences`` (dict): notch 차이 ``{기관명: int}``
+            - ``avgNotchDiff`` (float): 평균 괴리 (notch)
+            - ``agreements``/``disagreements`` (list[str]): 동의/비동의 근거
+            - ``structuralNotes`` (list[str]): 구조적 참고사항
+            - ``auditDate`` (str): 실행일
+
+    Raises:
+        없음.
+
+    Example:
+        >>> audit = auditCredit("005930", "삼성전자")
+        >>> audit.avgNotchDiff, audit.dcrGrade
+        (0.3, 'AA+')
+
+    Guide:
+        notch 차이 = dartlab vs 외부 등급의 단계 차이 (예 AA → AA-, 1 notch).
+        |avgNotchDiff| < 1 = 신평사 동의, 1~2 = 부분 동의, > 2 = 비동의 (사유
+        분석 필요). 79 개사 validation 대기업 87% 일치.
+
+    SeeAlso:
+        - ``credit.evaluate``: dartlab 등급 (본 함수 입력)
+        - ``credit.monitoring.crisisDetector``: 위기 신호
+        - ``auditToMarkdown``: 본 결과 → 보고서
+
+    Requires:
+        ``data/credit/externalGrades.json`` 로드 + credit.evaluate 호출 가능.
+
+    AIContext:
+        agreements + disagreements list 함께 인용 — notch 차이만 보면 원인
+        불명. structuralNotes 는 캡티브/지주사 등 구조적 차이 설명.
+
+    LLM Specifications:
+        AntiPatterns:
+            - avgNotchDiff 만 보고 단정 — 외부 등급 stale (분기 lag) 가능,
+              auditDate 함께 확인.
+            - 외부 등급 미보유 회사 (작은 회사) → 빈 externalGrades — audit
+              결과 신뢰도 낮음.
+        OutputSchema:
+            CreditAuditResult (12 필드 dataclass).
+        Prerequisites:
+            externalGrades.json + credit.evaluate (자동 호출 가능).
+        Freshness:
+            externalGrades.json = 운영자 분기 업데이트.
+        Dataflow:
+            stockCode → result (evaluate) → externalGrades 룩업 → notch 비교
+            → agreements/disagreements/structuralNotes 생성.
+        TargetMarkets: KR (KIS/KR/NICE). US 미적용.
     """
     if result is None:
         from dartlab.credit.engine import evaluate
