@@ -74,7 +74,7 @@ class IndustryNode:
 
     @staticmethod
     def fromDict(d: dict) -> IndustryNode:
-        """fromDict — TODO 한국어 동작 설명."""
+        """nodes.json 행 dict → IndustryNode 역직렬화."""
         return IndustryNode(
             stockCode=d.get("stockCode", ""),
             corpName=d.get("corpName", ""),
@@ -108,7 +108,7 @@ class IndustryEdge:
     ratio: float | None = None  # 매입비중 (%)
 
     def toDict(self) -> dict:
-        """toDict — TODO 한국어 동작 설명."""
+        """IndustryEdge → edges.json 행 dict 직렬화."""
         return {
             "fromCode": self.fromCode,
             "fromName": self.fromName,
@@ -126,7 +126,7 @@ class IndustryEdge:
 
     @staticmethod
     def fromDict(d: dict) -> IndustryEdge:
-        """fromDict — TODO 한국어 동작 설명."""
+        """edges.json 행 dict → IndustryEdge 역직렬화."""
         return IndustryEdge(
             fromCode=d.get("fromCode", ""),
             fromName=d.get("fromName", ""),
