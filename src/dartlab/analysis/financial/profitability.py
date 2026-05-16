@@ -53,29 +53,64 @@ def _isFinancialSector(company) -> bool:
 
 @memoizedCalc
 def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """이익 구조 시계열 -- 매출에서 순이익까지 금액과 마진.
+    """이익 구조 시계열 — 매출 → 매출원가 → 매출총이익 → 판관비 → 영업이익 → 순이익.
 
-    일반 기업: 매출/매출원가/매출총이익/판관비/영업이익/당기순이익
-    금융업: 이자수익(revenue 대체)/금융이익/영업이익/당기순이익
+    Capabilities:
+        IS 의 5 마진 단계 (매출 → COGS → GP → SG&A → OP → NI) 시계열을 산출.
+        일반/금융업 분기 (금융업은 이자수익 + 금융이익). YoY 변화율 함께
+        제공해 마진 압박/개선 추세 식별.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            revenue : float — 매출 (원)
-            revenueYoy : float — 매출 전기대비 (%)
-            operatingIncome : float — 영업이익 (원)
-            operatingMargin : float — 영업이익률 (%)
-            operatingIncomeYoy : float — 영업이익 전기대비 (%)
-            netIncome : float — 당기순이익 (원)
-            netMargin : float — 순이익률 (%)
-            netIncomeYoy : float — 순이익 전기대비 (%)
-            cogs : float — 매출원가 (원)
-            grossProfit : float — 매출총이익 (원)
-            grossMargin : float — 매출총이익률 (%)
-            sga : float — 판관비 (원)
-        displayHints : dict — core 컬럼 목록 + AI 표시 힌트
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 13 키 dict (revenue, cogs,
+              grossProfit/Margin, sga, operatingIncome/Margin, netIncome/Margin
+              + 각 YoY)
+            - ``displayHints`` (dict): UI 표시 메타 (core 컬럼 + 한국어 라벨)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcMarginTrend(Company("005930"))
+        >>> r["history"][0]["operatingMargin"], r["history"][0]["grossMargin"]
+        (12.5, 35.0)
+
+    Guide:
+        마진 추세 (3 년) 가 progressive 개선/악화면 신호 강함. Operating
+        margin 안정 (변동 ±2%p) + Net margin 변동 큼 = 영업외 손익 영향
+        (한국 회사 흔함). 금융업은 NIM (Net Interest Margin) 별도 분석.
+
+    SeeAlso:
+        - ``analyzeProfitability``: 정성 분석 (본 함수 결과 사용)
+        - ``calcReturnTrend``: ROE/ROA/ROIC 시계열
+        - ``calcMarginWaterfall``: COGS/SG&A 비중 변화 분해
+
+    Requires:
+        IS 시계열 (매출/매출원가/판관비/영업이익/당기순이익) ≥ 2 년.
+
+    AIContext:
+        history list 의 첫 dict 가 최신 (latest), [1] = 전년. YoY 변화 분석시
+        주의 — 일회성 영업외 (자산매각 등) 가 netMargin 만 영향. 마진 5
+        단계 함께 보면 영업 구조 + 영업외 영향 분리 가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 매출액 (revenue) 만 보고 성장 단정 — 영업이익 동반 확인 필수.
+            - 금융업 (은행/보험) 에 일반 마진 적용 — isFinancial 자동 분기
+              되지만 결과 dict 의 cogs/sga 가 0 일 수 있음.
+        OutputSchema:
+            ``{history: list[dict], displayHints: dict}``.
+        Prerequisites:
+            IS 시계열 + 일반/금융업 분기 표준 계정.
+        Freshness:
+            최신 분기 + 5 년 시계열 (annualColsFromPeriods).
+        Dataflow:
+            IS → 5 마진 단계 추출 → YoY 계산 → displayHints 메타 합성.
+        TargetMarkets: KR (DART 표준), US (EDGAR — 일부 표준 계정 매핑 필요).
     """
     isFinancial = _isFinancialSector(company)
 
