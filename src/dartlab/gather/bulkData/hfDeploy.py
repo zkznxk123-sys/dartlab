@@ -147,6 +147,6 @@ def deployKrxIndexToHF(
 
     See Also:
         deployKrxToHF : 위임 대상 (종목 prices path).
-        scripts/build/buildKrxIndexData.py : 호출 caller (운영자 cron).
+        .github/scripts/sync/buildKrxIndexData.py : 호출 caller (운영자 cron).
     """
     return deployKrxToHF(localDir, repoId=repoId, pathInRepo=pathInRepo, token=token)

@@ -10,7 +10,7 @@ Description
 종목 가격 축인 ``gather("krx", ...)`` 와 같은 3모드 계약을 따른다.
 사용자 기본 호출은 HuggingFace 데이터셋 ``krx/indices/raw-{YYYY}.parquet`` 를
 읽고, ``apiKey`` 를 명시한 호출만 KRX OpenAPI ``idx`` endpoint 를 직접 친다.
-운영자 cron 은 ``scripts/build/buildKrxIndexData.py`` 가 담당한다.
+운영자 cron 은 ``.github/scripts/sync/buildKrxIndexData.py`` 가 담당한다.
 
 시장군 의미:
     - ``KRX``: KRX300, 코리아 밸류업, ESG, 테마/전략 지수.
@@ -56,7 +56,7 @@ See Also
 --------
 ``dartlab.gather.krxApi`` — 전종목 주식 가격/시총/발행주식수.
 ``dartlab.gather._hfIndexBulk`` — 사용자 기본 HF 로더.
-``scripts/build/buildKrxIndexData.py`` — 운영자 bulk 수집 + HF push.
+``.github/scripts/sync/buildKrxIndexData.py`` — 운영자 bulk 수집 + HF push.
 ``engines.gather`` — gather 엔진 수집 계약 SSOT.
 """
 
@@ -324,7 +324,7 @@ async def fetchKrxIndexRange(
     --------
     fetchKrxIndexBydd : 일별 단일 호출 (본 함수 내부 fan-out 대상).
     gatherKrxIndex : 사용자 진입점 — apiKey 미명시 시 HF 사용.
-    scripts/build/buildKrxIndexData : 운영자 bulk + HF push 스크립트.
+    .github/scripts/sync/buildKrxIndexData : 운영자 bulk + HF push 스크립트.
     """
     startD = datetime.strptime(_normalizeDate(start), "%Y%m%d").date()
     endD = datetime.strptime(_normalizeDate(end), "%Y%m%d").date()
@@ -483,7 +483,7 @@ def gatherKrxIndex(
     --------
     dartlab.gather.krxApi.gatherKrx : 전종목 가격/시총/발행주식수.
     dartlab.gather._hfIndexBulk.loadFiltered : HF 기본 로더.
-    scripts/build/buildKrxIndexData.py : 운영자 bulk 수집 스크립트.
+    .github/scripts/sync/buildKrxIndexData.py : 운영자 bulk 수집 스크립트.
     """
     # 일자 디폴트
     if start is None:

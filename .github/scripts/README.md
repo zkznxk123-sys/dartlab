@@ -18,7 +18,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 
 ## 도메인별 스크립트 + 호출 workflow
 
-### sync/ — HF ↔ 로컬 양방향 sync
+### sync/ — HF ↔ 로컬 양방향 sync · 외부 API 수집
 
 | 스크립트 | 역할 | 호출 workflow |
 |---|---|---|
@@ -29,13 +29,22 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 | [sync/uploadData.py](sync/uploadData.py) | `dist/changed.txt` 기반 HF 증분 업로드 (batch 300/commit) | `dataSync.yml`, `dartNewStocks.yml` |
 | [sync/uploadHfReadme.py](sync/uploadHfReadme.py) | HF dataset README 갱신 | (수동) |
 | [sync/bulkUploadHf.py](sync/bulkUploadHf.py) | HF 전체 폴더 일괄 업로드 | (수동, cold start) |
+| [sync/buildKrxData.py](sync/buildKrxData.py) | KRX OpenAPI → 연도별 raw parquet + HF push | `buildKrxData.yml` |
+| [sync/buildKrxIndexData.py](sync/buildKrxIndexData.py) | KRX 지수 OHLCV bulk 수집 + HF push | `buildKrxIndexData.yml` |
+| [sync/buildMacroData.py](sync/buildMacroData.py) | FRED/ECOS 카탈로그 → HF macro 벌크 parquet | `macroData.yml` |
 
-### prebuild/ — derived artifact build
+### prebuild/ — derived artifact build (parquet → JSON / aggregate)
 
 | 스크립트 | 역할 | 호출 workflow |
 |---|---|---|
 | [prebuild/prebuildData.py](prebuild/prebuildData.py) | DART scan prebuild parquet 빌드 + HF 업로드 | `dataPrebuild.yml` |
 | [prebuild/prebuildValuation.py](prebuild/prebuildValuation.py) | valuation snapshot parquet 빌드 + HF 업로드 | `valuationSnapshot.yml` |
+| [prebuild/buildIndustryMap.py](prebuild/buildIndustryMap.py) | 산업지도 시각화 JSON (atlas/industries/companies) | `mapBuild.yml` |
+| [prebuild/buildFinanceJson.py](prebuild/buildFinanceJson.py) | finance.parquet → dashboards/finance.json (전 상장사 5Y) | `mapBuild.yml` |
+| [prebuild/buildQuartersJson.py](prebuild/buildQuartersJson.py) | finance.parquet → dashboards/quarters.json (분기 시계열) | `mapBuild.yml` |
+| [prebuild/buildMetaJson.py](prebuild/buildMetaJson.py) | dashboards/meta.json (engines + 블로그 + thesis) | `mapBuild.yml` |
+| [prebuild/buildMacroJson.py](prebuild/buildMacroJson.py) | macro.cycle → dashboards/macro.json | `mapBuild.yml` |
+| [prebuild/buildStoryManifest.py](prebuild/buildStoryManifest.py) | story SSOT → static/story/manifest.json | `mapBuild.yml` |
 
 ### meta/ — 메타 데이터 refresh
 
