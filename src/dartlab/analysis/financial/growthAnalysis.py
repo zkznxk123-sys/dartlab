@@ -255,26 +255,64 @@ def calcGrowthQuality(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict | None:
-    """지속가능성장률(SGR) vs 실제 매출성장률 갭.
+    """지속가능성장률 (SGR) vs 실제 매출성장률 갭 — 외부 자본 필요 여부 판정.
 
-    SGR = ROE x (1 - 배당성향/100)
-    gap = 실제 매출성장률 - SGR
-    - gap > 0: 외부 자본 필요 (성장이 내부 역량 초과)
+    Capabilities:
+        Higgins (1981) SGR = ROE × (1 - payout). 내부 retained 만으로 가능
+        성장률. 실제 매출성장률과 비교해 양수 갭 = 외부 자본 (debt 또는 equity
+        issuance) 필요, 음수 갭 = 잉여 (자사주매입/배당 확대 여력).
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            revenue : float — 매출 (원)
-            netIncome : float — 순이익 (원)
-            equity : float — 자기자본 (원)
-            roe : float — ROE (%)
-            payoutRatio : float — 배당성향 (%)
-            sgr : float — 지속가능성장률 (%)
-            actualGrowth : float — 실제 매출성장률 (%)
-            gap : float — 실제-SGR 갭 (%)
-    - gap < 0: 여유 (자사주/배당 확대 여력)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 9 키 (period, revenue,
+              netIncome, equity, roe, payoutRatio, sgr, actualGrowth, gap)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcSustainableGrowthRate(Company("005930"))
+        >>> r["history"][0]
+        {'roe': 15, 'payoutRatio': 25, 'sgr': 11.25, 'actualGrowth': 8,
+         'gap': -3.25, ...}
+        # 실제 8% < SGR 11.25% → 여유 (자사주매입/배당 확대 가능)
+
+    Guide:
+        gap > 5%p = 외부 자본 강한 필요 (보통 유상증자 or 신규 차입 발생).
+        gap < -5%p = 누적 현금 — 자사주매입 (조용한 환원) 또는 배당 확대
+        가능. KR 우량 회사 (삼성/현대) 는 보통 gap 음수.
+
+    SeeAlso:
+        - ``calcGrowthTrend``: 실제 성장률 시계열
+        - ``calcDividendPolicy``: 배당성향 (본 함수 입력)
+        - ``calcShareholderReturn``: 자사주매입 + 배당 합산
+
+    Requires:
+        IS (매출/순이익) + BS (자본총계) + CF (배당) ≥ 2 년.
+
+    AIContext:
+        gap 부호 함께 노출 — "외부 자본 필요" vs "여유" 라벨로 직관적 설명.
+        ROE 가 낮은 (5% 미만) 회사는 SGR 도 낮아 gap 양수 흔함.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 gap 만 보고 "유상증자 임박" 단정 — 3 년 추세 + 차입금
+              증가율 함께 확인.
+            - 무배당 (payoutRatio=0) 회사 → SGR = ROE 그대로. 정상.
+        OutputSchema:
+            ``{history: list[dict 9키]}``.
+        Prerequisites:
+            IS/BS/CF 시계열 ≥ 2 년.
+        Freshness:
+            최신 분기.
+        Dataflow:
+            IS → revenue/NI → BS → equity → ROE = NI/Equity → CF/dividends
+            → payoutRatio → SGR = ROE × (1 - payout/100) → gap = actual - SGR.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     # snakeId 단일 패턴
     isResult = company.select("IS", ["매출액", "당기순이익"])
