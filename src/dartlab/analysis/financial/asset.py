@@ -102,14 +102,17 @@ def _sumOp(data: dict, col: str, simpleKeys: list[str], fallbackPairs: list[list
 
 @memoizedCalc
 def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None:
-    """자산을 영업/비영업으로 재분류 — 시계열.
+    """자산을 영업/비영업으로 재분류 → 순영업자산 (NOA) + 자본배분 진단.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        BS 의 자산을 영업자산 (PP&E + 운전자본 + 영업관련 무형) vs 비영업자산
+        (현금 + 투자유가증권 + 비영업 부동산) 으로 재분류. NOA (Net Operating
+        Assets) = 영업자산 - 영업부채 산출. Penman/Healy (2018) 회계분석
+        프레임의 핵심.
+
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
 
     Returns
     -------
@@ -127,6 +130,49 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
         history : list[dict] — 연도별 자산 구조 시계열
         diagnosis : str — 자산 구조 진단
         notesDetail : dict | None — 주석 상세 데이터
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcAssetStructure(Company("005930"))
+        >>> r["latest"]["opAssetsPct"], r["latest"]["nonOpAssetsPct"]
+        (68, 32)  # 영업 68%, 비영업 (현금/투자) 32%
+
+    Guide:
+        영업자산 비중 > 70% = 영업 집중, 30~70% = 균형, < 30% = 비영업
+        과다 (지주사 또는 자본배분 비효율 신호). NOA 증가 추세 = 자본 재투자
+        (cumulative reinvestment). Penman ROE 분해: ROE = RNOA + FLEV × Spread.
+
+    SeeAlso:
+        - ``calcWorkingCapital``: 순운전자본 분해
+        - ``calcCapexPattern``: 고정영업자산 변화
+        - ``analyzeProfitability``: ROE/ROA 분석 (NOA 기반)
+
+    Requires:
+        Company.select(BS, [자산총계, 부채총계, 영업자산 + 영업부채 후보]).
+
+    AIContext:
+        비영업자산 비중 50%+ 회사 (예 캐시카우) 는 RNOA 가 ROE 보다 훨씬 높음
+        — 영업 효율성 평가에 유용. opAssets/nonOpAssets 비중 시계열 추세
+        함께 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 NOA 만 보고 효율성 판단 — 3 년 추세 필요.
+            - 캡티브 금융 회사 (현대차/기아) → 비영업 (금융자회사 자산) 큼.
+              "비영업 과다" 단정 금지.
+        OutputSchema:
+            ``{latest: dict 9키, history: list[dict], diagnosis: str,
+            notesDetail: dict | None}``.
+        Prerequisites:
+            BS 시계열 + 자산/부채 standardAccounts.
+        Freshness:
+            최신 분기 + 3~5 년 시계열.
+        Dataflow:
+            BS → 영업자산 (PPE + 무형 + 운전자본) + 비영업 (현금 + 투자) 분리
+            → NOA 합성 → diagnosis.
+        TargetMarkets: KR (DART), US (EDGAR). 표준 계정 매핑은 standardAccounts.
     """
     _allFallback = [k for pair in _OP_ASSET_FALLBACK + _OP_LIAB_FALLBACK for k in pair]
     allAccounts = (
