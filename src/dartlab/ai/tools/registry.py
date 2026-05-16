@@ -25,6 +25,7 @@ from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
+from .scenarioOverlay import scenarioOverlay
 from .storyTemplate import pickStoryTemplate
 from .types import ToolResult, ToolSpec
 from .validateRecipe import validateRecipe
@@ -290,6 +291,27 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "ScenarioOverlay": ToolSpec(
+        "ScenarioOverlay",
+        "macro 시나리오 preset (146 종 — 1997 IMF / 2008 GFC / Fed DFAST 등) 의 macro overrides 와 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. '금리 +50bp 면?' 류 질문에 답변 본문 옵션 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "scenarioName": {
+                    "type": "string",
+                    "description": "preset 이름 (예: 'asia_crisis', 'semiconductor_downturn')",
+                },
+                "stockCode": {"type": "string"},
+                "severity": {"type": "string", "enum": ["mild", "moderate", "severe", "extreme", ""]},
+                "market": {"type": "string", "enum": ["KR", "US", ""]},
+            },
+            "required": ["scenarioName"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "PickStoryTemplate": ToolSpec(
         "PickStoryTemplate",
         "기업유형 (growth/value/credit_risk 등 9 enum) 자동 분류 + 추천 story 섹션 묶음. '이 회사 어떻게 봐?' 종합 분석 의도면 답변 흐름 잡기 전에 호출.",
@@ -456,6 +478,7 @@ _TOOLS: dict[str, ToolFn] = {
     "EngineCall": engineCall,
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
+    "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
     "Read": readFile,
@@ -498,6 +521,7 @@ _LEGACY_NAME_MAP = {
     "engine_call": "EngineCall",
     "evidence_gate": "EvidenceGate",
     "pick_story_template": "PickStoryTemplate",
+    "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",
     "read": "Read",
