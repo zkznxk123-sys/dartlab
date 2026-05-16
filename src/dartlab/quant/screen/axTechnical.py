@@ -16,7 +16,7 @@ from dartlab.quant.screen.dataAccess import fetchOhlcv
 class _OHLCVWrapper:
     """OHLCV를 이미 보유한 경량 래퍼 — extended.py의 _fetchOhlcv 캐시 호환."""
 
-    def __init__(self, stockCode: str, ohlcv, market: str = "KR"):
+    def __init__(self, stockCode: str, ohlcv, market: str = "KR") -> None:
         self.stockCode = stockCode
         self.currency = "KRW" if market == "KR" else "USD"
         self._cache = {"_quant_ohlcv": ohlcv}

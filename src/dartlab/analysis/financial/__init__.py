@@ -901,11 +901,11 @@ def _acceptsOverrides(fn) -> bool:
 class _GroupAccessor:
     """analysis.financial, analysis.valuation 등 그룹 accessor."""
 
-    def __init__(self, analysisInstance: "Analysis", group: str):
+    def __init__(self, analysisInstance: "Analysis", group: str) -> None:
         self._analysis = analysisInstance
         self._group = group
 
-    def __call__(self, company=None, *, stockCode=None, basePeriod=None, overrides=None):
+    def __call__(self, company=None, *, stockCode=None, basePeriod=None, overrides=None) -> object:
         """그룹 가이드 또는 그룹 전체 실행. `stockCode` / `company` 호환."""
         return self._analysis(
             self._group,
@@ -915,7 +915,7 @@ class _GroupAccessor:
             overrides=overrides,
         )
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> object:
         """analysis.financial.profitability() 패턴."""
         try:
             resolved = _resolveAxis(name)
@@ -1279,7 +1279,7 @@ class Analysis:
             pass
         return results
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> "_GroupAccessor":
         """accessor 패턴: analysis.financial, analysis.valuation 등."""
         group = name if name in _GROUPS else _ALIASES.get(name) if _ALIASES.get(name) in _GROUPS else None
         if group is not None:

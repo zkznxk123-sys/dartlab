@@ -225,7 +225,7 @@ class AnalysisResult:
             result["coreEarnings"] = self.coreEarnings.grade
         return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()
