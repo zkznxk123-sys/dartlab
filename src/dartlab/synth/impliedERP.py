@@ -26,22 +26,72 @@ def calcImpliedERP(
     asOfDate: str | None = None,
     useCache: bool = True,
 ) -> dict[str, Any]:
-    """Damodaran Implied ERP 역산 — Gordon 공식.
+    """Damodaran Implied ERP 역산 (Gordon 공식 + 시장 indexed 가격) → 현재 ERP.
 
-    Parameters
-    ----------
-    country : "KR" | "US" | ...
-    asOfDate : ISO date. None 이면 현재 분기.
-    useCache : 분기 cache 사용 여부 (최대 90일 이내).
+    Capabilities:
+        Damodaran 의 Implied ERP 방법론 — KOSPI/S&P 500 의 현재 지수 + 집계
+        EPS + 배당/자사주매입 yield 에서 Gordon Growth model 역산하여 시장
+        내재 ERP 추출. ``loadDamodaranERP`` (정적) 와 동일 키 셋 + 분기
+        cache + 7 sub-key (impliedERP/indexLevel 등) 추가.
 
-    Returns
-    -------
-    dict — riskPremiums.loadDamodaranERP 와 **동일 키 셋**:
-        countryCode, name, matureMarketERP, countryRiskPremium, totalERP,
-        riskFreeRate, marginalTaxRate, rating, source, asOfDate
-    추가 서브키:
-        impliedERP, indexLevel, aggregateE, aggregateD, buybackYield,
-        payoutRatio, method, sampleCount
+    Args:
+        country: ``"KR"``/``"US"``. ISO 2-letter.
+        asOfDate: ISO 8601. None 시 현재 분기 (2024Q4 등).
+        useCache: 분기 cache (90 일 이내) 사용. False 면 실시간 재계산.
+
+    Returns:
+        dict (loadDamodaranERP 와 동일 10 키 + 추가 8 sub-key):
+            정적 키: countryCode/name/matureMarketERP/countryRiskPremium/
+                totalERP/riskFreeRate/marginalTaxRate/rating/source/asOfDate
+            동적 sub-key:
+            - ``impliedERP`` (float): Gordon 역산 ERP (%)
+            - ``indexLevel`` (float): 지수 현재값 (KOSPI/S&P 500)
+            - ``aggregateE``/``aggregateD`` (float): 집계 EPS/배당
+            - ``buybackYield``/``payoutRatio`` (float)
+            - ``method`` (str): ``"gordon"``/``"two_stage"``
+            - ``sampleCount`` (int): 사용된 종목 수
+
+    Raises:
+        없음 — 계산 실패 시 fallback (loadDamodaranERP) 반환.
+
+    Example:
+        >>> r = calcImpliedERP("KR")
+        >>> r["impliedERP"], r["indexLevel"]
+        (7.2, 2500.0)
+
+    Guide:
+        Gordon: P = E × (1-payout) / (r - g). E/P + buyback yield + g (성장)
+        → r → r - rf = ERP. 한국 ~7%, 미국 ~5% 평균. ERP 가 평균보다 높으면
+        시장 저평가, 낮으면 고평가 신호.
+
+    SeeAlso:
+        - ``loadDamodaranERP``: 정적 ERP (Damodaran 1 월/7 월 업데이트)
+        - ``calcDFV``: WACC 산출 시 본 ERP 사용
+        - Damodaran (2020) "Implied Equity Risk Premium"
+
+    Requires:
+        지수 + EPS 집계 데이터 (KRX/yahoo finance). 90 일 cache.
+
+    AIContext:
+        impliedERP vs 정적 ERP (matureMarketERP + countryRiskPremium) 차이가
+        crisis/euphoria 신호 — 차이 > 2%p 면 시장 mispricing 가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - useCache=True 결과를 real-time 으로 인용 — 90 일 lag 가능.
+            - method="two_stage" 결과 (성장 phase 가정) 의 ERP 를 Gordon
+              결과와 직접 비교 금지 — 다른 모델.
+        OutputSchema:
+            상기 18 키 dict (정적 10 + 동적 8).
+        Prerequisites:
+            지수 시계열 + EPS 집계 데이터 + loadDamodaranERP 호출 가능.
+        Freshness:
+            분기 cache (90 일). 매분기 갱신.
+        Dataflow:
+            country → cache 체크 → loadIndex + aggregateEPS → Gordon
+            역산 → impliedERP → cache 저장 → dict 반환.
+        TargetMarkets: KR (KOSPI + dartlab EPS aggregator), US (S&P 500
+            shiller data).
     """
     from dartlab.synth.riskPremiums import loadDamodaranERP
 
