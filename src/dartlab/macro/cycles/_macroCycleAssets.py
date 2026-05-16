@@ -302,24 +302,72 @@ def marketLevelValuation(
     totalMarketCap: float,
     gdp: float,
 ) -> MarketValuation:
-    """Buffett Indicator: 시가총액/GDP 비율로 시장 전체 밸류에이션 판정.
+    """Buffett Indicator (시총/GDP) → 시장 전체 밸류에이션 5 구간 분류.
 
-    Warren Buffett이 "가장 좋은 단일 지표"라고 언급한 시장 레벨 척도.
-    WILL5000PRFC(Wilshire 5000 시가총액) / GDP(명목).
-
-    역사적 범위 (미국):
-    - <70%: 극단 저평가 (2009, 2020 바닥)
-    - 70-100%: 저평가 (장기 평균 수준)
-    - 100-140%: 적정 (현대 평균)
-    - 140-180%: 고평가
-    - >180%: 극단 고평가 (닷컴, 2021)
+    Capabilities:
+        Warren Buffett 의 "가장 좋은 단일 시장 척도" — Wilshire 5000 시총
+        (WILL5000PRFC) / 명목 GDP. 역사적 범위 (1970~2024) 의 5 구간으로
+        분류하여 현 시점 시장 전체 밸류에이션 판정.
 
     Args:
-        total_market_cap: 전체 시가총액 (Billions $) — WILL5000PRFC
-        gdp: 명목 GDP (Billions $) — GDP
+        totalMarketCap: 전체 시가총액 (Billions $). FRED WILL5000PRFC.
+        gdp: 명목 GDP (Billions $). FRED GDP.
 
     Returns:
-        MarketValuation
+        MarketValuation dataclass:
+            - ``buffettIndicator`` (float): 시총/GDP 비율 (%)
+            - ``zone`` (str): ``"undervalued"``/``"fair"``/``"overvalued"``/
+              ``"extreme"``
+            - ``zoneLabel`` (str): 한국어
+            - ``description`` (str): 한국어 해석
+
+    Raises:
+        없음. gdp ≤ 0 시 zero result.
+
+    Example:
+        >>> r = marketLevelValuation(totalMarketCap=55000, gdp=27000)
+        >>> r.buffettIndicator, r.zone
+        (203.7, 'extreme')
+
+    Guide:
+        역사적 5 구간 (미국 1970~2024):
+        - < 70%: 극단 저평가 (2009 GFC 바닥, 2020 COVID 바닥)
+        - 70~100%: 저평가 (장기 평균 1990s)
+        - 100~140%: 적정 (현대 평균 2010s)
+        - 140~180%: 고평가
+        - > 180%: 극단 고평가 (1999 닷컴 정점 150%, 2021 175%)
+
+        본 지표는 시장 전체 — 개별 종목 valuation 과 다름. 글로벌화 (해외
+        매출 비중) 증가로 long-run 평균 자체가 상승 추세 (mean reversion 한계).
+
+    SeeAlso:
+        - ``classifyCycle``: 매크로 사이클 (밸류에이션과 함께 종합)
+        - ``copperGoldRatio``: 위험선호 (다른 시장 척도)
+        - Buffett, W. (2001) Fortune Magazine
+
+    Requires:
+        Wilshire 5000 시가총액 + 명목 GDP (FRED).
+
+    AIContext:
+        Buffett Indicator extreme 결과는 시장 전체 신호이지 개별 종목 매도
+        신호 아님 — long-run mean reversion 시점 불확실 (1~5 년).
+        한국 KOSPI 적용 시 KRX 전체 시총 / 한국 GDP 사용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - extreme 단계만 보고 "시장 폭락 임박" 단정 — Buffett 본인도
+              "정확한 timing 도구 아님" 명시 (2001 Fortune).
+            - 글로벌화 증가로 long-run 평균 자체 상승 — 1990 표준을 2024에
+              그대로 적용 금지.
+        OutputSchema:
+            MarketValuation ``{buffettIndicator, zone, zoneLabel, description}``.
+        Prerequisites:
+            FRED WILL5000PRFC + GDP. 동일 통화 단위 (Billions $).
+        Freshness:
+            시총 일, GDP 분기 (Bureau of Economic Analysis Q1/Q2/Q3/Q4).
+        Dataflow:
+            (시총 / GDP) × 100 → 5 구간 임계 분류 → description.
+        TargetMarkets: US (WILL5000PRFC + GDP). KR 도 KRX/KOSIS 적용 가능.
     """
     if gdp <= 0:
         return MarketValuation(0, "fair", "판별불가", "GDP 데이터 없음")
