@@ -56,27 +56,76 @@ def loadDamodaranERP(
     currency: str | None = None,
     asOfDate: str | None = None,
 ) -> dict[str, Any]:
-    """Damodaran 국가별 리스크 프리미엄 조회.
+    """Damodaran ERP (Equity Risk Premium) 국가별 룩업 + 자동 fallback.
 
-    Parameters
-    ----------
-    countryCode : ISO2 국가코드 (KR/US/JP/...). None 이면 currency 에서 추론.
-    currency : 통화 힌트 (countryCode 없을 때)
-    asOfDate : ISO date. 현재는 미사용 (월별 parquet 편입 시 활성화).
+    Capabilities:
+        Aswath Damodaran (NYU Stern) 의 사실상 표준 ERP 데이터 — 국가별 성숙
+        시장 ERP + 국가 리스크 프리미엄 + 무위험이자율 + 법인세율 + Moody's
+        등급을 dict 로 반환. countryCode 누락 시 currency 에서 추론. DCF
+        WACC 산출의 표준 입력.
 
-    Returns
-    -------
-    dict
-        countryCode : str — 해결된 ISO2
-        name : str — 국가명
-        matureMarketERP : float — 성숙시장 기준 프리미엄 (%)
-        countryRiskPremium : float — 국가 리스크 프리미엄 (%)
-        totalERP : float — matureMarketERP + countryRiskPremium (%)
-        riskFreeRate : float — 해당 국가 10Y 국채 (%)
-        marginalTaxRate : float — 법인세율 (%)
-        rating : str — Moody's 국가 등급
-        source : str — "damodaran_{YYYY-MM}" | "fallback_default"
-        asOfDate : str — 스냅샷 기준일
+    Args:
+        countryCode: ISO 2-letter 코드 (예 ``"KR"``, ``"US"``, ``"JP"``).
+            None 시 currency 에서 추론.
+        currency: 통화 힌트 (KRW → KR, USD → US, JPY → JP). countryCode 없을 때만.
+        asOfDate: ISO 8601 날짜. 현재 미사용 (월별 parquet 편입 시 활성).
+
+    Returns:
+        dict:
+            - ``countryCode`` (str): ISO2 해결 결과
+            - ``name`` (str): 국가명 (한국어)
+            - ``matureMarketERP`` (float): 성숙시장 기준 프리미엄 (%)
+            - ``countryRiskPremium`` (float): 국가 리스크 (%)
+            - ``totalERP`` (float): 합계
+            - ``riskFreeRate`` (float): 10Y 국채 (%)
+            - ``marginalTaxRate`` (float): 법인세율 (%)
+            - ``rating`` (str): Moody's 국가 등급
+            - ``source`` (str): ``"damodaran_{YYYY-MM}"`` 또는 ``"fallback_default"``
+            - ``asOfDate`` (str)
+
+    Raises:
+        없음 — 미지원 국가는 fallback_default 반환.
+
+    Example:
+        >>> erp = loadDamodaranERP("KR")
+        >>> erp["totalERP"], erp["riskFreeRate"], erp["rating"]
+        (6.8, 3.5, 'Aa2')
+
+    Guide:
+        Damodaran 의 ERP 는 매년 1 월/7 월 업데이트. 한국 totalERP ~ 6.8%
+        (matureMarketERP 5.0% + countryRiskPremium 1.8%). 미국 ERP ~ 5.0%
+        (mature, country risk 0). WACC 계산: Re = Rf + β × totalERP.
+
+    SeeAlso:
+        - ``loadAdamodaranBeta``: 업종별 unlevered beta
+        - ``resolveCountryCode``: ISO2 코드 해결
+        - ``analysis.financial.proforma.computeCompanyWacc``: WACC 본 데이터 사용
+        - Damodaran, A. (2024) "Equity Risk Premiums" Working Paper
+
+    Requires:
+        ``data/synth/damodaranDefaults.json`` 로드 가능.
+
+    AIContext:
+        source="fallback_default" 결과는 정확도 낮음 — 호출자에게 명시.
+        한국 회사의 WACC 산출에 미국 ERP (5.0%) 사용 금지 — KR ERP (6.8%)
+        사용 필수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - countryCode + currency 동시 입력 — countryCode 우선, currency
+              무시 (silently).
+            - 미지원 국가 (EM 일부) 호출 시 fallback 그대로 인용 — 호출자가
+              "근사값" 표기 필요.
+        OutputSchema:
+            상기 10 키 dict.
+        Prerequisites:
+            damodaranDefaults.json 보유 (Damodaran 데이터 추출 결과).
+        Freshness:
+            Damodaran 매년 1 월/7 월 업데이트. dartlab 패키지 버전 의존.
+        Dataflow:
+            countryCode/currency → resolveCountryCode → JSON 룩업 → fallback
+            (한국 KR ~ 미국 US ~ 글로벌 평균).
+        TargetMarkets: Global (90+ 국가 지원). KR/US/JP/CN/EU 주요 지원.
     """
     defaults = _loadDefaults()
     meta = defaults.get("_meta", {})
