@@ -405,4 +405,10 @@ forbidden_modules = [
     "dartlab.gather",
 ]
 allow_indirect_imports = true
-ignore_imports = []
+# industry/build 는 산업지도 builder 모듈 — scan 의 raw 접근이 빌더 본질.
+# 분석 코드와 빌더 코드 분리 별도 트랙 (industry/build → 별도 namespace) 전 ignore.
+ignore_imports = [
+    "dartlab.industry.build.delta -> dartlab.scan.io.parquet",
+    "dartlab.industry.build.edges -> dartlab.scan.network.scanner",
+    "dartlab.industry.build.edges -> dartlab.scan.network.edges",
+]
