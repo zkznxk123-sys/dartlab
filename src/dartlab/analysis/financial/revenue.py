@@ -592,23 +592,66 @@ def calcConcentration(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None:
-    """매출 품질 — 현금 뒷받침과 마진 추세.
+    """매출 품질 — OCF/NI 현금전환율 + 매출총이익률 추세 (4 분기).
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        매출의 "품질" 진단 — OCF/NI 현금전환율 (현금 뒷받침) + 매출총이익률
+        추세 (마진 개선/악화). Sloan accrual model 의 cash flow side 적용
+        + 손익계산서 1 단계 마진 추세.
 
-    Returns
-    -------
-    dict | None
-        cashConversion : float | None — 현금전환율 (%)
-        cashConversionLabel : str — 현금전환 판단 ("양호"|"주의"|"위험")
-        grossMargin : float | None — 매출총이익률 (%)
-        grossMarginTrend : list[float] — 최근 4기 매출총이익률 추이 (%)
-        grossMarginDirection : str — 마진 추세 ("개선"|"악화"|"안정")
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``cashConversion`` (float|None): OCF/NI (%)
+            - ``cashConversionLabel`` (str): "양호"/"주의"/"위험"
+            - ``grossMargin`` (float|None): 매출총이익률 (%)
+            - ``grossMarginTrend`` (list[float]): 최근 4 기
+            - ``grossMarginDirection`` (str): "개선"/"악화"/"안정"
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcRevenueQuality(Company("005930"))
+        >>> r["cashConversion"], r["grossMarginDirection"]
+        (108, '안정')
+
+    Guide:
+        현금전환율 > 100% = 매출이 현금으로 잘 회수됨 (양호). 80~100% =
+        주의 (운전자본 증가 추세 가능). < 80% = 위험 (Sloan accrual 경고).
+        매출총이익률 추세 (4 분기) > +2%p 개선 또는 < -2%p 악화.
+
+    SeeAlso:
+        - ``calcEarningsMomentum``: Sloan 분해 전체 (cash + accrual)
+        - ``calcMarginTrend``: 5 단계 마진 시계열
+        - ``calcCashflow``: CF 분석
+
+    Requires:
+        IS + CF 시계열 + ratios.operatingCfToNetIncome.
+
+    AIContext:
+        cashConversionLabel + grossMarginDirection 함께 인용. cashConversion
+        만 양호해도 grossMargin 추세 악화면 미래 위험 신호.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 cashConversion 만 보고 단정 — 3 년 추세 권장.
+            - grossMarginDirection "안정" 도 절대 마진 수준 (예 IT 30% vs
+              제조 15%) 비교 함께.
+        OutputSchema:
+            ``{cashConversion, cashConversionLabel, grossMargin,
+            grossMarginTrend, grossMarginDirection}``.
+        Prerequisites:
+            IS + CF 시계열 + ratios 헬퍼.
+        Freshness:
+            최신 분기.
+        Dataflow:
+            ratios → operatingCfToNetIncome → label + grossMargin 시계열
+            → direction 분류.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     ratios = _getRatios(company)
     if ratios is None:
