@@ -197,7 +197,60 @@ def narrateTrend(history: list[dict]) -> str:
 
 
 def narrateBorrowings(borrowingsDetail: list[dict] | None, latest: dict | None) -> str:
-    """차입금 구성 분석 — 만기/종류별."""
+    """차입금 구성 분석 — 만기/종류별 + 현금 대비.
+
+    Capabilities:
+        총차입금 + 단기/장기 비중 (금액 명시) + 현금/차입금 비율 기반 차환
+        위험 평가 자연어 합성. 현금 ≥ 차입금 → 차환 여력 우수, 현금 < 차입금
+        → 외부 조달 필요. _fmtTril 헬퍼로 조 단위 표기.
+
+    Args:
+        borrowingsDetail: 차입금 상세 (현재 미사용, 향후 만기별 분해 예정).
+        latest: 최신 BS row (totalBorrowing, cash, netDebt,
+            shortTermDebtRatio).
+
+    Returns:
+        str: 차입금 구조 + 차환 위험 평가 1~3 줄.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> narrateBorrowings(None, {"totalBorrowing": 1e13, "cash": 5e12,
+        ...                         "shortTermDebtRatio": 30})
+        '총차입금 10.0 조. 단기 30%(3.0 조), 장기 70%(7.0 조). 현금(5.0 조)이 총차입금의 50%로 차환 시 외부 조달이 필요할 수 있다.'
+
+    Guide:
+        - 현금/차입 > 2 = 매우 낮은 차환 위험 (순현금 회사).
+        - 1 < 현금/차입 < 2 = 차환 여력 보유.
+        - 현금/차입 < 1 = 외부 조달 의존 (시장 환경 따라 위험).
+        - 단기 비중 > 50% + 현금/차입 < 1 = 강한 차환 경고.
+
+    SeeAlso:
+        - ``narrateTrend``: 전기 대비 추세
+        - ``calcDebtMaturity``: 만기 구조 (numerical)
+        - ``calcLeverageTrend``: 부채 시계열
+
+    Requires:
+        latest dict (totalBorrowing 필수 + cash/netDebt + shortTermDebtRatio).
+
+    AIContext:
+        본 함수 결과 그대로 신용평가 본문에 삽입. 조 단위 표기 통일성 유지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 차입금 0 회사에 본 함수 호출 — 자동 "불필요" 메시지.
+            - 단기 비중 단독 인용 — 현금/차입 함께.
+        OutputSchema:
+            ``str``.
+        Prerequisites:
+            latest dict (BS).
+        Freshness:
+            분기.
+        Dataflow:
+            totalBorrowing → 단기/장기 비중 → 현금 대비 → 차환 위험 라벨.
+        TargetMarkets: KR (DART), US (EDGAR Short/Long-Term Debt).
+    """
     if latest is None:
         return ""
 
