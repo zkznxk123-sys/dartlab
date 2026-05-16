@@ -144,7 +144,64 @@ PRESET_SCENARIOS = PRESET_SCENARIOS_KR  # 기본값 (하위호환)
 
 
 def getPresetScenarios(market: str = "KR") -> dict[str, MacroScenario]:
-    """시장별 사전 정의 시나리오 반환."""
+    """시장별 사전 정의 매크로 시나리오 dict (baseline/adverse/severelyAdverse 등).
+
+    Capabilities:
+        DFAST/Bank of Korea 스트레스 테스트 시나리오 + dartlab 자체 시나리오를
+        시장별 (KR/US) 분기하여 dict 반환. simulateScenario/stressTest 의
+        scenario 이름 인자로 직접 입력 가능.
+
+    Args:
+        market: ``"KR"`` 또는 ``"US"``. 기본 ``"KR"``.
+
+    Returns:
+        dict[str, MacroScenario]: 시나리오 이름 → MacroScenario dataclass.
+            기본 키: ``"baseline"``, ``"adverse"``, ``"severelyAdverse"``,
+            ``"reflation"``, ``"stagflation"``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> scenarios = getPresetScenarios("KR")
+        >>> baseline = scenarios["baseline"]
+        >>> baseline.gdpGrowth, baseline.interestRate
+        ([2.4, 2.2, 2.1], [3.5, 3.0, 2.5])
+
+    Guide:
+        baseline = 매크로 변화 없음 (현재 추세 연장). adverse = -1σ 충격
+        (GDP -2%p, 금리 +200bp). severelyAdverse = -2σ (DFAST 표준).
+        reflation/stagflation 은 4 사분면 (quadrant) 의 reflation/stagflation
+        에 대응.
+
+    SeeAlso:
+        - ``simulateScenario``: scenario 인자로 본 dict 사용
+        - ``HISTORICAL_SCENARIOS``: 과거 실제 경로 (GFC/COVID 등)
+        - ``classifyQuadrant``: 4 사분면
+
+    Requires:
+        ``PRESET_SCENARIOS_KR`` + ``PRESET_SCENARIOS_US`` 정적 dict.
+
+    AIContext:
+        baseline 결과를 즉시 "정상 전망" 으로 인용 금지 — 현재 추세 연장
+        가정이므로 macro/summary 의 cycle 진단과 비교 필수.
+
+    LLM Specifications:
+        AntiPatterns:
+            - market="JP"/"EU" 등 미지원 시장 입력 — KR fallback (silently).
+              호출자가 market 유효성 확인 필요.
+            - 시나리오 dict 키 추측 — listAllScenarios 로 가능한 키 확인 권장.
+        OutputSchema:
+            ``dict[str, MacroScenario]``. MacroScenario 는 gdpGrowth/
+            interestRate/krwUsd/cpi 3 년 list 보유.
+        Prerequisites:
+            PRESET_SCENARIOS_KR/US dict 정의.
+        Freshness:
+            정적 — dartlab 버전 업데이트 시점.
+        Dataflow:
+            market 분기 → 해당 dict 반환.
+        TargetMarkets: KR (BOK + KOSIS), US (Fed DFAST + FRED).
+    """
     if market == "US":
         return PRESET_SCENARIOS_US
     return PRESET_SCENARIOS_KR
