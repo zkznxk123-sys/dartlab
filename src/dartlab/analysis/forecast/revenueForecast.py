@@ -565,37 +565,87 @@ def forecastRevenue(
     currency: str = "KRW",
     overrides: dict | None = None,
 ) -> RevenueForecastResult:
-    """매출액 4-소스 앙상블 예측. overrides로 AI/사용자 가정 조율 가능.
+    """매출액 4-소스 앙상블 예측 — fundamental + segment + backlog + consensus.
 
-    Parameters
-    ----------
-    series : dict
-        finance.timeseries 시계열 dict.
-    stockCode : str, optional
-        종목코드 (컨센서스 조회용).
-    sectorKey : str, optional
-        WICS 업종 키.
-    market : str
-        시장 ("KR", "US" 등, 기본 "KR").
-    horizon : int
-        예측 기간 (년, 기본 3).
-    companyData : CompanyDataBundle, optional
-        세그먼트/수주잔고 등 L1 데이터 브릿지.
-    currency : str
-        통화 (기본 "KRW").
-    overrides : dict, optional
-        AI/사용자 가정 오버라이드 ("baseRevenue", "growthRates" 등).
+    Capabilities:
+        4 source 가중평균: (1) fundamentalGrowth (재무 시계열 ARIMA-like) +
+        (2) segment bottom-up (사업부문별 합산) + (3) backlog signal (수주
+        잔고/계약자산) + (4) consensus (외부 추정치). 각 source 가중치는
+        라이프사이클 단계 + 데이터 가용성으로 동적 조정. AI/사용자 overrides
+        로 baseRevenue/growthRates 강제 가능.
 
-    Returns
-    -------
-    RevenueForecastResult
-        projected : list[float] — 연도별 예측 매출 (원)
-        growthRates : list[float] — 연도별 YoY 성장률 (%)
-        method : str — 예측 방법 ("ensemble" | "{source}_only")
-        confidence : str — 신뢰도 ("high" | "medium" | "low")
-        sourceWeights : dict[str, float] — 소스별 가중치
-        scenarios : dict[str, list[float]] — Base/Bull/Bear 매출 경로 (원)
-        forecastable : bool — 예측 가능 판정
+    Args:
+        series: ``finance.timeseries`` dict (BS/IS/CF).
+        stockCode: 종목코드 (consensus 조회용). None 이면 consensus 제외.
+        sectorKey: WICS 업종 키. lifecycle/탄성치 룩업.
+        market: ``"KR"``/``"US"``. 기본 ``"KR"``.
+        horizon: 예측 기간 (년). 기본 3.
+        companyData: ``CompanyDataBundle`` — segmentRevenue/orderDf/salesDf
+            L1 데이터 브릿지. None 이면 segment + backlog source 제외.
+        currency: ``"KRW"``/``"USD"``. 출력 단위.
+        overrides: AI 가정 dict. 키:
+            - ``baseRevenue`` (float): 시작점 강제
+            - ``growthRates`` (list[float]): horizon 길이 list
+            - ``primarySource`` (str): 4 source 중 하나 강제
+            - ``ai`` (dict): RevenueForecastAIOverlay (시나리오 가중)
+
+    Returns:
+        RevenueForecastResult dataclass:
+            - ``projected`` (list[float]): 연도별 예측 매출
+            - ``growthRates`` (list[float]): 연도별 YoY (%)
+            - ``method`` (str): ``"ensemble"`` 또는 ``"{source}_only"``
+            - ``confidence`` (str): high/medium/low
+            - ``sourceWeights`` (dict[str, float]): 4 source 가중치
+            - ``scenarios`` (dict): bull/base/bear path
+            - ``segmentForecasts`` (list[SegmentForecast]): 세그먼트 상세
+            - ``backlogSignal`` (BacklogSignal|None): 수주잔고 신호
+            - ``forecastable`` (bool): 예측 가능 여부
+            - ``warnings``/``assumptions`` (list[str])
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab import Company
+        >>> c = Company("005930")
+        >>> r = forecastRevenue(c.finance.timeseries, stockCode="005930",
+        ...                     sectorKey="IT", horizon=3)
+        >>> r.projected, r.confidence
+
+    Guide:
+        weights 결정: fundamentalGrowth (안정 사업), segment (다각화 회사),
+        backlog (수주 산업 — 건설/조선/방산), consensus (대형주). 4 source
+        모두 사용 가능 시 confidence=high. 1 개 source 만이면 medium 이하.
+
+    SeeAlso:
+        - ``_extractSegmentForecasts``: 세그먼트 source
+        - ``_computeBacklogSignal``: backlog source
+        - ``_fundamentalGrowth``: fundamental source
+        - ``simulateScenario``: 매크로 시나리오 결합 (forecast 의 다음 단계)
+
+    Requires:
+        series 가 finance.timeseries 스키마. 매출 시계열 ≥ 3 년.
+
+    AIContext:
+        sourceWeights 를 리포트에 항상 노출 (어떤 source 비중이 높은지).
+        confidence=low 결과 단독 인용 금지 — 호출자가 시나리오 cross-check.
+
+    LLM Specifications:
+        AntiPatterns:
+            - growthRates override 길이가 horizon 과 다르면 자동 truncate/
+              extend — 예상치 다르면 horizon 일치 권장.
+            - market="US" + stockCode KR 조합 — consensus 조회 실패.
+        OutputSchema:
+            RevenueForecastResult (12 필드 dataclass).
+        Prerequisites:
+            매출 시계열 ≥ 3 년 + sectorKey 적합.
+        Freshness:
+            series freshness (분기). consensus = T+1 캐시.
+        Dataflow:
+            series → _fundamentalGrowth + _extractSegmentForecasts +
+            _computeBacklogSignal + _fetchConsensusRevenue → _computeWeights
+            (lifecycle 별 가중) → 가중평균 projected → _buildScenarios → 결과.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     warnings: list[str] = []
     assumptions: list[str] = []
