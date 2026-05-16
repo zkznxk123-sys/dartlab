@@ -35,7 +35,7 @@ class Ref:
     sourceType: SourceType = "internal"
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """dataclass → dict 직렬화 (frozen=True 이므로 안전한 얕은 변환)."""
         return asdict(self)
 
 
@@ -51,7 +51,7 @@ class TraceEvent:
     ts: str = field(default_factory=_nowIso)
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """TraceEvent → kind/data/ts 3 키 dict 직렬화."""
         return {"kind": self.kind, "data": self.data, "ts": self.ts}
 
 
@@ -83,5 +83,5 @@ class VerificationResult:
     issues: list[str] = field(default_factory=list)
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """dataclass → dict 직렬화 (frozen=True 이므로 안전한 얕은 변환)."""
         return asdict(self)

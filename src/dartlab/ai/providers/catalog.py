@@ -13,12 +13,12 @@ _PROVIDERS = ("anthropic", "openai", "google", "xai", "ollama", "dartlab")
 
 
 def availableProviders() -> list[str]:
-    """availableProviders — TODO 한국어 동작 설명."""
+    """등록된 provider 이름 목록 — anthropic/openai/google/xai/ollama/dartlab."""
     return list(_PROVIDERS)
 
 
 def createProvider(config: LLMConfig | dict[str, Any] | None = None) -> LLMProvider:
-    """createProvider — TODO 한국어 동작 설명."""
+    """LLMConfig.provider 로 adapter 선택 — 미지정 시 DartLabProvider fallback."""
     cfg = _coerceConfig(config)
     name = (cfg.provider or "dartlab").lower()
     if name == "anthropic":
