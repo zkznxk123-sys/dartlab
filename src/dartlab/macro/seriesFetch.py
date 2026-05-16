@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import polars as pl
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +47,7 @@ def recentTimeseries(df, months: int = 6, valueCol: str = "value") -> list[dict]
         return None
 
 
-def applyAsOf(df, asOf: str | None):
+def applyAsOf(df, asOf: str | None) -> "pl.DataFrame | None":
     """as_of 날짜까지만 필터링 — 백테스트용.
 
     Parameters
@@ -92,7 +96,7 @@ def applyOverrides(data: dict, overrides: dict | None) -> dict:
 # ══════════════════════════════════════
 
 
-def getGather(asOf: str | None = None):
+def getGather(asOf: str | None = None) -> "Any":
     """gather 인스턴스 생성 — as_of 있으면 자동 필터링 래핑.
 
     모든 L2 모듈의 _fetch_* 함수에서 이것을 사용.

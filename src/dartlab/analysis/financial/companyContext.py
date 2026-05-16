@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from dartlab.core.utils.helpers import PeriodRange, annualColsFromPeriods, quarterlyColsFromPeriods
+
+if TYPE_CHECKING:
+    from dartlab.core.ratios import RatioResult
 
 
 def fetchNotesDetail(company, noteKeys: list[str]) -> dict[str, list[dict]]:
@@ -34,7 +39,7 @@ def getRatioSeries(company) -> tuple[dict, list[str]] | None:
         return None
 
 
-def getRatios(company):
+def getRatios(company) -> "RatioResult | None":
     """Return the Company's RatioResult object when available."""
 
     try:
