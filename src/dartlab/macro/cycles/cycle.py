@@ -165,6 +165,14 @@ def analyzeCycle(*, market: str = "US", asOf: str | None = None, overrides: dict
     -------
     - ``dartlab.synth.quadrant.classifyQuadrant`` : 성장 × 인플레 4 분면
     - ``dartlab.macro.cycles.macroCycle.calcMultipleBand`` : 사이클 기반 multiple band
+    - See Also: 위와 동일
+
+    When:
+        ``macro("cycle")`` 단일 진입점. AI 매크로 환경 답변 1 차.
+
+    How:
+        ``_fetchIndicators`` (FRED/ECOS) → overrides → ``classifyCycle`` → transition + quadrant
+        → dict 합성.
 
     Requires
     --------

@@ -104,6 +104,12 @@ def interpretAssets(indicators: dict[str, float | None]) -> list[AssetSignal]:
         - ``interpretGoldDrivers``: 금 3 요인 분해
         - ``interpretFxDrivers``: 환율 드라이버 분해
 
+    When:
+        ``macro("cycle")`` 진입점이 본 함수 호출. AI 매크로 환경 답변 직접 인용 시.
+
+    How:
+        indicators dict → 5 자산별 임계 분기 (level + change) → AssetSignal dataclass list.
+
     Requires:
         없음 (순수 함수). indicators dict 일부 키만 있어도 동작.
 
@@ -289,6 +295,13 @@ def calcMultipleBand(
     -------
     - ``dartlab.macro.cycles.macroCycle.classifyCycle`` : 매크로 국면 판정
     - ``dartlab.analysis.valuation.dcf`` : 절대가치 평가
+    - See Also: 위와 동일
+
+    When:
+        과거 시계열 멀티플 분포 대비 현재 위치 답변 시.
+
+    How:
+        valid 필터 → mean/std → z-score → normCdf 백분위 → ±1σ zone.
 
     Requires
     --------
@@ -391,6 +404,15 @@ def decomposeLongRate(
         - ``interpretAssets``: 장기금리 분해를 자동 호출
         - ``rateOutlook``: 정책금리 방향 (decomposeLongRate 보완)
         - NY Fed ACM term premium 시계열
+
+    When:
+        ``macro("cycle", "rates")``. AI 가 장기금리 변동 원인 분해 답변 시.
+
+    How:
+        acmTermPremium 명시 시 직접 사용, 없으면 termPremium = nominal - BEI - TIPS.
+
+    Raises:
+        없음 — 순수 산술. NaN 입력은 호출자가 사전 필터.
 
     Requires:
         FRED 시리즈 DGS10 + T10YIE + DFII10 (+ THREEFYTP10 옵션). API key 불필요.
