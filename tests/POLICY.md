@@ -213,23 +213,35 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 
 **ROI 표적**: `typing.Any` 시그니처는 약함 (raise 안 함만 검증). 구체 타입 (`int`, `str`, `Decimal`) 인자가 ROI 높음.
 
-### Track 5 — Mutation testing (mutmut) — ★★★★ **도입 완료 (Linux CI)**
+### Track 5 — Mutation testing — ★★★★★ **도입 완료 (mutation score 100%)**
 
 "테스트가 통과한다" 가 아니라 "테스트가 깨진 코드를 잡는다" 를 측정.
 
 | 항목 | 위치 |
 |---|---|
-| 설정 | `pyproject.toml [tool.mutmut]` (대상 = `src/dartlab/core/{naming,formatting,cache}`) |
-| 실 실행 | **CI nightly `mutation-testing` job** (Linux ubuntu-latest) |
-| Oracle 테스트 | `tests/core/test_formatting.py` (53 종 — oracle + property + metamorphic) |
-| 결과 artifact | CI nightly `mutation-results` (mutation-results.txt + mutants/) — 30 일 보관 |
-| 목표 | mutation score ≥ 80% |
+| **PR 차단 게이트** | `scripts/audit/mutationSmoke.py` (Windows + Linux 자작 7 패턴) |
+| Self-test | `tests/audit/test_mutationSmoke.py` (7 종 — pattern 존재 · score 계산) |
+| CI Fast job | `.github/workflows/ci-fast.yml` `mutation-smoke` (~35 초, 100% killed 강제) |
+| Nightly 확장 sweep | `mutmut` Linux runner — `.github/workflows/ci-nightly.yml` `mutation-testing` job |
+| 자작 mutmut 설정 | `pyproject.toml [tool.mutmut]` (대상 = `src/dartlab/core/{formatting, cache, naming}`) |
+| Oracle 테스트 표면 | `tests/core/test_formatting.py` (60 종) + `tests/core/test_ratios_metamorphic.py` (19 종) |
+| 결과 artifact | CI nightly `mutation-results` (mutation-results.txt) — 30 일 보관 |
+| 본 PR baseline | **7/7 killed (100% mutation score)** |
 
-⚠ **Windows 미지원** — mutmut 3.x 는 Linux/WSL only (mutmut [issue #397](https://github.com/boxed/mutmut/issues/397)). 본 PC 에서는 인프라 + oracle 만 검증. 실 sweep 은 CI nightly 가 담당.
+**Windows 호환** — `mutationSmoke.py` 가 직접 AST 텍스트 replace 후 `sys.executable` 로 pytest 호출. mutmut Linux 의존 회피.
 
-**부분 적용 정책**: Polars/numpy native 호출 비중이 큰 모듈은 mutant 가 의미 없음 (예: `analysis/`, `quant/`). `core/` pure 함수 한정.
+**현재 잡는 7 패턴** (회귀 빈도 높은 변형):
+1. `formatKr` 조 임계 off-by-one (`>=` → `>`)
+2. `formatKr` 억 임계 off-by-one
+3. `formatKr` 만 임계 off-by-one
+4. `formatComma` int collapse 조건 부정
+5. `yoyPct` 양수 분기 부호 변형 (`-` → `+`)
+6. `yoyPct` 부호 분기 `>=` → `>` (cur=0 케이스 누락)
+7. `yoyPct` None 가드 `==` → `!=`
 
-**언제 실행**: CI nightly 자동 (UTC 15:00 = KST 00:00) + `core/` 변경 PR 의 운영자 트리거 (workflow_dispatch). 생존 mutant 발견 시 oracle test 추가.
+**확장 정책**: 새 `core/*.py` pure 함수 추가 시 mutationSmoke.py 의 `_MUTATIONS` 에 패턴 추가. 부분 적용 (Polars/numpy native 호출 비중 큰 `analysis/`, `quant/` 는 mutant 무의미).
+
+**survived 발견 시**: oracle test 보강 → 패턴 재실행 → 100% 회복. 절대 mutation 자체 제거 금지.
 
 ### Track 6 — Test 강제 게이트 (CI fail when src/ adds without tests/) — ★★★★ **도입 완료 (warning-only)**
 
