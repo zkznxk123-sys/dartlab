@@ -85,6 +85,13 @@ site/
 
 # Pytest / benchmark / cache artifacts
 .pytest_cache/
+
+# Mutation testing cache (mutmut) — 결과는 mutmut results 명시 호출, cache 자체는 추적 X
+.mutmut-cache
+mutants/
+
+# AI eval 외부 LLM 호출 비용 발생 산출물 (eval set 본문은 추적, 결과 ledger 만 제외)
+tests/_evals/_runs/
 .benchmarks/
 .ruff_cache/
 .mypy_cache/
@@ -126,3 +133,6 @@ tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 unsloth_compiled_cache/
 scripts/dev/_camelcaseIndex.json
+
+# 구 Svelte UI 백업 (2026-05-16 React 재구축 시) — 참고용 로컬 보존
+ui/web.backup/
