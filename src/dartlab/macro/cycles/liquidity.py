@@ -212,26 +212,67 @@ def _fetchLiquidityData(market: str, asOf: str | None = None) -> dict[str, float
 def calcLiquidity(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """유동성 환경 종합 분석 — M2 + 연준 B/S + 신용스프레드 + FCI.
 
-    Parameters
-    ----------
-    market : str
-        ``"US"`` | ``"KR"``.
-    as_of : str | None
-        기준일. ``None`` 이면 최신.
-    overrides : dict | None
-        지표 강제 치환 (예: ``{"m2_yoy": 5.0}``).
+    Capabilities:
+        M2 (광의통화) YoY + 연준 대차대조표 변동 (QE/QT) + HY/IG 신용스프레드
+        + RRP 잔액 → 유동성 regime (abundant/neutral/tight) 합성 점수 +
+        signals (판정 근거 list). 시카고 연준 NFCI (US 공식 지수) + 자체 FCI
+        병렬 노출. Bridgewater/Brookings "전반적 금융 여건" 표준.
 
-    Returns
-    -------
-    dict
-        - market : str — 시장 코드
-        - regime : str — 유동성 국면 (``"abundant"``/``"neutral"``/``"tight"``)
-        - regimeLabel : str — 국면 한글명 (``"풍부"``/``"중립"``/``"긴축"``)
-        - score : float — 유동성 종합 점수 (점, -100~100)
-        - signals : list[str] — 판별에 사용된 신호 목록
-        - nfci : dict | None — 시카고 연준 NFCI (value:float, regime:str, regimeLabel:str, description:str). US 전용.
-        - fci : dict | None — 자체 FCI (value:float, regime:str, regimeLabel:str, components:dict, description:str)
-        - timeseries : dict — m2 / hy_spread / ig_spread 시계열
+    Args:
+        market: "US" | "KR".
+        asOf: 기준일. None 시 최신.
+        overrides: 지표 강제 치환 (예: ``{"m2_yoy": 5.0}``).
+
+    Returns:
+        dict:
+            - ``market``/``regime``/``regimeLabel``/``score`` (─100~100).
+            - ``signals`` (list[str]): 판정 근거.
+            - ``nfci`` (dict | None, US 전용): 시카고 연준 공식 지수.
+            - ``fci`` (dict | None): 자체 FCI + components.
+            - ``timeseries`` (dict): m2 / hy_spread / ig_spread.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcLiquidity(market="US")
+        >>> r["regime"], r["score"]
+        ('tight', -45.0)
+
+    Guide:
+        - regime "abundant" + 신용스프레드 < 300 bp = 위험자산 우호.
+        - regime "tight" + HY spread > 500 bp = 신용 시장 경고 (위험자산 회피).
+        - NFCI > 0 = 평균 대비 긴축, < 0 = 완화. 시카고 연준 표준.
+        - QT 기간 (연준 B/S 축소) 와 신용스프레드 확대 동시 발생 = strong
+          tight 신호.
+
+    SeeAlso:
+        - ``classifyLiquidityRegime``: 5 변수 표준 라벨
+        - ``capexPressure``: HY spread 변동 → 기업 capex
+        - ``analyzeCycle``: macro cycle (본 함수 입력)
+
+    Requires:
+        FRED M2 + WALCL (연준 B/S) + HY/IG OAS + RRPONTSYD (KR 별도).
+
+    AIContext:
+        regime label + score + 핵심 signals 함께. NFCI vs 자체 FCI 차이
+        있으면 양쪽 노출. overrides 사용 시 가정 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 지표 (M2 만) 로 regime 판단 — 본 함수가 5 변수 합성.
+            - KR 에 NFCI 인용 — US 전용.
+        OutputSchema:
+            ``{market, regime, regimeLabel, score, signals: list, nfci: dict?,
+              fci: dict, timeseries: dict}``.
+        Prerequisites:
+            FRED M2/WALCL/HY OAS/IG OAS/RRP.
+        Freshness:
+            주간 (FRED 갱신).
+        Dataflow:
+            FRED 5 변수 → classifyLiquidityRegime → score + signals → NFCI
+            + 자체 FCI 추가.
+        TargetMarkets: US (FRED + NFCI), KR (BOK + 자체 FCI).
     """
     data = _fetchLiquidityData(market, asOf=asOf)
     if overrides:
