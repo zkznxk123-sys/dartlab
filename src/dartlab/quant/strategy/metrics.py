@@ -349,7 +349,7 @@ def pbo(inSample: np.ndarray, outOfSample: np.ndarray) -> float:
 # ── CPCV split 생성 (Lopez AFML) ────────────────────────────────────────────
 
 
-def cpcvSplits(nObs: int, nSplits: int = 6, nTest: int = 2, embargo: int = 0):
+def cpcvSplits(nObs: int, nSplits: int = 6, nTest: int = 2, embargo: int = 0) -> list[tuple]:
     """Combinatorial Purged Cross-Validation 인덱스 분할.
 
     n_splits 그룹으로 나누고, n_test 개 그룹을 test 로 선택하는 모든 조합.

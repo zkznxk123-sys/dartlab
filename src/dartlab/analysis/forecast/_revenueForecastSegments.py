@@ -29,12 +29,12 @@ def _lazy(name):
     return getattr(importlib.import_module("dartlab.analysis.forecast.revenueForecast"), name)
 
 
-def __getattr__(name):
+def __getattr__(name: str):
     """본체 module attribute lazy lookup (forecastMetric, _classifyLifecycle 등)."""
     return _lazy(name)
 
 
-def forecastMetric(*args, **kwargs):
+def forecastMetric(*args, **kwargs) -> dict | None:
     """revenueForecast.forecastMetric lazy proxy — 본체로 위임."""
     return _lazy("forecastMetric")(*args, **kwargs)
 

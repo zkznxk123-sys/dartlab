@@ -288,7 +288,7 @@ def _fitGarch11(returns: np.ndarray) -> dict | None:
     resid = returns - mean_r
     var_init = float(np.var(resid))
 
-    def negLogLikelihood(params):
+    def negLogLikelihood(params) -> float:
         """GARCH(1,1) 음의 로그우도 — Nelder-Mead 최적화 목적함수.
 
         Parameters

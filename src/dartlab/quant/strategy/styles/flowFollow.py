@@ -45,6 +45,7 @@ flowAnalysis.calcFlow (KR only), gather/flow.py
 from __future__ import annotations
 
 from datetime import date as Date
+from typing import Any
 
 import numpy as np
 
@@ -54,7 +55,7 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, getStockCode, isKr
 
 
-def build(company, *, atrK: float = 3.0):
+def build(company, *, atrK: float = 3.0) -> "Rule | Any":
     """수급추종 룰 빌드. KR 전용 — US 면 NotApplicable sentinel.
 
     Returns:

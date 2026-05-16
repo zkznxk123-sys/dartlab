@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 
+from typing import Any, Callable
+
 import numpy as np
 
 from dartlab.core.market import resolveMarket
@@ -467,7 +469,7 @@ def forecastRuleFactory(
     calibFraction: float = 0.2,
     alpha: float = 0.10,
     requireConfidence: bool = False,
-):
+) -> Callable[..., Any]:
     """forecast 모델 기반 walkForward rule_factory 생성.
 
     walkForward(close, rule_factory=forecastRuleFactory(threshold=0.0005), ...) 형태로

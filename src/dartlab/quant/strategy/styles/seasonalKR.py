@@ -36,6 +36,8 @@ _helpers.tomMask (KR 캘린더 SSOT)
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from dartlab.quant.screen.dataAccess import tomMask
@@ -44,7 +46,7 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, isKr
 
 
-def build(company):
+def build(company) -> "Rule | Any":
     """한국캘린더 룰 빌드. KR 전용 — US 면 NotApplicable sentinel.
 
     Returns:

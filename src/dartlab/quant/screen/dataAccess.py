@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import numpy as np
+    import polars as pl
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +25,7 @@ STOCK_CODE_COLUMNS: tuple[str, ...] = ("stockCode", "종목코드", "stock_code"
 # ── OHLCV fetch ──────────────────────────────────────────
 
 
-def fetchOhlcv(stockCode: str, **kwargs: Any):
+def fetchOhlcv(stockCode: str, **kwargs: Any) -> "pl.DataFrame | None":
     """gather("price")로 OHLCV 수집 — 실패 시 None.
 
     Parameters
@@ -51,7 +55,7 @@ def fetchOhlcv(stockCode: str, **kwargs: Any):
         return None
 
 
-def fetchBenchmark(market: str = "KR", **kwargs: Any):
+def fetchBenchmark(market: str = "KR", **kwargs: Any) -> "pl.DataFrame | None":
     """벤치마크 OHLCV 수집 — KR=KRX 지수, US=S&P500.
 
     Parameters
@@ -99,7 +103,7 @@ def _scanDataRoot() -> Path:
     return Path(_getDataRoot())
 
 
-def loadScanParquet(name: str, market: str = "KR"):
+def loadScanParquet(name: str, market: str = "KR") -> "pl.LazyFrame | None":
     """scan 프리빌드 parquet lazy scan 로드.
 
     Args:
@@ -128,7 +132,7 @@ def loadScanParquet(name: str, market: str = "KR"):
     return pl.scan_parquet(path)
 
 
-def loadSharesOutstanding(market: str = "KR"):
+def loadSharesOutstanding(market: str = "KR") -> "pl.DataFrame | None":
     """발행주식수 프리빌드 LazyFrame 로드.
 
     KR: data/dart/scan/sharesOutstanding.parquet (보통주/우선주 분리)
@@ -159,7 +163,7 @@ def loadSharesOutstanding(market: str = "KR"):
     return pl.scan_parquet(path)
 
 
-def loadDocsForStock(stockCode: str):
+def loadDocsForStock(stockCode: str) -> "pl.DataFrame | None":
     """단일 종목 docs parquet 로드.
 
     Returns:
@@ -176,7 +180,7 @@ def loadDocsForStock(stockCode: str):
     return pl.read_parquet(path)
 
 
-def loadChangesForStock(stockCode: str):
+def loadChangesForStock(stockCode: str) -> "pl.DataFrame | None":
     """changes.parquet에서 단일 종목 필터링.
 
     Returns:
@@ -201,7 +205,7 @@ def loadChangesForStock(stockCode: str):
 # ── scan parquet에서 종목 백분위 계산 ────────────────────
 
 
-def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", reverse: bool = False):
+def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", reverse: bool = False) -> float | None:
     """scan lazy frame에서 특정 종목의 컬럼 백분위를 계산.
 
     Args:
@@ -249,7 +253,7 @@ def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", r
         return None, None
 
 
-def loadAllfilingsForStock(stockCode: str, *, lookback: int | None = None):
+def loadAllfilingsForStock(stockCode: str, *, lookback: int | None = None) -> "pl.DataFrame | None":
     """allFilings parquet 에서 단일 종목 데이터 로드.
 
     `data/dart/allFilings/*.parquet` 일자별 전종목 파일에서 stock_code 로 필터.
@@ -491,7 +495,7 @@ def extractAccounts(df, keys: list[str]) -> dict[str, float | None]:
     return {k: extractAccount(df, k) for k in keys}
 
 
-def ohlcvToArrays(df):
+def ohlcvToArrays(df) -> dict:
     """Polars OHLCV DataFrame → numpy 배열 dict.
 
     Returns:
@@ -537,7 +541,7 @@ def tomMask(dates) -> "Any":
     return np.array([(d <= 3 or d >= 25) for d in days], dtype=np.bool_)
 
 
-def extractSignalSeries(arr: dict, fn, *, key: str | None = None, **kwargs):
+def extractSignalSeries(arr: dict, fn, *, key: str | None = None, **kwargs) -> "np.ndarray | None":
     """벡터 신호 함수를 OHLCV 배열에 적용해 시계열 반환 (SSOT).
 
     Strategy DSL 이 dict-only analyze_xxx 함수의 시계열 분기 안에서 호출하는 단일

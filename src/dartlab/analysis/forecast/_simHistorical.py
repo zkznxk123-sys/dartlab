@@ -31,7 +31,7 @@ def _lazy(name):
     return getattr(importlib.import_module("dartlab.analysis.forecast.simulation"), name)
 
 
-def simulateScenario(*args, **kwargs):
+def simulateScenario(*args, **kwargs) -> dict | None:
     """simulation.simulateScenario lazy proxy — 본체로 위임."""
     return _lazy("simulateScenario")(*args, **kwargs)
 
