@@ -180,22 +180,71 @@ def ghsCrisisScore(
     assetPriceGrowth3y: float,
     realRate: float | None = None,
 ) -> GHSResult:
-    """GHS 금융위기 예측 점수.
+    """GHS (Greenwood-Hanson-Shleifer 2022) 금융위기 예측 점수 + Dalio 회로.
+
+    Capabilities:
+        Greenwood, Hanson & Shleifer (2022, JoF) "Predictable Financial
+        Crises" 의 핵심 모델 — 3 년 누적 신용 팽창 + 자산 가격 급등 결합
+        시 향후 3 년 내 금융위기 확률 ~40% (정상 시 ~7%). realRate 제공 시
+        Dalio Part 1 regime (deflation/inflation) 추가 판정.
 
     Args:
-        creditGrowth3y: 민간 신용/GDP의 3년 누적 변화 (%p)
-        assetPriceGrowth3y: 자산가격(주가 또는 부동산)의 3년 누적 수익률 (%)
-        realRate: 실질금리 (%). 제공 시 regime (deflation/inflation) 판정.
+        creditGrowth3y: 민간 신용/GDP 3 년 누적 변화 (%p).
+        assetPriceGrowth3y: 자산가격 (주가 또는 부동산) 3 년 누적 수익률 (%).
+        realRate: 실질금리 (%). 제공 시 regime 분기.
 
     Returns:
-        GHSResult: 위기 점수 + 3년 내 위기 확률 + regime (Dalio).
+        GHSResult dataclass:
+            - ``crisisScore`` (float): 0~100 위기 점수
+            - ``probability3y`` (float): 3 년 내 위기 확률 (0~1)
+            - ``zone`` (str): low/moderate/high/extreme
+            - ``regime`` (str|None): deflation/inflation (realRate 있을 때)
+            - ``creditScore``/``assetScore`` (float): 분해 점수
+            - ``warnings`` (list[str])
 
-    GHS 핵심: 3년간 급격한 신용 팽창 + 자산 가격 급등이 동시에 발생하면
-    향후 3년 내 금융위기 확률 ~40% (정상 시 ~7%).
+    Raises:
+        없음.
 
-    Regime (Dalio 확장): 같은 위기 점수라도
-    - deflation: 실질금리 >= 2% + 신용 수축 → 부채 디플레이션 압박
-    - inflation: 실질금리 <= 0% + 신용 확장 → 화폐/실물 인플레이션 압박
+    Example:
+        >>> r = ghsCrisisScore(creditGrowth3y=12, assetPriceGrowth3y=45,
+        ...                     realRate=-1.0)
+        >>> r.crisisScore, r.probability3y, r.regime
+        (75, 0.35, 'inflation')
+
+    Guide:
+        GHS 핵심: credit (50 점 만점) + asset (50 점) 합산. credit > 10%p +
+        asset > 30% 결합 시 zone="high". Dalio regime: deflation = 실질금리
+        +2% + 신용 수축 → 부채 디플레이션, inflation = 실질금리 <0% + 신용
+        확장 → 통화/실물 인플레이션 압박.
+
+    SeeAlso:
+        - ``creditToGDPGap``: BIS gap (단기 신용 거품)
+        - ``minskyPhase``: Minsky 부채 사이클 (구조적)
+        - ``dalioDebtCyclePhase``: Dalio 6 단계
+        - Greenwood, Hanson & Shleifer (2022) Journal of Finance
+
+    Requires:
+        creditGrowth3y + assetPriceGrowth3y (3 년 누적 변화).
+
+    AIContext:
+        probability3y 는 통계적 base rate — 개별 회사 부도 확률과 혼동 금지.
+        regime 라벨은 Dalio Part 1 정성 판정 (정확한 1 년 부도율 아님).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 신용 증가 (creditGrowth1y) 입력 — 본 함수는 3 년 누적
+              표준. 단기 변동성에 과민 반응.
+            - realRate=0 입력 → regime 판정 불가 (None 반환), 의도된 동작.
+        OutputSchema:
+            GHSResult (7 필드 dataclass).
+        Prerequisites:
+            credit + asset 3 년 시계열. realRate 옵션.
+        Freshness:
+            BIS credit 분기, asset price 일/월.
+        Dataflow:
+            creditGrowth3y → credit_score (0~50) + assetGrowth → asset_score
+            (0~50) → 합산 → zone → probability 매핑 + realRate → regime.
+        TargetMarkets: Global. BIS + Schiller (자산가격) 데이터.
     """
     # 신용 팽창 점수 (0-50)
     if creditGrowth3y > 15:
