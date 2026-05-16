@@ -46,6 +46,7 @@ import { Input } from '@/components/ui/input';
 import {
 	Sidebar,
 	SidebarContent,
+	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarHeader,
@@ -60,6 +61,8 @@ import { useTheme } from '@/shell/ThemeProvider';
 import { ProviderSettingsDialog } from '@/features/provider/ProviderSettingsDialog';
 import { useChat, type Conversation } from '@/features/chat/store/chat';
 import { downloadMarkdown } from '@/features/chat/store/export';
+import { CompanySearch } from '@/features/dashboard/sidebar/CompanySearch';
+import { RecentCompanies } from '@/features/dashboard/sidebar/RecentCompanies';
 
 interface ProviderStatusResp {
 	providers: Record<
@@ -175,34 +178,47 @@ export function AppSidebar() {
 			</SidebarHeader>
 
 			<SidebarContent>{isDashboard ? <DashboardNav /> : <AskNav />}</SidebarContent>
+			{isDashboard && (
+				<SidebarFooter className="border-t">
+					<RecentCompanies />
+				</SidebarFooter>
+			)}
 			<SidebarRail />
 		</Sidebar>
 	);
 }
 
+// 사이드바 = 회사 검색 (최상단) + 뷰 메뉴 (현재 "재무제표" 단일, 미래 가치평가·peer 등 추가 자리).
+// 최근 5 개 회사는 SidebarFooter 에 별도.
 function DashboardNav() {
 	const { pathname } = useLocation();
-	const items = [{ title: '재무제표', url: '/dashboard', icon: FileText }];
+	const views = [
+		{ id: 'financial', title: '재무제표', icon: FileText, url: '/dashboard' as const },
+	];
 	return (
-		<SidebarGroup>
-			<SidebarGroupContent>
-				<SidebarMenu>
-					{items.map((item) => {
-						const isActive = pathname === item.url || pathname.startsWith(item.url + '/');
-						return (
-							<SidebarMenuItem key={item.url}>
-								<SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-									<Link to={item.url}>
-										<item.icon />
-										<span>{item.title}</span>
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						);
-					})}
-				</SidebarMenu>
-			</SidebarGroupContent>
-		</SidebarGroup>
+		<>
+			<CompanySearch />
+			<SidebarGroup>
+				<SidebarGroupContent>
+					<SidebarMenu>
+						{views.map((v) => {
+							const isActive = pathname === v.url || pathname.startsWith(v.url + '/');
+							return (
+								<SidebarMenuItem key={v.id}>
+									<SidebarMenuButton asChild isActive={isActive} tooltip={v.title}>
+										<Link to={v.url}>
+											<v.icon />
+											<span>{v.title}</span>
+										</Link>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							);
+						})}
+					</SidebarMenu>
+				</SidebarGroupContent>
+			</SidebarGroup>
+			<CollapsedActionMenu />
+		</>
 	);
 }
 
@@ -214,8 +230,10 @@ function AskNav() {
 	const deleteConversation = useChat((s) => s.deleteConversation);
 	const renameConversation = useChat((s) => s.renameConversation);
 	const togglePin = useChat((s) => s.togglePin);
+	const clearAll = useChat((s) => s.clearAll);
 
 	const [q, setQ] = useState('');
+	const [clearAllOpen, setClearAllOpen] = useState(false);
 	const filtered = q.trim()
 		? conversations.filter((c) => {
 				const hay = (
@@ -251,6 +269,8 @@ function AskNav() {
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>
+
+			<CollapsedActionMenu />
 
 			<SidebarGroup className="group-data-[collapsible=icon]:hidden">
 				<SidebarGroupContent>
@@ -291,7 +311,98 @@ function AskNav() {
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>
+
+			{conversations.length > 0 && (
+				<SidebarGroup className="mt-auto">
+					<SidebarGroupContent>
+						<SidebarMenu>
+							<SidebarMenuItem>
+								<SidebarMenuButton
+									onClick={() => setClearAllOpen(true)}
+									tooltip="대화 전체 삭제"
+									className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+								>
+									<Trash2 />
+									<span>대화 전체 삭제</span>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						</SidebarMenu>
+					</SidebarGroupContent>
+				</SidebarGroup>
+			)}
+
+			<AlertDialog open={clearAllOpen} onOpenChange={setClearAllOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>모든 대화를 삭제할까요?</AlertDialogTitle>
+						<AlertDialogDescription>
+							{conversations.length}개 대화의 모든 메시지가 영구 삭제됩니다. 되돌릴 수 없습니다.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>취소</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={clearAll}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							전체 삭제
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</>
+	);
+}
+
+// 사이드바 collapsed (icon) 모드 에서만 노출 — 헤더에 가로로 있던 Dashboard/Theme/Settings 를
+// 세로로 풀어 사용자가 접은 상태에서도 접근 가능하게.
+function CollapsedActionMenu() {
+	const { pathname } = useLocation();
+	const navigate = useNavigate();
+	const { theme, setTheme } = useTheme();
+
+	const isDashboard = pathname.startsWith('/dashboard');
+	const isDark =
+		theme === 'dark' ||
+		(theme === 'system' &&
+			typeof window !== 'undefined' &&
+			window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+	return (
+		<SidebarGroup className="hidden group-data-[collapsible=icon]:block">
+			<SidebarGroupContent>
+				<SidebarMenu>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							onClick={() => navigate({ to: isDashboard ? '/ask' : '/dashboard' })}
+							tooltip={isDashboard ? 'Ask 모드' : 'Dashboard 모드'}
+						>
+							{isDashboard ? <MessageSquare /> : <LayoutDashboard />}
+							<span>{isDashboard ? 'Ask' : 'Dashboard'}</span>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+					<SidebarMenuItem>
+						<SidebarMenuButton
+							onClick={() => setTheme(isDark ? 'light' : 'dark')}
+							tooltip={isDark ? 'Light 모드' : 'Dark 모드'}
+						>
+							{isDark ? <Sun /> : <Moon />}
+							<span>{isDark ? 'Light' : 'Dark'}</span>
+						</SidebarMenuButton>
+					</SidebarMenuItem>
+					<SidebarMenuItem>
+						<ProviderSettingsDialog
+							trigger={
+								<SidebarMenuButton tooltip="Provider 설정">
+									<Settings />
+									<span>Provider</span>
+								</SidebarMenuButton>
+							}
+						/>
+					</SidebarMenuItem>
+				</SidebarMenu>
+			</SidebarGroupContent>
+		</SidebarGroup>
 	);
 }
 
