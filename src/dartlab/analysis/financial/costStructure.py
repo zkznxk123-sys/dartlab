@@ -569,20 +569,64 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
 
 @memoizedCalc
 def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
-    """주요 원재료 품목별 매입액 비중 — rawMaterial docs 토픽 기반.
+    """주요 원재료 품목별 매입액 비중 — rawMaterial docs 토픽.
 
-    부문/품목별 매입액 금액 행만 추출 (비중% 행 제외).
-    계층적 테이블의 경우 부문별 첫 품목 금액이 대표값으로 나타남.
+    Capabilities:
+        DART/EDGAR 사업보고서 "주요 원재료 매입현황" 표에서 품목별 매입액
+        + 총매입액 대비 비중 (%) 상위 8 개 (금액 내림차순) 추출. 계층 테이블
+        (부문×품목) 도 정상 파싱. % 행 자동 제외 (금액 행만).
 
-    Returns
-    -------
-    dict | None
-        segments : list[dict] — 품목별 매입액 (최대 8개, 금액 내림차순)
-            name : str — 원재료 품목명
-            amount : float — 매입액 (원)
-            pct : float — 총매입액 대비 비중 (%)
-        totalAmount : float — 총매입액 (원)
-        period : str — 기준 회계연도
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신 (회계연도 기준).
+
+    Returns:
+        dict | None:
+            - ``segments`` (list[dict]): 최대 8 개 (name, amount, pct)
+            - ``totalAmount`` (float): 총매입액
+            - ``period`` (str): 기준 회계연도
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcRawMaterialBreakdown(Company("005930"))
+        >>> r["segments"][0]
+        {'name': 'wafer', 'amount': 5.2e12, 'pct': 35.0}
+
+    Guide:
+        - 단일 품목 > 40% = 단일 원재료 의존도 위험 (commodity 가격 충격
+          취약).
+        - 반도체 = wafer/chemical, 자동차 = 철강/플라스틱, 화학 = 나프타.
+        - 매입액 절대값 + commodity 가격 추세 (FRED) 함께 보면 마진 압박
+          예측 가능.
+
+    SeeAlso:
+        - ``calcCostByNatureAnalysis``: 비용 성격별 (인건/감가/원재료 합계)
+        - ``analysis.business.calcSegmentFinancials``: 사업부문 매출 분해
+        - ``industry.materials``: 산업 평균 원재료 비중
+
+    Requires:
+        DART 사업보고서 "주요 원재료" 섹션 — 제조업만 공시 (금융/서비스 None).
+
+    AIContext:
+        품목명 + 비중 함께 인용. 단일 품목 40% 이상이면 risk 신호로 라벨.
+        총매입액 / 매출액 = 변동비 비중 추정 가능 (정밀하진 않음).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 비중 100% 인용 — 본 함수가 총계 행 자동 제외, 상위 8 개만.
+            - 금융/서비스에 본 함수 호출 — None 반환.
+        OutputSchema:
+            ``{segments: list[dict 3키], totalAmount: float, period: str}``.
+        Prerequisites:
+            DART 사업보고서 "주요 원재료 매입현황" 표.
+        Freshness:
+            연간 (사업보고서 본질).
+        Dataflow:
+            rawMaterial topic → 항목×기간 테이블 → 최신 연도 컬럼 → 금액 행
+            추출 (%, 소계/총계/합계 제외) → 내림차순 → 상위 8 개.
+        TargetMarkets: KR (DART), US 는 별도 (10-K segment 데이터).
     """
     from dartlab.core.utils.helpers import parseNumStr
 
