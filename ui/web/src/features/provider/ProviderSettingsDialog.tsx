@@ -152,8 +152,18 @@ function ProviderCard({
 		mutationFn: () => selectProvider(providerKey),
 		onSuccess: onChanged,
 	});
+	// API key 저장 시 자동 선택 — 사용자 두 번 클릭 안 하게.
 	const apiKeyM = useMutation({
-		mutationFn: () => setApiKey(providerKey, keyInput.trim()),
+		mutationFn: async () => {
+			await setApiKey(providerKey, keyInput.trim());
+			if (!info.selected) {
+				try {
+					await selectProvider(providerKey);
+				} catch {
+					/* 키 저장은 됐는데 선택 실패 — 사용자가 수동 '사용' 클릭 가능 */
+				}
+			}
+		},
 		onSuccess: () => {
 			setKeyInput('');
 			onChanged();
@@ -182,6 +192,14 @@ function ProviderCard({
 					/* 다음 폴링까지 */
 				}
 			}
+			// OAuth 성공 시 자동 선택 — 한 번 클릭으로 끝나게.
+			if (!info.selected) {
+				try {
+					await selectProvider(providerKey);
+				} catch {
+					/* 선택 실패 — 사용자가 수동 '사용' 가능 */
+				}
+			}
 			onChanged();
 		} finally {
 			setOauthBusy(false);
@@ -199,11 +217,30 @@ function ProviderCard({
 			? 'text-muted-foreground'
 			: 'text-muted-foreground';
 
+	const canSelect = info.available && !info.selected;
+
 	return (
 		<div
 			className={
 				'rounded-md border p-3 transition-colors ' +
-				(info.selected ? 'border-primary/40 bg-accent/40' : 'border-border')
+				(info.selected
+					? 'border-emerald-500/40 bg-emerald-500/5'
+					: canSelect
+						? 'border-border hover:border-foreground/30 cursor-pointer'
+						: 'border-border')
+			}
+			onClick={canSelect ? () => selectM.mutate() : undefined}
+			role={canSelect ? 'button' : undefined}
+			tabIndex={canSelect ? 0 : undefined}
+			onKeyDown={
+				canSelect
+					? (e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								selectM.mutate();
+							}
+						}
+					: undefined
 			}
 		>
 			<div className="flex items-center gap-2">
@@ -224,8 +261,12 @@ function ProviderCard({
 				<div className="mt-0.5 font-mono text-[11px] text-muted-foreground">{info.model}</div>
 			)}
 
-			{/* Actions */}
-			<div className="mt-2 flex flex-wrap items-center gap-2">
+			{/* Actions — 카드 onClick bubble 차단 (Input 안 타이핑·OAuth 로그인·키 저장 등) */}
+			<div
+				className="mt-2 flex flex-wrap items-center gap-2"
+				onClick={(e) => e.stopPropagation()}
+				onKeyDown={(e) => e.stopPropagation()}
+			>
 						{/* OAuth provider */}
 						{info.auth === 'oauth' &&
 							(info.available ? (
