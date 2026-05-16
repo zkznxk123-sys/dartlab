@@ -72,7 +72,7 @@ linkedSkills:
 source:
   type: manual_skill
   format: markdown
-lastUpdated: '2026-05-15'
+lastUpdated: '2026-05-16'
 ---
 
 ## 엔진 역할
@@ -159,38 +159,53 @@ columnsFor("BS")
 
 DART 측 mapper 데이터는 `reference/data/` 로 통합 승격 (`providers/dart/finance/mapperData/` 디렉토리 폐기). EDGAR 는 자체 `mapperData/` 보유 — 두 provider 패턴 비대칭 (대칭 작업은 후속 트랙).
 
-### 사이클 4 단계 — 운영자 트리거 발동 (cron 없음)
+### 사이클 4 단계 — 운영자 트리거 발동 (cron 없음, 직접 박는 정공)
+
+본 절차의 핵심: mapper 의 34,000+ 매핑은 *모두 운영자가 미커버 한글명을
+보고 직접 standardAccounts.snakeId 와 짝지어 박은 결과*. 자동 학습 X.
+파이프라인은 그 수동 박기를 효율화하는 도구이며 최종 매핑 결정은 사람.
 
 ```
-1. 관측 ledger (옵트인, ENV 켤 때만)
-   DARTLAB_MAPPING_LEDGER=1 환경에서 Company.show / scan / pivot 호출 시
-   pivot._pivotToSeries 가 미커버 (accountId, accountNm, sjDiv) 그룹을
-   data/mapping_candidates_raw.ndjson 에 append. ENV OFF 면 사용자 영향 0.
-   본체: src/dartlab/core/observability/mapping_ledger.py.
+1. polars lazy + anti-join 전수 미커버 추출 (Bash inline, ~2.5 초)
+   pl.scan_parquet('data/dart/finance/*.parquet').filter(...)
+     .with_columns(nm_n=norm(account_nm), id_n=stripPrefix(account_id))
+     .join(mappingsKeys, on='account_id', how='anti')
+     .join(mappingsKeys, on='id_n',       how='anti')
+     .join(mappingsKeys, on='account_nm', how='anti')
+     .join(mappingsKeys, on='nm_n',       how='anti')
+     .group_by(['account_id','account_nm','sj_div']).agg(occ, stockCodes)
+   → 미커버 그룹 ≈ 33k (false-positive 약 33% 포함)
 
-2. 재구성 + 5 신호 평가 (수동)
-   uv run python -X utf8 scripts/audit/mappingLedgerCompact.py
-   → 그룹화 + S1 빈도 / S2 회사 분산 / S3 한글 정규화 / S4 IFRS 동의어 1 hop /
-     S5 오타 거부 적용
-   → data/mapping_candidates.parquet (15 컬럼) 산출
-   본체: src/dartlab/core/observability/mapping_signals.py.
+2. mapper.map() Python 더블체크 (~0.2 초)
+   AccountMapper.get().map(accountId, accountNm) 8 단계 fallback 호출.
+   None 반환 행만 진짜 미커버 — anti-join 으로 못 잡은 synonym/정규화 단계
+   false-positive 제거.
+   → 진짜 미커버 ≈ 22k.
+   sj_div 분포: SCE 4,107 (별도 buildSceMatrix 흐름이라 무시),
+                BS/IS/CF/CIS 18,000+ 그룹.
 
-3. 운영자 review (수동)
-   uv run python -X utf8 scripts/dev/mappingReview.py list/inspect/confirm/
-     reject/alias/defer/export-pr
-   → staging parquet 의 status / suggestedSnakeId / operatorNote / decidedAt
-     컬럼만 갱신. accountMappings.json 미수정.
+3. SA korName substring 매칭 후보 추출
+   강한 후보 filter (occ ≥ 5, disp ≥ 3) ≈ 1.8k.
+   각 후보의 account_nm 정규화 → standardAccounts.korName 정규화와
+   양방향 substring + 길이 비율 score 계산. score ≥ 0.70 후보 top 1 추출.
 
-4. Prod patch (수동, 단독 권한)
-   uv run python -X utf8 scripts/dev/mappingPromote.py dryrun → apply
-   → confirmed 행을 accountMappings.json::mappings 에 atomic write 로 추가.
-     _metadata.{lastUpdate,addedCount,promoteCommit} 갱신.
-     AccountMapper.release() + labels._loadAccountMappings.cache_clear() 호출.
+4. 운영자 박기 — 액션 단어 보존 검토 후 batch JSON patch
+   stdout 후보 list 사람이 한 줄씩 검토:
+     OK 패턴 — prefix (유동·장기·외화), 숫자 (1./V.), suffix (조정·등·순액),
+               오타 (지배지업 ← 지배기업), 잘림 (당기손익측정금융자)
+     SKIP 패턴 — 액션 빠진 환각 (자산 처분손실 → 자산 자체),
+                의미 반대 (장기사채 → 단기사채)
+   확정 매핑을 accountMappings.json::mappings 에 batch 추가 (atomic write,
+   single-line 보존 separators=(',', ':')). _metadata.addedCount 누적.
+   AccountMapper.release() + lru_cache.cache_clear() 호출.
 ```
 
-운영자 트리거 발화 ("매퍼 정리해줘"/"분기 매퍼 업데이트"/"mapping refresh") 시
-`.claude/skills/mapping-refresh/SKILL.md` 절차서가 4 단계를 안내. 각 단계
-사이에 운영자 결정 필수 — 어떤 자동화도 prod JSON 을 직접 수정하지 않는다.
+운영자 트리거 발화 ("매퍼 정리해줘" / "nonstd 정리" / "mapping refresh") 시
+`.claude/skills/mapping-refresh/SKILL.md` 절차서가 4 단계 inline Bash
+실행. 각 단계 사이 운영자 결정 필수 — 어떤 자동화도 prod JSON 을 직접
+수정하지 않는다. cycle 당 30~80 매핑 추가, 추가율은 cycle 마다 둔화
+(신중도 증가). 본 사이클 138 매핑 박은 결과 카카오 035720 nonstd 행
+66 → 28 (58% 감소).
 
 ### 안전 자동학습의 정의 (5 신호)
 
