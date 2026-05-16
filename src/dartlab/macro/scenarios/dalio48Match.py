@@ -65,20 +65,63 @@ def match48Cases(
 ) -> dict:
     """현재 상태 vs 48 케이스 → top-K 최근접 매칭.
 
-    Parameters
-    ----------
-    currentState : dict. 키: peakDebtToGdp (= current totalDebtToGdp),
-        peakCreditGap (= current creditGap), troughRealRate (= realRate),
-        troughGdpGrowth (= gdpGrowth). 결측 None 허용.
-    topK : 반환할 상위 매칭 수.
+    Capabilities:
+        Dalio "Principles for Navigating Big Debt Crises" 48 부채 위기 케이스
+        DB 와 현재 매크로 상태 (peakDebtToGdp/peakCreditGap/troughRealRate/
+        troughGdpGrowth) Euclidean 거리 매칭 → top-K + archetype 분포
+        (deflationary/inflationary) + outcome 분포.
 
-    Returns
-    -------
-    dict
-        matches : list of {caseId, label, country, archetype, outcome, distance}
-        archetypeDistribution : {deflationary: count, inflationary: count}
-        outcomeDistribution : {outcome: count}
-        dominantArchetype : str
+    Args:
+        currentState: dict 키 (peakDebtToGdp/peakCreditGap/troughRealRate/
+            troughGdpGrowth). 결측 None 허용.
+        topK: 반환할 상위 매칭 수. 기본 5.
+
+    Returns:
+        dict — matches(list of caseId/label/country/archetype/outcome/distance/
+        reserveCurrency)/archetypeDistribution/outcomeDistribution/
+        dominantArchetype.
+
+    Example:
+        >>> r = match48Cases({"peakDebtToGdp": 110, "peakCreditGap": 8})
+        >>> r["dominantArchetype"]
+        'deflationary'
+
+    Guide:
+        dominantArchetype = top-K 분포의 최빈값. distance < 1.0 = 매우 유사.
+        매크로 시나리오 베이스로 활용.
+
+    When:
+        ``runScenario`` "Dalio 48 매칭" + AI 부채 위기 답변.
+
+    How:
+        _loadCases (JSON) → _vec 정규화 (각 신호 / scale) → Euclidean → sort →
+        top-K → archetype/outcome 분포.
+
+    Requires:
+        Dalio 48 cases JSON (dartlab 패키지 정적 자산).
+
+    Raises:
+        없음 — 빈 cases 면 빈 dict 반환.
+
+    See Also:
+        - matchDalioDetailCase : 단일 케이스 상세 매칭
+        - runScenario : 시나리오 실행
+
+    AIContext:
+        top 1~2 케이스 label + dominantArchetype 인용으로 "1990 일본과 유사
+        (deflationary)" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 케이스 (top 1) 만 인용 + 분포 미노출
+            - distance 절대값 단정 (≥ 2.0 면 신뢰 약함)
+        OutputSchema:
+            ``{matches, archetypeDistribution, outcomeDistribution,
+            dominantArchetype}``.
+        Prerequisites: cases JSON 로드 가능.
+        Freshness: 정적 (Dalio 책 발간 후 갱신 없음).
+        Dataflow: currentState → 정규화 → Euclidean → top-K → 분포.
+        TargetMarkets: Global (48 케이스 다국적). KR/US 적용.
     """
     cases = _loadCases()
     if not cases:

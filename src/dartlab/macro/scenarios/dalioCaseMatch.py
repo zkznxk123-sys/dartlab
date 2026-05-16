@@ -75,20 +75,60 @@ def matchDalioDetailCase(
 ) -> dict:
     """현재 매크로 상태 → Dalio Part 2 3 사례 중 가장 가까운 stage.
 
-    Parameters
-    ----------
-    currentState : 현재 상태 dict. 키: totalDebtToGdp, creditGap, realRate, gdpGrowth,
-        debtServiceYoY. 결측은 None 허용.
-    topK : 상위 몇 개 매치를 반환할지 (기본 3).
+    Capabilities:
+        Dalio Part 2 3 detail 사례 (Weimar/Great Depression/Great Deleveraging)
+        각 stage 와 현재 상태 (totalDebtToGdp/creditGap/realRate/gdpGrowth/
+        debtServiceYoY) cosine similarity 매칭 → top-K stage + bestPhase +
+        regimeVariant + outcome (beautiful/ugly_deleveraging).
 
-    Returns
-    -------
-    dict
-        matches : list of top-K matches, 각각
-            {caseId, caseLabel, year, phase, similarity, note, nextStage}
-        bestPhase : 가장 유사한 사례의 phase
-        bestRegimeVariant : 가장 유사한 사례의 regimeVariant
-        bestOutcome : 해당 사례의 최종 결과 (beautiful_deleveraging / ugly_* / ...)
+    Args:
+        currentState: 현재 상태 dict (5 키). 결측 None 허용.
+        topK: 상위 매치 수. 기본 3.
+
+    Returns:
+        dict — matches(caseId/caseLabel/year/phase/similarity/note/nextStage list)/
+        bestPhase/bestRegimeVariant/bestOutcome.
+
+    Example:
+        >>> r = matchDalioDetailCase({"totalDebtToGdp": 280, "realRate": -1.5})
+        >>> r["bestOutcome"]
+        'beautiful_deleveraging'
+
+    Guide:
+        similarity > 0.9 = 매우 유사. nextStage 인용으로 "현재 X stage, 다음 Y
+        stage 전망" 답변. match48Cases (Part 1) 와 동반 사용 권장.
+
+    When:
+        ``runScenario`` "Dalio detail 매칭" + AI 부채 위기 답변.
+
+    How:
+        _loadCases (3 detail 사례 JSON) → 각 stage _vectorize 정규화 → cosine
+        similarity → sort → top-K.
+
+    Requires:
+        Dalio detail cases JSON.
+
+    Raises:
+        없음.
+
+    See Also:
+        - match48Cases : 48 케이스 Euclidean (Part 1)
+        - runScenario : 시나리오 실행
+
+    AIContext:
+        bestPhase + bestOutcome + nextStage.note 인용으로 "현재 4 stage,
+        beautiful deleveraging, 다음 stage: 정상화" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - similarity 절대값 단정 (< 0.7 면 신뢰 약함)
+            - bestOutcome 만 인용 + bestPhase/nextStage 미노출
+        OutputSchema:
+            ``{matches, bestPhase, bestRegimeVariant, bestOutcome}``.
+        Prerequisites: detail cases JSON.
+        Freshness: 정적.
+        Dataflow: currentState → vectorize → cosine → top-K.
+        TargetMarkets: Global. KR/US 적용.
     """
     cases_doc = _loadCases()
     cases = cases_doc.get("cases", [])

@@ -10,21 +10,54 @@ from .presets import listAllScenarios
 def scenarioGuide(market: str = "US") -> pl.DataFrame:
     """사용 가능한 시나리오 목록 DataFrame.
 
-    ``dartlab.macro("시나리오")`` 무인자 호출 시 반환.
+    Capabilities:
+        listAllScenarios 결과를 polars DataFrame 으로 포맷팅 — 매크로 시나리오
+        카탈로그의 UI/CLI 진입점.
 
-    Parameters
-    ----------
-    market : str
-        시장 구분. ``"US"`` | ``"KR"``.
+    Args:
+        market: ``"US"`` | ``"KR"``.
 
-    Returns
-    -------
-    pl.DataFrame
-        name : str — 시나리오 이름
-        category : str — 분류 (역사적 재현 / 유형별 / 한국 특화 등)
-        type : str — 충격 유형 (신용 충격, 금리 충격 등)
-        severity : str — 심각도 (mild/moderate/severe/extreme)
-        description : str — 시나리오 설명
+    Returns:
+        pl.DataFrame (컬럼: name/category/type/severity/description).
+
+    Example:
+        >>> df = scenarioGuide("US")
+        >>> df.columns
+        ['name', 'category', 'type', 'severity', 'description']
+
+    Guide:
+        ``dartlab.macro("시나리오")`` 무인자 호출 시 본 함수 결과. 사용자에게
+        카탈로그 노출 후 name 으로 runScenario.
+
+    When:
+        Macro engine "시나리오" 키 무인자 호출 + AI 시나리오 카탈로그 답변.
+
+    How:
+        listAllScenarios → DataFrame 변환 (빈 결과면 빈 스키마 DataFrame).
+
+    Requires:
+        없음 (정적 카탈로그).
+
+    Raises:
+        없음.
+
+    See Also:
+        - listAllScenarios : list 형태 결과
+        - runScenario : 단일 실행
+
+    AIContext:
+        DataFrame head 3~5 행 + 전체 row 수 인용으로 카탈로그 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - DataFrame 전체 dump (행 수 다수)
+            - category group_by 누락한 채 dump
+        OutputSchema:
+            polars DataFrame ``(name, category, type, severity, description)``.
+        Prerequisites: 없음.
+        Freshness: 정적.
+        Dataflow: listAllScenarios → DataFrame.
+        TargetMarkets: US, KR.
     """
     items = listAllScenarios(market=market)
     if not items:
