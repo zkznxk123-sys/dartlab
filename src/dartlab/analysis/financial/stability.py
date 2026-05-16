@@ -256,41 +256,74 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
-    """Altman Z-Score 시계열 -- 부실 위험은 어디인가.
+    """Altman Z-Score (1968) 시계열 + 5 변수 분해 — 부실 위험 정량 진단.
 
-    BS/IS에서 원본 계정을 가져와 5개 변수를 직접 계산.
-    Z = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4 + 1.0*X5
-    X1 = 운전자본/총자산, X2 = 이익잉여금/총자산, X3 = EBIT/총자산
-    X4 = 시가총액/부채총계, X5 = 매출/총자산
+    Capabilities:
+        Altman (1968, JF) "Financial Ratios, Discriminant Analysis and the
+        Prediction of Corporate Bankruptcy" 의 Z-Score 시계열 산출. 5 변수
+        (X1~X5) + zScore + zone 분류. 비상장 회사는 Z''-Score (X4 변형) 자동
+        사용. 부도 예측 학술 표준.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            totalAssets : float — 자산총계 (원)
-            workingCapital : float — 운전자본 (원)
-            retainedEarnings : float — 이익잉여금 (원)
-            ebit : float — EBIT (원)
-            revenue : float — 매출액 (원)
-            totalDebt : float — 부채총계 (원)
-            x1_wcTa : float — 운전자본/총자산
-            x2_reTa : float — 이익잉여금/총자산
-            x3_ebitTa : float — EBIT/총자산
-            x4_mcapTl : float — 시가총액/부채총계
-            x5_revTa : float — 매출/총자산
-            zScore : float — Z-Score (점)
-            zModel : str — 사용 모델 ("Z-Score"|"Z''-Score")
-            zone : str — 판정 구간 ("안전"|"회색"|"위험")
-        latestScore : float — 최신 Z-Score (점)
-        zone : str — 최신 판정 ("안전"|"회색"|"위험"|"판별 불가")
-        diagnosticMeta : dict
-            model : str — 모델명
-            precision : float — 정밀도
-            typeIError : float — 1종 오류율
-            reference : str — 학술 출처
-            marketNote : str — 시장 적용 참고
-        notesDetail : dict — 충당부채 주석 상세 (있을 때만)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 13 키 (period + 6 BS/IS 원본
+              + 5 X 변수 + zScore + zModel + zone)
+            - ``latestScore`` (float): 최신 Z-Score
+            - ``zone`` (str): "안전"/"회색"/"위험"/"판별 불가"
+            - ``diagnosticMeta`` (dict): 진단 메타
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcDistressScore(Company("005930"))
+        >>> r["latestScore"], r["zone"]
+        (3.2, '안전')
+
+    Guide:
+        Z-Score 임계 (Altman 1968 원형):
+        - Z > 2.99: 안전 (safe zone)
+        - 1.81 < Z < 2.99: 회색 (grey zone)
+        - Z < 1.81: 위험 (distress zone)
+        Z''-Score (비상장/제조업 외): 2.6 / 1.1 임계. KR 대기업 평균 ~ 3.5,
+        US 대기업 ~ 4.0. distress zone 2~3 년 연속이면 부도 가능성 매우 높음.
+
+    SeeAlso:
+        - ``analyzeHealth``: Z-Score 포함 종합 건전성
+        - ``calcDistressEnsemble``: Altman + Ohlson + Piotroski + CHS 합성
+        - ``dartlab.synth.distress.chsModel.calcCHS``: 현대 표준 (Campbell 2008)
+        - Altman, E. (1968) "Financial Ratios, Discriminant Analysis"
+
+    Requires:
+        BS (자산총계, 운전자본, 이익잉여금, 부채총계) + IS (매출/EBIT)
+        + 시가총액 (시장 데이터).
+
+    AIContext:
+        Z-Score 절대값 + zone + history 추세 함께 인용. 단년도 위험 진입은
+        일회성 (M&A/적자) 가능, 2 년 연속 distress zone 가 진짜 신호.
+        Altman 1968 원형은 US 제조업 — KR/금융업 응용 시 Z''-Score 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - Z-Score 1.5 단년도 → "부도 임박" 단정 — 2~3 년 연속 distress
+              zone 확인 필수.
+            - 금융업/신규 IPO 회사 → Altman Z 적용 부적합. 본 함수가 자동
+              Z''-Score 분기.
+        OutputSchema:
+            ``{history: list[dict 13키], latestScore: float, zone: str,
+            diagnosticMeta: dict}``.
+        Prerequisites:
+            BS/IS 시계열 + 시가총액 (gather).
+        Freshness:
+            BS/IS 분기, 시가총액 일.
+        Dataflow:
+            BS/IS → 6 원본 (자산/WC/RE/EBIT/매출/부채) + 시가총액 → 5 X 변수
+            → Z = 1.2X1 + 1.4X2 + 3.3X3 + 0.6X4 + 1.0X5 → zone 분류.
+        TargetMarkets: KR (DART), US (EDGAR — Altman 원형 최적).
     """
     bsResult = company.select(
         "BS", ["자산총계", "유동자산", "유동부채", "부채총계", "이익잉여금", "미처분이익잉여금(결손금)"]
