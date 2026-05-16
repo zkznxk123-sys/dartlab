@@ -85,11 +85,11 @@ def _validateApiRef(apiRef: str) -> tuple[bool, str | None]:
 # ── Dispatch (direct call, JSON-safe 직렬화) ──────────────────────────
 
 
-# Company 인스턴스 LRU 캐시는 viz.dashboard.companyCache 로 위임 — rich / story /
+# Company 인스턴스 LRU 캐시는 viz.display.finance._cache 로 위임 — rich / story /
 # dashboard / mcp 모두 공유. 매 요청 새 인스턴스 생성 시 collect 결과를 잃어
 # cold start 1.8 초 + Polars heap 200~500MB 누적 → BoundedCache 5GB emergency
 # flush 무한 루프. 같은 target 은 single instance 재사용 (최대 8 종목).
-from dartlab.viz.dashboard.companyCache import getCompany as _getCompany  # noqa: E402,F401
+from dartlab.viz.display.finance._cache import getCompany as _getCompany  # noqa: E402,F401
 
 
 def _dispatch(apiRef: str, target: str | None, args: list[Any], kwargs: dict[str, Any]) -> Any:

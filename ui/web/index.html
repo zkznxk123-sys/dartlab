@@ -1,51 +1,15 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" class="dark">
 	<head>
 		<meta charset="UTF-8" />
+		<link rel="icon" type="image/png" href="/avatar.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-		<meta http-equiv="Pragma" content="no-cache" />
-		<meta http-equiv="Expires" content="0" />
-		<title>DartLab AI</title>
-		<link rel="icon" type="image/png" sizes="192x192" href="/avatar.png" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-		<link rel="apple-touch-icon" href="/avatar.png" />
-		<!-- Editorial dashboard fonts: Newsreader (display serif), IBM Plex Sans/Mono. -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
-		<script>
-			// 옛 Service Worker 잔재 제거. ui/web 은 PWA 의도 없음 — 과거 배포의 SW 가
-			// 브라우저에 캐시되어 `non-precached-url: index.html` 에러를 일으키는 케이스 정리.
-			(function () {
-				if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
-				try {
-					if (localStorage.getItem("dl-sw-purged") === "1") return;
-					navigator.serviceWorker.getRegistrations().then(function (regs) {
-						var purged = 0;
-						regs.forEach(function (r) { r.unregister(); purged++; });
-						if (typeof caches !== "undefined") {
-							caches.keys().then(function (keys) {
-								keys.forEach(function (k) { caches.delete(k); });
-							});
-						}
-						localStorage.setItem("dl-sw-purged", "1");
-						if (purged > 0) location.reload();
-					});
-				} catch (e) {}
-			})();
-		</script>
+		<meta name="theme-color" content="#050811" />
+		<meta name="color-scheme" content="dark" />
+		<title>DartLab</title>
 	</head>
-	<body>
-		<div id="app">
-			<div id="boot-fallback" style="min-height:100vh;background:#050811;color:#e5edf7;display:flex;align-items:center;justify-content:center;font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-				<div style="width:min(720px,calc(100vw - 32px));">
-					<div style="font-size:13px;color:#7dd3fc;margin-bottom:10px;">DartLab AI</div>
-					<div style="font-size:28px;font-weight:650;margin-bottom:24px;">무엇이든 물어보세요</div>
-					<div style="border:1px solid rgba(148,163,184,.28);border-radius:14px;background:rgba(15,23,42,.78);padding:14px 16px;color:#94a3b8;">앱을 여는 중입니다. 이 문구가 계속 보이면 새로고침하세요.</div>
-				</div>
-			</div>
-		</div>
-		<script type="module" src="/src/main.js"></script>
+	<body class="bg-background text-foreground antialiased">
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
 	</body>
 </html>
