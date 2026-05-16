@@ -285,7 +285,62 @@ def narrateCapitalStructure(
 
 
 def narrateLiquidity(latest: dict, axisScore: float | None) -> AxisNarrative:
-    """축 3: 유동성."""
+    """축 3: 유동성 서사 — 유동비율 + 단기차입금 + 현금비율 + 모순 진단.
+
+    Capabilities:
+        유동비율/단기차입금/현금비율 3 지표를 결합해 단기 유동성 진단 + 모순
+        탐지 (유동비율 좋은데 단기차입금 비중 높음 = 차환 리스크).
+
+    Args:
+        latest: 최신 분기 dict. 키: ``currentRatio`` (%), ``shortTermDebtRatio``
+            (%), ``cashRatio`` (%).
+        axisScore: 유동성 축 점수 (0~100). None 이면 평가 불가.
+
+    Returns:
+        AxisNarrative ``{axisName, summary, details, severity}``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> n = narrateLiquidity({"currentRatio": 250, "shortTermDebtRatio": 30,
+        ...                       "cashRatio": 40}, axisScore=10)
+        >>> n.severity
+        'strong'
+
+    Guide:
+        유동비율 > 200 = 매우 우수, > 150 = 양호, > 100 = 적정, < 100 =
+        부족. 모순 케이스 (CR>150 + STDR>50) 는 차환 의존도 큰 회사 — KR
+        대기업 자주 등장 (단기 만기 회전).
+
+    SeeAlso:
+        - ``narrateCashFlow``: OCF 기반 유동성 보강 진단
+        - ``narrateRepayment``: 이자보상 (유동성과 연계)
+
+    Requires:
+        latest dict 의 currentRatio 필수, 나머지 옵션.
+
+    AIContext:
+        단기차입금 비중 50%+ 회사는 신용경색 시 즉시 위험. summary 만 인용
+        금지 — details 의 모순 진단 라인 함께 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 유동비율만 보고 "유동성 우수" 결론 — STDR (단기차입금 비중)
+              병행 확인 필수.
+            - cashRatio 가 매우 높은 (50%+) 회사 — 안전이지만 자본배분
+              비효율 (배당/투자 부진) 신호 가능.
+        OutputSchema:
+            AxisNarrative ``{axisName, summary, details, severity}``.
+        Prerequisites:
+            latest dict 에 currentRatio 보유.
+        Freshness:
+            latest = 최신 분기.
+        Dataflow:
+            currentRatio/STDR/cashRatio → 분기 룰 → 모순 탐지 → details →
+            severity (axisScore).
+        TargetMarkets: KR (DART), US (EDGAR — current ratio 표준 동일).
+    """
     details = []
     sev = _severity(axisScore)
 
