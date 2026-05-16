@@ -65,6 +65,17 @@ def calcChainPosition(company: Any) -> dict | None:
     AIContext
     ---------
     회사의 산업 위치를 한 줄로 답변할 때 가장 먼저 호출. peers 목록은 비교 대상 회사 선정에 사용.
+
+    When:
+        "이 회사 가치사슬 위치", "동일 공정 경쟁사" 류 1 차 답변. ``Company.industry()`` 진입점이
+        본 함수를 호출.
+
+    How:
+        loadNodes → primary 노드 매칭 → taxonomy stage 메타 조회 → 동일 industry+stage peers 정렬.
+
+    See Also:
+        - ``dartlab.industry.taxonomy.getIndustry`` : 산업 정의 조회
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 섹터 단위 지표
     """
     from dartlab.industry.build.pipeline import loadNodes
     from dartlab.industry.taxonomy import getIndustry
@@ -256,6 +267,18 @@ def calcSectorMetrics(company: Any) -> dict | None:
     ---------
     "이 회사 OPM 이 업종 내 어디" 질문에 대한 1 차 답변 데이터. peerCount 가 작으면 분포
     해석에 보수적으로 답변. 백분위 None 은 본 회사 데이터 미흡 (분포에는 정상 회사 포함).
+
+    When:
+        업종 내 상대 위치 답변. ``Company.industry()`` 진입점이 본 함수를 sectorMetrics 키로 호출.
+
+    How:
+        loadNodes → industry 매칭 peers → scan.profitability/scan.growth 횡단면 호출 → 분포
+        (p10~p90/mean/std) 계산 → 대상 회사 백분위.
+
+    See Also:
+        - ``dartlab.scan.profitability`` : 횡단면 OPM/ROE 산출
+        - ``dartlab.scan.growth`` : 횡단면 매출 CAGR 산출
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorCycle`` : 업종 사이클 위치
     """
     from dartlab.industry.build.pipeline import loadNodes
     from dartlab.industry.taxonomy import getIndustry
@@ -381,6 +404,17 @@ def calcSectorCycle(company: Any) -> dict | None:
     ---------
     "이 회사 업종은 지금 어디" 질문에 대한 1 차 답변. macro cycle 과 결합하면 거시 환경 ×
     업종 사이클 × 회사 위치 3 축 분석.
+
+    When:
+        업종 단위 OPM 분위 판정이 필요할 때. ``Company.industry()`` 의 sectorCycle 키로 진입.
+
+    How:
+        loadNodes → industry peers → scan.profitability 현재 OPM → 중앙값 → 임계값 (10/0/<0)
+        매핑 → phase/direction 결정.
+
+    See Also:
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 동종 분포 + 백분위
+        - ``dartlab.macro.cycles.cycle.analyzeCycle`` : 거시 사이클 (대비)
     """
     from dartlab.industry.build.pipeline import loadNodes
     from dartlab.industry.taxonomy import getIndustry
@@ -496,6 +530,17 @@ def calcSectorDynamics(company: Any, *, macroPhase: str | None = None) -> dict |
     ---------
     회사 환경 진단 1 줄 답변에 적합. macroPhase 명시 안 하면 답변 보수적으로 ("환경 미확인"
     명시). tailwind/headwind 리스트는 비교 답변에도 그대로 인용 가능.
+
+    When:
+        매크로 × 업종 교차 진단이 필요할 때. ``Company.industry()`` 의 sectorDynamics 키로 진입.
+
+    How:
+        loadNodes → industry 매칭 → 정적 sensitivity 집합 매핑 (HIGH/DEFENSIVE/MODERATE) →
+        macroPhase 와 cross-join → tailwind/headwind 리스트 → summary 문장.
+
+    See Also:
+        - ``dartlab.macro.cycles.cycle.analyzeCycle`` : macroPhase 산출
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorCycle`` : 업종 자체 사이클
     """
     from dartlab.industry.build.pipeline import loadNodes
     from dartlab.industry.taxonomy import getIndustry
