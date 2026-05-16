@@ -370,6 +370,10 @@ class Macro:
                 - ECOS (KR) — public API
             Freshness:
                 FRED / ECOS 갱신 주기 (월 / 분기).
+            Dataflow:
+                axis → _resolve → _AXIS_REGISTRY 룩업 → importlib.import_module
+                → 축 함수 호출 (market + overrides + kwargs) → dict 결과
+                → buildAssumptions 보강 → 반환.
             TargetMarkets:
                 - US (FRED)
                 - KR (ECOS)

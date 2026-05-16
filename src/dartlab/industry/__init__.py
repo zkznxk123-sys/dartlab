@@ -135,8 +135,15 @@ class Industry:
                 - industryId 지정: 공정 / 종목코드 / 종목명
                 - summary=True: 공정 / 매출합계 / 영업이익합계
                 - timeline=True: 연도 / 공정별 매출 컬럼
+            Prerequisites:
+                - taxonomy + nodes.json (운영자 매핑 산출물)
+                - summary=True 시 재무 데이터 (자동 다운로드)
             Freshness:
                 taxonomy 정의 시점 — 운영자 수동 업데이트.
+            Dataflow:
+                industryId → loadNodes (nodes.json) → industry filter
+                → stage filter → 공정명 룩업 (taxonomy.getIndustry) →
+                DataFrame 조립. summary 모드는 buildIndustrySummary 경유.
             TargetMarkets:
                 - KR
         """

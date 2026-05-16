@@ -50,14 +50,60 @@ class MertonResult:
 
 
 def calcEquityVolatility(returns: list[float], tradingDays: int = 252) -> float:
-    """일별 수익률 → 연간 변동성 (비율).
+    """일별 수익률 시계열 → 연환산 주식 변동성 σ_E.
+
+    Capabilities:
+        일별 수익률 리스트의 sample std (ddof=1) 를 ``√tradingDays`` 로
+        연환산. Merton 모형의 σ_E 입력으로 직접 사용 가능. NaN/None 자동
+        제거.
 
     Args:
-        returns: 일별 수익률 리스트 (0.01 = 1%). NaN/None 제거 후 계산.
-        tradingDays: 연간 거래일 수.
+        returns: 일별 수익률 (decimal, 0.01 = 1%). None/NaN/inf 제거됨.
+        tradingDays: 연환산 인자. 미국/한국 시장 기본 252. 가상자산 365.
 
     Returns:
-        연간 변동성 (비율). 데이터 부족 시 0.0.
+        float: σ_E (연환산 변동성, decimal). 유효 샘플 < 20 시 ``0.0``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> returns = [0.01, -0.005, 0.002, ...]  # 252 일
+        >>> sigma = calcEquityVolatility(returns)
+        >>> 0.10 < sigma < 0.50  # 일반 주식 연 10~50% 변동성
+        True
+
+    Guide:
+        sample std × √(거래일수). 최소 20 일 sample 미만 시 0 반환 →
+        ``solveMerton`` 호출자가 입력 fallback 으로 사용 가능.
+
+    SeeAlso:
+        - ``solveMerton`` — 본 함수 결과를 σ_E 입력으로 받음
+        - ``dartlab.synth.stats.rollingStd`` (rolling 버전)
+
+    Requires:
+        수치 입력 (decimal). 퍼센트 (%) 단위면 미리 /100 변환.
+
+    AIContext:
+        반환값 0.0 은 "샘플 부족" 신호 (negative volatility 는 불가능).
+        호출자는 0.0 발견 시 외부 fallback (industry median 등) 사용
+        권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 퍼센트 (e.g., 1.0 = 1%) 를 입력하지 말 것. decimal (0.01) 이
+              ground truth. 결과가 비현실적 (>5.0) 이면 단위 오류 의심.
+            - tradingDays 를 365 로 두고 주식 데이터 사용 금지 (15% 과대).
+        OutputSchema:
+            float (decimal, e.g., 0.30 = 30%).
+        Prerequisites:
+            len(filtered returns) ≥ 20.
+        Freshness:
+            입력 returns 의 freshness (보통 EOD).
+        Dataflow:
+            returns → filter finite → mean → sample variance (ddof=1)
+            → √var → ×√tradingDays.
+        TargetMarkets: 모든 시장. tradingDays 만 시장별 조정.
     """
     clean = [r for r in returns if r is not None and math.isfinite(r)]
     n = len(clean)
@@ -79,19 +125,77 @@ def solveMerton(
     maxIter: int = 200,
     tol: float = 1e-8,
 ) -> MertonResult | None:
-    """Merton 모형 2-방정식 Newton-Raphson 풀이.
+    """Merton 구조 모형 2-방정식 Newton-Raphson 풀이 → D2D + PD.
+
+    Capabilities:
+        시가총액 E, 부채 D, 주식 변동성 σ_E 에서 기업 자산가치 V 와 자산
+        변동성 σ_A 를 풀어 Distance to Default 와 부도확률 (%) 을 산출.
+        Moody's KMV 가 사용하는 사실상 표준 구조 모형.
 
     Args:
-        equityValue: E (시가총액).
-        debtFaceValue: D (총부채 액면가).
-        equityVolatility: σ_E (연간 변동성, 비율. 0.3 = 30%).
-        riskFreeRate: r (무위험이자율, 0.035 = 3.5%).
-        maturity: T (만기, 년).
-        maxIter: 최대 반복 횟수.
-        tol: 수렴 허용오차.
+        equityValue: E — 시가총액 (원/달러).
+        debtFaceValue: D — 총부채 액면가 (원/달러). 만기 T 시점 상환 의무.
+        equityVolatility: σ_E — 연환산 주식 변동성 (decimal, 0.30 = 30%).
+        riskFreeRate: r — 무위험이자율 (decimal). 기본 0.035 (3.5%).
+        maturity: T — 만기 (년). 기본 1.0.
+        maxIter: Newton-Raphson 최대 반복. 기본 200.
+        tol: 수렴 허용오차. 기본 1e-8.
 
     Returns:
-        MertonResult 또는 입력 부적절 시 None.
+        MertonResult | None:
+            - ``assetValue`` (float): V — 추정 기업 자산가치
+            - ``assetVolatility`` (float): σ_A — 자산 변동성
+            - ``d2d`` (float): Distance to Default (시그마 단위)
+            - ``pd`` (float): 부도확률 (%, 0~100)
+            - ``equityValue``/``debtFaceValue``/``riskFreeRate``/
+              ``maturity``/``equityVolatility``: 입력 echo
+            - ``converged`` (bool): Newton-Raphson 수렴 여부
+            - ``iterations`` (int): 실제 반복 횟수
+        입력 부적절 (E≤0, D≤0, σ_E≤0) 시 ``None``.
+
+    Raises:
+        없음 — 수렴 실패 시 ``converged=False`` 로 반환.
+
+    Example:
+        >>> r = solveMerton(equityValue=1e12, debtFaceValue=5e11,
+        ...                 equityVolatility=0.30)
+        >>> if r and r.converged:
+        ...     print(f"PD: {r.pd:.2f}%, D2D: {r.d2d:.2f}σ")
+
+    Guide:
+        Merton (1974, JF). 기업 자산 V 가 GBM 따른다고 가정 →
+        E = V·N(d₁) - D·e^(-rT)·N(d₂) (Black-Scholes call). 추가 제약
+        σ_E·E = V·N(d₁)·σ_A (Itô) 와 함께 2-방정식 풀이. D2D = (ln(V/D) +
+        (r - σ_A²/2)·T) / (σ_A·√T), PD = N(-D2D).
+
+    SeeAlso:
+        - ``calcEquityVolatility`` — σ_E 입력 준비
+        - ``dartlab.synth.distress.chsModel.calcCHS`` — alternative PD
+
+    Requires:
+        E > 0, D > 0, σ_E > 0, T > 0.
+
+    AIContext:
+        ``converged=False`` 결과의 d2d/pd 는 신뢰도 낮음. 호출자는
+        converged 필터링 후 사용 권장. d2d < 0 은 즉시 부도 위험, d2d > 4
+        는 매우 안전.
+
+    LLM Specifications:
+        AntiPatterns:
+            - σ_E 를 퍼센트 단위 (30) 로 입력 금지. decimal (0.30) 만.
+            - 단기 부채만으로 D 산정 금지. 본 모형은 만기 T 까지의 모든
+              상환 의무를 합친 face value 가정.
+            - converged=False 인데 pd 단독 인용 금지.
+        OutputSchema:
+            MertonResult dataclass (slots=True). 11 필드 모두 출력.
+        Prerequisites:
+            E > 0, D > 0, σ_E > 0, 0 < T ≤ 10.
+        Freshness:
+            E = 거래일 종가, D = 최신 BS 분기, σ_E = 30~252 일 rolling.
+        Dataflow:
+            initial guess (V=E+D, σ_A=σ_E·E/(E+D)) → Newton-Raphson
+            (자코비안 2x2) → 수렴 후 d2d/pd 계산.
+        TargetMarkets: Global. 신흥국은 D 의 외화 부채 분리 권장.
     """
     # norm.cdf/pdf → _norm_cdf/_norm_pdf (math.erf 기반, scipy 불필요)
 

@@ -42,15 +42,71 @@ _BASE_ALLOCATION = {
 
 
 def regimeToAllocation(macroResult: dict) -> AllocationResult:
-    """종합 매크로 결과 → 자산배분 가중치.
+    """매크로 종합 결과 → 4 자산 배분 + 근거.
+
+    Capabilities:
+        macro/summary 의 통합 dict (overall + cycle + sentiment + liquidity
+        + crisis) 를 받아 주식/채권/금/현금 4 자산 배분 비중 (%) 과 산정
+        근거 리스트를 반환. (overall, phase) base 룩업 후 sentiment/FCI/
+        Minsky 시그널로 단계적 조정.
 
     Args:
-        macroResult: summary 축의 전체 결과 dict.
-            필수 키: overall, cycle.phase
-            선택 키: sentiment.fearGreed.score, liquidity.fci, inventory.ismAllocation
+        macroResult: summary 축 결과 dict.
+            필수 키: ``overall`` (favorable/neutral/unfavorable),
+            ``cycle.phase``. 선택 키: ``sentiment.fearGreed.score``,
+            ``liquidity.fci.regime``, ``crisis.minskyPhase.phase``.
 
     Returns:
-        AllocationResult: equity/bond/gold/cash % + 근거
+        AllocationResult dataclass:
+            - ``equity``/``bond``/``gold``/``cash`` (int): 비중 % (합계 100)
+            - ``regime`` (str): 적용된 regime 라벨 (e.g. "favorable/expansion")
+            - ``rationale`` (list[str]): 배분 결정 근거 라인 리스트
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = regimeToAllocation({"overall": "favorable", "cycle": {"phase": "expansion"}})
+        >>> r.equity + r.bond + r.gold + r.cash
+        100
+
+    Guide:
+        base 테이블 (10 조합) → fearGreed 극단 → FCI tight/loose → Minsky
+        overtrading/discredit 순서로 점진 조정. 합계 100 보정은 cash 흡수.
+        Bridgewater All-Weather + Ilmanen regime allocation.
+
+    SeeAlso:
+        - ``dartlab.synth.quadrant.classifyQuadrant``
+        - ``dartlab.macro.summary`` (호출자)
+
+    Requires:
+        macroResult 가 macro.summary 의 출력 스키마와 일치.
+
+    AIContext:
+        rationale 리스트는 각 조정 단계의 근거 시그널을 한 줄씩 추적. UI/
+        리포트에서 "왜 이 비중인가" 설명에 그대로 사용. cash 잔량 보정
+        라인은 명시되지 않으므로 합계 != 100 발견 시 cash 보정 라인 추가
+        주의.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 결과 비중을 즉시 매수/매도 신호로 변환 금지. 정성 권고이며
+              개별 종목/만기/통화는 별도 결정.
+            - rationale 가 적다고 confidence 가 낮다고 단정 금지 — base
+              테이블만으로도 충분히 신뢰 가능한 케이스 존재.
+        OutputSchema:
+            AllocationResult (frozen dataclass):
+            ``{equity:int, bond:int, gold:int, cash:int, regime:str,
+            rationale:list[str]}``.
+        Prerequisites:
+            macro/summary 의 ``overall``, ``cycle.phase`` 둘 다 존재.
+            sentiment/liquidity/crisis 는 선택.
+        Freshness:
+            macro/summary 의 freshness (보통 일/주간 갱신).
+        Dataflow:
+            (overall, phase) → _BASE_ALLOCATION 룩업 → fearGreed/FCI/Minsky
+            조정 → cash 합계 100 보정.
+        TargetMarkets: Global (4 자산 vehicle 은 시장 무관).
     """
     overall = macroResult.get("overall", "neutral")
     cycle = macroResult.get("cycle") or {}

@@ -183,6 +183,10 @@ class Quant:
                 - 주가 데이터 (gather("price") 자동 수집) — 첫 호출 시간 소요
             Freshness:
                 price 데이터 — T+1 (전일 종가).
+            Dataflow:
+                axis 입력 → _ALIASES/_OLD_METRICS 정규화 → _AXIS_REGISTRY 룩업
+                → gather("price")/scan/synth 데이터 패치 → 축별 calc 함수
+                → 종목 dict 또는 횡단면 pl.DataFrame 반환.
             TargetMarkets:
                 - KR (Naver Finance)
                 - US (Yahoo Finance)

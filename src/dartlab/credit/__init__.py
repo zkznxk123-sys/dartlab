@@ -324,6 +324,10 @@ def credit(
             - finance + report 데이터 (자동 다운로드)
         Freshness:
             정기보고서 마감 후 30~45 일.
+        Dataflow:
+            stockCode → engine.evaluate → 7 축 calc (repayment/leverage/
+            liquidity/cashFlow/businessStability/reliability/disclosureRisk)
+            → 가중 점수 합산 → CHS notch → grade 변환 → dict 조립.
         TargetMarkets:
             - KR (DART)
     """

@@ -271,67 +271,92 @@ def _addGrowthAtRisk(forecastResult: dict | None, liquidity: dict, asOf: str | N
 
 
 def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """매크로 전체 종합 판정 — **종목 분석 시 macro 호출은 이 함수 1회로 끝낸다**.
+    """매크로 전체 종합 판정 — 종목 분석 시 macro 호출은 이 함수 1회로 끝낸다.
 
-    11개 축(cycle, rates, assets, sentiment, liquidity, forecast, crisis,
-    inventory, trade, corporate, scenario)을 독립 호출하여 종합 스코어와
-    자산배분, 투자전략 대시보드를 산출한다.
+    Capabilities:
+        11 축 (cycle/rates/assets/sentiment/liquidity/forecast/crisis/
+        inventory/trade/corporate/scenario) 을 순차 호출 → 가중 스코어
+        합산 → overall (favorable/neutral/unfavorable) + 자산배분 +
+        40 투자전략 대시보드를 단일 dict 로 반환. 각 축 사이 ``_gcAfterAxis``
+        로 polars Rust 힙 회수 (R5 호출 7632MB peak 의 직접 fix).
 
-    AI 사용 가이드:
-        - 종목/회사 분석 컨텍스트에서는 **이 함수 1회**만 호출하라.
-          단일 축(cycle/rates/liquidity 등) 11번 반복 호출 금지.
-        - 결과 dict의 `cycle`, `rates`, `liquidity` 등 11축이 이미 포함됨.
-        - 단일 축 호출은 사용자가 "금리만 자세히" 같이 명시했을 때만.
-        - market은 종목의 currency에 맞게 — KR 종목은 "KR", US 종목은 "US".
+    Args:
+        market: 시장 코드 ``"US"`` 또는 ``"KR"``. 기본 ``"US"``. 종목의
+            currency 와 맞춰야 cycle/sentiment/trade 결과가 의미 있음.
+        asOf: 기준일 (YYYY-MM-DD). ``None`` 이면 최신 호출.
+        overrides: AI 가정 교체 dict. 전체 축에 전파.
+        **kwargs: BC 흡수 (현재 미사용).
 
-    Parameters
-    ----------
-    market : str
-        시장 코드 ("US" | "KR"). 기본 "US".
-    as_of : str | None
-        기준일 (YYYY-MM-DD). None이면 최신.
-    overrides : dict | None
-        AI 가정 교체. 전체 축에 전파.
+    Returns:
+        dict with keys:
+            - ``market`` (str): 입력 echo
+            - ``overall`` (str): ``"favorable"``/``"neutral"``/``"unfavorable"``
+            - ``overallLabel`` (str): 한국어
+            - ``score`` (float): -4 ~ +4 가중 합
+            - ``contributions`` (dict[str, float]): 축별 기여도 (0 제외)
+            - ``reasons`` (list[str]): 판정 근거
+            - ``cycle``/``rates``/``assets``/``sentiment``/``liquidity``
+              (dict): 5 핵심 축 결과
+            - ``forecast``/``crisis``/``inventory``/``trade``/``corporate``
+              (dict|None): 5 보조 축 (실패해도 종합 판정은 계속)
+            - ``allocation`` (dict|None): 자산배분 ``{equity, bond, gold,
+              cash, regime, rationale}``
+            - ``strategies`` (dict|None): 40 전략 대시보드
+              ``{total, active, bullish, bearish, signals}``
 
-    Returns
-    -------
-    dict
-        market : str — 시장 코드
-        overall : str — 종합 판정 ("favorable" | "neutral" | "unfavorable")
-        overallLabel : str — 종합 판정 한글 ("우호적" | "중립" | "비우호적")
-        score : float — 종합 스코어 (점, -4 ~ +4, 양수=우호적)
-        contributions : dict[str, float] — 축별 기여도 (0이 아닌 축만)
-        reasons : list[str] — 판정 근거 문장 리스트
-        cycle : dict — 경기사이클 분석 결과
-        rates : dict — 금리/채권 분석 결과
-        assets : dict — 자산시장 분석 결과
-        sentiment : dict — 시장 심리 분석 결과
-        liquidity : dict — 유동성 분석 결과
-        forecast : dict | None — 경제 예측 (LEI, 침체확률, Hamilton RS, Nowcast)
-        crisis : dict | None — 위기 감지 (Credit Gap, GHS, Minsky, Dalio 등)
-        inventory : dict | None — 재고순환 (ISM 바로미터, 재고 국면)
-        trade : dict | None — 교역 분석 (교역조건, 대용치, 수출이익)
-        corporate : dict | None — 기업집계 (이익사이클, Ponzi, 레버리지)
-        allocation : dict | None — 자산배분 추천
-            equity : float — 주식 비중 (%)
-            bond : float — 채권 비중 (%)
-            gold : float — 금 비중 (%)
-            cash : float — 현금 비중 (%)
-            regime : str — 레짐 코드
-            rationale : str — 근거 해설
-        strategies : dict | None — 투자전략 대시보드
-            total : int — 전체 전략 수
-            active : int — 활성 전략 수
-            bullish : int — 강세 전략 수
-            bearish : int — 약세 전략 수
-            signals : list[dict] — 개별 전략 시그널
-                id : int — 전략 번호
-                name : str — 전략명
-                active : bool — 활성 여부
-                direction : str — 방향 ("bullish" | "bearish")
-                strength : float — 강도 (0~1)
-                confidence : float — 신뢰도 (0~1)
-                description : str — 해설
+    Raises:
+        없음 — 각 축 호출 실패는 None 으로 흡수, overall 계산 계속.
+
+    Example:
+        >>> from dartlab.macro import Macro
+        >>> r = Macro()(market="KR")
+        >>> r["overall"], r["allocation"]["equity"]
+        ('favorable', 60)
+
+    Guide:
+        종목 분석 컨텍스트에서는 이 함수 1 회 호출로 끝낸다. 개별 축
+        (analyzeCycle, analyzeRates 등) 11 번 반복 호출 금지 — 같은 데이터
+        2 회 fetch + polars 힙 추가 압박. 단일 축은 사용자가 "금리만
+        자세히" 같이 명시했을 때만.
+
+    SeeAlso:
+        - ``dartlab.macro.cycles.cycle.analyzeCycle``
+        - ``dartlab.macro.rates.rates.analyzeRates``
+        - ``dartlab.synth.portfolioMapping.regimeToAllocation``
+        - ``dartlab.synth.strategyRules.evaluateStrategies``
+
+    Requires:
+        DART/EDGAR provider + Yahoo Finance + FRED/KOSIS. 인터넷 필요.
+
+    AIContext:
+        결과 dict 의 ``contributions`` 가 overall 의 직접 근거이므로
+        해석 시 가장 큰 기여 축 1~2 개를 인용. allocation 은 정성
+        권고이지 trade rule 이 아니다. strategies 의 high-confidence active
+        만 필터링해 사용 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 종목별로 매번 analyzeSummary 호출 금지. 한 세션 내 최신
+              결과 재사용 (caching 책임은 호출자).
+            - market="US" 로 호출한 결과를 KR 종목 분석에 사용 금지 (금리/
+              유동성 축이 달라짐).
+            - 개별 축 dict 의 score 합산을 직접 재계산하지 말 것 — 가중치는
+              내부 비공개.
+        OutputSchema:
+            ``{market, overall, overallLabel, score, contributions, reasons,
+            cycle, rates, assets, sentiment, liquidity, forecast, crisis,
+            inventory, trade, corporate, allocation, strategies}``.
+        Prerequisites:
+            네트워크 + macro provider 활성. analyzeCycle/Rates/Assets/
+            Sentiment/Liquidity 5 핵심 축 모두 성공해야 점수 신뢰 가능.
+        Freshness:
+            cycle/rates 일 단위, sentiment/liquidity 주 단위. asOf=None 이면
+            real-time fetch.
+        Dataflow:
+            analyzeCycle → analyzeRates → analyzeAssets → calcSentiment →
+            calcLiquidity (각 _gcAfterAxis) → 보조 5 축 → score 합산 →
+            regimeToAllocation → evaluateStrategies → dict 조립.
+        TargetMarkets: US, KR (market 인자로 분기). JP/EM 미지원.
     """
     from dartlab.macro.corporate.assets import analyzeAssets
     from dartlab.macro.cycles.cycle import analyzeCycle
