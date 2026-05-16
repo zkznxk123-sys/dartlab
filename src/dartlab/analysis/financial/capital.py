@@ -98,33 +98,65 @@ def _fmtAmt(value) -> str:
 
 @memoizedCalc
 def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None:
-    """조달원 분해 — 돈을 어디서 가져왔는가.
+    """자금조달 4 원천 분해 (내부유보 + 외부주주 + 금융차입 + 영업조달).
 
-    4가지 원천: 내부유보, 외부(주주), 금융차입, 영업조달.
-    시계열로 비중 변화를 추적한다.
+    Capabilities:
+        BS 의 자본 + 부채를 4 원천으로 분해 — 내부유보 (이익잉여금), 외부
+        주주 (납입자본), 금융차입 (총차입금), 영업조달 (매입채무 + 미지급금
+        등). 시계열로 비중 변화를 추적해 자본구조 변화 진단. analysis()
+        의 자금조달 축 핵심 함수.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
 
-    Returns
-    -------
-    dict | None
-        latest : dict
-            totalAssets : float — 총자산 (원)
-            retained : float — 이익잉여금 (원)
-            retainedPct : float — 이익잉여금 비중 (%)
-            paidIn : float — 납입자본 (원)
-            paidInPct : float — 납입자본 비중 (%)
-            finDebt : float — 금융차입 (원)
-            finDebtPct : float — 금융차입 비중 (%)
-            opFunding : float — 영업조달 (원)
-            opFundingPct : float — 영업조달 비중 (%)
-        history : list[dict] — 연도별 조달원 비중 시계열
-        diagnosis : str — 조달구조 진단
+    Returns:
+        dict | None:
+            - ``latest`` (dict): 9 키 (totalAssets + 4 원천 × 절대값/비중)
+            - ``history`` (list[dict]): 연도별 비중 시계열
+            - ``diagnosis`` (str): 조달구조 한국어 진단
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcFundingSources(Company("005930"))
+        >>> r["latest"]["retainedPct"], r["latest"]["finDebtPct"]
+        (45, 15)  # 내부유보 45%, 금융차입 15% (안정적 자본구조)
+
+    Guide:
+        retainedPct > 40% = 내부 현금 우위 (자립 성장). finDebtPct < 30% =
+        안정적 레버리지. paidInPct 큰 신규 IPO 회사 — 운영 안정화 후 retained
+        증가 추세 확인. opFundingPct 30%+ = 매입채무 의존 (B2B 산업 특성).
+
+    SeeAlso:
+        - ``calcDebtTimeline``: 차입금 시계열
+        - ``calcCapitalOverview``: 자본구조 종합
+        - ``analyzeHealth``: 재무건전성 (자금조달 결합)
+
+    Requires:
+        BS 시계열 (자산총계 + 자본총계 + 차입금 + 매입채무).
+
+    AIContext:
+        4 원천 비중 시계열 (history) 의 변화 방향 함께 노출 — retainedPct
+        상승 추세 = 좋은 신호, finDebtPct 상승 = 차입 증가 (capex 또는
+        부실 신호).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 비중만 인용 — 시계열 추세 (3~5 년) 함께 확인 필수.
+            - paidInPct 큰 신규 IPO 를 "재무 불안" 으로 단정 — 운영 안정화
+              기간 (3~5 년) 정상.
+        OutputSchema:
+            ``{latest: dict 9키, history: list[dict], diagnosis: str}``.
+        Prerequisites:
+            BS 시계열 + 자본/부채 standardAccounts.
+        Freshness:
+            최신 분기 + 5 년 시계열.
+        Dataflow:
+            BS → 자본총계 (retained + paidIn) + 부채총계 분해 (finDebt +
+            opFunding) → 비중 계산 → diagnosis.
+        TargetMarkets: KR (DART), US (EDGAR 표준 자본구조 동일).
     """
     accounts = [
         "자산총계",
