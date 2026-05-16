@@ -505,50 +505,66 @@ from dartlab.quant.factor._calcHelpers import _interpretFactorSharpe
 
 @withMemoryBudget(limitMb=300)
 def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
-    """Multi-Factor Risk Decomposition (Barra-style B Σ_f Bᵀ + D).
+    """Multi-Factor Risk Decomposition — Barra-style B Σ_f Bᵀ + D 분해.
 
     Capabilities:
-        - 단일 종목의 systematic vs idiosyncratic risk 분해
-        - 4 팩터 (SMB/HML/RMW/CMA) 공분산 + 종목 노출 (B = decomposeFactor loadings)
-        - 팩터별 리스크 기여도 (% of systematic)
-        - 정성 평가 (팩터 의존도 + 최대 기여 팩터)
+        단일 종목의 총 리스크를 4 팩터 (SMB/HML/RMW/CMA) 공분산 행렬과 노출 (loadings) 의
+        quadratic form 으로 systematic 부분과 idiosyncratic (residual) 부분으로 분해. 팩터별
+        marginal contribution 까지 산출해 "어느 팩터가 위험 주범" 인지 정량.
 
-    AIContext:
-        - story 시장분석 섹션의 ``riskDecompositionBlock`` 가 자동 호출
-        - "총 리스크 30% 중 systematic 22% / idiosyncratic 8%, SMB 기여 +45%" 같은 정량
-        - Barra MSCI 의 multi-factor risk model 표준 (B Σ_f Bᵀ + D)
+    Parameters
+    ----------
+    stockCode : str
+        종목코드 (KR 6 자리 또는 US ticker).
+    market : str, default "auto"
+        "KR" | "US" | "auto".
 
-    SeeAlso:
-        - decomposeFactor : 종목의 팩터 loadings (B)
-        - factorBuild.buildFactors : SMB/HML/RMW/CMA 시계열 (Σ_f 원료)
-        - calcFactorTearSheet : 팩터별 long-short Sharpe 평가
+    Returns
+    -------
+    dict | None
+        stockCode : str — 입력 echo
+        market : str — 해석된 시장
+        model : str — "Barra-style FF4 Multi-Factor"
+        systematicRisk : float — 팩터 기여 리스크 (연환산 %)
+        residualRisk : float — 고유 리스크 (idiosyncratic, 연환산 %)
+        totalRisk : float — 합산 (연환산 %)
+        systematicShare : float — systematic 비중 (% of total variance)
+        factorContributions : dict[str, float] — 팩터별 기여 (% of systematic)
+        loadings : dict[str, float] — B 벡터 (팩터별 노출)
+        interpretation : str — 정성 평가 ("SMB 의존 강한 소형주" 등)
+        decompose 실패 시 error dict 반환.
 
-    Args:
-        stockCode: 종목코드 또는 ticker.
-        market: ``"KR"`` | ``"US"`` | ``"auto"``.
+    Raises
+    ------
+    없음 (오류는 dict["error"]).
 
-    Returns:
-        dict
-            stockCode : str
-            market : str
-            model : str — "Barra-style FF4 Multi-Factor"
-            systematicRisk : float — 팩터 기여 리스크 (연환산 %)
-            residualRisk : float — 종목 고유 리스크 (idiosyncratic, 연환산 %)
-            totalRisk : float — 합산 (연환산 %)
-            systematicShare : float — systematic 비중 (% of total variance)
-            factorContributions : dict[str, float] — 팩터별 기여 (% of systematic, SMB/HML/RMW/CMA)
-            loadings : dict[str, float] — B 벡터 (팩터별 노출)
-            interpretation : str — 정성 평가
+    Example
+    -------
+    >>> r = calcMultiFactorRisk("005930")
+    >>> r["systematicShare"], r["factorContributions"]["SMB"]
+    (72.4, 41.8)
 
-    Examples:
-        >>> from dartlab.quant.factor.calc import calcMultiFactorRisk
-        >>> r = calcMultiFactorRisk("005930")
-        >>> print(r["systematicShare"], r["interpretation"])
+    Guide
+    -----
+    sys_var = B^T Σ_f B (quadratic form). 팩터별 기여 = B_k × (Σ_f B)_k / sys_var 의 marginal
+    contribution. systematicShare 가 50% 미만이면 종목 고유 변동 우세 — alpha 분석 우선.
+    50% 이상이면 팩터 의존 — factorContributions 최대값을 헤지 대상으로 선택.
 
-    Notes:
-        - sys_var = B^T Σ_f B  (팩터 공분산 × 노출 quadratic form)
-        - 팩터별 기여 = B_k × (Σ_f B)_k / sys_var (marginal contribution to risk)
-        - residual 은 decomposeFactor 의 residualRisk (이미 annualized) 사용
+    SeeAlso
+    -------
+    - ``dartlab.quant.factor.calc.decomposeFactor`` : loadings (B) 본체
+    - ``dartlab.quant.factor.calc.calcFactorTearSheet`` : 팩터별 Sharpe
+    - ``dartlab.quant.factor.residual.calcResidual`` : 잔여 alpha
+
+    Requires
+    --------
+    - L1 gather: 주가 OHLCV 60 거래일 이상
+    - L1.5 frame: factor build 결과 (SMB/HML/RMW/CMA 시계열)
+
+    AIContext
+    ---------
+    "총 리스크 30% 중 systematic 22% / idiosyncratic 8%, SMB +45%" 같은 정량 답변 진입점.
+    systematicShare 단독 인용보다 최대 factor contribution 까지 한 줄로 묶어 인용 권장.
     """
     decomp = decomposeFactor(stockCode, market=market)
     if not decomp or "error" in decomp:
