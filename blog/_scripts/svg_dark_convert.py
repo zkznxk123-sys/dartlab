@@ -1,10 +1,10 @@
 """SVG 라이트→다크 테마 변환 스크립트.
 
 사용법:
-  uv run python scripts/build/svg_dark_convert.py <svg_file_or_directory>
+  uv run python -X utf8 blog/_scripts/svg_dark_convert.py <svg_file_or_directory>
 
 글 단위 변환:
-  uv run python scripts/build/svg_dark_convert.py blog/03-financial-interpretation/115-ifrs18-income-statement-changes/assets/
+  uv run python -X utf8 blog/_scripts/svg_dark_convert.py blog/03-financial-interpretation/115-ifrs18-income-statement-changes/assets/
 """
 
 import re
