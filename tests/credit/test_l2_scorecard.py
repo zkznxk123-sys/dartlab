@@ -19,32 +19,41 @@ class TestScoreMetric:
     def test_below_excellent(self):
         from dartlab.credit.scoring.creditScorecard import scoreMetric
 
-        # 예: D/EBITDA 임계값 — 작을수록 좋음
-        threshold = {"excellent": 1.0, "good": 2.0, "moderate": 3.5, "weak": 5.0, "lower_is_better": True}
+        # 예: D/EBITDA — 작을수록 좋음 (breakpoints: (value, score) 오름차순)
+        threshold = {
+            "lower_is_better": True,
+            "breakpoints": [(1.0, 5.0), (2.0, 20.0), (3.5, 50.0), (5.0, 80.0)],
+        }
         r = scoreMetric(0.5, threshold)
         assert r is not None
-        assert r < 20
+        assert r <= 5.0
 
     def test_above_weak(self):
         from dartlab.credit.scoring.creditScorecard import scoreMetric
 
-        threshold = {"excellent": 1.0, "good": 2.0, "moderate": 3.5, "weak": 5.0, "lower_is_better": True}
+        threshold = {
+            "lower_is_better": True,
+            "breakpoints": [(1.0, 5.0), (2.0, 20.0), (3.5, 50.0), (5.0, 80.0)],
+        }
         r = scoreMetric(10.0, threshold)
         assert r is not None
-        assert r > 50
+        assert r >= 80.0
 
     def test_none(self):
         from dartlab.credit.scoring.creditScorecard import scoreMetric
 
-        threshold = {"excellent": 1.0, "good": 2.0, "moderate": 3.5, "weak": 5.0, "lower_is_better": True}
+        threshold = {"lower_is_better": True, "breakpoints": [(1.0, 5.0), (5.0, 80.0)]}
         r = scoreMetric(None, threshold)
         assert r is None
 
     def test_higherIsBetter(self):
         from dartlab.credit.scoring.creditScorecard import scoreMetric
 
-        # FFO/Debt — 높을수록 좋음
-        threshold = {"excellent": 0.5, "good": 0.3, "moderate": 0.15, "weak": 0.05, "lower_is_better": False}
+        # FFO/Debt — 높을수록 좋음 (breakpoints 값 오름차순, lower_is_better=False 면 내부 반전)
+        threshold = {
+            "lower_is_better": False,
+            "breakpoints": [(0.5, 5.0), (0.3, 20.0), (0.15, 50.0), (0.05, 80.0)],
+        }
         rGood = scoreMetric(0.6, threshold)
         rBad = scoreMetric(0.01, threshold)
         if rGood is not None and rBad is not None:
