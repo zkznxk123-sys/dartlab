@@ -18,7 +18,7 @@ _STATS_PATH = Path.home() / ".dartlab" / "ai_memory" / "skill_stats.jsonl"
 
 @dataclass
 class SkillStats:
-    """SkillStats — TODO 한국어 클래스 설명."""
+    """skill 별 누적 통계 — usage/success/valueRef + lastUsedTs."""
 
     skillId: str
     usageCount: int = 0
@@ -28,12 +28,12 @@ class SkillStats:
 
     @property
     def successRate(self) -> float:
-        """successRate — TODO 한국어 동작 설명."""
+        """successCount / usageCount (0 인 경우 0.0)."""
         return self.successCount / self.usageCount if self.usageCount else 0.0
 
     @property
     def avgValueRefs(self) -> float:
-        """avgValueRefs — TODO 한국어 동작 설명."""
+        """valueRefSum / usageCount (0 인 경우 0.0)."""
         return self.valueRefSum / self.usageCount if self.usageCount else 0.0
 
     @property
@@ -78,7 +78,7 @@ def recordOutcome(skillId: str, *, ok: bool, valueRefs: int = 0) -> SkillStats:
 
 
 def getSkillStats(skillId: str) -> SkillStats:
-    """getSkillStats — TODO 한국어 동작 설명."""
+    """JSONL 전체 스캔 → 해당 skillId 누적 SkillStats 산출."""
     stats = SkillStats(skillId=skillId)
     path = _resolveStatsPath()
     if not path.exists():
@@ -96,7 +96,7 @@ def getSkillStats(skillId: str) -> SkillStats:
 
 
 def allStats() -> dict[str, SkillStats]:
-    """allStats — TODO 한국어 동작 설명."""
+    """JSONL 전체 스캔 → skillId → SkillStats 매핑 (모든 skill 누적)."""
     result: dict[str, SkillStats] = {}
     path = _resolveStatsPath()
     if not path.exists():

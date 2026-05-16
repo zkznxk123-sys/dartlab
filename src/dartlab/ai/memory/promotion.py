@@ -38,7 +38,7 @@ class PromotionCandidate:
         return getattr(self, key)
 
     def get(self, key: str, default: Any = None) -> Any:
-        """get — TODO 한국어 동작 설명."""
+        """dict-like 접근 — dataclass 필드 또는 default."""
         return getattr(self, key, default)
 
 
