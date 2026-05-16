@@ -69,14 +69,67 @@ def _crosssecZscore(value: float, allValues: list[float]) -> float:
 
 
 def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """Asness 퀄리티 팩터 — 횡단면 z-score 기반.
+    """Asness 퀄리티 팩터 — 횡단면 z-score 기반 (QMJ).
+
+    Capabilities:
+        Asness/Frazzini/Pedersen (2019) "Quality Minus Junk" 팩터 구현.
+        Profitability (ROA/GP/AssetTurnover) + Safety (저변동/저레버리지) +
+        Payout (제외 — 시가총액 미보유). universe ≥ 1000 종목 횡단면 z 합성.
+        금융업은 자동 skip (부채 구조가 사업 본질이라 일반 quality 산식 부적절).
 
     Args:
-        stockCode: 종목코드 또는 ticker.
+        stockCode: 종목코드 (KR 6 자리) 또는 ticker (US).
         market: "KR" | "US" | "auto".
 
     Returns:
-        dict with qualityScore, profitabilityZ, safetyZ, grade, sector tag.
+        dict:
+            - ``stockCode``/``market``/``year`` (str): 식별.
+            - ``profitabilityZ``/``safetyZ`` (float): 컴포넌트 z.
+            - ``qualityScore`` (float): 합성 z.
+            - ``grade`` (str): A~F.
+            - ``sector`` (str, optional): "financial" 시 grade=None.
+            - 또는 ``error`` (str): 데이터 부족 사유.
+
+    Raises:
+        없음 (모든 실패는 error 키로 반환).
+
+    Example:
+        >>> r = calcQuality("005930")
+        >>> r["qualityScore"], r["grade"]
+        (1.45, 'A')
+
+    Guide:
+        QMJ 팩터는 장기 (10+ 년) 위험조정 초과수익 신호. 단일 회사 grade
+        절대값보다 universe 분위 (백분위) 가 더 유용. universe 분리 (KR/US)
+        엄수 — 시장 간 z 직접 비교 금지.
+
+    SeeAlso:
+        - ``calcValue``: book-based 가치
+        - ``calcMomentum``: 12-1 모멘텀
+        - ``factor/_rolling`` (Phase 1.2): 시계열 z 향후
+
+    Requires:
+        scan finance parquet (KR/US) + ≥ 1000 종목 universe.
+
+    AIContext:
+        grade + qualityScore 분위 함께. profitabilityZ vs safetyZ 분리 인용
+        가능 (수익성 강하나 안정성 약한 vs 반대).
+
+    LLM Specifications:
+        AntiPatterns:
+            - KR/US universe 혼용 z 비교 — universe 분리 필수.
+            - 금융업에 quality 인용 — grade=None 반환.
+        OutputSchema:
+            ``{stockCode, market, year, profitabilityZ: float, safetyZ: float,
+              qualityScore: float, grade: str}``.
+        Prerequisites:
+            finance parquet universe ≥ 1000.
+        Freshness:
+            연간.
+        Dataflow:
+            finance.parquet → annual 연결 → universe 1000+ → metric 캐시 →
+            본 종목 → 횡단면 z → qualityScore + grade.
+        TargetMarkets: KR, US (universe 별도).
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
