@@ -60,11 +60,17 @@ def calcResidual(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     R² 가 높으면 (>0.7) 종목 수익의 대부분이 팩터로 설명 — alpha 신호 약함. R² 가 낮으면
     (<0.3) 고유성 강하지만 OLS 노이즈도 클 수 있음. residualSharpe 만 단독 인용 금지.
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.factor.value.calcValue`` : 가치 팩터 신호
-    - ``dartlab.quant.factor.quality.calcQuality`` : 퀄리티 팩터 신호
-    - ``dartlab.quant.factor.calc.decomposeFactor`` : FF5 분해 본체
+    See Also:
+        - ``dartlab.quant.factor.value.calcValue`` : 가치 팩터 신호
+        - ``dartlab.quant.factor.quality.calcQuality`` : 퀄리티 팩터 신호
+        - ``dartlab.quant.factor.calc.decomposeFactor`` : FF5 분해 본체
+
+    When:
+        Quant residual 축 진입점 + AI 종목 알파 답변.
+
+    How:
+        OHLCV → FF5 팩터 회귀 → 잔차 시계열 → 모멘텀 + idio vol + alpha +
+        Sharpe + R².
 
     Requires
     --------

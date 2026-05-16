@@ -207,11 +207,17 @@ def calcMultiFactorRisk(stockCode: str, *, market: str = "auto") -> dict | None:
     contribution. systematicShare 가 50% 미만이면 종목 고유 변동 우세 — alpha 분석 우선.
     50% 이상이면 팩터 의존 — factorContributions 최대값을 헤지 대상으로 선택.
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.factor.calc.decomposeFactor`` : loadings (B) 본체
-    - ``dartlab.quant.factor.calc.calcFactorTearSheet`` : 팩터별 Sharpe
-    - ``dartlab.quant.factor.residual.calcResidual`` : 잔여 alpha
+    See Also:
+        - ``dartlab.quant.factor.calc.decomposeFactor`` : loadings (B) 본체
+        - ``dartlab.quant.factor.calc.calcFactorTearSheet`` : 팩터별 Sharpe
+        - ``dartlab.quant.factor.residual.calcResidual`` : 잔여 alpha
+
+    When:
+        Barra-style 리스크 분해 진입점 + AI 팩터 노출 답변.
+
+    How:
+        decomposeFactor (loadings B) → buildFactors (시계열) → Σ_f → B^T Σ_f B
+        quadratic → 팩터별 marginal contribution.
 
     Requires
     --------

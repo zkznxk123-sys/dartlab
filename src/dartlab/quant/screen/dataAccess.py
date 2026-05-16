@@ -81,7 +81,19 @@ def fetchBenchmark(market: str = "KR", **kwargs: Any) -> "pl.DataFrame | None":
         low : float — 저가
         close : float — 종가
         volume : int — 거래량
-        수집 실패 시 None."""
+        수집 실패 시 None.
+
+    Example:
+        >>> df = fetchBenchmark("KR")
+        >>> df.columns
+        ['date', 'open', 'high', 'low', 'close', 'volume']
+
+    Requires:
+        gather provider 활성 + 벤치마크 시리즈 등록.
+
+    Raises:
+        없음 — 실패는 None.
+    """
     try:
         from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
 
@@ -219,11 +231,21 @@ def stockPercentile(lf, stockCode: str, col: str, stockCol: str = "stockCode", r
         lf: pl.LazyFrame (scan parquet)
         stockCode: 종목코드
         col: 백분위를 구할 컬럼명
-        stock_col: 종목코드 컬럼명
+        stockCol: 종목코드 컬럼명
         reverse: True이면 높은 값 = 낮은 백분위 (PBR 등)
 
     Returns:
         (value, percentile) 또는 (None, None)
+
+    Example:
+        >>> stockPercentile(lf, "005930", "roe")
+        (0.18, 0.85)
+
+    Requires:
+        lf 가 polars LazyFrame + col 존재.
+
+    Raises:
+        없음 — 컬럼 누락 시 (None, None).
     """
     import polars as pl
 

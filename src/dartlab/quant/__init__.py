@@ -375,6 +375,15 @@ class Quant:
         ``runScanBacktest`` 를 ``dartlab.quant`` attribute 로 노출. axis 미등록 —
         registry dispatcher 의 ``fn(stockCode, **kw)`` 계약과 시그니처가 어긋나기 때문.
         세부 시그니처는 ``dartlab.quant.screen.scanBacktest.runScanBacktest`` 참고.
+
+        Example:
+            >>> Quant.scanBacktest(scan("저PER"), signalFn=...)
+
+        Requires:
+            scanResult 가 universe (종목 list/DataFrame) 보유.
+
+        Raises:
+            ValueError — runScanBacktest 내부 검증 실패 시.
         """
         from dartlab.quant.screen.scanBacktest import runScanBacktest
 

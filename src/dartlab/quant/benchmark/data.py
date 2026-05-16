@@ -476,7 +476,17 @@ def benchmarkSnapshot(
 
 
 def calcBenchmark(stockCode: str, **kwargs: Any) -> dict[str, Any]:
-    """quant registry용 얇은 래퍼."""
+    """quant registry용 얇은 래퍼.
+
+    Example:
+        >>> calcBenchmark("005930")
+
+    Requires:
+        benchmarkSnapshot 호출 가능 (KR/US 벤치마크 fetch).
+
+    Raises:
+        없음 (실패는 빈 dict).
+    """
     return benchmarkSnapshot(stockCode, **kwargs)
 
 

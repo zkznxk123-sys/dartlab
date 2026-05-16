@@ -126,6 +126,17 @@ def loadIndustryNodes() -> list[dict[str, Any]]:
 
     quant는 industry 엔진 코드를 import하지 않고 패키지 데이터만 읽는다. L2 엔진
     간 함수 의존을 만들지 않기 위한 경계다.
+
+    Example:
+        >>> nodes = loadIndustryNodes()
+        >>> nodes[0]["stockCode"]
+        '005930'
+
+    Requires:
+        dartlab/industry/nodes.json 정적 자산.
+
+    Raises:
+        FileNotFoundError — nodes.json 누락.
     """
     path = Path(__file__).resolve().parents[2] / "industry" / "nodes.json"
     return json.loads(path.read_text(encoding="utf-8"))

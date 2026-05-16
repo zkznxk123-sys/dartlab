@@ -89,11 +89,17 @@ def calcFactorIC(
     stepping** 으로 자기상관 제거 + ICIR 인플레이션 방지. 한 시점 cross-section 20 종목
     미만 제외. ICIR = icMean / icStd × √(252/h).
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.factor.calc.calcFactorTearSheet`` : long-short Sharpe (Alphalens 보완)
-    - ``dartlab.quant.factor.calc.decomposeFactor`` : 종목 FF5 loadings
-    - ``dartlab.quant.factor.calc.fundamentalLawIR`` : IC + breadth → IR
+    See Also:
+        - ``dartlab.quant.factor.calc.calcFactorTearSheet`` : long-short Sharpe (Alphalens 보완)
+        - ``dartlab.quant.factor.calc.decomposeFactor`` : 종목 FF5 loadings
+        - ``dartlab.quant.factor.calc.fundamentalLawIR`` : IC + breadth → IR
+
+    When:
+        Alphalens IC 표준 진입점 + Fundamental Law IC 원료.
+
+    How:
+        scan finance.parquet → 펀더멘털 rank (t-1) + forward return rank (t+h)
+        → Spearman IC 시계열 → mean/std/ICIR/HitRate/t-stat.
 
     Requires
     --------

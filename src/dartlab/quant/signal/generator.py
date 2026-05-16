@@ -110,6 +110,16 @@ def vgoldenCross(close: NDArray[np.float64], fast: int = 10, slow: int = 30) -> 
     -------
     NDArray[np.int8]
         +1=골든크로스, -1=데드크로스, 0=없음.
+
+    Example:
+        >>> vgoldenCross(close, 10, 30)
+        array([0, 0, 1, 0, ..., -1, 0])
+
+    Requires:
+        close 가 numpy array + slow + fast ≥ 2.
+
+    Raises:
+        없음.
     """
     return vcross(vsma(close, fast), vsma(close, slow))
 
@@ -143,6 +153,16 @@ def vrsiSignal(rsi: NDArray[np.float64], oversold: float = 30.0, overbought: flo
 
 def vmacdSignal(close: NDArray[np.float64], fast: int = 12, slow: int = 26, signal: int = 9) -> NDArray[np.int8]:
     """MACD/Signal 크로스.
+
+    Example:
+        >>> vmacdSignal(close)
+        array([0, 0, 1, ..., -1, 0])
+
+    Requires:
+        close 가 numpy array.
+
+    Raises:
+        없음.
 
     Parameters
     ----------

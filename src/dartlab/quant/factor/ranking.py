@@ -197,11 +197,17 @@ def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -
     (Fundamentals). compositeScore 는 백분위 평균이므로 0~1 범위가 의미. 100 개 미만 연도는
     fallback 으로 다음 후보 연도 자동 선택.
 
-    SeeAlso
-    -------
-    - ``dartlab.quant.factor.value.calcValue`` : 가치 단축
-    - ``dartlab.quant.factor.quality.calcQuality`` : 퀄리티 단축
-    - ``dartlab.scan.financial`` : finance.parquet SSOT
+    See Also:
+        - ``dartlab.quant.factor.value.calcValue`` : 가치 단축
+        - ``dartlab.quant.factor.quality.calcQuality`` : 퀄리티 단축
+        - ``dartlab.scan.financial`` : finance.parquet SSOT
+
+    When:
+        Quant universe ranking 진입점 + AI 종목 순위 답변.
+
+    How:
+        scan finance.parquet → 최신 연도 → 5 팩터 (KR) 또는 3 팩터 (US) 백분위
+        평균 → top-50 + stockCode 순위.
 
     Requires
     --------

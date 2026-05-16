@@ -71,10 +71,20 @@ def enrichWithIndicators(df: pl.DataFrame) -> pl.DataFrame:
         verdict 함수가 소비. 단독으로도 chart / dashboard 용 widget 입력에 활용.
         지표 컬럼 일부만 필요해도 모두 계산되니, 대형 시리즈는 memory 주의.
 
-    SeeAlso:
+    See Also:
         - ``technicalVerdict``: 본 함수 결과 + 추가 진단
         - ``core.indicators.*``: 25 지표 본체 (vsma/vema/vrsi 등)
         - ``Quant`` 의 ``기술`` 축
+
+    When:
+        ``technicalVerdict`` 사전 + chart/dashboard widget 입력 진입점.
+
+    How:
+        df → numpy 추출 (close/high/low/volume) → 25 지표 (core.indicators) →
+        with_columns 추가.
+
+    Raises:
+        KeyError — 필수 컬럼 (open/high/low/close) 누락.
 
     Requires:
         OHLCV polars DataFrame (252 일+ 권장 — SMA120/Bollinger 등 warmup
@@ -224,10 +234,20 @@ def technicalVerdict(
         ADX > 25 (강한 추세) 등 강세 신호 +1 씩, 반대 -1 씩. 절대값 의존 금지
         — signals list 의 근거 함께 인용. macro 사이클 + 본 verdict 교차 해석.
 
-    SeeAlso:
+    See Also:
         - ``enrichWithIndicators``: 25 지표 컬럼 추가 (full set)
         - ``Quant`` 의 ``기술`` 축
         - ``calcMomentum`` / ``calcVolatility``: 단일 그룹 깊이 분석
+
+    When:
+        ``Company.quant("판단")`` raw OHLCV 진입점. AI 종합 차트 판단 답변.
+
+    How:
+        df → RSI/SMA/Bollinger/ADX → 각 신호 ±1 합산 → score → verdict 라벨 +
+        signals list.
+
+    Raises:
+        KeyError — 필수 컬럼 누락.
 
     Requires:
         OHLCV polars DataFrame, 252 일+ 권장 (SMA60 warmup). 벤치마크 사용 시

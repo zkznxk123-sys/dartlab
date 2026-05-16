@@ -64,7 +64,17 @@ def calcSignalData(company) -> dict | None:
 
 @_memoized_calc
 def calcStrategyData(company) -> dict | None:
-    """전략 검증 데이터 — 스타일별 Sharpe + 진입."""
+    """전략 검증 데이터 — 스타일별 Sharpe + 진입.
+
+    Example:
+        >>> calcStrategyData(company)
+
+    Requires:
+        company 가 stockCode 보유 + OHLCV fetch 가능.
+
+    Raises:
+        없음 (실패는 None).
+    """
     strategy = calcStrategySnapshot(company)
     return {"data": strategy}
 
