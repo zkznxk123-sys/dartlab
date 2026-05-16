@@ -58,10 +58,75 @@ def buildEvidenceForensicsMemo(
     events: Iterable[Mapping[str, Any]] | None = None,
     scanRows: Iterable[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Build an L1/L1.5 evidence forensics memo.
+    """L1.5 Evidence Forensics — 매출-현금 brige + WC 변화 + 공시 변화 + 이상 패턴 종합.
 
-    Parameters are explicit so recipes can provide Company.show tables,
-    prebuilt scan rows, or section text without importing L2 engines here.
+    Capabilities:
+        분식 회계 신호 자동 탐지 — (1) 매출 → 현금 bridge (OCF/NI 격차),
+        (2) WC 변화 (재고/매출채권 비정상), (3) 공시 변화 (지배구조/주석),
+        (4) event (자기주식취득/특수 거래), (5) scan 횡단면 이상치. 5 source
+        합성하여 risk score + 후보 종목 라벨.
+
+    Args:
+        target: 종목코드.
+        market: ``"KR"``/``"US"``.
+        companyName: 한국어 회사명.
+        statements: BS/IS/CF raw 테이블.
+        sectionTexts: 공시 sections 텍스트 dict.
+        events: 이벤트 list (자기주식 등).
+        scanRows: scan 횡단면 raw rows.
+
+    Returns:
+        dict:
+            - ``riskScore`` (float): 0~100 위험 점수
+            - ``cashBridge`` (list): 매출-OCF bridge 분기별
+            - ``wcRows`` (list): WC 변화 분기별
+            - ``noteRows`` (list): 공시 변화 라인
+            - ``eventRows`` (list): 이벤트 노트
+            - ``anomalyRows`` (list): scan 이상치
+            - ``falsifierRows`` (list): 신뢰도 falsifier
+            - ``candidateRows`` (list): 후보 엔진 분석
+            - ``trace`` (list): 가정 추적
+
+    Raises:
+        없음 — 데이터 누락은 trace 에 기록.
+
+    Example:
+        >>> memo = buildEvidenceForensicsMemo(target="005930", statements=...)
+        >>> memo["riskScore"], len(memo["candidateRows"])
+        (35, 4)
+
+    Guide:
+        Sloan (1996) accrual model + Beneish M-Score + DSO/DIO 비정상 + 공시
+        패턴. riskScore > 60 = high risk, 30~60 = moderate, < 30 = low.
+        분식 의심 단정 금지 — academic 신호 합성.
+
+    SeeAlso:
+        - ``buildDamodaranMemo``: valuation memo (별도 함수)
+        - ``calcEarningsMomentum``: Sloan accrual 분해 (L2 단독)
+        - ``dartlab.scan.forensics``: scan 본체
+
+    Requires:
+        statements (BS/IS/CF) + 일부 옵션 입력.
+
+    AIContext:
+        analyzed memo 사용자에게 노출 시 "분식 의심" 단어 회피 — "이상 신호
+        탐지" 표현 권장. riskScore 60+ 시 추가 deep dive 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - riskScore 만 인용 — candidateRows + falsifierRows 함께 노출.
+            - sectionTexts 빈 dict 호출 → 공시 변화 source 누락. trace 확인 필수.
+        OutputSchema:
+            상기 9 키 dict.
+        Prerequisites:
+            statements 최소 1 분기 + 옵션 입력 1 종 이상.
+        Freshness:
+            statements = 최신 분기. scanRows/events = 운영자 큐레이션.
+        Dataflow:
+            statements → panel → analysis panel (가공) → 5 source
+            (cash bridge + WC + note + event + anomaly) → falsifier →
+            candidate → riskScore.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
 
     statement_map = dict(statements or {})
