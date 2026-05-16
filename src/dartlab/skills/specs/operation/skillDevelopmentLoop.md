@@ -42,6 +42,7 @@ toolRefs:
   - ReadSkill
   - GetSkillBody
   - ReadCapability
+  - CreateUserSkill
   - EngineCall
   - RunPython
   - SaveArtifact
@@ -58,7 +59,7 @@ sourceRefs:
 procedure:
   - gapSpot — 전 카테고리 dartlab.skills.search() 로 유사 skill 부재 확인 후 ReadCapability + ReadSkill 로 Company/gather/scan 노출 데이터 빈칸 식별. 후보 5~8 개 nominate (axis 명 / 사용 데이터 / 가설).
   - dataSanityCheck — protoSkill 작성 *전* 에 사용할 capability 를 1 종목 (대형 안정형) 으로 EngineCall 우선 호출해 실제 반환 형태와 시계열 길이를 본다. EngineCall surface 가 없을 때만 RunPython fallback 으로 확인한다. 가정 어긋나면 후보 폐기 또는 신호 정의 재설계.
-  - protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시. 엔진에 있는 기능은 toolRefs/본문에서 EngineCall 우선, RunPython 은 폴백 절차로 분리한다.
+  - protoSkill — 후보 1 개 선택. `CreateUserSkill` 로 .dartlab/skills/incubating/user.{slug}.md 초안을 작성한다. requiredEvidence[] 에 ground-truth 3 케이스 명시. 엔진에 있는 기능은 toolRefs/본문에서 EngineCall 우선, RunPython 은 fallback/폴백 절차로 분리한다.
   - selfRun — 같은 세션에서 ReadSkill 로 재로드 후 capabilityRefs 를 EngineCall 로 먼저 3 케이스 전부 실행한다. 보조 결합·L1.5 helper·미등록 실험 경로만 RunPython fallback 으로 실행한다. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).
   - redTeam — RunWorkbench 의 CRITIQUE 패스로 (a) 반대 가설 (b) 누락 데이터/edge case (c) 다른 axis 와 중복성 점검. 통과 못하면 protoSkill 재집필 1 회 회귀.
   - graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + 산출물 동기화 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.
@@ -100,6 +101,7 @@ failureModes:
   - 엔진 capability 가 있는데 recipe 본문이 RunPython 코드만 유도함
   - RunPython fallback 을 주 호출 경로처럼 써서 engine evidence refs 를 잃음
   - unverified viz skill 을 visualRefs 에 넣어 공식 시각화처럼 노출함
+  - CreateUserSkill 로 만든 local user skill 을 builtin/official skill 처럼 답변함
   - redTeam 회귀 횟수 누적 없이 무한 재집필
   - 동일 axis 가 이미 analysis/scan/quant 에 존재함을 점검 안 함
   - 한 질문에 맞춘 runner 를 skill 로 고정
@@ -108,6 +110,7 @@ failureModes:
 forbidden:
   - 운영자 ack 없이 graduate 실행
   - specs/ 디렉터리에 검증 미통과 skill 직접 쓰기
+  - local user skill 요청을 공식 specs/ 변경으로 처리
   - 엔진에 이미 있는 계산을 recipe RunPython 코드에 재구현
   - observed 가 아닌 viz skill 을 공식 visualRefs 로 연결
   - selfRun 결과를 외부 본문으로 인용 (sourceType=external 마커 누락)
@@ -165,7 +168,7 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 ### 3. protoSkill
 
 - SCHEMA.md `## 1. 5 카테고리` 표에 따라 카테고리 결정. 신규 axis 가 *signal/event* 영역이면 `engines.scan.{slug}` 또는 `engines.analysis.eventBased.{slug}`. 여러 엔진을 묶어 답변 품질을 높이는 절차면 `recipes.{domain}.{slug}`.
-- 초안 markdown 을 `.dartlab/skills/incubating/{category}.{slug}.md` 경로에 SaveArtifact 로 저장.
+- 초안 markdown 은 `CreateUserSkill` 로 `.dartlab/skills/incubating/user.{slug}.md` 에 저장한다. 이 로컬 user skill 은 공식 산출물 동기화 대상이 아니며 `trustTier: localUserDraft` 로 취급한다.
 - frontmatter 필수 5 개 (id·title·category·purpose·whenToUse) 채우고 `requiredEvidence[]` 에 ground-truth 3 케이스 명시 — 예: 005930 (성공), 047810 (위기), 138930 (저평가).
 - 본문 강제 섹션 (engine skill 인 경우): `## 공개 호출 방식`, `## 호출 동작`, `## 대표 반환 형태`.
 - recipe skill 은 tool card 가 아니다. 엔진 호출은 `linkedSkills`/`capabilityRefs`/`toolRefs` 에서 EngineCall 로 드러내고, RunPython 은 fallback code block 으로 분리한다.
@@ -173,7 +176,7 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 
 ### 4. selfRun
 
-- 새로 저장한 incubating skill 을 ReadSkill 로 다시 로드 (검증 — 같은 세션에서 검색 매칭되는지).
+- 새로 저장한 incubating user skill 을 `ReadSkill(includeUser=true)` 로 다시 로드 (검증 — 같은 세션에서 검색 매칭되는지).
 - capabilityRefs 의 각 API 를 EngineCall 로 먼저 호출, 보조 계산은 RunPython fallback 으로 실행한다.
 - EngineCall 결과의 `tableRef` / `valueRef` / `dateRef` / `sourceRef` 를 selfRun 표의 1차 근거로 둔다. fallback 코드도 `emit_result(...)` 로 같은 ref 형태를 남긴다.
 - 3 케이스를 *순차* 실행 (CLAUDE.md 메모리 안전: 동시 로드 ≤ 2).
@@ -196,9 +199,9 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
   3. incubating skill 본문 요약 (frontmatter + 본문 핵심 3 줄)
   4. 정식 등재 위치 제안 (`specs/{category}/{slug}.md`)
 - 운영자 ack 1 줄: `ok` 또는 `reject` 와 사유.
-- engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 *facade 호출 예시* 를 강제 — graduate 가 자동으로 *facade axis 등록 + 모듈 구현* 코드 작업 동반. 코드 작업이 무거우면 incubating 에 머무르며 별도 PR 로 분리.
+- engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 *facade 호출 예시* 를 강제 — graduate 가 자동으로 *facade axis 등록 + 모듈 구현* 코드 작업 동반. 코드 작업이 무거우면 local user skill 로 incubating 에 머무르며 별도 PR 로 분리.
 - `ok` + 코드 작업 동반 가능 시:
-  - `mv .dartlab/skills/incubating/{category}.{slug}.md src/dartlab/skills/specs/{category}/{slug}.md`
+  - `.dartlab/skills/incubating/user.{slug}.md` 내용을 검증 후 `src/dartlab/skills/specs/{category}/{slug}.md` 로 공식 스펙 작성
   - facade `_AXIS_REGISTRY` 등록 + 모듈 작성 (예: `src/dartlab/scan/{slug}.py`)
   - `uv run python -X utf8 scripts/build/validateSkills.py src/dartlab/skills/specs/{category}/{slug}.md`
   - 산출물 6 종 중 노출 표면에 영향을 받는 파일을 명시적으로 동기화

@@ -10,6 +10,7 @@ from typing import Any, Callable
 
 from .compareCompanies import compareCompanies
 from .compileVisual import compileVisual
+from .createUserSkill import createUserSkill
 from .engineCall import engineCall
 from .evidenceGate import evidenceGate
 from .groundingCheck import groundingCheck
@@ -201,6 +202,37 @@ _SPECS: dict[str, ToolSpec] = {
         },
         # 디스크 쓰기 — 사용자 홈 ~/.dartlab/artifacts/ 에 새 파일 생성. 같은 이름 두 번 호출 시
         # 덮어쓰기 가능 (idempotent 아님). destructive 는 아니지만 read-only 도 아님.
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
+    ),
+    "CreateUserSkill": ToolSpec(
+        "CreateUserSkill",
+        "사용자 요청으로 프로젝트 로컬 user skill 초안을 `.dartlab/skills` 아래에 작성. 공식 `src/dartlab/skills/specs` 는 절대 변경하지 않음. 엔진 capability 가 있으면 EngineCall 우선, RunPython 은 fallback 절차가 명시될 때만.",
+        {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "id": {
+                    "type": "string",
+                    "description": "선택. user.<slug> 로 정규화됨. 예: 'l15-event-watch' → user.l15-event-watch",
+                },
+                "purpose": {"type": "string"},
+                "whenToUse": {"type": "array", "items": {"type": "string"}},
+                "body": {"type": "string"},
+                "capabilityRefs": {"type": "array", "items": {"type": "string"}},
+                "toolRefs": {"type": "array", "items": {"type": "string"}},
+                "linkedSkills": {"type": "array", "items": {"type": "string"}},
+                "requiredEvidence": {"type": "array", "items": {"type": "string"}},
+                "expectedOutputs": {"type": "array", "items": {"type": "string"}},
+                "visualRefs": {"type": "array", "items": {"type": "string"}},
+                "visualGuidance": {"type": "array", "items": {"type": "string"}},
+                "incubating": {"type": "boolean"},
+                "overwrite": {"type": "boolean"},
+            },
+            "required": ["title", "purpose"],
+        },
         readOnlyHint=False,
         destructiveHint=False,
         idempotentHint=False,
@@ -505,6 +537,7 @@ _TOOLS: dict[str, ToolFn] = {
     "Read": readFile,
     "WebSearch": webSearch,
     "SaveArtifact": saveArtifact,
+    "CreateUserSkill": createUserSkill,
     "CompileVisual": compileVisual,
     "OutcomeLog": outcomeLog,
     "LookAheadGuard": lookAheadGuard,
@@ -530,6 +563,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "Read",
     "WebSearch",
     "SaveArtifact",
+    "CreateUserSkill",
     "CompileVisual",
 )
 
@@ -549,6 +583,7 @@ _LEGACY_NAME_MAP = {
     "read": "Read",
     "web_search": "WebSearch",
     "save_artifact": "SaveArtifact",
+    "create_user_skill": "CreateUserSkill",
     "compile_visual": "CompileVisual",
     "outcome_log": "OutcomeLog",
     "lookahead_guard": "LookAheadGuard",

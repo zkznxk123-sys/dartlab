@@ -47,6 +47,7 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "Read",
     "WebSearch",
     "SaveArtifact",
+    "CreateUserSkill",
     "CompileVisual",
     "RunWorkbench",
 )
