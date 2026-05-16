@@ -39,15 +39,60 @@ def classifyLiquidityRegime(
 ) -> LiquidityRegime:
     """유동성 환경 종합 판정.
 
+    Capabilities:
+        5 변수 (M2 YoY + 연준 B/S + HY/IG 스프레드 + 역레포) 임계 매칭 score
+        합산 → 3 regime (abundant/normal/tight) + signals 라벨 list.
+        Bridgewater 글로벌 유동성 모델 단순화.
+
     Args:
-        m2_yoy: M2 통화량 YoY 변화율 (%)
-        fed_bs_change_pct: 연준 총자산 변화율 (%, 3개월)
-        hy_spread: HY 스프레드 (bps)
-        ig_spread: IG 스프레드 (bps)
-        rrp_change_pct: 역레포 잔액 변화율 (%, 음수=유동성 방출)
+        m2Yoy: M2 통화량 YoY (%). 옵션.
+        fedBsChangePct: 연준 총자산 3M 변화율 (%). 옵션.
+        hySpread: HY OAS (bps). 옵션.
+        igSpread: IG OAS (bps). 옵션.
+        rrpChangePct: 역레포 잔액 변화율 (%, 음수=유동성 방출). 옵션.
 
     Returns:
-        LiquidityRegime
+        LiquidityRegime — regime(abundant/normal/tight)/regimeLabel/score(-3~+3)/
+        signals tuple.
+
+    Example:
+        >>> r = classifyLiquidityRegime(m2Yoy=8, hySpread=320)
+        >>> r.regime, r.score
+        ('abundant', 2.0)
+
+    Guide:
+        |score| ≥ 1.5 = 표준 regime 판정. signals 의 dominant 요인 인용으로
+        "M2 팽창 + HY 안정 = 풍부" 답변 완성.
+
+    When:
+        ``calcLiquidity`` 내부 + AI 유동성 답변 1 차.
+
+    How:
+        각 변수 임계 매칭 → score (±0.5~1.5) 누적 → ±1.5 임계로 regime.
+
+    Requires:
+        FRED M2SL/WALCL/BAMLH0A0HYM2/BAMLC0A0CM/RRPONTSYD 중 일부.
+
+    Raises:
+        없음 — 부분 입력도 동작.
+
+    See Also:
+        - calcLiquidity : 본 함수 + NFCI/FCI 종합
+        - capexPressure : HY 단일 변수
+
+    AIContext:
+        regimeLabel + signals 1~2 인용으로 한 문장 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 변수 (M2 만) 단정
+            - score 절대값 인용 + regime 미노출
+        OutputSchema:
+            LiquidityRegime ``(regime, regimeLabel, score, signals)``.
+        Prerequisites: FRED 5 시리즈 중 1+.
+        Freshness: 일간 (HY/IG/RRP) ~ 주간 (M2/WALCL).
+        Dataflow: 5 임계 → score 합산 → regime.
+        TargetMarkets: US (FRED). KR 미지원.
     """
     signals: list[str] = []
     score = 0.0

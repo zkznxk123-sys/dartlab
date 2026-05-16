@@ -60,19 +60,60 @@ def classifyInventoryPhase(
 ) -> InventoryPhase:
     """재고순환 4국면 판별.
 
+    Capabilities:
+        ISM 신규수주/재고 비율 + 전기 대비 MoM → 재고순환 4 국면
+        (active_restock/passive_restock/passive_destock/active_destock) +
+        equityImplication (bullish/neutral/bearish). Howard Marks / Damodaran
+        cycle positioning 표준 입력.
+
     Args:
-        newOrders: ISM 신규수주 지수 (또는 제조업 신규수주 증가율)
-        inventories: ISM 재고 지수 (또는 재고 증가율)
-        prevRatio: 이전 기간의 신규수주/재고 비율 (모멘텀 계산용)
+        newOrders: ISM 신규수주 지수 (또는 제조업 신규수주 증가율).
+        inventories: ISM 재고 지수 (≤ 0 면 판별 불가).
+        prevRatio: 이전 기간 신규수주/재고 비율 (모멘텀 계산용).
 
     Returns:
-        InventoryPhase: 국면 + 비율 + 주식 시사점
+        InventoryPhase — phase/phaseLabel/ratio/ratioMom/equityImplication/
+        equityLabel/description.
 
-    ISM 기반:
-    - 신규수주/재고 > 1 + 비율 상승 → 적극보충(회복초기, bullish)
-    - 신규수주/재고 > 1 + 비율 하락 → 수동보충(확장후기)
-    - 신규수주/재고 < 1 + 비율 하락 → 적극감축(수축)
-    - 신규수주/재고 < 1 + 비율 상승 → 수동감축(수축후기, 반등 임박)
+    Example:
+        >>> r = classifyInventoryPhase(52, 48, prevRatio=1.0)
+        >>> r.phase, r.equityImplication
+        ('active_restock', 'bullish')
+
+    Guide:
+        active_restock (수요 > 재고 + 비율 ↑) = 회복 초기 강세 신호.
+        passive_destock (수요 < 재고 + 비율 ↑) = 수축 후기 반등 임박.
+
+    When:
+        ``analyzeInventory`` 내부 + AI 재고순환 답변.
+
+    How:
+        ratio = newOrders / inventories → ratio_mom = ratio - prevRatio →
+        ratio ≥ 1 + rising/falling × 2 = 4 phase.
+
+    Requires:
+        ISM 신규수주 + 재고 (KR 제조업 신규수주/재고 fallback).
+
+    Raises:
+        없음 — inventories ≤ 0 면 unknown phase 반환.
+
+    See Also:
+        - ismBarometer : ISM PMI 수준
+        - analyzeInventory : 본 함수 호출 진입점
+
+    AIContext:
+        phaseLabel + equityLabel 인용으로 "적극보충 단계 — 주식 긍정" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - prevRatio 누락한 채 적극/수동 단정 (MoM 정보 손실)
+            - ratio 만 인용 + ratioMom 미노출
+        OutputSchema:
+            InventoryPhase (7 필드).
+        Prerequisites: ISM 또는 제조업 신규수주/재고.
+        Freshness: 월간 (ISM 첫 영업일).
+        Dataflow: orders/inv → ratio → MoM → 4 phase.
+        TargetMarkets: US (ISM), KR (BOK 제조업 fallback).
     """
     if inventories <= 0:
         return InventoryPhase(
@@ -140,15 +181,59 @@ def classifyInventoryPhase(
 def ismBarometer(ism: float, ismPrev: float | None = None) -> ISMSignal:
     """ISM PMI 기반 자산배분 바로미터.
 
+    Capabilities:
+        ISM 제조업 PMI 수준 → 4 zone (strong_expansion/expansion/contraction/
+        deep_contraction) + 자산배분 (overweight/neutral/underweight) +
+        rateImplication (ISM < 55 + 하락 → 인상 종결 신호). 투자전략 13 + 34.
+
     Args:
-        ism: ISM 제조업 PMI (0-100)
-        ismPrev: 이전 기간 ISM PMI (방향 판단용)
+        ism: ISM 제조업 PMI (0-100).
+        ismPrev: 이전 기간 ISM PMI (방향 판단용).
 
     Returns:
-        ISMSignal: 구간 + 자산배분 신호 + 금리 시사점
+        ISMSignal — level/zone/zoneLabel/equityStance/equityLabel/
+        rateImplication/rateLabel/description.
 
-    투자전략 13: ISM = 세계 자산배분 바로미터
-    투자전략 34: ISM < 55 하회 시 미국 금리인상 종결
+    Example:
+        >>> r = ismBarometer(48, ismPrev=52)
+        >>> r.zone, r.rateImplication
+        ('contraction', 'hike_end')
+
+    Guide:
+        ISM 55 = 자산배분 분기점. < 55 + 하락 추세 = Fed 인상 종결 신호 (전략 34).
+        < 45 = 심각 수축 → 채권/안전자산 강하게 선호.
+
+    When:
+        ``analyzeInventory`` 내부 + AI 글로벌 자산배분 답변.
+
+    How:
+        ism 4 구간 (55/50/45) × declining 매핑 → zone + equityStance +
+        rateImplication.
+
+    Requires:
+        ISM PMI (FRED NAPM 또는 ISMPMI).
+
+    Raises:
+        없음.
+
+    See Also:
+        - classifyInventoryPhase : 4 phase 단독
+        - ismAssetAllocation : risk_on/off 단순화
+
+    AIContext:
+        zoneLabel + equityLabel + rateLabel 3 필드 인용으로 "ISM 수축, 비중축소,
+        인상 종결" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ism 수준만 인용 + ismPrev 누락 (방향 무시)
+            - rate implication 자동 단정 (ISM<55 + 하락 조건)
+        OutputSchema:
+            ISMSignal (8 필드).
+        Prerequisites: ISM PMI level (+ 이전).
+        Freshness: 월간.
+        Dataflow: ism + prev → zone + 자산배분 + rate.
+        TargetMarkets: US (ISM). KR BOK PMI 가능.
     """
     declining = ismPrev is not None and ism < ismPrev
 
