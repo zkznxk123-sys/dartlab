@@ -49,10 +49,17 @@ def calcLiquidity(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         - 펀드 운용 시 일일 거래량의 5~10% 이내 매매 권장 → amihud 가
           impact cost 추정 입력.
 
-    SeeAlso:
+    See Also:
         - ``calcVolume``: 거래량 흐름
         - ``calcVolatility``: vol (저유동주는 vol 큼)
         - ``screen``: 유동성 필터 (펀드 스크리닝)
+
+    When:
+        Quant risk 측정 + 펀드 운용 시 impact cost 추정 진입점.
+
+    How:
+        OHLCV → daily return + dollar volume → Amihud (mean(|r|/vol)) + Roll
+        cov(Δp, Δp_{t-1}) → effective spread + turnover → grade.
 
     Requires:
         OHLCV (close + volume) ≥ 20 일.

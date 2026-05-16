@@ -103,10 +103,17 @@ def calcQuality(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         절대값보다 universe 분위 (백분위) 가 더 유용. universe 분리 (KR/US)
         엄수 — 시장 간 z 직접 비교 금지.
 
-    SeeAlso:
+    See Also:
         - ``calcValue``: book-based 가치
         - ``calcMomentum``: 12-1 모멘텀
         - ``factor/_rolling`` (Phase 1.2): 시계열 z 향후
+
+    When:
+        Quant 팩터 평가 + 종목 스크리닝 quality 축 진입점.
+
+    How:
+        universe finance parquet 로드 → Profitability (ROA/GP/AssetTurnover) +
+        Safety (low vol + low leverage) z-score → 합산 → grade A~F 매핑.
 
     Requires:
         scan finance parquet (KR/US) + ≥ 1000 종목 universe.

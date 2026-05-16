@@ -105,6 +105,12 @@ class Rule:
         -------
         Rule
             meta 가 병합된 새 Rule.
+
+        Requires:
+            없음 — 빈 dict 와도 동작.
+
+        Raises:
+            없음 — 단순 dict merge.
         """
         merged = {**self.meta, **kw}
         return Rule(

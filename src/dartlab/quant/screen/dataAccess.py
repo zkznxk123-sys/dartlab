@@ -44,7 +44,14 @@ def fetchOhlcv(stockCode: str, **kwargs: Any) -> "pl.DataFrame | None":
         low : float — 저가 (원)
         close : float — 종가 (원)
         volume : int — 거래량 (주)
-        수집 실패 시 None."""
+        수집 실패 시 None.
+
+    Requires:
+        L1 gather provider (KR KRX 또는 US Yahoo Finance) 활성.
+
+    Raises:
+        없음 — 모든 실패는 None 반환 + warning 로그.
+    """
     try:
         from dartlab.gather.entry import GatherEntry
 
@@ -491,7 +498,14 @@ def extractAccounts(df, keys: list[str]) -> dict[str, float | None]:
 
     Examples
     --------
-    >>> extractAccounts(df, ["sales", "net_income"])"""
+    >>> extractAccounts(df, ["sales", "net_income"])
+
+    Requires:
+        df 의 sj_div / account_nm / thstrm_amount 컬럼 존재.
+
+    Raises:
+        없음 — 매칭 실패는 None 값.
+    """
     return {k: extractAccount(df, k) for k in keys}
 
 

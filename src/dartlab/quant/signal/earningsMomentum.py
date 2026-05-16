@@ -65,10 +65,17 @@ def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         - PEAD 효과: 발표 후 60~90 일 sue 방향으로 drift (학술 검증).
         - earningsTrend "consistent_growth" + sue > 0 = 강한 기본 momentum.
 
-    SeeAlso:
+    See Also:
         - ``calcEventSignal``: 공시 이벤트 (실적 외)
         - ``calcMomentum``: 가격 모멘텀
         - ``calcCAR``: event-study 누적 초과수익
+
+    When:
+        Quant 실적 모멘텀 축 진입점 + AI 어닝 서프라이즈 답변.
+
+    How:
+        scan parquet → 영업이익 시계열 → SUE 산식 → PEAD 강도 라벨 + 추세
+        라벨 합성.
 
     Requires:
         scan finance parquet (연결 영업이익) + 충분한 시계열 (5+ 년 권장).

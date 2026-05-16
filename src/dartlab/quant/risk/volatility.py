@@ -86,10 +86,17 @@ def calcVolatility(
         - forecast 는 short horizon (≤ 5d) 신뢰, 장기는 mean reversion 가정
           GARCH 의 한계.
 
-    SeeAlso:
+    See Also:
         - ``calcTailRisk``: VaR/CVaR
         - ``calcMomentum``: 가격 모멘텀
         - ``synth.indicators.volatility``: ATR/BB width
+
+    When:
+        Quant risk + 변동성 regime 분류 + GARCH 예측 답변 진입점.
+
+    How:
+        OHLCV → log returns → 다중 윈도우 실현 vol (5/20/60/120/252d) → HAR-RV
+        회귀 + GARCH(1,1) MLE → regime 분류 → (옵션) h-step forecast.
 
     Requires:
         OHLCV 일별 시계열 ≥ 60 일.

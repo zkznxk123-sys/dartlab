@@ -47,10 +47,17 @@ def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         - OBV down + 가격 up = 약세 다이버전스 (조정 가능성).
         - volumeSurge > 3 = 이상 거래 (이벤트/공시 가능성, calcEventSignal 확인).
 
-    SeeAlso:
+    See Also:
         - ``calcFlow``: KR 수급 (외국인/기관)
         - ``calcMomentum``: 가격 모멘텀
         - ``synth.indicators.volume``: OBV/PVT 본체
+
+    When:
+        Quant volume 축 진입점 + AI 거래량 다이버전스 답변.
+
+    How:
+        OHLCV → OBV/AD/PVT 누적 → 20d slope → 가격↔거래량 비교 → divergence
+        라벨 + surge + regime.
 
     Requires:
         OHLCV (close + volume, optional high/low) ≥ 20 일.

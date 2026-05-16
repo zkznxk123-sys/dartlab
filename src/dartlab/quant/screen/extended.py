@@ -91,10 +91,17 @@ def calcTechnicalVerdict(company) -> dict | None:
         Company-bound 호출이 표준 (``c.quant("판단")``). 벤치마크 자동 선택:
         KR 종목 → KOSPI, US 종목 → S&P 500. ``benchmark`` 명시 시 override.
 
-    SeeAlso:
+    See Also:
         - ``technicalVerdict``: 본 함수의 raw OHLCV 버전 (analyzer.py)
         - ``calcMarketBeta``: β 단독 계산
         - ``calcTechnicalSignals``: 최근 신호만
+
+    When:
+        ``Company.quant("판단")`` 진입점. AI 종합 기술적 판단 답변 1 차.
+
+    How:
+        company → _fetchOhlcv → technicalVerdict (RSI/ADX/MACD/BB + β/α) → dict
+        합성 → memoized.
 
     Requires:
         gather("price") 자동 수집 가능 (네트워크). 30 봉 이상.

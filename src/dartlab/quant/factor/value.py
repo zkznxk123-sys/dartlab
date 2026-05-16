@@ -178,10 +178,17 @@ def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         동일 universe (KR↔US 혼용 금지). universe ≥ 1000 종목 확보 시점만
         z-score 신뢰.
 
-    SeeAlso:
+    See Also:
         - ``calcQuality``: ROE/ROA/마진 횡단면 z
         - ``calcMomentum``: 가격 모멘텀 (12-1)
         - ``analysis.valuation.dFV``: DCF 기반 정밀 valuation
+
+    When:
+        시가총액 미보유 환경 가치 신호. PBR/PER 산출 전 1 차 폴백.
+
+    How:
+        finance.parquet 로드 → universe ≥ 1000 종목 연도 → earningsToBook +
+        salesToBook + bookToAsset 3 컴포넌트 횡단면 z → 합산 → grade.
 
     Requires:
         scan finance parquet (KR/US 분리) + 연결 4 분기 데이터.

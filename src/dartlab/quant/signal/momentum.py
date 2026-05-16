@@ -70,10 +70,17 @@ def calcMomentum(stockCode: str, *, market: str = "auto", series: bool = False, 
         - 음의 모멘텀 (< -10%) + crashRisk 큼 = 회복 전 추가 하락 위험.
         - 22 일 미만 = error, 252 일 미만 = 6-1 m 폴백, ≥ 252 일 = 12-1 m.
 
-    SeeAlso:
+    See Also:
         - ``calcVolume``: 거래량 흐름
         - ``calcVolatility``: vol regime (모멘텀 회사는 vol 도 큼)
         - ``synth.indicators.momentum``: RSI/MACD
+
+    When:
+        Quant momentum 축 진입점 + AI 모멘텀 / 신고가 답변.
+
+    How:
+        OHLCV → close → 12-1 m (skip 1m) + 6-1 m + TS + 52w high + skewness
+        합성.
 
     Requires:
         OHLCV 일별 ≥ 22 일 (12-1 m 완전 신호는 ≥ 252 일).

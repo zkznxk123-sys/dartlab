@@ -49,10 +49,17 @@ def calcFlow(stockCode: str, *, market: str = "auto", series: bool = False, **kw
         - 누적 20d 절대값 + 시가총액 대비 비율 함께 인용 (절대값만 보면
           대형주 편향).
 
-    SeeAlso:
+    See Also:
         - ``calcVolume``: 거래량 (수급 = 거래 주체별 분해)
         - ``calcMomentum``: 가격 모멘텀
         - ``calcEventSignal``: 공시 이벤트와 결합
+
+    When:
+        KR 종목 quant 수급 축 진입점 + AI 외국인/기관 답변.
+
+    How:
+        gather("flow") 일별 순매수 → 5d/20d 누적 → flowMomentum (5d vs 20d) →
+        streak 연산.
 
     Requires:
         gather("flow") 데이터 — KR 만 가능.

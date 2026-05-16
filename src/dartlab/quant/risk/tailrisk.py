@@ -73,10 +73,17 @@ def calcTailrisk(
         - MDD 시점 (maxDrawdownDate) 함께 인용 시 macro 이벤트 (코로나/금리)
           연결 가능.
 
-    SeeAlso:
+    See Also:
         - ``calcVolatility``: GARCH/HAR-RV
         - ``calcMomentum``: 가격 모멘텀
         - ``credit.engine``: 신용 7 축 (본 vol 입력)
+
+    When:
+        Quant risk 축 진입점 + AI "최대 낙폭" · "VaR" 답변.
+
+    How:
+        OHLCV → log returns → percentile (5/1%) → VaR/CVaR → cumulative max →
+        drawdown → 하방편차 → Sortino/Sharpe.
 
     Requires:
         OHLCV 일별 ≥ 30 일.

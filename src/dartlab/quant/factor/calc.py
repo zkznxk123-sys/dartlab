@@ -225,6 +225,12 @@ def hedgeRatio(targetLoading: float, hedgeLoading: float) -> float:
 
     예: 포트의 SMB loading +0.8을 헤지하려면 SMB-vehicle의 SMB loading이
     +1.0인 경우 hedgeRatio = -0.8 (포트 1당 hedge -0.8).
+
+    Requires:
+        target/hedge 팩터 loading 값 (calcExposure 출력).
+
+    Raises:
+        없음 — hedgeLoading 0 면 0.0 반환.
     """
     if hedgeLoading == 0:
         return 0.0

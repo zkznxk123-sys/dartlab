@@ -71,10 +71,17 @@ def calcEventSignal(stockCode: str, *, market: str = "auto", series: bool = Fals
         - high_impact_dates 를 OHLCV 와 매핑하면 event-study CAR 산출 가능
           (calcCAR).
 
-    SeeAlso:
+    See Also:
         - ``calcEarnings``: SUE/PEAD (실적 한정)
         - ``calcCAR``: event-study cumulative abnormal return
         - ``calcMomentum``: 가격 모멘텀 (이벤트 후 drift)
+
+    When:
+        Quant event 축 진입점 + AI 공시 이벤트 영향 답변.
+
+    How:
+        allFilings → report_nm classify (_EVENT_RULES) → type + impact → 합산 →
+        verdict 라벨 + high-impact dates 추출.
 
     Requires:
         allFilings parquet (KR/US).
