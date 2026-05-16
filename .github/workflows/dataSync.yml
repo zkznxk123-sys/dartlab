@@ -105,12 +105,16 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Sync recent (finance + report)
-        run: uv run python -X utf8 .github/scripts/syncRecent.py
+        # -u + PYTHONUNBUFFERED=1: stdout 라인 버퍼링 차단 — 90 분 timeout cancel 시
+        # 어디서 멈췄는지 실시간 가시화. 이전 cancel run 84 분 동안 stdout 0 줄 =
+        # buffered 패턴 (정상 종료 시에만 flush). 진척 진단 불가 사고 차단.
+        run: uv run python -X utf8 -u .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: finance,report
           SYNC_STATE_SCOPE: fr  # 병렬 Job pending.txt 경쟁 회피
+          PYTHONUNBUFFERED: "1"
 
       - name: Upload to HuggingFace (finance)
         if: hashFiles('dist/changed_finance.txt') != ''
@@ -200,12 +204,13 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Sync recent (docs)
-        run: uv run python -X utf8 .github/scripts/syncRecent.py
+        run: uv run python -X utf8 -u .github/scripts/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: docs
           SYNC_STATE_SCOPE: docs
+          PYTHONUNBUFFERED: "1"
 
       - name: Upload to HuggingFace (docs)
         if: hashFiles('dist/changed_docs.txt') != ''
