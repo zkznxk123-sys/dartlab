@@ -76,7 +76,60 @@ def _fmtTril(v) -> str:
 
 
 def narrateProfile(profile: dict | None, segments: dict | None, rank: dict | None) -> str:
-    """기업 개요 서사 — 이 회사가 뭘 하는 회사인가."""
+    """기업 개요 서사 — 이 회사가 뭘 하는 회사인가.
+
+    Capabilities:
+        섹터 + 주요사업 + 부문 구성 (상위 3, share > 5%) + 업종 내 매출
+        순위/사이즈 클래스 (대형/중형/소형) 를 " | " 구분 1 줄로 합성.
+        credit 5-7 신용평가 섹션 도입부 표준 서사.
+
+    Args:
+        profile: 기업 프로필 dict (sector, products).
+        segments: 부문 dict (segments list, totalRevenue).
+        rank: 순위 dict (revenueRankInSector, revenueSectorTotal, sizeClass).
+
+    Returns:
+        str: " | " 구분 한 줄 서사. 데이터 부재 시 빈 문자열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> narrateProfile(profile={"sector": "반도체"}, segments={...},
+        ...                rank={"sizeClass": "large", ...})
+        '반도체 | 부문 구성: 메모리 65%(영업이익률 25%), 시스템LSI 30% | 업종 내 매출 1/15위 (대형)'
+
+    Guide:
+        - share > 5% 부문만 표기 (sub-segment noise 제거).
+        - margin 결측 시 부문 share 만 표기.
+        - rank 없으면 sector + segments 만.
+
+    SeeAlso:
+        - ``narrateTrend``: 전기 대비 추세
+        - ``buildNarratives``: 7 축 서사 합성 (본 함수 포함)
+
+    Requires:
+        ``profile`` (sector/products), ``segments`` (totalRevenue),
+        ``rank`` (size) 중 하나 이상.
+
+    AIContext:
+        본 함수 결과는 그대로 신용평가 도입부 1 줄로 사용. 변형 금지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - margin/share 값 변형 인용 — 원문 그대로.
+            - 부문 4 개 이상 나열 — 본 함수가 상위 3 만 반환.
+        OutputSchema:
+            ``str``.
+        Prerequisites:
+            profile + segments + rank 중 하나.
+        Freshness:
+            연간 (사업보고서 + 매출 ranking).
+        Dataflow:
+            profile sector → segments share 계산 → rank size class →
+            " | " join.
+        TargetMarkets: KR (DART), US (EDGAR Segment Reporting).
+    """
     parts = []
 
     # 업종 + 주요제품
