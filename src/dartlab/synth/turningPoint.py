@@ -19,24 +19,69 @@ def detectTurningPoints(
     method: str = "rolling_z",
     windowSize: int = 3,
 ) -> list[dict]:
-    """시계열 turning point 감지.
+    """시계열 turning point 감지 — rolling z-score 또는 CUSUM 알고리즘.
 
-    Parameters
-    ----------
-    series : 시계열 값 (최신 → 과거 권장. periods 와 같은 인덱스)
-    periods : 기간 라벨
-    minDeltaPct : 최소 변화율 (% — 이 미만은 노이즈)
-    method : "rolling_z" (이동평균 z-score) or "cusum"
-    windowSize : 이동 평균 창 (기본 3)
+    Capabilities:
+        시계열의 추세 전환점 (turning point) 자동 감지. rolling z-score
+        방법 (이동평균 + 표준편차 기반) 또는 CUSUM 방법 (누적합 알고리즘).
+        매출/이익/마진의 구조변화 시점 식별 + 변화 크기/방향 라벨.
 
-    Returns
-    -------
-    list[dict]
-        period : str
-        before, after : float
-        deltaPct : float (% — 양수면 상승)
-        direction : "up" | "down"
-        magnitude : "minor" | "moderate" | "major"
+    Args:
+        series: 시계열 값 (최신 → 과거 순서). None 자동 제외.
+        periods: 기간 라벨 (series 와 같은 길이).
+        minDeltaPct: 최소 변화율 (%). 이 미만은 노이즈로 무시. 기본 20%.
+        method: ``"rolling_z"`` (이동평균 z-score) 또는 ``"cusum"``.
+        windowSize: rolling 윈도우 크기. 기본 3 (분기).
+
+    Returns:
+        list[dict]: turning point 별:
+            - ``period`` (str): 전환 시점
+            - ``before``/``after`` (float): 전후 값
+            - ``deltaPct`` (float): 변화율 (%, 양수=상승)
+            - ``direction`` (str): ``"up"``/``"down"``
+            - ``magnitude`` (str): ``"large"``/``"moderate"``/``"small"``
+
+    Raises:
+        없음.
+
+    Example:
+        >>> tp = detectTurningPoints([100, 105, 110, 115, 80, 75, 70],
+        ...                          ["2024Q4","2024Q3",...])
+        >>> [(t["period"], t["direction"]) for t in tp]
+        [('2024Q1', 'down')]  # 115→80 (-30%) 가 turning point
+
+    Guide:
+        rolling_z: |last - rolling_mean| / rolling_std > 2 = turning point.
+        CUSUM: 누적 변화 + threshold 임계. minDeltaPct 20%+ 권장 (재무 데이터
+        분기 노이즈 회피). magnitude: large > 50%, moderate 30~50%, small.
+
+    SeeAlso:
+        - ``calcStructuralBreak``: Chow Test 기반 (다른 알고리즘)
+        - ``injectTurningPoints``: tableau-friendly dict 변환
+
+    Requires:
+        series 길이 ≥ windowSize × 2 + 1.
+
+    AIContext:
+        turning point 결과는 모델/예측의 시작점 — break 이후 데이터만 사용
+        권장 (calcStructuralBreak 와 연계). 단년 감지는 신뢰도 낮음.
+
+    LLM Specifications:
+        AntiPatterns:
+            - minDeltaPct 5% 입력 → 노이즈 다수 검출. 재무 분기 데이터는
+              20%+ 권장.
+            - series 길이 부족 (windowSize 미달) → 빈 list 반환. 호출자
+              분기 필요.
+        OutputSchema:
+            list[dict] — 0 개 이상 turning point.
+        Prerequisites:
+            series + periods 동일 길이, 최소 7~8 기간 권장.
+        Freshness:
+            시계열 freshness 에 따름.
+        Dataflow:
+            method 분기 → _detectByRollingZ 또는 _detectByCusum → minDeltaPct
+            필터 → _magnitude 라벨 → dict list.
+        TargetMarkets: 시장 무관 (시계열 분석).
     """
     if not series or not periods or len(series) != len(periods):
         return []
