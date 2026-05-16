@@ -147,6 +147,11 @@ _GRADE_ALIASES = {"등급", "grade", "종합", "종합등급", "credit", "신용
 def guide() -> "pl.DataFrame":
     """credit 엔진 7축 + 종합 가이드 DataFrame.
 
+    Capabilities:
+        dCR 신용분석 엔진의 7 축 (채무상환능력/자본구조/유동성/현금흐름/사업안정성/재무신뢰성/
+        공시리스크) + 종합 등급 카탈로그를 polars DataFrame 으로 반환. 동시에 빠른 시작 안내
+        로그 출력. 신규 사용자 self-discovery 진입점.
+
     공시 재무제표만으로 독립 신용등급(dCR)을 산출하는 엔진의 축 카탈로그.
     외부 API 키 불필요 — DART/EDGAR 재무 데이터 기반.
 
@@ -170,6 +175,28 @@ def guide() -> "pl.DataFrame":
     >>> c.credit()                              # Company-bound 가이드
     >>> c.credit("등급")                        # 종합 등급
     >>> c.credit("채무상환", detail=True)        # 채무상환 축 상세
+
+    Raises:
+        없음.
+
+    When:
+        ``dartlab.credit()`` / ``Company.credit()`` 무인자 호출 시 self-discovery 진입점. 신규
+        사용자가 축 목록 확인할 때.
+
+    How:
+        ``_AXIS_REGISTRY`` 내부 카탈로그 → ``synth.axisGuide.buildAxisGuideDataFrame`` → 빠른
+        시작 안내 로그.
+
+    Requires:
+        - 외부 데이터 불필요 (메모리 카탈로그만).
+
+    See Also:
+        - ``dartlab.credit.credit`` : 본 가이드 + 등급 산출 진입점
+        - ``dartlab.credit.creditCompany`` : Company-bound 진입점
+
+    AIContext:
+        AI 가 신규 종목 분석 전 축 목록 확인할 때 직접 호출. 답변 시 "credit 엔진 7 축" 정식
+        명칭 표기 권장.
     """
     from dartlab.synth.axisGuide import buildAxisGuideDataFrame
 
@@ -247,6 +274,15 @@ def credit(
 ) -> dict | "pl.DataFrame" | None:
     """신용등급 산출 단일 진입점.
 
+    Capabilities:
+        DART/EDGAR 공시 재무제표만으로 dCR 독립 신용등급을 산출하는 단일 진입점. 무인자 호출 시
+        가이드, stockCode 만 호출 시 종합 등급, axis 지정 시 해당 축만 반환. 79 개사 검증 대기업
+        87% / 중대형 82% 정확도. 외부 API 키 불필요.
+
+    AIContext:
+        AI 가 회사 부도 위험 / 재무 건전성 평가 진입점. axes 7 개 score 와 grade 종합 인용.
+        시점 단정보다 "정기보고서 마감 후 30~45 일 시차" 단서 권장.
+
     Parameters
     ----------
     stockCode : str | None
@@ -296,6 +332,10 @@ def credit(
     -----
     3-Track 모델(일반/금융/지주) + Notch Adjustment + CHS 시장 보정.
     79개사 검증: 대기업 87%, 중대형 82%. DART 공시 기반, API 키 불필요.
+
+    Requires:
+        - L1 raw: DART 정기보고서 (자동 다운로드) 또는 EDGAR 10-K/10-Q
+        - L1.5 frame: 재무제표 가공 frame
 
     Guide
     -----
@@ -364,6 +404,11 @@ def creditCompany(
 ) -> dict | "pl.DataFrame" | None:
     """Company 객체로 신용등급 산출 (Company-bound용).
 
+    Capabilities:
+        ``credit()`` 의 Company-bound 변형. DartCompany / EdgarCompany 인스턴스를 받아 동일
+        7 축 + 종합 등급 산출. ``overrides`` 지원 — AI / 사용자가 시나리오 가정 (예: 부채비율
+        150% 가정) 을 주입해 stress / what-if 분석 가능.
+
     Parameters
     ----------
     company : Company
@@ -392,6 +437,33 @@ def creditCompany(
     >>> c = dartlab.Company("005930")
     >>> c.credit("등급")                      # 종합
     >>> c.credit("채무상환", detail=True)      # 채무상환 축 상세
+
+    Raises:
+        ValueError: ``axis`` 가 등록되지 않은 이름인 경우 ``_filterAxis`` 에서.
+
+    Guide:
+        ``Company.credit`` 의 위임 대상. overrides 사용 시 ``assumptions`` 키가 결과 dict 에
+        추가 — UI / 답변에 "가정 명시" 단서 인용 권장.
+
+    When:
+        Company 객체에 binding 된 신용 분석. AI/사용자가 stress 시나리오 (부채비율 가정 등) 를
+        주입할 때.
+
+    How:
+        ``credit.engine.evaluateCompany`` 위임 → ``overrides`` 전달 → 축 필터 (optional) →
+        ``synth.overrides.buildAssumptions`` 로 가정 투명화.
+
+    Requires:
+        - Company 객체 (DartCompany / EdgarCompany)
+        - L1 raw: 회사별 재무 데이터 접근 가능
+
+    See Also:
+        - ``dartlab.credit.credit`` : stockCode 버전
+        - ``dartlab.synth.overrides.buildAssumptions`` : 가정 투명화
+
+    AIContext:
+        AI 가 시나리오 / what-if 분석 ("부채비율이 X% 였다면") 답변 시 ``overrides`` 키 직접 사용.
+        답변에 ``assumptions`` 필드 인용 의무.
     """
     if axis is None:
         return guide()
@@ -443,5 +515,11 @@ def axes() -> dict[str, str]:
     dict[str, str]
         키 : str — 축 이름 (예: "repayment", "leverage").
         값 : str — 한글 레이블 (예: "채무상환능력", "자본구조").
+
+    Raises:
+        없음.
+
+    Requires:
+        - 외부 데이터 불필요 (정적 dict 복사 반환).
     """
     return dict(_CREDIT_AXES)

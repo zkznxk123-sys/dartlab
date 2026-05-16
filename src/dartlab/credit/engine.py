@@ -142,7 +142,48 @@ def _isCaptiveByOFS(company, consolidatedBorrowing: float) -> bool:
 
 
 def evaluate(stockCode: str, *, detail: bool = False, basePeriod: str | None = None) -> dict | None:
-    """신용등급 산출 메인 진입점."""
+    """신용등급 산출 메인 진입점.
+
+    Capabilities:
+        stockCode 단일 입력으로 Company 객체 생성 후 ``evaluateCompany`` 위임. ``credit()``
+        진입점이 stockCode 만으로 호출될 때 본 함수를 거친다.
+
+    Args:
+        stockCode: 6 자리 KR 종목코드 또는 EDGAR ticker.
+        detail: ``True`` 면 7 축 상세 + 시계열 + narrative.
+        basePeriod: 분석 기준 기간 (예 ``"2024"``). None 이면 최신.
+
+    Returns:
+        dict | None: ``evaluateCompany`` 결과 그대로.
+
+    Raises:
+        없음 — Company 인스턴스화 실패 시 None.
+
+    Example:
+        >>> from dartlab.credit.engine import evaluate
+        >>> result = evaluate("005930")
+        >>> result["grade"]
+        'dCR-AA+'
+
+    Guide:
+        본 함수는 stockCode → Company 생성만 담당. 모든 로직은 ``evaluateCompany``.
+
+    When:
+        ``credit(stockCode)`` 가 본 함수 위임.
+
+    How:
+        ``dartlab.company.Company(stockCode)`` → ``evaluateCompany`` 위임.
+
+    Requires:
+        - L1 raw: DART/EDGAR 정기보고서 접근 가능
+
+    See Also:
+        - ``dartlab.credit.engine.evaluateCompany`` : 본 함수 위임 대상
+        - ``dartlab.credit.credit`` : 사용자 진입점
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (``credit(stockCode)`` 권장).
+    """
     from dartlab.company import Company
 
     company = Company(stockCode)
@@ -201,7 +242,15 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
           liquidity/businessStability) — 7 축 framework 미적용
         - Track C (지주): 7 축 + 가중치 차별화 + 별도재무 블렌딩
 
-    SeeAlso:
+    When:
+        Company 객체 단위 신용 분석이 필요할 때. ``Company.credit`` / ``creditCompany`` 본 함수
+        위임.
+
+    How:
+        ``_getSectorInfo`` / ``_isFinancial`` 분기 → ``calcAllMetrics`` 축별 metric → 가중평균
+        → CHS PD 보정 → Notch 7 룰 → 20 단계 grade 변환 → dict.
+
+    See Also:
         - ``credit`` (top-level): stockCode 진입점
         - ``calcAllMetrics``: 축별 metric 산출 (본 함수 호출)
         - ``computeChsProbability``: CHS PD 보정
