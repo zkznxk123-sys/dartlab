@@ -177,6 +177,10 @@ python_classes = ["Test*"]
 python_functions = ["test_*", "test*"]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
+# Hypothesis ghostwriter draft 폴더는 자동 수집 제외 — 명시 호출 시에만 실행.
+# (`tests/_drafts/` 안 fuzz draft 는 사용자 review 후 정식 위치로 이동.)
+# pytest default (`*.egg .* CVS _darcs {arch} dist node_modules venv`) + `_drafts` 추가.
+norecursedirs = ["*.egg", ".*", "CVS", "_darcs", "{arch}", "dist", "node_modules", "venv", "_drafts"]
 markers = [
     "requires_data: 로컬 parquet 데이터 필요 (CI에서 skip)",
     "unit: 순수 로직/mock만 — 데이터 로드 없음, 병렬 안전",
@@ -189,6 +193,8 @@ markers = [
     # flaky 는 pytest-rerunfailures 가 설치된 환경에서 작동. 미설치 환경에선 무시.
     # 미등록 시 PytestUnknownMarkWarning — 본 항목으로 warning 차단.
     "flaky: transient 실패 자동 재시도 (pytest-rerunfailures)",
+    # ghostwriter 자동 생성 draft (사용자 review 전) — `tests/_drafts/` 안 한정.
+    "draft: Hypothesis ghostwriter 자동 draft — 정식 위치 이동 전 시범 검증",
 ]
 
 [tool.coverage.run]
