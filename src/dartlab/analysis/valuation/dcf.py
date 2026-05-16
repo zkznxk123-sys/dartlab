@@ -440,7 +440,84 @@ def dcfValuation(
     currency: str = "KRW",
     proformaFCF: Optional[list[float]] = None,
 ) -> DCFResult:
-    """2-Stage DCF 밸류에이션 orchestrator (Q3.1e split)."""
+    """2-Stage DCF 밸류에이션 — FCF 프로젝션 + Terminal Value → 주당 가치.
+
+    Capabilities:
+        FCF 시계열에서 base FCF 추정 → 5년 초기 성장 (매출 3Y CAGR + 섹터
+        평균) → Gordon growth terminal value → WACC 할인 → 기업가치 + 주당
+        가치 산출. Damodaran multiStage DCF 의 직접 단순화 버전.
+
+    Args:
+        series: ``finance.timeseries`` 시계열 dict (BS/IS/CF).
+        shares: 발행주식수. 주당 가치 산출용.
+        sectorParams: 업종별 할인율/성장률.
+        currentPrice: 현재 주가 (원). marginOfSafety 계산용.
+        discountRate: WACC override (sectorParams.discountRate 우선).
+        terminalGrowth: 영구성장률 override. None 시 ``min(sector growth, 3%)``.
+        projectionYears: 초기 성장기 (년). 기본 5.
+        currency: ``"KRW"`` 또는 ``"USD"``. 출력 단위.
+        proformaFCF: AI 가 산출한 향후 FCF list override. 주어지면 ``_projectFcf``
+            가 이를 base 로 사용.
+
+    Returns:
+        DCFResult dataclass:
+            - ``fcfHistorical``/``fcfProjections`` (list[float])
+            - ``terminalValue``/``enterpriseValue``/``equityValue`` (float)
+            - ``perShareValue`` (float|None): shares 가 있어야 산출
+            - ``discountRate``/``growthRateInitial``/``terminalGrowth`` (float)
+            - ``marginOfSafety`` (float|None): (perShare - currentPrice) /
+              currentPrice * 100. currentPrice 없으면 None
+            - ``warnings`` (list[str]): DCF 적용 불가/조정 경고
+            - ``currency`` (str)
+        FCF 음수 시 빈 결과 + "DCF 적용 불가" warning.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.frame.sector import SECTOR_PARAMS
+        >>> r = dcfValuation(series, shares=5e9, sectorParams=SECTOR_PARAMS["IT"],
+        ...                  currentPrice=75000)
+        >>> r.perShareValue, r.marginOfSafety
+        (82000.0, 9.3)
+
+    Guide:
+        WACC ≤ terminalGrowth 시 ``wacc - 2.0`` 으로 자동 조정 + warning. initial
+        growth 는 매출 3Y CAGR 기반, [-5%, 15%] clamp. FCF 음수 회사는 DCF
+        부적합 — 호출자가 ``calcDFV`` 의 multi-model triangulation 사용 권장.
+
+    SeeAlso:
+        - ``multiStageDcf``: phase 별 다중 stage DCF
+        - ``ddmValuation``: 배당 기반 가치 (현금흐름 없는 회사)
+        - ``calcDFV``: 다중 모델 통합 진입점
+
+    Requires:
+        series 가 finance.timeseries 스키마. 최소 3 년 시계열.
+
+    AIContext:
+        DCF 가치 단독 인용 금지 — marginOfSafety + warnings 함께 노출. FCF
+        음수/수익 매출 변동성 큰 회사 (initial growth > 15%) 는 신뢰도 낮음.
+        Damodaran 의 권고: terminalGrowth ≤ 무위험이자율.
+
+    LLM Specifications:
+        AntiPatterns:
+            - terminalGrowth 4%+ 입력 금지 (실질 GDP 성장률 초과 = Gordon
+              가정 위반). 자동 조정되지만 warning 발생.
+            - shares 미지정 시 perShareValue=None — currentPrice 와 비교 불가.
+            - currentPrice 가 distressed (실가치 대비 -50%+) 인 회사에서
+              marginOfSafety 가 비정상 (500%+) → DCF 가정 자체 의심.
+        OutputSchema:
+            DCFResult (12 필드 dataclass).
+        Prerequisites:
+            series 의 CF/operating_cashflow + capex 시계열 ≥ 3 년.
+        Freshness:
+            series 의 freshness (보통 최신 분기).
+        Dataflow:
+            series → _resolveBaseFcf → revCagr → _projectFcf (5 년) →
+            terminal value (Gordon) → WACC 할인 → enterprise → equity
+            (net debt 차감) → 주당.
+        TargetMarkets: KR (DART 기준 통화 KRW), US (EDGAR USD).
+    """
     warnings: list[str] = []
 
     wacc = discountRate or (sectorParams.discountRate if sectorParams else 10.0)
