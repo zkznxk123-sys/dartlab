@@ -58,29 +58,65 @@ def _days(revenue, balance) -> float | None:
 
 @memoizedCalc
 def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """자산 회전 시계열 -- 자산을 얼마나 효율적으로 쓰는가.
+    """자산 회전 시계열 — 회전율 4 종 + DSO/DIO/DPO + CCC (현금전환주기).
 
-    IS(매출) + BS(자산/채권/재고)에서 원본 금액과 회전율을 동시에 본다.
+    Capabilities:
+        자산 효율성 4 종 (총자산회전율, 매출채권/재고/매입채무 회전율) 시계열
+        + DSO (Days Sales Outstanding) + DIO (Days Inventory Outstanding) +
+        DPO (Days Payable Outstanding) + CCC (Cash Conversion Cycle) 산출.
+        Damodaran/Penman 의 운전자본 효율성 분석.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            revenue : float — 매출액 (원)
-            totalAssets : float — 자산총계 (원)
-            receivables : float — 매출채권 (원)
-            receivablesYoy : float — 매출채권 전년비 (%)
-            inventory : float — 재고자산 (원)
-            inventoryYoy : float — 재고자산 전년비 (%)
-            payables : float — 매입채무 (원)
-            totalAssetTurnover : float — 총자산회전율 (배)
-            receivablesTurnover : float — 매출채권회전율 (배)
-            inventoryTurnover : float — 재고자산회전율 (배)
-            dso : float — 매출채권 회수일수 (일)
-            dio : float — 재고자산 보유일수 (일)
-            dpo : float — 매입채무 지급일수 (일)
-            ccc : float — 현금전환주기 (일)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 14 키:
+                period + revenue + totalAssets + receivables/inventory/payables
+                + 4 회전율 + DSO/DIO/DPO + CCC
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcTurnoverTrend(Company("005930"))
+        >>> r["history"][0]["dso"], r["history"][0]["ccc"]
+        (45, 30)  # 매출채권 45 일, CCC 30 일
+
+    Guide:
+        CCC = DSO + DIO - DPO. CCC 짧음 (< 0 = 마이너스 CCC) = 운전자본
+        효율 매우 우수 (Apple/Amazon). CCC 증가 추세 = 운전자본 부담 (재고
+        쌓임 또는 매출채권 회수 지연). KR 제조업 평균 CCC ~ 60~90 일.
+
+    SeeAlso:
+        - ``calcWorkingCapital``: 운전자본 절대값 시계열
+        - ``calcAssetStructure``: 자산 영업/비영업 분리
+        - ``calcInventoryDivergence``: 재고 신호 (predictionSignals)
+
+    Requires:
+        IS (매출/매출원가) + BS (자산/채권/재고/매입채무) ≥ 2 년.
+
+    AIContext:
+        CCC 시계열 추세 함께 노출 — 단년도 절대값 < 추세 변화가 더 informative.
+        매출채권/재고 YoY 도 함께 (revenue YoY 보다 빠르게 증가 시 운전자본
+        부담 신호).
+
+    LLM Specifications:
+        AntiPatterns:
+            - DSO 단독 인용 — DPO 와 함께 확인 (큰 회사는 supplier 협상력으로
+              DPO 늘려 CCC 단축).
+            - 단년도 CCC 비교 — 동종 업종 평균 (calcCagrComparison) 필요.
+        OutputSchema:
+            ``{history: list[dict 14키]}``.
+        Prerequisites:
+            IS + BS 시계열 + 매출채권/재고/매입채무 표준 계정.
+        Freshness:
+            최신 분기 + 시계열.
+        Dataflow:
+            IS → revenue + 매출원가 + BS → AR/Inv/AP → 4 회전율 → DSO/DIO/DPO
+            → CCC.
+        TargetMarkets: KR (DART 표준 계정), US (EDGAR 동일 표준).
     """
     isResult = company.select("IS", ["매출액", "매출원가"])
     bsResult = company.select(
