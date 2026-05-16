@@ -144,13 +144,70 @@ def interpretGoldDrivers(
 
 
 def classifyVixRegime(vix: float) -> VixRegime:
-    """VIX 수준으로 시장 공포 구간 판정 + 분할매수 신호.
+    """VIX (CBOE 변동성지수) → 6 구간 공포 레짐 + 분할매수 신호 강도.
+
+    Capabilities:
+        VIX 수준을 역사적 6 구간 (panic/extreme_fear/fear/anxious/normal/
+        complacent) 으로 분류하고 분할매수 신호 강도 (0~3) 산출. 역사적
+        contrarian 신호 — VIX > 30 진입 시 1~3 개월 후 +10~20% 수익률 관찰.
 
     Args:
-        vix: CBOE VIX 수준
+        vix: CBOE VIX 수준 (보통 10~80 범위).
 
     Returns:
-        VixRegime
+        VixRegime dataclass:
+            - ``vix`` (float)
+            - ``regime`` (str): 6 구간 enum
+            - ``regimeLabel`` (str): 한국어
+            - ``dcaSignal`` (int): 분할매수 강도 (0~3)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = classifyVixRegime(vix=35)
+        >>> r.regime, r.dcaSignal
+        ('extreme_fear', 2)
+
+    Guide:
+        역사적 6 구간:
+        - >= 40: panic (2008 80, 2020 82 정점) — DCA 신호 3 (max)
+        - >= 30: extreme_fear (시장 패닉) — DCA 신호 2
+        - >= 25: fear — DCA 신호 1
+        - >= 20: anxious (정상 ~ 경계)
+        - >= 15: normal (역사 평균 ~19)
+        - < 15: complacent (2017 8~10 정점 직전)
+
+        역사적 contrarian: VIX > 30 진입 시 S&P 500 1~3 개월 후 +10~20%
+        (1990~2024). 단, panic > 40 진입 후 추가 하락 가능 (2008 GFC 6 개월).
+
+    SeeAlso:
+        - ``interpretGoldDrivers``: VIX 안전수요 효과
+        - ``classifyCycle``: 사이클 종합 (VIX 입력)
+        - ``copperGoldRatio``: 위험선호 (반대 척도)
+
+    Requires:
+        VIX 일별 (FRED VIXCLS 또는 CBOE).
+
+    AIContext:
+        dcaSignal 은 정성적 권고 — 정확한 매수 시점 신호 아님. 사용자에게
+        regime + 역사 평균 ("19 vs 현재 22") 함께 노출 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 시점 VIX 만 보고 매수 신호 단정 — VIX는 mean-reverting,
+              상승 추세 (vix_change) 확인 필요 (별도 호출).
+            - panic 진입 즉시 매수 — 2008/2020 사례 모두 panic 진입 후
+              1~3 개월 추가 하락. 분할매수 (DCA 3 회) 가 안전.
+        OutputSchema:
+            VixRegime ``{vix, regime, regimeLabel, dcaSignal}``.
+        Prerequisites:
+            VIX 일 시계열 (FRED).
+        Freshness:
+            VIX 일 (EOD).
+        Dataflow:
+            vix → 6 임계 비교 → regime + dcaSignal 매핑.
+        TargetMarkets: US (S&P 500 변동성). KR 은 KOSPI 200 변동성 (V-KOSPI).
     """
     if vix >= 40:
         return VixRegime(vix, "panic", "패닉", 3)
