@@ -72,6 +72,12 @@ def minskyPhase(
         - ``ghsCrisisScore``: GHS 위기 예측
         - ``dalioDebtCyclePhase``: Dalio 6 단계 (Minsky 확장)
 
+    When:
+        ``macro("crisis", "minsky")``. AI 가 부채 사이클 답변 시.
+
+    How:
+        6 지표 각각 임계 분기 → 5 단계 scores 누적 → max score → phase 결정 → confidence.
+
     Requires:
         없음 — 6 지표 모두 옵션. 1 개라도 있으면 동작.
 
@@ -227,6 +233,13 @@ def kooBalanceSheetRecession(
         - ``minskyPhase``: Minsky revulsion (deleveraging 단계)
         - Koo, R. (2003) "Balance Sheet Recession" Nomura
 
+    When:
+        ``macro("crisis", "bsr")``. 일본형 / 미국형 BSR 답변, 정책 권고 산출 시.
+
+    How:
+        surplus = (privateSaving - privateInvestment) / GDP × 100 → 임계 (3% + 정책금리 < 2%)
+        → isBSR 플래그 + 설명문.
+
     Requires:
         privateSaving + privateInvestment + gdp > 0 + policyRate.
 
@@ -316,6 +329,13 @@ def fisherDebtDeflation(
         - ``minskyPhase``: Minsky revulsion (deleveraging)
         - Fisher, I. (1933) "The Debt-Deflation Theory of Great Depressions"
 
+    When:
+        ``macro("crisis", "fisher")``. 일본형 디플레 / 대공황 시나리오 답변 시.
+
+    How:
+        DSR 임계 (>14 +2 / >11 +1) + CPI 임계 (디플레 +3 / 준디플레 +1) + NPL 임계 → riskScore →
+        zone 라벨.
+
     Requires:
         dsr + cpiYoy 필수. nplRate 옵션 (없으면 2 지표만).
 
@@ -381,7 +401,42 @@ def krHousingFinancialStress(
 ) -> KRHousingStressResult:
     """한국 부동산-금융 스트레스: 주택가격 + 가계부채 복합.
 
+    Capabilities:
+        주택가격 YoY + 가계부채 YoY 결합 스트레스 점수 산출. 한국 가계부채/GDP 91% 환경에서
+        주택 가격 → 전세 → 대출 전이 경로 위험 진단.
+
     한국 가계부채/GDP = 91%. 주택가격 → 전세 → 대출 전이 경로.
+
+    Args:
+        housePriceYoy: 주택가격 YoY (%).
+        householdDebtYoy: 가계부채 YoY (%) (optional).
+
+    Returns:
+        KRHousingStressResult dataclass.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> krHousingFinancialStress(housePriceYoy=-5, householdDebtYoy=8)
+
+    Guide:
+        주택가격 급락 + 가계부채 증가 = 한국 특이 위기 패턴. 일반 BSR/Fisher 와 분리 사용.
+
+    When:
+        ``macro("crisis", "krHousing")``. 한국 부동산 시장 위기 답변 시.
+
+    How:
+        주택가격 YoY 음수 가중 + 가계부채 YoY 증가 가중 → 점수 → 라벨.
+
+    Requires:
+        - 입력 지표 (한국은행 / KB부동산 시계열)
+
+    See Also:
+        - ``dartlab.macro.crisis._detectorsMinsky.fisherDebtDeflation`` : 일반 디플레
+
+    AIContext:
+        한국 특이 위기 답변 시 본 함수 결과 인용. 일반 디플레와 분리 명시.
     """
     score = 0
     if housePriceYoy > 10:

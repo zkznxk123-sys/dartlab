@@ -131,6 +131,13 @@ def dalioDebtCyclePhase(
         - ``ghsCrisisScore``: 3 년 horizon 위기 확률
         - Dalio, R. (2018) "Principles for Navigating Big Debt Crises"
 
+    When:
+        ``macro("crisis", "debt")`` 호출. 거시 부채 사이클 판정 답변에.
+
+    How:
+        GDP/creditGap/실질금리/부채서비스 임계 분기 → 6 단계 phase → beautifulDeleveraging 시
+        sub-phase → fx/reserve 기반 regimeVariant.
+
     Requires:
         gdpGrowth + creditGap + realRate 중 최소 1 개.
 
@@ -290,6 +297,13 @@ def dalioPolicyLeverStatus(
         - ``dalioDebtCyclePhase``: 6 단계 (본 함수와 조합)
         - ``creditToGDPGap``: BIS gap (creditGap 입력)
         - Dalio, R. (2018) Big Debt Crises Ch.3
+
+    When:
+        ``macro("crisis", "policy")``. 정책 대응 여력 답변, 국가 비교 분석.
+
+    How:
+        4 레버 (policyRate/publicDebt/creditGap/fxFlexibility) 임계 분기 → maxed/partial/spare
+        라벨 → score 합산 → status.
 
     Requires:
         없음 — 4 레버 모두 옵션. 입력 없으면 모두 spare.
