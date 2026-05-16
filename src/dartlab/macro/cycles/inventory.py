@@ -109,10 +109,17 @@ def analyzeInventory(*, market: str = "US", asOf: str | None = None, overrides: 
         - contraction (둘 다 ↓): 주식 매도, 안전자산.
         ISM 50 = 확장/수축 경계.
 
-    SeeAlso:
+    See Also:
         - ``classifyInventoryPhase``: 4 국면 단독
         - ``calcLiquidity``: 유동성 regime
         - ``analyzeCycle``: macro cycle 종합 (본 함수 입력)
+
+    When:
+        ``analyzeSummary`` 의 inventory 축 진입점. AI 자산배분 답변 1 차.
+
+    How:
+        ISM 신규주문/재고 → 비율 + MoM → 4 국면 → equityImplication. PMI 수준 →
+        barometer zone → allocation stance.
 
     Requires:
         ISM PMI + 신규주문 + 재고 시계열 (KR 은 BOK 분기).

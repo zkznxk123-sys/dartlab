@@ -86,9 +86,16 @@ def classifyCycle(indicators: dict[str, float | None]) -> CyclePhase:
         하락+CLI 반등), expansion (확장, HY 안정+CLI 양수), slowdown (둔화,
         Term spread 역전+CPI 가속). 점수 모두 0 이면 ``"expansion"`` 기본값.
 
-    SeeAlso:
+    See Also:
         - ``interpretAssets``: 사이클 → 자산 추천
         - ``CYCLE_SECTOR_MAP``: 사이클별 섹터 전략
+
+    When:
+        ``analyzeCycle`` 내부 1 차 분류기 — phase 판정 결과를 transition/quadrant
+        가 받아 확장.
+
+    How:
+        8 지표 룰 매칭 → scores dict 누적 → argmax → top-2nd 차이로 confidence.
 
     Requires:
         없음 (순수 함수).

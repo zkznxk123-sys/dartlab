@@ -26,12 +26,56 @@ def interpretEmployment(
 ) -> EmploymentSignal:
     """고용 지표 해석.
 
+    Capabilities:
+        실업률 + 비농업고용 3 개월 평균을 가중 score 화 → 고용 상태 4 단계
+        (strong/moderate/weakening/weak) + 한글 라벨 + reasoning lines. sentiment
+        엔진 employment 축이 직접 호출.
+
     Args:
-        unrate: 실업률 (%)
-        payrolls_3m_avg: 비농업고용 3개월 평균 변화 (천명)
+        unrate: 실업률 (%).
+        payrolls3mAvg: 비농업고용 3 개월 평균 변화 (천명). None 가능.
 
     Returns:
-        EmploymentSignal
+        EmploymentSignal(state, stateLabel, reasoning).
+
+    Example:
+        >>> r = interpretEmployment(3.7, 200)
+        >>> r.state, r.stateLabel
+        ('strong', '강함')
+
+    Guide:
+        실업률 < 4% = 완전고용. payrolls 3M 평균 ±100K 가 강세/둔화 경계.
+
+    When:
+        ``calcSentiment`` 내부 employment 축. AI 고용 시장 답변.
+
+    How:
+        실업률 4 구간 + payrolls 4 구간 별 score (±1~2) 누적 → ≥3=strong,
+        ≥1=moderate, ≥-1=weakening, 그 외 weak.
+
+    Requires:
+        unrate (%). payrolls 옵션.
+
+    Raises:
+        없음.
+
+    See Also:
+        - interpretInflation : 인플레 축 (sentiment 의 쌍축)
+        - calcSentiment : sentiment 종합
+
+    AIContext:
+        stateLabel 인용 + reasoning 1~2 줄 노출 = 한 문장 답변 완성.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 실업률만 보고 강세 단정 — payrolls 둔화면 weakening 가능
+            - payrolls3mAvg 음수 무시
+        OutputSchema:
+            EmploymentSignal ``(state, stateLabel, reasoning)``.
+        Prerequisites: BLS UNRATE + PAYEMS.
+        Freshness: 월간 (첫 금요일).
+        Dataflow: unrate + payrolls → score → state 매핑.
+        TargetMarkets: US (BLS). KR 미지원.
     """
     from dartlab.macro.cycles.sentiment import EmploymentSignal
 
@@ -89,14 +133,59 @@ def interpretInflation(
 ) -> InflationSignal:
     """물가 지표 해석.
 
+    Capabilities:
+        CPI YoY + Core CPI + 5/10Y BEI 를 heat score 로 합산 → 인플레 5 단계
+        (hot/warm/target/cool/cold) + 한글 라벨. sentiment 엔진 inflation 축이
+        직접 호출.
+
     Args:
-        cpi_yoy: CPI YoY (%)
-        core_cpi_yoy: Core CPI YoY (%)
-        bei_5y: 5년 BEI (%) — 기대인플레이션
-        bei_10y: 10년 BEI (%) — 기대인플레이션
+        cpiYoy: CPI YoY (%).
+        coreCpiYoy: Core CPI YoY (%). None 가능.
+        bei5y: 5 년 BEI (%). None 가능.
+        bei10y: 10 년 BEI (%). 현재 미사용 (확장 슬롯).
 
     Returns:
-        InflationSignal
+        InflationSignal(state, stateLabel, reasoning).
+
+    Example:
+        >>> r = interpretInflation(3.2, 3.0, 2.5)
+        >>> r.state, r.stateLabel
+        ('warm', '높음')
+
+    Guide:
+        CPI > 4% = 과열, < 0% = 디플레 우려. BEI 5Y > 2.8% = 기대인플레 상승.
+
+    When:
+        ``calcSentiment`` 내부 inflation 축. AI 물가 답변 1 차.
+
+    How:
+        CPI 5 구간 (heat ±2/±1) + Core CPI ±1 + BEI ±1 누적 → ≥3=hot, ≥1=warm,
+        ≥-1=target, ≥-2=cool, 그 외 cold.
+
+    Requires:
+        cpiYoy (%). 나머지 옵션.
+
+    Raises:
+        없음.
+
+    See Also:
+        - interpretEmployment : 고용 축 (sentiment 의 쌍축)
+        - rateOutlook : 인플레 + 고용 → 정책금리 방향
+
+    AIContext:
+        stateLabel 인용 + reasoning 1~2 줄 = 한 문장 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - CPI 단독 인용 + Core CPI 무시
+            - 한국 CPI 에 미국 임계 (2%) 적용
+            - BEI 누락한 채 hot 단정
+        OutputSchema:
+            InflationSignal ``(state, stateLabel, reasoning)``.
+        Prerequisites: CPIAUCSL + CPILFESL + T5YIE.
+        Freshness: 월간 (CPI 10 일 발표).
+        Dataflow: CPI + Core + BEI → heat → state 매핑.
+        TargetMarkets: US (BLS + FRED). KR 미지원 (krInflationModel 별도).
     """
     from dartlab.macro.cycles.sentiment import InflationSignal
 
@@ -169,6 +258,17 @@ def ismAssetAllocation(ism: float) -> ISMAllocationSignal:
     """ISM PMI → 글로벌 자산배분 신호.
 
     투자전략 13: ISM지수가 세계 자산배분의 바로미터다.
+
+    Example:
+        >>> r = ismAssetAllocation(56)
+        >>> r.stance, r.equityWeight
+        ('risk_on', 'overweight')
+
+    Requires:
+        ISM PMI (FRED NAPM 또는 ISMPMI).
+
+    Raises:
+        없음 (실수 입력 시 산술 안전).
     """
     if ism >= 55:
         return ISMAllocationSignal(
@@ -219,16 +319,60 @@ class KRInflationEstimate:
 def krInflationModel(fxYoy: float, oilYoy: float) -> KRInflationEstimate:
     """한국 물가 = 환율 + 유가 모델.
 
-    투자전략 18: 우리나라 물가 흐름은 환율과 유가에 좌우된다.
-    원/달러 상승(원화약세) → 수입물가 상승 → CPI 상승.
-    유가 상승 → 에너지/운송비 상승 → CPI 상승.
+    Capabilities:
+        한국은행 pass-through 계수 (환율 0.06, 유가 0.03) 로 USDKRW YoY + WTI
+        YoY → 향후 CPI 방향 (upward/stable/downward) 추정. 투자전략 18 — 한국 물가
+        흐름은 환율과 유가에 좌우.
 
     Args:
-        fxYoy: USDKRW 전년대비 변화율 (%)
-        oilYoy: WTI 유가 전년대비 변화율 (%)
+        fxYoy: USDKRW 전년대비 변화율 (%). 양수=원화 약세.
+        oilYoy: WTI 유가 전년대비 변화율 (%).
 
     Returns:
-        KRInflationEstimate: 물가 방향
+        KRInflationEstimate(fxEffect, oilEffect, combined, direction,
+        directionLabel, description).
+
+    Example:
+        >>> r = krInflationModel(8.0, 30.0)
+        >>> r.direction, r.directionLabel
+        ('upward', '상승')
+
+    Guide:
+        combined > 0.5 = 상승 압력, < -0.5 = 하락. 환율 약세 + 유가 상승 동반 시
+        CPI 가속.
+
+    When:
+        ``calcSentiment`` market="KR" 내부 inflation 축. AI 한국 물가 답변.
+
+    How:
+        fxEffect = fxYoy × 0.06 + oilEffect = oilYoy × 0.03 → combined 합산 →
+        ±0.5 임계로 direction.
+
+    Requires:
+        fxYoy (BOK USDKRW), oilYoy (FRED DCOILWTICO 또는 EIA).
+
+    Raises:
+        없음.
+
+    See Also:
+        - interpretInflation : 미국 CPI 축
+        - calcSentiment : KR sentiment 종합 진입점
+
+    AIContext:
+        directionLabel + description 한 줄 인용으로 한국 물가 답변 완성.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 변수 (FX 만) 로 CPI 단정 — 유가 동반 검토 필수
+            - 한국 모델을 미국에 적용 — pass-through 계수 다름
+            - bp 단위로 fxYoy 입력 (％ 가 정상)
+        OutputSchema:
+            KRInflationEstimate ``(fxEffect, oilEffect, combined, direction,
+            directionLabel, description)``.
+        Prerequisites: USDKRW YoY + WTI YoY.
+        Freshness: USDKRW 일간, WTI 일간.
+        Dataflow: fx + oil → effect → combined → direction.
+        TargetMarkets: KR (한정).
     """
     # 실증적 pass-through 계수 (한국은행 연구: 환율 0.05~0.08, 유가 0.02~0.04)
     fx_effect = fxYoy * 0.06

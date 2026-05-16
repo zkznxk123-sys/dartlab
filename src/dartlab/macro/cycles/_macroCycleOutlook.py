@@ -48,9 +48,16 @@ def rateOutlook(indicators: dict[str, float | None]) -> dict:
         간소화 — 인상 bias 누적 (CPI>3, payrolls 강세 등) - 인하 bias (CPI<2,
         unemp 상승). bias > +2 = hike, < -2 = cut, 그 외 hold.
 
-    SeeAlso:
+    See Also:
         - ``classifyCycle``: 사이클 4 국면 (rateOutlook 와 함께 종합)
         - ``decomposeLongRate``: 장기금리 BEI/real rate 분해
+
+    When:
+        ``analyzeRates`` + ``analyzeSummary`` 의 rates 축 진입점.
+
+    How:
+        CPI/Core CPI/실업률/payrolls 별 bias 누적 (±1~2) → 합산 → ±2 임계로
+        direction (hike/cut/hold) + |bias|≥3 = high confidence.
 
     Requires:
         없음 (순수 함수). indicators 일부 키만 있어도 동작.
@@ -180,21 +187,68 @@ def detectTransitionSequence(
 ) -> TransitionSignal | None:
     """현재 국면에서 다음 국면으로의 전환 시퀀스를 감지.
 
+    Capabilities:
+        4 국면 cycle 의 순환 전이 (contraction→recovery→expansion→slowdown→
+        contraction) 마다 정해진 자산 신호 시퀀스를 확인 — 발현된 신호 수 ÷ 전체
+        = progress (0~1). history 가 있으면 신호별 최초 발현일까지 추적해
+        sequenceOrder + orderValid 검증.
+
     Args:
-        currentPhase: 현재 사이클 국면
-        indicators: 매크로 지표 dict (classifyCycle과 동일 키 + 추가)
-            - hy_spread_3m_change: HY 스프레드 3개월 변화 (bp)
-            - gold_yoy: 금 가격 YoY (%)
-            - long_rate_change: 장기금리 3개월 변화 (%p)
-            - vix: VIX 수준
-            - term_spread: 장단기 스프레드 (%)
-        history: 시계열 이력 — {시리즈명: [(날짜str, 값), ...]} 형태.
-            시퀀스 순서 검증에 사용. None이면 순서 검증 생략.
-            예: {"hy_spread": [("2025-01", 450), ("2025-02", 420), ...],
-                 "gold_yoy": [("2025-01", 5.2), ...]}
+        currentPhase: 현재 사이클 국면 (contraction/recovery/expansion/slowdown).
+        indicators: 매크로 지표 dict. 키 — hy_spread_3m_change/gold_yoy/
+            long_rate_change/vix/term_spread/bei_10y.
+        history: 신호별 시계열 ``{시리즈: [(date, val), ...]}``. None 이면 순서
+            검증 생략.
 
     Returns:
-        TransitionSignal 또는 전환 징후 없으면 None
+        TransitionSignal (fromPhase/toPhase/progress/triggered/pending/
+        sequenceOrder/orderValid) 또는 None (지원 외 phase, 시퀀스 미정의).
+
+    Example:
+        >>> r = detectTransitionSequence("expansion", {"hy_spread_3m_change": 60,
+        ...     "bei_10y": 2.8, "vix": 22, "term_spread": 0.1})
+        >>> r.toPhase, r.progress > 0.5
+        ('slowdown', True)
+
+    Guide:
+        progress ≥ 0.7 = "다음 국면 임박" 메시지. orderValid=False 면 순서 어긋남
+        — 시퀀스 정의 재검토 또는 전환 신뢰 약화.
+
+    When:
+        ``analyzeCycle`` 내부 — phase 판정 직후 호출.
+
+    How:
+        _TRANSITION_SEQUENCES 룩업 → indicator 임계 매칭 → triggered/pending 분리
+        → history 가 있으면 _findFirstTriggerDates → orderValid.
+
+    Requires:
+        - currentPhase 가 4 국면 중 하나
+        - indicators 에 최소 hy_spread_3m_change 또는 vix
+        - (선택) history 12 개월 신뢰 baseline
+
+    Raises:
+        없음 (지원 외 phase 면 None 반환).
+
+    See Also:
+        - classifyCycle : 4 국면 판정 (이 함수의 진입 phase)
+        - analyzeCycle : transition 결과 합성
+
+    AIContext:
+        progress + toPhase 두 필드만으로 "X 단계로 진행 중 (70%)" 1 문장 답변
+        가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - history 없이 sequenceOrder 인용 (None 일 수 있음)
+            - 시퀀스 정의 외 phase 입력 후 None 무시
+            - progress 30% 미만에서 전환 강조 (premature signal)
+        OutputSchema:
+            TransitionSignal ``{fromPhase, toPhase, progress, triggered, pending,
+            sequenceOrder, orderValid}``.
+        Prerequisites: classifyCycle phase 출력 + indicators.
+        Freshness: 일간 (HY/VIX) ~ 월간 (BEI).
+        Dataflow: phase → sequence 룩업 → indicator 임계 → progress + history 검증.
+        TargetMarkets: US (FRED 풀세트). KR 미지원 (시퀀스 미정의).
     """
     phases = ["contraction", "recovery", "expansion", "slowdown"]
     if currentPhase not in phases:
