@@ -340,21 +340,67 @@ def interpretFxDrivers(
     tradeBalanceYoy: float | None = None,
     vix: float | None = None,
 ) -> FxDrivers:
-    """환율 변동의 3요인 분해 해석.
+    """USDKRW 환율 변동 3 요인 분해 — 한미 금리차 + 무역수지 + 위험선호.
 
-    환율 = f(양국금리차, 무역수지, 위험선호도)
-    금리차 확대 → 자본유출 → 원화약세
-    무역흑자 확대 → 달러유입 → 원화강세
-    VIX 상승 → 위험회피 → 원화약세 (EM 통화 특성)
+    Capabilities:
+        Mundell-Fleming 모델 + Carry trade 이론 → 환율 변동의 3 학술 드라이버
+        분해: (1) 한미 금리차 (확대 = 자본유출 = 원화약세), (2) 무역수지
+        (흑자 확대 = 달러유입 = 원화강세), (3) VIX (상승 = EM 위험회피 =
+        원화약세). 각 요인 정량 평가 + 다수결 dominant.
 
     Args:
-        fx_change_pct: 환율 변화율 (%, 양수=원화약세)
-        rate_diff_change: 한미 금리차 변화 (%p, 양수=미국금리상대상승)
-        trade_balance_yoy: 무역수지 YoY 변화 (%, 양수=흑자확대)
-        vix: VIX 수준
+        fxChangePct: USDKRW 변화율 (%, 양수=원화약세).
+        rateDiffChange: 한미 금리차 변화 (%p, 양수=미국 금리 상대 상승).
+        tradeBalanceYoy: 무역수지 YoY 변화 (%, 양수=흑자 확대).
+        vix: VIX 수준.
 
     Returns:
-        FxDrivers
+        FxDrivers dataclass:
+            - ``fxChangePct`` (float): 입력 echo
+            - ``rateDiffEffect``/``tradeEffect``/``vixEffect`` (str): 각 효과
+            - ``dominant`` (str): 지배 요인
+            - ``description`` (str): 한국어 해석
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = interpretFxDrivers(fxChangePct=2.5, rateDiffChange=0.3,
+        ...                        tradeBalanceYoy=-15, vix=22)
+        >>> r.dominant
+        '금리차'  # 미국 금리 우위 → 자본유출 압력
+
+    Guide:
+        rateDiffChange > 0.2 = 미국 금리 상대 우위 → 원화약세. tradeBalanceYoy
+        < -10% = 무역흑자 축소 → 원화약세. VIX > 25 = EM 위험회피. 3 요인
+        합산해 다수 일치 시 dominant.
+
+    SeeAlso:
+        - ``interpretGoldDrivers``: 금 3 요인 (달러와 cross-check)
+        - ``rateOutlook``: 금리 방향 전망
+
+    Requires:
+        없음 — 4 입력 모두 옵션. fxChangePct 만 필수.
+
+    AIContext:
+        dominant + 3 효과 함께 인용. fxChangePct 절대값 큰 (>5%) 변동은 단일
+        요인이 아닌 복합 충격 — "기타" dominant 표시. KR 회사 분석 시 환율
+        영향 (수출 비중) 함께 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 금리차만 보고 환율 단정 — 무역수지 (KR 핵심) + VIX 함께.
+            - fxChangePct 절대값 인용 — 추세 (3 개월 평균) 권장.
+        OutputSchema:
+            FxDrivers ``{fxChangePct, rateDiffEffect, tradeEffect, vixEffect,
+            dominant, description}``.
+        Prerequisites:
+            USDKRW 변화율 (필수) + 3 보조 지표 (옵션).
+        Freshness:
+            환율 일, 무역수지 월, VIX 일, 금리차 일.
+        Dataflow:
+            3 요인 룰 → 원화강세/약세/중립 → 다수결 dominant → 한국어 합성.
+        TargetMarkets: KR (USDKRW). 다른 EM 통화도 응용 가능.
     """
     # 1) 금리차 요인
     if rateDiffChange is not None and rateDiffChange > 0.2:
