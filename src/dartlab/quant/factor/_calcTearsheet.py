@@ -58,10 +58,23 @@ def calcFactorTearSheet(
         - "quality 팩터" → calcFactorTearSheet("rmw")
         - "investment 팩터" → calcFactorTearSheet("cma")
 
-    SeeAlso:
+    See Also:
         - factorBuild.buildFactors : SMB/HML/RMW/CMA 시계열 빌드
         - decomposeFactor : 단일 종목 FF5 회귀 (loadings)
         - calcStrategySnapshot : 8 검증 스타일 백테스트
+
+    When:
+        Alphalens 팩터 평가 + AI 한국 시장 알파 원천 답변.
+
+    How:
+        buildFactors → 일별 long-short 시계열 → 연환산 수익/변동성/Sharpe/MDD/
+        Win Rate.
+
+    Requires:
+        scan finance.parquet + 일별 OHLCV (해당 연도).
+
+    Raises:
+        없음 — 실패는 None.
 
     Args:
         factorName: ``"smb"`` | ``"hml"`` | ``"rmw"`` | ``"cma"`` (대소문자 무관). 기본 ``"smb"``.

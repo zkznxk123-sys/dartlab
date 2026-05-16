@@ -358,6 +358,26 @@ def forecastReturns(
     - Calibration 은 in-sample 1-step 예측의 마지막 ``int(n * calibFraction)`` 점을 사용
       (split conformal 단순화 — 정식 split 은 별도 fit/calib 파티션 필요).
     - 의존성 0 (numpy 만). statsmodels / scipy / sklearn import 금지.
+
+    Capabilities:
+        가격 시계열 → log-return → 4 모델 (Naive/AR1/ETS-Holt/Theta) 자동 선택 또는
+        ensemble → conformal half-width → horizon 별 point + 90% interval +
+        가격 타깃 단일 dict.
+
+    Guide:
+        horizon ≤ 5 (단기) 권장. 누적 90% interval 은 horizon 에 따라 빠르게
+        넓어짐 — 20+ 일은 신뢰 낮음.
+
+    Requires:
+        OHLCV ≥ 30 일.
+
+    AIContext:
+        modelChosen + forecastTable[0].pointForecast + summary 인용으로 "다음
+        5 일 ETS 예측 +1.2% (90% CI -3% ~ +5%)" 답변.
+
+    See Also:
+        - calcMomentum : 가격 모멘텀 (point estimate 비교)
+        - calcVolatility : 변동성 (conformal width 검증)
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
