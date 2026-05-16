@@ -132,6 +132,9 @@ def sharpe(returns: np.ndarray, rf: float = 0.0) -> float:
     See Also:
         - sortino : 하방편차 기반
         - dsr : 다중 시도 정정
+
+    AIContext:
+        Sharpe 단독 인용 + sample 길이/n_trials 누락 금지 — dsr 동반.
     """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
@@ -184,6 +187,9 @@ def sortino(returns: np.ndarray, rf: float = 0.0) -> float:
 
     See Also:
         - sharpe : 양방향 변동
+
+    AIContext:
+        Sharpe vs Sortino 차이 인용으로 비대칭성 평가.
     """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
@@ -238,6 +244,9 @@ def mdd(equity: np.ndarray) -> float:
 
     See Also:
         - calcTailrisk : VaR/CVaR 동반
+
+    AIContext:
+        mdd 값 + 시점 함께 인용 (macro 이벤트 매핑).
     """
     e = np.asarray(equity, dtype=np.float64)
     e = e[~np.isnan(e)]
@@ -286,6 +295,9 @@ def winrate(tradePnls: np.ndarray) -> float:
     See Also:
         - profitFactor : 총 수익/손실 비율
         - expectancy : 거래당 평균
+
+    AIContext:
+        winrate < 50% + PF > 1.5 → 비대칭 양봉 전략.
     """
     p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
@@ -331,6 +343,9 @@ def profitFactor(tradePnls: np.ndarray) -> float:
     See Also:
         - winrate : 승률
         - expectancy : 거래당 평균
+
+    AIContext:
+        PF + winrate 인용으로 양봉/음봉 비율 답변.
     """
     p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
@@ -380,6 +395,9 @@ def expectancy(tradePnls: np.ndarray) -> float:
     See Also:
         - profitFactor : 총합 비율
         - sharpe : 위험 조정
+
+    AIContext:
+        expectancy × 빈도 = 연간 기대 수익, 수수료 차감 후 인용.
     """
     p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
@@ -425,6 +443,9 @@ def turnover(positions: np.ndarray) -> float:
 
     See Also:
         - exposure : 포지션 유지 비율
+
+    AIContext:
+        turnover × spread = 대략 거래비용 추정.
     """
     p = np.asarray(positions, dtype=np.float64)
     if len(p) < 2:
@@ -470,6 +491,9 @@ def exposure(positions: np.ndarray) -> float:
 
     See Also:
         - turnover : 변화량
+
+    AIContext:
+        exposure 보정 후 annualReturn 인용 (캐쉬 보유 기간 반영).
     """
     p = np.asarray(positions, dtype=np.float64)
     if len(p) == 0:
