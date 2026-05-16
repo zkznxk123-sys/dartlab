@@ -473,7 +473,64 @@ def narrateCashFlow(
 
 
 def narrateBusinessStability(biz: dict, axisScore: float | None) -> AxisNarrative:
-    """축 5: 사업 안정성."""
+    """축 5: 사업 안정성 서사 — 매출 변동계수 + 규모 + 사업 다각화 (HHI).
+
+    Capabilities:
+        매출 변동계수 (3~5 년 CV) + 매출 규모 + 세그먼트 HHI (Herfindahl)
+        를 결합해 사업 안정성 진단. 신평사의 "Business Risk" 축 직접 매핑.
+
+    Args:
+        biz: 사업 안정성 dict. 키:
+            - ``revenueCV`` (%): 매출 변동계수 (3~5 년)
+            - ``latestRevenue`` (원): 최신 매출
+            - ``segmentHHI`` (점): Herfindahl 사업 집중도 (0~10000)
+        axisScore: 사업안정성 축 점수 (0~100). None 이면 평가 불가.
+
+    Returns:
+        AxisNarrative ``{axisName, summary, details, severity}``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> n = narrateBusinessStability(
+        ...     {"revenueCV": 8, "latestRevenue": 15e12, "segmentHHI": 2000},
+        ...     axisScore=15)
+        >>> n.severity
+        'strong'
+
+    Guide:
+        revenueCV < 10% = 매우 안정 (utility/통신 등), 10~20% = 적정, >20% =
+        변동 큼 (시클리컬). HHI < 1500 = 다각화, > 4000 = 집중 (단일 사업).
+        매출 10조원+ = 대형주 안정성 보너스.
+
+    SeeAlso:
+        - ``narrateRepayment``: 부채 상환능력 (사업 안정성과 보완)
+        - ``credit.engine.evaluateCompany``: 본 함수 호출
+
+    Requires:
+        biz dict 의 revenueCV 필수, latestRevenue/segmentHHI 옵션.
+
+    AIContext:
+        시클리컬 (조선/철강/화학) 회사의 revenueCV 30%+ 는 정상 — 무조건
+        "변동성 크다" 부정 인용 금지. 업종 맥락 함께 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - HHI 만으로 다각화 평가 — 다각화가 신용에 항상 + 가 아님 (관련
+              없는 사업 다각화는 비효율).
+            - 매출 규모 1 조원 미만 회사를 "소형" 으로 negative 인용 — 우량
+              중소기업도 안정 가능.
+        OutputSchema:
+            AxisNarrative ``{axisName, summary, details, severity}``.
+        Prerequisites:
+            biz 에 revenueCV 보유 + 매출 시계열 ≥ 3 년 (CV 계산 기반).
+        Freshness:
+            biz = 최신 분기 + 3~5 년 시계열.
+        Dataflow:
+            biz dict → revenueCV/규모/HHI 룰 → details → severity.
+        TargetMarkets: KR (사업부문 dart 공시 기반), US (segment reporting).
+    """
     details = []
     sev = _severity(axisScore)
 
