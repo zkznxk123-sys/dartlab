@@ -6,22 +6,16 @@ Layer 1 (metrics.py) → Layer 2 (scorecard) → Layer 3 (등급 결정)
 
 from __future__ import annotations
 
-from dartlab.credit._engineCHS import _calcCHSAdjustment, _chsPdToScore, _chsSkip
-
-# ═══════════════════════════════════════════════════════════
-# 설정 (분리: _engineConfig.py SSOT, re-export 으로 BC 보존)
-# ═══════════════════════════════════════════════════════════
-from dartlab.credit._engineConfig import _CHS_PD_BRACKETS, _CONFIG, _WEIGHTS
-from dartlab.credit._engineNotch import (
-    _NOTCH_RULES,
-    _calcNotchAdjustment,
-    _notchForCapex,
-    _notchForCaptive,
-    _notchForConsecutiveProfit,
-    _notchForHolding,
-    _notchForMarketCap,
-    _notchForPublicCorp,
-    _notchForRevenue,
+from dartlab.credit._engineConfig import _CONFIG, _WEIGHTS
+from dartlab.credit._engineFinancial import _evaluateFinancial
+from dartlab.credit._engineNotch import _NOTCH_RULES
+from dartlab.credit._enginePostAdjust import (
+    _CREDIT_SCORE_LEGEND,
+    _applyPostAdjustments,
+    _applyTimeSeriesSmoothing,
+    _blendOFS,
+    _explainDivergence,
+    _normalizeMetricsForOutput,
 )
 from dartlab.credit._engineScoring import (
     _calcHistoricalScores,
@@ -37,7 +31,6 @@ from dartlab.credit.scoring.creditScorecard import (
     creditOutlook,
     gradeCategory,
     isInvestmentGrade,
-    mapTo20Grade,
     scoreMetric,
     weightedScore,
 )
@@ -80,7 +73,6 @@ def _isHolding(company) -> bool:
     name = getattr(company, "corpName", "") or ""
     if any(k in name for k in _CONFIG["holding_keywords"]):
         return True
-    # 재무 구조 기반: 관계기업 투자자산 비중
     try:
         bs = company.select("BS", ["종속기업,관계기업및공동기업투자", "관계기업등지분관련투자자산", "자산총계"])
         if bs is not None and len(bs) > 0:
@@ -91,7 +83,6 @@ def _isHolding(company) -> bool:
                 data, periods = parsed
                 invest = data.get("종속기업,관계기업및공동기업투자", {}) or data.get("관계기업등지분관련투자자산", {})
                 ta = data.get("자산총계", {})
-                # 최신 기간
                 for p in sorted(periods, reverse=True):
                     inv_val = invest.get(p)
                     ta_val = ta.get(p)
@@ -138,174 +129,11 @@ def _isCaptiveByOFS(company, consolidatedBorrowing: float) -> bool:
             return False
         sepBorrowing = sep.get("totalBorrowing", 0) or 0
         if sepBorrowing <= 0:
-            # 별도 차입금 0이면 전부 자회사 차입금
-            return consolidatedBorrowing > 1e12  # 1조 이상이면 의미 있음
+            return consolidatedBorrowing > 1e12
         ratio = consolidatedBorrowing / sepBorrowing
         return ratio > 10
     except (ImportError, TypeError, ValueError, AttributeError):
         return False
-
-
-# ═══════════════════════════════════════════════════════════
-# Notch Adjustment — 개별 규칙
-# ═══════════════════════════════════════════════════════════
-
-
-# ═══════════════════════════════════════════════════════════
-# 괴리 설명 + 공통 후처리
-# ═══════════════════════════════════════════════════════════
-
-
-def _explainDivergence(
-    grade: str, score: float, axes: list, latest: dict, chsResult: dict, captive: bool, holding: bool
-) -> list[str]:
-    """등급 결정 근거 + 신평사 등급과의 괴리 원인 자동 설명."""
-    explanations: list[str] = []
-
-    # 1. 가장 나쁜 축 식별
-    validAxes = [a for a in axes if a.get("score") is not None]
-    if validAxes:
-        worst = max(validAxes, key=lambda a: a["score"])
-        if worst["score"] > 30:
-            explanations.append(f"{worst['name']} 축이 {worst['score']:.0f}점으로 등급 하방 압력")
-
-    # 2. FCF 음수 = 투자 사이클
-    fcf = latest.get("fcf")
-    ocf = latest.get("ocf")
-    if fcf is not None and fcf < 0:
-        if ocf is not None and ocf > 0:
-            explanations.append("FCF 음수(OCF 양수) — 대규모 투자(CAPEX) 사이클 중. 투자와 부실을 정량으로 구분 불가")
-        else:
-            explanations.append("FCF·OCF 모두 음수 — 현금흐름 악화 신호")
-
-    # 3. CHS 하향 영향
-    if chsResult and chsResult.get("adjustment", 0) > 1:
-        explanations.append(
-            f"주가 기반 CHS 모델이 +{chsResult['adjustment']:.1f}점 하향 (PD {chsResult['chsPd']:.2%}). "
-            "최근 주가 하락이 반영된 결과"
-        )
-
-    # 4. D/EBITDA 자본집약
-    de = latest.get("debtToEbitda") or 0
-    if de > 10:
-        explanations.append(f"D/EBITDA {de:.1f}x — 자본집약 업종 구조적 특성 (CAPEX/리스 부채)")
-
-    # 5. 캡티브/지주 연결 왜곡
-    if captive:
-        explanations.append("캡티브 금융자회사 연결 — 연결 차입금에 금융자회사 대출 원금 포함")
-    if holding:
-        explanations.append("지주사 연결 구조 — 자회사 부채가 연결 레버리지에 반영")
-
-    # 6. 정량 한계 안내
-    explanations.append("dartlab dCR은 공시 정량 데이터 기반. 시장 지위, 경영진, 그룹 지원 등 정성 요소는 미반영")
-
-    return explanations
-
-
-def _applyPostAdjustments(company, overall, latest, metrics, axes, captive, holding, sepMetrics):
-    """CHS + Notch + divergence — Track A/B 공통 후처리."""
-    from dartlab.credit.scoring.creditScorecard import estimatePD
-    from dartlab.credit.scoring.creditScorecard import notchGrade as _notchGrade
-
-    # CHS 보정
-    chsResult = _calcCHSAdjustment(company, overall)
-    if chsResult.get("status") == "ok":
-        overall = chsResult["adjustedScore"]
-
-    grade, gradeDesc, pdEstimate = mapTo20Grade(overall)
-
-    # Notch Adjustment
-    notchAdj = _calcNotchAdjustment(company, grade, overall, latest, metrics, holding, captive, sepMetrics)
-    if notchAdj["totalNotch"] != 0:
-        grade = _notchGrade(grade, -notchAdj["totalNotch"])
-        pdEstimate = estimatePD(grade)
-        gradeDesc = gradeCategory(grade) + " (notch 조정)"
-
-    # divergence
-    divExpl = _explainDivergence(grade, overall, axes, latest, chsResult, captive, holding)
-
-    return grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl
-
-
-# ═══════════════════════════════════════════════════════════
-# 시계열 안정화
-# ═══════════════════════════════════════════════════════════
-
-
-def _applyTimeSeriesSmoothing(currentScore: float, historicalScores: list[float]) -> float:
-    """3개년 가중이동평균 — _CONFIG["ts_weights"] 사용."""
-    w = _CONFIG["ts_weights"]
-    if len(historicalScores) >= 2:
-        overall = currentScore * w[0] + historicalScores[0] * w[1] + historicalScores[1] * w[2]
-    elif len(historicalScores) == 1:
-        # 2개년: 현재 70%, 과거 30%
-        overall = currentScore * 0.70 + historicalScores[0] * 0.30
-    else:
-        overall = currentScore
-    return round(overall, 2)
-
-
-# ═══════════════════════════════════════════════════════════
-# OFS 블렌딩 (지주/캡티브)
-# ═══════════════════════════════════════════════════════════
-
-
-def _blendOFS(consolidated: float | None, separate: float | None) -> float | None:
-    """연결/별도 축 점수를 동적 블렌딩.
-
-    별도가 consolidated보다 ofs_advantage_threshold점+ 양호하면 별도 비중 상향.
-    """
-    if consolidated is None or separate is None:
-        return consolidated
-    adv = _CONFIG["ofs_advantage_threshold"]
-    if separate < consolidated - adv:
-        w_sep = _CONFIG["ofs_strong_weight"]
-    else:
-        w_sep = _CONFIG["ofs_default_weight"]
-    return round(consolidated * (1 - w_sep) + separate * w_sep, 2)
-
-
-# ═══════════════════════════════════════════════════════════
-# R21-1: metrics 출력 정규화 — tuple/dict 둘 다 지원, value 노출
-# ═══════════════════════════════════════════════════════════
-
-
-def _normalizeMetricsForOutput(metricItems: list) -> list[dict]:
-    """축의 metric 항목을 출력용 dict 로 정규화.
-
-    - dict 입력 (R21-1 신규): {"name", "value", "score"} 그대로 유지 (None score 포함, value 표시 위해)
-    - tuple 입력 (legacy): (name, score) → {"name", "score"}, value 없음
-    - score=None 인 항목도 포함 (value 가 있으면 표시 가치 있음)
-
-    R22-1: score 와 value 의미 차이를 AI/사용자가 헷갈리지 않도록
-    - value: 실제 metric 측정값 (예: FFO/Debt 354.67%, Debt/EBITDA 0.55배)
-    - score: 위험 점수 (0=최우량, 100=최위험) — 절대 metric value 아님
-    """
-    out: list[dict] = []
-    for item in metricItems:
-        if isinstance(item, dict):
-            entry = {"name": item.get("name", "")}
-            if "value" in item:
-                entry["value"] = item.get("value")
-            entry["score"] = item.get("score")
-            # 둘 다 None 이면 의미 없음 → 제외
-            if entry.get("value") is None and entry["score"] is None:
-                continue
-            out.append(entry)
-        else:
-            name, score = item
-            if score is None:
-                continue
-            out.append({"name": name, "score": score})
-    return out
-
-
-# R22-1: credit 결과 dict 의 score 의미 안내 (AI/사용자 혼동 방지)
-_CREDIT_SCORE_LEGEND = (
-    "score 는 위험 점수 (0=최우량, 100=최위험) 입니다. "
-    "metric 의 실제 측정값은 'value' 필드를 보세요. "
-    "예: Debt/EBITDA value=0.55배 (실측), score=1.65 (위험점수, 거의 AAA)."
-)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -407,7 +235,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     sector, industryGroup = _getSectorInfo(company)
     isFinancialCo = _isFinancial(company)
 
-    # ── Track B: 금융업 전용 평가 ──
     if isFinancialCo:
         return _evaluateFinancial(company, detail=detail, basePeriod=basePeriod, sector=sector)
 
@@ -415,10 +242,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     if metrics is None or not metrics.get("history"):
         return None
 
-    # R25-1: 손익/현금흐름 metric 이 모두 None 인 partial period 행은 건너뛰고
-    # 핵심 metric 이 채워진 가장 최근 행을 선택. EDGAR 회계연도 경계 (예: AAPL 2026Q1)
-    # 처럼 BS-only 행이 첫 번째로 오면 채무상환능력/현금흐름 축이 통째로 None 가 되어
-    # 자본구조만 반영된 잘못된 등급이 산출되던 문제 방지.
     _CORE_METRIC_KEYS = ("ebitda", "ocf", "netIncome", "interestExpense")
     history = metrics["history"]
     latest = history[0]
@@ -429,12 +252,10 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
                 break
     holding = _isHolding(company)
     captive = _isCaptiveFinance(latest.get("totalBorrowing") or 0, latest.get("ebitda"), isFinancialCo)
-    # OFS 기반 캡티브 보강 (D/EBITDA < 15이어도 연결/별도 차입금 비율로 감지)
     if not captive and not isFinancialCo:
         captive = _isCaptiveByOFS(company, latest.get("totalBorrowing") or 0)
     cyclical = _isCyclical(sector)
 
-    # 기준표 선택 (캡티브 > 지주 > 업종별 > 기본)
     if captive:
         from dartlab.credit.features.sectorThresholds import _airlineThresholds
 
@@ -449,8 +270,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         thresholds = getThresholds(sector, industryGroup)
         sectorLabel = getSectorLabel(sector)
 
-    # ── 축 1: 채무상환능력 ──
-    # R21-1: metrics 에 raw value + score 둘 다 노출 (AI/사용자 score=0 오해 방지)
     def _entry(name: str, value, threshold: dict) -> dict:
         return {
             "name": name,
@@ -458,7 +277,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
             "score": scoreMetric(value, threshold),
         }
 
-    # FOCF/Debt: FCF가 음수(CAPEX > OCF)면 구조적으로 나쁜 값 → 스킵
     _focfVal = latest.get("focfToDebt")
     if latest.get("fcf") is not None and (latest.get("fcf") or 0) < 0:
         _focfEntry = {"name": "FOCF/Debt", "value": _focfVal, "score": None}
@@ -473,7 +291,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     ]
     axis1 = axisScore(axis1_scores)
 
-    # ── 축 2: 자본 구조 ──
     axis2_scores = [
         _entry("부채비율", latest.get("debtRatio"), thresholds["debt_ratio"]),
         _entry("차입금의존도", latest.get("borrowingDependency"), thresholds["borrowing_dependency"]),
@@ -481,7 +298,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     ]
     axis2 = axisScore(axis2_scores)
 
-    # ── 별도재무제표 블렌딩 (지주/캡티브만) ──
     _needsOFS = holding or captive
     sepMetrics = None
     if _needsOFS and axis1 is not None:
@@ -489,14 +305,12 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
         sepMetrics = calcSeparateMetrics(company)
         if sepMetrics is not None:
-            # 축1: 별도 D/EBITDA 블렌딩
             sep_axis1_scores = [
                 _entry("별도D/EBITDA", sepMetrics.get("separateDebtToEbitda"), thresholds["debt_to_ebitda"]),
             ]
             sep1 = axisScore(sep_axis1_scores)
             axis1 = _blendOFS(axis1, sep1)
 
-            # 축2: 별도 부채비율 블렌딩
             sep_axis2_scores = [
                 _entry("별도부채비율", sepMetrics.get("separateDebtRatio"), thresholds["debt_ratio"]),
                 _entry("별도차입금의존도", sepMetrics.get("separateBorrowingDep"), thresholds["borrowing_dependency"]),
@@ -504,14 +318,12 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
             sep2 = axisScore(sep_axis2_scores)
             axis2 = _blendOFS(axis2, sep2)
 
-    # ── Phase 4: 캡티브/지주/사이클 축1 압축 (threshold 초과분 감쇄) ──
     compThresh = _CONFIG["axis1_compress_threshold"]
     compRatio = _CONFIG["axis1_compress_ratio"]
     if (captive or holding or cyclical) and axis1 is not None and axis1 > compThresh:
         excess = axis1 - compThresh
         axis1 = round(compThresh + excess * compRatio, 2)
 
-    # ── 축 3: 유동성 ──
     axis3_scores = [
         _entry("유동비율", latest.get("currentRatio"), thresholds["current_ratio"]),
         _entry("현금비율", latest.get("cashRatio"), thresholds["cash_ratio"]),
@@ -519,11 +331,9 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
     ]
     axis3 = axisScore(axis3_scores)
 
-    # ── 축 4: 현금흐름 ──
     axis4_scores = _scoreCashFlow(latest, metrics)
     axis4 = axisScore(axis4_scores)
 
-    # #1: 축4에도 별도 OCF 블렌딩 (캡티브/지주/자본집약)
     if _needsOFS and sepMetrics is not None and axis4 is not None:
         sepOcfScore = scoreMetric(
             sepMetrics.get("separateOcfToSales"), thresholds.get("ocf_to_sales", thresholds.get("cash_ratio", {}))
@@ -534,23 +344,19 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
             sepAxis4 = sum(s for s, _ in sepCfScores) / len(sepCfScores)
             axis4 = round(axis4 * 0.5 + sepAxis4 * 0.5, 2)
 
-    # ── 축 5: 사업 안정성 ──
     biz = metrics.get("businessStability", {})
     axis5_scores = _scoreBusinessStability(biz)
     axis5 = axisScore(axis5_scores)
 
-    # ── 축 6: 재무 신뢰성 ──
     rel = metrics.get("reliability", {})
     audit = metrics.get("auditOpinion")
     axis6_scores = _scoreReliability(rel, audit)
     axis6 = axisScore(axis6_scores)
 
-    # ── 축 7: 공시 리스크 ──
     dr = metrics.get("disclosureRisk")
     axis7_scores = _scoreDisclosureRisk(dr)
     axis7 = axisScore(axis7_scores)
 
-    # ── 가중평균 ──
     if captive or cyclical:
         w = _WEIGHTS["captive"]
     elif holding:
@@ -568,7 +374,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         {"name": "공시리스크", "score": axis7, "weight": w[6], "metrics": axis7_scores},
     ]
 
-    # 축별 등급 기여도 계산
     for a in axes:
         score = a.get("score") or 0
         weight = a.get("weight", 0)
@@ -576,16 +381,13 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
     currentScore = weightedScore([{"score": a["score"], "weight": a["weight"]} for a in axes])
 
-    # ── 시계열 안정화 (3개년 가중이동평균) ──
     historicalScores = _calcHistoricalScores(metrics, thresholds)
     overall = _applyTimeSeriesSmoothing(currentScore, historicalScores)
 
-    # ── CHS + Notch + divergence 공통 후처리 ──
     grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl = _applyPostAdjustments(
         company, overall, latest, metrics, axes, captive, holding, sepMetrics
     )
 
-    # ── eCR ──
     eCR = cashFlowGrade(
         latest.get("ocfToSales"),
         latest.get("fcf") is not None and (latest.get("fcf") or 0) > 0,
@@ -595,11 +397,9 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         else None,
     )
 
-    # ── Outlook ──
     allScores = [currentScore] + historicalScores
     outlook = creditOutlook(allScores)
 
-    # ── 결과 조립 ──
     result = {
         "grade": f"dCR-{grade}",
         "gradeRaw": grade,
@@ -642,13 +442,11 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
         result["borrowingsDetail"] = metrics.get("borrowingsDetail")
         result["provisionsDetail"] = metrics.get("provisionsDetail")
 
-        # 신규: 프로필 + 부문 구성 + 순위 + 별도재무
         result["profile"] = metrics.get("profile")
         result["segmentComposition"] = metrics.get("segmentComposition")
         result["rank"] = metrics.get("rank")
         result["separateMetrics"] = sepMetrics
 
-        # 서사 생성 — AI가 소비할 로데이터 + 해석
         from dartlab.credit.features.narrative import (
             buildNarratives,
             buildOverallNarrative,
@@ -660,7 +458,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
 
         narratives = buildNarratives(result, captive=captive, holding=holding, separateMetrics=sepMetrics)
 
-        # 추가 서사
         profileNarrative = narrateProfile(
             metrics.get("profile"), metrics.get("segmentComposition"), metrics.get("rank")
         )
@@ -669,7 +466,6 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
             metrics.get("borrowingsDetail"), metrics["history"][0] if metrics["history"] else None
         )
 
-        # 6막 인과 연결
         causalChain = narrateCausalChain(metrics["history"][0] if metrics["history"] else {}, result)
 
         result["narratives"] = {
@@ -690,156 +486,5 @@ def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = N
                 for n in narratives
             ],
         }
-
-    return result
-
-
-# ═══════════════════════════════════════════════════════════
-# 축별 스코어링 헬퍼
-
-# ═══════════════════════════════════════════════════════════
-# Track B: 금융업 전용 평가
-# ═══════════════════════════════════════════════════════════
-
-
-def _evaluateFinancial(company, *, detail: bool = False, basePeriod: str | None = None, sector=None) -> dict | None:
-    """금융업(은행/보험/증권) 전용 5축 평가.
-
-    D/EBITDA, FFO/Debt를 사용하지 않고
-    자본비율, ROA, NIM, 충당금 비율로 평가.
-    """
-    from dartlab.credit.scoring.metrics import calcFinancialMetrics
-
-    metrics = calcFinancialMetrics(company, basePeriod=basePeriod)
-    if metrics is None or not metrics.get("history"):
-        return None
-
-    from dartlab.credit.features.sectorThresholds import financialTrackBThresholds
-
-    thresholds = financialTrackBThresholds()
-    latest = metrics["history"][0]
-
-    # ── 축1: 자본적정성 ──
-    ax1 = [
-        ("자기자본비율", scoreMetric(latest.get("equityRatio"), thresholds["equity_ratio"])),
-    ]
-    s1 = axisScore(ax1)
-
-    # ── 축2: 수익성 ──
-    ax2 = [
-        ("ROA", scoreMetric(latest.get("roa"), thresholds["roa"])),
-        ("NIM대리", scoreMetric(latest.get("nimProxy"), thresholds["nim_proxy"])),
-    ]
-    s2 = axisScore(ax2)
-
-    # ── 축3: 자산건전성 ──
-    ax3 = [
-        ("충당금비율", scoreMetric(latest.get("provisionRatio"), thresholds["provision_ratio"])),
-    ]
-    s3 = axisScore(ax3)
-    if s3 is None:
-        # 자산건전성 데이터 없을 때: 대형 금융지주는 양호 추정, 소형은 중립
-        ta = latest.get("totalAssets") or 0
-        s3 = 12.0 if ta > 100e12 else 20.0 if ta > 10e12 else 25.0
-
-    # ── 축4: 유동성 ──
-    ax4 = [
-        ("현금/자산", scoreMetric(latest.get("cashToAsset"), thresholds["cash_to_asset"])),
-        ("유동비율", scoreMetric(latest.get("currentRatio"), thresholds["current_ratio"])),
-    ]
-    s4 = axisScore(ax4)
-    if s4 is None:
-        s4 = 25.0  # #4: 유동성도 데이터 없으면 중립
-
-    # ── 축5: 사업안정성 ──
-    biz = metrics.get("businessStability", {})
-    ax5 = []
-    revCV = biz.get("revenueCV")
-    if revCV is not None:
-        ax5.append(("영업안정성", min(revCV, 100)))
-    totalAssets = biz.get("totalAssets")
-    if totalAssets and totalAssets > 50e12:
-        ax5.append(("규모", 0.0))  # 대형 금융지주 = 최소 위험
-    elif totalAssets and totalAssets > 10e12:
-        ax5.append(("규모", 15.0))
-    else:
-        ax5.append(("규모", 35.0))
-    s5 = axisScore(ax5) if ax5 else 25.0
-
-    # ── 가중평균 ──
-    w = _WEIGHTS["financial"]
-    axes = [
-        {"name": "자본적정성", "score": s1, "weight": w[0], "metrics": ax1},
-        {"name": "수익성", "score": s2, "weight": w[1], "metrics": ax2},
-        {"name": "자산건전성", "score": s3, "weight": w[2], "metrics": ax3},
-        {"name": "유동성", "score": s4, "weight": w[3], "metrics": ax4},
-        {"name": "사업안정성", "score": s5, "weight": w[4], "metrics": ax5},
-    ]
-
-    # 축별 등급 기여도 계산
-    for a in axes:
-        score = a.get("score") or 0
-        weight = a.get("weight", 0)
-        a["contribution"] = round(score * weight, 2)
-
-    currentScore = weightedScore([{"score": a["score"], "weight": a["weight"]} for a in axes])
-
-    # 시계열 안정화 (간이 — 과거 ROA/자본비율 추세)
-    historicalScores = []
-    for h in metrics["history"][1:3]:
-        scores = []
-        er = scoreMetric(h.get("equityRatio"), thresholds["equity_ratio"])
-        roa = scoreMetric(h.get("roa"), thresholds["roa"])
-        if er is not None:
-            scores.append(er)
-        if roa is not None:
-            scores.append(roa)
-        if scores:
-            historicalScores.append(sum(scores) / len(scores))
-
-    overall = _applyTimeSeriesSmoothing(currentScore, historicalScores)
-
-    # ── CHS + Notch + divergence 공통 후처리 ──
-    grade, gradeDesc, pdEstimate, overall, chsResult, notchAdj, divExpl = _applyPostAdjustments(
-        company, overall, latest, metrics, axes, False, False, None
-    )
-
-    sectorLabel = f"{getSectorLabel(sector)} (Track B 금융전용)"
-
-    result = {
-        "grade": f"dCR-{grade}",
-        "gradeRaw": grade,
-        "gradeDescription": gradeDesc,
-        "gradeCategory": gradeCategory(grade),
-        "investmentGrade": isInvestmentGrade(grade),
-        "score": overall,
-        "healthScore": round(100 - overall, 2),
-        "currentScore": currentScore,
-        "pdEstimate": pdEstimate,
-        "eCR": None,
-        "outlook": creditOutlook([currentScore] + historicalScores),
-        "sector": sectorLabel,
-        "captiveFinance": False,
-        "holding": False,
-        "latestPeriod": latest.get("period"),
-        "chsAdjustment": chsResult,
-        "notchAdjustment": notchAdj if notchAdj["totalNotch"] != 0 else None,
-        "divergenceExplanation": divExpl,
-        "methodologyVersion": "v4.0-TrackB",
-        "axes": [
-            {
-                "name": a["name"],
-                "score": a["score"],
-                "weight": round(a["weight"] * 100),
-                "contribution": a.get("contribution", 0),
-                "metrics": _normalizeMetricsForOutput(a["metrics"]),
-            }
-            for a in axes
-        ],
-    }
-
-    if detail:
-        result["metricsHistory"] = metrics["history"]
-        result["businessStability"] = metrics.get("businessStability")
 
     return result
