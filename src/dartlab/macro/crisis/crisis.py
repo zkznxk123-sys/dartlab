@@ -243,6 +243,16 @@ def analyzeCrisis(*, market: str = "US", asOf: str | None = None, overrides: dic
         - ``creditToGDPGap``/``ghsCrisisScore``/``minskyPhase``: 개별 detector
         - ``synth.dalio48Match`` / ``synth.dalioCaseMatch``: 역사적 매칭 SSOT
 
+    When:
+        ``macro("crisis")`` 단일 진입점. AI 가 위기 종합 답변 (지금이 2008 같은가? 등) 시.
+
+    How:
+        ``_fetchCrisisData`` (FRED/ECOS) → overrides 적용 → 각 detector 호출 → 22+ 키 dict 합성
+        → timeseries 첨부.
+
+    Raises:
+        없음 — 개별 detector 실패는 None 키로 폴백.
+
     Requires:
         FRED (US: hy_spread, vix, dxy, gdp 등) 또는 ECOS (KR). API key 불필요.
 
@@ -415,6 +425,10 @@ _CYCLE_ACTIONS: dict[str, list[dict]] = {
 def calcCyclicalAction(*, market: str = "KR", asOf: str | None = None, overrides: dict | None = None) -> dict | None:
     """사이클 위치 기반 행동 추천. overrides로 AI 사이클 국면 조율.
 
+    Capabilities:
+        ``analyzeCrisis`` 결과의 cycle phase 또는 ``overrides["cyclePhase"]`` 를 받아 5 국면별
+        2~3 개 우선순위 행동 추천 dict 반환. AI 가 시나리오 조율 시 cyclePhase 강제 가능.
+
     Returns
     -------
     dict | None
@@ -422,6 +436,34 @@ def calcCyclicalAction(*, market: str = "KR", asOf: str | None = None, overrides
         phaseLabel : str
         actions : list[dict]
         historicalPrecedent : str | None
+
+    Raises:
+        없음 — analyzeCrisis 실패 또는 cycle 부재 시 None.
+
+    Example:
+        >>> from dartlab.macro.crisis.crisis import calcCyclicalAction
+        >>> r = calcCyclicalAction(market="KR")
+        >>> r["actions"][0]["action"]
+
+    Guide:
+        actions 의 urgency = critical/high/medium 우선순위. AI 답변에서 priority 1 만 인용 권장.
+
+    When:
+        AI 가 회사 / 기관 향 "지금 무엇을 해야 하나" 행동 권고 답변 시. overrides 로 시나리오 분기.
+
+    How:
+        overrides.cyclePhase 직접 매핑 OR ``analyzeCrisis`` 호출 → cycle phase → ``_CYCLE_ACTIONS``
+        룩업 → dict 반환.
+
+    Requires:
+        - FRED/ECOS 캐시 (analyzeCrisis 호출)
+
+    See Also:
+        - ``dartlab.macro.crisis.crisis.analyzeCrisis`` : cycle 산출
+        - ``dartlab.macro.cycles.cycle.analyzeCycle`` : 사이클 4 국면
+
+    AIContext:
+        AI 가 행동 권고 답변 시 본 함수 결과 1~2 개 priority 만 인용. 5 개 동시 권고는 노이즈.
     """
     # override: cyclePhase 직접 지정
     if overrides and overrides.get("cyclePhase"):

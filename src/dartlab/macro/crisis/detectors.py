@@ -99,6 +99,13 @@ def creditToGDPGap(creditGDPSeries: list[float]) -> CreditGapResult:
         - ``minskyPhase``: Minsky 부채 사이클 단계
         - Drehmann & Tsatsaronis (2014) BIS Quarterly Review
 
+    When:
+        ``macro("crisis", "creditGap")``. BIS CCyB 자본 권고 산출 시.
+
+    How:
+        ``_oneSidedHpTrend(λ=400000)`` → trend 시계열 → gap = actual - trend → 임계 분기 →
+        CCyB 매핑.
+
     Requires:
         creditGDPSeries 최소 4 기간 (HP filter 안정). 20+ 기간 권장.
 
@@ -222,6 +229,13 @@ def ghsCrisisScore(
         - ``minskyPhase``: Minsky 부채 사이클 (구조적)
         - ``dalioDebtCyclePhase``: Dalio 6 단계
         - Greenwood, Hanson & Shleifer (2022) Journal of Finance
+
+    When:
+        ``macro("crisis", "ghs")``. 3 년 horizon 위기 예측 답변 / 자산배분 위험 매크로 input.
+
+    How:
+        credit / asset 3 년 변화 → 점수 (각 0~50) → 합산 → zone + probability3y 매핑 + realRate
+        → regime.
 
     Requires:
         creditGrowth3y + assetPriceGrowth3y (3 년 누적 변화).
@@ -376,6 +390,12 @@ def recessionDashboard(
         - ``ghsCrisisScore``: GHS 위기 (3 년 horizon)
         - ``minskyPhase``: Minsky 부채 사이클 단계
         - ``classifyCycle``: 매크로 사이클 4 국면
+
+    When:
+        ``macro("crisis", "dashboard")``. 침체 가능성 종합 답변 / 자산배분 1 년 horizon.
+
+    How:
+        5 지표 각각 임계 분기 → 확률 변환 → 가중 합산 (35/25/20/10/10) → composite + 역사 매칭.
 
     Requires:
         없음 — 5 지표 모두 옵션, 1 개라도 있으면 동작.
