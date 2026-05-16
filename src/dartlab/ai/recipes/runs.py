@@ -75,7 +75,7 @@ class RecipeRunRecord:
     capturedAt: str | None = None
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """RunRecord 직렬화 — None 필드는 빈 문자열로 정규화."""
         d = asdict(self)
         if d["asOf"] is None:
             d["asOf"] = ""

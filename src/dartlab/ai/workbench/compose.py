@@ -13,7 +13,7 @@ from .state import WorkbenchState
 
 
 def runCompose(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
-    """runCompose — TODO 한국어 동작 설명."""
+    """COMPOSE 패스 — refs + critique → 최종 answer text 합성 (TraceEvent stream)."""
     text_collector: list[str] = []
     for ev in runLLMPass(
         state,

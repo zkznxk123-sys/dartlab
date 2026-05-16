@@ -76,7 +76,7 @@ class RecipeScorecard:
     notes: list[str] = field(default_factory=list)
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """RecipeScorecard 모든 필드 → dict 직렬화."""
         return asdict(self)
 
 

@@ -28,7 +28,7 @@ from dartlab.ai.tools.types import ToolSpec
 
 @dataclass
 class AgentResult:
-    """AgentResult — TODO 한국어 클래스 설명."""
+    """agent loop 종료 시 누적 결과 — text + refs + toolCalls + stopReason + steps."""
 
     text: str = ""
     refs: list[Ref] = field(default_factory=list)

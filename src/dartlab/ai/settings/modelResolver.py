@@ -51,7 +51,7 @@ _EXCLUDED_MODEL_PARTS = (
 
 
 def normalizeProviderId(provider: str | None) -> str | None:
-    """normalizeProviderId — TODO 한국어 동작 설명."""
+    """provider 이름 정규화 (chatgpt/gpt/oauth → oauth-codex, 그 외 lower)."""
     if not provider:
         return None
     lowered = provider.strip().lower()
@@ -61,7 +61,7 @@ def normalizeProviderId(provider: str | None) -> str | None:
 
 
 def isOpenaiFamilyProvider(provider: str | None) -> bool:
-    """isOpenaiFamilyProvider — TODO 한국어 동작 설명."""
+    """provider 가 OpenAI 호환 (openai/custom/oauth-codex 등) 인지 판정."""
     normalized = normalizeProviderId(provider)
     return normalized in _OPENAI_FAMILY_PROVIDERS or normalized is None
 
@@ -150,7 +150,7 @@ def fallbackModels(provider: str | None, *, allowFetch: bool = True) -> list[str
 
 
 def isOpenaiChatModel(modelId: str) -> bool:
-    """isOpenaiChatModel — TODO 한국어 동작 설명."""
+    """modelId 가 OpenAI chat 계열 (gpt-/o*) 인지 — embedding/whisper 등은 제외."""
     lowered = modelId.lower()
     return lowered.startswith(_OPENAI_MODEL_PREFIXES) and not any(part in lowered for part in _EXCLUDED_MODEL_PARTS)
 

@@ -20,7 +20,7 @@ from .targets import _hasRecipe
 
 
 def runWork(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
-    """runWork — TODO 한국어 동작 설명."""
+    """WORK 패스 — tool calling 실행 + ref 수집 (TraceEvent stream)."""
     yield from runLLMPass(
         state,
         provider,

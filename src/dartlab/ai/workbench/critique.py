@@ -13,7 +13,7 @@ from .state import WorkbenchState
 
 
 def runCritique(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
-    """runCritique — TODO 한국어 동작 설명."""
+    """CRITIQUE 패스 — refs 자기 비판 + 부족분 식별 (TraceEvent stream)."""
     user_ctx = _buildCritiqueContext(state)
     text_collector: list[str] = []
     for ev in runLLMPass(
