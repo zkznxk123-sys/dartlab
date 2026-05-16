@@ -118,7 +118,58 @@ def matchHistoricalEvents(
 ) -> list[HistoricalEvent]:
     """현재 매크로 상태와 유사한 역사적 사건 매칭 (Q3.1e split).
 
-    _SIGNATURE_CHECKS 테이블 기반 스코어링 → 0.5 이상 매치만 반환 (상위 3).
+    Capabilities:
+        현재 매크로 스냅샷을 _HISTORICAL_EPOCHS (볼커/골디락스/IT 버블/2008/2009
+        대반등/2011 유럽/2018 긴축/COVID/2022 인플레/AI 강세) 의 signature 와
+        _SIGNATURE_CHECKS 테이블로 스코어링 → 매치율 ≥ 0.5 상위 3 사건 반환.
+
+    Args:
+        data: 8 시리즈 월별 dict ({"hy_spread"/.../"cpi_yoy": {"YYYY-MM": v}}).
+
+    Returns:
+        list[HistoricalEvent] (eventName/eventDate/similarity(높음·보통)/context/
+        outcome). 최대 3 건.
+
+    Example:
+        >>> events = matchHistoricalEvents({"hy_spread": {...}, ...})
+        >>> events[0].eventName, events[0].similarity
+        ('2009 대반등', '높음')
+
+    Guide:
+        similarity "높음" (매치율 ≥ 0.75) 만 인용 권장. context 의 N/M 매칭
+        비율로 신뢰성 검증.
+
+    When:
+        ``buildHistoricalContext`` 내부 + AI "과거 어디와 비슷" 답변.
+
+    How:
+        _extractCurrentSnapshot → 각 epoch signature × _SIGNATURE_CHECKS 매칭 →
+        score/checks → 매치율 정렬 → top 3.
+
+    Requires:
+        8 시리즈 월별 (HY/HY_d3/YC/UR/UR_d6/VIX/NFCI/IP/CPI).
+
+    Raises:
+        없음 — 매치 없으면 빈 list.
+
+    See Also:
+        - buildHistoricalContext : 본 함수 호출 진입점
+        - simultaneousWarningFlags : 위기 신호
+
+    AIContext:
+        top 1~2 eventName + outcome 인용으로 "지금 2008-12 와 비슷, 향후 V자
+        반등" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 매치율 0.5~0.75 (보통) 단정 + similarity 미공개
+            - top 1 단정 + 후보 2/3 미노출
+        OutputSchema:
+            list[HistoricalEvent] (5 필드).
+        Prerequisites: 8 시리즈 월별.
+        Freshness: 월간.
+        Dataflow: snapshot → signature 매칭 → score → top-3.
+        TargetMarkets: US (epoch 미국 중심). KR 미지원.
     """
     curr = _extractCurrentSnapshot(data)
     matches: list[tuple[float, HistoricalEvent]] = []
@@ -293,21 +344,64 @@ def buildHistoricalContext(
 ) -> HistoricalContext:
     """종합 역사적 맥락 계산 — 위기 + 호황 + 역사적 사건 양방향.
 
+    Capabilities:
+        위기 신호 5 종 (HY 급등/YC 역전/실업 반등/CPI 가속/동시 경고등) + 호황
+        신호 2 종 (8 호황 점등/HY 압축) + 역사적 사건 매칭 (10 epoch) + 다음 장
+        제안 (suggestedScenario) 을 단일 dict 합성. 매크로 historical 맥락의
+        SSOT 진입점.
+
     Args:
-        data: {
-            "hy_spread": {YYYY-MM: %},
-            "spread_10y3m": {YYYY-MM: %},
-            "spread_10y2y": {YYYY-MM: %},
-            "unrate": {YYYY-MM: %},
-            "cpi_raw": {YYYY-MM: index},
-            "indpro": {YYYY-MM: index},
-            "vix": {YYYY-MM: level},
-            "nfci": {YYYY-MM: index},
-            "fedfunds": {YYYY-MM: %},  # optional, 역사적 사건 매칭용
-        }
+        data: 시리즈별 월별 dict — hy_spread/spread_10y3m/spread_10y2y/unrate/
+            cpi_raw/indpro/vix/nfci/fedfunds(옵션).
 
     Returns:
-        HistoricalContext
+        HistoricalContext — hySpike/yieldCurveInversion/unemploymentBounce/
+        cpiAcceleration/simultaneousWarnings/bullishSignals/hyCompression/
+        historicalEvents/suggestedScenario/suggestedReason/riskLevel/riskScore/
+        opportunityLevel/opportunityScore/description.
+
+    Example:
+        >>> r = buildHistoricalContext({"hy_spread": {...}, ...})
+        >>> r.riskLevel, r.historicalEvents[0].eventName
+        ('elevated', '2008 금융위기')
+
+    Guide:
+        riskLevel ≥ "elevated" + simultaneousWarnings.flagCount ≥ 3 = 강한
+        경고. opportunityLevel "favorable" 일 때만 적극적 매수 시그널 인용.
+
+    When:
+        ``analyzeCrisis`` 내부 + AI 매크로 historical 답변 1 차.
+
+    How:
+        data → _deltaN/_yoy 변환 → 5 위기 + 2 호황 신호 함수 호출 →
+        matchHistoricalEvents (10 epoch) → score 합산 → _findSuggestedScenario.
+
+    Requires:
+        FRED 8 시리즈 월별 (HY/YC/UR/CPI/IP/VIX/NFCI) + NBER 일자 정적.
+
+    Raises:
+        없음 — 부분 데이터로도 동작 (없는 신호는 None).
+
+    See Also:
+        - matchHistoricalEvents : 사건 매칭
+        - simultaneousWarningFlags : 동시 점등
+        - bullishSignalFlags : 호황 신호
+
+    AIContext:
+        riskLevel + opportunityLevel + 최상위 historicalEvent + description 1~2
+        줄 인용으로 한 단락 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - riskLevel 만 인용 + opportunityLevel 무시 (양방향 같이)
+            - historicalEvents top 1 단정 (similarity 검증 필수)
+            - suggestedScenario 단독 인용 + reason 미노출
+        OutputSchema:
+            HistoricalContext (15 필드).
+        Prerequisites: 8 시리즈 월별 + NBER 정적.
+        Freshness: 월간.
+        Dataflow: data → 변환 → 7 신호 + epoch 매칭 → score → 합성.
+        TargetMarkets: US (NBER + FRED 한정). KR 미지원.
     """
     hy = data.get("hy_spread")
     spread3m = data.get("spread_10y3m")

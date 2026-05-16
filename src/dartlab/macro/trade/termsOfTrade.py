@@ -79,14 +79,60 @@ def calcToT(
 ) -> ToTSignal:
     """교역조건 계산 + 방향 판별.
 
+    Capabilities:
+        교역조건 (수출물가 / 수입물가 × 100) 수준 + 전기대비 모멘텀 → 방향
+        (improving/stable/deteriorating) + 수출이익 시사 (positive/neutral/
+        negative). KR 수출 기업 마진 분석 표준 입력.
+
     Args:
-        exportPriceIdx: 수출물가지수
-        importPriceIdx: 수입물가지수
-        prevExportPriceIdx: 이전 기간 수출물가지수 (모멘텀용)
-        prevImportPriceIdx: 이전 기간 수입물가지수 (모멘텀용)
+        exportPriceIdx: 수출물가지수.
+        importPriceIdx: 수입물가지수 (≤ 0 면 판별 불가).
+        prevExportPriceIdx: 이전 기간 수출물가지수 (모멘텀용).
+        prevImportPriceIdx: 이전 기간 수입물가지수 (모멘텀용).
 
     Returns:
-        ToTSignal: 교역조건 수준 + 방향 + 수출이익 시사점
+        ToTSignal — level/momentum/direction/directionLabel/earningsImplication/
+        earningsLabel/description.
+
+    Example:
+        >>> r = calcToT(105.2, 98.5, 103.0, 100.0)
+        >>> r.direction, r.earningsImplication
+        ('improving', 'positive')
+
+    Guide:
+        |momentum| > 2 = 의미 있는 변화. earningsImplication "positive" +
+        export volume momentum 양수 동반 시 수출기업 EPS 모멘텀 강함.
+
+    When:
+        ``analyzeTrade`` 내부 + AI KR 수출 기업 답변.
+
+    How:
+        ToT = export/import × 100 → 전기 ToT → momentum = ToT - prev_ToT →
+        ±2 임계로 방향.
+
+    Requires:
+        ECOS KR 수출입 물가지수 (월간).
+
+    Raises:
+        없음 — importPriceIdx ≤ 0 시 판별불가 ToTSignal 반환.
+
+    See Also:
+        - totProxy : FX/유가 기반 대용치
+        - exportProfitLeading : ToT × 수출량 조합
+
+    AIContext:
+        direction + earningsLabel 두 필드 인용으로 한 문장 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - level (절대값) 만 인용 + momentum 무시
+            - prev 누락한 채 momentum 신뢰 (0 으로 stable 판정)
+        OutputSchema:
+            ToTSignal (7 필드).
+        Prerequisites: ECOS export/import price index.
+        Freshness: 월간.
+        Dataflow: prices → ratio → momentum → 방향 라벨.
+        TargetMarkets: KR (메인). US 미지원.
     """
     if importPriceIdx <= 0:
         return ToTSignal(
@@ -140,17 +186,57 @@ def calcToT(
 def totProxy(fxYoy: float, oilYoy: float) -> ToTProxy:
     """교역조건 대용치: 환율상승률 - 유가상승률.
 
-    투자전략 12: 원/달러 환율 상승률에서 유가 상승률을 빼면
-    교역조건의 대용치를 구할 수 있다.
+    Capabilities:
+        ECOS 수출입 물가지수 발표 전 실시간 대용치 — USDKRW YoY - WTI YoY.
+        원화 약세 (환율 상승) → 수출 유리, 유가 상승 → 수입원가 상승. 투자전략
+        12 표준.
 
     Args:
-        fxYoy: 환율(USDKRW) 전년대비 변화율 (%)
-            원화 약세(환율 상승) → 수출 유리 → 양수
-        oilYoy: WTI 유가 전년대비 변화율 (%)
-            유가 상승 → 수입원가 상승 → 교역조건 악화
+        fxYoy: 환율(USDKRW) 전년대비 변화율 (%).
+        oilYoy: WTI 유가 전년대비 변화율 (%).
 
     Returns:
-        ToTProxy: 대용치 + 방향
+        ToTProxy — value(%p)/direction(improving/stable/deteriorating)/
+        directionLabel/components(fxYoy/oilYoy)/description.
+
+    Example:
+        >>> r = totProxy(8.0, 2.0)
+        >>> r.direction
+        'improving'
+
+    Guide:
+        |value| > 5 = 의미 있는 변화. calcToT 결과와 동반 사용 시 신뢰성 ↑
+        (ECOS 발표 지연 + 대용치 실시간성 결합).
+
+    When:
+        ``analyzeTrade`` 내부 + AI 수출 환경 답변 (실시간).
+
+    How:
+        value = fxYoy - oilYoy → ±5 임계로 direction.
+
+    Requires:
+        FRED DEXKOUS (USDKRW) YoY + FRED DCOILWTICO (WTI) YoY.
+
+    Raises:
+        없음.
+
+    See Also:
+        - calcToT : 정식 ECOS 기반
+        - exportProfitLeading : 수출이익 선행 신호
+
+    AIContext:
+        direction + value 인용으로 "교역조건 대용치 +8%p 개선" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - bp 단위 입력 (% 가 정상)
+            - calcToT 와 충돌 시 단정 (둘 다 참고 권장)
+        OutputSchema:
+            ToTProxy (5 필드).
+        Prerequisites: USDKRW YoY + WTI YoY.
+        Freshness: 일간.
+        Dataflow: fxYoy - oilYoy → 임계 → direction.
+        TargetMarkets: KR. US 미지원.
     """
     value = fxYoy - oilYoy
 
@@ -182,15 +268,57 @@ def exportProfitLeading(
 ) -> ExportProfitSignal:
     """수출기업 이익 선행 신호.
 
-    투자전략 31: 교역조건 대용치는 수출기업 이익에 선행한다.
-    교역조건 방향 × 수출량 모멘텀 조합으로 판별.
+    Capabilities:
+        교역조건 모멘텀 × 수출량 모멘텀 조합 → 수출기업 이익 5 등급
+        (strong_positive/positive/neutral/negative/strong_negative) + confidence
+        (high/medium/low). 투자전략 31 — 교역조건 대용치는 수출기업 이익에 선행.
 
     Args:
-        totMomentum: 교역조건(또는 대용치) 모멘텀
-        exportVolMomentum: 수출량 증가율 (%)
+        totMomentum: 교역조건 또는 대용치 모멘텀 (%p).
+        exportVolMomentum: 수출량 증가율 (%).
 
     Returns:
-        ExportProfitSignal: 수출이익 선행 신호
+        ExportProfitSignal — signal/signalLabel/confidence/components/description.
+
+    Example:
+        >>> r = exportProfitLeading(3.0, 5.0)
+        >>> r.signal, r.confidence
+        ('strong_positive', 'high')
+
+    Guide:
+        strong_positive + high = KR 수출 EPS 강한 모멘텀. positive (medium) =
+        한 가지 신호만 → 추세 확인 필요.
+
+    When:
+        ``analyzeTrade`` 내부 + AI KR 수출 EPS 답변.
+
+    How:
+        totMomentum ±2 + exportVolMomentum ±3 4 조합 → 5 등급 라벨.
+
+    Requires:
+        calcToT 또는 totProxy momentum + 한국 관세청 수출량 증가율.
+
+    Raises:
+        없음.
+
+    See Also:
+        - calcToT : ToT 모멘텀 입력
+        - totProxy : 대용치 입력
+        - analyzeTrade : 본 함수 호출 진입점
+
+    AIContext:
+        signalLabel + components 인용으로 한 문장 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 임계 임의 변경 (±2 / ±3 표준)
+            - confidence 무시 + signal 단정
+        OutputSchema:
+            ExportProfitSignal (5 필드).
+        Prerequisites: ToT momentum + 수출량 YoY.
+        Freshness: 월간.
+        Dataflow: 2 momentum → 4 조합 → 라벨.
+        TargetMarkets: KR. US 미지원.
     """
     tot_positive = totMomentum > 2
     tot_negative = totMomentum < -2
