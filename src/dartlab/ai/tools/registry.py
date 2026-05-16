@@ -8,6 +8,7 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable
 
+from .compareCompanies import compareCompanies
 from .compileVisual import compileVisual
 from .engineCall import engineCall
 from .evidenceGate import evidenceGate
@@ -291,6 +292,25 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "CompareCompanies": ToolSpec(
+        "CompareCompanies",
+        "다중 종목 (2~3 개) wide-format 비교. 매출·영업이익·순이익·총자산·자기자본·부채·debtRatio·ROE + 각 종목 dCR/industry badge 자동 부착. '삼성·하이닉스 비교' 류 질문에 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCodes": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "2~3 개 종목 코드. 초과 시 앞 3 개만.",
+                },
+            },
+            "required": ["stockCodes"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "ScenarioOverlay": ToolSpec(
         "ScenarioOverlay",
         "macro 시나리오 preset (146 종 — 1997 IMF / 2008 GFC / Fed DFAST 등) 의 macro overrides 와 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. '금리 +50bp 면?' 류 질문에 답변 본문 옵션 1 회 호출.",
@@ -478,6 +498,7 @@ _TOOLS: dict[str, ToolFn] = {
     "EngineCall": engineCall,
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
+    "CompareCompanies": compareCompanies,
     "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
@@ -521,6 +542,7 @@ _LEGACY_NAME_MAP = {
     "engine_call": "EngineCall",
     "evidence_gate": "EvidenceGate",
     "pick_story_template": "PickStoryTemplate",
+    "compare_companies": "CompareCompanies",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",
