@@ -508,9 +508,73 @@ def minskyPhase(
     ponziRatio: float | None = None,
     dxyChange: float | None = None,
 ) -> MinskyPhaseResult:
-    """Kindleberger-Minsky 순환 5단계 판별.
+    """Kindleberger-Minsky 5 단계 (displacement→boom→overtrading→discredit→revulsion).
 
-    이전(displacement) → 호황(boom) → 과열(overtrading) → 공황(discredit) → 전염(revulsion)
+    Capabilities:
+        Minsky (1986) "Stabilizing an Unstable Economy" + Kindleberger (1978)
+        "Manias, Panics and Crashes" 의 5 단계 모델 — Credit gap + 자산 수익
+        + HY 스프레드 + VIX + Ponzi 비율 + 달러 변화 6 지표 가중 투표로 현재
+        단계 판정. 부채 사이클 분석의 결정판.
+
+    Args:
+        creditGap: Credit-to-GDP gap (%p).
+        assetReturn3y: 자산 3 년 수익률 (%).
+        hySpread: HY 스프레드 (bps).
+        vix: CBOE VIX.
+        ponziRatio: Ponzi 단계 비율 (회수성 대비 신규차입 의존도, %).
+        dxyChange: 달러 인덱스 변화 (%).
+
+    Returns:
+        MinskyPhaseResult dataclass:
+            - ``phase`` (str): 5 단계 중 하나
+            - ``phaseLabel`` (str): 한국어
+            - ``signals`` (list[str]): 판정 근거
+            - ``scores`` (dict): 5 단계 점수
+            - ``confidence`` (str)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = minskyPhase(creditGap=12, assetReturn3y=60, vix=15,
+        ...                  ponziRatio=35)
+        >>> r.phase
+        'overtrading'
+
+    Guide:
+        5 단계 시간 순서:
+        - displacement: 외부 충격 (기술 혁신, 정책 변화) → 신용 시작
+        - boom: 자산 가격 상승 + 신용 확장
+        - overtrading: 과열 (credit gap > 10%, asset > 50% 3Y)
+        - discredit: panic 시작 (HY 급등, VIX panic)
+        - revulsion: 신용 수축 (credit gap < -5, asset 하락)
+
+    SeeAlso:
+        - ``creditToGDPGap``: BIS 신용 거품
+        - ``ghsCrisisScore``: GHS 위기 예측
+        - ``dalioDebtCyclePhase``: Dalio 6 단계 (Minsky 확장)
+
+    Requires:
+        없음 — 6 지표 모두 옵션. 1 개라도 있으면 동작.
+
+    AIContext:
+        phase 라벨 + signals 함께 인용. confidence=low 결과는 전환기 — 분기
+        후 재호출 권장. ponziRatio > 50 은 Hyman Minsky 의 Ponzi 단계 강신호.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 지표 (VIX 만) 로 단계 판정 — 본 함수는 6 지표 합산.
+            - displacement → revulsion 5 단계는 시간 순서이지만 동시 신호
+              가능 — phase 가 항상 순서대로 진행하지 않음.
+        OutputSchema:
+            MinskyPhaseResult ``{phase, phaseLabel, signals, scores, confidence}``.
+        Prerequisites:
+            적어도 2 개 지표 권장 (1 개만이면 confidence=low).
+        Freshness:
+            지표별 (BIS 분기, VIX/HY 일, asset return 월).
+        Dataflow:
+            지표별 룰 → scores 5 단계 누적 → max → phase 결정 → confidence.
+        TargetMarkets: US (FRED 표준), Global (BIS).
     """
     signals: list[str] = []
     scores = {"displacement": 0, "boom": 0, "overtrading": 0, "discredit": 0, "revulsion": 0}
