@@ -14,8 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 분석·신용·거시·퀀트 엔진의 주요 함수 docstring 을 9 섹션 형식 (사용 시 주의사항 ·
   반환 스키마 · 사전 조건 · 데이터 흐름 등) 으로 보강했다. IDE 자동완성과 외부
   LLM tool calling 시점에 호출 맥락을 더 충실히 전달한다.
-- 큰 모듈 일부를 작은 파일로 분리하면서 외부 import path 와 함수 시그니처는 그대로
-  유지했다. 사용자 코드 변경 불필요.
+- 큰 모듈 12 종 (presets · crisis · metrics · engine · calc · grading · predictionSignals · dcf ·
+  dFV · simulation · macroCycle · historicalContext) 을 도메인별 작은 파일로 분리했다.
+  외부 import path 와 함수 시그니처는 그대로 유지 — 사용자 코드 변경 불필요.
+  특히 predictionSignals.py 는 2194 줄에서 facade 118 줄로 축소 (95% 감소).
+- 신용등급 표 SSOT 를 L1.5 (`synth/creditGradeTable.py`) 본체로 이동. credit/scoring 의
+  옛 위치는 shim 으로 재노출. L2↔L2 우회 호출 패턴 제거.
 
 ### Fixed
 
