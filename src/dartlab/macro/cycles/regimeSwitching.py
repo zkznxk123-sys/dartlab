@@ -379,18 +379,74 @@ def hamiltonRegime(
     maxIter: int = 200,
     tol: float = 1e-6,
 ) -> HamiltonResult:
-    """Hamilton Regime Switching — EM 알고리즘으로 추정.
+    """Hamilton Markov Regime Switching — EM 알고리즘 2-regime AR(1).
 
-    2-regime AR(1) Markov-Switching 모델:
-    y_t = μ_{s_t} + φ × y_{t-1} + ε_t,  ε_t ~ N(0, σ²_{s_t})
+    Capabilities:
+        Hamilton (1989) 2-regime Markov-Switching AR(1) 모델 EM 추정.
+        y_t = μ_{s_t} + φ × y_{t-1} + ε_t, ε_t ~ N(0, σ²_{s_t}). regime 0 =
+        확장 (높은 평균), regime 1 = 침체. 필터/스무더 확률 (Kim 1994) 함께
+        반환. GDP/산업생산 분기 시계열에 표준 적용.
 
     Args:
-        series: GDP 성장률 시계열 (분기, 최소 20기간)
-        maxIter: EM 최대 반복 횟수
-        tol: 로그우도 수렴 기준
+        series: 시계열 (GDP 성장률 분기, 최소 10 기간 권장 20+).
+        maxIter: EM 최대 반복 (기본 200).
+        tol: 로그우도 수렴 기준 (기본 1e-6).
 
     Returns:
-        HamiltonResult: 필터/스무더 확률 + 파라미터
+        HamiltonResult:
+            - ``filteredProbs``/``smoothedProbs`` (np.ndarray T×2): regime
+              확률 시계열.
+            - ``currentRegime`` (int): 최신 regime (0/1).
+            - ``currentProb`` (float): 최신 regime 확률.
+            - ``regimeLabels`` (tuple): ("expansion", "contraction").
+            - ``params`` (dict): μ, σ, φ, p00, p11.
+            - ``logLikelihood`` (float): 최종 LL.
+            - ``converged`` (bool) / ``iterations`` (int).
+
+    Raises:
+        없음 (T < 10 시 empty result 반환).
+
+    Example:
+        >>> r = hamiltonRegime([2.5, 2.8, -1.2, -0.5, 1.8, ...])
+        >>> r.currentRegime, r.currentProb
+        (0, 0.85)  # 85% 확률 확장 regime
+
+    Guide:
+        - smoothedProbs > 0.7 = 강한 regime 신호 (확장 또는 침체 확정).
+        - 0.3 ~ 0.7 = 전환 구간 (uncertainty 큼).
+        - 최소 20 분기 (5 년) 권장 — 단기 데이터는 regime 분리 약함.
+        - p00/p11 (자기지속 확률) 0.9+ 면 regime persistent.
+
+    SeeAlso:
+        - ``clevelandProbit``: 단변량 yield curve 기반
+        - ``sahmRule``: 실업률 룰
+        - ``conferenceBoardLEI``: LEI 합성지수
+
+    Requires:
+        시계열 ≥ 10 기간 (≥ 20 권장).
+
+    AIContext:
+        currentRegime + smoothedProb 함께. 확률 0.5 부근은 단정 금지 (전환
+        구간). converged=False 면 결과 신뢰 낮음.
+
+    LLM Specifications:
+        AntiPatterns:
+            - filteredProbs 와 smoothedProbs 혼동 — 후자가 회고적, 전자가
+              실시간.
+            - 짧은 시계열 (< 20 기간) 에 강한 단정.
+        OutputSchema:
+            ``HamiltonResult(filteredProbs: ndarray, smoothedProbs: ndarray,
+              currentRegime: int, currentProb: float, regimeLabels: tuple,
+              params: dict, logLikelihood: float, converged: bool,
+              iterations: int)``.
+        Prerequisites:
+            시계열 ≥ 10 기간 (≥ 20 권장).
+        Freshness:
+            분기 (GDP 갱신 직후).
+        Dataflow:
+            series → 초기값 (median split) → EM (E: forward-backward, M:
+            params 갱신) → 수렴 → 필터/스무더 확률.
+        TargetMarkets: US (BEA GDP), KR (BOK GDP), 글로벌 분기 GDP.
     """
     y = np.asarray(series, dtype=np.float64)
     T = len(y)
