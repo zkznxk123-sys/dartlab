@@ -543,28 +543,66 @@ def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[st
 
 @memoizedCalc
 def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict | None:
-    """Penman 분해 -- ROE가 영업력인지 레버리지인지 분리.
+    """Penman ROE 분해 — RNOA (영업력) vs FLEV × SPREAD (레버리지 효과) 분리.
 
-    ROCE = RNOA + FLEV × SPREAD
-    RNOA = NOPAT / NOA  (순영업자산수익률)
-    FLEV = NFO / Equity  (금융레버리지)
-    NBC  = 순금융비용 / NFO  (순차입비용률)
-    SPREAD = RNOA - NBC  (초과수익률)
-    leverageEffect = FLEV × SPREAD  (레버리지 효과)
+    Capabilities:
+        Penman & Nissim (2001, RAS) 의 ROE 분해 — ROCE = RNOA + FLEV × SPREAD.
+        영업 수익성 (RNOA) 과 레버리지 효과를 분리해 "ROE 가 영업 efficiency
+        에서 왔는가 아니면 financial leverage 에서 왔는가" 판정. NOA (Net
+        Operating Assets) + NFO (Net Financial Obligations) 회계 분리 기반.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            rnoa : float — 순영업자산수익률 (%)
-            flev : float — 금융레버리지 (배)
-            nbc : float — 순차입비용률 (%)
-            spread : float — 초과수익률 RNOA-NBC (%)
-            leverageEffect : float — 레버리지 효과 FLEV×SPREAD (%)
-            roce : float — 자기자본수익률 RNOA+leverageEffect (%)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
 
-    학술근거: Nissim & Penman (2001), Penman FSA&SV 5e.
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 분해 (period, rnoa, flev, nbc,
+              spread, leverageEffect, roce)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcPenmanDecomposition(Company("005930"))
+        >>> r["history"][0]
+        {'period': '2024', 'rnoa': 15, 'flev': 0.3, 'nbc': 3, 'spread': 12,
+         'leverageEffect': 3.6, 'roce': 18.6}
+        # ROE 18.6% = 영업 15% + 레버리지 효과 3.6%p (안전한 레버리지)
+
+    Guide:
+        진성 고수익 = RNOA > 15% + FLEV 낮음 (< 0.5). 레버리지 의존 = FLEV
+        > 1 + RNOA 보통 (10%). SPREAD 음수면 부채가 ROE 를 깎는 중 (적색
+        신호 — 부채 cost 가 영업 수익 초과).
+
+    SeeAlso:
+        - ``calcRoicTree``: McKinsey ROIC 분해
+        - ``calcReturnTrend``: ROE/ROA 시계열
+        - ``calcAssetStructure``: NOA 산출 (본 함수 입력 데이터)
+        - Penman, S. & Nissim, D. (2001) "Ratio Analysis and Equity Valuation"
+
+    Requires:
+        IS + BS 시계열 + 영업/비영업 분리 (calcAssetStructure 와 같은 로직).
+
+    AIContext:
+        ROE 만 인용 금지 — RNOA + leverageEffect 분해 결과 함께 노출. 진성
+        고수익 회사 (Penman 의 quality of earnings) 식별에 핵심.
+
+    LLM Specifications:
+        AntiPatterns:
+            - SPREAD 양수만 보고 "안전" 단정 — FLEV 비율 함께 확인 (FLEV 1+
+              이면 작은 SPREAD 변화에도 ROE 큰 영향).
+            - 단년도 RNOA 만 보고 "영업력 우수" — 3 년 추세 권장.
+        OutputSchema:
+            ``{history: list[dict 7키]}``.
+        Prerequisites:
+            IS/operatingIncome + BS/equity + NOA/NFO 분리 가능.
+        Freshness:
+            최신 분기 + 시계열.
+        Dataflow:
+            IS/BS → 영업/비영업 분리 → NOPAT/NOA → RNOA + FLEV + NBC →
+            SPREAD = RNOA - NBC → leverageEffect = FLEV × SPREAD → ROCE.
+        TargetMarkets: KR (DART), US (EDGAR). 표준 회계 동일.
     """
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익", "금융이익", "금융비용"])
     bsResult = company.select(
