@@ -49,34 +49,76 @@ def narrateRepayment(
     captive: bool = False,
     separateMetrics: dict | None = None,
 ) -> AxisNarrative:
-    """축 1: 채무상환능력 서사 생성.
+    """축 1: 채무상환능력 서사 — EBITDA 이자보상 + Debt/EBITDA + 차입금 규모.
 
-    EBITDA 이자보상배율, 차입금/EBITDA, 총차입금 규모 등을
-    업종 기준표 위치와 결합하여 채무상환능력 해석 문장을 생성한다.
+    Capabilities:
+        EBITDA 이자보상배율 + Debt/EBITDA + FFO/Debt + 총차입금 규모를 업종
+        기준표 위치와 결합해 신평사 수준의 한국어 해석 문장 (요약 + details
+        list) 생성. 캡티브 금융 복합기업은 별도재무 보정 적용.
 
-    Parameters
-    ----------
-    latest : dict
-        최신 분기 지표. 주요 키: ``ebitda`` (원), ``totalBorrowing`` (원),
-        ``revenue`` (원), ``ebitdaInterestCoverage`` (배).
-    axisScore : float | None
-        채무상환능력 축 점수 (점). None이면 평가 불가.
-    sectorLabel : str
-        업종 분류 레이블 (예: ``"제조업"``).
-    captive : bool
-        캡티브 금융 복합기업 여부. True이면 금융자회사 차입금
-        관련 보정 문구를 추가한다.
-    separateMetrics : dict | None
-        별도 재무제표 기반 지표. 캡티브 기업에서 제조 부문만
-        분리 평가할 때 사용한다.
+    Args:
+        latest: 최신 분기 지표 dict. 주요 키:
+            - ``ebitda`` (원), ``totalBorrowing`` (원), ``revenue`` (원)
+            - ``ebitdaInterestCoverage`` (배)
+            - ``debtToEbitda`` (배), ``ffoToDebt`` (%)
+        axisScore: 채무상환능력 축 점수 (0~100, 0=최우량). None 이면 평가 불가.
+        sectorLabel: 업종 분류 (예 ``"제조업"``).
+        captive: 캡티브 금융 복합기업 여부. True 이면 별도 D/EBITDA 보정.
+        separateMetrics: 별도 재무 dict. 캡티브 회사 제조 부문만 분리 평가용.
 
-    Returns
-    -------
-    AxisNarrative
-        axisName : str — 축 이름 (``"채무상환능력"``)
-        summary : str — 한 줄 요약 문장
-        details : list[str] — 세부 해석 문장 목록
-        severity : str — 심각도 (``"strong"`` / ``"moderate"`` / ``"weak"`` / ``"critical"``)
+    Returns:
+        AxisNarrative dataclass:
+            - ``axisName`` (str): ``"채무상환능력"``
+            - ``summary`` (str): 한 줄 요약
+            - ``details`` (list[str]): 세부 해석
+            - ``severity`` (str): ``"strong"``/``"adequate"``/``"weak"``/``"critical"``
+
+    Raises:
+        없음.
+
+    Example:
+        >>> n = narrateRepayment({"ebitda": 5e12, "totalBorrowing": 1e13,
+        ...                       "ebitdaInterestCoverage": 15, "debtToEbitda": 2.0,
+        ...                       "revenue": 3e14}, axisScore=15, sectorLabel="제조업")
+        >>> n.severity, n.summary
+        ('strong', '채무상환능력은 제조업 업종 기준 매우 우수하다.')
+
+    Guide:
+        ICR ≥ 100 = 무차입에 준 (이자비용 극소). Debt/EBITDA < 3 = 적정,
+        > 5 = 장기 상환 부담. FFO/Debt > 40% = 우수 내부 현금창출. 캡티브
+        금융 복합기업은 연결 D/EBITDA 보다 별도 D/EBITDA 가 핵심 (separate
+        Metrics 입력).
+
+    SeeAlso:
+        - ``narrateCapitalStructure``: 자본구조 (부채비율) 서사
+        - ``narrateLiquidity``: 유동성 (current/quick) 서사
+        - ``narrateCashFlow``: 현금흐름 (OCF) 서사
+        - ``credit.engine.evaluateCompany``: 본 함수 호출
+
+    Requires:
+        latest dict 의 필수 키 (ebitda, ebitdaInterestCoverage, debtToEbitda).
+
+    AIContext:
+        severity 만 단독 인용 금지 — summary + details (시계열 변화 포함) 함께
+        노출. 캡티브 기업 (현대차/기아 등) 은 captive=True 누락 시 부채비율
+        과대 평가.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ICR=999 같은 극단치를 그대로 인용 — "999배" 보다 "무차입 수준"
+              표현 (본 함수가 자동 변환).
+            - 캡티브 기업에서 captive=False 호출 — 금융자회사 차입금이
+              제조업 차입금처럼 표시되는 오해 발생.
+        OutputSchema:
+            AxisNarrative ``{axisName, summary, details, severity}``.
+        Prerequisites:
+            latest dict 에 ebitda + ebitdaInterestCoverage 최소 보유.
+        Freshness:
+            latest = 최신 분기 (마감 후 30~45 일).
+        Dataflow:
+            latest dict → ICR/Debt-EBITDA/FFO 분기 룰 → details 누적 →
+            severity (axisScore 기반) → summary 합성.
+        TargetMarkets: KR (DART 표준 계정), US 일부 (EBITDA 표준 동일).
     """
     details = []
     sev = _severity(axisScore)
