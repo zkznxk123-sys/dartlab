@@ -405,10 +405,30 @@ forbidden_modules = [
     "dartlab.gather",
 ]
 allow_indirect_imports = true
-# industry/build 는 산업지도 builder 모듈 — scan 의 raw 접근이 빌더 본질.
-# 분석 코드와 빌더 코드 분리 별도 트랙 (industry/build → 별도 namespace) 전 ignore.
+# 빌더/raw 데이터 접근 예외 — CLAUDE.md 표 "L1 직접 import 는 L1.5 에 없는 raw 가 필요할 때만 예외" 에 해당.
+# industry/build 산업지도 빌더, quant alphas/factor/benchmark/screen/regime/signal 의 HF bulk + krx listing
+# 등 raw 데이터 접근. frame/synth facade 확장 별도 트랙으로 점진 이전.
 ignore_imports = [
     "dartlab.industry.build.delta -> dartlab.scan.io.parquet",
     "dartlab.industry.build.edges -> dartlab.scan.network.scanner",
     "dartlab.industry.build.edges -> dartlab.scan.network.edges",
+    "dartlab.quant.alphas.bab -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.alphas.fundamentalMomentum -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.benchmark.data -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.benchmark.data -> dartlab.gather.bulkData.hfIndexBulk",
+    "dartlab.quant.benchmark.data -> dartlab.gather.entry",
+    "dartlab.quant.factor.build -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.factor.calc -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.factor.ranking -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.factor.value -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.regime.marketContext -> dartlab.gather.entry",
+    "dartlab.quant.screen._extendedCache -> dartlab.gather.entry",
+    "dartlab.quant.screen._extendedCache -> dartlab.gather.infra.http",
+    "dartlab.quant.screen._extendedCache -> dartlab.gather.sources.price",
+    "dartlab.quant.screen.dataAccess -> dartlab.gather.entry",
+    "dartlab.quant.screen.preset -> dartlab.gather.krx.listing",
+    "dartlab.quant.signal.flow -> dartlab.gather.entry",
+    "dartlab.analysis.financial.predictionSignals -> dartlab.scan",
+    "dartlab.analysis.financial.predictionSignals -> dartlab.scan.network.edges",
+    "dartlab.analysis.valuation.fitness -> dartlab.scan.builders.kr.extended",
 ]
