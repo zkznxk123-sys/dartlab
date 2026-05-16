@@ -12,7 +12,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 FORENSICS_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "incubator" / "forensics"
 
 FORENSICS_IDS = {

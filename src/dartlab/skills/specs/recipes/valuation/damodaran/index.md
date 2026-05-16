@@ -71,6 +71,16 @@ expectedOutputs:
   - Damodaran 10? ?? ?? 21? ?? ?? ??
   - L1/L1.5 ??? ??? gap ledger ???
   - official ?? ? ??? ?????? ?? ???
+visualRefs:
+  - engines.viz.financialStructureCharts
+  - engines.viz.scenarioVisuals
+  - engines.viz.evidenceCoverage
+  - engines.viz.mermaidDiagram
+visualGuidance:
+  - "Damodaran index 는 체계 라우터이므로 기본 산출은 표다. 재무 패널이 실제로 확보된 하위 recipe에서만 engines.viz.financialStructureCharts를 사용한다."
+  - "DCF band, reverse DCF, sensitivity는 하위 실행 결과가 tableRef/valueRef/dateRef를 갖출 때만 engines.viz.scenarioVisuals로 승격한다."
+  - "gap ledger와 promotion readiness는 engines.viz.evidenceCoverage로 보조할 수 있으나, blocker가 남아 있으면 차트보다 표와 한계 설명을 우선한다."
+  - "개념 트리는 engines.viz.mermaidDiagram으로 8노드 이하만 만들고, 공식 출처와 skillRef를 edge 근거로 둔다."
 
 expectedNovelty:
   - damodaranConceptTree
@@ -117,10 +127,12 @@ testUniverse:
 falsifier:
   description: "index가 DCF 실행 가능 상태를 Damodaran 분석체계 완성으로 선언하면 실패로 본다."
 humanIntro: "Damodaran식 분석은 적정가 계산기가 아니라 스토리와 숫자를 서로 반증하는 체계다. 이 진입점은 현재 실행 가능한 L1.5 가치평가 경로와 아직 메꿔야 할 narrative, life cycle, 특수상황, peer valuation 데이터 계약을 한곳에 묶는다."
-lastUpdated: "2026-05-14"
+lastUpdated: "2026-05-17"
 ---
 
 ## 공개 호출 방식
+
+AI 도구 실행 순서는 `EngineCall` 우선이다. 하위 recipe와 엔진 capability가 제공하는 Company/gather/scan/reference 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 `damodaranAnalysisSystem.json` 계약과 gap ledger 를 읽는 **RunPython fallback** 절차다.
 
 ```python
 import importlib.resources as resources
@@ -292,6 +304,8 @@ Damodaran식 분석은 narrative를 숫자로 번역하고, 그 숫자를 재무
 ## 기본 검증
 
 - `damodaranAnalysisSystem.json`의 개념 트리는 10개 축을 모두 포함해야 한다.
+- 하위 recipe 또는 엔진 surface 로 가능한 데이터 수집은 EngineCall 을 우선하고, RunPython 은 reference contract/gap ledger 결합 fallback 으로만 사용한다.
+- visualRefs 는 observed viz skill 만 포함해야 하며, DCF/sensitivity 시각화는 tableRef/valueRef/dateRef 가 있을 때만 emit 한다.
 - 모든 concept는 구현 스킬, 계획 스킬, 데이터 요구사항, gap id를 가져야 한다.
 - 모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 분류되어야 한다.
 - 엔진 보강 후보는 `engineSupplementBacklog`에 남기되, 스킬 phase에서는 `doNotImplementInSkillPhase`를 유지해야 한다.

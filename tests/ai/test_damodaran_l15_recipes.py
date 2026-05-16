@@ -12,7 +12,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DAMODARAN_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "valuation" / "damodaran"
 REFERENCE_DATA = REPO_ROOT / "src" / "dartlab" / "reference" / "data"
 

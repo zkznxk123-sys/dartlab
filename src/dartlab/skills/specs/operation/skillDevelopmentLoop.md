@@ -57,9 +57,9 @@ sourceRefs:
   - dartlab://skills/operation.skillDevelopmentLoop
 procedure:
   - gapSpot — 전 카테고리 dartlab.skills.search() 로 유사 skill 부재 확인 후 ReadCapability + ReadSkill 로 Company/gather/scan 노출 데이터 빈칸 식별. 후보 5~8 개 nominate (axis 명 / 사용 데이터 / 가설).
-  - dataSanityCheck — protoSkill 작성 *전* 에 사용할 capability 를 1 종목 (대형 안정형) 으로 호출해 실제 반환 형태와 시계열 길이를 본다. 가정 어긋나면 후보 폐기 또는 신호 정의 재설계.
-  - protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시.
-  - selfRun — 같은 세션에서 ReadSkill 로 재로드 후 capabilityRefs 를 EngineCall/RunPython 으로 3 케이스 전부 실행. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).
+  - dataSanityCheck — protoSkill 작성 *전* 에 사용할 capability 를 1 종목 (대형 안정형) 으로 EngineCall 우선 호출해 실제 반환 형태와 시계열 길이를 본다. EngineCall surface 가 없을 때만 RunPython fallback 으로 확인한다. 가정 어긋나면 후보 폐기 또는 신호 정의 재설계.
+  - protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시. 엔진에 있는 기능은 toolRefs/본문에서 EngineCall 우선, RunPython 은 폴백 절차로 분리한다.
+  - selfRun — 같은 세션에서 ReadSkill 로 재로드 후 capabilityRefs 를 EngineCall 로 먼저 3 케이스 전부 실행한다. 보조 결합·L1.5 helper·미등록 실험 경로만 RunPython fallback 으로 실행한다. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).
   - redTeam — RunWorkbench 의 CRITIQUE 패스로 (a) 반대 가설 (b) 누락 데이터/edge case (c) 다른 axis 와 중복성 점검. 통과 못하면 protoSkill 재집필 1 회 회귀.
   - graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + 산출물 동기화 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.
   - auditFeedback — 운영 중 같은 skill 이 audit P 반복 또는 docstring 보강 후보 적발 시, public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis 로 승격, 관련 SkillSpec 의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신.
@@ -97,6 +97,9 @@ failureModes:
   - ground-truth 케이스 없이 selfRun 통과시킴 (정성 평가 회귀)
   - incubating skill 을 selfRun 없이 바로 specs/ 로 등재
   - 1 종목으로만 검증 (3 케이스 강행규칙 위반)
+  - 엔진 capability 가 있는데 recipe 본문이 RunPython 코드만 유도함
+  - RunPython fallback 을 주 호출 경로처럼 써서 engine evidence refs 를 잃음
+  - unverified viz skill 을 visualRefs 에 넣어 공식 시각화처럼 노출함
   - redTeam 회귀 횟수 누적 없이 무한 재집필
   - 동일 axis 가 이미 analysis/scan/quant 에 존재함을 점검 안 함
   - 한 질문에 맞춘 runner 를 skill 로 고정
@@ -105,6 +108,8 @@ failureModes:
 forbidden:
   - 운영자 ack 없이 graduate 실행
   - specs/ 디렉터리에 검증 미통과 skill 직접 쓰기
+  - 엔진에 이미 있는 계산을 recipe RunPython 코드에 재구현
+  - observed 가 아닌 viz skill 을 공식 visualRefs 로 연결
   - selfRun 결과를 외부 본문으로 인용 (sourceType=external 마커 누락)
   - 종목 3 개 동시 메모리 로드 (CLAUDE.md 메모리 안전 위반)
   - 질문별 실행 코드 저장
@@ -117,7 +122,7 @@ examples:
 source:
   type: curated_markdown
   owner: dartlab
-lastUpdated: "2026-05-08"
+lastUpdated: "2026-05-17"
 ---
 
 ## 무엇을 하나
@@ -151,6 +156,8 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 ### 2. dataSanityCheck
 
 - protoSkill 작성 *전* 에 사용할 capability 를 1 종목 (대형 안정형, 예: 005930) 으로 호출해 *실제 반환 형태와 시계열 길이* 를 본다.
+- 실행 우선순위는 `EngineCall` → `RunPython fallback` 이다. `Company.show`, `Company.trace`, `Company.disclosure`, `scan.*`, `gather.*`, `analysis.*`, `quant.*`, `credit.*`, `macro.*`, `viz.*` 처럼 엔진 surface 가 있으면 EngineCall 로 호출한다.
+- RunPython 은 엔진 결과를 결합하거나 L1/L1.5 helper 를 직접 호출해야 하는 경우에만 보조로 쓴다. 이때 protoSkill 본문에 "RunPython fallback" 또는 "RunPython 폴백" 을 명시한다.
 - 검사 항목 — 행 수, 컬럼 존재, None/NaN 비율, 기간 범위, attr 이름 (dataclass docstring 으로 검산).
 - 가정과 어긋나면 후보 폐기 또는 신호 정의 재설계 (예: 시계열이 5 거래일뿐이면 σ 통계 가정 폐기 → 절대값/임계 비교로 재정의).
 - 이 단계가 빠지면 protoSkill 가정 오류가 selfRun 단계에서 적발돼 회귀 비용이 1 회 늘어난다 (실제 인큐베이션 회귀 사례에서 확립).
@@ -161,11 +168,14 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 - 초안 markdown 을 `.dartlab/skills/incubating/{category}.{slug}.md` 경로에 SaveArtifact 로 저장.
 - frontmatter 필수 5 개 (id·title·category·purpose·whenToUse) 채우고 `requiredEvidence[]` 에 ground-truth 3 케이스 명시 — 예: 005930 (성공), 047810 (위기), 138930 (저평가).
 - 본문 강제 섹션 (engine skill 인 경우): `## 공개 호출 방식`, `## 호출 동작`, `## 대표 반환 형태`.
+- recipe skill 은 tool card 가 아니다. 엔진 호출은 `linkedSkills`/`capabilityRefs`/`toolRefs` 에서 EngineCall 로 드러내고, RunPython 은 fallback code block 으로 분리한다.
+- 시각화가 답변 품질을 높이면 `visualRefs[]` 와 `visualGuidance[]` 를 같이 둔다. 단, 공식 visualRef 는 `status: observed` 인 `engines.viz.*` 만 사용한다. 재무 원표 기반이면 `engines.viz.financialStructureCharts` / `engines.viz.balanceStructureTrend` / `engines.viz.cashflowWaterfall` / `engines.viz.evidenceCoverage` / `engines.viz.mermaidDiagram` 중 실제 근거와 맞는 것만 고른다.
 
 ### 4. selfRun
 
 - 새로 저장한 incubating skill 을 ReadSkill 로 다시 로드 (검증 — 같은 세션에서 검색 매칭되는지).
-- capabilityRefs 의 각 API 를 EngineCall 로 호출, 보조 계산은 RunPython.
+- capabilityRefs 의 각 API 를 EngineCall 로 먼저 호출, 보조 계산은 RunPython fallback 으로 실행한다.
+- EngineCall 결과의 `tableRef` / `valueRef` / `dateRef` / `sourceRef` 를 selfRun 표의 1차 근거로 둔다. fallback 코드도 `emit_result(...)` 로 같은 ref 형태를 남긴다.
 - 3 케이스를 *순차* 실행 (CLAUDE.md 메모리 안전: 동시 로드 ≤ 2).
 - 결과 표: `(케이스 / 입력 / 출력 / evidence ref)` 4 열. 각 행은 1~2 줄.
 

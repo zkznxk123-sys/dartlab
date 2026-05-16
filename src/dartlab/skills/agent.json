@@ -23804,7 +23804,7 @@
       "categoryTitle": "Engines",
       "kind": "curated",
       "status": "observed",
-      "purpose": "Viz 는 분석 결과를 16 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + 신규 6 종) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
+      "purpose": "Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
       "whenToUse": [
         "viz",
         "시각화",
@@ -23815,10 +23815,11 @@
         "line / bar / radar / waterfall / heatmap",
         "landing 차트 빌드",
         "시계열 시각화",
-        "peer 비교 차트"
+        "peer 비교 차트",
+        "주가차트"
       ],
       "inputs": [
-        "chartType (16 종 중 하나)",
+        "chartType (등록 chartType 중 하나)",
         "data (행 list 또는 series dict)",
         "title · xAxis · yAxis",
         "evidenceBinding 또는 evidenceIds (필수)"
@@ -23834,6 +23835,7 @@
       ],
       "toolRefs": [
         "CompileVisual",
+        "EngineCall",
         "RunPython"
       ],
       "datasetRefs": [],
@@ -23885,7 +23887,7 @@
       "failureModes": [
         "evidenceBinding · evidenceIds 둘 다 없는 spec — emit_chart 가 거부",
         "단일값 또는 근거 없는 장식 시각화 시도",
-        "ChartRenderer 미등록 chartType 사용 — 16 종만 허용",
+        "ChartRenderer 미등록 chartType 사용 — 등록 chartType 만 허용",
         "period 없는 시계열 차트 (x 축 라벨 없음)"
       ],
       "forbidden": [
@@ -23927,7 +23929,7 @@
           "status": "limited"
         }
       },
-      "lastUpdated": null
+      "lastUpdated": "2026-05-17"
     },
     {
       "id": "engines.viz.tableBackedChart",
@@ -25503,7 +25505,10 @@
         "과거 운영 문서 주제는 `engines.*`, `runtime.*`, `operation.*` skill로 흡수한다.",
         "`/skills`와 `dartlab.skills.search()`를 공식 최초 탐색 표면으로 둔다.",
         "엔진 skill은 공개 호출 방식, 호출 동작, 대표 반환 형태, 실행 순서, 검증 게이트를 포함한다.",
-        "기능/docstring은 세부 필드와 코드 원천 자료이며, skill은 사람이 그대로 실행할 수 있는 공개 사용 문서다.",
+        "엔진 skill은 tool card 다. 엔진이 무엇을 분석할 수 있는지, 어떤 공개 호출을 쓰는지, 어떤 evidence 를 반환하는지까지만 책임진다. 축별 상세 schema 는 capability/docstring 으로 연결하고, 여러 엔진·반증·시각화·후속 모니터링을 묶는 실제 분석 절차는 recipe skill 로 둔다.",
+        "recipe skill은 EngineCall 우선이다. 엔진에 이미 있는 기능을 RunPython 코드로 다시 구현하지 않고, RunPython 은 engine surface 가 아직 없거나 L1/L1.5 helper 결합이 필요한 fallback 경로로만 둔다.",
+        "recipe 의 visualRefs 는 observed 상태의 `engines.viz.*` 만 공식 연결한다. unverified 시각화는 후속 후보로만 남기며, 근거 표 없이 장식 chart 를 만들지 않는다.",
+        "capability/docstring은 세부 필드와 코드 원천 자료이며, skill은 사람이 그대로 실행할 수 있는 공개 사용 문서다.",
         "기능 개선, API 변경, 반환 형태 변경, 운영 방식 개선이 있으면 관련 skill을 같은 변경에서 갱신한다.",
         "새 운영 규칙은 먼저 operation skill로 검색 가능해야 하며, 원문 위치가 필요하면 sourceRef를 반드시 둔다.",
         "이 전환이 완료되면 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다."
@@ -25528,7 +25533,7 @@
       "forbidden": [
         "운영 규칙의 SSOT를 삭제된 문서 경로와 SkillSpec 양쪽에 서로 다르게 둔다.",
         "공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작과 skill 설명의 불일치를 방치한다.",
-        "기능/docstring에서 skill을 자동 생성해 엔진 기본 skill을 대체한다."
+        "capability/docstring에서 skill을 자동 생성해 엔진 기본 skill을 대체한다."
       ],
       "examples": [
         "테스트 규칙을 Skills에서 찾기",
@@ -26031,9 +26036,9 @@
       ],
       "procedure": [
         "gapSpot — 전 카테고리 dartlab.skills.search() 로 유사 skill 부재 확인 후 ReadCapability + ReadSkill 로 Company/gather/scan 노출 데이터 빈칸 식별. 후보 5~8 개 nominate (axis 명 / 사용 데이터 / 가설).",
-        "dataSanityCheck — protoSkill 작성 *전* 에 사용할 기능 를 1 종목 (대형 안정형) 으로 호출해 실제 반환 형태와 시계열 길이를 본다. 가정 어긋나면 후보 폐기 또는 신호 정의 재설계.",
-        "protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시.",
-        "selfRun — 같은 세션에서 ReadSkill 로 재로드 후 사용 기능 를 EngineCall/RunPython 으로 3 케이스 전부 실행. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).",
+        "dataSanityCheck — protoSkill 작성 *전* 에 사용할 capability 를 1 종목 (대형 안정형) 으로 EngineCall 우선 호출해 실제 반환 형태와 시계열 길이를 본다. EngineCall surface 가 없을 때만 RunPython fallback 으로 확인한다. 가정 어긋나면 후보 폐기 또는 신호 정의 재설계.",
+        "protoSkill — 후보 1 개 선택. SCHEMA.md 준수 markdown 초안을 .dartlab/skills/incubating/{category}.{slug}.md 에 SaveArtifact 로 저장. requiredEvidence[] 에 ground-truth 3 케이스 명시. 엔진에 있는 기능은 toolRefs/본문에서 EngineCall 우선, RunPython 은 폴백 절차로 분리한다.",
+        "selfRun — 같은 세션에서 ReadSkill 로 재로드 후 capabilityRefs 를 EngineCall 로 먼저 3 케이스 전부 실행한다. 보조 결합·L1.5 helper·미등록 실험 경로만 RunPython fallback 으로 실행한다. 출력 ref + 정량 결과 누적. 종목 동시 로드 ≤ 2 (메모리 안전).",
         "redTeam — RunWorkbench 의 CRITIQUE 패스로 (a) 반대 가설 (b) 누락 데이터/edge case (c) 다른 axis 와 중복성 점검. 통과 못하면 protoSkill 재집필 1 회 회귀.",
         "graduate — 통과 시 specs/{category}/{slug}.md 로 이동 + 필요시 facade axis 등록 + 모듈 코드 작성 + 산출물 동기화 + 운영자 ack 1 줄. engines.{scan|gather|analysis|quant|macro}.* 응용 skill 은 lint 가 facade 호출 예시를 강제하므로 코드 작업 동반.",
         "auditFeedback — 운영 중 같은 skill 이 audit P 반복 또는 docstring 보강 후보 적발 시, public API 자체가 새 축을 요구할 정도로 반복되면 docstring Guide/AIContract 또는 공식 엔진 axis 로 승격, 관련 SkillSpec 의 공개 호출 방식과 대표 반환 형태를 같은 변경에서 갱신."
@@ -26041,7 +26046,7 @@
       "recipeSteps": [],
       "requiredEvidence": [
         "skillRef",
-        "사용 기능",
+        "capabilityRef",
         "auditResult",
         "groundTruthCases",
         "selfRunResultTable",
@@ -26060,6 +26065,9 @@
         "ground-truth 케이스 없이 selfRun 통과시킴 (정성 평가 회귀)",
         "incubating skill 을 selfRun 없이 바로 specs/ 로 등재",
         "1 종목으로만 검증 (3 케이스 강행규칙 위반)",
+        "엔진 capability 가 있는데 recipe 본문이 RunPython 코드만 유도함",
+        "RunPython fallback 을 주 호출 경로처럼 써서 engine evidence refs 를 잃음",
+        "unverified viz skill 을 visualRefs 에 넣어 공식 시각화처럼 노출함",
         "redTeam 회귀 횟수 누적 없이 무한 재집필",
         "동일 axis 가 이미 analysis/scan/quant 에 존재함을 점검 안 함",
         "한 질문에 맞춘 runner 를 skill 로 고정",
@@ -26069,6 +26077,8 @@
       "forbidden": [
         "운영자 ack 없이 graduate 실행",
         "specs/ 디렉터리에 검증 미통과 skill 직접 쓰기",
+        "엔진에 이미 있는 계산을 recipe RunPython 코드에 재구현",
+        "observed 가 아닌 viz skill 을 공식 visualRefs 로 연결",
         "selfRun 결과를 외부 본문으로 인용 (sourceType=external 마커 누락)",
         "종목 3 개 동시 메모리 로드 (CLAUDE.md 메모리 안전 위반)",
         "질문별 실행 코드 저장",
@@ -28952,6 +28962,7 @@
       ],
       "apiRefs": [],
       "toolRefs": [
+        "EngineCall",
         "RunPython"
       ],
       "datasetRefs": [],
@@ -28991,6 +29002,8 @@
       "sourceRefs": [],
       "procedure": [
         "`damodaranAnalysisSystem.json`의 개념 트리는 10개 축을 모두 포함해야 한다.",
+        "하위 recipe 또는 엔진 surface 로 가능한 데이터 수집은 EngineCall 을 우선하고, RunPython 은 reference contract/gap ledger 결합 fallback 으로만 사용한다.",
+        "visualRefs 는 observed viz skill 만 포함해야 하며, DCF/sensitivity 시각화는 tableRef/valueRef/dateRef 가 있을 때만 emit 한다.",
         "모든 concept는 구현 스킬, 계획 스킬, 데이터 요구사항, gap id를 가져야 한다.",
         "모든 gap은 `filled`, `fallbackAccepted`, `deferredWithBlocker` 중 하나로 분류되어야 한다.",
         "엔진 보강 후보는 `engineSupplementBacklog`에 남기되, 스킬 phase에서는 `doNotImplementInSkillPhase`를 유지해야 한다.",
@@ -29011,7 +29024,12 @@
         "L1/L1.5 ??? ??? gap ledger ???",
         "official ?? ? ??? ?????? ?? ???"
       ],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "Damodaran index 는 체계 라우터이므로 기본 산출은 표다. 재무 패널이 실제로 확보된 하위 recipe에서만 engines.viz.financialStructureCharts를 사용한다.",
+        "DCF band, reverse DCF, sensitivity는 하위 실행 결과가 tableRef/valueRef/dateRef를 갖출 때만 engines.viz.scenarioVisuals로 승격한다.",
+        "gap ledger와 promotion readiness는 engines.viz.evidenceCoverage로 보조할 수 있으나, blocker가 남아 있으면 차트보다 표와 한계 설명을 우선한다.",
+        "개념 트리는 engines.viz.mermaidDiagram으로 8노드 이하만 만들고, 공식 출처와 skillRef를 edge 근거로 둔다."
+      ],
       "failureModes": [
         "value만 계산하고 narrative와 driver 연결을 누락",
         "금융업·순환주·턴어라운드 같은 특수상황을 generic FCFF로 밀어넣음",
@@ -29043,7 +29061,12 @@
           ]
         }
       },
-      "visualRefs": [],
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
       "predecessors": [],
       "successors": [
         "recipes.valuation.damodaran.dataAudit",
@@ -29055,7 +29078,7 @@
       "graphTier": "L1.5",
       "cluster": "valuation.damodaran",
       "humanIntro": "Damodaran식 분석은 적정가 계산기가 아니라 스토리와 숫자를 서로 반증하는 체계다. 이 진입점은 현재 실행 가능한 L1.5 가치평가 경로와 아직 메꿔야 할 narrative, life cycle, 특수상황, peer valuation 데이터 계약을 한곳에 묶는다.",
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionReadiness\"][\"status\"],\n        \"implementedSkills\": system[\"promotionReadiness\"][\"skillCount\"],\n        \"plannedSkills\": len(system[\"promotionReadiness\"][\"promotionBlockers\"]),\n        \"gapCount\": len(system[\"promo"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 하위 recipe와 엔진 capability가 제공하는 Company/gather/scan/reference 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 `damodaranAnalysisSystem.json` 계약과 gap ledger 를 읽는 **RunPython fallback** 절차다.\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionR"
     },
     {
       "id": "recipes.valuation.damodaran.dataAudit",
@@ -30773,6 +30796,7 @@
       "outputs": [],
       "apiRefs": [],
       "toolRefs": [
+        "EngineCall",
         "RunPython"
       ],
       "datasetRefs": [],
@@ -30807,6 +30831,8 @@
       "procedure": [
         "5개 고정 타깃에서 self-run 표를 남긴다.",
         "KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.",
+        "엔진에 있는 Company/gather/reference 입력을 RunPython 코드로 재구현하지 않는다. RunPython 은 `buildDamodaranMemo` 결합 fallback 으로만 사용한다.",
+        "visualRefs 는 observed viz skill 만 포함해야 하며, DCF/가격/재무구조 차트는 tableRef/valueRef/dateRef/evidenceBinding 이 없으면 만들지 않는다.",
         "L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.",
         "deepDive execution status table은 21행이어야 하며 finalDecision과 scenarioFalsifier를 포함해야 한다.",
         "verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다."
@@ -30825,7 +30851,13 @@
         "DCF band ? reverse DCF ? gap ledger ? storyboardReady headline",
         "KR/US/??? route? final decision status"
       ],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "normalizedFinancials가 IS/BS/CF 원표에서 tableRef와 기간을 갖추면 engines.viz.financialStructureCharts로 재무 구조를 보조한다.",
+        "DCF band, reverse DCF, sensitivity는 memo table/value refs가 있을 때만 engines.viz.scenarioVisuals로 emit한다. 값만 있고 근거 ref가 없으면 표로 낮춘다.",
+        "현재가·시가총액 근거가 있을 때만 engines.viz.priceChart를 사용해 reverse DCF 맥락을 붙인다.",
+        "gapLedger와 blocker는 engines.viz.evidenceCoverage 또는 표로 제시한다. blocker가 남아 있으면 시각화보다 한계 문장을 우선한다.",
+        "valuation 메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 허용하고 모든 edge에 sourceRef 또는 skillRef를 둔다."
+      ],
       "failureModes": [
         "sub-skill 하나가 blocked인데 최종 memo를 complete로 표시",
         "valuation number만 출력하고 falsifier 누락",
@@ -30852,7 +30884,13 @@
           "status": "limited"
         }
       },
-      "visualRefs": [],
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.scenarioVisuals",
+        "engines.viz.priceChart",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
       "predecessors": [],
       "successors": [],
       "audiences": {},
@@ -30861,7 +30899,7 @@
       "graphTier": null,
       "cluster": null,
       "humanIntro": null,
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `gather.price`, reference lookup, 하위 Damodaran recipe 실행처럼 engine/capability surface 가 있는 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 같은 입력을 `buildDamodaranMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dict"
     },
     {
       "id": "recipes.incubator.forensics.index",
@@ -30905,8 +30943,8 @@
         "scan.disclosureRisk"
       ],
       "toolRefs": [
-        "RunPython",
-        "EngineCall"
+        "EngineCall",
+        "RunPython"
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
@@ -30937,6 +30975,8 @@
       ],
       "procedure": [
         "공개 호출 블록에 L2/L3 호출 문자열이 없어야 한다.",
+        "EngineCall 가능한 입력을 RunPython 코드가 재구현하지 않아야 한다. RunPython 은 L1.5 memo builder fallback 으로만 쓴다.",
+        "visualRefs 는 observed viz skill 만 포함해야 하며, tableRef/evidenceBinding 이 없으면 시각화를 emit 하지 않는다.",
         "`buildEvidenceForensicsMemo` 결과에는 10개 table이 모두 있어야 한다.",
         "ask가 `포렌식 팩`, `L1.5 회계 검증`, `analysis 없이` 질문에서 이 스킬을 상위 후보로 찾아야 한다.",
         "신호가 있어도 `falsifierLedger`가 없으면 답변 품질 실패로 본다."
@@ -30956,7 +30996,11 @@
         "signal별 supporting evidence와 counter evidence",
         "L2 엔진 승격 후보와 계속 사용할 recipe 계약"
       ],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "재무 원표 구조는 IS/BS/CF 기간·연결 기준이 맞고 evidenceBinding을 만들 수 있을 때만 engines.viz.financialStructureCharts로 emit한다.",
+        "coverage와 falsifier 상태는 차트보다 표가 우선이며, 시각화가 필요하면 observed 상태의 engines.viz.evidenceCoverage만 사용한다.",
+        "메커니즘은 engines.viz.mermaidDiagram으로 8노드 이하 diagram만 만들고 모든 edge를 tableRef/sourceRef에 묶는다."
+      ],
       "failureModes": [
         "Company.show topic 결손을 0으로 채워 bridge 계산",
         "매출채권 증가를 계절성·고객 믹스 변화 반증 없이 위험으로 단정",
@@ -30994,12 +31038,16 @@
           ]
         }
       },
-      "visualRefs": [],
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
       "predecessors": [],
       "successors": [],
       "audiences": {
-        "llm": "L2 분석엔진을 쓰지 말고 Company.show, scan primitive, synth helper만 사용해 evidence ledger와 falsifier를 만든다.",
-        "agent": "ReadSkill 후 GetSkillBody로 본문을 읽고 공개 호출 블록을 RunPython으로 실행해 tableRef/valueRef/dateRef를 만든다.",
+        "llm": "L2 분석엔진을 쓰지 말고 Company.show, Company.disclosure, scan primitive는 EngineCall로 우선 호출한 뒤 synth helper RunPython fallback으로 evidence ledger와 falsifier를 만든다.",
+        "agent": "ReadSkill 후 GetSkillBody로 본문을 읽고 capabilityRefs는 EngineCall로 먼저 호출한다. L1.5 memo builder가 필요할 때만 공개 호출 블록을 RunPython fallback으로 실행해 tableRef/valueRef/dateRef를 만든다.",
         "human": "원표와 공시 원문만으로 새 분석법을 실험하고, 유효하면 나중에 엔진으로 환류할 수 있게 만드는 포렌식 인큐베이터다."
       },
       "isLeafNode": false,
@@ -31007,7 +31055,7 @@
       "graphTier": "L1.5",
       "cluster": "incubator.forensics",
       "humanIntro": "이 팩은 완성된 L2 분석엔진을 잘 호출하는 조합기가 아니다. BS/IS/CF 원표, 공시 섹션, scan primitive 같은 L1/L1.5 재료만으로 아직 엔진화되지 않은 회계·공시 신호를 발굴하고, 반증 조건과 승격 후보를 함께 남긴다.",
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"deepDive\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n이 진입점은 투자 결론을 만들지 않는다. 대신 `riskScore`, `signalCount`, `candidateCount`, `decisionStatus`를 뽑고, 어떤 세부 skill을 더 읽어야 하는지 결정한다. `riskScore`는 L1/L1.5 신호의 강도일 뿐이며, 위험 단정이 아니다.\n\n### 2. 핵심 근거 수집\n\n근거는 `Company.show(\"IS\"|\"BS\"|\"CF\")`, optional section text, optional scan primitive row에서만 나온다. 답변에는 target, period, sourceRef, tableRef, valueRef, dateRef, executionRef가 함께 있어야 한다.\n\n### 3. 메커니즘 분석\n\n```mermaid\ngraph LR\n  A[\"Company.show IS/BS/CF\"] --> B[\"account trace ledger\"]\n  B --> C[\"revenue-to-cash bridge\"]\n  B --> D[\"working-capital pressure\"]\n  E[\"filing sections\"] --> F"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 surface 로 호출한다. 아래 Python 블록은 같은 근거를 묶어 `buildEvidenceForensicsMemo` 를 실행해야 하는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"deepDive\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n이 진입점은 투자 결론을 만들지 않는다. 대신 `riskScore`, `signalCount`, `candidateCount`, `decisionStatus`를 뽑고, 어떤 세부 skill을 더 읽어야 하는지 결정한다. `riskScore`는 L1/L1.5 신호의 강도일 뿐이며, 위험 단정이 아니다.\n\n### 2. 핵심 근거 수집\n\n근거는 `Company.show(\"IS\"|\"BS\"|\"CF\")`, optional section text, optional scan primitive row에서만 나온다. 답변에는 target, period, sourceRef, tableRef, valueRe"
     },
     {
       "id": "recipes.incubator.forensics.dataCoverageAudit",
@@ -31928,8 +31976,8 @@
         "scan.disclosureRisk"
       ],
       "toolRefs": [
-        "RunPython",
-        "EngineCall"
+        "EngineCall",
+        "RunPython"
       ],
       "datasetRefs": [],
       "knowledgeRefs": [
@@ -31957,6 +32005,8 @@
       "procedure": [
         "공개 호출 블록은 AST parse가 되어야 한다.",
         "공개 호출 블록은 L2/L3 호출 문자열을 포함하면 실패다.",
+        "EngineCall 가능한 Company/scan 입력을 RunPython 내부 계산으로 재구현하지 않는다.",
+        "visualRefs 는 observed viz skill 만 포함해야 하며, 원표 기간·evidenceBinding 이 없으면 차트 대신 ledger 표로 답한다.",
         "selfRun 결과에 `deepDive`, `falsifierLedger`, `engineCandidateMemo`가 모두 있어야 한다.",
         "ask 답변은 riskScore만 말하지 않고 open falsifier와 candidate memo를 함께 설명해야 한다."
       ],
@@ -31976,7 +32026,11 @@
         "open falsifier 수",
         "engine candidate 수"
       ],
-      "visualGuidance": [],
+      "visualGuidance": [
+        "IS/BS/CF 원표가 같은 기간·같은 연결 기준으로 확보되고 evidenceBinding을 만들 수 있을 때만 engines.viz.financialStructureCharts를 사용한다.",
+        "deepDive ledger와 falsifier 상태는 표가 1차 산출물이다. coverage 시각화가 필요할 때만 observed engines.viz.evidenceCoverage로 낮게 보조한다.",
+        "원표→bridge→falsifier→engine candidate 흐름은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고, 근거 없는 edge는 금지한다."
+      ],
       "failureModes": [
         "ask가 기존 analysis skill을 선택해 L2로 우회",
         "RunPython 결과는 있는데 답변이 근거 표 없이 요약만 제시",
@@ -32009,12 +32063,16 @@
           "status": "limited"
         }
       },
-      "visualRefs": [],
+      "visualRefs": [
+        "engines.viz.financialStructureCharts",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
       "predecessors": [],
       "successors": [],
       "audiences": {
-        "llm": "이 스킬은 L2 금지 조건이 핵심이다. 공개 호출 블록 그대로 RunPython을 실행하고 falsifier와 candidate memo를 함께 답한다.",
-        "agent": "ReadSkill 결과에서 이 스킬이 상위에 오면 Company.show와 disclosure만 실행하고 L2 capability를 쓰지 않는다.",
+        "llm": "이 스킬은 L2 금지 조건이 핵심이다. capabilityRefs는 EngineCall로 우선 호출하고, 공개 호출 블록은 L1.5 memo builder용 RunPython fallback으로만 실행한다.",
+        "agent": "ReadSkill 결과에서 이 스킬이 상위에 오면 Company.show, disclosure, scan primitive를 EngineCall로 실행하고 L2 capability를 쓰지 않는다. helper 결합이 필요할 때만 RunPython fallback을 쓴다.",
         "human": "깊은 분석처럼 보이는 결론보다, 어떤 원표와 공시 증거가 어떤 엔진 후보를 만들었는지 확인하는 절차다."
       },
       "isLeafNode": false,
@@ -32022,7 +32080,7 @@
       "graphTier": "L1.5",
       "cluster": "incubator.forensics",
       "humanIntro": "deepDive는 포렌식 팩의 실제 사용 경로다. 여러 세부 ledger를 하나로 묶되, 결론은 항상 반증 조건과 함께 남긴다. 나중에 일부 신호가 L2 엔진으로 승격돼도 이 스킬은 원표 검산 절차로 계속 사용된다.",
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\ntry:\n    disclosure = c.disclosure()\n    events = disclosure.head(20).to_dicts() if hasattr(disclosure, \"head\") else list(disclosure)[:20]\nexcept Exception:\n    events = []\n\nscanRows = []\nfor axis in (\"quality\", \"audit\", \"disclosureRisk\"):\n    try:\n        df = dartlab.scan(axis)\n        rows = df.head(3).to_dicts() if hasattr(df, \"head\") else []\n        for row in rows:\n            row[\"axis\"] = axis\n        scanRows.extend(rows)\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n    events=events,\n    scanRows=scanRows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"deepDive\"],\n    values={\n        \"target\": target,\n        \"riskScore\": memo[\"headline\"][\"riskScore\"],\n        \"signalCount\": memo[\"headline\"][\"signalCount\"],\n        \"candidate"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\ntry:\n    disclosure = c.disclosure()\n    events = disclosure.head(20).to_dicts() if hasattr(disclosure, \"head\") else list(disclosure)[:20]\nexcept Exception:\n    events = []\n\nscanRows = []\nfor axis in (\"quality\", \"audit\", \"disclosureRisk\"):\n    try:\n        df = dartlab.scan(axis)\n        rows = df.head(3).to_dicts() if hasattr(df, \"head\") else []\n        for row in rows:\n            row[\"axis\"] = axis\n        scanRows.extend(rows)\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n    even"
     }
   ]
 }
