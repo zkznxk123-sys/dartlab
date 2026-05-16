@@ -28,25 +28,66 @@ from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 
 @memoizedCalc
 def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None:
-    """배당 정책 시계열 — 배당성향, 배당금 추이, 연속 배당.
+    """배당 정책 시계열 — 배당성향 + 배당 성장률 + 연속 배당 연수 + 정책 분류.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        CF 의 dividends_paid + IS 의 net_profit 시계열에서 배당성향 (payout)
+        + 배당 성장률 (CAGR) + 연속 배당 연수 산출. capitalAllocation 의
+        핵심 함수 — Damodaran 의 dividend policy 4 사분면 (high/low growth ×
+        high/low payout) 분류 가능.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            dividendsPaid : float — 배당금 지급액 (원)
-            netIncome : float — 당기순이익 (원)
-            payoutRatio : float | None — 배당성향 (%)
-            dividendGrowth : float | None — 배당 성장률 (%)
-        consecutiveYears : int — 연속 배당 연수
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 dict (period, dividendsPaid,
+              netIncome, payoutRatio, dividendGrowth)
+            - ``consecutiveYears`` (int): 연속 배당 연수 (배당 단절 시 reset)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcDividendPolicy(Company("005930"))
+        >>> r["history"][0]["payoutRatio"], r["consecutiveYears"]
+        (25, 30)  # 25% 배당성향, 30 년 연속 배당
+
+    Guide:
+        payoutRatio 임계: < 20% = 성장 우선, 20~50% = 균형, > 50% = 배당
+        우선. 연속 배당 5+ 년 = dividend aristocrats 후보. KR 기준 평균 ~ 20%,
+        US 기준 ~ 30% (S&P 500 평균). 배당 성장률 5%+ 가 5 년 연속 = 우수.
+
+    SeeAlso:
+        - ``ddmValuation``: 배당 기반 가치 평가 (본 함수 입력)
+        - ``calcShareholderReturn``: 자사주매입 + 배당 합산
+        - ``narrateRepayment``: 배당 → 차입금 상환 여력 분석
+
+    Requires:
+        CF (dividends_paid) + IS (net_profit) 시계열 ≥ 2 년.
+
+    AIContext:
+        consecutiveYears + payoutRatio 함께 인용. KR 대기업 (삼성/현대) 은
+        20~30 년 연속 배당 사례 많음. 무배당 회사는 history 빈 list,
+        consecutiveYears=0.
+
+    LLM Specifications:
+        AntiPatterns:
+            - payoutRatio > 100% 결과를 "비정상" 단정 — 일시적 (turnaround)
+              가능. 3 년 평균 확인.
+            - 분기 dividends_paid 4 회 합산이 안 되면 TTM fallback —
+              ``_annualDividends`` 자동 처리.
+        OutputSchema:
+            ``{history: list[dict 5키], consecutiveYears: int}``.
+        Prerequisites:
+            CF/dividends_paid + IS/net_profit ≥ 2 년.
+        Freshness:
+            최신 분기 + 5~10 년 시계열.
+        Dataflow:
+            CF/dividends_paid → 연간 합산 → /net_profit → payoutRatio
+            + CAGR + 연속 배당 카운트.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     cfResult = company.select("CF", ["dividends_paid"])
     isResult = company.select("IS", ["당기순이익"])
