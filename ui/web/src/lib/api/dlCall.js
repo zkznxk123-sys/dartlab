@@ -2,6 +2,7 @@
 // 모든 dashboard data fetch 의 단일 진입점. capability registry 화이트리스트
 // 위에서 reflection dispatch 되므로 dartlab 새 capability 추가 시 자동 따라감.
 
+import { untrack } from "svelte";
 import { getLoadingCounter } from "$lib/stores/loadingCounter.svelte.js";
 
 const CALL_ENDPOINT = "/api/dl/call";
@@ -22,7 +23,7 @@ export async function dlCall(apiRef, opts = {}) {
 	if (kwargs && Object.keys(kwargs).length) body.kwargs = kwargs;
 
 	const counter = getLoadingCounter();
-	counter.begin();
+	untrack(() => counter.begin());
 	try {
 		const res = await fetch(CALL_ENDPOINT, {
 			method: "POST",
@@ -42,7 +43,7 @@ export async function dlCall(apiRef, opts = {}) {
 		}
 		return await res.json();
 	} finally {
-		counter.end();
+		untrack(() => counter.end());
 	}
 }
 

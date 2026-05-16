@@ -61,36 +61,35 @@
 	--text-body-sm: 13px;       --text-body-sm--line-height: 20px;
 	--text-meta: 11px;          --text-meta--line-height: 16px;
 
-	/* ── shadcn-svelte token alias — dl-* primitives 위의 표준 surface ──
-	   shadcn 컴포넌트가 기대하는 표준 토큰 이름을 dl-* 에 alias.
-	   alias 한 곳만 손대면 신규 shadcn + 기존 dl-* 양쪽 같은 시각 결과. */
-	--color-background: var(--color-dl-bg-dark);
-	--color-foreground: var(--color-dl-text);
-	--color-card: var(--color-dl-bg-card);
-	--color-card-foreground: var(--color-dl-text);
-	--color-popover: var(--color-dl-bg-darker);
-	--color-popover-foreground: var(--color-dl-text);
-	--color-primary: var(--color-dl-primary);
-	--color-primary-foreground: #ffffff;
-	--color-secondary: var(--color-dl-bg-card-hover);
-	--color-secondary-foreground: var(--color-dl-text);
-	--color-muted: var(--color-dl-bg-card);
-	--color-muted-foreground: var(--color-dl-text-muted);
-	--color-accent: var(--color-dl-bg-card-hover);
-	--color-accent-foreground: var(--color-dl-text);
-	--color-destructive: #ef4444;
-	--color-destructive-foreground: #ffffff;
-	--color-border: var(--color-dl-border);
-	--color-input: var(--color-dl-border);
-	--color-ring: var(--color-dl-ring);
-	--radius: 0.5rem;
-
-	/* ── chart palette — 8 색 폐기, 3 + 신호색 2 만 ── */
-	--color-chart-1: var(--color-dl-primary);
-	--color-chart-2: var(--color-dl-text-muted);
-	--color-chart-3: #818cf8;
-	--color-chart-4: var(--color-dl-success);
-	--color-chart-5: var(--color-dl-warning);
+	/* ── shadcn-svelte 표준 토큰 — Tailwind v4 @theme inline 매핑 ──
+	   :root / .dark 의 --background / --chart-1 ... 변수를 Tailwind 유틸 (bg-card, text-foreground) 로 연결. shadcn nova zinc 기본값 (oklch) 그대로. 강조색은 미래에 --chart-1 만 갈아끼우면 됨 — 별도 색 추가 X. */
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
 }
 
 /* ── VSCode webview theme mapping ── */
@@ -2229,115 +2228,60 @@ html, body,
 
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Dashboard — shadcn 기본 토큰 (HSL). Tailwind v4 @theme 다음 layer.
-   light = white background + zinc neutral, dark = zinc-950.
+   shadcn-svelte nova zinc baseColor 표준 토큰 (Tailwind v4 OKLCH).
+   강조색 미래 추가 자리만 마련 (chart-1) — 지금은 nova default 그대로.
+   chat / dl-* 토큰은 별도 (이 layer 영향 X).
    ─────────────────────────────────────────────────────────────────────────── */
 
 :root, html[data-theme="light"] {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
-  --radius: 0.5rem;
-  --chart-1: 222 89% 50%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 43 74% 49%;
-  --chart-4: 142 71% 45%;
-  --chart-5: 38 92% 50%;
-  --chart-6: 0 84% 60%;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.21 0.006 285.885);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.705 0.015 286.067);
+  --radius: 0.625rem;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
 }
 
 html[data-theme="dark"], :root.dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
-  --chart-1: 217 91% 60%;
-  --chart-2: 173 58% 49%;
-  --chart-3: 43 84% 59%;
-  --chart-4: 142 71% 55%;
-  --chart-5: 38 92% 60%;
-  --chart-6: 0 84% 70%;
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.92 0.004 286.32);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.552 0.016 285.938);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
 }
-
-.bg-background { background-color: hsl(var(--background)); }
-.bg-foreground { background-color: hsl(var(--foreground)); }
-.bg-card { background-color: hsl(var(--card)); }
-.bg-popover { background-color: hsl(var(--popover)); }
-.bg-primary { background-color: hsl(var(--primary)); }
-.bg-secondary { background-color: hsl(var(--secondary)); }
-.bg-muted { background-color: hsl(var(--muted)); }
-.bg-accent { background-color: hsl(var(--accent)); }
-.bg-destructive { background-color: hsl(var(--destructive)); }
-
-.text-background { color: hsl(var(--background)); }
-.text-foreground { color: hsl(var(--foreground)); }
-.text-card-foreground { color: hsl(var(--card-foreground)); }
-.text-popover-foreground { color: hsl(var(--popover-foreground)); }
-.text-primary { color: hsl(var(--primary)); }
-.text-primary-foreground { color: hsl(var(--primary-foreground)); }
-.text-secondary { color: hsl(var(--secondary)); }
-.text-secondary-foreground { color: hsl(var(--secondary-foreground)); }
-.text-muted-foreground { color: hsl(var(--muted-foreground)); }
-.text-accent-foreground { color: hsl(var(--accent-foreground)); }
-.text-destructive { color: hsl(var(--destructive)); }
-.text-destructive-foreground { color: hsl(var(--destructive-foreground)); }
-
-.border-border { border-color: hsl(var(--border)); }
-.border-input { border-color: hsl(var(--input)); }
-.ring-ring { --tw-ring-color: hsl(var(--ring)); }
-
-.bg-chart-1 { background-color: hsl(var(--chart-1)); }
-.bg-chart-2 { background-color: hsl(var(--chart-2)); }
-.bg-chart-3 { background-color: hsl(var(--chart-3)); }
-.bg-chart-4 { background-color: hsl(var(--chart-4)); }
-.bg-chart-5 { background-color: hsl(var(--chart-5)); }
-.bg-chart-6 { background-color: hsl(var(--chart-6)); }
-.text-chart-1 { color: hsl(var(--chart-1)); }
-.text-chart-2 { color: hsl(var(--chart-2)); }
-.text-chart-3 { color: hsl(var(--chart-3)); }
-.text-chart-4 { color: hsl(var(--chart-4)); }
-.text-chart-5 { color: hsl(var(--chart-5)); }
-.text-chart-6 { color: hsl(var(--chart-6)); }
-.fill-chart-1 { fill: hsl(var(--chart-1)); }
-.fill-chart-2 { fill: hsl(var(--chart-2)); }
-.fill-chart-3 { fill: hsl(var(--chart-3)); }
-.fill-chart-4 { fill: hsl(var(--chart-4)); }
-.fill-chart-5 { fill: hsl(var(--chart-5)); }
-.fill-chart-6 { fill: hsl(var(--chart-6)); }
-.stroke-chart-1 { stroke: hsl(var(--chart-1)); }
-.stroke-chart-2 { stroke: hsl(var(--chart-2)); }
-.stroke-chart-3 { stroke: hsl(var(--chart-3)); }
-.stroke-chart-4 { stroke: hsl(var(--chart-4)); }
-.stroke-chart-5 { stroke: hsl(var(--chart-5)); }
-.stroke-chart-6 { stroke: hsl(var(--chart-6)); }

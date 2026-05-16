@@ -23,6 +23,9 @@ async function capture(theme, mode, tab) {
 			deviceScaleFactor: 1,
 		});
 		const page = await ctx.newPage();
+		page.on("console", (msg) => console.log(`[browser:${msg.type()}] ${msg.text().slice(0, 200)}`));
+		page.on("pageerror", (err) => console.log(`[browser:error] ${err.message.slice(0, 300)}`));
+		page.on("requestfailed", (req) => console.log(`[browser:reqfail] ${req.url()} — ${req.failure()?.errorText}`));
 		await page.addInitScript(({ tab, mode, theme, sc }) => {
 			try {
 				localStorage.setItem("dartlab-dashboard-state-v2", JSON.stringify({ section: tab, stockCode: sc, mode }));
@@ -35,7 +38,7 @@ async function capture(theme, mode, tab) {
 			document.documentElement.setAttribute("data-theme", t);
 			document.documentElement.classList.toggle("dark", t === "dark");
 		}, theme);
-		await page.waitForTimeout(2200);
+		await page.waitForTimeout(5000);
 		const file = `screenshots/financial/${theme}-${mode}-${tab}.png`;
 		await page.screenshot({ path: file, fullPage: true });
 		log(`captured ${file}`);

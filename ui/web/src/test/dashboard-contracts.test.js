@@ -42,8 +42,7 @@ describe("Dashboard foundation — Phase 0", () => {
 			expect(source).toContain("export function getDashboardStore");
 		});
 
-		it("tracks section / stockCode / mode state (v2)", () => {
-			expect(source).toContain("section = $state");
+		it("tracks stockCode / mode state (v3 — section 폐기)", () => {
 			expect(source).toContain("stockCode = $state");
 			expect(source).toContain("mode = $state");
 		});
@@ -94,12 +93,10 @@ describe("Dashboard foundation — Phase 0", () => {
 			expect(source).toMatch(/setMode\("dashboard"\)/);
 		});
 
-		it("Sidebar 4 탭 nav 항목 (재무제표 IS/BS/CF/Ratios)", () => {
+		it("Sidebar dashboard 모드 = 재무제표 1 항목", () => {
 			const source = read("src/lib/components/Sidebar.svelte");
-			expect(source).toContain('key: "is"');
-			expect(source).toContain('key: "bs"');
-			expect(source).toContain('key: "cf"');
-			expect(source).toContain('key: "ratios"');
+			expect(source).toContain('key: "financial"');
+			expect(source).toContain("재무제표");
 		});
 
 		it("CompanySwitcher includes 16 KOSPI seed (Phase E 교체 대상)", () => {
@@ -143,7 +140,7 @@ describe("Dashboard foundation — Phase 0", () => {
 			expect(source).toContain("--primary:");
 			expect(source).toContain("--border:");
 			expect(source).toContain("--chart-1:");
-			expect(source).toContain("--chart-6:");
+			expect(source).toContain("--chart-5:");
 		});
 
 		it("retains dl-* primitives for Ask/chat surface", () => {

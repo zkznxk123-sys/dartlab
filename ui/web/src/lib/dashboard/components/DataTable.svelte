@@ -1,4 +1,7 @@
 <script>
+	import * as Card from "$lib/ui/card";
+	import * as Table from "$lib/ui/table";
+
 	let { title = "", subtitle = "", payload = null, loading = false, error = null } = $props();
 
 	function fmt(v, unit) {
@@ -10,47 +13,48 @@
 		if (abs >= 1e4) return (v / 1e4).toFixed(0) + "만";
 		return Math.round(v).toLocaleString();
 	}
+
+	const periods = $derived(payload?.data?.periods || []);
+	const rows = $derived(payload?.data?.rows || []);
 </script>
 
-<div class="rounded-lg border border-border bg-card text-card-foreground overflow-hidden">
-	<div class="px-4 pt-3 pb-1">
-		<div class="text-sm font-semibold tracking-tight">{title || payload?.chartSpec?.title || ""}</div>
+<Card.Root class="overflow-hidden">
+	<Card.Header class="pb-2">
+		<Card.Title class="text-sm font-semibold tracking-tight">{title || payload?.chartSpec?.title || ""}</Card.Title>
 		{#if subtitle}
-			<div class="text-[11px] text-muted-foreground">{subtitle}</div>
+			<Card.Description class="text-xs">{subtitle}</Card.Description>
 		{/if}
-	</div>
-	<div class="px-4 pb-3 pt-1 overflow-x-auto">
+	</Card.Header>
+	<Card.Content class="pt-1 overflow-x-auto">
 		{#if loading}
 			<div class="w-full h-40 animate-pulse rounded-md bg-muted"></div>
 		{:else if error}
 			<div class="text-xs text-destructive p-4">{error}</div>
-		{:else if !payload?.data?.rows?.length}
+		{:else if !rows.length}
 			<div class="text-xs text-muted-foreground p-4">데이터 없음</div>
 		{:else}
-			{@const periods = payload.data.periods || []}
-			{@const rows = payload.data.rows || []}
-			<table class="w-full text-xs tabular-nums">
-				<thead>
-					<tr class="border-b border-border">
-						<th class="text-left py-1.5 px-2 font-medium text-muted-foreground">항목</th>
+			<Table.Root>
+				<Table.Header>
+					<Table.Row>
+						<Table.Head>항목</Table.Head>
 						{#each periods as p}
-							<th class="text-right py-1.5 px-2 font-medium text-muted-foreground">{p}</th>
+							<Table.Head class="text-right">{p}</Table.Head>
 						{/each}
-					</tr>
-				</thead>
-				<tbody>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
 					{#each rows as r}
-						<tr class="border-b border-border/40 hover:bg-accent/40">
-							<td class="py-1.5 px-2">{r.label}</td>
+						<Table.Row>
+							<Table.Cell>{r.label}</Table.Cell>
 							{#each r.values as v}
-								<td class="py-1.5 px-2 text-right" class:text-destructive={typeof v === "number" && v < 0}>
+								<Table.Cell class="text-right tabular-nums {typeof v === 'number' && v < 0 ? 'text-destructive' : ''}">
 									{fmt(v, r.unit)}
-								</td>
+								</Table.Cell>
 							{/each}
-						</tr>
+						</Table.Row>
 					{/each}
-				</tbody>
-			</table>
+				</Table.Body>
+			</Table.Root>
 		{/if}
-	</div>
-</div>
+	</Card.Content>
+</Card.Root>

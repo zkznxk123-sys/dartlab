@@ -6,15 +6,10 @@
 	import ModeToggle from "$lib/dashboard/ModeToggle.svelte";
 	import ThemeToggle from "$lib/dashboard/ThemeToggle.svelte";
 	import CompanySwitcher from "$lib/dashboard/CompanySwitcher.svelte";
-	import { getDashboardStore } from "$lib/stores/dashboardStore.svelte.js";
 
-	const dash = getDashboardStore();
-	const FINANCIAL_NAV = [
-		{ key: "is", label: "손익계산서", desc: "매출 · 이익률 · 비용" },
-		{ key: "bs", label: "재무상태표", desc: "자산 · 부채 · 자본" },
-		{ key: "cf", label: "현금흐름표", desc: "영업 · 투자 · 재무" },
-		{ key: "ratios", label: "재무비율", desc: "수익성 · 안정성 · 효율성 · 성장성" },
-	];
+	// Sidebar dashboard 모드 단일 항목 — "재무제표".
+	// 본문 (FinancialView) 내부 Tabs 에서 IS/BS/CF/Ratios 토글.
+	const FINANCIAL_NAV = [{ key: "financial", label: "재무제표", desc: "IS · BS · CF · 비율" }];
 
 	const ui = getUiMode();
 
@@ -163,13 +158,10 @@
 				</div>
 				<div class="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
 					{#each FINANCIAL_NAV as item}
-						<button
-							class="w-full flex flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left transition-colors {dash.section === item.key ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}"
-							onclick={() => dash.setSection(item.key)}
-						>
+						<div class="w-full flex flex-col items-start gap-0.5 rounded-md px-3 py-2 bg-accent text-accent-foreground">
 							<span class="text-sm font-medium">{item.label}</span>
 							<span class="text-[10px] opacity-70">{item.desc}</span>
-						</button>
+						</div>
 					{/each}
 				</div>
 			{/if}

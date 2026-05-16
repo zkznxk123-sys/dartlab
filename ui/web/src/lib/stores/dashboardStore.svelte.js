@@ -1,10 +1,8 @@
-// Dashboard state store v2 — 4 탭 (IS/BS/CF/Ratios) + annual/quarterly mode.
-// Phase 8 ask snapshot 첨부 source.
+// Dashboard state store v3 — stockCode + mode 만. (재무제표 4 분류는 FinancialView 내부 Tabs.)
 
-const LS_KEY = "dartlab-dashboard-state-v2";
+const LS_KEY = "dartlab-dashboard-state-v3";
 
 const DEFAULT = {
-	section: "is",
 	stockCode: "035720",
 	mode: "annual",
 };
@@ -16,7 +14,6 @@ function loadInitial() {
 		if (!raw) return DEFAULT;
 		const parsed = JSON.parse(raw);
 		return {
-			section: ["is", "bs", "cf", "ratios"].includes(parsed.section) ? parsed.section : DEFAULT.section,
 			stockCode: parsed.stockCode || DEFAULT.stockCode,
 			mode: ["annual", "quarterly"].includes(parsed.mode) ? parsed.mode : DEFAULT.mode,
 		};
@@ -31,7 +28,6 @@ export function getDashboardStore() {
 	if (_instance) return _instance;
 
 	const saved = loadInitial();
-	let section = $state(saved.section);
 	let stockCode = $state(saved.stockCode);
 	let mode = $state(saved.mode);
 	let visibleKpis = $state([]);
@@ -40,20 +36,18 @@ export function getDashboardStore() {
 	function persist() {
 		if (typeof localStorage === "undefined") return;
 		try {
-			localStorage.setItem(LS_KEY, JSON.stringify({ section, stockCode, mode }));
+			localStorage.setItem(LS_KEY, JSON.stringify({ stockCode, mode }));
 		} catch {
 			/* localStorage 가득 차도 무시 */
 		}
 	}
 
 	_instance = {
-		get section() { return section; },
 		get stockCode() { return stockCode; },
 		get mode() { return mode; },
 		get visibleKpis() { return visibleKpis; },
 		get pendingSnapshot() { return pendingSnapshot; },
 
-		setSection(s) { section = s; persist(); },
 		setStockCode(c) { stockCode = c; persist(); },
 		setMode(m) { mode = m; persist(); },
 		setVisibleKpis(k) { visibleKpis = Array.isArray(k) ? k : []; },
@@ -62,7 +56,7 @@ export function getDashboardStore() {
 
 		snapshot() {
 			return {
-				dashboardView: section,
+				dashboardView: "financial",
 				stockCode,
 				mode,
 				visibleKpis: [...visibleKpis],
