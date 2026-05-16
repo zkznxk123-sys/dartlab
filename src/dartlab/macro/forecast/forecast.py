@@ -178,10 +178,20 @@ def analyzeForecast(*, market: str = "US", asOf: str | None = None, overrides: d
         Sahm + LEI 가 동시에 warning 일 때 강한 신호. nowcast 는 분기 GDP
         실시간 추정.
 
-    SeeAlso:
+    See Also:
         - ``analyzeCrisis``: 위기 신호 (recessionProb 입력 공유)
         - ``analyzeCycle``: 사이클 4 국면 (사이클·예측 동시 활용)
         - ``gdpNowcast``: Kalman DFM 본체
+
+    Raises:
+        없음 — 모델별 실패는 None 으로 흡수.
+
+    When:
+        ``analyzeSummary`` forecast 보조축 진입점. 침체확률 답변 1 차.
+
+    How:
+        FRED LEI 구성 10 series fetch → conferenceBoardLEI + clevelandProbit +
+        sahmRule + hamiltonRegime + gdpNowcast 5 모델 try/except → dict 합성.
 
     Requires:
         FRED (LEI 구성요소 10 시리즈, T10Y3M, payrolls 등). API key 불필요.

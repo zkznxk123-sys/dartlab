@@ -142,6 +142,17 @@ def capexPressure(hySpread: float, hySpreadChange: float) -> CapexPressure:
     Args:
         hySpread: HY 스프레드 (bps)
         hySpreadChange: HY 스프레드 3개월 변화 (bps)
+
+    Example:
+        >>> r = capexPressure(550, 120)
+        >>> r.pressure
+        'tightening'
+
+    Requires:
+        FRED BAMLH0A0HYM2 (HY OAS) latest + 3M ago.
+
+    Raises:
+        없음.
     """
     if hySpreadChange > 100 or hySpread > 500:
         return CapexPressure(
@@ -246,10 +257,17 @@ def calcLiquidity(*, market: str = "US", asOf: str | None = None, overrides: dic
         - QT 기간 (연준 B/S 축소) 와 신용스프레드 확대 동시 발생 = strong
           tight 신호.
 
-    SeeAlso:
+    See Also:
         - ``classifyLiquidityRegime``: 5 변수 표준 라벨
         - ``capexPressure``: HY spread 변동 → 기업 capex
         - ``analyzeCycle``: macro cycle (본 함수 입력)
+
+    When:
+        ``analyzeSummary`` liquidity 축 진입점 + analyzeCycle 보조.
+
+    How:
+        _fetchLiquidityData → overrides → classifyLiquidityRegime → score 합산 →
+        NFCI + 자체 FCI 병렬 dict 합성.
 
     Requires:
         FRED M2 + WALCL (연준 B/S) + HY/IG OAS + RRPONTSYD (KR 별도).

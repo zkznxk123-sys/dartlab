@@ -189,10 +189,20 @@ def analyzeTrade(*, market: str = "US", asOf: str | None = None, overrides: dict
         한국 우위 + 미국 소비 강세 = 한국 수출 이익 모멘텀 강세 신호.
         반대 케이스는 약세. KR 시장 위주이고 US 는 일부 키만 채움.
 
-    SeeAlso:
+    See Also:
         - ``analyzeCycle``: 사이클 4 국면 (교역과 함께 KR 진단)
         - ``synth.scenario``: 환율 시나리오 — overrides 매핑
         - ``industry``: 업종별 수출 비중 (교역 신호 적용 대상)
+
+    Raises:
+        없음 — 각 축 실패는 None 으로 흡수.
+
+    When:
+        ``analyzeSummary`` trade 보조축 진입점. KR 수출 답변 1 차.
+
+    How:
+        _fetchTradeData → overrides → calcToT + totProxy + exportProfitLeading +
+        leadingIndexRelativeStrength + USDKRW yoy / oil yoy 매핑 → dict 합성.
 
     Requires:
         ECOS (KR 수출물가/수입물가/usdkrw) + FRED (US 소매판매, PCE).

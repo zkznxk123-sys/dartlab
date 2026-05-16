@@ -258,6 +258,17 @@ def leadingIndexRelativeStrength(
 
     Returns:
         TradeLeadingSignal: 상대강도 → 환율 방향
+
+    Example:
+        >>> r = leadingIndexRelativeStrength(1.5, 0.2)
+        >>> r.fxDirection
+        'krw_weaken'
+
+    Requires:
+        FRED USSLIND (LEI) MoM + OECD KR CLI MoM.
+
+    Raises:
+        없음.
     """
     relative = usLeiMom - krCliMom
 

@@ -417,10 +417,17 @@ def hamiltonRegime(
         - 최소 20 분기 (5 년) 권장 — 단기 데이터는 regime 분리 약함.
         - p00/p11 (자기지속 확률) 0.9+ 면 regime persistent.
 
-    SeeAlso:
+    See Also:
         - ``clevelandProbit``: 단변량 yield curve 기반
         - ``sahmRule``: 실업률 룰
         - ``conferenceBoardLEI``: LEI 합성지수
+
+    When:
+        ``analyzeSummary`` regime 축 (US GDP) 진입점. 분기 갱신.
+
+    How:
+        EM 초기값 (median split) → forward-backward filter → Kim smoother → 수렴 →
+        params + smoothedProbs.
 
     Requires:
         시계열 ≥ 10 기간 (≥ 20 권장).

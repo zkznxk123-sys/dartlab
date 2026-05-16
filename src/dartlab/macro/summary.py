@@ -319,11 +319,19 @@ def analyzeSummary(*, market: str = "US", asOf: str | None = None, overrides: di
         2 회 fetch + polars 힙 추가 압박. 단일 축은 사용자가 "금리만
         자세히" 같이 명시했을 때만.
 
-    SeeAlso:
+    See Also:
         - ``dartlab.macro.cycles.cycle.analyzeCycle``
         - ``dartlab.macro.rates.rates.analyzeRates``
         - ``dartlab.synth.portfolioMapping.regimeToAllocation``
         - ``dartlab.synth.strategyRules.evaluateStrategies``
+
+    When:
+        ``Macro().__call__`` 단일 진입점. 종목 분석 시 macro 호출 1 회로 종결.
+
+    How:
+        5 핵심 축 (cycle/rates/assets/sentiment/liquidity) 순차 → _gcAfterAxis →
+        5 보조 축 (forecast/crisis/inventory/trade/corporate) try/except → score
+        가중 합산 → regimeToAllocation → evaluateStrategies → dict 합성.
 
     Requires:
         DART/EDGAR provider + Yahoo Finance + FRED/KOSIS. 인터넷 필요.

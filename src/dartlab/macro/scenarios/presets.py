@@ -61,9 +61,16 @@ def getScenario(name: str, *, severity: str | None = None, market: str = "US") -
         KR → 복합 (마지막). 가장 먼저 매칭된 시나리오 반환. 호출자는 결과
         dict 의 ``overrides`` 를 macro/summary 의 ``overrides`` 인자로 전달.
 
-    SeeAlso:
+    See Also:
         - ``listAllScenarios``: 사용 가능한 시나리오 목록
         - ``dartlab.macro.summary.analyzeSummary``: overrides 소비
+
+    When:
+        ``runScenario`` 내부 + AI 시나리오 답변 1 차 진입점.
+
+    How:
+        name 으로 6 카탈로그 순차 부분매칭 → severity 옵션 적용 → "+" 분해 →
+        overrides dict 합성.
 
     Requires:
         없음 (순수 함수).
@@ -188,24 +195,57 @@ def getScenario(name: str, *, severity: str | None = None, market: str = "US") -
 def listAllScenarios(market: str = "US") -> list[dict]:
     """모든 시나리오 목록.
 
-    역사적 재현, DFAST, 유형별, 현대적 리스크, 구조적, 한국 특화
-    카테고리의 전체 시나리오를 평탄화하여 반환한다.
+    Capabilities:
+        6 카탈로그 (역사적 재현/DFAST/유형별/현대 리스크/구조적/KR) 의 모든
+        시나리오 + severity 조합을 단일 list 로 평탄화. UI/AI 의 시나리오 픽커
+        진입점.
 
-    Parameters
-    ----------
-    market : str
-        시장 구분. ``"US"`` | ``"KR"``.
+    Args:
+        market: ``"US"`` | ``"KR"``. KR 호출 시에도 6 카탈로그 모두 표시.
 
-    Returns
-    -------
-    list[dict]
-        각 항목:
+    Returns:
+        list[dict] — 각 항목: name/category(역사적 재현·DFAST·유형별·현대적
+        리스크·구조적·한국 특화)/type/severity/description.
 
-        name : str — 시나리오 이름
-        category : str — 분류 (역사적 재현 / Fed DFAST / 유형별 / 현대적 리스크 / 구조적 / 한국 특화)
-        type : str — 충격 유형
-        severity : str — 심각도 (mild/moderate/severe/extreme)
-        description : str — 시나리오 설명
+    Example:
+        >>> items = listAllScenarios("US")
+        >>> items[0]["category"]
+        '역사적 재현'
+
+    Guide:
+        AI 시나리오 답변 전 listAllScenarios → 사용자가 인용한 name 확정 →
+        getScenario(name) 흐름. 부분 매칭 모호하면 본 함수가 1 차.
+
+    When:
+        ``scenarioGuide`` 진입점 + AI 시나리오 답변의 카탈로그 노출.
+
+    How:
+        6 카탈로그 dict 순회 → SEVERITIES 곱집합 (typed/modern/structural/KR) →
+        평탄화.
+
+    Requires:
+        없음 (정적 카탈로그).
+
+    Raises:
+        없음.
+
+    See Also:
+        - getScenario : 단일 시나리오 룩업
+        - scenarioGuide : 카탈로그 가이드
+
+    AIContext:
+        category 별 group_by 인용으로 사용자에게 옵션 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - category 누락한 채 name 만 인용 → 사용자 혼란
+            - severity 옵션 (4 종) 미노출
+        OutputSchema:
+            list[``{name, category, type, severity, description}``].
+        Prerequisites: 없음.
+        Freshness: 정적 (dartlab 버전 업그레이드 시 갱신).
+        Dataflow: 6 카탈로그 dict → 평탄화.
+        TargetMarkets: US (DFAST/FRED) + KR (KR_SCENARIOS) 통합.
     """
     result: list[dict] = []
 
