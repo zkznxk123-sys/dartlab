@@ -28,7 +28,63 @@ def hySpikesToRecession(
     thresholdBp: float = 1.0,
     currentDelta: float | None = None,
 ) -> HYSpikeHistory:
-    """HY 스프레드 3개월 급등 → 침체 선행 통계."""
+    """HY 스프레드 3개월 급등 → 침체 선행 통계.
+
+    Capabilities:
+        HY OAS 3 개월 변화 ≥ thresholdBp (기본 1.0 %p = 100bp) 구간 추출 → 12 개월
+        내 NBER 침체 발생률 + currentDelta 와 가장 유사한 과거 케이스 매칭.
+
+    Args:
+        hyMonthly: ``{"YYYY-MM": HY OAS %}`` 월별 dict.
+        thresholdBp: 급등 임계 (%p). 기본 1.0.
+        currentDelta: 현재 3M 변화 (%p). nearest 매칭에 사용.
+
+    Returns:
+        HYSpikeHistory — totalSpikes/recessionWithin12m/recessionRate12m/
+        nearestMatch/nearestMatchDelta/nearestMatchOutcome/currentDelta/
+        description.
+
+    Example:
+        >>> r = hySpikesToRecession({"2008-09": 8.0, ...}, currentDelta=2.5)
+        >>> r.recessionRate12m
+        0.67
+
+    Guide:
+        rate12m ≥ 0.6 = HY 급등 신호 강함. nearestMatchOutcome 인용으로 과거
+        대조 가능.
+
+    When:
+        ``simultaneousWarningFlags`` + ``buildHistoricalContext`` 내부.
+
+    How:
+        _deltaN(3M) → threshold 매칭 → _monthsToNextRecession 12 개월 카운트 +
+        currentDelta 와 |diff| 최소 매칭.
+
+    Requires:
+        FRED BAMLH0A0HYM2 월별 ≥ 1997 + NBER 침체 일자.
+
+    Raises:
+        없음.
+
+    See Also:
+        - hyCompressionToExpansion : 반대 (HY 급락 → 확장)
+        - simultaneousWarningFlags : 8 신호 종합
+
+    AIContext:
+        rate12m + nearestMatch 두 필드 인용으로 "HY 급등 12 개월 내 침체 N%
+        (2007-12 사례 비슷)" 한 문장 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 침체 중 발생 케이스 (in_rec=True) 까지 rate 계산 (제외 필요)
+            - currentDelta 없이 nearest 매칭 기대
+        OutputSchema:
+            HYSpikeHistory (8 필드).
+        Prerequisites: HY OAS 월별 + NBER.
+        Freshness: 월간.
+        Dataflow: deltaN → 임계 → 침체 확률 + nearest.
+        TargetMarkets: US. KR 미지원.
+    """
     d3 = _deltaN(hyMonthly, 3)
     spikes: list[tuple[str, float, int, bool]] = []
 
@@ -80,7 +136,61 @@ def hySpikesToRecession(
 def yieldCurveInversionsToRecession(
     spreadMonthly: dict[str, float],
 ) -> YCInversionHistory:
-    """Yield Curve 역전 시작점 → 침체까지 통계."""
+    """Yield Curve 역전 시작점 → 침체까지 통계.
+
+    Capabilities:
+        10Y-2Y (또는 10Y-3M) 스프레드 월별 시리즈에서 0 이상 → 음수 전이 시점
+        추출 → 각 역전 시작점 → 다음 NBER 침체까지 평균/중위 lead 개월. 현재
+        역전 중이면 시작일 + 경과 개월 노출.
+
+    Args:
+        spreadMonthly: ``{"YYYY-MM": Term spread %}`` 월별 dict.
+
+    Returns:
+        YCInversionHistory — totalInversions/avgLeadMonths/medianLeadMonths/
+        rangeLeadMonths/currentInversionStart/currentDurationMonths/description.
+
+    Example:
+        >>> r = yieldCurveInversionsToRecession({"2019-08": -0.05, ...})
+        >>> r.avgLeadMonths
+        14.0
+
+    Guide:
+        avgLeadMonths 12~18 = 표준 (역사적 평균 ~14). currentInversionStart 가
+        12 개월 초과면 "역전 장기화 → 침체 임박" 인용.
+
+    When:
+        ``simultaneousWarningFlags`` 보조 + AI 침체 시기 답변.
+
+    How:
+        spread 월별 시리즈 → 양→음 전이점 추출 → _monthsToNextRecession lead →
+        평균/중위/범위 + 현재 역전 추적.
+
+    Requires:
+        FRED T10Y2Y (또는 T10Y3M) 월별 + NBER.
+
+    Raises:
+        없음.
+
+    See Also:
+        - hySpikesToRecession : HY 급등 시그널
+        - buildHistoricalContext : 본 함수 호출 진입점
+
+    AIContext:
+        avgLeadMonths + currentDurationMonths 두 필드로 "역전 평균 14 개월 후
+        침체, 현재 8 개월째" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - lead = 999 (침체 없음) 케이스 포함 (제외 필요)
+            - 단일 역전 시점 강조 + 평균/중위 미인용
+        OutputSchema:
+            YCInversionHistory (7 필드).
+        Prerequisites: T10Y2Y 월별 ≥ 1977 + NBER.
+        Freshness: 월간.
+        Dataflow: spread → 전이점 추출 → lead 통계.
+        TargetMarkets: US. KR 미지원.
+    """
     months = sorted(spreadMonthly.keys())
     inversions: list[tuple[str, float, int]] = []
     prev_positive = True
@@ -133,7 +243,61 @@ def unemploymentBounceToRecession(
     *,
     thresholdPp: float = 0.3,
 ) -> URBounceHistory:
-    """실업률 12개월 최저에서 반등 → 침체 선행 통계."""
+    """실업률 12개월 최저에서 반등 → 침체 선행 통계.
+
+    Capabilities:
+        실업률 12 개월 rolling 최저 대비 +thresholdPp 이상 반등 시점 추출 →
+        12 개월 내 NBER 침체 발생률 + 현재 반등 정도. Sahm Rule 의 단순 변형.
+
+    Args:
+        urMonthly: ``{"YYYY-MM": UNRATE %}`` 월별 dict.
+        thresholdPp: 반등 임계 (%p). 기본 0.3.
+
+    Returns:
+        URBounceHistory — totalBounces/recessionWithin12m/recessionRate12m/
+        currentBounce/description.
+
+    Example:
+        >>> r = unemploymentBounceToRecession({"2024-08": 4.3, ...})
+        >>> r.recessionRate12m
+        0.75
+
+    Guide:
+        rate12m ≥ 0.7 = 강한 침체 선행 신호. currentBounce ≥ thresholdPp 인용
+        시 "현재 진행 중" 강조.
+
+    When:
+        ``simultaneousWarningFlags`` 보조 + AI 실업률 답변.
+
+    How:
+        12 개월 rolling 윈도우 → 저점 대비 차 ≥ threshold 시점 추출 (이전
+        시점은 미만) → 침체 카운트.
+
+    Requires:
+        FRED UNRATE 월별 ≥ 1948 + NBER.
+
+    Raises:
+        없음.
+
+    See Also:
+        - sahmRule : 0.5%p 임계 단순 룰
+        - buildHistoricalContext : 본 함수 호출 진입점
+
+    AIContext:
+        rate12m + currentBounce 두 필드 인용으로 "실업률 +0.4%p 반등, 과거
+        75% 12개월 내 침체" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단발 반등 (이전 월 이미 반등) 도 카운트 (필터링 필요)
+            - threshold 임의 변경 (Sahm 0.5 표준)
+        OutputSchema:
+            URBounceHistory (5 필드).
+        Prerequisites: UNRATE 월별 + NBER.
+        Freshness: 월간.
+        Dataflow: rolling min → bounce → 침체 확률.
+        TargetMarkets: US. KR 미지원.
+    """
     months = sorted(urMonthly.keys())
     bounces: list[tuple[str, float, float, int]] = []
 
@@ -182,7 +346,59 @@ def cpiAccelerationEvents(
     *,
     thresholdPp: float = 1.0,
 ) -> dict:
-    """CPI 가속 구간 식별."""
+    """CPI 가속 구간 식별.
+
+    Capabilities:
+        CPI raw 월별 시리즈 → YoY → 3 개월 변화 ≥ thresholdPp 가속 구간 카운트 +
+        현재 가속 여부. 인플레 쇼크 시기 진단.
+
+    Args:
+        cpiRawMonthly: ``{"YYYY-MM": CPI index}`` 원시 월별 dict.
+        thresholdPp: 가속 임계 (%p). 기본 1.0.
+
+    Returns:
+        dict — count/currentAcceleration/isAccelerating(bool)/description.
+
+    Example:
+        >>> r = cpiAccelerationEvents({"2022-06": 296.3, ...})
+        >>> r["isAccelerating"]
+        True
+
+    Guide:
+        currentAcceleration > 2.0 = 강한 가속 (2021-22 같은 인플레 쇼크). count
+        역사적 빈도 (1970s 다발) 와 비교 인용.
+
+    When:
+        ``buildHistoricalContext`` 내부 + AI 인플레 답변 보조.
+
+    How:
+        _yoy(raw) → _deltaN(3M, YoY) → threshold 매칭 → 현재 latest 가속도.
+
+    Requires:
+        FRED CPIAUCSL 월별 원시 ≥ 1947.
+
+    Raises:
+        없음.
+
+    See Also:
+        - interpretInflation : 현재 인플레 상태
+        - rateOutlook : 인플레 → 정책금리 방향
+
+    AIContext:
+        isAccelerating + currentAcceleration 두 필드 인용으로 "CPI +1.5%p 가속 중"
+        답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - YoY 가 아닌 raw 변화로 가속도 산출 (반드시 YoY 후 deltaN)
+            - threshold 임의 변경 (1.0 표준)
+        OutputSchema:
+            ``{count, currentAcceleration, isAccelerating, description}``.
+        Prerequisites: CPI 월별 원시.
+        Freshness: 월간 (10 일 발표).
+        Dataflow: raw → YoY → 3M delta → 임계.
+        TargetMarkets: US. KR 동일 적용 가능.
+    """
     cpiYoy = _yoy(cpiRawMonthly)
     accel = _deltaN(cpiYoy, 3)
 
@@ -206,7 +422,62 @@ def cpiAccelerationEvents(
 def simultaneousWarningFlags(
     data: dict[str, dict[str, float] | None],
 ) -> SimultaneousWarnings:
-    """8개 경고등 동시 점등 판정."""
+    """8개 경고등 동시 점등 판정.
+
+    Capabilities:
+        8 위험 신호 (HY>5%/HY급등/YC역전/실업↑/VIX>25/NFCI긴축/산업생산↓/
+        CPI>5%) 현재 점등 수 + 과거 3 개 이상 동시 점등 횟수 + 이후 18 개월
+        내 침체 확률 + 유사 시기 list.
+
+    Args:
+        data: ``{"hy_spread"/"hy_spread_d3"/"spread_10y2y"/"ur_d6"/"vix"/"nfci"/
+            "ip_yoy"/"cpi_yoy": {"YYYY-MM": value}}`` 월별 dict.
+
+    Returns:
+        SimultaneousWarnings — activeFlags/flagCount/historicalOccurrences/
+        recessionRate18m/similarPeriods/description.
+
+    Example:
+        >>> r = simultaneousWarningFlags({"hy_spread": {...}, ...})
+        >>> r.flagCount, r.recessionRate18m
+        (4, 0.85)
+
+    Guide:
+        flagCount ≥ 5 = 경고 매우 강함. recessionRate18m ≥ 0.7 + similar 사례
+        대조 인용으로 "지금 2007-12 와 유사" 답변 가능.
+
+    When:
+        ``buildHistoricalContext`` 위기 신호 1 차 진입점.
+
+    How:
+        latest 임계 매칭 + 모든 월 임계 매칭 → 3+ 점등 월 → 침체 카운트 + 현재
+        active 와 ≥ 2 overlap 인 과거 5 케이스.
+
+    Requires:
+        FRED 8 시리즈 월별 + NBER.
+
+    Raises:
+        없음.
+
+    See Also:
+        - bullishSignalFlags : 반대 (호황 신호)
+        - hySpikesToRecession : HY 단일 신호 통계
+
+    AIContext:
+        activeFlags + similarPeriods 1 건 인용으로 "지금 4 개 경고등 (HY/YC/실업/
+        VIX), 2007-12 와 유사 — 12 개월 후 침체" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - flagCount 만 인용 + similarPeriods 미노출
+            - 침체 중 (in_rec=True) 케이스 rate 계산 포함 (제외)
+        OutputSchema:
+            SimultaneousWarnings (6 필드).
+        Prerequisites: 8 시리즈 월별.
+        Freshness: 월간.
+        Dataflow: data → 8 임계 → 동시점등 카운트 → 침체 확률.
+        TargetMarkets: US. KR 미지원.
+    """
     hy = data.get("hy_spread") or {}
     hyD3 = data.get("hy_spread_d3") or {}
     yc = data.get("spread_10y2y") or {}

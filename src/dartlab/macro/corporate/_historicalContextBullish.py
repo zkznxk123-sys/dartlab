@@ -39,7 +39,60 @@ def hyCompressionToExpansion(
 ) -> HYCompressionHistory:
     """HY 스프레드 3개월 급락 (신용 완화) → 확장 통계.
 
-    HY가 빠르게 줄어든다 = 신용 시장이 안정 = 경기 회복/확장 신호.
+    Capabilities:
+        HY OAS 월별 시리즈에서 3 개월 변화 ≤ thresholdBp (기본 -1.0 %p = -100bp)
+        구간을 추출 → NBER 침체 종료 12 개월 이내 발생한 케이스 (회복 초기
+        신용 완화) 의 평균 확장 지속 개월 계산. 매크로 회복 통계 진단.
+
+    Args:
+        hyMonthly: ``{"YYYY-MM": HY OAS %}`` 월별 dict.
+        thresholdBp: 급락 임계 (%p). 기본 -1.0 = -100bp 이하.
+
+    Returns:
+        HYCompressionHistory — totalCompressions/avgExpansionMonths/currentDelta/
+        description.
+
+    Example:
+        >>> r = hyCompressionToExpansion({"2009-04": 12.0, "2009-07": 9.5, ...})
+        >>> r.avgExpansionMonths
+        62.0
+
+    Guide:
+        avg expansion 60~80 개월 = 큰 신용 완화 직후 장기 확장. currentDelta 가
+        threshold 이하면 "현재 신용 완화 진행 중" 인용.
+
+    When:
+        ``buildHistoricalContext`` 내부 + AI "신용 완화 이후 확장 가능성" 답변.
+
+    How:
+        _deltaN(3M) → threshold 매칭 → _monthsSinceRecessionEnd ≤ 12 필터 →
+        _monthsToNextRecession 평균.
+
+    Requires:
+        FRED BAMLH0A0HYM2 월별 + NBER 침체 일자 정적 테이블.
+
+    Raises:
+        없음.
+
+    See Also:
+        - bullishSignalFlags : 8 신호 동시 점등 통계
+        - buildHistoricalContext : 본 함수 호출 진입점
+
+    AIContext:
+        avgExpansionMonths + totalCompressions 두 필드 인용으로 "신용 완화 후
+        평균 N 개월 확장" 답변 완성.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 침체 기간 내 압축은 제외 (회복 초기 압축만 카운트)
+            - thresholdBp 양수 입력 (음수가 정상)
+        OutputSchema:
+            HYCompressionHistory ``(totalCompressions, avgExpansionMonths,
+            currentDelta, description)``.
+        Prerequisites: HY OAS 월별 시리즈 ≥ 1980 이상.
+        Freshness: 월말 단순화.
+        Dataflow: hyMonthly → deltaN → 회복기 필터 → 평균.
+        TargetMarkets: US (HY OAS 풀세트). KR 미지원.
     """
     d3 = _deltaN(hyMonthly, 3)
     compressions: list[tuple[str, float, int | None]] = []
@@ -83,15 +136,62 @@ def bullishSignalFlags(
 ) -> BullishSignals:
     """호황/회복 신호 감지 — 위기 경고등의 반대.
 
-    8개 긍정 신호:
-    - HY<4% (신용 안정)
-    - HY 축소 중 (3m<0)
-    - YC 양수 (>1.0)
-    - 실업률 하락 중 (6m<0)
-    - VIX<18 (안정)
-    - NFCI<-0.5 (금융환경 완화)
-    - 산업생산 성장 (YoY>2%)
-    - CPI 안정 (YoY 1~3%)
+    Capabilities:
+        8 긍정 신호 (HY<4%/HY축소/YC양수/실업↓/VIX<18/NFCI완화/산업생산↑/
+        CPI안정) 의 현재 점등 수 + 과거 4 개+ 동시 점등 횟수 + 이후 평균 확장
+        지속 개월 + 유사 시기 list. 위기 경고등의 반대.
+
+    Args:
+        data: ``{"hy_spread"/"hy_spread_d3"/"spread_10y2y"/"ur_d6"/"vix"/"nfci"/
+            "ip_yoy"/"cpi_yoy": {"YYYY-MM": value}}`` 월별 dict 모음.
+
+    Returns:
+        BullishSignals — activeSignals/signalCount/historicalOccurrences/
+        avgExpansionMonths/similarPeriods(list[dict])/description.
+
+    Example:
+        >>> r = bullishSignalFlags({"hy_spread": {...}, ...})
+        >>> r.signalCount, r.avgExpansionMonths
+        (5, 48.0)
+
+    Guide:
+        signalCount ≥ 4 = 호황 진행, ≥ 6 = 강한 호황. similarPeriods 와 매칭하면
+        과거 사례 인용 가능.
+
+    When:
+        ``buildHistoricalContext`` 내부 + AI "지금 호황 신호 몇 개" 답변.
+
+    How:
+        각 신호 임계 매칭 → active 리스트 + 4+ 동시 점등 월 → 이후 확장 지속
+        평균 → 현재 active 와 ≥ 3 overlap 인 과거 5 케이스.
+
+    Requires:
+        FRED HY/yield curve/UNRATE/VIX/NFCI/IP/CPI 월별 + NBER 침체 일자.
+
+    Raises:
+        없음.
+
+    See Also:
+        - hyCompressionToExpansion : 신용 완화 단일 신호 통계
+        - simultaneousWarningFlags : 반대 (위기 경고등)
+        - buildHistoricalContext : 본 함수 호출 진입점
+
+    AIContext:
+        activeSignals + similarPeriods 1 건 인용으로 "지금 (2008-02 와 유사) 4 개
+        호황 신호 점등" 1 문장 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - signalCount 만 인용 + similarPeriods 미노출
+            - 침체 중 (mtr=999) 케이스도 expansion 평균에 포함 (필터링 필요)
+            - 8 신호 임계 임의 변경 (재현성 손실)
+        OutputSchema:
+            BullishSignals ``(activeSignals, signalCount, historicalOccurrences,
+            avgExpansionMonths, similarPeriods, description)``.
+        Prerequisites: 8 시리즈 월별 cache.
+        Freshness: 월간.
+        Dataflow: data → 8 신호 임계 → active + 과거 카운트 → 평균.
+        TargetMarkets: US (NFCI 등 US 한정). KR 미지원.
     """
     hy = data.get("hy_spread") or {}
     hyD3 = data.get("hy_spread_d3") or {}
