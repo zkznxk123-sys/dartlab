@@ -95,24 +95,63 @@ def buildTransitionMatrix(
     *,
     ratings: tuple[str, ...] | None = None,
 ) -> pl.DataFrame:
-    """등급 전이 확률 matrix (row-stochastic).
+    """관측 전이 횟수 → row-stochastic 신용등급 전이 확률 matrix (Markov).
 
-    Parameters
-    ----------
-    counts : dict | None
-        ``{from_rating: {to_rating: count}}`` 형식의 관측 전이 횟수.
-        None 이면 ``data/credit/transition.json`` 로드.
-    ratings : tuple[str, ...] | None
-        등급 순서 (best → worst). None 이면 dCR 기본 20 등급.
+    Capabilities:
+        Standard & Poor's/Moody's 방법론 — 관측 전이 횟수 dict 를 row 합 = 1
+        의 확률 matrix 로 변환. 빈 관측 row 는 self-loop 안정 가정 (등급
+        유지), D (default) row 는 absorbing state.
 
-    Returns
-    -------
-    pl.DataFrame
-        ``from_rating`` 컬럼 + 각 to_rating 별 확률 컬럼. 각 row sum ≈ 1.
+    Args:
+        counts: ``{from_rating: {to_rating: count}}`` 관측 전이. None 시
+            ``data/credit/transition.json`` 자동 로드 (KR 신평사 평균).
+        ratings: 등급 순서 (best → worst). None 시 dCR 20 등급 기본.
 
-    Notes
-    -----
-    빈 관측 row → self-loop (안정 가정). D row 는 absorbing.
+    Returns:
+        pl.DataFrame:
+            - ``from_rating`` (str): 시작 등급
+            - 각 ``to_rating`` 컬럼 (float): 전이 확률 (row sum ≈ 1)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> matrix = buildTransitionMatrix()
+        >>> matrix.filter(pl.col("from_rating") == "AAA").select("AAA", "AA+", "D")
+        # AAA → AAA 0.95, AAA → AA+ 0.04, AAA → D 0.0001
+
+    Guide:
+        S&P 1981~2024 관측: AAA self-loop 95%+ (매우 안정), B 이하 self-loop
+        70%, D absorbing (한 번 default 면 영구). 본 함수는 1 년 전이 matrix
+        — 다년 전이는 matrix^N 으로 합성 (``forwardPdLadder``).
+
+    SeeAlso:
+        - ``forwardPdLadder``: 다년 PD 사다리 (matrix 거듭제곱)
+        - ``mapTo20Grade``: 점수 → 등급 변환 (전이 matrix 입력)
+        - S&P Annual Default Study (2024)
+
+    Requires:
+        counts dict 또는 transition.json (data/credit/).
+
+    AIContext:
+        전이 matrix 는 정적 — KR/US 시장별 다른 matrix 사용 권장 (현재 KR
+        평균만 제공). 본 matrix 를 활용한 다년 PD 예측은 ``forwardPdLadder``.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 다년 PD 를 직접 계산 — 본 함수는 1 년 transition matrix 만.
+              다년은 ``forwardPdLadder`` 호출.
+            - 빈 관측 row 를 0 으로 채우면 row sum != 1 — 본 함수가 self-loop
+              자동 적용 (안정 가정).
+        OutputSchema:
+            pl.DataFrame ``{from_rating: str, AAA: float, ..., D: float}``.
+        Prerequisites:
+            counts dict 또는 transition.json 로드.
+        Freshness:
+            transition.json = 운영자 수동 업데이트 (연 1 회 권장).
+        Dataflow:
+            counts → _countsToMatrix → row 정규화 (sum=1) → DataFrame.
+        TargetMarkets: KR (NICE/KIS 신평사 평균). US (S&P/Moody's) 별도 입력.
     """
     if counts is None:
         counts = _loadTransition()
