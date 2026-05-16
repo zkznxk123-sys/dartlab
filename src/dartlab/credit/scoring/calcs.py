@@ -33,20 +33,62 @@ def _evaluate(company, basePeriod=None):
 
 @_memoized_calc
 def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용분석 핵심 지표 시계열.
+    """신용분석 핵심 지표 시계열 — 7 축 metrics + 사업안정성.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
+    Capabilities:
+        evaluateCompany 의 metricsHistory 노출 — 기간별 7 축 (상환력/레버리지/
+        유동성/수익성/구조/시장신호/지배구조) 지표 시계열 + businessStability
+        (opMarginCV, revenueCV 변동성 지표) 동행. 신용 점수 출력 전 입력 데이터
+        가시화.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 7축 지표 시계열 (calcAllMetrics 결과)
-        businessStability : dict — 사업안정성 지표 (opMarginCV, revenueCV 등)
+    Args:
+        company: DartCompany | EdgarCompany 인스턴스.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 기간별 7 축 metrics (calcAllMetrics 결과).
+            - ``businessStability`` (dict): opMarginCV/revenueCV 등 변동성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCreditMetrics(Company("005930"))
+        >>> r["history"][0]["repayment"]["interestCoverage"]
+        18.5
+
+    Guide:
+        - 본 함수는 metrics 만 — 점수/등급은 calcCreditScore.
+        - businessStability 의 CV (coefficient of variation) 가 낮을수록
+          업황 안정 (CV < 0.2 = 매우 안정).
+        - 7 축 metrics 가 axis_evaluators 의 입력.
+
+    SeeAlso:
+        - ``calcCreditScore``: 종합 등급
+        - ``calcCreditHistory``: 등급 시계열
+        - ``credit.scoring.metrics.calcAllMetrics``: 7 축 metrics 본체
+
+    Requires:
+        DART/EDGAR 재무 시계열 (IS/BS/CF + 시가총액).
+
+    AIContext:
+        history latest 키 인용 + businessStability CV 함께. metrics 단독 인용
+        시 점수 변환 (calcCreditScore) 누락 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - metrics 인용으로 등급 추론 — calcCreditScore 필수.
+            - 단년도 metric 만 인용 — history 시계열 함께.
+        OutputSchema:
+            ``{history: list[dict], businessStability: dict}``.
+        Prerequisites:
+            IS/BS/CF + 시가총액.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → metricsHistory → 7 축 metric + businessStability.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -62,27 +104,66 @@ def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
-    """신용등급 종합 산출.
+    """신용등급 종합 산출 — 7 축 가중합 + override 시나리오.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
-    overrides : dict | None
-        시나리오 가정 교체. core/overrides.py CREDIT_KEYS에 정의된 키만 유효.
-        예: ``{"debtRatio": 150, "interestCoverage": 5.0}``
-        적용 시 결과에 ``overrides``/``overrideNote`` 키가 추가됨.
+    Capabilities:
+        7 축 (상환력/레버리지/유동성/수익성/구조/시장신호/지배구조) 가중합
+        → 0~100 score → 20 단계 grade (AAA~D) + PD (확률) 매핑. overrides 로
+        부채비율/IC 등 가정 교체 시나리오 가능. Damodaran credit synthetic
+        rating + Moody's RiskCalc 표준 융합.
 
-    Returns
-    -------
-    dict | None
-        evaluateCompany() 반환 dict 전체 (grade, score, axes 등).
-        overrides 적용 시 추가 키:
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간.
+        overrides: 시나리오 가정 (CREDIT_KEYS 만). 예: ``{"debtRatio": 150}``.
 
-        overrides : dict — 적용된 override 값
-        overrideNote : str — "AI/사용자 override 적용 시나리오"
+    Returns:
+        dict | None: evaluateCompany 결과 dict (grade, score, axes, ...).
+            overrides 적용 시 ``overrides``/``overrideNote`` 키 추가.
+
+    Raises:
+        없음 (None 시 데이터 부족).
+
+    Example:
+        >>> r = calcCreditScore(Company("005930"))
+        >>> r["grade"], r["score"]
+        ('AA+', 87.5)
+        >>> r2 = calcCreditScore(Company("005930"), overrides={"debtRatio": 200})
+        >>> r2["overrideNote"]
+        'AI/사용자 override 적용 시나리오'
+
+    Guide:
+        - investment grade (AAA~BBB-) vs speculative (BB+~D) 경계 주목.
+        - 단년도 grade 단독 인용 금지 — calcCreditHistory 시계열 함께.
+        - overrides 는 stress test 용 — 실제 등급과 구분 명시.
+
+    SeeAlso:
+        - ``calcCreditMetrics``: 7 축 metrics 입력
+        - ``calcCreditHistory``: 등급 시계열
+        - ``calcGradeImprovement``: 개선 시나리오
+
+    Requires:
+        IS/BS/CF + 시가총액 + 시장신호 (베타/변동성).
+
+    AIContext:
+        grade + score + 핵심 axes 함께 인용. overrides 사용 시 가정 명시 +
+        실제와 분리. PD 단독 인용 금지 (grade 매핑 표준).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 grade 단정 — 시계열 (calcCreditHistory) 함께.
+            - overrides 결과를 실제 grade 로 인용 — 시나리오임 명시.
+        OutputSchema:
+            ``{grade: str, score: float, axes: list, pd: float, ...,
+              overrides?: dict, overrideNote?: str}``.
+        Prerequisites:
+            IS/BS/CF + 시가총액.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → 7 축 score → 가중합 → grade mapping → (옵션)
+            override applied.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     # override 적용: 시나리오 부채비율 등으로 등급 재산출
