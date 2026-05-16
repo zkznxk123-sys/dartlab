@@ -88,16 +88,16 @@ class OpenAICompatProvider(BaseProvider):
 
     @property
     def defaultModel(self) -> str:
-        """defaultModel — TODO 한국어 동작 설명."""
+        """provider-specific default_model 또는 gpt-4o 폴백."""
         return self._defaults.get("default_model", "gpt-4o")
 
     @property
     def supportsNativeTools(self) -> bool:
-        """supportsNativeTools — TODO 한국어 동작 설명."""
+        """OpenAI 호환 API 는 native tool calling 표준 지원."""
         return True
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """provider 키 + openai SDK 클라이언트 생성 가능 여부."""
         try:
             self._getClient()
             return True
@@ -105,7 +105,7 @@ class OpenAICompatProvider(BaseProvider):
             return False
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        """complete — TODO 한국어 동작 설명."""
+        """OpenAI 호환 chat.completions 동기 호출 + rate-limit wrap."""
         client = self._getClient()
         try:
             response = client.chat.completions.create(
@@ -132,7 +132,7 @@ class OpenAICompatProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        """stream — TODO 한국어 동작 설명."""
+        """OpenAI 호환 chat.completions 스트리밍 — delta.content 만 yield."""
         client = self._getClient()
         try:
             response = client.chat.completions.create(
@@ -155,7 +155,7 @@ class OpenAICompatProvider(BaseProvider):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
-        """completeWithTools — TODO 한국어 동작 설명."""
+        """OpenAI 호환 tool calling — toolChoice + parallel_tool_calls=False."""
         client = self._getClient()
         kwargs: dict = {
             "model": self.resolvedModel,

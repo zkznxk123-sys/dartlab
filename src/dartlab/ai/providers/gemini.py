@@ -49,16 +49,16 @@ class GeminiProvider(BaseProvider):
 
     @property
     def defaultModel(self) -> str:
-        """defaultModel — TODO 한국어 동작 설명."""
+        """기본 Gemini 모델 — gemini-2.5-flash."""
         return "gemini-2.5-flash"
 
     @property
     def supportsNativeTools(self) -> bool:
-        """supportsNativeTools — TODO 한국어 동작 설명."""
+        """Gemini API native function calling 지원."""
         return True
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """GEMINI_API_KEY + google-genai SDK 사용 가능 여부."""
         try:
             self._getClient()
             return True
@@ -66,7 +66,7 @@ class GeminiProvider(BaseProvider):
             return False
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        """complete — TODO 한국어 동작 설명."""
+        """messages → Gemini generate_content 동기 호출 → LLMResponse."""
         client = self._getClient()
         systemInstruction, contents = _splitSystemAndContents(messages)
 
@@ -101,7 +101,7 @@ class GeminiProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        """stream — TODO 한국어 동작 설명."""
+        """Gemini generate_content_stream — text delta 만 yield."""
         client = self._getClient()
         systemInstruction, contents = _splitSystemAndContents(messages)
 
@@ -129,7 +129,7 @@ class GeminiProvider(BaseProvider):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
-        """completeWithTools — TODO 한국어 동작 설명."""
+        """Gemini function calling — toolChoice (any/none) + ToolResponse 반환."""
         client = self._getClient()
         from google.genai import types
 
@@ -206,7 +206,7 @@ class GeminiProvider(BaseProvider):
         answer: str | None,
         toolCalls: list,
     ) -> dict:
-        """formatAssistantToolCalls — TODO 한국어 동작 설명."""
+        """assistant 응답 + toolCalls → Gemini native parts (role=model)."""
         from google.genai import types
 
         parts = []
@@ -217,7 +217,7 @@ class GeminiProvider(BaseProvider):
         return {"role": "model", "parts": parts, "_gemini_native": True}
 
     def formatToolResult(self, toolCallId: str, result: str) -> dict:
-        """formatToolResult — TODO 한국어 동작 설명."""
+        """tool 결과 → Gemini function_response part (role=user)."""
         from google.genai import types
 
         name = toolCallId

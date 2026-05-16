@@ -11,7 +11,7 @@ from dartlab.ai.tools.types import ToolSpec
 
 
 class OpenAIProvider(BaseProvider):
-    """OpenAIProvider — TODO 한국어 클래스 설명."""
+    """OpenAI provider adapter — openai SDK 래핑 + native tool calling."""
 
     name = "openai"
     defaultModel = "gpt-4o"
@@ -27,7 +27,7 @@ class OpenAIProvider(BaseProvider):
         return OpenAI(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """OPENAI_API_KEY + openai SDK 동시 보유 여부."""
         if not (self.config.apiKey or os.getenv("OPENAI_API_KEY")):
             return False
         try:
@@ -37,7 +37,7 @@ class OpenAIProvider(BaseProvider):
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:
-        """toolSchema — TODO 한국어 동작 설명."""
+        """ToolSpec → OpenAI chat.completions tools 형식 (type=function 래핑)."""
         return {
             "type": "function",
             "function": {
@@ -54,7 +54,7 @@ class OpenAIProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
-        """complete — TODO 한국어 동작 설명."""
+        """messages + tools → OpenAI chat.completions → LLMEvent stream."""
         client = self._client()
         kwargs: dict[str, Any] = {
             "model": self.resolvedModel,

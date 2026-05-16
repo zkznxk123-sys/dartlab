@@ -43,7 +43,7 @@ _VRAM_MODEL_TIERS: list[tuple[int, str, str]] = [
 
 
 def recommendModel(vramMb: int | None = None) -> dict:
-    """recommendModel — TODO 한국어 동작 설명."""
+    """GPU VRAM 기반 모델 추천 — _VRAM_MODEL_TIERS 매핑."""
     if vramMb is None:
         from dartlab.ai.providers.support.ollamaSetup import _detectGpu
 
@@ -61,7 +61,7 @@ class OllamaProvider(BaseProvider):
 
     @property
     def supportsNativeTools(self) -> bool:
-        """supportsNativeTools — TODO 한국어 동작 설명."""
+        """Ollama 0.4+ native tool calling 지원."""
         return True
 
     def __init__(self, config: LLMConfig):
@@ -71,14 +71,14 @@ class OllamaProvider(BaseProvider):
 
     @property
     def defaultModel(self) -> str:
-        """defaultModel — TODO 한국어 동작 설명."""
+        """설치된 첫 모델 또는 llama3.1 폴백."""
         models = self.getInstalledModels()
         if models:
             return models[0]
         return "llama3.1"
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """Ollama 서버 /api/tags 응답 2 초 내 200 여부."""
         import httpx
 
         try:
@@ -88,7 +88,7 @@ class OllamaProvider(BaseProvider):
             return False
 
     def getInstalledModels(self) -> list[str]:
-        """getInstalledModels — TODO 한국어 동작 설명."""
+        """Ollama 서버 설치 모델 목록 (:latest 접미사 제거)."""
         import httpx
 
         try:
@@ -105,7 +105,7 @@ class OllamaProvider(BaseProvider):
             return []
 
     def preload(self, *, keepAliveMinutes: int = 30) -> bool:
-        """preload — TODO 한국어 동작 설명."""
+        """모델 VRAM 로드 후 keepAliveMinutes 분 동안 유지."""
         import httpx
 
         options = _buildInferenceOptions()
@@ -127,7 +127,7 @@ class OllamaProvider(BaseProvider):
             return False
 
     def unload(self) -> bool:
-        """unload — TODO 한국어 동작 설명."""
+        """keep_alive=0 으로 모델 VRAM 즉시 해제."""
         import httpx
 
         try:
@@ -141,7 +141,7 @@ class OllamaProvider(BaseProvider):
             return False
 
     def serverVersion(self) -> str | None:
-        """serverVersion — TODO 한국어 동작 설명."""
+        """Ollama 서버 /api/version 조회 (실패 시 None)."""
         import httpx
 
         try:
@@ -169,7 +169,7 @@ class OllamaProvider(BaseProvider):
         return self._client
 
     def complete(self, messages: list[dict[str, str]]) -> LLMResponse:
-        """complete — TODO 한국어 동작 설명."""
+        """Ollama 동기 chat.completions 호출 (OpenAI 호환 API)."""
         client = self._getClient()
         response = client.chat.completions.create(
             model=self.resolvedModel,
@@ -183,7 +183,7 @@ class OllamaProvider(BaseProvider):
         )
 
     def stream(self, messages: list[dict[str, str]]) -> Generator[str, None, None]:
-        """stream — TODO 한국어 동작 설명."""
+        """Ollama 스트리밍 chat.completions — delta.content 만 yield."""
         client = self._getClient()
         stream = client.chat.completions.create(
             model=self.resolvedModel,
@@ -200,7 +200,7 @@ class OllamaProvider(BaseProvider):
         messages: list[dict[str, str]],
         schema: dict | None = None,
     ) -> LLMResponse:
-        """completeJson — TODO 한국어 동작 설명."""
+        """JSON schema 강제 응답 모드 (response_format=json_schema 또는 json_object)."""
         client = self._getClient()
         if schema:
             response_format = {
@@ -229,7 +229,7 @@ class OllamaProvider(BaseProvider):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
-        """completeWithTools — TODO 한국어 동작 설명."""
+        """Ollama tool calling — chat.completions tools 파라미터 사용."""
         import json
 
         client = self._getClient()
