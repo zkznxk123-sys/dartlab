@@ -818,12 +818,6 @@ class _Module(sys.modules[__name__].__class__):
             instance = Industry()
             setattr(self, name, instance)
             return instance
-        if name == "topdown":
-            from dartlab.topdown import _TopdownEntry
-
-            instance = _TopdownEntry()
-            setattr(self, name, instance)
-            return instance
         if name == "viz":
             import dartlab.viz as _viz
 
@@ -848,11 +842,6 @@ if not _IS_PYODIDE:
     from dartlab.gather.entry import GatherEntry as _GatherEntry
 
     sys.modules[__name__].gather = _GatherEntry()
-
-    # topdown도 같은 문제 — 모듈 import가 __getattr__보다 우선이라 callable로 덮어쓴다
-    from dartlab.topdown import _TopdownEntry as _TopdownEntry
-
-    sys.modules[__name__].topdown = _TopdownEntry()
 
     # scan/analysis/credit/quant — 어떤 import 체인이 모듈을 먼저 로드하면
     # 모듈 클래스의 __getattr__이 동작 안 함 (CI에서 발견된 회귀).
@@ -955,7 +944,6 @@ __all__ = [
     "credit",
     "macro",
     "industry",
-    "topdown",
     "verbose",
     "dataDir",
     "codeToName",

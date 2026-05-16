@@ -1880,7 +1880,6 @@ def _generateCapabilitiesPy() -> str:
                 "macro": ("dartlab.macro", "Macro"),
                 "quant": ("dartlab.quant", "Quant"),
                 "industry": ("dartlab.industry", "Industry"),
-                "topdown": ("dartlab.topdown", None),  # 함수 직접 참조
             }
             candidates = [inspect.getdoc(getattr(type(obj), "__call__", None))]
             if name in _CALLABLE_MODULE_MAP:
@@ -1894,7 +1893,6 @@ def _generateCapabilitiesPy() -> str:
                         if cls:
                             candidates.append(inspect.getdoc(getattr(cls, "__call__", None)))
                     else:
-                        # 함수 직접 참조 (topdown 등)
                         fn = getattr(mod, name, None)
                         if fn and callable(fn):
                             candidates.append(inspect.getdoc(fn))
