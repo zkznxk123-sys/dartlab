@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { RefDetail } from '@/features/chat/store/chat';
 import { useChat } from '@/features/chat/store/chat';
+import { ProvenanceTree } from './ProvenanceTree';
 
 function kindIcon(kind: string) {
 	const k = kind.toLowerCase();
@@ -125,6 +126,7 @@ export function EvidenceChip({ refId, index }: Props) {
 							미리보기 — 전체는 도구 결과 본문에 있음.
 						</div>
 					)}
+					<ProvenanceTree refId={refId} />
 					{toolCallId && (
 						<Button
 							size="sm"
