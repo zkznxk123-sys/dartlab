@@ -537,18 +537,70 @@ def calcMultipleBand(
 
 
 def rateOutlook(indicators: dict[str, float | None]) -> dict:
-    """금리·물가·고용 조합으로 금리 방향 전망.
+    """금리·물가·고용 → Fed/BOK 정책 금리 방향 전망 (인상/동결/인하).
+
+    Capabilities:
+        Taylor rule 단순화 — CPI/Core CPI + 실업률 + payrolls 변화로 인플레
+        압력과 고용 강도를 합산하여 정책금리 방향 (hike/hold/cut) 과 신뢰도
+        산출. macro/summary 의 rates 축이 직접 호출.
 
     Args:
-        indicators:
-            - fed_funds / base_rate: 현재 정책금리 (%)
-            - cpi_yoy: CPI YoY (%)
-            - core_cpi_yoy: Core CPI YoY (%)
-            - unemployment: 실업률 (%)
-            - payrolls_change: 비농업고용 변화 (천명)
+        indicators: 매크로 dict. 지원 키:
+            - ``fed_funds`` 또는 ``base_rate`` (%): 현 정책금리
+            - ``cpi_yoy`` (%): CPI YoY
+            - ``core_cpi_yoy`` (%): Core CPI YoY
+            - ``unemployment`` (%): 실업률
+            - ``payrolls_change`` (천명): 비농업고용 변화
 
     Returns:
-        dict: direction, confidence, reasoning
+        dict:
+            - ``direction`` (str): ``"hike"``/``"hold"``/``"cut"``
+            - ``directionLabel`` (str): 한국어
+            - ``confidence`` (str): high/medium/low
+            - ``reasoning`` (list[str]): 판정 근거 라인
+            - ``bias`` (int): 양수=인상 / 음수=인하
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = rateOutlook({"fed_funds": 5.5, "cpi_yoy": 3.2,
+        ...                  "unemployment": 3.7, "payrolls_change": 200})
+        >>> r["direction"]
+        'hold'
+
+    Guide:
+        Taylor rule: r* = neutral + 1.5(π - 2) + 0.5(u_natural - u). 본 함수는
+        간소화 — 인상 bias 누적 (CPI>3, payrolls 강세 등) - 인하 bias (CPI<2,
+        unemp 상승). bias > +2 = hike, < -2 = cut, 그 외 hold.
+
+    SeeAlso:
+        - ``classifyCycle``: 사이클 4 국면 (rateOutlook 와 함께 종합)
+        - ``decomposeLongRate``: 장기금리 BEI/real rate 분해
+
+    Requires:
+        없음 (순수 함수). indicators 일부 키만 있어도 동작.
+
+    AIContext:
+        direction + reasoning 함께 인용. confidence=low 시 다음 분기 재호출
+        권장 (전환기). bias 절댓값 작으면 (|bias|<2) hold 가 default.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 지표 (CPI 만) 로 direction 판정 — Taylor rule 은 인플레 +
+              고용 동시 고려.
+            - 한국 base_rate 호출에 미국 fed_funds 표준 적용 — KR/US 별
+              neutral rate 다름 (한국 ~2.5%, 미국 ~3%).
+        OutputSchema:
+            ``{direction, directionLabel, confidence, reasoning, bias}``.
+        Prerequisites:
+            indicators 에 (fed_funds 또는 base_rate) + cpi_yoy 권장.
+        Freshness:
+            CPI 월간 (10 일 발표), 고용 월간 (첫 금요일).
+        Dataflow:
+            indicators → CPI bias + 고용 bias + 실업 bias 누적 → 합산 →
+            direction 분류 + confidence.
+        TargetMarkets: US (Fed funds + CPI + payrolls), KR (BOK base + KOSIS).
     """
     ff = indicators.get("fed_funds") or indicators.get("base_rate")
     cpi = indicators.get("cpi_yoy")
