@@ -20,25 +20,65 @@ def _ensureDir(path: Path) -> None:
 
 
 def recordGrade(stockCode: str, result: dict) -> Path:
-    """등급 이력에 현재 결과 추가.
+    """credit.evaluate 결과 → 등급 이력 JSON 누적 + 전이 매트릭스 자동 업데이트.
 
-    ``data/credit/history/{stockCode}.json``에 등급·점수·outlook 등을
-    JSON 배열로 축적한다. 이전 등급 대비 변경이 있으면
-    전이 매트릭스도 자동 업데이트한다.
+    Capabilities:
+        ``data/credit/history/{stockCode}.json`` 에 등급/점수/outlook 시계열
+        JSON 축적. 이전 등급 대비 변경이 있으면 transition matrix
+        (data/credit/transition.json) 의 (from, to) 카운트 자동 증가. credit
+        모니터링 파이프라인의 핵심 함수.
 
-    Parameters
-    ----------
-    stockCode : str
-        종목코드 (예: ``"005930"``).
-    result : dict
-        신용분석 결과. 주요 키: ``grade`` (str), ``gradeRaw`` (str),
-        ``score`` (점), ``eCR`` (str), ``outlook`` (str),
-        ``methodologyVersion`` (str), ``latestPeriod`` (str).
+    Args:
+        stockCode: 종목코드 (예 ``"005930"``).
+        result: ``credit.evaluate`` 결과 dict. 필수 키: ``grade``,
+            ``gradeRaw``, ``score``, ``eCR``, ``outlook``,
+            ``methodologyVersion``, ``latestPeriod``.
 
-    Returns
-    -------
-    Path
-        저장된 이력 파일의 경로 (``data/credit/history/{stockCode}.json``).
+    Returns:
+        Path: 저장된 이력 파일 (``data/credit/history/{stockCode}.json``).
+
+    Raises:
+        없음 — 디렉토리 자동 생성, write 실패 시도 silently log.
+
+    Example:
+        >>> from dartlab.credit import credit
+        >>> result = credit("005930")
+        >>> path = recordGrade("005930", result)
+        >>> path.name
+        '005930.json'
+
+    Guide:
+        매 분기 (또는 매주) 호출 권장 — 등급 변화 자동 추적. transition
+        matrix 는 KR 평균 누적되므로 분기별 운영자 검증 필요.
+
+    SeeAlso:
+        - ``loadHistory``: 본 함수 저장 결과 로드
+        - ``gradeChanged``: 변화 여부 판정
+        - ``buildTransitionMatrix``: 누적 카운트 → 확률 matrix
+
+    Requires:
+        ``data/credit/history/`` 디렉토리 + write 권한.
+
+    AIContext:
+        본 함수는 mutation (파일 IO + transition.json 업데이트). 회귀 테스트
+        에서 자동 호출 금지 (data 폴더 오염). 사용자/cron 트리거 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 동일 분기 동일 종목 반복 호출 → 중복 entry. ``latestPeriod``
+              체크 + 호출자 dedupe 필요.
+            - transition.json 의 stockCode 단위 추적 부재 — 전체 KR 평균만.
+              개별 종목 transition 은 history JSON 에서 별도 계산.
+        OutputSchema:
+            Path 객체.
+        Prerequisites:
+            ``data/credit/history/`` write 권한.
+        Freshness:
+            entry 마다 ``auditDate`` 추가 (오늘 날짜).
+        Dataflow:
+            stockCode → loadHistory → previousGrade 비교 → JSON entry 추가
+            → 저장 → transition matrix 업데이트.
+        TargetMarkets: KR (DART). US 미적용.
     """
     _ensureDir(_HISTORY_DIR)
     path = _HISTORY_DIR / f"{stockCode}.json"
