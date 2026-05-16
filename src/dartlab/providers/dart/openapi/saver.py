@@ -457,7 +457,7 @@ def _writeParquetAtomic(df: pl.DataFrame, dest: Path) -> None:
 
 
 def _keyExpr(columns: Sequence[str]) -> pl.Expr:
-    return pl.concat_str([pl.col(c).cast(pl.Utf8).fill_null("") for c in columns], separator="\x1f")
+    return pl.concat_str([pl.col(c).cast(pl.Utf8) for c in columns], separator="\x1f")
 
 
 def _materializeReplacementKeys(df: pl.DataFrame, keyColumns: Sequence[str]) -> pl.DataFrame:
@@ -491,6 +491,9 @@ def _validateReplacementKeys(df: pl.DataFrame, keyColumns: Sequence[str], *, lab
     missing = [c for c in keyColumns if c not in df.columns]
     if missing:
         raise ValueError(f"safe replacement requires {label} key columns: {missing}")
+
+    if label != "new":
+        return
 
     nullCounts = df.select(pl.any_horizontal([pl.col(c).is_null() for c in keyColumns]).sum().alias("nullKeys"))[
         "nullKeys"
@@ -577,7 +580,11 @@ def saveReplacingByKeys(
 
     keyCol = "__dartlab_replace_key"
     newKeys = df.with_columns(_keyExpr(keyColumns).alias(keyCol)).select(keyCol).unique().get_column(keyCol).to_list()
-    keep = existing.with_columns(_keyExpr(keyColumns).alias(keyCol)).filter(~pl.col(keyCol).is_in(newKeys)).drop(keyCol)
+    keep = (
+        existing.with_columns(_keyExpr(keyColumns).alias(keyCol))
+        .filter(pl.col(keyCol).is_null() | ~pl.col(keyCol).is_in(newKeys))
+        .drop(keyCol)
+    )
     combined = pl.concat([keep, df], how="diagonal_relaxed").unique()
     _writeParquetAtomic(combined, dest)
     return dest
