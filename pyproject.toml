@@ -322,6 +322,7 @@ dev = [
     "pytest-benchmark>=5.0.0",
     "pytest-cov>=6.0.0",
     "syrupy>=4.7.0",  # CLI 출력 (rich Console export_text) snapshot 동결 — 본 SSOT 통합 acceptance test
+    "pandera[polars]>=0.29.0",  # raw finance/report/docs frame 계약 — gather endpoint silent drift 차단
     "radon>=6.0.0",
     "rope>=1.14.0",
     "vulture>=2.0",

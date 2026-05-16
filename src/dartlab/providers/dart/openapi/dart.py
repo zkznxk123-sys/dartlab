@@ -202,6 +202,50 @@ def _periodLabel(bsnsYear: str, reprtCode: str) -> str:
     return f"{bsnsYear} {label}"
 
 
+def _maybeValidateFinance(df: pl.DataFrame) -> None:
+    """opt-in finance schema 검증 — DARTLAB_VALIDATE_SCHEMA=1 일 때만 동작.
+
+    Capabilities:
+        production path 의 데이터 drift 차단 — DART API 응답 schema 가 silent
+        하게 바뀌면 즉시 warning 로그. 환경변수 OFF (기본) 면 0 비용.
+    Args:
+        df: Dart.finance 결과 frame.
+    Returns:
+        None. validate 실패 시 logger.warning, raise 안 함 (production 무중단).
+    Example:
+        >>> _maybeValidateFinance(df)  # env OFF → no-op
+        >>> import os; os.environ['DARTLAB_VALIDATE_SCHEMA'] = '1'
+        >>> _maybeValidateFinance(df)  # schema 위반 시 logger.warning
+    Guide:
+        CI / dev 에서 ON (catch drift), production wheel 사용자는 default OFF.
+    SeeAlso:
+        dartlab.core.schemas.FinanceSchema.
+    Requires:
+        dev 환경 — pandera[polars] 설치. production wheel 은 default OFF 라 무영향.
+    AIContext:
+        본 SSOT 통합 PR 의 데이터 회귀 차단 1 차 방어선.
+    Raises:
+        없음. validate 실패는 warning 으로만 보고.
+    """
+    import os
+
+    if not os.environ.get("DARTLAB_VALIDATE_SCHEMA"):
+        return
+    if df is None or df.is_empty():
+        return
+    try:
+        from dartlab.core.logger import getLogger
+        from dartlab.core.schemas import FinanceSchema
+
+        FinanceSchema.validate(df, lazy=True)
+    except ImportError:
+        return
+    except Exception as exc:  # noqa: BLE001 — schema validation drift는 모든 예외 흡수
+        from dartlab.core.logger import getLogger
+
+        getLogger(__name__).warning("FinanceSchema drift: %s", str(exc)[:200])
+
+
 def _fetchSeries(
     client: DartClient,
     endpoint: str,
@@ -652,10 +696,12 @@ class Dart:
                 "reprt_code": reprtCode,
                 **extraParams,
             }
-            return self._client.getDf(f"{endpoint}.json", params)
+            df = self._client.getDf(f"{endpoint}.json", params)
+            _maybeValidateFinance(df)
+            return df
 
         corpName = self._resolveCorpName(corp)
-        return _fetchSeries(
+        df = _fetchSeries(
             self._client,
             endpoint,
             corpCodeStr,
@@ -664,6 +710,8 @@ class Dart:
             "재무제표",
             extraParams,
         )
+        _maybeValidateFinance(df)
+        return df
 
     def finstateMulti(
         self,
