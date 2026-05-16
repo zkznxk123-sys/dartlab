@@ -28,20 +28,65 @@ from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 
 @memoizedCalc
 def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
-    """매출원가율, 판관비율, 영업비용률 시계열.
+    """비용 구조 시계열 — 매출원가율 + 판관비율 + 영업비용률.
 
-    Returns
-    -------
-    dict
-        history : list[dict] — 기간별 비용 비중 시계열
-            period : str — 회계연도
-            revenue : float — 매출액 (원)
-            costOfSales : float — 매출원가 (원)
-            sga : float — 판매비와관리비 (원)
-            costOfSalesRatio : float | None — 매출원가율 (%)
-            sgaRatio : float | None — 판관비율 (%)
-            operatingCostRatio : float | None — 영업비용률 (%)
-        notesDetail : dict | None — 비용 성격별 분류 주석 (있는 경우)
+    Capabilities:
+        IS 비용 3 종 (매출원가, 판관비, 영업비용 합계) 의 매출 대비 비중
+        시계열 + 비용의 성격별 분류 (notesDetail) 자동 결합. 분리 키
+        (sumCostOfSales/sumSGA) 폴백으로 회사별 계정 변형 흡수.
+
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 7 키 (period + revenue +
+              costOfSales + sga + 3 비율).
+            - ``notesDetail`` (dict | None): 비용의 성격별 분류 주석.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCostBreakdown(Company("005930"))
+        >>> r["history"][0]["costOfSalesRatio"]
+        65.0  # 매출원가율 65%
+
+    Guide:
+        매출원가율 3 기 연속 상승 = 원가 부담 (calcCostStructureFlags 자동
+        탐지). 판관비율 동시 상승 = 운영 효율 저하. 단년도 절대값보다 추세
+        변화에 주목.
+
+    SeeAlso:
+        - ``calcOperatingLeverage``: DOL (영업레버리지)
+        - ``calcBreakevenEstimate``: BEP + 안전마진
+        - ``calcCostByNatureAnalysis``: 비용 성격별 (원재료/인건비/감가)
+        - ``calcMarginTrend``: 마진 시계열 (대척 지표)
+
+    Requires:
+        IS (매출액, 매출원가, 판매비와관리비). 매출 None/0 인 period 는
+        skip (가짜 0 출력 회피).
+
+    AIContext:
+        3 비율 절대값 + 추세 함께 인용. 매출원가율 추세 상승 + 판관비율
+        하락 = 외부 원가 (원재료/인건비) 충격 — calcCostByNatureAnalysis
+        의 카테고리별 분해로 원인 추적.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 비율 인용 — 동종 업종 평균 + 추세 함께 (calcMarginTrend).
+            - 매출 0 period 출력 — 본 함수가 None/0 자동 skip.
+        OutputSchema:
+            ``{history: list[dict 7키], notesDetail?: dict}``.
+        Prerequisites:
+            IS 시계열 + 매출원가/판관비 표준 또는 분리 계정.
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            IS → 매출 + sumCostOfSales (폴백) + sumSGA (폴백) → 3 비율 →
+            notesDetail (costByNature) 결합.
+        TargetMarkets: KR (DART), US (EDGAR — COGS/SG&A 표준).
     """
     # snakeId 단일 + sumCostOfSales / sumSGA 분리 키 fallback
     accounts = ["매출액", "매출원가", "판매비와관리비"]
@@ -98,18 +143,62 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | None:
-    """영업레버리지(DOL) 시계열 — 매출 변동 대비 영업이익 민감도.
+    """영업레버리지 (DOL) 시계열 — 매출 변동 대비 영업이익 민감도.
 
-    Returns
-    -------
-    dict
-        history : list[dict] — 기간별 영업레버리지 시계열
-            period : str — 회계연도
-            revenue : float — 매출액 (원)
-            operatingIncome : float — 영업이익 (원)
-            grossProfit : float — 매출총이익 (원)
-            dol : float | None — 영업레버리지 (배)
-            contributionProxy : float | None — 매출총이익/영업이익 (배)
+    Capabilities:
+        DOL = 영업이익 변화율 / 매출 변화율 (전년 대비). 양쪽 모두 양수일
+        때만 의미 — 부호 전환 시 None. DOL 절대값 cap ±20 (극단 레버리지
+        해석 무의미). contributionProxy = 매출총이익/영업이익 (고정비 구조
+        프록시).
+
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 6 키 (period + revenue +
+              operatingIncome + grossProfit + dol + contributionProxy).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcOperatingLeverage(Company("005930"))
+        >>> r["history"][0]["dol"]
+        2.5  # 매출 10% 변동 시 영업이익 25% 변동
+
+    Guide:
+        DOL > 3 = 고정비 부담 큼 (반도체/철강/화학 제조업 전형). DOL < 1.5
+        = 변동비 비중 큼 (소매/서비스). 경기 하강기에 DOL 높은 회사는
+        영업이익 급락 위험. contributionProxy 와 함께 인용.
+
+    SeeAlso:
+        - ``calcCostBreakdown``: 비용 구조 (DOL 의 근거)
+        - ``calcBreakevenEstimate``: BEP + 안전마진
+        - ``calcMarginTrend``: 영업이익률 추세
+
+    Requires:
+        IS (매출액, 영업이익, 매출총이익) ≥ 2 년.
+
+    AIContext:
+        DOL 단년도 절대값 + 추세 + 업종 평균 함께. 매출/영업이익 부호
+        전환 (적자→흑자) 직후는 DOL 무의미 (None). 본 함수가 자동 None.
+
+    LLM Specifications:
+        AntiPatterns:
+            - DOL 단독 인용 — 부호 전환 직후 None 무시.
+            - 서비스업에 DOL 3 단정 — 제조업 기준 적용 부적합.
+        OutputSchema:
+            ``{history: list[dict 6키]}``.
+        Prerequisites:
+            IS 시계열 + 영업이익/매출총이익 표준 계정.
+        Freshness:
+            분기 + 시계열 ≥ 2 년.
+        Dataflow:
+            IS → 매출/영업이익 (전년 대비) → 변화율 → DOL (양수일 때만)
+            → cap ±20 → contributionProxy = 매출총이익/영업이익.
+        TargetMarkets: KR (DART), US (EDGAR — Operating Income 표준).
     """
     accounts = ["매출액", "영업이익", "매출총이익"]
     isResult = company.select("IS", accounts)
