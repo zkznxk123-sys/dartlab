@@ -213,7 +213,68 @@ DEFAULT_ELASTICITY = SectorElasticity(0.8, 0.2, 15, 0, "moderate")
 
 
 def getElasticity(sectorKey: Optional[str]) -> SectorElasticity:
-    """업종 키로 감응도 조회."""
+    """업종 키 → SectorElasticity (GDP/FX/금리 감응도) 룩업 + DEFAULT fallback.
+
+    Capabilities:
+        WICS 11 대 업종별 사전 측정된 매크로 감응도 (revenueToGdp, revenueToFx,
+        marginToGdp, nimToRate, cyclicality) 조회. simulateScenario 의
+        매크로 충격 → 매출/마진 변환에 사용. None 또는 미등록 sectorKey 시
+        DEFAULT_ELASTICITY 반환.
+
+    Args:
+        sectorKey: WICS 업종 키 (예 ``"IT"``, ``"화학"``, ``"자동차"``).
+            None 이면 DEFAULT.
+
+    Returns:
+        SectorElasticity dataclass:
+            - ``revenueToGdp`` (float): 매출 GDP 탄성치 (1.0 = unitary)
+            - ``revenueToFx`` (float): 매출 환율 탄성치 (수출주 양수)
+            - ``marginToGdp`` (float): 마진 GDP 탄성치 (-1~+1)
+            - ``nimToRate`` (float): NIM 금리 탄성치 (은행만 양수)
+            - ``cyclicality`` (str): ``"high"``/``"moderate"``/``"defensive"``/``"low"``
+
+    Raises:
+        없음 — sectorKey 미등록 시 silently DEFAULT 반환.
+
+    Example:
+        >>> e = getElasticity("자동차")
+        >>> e.revenueToGdp, e.cyclicality
+        (1.8, 'high')  # 자동차는 GDP 1.8 배 탄성, 시클리컬
+
+    Guide:
+        탄성치 source: dartlab 자체 회귀 분석 (2010~2024 KR 11 업종 패널).
+        cyclicality 기반 자산배분 (regimeToAllocation) 에 전파. defensive 업종
+        (utility/필수소비재) 의 GDP 탄성 0.3 이하.
+
+    SeeAlso:
+        - ``simulateScenario``: 본 elasticity 사용
+        - ``SectorElasticity``: dataclass 정의
+        - ``classifyCycle``: cyclicality 사용
+
+    Requires:
+        ``SECTOR_ELASTICITY`` dict 로드 (data/synth/sectorElasticity.json).
+
+    AIContext:
+        DEFAULT_ELASTICITY 결과는 "업종 미식별" 신호 — 호출자 분기 권장
+        (사용자에게 명시적으로 "업종 정보 부족" 표기).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 한국어 업종명 ("정보기술") 직접 입력 — sectorKey 는 영문 키
+              ("IT") 또는 numeric WICS 코드.
+            - cyclicality="high" 만 보고 "위험" 단정 — 사이클 시점 (recovery)
+              에서는 high cyclicality 가 + alpha.
+        OutputSchema:
+            SectorElasticity (5 필드 dataclass).
+        Prerequisites:
+            data/synth/sectorElasticity.json 로드 가능.
+        Freshness:
+            정적 — 운영자 연 1 회 회귀 업데이트.
+        Dataflow:
+            sectorKey → SECTOR_ELASTICITY dict 룩업 → SectorElasticity 인스턴스.
+        TargetMarkets: KR (WICS 11 업종). US 적용 시 별도 SECTOR_ELASTICITY
+            (GICS 11) 정의 필요.
+    """
     if sectorKey is None:
         return DEFAULT_ELASTICITY
     return SECTOR_ELASTICITY.get(sectorKey, DEFAULT_ELASTICITY)
