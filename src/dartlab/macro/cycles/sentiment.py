@@ -474,25 +474,67 @@ def _fetchSentimentData(market: str, asOf: str | None = None) -> dict[str, float
 
 
 def calcSentiment(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """시장 심리 종합 분석 — 공포탐욕 근사 + VIX 구간 + JLN 불확실성.
+    """시장 심리 종합 분석 — 공포탐욕 + VIX regime + JLN 불확실성.
 
-    Parameters
-    ----------
-    market : str
-        ``"US"`` | ``"KR"``.
-    as_of : str | None
-        기준일. ``None`` 이면 최신.
-    overrides : dict | None
-        지표 강제 치환 (예: ``{"vix": 35}``).
+    Capabilities:
+        VIX (옵션 내재) + S&P 500 vs MA125 + HY spread 합성 → CNN 공포탐욕
+        근사 score (0~100, 5 components). VIX 구간 판정 (extreme_fear/fear/
+        neutral/greed/extreme_greed) + buySignal (역설지표). JLN Macro
+        Uncertainty (Jurado-Ludvigson-Ng 2015 AER, 132 시계열 예측오차 기반
+        실물 불확실성) 와 VIX 의 분기 추적.
 
-    Returns
-    -------
-    dict
-        - market : str — 시장 코드
-        - fearGreed : dict | None — 공포탐욕 근사 (score:float(점, 0-100), zone:str, zoneLabel:str, components:dict)
-        - vixRegime : dict | None — VIX 구간 판정 (level:float(pt), zone:str, zoneLabel:str, buySignal:bool)
-        - timeseries : dict — vix / sp500 / hy_spread 시계열
-        - macroUncertainty : dict | None — JLN 실물 불확실성 (value:float, zone:str, zoneLabel:str, vsVix:str, description:str)
+    Args:
+        market: "US" | "KR".
+        asOf: 기준일. None 시 최신.
+        overrides: 지표 강제 치환 (예: ``{"vix": 35}``).
+
+    Returns:
+        dict:
+            - ``fearGreed`` (dict | None): score + zone + components.
+            - ``vixRegime`` (dict | None): level + zone + buySignal.
+            - ``macroUncertainty`` (dict | None): JLN value + vsVix.
+            - ``timeseries`` (dict): vix / sp500 / hy_spread.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcSentiment(market="US")
+        >>> r["fearGreed"]["zone"], r["vixRegime"]["level"]
+        ('extreme_fear', 35.2)  # 역설적으로 buySignal=True
+
+    Guide:
+        - fearGreed score 25 미만 (extreme_fear) = 역설지표 매수 신호.
+        - score 75 초과 (extreme_greed) = 과열 (매도 신호 가능).
+        - JLN >> VIX 차이 큼 = 실물경제 불확실성 > 금융 (recession 전조 가능).
+        - VIX 30+ 가 6 개월 지속 = 위험회피 regime.
+
+    SeeAlso:
+        - ``calcFearGreedProxy``: 5 컴포넌트 단독
+        - ``classifyVixRegime``: VIX 구간 라벨
+        - ``calcLiquidity``: HY spread 함께
+
+    Requires:
+        FRED VIX (VIXCLS) + S&P 500 + HY OAS + (옵션) JLN.
+
+    AIContext:
+        score + zone + 핵심 component 함께. extreme zone 은 역설 신호일 수
+        있어 단정 금지. JLN > VIX 이면 실물 우려 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - VIX 단독으로 sentiment 단정 — 5 컴포넌트 합성 결과 사용.
+            - extreme_fear 를 "위험" 단정 — buySignal=True 인 역설지표.
+        OutputSchema:
+            ``{market, fearGreed: dict?, vixRegime: dict?, macroUncertainty:
+              dict?, timeseries: dict}``.
+        Prerequisites:
+            FRED VIXCLS + SP500 + HY OAS + (JLN optional).
+        Freshness:
+            일별 (VIX/SP500), 월별 (JLN).
+        Dataflow:
+            VIX + SP500 vs MA125 + HY → fearGreed → VIX regime → JLN 별도.
+        TargetMarkets: US (FRED), KR (KOSPI 변동성).
     """
     data = _fetchSentimentData(market, asOf=asOf)
     if overrides:
