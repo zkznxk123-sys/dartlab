@@ -484,15 +484,64 @@ def calcMultipleBand(
     current: float,
     metric: str = "PER",
 ) -> MultipleBand | None:
-    """과거 멀티플 시계열에서 정규분포 밴드 계산.
+    """멀티플 정규분포 밴드 — z-score + 백분위 + 저평가/적정/고평가 zone.
 
-    Args:
-        values: 과거 멀티플 값 리스트 (최소 5개)
-        current: 현재 멀티플
-        metric: "PER" | "PBR" | "EV/EBITDA" 등
+    Capabilities:
+        과거 멀티플 시계열에서 평균·표준편차를 산출하고, 현재값을 z-score 로 평가해 백분위 +
+        ±1σ 구간 zone ("cheap" | "fair" | "expensive") 을 반환. PER · PBR · EV/EBITDA 동일
+        구조로 사용 가능. 0 이하·200 초과 극단값은 자동 제외.
 
-    Returns:
-        MultipleBand 또는 데이터 부족 시 None
+    Parameters
+    ----------
+    values : list[float]
+        과거 멀티플 값 리스트. 유효값 ≥ 5 필요 (필터 후 기준).
+    current : float
+        현재 멀티플 값.
+    metric : str, default "PER"
+        멀티플 종류 ("PER" | "PBR" | "EV/EBITDA" 등). 결과 dict 의 metric 필드에 그대로 기록.
+
+    Returns
+    -------
+    MultipleBand | None
+        metric : str — 입력 그대로
+        current : float — 현재값
+        mean : float — 과거 평균
+        std : float — 과거 표준편차
+        percentile : float — 정규분포 CDF 기반 백분위 (%)
+        zone : str — "cheap" | "fair" | "expensive"
+        zLabel : str — "저평가" | "적정" | "고평가"
+        유효값 < 5 또는 std==0 이면 None.
+
+    Raises
+    ------
+    없음.
+
+    Example
+    -------
+    >>> hist = [12.3, 14.5, 11.8, 13.9, 15.2, 16.1, 12.0]
+    >>> band = calcMultipleBand(hist, current=18.5, metric="PER")
+    >>> band.zone, band.zLabel
+    ('expensive', '고평가')
+
+    Guide
+    -----
+    정규분포 가정이라 시계열이 right-skewed (예: PER) 인 경우 백분위가 약간 보수적으로 나옴.
+    극단값 (PER > 200) 자동 제외는 적자 기업의 음수 PER 같은 노이즈 차단용.
+
+    SeeAlso
+    -------
+    - ``dartlab.macro.cycles.macroCycle.classifyCycle`` : 매크로 국면 판정
+    - ``dartlab.analysis.valuation.dcf`` : 절대가치 평가
+
+    Requires
+    --------
+    - 과거 멀티플 시계열 ≥ 5 (필터 후 기준)
+    - 시계열 단위 일관성 (TTM PER vs forward PER 혼용 금지)
+
+    AIContext
+    ---------
+    "현재 PER 이 역사적으로 어느 수준" 답변에 사용. zone/zLabel/percentile 세 필드 묶음으로
+    한 줄 답변. None 반환 시 "기간 부족" 으로 답변하고 다른 지표 (PBR/EV) 시도 권장.
     """
     # 유효값 필터 (0 이하, 극단값 제거)
     valid = [v for v in values if v is not None and 0 < v < 200]
