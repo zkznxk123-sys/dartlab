@@ -35,7 +35,18 @@ def getArrays(company, *, start: str | None = None) -> dict:
 
 
 def isKr(company) -> bool:
-    """KR 시장 여부."""
+    """KR 시장 여부.
+
+    Example:
+        >>> isKr(company)
+        True
+
+    Requires:
+        company 가 stockCode 속성 보유.
+
+    Raises:
+        없음.
+    """
     code = getattr(company, "stockCode", None) or getattr(company, "stock_code", "")
     return resolveMarket(code, "auto") == "KR"
 
@@ -52,6 +63,16 @@ def getStockCode(company) -> str:
     -------
     str
         종목코드 문자열. 속성 없으면 빈 문자열.
+
+    Example:
+        >>> getStockCode(company)
+        '005930'
+
+    Requires:
+        company 가 stockCode 또는 stock_code 속성 보유.
+
+    Raises:
+        없음.
     """
     return getattr(company, "stockCode", None) or getattr(company, "stock_code", "")
 

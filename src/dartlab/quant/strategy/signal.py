@@ -73,6 +73,16 @@ class Signal:
         -------
         list[str]
             add() 로 등록된 신호 이름 리스트.
+
+        Example:
+            >>> sig.keys()
+            ['rsi', 'macd']
+
+        Requires:
+            없음.
+
+        Raises:
+            없음.
         """
         return list(self._signals.keys())
 

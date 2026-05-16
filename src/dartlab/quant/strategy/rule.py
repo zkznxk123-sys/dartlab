@@ -64,6 +64,16 @@ class Rule:
         -------
         _RuleBuilder
             .exit() 로 이어서 Rule 완성.
+
+        Example:
+            >>> Rule.entry(rsi < 30).exit(rsi > 70)
+            Rule(...)
+
+        Requires:
+            expr 가 array-like + boolean.
+
+        Raises:
+            없음.
         """
         return _RuleBuilder(entry=expr)
 
@@ -71,6 +81,15 @@ class Rule:
         """포지션 사이징 명시 — kelly / vol_target / risk_budget / equal.
 
         명시 안 하면 equal 1.0 (전 자본 진입).
+
+        Example:
+            >>> rule.withSizing("kelly", b=2.0, p=0.55)
+
+        Requires:
+            method 가 sizing 메서드 키.
+
+        Raises:
+            없음.
         """
         return Rule(
             entry_expr=self.entry_expr,
@@ -84,6 +103,15 @@ class Rule:
         """손절 명시 — atr / fixed_pct / chandelier.
 
         명시 안 하면 no stop (entry/exit 시그널만 사용, 홀드).
+
+        Example:
+            >>> rule.withStop("atr", multiplier=2.0)
+
+        Requires:
+            method 가 stop 메서드 키.
+
+        Raises:
+            없음.
         """
         return Rule(
             entry_expr=self.entry_expr,
@@ -216,5 +244,15 @@ class _RuleBuilder:
         -------
         Rule
             entry + exit 가 결합된 완성 Rule.
+
+        Example:
+            >>> Rule.entry(rsi < 30).exit(rsi > 70)
+            Rule(...)
+
+        Requires:
+            expr 와 entry 길이 일치.
+
+        Raises:
+            ValueError — 길이 mismatch.
         """
         return Rule(entry_expr=self.entry, exit_expr=expr)

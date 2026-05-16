@@ -92,7 +92,17 @@ class BacktestResult:
 
     @classmethod
     def notApplicable(cls, *, style: str, reason: str) -> "BacktestResult":
-        """KR-only 스타일을 US 에서 호출 시 sentinel."""
+        """KR-only 스타일을 US 에서 호출 시 sentinel.
+
+        Example:
+            >>> BacktestResult.notApplicable(style="kr_flow", reason="US 미지원")
+
+        Requires:
+            style/reason 문자열.
+
+        Raises:
+            없음.
+        """
         return cls(status="not_applicable", reason=reason, style=style)
 
 

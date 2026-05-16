@@ -42,11 +42,21 @@ def kellyContinuous(meanReturn: float, variance: float) -> float:
     Thorp (2006), MacLean & Ziemba 등. log-utility maximizer.
 
     Args:
-        mean_return: 기대수익률
+        meanReturn: 기대수익률
         variance: 분산
 
     Returns:
         Kelly 비율 (0이상). σ²=0이면 0.
+
+    Example:
+        >>> kellyContinuous(0.10, 0.04)
+        2.5
+
+    Requires:
+        meanReturn 연환산 + variance 연환산 일치.
+
+    Raises:
+        없음.
     """
     if variance <= 0:
         return 0.0
@@ -94,6 +104,16 @@ def sharpeBasedSize(sharpe: float, targetSharpe: float = 1.0, *, cap: float = 1.
     """샤프비율 기반 단순 사이징 — sharpe / target_sharpe로 비율 결정.
 
     sharpe ≥ target → cap, 음수 → 0.
+
+    Example:
+        >>> sharpeBasedSize(0.8, 1.0)
+        0.8
+
+    Requires:
+        sharpe 연환산 + targetSharpe > 0.
+
+    Raises:
+        없음.
     """
     if sharpe <= 0:
         return 0.0
@@ -108,6 +128,16 @@ def riskBudgetLeverage(
     """리스크 버짓 레버리지 — 포트폴리오 변동성을 risk_budget에 맞춤.
 
     책 10장: 자본의 % 단위로 risk_budget을 정하고 그 한도 안에서 portfolio leverage 결정.
+
+    Example:
+        >>> riskBudgetLeverage(0.15, 0.10)
+        0.667
+
+    Requires:
+        portfolioVol 연환산 + riskBudget 동일 단위.
+
+    Raises:
+        없음.
     """
     if portfolioVol <= 0:
         return 0.0

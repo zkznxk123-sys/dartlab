@@ -483,6 +483,16 @@ def fundamentalLawIR(ic: float, breadth: int) -> float:
 
     breadth = 연간 상호 독립인 베팅 수.
     예) IC=0.05, breadth=400 → IR=1.0 (Grinold 대표 사례).
+
+    Example:
+        >>> fundamentalLawIR(0.05, 400)
+        1.0
+
+    Requires:
+        breadth ≥ 1.
+
+    Raises:
+        없음 — breadth < 1 시 0 반환.
     """
     if breadth < 1:
         return 0.0
