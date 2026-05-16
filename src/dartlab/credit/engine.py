@@ -473,54 +473,87 @@ def evaluate(stockCode: str, *, detail: bool = False, basePeriod: str | None = N
 
 
 def evaluateCompany(company, *, detail: bool = False, basePeriod: str | None = None) -> dict | None:
-    """Company 객체로 신용등급 산출.
+    """Company → dCR 신용등급 (3-Track 분기 + CHS·Notch 보정).
 
-    기업 유형에 따라 3-Track 분기:
-    - Track A: 일반기업 (7축 가중평균)
-    - Track B: 금융업 (5축 전용 — 자본적정성/수익성/자산건전성/유동성/사업안정성)
-    - Track C: 지주사 (7축 + 가중치 차별화 + 별도재무 블렌딩)
+    Capabilities:
+        Company 의 업종/기업유형으로 Track A/B/C 분기 → 7 (또는 5) 축 가중평균
+        → CHS PD 보정 → Notch 7 룰 (재무약화/사업위험/지배구조 등) → dCR 등급
+        (AAA ~ D, 20 단계). credit engine 의 단일 진입점.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    detail : bool
-        True이면 metricsHistory, businessStability, narratives 등 상세 포함.
-    basePeriod : str | None
-        분석 기준 기간 (예: "2024"). None이면 최신.
+    Args:
+        company: DartCompany 또는 EdgarCompany 인스턴스.
+        detail: ``True`` 면 metricsHistory + businessStability + narratives
+            포함 (보고서 생성용). ``False`` 면 grade + score 만.
+        basePeriod: 분석 기준 기간 (예 ``"2024"``). ``None`` 이면 최신.
 
-    Returns
-    -------
-    dict | None
-        grade : str — dCR 등급 (예: "dCR-AA+")
-        gradeRaw : str — 등급 코드 (예: "AA+")
-        gradeDescription : str — 등급 설명
-        gradeCategory : str — 등급 범주 (최우량/우량/투자적격/투기/부실)
-        investmentGrade : bool — 투자적격 여부
-        score : float — 위험 점수 (0=최우량, 100=최위험) (점)
-        healthScore : float — 건전성 점수 (100-score) (점)
-        currentScore : float — 시계열 안정화 전 당기 점수 (점)
-        pdEstimate : float — 추정 부도확률 (%)
-        eCR : str | None — 현금흐름등급 (Track B는 None)
-        outlook : str — 전망 ("안정적"/"긍정적"/"부정적")
-        sector : str — 업종 라벨
-        captiveFinance : bool — 캡티브 금융 여부
-        holding : bool — 지주사 여부
-        latestPeriod : str — 최신 분석 기간
-        chsAdjustment : dict | None — CHS 부도확률 보정 결과
-        notchAdjustment : dict | None — Notch 보정 결과
-        divergenceExplanation : list[str] — 괴리 원인 설명
-        methodologyVersion : str — 방법론 버전
-        axes : list[dict] — 축별 상세 (name, score, weight, contribution, metrics)
-        metricsHistory : list[dict] — (detail=True) 기간별 지표 시계열
-        narratives : dict — (detail=True) 서사 (overall, causalChain, axes 등)
+    Returns:
+        dict | None: 다음 키 (BS/IS/CF 누락 시 ``None``):
+            - ``grade`` (str): dCR 등급 (예 ``"dCR-AA+"``)
+            - ``gradeRaw`` (str): 등급 코드
+            - ``gradeDescription``/``gradeCategory`` (str)
+            - ``investmentGrade`` (bool): 투자적격 여부
+            - ``score`` (float): 위험 점수 (0~100, 0=최우량)
+            - ``healthScore`` (float): 100 - score
+            - ``currentScore`` (float): 시계열 안정화 전
+            - ``pdEstimate`` (float): 부도확률 (%)
+            - ``eCR`` (str|None): 현금흐름등급 (Track B 는 None)
+            - ``outlook`` (str): 전망 ("안정적"/"긍정적"/"부정적")
+            - ``sector``/``captiveFinance``/``holding`` (str/bool)
+            - ``latestPeriod`` (str)
+            - ``chsAdjustment``/``notchAdjustment`` (dict|None)
+            - ``divergenceExplanation`` (list[str])
+            - ``methodologyVersion`` (str)
+            - ``axes`` (list[dict]): 7 (또는 5) 축 상세
+            - ``metricsHistory`` (detail=True): 기간별 시계열
+            - ``narratives`` (detail=True): 서사 dict
 
-    Examples
-    --------
-    >>> from dartlab.credit.engine import evaluateCompany
-    >>> result = evaluateCompany(company)
-    >>> result["grade"]
-    'dCR-AA+'
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.credit.engine import evaluateCompany
+        >>> r = evaluateCompany(Company("005930"))
+        >>> r["grade"], r["outlook"]
+        ('dCR-AA+', '안정적')
+
+    Guide:
+        3-Track 분류:
+        - Track A (일반): 7 축 (repayment/leverage/liquidity/cashFlow/
+          businessStability/reliability/disclosureRisk)
+        - Track B (금융): 5 축 (capitalAdequacy/profitability/assetQuality/
+          liquidity/businessStability) — 7 축 framework 미적용
+        - Track C (지주): 7 축 + 가중치 차별화 + 별도재무 블렌딩
+
+    SeeAlso:
+        - ``credit`` (top-level): stockCode 진입점
+        - ``calcAllMetrics``: 축별 metric 산출 (본 함수 호출)
+        - ``computeChsProbability``: CHS PD 보정
+        - ``_calcNotchAdjustment``: Notch 7 룰
+
+    Requires:
+        Company.finance (BS/IS/CF) + 종가 (CHS) + 업종 룩업.
+
+    AIContext:
+        ``grade`` + ``outlook`` 만 인용 금지 — divergenceExplanation 과 notch
+        / CHS adjustment 도 함께 노출해 등급 변동 근거 투명화. invest
+        decision 은 grade + score + 시계열 모두 검토.
+
+    LLM Specifications:
+        AntiPatterns:
+            - Track B 금융사 결과의 ``eCR`` 가 None 이라 "데이터 누락" 으로
+              해석 금지 — Track B 는 eCR 미적용이 정상.
+            - basePeriod 미지정 시 최신이 partial quarter 인 경우 자동
+              skip (R25-1) — currentScore 와 score 차이 발생 가능, 정상.
+        OutputSchema:
+            상기 22 키 dict. detail=True 시 metricsHistory + narratives 추가.
+        Prerequisites:
+            Company.finance + sectorThresholds 로드 + 종가 cache (CHS 입력).
+        Freshness:
+            finance = 최신 분기. CHS = 종가 cache 동기화.
+        Dataflow:
+            company → _getSectorInfo → Track 분기 → calcAllMetrics →
+            가중평균 → calcCHS → notch 7 룰 → mapTo20Grade → dict.
+        TargetMarkets: KR (DART), US (EDGAR). 등급표는 시장별 calibration.
     """
     sector, industryGroup = _getSectorInfo(company)
     isFinancialCo = _isFinancial(company)

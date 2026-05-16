@@ -45,29 +45,90 @@ def calcDFV(
     basePeriod: str | None = None,
     overrides: dict | None = None,
 ) -> dict | None:
-    """dartlab Fair Value v2.
+    """dartlab Fair Value v2 — 기업유형 × 생애주기 × 다중 모델 삼각검증.
 
-    Parameters
-    ----------
-    overrides : dict | None
-        AI/사용자 가정 override. wacc, terminalGrowth, primaryModel 키 지원.
+    Capabilities:
+        Company 의 기업유형 (early/growth/mature/decline) × 생애주기 단계로
+        primary 모델 (DCF/DDM/RIM/EV-EBITDA/PSR 등) 자동 선택, secondary 2 개
+        cross-check + Damodaran qualityWACC 조정 + DDM dividend floor + 청산
+        가치 안전망까지 결합한 단일 적정주가 산출.
 
-    Returns
-    -------
-    dict | None
-        dFV : float — dartlab 적정주가 (Base 시나리오)
-        scenarios : dict — bull/base/bear 적정가
-        currentPrice : float
-        upside : float — %
-        opinion : str
-        confidence : str
-        primaryModel : str — 사용된 primary 모델명
-        companyType : str | None
-        triangulation : dict — 삼각검증 결과
-        dividendFloor : dict | None — DDM 하한
-        qualityWACC : dict — WACC 조정 상세
-        allMethods : dict — 모든 방법론 적정가 (참고용)
-        overrideApplied : dict | None — 적용된 override (있으면)
+    Args:
+        company: Company 객체. ``finance``, ``stockCode``, ``currency``,
+            ``benchmark`` (선택) 속성 필요.
+        basePeriod: 기준 기간 (예 ``"2024Q4"``). ``None`` 이면 최신.
+        overrides: AI/사용자 가정 override dict. 지원 키:
+            - ``wacc`` (float): 강제 WACC
+            - ``terminalGrowth`` (float): 영구성장률 강제
+            - ``primaryModel`` (str): primary 모델 강제
+            - ``lifeCyclePhase`` (str): 생애주기 강제
+            - ``impliedERP``/``bottomUpBeta``/``countryCode``: WACC 산출 chain
+
+    Returns:
+        dict | None:
+            - ``dFV`` (float): 적정주가 base (원)
+            - ``scenarios`` (dict): ``{bull, base, bear}`` 시나리오 적정가
+            - ``currentPrice`` (float|None)
+            - ``upside`` (float): 적정 대비 (%)
+            - ``opinion`` (str): 의견 ("강력매수"/"매수"/"중립"/"매도"/"강력매도")
+            - ``confidence`` (str): 신뢰도 ("high"/"medium"/"low")
+            - ``primaryModel`` (str): 사용된 primary 모델명
+            - ``companyType`` (str|None)
+            - ``triangulation`` (dict): 삼각검증 결과 (3 방법론 일치도)
+            - ``dividendFloor`` (dict|None): DDM 하한
+            - ``qualityWACC`` (dict): WACC 조정 상세
+            - ``allMethods`` (dict): 모든 방법론 적정가 (참고용)
+            - ``overrideApplied`` (dict|None): 적용된 override
+            - ``survival`` (dict|None): 부도확률 기반 going-concern 가중
+        데이터 부족 (BS/IS/CF 누락) 시 ``None``.
+
+    Raises:
+        없음 — 내부 catch.
+
+    Example:
+        >>> from dartlab import Company
+        >>> r = calcDFV(Company("005930"), overrides={"wacc": 8.5})
+        >>> r["dFV"], r["opinion"]
+        (75000.0, '매수')
+
+    Guide:
+        primary 모델 선택 표 (fitness.selectModels): earlyGrowth/highGrowth →
+        DCF (FCF 기반), mature → EV-EBITDA + DDM, decline → 청산가치 + DDM.
+        secondary 2 개 cross-check 후 triangulation 일치도 ±25% 내면
+        confidence=high.
+
+    SeeAlso:
+        - ``dartlab.analysis.valuation.dcf.dcfValuation``: DCF 단독
+        - ``dartlab.analysis.valuation.dcf.ddmValuation``: DDM 단독
+        - ``dartlab.synth.distress.survival.applySurvivalWeight``: distress 가중
+        - ``dartlab.synth.riskPremiums.loadDamodaranERP``: ERP 룩업
+
+    Requires:
+        Company.finance (BS/IS/CF 시계열) + 종가 + analysis.financial 의 다수
+        헬퍼 (ratios, valuation, growth, investment, proforma).
+
+    AIContext:
+        ``upside`` 만 단독 인용 금지 — primaryModel + triangulation 일치도 +
+        confidence 셋 함께 노출. ``opinion`` 라벨은 사용자 향 표시이지 시장
+        actionable signal 이 아님 (전문가 검토 필수).
+
+    LLM Specifications:
+        AntiPatterns:
+            - upside 30%+ 인데 confidence="low" 결과를 그대로 인용 — 단일
+              모델 의존 신호. triangulation 일치도 확인 필수.
+            - overrides 키 추측 — 위 5 키만 적용됨, 나머지는 무시.
+            - companyType "financial" 인데 DCF 강제 (overrides=primaryModel)
+              금지 — 금융업은 RIM/DDM 만 의미.
+        OutputSchema:
+            상기 13 키 dict 또는 None. scenarios dict 는 bull/base/bear 3 키.
+        Prerequisites:
+            Company.finance + 종가 (gather("price")) + analysis 헬퍼 모듈.
+        Freshness:
+            finance = 최신 분기 (마감 후 30~45 일). 종가 = T+1.
+        Dataflow:
+            company → fitness.selectModels → primary/secondary 호출 →
+            qualityWACC 조정 → applySurvivalWeight → triangulate → opinion.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     from dartlab.synth.overrides import applyOverride
 
