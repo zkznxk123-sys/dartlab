@@ -697,24 +697,67 @@ def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용등급 한 노치 상향에 필요한 구체적 개선사항.
+    """등급 한 notch 상향에 필요한 구체적 개선 — reverse engineering.
 
-    가장 약한 축을 찾고, 그 축의 metric을 다음 등급 구간까지
-    올리는 데 필요한 변화량을 역계산한다.
+    Capabilities:
+        현재 grade 의 가장 약한 축을 찾고, 그 축의 metric 을 다음 등급
+        구간까지 올리는 데 필요한 변화량 역계산. 부채비율 N% 감축, IC X 배
+        개선 등 정량 목표 자연어 노출. 경영진 IR / Treasury 의 개선 우선순위
+        설정 입력.
 
-    Returns
-    -------
-    dict | None
-        currentGrade : str
-        currentScore : float
-        targetGrade : str
-        weakestAxis : str
-        improvements : list[dict]
-            axis : str — 축 이름
-            metric : str — 지표명
-            current : float — 현재값
-            target : float — 목표값
-            change : str — 자연어 설명
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``currentGrade``/``currentScore`` (str/float): 현재 등급/점수.
+            - ``targetGrade`` (str): 한 notch 위.
+            - ``weakestAxis`` (str): 개선 최우선 축.
+            - ``improvements`` (list[dict]): axis, metric, current, target,
+              change (자연어).
+
+    Raises:
+        없음 (None 시 데이터 부족).
+
+    Example:
+        >>> r = calcGradeImprovement(Company("005930"))
+        >>> r["improvements"][0]["change"]
+        '부채비율 35% → 30% (5pp 감축)'
+
+    Guide:
+        - weakestAxis 가 leverage 면 부채비율/순차입금 감축.
+        - profitability 면 마진 개선 (가격 인상 또는 원가 절감).
+        - structure 면 사업포트폴리오 변경 (장기 트랙).
+        - 단기 (분기 단위) 개선 가능 항목 vs 장기 (구조) 분리 해석.
+
+    SeeAlso:
+        - ``calcCreditScore``: 현재 등급
+        - ``calcCreditFlags``: 경고/개선 신호
+        - ``calcCreditNarrative``: 7 축 narrative
+
+    Requires:
+        evaluateCompany 결과 + sectorThresholds.
+
+    AIContext:
+        weakestAxis + improvements 직역 인용. "한 notch 상향" 이 현실적
+        목표인지 (1~2 년) 또는 구조 개혁 (5+ 년) 필요인지 구분 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 개선 목표를 "확정" 으로 인용 — 시나리오임 명시.
+            - 모든 축 동시 개선 권고 — weakestAxis 부터 단계별.
+        OutputSchema:
+            ``{currentGrade: str, currentScore: float, targetGrade: str,
+              weakestAxis: str, improvements: list[dict 5키]}``.
+        Prerequisites:
+            evaluateCompany + sectorThresholds.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → axis scores → 가장 약한 축 → metric 역계산 →
+            target 값 + change 자연어.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     if not result:
