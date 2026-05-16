@@ -6,6 +6,7 @@ import { AlertCircle, ChevronDown, ChevronRight, CircleCheck, Loader2 } from 'lu
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { ToolPart } from '@/features/chat/store/chat';
+import { useChat } from '@/features/chat/store/chat';
 import { ResultBody } from '../results/ResultBody';
 import { ToolArgs } from '../tools/registry';
 
@@ -28,6 +29,10 @@ function useLiveElapsed(startedAt: number, running: boolean): number {
 export function ToolCallRow({ tool }: { tool: ToolPart }) {
 	const [open, setOpen] = useState(false);
 	const liveMs = useLiveElapsed(tool.startedAt, tool.status === 'running');
+	const isHighlighted = useChat((s) => {
+		const c = s.conversations.find((cv) => cv.id === s.activeId);
+		return c?.highlightedToolCallId === tool.id;
+	});
 	const dur =
 		tool.status === 'running'
 			? fmtMs(liveMs)
@@ -43,9 +48,21 @@ export function ToolCallRow({ tool }: { tool: ToolPart }) {
 			<CircleCheck className="size-3.5 text-[#ea4647]" />
 		);
 
+	// Click-to-trace 강조 ring — flashTool 액션이 1.5 초 동안 set.
+	const triggerCls = isHighlighted
+		? 'ring-2 ring-[#ea4647] ring-offset-2 ring-offset-background transition-shadow'
+		: 'transition-shadow';
+
 	return (
-		<Collapsible open={open} onOpenChange={setOpen} className="my-1">
-			<CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-2.5 py-1.5 text-left text-xs hover:bg-muted/60 transition-colors">
+		<Collapsible
+			open={isHighlighted ? true : open}
+			onOpenChange={setOpen}
+			className="my-1"
+			data-tool-id={tool.id}
+		>
+			<CollapsibleTrigger
+				className={`flex w-full items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-2.5 py-1.5 text-left text-xs hover:bg-muted/60 transition-colors ${triggerCls}`}
+			>
 				{statusIcon}
 				<span className="font-mono font-medium text-foreground">{tool.name}</span>
 				{tool.summary && (

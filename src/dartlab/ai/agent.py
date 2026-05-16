@@ -257,6 +257,9 @@ def runAgent(
                         "status": "done" if resultDict.get("ok") else "error",
                         "outputSummary": resultDict.get("summary", ""),
                         "evidenceRefs": [ref.get("id") for ref in tool_refs if ref.get("id")],
+                        # 전체 ref 딕셔너리 (id, kind, title, source, payload, sourceType) — UI evidence chip preview 용.
+                        # SSE TOOL_CALL_RESULT 의 refDetails 필드로 그대로 전달됨.
+                        "refDetails": tool_refs,
                         "artifacts": tool_artifacts,
                         "error": resultDict.get("error"),
                         # raw data — agent_gateway._public_result_payload 가 stdout/values/table

@@ -1,4 +1,7 @@
-// Mermaid 다이어그램 — 테마 변경 시마다 재 init + SVG 컨테이너 폭 100%.
+// Mermaid 다이어그램 — 본문 폭 친화 양식.
+// 사이즈는 보수적 (fontSize 13, padding 8, spacing 작게) → 노드 폭 자연스럽게 200~280px 수준.
+// 장기 해법: viz skill 에 채팅 폭 가이드 추가해서 AI 가 처음부터 적정 크기 / 노드 수 그릴 것.
+// 현재 폴백: 노드 5 개 초과 LR/RL → TB 자동 회전.
 import { useEffect, useId, useState } from 'react';
 
 import { useTheme } from '@/shell/ThemeProvider';
@@ -11,6 +14,15 @@ async function getMermaid() {
 		mermaidLib = mod.default;
 	}
 	return mermaidLib;
+}
+
+function autoRotateDirection(code: string): string {
+	const headerRe = /^(\s*(?:flowchart|graph)\s+)(LR|RL)\b/m;
+	const m = headerRe.exec(code);
+	if (!m) return code;
+	const nodes = code.match(/\b[A-Za-z_]\w*\s*[([{]/g) ?? [];
+	if (nodes.length <= 5) return code;
+	return code.replace(headerRe, '$1TB');
 }
 
 export function MermaidDiagram({ code }: { code: string }) {
@@ -31,14 +43,20 @@ export function MermaidDiagram({ code }: { code: string }) {
 		(async () => {
 			try {
 				const m = await getMermaid();
-				// 매 렌더마다 재 init — 테마 변경 즉시 반영.
 				m.initialize({
 					startOnLoad: false,
 					theme: isDark ? 'dark' : 'default',
 					securityLevel: 'loose',
 					fontFamily: 'inherit',
-					fontSize: 16,
-					flowchart: { htmlLabels: true, useMaxWidth: false, padding: 16, nodeSpacing: 50, rankSpacing: 60 },
+					fontSize: 13,
+					flowchart: {
+						htmlLabels: true,
+						useMaxWidth: false,
+						padding: 8,
+						nodeSpacing: 30,
+						rankSpacing: 40,
+						curve: 'basis',
+					},
 					themeVariables: isDark
 						? {
 								primaryColor: '#1f2937',
@@ -55,12 +73,9 @@ export function MermaidDiagram({ code }: { code: string }) {
 								background: '#ffffff',
 							},
 				});
-				const out = await m.render(`mmd_${id}_${isDark ? 'd' : 'l'}`, code);
-				// mermaid 가 박은 width/height/style 속성 제거 → CSS 가 컨테이너 폭 100% 강제.
-				let cleaned = out.svg;
-				cleaned = cleaned.replace(/<svg([^>]*?)\s+width="[^"]*"/, '<svg$1');
-				cleaned = cleaned.replace(/<svg([^>]*?)\s+height="[^"]*"/, '<svg$1');
-				cleaned = cleaned.replace(/<svg([^>]*?)\s+style="[^"]*"/, '<svg$1');
+				const out = await m.render(`mmd_${id}_${isDark ? 'd' : 'l'}`, autoRotateDirection(code));
+				// mermaid 가 박는 인라인 max-width style 만 제거. width/height 속성은 그대로 (자연 크기).
+				const cleaned = out.svg.replace(/<svg([^>]*?)\s+style="[^"]*"/, '<svg$1');
 				if (!cancelled) setSvg(cleaned);
 			} catch (e) {
 				if (!cancelled) setErr((e as Error).message || 'mermaid render failed');
@@ -86,9 +101,11 @@ export function MermaidDiagram({ code }: { code: string }) {
 		);
 	}
 	return (
-		<div
-			className="my-3 overflow-x-auto rounded-md border border-border bg-background p-4 [&_svg]:!h-auto [&_svg]:!max-w-full [&_svg]:!w-full [&_svg]:mx-auto [&_.nodeLabel]:!text-foreground [&_.edgeLabel]:!text-foreground [&_.edgeLabel]:!bg-background"
-			dangerouslySetInnerHTML={{ __html: svg }}
-		/>
+		<div className="tiny-scroll my-3 max-h-[60vh] overflow-auto rounded-md border border-border bg-background p-3">
+			<div
+				className="flex justify-center [&_.edgeLabel]:!bg-background [&_.edgeLabel]:!text-foreground [&_.nodeLabel]:!text-foreground"
+				dangerouslySetInnerHTML={{ __html: svg }}
+			/>
+		</div>
 	);
 }

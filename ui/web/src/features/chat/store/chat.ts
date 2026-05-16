@@ -43,6 +43,16 @@ export interface Message {
 	error?: string;
 }
 
+export interface RefDetail {
+	id: string;
+	kind: string;
+	title: string;
+	source: string;
+	sourceType: 'internal' | 'external' | 'llm' | string;
+	payload?: Record<string, unknown>;
+	hasMore?: boolean;
+}
+
 export interface Conversation {
 	id: string;
 	title: string;
@@ -50,6 +60,10 @@ export interface Conversation {
 	createdAt: number;
 	updatedAt: number;
 	pinnedAt?: number; // 고정 timestamp — 없으면 미고정.
+	refs?: Record<string, RefDetail>; // refId → RefDetail. evidence chip preview 용.
+	refToToolMap?: Record<string, string>; // refId → toolCallId. click-to-trace 용.
+	workspaceContext?: { stockCode: string; market?: string; corpName?: string };
+	highlightedToolCallId?: string; // flashTool 액션이 set, 1.5 초 후 자동 해제.
 }
 
 interface ChatState {
@@ -72,9 +86,17 @@ interface ChatState {
 	addToolStart: (tool: { id: string; name: string; args: unknown; startedAt: number }) => void;
 
 	// id 매칭 tool part 의 status/result/error/summary 갱신.
+	// refDetails 가 오면 conversation.refs 에 흡수 + refToToolMap 빌드.
 	setToolResult: (
 		toolId: string,
-		payload: { status: 'done' | 'error'; result?: unknown; error?: string; summary?: string },
+		payload: {
+			status: 'done' | 'error';
+			result?: unknown;
+			error?: string;
+			summary?: string;
+			refs?: string[];
+			refDetails?: RefDetail[];
+		},
 	) => void;
 
 	// 마지막 assistant 메시지 parts[] 에 viewSpec part push.
@@ -94,6 +116,12 @@ interface ChatState {
 
 	// 대화 고정 토글.
 	togglePin: (id: string) => void;
+
+	// 워크스페이스 컨텍스트 (현재 분석 회사) 설정/해제.
+	setWorkspaceContext: (ctx: { stockCode: string; market?: string; corpName?: string } | null) => void;
+
+	// 특정 tool call 강조 (click-to-trace) — 1.5 초 후 자동 해제.
+	flashTool: (toolCallId: string) => void;
 }
 
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -204,8 +232,9 @@ export const useChat = create<ChatState>()(
 			setToolResult: (toolId, payload) => {
 				const id = get().activeId;
 				set({
-					conversations: updateConv(get().conversations, id, (c) =>
-						updateLastMessage(c, (m) => ({
+					conversations: updateConv(get().conversations, id, (c) => {
+						// 1) tool part 갱신
+						const next = updateLastMessage(c, (m) => ({
 							...m,
 							parts: m.parts.map((p) =>
 								p.type === 'tool' && p.id === toolId
@@ -219,8 +248,22 @@ export const useChat = create<ChatState>()(
 										}
 									: p,
 							),
-						})),
-					),
+						}));
+						// 2) conversation.refs / refToToolMap 흡수
+						const refsMap = { ...(next.refs ?? {}) };
+						const toolMap = { ...(next.refToToolMap ?? {}) };
+						for (const ref of payload.refDetails ?? []) {
+							if (!ref.id) continue;
+							refsMap[ref.id] = ref;
+							toolMap[ref.id] = toolId;
+						}
+						// refDetails 없어도 refs (id 만) 있으면 매핑은 보존
+						for (const refId of payload.refs ?? []) {
+							if (!refId || toolMap[refId]) continue;
+							toolMap[refId] = toolId;
+						}
+						return { ...next, refs: refsMap, refToToolMap: toolMap };
+					}),
 				});
 			},
 
@@ -311,6 +354,37 @@ export const useChat = create<ChatState>()(
 						c.id === id ? { ...c, pinnedAt: c.pinnedAt ? undefined : Date.now() } : c,
 					),
 				});
+			},
+
+			setWorkspaceContext: (ctx) => {
+				const id = get().activeId;
+				if (!id) return;
+				set({
+					conversations: get().conversations.map((c) =>
+						c.id === id ? { ...c, workspaceContext: ctx ?? undefined } : c,
+					),
+				});
+			},
+
+			flashTool: (toolCallId) => {
+				const id = get().activeId;
+				if (!id) return;
+				set({
+					conversations: get().conversations.map((c) =>
+						c.id === id ? { ...c, highlightedToolCallId: toolCallId } : c,
+					),
+				});
+				setTimeout(() => {
+					const cur = get().activeId;
+					if (cur !== id) return;
+					set({
+						conversations: get().conversations.map((c) =>
+							c.id === id && c.highlightedToolCallId === toolCallId
+								? { ...c, highlightedToolCallId: undefined }
+								: c,
+						),
+					});
+				}, 1500);
 			},
 		}),
 		{

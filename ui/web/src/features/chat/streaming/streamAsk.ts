@@ -9,6 +9,7 @@ export interface AskRequest {
 	provider?: string;
 	role?: string;
 	model?: string;
+	history?: Array<{ role: 'user' | 'assistant'; text: string }>;
 }
 
 export interface ToolStartPayload {
@@ -18,12 +19,24 @@ export interface ToolStartPayload {
 	startedAt: number;
 }
 
+export interface RefDetail {
+	id: string;
+	kind: string;
+	title: string;
+	source: string;
+	sourceType: 'internal' | 'external' | 'llm' | string;
+	payload?: Record<string, unknown>;
+	hasMore?: boolean;
+}
+
 export interface ToolResultPayload {
 	id: string;
 	status: 'done' | 'error';
 	result?: unknown;
 	error?: string;
 	summary?: string;
+	refs?: string[];
+	refDetails?: RefDetail[];
 }
 
 export interface ViewSpecPayload {
@@ -186,12 +199,23 @@ function dispatch(eventName: string, parsed: unknown, cb: AskCallbacks) {
 			const t = obj as ToolResultEvent;
 			if (typeof t.toolCallId !== 'string') break;
 			const status: 'done' | 'error' = t.status === 'error' ? 'error' : 'done';
+			const refs = Array.isArray(t.refs)
+				? (t.refs as unknown[]).filter((x): x is string => typeof x === 'string')
+				: undefined;
+			const refDetails = Array.isArray(t.refDetails)
+				? (t.refDetails as unknown[]).filter(
+						(x): x is RefDetail =>
+							!!x && typeof x === 'object' && typeof (x as RefDetail).id === 'string',
+					)
+				: undefined;
 			cb.onToolResult?.({
 				id: t.toolCallId,
 				status,
 				result: t.result,
 				error: typeof t.error === 'string' ? t.error : undefined,
 				summary: typeof t.summary === 'string' ? t.summary : undefined,
+				refs,
+				refDetails,
 			});
 			break;
 		}

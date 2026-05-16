@@ -11,6 +11,7 @@ import { ChatMessage } from './Message';
 import { Composer } from './Composer';
 import { EmptyState } from './EmptyState';
 import { ScrollToBottomButton } from './ScrollToBottomButton';
+import { WorkspaceBar } from './WorkspaceBar';
 
 export function Chat() {
 	const conversations = useChat((s) => s.conversations);
@@ -65,10 +66,11 @@ export function Chat() {
 	}, [activeId]);
 
 	const runStream = useCallback(
-		(question: string) => {
+		(question: string, history: Array<{ role: 'user' | 'assistant'; text: string }>) => {
 			setBusy(true);
+			const workspaceCtx = active?.workspaceContext;
 			streamRef.current = streamAsk(
-				{ question },
+				{ question, history, company: workspaceCtx?.stockCode },
 				{
 					onTextDelta: (delta) => appendTextDelta(delta),
 					onToolStart: (t) => addToolStart(t),
@@ -87,16 +89,41 @@ export function Chat() {
 				},
 			);
 		},
-		[appendTextDelta, addToolStart, setToolResult, addViewSpec, setLastLoading, setLastError],
+		[
+			active?.workspaceContext,
+			appendTextDelta,
+			addToolStart,
+			setToolResult,
+			addViewSpec,
+			setLastLoading,
+			setLastError,
+		],
 	);
+
+	// 현재 대화 → history (서버 max 50, UI 는 20 으로 cap). 마지막 placeholder 어시스턴트는 제외.
+	function buildHistory(): Array<{ role: 'user' | 'assistant'; text: string }> {
+		const cap = 20;
+		const out: Array<{ role: 'user' | 'assistant'; text: string }> = [];
+		for (const m of messages) {
+			if (m.loading) continue;
+			const text = m.parts
+				.map((p) => (p.type === 'text' ? p.text : ''))
+				.join('')
+				.trim();
+			if (!text) continue;
+			out.push({ role: m.role, text });
+		}
+		return out.slice(-cap);
+	}
 
 	function handleSend() {
 		const q = input.trim();
 		if (!q || busy) return;
+		const history = buildHistory();
 		addMessage('user', q);
 		addMessage('assistant', '', true);
 		setInput('');
-		runStream(q);
+		runStream(q, history);
 	}
 
 	function handleStop() {
@@ -111,9 +138,11 @@ export function Chat() {
 		if (busy) return;
 		const userText = popLastAssistantAndGetUserText();
 		if (!userText) return;
+		// pop 한 뒤 남은 messages 가 history. (pop 으로 user/assistant 제거됐으니 prev 컨텍스트만)
+		const history = buildHistory();
 		addMessage('user', userText);
 		addMessage('assistant', '', true);
-		runStream(userText);
+		runStream(userText, history);
 	}
 
 	function handleNewConversation() {
@@ -147,6 +176,7 @@ export function Chat() {
 
 	return (
 		<div className="flex flex-1 flex-col min-h-0 relative">
+			<WorkspaceBar />
 			<ScrollArea
 				className="flex-1 min-h-0"
 				viewportRef={viewportRef}
