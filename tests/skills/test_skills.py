@@ -592,7 +592,7 @@ def test_skill_evidence_check_reports_missing() -> None:
 
 
 def test_builtin_skill_specs_are_package_sources() -> None:
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     specs_root = repo_root / "src" / "dartlab" / "skills" / "specs"
 
     assert specs_root.exists()

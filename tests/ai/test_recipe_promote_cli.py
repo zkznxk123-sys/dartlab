@@ -15,7 +15,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 CLI_PATH = REPO_ROOT / "scripts" / "dev" / "recipe_promote.py"
 
 

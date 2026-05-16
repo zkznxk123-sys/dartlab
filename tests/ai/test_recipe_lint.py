@@ -21,7 +21,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
-_RECIPE_DIR = Path(__file__).resolve().parents[1] / "src" / "dartlab" / "skills" / "specs" / "recipes"
+_RECIPE_DIR = Path(__file__).resolve().parents[2] / "src" / "dartlab" / "skills" / "specs" / "recipes"
 
 
 def _recipe_paths() -> list[Path]:
