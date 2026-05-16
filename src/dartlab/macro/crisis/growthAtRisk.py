@@ -71,15 +71,64 @@ def growthAtRisk(
 ) -> dict | None:
     """FCI → GDP 성장률 조건부 분위 추정.
 
+    Capabilities:
+        Adrian-Boyarchenko-Giannone (2019 AER) Growth-at-Risk — FCI 를 조건으로
+        h 분기 후 GDP 성장률 분위 회귀 (5/25/50/75/95) → 하방 꼬리 리스크
+        (GaR 5th) + 비대칭도 (skewness). IMF 표준 매크로 리스크 지표.
+
     Args:
-        fci_values: FCI 시계열 (분기 또는 월간, 시간 순서)
-        gdp_growth_values: GDP 성장률 시계열 (%, 동일 주파수)
-        horizon: 예측 분기 수 (기본 4 = 1년 후)
-        quantiles: 추정할 분위수
+        fciValues: FCI 시계열 (분기 또는 월간, ≥ 20 관측치).
+        gdpGrowthValues: GDP 성장률 (%) 시계열 (동일 주파수).
+        horizon: 예측 분기 수. 기본 4 (1 년).
+        quantiles: 추정 분위 tuple. 기본 (0.05, 0.25, 0.50, 0.75, 0.95).
 
     Returns:
-        dict with GaR percentiles, tail risk, skewness
-        None if insufficient data
+        dict — currentGaR5/currentGaR25/median/currentGaR75/currentGaR95/
+        tailRisk(high/elevated/moderate/low)/tailLabel/skewness/description.
+        None — 데이터 부족 시.
+
+    Example:
+        >>> r = growthAtRisk([fci]*30, [gdp]*30, horizon=4)
+        >>> r["tailRisk"], r["currentGaR5"]
+        ('elevated', -1.5)
+
+    Guide:
+        tailRisk "high" (GaR5 < -2.0) = 1 년 후 침체 강한 신호. skewness 음수
+        부호 + 절댓값 ↑ = 하방 꼬리 두꺼움 (risk-off regime).
+
+    When:
+        ``analyzeCrisis`` 내부 + AI "1 년 후 GDP 하방 리스크" 답변.
+
+    How:
+        시계열 정렬 → NaN 제거 → horizon shift → 분위 회귀 (quantile regression
+        IWLS) → 현재 FCI 로 예측.
+
+    Requires:
+        ≥ 20 관측치 (FCI + GDP). NFCI (FRED) + GDP 분기 권장.
+
+    Raises:
+        없음 — 데이터 부족 시 None.
+
+    See Also:
+        - calcFCI : FCI 입력 생성
+        - analyzeCrisis : 본 함수 호출 진입점
+
+    AIContext:
+        tailLabel + currentGaR5 + median 3 필드 인용으로 "GaR 5th -1.5% (주의),
+        중위 +2.0%" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - currentGaR5 만 인용 + median 무시 (중심 추세 손실)
+            - 20 미만 관측치에 강한 단정
+            - quantile 임의 변경 (기본 5/25/50/75/95 표준)
+        OutputSchema:
+            ``{currentGaR5, currentGaR25, median, currentGaR75, currentGaR95,
+            tailRisk, tailLabel, skewness, description}`` 또는 None.
+        Prerequisites: FCI + GDP 시계열 ≥ 20 분기.
+        Freshness: 분기.
+        Dataflow: 시계열 → shift → quantile regression → 분위 + tail risk.
+        TargetMarkets: US (FCI + GDP). KR 동일 적용 가능.
     """
     fci = np.array(fciValues, dtype=np.float64)
     gdp = np.array(gdpGrowthValues, dtype=np.float64)

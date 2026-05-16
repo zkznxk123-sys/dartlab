@@ -57,17 +57,60 @@ def calcFCI(
 ) -> FCIResult:
     """금융환경지수 계산 — 5변수 z-score 가중 합산.
 
+    Capabilities:
+        5 변수 (정책금리/장기금리/신용스프레드/주가/환율) 시계열을 24+ 개월
+        z-score 표준화 → 시장별 (US/KR) 가중치 합산 → FCI 값 + 3 zone
+        (tight/neutral/loose). Chicago Fed NFCI 의 단순 자체 구현.
+
     Args:
-        variables: 각 변수의 시계열 (최근 24개월+ 권장)
-            - policy_rate: 정책금리 시계열
-            - long_rate: 장기금리(10Y) 시계열
-            - credit_spread: HY 스프레드 시계열
-            - equity: 주가지수 YoY% 시계열 (양수=상승)
-            - fx: 달러인덱스(또는 USDKRW) 시계열
-        market: "US" | "KR"
+        variables: 변수별 시계열 list (최근 24+ 개월). 키: policy_rate/long_rate/
+            credit_spread/equity (YoY%)/fx.
+        market: ``"US"`` | ``"KR"``.
 
     Returns:
-        FCIResult: FCI 값 + 구간 + 구성요소
+        FCIResult — value/regime(tight/neutral/loose)/regimeLabel/components
+        (z-score per 변수)/description.
+
+    Example:
+        >>> r = calcFCI({"policy_rate": [...], "credit_spread": [...]})
+        >>> r.regime, r.value
+        ('tight', 0.85)
+
+    Guide:
+        |value| > 0.5 = 의미 있는 편차. components 의 가장 큰 양수 z 가 dominant
+        긴축 요인. NFCI 와 동시 인용 시 정합성 검증.
+
+    When:
+        ``analyzeCrisis`` 내부 + AI 금융 환경 답변.
+
+    How:
+        각 변수 시계열 → z-score 표준화 → equity 부호 반전 → 시장별 가중 평균.
+
+    Requires:
+        24+ 개월 시계열 (5 변수 모두). 부분 입력도 동작 (가중치 정규화).
+
+    Raises:
+        없음 — 데이터 부족 시 "데이터부족" regime 반환.
+
+    See Also:
+        - calcLiquidity : NFCI + FCI 동시 노출
+        - classifyLiquidityRegime : 표준 라벨
+
+    AIContext:
+        regime + value + dominant component 인용으로 "FCI +0.85 (긴축),
+        신용스프레드가 주도" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 시계열 6 개월 미만 입력 (24+ 권장)
+            - market="US" 변수에 KR 가중치 적용
+            - components 미노출 (dominant 인용 불가)
+        OutputSchema:
+            FCIResult ``(value, regime, regimeLabel, components, description)``.
+        Prerequisites: 5 변수 월별 시계열.
+        Freshness: 일간 (yield/spread/equity/fx) ~ 월간 (policy rate).
+        Dataflow: variables → z-score → 가중 합 → regime.
+        TargetMarkets: US, KR (가중치 다름).
     """
     weights = _WEIGHTS_US if market.upper() == "US" else _WEIGHTS_KR
     components: dict[str, float] = {}
