@@ -74,6 +74,25 @@ class TestSignalIfrsSynonym:
         assert ms.signalIfrsSynonym("", "없는것", _MAPPINGS) is None
 
 
+class TestSignalKorNameMatchSuffixGuard:
+    """액션 접미 가드 — 자산 vs 처분손실/감소 등 의미 단어 차이를 점수 페널티."""
+
+    def test_suffix_mismatch_blocks_match(self) -> None:
+        sa = {
+            "financial_assets_at_fvtpl": {"korName": "당기손익공정가치측정금융자산"},
+            "losses_on_disposal_of_fvtpl": {"korName": "당기손익공정가치측정금융자산처분손실"},
+        }
+        # needle 끝 "처분손실" — *자산* 후보는 페널티 0.5 로 거부, *처분손실* 후보 채택.
+        snake, score = ms.signalKorNameMatch("당기손익공정가치측정금융자산 처분손실", sa)
+        assert snake == "losses_on_disposal_of_fvtpl"
+
+    def test_suffix_match_keeps_score(self) -> None:
+        sa = {"other_financial_assets": {"korName": "기타금융자산"}}
+        snake, score = ms.signalKorNameMatch("기타의금융자산", sa)
+        assert snake == "other_financial_assets"
+        assert score >= 0.85
+
+
 class TestSignalTypoReject:
     def test_one_jamo_diff_rejected(self) -> None:
         rejected, fix = ms.signalTypoReject("지배지업소유주지분", _STANDARD_ACCOUNTS)

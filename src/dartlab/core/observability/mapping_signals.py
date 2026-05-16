@@ -34,6 +34,8 @@ MIN_FREQUENCY = 5
 MIN_CORPORATE_DISPERSION = 3
 KOR_MATCH_THRESHOLD = 0.85
 TYPO_JAMO_DISTANCE = 1
+SUFFIX_TAIL_CHARS = 3  # 마지막 N 자 액션 단어 비교
+SUFFIX_MISMATCH_PENALTY = 0.5  # 끝 N 자 다를 때 점수 곱
 
 
 @dataclass(frozen=True)
@@ -187,6 +189,7 @@ def signalKorNameMatch(accountNm: str, standardAccounts: dict[str, dict]) -> tup
     if not accountNm or not standardAccounts:
         return None, 0.0
     needle = _normalizeKor(accountNm)
+    needleTail = needle[-SUFFIX_TAIL_CHARS:] if len(needle) >= SUFFIX_TAIL_CHARS else needle
     bestId: str | None = None
     bestScore = 0.0
     for snakeId, meta in standardAccounts.items():
@@ -195,6 +198,11 @@ def signalKorNameMatch(accountNm: str, standardAccounts: dict[str, dict]) -> tup
         if not candidate:
             continue
         score = _ratio(needle, candidate)
+        # 액션 접미 가드 — 자산/처분손실/감소/증가/평가 등 의미를 결정짓는 끝 N 자
+        # 가 다르면 점수 페널티. "자산 처분손실" 이 "자산" 으로 매핑되는 환각 차단.
+        candidateTail = candidate[-SUFFIX_TAIL_CHARS:] if len(candidate) >= SUFFIX_TAIL_CHARS else candidate
+        if needleTail != candidateTail:
+            score *= SUFFIX_MISMATCH_PENALTY
         if score > bestScore:
             bestScore = score
             bestId = snakeId

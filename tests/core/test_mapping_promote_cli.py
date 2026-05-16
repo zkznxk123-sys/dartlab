@@ -99,7 +99,12 @@ def jsonFile(tmp_path: Path) -> Path:
             "lastUpdate": "2026-03-09",
             "addedCount": 0,
         },
-        "standardAccounts": {},
+        "standardAccounts": {
+            "total_assets": {"korName": "자산총계"},
+            "other_financial_assets": {"korName": "기타금융자산"},
+            "different_value": {"korName": "다른가치"},
+            "different_snake_id": {"korName": "다른snake"},
+        },
         "mappings": {
             "자산총계": "total_assets",
         },
@@ -230,6 +235,54 @@ def test_apply_with_force_skips_conflict_but_adds_other(promoteMod, tmp_path: Pa
     assert data["mappings"]["자산총계"] == "total_assets"
     # 신규 매핑은 추가
     assert data["mappings"]["기타의금융자산"] == "other_financial_assets"
+
+
+def test_apply_rejects_ghost_snake_id(promoteMod, tmp_path: Path, jsonFile: Path) -> None:
+    """standardAccounts 부재 snakeId 는 apply 차단 (환각 매핑 가드)."""
+    schema = {
+        "firstSeenAt": pl.String,
+        "lastSeenAt": pl.String,
+        "accountId": pl.String,
+        "accountNm": pl.String,
+        "occurrenceCount": pl.Int64,
+        "stockCodes": pl.List(pl.String),
+        "sjDivs": pl.List(pl.String),
+        "corporateDispersion": pl.Int64,
+        "suggestedSnakeId": pl.String,
+        "confidence": pl.Float64,
+        "signalBreakdown": pl.String,
+        "autoEligible": pl.Boolean,
+        "status": pl.String,
+        "operatorNote": pl.String,
+        "decidedAt": pl.String,
+    }
+    rows = [
+        {
+            "firstSeenAt": "2026-05-16T00:00:00+00:00",
+            "lastSeenAt": "2026-05-16T00:00:00+00:00",
+            "accountId": "",
+            "accountNm": "환각계정",
+            "occurrenceCount": 10,
+            "stockCodes": ["005930", "000660", "035720"],
+            "sjDivs": ["BS"],
+            "corporateDispersion": 3,
+            "suggestedSnakeId": "non_existent_snake_id",  # standardAccounts 부재
+            "confidence": 0.99,
+            "signalBreakdown": "{}",
+            "autoEligible": True,
+            "status": "confirmed",
+            "operatorNote": None,
+            "decidedAt": "2026-05-16T00:00:00+00:00",
+        }
+    ]
+    staging = tmp_path / "ghost_staging.parquet"
+    pl.DataFrame(rows, schema=schema).write_parquet(staging)
+
+    before = jsonFile.read_text(encoding="utf-8")
+    rc = promoteMod.main(["--staging", str(staging), "--json", str(jsonFile), "apply"])
+    assert rc == 1
+    after = jsonFile.read_text(encoding="utf-8")
+    assert before == after  # zero modification
 
 
 def test_rollback_restores_previous_file(promoteMod, monkeypatch, tmp_path: Path) -> None:

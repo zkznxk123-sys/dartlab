@@ -78,35 +78,42 @@ def _readConfirmed(stagingPath: Path) -> dict[str, str]:
 
 
 def _computeDiff(
-    existing: dict[str, str], confirmed: dict[str, str]
-) -> tuple[dict[str, str], dict[str, tuple[str, str]]]:
-    """추가 후보와 충돌을 분리.
+    existing: dict[str, str],
+    confirmed: dict[str, str],
+    standardAccounts: dict[str, dict] | None = None,
+) -> tuple[dict[str, str], dict[str, tuple[str, str]], dict[str, str]]:
+    """추가 후보·충돌·standardAccounts 부재 분리.
 
     Args:
         existing: 현 ``accountMappings.json::mappings``.
         confirmed: staging confirmed dict.
+        standardAccounts: standardAccounts 메타. None 이면 hard check 생략.
 
     Returns:
-        (additions, conflicts) — additions 는 신규 매핑, conflicts 는
-        ``{accountNm: (existingSnakeId, proposedSnakeId)}`` (값이 다르면 충돌).
+        (additions, conflicts, ghostSnakes) — ghostSnakes 는 ``confirmed`` 의
+        snakeId 가 ``standardAccounts`` 에 부재한 환각 매핑.
 
     Example:
-        >>> _computeDiff({}, {"a": "x"})
-        ({'a': 'x'}, {})
+        >>> additions, conflicts, ghosts = _computeDiff({}, {"a": "x"}, {})
+        >>> ghosts
+        {'a': 'x'}
 
     Raises:
         없음.
     """
     additions: dict[str, str] = {}
     conflicts: dict[str, tuple[str, str]] = {}
+    ghostSnakes: dict[str, str] = {}
     for nm, snake in confirmed.items():
+        if standardAccounts is not None and snake not in standardAccounts:
+            ghostSnakes[nm] = snake
+            continue
         if nm in existing:
             if existing[nm] != snake:
                 conflicts[nm] = (existing[nm], snake)
-            # 같은 값이면 idempotent — additions 에 넣지 않음
             continue
         additions[nm] = snake
-    return additions, conflicts
+    return additions, conflicts, ghostSnakes
 
 
 def _writeJsonAtomic(path: Path, data: dict, *, compact: bool = True) -> None:
@@ -156,7 +163,8 @@ def cmdDryrun(args: argparse.Namespace) -> int:
     confirmed = _readConfirmed(args.staging)
     data = _loadJson(args.json)
     existing = data.get("mappings", {})
-    additions, conflicts = _computeDiff(existing, confirmed)
+    standardAccounts = data.get("standardAccounts", {})
+    additions, conflicts, ghostSnakes = _computeDiff(existing, confirmed, standardAccounts)
 
     print(f"[mappingPromote dryrun] 추가 예정 {len(additions)} 매핑:")
     for nm, snake in sorted(additions.items()):
@@ -165,6 +173,10 @@ def cmdDryrun(args: argparse.Namespace) -> int:
         print(f"\n  ⚠ 충돌 {len(conflicts)} 매핑 (apply 시 reject):")
         for nm, (old, new) in sorted(conflicts.items()):
             print(f"    ! {nm!r}: 기존={old} vs 신규={new}")
+    if ghostSnakes:
+        print(f"\n  ⚠ standardAccounts 부재 snakeId {len(ghostSnakes)} 매핑 (apply 시 reject):")
+        for nm, snake in sorted(ghostSnakes.items()):
+            print(f"    ? {nm!r} → {snake} (snakeId 환각)")
     return 0
 
 
@@ -187,8 +199,15 @@ def cmdApply(args: argparse.Namespace) -> int:
     confirmed = _readConfirmed(args.staging)
     data = _loadJson(args.json)
     existing = data.get("mappings", {})
-    additions, conflicts = _computeDiff(existing, confirmed)
+    standardAccounts = data.get("standardAccounts", {})
+    additions, conflicts, ghostSnakes = _computeDiff(existing, confirmed, standardAccounts)
 
+    if ghostSnakes and not args.force:
+        print(f"[mappingPromote apply] standardAccounts 부재 snakeId {len(ghostSnakes)} 매핑 — 적용 중단.")
+        for nm, snake in sorted(ghostSnakes.items()):
+            print(f"  ? {nm!r} → {snake} (snakeId 환각)")
+        print("  → 운영자가 정확한 snakeId 로 mappingReview confirm 재실행.")
+        return 1
     if conflicts and not args.force:
         print(f"[mappingPromote apply] 충돌 {len(conflicts)} 매핑 — 적용 중단.")
         for nm, (old, new) in sorted(conflicts.items()):
