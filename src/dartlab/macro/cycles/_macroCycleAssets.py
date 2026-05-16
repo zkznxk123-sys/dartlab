@@ -356,14 +356,68 @@ def marketLevelValuation(
 
 
 def realRateRegime(realRate: float, bei: float) -> RealRateRegimeResult:
-    """실질금리 + BEI → 금융환경 4분면.
+    """실질금리 (DFII10) + BEI (10Y break-even) → 금융 환경 4 레짐 분류.
 
-    | | BEI 상승 | BEI 하락 |
-    |실질금리 상승| 긴축 | 디플레 위험 |
-    |실질금리 하락| 리플레이션 | 골디락스 |
+    Capabilities:
+        실질금리와 BEI 의 (수준 + 조합) 으로 금융 환경 4 레짐 (긴축/디플레위험/
+        리플레이션/골디락스) 분류. macro/cycles/cycle 의 보조 진단으로 사용.
 
-    (방향 판별은 호출자가 전기 대비 제공)
-    여기서는 수준 기반으로 판별.
+    Args:
+        realRate: 10년 실질금리 (DFII10, %).
+        bei: 10년 break-even inflation (%).
+
+    Returns:
+        RealRateRegimeResult dataclass:
+            - ``realRate``/``bei`` (float): 입력 echo
+            - ``regime`` (str): ``"tight"``/``"deflation"``/``"reflation"``/
+              ``"goldilocks"``
+            - ``regimeLabel`` (str): 한국어
+            - ``description`` (str): 한국어 해석
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = realRateRegime(realRate=2.3, bei=1.8)
+        >>> r.regime
+        'deflation'
+
+    Guide:
+        4 레짐 매트릭스 (수준 기반):
+        - 실질 > 2 + BEI < 2 → deflation 위험
+        - 실질 > 1.5 + BEI > 2.5 → tight (긴축)
+        - 실질 < 0 + BEI > 2.5 → reflation
+        - 실질 < 0.5 + BEI ~ 2 → goldilocks
+
+        방향 판별 (전기 대비) 은 호출자 책임 — 본 함수는 수준 분류만.
+
+    SeeAlso:
+        - ``classifyCycle``: 사이클 4 국면 (regime 과 결합)
+        - ``interpretGoldDrivers``: realRateChange 사용
+        - ``rateOutlook``: 금리 방향 전망 (Fed funds 기반)
+
+    Requires:
+        실질금리 + BEI 둘 다 필요 (옵션 아님).
+
+    AIContext:
+        regime + description 함께 인용. tight regime 시 자산 클래스
+        선택 변경 권장 — 채권 우위. goldilocks 는 주식 우위.
+
+    LLM Specifications:
+        AntiPatterns:
+            - realRate 단독으로 regime 판정 — BEI 동반 분석 필수.
+            - 본 함수의 regime 라벨을 미국 Fed funds 와 혼동 (본 함수는 10Y
+              실질, Fed funds 는 단기).
+        OutputSchema:
+            RealRateRegimeResult ``{realRate, bei, regime, regimeLabel,
+            description}``.
+        Prerequisites:
+            FRED DFII10 + T10YIE (10Y BEI).
+        Freshness:
+            DFII10 일, T10YIE 일.
+        Dataflow:
+            (realRate, bei) → 4 레짐 임계 분류 → description 합성.
+        TargetMarkets: US (FRED DFII10 표준). KR 미적용 (KR BEI 부재).
     """
     if realRate > 2.0 and bei < 2.0:
         return RealRateRegimeResult(
