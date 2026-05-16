@@ -295,3 +295,95 @@ jobs:
           python-version: "3.12"
       - name: Validate notebook syntax
         run: python scripts/audit/validateNotebooks.py
+
+  # Track 1 — syrupy CLI snapshot 회귀 (HF 마커 · Progress · warning routing)
+  # 본 PR 의 acceptance test. snapshot 깨지면 PR 머지 차단.
+  snapshot-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis syrupy
+          pip install -e .
+      - name: Run snapshot tests
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/cli/test_output_snapshots.py -v --tb=short --no-cov
+
+  # Track 2 — Pandera schema drift (finance/report/docs raw frame 계약)
+  schema-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + Pandera
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis "pandera[polars]>=0.29.0"
+          pip install -e .
+      - name: Run schema regression
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/_schemas/ -v --tb=short --no-cov
+
+  # Track 3 — 에이전트 출력 6 신호 룰 채점 (외부 모델 호출 0, CI Fast 안전)
+  eval-rule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          pip install -e .
+      - name: Run eval smoke
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/_evals/test_eval_smoke.py -v --tb=short --no-cov
+
+  # Track 6 — 테스트 강제 게이트 (warning-only, 2026-Q3 fail 전환 예정)
+  # baseline (scripts/audit/_baselines/testCoverage.json) 대비 신규 누락만 보고.
+  test-coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true  # warning-only (Phase 1, 1 개월 후 제거)
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # diff origin/master 위해 전체 히스토리
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run gate (diff vs origin/master)
+        run: |
+          python -X utf8 scripts/audit/testCoverageGate.py --diff origin/master --limit 30
+      - name: Run gate (all, JSON report)
+        run: |
+          python -X utf8 scripts/audit/testCoverageGate.py --all --json > coverage-gate-report.json
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-coverage-gate
+          path: coverage-gate-report.json
+          retention-days: 30
