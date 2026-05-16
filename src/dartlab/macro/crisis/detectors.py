@@ -56,13 +56,70 @@ __all_helpers__ = [
 
 
 def creditToGDPGap(creditGDPSeries: list[float]) -> CreditGapResult:
-    """Credit-to-GDP Gap 계산 (BIS 방법).
+    """Credit-to-GDP Gap (BIS Basel III CCyB 표준) → 신용 거품 + 완충자본 산출.
+
+    Capabilities:
+        Drehmann & Tsatsaronis (2014) 의 BIS 방법론 — credit/GDP 시계열에
+        one-sided HP filter (λ=400,000) 적용하여 trend 추출 후 gap = actual -
+        trend 산출. gap > 2 = 거품 신호, BIS CCyB (counter-cyclical capital
+        buffer) 자동 산출.
 
     Args:
-        creditGDPSeries: 신용/GDP 비율 시계열 (분기, 최소 20기간)
+        creditGDPSeries: 분기별 신용/GDP 비율 시계열 (%). 최소 4 기간, 20+
+            기간 권장 (BIS 표준).
 
     Returns:
-        CreditGapResult: 갭 + CCyB 완충자본
+        CreditGapResult dataclass:
+            - ``gap`` (float): actual - trend
+            - ``trend`` (float): HP filter 추출 추세
+            - ``actual`` (float): 최신 신용/GDP
+            - ``zone`` (str): ``"normal"``/``"caution"``/``"alert"``/
+              ``"critical"``
+            - ``zoneLabel`` (str): 한국어
+            - ``ccybBuffer`` (float): BIS CCyB 권고 자본 (% of RWA)
+            - ``description`` (str)
+
+    Raises:
+        없음. 시계열 < 4 시 빈 결과.
+
+    Example:
+        >>> import polars as pl
+        >>> series = [...]  # 분기 신용/GDP, 20+ 기간
+        >>> r = creditToGDPGap(series)
+        >>> r.zone, r.ccybBuffer
+        ('alert', 1.5)  # 1.5% RWA 추가 자본 권고
+
+    Guide:
+        BIS 임계 (Basel III): gap < 2 = normal (CCyB=0), 2~5 = caution
+        (CCyB=0.5 점진), 5~10 = alert (CCyB 1~2%), >10 = critical (CCyB
+        2.5% upper bound). 한국은 BOK FSR 매년 발표.
+
+    SeeAlso:
+        - ``ghsCrisisScore``: GHS (Greenwood-Hanson-Shleifer) 위기 예측
+        - ``minskyPhase``: Minsky 부채 사이클 단계
+        - Drehmann & Tsatsaronis (2014) BIS Quarterly Review
+
+    Requires:
+        creditGDPSeries 최소 4 기간 (HP filter 안정). 20+ 기간 권장.
+
+    AIContext:
+        gap > 5 결과는 거품 우려 — 신용 사이클 위치 + Minsky/Dalio 와 함께
+        cross-check. ccybBuffer 는 정책 권고이지 즉시 위험 신호 아님.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 4 기간 미만 series → 빈 결과 (zoneLabel="데이터부족") 무시 금지.
+            - 단일 국가 gap 만 인용 — 글로벌 sync (BIS Q3-Q4) 확인.
+        OutputSchema:
+            CreditGapResult (7 필드 dataclass).
+        Prerequisites:
+            BIS/한국은행 credit/GDP 분기 series.
+        Freshness:
+            분기 단위 (BIS Q3 발표 = 1 분기 lag).
+        Dataflow:
+            series → _oneSidedHpTrend (λ=400000) → trend → gap = last - trend
+            → zone 임계 분류 → CCyB 매핑.
+        TargetMarkets: Global (BIS 표준). KR 도 한국은행 FSR.
     """
     if len(creditGDPSeries) < 4:
         return CreditGapResult(
