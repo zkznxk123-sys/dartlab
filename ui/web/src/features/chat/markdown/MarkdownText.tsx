@@ -68,6 +68,7 @@ const SENTINEL_CLOSE = '⦊';
 const SENTINEL_RE = /⦉CHIP:([^⦊]+)⦊/g;
 
 // 신뢰도 chip — 본문 안 [conf:high|mid|low|95] 마커 → 색상 chip.
+// splitWithSentinels 가 CONF_SENTINEL 도 같이 split → ConfidenceChip 렌더.
 const CONF_RE = /\[conf:(high|mid|low|\d{1,3})\]/gi;
 const CONF_SENTINEL_OPEN = '⦉CONF:';
 const CONF_SENTINEL_CLOSE = '⦊';
