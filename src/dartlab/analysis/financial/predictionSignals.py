@@ -101,19 +101,75 @@ def _getSectorKey(company) -> str | None:
 
 @memoizedCalc
 def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | None:
-    """이익 모멘텀 — Sloan 분해(현금 vs 발생액) + DuPont 추세.
+    """Sloan 분해 + DuPont 추세 → 이익 모멘텀 가속/감속 판정.
 
-    이익이 가속/감속 중인지, 현금 뒷받침이 있는지를 판단한다.
+    Capabilities:
+        Sloan (1996, AR) 의 현금 vs 발생액 분해와 DuPont 3 요소 (margin/
+        turnover/leverage) 추세를 결합. 이익이 가속/감속/reversal 중 어느
+        상태인지 + 현금 뒷받침 (OCF/NI) 강도를 함께 진단. predictionSignals
+        의 5 신호 중 가장 핵심.
 
-    Returns
-    -------
-    dict
-        history : list[dict] — 연도별 Sloan 분해 시계열 (netIncome, ocf, accrual, sloanAccrualRatio, ocfToNi, margin, turnover, leverage)
-        momentum : str — 이익 모멘텀 ("accelerating" | "decelerating" | "reversing" | "stable")
-        earningsDirection : str — 방향 ("up" | "down" | "flat")
-        persistenceScore : float — 현금 지속성 점수 (점)
-        highAccrualWarning : bool — 발생액 비율 경고 (|accrual/자산| > 10%)
-        confidence : str — 신뢰도 ("high" | "medium" | "low")
+    Args:
+        company: Company 객체. ``select("IS"|"CF"|"BS")`` 가능.
+        basePeriod: 기준 기간. ``None`` 이면 최신.
+
+    Returns:
+        dict | None: 다음 키 (필수 데이터 누락 시 ``None``):
+            - ``history`` (list[dict]): 연도별 Sloan 분해 (netIncome, ocf,
+              accrual, sloanAccrualRatio, ocfToNi, margin, turnover, leverage)
+            - ``momentum`` (str): ``"accelerating"``/``"decelerating"``/
+              ``"reversing"``/``"stable"``
+            - ``earningsDirection`` (str): ``"up"``/``"down"``/``"flat"``
+            - ``persistenceScore`` (float): OCF/NI 평균 (점)
+            - ``highAccrualWarning`` (bool): |accrual/자산| > 10% 경고
+            - ``confidence`` (str): ``"high"``/``"medium"``/``"low"``
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab import Company
+        >>> r = calcEarningsMomentum(Company("005930"))
+        >>> r["momentum"], r["highAccrualWarning"]
+        ('accelerating', False)
+
+    Guide:
+        Sloan accrualRatio = (NI - OCF) / 평균자산. 양수 = 발생액 비중,
+        음수 = 현금 우위. 10%+ 경고는 Sloan 의 earnings management 신호.
+        DuPont 분해로 margin/turnover 중 어느 요인이 변화 주도하는지 표시.
+
+    SeeAlso:
+        - ``calcPredictionSynthesis``: 본 함수 결과 + 4 신호 앙상블
+        - ``calcStructuralBreak``: 변동성 구조 변화 검증
+        - Sloan (1996) "Do Stock Prices Fully Reflect Information in Accruals
+          and Cash Flows?" The Accounting Review
+
+    Requires:
+        Company.select("IS", "당기순이익|매출액|영업이익") +
+        Company.select("CF", "영업활동현금흐름") +
+        Company.select("BS", "자산총계|자본총계").
+
+    AIContext:
+        ``highAccrualWarning=True`` 결과를 단독 인용해 "분식회계 의심" 으로
+        결론 짓지 말 것 — Sloan 의 통계적 신호이지 의도 판정 아님.
+        ``momentum`` 라벨과 함께 ``persistenceScore`` 도 노출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 결과만으로 momentum 판정 — 최소 3 년 history 필요
+              (confidence=low 결과는 호출자가 horizon 늘려 재호출).
+            - 자본총계 < 0 (자본잠식) 회사 — DuPont leverage 비정상 (0 또는
+              음수) → momentum 판정 신뢰도 낮음.
+        OutputSchema:
+            상기 6 키 dict.
+        Prerequisites:
+            IS/CF/BS 시계열 ≥ 3 년 + 자본총계 양수.
+        Freshness:
+            최신 보고기간 (분기). basePeriod 로 과거 시점 분석 가능.
+        Dataflow:
+            select(IS/CF/BS) → toDictBySnakeId → 연도별 NI/OCF/자산
+            → Sloan accrual = NI - OCF → momentum 분류 → persistence.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     isResult = company.select("IS", ["당기순이익", "매출액", "영업이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
@@ -240,20 +296,67 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
 
 @memoizedCalc
 def calcPeerPrediction(company, *, basePeriod: str | None = None) -> dict | None:
-    """횡단면 피어 예측 — scan 데이터 기반 cross-section 회귀.
+    """Cross-section + panel 회귀 → peer 기반 매출 성장률 예측 + 괴리.
 
-    사전 적합된 횡단면/패널 모델로 이 회사의 매출 성장률을 예측하고,
-    실제 성장률과의 괴리를 측정한다.
+    Capabilities:
+        scan 의 사전 적합된 횡단면/패널 OLS 모델 (loadModel/loadPanelModel)
+        로 이 회사의 향후 매출 성장률 (%) 을 예측. 실제 historical 성장률과
+        의 괴리 (divergence) 를 측정해 outlier 시그널 산출. 5 신호 중 cross-
+        section 기반 신호.
 
-    Returns
-    -------
-    dict
-        crossSectionPredicted : float | None — 횡단면 모델 예측 매출 성장률 (%)
-        panelPredicted : float | None — 패널 모델 예측 매출 성장률 (%)
-        ensemblePredicted : float — 앙상블 예측 매출 성장률 (%)
-        companyHistoricalGrowth : float | None — 실제 매출 성장률 (%)
-        divergence : float | None — 예측-실제 괴리 (%p)
-        modelR2 : float | None — 횡단면 모델 R-squared
+    Args:
+        company: Company 객체. stockCode + 재무 시계열 필요.
+        basePeriod: 기준 기간. None 이면 최신.
+
+    Returns:
+        dict | None: 다음 키 (모델/데이터 부족 시 ``None``):
+            - ``crossSectionPredicted`` (float|None): 횡단면 OLS 예측 (%)
+            - ``panelPredicted`` (float|None): 패널 모델 예측 (%)
+            - ``ensemblePredicted`` (float): 두 모델 평균 (없으면 단일)
+            - ``companyHistoricalGrowth`` (float|None): 실제 매출 성장률 (%)
+            - ``divergence`` (float|None): 예측 - 실제 (%p)
+            - ``modelR2`` (float|None): 횡단면 모델 R²
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcPeerPrediction(Company("005930"))
+        >>> r["ensemblePredicted"], r["divergence"]
+        (8.5, -2.3)  # 모델은 8.5% 예측, 실제는 10.8% (peer 대비 outperform)
+
+    Guide:
+        divergence > 0 → 모델보다 실제가 낮음 (peer 평균 하회). divergence
+        < 0 → outperform. |divergence| > 5%p 면 outlier (peer 대비 크게
+        다른 트랙). 모델 R² < 0.3 이면 예측 신뢰도 낮음.
+
+    SeeAlso:
+        - ``loadModel``/``loadPanelModel``: 횡단면/패널 모델 로드
+        - ``calcPredictionSynthesis``: 본 함수 + 4 신호 앙상블
+
+    Requires:
+        scan 사전 적합 모델 (year-1 ~ year-3 탐색) + Company 재무 시계열.
+
+    AIContext:
+        ensemblePredicted 단독 인용 금지 — modelR2 와 divergence 함께. R²
+        낮은 (<0.3) 모델 예측은 informative 가 아니라 noise 신호.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 모델이 없는 신규 산업/IPO 종목 — None 반환, 호출자 fallback
+              로직 필요.
+            - divergence 부호 해석 오류 — divergence>0 = 실제가 낮음 (peer
+              하회), <0 = outperform.
+        OutputSchema:
+            상기 6 키 dict.
+        Prerequisites:
+            scan/loadModel(year) 결과 존재 + Company 재무 ≥ 3 년.
+        Freshness:
+            모델 = 연 1 회 적합 (loadModel year 인자).
+        Dataflow:
+            stockCode → loadModel/loadPanelModel → company features →
+            예측 → ensemble → historical 비교 → divergence.
+        TargetMarkets: KR (scan SSOT). US 미적용 (모델 부재).
     """
     stockCode = _getStockCode(company)
     if stockCode is None:
@@ -391,22 +494,71 @@ def _getHistoricalRevenueGrowth(company, *, basePeriod: str | None = None) -> fl
 
 @memoizedCalc
 def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | None:
-    """구조변화 감지 — 매출/영업이익/마진/ROE 4대 지표.
+    """Chow Test → 매출/영업이익/마진/ROE 구조변화점 감지 + 추세 신뢰도.
 
-    Chow Test 기반 구조적 변화점을 감지하여 추세 추정의 신뢰도를 판단한다.
+    Capabilities:
+        Chow Test (1960) 의 dummy variable F-test 로 4 대 지표의 break year
+        를 탐색. break 전후 평균 성장률 비교로 트렌드 안정성 판정. predicition
+        모델의 horizon 결정 시 신뢰도 입력 (break 이후 데이터만 사용 권장).
 
-    Returns
-    -------
-    dict
-        metrics : list[dict] — 지표별 구조변화 결과
-            name : str — 지표명 (revenue, operatingIncome, operatingMargin, roe)
-            hasBreak : bool — 구조변화 존재 여부
-            breakYear : str | None — 변화점 기간
-            preBreakGrowth : float | None — 변화점 전 평균 성장률 (%)
-            postBreakGrowth : float | None — 변화점 후 평균 성장률 (%)
-            trendReliability : str — 추세 신뢰도 ("high" | "medium" | "low")
-            nObservations : int — 관측치 수
-        overallStability : str — 전체 안정성 ("stable" | "transitioning" | "volatile")
+    Args:
+        company: Company 객체. IS 시계열 ≥ 6 년 필요.
+        basePeriod: 기준 기간. None 이면 최신.
+
+    Returns:
+        dict | None: 다음 키 (6 년 미만 시 ``None``):
+            - ``metrics`` (list[dict]): 4 지표별:
+                * ``name`` (str): revenue/operatingIncome/operatingMargin/roe
+                * ``hasBreak`` (bool): break 존재 여부 (Chow F > 임계)
+                * ``breakYear`` (str|None): break 시점
+                * ``preBreakGrowth``/``postBreakGrowth`` (float|None): 평균 성장률
+                * ``trendReliability`` (str): high/medium/low
+                * ``nObservations`` (int)
+            - ``overallStability`` (str): ``"stable"``/``"transitioning"``/
+              ``"volatile"`` (4 지표 합산)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcStructuralBreak(Company("005930"))
+        >>> r["overallStability"]
+        'stable'
+        >>> [m["name"] for m in r["metrics"] if m["hasBreak"]]
+        ['operatingMargin']  # 마진만 구조변화
+
+    Guide:
+        Chow Test 임계: F > 5 = high break. preBreakGrowth vs postBreakGrowth
+        부호 반전 시 reversing trend — DCF/forecastRevenue 의 horizon 단축
+        권장 (break 이후 데이터만 사용). 6 년 미만 회사는 break 탐지 불가.
+
+    SeeAlso:
+        - ``dartlab.core.utils.ols.detectStructuralBreak``: Chow Test 본체
+        - ``calcMacroRegression``: 매크로 회귀에서 break 인지 분기
+
+    Requires:
+        IS 시계열 ≥ 6 년 + 매출액/영업이익 데이터.
+
+    AIContext:
+        ``overallStability="volatile"`` 회사는 모든 forecast 결과 신뢰도
+        하향. break year 가 외부 충격 (코로나/금융위기) 과 일치하면
+        natural break — 회사 fundamentals 변화로 해석 금지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - hasBreak=True 만 보고 즉시 "트렌드 깨짐" 단정 금지 — preBreak
+              vs postBreak 평균 비교 후 가속/감속/reversal 분류.
+            - 6 년 미만 회사에 본 함수 호출 → None — 호출자 분기 필요.
+        OutputSchema:
+            ``{metrics: list[dict 7키], overallStability: str}``.
+        Prerequisites:
+            IS 시계열 ≥ 6 년 + ``ols.detectStructuralBreak`` 로드 가능.
+        Freshness:
+            IS 의 freshness (최신 분기).
+        Dataflow:
+            IS 시계열 → 4 지표 추출 → Chow Test (각 year split) → F-stat
+            max → break year → pre/post 평균 → overall 합산.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     from dartlab.core.utils.ols import detectStructuralBreak, ols
 
