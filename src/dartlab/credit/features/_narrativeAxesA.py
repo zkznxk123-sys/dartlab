@@ -89,6 +89,13 @@ def narrateRepayment(
         - ``narrateCashFlow``: 현금흐름 (OCF) 서사
         - ``credit.engine.evaluateCompany``: 본 함수 호출
 
+    When:
+        채무상환능력 narrative 가 필요할 때. ``buildNarratives`` 진입점.
+
+    How:
+        ebitda/ICR/Debt-EBITDA/FFO 추출 → 임계 분기 → details 누적 → 캡티브 보정 (separate
+        D/EBITDA) → severity / summary.
+
     Requires:
         latest dict 의 필수 키 (ebitda, ebitdaInterestCoverage, debtToEbitda).
 
@@ -202,6 +209,10 @@ def narrateCapitalStructure(
 ) -> AxisNarrative:
     """축 2: 자본구조 서사 생성.
 
+    Capabilities:
+        부채비율 + 차입금의존도 + 순차입금/자기자본 + 차입구조 (단기/장기) 를 업종 기준표 위치와
+        결합해 자본구조 narrative 생성. captive=True 일 때 별도 부채비율 단서 자동 첨부.
+
     부채비율, 차입금의존도, 순차입금/자기자본 등을
     업종 기준표 위치와 결합하여 자본구조 해석 문장을 생성한다.
 
@@ -224,6 +235,33 @@ def narrateCapitalStructure(
         summary : str — 한 줄 요약 문장
         details : list[str] — 세부 해석 문장 목록
         severity : str — 심각도 (``"strong"`` / ``"moderate"`` / ``"weak"`` / ``"critical"``)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> narrateCapitalStructure({"debtRatio": 80, "borrowingDependency": 35}, 12)
+
+    Guide:
+        부채비율 < 100% = 우수 (지역/업종 차이 큼). 캡티브 회사는 separate debt ratio 가 핵심.
+
+    When:
+        자본구조 narrative 가 필요할 때. ``buildNarratives`` 진입점.
+
+    How:
+        debtRatio/borrowingDependency/netDebtToEquity → 임계 분기 → captive 별도 보정 →
+        severity / summary.
+
+    Requires:
+        - latest dict 의 debtRatio (필수) + borrowingDependency / netDebtToEquity (optional)
+
+    See Also:
+        - ``dartlab.credit.features._narrativeAxesA.narrateRepayment`` : 부채상환 narrative
+        - ``dartlab.credit.features._narrativeAxes.buildNarratives`` : 본 함수 사용자
+
+    AIContext:
+        부채비율 단독 인용 금지 — borrowingDependency / netDebtToEquity 결합. captive 회사는
+        "별도 부채비율" 단서 명시.
     """
     details = []
     sev = _severity(axisScore)

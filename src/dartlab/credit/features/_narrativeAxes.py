@@ -74,6 +74,12 @@ def narrateLiquidity(latest: dict, axisScore: float | None) -> AxisNarrative:
         - ``narrateCashFlow``: OCF 기반 유동성 보강 진단
         - ``narrateRepayment``: 이자보상 (유동성과 연계)
 
+    When:
+        유동성 축 narrative 가 필요할 때. ``buildNarratives`` 가 진입점.
+
+    How:
+        latest dict 의 3 지표 → 임계값 매핑 → details 라인 → 모순 진단 케이스 추가 → severity.
+
     Requires:
         latest dict 의 currentRatio 필수, 나머지 옵션.
 
@@ -150,6 +156,10 @@ def narrateCashFlow(
 ) -> AxisNarrative:
     """축 4: 현금흐름 서사 생성.
 
+    Capabilities:
+        OCF/매출 비율, FCF 추이, 현금흐름 패턴 (+/-/-) 을 해석해 현금 창출력 + 투자 부담 narrative
+        생성. captive=True (캡티브 금융 복합기업) 면 자동차/할부금융 특수 해석 분기.
+
     OCF/매출, FCF 추이, 현금흐름 패턴(+/-/-)을 해석하여
     현금 창출력과 투자 부담에 대한 서사를 생성한다.
 
@@ -172,6 +182,36 @@ def narrateCashFlow(
         summary : str — 한 줄 요약 문장
         details : list[str] — 세부 해석 문장 목록
         severity : str — 심각도 (``"strong"`` / ``"moderate"`` / ``"weak"`` / ``"critical"``)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.credit.features._narrativeAxes import narrateCashFlow
+        >>> n = narrateCashFlow({"ocfToSales": 18, "ocf": 1e12, "fcf": 5e11}, 20, metrics)
+        >>> n.severity
+        'strong'
+
+    Guide:
+        OCF/매출 > 15 = 우수, > 5 = 양호, < 0 = 영업현금유출. captive 회사는 OCF 부호 해석 주의.
+
+    When:
+        현금흐름 축 narrative 가 필요할 때. ``buildNarratives`` 진입점.
+
+    How:
+        latest OCF/매출 → 임계값 매핑 → metrics 시계열 → FCF 추이 + 패턴 → details / severity.
+
+    Requires:
+        - latest 의 ocfToSales/ocf 필수
+        - metrics 시계열 (추이 분석용)
+
+    See Also:
+        - ``dartlab.credit.features._narrativeAxes.narrateLiquidity`` : 유동성 보강
+        - ``dartlab.credit.features._narrativeAxes.buildNarratives`` : 본 함수 사용자
+
+    AIContext:
+        OCF 단독 인용 금지 — FCF / 패턴 / captive 단서까지 함께. 음수 OCF 는 "영업현금유출"
+        명시.
     """
     details = []
     sev = _severity(axisScore)
@@ -265,6 +305,12 @@ def narrateBusinessStability(biz: dict, axisScore: float | None) -> AxisNarrativ
         - ``narrateRepayment``: 부채 상환능력 (사업 안정성과 보완)
         - ``credit.engine.evaluateCompany``: 본 함수 호출
 
+    When:
+        사업안정성 축 narrative 가 필요할 때. ``buildNarratives`` 진입점.
+
+    How:
+        biz dict 의 3 지표 → 임계 매핑 → details → severity (axisScore 기반).
+
     Requires:
         biz dict 의 revenueCV 필수, latestRevenue/segmentHHI 옵션.
 
@@ -333,7 +379,47 @@ def narrateReliability(
     *,
     captive: bool = False,
 ) -> AxisNarrative:
-    """축 6: 재무 신뢰성."""
+    """축 6: 재무 신뢰성.
+
+    Capabilities:
+        Beneish M-Score + Piotroski F-Score + 감사의견을 결합해 재무제표 신뢰성 narrative 생성.
+        captive=True (캡티브 금융) 일 때 F-Score 왜곡 단서 자동 추가.
+
+    Args:
+        rel: 신뢰성 dict. 키 beneishMScore / piotroskiFScore.
+        auditOpinion: 감사의견 문자열 (예: "적정" / "한정" / "부적정").
+        axisScore: 신뢰성 축 점수 (0~100).
+        captive: 캡티브 금융 복합기업 여부.
+
+    Returns:
+        AxisNarrative ``{axisName, summary, details, severity}``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> narrateReliability({"beneishMScore": -2.8, "piotroskiFScore": 8}, "적정", 18)
+
+    Guide:
+        M-Score < -2.22 = 조작 가능성 낮음. F-Score >= 7 = 강건. 감사의견 "한정"/"부적정" 시
+        severity 직접 영향. captive 회사는 F-Score 보수적으로 해석.
+
+    When:
+        재무신뢰성 축 narrative 가 필요할 때. ``buildNarratives`` 진입점.
+
+    How:
+        beneishMScore/piotroskiFScore/auditOpinion 매핑 → captive 보정 → severity 결합.
+
+    Requires:
+        - rel dict 의 beneishMScore/piotroskiFScore (optional)
+        - auditOpinion 문자열 (optional)
+
+    See Also:
+        - ``dartlab.credit.features._narrativeAxes.buildNarratives`` : 본 함수 사용자
+
+    AIContext:
+        F-Score 단독 인용 금지 — M-Score / 감사의견 결합. 감사의견 "한정" 이상은 답변에 명시.
+    """
     details = []
     sev = _severity(axisScore)
 
@@ -376,7 +462,44 @@ def narrateReliability(
 
 
 def narrateDisclosureRisk(dr: dict | None, axisScore: float | None) -> AxisNarrative:
-    """축 7: 공시 리스크."""
+    """축 7: 공시 리스크.
+
+    Capabilities:
+        scan 단계에서 검출된 만성 우발부채 / 리스크 키워드 (횡령·배임·과징금) 수를 narrative
+        로 변환. dr=None 이면 "신호 없음" 폴백 (strong).
+
+    Args:
+        dr: 공시 리스크 dict (chronicYears / riskKeyword). None 허용.
+        axisScore: 공시리스크 축 점수 (0~100).
+
+    Returns:
+        AxisNarrative ``{axisName, summary, details, severity}``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> narrateDisclosureRisk({"chronicYears": 3, "riskKeyword": 2}, 35)
+
+    Guide:
+        chronicYears >= 3 = 만성. riskKeyword > 0 = 답변에 키워드 종류 단서 명시 권장.
+
+    When:
+        공시리스크 축 narrative 가 필요할 때. ``buildNarratives`` 진입점.
+
+    How:
+        chronicYears / riskKeyword 카운트 → 임계 매핑 → details → severity.
+
+    Requires:
+        - L1.5 scan 의 공시 리스크 신호 (optional dr)
+
+    See Also:
+        - ``dartlab.credit.features._narrativeAxes.buildNarratives`` : 본 함수 사용자
+
+    AIContext:
+        키워드 검출은 자동 — 답변 시 "공시 리스크 N 건 감지" 같이 수량만 명시, 단정 ("횡령
+        있음") 금지.
+    """
     details = []
     sev = _severity(axisScore)
 
@@ -423,6 +546,11 @@ def buildNarratives(
 ) -> list[AxisNarrative]:
     """engine.py evaluateCompany 결과에서 7축 전체 서사 생성.
 
+    Capabilities:
+        ``evaluateCompany`` 결과 dict 를 받아 7 축 (채무상환/자본구조/유동성/현금흐름/사업안정성/
+        재무신뢰성/공시리스크) narrative 리스트 산출. detail=True 결과의 ``narratives`` 키에
+        그대로 들어가는 단일 진입점.
+
     Parameters
     ----------
     captive : bool
@@ -431,6 +559,39 @@ def buildNarratives(
         지주사 여부. (현재 축별 서사에서 직접 사용하지 않으나 향후 확장용.)
     separateMetrics : dict | None
         별도 재무제표 지표. captive일 때 연결/별도 대비 참고 문장에 사용한다.
+
+    Returns:
+        list[AxisNarrative] (7 개) — 각 ``{axisName, summary, details, severity}``.
+
+    Raises:
+        없음 — 입력 result 누락 키는 빈 dict 폴백.
+
+    Example:
+        >>> from dartlab.credit.features._narrativeAxes import buildNarratives
+        >>> narratives = buildNarratives(creditResult, captive=False)
+        >>> narratives[0].summary
+
+    Guide:
+        UI / Story 6 막의 narrative 줄거리 데이터. 각 narrative 의 details 라인이 답변에 직접
+        인용 가능한 한국어 문장.
+
+    When:
+        ``evaluateCompany(detail=True)`` 가 본 함수 호출. AI 답변 narrative 라인 직접 인용 시.
+
+    How:
+        result.axes / metricsHistory / businessStability / reliability 등 추출 → 7 축
+        narrate* 호출 → list 반환.
+
+    Requires:
+        - result dict (``evaluateCompany`` 산출, axes / metricsHistory 키 보유)
+
+    See Also:
+        - ``dartlab.credit.features._narrativeAxes.narrateLiquidity`` 외 6 축 narrate
+        - ``dartlab.credit.engine.evaluateCompany`` : 본 함수 사용자
+
+    AIContext:
+        AI 가 신용 narrative 답변 생성 시 본 결과의 ``details`` 직접 인용. severity 별 색상 /
+        강조 가능 — 답변에 severity 단서도 함께.
     """
     axes = result.get("axes", [])
     latest = {}
