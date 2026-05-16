@@ -108,6 +108,12 @@ def narrateProfile(profile: dict | None, segments: dict | None, rank: dict | Non
         - ``narrateTrend``: 전기 대비 추세
         - ``buildNarratives``: 7 축 서사 합성 (본 함수 포함)
 
+    When:
+        credit 신용평가 보고서 도입 1 줄 서사가 필요할 때.
+
+    How:
+        profile sector → segments share 계산 → rank size class → " | " join.
+
     Requires:
         ``profile`` (sector/products), ``segments`` (totalRevenue),
         ``rank`` (size) 중 하나 이상.
@@ -171,7 +177,44 @@ def narrateProfile(profile: dict | None, segments: dict | None, rank: dict | Non
 
 
 def narrateTrend(history: list[dict]) -> str:
-    """전기 대비 추세 해석 orchestrator — 핵심 지표 개선/악화 (Q3.1f split)."""
+    """전기 대비 추세 해석 orchestrator — 핵심 지표 개선/악화 (Q3.1f split).
+
+    Capabilities:
+        metricsHistory 시계열에서 최신 vs 전기를 비교해 매출/영업이익/Debt-EBITDA/부채비율
+        line 단위 추세 해석 4 종 + 다년 stroyLine 결합. 변화 없으면 "변동 제한적" 폴백.
+
+    Args:
+        history: ``evaluateCompany(detail=True).metricsHistory`` (최신 0 → 과거 순).
+
+    Returns:
+        str: 추세 해석 1 줄 (마침표 포함) 또는 빈 문자열.
+
+    Raises:
+        없음 — history 2 개 미만이면 빈 문자열.
+
+    Example:
+        >>> narrateTrend(metricsHistory)
+        '매출 12% 증가했다. 영업이익 23% 개선. ...'
+
+    Guide:
+        본 함수가 4 개 ``_trend*Line`` 서브 함수를 orchestrate. 빈 라인은 자동 skip.
+
+    When:
+        신용평가 보고서의 "전기 대비" 한 줄. credit detail 결과 narrative 에 자동 첨부.
+
+    How:
+        history[0] vs history[1] 비교 → 4 라인 산출 → 다년 storyLine 첨부 → " " join + 마침표.
+
+    Requires:
+        - metricsHistory list (>= 2)
+
+    See Also:
+        - ``dartlab.credit.features.narrative.narrateProfile`` : 도입 1 줄
+        - ``dartlab.credit.features.narrative.buildOverallNarrative`` : 본 함수 사용자
+
+    AIContext:
+        AI 답변 "전기 대비" 1 줄 직접 인용 가능. 빈 문자열일 땐 "변동 제한적" 단서 명시.
+    """
     if len(history) < 2:
         return ""
 
@@ -230,6 +273,12 @@ def narrateBorrowings(borrowingsDetail: list[dict] | None, latest: dict | None) 
         - ``narrateTrend``: 전기 대비 추세
         - ``calcDebtMaturity``: 만기 구조 (numerical)
         - ``calcLeverageTrend``: 부채 시계열
+
+    When:
+        신용평가 본문의 차입금 구조 + 차환 위험 1~3 줄.
+
+    How:
+        latest.totalBorrowing → 단기/장기 비중 → 현금/차입 비율 → 차환 위험 라벨 합성.
 
     Requires:
         latest dict (totalBorrowing 필수 + cash/netDebt + shortTermDebtRatio).
@@ -293,10 +342,47 @@ def narrateBorrowings(borrowingsDetail: list[dict] | None, latest: dict | None) 
 def narrateCausalChain(latest: dict, result: dict) -> str:
     """6막 인과 연결 — dartlab 핵심 사상을 credit에 적용.
 
+    Capabilities:
+        매출 → 이익 → 현금 → 안정성 → 등급 인과 체인을 한 줄로 합성. 지주사 (holding=True) /
+        영업적자 등 특수 케이스 별도 분기. dartlab "앞이 뒤의 원인" 사상의 credit 본문 적용.
+
     매출 → 이익 → 현금 → 안정성 → 등급의 인과 체인.
     앞이 뒤의 원인이다.
 
     지주사/영업적자 등 특수 케이스를 별도 처리한다.
+
+    Args:
+        latest: 최신 metricsHistory row.
+        result: ``evaluateCompany`` 결과 (grade, holding 등).
+
+    Returns:
+        str: 인과 요약 1 줄.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> narrateCausalChain(metricsHistory[0], creditResult)
+        '인과 요약: 매출 300조원 → 영업이익 60조원 (20%) → OCF 80조원 → 순현금 → dCR-AA+.'
+
+    Guide:
+        지주사는 자체 매출보다 자회사 배당 OCF 가 핵심 — 별도 분기 처리.
+
+    When:
+        보고서의 한 줄 인과 요약. 보고서 도입/결론에 모두 적용 가능.
+
+    How:
+        result.holding 분기 → 지주사: 매출+배당+순현금 / 일반: 매출 → 이익 → 현금 → 안정성 →
+        등급 합성.
+
+    Requires:
+        - latest dict + result dict (``evaluateCompany`` 산출)
+
+    See Also:
+        - ``dartlab.credit.features.narrative.buildOverallNarrative`` : 본 함수 사용자
+
+    AIContext:
+        AI 답변에 한 줄 인과 요약 직접 인용 가능. holding=True 회사는 별도 분기 결과 사용.
     """
     parts = []
     grade = result.get("grade", "?")
@@ -377,6 +463,10 @@ def buildOverallNarrative(
 ) -> str:
     """등급 근거 종합 서사 — 인과 체인 통합.
 
+    Capabilities:
+        7 축 narrative + 인과 체인 + 강점/약점 + captive/holding 구조 단서를 합성한 등급 근거
+        종합 문단 1 단락 반환. credit 보고서 결론부 그대로 사용 가능.
+
     각 축별 서사(AxisNarrative)를 종합하여 매출→이익→현금→안정성→등급의
     인과 체인이 한 문단에 드러나는 종합 서사를 생성한다.
 
@@ -401,6 +491,34 @@ def buildOverallNarrative(
     str
         등급 근거 종합 서사 문단. 인과 체인(매출→이익→현금→안정성)을
         하나의 흐름으로 연결한 문장이며, 강점·약점·구조적 참고가 포함된다.
+
+    Raises:
+        없음 — narratives 비면 grade 인용만 가능.
+
+    Example:
+        >>> from dartlab.credit.features.narrative import buildOverallNarrative
+        >>> text = buildOverallNarrative(creditResult, narratives)
+
+    Guide:
+        UI / Story 6 막 결론, 보고서 결론부에 단일 문단으로 그대로 첨부 가능.
+
+    When:
+        보고서 / 답변의 등급 근거 결론 문단이 필요할 때.
+
+    How:
+        result.grade/score + narratives strong/weak 분류 → 인과 chain → 도입 sentence + 강약점
+        sentences + captive/holding 단서 → " " join.
+
+    Requires:
+        - ``evaluateCompany(detail=True)`` 산출 result + narratives 리스트
+
+    See Also:
+        - ``dartlab.credit.features._narrativeAxes.buildNarratives`` : narratives 산출
+        - ``dartlab.credit.features.narrative.narrateCausalChain`` : 인과 체인
+
+    AIContext:
+        AI 답변의 신용평가 결론 한 문단 그대로 인용. 답변 길이 조정 시 strength/weakness 라인만
+        발췌도 가능.
     """
     grade = result.get("grade", "?")
     score = result.get("score", 0)
