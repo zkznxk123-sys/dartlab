@@ -358,16 +358,61 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | None:
-    """매출 -> 순이익 마진 워터폴 분해.
+    """매출 → 순이익 워터폴 분해 — 단계별 금액 + 매출 대비 비중.
 
-    각 단계에서 얼마나 줄어드는지를 금액 + 비율(%)로 보여준다.
+    Capabilities:
+        매출 출발 → 매출원가/판관비/금융비용·수익/법인세 차감 → 당기순이익
+        도착까지 단계별 amount + pct + cumPct (누적) 시계열. UI 워터폴 차트
+        직접 입력. 영업외 (금융손익) 가 마진을 얼마나 갉아먹는지 가시화.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            steps : list[dict] — 워터폴 단계별 (label, value, pct)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 [{period, steps: list[dict]}]
+              steps 각 키: label + amount + pct + cumPct.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcMarginWaterfall(Company("005930"))
+        >>> [s["label"] for s in r["history"][0]["steps"][:3]]
+        ['매출', '매출원가', '매출총이익']
+
+    Guide:
+        한국 회사 흔한 패턴: 영업이익률 8% → 금융비용/외환손익 차감 후
+        순이익률 5%. 영업 vs 영업외 영향 분리하여 본업 수익성 평가.
+        매출 0 period 는 자동 skip.
+
+    SeeAlso:
+        - ``calcMarginTrend``: 마진 5 단계 시계열
+        - ``calcReturnTrend``: ROE 듀퐁 분해
+        - ``calcCostBreakdown``: 비용 비중 (워터폴 입력)
+
+    Requires:
+        IS (매출 + COGS + 판관비 + 금융비용/수익 + 법인세 + 순이익) ≥ 1 년.
+
+    AIContext:
+        워터폴 step label + cumPct 로 어디서 마진이 빠지는지 인용. 금융비용
+        > 5% 이면 영업외 부담 큼 신호. KR 재벌은 지분법손익이 영업외로
+        잡혀 순이익률 크게 변동.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 순이익률 단독 인용 — 워터폴 단계 함께 (영업 vs 영업외 분리).
+            - 매출 0 period 인용 — 본 함수가 자동 skip.
+        OutputSchema:
+            ``{history: list[{period, steps: list[{label,amount,pct,cumPct}]}]}``.
+        Prerequisites:
+            IS 10 계정 (매출/원가/총이익/판관비/영업이익/금융비용수익/PBT/세금/순이익).
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            IS → 10 계정 → 단계별 amount + pct (매출 대비) + cumPct (누적).
+        TargetMarkets: KR (DART), US (EDGAR — IS 표준).
     """
     isResult = company.select(
         "IS",
