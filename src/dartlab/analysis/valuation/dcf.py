@@ -78,23 +78,82 @@ def multiStageDcf(
     netDebt: float = 0.0,
     shares: int | None = None,
 ) -> dict:
-    """Damodaran Multi-stage DCF — 가변 성장률/마진/재투자율 지원.
+    """Damodaran Multi-stage DCF — N-phase 가변 성장률 + Gordon Terminal.
 
-    growthYears, growthRates 가 list 면 phase 별 구간. scalar 면 단일 phase.
-    Phase 1..N: 각 phase 의 고정 성장률로 FCF 투영 + 할인
-    Terminal: FCF_{n+1} / (WACC - g_stable)
+    Capabilities:
+        Damodaran (Investment Valuation Ch.12) 의 N-stage DCF — 각 phase 별
+        다른 성장률/마진/재투자율을 적용하여 FCF 투영 후 phase 별 WACC 할인,
+        terminal phase 는 Gordon growth model. ``calcDFV`` 의 TSD path 가
+        본 함수를 호출 (``_tsdBuildPhases`` 가 phase list 구성).
 
-    Parameters
-    ----------
-    baseFcf : 기준 FCF (원)
-    growthYears : int 또는 [n1, n2, ...] phase 별 연수
-    growthRates : float 또는 [r1, r2, ...] phase 별 연성장률 (%)
-    terminalGrowthRate : 영구성장률 (%). WACC - 2% 이하 권장, Rf 초과 금지.
-    wacc : 할인율 (%)
-    marginPath : 연도별 영업마진 (선택). 없으면 baseFcf 가 이미 마진 반영 가정.
-    reinvestmentPath : 연도별 재투자율 (선택).
-    netDebt : 순차입금 (원)
-    shares : 발행주식수
+    Args:
+        baseFcf: 기준 FCF (원).
+        growthYears: phase 별 연수. ``5`` 또는 ``[5, 3, 2]``.
+        growthRates: phase 별 성장률 (%). ``8.0`` 또는 ``[8.0, 5.0, 3.0]``.
+        terminalGrowthRate: Gordon 영구성장률 (%). WACC - 2% 이하 권장,
+            Rf 초과 금지 (Damodaran).
+        wacc: 할인율 (%).
+        marginPath: 연도별 영업마진 (선택). None 시 baseFcf 가 마진 반영 가정.
+        reinvestmentPath: 연도별 재투자율 (선택). None 시 baseFcf = FCF.
+        netDebt: 순차입금 (원). enterprise → equity 변환.
+        shares: 발행주식수. 주당 가치 산출.
+
+    Returns:
+        dict:
+            - ``baseFcf``/``wacc``/``terminalGrowthRate`` (float)
+            - ``growthYears``/``growthRates`` (list)
+            - ``fcfProjections`` (list[float]): 연도별 FCF 투영
+            - ``presentValues`` (list[float]): 연도별 PV
+            - ``terminalValue`` (float): Gordon TV
+            - ``terminalValuePV`` (float): TV 의 현재가치
+            - ``enterpriseValue``/``equityValue``/``perShareValue`` (float)
+            - ``warnings`` (list[str])
+
+    Raises:
+        없음 — WACC ≤ terminalGrowth 시 자동 조정.
+
+    Example:
+        >>> r = multiStageDcf(baseFcf=1e10, growthYears=[5, 3, 2],
+        ...                   growthRates=[15, 8, 3], terminalGrowthRate=2,
+        ...                   wacc=10, netDebt=2e10, shares=1e8)
+        >>> r["perShareValue"]
+
+    Guide:
+        N-phase 의 N 은 lifecycle 단계 — earlyGrowth (3 phase: 고/중/저
+        성장), mature (1 phase), decline (terminal 음수). _tsdBuildPhases
+        가 자동 구성. growth/marginPath/reinvestment 모두 list 일 때 길이
+        일치 필수 (불일치 시 짧은 쪽 기준 truncate).
+
+    SeeAlso:
+        - ``dcfValuation``: 단순 2-stage 버전
+        - ``calcDFV``: 다중 모델 통합 (본 함수 호출)
+        - ``_tsdBuildPhases``: phase list 자동 구성
+
+    Requires:
+        baseFcf > 0, wacc > terminalGrowth (자동 조정).
+
+    AIContext:
+        terminal value 가 enterprise value 의 70%+ 면 결과 신뢰도 낮음
+        (Gordon 가정 의존도 과다). marginPath 사용 시 reinvestment 도 함께
+        지정 권장 (margin 만 변하면 FCF 비현실적).
+
+    LLM Specifications:
+        AntiPatterns:
+            - terminalGrowthRate > Rf (무위험이자율) — Gordon 가정 위반.
+            - growthYears scalar + growthRates list (또는 그 반대) — 자동
+              broadcast 되지만 의도 불명확.
+            - marginPath 없이 reinvestmentPath 만 — baseFcf 가 이미 마진
+              반영 가정과 충돌.
+        OutputSchema:
+            상기 12 키 dict.
+        Prerequisites:
+            baseFcf > 0, wacc > 0, terminalGrowthRate < wacc.
+        Freshness:
+            stateless — 입력 가정의 freshness 에 따름.
+        Dataflow:
+            phase 별 (years × growth) → FCF projection → discount →
+            terminal value (Gordon) → enterprise → equity (- netDebt) → 주당.
+        TargetMarkets: Global. 통화는 호출자 (baseFcf/netDebt 동일 단위).
 
     Returns
     -------
