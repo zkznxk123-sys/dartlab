@@ -373,24 +373,65 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
 def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict | None:
     """비용의 성격별 분류(notes) — 인건비/원재료/감가상각 비중 추세.
 
-    K-IFRS 주석에서 비용의 성격별 분류를 추출하여,
-    원재료비·인건비·감가상각비 등 성격별 비중의 시계열 변화를 추적한다.
-    173개사 이상 데이터 보유 (금융/REIT/지주회사 미공시).
+    Capabilities:
+        K-IFRS 주석 "비용의 성격별 분류" 표에서 원재료/인건비/감가상각/
+        외주가공/물류 등 카테고리별 금액·비중 시계열 추출 + 비중 방향성
+        (증가/감소/안정) 자동 라벨. 173+ 회사 데이터 (금융/REIT/지주는 미공시).
+        IS 의 "기능별" 분류 (매출원가/판관비) 와 직교 — 비용 성격 원인 추적.
 
-    Returns
-    -------
-    dict | None
-        None이면 비용 성격별 분류 데이터 없음.
-        categories : list[dict] — 비용 카테고리별 시계열
-            name : str — 카테고리명 (원재료/인건비/감가상각 등)
-            history : list[dict] — 기간별 금액·비중
-                period : str — 회계연도
-                amount : float — 금액 (원)
-                ratio : float — 총비용 대비 비중 (%)
-            latestRatio : float — 최신 기간 비중 (%)
-            direction : str | None — 비중 추세 (비중 증가/비중 감소/안정)
-        periods : list[str] — 대상 회계연도 목록
-        insight : str | None — 주요 변화 요약 문장
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``categories`` (list[dict]): 카테고리별 (name, history list,
+              latestRatio, direction).
+            - ``periods`` (list[str]): 회계연도 목록.
+            - ``insight`` (str | None): 주요 변화 요약.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCostByNatureAnalysis(Company("005930"))
+        >>> r["categories"][0]
+        {'name': '원재료', 'latestRatio': 45.2, 'direction': '비중 증가', ...}
+
+    Guide:
+        - 원재료비 비중 상승 = commodity 원가 충격 (반도체 wafer/철강 철광석).
+        - 인건비 비중 상승 = 자동화 부족 또는 임금 인상.
+        - 감가상각 비중 상승 = 대규모 CapEx 후 효과 (반도체 fab).
+        매출원가율 (calcCostBreakdown) 상승 원인을 본 표로 분해.
+
+    SeeAlso:
+        - ``calcCostBreakdown``: 기능별 (매출원가/판관비)
+        - ``calcRawMaterialBreakdown``: 원재료 세분화 (제조업)
+        - ``calcOperatingLeverage``: DOL (고정비/변동비 비중과 연결)
+
+    Requires:
+        K-IFRS 주석 "비용의 성격별 분류" 표 — 회사가 공시한 경우만 (금융/
+        REIT/지주는 None 반환).
+
+    AIContext:
+        카테고리별 direction + latestRatio 함께. 원재료 + 인건비 합계가
+        70% 이상이면 변동비 중심 (서비스/유통), 30% 미만이면 고정비 중심
+        (반도체/통신). insight 가 자동 생성된 주요 변화 1~2 줄.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 비중 인용 — direction (3 년 추세) 함께.
+            - 금융업/REIT/지주에 본 함수 호출 — None 반환, 주석 미공시.
+        OutputSchema:
+            ``{categories: list[dict], periods: list[str], insight: str?}``.
+        Prerequisites:
+            K-IFRS 주석 본문에서 "비용의 성격별 분류" 표 공시.
+        Freshness:
+            연간 (주석 본질).
+        Dataflow:
+            notes (costByNature) → 카테고리 매핑 (원재료/인건비/감가상각/...)
+            → 비중 시계열 → direction 라벨 + insight 합성.
+        TargetMarkets: KR (K-IFRS 주석 표준), US 는 별도 (10-K natural cost 미공시).
     """
     from dartlab.analysis.financial.companyContext import fetchNotesDetail
     from dartlab.core.utils.helpers import parseNumStr
