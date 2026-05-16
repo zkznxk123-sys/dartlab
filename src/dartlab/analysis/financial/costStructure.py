@@ -260,18 +260,64 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
 
 @memoizedCalc
 def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | None:
-    """BEP 추정 — 고정비/(1-변동비율) 기반 손익분기 매출.
+    """손익분기점 (BEP) 추정 + 안전마진 시계열.
 
-    Returns
-    -------
-    dict
-        history : list[dict] — 기간별 손익분기점 추정 시계열
-            period : str — 회계연도
-            revenue : float — 매출액 (원)
-            fixedCostEstimate : float — 고정비 추정치 (원)
-            variableCostRatio : float | None — 변동비율 (%)
-            bepRevenue : float | None — 손익분기 매출액 (원)
-            marginOfSafety : float | None — 안전마진 (%)
+    Capabilities:
+        BEP = 고정비 / (1 - 변동비율). 단순화 가정: 변동비 = 매출원가,
+        고정비 = 판매비와관리비. 변동비율 95% 이상이면 한계이익률 무의미
+        → BEP None. 안전마진 = (매출 - BEP) / 매출 × 100.
+
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 6 키 (period + revenue +
+              fixedCostEstimate + variableCostRatio + bepRevenue +
+              marginOfSafety).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcBreakevenEstimate(Company("005930"))
+        >>> r["history"][0]["marginOfSafety"]
+        45.0  # 안전마진 45% — BEP 매출 대비 45% 여유
+
+    Guide:
+        안전마진 < 10% = 손익분기 근접 (경고). 30~50% = 양호. > 50% =
+        매우 안정. 단순화 가정 (매출원가 = 변동비) 은 제조업에 적합,
+        서비스업/소프트웨어는 인건비 분류 차이로 왜곡 가능.
+
+    SeeAlso:
+        - ``calcOperatingLeverage``: DOL (BEP 와 paired)
+        - ``calcCostBreakdown``: 비용 구조 (BEP 의 입력)
+        - ``calcCostByNatureAnalysis``: 정확한 변동비/고정비 분해
+
+    Requires:
+        IS (매출액, 매출원가, 판매비와관리비).
+
+    AIContext:
+        안전마진 + BEP 매출 함께. 단순화 가정 한계 명시 — 정확한 변동비/
+        고정비는 비용의 성격별 분류 (notes) 필요. calcCostByNatureAnalysis
+        결과 함께 인용 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 서비스/SW 회사에 매출원가 = 변동비 가정 — 인건비 (고정/준고정)
+              왜곡.
+            - 안전마진 50% → "안정" 단정 — 매출 변동성 (calcGrowthTrend) 함께.
+        OutputSchema:
+            ``{history: list[dict 6키]}``.
+        Prerequisites:
+            IS 시계열 + 매출원가 + 판관비 표준 계정.
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            IS → 매출/매출원가/판관비 → 변동비율 = 매출원가/매출 → BEP =
+            판관비/(1-변동비율) → 안전마진 = (매출-BEP)/매출.
+        TargetMarkets: KR (DART), US (EDGAR — 제조업 최적).
     """
     accounts = ["매출액", "매출원가", "판매비와관리비"]
     isResult = company.select("IS", accounts)
