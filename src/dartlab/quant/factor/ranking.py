@@ -151,40 +151,67 @@ def _loadAccount(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str
 
 
 def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
-    """전종목 5-팩터 멀티팩터 복합 순위 (Phase B3 정정).
+    """전종목 멀티팩터 횡단면 순위 — 5 팩터 (KR) / 3 팩터 (US) 복합 score.
 
-    2026-04-24: size (marketCap) + value (bookYield) 팩터 추가 → 5팩터 (margin/ROA/debt/size/value).
-    KR: KRX 시총 직접 사용. US: size/value 미사용 (시총 미수집) — 기존 3팩터.
-
-    학술 근거:
-    - Asness et al. (2013): Value and Momentum Everywhere
-    - Fama & French (1992): size + BM 팩터
-    - Piotroski (2000): Fundamentals score (ROA, margin, debt)
+    Capabilities:
+        scan finance.parquet 의 최신 연도 데이터로 영업이익률/ROA/부채비율 (3 팩터) + KR 한정
+        시가총액/북수익률 (size/value 2 팩터 추가) 의 백분위 평균을 복합 점수로 산출하고
+        상위 50 종목을 반환. stockCode 지정 시 해당 종목 순위 + 상위 10 인용 반환.
 
     Parameters
     ----------
-    market : str
-        시장. 기본 "KR".
-    stockCode : str | None
-        특정 종목 지정 시 해당 종목 순위 + 상위 10 반환.
+    market : str, default "KR"
+        시장 코드. KR 은 5 팩터, US 는 3 팩터 (size/value 미수집).
+    stockCode : str | None, default None
+        특정 종목 지정 시 해당 종목 순위 + 상위 10 인용.
+    **kwargs
+        forward-compat 슬롯.
 
     Returns
     -------
     dict
-        market : str — 시장
-        year : str — 기준 연도
+        market : str — 입력 echo
+        year : str — 기준 연도 (데이터 풍부한 최신 연도 자동 선택)
         totalStocks : int — 순위 산출 종목 수
-        factorsUsed : list[str] — 사용된 팩터 리스트
-        rankings : list[dict] — 상위 종목 리스트 (최대 50개)
-            stockCode : str — 6자리 종목코드
-            opMargin : float — 영업이익률 (%)
-            ROA : float — 총자산수익률 (%)
-            debtRatio : float — 부채비율 (%)
-            marketCap : float — 시가총액 (원, KR 만)
-            bookYield : float — equity/marketCap (= 1/PBR, KR 만)
-            compositeScore : float — 복합 백분위 (0~1, 1=top)
-            rank : int — 순위
-        target : dict | None — stockCode 지정 시 해당 종목 정보
+        factorsUsed : list[str] — 사용된 팩터 명 리스트
+        rankings : list[dict] — 상위 50 종목 (stockCode/opMargin/ROA/debtRatio/marketCap/bookYield/compositeScore/rank)
+        target : dict | None — stockCode 지정 시 (해당 종목 + 상위 10 인용)
+        데이터 부재 시 {**result, "error": str}.
+
+    Raises
+    ------
+    없음 (scan 결손 시 dict["error"]).
+
+    Example
+    -------
+    >>> r = calcRanking(market="KR")
+    >>> r["rankings"][0]["stockCode"], r["rankings"][0]["compositeScore"]
+    ('005930', 0.94)
+    >>> r2 = calcRanking(market="KR", stockCode="005930")
+    >>> r2["target"]["rank"]
+    7
+
+    Guide
+    -----
+    학술 근거: Asness 2013 (Value/Momentum Everywhere) · FF 1992 (size + BM) · Piotroski 2000
+    (Fundamentals). compositeScore 는 백분위 평균이므로 0~1 범위가 의미. 100 개 미만 연도는
+    fallback 으로 다음 후보 연도 자동 선택.
+
+    SeeAlso
+    -------
+    - ``dartlab.quant.factor.value.calcValue`` : 가치 단축
+    - ``dartlab.quant.factor.quality.calcQuality`` : 퀄리티 단축
+    - ``dartlab.scan.financial`` : finance.parquet SSOT
+
+    Requires
+    --------
+    - L1.5 scan: finance.parquet (시장별 100 종목 이상)
+    - KR 5 팩터: 시가총액 (KRX) 추가 필요
+
+    AIContext
+    ---------
+    "퀄리티 + 가치 통합 상위 종목" 1 차 진입. stockCode 지정 호출은 해당 종목이 "전종목 중 어디"
+    답변에 직결. factorsUsed 함께 인용해 KR/US 차이 명시 권장.
     """
     result: dict = {"market": market}
 
