@@ -34,18 +34,70 @@ def _classify(reportName: str) -> tuple[str, int]:
 
 
 def calcEventSignal(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
-    """allFilings 이벤트 기반 신호 분석.
+    """공시 이벤트 기반 신호 분석 — allFilings 분류 + impact 합산.
+
+    Capabilities:
+        DART/EDGAR 전체 공시 (allFilings) 를 type 별 분류 (재무/지분/M&A/소송/
+        배당/매출예측 등) + impact score 합산. high-impact 이벤트 일자 추출
+        후 PEAD 윈도우 (60d) Strategy DSL 입력. 단발 이벤트 vs 누적 이벤트
+        분리 인식.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
-        series: True 면 dict 에 `_series` 키 추가 — 일자별 high-impact 이벤트 dict
-                {"high_impact_dates": list[str(YYYY-MM-DD)], "pead_window": int}
-                Strategy DSL 측에서 OHLCV date 와 매핑해 boolean 시계열 생성.
+        series: True 면 ``_series`` (high_impact_dates list, pead_window int) 추가.
 
     Returns:
-        dict with totalEvents, eventTypes, impactScore, eventVerdict.
-        series=True 시: _series = {high_impact_dates, pead_window}.
+        dict:
+            - ``totalEvents`` (int): 전체 공시 수.
+            - ``eventTypes`` (dict[str, int]): type 별 카운트.
+            - ``impactScore`` (int): impact 합산.
+            - ``eventVerdict`` (str): impact 기반 종합 라벨.
+            - ``events`` (list[dict]): 시간순 (최근 N 개) (date, report,
+              type, impact).
+            - 또는 ``error`` (str): allFilings 부재.
+
+    Raises:
+        없음 (error 키).
+
+    Example:
+        >>> r = calcEventSignal("005930")
+        >>> r["eventTypes"]
+        {'재무': 12, 'M&A': 1, '지분변동': 3, ...}
+
+    Guide:
+        - 단기 (30d) M&A · 대규모 지분변동 → impact 큼.
+        - 분기보고서 (재무) impact 낮음 (정기). 임시·특별 보고서 impact 큼.
+        - high_impact_dates 를 OHLCV 와 매핑하면 event-study CAR 산출 가능
+          (calcCAR).
+
+    SeeAlso:
+        - ``calcEarnings``: SUE/PEAD (실적 한정)
+        - ``calcCAR``: event-study cumulative abnormal return
+        - ``calcMomentum``: 가격 모멘텀 (이벤트 후 drift)
+
+    Requires:
+        allFilings parquet (KR/US).
+
+    AIContext:
+        eventTypes 카운트 단독 인용 금지 — 최근 N 개 events 리스트 + impact
+        합산 함께. 시즌성 (분기말 보고 폭증) 고려 필요.
+
+    LLM Specifications:
+        AntiPatterns:
+            - totalEvents 절대값 인용 — 회사 규모/시장에 따라 정규화 필요.
+            - impactScore 동일 임계로 KR/US 직접 비교 — 시장 별 분포 다름.
+        OutputSchema:
+            ``{totalEvents: int, eventTypes: dict, impactScore: int,
+              eventVerdict: str, events: list[dict]}``.
+        Prerequisites:
+            allFilings parquet (KR DART, US EDGAR 8-K/10-K).
+        Freshness:
+            일별 (공시 발표 직후).
+        Dataflow:
+            allFilings → report_nm classify → type + impact → 합산 →
+            verdict 라벨 + high-impact dates.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
