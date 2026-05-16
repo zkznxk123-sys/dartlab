@@ -216,17 +216,66 @@ def enrichCompanyData(
 ) -> dict:
     """기존 ego JSON에 추가 데이터를 병합.
 
+    Capabilities:
+        egograph (1-hop 그래프) 에 calcSupplyInsights / AI insight / 5y financials / blog posts /
+        상위 공급사 10 + 고객사 10 + 2-hop 정보를 합성한 enriched company dict 반환.
+        Industry().__call__ 결과 카드의 본체 데이터.
+
     Parameters
     ----------
     stockCode : str
+        대상 회사 코드.
     egoData : dict
-        buildCompanyEgograph(stockCode) 결과.
+        ``buildCompanyEgograph(stockCode)`` 결과.
     edges : list
-        전체 엣지.
+        전체 IndustryEdge.
     nodes : list
-        전체 노드.
+        전체 IndustryNode.
     blogIndex : dict | None
         블로그 인덱스 (없으면 로드).
+    hop2Data : dict | None
+        ``computeHop2()`` 결과.
+
+    Returns
+    -------
+    dict
+        ego 기본 키 + insights/aiInsight/financials5y/blogPosts/topSuppliers/topCustomers/hop2
+
+    Raises:
+        없음 — 누락 소스는 빈 dict / 빈 list 로 폴백.
+
+    Example:
+        >>> from dartlab.industry.build.enrichCompany import enrichCompanyData
+        >>> from dartlab.industry.build.pipeline import loadNodes, loadEdges, buildCompanyEgograph
+        >>> data = enrichCompanyData("005930", buildCompanyEgograph("005930"), loadEdges(), loadNodes())
+        >>> data["insights"]["hhiRisk"]
+        '분산'
+
+    Guide:
+        ``Industry().__call__`` 의 회사 카드 표시 데이터. 단일 호출이 dict 키 12+ 결합 — 부분
+        키만 cite 권장.
+
+    When:
+        AI 회사 카드 답변 생성 시. 운영자가 manifest 빌드 후 enriched cache 갱신할 때.
+
+    How:
+        egoData 기반 + supply insights (calcSupplyInsights) + AI insight (DB 룩업) + financials5y
+        + 블로그 + 상위 공급/고객사 + hop2 → 단일 dict 합성.
+
+    Requires:
+        - L1.5 frame: nodes + edges + ego 그래프 (buildCompanyEgograph 산출)
+        - L1.5 scan: finance.parquet (5y financials)
+        - L4 ai: AI insight 캐시 (선택)
+        - blog: blogs/{code}.json (선택)
+
+    See Also:
+        - ``dartlab.industry.build.insights.calcSupplyInsights`` : 공급망 종합
+        - ``dartlab.industry.build.hop2.computeHop2`` : 2-hop 데이터
+        - ``dartlab.industry.Industry.__call__`` : 본 함수 결과 사용자
+
+    AIContext:
+        회사 카드 답변의 단일 진입점. 답변 길이가 매우 길어질 수 있으므로 ``insights.hhiRisk`` +
+        ``topSuppliers[:3]`` + ``aiInsight.summary`` 핵심 3 키만 발췌 권장.
     """
     from dartlab.industry.build.insights import calcSupplyInsights
 

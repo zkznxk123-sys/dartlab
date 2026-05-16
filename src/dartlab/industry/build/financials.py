@@ -135,6 +135,10 @@ def attachFinancials(
 ) -> list[IndustryNode]:
     """nodes에 재무 데이터를 붙인다.
 
+    Capabilities:
+        IndustryNode 리스트에 ``revenue`` 필드를 in-place 로 채워 반환. 최신 연도부터 fallback —
+        연결재무제표 매출액이 있는 가장 최근 연도가 채워짐. 누락 데이터는 None 유지.
+
     최신 연도부터 시도하여 데이터가 있는 연도를 사용한다.
 
     Parameters
@@ -148,6 +152,40 @@ def attachFinancials(
     -------
     list[IndustryNode]
         revenue 필드가 채워진 노드 리스트.
+
+    Raises:
+        없음 — finance.parquet 없거나 빈 결과면 nodes 그대로 반환.
+
+    Example:
+        >>> from dartlab.industry.build.financials import attachFinancials
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> nodes = attachFinancials(loadNodes())
+        >>> nodes[0].revenue
+        300870000000000
+
+    Guide:
+        ``Industry().build()`` 의 stage 후처리 단계에서 호출. ``buildIndustrySummary`` 가
+        revenue 값을 산업/공정 집계에 사용.
+
+    When:
+        manifest 빌드 (`buildIndustryMap`) 의 재무 attach 단계. 일반 분석 흐름에서는 직접 호출
+        않음.
+
+    How:
+        ``_extractYearly`` 로 최신 연도부터 finance.parquet 추출 → 종목 → revenue dict → nodes
+        in-place 갱신.
+
+    Requires:
+        - L1.5 scan: finance.parquet
+        - L1 raw: DART 연간 보고서 1 개 이상
+
+    See Also:
+        - ``dartlab.industry.build.financials.buildIndustrySummary`` : revenue 소비처
+        - ``dartlab.industry.build.financials.buildTimelineSummary`` : 연도별 집계
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (배치). ``Industry().build()`` 후 결과 nodes 의 revenue 필드만
+        cite.
     """
     if years is None:
         years = ["2025", "2024", "2023"]
@@ -186,10 +224,56 @@ def buildIndustrySummary(
 ) -> pl.DataFrame:
     """산업별/공정별 재무 집계.
 
+    Capabilities:
+        nodes 리스트에서 ``industryId`` 매칭 회사들의 단일 연도 재무를 추출해 stage (공정) 별로
+        매출(조)/영업이익(조)/기업수 집계 DataFrame 반환. 산업 카드 헤더 요약의 데이터 소스.
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        IndustryNode 리스트 (stage 필드 채워진 상태).
+    industryId : str
+        대상 산업 ID.
+    year : str
+        집계 연도 (예: "2024").
+
     Returns
     -------
     pl.DataFrame
         columns: 공정, 공정명, 매출(조), 영업이익(조), 기업수
+
+    Raises:
+        없음 — finance 데이터 없거나 매칭 0 면 빈 DataFrame.
+
+    Example:
+        >>> from dartlab.industry.build.financials import buildIndustrySummary
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> df = buildIndustrySummary(loadNodes(), "semiconductor", year="2024")
+        >>> df.select(["공정명", "매출(조)"]).head(3)
+
+    Guide:
+        매출/영업이익 단위는 조원. ``buildTimelineSummary`` 가 본 함수를 연도별 호출해 시계열로
+        결합.
+
+    When:
+        산업 카드의 stage 단위 매출/영업이익 비교가 필요할 때. UI 카드 헤더 / Story 6 막
+        narrative 데이터.
+
+    How:
+        ``_extractYearly(year)`` → finance × nodes inner join → industryId 필터 → stage 그룹
+        집계 → taxonomy stage 한글명 매핑.
+
+    Requires:
+        - L1.5 scan: finance.parquet
+        - reference: ``industry/taxonomy.getIndustry`` 정적 정의
+
+    See Also:
+        - ``dartlab.industry.build.financials.buildTimelineSummary`` : 연도별 시계열
+        - ``dartlab.industry.build.financials.attachFinancials`` : nodes revenue 채우기
+
+    AIContext:
+        "이 산업의 공정별 시장 규모" 류 답변 데이터. 매출(조) 단독보다 영업이익률 (영업이익/매출)
+        파생 인용 권장.
     """
     fin = _extractYearly(year)
     if fin.height == 0:
@@ -244,10 +328,52 @@ def buildTimelineSummary(
 ) -> pl.DataFrame:
     """연도별 공정 매출 추이.
 
+    Capabilities:
+        ``buildIndustrySummary`` 를 ``years`` 각 연도에 호출해 결과를 연도 컬럼 첨부 + concat
+        해 시계열 long-format DataFrame 반환. 산업의 공정 단위 시계열 비교용.
+
+    Parameters
+    ----------
+    nodes : list[IndustryNode]
+        nodes 리스트.
+    industryId : str
+        대상 산업 ID.
+    years : list[str] | None
+        대상 연도 리스트. None 이면 2021~2025.
+
     Returns
     -------
     pl.DataFrame
         columns: 연도, 공정, 공정명, 매출(조), 영업이익(조), 기업수
+
+    Raises:
+        없음 — 모든 연도 빈 결과면 빈 DataFrame.
+
+    Example:
+        >>> from dartlab.industry.build.financials import buildTimelineSummary
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> df = buildTimelineSummary(loadNodes(), "semiconductor")
+        >>> df.filter(pl.col("stage") == "memory").select(["연도", "매출(조)"])
+
+    Guide:
+        반환 frame 은 long-format (stage × year). UI 시계열 차트 / Story 6 막 "변화" 부분 데이터.
+
+    When:
+        산업 stage 단위 시계열 비교가 필요할 때 (단일 연도는 ``buildIndustrySummary``).
+
+    How:
+        years 루프 → ``buildIndustrySummary`` 호출 → 연도 컬럼 첨부 → concat → 정렬.
+
+    Requires:
+        - L1.5 scan: finance.parquet (years 각각)
+
+    See Also:
+        - ``dartlab.industry.build.financials.buildIndustrySummary`` : 단일 연도 집계
+        - ``dartlab.industry.build.financials.attachFinancials`` : revenue 첨부
+
+    AIContext:
+        "메모리 공정 시장 규모 추이" 류 답변 데이터. 연도 간 차이 (delta) 단독보다 절대값 매출(조)
+        과 동반 인용 권장.
     """
     if years is None:
         years = ["2021", "2022", "2023", "2024", "2025"]
