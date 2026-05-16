@@ -178,7 +178,7 @@ export function MarkdownText({ text }: { text: string }) {
 	const wrap = (children: ReactNode) => walkChildren(children, refIndex, extBlocks);
 
 	return (
-		<div className="text-[15px] leading-[1.75] text-foreground">
+		<div className="text-sm leading-[1.7] text-foreground">
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
 				components={{
