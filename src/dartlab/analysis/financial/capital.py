@@ -676,19 +676,63 @@ def calcInterestBurden(company, *, basePeriod: str | None = None) -> dict | None
 
 @memoizedCalc
 def calcLiquidity(company, *, basePeriod: str | None = None) -> dict | None:
-    """유동비율·당좌비율·현금비율·순운전자본.
+    """유동성 4 지표 (유동비율 + 당좌비율 + 현금비율 + 순운전자본) 정성 평가 라벨.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        ratios 의 4 유동성 지표 + 순운전자본 (WC) 을 한국어 정성 라벨 (안정/
+        보통/주의) 함께 산출. analysis() 의 안정성 축 표시용. credit
+        engine 의 metrics 와 별도 (간단 표시 목적).
 
-    Returns
-    -------
-    dict | None
-        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``metrics`` (list[tuple[str, str]]): ("유동비율", "150% — 안정")
+              형식. ratios=None 시 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcLiquidity(Company("005930"))
+        >>> r["metrics"][0]
+        ('유동비율', '180% — 안정')
+
+    Guide:
+        임계값: 유동비율 ≥ 150% = 안정, 100~150% = 보통, < 100% = 주의.
+        당좌비율 ≥ 100% = 즉시 동원 가능. 본 함수는 credit engine 의 7 축
+        분해와 별도 — 사용자 보고용 간단 표시.
+
+    SeeAlso:
+        - ``credit.scoring.metrics.calcAllMetrics``: 7 축 정량 지표
+        - ``narrateLiquidity``: credit 의 유동성 서사 생성
+        - ``calcCashFlowStructure``: 현금흐름 구조 (보완)
+
+    Requires:
+        Company.finance (BS) + ratios 헬퍼.
+
+    AIContext:
+        라벨 "주의" 결과 단독 인용 금지 — 단기차입금 비중 + 현금 흐름 함께
+        확인. KR 대기업은 차환 의존 (CR>150 + STDR>50) 흔하므로 모순 진단
+        필요.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 유동비율 200%+ 회사 → "유동성 매우 우수" 단정 — 현금 보유 과다
+              가능 (배당/투자 부진 신호). cashRatio 함께 확인.
+            - ratios=None 시 None 반환 — 호출자 분기 필요.
+        OutputSchema:
+            ``{metrics: list[tuple[str, str]]}`` 또는 None.
+        Prerequisites:
+            BS 시계열 + _getRatios 헬퍼 로드.
+        Freshness:
+            BS 최신 분기.
+        Dataflow:
+            company → _getRatios → currentRatio/quickRatio/cashRatio + WC →
+            한국어 라벨 → metrics list.
+        TargetMarkets: KR (DART), US (EDGAR — 동일 비율 표준).
     """
     ratios = _getRatios(company)
     if ratios is None:
