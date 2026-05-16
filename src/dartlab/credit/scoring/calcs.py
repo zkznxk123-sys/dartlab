@@ -261,26 +261,63 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
-    """현금흐름등급(eCR) 시계열.
+    """현금흐름등급 (eCR) 시계열 — OCF 기반 자체 신용등급.
 
-    OCF/매출, FCF 양수 여부, OCF/차입금 기반으로 기간별 eCR 등급 산출.
+    Capabilities:
+        OCF/매출 + FCF 양수 여부 + OCF/총차입금 세 가지로 기간별 eCR 등급
+        (AAA~D 매핑) 산출. Moody's CFR (Corporate Family Rating) 의 cash flow
+        강도 component 와 유사. 회계상 등급 (calcCreditScore) 와 직교 — 현금
+        창출력 단독 평가.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간. None 시 최신.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 현금흐름등급
-            period : str — 기간 (예: "2024")
-            eCR : str — 현금흐름등급 (예: "A", "BB")
-            ocfToSales : float | None — OCF/매출 (%)
-            fcfPositive : bool — FCF 양수 여부
-            ocfToDebt : float | None — OCF/총차입금 (%)
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 기간별 (period, eCR, ocfToSales,
+              fcfPositive, ocfToDebt).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCashFlowGrade(Company("005930"))
+        >>> r["history"][0]["eCR"], r["history"][0]["ocfToSales"]
+        ('A', 18.5)  # OCF/매출 18.5% → A 등급
+
+    Guide:
+        - eCR > 회계 grade 면 현금 우위 (적자 회사가 현금 창출은 우수).
+        - eCR < 회계 grade 면 현금 약점 (이익 보이지만 현금 부족 — 매출채권
+          누적 의심).
+        - FCF 음수 3 기 연속 = downgrade 신호.
+
+    SeeAlso:
+        - ``calcCreditScore``: 회계 grade
+        - ``calcDistressScore``: Altman Z
+        - ``analysis.financial.calcCashGenerationQuality``: OCF 품질
+
+    Requires:
+        CF (영업현금흐름) + IS (매출) + BS (차입금) 시계열.
+
+    AIContext:
+        eCR + ocfToSales + ocfToDebt 함께. 회계 grade 와 비교 시 차이 해석
+        (현금/이익 괴리).
+
+    LLM Specifications:
+        AntiPatterns:
+            - eCR 단독 인용으로 회계 grade 대체 — 두 grade 모두 노출.
+            - FCF 음수 단년도 단정 — 3 기 추세 함께.
+        OutputSchema:
+            ``{history: list[dict 5키]}``.
+        Prerequisites:
+            CF + IS + BS 시계열.
+        Freshness:
+            분기.
+        Dataflow:
+            metricsHistory → ocfToSales + fcfPositive + ocfToDebt → cashFlowGrade
+            함수 → eCR.
+        TargetMarkets: KR (DART), US (EDGAR — CF Statement 표준).
     """
     result = _evaluate(company, basePeriod)
     if result is None:
