@@ -129,3 +129,61 @@ def extractVizMarkers(stdout: str) -> list[dict]:
         except json.JSONDecodeError:
             pass
     return out
+
+
+def captureRichOutput(fn, *, width: int = 120, color: bool = False) -> str:
+    """fn 호출 동안 dartlab Console 출력을 텍스트로 캡처 — syrupy snapshot 호환.
+
+    Capabilities:
+        dartlab.core.logger 의 공용 Console 을 임시 record-mode 로 교체해 rich
+        Progress · Live · Console.print · RichHandler 로그를 한 문자열로 모은다.
+        snapshot 동결로 CLI 시각 회귀를 자동 차단한다.
+    Args:
+        fn: 인자 없는 callable. 본 함수 안에서 호출되며 그 동안의 출력만 캡처.
+        width: 터미널 폭 고정 (환경 독립성 — Windows / Linux ANSI 차이 제거).
+        color: True 면 ANSI escape 포함, False 면 plain text.
+    Returns:
+        str. console.export_text(clear=False, styles=color) 결과.
+    Example:
+        >>> from tests._helpers import captureRichOutput
+        >>> def emit_hf_marker():
+        ...     from dartlab.core.logger import getLogger
+        ...     getLogger(__name__).info("[cyan]⬇ HF[/] dartList.parquet")
+        >>> text = captureRichOutput(emit_hf_marker)
+        >>> "⬇ HF" in text
+        True
+    Guide:
+        installRichHandler 가 호출됐을 때만 logger → Console 라우팅 동작.
+        본 헬퍼가 자동으로 idempotent 호출.
+    SeeAlso:
+        dartlab.core.logger.installRichHandler · getConsole.
+    Requires:
+        rich Console.record=True 지원 (rich >= 12).
+    AIContext:
+        본 SSOT 통합 PR (commit ad520727b) 의 화면 일관성 acceptance test.
+    Raises:
+        없음. fn 내부 예외는 그대로 전파.
+    """
+    import io
+
+    from rich.console import Console
+
+    from dartlab.core import logger as _loggerMod
+
+    _loggerMod.installRichHandler()
+    buf = io.StringIO()
+    newConsole = Console(file=buf, record=True, force_terminal=True, width=width, color_system="truecolor")
+    savedConsole = _loggerMod._console
+    _loggerMod._console = newConsole
+    try:
+        savedRichHandler = None
+        for h in _loggerMod.logging.getLogger(_loggerMod._ROOT_NAME).handlers:
+            if hasattr(h, "console"):
+                savedRichHandler = h
+                h.console = newConsole
+        fn()
+        return newConsole.export_text(clear=False, styles=color)
+    finally:
+        _loggerMod._console = savedConsole
+        if savedRichHandler is not None:
+            savedRichHandler.console = savedConsole
