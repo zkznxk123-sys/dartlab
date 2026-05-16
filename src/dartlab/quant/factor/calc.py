@@ -708,66 +708,76 @@ def calcFactorIC(
     market: str = "KR",
     horizon: int = 1,
 ) -> dict | None:
-    """팩터의 Cross-Sectional Information Coefficient 시계열 — Grinold & Kahn Ch.5 표준.
+    """팩터 Information Coefficient — Grinold & Kahn 표준 IC mean/std/ICIR/HitRate.
 
     Capabilities:
-        - 일별 횡단면 Spearman IC = corr(factor rank, forward return rank) across stocks
-        - IC mean / IC std / ICIR (IC_mean / IC_std × √252) = Fundamental Law breadth 원료
-        - Hit rate (IC>0 일 비율) + 누적 IC 신호 안정성 진단
-        - horizon 옵션으로 1d/5d/20d forward return IC 비교
+        팩터별 일별 횡단면 Spearman IC 시계열 (corr(factor rank, forward return rank)) 을
+        non-overlapping h-일 stepping 으로 산출하고 평균 IC · 표준편차 · ICIR · HitRate ·
+        t-stat 까지 단일 dict 로 반환. Alphalens 표준 + Fundamental Law (IR ≈ IC × √breadth)
+        의 IC 원료. tear sheet 의 long-short Sharpe 와 독립 평가.
 
-    AIContext:
-        - story 시장분석 섹션의 ``factorICBlock`` 가 자동 호출 (향후)
-        - Alphalens 표준 metric (팩터 tear sheet 의 long-short Sharpe 와 독립 평가)
-        - ICIR > 0.5 = 강한 예측력, > 0.3 = 중간, < 0.1 = 노이즈
-        - Grinold & Kahn Fundamental Law: IR ≈ IC × √breadth
+    Parameters
+    ----------
+    factorName : str, default "value"
+        "size" | "value" | "quality" | "investment" (별칭 smb/hml/rmw/cma 허용).
+    market : str, default "KR"
+        KR 만 지원 (연말 MKTCAP/펀더멘털 SSOT).
+    horizon : int, default 1
+        forward return 기간 (일). 1 / 5 / 20 권장.
 
-    Guide:
-        - "value 팩터 예측력" → calcFactorIC("value")
-        - "size 팩터 5일 forward IC" → calcFactorIC("size", horizon=5)
-        - "quality 팩터 월간" → calcFactorIC("quality", horizon=20)
+    Returns
+    -------
+    dict | None
+        factorName : str — 대문자 팩터명
+        horizon : int — forward return 기간 (일)
+        market : str — "KR"
+        fundYear : str — 펀더멘털 기준 연도 (전년, look-ahead 방지)
+        retYear : str — 수익률 관측 연도 (당해, Q2~Q4)
+        nStocks : int — IC 계산 종목 수
+        nDays : int — IC 시계열 관측 일 수
+        icMean : float — 평균 Spearman IC (-1~1)
+        icStd : float — IC 표준편차
+        icir : float — IC Information Ratio (연환산)
+        hitRate : float — IC > 0 비율 (%)
+        tStat : float — icMean × √nDays / icStd
+        interpretation : str — 정성 평가
+        notes : str — 데이터 source
 
-    SeeAlso:
-        - calcFactorTearSheet : long-short portfolio Sharpe (Alphalens 보완)
-        - decomposeFactor : 단일 종목 FF5 loadings
-        - fundamentalLawIR : IC + breadth → IR 공식
+    Raises
+    ------
+    ValueError
+        factorName 미인식. market != "KR".
 
-    Args:
-        factorName: ``"size" | "value" | "quality" | "investment"``
-            (별칭 ``"smb" | "hml" | "rmw" | "cma"`` 허용). 기본 ``"value"``.
-        market: ``"KR"`` 만 지원 (연말 MKTCAP/펀더멘털 SSOT).
-        horizon: forward return 기간 (일). ``1`` / ``5`` / ``20`` 권장. 기본 ``1``.
+    Example
+    -------
+    >>> ic = calcFactorIC("value", horizon=5)
+    >>> ic["icir"], ic["interpretation"]
+    (0.42, '중간 예측력 (value)')
 
-    Returns:
-        dict
-            factorName : str — 대문자 팩터명
-            horizon : int — forward return 기간 (일)
-            market : str — "KR"
-            fundYear : str — 펀더멘털 기준 연도 (전년, look-ahead 방지)
-            retYear : str — 수익률 관측 연도 (당해, Q2~Q4)
-            nStocks : int — IC 계산에 포함된 종목 수
-            nDays : int — IC 시계열 관측일 수
-            icMean : float — 평균 Spearman IC (배, -1.0~1.0)
-            icStd : float — IC 표준편차 (배)
-            icir : float — IC Information Ratio (icMean/icStd × √(252/h), 배)
-            hitRate : float — IC > 0 구간 비율 (%)
-            tStat : float — IC mean t-통계량 (= icMean × √nDays / icStd)
-            interpretation : str — 정성 평가 ("강한 예측력" 등)
-            notes : str — 데이터 source
+    Guide
+    -----
+    Spearman (rank 기반) — outlier robust. forward return = log(close[t+h]/close[t]). 전년
+    연말 펀더멘털 snapshot → 당해 Q2~Q4 으로 look-ahead bias 방지. **non-overlapping h-일
+    stepping** 으로 자기상관 제거 + ICIR 인플레이션 방지. 한 시점 cross-section 20 종목
+    미만 제외. ICIR = icMean / icStd × √(252/h).
 
-    Examples:
-        >>> from dartlab.quant.factor.calc import calcFactorIC
-        >>> ic = calcFactorIC("value", horizon=5)
-        >>> print(ic["icir"], ic["interpretation"])
-        0.42 중간 예측력 (value)
+    SeeAlso
+    -------
+    - ``dartlab.quant.factor.calc.calcFactorTearSheet`` : long-short Sharpe (Alphalens 보완)
+    - ``dartlab.quant.factor.calc.decomposeFactor`` : 종목 FF5 loadings
+    - ``dartlab.quant.factor.calc.fundamentalLawIR`` : IC + breadth → IR
 
-    Notes:
-        - Spearman (rank 기반) — outlier robust.
-        - forward return = log(close[t+h]/close[t]).
-        - 전년 연말 펀더멘털 snapshot → 당해년도 Q2~Q4 (look-ahead bias 방지).
-        - **non-overlapping h-일 stepping** — 자기상관 제거, ICIR 인플레이션 방지.
-        - 한 시점 cross-section 최소 20 종목 미만은 제외.
-        - ICIR = icMean / icStd × √(252/h) = 연환산.
+    Requires
+    --------
+    - L1.5 scan: finance.parquet (KR)
+    - L1 gather: 일별 OHLCV (당해 Q2~Q4)
+    - 한 시점 cross-section ≥ 20 종목
+
+    AIContext
+    ---------
+    "value 팩터가 예측력 있나" 답변 진입점. ICIR > 0.5 = 강한, > 0.3 = 중간, < 0.1 = 노이즈.
+    hitRate 와 함께 인용하면 안정성 + 평균치 입체적 답변. horizon 별 비교 (1d/5d/20d) 로
+    예측 horizon 답변 가능.
     """
     fname = factorName.lower().strip()
     if fname not in _FACTOR_KEY_MAP:
