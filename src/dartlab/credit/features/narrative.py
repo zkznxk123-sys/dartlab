@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dartlab.core.formatting import formatDecimal, formatKr
 from dartlab.credit.features._narrativeAxes import (
+    buildNarratives,
     narrateBusinessStability,
     narrateCapitalStructure,
     narrateCashFlow,
