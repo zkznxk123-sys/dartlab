@@ -29,39 +29,64 @@ def analyzeScenario(
     compare: bool = True,
     **kwargs,
 ) -> pl.DataFrame | dict:
-    """시나리오 분석 — 축 계약 준수.
+    """시나리오 분석 단일 진입점 — 가이드 목록 또는 실행 + baseline 비교.
 
-    macro("시나리오")                          → 가이드 (110개 목록)
-    macro("시나리오", "2008 금융위기")          → 실행 + baseline 비교
-    macro("시나리오", "신용 충격", severity="severe") → 심각도 지정
+    Capabilities:
+        매크로 시나리오 110 개 (역사적 재현 15 + Fed DFAST 3 + 유형별 24 + 현대적 리스크 24
+        + 구조적 20 + 한국 특화 24) 의 두 모드 진입점. `name=None` 이면 가이드 DataFrame,
+        `name` 지정 시 시나리오 실행 + 현재 baseline 과의 delta 비교.
 
     Parameters
     ----------
-    name : str | None
-        시나리오 이름. None이면 가이드 목록 반환.
-    market : str
-        시장 구분. ``"US"`` | ``"KR"``.
-    severity : str | None
-        심각도. ``"mild"`` / ``"moderate"`` / ``"severe"`` / ``"extreme"``.
-    compare : bool
-        ``True`` 이면 현재 baseline과 비교 delta 포함.
+    name : str | None, default None
+        시나리오 이름. None 이면 110 개 가이드 목록 반환.
+    market : str, default "US"
+        시장 코드 — "US" | "KR".
+    severity : str | None, default None
+        심각도 — "mild" | "moderate" | "severe" | "extreme". 유형별/현대 리스크 시나리오에 적용.
+    compare : bool, default True
+        True 면 현재 baseline 과 비교 delta 포함.
     **kwargs
-        ``run_scenario`` 에 전달되는 추가 인자.
+        runScenario 전달 인자.
 
     Returns
     -------
-    pl.DataFrame — name=None 일 때 (가이드 목록)
-        name : str — 시나리오 이름
-        category : str — 분류 (역사적 재현 / 유형별 / 한국 특화 등)
-        type : str — 충격 유형 (신용 충격, 금리 충격 등)
-        severity : str — 심각도 (mild/moderate/severe/extreme)
-        description : str — 시나리오 설명
+    pl.DataFrame | dict
+        DataFrame (name=None) : name/category/type/severity/description 컬럼
+        dict (name 지정) : scenario/baseline/delta/meta
 
-    dict — name 지정 시 (실행 결과)
-        scenario : dict — 시나리오 적용 매크로 종합 결과
-        baseline : dict | None — 현재 상태 (compare=True 일 때)
-        delta : dict | None — 주요 지표 변화량 (compare=True 일 때)
-        meta : dict — 시나리오 메타데이터 (name, description, type, severity 등)
+    Raises
+    ------
+    없음 (시나리오 이름 미일치 시 빈 dict).
+
+    Example
+    -------
+    >>> import dartlab
+    >>> dartlab.macro("시나리오")
+    <pl.DataFrame 110 rows>
+    >>> dartlab.macro("시나리오", "2008 금융위기")
+    {'scenario': {...}, 'baseline': {...}, 'delta': {...}, 'meta': {...}}
+
+    Guide
+    -----
+    동일 충격 유형 (신용/금리/환율 등) 의 강도별 비교에는 severity 4 단계 인자 사용. compare=False
+    면 baseline fetch 비용 절약 (대량 시나리오 일괄 실행 시 권장).
+
+    SeeAlso
+    -------
+    - ``dartlab.macro.scenarios.engine.runScenario`` : 단일 시나리오 실행
+    - ``dartlab.macro.scenarios.engine.compareScenarios`` : 다 시나리오 비교
+    - ``dartlab.macro.scenarios.catalog.scenarioGuide`` : 가이드 목록
+
+    Requires
+    --------
+    - L1 gather: 매크로 baseline (compare=True 일 때)
+    - L1.5 synth: scenario 매핑
+
+    AIContext
+    ---------
+    "이 시나리오가 오면" 질문의 1 차 진입. delta 의 주요 필드 (예: equity, credit) 만 인용해도
+    한 단락 답변 가능. severity 미지정 시 default "moderate" 가정.
     """
     if name is None:
         return scenarioGuide(market=market)
