@@ -19,10 +19,12 @@ fi
 #    전수 unit 은 10분+ 소요로 비현실적 (CI 가 최종 게이트). 변경 모듈 관련 테스트 통과만
 #    강제해 이번 같은 유형 (predictionSignals 변경 → test_analysis_prediction 실패) 사고 차단.
 REMOTE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)
+# --diff-filter=d 로 삭제된 파일 제외 — stale 매칭이 pytest "file not found" 로
+# 무관한 push 를 차단하는 회귀 차단.
 if [ -n "$REMOTE_BRANCH" ]; then
-  CHANGED_PY=$(git diff --name-only "$REMOTE_BRANCH..HEAD" -- 'src/dartlab/*.py' 'tests/test_*.py' 2>/dev/null)
+  CHANGED_PY=$(git diff --name-only --diff-filter=d "$REMOTE_BRANCH..HEAD" -- 'src/dartlab/*.py' 'tests/test_*.py' 2>/dev/null)
 else
-  CHANGED_PY=$(git diff-tree --no-commit-id --name-only -r HEAD -- 'src/dartlab/*.py' 'tests/test_*.py' 2>/dev/null)
+  CHANGED_PY=$(git diff-tree --no-commit-id --name-only --diff-filter=d -r HEAD -- 'src/dartlab/*.py' 'tests/test_*.py' 2>/dev/null)
 fi
 
 if [ -n "$CHANGED_PY" ]; then
