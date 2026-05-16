@@ -537,24 +537,66 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcDistressEnsemble(company, *, basePeriod: str | None = None) -> dict | None:
-    """4개 부실예측 모델 앙상블 -- 다수결 투표.
+    """4 개 부실예측 모델 앙상블 — 다수결 투표.
 
-    Altman Z-Score, Ohlson O-Score, Springate S-Score, Zmijewski X-Score
-    각 모델의 판정(safe/warning/danger)을 집계하여 종합 등급 산출.
+    Capabilities:
+        Altman Z (제조) + Altman Z'' (비제조/신흥) + Ohlson O + Springate S +
+        Zmijewski X 각 모델 verdict (safe/warning/danger) 집계 → 다수결로
+        종합 등급 (안전/주의/위험) + agreement (일치도). 단일 모델 의존
+        편향 제거. 신흥시장에선 Altman Z'' 가 신뢰성 높음 (KR/EM 회사).
 
-    Returns
-    -------
-    dict
-        models : list[dict]
-            model : str — 모델명
-            score : float — 모델 점수 (점)
-            verdict : str — 개별 판정 ("safe"|"warning"|"danger")
-            threshold : str — 임계값 설명
-        ensemble : str — 종합 판정 ("안전"|"주의"|"위험")
-        agreement : float — 모델 간 일치도 (%)
-        dangerCount : int — 위험 판정 모델 수
-        safeCount : int — 안전 판정 모델 수
-        total : int — 전체 모델 수
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``models`` (list[dict]): 모델별 (model, score, verdict, threshold)
+            - ``ensemble`` (str): "안전"|"주의"|"위험"
+            - ``agreement`` (float): 다수파 일치도 (%)
+            - ``dangerCount``/``safeCount``/``total`` (int): 카운트
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcDistressEnsemble(Company("005930"))
+        >>> r["ensemble"], r["agreement"]
+        ('안전', 100.0)  # 5/5 모델 safe
+
+    Guide:
+        - agreement < 60% = 모델 간 불일치 → 단일 모델 결과 신뢰 어려움.
+        - 다수결 "위험" + agreement > 80% = 강한 부실 신호 (3+ 모델 동의).
+        - Ohlson O / Zmijewski X = logit 모델로 확률 (%) 출력, Altman = z-score.
+
+    SeeAlso:
+        - ``calcDistressScore``: Altman Z 단독 시계열
+        - ``credit.features.chsFeatures``: CHS (Campbell-Hilscher-Szilagyi)
+        - ``calcLeverageTrend``: 부실 모델의 입력 (부채/자본/EBIT)
+
+    Requires:
+        IS + BS + (시가총액 — Altman Z 의 X4 입력 marketCap).
+
+    AIContext:
+        ensemble + agreement + 모델별 verdict 함께 인용. KR 신흥시장 회사는
+        Altman Z'' 가중치 더 높게 해석. 한 모델만 "위험" 이고 나머지 safe 면
+        해당 모델 한정 신호 (예: Ohlson 은 자본잠식·과거 적자에 민감).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 모델 1 개 결과 단독 인용 — 앙상블 다수결 인용 (편향 제거).
+            - agreement 60% 미만에 강한 단정 — 모델 간 불일치 명시.
+        OutputSchema:
+            ``{models: list, ensemble: str, agreement: float, dangerCount: int,
+              safeCount: int, total: int}``.
+        Prerequisites:
+            IS + BS + 시가총액 (Altman Z X4).
+        Freshness:
+            분기 (시가총액 일간 갱신, 회계 분기).
+        Dataflow:
+            getRatios → 5 모델 score → 각 verdict → 다수결 → ensemble +
+            agreement.
+        TargetMarkets: KR (Altman Z'' 가중), US (Altman Z 가중).
     """
     ratios = getRatios(company)
     if ratios is None:
