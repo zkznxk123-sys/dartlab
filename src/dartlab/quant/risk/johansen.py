@@ -163,21 +163,61 @@ def johansenTest(Y: np.ndarray, *, lag: int = 1) -> dict:
 
 
 def calcVECM(Y: np.ndarray, *, lag: int = 1, cointRank: int | None = None) -> dict:
-    """Vector Error Correction Model — Johansen 후 short-run dynamics 추정.
+    """VECM — Johansen 공적분 + 단기 조정 동학 (α, β, spreads).
 
-    ΔY_t = αβ^T Y_{t-1} + Σ Γ ΔY_{t-i} + ε
+    Capabilities:
+        다변량 시계열 Y 를 Johansen test 로 공적분 rank 자동 추정 후, 적응 loadings (α) 와
+        공적분 벡터 (β), 정상 spread 시계열 (β^T Y) 을 산출. 페어 트레이딩·환율-금리 균형
+        분석·구조방정식 추정에 사용.
 
-    Args:
-        Y: T × k.
-        lag: VAR lag.
-        cointRank: 명시. None 이면 johansenTest 자동 추정.
+    Parameters
+    ----------
+    Y : np.ndarray
+        T × k 다변량 시계열 (T 행, k 변수).
+    lag : int, default 1
+        VAR lag 수.
+    cointRank : int | None, default None
+        공적분 rank 명시. None 이면 johansenTest 자동 추정.
 
-    Returns:
-        dict
-            beta : k × r cointegrating vectors
-            alpha : k × r adjustment loadings
-            spreads : T × r 시계열 (β^T Y_t, stationary)
-            interpretation : str
+    Returns
+    -------
+    dict
+        beta : np.ndarray — k × r 공적분 벡터
+        alpha : np.ndarray — k × r 적응 loadings
+        spreads : np.ndarray — T × r 정상 spread 시계열
+        cointRank : int — 사용된 rank
+        interpretation : str — 평균 회귀 속도 + spread variance 요약
+        rank=0 또는 johansen 오류 시 {"error": str}.
+
+    Raises
+    ------
+    없음 (오류는 dict["error"]).
+
+    Example
+    -------
+    >>> r = calcVECM(Y, lag=2)
+    >>> r["cointRank"], r["interpretation"]
+    (1, 'VECM rank=1. 평균 회귀 속도 (α 평균) = 0.082, ...')
+
+    Guide
+    -----
+    ΔY_t = αβ^T Y_{t-1} + Σ Γ ΔY_{t-i} + ε 의 1 차 근사. α 작을수록 회귀 느림. spread 의
+    표준편차가 작으면 페어 트레이드 후보 (mean-reverting strong).
+
+    SeeAlso
+    -------
+    - ``dartlab.quant.risk.johansen.johansenTest`` : 공적분 rank 검정
+    - ``dartlab.quant.risk.bubbleTest.calcGSADF`` : 비정상성 (버블) 진단
+
+    Requires
+    --------
+    - 시계열 T > 50 (rank 추정 신뢰성)
+    - 변수 간 공적분 가능성 (단위근 변수)
+
+    AIContext
+    ---------
+    "두 시계열이 균형 관계 있나" 답변에 사용. cointRank>0 이면 균형 존재 + α 크기로 회귀 속도
+    인용. rank=0 = 균형 없음으로 답변하고 단변량 추세 분석으로 전환.
     """
     Y = np.asarray(Y, dtype=np.float64)
     jr = johansenTest(Y, lag=lag)
