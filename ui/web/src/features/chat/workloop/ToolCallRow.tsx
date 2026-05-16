@@ -10,6 +10,72 @@ import { useChat } from '@/features/chat/store/chat';
 import { ResultBody } from '../results/ResultBody';
 import { ToolArgs } from '../tools/registry';
 
+interface ExecutionFailureData {
+	traceback?: unknown;
+	errorLine?: unknown;
+	hint?: unknown;
+	stdout?: unknown;
+	stderr?: unknown;
+	durationMs?: unknown;
+}
+
+function asString(v: unknown): string {
+	if (typeof v === 'string') return v;
+	if (v == null) return '';
+	return String(v);
+}
+
+function ToolErrorBody({ tool }: { tool: ToolPart }) {
+	// 서버 ToolResult.data 안 traceback / errorLine / hint / stdout 노출.
+	// 짧은 error 코드 (tool.error) 와 함께 진짜 진단 정보를 펼침 — '왜 실패했는지' 즉시.
+	const data =
+		tool.result && typeof tool.result === 'object'
+			? ((tool.result as { data?: ExecutionFailureData }).data ?? {})
+			: {};
+	const errorLine = asString(data.errorLine);
+	const traceback = asString(data.traceback);
+	const hint = asString(data.hint);
+	const stdout = asString(data.stdout);
+	return (
+		<div className="space-y-2">
+			<div className="flex items-baseline gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-2.5 py-1.5">
+				<span className="font-mono text-[10px] uppercase tracking-wider text-destructive shrink-0">
+					{tool.error || 'error'}
+				</span>
+				{errorLine && (
+					<span className="truncate text-xs text-destructive">{errorLine}</span>
+				)}
+			</div>
+			{hint && (
+				<div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-2.5 py-1.5 text-xs text-amber-700 dark:text-amber-400">
+					<span className="font-mono text-[10px] uppercase tracking-wider opacity-70">hint</span>
+					<span className="ml-2">{hint}</span>
+				</div>
+			)}
+			{traceback && (
+				<details className="rounded-md border border-border bg-muted/20" open={!hint && !errorLine}>
+					<summary className="cursor-pointer px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground">
+						traceback
+					</summary>
+					<pre className="tiny-scroll max-h-[50vh] overflow-auto px-2.5 pb-2 whitespace-pre-wrap break-words text-[11px] font-mono text-muted-foreground">
+						{traceback}
+					</pre>
+				</details>
+			)}
+			{stdout && (
+				<details className="rounded-md border border-border bg-muted/20">
+					<summary className="cursor-pointer px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-foreground">
+						stdout
+					</summary>
+					<pre className="tiny-scroll max-h-[30vh] overflow-auto px-2.5 pb-2 whitespace-pre-wrap break-words text-[11px] font-mono text-muted-foreground">
+						{stdout}
+					</pre>
+				</details>
+			)}
+		</div>
+	);
+}
+
 function fmtMs(ms: number): string {
 	if (ms < 1000) return `${ms}ms`;
 	return `${(ms / 1000).toFixed(1)}s`;
@@ -90,9 +156,7 @@ export function ToolCallRow({ tool }: { tool: ToolPart }) {
 							<span>실행 중…</span>
 						</div>
 					) : tool.error ? (
-						<pre className="tiny-scroll max-h-[60vh] overflow-auto rounded-md border border-destructive/30 bg-destructive/5 p-2.5 whitespace-pre-wrap break-words text-xs font-mono text-destructive">
-							{tool.error}
-						</pre>
+						<ToolErrorBody tool={tool} />
 					) : (
 						<ResultBody result={tool.result} />
 					)}

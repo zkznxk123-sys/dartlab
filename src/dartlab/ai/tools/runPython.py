@@ -60,6 +60,23 @@ def _tryUnindentFallback(code: str) -> str | None:
     return stripped
 
 
+def _lastTracebackLine(tracebackText: str) -> str:
+    """traceback 마지막 비어있지 않은 줄 (보통 `ExceptionName: message`) 반환.
+
+    UI 답변 헤더·summary 에 한 줄 진단 노출용. 추출 실패 시 빈 문자열.
+    """
+    text = (tracebackText or "").strip()
+    if not text:
+        return ""
+    for line in reversed(text.splitlines()):
+        s = line.strip()
+        if not s:
+            continue
+        # 너무 길면 자름 — UI summary 한 줄 가독성.
+        return s[:240]
+    return ""
+
+
 def _diagnoseErrorHint(tracebackText: str) -> str:
     """LLM 코드 결함 분류 — 자주 보이는 polars / pandas / dartlab API 패턴.
 
@@ -207,11 +224,15 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
             (code or "")[:1500],
             container["error"],
         )
-        # 흔한 LLM 코드 결함 → LLM 다음 turn 에 같은 실수 안 하게 hint 부착.
+        # 흔한 모델 코드 결함 → 다음 turn 에 같은 실수 안 하게 hint 부착.
         # 단순 substring 매칭 — 정밀도보다 다음 attempt 의 가이드성 우선.
-        hint = _diagnoseErrorHint(container["error"])
+        traceback_text = container["error"]
+        hint = _diagnoseErrorHint(traceback_text)
+        errorLine = _lastTracebackLine(traceback_text)
         summary = "run_python 실행 실패"
-        if hint:
+        if errorLine:
+            summary = f"run_python 실행 실패 — {errorLine}"
+        elif hint:
             summary = f"run_python 실행 실패 — {hint}"
         return ToolResult(
             False,
@@ -222,12 +243,21 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                     kind="executionRef",
                     title="python execution failed",
                     source="run_python",
-                    payload={"durationMs": duration, "stderr": container["error"], "hint": hint},
+                    payload={
+                        "durationMs": duration,
+                        "stderr": traceback_text,
+                        "hint": hint,
+                        "errorLine": errorLine,
+                    },
                 )
             ],
             data={
                 "stdout": stdout.getvalue(),
                 "stderr": stderr.getvalue(),
+                # 실제 exception traceback — UI 가 errorBody 로 펼침. data.stderr (스트림 캡처)
+                # 은 raise 시 비어있어서 user 가 진단 못 함 → 별도 필드 노출.
+                "traceback": traceback_text,
+                "errorLine": errorLine,
                 "durationMs": duration,
                 "hint": hint,
             },
