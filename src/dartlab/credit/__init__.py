@@ -27,8 +27,12 @@ src/dartlab/analysis/CREDIT.md 참조.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from dartlab.core.logger import getLogger
+
+if TYPE_CHECKING:
+    import polars as pl
 
 _log = getLogger(__name__)
 
@@ -140,7 +144,7 @@ _ALIASES: dict[str, str] = {
 _GRADE_ALIASES = {"등급", "grade", "종합", "종합등급", "credit", "신용등급"}
 
 
-def guide():
+def guide() -> "pl.DataFrame":
     """credit 엔진 7축 + 종합 가이드 DataFrame.
 
     공시 재무제표만으로 독립 신용등급(dCR)을 산출하는 엔진의 축 카탈로그.
@@ -240,7 +244,7 @@ def _filterAxis(result: dict, axis: str) -> dict | None:
 
 def credit(
     stockCode: str | None = None, axis: str | None = None, *, detail: bool = False, basePeriod: str | None = None
-):
+) -> dict | "pl.DataFrame" | None:
     """신용등급 산출 단일 진입점.
 
     Parameters
@@ -357,7 +361,7 @@ def creditCompany(
     detail: bool = False,
     basePeriod: str | None = None,
     overrides: dict | None = None,
-):
+) -> dict | "pl.DataFrame" | None:
     """Company 객체로 신용등급 산출 (Company-bound용).
 
     Parameters

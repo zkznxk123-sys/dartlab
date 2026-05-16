@@ -26,67 +26,67 @@ def _lazy(name):
     return getattr(importlib.import_module("dartlab.analysis.financial.predictionSignals"), name)
 
 
-def calcEarningsMomentum(*args, **kwargs):
+def calcEarningsMomentum(*args, **kwargs) -> dict | None:
     """predictionSignals.calcEarningsMomentum lazy proxy — 본체로 위임."""
     return _lazy("calcEarningsMomentum")(*args, **kwargs)
 
 
-def calcPeerPrediction(*args, **kwargs):
+def calcPeerPrediction(*args, **kwargs) -> dict | None:
     """predictionSignals.calcPeerPrediction lazy proxy — 본체로 위임."""
     return _lazy("calcPeerPrediction")(*args, **kwargs)
 
 
-def calcStructuralBreak(*args, **kwargs):
+def calcStructuralBreak(*args, **kwargs) -> dict | None:
     """predictionSignals.calcStructuralBreak lazy proxy — 본체로 위임."""
     return _lazy("calcStructuralBreak")(*args, **kwargs)
 
 
-def calcMacroSensitivity(*args, **kwargs):
+def calcMacroSensitivity(*args, **kwargs) -> dict | None:
     """predictionSignals.calcMacroSensitivity lazy proxy — 본체로 위임."""
     return _lazy("calcMacroSensitivity")(*args, **kwargs)
 
 
-def calcMacroRegression(*args, **kwargs):
+def calcMacroRegression(*args, **kwargs) -> dict | None:
     """predictionSignals.calcMacroRegression lazy proxy — 본체로 위임."""
     return _lazy("calcMacroRegression")(*args, **kwargs)
 
 
-def calcEventImpact(*args, **kwargs):
+def calcEventImpact(*args, **kwargs) -> dict | None:
     """predictionSignals.calcEventImpact lazy proxy — 본체로 위임."""
     return _lazy("calcEventImpact")(*args, **kwargs)
 
 
-def calcDisclosureDelta(*args, **kwargs):
+def calcDisclosureDelta(*args, **kwargs) -> dict | None:
     """predictionSignals.calcDisclosureDelta lazy proxy — 본체로 위임."""
     return _lazy("calcDisclosureDelta")(*args, **kwargs)
 
 
-def calcInventoryDivergence(*args, **kwargs):
+def calcInventoryDivergence(*args, **kwargs) -> dict | None:
     """predictionSignals.calcInventoryDivergence lazy proxy — 본체로 위임."""
     return _lazy("calcInventoryDivergence")(*args, **kwargs)
 
 
-def calcAnnouncementTiming(*args, **kwargs):
+def calcAnnouncementTiming(*args, **kwargs) -> dict | None:
     """predictionSignals.calcAnnouncementTiming lazy proxy — 본체로 위임."""
     return _lazy("calcAnnouncementTiming")(*args, **kwargs)
 
 
-def calcSupplyChainSignal(*args, **kwargs):
+def calcSupplyChainSignal(*args, **kwargs) -> dict | None:
     """predictionSignals.calcSupplyChainSignal lazy proxy — 본체로 위임."""
     return _lazy("calcSupplyChainSignal")(*args, **kwargs)
 
 
-def calcConsensusDirection(*args, **kwargs):
+def calcConsensusDirection(*args, **kwargs) -> dict | None:
     """predictionSignals.calcConsensusDirection lazy proxy — 본체로 위임."""
     return _lazy("calcConsensusDirection")(*args, **kwargs)
 
 
-def calcFlowDirection(*args, **kwargs):
+def calcFlowDirection(*args, **kwargs) -> dict | None:
     """predictionSignals.calcFlowDirection lazy proxy — 본체로 위임."""
     return _lazy("calcFlowDirection")(*args, **kwargs)
 
 
-def calcRevenueDirection(*args, **kwargs):
+def calcRevenueDirection(*args, **kwargs) -> dict | None:
     """predictionSignals.calcRevenueDirection lazy proxy — 본체로 위임."""
     return _lazy("calcRevenueDirection")(*args, **kwargs)
 

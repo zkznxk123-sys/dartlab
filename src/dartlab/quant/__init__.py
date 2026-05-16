@@ -306,7 +306,7 @@ class Quant:
         return "\n".join(lines)
 
     # scan → quant 폐쇄 루프 — axis 미등록 (top-level helper)
-    def scanBacktest(self, scanResult, **kwargs):
+    def scanBacktest(self, scanResult, **kwargs) -> dict:
         """scan 결과 universe + signalFn / style → multi-asset backtest.
 
         ``runScanBacktest`` 를 ``dartlab.quant`` attribute 로 노출. axis 미등록 —
