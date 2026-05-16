@@ -23,27 +23,71 @@ def calcBottomUpBeta(
     peerLimit: int = 20,
     country: str = "KR",
 ) -> dict[str, Any]:
-    """Hamada unlever/relever — 섹터 peer 평균 unlevered β → 자기 D/E 로 relever.
+    """Hamada equation — peer 평균 unlevered β → 자기 D/E 로 relever (bottom-up β).
 
-    Parameters
-    ----------
-    sector : 섹터/산업그룹명 (industryGroup 권장).
-    debtToEquity : 자기 D/E (시장가 기준 권장, 없으면 book).
-    taxRate : 유효세율 (0.0~0.5).
-    peerLimit : peer 샘플 최대 수.
-    country : ISO2 (peer 필터링은 현재 KR 만 지원, 다른 국가 fallback).
+    Capabilities:
+        Damodaran 의 bottom-up beta 방법 — 자체 회귀 β 의 측정오차 문제를
+        peer 평균 unlevered β 로 우회. Hamada (1972): β_L = β_U × (1 + (1-t)
+        × D/E). 한국 시장은 scan/finance.parquet 에서 peer 자동 추출.
 
-    Returns
-    -------
-    dict
-        leveredBeta : float — relevered β (자기 D/E 적용)
-        unleveredBetaMean : float — peer unlevered 평균
-        unleveredBetaMedian : float
-        peerCount : int
-        method : "bottom_up" | "sector_default" | "fallback_one"
-        peers : list[{code, betaLevered, de, betaUnlevered}]
-        sector : str
-        debtToEquity : float
+    Args:
+        sector: 섹터/산업그룹명 (WICS industryGroup 권장).
+        debtToEquity: 자기 D/E (시장가 기준 권장, 없으면 book).
+        taxRate: 유효세율 (0.0~0.5). 기본 0.22 (KR 법인세 + 지방소득세).
+        peerLimit: peer 샘플 최대 수. 기본 20.
+        country: ISO2 (현재 KR 만 peer 자동 추출, US 등은 sector_default).
+
+    Returns:
+        dict:
+            - ``leveredBeta`` (float): relevered β
+            - ``unleveredBetaMean``/``unleveredBetaMedian`` (float)
+            - ``peerCount`` (int)
+            - ``method`` (str): ``"bottom_up"``/``"sector_default"``/
+              ``"fallback_one"``
+            - ``peers`` (list[dict]): {code, betaLevered, de, betaUnlevered}
+            - ``sector``/``debtToEquity`` (str/float): echo
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcBottomUpBeta(sector="자동차", debtToEquity=0.8, country="KR")
+        >>> r["leveredBeta"], r["peerCount"]
+        (1.45, 12)
+
+    Guide:
+        peer 5 개 이상 확보 시 bottom_up, 5 개 미만 시 sector_default (정적
+        섹터 β). 다 안 되면 fallback_one (β=1). 한국 자동차/IT 의 β ~ 1.2~1.5,
+        utility 0.6~0.8, 필수소비재 0.5~0.7.
+
+    SeeAlso:
+        - ``loadDamodaranERP``: ERP 입력
+        - ``computeCompanyWacc``: bottom_up β 사용 WACC 산출
+        - Damodaran (2012) "Investment Valuation" Ch.4
+
+    Requires:
+        scan/finance.parquet (peer 추출 — KR) 또는 sectorBetaFallback dict.
+
+    AIContext:
+        method 라벨 노출 필수 — bottom_up 결과만 신뢰. sector_default 는
+        근사값, fallback_one 은 데이터 부족 신호. peerCount < 5 이면
+        결과 신뢰도 낮음.
+
+    LLM Specifications:
+        AntiPatterns:
+            - taxRate 0.5 초과 입력 — 자동 clamp [0, 0.5].
+            - country="US" 호출 → sector_default 자동 — KR 만 peer 추출.
+              US 회사 분석 시 Damodaran US sector β 사용 권장.
+        OutputSchema:
+            상기 8 키 dict.
+        Prerequisites:
+            scan/finance.parquet 로드 가능 (KR peer 추출).
+        Freshness:
+            scan/finance.parquet = 분기 (마감 후 30~45 일).
+        Dataflow:
+            sector → _extractKrPeers (KR) → unlevered β 계산 → 평균 →
+            relever (Hamada) → leveredBeta.
+        TargetMarkets: KR (scan/finance.parquet). US 는 sector_default fallback.
     """
     tax = max(0.0, min(0.5, float(taxRate)))
     de = max(0.0, float(debtToEquity))
