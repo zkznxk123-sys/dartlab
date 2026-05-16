@@ -50,13 +50,13 @@ default_whitelist:
   - CHANGELOG.md
 
   # ── 폐기 검증 테스트 (의도적으로 옛 API 패턴을 검증) ──
-  - tests/test_cli_commands.py
-  - tests/test_dart_company_methods.py
-  - tests/test_guide_full.py
-  - tests/test_pivot_annual_column.py
-  - tests/test_company_facade.py
-  - tests/test_pivot_q4_root_cause.py
-  - tests/test_fixture_company_full.py
+  - tests/cli/test_commands.py
+  - tests/providers/dart/test_company_methods.py
+  - tests/story/test_guide_full.py
+  - tests/analysis/test_pivot_annual_column.py
+  - tests/gather/test_company_facade.py
+  - tests/analysis/test_pivot_q4_root_cause.py
+  - tests/_fixtures/test_company_full.py
 
   # ── historical SPEC / STATUS / dev 문서 (구현 상태 표시) ──
   - src/dartlab/providers/dart/finance/STATUS.md
@@ -262,7 +262,7 @@ patterns:
     whitelist_paths:
       - CHANGELOG.md
       - operation.philosophy  # history
-      - tests/test_wheelPackaging.py  # gitignore 검증 목적의 명시 잔존
+      - tests/audit/test_wheelPackaging.py  # gitignore 검증 목적의 명시 잔존
 
   # ── 옛 테스트 파일명 (workflow / CI 스크립트) ──────────────
   - name: test_review_filename

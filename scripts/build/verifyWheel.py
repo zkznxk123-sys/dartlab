@@ -30,7 +30,7 @@ import zipfile
 from pathlib import Path
 
 # 필수 번들 리소스 — 2026-04-19 사고 class 직접 방어.
-# `tests/test_wheelPackaging.py::test_parserMappings_inWheel` 와 동기화.
+# `tests/audit/test_wheelPackaging.py::test_parserMappings_inWheel` 와 동기화.
 _REQUIRED_BUNDLE_FILES = [
     # parserMappings
     "dartlab/providers/data/parserMappings/sections.json",

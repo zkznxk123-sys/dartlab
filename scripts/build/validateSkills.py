@@ -191,7 +191,7 @@ def _validateApplicationCallExample(path: Path, text: str, block: str) -> list[s
     """engines.analysis.* / engines.scan.* 응용 skill 본문에 호출 예시가 있는지.
 
     빈 boilerplate 또는 잘못된 호출 예시 회귀 차단용 약한 lint. 정확한 (group, axis)
-    매칭은 ``tests/test_skills.py`` 의 정합성 테스트가 담당.
+    매칭은 ``tests/skills/test_skills.py`` 의 정합성 테스트가 담당.
     """
     sid = hasScalar(block, "id") or ""
     errors: list[str] = []

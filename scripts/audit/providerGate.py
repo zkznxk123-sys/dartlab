@@ -33,11 +33,11 @@ _AUDIT_SCRIPTS = [
 ]
 
 _TEST_GATES = [
-    ("룰 1 — Protocol contract", "tests/test_providerContract.py"),
-    ("룰 7 — src↔tests mirror", "tests/test_structureMirror.py"),
-    ("룰 9 — raw cross-scan", "tests/test_no_raw_cross_scan.py"),
-    ("룰 10 — iter pairs", "tests/test_provider_iter_pairs.py"),
-    ("룰 11 — Company context", "tests/test_company_context.py"),
+    ("룰 1 — Protocol contract", "tests/providers/test_contract.py"),
+    ("룰 7 — src↔tests mirror", "tests/architecture/test_structureMirror.py"),
+    ("룰 9 — raw cross-scan", "tests/architecture/test_no_raw_cross_scan.py"),
+    ("룰 10 — iter pairs", "tests/providers/test_iter_pairs.py"),
+    ("룰 11 — Company context", "tests/gather/test_company_context.py"),
 ]
 
 
