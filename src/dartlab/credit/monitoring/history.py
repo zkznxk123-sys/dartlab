@@ -56,6 +56,13 @@ def recordGrade(stockCode: str, result: dict) -> Path:
         - ``gradeChanged``: 변화 여부 판정
         - ``buildTransitionMatrix``: 누적 카운트 → 확률 matrix
 
+    When:
+        분기 / 주 단위 운영자 cron 트리거. AI 응답 흐름에서 직접 호출 금지 (mutation).
+
+    How:
+        history JSON 로드 → previousGrade 비교 → 새 entry append → 파일 저장 → 변화 시
+        transition.json 카운트 갱신.
+
     Requires:
         ``data/credit/history/`` 디렉토리 + write 권한.
 
@@ -114,6 +121,33 @@ def recordGrade(stockCode: str, result: dict) -> Path:
 def loadHistory(stockCode: str) -> list[dict]:
     """종목의 등급 이력 전체를 로드.
 
+    Capabilities:
+        ``data/credit/history/{stockCode}.json`` 을 로드해 시계열 entry 리스트 반환. 파일/JSON
+        손상 시 빈 리스트 폴백.
+
+    AIContext:
+        AI 답변에서 "등급 변경 이력" / "현재 outlook" 인용 시 본 함수 결과 직접 사용. 빈 리스트
+        면 "이력 없음" 단서 명시.
+
+    When:
+        ``gradeChanged`` / ``recordGrade`` 가 본 함수 호출. AI 가 시계열 답변 시 직접 호출.
+
+    How:
+        파일 경로 결정 → read_text → json.loads → 리스트 반환.
+
+    Guide:
+        반환 entry 의 ``date`` 컬럼은 운영자 호출 시점. 분기 보고서 기준 기간은 ``period``.
+
+    See Also:
+        - ``dartlab.credit.monitoring.history.recordGrade`` : 본 함수 저장 측
+        - ``dartlab.credit.monitoring.history.gradeChanged`` : 변경 여부
+
+    Requires:
+        - ``data/credit/history/{stockCode}.json`` (없어도 빈 리스트 폴백).
+
+    Raises:
+        없음 — 파일 부재 / JSON 손상 모두 빈 리스트.
+
     Parameters
     ----------
     stockCode : str
@@ -147,7 +181,46 @@ def loadHistory(stockCode: str) -> list[dict]:
 
 
 def gradeChanged(stockCode: str, newGrade: str) -> bool:
-    """이전 등급 대비 변경 여부."""
+    """이전 등급 대비 변경 여부.
+
+    Capabilities:
+        ``loadHistory`` 결과 마지막 entry 의 grade 와 ``newGrade`` 비교. 이력 없으면 True (첫
+        발행도 변경으로 간주).
+
+    Args:
+        stockCode: 종목코드.
+        newGrade: 비교 대상 신규 등급 (예: "dCR-AA+").
+
+    Returns:
+        bool: 변경되었거나 첫 발행이면 True.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> gradeChanged("005930", "dCR-AA+")
+        False
+
+    Guide:
+        Alert / Slack 발송 트리거에 사용. 첫 발행 케이스도 True 처리 — 호출자가 별도 처리 필요.
+
+    When:
+        ``recordGrade`` 호출 전 변경 여부 사전 체크, 또는 모니터링 알람 트리거.
+
+    How:
+        ``loadHistory`` → 마지막 entry grade vs newGrade.
+
+    Requires:
+        - ``data/credit/history/`` 접근 가능
+
+    See Also:
+        - ``dartlab.credit.monitoring.history.loadHistory`` : 본 함수 사용
+        - ``dartlab.credit.monitoring.history.recordGrade`` : 변경 저장
+
+    AIContext:
+        AI 가 "등급 변경됐는가" 답변 시 본 함수 직접 호출. True 면 ``loadHistory`` 로 직전 등급
+        확인 + 답변 첨부.
+    """
     history = loadHistory(stockCode)
     if not history:
         return True  # 첫 발행
@@ -179,6 +252,10 @@ def _loadTransition() -> dict:
 def updateTransitionMatrix() -> dict:
     """전체 히스토리에서 전이 매트릭스 재계산.
 
+    Capabilities:
+        ``data/credit/history/`` 내 모든 종목 이력 파일을 순회해 (이전 등급 → 현재 등급) 전이를
+        집계, ``data/credit/transition.json`` 에 dict 저장 + 반환. 분기별 운영자 재계산용.
+
     ``data/credit/history/`` 내 모든 종목 이력 파일을 순회하여
     등급 변경 건수를 집계하고, 전이 매트릭스를
     ``data/credit/transition.json``에 저장한다.
@@ -190,6 +267,34 @@ def updateTransitionMatrix() -> dict:
         예: ``{"A+": {"A": 3, "AA-": 1}}``.
         ``from_grade`` — 변경 전 등급, ``to_grade`` — 변경 후 등급,
         ``count`` : int — 해당 전이 발생 횟수 (건).
+
+    Raises:
+        OSError: 디스크 쓰기 실패 시. 개별 파일 읽기 실패는 silent skip.
+
+    Example:
+        >>> from dartlab.credit.monitoring.history import updateTransitionMatrix
+        >>> matrix = updateTransitionMatrix()
+        >>> matrix.get("dCR-AA+", {})
+
+    Guide:
+        본 함수는 누적 카운트만 — 확률 matrix 가 필요하면 호출자가 row 정규화. KR 평균 추적.
+
+    When:
+        분기 1 회 운영자 실행 (cron). AI 가 직접 호출하지 않는다 (전 종목 IO 비용).
+
+    How:
+        history 폴더 glob → 종목별 이력 로드 → 인접 entry grade 비교 → 변경 시 (from, to)
+        카운트 증가 → transition.json 직렬화.
+
+    Requires:
+        - ``data/credit/history/*.json`` 다수 + transition.json write 권한
+
+    See Also:
+        - ``dartlab.credit.monitoring.history.recordGrade`` : 신규 entry 추가 + 점진 갱신
+        - ``dartlab.credit.monitoring.history.loadHistory`` : 개별 종목 이력 로드
+
+    AIContext:
+        AI 직접 호출 없음. 답변 시 "전이 확률" 통계 인용 가능 — KR 평균이므로 단일 종목 단정 금지.
     """
     _ensureDir(_HISTORY_DIR)
     matrix: dict = {}
