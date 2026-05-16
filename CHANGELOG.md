@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dFV · simulation · macroCycle · historicalContext) 을 도메인별 작은 파일로 분리했다.
   외부 import path 와 함수 시그니처는 그대로 유지 — 사용자 코드 변경 불필요.
   특히 predictionSignals.py 는 2194 줄에서 facade 118 줄로 축소 (95% 감소).
+- 600~900 줄로 남아 있던 6 종을 추가 분리했다 — credit/engine 845→490 (Track B
+  + 후처리 분리), valuation/dcf 754→521 (상대가치 + 민감도 + 청산가치 분리),
+  macro/historicalContext 687→376 (5 이벤트 통계 분리), credit/scoring/metrics 684→425
+  (Track B 분리), macro/cycles/macroCycle 642→381 (금리 전망 + 전환 시퀀스 분리),
+  analysis/forecast/simulation 491→244 (시나리오 시뮬레이션 분리). 1000 줄 이상이던
+  god module 11 종 + 600~900 줄대 잔존 6 종 모두 정리 완료.
 - 신용등급 표 SSOT 를 L1.5 (`synth/creditGradeTable.py`) 본체로 이동. credit/scoring 의
   옛 위치는 shim 으로 재노출. L2↔L2 우회 호출 패턴 제거.
 
