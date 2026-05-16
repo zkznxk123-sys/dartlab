@@ -9,11 +9,14 @@ import { EvidenceChip } from '../refs/EvidenceChip';
 import { MermaidDiagram } from './MermaidDiagram';
 import { UntrustedBlock } from './UntrustedBlock';
 
-// CommonMark flanking — `**` 안 양 끝 공백 trim.
-// 모델이 `** 매크로 연결 **:` `**한국 분석 **:` 처럼 안 공백 패딩 넣는 습관 → raw 노출.
+// CommonMark flanking 두 케이스 보정.
+// (1) `** foo **` 안쪽 공백 패딩 trim — right-flanking whitespace 차단 회피.
+// (2) `**"..."**한글` — 닫는 `**` 앞이 punctuation 이고 뒤가 CJK letter 면 right-flanking 실패 → 공백 삽입.
 // 한 줄 안 매칭 (`[^*\n]`) 으로 단락/리스트 안전.
 function fixCjkBold(text: string): string {
-	return text.replace(/\*\*\s*([^*\n]*?[^\s*])\s*\*\*/g, '**$1**');
+	let out = text.replace(/\*\*\s*([^*\n]*?[^\s*])\s*\*\*/g, '**$1**');
+	out = out.replace(/(\*\*[^*\n]+?\*\*)(?=[가-힣ぁ-んァ-ヴー一-龥])/g, '$1 ');
+	return out;
 }
 
 // dartlab ref ID 양식 — kind:value 형태. kind 는 알려진 12 종.

@@ -74,7 +74,6 @@ export function WorkspaceBar() {
 	return (
 		<div className="mx-auto flex w-full max-w-3xl items-center gap-2 px-4 py-2 border-b border-border/60">
 			<Briefcase className="size-3.5 text-muted-foreground shrink-0" />
-			<span className="text-xs text-muted-foreground shrink-0">분석 중</span>
 			<Badge variant="secondary" className="font-mono font-normal text-[11px]">
 				{ctx.stockCode}
 			</Badge>

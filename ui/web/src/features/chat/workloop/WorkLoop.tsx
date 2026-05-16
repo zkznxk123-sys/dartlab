@@ -38,7 +38,7 @@ function durationLabel(parts: LoopPart[]): string | null {
 	return `${(ms / 1000).toFixed(1)}s`;
 }
 
-export function WorkLoop({ parts }: { parts: LoopPart[] }) {
+export function WorkLoop({ parts, stillWorking = false }: { parts: LoopPart[]; stillWorking?: boolean }) {
 	const running = loopRunning(parts);
 	const errored = loopErrored(parts);
 	// 진행 중이면 기본 펼쳐서 사용자가 무엇이 돌고 있는지 보게 — 끝나면 자동 접힘 의도지만 사용자가 만질 수 있게 controlled.
@@ -52,7 +52,10 @@ export function WorkLoop({ parts }: { parts: LoopPart[] }) {
 	const cur = currentToolName(parts);
 	const dur = durationLabel(parts);
 
-	const statusIcon = running ? (
+	// stillWorking = message.loading 이고 본 loop 뒤에 text group 이 없음 → "완료" 가 아닌 "진행" 으로 본다.
+	const workingLabel = running || stillWorking;
+
+	const statusIcon = workingLabel ? (
 		<Loader2 className="size-3.5 animate-spin text-muted-foreground" />
 	) : errored ? (
 		<Sparkles className="size-3.5 text-destructive" />
@@ -60,7 +63,7 @@ export function WorkLoop({ parts }: { parts: LoopPart[] }) {
 		<Sparkles className="size-3.5 text-emerald-500" />
 	);
 
-	const label = running
+	const label = workingLabel
 		? cur
 			? `분석 중 · ${cur}`
 			: '분석 중'

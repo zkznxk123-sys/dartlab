@@ -2,11 +2,10 @@
 // 사용자 = 우측 정렬, 둥근 muted 박스, 폭 75%. 아바타 없음.
 // AI    = 좌측 정렬, 전체 폭, 배경 없음. hover 시 MessageActions (복사 · 재생성).
 // parts[] 는 groupParts 로 [text | loop] 시퀀스로 묶어 렌더.
-import { RotateCcw } from 'lucide-react';
+import { Loader2, RotateCcw } from 'lucide-react';
 
 import type { Message } from '@/features/chat/store/chat';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { MarkdownText } from '../markdown/MarkdownText';
 import { groupParts, WorkLoop } from '../workloop/WorkLoop';
 import { MessageActions } from './MessageActions';
@@ -37,6 +36,10 @@ export function ChatMessage({ message, onRegenerate, canRegenerate }: Props) {
 		);
 	}
 
+	// 마지막 그룹이 loop 면 "답변 작성 전" — 그 loop 는 stillWorking, 별도 spinner 노출.
+	const lastGroup = groups[groups.length - 1];
+	const showComposingSpinner = !!message.loading && (!lastGroup || lastGroup.kind === 'loop');
+
 	return (
 		<div className="group px-4 py-3 space-y-2">
 			{message.error && (
@@ -55,18 +58,22 @@ export function ChatMessage({ message, onRegenerate, canRegenerate }: Props) {
 					)}
 				</div>
 			)}
-			{groups.map((g, i) =>
-				g.kind === 'text' ? (
-					<MarkdownText key={i} text={g.part.text} />
-				) : (
-					<WorkLoop key={i} parts={g.parts} />
-				),
-			)}
+			{groups.map((g, i) => {
+				if (g.kind === 'text') return <MarkdownText key={i} text={g.part.text} />;
+				const hasTextAfter = groups.slice(i + 1).some((x) => x.kind === 'text');
+				const stillWorking = !!message.loading && !hasTextAfter;
+				return <WorkLoop key={i} parts={g.parts} stillWorking={stillWorking} />;
+			})}
 			{showThinking && (
-				<div className="space-y-2 py-1">
-					<Skeleton className="h-3 w-4/5" />
-					<Skeleton className="h-3 w-3/5" />
-					<Skeleton className="h-3 w-2/3" />
+				<div className="flex items-center gap-2 py-1 text-sm text-muted-foreground">
+					<Loader2 className="size-3.5 animate-spin" />
+					<span>분석 준비 중</span>
+				</div>
+			)}
+			{!showThinking && showComposingSpinner && (
+				<div className="flex items-center gap-2 py-1 text-sm text-muted-foreground">
+					<Loader2 className="size-3.5 animate-spin" />
+					<span>답변 작성 중</span>
 				</div>
 			)}
 			{!message.loading && (hasParts || message.error) && (
