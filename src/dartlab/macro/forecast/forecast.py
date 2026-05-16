@@ -113,19 +113,18 @@ def _pctChange(current: float | None, prev: float | None) -> float | None:
 
 
 def analyzeForecast(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """경제 예측 종합 분석.
+    """경제 예측 종합 분석 — LEI + 프로빗 침체확률 + Sahm + GDP Nowcast.
 
-    LEI 복제, Cleveland Fed 프로빗 침체확률, Sahm Rule,
-    Hamilton Regime Switching, GDP Nowcasting을 종합한다.
+    Capabilities:
+        매크로 예측 5 종 통합 — Conference Board LEI (10 구성요소 복제),
+        Cleveland Fed 프로빗 침체확률 (10Y-3M 기반), Sahm Rule (실업률 +0.5%p
+        triggering), Hamilton Regime Switching (EM 알고리즘), GDP Nowcasting
+        (Kalman DFM). 침체 vs 확장 시장 방향성 정량 예측.
 
-    Parameters
-    ----------
-    market : str
-        시장 코드 ("US" | "KR"). 기본 "US".
-    as_of : str | None
-        기준일 (YYYY-MM-DD). None이면 최신.
-    overrides : dict | None
-        AI 가정 교체 (예: ``{"t10y3m": -0.5}``).
+    Args:
+        market: 시장 코드 ``"US"`` (기본) 또는 ``"KR"``.
+        asOf: 기준일 ``YYYY-MM-DD``. ``None`` 이면 최신.
+        overrides: AI 가정 교체. 예 ``{"t10y3m": -0.5}``.
 
     Returns
     -------
@@ -167,6 +166,46 @@ def analyzeForecast(*, market: str = "US", asOf: str | None = None, overrides: d
             converged : bool — 수렴 여부
             description : str — 해설
         timeseries : dict — 주요 시계열 (t10y3m, sp500, permit 등)
+
+    Example:
+        >>> from dartlab.macro.forecast.forecast import analyzeForecast
+        >>> r = analyzeForecast(market="US")
+        >>> r["recessionProb"]["probability"], r["lei"]["signalLabel"]
+        (0.18, '확장 (확실)')
+
+    Guide:
+        예측 모델 5 종 합산 — 단일 모델 (예: LEI 만) 의존 금지. 침체확률 +
+        Sahm + LEI 가 동시에 warning 일 때 강한 신호. nowcast 는 분기 GDP
+        실시간 추정.
+
+    SeeAlso:
+        - ``analyzeCrisis``: 위기 신호 (recessionProb 입력 공유)
+        - ``analyzeCycle``: 사이클 4 국면 (사이클·예측 동시 활용)
+        - ``gdpNowcast``: Kalman DFM 본체
+
+    Requires:
+        FRED (LEI 구성요소 10 시리즈, T10Y3M, payrolls 등). API key 불필요.
+
+    AIContext:
+        "지금 침체 확률" · "GDP 어디로 가나" · "Sahm rule 발동했나" 등
+        예측 질문에 호출. 5 모델 모두 인용 — 단일 모델 cherry-pick 금지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - recessionProb.probability 만 인용 (LEI / Sahm 무시)
+            - asOf 미지정 + recent fetch 실패 시 stale data 해석 — timeseries
+              에서 latest date 검증 필요
+            - KR 시장에 US 전용 키 (recessionProb / sahmRule / nowcast) 기대
+        OutputSchema:
+            상기 7 키 dict. KR 시장 일부 키 None.
+        Prerequisites:
+            FRED LEI 구성요소 10 시리즈 cache. ECOS (KR 추가).
+        Freshness:
+            FRED 월간 (LEI 발표 익월 중순), 일간 (T10Y3M).
+        Dataflow:
+            _fetchForecastData → overrides → leiReplica + clevelandProbit +
+            sahmRule + hamiltonEM + gdpNowcast → dict.
+        TargetMarkets: US (FRED 풀세트), KR (ECOS LEI 일부).
     """
     data = _fetchForecastData(market, asOf=asOf)
     if overrides:

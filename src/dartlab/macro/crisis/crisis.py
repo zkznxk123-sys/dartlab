@@ -149,24 +149,20 @@ def _fetchCrisisData(market: str, asOf: str | None = None) -> dict[str, float | 
 
 
 def analyzeCrisis(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """위기 감지 종합 분석.
+    """위기 감지 종합 분석 — Credit Gap + GHS + Minsky + 침체 대시보드.
 
-    Credit-to-GDP Gap, GHS 위기점수, 설비투자 압력, 침체 대시보드 등
-    위기 관련 지표를 종합 산출한다.
+    Capabilities:
+        매크로 위기 신호 4 종 통합 — Credit-to-GDP Gap (BIS 기준), GHS 위기 점수
+        (신용+자산 가격 동시 급등), Minsky 위기 단계 (대형 자산 거품 4 phase),
+        침체 대시보드 (probit + LEI + ISM + 신용갭 + HY 스프레드 종합). 추가로
+        설비투자 압력, 부채-deflation 신호.
 
-    Parameters
-    ----------
-    market : str
-        시장 코드 ("US" | "KR"). 기본 "US".
-    as_of : str | None
-        기준일 (YYYY-MM-DD). None이면 최신.
-    overrides : dict | None
-        AI 가정 교체 (예: ``{"vix": 30}``).
-    **kwargs
-        probitProb : float — 프로빗 침체확률 (summary에서 전달)
-        leiSignal : str — LEI 시그널 (summary에서 전달)
-        ismLevel : float — ISM PMI 수준 (summary에서 전달)
-        realRate : float — 실질금리 (%)
+    Args:
+        market: 시장 코드. ``"US"`` (기본) 또는 ``"KR"``.
+        asOf: 기준일 ``YYYY-MM-DD``. ``None`` 이면 최신.
+        overrides: AI 가정 교체. 키: ``vix``/``hySpread``/``unrate`` 등.
+        **kwargs: ``probitProb``/``leiSignal``/``ismLevel``/``realRate`` —
+            summary 호출 시 자동 전달.
 
     Returns
     -------
@@ -229,6 +225,48 @@ def analyzeCrisis(*, market: str = "US", asOf: str | None = None, overrides: dic
         excessBondPremium : dict | None — 초과채권프리미엄 (Gilchrist-Zakrajsek)
         creditCycle : dict | None — Verdad 신용사이클 4단계
         timeseries : dict — 주요 시계열 (hy_spread, vix, dxy)
+
+    Example:
+        >>> from dartlab.macro.crisis.crisis import analyzeCrisis
+        >>> r = analyzeCrisis(market="US")
+        >>> r["creditGap"]["zone"], r["minskyPhase"]["phaseLabel"]
+        ('normal', '확장 (확실)')
+
+    Guide:
+        4 위기 모델 (BIS Credit Gap, GHS, Minsky, R&R) 을 동시 매칭. 단일 신호
+        의존 금지 — composite + 다중 매칭으로 판정. KR 은 부동산 + 신용 사이클
+        특화 모델 (krHousingStress, krCreditRisk) 추가.
+
+    SeeAlso:
+        - ``analyzeCycle``: 사이클 4 국면 (사이클·위기 동시 활용)
+        - ``analyzeForecast``: 침체확률 (probit) — recessionDashboard 입력
+        - ``creditToGDPGap``/``ghsCrisisScore``/``minskyPhase``: 개별 detector
+        - ``synth.dalio48Match`` / ``synth.dalioCaseMatch``: 역사적 매칭 SSOT
+
+    Requires:
+        FRED (US: hy_spread, vix, dxy, gdp 등) 또는 ECOS (KR). API key 불필요.
+
+    AIContext:
+        "지금 금융위기 신호 있나" · "2008 같은 거품 시작인가" · "한국 부동산
+        위험" 등 위기 질문에 호출. composite 점수 + 다중 모델 합산을 보고
+        zone 만 인용하지 말 것.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 detector 결과만 인용 (creditGap 만 보고 위기 단정 등)
+            - composite < 0.3 인데 alarmist 톤 — zoneLabel 우선 인용
+            - KR 시장에 US 전용 키 (kooRecession/fisherDeflation/dalio*) 기대
+        OutputSchema:
+            상기 22+ 키 dict. market 별 일부 키 None 가능.
+        Prerequisites:
+            seriesFetch 의 FRED/ECOS cache (httpx) 워밍업.
+        Freshness:
+            FRED 일/주, ECOS 월 (계열별).
+        Dataflow:
+            _fetchCrisisData (FRED/ECOS) → overrides 적용 → 각 detector
+            (creditToGDPGap, ghsCrisisScore, minskyPhase, recessionDashboard
+            등) → dict 합치기.
+        TargetMarkets: US (FRED), KR (ECOS + KR 특화 모델).
     """
     data = _fetchCrisisData(market, asOf=asOf)
     if overrides:

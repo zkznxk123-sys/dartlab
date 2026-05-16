@@ -281,7 +281,71 @@ def _resolve(axis: str) -> str:
 
 
 class Macro:
-    """시장 레벨 매크로 분석 — 6막 인과 서사."""
+    """시장 레벨 매크로 분석 — 6 막 인과 서사 엔진.
+
+    Capabilities:
+        FRED · ECOS 등 공개 매크로 데이터를 가져와 사이클 4 국면 (침체/회복/
+        확장/둔화) · 위기 신호 (8 종 경고등) · 금리 전망 · 유동성 레짐 · 시장
+        심리 · 시나리오 매칭 (역사적 재현) · 종합 투자 전략을 산출. ``Macro()``
+        무인자 호출은 가이드 DataFrame, axis 지정은 dict 반환.
+
+    Args:
+        없음 (callable). 실제 인자는 ``__call__`` 시그니처:
+        ``axis``/``target``/``market``/``overrides``/``**kwargs``.
+
+    Returns:
+        ``Macro`` 인스턴스. 호출 가능 객체.
+
+    Example:
+        >>> from dartlab import macro
+        >>> macro()                            # 가이드 DataFrame
+        >>> macro("사이클")                     # 경기 4 국면
+        >>> macro("금리")                       # 금리 + 수익률곡선
+        >>> macro("종합")                       # 매크로 종합 + 투자 전략
+        >>> macro("시나리오", "2008 금융위기")    # 역사적 시나리오
+
+    Guide:
+        매크로 엔진은 6 막 인과의 최상위 — 사이클 → 업종 (scan) → 기업
+        (analysis) 순서로 분석 흐름이 흘러간다. 종목 분석 전 매크로 환경부터
+        파악할 때 사용. KR/US 시장 모두 지원, market 명시 필수.
+
+    SeeAlso:
+        - ``Quant``: 시장 심리·변동성 — macro 사이클과 교차 분석
+        - ``analysis``: 개별 기업 재무 — macro 환경 하 기업 건전성
+        - ``scan``: 전종목 횡단 — macro 사이클별 업종 영향 비교
+        - ``synth.scenario``: 시나리오 카탈로그 SSOT
+
+    Requires:
+        FRED API (US, 공개), ECOS API (KR, 공개). API key 불필요.
+
+    AIContext:
+        "지금 경기 어떄?" · "금리 방향성 어디로 가나" · "2008 같은 위기 올
+        수 있나" · "시장 심리 과열인가" 등 매크로 환경 질문에 매칭. AI 는
+        axis 를 한국어 키 (사이클/위기/시나리오/유동성/심리/금리/종합) 로
+        전달. company 분석 전 매크로 컨텍스트 확립용으로 우선 호출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - axis 영문 추측 (cycle/crisis) — 한국어 키만 매핑
+            - market 미지정 시 default "US" — KR 의도면 명시 필수
+            - overrides 키 임의 추가 — 유효 키 4 종 (cyclePhase/rateScenario/
+              fxScenario/liquidityScenario) 외 ValueError
+        OutputSchema:
+            - axis=None: ``pl.DataFrame(columns=[axis, label, description, example, group])``
+            - axis="사이클": ``{phase, label, confidence, indicators}``
+            - axis="시나리오": ``{historical analogue, projection}``
+            - axis="종합": ``{indicators, narrative, investmentStrategy}``
+        Prerequisites:
+            FRED 데이터 캐시 (httpx) + ECOS public endpoint (kr).
+        Freshness:
+            FRED 일/월/분기, ECOS 월/분기 (시리즈별).
+        Dataflow:
+            axis → _resolve(한글→key) → _AXIS_REGISTRY 룩업 → import_module →
+            축 함수 호출 (market + overrides) → autoEnrich → dict.
+        TargetMarkets:
+            - US (FRED)
+            - KR (ECOS)
+    """
 
     def __call__(
         self,

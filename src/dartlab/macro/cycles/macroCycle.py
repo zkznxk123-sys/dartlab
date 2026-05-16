@@ -355,17 +355,67 @@ def decomposeLongRate(
     tips: float,
     acmTermPremium: float | None = None,
 ) -> RateDecomposition:
-    """10년 명목금리를 3요소로 분해 (DKW 모델 근사).
+    """10 년 명목금리를 3 요소로 분해 — DKW (Diebold-Kilian-Wright) 모델 근사.
+
+    Capabilities:
+        명목 10Y 금리 = 기대인플레이션 (BEI) + 실질금리 (TIPS) + 기간프리미엄.
+        ACM (Adrian-Crump-Moench, NY Fed) 추정치가 있으면 직접 사용, 없으면
+        잔차로 근사 (nominal - BEI - TIPS).
 
     Args:
-        nominal: 10년 명목금리 DGS10 (%)
-        bei: 10년 BEI T10YIE (%)  — 기대인플레이션
-        tips: 10년 TIPS DFII10 (%) — 실질금리
-        acm_term_premium: Adrian-Crump-Moench 10년 기간프리미엄 (%).
-            FRED THREEFYTP10에서 수집. None이면 잔차 근사.
+        nominal: 10년 명목금리 DGS10 (%).
+        bei: 10년 BEI T10YIE (%) — 기대인플레이션.
+        tips: 10년 TIPS DFII10 (%) — 실질금리.
+        acmTermPremium: ACM 10년 기간프리미엄 (%). FRED THREEFYTP10. None
+            이면 잔차 근사.
 
     Returns:
-        RateDecomposition
+        ``RateDecomposition`` — ``nominal``/``expectedInflation``/``realRate``/
+        ``termPremium`` 4 float (소수점 3 자리).
+
+    Example:
+        >>> from dartlab.macro.cycles.macroCycle import decomposeLongRate
+        >>> r = decomposeLongRate(nominal=4.5, bei=2.5, tips=2.0)
+        >>> r.expectedInflation, r.termPremium
+        (2.5, 0.0)
+        >>> r = decomposeLongRate(nominal=4.5, bei=2.5, tips=2.0, acmTermPremium=0.5)
+        >>> r.termPremium
+        0.5
+
+    Guide:
+        장기금리 상승의 원인 분해 — BEI 상승 (인플레 기대) vs realRate 상승
+        (성장 기대) vs termPremium 상승 (불확실성). 단일 nominal 변동만 보고
+        해석 금지.
+
+    SeeAlso:
+        - ``interpretAssets``: 장기금리 분해를 자동 호출
+        - ``rateOutlook``: 정책금리 방향 (decomposeLongRate 보완)
+        - NY Fed ACM term premium 시계열
+
+    Requires:
+        FRED 시리즈 DGS10 + T10YIE + DFII10 (+ THREEFYTP10 옵션). API key 불필요.
+
+    AIContext:
+        "장기금리 왜 올랐나" · "인플레 기대 vs 성장 기대 분해" 등 금리 해석
+        질문에 호출. 결과의 termPremium 부호에 주의 (음수도 가능 — flight to
+        quality).
+
+    LLM Specifications:
+        AntiPatterns:
+            - bei + tips ≠ nominal 인데 acmTermPremium 미사용 — 데이터 비일치
+              가능 (다른 기준일). 동일 일자 데이터 권장.
+            - termPremium 단순 인용 — 추세 (변화) 도 함께 검토.
+        OutputSchema:
+            ``RateDecomposition(nominal: float, expectedInflation: float,
+            realRate: float, termPremium: float)``.
+        Prerequisites:
+            없음 (순수 함수). 입력 4 float 만.
+        Freshness:
+            FRED 일간 갱신 시리즈 — 호출자가 일자 동기화.
+        Dataflow:
+            (nominal, bei, tips, acmTermPremium?) → 잔차 또는 ACM 직접 →
+            RateDecomposition.
+        TargetMarkets: US (FRED DGS10/T10YIE/DFII10 풀세트). KR 은 미지원.
     """
     if acmTermPremium is not None:
         # ACM 모델 기간프리미엄 사용 (NY Fed 추정치)

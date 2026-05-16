@@ -78,18 +78,64 @@ def calcFearGreedProxy(
     goldEquityRatio: float | None = None,
     cryptoMomentum: float | None = None,
 ) -> SentimentScore:
-    """FRED 4~5요소로 CNN Fear & Greed Index 근사.
+    """FRED 4~5 요소로 CNN Fear & Greed Index 근사 — 0=극단공포 / 100=극단탐욕.
+
+    Capabilities:
+        VIX (변동성) + S&P500 모멘텀 + HY 스프레드 + (옵션) 금/주식 비율 +
+        (옵션) 비트코인 모멘텀을 정규화하여 0~100 sentiment score 산출. CNN
+        Fear & Greed 의 공개 데이터 기반 근사 (실제 CNN 모델은 비공개).
 
     Args:
-        vix: CBOE VIX (낮을수록 탐욕)
-        sp500_vs_ma125: S&P500 현재가 / 125일 이동평균 비율 (1.0 = 평균, >1 = 탐욕)
-        hy_spread: HY 스프레드 bps (낮을수록 탐욕)
-        gold_equity_ratio: 금/S&P500 비율 (높을수록 공포). None이면 제외.
-        crypto_momentum: BTC 90일 변화율 (%). 유동성 과잉/긴축의 극단 지표.
-            양수=위험선호(탐욕), 음수=위험회피(공포). None이면 제외.
+        vix: CBOE VIX (낮을수록 탐욕).
+        sp500VsMa125: S&P500 현재가 / 125 일 이동평균 비율 (1.0=평균, >1=탐욕).
+        hySpread: HY 스프레드 (bps, 낮을수록 탐욕).
+        goldEquityRatio: 금 / S&P500 비율. 높을수록 공포. None 이면 제외.
+        cryptoMomentum: BTC 90 일 변화율 (%). 양수=탐욕, 음수=공포. None 이면 제외.
 
     Returns:
-        SentimentScore (0=극단공포, 100=극단탐욕)
+        ``SentimentScore`` — ``score`` (0~100 float) + ``label`` (str) +
+        ``components`` (dict[str, float]) 의 dataclass.
+
+    Example:
+        >>> from dartlab.macro.cycles.sentiment import calcFearGreedProxy
+        >>> r = calcFearGreedProxy(vix=35.0, sp500VsMa125=-10.0, hySpread=8.0)
+        >>> r.score
+        15.5
+
+    Guide:
+        Sentiment 단일 지표 의존 금지 — 사이클 + 위기 + 예측과 함께 해석.
+        score < 25 은 극단 공포 (역사적 매수 zone), > 75 은 극단 탐욕 (조심).
+        crypto 모멘텀은 2020+ 의 강력한 risk-on/off 신호.
+
+    SeeAlso:
+        - ``calcSentiment``: 종합 sentiment (본 함수 + 추가 신호 통합)
+        - ``classifyVixRegime``: VIX 단독 regime 판별
+        - CNN Fear & Greed Index 공식 페이지
+
+    Requires:
+        FRED 시리즈 VIXCLS + S&P500 + BAMLH0A0HYM2 (+ GOLDAMGBD228NLBM
+        옵션). API key 불필요.
+
+    AIContext:
+        "시장 심리 과열인가" · "공포 / 탐욕 어느 쪽" · "매수 zone 인가" 등
+        심리 지표 질문에 호출. score + components 둘 다 인용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - score 만 인용 (components 분해 무시) — VIX 만 극단인지 모두 극단인지 다름
+            - cryptoMomentum 절대값 큰데 None 처리 — 2020+ 환경에선 포함 권장
+            - 1 일치 score 만 보고 sentiment 단정 — 추세 (5/20 일 평균) 권장
+        OutputSchema:
+            ``SentimentScore(score: float, label: str, components: dict[str, float])``.
+            components 키: ``vix``/``momentum``/``credit``/``safe_haven``?/``crypto``?.
+        Prerequisites:
+            없음 (순수 함수). 입력 3~5 float 만.
+        Freshness:
+            VIX 일간, S&P500 일간, HY 스프레드 일간 — 동일 일자 동기화 권장.
+        Dataflow:
+            (vix, sp500vsMa, hySpread, gold?, crypto?) → _normalize 5 요소
+            → 가중 평균 → SentimentScore.
+        TargetMarkets: US (FRED). KR 미지원.
     """
     components: dict[str, float] = {}
 

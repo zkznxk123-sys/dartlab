@@ -175,6 +175,31 @@ def analyzeCycle(*, market: str = "US", asOf: str | None = None, overrides: dict
     ---------
     매크로 환경 1 차 답변 진입점. phaseLabel + sectorStrategy 두 필드만 인용해도 한 단락 답변
     가능. transition.progress 가 70%+ 면 "다음 국면 임박" 메시지 추가.
+
+    Args
+    ----
+    market: 시장 코드 ``"US"`` (기본) 또는 ``"KR"``. KR 은 BSI/CPI 기반.
+    asOf: 기준일 ``YYYY-MM-DD``. None 이면 최신.
+    overrides: 지표 강제 치환. 키: ``vix``/``hySpread``/``termSpread`` 등.
+    **kwargs: forward-compat. 현재 미사용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - phase 만 인용 (confidence 무시) — low confidence 면 결과 약함
+            - transition 누락 — progress < 30% 면 transition None 또는 미트리거
+            - KR 시장에 quadrant 기대 — US 만 활성
+        OutputSchema:
+            ``{market: str, phase: str, phaseLabel: str, confidence: str,
+            signals: list[str], sectorStrategy: str, transition: dict|None,
+            timeseries: dict, quadrant: dict|None}``.
+        Prerequisites:
+            FRED (US) 또는 ECOS (KR) cache. 1 년+ history baseline.
+        Freshness:
+            FRED 일간 (hy_spread, vix, term_spread) — 호출 시점 캐시 갱신.
+        Dataflow:
+            _fetchIndicators → overrides → classifyCycle → detectTransition
+            (전환 시퀀스) → classifyQuadrant (US 만) → dict.
+        TargetMarkets: US (FRED 풀세트), KR (ECOS BSI/CPI 일부).
     """
     indicators = _fetchIndicators(market, asOf=asOf)
     if overrides:
