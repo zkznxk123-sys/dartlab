@@ -304,19 +304,69 @@ def classifyCycle(indicators: dict[str, float | None]) -> CyclePhase:
 
 
 def interpretAssets(indicators: dict[str, float | None]) -> list[AssetSignal]:
-    """5대 자산의 현재 상태를 해석.
+    """5 대 자산 (단기금리/장기금리/환율/금/VIX) 현재 상태 해석.
+
+    Capabilities:
+        매크로 지표 dict 를 받아 5 자산의 (현 수준 + 변화) 를 해석한 list
+        반환. 단기/장기금리는 정책/inflation 근거 분리. 환율은 한미 금리차
+        교차 해석. 금은 YoY 모멘텀. VIX 는 변화량.
 
     Args:
-        indicators: 키-값 dict. 지원 키:
-            - short_rate / short_rate_change: 단기금리 (%, %p)
-            - long_rate / long_rate_change: 장기금리 (%, %p)
-            - bei_change: BEI 변화 (%p) — 장기금리 "왜" 해석용
-            - real_rate_change: 실질금리 변화 (%p) — 장기금리 "왜" 해석용
-            - fx_usdkrw / fx_change_pct: 원/달러 환율 (원, %)
-            - rate_diff: 한미 금리차 (%p) — 환율 교차 해석용
-            - rate_diff_change: 금리차 변화 (%p) — 환율 교차 해석용
-            - gold / gold_yoy: 금 가격 ($/oz, %)
-            - vix / vix_change: VIX (index, pts)
+        indicators: 매크로 지표 dict. 지원 키 (모두 옵션):
+            - ``short_rate``/``short_rate_change`` (%, %p)
+            - ``long_rate``/``long_rate_change`` (%, %p)
+            - ``bei_change``/``real_rate_change`` (%p) — 장기금리 "왜" 분해
+            - ``fx_usdkrw``/``fx_change_pct`` (원, %)
+            - ``rate_diff``/``rate_diff_change`` (%p) — 한미 금리차
+            - ``gold``/``gold_yoy`` ($/oz, %)
+            - ``vix``/``vix_change`` (index, pts)
+
+    Returns:
+        list[AssetSignal]: 자산별 dataclass:
+            - ``asset`` (str): 자산명
+            - ``level`` (float|None)
+            - ``interpretation`` (str): 한국어 해석
+            - ``implication`` (str): 함의 라벨 (긴축기대/완화기대/안전선호 등)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = interpretAssets({"short_rate": 3.5, "short_rate_change": 0.5,
+        ...                      "vix": 28, "vix_change": 8})
+        >>> [s.implication for s in r]
+        ['긴축기대', ..., '안전선호']
+
+    Guide:
+        장기금리 변화를 BEI/real rate 분해로 인플레 vs 성장 기대 구분.
+        환율 변화는 한미 금리차 변화와 교차 — 금리차 확대 + 환율 상승 =
+        달러 강세, 금리차 축소 + 환율 하락 = 원화 강세.
+
+    SeeAlso:
+        - ``classifyCycle``: 사이클 4 국면 (자산 신호 종합)
+        - ``interpretGoldDrivers``: 금 3 요인 분해
+        - ``interpretFxDrivers``: 환율 드라이버 분해
+
+    Requires:
+        없음 (순수 함수). indicators dict 일부 키만 있어도 동작.
+
+    AIContext:
+        해석 라벨 (interpretation) 을 그대로 인용 — 사용자에게 매크로 환경
+        의 직접 텍스트 노출 가능. implication 만으로는 정량 정보 부족.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단기금리만 보고 "긴축" 단정 — 장기금리 + 환율 함께 확인.
+            - VIX 절대값 (예 18) 만 인용 — vix_change 도 함께 (급등 시 panic).
+        OutputSchema:
+            list[AssetSignal] — 자산 개수만큼 (입력 indicators 에 따름).
+        Prerequisites:
+            indicators dict (적어도 1 자산의 level + change).
+        Freshness:
+            지표별 (금리/환율 일, VIX 일, 금 일).
+        Dataflow:
+            indicators → 자산별 분기 룰 → AssetSignal dataclass list.
+        TargetMarkets: KR (USDKRW + 한미 금리차), Global (long_rate/gold/VIX).
     """
     results: list[AssetSignal] = []
 
