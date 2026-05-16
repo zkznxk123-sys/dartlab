@@ -70,6 +70,11 @@ def _extractTexts(parquetPath: Path) -> dict[str, str]:
 def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
     """docs 텍스트로 노드의 stage/confidence를 보강한다.
 
+    Capabilities:
+        2 단계까지 채워진 노드 중 stage 가 비어있거나 confidence 가 낮은 종목에 대해 ``docs/
+        {code}.parquet`` 본문 (사업의 내용 / 원재료 등 토픽별 가중 합성) 으로 stage 재매칭.
+        보강 시 ``source="docs"`` 마킹.
+
     Parameters
     ----------
     nodes : list[IndustryNode]
@@ -79,6 +84,38 @@ def enrich(nodes: list[IndustryNode]) -> list[IndustryNode]:
     -------
     list[IndustryNode]
         docs 분석으로 보강된 노드 리스트.
+
+    Raises:
+        없음 — docs 폴더 부재 시 warning + 입력 그대로 반환.
+
+    Example:
+        >>> from dartlab.industry.build.stage3_docs import enrich
+        >>> nodes = enrich(stage2Nodes)
+        >>> sum(1 for n in nodes if n.source == "docs")
+        720
+
+    Guide:
+        ``buildIndustryMap`` 의 3 단계. docs parquet 전 종목 스캔이라 비용이 큼 — ``skipDocs=True``
+        로 단계 건너뛰기 가능 (빠른 테스트).
+
+    When:
+        manifest 빌드 3 단계. KindList 주요제품 만으로 stage 매칭 안 되는 종목 보강 시.
+
+    How:
+        nodes 인덱스 (종목별) → 종목별 ``docs/{code}.parquet`` 토픽 스캔 → 합성 텍스트 →
+        ``matchStageByKeywords`` → 결과 stage/conf 으로 노드 업데이트.
+
+    Requires:
+        - L1.5 frame: docs parquet 폴더
+        - 입력 nodes (stage1+2 결과)
+
+    See Also:
+        - ``dartlab.industry.taxonomy.matchStageByKeywords`` : 매칭 코어
+        - ``dartlab.industry.build.stage4_review.applyOverrides`` : 4 단계 보정
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (배치). 답변에서 ``source=="docs"`` 노드는 "사업보고서 본문
+        분석 결과" 단서 인용.
     """
     docsDir = _docsDir()
     if not docsDir.exists():

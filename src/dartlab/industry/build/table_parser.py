@@ -33,11 +33,46 @@ def _isSeparatorRow(cells: list[str]) -> bool:
 def extractTables(content: str) -> list[list[list[str]]]:
     """마크다운 텍스트에서 모든 테이블을 추출.
 
+    Capabilities:
+        파이프 (`|`) 기반 마크다운 테이블을 줄 단위 파싱해 row × cell 2D 리스트로 추출. 구분선
+        (`---`) 행은 자동 제거, 1 행짜리 노이즈 테이블은 폐기.
+
     Returns
     -------
     list[list[list[str]]]
         테이블 리스트. 각 테이블은 행(list) × 셀(str).
         구분선 행(---)은 제거됨.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.industry.build.table_parser import extractTables
+        >>> tables = extractTables("|a|b|\\n|---|---|\\n|1|2|")
+        >>> tables
+        [[['a', 'b'], ['1', '2']]]
+
+    Guide:
+        ``findTableByHeaders`` 가 본 함수 결과에서 키워드 매칭 테이블을 골라낸다. 1 행 헤더만
+        있는 비정형 표는 자동 제거 (len(t) >= 2 필터).
+
+    When:
+        ``extractRawMaterialEdges`` 가 docs 본문 → 테이블 추출 1 단계로 사용.
+
+    How:
+        줄 단위 split → ``_splitTableRow`` 로 셀 분리 → 구분선 검출 → 빈 줄 도달 시 한 테이블
+        종료 → 1 행 이상 테이블만 수집.
+
+    Requires:
+        - 외부 의존 없음 — 순수 텍스트 파싱.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.findTableByHeaders`` : 본 결과 검색
+        - ``dartlab.industry.build.table_parser.tableToRowDicts`` : 헤더 기반 dict 변환
+
+    AIContext:
+        AI 가 docs 본문 표를 직접 다루지 않는다 (table_parser 가 처리한 후 IndustryEdge 형태로
+        받음). 본 함수는 내부 헬퍼.
     """
     if not content:
         return []
@@ -69,12 +104,41 @@ def extractTables(content: str) -> list[list[list[str]]]:
 def tableToRowDicts(table: list[list[str]]) -> list[dict[str, str]]:
     """테이블을 헤더 기반 dict 리스트로 변환.
 
+    Capabilities:
+        2D 테이블의 첫 행을 헤더로 삼아 각 데이터 행을 {header: value} dict 로 변환. 빈 셀은
+        이전 행 값 상속 (마크다운 병합 효과).
+
     첫 번째 행을 헤더로 간주. 이전 행 값이 빈 셀은 상속(병합 효과).
 
     Returns
     -------
     list[dict[str, str]]
         각 row = {header: value}
+
+    Raises:
+        없음 — 빈/단일 행 테이블은 빈 리스트.
+
+    Example:
+        >>> tableToRowDicts([["A","B"],["1","2"]])
+        [{'A': '1', 'B': '2'}]
+
+    Guide:
+        헤더가 메타 행 ("(단위: 억원)") 등으로 시작하면 ``tableToRowDictsWithHeaderRow`` 사용.
+
+    When:
+        단순 테이블 → dict 변환 (헤더 0 행이 명확할 때).
+
+    How:
+        첫 행 헤더 → 데이터 행 루프 → 열 수 padding → 빈 셀 → prev 상속 → dict.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.tableToRowDictsWithHeaderRow`` : 헤더 행 선택
+
+    AIContext:
+        AI 직접 호출 없음 (내부 헬퍼).
     """
     if not table or len(table) < 2:
         return []
@@ -121,6 +185,18 @@ def findTableByHeaders(
     -------
     tuple[list[list[str]], int] | None
         (매칭된 테이블, 실제 헤더 행 인덱스).
+
+    Raises:
+        없음 — 매칭 실패 시 None.
+
+    Example:
+        >>> from dartlab.industry.build.table_parser import extractTables, findTableByHeaders
+        >>> tables = extractTables(docContent)
+        >>> findTableByHeaders(tables, ["매입처", "비중"])[1]
+        0
+
+    Requires:
+        - 외부 의존 없음.
     """
     for table in tables:
         if not table:
@@ -141,12 +217,44 @@ def tableToRowDictsWithHeaderRow(
 ) -> list[dict[str, str]]:
     """특정 행을 헤더로 지정하여 dict 리스트 변환.
 
+    Capabilities:
+        ``headerRow`` 인덱스 행을 헤더로 지정해 그 아래 행들을 dict 리스트로 변환. ``inheritColumns``
+        의 키워드에 매칭되는 헤더의 빈 셀은 이전 행 값을 상속 (마크다운 rowspan 병합 복원).
+        DART 보고서 "부문" 컬럼 병합 셀 처리에 특화.
+
     Parameters
     ----------
     inheritColumns : list[str] | None
         빈 셀을 이전 행에서 상속할 헤더 키워드 목록.
         예: ['부문', '부 문'] — 병합된 셀 복원.
         None이면 상속 없음 (빈 셀은 빈 셀 그대로).
+
+    Raises:
+        없음 — 빈 / headerRow 범위 초과 시 빈 리스트.
+
+    Example:
+        >>> tableToRowDictsWithHeaderRow(table, headerRow=1, inheritColumns=["부문"])
+
+    Guide:
+        DART 사업보고서 원재료/매출 표는 보통 행 0 이 "(단위: 백만원)" — ``findTableByHeaders``
+        결과의 ``hi`` 를 ``headerRow`` 로 전달해 사용.
+
+    When:
+        ``extractRawMaterialEdges`` 가 매입처 표 변환 시 본 함수 호출.
+
+    How:
+        헤더 행 추출 → 상속 컬럼 인덱스 집합 → 데이터 행 루프 → shift 휴리스틱 (첫 셀 비어있고
+        끝 셀 비어있으면 한 칸 미는 패턴 검출) → 셀 값 채우기.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.findTableByHeaders`` : 헤더 행 검색
+        - ``dartlab.industry.build.edges.extractRawMaterialEdges`` : 본 함수 사용자
+
+    AIContext:
+        AI 직접 호출 없음 (내부 헬퍼). 결과 dict 가 supplier 엣지 product/amount/ratio 추출 원본.
     """
     if not table or headerRow >= len(table):
         return []
@@ -199,7 +307,43 @@ def tableToRowDictsWithHeaderRow(
 
 
 def parseAmount(text: str) -> float | None:
-    """'138,272' 같은 숫자 문자열을 float로 변환."""
+    """'138,272' 같은 숫자 문자열을 float로 변환.
+
+    Capabilities:
+        쉼표/공백 포함 숫자 문자열을 float 로 변환. 빈 문자열 / "-" / 변환 불가 시 None.
+        DART 표의 천 단위 쉼표 처리에 특화.
+
+    Args:
+        text: 입력 문자열 (예: "138,272").
+
+    Returns:
+        float 변환 결과 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parseAmount("138,272"), parseAmount("-")
+        (138272.0, None)
+
+    Guide:
+        통화 단위 (억원/백만원) 는 호출자가 별도 정규화. 본 함수는 순수 숫자 파싱.
+
+    When:
+        ``extractRawMaterialEdges`` 가 매입액 셀 값 변환 시.
+
+    How:
+        쉼표/공백 strip → "-" 체크 → float() try/except → None 폴백.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.parsePercent`` : 비율 셀 변환
+
+    AIContext:
+        AI 직접 호출 없음.
+    """
     if not text:
         return None
     cleaned = text.replace(",", "").replace(" ", "").strip()
@@ -212,7 +356,42 @@ def parseAmount(text: str) -> float | None:
 
 
 def parsePercent(text: str) -> float | None:
-    """'18.5%' 같은 비율을 float(0~100)로 변환."""
+    """'18.5%' 같은 비율을 float(0~100)로 변환.
+
+    Capabilities:
+        '%' 접미사 포함 비율 문자열을 0~100 float 로 변환. 빈 문자열 / "-" / 변환 불가 시 None.
+
+    Args:
+        text: 입력 문자열 (예: "18.5%").
+
+    Returns:
+        float (0~100) 또는 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> parsePercent("18.5%"), parsePercent("-")
+        (18.5, None)
+
+    Guide:
+        결과는 0~100 스케일 (0.185 가 아닌 18.5). 0~1 스케일 필요 시 호출자가 /100.
+
+    When:
+        ``extractRawMaterialEdges`` 가 매입 비중 셀 값 변환 시.
+
+    How:
+        '%' / 쉼표 strip → "-" 체크 → float() try/except.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.parseAmount`` : 숫자 셀 변환
+
+    AIContext:
+        AI 직접 호출 없음.
+    """
     if not text:
         return None
     cleaned = text.replace("%", "").replace(",", "").strip()
@@ -235,10 +414,39 @@ _CLEAN_RE = re.compile(r"(\s*등\s*$|\s*\([^)]*\)\s*$)")
 def extractCorpNames(cell: str) -> list[str]:
     """'Qualcomm, MediaTek' 또는 '솔브레인㈜, 동우화인켐㈜ 등' 같은 셀에서 회사명을 분리.
 
+    Capabilities:
+        쉼표 / 점 / "및"·"and" 구분자로 셀을 분리하고 끝의 " 등" / "( ... )" 접미사를 제거.
+        2 글자 이상 회사명만 남김. ㈜/(주) 등 원본 정규형 보존 (정규화는 ``normalizeCorpName``).
+
     Returns
     -------
     list[str]
         정제된 회사명 리스트 (㈜/(주) 포함 원본 유지).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> extractCorpNames("솔브레인㈜, 동우화인켐㈜ 등")
+        ['솔브레인㈜', '동우화인켐㈜']
+
+    Guide:
+        반환 회사명은 정규형 (㈜ 포함) 그대로. KindList 매칭 전 ``normalizeCorpName`` 으로 ㈜ 제거.
+
+    When:
+        ``extractRawMaterialEdges`` 가 "매입처" 셀에서 공급사 다중 추출 시.
+
+    How:
+        끝 "등" / "(...)" 제거 → 쉼표/점/"및"/"and" split → 각 토큰 trim → 2 글자 이상 필터.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.normalizeCorpName`` : 매칭용 정규화
+
+    AIContext:
+        AI 직접 호출 없음.
     """
     if not cell:
         return []
@@ -260,7 +468,43 @@ def extractCorpNames(cell: str) -> list[str]:
 
 
 def normalizeCorpName(name: str) -> str:
-    """㈜/(주)/주식회사 제거하여 정규화 (매칭용)."""
+    """㈜/(주)/주식회사 제거하여 정규화 (매칭용).
+
+    Capabilities:
+        ㈜ / (주) / 주식회사 접미·접두사를 제거해 KindList 회사명과 매칭 가능한 정규형 반환.
+        결과는 공백 strip.
+
+    Args:
+        name: 원본 회사명 (예: "솔브레인㈜").
+
+    Returns:
+        정규화된 이름 (예: "솔브레인").
+
+    Raises:
+        없음.
+
+    Example:
+        >>> normalizeCorpName("솔브레인㈜")
+        '솔브레인'
+
+    Guide:
+        본 함수는 매칭용 — UI 표시는 원본 ㈜ 포함 형태 유지 권장.
+
+    When:
+        ``extractRawMaterialEdges`` 가 매입처 셀 → KindList 룩업 매칭 직전에.
+
+    How:
+        ㈜ / (주) / 주식회사 substring 모두 제거 → strip.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.industry.build.table_parser.extractCorpNames`` : 회사명 분리
+
+    AIContext:
+        AI 직접 호출 없음.
+    """
     if not name:
         return ""
     n = name.strip()
