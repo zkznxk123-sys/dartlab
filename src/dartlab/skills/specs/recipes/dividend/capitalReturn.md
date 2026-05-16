@@ -21,6 +21,7 @@ capabilityRefs:
   - Company.show
 toolRefs:
   - search_reference
+  - EngineCall
   - RunPython
   - finalize_answer
 knowledgeRefs:

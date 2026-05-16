@@ -17,6 +17,7 @@ linkedSkills:
   - recipes.valuation.damodaran.businessModelFit
   - engines.company
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

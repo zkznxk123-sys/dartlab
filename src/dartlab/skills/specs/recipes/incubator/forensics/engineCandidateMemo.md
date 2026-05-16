@@ -26,6 +26,7 @@ capabilityRefs:
   - Company.show
   - scan.quality
 toolRefs:
+  - EngineCall
   - RunPython
 sourceRefs:
   - dartlab://skills/recipes.incubator.forensics.engineCandidateMemo

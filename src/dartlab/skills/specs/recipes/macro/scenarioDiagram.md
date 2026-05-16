@@ -18,6 +18,7 @@ linkedSkills:
   - recipes.macro.tailRiskScenarioScan
   - recipes.macro.historicalPositioning
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 requiredEvidence:

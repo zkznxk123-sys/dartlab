@@ -15,6 +15,7 @@ linkedSkills:
   - recipes.valuation.damodaran.reinvestmentRoc
   - recipes.valuation.damodaran.scenarioFalsifier
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

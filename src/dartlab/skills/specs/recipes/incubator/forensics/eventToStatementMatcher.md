@@ -24,6 +24,7 @@ capabilityRefs:
   - Company.show
   - Company.disclosure
 toolRefs:
+  - EngineCall
   - RunPython
 sourceRefs:
   - dartlab://skills/recipes.incubator.forensics.eventToStatementMatcher

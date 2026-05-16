@@ -34,6 +34,7 @@ linkedSkills:
   - recipes.valuation.damodaran.distressAdjustedDcf
   - recipes.valuation.damodaran.scenarioFalsifier
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

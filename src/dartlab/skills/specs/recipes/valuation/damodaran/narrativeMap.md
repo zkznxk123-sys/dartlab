@@ -16,6 +16,7 @@ linkedSkills:
   - recipes.valuation.damodaran.businessModelFit
   - recipes.valuation.damodaran.lifeCycleClassifier
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

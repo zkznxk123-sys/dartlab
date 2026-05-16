@@ -14,6 +14,7 @@ linkedSkills:
   - recipes.valuation.damodaran.normalizedFinancials
   - recipes.valuation.damodaran.costOfCapital
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

@@ -58,6 +58,7 @@ knowledgeRefs:
   - operation.testing
   - operation.code
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

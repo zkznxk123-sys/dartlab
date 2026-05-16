@@ -20,6 +20,7 @@ linkedSkills:
   - recipes.macro.dollarFundingStress
   - recipes.credit.cycleStressMap
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 requiredEvidence:

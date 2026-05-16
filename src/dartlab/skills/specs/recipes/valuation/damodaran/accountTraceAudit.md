@@ -16,6 +16,7 @@ linkedSkills:
   - recipes.valuation.damodaran.dataAudit
   - recipes.valuation.damodaran.normalizedFinancials
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

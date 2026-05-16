@@ -20,6 +20,7 @@ linkedSkills:
   - recipes.macro.yieldCurveStress
   - recipes.macro.inflationBreadthWatch
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 requiredEvidence:

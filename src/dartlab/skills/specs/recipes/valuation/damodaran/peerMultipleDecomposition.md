@@ -14,6 +14,7 @@ linkedSkills:
   - recipes.valuation.damodaran.relativeCheck
   - recipes.valuation.damodaran.storyToDrivers
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef
