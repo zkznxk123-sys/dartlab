@@ -760,12 +760,64 @@ def fisherDebtDeflation(
     cpiYoy: float,
     nplRate: float | None = None,
 ) -> FisherDeflationResult:
-    """Fisher Debt-Deflation: 고부채 + 디플레이션 → 실질 부채 증가 악순환.
+    """Fisher (1933) Debt-Deflation — 고부채 + 디플레이션 → 실질 부채 증가 악순환.
+
+    Capabilities:
+        Irving Fisher (1933) "The Debt-Deflation Theory of Great Depressions"
+        의 핵심 — 고부채 + 디플레이션 결합 시 실질 부채 부담 증가 → 자산
+        매각 → 자산 가격 하락 → 신용 수축 → 추가 디플레이션 의 9-step
+        악순환. DSR + CPI + NPL 3 지표로 위험 점수 산출.
 
     Args:
-        dsr: 부채서비스비율 (원리금/소득, %)
-        cpiYoy: CPI 전년대비 변화율 (%)
-        nplRate: 부실대출비율 (%)
+        dsr: 부채서비스비율 (원리금/소득, %). > 14% = 역사적 고수준.
+        cpiYoy: CPI YoY (%). < 0 = 디플레이션, < 1 = 준디플레.
+        nplRate: 부실대출비율 (%). 옵션. > 5% = 위기 임박.
+
+    Returns:
+        FisherDeflationResult dataclass:
+            - ``riskScore`` (int): 0~7
+            - ``zone`` (str): low/moderate/high/extreme
+            - ``zoneLabel`` (str): 한국어
+            - ``description`` (str): 한국어 진단
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = fisherDebtDeflation(dsr=15, cpiYoy=-0.5, nplRate=4.5)
+        >>> r.zone
+        'high'
+
+    Guide:
+        riskScore 임계: 0~1 = low (정상), 2~3 = moderate (주의), 4~5 = high
+        (위험), 6+ = extreme (Fisher 시나리오 본격). 디플레이션 (CPI<0) 단
+        독으로 +3점 — 가장 큰 가중치.
+
+    SeeAlso:
+        - ``kooBalanceSheetRecession``: BSR (Fisher 의 시장 측면)
+        - ``minskyPhase``: Minsky revulsion (deleveraging)
+        - Fisher, I. (1933) "The Debt-Deflation Theory of Great Depressions"
+
+    Requires:
+        dsr + cpiYoy 필수. nplRate 옵션 (없으면 2 지표만).
+
+    AIContext:
+        Fisher 시나리오는 통화정책 무력화 + 재정 확대 필수 (Friedman + Koo).
+        zone="extreme" 결과는 정책 결정자 향 (개별 기업 향이 아님).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단기 (1 개월) CPI 음수 → 디플레 단정 — 3 개월 연속 음수 필요.
+            - DSR > 14% 만 보고 위기 단정 — CPI 정상이면 정상 부채 부담.
+        OutputSchema:
+            FisherDeflationResult ``{riskScore, zone, zoneLabel, description}``.
+        Prerequisites:
+            국민계정 DSR (분기) + CPI (월) + NPL (분기).
+        Freshness:
+            DSR 분기, CPI 월, NPL 분기.
+        Dataflow:
+            DSR + CPI + NPL 룰 → riskScore 누적 → zone 분류.
+        TargetMarkets: KR (한국은행 DSR), Global. 일본 1995~2000 가장 적합.
     """
     riskScore = 0
 
