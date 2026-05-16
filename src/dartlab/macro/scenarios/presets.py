@@ -1,7 +1,17 @@
-"""매크로 시나리오 프리셋 — 역사적 충격 + 유형별 + 한국 특화.
+"""매크로 시나리오 프리셋 facade — 6 카탈로그 통합 진입점.
 
-실측 데이터 기반 overrides dict. Fed CCAR/DFAST, IMF, BIS 방법론 참조.
-모든 수치는 역사적 실측값 또는 학술 문헌의 스트레스 기준.
+본 모듈은 4 카탈로그 (HISTORICAL/MODERN_RISK/STRUCTURAL/TYPED) + KR/DFAST 2 카탈로그를
+import 로 재노출하고, ``getScenario`` / ``listAllScenarios`` 호출 로직만 담는다.
+
+카탈로그 데이터 위치:
+- HISTORICAL_SCENARIOS  → ``_presetsHistorical.py`` (15 시나리오)
+- MODERN_RISK_SCENARIOS → ``_presetsModernRisk.py`` (6 시나리오)
+- STRUCTURAL_SCENARIOS  → ``_presetsStructural.py`` (5 시나리오)
+- SEVERITIES + TYPED_SCENARIOS → ``_presetsTyped.py`` (6 유형 × 4 심각도)
+- DFAST_SCENARIOS + KR_SCENARIOS → ``_presetsKr.py`` (Fed DFAST + 한국 특화)
+
+외부 호출자는 본 모듈의 ``getScenario`` / ``listAllScenarios`` 만 호출.
+4 dict 직접 import 도 BC 보존을 위해 가능하지만 신규 코드는 함수 진입점 사용 권장.
 
 Sources:
 - Fed CCAR/DFAST 2025-2026 Severely Adverse
@@ -13,465 +23,11 @@ Sources:
 
 from __future__ import annotations
 
-# ══════════════════════════════════════
-# 1. 역사적 재현 (8개) — 실측 수치
-# ══════════════════════════════════════
+from dartlab.macro.scenarios._presetsHistorical import HISTORICAL_SCENARIOS
 from dartlab.macro.scenarios._presetsKr import DFAST_SCENARIOS, KR_SCENARIOS
-
-HISTORICAL_SCENARIOS: dict[str, dict] = {
-    "1973 오일쇼크": {
-        "description": "OPEC 금수조치 — 유가 300% 급등, 스태그플레이션",
-        "period": "1973-10 ~ 1975-03",
-        "type": "유가/원자재",
-        "severity": "extreme",
-        "overrides": {
-            "cpi_yoy": 12.3,
-            "fedfunds": 13.0,
-            "unrate": 9.0,
-            "indpro_yoy": -12.6,
-            "term_spread": 0.5,
-        },
-        "outcome": "S&P -48%. 스태그플레이션 2년. 1975-03 저점 후 회복.",
-    },
-    "1980 볼커 긴축": {
-        "description": "Fed 기준금리 19.1% — 인플레 진압을 위한 역사적 긴축",
-        "period": "1980-01 ~ 1982-11",
-        "type": "금리 충격",
-        "severity": "extreme",
-        "overrides": {
-            "fedfunds": 19.1,
-            "cpi_yoy": 14.8,
-            "unrate": 10.8,
-            "term_spread": -2.0,
-            "indpro_yoy": -8.0,
-        },
-        "outcome": "S&P -27%. 더블딥 침체. 인플레 진압 후 1983~89 장기 확장.",
-    },
-    "1987 블랙먼데이": {
-        "description": "하루 만에 DJIA -22.6% — 시장 구조적 붕괴",
-        "period": "1987-10",
-        "type": "자산 버블 붕괴",
-        "severity": "severe",
-        "overrides": {
-            "vix": 150,  # VIX 미존재, 추정 내재변동성
-            "hy_spread": 400,
-            "sp500_change": -22.6,
-        },
-        "outcome": "실물경제 영향 미미. Fed 유동성 공급으로 2개월 내 안정.",
-    },
-    "1997 아시아 위기": {
-        "description": "태국 바트화 붕괴 → 한국 IMF 구제금융",
-        "period": "1997-07 ~ 1998-12",
-        "type": "통화/신용 충격",
-        "severity": "severe",
-        "overrides": {
-            "hy_spread": 600,
-            "vix": 45,
-            "nfci": 1.0,
-        },
-        "outcome": "한국 GDP -5.5%, 원/달러 1,964원. 1999년부터 V자 회복.",
-        "kr_overrides": {
-            "usdkrw": 1964,
-            "kospi_change": -65,
-            "base_rate": 25.0,
-        },
-    },
-    "2001 IT버블": {
-        "description": "닷컴 버블 붕괴 — NASDAQ -78%",
-        "period": "2000-03 ~ 2002-10",
-        "type": "자산 버블 붕괴",
-        "severity": "severe",
-        "overrides": {
-            "hy_spread": 1000,
-            "vix": 45,
-            "unrate": 6.3,
-            "fedfunds": 1.0,
-            "term_spread": 2.5,
-            "indpro_yoy": -6.0,
-            "sp500_change": -49,
-        },
-        "outcome": "NASDAQ -78%, S&P -49%. 얕은 침체(8개월). 2003년부터 회복.",
-    },
-    "2008 금융위기": {
-        "description": "리먼 브라더스 파산 — 글로벌 신용 경색",
-        "period": "2008-09 ~ 2009-03",
-        "type": "신용 충격",
-        "severity": "extreme",
-        "overrides": {
-            "hy_spread": 2182,
-            "vix": 80.86,
-            "unrate": 10.0,
-            "cpi_yoy": -2.1,
-            "fedfunds": 0.16,
-            "term_spread": 2.5,
-            "nfci": 3.0,
-            "indpro_yoy": -15.0,
-            "sp500_change": -57,
-        },
-        "outcome": "S&P -57%, 실업률 10%. 2009-03 저점 후 V자 반등. 112개월 확장.",
-    },
-    "2020 COVID": {
-        "description": "코로나19 팬데믹 — 전세계 봉쇄",
-        "period": "2020-02 ~ 2020-04",
-        "type": "지정학/팬데믹",
-        "severity": "extreme",
-        "overrides": {
-            "hy_spread": 1087,
-            "vix": 82.69,
-            "unrate": 14.7,
-            "cpi_yoy": 0.1,
-            "fedfunds": 0.05,
-            "nfci": 1.5,
-            "indpro_yoy": -15.0,
-            "sp500_change": -34,
-        },
-        "outcome": "역사상 최단 침체(2개월). V자 반등, QE 무제한. NASDAQ +100% 12개월.",
-    },
-    "2022 인플레 긴축": {
-        "description": "CPI 9.1% + Fed 역사적 속도 긴축",
-        "period": "2022-01 ~ 2022-12",
-        "type": "인플레이션",
-        "severity": "moderate",
-        "overrides": {
-            "cpi_yoy": 9.1,
-            "fedfunds": 5.33,
-            "hy_spread": 600,
-            "vix": 37,
-            "term_spread": -0.8,
-            "indpro_yoy": -1.0,
-            "sp500_change": -25,
-        },
-        "outcome": "S&P -25%, NASDAQ -33%. 침체 회피. 연착륙 성공.",
-    },
-    # ── 추가 역사적 사건 ──
-    "1998 LTCM": {
-        "description": "LTCM 파산 + 러시아 디폴트 — 글로벌 유동성 경색",
-        "period": "1998-08 ~ 1998-11",
-        "type": "신용 충격",
-        "severity": "severe",
-        "overrides": {
-            "hy_spread": 700,
-            "vix": 45,
-            "nfci": 1.2,
-            "term_spread": 0.3,
-            "fedfunds": 4.75,
-        },
-        "outcome": "S&P -22% (3개월). Fed 긴급 인하 3회 → V자 반등. 침체 없음.",
-    },
-    "2001 9/11": {
-        "description": "9/11 테러 — 4일 거래 중단, 지정학적 충격",
-        "period": "2001-09",
-        "type": "지정학/팬데믹",
-        "severity": "severe",
-        "overrides": {
-            "vix": 45,
-            "hy_spread": 800,
-            "sp500_change": -12,
-            "fedfunds": 3.0,
-            "nfci": 0.8,
-        },
-        "outcome": "이미 IT버블 침체 중. S&P -12% (1주). 2개월 후 반등 시작.",
-    },
-    "2011 유럽 재정위기": {
-        "description": "그리스/이탈리아 국채 위기 + 미국 신용등급 강등",
-        "period": "2011-07 ~ 2011-12",
-        "type": "신용 충격",
-        "severity": "moderate",
-        "overrides": {
-            "hy_spread": 650,
-            "vix": 48,
-            "nfci": 0.5,
-            "sp500_change": -19,
-        },
-        "outcome": "S&P -19%. V자 반등. 위기는 유럽에 국한. 미국 침체 없음.",
-    },
-    "2015 중국 위안 절하": {
-        "description": "중국 갑작스러운 위안 절하 — EM 자본유출 공포",
-        "period": "2015-08 ~ 2016-02",
-        "type": "통화/EM 충격",
-        "severity": "moderate",
-        "overrides": {
-            "vix": 40,
-            "hy_spread": 700,
-            "indpro_yoy": -2.0,
-            "sp500_change": -14,
-        },
-        "outcome": "S&P -14%. 중국 안정화 조치 후 회복. 미국 침체 없음.",
-    },
-    "2018 연말 긴축공포": {
-        "description": "Fed QT + 금리인상 4회 → 시장 패닉",
-        "period": "2018-10 ~ 2019-01",
-        "type": "금리 충격",
-        "severity": "mild",
-        "overrides": {
-            "fedfunds": 2.5,
-            "hy_spread": 530,
-            "vix": 36,
-            "term_spread": 0.1,
-            "sp500_change": -20,
-        },
-        "outcome": "S&P -20% (3개월). Fed 피벗(금리 동결) → 2019 강세장.",
-    },
-    "2022 러시아-우크라이나": {
-        "description": "러시아 우크라이나 침공 — 유가/곡물 급등",
-        "period": "2022-02 ~ 2022-06",
-        "type": "지정학/팬데믹",
-        "severity": "moderate",
-        "overrides": {
-            "cpi_yoy": 8.5,
-            "vix": 37,
-            "hy_spread": 500,
-            "indpro_yoy": -1.0,
-        },
-        "outcome": "유가 $130 터치. CPI 가속. 인플레 긴축의 직접 원인.",
-    },
-    "2023 SVB 은행위기": {
-        "description": "실리콘밸리은행 파산 — 금리 급등에 의한 은행 채권 손실",
-        "period": "2023-03",
-        "type": "신용 충격",
-        "severity": "mild",
-        "overrides": {
-            "hy_spread": 500,
-            "vix": 30,
-            "nfci": 0.3,
-        },
-        "outcome": "FDIC 즉각 개입. 3주 내 안정. 시스템 위기로 번지지 않음.",
-    },
-}
-
-# ══════════════════════════════════════
-# 현대적 리스크 시나리오 (아직 발생 안 함)
-# ══════════════════════════════════════
-
-MODERN_RISK_SCENARIOS: dict[str, dict] = {
-    "AI 버블 붕괴": {
-        "description": "AI 과잉투자 → 수익 실현 실패 → 기술주 폭락",
-        "type": "자산 버블 붕괴",
-        "transmission": "기술주 폭락 → HY 확대(기술 기업 부채) → VC/PE 손실 → 신용 경색 확산",
-        "reference": "2001 IT버블 패턴 + 현대 AI 투자 규모",
-        "mild": {"sp500_change": -20, "vix": 35, "hy_spread": 500},
-        "moderate": {"sp500_change": -35, "vix": 50, "hy_spread": 700, "nfci": 0.5},
-        "severe": {"sp500_change": -50, "vix": 65, "hy_spread": 1000, "nfci": 1.5, "unrate": 7.0},
-        "extreme": {"sp500_change": -70, "vix": 80, "hy_spread": 1500, "nfci": 2.5, "unrate": 9.0, "indpro_yoy": -5.0},
-    },
-    "중국 디플레이션": {
-        "description": "중국 부동산 붕괴 + 디플레이션 수출 → 글로벌 수요 위축",
-        "type": "디플레이션",
-        "transmission": "중국 수요 붕괴 → 원자재 가격 하락 → EM 수출 급감 → 글로벌 산업생산 위축",
-        "reference": "일본 1990년대 + 중국 2024~ 부동산 위기",
-        "mild": {"indpro_yoy": -2.0, "cpi_yoy": 1.0},
-        "moderate": {"indpro_yoy": -5.0, "cpi_yoy": 0.5, "hy_spread": 500, "vix": 30},
-        "severe": {"indpro_yoy": -10.0, "cpi_yoy": -0.5, "hy_spread": 700, "vix": 40, "unrate": 6.0},
-        "extreme": {"indpro_yoy": -15.0, "cpi_yoy": -2.0, "hy_spread": 1000, "vix": 55, "unrate": 8.0, "fedfunds": 0.5},
-    },
-    "일본식 장기침체": {
-        "description": "재무상태표 침체 — 장기 저성장 + 제로금리 함정",
-        "type": "디플레이션",
-        "transmission": "자산 버블 붕괴 → 민간 디레버리징 → 소비/투자 장기 위축 → 제로금리에도 회복 안 됨",
-        "reference": "Koo (2009) Balance Sheet Recession, 일본 1990~2010",
-        "mild": {"fedfunds": 0.5, "cpi_yoy": 0.5, "indpro_yoy": 0.0, "term_spread": 0.5},
-        "moderate": {"fedfunds": 0.1, "cpi_yoy": 0.0, "indpro_yoy": -1.0, "term_spread": 0.3, "unrate": 5.5},
-        "severe": {
-            "fedfunds": 0.0,
-            "cpi_yoy": -0.5,
-            "indpro_yoy": -3.0,
-            "term_spread": 0.2,
-            "unrate": 7.0,
-            "hy_spread": 400,
-        },
-        "extreme": {
-            "fedfunds": 0.0,
-            "cpi_yoy": -1.5,
-            "indpro_yoy": -5.0,
-            "term_spread": 0.1,
-            "unrate": 8.0,
-            "hy_spread": 600,
-        },
-    },
-    "대만 해협 분쟁": {
-        "description": "미중 군사 대치 — 반도체 공급망 단절 + 글로벌 무역 마비",
-        "type": "지정학/팬데믹",
-        "transmission": "군사 대치 → VIX 급등 + 안전자산 쏠림 → 반도체 공급 단절 → 산업생산 마비 → 글로벌 침체",
-        "reference": "2020 COVID 공급 충격 + 1973 오일쇼크 규모",
-        "mild": {"vix": 45, "hy_spread": 600, "indpro_yoy": -5.0},
-        "moderate": {"vix": 60, "hy_spread": 900, "indpro_yoy": -10.0, "cpi_yoy": 6.0, "nfci": 1.0},
-        "severe": {"vix": 75, "hy_spread": 1200, "indpro_yoy": -18.0, "cpi_yoy": 8.0, "nfci": 2.0, "unrate": 9.0},
-        "extreme": {"vix": 90, "hy_spread": 2000, "indpro_yoy": -25.0, "cpi_yoy": 12.0, "nfci": 3.0, "unrate": 12.0},
-    },
-    "글로벌 무역전쟁": {
-        "description": "미중 관세 전면전 + WTO 체제 붕괴",
-        "type": "지정학/팬데믹",
-        "transmission": "관세 급등 → 수입물가 상승 → 공급망 재편 비용 → 산업생산 위축 → 스태그플레이션",
-        "reference": "2018-19 미중 무역분쟁 확대 버전",
-        "mild": {"cpi_yoy": 4.0, "indpro_yoy": -2.0, "vix": 30},
-        "moderate": {"cpi_yoy": 5.5, "indpro_yoy": -5.0, "vix": 40, "hy_spread": 500},
-        "severe": {"cpi_yoy": 7.0, "indpro_yoy": -8.0, "vix": 50, "hy_spread": 700, "unrate": 6.0},
-        "extreme": {"cpi_yoy": 10.0, "indpro_yoy": -15.0, "vix": 65, "hy_spread": 1000, "unrate": 9.0},
-    },
-    "미국 국채 위기": {
-        "description": "미국 재정적자 급증 → 국채 수요 급감 → 금리 급등",
-        "type": "금리 충격",
-        "transmission": "국채 매도 → 장기금리 급등 → 모기지/기업 차입 비용 폭증 → 부동산/기업 동시 위기",
-        "reference": "2011 미국 신용등급 강등 + 영국 2022 미니버짓 위기",
-        "mild": {"term_spread": 2.0, "fedfunds": 5.5, "vix": 30, "hy_spread": 500},
-        "moderate": {"term_spread": 3.0, "fedfunds": 6.0, "vix": 45, "hy_spread": 700},
-        "severe": {"term_spread": 4.0, "fedfunds": 7.0, "vix": 55, "hy_spread": 1000, "unrate": 7.0},
-        "extreme": {"term_spread": 5.0, "fedfunds": 8.0, "vix": 70, "hy_spread": 1500, "unrate": 10.0},
-    },
-}
-
-# ══════════════════════════════════════
-# 구조적 시나리오 (regime 유형)
-# ══════════════════════════════════════
-
-STRUCTURAL_SCENARIOS: dict[str, dict] = {
-    "스태그플레이션": {
-        "description": "고물가 + 저성장 — 최악의 조합",
-        "type": "인플레이션",
-        "transmission": "공급 충격 → CPI 급등 + GDP 위축 동시 → 중앙은행 딜레마 (긴축하면 침체, 완화하면 인플레)",
-        "reference": "1973-74 오일쇼크, 2022 일부 시기",
-        "mild": {"cpi_yoy": 5.0, "indpro_yoy": -1.0, "fedfunds": 5.0, "unrate": 5.0},
-        "moderate": {"cpi_yoy": 7.0, "indpro_yoy": -3.0, "fedfunds": 6.0, "unrate": 6.0, "hy_spread": 500},
-        "severe": {"cpi_yoy": 9.0, "indpro_yoy": -6.0, "fedfunds": 7.0, "unrate": 8.0, "hy_spread": 700, "vix": 40},
-        "extreme": {
-            "cpi_yoy": 14.0,
-            "indpro_yoy": -12.0,
-            "fedfunds": 12.0,
-            "unrate": 10.0,
-            "hy_spread": 1000,
-            "vix": 55,
-        },
-    },
-    "디플레이션": {
-        "description": "물가 하락 + 경기 위축 — 유동성 함정",
-        "type": "디플레이션",
-        "transmission": "수요 붕괴 → CPI 하락 → 실질금리 상승 → 소비 연기 → 기업 이익 악화 → 악순환",
-        "reference": "일본 1990~2010, 2008-09 미국",
-        "mild": {"cpi_yoy": 0.5, "fedfunds": 0.5, "indpro_yoy": -1.0},
-        "moderate": {"cpi_yoy": -0.5, "fedfunds": 0.1, "indpro_yoy": -3.0, "unrate": 6.0},
-        "severe": {"cpi_yoy": -1.5, "fedfunds": 0.0, "indpro_yoy": -6.0, "unrate": 8.0, "hy_spread": 600},
-        "extreme": {"cpi_yoy": -3.0, "fedfunds": 0.0, "indpro_yoy": -10.0, "unrate": 10.0, "hy_spread": 1000},
-    },
-    "골디락스": {
-        "description": "저인플레 + 완전고용 + 안정 성장 — 이상적 환경",
-        "type": "호황",
-        "transmission": "물가 안정 → 금리 안정 → 기업 이익 증가 → 고용 증가 → 선순환",
-        "reference": "1995-98 미국, 2017 미국",
-        "mild": {"cpi_yoy": 2.5, "unrate": 4.5, "fedfunds": 3.0, "vix": 18, "hy_spread": 350},
-        "moderate": {"cpi_yoy": 2.0, "unrate": 4.0, "fedfunds": 2.5, "vix": 14, "hy_spread": 300, "indpro_yoy": 3.0},
-        "severe": {"cpi_yoy": 1.8, "unrate": 3.5, "fedfunds": 2.0, "vix": 12, "hy_spread": 250, "indpro_yoy": 4.0},
-        "extreme": {
-            "cpi_yoy": 1.5,
-            "unrate": 3.0,
-            "fedfunds": 1.5,
-            "vix": 10,
-            "hy_spread": 200,
-            "indpro_yoy": 5.0,
-            "nfci": -1.0,
-        },
-    },
-    "경착륙": {
-        "description": "급격한 긴축 후 침체 진입",
-        "type": "금리 충격",
-        "transmission": "급격한 금리 인상 → 경기 급랭 → 실업률 급등 → 신용 위축 → 디플레이션 위험",
-        "reference": "1980 볼커, 2007-08",
-        "mild": {"fedfunds": 6.0, "unrate": 5.5, "indpro_yoy": -2.0, "hy_spread": 500},
-        "moderate": {"fedfunds": 6.5, "unrate": 7.0, "indpro_yoy": -5.0, "hy_spread": 700, "vix": 35},
-        "severe": {"fedfunds": 7.0, "unrate": 8.5, "indpro_yoy": -8.0, "hy_spread": 1000, "vix": 50},
-        "extreme": {"fedfunds": 8.0, "unrate": 10.0, "indpro_yoy": -12.0, "hy_spread": 1500, "vix": 65},
-    },
-    "연착륙": {
-        "description": "적절한 긴축 → 인플레 진정 → 침체 회피",
-        "type": "호황",
-        "transmission": "점진적 금리 인상 → 인플레 둔화 → 실업률 소폭 상승 후 안정 → 성장 재가속",
-        "reference": "1995 그린스펀, 2023-24",
-        "mild": {"cpi_yoy": 3.0, "fedfunds": 4.5, "unrate": 4.5, "vix": 18, "hy_spread": 380},
-        "moderate": {"cpi_yoy": 2.5, "fedfunds": 4.0, "unrate": 4.2, "vix": 15, "hy_spread": 340, "indpro_yoy": 2.0},
-        "severe": {"cpi_yoy": 2.2, "fedfunds": 3.5, "unrate": 4.0, "vix": 13, "hy_spread": 300, "indpro_yoy": 3.0},
-        "extreme": {
-            "cpi_yoy": 2.0,
-            "fedfunds": 3.0,
-            "unrate": 3.8,
-            "vix": 12,
-            "hy_spread": 280,
-            "indpro_yoy": 4.0,
-            "nfci": -0.8,
-        },
-    },
-}
-
-# ══════════════════════════════════════
-# 2. 유형별 × 심각도 (6 × 4 = 24개)
-# ══════════════════════════════════════
-
-SEVERITIES = ("mild", "moderate", "severe", "extreme")
-
-TYPED_SCENARIOS: dict[str, dict] = {
-    "신용 충격": {
-        "description": "은행/기업 신용 경색",
-        "transmission": "NFCI 긴축 → 설비투자 축소(3-6개월) → GDP 하락 → 실업률 상승",
-        "reference": "Gilchrist & Zakrajšek (2012 AER)",
-        "mild": {"hy_spread": 500, "vix": 30, "nfci": 0.3, "ig_spread": 150},
-        "moderate": {"hy_spread": 700, "vix": 40, "nfci": 0.8, "ig_spread": 250},
-        "severe": {"hy_spread": 1000, "vix": 55, "nfci": 1.5, "ig_spread": 400, "unrate": 7.0},
-        "extreme": {"hy_spread": 2000, "vix": 75, "nfci": 3.0, "ig_spread": 600, "unrate": 10.0},
-    },
-    "금리 충격": {
-        "description": "급격한 금리 인상 또는 예기치 못한 긴축",
-        "transmission": "기준금리 급등 → HY/IG 스프레드 확대 → 소비/투자 위축(6-18개월) → 고용 악화",
-        "reference": "Fed CCAR/DFAST Severely Adverse",
-        "mild": {"fedfunds": 6.0, "hy_spread": 450, "term_spread": -0.3, "vix": 25},
-        "moderate": {"fedfunds": 7.0, "hy_spread": 600, "term_spread": -1.0, "vix": 35},
-        "severe": {"fedfunds": 8.0, "hy_spread": 800, "term_spread": -1.5, "vix": 50, "unrate": 7.0},
-        "extreme": {"fedfunds": 12.0, "hy_spread": 1200, "term_spread": -2.0, "vix": 60, "unrate": 10.0},
-    },
-    "유가/원자재 충격": {
-        "description": "에너지 가격 급등으로 인한 비용 인플레이션",
-        "transmission": "유가 급등 → CPI/PPI 상승(즉시~3개월) → 기업 마진 압축 → 산업생산 하락(~10개월)",
-        "reference": "1973 오일쇼크, 2022 에너지 위기",
-        "mild": {"cpi_yoy": 4.5, "indpro_yoy": -1.0},
-        "moderate": {"cpi_yoy": 6.0, "indpro_yoy": -3.0, "hy_spread": 500, "vix": 30},
-        "severe": {"cpi_yoy": 8.0, "indpro_yoy": -5.0, "hy_spread": 700, "vix": 40},
-        "extreme": {"cpi_yoy": 12.0, "indpro_yoy": -10.0, "hy_spread": 1000, "vix": 50, "unrate": 8.0},
-    },
-    "지정학/팬데믹": {
-        "description": "전쟁, 테러, 팬데믹 등 외생적 충격",
-        "transmission": "VIX 급등 → 모든 자산 동시 매도 → HY 확대 → 실물 위축",
-        "reference": "2020 COVID, 9/11, 러시아-우크라이나",
-        "mild": {"vix": 35, "hy_spread": 500},
-        "moderate": {"vix": 50, "hy_spread": 700, "nfci": 0.5, "indpro_yoy": -3.0},
-        "severe": {"vix": 65, "hy_spread": 1000, "nfci": 1.5, "indpro_yoy": -8.0, "unrate": 8.0},
-        "extreme": {"vix": 80, "hy_spread": 1500, "nfci": 2.0, "indpro_yoy": -15.0, "unrate": 14.0},
-    },
-    "자산 버블 붕괴": {
-        "description": "주식/부동산 버블 붕괴",
-        "transmission": "주가 급락 → 역부의효과 → 소비 위축 → HY 확대 → 실업 증가",
-        "reference": "2001 IT버블, 1987 블랙먼데이",
-        "mild": {"sp500_change": -15, "vix": 30, "hy_spread": 450},
-        "moderate": {"sp500_change": -25, "vix": 40, "hy_spread": 600},
-        "severe": {"sp500_change": -40, "vix": 55, "hy_spread": 900, "unrate": 7.0},
-        "extreme": {"sp500_change": -55, "vix": 75, "hy_spread": 1500, "unrate": 10.0},
-    },
-    "인플레이션 충격": {
-        "description": "급격한 물가 상승 + 중앙은행 긴축 대응",
-        "transmission": "CPI 급등 → 금리 인상 압력 → HY 확대 → 소비/투자 위축",
-        "reference": "1980 볼커, 2022 인플레",
-        "mild": {"cpi_yoy": 5.0, "fedfunds": 5.5, "term_spread": -0.3},
-        "moderate": {"cpi_yoy": 7.0, "fedfunds": 7.0, "term_spread": -0.8, "hy_spread": 500},
-        "severe": {"cpi_yoy": 9.0, "fedfunds": 9.0, "term_spread": -1.5, "hy_spread": 700, "vix": 40},
-        "extreme": {
-            "cpi_yoy": 14.0,
-            "fedfunds": 15.0,
-            "term_spread": -2.0,
-            "hy_spread": 1000,
-            "vix": 50,
-            "unrate": 10.0,
-        },
-    },
-}
-
-# ══════════════════════════════════════
-# 3. 한국 특화 (3개)
+from dartlab.macro.scenarios._presetsModernRisk import MODERN_RISK_SCENARIOS
+from dartlab.macro.scenarios._presetsStructural import STRUCTURAL_SCENARIOS
+from dartlab.macro.scenarios._presetsTyped import SEVERITIES, TYPED_SCENARIOS
 
 
 def getScenario(name: str, *, severity: str | None = None, market: str = "US") -> dict | None:
@@ -608,7 +164,7 @@ def getScenario(name: str, *, severity: str | None = None, market: str = "US") -
                 "overrides": val[sev],
             }
 
-    # 5. 복합 시나리오 (+ 구분)
+    # 7. 복합 시나리오 (+ 구분)
     if "+" in name:
         parts = [p.strip() for p in name.split("+")]
         combined_overrides: dict = {}
@@ -728,3 +284,16 @@ def listAllScenarios(market: str = "US") -> list[dict]:
                 )
 
     return result
+
+
+__all__ = [
+    "DFAST_SCENARIOS",
+    "HISTORICAL_SCENARIOS",
+    "KR_SCENARIOS",
+    "MODERN_RISK_SCENARIOS",
+    "SEVERITIES",
+    "STRUCTURAL_SCENARIOS",
+    "TYPED_SCENARIOS",
+    "getScenario",
+    "listAllScenarios",
+]
