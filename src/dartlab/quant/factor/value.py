@@ -143,17 +143,68 @@ def _zscore(value: float, allValues: list[float]) -> float:
 
 
 def calcValue(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """Value/yield 신호 — book-based 횡단면 z-score.
+    """Value/yield 신호 — book-based 횡단면 z-score (PBR/PER 부재 폴백).
 
-    ⚠️ PBR/PER/PSR 미산출 — 시가총액 데이터 부재. earningsToBook(=ROE),
-    salesToBook(=AssetTurnover proxy), bookToAsset(=레버리지 역수)을 z화.
+    Capabilities:
+        시가총액 미보유 환경에서 가치 신호 산출 — earningsToBook (= ROE),
+        salesToBook (= AssetTurnover proxy), bookToAsset (= 레버리지 역수)
+        3 컴포넌트의 횡단면 z-score 합성 → valueScore + valueGrade (A~F).
+        금융업은 자동 skip (가치 산식 부적절).
 
     Args:
-        stockCode: 종목코드 또는 ticker.
-        market: "KR" | "US" | "auto".
+        stockCode: 종목코드 (KR 6 자리) 또는 ticker (US).
+        market: "KR" | "US" | "auto" (resolveMarket 분기).
 
     Returns:
-        dict — components, valueScore, valueGrade, limitation note.
+        dict:
+            - ``stockCode``/``market``/``year`` (str): 식별.
+            - ``components`` (dict): earningsToBook/salesToBook/bookToAsset.
+            - ``valueScore`` (float): 3 컴포넌트 z 합계.
+            - ``valueGrade`` (str): A~F.
+            - ``limitation`` (str): "시가총액 부재 — PBR/PER 미산출" 명시.
+            - 또는 ``error`` (str): 데이터 부족 사유.
+
+    Raises:
+        없음 (모든 실패는 error 키로 반환).
+
+    Example:
+        >>> r = calcValue("005930")
+        >>> r["components"]["earningsToBook"], r["valueGrade"]
+        (0.18, 'B')
+
+    Guide:
+        ⚠️ PBR/PER/PSR 미산출 — 본 함수는 book-based 폴백. 정식 가치 평가는
+        marketCap 도입 후 PBR/PER/EV-EBITDA 별도 트랙. valueScore 비교는
+        동일 universe (KR↔US 혼용 금지). universe ≥ 1000 종목 확보 시점만
+        z-score 신뢰.
+
+    SeeAlso:
+        - ``calcQuality``: ROE/ROA/마진 횡단면 z
+        - ``calcMomentum``: 가격 모멘텀 (12-1)
+        - ``analysis.valuation.dFV``: DCF 기반 정밀 valuation
+
+    Requires:
+        scan finance parquet (KR/US 분리) + 연결 4 분기 데이터.
+
+    AIContext:
+        valueGrade 단독 인용 금지 — limitation note + universe 크기 함께.
+        금융업은 sector="financial" + grade=None 반환 — 별도 trail 필요.
+
+    LLM Specifications:
+        AntiPatterns:
+            - PBR/PER 라벨 인용 — 본 함수는 book-based, 시장가 아님.
+            - KR/US universe 혼용 z 비교 — universe 분리 필수.
+        OutputSchema:
+            ``{stockCode, market, year, components: dict, valueScore: float,
+              valueGrade: str, limitation: str}`` 또는 ``{..., error: str}``.
+        Prerequisites:
+            scan finance parquet 1000+ 종목 universe.
+        Freshness:
+            연간 (회계연도 기준).
+        Dataflow:
+            finance.parquet → extractAnnualConsolidated → universe 1000+ 연도
+            선택 → 3 컴포넌트 → 횡단면 z → valueScore + grade.
+        TargetMarkets: KR (DART 연결재무), US (EDGAR 10-K).
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
