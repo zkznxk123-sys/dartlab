@@ -643,6 +643,61 @@ def _syncMaxWorkers(default: int = 4) -> int | None:
     return workers if workers > 0 else default
 
 
+def _syncCheckpointEvery(default: int = 100) -> int:
+    """batchCollect 의 checkpoint upload 단위 (종목 수). 0 이면 비활성."""
+    raw = os.environ.get("SYNC_CHECKPOINT_EVERY", "").strip()
+    if not raw:
+        return default
+    try:
+        v = int(raw)
+    except ValueError:
+        return default
+    return max(0, v)
+
+
+def _makeCheckpointUploader(cat: str) -> "callable":
+    """cat 단위 checkpoint upload 콜백 — 종목 N 개마다 HF 에 incremental upload.
+
+    cancel/timeout 안전망: drain 된 종목까지는 HF 에 안전 반영. 나머지는 다음 sync 의
+    rcept_no 비교로 자연 retry. 90 분 timeout 사고 (2026-05-16) 의 root cause fix —
+    이전엔 main() 끝까지 가야 yml 의 Upload step 진입했고 cancel 시 0 건 반영됐다.
+    """
+    import subprocess
+
+    scriptDir = Path(__file__).resolve().parent
+    distDir = Path("dist")
+    uploadScript = scriptDir / "uploadData.py"
+
+    def _upload(stockCodes: list[str]) -> None:
+        if not stockCodes:
+            return
+        distDir.mkdir(exist_ok=True)
+        files = [f"{code}.parquet" for code in stockCodes]
+
+        # 누적 changed_<cat>.txt: hash 감지 단계의 final 결과와 합쳐서 yml Upload step 이
+        # 마지막 잔여분도 잡을 수 있게 한다.
+        catPath = distDir / f"changed_{cat}.txt"
+        existing = set(catPath.read_text(encoding="utf-8").splitlines()) if catPath.exists() else set()
+        catPath.write_text("\n".join(sorted(existing | set(files))) + "\n", encoding="utf-8")
+
+        # checkpoint batch 만 changed.txt → uploadData 가 그것만 HF push.
+        (distDir / "changed.txt").write_text("\n".join(files) + "\n", encoding="utf-8")
+
+        env = os.environ.copy()
+        env["SYNC_CATEGORY"] = cat
+        rc = subprocess.run(
+            [sys.executable, "-X", "utf8", "-u", str(uploadScript), "--target", "hf"],
+            env=env,
+            check=False,
+        ).returncode
+        if rc != 0:
+            print(f"[checkpoint] {cat}: upload rc={rc} (batch_size={len(files)})", flush=True)
+        else:
+            print(f"[checkpoint] {cat}: {len(files)}개 HF upload OK", flush=True)
+
+    return _upload
+
+
 def main():
     keys = os.environ.get("DART_API_KEYS", "")
     if not keys:
@@ -750,6 +805,7 @@ def main():
         from dartlab.providers.dart.openapi.batch import batchCollect
 
         maxWorkers = _syncMaxWorkers()
+        checkpointEvery = _syncCheckpointEvery()
 
         # finance/report 각각 독립적으로 누락 종목만 수집.
         # 한 카테고리만 누락이면 다른 카테고리는 건드리지 않는다.
@@ -758,7 +814,10 @@ def main():
             if not codes:
                 print(f"[syncRecent] {cat}: 누락 없음 → 스킵")
                 continue
-            print(f"[syncRecent] {cat}: {len(codes)}개 종목 수집 시작")
+            print(
+                f"[syncRecent] {cat}: {len(codes)}개 종목 수집 시작 (checkpoint={checkpointEvery or 'off'})",
+                flush=True,
+            )
             batchCollect(
                 codes,
                 categories=[cat],
@@ -766,6 +825,8 @@ def main():
                 showProgress=False,
                 targetPeriodsByCode=periods,
                 maxWorkers=maxWorkers,
+                onCheckpoint=_makeCheckpointUploader(cat) if checkpointEvery > 0 else None,
+                checkpointEvery=checkpointEvery,
             )
 
     verifyFailures = _verifyCollectedRcepts(targetFilings, dataDir, categories)

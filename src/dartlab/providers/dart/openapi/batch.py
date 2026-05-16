@@ -14,6 +14,7 @@ import asyncio
 import io
 import re
 import zipfile
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -895,10 +896,16 @@ async def _workerLoop(
     onPeriod,
     failures: dict[str, dict[str, str]] | None = None,
     targetPeriodsByCode: dict[str, list[tuple[str, str]]] | None = None,
+    checkpointBuffer: list[str] | None = None,
+    checkpointLock: asyncio.Lock | None = None,
+    checkpointEvery: int = 0,
+    onCheckpoint: Callable[[list[str]], None] | None = None,
 ) -> None:
     """워커: 큐에서 종목 꺼내서 수집. 키 소진 시 종료.
 
     failures: {stockCode: {category: errorRepr}} 형태로 실패 추적.
+    onCheckpoint: 종목 ``checkpointEvery`` 개 완료마다 그 batch 의 stockCode 리스트로 호출.
+        cancel/timeout 안전망 — buffer drain 된 종목은 콜백이 이미 외부 보존 (예: HF upload) 처리.
     """
     import logging
 
@@ -990,6 +997,27 @@ async def _workerLoop(
             if onComplete:
                 catSummary = " ".join(f"{k}:{v}" for k, v in result.items() if v > 0)
                 onComplete(corpName, catSummary)
+            # checkpoint: N 종목마다 buffer drain + 외부 콜백 (HF incremental upload 등).
+            # cancel/timeout 시 drain 된 종목까지는 외부에 안전 보존, 나머지는 다음 sync 의
+            # rcept_no 비교로 자연 retry.
+            if (
+                onCheckpoint is not None
+                and checkpointBuffer is not None
+                and checkpointLock is not None
+                and checkpointEvery > 0
+            ):
+                drain: list[str] | None = None
+                async with checkpointLock:
+                    checkpointBuffer.append(stockCode)
+                    if len(checkpointBuffer) >= checkpointEvery:
+                        drain = checkpointBuffer[:]
+                        checkpointBuffer.clear()
+                if drain:
+                    loop = asyncio.get_running_loop()
+                    try:
+                        await loop.run_in_executor(None, onCheckpoint, drain)
+                    except Exception as e:
+                        logger.warning("checkpoint.fail batch_size=%d err=%s", len(drain), repr(e)[:200])
 
         queue.task_done()
 
@@ -1019,6 +1047,8 @@ def batchCollect(
     incremental: bool = True,
     showProgress: bool = True,
     targetPeriodsByCode: dict[str, list[tuple[str, str]]] | None = None,
+    onCheckpoint: Callable[[list[str]], None] | None = None,
+    checkpointEvery: int = 0,
 ) -> dict[str, dict[str, int]]:
     """병렬 배치 수집. 키 N개 → 워커 N개 → 종목 분배.
 
@@ -1089,6 +1119,10 @@ def batchCollect(
         results: dict[str, dict[str, int]] = {}
         failures: dict[str, dict[str, str]] = {}
 
+        # checkpoint: 모든 worker 공유 buffer + lock. N 종목 도달 시 외부 콜백.
+        checkpointBuffer: list[str] | None = [] if onCheckpoint is not None and checkpointEvery > 0 else None
+        checkpointLock: asyncio.Lock | None = asyncio.Lock() if checkpointBuffer is not None else None
+
         try:
             workers = [
                 asyncio.create_task(
@@ -1105,6 +1139,10 @@ def batchCollect(
                         periodFn,
                         failures,
                         targetPeriodsByCode,
+                        checkpointBuffer,
+                        checkpointLock,
+                        checkpointEvery,
+                        onCheckpoint,
                     )
                 )
                 for i, c in enumerate(clients)
@@ -1113,6 +1151,19 @@ def batchCollect(
         finally:
             for c in clients:
                 await c.close()
+
+            # final flush: cancel/exhausted/완료 어떤 경로든 buffer 의 잔여 종목 외부에 넘긴다.
+            if onCheckpoint is not None and checkpointBuffer is not None and checkpointBuffer:
+                drain = checkpointBuffer[:]
+                checkpointBuffer.clear()
+                import logging as _logging
+
+                try:
+                    onCheckpoint(drain)
+                except Exception as e:
+                    _logging.getLogger("dartlab.collector").warning(
+                        "checkpoint.final_flush.fail batch_size=%d err=%s", len(drain), repr(e)[:200]
+                    )
 
         # P0 수정 (2026-04-06):
         # 1) 큐에 남은 종목 = exhausted로 잘린 종목 → pending 파일 저장
