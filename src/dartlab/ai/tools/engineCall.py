@@ -17,6 +17,7 @@ from dartlab.core.confidence import baseScore as _baseScore
 from .creditBadge import getDcrBadge
 from .filingDeepLink import attachDocRef, buildPeriodToFiling
 from .formatting import formatMoney, formatPercent
+from .industryContext import getIndustryBadge
 from .types import ToolResult
 
 _FILING_DIRECT_CONFIDENCE = _baseScore("filing_direct")
@@ -196,6 +197,9 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
     badge = getDcrBadge(company)
     if badge is not None:
         data["dcrBadge"] = badge
+    industryBadge = getIndustryBadge(company)
+    if industryBadge is not None:
+        data["industryBadge"] = industryBadge
     return ToolResult(
         True,
         summary_msg,

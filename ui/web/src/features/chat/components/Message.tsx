@@ -8,20 +8,23 @@ import type { Message, ToolPart } from '@/features/chat/store/chat';
 import { Button } from '@/components/ui/button';
 import { MarkdownText } from '../markdown/MarkdownText';
 import { DcrPopover, type DcrBadgeData } from '../refs/DcrPopover';
+import { IndustryChip, type IndustryBadgeData } from '../refs/IndustryChip';
 import { groupParts, WorkLoop } from '../workloop/WorkLoop';
 import { MessageActions } from './MessageActions';
 
-function extractDcrBadge(message: Message): DcrBadgeData | null {
-	// 가장 최근 EngineCall(Company.show) 도구 결과의 data.dcrBadge.
+interface CompanyShowData {
+	dcrBadge?: DcrBadgeData;
+	industryBadge?: IndustryBadgeData;
+}
+
+function latestToolResultData(message: Message): CompanyShowData | null {
 	for (let i = message.parts.length - 1; i >= 0; i--) {
 		const p = message.parts[i];
 		if (!p || p.type !== 'tool') continue;
 		const t = p as ToolPart;
 		if (t.status !== 'done') continue;
-		const r = t.result as { data?: { dcrBadge?: DcrBadgeData } } | undefined;
-		if (r?.data?.dcrBadge?.gradeRaw || r?.data?.dcrBadge?.grade) {
-			return r.data.dcrBadge;
-		}
+		const r = t.result as { data?: CompanyShowData } | undefined;
+		if (r?.data?.dcrBadge || r?.data?.industryBadge) return r.data;
 	}
 	return null;
 }
@@ -55,13 +58,16 @@ export function ChatMessage({ message, onRegenerate, canRegenerate }: Props) {
 	// 마지막 그룹이 loop 면 "답변 작성 전" — 그 loop 는 stillWorking, 별도 spinner 노출.
 	const lastGroup = groups[groups.length - 1];
 	const showComposingSpinner = !!message.loading && (!lastGroup || lastGroup.kind === 'loop');
-	const dcrBadge = extractDcrBadge(message);
+	const badgeData = latestToolResultData(message);
+	const dcrBadge = badgeData?.dcrBadge ?? null;
+	const industryBadge = badgeData?.industryBadge ?? null;
 
 	return (
 		<div className="group px-4 py-3 space-y-2">
-			{dcrBadge && (
-				<div className="flex items-center gap-2 pb-0.5">
-					<DcrPopover badge={dcrBadge} />
+			{(dcrBadge || industryBadge) && (
+				<div className="flex flex-wrap items-center gap-2 pb-0.5">
+					{dcrBadge && <DcrPopover badge={dcrBadge} />}
+					{industryBadge && <IndustryChip badge={industryBadge} />}
 				</div>
 			)}
 			{message.error && (
