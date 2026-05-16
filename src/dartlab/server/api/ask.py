@@ -49,6 +49,11 @@ async def apiAsk(req: AskRequest):
         return EventSourceResponse(
             _streamPublicAsk(req),
             media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache, no-transform",
+                "X-Accel-Buffering": "no",
+                "Connection": "keep-alive",
+            },
         )
 
     return await runPlainChat(req)

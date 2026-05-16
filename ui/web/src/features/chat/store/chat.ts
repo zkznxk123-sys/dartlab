@@ -148,6 +148,10 @@ function updateLastMessage(c: Conversation, mut: (m: Message) => Message): Conve
 	return { ...c, messages: msgs, updatedAt: Date.now() };
 }
 
+// rAF 스트리밍 코얼레스 — appendTextDelta 가 같은 프레임 안 여러 chunk 를 한 번에 flush 한다.
+let pendingDeltaBuffer: Record<string, string> = {};
+let deltaFlushScheduled = false;
+
 export const useChat = create<ChatState>()(
 	persist(
 		(set, get) => ({
@@ -192,19 +196,35 @@ export const useChat = create<ChatState>()(
 
 			appendTextDelta: (delta) => {
 				const id = get().activeId;
-				set({
-					conversations: updateConv(get().conversations, id, (c) =>
-						updateLastMessage(c, (m) => {
-							const last = m.parts[m.parts.length - 1];
-							if (last && last.type === 'text') {
-								const parts = m.parts.slice(0, -1);
-								parts.push({ type: 'text', text: last.text + delta });
-								return { ...m, parts };
-							}
-							return { ...m, parts: [...m.parts, { type: 'text', text: delta }] };
-						}),
-					),
-				});
+				if (!id) return;
+				// rAF coalesce — 같은 프레임 안 delta 를 한 번 setState 로 합친다.
+				// 매 delta setState → React 매번 재렌더 + MarkdownText 전체 재파싱 → 사용자에게 "한 번에" 보이는 현상.
+				pendingDeltaBuffer[id] = (pendingDeltaBuffer[id] ?? '') + delta;
+				if (deltaFlushScheduled) return;
+				deltaFlushScheduled = true;
+				const flush = () => {
+					deltaFlushScheduled = false;
+					const buffered = pendingDeltaBuffer;
+					pendingDeltaBuffer = {};
+					let convs = get().conversations;
+					for (const [convId, d] of Object.entries(buffered)) {
+						if (!d) continue;
+						convs = updateConv(convs, convId, (c) =>
+							updateLastMessage(c, (m) => {
+								const last = m.parts[m.parts.length - 1];
+								if (last && last.type === 'text') {
+									const parts = m.parts.slice(0, -1);
+									parts.push({ type: 'text', text: last.text + d });
+									return { ...m, parts };
+								}
+								return { ...m, parts: [...m.parts, { type: 'text', text: d }] };
+							}),
+						);
+					}
+					set({ conversations: convs });
+				};
+				if (typeof requestAnimationFrame === 'function') requestAnimationFrame(flush);
+				else setTimeout(flush, 16);
 			},
 
 			addToolStart: (tool) => {
