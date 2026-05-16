@@ -698,20 +698,68 @@ def _analyzeCashflowFinancial(aSeries: dict) -> InsightResult:
 
 
 def analyzeRiskSummary(insights: dict[str, InsightResult]) -> InsightResult:
-    """리스크 종합 분석.
+    """8 인사이트 영역 리스크 통합 — 가장 위험한 영역 강조 + 종합 등급.
 
-    Parameters
-    ----------
-    insights : dict[str, InsightResult]
-        영역별 인사이트 결과 (performance, profitability 등 키).
+    Capabilities:
+        8 인사이트 영역 (performance/profitability/health/cashflow/governance/
+        predictability/uncertainty/coreEarnings) 의 risks Flag 를 모두 합쳐
+        통합. severity 가중 (danger 3 / warning 2 / info 1) 합산하여 종합
+        리스크 등급 산출.
 
-    Returns
-    -------
-    InsightResult
-        grade : str — 'A'~'F' 등급
-        summary : str — 리스크 종합 요약
-        details : list[str] — 개별 리스크 텍스트 목록
-        risks : list[Flag] — 전체 리스크 플래그 취합
+    Args:
+        insights: 영역별 InsightResult dict. analyzePerformance/Profitability/
+            Health/Cashflow/Governance/Predictability/Uncertainty/CoreEarnings
+            결과를 키-값으로 보유.
+
+    Returns:
+        InsightResult:
+            - ``grade`` (str): A (낮은 리스크) ~ F (높은 리스크)
+            - ``summary`` (str): 한국어 요약
+            - ``details`` (list[str]): danger/warning 플래그 텍스트
+            - ``risks`` (list[Flag]): 8 영역 전체 합집합
+
+    Raises:
+        없음. 빈 insights dict 시 grade='N'.
+
+    Example:
+        >>> insights = {"health": analyzeHealth(ratios),
+        ...             "cashflow": analyzeCashflow(...)}
+        >>> r = analyzeRiskSummary(insights)
+        >>> r.grade, len(r.risks)
+        ('B', 3)
+
+    Guide:
+        리스크 가중치: danger=3, warning=2, info=1. 합산 0~3 = A, 4~6 = B,
+        7~9 = C, 10~14 = D, 15+ = F. 가장 많은 danger 가 어디서 왔는지
+        details 첫 라인에 명시.
+
+    SeeAlso:
+        - ``analyzeOpportunitySummary``: 반대 (강점 통합)
+        - ``credit.engine.evaluateCompany``: 본 함수와 별도 신용 등급
+        - 본 함수 호출자: ``Company.insights``
+
+    Requires:
+        insights dict 가 영역별 InsightResult.risks 보유.
+
+    AIContext:
+        risks 리스트는 사용자 향 직접 텍스트 — 모두 노출 권장 (truncate
+        금지). grade 만 인용 시 위험 종류 (governance vs health) 정보 손실.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 영역 (예 health) 만 보고 종합 리스크 판단 — 8 영역 합집합 권장.
+            - 빈 risks 리스트 → A 등급 — 실제 데이터 부족일 수도 있으므로
+              insights 키 개수 확인 함께.
+        OutputSchema:
+            InsightResult ``{grade, summary, details, risks}``.
+        Prerequisites:
+            insights dict 의 영역별 InsightResult (risks 필드 보유).
+        Freshness:
+            영역별 InsightResult freshness (최신 분기).
+        Dataflow:
+            8 영역 risks → severity 가중 합산 → grade 매핑 → details
+            (danger 우선) 합성.
+        TargetMarkets: KR + US. 영역별 분석에 따라 분기.
     """
     allRisks: list[Flag] = []
     for key in [
