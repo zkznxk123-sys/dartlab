@@ -75,6 +75,27 @@ def computeMatrixProfile(
         - O(n²·m) — n=1000 / m=30 → 약 30M 연산, 1초 미만.
         - z-normalize 로 패턴 매칭 (절대값 무관).
         - 더 빠른 알고리즘 (STOMP/SCRIMP) 은 후속.
+
+    Guide:
+        motif = 유사 차트 검색의 base. discord = anomaly. window 30 = 1 개월
+        거래일 기본.
+
+    When:
+        AI "이 차트와 비슷한 패턴" 답변 + retrospective 진입 신호 source.
+
+    How:
+        sliding windows → z-normalize → 모든 쌍 Euclidean → trivial neighborhood
+        excl → profile + idx → motif/discord 추출.
+
+    Requires:
+        시계열 ≥ 2 × window.
+
+    Raises:
+        없음 — 실패 시 error 키.
+
+    See Also:
+        - calcMomentum : 단일 종목 모멘텀
+        - calcVolatility : 변동성 regime
     """
     series = np.asarray(series, dtype=np.float64)
     n_raw = len(series)

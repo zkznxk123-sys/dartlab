@@ -79,6 +79,26 @@ def fracDiffFFD(
         - d=0.4 가 통상 sweet spot (Lopez de Prado 권장).
         - d 너무 크면 메모리 손실, 너무 작으면 stationary 통과 실패.
         - originalCorr > 0.7 이면 메모리 보존 ok.
+
+    Guide:
+        Lopez de Prado AFML — log_return 의 stationary 보장 + 메모리 보존 동시.
+        ML 모델 (RF/GRU/xgboost) 의 표준 입력.
+
+    When:
+        Quant ML 인프라 + 시계열 stationary 검증.
+
+    How:
+        d/threshold → 가중치 truncation → convolve → window 결정 → 변환 시리즈
+        + 원본 corr.
+
+    Requires:
+        시계열 ≥ 30. d ∈ [0, 1].
+
+    Raises:
+        없음 — 실패 시 error 키.
+
+    See Also:
+        - calcSADF : 단위근/버블 검정 (stationary 검증 보조)
     """
     series = np.asarray(series, dtype=np.float64)
     if len(series) < 30:

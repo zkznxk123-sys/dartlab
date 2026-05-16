@@ -65,6 +65,31 @@ def calcQFactor(
             topQ : list[tuple[str, float]] — Top 10 (0.99 이상)
             bottomQ : list[tuple[str, float]] — Bottom 10
             interpretation : str
+
+    Guide:
+        Hou-Xue-Zhang (2015) q-factor — FF5 RMW + CMA 재조립. q ≥ 0.95 = 강한
+        alpha 후보.
+
+    When:
+        Quant 재무 알파 + AI q-factor 답변.
+
+    How:
+        scan finance.parquet 2 기 → ROE rank + -AssetGrowth rank → 0.5×0.5
+        가중 합 → q-score percentile.
+
+    Requires:
+        scan finance.parquet (2 기 + AssetGrowth 매핑).
+
+    Raises:
+        없음 — 실패는 None.
+
+    Example:
+        >>> r = calcQFactor()
+        >>> r["topQ"][0]
+
+    See Also:
+        - calcQMJ : Asness QMJ
+        - calcPiotroskiFactor : 9 신호 합성
     """
     try:
         lf = loadScanParquet("finance", market)
