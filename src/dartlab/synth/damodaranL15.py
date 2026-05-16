@@ -88,10 +88,83 @@ def buildDamodaranMemo(
     industryKey: str | None = None,
     maxYears: int = 10,
 ) -> dict[str, Any]:
-    """Build a Damodaran-style L1.5 valuation memo from raw tables.
+    """L1.5 Damodaran valuation memo — DCF + Reverse DCF + Sensitivity (raw tables).
 
-    Parameters are explicit so recipes can orchestrate L1/L1.5 resources
-    without this helper importing engines or sibling L1.5 modules.
+    Capabilities:
+        Damodaran 의 "story-driven valuation" 프레임을 L1.5 layer 에서 구현.
+        BS/IS/CF raw 테이블 + country/industry defaults + market data 를
+        받아 DCF band (5/50/95 percentile) + reverse DCF (현 주가 내재 가정)
+        + 민감도 + assumption trace 생성. L2 엔진 import 없이 L1.5 layer 만
+        사용 (recipe orchestrator 친화적).
+
+    Args:
+        target: 종목코드 (KR 6 자리 또는 US ticker).
+        market: ``"KR"``/``"US"``.
+        currency: ``"KRW"``/``"USD"``.
+        companyName: 한국어 회사명.
+        statements: raw 재무 dict ``{"BS": DataFrame, "IS": DataFrame,
+            "CF": DataFrame}``.
+        countryDefaults: 국가 defaults JSON (ERP, riskFreeRate 등).
+        industryDefaults: 업종 defaults JSON (β, growth, margin).
+        marketData: 현재 주가/시총 dict (옵션, reverse DCF 용).
+        industryKey: 명시 업종 키. None 시 자동 매칭.
+        maxYears: 사용할 연도 수. 기본 10.
+
+    Returns:
+        dict — Damodaran memo:
+            - ``modelFit`` (dict): 적합 모델 선택 + 신뢰도
+            - ``assumptions`` (dict): WACC/growth/margin 가정
+            - ``dcf`` (dict): 5/50/95 percentile band
+            - ``reverseDcf`` (dict): 현 주가 내재 가정
+            - ``sensitivity`` (dict): WACC/g 민감도
+            - ``trace`` (list): 가정 추적
+            - ``panel`` (DataFrame): 처리된 패널
+            - ``gaps`` (list): 데이터 누락 항목
+
+    Raises:
+        없음 — 데이터 누락은 trace 에 기록 + best-effort.
+
+    Example:
+        >>> memo = buildDamodaranMemo(target="005930", market="KR", currency="KRW",
+        ...                            companyName="삼성전자", statements=...,
+        ...                            countryDefaults=..., industryDefaults=...)
+        >>> memo["dcf"]["p50"], memo["reverseDcf"]["impliedGrowth"]
+        (75000, 3.5)
+
+    Guide:
+        Damodaran story-driven approach: 매크로 (countryDefaults) → 업종
+        (industryDefaults) → 회사 (statements) 의 3-tier 가정 합성. reverse
+        DCF 는 "현 주가가 함의하는 성장률" 을 역산해 시장 implied story 가
+        합리적인지 평가.
+
+    SeeAlso:
+        - ``calcDFV``: dartlab Fair Value (본 memo 와 별도, multi-model)
+        - ``loadDamodaranERP``: countryDefaults 입력
+        - Damodaran, A. (2018) "Narrative and Numbers"
+
+    Requires:
+        statements (BS/IS/CF 시계열) + countryDefaults + industryDefaults.
+
+    AIContext:
+        recipe orchestrator (capability/storyMemoRecipe.py) 에서 본 함수 호출.
+        L2 import 0 — pure L1.5 layer.
+
+    LLM Specifications:
+        AntiPatterns:
+            - industryKey 명시 입력 시 자동 매칭 우회 — 잘못된 업종 강제
+              가능. None 권장 (자동 매칭 + log).
+            - reverseDcf 의 impliedGrowth 가 5%+ 면 시장 implied story 가 과
+              낙관 — 호출자가 sanity check 권장.
+        OutputSchema:
+            상기 8 키 dict.
+        Prerequisites:
+            statements (BS/IS/CF) + country/industry defaults JSON.
+        Freshness:
+            statements = 최신 분기. defaults = Damodaran 매년 1 월/7 월.
+        Dataflow:
+            statements → _buildPanel → _assumptions (country + industry +
+            company) → _dcfBand + _reverseDcf + _sensitivity → memo dict.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
 
     market_data = marketData or {}
