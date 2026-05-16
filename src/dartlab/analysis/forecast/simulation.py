@@ -245,35 +245,81 @@ def simulateScenario(
     sectorParams: SectorParams | None = None,
     shares: int | None = None,
 ) -> SimulationResult:
-    """단일 거시경제 시나리오 하에서 3년 실적 경로 시뮬레이션.
+    """단일 거시 시나리오 → 3 년 매출/영업이익/FCF/DCF 시뮬레이션.
 
-    Parameters
-    ----------
-    series : dict
-        finance.timeseries 시계열 dict.
-    scenario : MacroScenario | str
-        거시경제 시나리오 객체 또는 프리셋 이름 ("baseline", "adverse" 등).
-    sectorKey : str, optional
-        WICS 업종 키.
-    sectorParams : SectorParams, optional
-        업종별 파라미터 (할인율, 성장률 등).
-    shares : int, optional
-        발행주식수.
+    Capabilities:
+        매크로 시나리오 (GDP/금리/환율/CPI 3 년 경로) 와 업종 탄성치를 결합
+        하여 매출 → 영업이익 → FCF 시계열을 산출하고 DCF 기업가치를 계산.
+        시나리오 분석의 기본 단위 (simulateAllScenarios, simulateHistorical,
+        stressTest 모두 본 함수를 내부 호출).
 
-    Returns
-    -------
-    SimulationResult
-        scenarioName : str — 시나리오 코드명
-        scenarioLabel : str — 시나리오 한글명
-        years : int — 시뮬레이션 기간 (년)
-        revenuePath : list[float] — 연도별 예상 매출 (원)
-        operatingIncomePath : list[float] — 연도별 예상 영업이익 (원)
-        marginPath : list[float] — 연도별 예상 영업이익률 (%)
-        fcfPath : list[float] — 연도별 예상 FCF (원)
-        dcfValue : float — DCF 기업가치 (원)
-        perShareValue : float | None — 주당 가치 (원)
-        revenueChangePct : float — 최종연도 매출 변화율 (%)
-        marginChangeBps : float — 최종연도 마진 변화 (bps)
+    Args:
+        series: ``finance.timeseries`` dict (BS/IS/CF 시계열).
+        scenario: ``MacroScenario`` 객체 또는 프리셋 이름 (``"baseline"``,
+            ``"adverse"``, ``"severely_adverse"``).
+        sectorKey: WICS 업종 키. 업종별 탄성치 룩업.
+        sectorParams: 업종별 파라미터 (할인율, 성장률).
+        shares: 발행주식수. 주당 가치 산출용.
+
+    Returns:
+        SimulationResult dataclass:
+            - ``scenarioName``/``scenarioLabel`` (str)
+            - ``years`` (int): 시뮬 기간 (3 년)
+            - ``revenuePath``/``operatingIncomePath``/``marginPath``/``fcfPath``
+              (list[float]): 연도별 시계열
+            - ``dcfValue`` (float): DCF 기업가치
+            - ``perShareValue`` (float|None): 주당 가치
+            - ``revenueChangePct``/``marginChangeBps`` (float): 최종 변화량
+            - ``elasticityUsed`` (SectorElasticity): 적용된 탄성치
+            - ``assumptions`` (dict): 가정 투명화
+            - ``warnings`` (list[str]): 경고
+        시나리오 매칭 실패 시 빈 path + warnings 포함 결과.
+
+    Raises:
+        없음 (내부 catch).
+
+    Example:
+        >>> from dartlab import Company
+        >>> c = Company("005930")
+        >>> r = simulateScenario(c.finance.timeseries, "adverse", sectorKey="IT")
+        >>> r.revenuePath, r.dcfValue
+
+    Guide:
+        baseline = 매크로 변화 없음 (현재 추세 연장). adverse = 1 표준편차
+        충격 (GDP -2%p, 금리 +200bp). severely_adverse = 2 표준편차.
+        learnedBetas 입력 시 (simulateHistorical) 정적 탄성치 override.
+
+    SeeAlso:
+        - ``simulateAllScenarios``: 3 시나리오 일괄
+        - ``simulateHistorical``: 과거 위기 재현
+        - ``monteCarloForecast``: 1000 회 확률 분포
+        - ``stressTest``: 극단 스트레스
+
+    Requires:
+        ``series`` 가 finance.timeseries 스키마. ``MacroScenario`` 가
+        gdpGrowth/interestRate/krwUsd/cpi 3 년 list 보유.
+
+    AIContext:
+        scenarioName="알 수 없음" 결과 무시. assumptions dict 의 키-값을
+        리포트에 노출하여 어떤 탄성치/할인율이 적용됐는지 투명화.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 시나리오 결과만 인용 금지 — baseline + adverse + severe
+              3 개 비교 권장.
+            - revenuePath 의 절대값보다 변화율 (revenueChangePct) 이 시나리오
+              간 비교에 적합.
+        OutputSchema:
+            SimulationResult (11 필드 dataclass).
+        Prerequisites:
+            series 에 IS/CF/BS 시계열 + sectorKey 적합 (없으면 default 사용).
+        Freshness:
+            series 의 freshness (최신 분기). MacroScenario 는 정적.
+        Dataflow:
+            scenario 정규화 → 업종 탄성치 룩업 → 매출 path (GDP × β) →
+            영업이익 path (margin × β) → FCF (FCF/NI 비율) → DCF (할인) →
+            결과 dataclass.
+        TargetMarkets: KR + US (sectorKey 인자가 시장별 분기).
     """
     warnings: list[str] = []
 
