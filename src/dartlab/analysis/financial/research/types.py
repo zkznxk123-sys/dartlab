@@ -1,333 +1,50 @@
-"""Research 엔진 데이터 타입 — 종합 기업분석 리포트."""
+"""Research 엔진 데이터 타입 — 종합 기업분석 리포트.
+
+작은 dataclass 들은 도메인별 sub-module 로 분리 (BC 위해 re-export):
+- ``_typesScoring.py``: 정량 스코어 (Piotroski/MagicFormula/QMJ/Lynch/DuPont/QuantScores)
+- ``_typesSection.py``: 섹션 dataclass (Meta/Executive/Thesis/Overview/Sector/Financial 외)
+- ``_typesNarrative.py``: 서사 (NarrativeParagraph/NarrativeAnalysis)
+
+``ResearchResult`` 본체는 본 파일에 유지 — Jupyter rich rendering 의 단일 진입점.
+"""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-
-# ══════════════════════════════════════
-# 정량 스코어링
-# ══════════════════════════════════════
-
-
-@dataclass
-class PiotroskiScore:
-    """Piotroski F-Score (0-9)."""
-
-    total: int = 0
-    components: dict[str, bool] = field(default_factory=dict)
-    interpretation: str = ""  # "strong" | "moderate" | "weak"
-
-
-@dataclass
-class MagicFormulaScore:
-    """Greenblatt Magic Formula."""
-
-    roic: float | None = None
-    earningsYield: float | None = None
-
-
-@dataclass
-class QmjScore:
-    """AQR Quality Minus Junk (4-pillar)."""
-
-    profitability: float | None = None
-    growth: float | None = None
-    safety: float | None = None
-    payout: float | None = None
-    composite: float | None = None
-
-
-@dataclass
-class LynchFairValue:
-    """Peter Lynch Fair Value."""
-
-    earningsGrowthRate: float | None = None  # 5Y EPS CAGR (%)
-    fairValue: float | None = None  # growthRate * EPS
-    currentPrice: float | None = None
-    pegRatio: float | None = None
-    signal: str | None = None  # "undervalued" | "fair" | "overvalued"
-
-
-@dataclass
-class DuPontResult:
-    """DuPont 5-factor 분해."""
-
-    netMargin: list[float | None] = field(default_factory=list)
-    assetTurnover: list[float | None] = field(default_factory=list)
-    equityMultiplier: list[float | None] = field(default_factory=list)
-    roe: list[float | None] = field(default_factory=list)
-    periods: list[str] = field(default_factory=list)
-    driver: str = ""  # "margin" | "turnover" | "leverage" | "balanced"
-    # 5-factor 확장
-    taxBurden: list[float | None] = field(default_factory=list)  # NI/EBT
-    interestBurden: list[float | None] = field(default_factory=list)  # EBT/EBIT
-    operatingMargin: list[float | None] = field(default_factory=list)  # EBIT/Sales
-    roic: list[float | None] = field(default_factory=list)  # NOPAT/IC
-
-
-@dataclass
-class QuantScores:
-    """정량 스코어링 프레임워크 종합."""
-
-    piotroski: PiotroskiScore | None = None
-    magicFormula: MagicFormulaScore | None = None
-    qmj: QmjScore | None = None
-    lynchFairValue: LynchFairValue | None = None
-    buffettOwnerEarnings: float | None = None
-    dupont: DuPontResult | None = None
-
-
-# ══════════════════════════════════════
-# 리포트 섹션
-# ══════════════════════════════════════
-
-
-@dataclass
-class ResearchMeta:
-    """리포트 메타데이터."""
-
-    stockCode: str = ""
-    corpName: str = ""
-    generatedAt: str = ""
-    dataAsOf: str = ""
-    coverageScore: float = 0.0  # 0~1
-    market: str = "KR"
-    currency: str = "KRW"
-    warnings: list[str] = field(default_factory=list)
-
-
-@dataclass
-class ExecutiveSummary:
-    """핵심 요약."""
-
-    opinion: str = ""  # "강력매수" ~ "강력매도"
-    profile: str = ""  # "premium" | "growth" | "stable" | "caution" | "distress"
-    targetPrice: float | None = None
-    currentPrice: float | None = None
-    upside: float | None = None
-    thesis: str = ""
-    grades: dict[str, str] = field(default_factory=dict)
-    keyMetrics: list[dict[str, object]] = field(default_factory=list)
-
-
-@dataclass
-class InvestmentThesis:
-    """투자논거."""
-
-    bullCase: list[str] = field(default_factory=list)
-    bearCase: list[str] = field(default_factory=list)
-    catalysts: list[str] = field(default_factory=list)
-    monitoringPoints: list[str] = field(default_factory=list)
-    confidence: float = 0.0
-    summaryNarrative: str = ""
-
-
-@dataclass
-class CompanyOverview:
-    """기업 개요."""
-
-    description: str | None = None
-    sectorName: str | None = None
-    industryName: str | None = None
-    newsHeadlines: list[str] = field(default_factory=list)
-
-
-@dataclass
-class SectorKpi:
-    """단일 섹터 KPI."""
-
-    name: str = ""
-    label: str = ""
-    value: float | None = None
-    benchmark: float | None = None
-    unit: str = ""
-    assessment: str = ""  # "good" | "neutral" | "bad"
-
-
-@dataclass
-class SectorKpis:
-    """섹터별 특화 KPI."""
-
-    sectorName: str = ""
-    kpis: list[SectorKpi] = field(default_factory=list)
-
-
-@dataclass
-class BeneishDetail:
-    """Beneish M-Score 8변수 개별."""
-
-    dsri: float | None = None  # 매출채권지수
-    gmi: float | None = None  # 매출총이익지수
-    aqi: float | None = None  # 자산품질지수
-    sgi: float | None = None  # 매출성장지수
-    depi: float | None = None  # 감가상각지수
-    sgai: float | None = None  # 판관비지수
-    lvgi: float | None = None  # 레버리지지수
-    tata: float | None = None  # 발생주의비율
-    mScore: float | None = None  # 종합 M-Score
-    flagged: list[str] = field(default_factory=list)  # 경고 변수명 리스트
-
-
-@dataclass
-class FinancialAnalysis:
-    """재무 분석."""
-
-    dupont: DuPontResult | None = None
-    marginTrends: dict[str, list[float | None]] = field(default_factory=dict)
-    periods: list[str] = field(default_factory=list)
-    # BS 요약 시계열
-    bsSummary: dict[str, list[float | None]] = field(default_factory=dict)
-    # CF 요약 시계열
-    cfSummary: dict[str, list[float | None]] = field(default_factory=dict)
-    # 3표 연결 지표 시계열
-    crossStatementMetrics: dict[str, list[float | None]] = field(default_factory=dict)
-    # Common-Size 분석 (Lens 2)
-    isCommonSize: dict[str, list[float | None]] = field(default_factory=dict)  # IS항목/매출 %
-    bsCommonSize: dict[str, list[float | None]] = field(default_factory=dict)  # BS항목/자산 %
-
-
-@dataclass
-class EarningsQuality:
-    """이익의 질."""
-
-    cfToNi: float | None = None
-    accrualRatio: float | None = None
-    ccc: float | None = None  # Cash Conversion Cycle (days)
-    beneishMScore: float | None = None
-    assessment: str = ""  # "high" | "moderate" | "low" | "questionable"
-
-
-@dataclass
-class MarketData:
-    """시장 데이터 요약."""
-
-    currentPrice: float | None = None
-    marketCap: float | None = None
-    per: float | None = None
-    pbr: float | None = None
-    dividendYield: float | None = None
-    high52w: float | None = None
-    low52w: float | None = None
-    targetPrice: float | None = None
-    analystCount: int | None = None
-    buyRatio: float | None = None
-    foreignHoldingRatio: float | None = None
-    baseRate: float | None = None
-    usdKrw: float | None = None
-
-
-@dataclass
-class ForecastData:
-    """전망 데이터."""
-
-    revenueConsensus: list[dict[str, object]] = field(default_factory=list)
-    selfForecast: dict[str, object] | None = None
-    scenarioSummary: dict[str, object] | None = None
-
-
-# ══════════════════════════════════════
-# 새 섹션 타입 — v2
-# ══════════════════════════════════════
-
-
-@dataclass
-class InsightDetail:
-    """insight 영역 상세 — 등급 + 근거 수치."""
-
-    area: str = ""
-    grade: str = ""
-    summary: str = ""
-    details: list[str] = field(default_factory=list)
-    risks: list[str] = field(default_factory=list)
-    opportunities: list[str] = field(default_factory=list)
-
-
-@dataclass
-class DistressSection:
-    """부실 리스크 스코어카드."""
-
-    level: str = ""  # safe/watch/warning/danger/critical
-    overall: float = 0.0  # 0~100
-    creditGrade: str = ""  # AAA~D
-    creditDescription: str = ""
-    riskFactors: list[str] = field(default_factory=list)
-    cashRunwayMonths: float | None = None
-    axesSummary: list[dict[str, object]] = field(default_factory=list)
-
-
-@dataclass
-class AnomalySection:
-    """이상치 탐지 결과."""
-
-    items: list[dict[str, object]] = field(default_factory=list)
-    criticalCount: int = 0
-    warningCount: int = 0
-
-
-@dataclass
-class RiskSection:
-    """종합 리스크 — distress + anomalies + insight.risk 통합."""
-
-    distress: DistressSection | None = None
-    anomalies: AnomalySection | None = None
-    insightRisk: InsightDetail | None = None
-    riskNarrative: str = ""
-
-
-@dataclass
-class ValuationSection:
-    """밸류에이션 — DCF/DDM/상대가치 종합."""
-
-    dcfPerShare: float | None = None
-    dcfMos: float | None = None  # 안전마진 (%)
-    ddmPerShare: float | None = None
-    relativePerShare: float | None = None
-    fairValueRange: tuple[float, float] | None = None
-    verdict: str = ""  # "저평가" | "적정" | "고평가"
-    methodology: list[str] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
-
-
-@dataclass
-class PeerSection:
-    """동종업 비교 — 섹터 배수 기반 (OOM 안전)."""
-
-    sectorName: str = ""
-    sectorMultiples: dict[str, float] = field(default_factory=dict)
-    companyMultiples: dict[str, float | None] = field(default_factory=dict)
-    premiumDiscount: dict[str, float | None] = field(default_factory=dict)
-    peerNarrative: str = ""
-
-
-# ══════════════════════════════════════
-# Narrative Analysis — v3
-# ══════════════════════════════════════
-
-
-@dataclass
-class NarrativeParagraph:
-    """단일 교차분석 서술 단위."""
-
-    dimension: str = ""  # "dupont"|"margin"|"growth"|"cashflow"|"efficiency"|"segment"|"sectorRelative"
-    title: str = ""
-    body: str = ""  # 2-3문장 교차분석 서술
-    severity: str = ""  # "positive"|"neutral"|"negative"|"warning"
-
-
-@dataclass
-class NarrativeAnalysis:
-    """7차원 교차분석 서술 결과."""
-
-    paragraphs: list[NarrativeParagraph] = field(default_factory=list)
-    forwardImplications: list[str] = field(default_factory=list)
-    crossReferences: list[str] = field(default_factory=list)
-
+from dataclasses import asdict, dataclass, field  # noqa: F401
+
+# 분리된 dataclass re-export (BC)
+from dartlab.analysis.financial.research._typesNarrative import NarrativeAnalysis, NarrativeParagraph  # noqa: F401
+from dartlab.analysis.financial.research._typesScoring import (  # noqa: F401
+    DuPontResult,
+    LynchFairValue,
+    MagicFormulaScore,
+    PiotroskiScore,
+    QmjScore,
+    QuantScores,
+)
+from dartlab.analysis.financial.research._typesSection import (  # noqa: F401
+    AnomalySection,
+    BeneishDetail,
+    CompanyOverview,
+    DistressSection,
+    EarningsQuality,
+    ExecutiveSummary,
+    FinancialAnalysis,
+    ForecastData,
+    InsightDetail,
+    InvestmentThesis,
+    MarketData,
+    PeerSection,
+    ResearchMeta,
+    RiskSection,
+    SectorKpi,
+    SectorKpis,
+    ValuationSection,
+)
 
 # ══════════════════════════════════════
 # 렌더링 헬퍼
 # ══════════════════════════════════════
-
-
 # core SSOT re-export (하위 호환)
 from dartlab.core.utils.fmt import fmtBig as _fmtBig
 from dartlab.core.utils.fmt import fmtNum as _fmtNum
