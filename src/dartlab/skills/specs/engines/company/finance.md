@@ -27,6 +27,7 @@ outputs:
   - AnalysisResult (fsSummary 매칭 결과)
 capabilityRefs: []
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.company

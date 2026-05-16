@@ -29,6 +29,7 @@ capabilityRefs:
   - industry
 toolRefs:
   - search_reference
+  - EngineCall
   - RunPython
   - finalize_answer
 requiredEvidence:

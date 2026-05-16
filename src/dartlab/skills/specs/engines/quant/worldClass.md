@@ -22,6 +22,7 @@ capabilityRefs:
   - quant
 toolRefs:
   - search_reference
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.quant

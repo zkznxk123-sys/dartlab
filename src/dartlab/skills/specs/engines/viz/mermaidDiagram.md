@@ -21,6 +21,7 @@ outputs:
   - mermaid source
   - diagramRef
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.viz

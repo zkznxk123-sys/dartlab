@@ -31,6 +31,7 @@ capabilityRefs:
   - ChartResult
 toolRefs:
   - CompileVisual
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - start.dartlabSkillOs

@@ -25,6 +25,7 @@ capabilityRefs:
 toolRefs:
   - search_reference
   - InspectDataset
+  - EngineCall
   - RunPython
   - finalize_answer
 knowledgeRefs:

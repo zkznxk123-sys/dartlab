@@ -22,6 +22,7 @@ outputs:
   - chartType heatmap ChartSpec
   - Mermaid graph LR
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 knowledgeRefs:

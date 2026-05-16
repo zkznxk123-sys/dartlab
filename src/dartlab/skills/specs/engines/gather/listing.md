@@ -25,6 +25,7 @@ capabilityRefs:
   - Company.topicSummaries
   - Company.listing
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.search

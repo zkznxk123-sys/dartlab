@@ -24,6 +24,7 @@ datasetRefs:
 toolRefs:
   - search_reference
   - InspectDataset
+  - EngineCall
   - RunPython
   - CompileVisual
   - finalize_answer

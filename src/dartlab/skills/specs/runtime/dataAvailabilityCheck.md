@@ -27,6 +27,7 @@ capabilityRefs:
 toolRefs:
   - search_reference
   - InspectDataset
+  - EngineCall
   - RunPython
 requiredEvidence:
   - latestAsOf

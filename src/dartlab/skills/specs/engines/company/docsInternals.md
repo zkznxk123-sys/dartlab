@@ -23,6 +23,7 @@ outputs:
   - Rust 포팅 단계별 인터페이스
 capabilityRefs: []
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.company.sections
