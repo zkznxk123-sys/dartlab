@@ -249,22 +249,70 @@ def dalioPolicyLeverStatus(
     creditGap: float | None = None,
     fxFlexibility: str | None = None,
 ) -> DalioPolicyLeverResult:
-    """Dalio 정책 4 레버 소진도 판정 (Big Debt Crises Ch.3).
+    """Dalio 정책 4 레버 (monetary/fiscal/credit/fx) 소진도 → 위기 대응 여력 진단.
 
-    위기 대응 시 정부가 쓸 수 있는 수단이 얼마나 남아있는가 — 가장
-    중요한 것은 "여유 레버가 남아있나" 이다 (Dalio).
+    Capabilities:
+        Dalio (2018) Big Debt Crises Ch.3 — 정부가 위기 대응에 쓸 수 있는
+        4 레버 (monetary/fiscal/credit/fx) 의 소진도를 판정. 가장 중요한
+        통찰: "어떤 위기인가" 보다 "얼마나 레버가 남아있나" — 한국은 fiscal/
+        FX 여유, 미국은 monetary 소진 + fiscal 여유, 일본은 4 레버 모두 소진.
 
-    Parameters
-    ----------
-    policyRate : 기준금리 (%). <= 0.5% → maxed, <= 2% → partial, 그 외 spare.
-    publicDebtToGdp : 공공부채/GDP (%). >= 120 → maxed, >= 80 → partial, 그 외 spare.
-    creditGap : BIS credit-to-GDP gap (%p). >= 8 → maxed, >= 2 → partial, 그 외 spare.
-    fxFlexibility : "flexible"|"managed"|"pegged" — peg/관리 = maxed, 자유변동 = spare.
+    Args:
+        policyRate: 기준금리 (%). ≤ 0.5 = maxed, ≤ 2 = partial, 그 외 spare.
+        publicDebtToGdp: 공공부채/GDP (%). ≥ 120 = maxed, ≥ 80 = partial.
+        creditGap: BIS credit-to-GDP gap (%p). ≥ 8 = maxed, ≥ 2 = partial.
+        fxFlexibility: ``"flexible"``/``"managed"``/``"pegged"`` — peg/관리 =
+            maxed (FX 자유롭게 못 풂), flexible = spare.
 
-    Returns
-    -------
-    DalioPolicyLeverResult
-        4 레버 상태 + 소진도 점수 (3=maxed, 2=partial, 1=spare, 합계 0~12).
+    Returns:
+        DalioPolicyLeverResult dataclass:
+            - ``monetary``/``fiscal``/``credit``/``fx`` (str): 각 레버 상태
+            - ``totalScore`` (int): 0~12 (4 × 3) 소진도
+            - ``available`` (int): 남은 spare 레버 수
+            - ``status`` (str): ``"abundant"``/``"limited"``/``"depleted"``
+            - ``description`` (str): 한국어 진단
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = dalioPolicyLeverStatus(policyRate=0.5, publicDebtToGdp=260,
+        ...                            creditGap=10, fxFlexibility="managed")
+        >>> r.status, r.totalScore
+        ('depleted', 11)  # 일본 사례
+
+    Guide:
+        totalScore 임계: 0~4 = abundant, 5~8 = limited, 9~12 = depleted.
+        depleted 국가는 위기 시 새로운 도구 (Yield Curve Control, 직접
+        통화 인쇄 등) 필요. 한국은 보통 abundant ~ limited.
+
+    SeeAlso:
+        - ``dalioDebtCyclePhase``: 6 단계 (본 함수와 조합)
+        - ``creditToGDPGap``: BIS gap (creditGap 입력)
+        - Dalio, R. (2018) Big Debt Crises Ch.3
+
+    Requires:
+        없음 — 4 레버 모두 옵션. 입력 없으면 모두 spare.
+
+    AIContext:
+        status="depleted" 결과는 정책 결정자 향 (정부 대응 한계 시점). 개별
+        기업 분석에서는 ``available`` 수로 macro 여력 표시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 레버 (policyRate 만) 보고 status 단정 — 4 레버 합산.
+            - fxFlexibility 결측 시 자동 spare 처리 — 의도된 default 이나
+              실제 peg/관리 통화이면 maxed 명시 권장.
+        OutputSchema:
+            DalioPolicyLeverResult ``{monetary, fiscal, credit, fx, totalScore,
+            available, status, description}``.
+        Prerequisites:
+            적어도 1 레버 입력 권장 (그 외 spare default).
+        Freshness:
+            정책금리 일, 공공부채 분기 (IMF/한국은행), creditGap 분기.
+        Dataflow:
+            각 레버 임계 비교 → maxed/partial/spare 라벨 → 점수 합산 → status.
+        TargetMarkets: Global (Dalio 원형). 한국 + 미국 + 일본 + EU 모두.
     """
     signals: list[str] = []
 
