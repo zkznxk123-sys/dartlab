@@ -56,28 +56,69 @@ from dartlab.core.utils.calc import safePct as _pctOf  # noqa: E402
 
 @memoizedCalc
 def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """레버리지 구조 시계열 -- 부채로 얼마나 버티는가.
+    """레버리지 구조 시계열 — 부채로 얼마나 버티는가.
 
-    BS에서 부채/자본/자산 원본 금액을 가져와서
-    부채비율 + 자기자본비율 + 순차입금비율을 금액과 함께 보여준다.
+    Capabilities:
+        부채총계/자본총계/자산총계/현금/총차입금 원본 + 부채비율/자기자본
+        비율/순차입금비율 시계열. 차입금은 회사별 키 패턴 무관 sumBorrowings
+        헬퍼로 단·장기 + 사채 + 유동성장기차입금 합산. notesDetail 로 차입금/
+        리스 주석 enrichment + injectTurningPoints 로 변곡점 자동 라벨.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            totalDebt : float — 부채총계 (원)
-            totalDebtYoy : float — 부채총계 전년비 (%)
-            equity : float — 자본총계 (원)
-            equityYoy : float — 자본총계 전년비 (%)
-            totalAssets : float — 자산총계 (원)
-            cash : float — 현금및현금성자산 (원)
-            totalBorrowing : float — 총차입금 (원)
-            netDebt : float — 순차입금 (원)
-            debtRatio : float — 부채비율 (%)
-            equityRatio : float — 자기자본비율 (%)
-            netDebtRatio : float — 순차입금비율 (%)
-        notesDetail : dict — 차입금/리스 주석 상세 (있을 때만)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 12 키 (period, totalDebt + YoY, equity +
+              YoY, totalAssets, cash, totalBorrowing, netDebt, debtRatio,
+              equityRatio, netDebtRatio)
+            - ``turningPoints`` (list[dict]): debtRatio Δ ≥ 25pp 변곡점
+            - ``notesDetail`` (dict, optional): borrowings + lease 주석
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcLeverageTrend(Company("005930"))
+        >>> r["history"][0]["debtRatio"], r["history"][0]["netDebtRatio"]
+        (35.2, -8.1)  # 부채비율 35%, 순현금 (netDebt 음수)
+
+    Guide:
+        - 부채비율 > 200% 가 2+ 년 연속 = 자본 잠식 위험 (KR 제조업 기준).
+        - 순차입금비율 음수 = 순현금 (자기자본보다 현금이 많음, 삼성전자
+          전형).
+        - 차입금 키 회사별 다양 (사채/유동성장기차입금) → sumBorrowings 가
+          12 키 합산하므로 누락 없음.
+
+    SeeAlso:
+        - ``calcCoverageTrend``: IC (이자보상)
+        - ``calcFundingSources``: 자본/부채/차입 funding mix
+        - ``credit.engine``: 7 축 종합 (본 함수가 leverage 축 입력)
+
+    Requires:
+        BS (부채총계 + 자본총계 + 자산총계 + 현금 + 차입금 12 키 후보) ≥ 2 년.
+
+    AIContext:
+        debtRatio + netDebt 부호 함께 인용. netDebt < 0 (순현금) 회사는
+        부채비율 높아도 안전 — netDebt 부호 우선 판단. turningPoints 있으면
+        구조 변화 시점 (M&A·구조조정) 시그널로 활용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 부채비율 단독 인용 — netDebt 부호 함께 (순현금 회사 오판 방지).
+            - 단기·장기 차입금 별도 합산 시도 — sumBorrowings 가 12 키 모두
+              합산 (회사별 키 패턴 무관).
+        OutputSchema:
+            ``{history: list[dict 12키], turningPoints: list, notesDetail?: dict}``.
+        Prerequisites:
+            BS 7 계정 + 차입금 12 키 후보.
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            BS → 부채/자본/자산/현금/차입금 → 3 비율 + netDebt →
+            injectTurningPoints + fetchNotesDetail enrichment.
+        TargetMarkets: KR (DART), US (EDGAR — 표준).
     """
     bsResult = company.select(
         "BS",
