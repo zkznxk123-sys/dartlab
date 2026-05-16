@@ -13,6 +13,7 @@ import polars as pl
 
 from dartlab.ai.contracts import Ref
 
+from .creditBadge import getDcrBadge
 from .formatting import formatMoney, formatPercent
 from .types import ToolResult
 
@@ -168,19 +169,23 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
     summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인"
     if auto_gather_used:
         summary_msg += " (자동 update 후 재조회 성공)"
+    data: dict[str, Any] = {
+        "companyName": companyName,
+        "stockCode": stockCode,
+        "statement": topic,
+        "label": _STMT_LABELS[topic],
+        "summary": summary,
+        "markdown": _statementMarkdown(companyName, stockCode, topic, summary),
+        "autoGatherUsed": auto_gather_used,
+    }
+    badge = getDcrBadge(company)
+    if badge is not None:
+        data["dcrBadge"] = badge
     return ToolResult(
         True,
         summary_msg,
         refs=refs,
-        data={
-            "companyName": companyName,
-            "stockCode": stockCode,
-            "statement": topic,
-            "label": _STMT_LABELS[topic],
-            "summary": summary,
-            "markdown": _statementMarkdown(companyName, stockCode, topic, summary),
-            "autoGatherUsed": auto_gather_used,
-        },
+        data=data,
     )
 
 

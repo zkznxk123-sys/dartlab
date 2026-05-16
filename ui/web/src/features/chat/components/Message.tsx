@@ -4,11 +4,27 @@
 // parts[] 는 groupParts 로 [text | loop] 시퀀스로 묶어 렌더.
 import { Loader2, RotateCcw } from 'lucide-react';
 
-import type { Message } from '@/features/chat/store/chat';
+import type { Message, ToolPart } from '@/features/chat/store/chat';
 import { Button } from '@/components/ui/button';
 import { MarkdownText } from '../markdown/MarkdownText';
+import { DcrPopover, type DcrBadgeData } from '../refs/DcrPopover';
 import { groupParts, WorkLoop } from '../workloop/WorkLoop';
 import { MessageActions } from './MessageActions';
+
+function extractDcrBadge(message: Message): DcrBadgeData | null {
+	// 가장 최근 EngineCall(Company.show) 도구 결과의 data.dcrBadge.
+	for (let i = message.parts.length - 1; i >= 0; i--) {
+		const p = message.parts[i];
+		if (!p || p.type !== 'tool') continue;
+		const t = p as ToolPart;
+		if (t.status !== 'done') continue;
+		const r = t.result as { data?: { dcrBadge?: DcrBadgeData } } | undefined;
+		if (r?.data?.dcrBadge?.gradeRaw || r?.data?.dcrBadge?.grade) {
+			return r.data.dcrBadge;
+		}
+	}
+	return null;
+}
 
 interface Props {
 	message: Message;
@@ -39,9 +55,15 @@ export function ChatMessage({ message, onRegenerate, canRegenerate }: Props) {
 	// 마지막 그룹이 loop 면 "답변 작성 전" — 그 loop 는 stillWorking, 별도 spinner 노출.
 	const lastGroup = groups[groups.length - 1];
 	const showComposingSpinner = !!message.loading && (!lastGroup || lastGroup.kind === 'loop');
+	const dcrBadge = extractDcrBadge(message);
 
 	return (
 		<div className="group px-4 py-3 space-y-2">
+			{dcrBadge && (
+				<div className="flex items-center gap-2 pb-0.5">
+					<DcrPopover badge={dcrBadge} />
+				</div>
+			)}
 			{message.error && (
 				<div className="flex items-center gap-2 text-sm text-destructive">
 					<span>⚠ {message.error}</span>
