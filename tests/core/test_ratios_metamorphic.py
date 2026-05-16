@@ -67,6 +67,16 @@ class TestYoyPctOracle:
         assert yoyPct(100, None) is None
         assert yoyPct(None, None) is None
 
+    def test_cur_zero_with_positive_prev(self) -> None:
+        """cur=0, prev>0 → -100% (전액 손실). mutation `>=` → `>` cur=0 케이스 회귀 가드."""
+        assert yoyPct(0, 100) == -100.0
+        assert yoyPct(0, 50000) == -100.0
+
+    def test_cur_zero_with_negative_prev(self) -> None:
+        """cur=0, prev<0 → 부호 전환 (음수→0 양수) → None."""
+        # cur=0 은 ">= 0" 으로 양수 분기지만 prev<0 이라 둘 다 거짓 → None
+        assert yoyPct(0, -100) is None
+
 
 class TestYoyPctMetamorphic:
     """yoyPct metamorphic — 변환 후 속성 보존."""

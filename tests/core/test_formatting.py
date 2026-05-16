@@ -98,6 +98,16 @@ class TestFormatKrOracle:
     def test_with_won_below_eok(self) -> None:
         assert formatKr(10_000, withWon=True) == "10,000원"
 
+    def test_with_won_jo_boundary_exact(self) -> None:
+        """withWon=True 분기의 조 임계 정확 (1e12 → 1.0조원). mutmut withWon 분기 잡기."""
+        assert formatKr(1_000_000_000_000, withWon=True) == "1.0조원"
+        assert formatKr(999_999_999_999, withWon=True) == "10,000억원"
+
+    def test_with_won_eok_boundary_exact(self) -> None:
+        """withWon=True 분기의 억 임계 정확 (1e8 → 1억원)."""
+        assert formatKr(100_000_000, withWon=True) == "1억원"
+        assert formatKr(99_999_999, withWon=True) == "99,999,999원"
+
     def test_none_nullstr(self) -> None:
         assert formatKr(None) == "-"
 
