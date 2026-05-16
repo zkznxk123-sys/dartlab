@@ -12,11 +12,14 @@ from typing import Any
 import polars as pl
 
 from dartlab.ai.contracts import Ref
+from dartlab.core.confidence import baseScore as _baseScore
 
 from .creditBadge import getDcrBadge
 from .filingDeepLink import attachDocRef, buildPeriodToFiling
 from .formatting import formatMoney, formatPercent
 from .types import ToolResult
+
+_FILING_DIRECT_CONFIDENCE = _baseScore("filing_direct")
 
 _AUTO_GATHER_ENABLED = os.environ.get("DARTLAB_AUTO_GATHER", "1") not in {"0", "false", "False"}
 
@@ -142,7 +145,15 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         )
     filingMap = buildPeriodToFiling(company)
     latestPeriod = summary["latestPeriod"]
-    tablePayload = attachDocRef(summary, latestPeriod, filingMap)
+
+    def _enrich(base: dict[str, Any]) -> dict[str, Any]:
+        """payload 에 docRef + confidence (filing_direct = 95) + provenance 부착."""
+        out = attachDocRef(base, latestPeriod, filingMap)
+        out.setdefault("confidence", _FILING_DIRECT_CONFIDENCE)
+        out.setdefault("confidenceMethod", "filing_direct")
+        return out
+
+    tablePayload = _enrich(summary)
     table_ref = Ref(
         id=f"table:{stockCode}:{topic}:{latestPeriod}",
         kind="tableRef",
@@ -157,7 +168,7 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
             kind="valueRef",
             title=f"{row['item']} {latestPeriod}",
             source=table_ref.id,
-            payload=attachDocRef(row, latestPeriod, filingMap),
+            payload={**_enrich(row), "provenance": [table_ref.id]},
         )
         for row in summary["rows"]
     )
@@ -167,7 +178,7 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
             kind="dateRef",
             title=f"{_STMT_LABELS[topic]} 기준시점",
             source=table_ref.id,
-            payload=attachDocRef({"period": latestPeriod}, latestPeriod, filingMap),
+            payload={**_enrich({"period": latestPeriod}), "provenance": [table_ref.id]},
         )
     )
     summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인"

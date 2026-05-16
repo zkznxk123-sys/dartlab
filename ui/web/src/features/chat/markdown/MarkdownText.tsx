@@ -5,6 +5,7 @@ import { Fragment, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { ConfidenceChip } from '../refs/ConfidenceChip';
 import { EvidenceChip } from '../refs/EvidenceChip';
 import { MermaidDiagram } from './MermaidDiagram';
 import { UntrustedBlock } from './UntrustedBlock';
@@ -65,6 +66,16 @@ const REF_ID_RE = new RegExp(`\\b(${REF_KIND_ALT}):[A-Za-z0-9_.\\-:]+`, 'g');
 const SENTINEL_OPEN = '⦉CHIP:';
 const SENTINEL_CLOSE = '⦊';
 const SENTINEL_RE = /⦉CHIP:([^⦊]+)⦊/g;
+
+// 신뢰도 chip — 본문 안 [conf:high|mid|low|95] 마커 → 색상 chip.
+const CONF_RE = /\[conf:(high|mid|low|\d{1,3})\]/gi;
+const CONF_SENTINEL_OPEN = '⦉CONF:';
+const CONF_SENTINEL_CLOSE = '⦊';
+const CONF_SENTINEL_RE = /⦉CONF:([^⦊]+)⦊/g;
+
+function injectConfSentinels(text: string): string {
+	return text.replace(CONF_RE, (_m, raw) => `${CONF_SENTINEL_OPEN}${raw}${CONF_SENTINEL_CLOSE}`);
+}
 
 // ref ID 추출 + sentinel 로 마킹. 백틱 안 / inline code 는 보호 (간단: ` 로 감싸진 구간 skip).
 function injectRefSentinels(text: string): { text: string; refOrder: string[] } {
@@ -130,16 +141,24 @@ function splitWithSentinels(
 	refIndex: Map<string, number>,
 	extBlocks: string[],
 ): ReactNode {
-	if (!s.includes(SENTINEL_OPEN) && !s.includes(EXT_SENTINEL_OPEN)) return s;
+	if (
+		!s.includes(SENTINEL_OPEN) &&
+		!s.includes(EXT_SENTINEL_OPEN) &&
+		!s.includes(CONF_SENTINEL_OPEN)
+	) {
+		return s;
+	}
 
 	const parts: ReactNode[] = [];
 	let cursor = 0;
-	const combined = new RegExp(`${SENTINEL_RE.source}|${EXT_SENTINEL_RE.source}`, 'g');
+	const combined = new RegExp(
+		`${SENTINEL_RE.source}|${EXT_SENTINEL_RE.source}|${CONF_SENTINEL_RE.source}`,
+		'g',
+	);
 	let m: RegExpExecArray | null;
 	while ((m = combined.exec(s)) !== null) {
 		if (m.index > cursor) parts.push(s.slice(cursor, m.index));
 		if (m[1]) {
-			// ref chip
 			const refId = m[1];
 			parts.push(
 				<EvidenceChip
@@ -149,11 +168,10 @@ function splitWithSentinels(
 				/>,
 			);
 		} else if (m[2] !== undefined) {
-			// external block
 			const idx = Number(m[2]);
-			parts.push(
-				<UntrustedBlock key={`ext-${m.index}`} text={extBlocks[idx] ?? ''} />,
-			);
+			parts.push(<UntrustedBlock key={`ext-${m.index}`} text={extBlocks[idx] ?? ''} />);
+		} else if (m[3] !== undefined) {
+			parts.push(<ConfidenceChip key={`conf-${m.index}`} raw={m[3]} />);
 		}
 		cursor = combined.lastIndex;
 	}
@@ -187,8 +205,10 @@ export function MarkdownText({ text }: { text: string }) {
 	const { text: t1, blocks: extBlocks } = injectExternalSentinels(t0);
 	// 2) ref ID sentinel
 	const { text: t2, refOrder } = injectRefSentinels(t1);
+	// 2.5) 신뢰도 chip sentinel — [conf:high|mid|low|95]
+	const t2c = injectConfSentinels(t2);
 	// 3) CJK bold 보정
-	const cleaned = fixCjkBold(t2);
+	const cleaned = fixCjkBold(t2c);
 	const refIndex = new Map(refOrder.map((id, i) => [id, i + 1]));
 
 	const wrap = (children: ReactNode) => walkChildren(children, refIndex, extBlocks);
