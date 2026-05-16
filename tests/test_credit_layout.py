@@ -23,7 +23,13 @@ EXPECTED_LAYOUT: dict[str, set[str]] = {
     "scoring": {"metrics.py", "gradeTable.py", "creditScorecard.py", "migration.py", "calcs.py", "_metricsHelpers.py"},
     "models": {"chsModel.py", "merton.py", "survival.py", "excessBondPremium.py"},
     "monitoring": {"crisisDetector.py", "creditCycle.py", "audit.py", "history.py"},
-    "features": {"chsFeatures.py", "sectorThresholds.py", "narrative.py", "_narrativeTypes.py"},
+    "features": {
+        "chsFeatures.py",
+        "sectorThresholds.py",
+        "narrative.py",
+        "_narrativeTypes.py",
+        "_narrativeBuilders.py",
+    },
 }
 
 
