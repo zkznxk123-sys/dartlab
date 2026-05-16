@@ -11,7 +11,6 @@ import { ChatMessage } from './Message';
 import { Composer } from './Composer';
 import { EmptyState } from './EmptyState';
 import { ScrollToBottomButton } from './ScrollToBottomButton';
-import { WorkspaceBar } from './WorkspaceBar';
 
 export function Chat() {
 	const conversations = useChat((s) => s.conversations);
@@ -176,7 +175,6 @@ export function Chat() {
 
 	return (
 		<div className="flex flex-1 flex-col min-h-0 relative">
-			<WorkspaceBar />
 			<ScrollArea
 				className="flex-1 min-h-0"
 				viewportRef={viewportRef}

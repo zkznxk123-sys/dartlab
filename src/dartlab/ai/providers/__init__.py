@@ -210,14 +210,26 @@ def streamProvider(
     """Provider 의 generate_stream 사용. 미지원 provider 는 generate() wrap fallback.
 
     chatNative / agent loop 가 본 helper 호출. UI 가 typing 효과 받음 (지원 provider).
+    streaming 미지원 provider (oauth-codex / codex / gemini) 도 텍스트를 chunk 로 잘라
+    delay 하며 yield → UI 가 token-by-token 흐름으로 보이도록 시뮬레이션.
     """
+    import time
     from collections.abc import Iterator  # noqa: F401 — typing only
 
     if hasattr(provider, "generateStream") and callable(getattr(provider, "generateStream")):
         yield from provider.generateStream(messages, tools)
         return
     turn = provider.generate(messages, tools)
-    yield StreamChunk(text=turn.content, final=True, turn=turn)
+    text = turn.content or ""
+    if text:
+        CHUNK_SIZE = 16
+        CHUNK_DELAY = 0.012
+        total = len(text)
+        for i in range(0, total, CHUNK_SIZE):
+            yield StreamChunk(text=text[i : i + CHUNK_SIZE])
+            if i + CHUNK_SIZE < total:
+                time.sleep(CHUNK_DELAY)
+    yield StreamChunk(text="", final=True, turn=turn)
 
 
 class UnavailableProvider:
