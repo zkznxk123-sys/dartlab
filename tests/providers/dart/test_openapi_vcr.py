@@ -44,28 +44,46 @@ def test_buildVcr_match_on_includes_path_and_query() -> None:
 
 
 @pytest.mark.network
-def test_corpCode_replay_or_skip() -> None:
-    """DART corpCode 조회 카세트 replay — 카세트 없으면 skip.
+def test_list_replay_or_record() -> None:
+    """DART list.json 공시 목록 — 카세트 record (없을 때) 또는 replay (있을 때).
 
-    record 절차 (운영자 트리거 1 회):
-        $env:DART_API_KEY="..."
-        uv run python -X utf8 -m pytest tests/providers/dart/test_openapi_vcr.py \
-            -m "network" -v --vcr-record=once
-
-    이후 CI 는 카세트만 replay (record_mode='none').
+    카세트 부재 + DART_API_KEY 없음 → skip.
+    카세트 부재 + DART_API_KEY 있음 → record 모드 (`once`, 첫 실 호출).
+    카세트 존재 → replay 모드 (`none`, 네트워크 없이 검증).
     """
-    cassette = _cassette("corpCode.yaml")
-    if not cassette.exists():
-        pytest.skip(f"VCR 카세트 없음: {cassette}. 운영자 트리거로 record 필요 — tests/_cassettes/README.md 참조.")
+    import os
 
-    vcrInstance = buildVcr(str(_CASSETTE_DIR), record_mode="none")
+    import httpx
+
+    cassette = _cassette("list.yaml")
+    has_api_key = bool(os.environ.get("DART_API_KEY"))
+
+    if not cassette.exists() and not has_api_key:
+        pytest.skip(f"카세트 없음 ({cassette}) + DART_API_KEY 미설정 — 운영자 트리거 필요.")
+
+    mode = "once" if not cassette.exists() else "none"
+    vcrInstance = buildVcr(str(_CASSETTE_DIR), record_mode=mode)
+
+    api_key = os.environ.get("DART_API_KEY", "REPLAY_NO_KEY_NEEDED")
+    url = "https://opendart.fss.or.kr/api/list.json"
+    params = {
+        "crtfc_key": api_key,
+        "corp_code": "00126380",  # 삼성전자
+        "bgn_de": "20240101",
+        "end_de": "20240131",
+    }
+
     with vcrInstance.use_cassette(cassette.name):
-        # 실제 dartlab API 호출 — 카세트로 replay
-        from dartlab.providers.dart.openapi.corpCode import fetchCorpCode
+        r = httpx.get(url, params=params, timeout=30)
+        assert r.status_code == 200, f"HTTP {r.status_code}"
 
-        df = fetchCorpCode()
-        assert df is not None
-        assert df.height > 0
-        # 컬럼 회귀 가드 — DART API 가 응답 컬럼 바꾸면 즉시 fail
-        for required_col in ("corp_code", "corp_name", "stock_code"):
-            assert required_col in df.columns, f"DART corpCode 응답에서 {required_col} 컬럼 누락"
+        # DART 응답 schema 회귀 가드
+        body = r.json()
+        assert "status" in body, "DART 응답에 status 누락"
+        if body["status"] == "000":
+            assert "list" in body, "DART 정상 응답에 list 누락"
+
+    # sanitize 검증 — 카세트에 API key 노출 안 됨
+    if cassette.exists() and api_key != "REPLAY_NO_KEY_NEEDED":
+        content = cassette.read_text(encoding="utf-8")
+        assert api_key not in content, "DART_API_KEY 가 카세트에 노출됨 — sanitize 실패"

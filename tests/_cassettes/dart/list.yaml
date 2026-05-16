@@ -1,0 +1,41 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - opendart.fss.or.kr
+      User-Agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://opendart.fss.or.kr/api/list.json?bgn_de=20240101&corp_code=00126380&end_de=20240131
+  response:
+    body:
+      string: "{\"status\":\"000\",\"message\":\"\uC815\uC0C1\",\"page_no\":1,\"page_count\":10,\"total_count\":15,\"total_page\":2,\"list\":[{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uD2B9\uC218\uAD00\uACC4\uC778\uACFC\uC758\uB0B4\uBD80\uAC70\uB798\",\"rcept_no\":\"20240131000326\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uACF5\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uC218\uC2DC\uACF5\uC2DC\uC758\uBB34\uAD00\uB828\uC0AC\uD56D(\uACF5\uC815\uACF5\uC2DC)\",\"rcept_no\":\"20240131800110\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uC720\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uB9E4\uCD9C\uC561\uB610\uB294\uC190\uC775\uAD6C\uC87030%(\uB300\uADDC\uBAA8\uBC95\uC778\uC74015%)\uC774\uC0C1\uBCC0\uACBD\",\"rcept_no\":\"20240131800076\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uC720\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"[\uAE30\uC7AC\uC815\uC815]\uC7A5\uB798\uC0AC\uC5C5\u318D\uACBD\uC601\uACC4\uD68D(\uACF5\uC815\uACF5\uC2DC)\",\"rcept_no\":\"20240131800054\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uC720\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uD604\uAE08\u318D\uD604\uBB3C\uBC30\uB2F9\uACB0\uC815\",\"rcept_no\":\"20240131800043\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uC720\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"[\uAE30\uC7AC\uC815\uC815]\uC5F0\uACB0\uC7AC\uBB34\uC81C\uD45C\uAE30\uC900\uC601\uC5C5(\uC7A0\uC815)\uC2E4\uC801(\uACF5\uC815\uACF5\uC2DC)\",\"rcept_no\":\"20240131800033\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uC720\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uC5F0\uACB0\uC7AC\uBB34\uC81C\uD45C\uAE30\uC900\uC601\uC5C5(\uC7A0\uC815)\uC2E4\uC801(\uACF5\uC815\uACF5\uC2DC)\",\"rcept_no\":\"20240131800032\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240131\",\"rm\":\"\uC720\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uC8FC\uC2DD\uB4F1\uC758\uB300\uB7C9\uBCF4\uC720\uC0C1\uD669\uBCF4\uACE0\uC11C(\uC77C\uBC18)\",\"rcept_no\":\"20240126000600\",\"flr_nm\":\"\uC0BC\uC131\uBB3C\uC0B0\",\"rcept_dt\":\"20240126\",\"rm\":\"\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uC8FC\uC2DD\uB4F1\uC758\uB300\uB7C9\uBCF4\uC720\uC0C1\uD669\uBCF4\uACE0\uC11C(\uC77C\uBC18)\",\"rcept_no\":\"20240119000573\",\"flr_nm\":\"\uC0BC\uC131\uBB3C\uC0B0\",\"rcept_dt\":\"20240119\",\"rm\":\"\"},{\"corp_code\":\"00126380\",\"corp_name\":\"\uC0BC\uC131\uC804\uC790\",\"stock_code\":\"005930\",\"corp_cls\":\"Y\",\"report_nm\":\"\uCD5C\uB300\uC8FC\uC8FC\uB4F1\uC18C\uC720\uC8FC\uC2DD\uBCC0\uB3D9\uC2E0\uACE0\uC11C\",\"rcept_no\":\"20240115800789\",\"flr_nm\":\"\uC0BC\uC131\uC804\uC790\",\"rcept_dt\":\"20240115\",\"rm\":\"\uC720\"}]}"
+    headers:
+      Cache-Control:
+      - no-cache
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Sat, 16 May 2026 12:01:02 GMT
+      Expires:
+      - Thu, 01 Jan 1970 00:00:00 GMT
+      Pragma:
+      - no-cache
+      Set-Cookie:
+      - WMONID=R2z4nkCCBiv; Expires=Sun, 16-May-2027 21:1:2 GMT; Path=/
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+version: 1
