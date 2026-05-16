@@ -346,7 +346,7 @@ def test_emit_chart_passes_axis_categories_with_real_values(capsys):
 
 
 def test_extract_single_spec():
-    from dartlab.viz.spec.extract import extractVizSpecs
+    from dartlab.viz import extractVizSpecs
 
     spec_dict = {"chartType": "bar", "title": "T"}
     marker = f"<!--DARTLAB_VIZ:{json.dumps(spec_dict)}:VIZ_END-->"
@@ -361,7 +361,7 @@ def test_extract_single_spec():
 
 
 def test_extract_multiple_specs():
-    from dartlab.viz.spec.extract import extractVizSpecs
+    from dartlab.viz import extractVizSpecs
 
     m1 = f"<!--DARTLAB_VIZ:{json.dumps({'chartType': 'bar'})}:VIZ_END-->"
     m2 = f"<!--DARTLAB_VIZ:{json.dumps({'vizType': 'diagram', 'diagramType': 'mermaid'})}:VIZ_END-->"
@@ -374,7 +374,7 @@ def test_extract_multiple_specs():
 
 
 def test_extract_no_specs():
-    from dartlab.viz.spec.extract import extractVizSpecs
+    from dartlab.viz import extractVizSpecs
 
     cleaned, specs = extractVizSpecs("plain text without markers")
     assert specs == []
@@ -382,7 +382,7 @@ def test_extract_no_specs():
 
 
 def test_extract_invalid_json_ignored():
-    from dartlab.viz.spec.extract import extractVizSpecs
+    from dartlab.viz import extractVizSpecs
 
     stdout = "pre <!--DARTLAB_VIZ:not-valid-json:VIZ_END--> post"
     cleaned, specs = extractVizSpecs(stdout)
@@ -391,7 +391,7 @@ def test_extract_invalid_json_ignored():
 
 
 def test_extract_mixed_valid_invalid():
-    from dartlab.viz.spec.extract import extractVizSpecs
+    from dartlab.viz import extractVizSpecs
 
     valid = f"<!--DARTLAB_VIZ:{json.dumps({'ok': True})}:VIZ_END-->"
     invalid = "<!--DARTLAB_VIZ:{broken:VIZ_END-->"

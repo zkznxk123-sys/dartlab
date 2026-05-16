@@ -95,9 +95,12 @@ from dartlab.viz.generators import (  # noqa: F401
     specSixActRadar,
 )
 
-# ── ChartSpec → Plotly Figure 변환 ──
+# ── ChartSpec → 매체 렌더러 ──
+from dartlab.viz.renderers.ascii import renderAscii  # noqa: F401
+from dartlab.viz.renderers.network import renderNetwork  # noqa: F401
 from dartlab.viz.renderers.plotly import PlotlyChartRenderer
 from dartlab.viz.renderers.plotly import fromSpec as chart_from_spec  # noqa: F401
+from dartlab.viz.renderers.svg import renderSvg  # noqa: F401
 
 # ── AI stdout 마커 추출 ──
 from dartlab.viz.spec.extract import extractVizSpecs  # noqa: F401
