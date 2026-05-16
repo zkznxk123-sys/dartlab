@@ -334,17 +334,72 @@ def recessionDashboard(
     creditGap: float | None = None,
     hySpread: float | None = None,
 ) -> RecessionDashboard:
-    """침체 확률 종합 대시보드.
+    """침체 확률 종합 대시보드 — 5 지표 가중 합산 + 역사 패턴 매칭.
+
+    Capabilities:
+        Cleveland Fed 프로빗 (35%) + LEI 신호 (25%) + ISM PMI (20%) + Credit
+        Gap (10%) + HY 스프레드 (10%) 5 지표 가중평균하여 종합 침체 확률
+        산출 + 역사적 침체 패턴 (2008/2020/2001) 와 매칭하여 가장 유사한
+        시나리오 식별.
 
     Args:
-        probitProb: Cleveland Fed 프로빗 침체 확률 (0-1)
-        leiSignal: LEI 신호 ("expansion" | "caution" | "recession_warning")
-        ismLevel: ISM PMI (0-100)
-        creditGap: Credit-to-GDP gap (%p)
-        hySpread: HY 스프레드 (bps)
+        probitProb: Cleveland Fed 프로빗 침체 확률 (0~1).
+        leiSignal: LEI 신호 ``"expansion"``/``"caution"``/``"recession_warning"``.
+        ismLevel: ISM 제조업 PMI (0~100).
+        creditGap: Credit-to-GDP gap (%p, BIS 표준).
+        hySpread: HY 스프레드 (bps).
 
     Returns:
-        RecessionDashboard: 종합 침체 확률 + 역사 패턴 매칭
+        RecessionDashboard dataclass:
+            - ``probabilityComposite`` (float): 가중 합산 (0~1)
+            - ``zone``/``zoneLabel`` (str): low/moderate/elevated/high
+            - ``signals`` (dict): 5 지표별 변환 확률
+            - ``historicalAnalogue`` (str|None): "2008 GFC" 등
+            - ``yieldCurveStatus`` (str|None)
+            - ``warnings`` (list[str])
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = recessionDashboard(probitProb=0.45, leiSignal="recession_warning",
+        ...                          ismLevel=48, creditGap=8, hySpread=600)
+        >>> r.zone, r.historicalAnalogue
+        ('high', '2007-2008 신용 사이클')
+
+    Guide:
+        프로빗 가중치 35% 이유: NBER 침체 예측에서 가장 정확. LEI 25%
+        는 6 개월 선행. ISM 50 = 확장/수축 경계. composite > 0.50 = 1 년
+        내 침체 확률 매우 높음.
+
+    SeeAlso:
+        - ``ghsCrisisScore``: GHS 위기 (3 년 horizon)
+        - ``minskyPhase``: Minsky 부채 사이클 단계
+        - ``classifyCycle``: 매크로 사이클 4 국면
+
+    Requires:
+        없음 — 5 지표 모두 옵션, 1 개라도 있으면 동작.
+
+    AIContext:
+        composite 만 인용 금지 — signals dict 의 5 지표 분해 + historical
+        Analogue 함께 노출. zone="elevated" 결과는 transitioning 신호이지
+        즉시 침체 신호 아님.
+
+    LLM Specifications:
+        AntiPatterns:
+            - hySpread 만 보고 침체 단정 — 본 함수는 5 지표 가중 합산.
+            - 프로빗만 5 분기 lag 데이터로 호출 — 결과 신뢰도 낮음 (회귀
+              모델 stale).
+        OutputSchema:
+            RecessionDashboard ``{probabilityComposite, zone, zoneLabel,
+            signals, historicalAnalogue, yieldCurveStatus, warnings}``.
+        Prerequisites:
+            적어도 1 개 지표. 5 개 모두 있으면 신뢰도 high.
+        Freshness:
+            프로빗 월간 (Cleveland Fed), LEI 월간, ISM 월간 1 일, Credit Gap 분기.
+        Dataflow:
+            각 지표 → 확률 매핑 → 가중평균 → zone 분류 → 역사 패턴 매칭.
+        TargetMarkets: US (Cleveland Fed + ISM + LEI). KR 미적용 (지표 부재).
     """
     signals: dict[str, float | None] = {}
     weights: list[tuple[float, float]] = []  # (weight, probability)
