@@ -396,26 +396,62 @@ def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | 
 
 @_memoized_calc
 def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용 경고(warning)/개선(opportunity) 플래그.
+    """신용 경고/개선 플래그 — 등급 변동 트리거 신호.
 
-    최신 기간의 핵심 지표를 검사하여 등급에 영향을 미치는
-    경고 신호와 개선 기회를 식별한다.
+    Capabilities:
+        최신 기간 metrics 를 임계치와 대조해 warning (등급 하방) / opportunity
+        (등급 상향) 플래그 자동 라벨. 각 플래그는 signal + detail + impact
+        (notch 영향) 동행. 금융업/일반업 분기. S&P/Moody's credit watch
+        조건 유사.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간. None 시 최신.
 
-    Returns
-    -------
-    dict | None
-        flags : list[dict] — 경고/개선 플래그 목록
-            type : str — "warning" 또는 "opportunity"
-            signal : str — 신호 요약 (예: "이자보상배율 1.5배 미달")
-            detail : str — 상세 설명 (예: "EBITDA/이자비용 = 1.2배")
-            impact : str — 등급 영향 (예: "등급 하방 1~2 notch")
+    Returns:
+        dict | None:
+            - ``flags`` (list[dict]): type (warning/opportunity), signal,
+              detail, impact.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCreditFlags(Company("005930"))
+        >>> r["flags"][0]["type"], r["flags"][0]["signal"]
+        ('opportunity', '이자보상배율 우수 (18.5배)')
+
+    Guide:
+        - warning 2+ 동시 발생 = downgrade 임박 신호.
+        - opportunity 만 있는 회사는 upgrade 후보.
+        - 금융업은 별도 임계 (BIS/NPL) — 본 함수가 자동 분기.
+
+    SeeAlso:
+        - ``calcCreditScore``: 점수 산출 (본 함수가 보조)
+        - ``calcCreditHistory``: 등급 시계열
+        - ``credit.monitoring.crisisDetector``: 단기 위기 신호
+
+    Requires:
+        metricsHistory (calcAllMetrics) + sector 정보.
+
+    AIContext:
+        flags 리스트 그대로 인용 — 각 signal + detail + impact 함께. type 별
+        분리 (warning vs opportunity) 권장.
+
+    LLM Specifications:
+        AntiPatterns:
+            - warning 1 개로 downgrade 단정 — 2+ 동시 발생이 강한 신호.
+            - 금융업에 일반업 임계 적용 — 본 함수가 자동 분기.
+        OutputSchema:
+            ``{flags: list[{type, signal, detail, impact}]}``.
+        Prerequisites:
+            metricsHistory + sector.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → latest metrics → 임계 대조 → flag 생성 →
+            type/signal/detail/impact 라벨.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     if result is None:
