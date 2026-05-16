@@ -304,7 +304,7 @@
       "title": "Company",
       "category": "engines",
       "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.show'.",
-      "inDegree": 79,
+      "inDegree": 83,
       "outDegree": 12,
       "cluster": "company",
       "isEntry": false,
@@ -512,7 +512,7 @@
       "title": "Gather",
       "category": "engines",
       "purpose": "Gather 엔진은 가격, 컨센서스, 수급, 뉴스, 배당, 소유구조, 섹터, 매크로, catalyst 일정 등 외부/보조 데이터를 수집하는 실행 스킬이다. 트리거 — '가격', '뉴스', '소유구조', '컨센서스', '외부 데이터 수집', '다가오는 일정'.",
-      "inDegree": 118,
+      "inDegree": 125,
       "outDegree": 7,
       "cluster": "gather",
       "isEntry": false,
@@ -1617,7 +1617,7 @@
       "title": "Scan",
       "category": "engines",
       "purpose": "Scan 엔진은 시장/유니버스 횡단면에서 후보를 발굴하고 순위를 계산하는 실행 스킬이다. 트리거 — '스캔', '종목 발굴', '후보 추출', '랭킹'.",
-      "inDegree": 50,
+      "inDegree": 55,
       "outDegree": 8,
       "cluster": "scan",
       "isEntry": false,
@@ -1994,7 +1994,7 @@
       "title": "Viz (차트·다이어그램 spec)",
       "category": "engines",
       "purpose": "Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
-      "inDegree": 23,
+      "inDegree": 26,
       "outDegree": 14,
       "cluster": "viz",
       "isEntry": false,
@@ -2136,7 +2136,7 @@
       "id": "operation.aiEngine",
       "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
       "category": "operation",
-      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 9+1 도구 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.",
+      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.",
       "inDegree": 0,
       "outDegree": 5,
       "cluster": "operation",
@@ -2176,7 +2176,7 @@
       "title": "dartlab 아키텍처 — 전체 청사진",
       "category": "operation",
       "purpose": "dartlab 아키텍처 — 전체 청사진 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
-      "inDegree": 6,
+      "inDegree": 8,
       "outDegree": 1,
       "cluster": "operation",
       "isEntry": false,
@@ -2397,7 +2397,7 @@
       "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
       "purpose": "AI 가 분석 빈칸을 발굴해 신규 skill 초안을 만들고 같은 세션에서 자가 실행으로 검증해 정식 등재까지 가는 6 단계 사이클과, 운영 중 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 회환 절차를 합쳐 한 곳에서 관리한다. 트리거 — 신규 분석 skill 만들자 / 분석 빈칸 메우기 / audit 결과 반영.",
-      "inDegree": 3,
+      "inDegree": 7,
       "outDegree": 4,
       "cluster": "operation",
       "isEntry": false,
@@ -2824,6 +2824,193 @@
       "isLeaf": false,
       "isOrphan": true,
       "audiences": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "title": "Event Radar Capital Action Monitor",
+      "category": "recipes",
+      "purpose": "dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.",
+      "inDegree": 2,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "title": "Event Radar Consensus Drift Watch",
+      "category": "recipes",
+      "purpose": "gather consensus 원자료의 최근 두 row를 비교해 매출, 영업이익, EPS, 목표가 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "inDegree": 2,
+      "outDegree": 3,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.deepDive",
+      "title": "Event Radar Deep Dive",
+      "category": "recipes",
+      "purpose": "source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다.",
+      "inDegree": 8,
+      "outDegree": 12,
+      "cluster": "recipes",
+      "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "title": "Event Radar Engine Candidate Memo",
+      "category": "recipes",
+      "purpose": "이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다.",
+      "inDegree": 2,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.eventInbox",
+      "title": "Event Radar Event Inbox",
+      "category": "recipes",
+      "purpose": "Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.",
+      "inDegree": 5,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "title": "Event Radar Falsifier Ledger",
+      "category": "recipes",
+      "purpose": "이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.",
+      "inDegree": 8,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.index",
+      "title": "Event Radar Incubator 진입점",
+      "category": "recipes",
+      "purpose": "Company.disclosure, liveFilings, gather 원자료, scan primitive, observed viz skill만으로 단기 이벤트와 시장 반응을 묶어 촉매 후보를 찾는 L1/L1.5 스킬팩 진입점이다. 트리거 - '이벤트 레이더', '촉매 체크', '공시와 주가 반응'.",
+      "inDegree": 1,
+      "outDegree": 17,
+      "cluster": "recipes",
+      "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "title": "Event Radar Insider Ownership Signal",
+      "category": "recipes",
+      "purpose": "gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "inDegree": 2,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "title": "Event Radar Price Flow Reaction",
+      "category": "recipes",
+      "purpose": "gather price/flow 원자료로 이벤트 전후 가격·거래량·수급 반응을 확인하는 L1/L1.5 절차다.",
+      "inDegree": 3,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "title": "Event Radar Source Coverage Audit",
+      "category": "recipes",
+      "purpose": "이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.",
+      "inDegree": 3,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "title": "Event Radar Visual Decision Pack",
+      "category": "recipes",
+      "purpose": "이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.",
+      "inDegree": 2,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
     },
     {
       "id": "recipes.incubator.forensics.accountTraceLedger",
@@ -4034,7 +4221,7 @@
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
       "purpose": "ask 작업대의 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 와 각 패스에서 발급해야 할 ref kind 를 단일 SSOT 로 못박는다.",
-      "inDegree": 8,
+      "inDegree": 11,
       "outDegree": 0,
       "cluster": "runtime",
       "isEntry": false,
@@ -4047,7 +4234,7 @@
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
       "purpose": "사람과 LLM 이 DartLab 을 처음 볼 때 Skills 카탈로그 하나에서 분석 · 엔진 능력 · 운영 규칙 · 확장 절차를 찾는 공식 시작점이다. 외부 API 문서나 흩어진 ops 폴더 대신 skill 검색 → frontmatter 확인 → 본문 절차 → 검증 게이트 순서를 따른다.",
-      "inDegree": 37,
+      "inDegree": 38,
       "outDegree": 7,
       "cluster": "start",
       "isEntry": true,
@@ -10145,6 +10332,341 @@
       "kind": "linkedRecipe"
     },
     {
+      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.priceFlowReaction",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "recipes.incubator.eventRadar.visualDecisionPack",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.deepDive",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "dst": "operation.architecture",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.eventInbox",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.eventInbox",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.eventInbox",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.eventInbox",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "dst": "recipes.incubator.eventRadar.priceFlowReaction",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.priceFlowReaction",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.visualDecisionPack",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "start.dartlabSkillOs",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "operation.architecture",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.index",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.priceFlowReaction",
+      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.priceFlowReaction",
+      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.priceFlowReaction",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.priceFlowReaction",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "dst": "recipes.incubator.eventRadar.index",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.visualDecisionPack",
+      "dst": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.visualDecisionPack",
+      "dst": "recipes.incubator.eventRadar.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.visualDecisionPack",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.eventRadar.visualDecisionPack",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
       "src": "recipes.incubator.forensics.accountTraceLedger",
       "dst": "recipes.incubator.forensics.revenueToCashBridge",
       "kind": "linkedRecipe"
@@ -12306,6 +12828,8 @@
     }
   ],
   "entries": [
+    "recipes.incubator.eventRadar.deepDive",
+    "recipes.incubator.eventRadar.index",
     "recipes.incubator.forensics.deepDive",
     "recipes.incubator.forensics.index",
     "recipes.valuation.damodaran.index",
@@ -12456,6 +12980,19 @@
       "recipes.quality.earningsQualityTriad",
       "recipes.quality.workingCapitalQuality",
       "recipes.valuation.intrinsicValueBand"
+    ],
+    [
+      "recipes.incubator.eventRadar.capitalActionMonitor",
+      "recipes.incubator.eventRadar.consensusDriftWatch",
+      "recipes.incubator.eventRadar.deepDive",
+      "recipes.incubator.eventRadar.engineCandidateMemo",
+      "recipes.incubator.eventRadar.eventInbox",
+      "recipes.incubator.eventRadar.falsifierLedger",
+      "recipes.incubator.eventRadar.index",
+      "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "recipes.incubator.eventRadar.priceFlowReaction",
+      "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "recipes.incubator.eventRadar.visualDecisionPack"
     ],
     [
       "recipes.incubator.forensics.accountTraceLedger",

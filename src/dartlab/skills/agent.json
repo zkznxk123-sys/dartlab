@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 299,
+    "skillCount": 310,
     "categories": [
       {
         "id": "start",
@@ -32,7 +32,7 @@
         "id": "recipes",
         "title": "Recipes",
         "description": "?? ??? L1/L1.5 ??? ?? ?? ??? ???? ?? ??.",
-        "count": 96
+        "count": 107
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -32109,6 +32109,1300 @@
       "cluster": "incubator.forensics",
       "humanIntro": "deepDive는 포렌식 팩의 실제 사용 경로다. 여러 세부 ledger를 하나로 묶되, 결론은 항상 반증 조건과 함께 남긴다. 나중에 일부 신호가 L2 엔진으로 승격돼도 이 스킬은 원표 검산 절차로 계속 사용된다.",
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\ntry:\n    disclosure = c.disclosure()\n    events = disclosure.head(20).to_dicts() if hasattr(disclosure, \"head\") else list(disclosure)[:20]\nexcept Exception:\n    events = []\n\nscanRows = []\nfor axis in (\"quality\", \"audit\", \"disclosureRisk\"):\n    try:\n        df = dartlab.scan(axis)\n        rows = df.head(3).to_dicts() if hasattr(df, \"head\") else []\n        for row in rows:\n            row[\"axis\"] = axis\n        scanRows.extend(rows)\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n    even"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.index",
+      "title": "Event Radar Incubator 진입점",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "Company.disclosure, liveFilings, gather 원자료, scan primitive, observed viz skill만으로 단기 이벤트와 시장 반응을 묶어 촉매 후보를 찾는 L1/L1.5 스킬팩 진입점이다. 트리거 - '이벤트 레이더', '촉매 체크', '공시와 주가 반응'.",
+      "whenToUse": [
+        "이벤트 레이더",
+        "촉매 체크",
+        "공시와 주가 반응",
+        "단기 이벤트 모니터",
+        "원자료 기반 catalyst",
+        "insider ownership signal",
+        "consensus drift watch"
+      ],
+      "inputs": [
+        "기업 코드 또는 ticker",
+        "Company.disclosure 또는 Company.liveFilings row",
+        "Company.gather price flow news dividends splits consensus row",
+        "optional scan primitive row"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "source coverage audit",
+        "event inbox",
+        "price flow reaction",
+        "insider ownership signal",
+        "capital action monitor",
+        "consensus drift watch",
+        "falsifier ledger",
+        "engine candidate memo",
+        "visual decision pack"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.liveFilings",
+        "Company.gather",
+        "scan.market",
+        "scan.insider",
+        "scan.capital"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "start.dartlabSkillOs",
+        "operation.architecture",
+        "operation.skillDevelopmentLoop",
+        "engines.company",
+        "engines.gather",
+        "engines.scan",
+        "engines.viz"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.insiderOwnershipSignal",
+        "recipes.incubator.eventRadar.capitalActionMonitor",
+        "recipes.incubator.eventRadar.consensusDriftWatch",
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.engineCandidateMemo",
+        "recipes.incubator.eventRadar.visualDecisionPack",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.index"
+      ],
+      "procedure": [
+        "공개 호출 블록에 L2/L3 호출 문자열이 없어야 한다.",
+        "RunPython은 `buildEventRadarMemo` 결합과 `emit_result(...)` 발급에만 쓴다.",
+        "visualRefs는 observed 상태의 viz skill만 포함한다.",
+        "`deepDive`, `falsifierLedger`, `engineCandidateMemo`, `visualDecisionPack`이 모두 있어야 한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "L2 금지 조건을 통과한 event radar ledger",
+        "event별 supporting evidence와 counter evidence",
+        "observed viz surface 선택표",
+        "엔진 환류 후보와 recipe 보존 계약"
+      ],
+      "visualGuidance": [
+        "가격 원자료가 있을 때만 engines.viz.priceChart를 사용하고, priceRows의 date/close/volume을 evidenceBinding으로 묶는다.",
+        "headline의 radarScore, eventCount, openFalsifierCount는 engines.viz.kpiRibbon으로만 보조 표시한다.",
+        "sourceCoverageAudit와 falsifierLedger는 engines.viz.evidenceCoverage로 표시할 수 있지만 표가 1차 산출물이다.",
+        "공시-반응-반증 흐름은 engines.viz.mermaidDiagram으로 8노드 이하만 만든다."
+      ],
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.kpiRibbon",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
+      "failureModes": [
+        "정기 공시를 새로운 촉매로 오해",
+        "시장 전체 급락을 개별 이벤트 반응으로 단정",
+        "내부자 거래의 계획 매도나 데이터 지연을 반증하지 않음",
+        "가격 차트에 tableRef/evidenceBinding을 붙이지 않음"
+      ],
+      "forbidden": [
+        "c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.",
+        "이벤트를 투자 결론으로 바로 단정하지 않는다.",
+        "observed 상태가 아닌 viz skill을 visualRefs에 연결하지 않는다.",
+        "RunPython에서 엔진이 이미 제공하는 수집 기능을 재구현하지 않는다."
+      ],
+      "examples": [
+        "삼성전자 이벤트 레이더로 촉매 체크",
+        "공시와 주가 반응만으로 단기 이벤트 봐줘",
+        "analysis 없이 catalyst candidate 정리"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited",
+          "limitations": [
+            "브라우저 snapshot 범위에서는 live filing, price, flow, consensus row가 제한될 수 있다."
+          ]
+        }
+      },
+      "audiences": {
+        "llm": "Company.disclosure/liveFilings/gather와 scan primitive는 EngineCall로 먼저 호출하고, buildEventRadarMemo는 RunPython fallback으로만 실행한다.",
+        "agent": "ReadSkill 후 capabilityRefs를 엔진 호출로 확보한다. helper 결과에는 tableRef/valueRef/dateRef/sourceRef를 붙이고 L2 결론으로 승격하지 않는다.",
+        "human": "새 분석 엔진을 만들기 전, 원자료 이벤트와 시장 반응이 반복 가능한지 확인하는 촉매 인큐베이터다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": true,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "이 팩은 복잡한 엔진 호출법을 여러 스킬로 쪼개는 대신, 이미 있는 L1/L1.5 표면을 조합해 촉매 후보와 반증 조건을 빠르게 남긴다. 유효한 축은 나중에 엔진으로 환류하되 recipe는 원자료 검산 경로로 유지한다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.disclosure`, `Company.liveFilings`, `Company.gather`, `scan.market`, `scan.insider`, `scan.capital`은 엔진 surface로 호출한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.disclosure(days=45), limit=50)\nexcept TypeError:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    live_filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    live_filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=[*live_filings, *filings],\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gat"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "title": "Event Radar Source Coverage Audit",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "이벤트 레이더 coverage",
+        "catalyst source audit",
+        "원자료 결손 확인"
+      ],
+      "inputs": [
+        "raw event radar input rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "sourceCoverageAudit table"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.liveFilings",
+        "Company.gather",
+        "scan.market"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.company",
+        "engines.gather",
+        "engines.scan"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.index",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.sourceCoverageAudit"
+      ],
+      "procedure": [
+        "sourceCoverageAudit가 비어 있으면 실패다.",
+        "missing source를 답변 한계에 포함한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "source별 rowCount와 latestDate",
+        "missing source와 requiredFor"
+      ],
+      "visualGuidance": [
+        "sourceCoverageAudit table row가 있을 때만 engines.viz.evidenceCoverage coverage 표 시각화를 사용한다."
+      ],
+      "visualRefs": [
+        "engines.viz.evidenceCoverage"
+      ],
+      "failureModes": [
+        "priceRows 없이 priceChart를 선택",
+        "filings 결손인데 eventInbox를 정상으로 처리"
+      ],
+      "forbidden": [
+        "결손 source를 0 또는 없음으로 단정하지 않는다."
+      ],
+      "examples": [
+        "이벤트 레이더 source coverage 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "EngineCall로 원자료를 먼저 받고 RunPython fallback은 coverage table emit에만 사용한다.",
+        "agent": "missing source를 답변 한계로 노출한다.",
+        "human": "실행 전에 어떤 원자료가 비었는지 보는 게이트다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "source coverage는 이벤트 레이더의 첫 번째 중단점이다. 없는 source를 추정하지 않고, 어떤 판단을 못 하는지 먼저 고정한다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gather_rows(\"ownership\", limit=20),\n    dividendRows=gather_rows(\"dividends\", limit=20),\n    splitRows=gather_rows(\"splits\", limit=20),\n    consensusRows=gather_rows(\"consensus\", limit=12),\n)\n\nemit_result(\n    table=memo[\"tables\"][\"sourceCoverageAudit\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=mem"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.eventInbox",
+      "title": "Event Radar Event Inbox",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event inbox",
+        "공시 뉴스 촉매",
+        "이벤트 분류"
+      ],
+      "inputs": [
+        "filing rows",
+        "news rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "eventInbox table"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.liveFilings",
+        "Company.gather"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.company",
+        "engines.gather"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.eventInbox"
+      ],
+      "procedure": [
+        "eventInbox row에는 date/source/title/status가 있어야 한다.",
+        "missing이면 이벤트 결론을 내지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "event category와 status",
+        "filing/news source"
+      ],
+      "visualGuidance": [
+        "eventInbox는 table/표가 우선이며 coverage 상태만 engines.viz.evidenceCoverage로 보조한다."
+      ],
+      "visualRefs": [
+        "engines.viz.evidenceCoverage"
+      ],
+      "failureModes": [
+        "정기보고서 제출을 새로운 촉매로 오해"
+      ],
+      "forbidden": [
+        "키워드만으로 이벤트 중요도를 확정하지 않는다."
+      ],
+      "examples": [
+        "오늘 공시 뉴스 이벤트 inbox"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "filing/news row를 EngineCall로 받은 뒤 helper fallback으로 eventInbox를 만든다.",
+        "agent": "category와 status를 항상 source/date와 함께 표시한다.",
+        "human": "공시·뉴스 원자료를 하나의 촉매 inbox로 정리한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "eventInbox는 이벤트 후보를 모으는 단계다. 아직 원인·결론이 아니라, 뒤의 reaction과 falsifier를 붙일 후보 목록이다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    try:\n        filings = rows(c.disclosure(), limit=50)\n    except Exception:\n        filings = []\n\ntry:\n    news_rows = rows(c.gather(\"news\"), limit=20)\nexcept Exception:\n    news_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=news_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"eventInbox\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n공시·뉴스 row를 날짜 역순으로 정렬하고 earnings, capitalAction, financing, governance, regulatory, filingRisk, deal category로 분류한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 공시·뉴스 날짜 |\n| `source` | filing/news |\n| `title` | 원문 제목 |\n| `category` | 이벤트 유형 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.priceFlowReaction - 이벤트 뒤 시장 반응 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - 정기·"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "title": "Event Radar Price Flow Reaction",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "gather price/flow 원자료로 이벤트 전후 가격·거래량·수급 반응을 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "price flow reaction",
+        "이벤트 주가 반응",
+        "거래량 수급 확인"
+      ],
+      "inputs": [
+        "price rows",
+        "flow rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "priceFlowReaction table"
+      ],
+      "apiRefs": [
+        "Company.gather",
+        "scan.market"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.gather",
+        "engines.scan"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.priceFlowReaction"
+      ],
+      "procedure": [
+        "priceRows가 없으면 priceChart를 만들지 않는다.",
+        "priceChangePct와 volumeRatio는 직전 row가 없으면 None으로 둔다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "priceChangePct",
+        "volumeRatio",
+        "foreign/institution net flow"
+      ],
+      "visualGuidance": [
+        "priceRows의 date/close/volume이 있을 때만 engines.viz.priceChart를 사용한다."
+      ],
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.kpiRibbon"
+      ],
+      "failureModes": [
+        "거래정지·액면분할을 가격 반응으로 오해"
+      ],
+      "forbidden": [
+        "가격 급등락만으로 이벤트 원인을 단정하지 않는다."
+      ],
+      "examples": [
+        "공시 후 주가와 수급 반응 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "price/flow는 EngineCall로 먼저 가져오고 helper fallback은 계산 ledger만 만든다.",
+        "agent": "priceChart는 raw price row가 있을 때만 선택한다.",
+        "human": "이벤트가 시장에서 실제로 반응했는지 확인한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "priceFlowReaction은 이벤트 후보와 시장 반응을 연결하지만, 원인 단정은 하지 않는다. 가격·거래량·수급은 falsifier와 함께 읽는다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=40):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    flow_rows = rows(c.gather(\"flow\"), limit=40)\nexcept Exception:\n    flow_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    priceRows=price_rows,\n    flowRows=flow_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"priceFlowReaction\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n최근 2개 price row로 `priceChangePct`와 `volumeRatio`를 계산하고, 최신 flow row의 외국인·기관 순매수를 함께 둔다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 기준일 |\n| `close` | 최신 종가 |\n| `priceChangePct` | 직전 대비 변화율 |\n| `volumeRatio` | 직전 대비 거래량 배수 |\n| `netFlow` | 외국인+기관 순매수 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 어떤 이벤트가 있었는지 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - market-wide move 반증.\n\n## 기본 검증\n\n- priceRows가 없으면 priceChart를 만들지 않는다.\n-"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "title": "Event Radar Insider Ownership Signal",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "insider ownership signal",
+        "내부자 거래",
+        "주요주주 지분 변화"
+      ],
+      "inputs": [
+        "insider rows",
+        "ownership rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "insiderOwnershipSignal table"
+      ],
+      "apiRefs": [
+        "Company.gather",
+        "scan.insider"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.gather",
+        "engines.scan"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.insiderOwnershipSignal"
+      ],
+      "procedure": [
+        "holder가 없으면 unknown으로 표시하고 단정하지 않는다.",
+        "amount 부호만으로 의도를 해석하지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "insider/holder direction",
+        "amount 또는 지분 변화"
+      ],
+      "visualGuidance": [
+        "내부자·주요주주 row는 table/표가 우선이며 source coverage만 engines.viz.evidenceCoverage로 보조한다."
+      ],
+      "visualRefs": [
+        "engines.viz.evidenceCoverage"
+      ],
+      "failureModes": [
+        "계획 매도를 부정적 신호로 단정"
+      ],
+      "forbidden": [
+        "내부자 매수·매도를 선행 정보로 단정하지 않는다."
+      ],
+      "examples": [
+        "내부자 매수와 주요주주 지분 변화 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "insider/ownership row를 EngineCall로 확보한 뒤 helper fallback으로 정리한다.",
+        "agent": "holder, direction, amount, date를 함께 제시한다.",
+        "human": "지분 변화가 이벤트 레이더의 보조 촉매인지 확인한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "insiderOwnershipSignal은 거래 방향을 표시하지만 의도는 해석하지 않는다. 계획 매도와 데이터 지연은 반드시 반증 조건으로 남긴다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=20):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    insider_rows = rows(c.gather(\"insiderTrading\"), limit=20)\nexcept Exception:\n    insider_rows = []\n\ntry:\n    ownership_rows = rows(c.gather(\"ownership\"), limit=20)\nexcept Exception:\n    ownership_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    insiderRows=insider_rows,\n    ownershipRows=ownership_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"insiderOwnershipSignal\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n내부자 거래와 지분 변화 row에서 holder, direction, amount, status를 추출한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 거래 또는 공시 날짜 |\n| `holder` | 내부자 또는 주요주주 |\n| `direction` | buy/sell/ownershipChange/snapshot |\n| `amount` | 수량 또는 지분 변화 |\n| `status` | ok/watch/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 관련 공시 이벤트 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - 계획 거래 반증.\n\n## 기본 검증\n\n- holder가 없으면 unknown으로 표시하고 단정하지 않는다"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "title": "Event Radar Capital Action Monitor",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "capital action monitor",
+        "배당 자사주 분할 증자",
+        "전환사채 이벤트"
+      ],
+      "inputs": [
+        "dividend rows",
+        "split rows",
+        "filing event rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "capitalActionMonitor table"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.gather",
+        "scan.capital"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.company",
+        "engines.gather",
+        "engines.scan"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.capitalActionMonitor"
+      ],
+      "procedure": [
+        "자본 이벤트는 호재·악재 결론이 아니라 action row로 둔다.",
+        "value가 없으면 제목과 sourceRef를 근거로 둔다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "dividend/split/filing capital action rows"
+      ],
+      "visualGuidance": [
+        "capital action count는 engines.viz.kpiRibbon chart의 보조 숫자로만 표시하고 원표는 table/표로 보존한다."
+      ],
+      "visualRefs": [
+        "engines.viz.kpiRibbon",
+        "engines.viz.evidenceCoverage"
+      ],
+      "failureModes": [
+        "유상증자와 무상증자 영향을 섞음"
+      ],
+      "forbidden": [
+        "배당·분할을 항상 호재로 단정하지 않는다."
+      ],
+      "examples": [
+        "배당 자사주 분할 증자 이벤트 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "capital 관련 원자료는 EngineCall로 받고 helper fallback으로 action table을 만든다.",
+        "agent": "action과 value를 source/date에 묶어 표시한다.",
+        "human": "자본 이벤트가 실제 촉매인지 따로 확인한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "capitalActionMonitor는 배당·분할·증자 같은 표면상 큰 이벤트를 모으되, 반복 배당과 희석 이벤트를 분리해 과잉 해석을 막는다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=20):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    dividend_rows = rows(c.gather(\"dividends\"), limit=20)\nexcept Exception:\n    dividend_rows = []\n\ntry:\n    split_rows = rows(c.gather(\"splits\"), limit=20)\nexcept Exception:\n    split_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    dividendRows=dividend_rows,\n    splitRows=split_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"capitalActionMonitor\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\ndividend/split row와 filing event의 capitalAction category를 하나의 action table로 합친다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 기준일 |\n| `action` | dividend/split/filingCapitalAction |\n| `value` | 배당금, 분할비율, filing title |\n| `status` | watch/missing |\n| `evidence` | 원자료 출처 |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 자본 이벤트 공시 분류.\n2. recip"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "title": "Event Radar Consensus Drift Watch",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "gather consensus 원자료의 최근 두 row를 비교해 매출, 영업이익, EPS, 목표가 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "consensus drift",
+        "컨센서스 변화",
+        "목표주가 변동"
+      ],
+      "inputs": [
+        "consensus rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "consensusDriftWatch table"
+      ],
+      "apiRefs": [
+        "Company.gather"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.gather"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.consensusDriftWatch"
+      ],
+      "procedure": [
+        "consensus row가 2개 미만이면 drift를 계산하지 않는다.",
+        "단위·통화가 확인되지 않으면 결론을 제한한다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "metric별 latest previous revisionPct"
+      ],
+      "visualGuidance": [
+        "컨센서스 drift는 source/date가 안정적일 때만 kpiRibbon chart 보조 숫자로 표시하고 원자료 table을 보존한다."
+      ],
+      "visualRefs": [
+        "engines.viz.kpiRibbon",
+        "engines.viz.evidenceCoverage"
+      ],
+      "failureModes": [
+        "단위 변경을 실적 하향으로 오해"
+      ],
+      "forbidden": [
+        "컨센서스 변화 하나로 실적 결론을 단정하지 않는다."
+      ],
+      "examples": [
+        "컨센서스가 최근 하향됐는지 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "consensus row는 EngineCall로 받고 helper fallback은 최근 두 row drift만 계산한다.",
+        "agent": "metric별 latest/previous/revisionPct를 sourceRef와 함께 제시한다.",
+        "human": "시장 기대가 변했는지 원자료로만 확인한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "consensusDriftWatch는 시장 기대의 움직임을 보는 보조 신호다. 원자료 날짜와 단위를 모르면 방향성을 말하지 않는다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=12):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    consensus_rows = rows(c.gather(\"consensus\"), limit=12)\nexcept Exception:\n    consensus_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    consensusRows=consensus_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"consensusDriftWatch\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n최근 두 consensus row의 revenue, operatingProfit, eps, targetPrice 값을 비교해 revisionPct와 status를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 최신 consensus 날짜 |\n| `metric` | revenue/operatingProfit/eps/targetPrice |\n| `latest` | 최신값 |\n| `previous` | 이전값 |\n| `revisionPct` | 변화율 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 컨센서스 변화 전후 이벤트 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - stale update 반증.\n\n## 기본 검증\n\n- consensus row가 2개 미만이면 drift를 계산하지 않는다.\n- 단위·통화가 확인되지 않으면 결론을 제한한다."
+    },
+    {
+      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "title": "Event Radar Falsifier Ledger",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar falsifier",
+        "촉매 반증",
+        "이벤트 결론 검산"
+      ],
+      "inputs": [
+        "event radar memo tables"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "falsifierLedger table"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.gather",
+        "scan.market"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "runtime.workbenchEvidenceFlow",
+        "operation.skillDevelopmentLoop"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "procedure": [
+        "open falsifier가 있으면 확정 표현을 쓰지 않는다.",
+        "counterEvidenceNeeded가 빈 문자열이면 실패다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "claim별 supportingEvidence",
+        "counterEvidenceNeeded",
+        "open/notTriggered status"
+      ],
+      "visualGuidance": [
+        "falsifierLedger는 table/표가 1차 산출물이며 evidenceCoverage는 open/notTriggered 개수만 보조한다."
+      ],
+      "visualRefs": [
+        "engines.viz.evidenceCoverage"
+      ],
+      "failureModes": [
+        "반증 조건 없이 radarScore만 표시"
+      ],
+      "forbidden": [
+        "open falsifier가 있는데 촉매 결론을 확정하지 않는다."
+      ],
+      "examples": [
+        "이벤트 레이더 반증 ledger"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "helper fallback 결과의 falsifierLedger를 반드시 답변에 포함한다.",
+        "agent": "open falsifier 개수와 내용을 valueRef/tableRef에 묶는다.",
+        "human": "촉매 후보가 틀릴 수 있는 이유를 먼저 확인한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "falsifierLedger는 이 팩의 안전장치다. 좋은 이벤트처럼 보여도 반증이 열려 있으면 결론은 보류한다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    flow_rows = rows(c.gather(\"flow\"), limit=40)\nexcept Exception:\n    flow_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n    flowRows=flow_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"falsifierLedger\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nevent, reaction, insider, capital, consensus 신호마다 supportingEvidence와 counterEvidenceNeeded를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `claim` | 검증 중인 주장 |\n| `supportingEvidence` | ok/watch/risk/missing |\n| `counterEvidenceNeeded` | 필요한 반증 |\n| `status` | open/notTriggered |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.engineCandidateMemo - 반복 가능한 신호만 후보로 넘긴다.\n2. recipes.incubato"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "title": "Event Radar Engine Candidate Memo",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar engine candidate",
+        "엔진 환류 후보",
+        "recipe to engine"
+      ],
+      "inputs": [
+        "event radar memo tables"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "engineCandidateMemo table"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.gather",
+        "scan.market",
+        "scan.insider",
+        "scan.capital"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "operation.architecture",
+        "operation.skillDevelopmentLoop"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.engineCandidateMemo"
+      ],
+      "procedure": [
+        "promotionGate가 없는 후보는 실패다.",
+        "단일 실행 결과는 구현 완료가 아니다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "signalId별 status",
+        "recommendedEngineOwner",
+        "promotionGate"
+      ],
+      "visualGuidance": [
+        "엔진 후보 흐름은 engines.viz.mermaidDiagram으로 8노드 이하만 표시한다."
+      ],
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
+      "failureModes": [
+        "selfRun 없이 엔진 승격 후보로 확정"
+      ],
+      "forbidden": [
+        "engineCandidateMemo를 실제 엔진 구현으로 표현하지 않는다."
+      ],
+      "examples": [
+        "이벤트 레이더에서 엔진 후보 정리"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "이 표는 승격 후보 메모이지 엔진 결과가 아니다.",
+        "agent": "promotionGate와 keepAsSkillAfterPromotion을 그대로 보여준다.",
+        "human": "어떤 recipe 신호가 엔진화될 만한지 검토한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "engineCandidateMemo는 사용자가 말한 '진짜 스킬은 recipe'라는 방향을 보존한다. 반복 가능한 축만 엔진으로 옮기고 recipe는 검산 경로로 남긴다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    consensus_rows = rows(c.gather(\"consensus\"), limit=12)\nexcept Exception:\n    consensus_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n    consensusRows=consensus_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"engineCandidateMemo\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\neventInbox, priceFlowReaction, insiderOwnershipSignal, capitalActionMonitor, consensusDriftWatch, scanContext를 후보 signal로 정리한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `signalId` | 후보 축 |\n| `status` | missing/ok/watch/risk |\n| `recommendedEngineOwner` | 나중에 담당할 엔진 영역 |\n| `promotionGate` | 승격 조건 |\n| `keepAsSkillAfterPromotion` | recipe 보존 여부 |\n\n## 연계 절"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "title": "Event Radar Visual Decision Pack",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar visualization",
+        "촉매 레이더 차트",
+        "observed viz binding"
+      ],
+      "inputs": [
+        "event radar memo tables"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "visualDecisionPack table"
+      ],
+      "apiRefs": [
+        "Company.gather"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "engines.viz",
+        "runtime.workbenchEvidenceFlow"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.visualDecisionPack"
+      ],
+      "procedure": [
+        "visualRefs는 observed viz만 포함한다.",
+        "blocked visualRef를 emit하지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "visualRef별 ready/blocked",
+        "requiredBinding"
+      ],
+      "visualGuidance": [
+        "사용 가능한 visualRef는 observed 상태의 priceChart, kpiRibbon, evidenceCoverage, mermaidDiagram으로 제한한다.",
+        "requiredBinding이 blocked이면 차트 대신 tableRef를 답변한다."
+      ],
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.kpiRibbon",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
+      "failureModes": [
+        "blocked visual을 무시하고 차트 emit"
+      ],
+      "forbidden": [
+        "unverified viz skill을 visualRefs에 연결하지 않는다.",
+        "priceRows 없이 priceChart를 만들지 않는다."
+      ],
+      "examples": [
+        "이벤트 레이더 시각화 가능 여부 확인"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "visualDecisionPack의 ready visualRef만 사용한다.",
+        "agent": "차트를 만들기 전 requiredBinding을 확인한다.",
+        "human": "시각화가 가능한 결과와 아직 표로 봐야 하는 결과를 구분한다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "visualDecisionPack은 사용자가 요청한 시각 요소 품질 게이트다. 완성도 높은 observed viz만 연결하고, 근거가 없으면 막는다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=40):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"visualDecisionPack\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\npriceRows, coverage, signal count를 기준으로 priceChart, kpiRibbon, evidenceCoverage, mermaidDiagram의 ready/blocked를 결정한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `visualRef` | observed viz skill |\n| `status` | ready/blocked |\n| `requiredBinding` | 필요한 근거 결합 |\n| `evidence` | 선택 사유 |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.sourceCoverageAudit - source coverage 확인.\n2. recipes.incubator.eventRadar.deepDive - 최종 답변의 visual gate.\n\n## 기본 검증\n\n- visualRefs는 observed viz만 포함한다.\n- blocked visualRef를 em"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.deepDive",
+      "title": "Event Radar Deep Dive",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다.",
+      "whenToUse": [
+        "이벤트 레이더 deep dive",
+        "촉매 후보 전체 실행",
+        "공시 주가 수급 컨센서스 종합"
+      ],
+      "inputs": [
+        "filing/news/price/flow/insider/ownership/dividend/split/consensus rows"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "deepDive step ledger",
+        "headline radar score",
+        "falsifier ledger",
+        "engine candidate memo",
+        "visual decision pack"
+      ],
+      "apiRefs": [
+        "Company.disclosure",
+        "Company.liveFilings",
+        "Company.gather",
+        "scan.market",
+        "scan.insider",
+        "scan.capital"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "operation.skillDevelopmentLoop",
+        "runtime.workbenchEvidenceFlow",
+        "engines.viz"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.insiderOwnershipSignal",
+        "recipes.incubator.eventRadar.capitalActionMonitor",
+        "recipes.incubator.eventRadar.consensusDriftWatch",
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.engineCandidateMemo",
+        "recipes.incubator.eventRadar.visualDecisionPack"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.eventRadar.deepDive"
+      ],
+      "procedure": [
+        "공개 호출 블록은 AST parse가 되어야 한다.",
+        "공개 호출 블록은 L2/L3 호출 문자열을 포함하면 실패다.",
+        "`deepDive`, `falsifierLedger`, `engineCandidateMemo`, `visualDecisionPack`이 모두 있어야 한다.",
+        "ready가 아닌 visualRef는 차트로 emit하지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "11단계 deepDive ledger",
+        "radarScore와 eventCount",
+        "open falsifier 수",
+        "ready visualRef 수"
+      ],
+      "visualGuidance": [
+        "priceFlowReaction에 priceRows binding이 있을 때만 engines.viz.priceChart를 사용한다.",
+        "headline metric은 engines.viz.kpiRibbon으로만 작게 보조한다.",
+        "coverage/falsifier 상태는 engines.viz.evidenceCoverage로 보조 가능하지만 표가 우선이다.",
+        "공시→반응→반증→엔진후보 흐름은 engines.viz.mermaidDiagram 8노드 이하로만 만든다."
+      ],
+      "visualRefs": [
+        "engines.viz.priceChart",
+        "engines.viz.kpiRibbon",
+        "engines.viz.evidenceCoverage",
+        "engines.viz.mermaidDiagram"
+      ],
+      "failureModes": [
+        "ask가 기존 분석 엔진으로 우회",
+        "RunPython 결과는 있는데 답변이 근거 표 없이 요약만 제시",
+        "visualDecisionPack 없이 차트 생성"
+      ],
+      "forbidden": [
+        "c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.",
+        "radarScore를 투자 결론으로 해석하지 않는다.",
+        "blocked visualRef를 emit하지 않는다."
+      ],
+      "examples": [
+        "삼성전자 이벤트 레이더 deep dive",
+        "analysis 없이 촉매 후보 전체 실행"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "capabilityRefs는 EngineCall로 우선 호출하고 공개 호출 블록은 L1.5 memo builder용 RunPython fallback으로만 실행한다.",
+        "agent": "ReadSkill 결과에서 이 스킬이 상위에 오면 Company/gather/scan primitive를 EngineCall로 실행하고 L2 capability를 쓰지 않는다.",
+        "human": "이벤트 후보, 반응, 반증, 시각화 가능 여부를 한 번에 보는 실제 사용 경로다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": true,
+      "graphTier": "L1.5",
+      "cluster": "incubator.eventRadar",
+      "humanIntro": "deepDive는 이벤트 레이더 팩의 실제 사용 경로다. 신호를 만들기보다 원자료와 반증 조건, 시각화 가능 여부를 함께 묶는다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.disclosure`, `Company.liveFilings`, `Company.gather`, `scan.market`, `scan.insider`, `scan.capital`은 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    try:\n        filings = rows(c.disclosure(), limit=50)\n    except Exception:\n        filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gather_rows(\"ownership\", limit=20),\n    dividendRows=gather_rows(\"dividends\", limit=20),\n    splitRow"
     }
   ]
 }

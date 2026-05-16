@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 301,
+    "skillCount": 312,
     "categories": [
       {
         "id": "start",
@@ -32,7 +32,7 @@
         "id": "recipes",
         "title": "Recipes",
         "description": "?? ??? L1/L1.5 ??? ?? ?? ??? ???? ?? ??.",
-        "count": 96
+        "count": 107
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -5835,6 +5835,193 @@
         "recipes.incubator.forensics.noteSignalExtractor"
       ],
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\ntry:\n    disclosure = c.disclosure()\n    events = disclosure.head(20).to_dicts() if hasattr(disclosure, \"head\") else list(disclosure)[:20]\nexcept Exception:\n    events = []\n\nscanRows = []\nfor axis in (\"quality\", \"audit\", \"disclosureRisk\"):\n    try:\n        df = dartlab.scan(axis)\n        rows = df.head(3).to_dicts() if hasattr(df, \"head\") else []\n        for row in rows:\n            row[\"axis\"] = axis\n        scanRows.extend(rows)\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n    even"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.index",
+      "title": "Event Radar Incubator 진입점",
+      "category": "recipes",
+      "purpose": "Company.disclosure, liveFilings, gather 원자료, scan primitive, observed viz skill만으로 단기 이벤트와 시장 반응을 묶어 촉매 후보를 찾는 L1/L1.5 스킬팩 진입점이다. 트리거 - '이벤트 레이더', '촉매 체크', '공시와 주가 반응'.",
+      "whenToUse": [
+        "이벤트 레이더",
+        "촉매 체크",
+        "공시와 주가 반응",
+        "단기 이벤트 모니터",
+        "원자료 기반 catalyst",
+        "insider ownership signal",
+        "consensus drift watch"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.insiderOwnershipSignal",
+        "recipes.incubator.eventRadar.capitalActionMonitor"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.disclosure`, `Company.liveFilings`, `Company.gather`, `scan.market`, `scan.insider`, `scan.capital`은 엔진 surface로 호출한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.disclosure(days=45), limit=50)\nexcept TypeError:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    live_filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    live_filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=[*live_filings, *filings],\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gat"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "title": "Event Radar Source Coverage Audit",
+      "category": "recipes",
+      "purpose": "이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "이벤트 레이더 coverage",
+        "catalyst source audit",
+        "원자료 결손 확인"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.index",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gather_rows(\"ownership\", limit=20),\n    dividendRows=gather_rows(\"dividends\", limit=20),\n    splitRows=gather_rows(\"splits\", limit=20),\n    consensusRows=gather_rows(\"consensus\", limit=12),\n)\n\nemit_result(\n    table=memo[\"tables\"][\"sourceCoverageAudit\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=mem"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.eventInbox",
+      "title": "Event Radar Event Inbox",
+      "category": "recipes",
+      "purpose": "Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event inbox",
+        "공시 뉴스 촉매",
+        "이벤트 분류"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    try:\n        filings = rows(c.disclosure(), limit=50)\n    except Exception:\n        filings = []\n\ntry:\n    news_rows = rows(c.gather(\"news\"), limit=20)\nexcept Exception:\n    news_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=news_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"eventInbox\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n공시·뉴스 row를 날짜 역순으로 정렬하고 earnings, capitalAction, financing, governance, regulatory, filingRisk, deal category로 분류한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 공시·뉴스 날짜 |\n| `source` | filing/news |\n| `title` | 원문 제목 |\n| `category` | 이벤트 유형 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.priceFlowReaction - 이벤트 뒤 시장 반응 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - 정기·"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "title": "Event Radar Price Flow Reaction",
+      "category": "recipes",
+      "purpose": "gather price/flow 원자료로 이벤트 전후 가격·거래량·수급 반응을 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "price flow reaction",
+        "이벤트 주가 반응",
+        "거래량 수급 확인"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=40):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    flow_rows = rows(c.gather(\"flow\"), limit=40)\nexcept Exception:\n    flow_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    priceRows=price_rows,\n    flowRows=flow_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"priceFlowReaction\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n최근 2개 price row로 `priceChangePct`와 `volumeRatio`를 계산하고, 최신 flow row의 외국인·기관 순매수를 함께 둔다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 기준일 |\n| `close` | 최신 종가 |\n| `priceChangePct` | 직전 대비 변화율 |\n| `volumeRatio` | 직전 대비 거래량 배수 |\n| `netFlow` | 외국인+기관 순매수 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 어떤 이벤트가 있었는지 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - market-wide move 반증.\n\n## 기본 검증\n\n- priceRows가 없으면 priceChart를 만들지 않는다.\n-"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "title": "Event Radar Insider Ownership Signal",
+      "category": "recipes",
+      "purpose": "gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "insider ownership signal",
+        "내부자 거래",
+        "주요주주 지분 변화"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=20):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    insider_rows = rows(c.gather(\"insiderTrading\"), limit=20)\nexcept Exception:\n    insider_rows = []\n\ntry:\n    ownership_rows = rows(c.gather(\"ownership\"), limit=20)\nexcept Exception:\n    ownership_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    insiderRows=insider_rows,\n    ownershipRows=ownership_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"insiderOwnershipSignal\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n내부자 거래와 지분 변화 row에서 holder, direction, amount, status를 추출한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 거래 또는 공시 날짜 |\n| `holder` | 내부자 또는 주요주주 |\n| `direction` | buy/sell/ownershipChange/snapshot |\n| `amount` | 수량 또는 지분 변화 |\n| `status` | ok/watch/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 관련 공시 이벤트 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - 계획 거래 반증.\n\n## 기본 검증\n\n- holder가 없으면 unknown으로 표시하고 단정하지 않는다"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "title": "Event Radar Capital Action Monitor",
+      "category": "recipes",
+      "purpose": "dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "capital action monitor",
+        "배당 자사주 분할 증자",
+        "전환사채 이벤트"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=20):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    dividend_rows = rows(c.gather(\"dividends\"), limit=20)\nexcept Exception:\n    dividend_rows = []\n\ntry:\n    split_rows = rows(c.gather(\"splits\"), limit=20)\nexcept Exception:\n    split_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    dividendRows=dividend_rows,\n    splitRows=split_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"capitalActionMonitor\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\ndividend/split row와 filing event의 capitalAction category를 하나의 action table로 합친다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 기준일 |\n| `action` | dividend/split/filingCapitalAction |\n| `value` | 배당금, 분할비율, filing title |\n| `status` | watch/missing |\n| `evidence` | 원자료 출처 |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 자본 이벤트 공시 분류.\n2. recip"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "title": "Event Radar Consensus Drift Watch",
+      "category": "recipes",
+      "purpose": "gather consensus 원자료의 최근 두 row를 비교해 매출, 영업이익, EPS, 목표가 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "consensus drift",
+        "컨센서스 변화",
+        "목표주가 변동"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=12):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    consensus_rows = rows(c.gather(\"consensus\"), limit=12)\nexcept Exception:\n    consensus_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    consensusRows=consensus_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"consensusDriftWatch\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n최근 두 consensus row의 revenue, operatingProfit, eps, targetPrice 값을 비교해 revisionPct와 status를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 최신 consensus 날짜 |\n| `metric` | revenue/operatingProfit/eps/targetPrice |\n| `latest` | 최신값 |\n| `previous` | 이전값 |\n| `revisionPct` | 변화율 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 컨센서스 변화 전후 이벤트 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - stale update 반증.\n\n## 기본 검증\n\n- consensus row가 2개 미만이면 drift를 계산하지 않는다.\n- 단위·통화가 확인되지 않으면 결론을 제한한다."
+    },
+    {
+      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "title": "Event Radar Falsifier Ledger",
+      "category": "recipes",
+      "purpose": "이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar falsifier",
+        "촉매 반증",
+        "이벤트 결론 검산"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    flow_rows = rows(c.gather(\"flow\"), limit=40)\nexcept Exception:\n    flow_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n    flowRows=flow_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"falsifierLedger\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nevent, reaction, insider, capital, consensus 신호마다 supportingEvidence와 counterEvidenceNeeded를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `claim` | 검증 중인 주장 |\n| `supportingEvidence` | ok/watch/risk/missing |\n| `counterEvidenceNeeded` | 필요한 반증 |\n| `status` | open/notTriggered |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.engineCandidateMemo - 반복 가능한 신호만 후보로 넘긴다.\n2. recipes.incubato"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "title": "Event Radar Engine Candidate Memo",
+      "category": "recipes",
+      "purpose": "이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar engine candidate",
+        "엔진 환류 후보",
+        "recipe to engine"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    consensus_rows = rows(c.gather(\"consensus\"), limit=12)\nexcept Exception:\n    consensus_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n    consensusRows=consensus_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"engineCandidateMemo\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\neventInbox, priceFlowReaction, insiderOwnershipSignal, capitalActionMonitor, consensusDriftWatch, scanContext를 후보 signal로 정리한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `signalId` | 후보 축 |\n| `status` | missing/ok/watch/risk |\n| `recommendedEngineOwner` | 나중에 담당할 엔진 영역 |\n| `promotionGate` | 승격 조건 |\n| `keepAsSkillAfterPromotion` | recipe 보존 여부 |\n\n## 연계 절"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "title": "Event Radar Visual Decision Pack",
+      "category": "recipes",
+      "purpose": "이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar visualization",
+        "촉매 레이더 차트",
+        "observed viz binding"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=40):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"visualDecisionPack\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\npriceRows, coverage, signal count를 기준으로 priceChart, kpiRibbon, evidenceCoverage, mermaidDiagram의 ready/blocked를 결정한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `visualRef` | observed viz skill |\n| `status` | ready/blocked |\n| `requiredBinding` | 필요한 근거 결합 |\n| `evidence` | 선택 사유 |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.sourceCoverageAudit - source coverage 확인.\n2. recipes.incubator.eventRadar.deepDive - 최종 답변의 visual gate.\n\n## 기본 검증\n\n- visualRefs는 observed viz만 포함한다.\n- blocked visualRef를 em"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.deepDive",
+      "title": "Event Radar Deep Dive",
+      "category": "recipes",
+      "purpose": "source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다.",
+      "whenToUse": [
+        "이벤트 레이더 deep dive",
+        "촉매 후보 전체 실행",
+        "공시 주가 수급 컨센서스 종합"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.insiderOwnershipSignal",
+        "recipes.incubator.eventRadar.capitalActionMonitor"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.disclosure`, `Company.liveFilings`, `Company.gather`, `scan.market`, `scan.insider`, `scan.capital`은 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    try:\n        filings = rows(c.disclosure(), limit=50)\n    except Exception:\n        filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gather_rows(\"ownership\", limit=20),\n    dividendRows=gather_rows(\"dividends\", limit=20),\n    splitRow"
     }
   ]
 }

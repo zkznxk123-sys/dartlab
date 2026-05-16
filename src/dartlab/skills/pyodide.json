@@ -2931,6 +2931,107 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.index",
+      "title": "Event Radar Incubator 진입점",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 snapshot 범위에서는 live filing, price, flow, consensus row가 제한될 수 있다."
+      ]
+    },
+    {
+      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "title": "Event Radar Source Coverage Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.eventInbox",
+      "title": "Event Radar Event Inbox",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "title": "Event Radar Price Flow Reaction",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "title": "Event Radar Insider Ownership Signal",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "title": "Event Radar Capital Action Monitor",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "title": "Event Radar Consensus Drift Watch",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "title": "Event Radar Falsifier Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "title": "Event Radar Engine Candidate Memo",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "title": "Event Radar Visual Decision Pack",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.eventRadar.deepDive",
+      "title": "Event Radar Deep Dive",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     }
   ]
 }
