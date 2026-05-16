@@ -1,19 +1,25 @@
-"""DartLab 컬러 팔레트 — 단일 원천.
+"""[deprecated path] DartLab 컬러 팔레트 — SSOT 는 `dartlab.viz.palette` 로 이동.
 
-Python 측 모든 시각화가 이 모듈에서 색상을 가져온다.
-JS 측: ``ui/shared/chart/colors.ts`` (동일 값, 주석으로 교차 참조).
+기존 `from dartlab.core.palette import COLORS` 호환을 위한 lazy re-export shim.
+신규 코드는 `from dartlab.viz.palette import COLORS, INTENT_MAP, TONE_MAP` 사용.
+
+L0 ← L4 직접 import 회피 위해 `__getattr__` 로 지연 lookup.
 """
 
 from __future__ import annotations
 
-COLORS: list[str] = [
-    "#ea4647",  # primary red
-    "#fb923c",  # accent orange
-    "#3b82f6",  # blue
-    "#22c55e",  # green
-    "#8b5cf6",  # purple
-    "#06b6d4",  # cyan
-    "#f59e0b",  # amber
-    "#ec4899",  # pink
-]
-"""8색 팔레트. 인덱스로 순환 사용: ``COLORS[i % len(COLORS)]``."""
+_DEFERRED_EXPORTS = frozenset({"COLORS", "INTENT_MAP", "TONE_MAP"})
+
+
+def __getattr__(name: str) -> object:
+    """BC — 사용 시점에 viz/palette 동적 lookup (cycle 회피)."""
+    if name in _DEFERRED_EXPORTS:
+        import importlib
+
+        mod = importlib.import_module("dartlab.viz.palette")
+        return getattr(mod, name)
+    raise AttributeError(f"module 'dartlab.core.palette' has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    return sorted(_DEFERRED_EXPORTS)
