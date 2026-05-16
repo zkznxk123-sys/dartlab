@@ -619,22 +619,64 @@ def calcDistressEnsemble(company, *, basePeriod: str | None = None) -> dict | No
 
 @memoizedCalc
 def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
-    """부채 만기 구조 분석.
+    """부채 만기 구조 — 단기/장기/사채 + 차환 리스크.
 
-    단기/장기 차입금 비율, 차환 리스크 지표.
+    Capabilities:
+        단기차입금/장기차입금/사채 분해 + 단기차입금 비중 + 유동부채/부채총계
+        + 차환능력 (단기차입금/OCF) 시계열. 업종별 계정 폴백 (제조 → 금융
+        → 바이오). 차환 리스크 (refinancing risk) 정량화.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            shortTermBorrowing : float — 단기차입금 (원)
-            longTermBorrowing : float — 장기차입금 (원)
-            bonds : float — 사채 (원)
-            totalBorrowing : float — 총차입금 (원)
-            shortTermRatio : float — 단기차입금 비중 (%)
-            currentToTotalDebt : float — 유동부채/부채총계 (%)
-            refinancingRisk : float — 단기차입금/OCF (배)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 8 키 (period + 3 차입금 분해
+              + totalBorrowing + 3 비율 지표).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcDebtMaturity(Company("005930"))
+        >>> r["history"][0]["refinancingRisk"]
+        0.8  # OCF 가 단기차입 1.25 배 — 양호
+
+    Guide:
+        - 단기차입금 비중 > 50% + refinancingRisk > 2 = 차환 위기 신호.
+        - 사채 (회사채) 만기 도래 시 시장 환경 (금리/스프레드) 함께 확인.
+        - 금융업/바이오는 차입 구조 다름 — 자동 폴백 분기.
+
+    SeeAlso:
+        - ``calcLeverageTrend``: 부채/자본 구조 (위 함수와 paired)
+        - ``calcCoverageTrend``: 이자보상배율
+        - ``calcFundingSources``: 자금조달 원천 (CF/투자/재무)
+
+    Requires:
+        BS (단기/장기차입금/사채 또는 차입부채/발행사채 또는 유동/장기금융부채)
+        + CF (영업활동현금흐름).
+
+    AIContext:
+        단기차입 비중 + refinancingRisk 함께 인용. 단기 비중 높아도
+        OCF 가 충분하면 (refinancingRisk < 1) 안전. KR 회사채 시장 활황기 vs
+        냉각기에 따라 차환 난이도 달라짐.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단기차입금 비중만으로 위험 판정 — OCF 와 비교 필수.
+            - 금융업/바이오에 제조업 폴백 기대 — 본 함수가 자동 분기.
+        OutputSchema:
+            ``{history: list[dict 8키]}``.
+        Prerequisites:
+            BS 차입금 계정 (업종별 키) + CF 영업현금흐름.
+        Freshness:
+            BS 분기 + CF 분기.
+        Dataflow:
+            BS → 단기/장기/사채 (제조) 또는 차입부채/발행사채 (금융) 또는
+            유동/장기금융부채 (바이오) → 합산 → CF 영업현금흐름 → 단기/OCF
+            = refinancingRisk.
+        TargetMarkets: KR (DART 표준), US (EDGAR Long-term/Current Debt).
     """
     bsResult = company.select(
         "BS",
