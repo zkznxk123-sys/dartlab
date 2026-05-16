@@ -171,12 +171,73 @@ def searchSuggestions(question: str) -> list[dict[str, str]]:
 
 
 def resolveStockCodeFromText(text: str) -> tuple[str | None, str]:
-    """자연어 텍스트에서 stockCode/ticker 와 남은 질문을 분리한다.
+    """자연어 텍스트 → (stockCode | ticker | None, 남은 질문) 분리.
 
-    core layer 책임 — Company 인스턴스 생성은 호출자 (dartlab.company.resolveFromText) 책임.
+    Capabilities:
+        4-tier 매칭: (1) 6 자리 KR 종목코드 → (2) US ticker (대문자 1~5
+        글자) → (3) 약칭/별칭 (COMMON_ALIASES) → (4) 정식 회사명 후보군
+        매칭. 매칭 시 종목코드/티커 + 잔여 텍스트 반환, 실패 시 (None, text).
+
+    Args:
+        text: 자연어 입력 (예 ``"삼성전자 매출 어때"``, ``"AAPL revenue"``,
+            ``"005930 부채비율"``).
 
     Returns:
-        (stockCode | ticker | None, remaining_question)
+        tuple[str | None, str]:
+            첫째: 매칭된 stockCode (KR 6 자리) 또는 ticker (US 대문자) 또는
+                ``None`` (매칭 실패).
+            둘째: 매칭 부분 제거 후 남은 질문 텍스트.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> resolveStockCodeFromText("삼성전자 매출 어때")
+        ('005930', '매출 어때')
+        >>> resolveStockCodeFromText("AAPL revenue growth")
+        ('AAPL', 'revenue growth')
+        >>> resolveStockCodeFromText("부채비율 어떻게 봐야 해")
+        (None, '부채비율 어떻게 봐야 해')
+
+    Guide:
+        core layer 책임 — Company 인스턴스 생성은 호출자 (``dartlab.company.
+        resolveFromText``) 책임. 본 함수는 stockCode 식별만.
+        조사 ("의/이/가/은/는/을/를") 자동 제거 (``stripParticles``).
+        다단어 회사명은 길이 우선 매칭 (4 단어 → 1 단어).
+
+    SeeAlso:
+        - ``collectCandidates``: 후보군 수집 (본 함수가 내부 호출)
+        - ``COMMON_ALIASES``: 약칭 매핑 SSOT
+        - ``dartlab.company.resolveFromText``: Company 인스턴스 생성 wrapper
+
+    Requires:
+        ``COMMON_ALIASES`` JSON 로드 + nodes.json (회사명 룩업).
+
+    AIContext:
+        매칭 실패 (None) 시 호출자는 가이드 메시지 ("종목코드를 찾을 수
+        없습니다. AAPL 또는 005930 같은 형식 사용") 출력 권장. ticker 와
+        조사 ("매출 어때") 가 함께 있으면 잔여 텍스트로 정확히 분리됨.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 띄어쓰기 없는 입력 ("삼성전자매출") — 단어 분리 어려워 매칭 실패.
+              자연어 입력은 띄어쓰기 권장.
+            - 대문자 5 글자 초과 (예 "AAPLZ") — ticker 패턴 미매칭 → 회사명
+              경로로 진입.
+            - 영문 회사명 (예 "Apple") — COMMON_ALIASES 에 등록 안 됐으면 실패.
+              ticker 직접 입력 권장.
+        OutputSchema:
+            ``(stockCode_or_ticker_or_None, remaining_text)``.
+        Prerequisites:
+            COMMON_ALIASES (frame/resolve.py 내 정의) + nodes.json (industry
+            taxonomy 회사명 룩업).
+        Freshness:
+            COMMON_ALIASES 는 정적. nodes.json 운영자 업데이트 시점.
+        Dataflow:
+            text → strip → 6 자리 regex → US ticker regex → 단어 조합
+            (4→1) × stripParticles → COMMON_ALIASES → collectCandidates
+            (단일 매칭이면 채택).
+        TargetMarkets: KR (6 자리 종목코드), US (대문자 ticker). JP/EM 미지원.
     """
     text = text.strip()
     if not text:
