@@ -667,13 +667,68 @@ def kooBalanceSheetRecession(
     gdp: float,
     policyRate: float,
 ) -> KooRecessionResult:
-    """Koo BSR: 민간 금융 잉여 + 저금리 = 재무상태표 침체.
+    """Koo Balance Sheet Recession — 민간 금융 잉여 + 저금리 = BSR 진단.
+
+    Capabilities:
+        Richard Koo (Nomura, 2003) 의 BSR 모델 — 민간 (가계 + 기업) 이 부채
+        상환을 우선시할 때 차입 수요가 사라져 통화정책 무력화. 잉여 > GDP
+        3% + 정책금리 < 2% = BSR 신호. 일본 잃어버린 30년 + 2008 후 미국/
+        유럽 일부 적용.
 
     Args:
-        privateSaving: 민간 부문 총저축
-        privateInvestment: 민간 총투자
-        gdp: GDP
-        policyRate: 정책금리 (%)
+        privateSaving: 민간 부문 총저축 (원).
+        privateInvestment: 민간 총투자 (원).
+        gdp: GDP (원). 잉여 비율 계산 분모.
+        policyRate: 정책금리 (%).
+
+    Returns:
+        KooRecessionResult dataclass:
+            - ``surplus`` (float): 민간 금융 잉여 (% of GDP)
+            - ``policyRate`` (float)
+            - ``isBSR`` (bool): 본격 BSR 여부
+            - ``description`` (str)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = kooBalanceSheetRecession(privateSaving=200e12,
+        ...                              privateInvestment=170e12,
+        ...                              gdp=1000e12, policyRate=0.5)
+        >>> r.isBSR
+        True
+
+    Guide:
+        BSR 임계: surplus > 3% + policyRate < 2%. surplus 만 높으면 부분
+        BSR (재정 확대 효과 약화), 둘 다 충족하면 본격 BSR (금리 무력화,
+        재정 확대 필수). 일본 1995~2005, 미국 2009~2015 사례.
+
+    SeeAlso:
+        - ``fisherDebtDeflation``: Fisher (1933) 부채 디플레이션 (BSR 의
+          극단)
+        - ``minskyPhase``: Minsky revulsion (deleveraging 단계)
+        - Koo, R. (2003) "Balance Sheet Recession" Nomura
+
+    Requires:
+        privateSaving + privateInvestment + gdp > 0 + policyRate.
+
+    AIContext:
+        BSR 진단 + 정책 권고 ("재정 확대 필수") 함께 노출. surplus 음수면
+        민간 차입 우위 (정상), positive 큰 값이 위기 신호.
+
+    LLM Specifications:
+        AntiPatterns:
+            - GDP=0 또는 음수 입력 시 빈 결과 → 호출자 분기 필요.
+            - 단기 (1 분기) 잉여만 보고 BSR 단정 — 3~5 년 sustained 필요.
+        OutputSchema:
+            KooRecessionResult ``{surplus, policyRate, isBSR, description}``.
+        Prerequisites:
+            국민계정 (saving/investment/GDP) + 정책금리.
+        Freshness:
+            국민계정 분기. 정책금리 일.
+        Dataflow:
+            (saving - investment) / GDP × 100 → surplus → +rate 임계 → isBSR.
+        TargetMarkets: 일본 (Koo 원형), 미국 (2008 후), 한국 (2020~).
     """
     if gdp <= 0:
         return KooRecessionResult(0, policyRate, False, "GDP 데이터 없음")
