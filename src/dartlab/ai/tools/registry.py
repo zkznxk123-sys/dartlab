@@ -10,6 +10,7 @@ from typing import Any, Callable
 
 from .compileVisual import compileVisual
 from .engineCall import engineCall
+from .evidenceGate import evidenceGate
 from .groundingCheck import groundingCheck
 from .inspectDataset import inspectDataset
 from .listEngineGaps import listEngineGaps
@@ -288,6 +289,22 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "EvidenceGate": ToolSpec(
+        "EvidenceGate",
+        "Skill OS spec 의 requiredEvidence ↔ 누적 refs 비교. 답변 합성 직전 호출 — missing ref kind 있으면 답변에 ⚠ + 한계 문장 추가 권장.",
+        {
+            "type": "object",
+            "properties": {
+                "skillId": {"type": "string"},
+                "refs": {"type": "array"},
+            },
+            "required": ["skillId"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "GroundingCheck": ToolSpec(
         "GroundingCheck",
         "답변 본문의 material claim (수치/날짜/랭킹) 분류 + ref token 매칭 검증. fake ref token 감지. workbench GATE 휴리스틱 표면화.",
@@ -421,6 +438,7 @@ _TOOLS: dict[str, ToolFn] = {
     "ReadSkillMarket": readSkillMarket,
     "ReadCapability": readCapability,
     "EngineCall": engineCall,
+    "EvidenceGate": evidenceGate,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
     "Read": readFile,
@@ -461,6 +479,7 @@ _LEGACY_NAME_MAP = {
     "read_skill_market": "ReadSkillMarket",
     "read_capability": "ReadCapability",
     "engine_call": "EngineCall",
+    "evidence_gate": "EvidenceGate",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",
     "read": "Read",

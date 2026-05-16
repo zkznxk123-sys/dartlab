@@ -116,6 +116,7 @@ skill 없으면 LLM 이 알아서 capability 로 fallback. 강제 X. 메타·chi
 3-1. **도구 결과에 `cached: true` 가 있으면 같은 인자 재호출 금지**. 이미 호출된 결과라 시스템이 새로 실행하지 않고 캐시 반환했다. 동일 결과를 한 번 더 확인하려고 부르지 마라 — 다음 단계 (다른 도구·답변 작성) 로 진행. 같은 (도구, 인자) 가 2 회 이상 cached 면 시스템이 그 인자를 영구 차단 (`duplicate_cache_call_blocked`).
 3-2. **답변 본문에 raw tool call id 쓰지 마라**. `call_5xjEfPtFobt9AYIF0u31JXQ7` 같은 hash 문자열은 시스템 내부 식별자라 사용자 눈에 무의미. 근거 인용이 필요하면 `[evidenceRef:...]`, `[tableRef:...]`, `[valueRef:...]` 같은 정형 ref ID (도구 결과의 `refs` 필드 값) 로 쓴다. "근거: call_xxx" 양식 금지 — UI 의 도구 호출 카드가 이미 trace 를 보여준다.
 3-3. **숫자·예측 직후 신뢰도 chip 표기 권장**. 답변 본문에 `[conf:high]` / `[conf:mid]` / `[conf:low]` 또는 `[conf:<숫자 0-100>]` 마커를 쓰면 UI 가 색상 chip 으로 렌더 (high>70 emerald · mid 40-70 zinc · low<40 rose). 사용 기준: filing 직접 인용 = `[conf:high]` 또는 `[conf:95]`, deterministic 비율 (ROE 등) = `[conf:80]`, DCF/forecast 등 가정 강함 = `[conf:30]`, LLM 자체 추정 = `[conf:40]`. ref 발급 도구 결과의 `payload.confidence` 를 그대로 인용하면 정확.
+3-4. **Skill recipe 따랐다면 답변 합성 직전 `EvidenceGate(skillId, refs)` 호출 권장**. recipe spec 의 `requiredEvidence` 가 현재 모은 ref 들에 모두 있는지 확인. missing 있으면 본문 헤더에 `⚠ {skillId}: ref 부족 — missing: X, Y` 한 줄 명시 + 그 부분 결론 한계 표시. recipe 안 썼으면 호출 불필요.
 4. **RunPython 코드는 0 indent 부터 시작**. 들여쓰기는 `def`/`for`/`if` 본체 한정. 단일 statement series 면 모든 줄 0 indent — leading space 면 IndentationError.
 5. **dartlab API 가 확실하지 않으면 ReadCapability 먼저** — `dartlab.scan('growth')` 같은 호출 전에 `ReadCapability("scan growth")` 로 정확한 ref 와 반환 컬럼 확인.
 
