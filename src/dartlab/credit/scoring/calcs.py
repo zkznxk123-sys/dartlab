@@ -550,28 +550,63 @@ def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | None:
-    """credit publisher의 7축 서사를 story 블록용으로 변환.
+    """7 축 서사 — credit publisher 의 axis별 narrative dict.
 
-    credit/narrative.py::buildNarratives() 결과를 그대로 반환.
-    review가 5-7 신용평가 섹션에서 소비.
+    Capabilities:
+        credit/features/narrative.py::buildNarratives 결과 노출 — 7 축
+        (상환력/레버리지/유동성/수익성/구조/시장신호/지배구조) 별 summary +
+        details + severity (good/neutral/warning/critical). story 5-7 신용평가
+        섹션의 raw 입력.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간. None 시 최신.
 
-    Returns
-    -------
-    dict | None
-        axes : list[dict] — 축별 서사
-            axisName : str — 축 이름 (예: "채무상환능력")
-            summary : str — 한 줄 요약
-            details : list[str] — 상세 설명 문장들
-            severity : str — 심각도 ("good"/"neutral"/"warning"/"critical")
-        grade : str — dCR 등급 (예: "dCR-AA+")
-        gradeDescription : str — 등급 설명
+    Returns:
+        dict | None:
+            - ``axes`` (list[dict]): axisName, summary, details list, severity.
+            - ``grade`` (str): dCR 등급.
+            - ``gradeDescription`` (str): 등급 설명.
+
+    Raises:
+        없음 (None 시 narrative 빌드 실패 또는 데이터 부족).
+
+    Example:
+        >>> r = calcCreditNarrative(Company("005930"))
+        >>> r["axes"][0]["axisName"], r["axes"][0]["severity"]
+        ('채무상환능력', 'good')
+
+    Guide:
+        - severity "critical" 축이 있으면 grade 가 낮을 가능성 큼 (downgrade).
+        - severity "good" 축만 모이면 upgrade 후보.
+        - details 는 LLM 인용 시 직역 권장 (특정 metric 값 포함).
+
+    SeeAlso:
+        - ``calcCreditScore``: 점수 산출 (본 narrative 와 paired)
+        - ``calcCreditAudit``: 외부 신평사 대조
+        - ``credit.features.narrative.buildNarratives``: 본체
+
+    Requires:
+        evaluateCompany 결과 (axes + metricsHistory).
+
+    AIContext:
+        axes 직역 인용 권장 (summary 1 줄 + 핵심 details 1~2 개). severity
+        라벨 단독 인용 금지, summary + 핵심 metric 함께.
+
+    LLM Specifications:
+        AntiPatterns:
+            - severity 라벨 단독 인용 — summary + 핵심 metric 함께.
+            - 본 함수 결과로 grade 추론 — calcCreditScore 가 정답.
+        OutputSchema:
+            ``{axes: list[{axisName, summary, details: list, severity}],
+              grade: str, gradeDescription: str}``.
+        Prerequisites:
+            evaluateCompany 결과.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → buildNarratives → 7 축 narrative + grade.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     if result is None:
