@@ -1,11 +1,11 @@
 import skillIndex from '$skills/index.json';
 
-export const skillCategoryOrder = ['start', 'runtime', 'operation', 'engines', 'recipes'] as const;
+// operation 카테고리는 landing 검색에서 제외 (skills 필터 참조) — 메뉴/순서에서도 노출 X.
+export const skillCategoryOrder = ['start', 'runtime', 'engines', 'recipes'] as const;
 
 export const skillCategoryTitle: Record<string, string> = {
 	start: 'Start',
 	runtime: 'Runtime',
-	operation: 'Operation',
 	engines: 'Engines',
 	recipes: 'Recipes'
 };
@@ -128,8 +128,10 @@ if (skippedPaths.length > 0 && typeof console !== 'undefined') {
 }
 
 export const skillsMeta: SkillIndexMeta = (skillIndex as { meta?: SkillIndexMeta }).meta ?? {};
+// operation/ 은 운영자·기여자 내부 SSOT (philosophy·code·testing·architecture).
+// landing 방문자가 검색할 컨텐츠가 아님 — 빌드 JSON 은 운영자 권한이라 UI 단에서 제외.
 export const skills: SkillDoc[] = ((skillIndex as { skills?: SkillDoc[] }).skills ?? [])
-	.filter((skill) => skill.category !== 'capability')
+	.filter((skill) => skill.category !== 'capability' && skill.category !== 'operation')
 	.map(normalizeSkillCategory);
 
 const skillById = new Map<string, SkillDoc>(skills.map((skill) => [skill.id, skill]));
