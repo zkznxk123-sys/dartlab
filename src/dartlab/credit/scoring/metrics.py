@@ -49,17 +49,17 @@ _annualCols = annualColsFromPeriods
 
 
 def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
-    """7축 모든 지표를 한 번에 산출.
+    """7 축 신용분석 30+ 지표 한 번에 산출 — credit engine 의 핵심 데이터 함수.
 
-    company.select()로 원본 데이터(BS/IS/CF)를 직접 가져오고,
-    notes/sections에서 차입금 내역, 부문 구성, 감사의견 등을 보강한다.
+    Capabilities:
+        Company 의 BS/IS/CF + notes (차입금/부문/감사의견 + 9 년 시계열) +
+        sections (공시 리스크) → 신용 7 축 모든 지표 (FFO/Debt, Debt/EBITDA,
+        EBITDA Interest Coverage 등 30+) 산출 + Beneish M-Score + Piotroski
+        F-Score 동반 산출. credit.engine.evaluateCompany 가 본 함수 호출.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간 (예: "2024"). None이면 최신 9개년.
+    Args:
+        company: DartCompany 또는 EdgarCompany 인스턴스.
+        basePeriod: 분석 기준 기간 (예 ``"2024"``). None 시 최신 9 년.
 
     Returns
     -------
@@ -101,6 +101,47 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
         profile : dict | None — 기업 프로필 (섹터, 주요제품)
         segmentComposition : dict | None — 부문별 매출 구성
         rank : dict | None — 업종 내 순위
+
+    Raises:
+        없음 — 데이터 누락 시 None 반환.
+
+    Example:
+        >>> m = calcAllMetrics(Company("005930"))
+        >>> m["history"][0]["ebitdaInterestCoverage"], m["auditOpinion"]
+        (15.2, '적정')
+
+    Guide:
+        9 년 시계열 산출 (basePeriod=None). 부분 분기 (R25-1 partial period)
+        는 evaluateCompany 가 건너뛴다. 본 함수는 모든 행 반환.
+
+    SeeAlso:
+        - ``credit.engine.evaluateCompany``: 본 함수 호출자
+        - ``sectorThresholds``: 업종별 임계값 (본 metric 비교)
+        - ``narrateRepayment`` 등: 본 metric 으로 서사 생성
+
+    Requires:
+        Company.select("BS/IS/CF") + notes 데이터 (DART 공시).
+
+    AIContext:
+        history list 의 첫 dict 가 최신 — 시계열 비교 시 [0] vs [1] 사용.
+        businessStability 의 revenueCV 만 단독 인용 금지 — sectorThresholds
+        와 비교 후 정성 판정.
+
+    LLM Specifications:
+        AntiPatterns:
+            - history list 만 보고 단기 변동 판단 — 최소 3 년 추세 권장.
+            - profile 누락 (None) 시 sector 정보 미사용 — sectorThresholds
+              fallback 으로 일반 임계 사용 (정확도 낮음).
+        OutputSchema:
+            상기 30+ 키 dict.
+        Prerequisites:
+            Company.finance (BS/IS/CF) + notes (borrowings/segments) 로드.
+        Freshness:
+            BS/IS/CF = 최신 분기 (마감 후 30~45 일). notes = 함께.
+        Dataflow:
+            company.select → 9 년 BS/IS/CF → metric 계산 (30+) → notes
+            보강 → businessStability + reliability + disclosureRisk 합성.
+        TargetMarkets: KR (DART 표준), US (EDGAR — 일부 metric 부분 적용).
     """
     # ── 원본 데이터 수집 ──
     bsResult = company.select(
