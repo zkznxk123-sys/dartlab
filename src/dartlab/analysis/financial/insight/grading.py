@@ -45,29 +45,67 @@ def analyzePerformance(
     qPeriods: list[str],
     isFinancial: bool = False,
 ) -> InsightResult:
-    """실적 성장성 분석.
+    """실적 성장성 — 매출 + 영업이익 YoY + 변동성 (불완전 연도 자동 제외).
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열.
-    aYears : list[str]
-        연간 기간 라벨 리스트.
-    qSeries : dict
-        분기 재무 시계열.
-    qPeriods : list[str]
-        분기 기간 라벨 리스트.
-    isFinancial : bool
-        금융업 여부.
+    Capabilities:
+        연간 매출/영업이익 YoY 성장률 + 분기 시계열 변동성 (max quarterly
+        change) 결합. 불완전 연도 (현재 진행 중 1Q/2Q/3Q) 자동 감지 + 제외
+        (detectIncompleteYear). 금융업은 매출 대신 영업이익 사용.
 
-    Returns
-    -------
-    InsightResult
-        grade : str — 'A'~'F' 등급
-        summary : str — 요약 문장
-        details : list[str] — 세부 분석 항목
-        risks : list[Flag] — 리스크 플래그
-        opportunities : list[Flag] — 기회 플래그
+    Args:
+        aSeries: 연간 재무 시계열 dict (IS).
+        aYears: 연간 기간 라벨 리스트.
+        qSeries: 분기 재무 시계열 dict.
+        qPeriods: 분기 기간 라벨 리스트.
+        isFinancial: 금융업 여부. True 면 영업이익 기반.
+
+    Returns:
+        InsightResult dataclass:
+            - ``grade`` (str): A~F
+            - ``summary`` (str): 한국어
+            - ``details`` (list[str])
+            - ``risks``/``opportunities`` (list[Flag])
+
+    Raises:
+        없음. revGrowth=None 시 grade='N'.
+
+    Example:
+        >>> r = analyzePerformance(aSeries, ["2021","2022","2023"], qSeries, qPeriods)
+        >>> r.grade, r.summary
+        ('A', '매출 고성장 +25%, 영업이익 동반 성장')
+
+    Guide:
+        매출 성장률 임계: >20% = 고성장 (+3 score), 10~20% = 양호 (+2),
+        0~10% = 안정 (+1), -10~0% = 감소, < -10% = 급감 (-2 + danger).
+        영업이익 +50%+ = 급증, < -30% = 급감. 변동성 30%+ = warning.
+
+    SeeAlso:
+        - ``analyzeProfitability``: 수익성 (성장 + 마진)
+        - ``calcStructuralBreak``: 매출/영업이익 구조변화점 감지
+        - ``detectIncompleteYear``: 불완전 연도 식별
+
+    Requires:
+        aSeries 의 IS/sales + IS/operating_profit 시계열 ≥ 2 년.
+
+    AIContext:
+        성장률 단독 인용 금지 — 변동성 + 영업이익 동반 성장 여부 함께. 불완전
+        연도 (예 2024 3Q) 가 자동 제외되므로 분기 정확도 영향 없음.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 YoY 만으로 grade 단정 — 본 함수는 3 년 추세 가능 시 활용.
+            - 매출 급감 (-10%) → automatic F — 일회성 (M&A 분할 등) 가능
+              하므로 영업이익 동반 확인.
+        OutputSchema:
+            InsightResult ``{grade, summary, details, risks, opportunities}``.
+        Prerequisites:
+            IS 시계열 ≥ 2 년 + 분기 시계열 (변동성용).
+        Freshness:
+            최신 분기. 불완전 연도 자동 제외.
+        Dataflow:
+            IS → revGrowth/opGrowth/volatility → score 누적 → grade →
+            risks/opps Flag 생성.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     lastYear, qCount = detectIncompleteYear(qPeriods)
     incomplete = qCount < 4
