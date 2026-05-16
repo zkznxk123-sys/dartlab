@@ -61,6 +61,31 @@ def detectStructuralBreak(
             isBreak : bool
             mean_pre / mean_post : float | None
             interpretation : str
+
+    Guide:
+        Quandt-Andrews (1993) — 미지 break 시점. threshold 3.0 보수적, 2.5 완화.
+        trim 0.15 표준 (양 끝 sampling bias 제거).
+
+    When:
+        Regime change 탐지 + AI 매크로/펀더멘털 shift 답변.
+
+    How:
+        후보 시점 t* sweep → 전후 평균 t-stat → sup → threshold 비교.
+
+    Requires:
+        시계열 n ≥ 30.
+
+    Raises:
+        없음 — invalid 시 error 키.
+
+    Example:
+        >>> r = detectStructuralBreak(series)
+        >>> r["isBreak"]
+        True
+
+    See Also:
+        - calcSADF : 단위근/버블 break
+        - hamiltonRegime : Markov regime
     """
     s = np.asarray(series, dtype=np.float64)
     n = len(s)

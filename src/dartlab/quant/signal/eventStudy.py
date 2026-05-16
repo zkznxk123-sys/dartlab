@@ -72,6 +72,32 @@ def calcCAR(
             tStat : float
             isSignificant : bool — |t| > 1.96
             interpretation : str
+
+    Guide:
+        MacKinlay (1997) event study 표준. estimationWindow (-120, -30) +
+        eventWindow (-5, +5) 표준. |t| > 1.96 = 5% 유의.
+
+    When:
+        Quant event study + AI 공시 영향 답변.
+
+    How:
+        estimation window 에서 α/β 회귀 → eventWindow expected return →
+        abnormal return → CAR + t-stat.
+
+    Requires:
+        stockReturns + marketReturns 동일 길이 + eventIdx 가 window 안.
+
+    Raises:
+        없음 — window out of range 시 error 키.
+
+    Example:
+        >>> r = calcCAR(stockR, marketR, eventIdx=120)
+        >>> r["car"]
+        0.045
+
+    See Also:
+        - calcEventSignal : 공시 이벤트 분류
+        - labelTripleBarrier : ML 라벨링
     """
     n = len(stockReturns)
     est_lo = eventIdx + estimationWindow[0]

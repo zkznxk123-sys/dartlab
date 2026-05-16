@@ -52,6 +52,31 @@ def haircutSharpe(
     Notes:
         - HLZ 원논문은 Bayesian re-weighting — 본 함수는 frequentist 단순화 (Bonferroni).
         - DSR (Bailey-Lopez 2014) 와 결합 권장 — DSR 은 within-strategy 다중 시도, HLZ 는 between-strategy.
+
+    Guide:
+        N 전략 동시 검정 시 보정 후 critical t 가 √log(N) 만큼 증가. nTests > 10
+        면 BHY 권장.
+
+    When:
+        Quant 거버넌스 + 전략 검증 + AI strategy 진정성 답변.
+
+    How:
+        tStat = sharpe × √years → critical t (method 별) → haircutSharpe →
+        손실율 → 5% 유의 판정.
+
+    Requires:
+        sharpe (관측) + nObs ≥ 30 + nTests ≥ 1.
+
+    Raises:
+        없음 — invalid 입력은 error 키.
+
+    Example:
+        >>> haircutSharpe(2.0, nTests=10, nObs=2520)["isSignificant"]
+        True
+
+    See Also:
+        - calcFactorIC : 팩터 IC 진단
+        - dsrShrinkage : within-strategy DSR
     """
     if nObs < 30 or nTests < 1:
         return {"error": "invalid input"}

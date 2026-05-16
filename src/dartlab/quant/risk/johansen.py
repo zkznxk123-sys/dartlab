@@ -66,6 +66,32 @@ def johansenTest(Y: np.ndarray, *, lag: int = 1) -> dict:
             beta : np.ndarray — k × cointRank cointegrating vectors
             eigenvalues : np.ndarray
             interpretation : str
+
+    Guide:
+        Johansen (1991) — multi-variate cointegration. k ≤ 5 권장 (critical
+        table 한정). T ≥ 20k 필요.
+
+    When:
+        다중 자산 페어 트레이딩 + AI 공적분 답변.
+
+    How:
+        ΔY_t = αβ^T Y_{t-1} + ε → eigendecomposition → trace statistics → 5%
+        critical 비교 → cointRank.
+
+    Requires:
+        Y 가 T×k (k ≤ 5, T ≥ 20k).
+
+    Raises:
+        없음 — shape/k 범위 초과 시 error 키.
+
+    Example:
+        >>> r = johansenTest(Y, lag=1)
+        >>> r["cointRank"]
+        1
+
+    See Also:
+        - calcVECM : VECM 추정 (본 함수 + α 적응)
+        - calcPairs : Engle-Granger 2-asset
     """
     Y = np.asarray(Y, dtype=np.float64)
     if Y.ndim != 2:

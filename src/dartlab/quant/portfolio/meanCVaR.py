@@ -57,6 +57,32 @@ def optimizeMeanCVaR(
     Notes:
         - Projected Gradient + soft barrier — 정확한 LP 아님, 근사. cvxpy 미사용.
         - 결과는 sample CVaR (overfit 위험). out-of-sample 검증 필수.
+
+    Guide:
+        Rockafellar-Uryasev — variance 대체 tail-aware risk. T ≥ 252 권장
+        (sample CVaR 신뢰성).
+
+    When:
+        Portfolio + AI tail risk 최소화 답변.
+
+    How:
+        샘플 수익률 → α 분위 = VaR → tail 평균 = CVaR → projected gradient +
+        barrier 로 비중 최적화.
+
+    Requires:
+        returns T×N (N ≥ 2, T ≥ 30).
+
+    Raises:
+        없음 — shape mismatch 시 error 키.
+
+    Example:
+        >>> r = optimizeMeanCVaR(returns)
+        >>> r["cvar"]
+        -0.032
+
+    See Also:
+        - blackLittermanPosterior : 뷰 기반
+        - optimizeNCO : cluster 기반
     """
     R = np.asarray(returns, dtype=np.float64)
     if R.ndim != 2 or R.shape[1] < 2:

@@ -62,6 +62,32 @@ def labelTripleBarrier(
             barriers : dict — {pt, sl, vertical, volWindow} 메타
             stats : dict — winRate / lossRate / timeoutRate / avgRet / avgHold
             interpretation : str
+
+    Guide:
+        AFML Ch.3 — pt/sl 비대칭 (2:1) + vertical 10 일 기본. ML primary 모델
+        학습 라벨 SSOT.
+
+    When:
+        ML primary 모델 라벨 생성 + AI 백테스트 라벨링 답변.
+
+    How:
+        rolling vol 추정 → 각 t0 에서 pt×σ 상단/sl×σ 하단/vertical 일 3 경계 →
+        가장 먼저 닿는 경계 label + hold + return.
+
+    Requires:
+        close ≥ vertical + volWindow + 1, 양수 종가.
+
+    Raises:
+        없음 — 데이터 부족 시 error 키.
+
+    Example:
+        >>> r = labelTripleBarrier(close, pt=2.0, sl=1.0, vertical=10)
+        >>> r["stats"]["winRate"]
+        0.45
+
+    See Also:
+        - calcCAR : event-study 누적 초과수익
+        - vectorBacktest : 백테스트 본체
     """
     close = np.asarray(close, dtype=np.float64)
     n_raw = len(close)

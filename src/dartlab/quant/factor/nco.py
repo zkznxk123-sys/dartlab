@@ -113,6 +113,32 @@ def optimizeNCO(
             intraWeights : list[np.ndarray] — cluster 내부 비중
             interWeights : np.ndarray — cluster 간 비중
             interpretation : str
+
+    Guide:
+        Lopez de Prado AFML Ch.16 — 30+ universe 에서 mean-variance 의 conditional
+        number explosion 회피. nClusters 4~6 권장.
+
+    When:
+        대형 universe portfolio optimization + AI 30+ 종목 안정 비중 답변.
+
+    How:
+        cov → corr → distance → single-linkage cluster → cluster 내부 tangency/
+        min-var + cluster 간 risk parity → 최종 weights.
+
+    Requires:
+        cov 가 양의 준정칙 N×N (N ≥ nClusters).
+
+    Raises:
+        없음 — shape mismatch 시 error 키.
+
+    Example:
+        >>> r = optimizeNCO(cov, nClusters=5)
+        >>> r["weights"].sum()
+        1.0
+
+    See Also:
+        - allocateERC : HRP 단순화
+        - blackLittermanPosterior : 뷰 + prior 결합
     """
     Sigma = np.asarray(cov, dtype=np.float64)
     N = Sigma.shape[0]

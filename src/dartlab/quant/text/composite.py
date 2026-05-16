@@ -55,6 +55,30 @@ def calcTextComposite(
             composite : float — weighted z (negative weight 적용)
             interpretation : str
         None — 텍스트 데이터 0개
+
+    Guide:
+        4 텍스트 축 weighted z. negative weight (toneChange/riskText) 로 부정
+        신호 반전. composite ≥ 1.5 = 강한 positive text alpha.
+
+    When:
+        Quant text alpha 진입점 + AI 공시 본문 분석 답변.
+
+    How:
+        4 sub-함수 (sentiment/toneChange/riskText/governance) 호출 → z-score →
+        가중 합성.
+
+    Requires:
+        scan 또는 gather text 데이터 (4 sub-함수 의존).
+
+    Raises:
+        없음 — 누락 시 None.
+
+    Example:
+        >>> calcTextComposite("005930")["composite"]
+        0.85
+
+    See Also:
+        - calcSentiment / calcToneChange / calcRiskText / calcGovernanceQuant : 각 축
     """
     try:
         from dartlab.quant.text.governance import calcGovernanceQuant

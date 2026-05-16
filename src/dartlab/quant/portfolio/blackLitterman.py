@@ -55,6 +55,32 @@ def blackLittermanPosterior(
             covBL : np.ndarray — posterior covariance (사후)
             weights : np.ndarray — μ_BL 기반 tangency portfolio
             interpretation : str
+
+    Guide:
+        Black-Litterman (1992) — 시장 합의 + view 합리적 결합. K=1 단순 view 부터
+        K=N 풀 view 까지. riskAversion δ ≈ 2~3 (S&P 가정).
+
+    When:
+        Portfolio + AI view 기반 최적화 답변.
+
+    How:
+        equilibrium μ_eq = δΣw_mkt → view P/q/Ω 결합 → posterior μ_BL + cov_BL
+        → tangency weights.
+
+    Requires:
+        cov N×N + marketWeights N (합=1). view 옵션.
+
+    Raises:
+        없음 — shape mismatch 시 error 키.
+
+    Example:
+        >>> r = blackLittermanPosterior(cov=cov, marketWeights=w)
+        >>> r["weights"].sum()
+        1.0
+
+    See Also:
+        - optimizeNCO : cluster 기반
+        - optimizeMeanCVaR : CVaR 최소화
     """
     Sigma = np.asarray(cov, dtype=np.float64)
     w_mkt = np.asarray(marketWeights, dtype=np.float64)
