@@ -202,6 +202,17 @@ def runGate(files: list[Path]) -> Report:
     return report
 
 
+def _loadBaseline(baseline_path: Path) -> set[tuple[str, str]]:
+    """baseline JSON 에서 (path, func_name) 집합 추출 — 기존 부채.
+
+    PowerShell `Out-File -Encoding utf8` 는 BOM 을 붙이므로 utf-8-sig 로 읽어 흡수.
+    """
+    if not baseline_path.exists():
+        return set()
+    data = json.loads(baseline_path.read_text(encoding="utf-8-sig"))
+    return {(m["path"], m["func"]) for m in data.get("missing", [])}
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     group = parser.add_mutually_exclusive_group(required=True)
@@ -211,6 +222,17 @@ def main(argv: list[str] | None = None) -> int:
         "--fail-on-missing",
         action="store_true",
         help="누락 발견 시 exit 1 (default: warning-only, Phase 2 도입 시 활성)",
+    )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        default=_REPO / "scripts" / "audit" / "_baselines" / "testCoverage.json",
+        help="baseline JSON 경로. 기존 누락은 면제, 신규만 fail (default 첨부 파일).",
+    )
+    parser.add_argument(
+        "--no-baseline",
+        action="store_true",
+        help="baseline 무시 — 모든 누락 보고 (전체 부채 ledger 갱신용)",
     )
     parser.add_argument("--json", action="store_true", help="JSON 결과 출력")
     parser.add_argument("--limit", type=int, default=20, help="missing 출력 limit (default 20)")
@@ -226,20 +248,33 @@ def main(argv: list[str] | None = None) -> int:
 
     report = runGate(files)
 
+    # Baseline diff — 기존 누락 면제, 신규만 fail 대상
+    baseline = set() if args.no_baseline else _loadBaseline(args.baseline)
+    new_missing = [m for m in report.missing if (m.src_path, m.func_name) not in baseline]
+    grandfathered = [m for m in report.missing if (m.src_path, m.func_name) in baseline]
+
     if args.json:
-        print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+        out = report.to_dict()
+        out["baseline_count"] = len(baseline)
+        out["grandfathered_count"] = len(grandfathered)
+        out["new_missing_count"] = len(new_missing)
+        out["new_missing"] = [{"path": m.src_path, "func": m.func_name, "line": m.line} for m in new_missing]
+        print(json.dumps(out, ensure_ascii=False, indent=2))
     else:
         print(f"검사 파일: {report.checked_files}")
         print(f"공개 함수: {report.total_public_funcs}")
-        print(f"테스트 누락: {len(report.missing)}")
-        if report.missing:
-            print("\n누락 상위:")
-            for m in report.missing[: args.limit]:
+        print(f"테스트 누락 (전체): {len(report.missing)}")
+        print(f"  - baseline grandfathered: {len(grandfathered)}")
+        print(f"  - 신규 누락: {len(new_missing)}")
+        if new_missing:
+            print("\n신규 누락 상위 (본 PR 차단 대상):")
+            for m in new_missing[: args.limit]:
                 print(f"  - {m.src_path}:{m.line}  {m.func_name}")
-            if len(report.missing) > args.limit:
-                print(f"  ... 외 {len(report.missing) - args.limit} 종 더")
+            if len(new_missing) > args.limit:
+                print(f"  ... 외 {len(new_missing) - args.limit} 종 더")
 
-    if report.missing and args.fail_on_missing:
+    # 신규 누락만 fail 대상 (baseline 부채는 별도 quota 트랙)
+    if new_missing and args.fail_on_missing:
         return 1
     return 0
 

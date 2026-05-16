@@ -1,0 +1,5492 @@
+﻿{
+  "checked_files": 722,
+  "total_public_funcs": 3134,
+  "missing_count": 1097,
+  "missing": [
+    {
+      "path": "_aiEntries.py",
+      "func": "saveTemplate",
+      "line": 54
+    },
+    {
+      "path": "ai/agents/runToolLoop.py",
+      "func": "runToolLoop",
+      "line": 40
+    },
+    {
+      "path": "ai/memory/stats.py",
+      "func": "getSkillStats",
+      "line": 80
+    },
+    {
+      "path": "ai/memory/stats.py",
+      "func": "setStatsPathForTesting",
+      "line": 123
+    },
+    {
+      "path": "ai/memory/wiring.py",
+      "func": "wireSessionMemory",
+      "line": 35
+    },
+    {
+      "path": "ai/memory/wiring.py",
+      "func": "fetchPastContext",
+      "line": 112
+    },
+    {
+      "path": "ai/memory/wiring.py",
+      "func": "fetchRecallContext",
+      "line": 127
+    },
+    {
+      "path": "ai/memory/wiring.py",
+      "func": "inferStockCodeContext",
+      "line": 146
+    },
+    {
+      "path": "ai/memory/wiring.py",
+      "func": "defaultPriceLookup",
+      "line": 167
+    },
+    {
+      "path": "ai/settings/aiSetup.py",
+      "func": "providersStatus",
+      "line": 41
+    },
+    {
+      "path": "ai/settings/detect.py",
+      "func": "autoDetectProvider",
+      "line": 38
+    },
+    {
+      "path": "ai/settings/modelResolver.py",
+      "func": "normalizeProviderId",
+      "line": 53
+    },
+    {
+      "path": "ai/settings/modelResolver.py",
+      "func": "isOpenaiFamilyProvider",
+      "line": 63
+    },
+    {
+      "path": "ai/settings/modelResolver.py",
+      "func": "fallbackModels",
+      "line": 140
+    },
+    {
+      "path": "ai/settings/modelResolver.py",
+      "func": "isOpenaiChatModel",
+      "line": 152
+    },
+    {
+      "path": "ai/settings/profile.py",
+      "func": "getProfileManager",
+      "line": 387
+    },
+    {
+      "path": "ai/settings/profile.py",
+      "func": "ensureProvider",
+      "line": 194
+    },
+    {
+      "path": "ai/settings/profile.py",
+      "func": "ensureRole",
+      "line": 201
+    },
+    {
+      "path": "ai/settings/profile.py",
+      "func": "saveApiKey",
+      "line": 316
+    },
+    {
+      "path": "ai/settings/profile.py",
+      "func": "clearApiKey",
+      "line": 324
+    },
+    {
+      "path": "ai/settings/profile.py",
+      "func": "fingerprint",
+      "line": 376
+    },
+    {
+      "path": "ai/tools/columnAlias.py",
+      "func": "normalizeColumn",
+      "line": 102
+    },
+    {
+      "path": "ai/tools/columnAlias.py",
+      "func": "columnsFor",
+      "line": 128
+    },
+    {
+      "path": "ai/tools/columnAlias.py",
+      "func": "topicAccountPriority",
+      "line": 139
+    },
+    {
+      "path": "ai/tools/columnAlias.py",
+      "func": "availableTopics",
+      "line": 147
+    },
+    {
+      "path": "ai/tools/formatting.py",
+      "func": "formatMoney",
+      "line": 27
+    },
+    {
+      "path": "ai/tools/formatting.py",
+      "func": "formatPercent",
+      "line": 42
+    },
+    {
+      "path": "ai/tools/formatting.py",
+      "func": "shortText",
+      "line": 53
+    },
+    {
+      "path": "ai/tools/inspectDataset.py",
+      "func": "inspectDataset",
+      "line": 22
+    },
+    {
+      "path": "ai/tools/readSkillMarket.py",
+      "func": "readSkillMarket",
+      "line": 11
+    },
+    {
+      "path": "ai/tools/runPython.py",
+      "func": "emitResult",
+      "line": 116
+    },
+    {
+      "path": "ai/tools/runWorkbench.py",
+      "func": "runWorkbench",
+      "line": 20
+    },
+    {
+      "path": "ai/tools/saveArtifact.py",
+      "func": "saveArtifact",
+      "line": 24
+    },
+    {
+      "path": "ai/trace.py",
+      "func": "installProgressCapture",
+      "line": 9
+    },
+    {
+      "path": "ai/workbench/chatNative.py",
+      "func": "streamChatNative",
+      "line": 24
+    },
+    {
+      "path": "ai/workbench/compose.py",
+      "func": "runCompose",
+      "line": 15
+    },
+    {
+      "path": "ai/workbench/critique.py",
+      "func": "runCritique",
+      "line": 15
+    },
+    {
+      "path": "ai/workbench/harvest.py",
+      "func": "runHarvest",
+      "line": 21
+    },
+    {
+      "path": "ai/workbench/heuristic.py",
+      "func": "streamHeuristic",
+      "line": 41
+    },
+    {
+      "path": "ai/workbench/passes.py",
+      "func": "streamLLMPasses",
+      "line": 24
+    },
+    {
+      "path": "ai/workbench/runner.py",
+      "func": "runLLMPass",
+      "line": 33
+    },
+    {
+      "path": "ai/workbench/work.py",
+      "func": "runWork",
+      "line": 22
+    },
+    {
+      "path": "analysis/financial/accountSums.py",
+      "func": "sumBorrowings",
+      "line": 59
+    },
+    {
+      "path": "analysis/financial/accountSums.py",
+      "func": "sumCostOfSales",
+      "line": 84
+    },
+    {
+      "path": "analysis/financial/accountSums.py",
+      "func": "sumSGA",
+      "line": 89
+    },
+    {
+      "path": "analysis/financial/accountSums.py",
+      "func": "sumIncomeTax",
+      "line": 94
+    },
+    {
+      "path": "analysis/financial/accountSums.py",
+      "func": "sumBorrowingsKorean",
+      "line": 104
+    },
+    {
+      "path": "analysis/financial/asset.py",
+      "func": "calcInvestmentPropertyTrend",
+      "line": 565
+    },
+    {
+      "path": "analysis/financial/asset.py",
+      "func": "calcIntangibleAssetDetail",
+      "line": 652
+    },
+    {
+      "path": "analysis/financial/asset.py",
+      "func": "calcAssetFlags",
+      "line": 763
+    },
+    {
+      "path": "analysis/financial/attribution.py",
+      "func": "decomposeMarginChange",
+      "line": 14
+    },
+    {
+      "path": "analysis/financial/attribution.py",
+      "func": "decomposeRoicChange",
+      "line": 111
+    },
+    {
+      "path": "analysis/financial/attribution.py",
+      "func": "decomposeFcfChange",
+      "line": 190
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcFundingSources",
+      "line": 100
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcCapitalOverview",
+      "line": 403
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcCapitalTimeline",
+      "line": 462
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcDebtTimeline",
+      "line": 554
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcInterestBurden",
+      "line": 666
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcLiquidity",
+      "line": 710
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcCashFlowStructure",
+      "line": 799
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcDistressIndicators",
+      "line": 972
+    },
+    {
+      "path": "analysis/financial/capital.py",
+      "func": "calcCapitalFlags",
+      "line": 1039
+    },
+    {
+      "path": "analysis/financial/capitalAllocation.py",
+      "func": "calcDividendDocs",
+      "line": 391
+    },
+    {
+      "path": "analysis/financial/capitalAllocation.py",
+      "func": "calcTreasuryStockStatus",
+      "line": 463
+    },
+    {
+      "path": "analysis/financial/companyContext.py",
+      "func": "fetchNotesDetail",
+      "line": 13
+    },
+    {
+      "path": "analysis/financial/companyContext.py",
+      "func": "getRatioSeries",
+      "line": 30
+    },
+    {
+      "path": "analysis/financial/companyContext.py",
+      "func": "getRatios",
+      "line": 42
+    },
+    {
+      "path": "analysis/financial/companyContext.py",
+      "func": "resolveBasePeriod",
+      "line": 51
+    },
+    {
+      "path": "analysis/financial/companyType.py",
+      "func": "detectTemplates",
+      "line": 150
+    },
+    {
+      "path": "analysis/financial/companyType.py",
+      "func": "detectTemplate",
+      "line": 162
+    },
+    {
+      "path": "analysis/financial/costStructure.py",
+      "func": "calcCostByNatureAnalysis",
+      "line": 373
+    },
+    {
+      "path": "analysis/financial/costStructure.py",
+      "func": "calcRawMaterialBreakdown",
+      "line": 571
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcBeneishMScore",
+      "line": 30
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcSloanAccruals",
+      "line": 141
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "detectAuditFlags",
+      "line": 312
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcBeneishTimeline",
+      "line": 496
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcRichardsonAccrual",
+      "line": 724
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcNonOperatingBreakdown",
+      "line": 849
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcDilutionTrend",
+      "line": 941
+    },
+    {
+      "path": "analysis/financial/earningsQuality.py",
+      "func": "calcQualityAnomalies",
+      "line": 1034
+    },
+    {
+      "path": "analysis/financial/efficiency.py",
+      "func": "calcTurnoverTrend",
+      "line": 60
+    },
+    {
+      "path": "analysis/financial/efficiency.py",
+      "func": "calcEfficiencyFlags",
+      "line": 193
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcRevenueForecast",
+      "line": 136
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcSegmentForecast",
+      "line": 203
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcProFormaHighlights",
+      "line": 247
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcScenarioImpact",
+      "line": 322
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcForecastMethodology",
+      "line": 375
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcHistoricalRatios",
+      "line": 405
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcForecastFlags",
+      "line": 451
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcCalibrationReport",
+      "line": 503
+    },
+    {
+      "path": "analysis/financial/forecastCalcs.py",
+      "func": "calcScenarioSimulation",
+      "line": 551
+    },
+    {
+      "path": "analysis/financial/governance.py",
+      "func": "calcExecutivePayDivergence",
+      "line": 299
+    },
+    {
+      "path": "analysis/financial/governance.py",
+      "func": "calcIndependentDirectorQuality",
+      "line": 399
+    },
+    {
+      "path": "analysis/financial/growthAnalysis.py",
+      "func": "calcGrowthFlags",
+      "line": 427
+    },
+    {
+      "path": "analysis/financial/growthAnalysis.py",
+      "func": "calcCagrComparison",
+      "line": 471
+    },
+    {
+      "path": "analysis/financial/insight/_gradingCashflow.py",
+      "func": "analyzeCashflow",
+      "line": 20
+    },
+    {
+      "path": "analysis/financial/insight/_gradingForecast.py",
+      "func": "analyzePredictability",
+      "line": 30
+    },
+    {
+      "path": "analysis/financial/insight/_gradingForecast.py",
+      "func": "analyzeUncertainty",
+      "line": 109
+    },
+    {
+      "path": "analysis/financial/insight/_gradingForecast.py",
+      "func": "analyzeCoreEarnings",
+      "line": 198
+    },
+    {
+      "path": "analysis/financial/insight/_gradingForecast.py",
+      "func": "disclosureGapFlags",
+      "line": 300
+    },
+    {
+      "path": "analysis/financial/insight/_gradingGovernance.py",
+      "func": "analyzeGovernance",
+      "line": 84
+    },
+    {
+      "path": "analysis/financial/insight/_gradingHealth.py",
+      "func": "analyzeHealth",
+      "line": 20
+    },
+    {
+      "path": "analysis/financial/insight/_gradingPerformance.py",
+      "func": "analyzePerformance",
+      "line": 20
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectWorkingCapitalAnomaly",
+      "line": 108
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectMarginDivergence",
+      "line": 285
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectFinancialSectorAnomaly",
+      "line": 350
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectTrendDeterioration",
+      "line": 413
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectCCCDeterioration",
+      "line": 512
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectAuditRedFlags",
+      "line": 613
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectBenfordAnomaly",
+      "line": 711
+    },
+    {
+      "path": "analysis/financial/insight/anomaly.py",
+      "func": "detectRevenueQuality",
+      "line": 790
+    },
+    {
+      "path": "analysis/financial/insight/detector.py",
+      "func": "detectFinancialSector",
+      "line": 26
+    },
+    {
+      "path": "analysis/financial/insight/pipeline.py",
+      "func": "analyzeAudit",
+      "line": 298
+    },
+    {
+      "path": "analysis/financial/investmentAnalysis.py",
+      "func": "calcInvestmentInOther",
+      "line": 495
+    },
+    {
+      "path": "analysis/financial/investmentAnalysis.py",
+      "func": "calcInvestmentFlags",
+      "line": 565
+    },
+    {
+      "path": "analysis/financial/lifeCycle.py",
+      "func": "calcLifeCycle",
+      "line": 40
+    },
+    {
+      "path": "analysis/financial/macroExposure.py",
+      "func": "calcValuationBand",
+      "line": 299
+    },
+    {
+      "path": "analysis/financial/profitability.py",
+      "func": "calcProfitabilityFlags",
+      "line": 544
+    },
+    {
+      "path": "analysis/financial/profitability.py",
+      "func": "calcPenmanDecomposition",
+      "line": 625
+    },
+    {
+      "path": "analysis/financial/profitability.py",
+      "func": "calcRoicTree",
+      "line": 808
+    },
+    {
+      "path": "analysis/financial/quality.py",
+      "func": "computeQuality",
+      "line": 74
+    },
+    {
+      "path": "analysis/financial/quality.py",
+      "func": "overallScore",
+      "line": 51
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcPiotroski",
+      "line": 78
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcMagicFormula",
+      "line": 183
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcQmj",
+      "line": 237
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcLynchFairValue",
+      "line": 321
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcBuffettOwnerEarnings",
+      "line": 391
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcDuPont",
+      "line": 425
+    },
+    {
+      "path": "analysis/financial/research/scoring.py",
+      "func": "calcAllScores",
+      "line": 571
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcSegmentTrend",
+      "line": 336
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcBreakdown",
+      "line": 421
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcRevenueGrowth",
+      "line": 489
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcConcentration",
+      "line": 541
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcRevenueQuality",
+      "line": 594
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcGrowthContribution",
+      "line": 707
+    },
+    {
+      "path": "analysis/financial/revenue.py",
+      "func": "calcFlags",
+      "line": 784
+    },
+    {
+      "path": "analysis/financial/scenarioSensitivity.py",
+      "func": "calcScenarioSensitivity",
+      "line": 22
+    },
+    {
+      "path": "analysis/financial/scenarioSensitivity.py",
+      "func": "calcImprovementLevers",
+      "line": 204
+    },
+    {
+      "path": "analysis/financial/scorecard.py",
+      "func": "calcPiotroskiDetail",
+      "line": 272
+    },
+    {
+      "path": "analysis/financial/scorecard.py",
+      "func": "calcSummaryFlags",
+      "line": 317
+    },
+    {
+      "path": "analysis/financial/sectorKpi/construction.py",
+      "func": "calcConstructionKpis",
+      "line": 12
+    },
+    {
+      "path": "analysis/financial/sectorKpi/dispatcher.py",
+      "func": "detectSector",
+      "line": 32
+    },
+    {
+      "path": "analysis/financial/sectorKpi/dispatcher.py",
+      "func": "sectorKpi",
+      "line": 41
+    },
+    {
+      "path": "analysis/financial/sectorKpi/gaming.py",
+      "func": "calcGamingKpis",
+      "line": 12
+    },
+    {
+      "path": "analysis/financial/sectorKpi/pharma.py",
+      "func": "calcPharmaKpis",
+      "line": 30
+    },
+    {
+      "path": "analysis/financial/sectorKpi/semiconductor.py",
+      "func": "calcSemiconductorKpis",
+      "line": 12
+    },
+    {
+      "path": "analysis/financial/stability.py",
+      "func": "calcDistressEnsemble",
+      "line": 539
+    },
+    {
+      "path": "analysis/financial/stability.py",
+      "func": "calcDebtMaturity",
+      "line": 704
+    },
+    {
+      "path": "analysis/financial/stability.py",
+      "func": "calcStabilityFlags",
+      "line": 865
+    },
+    {
+      "path": "analysis/financial/storyValidation.py",
+      "func": "calcPlausibilityBand",
+      "line": 248
+    },
+    {
+      "path": "analysis/financial/taxAnalysis.py",
+      "func": "calcEffectiveTaxRate",
+      "line": 24
+    },
+    {
+      "path": "analysis/financial/taxAnalysis.py",
+      "func": "calcTaxCashConversion",
+      "line": 94
+    },
+    {
+      "path": "analysis/financial/taxAnalysis.py",
+      "func": "calcDeferredTax",
+      "line": 165
+    },
+    {
+      "path": "analysis/financial/taxAnalysis.py",
+      "func": "calcTaxFlags",
+      "line": 223
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcDdm",
+      "line": 269
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcRelativeValuation",
+      "line": 345
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcResidualIncome",
+      "line": 388
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcNavValuation",
+      "line": 459
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcPriceTarget",
+      "line": 528
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcReverseImplied",
+      "line": 628
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcSensitivity",
+      "line": 671
+    },
+    {
+      "path": "analysis/financial/valuation.py",
+      "func": "calcValuationFlags",
+      "line": 994
+    },
+    {
+      "path": "analysis/forecast/_simHistorical.py",
+      "func": "simulateHistorical",
+      "line": 85
+    },
+    {
+      "path": "analysis/forecast/_simHistorical.py",
+      "func": "backtestSimulation",
+      "line": 165
+    },
+    {
+      "path": "analysis/forecast/calibrationMetrics.py",
+      "func": "computeBrierScore",
+      "line": 37
+    },
+    {
+      "path": "analysis/forecast/calibrationMetrics.py",
+      "func": "buildCalibrationBins",
+      "line": 63
+    },
+    {
+      "path": "analysis/forecast/calibrationMetrics.py",
+      "func": "generateCalibrationReport",
+      "line": 118
+    },
+    {
+      "path": "analysis/forecast/forwardTest.py",
+      "func": "generateKey",
+      "line": 37
+    },
+    {
+      "path": "analysis/forecast/forwardTest.py",
+      "func": "saveForecast",
+      "line": 58
+    },
+    {
+      "path": "analysis/forecast/forwardTest.py",
+      "func": "loadRecords",
+      "line": 86
+    },
+    {
+      "path": "analysis/forecast/forwardTest.py",
+      "func": "evaluateCalibration",
+      "line": 217
+    },
+    {
+      "path": "analysis/forecast/revenueForecast.py",
+      "func": "applyAiOverlay",
+      "line": 1111
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "addNode",
+      "line": 99
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "addEdge",
+      "line": 109
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "getNode",
+      "line": 126
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "outgoing",
+      "line": 141
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "incoming",
+      "line": 156
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "findNodes",
+      "line": 171
+    },
+    {
+      "path": "analysis/graph/schema.py",
+      "func": "edgeCount",
+      "line": 198
+    },
+    {
+      "path": "analysis/graph/traverse.py",
+      "func": "causes",
+      "line": 12
+    },
+    {
+      "path": "analysis/graph/traverse.py",
+      "func": "ancestors",
+      "line": 58
+    },
+    {
+      "path": "analysis/graph/traverse.py",
+      "func": "causesNarrative",
+      "line": 181
+    },
+    {
+      "path": "analysis/graph/traverse.py",
+      "func": "timelineNarrative",
+      "line": 213
+    },
+    {
+      "path": "analysis/valuation/analyst.py",
+      "func": "collectMarket",
+      "line": 127
+    },
+    {
+      "path": "analysis/valuation/bankDFV.py",
+      "func": "isFinancialCompany",
+      "line": 25
+    },
+    {
+      "path": "analysis/valuation/bankDFV.py",
+      "func": "calcBankDFV",
+      "line": 56
+    },
+    {
+      "path": "analysis/valuation/bankValuation.py",
+      "func": "calcBankExcessReturn",
+      "line": 15
+    },
+    {
+      "path": "analysis/valuation/controlSynergy.py",
+      "func": "calcControlValue",
+      "line": 19
+    },
+    {
+      "path": "analysis/valuation/controlSynergy.py",
+      "func": "calcSynergyValue",
+      "line": 140
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "fitCrossSection",
+      "line": 187
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "fitPanel",
+      "line": 265
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "saveModel",
+      "line": 375
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "loadModel",
+      "line": 405
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "savePanelModel",
+      "line": 429
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "loadPanelModel",
+      "line": 458
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "toFeatureDict",
+      "line": 151
+    },
+    {
+      "path": "analysis/valuation/crossRegression.py",
+      "func": "toFeatureVector",
+      "line": 170
+    },
+    {
+      "path": "analysis/valuation/fitness.py",
+      "func": "selectModels",
+      "line": 57
+    },
+    {
+      "path": "analysis/valuation/fitness.py",
+      "func": "calcMethodFitness",
+      "line": 128
+    },
+    {
+      "path": "analysis/valuation/priceImplied.py",
+      "func": "reverseImpliedGrowth",
+      "line": 27
+    },
+    {
+      "path": "analysis/valuation/priceImplied.py",
+      "func": "computeGap",
+      "line": 115
+    },
+    {
+      "path": "analysis/valuation/qualityWACC.py",
+      "func": "calcQualityWACC",
+      "line": 13
+    },
+    {
+      "path": "analysis/valuation/realOptions.py",
+      "func": "calcRealOptionsValue",
+      "line": 22
+    },
+    {
+      "path": "analysis/valuation/residualIncome.py",
+      "func": "calcResidualIncome",
+      "line": 47
+    },
+    {
+      "path": "analysis/valuation/sotp.py",
+      "func": "calcSotpNav",
+      "line": 20
+    },
+    {
+      "path": "analysis/valuation/sotp.py",
+      "func": "calcHoldingDFV",
+      "line": 188
+    },
+    {
+      "path": "cli/constants.py",
+      "func": "toolLabel",
+      "line": 96
+    },
+    {
+      "path": "cli/constants.py",
+      "func": "formatToolArgs",
+      "line": 101
+    },
+    {
+      "path": "cli/constants.py",
+      "func": "toolResultPreview",
+      "line": 112
+    },
+    {
+      "path": "company.py",
+      "func": "resolveFromText",
+      "line": 182
+    },
+    {
+      "path": "config.py",
+      "func": "loadProjectConfig",
+      "line": 59
+    },
+    {
+      "path": "config.py",
+      "func": "getDefaultCompany",
+      "line": 92
+    },
+    {
+      "path": "config.py",
+      "func": "getDefaultModel",
+      "line": 104
+    },
+    {
+      "path": "core/cache.py",
+      "func": "makeKey",
+      "line": 12
+    },
+    {
+      "path": "core/credentials.py",
+      "func": "registerCredentialProvider",
+      "line": 114
+    },
+    {
+      "path": "core/credentials.py",
+      "func": "listCredentialProviders",
+      "line": 137
+    },
+    {
+      "path": "core/credentials.py",
+      "func": "getCredentialProvider",
+      "line": 154
+    },
+    {
+      "path": "core/credentials.py",
+      "func": "getCredential",
+      "line": 235
+    },
+    {
+      "path": "core/credentials.py",
+      "func": "saveKey",
+      "line": 275
+    },
+    {
+      "path": "core/dataConfig.py",
+      "func": "hfBaseUrl",
+      "line": 109
+    },
+    {
+      "path": "core/dataLoader.py",
+      "func": "readParquetSafe",
+      "line": 41
+    },
+    {
+      "path": "core/dataLoader.py",
+      "func": "repairLocalCache",
+      "line": 234
+    },
+    {
+      "path": "core/dataLoader.py",
+      "func": "loadEdgarTargetUniverse",
+      "line": 633
+    },
+    {
+      "path": "core/dataLoaderFreshness.py",
+      "func": "downloadWithRetry",
+      "line": 12
+    },
+    {
+      "path": "core/dataLoaderFreshness.py",
+      "func": "maybeWarnStale",
+      "line": 85
+    },
+    {
+      "path": "core/dataLoaderFreshness.py",
+      "func": "shouldRefreshDart",
+      "line": 105
+    },
+    {
+      "path": "core/dataLoaderFreshness.py",
+      "func": "refreshFromHf",
+      "line": 161
+    },
+    {
+      "path": "core/dataLoaderNormalize.py",
+      "func": "optimizeMemory",
+      "line": 27
+    },
+    {
+      "path": "core/dataLoaderNormalize.py",
+      "func": "normalizeDartDocs",
+      "line": 52
+    },
+    {
+      "path": "core/dataLoaderNormalize.py",
+      "func": "normalizeEdgarDocs",
+      "line": 77
+    },
+    {
+      "path": "core/dataLoaderNormalize.py",
+      "func": "edgarReportTypeFromRow",
+      "line": 104
+    },
+    {
+      "path": "core/dataLoaderNormalize.py",
+      "func": "applyEdgarPeriodKeys",
+      "line": 123
+    },
+    {
+      "path": "core/dataLoaderNormalize.py",
+      "func": "inferEdgarPeriodKeyMap",
+      "line": 142
+    },
+    {
+      "path": "core/dataLoaderPyodide.py",
+      "func": "loadDataPyodide",
+      "line": 12
+    },
+    {
+      "path": "core/dataLoaderPyodide.py",
+      "func": "pyodideFetchScanLite",
+      "line": 67
+    },
+    {
+      "path": "core/dataLoaderPyodide.py",
+      "func": "pyodideFetchToFS",
+      "line": 92
+    },
+    {
+      "path": "core/dataLoaderUniverse.py",
+      "func": "loadEdgarTargetUniverse",
+      "line": 59
+    },
+    {
+      "path": "core/dataLoaderUniverse.py",
+      "func": "loadSp500Tickers",
+      "line": 76
+    },
+    {
+      "path": "core/di.py",
+      "func": "getFinanceAccessor",
+      "line": 47
+    },
+    {
+      "path": "core/di.py",
+      "func": "setFinanceAccessor",
+      "line": 81
+    },
+    {
+      "path": "core/di.py",
+      "func": "getQuantAccessor",
+      "line": 111
+    },
+    {
+      "path": "core/di.py",
+      "func": "setQuantAccessor",
+      "line": 145
+    },
+    {
+      "path": "core/di.py",
+      "func": "getIndustryAccessor",
+      "line": 175
+    },
+    {
+      "path": "core/di.py",
+      "func": "setIndustryAccessor",
+      "line": 209
+    },
+    {
+      "path": "core/di.py",
+      "func": "getMacroProvider",
+      "line": 239
+    },
+    {
+      "path": "core/di.py",
+      "func": "setMacroProvider",
+      "line": 273
+    },
+    {
+      "path": "core/disclosureFetcher.py",
+      "func": "registerDisclosureFetcher",
+      "line": 48
+    },
+    {
+      "path": "core/disclosureFetcher.py",
+      "func": "getDisclosureFetcher",
+      "line": 54
+    },
+    {
+      "path": "core/env.py",
+      "func": "loadEnv",
+      "line": 65
+    },
+    {
+      "path": "core/env.py",
+      "func": "saveEnvKey",
+      "line": 105
+    },
+    {
+      "path": "core/financeDocAccessor.py",
+      "func": "registerFinanceDocAccessor",
+      "line": 80
+    },
+    {
+      "path": "core/gatherProvider.py",
+      "func": "registerGatherProvider",
+      "line": 53
+    },
+    {
+      "path": "core/gatherProvider.py",
+      "func": "getGatherProvider",
+      "line": 59
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "registerHtmlRenderer",
+      "line": 69
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "getHtmlRenderer",
+      "line": 75
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "renderRatio",
+      "line": 23
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "renderInsight",
+      "line": 27
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "htmlDistress",
+      "line": 31
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "htmlInsight",
+      "line": 35
+    },
+    {
+      "path": "core/htmlRenderer.py",
+      "func": "renderNetwork",
+      "line": 43
+    },
+    {
+      "path": "core/indicators/channels.py",
+      "func": "vkeltner",
+      "line": 64
+    },
+    {
+      "path": "core/indicators/channels.py",
+      "func": "vdonchian",
+      "line": 80
+    },
+    {
+      "path": "core/indicators/channels.py",
+      "func": "vbollingerPercentB",
+      "line": 96
+    },
+    {
+      "path": "core/indicators/channels.py",
+      "func": "vbollingerWidth",
+      "line": 104
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vstochastic",
+      "line": 65
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vroc",
+      "line": 79
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vmomentum",
+      "line": 89
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vwilliamsR",
+      "line": 97
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vcci",
+      "line": 113
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vcmo",
+      "line": 132
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vstochasticRsi",
+      "line": 151
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vkdj",
+      "line": 173
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vawesomeOscillator",
+      "line": 189
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vultimateOscillator",
+      "line": 197
+    },
+    {
+      "path": "core/indicators/momentum.py",
+      "func": "vdpo",
+      "line": 227
+    },
+    {
+      "path": "core/indicators/price.py",
+      "func": "vpivotPoints",
+      "line": 44
+    },
+    {
+      "path": "core/indicators/price.py",
+      "func": "vlinearRegression",
+      "line": 78
+    },
+    {
+      "path": "core/indicators/price.py",
+      "func": "vzigzag",
+      "line": 105
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vadx",
+      "line": 89
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vpsar",
+      "line": 130
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vsupertrend",
+      "line": 178
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vwma",
+      "line": 215
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vdema",
+      "line": 226
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vtema",
+      "line": 241
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vhma",
+      "line": 259
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vvwma",
+      "line": 277
+    },
+    {
+      "path": "core/indicators/trend.py",
+      "func": "vtrix",
+      "line": 290
+    },
+    {
+      "path": "core/indicators/volatility.py",
+      "func": "vulcer",
+      "line": 61
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vobv",
+      "line": 44
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vmfi",
+      "line": 58
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "velderRay",
+      "line": 82
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vforceIndex",
+      "line": 95
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vvwap",
+      "line": 103
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vadl",
+      "line": 117
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vchaikin",
+      "line": 133
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vemv",
+      "line": 146
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vnvi",
+      "line": 161
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vpvi",
+      "line": 173
+    },
+    {
+      "path": "core/indicators/volume.py",
+      "func": "vpvt",
+      "line": 185
+    },
+    {
+      "path": "core/insiderRawProvider.py",
+      "func": "registerInsiderRawProvider",
+      "line": 53
+    },
+    {
+      "path": "core/insiderRawProvider.py",
+      "func": "getInsiderRawProvider",
+      "line": 59
+    },
+    {
+      "path": "core/listingResolver.py",
+      "func": "registerListingResolver",
+      "line": 67
+    },
+    {
+      "path": "core/listingResolver.py",
+      "func": "getListingResolver",
+      "line": 73
+    },
+    {
+      "path": "core/listingResolver.py",
+      "func": "kindList",
+      "line": 40
+    },
+    {
+      "path": "core/loaders.py",
+      "func": "registerLoader",
+      "line": 69
+    },
+    {
+      "path": "core/loaders.py",
+      "func": "getLoader",
+      "line": 74
+    },
+    {
+      "path": "core/loaders.py",
+      "func": "listLoaders",
+      "line": 80
+    },
+    {
+      "path": "core/market.py",
+      "func": "detectMarket",
+      "line": 27
+    },
+    {
+      "path": "core/market.py",
+      "func": "resolveMarket",
+      "line": 81
+    },
+    {
+      "path": "core/memory.py",
+      "func": "checkMemoryAndGc",
+      "line": 145
+    },
+    {
+      "path": "core/memory.py",
+      "func": "memoryGuard",
+      "line": 459
+    },
+    {
+      "path": "core/memory.py",
+      "func": "memoizedCalc",
+      "line": 490
+    },
+    {
+      "path": "core/messagingContext.py",
+      "func": "hasDartKey",
+      "line": 63
+    },
+    {
+      "path": "core/messagingErrors.py",
+      "func": "inferFeature",
+      "line": 47
+    },
+    {
+      "path": "core/messagingFormatting.py",
+      "func": "formatMessage",
+      "line": 48
+    },
+    {
+      "path": "core/messagingHandlers.py",
+      "func": "onScanRequested",
+      "line": 169
+    },
+    {
+      "path": "core/messagingShare.py",
+      "func": "onCloudflaredMissing",
+      "line": 42
+    },
+    {
+      "path": "core/messagingShare.py",
+      "func": "onCloudflareLoginRequired",
+      "line": 80
+    },
+    {
+      "path": "core/messagingShare.py",
+      "func": "onTunnelStartFailed",
+      "line": 105
+    },
+    {
+      "path": "core/messagingShare.py",
+      "func": "onShareSecurityWarning",
+      "line": 140
+    },
+    {
+      "path": "core/polarsUtil.py",
+      "func": "isValidDf",
+      "line": 11
+    },
+    {
+      "path": "core/polarsUtil.py",
+      "func": "isEmptyDf",
+      "line": 36
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchMacroSeries",
+      "line": 403
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchExogenousAxes",
+      "line": 407
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchAlignedMacro",
+      "line": 411
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "lookupCompany",
+      "line": 415
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchUniverseBulk",
+      "line": 434
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchTechnicalIndicators",
+      "line": 438
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchListing",
+      "line": 447
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchScanProfitability",
+      "line": 451
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchScanFinanceParquet",
+      "line": 455
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "applyAsOf",
+      "line": 468
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchSeriesLatest",
+      "line": 472
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "fetchSeriesYoy",
+      "line": 476
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "iterSections",
+      "line": 524
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "listAccounts",
+      "line": 569
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "iterAccounts",
+      "line": 583
+    },
+    {
+      "path": "core/protocols.py",
+      "func": "iterSearch",
+      "line": 619
+    },
+    {
+      "path": "core/providers/registry.py",
+      "func": "providerChoices",
+      "line": 156
+    },
+    {
+      "path": "core/providers/registry.py",
+      "func": "cliProviderChoices",
+      "line": 161
+    },
+    {
+      "path": "core/providers/secrets.py",
+      "func": "setJson",
+      "line": 124
+    },
+    {
+      "path": "core/providers/setupGuide.py",
+      "func": "resolveAlias",
+      "line": 85
+    },
+    {
+      "path": "core/providers/setupGuide.py",
+      "func": "noProviderMessage",
+      "line": 108
+    },
+    {
+      "path": "core/ratios.py",
+      "func": "toSeriesDict",
+      "line": 2118
+    },
+    {
+      "path": "core/registry.py",
+      "func": "resolveAlias",
+      "line": 103
+    },
+    {
+      "path": "core/registry.py",
+      "func": "getCategories",
+      "line": 112
+    },
+    {
+      "path": "core/registry.py",
+      "func": "getNotesEntries",
+      "line": 130
+    },
+    {
+      "path": "core/registry.py",
+      "func": "buildModuleDescription",
+      "line": 135
+    },
+    {
+      "path": "core/registry.py",
+      "func": "buildFeatureDescription",
+      "line": 148
+    },
+    {
+      "path": "core/registry.py",
+      "func": "buildQuestionModules",
+      "line": 177
+    },
+    {
+      "path": "core/registry.py",
+      "func": "buildKeywordMap",
+      "line": 188
+    },
+    {
+      "path": "core/utils/calc.py",
+      "func": "safePctPositive",
+      "line": 30
+    },
+    {
+      "path": "core/utils/fmt.py",
+      "func": "fmtNum",
+      "line": 36
+    },
+    {
+      "path": "core/utils/fmt.py",
+      "func": "fmtUnit",
+      "line": 43
+    },
+    {
+      "path": "core/utils/labels.py",
+      "func": "getKoreanLabels",
+      "line": 64
+    },
+    {
+      "path": "core/utils/labels.py",
+      "func": "getEnglishLabels",
+      "line": 209
+    },
+    {
+      "path": "core/utils/labels.py",
+      "func": "getAccountLabels",
+      "line": 214
+    },
+    {
+      "path": "core/utils/labels.py",
+      "func": "getReverseKoreanLabels",
+      "line": 246
+    },
+    {
+      "path": "core/utils/labels.py",
+      "func": "resolveLabel",
+      "line": 273
+    },
+    {
+      "path": "core/utils/labels.py",
+      "func": "mergeAliasRows",
+      "line": 369
+    },
+    {
+      "path": "core/utils/ols.py",
+      "func": "olsMulti",
+      "line": 52
+    },
+    {
+      "path": "core/utils/ols.py",
+      "func": "invertMatrix",
+      "line": 152
+    },
+    {
+      "path": "core/utils/ols.py",
+      "func": "detectStructuralBreak",
+      "line": 185
+    },
+    {
+      "path": "core/utils/ols.py",
+      "func": "coefficientOfVariation",
+      "line": 235
+    },
+    {
+      "path": "core/utils/ols.py",
+      "func": "logisticRegression",
+      "line": 262
+    },
+    {
+      "path": "core/utils/ols.py",
+      "func": "logisticPredict",
+      "line": 368
+    },
+    {
+      "path": "core/utils/ordering.py",
+      "func": "sortSeries",
+      "line": 72
+    },
+    {
+      "path": "core/utils/period.py",
+      "func": "extractYear",
+      "line": 50
+    },
+    {
+      "path": "core/utils/period.py",
+      "func": "calendarQuarterFromEnd",
+      "line": 65
+    },
+    {
+      "path": "core/utils/period.py",
+      "func": "fiscalToCalendarLabel",
+      "line": 101
+    },
+    {
+      "path": "core/utils/period.py",
+      "func": "buildFiscalToCalendarMap",
+      "line": 168
+    },
+    {
+      "path": "core/utils/period.py",
+      "func": "resolveLatestPeriod",
+      "line": 364
+    },
+    {
+      "path": "credit/features/sectorThresholds.py",
+      "func": "financialTrackBThresholds",
+      "line": 540
+    },
+    {
+      "path": "credit/features/sectorThresholds.py",
+      "func": "getSectorLabel",
+      "line": 679
+    },
+    {
+      "path": "credit/monitoring/audit.py",
+      "func": "auditCredit",
+      "line": 80
+    },
+    {
+      "path": "credit/monitoring/audit.py",
+      "func": "auditToMarkdown",
+      "line": 268
+    },
+    {
+      "path": "credit/monitoring/audit.py",
+      "func": "saveAudit",
+      "line": 323
+    },
+    {
+      "path": "credit/monitoring/history.py",
+      "func": "recordGrade",
+      "line": 22
+    },
+    {
+      "path": "credit/monitoring/history.py",
+      "func": "loadHistory",
+      "line": 114
+    },
+    {
+      "path": "credit/monitoring/history.py",
+      "func": "gradeChanged",
+      "line": 149
+    },
+    {
+      "path": "credit/monitoring/history.py",
+      "func": "updateTransitionMatrix",
+      "line": 179
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcCreditHistory",
+      "line": 181
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcCashFlowGrade",
+      "line": 263
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcCreditPeerPosition",
+      "line": 353
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcCreditFlags",
+      "line": 398
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcCreditNarrative",
+      "line": 552
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcCreditAudit",
+      "line": 641
+    },
+    {
+      "path": "credit/scoring/calcs.py",
+      "func": "calcGradeImprovement",
+      "line": 699
+    },
+    {
+      "path": "credit/scoring/metrics.py",
+      "func": "calcSeparateMetrics",
+      "line": 426
+    },
+    {
+      "path": "credit/scoring/metrics.py",
+      "func": "calcFinancialMetrics",
+      "line": 523
+    },
+    {
+      "path": "frame/resolve.py",
+      "func": "stripParticles",
+      "line": 63
+    },
+    {
+      "path": "frame/resolve.py",
+      "func": "resolveAlias",
+      "line": 68
+    },
+    {
+      "path": "frame/resolve.py",
+      "func": "collectCandidates",
+      "line": 79
+    },
+    {
+      "path": "frame/resolve.py",
+      "func": "searchSuggestions",
+      "line": 133
+    },
+    {
+      "path": "frame/resolve.py",
+      "func": "resolveStockCodeFromText",
+      "line": 173
+    },
+    {
+      "path": "frame/sector/core.py",
+      "func": "getSectorParamsByName",
+      "line": 283
+    },
+    {
+      "path": "frame/select.py",
+      "func": "toHtml",
+      "line": 282
+    },
+    {
+      "path": "frame/select.py",
+      "func": "toHtml",
+      "line": 414
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchMacroSeries",
+      "line": 104
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchExogenousAxes",
+      "line": 165
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchAlignedMacro",
+      "line": 197
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "lookupCompany",
+      "line": 236
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchUniverseBulk",
+      "line": 644
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchTechnicalIndicators",
+      "line": 683
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchListing",
+      "line": 760
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchScanProfitability",
+      "line": 792
+    },
+    {
+      "path": "gather/accessors.py",
+      "func": "fetchScanFinanceParquet",
+      "line": 813
+    },
+    {
+      "path": "gather/bulkData/hfDeploy.py",
+      "func": "deployKrxToHF",
+      "line": 23
+    },
+    {
+      "path": "gather/bulkData/hfDeploy.py",
+      "func": "deployKrxIndexToHF",
+      "line": 114
+    },
+    {
+      "path": "gather/bulkData/macroHf.py",
+      "func": "loadManifest",
+      "line": 41
+    },
+    {
+      "path": "gather/bulkData/macroHf.py",
+      "func": "loadObservations",
+      "line": 89
+    },
+    {
+      "path": "gather/bulkData/macroHf.py",
+      "func": "availableSeries",
+      "line": 137
+    },
+    {
+      "path": "gather/bulkData/macroHf.py",
+      "func": "latestUpdatedAt",
+      "line": 311
+    },
+    {
+      "path": "gather/dart/viewer.py",
+      "func": "docMeta",
+      "line": 215
+    },
+    {
+      "path": "gather/domains/fmp.py",
+      "func": "fetchDividends",
+      "line": 245
+    },
+    {
+      "path": "gather/domains/fmp.py",
+      "func": "fetchSplits",
+      "line": 331
+    },
+    {
+      "path": "gather/domains/krx.py",
+      "func": "fetchIndustryPeers",
+      "line": 114
+    },
+    {
+      "path": "gather/domains/krx.py",
+      "func": "fetchIndustryList",
+      "line": 199
+    },
+    {
+      "path": "gather/domains/naver.py",
+      "func": "fetchRevenueConsensus",
+      "line": 381
+    },
+    {
+      "path": "gather/domains/naver.py",
+      "func": "fetchSectorPer",
+      "line": 507
+    },
+    {
+      "path": "gather/domains/naver.py",
+      "func": "fetchIntraday",
+      "line": 649
+    },
+    {
+      "path": "gather/ecos/catalog.py",
+      "func": "resolveId",
+      "line": 597
+    },
+    {
+      "path": "gather/fred/catalog.py",
+      "func": "getAllEntries",
+      "line": 362
+    },
+    {
+      "path": "gather/fred/series.py",
+      "func": "fetchReleases",
+      "line": 384
+    },
+    {
+      "path": "gather/fred/transform.py",
+      "func": "normalizeMulti",
+      "line": 247
+    },
+    {
+      "path": "gather/infra/telemetry.py",
+      "func": "recordCacheHit",
+      "line": 239
+    },
+    {
+      "path": "gather/infra/telemetry.py",
+      "func": "recordCacheMiss",
+      "line": 289
+    },
+    {
+      "path": "gather/infra/telemetry.py",
+      "func": "recordCacheEvict",
+      "line": 338
+    },
+    {
+      "path": "gather/krx/listing/dartList.py",
+      "func": "getDartList",
+      "line": 69
+    },
+    {
+      "path": "gather/krx/listing/registry.py",
+      "func": "handle_starttag",
+      "line": 69
+    },
+    {
+      "path": "gather/krx/listing/registry.py",
+      "func": "handle_endtag",
+      "line": 109
+    },
+    {
+      "path": "gather/krx/listing/registry.py",
+      "func": "handle_data",
+      "line": 147
+    },
+    {
+      "path": "gather/krx/listing/resolver.py",
+      "func": "kindList",
+      "line": 202
+    },
+    {
+      "path": "gather/krx/marketCap.py",
+      "func": "marketCapSnapshot",
+      "line": 325
+    },
+    {
+      "path": "gather/krx/marketCap.py",
+      "func": "marketCapAll",
+      "line": 408
+    },
+    {
+      "path": "gather/macroProvider.py",
+      "func": "applyAsOf",
+      "line": 68
+    },
+    {
+      "path": "gather/macroProvider.py",
+      "func": "fetchSeriesLatest",
+      "line": 101
+    },
+    {
+      "path": "gather/macroProvider.py",
+      "func": "fetchSeriesYoy",
+      "line": 138
+    },
+    {
+      "path": "gather/mapping/exogenousAxes.py",
+      "func": "getExogenousIndicators",
+      "line": 320
+    },
+    {
+      "path": "gather/mapping/exogenousAxes.py",
+      "func": "getExogenousSeriesIds",
+      "line": 385
+    },
+    {
+      "path": "gather/mapping/exogenousAxes.py",
+      "func": "getExogenousSummary",
+      "line": 423
+    },
+    {
+      "path": "gather/mapping/exogenousAxes.py",
+      "func": "getAllIndicators",
+      "line": 512
+    },
+    {
+      "path": "gather/mapping/productIndicators.py",
+      "func": "getProductIndicators",
+      "line": 86
+    },
+    {
+      "path": "gather/mapping/productIndicators.py",
+      "func": "getProductSummary",
+      "line": 154
+    },
+    {
+      "path": "gather/transforms/adjustPrice.py",
+      "func": "detectEventsFromPrices",
+      "line": 60
+    },
+    {
+      "path": "gather/transforms/adjustPrice.py",
+      "func": "applyAdjustment",
+      "line": 163
+    },
+    {
+      "path": "gather/transforms/indicatorDispatch.py",
+      "func": "addIndicators",
+      "line": 162
+    },
+    {
+      "path": "gather/transforms/indicatorDispatch.py",
+      "func": "computeIndicator",
+      "line": 245
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "addChangeRate",
+      "line": 23
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "resampleToQuarterly",
+      "line": 104
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "resampleToAnnual",
+      "line": 162
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "saveMacroParquet",
+      "line": 223
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "loadMacroParquet",
+      "line": 273
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "enrichAndCache",
+      "line": 327
+    },
+    {
+      "path": "gather/transforms/macro.py",
+      "func": "alignToFinancialPeriods",
+      "line": 393
+    },
+    {
+      "path": "gather/types.py",
+      "func": "shortSelling",
+      "line": 666
+    },
+    {
+      "path": "gather/types.py",
+      "func": "sourcesFailed",
+      "line": 735
+    },
+    {
+      "path": "industry/build/delta.py",
+      "func": "computeYoyDelta",
+      "line": 60
+    },
+    {
+      "path": "industry/build/edges.py",
+      "func": "extractNetworkEdges",
+      "line": 69
+    },
+    {
+      "path": "industry/build/edges.py",
+      "func": "extractDocsEdges",
+      "line": 191
+    },
+    {
+      "path": "industry/build/edges.py",
+      "func": "extractRawMaterialEdges",
+      "line": 336
+    },
+    {
+      "path": "industry/build/edges.py",
+      "func": "buildAllEdges",
+      "line": 467
+    },
+    {
+      "path": "industry/build/enrichCompany.py",
+      "func": "enrichCompanyData",
+      "line": 209
+    },
+    {
+      "path": "industry/build/financials.py",
+      "func": "attachFinancials",
+      "line": 131
+    },
+    {
+      "path": "industry/build/financials.py",
+      "func": "buildIndustrySummary",
+      "line": 181
+    },
+    {
+      "path": "industry/build/financials.py",
+      "func": "buildTimelineSummary",
+      "line": 239
+    },
+    {
+      "path": "industry/build/hop2.py",
+      "func": "computeHop2",
+      "line": 32
+    },
+    {
+      "path": "industry/build/insights.py",
+      "func": "calcHHI",
+      "line": 12
+    },
+    {
+      "path": "industry/build/insights.py",
+      "func": "riskLabel",
+      "line": 71
+    },
+    {
+      "path": "industry/build/insights.py",
+      "func": "calcTopNRatio",
+      "line": 93
+    },
+    {
+      "path": "industry/build/insights.py",
+      "func": "calcSupplyInsights",
+      "line": 148
+    },
+    {
+      "path": "industry/build/insights.py",
+      "func": "calcIndustryConcentration",
+      "line": 260
+    },
+    {
+      "path": "industry/build/pipeline.py",
+      "func": "buildIndustryMap",
+      "line": 88
+    },
+    {
+      "path": "industry/build/pipeline.py",
+      "func": "loadNodes",
+      "line": 180
+    },
+    {
+      "path": "industry/build/pipeline.py",
+      "func": "loadEdges",
+      "line": 197
+    },
+    {
+      "path": "industry/build/stage4_review.py",
+      "func": "findLowConfidence",
+      "line": 106
+    },
+    {
+      "path": "industry/build/table_parser.py",
+      "func": "tableToRowDicts",
+      "line": 69
+    },
+    {
+      "path": "industry/build/table_parser.py",
+      "func": "findTableByHeaders",
+      "line": 102
+    },
+    {
+      "path": "industry/build/table_parser.py",
+      "func": "tableToRowDictsWithHeaderRow",
+      "line": 136
+    },
+    {
+      "path": "industry/build/table_parser.py",
+      "func": "parsePercent",
+      "line": 214
+    },
+    {
+      "path": "industry/build/table_parser.py",
+      "func": "extractCorpNames",
+      "line": 235
+    },
+    {
+      "path": "industry/build/table_parser.py",
+      "func": "normalizeCorpName",
+      "line": 262
+    },
+    {
+      "path": "industry/calcs/companyCalcs.py",
+      "func": "calcChainPosition",
+      "line": 12
+    },
+    {
+      "path": "industry/calcs/companyCalcs.py",
+      "func": "calcSectorMetrics",
+      "line": 198
+    },
+    {
+      "path": "industry/calcs/companyCalcs.py",
+      "func": "calcSectorCycle",
+      "line": 330
+    },
+    {
+      "path": "industry/calcs/companyCalcs.py",
+      "func": "calcSectorDynamics",
+      "line": 441
+    },
+    {
+      "path": "industry/calcs/peers.py",
+      "func": "industryPeerMetricKeys",
+      "line": 117
+    },
+    {
+      "path": "industry/calcs/peers.py",
+      "func": "asDict",
+      "line": 29
+    },
+    {
+      "path": "industry/taxonomy.py",
+      "func": "loadTaxonomy",
+      "line": 21
+    },
+    {
+      "path": "industry/taxonomy.py",
+      "func": "getIndustry",
+      "line": 56
+    },
+    {
+      "path": "industry/taxonomy.py",
+      "func": "listIndustries",
+      "line": 72
+    },
+    {
+      "path": "industry/taxonomy.py",
+      "func": "findIndustryByKsic",
+      "line": 90
+    },
+    {
+      "path": "industry/taxonomy.py",
+      "func": "matchStageByKeywords",
+      "line": 110
+    },
+    {
+      "path": "industry/taxonomy.py",
+      "func": "invalidateCache",
+      "line": 168
+    },
+    {
+      "path": "industry/types.py",
+      "func": "stageByKey",
+      "line": 31
+    },
+    {
+      "path": "industry/types.py",
+      "func": "allKeywords",
+      "line": 38
+    },
+    {
+      "path": "macro/corporate/assets.py",
+      "func": "analyzeAssets",
+      "line": 68
+    },
+    {
+      "path": "macro/corporate/corporate.py",
+      "func": "analyzeCorporate",
+      "line": 76
+    },
+    {
+      "path": "macro/corporate/corporateAggregate.py",
+      "func": "aggregateEarningsCycle",
+      "line": 79
+    },
+    {
+      "path": "macro/corporate/corporateAggregate.py",
+      "func": "ponziRatio",
+      "line": 125
+    },
+    {
+      "path": "macro/corporate/corporateAggregate.py",
+      "func": "leverageCycle",
+      "line": 182
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "hySpikesToRecession",
+      "line": 49
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "yieldCurveInversionsToRecession",
+      "line": 115
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "unemploymentBounceToRecession",
+      "line": 172
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "cpiAccelerationEvents",
+      "line": 228
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "simultaneousWarningFlags",
+      "line": 263
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "hyCompressionToExpansion",
+      "line": 400
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "bullishSignalFlags",
+      "line": 446
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "matchHistoricalEvents",
+      "line": 711
+    },
+    {
+      "path": "macro/corporate/historicalContext.py",
+      "func": "buildHistoricalContext",
+      "line": 886
+    },
+    {
+      "path": "macro/crisis/creditCycleDetect.py",
+      "func": "classifyCreditCycle",
+      "line": 15
+    },
+    {
+      "path": "macro/crisis/crisis.py",
+      "func": "calcCyclicalAction",
+      "line": 377
+    },
+    {
+      "path": "macro/crisis/detectors.py",
+      "func": "recessionDashboard",
+      "line": 330
+    },
+    {
+      "path": "macro/crisis/detectors.py",
+      "func": "krHousingFinancialStress",
+      "line": 860
+    },
+    {
+      "path": "macro/crisis/excessBondPremium.py",
+      "func": "classifyEBP",
+      "line": 15
+    },
+    {
+      "path": "macro/crisis/excessBondPremium.py",
+      "func": "approximateEBP",
+      "line": 58
+    },
+    {
+      "path": "macro/cycles/_macroCycleAssets.py",
+      "func": "interpretGoldDrivers",
+      "line": 32
+    },
+    {
+      "path": "macro/cycles/_macroCycleAssets.py",
+      "func": "classifyVixRegime",
+      "line": 146
+    },
+    {
+      "path": "macro/cycles/_macroCycleAssets.py",
+      "func": "interpretFxDrivers",
+      "line": 337
+    },
+    {
+      "path": "macro/cycles/_macroCycleAssets.py",
+      "func": "marketLevelValuation",
+      "line": 462
+    },
+    {
+      "path": "macro/cycles/cycle.py",
+      "func": "analyzeCycle",
+      "line": 115
+    },
+    {
+      "path": "macro/cycles/inflection.py",
+      "func": "detectInflections",
+      "line": 50
+    },
+    {
+      "path": "macro/cycles/inventory.py",
+      "func": "analyzeInventory",
+      "line": 72
+    },
+    {
+      "path": "macro/cycles/liquidity.py",
+      "func": "classifyLiquidityRegime",
+      "line": 33
+    },
+    {
+      "path": "macro/cycles/liquidity.py",
+      "func": "calcLiquidity",
+      "line": 212
+    },
+    {
+      "path": "macro/cycles/macroCycle.py",
+      "func": "classifyCycle",
+      "line": 89
+    },
+    {
+      "path": "macro/cycles/macroCycle.py",
+      "func": "interpretAssets",
+      "line": 306
+    },
+    {
+      "path": "macro/cycles/macroCycle.py",
+      "func": "calcMultipleBand",
+      "line": 482
+    },
+    {
+      "path": "macro/cycles/macroCycle.py",
+      "func": "rateOutlook",
+      "line": 588
+    },
+    {
+      "path": "macro/cycles/macroCycle.py",
+      "func": "detectTransitionSequence",
+      "line": 751
+    },
+    {
+      "path": "macro/cycles/macroCycle.py",
+      "func": "decomposeLongRate",
+      "line": 853
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "calcFearGreedProxy",
+      "line": 74
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "estimateRateExpectation",
+      "line": 141
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "interpretEmployment",
+      "line": 192
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "interpretInflation",
+      "line": 251
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "ismAssetAllocation",
+      "line": 333
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "krInflationModel",
+      "line": 384
+    },
+    {
+      "path": "macro/cycles/sentiment.py",
+      "func": "calcSentiment",
+      "line": 476
+    },
+    {
+      "path": "macro/forecast/forecast.py",
+      "func": "analyzeForecast",
+      "line": 115
+    },
+    {
+      "path": "macro/forecast/macroBacktest.py",
+      "func": "walkForwardBacktest",
+      "line": 59
+    },
+    {
+      "path": "macro/rates/bondRiskPremia.py",
+      "func": "forwardRatesFromSpot",
+      "line": 21
+    },
+    {
+      "path": "macro/rates/bondRiskPremia.py",
+      "func": "cochranePiazzesiFactor",
+      "line": 43
+    },
+    {
+      "path": "macro/rates/rates.py",
+      "func": "analyzeRates",
+      "line": 104
+    },
+    {
+      "path": "macro/scenarios/catalog.py",
+      "func": "scenarioGuide",
+      "line": 10
+    },
+    {
+      "path": "macro/scenarios/engine.py",
+      "func": "runScenario",
+      "line": 13
+    },
+    {
+      "path": "macro/scenarios/engine.py",
+      "func": "compareScenarios",
+      "line": 85
+    },
+    {
+      "path": "macro/scenarios/presets.py",
+      "func": "getScenario",
+      "line": 33
+    },
+    {
+      "path": "macro/scenarios/presets.py",
+      "func": "listAllScenarios",
+      "line": 188
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "recentTimeseries",
+      "line": 15
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "applyAsOf",
+      "line": 50
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "getGather",
+      "line": 99
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "fetchLatestWithPrev",
+      "line": 158
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "fetchSeriesList",
+      "line": 186
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "fetchYoy",
+      "line": 213
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "fetchChangePct",
+      "line": 242
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "fetchWithHistory",
+      "line": 273
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "fetchMonthlyDict",
+      "line": 306
+    },
+    {
+      "path": "macro/seriesFetch.py",
+      "func": "collectTimeseries",
+      "line": 339
+    },
+    {
+      "path": "macro/summary.py",
+      "func": "analyzeSummary",
+      "line": 273
+    },
+    {
+      "path": "macro/trade/termsOfTrade.py",
+      "func": "exportProfitLeading",
+      "line": 179
+    },
+    {
+      "path": "macro/trade/termsOfTrade.py",
+      "func": "leadingIndexRelativeStrength",
+      "line": 247
+    },
+    {
+      "path": "macro/trade/trade.py",
+      "func": "analyzeTrade",
+      "line": 133
+    },
+    {
+      "path": "plugins.py",
+      "func": "rediscover",
+      "line": 184
+    },
+    {
+      "path": "providers/dart/accessor/profileAccessor.py",
+      "func": "availableTopics",
+      "line": 378
+    },
+    {
+      "path": "providers/dart/accessor/sectionsSource.py",
+      "func": "forTopics",
+      "line": 93
+    },
+    {
+      "path": "providers/dart/builder/docsIndexBuilder.py",
+      "func": "representativePeriodRank",
+      "line": 229
+    },
+    {
+      "path": "providers/dart/builder/docsIndexBuilder.py",
+      "func": "topicRowSortKey",
+      "line": 359
+    },
+    {
+      "path": "providers/dart/docs/sections/textStructure.py",
+      "func": "flushBody",
+      "line": 272
+    },
+    {
+      "path": "providers/dart/docs/sections/types.py",
+      "func": "savings",
+      "line": 47
+    },
+    {
+      "path": "providers/dart/docs/sections/views.py",
+      "func": "flushText",
+      "line": 476
+    },
+    {
+      "path": "providers/dart/docs/sections/views.py",
+      "func": "flushTable",
+      "line": 516
+    },
+    {
+      "path": "providers/dart/docs/sections/views.py",
+      "func": "flushAll",
+      "line": 556
+    },
+    {
+      "path": "providers/dart/parse/tableHorizontalizer.py",
+      "func": "isJunk",
+      "line": 322
+    },
+    {
+      "path": "providers/dart/search/fieldIndex.py",
+      "func": "addDoc",
+      "line": 128
+    },
+    {
+      "path": "providers/dart/search/fieldIndex.py",
+      "func": "feedDf",
+      "line": 799
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "sectionsDiff",
+      "line": 88
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "topicDiff",
+      "line": 207
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "lineDiffDataFrame",
+      "line": 273
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "topicHistoryDataFrame",
+      "line": 335
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "diffSummaryDataFrame",
+      "line": 366
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "charDiff",
+      "line": 464
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "keywordFrequency",
+      "line": 504
+    },
+    {
+      "path": "providers/docs/diff.py",
+      "func": "totalLines",
+      "line": 202
+    },
+    {
+      "path": "providers/edinet/company.py",
+      "func": "securitiesCode",
+      "line": 351
+    },
+    {
+      "path": "providers/mappers/common.py",
+      "func": "hasForeignCurrencyInValue",
+      "line": 53
+    },
+    {
+      "path": "providers/mappers/notesMapper.py",
+      "func": "resolveAlias",
+      "line": 100
+    },
+    {
+      "path": "providers/mappers/parserMapper.py",
+      "func": "affiliateTransposedMovement",
+      "line": 83
+    },
+    {
+      "path": "providers/mappers/parserMapper.py",
+      "func": "isCostSkip",
+      "line": 102
+    },
+    {
+      "path": "providers/mappers/parserMapper.py",
+      "func": "sectionKeywords",
+      "line": 114
+    },
+    {
+      "path": "providers/mappers/scanner.py",
+      "func": "scanNotes",
+      "line": 70
+    },
+    {
+      "path": "providers/mappers/scanner.py",
+      "func": "discoverAliases",
+      "line": 144
+    },
+    {
+      "path": "providers/notesExtractor.py",
+      "func": "extractNotesContent",
+      "line": 8
+    },
+    {
+      "path": "providers/notesExtractor.py",
+      "func": "findNumberedSection",
+      "line": 32
+    },
+    {
+      "path": "providers/tableParser.py",
+      "func": "detectUnitLabel",
+      "line": 115
+    },
+    {
+      "path": "providers/tableParser.py",
+      "func": "extractRawTables",
+      "line": 135
+    },
+    {
+      "path": "providers/tableParser.py",
+      "func": "extractAccounts",
+      "line": 472
+    },
+    {
+      "path": "providers/viewer.py",
+      "func": "launchViewer",
+      "line": 6
+    },
+    {
+      "path": "quant/alphas/accruals.py",
+      "func": "calcAccrualsFactor",
+      "line": 30
+    },
+    {
+      "path": "quant/alphas/altman.py",
+      "func": "calcAltmanFactor",
+      "line": 56
+    },
+    {
+      "path": "quant/alphas/beneish.py",
+      "func": "calcBeneishFactor",
+      "line": 122
+    },
+    {
+      "path": "quant/alphas/earningsSurprise.py",
+      "func": "calcEarningsSurprise",
+      "line": 32
+    },
+    {
+      "path": "quant/alphas/fundamentalMomentum.py",
+      "func": "calcFundamentalMomentum",
+      "line": 36
+    },
+    {
+      "path": "quant/alphas/piotroski.py",
+      "func": "calcPiotroskiFactor",
+      "line": 120
+    },
+    {
+      "path": "quant/alphas/qFactor.py",
+      "func": "calcQFactor",
+      "line": 38
+    },
+    {
+      "path": "quant/alphas/qmj.py",
+      "func": "calcQMJ",
+      "line": 43
+    },
+    {
+      "path": "quant/benchmark/data.py",
+      "func": "benchmarkSnapshot",
+      "line": 428
+    },
+    {
+      "path": "quant/benchmark/data.py",
+      "func": "calcBenchmark",
+      "line": 478
+    },
+    {
+      "path": "quant/benchmark/map.py",
+      "func": "sectorCandidates",
+      "line": 99
+    },
+    {
+      "path": "quant/benchmark/map.py",
+      "func": "loadIndustryNodes",
+      "line": 124
+    },
+    {
+      "path": "quant/factor/_factorIC.py",
+      "func": "calcFactorIC",
+      "line": 33
+    },
+    {
+      "path": "quant/factor/_factorIC.py",
+      "func": "calcFactorICAll",
+      "line": 253
+    },
+    {
+      "path": "quant/factor/build.py",
+      "func": "buildFactors",
+      "line": 252
+    },
+    {
+      "path": "quant/factor/calc.py",
+      "func": "factorExposureLimits",
+      "line": 187
+    },
+    {
+      "path": "quant/factor/calc.py",
+      "func": "hedgeRatio",
+      "line": 223
+    },
+    {
+      "path": "quant/factor/calc.py",
+      "func": "calcFactorTearSheet",
+      "line": 377
+    },
+    {
+      "path": "quant/factor/calc.py",
+      "func": "calcMultiFactorRisk",
+      "line": 507
+    },
+    {
+      "path": "quant/factor/calc.py",
+      "func": "calcFactorTearSheetAll",
+      "line": 647
+    },
+    {
+      "path": "quant/factor/multipleTesting.py",
+      "func": "haircutSharpe",
+      "line": 17
+    },
+    {
+      "path": "quant/factor/multipleTesting.py",
+      "func": "realityCheck",
+      "line": 108
+    },
+    {
+      "path": "quant/factor/nco.py",
+      "func": "optimizeNCO",
+      "line": 85
+    },
+    {
+      "path": "quant/factor/quality.py",
+      "func": "calcQuality",
+      "line": 71
+    },
+    {
+      "path": "quant/factor/ranking.py",
+      "func": "calcRanking",
+      "line": 153
+    },
+    {
+      "path": "quant/factor/residual.py",
+      "func": "calcResidual",
+      "line": 15
+    },
+    {
+      "path": "quant/factor/shrinkage.py",
+      "func": "shrinkOAS",
+      "line": 17
+    },
+    {
+      "path": "quant/factor/shrinkage.py",
+      "func": "shrinkConstantCorrelation",
+      "line": 51
+    },
+    {
+      "path": "quant/factor/shrinkage.py",
+      "func": "denoiseRMT",
+      "line": 89
+    },
+    {
+      "path": "quant/factor/value.py",
+      "func": "calcValue",
+      "line": 145
+    },
+    {
+      "path": "quant/labels/tripleBarrier.py",
+      "func": "labelTripleBarrier",
+      "line": 30
+    },
+    {
+      "path": "quant/labels/tripleBarrier.py",
+      "func": "metaLabel",
+      "line": 144
+    },
+    {
+      "path": "quant/portfolio/attribution.py",
+      "func": "brinsonAttribution",
+      "line": 23
+    },
+    {
+      "path": "quant/portfolio/attribution.py",
+      "func": "timingEffect",
+      "line": 86
+    },
+    {
+      "path": "quant/portfolio/blackLitterman.py",
+      "func": "blackLittermanPosterior",
+      "line": 21
+    },
+    {
+      "path": "quant/portfolio/blackLitterman.py",
+      "func": "buildSimpleViews",
+      "line": 118
+    },
+    {
+      "path": "quant/portfolio/meanCVaR.py",
+      "func": "optimizeMeanCVaR",
+      "line": 22
+    },
+    {
+      "path": "quant/portfolio/meanCVaR.py",
+      "func": "cvar",
+      "line": 73
+    },
+    {
+      "path": "quant/portfolio/optimize.py",
+      "func": "optimizeMeanVar",
+      "line": 209
+    },
+    {
+      "path": "quant/portfolio/optimize.py",
+      "func": "optimizeRiskParity",
+      "line": 293
+    },
+    {
+      "path": "quant/portfolio/optimize.py",
+      "func": "allocateERC",
+      "line": 438
+    },
+    {
+      "path": "quant/portfolio/sizing.py",
+      "func": "kellyFraction",
+      "line": 18
+    },
+    {
+      "path": "quant/portfolio/sizing.py",
+      "func": "kellyContinuous",
+      "line": 39
+    },
+    {
+      "path": "quant/portfolio/sizing.py",
+      "func": "inverseVolatilityWeights",
+      "line": 56
+    },
+    {
+      "path": "quant/portfolio/sizing.py",
+      "func": "volatilityTargetLeverage",
+      "line": 69
+    },
+    {
+      "path": "quant/portfolio/sizing.py",
+      "func": "sharpeBasedSize",
+      "line": 93
+    },
+    {
+      "path": "quant/portfolio/sizing.py",
+      "func": "riskBudgetLeverage",
+      "line": 103
+    },
+    {
+      "path": "quant/portfolio/transactionCost.py",
+      "func": "almgrenChrissCost",
+      "line": 24
+    },
+    {
+      "path": "quant/portfolio/transactionCost.py",
+      "func": "sharpeNetOfCost",
+      "line": 101
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectDoubleBottom",
+      "line": 39
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectDoubleTop",
+      "line": 92
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectHeadShoulders",
+      "line": 141
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectInvertedHS",
+      "line": 200
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectTripleBottom",
+      "line": 255
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectTripleTop",
+      "line": 304
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectRoundingBottom",
+      "line": 352
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectRoundingTop",
+      "line": 406
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "detectChartPatterns",
+      "line": 462
+    },
+    {
+      "path": "quant/regime/chartPatterns.py",
+      "func": "calcChartPatterns",
+      "line": 523
+    },
+    {
+      "path": "quant/regime/hmm.py",
+      "func": "calcRegime",
+      "line": 47
+    },
+    {
+      "path": "quant/regime/pattern.py",
+      "func": "calcPattern",
+      "line": 136
+    },
+    {
+      "path": "quant/risk/bubbleTest.py",
+      "func": "calcSADF",
+      "line": 49
+    },
+    {
+      "path": "quant/risk/bubbleTest.py",
+      "func": "calcGSADF",
+      "line": 148
+    },
+    {
+      "path": "quant/risk/johansen.py",
+      "func": "johansenTest",
+      "line": 42
+    },
+    {
+      "path": "quant/risk/johansen.py",
+      "func": "calcVECM",
+      "line": 165
+    },
+    {
+      "path": "quant/risk/microstructure.py",
+      "func": "calcLiquidity",
+      "line": 17
+    },
+    {
+      "path": "quant/risk/structuralBreak.py",
+      "func": "detectStructuralBreak",
+      "line": 33
+    },
+    {
+      "path": "quant/risk/structuralBreak.py",
+      "func": "detectMultipleBreaks",
+      "line": 104
+    },
+    {
+      "path": "quant/risk/tailrisk.py",
+      "func": "calcTailrisk",
+      "line": 35
+    },
+    {
+      "path": "quant/risk/volatility.py",
+      "func": "calcVolatility",
+      "line": 36
+    },
+    {
+      "path": "quant/risk/volatility.py",
+      "func": "negLogLikelihood",
+      "line": 291
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcTrendData",
+      "line": 39
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcRiskData",
+      "line": 49
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcSignalData",
+      "line": 58
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcStrategyData",
+      "line": 66
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcCrosscheckData",
+      "line": 73
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcQuantConclusionData",
+      "line": 81
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcStrategySnapshot",
+      "line": 113
+    },
+    {
+      "path": "quant/screen/_extendedNarrative.py",
+      "func": "calcActionableTargets",
+      "line": 152
+    },
+    {
+      "path": "quant/screen/axStrategy.py",
+      "func": "runStrategy",
+      "line": 102
+    },
+    {
+      "path": "quant/screen/axStrategy.py",
+      "func": "runBacktest",
+      "line": 149
+    },
+    {
+      "path": "quant/screen/axStrategy.py",
+      "func": "runStyle",
+      "line": 251
+    },
+    {
+      "path": "quant/screen/axStrategy.py",
+      "func": "runEntry",
+      "line": 278
+    },
+    {
+      "path": "quant/screen/axStrategy.py",
+      "func": "runMultiAsset",
+      "line": 361
+    },
+    {
+      "path": "quant/screen/axStrategy.py",
+      "func": "runWalkforward",
+      "line": 393
+    },
+    {
+      "path": "quant/screen/axTechnical.py",
+      "func": "calcIndicators",
+      "line": 36
+    },
+    {
+      "path": "quant/screen/axTechnical.py",
+      "func": "calcSignals",
+      "line": 74
+    },
+    {
+      "path": "quant/screen/axTechnical.py",
+      "func": "calcVerdict",
+      "line": 115
+    },
+    {
+      "path": "quant/screen/axTechnical.py",
+      "func": "calcBeta",
+      "line": 159
+    },
+    {
+      "path": "quant/screen/axTechnical.py",
+      "func": "calcDivergence",
+      "line": 198
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "loadScanParquet",
+      "line": 106
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "loadDocsForStock",
+      "line": 166
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "loadChangesForStock",
+      "line": 183
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "stockPercentile",
+      "line": 208
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "loadAllfilingsForStock",
+      "line": 256
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "extractAccounts",
+      "line": 473
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "ohlcvToArrays",
+      "line": 498
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "tomMask",
+      "line": 524
+    },
+    {
+      "path": "quant/screen/dataAccess.py",
+      "func": "extractSignalSeries",
+      "line": 544
+    },
+    {
+      "path": "quant/screen/preset.py",
+      "func": "calcScreen",
+      "line": 142
+    },
+    {
+      "path": "quant/signal/analyzer.py",
+      "func": "enrichWithIndicators",
+      "line": 42
+    },
+    {
+      "path": "quant/signal/event.py",
+      "func": "calcEventSignal",
+      "line": 36
+    },
+    {
+      "path": "quant/signal/eventStudy.py",
+      "func": "calcCAR",
+      "line": 39
+    },
+    {
+      "path": "quant/signal/eventStudy.py",
+      "func": "calcBHAR",
+      "line": 115
+    },
+    {
+      "path": "quant/signal/generator.py",
+      "func": "vmacdSignal",
+      "line": 144
+    },
+    {
+      "path": "quant/signal/generator.py",
+      "func": "vbollingerSignal",
+      "line": 167
+    },
+    {
+      "path": "quant/signal/generator.py",
+      "func": "vbreakoutSignal",
+      "line": 196
+    },
+    {
+      "path": "quant/signal/generator.py",
+      "func": "vAtrTrailingStop",
+      "line": 232
+    },
+    {
+      "path": "quant/signal/generator.py",
+      "func": "vVolatilityScaledStop",
+      "line": 282
+    },
+    {
+      "path": "quant/signal/generator.py",
+      "func": "vTrendFilter",
+      "line": 311
+    },
+    {
+      "path": "quant/signal/momentum.py",
+      "func": "calcMomentum",
+      "line": 37
+    },
+    {
+      "path": "quant/signal/pairsTrading.py",
+      "func": "calcPairs",
+      "line": 21
+    },
+    {
+      "path": "quant/signal/volume.py",
+      "func": "calcVolume",
+      "line": 15
+    },
+    {
+      "path": "quant/strategy/backtest.py",
+      "func": "vectorBacktest",
+      "line": 104
+    },
+    {
+      "path": "quant/strategy/backtest.py",
+      "func": "notApplicable",
+      "line": 96
+    },
+    {
+      "path": "quant/strategy/metrics.py",
+      "func": "sortino",
+      "line": 119
+    },
+    {
+      "path": "quant/strategy/metrics.py",
+      "func": "winrate",
+      "line": 170
+    },
+    {
+      "path": "quant/strategy/metrics.py",
+      "func": "profitFactor",
+      "line": 189
+    },
+    {
+      "path": "quant/strategy/metrics.py",
+      "func": "expectancy",
+      "line": 212
+    },
+    {
+      "path": "quant/strategy/metrics.py",
+      "func": "cpcvSplits",
+      "line": 352
+    },
+    {
+      "path": "quant/strategy/presets.py",
+      "func": "STYLE_REGISTRY",
+      "line": 73
+    },
+    {
+      "path": "quant/strategy/presets.py",
+      "func": "resolveStyle",
+      "line": 81
+    },
+    {
+      "path": "quant/strategy/presets.py",
+      "func": "listStyles",
+      "line": 105
+    },
+    {
+      "path": "quant/strategy/rule.py",
+      "func": "withSizing",
+      "line": 70
+    },
+    {
+      "path": "quant/strategy/rule.py",
+      "func": "withStop",
+      "line": 83
+    },
+    {
+      "path": "quant/strategy/rule.py",
+      "func": "withMeta",
+      "line": 96
+    },
+    {
+      "path": "quant/strategy/rule.py",
+      "func": "shiftLag",
+      "line": 118
+    },
+    {
+      "path": "quant/strategy/rule.py",
+      "func": "lookaheadCheck",
+      "line": 142
+    },
+    {
+      "path": "quant/strategy/styles/_common.py",
+      "func": "getArrays",
+      "line": 16
+    },
+    {
+      "path": "quant/strategy/styles/_common.py",
+      "func": "isKr",
+      "line": 37
+    },
+    {
+      "path": "quant/strategy/styles/_common.py",
+      "func": "getStockCode",
+      "line": 43
+    },
+    {
+      "path": "quant/strategy/styles/_common.py",
+      "func": "safeQuantile",
+      "line": 59
+    },
+    {
+      "path": "quant/text/composite.py",
+      "func": "calcTextComposite",
+      "line": 29
+    },
+    {
+      "path": "quant/text/governance.py",
+      "func": "calcGovernanceQuant",
+      "line": 45
+    },
+    {
+      "path": "quant/text/risk.py",
+      "func": "calcRiskText",
+      "line": 40
+    },
+    {
+      "path": "quant/text/sentiment.py",
+      "func": "calcSentiment",
+      "line": 17
+    },
+    {
+      "path": "quant/text/toneChange.py",
+      "func": "calcToneChange",
+      "line": 17
+    },
+    {
+      "path": "quant/transforms/fracDiff.py",
+      "func": "fracDiffFFD",
+      "line": 39
+    },
+    {
+      "path": "quant/transforms/fracDiff.py",
+      "func": "findMinDForStationarity",
+      "line": 118
+    },
+    {
+      "path": "quant/transforms/matrixProfile.py",
+      "func": "computeMatrixProfile",
+      "line": 34
+    },
+    {
+      "path": "quant/transforms/matrixProfile.py",
+      "func": "findSimilarPatterns",
+      "line": 130
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "graphStatus",
+      "line": 85
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "loadAnalysisGraph",
+      "line": 99
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "inferQuestionProfile",
+      "line": 117
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "routeQuestion",
+      "line": 130
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "allContracts",
+      "line": 175
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "contractsForQuestion",
+      "line": 186
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "contractIdsForQuestion",
+      "line": 196
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "allProcessMaps",
+      "line": 201
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "processMapsForQuestion",
+      "line": 207
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "understandingPacketForQuestion",
+      "line": 215
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "planDartlabQuestion",
+      "line": 248
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "explainDartlabTool",
+      "line": 253
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "validateDartlabPlan",
+      "line": 272
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "listDartlabProcesses",
+      "line": 299
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "answerContractNames",
+      "line": 321
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "preflightActionsForQuestion",
+      "line": 344
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "toolBudgetForQuestion",
+      "line": 374
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "toolNamesForQuestion",
+      "line": 385
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "requiresVisualExplanation",
+      "line": 390
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "contextForQuestion",
+      "line": 399
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "queryAnalysisGraph",
+      "line": 411
+    },
+    {
+      "path": "reference/capability/analysisGraph.py",
+      "func": "impactForGraphNode",
+      "line": 455
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "getDefaultCapabilityRegistry",
+      "line": 306
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "clearCapabilityRegistry",
+      "line": 311
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "registerToolCapability",
+      "line": 316
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "getCapabilitySpecs",
+      "line": 366
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "getAnalysisContractSpecs",
+      "line": 707
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "renderWidget",
+      "line": 173
+    },
+    {
+      "path": "reference/capability/registry.py",
+      "func": "switchView",
+      "line": 220
+    },
+    {
+      "path": "reference/capability/search.py",
+      "func": "searchCapabilities",
+      "line": 165
+    },
+    {
+      "path": "reference/capability/search.py",
+      "func": "jsonish",
+      "line": 214
+    },
+    {
+      "path": "reference/capability/search.py",
+      "func": "formatSearchResults",
+      "line": 222
+    },
+    {
+      "path": "reference/mappers/accountMapper.py",
+      "func": "snakeIds",
+      "line": 155
+    },
+    {
+      "path": "reference/mappers/accountMapper.py",
+      "func": "snakeIdToKor",
+      "line": 197
+    },
+    {
+      "path": "reference/mappers/aliasMapper.py",
+      "func": "variantsOf",
+      "line": 184
+    },
+    {
+      "path": "reference/mappers/topicMapper.py",
+      "func": "keywordsFor",
+      "line": 166
+    },
+    {
+      "path": "scan/audit.py",
+      "func": "scanAudit",
+      "line": 88
+    },
+    {
+      "path": "scan/builders/edgar/helpers.py",
+      "func": "scanEdgarAccounts",
+      "line": 12
+    },
+    {
+      "path": "scan/builders/edgar/helpers.py",
+      "func": "scanEdgarRawTags",
+      "line": 165
+    },
+    {
+      "path": "scan/builders/edgar/helpers.py",
+      "func": "gradeByValue",
+      "line": 260
+    },
+    {
+      "path": "scan/builders/kr/common.py",
+      "func": "reportDir",
+      "line": 176
+    },
+    {
+      "path": "scan/builders/kr/common.py",
+      "func": "mergeBatchFiles",
+      "line": 257
+    },
+    {
+      "path": "scan/builders/kr/docs/changes.py",
+      "func": "buildChanges",
+      "line": 149
+    },
+    {
+      "path": "scan/builders/kr/docs/index.py",
+      "func": "buildEdgarDocsIndex",
+      "line": 250
+    },
+    {
+      "path": "scan/builders/kr/docs/index.py",
+      "func": "buildEdinetDocsIndex",
+      "line": 325
+    },
+    {
+      "path": "scan/builders/kr/extended.py",
+      "func": "calcPeerPosition",
+      "line": 20
+    },
+    {
+      "path": "scan/builders/kr/extended.py",
+      "func": "calcGovernanceSummary",
+      "line": 253
+    },
+    {
+      "path": "scan/builders/kr/report/fields.py",
+      "func": "scanFields",
+      "line": 20
+    },
+    {
+      "path": "scan/builders/kr/report/fields.py",
+      "func": "executeScreenSpec",
+      "line": 117
+    },
+    {
+      "path": "scan/builders/kr/snapshot.py",
+      "func": "buildScanSnapshot",
+      "line": 51
+    },
+    {
+      "path": "scan/builders/kr/valuationBuild.py",
+      "func": "buildValuation",
+      "line": 47
+    },
+    {
+      "path": "scan/capital/scanner.py",
+      "func": "scanDividend",
+      "line": 20
+    },
+    {
+      "path": "scan/capital/scanner.py",
+      "func": "scanTreasuryStock",
+      "line": 131
+    },
+    {
+      "path": "scan/capital/scanner.py",
+      "func": "scanCapitalChange",
+      "line": 244
+    },
+    {
+      "path": "scan/debt/risk.py",
+      "func": "scanIcr",
+      "line": 150
+    },
+    {
+      "path": "scan/debt/scanner.py",
+      "func": "scanBonds",
+      "line": 12
+    },
+    {
+      "path": "scan/debt/scanner.py",
+      "func": "scanShortDebt",
+      "line": 111
+    },
+    {
+      "path": "scan/debt/scanner.py",
+      "func": "scanDebtMix",
+      "line": 200
+    },
+    {
+      "path": "scan/disclosureRisk.py",
+      "func": "scanDisclosureRisk",
+      "line": 107
+    },
+    {
+      "path": "scan/dividendTrend.py",
+      "func": "scanDividendTrend",
+      "line": 97
+    },
+    {
+      "path": "scan/financial/cashflow.py",
+      "func": "scanCashflow",
+      "line": 250
+    },
+    {
+      "path": "scan/financial/efficiency.py",
+      "func": "scanEfficiency",
+      "line": 86
+    },
+    {
+      "path": "scan/financial/growth.py",
+      "func": "scanGrowth",
+      "line": 106
+    },
+    {
+      "path": "scan/financial/liquidity.py",
+      "func": "scanLiquidity",
+      "line": 226
+    },
+    {
+      "path": "scan/financial/profitability.py",
+      "func": "scanProfitability",
+      "line": 78
+    },
+    {
+      "path": "scan/financial/quality.py",
+      "func": "scanQuality",
+      "line": 250
+    },
+    {
+      "path": "scan/governance/scanner.py",
+      "func": "scanMajorHolderPct",
+      "line": 15
+    },
+    {
+      "path": "scan/governance/scanner.py",
+      "func": "scanOutsideDirectors",
+      "line": 86
+    },
+    {
+      "path": "scan/governance/scanner.py",
+      "func": "scanPayRatio",
+      "line": 247
+    },
+    {
+      "path": "scan/governance/scanner.py",
+      "func": "scanAuditOpinion",
+      "line": 351
+    },
+    {
+      "path": "scan/governance/scanner.py",
+      "func": "scanMinorityHolder",
+      "line": 433
+    },
+    {
+      "path": "scan/governance/scorer.py",
+      "func": "scoreOutsideRatio",
+      "line": 70
+    },
+    {
+      "path": "scan/governance/scorer.py",
+      "func": "scorePayRatio",
+      "line": 153
+    },
+    {
+      "path": "scan/governance/scorer.py",
+      "func": "scoreAudit",
+      "line": 216
+    },
+    {
+      "path": "scan/governance/scorer.py",
+      "func": "scoreMinority",
+      "line": 273
+    },
+    {
+      "path": "scan/insider.py",
+      "func": "scanInsider",
+      "line": 117
+    },
+    {
+      "path": "scan/io/parquet.py",
+      "func": "loadListing",
+      "line": 304
+    },
+    {
+      "path": "scan/macroBeta.py",
+      "func": "scanMacroBeta",
+      "line": 24
+    },
+    {
+      "path": "scan/network/classifier.py",
+      "func": "classifyBalanced",
+      "line": 405
+    },
+    {
+      "path": "scan/network/edges.py",
+      "func": "buildInvestEdges",
+      "line": 15
+    },
+    {
+      "path": "scan/network/edges.py",
+      "func": "deduplicateEdges",
+      "line": 168
+    },
+    {
+      "path": "scan/network/edges.py",
+      "func": "buildHolderEdges",
+      "line": 269
+    },
+    {
+      "path": "scan/network/edges.py",
+      "func": "dfs",
+      "line": 474
+    },
+    {
+      "path": "scan/network/export.py",
+      "func": "exportOverview",
+      "line": 284
+    },
+    {
+      "path": "scan/network/scanner.py",
+      "func": "loadListing",
+      "line": 39
+    },
+    {
+      "path": "scan/network/scanner.py",
+      "func": "scanInvested",
+      "line": 152
+    },
+    {
+      "path": "scan/network/scanner.py",
+      "func": "scanMajorHolders",
+      "line": 211
+    },
+    {
+      "path": "scan/network/scanner.py",
+      "func": "scanAffiliateDocs",
+      "line": 430
+    },
+    {
+      "path": "scan/screen/rank.py",
+      "func": "getRankOrBuild",
+      "line": 409
+    },
+    {
+      "path": "scan/watch/digest.py",
+      "func": "buildDigest",
+      "line": 26
+    },
+    {
+      "path": "scan/watch/scanner.py",
+      "func": "scanCompany",
+      "line": 126
+    },
+    {
+      "path": "scan/watch/scanner.py",
+      "func": "topScore",
+      "line": 42
+    },
+    {
+      "path": "scan/watch/scorer.py",
+      "func": "scoreChanges",
+      "line": 67
+    },
+    {
+      "path": "scan/watch/scorer.py",
+      "func": "scoredToDataframe",
+      "line": 240
+    },
+    {
+      "path": "scan/workforce/growth.py",
+      "func": "scanSalaryGrowth",
+      "line": 41
+    },
+    {
+      "path": "scan/workforce/growth.py",
+      "func": "scanRevenueGrowth",
+      "line": 262
+    },
+    {
+      "path": "scan/workforce/growth.py",
+      "func": "computeSalaryVsRevenue",
+      "line": 317
+    },
+    {
+      "path": "scan/workforce/scanner.py",
+      "func": "scanEmployee",
+      "line": 17
+    },
+    {
+      "path": "scan/workforce/scanner.py",
+      "func": "scanTotalPayroll",
+      "line": 139
+    },
+    {
+      "path": "scan/workforce/scanner.py",
+      "func": "scanRevenuePerEmployee",
+      "line": 230
+    },
+    {
+      "path": "scan/workforce/scanner.py",
+      "func": "scanTopPay",
+      "line": 438
+    },
+    {
+      "path": "scan/workforce/scanner.py",
+      "func": "scanLaborRatio",
+      "line": 577
+    },
+    {
+      "path": "scan/workforce/scanner.py",
+      "func": "scanValueAdded",
+      "line": 636
+    },
+    {
+      "path": "server/_ui_path.py",
+      "func": "resolveUiBuildDir",
+      "line": 19
+    },
+    {
+      "path": "server/_ui_path.py",
+      "func": "resolveUiSourceDir",
+      "line": 43
+    },
+    {
+      "path": "server/cache.py",
+      "func": "isExpired",
+      "line": 36
+    },
+    {
+      "path": "server/chat.py",
+      "func": "extractLastStockCode",
+      "line": 31
+    },
+    {
+      "path": "server/chat.py",
+      "func": "buildTopicSummaryQuestion",
+      "line": 41
+    },
+    {
+      "path": "server/room.py",
+      "func": "startCleanupLoop",
+      "line": 195
+    },
+    {
+      "path": "server/room.py",
+      "func": "startBackgroundCleanup",
+      "line": 203
+    },
+    {
+      "path": "server/room.py",
+      "func": "stopBackgroundCleanup",
+      "line": 207
+    },
+    {
+      "path": "server/runtime.py",
+      "func": "defaultHost",
+      "line": 12
+    },
+    {
+      "path": "server/runtime.py",
+      "func": "ensurePort",
+      "line": 83
+    },
+    {
+      "path": "server/runtime.py",
+      "func": "runServer",
+      "line": 112
+    },
+    {
+      "path": "server/services/aiAnalysis.py",
+      "func": "buildTopicSummaryViewContext",
+      "line": 17
+    },
+    {
+      "path": "server/services/aiAnalysis.py",
+      "func": "streamTopicSummary",
+      "line": 31
+    },
+    {
+      "path": "server/services/aiAnalysis.py",
+      "func": "runPlainChat",
+      "line": 61
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "selectedProvider",
+      "line": 15
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "shouldPreloadOllama",
+      "line": 26
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "probeProviderAvailability",
+      "line": 39
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "buildOllamaDetail",
+      "line": 62
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "buildCodexDetail",
+      "line": 89
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "buildOauthCodexDetail",
+      "line": 128
+    },
+    {
+      "path": "server/services/aiProfile.py",
+      "func": "validateProviderConnection",
+      "line": 173
+    },
+    {
+      "path": "server/services/companyApi.py",
+      "func": "safeTopicLabel",
+      "line": 30
+    },
+    {
+      "path": "server/services/companyApi.py",
+      "func": "filterBlocksByPeriod",
+      "line": 60
+    },
+    {
+      "path": "server/services/companyApi.py",
+      "func": "buildToc",
+      "line": 94
+    },
+    {
+      "path": "server/services/companyApi.py",
+      "func": "buildViewer",
+      "line": 194
+    },
+    {
+      "path": "server/services/companyApi.py",
+      "func": "buildDiffSummary",
+      "line": 222
+    },
+    {
+      "path": "server/streaming.py",
+      "func": "streamAsk",
+      "line": 65
+    },
+    {
+      "path": "server/streaming.py",
+      "func": "streamAnalysis",
+      "line": 84
+    },
+    {
+      "path": "server/streaming.py",
+      "func": "collectAnalysisText",
+      "line": 106
+    },
+    {
+      "path": "server/streaming.py",
+      "func": "collectAnalysisResult",
+      "line": 112
+    },
+    {
+      "path": "skills/graph.py",
+      "func": "strongconnect",
+      "line": 475
+    },
+    {
+      "path": "skills/market.py",
+      "func": "defaultMarketUrl",
+      "line": 42
+    },
+    {
+      "path": "skills/market.py",
+      "func": "emptyMarketIndex",
+      "line": 48
+    },
+    {
+      "path": "skills/market.py",
+      "func": "loadMarketIndex",
+      "line": 63
+    },
+    {
+      "path": "skills/market.py",
+      "func": "searchMarketSkills",
+      "line": 94
+    },
+    {
+      "path": "skills/market.py",
+      "func": "isRunnableMarketSkill",
+      "line": 128
+    },
+    {
+      "path": "skills/registry.py",
+      "func": "describeSkill",
+      "line": 247
+    },
+    {
+      "path": "skills/registry.py",
+      "func": "validateExecutionSkillSubstance",
+      "line": 364
+    },
+    {
+      "path": "story/builders.py",
+      "func": "capitalTimelineBlock",
+      "line": 551
+    },
+    {
+      "path": "story/builders.py",
+      "func": "debtTimelineBlock",
+      "line": 572
+    },
+    {
+      "path": "story/builders.py",
+      "func": "capexBlock",
+      "line": 808
+    },
+    {
+      "path": "story/builders.py",
+      "func": "assetEfficiencyBlock",
+      "line": 859
+    },
+    {
+      "path": "story/builders.py",
+      "func": "cashQualityBlock",
+      "line": 945
+    },
+    {
+      "path": "story/builders.py",
+      "func": "growthQualityBlock",
+      "line": 1239
+    },
+    {
+      "path": "story/builders.py",
+      "func": "coverageTrendBlock",
+      "line": 1325
+    },
+    {
+      "path": "story/builders.py",
+      "func": "scenarioSensitivityBlock",
+      "line": 1390
+    },
+    {
+      "path": "story/builders.py",
+      "func": "criticalAssumptionsBlock",
+      "line": 1468
+    },
+    {
+      "path": "story/builders.py",
+      "func": "turnoverTrendBlock",
+      "line": 1497
+    },
+    {
+      "path": "story/builders.py",
+      "func": "cccTrendBlock",
+      "line": 1523
+    },
+    {
+      "path": "story/builders.py",
+      "func": "breakevenEstimateBlock",
+      "line": 1805
+    },
+    {
+      "path": "story/builders.py",
+      "func": "treasuryStockStatusBlock",
+      "line": 1937
+    },
+    {
+      "path": "story/builders.py",
+      "func": "dividendSustainabilityBlock",
+      "line": 1977
+    },
+    {
+      "path": "story/builders.py",
+      "func": "totalShareholderReturnBlock",
+      "line": 2030
+    },
+    {
+      "path": "story/builders.py",
+      "func": "residualIncomeBlock",
+      "line": 2387
+    },
+    {
+      "path": "story/builders.py",
+      "func": "priceTargetBlock",
+      "line": 2411
+    },
+    {
+      "path": "story/builders.py",
+      "func": "reverseImpliedBlock",
+      "line": 2453
+    },
+    {
+      "path": "story/builders.py",
+      "func": "dFVBlock",
+      "line": 2479
+    },
+    {
+      "path": "story/builders.py",
+      "func": "methodFitnessBlock",
+      "line": 2518
+    },
+    {
+      "path": "story/builders.py",
+      "func": "qualityFactorsBlock",
+      "line": 2554
+    },
+    {
+      "path": "story/builders.py",
+      "func": "sensitivityBlock",
+      "line": 2586
+    },
+    {
+      "path": "story/builders.py",
+      "func": "valuationSynthesisBlock",
+      "line": 2650
+    },
+    {
+      "path": "story/builders.py",
+      "func": "valuationFlagsBlock",
+      "line": 2723
+    },
+    {
+      "path": "story/builders.py",
+      "func": "executivePayDivergenceBlock",
+      "line": 2829
+    },
+    {
+      "path": "story/builders.py",
+      "func": "independentDirectorQualityBlock",
+      "line": 2861
+    },
+    {
+      "path": "story/builders.py",
+      "func": "peerPositionBlock",
+      "line": 2980
+    },
+    {
+      "path": "story/builders.py",
+      "func": "proFormaHighlightsBlock",
+      "line": 3241
+    },
+    {
+      "path": "story/builders.py",
+      "func": "scenarioImpactBlock",
+      "line": 3284
+    },
+    {
+      "path": "story/builders.py",
+      "func": "historicalRatiosBlock",
+      "line": 3344
+    },
+    {
+      "path": "story/builders.py",
+      "func": "calibrationReportBlock",
+      "line": 3384
+    },
+    {
+      "path": "story/builders.py",
+      "func": "richardsonAccrualBlock",
+      "line": 3544
+    },
+    {
+      "path": "story/builders.py",
+      "func": "nonOperatingBreakdownBlock",
+      "line": 3583
+    },
+    {
+      "path": "story/builders.py",
+      "func": "cagrComparisonBlock",
+      "line": 3625
+    },
+    {
+      "path": "story/builders.py",
+      "func": "articulationCheckBlock",
+      "line": 3660
+    },
+    {
+      "path": "story/builders.py",
+      "func": "cashFlowGradeBlock",
+      "line": 3817
+    },
+    {
+      "path": "story/builders.py",
+      "func": "creditPeerPositionBlock",
+      "line": 3849
+    },
+    {
+      "path": "story/builders.py",
+      "func": "creditNarrativeBlock",
+      "line": 3893
+    },
+    {
+      "path": "story/builders.py",
+      "func": "creditAuditBlock",
+      "line": 3936
+    },
+    {
+      "path": "story/builders.py",
+      "func": "quantModuleBlock",
+      "line": 4116
+    },
+    {
+      "path": "story/builders.py",
+      "func": "strategySnapshotBlock",
+      "line": 4143
+    },
+    {
+      "path": "story/builders.py",
+      "func": "riskDecompositionBlock",
+      "line": 4353
+    },
+    {
+      "path": "story/builders.py",
+      "func": "factorTearSheetBlock",
+      "line": 4389
+    },
+    {
+      "path": "story/builders.py",
+      "func": "factorICBlock",
+      "line": 4439
+    },
+    {
+      "path": "story/builders.py",
+      "func": "altmanFactorBlock",
+      "line": 4491
+    },
+    {
+      "path": "story/builders.py",
+      "func": "piotroskiFactorBlock",
+      "line": 4514
+    },
+    {
+      "path": "story/builders.py",
+      "func": "beneishFactorBlock",
+      "line": 4552
+    },
+    {
+      "path": "story/builders.py",
+      "func": "accrualsFactorBlock",
+      "line": 4577
+    },
+    {
+      "path": "story/builders.py",
+      "func": "qFactorBlock",
+      "line": 4603
+    },
+    {
+      "path": "story/builders.py",
+      "func": "qmjBlock",
+      "line": 4624
+    },
+    {
+      "path": "story/builders.py",
+      "func": "babBlock",
+      "line": 4645
+    },
+    {
+      "path": "story/builders.py",
+      "func": "earningsSurpriseBlock",
+      "line": 4672
+    },
+    {
+      "path": "story/builders.py",
+      "func": "fundMomentumBlock",
+      "line": 4693
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroPositionBlock",
+      "line": 4717
+    },
+    {
+      "path": "story/builders.py",
+      "func": "assetSignalsBlock",
+      "line": 4753
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroEnvironmentBlock",
+      "line": 4780
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroCycleBlock",
+      "line": 4833
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroRatesBlock",
+      "line": 4915
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroLiquidityBlock",
+      "line": 4975
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroSentimentBlock",
+      "line": 5023
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroForecastBlock",
+      "line": 5074
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroCorporateBlock",
+      "line": 5143
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroTradeBlock",
+      "line": 5184
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroFlagsBlock",
+      "line": 5223
+    },
+    {
+      "path": "story/builders.py",
+      "func": "sectorKpiBlock",
+      "line": 5297
+    },
+    {
+      "path": "story/builders.py",
+      "func": "improvementLeversBlock",
+      "line": 5366
+    },
+    {
+      "path": "story/builders.py",
+      "func": "gradeUpgradePathBlock",
+      "line": 5403
+    },
+    {
+      "path": "story/builders.py",
+      "func": "technicalActionTargetsBlock",
+      "line": 5439
+    },
+    {
+      "path": "story/builders.py",
+      "func": "cyclicalActionPlanBlock",
+      "line": 5476
+    },
+    {
+      "path": "story/builders.py",
+      "func": "damodaran3testBlock",
+      "line": 5507
+    },
+    {
+      "path": "story/builders.py",
+      "func": "thesisReportBlocks",
+      "line": 5537
+    },
+    {
+      "path": "story/builders.py",
+      "func": "companyCyclePositionBlock",
+      "line": 5584
+    },
+    {
+      "path": "story/builders.py",
+      "func": "valuationBandBlock",
+      "line": 5635
+    },
+    {
+      "path": "story/builders.py",
+      "func": "lifeCycleStageBlock",
+      "line": 5669
+    },
+    {
+      "path": "story/builders.py",
+      "func": "valuationSinsBlock",
+      "line": 5711
+    },
+    {
+      "path": "story/builders.py",
+      "func": "plausibilityBandBlock",
+      "line": 5744
+    },
+    {
+      "path": "story/builders.py",
+      "func": "storyPrecedentsBlock",
+      "line": 5791
+    },
+    {
+      "path": "story/builders.py",
+      "func": "sectorMetricsBlock",
+      "line": 5906
+    },
+    {
+      "path": "story/builders.py",
+      "func": "sectorOutlookBlock",
+      "line": 5964
+    },
+    {
+      "path": "story/builders.py",
+      "func": "macroSensitivityBlock",
+      "line": 6019
+    },
+    {
+      "path": "story/builders.py",
+      "func": "creditScenarioBlock",
+      "line": 6060
+    },
+    {
+      "path": "story/dashboard.py",
+      "func": "listDashboardQuestions",
+      "line": 119
+    },
+    {
+      "path": "story/formats.py",
+      "func": "renderAscii",
+      "line": 516
+    },
+    {
+      "path": "story/macro/builders.py",
+      "func": "buildDashboardBlocks",
+      "line": 44
+    },
+    {
+      "path": "story/macro/builders.py",
+      "func": "buildPhaseBlocks",
+      "line": 117
+    },
+    {
+      "path": "story/macro/builders.py",
+      "func": "buildCausationBlocks",
+      "line": 348
+    },
+    {
+      "path": "story/macro/builders.py",
+      "func": "buildOutlookBlocks",
+      "line": 553
+    },
+    {
+      "path": "story/macro/builders.py",
+      "func": "buildAllocationBlocks",
+      "line": 740
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specFciTimeline",
+      "line": 6
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specEarningsCycle",
+      "line": 21
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specPonziRatio",
+      "line": 35
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specRecessionProb",
+      "line": 49
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specCycleIndicators",
+      "line": 67
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specFearGreedComponents",
+      "line": 88
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specTradeTot",
+      "line": 102
+    },
+    {
+      "path": "story/macro/charts.py",
+      "func": "specCorporateTable",
+      "line": 121
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "detectConflicts",
+      "line": 293
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "generateCirculationSummary",
+      "line": 342
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "generateActTransition",
+      "line": 433
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "generateSoWhat",
+      "line": 455
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "generateRatesNarrative",
+      "line": 482
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "narrateTransmissionChain",
+      "line": 492
+    },
+    {
+      "path": "story/macro/narrative.py",
+      "func": "narrateOverallStory",
+      "line": 541
+    },
+    {
+      "path": "story/macro/report.py",
+      "func": "macroReport",
+      "line": 46
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateQuantRisk",
+      "line": 169
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateSignals",
+      "line": 200
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateStrategyVerdict",
+      "line": 224
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateCrosscheck",
+      "line": 261
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateQuantConclusion",
+      "line": 281
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateTechnicalVerdict",
+      "line": 319
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateGrowth",
+      "line": 360
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateMargin",
+      "line": 384
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateCashQuality",
+      "line": 458
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateLeverage",
+      "line": 470
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateDistress",
+      "line": 496
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateROIC",
+      "line": 506
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateStrategy",
+      "line": 583
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateConcentration",
+      "line": 661
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateMacroEnvironment",
+      "line": 676
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "buildActSummary",
+      "line": 703
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateSectorContext",
+      "line": 800
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateImprovementLevers",
+      "line": 843
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateGradeUpgrade",
+      "line": 864
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateTechnicalAction",
+      "line": 883
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateCyclicalAction",
+      "line": 901
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateDFV",
+      "line": 924
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateLifeCycle",
+      "line": 1002
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateStoryPrecedents",
+      "line": 1117
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateAltman",
+      "line": 1136
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narratePiotroski",
+      "line": 1151
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateBeneish",
+      "line": 1165
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateAccruals",
+      "line": 1178
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateQFactor",
+      "line": 1192
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateQMJ",
+      "line": 1202
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateBAB",
+      "line": 1215
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateEarningsSurprise",
+      "line": 1228
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateFundMomentum",
+      "line": 1240
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateFactorTearSheet",
+      "line": 1252
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateRiskDecomposition",
+      "line": 1266
+    },
+    {
+      "path": "story/narrate.py",
+      "func": "narrateFactorIC",
+      "line": 1287
+    },
+    {
+      "path": "story/narrative.py",
+      "func": "detectThreads",
+      "line": 610
+    },
+    {
+      "path": "story/narrative.py",
+      "func": "buildActTransitions",
+      "line": 628
+    },
+    {
+      "path": "story/narrative.py",
+      "func": "buildCirculationSummary",
+      "line": 681
+    },
+    {
+      "path": "story/narrative.py",
+      "func": "buildCausalWeights",
+      "line": 817
+    },
+    {
+      "path": "story/narrative.py",
+      "func": "buildValuationImpact",
+      "line": 867
+    },
+    {
+      "path": "story/narrativeDiff.py",
+      "func": "computeImpact",
+      "line": 28
+    },
+    {
+      "path": "story/narrativeDiff.py",
+      "func": "narrateDiff",
+      "line": 109
+    },
+    {
+      "path": "story/publisher.py",
+      "func": "publishReport",
+      "line": 27
+    },
+    {
+      "path": "story/publisher.py",
+      "func": "publishReportFromCompany",
+      "line": 50
+    },
+    {
+      "path": "story/publisher.py",
+      "func": "publishBatch",
+      "line": 94
+    },
+    {
+      "path": "story/renderer.py",
+      "func": "renderStory",
+      "line": 18
+    },
+    {
+      "path": "story/sixAct.py",
+      "func": "sixActScore",
+      "line": 234
+    },
+    {
+      "path": "story/sixAct.py",
+      "func": "asDict",
+      "line": 50
+    },
+    {
+      "path": "story/sixAct.py",
+      "func": "asScoreDict",
+      "line": 61
+    },
+    {
+      "path": "story/storyTree.py",
+      "func": "buildStoryTree",
+      "line": 38
+    },
+    {
+      "path": "story/storyTree.py",
+      "func": "narrateStoryTree",
+      "line": 111
+    },
+    {
+      "path": "story/summary.py",
+      "func": "buildSummaryCard",
+      "line": 18
+    },
+    {
+      "path": "story/summary.py",
+      "func": "buildSectionSummary",
+      "line": 93
+    },
+    {
+      "path": "story/templates.py",
+      "func": "resolvePerspective",
+      "line": 531
+    },
+    {
+      "path": "story/utils.py",
+      "func": "fmtAmtScale",
+      "line": 42
+    },
+    {
+      "path": "story/utils.py",
+      "func": "unifyTableScale",
+      "line": 59
+    },
+    {
+      "path": "story/utils.py",
+      "func": "padLabel",
+      "line": 142
+    },
+    {
+      "path": "story/utils.py",
+      "func": "isTerminal",
+      "line": 150
+    },
+    {
+      "path": "story/validators/validators.py",
+      "func": "damodaranTest",
+      "line": 41
+    },
+    {
+      "path": "synth/distress/chsFeatures.py",
+      "func": "extractChsFeatures",
+      "line": 16
+    },
+    {
+      "path": "synth/distress/chsFeatures.py",
+      "func": "computeChsProbability",
+      "line": 150
+    },
+    {
+      "path": "synth/distress/chsModel.py",
+      "func": "calcCHS",
+      "line": 60
+    },
+    {
+      "path": "synth/overrides.py",
+      "func": "buildAssumptions",
+      "line": 156
+    },
+    {
+      "path": "synth/overrides.py",
+      "func": "validateOverrides",
+      "line": 271
+    },
+    {
+      "path": "synth/overrides.py",
+      "func": "describeOverrides",
+      "line": 495
+    },
+    {
+      "path": "synth/quadrant.py",
+      "func": "classifyQuadrant",
+      "line": 68
+    },
+    {
+      "path": "synth/scanBridge.py",
+      "func": "isEdgarSchema",
+      "line": 52
+    },
+    {
+      "path": "synth/scanBridge.py",
+      "func": "extractAnnualConsolidated",
+      "line": 70
+    },
+    {
+      "path": "synth/scanBridge.py",
+      "func": "getAccountValue",
+      "line": 94
+    },
+    {
+      "path": "synth/scanBridge.py",
+      "func": "sumAccountByYear",
+      "line": 184
+    },
+    {
+      "path": "synth/scanBridge.py",
+      "func": "medianRatioByYear",
+      "line": 255
+    },
+    {
+      "path": "synth/scenario.py",
+      "func": "getPresetScenarios",
+      "line": 146
+    },
+    {
+      "path": "synth/scenario.py",
+      "func": "getNoiseSigma",
+      "line": 354
+    },
+    {
+      "path": "synth/turningPoint.py",
+      "func": "detectTurningPoints",
+      "line": 14
+    },
+    {
+      "path": "synth/turningPoint.py",
+      "func": "injectTurningPoints",
+      "line": 201
+    },
+    {
+      "path": "viz/export/excel.py",
+      "func": "exportWithTemplate",
+      "line": 374
+    },
+    {
+      "path": "viz/export/sources.py",
+      "func": "discoverSources",
+      "line": 206
+    },
+    {
+      "path": "viz/export/sources.py",
+      "func": "availableFlat",
+      "line": 65
+    },
+    {
+      "path": "viz/export/template.py",
+      "func": "addSheet",
+      "line": 60
+    },
+    {
+      "path": "viz/export/template.py",
+      "func": "removeSheet",
+      "line": 65
+    },
+    {
+      "path": "viz/export/template.py",
+      "func": "moveSheet",
+      "line": 71
+    },
+    {
+      "path": "viz/export/template.py",
+      "func": "fromJson",
+      "line": 100
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specRevenueTrend",
+      "line": 155
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specCashflowWaterfall",
+      "line": 214
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specBalanceSheet",
+      "line": 261
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specProfitability",
+      "line": 313
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specDividend",
+      "line": 368
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specInsightRadar",
+      "line": 428
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specRatioSparklines",
+      "line": 462
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specDiffHeatmap",
+      "line": 525
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specPeerRadar",
+      "line": 571
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specSensitivityHeatmap",
+      "line": 607
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specMarginTrend",
+      "line": 642
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specLeverageTrend",
+      "line": 681
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specGrowthYoyBar",
+      "line": 708
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specRevenueScenarioBand",
+      "line": 736
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specSixActRadar",
+      "line": 784
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specPeerMatrix",
+      "line": 831
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specKpiRibbon",
+      "line": 876
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specHoverSpark",
+      "line": 930
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specIncomeTrendMatrix",
+      "line": 985
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specCashflowSignedMatrix",
+      "line": 1112
+    },
+    {
+      "path": "viz/generators/core.py",
+      "func": "specEvidenceCoverage",
+      "line": 1267
+    },
+    {
+      "path": "viz/renderers/ascii.py",
+      "func": "renderAscii",
+      "line": 148
+    },
+    {
+      "path": "viz/renderers/network.py",
+      "func": "renderNetwork",
+      "line": 616
+    },
+    {
+      "path": "viz/renderers/plotly.py",
+      "func": "fromSpec",
+      "line": 68
+    },
+    {
+      "path": "viz/renderers/svg.py",
+      "func": "renderSvg",
+      "line": 249
+    },
+    {
+      "path": "viz/spec/chartSpec.py",
+      "func": "toPlotly",
+      "line": 122
+    },
+    {
+      "path": "viz/spec/chartSpec.py",
+      "func": "toHtml",
+      "line": 132
+    },
+    {
+      "path": "viz/spec/chartSpec.py",
+      "func": "toImage",
+      "line": 137
+    },
+    {
+      "path": "viz/spec/chartSpec.py",
+      "func": "toSvgRaw",
+      "line": 149
+    },
+    {
+      "path": "viz/spec/chartSpec.py",
+      "func": "toAscii",
+      "line": 158
+    },
+    {
+      "path": "viz/spec/intents.py",
+      "func": "listVizIntents",
+      "line": 201
+    }
+  ]
+}

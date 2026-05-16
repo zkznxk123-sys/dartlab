@@ -167,3 +167,42 @@ def test_runGate_known_covered_function() -> None:
     assert "formatComma" not in missing_names, f"formatComma 가 누락으로 잡힘 (missing={missing_names})"
     assert "formatKr" not in missing_names
     assert "formatDecimal" not in missing_names
+
+
+def test_loadBaseline_empty_when_no_file(tmp_path: Path) -> None:
+    """baseline 파일 없으면 빈 set."""
+    gate = _loadGateModule()
+    assert gate._loadBaseline(tmp_path / "absent.json") == set()
+
+
+def test_loadBaseline_parses_missing_tuples(tmp_path: Path) -> None:
+    """baseline JSON 의 missing list → (path, func) 튜플 집합."""
+    gate = _loadGateModule()
+    import json as _json
+
+    f = tmp_path / "baseline.json"
+    f.write_text(
+        _json.dumps(
+            {
+                "missing": [
+                    {"path": "core/foo.py", "func": "barFunc", "line": 10},
+                    {"path": "credit/baz.py", "func": "qux", "line": 20},
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    baseline = gate._loadBaseline(f)
+    assert ("core/foo.py", "barFunc") in baseline
+    assert ("credit/baz.py", "qux") in baseline
+    assert len(baseline) == 2
+
+
+def test_baseline_file_exists() -> None:
+    """실 baseline JSON (scripts/audit/_baselines/testCoverage.json) 존재 + 파싱 가능."""
+    gate = _loadGateModule()
+    baseline_path = _REPO / "scripts" / "audit" / "_baselines" / "testCoverage.json"
+    assert baseline_path.exists(), f"baseline 누락: {baseline_path}"
+    baseline = gate._loadBaseline(baseline_path)
+    # 본 PR 도입 시점 baseline 1097 — 35% 부채. 0 이면 baseline 깨짐.
+    assert len(baseline) > 100, f"baseline 항목 너무 적음 (len={len(baseline)})"
