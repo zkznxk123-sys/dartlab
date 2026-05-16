@@ -120,6 +120,7 @@ skill 없으면 LLM 이 알아서 capability 로 fallback. 강제 X. 메타·chi
 3-5. **"이 회사 어떻게 봐?" 종합 분석 의도면 답변 흐름 잡기 전 `PickStoryTemplate(stockCode, question)` 호출 권장**. 기업유형 9 enum (growth/value/value_decline/turnaround/credit_risk/financial_distress/holding/financial/general) 자동 분류 + 추천 story focusSections 반환. 답변 본문을 focusSections 순서 (예: 신용평가 → 안정성 → 자금조달) 로 짜면 일반 분석과 양식이 차별화된다. 단일 지표 질문엔 불필요.
 4. **RunPython 코드는 0 indent 부터 시작**. 들여쓰기는 `def`/`for`/`if` 본체 한정. 단일 statement series 면 모든 줄 0 indent — leading space 면 IndentationError.
 5. **dartlab API 가 확실하지 않으면 ReadCapability 먼저** — `dartlab.scan('growth')` 같은 호출 전에 `ReadCapability("scan growth")` 로 정확한 ref 와 반환 컬럼 확인.
+5-1. **ReadCapability 결과의 apiRef 를 *그대로* 인용 — 변형/단축/추측 금지**. `macro.rates`·`gather.macro`·`scan.ratio.roe` 같은 추측은 `unknown_api_ref` 차단. ReadCapability 가 `macro` 만 반환하면 EngineCall(apiRef="macro") 그대로. namespace 가 필요한 호출 (예: scan axis) 은 args 에 `{"axis": "ratio", "metric": "roe"}` 로 분리 — 점 표기 합치지 마라.
 
 ## 외부 본문 가드
 

@@ -112,10 +112,12 @@ def test_runAgent_tool_chain(monkeypatch: pytest.MonkeyPatch) -> None:
     assert any(e.kind == "chunk" and "삼성전자" in e.data.get("text", "") for e in events)
 
 
-# ── 3. failure_streak — 같은 도구 2 회 실패 → 차단 → 답변 ─────────────────
-def test_runAgent_failure_streak_blocks_repeat(monkeypatch: pytest.MonkeyPatch) -> None:
-    """WebSearch 가 같은 error_code 2 회 실패 → 3 회째 호출은 즉시 차단되고
-    LLM 메시지에 [차단됨] 안내. 이후 turn 에서 LLM 이 답변 생성.
+# ── 3. failure_streak — 같은 args 2 회 실패 → 그 args 만 차단. 다른 args 는 통과 ─────
+def test_runAgent_failure_streak_blocks_same_args(monkeypatch: pytest.MonkeyPatch) -> None:
+    """같은 args 가 같은 error 로 2 회 실패하면 *그 args 만* 차단 — 다른 args 는 풀어둠.
+
+    2026-05-17 회귀 가드: 과거 (도구 전체) 차단 정책이 EngineCall(macro.rates) 두 번 실패 후
+    EngineCall(macro, valid) 까지 막던 회귀. 이제 cacheKey=(name, argsHash) 단위.
     """
     call_count = {"WebSearch": 0}
 
@@ -133,35 +135,38 @@ def test_runAgent_failure_streak_blocks_repeat(monkeypatch: pytest.MonkeyPatch) 
 
     monkeypatch.setattr("dartlab.ai.agent.executeTool", fake_execute)
 
+    sameQuery = {"query": "최근 섹터"}
+    differentQuery = {"query": "다른 섹터"}
     provider = _ScriptedProvider(
         [
-            ProviderTurn(
-                content="", toolCalls=[ToolCall(id="t1", name="WebSearch", args={"query": "최근 섹터"})], raw=None
-            ),
-            ProviderTurn(
-                content="", toolCalls=[ToolCall(id="t2", name="WebSearch", args={"query": "한국 섹터"})], raw=None
-            ),
-            # 3 회째 — failure_streak 임계 도달 → blocked. agent 가 즉시 차단 응답 반환.
-            ProviderTurn(
-                content="", toolCalls=[ToolCall(id="t3", name="WebSearch", args={"query": "섹터 트렌드"})], raw=None
-            ),
-            # 차단 후 LLM 이 답변 생성.
+            ProviderTurn(content="", toolCalls=[ToolCall(id="t1", name="WebSearch", args=sameQuery)], raw=None),
+            ProviderTurn(content="", toolCalls=[ToolCall(id="t2", name="WebSearch", args=sameQuery)], raw=None),
+            # 3 회째 — 같은 args 임계 도달 → blocked. executeTool 호출 X.
+            ProviderTurn(content="", toolCalls=[ToolCall(id="t3", name="WebSearch", args=sameQuery)], raw=None),
+            # 4 회째 — 다른 args → 도구 자체는 안 막혀서 실행됨 (다시 fail 하지만 streak 0 부터).
+            ProviderTurn(content="", toolCalls=[ToolCall(id="t4", name="WebSearch", args=differentQuery)], raw=None),
+            # 차단 후 답변 생성.
             ProviderTurn(content="외부 검색이 어려워 내부 데이터로 답변합니다 ...", toolCalls=[], raw=None),
         ]
     )
 
     events = _collect(runAgent("최근 섹터", provider=provider, toolNames=("WebSearch",)))
 
-    # 실제 executeTool 호출은 2 회 (3 회째는 차단)
-    assert call_count["WebSearch"] == 2, f"3 회째는 차단돼야 — actual {call_count}"
-    # tool_result 는 3 회 emit (2 회 실제 + 1 회 차단됨)
+    # 실제 executeTool 호출은 2 회 (sameQuery 1 회 fresh fail + differentQuery 1 회 fresh fail).
+    # t2 sameQuery 는 cache hit (1 회), t3 sameQuery 는 cache_hit_count 임계 (2) 도달 → 차단.
+    # t4 differentQuery 는 cache 없어 fresh 실행 — 도구 자체는 안 막힘 (회귀 가드 핵심).
+    assert call_count["WebSearch"] == 2, f"cache 후 t3 차단되어야 — actual {call_count}"
     results = _tool_results(events)
-    assert len(results) == 3
-    assert results[0]["status"] == "error"
-    assert results[1]["status"] == "error"
-    assert results[2]["status"] == "error"
-    assert "tool_blocked_after_repeated_failures" in str(results[2].get("error") or "")
-    # 최종 chunk text 가 LLM 답변
+    assert len(results) == 4
+    assert results[0]["status"] == "error"  # fresh fail
+    # t2 cached (직전 fail 그대로) — error 노출 + cached=True
+    assert results[1].get("cached") is True
+    # t3 cache_hit_count 임계 도달 → 차단
+    assert "duplicate_cache_call_blocked" in str(results[2].get("error") or "")
+    # t4 다른 args — fresh 시도 가능 (도구 단위 차단 0, 회귀 가드 핵심)
+    assert results[3]["status"] == "error"
+    assert "tool_blocked_after_repeated_failures" not in str(results[3].get("error") or "")
+    assert "duplicate_cache_call_blocked" not in str(results[3].get("error") or "")
     text = "".join(e.data.get("text", "") for e in events if e.kind == "chunk")
     assert "외부 검색이 어려워" in text
 

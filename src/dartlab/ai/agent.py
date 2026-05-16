@@ -95,11 +95,12 @@ def runAgent(
     refs: list[dict[str, Any]] = []
     artifacts: list[dict[str, Any]] = []
     text_emitted = ""
-    # 같은 도구 + 같은 error 코드 누적 카운트. 임계 도달 시 도구 호출 차단 +
-    # 다음 LLM turn 에 시스템 메시지로 "이 도구 그만 시도하고 답변 작성하라" 신호.
-    # max_iterations 까지 무의미 retry 하다 답변 못 만드는 회귀 방지.
-    failure_streak: dict[tuple[str, str], int] = {}
-    blocked_tools: set[str] = set()
+    # 실패 streak — 같은 (도구, error code, args) 가 임계 회 누적되면 그 *args 만* 차단.
+    # 과거 (도구, error) 단위 차단은 한 호출의 invalid args 때문에 다른 valid args 도 막혔던
+    # 회귀 (2026-05-17): EngineCall("macro.rates") → unknown_api_ref → EngineCall("gather.macro") →
+    # unknown_api_ref → EngineCall("macro") (valid) 차단. 도구 전체 막지 말고 args 만.
+    failure_streak: dict[tuple[str, str, str], int] = {}
+    blocked_calls: set[tuple[str, str]] = set()  # (name, argsHash)
     _FAILURE_STREAK_LIMIT = 2
     # 동일 (name, args) 호출 결과 캐시 — LLM 이 같은 도구·인자를 반복하면 재실행하지 않고
     # cached 결과 즉시 반환 + LLM 메시지에 "이미 호출됐음, 다시 부르지 마라" 명시.
@@ -172,13 +173,13 @@ def runAgent(
             fresh_read: list[tuple[Any, tuple[str, str]]] = []
             fresh_write: list[tuple[Any, tuple[str, str]]] = []
             for tc in turn.toolCalls:
-                if tc.name in blocked_tools:
-                    yield from _emitBlocked(tc, messages)
-                    continue
                 cache_key = (
                     tc.name,
                     json.dumps(tc.args or {}, ensure_ascii=False, sort_keys=True, default=str),
                 )
+                if cache_key in blocked_calls:
+                    yield from _emitBlocked(tc, messages)
+                    continue
                 cached = call_cache.get(cache_key)
                 if cached is not None:
                     cache_hit_count[cache_key] = cache_hit_count.get(cache_key, 0) + 1
@@ -215,11 +216,12 @@ def runAgent(
                         call_cache[cache_key] = resultDict
                         yield from _finalizeResult(
                             tc,
+                            cache_key,
                             resultDict,
                             refs,
                             artifacts,
                             failure_streak,
-                            blocked_tools,
+                            blocked_calls,
                             messages,
                             failureStreakLimit=_FAILURE_STREAK_LIMIT,
                         )
@@ -244,11 +246,12 @@ def runAgent(
                 call_cache[cache_key] = resultDict
                 yield from _finalizeResult(
                     tc,
+                    cache_key,
                     resultDict,
                     refs,
                     artifacts,
                     failure_streak,
-                    blocked_tools,
+                    blocked_calls,
                     messages,
                     failureStreakLimit=_FAILURE_STREAK_LIMIT,
                 )
@@ -411,11 +414,12 @@ def _emitCached(
 
 def _finalizeResult(
     tc: Any,
+    cacheKey: tuple[str, str],
     resultDict: dict[str, Any],
     refs: list[dict[str, Any]],
     artifacts: list[dict[str, Any]],
-    failureStreak: dict[tuple[str, str], int],
-    blockedTools: set[str],
+    failureStreak: dict[tuple[str, str, str], int],
+    blockedCalls: set[tuple[str, str]],
     messages: list[dict[str, Any]],
     failureStreakLimit: int,
 ) -> Iterator[TraceEvent]:
@@ -423,15 +427,20 @@ def _finalizeResult(
 
     메인 thread 에서만 호출 (read-only fan-out 의 as_completed 콜백 포함 — fut.result() 후 메인 generator
     가 본 함수 호출). thread 안에서는 호출 금지 — 공유 state mutation 있음.
+
+    실패 streak partition: (name, error_code, argsHash) — 같은 도구의 valid 호출까지 차단되는
+    회귀 (2026-05-17) 방지. blockedCalls 도 (name, argsHash) 단위로 — 도구 자체는 풀어둠.
     """
+    argsHash = cacheKey[1]
     if not resultDict.get("ok"):
         err_key = str(resultDict.get("error") or "unknown")
-        streak_key = (tc.name, err_key)
+        streak_key = (tc.name, err_key, argsHash)
         failureStreak[streak_key] = failureStreak.get(streak_key, 0) + 1
         if failureStreak[streak_key] >= failureStreakLimit:
-            blockedTools.add(tc.name)
+            blockedCalls.add(cacheKey)
     else:
-        for k in [k for k in failureStreak if k[0] == tc.name]:
+        # 같은 도구 + 같은 args 성공 → 그 args 의 모든 error streak 리셋.
+        for k in [k for k in failureStreak if k[0] == tc.name and k[2] == argsHash]:
             failureStreak.pop(k, None)
     tool_refs = list(resultDict.get("refs") or [])
     refs.extend(tool_refs)
