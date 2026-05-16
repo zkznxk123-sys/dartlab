@@ -213,33 +213,52 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 
 **ROI 표적**: `typing.Any` 시그니처는 약함 (raise 안 함만 검증). 구체 타입 (`int`, `str`, `Decimal`) 인자가 ROI 높음.
 
-### Track 5 — Mutation testing (mutmut) — ★★★ **도입 예정 (2026-Q3)**
+### Track 5 — Mutation testing (mutmut) — ★★★★ **도입 완료 (Linux CI)**
 
 "테스트가 통과한다" 가 아니라 "테스트가 깨진 코드를 잡는다" 를 측정.
 
 | 항목 | 위치 |
 |---|---|
-| 설정 | `pyproject.toml [tool.mutmut]` (대상 = `src/dartlab/core/{naming,formatting,utils}`) |
-| 실행 | `uv run mutmut run` (전체 1-2 시간) |
-| 결과 | `.mutmut-cache` + `mutmut results` (생존 mutant 목록) |
-| 목표 | mutation score ≥ 80% (잘하는 라이브러리 수준) |
+| 설정 | `pyproject.toml [tool.mutmut]` (대상 = `src/dartlab/core/{naming,formatting,cache}`) |
+| 실 실행 | **CI nightly `mutation-testing` job** (Linux ubuntu-latest) |
+| Oracle 테스트 | `tests/core/test_formatting.py` (53 종 — oracle + property + metamorphic) |
+| 결과 artifact | CI nightly `mutation-results` (mutation-results.txt + mutants/) — 30 일 보관 |
+| 목표 | mutation score ≥ 80% |
+
+⚠ **Windows 미지원** — mutmut 3.x 는 Linux/WSL only (mutmut [issue #397](https://github.com/boxed/mutmut/issues/397)). 본 PC 에서는 인프라 + oracle 만 검증. 실 sweep 은 CI nightly 가 담당.
 
 **부분 적용 정책**: Polars/numpy native 호출 비중이 큰 모듈은 mutant 가 의미 없음 (예: `analysis/`, `quant/`). `core/` pure 함수 한정.
 
-**언제 실행**: 주간 cron + `core/` 변경 PR. 생존 mutant 발견 시 oracle test 추가.
+**언제 실행**: CI nightly 자동 (UTC 15:00 = KST 00:00) + `core/` 변경 PR 의 운영자 트리거 (workflow_dispatch). 생존 mutant 발견 시 oracle test 추가.
 
-### Track 6 — Test 강제 게이트 (CI fail when src/ adds without tests/) — ★★★ **도입 예정 (2026-Q3)**
+### Track 6 — Test 강제 게이트 (CI fail when src/ adds without tests/) — ★★★★ **도입 완료 (warning-only)**
 
 | 항목 | 위치 |
 |---|---|
 | 게이트 스크립트 | `scripts/audit/testCoverageGate.py` |
-| CI 호출 | `.github/workflows/ci-fast.yml` job `test-coverage-gate` |
-| 룰 | PR diff 에서 `src/dartlab/**/*.py` 의 새 함수 (def) 추가 → `tests/**/test_*.py` 에 해당 함수 import 또는 참조 존재해야 함 |
-| 예외 | `# nocover`, `_private`, abstract method, Protocol method, `cli/main.py` 진입점 |
+| Baseline 동결 | `scripts/audit/_baselines/testCoverage.json` — **1097 / 3134 (35%) 부채** |
+| CI 호출 | `.github/workflows/ci-fast.yml` job `test-coverage-gate` (`continue-on-error: true`) |
+| Self-test | `tests/audit/test_testCoverageGate.py` — 12 종 |
+| 룰 | PR diff 에서 `src/dartlab/**/*.py` 의 새 공개 함수 (def, non-private) 추가 → `tests/**/test_*.py` 에 해당 함수명 등장해야 함 (substring 휴리스틱) |
+| 예외 | `_private`, abstract method (ellipsis 본문), `@abstractmethod`, `@overload`, `__init__.py`, `cli/main.py` 진입점, `server/api/`, `providers/*/openapi/`, `viz/charts/`, `mcp/` |
 
-**부드러운 도입**: 처음 1 개월 warning-only → 통계 보고 후 fail 전환.
+**Baseline 정책**: 본 PR 시점 1097 누락은 부채 ledger 로 동결 (`_baselines/testCoverage.json`). 향후 PR 은 *신규 누락만 fail 대상*. 부채 quota 는 [memory/baseline_quota.md](C:/Users/MSI/.claude/projects/C--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/baseline_quota.md) 분기 정책 따름.
 
-### Track 7 — Record-Replay (VCR) — ★★★ **도입 예정 (2026-Q3)**
+**부드러운 도입 단계**:
+1. **Phase 1 (현재, 2026-Q2)** — `continue-on-error: true` warning-only. PR diff 보고만, 머지 차단 X.
+2. **Phase 2 (2026-Q3)** — `--fail-on-missing` 추가, `continue-on-error` 제거. 신규 누락 PR 머지 차단.
+3. **Phase 3 (2026-Q4)** — baseline 부채 quota 감소 (분기당 10% 씩 감축) 추가 트랙.
+
+**갱신 절차**:
+```powershell
+# baseline 재측정 (분기별 quota 측정)
+uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json | Out-File -Encoding utf8 scripts/audit/_baselines/testCoverage.json
+
+# diff 검토 후 commit
+git diff scripts/audit/_baselines/testCoverage.json
+```
+
+### Track 7 — Record-Replay (VCR) — ★★★ **인프라 도입 완료 (카세트 record 운영자 트리거)**
 
 | 항목 | 위치 |
 |---|---|
