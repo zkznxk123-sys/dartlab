@@ -35,16 +35,69 @@ def interpretGoldDrivers(
     dxyChangePct: float,
     vix: float,
 ) -> GoldDrivers:
-    """금 가격의 3요인 분해 해석.
+    """금 가격 3 요인 분해 — 실질금리 + 달러 + 안전수요 (VIX).
+
+    Capabilities:
+        금 가격 변동의 3 가지 학술적 드라이버 분해: (1) 실질금리 (역상관 -
+        DFII10), (2) 달러 강세 (역상관 - DXY), (3) 안전수요 (정상관 - VIX).
+        각 효과를 정량 추정 + 잔차로 "기타 (geopolitical/central bank)" 추적.
 
     Args:
-        gold_yoy: 금 YoY 변화율 (%)
-        real_rate_change: 실질금리(DFII10) 변화 (%p, 양수=상승)
-        dxy_change_pct: 달러인덱스 변화율 (%, 양수=달러강세)
-        vix: VIX 수준
+        goldYoy: 금 YoY 변화율 (%).
+        realRateChange: 실질금리 (DFII10) 변화 (%p, 양수=상승).
+        dxyChangePct: 달러 인덱스 변화율 (%, 양수=달러강세).
+        vix: VIX 수준 (panic 시 안전수요 증가).
 
     Returns:
-        GoldDrivers
+        GoldDrivers dataclass:
+            - ``goldYoy`` (float): 입력 echo
+            - ``realRateEffect``/``dollarEffect``/``safeHavenEffect`` (str):
+              ``"상승압력"``/``"하락압력"``/``"중립"``
+            - ``dominant`` (str): 지배 요인 ("실질금리"/"달러"/"안전자산"/"기타")
+            - ``description`` (str): 한국어 해석
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = interpretGoldDrivers(goldYoy=18, realRateChange=-0.8,
+        ...                          dxyChangePct=-3, vix=22)
+        >>> r.dominant, r.realRateEffect
+        ('실질금리', '상승압력')
+
+    Guide:
+        실질금리 < -0.3%p (3 개월) → 금 상승압력 (carry cost 감소). 달러 < -2%
+        (3 개월) → 금 상승 (USD 가격 inverse). VIX > 25 → 안전수요 활성.
+        3 요인 합산해 다수결로 dominant 선정. 모두 중립이면 "기타".
+
+    SeeAlso:
+        - ``classifyVixRegime``: VIX 4 단계
+        - ``copperGoldRatio``: 구리/금 비율 (위험선호)
+        - ``classifyCycle``: 사이클 종합
+
+    Requires:
+        4 입력 모두 필요 (옵션 아님).
+
+    AIContext:
+        dominant + 3 효과 모두 인용 (단일 요인만 인용 금지). 학술적 회귀
+        실험에서 실질금리 -0.6, 달러 -0.4, VIX +0.2 비중. KR 입력 시 BOK
+        실질금리 + WSJ 달러 인덱스 사용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - VIX 만 보고 금 전망 단정 — 실질금리 + 달러 함께 확인.
+            - YoY 1 개월 변화로 추세 단정 — 본 함수는 단일 시점 분해 (1 분기
+              3 개월 변화 기준).
+        OutputSchema:
+            GoldDrivers ``{goldYoy, realRateEffect, dollarEffect,
+            safeHavenEffect, dominant, description}``.
+        Prerequisites:
+            금 가격 + 실질금리 (DFII10) + DXY + VIX 시계열.
+        Freshness:
+            금 가격 일, 실질금리 일, DXY 일, VIX 일.
+        Dataflow:
+            3 요인 룰 → 상승/하락/중립 라벨 → 다수결 dominant → 한국어 합성.
+        TargetMarkets: Global (FRED + Yahoo Finance + DFII10).
     """
     # 실질금리 역상관: 실질금리 하락 → 금 상승압력
     if realRateChange < -0.3:
