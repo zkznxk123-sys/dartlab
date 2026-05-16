@@ -169,22 +169,67 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
 
 @memoizedCalc
 def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """이자보상배율 시계열 -- 이자를 갚을 능력이 있는가.
+    """이자보상배율 시계열 — 영업이익으로 이자를 몇 배 커버하는가.
 
-    IS 영업이익 / 이자비용으로 산출.
-    이자비용 소스 우선순위: IS 이자비용 → CF interest_paid → IS 금융비용.
-    금융비용은 외환손실·파생상품 등 비이자 항목 포함하여 과대계상 위험.
+    Capabilities:
+        영업이익 / 이자비용 시계열 + 이자비용 소스 추적 (IS 이자비용 → CF
+        interest_paid → IS 금융비용 우선순위). 금융비용은 외환손실·파생상품
+        등 비이자 항목 포함하여 과대계상 위험이 있어 폴백으로만 사용.
+        Damodaran 의 신용등급 매핑 표준 입력.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            operatingIncome : float — 영업이익 (원)
-            operatingIncomeYoy : float — 영업이익 전년비 (%)
-            interestExpense : float — 이자비용 (원)
-            interestExpenseSource : str — 이자비용 소스 ("이자비용"|"CF이자지급"|"금융비용")
-            interestCoverage : float — 이자보상배율 (배)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 5 키 (period + operatingIncome
+              + operatingIncomeYoy + interestExpense + interestExpenseSource
+              + interestCoverage).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCoverageTrend(Company("005930"))
+        >>> r["history"][0]["interestCoverage"]
+        18.5  # 이자 18.5 배 커버 — AA 등급 매핑
+
+    Guide:
+        Damodaran 신용등급 매핑 (대기업):
+        - IC > 12.5: AAA / IC 9.5~12.5: AA / IC 7.5~9.5: A+
+        - IC 6~7.5: A / IC 4.5~6: A-/BBB+ / IC 3~4.5: BBB
+        - IC 1.5~3: BB / IC < 1: 부도 위험.
+        IC < 1 가 2~3 년 연속이면 채무 재조정 신호.
+
+    SeeAlso:
+        - ``calcLeverageTrend``: 부채/자본 구조
+        - ``calcDistressScore``: Altman Z (IC 직접 변수 아님, EBIT/TA)
+        - ``credit.scoring.metrics.calcAllMetrics``: 7 축 종합 진단
+
+    Requires:
+        IS (영업이익, 이자비용 또는 금융비용) + CF (interest_paid 폴백).
+
+    AIContext:
+        IC 절대값 + source + YoY 함께 인용. source = "금융비용" 일 때는
+        과대계상 가능성 명시. 순현금 회사 (netDebt < 0) 는 IC 낮아도
+        문제 없음 — calcLeverageTrend 함께 확인.
+
+    LLM Specifications:
+        AntiPatterns:
+            - source 무시하고 IC 인용 — "금융비용" 폴백은 외환손실 포함
+              과대계상.
+            - 순현금 회사에 IC < 3 → "이자 부담" 단정 — netDebt 함께 확인.
+        OutputSchema:
+            ``{history: list[dict 5키]}``.
+        Prerequisites:
+            IS 영업이익 + 이자비용/금융비용 또는 CF interest_paid.
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            IS → 영업이익 + (이자비용 또는 금융비용) + CF (interest_paid
+            폴백) → 우선순위 분기 → IC = 영업이익 / |이자비용|.
+        TargetMarkets: KR (DART), US (EDGAR — Interest Expense 표준).
     """
     isResult = company.select("IS", ["영업이익", "금융비용", "이자비용"])
     parsed = toDictBySnakeId(isResult)
