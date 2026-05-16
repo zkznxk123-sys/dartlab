@@ -59,10 +59,63 @@ def scoreMetric(
 
 
 def weightedScore(axes: list[dict]) -> float:
-    """5축 가중평균 종합 점수.
+    """7 축 결과 list → 가중평균 종합 신용 위험 점수.
 
-    axes: [{"name": str, "score": float|None, "weight": float}, ...]
-    score가 None인 축은 제외하고 나머지 가중치를 재분배.
+    Capabilities:
+        각 축의 ``score`` 와 ``weight`` 를 받아 None 축 제외 후 나머지로
+        가중치 재분배하여 0~100 점 (0=최우량, 100=최위험) 점수 산출.
+        credit/engine 의 최종 등급 산출에 사용.
+
+    Args:
+        axes: ``[{"name": str, "score": float|None, "weight": float}, ...]``
+            형태 리스트. score=None 인 축은 가중치 재분배로 제외.
+
+    Returns:
+        float: 0~100 점 가중평균. 모든 score=None 또는 totalWeight=0 시
+            중립값 ``50.0``.
+
+    Raises:
+        없음. score/weight 가 dict 에 없으면 KeyError 가능.
+
+    Example:
+        >>> axes = [{"name": "repayment", "score": 30, "weight": 0.3},
+        ...         {"name": "leverage", "score": 25, "weight": 0.2}]
+        >>> weightedScore(axes)
+        28.0
+
+    Guide:
+        7 축 weights 표준 (engine 설정): repayment 0.30 + leverage 0.20 +
+        liquidity 0.10 + cashFlow 0.15 + businessStability 0.10 +
+        reliability 0.10 + disclosureRisk 0.05. 결과 점수는 ``mapTo20Grade``
+        로 dCR 등급 (AAA ~ D) 변환.
+
+    SeeAlso:
+        - ``dartlab.synth.creditGradeTable.mapTo20Grade``: 점수 → 등급
+        - ``axisScore``: 개별 축 점수 산출
+        - ``creditOutlook``: 점수 시계열 → 전망
+
+    Requires:
+        없음 (순수 함수).
+
+    AIContext:
+        score=None 축이 절반 이상이면 결과 신뢰도 낮음 — 호출자는 valid 축
+        개수를 함께 확인. 50.0 fallback 은 데이터 부족 신호이지 실제 중립
+        등급이 아니다.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 결과 점수만 단독 인용 금지. 등급 + outlook + valid 축 개수도 함께.
+            - axes dict 의 weight 변경하면서 합계 1.0 보존 가정 금지 — 본 함수가
+              내부에서 재분배.
+        OutputSchema:
+            float ∈ [0, 100]. 0 = 최우량 (AAA), 100 = 최위험 (D).
+        Prerequisites:
+            axes list 의 각 dict 가 ``score``, ``weight`` 키 보유.
+        Freshness:
+            stateless — 입력 axes 의 freshness 에 따름.
+        Dataflow:
+            axes → (score, weight) pair list (None 제외) → totalWeight → 가중합/totalWeight.
+        TargetMarkets: KR + Global. 등급표 (mapTo20Grade) 가 시장별 분기.
     """
     valid = [(a["score"], a["weight"]) for a in axes if a.get("score") is not None]
     if not valid:

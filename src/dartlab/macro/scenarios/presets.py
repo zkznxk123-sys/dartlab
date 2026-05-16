@@ -475,34 +475,64 @@ TYPED_SCENARIOS: dict[str, dict] = {
 
 
 def getScenario(name: str, *, severity: str | None = None, market: str = "US") -> dict | None:
-    """시나리오 이름으로 프리셋 조회.
+    """시나리오 이름 → 프리셋 dict (역사/DFAST/현대/구조/유형/KR 6 카탈로그 부분 매칭).
 
-    역사적 재현 → DFAST → 현대적 리스크 → 구조적 → 유형별 → 한국 특화
-    → 복합(+ 구분) 순으로 탐색하며, 부분 문자열 매칭으로 찾는다.
+    Capabilities:
+        부분 문자열 매칭으로 6 카탈로그 (HISTORICAL/DFAST/MODERN_RISK/STRUCTURAL/
+        TYPED/KR_SCENARIOS) + 복합 시나리오 ("A + B" 형태) 를 탐색하여 매크로
+        override dict 를 반환. macro 시나리오 분석의 단일 진입점.
 
-    Parameters
-    ----------
-    name : str
-        시나리오 이름 (한글/영문). 부분 매칭 가능.
-        복합 시나리오는 ``"금리 충격 + 유가 충격"`` 형태.
-    severity : str | None
-        심각도. ``"mild"`` / ``"moderate"`` / ``"severe"`` / ``"extreme"``.
-        유형별·구조적 시나리오에서 사용. 미지정 시 ``"moderate"``.
-    market : str
-        시장 구분. ``"US"`` | ``"KR"``.
-        ``"KR"`` 이면 역사적 재현의 ``kr_overrides`` 병합.
+    Args:
+        name: 시나리오 이름 (한글/영문). 부분 매칭. 복합은 ``"금리 충격 + 유가 충격"``.
+        severity: ``"mild"``/``"moderate"``/``"severe"``/``"extreme"``. 유형별/
+            구조적 시나리오에 적용. 기본 ``"moderate"``.
+        market: ``"US"``/``"KR"``. ``"KR"`` 이면 역사적 재현의 ``kr_overrides`` 병합.
 
-    Returns
-    -------
-    dict | None
-        매칭 시나리오가 없으면 ``None``. 있으면:
+    Returns:
+        dict | None: 매칭 시나리오 dict (description/type/severity/transmission/
+            reference/overrides 키). 매칭 실패 시 ``None``.
 
-        description : str — 시나리오 설명
-        type : str — 충격 유형 (신용 충격, 금리 충격 등)
-        severity : str — 심각도
-        transmission : str — 전파 경로
-        reference : str — 참조 문헌/사건
-        overrides : dict — 매크로 지표 override 값
+    Raises:
+        없음.
+
+    Example:
+        >>> getScenario("2008 GFC", market="KR")
+        {'description': '...', 'overrides': {'gdpGrowth': [-5.1, ...], ...}}
+        >>> getScenario("금리 충격 + 유가 충격", severity="severe")
+
+    Guide:
+        탐색 순서: 역사적 재현 → DFAST → 현대 리스크 → 구조적 → 유형별 →
+        KR → 복합 (마지막). 가장 먼저 매칭된 시나리오 반환. 호출자는 결과
+        dict 의 ``overrides`` 를 macro/summary 의 ``overrides`` 인자로 전달.
+
+    SeeAlso:
+        - ``listAllScenarios``: 사용 가능한 시나리오 목록
+        - ``dartlab.macro.summary.analyzeSummary``: overrides 소비
+
+    Requires:
+        없음 (순수 함수).
+
+    AIContext:
+        시나리오 이름이 모호하면 listAllScenarios 로 카탈로그 확인 권장.
+        market="KR" 호출 시 KR 특화 overrides 가 자동 병합되므로 미국 시나리오에서도
+        한국 환율/금리 차이가 반영됨.
+
+    LLM Specifications:
+        AntiPatterns:
+            - severity 추측 금지 — 4 옵션만 (mild/moderate/severe/extreme).
+            - 매칭 실패 시 None 받고 그대로 호출자에 전파 금지 — 호출자가
+              fallback (baseline) 사용하도록 분기 필요.
+        OutputSchema:
+            ``{description: str, type: str, severity: str, transmission: str,
+            reference: str, overrides: dict}`` 또는 ``None``.
+        Prerequisites:
+            없음. 정적 카탈로그 룩업.
+        Freshness:
+            stateless — 카탈로그 수정 시 dartlab 버전 업그레이드 필요.
+        Dataflow:
+            name → 6 카탈로그 순차 탐색 → 부분 매칭 → 복합 시나리오 분해 →
+            override dict 합성.
+        TargetMarkets: US (DFAST/FRED), KR (KR_SCENARIOS + kr_overrides 병합).
     """
     # 1. 역사적 재현
     for key, val in HISTORICAL_SCENARIOS.items():

@@ -53,13 +53,72 @@ __all_helpers__ = [
 
 @_memoized_calc
 def calcTechnicalVerdict(company) -> dict | None:
-    """기술적 종합 판단 — 강세/중립/약세 + 주요 지표.
+    """Company OHLCV → 기술적 종합 판단 + 25 지표 (강세/중립/약세).
+
+    Capabilities:
+        Company 의 OHLCV (gather("price") 자동 수집) 를 ``technicalVerdict`` 에
+        통과시켜 RSI/ADX/MACD/볼린저/카테고리 + 시장 대비 베타·상대강도까지
+        단일 dict 로 반환. quant 시장 분석의 핵심 진입점.
 
     Args:
-        company: Company 객체.
+        company: Company 객체. ``stockCode``, ``currency``, ``benchmark``
+            (선택), ``benchmarkMode`` (선택) 속성 사용.
 
     Returns:
-        dict — verdict, score, rsi, adx, aboveSma20, aboveSma60, bbPosition, signals.
+        dict | None: 다음 키 (OHLCV 30 봉 미만 시 ``None``):
+            - ``verdict`` (str): ``"강세"``/``"중립"``/``"약세"``
+            - ``score`` (int): -4 ~ +4
+            - ``rsi`` (float): 최신 RSI(14)
+            - ``adx`` (float|None): 최신 ADX(14)
+            - ``aboveSma20``/``aboveSma60`` (bool|None): MA 위치
+            - ``bbPosition`` (float|None): 볼린저 %B (0~100)
+            - ``signals`` (dict): goldenCross/rsiSignal/macdSignal 최근 20봉 누적
+            - ``relativeStrength`` (float|None): 종목 RSI - 시장 RSI
+            - ``beta`` (dict|None): OLS β + α + R² + CAPM
+            - ``categories`` (dict): trend 카테고리 + indicators
+            - ``benchmarkUsed`` (dict|None): 사용된 벤치마크 메타
+
+    Raises:
+        없음 — 모든 예외 내부 catch → ``None``.
+
+    Example:
+        >>> from dartlab import Company
+        >>> r = calcTechnicalVerdict(Company("005930"))
+        >>> r["verdict"], r["score"]
+        ('강세', 3)
+
+    Guide:
+        Company-bound 호출이 표준 (``c.quant("판단")``). 벤치마크 자동 선택:
+        KR 종목 → KOSPI, US 종목 → S&P 500. ``benchmark`` 명시 시 override.
+
+    SeeAlso:
+        - ``technicalVerdict``: 본 함수의 raw OHLCV 버전 (analyzer.py)
+        - ``calcMarketBeta``: β 단독 계산
+        - ``calcTechnicalSignals``: 최근 신호만
+
+    Requires:
+        gather("price") 자동 수집 가능 (네트워크). 30 봉 이상.
+
+    AIContext:
+        verdict + score 만 인용 금지 — categories.trend + rsi/adx 도 함께 노출
+        해 근거 투명화. confidence 가 별도 키 없으므로 score 절댓값으로 대체.
+
+    LLM Specifications:
+        AntiPatterns:
+            - OHLCV 30 봉 미만 종목 (신규 상장) 에서 verdict 인용 금지 — None.
+            - benchmark="S&P500" 으로 호출하면서 market 미지정 시 KR 종목이면
+              자동 감지 (market="auto") 가 KR 로 가버려 오작동.
+        OutputSchema:
+            ``{verdict, score, rsi, adx, aboveSma20, aboveSma60, bbPosition,
+            signals, relativeStrength, beta, categories, benchmarkUsed}``.
+        Prerequisites:
+            ``_fetchOhlcv`` 성공 (네트워크) + 30 봉 이상.
+        Freshness:
+            OHLCV cache (T+1). 첫 호출 후 Company._cache 재사용.
+        Dataflow:
+            company → _fetchOhlcv → technicalVerdict (analyzer.py) →
+            dict (verdict/score/카테고리/베타) → memoized.
+        TargetMarkets: KR (Naver), US (Yahoo).
     """
     ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:

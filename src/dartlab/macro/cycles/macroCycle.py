@@ -87,21 +87,71 @@ CYCLE_SECTOR_MAP: dict[str, dict[str, str]] = {
 
 
 def classifyCycle(indicators: dict[str, float | None]) -> CyclePhase:
-    """매크로 지표로 경제 사이클 4국면 판별.
+    """매크로 8 지표 → 경제 사이클 4국면 판별 (가중 투표).
+
+    Capabilities:
+        HY 스프레드 + Term 스프레드 + VIX + 금 YoY + CLI 모멘텀 + CPI/BEI 등
+        8 지표를 가중치로 합산하여 4 국면 (contraction/recovery/expansion/
+        slowdown) 중 하나를 선택. macro/summary 의 cycle 축이 직접 호출.
 
     Args:
-        indicators: 키-값 dict. 지원 키:
-            - hy_spread: 하이일드 스프레드 (bp)
-            - term_spread: 장단기 스프레드 (10Y-2Y, %)
-            - vix: CBOE VIX
-            - gold_yoy: 금 가격 YoY 변화율 (%)
-            - cli_mom: 경기선행지수 전월비 변화
-            - hy_spread_3m_change: HY 스프레드 3개월 변화 (bp)
-            - cpi_yoy: CPI YoY (%)
-            - bei_10y: 10년 BEI 기대인플레이션 (%)
+        indicators: 매크로 지표 dict. 지원 키:
+            - ``hy_spread``: HY 스프레드 (bp)
+            - ``term_spread``: 10Y-2Y 스프레드 (%)
+            - ``vix``: CBOE VIX
+            - ``gold_yoy``: 금 YoY (%)
+            - ``cli_mom``: 경기선행지수 전월비
+            - ``hy_spread_3m_change``: HY 3M 변화 (bp)
+            - ``cpi_yoy``: CPI YoY (%)
+            - ``bei_10y``: 10Y BEI (%)
+            모든 키 옵션. None 값은 해당 지표 무시.
 
     Returns:
-        CyclePhase 판별 결과
+        CyclePhase dataclass:
+            - ``phase`` (str): ``"contraction"``/``"recovery"``/``"expansion"``/``"slowdown"``
+            - ``phaseLabel`` (str): 한국어
+            - ``confidence`` (str): ``"high"``/``"medium"``/``"low"`` (top - 2nd 차이)
+            - ``signals`` (list[str]): 판정 근거 라인 리스트
+            - ``scores`` (dict[str, int]): 4 국면 누적 점수
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = classifyCycle({"hy_spread": 450, "term_spread": -0.3, "vix": 28})
+        >>> r.phase
+        'slowdown'
+
+    Guide:
+        4 국면 정의: contraction (침체, HY 급등+VIX>30), recovery (회복, HY
+        하락+CLI 반등), expansion (확장, HY 안정+CLI 양수), slowdown (둔화,
+        Term spread 역전+CPI 가속). 점수 모두 0 이면 ``"expansion"`` 기본값.
+
+    SeeAlso:
+        - ``interpretAssets``: 사이클 → 자산 추천
+        - ``CYCLE_SECTOR_MAP``: 사이클별 섹터 전략
+
+    Requires:
+        없음 (순수 함수).
+
+    AIContext:
+        confidence="low" 결과는 전환기 가능성 — 동일 indicators 1~2 분기 후
+        재호출 권장. signals 리스트는 라벨 인용 시 함께 노출하여 근거 투명화.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 지표만으로 phase 추론 금지. 본 함수는 8 지표 가중 합산.
+            - signals 리스트가 비어 있을 때 phase 신뢰 금지 — 입력 부족 신호.
+        OutputSchema:
+            CyclePhase ``{phase, phaseLabel, confidence, signals, scores}``.
+        Prerequisites:
+            최소 1 개 지표 값 (None 아님). 모두 None 이면 기본 expansion.
+        Freshness:
+            지표별 갱신 주기 (HY/VIX 일, CLI 월, CPI/BEI 월).
+        Dataflow:
+            지표별 룰 → scores dict 누적 → max → phase + confidence 계산
+            (top - 2nd 차이로).
+        TargetMarkets: US (FRED), KR (BOK ECOS).
     """
     signals: list[str] = []
     scores = {"contraction": 0, "recovery": 0, "expansion": 0, "slowdown": 0}
