@@ -188,7 +188,7 @@ jobs:
         env:
           GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref || '' }}
         run: |
-          python -X utf8 .github/scripts/planRealdata.py > /tmp/tests.json
+          python -X utf8 .github/scripts/ops/planRealdata.py > /tmp/tests.json
           echo "plan 결과:"
           cat /tmp/tests.json
           echo

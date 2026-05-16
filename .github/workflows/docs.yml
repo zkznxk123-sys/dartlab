@@ -8,7 +8,7 @@ on:
       - 'src/dartlab/skills/**'
       - 'blog/**'
       - '.github/workflows/docs.yml'
-      - '.github/scripts/buildSkillMarket.py'
+      - '.github/scripts/search/buildSkillMarket.py'
   discussion:
     types: [created, edited, answered, unanswered, labeled, unlabeled]
   discussion_comment:
@@ -51,7 +51,7 @@ jobs:
       # HF SSoT: map JSON 은 git 에 없음 (.gitignore). 빌드 전 HF 에서 내려받아
       # landing/static/map/ 에 풀어둠 → SvelteKit static adapter 가 build/ 에 복사.
       - name: Seed industry map from HF
-        run: uv run python -X utf8 .github/scripts/seedFromHf.py --category industryMap
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category industryMap
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           DARTLAB_DATA_DIR: ${{ github.workspace }}
@@ -71,7 +71,7 @@ jobs:
           [ "$count" -ge 2000 ] || { echo "ERROR: map seed 부족 ($count)"; exit 1; }
 
       - name: Build Skill Market index
-        run: uv run python -X utf8 .github/scripts/buildSkillMarket.py --out landing/static/skills/market --category "Skill Market" --write-comment
+        run: uv run python -X utf8 .github/scripts/search/buildSkillMarket.py --out landing/static/skills/market --category "Skill Market" --write-comment
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DARTLAB_MARKET_CURATORS: ${{ github.repository_owner }}

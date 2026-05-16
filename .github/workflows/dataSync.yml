@@ -100,7 +100,7 @@ jobs:
       # HF seed: GHA cache 가 cold/stale 해도 부족 parquet 을 HF 에서 채움 (idempotent).
       # cold start death spiral 차단 — HF 가 source of truth, GHA cache 는 속도 부스터.
       - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/seedFromHf.py --category finance,report,docs
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report,docs
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
@@ -108,7 +108,7 @@ jobs:
         # -u + PYTHONUNBUFFERED=1: stdout 라인 버퍼링 차단 — 90 분 timeout cancel 시
         # 어디서 멈췄는지 실시간 가시화. 이전 cancel run 84 분 동안 stdout 0 줄 =
         # buffered 패턴 (정상 종료 시에만 flush). 진척 진단 불가 사고 차단.
-        run: uv run python -X utf8 -u .github/scripts/syncRecent.py
+        run: uv run python -X utf8 -u .github/scripts/sync/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
@@ -121,7 +121,7 @@ jobs:
         run: |
           if [ -s dist/changed_finance.txt ]; then
             cp dist/changed_finance.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target hf
+            uv run python .github/scripts/sync/uploadData.py --target hf
           fi
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -132,7 +132,7 @@ jobs:
         run: |
           if [ -s dist/changed_report.txt ]; then
             cp dist/changed_report.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target hf
+            uv run python .github/scripts/sync/uploadData.py --target hf
           fi
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -199,12 +199,12 @@ jobs:
 
       # HF seed: cold/stale cache 대비 (idempotent).
       - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/seedFromHf.py --category docs
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category docs
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Sync recent (docs)
-        run: uv run python -X utf8 -u .github/scripts/syncRecent.py
+        run: uv run python -X utf8 -u .github/scripts/sync/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
@@ -217,7 +217,7 @@ jobs:
         run: |
           if [ -s dist/changed_docs.txt ]; then
             cp dist/changed_docs.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target hf
+            uv run python .github/scripts/sync/uploadData.py --target hf
           fi
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -273,7 +273,7 @@ jobs:
           restore-keys: dartlab-data-${{ matrix.category }}-
 
       - name: Full collect (88-quarter diff)
-        run: uv run python .github/scripts/syncData.py
+        run: uv run python .github/scripts/sync/syncData.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           SYNC_CATEGORY: ${{ matrix.category }}
@@ -286,7 +286,7 @@ jobs:
           key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
 
       - name: Upload to HuggingFace
-        run: uv run python .github/scripts/uploadData.py --target hf
+        run: uv run python .github/scripts/sync/uploadData.py --target hf
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           SYNC_CATEGORY: ${{ matrix.category }}

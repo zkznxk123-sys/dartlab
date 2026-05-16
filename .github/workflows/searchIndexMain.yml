@@ -58,6 +58,6 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build content main + upload
-        run: uv run python .github/scripts/buildSearchMain.py
+        run: uv run python .github/scripts/search/buildSearchMain.py
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

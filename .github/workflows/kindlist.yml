@@ -43,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Crawl KRX KIND
-        run: python .github/scripts/updateKindList.py
+        run: python .github/scripts/meta/updateKindList.py
 
       - name: Upload KindList to Release
         if: ${{ !hashFiles('dist/SKIP') }}
@@ -99,7 +99,7 @@ jobs:
       - name: Fetch OpenDART CORPCODE.xml
         run: |
           export DART_API_KEY="${DART_API_KEYS%%,*}"
-          python .github/scripts/updateDartList.py
+          python .github/scripts/meta/updateDartList.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
 

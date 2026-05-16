@@ -77,7 +77,7 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build content delta + upload
-        run: uv run python .github/scripts/buildSearchDelta.py
+        run: uv run python .github/scripts/search/buildSearchDelta.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
