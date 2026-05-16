@@ -688,28 +688,67 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
 
 @memoizedCalc
 def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
-    """McKinsey ROIC Tree — ROIC가 높은/낮은 이유를 원인까지 추적.
+    """McKinsey ROIC Tree → ROIC 분해 (마진 × 회전율 → COGS/SG&A/Tax + WC/Fixed).
 
-    ROIC = Operating Margin × Capital Turnover
-    Operating Margin = 1 - (COGS/Rev) - (SGA/Rev) - Tax Rate
-    Capital Turnover = Revenue / Invested Capital
-      IC = Working Capital (AR+Inv-AP) + Fixed Capital (PPE+Intangible)
+    Capabilities:
+        McKinsey "Valuation" (Koller 2020) 의 ROIC 분해 — ROIC = Margin × Turnover.
+        Margin 은 (COGS/Rev + SG&A/Rev + TaxRate) 로 분해, Turnover 는 WC vs
+        Fixed Capital 로 분해. ROIC 변화의 원인 (마진 vs 회전율) 자동 식별.
+        Penman/Damodaran 의 ROE 분해와 보완.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            roic : float — 투하자본수익률 (%)
-            operatingMargin : float — 영업이익률 (%)
-            capitalTurnover : float — 투하자본회전율 (배)
-            grossMargin : float — 매출총이익률 (%)
-            sgaRatio : float — 판관비율 (%)
-            effectiveTaxRate : float — 유효세율 (%)
-            wcTurnover : float — 운전자본회전율 (배)
-            fixedTurnover : float — 고정자본회전율 (배)
-            marginDriver : str — 마진 변동 주요인 ("cogs"|"sga"|"tax")
-            turnoverDriver : str — 회전율 변동 주요인 ("wc"|"fixed")
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 ROIC tree (period, roic,
+              operatingMargin, capitalTurnover, grossMargin, sgaRatio,
+              effectiveTaxRate, wcTurnover, fixedTurnover, marginDriver,
+              turnoverDriver)
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcRoicTree(Company("005930"))
+        >>> r["history"][0]["roic"], r["history"][0]["marginDriver"]
+        (15, 'cogs')  # ROIC 15%, 변화 주도 = COGS
+
+    Guide:
+        ROIC 임계: > 15% = excellent (cost of capital 10% 가정), 10~15% =
+        good, < 10% = value destroyer. marginDriver 가 "cogs" 인데 매출 증가
+        시기 = 규모 경제, "sga" 우세 = 영업 효율 개선 또는 악화.
+
+    SeeAlso:
+        - ``calcMarginTrend``: 마진 단순 시계열
+        - ``calcReturnTrend``: ROE/ROA/ROIC 시계열
+        - ``calcPenmanDecomposition``: ROE 분해 (RNOA + FLEV × Spread)
+        - Koller, T. (2020) "Valuation: Measuring and Managing"
+
+    Requires:
+        IS 시계열 (매출/매출원가/판관비/세금) + BS (운전자본 + 고정자본) ≥ 2 년.
+
+    AIContext:
+        ROIC > WACC = value creator, < WACC = value destroyer. marginDriver +
+        turnoverDriver 라벨을 사용자에게 노출 — "왜 ROIC 가 변했는지" 직접
+        설명.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ROIC 절대값만 인용 — WACC 와 비교 필수 (calcDFV 의 qualityWACC
+              사용 권장).
+            - 단년도 분해 — 3 년 추세로 marginDriver 의 안정성 확인 필수.
+        OutputSchema:
+            ``{history: list[dict 11키]}``.
+        Prerequisites:
+            IS + BS 시계열 + standardAccounts (매출원가/판관비/세금).
+        Freshness:
+            최신 분기 + 시계열 (5 년 권장).
+        Dataflow:
+            IS → margin 분해 (COGS/SG&A/Tax) + BS → IC = WC + Fixed →
+            Turnover → ROIC = margin × turnover → driver 식별.
+        TargetMarkets: KR (DART), US (EDGAR). 표준 계정 매핑.
     """
     isResult = company.select(
         "IS", ["매출액", "매출원가", "판매비와관리비", "영업이익", "법인세비용", "법인세차감전순이익"]
