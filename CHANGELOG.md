@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+라이브러리 내부 구조 정리와 사용자/LLM 가독성 보강 작업.
+
+### Changed
+
+- 분석·신용·거시·퀀트 엔진의 주요 함수 docstring 을 9 섹션 형식 (사용 시 주의사항 ·
+  반환 스키마 · 사전 조건 · 데이터 흐름 등) 으로 보강했다. IDE 자동완성과 외부
+  LLM tool calling 시점에 호출 맥락을 더 충실히 전달한다.
+- 큰 모듈 일부를 작은 파일로 분리하면서 외부 import path 와 함수 시그니처는 그대로
+  유지했다. 사용자 코드 변경 불필요.
+
+### Fixed
+
+- 일부 모듈 docstring 의 placeholder 잔재 (`TODO 한국어 동작 설명`) 를 의미 있는 한
+  줄로 치환했다. `help()` · IDE hover 출력 가독성 개선.
+
 ## [0.10.1] - 2026-05-14
 
 DART 정기공시 증분 수집과 기본 설치 의존성을 중심으로 한 안정화 릴리스.
