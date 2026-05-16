@@ -23,8 +23,45 @@ def scoreMetric(
 ) -> float | None:
     """단일 지표 → 0-100 위험 점수 (선형 보간).
 
+    Capabilities:
+        thresholdDef 의 breakpoints 와 lower_is_better 플래그로 입력값을 0~100 위험 점수로
+        선형 보간 변환. 범위 밖 값은 양 끝 클램프. credit scorecard 의 기본 매핑 primitive.
+
     thresholdDef: {"lower_is_better": bool, "breakpoints": [(value, score), ...]}
     breakpoints는 값 오름차순 정렬 가정.
+
+    Args:
+        value: 입력 metric 값.
+        thresholdDef: {"lower_is_better": bool, "breakpoints": list[tuple]}.
+
+    Returns:
+        float | None — 0~100 위험 점수. value=None 이면 None.
+
+    Raises:
+        KeyError: thresholdDef 에 ``lower_is_better`` / ``breakpoints`` 키 부재 시.
+
+    Example:
+        >>> scoreMetric(2.5, {"lower_is_better": True, "breakpoints": [(0.0, 0), (5.0, 50)]})
+        25.0
+
+    Guide:
+        breakpoints 는 0 ~ 100 점수 (0=최우량). lower_is_better=True 면 값 ↑ 위험 ↑.
+
+    When:
+        ``calcCreditHistory`` / scorecard 내부에서 각 metric 점수 산출 시.
+
+    How:
+        lower_is_better 반전 → 양 끝 클램프 → 인접 breakpoint 쌍 보간.
+
+    Requires:
+        - thresholdDef 의 breakpoints 오름차순 + 각 (value, score) tuple
+
+    See Also:
+        - ``dartlab.credit.scoring.creditScorecard.weightedScore`` : 7 축 합성
+        - ``dartlab.credit.features.sectorThresholds.getThresholds`` : 기준표 소스
+
+    AIContext:
+        AI 직접 호출 없음 (내부 헬퍼).
     """
     if value is None:
         return None
@@ -94,6 +131,12 @@ def weightedScore(axes: list[dict]) -> float:
         - ``axisScore``: 개별 축 점수 산출
         - ``creditOutlook``: 점수 시계열 → 전망
 
+    When:
+        ``credit.engine.evaluateCompany`` 가 7 축 score 합성 시.
+
+    How:
+        valid (score is not None) 축 추출 → totalWeight 합 → 가중합 / totalWeight.
+
     Requires:
         없음 (순수 함수).
 
@@ -143,7 +186,45 @@ def cashFlowGrade(
 ) -> str:
     """현금흐름등급 eCR-1 ~ eCR-6.
 
+    Capabilities:
+        OCF/매출 + FCF 양수 여부 + OCF/총차입금 (+ 안정성) 입력으로 eCR-1 (최상) ~ eCR-6 (심각)
+        라벨 결정. 한국 신평사 현금흐름창출능력 별도 평가 대응.
+
     한국 신평사 현금흐름창출능력 별도 평가 대응.
+
+    Args:
+        ocfToSales: 영업현금흐름/매출 (%).
+        fcfPositive: FCF 양수 여부.
+        ocfToDebt: 영업현금흐름/총차입금 (%).
+        ocfTrendStable: 시계열 안정성 (optional).
+
+    Returns:
+        str: "eCR-1" ~ "eCR-6" 또는 "eCR-?" (ocfToSales None).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> cashFlowGrade(18.0, True, 35.0)
+        'eCR-1'
+
+    Guide:
+        eCR-1: OCF/매출 > 15% + FCF 양수 + OCF/총차입금 > 30%. eCR-6: OCF/매출 ≤ -5%.
+
+    When:
+        ``calcCashFlowGrade`` 가 기간별로 본 함수 호출.
+
+    How:
+        ocfToSales 임계 분기 → 보조 조건 (FCF / OCF-Debt / trend) → eCR 라벨.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.credit.scoring.calcs.calcCashFlowGrade`` : 본 함수 사용자
+
+    AIContext:
+        AI 답변에 eCR 단독 인용 가능. 회계 grade 와 차이 있으면 "현금/이익 괴리" 단서 권장.
     """
     if ocfToSales is None:
         return "eCR-?"
@@ -178,7 +259,42 @@ def cashFlowGrade(
 def creditOutlook(scoreHistory: list[float]) -> str:
     """5개년 종합점수 추세 → 안정적/긍정적/부정적.
 
+    Capabilities:
+        최신 vs 가장 오래된 점수 차이 (delta) 가 ±5 점 임계를 넘으면 긍정적/부정적, 그 외는 안정적
+        라벨 반환. credit grade 의 outlook 필드 산출 헬퍼.
+
     scoreHistory: 최신→과거 순서 점수 리스트.
+
+    Args:
+        scoreHistory: 최신 → 과거 순서 점수 리스트. 길이 < 2 면 "N/A".
+
+    Returns:
+        str: "긍정적" | "안정적" | "부정적" | "N/A".
+
+    Raises:
+        없음.
+
+    Example:
+        >>> creditOutlook([15, 20, 28, 35])
+        '긍정적'
+
+    Guide:
+        점수 ↓ 이 위험 ↓ (개선) = 긍정적. 5 점은 ~1 notch 변동.
+
+    When:
+        ``credit.engine.evaluateCompany`` 가 grade 의 outlook 산출 시.
+
+    How:
+        scoreHistory[0] - scoreHistory[-1] = delta → ±5 임계 → 라벨.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.credit.scoring.calcs.calcCreditHistory`` : 점수 시계열
+
+    AIContext:
+        AI 답변 "outlook 긍정적/부정적" 인용 시 임계 ±5 점 단서 명시 권장.
     """
     if not scoreHistory or len(scoreHistory) < 2:
         return "N/A"
@@ -200,8 +316,43 @@ def axisScore(
 ) -> float | None:
     """축 내 개별 지표 점수들의 평균 → 축 점수.
 
+    Capabilities:
+        축 내 개별 지표 점수 (tuple 또는 dict 입력) 의 단순 평균 산출. None 지표는 제외. 모두
+        None 이면 None 반환.
+
     metricScores: [(지표명, 점수|None), ...] 또는 [{"name", "value", "score"}, ...]
     None인 지표는 제외. tuple/dict 둘 다 지원 (R21-1: metrics 에 value 포함).
+
+    Args:
+        metricScores: 지표 점수 list. tuple ``(name, score)`` 또는 dict ``{name, value, score}``.
+
+    Returns:
+        float | None — 평균 점수. 모두 None 이면 None.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> axisScore([("ocfToSales", 25.0), ("fcfMargin", 18.0)])
+        21.5
+
+    Guide:
+        축 가중치는 ``weightedScore`` 에서 적용 — 본 함수는 축 내부 평균만.
+
+    When:
+        ``credit.engine`` 의 축별 score 합성 시.
+
+    How:
+        valid 점수 추출 (None 제외) → 단순 평균.
+
+    Requires:
+        - 외부 의존 없음.
+
+    See Also:
+        - ``dartlab.credit.scoring.creditScorecard.weightedScore`` : 축 가중평균
+
+    AIContext:
+        AI 직접 호출 없음 (내부 헬퍼).
     """
     valid: list[float] = []
     for item in metricScores:

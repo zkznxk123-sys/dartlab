@@ -69,6 +69,12 @@ def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
         - ``calcCreditHistory``: 등급 시계열
         - ``credit.scoring.metrics.calcAllMetrics``: 7 축 metrics 본체
 
+    When:
+        ``c.credit("metrics")`` / story 5-7 신용 섹션 raw 입력 필요할 때.
+
+    How:
+        ``_evaluate(detail=True)`` → metricsHistory + businessStability 추출 → dict.
+
     Requires:
         DART/EDGAR 재무 시계열 (IS/BS/CF + 시가총액).
 
@@ -142,6 +148,12 @@ def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict |
         - ``calcCreditHistory``: 등급 시계열
         - ``calcGradeImprovement``: 개선 시나리오
 
+    When:
+        ``c.credit("score")`` 호출. AI 가 stress 시나리오 답변 (overrides 주입) 시.
+
+    How:
+        ``_evaluate`` → result 반환 (overrides 있으면 validate 후 dict 에 주입).
+
     Requires:
         IS/BS/CF + 시가총액 + 시장신호 (베타/변동성).
 
@@ -181,6 +193,11 @@ def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict |
 def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
     """신용등급 시계열.
 
+    Capabilities:
+        evaluateCompany metricsHistory 의 기간별 metric 을 다시 sectorThresholds 룩업 → metric
+        score → 평균 → mapTo20Grade 로 변환해 기간별 grade 시계열 산출. ``stable`` 플래그로 등급
+        변동성 판정.
+
     기간별 간이 점수를 산출하고, 등급 안정성을 판단한다.
 
     Parameters
@@ -201,6 +218,35 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
         stable : bool — 등급 안정성 (고유 등급 2개 이하면 True)
         latestGrade : str | None — 최신 기간 등급
         oldestGrade : str | None — 가장 오래된 기간 등급
+
+    Raises:
+        없음 — metricsHistory 부재 시 None.
+
+    Example:
+        >>> r = calcCreditHistory(Company("005930"))
+        >>> r["stable"], r["latestGrade"]
+        (True, 'AA+')
+
+    Guide:
+        본 함수는 5 개 metric 평균으로 간이 grade 추정 — engine 의 7 축 가중평균과 약간 다름.
+        시계열 변동 추세 답변에 적합.
+
+    When:
+        ``c.credit("history")`` 호출. 등급 안정성 답변, Story 변화 섹션.
+
+    How:
+        ``_evaluate`` → metricsHistory 루프 → sectorThresholds.scoreMetric → 5 metric 평균 →
+        mapTo20Grade → 기간별 entry.
+
+    Requires:
+        - IS/BS/CF 시계열 (``_evaluate`` 결과 metricsHistory) + sectorThresholds
+
+    SeeAlso:
+        - ``dartlab.credit.scoring.calcs.calcCreditScore`` : 7 축 정식 grade
+        - ``dartlab.credit.scoring.creditScorecard.mapTo20Grade`` : 점수→등급
+
+    AIContext:
+        AI 답변 "등급 추세" 시 본 결과 직접 인용. ``stable=False`` 면 변동성 단서 필수.
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -297,6 +343,13 @@ def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
         - ``calcDistressScore``: Altman Z
         - ``analysis.financial.calcCashGenerationQuality``: OCF 품질
 
+    When:
+        ``c.credit("cashflow")`` 호출. AI 답변 "현금 창출 grade" 시.
+
+    How:
+        metricsHistory 루프 → ocfToSales / fcfPositive / ocfToDebt → ``cashFlowGrade`` 호출 →
+        기간별 eCR.
+
     Requires:
         CF (영업현금흐름) + IS (매출) + BS (차입금) 시계열.
 
@@ -353,6 +406,10 @@ def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
 def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     """업종 내 신용 순위.
 
+    Capabilities:
+        대상 회사 최신 분기 4 핵심 지표 (부채비율/IC/FFO-Debt/유동비율) 를 dict 로 노출. peer
+        비교 데이터는 현재 미구현 (``peerAvailable=False``) — 호출자가 별도 peer 매칭 필요.
+
     최신 기간의 핵심 지표를 추출하여 peer 비교 기반 제공.
 
     Parameters
@@ -372,6 +429,34 @@ def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | 
             ffoToDebt : float | None — FFO/총차입금 (%)
             currentRatio : float | None — 유동비율 (%)
         peerAvailable : bool — peer 데이터 가용 여부
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCreditPeerPosition(Company("005930"))
+        >>> r["metrics"]["debtRatio"]
+        38.5
+
+    Guide:
+        ``peerAvailable=False`` 이면 peer 분포는 ``industry.calcs.companyCalcs.calcSectorMetrics``
+        결과와 결합 권장. 본 함수 단독으로는 "내 지표" 만 노출.
+
+    When:
+        ``c.credit("peer")`` 호출. AI 가 동종 비교 답변 시 본 결과 + sectorMetrics 결합.
+
+    How:
+        ``_evaluate`` → metricsHistory[0] 추출 → 4 metric 노출.
+
+    Requires:
+        - IS/BS/CF 시계열 (evaluateCompany 결과)
+
+    See Also:
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 동종 분포
+
+    AIContext:
+        AI 답변 시 "동종 분포 별도 조회 필요" 단서 명시. metric 단독 인용으로 "업계 1 위" 단정
+        금지.
     """
     result = _evaluate(company, basePeriod)
     if result is None:

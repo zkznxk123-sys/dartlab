@@ -57,6 +57,14 @@ def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
         - ``calcCreditHistory``: 등급 시계열
         - ``credit.monitoring.crisisDetector``: 단기 위기 신호
 
+    When:
+        ``c.credit("flags")`` 호출 시. AI 가 회사 watch 상태 (downgrade 임박 / upgrade 후보)
+        답변 시.
+
+    How:
+        ``_evaluate`` → latest metrics 추출 → 금융업 분기 → ICR/부채비율/OCF/D-EBITDA/FFO/유동비율
+        임계 대조 → flag list.
+
     Requires:
         metricsHistory (calcAllMetrics) + sector 정보.
 
@@ -207,6 +215,12 @@ def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | Non
         - severity "good" 축만 모이면 upgrade 후보.
         - details 는 LLM 인용 시 직역 권장 (특정 metric 값 포함).
 
+    When:
+        ``c.credit("narrative")`` 호출 시. Story 5-7 / 보고서 narrative 섹션 데이터.
+
+    How:
+        ``_evaluate(detail=True)`` → buildNarratives 호출 → 7 축 dict + grade 합성.
+
     SeeAlso:
         - ``calcCreditScore``: 점수 산출 (본 narrative 와 paired)
         - ``calcCreditAudit``: 외부 신평사 대조
@@ -267,6 +281,10 @@ def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | Non
 def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
     """credit publisher의 외부 신평사 대조를 story 블록용으로 변환.
 
+    Capabilities:
+        ``auditCredit`` 결과를 dict 로 변환해 story 블록 / AI 답변에 그대로 인용 가능 형태로 노출.
+        외부 신평사 (KIS/KR/NICE) 와 dCR 의 notch 차이 + 동의/비동의 포인트 합성.
+
     credit/audit.py::auditCredit() 결과를 그대로 반환.
 
     Parameters
@@ -288,6 +306,33 @@ def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
         avgNotchDiff : float — 평균 notch 차이 (notch)
         agreements : list[str] — 일치 포인트
         disagreements : list[str] — 괴리 포인트
+
+    Raises:
+        없음 — auditCredit 실패 시 None 반환.
+
+    Example:
+        >>> r = calcCreditAudit(Company("005930"))
+        >>> r["avgNotchDiff"]
+        0.3
+
+    Guide:
+        외부 등급은 분기 lag 가능 — AI 답변에 stale 가능성 단서 명시.
+
+    When:
+        ``c.credit("audit")`` 호출. Story 신용평가 섹션의 신평사 대조 데이터.
+
+    How:
+        ``_evaluate`` → ``auditCredit`` (외부 등급 룩업 + notch 차이) → dict 변환.
+
+    Requires:
+        - L1 raw: 재무 데이터 + ``data/credit/externalGrades.json``
+
+    SeeAlso:
+        - ``dartlab.credit.monitoring.audit.auditCredit`` : 본 함수 위임 대상
+        - ``dartlab.credit.scoring._calcsAdvanced.calcCreditNarrative`` : 동행 narrative
+
+    AIContext:
+        AI 답변 시 ``agreements`` + ``disagreements`` 함께 인용. 평균 notch 차이만 단독 인용 금지.
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -361,6 +406,12 @@ def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | No
         - ``calcCreditScore``: 현재 등급
         - ``calcCreditFlags``: 경고/개선 신호
         - ``calcCreditNarrative``: 7 축 narrative
+
+    When:
+        ``c.credit("improvement")`` 호출. 경영진 IR / Treasury 의 신용 개선 우선순위 답변에.
+
+    How:
+        ``_evaluate`` → axes 약한 축 → 다음 등급 구간 임계값 → metric 역산 → change 자연어.
 
     Requires:
         evaluateCompany 결과 + sectorThresholds.

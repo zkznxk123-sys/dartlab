@@ -17,6 +17,11 @@ _annualCols = annualColsFromPeriods
 def calcSeparateMetrics(company) -> dict | None:
     """별도재무제표(OFS) 기반 보조 지표.
 
+    Capabilities:
+        company 의 별도재무제표 (OFS) 에서 부채/차입금/EBITDA + 파생 비율 (separateDebtRatio /
+        D-EBITDA / Net D-EBITDA / OCF/Sales 등) 산출. 지주사/캡티브 금융의 연결 (CFS) D-EBITDA
+        왜곡 보정용.
+
     연결(CFS) 대비 별도(OFS)의 부채/차입금/EBITDA를 산출.
     지주사/캡티브 금융에서 연결 D/EBITDA 왜곡을 보정하는 데 사용.
 
@@ -42,6 +47,37 @@ def calcSeparateMetrics(company) -> dict | None:
         separateBorrowingDep : float | None — 별도 차입금의존도 (%)
         separateOcfToSales : float | None — 별도 OCF/매출 (%)
         separateOcfToDebt : float | None — 별도 OCF/총차입금 (%)
+
+    Raises:
+        없음 — OFS 데이터 부재 시 None 반환.
+
+    Example:
+        >>> from dartlab.credit.scoring._metricsTrackB import calcSeparateMetrics
+        >>> sep = calcSeparateMetrics(Company("005380"))  # 현대차 (캡티브)
+        >>> sep["separateDebtToEbitda"]
+
+    Guide:
+        지주사/캡티브 회사는 본 함수 결과의 ``separateDebtToEbitda`` 가 연결 대비 크게 우수.
+        narrateRepayment / narrateCapitalStructure 가 본 값을 단서로 자동 첨부.
+
+    When:
+        ``credit.engine.evaluateCompany`` 가 captive/holding 회사 분기에 본 함수 호출. AI 가
+        지주사 답변 시.
+
+    How:
+        company._getFinanceBuild("y", "OFS") 추출 → 최신 기간 BS/IS/CF 값 → 파생 비율 산출.
+
+    Requires:
+        - L1 raw: 별도재무제표 (OFS) 보유
+        - company.companyFinanceBuild 호출 가능
+
+    See Also:
+        - ``dartlab.credit.scoring._metricsTrackB.calcFinancialMetrics`` : 금융업 Track B
+        - ``dartlab.credit.features._narrativeAxesA.narrateCapitalStructure`` : 본 결과 사용자
+
+    AIContext:
+        AI 가 지주사 부채비율 답변 시 별도 vs 연결 차이 인용 필수. ``separateDebtRatio`` 단독
+        인용 금지.
     """
     try:
         ofs = company._getFinanceBuild("y", "OFS")
@@ -114,6 +150,10 @@ def calcSeparateMetrics(company) -> dict | None:
 def calcFinancialMetrics(company, *, basePeriod: str | None = None) -> dict | None:
     """금융업(은행/보험/증권) 전용 5축 지표 산출.
 
+    Capabilities:
+        은행/보험/증권 회사용 5 축 지표 (자기자본비율, ROA, NIM proxy, 충당금비율, cash-to-asset)
+        시계열 산출. 일반기업 D-EBITDA/FFO-Debt 미적용 Track B 핵심 함수.
+
     일반기업용 D/EBITDA, FFO/Debt 대신
     자본비율, ROA, NIM 대리, 충당금 비율 등 금융업 핵심 지표 사용.
 
@@ -145,6 +185,37 @@ def calcFinancialMetrics(company, *, basePeriod: str | None = None) -> dict | No
             roaCV : float | None — ROA 변동계수 (%)
             totalAssets : float | None — 최신 자산총계 (원)
         track : str — "B" (금융업 트랙 식별자)
+
+    Raises:
+        없음 — BS/IS 데이터 부재 또는 연도 < 2 면 None.
+
+    Example:
+        >>> from dartlab.credit.scoring._metricsTrackB import calcFinancialMetrics
+        >>> r = calcFinancialMetrics(Company("105560"))  # KB금융지주
+        >>> r["history"][0]["equityRatio"]
+        9.8
+
+    Guide:
+        BIS 자기자본비율 7~15% 정상. ROA 0.3~1.5% 정상. NIM proxy 1~3%. ``financialTrackBThresholds``
+        가 본 함수 산출 metric 에 매핑.
+
+    When:
+        ``evaluateCompany`` 가 회사 sector 가 FINANCIALS 일 때 본 함수로 분기.
+
+    How:
+        company.select BS/IS/CF → 연간 컬럼 추출 → 자본/이자/충당금 row-wise 계산 → history list
+        + businessStability 합성.
+
+    Requires:
+        - company.select BS/IS/CF 가능 (DART/EDGAR 금융업 재무제표)
+
+    See Also:
+        - ``dartlab.credit.scoring._metricsTrackB.calcSeparateMetrics`` : 별도 보조 지표
+        - ``dartlab.credit.features.sectorThresholds.financialTrackBThresholds`` : 임계값
+
+    AIContext:
+        AI 답변 시 metric 단독 인용 금지 — BIS 8% 같은 규제 기준 함께 명시. 금융지주 vs 시중은행
+        구분 단서 권장.
     """
     bsResult = company.select(
         "BS",

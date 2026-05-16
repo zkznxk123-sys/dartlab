@@ -128,6 +128,14 @@ def calcAllMetrics(company, *, basePeriod: str | None = None) -> dict | None:
         - ``sectorThresholds``: 업종별 임계값 (본 metric 비교)
         - ``narrateRepayment`` 등: 본 metric 으로 서사 생성
 
+    When:
+        ``credit.engine.evaluateCompany`` 가 항상 본 함수 호출. AI 직접 호출은 raw metric 만
+        필요할 때 (드물다).
+
+    How:
+        company.select BS/IS/CF → 9 년 시계열 → 30+ metric piecewise 계산 → notes 보강 →
+        businessStability/reliability/disclosureRisk 합성.
+
     Requires:
         Company.select("BS/IS/CF") + notes 데이터 (DART 공시).
 
