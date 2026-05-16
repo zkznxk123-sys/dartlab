@@ -69,8 +69,9 @@ def _buildNodeIndex(nodes: list[IndustryNode]) -> dict[str, IndustryNode]:
 def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     """scan/network의 investedCompany 데이터에서 계열·투자 엣지를 추출한다.
 
-    상장사 간 투자 관계만 추출 (비상장 제외).
-    경영참여 → affiliate (confidence 0.9), 단순투자 → investor (confidence 0.6).
+    Capabilities:
+        DART 출자/투자내역 (`scan/network/scanner.scanInvested`) 에서 상장사 간 투자 관계만
+        선별해 IndustryEdge 로 변환. 경영참여→affiliate (conf 0.9), 단순투자→investor (conf 0.6).
 
     Parameters
     ----------
@@ -81,6 +82,40 @@ def extractNetworkEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     -------
     list[IndustryEdge]
         추출된 계열·투자 엣지 리스트. 동일 from-to 쌍 중복 제거됨.
+
+    Raises:
+        없음 — scanInvested/buildInvestEdges 실패 시 warning + 빈 리스트 반환.
+
+    Example:
+        >>> from dartlab.industry.build.edges import extractNetworkEdges
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> edges = extractNetworkEdges(loadNodes())
+        >>> edges[0].edgeType, edges[0].confidence
+        ('affiliate', 0.9)
+
+    Guide:
+        ``buildAllEdges`` 의 1 단계 소스. 양쪽 모두 KindList 상장사여야 엣지 생성 — 비상장 모회사
+        / 자회사는 자동 제외.
+
+    When:
+        산업지도 manifest 빌드 (`buildIndustryMap`) 의 1 단계 엣지 수집 시점.
+
+    How:
+        nodes 인덱스 + listing 룩업 → `scanInvested` 원천 → `buildInvestEdges` 변환 → 상장사 쌍
+        필터링 → from-to 중복 제거 → IndustryEdge 리스트.
+
+    Requires:
+        - L1.5 scan: ``scan/network`` 산출 raw 데이터
+        - reference: KindList (`_listingLookup`) — 상장사 code↔name 매핑
+
+    See Also:
+        - ``dartlab.industry.build.edges.extractDocsEdges`` : docs 패턴 추출
+        - ``dartlab.industry.build.edges.extractRawMaterialEdges`` : 원재료 거래 추출
+        - ``dartlab.industry.build.edges.buildAllEdges`` : 본 함수 호출 사용자
+
+    AIContext:
+        "이 회사의 계열사", "지분 관계" 류 답변 데이터. confidence 0.9 (경영참여) 만 강한 단정,
+        0.6 (단순투자) 은 "투자 보유 관계" 정도로 약하게 인용.
     """
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)
@@ -191,6 +226,11 @@ def _extractCorpNames(content: str) -> list[str]:
 def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     """docs parquet의 섹션 제목 패턴으로 supplier/customer/affiliate 엣지를 추출한다.
 
+    Capabilities:
+        DART 사업보고서 docs parquet 의 ``section_title`` 패턴 (원재료/매출처/특수관계자) 으로
+        본문에서 거래 상대방 상장사를 자동 식별. ㈜/주식회사 패턴 추출 + 상장사명 직접 매칭
+        2 방식 병행.
+
     2가지 방법으로 상장사를 찾는다:
     1. 본문에서 ㈜/주식회사 패턴으로 법인명 추출 → KindList 매칭
     2. KindList 상장사명이 본문에 직접 나오는 경우 (3글자 이상)
@@ -205,6 +245,41 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     list[IndustryEdge]
         추출된 엣지 리스트. from+to+type 기준 중복 제거됨.
         supplier confidence 0.7, customer 0.6, affiliate 0.5.
+
+    Raises:
+        없음 — 개별 docs parquet 로드 실패 시 해당 종목만 skip.
+
+    Example:
+        >>> from dartlab.industry.build.edges import extractDocsEdges
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> edges = extractDocsEdges(loadNodes())
+        >>> sum(1 for e in edges if e.edgeType == "supplier")
+        2480
+
+    Guide:
+        ``buildAllEdges`` 의 2 단계. 패턴 추출이라 false positive 가능 — confidence 0.5~0.7
+        구간이므로 단정 답변에는 부적합, "보고서에 언급" 정도로 인용.
+
+    When:
+        ``extractRawMaterialEdges`` 가 거래금액 정확도 우선이면, 본 함수는 거래 다양성/언급 추출
+        우선. 두 함수 결과는 ``buildAllEdges`` 에서 병합.
+
+    How:
+        nodes 종목별 ``docs/{code}.parquet`` 스캔 → section_title 패턴 매칭 → 본문에서 ㈜/상장사명
+        추출 → IndustryEdge 변환 → from+to+type 중복 제거.
+
+    Requires:
+        - L1.5 frame: docs parquet 폴더 (`_docsDir()` 산출)
+        - reference: KindList (`_listingLookup`) — 상장사 code↔name 매핑
+
+    See Also:
+        - ``dartlab.industry.build.edges.extractRawMaterialEdges`` : 원재료 거래 (금액 우선)
+        - ``dartlab.industry.build.edges.extractNetworkEdges`` : 계열·투자 관계
+        - ``dartlab.industry.build.edges.buildAllEdges`` : 본 함수 호출 사용자
+
+    AIContext:
+        "이 회사의 주요 매출처", "거래처에 ○○ 언급" 류 답변 데이터. confidence 가 낮으므로 "보고서
+        언급" 단서를 답변에 명시.
     """
     edges: list[IndustryEdge] = []
     nodeIdx = _buildNodeIndex(nodes)
@@ -336,6 +411,11 @@ def extractDocsEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     """docs "원재료 및 생산설비" 마크다운 테이블에서 구조화된 supplier 엣지를 추출한다.
 
+    Capabilities:
+        DART 사업보고서 "원재료 및 생산설비" 섹션의 마크다운 테이블 (부문/품목/매입액/비중/매입처)
+        을 파싱해 product/amount(억원)/ratio(%) 메타 포함 정밀 supplier 엣지를 산출. 표 헤더 매칭이
+        성공한 회사만 — 비표 형식 본문은 ``extractDocsEdges`` 가 보완.
+
     구조화된 데이터: 부문 / 품목 / 매입액 / 비중 / 매입처
     → 공급사 실명 + 제품 + 거래 비중이 포함된 정밀 엣지.
 
@@ -349,6 +429,43 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
     list[IndustryEdge]
         supplier 엣지 리스트. confidence 0.9 (테이블 직접 매칭).
         각 엣지에 product (품목명), amount (매입액, 억원), ratio (비중, %) 포함.
+
+    Raises:
+        없음 — 개별 docs parquet 로드 실패 시 해당 종목만 skip.
+
+    Example:
+        >>> from dartlab.industry.build.edges import extractRawMaterialEdges
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> edges = extractRawMaterialEdges(loadNodes())
+        >>> precise = [e for e in edges if e.amount]
+        >>> len(precise)
+        642
+
+    Guide:
+        ``buildAllEdges`` 의 3 단계 — confidence 0.9, ``preciseEdgeCount`` 의 주요 소스.
+        ``calcSupplyInsights`` 의 HHI 도 본 함수 산출 ``amount`` 가 있는 엣지만으로 계산.
+
+    When:
+        manifest 빌드 — 정밀 supplier 엣지 (amount/ratio 포함) 가 필요할 때만. 패턴/언급 추출은
+        ``extractDocsEdges``.
+
+    How:
+        nodes 종목별 ``docs/{code}.parquet`` 의 "원재료" 섹션 → 최신 사업보고서 row → 마크다운
+        테이블 추출 → "매입처" 헤더 매칭 → 행 단위 IndustryEdge 변환 (품목/매입액/비중/매입처
+        정규화).
+
+    Requires:
+        - L1.5 frame: docs parquet 폴더 + table_parser 헬퍼
+        - reference: KindList (정규화된 회사명 매핑)
+
+    See Also:
+        - ``dartlab.industry.build.edges.extractDocsEdges`` : 비표 본문 패턴 보완
+        - ``dartlab.industry.build.edges.buildAllEdges`` : 본 함수 호출 사용자
+        - ``dartlab.industry.build.insights.calcSupplyInsights`` : amount 우선 소비처
+
+    AIContext:
+        "주요 원재료 공급사", "매입처 비중" 류 답변 데이터. ``amount`` 와 ``ratio`` 보유한 엣지만
+        강한 단정 가능 — ``preciseEdgeCount`` 적은 회사는 "일부 거래만 공시" 단서 명시.
     """
     from dartlab.industry.build.stage3_docs import _docsDir
     from dartlab.industry.build.table_parser import (
@@ -467,6 +584,11 @@ def extractRawMaterialEdges(nodes: list[IndustryNode]) -> list[IndustryEdge]:
 def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[IndustryEdge]:
     """network·docs·원재료 테이블 3개 소스에서 엣지를 수집하여 통합한다.
 
+    Capabilities:
+        3 소스 (`extractNetworkEdges` / `extractDocsEdges` / `extractRawMaterialEdges`) 엣지를
+        병합하고 (from, to, edgeType) 키로 중복 제거. 우선순위 docs_table > docs > network 적용.
+        ``skipDocs`` 로 docs 패스 생략 가능 (빠른 테스트).
+
     Parameters
     ----------
     nodes : list[IndustryNode]
@@ -479,6 +601,43 @@ def buildAllEdges(nodes: list[IndustryNode], *, skipDocs: bool = False) -> list[
     list[IndustryEdge]
         통합 엣지 리스트. from+to+type 기준 중복 제거.
         우선순위: docs_table > docs > network.
+
+    Raises:
+        없음 — 각 소스 추출 실패 시 warning + skip, 부분 결과 보존.
+
+    Example:
+        >>> from dartlab.industry.build.edges import buildAllEdges
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> edges = buildAllEdges(loadNodes())
+        >>> len(edges)
+        4820
+
+    Guide:
+        manifest 빌드 (`buildIndustryMap`) 의 단일 엣지 수집 진입점. 결과는 ``edges.json`` 으로
+        직렬화. 동일 쌍의 docs_table 엣지가 docs/network 엣지를 덮어써 메타 풍부도 우선.
+
+    When:
+        ``buildIndustryMap`` 의 엣지 수집 단계. 일반 분석 흐름에서는 호출하지 않는다 — 전 종목
+        docs parquet 스캔 비용 때문.
+
+    How:
+        ``extractNetworkEdges`` (출자) → ``extractDocsEdges`` (패턴) → ``extractRawMaterialEdges``
+        (테이블) 순차 호출 → source 우선순위로 정렬 후 (from, to, edgeType) 중복 제거.
+
+    Requires:
+        - 3 소스 의존성 합집합: scan/network + docs parquet + KindList reference
+        - nodes 리스트 (primary 노드 기반)
+
+    See Also:
+        - ``dartlab.industry.build.edges.extractNetworkEdges`` : 1 단계 소스
+        - ``dartlab.industry.build.edges.extractDocsEdges`` : 2 단계 소스
+        - ``dartlab.industry.build.edges.extractRawMaterialEdges`` : 3 단계 소스
+        - ``dartlab.industry.build.pipeline.buildIndustryMap`` : 본 함수 호출 사용자
+
+    AIContext:
+        산업지도 manifest 의 모든 회사 관계 (계열·매입·매출·원재료) 진입점. AI 답변에서 엣지
+        ``source`` 가 docs_table 이면 강한 단정, network 면 "출자 관계", docs (텍스트 매칭) 면
+        "보고서 언급" 단서 권장.
     """
     edges: list[IndustryEdge] = []
 

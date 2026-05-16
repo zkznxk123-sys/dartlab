@@ -55,6 +55,17 @@ def calcHHI(supplierAmounts: list[float]) -> float:
     AIContext
     ---------
     "공급망 의존도", "시장 집중도" 질문의 1 차 답변. 값 단독 인용보다 ``riskLabel`` 결합 권장.
+
+    When:
+        공급망/시장 집중도 단일 수치가 필요할 때. 회사 단위 종합은 ``calcSupplyInsights``,
+        산업 단위는 ``calcIndustryConcentration`` 진입점이 본 함수를 호출.
+
+    How:
+        양수 amount/revenue 리스트 → HHI → ``riskLabel`` 로 분산/중간/집중 라벨 변환의 1 단계.
+
+    See Also:
+        - ``dartlab.industry.build.insights.calcTopNRatio`` : 상위 N 사 비중
+        - ``dartlab.industry.build.insights.riskLabel`` : HHI → 위험 라벨
     """
     total = sum(a for a in supplierAmounts if a and a > 0)
     if total == 0:
@@ -71,6 +82,10 @@ def calcHHI(supplierAmounts: list[float]) -> float:
 def riskLabel(hhi: float) -> str:
     """HHI 값을 위험 라벨로 변환한다.
 
+    Capabilities:
+        DOJ Antitrust 기준 (1500 / 2500) 으로 HHI 를 4 단계 한국어 라벨 ("데이터 부족" /
+        "분산" / "중간" / "집중") 로 변환.
+
     Parameters
     ----------
     hhi : float
@@ -80,6 +95,34 @@ def riskLabel(hhi: float) -> str:
     -------
     str
         "데이터 부족" (0) / "분산" (<1500) / "중간" (<2500) / "집중" (>=2500).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> riskLabel(3500)
+        '집중'
+
+    Guide:
+        UI 카드/요약 텍스트에 그대로 노출 가능한 한국어 라벨. 숫자 인용 시 ``calcHHI`` 결합.
+
+    When:
+        HHI 숫자 단독으로는 의미 전달이 약할 때. AI 답변/UI 카드의 "한 줄 진단".
+
+    How:
+        ``calcHHI`` 산출값 → 본 함수 → 라벨. ``calcSupplyInsights`` / ``calcIndustryConcentration``
+        가 ``hhiRisk`` 필드로 자동 결합해 반환.
+
+    Requires:
+        - 입력은 ``calcHHI`` 가 반환한 0~10000 범위 float 값.
+
+    See Also:
+        - ``dartlab.industry.build.insights.calcHHI`` : 본 함수의 입력 산출
+        - ``dartlab.industry.build.insights.calcSupplyInsights`` : 라벨 자동 결합
+
+    AIContext:
+        "분산 시장이다 / 집중도가 높다" 1 줄 답변. 정밀 엣지 부족 (preciseEdgeCount 낮음) 시
+        "데이터 부족" 으로 폴백되므로 별도 단서 없이 그대로 인용 가능.
     """
     if hhi == 0:
         return "데이터 부족"
@@ -136,6 +179,16 @@ def calcTopNRatio(supplierAmounts: list[float], n: int = 3) -> float:
     AIContext
     ---------
     "1 위가 몇 %", "상위 3 사가 시장 절반 이상" 류 답변. ``calcHHI`` 와 함께 인용하면 입체적.
+
+    When:
+        상위 쏠림 수치가 필요할 때 (CR1/CR3 등). 단독 사용보다 ``calcHHI`` 와 병기 권장.
+
+    How:
+        양수 amount 리스트 → 내림차순 정렬 → 상위 n 합/전체 합 비율 (%). 회사 단위는
+        ``calcSupplyInsights`` 진입점에서 top1Ratio/top3Ratio 필드로 자동 결합.
+
+    See Also:
+        - ``dartlab.industry.build.insights.calcHHI`` : 분포 전체 집중도
     """
     amounts = sorted([a for a in supplierAmounts if a and a > 0], reverse=True)
     total = sum(amounts)
@@ -212,6 +265,18 @@ def calcSupplyInsights(
     ---------
     회사 공급망 답변의 단일 진입점. ``hhiRisk`` + ``top1Ratio`` 두 값으로 한 줄 요약 가능.
     정밀 엣지가 적으면 ("일부 거래만 추정") 답변에 명시.
+
+    When:
+        "삼성전자 공급망", "이 회사 공급사 집중도" 류 질의의 1 차 답변. 회사 카드의 supply
+        섹션 데이터 소스로도 사용.
+
+    How:
+        edges/nodes 그래프 입력 → 본 회사 inbound supplier 엣지 추출 → ``calcHHI`` /
+        ``calcTopNRatio`` 호출 → 산업/공정 다양성 카운팅 → 단일 dict.
+
+    See Also:
+        - ``dartlab.industry.build.insights.calcHHI`` : HHI 단독
+        - ``dartlab.industry.build.insights.calcIndustryConcentration`` : 산업 단위 집중도
     """
     # 이 회사가 to인 supplier 엣지 (공급받는 관계)
     incoming = [e for e in edges if e.toCode == stockCode and e.edgeType == "supplier"]
@@ -314,6 +379,18 @@ def calcIndustryConcentration(
     AIContext
     ---------
     "이 산업은 과점 시장" / "분산 시장" 답변의 1 차 진단. topN 은 시장 주도 회사 답변에 그대로 인용.
+
+    When:
+        "반도체 산업 과점 정도", "은행 산업 1 위 점유율" 류 질의. 산업 카드/지도의 헤더 진단 1 줄
+        생성에 사용.
+
+    How:
+        nodes 리스트 입력 → 산업 매칭 + 매출 양수 필터 → ``calcHHI`` / ``calcTopNRatio`` 호출
+        → 상위 5 사 프로필 첨부 → 단일 dict.
+
+    See Also:
+        - ``dartlab.industry.build.insights.calcSupplyInsights`` : 회사 단위 집중도
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 분포 + 백분위
     """
     members = [n for n in nodes if n.industry == industryId and n.revenue and n.revenue > 0]
     if not members:

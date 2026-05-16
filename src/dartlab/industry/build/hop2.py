@@ -32,6 +32,11 @@ HOP2_EDGE_LIMIT = 50  # 회사당 2-hop 엣지 최대
 def computeHop2() -> dict[str, dict]:
     """전 종목 2-hop 공급망 사전 계산 — "내 공급사의 공급사" 를 미리 찾아둔다.
 
+    Capabilities:
+        nodes.json + edges.json 에서 인접 리스트를 구성하고, 회사별 2-hop 이웃·핵심 엣지·
+        허브 플래그를 단일 dict 로 직렬화. 허브 노드 (degree > HUB_THRESHOLD) 는
+        amount 있는 1-hop 거래 상대만 1 단계 더 확장 (1.5-hop) 해 폭증 방지.
+
     nodes.json + edges.json 에서 인접 리스트를 구성하고, 각 회사별로
     1-hop 이웃의 이웃(2-hop)을 탐색한다. 허브 노드(degree > 200)는
     amount 있는 거래의 상대만 1단계 더 확장(1.5-hop)하여 폭증을 방지한다.
@@ -78,6 +83,34 @@ def computeHop2() -> dict[str, dict]:
     False
     >>> len(hop2['005930']['hop2Neighbors'])  # 2-hop 이웃 수
     100
+
+    Raises:
+        없음 — nodes/edges 비어있으면 빈 dict 반환.
+
+    Guide:
+        manifest 빌드 1 회 (`buildIndustryMap`) 에서 호출. 결과는 ``hop2.json`` 산출물로 직렬화
+        돼 UI 의 "확장 공급망" 그래프 시각화에 사용.
+
+    When:
+        산업지도 manifest 빌드 시. 일반 분석 흐름에서는 직접 호출하지 않는다 — 전 종목 인접
+        리스트 빌드 비용 때문.
+
+    How:
+        loadNodes/loadEdges → 인접 리스트 → degree 계산 → 허브 식별 → 종목별 BFS 2-hop
+        탐색 (허브는 1.5-hop) → amount 우선 엣지 Top N → dict 반환.
+
+    Requires:
+        - L1.5 frame: ``industry/build/pipeline.loadNodes/loadEdges`` 산출물
+        - 인접 리스트 + degree 가 메모리에 fit 하는 규모 (현재 5000+ 종목 가능)
+
+    See Also:
+        - ``dartlab.industry.build.pipeline.buildIndustryMap`` : 본 함수 호출 사용자
+        - ``dartlab.industry.build.edges.buildAllEdges`` : 1-hop 엣지 원본
+        - ``dartlab.industry.build.delta.computeYoyDelta`` : 동일 빌드 동행 산출
+
+    AIContext:
+        AI 답변 "삼성전자 공급망의 공급망", "2 단계 거리 의존도" 류 답변 데이터 소스. ``hub``
+        플래그가 True 인 회사는 답변에 "허브 노드 (간접 의존 다수)" 단서 명시 권장.
     """
     nodes = loadNodes()
     edges = loadEdges()
