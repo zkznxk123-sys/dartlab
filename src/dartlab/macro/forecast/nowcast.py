@@ -171,18 +171,64 @@ def gdpNowcast(
 ) -> NowcastResult:
     """Dynamic Factor Model로 GDP Nowcasting.
 
-    PCA 초기화 → Kalman 필터/스무더 → EM 반복.
+    Capabilities:
+        Stock-Watson / Giannone-Reichlin-Small (2008 JME) Dynamic Factor Model
+        — 월간 매크로 지표 행렬에서 공통 팩터 추출 → AR(p) → 분기 GDP 추정.
+        PCA 초기화 → Kalman filter/smoother → EM 반복. NY Fed/Atlanta Fed
+        nowcasting 의 base 모델.
 
     Args:
-        indicators: (T, n) 행렬 — n개 월간 거시지표. NaN = 결측/미발표.
-            마지막 열이 GDP(분기)면 분기 미발표 월은 NaN.
-        nFactors: 추출할 공통 팩터 수 (기본 1)
-        arOrder: 팩터 AR 차수 (기본 1)
-        maxIter: EM 최대 반복
-        tol: 로그우도 수렴 기준
+        indicators: (T, n) 행렬 — n 개 월간 매크로 지표. NaN = 결측/미발표.
+            마지막 열 = GDP (분기, 미발표 월 NaN).
+        nFactors: 공통 팩터 수. 기본 1.
+        arOrder: 팩터 AR 차수. 기본 1.
+        maxIter: EM 최대 반복. 기본 50.
+        tol: 로그우도 수렴 기준. 기본 1e-4.
 
     Returns:
-        NowcastResult
+        NowcastResult — gdpEstimate(%)/confidence(high/medium/low)/factor/
+        factorCurrent/loadings/logLikelihood/converged/iterations/description.
+
+    Example:
+        >>> r = gdpNowcast(indicators_matrix, nFactors=1)
+        >>> r.gdpEstimate, r.confidence
+        (2.1, 'medium')
+
+    Guide:
+        confidence "high" 면 분기 마지막 한 달 발표 직전 정확도. "low" = 데이터
+        결측 다수. converged=False 면 maxIter 증가 검토.
+
+    When:
+        ``analyzeForecast`` 내부 + AI "현재 분기 GDP 어디로" 답변.
+
+    How:
+        표준화 → PCA 초기화 (eigenvector top-r) → Kalman filter/smoother →
+        EM (M-step: VAR + loading + variance) → 수렴.
+
+    Requires:
+        월간 매크로 지표 (≥ rp + 5 관측치, ≥ r + 1 변수). 표준 8~12 지표 권장.
+
+    Raises:
+        없음 — 데이터 부족 시 "데이터 부족" description.
+
+    See Also:
+        - analyzeForecast : 본 함수 호출 진입점
+        - conferenceBoardLEI : 합성지수 단순
+
+    AIContext:
+        gdpEstimate + confidence 인용으로 "Nowcast +2.1% (medium)" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - converged=False 결과 단정
+            - confidence 무시 + gdpEstimate 절대값 단정
+            - 단일 indicator 입력 (n ≥ 5 권장)
+        OutputSchema:
+            NowcastResult (9 필드).
+        Prerequisites: 월간 매크로 행렬.
+        Freshness: 월간 (마지막 발표 즉시 갱신).
+        Dataflow: 표준화 → PCA → Kalman → EM → factor + GDP.
+        TargetMarkets: US (FRED 8~12 지표 표준). KR (KOSIS 가능).
     """
     y = np.asarray(indicators, dtype=np.float64)
     T, n = y.shape
