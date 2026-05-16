@@ -16,7 +16,7 @@ from typing import Any
 
 from dartlab.core.palette import COLORS
 from dartlab.synth.ratioCategories import RATIO_CATEGORIES
-from dartlab.viz.refs import chartEvidenceBinding
+from dartlab.viz.spec.refs import chartEvidenceBinding
 
 # ── 7영역 인사이트 상수 ──
 
@@ -946,7 +946,7 @@ def specHoverSpark(
     """
     if not periods or not values:
         return None
-    from dartlab.viz.refs import seriesPointRefs
+    from dartlab.viz.spec.refs import seriesPointRefs
 
     return {
         "chartType": "hover-spark",

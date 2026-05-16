@@ -14,7 +14,7 @@ from dartlab.story.catalog import ACT_HEADERS, listBlocks, listSections
 from dartlab.story.dashboard import listDashboardQuestions
 from dartlab.story.reportTypes import REPORT_TYPES
 from dartlab.story.templates import STORY_TEMPLATES, TEMPLATES
-from dartlab.viz.intents import listVizIntents
+from dartlab.viz.spec.intents import listVizIntents
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "landing" / "static" / "story" / "manifest.json"

@@ -68,7 +68,7 @@ class VizHtmlRenderer:
     def renderNetwork(self, *args: Any, **kwargs: Any) -> Any | None:
         """네트워크 그래프 → 렌더 — viz.network.renderNetwork 위임. 실패 시 None."""
         try:
-            from dartlab.viz.network import renderNetwork
+            from dartlab.viz.renderers.network import renderNetwork
 
             return renderNetwork(*args, **kwargs)
         except ImportError:

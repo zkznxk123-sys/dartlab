@@ -102,7 +102,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
 
     extension activate 직후 호출되도록 설계. 다음을 미리 수행:
     - dartlab.ai.kernel 모듈 import (lazy 비용)
-    - dartlab.viz.extract import
+    - dartlab.viz.spec.extract import
 
     실패 항목은 무시 — 워밍업은 best-effort.
     """
@@ -116,7 +116,7 @@ def _handleWarmup(_msg: dict[str, Any]) -> None:
             diag["skipped"].append(f"{name}: {exc.__class__.__name__}")
 
     _try("kernel", lambda: __import__("dartlab.ai.kernel", fromlist=["ask"]))
-    _try("viz_extract", lambda: __import__("dartlab.viz.extract", fromlist=["extract_viz_specs"]))
+    _try("viz_extract", lambda: __import__("dartlab.viz.spec.extract", fromlist=["extract_viz_specs"]))
 
     _emit({"event": "warmup_done", "data": diag})
 

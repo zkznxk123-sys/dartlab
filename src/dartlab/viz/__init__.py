@@ -21,7 +21,7 @@
     emit_diagram("mermaid", "graph LR\\n  A-->B")
 
     # ChartSpec → Plotly Figure 변환
-    from dartlab.viz.plotly import from_spec
+    from dartlab.viz.renderers.plotly import from_spec
     fig = from_spec(spec)
 """
 
@@ -66,9 +66,6 @@ from dartlab.viz.charts import (
     profitability as profitability_chart,
 )
 
-# ── AI stdout 마커 추출 ──
-from dartlab.viz.extract import extractVizSpecs  # noqa: F401
-
 # ── Company → ChartSpec 생성기 ──
 from dartlab.viz.generators import (  # noqa: F401
     SPEC_GENERATORS,
@@ -98,26 +95,28 @@ from dartlab.viz.generators import (  # noqa: F401
     specSixActRadar,
 )
 
-# ── Dashboard visual intent catalog ──
-from dartlab.viz.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: F401
-
 # ── ChartSpec → Plotly Figure 변환 ──
-from dartlab.viz.plotly import PlotlyChartRenderer
-from dartlab.viz.plotly import fromSpec as chart_from_spec  # noqa: F401
+from dartlab.viz.renderers.plotly import PlotlyChartRenderer
+from dartlab.viz.renderers.plotly import fromSpec as chart_from_spec  # noqa: F401
+
+# ── AI stdout 마커 추출 ──
+from dartlab.viz.spec.extract import extractVizSpecs  # noqa: F401
+
+# ── Dashboard visual intent catalog ──
+from dartlab.viz.spec.intents import VIZ_INTENTS, VizIntent, listVizIntents  # noqa: F401
 
 _registerRenderer(PlotlyChartRenderer())
 
 # ── evidence ref 빌더 ──
-from dartlab.viz.refs import (  # noqa: F401
+# ── VizSpec ──
+from dartlab.viz.spec import VizSpec  # noqa: F401
+from dartlab.viz.spec.refs import (  # noqa: F401
     chartEvidenceBinding,
     filingDeepLink,
     seriesPointRefs,
     tableRef,
     valueRef,
 )
-
-# ── VizSpec ──
-from dartlab.viz.spec import VizSpec  # noqa: F401
 
 # ══════════════════════════════════════
 # AI 코드용 emit 함수

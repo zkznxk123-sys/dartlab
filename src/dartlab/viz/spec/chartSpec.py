@@ -125,7 +125,7 @@ class VizSpec:
         Raises:
             ImportError: plotly 미설치 시.
         """
-        from dartlab.viz.plotly import fromSpec
+        from dartlab.viz.renderers.plotly import fromSpec
 
         return fromSpec(self.toDict())
 
@@ -151,7 +151,7 @@ class VizSpec:
 
         landing 컴포넌트와 유사한 간결한 SVG. bar/line/sparkline/pie/combo 지원.
         """
-        from dartlab.viz.svg import renderSvg
+        from dartlab.viz.renderers.svg import renderSvg
 
         return renderSvg(self.toDict(), width=width, height=height)
 
@@ -160,7 +160,7 @@ class VizSpec:
 
         bar/line/sparkline 지원. plotext 우선, 없으면 fallback.
         """
-        from dartlab.viz.ascii import renderAscii
+        from dartlab.viz.renderers.ascii import renderAscii
 
         return renderAscii(self.toDict(), width=width, height=height)
 

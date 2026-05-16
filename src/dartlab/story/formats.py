@@ -543,7 +543,7 @@ def renderAscii(story, *, width: int = 80) -> str:
         TableBlock,
         TextBlock,
     )
-    from dartlab.viz.ascii import renderAscii
+    from dartlab.viz.renderers.ascii import renderAscii
 
     lines: list[str] = []
     rule = "═" * width

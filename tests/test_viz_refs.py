@@ -8,46 +8,46 @@ pytestmark = pytest.mark.unit
 
 
 def test_table_ref_with_period_kind():
-    from dartlab.viz.refs import tableRef
+    from dartlab.viz.spec.refs import tableRef
 
     assert tableRef("finance", "IS", "Y") == "finance:IS:Y"
 
 
 def test_table_ref_without_period_kind():
-    from dartlab.viz.refs import tableRef
+    from dartlab.viz.spec.refs import tableRef
 
     assert tableRef("scan", "PEER") == "scan:PEER"
 
 
 def test_value_ref_format():
-    from dartlab.viz.refs import valueRef
+    from dartlab.viz.spec.refs import valueRef
 
     assert valueRef("005930", "finance", "IS", "sales", "2024") == "finance:005930:IS:sales:2024"
 
 
 def test_filing_deep_link_basic():
-    from dartlab.viz.refs import filingDeepLink
+    from dartlab.viz.spec.refs import filingDeepLink
 
     url = filingDeepLink("20250315000123")
     assert url == "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250315000123"
 
 
 def test_filing_deep_link_with_page():
-    from dartlab.viz.refs import filingDeepLink
+    from dartlab.viz.spec.refs import filingDeepLink
 
     url = filingDeepLink("20250315000123", page=42)
     assert url == "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20250315000123#page=42"
 
 
 def test_filing_deep_link_none_for_empty_rcept():
-    from dartlab.viz.refs import filingDeepLink
+    from dartlab.viz.spec.refs import filingDeepLink
 
     assert filingDeepLink(None) is None
     assert filingDeepLink("") is None
 
 
 def test_chart_evidence_binding_minimum():
-    from dartlab.viz.refs import chartEvidenceBinding
+    from dartlab.viz.spec.refs import chartEvidenceBinding
 
     binding = chartEvidenceBinding(stockCode="005930", source="finance", topic="IS")
     assert binding == {
@@ -59,7 +59,7 @@ def test_chart_evidence_binding_minimum():
 
 
 def test_chart_evidence_binding_full():
-    from dartlab.viz.refs import chartEvidenceBinding
+    from dartlab.viz.spec.refs import chartEvidenceBinding
 
     binding = chartEvidenceBinding(
         stockCode="005930",
@@ -76,7 +76,7 @@ def test_chart_evidence_binding_full():
 
 
 def test_series_point_refs_without_rcept():
-    from dartlab.viz.refs import seriesPointRefs
+    from dartlab.viz.spec.refs import seriesPointRefs
 
     refs = seriesPointRefs(
         stockCode="005930",
@@ -92,7 +92,7 @@ def test_series_point_refs_without_rcept():
 
 
 def test_series_point_refs_with_rcept_and_page():
-    from dartlab.viz.refs import seriesPointRefs
+    from dartlab.viz.spec.refs import seriesPointRefs
 
     refs = seriesPointRefs(
         stockCode="005930",
@@ -111,7 +111,7 @@ def test_series_point_refs_with_rcept_and_page():
 
 
 def test_series_point_refs_partial_rcept():
-    from dartlab.viz.refs import seriesPointRefs
+    from dartlab.viz.spec.refs import seriesPointRefs
 
     refs = seriesPointRefs(
         stockCode="005930",
