@@ -63,9 +63,15 @@ export function GaugeChart({ value, min, max, bands = [], label, unit, hint, hei
 	}
 
 	return (
-		<div className="flex h-full flex-col items-center justify-center gap-1 px-2">
+		<div className="flex h-full w-full flex-col items-center justify-center gap-1 px-2">
 			{label && <div className="text-xs text-muted-foreground">{label}</div>}
-			<svg width={width} height={height + 10} viewBox={`0 0 ${width} ${height + 10}`}>
+			<svg
+				width="100%"
+				height="auto"
+				viewBox={`0 0 ${width} ${height + 10}`}
+				preserveAspectRatio="xMidYMid meet"
+				style={{ maxWidth: `${width}px`, maxHeight: `${height + 10}px` }}
+			>
 				{/* 배경 호 */}
 				<path
 					d={arc(0, 1)}
