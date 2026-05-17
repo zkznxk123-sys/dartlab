@@ -78,6 +78,12 @@ def calcGrowthTrend(company, *, basePeriod: str | None = None) -> dict | None:
         CAGR 이 revenue CAGR 보다 높으면 마진 개선 (operating leverage), 반대면
         마진 압박. totalAssets CAGR > revenue CAGR = 효율성 저하 신호.
 
+    When:
+        analysis() 성장성 축 시계열·표 표시, 보고서 헤더 CAGR 인용 시.
+
+    How:
+        IS + BS 시계열을 연도별 컬럼으로 매핑 → YoY/CAGR + turning point 주입.
+
     SeeAlso:
         - ``calcGrowthQuality``: 성장의 품질 (organic vs M&A 등)
         - ``calcSustainableGrowthRate``: ROE × (1-payout) sustainable rate
@@ -213,6 +219,13 @@ def calcGrowthQuality(company, *, basePeriod: str | None = None) -> dict | None:
         압박 경고. 최근 영업이익 YoY > 10% 면 "개선 중" 으로 완화 (턴어라운드
         기업 배려). "내실 위주" = 이익 CAGR > 매출 CAGR × 1.5.
 
+    When:
+        성장의 질 정성 라벨이 필요할 때 (외형 vs 내실 판정·op leverage 시계열).
+
+    How:
+        ``calcGrowthTrend`` 의 cagr·history 를 받아 비율 비교 → quality
+        라벨 + leverageEffect 시계열 산출.
+
     SeeAlso:
         - ``calcGrowthTrend``: 본 함수의 입력 (CAGR + 시계열)
         - ``calcSustainableGrowthRate``: SGR vs 실제 갭
@@ -328,6 +341,13 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
         gap < -5%p = 누적 현금 — 자사주매입 (조용한 환원) 또는 배당 확대
         가능. KR 우량 회사 (삼성/현대) 는 보통 gap 음수.
 
+    When:
+        외부 자금 의존도·자사주 환원 여력 진단, 재무 정책 적정성 검토.
+
+    How:
+        IS/BS/CF 매핑 → ROE = NI/Equity → payoutRatio = 배당/NI → SGR =
+        ROE × (1 - payout/100) → gap = actualGrowth - SGR.
+
     SeeAlso:
         - ``calcGrowthTrend``: 실제 성장률 시계열
         - ``calcDividendPolicy``: 배당성향 (본 함수 입력)
@@ -427,10 +447,42 @@ def calcSustainableGrowthRate(company, *, basePeriod: str | None = None) -> dict
 def calcGrowthFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """성장성 경고/기회 플래그.
 
-    Returns
-    -------
-    list[str]
-        경고/기회 메시지 리스트. 빈 리스트이면 이상 없음.
+    Capabilities:
+        - 매출 3 기 연속 역성장·매출 고성장 (20%+)·성장-이익 괴리 시 한국어
+          flags 생성.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고/기회 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        외형 성장 (매출 ≥ 10%) + 이익 감소 (영업이익 < 0) 동시 발생 시
+        수익성 희석 경고.
+
+    When:
+        보고서·UI 위험 배너에 성장 관련 경고 한 줄 표시할 때.
+
+    How:
+        ``calcGrowthTrend`` 의 history 를 임계값과 비교 후 한국어 포맷팅.
+
+    Requires:
+        ``calcGrowthTrend`` 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcGrowthFlags(Company("005930"))
+        ["매출 고성장 (25.0%)"]
+
+    SeeAlso:
+        - ``calcGrowthTrend``: 본 함수 입력
+
+    AIContext:
+        AI 답변 성장성 경고 인용 시.
     """
     flags: list[str] = []
 
@@ -500,6 +552,13 @@ def calcCagrComparison(company, *, basePeriod: str | None = None) -> dict | None
         - 부채 CAGR > 자본 CAGR + 10pp = 레버리지 확대 (유의).
         - 영업이익 CAGR < 매출 CAGR - 5pp = 마진 압박.
         Damodaran "intrinsic growth" 평가 시 매출 CAGR 가 출발점.
+
+    When:
+        장기 구조 변화 진단 (마진 방향·자산 효율·레버리지) 시.
+
+    How:
+        IS/BS 5 계정 CAGR 산출 → 3 쌍 비교 (매출-영업이익, 자산-매출,
+        부채-자본) → gap 임계로 양호/주의/경고 라벨링.
 
     SeeAlso:
         - ``calcGrowthTrend``: 단기 YoY + 3y CAGR

@@ -188,17 +188,42 @@ def _calcImpliedBorrowingRate(company, finDebt: float) -> float | None:
 def calcCapitalOverview(company, *, basePeriod: str | None = None) -> dict | None:
     """총자산/총부채/자기자본/순차입금 스냅샷.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 자본구조 4 핵심 (총자산·총부채·자기자본·순차입금) metrics tuple 산출.
 
-    Returns
-    -------
-    dict | None
-        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None: metrics 키에 (항목명, 값 문자열) 쌍 목록. ratios 미가용 시 None.
+
+    Guide:
+        부채비율·자기자본비율·순차입금비율을 동반 표기. 순차입금 < 0 일 때
+        "순현금" 라벨로 자동 전환.
+
+    When:
+        analysis() 의 자본구조 축 요약 표시 시점.
+
+    How:
+        ``_getRatios`` 로 정규 ratios 스냅샷을 얻어 4 metrics 를 직렬화.
+
+    Requires:
+        ratios 캐시가 사전에 채워져 있어야 한다.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCapitalOverview(Company("005930"))
+        {"metrics": [("총자산", "..."), ...]}
+
+    SeeAlso:
+        - ``calcCapitalTimeline``: 자본 시계열
+        - ``calcDebtTimeline``: 부채 시계열
+
+    AIContext:
+        AI 답변에서 자본구조 한 줄 요약을 만들 때 인용.
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -247,17 +272,43 @@ def calcCapitalOverview(company, *, basePeriod: str | None = None) -> dict | Non
 def calcCapitalTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """자본총계·이익잉여금 시계열.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 자본총계 + 이익잉여금 연도별/분기별 테이블과 내부유보 비중 산출.
 
-    Returns
-    -------
-    dict | None
-        tables : list[tuple[str, list[dict], list[str]]] — (라벨, 행 목록, 기간 컬럼) 튜플
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (annualColsFromPeriods 입력).
+
+    Returns:
+        dict | None: tables 키에 (라벨, 행 목록, 기간 컬럼) 튜플 리스트. 데이터 부재 시 None.
+
+    Guide:
+        BS 의 ``total_stockholders_equity`` 와 retained 항목을 결합해 자본
+        구성 흐름을 보여준다.
+
+    When:
+        자본 안정성 시계열 시각화·기업 분석 본문에서 자본 트렌드 서술 시.
+
+    How:
+        ``company.select("BS", ...)`` → ``toDictBySnakeId`` → 연/분기 컬럼별
+        ``_buildCapitalTable`` 호출.
+
+    Requires:
+        BS rawNormalized parquet 가 갱신돼 있어야 한다.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCapitalTimeline(Company("005930"))
+        {"tables": [("연도별", [...], ["2024-12", ...])]}
+
+    SeeAlso:
+        - ``calcCapitalOverview``: 단일 스냅샷 metrics
+        - ``calcDebtTimeline``: 부채 시계열
+
+    AIContext:
+        AI 답변에서 자본 트렌드를 표 형태로 인용할 때 사용.
     """
     result = company.select("BS", ["자본총계", "이익잉여금", "미처분이익잉여금(결손금)"])
     parsed = toDictBySnakeId(result)
@@ -339,17 +390,43 @@ def _buildCapitalTable(equityRow: dict, retainedRow: dict | None, cols: list[str
 def calcDebtTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """부채총계·금융부채·영업부채 시계열.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 부채 항목 분해 (금융부채 = 차입금 + 사채 / 영업부채 = 부채총계 -
+          금융부채) + 비중 시계열.
 
-    Returns
-    -------
-    dict | None
-        tables : list[tuple[str, list[dict], list[str]]] — (라벨, 행 목록, 기간 컬럼) 튜플
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: tables 키에 (라벨, 행 목록, 기간 컬럼) 튜플 리스트.
+
+    Guide:
+        단기/장기 차입금이 분리 안 된 회사는 통합 ``borrowings`` fallback 사용.
+
+    When:
+        부채구조 안정성 분석·신용 평가 보고에서 차입금 의존도를 표로 보여줄 때.
+
+    How:
+        ``company.select("BS", ...)`` 의 차입금·사채 컬럼을 묶어
+        ``_buildDebtTable`` 로 행 생성.
+
+    Requires:
+        BS 의 borrowings/debentures 매핑이 정상이어야 한다.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDebtTimeline(Company("005930"))
+        {"tables": [("연도별", [...], [...])]}
+
+    SeeAlso:
+        - ``calcCapitalTimeline``: 자기자본 시계열
+        - ``calcInterestBurden``: 이자 부담
+
+    AIContext:
+        AI 답변의 부채 구조 인용 시 사용.
     """
     result = company.select("BS", ["부채총계", "단기차입금", "장기차입금", "차입부채", "사채"])
     parsed = toDictBySnakeId(result)
@@ -451,17 +528,42 @@ def _buildDebtTable(liabRow: dict, stbRow, ltbRow, bondRow, cols: list[str]) -> 
 def calcInterestBurden(company, *, basePeriod: str | None = None) -> dict | None:
     """이자보상배율·이자비용.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 이자보상배율 (interestCoverage) 정성 라벨 + 이자비용 절대값 산출.
 
-    Returns
-    -------
-    dict | None
-        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: metrics 키에 (항목명, 값) tuple list. ratios 부재 시 None.
+
+    Guide:
+        이자보상배율 임계값: ≥ 10 우수, ≥ 3 안정, ≥ 1.5 주의, 그 외 위험.
+
+    When:
+        부채 안정성/신용도 분석에서 이자 부담 한 줄 요약을 표시할 때.
+
+    How:
+        ``_getRatios`` → interestCoverage·interestExpense 를 정성 라벨에
+        매핑해 metrics 직렬화.
+
+    Requires:
+        IS 이자비용 + 영업이익 데이터 정상.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcInterestBurden(Company("005930"))
+        {"metrics": [("이자보상배율", "12.5배 — 우수"), ...]}
+
+    SeeAlso:
+        - ``calcDebtTimeline``: 부채 시계열
+        - ``credit.scoring.metrics``: 7 축 정량
+
+    AIContext:
+        AI 답변의 이자 부담 한 줄 요약 인용 시.
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -521,6 +623,14 @@ def calcLiquidity(company, *, basePeriod: str | None = None) -> dict | None:
         임계값: 유동비율 ≥ 150% = 안정, 100~150% = 보통, < 100% = 주의.
         당좌비율 ≥ 100% = 즉시 동원 가능. 본 함수는 credit engine 의 7 축
         분해와 별도 — 사용자 보고용 간단 표시.
+
+    When:
+        analysis() 안정성 축 표시 또는 사용자 보고서에서 유동성 지표를 정성
+        라벨과 함께 보여줄 때.
+
+    How:
+        ``_getRatios`` 로 ratios 스냅샷을 얻고 4 지표를 정성 임계값에 매칭한
+        metrics tuple list 로 변환.
 
     SeeAlso:
         - ``credit.scoring.metrics.calcAllMetrics``: 7 축 정량 지표

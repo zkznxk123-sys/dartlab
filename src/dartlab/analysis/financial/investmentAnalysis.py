@@ -118,29 +118,47 @@ def _estimateWacc(company) -> float | None:
 def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """ROIC 시계열 -- 투하자본 대비 실제 수익률.
 
-    IS에서 영업이익 + 세율, BS에서 자본 + 차입금으로 직접 계산.
-    ROIC = NOPAT / Invested Capital
+    Capabilities:
+        - ROIC = NOPAT / Invested Capital 시계열 + WACC 스프레드 + Damodaran
+          Excess Return 분해 + 변화 driver attribution.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 ROIC 시계열
-            period : str — 기간
-            operatingIncome : float | None — 영업이익
-            effectiveTaxRate : float — 유효세율 (%)
-            nopat : float | None — 세후영업이익
-            equity : float | None — 자본총계
-            totalBorrowing : float | None — 이자부차입금 합계
-            cash : float | None — 현금및현금성자산
-            investedCapital : float | None — 투하자본
-            roic : float | None — ROIC (%)
-            roicYoy : float | None — ROIC YoY 변화율 (%)
-            waccEstimate : float | None — 추정 WACC (%)
-            spread : float | None — ROIC - WACC (%p)
-            decomposition : dict | None — Damodaran Excess Return 분해
-                operatingMargin, assetTurnover, taxRetention, roicReconstructed,
-                excessReturnPct, excessReturnAbs, marginContribution,
-                turnoverContribution, dominantDriver
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history 키에 기간별 13+ 키 (operatingIncome/NOPAT/
+        investedCapital/roic/spread/decomposition) 행 리스트. 데이터 부재
+        시 None.
+
+    Guide:
+        IS 영업이익·법인세 + BS 자본·차입금으로 직접 계산. 유효세율 0~50%
+        클립. equity=0 인 기간은 인접 기간 fallback.
+
+    When:
+        가치 창출 진단 (ROIC vs WACC), 마진/회전율 driver 분해, 투자 효율
+        시계열 분석.
+
+    How:
+        IS/BS rawNormalized → NOPAT/Invested Capital 계산 → ROIC →
+        ``decomposeRoic`` 로 분해 → ``decomposeRoicChange`` 로 attribution.
+
+    Requires:
+        IS (영업이익/법인세/매출) + BS (자본/차입금/현금) ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcRoicTimeline(Company("005930"))
+        {"history": [{"period": "2024-12", "roic": 14.2, ...}]}
+
+    SeeAlso:
+        - ``calcEvaTimeline``: EVA 절대값
+        - ``attribution.decomposeRoicChange``: ROIC 변화 분해
+
+    AIContext:
+        AI 답변에서 ROIC 시계열·WACC 스프레드 인용 시.
     """
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익", "매출액"])
     bsResult = company.select(
@@ -314,19 +332,43 @@ def calcRoicTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict | None:
     """투자 강도 시계열 -- CAPEX/매출, 유무형 비율.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 투자 강도 시계열
-            period : str — 기간
-            capex : float | None — CAPEX (유형+무형 취득)
-            revenue : float | None — 매출액
-            tangibleAssets : float | None — 유형자산
-            intangibleAssets : float | None — 무형자산
-            totalAssets : float | None — 자산총계
-            capexToRevenue : float | None — CAPEX/매출 (%)
-            tangibleRatio : float | None — 유형자산/총자산 (%)
-            intangibleRatio : float | None — 무형자산/총자산 (%)
+    Capabilities:
+        - CAPEX(유형+무형 취득)/매출 비율 + 유형/무형자산 구성 시계열.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history 키에 기간별 CAPEX·매출·자산·비율 8 키 행 리스트.
+        데이터 부재 시 None.
+
+    Guide:
+        capexToRevenue > 10% = 자본집약, < 3% = 자산경량. 무형자산 비율
+        급등은 M&A·영업권 신호.
+
+    When:
+        설비투자 강도·자산 경량화 시계열 진단, 산업 평균 대비 투자 정책 비교.
+
+    How:
+        CF 의 PP&E·무형 취득 + IS 매출 + BS 유무형/자산총계 매핑 후 비율 계산.
+
+    Requires:
+        CF/IS/BS rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcInvestmentIntensity(Company("005930"))
+        {"history": [{"period": "...", "capexToRevenue": 8.2, ...}]}
+
+    SeeAlso:
+        - ``calcRoicTimeline``: 투자 수익률 평가
+        - ``calcEvaTimeline``: EVA 시계열
+
+    AIContext:
+        AI 답변에서 CAPEX 강도·자산 구성 인용 시.
     """
     cfResult = company.select(
         "CF",
@@ -388,18 +430,42 @@ def calcInvestmentIntensity(company, *, basePeriod: str | None = None) -> dict |
 def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """NOPAT + 투하자본 시계열.
 
-    투하자본 = 자본총계 + 이자부차입금 - 현금 (ROIC와 동일 기준).
+    Capabilities:
+        - NOPAT + 투하자본 + NOPAT/IC 수익률 + EVA (NOPAT - IC × WACC) 시계열.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 EVA 시계열
-            period : str — 기간
-            nopat : float | None — 세후영업이익
-            investedCapital : float — 투하자본
-            nopatReturn : float | None — NOPAT/투하자본 (%)
-            waccEstimate : float | None — 추정 WACC (%)
-            eva : float | None — 경제적부가가치 (NOPAT - IC * WACC)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history 키에 nopat/investedCapital/nopatReturn/waccEstimate/
+        eva 행 리스트. 데이터 부재 시 None.
+
+    Guide:
+        EVA > 0 = 자본비용 초과 가치 창출. 투하자본 = 자본총계 + 이자부차입
+        금 - 현금 (ROIC 와 동일 기준). WACC 추정은 ``_estimateWacc``.
+
+    When:
+        Stern Stewart 식 가치 창출 진단·자본비용 회수 여부 시계열로 확인.
+
+    How:
+        IS 영업이익·법인세 → NOPAT, BS 자본/차입금/현금 → 투하자본 → 비율 계산.
+
+    Requires:
+        IS/BS rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEvaTimeline(Company("005930"))
+        {"history": [{"period": "...", "eva": 12345}]}
+
+    SeeAlso:
+        - ``calcRoicTimeline``: 동일 구조 비율 표시
+
+    AIContext:
+        AI 답변에서 EVA 절대값·자본비용 회수 인용 시.
     """
     isResult = company.select("IS", ["영업이익", "법인세비용", "법인세차감전순이익"])
     bsResult = company.select(
@@ -495,19 +561,44 @@ def calcEvaTimeline(company, *, basePeriod: str | None = None) -> dict | None:
 def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | None:
     """investmentInOtherDetail docs 토픽에서 타법인 출자 총액 추출.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 사업보고서 텍스트 블록에서 "조/억원" 출자 총액 패턴 정규식 매칭으로
+          totalBookValue (억원) 추출.
 
-    Returns
-    -------
-    dict | None
-        totalBookValue : float | None — 출자 총 장부금액 (억원)
-        description : str | None — 원문 서술 발췌
-        period : str | None — 기준 연도
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (현재 미사용).
+
+    Returns:
+        dict | None: totalBookValue/description/period 키. 패턴 매칭 실패 시
+        None.
+
+    Guide:
+        DART 사업보고서 전용. 텍스트 정규식 매칭이므로 회사별 서술 차이에
+        따라 누락 가능.
+
+    When:
+        타법인 출자 규모를 본문 서술 그대로 발췌해야 할 때.
+
+    How:
+        ``company.show("investmentInOtherDetail")`` 의 text 블록 preview 를
+        정규식 ``출자 금액 ... 조 ... 억`` 패턴 매칭.
+
+    Requires:
+        DART investmentInOtherDetail docs 토픽 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcInvestmentInOther(Company("005930"))
+        {"totalBookValue": 12345, ...}
+
+    SeeAlso:
+        - ``calcInvestmentIntensity``: 본업 투자 강도
+
+    AIContext:
+        AI 답변에서 타법인 출자 총액 인용 시.
     """
     import re
 
@@ -565,10 +656,41 @@ def calcInvestmentInOther(company, *, basePeriod: str | None = None) -> dict | N
 def calcInvestmentFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """투자 분석 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 메시지 문자열 리스트 (저ROIC 지속, 무형자산비율 급등 등).
+    Capabilities:
+        - ROIC 3 년 연속 < 5% (자본비용 미회수)·무형자산비율 +10%p 급등 등을
+          한국어 flags 로 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        flag 임계 — ROIC < 5% × 3 년 / 무형자산비율 +10%p 이상.
+
+    When:
+        보고서·UI 위험 배너에 투자 관련 경고 한 줄 표시할 때.
+
+    How:
+        하위 calc 결과를 임계값과 비교 후 한국어 포맷팅.
+
+    Requires:
+        ``calcRoicTimeline`` + ``calcInvestmentIntensity`` 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcInvestmentFlags(Company("005930"))
+        ["ROIC 3.2% — 3년 연속 ..."]
+
+    SeeAlso:
+        - ``calcRoicTimeline``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 투자 위험 한 줄 인용 시.
     """
     flags = []
 

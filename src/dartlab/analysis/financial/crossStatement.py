@@ -27,23 +27,43 @@ from dartlab.core.utils.safe import getFirst as _getFirst  # SSOT
 def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """IS-CF 괴리 시계열 — 순이익 vs 영업CF.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 당기순이익과 영업현금흐름의 연도별 괴리율·방향·비경상 왜곡 플래그.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            netIncome : float — 당기순이익 (원)
-            ocf : float — 영업현금흐름 (원)
-            divergence : float | None — 괴리율 (%)
-            direction : str | None — 괴리 방향 ("NI>CF"|"CF>NI")
-            nonRecurringDistortion : bool — 비경상 왜곡 여부
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (annualColsFromPeriods 입력).
+
+    Returns:
+        dict | None: history 키에 period/netIncome/ocf/divergence/direction/
+        nonRecurringDistortion 행 리스트. 데이터 부재 시 None.
+
+    Guide:
+        괴리율 = (NI - OCF) / |NI| * 100. 영업이익 대비 NI 가 30% 미만이면
+        비경상 왜곡으로 표시.
+
+    When:
+        이익의 질·회계 신뢰성 검증, 종합 이상 점수 산출의 1 차 신호.
+
+    How:
+        IS 의 당기순이익·영업이익과 CF 의 영업CF 를 매핑 → 연도별 컬럼 순회.
+
+    Requires:
+        IS·CF rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcIsCfDivergence(Company("005930"))
+        {"history": [{"period": "2024-12", "divergence": 12.3, ...}]}
+
+    SeeAlso:
+        - ``calcAnomalyScore``: 종합 이상 점수
+        - ``earningsQuality.calcAccrualAnalysis``: 발생액 분석
+
+    AIContext:
+        AI 답변에서 이익 - 현금 괴리를 한 줄로 인용할 때.
     """
     isResult = company.select("IS", ["당기순이익", "영업이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
@@ -108,23 +128,43 @@ def calcIsCfDivergence(company, *, basePeriod: str | None = None) -> dict | None
 def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """IS-BS 괴리 시계열 — 매출 성장 vs 매출채권/재고 성장.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 매출 성장률 vs 매출채권/재고 성장률의 %p 차이 (gap) 시계열.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            revenueGrowth : float | None — 매출 성장률 (%)
-            receivableGrowth : float | None — 매출채권 성장률 (%)
-            inventoryGrowth : float | None — 재고자산 성장률 (%)
-            revRecGap : float | None — 매출-채권 성장 괴리 (%p)
-            revInvGap : float | None — 매출-재고 성장 괴리 (%p)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history 키에 period/revenueGrowth/receivableGrowth/
+        inventoryGrowth/revRecGap/revInvGap 행 리스트.
+
+    Guide:
+        gap > 20%p 는 매출 인식 의심 또는 재고 적체. 부호가 양수이면 BS 가
+        더 빨리 증가.
+
+    When:
+        매출 인식 정책의 보수성·재고 적체 신호를 시계열로 확인할 때.
+
+    How:
+        IS 매출액 + BS 매출채권·재고를 매핑 → 연도별 growth 계산 후 차이 산출.
+
+    Requires:
+        BS/IS rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcIsBsDivergence(Company("005930"))
+        {"history": [{"period": "...", "revRecGap": 5.2, ...}]}
+
+    SeeAlso:
+        - ``calcIsCfDivergence``: 이익-현금 괴리
+        - ``calcAnomalyScore``: 종합 점수화
+
+    AIContext:
+        AI 답변에서 매출 인식 신뢰성 한 줄 인용 시.
     """
     isResult = company.select("IS", ["매출액"])
     bsResult = company.select("BS", ["매출채권및기타채권", "재고자산"])
@@ -198,20 +238,44 @@ def calcIsBsDivergence(company, *, basePeriod: str | None = None) -> dict | None
 def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
     """종합 이상 점수 시계열 — 교차검증 결과 종합.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - IS-CF 괴리 + IS-BS 괴리 + 발생액 + Beneish M-Score 를 5 항목
+          가중합 (총 100 점) 으로 종합한 이상 점수 시계열.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            score : float — 이상 점수 (점, 0~100)
-            components : dict — 구성 요소별 점수
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history 키에 period/score/components 행 리스트. 데이터
+        부재 시 None.
+
+    Guide:
+        가중치: IS-CF 30 + 매출채권 gap 20 + 재고 gap 20 + 발생액 15 +
+        M-Score 15. 비경상 왜곡 시 IS-CF 절반 감쇄.
+
+    When:
+        재무제표 신뢰성에 대한 단일 스코어가 필요한 경우 (분석 보고 헤더).
+
+    How:
+        하위 4 calc 함수 결과를 period 키로 묶어 가중합 산출.
+
+    Requires:
+        IS/BS/CF 데이터 + earningsQuality 모듈.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAnomalyScore(Company("005930"))
+        {"history": [{"period": "2024-12", "score": 35.2, ...}]}
+
+    SeeAlso:
+        - ``calcCrossStatementFlags``: 임계 초과 플래그
+        - ``earningsQuality.calcBeneishTimeline``: M-Score
+
+    AIContext:
+        AI 답변에서 신뢰성 단일 스코어 인용.
     """
     isCf = calcIsCfDivergence(company, basePeriod=basePeriod)
     isBs = calcIsBsDivergence(company, basePeriod=basePeriod)
@@ -301,10 +365,41 @@ def calcAnomalyScore(company, *, basePeriod: str | None = None) -> dict | None:
 def calcCrossStatementFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """교차검증 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 메시지 문자열 리스트 (IS-CF 괴리, 매출채권/재고 이상 증가, 종합 이상점수 등).
+    Capabilities:
+        - IS-CF 50%+ 괴리, 매출채권/재고 20%p+ 초과 성장, 종합 점수 70+ 시
+          한국어 경고 문자열 리스트 생성.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 초과 없으면 빈 리스트.
+
+    Guide:
+        flags 는 사용자 친화 한국어 한 줄. 정량 점수는 anomaly score 사용.
+
+    When:
+        보고서·UI 의 위험 배너 영역에 표시할 경고 문구가 필요할 때.
+
+    How:
+        하위 calc 3 종 결과를 임계값과 비교 후 한국어 포맷팅.
+
+    Requires:
+        하위 3 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCrossStatementFlags(Company("005930"))
+        ["IS-CF 괴리 ..."]
+
+    SeeAlso:
+        - ``calcAnomalyScore``: 정량 점수
+
+    AIContext:
+        AI 답변 위험 경고 배너 인용.
     """
     flags = []
 
@@ -342,33 +437,44 @@ def calcCrossStatementFlags(company, *, basePeriod: str | None = None) -> list[s
 def calcArticulationCheck(company, *, basePeriod: str | None = None) -> dict | None:
     """BS-CF 정합성 검증 — 재무제표 3표가 수학적으로 연결되는지.
 
-    3가지 정합성:
-    1. PPE 정합: delta_PPE ≈ CAPEX - 감가상각 - 처분
-    2. 현금 정합: delta_Cash ≈ OCF + ICF + FCF
-    3. 자본 정합: delta_Equity ≈ NI - 배당 + OCI + 신주발행
+    Capabilities:
+        - PPE/현금/자본 정합 3 식의 오차 시계열 산출.
 
-    오차가 크면 연결범위 변동, 환율 효과, 재분류 가능성.
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Returns:
+        dict | None: history 키에 period/ppeError/cashError/equityError/
+        maxErrorPct 행 리스트. 데이터 부재 시 None.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            ppeError : float — PPE 정합 오차 (원)
-            cashError : float — 현금 정합 오차 (원)
-            equityError : float — 자본 정합 오차 (원)
-            maxErrorPct : float — 최대 오차율 (%)
+    Guide:
+        정합 식 — delta_PPE ≈ CAPEX - 감가상각 - 처분 / delta_Cash ≈
+        OCF + ICF + FCF / delta_Equity ≈ NI - 배당 + OCI + 신주발행. 오차가
+        크면 연결범위 변동, 환율 효과, 재분류 가능성.
 
-    Notes
-    -----
-    학술근거: Articulation of Financial Statements (FASB/IASB).
+    When:
+        재무제표 연결 변경·재분류·환율 효과 의심 시점에 정합성 검증.
+
+    How:
+        BS/CF/IS 3 표를 매핑 후 3 정합 식에 대한 잔차 산출.
+
+    Requires:
+        BS/IS/CF rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcArticulationCheck(Company("005930"))
+        {"history": [{"period": "...", "maxErrorPct": 3.2, ...}]}
+
+    SeeAlso:
+        - ``calcAnomalyScore``: 종합 신뢰성 점수
+
+    AIContext:
+        AI 답변에서 연결 범위 변동 가능성 인용 시. 학술근거: Articulation
+        of Financial Statements (FASB/IASB).
     """
     bsResult = company.select(
         "BS",

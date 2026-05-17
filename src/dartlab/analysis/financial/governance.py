@@ -22,22 +22,41 @@ from dartlab.core.utils.helpers import MAX_RATIO_YEARS, annualColsFromPeriods, t
 def calcOwnershipTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """최대주주 지분율 시계열 + 최근 주주 구성.
 
-    report.majorHolder에서 연도별 합산 지분율 추이와
-    최신 시점 개별 주주(top 10)를 추출한다.
+    Capabilities:
+        - DART majorHolder 섹션의 연도별 합산 지분율 추이 + 최신 상위 10 주주.
 
-    Returns
-    -------
-    dict | None
-        None: majorHolder 데이터 없음.
-        history : list[dict] — 연도별 지분율 추이
-            year : str — 연도
-            ratio : float — 합산 지분율 (%)
-            change : float — 전기 대비 변동 (%p)
-        latestHolders : list[dict] — 최근 주주 구성 (상위 10명)
-            name : str — 주주명
-            relate : str — 관계
-            ratio : float — 지분율 (%)
-            shares : int — 보유 주식수
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (현재 미사용).
+
+    Returns:
+        dict | None: history (연도별 ratio/change %p) + latestHolders (상위
+        10) 객체. majorHolder 미가용 시 None.
+
+    Guide:
+        DART 전용 — EDGAR Company 는 None 반환 (SEC 동등 소스 없음).
+
+    When:
+        지배구조 보고에서 최대주주 안정성·지분 변동 추적할 때.
+
+    How:
+        ``_safePivotMajorHolder`` 결과를 MAX_RATIO_YEARS 로 절단 후 history.
+
+    Requires:
+        DART report.majorHolder 수신.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcOwnershipTrend(Company("005930"))
+        {"history": [...], "latestHolders": [...]}
+
+    SeeAlso:
+        - ``calcBoardComposition``: 이사회 구성
+
+    AIContext:
+        AI 답변에서 최대주주 변동·집중도 인용 시.
     """
     result = _safePivotMajorHolder(company)
     if result is None:
@@ -72,15 +91,41 @@ def calcOwnershipTrend(company, *, basePeriod: str | None = None) -> dict | None
 def calcBoardComposition(company, *, basePeriod: str | None = None) -> dict | None:
     """이사회 구성 -- 사외이사비율, 전체 임원 수.
 
-    report.executive에서 최신 분기 기준 이사회 구성을 추출한다.
+    Capabilities:
+        - 최신 분기 임원 수 / 등기 / 사외 / 사외이사비율 (%).
 
-    Returns
-    -------
-    dict
-        totalCount : int — 전체 임원 수
-        registeredCount : int — 등기임원 수
-        outsideCount : int — 사외이사 수
-        outsideRatio : float — 사외이사비율 (%)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (현재 미사용).
+
+    Returns:
+        dict | None: totalCount/registeredCount/outsideCount/outsideRatio.
+        executive 미가용 시 None.
+
+    Guide:
+        DART report.executive 기반. EDGAR Company 는 None.
+
+    When:
+        지배구조 분석 헤더에서 이사회 한 줄 요약 표시.
+
+    How:
+        ``_safePivotExecutive`` 결과 카운트 사용 후 비율 계산.
+
+    Requires:
+        DART report.executive 수신.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcBoardComposition(Company("005930"))
+        {"totalCount": 10, "outsideRatio": 60.0, ...}
+
+    SeeAlso:
+        - ``calcIndependentDirectorQuality``: 독립성 평가
+
+    AIContext:
+        AI 답변에서 이사회 구성 한 줄 인용 시.
     """
     result = _safePivotExecutive(company)
     if result is None:
@@ -109,18 +154,41 @@ def calcBoardComposition(company, *, basePeriod: str | None = None) -> dict | No
 def calcAuditOpinionTrend(company, *, basePeriod: str | None = None) -> dict | None:
     """감사의견 + 감사인 시계열.
 
-    report.audit에서 연도별 감사의견과 감사인을 추출한다.
-    감사인 변경도 감지한다.
+    Capabilities:
+        - 연도별 감사의견 + 감사법인 + 변경 플래그.
 
-    Returns
-    -------
-    dict | None
-        None: audit 데이터 없음.
-        history : list[dict] — 연도별 감사 이력
-            year : str — 연도
-            opinion : str — 감사의견
-            auditor : str — 감사인
-            auditorChanged : bool — 감사인 변경 여부
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (현재 미사용).
+
+    Returns:
+        dict | None: history 키에 year/opinion/auditor/auditorChanged 행
+        리스트. audit 미가용 시 None.
+
+    Guide:
+        DART report.audit 기반. 감사인 변경 ≥ 1 회 감지.
+
+    When:
+        감사 안정성·의견 변경 (한정·부적정) 추적, 감사인 교체 빈도 점검.
+
+    How:
+        ``_safePivotAudit`` 의 years/opinions/auditors 매핑 후 직전과 비교.
+
+    Requires:
+        DART report.audit 수신.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAuditOpinionTrend(Company("005930"))
+        {"history": [{"year": "...", "opinion": "적정", ...}]}
+
+    SeeAlso:
+        - ``calcOwnershipTrend``: 지배구조 시계열
+
+    AIContext:
+        AI 답변의 감사 안정성 인용 시.
     """
     result = _safePivotAudit(company)
     if result is None:
@@ -158,21 +226,43 @@ def calcAuditOpinionTrend(company, *, basePeriod: str | None = None) -> dict | N
 def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dict | None:
     """임원 총보수 5Y 증가율 vs 매출/순이익 증가율 괴리.
 
-    실적 부진에도 임원보수만 증가하는 패턴을 감지한다.
+    Capabilities:
+        - 5 년 임원 총보수 CAGR 과 매출/순이익 CAGR 비교 + 괴리 (%p) 산출.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            year : str
-            execPayTotal : float — 전체 임원 보수 총액 (원)
-            revenue : float — 매출 (원)
-            netIncome : float — 순이익 (원)
-        cagr : dict
-            execPay : float — 5Y CAGR (%)
-            revenue : float — 5Y CAGR (%)
-            netIncome : float — 5Y CAGR (%)
-        divergence : float | None — execPay CAGR - 매출 CAGR (%p). 양수 = 매출보다 빨리 증가.
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history (연도별 pay/매출/NI) + cagr 3 종 + divergence
+        (execPay - revenue %p). 데이터 부족 시 None.
+
+    Guide:
+        divergence > 0 이면 실적 대비 임원보수가 빠르게 증가 — 거버넌스
+        경고 신호.
+
+    When:
+        지배구조 보고서에서 경영진 인센티브 정렬 점검할 때.
+
+    How:
+        ``_safePivotExecutivePay`` 의 payByTypeDf 를 연도별 합산 후 IS 매출/
+        순이익 매핑 → CAGR 계산.
+
+    Requires:
+        DART report.executive (보수 섹션) + IS sales/net_profit.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcExecutivePayDivergence(Company("005930"))
+        {"history": [...], "cagr": {...}, "divergence": 4.5}
+
+    SeeAlso:
+        - ``calcBoardComposition``: 이사회 구성
+
+    AIContext:
+        AI 답변에서 경영진 인센티브 정렬 인용 시.
     """
     pay = _safePivotExecutivePay(company)
     if pay is None or pay.payByTypeDf is None:
@@ -258,16 +348,42 @@ def calcExecutivePayDivergence(company, *, basePeriod: str | None = None) -> dic
 def calcIndependentDirectorQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """외부이사 독립성 — 비율 시계열 + 독립성 플래그.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            year : str
-            total : int
-            outside : int
-            ratio : float — 사외이사 비율 (%)
-        latest : dict — 최신 구성
-        flags : list[str] — 독립성 우려 신호
+    Capabilities:
+        - 사외이사 비율 + 독립성 우려 한국어 flags 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (현재 미사용).
+
+    Returns:
+        dict | None: history (단일 latest 행 list) + latest (구성) + flags
+        (한국어 경고 리스트). executive 미가용 시 None.
+
+    Guide:
+        flags 기준 — 25% 미만 취약 / 33% 미만 1/3 기준 미달 / 사외 ≤ 2 명
+        + 전체 ≥ 6 명 절대수 부족.
+
+    When:
+        이사회 독립성 정성 평가가 필요할 때.
+
+    How:
+        ``_safePivotExecutive`` 결과 카운트 → 비율 계산 → 임계 비교.
+
+    Requires:
+        DART report.executive 수신.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcIndependentDirectorQuality(Company("005930"))
+        {"latest": {...}, "flags": [...]}
+
+    SeeAlso:
+        - ``calcBoardComposition``: 단순 비율 산출
+
+    AIContext:
+        AI 답변에서 독립성 우려 한 줄 인용 시.
     """
     from dartlab.core.utils.helpers import parseNumStr  # noqa: F401 (consistency)
 
