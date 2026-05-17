@@ -193,6 +193,36 @@ def calcDcf(
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
         overrideApplied : dict | None — 적용된 override (있으면)
+
+    Capabilities:
+        - 5 년 FCF projection + 영구가치 (terminal) → DCF intrinsic value
+        - overrides 로 WACC/terminalGrowth 가정 변경 가능
+
+    Guide:
+        Damodaran DCF 표준. marginOfSafety ≥ 30% = 저평가.
+
+    When:
+        Valuation + AI DCF 답변.
+
+    How:
+        ``dcfValuation`` 위임 → overrides 적용 → 결과 dict.
+
+    Requires:
+        IS/CF 시계열 + WACC 추정.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDcf(company)["perShareValue"]
+        82000
+
+    See Also:
+        - calcDdm : 배당 기반
+        - calcRelativeValuation : 상대
+
+    AIContext:
+        "DCF 적정가" 답변 시 perShareValue + marginOfSafety 인용.
     """
     from dartlab.analysis.valuation.dcf import dcfValuation
     from dartlab.synth.overrides import applyOverride
@@ -285,6 +315,36 @@ def calcDdm(company: Any, *, basePeriod: str | None = None) -> dict | None:
         warnings : list[str] — 경고 메시지
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+
+    Capabilities:
+        - Gordon / H-Model 자동 선택 + dividend growth + discount rate → 주당 내재가치
+        - calcDividendPolicy 연간 배당 사용 (분기 합산 오류 회피)
+
+    Guide:
+        배당주 (payout > 30% 안정) 한정 적용. 무배당/저배당은 calcDcf 사용.
+
+    When:
+        DDM valuation + AI 배당주 평가 답변.
+
+    How:
+        capitalAllocation.calcDividendPolicy → annual DPS → ddmValuation 모델 호출.
+
+    Requires:
+        배당 시계열 + WACC.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDdm(company)["intrinsicValue"]
+        76000
+
+    See Also:
+        - calcDcf : FCF 기반
+        - capitalAllocation.calcDividendPolicy : 입력
+
+    AIContext:
+        "DDM 적정가" 답변 시 intrinsicValue + modelUsed 인용.
     """
     from dartlab.analysis.financial.capitalAllocation import calcDividendPolicy
     from dartlab.analysis.valuation.dcf import ddmValuation
@@ -356,6 +416,36 @@ def calcRelativeValuation(company: Any, *, basePeriod: str | None = None) -> dic
         warnings : list[str] — 경고 메시지
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+
+    Capabilities:
+        - PER/PBR/EV-EBITDA/PSR/PEG 5 멀티플 동시 → 업종 대비 premium/discount + consensus
+        - 멀티플별 implied value 산출
+
+    Guide:
+        업종 대비 -30% 이상 discount = 저평가. consensusValue = 5 멀티플 평균.
+
+    When:
+        상대 valuation + AI 업종 대비 답변.
+
+    How:
+        sector multiples + 현재 멀티플 → implied per/pbr/etc. → consensus.
+
+    Requires:
+        sector params + 현재 가격.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcRelativeValuation(company)["consensusValue"]
+        72000
+
+    See Also:
+        - calcDcf : DCF
+        - sector params
+
+    AIContext:
+        "업종 대비 valuation" 답변 시 premiumDiscount + consensusValue 인용.
     """
     from dartlab.analysis.valuation.dcf import relativeValuation
 
@@ -400,6 +490,36 @@ def calcResidualIncome(company: Any, *, basePeriod: str | None = None) -> dict |
         warnings : list[str] — 경고 메시지
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+
+    Capabilities:
+        - BPS + 잔여이익 (ROE-COE) × 자본 → 내재가치 + 상승여력
+        - Ohlson 1995 RIM 표준
+
+    Guide:
+        ROE > COE 가 지속 = 가치 창출 (intrinsic > BPS). 반대는 가치 파괴.
+
+    When:
+        RIM valuation + AI 자기자본 기반 답변.
+
+    How:
+        ``_rimCalc`` 위임 → 시계열 + 터미널 합산.
+
+    Requires:
+        BS 자기자본 + ROE 시계열 + beta.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcResidualIncome(company)["intrinsicValue"]
+        78000
+
+    See Also:
+        - calcDcf / calcDdm : 대안
+        - _rimCalc : core
+
+    AIContext:
+        "RIM 적정가" 답변 시 intrinsicValue + upside 인용.
     """
     series, shares, currency = _getSeriesAndShares(company)
     sp = _getSectorParams(company)
@@ -468,6 +588,35 @@ def calcNavValuation(company: Any) -> dict | None:
         holdingDiscount : float — 지주사 할인율 (0.30)
         subsidiaries : list[dict] — 자회사별 상세 (code, ratio(%), marketCap(원), value(원))
         netDebt : float — 순차입금 (원)
+
+    Capabilities:
+        - 상장 자회사 시총 × 지분율 합산 - 순차입금 → NAV. 한국 평균 30% 할인 적용
+        - SK/LG/삼성/POSCO 4 지주사 매핑 SSOT
+
+    Guide:
+        한국 지주사 valuation 표준. holdingDiscount 30% 는 실증 평균 (Damodaran KR study).
+
+    When:
+        지주사 valuation + AI 지주사 답변.
+
+    How:
+        _HOLDING_SUBS lookup → 자회사 시총 fetch → 합산 - netDebt → 할인.
+
+    Requires:
+        _HOLDING_SUBS 에 등록된 종목.
+
+    Raises:
+        없음 — 미등록 시 None.
+
+    Example:
+        >>> calcNavValuation(Company("034730"))["navPerShare"]
+        180000
+
+    See Also:
+        - _HOLDING_SUBS : 매핑 SSOT
+
+    AIContext:
+        "지주사 NAV" 답변 시 navPerShare + holdingDiscount 인용.
     """
     stockCode = getattr(company, "stockCode", "")
     subs = _HOLDING_SUBS.get(stockCode)
@@ -541,6 +690,36 @@ def calcReverseImplied(company: Any, *, basePeriod: str | None = None) -> dict |
         warnings : list[str] — 경고 메시지
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+
+    Capabilities:
+        - 시장 가격에서 역산한 implied 매출 성장률 + 시장 신호 (overpriced/underpriced/fair)
+        - 가정한 margin/WACC 명시
+
+    Guide:
+        Mauboussin 2006 reverse DCF. impliedGrowth > 역사 평균 + 5% = 시장 과도 낙관.
+
+    When:
+        시장 가격 해석 + AI "시장이 얼마를 기대" 답변.
+
+    How:
+        market cap → reverseImpliedGrowth → 가정 WACC/margin 으로 역산.
+
+    Requires:
+        시가총액 + 매출 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcReverseImplied(company)["impliedGrowthRate"]
+        12.5
+
+    See Also:
+        - calcDcf : 정방향
+        - priceImplied.reverseImpliedGrowth
+
+    AIContext:
+        "시장이 내재하는 성장률" 답변 시 impliedGrowthRate + signal 인용.
     """
     from dartlab.analysis.valuation.priceImplied import reverseImpliedGrowth
 
@@ -580,6 +759,36 @@ def calcSensitivity(company: Any, *, basePeriod: str | None = None) -> dict | No
         baseValue : float — 기준 주가 (원)
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+
+    Capabilities:
+        - WACC × terminalGrowth 2D 그리드로 DCF 결과 sensitivity
+        - 가정 변동 시 주가 범위 표시
+
+    Guide:
+        ±1%p 변동 grid → 가정 민감도 시각화. 셀 간격 큼 = high sensitivity.
+
+    When:
+        Valuation 가정 검증 + AI "가정 변하면" 답변.
+
+    How:
+        ``sensitivityAnalysis`` 위임 → grid 산출.
+
+    Requires:
+        DCF 기본 가정.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSensitivity(company)["baseValue"]
+        82000
+
+    See Also:
+        - calcDcf : base case
+        - sensitivityAnalysis
+
+    AIContext:
+        "가정 민감도" 답변 시 grid range 인용.
     """
     from dartlab.analysis.valuation.dcf import sensitivityAnalysis
 
