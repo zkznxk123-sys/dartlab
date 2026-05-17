@@ -30,6 +30,21 @@ def calcCEOTurnover(company, *, basePeriod: str | None = None) -> dict | None:
     MSCI Board refreshment 와 SSRN CEO tenure inverted-U 이론(취임 3년 이내
     고위험) 에 대응하는 축.
 
+    Capabilities:
+        - 5년 윈도우 CEO 이름 집합 변동을 교체 횟수와 재임으로 환산.
+
+    When:
+        지배구조 리스크 점검, 경영진 안정성 평가 시점.
+
+    How:
+        executive docs 개인별 테이블 → isCeo 필터 → 연도별 집합 diff.
+
+    Requires:
+        DART 사업보고서 임원의 현황 파서 결과 (_loadExecutiveDocs).
+
+    AIContext:
+        turnoverCount 단독으로 경영 위기 단정 금지 — 재임·맥락 함께.
+
     Parameters
     ----------
     company : Company
@@ -149,6 +164,21 @@ def calcRelatedPartyIntensity(company, *, basePeriod: str | None = None) -> dict
     채무보증을 추출하고 전사 매출·자산 대비 비율을 산출한다. tunneling
     (자산·수익 이전) 문헌과 ISS Audit&Risk pillar 에 대응하는 축으로,
     지주·계열 중심 기업의 이해충돌 가능성을 포착한다.
+
+    Capabilities:
+        - 특수관계자 매출·매입·보증의 전사 대비 비율과 추세 산출.
+
+    When:
+        지주·계열 의존도 평가, tunneling 의심 점검 시점.
+
+    How:
+        relatedPartyTx 파서 → 연도별 합산 → IS/BS 대비 비율 + 추세 분류.
+
+    Requires:
+        DART 「대주주 등과의 거래내용」 파서 결과 + IS/BS 데이터.
+
+    AIContext:
+        절대 수치보다 피어 대비·추세 해석. 단위 오류 가능성 (1%↓, 10000%↑) 경고.
 
     Parameters
     ----------
@@ -334,6 +364,21 @@ def calcLegalEventRisk(company, *, basePeriod: str | None = None) -> dict | None
     소송 건수·금액, 자기자본 대비 채무보증 비율을 추출한다. 이벤트 스터디
     실증(벌칙공시 이후 누적초과수익률 음)과 ISS Governance QualityScore
     Audit&Risk 필러에 대응하는 축.
+
+    Capabilities:
+        - 제재·소송·채무보증을 3 년 윈도우로 집계해 자기자본 대비 비율 산출.
+
+    When:
+        Audit&Risk 평가, 우발부채 부담 점검 시점.
+
+    How:
+        sanction/contingent 파서 결과 → 윈도우 합산 → 자기자본 대비 비율.
+
+    Requires:
+        DART 「제재 현황」·「우발부채」 파서 결과 + 자기자본 (BS).
+
+    AIContext:
+        이벤트 0 건은 None 아닌 count=0 — 미보고 가능성도 함께 언급.
 
     Parameters
     ----------

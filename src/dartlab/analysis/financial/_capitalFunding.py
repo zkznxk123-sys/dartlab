@@ -111,6 +111,12 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
         안정적 레버리지. paidInPct 큰 신규 IPO 회사 — 운영 안정화 후 retained
         증가 추세 확인. opFundingPct 30%+ = 매입채무 의존 (B2B 산업 특성).
 
+    When:
+        자본구조 변화·차입 의존도 추세 진단 시점.
+
+    How:
+        BS 자본·부채를 4 원천으로 분해 후 시계열 비중 + 한국어 diagnosis.
+
     SeeAlso:
         - ``calcDebtTimeline``: 차입금 시계열
         - ``calcCapitalOverview``: 자본구조 종합
@@ -297,10 +303,38 @@ def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None
 def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
     """자금조달 관련 경고/기회 플래그.
 
+    Capabilities:
+        - 부채비율·이자보상·유동성·Altman/Piotroski 등 신호 플래그화.
+
     Returns
     -------
     list[tuple[str, str]]
         각 원소는 (플래그 텍스트, "warning" | "opportunity").
+
+    Guide:
+        금융업과 비금융업 임계 분리. 순현금/고 이자보상은 완화 어조.
+
+    When:
+        자금조달 축 종합 진단 후 사용자 노출 직전.
+
+    How:
+        ratios + BS 직접 계산 → 임계 비교 → 한국어 플래그 텍스트 생성.
+
+    Requires:
+        capital._getRatios 결과 + BS 부채/차입 항목.
+
+    Raises:
+        없음 — ratios 부재 시 빈 리스트.
+
+    Example:
+        >>> calcCapitalFlags(company)
+        [('고부채 (부채비율 220%)', 'warning')]
+
+    See Also:
+        - calcFundingSources : 자금조달 4 원천.
+
+    AIContext:
+        warning 라벨은 정성 신호 — 즉시 위기 단정 금지, 맥락 함께.
     """
     flags: list[tuple[str, str]] = []
 

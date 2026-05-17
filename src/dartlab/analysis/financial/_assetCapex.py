@@ -23,6 +23,9 @@ _MAX_YEARS = 8
 def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
     """CAPEX vs 감가상각 + 건설중인자산 추이.
 
+    Capabilities:
+        - CAPEX/감가상각 비율과 건설중인자산 비중을 시계열로 정리.
+
     Parameters
     ----------
     company : Company
@@ -41,6 +44,31 @@ def calcCapexPattern(company, *, basePeriod: str | None = None) -> dict | None:
             cipPct : float — 건설중인자산 비중 (%)
             investmentType : str — 투자 유형 판단
         history : list[dict] — 연도별 CAPEX 패턴 시계열
+
+    Guide:
+        비율 1.5 초과 = 적극 투자, 1.0 이하 = 유지/축소.
+
+    When:
+        설비 사이클 진단, CAPEX 강도 평가 시점.
+
+    How:
+        CF 유형/무형 취득 합 vs IS·CF 감가상각 (3-tier fallback) 비교.
+
+    Requires:
+        BS/CF/IS 다년 + 유형자산·감가상각 항목.
+
+    Raises:
+        없음 — BS 결측 시 None.
+
+    Example:
+        >>> calcCapexPattern(company)
+        {'latest': {'investmentType': '성장 투자 — CAPEX > 감가상각'}, ...}
+
+    See Also:
+        - calcInvestmentPropertyTrend : 투자부동산 추세.
+
+    AIContext:
+        ratio 가 None 이면 감가상각 추정 오차 가능성 명시.
     """
     # CAPEX = 유형자산 취득(CF 투자활동에서)
     cfAccounts = ["유형자산의취득", "무형자산의취득", "감가상각비"]
@@ -155,6 +183,9 @@ def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> di
     부동산 비중이 높은 기업(REIT, 건설사, 보험사)에서 자산 분석 정확도 향상.
     notes.investmentProperty에서 항목별 시계열을 추출하여 총자산 대비 비중 추적.
 
+    Capabilities:
+        - 투자부동산 시계열 비중 + 주석 enrichment 결합.
+
     Parameters
     ----------
     company : Company
@@ -172,6 +203,31 @@ def calcInvestmentPropertyTrend(company, *, basePeriod: str | None = None) -> di
             ipPct : float — 총자산 대비 비중 (%)
         trend : str | None — 비중 추세 ("비중 증가"|"비중 감소"|"안정")
         notesDetail : list[dict] | None — 주석 상세 데이터
+
+    Guide:
+        REIT/건설사 외엔 비중 5% 미만이 일반.
+
+    When:
+        부동산 비중 큰 기업의 자산 구조 검토 시점.
+
+    How:
+        BS 투자부동산/자산총계 비중 + notes investmentProperty 결합.
+
+    Requires:
+        BS 다년 + 투자부동산 계정.
+
+    Raises:
+        없음 — 결측 시 None.
+
+    Example:
+        >>> calcInvestmentPropertyTrend(company)
+        {'trend': '비중 증가', ...}
+
+    See Also:
+        - calcIntangibleAssetDetail : 무형자산 분해.
+
+    AIContext:
+        주석 detail 부재 시 history 비중만 인용.
     """
     bsResult = company.select("BS", ["자산총계", "투자부동산"])
     parsed = toDictBySnakeId(bsResult)
@@ -243,6 +299,9 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
     영업권 비중, R&D 자산화 추세, 손상차손 리스크를 분석.
     바이오/IT 등 IP 비중 높은 기업에서 이익품질 판단에 중요.
 
+    Capabilities:
+        - 무형자산 항목별 비중과 영업권 비중 추세 분석.
+
     Parameters
     ----------
     company : Company
@@ -263,6 +322,31 @@ def calcIntangibleAssetDetail(company, *, basePeriod: str | None = None) -> dict
         goodwillPct : float | None — 영업권 비중 (%)
         trend : str | None — 비중 추세 ("비중 증가"|"비중 감소"|"안정")
         notesDetail : list[dict] | None — 주석 원본
+
+    Guide:
+        영업권 비중 50% 초과면 손상차손 리스크 우선 점검.
+
+    When:
+        무형자산 비중 큰 기업 (바이오·IT) 이익 질 점검 시점.
+
+    How:
+        notes intangibleAsset 항목별 합산 + BS 백업 → 비중·추세 산출.
+
+    Requires:
+        BS 다년 + notes intangibleAsset 또는 BS 무형자산·영업권.
+
+    Raises:
+        없음 — 결측 시 None.
+
+    Example:
+        >>> calcIntangibleAssetDetail(company)
+        {'goodwillPct': 35.0, 'trend': '안정'}
+
+    See Also:
+        - calcInvestmentPropertyTrend : 투자부동산 추세.
+
+    AIContext:
+        영업권 손상은 회계 추정 — 단정 금지, 주석 detail 함께 확인.
     """
     from dartlab.analysis.financial.companyContext import fetchNotesDetail
     from dartlab.core.utils.helpers import parseNumStr

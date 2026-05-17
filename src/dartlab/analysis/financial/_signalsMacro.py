@@ -123,6 +123,12 @@ def calcStructuralBreak(company, *, basePeriod: str | None = None) -> dict | Non
         부호 반전 시 reversing trend — DCF/forecastRevenue 의 horizon 단축
         권장 (break 이후 데이터만 사용). 6 년 미만 회사는 break 탐지 불가.
 
+    When:
+        장기 추세 안정성 점검과 horizon 결정 직전.
+
+    How:
+        4 지표 시계열을 year split 별 Chow F-stat 으로 break 탐색.
+
     SeeAlso:
         - ``dartlab.core.utils.ols.detectStructuralBreak``: Chow Test 본체
         - ``calcMacroRegression``: 매크로 회귀에서 break 인지 분기
@@ -294,6 +300,9 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     라이브 매크로 데이터를 fetch하지 않는다.
     관련 지표명을 반환하여 AI가 gather.macro()로 조회할 수 있게 한다.
 
+    Capabilities:
+        - 섹터 탄성치와 거시 동인 지표명을 매핑해 노출도 산출.
+
     Returns
     -------
     dict
@@ -311,6 +320,31 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
         predictionAxes : dict | None — 라이브 축 상태 (PredictionSpace 캐시 있을 때)
         axisImpact : dict | None — 업종별 축 영향도
         netMacroEffect : float | None — 순 매크로 효과 합산
+
+    Guide:
+        relevantIndicators 를 gather.macro() 로 조회해 라이브 결합.
+
+    When:
+        업종별 거시 노출 점검 + 시나리오 가정 정의 직전.
+
+    How:
+        getElasticity(sectorKey) + 섹터→지표 매핑 결합.
+
+    Requires:
+        sectorKey 매핑, synth.scenario.getElasticity 사용 가능.
+
+    Raises:
+        없음 — sectorKey 결측 시 기본값.
+
+    Example:
+        >>> calcMacroSensitivity(company)
+        {'fxExposure': 'high', ...}
+
+    See Also:
+        - calcMacroRegression : 동적 베타 회귀.
+
+    AIContext:
+        탄성치는 섹터 기본값 — 기업별 베타는 calcMacroRegression 우선.
     """
     from dartlab.synth.scenario import getElasticity
 
@@ -410,6 +444,9 @@ def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | Non
     - Fama-MacBeth 1973: 횡단면 회귀로 팩터 프리미엄 추정
     - 시간차(lag) 효과: GDP t → 매출 t+1 (경기 전달 메커니즘)
 
+    Capabilities:
+        - 기업 고유 거시 베타와 lag 효과를 OLS 로 추정.
+
     Returns
     -------
     dict
@@ -426,6 +463,31 @@ def calcMacroRegression(company, *, basePeriod: str | None = None) -> dict | Non
         confidence : str — 신뢰도 ("high" | "medium" | "low")
         sectorKey : str | None — 업종 키
         table : list[dict] — 기간별 매출 성장률 vs 거시 변화율 시계열
+
+    Guide:
+        nObs ≥ 10 + R² ≥ 0.3 일 때 동적 베타 채택 권장.
+
+    When:
+        섹터 평균 탄성치보다 기업 고유 베타가 필요한 분석.
+
+    How:
+        IS 시계열 vs 매크로 시계열 OLS, lag 0/1/2 별 R² 비교.
+
+    Requires:
+        매출 다년 + 매크로 시계열, ols 모듈.
+
+    Raises:
+        없음 — 자료 부족 시 None.
+
+    Example:
+        >>> calcMacroRegression(company)
+        {'rSquared': 0.45, 'confidence': 'medium'}
+
+    See Also:
+        - calcMacroSensitivity : 정적 탄성치 매핑.
+
+    AIContext:
+        R² 낮으면 (< 0.2) 정적 베타 fallback 권장.
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)

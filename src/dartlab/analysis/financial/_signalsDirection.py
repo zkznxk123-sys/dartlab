@@ -68,6 +68,9 @@ def calcConsensusDirection(company, *, basePeriod: str | None = None) -> dict | 
 
     Zacks 연구: 컨센서스 방향이 실적 방향의 가장 강력한 단일 예측자 (70%).
 
+    Capabilities:
+        - 네이버 컨센서스 추정치와 직전 실적을 방향 신호로 변환.
+
     Returns
     -------
     dict
@@ -78,6 +81,31 @@ def calcConsensusDirection(company, *, basePeriod: str | None = None) -> dict | 
         expectedGrowthPct : float — 예상 성장률 (%)
         direction : str — 방향 ("up" | "down" | "flat")
         confidence : str — 신뢰도 ("high" | "medium" | "low")
+
+    Guide:
+        성장률 절대값 ≥ 10% 면 high, 3~10% medium.
+
+    When:
+        다음 연간 실적 예측 직전, 컨센서스 갱신 시점.
+
+    How:
+        m.stock.naver finance/annual JSON 파싱 → 매출 행 비교.
+
+    Requires:
+        stockCode 매핑, httpx 네트워크 접근.
+
+    Raises:
+        없음 — 네트워크/파싱 실패 시 None.
+
+    Example:
+        >>> calcConsensusDirection(company)
+        {'direction': 'up', 'expectedGrowthPct': 8.5}
+
+    See Also:
+        - calcRevenueDirection : 자체 모멘텀.
+
+    AIContext:
+        외부 컨센서스 인용은 데이터 출처 명시 (네이버 finance).
     """
     stockCode = _getStockCode(company)
     if not stockCode:
@@ -159,6 +187,9 @@ def calcFlowDirection(company, *, basePeriod: str | None = None) -> dict | None:
     최근 60거래일 기관+외국인 순매수 합계가 양이면 실적 개선 기대.
     "스마트머니는 실적을 안다" (Park et al., MDPI 2020).
 
+    Capabilities:
+        - 기관·외국인 순매수 누적을 실적 선행 신호로 환산.
+
     Returns
     -------
     dict
@@ -168,6 +199,31 @@ def calcFlowDirection(company, *, basePeriod: str | None = None) -> dict | None:
         direction : str — 방향 ("up" | "down" | "flat")
         days : int — 집계 거래일 수 (일)
         confidence : str — 신뢰도 ("high" | "medium" | "low")
+
+    Guide:
+        스마트머니 합 > 100만 주 면 medium, 1000만 주 high.
+
+    When:
+        분기 실적 발표 1~2주 전 수급 선행 점검.
+
+    How:
+        m.stock.naver integration JSON 의 dealTrendInfos 누적.
+
+    Requires:
+        stockCode 매핑, httpx 네트워크 접근.
+
+    Raises:
+        없음 — 네트워크 실패 시 None.
+
+    Example:
+        >>> calcFlowDirection(company)
+        {'direction': 'up', 'smartMoneyNet': 2500000}
+
+    See Also:
+        - calcConsensusDirection : 컨센서스 방향.
+
+    AIContext:
+        수급 데이터는 단기 변동 크므로 단독 결론 자제.
     """
     stockCode = _getStockCode(company)
     if not stockCode:
@@ -238,6 +294,9 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
 
     학술 근거: M4/M5 Competition — 단순 방법이 최강.
 
+    Capabilities:
+        - 모멘텀+마진+OLS 결합 베이즈 사후확률 산출.
+
     Returns
     -------
     dict
@@ -254,6 +313,31 @@ def calcRevenueDirection(company, *, basePeriod: str | None = None) -> dict | No
         industryPrior : float — 업종별 모멘텀 사전확률 (0.0-1.0)
         confidence : str — 신뢰도 ("very_high" | "high" | "medium" | "low")
         history : list[dict] — 최근 4분기 YoY 방향 이력
+
+    Guide:
+        confirms 2 이상 + streak 2 면 high confidence.
+
+    When:
+        분기 결산 직후 다음 분기 매출 방향 추정.
+
+    How:
+        IS 분기 YoY → 마진·OLS 일치 가산 → 베이즈 calibrate.
+
+    Requires:
+        IS 분기 6 개 이상, 업종 prior 매핑.
+
+    Raises:
+        없음 — 데이터 부족 시 None.
+
+    Example:
+        >>> calcRevenueDirection(company)
+        {'direction': 'up', 'probability': 0.77}
+
+    See Also:
+        - calcConsensusDirection : 외부 컨센서스.
+
+    AIContext:
+        probability 인용 시 보정 사후확률임을 명시.
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)

@@ -22,6 +22,9 @@ _MAX_YEARS = 8
 def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/투자CF/재무CF + FCF + CF 패턴.
 
+    Capabilities:
+        - 3 종 현금흐름 부호 패턴 분류와 FCF 계산.
+
     Parameters
     ----------
     company : Company
@@ -36,6 +39,31 @@ def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | N
         cols : list[str] — 기간 컬럼
         pattern : str | None — CF 패턴 진단
         metrics : list[tuple[str, str]] | None — FCF 등 요약 지표
+
+    Guide:
+        +/-/+ 패턴 = 성숙기, -/-/+ = 초기/위기 등 8 분류 참고.
+
+    When:
+        영업·투자·재무 자금흐름 종합 진단 시점.
+
+    How:
+        OCF/ICF/FCF 부호 매트릭스 분류 + FCF = OCF - CAPEX.
+
+    Requires:
+        CF 분기 또는 Q4, capex 식별 가능.
+
+    Raises:
+        없음 — 결측 시 None.
+
+    Example:
+        >>> calcCashFlowStructure(company)
+        {'pattern': '성숙기', ...}
+
+    See Also:
+        - calcDistressIndicators : 재무 곤경 신호.
+
+    AIContext:
+        패턴 분류는 정성 라벨 — 단정 대신 신호로 인용.
     """
     from dartlab.analysis.financial.capital import _getRatios, _quarterlyCols
 
@@ -197,6 +225,9 @@ def _isFinancialCompany(company) -> bool:
 def calcDistressIndicators(company, *, basePeriod: str | None = None) -> dict | None:
     """Altman Z, Ohlson O, Piotroski F, Springate S.
 
+    Capabilities:
+        - 4 종 부실예측 모형 결과를 라벨링해 일괄 노출.
+
     Parameters
     ----------
     company : Company
@@ -208,6 +239,31 @@ def calcDistressIndicators(company, *, basePeriod: str | None = None) -> dict | 
     -------
     dict | None
         metrics : list[tuple[str, str]] — (지표명, 값+판정 문자열) 쌍 목록
+
+    Guide:
+        금융업은 Altman 적용 제외. 4 지표 중복 신호 확인.
+
+    When:
+        부실 위험 종합 점검, 신용 평가 보조 시점.
+
+    How:
+        ratios 객체의 사전 계산된 4 지표를 임계 비교 후 라벨링.
+
+    Requires:
+        capital._getRatios 가 4 지표 계산 가능 (BS/IS/CF 시계열).
+
+    Raises:
+        없음 — ratios 부재 시 None.
+
+    Example:
+        >>> calcDistressIndicators(company)
+        {'metrics': [('Altman Z', '3.10 — 안전'), ...]}
+
+    See Also:
+        - calcCashFlowStructure : 현금흐름 패턴.
+
+    AIContext:
+        4 지표 중 다수 일치할 때만 결론 인용 (단일 지표 단정 금지).
     """
     from dartlab.analysis.financial.capital import _getRatios
 

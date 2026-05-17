@@ -39,7 +39,18 @@ def __getattr__(name: str):
 
 
 def extractHistoricalRatios(*args, **kwargs):
-    """과거 비율 추출 — proforma.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """과거 비율 추출 — proforma.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        dartlab.analysis.financial.proforma 본체 import 가능.
+
+    Raises:
+        proforma 본체가 던지는 예외 그대로 전파.
+
+    Example:
+        >>> extractHistoricalRatios(company)
+        {...}
+    """
     from dartlab.analysis.financial.proforma import extractHistoricalRatios as _f
 
     return _f(*args, **kwargs)
@@ -149,6 +160,9 @@ def computeCompanyWacc(
     Ke = Rf + beta * (matureMarketERP + countryRiskPremium)
     WACC = E/(D+E) * Ke + D/(D+E) * Kd * (1-t)
 
+    Capabilities:
+        - 회사 시계열 + 시장 파라미터 + Damodaran 표 결합 WACC 산출.
+
     Parameters
     ----------
     country : ISO2 국가코드 (KR/US/JP/...). 지정 시 Damodaran 테이블로 rf/erp 자동.
@@ -156,6 +170,31 @@ def computeCompanyWacc(
     country_risk_premium : 국가 리스크 프리미엄 (%) 명시 override. None 이면 자동.
     implied_erp : True 면 Damodaran Gordon 역산 (시장 내재). 실패 시 historical fallback.
     bottom_up_beta : True 면 섹터 peer unlever/relever (Hamada). 실패 시 기본 beta.
+
+    Guide:
+        impliedErp 실패 시 historical fallback 자동.
+
+    When:
+        DCF·proforma 빌드 직전 회사별 WACC 산출.
+
+    How:
+        Rf + beta × ERP 로 Ke, Kd × (1-t) 가중 합산.
+
+    Requires:
+        BS 차입금/자기자본, 섹터 파라미터 또는 베타 source.
+
+    Raises:
+        Damodaran/sector 파라미터 결측 시 ImportError 전파 가능.
+
+    Example:
+        >>> computeCompanyWacc(series, currency="KRW")
+        (0.085, {...})
+
+    See Also:
+        - buildProforma : WACC 소비.
+
+    AIContext:
+        결과 dict 의 component 노출 (Ke/Kd/weights) 로 재현 가능성 보장.
     """
     from dartlab.frame.sector import getMarketParams
 
@@ -353,6 +392,31 @@ def buildProforma(
         market_cap: 시가총액.
         scenario_name: 시나리오 이름.
         overrides: 비율 오버라이드 (예: {"gross_margin": 35.0}).
+
+    Capabilities:
+        - 과거 비율 + 성장 경로 + WACC 로 IS/BS/CF 3-statement 추정.
+
+    Guide:
+        overrides 는 마진·회전율 등 핵심 비율만. 전 비율 override 비권장.
+
+    When:
+        DCF·시나리오 산출 직전 회계 일관성 유지된 추정치 생성.
+
+    How:
+        ratios → margin·turnover 적용 → BS/CF 회계 잠금 → WACC 결합.
+
+    Requires:
+        series 시계열 ≥ 3 년, sectorParams 또는 elasticity.
+
+    Raises:
+        WACC 계산 의존성 부재 시 ImportError 전파.
+
+    SeeAlso:
+        - computeCompanyWacc : 할인율 산출.
+        - extractHistoricalRatios : 입력 비율 추출.
+
+    AIContext:
+        결과 ProFormaResult 의 warnings 가 비어있는지 함께 검토 후 인용.
     """
     warnings: list[str] = []
 

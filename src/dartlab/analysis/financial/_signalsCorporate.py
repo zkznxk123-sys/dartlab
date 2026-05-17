@@ -53,6 +53,9 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
     공시 텍스트 변화량을 방향성 신호로 해석한다.
     FinBERT 등 톤 분석은 미적용 — 변화 크기만 사용.
 
+    Capabilities:
+        - 공시 텍스트 변화율을 방향성 신호로 환산.
+
     Returns
     -------
     dict
@@ -63,6 +66,31 @@ def calcDisclosureDelta(company, *, basePeriod: str | None = None) -> dict | Non
         signalDirection : str — 방향성 ("positive" | "negative" | "neutral")
         signalStrength : str — 신호 강도 ("strong" | "moderate" | "weak")
         topChangedTopics : list[dict] — 변화율 상위 5개 토픽 (topic, changeRate)
+
+    Guide:
+        리스크 토픽 변화율 우선, 사업 토픽 변화는 보조.
+
+    When:
+        분기 공시 갱신 직후 텍스트 변화 모니터링.
+
+    How:
+        company._docs.diff() 토픽 changeRate 를 가중 분류.
+
+    Requires:
+        company._docs.diff() 가능 (텍스트 diff 캐시).
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> calcDisclosureDelta(company)
+        {'signalDirection': 'negative', ...}
+
+    See Also:
+        - calcAnnouncementTiming : 공시 시점 패턴.
+
+    AIContext:
+        리스크 토픽 변화율이 30% 이상이면 부정 신호로 인용.
     """
     try:
         diffResult = company._docs.diff()
@@ -143,6 +171,9 @@ def calcInventoryDivergence(company, *, basePeriod: str | None = None) -> dict |
     매출채권 증가율 > 매출 증가율 = 회수 악화.
     NOA 급증 = 이익 조작 가능성 (Oler 2024).
 
+    Capabilities:
+        - 재고·매출채권 증가율과 매출 증가율 괴리 점수화.
+
     Returns
     -------
     dict
@@ -151,6 +182,31 @@ def calcInventoryDivergence(company, *, basePeriod: str | None = None) -> dict |
         receivableSignal : str — 매출채권 신호 ("deteriorating" | "improving" | "stable")
         noaGrowth : float | None — NOA 성장률 (%)
         riskScore : int — 리스크 점수 (점, 0-100)
+
+    Guide:
+        괴리 폭 ≥ 10%p 면 명확 신호, 5~10%p 면 약신호.
+
+    When:
+        분기 결산 후 운전자본 변화 감시 시점.
+
+    How:
+        BS 재고·매출채권 ÷ IS 매출 증가율 비교 후 점수화.
+
+    Requires:
+        BS·IS 다년치 (최소 2 기), snake_id 매핑 완료.
+
+    Raises:
+        없음 — 결측 시 None.
+
+    Example:
+        >>> calcInventoryDivergence(company)
+        {'inventorySignal': 'building', 'riskScore': 65}
+
+    See Also:
+        - calcDisclosureDelta : 공시 변화 신호.
+
+    AIContext:
+        riskScore ≥ 60 이면 이익 질 의심 근거로 인용.
     """
     bsResult = company.select(
         "BS", ["재고자산", "매출채권및기타채권", "매출채권", "매입채무및기타채무", "매입채무", "자산총계"]
@@ -297,6 +353,9 @@ def calcAnnouncementTiming(company, *, basePeriod: str | None = None) -> dict | 
     같은 업종에서 이미 실적을 발표한 기업들의 성장 방향을 집계한다.
     Ramnath 2002, Thomas & Zhang 2008 — 20년+ 검증된 anomaly.
 
+    Capabilities:
+        - 선발 발표 피어의 성장 방향을 후발 예측 신호로 변환.
+
     Returns
     -------
     dict
@@ -307,6 +366,31 @@ def calcAnnouncementTiming(company, *, basePeriod: str | None = None) -> dict | 
         bellwetherSignal : str — 벨웨더 신호 ("positive" | "negative" | "neutral")
         peerConsensus : float — 피어 합의 점수 (-1.0 ~ +1.0)
         confidence : str — 신뢰도 ("high" | "medium" | "low")
+
+    Guide:
+        피어 발표 수 5 이상일 때 신뢰도 medium, 10 이상 high.
+
+    When:
+        분기 실적 발표 시즌 초중반, 후발 기업 예측 직전.
+
+    How:
+        Scan 횡단면 growth → 발표 완료 피어의 up/down 카운트.
+
+    Requires:
+        Scan 사용 가능, 업종 분류 매핑.
+
+    Raises:
+        없음 — Scan 실패 시 None.
+
+    Example:
+        >>> calcAnnouncementTiming(company)
+        {'bellwetherSignal': 'positive', ...}
+
+    See Also:
+        - calcSupplyChainSignal : 공급망 신호.
+
+    AIContext:
+        bellwetherSignal 은 동종 피어 합의로 인용 (단일 기업 예측 아님).
     """
     stockCode = _getStockCode(company)
     if stockCode is None:
@@ -416,6 +500,9 @@ def calcSupplyChainSignal(company, *, basePeriod: str | None = None) -> dict | N
     DART 투자관계 + 관계사 거래에서 연결 기업을 식별하고,
     상장 관계사의 성장률로 이 회사에 대한 전파 신호를 계산.
 
+    Capabilities:
+        - 상장 관계사 성장 시계열로 자사 선행 신호 추정.
+
     Returns
     -------
     dict
@@ -424,6 +511,31 @@ def calcSupplyChainSignal(company, *, basePeriod: str | None = None) -> dict | N
         nLinkedListed : int — 상장 관계사 수
         supplyChainRisk : str — 공급망 리스크 ("high" | "moderate" | "low")
         confidence : str — 신뢰도 ("high" | "medium" | "low")
+
+    Guide:
+        상장 관계사 3 개 이상일 때 medium, 5 개 이상 high.
+
+    When:
+        고객·공급망 의존 높은 기업의 분기 결산 예측 직전.
+
+    How:
+        DART 투자관계·관계사 거래 → 상장 코드 → growth 가중 평균.
+
+    Requires:
+        Scan growth 사용 가능, 관계사 매핑 데이터.
+
+    Raises:
+        없음 — 관계사 결측 시 None.
+
+    Example:
+        >>> calcSupplyChainSignal(company)
+        {'networkMomentum': 0.42, ...}
+
+    See Also:
+        - calcAnnouncementTiming : 동종 발표 타이밍.
+
+    AIContext:
+        networkMomentum ≥ 0.3 이면 공급망 호조 근거로 인용.
     """
     stockCode = _getStockCode(company)
     if stockCode is None:

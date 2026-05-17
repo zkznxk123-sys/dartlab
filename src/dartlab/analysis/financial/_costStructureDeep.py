@@ -54,6 +54,12 @@ def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict 
         - 감가상각 비중 상승 = 대규모 CapEx 후 효과 (반도체 fab).
         매출원가율 (calcCostBreakdown) 상승 원인을 본 표로 분해.
 
+    When:
+        매출원가율 변화 원인 분해, 비용 성격 추세 추적 시점.
+
+    How:
+        notes costByNature 표 파싱 → 카테고리별 비중 시계열 + direction 라벨.
+
     SeeAlso:
         - ``calcCostBreakdown``: 기능별 (매출원가/판관비)
         - ``calcRawMaterialBreakdown``: 원재료 세분화 (제조업)
@@ -250,6 +256,12 @@ def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict 
         - 반도체 = wafer/chemical, 자동차 = 철강/플라스틱, 화학 = 나프타.
         - 매입액 절대값 + commodity 가격 추세 (FRED) 함께 보면 마진 압박
           예측 가능.
+
+    When:
+        원재료 의존도·commodity 노출 평가 시점.
+
+    How:
+        rawMaterial 사업보고서 표 → 최신 연도 금액 행 추출 → 상위 8 개 정렬.
 
     SeeAlso:
         - ``calcCostByNatureAnalysis``: 비용 성격별 (인건/감가/원재료 합계)

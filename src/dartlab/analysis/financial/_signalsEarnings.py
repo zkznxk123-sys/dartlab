@@ -61,6 +61,12 @@ def calcEarningsMomentum(company, *, basePeriod: str | None = None) -> dict | No
         음수 = 현금 우위. 10%+ 경고는 Sloan 의 earnings management 신호.
         DuPont 분해로 margin/turnover 중 어느 요인이 변화 주도하는지 표시.
 
+    When:
+        분기 결산 후 이익 모멘텀 + 현금 뒷받침 동시 점검 시점.
+
+    How:
+        IS/CF/BS 시계열 → Sloan accrual + DuPont 3 요소 추세 결합.
+
     SeeAlso:
         - ``calcPredictionSynthesis``: 본 함수 결과 + 4 신호 앙상블
         - ``calcStructuralBreak``: 변동성 구조 변화 검증

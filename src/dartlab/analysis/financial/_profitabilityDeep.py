@@ -60,6 +60,12 @@ def calcMarginWaterfall(company, *, basePeriod: str | None = None) -> dict | Non
         순이익률 5%. 영업 vs 영업외 영향 분리하여 본업 수익성 평가.
         매출 0 period 는 자동 skip.
 
+    When:
+        본업 vs 영업외 영향 분리 점검, 워터폴 차트 입력 직전.
+
+    How:
+        IS 10 계정 → 매출 대비 pct + 누적 cumPct 단계별 산출.
+
     SeeAlso:
         - ``calcMarginTrend``: 마진 5 단계 시계열
         - ``calcReturnTrend``: ROE 듀퐁 분해
@@ -244,6 +250,12 @@ def calcPenmanDecomposition(company, *, basePeriod: str | None = None) -> dict |
         > 1 + RNOA 보통 (10%). SPREAD 음수면 부채가 ROE 를 깎는 중 (적색
         신호 — 부채 cost 가 영업 수익 초과).
 
+    When:
+        ROE 원천 (영업력 vs 레버리지) 분리 평가 시점.
+
+    How:
+        IS/BS → NOPAT/NOA/NFO 분리 → RNOA + FLEV × SPREAD 합산.
+
     SeeAlso:
         - ``calcRoicTree``: McKinsey ROIC 분해
         - ``calcReturnTrend``: ROE/ROA 시계열
@@ -423,6 +435,12 @@ def calcRoicTree(company, *, basePeriod: str | None = None) -> dict | None:
         ROIC 임계: > 15% = excellent (cost of capital 10% 가정), 10~15% =
         good, < 10% = value destroyer. marginDriver 가 "cogs" 인데 매출 증가
         시기 = 규모 경제, "sga" 우세 = 영업 효율 개선 또는 악화.
+
+    When:
+        ROIC 변화 원인 (마진 vs 회전율) 진단, WACC 대비 가치창출 평가.
+
+    How:
+        IS → 마진 분해 + BS → IC (WC+Fixed) → ROIC = margin × turnover.
 
     SeeAlso:
         - ``calcMarginTrend``: 마진 단순 시계열

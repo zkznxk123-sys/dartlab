@@ -37,6 +37,9 @@ def calcEventImpact(company, *, basePeriod: str | None = None) -> dict | None:
     과거에 공시 텍스트가 급변하거나 지배구조가 변한 시점을 식별하고,
     해당 시점 전후 매출/마진 변화 패턴을 추출한다.
 
+    Capabilities:
+        - 이벤트 시점 전후 매출·마진 충격과 회복기간 측정.
+
     Returns
     -------
     dict
@@ -52,6 +55,31 @@ def calcEventImpact(company, *, basePeriod: str | None = None) -> dict | None:
         averageImpact : dict[str, float] — 이벤트 유형별 평균 충격 (%p)
         resilience : str — 충격 회복력 ("high" | "medium" | "low")
         avgRecoveryYears : float | None — 평균 회복 기간
+
+    Guide:
+        평균 회복 ≤ 1 년이면 high 회복력, 3 년 이상이면 low.
+
+    When:
+        구조적 사건 (지배구조·공시 급변) 후 회복력 평가 시점.
+
+    How:
+        IS 시계열 + 공시 diff 결합 → 이벤트 식별 → 전후 매출/마진 비교.
+
+    Requires:
+        IS 다년 시계열, 공시 텍스트 diff 또는 구조변화 신호.
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> calcEventImpact(company)
+        {'resilience': 'medium', 'avgRecoveryYears': 1.5}
+
+    See Also:
+        - calcStructuralBreak : 구조 변화 검출.
+
+    AIContext:
+        이벤트 라벨링은 통계 신호 — 의도/사유 단정 금지.
     """
     isResult = company.select("IS", ["매출액", "영업이익"])
     isParsed = toDictBySnakeId(isResult)

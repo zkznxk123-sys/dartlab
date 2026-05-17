@@ -82,6 +82,12 @@ def calcPeerPrediction(company, *, basePeriod: str | None = None) -> dict | None
         < 0 → outperform. |divergence| > 5%p 면 outlier (peer 대비 크게
         다른 트랙). 모델 R² < 0.3 이면 예측 신뢰도 낮음.
 
+    When:
+        peer 평균 대비 outperform/underperform 신호 추출 시점.
+
+    How:
+        loadModel/loadPanelModel → 회사 features 적용 → ensemble 평균.
+
     SeeAlso:
         - ``loadModel``/``loadPanelModel``: 횡단면/패널 모델 로드
         - ``calcPredictionSynthesis``: 본 함수 + 4 신호 앙상블

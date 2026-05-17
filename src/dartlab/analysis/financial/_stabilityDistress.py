@@ -58,6 +58,12 @@ def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
         Z''-Score (비상장/제조업 외): 2.6 / 1.1 임계. KR 대기업 평균 ~ 3.5,
         US 대기업 ~ 4.0. distress zone 2~3 년 연속이면 부도 가능성 매우 높음.
 
+    When:
+        부실 위험 정량 진단, 신용 평가 보조 시점.
+
+    How:
+        BS/IS + 시가총액 → 5 X 변수 → Z = 1.2X1 + 1.4X2 + 3.3X3 + 0.6X4 + 1.0X5.
+
     SeeAlso:
         - ``analyzeHealth``: Z-Score 포함 종합 건전성
         - ``calcDistressEnsemble``: Altman + Ohlson + Piotroski + CHS 합성
@@ -248,6 +254,12 @@ def calcDistressEnsemble(company, *, basePeriod: str | None = None) -> dict | No
         - agreement < 60% = 모델 간 불일치 → 단일 모델 결과 신뢰 어려움.
         - 다수결 "위험" + agreement > 80% = 강한 부실 신호 (3+ 모델 동의).
         - Ohlson O / Zmijewski X = logit 모델로 확률 (%) 출력, Altman = z-score.
+
+    When:
+        부실 위험 다중 모델 교차검증, 단일 모델 편향 제거 시점.
+
+    How:
+        getRatios 5 모델 score → 임계 비교 verdict → 다수결 + agreement 계산.
 
     SeeAlso:
         - ``calcDistressScore``: Altman Z 단독 시계열
