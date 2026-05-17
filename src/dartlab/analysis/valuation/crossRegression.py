@@ -60,6 +60,36 @@ class CrossSectionModel:
         -------
         float | None
             예측 매출 성장률 (%). 피처 누락 시 None.
+
+        Capabilities:
+            - features dict + 섹터 더미 → linear combination 매출 성장률 예측
+            - sector 가 sectorNames 에 없으면 reference (모든 더미 0)
+
+        Guide:
+            CrossSectionModel 의 predict — fitCrossSection 결과 모델 인스턴스에서 호출.
+
+        When:
+            모델 추정 후 개별 기업 예측 + AI 매출 성장 예측 답변.
+
+        How:
+            FEATURES 추출 → 섹터 더미 append → β·x 합산.
+
+        Requires:
+            features 에 FEATURES 모든 key + 적합된 coefficients.
+
+        Raises:
+            없음 — 누락 시 None.
+
+        Example:
+            >>> model.predict({"per": 12, ...}, sector="반도체")
+            8.5
+
+        See Also:
+            - fitCrossSection : 모델 적합
+            - PanelModel.predict : 패널 버전
+
+        AIContext:
+            "이 기업 매출 성장 예측" 답변 시 예측값 인용.
         """
         if not self.coefficients:
             return None
@@ -113,6 +143,36 @@ class PanelModel:
         -------
         float | None
             예측 매출 성장률 (%). 피처 누락 시 None.
+
+        Capabilities:
+            - 기업 고정효과 + 변수 효과 → 예측 (firmIntercepts[code] 또는 grandMean fallback)
+            - 패널 회귀 결과 활용
+
+        Guide:
+            기업 고정효과 (firmIntercepts) 추정으로 횡단면보다 정확. 신규 종목은 grandMean.
+
+        When:
+            패널 모델 적합 후 예측 + AI 패널 회귀 답변.
+
+        How:
+            firmIntercepts lookup → β·x 가산.
+
+        Requires:
+            features key = featureNames + 모델 적합 완료.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> panel.predict("005930", {...})
+            7.2
+
+        See Also:
+            - fitPanel : 패널 모델 적합
+            - CrossSectionModel.predict : 횡단면
+
+        AIContext:
+            패널 fixed effects 인용한 예측 답변.
         """
         x = []
         for fname in self.featureNames:
@@ -155,6 +215,16 @@ class CompanyFeatures:
         -------
         dict[str, float]
             피처명 → 값 매핑 (per, pbr, lnMarketCap 등).
+
+        Requires:
+            CompanyFeatures 모든 필드 채워짐.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> cf.toFeatureDict()["per"]
+            12.5
         """
         return {
             "per": self.per,
@@ -174,6 +244,16 @@ class CompanyFeatures:
         -------
         list[float]
             FEATURES 순서대로 정렬된 피처 값 리스트.
+
+        Requires:
+            CompanyFeatures 필드 채워짐.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> cf.toFeatureVector()[0]
+            12.5
         """
         d = self.toFeatureDict()
         return [d[f] for f in FEATURES]
@@ -210,6 +290,36 @@ def fitCrossSection(
         adjRSquared : float — 수정 결정계수 (0~1)
         nObs : int — 관측치 수
         관측치 부족 시 None.
+
+    Capabilities:
+        - 횡단면 회귀 (전 상장사) OLS + 섹터 더미 + winsorize → 모델 추정
+        - R²/AdjR² 동시 평가
+
+    Guide:
+        Fama-MacBeth 횡단면 표준. winsorize 2% 로 outlier 영향 축소.
+
+    When:
+        횡단면 모델 학습 + AI "전 시장에서 이 변수 효과" 답변.
+
+    How:
+        winsorize → OLS via numpy → 모델 dataclass.
+
+    Requires:
+        같은 연도 observations ≥ minObs (기본 30).
+
+    Raises:
+        없음 — 부족 시 None.
+
+    Example:
+        >>> m = fitCrossSection(obs); m.rSquared
+        0.32
+
+    See Also:
+        - fitPanel : 패널 (다년)
+        - saveModel : 저장
+
+    AIContext:
+        "PER 가 매출 성장 예측에" 답변 시 coefficients + R² 인용.
     """
     if len(observations) < minObs:
         return None
@@ -291,6 +401,36 @@ def fitPanel(
         nFirms : int — 기업 수
         firmIntercepts : dict[str, float] — 기업별 고정효과
         관측치/연도 부족 시 None.
+
+    Capabilities:
+        - within estimator (demeaning) → 기업 고정효과 + 변수 효과 분리 추정
+        - firmIntercepts 종목별 α_i
+
+    Guide:
+        횡단면 OLS 보다 omitted variable bias 강건. minObs 50 + minYears 3.
+
+    When:
+        패널 모델 추정 + AI 다년 효과 답변.
+
+    How:
+        기업별 평균 demeaning → OLS → 기업별 intercept 복원.
+
+    Requires:
+        observations ≥ 50 + 연도 ≥ 3 + 기업당 ≥ 2 관측.
+
+    Raises:
+        없음 — 부족 시 None.
+
+    Example:
+        >>> p = fitPanel(obs); p.rSquared
+        0.42
+
+    See Also:
+        - fitCrossSection : 단일 연도
+        - savePanelModel : 저장
+
+    AIContext:
+        "기업 고정효과 분리한 변수 효과" 답변 시 coefficients + nFirms 인용.
     """
     if len(observations) < minObs:
         return None
@@ -384,6 +524,36 @@ def saveModel(model: CrossSectionModel) -> Path:
     -------
     Path
         저장된 파일 경로 (~/.dartlab/models/crossSection_{year}.json).
+
+    Capabilities:
+        - dataclass → JSON 직렬화 → 캐시 디렉토리 기록
+        - 동일 연도 덮어쓰기
+
+    Guide:
+        일 1 회 사전 적합 후 캐시. loadModel 이 사용.
+
+    When:
+        모델 적합 후 디스크 저장.
+
+    How:
+        dict 변환 → json.dumps → Path.write_text.
+
+    Requires:
+        쓰기 권한 + ``~/.dartlab/models/``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> saveModel(model)
+        PosixPath('/.../crossSection_2025.json')
+
+    SeeAlso:
+        - loadModel : 복원
+        - fitCrossSection : 적합
+
+    AIContext:
+        사전 적합 모델 저장. AI 답변 시 invisible.
     """
     _MODEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _MODEL_CACHE_DIR / f"crossSection_{model.year}.json"
@@ -414,6 +584,36 @@ def loadModel(year: int) -> CrossSectionModel | None:
     -------
     CrossSectionModel | None
         캐시된 모델. 파일 없거나 파싱 실패 시 None.
+
+    Capabilities:
+        - 캐시 JSON → CrossSectionModel dataclass 복원
+        - 파일 없거나 schema 불일치 시 None
+
+    Guide:
+        예측 시점 무거운 재적합 회피. None 시 fitCrossSection 재실행.
+
+    When:
+        예측 직전 캐시 hit 시도.
+
+    How:
+        Path.read_text → json.loads → dataclass(**data).
+
+    Requires:
+        ``crossSection_{year}.json`` 가용.
+
+    Raises:
+        없음 — 파싱 실패 시 None.
+
+    Example:
+        >>> loadModel(2025).rSquared
+        0.32
+
+    SeeAlso:
+        - saveModel : 저장
+        - fitCrossSection : 적합
+
+    AIContext:
+        AI 예측 호출 시 invisible cache.
     """
     path = _MODEL_CACHE_DIR / f"crossSection_{year}.json"
     if not path.exists():
@@ -438,6 +638,36 @@ def savePanelModel(model: PanelModel) -> Path:
     -------
     Path
         저장된 파일 경로 (~/.dartlab/models/panel_latest.json).
+
+    Capabilities:
+        - PanelModel → JSON (firmIntercepts dict 포함) 저장
+        - 1 개 파일만 유지 (latest)
+
+    Guide:
+        패널은 단일 latest 캐시. 새 적합 시 덮어쓰기.
+
+    When:
+        패널 모델 추정 후 캐싱.
+
+    How:
+        dict 변환 → write_text.
+
+    Requires:
+        쓰기 권한.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> savePanelModel(panel)
+        PosixPath('/.../panel_latest.json')
+
+    SeeAlso:
+        - loadPanelModel : 복원
+        - fitPanel : 적합
+
+    AIContext:
+        패널 사전 적합 캐싱. AI invisible.
     """
     _MODEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = _MODEL_CACHE_DIR / "panel_latest.json"
@@ -462,6 +692,36 @@ def loadPanelModel() -> PanelModel | None:
     -------
     PanelModel | None
         캐시된 모델. 파일 없거나 파싱 실패 시 None.
+
+    Capabilities:
+        - panel_latest.json 캐시 → PanelModel 복원
+        - 파일 없음 또는 schema 변경 시 None
+
+    Guide:
+        예측 직전 cache hit 시도. None 시 fitPanel 재실행.
+
+    When:
+        패널 예측 직전.
+
+    How:
+        read_text → json.loads → PanelModel(**data).
+
+    Requires:
+        ``panel_latest.json`` 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> loadPanelModel().nFirms
+        320
+
+    SeeAlso:
+        - savePanelModel : 저장
+        - fitPanel : 적합
+
+    AIContext:
+        AI invisible cache.
     """
     path = _MODEL_CACHE_DIR / "panel_latest.json"
     if not path.exists():
