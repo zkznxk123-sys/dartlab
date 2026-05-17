@@ -187,12 +187,38 @@ def _selectDocsSalesOrder(company, keyword: str | None = None):
 def calcCompanyProfile(company, *, basePeriod: str | None = None) -> dict | None:
     """업종/주요제품 맥락.
 
-    Returns
-    -------
-    dict | None
-        sector : str — 섹터 > 산업그룹 문자열
-        company : str — 기업명 (EDGAR만)
-        products : str — 주요제품 설명
+    Capabilities:
+        - 섹터/산업그룹 + 기업명 + 주요제품 텍스트 컨텍스트 합성
+        - KR: KRX 주요제품. US: EDGAR 10-K Item 1.
+
+    Returns:
+        dict | None — sector/company/products 키. 모두 없으면 None.
+
+    Guide:
+        story 첫 박스 (회사 소개) 입력. AI 답변에 회사 정체성 인용.
+
+    When:
+        Story intro + AI "이 회사 뭐 하는" 답변.
+
+    How:
+        sector dispatch → market 별 product 텍스트 추출.
+
+    Requires:
+        company.sector + (KR) listing 또는 (US) docs.sections.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCompanyProfile(company)["sector"]
+        '섹터: IT > 반도체'
+
+    See Also:
+        - companyContext.* : 추가 메타
+        - calcSegmentComposition : 매출 구성
+
+    AIContext:
+        "이 회사 소개" 답변 시 sector + products 인용.
     """
     parts: dict[str, str] = {}
 
@@ -282,6 +308,36 @@ def calcSegmentComposition(company, *, basePeriod: str | None = None) -> dict | 
         hasOpIncome : bool — 영업이익 데이터 존재 여부
         summary : str — 상위 부문 요약
         compositionHistory : list[dict] | None — 연도별 비중 시계열
+
+    Capabilities:
+        - notes 부문별 매출/영업이익 추출 → segments list + summary
+        - compositionHistory 시계열 비중
+
+    Guide:
+        story segment 박스 입력. 상위 부문 비중 ≥ 60% = 집중 (위험).
+
+    When:
+        Story segment + AI "사업부 매출 구성" 답변.
+
+    How:
+        ``_selectDocsRevenue`` + opIncome 매칭 → segments dict 변환.
+
+    Requires:
+        notes 부문 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSegmentComposition(company)["segments"][0]["name"]
+        '반도체'
+
+    See Also:
+        - calcSegmentTrend : 시계열
+        - calcConcentration : 집중도
+
+    AIContext:
+        "사업부 매출 구성" 답변 시 segments + summary 인용.
     """
     docsResult = _selectDocsRevenue(company, basePeriod=basePeriod)
     if docsResult is None:
@@ -360,6 +416,36 @@ def calcSegmentTrend(company, *, basePeriod: str | None = None) -> dict | None:
             yoy : float | None — 최근 전기대비 (%)
             opMargins : dict[str, float] | None — 연도별 영업이익률 (%)
             opMarginDirection : str | None — 마진 방향 ("개선"|"악화"|"안정")
+
+    Capabilities:
+        - 부문별 multi-year 매출 시계열 + YoY + 영업이익률 변화 방향
+        - rows list 로 부문별 trend 비교
+
+    Guide:
+        부문별 yoy ≥ 30% 와 마진 개선 동행 = 강세 부문.
+
+    When:
+        Story segment trend + AI 부문 추세 답변.
+
+    How:
+        notes 부문 시계열 + 연도별 op 매칭 → rows dict.
+
+    Requires:
+        notes 시계열 ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSegmentTrend(company)["rows"][0]["yoy"]
+        24
+
+    See Also:
+        - calcSegmentComposition : 단일 시점
+        - calcGrowthContribution : 부문 기여도
+
+    AIContext:
+        "이 사업부 성장세" 답변 시 yoy + opMarginDirection 인용.
     """
     docsResult = _selectDocsRevenue(company, basePeriod=basePeriod)
     if docsResult is None:
@@ -446,6 +532,36 @@ def calcBreakdown(company, sub: str, *, basePeriod: str | None = None) -> dict |
             pct : float — 비중 (%)
         total : float — 합계 (원)
         breakdownHistory : list[dict] | None — 연도별 비중 변화
+
+    Capabilities:
+        - 지역/제품 매출 비중 + 다년간 비중 변화 추세
+        - 합계 + 비중 % 정규화
+
+    Guide:
+        지역 다변화 (top 비중 < 50%) = 글로벌 분산 안정. 제품 집중 = pricing power 가능.
+
+    When:
+        Story breakdown + AI 지역/제품 답변.
+
+    How:
+        ``_selectDocsSalesOrder`` → 항목별 매출 추출 → 정렬 + 비중 계산.
+
+    Requires:
+        notes 지역/제품 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcBreakdown(company, "지역")["items"][0]["name"]
+        '한국'
+
+    See Also:
+        - calcSegmentComposition : 사업부문
+        - calcConcentration : 집중도
+
+    AIContext:
+        "이 회사 지역별/제품별 매출" 답변 시 items + pct 인용.
     """
     result = _selectDocsSalesOrder(company)
     if result is None:
@@ -509,6 +625,36 @@ def calcRevenueGrowth(company, *, basePeriod: str | None = None) -> dict | None:
         yoy : float | None — 매출 전기대비 성장률 (%)
         cagr3y : float | None — 매출 3년 CAGR (%)
         quarterlySelect : SelectResult | None — 분기별 매출 원본
+
+    Capabilities:
+        - ratios.revenueGrowth + cagr3y + 분기 시계열 원본 통합
+        - 분기 vs 연간 CAGR 교차 검증 (5%p 이상 차이 시 연간 우선)
+
+    Guide:
+        성장률 표준 진입. yoy ≥ 20% + cagr 매년 안정 = 강한 성장.
+
+    When:
+        Growth 평가 + AI 매출 성장률 답변.
+
+    How:
+        ratios → CAGR + annual 교차 검증 + 분기 select.
+
+    Requires:
+        IS 시계열 ≥ 4 분기.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcRevenueGrowth(company)["yoy"]
+        18.2
+
+    See Also:
+        - calcGrowthContribution : 부문 기여
+        - growthAnalysis.* : 정밀 성장 분석
+
+    AIContext:
+        "성장률" 답변 시 yoy + cagr3y 인용.
     """
     ratios = _getRatios(company)
     yoy = getattr(ratios, "revenueGrowth", None) if ratios else None
@@ -564,6 +710,36 @@ def calcConcentration(company, *, basePeriod: str | None = None) -> dict | None:
         domesticPct : float | None — 내수 비중 (%)
         hhiHistory : list | None — HHI 시계열
         hhiDirection : str — HHI 추세 방향
+
+    Capabilities:
+        - HHI (Herfindahl-Hirschman) 집중도 + 3 단계 라벨 + 최대 부문 비중 + 내수 비중
+        - HHI 시계열 추세 (분산화/집중화)
+
+    Guide:
+        HHI > 5000 = 고집중 (단일 사업 위험), < 2500 = 분산. 추세 ↑ = 사업 집중화.
+
+    When:
+        Risk concentration + AI 사업 집중도 답변.
+
+    How:
+        부문별 매출 비중² 합 → HHI → 라벨링 + history.
+
+    Requires:
+        부문별 매출 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcConcentration(company)["hhiLabel"]
+        '중간 집중'
+
+    See Also:
+        - calcBreakdown : 지역/제품
+        - calcSegmentComposition : 사업부문
+
+    AIContext:
+        "사업 집중도 위험" 답변 시 hhi + hhiLabel 인용.
     """
     revVals = _getDocsRevenueVals(company)
     if not revVals:
@@ -630,6 +806,12 @@ def calcRevenueQuality(company, *, basePeriod: str | None = None) -> dict | None
         현금전환율 > 100% = 매출이 현금으로 잘 회수됨 (양호). 80~100% =
         주의 (운전자본 증가 추세 가능). < 80% = 위험 (Sloan accrual 경고).
         매출총이익률 추세 (4 분기) > +2%p 개선 또는 < -2%p 악화.
+
+    When:
+        Story revenue quality + AI 매출 품질 답변.
+
+    How:
+        ratios.operatingCfToNetIncome + grossMargin 시계열 → label/direction.
 
     SeeAlso:
         - ``calcEarningsMomentum``: Sloan 분해 전체 (cash + accrual)
@@ -731,6 +913,36 @@ def calcGrowthContribution(company, *, basePeriod: str | None = None) -> dict | 
             pct : float — 성장 기여 비중 (%)
         driver : str — 핵심 성장 동인 요약
         period : str — 비교 기간 ("2021 -> 2024")
+
+    Capabilities:
+        - 부문별 매출 변동 분해 → 성장 기여 % + 핵심 동인 식별
+        - "이 회사 성장은 X 부문에서" 답변 출처
+
+    Guide:
+        contributions[0].pct ≥ 70% = 단일 부문 의존 성장 (다각화 부재).
+
+    When:
+        Story growth attribution + AI "어디서 성장" 답변.
+
+    How:
+        부문별 (end - start) → 합산 → 비중 정렬.
+
+    Requires:
+        부문별 다년 매출 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcGrowthContribution(company)["driver"]
+        '반도체 부문이 성장 65% 기여'
+
+    See Also:
+        - calcSegmentTrend : 부문 시계열
+        - calcRevenueGrowth : 단일 yoy
+
+    AIContext:
+        "성장 동인" 답변 시 driver + contributions 인용.
     """
     docsResult = _selectDocsRevenue(company, basePeriod=basePeriod)
     if docsResult is None:
@@ -795,6 +1007,36 @@ def calcFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]
     -------
     list[tuple[str, str]]
         각 원소는 (플래그 텍스트, "warning" | "opportunity").
+
+    Capabilities:
+        - HHI 집중도 + 성장률 + cagr 기반 자동 flag 누적
+        - opportunity / warning 2 종 분류
+
+    Guide:
+        revenue 종합 위험/기회 플래그. flag ≥ 2 = 강한 시그널.
+
+    When:
+        Story revenue flag + AI 위험/기회 답변.
+
+    How:
+        HHI + revenueGrowth + cagr 임계 비교 → flags 누적.
+
+    Requires:
+        ratios + 매출 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcFlags(company)
+        [('매출 고성장 YoY +24%', 'opportunity')]
+
+    See Also:
+        - calcConcentration : HHI
+        - calcRevenueGrowth : 성장률
+
+    AIContext:
+        "revenue 시그널" 답변 시 flag 인용.
     """
     flags: list[tuple[str, str]] = []
 
