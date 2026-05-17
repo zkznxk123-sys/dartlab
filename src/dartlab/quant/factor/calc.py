@@ -42,14 +42,47 @@ log = logging.getLogger(__name__)
 def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> dict:
     """진짜 횡단면 팩터 시계열로 단일 종목 회귀.
 
+    Capabilities:
+        - FF5 (MKT/SMB/HML/RMW/CMA) 또는 fallback CAPM 다변수 회귀 → 팩터 로딩 + alpha
+        - Grinold/Kahn IR (raw/annualized/expected) + Ch.7 risk decomposition (systematic/residual)
+
     Args:
         stockCode: 종목코드 또는 ticker.
-        market: "KR" | "US" | "auto".
+        market: ``"KR"`` | ``"US"`` | ``"auto"``.
+        **kwargs: ``start/end/benchmark/benchmarkMode`` 등.
 
     Returns:
-        dict — MKT/SMB/HML/RMW/CMA 로딩 + alpha + R² + 데이터 적정성 + 한계 명시
-        + Grinold/Kahn IR 지표 (informationRatio raw, informationRatioAnnualized,
-        expectedIR via Fundamental Law).
+        dict — 로딩/alpha/R²/IR/risk decomposition/factor 기여도/interpretation.
+        ``"error"`` 키 = 데이터 부족.
+
+    Guide:
+        Fama-French 2015 표준 + Grinold-Kahn Active Portfolio Management. US 는 현재 FF5
+        미빌드 → CAPM fallback. ``dataAdequacy="low"`` 면 회귀 신뢰도 ↓.
+
+    When:
+        Quant factor 분해 + AI "이 종목 어느 팩터에 노출" 답변.
+
+    How:
+        OHLCV+benchmark fetch → log return → factors load → ``_multiOls`` → IR + 위험 분해.
+
+    Requires:
+        OHLCV ≥ 60 봉 + 벤치마크 가용 + (KR 한정) ``buildFactors`` 빌드 완료.
+
+    Raises:
+        없음 — 데이터 부족·벤치 없음 시 ``{"error": ...}`` 반환.
+
+    Example:
+        >>> r = decomposeFactor("005930", market="KR")
+        >>> r["model"], r["informationRatioAnnualized"]
+        ('FF5-real', 0.42)
+
+    See Also:
+        - buildFactors : factor 시계열 빌드
+        - decomposeRisk : 위험 분해
+        - factorExposureLimits : 한도 체크
+
+    AIContext:
+        "이 종목 팩터 노출" 답변 시 top loading + alpha + IR 인용.
     """
     market = resolveMarket(stockCode, market)
     benchmark = kwargs.pop("benchmark", None)
@@ -187,12 +220,44 @@ def decomposeFactor(stockCode: str, *, market: str = "auto", **kwargs: Any) -> d
 def factorExposureLimits(loadings: dict, *, limits: dict | None = None) -> dict:
     """팩터 익스포저 한도 체크 (책 7장 — 팩터 리스크 관리).
 
+    Capabilities:
+        - |loading| > limit 팩터 식별 + 초과분 반대 방향 hedgeSize 계산
+        - 기본 한도: MKT 1.5, 나머지 0.5 (보수적)
+
     Args:
-        loadings: {factor_name: loading_value} (decomposeFactor 결과의 항목)
-        limits: {factor_name: max_abs}. None이면 기본값 사용.
+        loadings: ``{factor_name: {loading: float, tstat: float}}`` (decomposeFactor 항목).
+        limits: ``{factor_name: max_abs}``. None 이면 기본값.
 
     Returns:
-        dict — 각 팩터의 |loading|, 한도 초과 여부, 권장 헤지비율.
+        dict — limits/breaches/compliant.
+
+    Guide:
+        Grinold-Kahn Ch.7. 팩터 위험 관리. breaches 가 있으면 hedge vehicle 로 |loading|
+        한도 이내로 조정.
+
+    When:
+        팩터 노출 한도 검증 + AI "팩터 베팅 위험" 답변.
+
+    How:
+        limits 순회 → |loading| vs limit → 초과 시 hedgeSize = -(loading - sign×lim).
+
+    Requires:
+        decomposeFactor 결과의 팩터 dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = factorExposureLimits(decomposed_loadings)
+        >>> r["compliant"]
+        False
+
+    See Also:
+        - decomposeFactor : loadings 산출
+        - hedgeRatio : 헤지 비율
+
+    AIContext:
+        "팩터 위험 한도 초과" 답변 시 breach factor + hedgeSize 인용.
     """
     if limits is None:
         # 기본: MKT 1.5, 나머지 0.5 (보수적)
@@ -256,10 +321,49 @@ def decomposeRisk(
 ) -> dict:
     """Grinold Ch.7 — systematic / residual 리스크 분해.
 
-    Returns
-    -------
-    dict with systematicRisk, residualRisk, totalRisk, systematicShare,
-    residualShare, trackingError (= residualRisk; IR 분모).
+    Total risk² = Systematic risk² + Residual risk². systematic = factor exposure 에서
+    오는 리스크 (hedgeable). residual = 종목 고유 (idiosyncratic). IR 의 분모 = tracking error.
+
+    Capabilities:
+        - 종목 returns 를 systematic (F @ β) + residual 로 분해 → 각 표준편차 + share
+        - annualize=True 시 √252 곱 (Trading Days)
+
+    Args:
+        returns: 종목 일별 수익률 (T,).
+        factorExposures: β 벡터 (K,).
+        factorReturns: F 매트릭스 (T × K).
+        annualize: True 면 √252 곱. 기본 True.
+
+    Returns:
+        dict — systematicRisk/residualRisk/totalRisk/systematicShare/residualShare/trackingError.
+
+    Guide:
+        Grinold-Kahn Ch.7 표준. residualShare ≥ 0.6 = 종목 alpha 비중 큼 (factor 비의존).
+
+    When:
+        포트 risk 분해 + AI "팩터 위험 vs 종목 위험" 답변.
+
+    How:
+        sys_series = F @ β, residual = y - sys_series → var → annualized risk.
+
+    Requires:
+        returns 와 factorReturns 행 길이 정합 + factorExposures K 일치.
+
+    Raises:
+        없음 — 길이 불일치 시 NaN dict.
+
+    Example:
+        >>> r = decomposeRisk(returns=y, factorExposures=betas, factorReturns=X)
+        >>> r["residualShare"]
+        0.42
+
+    See Also:
+        - decomposeFactor : β 산출
+        - residualRiskForecast : EWMA 예측
+        - residualAlphaIR : 잔여 alpha IR
+
+    AIContext:
+        "위험 분해 결과 systematic vs residual" 답변 시 share 인용.
     """
     y = np.asarray(returns, dtype=float)
     beta = np.asarray(factorExposures, dtype=float)
@@ -303,19 +407,43 @@ def residualRiskForecast(
 ) -> float:
     """EWMA 기반 잔여 변동성 예측 (Grinold Ch.7 권고).
 
-    Parameters
-    ----------
-    historicalResidual : np.ndarray
-        팩터 제거 후 잔여 일별 수익률 시계열.
-    horizonDays : int
-        예측 기간 (일). 기본 252 (1년).
-    halfLifeDays : int
-        EWMA 반감기 (일). 기본 60.
+    Capabilities:
+        - 잔여 수익률 시계열에 EWMA (halfLife) 적용 → 가중 평균/분산 → horizon 변동성
+        - 표본 < 10 시 NaN 반환
 
-    Returns
-    -------
-    float
-        horizonDays 기간의 잔여 변동성 예측치 (%). 표본 < 10 이면 NaN.
+    Args:
+        historicalResidual: 팩터 제거 후 잔여 일별 수익률 시계열.
+        horizonDays: 예측 기간 (일). 기본 ``252`` (1년).
+        halfLifeDays: EWMA 반감기 (일). 기본 ``60``.
+
+    Returns:
+        float — horizonDays 기간 잔여 변동성 예측치 (%). 표본 < 10 → NaN.
+
+    Guide:
+        Grinold Ch.7 권고 EWMA. halfLife 짧으면 (30) 변동성 변화에 민감, 길면 (120) 안정적.
+
+    When:
+        Forward-looking IR 추정 + AI 미래 변동성 답변.
+
+    How:
+        ``lam = 0.5^(1/halfLife)`` → exponential weights → 가중 평균/분산 → √(var × horizon).
+
+    Requires:
+        historicalResidual 표본 ≥ 10.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> residualRiskForecast(residuals, horizonDays=252, halfLifeDays=60)
+        0.18
+
+    See Also:
+        - decomposeRisk : 분해
+        - residualAlphaIR : IR
+
+    AIContext:
+        "내년 1 년 잔여 변동성 예측" 답변에 인용.
     """
     r = np.asarray(historicalResidual, dtype=float)
     r = r[~np.isnan(r)]
@@ -332,20 +460,43 @@ def residualRiskForecast(
 def residualAlphaIR(residualSeries: np.ndarray, *, annualize: bool = True) -> dict:
     """Grinold 잔여 시계열로부터 raw IR + 연환산 alpha/trackingError.
 
-    Parameters
-    ----------
-    residualSeries : np.ndarray
-        팩터 제거 후 잔여 일별 수익률 시계열.
-    annualize : bool
-        True 면 252 거래일 기준 연환산. 기본 True.
+    Capabilities:
+        - 잔여 시계열의 mean/std → rawIR + 연환산 IR + alpha + trackingError 4 통합 지표
+        - annualize=False 시 일별 raw 값만 반환
 
-    Returns
-    -------
-    dict
-        rawIR : float — 일별 IR = mean/std (배)
-        annualizedIR : float | None — 연환산 IR (배). annualize=False 시 None
-        alpha : float — 잔여 알파 (%, 연환산 시 ×252)
-        trackingError : float — 추적오차 = std × √252 (%)
+    Args:
+        residualSeries: 팩터 제거 후 잔여 일별 수익률 시계열.
+        annualize: True 면 √252 곱. 기본 True.
+
+    Returns:
+        dict — rawIR/annualizedIR/alpha/trackingError. 표본 < 2 시 NaN dict.
+
+    Guide:
+        Grinold-Kahn Ch.5 IR 정의. IR ≥ 0.5 = good, ≥ 1.0 = exceptional alpha.
+
+    When:
+        팩터 제거 후 alpha 평가 + AI "이 종목 alpha 얼마" 답변.
+
+    How:
+        mu = mean, sd = std, raw_ir = mu/sd. annualize → scale × √252.
+
+    Requires:
+        residualSeries 표본 ≥ 2 + std > 0.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = residualAlphaIR(residuals)
+        >>> r["annualizedIR"]
+        0.42
+
+    See Also:
+        - decomposeRisk : 분해 + tracking error
+        - strategy.metrics.calcIR : daily IR helper
+
+    AIContext:
+        "이 종목 alpha 와 추적오차" 답변 시 alpha + trackingError 인용.
     """
     r = np.asarray(residualSeries, dtype=float)
     r = r[~np.isnan(r)]
