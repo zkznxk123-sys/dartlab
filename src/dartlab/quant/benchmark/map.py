@@ -69,11 +69,38 @@ SECTOR_INDEX_MAP: dict[str, tuple[tuple[str, str, float], ...]] = {
 def availableIndexNames() -> set[tuple[str, str]]:
     """로컬 KRX 지수 데이터에 실제 존재하는 ``(시장군, 지수명)`` 집합.
 
-    Returns
-    -------
-    set[tuple[str, str]]
-        indexMarket : str — "KOSPI" | "KOSDAQ" | "KRX"
-        indexName : str — KRX 지수명
+    Capabilities:
+        - data/krx/indices/raw-*.parquet 최신 2 파일에서 (MARKET_GROUP, IDX_NM) unique 집합
+        - lru_cache 로 세션 내 단 1 회 IO
+
+    Returns:
+        set[tuple[str, str]] — (indexMarket, indexName) 쌍.
+
+    Guide:
+        벤치 indexExists 검증의 데이터 소스. 빈 집합 = krx 데이터 없음 (test/dev 환경).
+
+    When:
+        Sector 후보 검증 + AI 사용 가능 벤치 답변.
+
+    How:
+        ``_getDataRoot`` → krx/indices/raw-*.parquet → ``MARKET_GROUP/IDX_NM`` unique.
+
+    Requires:
+        ``data/krx/indices/`` raw parquet ≥ 1.
+
+    Raises:
+        없음 — 파일 없음 시 빈 집합.
+
+    Example:
+        >>> ("KOSPI", "코스피 200") in availableIndexNames()
+        True
+
+    SeeAlso:
+        - indexExists : 존재 검증
+        - sectorCandidates : 후보 변환
+
+    AIContext:
+        "이 지수 데이터 있는가" 답변 시 집합 lookup.
     """
     import polars as pl
 
@@ -89,7 +116,45 @@ def availableIndexNames() -> set[tuple[str, str]]:
 
 
 def indexExists(indexMarket: str, indexName: str) -> bool:
-    """KRX 지수 데이터에 지수명이 존재하는지 확인한다."""
+    """KRX 지수 데이터에 지수명이 존재하는지 확인한다.
+
+    Capabilities:
+        - ``availableIndexNames`` 캐시 lookup → 존재 boolean
+        - 빈 캐시 (데이터 없음) 시 True 반환 (개발 환경 fallback)
+
+    Args:
+        indexMarket: ``"KOSPI" | "KOSDAQ" | "KRX"``.
+        indexName: 지수명.
+
+    Returns:
+        bool — 존재 여부.
+
+    Guide:
+        sector/style 후보 생성 후 가용성 검증. False 면 fallback 필요.
+
+    When:
+        벤치 후보 검증 + AI 데이터 없음 안내.
+
+    How:
+        ``availableIndexNames`` cache → tuple in set 비교.
+
+    Requires:
+        없음 (캐시 자동 채움).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> indexExists("KOSPI", "코스피 200")
+        True
+
+    SeeAlso:
+        - availableIndexNames : 캐시
+        - sectorCandidates : 후보 생성
+
+    AIContext:
+        "이 지수 데이터 가용" 답변 시 boolean 인용.
+    """
     names = availableIndexNames()
     if not names:
         return True
@@ -97,7 +162,45 @@ def indexExists(indexMarket: str, indexName: str) -> bool:
 
 
 def sectorCandidates(industryId: str | None, preferredMarket: str | None = None) -> list[dict[str, Any]]:
-    """taxonomy industry ID를 KRX 섹터 벤치마크 후보로 변환한다."""
+    """taxonomy industry ID를 KRX 섹터 벤치마크 후보로 변환한다.
+
+    Capabilities:
+        - SECTOR_INDEX_MAP 룩업 → 산업 ID → KRX 섹터 지수 후보 list
+        - preferredMarket 우선순위 정렬 (해당 시장 후보 앞으로)
+
+    Args:
+        industryId: industry node taxonomy id.
+        preferredMarket: 우선 시장 (``"KOSPI"`` | ``"KOSDAQ"``).
+
+    Returns:
+        list[dict] — benchmarkType/source/indexMarket/indexName/confidence/industry.
+
+    Guide:
+        벤치 stack 의 sector 차원 입력. industryId None 시 빈 list.
+
+    When:
+        Sector benchmark 선택 + AI 섹터 벤치 추천.
+
+    How:
+        SECTOR_INDEX_MAP[industryId] → row 정렬 → dict 변환.
+
+    Requires:
+        industryId 매핑 등록.
+
+    Raises:
+        없음 — 미등록 ID 시 빈 list.
+
+    Example:
+        >>> sectorCandidates("semiconductor")[0]["indexName"]
+        'KRX 반도체'
+
+    SeeAlso:
+        - resolveBenchmarkStack : sector 후보 소비
+        - SECTOR_INDEX_MAP : 매핑 SSOT
+
+    AIContext:
+        "이 산업의 벤치 후보" 답변 시 list 인용.
+    """
     if not industryId:
         return []
     rows = SECTOR_INDEX_MAP.get(industryId, ())
@@ -143,7 +246,45 @@ def loadIndustryNodes() -> list[dict[str, Any]]:
 
 
 def primaryIndustryNode(stockCode: str | None) -> dict[str, Any] | None:
-    """종목의 primary industry node를 반환한다."""
+    """종목의 primary industry node를 반환한다.
+
+    Capabilities:
+        - loadIndustryNodes 캐시에서 stockCode 매칭 → primary=True 우선 + confidence max 선택
+        - 매칭 0 건 시 None
+
+    Args:
+        stockCode: 6 자리 종목코드.
+
+    Returns:
+        dict | None — industry node (taxonomy id/sector 등).
+
+    Guide:
+        벤치 stack 의 sector 차원 입력 (industryId 추출). L2 quant → L2 industry import 회피
+        목적 — 정적 nodes.json 만 읽음.
+
+    When:
+        Sector 벤치 결정 + AI 산업 분류 답변.
+
+    How:
+        loadIndustryNodes → stockCode filter → primary=True 우선 → confidence top.
+
+    Requires:
+        nodes.json 에 stockCode 등록.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> primaryIndustryNode("005930")["industryId"]
+        'semiconductor'
+
+    SeeAlso:
+        - loadIndustryNodes : 캐시
+        - sectorCandidates : industry → 벤치 후보
+
+    AIContext:
+        "이 종목 산업" 답변 시 node 의 industryId/sector 인용.
+    """
     if not stockCode:
         return None
     matches = [n for n in loadIndustryNodes() if n.get("stockCode") == stockCode]
