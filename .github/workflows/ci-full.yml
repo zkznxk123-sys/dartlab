@@ -34,6 +34,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest pytest-asyncio pytest-cov hypothesis pytest-benchmark pytest-xdist
+          # dev group 의 vcrpy/pandera/syrupy 가 tests/_cassettes / tests/_schemas /
+          # tests/cli/test_output_snapshots 에 필요.
+          pip install "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
           pip install -e .[all]
       # realData/heavy/freshInstall 제외 — 이들은 realdata-suite / ci-nightly 담당.
       - name: Run tests with coverage (Python 3.12)
@@ -45,9 +48,9 @@ jobs:
         run: |
           pytest tests/ -n 2 --dist loadfile --tb=short \
             -m "not requires_data and not heavy and not realData and not freshInstall" \
-            --ignore=tests/test_fixture_analysis_real.py \
-            --ignore=tests/test_fixture_credit_real.py \
-            --ignore=tests/test_fixture_story_real.py \
+            --ignore=tests/_fixtures/test_analysis_real.py \
+            --ignore=tests/_fixtures/test_credit_real.py \
+            --ignore=tests/_fixtures/test_story_real.py \
             --ignore=tests/realData \
             --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml \
             --cov-fail-under=40 --benchmark-disable
@@ -60,9 +63,9 @@ jobs:
         run: |
           pytest tests/ -n 2 --dist loadfile --tb=short \
             -m "not requires_data and not heavy and not realData and not freshInstall" \
-            --ignore=tests/test_fixture_analysis_real.py \
-            --ignore=tests/test_fixture_credit_real.py \
-            --ignore=tests/test_fixture_story_real.py \
+            --ignore=tests/_fixtures/test_analysis_real.py \
+            --ignore=tests/_fixtures/test_credit_real.py \
+            --ignore=tests/_fixtures/test_story_real.py \
             --ignore=tests/realData \
             --no-cov --benchmark-disable
       - name: Upload coverage to Codecov
@@ -100,7 +103,7 @@ jobs:
           PYTEST_MEMORY_LIMIT_MB: "5000"
           DARTLAB_TEST_LOCKED: "1"
         run: |
-          for f in tests/test_fixture_analysis_real.py tests/test_fixture_credit_real.py tests/test_fixture_story_real.py; do
+          for f in tests/_fixtures/test_analysis_real.py tests/_fixtures/test_credit_real.py tests/_fixtures/test_story_real.py; do
             echo "=== $f ==="
             pytest "$f" --tb=short -q --benchmark-disable -p no:cacheprovider || exit 1
           done
@@ -131,7 +134,7 @@ jobs:
           PYTHONIOENCODING: utf-8
           DARTLAB_TEST_LOCKED: "1"
         shell: bash
-        run: python -X utf8 -m pytest tests/test_bundledResources.py tests/test_wheelPackaging.py -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
+        run: python -X utf8 -m pytest tests/core/test_bundledResources.py tests/audit/test_wheelPackaging.py -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
       - name: Silent-fail lint
         shell: bash
         run: python -X utf8 scripts/dev/checkSilentFail.py

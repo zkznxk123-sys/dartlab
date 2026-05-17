@@ -278,6 +278,8 @@ class TestFormatMetamorphic:
             restored = float(result.replace(",", ""))
         except ValueError:
             return  # int collapse 케이스 — 동일성 검증 어려움
-        # decimals=2 라면 |val - restored| < 0.005
+        # decimals=2 라면 |val - restored| ≤ 0.005 (절반 단위 반올림 경계).
+        # IEEE 754 표현으로 0.005 가 0.0050000000000000044 같이 저장돼 strict
+        # 부등호 fail 가능 — epsilon 여유로 floating-point noise 흡수.
         if "." in result:
-            assert abs(val - restored) < 0.005
+            assert abs(val - restored) <= 0.005 + 1e-9
