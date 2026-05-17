@@ -89,7 +89,7 @@ def testEventRadarSkillsAreExposedThroughAiEntryPoints() -> None:
 
     entry = readSkill("이벤트 레이더 eventRadar incubator 촉매 체크", limit=8, includeUser=False)
     reaction = readSkill("price flow reaction 이벤트 주가 수급 반응", limit=8, includeUser=False)
-    visual = readSkill("visual decision pack observed viz priceChart kpiRibbon", limit=8, includeUser=False)
+    visual = readSkill("eventRadar visual decision pack observed viz priceChart kpiRibbon", limit=8, includeUser=False)
 
     assert entry.ok
     assert entry.data["skills"][0]["id"] == "recipes.incubator.eventRadar.index"

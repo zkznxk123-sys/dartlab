@@ -418,6 +418,7 @@ from dartlab.quant.portfolio._optimizeAdvanced import (  # noqa: E402, F401
     activeExposure,
     allocateERC,
     constrainedMinVariance,
+    factorExposureConstraint,
     holdingsToFactorExposure,
     riskBudgetByFactor,
 )

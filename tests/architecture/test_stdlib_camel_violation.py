@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
+ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 
 PROTECTED_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("asyncio", re.compile(r"\basyncio\.[a-z][a-zA-Z]*[A-Z]")),

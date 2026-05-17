@@ -31,7 +31,7 @@ import pytest
 
 pytestmark = [pytest.mark.unit]
 
-_REPO_ROOT = Path(__file__).resolve().parents[1]
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 _SRC_ROOT = _REPO_ROOT / "src" / "dartlab"
 
 

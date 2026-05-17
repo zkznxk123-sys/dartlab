@@ -587,7 +587,7 @@ def test_download_batch_classifies_failure_kinds():
 
     import httpx
 
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[3]
     scriptPath = root / "experiments" / "057_edgarSectionMap_fail" / "002_downloadFirst2000.py"
     spec = importlib.util.spec_from_file_location("exp057_download", scriptPath)
     assert spec is not None and spec.loader is not None
@@ -610,7 +610,7 @@ def test_download_batch_lock_blocks_duplicate_run(tmp_path):
 
     import pytest
 
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[3]
     scriptPath = root / "experiments" / "057_edgarSectionMap_fail" / "002_downloadFirst2000.py"
     spec = importlib.util.spec_from_file_location("exp057_download_lock", scriptPath)
     assert spec is not None and spec.loader is not None
@@ -630,7 +630,7 @@ def test_download_batch_load_completed_requires_existing_parquet(tmp_path):
     import importlib.util
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[3]
     scriptPath = root / "experiments" / "057_edgarSectionMap_fail" / "002_downloadFirst2000.py"
     spec = importlib.util.spec_from_file_location("exp057_download_completed", scriptPath)
     assert spec is not None and spec.loader is not None
@@ -661,7 +661,7 @@ def test_download_batch_prepare_state_archives_stale_progress(tmp_path):
     import importlib.util
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[3]
     scriptPath = root / "experiments" / "057_edgarSectionMap_fail" / "002_downloadFirst2000.py"
     spec = importlib.util.spec_from_file_location("exp057_download_state", scriptPath)
     assert spec is not None and spec.loader is not None
@@ -1241,7 +1241,7 @@ def test_priorityTickerCollection_load_completed_requires_existing_parquet(tmp_p
     assert completed == {"AAPL"}
 
 
-_HAS_EDGAR_TICKERS = (Path(__file__).resolve().parents[1] / "data" / "edgar" / "tickers.parquet").exists()
+_HAS_EDGAR_TICKERS = (Path(__file__).resolve().parents[3] / "data" / "edgar" / "tickers.parquet").exists()
 _skipNoEdgarTickers = pytest.mark.skipif(
     not _HAS_EDGAR_TICKERS,
     reason="EDGAR tickers.parquet 없음",

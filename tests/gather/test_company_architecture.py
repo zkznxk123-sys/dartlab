@@ -15,7 +15,7 @@ from dartlab.providers.edgar import Company as EdgarEngineCompany
 
 
 def _read(relpath: str) -> str:
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     return (root / relpath).read_text(encoding="utf-8")
 
 
@@ -60,7 +60,7 @@ def test_engine_modules_do_not_import_root_company_or_compare():
 
 
 def test_compare_modules_are_removed():
-    root = Path(__file__).resolve().parents[1]
+    root = Path(__file__).resolve().parents[2]
     targets = [
         "src/dartlab/compare.py",
         "src/dartlab/providers/dart/compare.py",
@@ -96,7 +96,7 @@ def test_export_module_does_not_depend_on_root_company_internals():
 
 
 def test_ai_owned_helpers_do_not_live_in_src_root():
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     forbidden = [
         "src/dartlab/" + "ai_" + "backup",
         "src/dartlab/tools",
@@ -138,7 +138,7 @@ def test_core_does_not_own_retired_subpackages():
     가이드 안내·유틸·프로토콜은 OK. AI provider config (ai/settings),
     도메인 분석 (finance), CLI 통합 wrapper 는 core 가 아니다.
     """
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     forbidden_dirs = [
         "src/dartlab/core/ai",
         "src/dartlab/core/finance",

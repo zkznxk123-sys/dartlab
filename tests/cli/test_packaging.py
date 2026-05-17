@@ -9,7 +9,7 @@ pytestmark = pytest.mark.unit
 import tomllib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_pyproject_cli_entrypoint_is_package_main():

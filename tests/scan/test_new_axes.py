@@ -494,14 +494,14 @@ class TestRelatedPartyIntensity:
                 return_value=500_000_000_000,  # 5000억원
             ),
             patch(
-                "dartlab.analysis.financial.governance.toDictBySnakeId",
+                "dartlab.analysis.financial._governanceDeepRest.toDictBySnakeId",
                 return_value=(
                     {"sales": {"2023": 1_000_000_000_000, "2024": 2_500_000_000_000}},
                     ["2023", "2024"],
                 ),
             ),
             patch(
-                "dartlab.analysis.financial.governance.annualColsFromPeriods",
+                "dartlab.analysis.financial._governanceDeepRest.annualColsFromPeriods",
                 return_value=["2023", "2024"],
             ),
         ):
@@ -550,14 +550,14 @@ class TestRelatedPartyIntensity:
                 return_value=None,
             ),
             patch(
-                "dartlab.analysis.financial.governance.toDictBySnakeId",
+                "dartlab.analysis.financial._governanceDeepRest.toDictBySnakeId",
                 return_value=(
                     {"sales": {"2023": 1_000_000_000_000, "2024": 1_000_000_000_000}},
                     ["2023", "2024"],
                 ),
             ),
             patch(
-                "dartlab.analysis.financial.governance.annualColsFromPeriods",
+                "dartlab.analysis.financial._governanceDeepRest.annualColsFromPeriods",
                 return_value=["2023", "2024"],
             ),
             patch("dartlab.analysis.financial.governance._loadSanction", return_value=None),

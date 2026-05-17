@@ -14,11 +14,11 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-_ROOT = Path(__file__).resolve().parents[1]
+_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _load_build_script(name: str):
-    path = _ROOT / "scripts" / "build" / f"{name}.py"
+    path = _ROOT / ".github" / "scripts" / "sync" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)

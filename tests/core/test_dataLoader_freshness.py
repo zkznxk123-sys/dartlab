@@ -22,7 +22,7 @@ def _load_sync_recent_module():
 
     spec = importlib.util.spec_from_file_location(
         "syncRecent",
-        Path(__file__).parent.parent.parent / ".github" / "scripts" / "syncRecent.py",
+        Path(__file__).parent.parent.parent / ".github" / "scripts" / "sync" / "syncRecent.py",
     )
     if spec is None or spec.loader is None:
         pytest.skip("syncRecent.py 로드 실패")

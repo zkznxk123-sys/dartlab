@@ -99,7 +99,7 @@ def test_sector_macro_map():
 
 
 def test_avgGrowth():
-    from dartlab.analysis.financial.predictionSignals import _avgGrowth
+    from dartlab.analysis.financial._signalsMacro import _avgGrowth
 
     assert _avgGrowth([100, 110, 121]) == pytest.approx(10.0, abs=0.5)
     assert _avgGrowth([100, 50]) == pytest.approx(-50.0, abs=0.1)
@@ -108,7 +108,7 @@ def test_avgGrowth():
 
 
 def test_safe():
-    from dartlab.analysis.financial.predictionSignals import _safe
+    from dartlab.core.utils.calc import safeDiv as _safe
 
     assert _safe(10, 5) == 2.0
     assert _safe(10, 0) is None

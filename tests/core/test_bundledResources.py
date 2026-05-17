@@ -29,7 +29,7 @@ import pytest
 
 pytestmark = [pytest.mark.unit]
 
-_PKG_ROOT = Path(__file__).resolve().parents[1] / "src" / "dartlab"
+_PKG_ROOT = Path(__file__).resolve().parents[2] / "src" / "dartlab"
 
 
 # ════════════════════════════════════════

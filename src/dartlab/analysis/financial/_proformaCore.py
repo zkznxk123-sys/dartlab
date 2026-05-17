@@ -30,6 +30,7 @@ def __getattr__(name: str):
         "ProformaInput",
         "ProformaResult",
         "ProFormaResult",
+        "ProFormaYear",
         "ProformaScenario",
     }:
         from dartlab.analysis.financial import proforma as _pf
@@ -418,6 +419,8 @@ def buildProforma(
     AIContext:
         결과 ProFormaResult 의 warnings 가 비어있는지 함께 검토 후 인용.
     """
+    from dartlab.analysis.financial.proforma import ProFormaResult, ProFormaYear  # noqa: F401
+
     warnings: list[str] = []
 
     # 1. 과거 비율 추출

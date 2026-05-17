@@ -17,10 +17,29 @@ import pytest
 
 CREDIT = Path(__file__).resolve().parent.parent.parent / "src" / "dartlab" / "credit"
 
-ROOT_ALLOWED: set[str] = {"__init__.py", "engine.py", "_engineConfig.py", "_engineNotch.py"}
+ROOT_ALLOWED: set[str] = {
+    "__init__.py",
+    "engine.py",
+    "_engineConfig.py",
+    "_engineNotch.py",
+    "_engineCHS.py",
+    "_engineFinancial.py",
+    "_enginePostAdjust.py",
+    "_engineScoring.py",
+}
 
 EXPECTED_LAYOUT: dict[str, set[str]] = {
-    "scoring": {"metrics.py", "gradeTable.py", "creditScorecard.py", "migration.py", "calcs.py", "_metricsHelpers.py"},
+    "scoring": {
+        "metrics.py",
+        "gradeTable.py",
+        "creditScorecard.py",
+        "migration.py",
+        "calcs.py",
+        "_metricsHelpers.py",
+        "_metricsFetchers.py",
+        "_metricsTrackB.py",
+        "_calcsAdvanced.py",
+    },
     "models": {"chsModel.py", "merton.py", "survival.py", "excessBondPremium.py"},
     "monitoring": {"crisisDetector.py", "creditCycle.py", "audit.py", "history.py"},
     "features": {
@@ -30,6 +49,7 @@ EXPECTED_LAYOUT: dict[str, set[str]] = {
         "_narrativeTypes.py",
         "_narrativeBuilders.py",
         "_narrativeAxes.py",
+        "_narrativeAxesA.py",
     },
 }
 

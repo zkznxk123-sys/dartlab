@@ -19,9 +19,14 @@ def test_no_direct_q4_read_in_tax_analysis():
 
 @pytest.mark.unit
 def test_no_direct_q4_read_in_prediction_signals():
-    """Phase 15 A1: predictionSignals Sloan calc 가 annualSumFlow 사용."""
-    src = (_SRC / "analysis" / "financial" / "predictionSignals.py").read_text(encoding="utf-8")
-    assert "annualSumFlow" in src, "predictionSignals 가 annualSumFlow 사용 안 함"
+    """Phase 15 A1: predictionSignals Sloan calc 가 annualSumFlow 사용.
+
+    predictionSignals 본체는 BC re-export 만 남고, Sloan accrual Q4 합산 로직은
+    분리된 sub-signal `_signalsEarnings` 로 이동. 해당 모듈에 annualSumFlow
+    사용을 검증 (Q4 함정 차단).
+    """
+    earnings = (_SRC / "analysis" / "financial" / "_signalsEarnings.py").read_text(encoding="utf-8")
+    assert "annualSumFlow" in earnings, "_signalsEarnings 가 annualSumFlow 사용 안 함 (Q4 함정)"
 
 
 @pytest.mark.unit

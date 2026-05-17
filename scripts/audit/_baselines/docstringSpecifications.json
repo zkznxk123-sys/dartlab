@@ -1,6 +1,8 @@
 {
   "_note": "P-PR 트랙 — providers/ docstring Specifications sub-section baseline. P-PR2 (자동 sweep) / P-PR3 (사람 review) 통과마다 축소. P-PR3 종료 시 strict 0.",
   "violations": [
+    "src/dartlab/providers/dart/ops/insiderTrades.py::fetchInsiderTradingRaw",
+    "src/dartlab/providers/dart/ops/insiderTrades.py::fetchMajorShareholdersRaw",
     "src/dartlab/providers/docs/diff.py::buildDiffMatrix",
     "src/dartlab/providers/docs/diff.py::buildHeatmapSpec",
     "src/dartlab/providers/docs/diff.py::changeRate",

@@ -22,7 +22,7 @@ def test_lite_accounts_all_in_sortOrder():
     """LITE_ACCOUNTS 30 개가 sortOrder.json 에 모두 존재."""
     from dartlab.scan.io.parquet import _LITE_ACCOUNTS_BS, _LITE_ACCOUNTS_CF, _LITE_ACCOUNTS_IS, LITE_ACCOUNTS
 
-    sortOrderPath = Path(__file__).resolve().parents[1] / "src" / "dartlab" / "core" / "utils" / "sortOrder.json"
+    sortOrderPath = Path(__file__).resolve().parents[2] / "src" / "dartlab" / "core" / "utils" / "sortOrder.json"
     data = json.loads(sortOrderPath.read_text(encoding="utf-8"))
 
     assert len(LITE_ACCOUNTS) == 30, f"LITE_ACCOUNTS 는 30 개여야 함 (실제 {len(LITE_ACCOUNTS)})"
