@@ -111,6 +111,7 @@ jobs:
         run: uv run python -X utf8 -u .github/scripts/sync/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # checkpoint subprocess (uploadData.py) 가 필요
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: finance,report
           SYNC_STATE_SCOPE: fr  # 병렬 Job pending.txt 경쟁 회피
@@ -207,6 +208,7 @@ jobs:
         run: uv run python -X utf8 -u .github/scripts/sync/syncRecent.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # checkpoint subprocess (uploadData.py) 가 필요
           SYNC_LOOKBACK_DAYS: ${{ github.event.inputs.lookback_days || '14' }}
           SYNC_CATEGORIES: docs
           SYNC_STATE_SCOPE: docs
