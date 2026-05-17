@@ -314,7 +314,9 @@ jobs:
       - name: Install package + test deps
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis syrupy
+          # pytest-cov 는 pyproject.toml [tool.pytest.ini_options] addopts 와 호환 위해 필요
+          # (--no-cov 플래그 해석은 pytest-cov 가 등록한 hook).
+          pip install pytest pytest-asyncio pytest-cov hypothesis syrupy
           pip install -e .
       - name: Run snapshot tests
         env:
@@ -335,7 +337,7 @@ jobs:
       - name: Install package + Pandera
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis "pandera[polars]>=0.29.0"
+          pip install pytest pytest-asyncio pytest-cov hypothesis "pandera[polars]>=0.29.0"
           pip install -e .
       - name: Run schema regression
         env:
@@ -356,7 +358,7 @@ jobs:
       - name: Install package + test deps
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-cov
           pip install -e .
       - name: Run eval smoke
         env:
