@@ -61,6 +61,36 @@ def calcRiskText(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         newRisks : list[str] — 최근 기간에 새로 등장한 키워드
         riskScore : float — 멘션 밀도 (천 단어당, 점)
         riskGrade : str — "high" | "medium" | "low"
+
+    Capabilities:
+        - 리스크 키워드 (위험/소송/부도/제소 등) 출현 + 기간별 추세 + 신규 키워드 식별
+        - 멘션 밀도 (1000 단어당) → riskGrade 분류
+
+    Guide:
+        Loughran-McDonald risk-related 어휘 확장. 신규 등장 키워드는 "이번 분기 추가된 위험".
+
+    When:
+        Text 위험 + AI 공시 위험 경고 답변.
+
+    How:
+        ``loadChangesForStock`` → 키워드 매칭 → 기간별 카운트 + 추세.
+
+    Requires:
+        docs 또는 changes 데이터 가용.
+
+    Raises:
+        없음 — 데이터 부재 시 ``{error}``.
+
+    Example:
+        >>> calcRiskText("005930")["riskGrade"]
+        'medium'
+
+    See Also:
+        - calcSentiment / calcToneChange : 자매 text 축
+        - composite.calcTextComposite : 통합
+
+    AIContext:
+        "공시 위험 어휘 증가" 답변 시 trend + newRisks 인용.
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

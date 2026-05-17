@@ -38,6 +38,37 @@ def calcToneChange(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
             from : str, to : str, shift : float (점),
             newNegatives : list[str]
         totalPeriods : int — 전체 분석 기간 수
+
+    Capabilities:
+        - 연속 공시 기간의 sentiment 차이 → 톤 악화/개선/유지 판정
+        - 신규 등장 부정 단어 추출 (top 비교)
+
+    Guide:
+        Li 2008 어조 변화 (toneChange) 비대칭 정보 전달. |shift| ≥ 0.05 = 의미 있는 변화.
+
+    When:
+        Text 시계열 변화 + AI 톤 악화 경고 답변.
+
+    How:
+        ``loadChangesForStock`` → 기간별 segmentation → 인접 기간 score diff.
+
+    Requires:
+        changes parquet ≥ 2 기간.
+
+    Raises:
+        없음 — 데이터 부족 시 ``{error}``.
+
+    Example:
+        >>> calcToneChange("005930")["direction"]
+        '악화'
+
+    See Also:
+        - calcSentiment : 단일 시점 sentiment
+        - calcRiskText : 위험 어휘
+        - composite.calcTextComposite : 통합
+
+    AIContext:
+        "공시 톤 악화 여부" 답변 시 direction + magnitude 인용.
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

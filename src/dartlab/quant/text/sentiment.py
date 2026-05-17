@@ -44,6 +44,37 @@ def calcSentiment(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
         timeSeries : list[dict] — 기간별 감성 점수 (최근 20개)
             period : str, score : float, pos : int, neg : int, words : int
         sentimentVerdict : str — "positive" | "negative" | "neutral"
+
+    Capabilities:
+        - 공시 본문 토큰화 → Loughran-McDonald 한국어 사전 매칭 → pos/neg/uncertainty 집계
+        - 종합 점수 + verdict + top 부정 단어 + 시계열
+
+    Guide:
+        Loughran-McDonald 2011 금융 어휘 표준 + 한국어 사전 확장. score ≥ 0.1 = positive.
+
+    When:
+        Text alpha + AI 공시 톤 답변.
+
+    How:
+        ``loadDocsForStock`` → 토큰화 → 사전 매칭 → 통계 + 시계열.
+
+    Requires:
+        ``data/dart/docs/{stockCode}.parquet`` 가용.
+
+    Raises:
+        없음 — 텍스트 부재 시 ``{error}``.
+
+    Example:
+        >>> calcSentiment("005930")["sentimentVerdict"]
+        'positive'
+
+    See Also:
+        - calcToneChange : 시계열 변화
+        - calcRiskText : 위험 어휘
+        - composite.calcTextComposite : 텍스트 통합
+
+    AIContext:
+        "공시 톤" 답변 시 sentimentScore + topNegativeWords 인용.
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}
