@@ -156,6 +156,27 @@ signal/regime, score, basis/source, assumptions, flags
 
 매크로 판단에는 시장, 지표명, 값, 단위, 기준일, 출처, 실행 ref가 필요하다. 최신 데이터가 아니면 stale 가능성을 같이 말한다.
 
+## EngineCall (agent 경로) args 매핑
+
+| `dartlab.macro(...)` | `EngineCall(apiRef="macro", args=...)` |
+| --- | --- |
+| `dartlab.macro()` 가이드 | `{}` (빈 dict) |
+| `dartlab.macro("cycle", market="KR")` | `{"axis": "cycle", "market": "KR"}` |
+| `dartlab.macro("rates", market="US")` | `{"axis": "rates", "market": "US"}` |
+| `dartlab.macro("scenario", "2008 금융위기")` | `{"axis": "scenario", "target": "2008 금융위기"}` |
+| `dartlab.macro("summary", market="KR")` | `{"axis": "summary", "market": "KR"}` |
+| `Company("005930").macro("사이클")` | `{"stockCode": "005930", "axis": "사이클"}` (apiRef="Company.macro") |
+
+**guard** — axis 와 market 을 점 표기로 합쳐 `apiRef="macro.rates.US"` 호출 금지. args 안에 분리.
+
+## 기업 답변에 macro 변수 결합 시 — 정량 시나리오 권장
+
+P4 류 질문 ("다음 분기 영업이익률 떨어질까? 어떤 조건에서 깨지나") 에서 환율·금리·메모리 가격 같은 macro 변수를 *반증조건* 으로 인용할 때는:
+
+1. **시나리오 호출** — `dartlab.macro("scenario", "USD-KRW 5% 강세")` 또는 사전 정의된 preset (`"2008 금융위기"`, `"COVID 충격"` 등). 임의 가정은 답변 한계로 표기.
+2. **민감도 결합** — `c.analysis("macro", "매크로민감도")` 가 기업 단위 매출/영업이익 탄력성 (예: `매출 elasticity vs WonDollar = 0.3`) 반환. 시장 시나리오 × 기업 elasticity = 정량 임팩트.
+3. **최소 시나리오 명시 X 답변 금지** — "환율이 우호적이면 마진 방어" 같은 일반론은 evidence 0 으로 GATE 차단 대상. 시나리오 호출 0 회 가능하지만 반증조건은 변수명 + 임계값 + 방향 셋 다 명시.
+
 ## 기본 실행 순서
 
 1. 시장을 정한다: `KR`, `US`, 또는 `auto`.

@@ -178,13 +178,47 @@ Company("005930").industry()
 
 산업 답변은 `target` (종목코드) · `industryId` · `stage` · taxonomy `dataAsOf` (운영자 갱신 시점) 를 남긴다. `confidence < 0.5` 면 매칭 신뢰도 낮음을 답변에 명시.
 
+## Company.show 응답에 industryBadge 자동 부착 — 단일 종목 답변 권장 경로
+
+`Company.show(topic)` (또는 `EngineCall(apiRef="Company.show")`) 의 반환 `data` dict 에 `industryBadge` 가 자동 부착된다 (Track E). 단일 종목 답변이면 별도 `industry()` 호출 불필요:
+
+```text
+data.industryBadge = {
+    industryId: "semiconductor",
+    industryName: "반도체",
+    stage: "fab",
+    stageName: "전공정(FAB)",
+    role: "제조",
+    stream: "midstream",
+    phase: "재도약",          # 라이프사이클 5 phase: 도입·성장·성숙·재도약·쇠퇴
+    peers: [{stockCode, corpName}, ...],
+    confidence: 73,
+    confidenceMethod: "ratio",
+}
+```
+
+단일 종목 헤더 chip 양식: `🏭 {industryName} · {stageName} · {phase} [conf:{confidence}]`.
+
+## EngineCall (agent 경로) args 매핑
+
+| `dartlab.industry(...)` | `EngineCall(apiRef="industry", args=...)` |
+| --- | --- |
+| `dartlab.industry()` 가이드 | `{}` (빈 dict) |
+| `dartlab.industry("semiconductor")` | `{"industryId": "semiconductor"}` |
+| `dartlab.industry("semiconductor", stage="fab")` | `{"industryId": "semiconductor", "stage": "fab"}` |
+| `dartlab.industry("semiconductor", summary=True, year="2024")` | `{"industryId": "semiconductor", "summary": true, "year": "2024"}` |
+| `Company("005930").industry()` | `{"stockCode": "005930"}` (apiRef="Company.industry") |
+
+`summary` · `timeline` · `lifecycle` 셋 동시 X — 우선순위 summary > timeline > lifecycle.
+
 ## 기본 실행 순서
 
-1. 산업 ID 모르면 `dartlab.industry()` 로 목록 확인.
-2. 단일 기업 위치는 `Company(code).industry()` — chainId·stage·peers 1 회로.
-3. 공정 매출 집계가 필요하면 `dartlab.industry(industryId, summary=True, year=...)`.
-4. peer 그룹은 `peers` list 만 추출해 `analysis` / `scan` / `quant` 에 전달.
-5. 매칭 실패 (None 반환) 시 추측하지 않고 산업 분류 미등록임을 답변에 명시.
+1. **단일 종목 산업 위치** — `Company.show(...).data.industryBadge` 그대로 인용 (자동 부착, 추가 호출 불필요).
+2. **산업 ID 모를 때 가이드** — `dartlab.industry()` 로 목록.
+3. **산업 전체 횡단 / 공정별 집계** — `dartlab.industry(industryId, summary=True, year=...)`.
+4. **연도별 라이프사이클 phase 추적** — `dartlab.industry(industryId, lifecycle=True)`.
+5. peer 그룹은 `industryBadge.peers[].stockCode` 또는 `Company.industry().peers` 추출 → `analysis` / `scan` / `quant` 전달.
+6. 매칭 실패 (None 반환) 시 추측 X — 산업 분류 미등록 명시.
 
 ## 기본 검증
 
