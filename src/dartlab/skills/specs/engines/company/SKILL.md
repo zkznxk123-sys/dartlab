@@ -142,6 +142,28 @@ Company 생성 시 target과 market/provider를 확정한다. 이후 `show/selec
 
 무인자 또는 topic 누락 호출은 가능한 topic/axis 가이드를 반환할 수 있다. 데이터가 없으면 결손을 0으로 채우지 않고 빈 DataFrame, `None`, flags, 제한 메시지로 표현한다.
 
+### `c.show()` 응답 data 의 자동 부착 필드 (단일 종목 답변의 1 차 진입점)
+
+`c.show(topic)` 의 반환 dict (server agent/MCP 경유 시 `EngineCall(apiRef="Company.show")` 결과의 `data`) 에는 원자료 외에 다음이 자동 부착된다 — 별도 도구 호출 없이 그대로 인용:
+
+| key | 내용 | 사용처 |
+| --- | --- | --- |
+| `dcrBadge.grade` · `dcrBadge.score` · `dcrBadge.healthScore` · `dcrBadge.outlook` | dCR 등급 + 위험/건전성 점수 + 전망 | 답변 헤더 chip · 신용 한 줄 결론 |
+| `dcrBadge.axes` | **7 축 완전 형태** — 각 항목 `{name, weight, score}` (채무상환 25w/X / 자본구조 20w/X / 유동성 15w/X / 현금흐름 15w/X / 사업안정성 10w/X / 재무신뢰성 10w/X / 공시 5w/X) | 7 축 약점 분해 — 추가 `c.credit()` 호출 불필요 |
+| `dcrBadge.confidence` · `dcrBadge.confidenceMethod` | 신뢰도 (0-100, "ratio" 등) | `[conf:N]` chip |
+| `industryBadge.industryId` · `industryBadge.industryName` · `industryBadge.stageName` · `industryBadge.phase` | 산업 식별 + 라이프사이클 단계 (도입·성장·성숙·재도약·쇠퇴) | 답변 헤더 chip · 산업 맥락 |
+| `industryBadge.peers` | 같은 산업 노드의 동종 종목 list | 비교 후보 |
+
+**가드** — 7 축 점수가 `dcrBadge.axes` 에 *이미 있다*. "7 축 약점 / 점수 차이" 질문에 `EngineCall("credit")` 재호출 금지 (반환은 axis 가이드 metadata 만 — 실제 점수 아님). 약점 분해 양식: `약점 = weight × score 기여도`. 예: 재무신뢰성 10% × 25.0 = 2.50, 채무상환 25% × 6.77 = 1.69.
+
+### stockCode resolve 실패 시 행동 (회복 절차)
+
+`c = dartlab.Company(code)` 가 코드 미발견 / 비상장 / 데이터셋 미수집 면 fail-fast — 같은 코드로 `c.show / c.credit / c.analysis` 등 반복 호출 금지. 한 번 `company_not_resolved` 면 즉시 답변에 "데이터 없음" + 가능한 원인 (잘못된 6 자리 / 비상장 / 미수집) 명시. 회사명만 주어졌으면 `dartlab.Company.search("회사명")` 1 회로 코드 lookup 후 재시도, 그것도 fail 이면 멈춤.
+
+### dataAsOf freshness
+
+`c.show()` / `c.analysis()` 결과의 `latestPeriod` (또는 `dataAsOf`) 가 *오늘* 기준 stale (예: 2 분기 이상 뒤) 일 수 있다. 정기보고서 공시 지연 / 분기 잠정실적 미반영 / fixture 환경 가능성. 답변 헤더 chip 옆에 `📅 데이터 as-of {latestPeriod}` 노출 권장 — 사용자가 "지금이 최신인가" 즉시 판단.
+
 ## 전체 축/메서드 목록
 
 | method | 담당 | 대표 호출 |

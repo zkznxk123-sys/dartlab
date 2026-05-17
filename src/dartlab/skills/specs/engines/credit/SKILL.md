@@ -160,6 +160,19 @@ repayment = c.credit("채무상환")
 
 데이터 부족 (재무 결손·신생 상장·연결재무제표 부재) 시 결손을 0 으로 채우지 않고 `riskFlags` 와 제한 메시지로 표현.
 
+### Company.show 응답에 dcrBadge 자동 부착 — 단일 종목 답변의 권장 경로
+
+`Company.show(topic)` (또는 `EngineCall(apiRef="Company.show")`) 의 반환 `data` dict 에 `dcrBadge` 가 자동 부착된다 (Track G). `dcrBadge.axes` 는 **7 축 완전 형태** — 각 항목 `{name, weight, score}` 가 들어있다. 신용·약점 질문이 단일 종목 한정이면:
+
+| 시나리오 | 권장 호출 | 비권장 |
+| --- | --- | --- |
+| "삼성전자 신용도 어때?" | `Company.show("IS")` 1 회 → `data.dcrBadge` 인용 | `EngineCall("credit")` 별도 호출 |
+| "7 축 약점은?" | `Company.show("IS").data.dcrBadge.axes` 그대로 분해 | `EngineCall("credit", stockCode, axis)` 7 회 |
+| 등급 transition / migration matrix | `credit.migration.buildTransitionMatrix()` (별도 모듈) | dcrBadge 만으로 X |
+| 외부 신평 비교 / 표본 79 개사 검증 | 본 skill 의 `detail=True` 호출 | dcrBadge 만으로 X |
+
+**회귀 가드** — 7 축 점수가 이미 `dcrBadge.axes` 에 있는데 `EngineCall("credit")` 재호출하면 axis 가이드 metadata (axis · label · description · group) 만 반환되어 "데이터 부족" 환각 (2026-05-17 OAuth P5 probe 재현). 약점 분해는 본문의 [기본 실행 순서](#기본-실행-순서) 가 정공.
+
 ## 7 축 목록
 
 | axis | label | weight | 핵심 지표 |
@@ -206,10 +219,26 @@ dartlab.credit("005930", "채무상환")
 
 ## 기본 실행 순서
 
+**단일 종목 신용·약점 분석 (chat-native 권장 경로)** — `Company.show("IS")` 1 회 호출 후 `data.dcrBadge.axes` 의 7 축을 직접 분해. 약점 순위는 *가중위험기여 = weight × score* 로 정렬:
+
+```text
+재무신뢰성  10% × 25.00 → 기여 2.50  (1 순위)
+채무상환   25% × 6.77  → 기여 1.69  (2 순위)
+사업안정성  10% × 13.75 → 기여 1.38  (3 순위)
+유동성     15% × 4.04  → 기여 0.61
+자본구조   20% × 2.20  → 기여 0.44
+현금흐름   15% × 0.00  → 기여 0.00
+공시리스크   5% × N/A   → 평가 공백
+```
+
+각 축 안 세부 지표 (예: 채무상환 축의 EBITDA/이자비용 · Debt/EBITDA · FFO/총차입금) 는 `dcrBadge.axes[i].metrics` (detail 모드) 에 시계열. 단일 종목이면 본 경로로 충분 — 추가 `credit()` 호출 불필요.
+
+**심층 / 외부 신평 비교 / migration 시계열** — 다음 경로 (별도 capability):
+
 1. 종목코드 확정 (`dartlab.searchName("회사명")` 또는 사용자 입력).
-2. `dartlab.credit("005930")` 으로 종합 등급 확인.
-3. score 가 50+ 이면 weak 축 식별 → 해당 축 단독 호출 (`dartlab.credit("005930", "채무상환")`).
-4. `analysis` 의 안정성·현금흐름 축과 교차 검증.
+2. `dartlab.credit("005930", detail=True)` 으로 7 축 상세 + 모든 지표 시계열 + narrative.
+3. `analysis` 의 안정성·현금흐름 축과 교차 검증.
+4. `credit.migration.buildTransitionMatrix()` + `forwardPdLadder(horizons=(1, 3, 5))` 로 등급 전이 행렬 + 1y/3y/5y 누적 PD.
 5. 외부 신평 비교 시 시점·표본·정성 요소 차이를 답변에 명시.
 
 ## 기본 검증
