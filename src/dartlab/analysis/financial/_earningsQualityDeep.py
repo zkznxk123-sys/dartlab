@@ -26,28 +26,72 @@ def _beneishInterpretation(*args, **kwargs):
 
 
 def calcBeneishMScore(*args, **kwargs):
-    """Beneish M-Score 본 점수 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """Beneish M-Score 본 점수 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        earningsQuality.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcBeneishMScore(company)["mScore"]
+        -2.1
+    """
     from dartlab.analysis.financial.earningsQuality import calcBeneishMScore as _f
 
     return _f(*args, **kwargs)
 
 
 def calcSloanAccruals(*args, **kwargs):
-    """Sloan accruals — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """Sloan accruals — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        earningsQuality.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSloanAccruals(company)["accruals"]
+        0.03
+    """
     from dartlab.analysis.financial.earningsQuality import calcSloanAccruals as _f
 
     return _f(*args, **kwargs)
 
 
 def calcAccrualAnalysis(*args, **kwargs):
-    """발생액 분석 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """발생액 분석 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        earningsQuality.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAccrualAnalysis(company)["score"]
+        0.5
+    """
     from dartlab.analysis.financial.earningsQuality import calcAccrualAnalysis as _f
 
     return _f(*args, **kwargs)
 
 
 def calcEarningsPersistence(*args, **kwargs):
-    """이익 지속성 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """이익 지속성 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        earningsQuality.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEarningsPersistence(company)["score"]
+        0.7
+    """
     from dartlab.analysis.financial.earningsQuality import calcEarningsPersistence as _f
 
     return _f(*args, **kwargs)
@@ -61,14 +105,36 @@ def _calcEarningsQualityFlagsBase(*args, **kwargs):
 
 
 def detectAuditFlags(*args, **kwargs):
-    """감사 flag 검출 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """감사 flag 검출 — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        earningsQuality.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectAuditFlags(company)
+        ['지정감사인', '한정의견']
+    """
     from dartlab.analysis.financial.earningsQuality import detectAuditFlags as _f
 
     return _f(*args, **kwargs)
 
 
 def calcEarningsQualityFlags(*args, **kwargs):
-    """earnings quality flags — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """earnings quality flags — earningsQuality.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        earningsQuality.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEarningsQualityFlags(company)
+        [('HIGH_ACCRUAL', '...')]
+    """
     from dartlab.analysis.financial.earningsQuality import calcEarningsQualityFlags as _f
 
     return _f(*args, **kwargs)
@@ -99,6 +165,36 @@ def calcBeneishTimeline(company, *, basePeriod: str | None = None) -> dict | Non
             reference : str — 학술 근거
             sampleBase : str — 표본 기반
             krNote : str — K-IFRS 환경 주의사항
+
+    Capabilities:
+        - annual 데이터에서 8 변수 Beneish 직접 계산 + 기간별 시계열 + threshold 비교
+        - K-IFRS 환경 한계 명시 (precision/falsePositiveRate 메타)
+
+    Guide:
+        Beneish 1999 표준. M > -1.78 = 조작 의심. 한국 K-IFRS 환경에서 false positive 잦음.
+
+    When:
+        Earnings quality 시계열 + AI 회계 조작 의심 답변.
+
+    How:
+        snakeId pattern 으로 IS/BS/CF 추출 → 8 변수 계산 → M 합산.
+
+    Requires:
+        IS/BS/CF 시계열 ≥ 2 년.
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> calcBeneishTimeline(company)["history"][-1]["mScore"]
+        -2.05
+
+    See Also:
+        - calcBeneishMScore : 단일 기간
+        - calcQualityAnomalies : 종합 anomaly
+
+    AIContext:
+        "이 종목 회계 조작 의심" 답변 시 mScore 시계열 + threshold 인용.
     """
     # snakeId 단일 패턴 (alias 양방향이 EDGAR↔DART 변형 자동 처리)
     isResult = company.select(
@@ -250,6 +346,36 @@ def calcRichardsonAccrual(company, *, basePeriod: str | None = None) -> dict | N
             finacc : float | None — 금융 발생액/총자산 (%)
             totalAccrual : float | None — 총발생액/총자산 (%)
             reliabilityScore : str | None — 이익 신뢰도 (high/medium/low)
+
+    Capabilities:
+        - BS 변동 기반 3계층 발생액 분해 (WCACC/LTOACC/FINACC)
+        - reliabilityScore (high/medium/low) 분류
+
+    Guide:
+        Richardson et al. 2005 표준. LTOACC 가 클수록 이익 지속성 낮음 → 이익 품질 우려.
+
+    When:
+        Earnings quality 정밀 진단 + AI 발생액 분해 답변.
+
+    How:
+        BS 시계열 → 운전자본/비유동영업/금융 발생액 차분.
+
+    Requires:
+        BS 시계열 ≥ 2 년.
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> calcRichardsonAccrual(company)["history"][-1]["reliabilityScore"]
+        'medium'
+
+    See Also:
+        - calcSloanAccruals : 단순 Sloan
+        - calcBeneishTimeline : 8 변수 Beneish
+
+    AIContext:
+        "이익 품질 정밀 진단" 답변 시 LTOACC + reliabilityScore 인용.
     """
     bsResult = company.select(
         "BS",
@@ -371,6 +497,36 @@ def calcNonOperatingBreakdown(company, *, basePeriod: str | None = None) -> dict
             nonOpTotal : float | None — 영업외손익 합계 (원)
             nonOpRatio : float | None — 영업외/영업이익 비율 (%)
         notesDetail : dict | None — 관계기업 투자 주석 (있는 경우)
+
+    Capabilities:
+        - IS 영업외 항목 (금융이익/비용/지분법/기타) 시계열 분해 + 영업외 비중 산출
+        - notesDetail 로 관계기업 투자 주석 보강
+
+    Guide:
+        영업외 비중이 영업이익 대비 30% 이상 = 이익 품질 저하 (영업 본업 외 의존).
+
+    When:
+        영업외 비중 분석 + AI "이익이 영업에서 나왔나" 답변.
+
+    How:
+        IS snakeId 추출 → 금융/지분법/기타 계산.
+
+    Requires:
+        IS 시계열 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcNonOperatingBreakdown(company)["history"][-1]["nonOpRatio"]
+        15.2
+
+    See Also:
+        - calcRichardsonAccrual : 발생액 분해
+        - earningsQuality.calcSloanAccruals
+
+    AIContext:
+        "이익이 본업에서" 답변 시 nonOpRatio 인용.
     """
     isResult = company.select(
         "IS",
@@ -456,6 +612,36 @@ def calcDilutionTrend(company, *, basePeriod: str | None = None) -> dict | None:
             dilutionPct : float | None — 희석 괴리율 (%)
         latestDilution : float | None — 최신 기간 희석 괴리율 (%)
         trend : str | None — 희석 추세 (희석 증가/희석 감소/안정)
+
+    Capabilities:
+        - notes.eps 에서 basic vs diluted EPS 시계열 추출 + 괴리율 추세 분류
+        - 5% 이상 = 잠재 희석 리스크 식별
+
+    Guide:
+        희석 괴리율 추세 ↑ = 신주발행/CB 등 dilution 압력 ↑. 5% 임계 보수적.
+
+    When:
+        희석 리스크 + AI EPS dilution 답변.
+
+    How:
+        notesDetail.eps → basic/diluted 매칭 → 시계열 계산.
+
+    Requires:
+        notes.eps 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDilutionTrend(company)["latestDilution"]
+        3.2
+
+    See Also:
+        - calcNonOperatingBreakdown : 영업외
+        - companyContext.fetchNotesDetail
+
+    AIContext:
+        "EPS 희석 압력" 답변 시 latestDilution + trend 인용.
     """
     from dartlab.analysis.financial.companyContext import fetchNotesDetail
 
@@ -547,6 +733,36 @@ def calcQualityAnomalies(company, *, basePeriod: str | None = None) -> dict | No
         sloan : dict — 발생액 quintile
         auditFlags : list — 감사보고서 위험 키워드
         period : str
+
+    Capabilities:
+        - Beneish + Sloan + 5 카테고리 (분식/일회성/매출채권/자본우회/영업권) + 감사보고서 키워드 통합
+        - 0~100 score 산출
+
+    Guide:
+        Damodaran reference 기반 종합. score ≥ 70 = 다중 anomaly 의심.
+
+    When:
+        Earnings quality 종합 + AI 회계 anomaly 답변.
+
+    How:
+        IS+BS+CF + docs → Beneish + Sloan + audit flags + 5 카테고리.
+
+    Requires:
+        IS/BS/CF + docs 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcQualityAnomalies(company)["score"]
+        45
+
+    See Also:
+        - calcBeneishTimeline : Beneish 시계열
+        - calcRichardsonAccrual : 발생액 분해
+
+    AIContext:
+        "회계 anomaly 종합" 답변 시 score + flags 인용.
     """
     # core 의 base 함수들이 본 모듈 안으로 머지됨 (S5b)
     # — calcBeneishMScore / _calcEarningsQualityFlagsBase / detectAuditFlags 는 모듈 상단 정의

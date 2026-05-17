@@ -22,28 +22,72 @@ def __getattr__(name: str):
 
 
 def computePriceTarget(*args, **kwargs):
-    """price target — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """price target — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import 가능.
+
+    Raises:
+        없음 — 본체 위임.
+
+    Example:
+        >>> computePriceTarget(company)
+        {...}
+    """
     from dartlab.analysis.financial.valuation import computePriceTarget as _f
 
     return _f(*args, **kwargs)
 
 
 def calcValuationConsistency(*args, **kwargs):
-    """valuation 일관성 — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """valuation 일관성 — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcValuationConsistency(company)["score"]
+        0.7
+    """
     from dartlab.analysis.financial.valuation import calcValuationConsistency as _f
 
     return _f(*args, **kwargs)
 
 
 def calcMonteCarloValuation(*args, **kwargs):
-    """Monte Carlo valuation — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """Monte Carlo valuation — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcMonteCarloValuation(company)["mean"]
+        78000
+    """
     from dartlab.analysis.financial.valuation import calcMonteCarloValuation as _f
 
     return _f(*args, **kwargs)
 
 
 def calcCrossSectionRegression(*args, **kwargs):
-    """횡단면 회귀 — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """횡단면 회귀 — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCrossSectionRegression(company)["impliedValue"]
+        80000
+    """
     from dartlab.analysis.financial.valuation import calcCrossSectionRegression as _f
 
     return _f(*args, **kwargs)
@@ -92,49 +136,126 @@ def _getSectorParams(*args, **kwargs):
 
 
 def calcDcf(*args, **kwargs):
-    """DCF 계산 — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """DCF 계산 — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDcf(company)["intrinsicValue"]
+        82000
+    """
     from dartlab.analysis.financial.valuation import calcDcf as _f
 
     return _f(*args, **kwargs)
 
 
 def calcDdm(*args, **kwargs):
-    """DDM 계산 — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """DDM 계산 — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDdm(company)["intrinsicValue"]
+        72000
+    """
     from dartlab.analysis.financial.valuation import calcDdm as _f
 
     return _f(*args, **kwargs)
 
 
 def calcRelativeValuation(*args, **kwargs):
-    """상대 valuation — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """상대 valuation — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcRelativeValuation(company)["impliedPER"]
+        12
+    """
     from dartlab.analysis.financial.valuation import calcRelativeValuation as _f
 
     return _f(*args, **kwargs)
 
 
 def calcResidualIncome(*args, **kwargs):
-    """residual income — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """residual income — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcResidualIncome(company)["intrinsicValue"]
+        75000
+    """
     from dartlab.analysis.financial.valuation import calcResidualIncome as _f
 
     return _f(*args, **kwargs)
 
 
 def calcNavValuation(*args, **kwargs):
-    """NAV valuation — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """NAV valuation — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcNavValuation(company)["nav"]
+        90000
+    """
     from dartlab.analysis.financial.valuation import calcNavValuation as _f
 
     return _f(*args, **kwargs)
 
 
 def calcReverseImplied(*args, **kwargs):
-    """reverse implied — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """reverse implied — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcReverseImplied(company)["impliedGrowth"]
+        0.08
+    """
     from dartlab.analysis.financial.valuation import calcReverseImplied as _f
 
     return _f(*args, **kwargs)
 
 
 def calcSensitivity(*args, **kwargs):
-    """sensitivity — valuation.py 본체 위임 (cycle 회피 lazy proxy)."""
+    """sensitivity — valuation.py 본체 위임 (cycle 회피 lazy proxy).
+
+    Requires:
+        valuation.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSensitivity(company)["range"]
+        (60000, 90000)
+    """
     from dartlab.analysis.financial.valuation import calcSensitivity as _f
 
     return _f(*args, **kwargs)
@@ -159,6 +280,36 @@ def calcPriceTarget(company: Any, *, basePeriod: str | None = None) -> dict | No
         warnings : list[str] — 경고 메시지
         currentPrice : float | None — 현재 주가 (원)
         currency : str — 통화 (KRW | USD)
+
+    Capabilities:
+        - 5 valuation 시나리오 (낙관/기본/보수/베어/베이스) 확률 가중 + Monte Carlo
+        - 신호 (buy/hold/sell) + 확률 + waccDetails 종합
+
+    Guide:
+        analysis price target 표준 진입. confidence=high + signal=buy + |upside| > 20% 강력 매수.
+
+    When:
+        Story price target + AI 목표 주가 답변.
+
+    How:
+        5 시나리오 valuation + Monte Carlo distribution → 가중 평균 + 백분위.
+
+    Requires:
+        company 회계 + 현재 주가 + sector params.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcPriceTarget(company)["weightedTarget"]
+        80000
+
+    See Also:
+        - calcDcf / calcDdm / calcRelativeValuation : 단일 모델
+        - calcValuationSynthesis : 모델 종합
+
+    AIContext:
+        "목표 주가" 답변 시 weightedTarget + signal + confidence 인용.
     """
     series, shares, currency = _getSeriesAndShares(company)
     price = _fetchPriceContext(company)
@@ -377,6 +528,37 @@ def calcValuationSynthesis(company: Any, *, basePeriod: str | None = None) -> di
         reverseImplied : dict | None — 역내재성장률 (모델 실패 시 보충)
         warnings : list[str] — 경고 메시지
         technicalContext : dict | None — 기술적 분석 컨텍스트 (verdict, score, rsi)
+
+    Capabilities:
+        - 기업 유형 (financial/growth/cyclical 등) 자동 분류 → 모델별 가중치 → 가중 fair value
+        - fairValueRange + verdict (저평가/적정/고평가)
+
+    Guide:
+        모델별 가중치는 기업 유형 따라 자동. dividend 형 = DDM 50%, growth = DCF 60%. weighted
+        FairValue 대비 현재가로 verdict.
+
+    When:
+        Valuation 종합 + AI 적정가 답변.
+
+    How:
+        ``_classifyCompanyType`` → ``fullValuation`` 모델 5+ 호출 → 가중 합성.
+
+    Requires:
+        회계 시계열 + sector params + 현재 주가.
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> calcValuationSynthesis(company)["verdict"]
+        '저평가'
+
+    See Also:
+        - calcPriceTarget : 시나리오 기반
+        - calcValuationFlags : 적정성 플래그
+
+    AIContext:
+        "이 종목 적정가" 답변 시 weightedFairValue + verdict 인용.
     """
     from dartlab.analysis.valuation.dcf import fullValuation
 
@@ -531,6 +713,36 @@ def calcValuationFlags(company: Any, *, basePeriod: str | None = None) -> list[d
     list[dict]
         signal : str — 신호 유형 ("opportunity" | "warning" | "info")
         label : str — 플래그 설명 메시지
+
+    Capabilities:
+        - DCF margin of safety + 상대 valuation + 다른 모델 결과 → opportunity/warning 플래그
+        - 안전마진 30% 이상 = opportunity, -30% 이하 = warning
+
+    Guide:
+        story flag 박스의 valuation 영역 입력. signal == opportunity 수 ≥ 2 = 매수 후보 강함.
+
+    When:
+        Valuation 플래그 + AI 저평가/고평가 알림.
+
+    How:
+        calcDcf + calcRelativeValuation 등 호출 → 임계 비교 → 플래그 dict 누적.
+
+    Requires:
+        valuation sub-calc 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcValuationFlags(company)[0]["signal"]
+        'opportunity'
+
+    See Also:
+        - calcValuationSynthesis : 가중 합성
+        - calcPriceTarget : 시나리오
+
+    AIContext:
+        "valuation 경고/기회" 답변 시 signal=opportunity / warning 인용.
     """
     flags: list[dict] = []
 
