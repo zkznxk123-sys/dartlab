@@ -211,7 +211,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원", "dualStack": True},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        # layout 4×4 는 resolveLayout 의 trend 자동 보정 (시리즈 9 ≥ 6) 과 동일 — 명시 생략.
         "help": "자산(왼쪽) = 부채+자본(오른쪽). 두 막대 높이는 항상 같다 (회계 등식). 매출채권·재고도 영업자산이지만 운전자본 회수기간 신호로 따로 분리. 기타 영업자산은 PPE·무형·관계사 등 비유동 본업 자본. 금융부채 ↑ 이자 부담, 이익잉여금 ↑ 내부유보 건전.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -332,7 +332,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "손익구조",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "profitability",
+        "subCategory": "performance",
         "seriesPlan": [
             {
                 "key": "revenue",
@@ -428,7 +428,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "이익률 추세",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "profitability",
+        "subCategory": "performance",
         "seriesPlan": [
             {
                 "key": "gpm",
@@ -458,9 +458,9 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 "ratio": {"num": {"netIncome": 1}, "den": {"revenue": 1}, "scale": 100},
             },
         ],
-        "options": {"unit": "%"},
+        "options": {"unit": "%", "referenceBand": True},
         "xlSpan": 1,
-        "help": "매출총이익률 = 원가 대비 가격결정력 (산업/제품 경쟁력). 영업이익률 = 비용 통제 능력. 순이익률 = 금융비용·세금 차감 후 최종. 추세 하락은 경쟁 심화 또는 비용 증가.",
+        "help": "매출총이익률 = 원가 대비 가격결정력 (산업/제품 경쟁력). 영업이익률 = 비용 통제 능력. 순이익률 = 금융비용·세금 차감 후 최종. 추세 하락은 경쟁 심화 또는 비용 증가. (5y range 띠 표시 — P-DASH-V1 D12)",
     },
     # ─────────────────────────────────────────────────────────────
     # 6. 수익성 (ROE / ROA)
@@ -470,7 +470,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "수익성",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "profitability",
+        "subCategory": "performance",
         "seriesPlan": [
             {
                 "key": "roe",
@@ -503,7 +503,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "성장성",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "performance",
         "seriesPlan": [
             {
                 "key": "revenueYoy",
@@ -545,7 +545,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "비용 구조",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "profitability",
+        "subCategory": "performance",
         "seriesPlan": [
             {
                 "key": "costOfSales",
@@ -775,7 +775,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "활동성",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "profitability",
+        "subCategory": "performance",
         "seriesPlan": [
             {
                 "key": "assetTurnover",
@@ -821,7 +821,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "매출",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "performance",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -836,7 +836,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "영업이익",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "performance",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -851,7 +851,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "순이익",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "performance",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -866,7 +866,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "잉여현금흐름",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "performance",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -951,19 +951,87 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "help": "매출 1 원당 FCF. 10%+ 우량.",
     },
     # ─────────────────────────────────────────────────────────────
-    # 17. 현금·배분 sankey (CFO → 사용처)
+    # P-DASH-V1 D10 — 성과 sub 깊이 보강.
+    # DuPont 3-factor radar / 이익 지속성 gauge / M-Score gauge / 영업 레버리지 list.
     # ─────────────────────────────────────────────────────────────
-    "cashflowAllocation": {
-        "kind": "sankey",
-        "title": "자본배분 흐름",
+    "dupontRadar": {
+        "kind": "radar",
+        "title": "DuPont 분해 (3-factor)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "performance",
+        "seriesPlan": [],
+        # duPontRadar adapter — 마지막 4 기간 polygon. 3 축 (NPM · Asset Turnover · Equity Multiplier) 동시 시계열.
+        "dataSpec": {"adapter": "duPontRadar"},
+        "options": {"unit": ""},
+        "help": "ROE = NPM × Asset Turnover × Equity Multiplier. 마지막 4 기간 polygon 으로 축별 변동 추적.",
+    },
+    "earningsPersistenceGauge": {
+        "kind": "gauge",
+        "title": "이익 지속성 (영업CF/순이익)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "performance",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {
+                    "label": "CF/NI",
+                    "ratio": {"num": {"cfOperating": 1}, "den": {"netIncome": 1}, "scale": 100},
+                    "unit": "%",
+                    "intent": "primary",
+                },
+            ],
+        },
+        "options": {"unit": "%"},
+        "help": "Penman Earnings Power — 영업CF/순이익. 100%↑ 정상 (이익=현금). 70% 미만 지속은 분식 의심.",
+    },
+    "operatingLeverageTopList": {
+        "kind": "topList",
+        "title": "영업 레버리지 신호",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "performance",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "flagsTopList",
+            "module": "dartlab.analysis.financial.earningsQuality",
+            "fn": "calcEarningsQualityFlags",
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 3},
+        "help": "매출 변화 대비 영업이익·EBITDA 변화 — 고정비 비중 신호. Greenblatt Earnings Yield 보조.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 17-A. 자본배분 stacked bar over time (sankey 대체 — Wall Street Prep 정통).
+    # ─────────────────────────────────────────────────────────────
+    "capitalAllocationBars": {
+        "kind": "trend",
+        "title": "자본배분 (시간축)",
+        "topic": "CF",
+        "tab": "financial",
+        "subCategory": "cashflow",
+        "seriesPlan": [],  # adapter 가 series 직접 생성
+        "dataSpec": {"adapter": "capitalAllocationBars"},
+        "options": {"stacked": True, "unit": "원"},
+        "layout": {"colSpan": 2, "rowSpan": 2},
+        "help": "연도별 영업CF 사용처 — 설비투자 / 배당 / 부채상환 / 잉여 4 분해. 비중 변화로 capital allocation 우선순위 추적.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 17-B. 자본배분 waterfall (단년 분해 — Damodaran "Returning Cash").
+    # ─────────────────────────────────────────────────────────────
+    "capitalAllocationWaterfall": {
+        "kind": "waterfall",
+        "title": "자본배분 (단년 분해)",
         "topic": "CF",
         "tab": "financial",
         "subCategory": "cashflow",
         "seriesPlan": [],
-        "dataSpec": {"adapter": "cashflowSankey"},
-        "options": {},
-        "layout": {"colSpan": 2, "rowSpan": 3},
-        "help": "영업CF → CapEx · 배당 · 잉여 분해. 본업이 만든 현금 사용처.",
+        "dataSpec": {"adapter": "capitalAllocationWaterfall"},
+        "options": {"unit": "원"},
+        "layout": {"colSpan": 2, "rowSpan": 2},
+        "help": "최근 기간 영업CF 가 어떻게 분해되는가. 영업CF → -설비투자 → -배당 → -부채상환 → 잉여. 부호별 색.",
     },
     # ─────────────────────────────────────────────────────────────
     # 18. 리스크·신호 — distress gauge
@@ -983,6 +1051,62 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # ─────────────────────────────────────────────────────────────
     # 19. 리스크·신호 — 이상신호 top 6
     # ─────────────────────────────────────────────────────────────
+    # 만기 분포 — 단기차입금 / 장기차입금·사채 stacked. McKinsey "Refinancing Risk".
+    "maturityProfile": {
+        "kind": "trend",
+        "title": "부채 만기 분포",
+        "topic": "BS",
+        "tab": "financial",
+        "subCategory": "capitalStructure",
+        "seriesPlan": [
+            {
+                "key": "shortDebt",
+                "label": "단기차입금 (1년 내)",
+                "color": COLORS[2],
+                "intent": "negative",
+                "unit": "원",
+                "type": "bar",
+                "stack": "maturity",
+                "account": "shortDebt",
+            },
+            {
+                "key": "longDebt",
+                "label": "장기차입금·사채 (1년+)",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "원",
+                "type": "bar",
+                "stack": "maturity",
+                "account": "longDebt",
+            },
+        ],
+        "options": {"stacked": True, "unit": "원"},
+        "help": "단기 비중 ↑ = 차환 위험 (refinancing risk). 금리 사이클 노출 신호. 만기 mismatch (단기 자금으로 장기 투자) 도 함께 확인.",
+    },
+    # 시나리오 민감도 heatmap — 매출 변동 × 마진 변동 9 cell matrix.
+    "scenarioSensitivityHeatmap": {
+        "kind": "matrix",
+        "title": "시나리오 민감도 (매출 × 마진)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "risk",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "scenarioSensitivity"},
+        "options": {},
+        "help": "매출 ±X% × 영업이익률 ±Y% 변화에 따른 영업이익 변동 (단위 ±N%). Damodaran scenario analysis. 색 진하기 = 절대값 크기.",
+    },
+    "riskDistressDecomp": {
+        "kind": "topList",
+        "title": "부실 위험 분해 (Altman Z' 5 인자)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "risk",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "distressDecomp"},
+        "options": {},
+        "layout": {"colSpan": 2, "rowSpan": 3},
+        "help": "Altman Z' 점수가 왜 그 값인지 — 5 인자 각각의 값 + 가중 기여도. 절대값 큰 인자가 점수 결정. P-DASH-V1 D13 decompositionPanel.",
+    },
     "riskAnomaly": {
         "kind": "topList",
         "title": "변동 큰 지표",
@@ -1076,15 +1200,22 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "kpiCashCapex",
     "kpiCashFcf",
     "kpiCashFcfMargin",
-    "cashflowAllocation",
+    "dupontRadar",
+    "earningsPersistenceGauge",
+    "operatingLeverageTopList",
+    "capitalAllocationBars",
+    "capitalAllocationWaterfall",
     "fcfTrend",
     # 재무건전성 sub
     "leverageTrend",
     "stabilityRatio",
     "liquidityTrend",
     "workingCapitalDays",
+    "maturityProfile",
     # 리스크·신호 sub
     "riskDistress",
+    "riskDistressDecomp",
+    "scenarioSensitivityHeatmap",
     "riskAnomaly",
     "riskLifeCycle",
 ]
@@ -1092,4 +1223,29 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
 KPI 1×1 4 개 = 한 row, 자산구조 2×3 + 부채/자본 1×3 = 한 row, trend 2×2 4 개 = 두 row."""
 
 
-__all__ = ["FINANCE_CARDS", "FINANCE_DASHBOARD_KEYS"]
+# overview = "한눈에 진단" narrative — 38 카드 dump 가 아닌 12 카드 curated.
+# 순서: KPI 4 → 회계 등식 hero → 본업+현금 → 추세 → 위험.
+OVERVIEW_KEYS: list[str] = [
+    # row 1: 핵심 KPI 4 (각 1×1) — 매출·영업이익·ROE·부채비율
+    "kpiRevenue",
+    "kpiOperatingIncome",
+    "kpiRoe",
+    "kpiDebtRatio",
+    # row 2-5: 자산구조 dual-stack hero (4×4)
+    "assetComposition",
+    # row 6+: 본업 + 현금 (각 2×3)
+    "incomeBreakdown",
+    "cashflowSigned",
+    # row 추세 (각 2×3)
+    "marginTrend",
+    "growthYoy",
+    # row 위험 (gauge 1×2 + topList 2×3 + 생애주기 4×1)
+    "riskDistress",
+    "riskAnomaly",
+    "riskLifeCycle",
+]
+"""overview narrative — '5초 진단' curated 12 카드.
+사용자 요구 (P-DASH-V1 보강 2): 흐름 view 지 sub 의 dump 가 아니다."""
+
+
+__all__ = ["FINANCE_CARDS", "FINANCE_DASHBOARD_KEYS", "OVERVIEW_KEYS"]

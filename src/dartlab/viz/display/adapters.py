@@ -66,9 +66,14 @@ def _drill(obj: Any, path: str) -> Any:
 
 
 def buildKpiTilesFromNorm(norm: Any, periods: list[str], tilePlans: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """norm + tilePlans → KpiTile dict list.
+    """norm + tilePlans → KpiTile dict list (P-DASH-V1 D11: sparkline + range bar).
 
     tilePlans 각 항목: {label, account?: str, ratio?: dict, unit, intent, subtitle?}.
+
+    출력 tile 각 항목:
+        - value/prev/unit/intent/subtitle (기존)
+        - sparkline: list[float] — 최근 8 분기 데이터 (카드 우측 mini line).
+        - rangeMin/rangeMax: 자체 5y range (카드 하단 percentile bar).
     """
     tiles: list[dict[str, Any]] = []
     for plan in tilePlans:
@@ -76,7 +81,6 @@ def buildKpiTilesFromNorm(norm: Any, periods: list[str], tilePlans: list[dict[st
         unit = plan.get("unit", "")
         intent = plan.get("intent", "primary")
         subtitle = plan.get("subtitle", "")
-        # 데이터 추출 — account/compose/ratio 중 하나.
         data: list[float | None] = []
         if "account" in plan:
             data = extractSeries(norm, plan["account"], periods)
@@ -90,18 +94,31 @@ def buildKpiTilesFromNorm(norm: Any, periods: list[str], tilePlans: list[dict[st
             data = [(n / d * scale) if (n is not None and d is not None and d != 0) else None for n, d in zip(num, den)]
         elif "compose" in plan:
             data = _sumWeighted(norm, plan["compose"], periods)
-        # 마지막 2 비 None 값.
         last, prev = _lastTwo(data)
-        tiles.append(
-            {
-                "label": label,
-                "value": last,
-                "prev": prev,
-                "unit": unit,
-                "intent": intent,
-                "subtitle": subtitle,
-            }
-        )
+
+        # sparkline — 최근 8 기간 (또는 가능한 만큼).
+        nonNone = [v for v in data if v is not None]
+        sparkline = nonNone[-8:] if len(nonNone) >= 1 else []
+        # 5y range — 최근 20 분기 또는 5 년 (annual) 의 min/max.
+        rangeWindow = nonNone[-20:] if nonNone else []
+        rangeMin = min(rangeWindow) if rangeWindow else None
+        rangeMax = max(rangeWindow) if rangeWindow else None
+
+        tile: dict[str, Any] = {
+            "label": label,
+            "value": last,
+            "prev": prev,
+            "unit": unit,
+            "intent": intent,
+            "subtitle": subtitle,
+        }
+        if sparkline:
+            tile["sparkline"] = sparkline
+        if rangeMin is not None:
+            tile["rangeMin"] = rangeMin
+        if rangeMax is not None:
+            tile["rangeMax"] = rangeMax
+        tiles.append(tile)
     return tiles
 
 
@@ -138,6 +155,66 @@ def _lastTwo(arr: list[float | None]) -> tuple[float | None, float | None]:
             prev = v
             break
     return last, prev
+
+
+def buildDuPontRadar(norm: Any, periods: list[str]) -> dict[str, Any]:
+    """DuPont 3-factor radar — 마지막 4 기간을 각 polygon 으로.
+
+    axes: [순이익률 (%), 자산회전율 (회 ×100), 레버리지 (배 ×10)]
+        scale 보정으로 3 축이 비슷한 magnitude → polar 가 한쪽에 쏠리지 않게.
+    polygon: 마지막 4 기간 (당기·전기·1y 전·2y 전) — 시각적 시계열.
+
+    Args:
+        norm: 정규화 finance DataFrame.
+        periods: 시간 라벨 list (마지막 = 최신).
+
+    Returns:
+        {categories: [axis label], series: [{key, label, color, data: [axis 값]}]}.
+        data 모두 None 이면 호출자가 fallback.
+    """
+    if not periods:
+        return {"categories": [], "series": []}
+
+    npm = _sumWeighted(norm, {"netIncome": 1}, periods)
+    rev = _sumWeighted(norm, {"revenue": 1}, periods)
+    assets = _sumWeighted(norm, {"assets": 1}, periods)
+    equity = _sumWeighted(norm, {"equity": 1}, periods)
+
+    def _ratio(num: list[float | None], den: list[float | None], scale: float, i: int) -> float | None:
+        n = num[i] if i < len(num) else None
+        d = den[i] if i < len(den) else None
+        if n is None or d is None or d == 0:
+            return None
+        return (n / d) * scale
+
+    axesLabels = ["순이익률(%)", "자산회전(회×100)", "레버리지(배×10)"]
+
+    sample = periods[-4:] if len(periods) >= 4 else periods
+    palette = ["#dc2626", "#f97316", "#a78bfa", "#9ca3af"]
+    series: list[dict[str, Any]] = []
+    for offset, period in enumerate(sample):
+        i = len(periods) - len(sample) + offset
+        m = _ratio(npm, rev, 100, i)
+        t = _ratio(rev, assets, 100, i)
+        l = _ratio(assets, equity, 10, i)
+        data = [m, t, l]
+        if all(v is None for v in data):
+            continue
+        isCurrent = offset == len(sample) - 1
+        series.append(
+            {
+                "key": f"p{offset}",
+                "label": f"{period}{'(당기)' if isCurrent else ''}",
+                "color": palette[len(sample) - 1 - offset]
+                if (len(sample) - 1 - offset) < len(palette)
+                else palette[-1],
+                "data": data,
+                "type": "radar",
+                "unit": "",
+            }
+        )
+
+    return {"categories": axesLabels, "series": series}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -223,6 +300,113 @@ def buildDistressGauge(company: Any) -> dict[str, Any]:
         "unit": "",
         "subtitle": f"Altman Z' (private firm) · {p} · ≥2.9 안전 / 1.23~2.9 주의 / <1.23 위험",
     }
+
+
+def buildScenarioSensitivity(company: Any) -> dict[str, Any]:
+    """매출 변동 × 마진 변동 → 영업이익 변동 % heatmap (P-DASH-V1 D15).
+
+    base = 최근 기간 매출·영업이익률. 3×3 matrix:
+        rev shifts:  -10% / 0% / +10%
+        margin shifts: -2pp / 0 / +2pp
+
+    각 cell = (base 영업이익 대비 변동 영업이익 - 1) × 100 %.
+
+    Returns: {cells, rowOrder, colOrder, tone}.
+    """
+    try:
+        norm = normalize.normalize(company.rawFinance)
+        from dartlab.viz.display.finance.periods import lastNPeriods
+
+        periods = lastNPeriods(norm, 4, "annual")
+    except Exception:  # noqa: BLE001
+        return {}
+    if not periods:
+        return {}
+    p = periods[-1]
+    rv = _toFloat(extractSeries(norm, "revenue", [p])[0]) or 0.0
+    oi = _toFloat(extractSeries(norm, "operatingIncome", [p])[0]) or 0.0
+    if rv <= 0 or oi <= 0:
+        return {}
+    baseMargin = oi / rv  # 0.xx
+    revShifts = [("매출 -10%", -0.10), ("매출 0%", 0.0), ("매출 +10%", 0.10)]
+    marginShifts = [("마진 -2pp", -0.02), ("마진 0", 0.0), ("마진 +2pp", 0.02)]
+    cells: list[dict[str, Any]] = []
+    for marginLabel, mShift in marginShifts:
+        for revLabel, rShift in revShifts:
+            newRev = rv * (1 + rShift)
+            newMargin = baseMargin + mShift
+            newOi = newRev * newMargin
+            change = (newOi - oi) / oi * 100 if oi != 0 else 0.0
+            cells.append(
+                {
+                    "row": marginLabel,
+                    "col": revLabel,
+                    "value": round(change, 1),
+                    "unit": "%",
+                }
+            )
+    return {
+        "cells": cells,
+        "rowOrder": [m for m, _ in marginShifts],
+        "colOrder": [r for r, _ in revShifts],
+        "tone": "diverging",
+    }
+
+
+def buildDistressDecomp(company: Any) -> dict[str, Any]:
+    """Altman Z' 5 인자 분해 — distress gauge 의 "왜?" topList (P-DASH-V1 D13).
+
+    각 인자 X1~X5 의 값 + 계수 가중 기여도 (점수에 얼마나 기여했는지).
+    높은 절대 기여 인자가 분석 핵심.
+
+    Returns:
+        {items: [{label, value(인자값), unit, delta(가중 기여)}, ...]}
+        기여도 절대값 내림차순 정렬.
+    """
+    try:
+        norm = normalize.normalize(company.rawFinance)
+        from dartlab.viz.display.finance.periods import lastNPeriods
+
+        periods = lastNPeriods(norm, 4, "annual")
+    except Exception:  # noqa: BLE001
+        return {}
+    if not periods:
+        return {}
+    p = periods[-1]
+    ca = _toFloat(extractSeries(norm, "currentAssets", [p])[0]) or 0.0
+    cl = _toFloat(extractSeries(norm, "currentLiabilities", [p])[0]) or 0.0
+    ta = _toFloat(extractSeries(norm, "assets", [p])[0]) or 0.0
+    re = _toFloat(extractSeries(norm, "retainedEarnings", [p])[0]) or 0.0
+    oi = _toFloat(extractSeries(norm, "operatingIncome", [p])[0]) or 0.0
+    eq = _toFloat(extractSeries(norm, "equity", [p])[0]) or 0.0
+    tl = _toFloat(extractSeries(norm, "liabilities", [p])[0]) or 0.0
+    rv = _toFloat(extractSeries(norm, "revenue", [p])[0]) or 0.0
+    if ta <= 0 or tl <= 0:
+        return {}
+    x1 = (ca - cl) / ta
+    x2 = re / ta
+    x3 = oi / ta
+    x4 = eq / tl
+    x5 = rv / ta
+    factors = [
+        ("X1 운전자본/자산", x1, 0.717),
+        ("X2 잉여금/자산", x2, 0.847),
+        ("X3 영업이익/자산", x3, 3.107),
+        ("X4 자기자본/부채", x4, 0.420),
+        ("X5 자산회전율", x5, 0.998),
+    ]
+    items = [
+        {
+            "label": label,
+            "value": round(val, 3),
+            "unit": "배",
+            "delta": round(val * coef, 3),  # 가중 기여 (Z 에 대한)
+            "description": f"× {coef} = {val * coef:.2f}",
+        }
+        for label, val, coef in factors
+    ]
+    items.sort(key=lambda x: abs(x.get("delta") or 0.0), reverse=True)
+    return {"items": items, "direction": "desc"}
 
 
 def buildBeneishGauge(company: Any) -> dict[str, Any]:
@@ -318,9 +502,11 @@ def buildLifeCyclePhase(company: Any) -> dict[str, Any]:
 
 
 def buildCashflowAllocationSankey(norm: Any, periods: list[str]) -> dict[str, Any]:
-    """norm 의 마지막 기간에서 CFO 를 CapEx · 배당 · 부채상환 · 잉여 로 분해.
+    """[DEPRECATED — P-DASH-V1 D6] norm 마지막 기간 CFO 분해 sankey.
 
-    값이 모두 0 또는 음수면 빈 dict.
+    Sankey 는 자본배분 시각화 표준 아니다 (Wall Street Prep / Damodaran).
+    대안: capitalAllocationBars (stacked over time) · capitalAllocationWaterfall (단년).
+    본 함수는 backward-compat 용 — catalog 의 sankey 카드는 D6 에서 폐기됨.
     """
     if not periods:
         return {}
@@ -328,7 +514,6 @@ def buildCashflowAllocationSankey(norm: Any, periods: list[str]) -> dict[str, An
     cfo = extractSeries(norm, "cfOperating", [last])[0]
     capex_raw = extractSeries(norm, "capex", [last])[0]
     dividends_raw = extractSeries(norm, "dividendsPaid", [last])[0]
-    # capex/배당은 음수일 수 있음 — 절대값으로.
     cfo_v = _toFloat(cfo) or 0.0
     capex = abs(_toFloat(capex_raw) or 0.0)
     dividends = abs(_toFloat(dividends_raw) or 0.0)
@@ -347,6 +532,146 @@ def buildCashflowAllocationSankey(norm: Any, periods: list[str]) -> dict[str, An
     if not links:
         return {}
     return {"nodes": nodes, "links": links}
+
+
+# ─────────────────────────────────────────────────────────────
+# 자본배분 — stacked bar over time + waterfall (sankey 대체).
+# Wall Street Prep / Damodaran 정통 시각화.
+# ─────────────────────────────────────────────────────────────
+
+
+def buildCapitalAllocationBars(norm: Any, periods: list[str]) -> dict[str, Any]:
+    """연도 × {CapEx · 배당 · 부채상환 · 잉여} stacked bar 시계열.
+
+    Returns:
+        {seriesPlan-like: [series with data list]}  builder 가 view.series 에 박음.
+
+    Buckets:
+        - capEx (음수→양수 변환, intent=negative): -capex
+        - dividends (intent=accent): -dividendsPaid
+        - debtRepay (intent=negative): -cfFinancing 중 부채 부분 (근사)
+        - surplus (intent=positive): max(cfOperating - 사용처, 0)
+
+    데이터 부족 시 빈 dict.
+    """
+    if not periods or len(periods) < 2:
+        return {}
+
+    capexSeries: list[float | None] = []
+    divSeries: list[float | None] = []
+    debtRepaySeries: list[float | None] = []
+    surplusSeries: list[float | None] = []
+
+    cfoVals = extractSeries(norm, "cfOperating", periods)
+    capexVals = extractSeries(norm, "capex", periods)
+    divVals = extractSeries(norm, "dividendsPaid", periods)
+    cffVals = extractSeries(norm, "cfFinancing", periods)
+
+    for i in range(len(periods)):
+        cfo = _toFloat(cfoVals[i]) or 0.0
+        capex = abs(_toFloat(capexVals[i]) or 0.0)
+        div = abs(_toFloat(divVals[i]) or 0.0)
+        cff = _toFloat(cffVals[i]) or 0.0
+        # 부채상환 = 음수 재무CF − 배당 (배당도 재무CF 음수에 포함되어있을 가능성).
+        debtRepay = max(-cff - div, 0.0) if cff < 0 else 0.0
+        used = capex + div + debtRepay
+        surplus = max(cfo - used, 0.0)
+        capexSeries.append(capex if capex > 0 else None)
+        divSeries.append(div if div > 0 else None)
+        debtRepaySeries.append(debtRepay if debtRepay > 0 else None)
+        surplusSeries.append(surplus if surplus > 0 else None)
+
+    # 모든 시리즈가 None 일 가능성 — 데이터 0.
+    nonNone = sum(1 for s in (capexSeries, divSeries, debtRepaySeries, surplusSeries) for v in s if v is not None)
+    if nonNone == 0:
+        return {}
+
+    # ChartContainer + Bar stack 으로 그릴 series list 반환.
+    # finance.py 의 색 코드 (COLORS) 직접 import 회피 — render 가 palette 적용.
+    return {
+        "series": [
+            {
+                "key": "capex",
+                "label": "설비투자",
+                "intent": "negative",
+                "unit": "원",
+                "type": "bar",
+                "stack": "alloc",
+                "data": capexSeries,
+            },
+            {
+                "key": "dividends",
+                "label": "배당",
+                "intent": "accent",
+                "unit": "원",
+                "type": "bar",
+                "stack": "alloc",
+                "data": divSeries,
+            },
+            {
+                "key": "debtRepay",
+                "label": "부채상환",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "bar",
+                "stack": "alloc",
+                "data": debtRepaySeries,
+            },
+            {
+                "key": "surplus",
+                "label": "잉여",
+                "intent": "positive",
+                "unit": "원",
+                "type": "bar",
+                "stack": "alloc",
+                "data": surplusSeries,
+            },
+        ],
+    }
+
+
+def buildCapitalAllocationWaterfall(norm: Any, periods: list[str]) -> dict[str, Any]:
+    """단년 자본배분 waterfall — 영업CF → -CapEx → -배당 → -부채상환 → ΔCash.
+
+    Returns 마지막 기간 분해. 데이터 부족 시 빈 dict.
+
+    series 1 개 — recharts BarChart 가 measure 메타로 absolute/relative 분리.
+    """
+    if not periods:
+        return {}
+    last = periods[-1]
+    cfo = _toFloat(extractSeries(norm, "cfOperating", [last])[0]) or 0.0
+    capex = abs(_toFloat(extractSeries(norm, "capex", [last])[0]) or 0.0)
+    div = abs(_toFloat(extractSeries(norm, "dividendsPaid", [last])[0]) or 0.0)
+    cff = _toFloat(extractSeries(norm, "cfFinancing", [last])[0]) or 0.0
+    debtRepay = max(-cff - div, 0.0) if cff < 0 else 0.0
+    surplus = cfo - capex - div - debtRepay
+
+    if cfo <= 0:
+        return {}
+
+    # categories + points (measure 메타).
+    categories = ["영업CF", "-설비투자", "-배당", "-부채상환", "잉여"]
+    points = [
+        {"value": cfo, "measure": "absolute"},
+        {"value": -capex if capex > 0 else 0.0, "measure": "relative"},
+        {"value": -div if div > 0 else 0.0, "measure": "relative"},
+        {"value": -debtRepay if debtRepay > 0 else 0.0, "measure": "relative"},
+        {"value": surplus, "measure": "total"},
+    ]
+    return {
+        "categories": categories,
+        "series": [
+            {
+                "key": "waterfall",
+                "label": "자본배분 waterfall",
+                "unit": "원",
+                "type": "bar",
+                "points": points,
+                "data": [p["value"] for p in points],
+            }
+        ],
+    }
 
 
 # ─────────────────────────────────────────────────────────────
@@ -533,7 +858,11 @@ def buildAnomalyTopList(company: Any) -> list[dict[str, Any]]:
 __all__ = [
     "LIFE_CYCLE_PHASES",
     "buildBeneishGauge",
+    "buildCapitalAllocationBars",
+    "buildCapitalAllocationWaterfall",
     "buildCashflowAllocationSankey",
+    "buildDistressDecomp",
+    "buildScenarioSensitivity",
     "buildDistressGauge",
     "buildKpiTilesFromNorm",
     "buildLifeCyclePhase",
