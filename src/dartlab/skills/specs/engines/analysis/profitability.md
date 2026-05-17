@@ -116,6 +116,25 @@ lastUpdated: "2026-05-02"
 - scan 또는 macro 맥락이 있으면 업황과 기업 수익성 변화를 연결한다.
 - claim은 기간, metric, table 또는 value ref에 묶는다.
 
+## 다중 종목 비교 (2~3 사) 의 권장 경로
+
+"A vs B 영업이익률 비교" / "A · B · C 중 누가 마진 더 좋아" 류 질문은 **`CompareCompanies(stockCodes=["A","B","C"])` 1 회 호출이 정공**. 종목별 `Company.show` 를 N 회 호출하지 마라 (LLM 이 종목마다 별도 turn 으로 분리해 시퀀셜 → CompareCompanies 1 회 대비 2~3 배 느림). CompareCompanies 결과는 wide-format DataFrame + 종목별 `dcrBadge` · `industryBadge` 자동 부착이라 헤더에 양사 chip 동시 노출 가능.
+
+추가 계산이 필요한 경우 (예: QoQ 변화 분리, peer 평균 차이) 만 결과 wide table 을 RunPython 으로 가공.
+
+## OPM (영업이익률) 표준 정의 — 답변 양식
+
+영업이익률 = `operating_profit / sales` (분기 기준). 명시할 것:
+
+- 단위 통일: 표 한 컬럼 안 단위 (조원 · 억원 · %) 행마다 통일. `1.471 억` 과 `1 조 1,163 억` 같이 7,500 배 스케일 차이를 같은 컬럼에 섞지 마라 — 큰 단위 (조) 로 환산.
+- 기간 명시: `2025Q4` 같은 quarter 라벨. 연환산/YTD/단일분기 혼용 금지.
+- 연결/별도: `Company.show("IS").data.summary` 의 `consolidation` 또는 별도 명시 없으면 "전사 연결 기준" default.
+- 환율 영향: 수출 비중 50% 이상 회사 (반도체·자동차·조선 등) 는 환율 시나리오 미반영 사실을 한계로 표기.
+
+## ROE 표준 정의
+
+ROE = `net_income / equity`. 분모는 **기말 자본 default** (가장 단순). 평균 자본 (기초+기말/2) 을 쓰면 그 사실을 답변에 명시. ROE 100% 같은 극단값은 자본금 잠식 / 자기주식 / 회계 기저 효과 의심 — 그대로 인용하지 말고 sanity 표시.
+
 ## 공개 호출 방식
 
 ```python

@@ -181,14 +181,47 @@ metric/value/score, rank, basis/source, flags
 
 후보 발굴 결과에는 `universe`, `datasetAsOf`, `filter`, `formula`, `table`, `executionRef`가 필요하다. 최종 답변은 회사명만 나열하지 말고 evidence table을 포함한다.
 
+## EngineCall (agent 경로) args 매핑
+
+agent (ai/mcp/server) 가 본 엔진을 호출할 때는 `EngineCall(apiRef="scan", args={...})` 양식. dartlab.scan() 의 positional 인자를 args dict 의 key 로 변환:
+
+| `dartlab.scan(...)` | `EngineCall(apiRef="scan", args=...)` |
+| --- | --- |
+| `dartlab.scan("growth")` | `{"axis": "growth"}` |
+| `dartlab.scan("account", "매출액")` | `{"axis": "account", "target": "매출액"}` |
+| `dartlab.scan("ratio", "roe")` | `{"axis": "ratio", "target": "roe"}` |
+| `dartlab.scan("screen", "value")` | `{"axis": "screen", "target": "value"}` |
+| `dartlab.scan("screen", spec={"filters": [...]})` | `{"axis": "screen", "spec": {"filters": [...]}}` |
+
+**guard** — axis 와 target 을 점 표기로 합쳐 `apiRef="scan.ratio.roe"` 호출 금지 (`unknown_api_ref` 차단). args 안에 분리.
+
+## 산업/섹터 질문 ("반도체 어때?" 류) 처리
+
+"반도체", "2 차전지", "자동차" 같은 산업 keyword 가 질문에 있으면:
+
+1. **industry 엔진 우선** — `dartlab.industry("반도체")` 또는 `c.industry()` 가 산업 라이프사이클 단계 (도입·성장·성숙·재도약·쇠퇴) + 밸류체인 노드 + 동종 종목 list 반환.
+2. **scan 으로 횡단면 비교** — 같은 industryHint 안에서 `dartlab.scan(axis, universe={"industryHint": "반도체"})` 또는 결과 DataFrame 의 `industryName` 컬럼 필터.
+3. 답변에는 산업 라이프사이클 단계 + 공정/세부 분류 (전공정 FAB · 후공정 패키징 · 테스트 · 설계 · 소재 · 장비) 별 ranking 둘 다.
+
+단일 종목 답변에 부착되는 `industryBadge` (Company.show 응답) 는 같은 산업 종목 peers list 를 자동 포함 — 별도 industry 호출 없이 peer 후보 즉시 사용 가능.
+
+## universe default
+
+- `universe` 미지정 → KR 전종목 (KOSPI + KOSDAQ + KONEX 등 dartlab 수집 범위).
+- 미국 시장 한정 질문이면 `universe="US"` 또는 `market="US"`.
+- 산업 한정 → `universe={"industryHint": "반도체"}`.
+- 사용자 지정 종목 list → `universe={"stockCodes": ["005930", "000660"]}`.
+
+기준일 (`datasetAsOf`) 은 결과 DataFrame 의 컬럼으로 반환. 답변에 그대로 인용 — 데이터 freshness 명시.
+
 ## 기본 실행 순서
 
-1. 질문이 후보 발굴인지 단일 기업 분석인지 구분한다.
-2. 후보 발굴이면 `dartlab.scan()`으로 axis를 확인한다.
-3. primitive가 필요한지 preset/spec가 필요한지 고른다.
-4. `dartlab.scan(axis, target/spec)`를 실행한다.
-5. 기준일, 유니버스, 필터, 계산식, rank를 검산한다.
-6. 상위 후보는 `Company(...).analysis()`, `credit`, `quant`로 심층 검증한다.
+1. 질문이 후보 발굴인지 단일 기업 분석인지 산업 횡단인지 구분.
+2. 후보 발굴이면 `dartlab.scan()`으로 axis 확인.
+3. primitive (`account`/`ratio`) vs preset (`screen`) vs financial axis (`growth`/`profitability`/`quality`/...) 선택.
+4. `dartlab.scan(axis, target/spec)` 또는 `EngineCall(apiRef="scan", args={"axis": ..., "target": ...})` 호출.
+5. 기준일, 유니버스, 필터, 계산식, rank 검산.
+6. 상위 후보는 `Company(...).analysis()`, `credit`, `quant` 로 심층 검증.
 
 ## 기본 검증
 

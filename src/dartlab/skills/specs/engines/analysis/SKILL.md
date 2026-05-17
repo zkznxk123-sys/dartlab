@@ -228,6 +228,31 @@ c.analysis("financial", "수익성")
 
 단위는 원천 데이터와 계산 항목의 성격을 따른다. 금액은 원천 table의 통화/단위를 보존하고, 비율은 percent 또는 ratio 여부를 명확히 표시해야 한다. 스킬에 적힌 대표 키와 실제 공개 API가 충돌하면 스킬이 오래된 것이므로 같은 변경에서 갱신한다.
 
+## EngineCall (agent 경로) args 매핑
+
+agent (ai/mcp/server) 가 본 엔진을 호출할 때는 `EngineCall(apiRef="Company.analysis", args={...})` 양식. positional 인자를 args dict 의 key 로 변환:
+
+| `c.analysis(...)` | `EngineCall(apiRef="Company.analysis", args=...)` |
+| --- | --- |
+| `c.analysis()` (가이드) | `{"stockCode": "005930"}` (axis 생략 → 가이드) |
+| `c.analysis("financial")` (그룹) | `{"stockCode": "005930", "group": "financial"}` |
+| `c.analysis("financial", "수익성")` | `{"stockCode": "005930", "group": "financial", "axis": "수익성"}` |
+| `c.analysis("수익성")` (축만) | `{"stockCode": "005930", "axis": "수익성"}` |
+
+**guard** — group 과 axis 를 점 표기로 합쳐 `apiRef="analysis.financial.profitability"` 호출 금지. `apiRef="Company.analysis"` 고정 + args 에 분리.
+
+## Company.show vs Company.analysis — 어느 쪽?
+
+| 질문 | 권장 |
+| --- | --- |
+| "2025Q4 매출 / 영업이익 / 순이익 알려줘" — 원자료 인용 | `Company.show("IS")` |
+| "이 회사 수익성 어때 / 개선됐어?" — 인과 해석 | `Company.analysis("financial", "수익성")` |
+| 7 축 신용 약점 분해 | `Company.show("IS").data.dcrBadge.axes` (자동 부착, 추가 호출 불필요) |
+| 산업 라이프사이클 / peers | `Company.show(...).data.industryBadge` (자동 부착) |
+| DCF / 멀티플 / 적정가 | `Company.analysis("valuation", "가치평가")` |
+
+**핵심 차이** — `Company.show` 는 *원자료 + 자동 부착 badge (dcrBadge / industryBadge)*, `Company.analysis` 는 *해석 결과 (assumptions · narrative · history)*. 단순 숫자 조회면 show, 해석/근거 chain 이 필요하면 analysis. 단일 종목 신용 질문은 show 1 회만으로 7 축 분해 완성 — analysis credit 또는 EngineCall("credit") 추가 불필요.
+
 ## 축 선택 규칙
 
 수익구조, 비용구조, 이익품질, 현금흐름처럼 재무제표 안에서 인과를 읽는 질문은 `financial` 그룹을 쓴다.
