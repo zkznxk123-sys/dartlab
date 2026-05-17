@@ -1,6 +1,6 @@
 """사업포트폴리오 탭 — KPI 4 개 분리 + 자본배분 sankey + 비용구조 + 자본효율.
 
-bento 밀도 packing: 4 KPI 한 row + sankey (2×3) + costMix (2×3) + capitalReturns (4×2).
+bento 밀도 packing: 4 KPI 한 row + 자본배분 stacked/waterfall + costMix (2×3) + capitalReturns (2×3, 3 시리즈 auto).
 """
 
 from __future__ import annotations
@@ -65,16 +65,16 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         intent="accent",
         helpText="매출 대비 R&D. 5%+ 기술집약, 1% 미만 전통산업.",
     ),
-    "capitalAllocationSankey": {
-        "kind": "sankey",
-        "title": "자본배분 흐름",
+    "portfolioCapitalAllocation": {
+        "kind": "trend",
+        "title": "자본배분 (시간축)",
         "topic": "CF",
         "tab": "portfolio",
         "seriesPlan": [],
-        "dataSpec": {"adapter": "cashflowSankey"},
-        "options": {},
-        "layout": {"colSpan": 2, "rowSpan": 3},
-        "help": "영업현금흐름 → CapEx · 배당 · 잉여 분해. 본업이 만든 현금이 어떻게 쓰였는가.",
+        "dataSpec": {"adapter": "capitalAllocationBars"},
+        "options": {"stacked": True, "unit": "원"},
+        "layout": {"colSpan": 2, "rowSpan": 2},
+        "help": "연도별 자본 사용처 — 설비투자 / 배당 / 부채상환 / 잉여. 사업 우선순위 추적.",
     },
     "costMix": {
         "kind": "trend",
@@ -153,7 +153,6 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 2},
         "help": "ROE/ROA + 자산회전율. ROIC vs WACC 정밀 산출은 후속.",
     },
 }
@@ -164,7 +163,7 @@ PORTFOLIO_KEYS: list[str] = [
     "portfolioKpiOp",
     "portfolioKpiOpMargin",
     "portfolioKpiRnd",
-    "capitalAllocationSankey",
+    "portfolioCapitalAllocation",
     "costMix",
     "capitalReturns",
 ]
