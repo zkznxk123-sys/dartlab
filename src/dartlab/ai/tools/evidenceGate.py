@@ -72,7 +72,7 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
         },
     )
     return ToolResult(
-        ok,
+        True,
         msg,
         refs=[gateRef],
         data={

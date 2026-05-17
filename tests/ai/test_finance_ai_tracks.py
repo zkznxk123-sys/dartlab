@@ -69,9 +69,16 @@ def test_track_f_data_contract_validate() -> None:
 
 
 def test_track_i_evidence_gate_missing() -> None:
-    """Track I — requiredEvidence 모두 누락 시 fail + missing 리스트."""
+    """Track I — requiredEvidence 모두 누락 시 data.ok=False + missing 리스트.
+
+    tool-execution status (`result['ok']`) 와 gate validation status (`data['ok']`) 분리:
+    gate 가 정상 실행돼 누락을 *발견* 한 것은 tool 실패 아님. 외부 ok=False 면
+    agent.py 의 failure_streak 가 gate 검증 실패까지 도구 실패로 계상해 결국 차단되는
+    회귀 (2026-05-17 OAuth Q2 probe 에서 EvidenceGate "error" status 표시 확인).
+    """
     result = executeTool("EvidenceGate", {"skillId": "recipes.valuation.damodaran.index", "refs": []})
-    assert result["ok"] is False
+    assert result["ok"] is True  # tool 정상 실행
+    assert result["data"]["ok"] is False  # gate validation 실패
     assert isinstance(result["data"]["missing"], list)
     assert len(result["data"]["missing"]) >= 1
 

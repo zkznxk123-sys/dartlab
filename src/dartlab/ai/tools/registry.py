@@ -386,7 +386,11 @@ _SPECS: dict[str, ToolSpec] = {
             "type": "object",
             "properties": {
                 "skillId": {"type": "string"},
-                "refs": {"type": "array"},
+                "refs": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "지금까지 모은 refs (각 항목 dict, 최소 'kind' 키 포함). 빈 list 도 허용 — 검증만 수행.",
+                },
             },
             "required": ["skillId"],
         },
@@ -402,7 +406,11 @@ _SPECS: dict[str, ToolSpec] = {
             "type": "object",
             "properties": {
                 "answer": {"type": "string"},
-                "refs": {"type": "array"},
+                "refs": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "지금까지 모은 refs. 빈 list 도 허용.",
+                },
             },
             "required": ["answer"],
         },

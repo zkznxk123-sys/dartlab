@@ -59,6 +59,13 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "SaveArtifact",
     "CreateUserSkill",
     "CompileVisual",
+    # finance-native primitive (Track C/G/H/I) — registry 등록만 됐다가 default 미노출
+    # 이라 LLM 이 호출 못 했던 회귀. 2026-05-17 OAuth probe 에서 다중 종목 비교 시
+    # CompareCompanies 1 회 대신 Company.show 2 회 + RunPython 우회 (91s) 발견 후 합류.
+    "CompareCompanies",
+    "PickStoryTemplate",
+    "EvidenceGate",
+    "GroundingCheck",
     "RunWorkbench",
 )
 
