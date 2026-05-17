@@ -63,6 +63,36 @@ def calcBeneishMScore(
         mScore : float
         zone : "low_risk" | "watch" | "high_risk"
         components : dict — 8 변수
+
+    Capabilities:
+        - 8 변수 (DSRI/GMI/AQI/SGI/DEPI/SGAI/TATA/LVGI) Beneish 공식 직접 계산
+        - zone 분류 (low/watch/high) + interpretation 문장
+
+    Guide:
+        Beneish 1999 분식 진단 표준. M > -1.78 = 분식 의심. K-IFRS 환경 false positive 잦음.
+
+    When:
+        Earnings quality 1 회 진단 + AI 분식 의심 답변.
+
+    How:
+        8 변수 산출 → 가중 합산 → zone 분류.
+
+    Requires:
+        IS/BS/CF 2 년 (T, T-1).
+
+    Raises:
+        없음 — invalid input 시 skip.
+
+    Example:
+        >>> calcBeneishMScore(salesT=100, ...)["zone"]
+        'low_risk'
+
+    See Also:
+        - calcSloanAccruals : 단순 발생액
+        - _earningsQualityDeep.calcBeneishTimeline : 시계열
+
+    AIContext:
+        "분식 의심" 답변 시 mScore + zone + components 인용.
     """
     if salesT <= 0 or salesT1 <= 0 or totalAssetsT <= 0 or totalAssetsT1 <= 0:
         return {"mScore": None, "zone": "skip", "components": {}}
@@ -154,6 +184,36 @@ def calcSloanAccruals(
         accrualRatio : float
         quintile : "Q1" (highest accrual, 위험) ~ "Q5" (cleanest)
         warning : str | None
+
+    Capabilities:
+        - Sloan 1996 accrual ratio + 5-quintile 분류 + 경고 메시지
+        - Q1 = highest accrual = 1 년 후 underperform 위험
+
+    Guide:
+        accrual > 10% = Q1 (high risk). < 0% = Q5 (cleanest).
+
+    When:
+        Earnings quality + AI 발생액 답변.
+
+    How:
+        (NI - OCF) / TA → quintile 분류.
+
+    Requires:
+        IS net + CF ocf + BS total assets.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSloanAccruals(net, ocf, ta)["quintile"]
+        'Q2'
+
+    See Also:
+        - calcBeneishMScore : 8 변수
+        - calcAccrualAnalysis : 시계열
+
+    AIContext:
+        "발생액 위험" 답변 시 accrualRatio + quintile 인용.
     """
     if totalAssets is None or totalAssets <= 0 or netIncome is None or ocf is None:
         return {"accrualRatio": None, "quintile": "skip", "warning": None}
@@ -313,6 +373,42 @@ def detectAuditFlags(auditOpinionText: str) -> list[dict]:
     """감사보고서 텍스트에서 위험 키워드 자동 감지.
 
     Damodaran Ch.4 + KICPA 표준 키워드.
+
+    Capabilities:
+        - 의견거절/부적정/한정/계속기업/내부통제/재작성/특수관계자/KAM 8 키워드 매칭
+        - severity (critical/high/low) 분류
+
+    Args:
+        auditOpinionText: 감사보고서 본문 텍스트.
+
+    Returns:
+        list[dict] — keyword/severity/description.
+
+    Guide:
+        critical 키워드 1개 이상 = 즉시 매도 검토. high ≥ 2 = 위험 다중 신호.
+
+    When:
+        감사보고서 안전성 + AI 회계 신뢰 답변.
+
+    How:
+        키워드 list 순회 → text 매칭 → dict 누적.
+
+    Requires:
+        auditOpinionText 문자열.
+
+    Raises:
+        없음 — 빈 입력 시 빈 list.
+
+    Example:
+        >>> detectAuditFlags("...계속기업 가정에 관한 의문...")[0]["severity"]
+        'high'
+
+    See Also:
+        - calcEarningsQualityFlags : 종합
+        - _earningsQualityDeep.calcBeneishTimeline
+
+    AIContext:
+        "감사보고서 위험" 답변 시 keyword + severity 인용.
     """
     if not auditOpinionText:
         return []
@@ -361,6 +457,36 @@ def calcAccrualAnalysis(company, *, basePeriod: str | None = None) -> dict | Non
             accrualToRevenue : float | None — 발생액/매출액 (%)
             ocfToNi : float | None — 영업CF/순이익 (%)
         notesDetail : dict | None — 매출채권 대손충당금 주석 (있는 경우)
+
+    Capabilities:
+        - 발생액 시계열 + Sloan ratio + accrual/revenue + OCF/NI 4 지표 종합
+        - notesDetail 로 매출채권 대손 보강
+
+    Guide:
+        OCF/NI < 80% 가 3 년 지속 = 이익 품질 의심.
+
+    When:
+        Earnings quality 시계열 + AI 발생액 시간 추세 답변.
+
+    How:
+        IS/CF/BS 시계열 → 발생액 + 비율 계산.
+
+    Requires:
+        IS/CF/BS 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAccrualAnalysis(company)["history"][-1]["ocfToNi"]
+        92
+
+    See Also:
+        - calcSloanAccruals : 단일 지표
+        - _earningsQualityDeep.calcRichardsonAccrual : 3 계층
+
+    AIContext:
+        "이익 품질 추세" 답변 시 ocfToNi 시계열 인용.
     """
     isResult = company.select("IS", ["당기순이익", "매출액"])
     cfResult = company.select("CF", ["영업활동현금흐름"])
@@ -439,6 +565,36 @@ def calcEarningsPersistence(company, *, basePeriod: str | None = None) -> dict |
             nonOperatingIncome : float — 영업외손익 (원)
             nonOpRatio : float | None — 영업외/영업이익 비율 (%)
         earningsVolatility : float | None — 영업이익 변동계수 (배)
+
+    Capabilities:
+        - 영업이익 vs 세전이익 분해 → 영업외 비중 + 변동계수 (CV)
+        - 이익 안정성 측정
+
+    Guide:
+        nonOpRatio ≥ 30% = 비영업 이익 의존. CV ≥ 0.5 = 변동 큰 이익.
+
+    When:
+        Earnings persistence + AI 이익 안정성 답변.
+
+    How:
+        IS 시계열 → 영업/세전 분해 → 변동계수.
+
+    Requires:
+        IS 시계열 ≥ 3 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEarningsPersistence(company)["earningsVolatility"]
+        0.18
+
+    See Also:
+        - _earningsQualityDeep.calcNonOperatingBreakdown : 정밀 비영업
+        - calcAccrualAnalysis : 발생액
+
+    AIContext:
+        "이익 안정성" 답변 시 nonOpRatio + earningsVolatility 인용.
     """
     accounts = ["영업이익", "법인세차감전순이익", "세전이익"]
     isResult = company.select("IS", accounts)
@@ -510,6 +666,36 @@ def calcEarningsQualityFlags(company, *, basePeriod: str | None = None) -> dict:
             baseRate : str — 표본 기반
             reference : str — 학술 근거
             sectorNote : str — 업종별 주의사항
+
+    Capabilities:
+        - accrual/persistence/Beneish/audit 4 sub-calc 결과 → 종합 flag list + enrichedFlags
+        - precision/baseRate/reference 메타로 정확도 명시
+
+    Guide:
+        story earnings quality flag 박스 입력. enriched ≥ 2 critical = 매도 검토.
+
+    When:
+        Story flag + AI 회계 위험 답변.
+
+    How:
+        4 sub-calc 호출 → 임계 비교 → flags + enriched 누적.
+
+    Requires:
+        IS/BS/CF + audit text.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEarningsQualityFlags(company)["flags"]
+        ['Sloan 발생액비율 15% — 이익 현금화 부족']
+
+    See Also:
+        - calcAccrualAnalysis : 발생액
+        - detectAuditFlags : 감사 키워드
+
+    AIContext:
+        "회계 위험 종합" 답변 시 flags + enrichedFlags 인용.
     """
     flags: list[str] = []
     enriched: list[dict] = []
