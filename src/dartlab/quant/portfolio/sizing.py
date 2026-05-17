@@ -22,13 +22,42 @@ def kellyFraction(winProb: float, winLossRatio: float, *, fraction: float = 1.0)
     where p = win probability, b = win/loss ratio (avg win / avg loss).
 
     Args:
-        win_prob: 0~1 승률
-        win_loss_ratio: 평균이익/평균손실 비율 (양수)
-        fraction: 0~1 사이 fractional Kelly (기본 full=1.0).
-                  실무는 보통 half-Kelly(0.5) 또는 quarter(0.25).
+        winProb: 0~1 승률.
+        winLossRatio: 평균이익/평균손실 비율 (양수).
+        fraction: 0~1 사이 fractional Kelly. 기본 ``1.0`` full. 실무는 보통 half-Kelly(0.5) 또는 quarter(0.25).
 
     Returns:
-        포지션 비율 (0~1, 음수면 베팅 안 함).
+        float — 포지션 비율 (0~1). 음수면 0.
+
+    Capabilities:
+        - Kelly 공식 정확 + fractional Kelly 보정 + 0~1 클립
+        - winProb 경계 (0/1) 또는 winLossRatio 비양수 시 안전 0
+
+    Guide:
+        Kelly (1956) full = optimal log-utility. 실무는 절반·1/4 Kelly 보수적 사용 (반감기 효과).
+
+    When:
+        Position 사이징 + AI 베팅 비율 답변.
+
+    How:
+        full = (p*b - (1-p)) / b → fraction 곱 → 0~1 클립.
+
+    Requires:
+        winProb ∈ (0,1) + winLossRatio > 0.
+
+    Raises:
+        없음 — 비유효 시 0.
+
+    Example:
+        >>> kellyFraction(0.55, 1.5, fraction=0.5)
+        0.122
+
+    See Also:
+        - kellyContinuous : μ/σ² 연속형
+        - volatilityTargetLeverage : 변동성 타겟
+
+    AIContext:
+        "Kelly 비율 얼마" 답변 시 fraction × full 인용.
     """
     if winProb <= 0 or winProb >= 1 or winLossRatio <= 0:
         return 0.0
@@ -67,6 +96,42 @@ def inverseVolatilityWeights(volatilities: np.ndarray) -> np.ndarray:
     """역변동성 가중 — w_i ∝ 1/σ_i, 합=1.
 
     Maillard 2010 IVP. 가장 단순한 risk parity 베이스라인.
+
+    Capabilities:
+        - 변동성 ↑ → 가중 ↓ 역수 비례 + 합 1 정규화
+        - σ ≤ 0 인 자산은 무한대 → 가중 0 효과
+
+    Args:
+        volatilities: 자산별 변동성 array.
+
+    Returns:
+        np.ndarray — 0~1 가중치, 합 1.
+
+    Guide:
+        ERC (allocateERC) 보다 단순. 상관 무시하므로 자산 수 늘수록 ERC 와 차이.
+
+    When:
+        Portfolio risk parity 베이스라인 + AI 변동성 균등 답변.
+
+    How:
+        ``1/σ`` → 합으로 정규화.
+
+    Requires:
+        volatilities array (양수 권장).
+
+    Raises:
+        없음 — 합 0 시 zeros 반환.
+
+    Example:
+        >>> inverseVolatilityWeights(np.array([0.1, 0.2, 0.4]))
+        array([0.5714, 0.2857, 0.1428])
+
+    See Also:
+        - allocateERC : 상관 고려 ERC
+        - volatilityTargetLeverage : 단일 자산 사이징
+
+    AIContext:
+        "역변동성 가중" 답변 시 weights array 인용.
     """
     vols = np.asarray(volatilities, dtype=float)
     inv = 1 / np.where(vols > 0, vols, np.inf)
@@ -87,12 +152,42 @@ def volatilityTargetLeverage(
     높으면 down. 책 10장 핵심 룰.
 
     Args:
-        realized_vol: 실현 (보통 연환산) 변동성
-        target_vol: 목표 (기본 10%)
-        max_leverage: 상한 (기본 3배)
+        realizedVol: 실현 (보통 연환산) 변동성.
+        targetVol: 목표 변동성. 기본 ``0.10`` (10%).
+        maxLeverage: 레버리지 상한. 기본 ``3.0``.
 
     Returns:
-        포지션 사이즈 곱수 (0 ~ max_leverage)
+        float — 포지션 사이즈 곱수 (0 ~ maxLeverage).
+
+    Capabilities:
+        - 실현 변동성 < 목표 → leverage up (자본 효율) , 높으면 down (위험 절감)
+        - maxLeverage 상한 + 음수 클립
+
+    Guide:
+        Carver 2015 Systematic Trading Ch.10. targetVol 10% 표준 (개인 보수적), 기관은 15~20%.
+
+    When:
+        포지션 동적 사이징 + AI "지금 사이즈 얼마" 답변.
+
+    How:
+        ``lev = targetVol / realizedVol`` → clip(0, maxLeverage).
+
+    Requires:
+        realizedVol > 0 + 동일 시간 단위 (annualized 권장).
+
+    Raises:
+        없음 — realizedVol ≤ 0 시 0.
+
+    Example:
+        >>> volatilityTargetLeverage(0.05, 0.10)
+        2.0
+
+    See Also:
+        - kellyFraction : 승률 기반
+        - riskBudgetLeverage : 리스크 버짓
+
+    AIContext:
+        "변동성 타겟 레버리지" 답변 시 lev + 상한 인용.
     """
     if realizedVol <= 0:
         return 0.0

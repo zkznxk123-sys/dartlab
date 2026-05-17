@@ -71,7 +71,41 @@ _REGISTRY_CACHE: dict[str, Callable[..., Any]] | None = None
 
 
 def STYLE_REGISTRY() -> dict[str, Callable[..., Any]]:  # noqa: N802
-    """스타일 레지스트리 dict (lazy)."""
+    """스타일 레지스트리 dict (lazy).
+
+    Capabilities:
+        - 8 검증 스타일 (trendFollow/meanReversion/breakout/dipBuy/eventDriven/flowFollow/lowVolDefensive/seasonalKR) 빌더 매핑
+        - lazy + module 캐시 (lru 효과)
+
+    Returns:
+        dict[str, Callable] — ``{styleKey: build_fn}``.
+
+    Guide:
+        모든 Quant strategy 진입점의 SSOT. 새 스타일 추가 시 본 dict 에 등록.
+
+    When:
+        Strategy 일괄 백테스트 + AI 스타일 enumerate.
+
+    How:
+        ``_REGISTRY_CACHE`` 모듈 변수 lazy build → 재사용.
+
+    Requires:
+        styles/*.py 모듈 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> list(STYLE_REGISTRY().keys())[:3]
+        ['trendFollow', 'meanReversion', 'breakout']
+
+    See Also:
+        - resolveStyle : alias 해석
+        - listStyles : 카탈로그 dict
+
+    AIContext:
+        "사용 가능 스타일" 답변 시 keys 인용.
+    """
     global _REGISTRY_CACHE
     if _REGISTRY_CACHE is None:
         _REGISTRY_CACHE = _lazyStyles()
@@ -90,6 +124,36 @@ def resolveStyle(name: str) -> str:
     -------
     str
         정규 영문 키. 예: "trendFollow". 매칭 실패 시 원본 반환.
+
+    Capabilities:
+        - 한글/영문 양방향 매칭 + 대소문자 무시 fallback
+        - 매칭 실패 시 원본 그대로 (verbose fallback)
+
+    Guide:
+        한글 alias 매핑 (``"추세추종"`` → ``"trendFollow"``) 입력 받는 모든 진입점에 적용.
+
+    When:
+        사용자 한글 입력 정규화 + AI/CLI 진입.
+
+    How:
+        STYLE_ALIASES 직접 lookup → lower 시도 → fallback 원본.
+
+    Requires:
+        STYLE_ALIASES dict 등록.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> resolveStyle("추세추종")
+        'trendFollow'
+
+    See Also:
+        - STYLE_REGISTRY : 등록된 스타일
+        - listStyles : 카탈로그
+
+    AIContext:
+        한글 스타일 명령 정규화 답변 시 사용.
     """
     if not name:
         return name
@@ -113,6 +177,36 @@ def listStyles() -> list[dict]:
         label : str — 스타일 한 줄 요약
         description : str — build 함수 docstring 첫 줄
         kr_only : bool — KR 전용 여부
+
+    Capabilities:
+        - STYLE_REGISTRY 순회 → build 함수 docstring 첫 줄 추출 → 카탈로그 dict 변환
+        - kr_only 플래그로 시장 제약 표시
+
+    Guide:
+        ``c.quant("style")`` 인자 없는 호출의 응답 카탈로그.
+
+    When:
+        Style 카탈로그 조회 + AI "어떤 스타일 있나" 답변.
+
+    How:
+        STYLE_REGISTRY → 함수 docstring split → dict 생성.
+
+    Requires:
+        styles 각 ``build`` 의 docstring 첫 줄.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> listStyles()[0]["key"]
+        'trendFollow'
+
+    See Also:
+        - STYLE_REGISTRY : 등록
+        - resolveStyle : alias
+
+    AIContext:
+        "사용 가능 스타일 목록" 답변 시 list 인용.
     """
     reg = STYLE_REGISTRY()
     items = []

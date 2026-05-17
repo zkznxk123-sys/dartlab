@@ -75,20 +75,47 @@ def walkForward(
     Sliding window 로 train(IS) → test(OOS) 반복. test 구간 수익률만 누적해서
     OOS Sharpe/MDD/DSR 계산. PBO 는 segments 비교로 산출.
 
+    Capabilities:
+        - 슬라이딩 train/test/step → OOS 누적 수익률 + segment 별 sharpe → PBO
+        - 정적 Rule 또는 dynamic ruleFactory (IS fit + OOS predict) 지원
+
     Args:
-        close: 가격 시계열
-        rule: 정적 Rule (전체 시계열에 한 번 빌드 — 기존 동작). rule_factory 가
-            우선 적용, rule 무시.
-        rule_factory: ``Callable[[is_close: np.ndarray, oos_len: int], Rule]`` —
-            fold 마다 IS 구간만 보고 fit, 반환 Rule 의 length 는 train+test.
-            forecast 모델처럼 IS fit + OOS predict 패턴에 사용. None 이면 기존
-            정적 rule 슬라이스 동작 유지 (backward compat).
-        train: in-sample window 크기
-        test: out-of-sample window 크기
-        step: 다음 fold 시작 간격
+        close: 가격 시계열.
+        rule: 정적 Rule. ruleFactory 가 우선.
+        train: in-sample window. 기본 ``252``.
+        test: out-of-sample window. 기본 ``63``.
+        step: 다음 fold 시작 간격. 기본 ``63``.
+        open_/high/low: 보조 OHLC.
+        dates: 날짜.
+        style: 스타일 이름 메타.
+        feeBps: 수수료. 기본 5.
+        slipBps: 슬리피지. 기본 5.
+        ruleFactory: 동적 Rule 생성기.
 
     Returns:
-        BacktestResult (oos=True, pbo 채워짐)
+        BacktestResult — ``oos=True``, ``pbo`` 채워짐.
+
+    Guide:
+        Lopez de Prado AFML 표준. train=252 (1 년) + test=63 (1 분기) + step=63 (분기 회전).
+        PBO ≥ 0.5 = 과적합 의심.
+
+    When:
+        OOS 견고성 검정 + AI 과적합 답변.
+
+    How:
+        for start in range(0, n-train-test, step): IS fit (정적 또는 factory) → OOS
+        backtest → 수익률 누적 → BacktestResult 합성.
+
+    Requires:
+        close 길이 ≥ train + test.
+
+    Raises:
+        없음.
+
+    See Also:
+        - vectorBacktest : in-sample
+        - cpcv : Combinatorial Purged CV
+        - strategy.metrics.pbo : 산출
 
     Notes
     -----
@@ -273,14 +300,40 @@ def multiAssetBacktest(
 
     각 종목별 단일 백테스트 → 일별 수익률 → 가중 결합.
 
+    Capabilities:
+        - 종목별 단일 백테스트 → 일별 returns 매트릭스 → 3 가중방식 (equal/inv_vol/risk_parity) 결합
+        - 포트 sharpe/mdd/dsr 산출 + 종목별 contribution
+
     Args:
-        stock_codes: 종목 리스트 (예: ['005930', '000660', ...])
-        rule_builder: callable(company) -> Rule (스타일 build 함수 또는 사용자 정의)
-        weighting: "equal" | "inv_vol" | "risk_parity"
-        fee_bps/slip_bps: 거래비용
+        stockCodes: 종목 리스트 (예: ``['005930', '000660', ...]``).
+        ruleBuilder: ``callable(company) -> Rule`` (스타일 build 함수).
+        weighting: ``"equal"`` | ``"inv_vol"`` | ``"risk_parity"``.
+        feeBps: 수수료 bps. 기본 5.
+        slipBps: 슬리피지 bps. 기본 5.
+        style: 메타 스타일명.
 
     Returns:
-        BacktestResult — 가중 결합 결과
+        BacktestResult — 가중 결합 결과.
+
+    Guide:
+        분산 효과 + correlation diversification 측정. inv_vol/risk_parity 가 equal 보다
+        리스크 분산 균등.
+
+    When:
+        멀티 종목 포트 평가 + AI 분산 효과 답변.
+
+    How:
+        각 종목 단일 backtest → 종목별 returns → weighting 적용 → 포트 returns → 통계.
+
+    Requires:
+        stockCodes ≥ 1 + 종목별 OHLCV 가용.
+
+    Raises:
+        없음 — 데이터 부족 시 error sentinel.
+
+    See Also:
+        - vectorBacktest : 단일 종목
+        - portfolio.allocateERC : risk parity weights
     """
     from dataclasses import dataclass
 
@@ -422,13 +475,41 @@ def cpcv(
 
     n_splits 개 그룹 → n_test 개 조합 모두 test. 각 조합의 OOS Sharpe 평균 + DSR.
 
+    Capabilities:
+        - C(nSplits, nTest) 모든 조합 → 각 fold OOS sharpe → 평균 + DSR
+        - embargo 로 train/test 경계 purge → look-ahead bias 회피
+
     Args:
-        n_splits: 분할 수
-        n_test: test 그룹 수
-        embargo: test 양 끝 purge 관측치
+        close: 가격 시계열.
+        rule: Rule 객체.
+        nSplits: 분할 수. 기본 ``6``.
+        nTest: test 그룹 수. 기본 ``2``.
+        embargo: test 양 끝 purge 관측치. 기본 ``5``.
+        open_/high/low: 보조 OHLC.
+        style: 메타.
 
     Returns:
-        BacktestResult (oos=True, cpcv 메타 채워짐)
+        BacktestResult — ``oos=True``, ``cpcv`` 메타 채워짐.
+
+    Guide:
+        Lopez de Prado AFML Ch.7. walkForward 보다 더 많은 OOS 조합 → 안정적 DSR.
+        nSplits=6, nTest=2 → 15 조합.
+
+    When:
+        과적합 검정 강건성 + AI DSR 답변.
+
+    How:
+        ``cpcvSplits`` 로 모든 (train, test) 조합 생성 → fold 별 OOS backtest → sharpe 평균.
+
+    Requires:
+        close 충분히 길어야 (fold ≥ 6).
+
+    Raises:
+        없음 — 조합 0 시 error sentinel.
+
+    See Also:
+        - walkForward : sliding window
+        - strategy.metrics.cpcvSplits : split 생성
     """
     n = len(close)
     fold_sharpes: list[float] = []
