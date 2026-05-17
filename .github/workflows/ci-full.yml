@@ -37,6 +37,8 @@ jobs:
           # dev group 의 vcrpy/pandera/syrupy 가 tests/_cassettes / tests/_schemas /
           # tests/cli/test_output_snapshots 에 필요.
           pip install "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
+          # mcp 명시 우선 install — dartlab.mcp namespace 회피.
+          pip install "mcp[cli]>=1.0,<1.27.1"
           pip install -e .[all]
       # realData/heavy/freshInstall 제외 — 이들은 realdata-suite / ci-nightly 담당.
       - name: Run tests with coverage (Python 3.12)

@@ -172,9 +172,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-asyncio pytest-cov hypothesis pytest-xdist pytest-benchmark
           # tests/_schemas (pandera) / tests/_cassettes (vcrpy) / tests/cli/test_output_snapshots
-          # (syrupy snapshot fixture) 는 dependency-groups.dev 의 패키지가 필요. CI 가 dev
-          # group 미설치 시 ImportError / fixture 'snapshot' not found 로 차단됨.
+          # (syrupy snapshot fixture) 는 dependency-groups.dev 의 패키지가 필요.
           pip install "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
+          # mcp 명시 우선 install — dartlab.mcp 와 standalone mcp 의 namespace 회피
+          # (hatch editable layout 의 `src/dartlab` path 추가가 'from mcp.server.stdio'
+          # 를 dartlab.mcp 로 잘못 잡는 회귀 차단). dartlab editable 은 뒤에.
+          pip install "mcp[cli]>=1.0,<1.27.1"
           pip install -e .[all]
       # unit marker 만 — 가장 빠른 피드백. requires_data 는 fixture 없으면 data
       # 로드 실패이므로 제외. pytest-benchmark 는 bench_*.py 수집 위해 설치.
