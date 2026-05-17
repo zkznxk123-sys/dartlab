@@ -58,6 +58,13 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
         탐지). 판관비율 동시 상승 = 운영 효율 저하. 단년도 절대값보다 추세
         변화에 주목.
 
+    When:
+        비용 구조 변화·원가 부담 추세 진단, 마진 분석의 1 차 입력.
+
+    How:
+        IS rawNormalized → 매출 + sumCostOfSales (폴백) + sumSGA (폴백) →
+        3 비율 → notesDetail (costByNature) 결합.
+
     SeeAlso:
         - ``calcOperatingLeverage``: DOL (영업레버리지)
         - ``calcBreakevenEstimate``: BEP + 안전마진
@@ -172,6 +179,13 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
         DOL > 3 = 고정비 부담 큼 (반도체/철강/화학 제조업 전형). DOL < 1.5
         = 변동비 비중 큼 (소매/서비스). 경기 하강기에 DOL 높은 회사는
         영업이익 급락 위험. contributionProxy 와 함께 인용.
+
+    When:
+        고정비 구조 평가·경기 하강기 영업이익 민감도 진단 시.
+
+    How:
+        IS 매출/영업이익/매출총이익 매핑 → 전년 대비 변화율 비율로 DOL +
+        contributionProxy 계산. 부호 전환 period 는 None.
 
     SeeAlso:
         - ``calcCostBreakdown``: 비용 구조 (DOL 의 근거)
@@ -290,6 +304,13 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
         매우 안정. 단순화 가정 (매출원가 = 변동비) 은 제조업에 적합,
         서비스업/소프트웨어는 인건비 분류 차이로 왜곡 가능.
 
+    When:
+        손익분기점 분석·안전마진 정성 평가 시.
+
+    How:
+        IS 매출/매출원가/판관비 매핑 → 변동비율 = 매출원가/매출 → BEP =
+        판관비/(1-변동비율) → 안전마진 = (매출-BEP)/매출.
+
     SeeAlso:
         - ``calcOperatingLeverage``: DOL (BEP 와 paired)
         - ``calcCostBreakdown``: 비용 구조 (BEP 의 입력)
@@ -378,10 +399,42 @@ from dartlab.analysis.financial._costStructureDeep import (  # noqa: E402, F401
 def calcCostStructureFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """비용 구조 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 메시지 목록 (매출원가율 연속 상승, 고DOL, 안전마진 부족 등).
+    Capabilities:
+        - 매출원가율/판관비율 3 기 연속 상승, 고DOL, 안전마진 부족 시 한국어
+          flags 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        flag 신호 — cogsRatio/sgaRatio 3 년 단조 상승, DOL > 3, 안전마진 < 10%.
+
+    When:
+        보고서·UI 위험 배너에 비용 구조 경고 한 줄 표시.
+
+    How:
+        ``calcCostBreakdown`` + ``calcOperatingLeverage`` + ``calcBreakevenEstimate``
+        결과를 임계와 비교 후 한국어 포맷팅.
+
+    Requires:
+        하위 3 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCostStructureFlags(Company("005930"))
+        ["매출원가율 3년 연속 상승 ..."]
+
+    SeeAlso:
+        - ``calcCostBreakdown``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 비용 구조 위험 인용 시.
     """
     flags = []
 
