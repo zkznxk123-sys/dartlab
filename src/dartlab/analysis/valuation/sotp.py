@@ -25,6 +25,20 @@ def calcSotpNav(
 ) -> dict | None:
     """SOTP NAV — Damodaran Ch.16.
 
+    Capabilities:
+        - investedCompany (자회사 장부가) 합산 + 모회사 별도 자산 - 부채
+        - 한국 시장 평균 holding discount 40% (Damodaran 20% + 한국 갭 20%)
+        - sanity cap (시가총액 × 3) 으로 DART 데이터 중복/단위 보정
+
+    Parameters
+    ----------
+    company : Company
+        지주사 회사.
+    holdingDiscount : float
+        지주사 할인율 (0.40 기본, [0.0, 0.7] clamp).
+    overrides : dict, optional
+        가정 override.
+
     Returns
     -------
     dict | None
@@ -36,6 +50,33 @@ def calcSotpNav(
         listedCount, unlistedCount, totalCount
         holdingDiscount, perShare, method
         warnings : list[str]
+
+    Example:
+        >>> calcSotpNav(Company("003550"))  # LG
+        {"perShare": 85000, "adjustedNav": ..., ...}
+
+    Guide:
+        investedCompany 미가용 또는 affiliate_book_sum ≤ 0 시 None. shares
+        역산 실패 시 한국 지주 평균 PBR 0.5 기반 fallback.
+
+    When:
+        지주사 (SK/LG/CJ 등) dFV 산출 시점 — calcHoldingDFV 가 호출.
+
+    How:
+        calcSotpNav(company) 또는 holdingDiscount=0.5 강제.
+
+    Requires:
+        company.show("investedCompany") + company.select("BS", ["자본총계"]).
+
+    Raises:
+        없음 — 데이터 부족은 None.
+
+    See Also:
+        - calcHoldingDFV : 본 함수의 dFV 진입점 wrapper
+        - Damodaran *Investment Valuation* Ch.16
+
+    AIContext:
+        지주사 NAV 답변 시 adjustedNav + holdingDiscount 함께 노출.
     """
     overrides = overrides or {}
     warnings: list[str] = []
@@ -188,7 +229,50 @@ def calcSotpNav(
 def calcHoldingDFV(company: Any, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
     """지주사 전용 dFV — SOTP NAV 우선.
 
-    Returns: calcDFV 호환 dict (primaryModel="sotp")
+    Capabilities:
+        - calcSotpNav 결과 → calcDFV 호환 스키마 변환
+        - scenarios (bull/base/bear) + opinion + confidence 부착
+        - primaryModel="sotp" 고정
+
+    Parameters
+    ----------
+    company : Company
+        지주사 회사.
+    basePeriod : str, optional
+        기준 기간.
+    overrides : dict, optional
+        가정 override.
+
+    Returns
+    -------
+    dict | None
+        calcDFV 호환 dict (primaryModel="sotp", companyType="지주").
+
+    Example:
+        >>> calcHoldingDFV(Company("003550"))
+        {"dFV": 85000, "opinion": "매수", "primaryModel": "sotp", ...}
+
+    Guide:
+        scenarios = base ± 15%. confidence="medium" 고정 (NAV 변동성 큼).
+
+    When:
+        isHoldingCompany True → calcDFV 가 본 함수로 dispatch.
+
+    How:
+        calcHoldingDFV(company).
+
+    Requires:
+        calcSotpNav + _getCurrentPriceLight + _opinion.
+
+    Raises:
+        없음.
+
+    See Also:
+        - calcSotpNav : NAV 본체
+        - calcDFV : 통합 진입점
+
+    AIContext:
+        지주사 적정주가 답변 시 dFV + sotpModel.affiliates 함께 인용.
     """
     overrides = overrides or {}
     sotp = calcSotpNav(company, overrides=overrides)

@@ -54,6 +54,11 @@ def calcResidualIncome(
 ) -> RIMResult | None:
     """잔여이익모델(RIM) -- 자기자본 대비 초과이익의 현재가치.
 
+    Capabilities:
+        - RI_t = NI_t - (Equity_{t-1} × CoE) 시계열 산출
+        - Intrinsic = BPS + Σ(RI / (1+CoE)^t) + Terminal Value
+        - CoE 부재 시 CAPM proxy (Rf + β × ERP) 자동 추정
+
     Parameters
     ----------
     series : dict
@@ -79,6 +84,33 @@ def calcResidualIncome(
         upside : float | None — 현재가 대비 괴리율 (%)
         terminalValue : float | None — 영구가치 (원)
         데이터 부족 시 None.
+
+    Example:
+        >>> r = calcResidualIncome(series, shares=5e9, currentPrice=75000)
+        >>> r.intrinsicValue
+
+    Guide:
+        ROE > CoE 인 회사 (경제적 부가가치 창출) 에서 의미 큼. ROE < CoE 면
+        intrinsicValue < BPS 가능.
+
+    When:
+        FCF 변동성 큰 회사 또는 IFRS 회계상 자본 비중 큰 회사 가치평가 시.
+
+    How:
+        calcResidualIncome(series, shares=s, currentPrice=p).
+
+    Requires:
+        getAnnualValues (net_profit + total_stockholders_equity) ≥ 2년 시계열.
+
+    Raises:
+        없음 — 데이터 부족 시 None.
+
+    See Also:
+        - dcfValuation / ddmValuation : 대안 모델
+        - calcDFV : RIM 을 secondary 로 사용하는 진입점
+
+    AIContext:
+        RIM 결과 답변 시 intrinsicValue + Omega (경쟁우위 지속성) 함께 인용.
     """
     warnings: list[str] = []
 

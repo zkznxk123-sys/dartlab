@@ -65,10 +65,50 @@ def ddmValuation(
 ) -> DDMResult:
     """Gordon Growth / 2-Stage DDM.
 
+    Capabilities:
+        - Gordon Growth Model 또는 2-Stage DDM 자동 선택
+        - 연간 배당 미주입 시 CF/dividends_paid 자체 추출 (분기 합산)
+        - 배당 성장률 CAGR + 비정상 (>25%) 시 보수 추정 + warning
+
     Args:
+        series: finance.timeseries dict (CF 필수).
+        shares: 발행주식수.
+        sectorParams: 업종별 할인율.
+        currentPrice: 현재 주가 (upside 계산용).
+        discountRate: CoE override (None 시 sectorParams.discountRate).
         annualDividends: 연간 배당 총액 리스트 (과거→최신 순).
             calcDividendPolicy에서 추출한 정확한 연간 합산 값 우선.
             None이면 CF/dividends_paid에서 자체 추출.
+
+    Returns:
+        DDMResult — intrinsicValue/dividendPerShare/dividendGrowth/modelUsed 등.
+
+    Example:
+        >>> r = ddmValuation(series, shares=5e9, currentPrice=75000)
+        >>> r.intrinsicValue, r.dividendYield
+
+    Guide:
+        무배당/배당 데이터 부재 시 intrinsicValue=None + warning. 배당 성장률
+        ≥ CoE 시 2-stage 자동 전환.
+
+    When:
+        고배당 회사 primary valuation 또는 일반 회사 dividend floor 산출 시.
+
+    How:
+        ddmValuation(series, shares=s, currentPrice=p, annualDividends=[...]).
+
+    Requires:
+        getAnnualValues/getLatest/getTTM (CF) + _cagr.
+
+    Raises:
+        없음 — 데이터 부족은 modelUsed="N/A" 반환.
+
+    See Also:
+        - dcfValuation : FCF 기반 가치
+        - calcDFV : 다중 모델 통합
+
+    AIContext:
+        DDM 결과 답변 시 dividendYield + payoutRatio + dividendGrowth 인용.
     """
     warnings: list[str] = []
     r = discountRate or (sectorParams.discountRate if sectorParams else 10.0)

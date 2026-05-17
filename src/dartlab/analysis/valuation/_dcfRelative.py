@@ -38,6 +38,22 @@ def liquidationValuation(
 ) -> dict:
     """Damodaran 청산가치 — 자산별 회수율 차등.
 
+    Capabilities:
+        - 자산별 차등 회수율 (cash 100%/AR 70%/inventory 50%/tangible 60%/intangible 10%)
+        - gross recovery - 부채 = 주주 몫
+        - recoveryOverrides 로 회수율 사용자 조정 가능
+
+    Parameters
+    ----------
+    cash, receivables, inventory, tangibleAssets, intangibleAssets, otherAssets : float
+        자산별 장부가 (원).
+    totalLiabilities : float
+        총 부채.
+    shares : int, optional
+        발행주식수.
+    recoveryOverrides : dict, optional
+        자산별 회수율 override.
+
     Returns
     -------
     dict
@@ -46,6 +62,32 @@ def liquidationValuation(
         netToEquity : float — 부채 상환 후 잔여
         perShare : float | None
         weightedRecoveryRate : float — 가중 평균 회수율 (0.0~1.0)
+
+    Example:
+        >>> liquidationValuation(cash=1e9, tangibleAssets=5e9, totalLiabilities=4e9, shares=1e7)
+        {"netToEquity": ..., "perShare": ..., ...}
+
+    Guide:
+        netToEquity ≤ 0 시 perShare=None — 청산 시 주주 몫 없음.
+
+    When:
+        decline phase 또는 distress 회사의 floor value 산출.
+
+    How:
+        liquidationValuation(cash=c, tangibleAssets=t, ..., totalLiabilities=L, shares=s).
+
+    Requires:
+        외부 의존 없음 — pure function.
+
+    Raises:
+        없음.
+
+    See Also:
+        - calcDFV : 본 함수를 floor 로 사용
+        - Damodaran *Dark Side of Valuation* Ch.9
+
+    AIContext:
+        청산가치 답변 시 자산별 회수금액 + weightedRecoveryRate 인용.
     """
     recovery = dict(_LIQUIDATION_RECOVERY)
     if recoveryOverrides:
@@ -83,7 +125,58 @@ def relativeValuation(
     shares: Optional[int] = None,
     currentPrice: Optional[float] = None,
 ) -> RelativeValuationResult:
-    """섹터 배수 기반 상대가치 추정 (Normalized Earnings 지원)."""
+    """섹터 배수 기반 상대가치 추정 (Normalized Earnings 지원).
+
+    Capabilities:
+        - 5 멀티플 (PER/PBR/EV/EBITDA/PSR/PEG) 동시 산출 + 가중평균 consensusValue
+        - Normalized Earnings (과거 평균 ROE × 현재 BPS) 자동 사용 옵션
+        - 멀티플별 가중치 (EV/EBITDA 3.0 / PER 2.5 / PBR 1.5 / PSR 1.0 / PEG 1.0)
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries dict.
+    sectorParams : SectorParams, optional
+        업종별 배수 (PER/PBR/EV/EBITDA 등).
+    marketCap : float, optional
+        시가총액.
+    shares : int, optional
+        발행주식수.
+    currentPrice : float, optional
+        현재 주가.
+
+    Returns
+    -------
+    RelativeValuationResult
+        sectorMultiples, currentMultiples, impliedValues, premiumDiscount,
+        consensusValue, warnings.
+
+    Example:
+        >>> r = relativeValuation(series, sectorParams=sp, marketCap=4.5e14, shares=5e9)
+        >>> r.consensusValue
+
+    Guide:
+        impliedValue 가 현재가의 5배 초과 시 outlier 제거. 양수 implied 만 가중평균.
+
+    When:
+        DCF 대안 / 신생기업 / 사이클 회사의 멀티플 기반 가치평가 시.
+
+    How:
+        relativeValuation(series, sectorParams=sp, marketCap=mc, shares=s, currentPrice=p).
+
+    Requires:
+        getTTM/getLatest (IS/BS/CF) + SectorParams.
+
+    Raises:
+        없음.
+
+    See Also:
+        - dcfValuation : 현금흐름 기반
+        - calcDFV : 다중 모델 통합
+
+    AIContext:
+        멀티플 기반 가치 답변 시 currentMultiples 와 sectorMultiples 비교 노출.
+    """
     warnings: list[str] = []
     sp = sectorParams or SectorParams(
         discountRate=10.0,
@@ -206,6 +299,55 @@ def sensitivityAnalysis(
     """WACC x 영구성장률 민감도 그리드.
 
     DCF 결과를 WACC +-waccRange, 영구성장률 +-growthRange로 재계산.
+
+    Capabilities:
+        - WACC × terminalGrowth 2D 그리드 (steps × steps) DCF 재계산
+        - WACC ≤ TG 또는 WACC ≤ 0 인 셀 자동 skip
+        - base 결과 동시 반환 (베이스 vs 그리드 비교)
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries dict.
+    shares, sectorParams, currentPrice, currency : 일반 DCF 인자.
+    waccRange : float
+        WACC ±range (%, 기본 2.0).
+    growthRange : float
+        TG ±range (%, 기본 2.0).
+    steps : int
+        그리드 스텝 수 (기본 5).
+
+    Returns
+    -------
+    SensitivityResult | None
+        grid : list[{wacc, terminalGrowth, perShareValue, enterpriseValue}]
+        baseWacc, baseTerminalGrowth, baseValue.
+
+    Example:
+        >>> r = sensitivityAnalysis(series, shares=5e9, waccRange=2.0, steps=5)
+        >>> len(r.grid)
+
+    Guide:
+        steps=5 → 5×5=25 셀. 일부 셀은 wacc≤TG 로 skip 될 수 있음.
+
+    When:
+        밸류에이션 보고서의 sensitivity 표/heatmap 시각화 시.
+
+    How:
+        sensitivityAnalysis(series, shares=s, waccRange=2.0, growthRange=2.0, steps=5).
+
+    Requires:
+        dcfValuation — 각 셀 마다 재호출.
+
+    Raises:
+        없음.
+
+    See Also:
+        - dcfValuation : 본 함수가 반복 호출
+        - calcDFV : 보다 정교한 시나리오 분석
+
+    AIContext:
+        가정 변화 영향 답변 시 grid 의 p10/p90 perShareValue 차이 인용.
     """
     from dartlab.analysis.valuation.dcf import dcfValuation
 
