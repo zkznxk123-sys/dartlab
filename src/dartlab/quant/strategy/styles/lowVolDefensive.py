@@ -61,11 +61,46 @@ def build(
     대신 self-history z-score: 자기 자신의 5년 rolling MDD 분포 vs 현재 시점.
     `mdd_z = (mdd_t - μ) / σ` — z > 0.5 = 평소보다 안정적, z < -0.5 = 평소보다 위험.
 
+    Capabilities:
+        - 변동성 < 40 분위 + 자기 history MDD z-score ≥ 0 진입 → 안정 시점 매수
+        - 변동성 > 70 분위 또는 MDD z < -1.0 청산
+
     Args:
-        vol_low_q: 변동성 진입 quantile (낮은 vol 권장)
-        vol_high_q: 변동성 청산 quantile
-        mdd_z_entry: rolling MDD self z-score 진입 임계 (높을수록 더 안정 시점)
-        mdd_z_exit: 청산 임계
+        company: Company 객체.
+        volLowQ: 변동성 진입 분위. 기본 ``0.40``.
+        volHighQ: 변동성 청산 분위. 기본 ``0.70``.
+        mddZEntry: rolling MDD self z 진입. 기본 ``0.0``.
+        mddZExit: 청산. 기본 ``-1.0``.
+
+    Returns:
+        Rule — entry/exit (stop 없음, vol exit 이 stop 역할).
+
+    Guide:
+        Frazzini-Pedersen 2014 BAB self-history z-score 적용. 절대 임계 (mdd<-0.10)
+        는 KR 시장에 부적합.
+
+    When:
+        Low-vol defensive + AI 방어적 매수 답변.
+
+    How:
+        ``_volatilitySeries`` + ``_tailriskSeries`` → 분위 + z-score → Signal.
+
+    Requires:
+        close ≥ 252 봉 (1 년 vol/MDD).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> build(company).meta["style"]
+        'lowVolDefensive'
+
+    See Also:
+        - strategy.styles.meanReversion : 다른 방어형
+        - risk.tailrisk : MDD core
+
+    AIContext:
+        "지금 방어적 매수 가능" 답변 시 entry 봉 인용.
     """
     arr = getArrays(company)
     close = arr.get("close")

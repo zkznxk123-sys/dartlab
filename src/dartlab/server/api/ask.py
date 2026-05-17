@@ -49,6 +49,11 @@ async def apiAsk(req: AskRequest):
         return EventSourceResponse(
             _streamPublicAsk(req),
             media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache, no-transform",
+                "X-Accel-Buffering": "no",
+                "Connection": "keep-alive",
+            },
         )
 
     return await runPlainChat(req)
@@ -65,8 +70,18 @@ async def _streamPublicAsk(req: AskRequest):
             "corpName": company.corpName,
             "company": company.company,
         }
+    # 다중 턴 컨텍스트 — 직전 history 를 user message 앞에 prepend.
+    # HistoryMessage(role, text) → AgentRunMessage(role, content). max_length=50 은 AskRequest 가 강제.
+    messages: list[AgentRunMessage] = []
+    for h in req.history or []:
+        if not h.text:
+            continue
+        if h.role not in ("user", "assistant", "system"):
+            continue
+        messages.append(AgentRunMessage(role=h.role, content=h.text))
+    messages.append(AgentRunMessage(role="user", content=req.question))
     agent_req = AgentRunRequest(
-        messages=[AgentRunMessage(role="user", content=req.question)],
+        messages=messages,
         provider=req.provider,
         role=req.role,
         model=req.model,

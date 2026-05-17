@@ -81,7 +81,7 @@ def downloadCompanyfactsBulk(
     ttlHours : int
         로컬 freshness TTL. SEC companyfacts 는 매일 04:25 UTC 갱신되므로 24h 기본.
     progress : bool
-        tqdm 진행률 표시 (stderr).
+        rich.Progress 진행률 표시 (SSOT Console).
 
     Raises:
         httpx.HTTPError: SEC bulk endpoint 호출 실패.
@@ -285,7 +285,7 @@ def convertBulkToParquets(
     onlyCiks : set[str] | None
         지정된 cik(0-padded 10자리)만 변환. 테스트/샘플용.
     progress : bool
-        tqdm 진행률.
+        rich.Progress 진행률.
     force : bool
         True 면 stamp 무시하고 항상 재변환 (CI 강제 리빌드 용).
         기본 False: zip mtime 이 `companyfacts.converted` 스탬프보다 최신이거나
@@ -422,22 +422,135 @@ def convertBulkToParquets(
 # ── 진행률/이벤트 헬퍼 ─────────────────────────────────────────────────
 
 
+class _RichBar:
+    """rich.Progress 어댑터 — tqdm 호환 (.update(n), .close())."""
+
+    def __init__(self, total: int, *, unit: str) -> None:
+        from rich.progress import (
+            BarColumn,
+            DownloadColumn,
+            MofNCompleteColumn,
+            Progress,
+            TextColumn,
+            TimeRemainingColumn,
+            TransferSpeedColumn,
+        )
+
+        from dartlab.core.logger import getConsole
+
+        if unit == "B":
+            cols = (
+                TextColumn("[cyan]companyfacts.zip"),
+                BarColumn(),
+                DownloadColumn(),
+                TransferSpeedColumn(),
+                TimeRemainingColumn(),
+            )
+        else:
+            cols = (
+                TextColumn("[cyan]companyfacts.zip"),
+                BarColumn(),
+                MofNCompleteColumn(),
+                TimeRemainingColumn(),
+            )
+        self._progress = Progress(*cols, console=getConsole(), transient=False)
+        self._progress.start()
+        self._task = self._progress.add_task("companyfacts.zip", total=total)
+
+    def update(self, advance: int) -> None:
+        """진행률을 advance 만큼 전진 — tqdm.update 호환.
+
+        Capabilities:
+            rich.Progress.update 를 tqdm 호환 시그니처로 노출해 기존 caller 의
+            ``bar.update(n)`` 패턴을 유지한다.
+
+        Args:
+            advance: 누적 advance (바이트 수 또는 파일 수).
+
+        Returns:
+            None.
+
+        Example:
+            >>> bar = _initBar(1024, show=True)
+            >>> if bar: bar.update(256)
+
+        Guide:
+            tqdm 어댑터 — caller 는 update/close 만 호출하면 된다.
+
+        AIContext:
+            companyfactsBulk 다운로드/변환 진행률을 SSOT rich Console 로 라우팅.
+
+        SeeAlso:
+            :meth:`_RichBar.close` · :func:`_initBar` · :func:`dartlab.core.logger.getConsole`.
+
+        Requires:
+            인스턴스가 ``__init__`` 에서 rich.Progress.start() 호출 후 task_id 를
+            확보한 상태여야 한다.
+
+        LLM Specifications:
+            AntiPatterns: tqdm.update 대용으로 호출. update 후 close 없이 종료 금지.
+            OutputSchema: None.
+            Prerequisites: _RichBar 인스턴스 (생성자에서 task 등록 완료).
+            Freshness: 호출 즉시 rich Console 에 반영 (refresh_per_second 기본).
+            Dataflow: caller(zip 다운로드 청크) → _RichBar.update → rich.Progress → Console.
+            TargetMarkets: EDGAR bulk 다운로드 진행률 관찰.
+
+        Raises:
+            없음. 내부 rich.Progress.update 에 위임.
+        """
+        self._progress.update(self._task, advance=advance)
+
+    def close(self) -> None:
+        """rich.Progress 컨텍스트 종료 — tqdm.close 호환.
+
+        Capabilities:
+            rich.Progress.stop 을 tqdm 호환 시그니처로 노출해 기존 caller 의
+            ``bar.close()`` 패턴을 유지한다.
+
+        Args:
+            없음.
+
+        Returns:
+            None.
+
+        Example:
+            >>> bar = _initBar(1024, show=True)
+            >>> if bar: bar.close()
+
+        Guide:
+            try/finally 패턴에서 bar 가 None 이 아닐 때만 호출.
+
+        AIContext:
+            companyfactsBulk 다운로드 종료 시 rich Progress task 정리.
+
+        SeeAlso:
+            :meth:`_RichBar.update` · :func:`_initBar` · :func:`dartlab.core.logger.getConsole`.
+
+        Requires:
+            인스턴스가 ``__init__`` 에서 rich.Progress.start() 호출 후 활성 상태여야 한다.
+
+        LLM Specifications:
+            AntiPatterns: close 두 번 호출 금지 (rich.Progress.stop 멱등 아님).
+            OutputSchema: None.
+            Prerequisites: _RichBar 인스턴스 (생성자에서 start 완료).
+            Freshness: 호출 즉시 Live frame 종료.
+            Dataflow: caller(finally 블록) → _RichBar.close → rich.Progress.stop.
+            TargetMarkets: EDGAR bulk 다운로드/변환 종료 시 자원 정리.
+
+        Raises:
+            없음. 내부 rich.Progress.stop 에 위임.
+        """
+        self._progress.stop()
+
+
 def _initBar(total: int, *, show: bool, unit: str = "B"):
-    """tqdm 진행률 바 생성. tqdm 없으면 None."""
+    """rich.Progress 어댑터 생성 (tqdm 호환 .update/.close)."""
     if not show or total <= 0:
         return None
     try:
-        from tqdm import tqdm
+        return _RichBar(total, unit=unit)
     except ImportError:
         return None
-    unit_scale = unit == "B"
-    return tqdm(
-        total=total,
-        unit=unit,
-        unit_scale=unit_scale,
-        unit_divisor=1024 if unit_scale else 1000,
-        desc="companyfacts.zip",
-    )
 
 
 def _emitStart(totalBytes: int) -> None:

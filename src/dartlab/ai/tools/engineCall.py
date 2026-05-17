@@ -12,9 +12,15 @@ from typing import Any
 import polars as pl
 
 from dartlab.ai.contracts import Ref
+from dartlab.core.confidence import baseScore as _baseScore
 
+from .creditBadge import getDcrBadge
+from .filingDeepLink import attachDocRef, buildPeriodToFiling
 from .formatting import formatMoney, formatPercent
+from .industryContext import getIndustryBadge
 from .types import ToolResult
+
+_FILING_DIRECT_CONFIDENCE = _baseScore("filing_direct")
 
 _AUTO_GATHER_ENABLED = os.environ.get("DARTLAB_AUTO_GATHER", "1") not in {"0", "false", "False"}
 
@@ -35,6 +41,7 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
     """Validate and execute a public DartLab API call plan."""
 
     call_plan = dict(plan or kwargs or {})
+    _normalizeArgsDict(call_plan)
     apiRef = _apiRef(call_plan)
     if not apiRef:
         return ToolResult(False, "apiRef를 확인하지 못했습니다.", error="missing_api_ref")
@@ -54,9 +61,50 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
     return _genericPublicCall(apiRef, call_plan)
 
 
+def _normalizeArgsDict(plan: dict[str, Any]) -> None:
+    """ToolSpec schema 가 args 를 dict 로 정의 — 모델 양식 그대로 flatten.
+
+    LLM 표준 호출: `{"apiRef": "Company.show", "args": {"stockCode": "005930", "topic": "IS"}}`.
+    이전 핸들러들은 `plan["args"]` 를 list 로 가정 (옛 형식) → dict 면 `list(dict)` 가 *키* 만
+    뽑아 회귀 (`company_not_resolved`). dict 면 키들을 plan root 로 흡수 + args 를 빈 list 로.
+    """
+    raw = plan.get("args")
+    if not isinstance(raw, dict):
+        return
+    # 충돌 회피 — plan root 에 이미 명시된 키는 우선 (옛 호환).
+    for key, value in raw.items():
+        plan.setdefault(key, value)
+    # 핸들러들이 `list(plan.get("args") or [])` 패턴 — dict 가 list 로 캐스팅되어 키만 뽑히는
+    # 회귀 차단. flatten 후 args 는 빈 list 로 재설정.
+    plan["args"] = []
+
+
 def _apiRef(plan: dict[str, Any]) -> str:
-    if plan.get("apiRef"):
-        return str(plan["apiRef"])
+    raw = str(plan.get("apiRef") or "").strip()
+    # 방어적 파서 — 모델이 'Company.show TSLA IS freq=Q' 처럼 인자까지 apiRef 에 합쳐
+    # 보내는 회귀 케이스. 첫 토큰을 apiRef 로, 나머지는 args/kwargs 로 흡수.
+    if raw and " " in raw:
+        parts = raw.split()
+        apiRef = parts[0]
+        plan["apiRef"] = apiRef
+        existing_args: list[Any] = list(plan.get("args") or [])
+        existing_kwargs: dict[str, Any] = dict(plan.get("kwargs") or {})
+        # 첫 인자가 종목코드 또는 ticker 면 target 으로 우선 흡수.
+        target_set = bool(plan.get("target") or plan.get("stockCode"))
+        for token in parts[1:]:
+            if "=" in token:
+                key, value = token.split("=", 1)
+                existing_kwargs[key.strip()] = value.strip()
+            elif not target_set and _looksLikeStockOrTicker(token):
+                plan["target"] = token
+                target_set = True
+            else:
+                existing_args.append(token)
+        plan["args"] = existing_args
+        plan["kwargs"] = existing_kwargs
+        return apiRef
+    if raw:
+        return raw
     engine = str(plan.get("engine") or "").strip()
     method = str(plan.get("method") or "").strip()
     if engine.lower() == "company" and method:
@@ -64,6 +112,14 @@ def _apiRef(plan: dict[str, Any]) -> str:
     if engine.lower() == "dartlab" and method:
         return f"dartlab.{method}"
     return ""
+
+
+def _looksLikeStockOrTicker(token: str) -> bool:
+    if not token:
+        return False
+    if re.match(r"^\d{6}$", token):
+        return True
+    return bool(re.match(r"^[A-Z]{1,6}$", token))
 
 
 def _capabilityExists(apiRef: str) -> bool:
@@ -84,7 +140,9 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
     if company is None:
         return ToolResult(
             False,
-            "종목을 먼저 특정해야 재무제표를 확인할 수 있습니다. 예: `삼성전자 재무상태표 확인`",
+            "stockCode 누락 — EngineCall 호출 시 args dict 안에 stockCode 를 반드시 포함. 예: "
+            '{"apiRef":"Company.show","args":{"stockCode":"005930","topic":"IS"}} '
+            "(plan root 가 아닌 args 안에).",
             error="company_not_resolved",
         )
     companyName = str(getattr(company, "corpName", None) or getattr(company, "name", None) or "")
@@ -107,49 +165,67 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
         return ToolResult(
             False, f"{companyName or stockCode} {topic} 표를 요약하지 못했습니다.", error="unreadable_table"
         )
+    filingMap = buildPeriodToFiling(company)
+    latestPeriod = summary["latestPeriod"]
+
+    def _enrich(base: dict[str, Any]) -> dict[str, Any]:
+        """payload 에 docRef + confidence (filing_direct = 95) + provenance 부착."""
+        out = attachDocRef(base, latestPeriod, filingMap)
+        out.setdefault("confidence", _FILING_DIRECT_CONFIDENCE)
+        out.setdefault("confidenceMethod", "filing_direct")
+        return out
+
+    tablePayload = _enrich(summary)
     table_ref = Ref(
-        id=f"table:{stockCode}:{topic}:{summary['latestPeriod']}",
+        id=f"table:{stockCode}:{topic}:{latestPeriod}",
         kind="tableRef",
-        title=f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']}",
+        title=f"{companyName or stockCode} {_STMT_LABELS[topic]} {latestPeriod}",
         source=f"Company({stockCode}).show('{topic}')",
-        payload=summary,
+        payload=tablePayload,
     )
     refs = [table_ref]
     refs.extend(
         Ref(
-            id=f"value:{stockCode}:{topic}:{summary['latestPeriod']}:{row['snakeId']}",
+            id=f"value:{stockCode}:{topic}:{latestPeriod}:{row['snakeId']}",
             kind="valueRef",
-            title=f"{row['item']} {summary['latestPeriod']}",
+            title=f"{row['item']} {latestPeriod}",
             source=table_ref.id,
-            payload=row,
+            payload={**_enrich(row), "provenance": [table_ref.id]},
         )
         for row in summary["rows"]
     )
     refs.append(
         Ref(
-            id=f"date:{stockCode}:{topic}:{summary['latestPeriod']}",
+            id=f"date:{stockCode}:{topic}:{latestPeriod}",
             kind="dateRef",
             title=f"{_STMT_LABELS[topic]} 기준시점",
             source=table_ref.id,
-            payload={"period": summary["latestPeriod"]},
+            payload={**_enrich({"period": latestPeriod}), "provenance": [table_ref.id]},
         )
     )
     summary_msg = f"{companyName or stockCode} {_STMT_LABELS[topic]} {summary['latestPeriod']} 확인"
     if auto_gather_used:
         summary_msg += " (자동 update 후 재조회 성공)"
+    data: dict[str, Any] = {
+        "companyName": companyName,
+        "stockCode": stockCode,
+        "statement": topic,
+        "label": _STMT_LABELS[topic],
+        "summary": summary,
+        "markdown": _statementMarkdown(companyName, stockCode, topic, summary),
+        "autoGatherUsed": auto_gather_used,
+    }
+    badge = getDcrBadge(company)
+    if badge is not None:
+        data["dcrBadge"] = badge
+    industryBadge = getIndustryBadge(company)
+    if industryBadge is not None:
+        data["industryBadge"] = industryBadge
     return ToolResult(
         True,
         summary_msg,
         refs=refs,
-        data={
-            "companyName": companyName,
-            "stockCode": stockCode,
-            "statement": topic,
-            "label": _STMT_LABELS[topic],
-            "summary": summary,
-            "markdown": _statementMarkdown(companyName, stockCode, topic, summary),
-            "autoGatherUsed": auto_gather_used,
-        },
+        data=data,
     )
 
 

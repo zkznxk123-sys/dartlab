@@ -152,6 +152,36 @@ def calcRevenueForecast(company: Any, *, basePeriod: str | None = None) -> dict 
         forecastable : bool — 예측 가능 여부
         unforecastableReason : str — 예측 불가 사유 (forecastable=False 시)
         disclaimer : str — 면책 문구
+
+    Capabilities:
+        - 7 소스 앙상블 (CAGR/회귀/세그먼트/매크로/Damodaran 등) → 3 시나리오 매출 전망
+        - lifecycle + confidence + scenarios 종합
+
+    Guide:
+        매출 전망 표준 진입. forecastable=False = 예측 불가 (라이프사이클 위반 등).
+
+    When:
+        Story forecast 박스 + AI 매출 전망 답변.
+
+    How:
+        ``_runForecastRevenue`` → projected/scenarios/lifecycle 출력 dict.
+
+    Requires:
+        IS 시계열 ≥ 5 년.
+
+    Raises:
+        없음 — projected None 시 None.
+
+    Example:
+        >>> calcRevenueForecast(company)["confidence"]
+        'medium'
+
+    See Also:
+        - calcSegmentForecast : 세그먼트별
+        - calcProFormaHighlights : pro forma
+
+    AIContext:
+        "이 종목 매출 전망" 답변 시 projected + scenarios + confidence 인용.
     """
     result = _runForecastRevenue(company)
     if not result or not result.projected:
@@ -203,19 +233,38 @@ def calcRevenueForecast(company: Any, *, basePeriod: str | None = None) -> dict 
 def calcSegmentForecast(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """세그먼트별 개별 매출 성장 전망.
 
-    Returns
-    -------
-    dict | None
-        None: 세그먼트 데이터 없음.
-        isEstimate : bool — 추정치 여부
-        currency : str — 통화 코드
-        segments : list[dict] — 세그먼트별 전망
-            name : str — 세그먼트명
-            projected : list[float] — 전망 매출 (원)
-            growthRates : list[float] — 전망 성장률 (%)
-            method : str — 예측 방법론
-            shareOfRevenue : float — 매출 비중 (%)
-            lifecycle : str — 라이프사이클 단계
+    Capabilities:
+        - 사업 부문 segment 별 독립 매출 예측 + 비중 + 라이프사이클
+        - segments 합산 = 전체 매출 전망 (calcRevenueForecast)
+
+    Returns:
+        dict | None — None=세그먼트 데이터 없음. segments list 와 currency.
+
+    Guide:
+        segment 별 다른 성장률 가능 — 부문별 lifecycle 인용으로 인사이트 풍부.
+
+    When:
+        Story segment 박스 + AI "어느 사업부가 성장" 답변.
+
+    How:
+        ``_runForecastRevenue`` → segmentForecasts 추출.
+
+    Requires:
+        segment 데이터 (notes 또는 segment 매핑) 가용.
+
+    Raises:
+        없음 — 부재 시 None.
+
+    Example:
+        >>> calcSegmentForecast(company)["segments"][0]["name"]
+        '반도체'
+
+    See Also:
+        - calcRevenueForecast : 전체 매출 전망
+        - calcProFormaHighlights : pro forma
+
+    AIContext:
+        "어느 사업부가 성장 끄는가" 답변 시 segments 의 growthRates 인용.
     """
     result = _runForecastRevenue(company)
     if not result or not result.segmentForecasts:
@@ -263,6 +312,36 @@ def calcProFormaHighlights(company: Any, *, basePeriod: str | None = None) -> di
             fcf : float — 잉여현금흐름 (원)
         warnings : list[str] — 경고 메시지
         disclaimer : str — 면책 문구
+
+    Capabilities:
+        - 매출 성장 경로 + sector params 로 pro-forma IS/CF 전망 (revenue/op/net/EBITDA/FCF)
+        - WACC + 연도별 yearOffset 메타
+
+    Guide:
+        DCF 입력의 표준. years 의 FCF 가 DCF intrinsicValue 산출에 사용.
+
+    When:
+        Story pro-forma 박스 + AI 전망 IS 답변.
+
+    How:
+        calcRevenueForecast → growthPath → buildProforma → projections 변환.
+
+    Requires:
+        매출 전망 + sector params.
+
+    Raises:
+        없음 — proforma 실패 시 None.
+
+    Example:
+        >>> calcProFormaHighlights(company)["years"][0]["revenue"]
+        220000000000
+
+    See Also:
+        - calcRevenueForecast : 매출
+        - calcScenarioImpact : 시나리오 영향
+
+    AIContext:
+        "내년 IS 전망" 답변 시 years 의 revenue/operatingIncome 인용.
     """
     result = _runForecastRevenue(company)
     if not result or not result.projected:
@@ -334,6 +413,36 @@ def calcScenarioImpact(company: Any, *, basePeriod: str | None = None) -> dict |
             revenuePath : list[float] — 매출 경로 (원)
             marginPath : list[float] — 마진 경로 (%)
             warnings : list[str] — 경고 메시지
+
+    Capabilities:
+        - baseline/bull/bear 3 시나리오 매크로 충격에 대한 매출/마진 영향 시뮬
+        - revenuePath + marginPath 시계열
+
+    Guide:
+        Macro stress 테스트. spread (bull-bear) ≥ 50% = 시나리오 불확실성 ↑.
+
+    When:
+        Scenario stress + AI "매크로 시나리오" 답변.
+
+    How:
+        ``simulateAllScenarios`` → 각 시나리오 path → dict 변환.
+
+    Requires:
+        sector params + 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcScenarioImpact(company)["scenarios"]["bull"]["revenueChangePct"]
+        18
+
+    See Also:
+        - calcRevenueForecast : 기본 전망
+        - calcScenarioSimulation : 시뮬레이션 본체
+
+    AIContext:
+        "매크로 시나리오 영향" 답변 시 scenarios 의 revenueChangePct 인용.
     """
     series, _, sectorKey, _, currency = _getSeriesAndMeta(company)
     shares = _getShares(company)
@@ -385,6 +494,36 @@ def calcForecastMethodology(company: Any, *, basePeriod: str | None = None) -> d
         assumptions : list[str] — 가정 목록
         warnings : list[str] — 경고 메시지
         lifecycle : str — 라이프사이클 단계
+
+    Capabilities:
+        - 예측에 사용된 method/sources/weights/assumptions 투명 공개
+        - 시나리오 신뢰도 + lifecycle 명시
+
+    Guide:
+        story methodology 박스 표준 입력. 사용자에게 예측 근거를 보여주는 투명성 도구.
+
+    When:
+        AI "어떻게 예측" 답변 + 방법론 검증.
+
+    How:
+        ``_runForecastRevenue`` 결과의 method/sources/assumptions 추출.
+
+    Requires:
+        매출 전망 실행 (calcRevenueForecast) 완료.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcForecastMethodology(company)["method"]
+        'ensemble_7'
+
+    See Also:
+        - calcRevenueForecast : 본 예측
+        - calcForecastFlags : 위험 플래그
+
+    AIContext:
+        "예측 방법론" 답변 시 method + sources 인용.
     """
     result = _runForecastRevenue(company)
     if not result:
@@ -420,6 +559,36 @@ def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict
         confidence : str — 신뢰도
         trends : dict — 비율 추세 정보
         warnings : list[str] — 경고 메시지
+
+    Capabilities:
+        - 과거 IS/BS/CF 비율 (margin/SGA/tax/depreciation/capex/NWC/dividend) 8 종 추출
+        - confidence + trends 동시 평가
+
+    Guide:
+        pro-forma 예측의 입력 base. yearsUsed ≥ 5 권장.
+
+    When:
+        Pro-forma 입력 + AI "이 회사 마진 구조" 답변.
+
+    How:
+        ``extractHistoricalRatios`` 위임 → 8 비율 + 메타.
+
+    Requires:
+        IS/BS/CF 시계열 ≥ 3 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcHistoricalRatios(company)["grossMargin"]
+        38.5
+
+    See Also:
+        - calcProFormaHighlights : 사용처
+        - calcForecastMethodology : 입력 투명성
+
+    AIContext:
+        "마진 구조" 답변 시 grossMargin + trends 인용.
     """
     series, _, _, _, _ = _getSeriesAndMeta(company)
 
@@ -451,10 +620,38 @@ def calcHistoricalRatios(company: Any, *, basePeriod: str | None = None) -> dict
 def calcForecastFlags(company: Any, *, basePeriod: str | None = None) -> dict | None:
     """매출전망 플래그.
 
-    Returns
-    -------
-    dict
-        flags : list[tuple[str, str]] — (severity, message) 쌍 목록
+    Capabilities:
+        - 예측 불가 / 낮은 신뢰도 / 시계열 only / 구조변화 / 시나리오 격차 / engine warnings 등 6 종 flag
+        - story flag 박스 입력
+
+    Returns:
+        dict — {"flags": list[(code, message)]} 또는 None.
+
+    Guide:
+        flag 누적 = 예측 신뢰도 ↓. UNFORECASTABLE 가장 강한 경고.
+
+    When:
+        Story forecast flag + AI 예측 신뢰 답변.
+
+    How:
+        forecastable/confidence/method/structural_break/scenarios 평가 → 누적.
+
+    Requires:
+        ``_runForecastRevenue`` 결과 가용.
+
+    Raises:
+        없음 — flag 0 시 None.
+
+    Example:
+        >>> calcForecastFlags(company)["flags"]
+        [('LOW_CONFIDENCE', '...')]
+
+    See Also:
+        - calcRevenueForecast : 본 예측
+        - calcForecastMethodology : 투명성
+
+    AIContext:
+        "예측 위험" 답변 시 flags 인용.
     """
     result = _runForecastRevenue(company)
     if not result:
@@ -513,6 +710,36 @@ def calcCalibrationReport(company: Any, *, basePeriod: str | None = None) -> dic
         brierScore : float — Brier 점수 (0~1, 낮을수록 정확)
         nRecords : int — 평가 레코드 수
         bins : list[dict] — 캘리브레이션 구간별 통계
+
+    Capabilities:
+        - 종목별 과거 예측 vs 실제 비교 → Brier score + 구간별 calibration bins
+        - 5+ records 누적되면 점진 활성화
+
+    Guide:
+        Brier ≤ 0.20 = 잘 캘리브레이션. 0.25 = 무작위 추정 수준.
+
+    When:
+        예측 정확도 검증 + AI "이 예측 신뢰" 답변.
+
+    How:
+        forwardTest.loadRecords → directionProbability/Actual → Brier + bins.
+
+    Requires:
+        forwardTest 누적 레코드 ≥ 5.
+
+    Raises:
+        없음 — 부족 시 None.
+
+    Example:
+        >>> calcCalibrationReport(company)["brierScore"]
+        0.18
+
+    See Also:
+        - forecast.forwardTest : 레코드 기록
+        - calcForecastFlags : 예측 위험
+
+    AIContext:
+        "이전 예측 정확도" 답변 시 brierScore + nRecords 인용.
     """
     from dataclasses import asdict
 
@@ -569,6 +796,36 @@ def calcScenarioSimulation(company: Any, *, basePeriod: str | None = None) -> di
         quarterlyOITargets : dict — 시나리오별 분기 영업이익 목표 (원)
         dcfPerShare : dict — 시나리오별 주당 DCF 가치 (원)
         seasonality : dict — revenue/operatingIncome 분기 계절성 가중치
+
+    Capabilities:
+        - 과거 3 년 CAGR base → bull/base/bear 3 시나리오 ProForma + 분기 목표 + DCF
+        - seasonality 가중치로 분기 분해
+
+    Guide:
+        자동 시나리오 생성. 사용자 정의 성장률은 scenarioSim.createSimulation 직접 호출.
+
+    When:
+        Scenario simulation + AI "3 시나리오 비교" 답변.
+
+    How:
+        과거 CAGR 계산 → createSimulation → 시나리오별 IS/BS/CF + 분기 목표.
+
+    Requires:
+        IS 시계열 ≥ 8 분기 (2 년).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcScenarioSimulation(company)["scenarios"]["bull"]["revenue"]
+        260000000000
+
+    See Also:
+        - calcScenarioImpact : 매크로 시나리오
+        - calcProFormaHighlights : 단일 시나리오 IS
+
+    AIContext:
+        "3 시나리오 자동 시뮬" 답변 시 scenarios 각 항목 인용.
     """
     from dartlab.analysis.forecast.scenarioSim import createSimulation
 

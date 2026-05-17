@@ -29,28 +29,78 @@ def _parse(val) -> float | None:
 def calcEarnings(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
     """SUE + PEAD 이익 모멘텀 분석.
 
-    Standardized Unexpected Earnings 로 서프라이즈 크기를 측정하고,
-    PEAD(Post-Earnings Announcement Drift) 신호 강도를 판정한다.
+    Capabilities:
+        Standardized Unexpected Earnings (SUE = (latest - mean) / std) 로
+        실적 서프라이즈 강도 측정 + PEAD (Post-Earnings Announcement Drift,
+        Bernard-Thomas 1989) 신호 강도 판정. 영업이익 시계열 추세 라벨링
+        (consistent_growth / mostly_growing / mostly_declining / mixed).
 
-    Parameters
-    ----------
-    stockCode : str
-        종목코드.
-    market : str
-        "KR" | "US" | "auto". 기본 "auto".
+    Args:
+        stockCode: 종목코드 또는 ticker.
+        market: "KR" | "US" | "auto".
 
-    Returns
-    -------
-    dict
-        stockCode : str — 종목코드
-        market : str — 시장
-        sue : float — Standardized Unexpected Earnings (배)
-        latestOpIncome : float — 최근 영업이익 (원)
-        prevMean : float — 과거 평균 영업이익 (원)
-        peadSignal : str — "positive_drift" | "negative_drift" | "mild_positive" | "mild_negative" | "none"
-        peadStrength : str — "strong" | "moderate" | "weak"
-        earningsTrend : str — "consistent_growth" | "mostly_growing" | "mostly_declining" | "mixed"
-        opIncomeHistory : dict[str, float] — 연도별 영업이익 (원)
+    Returns:
+        dict:
+            - ``stockCode``/``market``: 식별.
+            - ``sue`` (float): SUE 배.
+            - ``latestOpIncome``/``prevMean`` (float): 최근/과거 평균 영업이익.
+            - ``peadSignal`` (str): positive_drift / negative_drift /
+              mild_positive / mild_negative / none.
+            - ``peadStrength`` (str): strong / moderate / weak.
+            - ``earningsTrend`` (str): consistent_growth / mostly_growing /
+              mostly_declining / mixed.
+            - ``opIncomeHistory`` (dict[str, float]): 연도별 영업이익.
+            - 또는 ``error`` (str): 데이터 부족.
+
+    Raises:
+        없음 (error 키).
+
+    Example:
+        >>> r = calcEarnings("005930")
+        >>> r["sue"], r["peadSignal"]
+        (2.3, 'positive_drift')
+
+    Guide:
+        - SUE > 2 = strong positive surprise, < -2 = strong negative.
+        - PEAD 효과: 발표 후 60~90 일 sue 방향으로 drift (학술 검증).
+        - earningsTrend "consistent_growth" + sue > 0 = 강한 기본 momentum.
+
+    See Also:
+        - ``calcEventSignal``: 공시 이벤트 (실적 외)
+        - ``calcMomentum``: 가격 모멘텀
+        - ``calcCAR``: event-study 누적 초과수익
+
+    When:
+        Quant 실적 모멘텀 축 진입점 + AI 어닝 서프라이즈 답변.
+
+    How:
+        scan parquet → 영업이익 시계열 → SUE 산식 → PEAD 강도 라벨 + 추세
+        라벨 합성.
+
+    Requires:
+        scan finance parquet (연결 영업이익) + 충분한 시계열 (5+ 년 권장).
+
+    AIContext:
+        SUE 절대값 + peadSignal + earningsTrend 함께. KR 회사 어닝 시즌 (4월/
+        7월/10월/1월) 직후 본 신호 모니터링. 영업이익 vs 순이익 차이 (KR
+        은 영업이익 주축, US 는 EPS).
+
+    LLM Specifications:
+        AntiPatterns:
+            - SUE 단독 인용 — earningsTrend + peadStrength 함께.
+            - 발표 직전에 본 함수 호출 — drift 효과는 발표 후 60+ 일.
+        OutputSchema:
+            ``{stockCode, market, sue: float, latestOpIncome: float, prevMean:
+              float, peadSignal: str, peadStrength: str, earningsTrend: str,
+              opIncomeHistory: dict}``.
+        Prerequisites:
+            scan finance parquet 시계열 5+ 년.
+        Freshness:
+            분기 (실적 발표 직후).
+        Dataflow:
+            finance parquet → 연도별 영업이익 → mean/std → SUE → drift signal
+            라벨 + trend 라벨.
+        TargetMarkets: KR (DART 영업이익), US (EDGAR operating_profit).
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

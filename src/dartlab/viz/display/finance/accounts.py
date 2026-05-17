@@ -122,6 +122,20 @@ _STANDARDS: tuple[StandardAccount, ...] = (
     ),
     StandardAccount("equity", "자본총계", "BS", ("ifrs-full_Equity", "ifrs_Equity"), ("자본총계",)),
     StandardAccount(
+        "capitalStock",
+        "자본금",
+        "BS",
+        ("ifrs-full_IssuedCapital", "ifrs_IssuedCapital", "dart_IssuedCapital"),
+        ("자본금",),
+    ),
+    StandardAccount(
+        "capitalSurplus",
+        "자본잉여금",
+        "BS",
+        ("ifrs-full_SharePremium", "dart_AdditionalPaidInCapital", "ifrs_SharePremium"),
+        ("자본잉여금", "주식발행초과금"),
+    ),
+    StandardAccount(
         "retainedEarnings", "이익잉여금", "BS", ("ifrs-full_RetainedEarnings", "ifrs_RetainedEarnings"), ("이익잉여금",)
     ),
     # ─── CF 4 ───

@@ -237,6 +237,10 @@ class Industry:
     def build(self, *, skipDocs: bool = False) -> None:
         """산업지도를 빌드한다 (4단계 파이프라인).
 
+        Capabilities:
+            KSIC → 제품 분류 → docs 보정 → review 4 단계 파이프라인을 1 회 실행. 결과는
+            data/industry/{nodes,edges,deltas,hop2}.json 으로 직렬화.
+
         Parameters
         ----------
         skipDocs : bool
@@ -247,6 +251,35 @@ class Industry:
         None
             결과는 ``data/industry/nodes.json`` + ``edges.json`` 에 저장.
             조회는 ``industry(industryId)`` / ``industry.edges()``.
+
+        Raises:
+            없음 — 개별 단계 실패는 warning + skip.
+
+        Example:
+            >>> from dartlab.industry import Industry
+            >>> Industry().build(skipDocs=False)
+
+        Guide:
+            전 종목 docs parquet 스캔 비용이 크다. 일반 사용자는 호출하지 말고 manifest 빌드된
+            결과 (``Industry()(industryId)`` / ``edges()``) 조회만.
+
+        When:
+            산업지도 manifest 가 stale 일 때 (재무 데이터 또는 KSIC 갱신 후) 만.
+
+        How:
+            ``industry/build/pipeline.buildIndustryMap`` 위임. 내부적으로 stage1_ksic →
+            stage2_product → stage3_docs → stage4_review 순.
+
+        Requires:
+            - L1 raw: DART 사업보고서·재무·KindList
+            - L1.5 frame: scan/finance.parquet + docs/{code}.parquet
+
+        See Also:
+            - ``dartlab.industry.build.pipeline.buildIndustryMap`` : 본 위임 대상
+            - ``dartlab.industry.Industry.__call__`` : 조회 진입점
+
+        AIContext:
+            AI 가 직접 호출하지 않는다 (배치 작업). 운영자가 manifest 갱신할 때만.
         """
         from dartlab.industry.build.pipeline import buildIndustryMap
 
@@ -254,6 +287,10 @@ class Industry:
 
     def edges(self, industryId: str | None = None, stockCode: str | None = None) -> pl.DataFrame:
         """공급-수요·계열 관계 조회.
+
+        Capabilities:
+            ``edges.json`` 산출물을 로드해 (industryId, stockCode) 필터 후 한국어 컬럼 polars
+            DataFrame 으로 반환. 단일 호출로 회사 / 산업 단위 거래 관계 검색 가능.
 
         Parameters
         ----------
@@ -266,6 +303,33 @@ class Industry:
         -------
         pl.DataFrame
             columns: from코드, from이름, to코드, to이름, 관계, 산업, 신뢰도, 소스, 근거
+
+        Raises:
+            없음 — manifest 없으면 빈 DataFrame.
+
+        Example:
+            >>> from dartlab.industry import Industry
+            >>> Industry().edges(stockCode="005930").select(["to이름", "관계", "신뢰도"]).head(3)
+
+        Guide:
+            반환 DataFrame 의 ``소스`` 컬럼이 docs_table 이면 강한 단정, network 이면 출자 관계,
+            docs 면 보고서 언급. 답변에 신뢰도/소스 단서 명시 권장.
+
+        When:
+            "이 회사 거래처", "이 산업 안 관계망" 류 답변 데이터 조회. UI 그래프 시각화 데이터.
+
+        How:
+            ``industry/build/pipeline.loadEdges`` → 산업/종목 필터 → 한국어 컬럼 DataFrame 변환.
+
+        Requires:
+            - ``data/industry/edges.json`` manifest (``build()`` 이후 산출)
+
+        See Also:
+            - ``dartlab.industry.Industry.build`` : manifest 빌드
+            - ``dartlab.industry.build.pipeline.loadEdges`` : 본 위임 대상
+
+        AIContext:
+            엣지 단일 진입점. AI 답변 cite 시 ``소스`` 와 ``신뢰도`` 컬럼을 evidence 로 명시.
         """
         from dartlab.industry.build.pipeline import loadEdges
 
@@ -309,6 +373,10 @@ class Industry:
     def map(self, industryId: str) -> Any:
         """IndustryDef 객체를 반환 (taxonomy 조회).
 
+        Capabilities:
+            정적 taxonomy (``industry/taxonomy.py``) 에서 산업 정의 (한글명/공정 단계 리스트)를
+            조회. 본 객체는 ``Industry()(industryId)`` 결과 카드의 헤더/공정 라벨 소스.
+
         Parameters
         ----------
         industryId : str
@@ -321,6 +389,35 @@ class Industry:
             name : str — 한글 산업명
             stages : list[StageDef] — 공정 단계 정의 (key, name, role, note).
             등록되지 않은 산업이면 None.
+
+        Raises:
+            없음 — 미등록 ID 면 None.
+
+        Example:
+            >>> from dartlab.industry import Industry
+            >>> Industry().map("semiconductor").name
+            '반도체'
+
+        Guide:
+            결과의 ``stages`` 키 셋이 ``IndustryNode.stage`` 의 valid 값 — 매핑 검증 / 운영자
+            override 작성에 참조.
+
+        When:
+            "이 산업의 공정 단계는?", "stages 키 목록 확인" 류 메타 조회.
+
+        How:
+            ``industry/taxonomy.getIndustry`` 위임 — 정적 JSON 로드 + 룩업.
+
+        Requires:
+            - reference: ``industry/taxonomy.py`` 정적 정의
+
+        See Also:
+            - ``dartlab.industry.taxonomy.getIndustry`` : 본 위임 대상
+            - ``dartlab.industry.Industry.__call__`` : 회사 카드 진입점
+
+        AIContext:
+            AI 답변에서 산업 한글명과 공정 단계 키 인용에 사용. ``Industry()(code)`` 결과의
+            ``stage`` 필드 매칭 표준.
         """
         from dartlab.industry.taxonomy import getIndustry
 
@@ -337,6 +434,11 @@ def addOverride(
     confidence: float = 1.0,
 ) -> None:
     """overrides.json에 확정 매핑을 추가/갱신한다.
+
+    Capabilities:
+        AI/운영자가 ``Industry()`` 자동 분류 오류를 발견했을 때 (industryId, stockCode, stage)
+        확정 매핑을 ``overrides.json`` 에 기록. 다음 ``Industry().build()`` 호출 시 stage4_review
+        에서 강제 반영.
 
     AI가 코드 실행 루프에서 호출하여 오분류를 보정한다.
 
@@ -360,6 +462,36 @@ def addOverride(
     None
         결과는 ``src/dartlab/industry/overrides.json`` 에 저장. 다음
         ``industry.build()`` 호출 시 반영된다.
+
+    Raises:
+        없음 — overrides.json 손상 시 빈 dict 로 시작 후 덮어쓰기.
+
+    Example:
+        >>> from dartlab.industry import addOverride
+        >>> addOverride("semiconductor", "005930", "memory", note="DRAM 1 위")
+
+    Guide:
+        본 함수는 disk 즉시 반영이지만, 효과는 다음 ``build()`` 시점부터. taxonomy 미등록
+        stage 면 stage4 가 fallback 에서 무시 — 사전에 ``Industry().map(industryId).stages`` 확인.
+
+    When:
+        AI/운영자가 자동 분류 오류를 발견한 즉시. 같은 (industryId, stockCode) 다시 호출 시
+        덮어쓰기.
+
+    How:
+        ``data/industry/overrides.json`` 로드 → industryId 슬롯에 (stockCode, stage, ...) entry
+        upsert → 직렬화. 다음 ``build()`` 에서 stage4_review 가 반영.
+
+    Requires:
+        - 쓰기 가능한 ``data/industry/overrides.json`` 경로
+
+    See Also:
+        - ``dartlab.industry.build.stage4_review.applyOverrides`` : 본 결과 반영
+        - ``dartlab.industry.Industry.build`` : override 반영 빌드
+
+    AIContext:
+        AI 가 분석 후 "이 회사는 ○○ 단계로 분류해야" 라고 판단 시 직접 호출. ``note`` 에 근거
+        문장 1 줄 (예: "DART 보고서 2024 사업보고서 사업의 내용 섹션 인용") 권장.
     """
     ovFile = _DATA_DIR / "overrides.json"
     data: dict = {}

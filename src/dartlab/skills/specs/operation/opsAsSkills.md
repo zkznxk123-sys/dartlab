@@ -55,7 +55,7 @@ examples:
 source:
   type: curated_markdown
   owner: dartlab
-lastUpdated: "2026-05-03"
+lastUpdated: "2026-05-17"
 ---
 
 ## 절차
@@ -63,6 +63,9 @@ lastUpdated: "2026-05-03"
 - 과거 운영 문서 주제는 `engines.*`, `runtime.*`, `operation.*` skill로 흡수한다.
 - `/skills`와 `dartlab.skills.search()`를 공식 최초 탐색 표면으로 둔다.
 - 엔진 skill은 공개 호출 방식, 호출 동작, 대표 반환 형태, 실행 순서, 검증 게이트를 포함한다.
+- 엔진 skill은 tool card 다. 엔진이 무엇을 분석할 수 있는지, 어떤 공개 호출을 쓰는지, 어떤 evidence 를 반환하는지까지만 책임진다. 축별 상세 schema 는 capability/docstring 으로 연결하고, 여러 엔진·반증·시각화·후속 모니터링을 묶는 실제 분석 절차는 recipe skill 로 둔다.
+- recipe skill은 EngineCall 우선이다. 엔진에 이미 있는 기능을 RunPython 코드로 다시 구현하지 않고, RunPython 은 engine surface 가 아직 없거나 L1/L1.5 helper 결합이 필요한 fallback 경로로만 둔다.
+- recipe 의 visualRefs 는 observed 상태의 `engines.viz.*` 만 공식 연결한다. unverified 시각화는 후속 후보로만 남기며, 근거 표 없이 장식 chart 를 만들지 않는다.
 - capability/docstring은 세부 필드와 코드 원천 자료이며, skill은 사람이 그대로 실행할 수 있는 공개 사용 문서다.
 - 기능 개선, API 변경, 반환 형태 변경, 운영 방식 개선이 있으면 관련 skill을 같은 변경에서 갱신한다.
 - 새 운영 규칙은 먼저 operation skill로 검색 가능해야 하며, 원문 위치가 필요하면 sourceRef를 반드시 둔다.

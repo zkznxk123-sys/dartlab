@@ -260,6 +260,25 @@ def calcMarketContext(
     - 금리 류 (BASE_RATE, FEDFUNDS, DGS10) 는 Δ (단순 차분), 그 외는 Δlog 로 회귀.
     - flow 는 KR 전용. US 종목은 flowAvailable=False 로 관련 키 누락.
     - CAPM 의 시장 지수는 stockCode 의 상장 시장 (KOSPI/KOSDAQ) 또는 SPX (US) — `fetchBenchmarkOhlcv` SSOT 재사용.
+
+    Capabilities:
+        가격 시계열 → CAPM (마켓 베타/알파) + 거시 베타 (환율/금리/CPI/M2 등 4
+        변수) + KR 수급 (smartMoney/flow) 1 행 evidence dict.
+
+    Guide:
+        marketBeta ∈ [0.3, 1.8] 정상. usdkrwBeta 양수 = 수출주, 0 근처 = 내수.
+        lookback 252 (1 거래년) 기본 — 504 (2 년) 도 옵션.
+
+    Requires:
+        OHLCV ≥ 60 일 + 거시 변수 wide DF (gather macro) + 벤치마크 OHLCV.
+
+    AIContext:
+        marketBeta + 핵심 거시 베타 1~2 + smartMoneyZ60d (KR) 인용으로 한 단락
+        답변.
+
+    See Also:
+        - scan.macroBeta : 펀더멘털 (재무성장-거시) 회귀
+        - calcFlow : KR 수급 단독
     """
     market = resolveMarket(stockCode, market)
 

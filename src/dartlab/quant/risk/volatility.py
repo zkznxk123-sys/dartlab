@@ -42,21 +42,84 @@ def calcVolatility(
     forecastHorizon: int = 5,
     **kwargs,
 ) -> dict:
-    """변동성 종합 분석.
+    """변동성 종합 분석 — 실현 / HAR-RV / GARCH(1,1) / regime / forecast.
+
+    Capabilities:
+        다중 기간 실현 변동성 (5/20/60/120/252 d) + HAR-RV (Corsi 2009, daily/
+        weekly/monthly RV 회귀) + GARCH(1,1) MLE 적합 + 변동성 regime 분류 +
+        h-step 분산 예측 (Bollerslev 1986 closed form). GARCH 미적합 시 EWMA
+        λ=0.94 stationary fallback. forecastHorizon 기본 5 일.
 
     Args:
-        stockCode: 종목코드 또는 ticker.
+        stockCode: 종목코드 (KR 6자리) 또는 ticker (US).
         market: "KR" | "US" | "auto".
-        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 rolling vol 시계열.
-        forecast: True 면 GARCH(1,1) 의 h-step ahead variance forecast (Bollerslev 1986
-            closed form) 를 결과 dict 에 추가. GARCH 미적합 시 EWMA λ=0.94 stationary
-            fallback. 키: ``forecastVar_h{H}``, ``forecastVol_h{H}``, ``forecastVolModel``.
+        series: True 면 ``_series`` 키 추가 (Strategy DSL 입력용 rolling vol).
+        forecast: True 면 GARCH h-step variance forecast 추가.
         forecastHorizon: forecast=True 시 예측 일수 (기본 5).
 
     Returns:
-        dict with garchVol, harRV, volTermStructure, volRegime.
-        series=True 시: _series = {realized_vol, garch_vol} 길이 N.
-        forecast=True 시: forecastVar_h{H}, forecastVol_h{H} (annualized), forecastVolModel.
+        dict:
+            - ``realizedVol_{5,20,60,120,252}d`` (float): 연율화 vol.
+            - ``garchVol`` (float): GARCH(1,1) 추정.
+            - ``harRV`` (float): HAR-RV 예측.
+            - ``volRegime`` (str): "low"|"normal"|"high".
+            - ``volTermStructure`` (dict): 단·장기 vol 비교.
+            - ``_series`` (dict, optional, series=True): {realized_vol,
+              garch_vol} 길이 N.
+            - ``forecastVar_h{H}``/``forecastVol_h{H}``/``forecastVolModel``
+              (optional, forecast=True).
+            - 또는 ``error`` (str): 데이터 부족.
+
+    Raises:
+        없음 (모든 실패는 error 키).
+
+    Example:
+        >>> r = calcVolatility("005930", forecast=True, forecastHorizon=5)
+        >>> r["realizedVol_20d"], r["volRegime"]
+        (0.28, 'normal')
+
+    Guide:
+        - 최소 60 일 데이터 필요 (그 미만 error).
+        - HAR-RV 는 66 일 이상 (long-memory 효과 반영).
+        - GARCH vol 와 realized 60d vol 차이가 크면 regime 전환 (low→high)
+          의심.
+        - forecast 는 short horizon (≤ 5d) 신뢰, 장기는 mean reversion 가정
+          GARCH 의 한계.
+
+    See Also:
+        - ``calcTailRisk``: VaR/CVaR
+        - ``calcMomentum``: 가격 모멘텀
+        - ``synth.indicators.volatility``: ATR/BB width
+
+    When:
+        Quant risk + 변동성 regime 분류 + GARCH 예측 답변 진입점.
+
+    How:
+        OHLCV → log returns → 다중 윈도우 실현 vol (5/20/60/120/252d) → HAR-RV
+        회귀 + GARCH(1,1) MLE → regime 분류 → (옵션) h-step forecast.
+
+    Requires:
+        OHLCV 일별 시계열 ≥ 60 일.
+
+    AIContext:
+        realizedVol vs garchVol 분리 인용 — 후자는 모델 추정, 전자는 관측.
+        volRegime 라벨 단독 인용 금지, vol 절대값 + 5d/252d 비율 함께.
+
+    LLM Specifications:
+        AntiPatterns:
+            - garchVol 단독 인용 — 모델 가정 (조건부 정규) 의 한계.
+            - 60 일 미만에 본 함수 호출 — error 반환.
+        OutputSchema:
+            ``{realizedVol_*: float, garchVol: float, harRV: float,
+              volRegime: str, volTermStructure: dict, ...}``.
+        Prerequisites:
+            OHLCV 일별 ≥ 60 일 (HAR-RV 위해 권장 ≥ 66 일).
+        Freshness:
+            일별 (최신 종가까지).
+        Dataflow:
+            OHLCV → log returns → 다중 윈도우 실현 vol → HAR-RV 회귀 →
+            GARCH MLE → regime 분류 → (옵션) h-step forecast.
+        TargetMarkets: KR (KRX OHLCV), US (NYSE/NASDAQ).
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
@@ -232,18 +295,44 @@ def _fitGarch11(returns: np.ndarray) -> dict | None:
     resid = returns - mean_r
     var_init = float(np.var(resid))
 
-    def negLogLikelihood(params):
+    def negLogLikelihood(params) -> float:
         """GARCH(1,1) 음의 로그우도 — Nelder-Mead 최적화 목적함수.
 
-        Parameters
-        ----------
-        params : array-like
-            [omega, alpha, beta] GARCH 파라미터.
+        Capabilities:
+            - GARCH(1,1) sigma² 시계열 + Gaussian log-likelihood 누적 → 음수 반환
+            - 파라미터 제약 (ω > 0, α ≥ 0, β ≥ 0, α+β < 1) 위반 시 1e10 penalty
 
-        Returns
-        -------
-        float
-            음의 로그우도 (값). 파라미터 제약 위반 시 1e10.
+        Args:
+            params: ``[omega, alpha, beta]`` GARCH 파라미터.
+
+        Returns:
+            float — 음의 로그우도 (최적화 minimize target).
+
+        Guide:
+            Bollerslev 1986 GARCH(1,1) 표준. closure 내부 함수 — outer ``calcGARCH`` 가 사용.
+
+        When:
+            GARCH 파라미터 추정 internal + AI 변동성 모델링 답변.
+
+        How:
+            sigma2 시계열 → log + resid²/sigma2 누적 → -ll.
+
+        Requires:
+            outer scope 의 returns + resid + var_init.
+
+        Raises:
+            없음 — 제약 위반 시 penalty 반환.
+
+        Example:
+            >>> negLogLikelihood([0.001, 0.08, 0.85])
+            -1240.5
+
+        SeeAlso:
+            - calcGARCH : 외부 wrapper
+            - _nelderMead : 옵티마이저
+
+        AIContext:
+            GARCH 추정의 internal objective. AI 사용자에게 직접 노출 X.
         """
         omega, alpha, beta = params
         if omega <= 0 or alpha < 0 or beta < 0 or alpha + beta >= 1:

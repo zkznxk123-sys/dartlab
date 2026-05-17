@@ -40,13 +40,78 @@ __all_helpers__ = [
 
 
 def enrichWithIndicators(df: pl.DataFrame) -> pl.DataFrame:
-    """OHLCV DataFrame에 25개 기술적 지표를 추가.
+    """OHLCV DataFrame 에 기술적 지표 25 종을 컬럼으로 추가.
+
+    Capabilities:
+        가격 시계열 OHLCV 에 추세 (SMA/EMA/MACD/ADX/PSAR/Supertrend) + 모멘텀
+        (RSI/Stochastic/ROC/Williams%R/CCI/CMO) + 변동성 (Bollinger/ATR/
+        Keltner/Donchian) + 거래량 (OBV/MFI/Force Index/Elder Ray) 등 4 그룹
+        25 지표를 모두 계산해 새 컬럼으로 추가. ``core/indicators`` SSOT 호출.
 
     Args:
-        df: date, open, high, low, close, volume 컬럼 필수.
+        df: ``polars.DataFrame``. 필수 컬럼 ``date``/``open``/``high``/``low``/
+            ``close``. ``volume`` 은 옵션 (없으면 0 으로 채움 → OBV/MFI 무효).
 
     Returns:
-        원본 + 지표 컬럼이 추가된 DataFrame.
+        ``pl.DataFrame`` — 원본 + 25 지표 컬럼 추가. 컬럼 명: ``sma20``/
+        ``sma60``/``sma120``/``ema12``/``ema26``/``macd_line``/``macd_signal``/
+        ``macd_hist``/``adx14``/``psar``/``supertrend``/``rsi14``/``stoch_k``/
+        ``stoch_d``/``roc12``/``mom10``/``williamsR``/``cci20``/``cmo14``/
+        ``bb_upper``/``bb_middle``/``bb_lower``/``atr14``/``obv``/``mfi14``.
+
+    Example:
+        >>> import polars as pl
+        >>> from dartlab.quant import enrichWithIndicators
+        >>> df = pl.read_parquet("price.parquet")  # OHLCV
+        >>> enriched = enrichWithIndicators(df)
+        >>> enriched.select(["close", "sma20", "rsi14", "macd_line"]).tail(5)
+
+    Guide:
+        ``technicalVerdict`` 의 사전 단계 — enrichWithIndicators 결과를
+        verdict 함수가 소비. 단독으로도 chart / dashboard 용 widget 입력에 활용.
+        지표 컬럼 일부만 필요해도 모두 계산되니, 대형 시리즈는 memory 주의.
+
+    See Also:
+        - ``technicalVerdict``: 본 함수 결과 + 추가 진단
+        - ``core.indicators.*``: 25 지표 본체 (vsma/vema/vrsi 등)
+        - ``Quant`` 의 ``기술`` 축
+
+    When:
+        ``technicalVerdict`` 사전 + chart/dashboard widget 입력 진입점.
+
+    How:
+        df → numpy 추출 (close/high/low/volume) → 25 지표 (core.indicators) →
+        with_columns 추가.
+
+    Raises:
+        KeyError — 필수 컬럼 (open/high/low/close) 누락.
+
+    Requires:
+        OHLCV polars DataFrame (252 일+ 권장 — SMA120/Bollinger 등 warmup
+        고려). volume 없으면 거래량 계열 무효.
+
+    AIContext:
+        "이 종목 기술적 분석" · "차트 지표 보여줘" · "RSI/MACD 신호" 등
+        가격 차트 분석 질문에 호출. 결과를 chart 또는 ``technicalVerdict``
+        로 패스.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 252 일 미만 데이터로 호출 — sma120 / bb 워밍업 부족 NaN
+            - volume 컬럼 없는데 OBV / MFI 인용 — 무효값 (전부 0)
+            - 일자 정렬 안 됨 — date asc 필수 (호출 전 sort)
+        OutputSchema:
+            원본 컬럼 + 25 신규 컬럼 추가된 ``pl.DataFrame``. 모든 신규는
+            float (NaN 가능). 컬럼 명 상기 참조.
+        Prerequisites:
+            polars 설치. 입력 df 가 OHLCV schema 일치. ``core.indicators``
+            available.
+        Freshness:
+            입력 df 의 freshness 에 종속 (호출자 책임).
+        Dataflow:
+            df → numpy 추출 (close/high/low/volume) → 25 지표 계산 →
+            with_columns 로 추가 → 반환.
+        TargetMarkets: Global (가격 시계열 형식만 맞으면 KR/US/JP/등 모두).
     """
     close = df["close"].to_numpy().astype(np.float64)
     high = df["high"].to_numpy().astype(np.float64)
@@ -135,11 +200,82 @@ def technicalVerdict(
     benchmark: str | None = None,
     benchmarkMode: str = "market",
 ) -> dict[str, Any]:
-    """OHLCV → 종합 기술적 판단.
+    """OHLCV → 종합 기술적 판단 (강세 / 중립 / 약세 verdict + 다중 신호).
+
+    Capabilities:
+        가격 시계열에서 RSI/SMA/Bollinger/ADX 등 핵심 지표를 합산해 종합
+        verdict 산출. score (-4~+4) 와 함께 ``강세`` / ``중립`` / ``약세``
+        라벨 반환. 벤치마크 (시장 지수 또는 동종 업종) 와의 상대 강도 옵션.
+
+    Args:
+        df: ``polars.DataFrame`` (OHLCV — date/open/high/low/close/volume).
+        stockCode: 종목 코드 (옵션). 결과 dict 에 포함.
+        market: ``"auto"`` (기본) / ``"KR"`` / ``"US"``. 벤치마크 자동 선택용.
+        benchmark: 벤치마크 종목 코드 (예 ``"KOSPI"``, ``"SPY"``). None 이면
+            market 자동.
+        benchmarkMode: ``"market"`` (기본, 시장 지수) 또는 ``"sector"`` (업종).
 
     Returns:
-        dict with keys: verdict(강세/중립/약세), score(-4~+4),
-        rsi, aboveSma20, aboveSma60, bbPosition, signals, ...
+        dict — ``verdict`` (str) / ``score`` (int, -4~+4) / ``rsi`` (float) /
+        ``aboveSma20`` (bool|None) / ``aboveSma60`` (bool|None) / ``bbPosition``
+        (str) / ``adx`` (float|None) / ``signals`` (list[str]) /
+        ``relativeStrength`` (dict|None, benchmark 지정 시) 등.
+
+    Example:
+        >>> import polars as pl
+        >>> from dartlab.quant import technicalVerdict
+        >>> df = pl.read_parquet("price.parquet")
+        >>> r = technicalVerdict(df, stockCode="005930", market="KR")
+        >>> r["verdict"], r["score"]
+        ('강세', 3)
+
+    Guide:
+        score = 다중 지표 가중 합 — RSI > 70 / SMA 정배열 / Bollinger 상단 /
+        ADX > 25 (강한 추세) 등 강세 신호 +1 씩, 반대 -1 씩. 절대값 의존 금지
+        — signals list 의 근거 함께 인용. macro 사이클 + 본 verdict 교차 해석.
+
+    See Also:
+        - ``enrichWithIndicators``: 25 지표 컬럼 추가 (full set)
+        - ``Quant`` 의 ``기술`` 축
+        - ``calcMomentum`` / ``calcVolatility``: 단일 그룹 깊이 분석
+
+    When:
+        ``Company.quant("판단")`` raw OHLCV 진입점. AI 종합 차트 판단 답변.
+
+    How:
+        df → RSI/SMA/Bollinger/ADX → 각 신호 ±1 합산 → score → verdict 라벨 +
+        signals list.
+
+    Raises:
+        KeyError — 필수 컬럼 누락.
+
+    Requires:
+        OHLCV polars DataFrame, 252 일+ 권장 (SMA60 warmup). 벤치마크 사용 시
+        동일 기간 벤치마크 시계열 가용성.
+
+    AIContext:
+        "이 종목 기술적으로 강세인가" · "RSI 과매수 / 과매도" · "200 일선
+        뚫었나" 등 차트 단기 진단 질문에 호출. verdict + signals 함께 인용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - verdict 만 인용 (score / signals 무시) — 같은 verdict 도 신호
+              내용이 다름
+            - 1 일치 verdict 만 보고 매매 단정 — 추세 (5/20 일 verdict 시계열)
+              검토 권장
+            - benchmark 없이 relativeStrength 기대 — None 반환
+        OutputSchema:
+            ``{verdict: str, score: int, rsi: float, aboveSma20: bool|None,
+            aboveSma60: bool|None, bbPosition: str, adx: float|None,
+            signals: list[str], relativeStrength: dict|None}``.
+        Prerequisites:
+            OHLCV 시계열 + (옵션) 벤치마크 시계열. polars + numpy.
+        Freshness:
+            입력 df 의 latest date 에 종속 — 호출자 책임.
+        Dataflow:
+            df → 지표 4 종 계산 → 각 신호 +/- 1 합산 → score → verdict
+            (강세 ≥+2 / 중립 / 약세 ≤-2) → dict.
+        TargetMarkets: Global (KR/US/JP 모두). market 인자로 벤치마크 라우팅.
     """
     close = df["close"].to_numpy().astype(np.float64)
     high = df["high"].to_numpy().astype(np.float64)

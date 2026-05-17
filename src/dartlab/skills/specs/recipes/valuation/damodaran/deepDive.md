@@ -34,6 +34,7 @@ linkedSkills:
   - recipes.valuation.damodaran.distressAdjustedDcf
   - recipes.valuation.damodaran.scenarioFalsifier
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef
@@ -51,6 +52,18 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
+visualRefs:
+  - engines.viz.financialStructureCharts
+  - engines.viz.scenarioVisuals
+  - engines.viz.priceChart
+  - engines.viz.evidenceCoverage
+  - engines.viz.mermaidDiagram
+visualGuidance:
+  - "normalizedFinancials가 IS/BS/CF 원표에서 tableRef와 기간을 갖추면 engines.viz.financialStructureCharts로 재무 구조를 보조한다."
+  - "DCF band, reverse DCF, sensitivity는 memo table/value refs가 있을 때만 engines.viz.scenarioVisuals로 emit한다. 값만 있고 근거 ref가 없으면 표로 낮춘다."
+  - "현재가·시가총액 근거가 있을 때만 engines.viz.priceChart를 사용해 reverse DCF 맥락을 붙인다."
+  - "gapLedger와 blocker는 engines.viz.evidenceCoverage 또는 표로 제시한다. blocker가 남아 있으면 시각화보다 한계 문장을 우선한다."
+  - "valuation 메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 허용하고 모든 edge에 sourceRef 또는 skillRef를 둔다."
 runtimeCompatibility:
   server:
     status: supported
@@ -85,10 +98,12 @@ testUniverse:
   asOfPolicy: latest
 falsifier:
   description: "dataAudit, modelFit, falsifier 중 하나라도 blocked인데 complete memo로 선언하면 실패로 본다."
-lastUpdated: "2026-05-14"
+lastUpdated: "2026-05-17"
 ---
 
 ## 공개 호출 방식
+
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show("IS"|"BS"|"CF")`, `gather.price`, reference lookup, 하위 Damodaran recipe 실행처럼 engine/capability surface 가 있는 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 같은 입력을 `buildDamodaranMemo` 로 묶는 **RunPython fallback** 절차다.
 
 ```python
 import dartlab
@@ -221,7 +236,7 @@ emit_result(
 
 ### 2. 핵심 근거 수집
 
-20개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 호출 또는 recipe 내부 RunPython 계산에서 나온다. 공식 승격 후보 검토에서는 `finalDecision.blockerCount == 0` 또는 blocker가 의도된 모델 차단인지 확인해야 한다.
+20개 하위 Damodaran recipe의 결과를 순서대로 묶는다. 모든 숫자는 L1/L1.5 EngineCall 결과 또는 RunPython fallback 이 발급한 `emit_result(...)` evidence 에서 나온다. 공식 승격 후보 검토에서는 `finalDecision.blockerCount == 0` 또는 blocker가 의도된 모델 차단인지 확인해야 한다.
 
 ### 3. 메커니즘 분석
 
@@ -286,7 +301,8 @@ graph LR
 
 - 5개 고정 타깃에서 self-run 표를 남긴다.
 - KR+US 각 1개 이상 full path 또는 fallback path 성공이 있어야 한다.
+- 엔진에 있는 Company/gather/reference 입력을 RunPython 코드로 재구현하지 않는다. RunPython 은 `buildDamodaranMemo` 결합 fallback 으로만 사용한다.
+- visualRefs 는 observed viz skill 만 포함해야 하며, DCF/가격/재무구조 차트는 tableRef/valueRef/dateRef/evidenceBinding 이 없으면 만들지 않는다.
 - L2 금지 정적 검사와 `strict-l0-l15` guard를 통과하기 전에는 complete 선언 금지.
 - deepDive execution status table은 21행이어야 하며 finalDecision과 scenarioFalsifier를 포함해야 한다.
 - verified/curated 승격은 ValidateRecipe scorecard와 운영자 승격 절차 이후에만 가능하다.
-

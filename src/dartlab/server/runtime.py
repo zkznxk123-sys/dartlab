@@ -83,7 +83,10 @@ def _killPort(port: int) -> bool:
 def ensurePort(port: int) -> str:
     """포트 확보. "ok" | "already_running" | "failed" 반환."""
     import socket
-    import sys
+
+    from dartlab.core.logger import getLogger
+
+    _log = getLogger(__name__)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -94,15 +97,15 @@ def ensurePort(port: int) -> str:
         pass
 
     if _isDartlabAlive(port):
-        print(f"\n  기존 서버 종료 중 (포트 {port})...")
+        _log.info("기존 서버 종료 중 (포트 %d)...", port)
     else:
-        print(f"\n  포트 {port} 사용 중 (좀비) — 기존 프로세스 종료 중...")
+        _log.info("포트 %d 사용 중 (좀비) — 기존 프로세스 종료 중...", port)
     if _killPort(port):
-        print("  종료 완료. 재시작합니다.\n")
+        _log.info("종료 완료. 재시작합니다.")
         return "ok"
 
-    print(f"\n  오류: 포트 {port}을 해제할 수 없습니다.", file=sys.stderr)
-    print(f"  다른 포트를 사용하세요: dartlab ai --port {port + 1}\n", file=sys.stderr)
+    _log.error("포트 %d 을 해제할 수 없습니다.", port)
+    _log.error("다른 포트를 사용하세요: dartlab ai --port %d", port + 1)
     return "failed"
 
 

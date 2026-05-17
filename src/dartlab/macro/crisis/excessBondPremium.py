@@ -15,12 +15,59 @@ from __future__ import annotations
 def classifyEBP(ebp: float, ebpPrev: float | None = None) -> dict:
     """EBP 수준 + 변화 → 신용 스트레스 판별.
 
+    Capabilities:
+        Gilchrist-Zakrajšek (2012 AER) Excess Bond Premium 근사값을 4 zone
+        (benign/caution/stress/crisis) 으로 매핑 + 3 개월 변화 방향 (worsening/stable/
+        improving) 까지 동시 분류. EBP > 1.0 = 12 개월 내 침체 강한 신호.
+
     Args:
-        ebp: 현재 Excess Bond Premium (근사값)
-        ebp_prev: 3개월 전 EBP (변화 방향용)
+        ebp: 현재 Excess Bond Premium 근사값 (%p, 예: 0.5 = 50bp).
+        ebpPrev: 3 개월 전 EBP. None 이면 direction="stable".
 
     Returns:
-        dict with zone, recessionSignal, description
+        dict — ebp/ebpChange3m/direction/zone/zoneLabel(한글)/recessionSignal(bool)/
+        description.
+
+    Example:
+        >>> r = classifyEBP(1.2, 0.8)
+        >>> r["zone"], r["recessionSignal"], r["direction"]
+        ('crisis', True, 'worsening')
+
+    Guide:
+        매크로 위기 신호 1 차 게이트. crisis zone 이면 사이클 분석 (cycle) 결과 무관
+        하게 회피 신호 우선.
+
+    When:
+        ``analyzeCrisis`` 내부 + AI 신용 스트레스 답변 진입점.
+
+    How:
+        4 임계 (0/0.5/1.0) 로 zone → zoneLabel 매핑 + 3 개월 변화 ±0.2 임계로 direction.
+
+    Requires:
+        - approximateEBP 로 사전 산출된 ebp 값
+        - 3 개월 전 같은 방식 산출된 ebpPrev (변화 방향 신뢰성)
+
+    Raises:
+        없음 — None 입력 안전 처리.
+
+    See Also:
+        - approximateEBP : HY OAS 기반 EBP 근사
+        - dartlab.macro.crisis.fci.calcFCI : 종합 금융컨디션 지수
+
+    AIContext:
+        zoneLabel 한 단어 인용 ("위기" · "스트레스") 으로 한 문장 답변 가능.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ebp 단독 인용 + direction 무시 → 추세 신호 손실
+            - benign zone 에서 추가 분석 생략 → improvement 추세 못 잡음
+            - bp 단위로 ebp 넘김 (％p 가 정상)
+        OutputSchema:
+            ``{ebp, ebpChange3m, direction, zone, zoneLabel, recessionSignal, description}``
+        Prerequisites: approximateEBP 출력.
+        Freshness: HY OAS 일간.
+        Dataflow: approximateEBP → classifyEBP → analyzeCrisis.
+        TargetMarkets: US (HY OAS 풀세트), KR 미지원.
     """
     if ebp < 0:
         zone, zone_label = "benign", "양호"
@@ -66,11 +113,18 @@ def approximateEBP(
     - 또는 역사 평균 HY 스프레드의 일정 비율
 
     Args:
-        hy_spread: ICE BofA HY OAS (bp)
-        default_spread_proxy: 기대 부도 프리미엄 근사 (bp)
+        hySpread: ICE BofA HY OAS (bp)
+        defaultSpreadProxy: 기대 부도 프리미엄 근사 (bp)
             예: BAA-AAA spread × 스케일 팩터, 또는 장기 평균 HY 스프레드의 60%
 
     Returns:
         EBP 근사값 (%p 단위, 예: 0.5 = 50bp)
+
+    Requires:
+        - hySpread: ICE BofA HY OAS daily (FRED BAMLH0A0HYM2)
+        - defaultSpreadProxy: BAA-AAA (Moody's) 또는 HY 장기평균 × 비율
+
+    Raises:
+        없음 — 단순 산술.
     """
     return round((hySpread - defaultSpreadProxy) / 100, 3)

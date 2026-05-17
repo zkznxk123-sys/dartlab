@@ -47,14 +47,44 @@ def _regimeSeries(close: np.ndarray) -> dict:
 def calcRegime(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
     """레짐 감지 분석.
 
+    Capabilities:
+        - 일별 log return 으로 bull/bear/sideways 3-state regime 감지
+        - probability 시계열 동시 (Strategy DSL 입력 가능)
+
     Args:
         stockCode: 종목코드 또는 ticker.
-        market: "KR" | "US" | "auto".
-        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 (state, prob_bull 시계열).
+        market: ``"KR"`` | ``"US"`` | ``"auto"``.
+        series: True 면 ``_series`` 키 추가 (state/prob_bull 시계열).
 
     Returns:
-        dict with regime, probability, trendSignal.
-        series=True 시: _series = {state(int8 0/1/2), prob_bull(float)} 길이 N.
+        dict — stockCode/market/dataPoints/regime/probability/trendSignal/_series.
+
+    Guide:
+        Hamilton 1989 regime switching 단순화. 평균 + 변동성 분기점으로 state 분류.
+        series=True 는 dipBuy/lowVolDefensive 등 regime 기반 strategy 의 입력.
+
+    When:
+        Quant regime 축 + AI 시장 국면 답변.
+
+    How:
+        OHLCV fetch → log return → state 분류 (mean/var threshold).
+
+    Requires:
+        close ≥ 60 봉.
+
+    Raises:
+        없음 — 부족 시 ``{error}``.
+
+    Example:
+        >>> calcRegime("005930")["regime"]
+        'bull'
+
+    See Also:
+        - calcPattern : 캔들/차트 패턴
+        - strategy.styles.dipBuy : regime 입력 사용
+
+    AIContext:
+        "현재 시장 국면" 답변 시 regime + probability 인용.
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)

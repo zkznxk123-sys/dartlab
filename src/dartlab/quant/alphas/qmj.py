@@ -62,6 +62,30 @@ def calcQMJ(
 
     Returns:
         dict — market / year / universe / scores / components / topQuality / topJunk / interpretation
+
+    Guide:
+        Asness-Frazzini-Pedersen QMJ — profitability + safety + (payout 제외)
+        합성. Q ≥ 0.95 = strong quality, Junk (≤ 0.05) = 회피.
+
+    When:
+        Quant 재무 알파 + AI quality 종목 답변.
+
+    How:
+        scan finance.parquet → profitability (ROE/GP/AssetTurnover) +
+        safety (저변동/저레버리지) rank → 합성 Q-score.
+
+    Requires:
+        scan finance.parquet (수익성 + 레버리지 매핑).
+
+    Raises:
+        없음 — 실패는 None.
+
+    Example:
+        >>> calcQMJ()["topQuality"][0]
+
+    See Also:
+        - calcQuality : 단일 종목 QMJ
+        - calcQFactor : Hou-Xue-Zhang q
     """
     try:
         lf = loadScanParquet("finance", market)

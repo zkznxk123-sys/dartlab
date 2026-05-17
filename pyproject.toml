@@ -177,6 +177,10 @@ python_classes = ["Test*"]
 python_functions = ["test_*", "test*"]
 addopts = "-v --tb=short"
 asyncio_mode = "auto"
+# Hypothesis ghostwriter draft 폴더는 자동 수집 제외 — 명시 호출 시에만 실행.
+# (`tests/_drafts/` 안 fuzz draft 는 사용자 review 후 정식 위치로 이동.)
+# pytest default (`*.egg .* CVS _darcs {arch} dist node_modules venv`) + `_drafts` 추가.
+norecursedirs = ["*.egg", ".*", "CVS", "_darcs", "{arch}", "dist", "node_modules", "venv", "_drafts"]
 markers = [
     "requires_data: 로컬 parquet 데이터 필요 (CI에서 skip)",
     "unit: 순수 로직/mock만 — 데이터 로드 없음, 병렬 안전",
@@ -189,7 +193,34 @@ markers = [
     # flaky 는 pytest-rerunfailures 가 설치된 환경에서 작동. 미설치 환경에선 무시.
     # 미등록 시 PytestUnknownMarkWarning — 본 항목으로 warning 차단.
     "flaky: transient 실패 자동 재시도 (pytest-rerunfailures)",
+    # ghostwriter 자동 생성 draft (사용자 review 전) — `tests/_drafts/` 안 한정.
+    "draft: Hypothesis ghostwriter 자동 draft — 정식 위치 이동 전 시범 검증",
+    # AI agent eval — LLM 호출 + judge 채점. 운영자 트리거 또는 nightly.
+    "eval: AI agent LLM 출력 회귀 (외부 API 호출, 비용 발생)",
+    # mutation testing 메타 마커.
+    "mutation: mutmut 대상 표시 — 잘못된 mutant 가 잡혀야 통과",
+    # metamorphic — 변환 후 보존 속성 검증 (수치 분석에 oracle 부재 시).
+    "metamorphic: 변환 후 속성 보존 (ranking shift, 단위 변환, 통화 환산)",
+    # vcr — record-replay 카세트 사용 (외부 HTTP mock).
+    "vcr: HTTP record-replay 카세트 사용 (네트워크 없이 회귀 검증)",
 ]
+
+# ════════════════════════════════════════════════════════════════════
+# Mutation testing (mutmut) — Track 5
+# ────────────────────────────────────────────────────────────────────
+# 부분 적용: Polars/numpy native 호출 비중 큰 모듈은 mutant 의미 없음 (core/ 외 제외).
+# 실행: uv run mutmut run    # 약 30-60 분
+# 결과: uv run mutmut results
+# 목표: mutation score ≥ 80%
+[tool.mutmut]
+paths_to_mutate = [
+    "src/dartlab/core/formatting.py",
+    "src/dartlab/core/cache.py",
+    "src/dartlab/core/naming/__init__.py",
+]
+tests_dir = "tests/core/"
+runner = "uv run python -X utf8 -m pytest -x -m unit --no-cov -q"
+# CI 통합은 주간 cron — 매 PR fail gate 는 아님 (시간 비용 큼).
 
 [tool.coverage.run]
 source = ["dartlab"]
@@ -321,6 +352,10 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "pytest-benchmark>=5.0.0",
     "pytest-cov>=6.0.0",
+    "syrupy>=4.7.0",  # CLI 출력 (rich Console export_text) snapshot 동결 — 본 SSOT 통합 acceptance test
+    "pandera[polars]>=0.29.0",  # raw finance/report/docs frame 계약 — gather endpoint silent drift 차단
+    "mutmut>=3.0.0",  # mutation testing — "테스트가 깨진 코드 잡나" 측정. core/ 한정 (Polars native 모듈 제외).
+    "vcrpy>=6.0.0",  # HTTP record-replay — providers/dart, providers/edgar 외부 호출 회귀.
     "radon>=6.0.0",
     "rope>=1.14.0",
     "vulture>=2.0",
@@ -405,4 +440,30 @@ forbidden_modules = [
     "dartlab.gather",
 ]
 allow_indirect_imports = true
-ignore_imports = []
+# 빌더/raw 데이터 접근 예외 — CLAUDE.md 표 "L1 직접 import 는 L1.5 에 없는 raw 가 필요할 때만 예외" 에 해당.
+# industry/build 산업지도 빌더, quant alphas/factor/benchmark/screen/regime/signal 의 HF bulk + krx listing
+# 등 raw 데이터 접근. frame/synth facade 확장 별도 트랙으로 점진 이전.
+ignore_imports = [
+    "dartlab.industry.build.delta -> dartlab.scan.io.parquet",
+    "dartlab.industry.build.edges -> dartlab.scan.network.scanner",
+    "dartlab.industry.build.edges -> dartlab.scan.network.edges",
+    "dartlab.quant.alphas.bab -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.alphas.fundamentalMomentum -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.benchmark.data -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.benchmark.data -> dartlab.gather.bulkData.hfIndexBulk",
+    "dartlab.quant.benchmark.data -> dartlab.gather.entry",
+    "dartlab.quant.factor.build -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.factor.calc -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.factor.ranking -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.factor.value -> dartlab.gather.bulkData.hfBulk",
+    "dartlab.quant.regime.marketContext -> dartlab.gather.entry",
+    "dartlab.quant.screen._extendedCache -> dartlab.gather.entry",
+    "dartlab.quant.screen._extendedCache -> dartlab.gather.infra.http",
+    "dartlab.quant.screen._extendedCache -> dartlab.gather.sources.price",
+    "dartlab.quant.screen.dataAccess -> dartlab.gather.entry",
+    "dartlab.quant.screen.preset -> dartlab.gather.krx.listing",
+    "dartlab.quant.signal.flow -> dartlab.gather.entry",
+    "dartlab.analysis.financial.predictionSignals -> dartlab.scan",
+    "dartlab.analysis.financial.predictionSignals -> dartlab.scan.network.edges",
+    "dartlab.analysis.valuation.fitness -> dartlab.scan.builders.kr.extended",
+]

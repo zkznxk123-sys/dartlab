@@ -543,6 +543,17 @@ def financialTrackBThresholds() -> dict:
     D/EBITDA, FFO/Debt를 사용하지 않음.
     자기자본비율, ROA, NIM, 충당금 비율이 핵심.
     은행: 자기자본비율 7~15%, ROA 0.3~1.5%, NIM 1~3%.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.credit.features.sectorThresholds import financialTrackBThresholds
+        >>> financialTrackBThresholds()["equity_ratio"]["lower_is_better"]
+        False
+
+    Requires:
+        - 외부 의존 없음 (정적 dict).
     """
     return {
         "equity_ratio": {  # 금융지주 자기자본비율: 7~15% 정상, BIS 최저 8%
@@ -667,7 +678,46 @@ _SECTOR_THRESHOLDS[Sector.ENERGY] = _energyThresholds()
 def getThresholds(sector: Sector | None, industryGroup: IndustryGroup | None = None) -> dict:
     """업종별 기준표 반환.
 
+    Capabilities:
+        IndustryGroup override (반도체/조선/은행 등 13 개) 가 있으면 우선, 없으면 Sector 대분류
+        기본값. 둘 다 None 이면 ``_defaultThresholds`` 폴백. credit 7 축 metric 의 임계값 dict
+        단일 진입점.
+
     IndustryGroup override가 있으면 우선, 없으면 Sector 대분류 사용.
+
+    Args:
+        sector: 대분류 Sector enum (없으면 _defaultThresholds).
+        industryGroup: 세부 IndustryGroup enum (없으면 sector 사용).
+
+    Returns:
+        업종별 metric → breakpoints dict.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.credit.features.sectorThresholds import getThresholds
+        >>> th = getThresholds(None, IndustryGroup.SEMICONDUCTOR)
+        >>> th["debt_to_ebitda"]["lower_is_better"]
+        True
+
+    Guide:
+        Track A 7 축 metric 점수 산정 시 본 기준표의 breakpoints 를 piecewise linear 로 적용.
+
+    When:
+        ``credit.engine.evaluateCompany`` 가 ``_getSectorInfo`` 후 본 함수 호출.
+
+    How:
+        industryGroup override 우선 → sector 매핑 → 둘 다 부재 시 default.
+
+    Requires:
+        - 외부 의존 없음 (정적 dict 룩업).
+
+    See Also:
+        - ``dartlab.credit.features.sectorThresholds.getSectorLabel`` : 한국어 라벨
+
+    AIContext:
+        AI 답변 시 업종 임계값을 "반도체 업종 기준 D/EBITDA < 3 양호" 식으로 명시.
     """
     if industryGroup is not None and industryGroup in _INDUSTRY_THRESHOLDS:
         return _INDUSTRY_THRESHOLDS[industryGroup]
@@ -677,7 +727,19 @@ def getThresholds(sector: Sector | None, industryGroup: IndustryGroup | None = N
 
 
 def getSectorLabel(sector: Sector | None) -> str:
-    """업종 라벨 반환."""
+    """업종 라벨 반환.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.credit.features.sectorThresholds import getSectorLabel
+        >>> getSectorLabel(None)
+        '일반'
+
+    Requires:
+        - 외부 의존 없음.
+    """
     if sector is None:
         return "일반"
     return sector.value

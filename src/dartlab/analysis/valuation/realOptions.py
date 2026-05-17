@@ -28,6 +28,23 @@ def calcRealOptionsValue(
 ) -> dict[str, Any] | None:
     """lifeCycle 기반 Real Option 가치 계산.
 
+    Capabilities:
+        - lifeCycle phase → optionType 자동 선택 (delay/expand/abandon)
+        - delay → binomial american call, expand → BS call, abandon → BS put
+        - σ = 영업이익률 시계열 표준편차 (연환산)
+        - dFV primary 에 곱하지 않음 — 별도 sub-dict (이중계산 방지)
+
+    Parameters
+    ----------
+    company : Company
+        대상 기업.
+    optionType : str, optional
+        "delay" | "expand" | "abandon". None 시 phase 기반 자동.
+    basePeriod : str, optional
+        기준 기간.
+    overrides : dict, optional
+        lifeCyclePhase 강제 등.
+
     Returns
     -------
     dict | None
@@ -43,6 +60,35 @@ def calcRealOptionsValue(
         appliedAs : "uplift" | "floor"
         method : "black_scholes" | "binomial"
         warnings : list[str]
+
+    Example:
+        >>> calcRealOptionsValue(Company("005930"))
+        {"optionType": "expand", "optionValue": 8500, "appliedAs": "uplift", ...}
+
+    Guide:
+        S/K/T/sigma 도출 실패 시 None. earlyGrowth/highGrowth → delay,
+        matureGrowth → expand, decline/turnaround → abandon.
+
+    When:
+        R&D 비중 큰 회사 또는 옵션성 자산 (광산권/특허) 회사의 dFV 보조 시.
+
+    How:
+        calcRealOptionsValue(company) 또는 optionType="delay" 등 강제.
+
+    Requires:
+        calcLifeCycle + calcMarginTrend + calcDcf + _calcLiquidationDetail +
+        loadDamodaranERP + optionValue.
+
+    Raises:
+        없음.
+
+    See Also:
+        - blackScholesCall / binomialOption : 옵션 가격 본체
+        - Damodaran *Investment Valuation* Ch.28-30
+
+    AIContext:
+        Real Option 가치 답변 시 optionType + timeValue (시간가치) 인용.
+        primary 가치에 합산하지 않고 sub-dict 로 노출.
     """
     overrides = overrides or {}
 

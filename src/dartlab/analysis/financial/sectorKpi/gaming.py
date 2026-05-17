@@ -12,11 +12,38 @@ from dartlab.core.memory import memoizedCalc
 def calcGamingKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """게임·엔터 핵심 KPI.
 
-    Returns
-    -------
-    dict | None
-        ipPortfolio : dict — IP별 매출 추정 + HHI
-        contentConcentration : dict | None — 주력 IP 의존도
+    Capabilities:
+        - productService 매출 분해 → IP 포트폴리오 HHI + 1위 IP 의존도.
+
+    Guide:
+        rows → 매출액 추출 → share 계산 → HHI · top1 share.
+
+    When:
+        넥슨/엔씨/카카오게임즈 등 IP 비즈니스 평가 시.
+
+    How:
+        제품별 매출 share → 제곱합×10000 = HHI. >4000 고집중, >2500 중집중, 이하 분산.
+
+    Requires:
+        company.show("productService") 또는 show("segments") rows 존재.
+
+    Raises:
+        없음. AttributeError·ValueError·TypeError·KeyError try 흡수.
+
+    Returns:
+        dict | None
+            ipPortfolio : dict — IP별 매출 추정 + HHI
+            contentConcentration : dict | None — 주력 IP 의존도
+
+    Example:
+        >>> calcGamingKpis(엔씨소프트)
+        {"ipPortfolio": {...}, "contentConcentration": {...}}
+
+    See Also:
+        - dispatcher.sectorKpi : 섹터 자동 라우팅.
+
+    AIContext:
+        IP 집중 위험 (단일 IP 매출 의존) 평가 인용.
     """
     result: dict = {}
 

@@ -12,12 +12,39 @@ from dartlab.core.memory import memoizedCalc
 def calcConstructionKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """건설업 핵심 KPI 통합 반환.
 
-    Returns
-    -------
-    dict | None
-        orderBacklog : dict | None — 수주잔고 시계열 + 회전
-        contractMix : dict | None — 도급 vs 자체개발 비중 + 마진 갭
-        pfExposure : dict | None — PF 보증·채무 노출
+    Capabilities:
+        - 수주잔고·도급비중·PF 노출 3 종 KPI 통합 산출.
+
+    Guide:
+        DART report(constructionOrders) + sections(productService) + notes(provisions) 결합.
+
+    When:
+        건설사 (현대건설·GS건설 등) 펀더멘털 분석 시.
+
+    How:
+        매출 시계열·productService 키워드 매칭·충당부채 PF 항목 카운트.
+
+    Requires:
+        company.select("IS") + show("productService") + show("provisions") 가능.
+
+    Raises:
+        없음. 내부 예외 (AttributeError·ValueError·TypeError·KeyError) try 흡수.
+
+    Returns:
+        dict | None
+            orderBacklog : dict | None — 수주잔고 시계열 + 회전
+            contractMix : dict | None — 도급 vs 자체개발 비중 + 마진 갭
+            pfExposure : dict | None — PF 보증·채무 노출
+
+    Example:
+        >>> calcConstructionKpis(현대건설)
+        {"orderBacklog": {...}, "contractMix": {...}, "pfExposure": {...}}
+
+    See Also:
+        - dispatcher.sectorKpi : 섹터 자동 라우팅 진입점.
+
+    AIContext:
+        건설업 펀더멘털 질문 시 도급/자체개발 비중·PF 노출 인용.
     """
     from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 

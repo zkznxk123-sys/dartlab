@@ -60,15 +60,56 @@ def _normalCdf(x: float) -> float:
 def clevelandProbit(spread10y3m: float) -> RecessionProb:
     """Cleveland Fed 프로빗: 10Y-3M 스프레드 → 12개월 내 침체 확률.
 
+    Capabilities:
+        Estrella-Mishkin (1996) 기반 Cleveland Fed 공표 probit 모델 — α=-0.5333,
+        β=-0.6330. P(recession) = Φ(α + β × spread). 12 개월 내 침체 확률을
+        4 zone (low/moderate/elevated/high) 으로 매핑.
+
     Args:
-        spread10y3m: 10년 국채 - 3개월 국채 스프레드 (%p)
+        spread10y3m: 10Y - 3M 스프레드 (%p). 음수 = 역전.
 
     Returns:
-        RecessionProb: 침체 확률 + 구간
+        RecessionProb — probability(0~1)/zone/zoneLabel/spread/description.
 
-    모델: P(recession) = Φ(α + β × spread)
-    계수는 Cleveland Fed 공표값 (Estrella-Mishkin 1996 기반):
-    α = -0.5333, β = -0.6330
+    Example:
+        >>> r = clevelandProbit(-0.5)
+        >>> r.zone, round(r.probability, 2)
+        ('elevated', 0.42)
+
+    Guide:
+        zone "elevated" (≥ 30%) = 12 개월 침체 경계. "high" (≥ 50%) = 침체 강한
+        신호. 역전 (spread < 0) 4 개월 지속 시 추가 매크로 검증 권장.
+
+    When:
+        ``analyzeForecast`` 내부 + AI 침체 확률 답변 1 차.
+
+    How:
+        z = α + β × spread → Φ (normal CDF erf 구현) → probability → zone 라벨.
+
+    Requires:
+        FRED T10Y3M (또는 DGS10 - DGS3MO).
+
+    Raises:
+        없음.
+
+    See Also:
+        - sahmRule : 실업률 단순 룰
+        - hamiltonRegime : Markov regime
+        - conferenceBoardLEI : LEI 합성
+
+    AIContext:
+        probability × 100 + zoneLabel 인용으로 "침체 확률 42% (경계)" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - spread 부호만 단정 (probability 계산 필요)
+            - T10Y2Y 대체 사용 (계수 다름)
+        OutputSchema:
+            RecessionProb ``(probability, zone, zoneLabel, spread, description)``.
+        Prerequisites: T10Y3M latest.
+        Freshness: 일간.
+        Dataflow: spread → probit → probability → zone.
+        TargetMarkets: US 한정 (계수). KR 미지원.
     """
     alpha = -0.5333
     beta = -0.6330
@@ -121,23 +162,62 @@ def conferenceBoardLEI(
 ) -> LEIResult:
     """Conference Board LEI 복제.
 
+    Capabilities:
+        Conference Board 10 구성요소 (가중치 2023 공표값) 가중 합산 → LEI level
+        + MoM + 6 개월 연율 변화 + 신호 (expansion/caution/recession_warning).
+        침체 룰: 6 개월 연율 < -4.4% AND 5+ 구성요소 하락.
+
     Args:
-        components: 10개 구성요소의 표준화된 변화율 (%)
-            - avg_weekly_hours: 제조업 주당 평균 근무시간 변화율
-            - initial_claims: 신규 실업수당 청구 변화율 (역수)
-            - new_orders_consumer: 소비재 신규수주 변화율
-            - ism_new_orders: ISM 신규수주 (50 기준 편차)
-            - new_orders_nondefense_cap: 비국방자본재 신규수주 변화율
-            - building_permits: 건축허가 변화율
-            - sp500: S&P500 변화율
-            - leading_credit: Leading Credit Index 변화율
-            - term_spread: 10Y-FF 스프레드 수준
-            - consumer_expectations: 소비자기대지수 변화율
-        prevLevel: 이전 LEI 수준 (MoM 계산용)
-        prevLevel6m: 6개월 전 LEI 수준 (연율 변화 계산용)
+        components: 10 구성요소 dict (avg_weekly_hours/initial_claims(역수)/
+            new_orders_consumer/ism_new_orders/new_orders_nondefense_cap/
+            building_permits/sp500/leading_credit/term_spread/
+            consumer_expectations). None 허용 (부분 weight 정규화).
+        prevLevel: 이전 LEI level.
+        prevLevel6m: 6 개월 전 LEI level.
 
     Returns:
-        LEIResult: LEI 합성 지수 + 신호
+        LEIResult — level/mom/mom6m/signal/signalLabel/components/description.
+
+    Example:
+        >>> r = conferenceBoardLEI({"sp500": 0.5, ...}, prevLevel=100)
+        >>> r.signal
+        'expansion'
+
+    Guide:
+        signal "recession_warning" = Conference Board 공식 침체 룰 (6 개월 연율
+        < -4.4% + 5 개+ 하락) 동시 충족 시.
+
+    When:
+        ``analyzeForecast`` 내부 + AI 경기선행 답변.
+
+    How:
+        가중 합산 (부분 데이터 정규화) → level → MoM + 6M 연율 → 룰 매칭.
+
+    Requires:
+        FRED 10 시리즈 (AWHMAN/ICSA/UMCSENT/NAPM/NEWORDER/PERMIT/SP500/
+        T10Y3M 등) 중 1+.
+
+    Raises:
+        없음 — 데이터 부족 시 "데이터부족" 신호.
+
+    See Also:
+        - clevelandProbit : 단변량 yield curve
+        - sahmRule : 실업률 단순 룰
+        - hamiltonRegime : Markov
+
+    AIContext:
+        signalLabel + mom6m + declining 카운트 인용으로 한 단락 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - components 부분 입력 후 level 절대값 단정
+            - signal 만 인용 + mom6m 미노출
+        OutputSchema:
+            LEIResult (7 필드).
+        Prerequisites: 10 구성요소 시리즈 중 일부.
+        Freshness: 월간 (Conference Board 발표).
+        Dataflow: components → 가중합 → MoM + 6M 연율 → 신호.
+        TargetMarkets: US 한정. KR 미지원.
     """
     weighted_sum = 0.0
     available = 0
@@ -214,11 +294,56 @@ class SahmResult:
 def sahmRule(unemploymentSeries: list[float]) -> SahmResult:
     """Sahm Rule: 실업률 3개월 MA - 12개월 최저 3개월 MA.
 
+    Capabilities:
+        Sahm Rule (2019) 침체 시작 룰 — 실업률 3 개월 평균 - 직전 12 개월 내
+        3 개월 평균 최저값 ≥ 0.5%p 면 침체 신호 (역사적 100% 정확). 3 zone
+        (normal/warning/recession) 매핑.
+
     Args:
-        unemploymentSeries: 월간 실업률 시계열 (최소 15개월)
+        unemploymentSeries: 월간 실업률 (%) 시계열 (≥ 15 개월).
 
     Returns:
-        SahmResult: >= 0.5%p이면 침체 시작 신호
+        SahmResult — value(%p)/triggered(bool)/zone/zoneLabel/description.
+
+    Example:
+        >>> r = sahmRule([3.5]*12 + [3.7, 4.0, 4.1])
+        >>> r.triggered, r.zone
+        (True, 'recession')
+
+    Guide:
+        triggered=True 면 침체 강한 신호 (Sahm 본인은 ≥ 0.5 임계 절대 신뢰).
+        warning (0.3~0.5) = 침체 접근 중.
+
+    When:
+        ``analyzeForecast`` 내부 + AI 침체 시작 답변.
+
+    How:
+        최근 3 개월 평균 - 직전 12 개월 중 3 개월 평균 최저값.
+
+    Requires:
+        FRED UNRATE 월별 ≥ 15 개월.
+
+    Raises:
+        없음 — 데이터 부족 시 0 값 + "데이터부족" 라벨.
+
+    See Also:
+        - clevelandProbit : yield curve
+        - conferenceBoardLEI : 10 구성요소
+        - unemploymentBounceToRecession : 0.3%p 변형
+
+    AIContext:
+        value + zoneLabel 인용으로 "Sahm 0.55%p (침체 발동)" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 월 실업률 단정 (3 개월 MA 가 표준)
+            - 15 개월 미만에 강한 단정
+        OutputSchema:
+            SahmResult ``(value, triggered, zone, zoneLabel, description)``.
+        Prerequisites: UNRATE 월별 ≥ 15.
+        Freshness: 월간 (BLS 첫 금요일).
+        Dataflow: series → 3M MA → 12M 최저 → 차.
+        TargetMarkets: US 한정 (계수 검증). KR 미지원.
     """
     if len(unemploymentSeries) < 15:
         return SahmResult(0.0, False, "normal", "데이터부족", "실업률 시계열 15개월 미만")
@@ -379,18 +504,81 @@ def hamiltonRegime(
     maxIter: int = 200,
     tol: float = 1e-6,
 ) -> HamiltonResult:
-    """Hamilton Regime Switching — EM 알고리즘으로 추정.
+    """Hamilton Markov Regime Switching — EM 알고리즘 2-regime AR(1).
 
-    2-regime AR(1) Markov-Switching 모델:
-    y_t = μ_{s_t} + φ × y_{t-1} + ε_t,  ε_t ~ N(0, σ²_{s_t})
+    Capabilities:
+        Hamilton (1989) 2-regime Markov-Switching AR(1) 모델 EM 추정.
+        y_t = μ_{s_t} + φ × y_{t-1} + ε_t, ε_t ~ N(0, σ²_{s_t}). regime 0 =
+        확장 (높은 평균), regime 1 = 침체. 필터/스무더 확률 (Kim 1994) 함께
+        반환. GDP/산업생산 분기 시계열에 표준 적용.
 
     Args:
-        series: GDP 성장률 시계열 (분기, 최소 20기간)
-        maxIter: EM 최대 반복 횟수
-        tol: 로그우도 수렴 기준
+        series: 시계열 (GDP 성장률 분기, 최소 10 기간 권장 20+).
+        maxIter: EM 최대 반복 (기본 200).
+        tol: 로그우도 수렴 기준 (기본 1e-6).
 
     Returns:
-        HamiltonResult: 필터/스무더 확률 + 파라미터
+        HamiltonResult:
+            - ``filteredProbs``/``smoothedProbs`` (np.ndarray T×2): regime
+              확률 시계열.
+            - ``currentRegime`` (int): 최신 regime (0/1).
+            - ``currentProb`` (float): 최신 regime 확률.
+            - ``regimeLabels`` (tuple): ("expansion", "contraction").
+            - ``params`` (dict): μ, σ, φ, p00, p11.
+            - ``logLikelihood`` (float): 최종 LL.
+            - ``converged`` (bool) / ``iterations`` (int).
+
+    Raises:
+        없음 (T < 10 시 empty result 반환).
+
+    Example:
+        >>> r = hamiltonRegime([2.5, 2.8, -1.2, -0.5, 1.8, ...])
+        >>> r.currentRegime, r.currentProb
+        (0, 0.85)  # 85% 확률 확장 regime
+
+    Guide:
+        - smoothedProbs > 0.7 = 강한 regime 신호 (확장 또는 침체 확정).
+        - 0.3 ~ 0.7 = 전환 구간 (uncertainty 큼).
+        - 최소 20 분기 (5 년) 권장 — 단기 데이터는 regime 분리 약함.
+        - p00/p11 (자기지속 확률) 0.9+ 면 regime persistent.
+
+    See Also:
+        - ``clevelandProbit``: 단변량 yield curve 기반
+        - ``sahmRule``: 실업률 룰
+        - ``conferenceBoardLEI``: LEI 합성지수
+
+    When:
+        ``analyzeSummary`` regime 축 (US GDP) 진입점. 분기 갱신.
+
+    How:
+        EM 초기값 (median split) → forward-backward filter → Kim smoother → 수렴 →
+        params + smoothedProbs.
+
+    Requires:
+        시계열 ≥ 10 기간 (≥ 20 권장).
+
+    AIContext:
+        currentRegime + smoothedProb 함께. 확률 0.5 부근은 단정 금지 (전환
+        구간). converged=False 면 결과 신뢰 낮음.
+
+    LLM Specifications:
+        AntiPatterns:
+            - filteredProbs 와 smoothedProbs 혼동 — 후자가 회고적, 전자가
+              실시간.
+            - 짧은 시계열 (< 20 기간) 에 강한 단정.
+        OutputSchema:
+            ``HamiltonResult(filteredProbs: ndarray, smoothedProbs: ndarray,
+              currentRegime: int, currentProb: float, regimeLabels: tuple,
+              params: dict, logLikelihood: float, converged: bool,
+              iterations: int)``.
+        Prerequisites:
+            시계열 ≥ 10 기간 (≥ 20 권장).
+        Freshness:
+            분기 (GDP 갱신 직후).
+        Dataflow:
+            series → 초기값 (median split) → EM (E: forward-backward, M:
+            params 갱신) → 수렴 → 필터/스무더 확률.
+        TargetMarkets: US (BEA GDP), KR (BOK GDP), 글로벌 분기 GDP.
     """
     y = np.asarray(series, dtype=np.float64)
     T = len(y)

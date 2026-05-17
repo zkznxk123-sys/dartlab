@@ -60,10 +60,44 @@ def build(
     추가 robustness:
         OBV 5일 누적 양수 (거래량 확인) — Faith 원본 비포함이지만 false signal 감소.
 
+    Capabilities:
+        - Donchian channel 20 일 신고가 돌파 + 거래량 확인 (OBV) → 진입
+        - 10 일 신저가 또는 ATR×2 stop → 청산
+
     Args:
-        entry_period: 진입 채널 기간 (Turtle 20일)
-        exit_period: 청산 채널 기간 (Turtle 10일, S1)
-        atr_k: ATR stop 배수 (Turtle 2N)
+        company: Company 객체.
+        entryPeriod: 진입 채널 기간. 기본 ``20`` (Turtle).
+        exitPeriod: 청산 채널 기간. 기본 ``10`` (Turtle S1).
+        atrK: ATR stop 배수. 기본 ``2.0`` (Turtle 2N).
+
+    Returns:
+        Rule — entry/exit + atr stop.
+
+    Guide:
+        Faith 1980s Turtle System 1 정확. ATR=2N stop 보수적.
+
+    When:
+        Breakout strategy + AI 신고가 돌파 답변.
+
+    How:
+        Donchian high/low + OBV 거래량 확인 → entry/exit Signal.
+
+    Requires:
+        OHLCV ≥ entryPeriod + 20 봉.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> build(company).meta["style"]
+        'breakout'
+
+    See Also:
+        - strategy.styles.trendFollow : 함께 사용
+        - signal.generator.vbreakoutSignal : core
+
+    AIContext:
+        "신고가 돌파 시점" 답변 시 entry 마지막 봉 인용.
     """
     arr = getArrays(company)
     close = arr.get("close")

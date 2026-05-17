@@ -18,6 +18,7 @@ linkedSkills:
   - recipes.valuation.damodaran.costOfCapital
   - recipes.valuation.damodaran.scenarioFalsifier
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

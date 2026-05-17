@@ -33,20 +33,68 @@ def _evaluate(company, basePeriod=None):
 
 @_memoized_calc
 def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용분석 핵심 지표 시계열.
+    """신용분석 핵심 지표 시계열 — 7 축 metrics + 사업안정성.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
+    Capabilities:
+        evaluateCompany 의 metricsHistory 노출 — 기간별 7 축 (상환력/레버리지/
+        유동성/수익성/구조/시장신호/지배구조) 지표 시계열 + businessStability
+        (opMarginCV, revenueCV 변동성 지표) 동행. 신용 점수 출력 전 입력 데이터
+        가시화.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 7축 지표 시계열 (calcAllMetrics 결과)
-        businessStability : dict — 사업안정성 지표 (opMarginCV, revenueCV 등)
+    Args:
+        company: DartCompany | EdgarCompany 인스턴스.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 기간별 7 축 metrics (calcAllMetrics 결과).
+            - ``businessStability`` (dict): opMarginCV/revenueCV 등 변동성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCreditMetrics(Company("005930"))
+        >>> r["history"][0]["repayment"]["interestCoverage"]
+        18.5
+
+    Guide:
+        - 본 함수는 metrics 만 — 점수/등급은 calcCreditScore.
+        - businessStability 의 CV (coefficient of variation) 가 낮을수록
+          업황 안정 (CV < 0.2 = 매우 안정).
+        - 7 축 metrics 가 axis_evaluators 의 입력.
+
+    SeeAlso:
+        - ``calcCreditScore``: 종합 등급
+        - ``calcCreditHistory``: 등급 시계열
+        - ``credit.scoring.metrics.calcAllMetrics``: 7 축 metrics 본체
+
+    When:
+        ``c.credit("metrics")`` / story 5-7 신용 섹션 raw 입력 필요할 때.
+
+    How:
+        ``_evaluate(detail=True)`` → metricsHistory + businessStability 추출 → dict.
+
+    Requires:
+        DART/EDGAR 재무 시계열 (IS/BS/CF + 시가총액).
+
+    AIContext:
+        history latest 키 인용 + businessStability CV 함께. metrics 단독 인용
+        시 점수 변환 (calcCreditScore) 누락 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - metrics 인용으로 등급 추론 — calcCreditScore 필수.
+            - 단년도 metric 만 인용 — history 시계열 함께.
+        OutputSchema:
+            ``{history: list[dict], businessStability: dict}``.
+        Prerequisites:
+            IS/BS/CF + 시가총액.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → metricsHistory → 7 축 metric + businessStability.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -62,27 +110,72 @@ def calcCreditMetrics(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
-    """신용등급 종합 산출.
+    """신용등급 종합 산출 — 7 축 가중합 + override 시나리오.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
-    overrides : dict | None
-        시나리오 가정 교체. core/overrides.py CREDIT_KEYS에 정의된 키만 유효.
-        예: ``{"debtRatio": 150, "interestCoverage": 5.0}``
-        적용 시 결과에 ``overrides``/``overrideNote`` 키가 추가됨.
+    Capabilities:
+        7 축 (상환력/레버리지/유동성/수익성/구조/시장신호/지배구조) 가중합
+        → 0~100 score → 20 단계 grade (AAA~D) + PD (확률) 매핑. overrides 로
+        부채비율/IC 등 가정 교체 시나리오 가능. Damodaran credit synthetic
+        rating + Moody's RiskCalc 표준 융합.
 
-    Returns
-    -------
-    dict | None
-        evaluateCompany() 반환 dict 전체 (grade, score, axes 등).
-        overrides 적용 시 추가 키:
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간.
+        overrides: 시나리오 가정 (CREDIT_KEYS 만). 예: ``{"debtRatio": 150}``.
 
-        overrides : dict — 적용된 override 값
-        overrideNote : str — "AI/사용자 override 적용 시나리오"
+    Returns:
+        dict | None: evaluateCompany 결과 dict (grade, score, axes, ...).
+            overrides 적용 시 ``overrides``/``overrideNote`` 키 추가.
+
+    Raises:
+        없음 (None 시 데이터 부족).
+
+    Example:
+        >>> r = calcCreditScore(Company("005930"))
+        >>> r["grade"], r["score"]
+        ('AA+', 87.5)
+        >>> r2 = calcCreditScore(Company("005930"), overrides={"debtRatio": 200})
+        >>> r2["overrideNote"]
+        'AI/사용자 override 적용 시나리오'
+
+    Guide:
+        - investment grade (AAA~BBB-) vs speculative (BB+~D) 경계 주목.
+        - 단년도 grade 단독 인용 금지 — calcCreditHistory 시계열 함께.
+        - overrides 는 stress test 용 — 실제 등급과 구분 명시.
+
+    SeeAlso:
+        - ``calcCreditMetrics``: 7 축 metrics 입력
+        - ``calcCreditHistory``: 등급 시계열
+        - ``calcGradeImprovement``: 개선 시나리오
+
+    When:
+        ``c.credit("score")`` 호출. AI 가 stress 시나리오 답변 (overrides 주입) 시.
+
+    How:
+        ``_evaluate`` → result 반환 (overrides 있으면 validate 후 dict 에 주입).
+
+    Requires:
+        IS/BS/CF + 시가총액 + 시장신호 (베타/변동성).
+
+    AIContext:
+        grade + score + 핵심 axes 함께 인용. overrides 사용 시 가정 명시 +
+        실제와 분리. PD 단독 인용 금지 (grade 매핑 표준).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년도 grade 단정 — 시계열 (calcCreditHistory) 함께.
+            - overrides 결과를 실제 grade 로 인용 — 시나리오임 명시.
+        OutputSchema:
+            ``{grade: str, score: float, axes: list, pd: float, ...,
+              overrides?: dict, overrideNote?: str}``.
+        Prerequisites:
+            IS/BS/CF + 시가총액.
+        Freshness:
+            분기.
+        Dataflow:
+            evaluateCompany → 7 축 score → 가중합 → grade mapping → (옵션)
+            override applied.
+        TargetMarkets: KR (DART), US (EDGAR).
     """
     result = _evaluate(company, basePeriod)
     # override 적용: 시나리오 부채비율 등으로 등급 재산출
@@ -99,6 +192,11 @@ def calcCreditScore(company, *, basePeriod: str | None = None, overrides: dict |
 @_memoized_calc
 def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
     """신용등급 시계열.
+
+    Capabilities:
+        evaluateCompany metricsHistory 의 기간별 metric 을 다시 sectorThresholds 룩업 → metric
+        score → 평균 → mapTo20Grade 로 변환해 기간별 grade 시계열 산출. ``stable`` 플래그로 등급
+        변동성 판정.
 
     기간별 간이 점수를 산출하고, 등급 안정성을 판단한다.
 
@@ -120,6 +218,35 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
         stable : bool — 등급 안정성 (고유 등급 2개 이하면 True)
         latestGrade : str | None — 최신 기간 등급
         oldestGrade : str | None — 가장 오래된 기간 등급
+
+    Raises:
+        없음 — metricsHistory 부재 시 None.
+
+    Example:
+        >>> r = calcCreditHistory(Company("005930"))
+        >>> r["stable"], r["latestGrade"]
+        (True, 'AA+')
+
+    Guide:
+        본 함수는 5 개 metric 평균으로 간이 grade 추정 — engine 의 7 축 가중평균과 약간 다름.
+        시계열 변동 추세 답변에 적합.
+
+    When:
+        ``c.credit("history")`` 호출. 등급 안정성 답변, Story 변화 섹션.
+
+    How:
+        ``_evaluate`` → metricsHistory 루프 → sectorThresholds.scoreMetric → 5 metric 평균 →
+        mapTo20Grade → 기간별 entry.
+
+    Requires:
+        - IS/BS/CF 시계열 (``_evaluate`` 결과 metricsHistory) + sectorThresholds
+
+    SeeAlso:
+        - ``dartlab.credit.scoring.calcs.calcCreditScore`` : 7 축 정식 grade
+        - ``dartlab.credit.scoring.creditScorecard.mapTo20Grade`` : 점수→등급
+
+    AIContext:
+        AI 답변 "등급 추세" 시 본 결과 직접 인용. ``stable=False`` 면 변동성 단서 필수.
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -180,26 +307,70 @@ def calcCreditHistory(company, *, basePeriod: str | None = None) -> dict | None:
 
 @_memoized_calc
 def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
-    """현금흐름등급(eCR) 시계열.
+    """현금흐름등급 (eCR) 시계열 — OCF 기반 자체 신용등급.
 
-    OCF/매출, FCF 양수 여부, OCF/차입금 기반으로 기간별 eCR 등급 산출.
+    Capabilities:
+        OCF/매출 + FCF 양수 여부 + OCF/총차입금 세 가지로 기간별 eCR 등급
+        (AAA~D 매핑) 산출. Moody's CFR (Corporate Family Rating) 의 cash flow
+        강도 component 와 유사. 회계상 등급 (calcCreditScore) 와 직교 — 현금
+        창출력 단독 평가.
 
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
+    Args:
+        company: DartCompany | EdgarCompany.
+        basePeriod: 기준 기간. None 시 최신.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict] — 기간별 현금흐름등급
-            period : str — 기간 (예: "2024")
-            eCR : str — 현금흐름등급 (예: "A", "BB")
-            ocfToSales : float | None — OCF/매출 (%)
-            fcfPositive : bool — FCF 양수 여부
-            ocfToDebt : float | None — OCF/총차입금 (%)
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 기간별 (period, eCR, ocfToSales,
+              fcfPositive, ocfToDebt).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCashFlowGrade(Company("005930"))
+        >>> r["history"][0]["eCR"], r["history"][0]["ocfToSales"]
+        ('A', 18.5)  # OCF/매출 18.5% → A 등급
+
+    Guide:
+        - eCR > 회계 grade 면 현금 우위 (적자 회사가 현금 창출은 우수).
+        - eCR < 회계 grade 면 현금 약점 (이익 보이지만 현금 부족 — 매출채권
+          누적 의심).
+        - FCF 음수 3 기 연속 = downgrade 신호.
+
+    SeeAlso:
+        - ``calcCreditScore``: 회계 grade
+        - ``calcDistressScore``: Altman Z
+        - ``analysis.financial.calcCashGenerationQuality``: OCF 품질
+
+    When:
+        ``c.credit("cashflow")`` 호출. AI 답변 "현금 창출 grade" 시.
+
+    How:
+        metricsHistory 루프 → ocfToSales / fcfPositive / ocfToDebt → ``cashFlowGrade`` 호출 →
+        기간별 eCR.
+
+    Requires:
+        CF (영업현금흐름) + IS (매출) + BS (차입금) 시계열.
+
+    AIContext:
+        eCR + ocfToSales + ocfToDebt 함께. 회계 grade 와 비교 시 차이 해석
+        (현금/이익 괴리).
+
+    LLM Specifications:
+        AntiPatterns:
+            - eCR 단독 인용으로 회계 grade 대체 — 두 grade 모두 노출.
+            - FCF 음수 단년도 단정 — 3 기 추세 함께.
+        OutputSchema:
+            ``{history: list[dict 5키]}``.
+        Prerequisites:
+            CF + IS + BS 시계열.
+        Freshness:
+            분기.
+        Dataflow:
+            metricsHistory → ocfToSales + fcfPositive + ocfToDebt → cashFlowGrade
+            함수 → eCR.
+        TargetMarkets: KR (DART), US (EDGAR — CF Statement 표준).
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -235,6 +406,10 @@ def calcCashFlowGrade(company, *, basePeriod: str | None = None) -> dict | None:
 def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | None:
     """업종 내 신용 순위.
 
+    Capabilities:
+        대상 회사 최신 분기 4 핵심 지표 (부채비율/IC/FFO-Debt/유동비율) 를 dict 로 노출. peer
+        비교 데이터는 현재 미구현 (``peerAvailable=False``) — 호출자가 별도 peer 매칭 필요.
+
     최신 기간의 핵심 지표를 추출하여 peer 비교 기반 제공.
 
     Parameters
@@ -254,6 +429,34 @@ def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | 
             ffoToDebt : float | None — FFO/총차입금 (%)
             currentRatio : float | None — 유동비율 (%)
         peerAvailable : bool — peer 데이터 가용 여부
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCreditPeerPosition(Company("005930"))
+        >>> r["metrics"]["debtRatio"]
+        38.5
+
+    Guide:
+        ``peerAvailable=False`` 이면 peer 분포는 ``industry.calcs.companyCalcs.calcSectorMetrics``
+        결과와 결합 권장. 본 함수 단독으로는 "내 지표" 만 노출.
+
+    When:
+        ``c.credit("peer")`` 호출. AI 가 동종 비교 답변 시 본 결과 + sectorMetrics 결합.
+
+    How:
+        ``_evaluate`` → metricsHistory[0] 추출 → 4 metric 노출.
+
+    Requires:
+        - IS/BS/CF 시계열 (evaluateCompany 결과)
+
+    See Also:
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 동종 분포
+
+    AIContext:
+        AI 답변 시 "동종 분포 별도 조회 필요" 단서 명시. metric 단독 인용으로 "업계 1 위" 단정
+        금지.
     """
     result = _evaluate(company, basePeriod)
     if result is None:
@@ -276,336 +479,11 @@ def calcCreditPeerPosition(company, *, basePeriod: str | None = None) -> dict | 
     }
 
 
-@_memoized_calc
-def calcCreditFlags(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용 경고(warning)/개선(opportunity) 플래그.
+# ── calcCreditFlags + calcCreditNarrative + calcCreditAudit + calcGradeImprovement → _calcsAdvanced.py 분리 ──
 
-    최신 기간의 핵심 지표를 검사하여 등급에 영향을 미치는
-    경고 신호와 개선 기회를 식별한다.
-
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
-
-    Returns
-    -------
-    dict | None
-        flags : list[dict] — 경고/개선 플래그 목록
-            type : str — "warning" 또는 "opportunity"
-            signal : str — 신호 요약 (예: "이자보상배율 1.5배 미달")
-            detail : str — 상세 설명 (예: "EBITDA/이자비용 = 1.2배")
-            impact : str — 등급 영향 (예: "등급 하방 1~2 notch")
-    """
-    result = _evaluate(company, basePeriod)
-    if result is None:
-        return None
-
-    history_data = result.get("metricsHistory", [])
-    if not history_data:
-        return None
-
-    latest = history_data[0]
-    flags: list[dict] = []
-
-    isFinancial = False
-    try:
-        si = getattr(company, "sector", None)
-        if si:
-            from dartlab.frame.sector import Sector
-
-            isFinancial = si.sector == Sector.FINANCIALS
-    except (AttributeError, ImportError):
-        pass
-
-    icr = latest.get("ebitdaInterestCoverage")
-    if icr is not None and icr < 1.5 and not isFinancial:
-        flags.append(
-            {
-                "type": "warning",
-                "signal": "이자보상배율 1.5배 미달",
-                "detail": f"EBITDA/이자비용 = {icr}배",
-                "impact": "등급 하방 1~2 notch",
-            }
-        )
-
-    dr = latest.get("debtRatio")
-    if dr is not None and dr > 300 and not isFinancial:
-        flags.append(
-            {"type": "warning", "signal": "부채비율 300% 초과", "detail": f"부채비율 {dr:.0f}%", "impact": "등급 하방"}
-        )
-
-    ocfVal = latest.get("ocf")
-    if ocfVal is not None and ocfVal < 0:
-        flags.append(
-            {
-                "type": "warning",
-                "signal": "영업현금흐름 적자",
-                "detail": "본업에서 현금 유출",
-                "impact": "등급 하방 2+ notch",
-            }
-        )
-
-    de = latest.get("debtToEbitda")
-    if de is not None and de > 5 and not isFinancial:
-        flags.append(
-            {
-                "type": "warning",
-                "signal": "Debt/EBITDA 5배 초과",
-                "detail": f"총차입금/EBITDA = {de}배",
-                "impact": "B급 이하 위험",
-            }
-        )
-
-    if icr is not None and icr > 10:
-        flags.append(
-            {
-                "type": "opportunity",
-                "signal": "이자보상배율 10배 초과",
-                "detail": f"EBITDA/이자비용 = {icr}배",
-                "impact": "등급 상방",
-            }
-        )
-
-    ffoDebt = latest.get("ffoToDebt")
-    if ffoDebt is not None and ffoDebt > 40:
-        flags.append(
-            {
-                "type": "opportunity",
-                "signal": "FFO/총차입금 40% 초과",
-                "detail": f"FFO/Debt = {ffoDebt:.0f}%",
-                "impact": "등급 상방",
-            }
-        )
-
-    cr = latest.get("currentRatio")
-    if cr is not None and cr > 200:
-        flags.append(
-            {
-                "type": "opportunity",
-                "signal": "유동비율 200% 초과",
-                "detail": f"유동비율 {cr:.0f}%",
-                "impact": "유동성 안전",
-            }
-        )
-
-    return {"flags": flags}
-
-
-@_memoized_calc
-def calcCreditNarrative(company, *, basePeriod: str | None = None) -> dict | None:
-    """credit publisher의 7축 서사를 story 블록용으로 변환.
-
-    credit/narrative.py::buildNarratives() 결과를 그대로 반환.
-    review가 5-7 신용평가 섹션에서 소비.
-
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
-
-    Returns
-    -------
-    dict | None
-        axes : list[dict] — 축별 서사
-            axisName : str — 축 이름 (예: "채무상환능력")
-            summary : str — 한 줄 요약
-            details : list[str] — 상세 설명 문장들
-            severity : str — 심각도 ("good"/"neutral"/"warning"/"critical")
-        grade : str — dCR 등급 (예: "dCR-AA+")
-        gradeDescription : str — 등급 설명
-    """
-    result = _evaluate(company, basePeriod)
-    if result is None:
-        return None
-
-    from dartlab.credit.features.narrative import buildNarratives
-
-    try:
-        narratives = buildNarratives(result)
-    except (KeyError, AttributeError, TypeError):
-        return None
-
-    if not narratives:
-        return None
-
-    return {
-        "axes": [
-            {
-                "axisName": n.axisName,
-                "summary": n.summary,
-                "details": n.details,
-                "severity": n.severity,
-            }
-            for n in narratives
-        ],
-        "grade": result.get("grade", ""),
-        "gradeDescription": result.get("gradeDescription", ""),
-    }
-
-
-@_memoized_calc
-def calcCreditAudit(company, *, basePeriod: str | None = None) -> dict | None:
-    """credit publisher의 외부 신평사 대조를 story 블록용으로 변환.
-
-    credit/audit.py::auditCredit() 결과를 그대로 반환.
-
-    Parameters
-    ----------
-    company : Company
-        DartCompany 또는 EdgarCompany 인스턴스.
-    basePeriod : str | None
-        분석 기준 기간. None이면 최신.
-
-    Returns
-    -------
-    dict | None
-        stockCode : str — 종목코드
-        corpName : str — 기업명
-        dcrGrade : str — dartlab dCR 등급
-        dcrScore : float — dCR 점수 (점)
-        externalGrades : dict — 외부 신평사 등급 (기관명→등급)
-        notchDifferences : dict — 신평사별 notch 차이 (기관명→notch 수)
-        avgNotchDiff : float — 평균 notch 차이 (notch)
-        agreements : list[str] — 일치 포인트
-        disagreements : list[str] — 괴리 포인트
-    """
-    result = _evaluate(company, basePeriod)
-    if result is None:
-        return None
-
-    stockCode = getattr(company, "stockCode", None) or getattr(company, "ticker", "")
-    corpName = getattr(company, "corpName", "") or ""
-    if not stockCode:
-        return None
-
-    from dartlab.credit.monitoring.audit import auditCredit
-
-    try:
-        audit = auditCredit(stockCode, corpName, result=result)
-    except (KeyError, AttributeError, TypeError, OSError):
-        return None
-
-    if audit is None:
-        return None
-
-    return {
-        "stockCode": audit.stockCode,
-        "corpName": audit.corpName,
-        "dcrGrade": audit.dcrGrade,
-        "dcrScore": audit.dcrScore,
-        "externalGrades": dict(audit.externalGrades),
-        "notchDifferences": dict(audit.notchDifferences),
-        "avgNotchDiff": audit.avgNotchDiff,
-        "agreements": list(audit.agreements),
-        "disagreements": list(audit.disagreements),
-    }
-
-
-@_memoized_calc
-def calcGradeImprovement(company, *, basePeriod: str | None = None) -> dict | None:
-    """신용등급 한 노치 상향에 필요한 구체적 개선사항.
-
-    가장 약한 축을 찾고, 그 축의 metric을 다음 등급 구간까지
-    올리는 데 필요한 변화량을 역계산한다.
-
-    Returns
-    -------
-    dict | None
-        currentGrade : str
-        currentScore : float
-        targetGrade : str
-        weakestAxis : str
-        improvements : list[dict]
-            axis : str — 축 이름
-            metric : str — 지표명
-            current : float — 현재값
-            target : float — 목표값
-            change : str — 자연어 설명
-    """
-    result = _evaluate(company, basePeriod)
-    if not result:
-        return None
-
-    grade = result.get("grade", "")
-    score = result.get("score", 0)
-    metrics = result.get("metrics", {})
-
-    if not grade or not metrics:
-        return None
-
-    from dartlab.credit.features.sectorThresholds import getThresholds
-    from dartlab.credit.scoring.creditScorecard import mapTo20Grade, scoreMetric
-
-    sector, ig = None, None
-    try:
-        si = getattr(company, "sector", None)
-        if si:
-            sector, ig = si.sector, si.industryGroup
-    except (AttributeError, ImportError):
-        pass
-
-    thresholds = getThresholds(sector, ig)
-
-    # 각 축별 현재 스코어 산출 + 가장 약한 축 찾기
-    axis_scores: list[tuple[str, str, float, float]] = []
-    metric_map = [
-        ("leverage", "debt_to_ebitda", "debtToEbitda"),
-        ("coverage", "ebitda_interest_coverage", "ebitdaInterestCoverage"),
-        ("liquidity", "current_ratio", "currentRatio"),
-        ("cashflow", "ffo_to_debt", "ffoToDebt"),
-        ("stability", "debt_ratio", "debtRatio"),
-    ]
-    for axis_name, t_key, m_key in metric_map:
-        val = metrics.get(m_key)
-        if val is None:
-            continue
-        s = scoreMetric(val, thresholds[t_key])
-        if s is not None:
-            axis_scores.append((axis_name, t_key, val, s))
-
-    if not axis_scores:
-        return None
-
-    axis_scores.sort(key=lambda x: x[3], reverse=True)  # 높은 스코어 = 약한 축
-    weakest = axis_scores[0]
-
-    # 목표: 스코어를 5점 낮추면 대략 한 노치 상향
-    target_score = max(0, score - 5)
-    tg, _, _ = mapTo20Grade(target_score)
-
-    # 각 약한 축에서 필요한 metric 개선 역계산
-    improvements = []
-    for axis_name, t_key, current_val, current_score in axis_scores[:3]:
-        bp = thresholds[t_key]
-        # breakpoints에서 한 단계 나은 구간 찾기
-        target_val = current_val
-        for threshold_val, threshold_score in bp:
-            if threshold_score < current_score:
-                target_val = threshold_val
-                break
-
-        if target_val != current_val:
-            direction = "감소" if target_val < current_val else "증가"
-            pct_change = abs(target_val - current_val) / abs(current_val) * 100 if current_val != 0 else 0
-            improvements.append(
-                {
-                    "axis": axis_name,
-                    "metric": t_key,
-                    "current": round(current_val, 2),
-                    "target": round(target_val, 2),
-                    "change": f"{t_key} {current_val:.1f} → {target_val:.1f} ({pct_change:.0f}% {direction})",
-                }
-            )
-
-    return {
-        "currentGrade": grade,
-        "currentScore": round(score, 1),
-        "targetGrade": tg,
-        "weakestAxis": weakest[0],
-        "improvements": improvements,
-    }
+from dartlab.credit.scoring._calcsAdvanced import (  # noqa: E402, F401
+    calcCreditAudit,
+    calcCreditFlags,
+    calcCreditNarrative,
+    calcGradeImprovement,
+)

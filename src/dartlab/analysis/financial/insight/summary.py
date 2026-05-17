@@ -65,6 +65,10 @@ def _avgGrade(grades: dict[str, str]) -> float:
 def classifyProfile(grades: dict[str, str]) -> str:
     """등급 조합으로 기업 프로필 분류.
 
+    Capabilities:
+        - 평균 점수 + 영역별 등급 조합 → 6 프로필 (premium/growth/stable/caution/
+          distress/mixed) 중 하나 매핑.
+
     Parameters
     ----------
     grades : dict[str, str]
@@ -74,6 +78,32 @@ def classifyProfile(grades: dict[str, str]) -> str:
     -------
     str
         profile : str — 'premium' | 'growth' | 'stable' | 'caution' | 'distress' | 'mixed'
+
+    Guide:
+        프로필은 사용자 답변 톤 (우량 vs 주의) 결정에 사용. 단일 등급보다 신호 풍부.
+
+    When:
+        analyzeFinancial 후반. 8 영역 grade 산출 직후 호출.
+
+    How:
+        평균 점수 + risk/health/profitability 등 핵심 영역 등급 조건 비교.
+
+    Requires:
+        grades dict 에 핵심 영역 (performance/profitability/health/risk/opportunity) 키.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyProfile({"performance": "A", "profitability": "A", "risk": "A"})
+        'premium'
+
+    See Also:
+        - generateSummary: 본 프로필 사용해 톤 분기
+        - analyzeRiskSummary: 'risk' 등급 산출
+
+    AIContext:
+        프로필명은 내부 키로만 사용. 사용자 답변에는 generateSummary 의 한국어 텍스트로 전달.
     """
     avgScore = _avgGrade(grades)
     perf = grades.get("performance", "C")
@@ -179,6 +209,10 @@ def generateSummary(
 ) -> str:
     """한국어 종합 요약 생성.
 
+    Capabilities:
+        - 프로필별 톤 분기 + 강점/약점 영역 라벨 + danger anomaly 1 건 통합 →
+          2~4 문장 자연어 요약 생성.
+
     Parameters
     ----------
     corpName : str
@@ -194,6 +228,32 @@ def generateSummary(
     -------
     str
         summary : str — 2~4문장의 한국어 종합 요약.
+
+    Guide:
+        UI 카드 헤더 + Ask Workbench 답변 도입부에 직접 사용. 회사명 조사 자동.
+
+    When:
+        analyzeFinancial 의 최종 단계. AnalysisResult.summary 필드에 저장.
+
+    How:
+        profile 분기 → 강점/약점 라벨 추출 → keyMetric → danger anomaly 합성.
+
+    Requires:
+        insights dict (강점/약점 추출) + anomalies (danger 보강).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> generateSummary("삼성전자", insights, anomalies, "premium")
+        '삼성전자는 실적, 수익성 등 ...'
+
+    See Also:
+        - classifyProfile: profile 산출
+        - analyzeFinancial: 상위 호출자
+
+    AIContext:
+        본 텍스트가 사용자 답변 시작. 추가 분석은 영역별 grade · anomaly · distress 인용으로 확장.
     """
     strengths = _getStrengths(insights)
     weaknesses = _getWeaknesses(insights)

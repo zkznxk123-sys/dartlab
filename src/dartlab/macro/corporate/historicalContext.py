@@ -21,6 +21,23 @@ from dataclasses import dataclass
 
 import numpy as np
 
+# 회복기 신호 (bullishSignalFlags + hyCompressionToExpansion) — _historicalContextBullish.py 분리 (BC re-export)
+from dartlab.macro.corporate._historicalContextBullish import (  # noqa: F401
+    _HISTORICAL_EPOCHS,
+    _SIGNATURE_CHECKS,
+    bullishSignalFlags,
+    hyCompressionToExpansion,
+)
+
+# 이벤트 통계 (분리: _historicalContextEvents.py SSOT, re-export 으로 BC 보존)
+from dartlab.macro.corporate._historicalContextEvents import (  # noqa: F401
+    cpiAccelerationEvents,
+    hySpikesToRecession,
+    simultaneousWarningFlags,
+    unemploymentBounceToRecession,
+    yieldCurveInversionsToRecession,
+)
+
 # 헬퍼 (분리: _historicalContextHelpers.py SSOT, re-export 으로 BC 보존)
 from dartlab.macro.corporate._historicalContextHelpers import (
     _NBER_RECESSIONS,
@@ -43,333 +60,6 @@ from dartlab.macro.corporate._historicalContextTypes import (
     YCInversionHistory,
 )
 
-# ── 순수함수 ──
-
-
-def hySpikesToRecession(
-    hyMonthly: dict[str, float],
-    *,
-    thresholdBp: float = 1.0,
-    currentDelta: float | None = None,
-) -> HYSpikeHistory:
-    """HY 스프레드 3개월 급등 → 침체 선행 통계.
-
-    Args:
-        hy_monthly: {YYYY-MM: HY spread %}
-        threshold_bp: 급등 기준 (%, 기본 1.0 = 100bp)
-        current_delta: 현재 3개월 변화 (매칭용)
-
-    Returns:
-        HYSpikeHistory
-    """
-    d3 = _deltaN(hyMonthly, 3)
-    spikes: list[tuple[str, float, int, bool]] = []  # (month, delta, months_to_rec, in_rec)
-
-    for m in sorted(d3.keys()):
-        if d3[m] > thresholdBp:
-            mtr = _monthsToNextRecession(m)
-            spikes.append((m, d3[m], mtr, _isRecession(m)))
-
-    # 침체 중이 아닌 급등 → 12개월 내 침체 통계
-    pre_rec = [s for s in spikes if not s[3] and s[2] < 999]
-    within_12 = sum(1 for s in pre_rec if s[2] <= 12)
-    rate = within_12 / len(pre_rec) if pre_rec else 0.0
-
-    # 현재와 가장 유사한 시점
-    nearest = None
-    nearest_delta = None
-    nearest_outcome = None
-    if currentDelta is not None and spikes:
-        best_diff = float("inf")
-        for m, delta, mtr, in_rec in spikes:
-            diff = abs(delta - currentDelta)
-            if diff < best_diff:
-                best_diff = diff
-                nearest = m
-                nearest_delta = delta
-                if in_rec:
-                    nearest_outcome = "침체 중"
-                elif mtr < 999:
-                    nearest_outcome = f"{mtr}개월 후 침체"
-                else:
-                    nearest_outcome = "침체 없음"
-
-    desc_parts = [f"HY 스프레드 3개월 +{thresholdBp * 100:.0f}bp 이상 급등: 과거 {len(spikes)}회"]
-    if pre_rec:
-        desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate * 100:.0f}%)")
-    if nearest:
-        desc_parts.append(f"가장 유사: {nearest} ({nearest_outcome})")
-
-    return HYSpikeHistory(
-        totalSpikes=len(spikes),
-        recessionWithin12m=within_12,
-        recessionRate12m=round(rate, 3),
-        nearestMatch=nearest,
-        nearestMatchDelta=round(nearest_delta, 2) if nearest_delta else None,
-        nearestMatchOutcome=nearest_outcome,
-        currentDelta=round(currentDelta, 2) if currentDelta is not None else None,
-        description=". ".join(desc_parts),
-    )
-
-
-def yieldCurveInversionsToRecession(
-    spreadMonthly: dict[str, float],
-) -> YCInversionHistory:
-    """Yield Curve 역전 시작점 → 침체까지 통계.
-
-    Args:
-        spread_monthly: {YYYY-MM: 10Y-3M spread %}
-    """
-    months = sorted(spreadMonthly.keys())
-    inversions: list[tuple[str, float, int]] = []  # (start_month, spread, months_to_rec)
-    prev_positive = True
-
-    for m in months:
-        val = spreadMonthly[m]
-        if val < 0 and prev_positive:
-            mtr = _monthsToNextRecession(m)
-            inversions.append((m, val, mtr))
-        prev_positive = val >= 0
-
-    valid = [i for i in inversions if i[2] < 999]
-    leads = [i[2] for i in valid] if valid else []
-
-    # 현재 역전 상태 확인
-    current_start = None
-    current_dur = None
-    if months:
-        latest = months[-1]
-        if spreadMonthly[latest] < 0:
-            # 역전 시작점 역추적
-            for m in reversed(months):
-                if spreadMonthly[m] >= 0:
-                    break
-                current_start = m
-            if current_start:
-                y1, m1 = int(current_start[:4]), int(current_start[5:7])
-                y2, m2 = int(latest[:4]), int(latest[5:7])
-                current_dur = (y2 - y1) * 12 + (m2 - m1)
-
-    desc_parts = [f"Yield Curve 역전: 과거 {len(inversions)}회"]
-    if leads:
-        desc_parts.append(
-            f"역전→침체 평균 {np.mean(leads):.0f}개월, 중위 {np.median(leads):.0f}개월 (범위 {min(leads)}~{max(leads)})"
-        )
-    if current_start:
-        desc_parts.append(f"현재 {current_start}부터 역전 중 ({current_dur}개월째)")
-
-    return YCInversionHistory(
-        totalInversions=len(inversions),
-        avgLeadMonths=round(float(np.mean(leads)), 1) if leads else None,
-        medianLeadMonths=round(float(np.median(leads)), 1) if leads else None,
-        rangeLeadMonths=(min(leads), max(leads)) if leads else None,
-        currentInversionStart=current_start,
-        currentDurationMonths=current_dur,
-        description=". ".join(desc_parts),
-    )
-
-
-def unemploymentBounceToRecession(
-    urMonthly: dict[str, float],
-    *,
-    thresholdPp: float = 0.3,
-) -> URBounceHistory:
-    """실업률 12개월 최저에서 반등 → 침체 선행 통계.
-
-    Args:
-        ur_monthly: {YYYY-MM: 실업률 %}
-        threshold_pp: 반등 기준 (%p)
-    """
-    months = sorted(urMonthly.keys())
-    bounces: list[tuple[str, float, float, int]] = []  # (month, ur, low, mtr)
-
-    for i, m in enumerate(months):
-        if i < 12:
-            continue
-        window = [urMonthly[months[j]] for j in range(i - 12, i + 1)]
-        low = min(window)
-        bounce = urMonthly[m] - low
-        if bounce >= thresholdPp:
-            # 이번 달에 처음 돌파?
-            prev_bounce = urMonthly[months[i - 1]] - min(urMonthly[months[j]] for j in range(max(0, i - 13), i))
-            if prev_bounce < thresholdPp:
-                mtr = _monthsToNextRecession(m)
-                bounces.append((m, urMonthly[m], low, mtr))
-
-    pre_rec = [b for b in bounces if not _isRecession(b[0]) and b[3] < 999]
-    within_12 = sum(1 for b in pre_rec if b[3] <= 12)
-    rate = within_12 / len(pre_rec) if pre_rec else 0.0
-
-    # 현재 반등 상태
-    current_bounce = None
-    if months:
-        latest = months[-1]
-        i = len(months) - 1
-        if i >= 12:
-            window = [urMonthly[months[j]] for j in range(i - 12, i + 1)]
-            low = min(window)
-            current_bounce = round(urMonthly[latest] - low, 2)
-
-    desc_parts = [f"실업률 12개월 저점 대비 +{thresholdPp}%p 이상 반등: 과거 {len(bounces)}회"]
-    if pre_rec:
-        desc_parts.append(f"12개월 내 침체 {within_12}/{len(pre_rec)} ({rate * 100:.0f}%)")
-    if current_bounce is not None and current_bounce >= thresholdPp:
-        desc_parts.append(f"현재 저점 대비 +{current_bounce}%p 반등 중")
-
-    return URBounceHistory(
-        totalBounces=len(bounces),
-        recessionWithin12m=within_12,
-        recessionRate12m=round(rate, 3),
-        currentBounce=current_bounce,
-        description=". ".join(desc_parts),
-    )
-
-
-def cpiAccelerationEvents(
-    cpiRawMonthly: dict[str, float],
-    *,
-    thresholdPp: float = 1.0,
-) -> dict:
-    """CPI 가속 구간 식별.
-
-    Args:
-        cpi_raw_monthly: {YYYY-MM: CPI index}
-        threshold_pp: 3개월간 YoY 변화 기준 (%p)
-
-    Returns:
-        dict with count, currentAcceleration, description
-    """
-    cpiYoy = _yoy(cpiRawMonthly)
-    accel = _deltaN(cpiYoy, 3)
-
-    events = [(m, accel[m]) for m in sorted(accel.keys()) if accel[m] > thresholdPp]
-
-    # 현재 가속도
-    latest_month = max(accel.keys()) if accel else None
-    current_accel = accel.get(latest_month) if latest_month else None
-
-    desc = f"CPI 3개월 +{thresholdPp}%p 이상 가속: 과거 {len(events)}회"
-    if current_accel is not None and current_accel > thresholdPp:
-        desc += f". 현재 +{current_accel:.1f}%p 가속 중"
-
-    return {
-        "count": len(events),
-        "currentAcceleration": round(current_accel, 2) if current_accel else None,
-        "isAccelerating": current_accel is not None and current_accel > thresholdPp,
-        "description": desc,
-    }
-
-
-def simultaneousWarningFlags(
-    data: dict[str, dict[str, float] | None],
-) -> SimultaneousWarnings:
-    """8개 경고등 동시 점등 판정.
-
-    Args:
-        data: {
-            "hy_spread": {YYYY-MM: %},
-            "hy_spread_d3": {YYYY-MM: 3m변화},
-            "spread_10y2y": {YYYY-MM: %},
-            "ur_d6": {YYYY-MM: 6m변화},
-            "vix": {YYYY-MM: level},
-            "nfci": {YYYY-MM: index},
-            "ip_yoy": {YYYY-MM: %},
-            "cpi_yoy": {YYYY-MM: %},
-        }
-    """
-    hy = data.get("hy_spread") or {}
-    hyD3 = data.get("hy_spread_d3") or {}
-    yc = data.get("spread_10y2y") or {}
-    urD6 = data.get("ur_d6") or {}
-    vixD = data.get("vix") or {}
-    nfciD = data.get("nfci") or {}
-    ipYoy = data.get("ip_yoy") or {}
-    cpiYoy = data.get("cpi_yoy") or {}
-
-    # 공통 월 집합
-    all_months = sorted(set(hy.keys()) & set(yc.keys()))
-
-    # 현재 월 경고등
-    latest = all_months[-1] if all_months else None
-    active: list[str] = []
-    if latest:
-        if hy.get(latest, 0) > 5:
-            active.append("HY>5%")
-        if hyD3.get(latest, 0) > 0.5:
-            active.append("HY급등")
-        if yc.get(latest, 1) < 0:
-            active.append("YC역전")
-        if urD6.get(latest, 0) > 0.3:
-            active.append("실업↑")
-        if vixD.get(latest, 0) > 25:
-            active.append("VIX>25")
-        if nfciD.get(latest, -1) > 0:
-            active.append("NFCI긴축")
-        if ipYoy.get(latest, 1) < 0:
-            active.append("산업생산↓")
-        if cpiYoy.get(latest, 0) > 5:
-            active.append("CPI>5%")
-
-    # 역사적 동시 점등 통계
-    multi_warn_months: list[tuple[str, list[str]]] = []
-    for m in all_months:
-        flags: list[str] = []
-        if hy.get(m, 0) > 5:
-            flags.append("HY>5%")
-        if hyD3.get(m, 0) > 0.5:
-            flags.append("HY급등")
-        if yc.get(m, 1) < 0:
-            flags.append("YC역전")
-        if urD6.get(m, 0) > 0.3:
-            flags.append("실업↑")
-        if vixD.get(m, 0) > 25:
-            flags.append("VIX>25")
-        if nfciD.get(m, -1) > 0:
-            flags.append("NFCI긴축")
-        if ipYoy.get(m, 1) < 0:
-            flags.append("산업생산↓")
-        if cpiYoy.get(m, 0) > 5:
-            flags.append("CPI>5%")
-        if len(flags) >= 3:
-            multi_warn_months.append((m, flags))
-
-    # 18개월 내 침체 비율
-    pre_rec = [(m, flags) for m, flags in multi_warn_months if not _isRecession(m) and _monthsToNextRecession(m) < 999]
-    within_18 = sum(1 for m, _ in pre_rec if _monthsToNextRecession(m) <= 18)
-    rate = within_18 / len(pre_rec) if pre_rec else 0.0
-
-    # 유사 시기 매칭 (현재 경고등과 겹치는 과거)
-    similar: list[dict] = []
-    if active:
-        active_set = set(active)
-        for m, flags in reversed(multi_warn_months):
-            if m == latest:
-                continue
-            overlap = set(flags) & active_set
-            if len(overlap) >= 2:
-                mtr = _monthsToNextRecession(m)
-                outcome = "침체 중" if _isRecession(m) else (f"{mtr}개월 후 침체" if mtr < 24 else "침체 없음")
-                similar.append({"month": m, "flags": flags, "outcome": outcome, "overlap": list(overlap)})
-            if len(similar) >= 5:
-                break
-
-    desc = f"현재 경고등 {len(active)}개"
-    if active:
-        desc += f" ({', '.join(active)})"
-    desc += f". 과거 3개+ 동시 점등 {len(multi_warn_months)}회"
-    if pre_rec:
-        desc += f", 18개월 내 침체 {within_18}/{len(pre_rec)} ({rate * 100:.0f}%)"
-
-    return SimultaneousWarnings(
-        activeFlags=active,
-        flagCount=len(active),
-        historicalOccurrences=len(multi_warn_months),
-        recessionRate18m=round(rate, 3),
-        similarPeriods=similar,
-        description=desc,
-    )
-
-
 # ══════════════════════════════════════
 # 호황/회복 신호 (위기의 반대)
 # ══════════════════════════════════════
@@ -382,291 +72,6 @@ _EXPANSION_STARTS: list[str] = [
     "2001-12",
     "2009-07",
     "2020-05",
-]
-
-
-def _monthsSinceRecessionEnd(month: str) -> int | None:
-    """마지막 침체 종료 이후 경과 개월. 침체 중이면 None."""
-    if _isRecession(month):
-        return None
-    for _, end in reversed(_NBER_RECESSIONS):
-        if month > end:
-            y1, m1 = int(end[:4]), int(end[5:7])
-            y2, m2 = int(month[:4]), int(month[5:7])
-            return (y2 - y1) * 12 + (m2 - m1)
-    return None
-
-
-def hyCompressionToExpansion(
-    hyMonthly: dict[str, float],
-    *,
-    thresholdBp: float = -1.0,
-) -> HYCompressionHistory:
-    """HY 스프레드 3개월 급락 (신용 완화) → 확장 통계.
-
-    HY가 빠르게 줄어든다 = 신용 시장이 안정 = 경기 회복/확장 신호.
-    """
-    d3 = _deltaN(hyMonthly, 3)
-    compressions: list[tuple[str, float, int | None]] = []
-
-    for m in sorted(d3.keys()):
-        if d3[m] < thresholdBp:
-            since = _monthsSinceRecessionEnd(m)
-            compressions.append((m, d3[m], since))
-
-    # 침체 직후 급락인 경우 (회복 초기) — 이후 확장 기간
-    recovery_compressions = [c for c in compressions if c[2] is not None and c[2] <= 12]
-    expansion_durations = []
-    for m, _, _ in recovery_compressions:
-        mtr = _monthsToNextRecession(m)
-        if mtr < 999:
-            expansion_durations.append(mtr)
-
-    avg_exp = float(np.mean(expansion_durations)) if expansion_durations else None
-
-    latest = max(d3.keys()) if d3 else None
-    currentDelta = d3.get(latest) if latest else None
-
-    desc_parts = [
-        f"HY 스프레드 3개월 -{abs(thresholdBp) * 100:.0f}bp 이상 급락 (신용 완화): 과거 {len(compressions)}회"
-    ]
-    if avg_exp:
-        desc_parts.append(f"회복 초기 급락 후 평균 {avg_exp:.0f}개월 확장 지속")
-    if currentDelta is not None and currentDelta < thresholdBp:
-        desc_parts.append(f"현재 3개월 {currentDelta * 100:+.0f}bp — 신용 완화 진행 중")
-
-    return HYCompressionHistory(
-        totalCompressions=len(compressions),
-        avgExpansionMonths=round(avg_exp, 1) if avg_exp else None,
-        currentDelta=round(currentDelta, 2) if currentDelta is not None else None,
-        description=". ".join(desc_parts),
-    )
-
-
-def bullishSignalFlags(
-    data: dict[str, dict[str, float] | None],
-) -> BullishSignals:
-    """호황/회복 신호 감지 — 위기 경고등의 반대.
-
-    8개 긍정 신호:
-    - HY<4% (신용 안정)
-    - HY 축소 중 (3m<0)
-    - YC 양수 (>1.0)
-    - 실업률 하락 중 (6m<0)
-    - VIX<18 (안정)
-    - NFCI<-0.5 (금융환경 완화)
-    - 산업생산 성장 (YoY>2%)
-    - CPI 안정 (YoY 1~3%)
-    """
-    hy = data.get("hy_spread") or {}
-    hyD3 = data.get("hy_spread_d3") or {}
-    yc = data.get("spread_10y2y") or {}
-    urD6 = data.get("ur_d6") or {}
-    vixD = data.get("vix") or {}
-    nfciD = data.get("nfci") or {}
-    ipYoy = data.get("ip_yoy") or {}
-    cpiYoy = data.get("cpi_yoy") or {}
-
-    all_months = sorted(set(hy.keys()) & set(yc.keys())) if hy and yc else []
-    latest = all_months[-1] if all_months else None
-
-    active: list[str] = []
-    if latest:
-        if hy.get(latest, 10) < 4:
-            active.append("HY<4%")
-        if hyD3.get(latest, 0) < -0.3:
-            active.append("HY축소")
-        if yc.get(latest, 0) > 1.0:
-            active.append("YC양수")
-        if urD6.get(latest, 0) < 0:
-            active.append("실업↓")
-        if vixD.get(latest, 30) < 18:
-            active.append("VIX안정")
-        if nfciD.get(latest, 0) < -0.5:
-            active.append("NFCI완화")
-        if ipYoy.get(latest, 0) > 2:
-            active.append("산업생산↑")
-        cpi = cpiYoy.get(latest, 5)
-        if 1 <= cpi <= 3:
-            active.append("CPI안정")
-
-    # 역사적 4개+ 동시 점등 통계
-    multi_bull: list[tuple[str, list[str]]] = []
-    for m in all_months:
-        signals: list[str] = []
-        if hy.get(m, 10) < 4:
-            signals.append("HY<4%")
-        if hyD3.get(m, 0) < -0.3:
-            signals.append("HY축소")
-        if yc.get(m, 0) > 1.0:
-            signals.append("YC양수")
-        if urD6.get(m, 0) < 0:
-            signals.append("실업↓")
-        if vixD.get(m, 30) < 18:
-            signals.append("VIX안정")
-        if nfciD.get(m, 0) < -0.5:
-            signals.append("NFCI완화")
-        if ipYoy.get(m, 0) > 2:
-            signals.append("산업생산↑")
-        cpi_v = cpiYoy.get(m, 5)
-        if 1 <= cpi_v <= 3:
-            signals.append("CPI안정")
-        if len(signals) >= 4:
-            multi_bull.append((m, signals))
-
-    # 4개+ 호황 신호 후 확장 지속 기간
-    expansion_months = []
-    for m, _ in multi_bull:
-        mtr = _monthsToNextRecession(m)
-        if mtr < 999 and not _isRecession(m):
-            expansion_months.append(mtr)
-    avg_exp = float(np.mean(expansion_months)) if expansion_months else None
-
-    # 유사 시기
-    similar: list[dict] = []
-    if active:
-        active_set = set(active)
-        for m, signals in reversed(multi_bull):
-            if m == latest:
-                continue
-            overlap = set(signals) & active_set
-            if len(overlap) >= 3:
-                mtr = _monthsToNextRecession(m)
-                outcome = f"{mtr}개월 확장 지속" if mtr < 999 and not _isRecession(m) else "확장 중"
-                similar.append({"month": m, "signals": signals, "outcome": outcome, "overlap": list(overlap)})
-            if len(similar) >= 5:
-                break
-
-    desc = f"호황 신호 {len(active)}개"
-    if active:
-        desc += f" ({', '.join(active)})"
-    desc += f". 과거 4개+ 동시 {len(multi_bull)}회"
-    if avg_exp:
-        desc += f", 이후 평균 {avg_exp:.0f}개월 확장"
-
-    return BullishSignals(
-        activeSignals=active,
-        signalCount=len(active),
-        historicalOccurrences=len(multi_bull),
-        avgExpansionMonths=round(avg_exp, 1) if avg_exp else None,
-        similarPeriods=similar,
-        description=desc,
-    )
-
-
-# ══════════════════════════════════════
-# 역사적 사건 매칭
-# ══════════════════════════════════════
-
-_HISTORICAL_EPOCHS: list[dict] = [
-    {
-        "name": "볼커 긴축 (1980-81)",
-        "period": ("1980-01", "1982-11"),
-        "signature": {"cpi_yoy_high": 8, "ff_high": 10, "ur_high": 7},
-        "outcome": "인플레 진압 → 1983~89 장기 확장",
-        "nextRisk": "골디락스",
-        "nextEvent": "1983~89 장기 확장",
-    },
-    {
-        "name": "골디락스 (1995-98)",
-        "period": ("1995-01", "1998-06"),
-        "signature": {"cpi_yoy_low": 3, "ur_low": 5.5, "vix_low": 20, "yc_positive": True},
-        "outcome": "저인플레 + 완전고용 + 주식 강세 42개월",
-        "nextRisk": "자산 버블 붕괴",
-        "nextEvent": "IT 버블 정점 (2000) → NASDAQ -78%",
-    },
-    {
-        "name": "IT 버블 정점 (2000)",
-        "period": ("1999-06", "2000-09"),
-        "signature": {"vix_low": 25, "yc_inverted": True, "ip_strong": True},
-        "outcome": "NASDAQ -78%, 2001-03 침체 시작",
-        "nextRisk": "신용 충격",
-        "nextEvent": "2001 침체 → 2001-03~2001-11",
-    },
-    {
-        "name": "금융위기 (2008)",
-        "period": ("2007-12", "2009-03"),
-        "signature": {"hy_high": 8, "nfci_tight": True, "ur_rising": True, "ip_falling": True},
-        "outcome": "S&P -57%, 실업률 10%, 2009-03 저점 후 V자 반등",
-        "nextRisk": "연착륙",
-        "nextEvent": "2009 대반등 → 112개월 확장",
-    },
-    {
-        "name": "2009 대반등",
-        "period": ("2009-03", "2010-06"),
-        "signature": {"hy_falling": True, "nfci_easing": True, "vix_falling": True},
-        "outcome": "S&P +80% (12개월), 112개월 확장 시작",
-        "nextRisk": "신용 충격",
-        "nextEvent": "유럽 재정위기 (2011) → S&P -19%",
-    },
-    {
-        "name": "유럽 재정위기 (2011)",
-        "period": ("2011-07", "2011-12"),
-        "signature": {"hy_high": 6, "vix_high": 30, "yc_positive": True},
-        "outcome": "V자 반등, 위기는 유럽에 국한",
-        "nextRisk": "골디락스",
-        "nextEvent": "2012~2018 장기 확장",
-    },
-    {
-        "name": "연준 긴축 쇼크 (2018말)",
-        "period": ("2018-10", "2019-01"),
-        "signature": {"hy_rising": True, "vix_high": 25, "yc_flat": True, "ff_rising": True},
-        "outcome": "연준 피벗(금리 동결) → 2019 강세장",
-        "nextRisk": "지정학/팬데믹",
-        "nextEvent": "COVID 충격 (2020-03)",
-    },
-    {
-        "name": "COVID 충격 (2020-03)",
-        "period": ("2020-02", "2020-04"),
-        "signature": {"vix_high": 40, "hy_high": 8, "nfci_tight": True, "ip_falling": True},
-        "outcome": "역사상 최단 침체(2개월), V자 반등, 양적완화",
-        "nextRisk": "인플레이션 충격",
-        "nextEvent": "인플레 긴축 (2022) → CPI 9.1%",
-    },
-    {
-        "name": "인플레 긴축 (2022)",
-        "period": ("2022-01", "2022-12"),
-        "signature": {"cpi_yoy_high": 5, "ff_rising": True, "yc_inverted": True},
-        "outcome": "NASDAQ -33%, 하지만 침체 회피",
-        "nextRisk": "골디락스",
-        "nextEvent": "AI 강세장 (2023-24) → 연착륙",
-    },
-    {
-        "name": "AI 강세장 (2023-24)",
-        "period": ("2023-01", "2024-12"),
-        "signature": {"vix_low": 20, "ur_low": 4.5, "ip_stable": True, "hy_low": 4},
-        "outcome": "NASDAQ +85%, 연착륙 기대",
-        "nextRisk": "AI 버블 붕괴",
-        "nextEvent": "??? (진행 중)",
-    },
-]
-
-
-# signature 조건 → (curr 키, 비교 함수 (값, 임계값) → bool)
-# 임계값 없는 키는 sig 내 boolean flag 만 검사 (두 번째 인자 무시).
-_SIGNATURE_CHECKS: list[tuple[str, str, object]] = [
-    ("cpi_yoy_high", "cpi_yoy", lambda v, t: v >= t),
-    ("cpi_yoy_low", "cpi_yoy", lambda v, t: v <= t),
-    ("ff_high", "ff", lambda v, t: v >= t),
-    ("ff_rising", "ff", lambda v, _t: v > 3),
-    ("ur_high", "ur", lambda v, t: v >= t),
-    ("ur_low", "ur", lambda v, t: v <= t),
-    ("ur_rising", "ur_d6", lambda v, _t: v > 0.3),
-    ("vix_high", "vix", lambda v, t: v >= t),
-    ("vix_low", "vix", lambda v, t: v <= t),
-    ("vix_falling", "vix", lambda v, _t: v < 20),
-    ("hy_high", "hy", lambda v, t: v >= t),
-    ("hy_low", "hy", lambda v, t: v <= t),
-    ("hy_rising", "hy_d3", lambda v, _t: v > 0.5),
-    ("hy_falling", "hy_d3", lambda v, _t: v < -0.5),
-    ("yc_inverted", "yc", lambda v, _t: v < 0),
-    ("yc_positive", "yc", lambda v, _t: v > 0.5),
-    ("yc_flat", "yc", lambda v, _t: -0.3 <= v <= 0.3),
-    ("nfci_tight", "nfci", lambda v, _t: v > 0),
-    ("nfci_easing", "nfci", lambda v, _t: v < -0.3),
-    ("ip_falling", "ip_yoy", lambda v, _t: v < 0),
-    ("ip_strong", "ip_yoy", lambda v, _t: v > 3),
-    ("ip_stable", "ip_yoy", lambda v, _t: v > -1),
 ]
 
 
@@ -713,7 +118,58 @@ def matchHistoricalEvents(
 ) -> list[HistoricalEvent]:
     """현재 매크로 상태와 유사한 역사적 사건 매칭 (Q3.1e split).
 
-    _SIGNATURE_CHECKS 테이블 기반 스코어링 → 0.5 이상 매치만 반환 (상위 3).
+    Capabilities:
+        현재 매크로 스냅샷을 _HISTORICAL_EPOCHS (볼커/골디락스/IT 버블/2008/2009
+        대반등/2011 유럽/2018 긴축/COVID/2022 인플레/AI 강세) 의 signature 와
+        _SIGNATURE_CHECKS 테이블로 스코어링 → 매치율 ≥ 0.5 상위 3 사건 반환.
+
+    Args:
+        data: 8 시리즈 월별 dict ({"hy_spread"/.../"cpi_yoy": {"YYYY-MM": v}}).
+
+    Returns:
+        list[HistoricalEvent] (eventName/eventDate/similarity(높음·보통)/context/
+        outcome). 최대 3 건.
+
+    Example:
+        >>> events = matchHistoricalEvents({"hy_spread": {...}, ...})
+        >>> events[0].eventName, events[0].similarity
+        ('2009 대반등', '높음')
+
+    Guide:
+        similarity "높음" (매치율 ≥ 0.75) 만 인용 권장. context 의 N/M 매칭
+        비율로 신뢰성 검증.
+
+    When:
+        ``buildHistoricalContext`` 내부 + AI "과거 어디와 비슷" 답변.
+
+    How:
+        _extractCurrentSnapshot → 각 epoch signature × _SIGNATURE_CHECKS 매칭 →
+        score/checks → 매치율 정렬 → top 3.
+
+    Requires:
+        8 시리즈 월별 (HY/HY_d3/YC/UR/UR_d6/VIX/NFCI/IP/CPI).
+
+    Raises:
+        없음 — 매치 없으면 빈 list.
+
+    See Also:
+        - buildHistoricalContext : 본 함수 호출 진입점
+        - simultaneousWarningFlags : 위기 신호
+
+    AIContext:
+        top 1~2 eventName + outcome 인용으로 "지금 2008-12 와 비슷, 향후 V자
+        반등" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 매치율 0.5~0.75 (보통) 단정 + similarity 미공개
+            - top 1 단정 + 후보 2/3 미노출
+        OutputSchema:
+            list[HistoricalEvent] (5 필드).
+        Prerequisites: 8 시리즈 월별.
+        Freshness: 월간.
+        Dataflow: snapshot → signature 매칭 → score → top-3.
+        TargetMarkets: US (epoch 미국 중심). KR 미지원.
     """
     curr = _extractCurrentSnapshot(data)
     matches: list[tuple[float, HistoricalEvent]] = []
@@ -888,21 +344,64 @@ def buildHistoricalContext(
 ) -> HistoricalContext:
     """종합 역사적 맥락 계산 — 위기 + 호황 + 역사적 사건 양방향.
 
+    Capabilities:
+        위기 신호 5 종 (HY 급등/YC 역전/실업 반등/CPI 가속/동시 경고등) + 호황
+        신호 2 종 (8 호황 점등/HY 압축) + 역사적 사건 매칭 (10 epoch) + 다음 장
+        제안 (suggestedScenario) 을 단일 dict 합성. 매크로 historical 맥락의
+        SSOT 진입점.
+
     Args:
-        data: {
-            "hy_spread": {YYYY-MM: %},
-            "spread_10y3m": {YYYY-MM: %},
-            "spread_10y2y": {YYYY-MM: %},
-            "unrate": {YYYY-MM: %},
-            "cpi_raw": {YYYY-MM: index},
-            "indpro": {YYYY-MM: index},
-            "vix": {YYYY-MM: level},
-            "nfci": {YYYY-MM: index},
-            "fedfunds": {YYYY-MM: %},  # optional, 역사적 사건 매칭용
-        }
+        data: 시리즈별 월별 dict — hy_spread/spread_10y3m/spread_10y2y/unrate/
+            cpi_raw/indpro/vix/nfci/fedfunds(옵션).
 
     Returns:
-        HistoricalContext
+        HistoricalContext — hySpike/yieldCurveInversion/unemploymentBounce/
+        cpiAcceleration/simultaneousWarnings/bullishSignals/hyCompression/
+        historicalEvents/suggestedScenario/suggestedReason/riskLevel/riskScore/
+        opportunityLevel/opportunityScore/description.
+
+    Example:
+        >>> r = buildHistoricalContext({"hy_spread": {...}, ...})
+        >>> r.riskLevel, r.historicalEvents[0].eventName
+        ('elevated', '2008 금융위기')
+
+    Guide:
+        riskLevel ≥ "elevated" + simultaneousWarnings.flagCount ≥ 3 = 강한
+        경고. opportunityLevel "favorable" 일 때만 적극적 매수 시그널 인용.
+
+    When:
+        ``analyzeCrisis`` 내부 + AI 매크로 historical 답변 1 차.
+
+    How:
+        data → _deltaN/_yoy 변환 → 5 위기 + 2 호황 신호 함수 호출 →
+        matchHistoricalEvents (10 epoch) → score 합산 → _findSuggestedScenario.
+
+    Requires:
+        FRED 8 시리즈 월별 (HY/YC/UR/CPI/IP/VIX/NFCI) + NBER 일자 정적.
+
+    Raises:
+        없음 — 부분 데이터로도 동작 (없는 신호는 None).
+
+    See Also:
+        - matchHistoricalEvents : 사건 매칭
+        - simultaneousWarningFlags : 동시 점등
+        - bullishSignalFlags : 호황 신호
+
+    AIContext:
+        riskLevel + opportunityLevel + 최상위 historicalEvent + description 1~2
+        줄 인용으로 한 단락 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - riskLevel 만 인용 + opportunityLevel 무시 (양방향 같이)
+            - historicalEvents top 1 단정 (similarity 검증 필수)
+            - suggestedScenario 단독 인용 + reason 미노출
+        OutputSchema:
+            HistoricalContext (15 필드).
+        Prerequisites: 8 시리즈 월별 + NBER 정적.
+        Freshness: 월간.
+        Dataflow: data → 변환 → 7 신호 + epoch 매칭 → score → 합성.
+        TargetMarkets: US (NBER + FRED 한정). KR 미지원.
     """
     hy = data.get("hy_spread")
     spread3m = data.get("spread_10y3m")

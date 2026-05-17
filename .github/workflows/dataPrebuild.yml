@@ -83,12 +83,12 @@ jobs:
 
       # HF seed: cache miss/stale 대비 부족 parquet 을 HF 에서 채움 (idempotent).
       - name: Seed missing parquet from HF
-        run: uv run python -X utf8 .github/scripts/seedFromHf.py --category finance,report,docs
+        run: uv run python -X utf8 .github/scripts/sync/seedFromHf.py --category finance,report,docs
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build DART scan prebuilds + upload
-        run: uv run python -X utf8 .github/scripts/prebuildData.py
+        run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 

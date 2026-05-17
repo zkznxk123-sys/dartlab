@@ -295,3 +295,118 @@ jobs:
           python-version: "3.12"
       - name: Validate notebook syntax
         run: python scripts/audit/validateNotebooks.py
+
+  # Track 1 — syrupy CLI snapshot 회귀 (HF 마커 · Progress · warning routing)
+  # 본 PR 의 acceptance test. snapshot 깨지면 PR 머지 차단.
+  snapshot-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis syrupy
+          pip install -e .
+      - name: Run snapshot tests
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/cli/test_output_snapshots.py -v --tb=short --no-cov
+
+  # Track 2 — Pandera schema drift (finance/report/docs raw frame 계약)
+  schema-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + Pandera
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis "pandera[polars]>=0.29.0"
+          pip install -e .
+      - name: Run schema regression
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/_schemas/ -v --tb=short --no-cov
+
+  # Track 3 — 에이전트 출력 6 신호 룰 채점 (외부 모델 호출 0, CI Fast 안전)
+  eval-rule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          pip install -e .
+      - name: Run eval smoke
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          pytest tests/_evals/test_eval_smoke.py -v --tb=short --no-cov
+
+  # Track 5 — Mutation smoke (Windows 호환 자작) — core/formatting + core/ratios 7 패턴
+  # 100% killed 강제. survived 발견 시 fail. CI Fast 안전 (~35초).
+  mutation-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis
+          pip install -e .
+      - name: Run mutation smoke (7 patterns, must be 100% killed)
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          python -X utf8 scripts/audit/mutationSmoke.py
+
+  # Track 6 — 테스트 강제 게이트 (Phase 2 fail-on-missing 활성)
+  # baseline (scripts/audit/_baselines/testCoverage.json) 대비 신규 누락만 fail.
+  # 기존 1097 부채는 grandfathered (별도 quota 트랙).
+  test-coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # diff origin/master 위해 전체 히스토리
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run gate (diff vs origin/master, fail-on-new-missing)
+        run: |
+          python -X utf8 scripts/audit/testCoverageGate.py --diff origin/master --fail-on-missing --limit 30
+      - name: Run gate (all, JSON report)
+        if: always()
+        run: |
+          python -X utf8 scripts/audit/testCoverageGate.py --all --json > coverage-gate-report.json
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-coverage-gate
+          path: coverage-gate-report.json
+          retention-days: 30

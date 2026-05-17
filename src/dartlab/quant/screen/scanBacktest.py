@@ -198,6 +198,26 @@ def runScanBacktest(
     - signalFn 우선. 둘 다 미지정 시 ValueError.
     - axis 미등록 — ``dartlab.quant("scanBacktest", ...)`` 호출 X. ``dartlab.quant.screen.scanBacktest(...)``
       attribute 호출만 지원.
+
+    Capabilities:
+        scan 결과 universe → signalFn 또는 style 적용 → multiAssetBacktest 폐쇄
+        루프 + scanContext (재현성 hash) 포함된 BacktestResult.
+
+    Guide:
+        universe 사전 sort/filter 책임은 호출자. topN 기본 20 — 100+ 면 성능
+        주의. signalFn 우선, style 은 8 STYLE_REGISTRY 등록 ID.
+
+    Requires:
+        scanResult 가 stockCode/종목코드/stock_code 컬럼 보유 + 각 종목 OHLCV
+        fetch 가능.
+
+    AIContext:
+        result.sharpe + result.scanContext.universeSize 인용으로 "Top 20 trendFollow,
+        Sharpe 2.45" 답변.
+
+    See Also:
+        - dartlab.scan : universe 생성
+        - calcStrategySnapshot : 단일 종목 전략 평가
     """
     if isEmptyDf(scanResult):
         return BacktestResult(status="error", reason="empty scanResult")

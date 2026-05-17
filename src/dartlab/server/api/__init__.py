@@ -8,6 +8,7 @@ from .data import router as data_router
 from .dl import router as dl_router
 from .macro import router as macro_router
 from .room import router as room_router
+from .viz import router as viz_router
 
 __all__ = [
     "ai_router",
@@ -20,4 +21,5 @@ __all__ = [
     "dl_router",
     "macro_router",
     "room_router",
+    "viz_router",
 ]

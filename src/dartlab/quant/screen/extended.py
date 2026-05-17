@@ -91,10 +91,17 @@ def calcTechnicalVerdict(company) -> dict | None:
         Company-bound 호출이 표준 (``c.quant("판단")``). 벤치마크 자동 선택:
         KR 종목 → KOSPI, US 종목 → S&P 500. ``benchmark`` 명시 시 override.
 
-    SeeAlso:
+    See Also:
         - ``technicalVerdict``: 본 함수의 raw OHLCV 버전 (analyzer.py)
         - ``calcMarketBeta``: β 단독 계산
         - ``calcTechnicalSignals``: 최근 신호만
+
+    When:
+        ``Company.quant("판단")`` 진입점. AI 종합 기술적 판단 답변 1 차.
+
+    How:
+        company → _fetchOhlcv → technicalVerdict (RSI/ADX/MACD/BB + β/α) → dict
+        합성 → memoized.
 
     Requires:
         gather("price") 자동 수집 가능 (네트워크). 30 봉 이상.
@@ -143,11 +150,43 @@ def calcTechnicalVerdict(company) -> dict | None:
 def calcTechnicalSignals(company) -> dict | None:
     """최근 20일 매매 신호 요약.
 
+    Capabilities:
+        - 골든크로스/RSI/MACD/볼린저 4 신호 일괄 계산 + 최근 20 봉 누적
+        - recentEvents 10 개 (날짜/타입/방향) + bullish/bearish 요약
+
     Args:
         company: Company 객체 (gather("price")로 OHLCV 자동 수집).
 
     Returns:
-        dict — signals, signalSummary, recentEvents.
+        dict | None — signals/signalSummary/recentEvents. OHLCV ≥ 60 일 부족 시 None.
+
+    Guide:
+        story 6 막 signal 박스 + AI 단기 매매 신호 답변 표준 출처.
+
+    When:
+        Story signal + AI 최근 신호 답변.
+
+    How:
+        ``_fetchOhlcv`` → vrsi/vgoldenCross/vrsiSignal/vmacdSignal/vbollingerSignal 동시
+        → 최근 20 봉 sum + recent event 리스트.
+
+    Requires:
+        OHLCV ≥ 60 봉.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcTechnicalSignals(company)
+        >>> r["signalSummary"]
+        {'bullish': 5, 'bearish': 2}
+
+    See Also:
+        - signal.generator : 개별 신호 계산기
+        - calcTechnicalVerdict : 종합 점수
+
+    AIContext:
+        "최근 N 일 매수 신호" 답변 시 signals 합산 + recentEvents 인용.
     """
     ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 60:
@@ -210,11 +249,44 @@ def calcTechnicalSignals(company) -> dict | None:
 def calcMarketBeta(company) -> dict | None:
     """시장 베타 + CAPM 기대수익률 + 해석.
 
+    Capabilities:
+        - OLS β + R² + CAPM 기대수익 + 벤치 대비 relativeStrength
+        - β 구간별 해석 문장 (5 단계: 매우 높음/약간 높음/유사/방어/독립)
+
     Args:
         company: Company 객체.
 
     Returns:
-        dict — value, r2, capmExpected, relativeStrength, interpretation.
+        dict | None — value/r2/capmExpected/relativeStrength/benchmarkUsed/interpretation.
+        OHLCV < 60 일 또는 벤치 없음 시 None.
+
+    Guide:
+        시장 민감도 평가. β > 1.5 = 변동성 매우 큼. R² < 0.3 = 시장 동행성 약함.
+
+    When:
+        story risk 박스 + AI 변동성 답변.
+
+    How:
+        ``_fetchOhlcv`` + ``_fetchBenchmarkForCompany`` → ``_calcBeta`` + ``_relativeStrength``
+        → 해석 문장 합성.
+
+    Requires:
+        OHLCV ≥ 60 봉 + 벤치 데이터 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcMarketBeta(company)
+        >>> r["value"], r["interpretation"]
+        (1.18, '시장보다 약간 높은 변동성 (β=1.18)')
+
+    See Also:
+        - signal.analyzer._calcBeta : core
+        - calcMarketRisk : ATR + β 통합
+
+    AIContext:
+        "이 종목의 베타" 답변 시 value + interpretation 인용.
     """
     ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 60:
@@ -260,12 +332,45 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
     재무 스코어카드 등급과 기술적 판단을 비교하여
     괴리(divergence) 여부와 진단 메시지를 반환한다.
 
+    Capabilities:
+        - 재무 등급 3 단계 (good/neutral/poor) × 기술 verdict 3 단계 (bullish/neutral/bearish)
+        - 9 칸 _MATRIX 에서 divergence 키워드 (순풍/관심/괴리/위험 등) + 진단 문장 추출
+
     Args:
         company: Company 객체.
-        basePeriod: 기준 기간 (기본 최신).
+        basePeriod: 기준 기간. 기본 None (최신).
 
     Returns:
-        dict — financialGrade, technicalVerdict, divergence, diagnosis, matrix.
+        dict | None — financialGrade/technicalVerdict/technicalScore/divergence/diagnosis/matrix.
+        재무 등급 + 기술 verdict 둘 다 None 시 None.
+
+    Guide:
+        review가 두 엔진 (analysis + quant) 결과를 조합할 때 scorecard 를
+        ``_cache["_calcScorecard:None"]`` 에 주입 → 본 함수가 읽음.
+
+    When:
+        story crosscheck 박스 + AI "재무 vs 기술 일치 여부" 답변.
+
+    How:
+        cache scorecard 추출 → ``technicalVerdict`` → 9 칸 매트릭스 lookup.
+
+    Requires:
+        analysis scorecard 사전 계산 (review 단계) + OHLCV ≥ 30 봉.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcFundamentalDivergence(company)
+        >>> r["divergence"], r["matrix"]
+        ('괴리', 'good_bearish')
+
+    See Also:
+        - signal.analyzer.technicalVerdict : tech verdict
+        - analysis.financial.scorecard : 재무 등급
+
+    AIContext:
+        "재무 vs 기술 진단" 답변 시 divergence + diagnosis 인용.
     """
     from dartlab.quant.signal.analyzer import technicalVerdict
 
@@ -346,11 +451,43 @@ def calcFundamentalDivergence(company, *, basePeriod: str | None = None) -> dict
 def calcMarketRisk(company) -> dict | None:
     """시장 리스크 — ATR 변동성 등급 + 베타 + 상대강도.
 
+    Capabilities:
+        - 14 일 ATR + ATR/close% + 4 단계 변동성 등급 (매우 높음/높음/보통/낮음)
+        - ``calcMarketBeta`` 호출 → β + relativeStrength 결합
+
     Args:
         company: Company 객체.
 
     Returns:
-        dict — beta, atr, atrPercent, relativeStrength, volatilityGrade, price.
+        dict | None — beta/atr/atrPercent/relativeStrength/volatilityGrade/price.
+        OHLCV < 30 봉 부족 시 None.
+
+    Guide:
+        story risk 박스 + AI 변동성·β 통합 답변. ATR% 5%+ = 매우 높음.
+
+    When:
+        Story risk + AI 변동성/β 종합 답변.
+
+    How:
+        ``vatr`` → atrPct 계산 → volatilityGrade 분류 + ``calcMarketBeta`` 합산.
+
+    Requires:
+        OHLCV ≥ 30 봉 + 벤치 가용 (β용).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcMarketRisk(company)
+        >>> r["volatilityGrade"]
+        '높음'
+
+    See Also:
+        - calcMarketBeta : β + capm
+        - synth.indicators.vatr : ATR core
+
+    AIContext:
+        "변동성 위험" 답변 시 volatilityGrade + atrPercent + β 인용.
     """
     ohlcv = _fetchOhlcv(company)
     if isEmptyDf(ohlcv) or len(ohlcv) < 30:
@@ -400,11 +537,41 @@ def calcMarketRisk(company) -> dict | None:
 def calcMarketAnalysisFlags(company) -> list[str]:
     """시장분석 플래그 — 기술적 신호 기반 경고/기회.
 
+    Capabilities:
+        - RSI ≥ 70/≤ 30, ADX ≥ 40, BB ≥ 95/≤ 5, SMA 정/역배열, score ±3 신호별 한 줄 플래그
+        - ⚠ 마커로 경고/기회 시각 구분
+
     Args:
         company: Company 객체.
 
     Returns:
-        list[str] — 경고/기회 플래그 문자열 목록.
+        list[str] — 0+ 개 플래그 문자열. 데이터 부족 시 빈 list.
+
+    Guide:
+        story 6 막 market analysis 박스 + AI 단기 경고/기회 답변. 플래그 ≥ 3 = 다중 신호 일치.
+
+    When:
+        Story flag 박스 + AI 단기 진단 답변.
+
+    How:
+        ``technicalVerdict`` 호출 → rsi/adx/bbPos/aboveSma20/aboveSma60/score 임계 비교.
+
+    Requires:
+        OHLCV ≥ 30 봉 + technicalVerdict 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcMarketAnalysisFlags(company)
+        ['⚠ RSI 72 — 과매수 구간', '강한 추세 진행 중 (ADX 42)']
+
+    See Also:
+        - signal.analyzer.technicalVerdict : 입력 verdict
+        - calcTechnicalSignals : recentEvents
+
+    AIContext:
+        "지금 종목 경고 사인" 답변 시 ⚠ 플래그 인용.
     """
     from dartlab.quant.signal.analyzer import technicalVerdict
 

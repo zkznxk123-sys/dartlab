@@ -129,3 +129,116 @@ def extractVizMarkers(stdout: str) -> list[dict]:
         except json.JSONDecodeError:
             pass
     return out
+
+
+def buildVcr(
+    cassette_dir: str,
+    *,
+    record_mode: str = "once",
+    filter_query: list[str] | None = None,
+    filter_headers: list[str] | None = None,
+):
+    """providers/* 외부 HTTP 호출 record-replay 카세트 생성기 — Track 7.
+
+    Capabilities:
+        vcrpy 의 VCR 인스턴스를 dartlab 표준 설정 (sanitize + match 룰)
+        으로 생성. DART/EDGAR API 키 같은 민감 정보를 카세트에서 자동 제거.
+    Args:
+        cassette_dir: 카세트 저장 경로. 보통 tests/_cassettes/{provider}.
+        record_mode: vcrpy 모드. "once" (없으면 record, 있으면 replay),
+            "none" (replay only, 카세트 없으면 fail), "new_episodes" (추가만).
+            CI 기본은 "none".
+        filter_query: 쿼리 파라미터 sanitize 목록 (기본: crtfc_key, api_key).
+        filter_headers: 헤더 sanitize 목록 (기본: Authorization, Cookie).
+    Returns:
+        vcr.VCR 인스턴스. .use_cassette('name.yaml') 컨텍스트 매니저 / 데코레이터.
+    Example:
+        >>> _vcr = buildVcr('tests/_cassettes/dart')
+        >>> @_vcr.use_cassette('corpCode.yaml')
+        ... def test_corpCode_replay():
+        ...     from dartlab.providers.dart.openapi.corpCode import fetchCorpCode
+        ...     df = fetchCorpCode()
+        ...     assert df.height > 0
+    Guide:
+        첫 record 는 운영자 트리거 (API key 필요). 카세트 commit 후
+        CI 에서 record_mode="none" 으로 replay 만.
+    SeeAlso:
+        tests/_cassettes/README.md (절차) · vcrpy 공식 문서.
+    Requires:
+        vcrpy>=6.0 (pyproject [dependency-groups].dev). httpx wrapping 지원.
+    AIContext:
+        DART/EDGAR API 응답 포맷 변경 시 fixture parquet 만으론 못 잡음.
+        카세트는 raw HTTP body 까지 동결해 silent drift 차단.
+    Raises:
+        ImportError: vcrpy 미설치 시 (production install 에는 없는 dev dep).
+    """
+    try:
+        import vcr
+    except ImportError as e:  # pragma: no cover
+        raise ImportError("vcrpy 미설치 — uv sync --group dev 후 재실행. tests/_cassettes/README.md 참조.") from e
+
+    return vcr.VCR(
+        cassette_library_dir=cassette_dir,
+        record_mode=record_mode,
+        filter_query_parameters=filter_query or ["crtfc_key", "api_key", "apikey"],
+        filter_headers=filter_headers or ["Authorization", "Cookie", "X-Api-Key"],
+        match_on=["method", "scheme", "host", "port", "path", "query"],
+    )
+
+
+def captureRichOutput(fn, *, width: int = 120, color: bool = False) -> str:
+    """fn 호출 동안 dartlab Console 출력을 텍스트로 캡처 — syrupy snapshot 호환.
+
+    Capabilities:
+        dartlab.core.logger 의 공용 Console 을 임시 record-mode 로 교체해 rich
+        Progress · Live · Console.print · RichHandler 로그를 한 문자열로 모은다.
+        snapshot 동결로 CLI 시각 회귀를 자동 차단한다.
+    Args:
+        fn: 인자 없는 callable. 본 함수 안에서 호출되며 그 동안의 출력만 캡처.
+        width: 터미널 폭 고정 (환경 독립성 — Windows / Linux ANSI 차이 제거).
+        color: True 면 ANSI escape 포함, False 면 plain text.
+    Returns:
+        str. console.export_text(clear=False, styles=color) 결과.
+    Example:
+        >>> from tests._helpers import captureRichOutput
+        >>> def emit_hf_marker():
+        ...     from dartlab.core.logger import getLogger
+        ...     getLogger(__name__).info("[cyan]⬇ HF[/] dartList.parquet")
+        >>> text = captureRichOutput(emit_hf_marker)
+        >>> "⬇ HF" in text
+        True
+    Guide:
+        installRichHandler 가 호출됐을 때만 logger → Console 라우팅 동작.
+        본 헬퍼가 자동으로 idempotent 호출.
+    SeeAlso:
+        dartlab.core.logger.installRichHandler · getConsole.
+    Requires:
+        rich Console.record=True 지원 (rich >= 12).
+    AIContext:
+        본 SSOT 통합 PR (commit ad520727b) 의 화면 일관성 acceptance test.
+    Raises:
+        없음. fn 내부 예외는 그대로 전파.
+    """
+    import io
+
+    from rich.console import Console
+
+    from dartlab.core import logger as _loggerMod
+
+    _loggerMod.installRichHandler()
+    buf = io.StringIO()
+    newConsole = Console(file=buf, record=True, force_terminal=True, width=width, color_system="truecolor")
+    savedConsole = _loggerMod._console
+    _loggerMod._console = newConsole
+    try:
+        savedRichHandler = None
+        for h in _loggerMod.logging.getLogger(_loggerMod._ROOT_NAME).handlers:
+            if hasattr(h, "console"):
+                savedRichHandler = h
+                h.console = newConsole
+        fn()
+        return newConsole.export_text(clear=False, styles=color)
+    finally:
+        _loggerMod._console = savedConsole
+        if savedRichHandler is not None:
+            savedRichHandler.console = savedConsole

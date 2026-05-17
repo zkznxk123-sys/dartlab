@@ -75,6 +75,27 @@ def computeMatrixProfile(
         - O(n²·m) — n=1000 / m=30 → 약 30M 연산, 1초 미만.
         - z-normalize 로 패턴 매칭 (절대값 무관).
         - 더 빠른 알고리즘 (STOMP/SCRIMP) 은 후속.
+
+    Guide:
+        motif = 유사 차트 검색의 base. discord = anomaly. window 30 = 1 개월
+        거래일 기본.
+
+    When:
+        AI "이 차트와 비슷한 패턴" 답변 + retrospective 진입 신호 source.
+
+    How:
+        sliding windows → z-normalize → 모든 쌍 Euclidean → trivial neighborhood
+        excl → profile + idx → motif/discord 추출.
+
+    Requires:
+        시계열 ≥ 2 × window.
+
+    Raises:
+        없음 — 실패 시 error 키.
+
+    See Also:
+        - calcMomentum : 단일 종목 모멘텀
+        - calcVolatility : 변동성 regime
     """
     series = np.asarray(series, dtype=np.float64)
     n_raw = len(series)
@@ -150,6 +171,38 @@ def findSimilarPatterns(
             window : int
             limit : list[tuple[int, float]] — (start_idx, distance) 거리 오름차순
             interpretation : str
+
+    Capabilities:
+        - z-normalized window 거리 매트릭스 → 쿼리 패턴과 유사한 과거 시점 top-K
+        - excludeFraction 으로 자기 근방 trivial 제거
+
+    Guide:
+        Yeh-Keogh 2016 Matrix Profile. 유사 패턴 = 과거 비슷한 movement 식별. AI "지금
+        패턴 과거에 있었나" 답변.
+
+    When:
+        Pattern matching + AI 유사 시점 답변.
+
+    How:
+        sliding window → z-normalize → 거리 계산 → trivial exclude → top-limit 정렬.
+
+    Requires:
+        series 길이 ≥ queryStart + window.
+
+    Raises:
+        없음 — 범위 초과 시 ``{error}``.
+
+    Example:
+        >>> r = findSimilarPatterns(series, queryStart=len(series)-30, window=30)
+        >>> r["limit"][0][1]
+        2.1
+
+    See Also:
+        - calcMatrixProfile : motif/discord 탐지
+        - regime.chartPatterns : 매크로 패턴
+
+    AIContext:
+        "현재 패턴과 비슷한 과거 시점" 답변 시 (idx, distance) top 인용.
     """
     series = np.asarray(series, dtype=np.float64)
     n_raw = len(series)

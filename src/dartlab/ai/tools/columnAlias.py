@@ -145,5 +145,5 @@ def topicAccountPriority(topic: str) -> tuple[tuple[str, str], ...]:
 
 
 def availableTopics() -> list[str]:
-    """availableTopics — TODO 한국어 동작 설명."""
+    """column alias 매핑이 등록된 topic 이름 목록."""
     return list(_TOPIC_COLUMNS.keys())

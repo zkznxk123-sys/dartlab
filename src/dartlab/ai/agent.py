@@ -24,16 +24,26 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from .contracts import TraceEvent
 from .providers import streamProvider
 from .tools.formatting import wrapExternalInResult
-from .tools.registry import executeTool, toolSpecs
+from .tools.registry import executeTool, isToolReadOnly, toolSpecs
 from .toolStorage import buildPersistedContent, exceedsSizeCap, persistLargeResult
 from .workbench.prompts import DARTLAB_CHAT_SYSTEM
 
 logger = logging.getLogger(__name__)
+
+# 한 turn 에 LLM 이 동시에 emit 한 read-only 도구들을 thread pool 로 fan-out.
+# 같은 turn 안 호출은 LLM 이 의존성 없음을 보증 (의존 있으면 다른 turn 으로 분리). 즉
+# ReadSkill + ReadCapability + InspectDataset + EngineCall(scan='roe') + EngineCall(scan='debt')
+# 같은 묶음은 모두 동시 실행 가능. write 도구 (RunPython · SaveArtifact · OutcomeLog) 는 시퀀셜.
+#
+# 워커 수 4 — polars/Rust 가 GIL 풀어 CPU bound 도 진짜 병렬, 네트워크 외부 호출 (WebSearch) 도
+# 함께 묶임. 8 까지 늘려도 안전하나 LLM provider rate-limit 측면에서 보수적.
+_PARALLEL_READ_WORKERS = 4
 
 # LLM 노출 도구 set — PascalCase (Claude 도구 체계 호환). Skill 우선 → Capability → 실행 → 시각화.
 # EngineCall = 단일 capability 1 회. RunPython = 다단 계산. Read = 파일 직접 인용.
@@ -47,7 +57,15 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "Read",
     "WebSearch",
     "SaveArtifact",
+    "CreateUserSkill",
     "CompileVisual",
+    # finance-native primitive (Track C/G/H/I) — registry 등록만 됐다가 default 미노출
+    # 이라 LLM 이 호출 못 했던 회귀. 2026-05-17 OAuth probe 에서 다중 종목 비교 시
+    # CompareCompanies 1 회 대신 Company.show 2 회 + RunPython 우회 (91s) 발견 후 합류.
+    "CompareCompanies",
+    "PickStoryTemplate",
+    "EvidenceGate",
+    "GroundingCheck",
     "RunWorkbench",
 )
 
@@ -84,16 +102,21 @@ def runAgent(
     refs: list[dict[str, Any]] = []
     artifacts: list[dict[str, Any]] = []
     text_emitted = ""
-    # 같은 도구 + 같은 error 코드 누적 카운트. 임계 도달 시 도구 호출 차단 +
-    # 다음 LLM turn 에 시스템 메시지로 "이 도구 그만 시도하고 답변 작성하라" 신호.
-    # max_iterations 까지 무의미 retry 하다 답변 못 만드는 회귀 방지.
-    failure_streak: dict[tuple[str, str], int] = {}
-    blocked_tools: set[str] = set()
+    # 실패 streak — 같은 (도구, error code, args) 가 임계 회 누적되면 그 *args 만* 차단.
+    # 과거 (도구, error) 단위 차단은 한 호출의 invalid args 때문에 다른 valid args 도 막혔던
+    # 회귀 (2026-05-17): EngineCall("macro.rates") → unknown_api_ref → EngineCall("gather.macro") →
+    # unknown_api_ref → EngineCall("macro") (valid) 차단. 도구 전체 막지 말고 args 만.
+    failure_streak: dict[tuple[str, str, str], int] = {}
+    blocked_calls: set[tuple[str, str]] = set()  # (name, argsHash)
     _FAILURE_STREAK_LIMIT = 2
     # 동일 (name, args) 호출 결과 캐시 — LLM 이 같은 도구·인자를 반복하면 재실행하지 않고
     # cached 결과 즉시 반환 + LLM 메시지에 "이미 호출됐음, 다시 부르지 마라" 명시.
     # 사용자 audit 에서 ReadCapability 2 회 / 같은 Read 3 회 같은 비효율 루프 차단.
     call_cache: dict[tuple[str, str], dict[str, Any]] = {}
+    # 같은 (name, args) 가 cache_hit 임계 회 반복되면 강제 차단 — LLM 이 자연어 가드 무시하고
+    # 계속 부르는 회귀 (사용자 audit: scan.ratio 4 회 연속 cached) 방지.
+    cache_hit_count: dict[tuple[str, str], int] = {}
+    _CACHE_HIT_BLOCK_LIMIT = 2
 
     for iteration in range(maxIterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
@@ -151,160 +174,93 @@ def runAgent(
             }
             messages.append(assistant_msg)
 
+            # ── 2 단 fan-out: read-only 병렬 + write 시퀀셜 ──
+            # turn 안 toolCalls 는 LLM 이 의존성 없음 보증 (의존 있으면 다른 turn 분리).
+            # blocked / cached path 는 외부 호출 0 ms 라 분류 후 즉시 emit. 새 실행만 partition.
+            fresh_read: list[tuple[Any, tuple[str, str]]] = []
+            fresh_write: list[tuple[Any, tuple[str, str]]] = []
             for tc in turn.toolCalls:
-                # 동일 도구가 임계 회 연속 실패한 적 있으면 호출 차단 + LLM 에 안내.
-                if tc.name in blocked_tools:
-                    yield TraceEvent(
-                        "tool_start",
-                        {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 차단됨"},
-                    )
-                    yield TraceEvent(
-                        "tool_result",
-                        {
-                            "id": tc.id,
-                            "tool": tc.name,
-                            "status": "error",
-                            "outputSummary": f"{tc.name} 반복 실패 — 호출 차단",
-                            "evidenceRefs": [],
-                            "artifacts": [],
-                            "error": "tool_blocked_after_repeated_failures",
-                            "data": None,
-                        },
-                    )
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": json.dumps(
-                                {
-                                    "ok": False,
-                                    "summary": f"{tc.name} 가 직전 turn 에서 반복 실패해 차단됨. 본 도구 다시 호출 금지. 지금까지 모은 정보로 답변 작성하거나 다른 도구 사용.",
-                                    "data": None,
-                                    "error": "tool_blocked_after_repeated_failures",
-                                },
-                                ensure_ascii=False,
-                            ),
-                        }
-                    )
-                    continue
-                yield TraceEvent(
-                    "tool_start",
-                    {
-                        "id": tc.id,
-                        "tool": tc.name,
-                        "input": tc.args,
-                        "summary": f"{tc.name} 호출",
-                    },
+                cache_key = (
+                    tc.name,
+                    json.dumps(tc.args or {}, ensure_ascii=False, sort_keys=True, default=str),
                 )
-                # 동일 (name, args) 호출이 한 run 에서 반복되면 cached 결과 즉시 재사용.
-                # LLM 에 "이미 호출됐음, 다시 부르지 마라" 명시 — 무의미 루프 차단.
-                cache_key = (tc.name, json.dumps(tc.args or {}, ensure_ascii=False, sort_keys=True, default=str))
+                if cache_key in blocked_calls:
+                    yield from _emitBlocked(tc, messages)
+                    continue
                 cached = call_cache.get(cache_key)
                 if cached is not None:
-                    cached_summary = str(cached.get("summary") or "")
-                    note = f"(cached) 같은 인자로 이미 호출됨 — 다시 부르지 마라. 직전 결과: {cached_summary[:120]}"
-                    yield TraceEvent(
-                        "tool_result",
-                        {
-                            "id": tc.id,
-                            "tool": tc.name,
-                            "status": "done" if cached.get("ok") else "error",
-                            "outputSummary": note,
-                            "evidenceRefs": [ref.get("id") for ref in cached.get("refs") or [] if ref.get("id")],
-                            "artifacts": [r for r in cached.get("refs") or [] if r.get("kind") == "artifactRef"],
-                            "error": cached.get("error"),
-                            "data": cached.get("data"),
-                            "cached": True,
-                        },
-                    )
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tc.id,
-                            "content": json.dumps(
-                                {
-                                    "ok": cached.get("ok"),
-                                    "summary": note,
-                                    "data": None,
-                                    "error": cached.get("error"),
-                                },
-                                ensure_ascii=False,
-                            ),
-                        }
-                    )
+                    cache_hit_count[cache_key] = cache_hit_count.get(cache_key, 0) + 1
+                    yield from _emitCached(tc, cached, cache_hit_count[cache_key], _CACHE_HIT_BLOCK_LIMIT, messages)
                     continue
-                resultDict = executeTool(tc.name, tc.args)
-                call_cache[cache_key] = resultDict
-                # 실패 streak 추적 — 같은 도구 + 같은 error 코드 N 회 → blocked.
-                if not resultDict.get("ok"):
-                    err_key = str(resultDict.get("error") or "unknown")
-                    streak_key = (tc.name, err_key)
-                    failure_streak[streak_key] = failure_streak.get(streak_key, 0) + 1
-                    if failure_streak[streak_key] >= _FAILURE_STREAK_LIMIT:
-                        blocked_tools.add(tc.name)
-                else:
-                    # 성공 시 해당 도구의 모든 streak 리셋.
-                    failure_streak = {k: v for k, v in failure_streak.items() if k[0] != tc.name}
-                tool_refs = list(resultDict.get("refs") or [])
-                refs.extend(tool_refs)
-                tool_artifacts = [ref for ref in tool_refs if ref.get("kind") == "artifactRef"]
-                artifacts.extend(tool_artifacts)
-                yield TraceEvent(
-                    "tool_result",
-                    {
-                        "id": tc.id,
-                        "tool": tc.name,
-                        "status": "done" if resultDict.get("ok") else "error",
-                        "outputSummary": resultDict.get("summary", ""),
-                        "evidenceRefs": [ref.get("id") for ref in tool_refs if ref.get("id")],
-                        "artifacts": tool_artifacts,
-                        "error": resultDict.get("error"),
-                        # raw data — agent_gateway._public_result_payload 가 stdout/values/table
-                        # preview 추출. UI expand 시 표시.
-                        "data": resultDict.get("data"),
-                    },
-                )
-                # visualRef 발견 시 VIEW_SPEC event emit — ChartRenderer 가 메시지 흐름에 인라인.
-                for ref in tool_refs:
-                    if ref.get("kind") != "visualRef":
-                        continue
-                    payload = ref.get("payload") or {}
-                    spec = payload.get("spec") if isinstance(payload, dict) else None
-                    if not spec:
-                        continue
+                (fresh_read if isToolReadOnly(tc.name) else fresh_write).append((tc, cache_key))
+
+            # Phase 2: read-only 병렬 — tool_start 모두 즉시 + as_completed 로 결과 도착순 emit.
+            if fresh_read:
+                for tc, _ in fresh_read:
                     yield TraceEvent(
-                        "view_spec",
-                        {
-                            "id": ref.get("id"),
-                            "spec": spec,
-                            "title": ref.get("title"),
-                            "source": ref.get("source"),
-                        },
+                        "tool_start",
+                        {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 호출"},
                     )
-                # 외부 본문 (sourceType=external) 인 ref 가 있으면 data 텍스트 필드를 [EXTERNAL CONTENT START/END]
-                # 마커로 감싼다 — LLM 이 마커 안의 지시를 *데이터* 로만 다루게 한다.
-                # 상세: runtime.workbenchEvidenceFlow "외부 본문 처리".
-                wrapped = wrapExternalInResult(resultDict)
-                content_str = json.dumps(
-                    {
-                        "ok": wrapped.get("ok"),
-                        "summary": wrapped.get("summary", ""),
-                        "data": wrapped.get("data"),
-                        "error": wrapped.get("error"),
-                    },
-                    ensure_ascii=False,
-                    default=str,
-                )
-                # 큰 결과는 디스크 persist + preview 만 inject. LLM 이 Read 도구로 전체 재호출 가능.
-                if exceedsSizeCap(content_str):
-                    preview, file_path = persistLargeResult(tc.name, tc.id, content_str)
-                    content_str = buildPersistedContent(file_path, preview, len(content_str))
-                messages.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": tc.id,
-                        "content": content_str,
+                # 작업 단위 함수 (thread 안에서 호출). registry.executeTool 자체는 thread-safe —
+                # 각 도구가 자체 캐시/IO 만 건드리고 agent.py 의 mutable state 는 메인 thread 만 변경.
+                with ThreadPoolExecutor(max_workers=_PARALLEL_READ_WORKERS) as ex:
+                    fut_to_meta = {
+                        ex.submit(executeTool, tc.name, tc.args): (tc, cache_key) for tc, cache_key in fresh_read
                     }
+                    for fut in as_completed(fut_to_meta):
+                        tc, cache_key = fut_to_meta[fut]
+                        try:
+                            resultDict = fut.result()
+                        except Exception as exc:  # noqa: BLE001
+                            logger.exception("tool %s threw uncaught (parallel)", tc.name)
+                            resultDict = {
+                                "ok": False,
+                                "summary": f"{tc.name} 실행 오류: {type(exc).__name__}",
+                                "data": None,
+                                "error": type(exc).__name__,
+                                "refs": [],
+                            }
+                        call_cache[cache_key] = resultDict
+                        yield from _finalizeResult(
+                            tc,
+                            cache_key,
+                            resultDict,
+                            refs,
+                            artifacts,
+                            failure_streak,
+                            blocked_calls,
+                            messages,
+                            failureStreakLimit=_FAILURE_STREAK_LIMIT,
+                        )
+
+            # Phase 3: write 시퀀셜 — 순서 의존 가능 (SaveArtifact 덮어쓰기 등).
+            for tc, cache_key in fresh_write:
+                yield TraceEvent(
+                    "tool_start",
+                    {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 호출"},
+                )
+                try:
+                    resultDict = executeTool(tc.name, tc.args)
+                except Exception as exc:  # noqa: BLE001
+                    logger.exception("tool %s threw uncaught (sequential)", tc.name)
+                    resultDict = {
+                        "ok": False,
+                        "summary": f"{tc.name} 실행 오류: {type(exc).__name__}",
+                        "data": None,
+                        "error": type(exc).__name__,
+                        "refs": [],
+                    }
+                call_cache[cache_key] = resultDict
+                yield from _finalizeResult(
+                    tc,
+                    cache_key,
+                    resultDict,
+                    refs,
+                    artifacts,
+                    failure_streak,
+                    blocked_calls,
+                    messages,
+                    failureStreakLimit=_FAILURE_STREAK_LIMIT,
                 )
             continue  # 다시 LLM 호출
 
@@ -370,6 +326,183 @@ def runAgent(
                 "mode": "agent",
             },
         },
+    )
+
+
+def _emitBlocked(tc: Any, messages: list[dict[str, Any]]) -> Iterator[TraceEvent]:
+    """차단된 도구 호출 — tool_start + tool_result(error) + tool message 한 묶음 emit."""
+    yield TraceEvent(
+        "tool_start",
+        {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 차단됨"},
+    )
+    yield TraceEvent(
+        "tool_result",
+        {
+            "id": tc.id,
+            "tool": tc.name,
+            "status": "error",
+            "outputSummary": f"{tc.name} 반복 실패 — 호출 차단",
+            "evidenceRefs": [],
+            "artifacts": [],
+            "error": "tool_blocked_after_repeated_failures",
+            "data": None,
+        },
+    )
+    messages.append(
+        {
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": json.dumps(
+                {
+                    "ok": False,
+                    "summary": f"{tc.name} 가 직전 turn 에서 반복 실패해 차단됨. 본 도구 다시 호출 금지. 지금까지 모은 정보로 답변 작성하거나 다른 도구 사용.",
+                    "data": None,
+                    "error": "tool_blocked_after_repeated_failures",
+                },
+                ensure_ascii=False,
+            ),
+        }
+    )
+
+
+def _emitCached(
+    tc: Any,
+    cached: dict[str, Any],
+    hitN: int,
+    hitBlockLimit: int,
+    messages: list[dict[str, Any]],
+) -> Iterator[TraceEvent]:
+    """cached 호출 — 동일 (name, args) 재호출 시 즉시 응답. hitBlockLimit 초과 시 강제 차단."""
+    yield TraceEvent(
+        "tool_start",
+        {"id": tc.id, "tool": tc.name, "input": tc.args, "summary": f"{tc.name} 호출"},
+    )
+    is_blocked = hitN >= hitBlockLimit
+    cached_summary = str(cached.get("summary") or "")
+    if is_blocked:
+        llmGuardNote = (
+            f"{tc.name} 가 같은 인자로 {hitN} 회 반복 호출됨 — 본 인자 재호출 영구 차단. "
+            f"다른 도구나 답변 작성으로 진행."
+        )
+    else:
+        llmGuardNote = f"(cached) 같은 인자로 이미 호출됨 — 다시 부르지 마라. 직전 결과: {cached_summary[:120]}"
+    uiSummary = f"(반복 차단) 같은 인자 {hitN} 회 — 더 부르지 않음" if is_blocked else f"(캐시됨) {cached_summary[:80]}"
+    yield TraceEvent(
+        "tool_result",
+        {
+            "id": tc.id,
+            "tool": tc.name,
+            "status": "done" if cached.get("ok") and not is_blocked else "error",
+            "outputSummary": uiSummary,
+            "evidenceRefs": [ref.get("id") for ref in cached.get("refs") or [] if ref.get("id")],
+            "artifacts": [r for r in cached.get("refs") or [] if r.get("kind") == "artifactRef"],
+            "error": cached.get("error") if not is_blocked else "duplicate_cache_call_blocked",
+            "data": cached.get("data") if not is_blocked else None,
+            "cached": True,
+        },
+    )
+    messages.append(
+        {
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": json.dumps(
+                {
+                    "ok": cached.get("ok") if not is_blocked else False,
+                    "cached": True,
+                    "summary": llmGuardNote,
+                    "data": None,
+                    "error": cached.get("error") if not is_blocked else "duplicate_cache_call_blocked",
+                },
+                ensure_ascii=False,
+            ),
+        }
+    )
+
+
+def _finalizeResult(
+    tc: Any,
+    cacheKey: tuple[str, str],
+    resultDict: dict[str, Any],
+    refs: list[dict[str, Any]],
+    artifacts: list[dict[str, Any]],
+    failureStreak: dict[tuple[str, str, str], int],
+    blockedCalls: set[tuple[str, str]],
+    messages: list[dict[str, Any]],
+    failureStreakLimit: int,
+) -> Iterator[TraceEvent]:
+    """새 실행 결과 후처리 — streak 갱신 + tool_result emit + visualRef view_spec + tool message append.
+
+    메인 thread 에서만 호출 (read-only fan-out 의 as_completed 콜백 포함 — fut.result() 후 메인 generator
+    가 본 함수 호출). thread 안에서는 호출 금지 — 공유 state mutation 있음.
+
+    실패 streak partition: (name, error_code, argsHash) — 같은 도구의 valid 호출까지 차단되는
+    회귀 (2026-05-17) 방지. blockedCalls 도 (name, argsHash) 단위로 — 도구 자체는 풀어둠.
+    """
+    argsHash = cacheKey[1]
+    if not resultDict.get("ok"):
+        err_key = str(resultDict.get("error") or "unknown")
+        streak_key = (tc.name, err_key, argsHash)
+        failureStreak[streak_key] = failureStreak.get(streak_key, 0) + 1
+        if failureStreak[streak_key] >= failureStreakLimit:
+            blockedCalls.add(cacheKey)
+    else:
+        # 같은 도구 + 같은 args 성공 → 그 args 의 모든 error streak 리셋.
+        for k in [k for k in failureStreak if k[0] == tc.name and k[2] == argsHash]:
+            failureStreak.pop(k, None)
+    tool_refs = list(resultDict.get("refs") or [])
+    refs.extend(tool_refs)
+    tool_artifacts = [ref for ref in tool_refs if ref.get("kind") == "artifactRef"]
+    artifacts.extend(tool_artifacts)
+    yield TraceEvent(
+        "tool_result",
+        {
+            "id": tc.id,
+            "tool": tc.name,
+            "status": "done" if resultDict.get("ok") else "error",
+            "outputSummary": resultDict.get("summary", ""),
+            "evidenceRefs": [ref.get("id") for ref in tool_refs if ref.get("id")],
+            "refDetails": tool_refs,
+            "artifacts": tool_artifacts,
+            "error": resultDict.get("error"),
+            "data": resultDict.get("data"),
+        },
+    )
+    for ref in tool_refs:
+        if ref.get("kind") != "visualRef":
+            continue
+        payload = ref.get("payload") or {}
+        spec = payload.get("spec") if isinstance(payload, dict) else None
+        if not spec:
+            continue
+        yield TraceEvent(
+            "view_spec",
+            {
+                "id": ref.get("id"),
+                "spec": spec,
+                "title": ref.get("title"),
+                "source": ref.get("source"),
+            },
+        )
+    wrapped = wrapExternalInResult(resultDict)
+    content_str = json.dumps(
+        {
+            "ok": wrapped.get("ok"),
+            "summary": wrapped.get("summary", ""),
+            "data": wrapped.get("data"),
+            "error": wrapped.get("error"),
+        },
+        ensure_ascii=False,
+        default=str,
+    )
+    if exceedsSizeCap(content_str):
+        preview, file_path = persistLargeResult(tc.name, tc.id, content_str)
+        content_str = buildPersistedContent(file_path, preview, len(content_str))
+    messages.append(
+        {
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": content_str,
+        }
     )
 
 

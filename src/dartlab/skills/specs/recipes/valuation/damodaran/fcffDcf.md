@@ -19,6 +19,7 @@ linkedSkills:
   - engines.company
   - engines.gather
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

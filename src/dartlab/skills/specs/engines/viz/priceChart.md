@@ -26,6 +26,7 @@ outputs:
   - overlays (ma20/ma60 등)
   - evidenceBinding
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 knowledgeRefs:

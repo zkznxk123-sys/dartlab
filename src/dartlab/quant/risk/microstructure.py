@@ -15,14 +15,75 @@ from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def calcLiquidity(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """시장 미시구조 유동성 분석.
+    """시장 미시구조 유동성 분석 — Amihud + Roll + 회전율.
+
+    Capabilities:
+        Amihud (2002) ILLIQ = mean(|r| / dollar_volume) + log scale +
+        recent 20d 변화 추적 + Roll (1984) effective spread = 2 √(-cov(Δp,
+        Δp_{t-1})) + turnover (회전율) → liquidityGrade (A~F) 라벨.
+        대형주 vs 소형주 유동성 차이 정량화.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
 
     Returns:
-        dict with amihud, rollSpread, turnover, liquidityGrade.
+        dict:
+            - ``amihud``/``amihudLog`` (float): 비유동성 (높을수록 비유동).
+            - ``rollSpread`` (float): 추정 effective spread.
+            - ``turnover`` (float): 회전율.
+            - ``liquidityGrade`` (str): A~F.
+            - 또는 ``error`` (str): 20 일 미만.
+
+    Raises:
+        없음 (error 키).
+
+    Example:
+        >>> r = calcLiquidity("005930")
+        >>> r["amihudLog"], r["liquidityGrade"]
+        (-8.5, 'A')  # 대형주 → A 등급
+
+    Guide:
+        - amihud > 1e-6 = 비유동 (소형주). 1e-9 미만 = 매우 유동 (대형주).
+        - rollSpread 가 명시적 bid-ask 보다 크면 noisy trade (저유동).
+        - 펀드 운용 시 일일 거래량의 5~10% 이내 매매 권장 → amihud 가
+          impact cost 추정 입력.
+
+    See Also:
+        - ``calcVolume``: 거래량 흐름
+        - ``calcVolatility``: vol (저유동주는 vol 큼)
+        - ``screen``: 유동성 필터 (펀드 스크리닝)
+
+    When:
+        Quant risk 측정 + 펀드 운용 시 impact cost 추정 진입점.
+
+    How:
+        OHLCV → daily return + dollar volume → Amihud (mean(|r|/vol)) + Roll
+        cov(Δp, Δp_{t-1}) → effective spread + turnover → grade.
+
+    Requires:
+        OHLCV (close + volume) ≥ 20 일.
+
+    AIContext:
+        liquidityGrade 단독 인용 금지 — amihudLog 절대값 + 비교 universe 명시.
+        US 대형주 (AAPL, MSFT) vs KR 대형주 amihud 절대값은 시장 규모 차이로
+        직접 비교 어려움.
+
+    LLM Specifications:
+        AntiPatterns:
+            - amihud 절대값 KR↔US 직접 비교 — 시장 규모 차이.
+            - 20 일 미만에 본 함수 호출 — error.
+        OutputSchema:
+            ``{amihud: float, amihudLog: float, rollSpread: float, turnover:
+              float, liquidityGrade: str}``.
+        Prerequisites:
+            OHLCV close + volume ≥ 20 일.
+        Freshness:
+            일별.
+        Dataflow:
+            OHLCV → daily return + dollar volume → Amihud → Roll covariance
+            → turnover → grade.
+        TargetMarkets: KR (KRX), US (NYSE/NASDAQ).
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)

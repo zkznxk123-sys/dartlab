@@ -203,10 +203,39 @@ class AnalysisResult:
     def grades(self) -> dict[str, str]:
         """10영역 등급 dict 반환.
 
+        Capabilities:
+            - 7 필수 + 3 옵션 영역 grade 를 단일 dict 로 묶어 반환.
+
         Returns
         -------
         dict[str, str]
             영역 키 → 등급 문자열 ("A"~"F") 매핑.
+
+        Guide:
+            classifyProfile 입력으로 직접 사용. 옵션 영역 None 이면 키 누락.
+
+        When:
+            AnalysisResult 활용 시 grade 만 빠르게 살펴볼 때.
+
+        How:
+            self.{performance/profitability/.../coreEarnings}.grade 추출.
+
+        Requires:
+            self 가 AnalysisResult dataclass 인스턴스 (이미 보장).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> result.grades()
+            {'performance': 'A', 'profitability': 'B', ...}
+
+        See Also:
+            - classifyProfile: dict 입력으로 프로필 분류
+            - generateSummary: 강점/약점 추출 입력
+
+        AIContext:
+            10 영역 grade 한눈 비교 시. 사용자 직접 노출보다는 내부 가공용.
         """
         result = {
             "performance": self.performance.grade,
@@ -225,7 +254,7 @@ class AnalysisResult:
             result["coreEarnings"] = self.coreEarnings.grade
         return result
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         from dartlab.core.htmlRenderer import getHtmlRenderer
 
         renderer = getHtmlRenderer()

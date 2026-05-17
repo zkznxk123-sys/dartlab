@@ -42,24 +42,24 @@ jobs:
         run: uv run python -c "import dartlab; print('dartlab', getattr(dartlab, '__version__', 'dev'))"
 
       - name: Build industry map (all companies) + HF upload
-        run: uv run python -X utf8 scripts/build/buildIndustryMap.py --companies 0
+        run: uv run python -X utf8 .github/scripts/prebuild/buildIndustryMap.py --companies 0
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
       - name: Build dashboard finance.json (Polars batch)
-        run: uv run python -X utf8 scripts/build/buildFinanceJson.py
+        run: uv run python -X utf8 .github/scripts/prebuild/buildFinanceJson.py
 
       - name: Build dashboard quarters.json (Polars batch)
-        run: uv run python -X utf8 scripts/build/buildQuartersJson.py
+        run: uv run python -X utf8 .github/scripts/prebuild/buildQuartersJson.py
 
       - name: Build dashboard meta.json
-        run: uv run python -X utf8 scripts/build/buildMetaJson.py
+        run: uv run python -X utf8 .github/scripts/prebuild/buildMetaJson.py
 
       - name: Build dashboard macro.json
-        run: uv run python -X utf8 scripts/build/buildMacroJson.py
+        run: uv run python -X utf8 .github/scripts/prebuild/buildMacroJson.py
 
       - name: Build story manifest
-        run: uv run python -X utf8 scripts/build/buildStoryManifest.py
+        run: uv run python -X utf8 .github/scripts/prebuild/buildStoryManifest.py
 
       - name: Validate map output
         run: |

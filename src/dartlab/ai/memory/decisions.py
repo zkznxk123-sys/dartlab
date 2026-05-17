@@ -46,7 +46,7 @@ class DecisionMemo:
         return self.question
 
     def get(self, key: str, default: Any = None) -> Any:
-        """get — TODO 한국어 동작 설명."""
+        """dict-like 접근 — DecisionMemo 필드 또는 'text' 합성 키."""
         if key == "text":
             return self.text or default
         return getattr(self, key, default)
@@ -201,7 +201,7 @@ def _rowToMemo(row: dict) -> DecisionMemo:
 
 
 def recall(query: str, *, k: int = 5) -> list[DecisionMemo]:
-    """recall — TODO 한국어 동작 설명."""
+    """query 토큰 매칭 점수로 DecisionMemo 상위 k 개 회상 (JSONL 스캔)."""
     path = _resolveDecisionsPath()
     if not path.exists() or not query:
         return []

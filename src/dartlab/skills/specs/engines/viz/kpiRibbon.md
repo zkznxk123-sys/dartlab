@@ -20,6 +20,7 @@ outputs:
   - KPI cards
   - evidenceBinding
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 knowledgeRefs:

@@ -104,29 +104,70 @@ def _fetchRateData(market: str, asOf: str | None = None) -> dict[str, float | No
 def analyzeRates(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """금리 종합 분석 — 방향 전망 + 고용/물가 해석 + 수익률곡선 분해.
 
-    Parameters
-    ----------
-    market : str
-        ``"US"`` | ``"KR"``.
-    as_of : str | None
-        기준일. ``None`` 이면 최신.
-    overrides : dict | None
-        지표 강제 치환 (예: ``{"fed_funds": 5.5}``).
+    Capabilities:
+        금리 7 축 통합 — rateOutlook (Taylor rule 방향) + FedWatch 근사
+        (estimateRateExpectation) + DKW 장기금리 분해 (decomposeLongRate) +
+        고용/물가 해석 + Nelson-Siegel 수익률곡선 + ACM 텀프리미엄 +
+        Cochrane-Piazzesi 채권 리스크 프리미엄. macro/summary 의 rates 축 진입점.
 
-    Returns
-    -------
-    dict
-        - market : str — 시장 코드
-        - outlook : dict — 금리 방향 전망 (direction:str, reasoning:list[str])
-        - expectation : dict | None — FedWatch 근사 (spread2yFf:float(%p), direction:str, directionLabel:str, strength:str)
-        - decomposition : dict | None — DKW 장기금리 분해 (nominal:float(%), expectedInflation:float(%), realRate:float(%), termPremium:float(%p), termPremiumSource:str). US 전용.
-        - employment : dict | None — 고용 해석 (state:str, stateLabel:str, reasoning:list[str])
-        - inflation : dict | None — 물가 해석 (state:str, stateLabel:str, reasoning:list[str])
-        - yieldCurve : dict | None — Nelson-Siegel 분해 (beta0~2:float, lambda:float, rmse:float, interpretation:str, description:str). US 전용.
-        - realRateRegime : dict | None — BEI/실질금리 4분면 (realRate:float(%), bei:float(%), regime:str, regimeLabel:str, description:str). US 전용.
-        - termPremium : dict | None — ACM 텀프리미엄 (value:float(%p), zone:str, zoneLabel:str, implication:str, description:str). US 전용.
-        - bondRiskPremium : dict | None — Cochrane-Piazzesi 채권 리스크 프리미엄. US 전용.
-        - timeseries : dict — fed_funds / dgs2 / dgs10 / bei / cpi 시계열
+    Args:
+        market: ``"US"`` | ``"KR"``.
+        asOf: 기준일 ``YYYY-MM-DD``. None 이면 최신.
+        overrides: 지표 강제 치환 (예: ``{"fed_funds": 5.5}``).
+
+    Returns:
+        dict — market/outlook/expectation/decomposition(US)/employment/inflation/
+        yieldCurve(US)/realRateRegime(US)/termPremium(US)/bondRiskPremium(US)/
+        timeseries 키.
+
+    Example:
+        >>> r = analyzeRates(market="US")
+        >>> r["outlook"]["direction"], r["yieldCurve"]["interpretation"][:5]
+        ('hold', '평탄화')
+
+    Guide:
+        outlook + expectation 동시 hike 면 강한 인상 신호. realRateRegime
+        "stagflation" + termPremium "elevated" 동시 = 채권 회피 강화.
+        decomposition.termPremiumSource="ACM" 가 "residual" 보다 신뢰 우위.
+
+    When:
+        ``analyzeSummary`` rates 축 진입점 + AI 금리 답변.
+
+    How:
+        _fetchRateData → overrides → rateOutlook + estimateRateExpectation +
+        decomposeLongRate (US) + interpretEmployment + interpretInflation +
+        nelsonSiegel (US) + realRateRegime (US) + ACM TP fetch +
+        cochranePiazzesiFactor (US) → dict 합성.
+
+    Requires:
+        FRED (FEDFUNDS/DGS1~30/T10YIE/DFII10/CPIAUCSL/CPILFESL/UNRATE/
+        THREEFYTP10) + BOK ECOS (KR 기준금리/CPI).
+
+    Raises:
+        없음 — 개별 축 실패는 None 으로 흡수.
+
+    See Also:
+        - rateOutlook : Taylor rule 단순화
+        - decomposeLongRate : DKW 분해
+        - nelsonSiegel : 수익률곡선 분해
+
+    AIContext:
+        outlook.direction + expectation.directionLabel + decomposition (US) 3
+        필드만으로 한 단락 답변. KR 은 outlook + employment + inflation 까지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - outlook 만 인용 + expectation/decomposition 무시
+            - KR 시장에 yieldCurve/termPremium 기대 (US 전용)
+            - termPremiumSource "residual" 결과를 ACM 만큼 단정
+        OutputSchema:
+            ``{market, outlook, expectation, decomposition, employment,
+            inflation, yieldCurve, realRateRegime, termPremium, bondRiskPremium,
+            timeseries}``.
+        Prerequisites: FRED + BOK ECOS cache.
+        Freshness: FRED 일간 + 월간 (CPI 10 일).
+        Dataflow: _fetchRateData → 7 축 함수 → dict 합성.
+        TargetMarkets: US (풀세트), KR (outlook/employment/inflation 부분).
     """
     data = _fetchRateData(market, asOf=asOf)
     if overrides:

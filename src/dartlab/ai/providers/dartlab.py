@@ -15,17 +15,17 @@ from dartlab.ai.tools.types import ToolSpec
 
 
 class DartLabProvider(BaseProvider):
-    """DartLabProvider — TODO 한국어 클래스 설명."""
+    """research-graph 호환 backward-compat 어댑터 (LLM 직접 호출 없음)."""
 
     name = "dartlab"
     defaultModel = "dartlab-research-graph"
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """항상 True — built-in adapter 라 외부 의존 없음."""
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:
-        """toolSchema — TODO 한국어 동작 설명."""
+        """ToolSpec → Anthropic-호환 schema dict."""
         return {
             "name": spec.name,
             "description": spec.description,
@@ -39,7 +39,7 @@ class DartLabProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
-        """complete — TODO 한국어 동작 설명."""
+        """no-op stub — 즉시 stop 이벤트 yield (research-graph 위임 표식)."""
         yield LLMEvent(
             "stop",
             {"reason": "dartlab_research_graph", "usage": {}},

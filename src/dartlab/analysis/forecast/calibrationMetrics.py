@@ -42,6 +42,10 @@ def computeBrierScore(
 
     0 = 완벽, 1 = 최악.
 
+    Capabilities:
+        - 확률 예측의 평균 제곱 오차 계산
+        - 캘리브레이션 베이스 지표 제공
+
     Parameters
     ----------
     predictions : list[float]
@@ -53,6 +57,32 @@ def computeBrierScore(
     -------
     float
         Brier Score (0~1). 데이터 없으면 1.0.
+
+    Guide:
+        예측 확률·실제 결과 두 리스트를 같은 길이로 정렬해 호출한다.
+
+    When:
+        확률 예측의 정확도를 단일 스칼라로 요약할 때.
+
+    How:
+        generateCalibrationReport 내부 호출 또는 단독 사용 가능.
+
+    Requires:
+        predictions·outcomes 길이 동일, 값은 [0,1] 구간.
+
+    Raises:
+        없음. 데이터 부족 시 1.0 반환.
+
+    Example:
+        >>> computeBrierScore([0.7, 0.3], [1, 0])
+        0.09
+
+    See Also:
+        - buildCalibrationBins : 구간별 적중률 계산
+        - generateCalibrationReport : 전체 리포트 생성
+
+    AIContext:
+        AI 답변 시 "예측 정확도 Brier=X" 형태로 인용한다.
     """
     if not predictions or len(predictions) != len(outcomes):
         return 1.0
@@ -67,6 +97,10 @@ def buildCalibrationBins(
 ) -> list[CalibrationBin]:
     """확률 구간별 적중률 계산 (reliability diagram 데이터).
 
+    Capabilities:
+        - 확률 구간별 평균 예측·실제 적중률 산출
+        - 신뢰도 다이어그램 시각화 데이터 제공
+
     Parameters
     ----------
     predictions : list[float]
@@ -80,6 +114,33 @@ def buildCalibrationBins(
     -------
     list[CalibrationBin]
         구간별 예측/실제 평균 + 괴리.
+
+    Guide:
+        nBins 등분으로 [0,1] 을 나눠 각 구간 내 예측·실제 평균을 묶는다.
+
+    When:
+        "80% 예측이 정말 80% 맞는가" 구간별 검증할 때.
+
+    How:
+        generateCalibrationReport 가 내부적으로 호출. 단독 시각화도 가능.
+
+    Requires:
+        predictions·outcomes 길이 동일, 값은 [0,1] 구간.
+
+    Raises:
+        없음. 빈 입력 시 빈 리스트.
+
+    Example:
+        >>> bins = buildCalibrationBins([0.1, 0.9], [0, 1], nBins=2)
+        >>> len(bins)
+        2
+
+    See Also:
+        - computeBrierScore : 단일 스칼라 정확도
+        - generateCalibrationReport : 전체 리포트 생성
+
+    AIContext:
+        AI 답변 시 reliability diagram 구간별 표로 인용.
     """
     if not predictions:
         return []
@@ -121,6 +182,10 @@ def generateCalibrationReport(
 ) -> CalibrationReport | None:
     """전체 캘리브레이션 리포트 생성.
 
+    Capabilities:
+        - Brier·Brier Skill·구간별 적중률을 한 리포트로 묶음
+        - 캘리브레이션 합격 여부 자동 판정
+
     Parameters
     ----------
     predictions : list[float]
@@ -132,6 +197,33 @@ def generateCalibrationReport(
     -------
     CalibrationReport | None
         Brier Score, Skill Score, 구간별 적중률. 데이터 5개 미만이면 None.
+
+    Guide:
+        예측-결과 페어가 5 개 이상 축적된 시점에 한 번 호출.
+
+    When:
+        모델/시나리오의 확률 보정도를 종합 평가할 때.
+
+    How:
+        computeBrierScore + buildCalibrationBins 결과를 묶어 dataclass 반환.
+
+    Requires:
+        predictions·outcomes 길이 동일, ≥5 건.
+
+    Raises:
+        없음. 데이터 부족 시 None 반환.
+
+    Example:
+        >>> r = generateCalibrationReport([0.5]*10, [1,0]*5)
+        >>> r.totalPredictions
+        10
+
+    See Also:
+        - computeBrierScore : 정확도 지표
+        - buildCalibrationBins : 구간별 통계
+
+    AIContext:
+        AI 답변 시 캘리브레이션 합격/실패 판정 근거로 인용.
     """
     if not predictions or len(predictions) < 5:
         return None

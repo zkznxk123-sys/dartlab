@@ -58,6 +58,13 @@ def calcCostBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
         탐지). 판관비율 동시 상승 = 운영 효율 저하. 단년도 절대값보다 추세
         변화에 주목.
 
+    When:
+        비용 구조 변화·원가 부담 추세 진단, 마진 분석의 1 차 입력.
+
+    How:
+        IS rawNormalized → 매출 + sumCostOfSales (폴백) + sumSGA (폴백) →
+        3 비율 → notesDetail (costByNature) 결합.
+
     SeeAlso:
         - ``calcOperatingLeverage``: DOL (영업레버리지)
         - ``calcBreakevenEstimate``: BEP + 안전마진
@@ -172,6 +179,13 @@ def calcOperatingLeverage(company, *, basePeriod: str | None = None) -> dict | N
         DOL > 3 = 고정비 부담 큼 (반도체/철강/화학 제조업 전형). DOL < 1.5
         = 변동비 비중 큼 (소매/서비스). 경기 하강기에 DOL 높은 회사는
         영업이익 급락 위험. contributionProxy 와 함께 인용.
+
+    When:
+        고정비 구조 평가·경기 하강기 영업이익 민감도 진단 시.
+
+    How:
+        IS 매출/영업이익/매출총이익 매핑 → 전년 대비 변화율 비율로 DOL +
+        contributionProxy 계산. 부호 전환 period 는 None.
 
     SeeAlso:
         - ``calcCostBreakdown``: 비용 구조 (DOL 의 근거)
@@ -290,6 +304,13 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
         매우 안정. 단순화 가정 (매출원가 = 변동비) 은 제조업에 적합,
         서비스업/소프트웨어는 인건비 분류 차이로 왜곡 가능.
 
+    When:
+        손익분기점 분석·안전마진 정성 평가 시.
+
+    How:
+        IS 매출/매출원가/판관비 매핑 → 변동비율 = 매출원가/매출 → BEP =
+        판관비/(1-변동비율) → 안전마진 = (매출-BEP)/매출.
+
     SeeAlso:
         - ``calcOperatingLeverage``: DOL (BEP 와 paired)
         - ``calcCostBreakdown``: 비용 구조 (BEP 의 입력)
@@ -366,261 +387,54 @@ def calcBreakevenEstimate(company, *, basePeriod: str | None = None) -> dict | N
     return {"history": history} if history else None
 
 
-# ── 비용의 성격별 분류 분석 ──
+# ── calcCostByNatureAnalysis + calcRawMaterialBreakdown → _costStructureDeep.py 분리 ──
 
-
-@memoizedCalc
-def calcCostByNatureAnalysis(company, *, basePeriod: str | None = None) -> dict | None:
-    """비용의 성격별 분류(notes) — 인건비/원재료/감가상각 비중 추세.
-
-    K-IFRS 주석에서 비용의 성격별 분류를 추출하여,
-    원재료비·인건비·감가상각비 등 성격별 비중의 시계열 변화를 추적한다.
-    173개사 이상 데이터 보유 (금융/REIT/지주회사 미공시).
-
-    Returns
-    -------
-    dict | None
-        None이면 비용 성격별 분류 데이터 없음.
-        categories : list[dict] — 비용 카테고리별 시계열
-            name : str — 카테고리명 (원재료/인건비/감가상각 등)
-            history : list[dict] — 기간별 금액·비중
-                period : str — 회계연도
-                amount : float — 금액 (원)
-                ratio : float — 총비용 대비 비중 (%)
-            latestRatio : float — 최신 기간 비중 (%)
-            direction : str | None — 비중 추세 (비중 증가/비중 감소/안정)
-        periods : list[str] — 대상 회계연도 목록
-        insight : str | None — 주요 변화 요약 문장
-    """
-    from dartlab.analysis.financial.companyContext import fetchNotesDetail
-    from dartlab.core.utils.helpers import parseNumStr
-
-    notesData = fetchNotesDetail(company, ["costByNature"])
-    rawRows = notesData.get("costByNature")
-    if not rawRows:
-        return None
-
-    # costByNature: [{항목, 2024, 2023, ...}] (항목×연도 테이블)
-    # 기간 컬럼 추출
-    sampleRow = rawRows[0]
-    periodCols = sorted(
-        [k for k in sampleRow if k not in ("항목",) and str(k).replace("-", "").isdigit()], reverse=True
-    )
-    if not periodCols:
-        return None
-
-    periodCols = periodCols[:_MAX_YEARS]
-
-    # 총비용 행 찾기 (합계/총계)
-    totalRow = None
-    detailRows = []
-    for row in rawRows:
-        item = str(row.get("항목", "")).strip()
-        if any(kw in item for kw in ("합계", "총계", "계")):
-            if totalRow is None:
-                totalRow = row
-        else:
-            detailRows.append(row)
-
-    if not detailRows:
-        return None
-
-    # 성격별 분류: 주요 비용 카테고리 매핑
-    _CATEGORY_KEYWORDS = {
-        "원재료": ["원재료", "재료비", "원자재"],
-        "상품매입": ["상품", "상품매입"],
-        "인건비": ["종업원급여", "급여", "인건비", "퇴직급여", "복리후생"],
-        "감가상각": ["감가상각", "상각비", "무형자산상각"],
-        "외주비": ["외주", "용역"],
-        "기타": [],
-    }
-
-    categories: dict[str, dict[str, float]] = {}  # {catName: {period: amount}}
-    for row in detailRows:
-        item = str(row.get("항목", "")).strip()
-        if not item:
-            continue
-
-        # 카테고리 매칭
-        matched = "기타"
-        for catName, keywords in _CATEGORY_KEYWORDS.items():
-            if any(kw in item for kw in keywords):
-                matched = catName
-                break
-
-        if matched not in categories:
-            categories[matched] = {}
-        for col in periodCols:
-            v = parseNumStr(row.get(col))
-            if v is not None:
-                categories[matched][col] = categories[matched].get(col, 0) + v
-
-    if not categories:
-        return None
-
-    # 총비용 계산 (totalRow 없으면 합산)
-    totals: dict[str, float] = {}
-    if totalRow:
-        for col in periodCols:
-            v = parseNumStr(totalRow.get(col))
-            if v is not None and v > 0:
-                totals[col] = v
-    if not totals:
-        for col in periodCols:
-            s = sum(cats.get(col, 0) for cats in categories.values())
-            if s > 0:
-                totals[col] = s
-
-    # 카테고리별 결과 생성
-    result_categories = []
-    for catName, vals in categories.items():
-        if not vals:
-            continue
-        history = []
-        for col in periodCols:
-            amt = vals.get(col, 0)
-            total = totals.get(col, 0)
-            ratio = round(amt / total * 100, 1) if total > 0 else 0
-            history.append({"period": col, "amount": amt, "ratio": ratio})
-
-        latestRatio = history[0]["ratio"] if history else 0
-        direction = None
-        ratios = [h["ratio"] for h in history if h["ratio"] > 0]
-        if len(ratios) >= 2:
-            diff = ratios[0] - ratios[-1]
-            if diff > 3:
-                direction = "비중 증가"
-            elif diff < -3:
-                direction = "비중 감소"
-            else:
-                direction = "안정"
-
-        result_categories.append(
-            {
-                "name": catName,
-                "history": history,
-                "latestRatio": latestRatio,
-                "direction": direction,
-            }
-        )
-
-    # 비중 기준 정렬 (기타 제외하고 큰 순)
-    result_categories.sort(key=lambda x: (x["name"] == "기타", -x["latestRatio"]))
-
-    # 인사이트 생성
-    insight = None
-    laborCat = next((c for c in result_categories if c["name"] == "인건비"), None)
-    materialCat = next((c for c in result_categories if c["name"] == "원재료"), None)
-    if laborCat and laborCat["direction"] == "비중 증가":
-        insight = f"인건비 비중 {laborCat['latestRatio']:.0f}%로 증가 추세 — 노동집약도 심화"
-    elif materialCat and materialCat["direction"] == "비중 증가":
-        insight = f"원재료비 비중 {materialCat['latestRatio']:.0f}%로 증가 — 원가 부담 확대"
-
-    return {
-        "categories": result_categories,
-        "periods": periodCols,
-        "insight": insight,
-    }
-
-
-# ── 원재료 비중 (docs 보강) ──
-
-
-@memoizedCalc
-def calcRawMaterialBreakdown(company, *, basePeriod: str | None = None) -> dict | None:
-    """주요 원재료 품목별 매입액 비중 — rawMaterial docs 토픽 기반.
-
-    부문/품목별 매입액 금액 행만 추출 (비중% 행 제외).
-    계층적 테이블의 경우 부문별 첫 품목 금액이 대표값으로 나타남.
-
-    Returns
-    -------
-    dict | None
-        segments : list[dict] — 품목별 매입액 (최대 8개, 금액 내림차순)
-            name : str — 원재료 품목명
-            amount : float — 매입액 (원)
-            pct : float — 총매입액 대비 비중 (%)
-        totalAmount : float — 총매입액 (원)
-        period : str — 기준 회계연도
-    """
-    from dartlab.core.utils.helpers import parseNumStr
-
-    result = company.select("rawMaterial", ["매입액"])
-    if result is None:
-        return None
-
-    import polars as pl
-
-    df = result if isinstance(result, pl.DataFrame) else getattr(result, "df", None)
-    if df is None or "항목" not in df.columns:
-        return None
-
-    from dartlab.core.utils.helpers import periodCols
-
-    pCols = periodCols(df)
-    if not pCols:
-        return None
-
-    # 최신 연도 컬럼 사용 (basePeriod 이하, Q 없는 연도 우선)
-    annuals = annualColsFromPeriods(pCols, basePeriod, 1)
-    latestCol = annuals[0] if annuals else pCols[0]
-
-    labelCol = "항목"
-    items = df[labelCol].to_list()
-    vals = df[latestCol].to_list()
-
-    # 총계 행 찾기
-    totalAmount = None
-    for it, v in zip(items, vals):
-        if any(k in str(it) for k in ["총계", "합계"]):
-            totalAmount = parseNumStr(str(v))
-            break
-
-    if totalAmount is None or totalAmount <= 0:
-        return None
-
-    # 금액 행만 추출 (소계/총계 제외, % 비중 행 제외)
-    segments = []
-    for it, v in zip(items, vals):
-        it = str(it)
-        vStr = str(v).strip()
-        if any(k in it for k in ["총계", "합계", "소계"]):
-            continue
-        if "%" in vStr:
-            continue
-        parsed = parseNumStr(vStr)
-        if parsed is None or parsed <= 0:
-            continue
-        name = it.replace("_매입액", "").strip()
-        if not name:
-            continue
-        pct = parsed / totalAmount * 100
-        if pct < 1:
-            continue
-        segments.append({"name": name, "amount": parsed, "pct": round(pct, 1)})
-
-    if not segments:
-        return None
-
-    segments.sort(key=lambda x: x["amount"], reverse=True)
-    return {
-        "segments": segments[:8],
-        "totalAmount": totalAmount,
-        "period": latestCol,
-    }
-
-
-# ── 플래그 ──
+from dartlab.analysis.financial._costStructureDeep import (  # noqa: E402, F401
+    calcCostByNatureAnalysis,
+    calcRawMaterialBreakdown,
+)
 
 
 @memoizedCalc
 def calcCostStructureFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """비용 구조 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 메시지 목록 (매출원가율 연속 상승, 고DOL, 안전마진 부족 등).
+    Capabilities:
+        - 매출원가율/판관비율 3 기 연속 상승, 고DOL, 안전마진 부족 시 한국어
+          flags 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        flag 신호 — cogsRatio/sgaRatio 3 년 단조 상승, DOL > 3, 안전마진 < 10%.
+
+    When:
+        보고서·UI 위험 배너에 비용 구조 경고 한 줄 표시.
+
+    How:
+        ``calcCostBreakdown`` + ``calcOperatingLeverage`` + ``calcBreakevenEstimate``
+        결과를 임계와 비교 후 한국어 포맷팅.
+
+    Requires:
+        하위 3 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCostStructureFlags(Company("005930"))
+        ["매출원가율 3년 연속 상승 ..."]
+
+    SeeAlso:
+        - ``calcCostBreakdown``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 비용 구조 위험 인용 시.
     """
     flags = []
 

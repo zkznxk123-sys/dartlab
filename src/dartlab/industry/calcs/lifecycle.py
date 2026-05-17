@@ -35,7 +35,47 @@ _PHASE_THRESHOLDS = {
 def classifyPhase(yoyGrowthPct: float | None) -> str:
     """단일 YoY 성장률 → Vernon 3+쇠퇴 phase 라벨.
 
+    Capabilities:
+        YoY 성장률 (%) → Vernon 3 단계 + 쇠퇴 라벨 (도입/성장/성숙/쇠퇴). None/NaN 은 unknown
+        (첫 해 yoy 계산 불가).
+
     None / NaN 입력 시 'unknown' (첫 해 — yoy 계산 불가).
+
+    Parameters
+    ----------
+    yoyGrowthPct : float | None
+        YoY 매출 성장률 (%).
+
+    Returns
+    -------
+    str
+        "도입" | "성장" | "성숙" | "쇠퇴" | "unknown".
+
+    Raises:
+        없음.
+
+    Example:
+        >>> classifyPhase(45.0), classifyPhase(5.0), classifyPhase(-3.0)
+        ('도입', '성숙', '쇠퇴')
+
+    Guide:
+        임계값 (30 / 10 / 0) 은 모듈 상수 ``_PHASE_THRESHOLDS``. 도메인별 변경은 워크숍 결과 반영.
+
+    When:
+        ``classifyLifecycle`` 의 row-wise 매핑 함수로 사용. 단독 호출은 드물다.
+
+    How:
+        입력값을 임계 3 단 비교 → 라벨 매핑.
+
+    Requires:
+        - 입력은 단일 연도 YoY % (예: 12.3).
+
+    See Also:
+        - ``dartlab.industry.calcs.lifecycle.classifyLifecycle`` : 본 함수 사용자
+
+    AIContext:
+        "도입기 / 성장기" 답변에 사용. 단일 연도가 외부 충격 (코로나 등) 영향 시 답변에 "단일
+        연도 단서" 명시 권장.
     """
     if yoyGrowthPct is None:
         return "unknown"
@@ -56,6 +96,10 @@ def classifyLifecycle(
     years: list[str] | None = None,
 ) -> pl.DataFrame:
     """산업 라이프사이클 시계열 — 연도별 phase + YoY 성장 + 기업수.
+
+    Capabilities:
+        대상 산업의 연도별 매출(조) 합 + 기업수 + YoY 성장률 + Vernon phase 라벨을 단일 polars
+        DataFrame 으로 산출. 라이프사이클 visual / Story 6 막 narrative 1 차 데이터.
 
     Parameters
     ----------
@@ -79,6 +123,36 @@ def classifyLifecycle(
     -----
     backtest SSOT 는 ``dartlab.quant.walkForward`` — 본 함수는 phase 라벨링만 담당.
     forecast 신뢰도 = advisory (학술 모델 기반 회고 분류, 점예측 X).
+
+    Raises:
+        없음 — 데이터 부족 시 빈 DataFrame.
+
+    Example:
+        >>> from dartlab.industry.calcs.lifecycle import classifyLifecycle
+        >>> df = classifyLifecycle("semiconductor")
+        >>> df.select(["연도", "yoy성장률", "phase"])
+
+    Guide:
+        반환은 회고 분류 (advisory). 첫 해 phase 는 unknown — 답변 시 "최근 N 년" 단서 명시.
+
+    When:
+        산업 라이프사이클 답변, Story 6 막 "변화" 데이터, UI 시계열 phase 시각화.
+
+    How:
+        ``buildTimelineSummary`` 호출 → 연도 그룹 매출 합산 → shift 로 YoY% → ``classifyPhase``
+        row-wise 매핑 → 라벨 컬럼 첨부.
+
+    See Also:
+        - ``dartlab.industry.calcs.lifecycle.classifyPhase`` : row-wise 분류
+        - ``dartlab.industry.build.financials.buildTimelineSummary`` : 시계열 원본
+
+    Requires:
+        - L1.5 frame: ``buildTimelineSummary`` 산출 가능 (재무 1+ 연도)
+        - reference: ``industry/taxonomy`` 등록된 산업
+
+    AIContext:
+        Story 6 막 "변화" 데이터 직접 인용. 답변에 ``phase`` 가 unknown 인 첫 해는 단서 ("최근 N
+        년 yoy 기반") 명시 권장.
     """
     from dartlab.industry.build.financials import buildTimelineSummary
     from dartlab.industry.build.pipeline import loadNodes

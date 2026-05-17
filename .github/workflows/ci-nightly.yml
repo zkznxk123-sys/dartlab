@@ -147,3 +147,42 @@ jobs:
           DARTLAB_TEST_LOCKED: "1"
         run: |
           bash scripts/dev/test-realdata.sh tests/realData/test_freshInstall.py -v --tb=short
+
+  # Track 5 — mutmut mutation testing (core/ 한정, Linux only)
+  # Windows native 미지원 (mutmut 이슈 #397). nightly Linux runner 에서 1 회 sweep
+  # → mutation score baseline 측정. 결과 artifact 로 다운로드 후 oracle 보강 트리거.
+  mutation-testing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    continue-on-error: true  # 첫 baseline 측정 단계 — fail 차단 X
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install package + mutmut
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio hypothesis "mutmut>=3.0"
+          pip install -e .
+      - name: Run mutmut sweep (core/{formatting,cache,naming})
+        env:
+          DARTLAB_TEST_LOCKED: "1"
+        run: |
+          # mutmut 가 .mutmut-cache 에 mutant 결과 누적. CI 는 매 nightly 신선 실행.
+          rm -rf .mutmut-cache mutants/
+          mutmut run || true  # mutant 일부 생존해도 다음 단계로 (baseline 측정 단계)
+      - name: Generate mutation report
+        run: |
+          mutmut results > mutation-results.txt 2>&1 || true
+          cat mutation-results.txt | head -100
+      - name: Upload mutation report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: mutation-results
+          path: |
+            mutation-results.txt
+            mutants/
+          retention-days: 30

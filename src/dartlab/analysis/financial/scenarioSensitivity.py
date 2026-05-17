@@ -22,6 +22,35 @@ from dartlab.core.memory import memoizedCalc
 def calcScenarioSensitivity(company, *, basePeriod: str | None = None) -> dict | None:
     """핵심 지표 3-shock 민감도 분석.
 
+    Capabilities:
+        - OPM -5pp · 매출 -15% · 금리 +2pp 3 시나리오 결과 산출.
+
+    Guide:
+        baseCase + 3 shock 결과 + critical assumption + breakdown point.
+
+    When:
+        "악조건이면?" 스트레스 시나리오 질의 진입 시.
+
+    How:
+        IS/BS 최신값 추출 → 3 shock 적용 → 지표 재계산.
+
+    Requires:
+        IS (sales/op/ni/interest) + BS (equity/liabilities).
+
+    Raises:
+        없음 (필수 슬롯 부재 시 None).
+
+    Example:
+        >>> calcScenarioSensitivity(c)["shocks"]["opm_minus_5pp"]
+        {"opm": ..., "roe": ..., ...}
+
+    See Also:
+        - calcImprovementLevers : 호조건 개선 lever
+        - calcValuationBand : 멀티플 시나리오
+
+    AIContext:
+        AI 답변 "스트레스 테스트 결과" 카드의 핵심 evidence.
+
     Returns
     -------
     dict | None
@@ -206,6 +235,35 @@ def calcImprovementLevers(company, *, basePeriod: str | None = None) -> dict | N
 
     "진단"이 아니라 "처방" — 이 회사가 어떻게 하면 좋아지는가.
     scenarioSensitivity의 baseCase 재사용 + 상방 시나리오 5종 계산.
+
+    Capabilities:
+        - 매출원가/판관비/회전율 등 lever 별 효과 정렬.
+
+    Guide:
+        difficulty (easy/medium/hard) + timeframe + effect 합성.
+
+    When:
+        "어떻게 좋아질 수 있나?" 처방 의도 진입 시.
+
+    How:
+        scenarioSensitivity baseCase 재사용 → 5 lever 시뮬레이션 → 정렬.
+
+    Requires:
+        calcScenarioSensitivity 가 baseCase 반환해야 동작.
+
+    Raises:
+        없음 (base 부재 시 None).
+
+    Example:
+        >>> calcImprovementLevers(c)["topLever"]
+        "cogs_reduction_3pp"
+
+    See Also:
+        - calcScenarioSensitivity : 하방 시나리오 페어
+        - calcMarginWaterfall : 비용 분해
+
+    AIContext:
+        AI 답변 "개선 처방" 코너의 우선순위 정렬에 직접 사용.
 
     Returns
     -------

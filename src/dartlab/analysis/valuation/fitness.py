@@ -57,8 +57,15 @@ def _lookupMatrix(template: str | None, phase: str | None) -> dict:
 def selectModels(company: Any, *, lifeCyclePhase: str | None = None) -> dict:
     """기업유형 × 생애주기 감지 → primary/secondary 모델 자동 선택.
 
+    Capabilities:
+        - detectTemplate (기업유형) + calcLifeCycle (생애주기) → 2-key 매트릭스 룩업
+        - DDM 역할 판정 (고배당 정책 → primary 승격, 무배당 → excluded)
+        - 부도확률 가중치 적용 여부 (survivalAdj) 동반
+
     Parameters
     ----------
+    company : Company
+        대상 기업.
     lifeCyclePhase : 명시 시 calcLifeCycle 호출 생략. AI override 경로.
 
     Returns
@@ -70,6 +77,33 @@ def selectModels(company: Any, *, lifeCyclePhase: str | None = None) -> dict:
         secondary : list[str]
         survivalAdj : bool — Dark Side 가중치 적용 여부
         ddmRole : str — "primary" | "floor" | "excluded"
+
+    Example:
+        >>> selectModels(Company("005930"))
+        {"primary": "relative", "secondary": ["dcf2stage", "rim"], ...}
+
+    Guide:
+        2-key fallback chain: (t,p) → (None,p) → (t,None) → (None,None).
+        고배당 (avg payout ≥ 60% + consecutive ≥ 5y) 시 DDM primary 승격.
+
+    When:
+        calcDFV 진입 시 primary/secondary 모델 결정 단계.
+
+    How:
+        selectModels(company) 또는 lifeCyclePhase 강제 주입.
+
+    Requires:
+        analysis.financial.companyType + lifeCycle + capitalAllocation 헬퍼.
+
+    Raises:
+        없음 — 헬퍼 ImportError/AttributeError 시 default 매트릭스.
+
+    See Also:
+        - calcMethodFitness : v1 호환 적합도 점수
+        - calcDFV : 본 함수 결과를 사용하는 진입점
+
+    AIContext:
+        primary 모델 선택 근거 답변 시 lifeCyclePhase + companyType 인용.
     """
     template = None
     try:
@@ -128,6 +162,10 @@ def selectModels(company: Any, *, lifeCyclePhase: str | None = None) -> dict:
 def calcMethodFitness(company: Any, *, basePeriod: str | None = None) -> dict:
     """각 밸류에이션 방법론의 적합도 자동 판정 (v1 호환 유지).
 
+    Capabilities:
+        - DCF/RIM/DDM/relative 4 방법론 각각 0.0~1.0 적합도 + 근거 reason 산출
+        - FCF 안정성 (CV) · Omega · 배당 연속성 · peer 수 등 신호 기반
+
     Parameters
     ----------
     company : Company
@@ -142,6 +180,33 @@ def calcMethodFitness(company: Any, *, basePeriod: str | None = None) -> dict:
         rim : dict — RIM 적합도
         ddm : dict — DDM 적합도
         relative : dict — 상대가치 적합도
+
+    Example:
+        >>> calcMethodFitness(Company("005930"))
+        {"dcf": {"fitness": 0.9, "reason": "..."}, ...}
+
+    Guide:
+        v2 의 selectModels 가 매트릭스 기반이므로 본 함수는 fallback/시각화용.
+
+    When:
+        모델 적합도 시각화 차트 또는 selectModels 의 primary 가 None 인 fallback 경로.
+
+    How:
+        calcMethodFitness(company).
+
+    Requires:
+        analysis.financial 의 cashFlowStructure / residualIncome / capitalAllocation
+        / scan.builders 헬퍼들.
+
+    Raises:
+        없음 — 헬퍼 실패 시 fitness=0.2~0.3 default.
+
+    See Also:
+        - selectModels : v2 매트릭스 기반 선택
+        - calcDFV : 최종 사용처
+
+    AIContext:
+        모델 신뢰도 답변 시 fitness 점수 + reason 함께 인용.
     """
     return {
         "dcf": _dcfFitness(company, basePeriod),

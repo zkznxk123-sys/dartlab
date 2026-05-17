@@ -61,6 +61,31 @@ def detectStructuralBreak(
             isBreak : bool
             mean_pre / mean_post : float | None
             interpretation : str
+
+    Guide:
+        Quandt-Andrews (1993) — 미지 break 시점. threshold 3.0 보수적, 2.5 완화.
+        trim 0.15 표준 (양 끝 sampling bias 제거).
+
+    When:
+        Regime change 탐지 + AI 매크로/펀더멘털 shift 답변.
+
+    How:
+        후보 시점 t* sweep → 전후 평균 t-stat → sup → threshold 비교.
+
+    Requires:
+        시계열 n ≥ 30.
+
+    Raises:
+        없음 — invalid 시 error 키.
+
+    Example:
+        >>> r = detectStructuralBreak(series)
+        >>> r["isBreak"]
+        True
+
+    See Also:
+        - calcSADF : 단위근/버블 break
+        - hamiltonRegime : Markov regime
     """
     s = np.asarray(series, dtype=np.float64)
     n = len(s)
@@ -112,8 +137,45 @@ def detectMultipleBreaks(
 
     Bai-Perron 정식이 아닌 단순 sequential — 빠르고 robust.
 
+    Capabilities:
+        - detectStructuralBreak 재귀 적용 → maxBreaks 까지 다중 break 시점 식별
+        - 각 break 의 pre/post mean + stat 동시 반환
+
+    Args:
+        series: 1D 시계열.
+        maxBreaks: 최대 break 수. 기본 ``3``.
+        trim: 양 끝 trim 비율. 기본 ``0.15``.
+        threshold: |t-stat| 임계. 기본 ``3.0``.
+
     Returns:
-        dict — breaks (list of {idx, stat, meanPre, meanPost}), nBreaks
+        dict — n/breaks/nBreaks/interpretation.
+
+    Guide:
+        Bai-Perron 1998 simplified. 정식 BP 보다 빠르고 robust. 다중 regime change 식별.
+
+    When:
+        Regime 다중 break + AI 구조변화 답변.
+
+    How:
+        재귀: sub-sample 에서 detectStructuralBreak → break 발견 시 양쪽 재귀.
+
+    Requires:
+        series ≥ 30.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = detectMultipleBreaks(series, maxBreaks=3)
+        >>> r["nBreaks"]
+        2
+
+    See Also:
+        - detectStructuralBreak : 단일 break
+        - regime.hmm : Markov regime
+
+    AIContext:
+        "다중 구조변화 시점" 답변 시 breaks idx 리스트 인용.
     """
     s = np.asarray(series, dtype=np.float64)
     breaks = []

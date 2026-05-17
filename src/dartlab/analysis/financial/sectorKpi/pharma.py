@@ -30,11 +30,38 @@ _POS_BY_PHASE = {
 def calcPharmaKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """제약·바이오 핵심 KPI.
 
-    Returns
-    -------
-    dict | None
-        pipelineStages : dict — 임상 단계별 카운트 (sections 텍스트 키워드 추출)
-        rdIntensity : dict | None — R&D/매출 비율
+    Capabilities:
+        - 사업보고서 텍스트 임상 단계 키워드 카운트 + R&D/매출 비율.
+
+    Guide:
+        _PHASE_PATTERNS regex → 단계별 mention count → POS 가중 평균 + R&D intensity.
+
+    When:
+        바이오 (셀트리온·삼성바이오로직스·한미약품 등) 파이프라인 가치 평가 시.
+
+    How:
+        Preclinical 5% · Phase I 10% · Phase II 15% · Phase III 50% · Approved 90% POS 가중.
+
+    Requires:
+        company.show("사업의내용"·"연구개발활동") 텍스트 + select("IS", ["sales", "research_and_development"]).
+
+    Raises:
+        없음. AttributeError·ValueError·TypeError·KeyError try 흡수.
+
+    Returns:
+        dict | None
+            pipelineStages : dict — 임상 단계별 카운트 (sections 텍스트 키워드 추출)
+            rdIntensity : dict | None — R&D/매출 비율
+
+    Example:
+        >>> calcPharmaKpis(셀트리온)
+        {"pipelineStages": {...}, "rdIntensity": {...}}
+
+    See Also:
+        - dispatcher.sectorKpi : 섹터 자동 라우팅.
+
+    AIContext:
+        파이프라인 가치 (rNPV 베이스라인) · R&D intensity 인용.
     """
     result: dict = {}
 

@@ -97,221 +97,6 @@ def _fmtAmt(value) -> str:
 
 
 @memoizedCalc
-def calcFundingSources(company, *, basePeriod: str | None = None) -> dict | None:
-    """자금조달 4 원천 분해 (내부유보 + 외부주주 + 금융차입 + 영업조달).
-
-    Capabilities:
-        BS 의 자본 + 부채를 4 원천으로 분해 — 내부유보 (이익잉여금), 외부
-        주주 (납입자본), 금융차입 (총차입금), 영업조달 (매입채무 + 미지급금
-        등). 시계열로 비중 변화를 추적해 자본구조 변화 진단. analysis()
-        의 자금조달 축 핵심 함수.
-
-    Args:
-        company: Company 객체.
-        basePeriod: 기준 기간. None 시 최신.
-
-    Returns:
-        dict | None:
-            - ``latest`` (dict): 9 키 (totalAssets + 4 원천 × 절대값/비중)
-            - ``history`` (list[dict]): 연도별 비중 시계열
-            - ``diagnosis`` (str): 조달구조 한국어 진단
-
-    Raises:
-        없음.
-
-    Example:
-        >>> r = calcFundingSources(Company("005930"))
-        >>> r["latest"]["retainedPct"], r["latest"]["finDebtPct"]
-        (45, 15)  # 내부유보 45%, 금융차입 15% (안정적 자본구조)
-
-    Guide:
-        retainedPct > 40% = 내부 현금 우위 (자립 성장). finDebtPct < 30% =
-        안정적 레버리지. paidInPct 큰 신규 IPO 회사 — 운영 안정화 후 retained
-        증가 추세 확인. opFundingPct 30%+ = 매입채무 의존 (B2B 산업 특성).
-
-    SeeAlso:
-        - ``calcDebtTimeline``: 차입금 시계열
-        - ``calcCapitalOverview``: 자본구조 종합
-        - ``analyzeHealth``: 재무건전성 (자금조달 결합)
-
-    Requires:
-        BS 시계열 (자산총계 + 자본총계 + 차입금 + 매입채무).
-
-    AIContext:
-        4 원천 비중 시계열 (history) 의 변화 방향 함께 노출 — retainedPct
-        상승 추세 = 좋은 신호, finDebtPct 상승 = 차입 증가 (capex 또는
-        부실 신호).
-
-    LLM Specifications:
-        AntiPatterns:
-            - 단년도 비중만 인용 — 시계열 추세 (3~5 년) 함께 확인 필수.
-            - paidInPct 큰 신규 IPO 를 "재무 불안" 으로 단정 — 운영 안정화
-              기간 (3~5 년) 정상.
-        OutputSchema:
-            ``{latest: dict 9키, history: list[dict], diagnosis: str}``.
-        Prerequisites:
-            BS 시계열 + 자본/부채 standardAccounts.
-        Freshness:
-            최신 분기 + 5 년 시계열.
-        Dataflow:
-            BS → 자본총계 (retained + paidIn) + 부채총계 분해 (finDebt +
-            opFunding) → 비중 계산 → diagnosis.
-        TargetMarkets: KR (DART), US (EDGAR 표준 자본구조 동일).
-    """
-    accounts = [
-        "자산총계",
-        "자본총계",
-        "이익잉여금",
-        "미처분이익잉여금(결손금)",
-        "자본금",
-        "자본잉여금",
-        "부채총계",
-        "단기차입금",
-        "장기차입금",
-        "차입금단기",  # short_term_borrowings 한국어 변형
-        "long_term_borrowings",  # 영문만 있는 회사 (한화오션)
-        "short_term_borrowings",
-        "차입부채",  # 통합 차입금 (SK하이닉스)
-        "장기차입부채",  # noncurrent_borrowings (LG에솔)
-        "유동성장기차입금",  # current_portion_of_longterm_borrowings
-        "사채",
-        "매입채무",
-        "선수금",
-        "계약부채",
-        "선수수익",
-    ]
-    result = company.select("BS", accounts)
-    parsed = toDictBySnakeId(result)
-    if parsed is None:
-        return None
-
-    data, allPeriods = parsed
-    taRow = data.get("total_assets")
-    if taRow is None:
-        return None
-
-    from dartlab.core.utils.helpers import mergeRows
-
-    reRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
-    pcRow = data.get("paidin_capital", {})
-    csRow = data.get("capital_surplus", {})
-    eqRow = data.get("total_stockholders_equity", {})
-    liabRow = data.get("total_liabilities", {})
-    apRow = data.get("trade_and_other_payables", {})
-    advRow = data.get("advance_from_customers", {})
-    clRow = data.get("contract_liabilities", {})
-    diRow = data.get("deferred_income", {})
-
-    yCols = annualColsFromPeriods(allPeriods, basePeriod, _MAX_YEARS)
-    if not yCols:
-        yCols = _quarterlyCols(allPeriods, _MAX_YEARS)
-    if not yCols:
-        return None
-
-    history = []
-    latest = None
-
-    for col in yCols:
-        ta = taRow.get(col)
-        if ta is None or ta <= 0:
-            continue
-
-        # 핵심 자본구조 항목은 모든 회사가 보유 — None = 미수집. 가짜 0 출력 회피 위해 skip.
-        retained = reRow.get(col)
-        equity = eqRow.get(col)
-        liab = liabRow.get(col)
-        if retained is None or equity is None or liab is None:
-            continue
-
-        # 합산 항목 (자본잉여금/자본금, 영업관련 부채) 의 개별 component 는 0 fallback OK
-        # — 그 항목이 회사에 없을 수 있음 (선택적 항목)
-        paidIn = (pcRow.get(col) or 0) + (csRow.get(col) or 0)
-        # 차입금: 회사 키 패턴 무관 헬퍼 (분리/통합/언더스코어/noncurrent 변형 모두 처리)
-        finDebt = sumBorrowings(data, col)
-        opFunding = (apRow.get(col) or 0) + (advRow.get(col) or 0) + (clRow.get(col) or 0) + (diRow.get(col) or 0)
-
-        otherEquity = max(0, equity - retained - paidIn)
-        otherLiab = max(0, liab - finDebt - opFunding)
-
-        entry = {
-            "period": col,
-            "retainedPct": retained / ta * 100,
-            "paidInPct": paidIn / ta * 100,
-            "finDebtPct": finDebt / ta * 100,
-            "opFundingPct": opFunding / ta * 100,
-            "otherLiabPct": otherLiab / ta * 100,
-            "otherEquityPct": otherEquity / ta * 100,
-        }
-        history.append(entry)
-
-        if latest is None:
-            latest = {
-                "totalAssets": ta,
-                "retained": retained,
-                "retainedPct": entry["retainedPct"],
-                "paidIn": paidIn,
-                "paidInPct": entry["paidInPct"],
-                "finDebt": finDebt,
-                "finDebtPct": entry["finDebtPct"],
-                "opFunding": opFunding,
-                "opFundingPct": entry["opFundingPct"],
-                "otherLiab": otherLiab,
-                "otherLiabPct": entry["otherLiabPct"],
-                "otherEquity": otherEquity,
-                "otherEquityPct": entry["otherEquityPct"],
-            }
-
-    if latest is None:
-        return None
-
-    # 진단: 내부유보 vs 금융차입 비중으로 자금조달 성격 판단
-    rPct = latest["retainedPct"]
-    fPct = latest["finDebtPct"]
-    if rPct >= 50:
-        diagnosis = "자기 힘으로 성장 — 이익잉여금이 자산의 절반 이상"
-    elif rPct >= 30 and fPct < 30:
-        diagnosis = "내부유보 중심 — 차입 의존도 낮음"
-    elif fPct >= 40:
-        diagnosis = "차입 의존 — 금융부채가 자산의 40% 이상"
-    elif fPct >= rPct:
-        diagnosis = "외부 조달 우위 — 금융차입이 내부유보를 초과"
-    else:
-        diagnosis = "균형 조달 — 내부유보와 외부 조달이 혼합"
-
-    # 보충 지표: 순차입금/EBITDA, 암묵적 차입금리
-    netDebtEbitda = _calcNetDebtEbitda(company, latest["finDebt"])
-    impliedRate = _calcImpliedBorrowingRate(company, latest["finDebt"])
-
-    result = {"latest": latest, "history": history, "diagnosis": diagnosis}
-    if netDebtEbitda is not None:
-        result["netDebtEbitda"] = netDebtEbitda
-    if impliedRate is not None:
-        result["impliedBorrowingRate"] = impliedRate
-
-    # 비중 변화 방향 (금융차입 비중이 늘고 있는가)
-    if len(history) >= 2:
-        newest = history[0]["finDebtPct"]
-        oldest = history[-1]["finDebtPct"]
-        diff = newest - oldest
-        if diff > 5:
-            result["leverageTrend"] = (
-                f"금융차입 비중 +{diff:.0f}pp 증가 ({history[-1]['period']}→{history[0]['period']})"
-            )
-        elif diff < -5:
-            result["leverageTrend"] = (
-                f"금융차입 비중 {diff:.0f}pp 감소 ({history[-1]['period']}→{history[0]['period']})"
-            )
-
-    # notes enrichment — 차입금 주석 (이자율, 만기, 담보 등)
-    from dartlab.analysis.financial.companyContext import fetchNotesDetail
-
-    notesDetail = fetchNotesDetail(company, ["borrowings"])
-    if notesDetail:
-        result["notesDetail"] = notesDetail
-
-    return result
-
-
 def _latestAnnualVal(company, stmt: str, accountName: str) -> float | None:
     """select(stmt, [accountName])에서 최신 연도 값을 꺼낸다.
 
@@ -403,17 +188,42 @@ def _calcImpliedBorrowingRate(company, finDebt: float) -> float | None:
 def calcCapitalOverview(company, *, basePeriod: str | None = None) -> dict | None:
     """총자산/총부채/자기자본/순차입금 스냅샷.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 자본구조 4 핵심 (총자산·총부채·자기자본·순차입금) metrics tuple 산출.
 
-    Returns
-    -------
-    dict | None
-        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None: metrics 키에 (항목명, 값 문자열) 쌍 목록. ratios 미가용 시 None.
+
+    Guide:
+        부채비율·자기자본비율·순차입금비율을 동반 표기. 순차입금 < 0 일 때
+        "순현금" 라벨로 자동 전환.
+
+    When:
+        analysis() 의 자본구조 축 요약 표시 시점.
+
+    How:
+        ``_getRatios`` 로 정규 ratios 스냅샷을 얻어 4 metrics 를 직렬화.
+
+    Requires:
+        ratios 캐시가 사전에 채워져 있어야 한다.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCapitalOverview(Company("005930"))
+        {"metrics": [("총자산", "..."), ...]}
+
+    SeeAlso:
+        - ``calcCapitalTimeline``: 자본 시계열
+        - ``calcDebtTimeline``: 부채 시계열
+
+    AIContext:
+        AI 답변에서 자본구조 한 줄 요약을 만들 때 인용.
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -462,17 +272,43 @@ def calcCapitalOverview(company, *, basePeriod: str | None = None) -> dict | Non
 def calcCapitalTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """자본총계·이익잉여금 시계열.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 자본총계 + 이익잉여금 연도별/분기별 테이블과 내부유보 비중 산출.
 
-    Returns
-    -------
-    dict | None
-        tables : list[tuple[str, list[dict], list[str]]] — (라벨, 행 목록, 기간 컬럼) 튜플
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간 (annualColsFromPeriods 입력).
+
+    Returns:
+        dict | None: tables 키에 (라벨, 행 목록, 기간 컬럼) 튜플 리스트. 데이터 부재 시 None.
+
+    Guide:
+        BS 의 ``total_stockholders_equity`` 와 retained 항목을 결합해 자본
+        구성 흐름을 보여준다.
+
+    When:
+        자본 안정성 시계열 시각화·기업 분석 본문에서 자본 트렌드 서술 시.
+
+    How:
+        ``company.select("BS", ...)`` → ``toDictBySnakeId`` → 연/분기 컬럼별
+        ``_buildCapitalTable`` 호출.
+
+    Requires:
+        BS rawNormalized parquet 가 갱신돼 있어야 한다.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCapitalTimeline(Company("005930"))
+        {"tables": [("연도별", [...], ["2024-12", ...])]}
+
+    SeeAlso:
+        - ``calcCapitalOverview``: 단일 스냅샷 metrics
+        - ``calcDebtTimeline``: 부채 시계열
+
+    AIContext:
+        AI 답변에서 자본 트렌드를 표 형태로 인용할 때 사용.
     """
     result = company.select("BS", ["자본총계", "이익잉여금", "미처분이익잉여금(결손금)"])
     parsed = toDictBySnakeId(result)
@@ -554,17 +390,43 @@ def _buildCapitalTable(equityRow: dict, retainedRow: dict | None, cols: list[str
 def calcDebtTimeline(company, *, basePeriod: str | None = None) -> dict | None:
     """부채총계·금융부채·영업부채 시계열.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 부채 항목 분해 (금융부채 = 차입금 + 사채 / 영업부채 = 부채총계 -
+          금융부채) + 비중 시계열.
 
-    Returns
-    -------
-    dict | None
-        tables : list[tuple[str, list[dict], list[str]]] — (라벨, 행 목록, 기간 컬럼) 튜플
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: tables 키에 (라벨, 행 목록, 기간 컬럼) 튜플 리스트.
+
+    Guide:
+        단기/장기 차입금이 분리 안 된 회사는 통합 ``borrowings`` fallback 사용.
+
+    When:
+        부채구조 안정성 분석·신용 평가 보고에서 차입금 의존도를 표로 보여줄 때.
+
+    How:
+        ``company.select("BS", ...)`` 의 차입금·사채 컬럼을 묶어
+        ``_buildDebtTable`` 로 행 생성.
+
+    Requires:
+        BS 의 borrowings/debentures 매핑이 정상이어야 한다.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDebtTimeline(Company("005930"))
+        {"tables": [("연도별", [...], [...])]}
+
+    SeeAlso:
+        - ``calcCapitalTimeline``: 자기자본 시계열
+        - ``calcInterestBurden``: 이자 부담
+
+    AIContext:
+        AI 답변의 부채 구조 인용 시 사용.
     """
     result = company.select("BS", ["부채총계", "단기차입금", "장기차입금", "차입부채", "사채"])
     parsed = toDictBySnakeId(result)
@@ -666,17 +528,42 @@ def _buildDebtTable(liabRow: dict, stbRow, ltbRow, bondRow, cols: list[str]) -> 
 def calcInterestBurden(company, *, basePeriod: str | None = None) -> dict | None:
     """이자보상배율·이자비용.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 이자보상배율 (interestCoverage) 정성 라벨 + 이자비용 절대값 산출.
 
-    Returns
-    -------
-    dict | None
-        metrics : list[tuple[str, str]] — (항목명, 값 문자열) 쌍 목록
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: metrics 키에 (항목명, 값) tuple list. ratios 부재 시 None.
+
+    Guide:
+        이자보상배율 임계값: ≥ 10 우수, ≥ 3 안정, ≥ 1.5 주의, 그 외 위험.
+
+    When:
+        부채 안정성/신용도 분석에서 이자 부담 한 줄 요약을 표시할 때.
+
+    How:
+        ``_getRatios`` → interestCoverage·interestExpense 를 정성 라벨에
+        매핑해 metrics 직렬화.
+
+    Requires:
+        IS 이자비용 + 영업이익 데이터 정상.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcInterestBurden(Company("005930"))
+        {"metrics": [("이자보상배율", "12.5배 — 우수"), ...]}
+
+    SeeAlso:
+        - ``calcDebtTimeline``: 부채 시계열
+        - ``credit.scoring.metrics``: 7 축 정량
+
+    AIContext:
+        AI 답변의 이자 부담 한 줄 요약 인용 시.
     """
     ratios = _getRatios(company)
     if ratios is None:
@@ -737,6 +624,14 @@ def calcLiquidity(company, *, basePeriod: str | None = None) -> dict | None:
         당좌비율 ≥ 100% = 즉시 동원 가능. 본 함수는 credit engine 의 7 축
         분해와 별도 — 사용자 보고용 간단 표시.
 
+    When:
+        analysis() 안정성 축 표시 또는 사용자 보고서에서 유동성 지표를 정성
+        라벨과 함께 보여줄 때.
+
+    How:
+        ``_getRatios`` 로 ratios 스냅샷을 얻고 4 지표를 정성 임계값에 매칭한
+        metrics tuple list 로 변환.
+
     SeeAlso:
         - ``credit.scoring.metrics.calcAllMetrics``: 7 축 정량 지표
         - ``narrateLiquidity``: credit 의 유동성 서사 생성
@@ -795,347 +690,15 @@ def calcLiquidity(company, *, basePeriod: str | None = None) -> dict | None:
     return {"metrics": metrics}
 
 
-@memoizedCalc
-def calcCashFlowStructure(company, *, basePeriod: str | None = None) -> dict | None:
-    """영업CF/투자CF/재무CF + FCF + CF 패턴.
+# ── calcCashFlowStructure + calcDistressIndicators + _sign/_classifyCfPattern/_isFinancialCompany → _capitalCashflow.py 분리 ──
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
-
-    Returns
-    -------
-    dict | None
-        tableRows : list[dict] — CF 항목별 기간 매핑 행
-        cols : list[str] — 기간 컬럼
-        pattern : str | None — CF 패턴 진단
-        metrics : list[tuple[str, str]] | None — FCF 등 요약 지표
-    """
-    result = company.select(
-        "CF",
-        ["영업활동현금흐름", "투자활동현금흐름", "재무활동으로인한현금흐름", "유형자산의취득"],
-    )
-    parsed = toDictBySnakeId(result)
-    if parsed is None:
-        return None
-
-    data, allPeriods = parsed
-    ocfRow = data.get("operating_cashflow") or data.get("cash_flows_from_operating_activities")
-    if ocfRow is None:
-        return None
-    icfRow = data.get("investing_cashflow") or data.get("cash_flows_from_investing_activities")
-    fcfRow = data.get("cash_flows_from_financing_activities") or data.get("financing_cashflow")
-    capexRow = data.get("purchase_of_property_plant_and_equipment")
-
-    qCols = _quarterlyCols(allPeriods, _MAX_QUARTERS)
-    if not qCols:
-        return None
-
-    rawRows: list[dict] = []
-    rawRows.append({"": "영업CF", **{c: ocfRow.get(c) for c in qCols}})
-    if icfRow:
-        rawRows.append({"": "투자CF", **{c: icfRow.get(c) for c in qCols}})
-    if fcfRow:
-        rawRows.append({"": "재무CF", **{c: fcfRow.get(c) for c in qCols}})
-    if capexRow:
-        freeRow: dict = {"": "FCF"}
-        for c in qCols:
-            ocf = ocfRow.get(c)
-            capex = capexRow.get(c)
-            if ocf is not None and capex is not None:
-                free = ocf + capex if capex < 0 else ocf - capex
-                freeRow[c] = free
-            else:
-                freeRow[c] = None
-        rawRows.append(freeRow)
-
-    # CF 패턴 분류 (분기 우선, 분기 데이터 없으면 연간 fallback)
-    latestCol = qCols[0]
-    ocfSign = _sign(ocfRow.get(latestCol))
-    icfSign = _sign((icfRow or {}).get(latestCol))
-    fcfSign = _sign((fcfRow or {}).get(latestCol))
-    pattern = _classifyCfPattern(ocfSign, icfSign, fcfSign)
-    if pattern is None:
-        # Q4 기준으로 재시도 (재무CF가 특정 분기에만 있는 기업 대응)
-        q4Cols = sorted([c for c in allPeriods if c.endswith("Q4")], reverse=True)
-        for qc in q4Cols[:3]:
-            ocfA = _sign(ocfRow.get(qc))
-            icfA = _sign((icfRow or {}).get(qc))
-            fcfA = _sign((fcfRow or {}).get(qc))
-            pattern = _classifyCfPattern(ocfA, icfA, fcfA)
-            if pattern is not None:
-                break
-
-    # 추가 지표
-    ratios = _getRatios(company)
-    metrics = None
-    if ratios is not None:
-        extra = []
-        ocfm = getattr(ratios, "operatingCfMargin", None)
-        if ocfm is not None:
-            extra.append(("영업CF 마진", f"{ocfm:.1f}%"))
-        cxr = getattr(ratios, "capexRatio", None)
-        if cxr is not None:
-            extra.append(("CAPEX/매출", f"{cxr:.1f}%"))
-        ftor = getattr(ratios, "fcfToOcfRatio", None)
-        if ftor is not None:
-            extra.append(("FCF/OCF", f"{ftor:.0f}%"))
-        if extra:
-            metrics = extra
-
-    return {
-        "tableRows": rawRows,
-        "cols": qCols,
-        "pattern": pattern,
-        "metrics": metrics,
-    }
-
-
-def _sign(val) -> str:
-    """양/음/0 부호.
-
-    Returns
-    -------
-    str
-        ``"+"``, ``"-"``, ``"0"``, 또는 ``"?"`` (None).
-    """
-    if val is None:
-        return "?"
-    if val > 0:
-        return "+"
-    if val < 0:
-        return "-"
-    return "0"
-
-
-def _classifyCfPattern(ocf: str, icf: str, fcf: str) -> str | None:
-    """영업/투자/재무 CF 부호 조합으로 패턴 분류.
-
-    Parameters
-    ----------
-    ocf : str
-        영업CF 부호 (``"+"``, ``"-"``, ``"0"``, ``"?"``).
-    icf : str
-        투자CF 부호.
-    fcf : str
-        재무CF 부호.
-
-    Returns
-    -------
-    str | None
-        CF 패턴 한국어 설명 (예: ``"성숙형 — 영업으로 벌어 투자하고 부채 상환"``).
-        미분류 조합이면 None.
-    """
-    patterns = {
-        ("+", "-", "-"): "성숙형 — 영업으로 벌어 투자하고 부채 상환",
-        ("+", "-", "+"): "확장형 — 영업 + 외부 조달로 적극 투자",
-        ("+", "+", "-"): "구조조정형 — 자산 매각하며 부채 상환",
-        ("-", "-", "+"): "위기형 — 영업 적자를 외부 차입으로 메움",
-        ("-", "+", "+"): "축소형 — 자산 매각 + 차입으로 영업 적자 보전",
-        ("-", "+", "-"): "전환형 — 자산 매각으로 부채 상환, 영업 회복 필요",
-        # 재무CF 미보고("?" 또는 "0") — 영업/투자만으로 부분 분류
-        ("+", "-", "?"): "성숙형 — 영업으로 벌어 투자 (재무CF 미보고)",
-        ("+", "-", "0"): "성숙형 — 영업으로 벌어 투자 (재무CF 미보고)",
-        ("-", "-", "?"): "위기형 — 영업+투자 모두 유출 (재무CF 미보고)",
-        ("-", "-", "0"): "위기형 — 영업+투자 모두 유출 (재무CF 미보고)",
-    }
-    return patterns.get((ocf, icf, fcf))
-
-
-def _isFinancialCompany(company) -> bool:
-    """금융업 판별 (capital.py 내부용).
-
-    Returns
-    -------
-    bool
-        금융업/지주사이면 True.
-    """
-    try:
-        sector = getattr(company, "sector", None)
-        if sector is not None:
-            from dartlab.frame.sector import Sector
-
-            if sector.sector == Sector.FINANCIALS:
-                return True
-        name = getattr(company, "corpName", "") or ""
-        if any(k in name for k in ("지주", "홀딩스", "Holdings")):
-            return True
-    except (AttributeError, ImportError):
-        pass
-    return False
-
-
-@memoizedCalc
-def calcDistressIndicators(company, *, basePeriod: str | None = None) -> dict | None:
-    """Altman Z, Ohlson O, Piotroski F, Springate S.
-
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
-
-    Returns
-    -------
-    dict | None
-        metrics : list[tuple[str, str]] — (지표명, 값+판정 문자열) 쌍 목록
-    """
-    ratios = _getRatios(company)
-    if ratios is None:
-        return None
-
-    isFinancial = _isFinancialCompany(company)
-    metrics = []
-
-    # Altman Z-Score: 비금융 제조업용 모형 — 금융업에는 적용 불가
-    if not isFinancial:
-        az = getattr(ratios, "altmanZScore", None)
-        if az is None:
-            az = getattr(ratios, "altmanZppScore", None)
-        if az is not None:
-            if az > 2.99:
-                quality = "안전"
-            elif az > 1.81:
-                quality = "회색지대"
-            else:
-                quality = "부실 위험"
-            metrics.append(("Altman Z", f"{az:.2f} — {quality}"))
-
-    op = getattr(ratios, "ohlsonProbability", None)
-    if op is not None:
-        metrics.append(("Ohlson 부실확률", f"{op:.1f}%"))
-    else:
-        os_ = getattr(ratios, "ohlsonOScore", None)
-        if os_ is not None:
-            metrics.append(("Ohlson O-Score", f"{os_:.2f}"))
-
-    pf = getattr(ratios, "piotroskiFScore", None)
-    if pf is not None:
-        maxF = getattr(ratios, "piotroskiMaxScore", 9)
-        if pf >= 7:
-            quality = "재무 건전"
-        elif pf >= 4:
-            quality = "보통"
-        else:
-            quality = "재무 약화"
-        metrics.append(("Piotroski F", f"{pf}/{maxF} — {quality}"))
-
-    ss = getattr(ratios, "springateSScore", None)
-    if ss is not None:
-        quality = "안전" if ss > 0.862 else "부실 위험"
-        metrics.append(("Springate S", f"{ss:.2f} — {quality}"))
-
-    if not metrics:
-        return None
-
-    return {"metrics": metrics}
-
-
-@memoizedCalc
-def calcCapitalFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
-    """자금조달 관련 경고/기회 플래그.
-
-    Returns
-    -------
-    list[tuple[str, str]]
-        각 원소는 (플래그 텍스트, "warning" | "opportunity").
-    """
-    flags: list[tuple[str, str]] = []
-
-    ratios = _getRatios(company)
-    if ratios is None:
-        return flags
-
-    isFinancial = _isFinancialCompany(company)
-
-    dr = getattr(ratios, "debtRatio", None)
-    if dr is not None:
-        if isFinancial:
-            # 금융업은 예수부채로 부채비율이 구조적으로 높음
-            if dr > 2000:
-                flags.append((f"금융업 부채비율 {dr:.0f}% — 과다", "warning"))
-        elif dr > 200:
-            flags.append((f"고부채 (부채비율 {dr:.0f}%)", "warning"))
-
-    ic = getattr(ratios, "interestCoverage", None)
-    if not isFinancial and ic is not None and ic < 3:
-        severity = "심각" if ic < 1.5 else "주의"
-        flags.append((f"이자보상 {severity} ({ic:.1f}배)", "warning"))
-
-    cr = getattr(ratios, "currentRatio", None)
-    nd = getattr(ratios, "netDebt", None)
-    isNetCash = nd is not None and nd < 0
-    if not isFinancial and cr is not None and cr < 100:
-        if isNetCash:
-            # 순현금이면 유동비율 낮아도 실질 유동성 위험 낮음 (IFRS16 리스부채 등)
-            flags.append((f"유동비율 주의 ({cr:.0f}%) — 순현금이므로 실질 위험 낮음", "warning"))
-        elif ic is not None and ic > 5:
-            # 이자보상배율 양호하면 실질 유동성 위험 낮음
-            flags.append((f"유동비율 주의 ({cr:.0f}%) — 이자보상 {ic:.0f}배로 양호", "warning"))
-        else:
-            flags.append((f"유동성 위기 (유동비율 {cr:.0f}%)", "warning"))
-
-    az = getattr(ratios, "altmanZScore", None) or getattr(ratios, "altmanZppScore", None)
-    if not isFinancial and az is not None and az < 1.81:
-        flags.append((f"Altman Z 부실 경계 ({az:.2f})", "warning"))
-
-    pf = getattr(ratios, "piotroskiFScore", None)
-    if pf is not None and pf < 3:
-        flags.append((f"Piotroski F 재무 약화 ({pf}/9)", "warning"))
-
-    # 금융부채 비중 (BS에서 직접 계산)
-    flagResult = company.select(
-        "BS",
-        [
-            "부채총계",
-            "단기차입금",
-            "장기차입금",
-            "차입부채",
-            "사채",
-            "자본총계",
-            "이익잉여금",
-            "미처분이익잉여금(결손금)",
-        ],
-    )
-    flagParsed = toDictBySnakeId(flagResult)
-    if flagParsed is not None and "total_liabilities" in flagParsed[0]:
-        data = flagParsed[0]
-        liabRow = data["total_liabilities"]
-        stbRow = data.get("shortterm_borrowings")
-        ltbRow = data.get("longterm_borrowings")
-        unifiedBorrowRow = data.get("borrowings")  # 통합 차입금 fallback
-        bondRow = data.get("debentures")
-        # stb/ltb 둘 다 None → unifiedBorrow 를 stb 위치로
-        if stbRow is None and ltbRow is None and unifiedBorrowRow is not None:
-            stbRow = unifiedBorrowRow
-        finDebtPct = _calcFinDebtPct(liabRow, stbRow, ltbRow, bondRow)
-        if finDebtPct is not None and finDebtPct > 50:
-            flags.append((f"금융부채 비중 {finDebtPct:.0f}% — 이자 부담 부채 높음", "warning"))
-
-        equityRow = data.get("total_stockholders_equity")
-        from dartlab.core.utils.helpers import mergeRows
-
-        retainedRow = mergeRows(data.get("retained_earnings"), data.get("unappropriated_retained_earnings_deficit"))
-        retainedPct = _calcRetainedPct(equityRow, retainedRow)
-        if retainedPct is not None and retainedPct > 70:
-            flags.append((f"내부유보 비중 {retainedPct:.0f}% — 자기 힘으로 성장", "opportunity"))
-
-    nd = getattr(ratios, "netDebt", None)
-    if nd is not None and nd < 0:
-        flags.append(("순현금 상태", "opportunity"))
-
-    if ic is not None and ic > 10:
-        flags.append((f"이자보상 우수 ({ic:.0f}배)", "opportunity"))
-
-    if pf is not None and pf >= 7:
-        flags.append((f"Piotroski F 재무 건전 ({pf}/9)", "opportunity"))
-
-    return flags
-
+from dartlab.analysis.financial._capitalCashflow import (  # noqa: E402, F401
+    _classifyCfPattern,
+    _isFinancialCompany,
+    _sign,
+    calcCashFlowStructure,
+    calcDistressIndicators,
+)
 
 # ── 내부 헬퍼 ──
 
@@ -1179,3 +742,10 @@ def _calcFinDebtPct(liabRow, stbRow, ltbRow, bondRow) -> float | None:
         if parts:
             return sum(parts) / tl * 100
     return None
+
+
+# 분리된 함수 (BC re-export)
+from dartlab.analysis.financial._capitalFunding import (  # noqa: E402, F401
+    calcCapitalFlags,
+    calcFundingSources,
+)

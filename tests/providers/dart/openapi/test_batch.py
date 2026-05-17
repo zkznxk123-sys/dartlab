@@ -95,6 +95,97 @@ def test_batch_collect_all_callable() -> None:
     assert callable(batchCollectAll)
 
 
+def test_batch_collect_invokes_on_checkpoint_per_n_stocks(monkeypatch) -> None:
+    """batchCollect 가 N 종목마다 onCheckpoint 콜백 호출 + 종료 직전 final flush.
+
+    cancel/timeout 안전망 검증 — 90 분 timeout 사고 (2026-05-16) 의 root cause fix.
+    """
+    from dartlab.providers.dart.openapi import batch
+
+    monkeypatch.setattr(batch, "_resolveCorpMap", lambda codes: {c: ("", c) for c in codes})
+    monkeypatch.setattr(batch, "resolveDartKeys", lambda: ["fake-key"])
+
+    class _FakeClient:
+        exhausted = False
+
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        async def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(batch, "AsyncDartClient", _FakeClient)
+
+    async def _zero(*args, **kwargs):
+        return 0
+
+    monkeypatch.setattr(batch, "_collectFinance", _zero)
+    monkeypatch.setattr(batch, "_collectReport", _zero)
+    monkeypatch.setattr(batch, "_collectDocs", _zero)
+
+    calls: list[list[str]] = []
+
+    def _cb(codes: list[str]) -> None:
+        calls.append(list(codes))
+
+    batch.batchCollect(
+        ["A", "B", "C", "D", "E", "F", "G"],
+        categories=["finance"],
+        showProgress=False,
+        onCheckpoint=_cb,
+        checkpointEvery=3,
+    )
+
+    flat = [code for chunk in calls for code in chunk]
+    # 7 종목 / every 3 → drain at 3, drain at 6, final flush 1 종목.
+    assert set(flat) == {"A", "B", "C", "D", "E", "F", "G"}
+    # final flush 가 비어있지 않은 잔여를 호출 — 최소 1 회 호출.
+    assert len(calls) >= 1
+    # 어떤 chunk 도 checkpointEvery 초과하지 않음.
+    assert all(len(chunk) <= 3 for chunk in calls)
+
+
+def test_batch_collect_skips_checkpoint_when_disabled(monkeypatch) -> None:
+    """checkpointEvery=0 (default) 면 콜백 자체가 호출되지 않는다 — 기존 호출자 호환."""
+    from dartlab.providers.dart.openapi import batch
+
+    monkeypatch.setattr(batch, "_resolveCorpMap", lambda codes: {c: ("", c) for c in codes})
+    monkeypatch.setattr(batch, "resolveDartKeys", lambda: ["fake-key"])
+
+    class _FakeClient:
+        exhausted = False
+
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        async def close(self) -> None:
+            return None
+
+    monkeypatch.setattr(batch, "AsyncDartClient", _FakeClient)
+
+    async def _zero(*args, **kwargs):
+        return 0
+
+    monkeypatch.setattr(batch, "_collectFinance", _zero)
+    monkeypatch.setattr(batch, "_collectReport", _zero)
+    monkeypatch.setattr(batch, "_collectDocs", _zero)
+
+    invoked = {"n": 0}
+
+    def _cb(_codes):
+        invoked["n"] += 1
+
+    batch.batchCollect(
+        ["A", "B"],
+        categories=["finance"],
+        showProgress=False,
+        onCheckpoint=_cb,  # callback 줘도
+        checkpointEvery=0,  # every=0 이면 비활성
+    )
+
+    assert invoked["n"] == 0
+
+
 def test_collect_finance_target_period_refreshes_existing_period(tmp_path, monkeypatch) -> None:
     """targetPeriods는 정정 공시 반영을 위해 기존 period도 다시 수집한다."""
     import asyncio

@@ -103,10 +103,42 @@ _REQUIRED_SCAN_ROOT_FILES: tuple[str, ...] = (
     "sharesOutstanding.parquet",
 )
 
+# scan/report/ 안 필수 prebuild — scanner 들이 호출하는 apiType 들 SSOT.
+# 빌더 `scan/builders/kr/report/build.SCAN_API_TYPES` 와 1:1 일치해야 한다 — 정합성은
+# `tests/scan/test_prebuild_contract.py::test_required_report_matches_builder` 가 강제.
+# 한쪽 추가 시 다른 쪽도 동시 갱신 (회귀 사례: shortTermBond/commercialPaper/investedCompany
+# 누락 → dartlab.scan("debt") silent thrift error, 2026-05-17 점검).
+_REQUIRED_REPORT_FILES: tuple[str, ...] = (
+    "auditOpinion.parquet",
+    "capitalChange.parquet",
+    "commercialPaper.parquet",
+    "corporateBond.parquet",
+    "dividend.parquet",
+    "employee.parquet",
+    "executive.parquet",
+    "executivePayAllTotal.parquet",
+    "executivePayIndividual.parquet",
+    "investedCompany.parquet",
+    "majorHolder.parquet",
+    "minorityHolder.parquet",
+    "outsideDirector.parquet",
+    "shortTermBond.parquet",
+    "treasuryStock.parquet",
+)
+
 
 def _isScanComplete(scanDir: Path) -> bool:
-    """scan 프리빌드 루트 필수 파일이 모두 존재하는지 확인."""
-    return all((scanDir / name).exists() for name in _REQUIRED_SCAN_ROOT_FILES)
+    """scan 프리빌드 루트 + report/ 필수 파일 모두 존재 확인.
+
+    root 3 개 (_REQUIRED_SCAN_ROOT_FILES) + report 15 개 (_REQUIRED_REPORT_FILES) 모두
+    있어야 True. 둘 중 하나 누락 시 _ensureScanData() 가 재다운로드 강제.
+    """
+    if not all((scanDir / name).exists() for name in _REQUIRED_SCAN_ROOT_FILES):
+        return False
+    reportDir = scanDir / "report"
+    if not reportDir.is_dir():
+        return False
+    return all((reportDir / name).exists() for name in _REQUIRED_REPORT_FILES)
 
 
 def _ensureScanData() -> Path:

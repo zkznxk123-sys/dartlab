@@ -19,6 +19,7 @@ capabilityRefs:
   - scan
 toolRefs:
   - search_reference
+  - EngineCall
   - RunPython
   - CompileVisual
   - finalize_answer

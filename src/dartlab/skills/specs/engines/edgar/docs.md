@@ -24,6 +24,7 @@ capabilityRefs:
   - Company.sections
   - Company.show
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.edgar

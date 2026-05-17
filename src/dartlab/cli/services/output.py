@@ -1,42 +1,48 @@
-"""Console output helpers for CLI commands — Rich 기반."""
+"""Console output helpers for CLI commands — Rich 기반.
+
+SSOT 는 ``dartlab.core.logger`` 모듈. 본 파일은 호환성을 위한 thin re-export
+이며 신규 코드는 ``from dartlab.core.logger import getConsole`` 를 직접 쓴다.
+"""
 
 from __future__ import annotations
 
 import re
 from typing import TYPE_CHECKING
 
-from rich.console import Console
 from rich.table import Table
 
 from dartlab.core.formatting import formatComma
+from dartlab.core.logger import getConsole, getErrConsole
 
 if TYPE_CHECKING:
     import polars as pl
+    from rich.console import Console
 
-_console = Console()
-_errConsole = Console(stderr=True)
-
-
-def getConsole() -> Console:
-    """공용 Rich Console 반환."""
-    return _console
+__all__ = [
+    "getConsole",
+    "printDataframe",
+    "printError",
+    "printInfo",
+    "printSearchResults",
+    "printWarning",
+]
 
 
 def printError(message: str) -> None:
     """오류 메시지를 stderr에 출력."""
     from rich.markup import escape
 
-    _errConsole.print(f"[bold red]오류:[/] {escape(message)}")
+    getErrConsole().print(f"[bold red]오류:[/] {escape(message)}")
 
 
 def printInfo(message: str = "") -> None:
     """일반 정보 메시지 출력."""
-    _console.print(message)
+    getConsole().print(message)
 
 
 def printWarning(message: str) -> None:
     """경고 메시지를 stderr에 출력."""
-    _errConsole.print(f"[bold yellow]경고:[/] {message}")
+    getErrConsole().print(f"[bold yellow]경고:[/] {message}")
 
 
 def _isNumericCol(dtypeStr: str) -> bool:
@@ -62,7 +68,7 @@ def printDataframe(
     - 최대 max_rows행 표시
     """
     if df.is_empty():
-        _console.print("[dim]데이터가 없습니다.[/]")
+        getConsole().print("[dim]데이터가 없습니다.[/]")
         return
 
     table = Table(title=title, show_lines=False, padding=(0, 1))
@@ -96,9 +102,9 @@ def printDataframe(
                 cells.append(str(val))
         table.add_row(*cells)
 
-    _console.print(table)
+    getConsole().print(table)
     if len(df) > maxRows:
-        _console.print(f"[dim]... {len(df) - maxRows}행 추가 (총 {len(df)}행)[/]")
+        getConsole().print(f"[dim]... {len(df) - maxRows}행 추가 (총 {len(df)}행)[/]")
 
 
 def printSearchResults(results: "pl.DataFrame") -> None:

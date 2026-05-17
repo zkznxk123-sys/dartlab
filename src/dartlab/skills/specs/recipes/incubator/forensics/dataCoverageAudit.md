@@ -22,6 +22,7 @@ outputs:
 capabilityRefs:
   - Company.show
 toolRefs:
+  - EngineCall
   - RunPython
 sourceRefs:
   - dartlab://skills/recipes.incubator.forensics.dataCoverageAudit

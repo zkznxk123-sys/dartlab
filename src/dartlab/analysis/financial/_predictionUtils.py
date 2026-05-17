@@ -33,7 +33,18 @@ DIRECTION_SCORES = {
 
 
 def clamp(v: float, lo: float = -1.0, hi: float = 1.0) -> float:
-    """값을 [lo, hi] 범위로 클램핑."""
+    """값을 [lo, hi] 범위로 클램핑.
+
+    Requires:
+        v 는 비교 가능한 수치형.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> clamp(1.5)
+        1.0
+    """
     return max(lo, min(hi, v))
 
 
@@ -46,6 +57,34 @@ def calibrate(rawPosterior: float) -> float:
     - 원시 86% → 실측 88%
 
     선형 보간으로 과신 제거. 원시 확률이 높을수록 실측에 가깝게 보정.
+
+    Capabilities:
+        - 원시 사후확률을 walk-forward 실측 기반으로 shrink.
+
+    Guide:
+        결과는 [0.50, 0.95] 클립.
+
+    When:
+        예측 확률 노출 직전 과신 보정 시점.
+
+    How:
+        base 0.72 + (raw - base) * 0.6 선형 shrink.
+
+    Requires:
+        rawPosterior ∈ [0, 1] 수치.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calibrate(0.85)
+        0.798
+
+    See Also:
+        - bayesUpdate : 사후확률 갱신.
+
+    AIContext:
+        확률 인용 시 calibrated 값 사용 명시.
     """
     base = 0.72  # 모멘텀 기저 정확도
     shrinkage = 0.6  # 60%만 반영
@@ -63,6 +102,34 @@ def bayesUpdate(prior: float, evidence: float, damping: float = 0.3) -> float:
             신호 간 독립성 가정 위반을 보정. 0.3이 과신 방지 + 변별력 유지의 균형.
 
     나이브 베이즈 + 감쇠: lr^damping
+
+    Capabilities:
+        - prior odds 에 evidence likelihood ratio 의 damping 거듭제곱 적용.
+
+    Guide:
+        damping = 0.3 이 기본 — 독립성 위반 보정.
+
+    When:
+        다중 신호 누적 베이즈 결합 단계.
+
+    How:
+        prior_odds × (evidence/(1-evidence))^damping.
+
+    Requires:
+        prior, evidence ∈ (0, 1).
+
+    Raises:
+        없음 — 경계값은 prior 반환.
+
+    Example:
+        >>> bayesUpdate(0.6, 0.7)
+        0.66
+
+    See Also:
+        - calibrate : 사후확률 보정.
+
+    AIContext:
+        다중 신호 인용 시 damping 적용된 결과임을 명시.
     """
     if evidence <= 0 or evidence >= 1:
         return prior

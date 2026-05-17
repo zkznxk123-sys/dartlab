@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import mimetypes
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from ._ui_path import resolveUiBuildDir
+
+# Windows registry 가 .css → application/json 같은 잘못된 매핑을 반환하는 사례 차단.
+# Python mimetypes 가 module import 시점 registry 를 읽으므로 명시적 add_type 으로 override.
+mimetypes.add_type("text/css", ".css")
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("application/javascript", ".mjs")
+mimetypes.add_type("application/json", ".map")
+mimetypes.add_type("image/svg+xml", ".svg")
+mimetypes.add_type("font/woff2", ".woff2")
 
 _UI_DIR = resolveUiBuildDir()
 

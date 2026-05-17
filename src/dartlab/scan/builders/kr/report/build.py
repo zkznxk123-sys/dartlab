@@ -50,7 +50,9 @@ from dartlab.scan.builders.kr.common import reportDir as _reportDir
 from dartlab.scan.builders.kr.common import say as _say
 from dartlab.scan.builders.kr.common import scanDir as _scanDir
 
-# scanner에서 실제 사용하는 apiType 12개
+# scanner에서 실제 사용하는 apiType 15개 (scan 디렉토리 grep 으로 동기화).
+# 누락 시 fallback per-file scan path 가 polars streaming concat 단계에서 thrift error
+# 로 axis 전체 실패 — 빠진 apiType 추가 시 본 리스트 반드시 갱신.
 SCAN_API_TYPES = [
     "majorHolder",
     "executive",
@@ -64,13 +66,16 @@ SCAN_API_TYPES = [
     "corporateBond",
     "outsideDirector",
     "minorityHolder",
+    "shortTermBond",
+    "commercialPaper",
+    "investedCompany",
 ]
 
 
 def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
     """report/*.parquet → apiType별 12개 분리 parquet 프리빌드.
 
-    ``SCAN_API_TYPES`` 12 종 (majorHolder/executive/employee/auditOpinion/dividend/...) 의
+    ``SCAN_API_TYPES`` 15 종 (majorHolder/executive/employee/auditOpinion/dividend/...) 의
     각 apiType 마다 종목별 raw row 를 모아 별도 parquet 으로 출력. report.parquet 단일
     합본이 아닌 12개 분할 — apiType 마다 스키마가 다르고 사용 단위가 다르므로.
 
@@ -98,7 +103,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
     >>> [p.name for p in paths[:3]]
 
     Capabilities:
-        - 종목별 raw report parquet 을 12 apiType 별로 split. ``apiType`` 컬럼 == 카테고리
+        - 종목별 raw report parquet 을 15 apiType 별로 split. ``apiType`` 컬럼 == 카테고리
           매칭으로 종목 row 를 해당 apiType bucket 에 추가. 200 종목 단위 배치 청크 → merge.
         - apiType 마다 다른 컬럼 스키마 흡수 (``diagonal_relaxed`` concat).
 
@@ -110,7 +115,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
 
     Guide:
         - 출력 경로: ``data/dart/scan/report/{apiType}.parquet``
-        - 12 apiType 중 일부만 raw 에 있으면 그 apiType 만 생성 (나머지 silent skip).
+        - 15 apiType 중 일부만 raw 에 있으면 그 apiType 만 생성 (나머지 silent skip).
         - 파일 크기는 apiType 마다 차이 큰 — employee/executive 가 가장 크다.
 
     When:
@@ -119,7 +124,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
 
     How:
         ``buildScan`` 의 4 번째 단계. apiType 별 buffer dict (``apiChunks``) 를 유지하면서
-        종목당 raw 를 12 apiType 으로 filter → buffer push. ``_BATCH`` (200) 도달 시 임시
+        종목당 raw 를 15 apiType 으로 filter → buffer push. ``_BATCH`` (200) 도달 시 임시
         청크 flush. 종료 시 잔존 청크 flush + apiType 마다 ``_mergeBatchFiles`` 단일 파일 머지.
         12 임시 디렉토리 (``_tmp_{apiType}/``) 사용 후 cleanup.
 
@@ -128,7 +133,7 @@ def buildReport(*, sinceYear: int = 2021, verbose: bool = True) -> list[Path]:
         - ``apiType`` 컬럼 (필수, 없으면 종목 skip)
 
     SeeAlso:
-        - :data:`SCAN_API_TYPES` — 처리 대상 12 apiType list
+        - :data:`SCAN_API_TYPES` — 처리 대상 15 apiType list
         - :func:`dartlab.scan.builders.kr.core.buildScan` — 본 함수 포함 통합 호출
         - :func:`dartlab.scan.builders.kr.docs.changes.buildChanges`
         - :func:`dartlab.scan.builders.kr.financeBuild.buildFinance`

@@ -56,17 +56,44 @@ def _classifyCfPattern(ocf: float, icf: float, fcf: float) -> str | None:
 def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/투자CF/재무CF + FCF 시계열.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            ocf : float — 영업활동현금흐름 (원)
-            icf : float — 투자활동현금흐름 (원)
-            fcfFinancing : float — 재무활동현금흐름 (원)
-            capex : float — 설비투자 (원)
-            fcf : float — 잉여현금흐름 (원)
-            pattern : str — CF 패턴 분류 ("성숙형"|"확장형"|"위기형" 등)
+    Capabilities:
+        - 3 구간 CF + CAPEX + FCF + 한국어 패턴 분류 + 변화 driver 분해.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history (연도별 6 키) + turningPoints. CF 데이터 부재
+        시 None.
+
+    Guide:
+        패턴 7 종 — 성숙형/확장형/위기형/축소형/구조조정형/전환형 등. FCF =
+        OCF - CAPEX (유형+무형 취득).
+
+    When:
+        현금흐름 구조 시계열·CF 패턴 변화 추적할 때.
+
+    How:
+        CF rawNormalized → 3 구간·CAPEX 매핑 → 부호 조합으로 패턴 분류 →
+        ``decomposeFcfChange`` 로 driver 추가.
+
+    Requires:
+        CF rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCashFlowOverview(Company("005930"))
+        {"history": [{"period": "...", "pattern": "성숙형", ...}]}
+
+    SeeAlso:
+        - ``calcCashQuality``: 이익 - 현금 뒷받침
+        - ``calcCashFlowFlags``: 경고 플래그
+
+    AIContext:
+        AI 답변에서 CF 패턴 한 줄 인용 시.
     """
     # snakeId 단일 패턴 (alias 양방향 자동 매핑)
     cfAccounts = [
@@ -155,16 +182,43 @@ def calcCashFlowOverview(company, *, basePeriod: str | None = None) -> dict | No
 def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF/순이익, 영업CF/매출 — 이익이 현금으로 뒷받침되는가.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            ocf : float — 영업활동현금흐름 (원)
-            netIncome : float — 당기순이익 (원)
-            revenue : float — 매출액 (원)
-            ocfToNi : float — 영업CF/순이익 (%)
-            ocfMargin : float — 영업CF/매출 (%)
+    Capabilities:
+        - 연도별 영업CF/순이익 + 영업CF/매출 비율 시계열.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history 키에 ocf/netIncome/revenue/ocfToNi/ocfMargin
+        행 리스트. 데이터 부재 시 None.
+
+    Guide:
+        ocfToNi ≥ 80% = 이익이 현금으로 잘 뒷받침. ±1000% 초과 비율은 None
+        (의미 없음).
+
+    When:
+        이익의 질·발생액 의심 신호 1 차 검증.
+
+    How:
+        CF 영업현금 + IS 순이익·매출 매핑 → 비율 시계열.
+
+    Requires:
+        CF/IS rawNormalized parquet.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCashQuality(Company("005930"))
+        {"history": [{"period": "...", "ocfToNi": 95.3, ...}]}
+
+    SeeAlso:
+        - ``calcCashFlowOverview``: 구조 시계열
+        - ``crossStatement.calcIsCfDivergence``: 괴리 시계열
+
+    AIContext:
+        AI 답변에서 이익-현금 뒷받침 한 줄 인용 시.
     """
     cfResult = company.select("CF", ["영업활동현금흐름"])
     isResult = company.select("IS", ["당기순이익", "매출액"])
@@ -220,10 +274,42 @@ def calcCashQuality(company, *, basePeriod: str | None = None) -> dict | None:
 def calcCashFlowFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """현금흐름 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 플래그 문자열 목록.
+    Capabilities:
+        - 영업CF 적자·FCF 적자·위기형 패턴·영업CF 3 년 감소·이익 대비 현금
+          부족 등을 한국어 flags 로 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        flag 임계 — ocf < 0 / fcf < 0 (ocf > 0 일 때) / ocfToNi < 40% /
+        ocfMargin < 0.
+
+    When:
+        보고서·UI 위험 배너에 현금흐름 위험 한 줄 표시.
+
+    How:
+        ``calcCashFlowOverview`` + ``calcCashQuality`` 결과를 임계와 비교.
+
+    Requires:
+        하위 2 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCashFlowFlags(Company("005930"))
+        ["영업CF 적자 — ..."]
+
+    SeeAlso:
+        - ``calcCashFlowOverview``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 현금흐름 위험 인용 시.
     """
     flags = []
 
@@ -275,24 +361,43 @@ def calcCashFlowFlags(company, *, basePeriod: str | None = None) -> list[str]:
 def calcOcfDecomposition(company, *, basePeriod: str | None = None) -> dict | None:
     """영업CF를 구성요소로 분해 — 현금흐름의 원천을 파악.
 
-    대부분 기업이 CF에 개별 조정항목을 안 쓰므로 BS 변동으로 간접 추정.
+    Capabilities:
+        - OCF ≈ NI + 감가상각 + 운전자본 변동 식의 잔차까지 7 키 시계열.
 
-    OCF ≈ 순이익 + 비현금비용(감가상각 추정) + 운전자본 변동
-    운전자본 변동 = -(delta_AR) - (delta_Inv) + (delta_AP)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            ni : float — 당기순이익 (원)
-            ocf : float — 영업활동현금흐름 (원)
-            depEstimate : float — 감가상각 추정치 (원)
-            wcEffect : float — 운전자본 변동 효과 (원)
-            arChange : float — 매출채권 변동 (원)
-            invChange : float — 재고자산 변동 (원)
-            apChange : float — 매입채무 변동 (원)
-            residual : float — 잔차 (원)
+    Returns:
+        dict | None: history (ni/ocf/depEstimate/wcEffect/arChange/invChange/
+        apChange/residual) 행 리스트. 데이터 ≥ 2 년 부재 시 None.
+
+    Guide:
+        대부분 기업이 CF 개별 조정항목을 안 쓰므로 BS 변동으로 간접 추정.
+        감가상각 = PP&E / 10 가정. 운전자본 = -ΔAR - ΔInv + ΔAP.
+
+    When:
+        OCF 의 원천 분해·운전자본 영향 시계열 분석할 때.
+
+    How:
+        IS/CF/BS 매핑 → 연도별 BS delta + 감가상각 추정 → residual 계산.
+
+    Requires:
+        IS/CF/BS rawNormalized parquet ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcOcfDecomposition(Company("005930"))
+        {"history": [{"period": "...", "wcEffect": ..., ...}]}
+
+    SeeAlso:
+        - ``calcCashFlowOverview``: 3 구간 CF
+        - ``calcCashQuality``: 이익-현금 비율
+
+    AIContext:
+        AI 답변에서 OCF 분해·운전자본 영향 인용 시.
     """
     isResult = company.select("IS", ["당기순이익"])
     cfResult = company.select("CF", ["영업활동현금흐름"])

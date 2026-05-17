@@ -121,7 +121,7 @@ def buildFinance(*, sinceYear: int = 2021, verbose: bool = True) -> Path | None:
 
     Guide:
         - 결산월 SSOT 우선순위: corp_profile (DART API) → listing (KIND) → rcept_no 추정 → 12 fallback.
-          P-S11 이후 corp_profile 이 권위 SSOT. ``scripts/build/buildCorpProfile.py`` 가 매 prebuild
+          P-S11 이후 corp_profile 이 권위 SSOT. ``.github/scripts/meta/buildCorpProfile.py`` 가 매 prebuild
           전에 갱신 (신규 상장 / 결산월 변경 즉시 반영).
         - 비12월 결산 환원 실패 시 회계분기가 캘린더에 misplace (예: 10월 결산 사업연도 2026 4 분기
           → 잘못된 2025Q4 같은). sanity check 가 warning emit.

@@ -49,7 +49,36 @@ class DataQualityScore:
 
     @property
     def overallScore(self) -> float:
-        """종합 품질 점수 (0~100)."""
+        """종합 품질 점수 (0~100).
+
+        Capabilities:
+            - 매핑률·기간 커버리지·완전성 단일 점수 합성.
+
+        Guide:
+            None 슬롯은 무시한 산술 평균.
+
+        When:
+            UI/리포트 "데이터 품질 N/100" 카드 표시 직전.
+
+        How:
+            mappingRate·periodCoverage·avg(completeness) 평균.
+
+        Requires:
+            DataQualityScore 인스턴스 필드 채워져 있어야.
+
+        Raises:
+            없음 (필드 부재 시 0.0).
+
+        Example:
+            >>> DataQualityScore(periodCoverage=80.0).overallScore
+            80.0
+
+        See Also:
+            - computeQuality : 인스턴스 생성
+
+        AIContext:
+            AI 답변 헤더에 "데이터 품질 X/100" 표시에 직접 사용.
+        """
         scores = []
         if self.mappingRate is not None:
             scores.append(self.mappingRate)
@@ -86,6 +115,35 @@ def computeQuality(
 
     Returns:
         DataQualityScore
+
+    Capabilities:
+        - mapping/coverage/completeness 3 신호 합성 점수 계산.
+
+    Guide:
+        매핑률 + 기간 커버리지 + BS/IS/CF 핵심 계정 완전성.
+
+    When:
+        timeseries 빌드 직후 품질 게이트가 필요할 때.
+
+    How:
+        series 순회 → 핵심 계정 누락 검사 → DataQualityScore 채움.
+
+    Requires:
+        buildTimeseries series + periods.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> computeQuality(series, periods).overallScore
+        85.0
+
+    See Also:
+        - DataQualityScore.overallScore : 합성 점수
+        - buildTimeseries : series 생성
+
+    AIContext:
+        AI 가 답변 신뢰도 가드: 점수 < 50 이면 "데이터 부족" 경고 부착.
     """
     score = DataQualityScore()
     score.totalPeriods = len(periods)

@@ -33,6 +33,44 @@ class Signal:
         """boolean 또는 boolean-castable array 를 추가.
 
         길이는 첫 add 기준으로 고정 (이후 add 는 같은 길이만 허용).
+
+        Capabilities:
+            - identifier key 검증 + boolean 캐스팅 + 첫 add 기준 길이 lock
+            - chained add 지원 (self return)
+
+        Args:
+            key: 식별자 (Python identifier).
+            series: boolean array 또는 cast 가능 array.
+
+        Returns:
+            Signal — self (chaining).
+
+        Guide:
+            Strategy DSL 의 진입/청산 컴포지션 단위. ``s.add("up", ema > sma)`` 처럼 chain.
+
+        When:
+            Rule 빌드 + AI 조건 합성 답변.
+
+        How:
+            identifier 검증 → bool cast → length validate → dict 저장.
+
+        Requires:
+            series 가 numpy array 또는 cast 가능.
+
+        Raises:
+            ValueError — key 가 invalid identifier 또는 length mismatch.
+
+        Example:
+            >>> s = Signal().add("ema_up", ema20 > ema60)
+            >>> s.ema_up.dtype
+            dtype('bool')
+
+        See Also:
+            - Rule : Signal 컴포지션
+            - strategy.styles.* : Signal 사용 예
+
+        AIContext:
+            DSL 조건 합성 답변 시 add 체인 인용.
         """
         if not key.isidentifier():
             raise ValueError(f"key must be valid identifier: {key!r}")
@@ -73,6 +111,16 @@ class Signal:
         -------
         list[str]
             add() 로 등록된 신호 이름 리스트.
+
+        Example:
+            >>> sig.keys()
+            ['rsi', 'macd']
+
+        Requires:
+            없음.
+
+        Raises:
+            없음.
         """
         return list(self._signals.keys())
 

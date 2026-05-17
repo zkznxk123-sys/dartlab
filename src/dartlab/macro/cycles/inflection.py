@@ -56,14 +56,61 @@ def detectInflections(
 ) -> list[Inflection]:
     """finance DataFrame에서 변곡점을 감지한다.
 
+    Capabilities:
+        finance DataFrame (account × year) 의 셀별 연도 간 변화율을 검사하여
+        |change| ≥ majorThreshold (기본 20%) = major, ≥ minorThreshold (10%) =
+        minor 변곡점 추출. 부호 반전은 절대 major. AI 재무 변곡점 답변 1 차.
+
     Args:
-        df: account(행) × year(열) DataFrame.
-        majorThreshold: major 변곡점 기준 (기본 20%).
-        minorThreshold: minor 변곡점 기준 (기본 10%).
-        minAbsValue: 이 값 미만인 셀은 무시 (0 근처 노이즈 방지).
+        df: account(행) × year(열) DataFrame. account 컬럼 자동 인식.
+        majorThreshold: major 기준 (기본 0.20 = 20%).
+        minorThreshold: minor 기준 (기본 0.10 = 10%).
+        minAbsValue: 0 근처 노이즈 필터 (기본 1.0).
 
     Returns:
-        Inflection 리스트 (severity 내림차순 → changeRate 내림차순).
+        list[Inflection] — account/year/prevYear/prev/curr/changeRate/severity
+        (major/minor). severity 내림차순 → changeRate 내림차순 정렬.
+
+    Example:
+        >>> inflections = detectInflections(financeDf)
+        >>> inflections[0].account, inflections[0].severity
+        ('영업이익', 'major')
+
+    Guide:
+        majorThreshold 30%+ 로 올리면 더 의미 있는 변곡점만 (대규모 변화).
+        부호 반전 (흑자→적자 등) 은 changeRate 와 무관하게 major.
+
+    When:
+        ``analyzeCorporate`` 보조 + AI 재무 변곡점 답변 + analysis/forecast 진단.
+
+    How:
+        account 컬럼 자동 탐색 → year 컬럼 sorted → 각 cell 전기 대비 변화율 →
+        임계 매칭 + 부호 반전 별도 처리.
+
+    Requires:
+        finance DataFrame (long-form account × year 행렬).
+
+    Raises:
+        없음 — account/year 컬럼 없으면 빈 list.
+
+    See Also:
+        - analysis.financial.* : 변곡점 후속 분석
+        - aggregateEarningsCycle : 매크로 집계
+
+    AIContext:
+        top 3 inflection (account/year/changeRate) 인용으로 "2024 영업이익 +35%
+        major 변곡" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - minAbsValue 무시 → 0 근처 노이즈 다발
+            - 단일 변곡점 단정 + severity 라벨 미노출
+        OutputSchema:
+            list[Inflection] (7 필드).
+        Prerequisites: finance DataFrame.
+        Freshness: 연간/분기.
+        Dataflow: df → 셀 변화율 → 임계 → 정렬.
+        TargetMarkets: KR/US (계정 형식 무관).
     """
     acctCol = _accountCol(df)
     if acctCol is None:

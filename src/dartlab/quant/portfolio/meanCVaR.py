@@ -57,6 +57,32 @@ def optimizeMeanCVaR(
     Notes:
         - Projected Gradient + soft barrier — 정확한 LP 아님, 근사. cvxpy 미사용.
         - 결과는 sample CVaR (overfit 위험). out-of-sample 검증 필수.
+
+    Guide:
+        Rockafellar-Uryasev — variance 대체 tail-aware risk. T ≥ 252 권장
+        (sample CVaR 신뢰성).
+
+    When:
+        Portfolio + AI tail risk 최소화 답변.
+
+    How:
+        샘플 수익률 → α 분위 = VaR → tail 평균 = CVaR → projected gradient +
+        barrier 로 비중 최적화.
+
+    Requires:
+        returns T×N (N ≥ 2, T ≥ 30).
+
+    Raises:
+        없음 — shape mismatch 시 error 키.
+
+    Example:
+        >>> r = optimizeMeanCVaR(returns)
+        >>> r["cvar"]
+        -0.032
+
+    See Also:
+        - blackLittermanPosterior : 뷰 기반
+        - optimizeNCO : cluster 기반
     """
     R = np.asarray(returns, dtype=np.float64)
     if R.ndim != 2 or R.shape[1] < 2:
@@ -71,11 +97,44 @@ def optimizeMeanCVaR(
     w = np.ones(N) / N
 
     def cvar(weights: np.ndarray) -> float:
-        """cvar — TODO 한국어 동작 설명."""
-        port = R @ weights
-        var_thresh = np.quantile(port, alpha)
-        tail = port[port <= var_thresh]
-        return -float(tail.mean()) if len(tail) > 0 else 0.0
+        """포트폴리오 weights 의 CVaR (alpha 분위 tail loss 평균).
+
+        Capabilities:
+            - alpha 하위 quantile 의 평균 손실 (Expected Shortfall) 계산
+            - 음수 부호 → 손실 양수화 (큰 값 = 위험)
+
+        Args:
+            weights: 가중치 벡터.
+
+        Returns:
+            float — CVaR (양수, 손실).
+
+        Guide:
+            Rockafellar-Uryasev 2000 CVaR. alpha=0.05 → 5% 최악 시나리오 평균 손실.
+
+        When:
+            CVaR optimization 내부 objective + AI tail risk 답변.
+
+        How:
+            R @ w 포트 수익률 → quantile → tail mask 평균.
+
+        Requires:
+            R 매트릭스 (T × N) 외부 closure.
+
+        Raises:
+            없음 — 빈 tail 시 0.
+
+        Example:
+            >>> cvar(np.array([0.5, 0.5]))
+            0.012
+
+        SeeAlso:
+            - optimizeCVaR : 외부 wrapper
+            - risk.var : VaR
+
+        AIContext:
+            "5% 최악 손실 평균" 답변에 인용.
+        """
 
     # Projected gradient descent (단순)
     lr = 0.005

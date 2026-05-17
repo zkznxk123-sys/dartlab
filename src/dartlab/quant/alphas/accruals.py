@@ -48,9 +48,27 @@ def calcAccrualsFactor(
     Guide:
         - 시장 스냅샷 : calcAccrualsFactor()
 
-    SeeAlso:
+    See Also:
         - calcBeneishFactor : 이익 조작 (보완)
         - calcPiotroskiFactor : 건강 (F4 cfGtNi 가 같은 원리)
+
+    When:
+        Quant 이익 품질 축 + AI Sloan accrual 답변.
+
+    How:
+        scan finance.parquet 최신 연도 → (NI - CFO) / TA → high/neutral/low 3
+        그룹.
+
+    Requires:
+        scan finance.parquet (NI/CFO/TA 매핑).
+
+    Raises:
+        없음 — 실패는 None.
+
+    Example:
+        >>> r = calcAccrualsFactor()
+        >>> r["groups"]["high"]["pct"]
+        15.0
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

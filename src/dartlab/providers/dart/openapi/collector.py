@@ -266,13 +266,21 @@ class DocsCollector:
 
         from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
+        from dartlab.core.logger import getConsole
+
         session = _makeSession()
 
         # Phase 1: 하위 섹션 URL 수집
         allSubDocs: list[dict] = []
         failCount1 = 0
 
-        _p1 = Progress(SpinnerColumn(), TextColumn("[bold blue]{task.description}"), BarColumn(), MofNCompleteColumn())
+        _p1 = Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=getConsole(),
+        )
         _t1 = _p1.add_task(f"[1/2] 목차 수집 | {self.corpName}", total=len(rceptNos))
         with _p1:
             for i, rcpNo in enumerate(rceptNos):
@@ -321,7 +329,13 @@ class DocsCollector:
             if sd["url"] not in urlToTitle:
                 urlToTitle[sd["url"]] = sd["title"]
 
-        _p2 = Progress(SpinnerColumn(), TextColumn("[bold blue]{task.description}"), BarColumn(), MofNCompleteColumn())
+        _p2 = Progress(
+            SpinnerColumn(),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(),
+            MofNCompleteColumn(),
+            console=getConsole(),
+        )
         _t2 = _p2.add_task(
             f"[2/2] HTML 수집 | {self.corpName} ({uniqueReports}건, {len(uniqueUrls)}섹션)", total=len(uniqueUrls)
         )

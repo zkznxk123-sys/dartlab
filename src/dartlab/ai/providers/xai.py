@@ -11,7 +11,7 @@ XAI_BASE_URL = "https://api.x.ai/v1"
 
 
 class XAIProvider(OpenAIProvider):
-    """XAIProvider — TODO 한국어 클래스 설명."""
+    """xAI Grok provider — OpenAI 스키마 + x.ai baseUrl 재사용."""
 
     name = "xai"
     defaultModel = "grok-2-latest"
@@ -27,7 +27,7 @@ class XAIProvider(OpenAIProvider):
         return OpenAI(apiKey=apiKey, baseUrl=self.config.baseUrl or XAI_BASE_URL)
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """XAI_API_KEY + openai SDK 동시 보유 여부."""
         if not (self.config.apiKey or os.getenv("XAI_API_KEY")):
             return False
         try:

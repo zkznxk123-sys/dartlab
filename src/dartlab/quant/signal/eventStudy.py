@@ -72,6 +72,32 @@ def calcCAR(
             tStat : float
             isSignificant : bool — |t| > 1.96
             interpretation : str
+
+    Guide:
+        MacKinlay (1997) event study 표준. estimationWindow (-120, -30) +
+        eventWindow (-5, +5) 표준. |t| > 1.96 = 5% 유의.
+
+    When:
+        Quant event study + AI 공시 영향 답변.
+
+    How:
+        estimation window 에서 α/β 회귀 → eventWindow expected return →
+        abnormal return → CAR + t-stat.
+
+    Requires:
+        stockReturns + marketReturns 동일 길이 + eventIdx 가 window 안.
+
+    Raises:
+        없음 — window out of range 시 error 키.
+
+    Example:
+        >>> r = calcCAR(stockR, marketR, eventIdx=120)
+        >>> r["car"]
+        0.045
+
+    See Also:
+        - calcEventSignal : 공시 이벤트 분류
+        - labelTripleBarrier : ML 라벨링
     """
     n = len(stockReturns)
     est_lo = eventIdx + estimationWindow[0]
@@ -132,7 +158,38 @@ def calcBHAR(
         holdWindow: 후속 보유 일수. 기본 ``60`` (3개월).
 
     Returns:
-        dict — bhar, bhar_stock, bhar_market, interpretation
+        dict — eventIdx/holdWindow/bharStock/bharMarket/bhar/interpretation.
+
+    Capabilities:
+        - 종목 누적 수익 - 시장 누적 수익 → 장기 abnormal return
+        - holdWindow 60 일 (3 개월) 표준
+
+    Guide:
+        Barber-Lyon 1997 표준. 장기 drift (60~120 일) 검정에 적합. CAR (짧은 window) 와
+        구분.
+
+    When:
+        Long-horizon event drift + AI 장기 abnormal 답변.
+
+    How:
+        eventIdx 이후 holdWindow 봉 cumulative product - 시장 cumulative product.
+
+    Requires:
+        시계열 길이 ≥ eventIdx + holdWindow + 1.
+
+    Raises:
+        없음 — 범위 초과 시 ``{error}``.
+
+    Example:
+        >>> calcBHAR(stockR, marketR, eventIdx=120)["bhar"]
+        4.2
+
+    See Also:
+        - calcCAR : 단기 CAR
+        - signal.eventStudy : 위 모듈
+
+    AIContext:
+        "공시 후 3 개월 abnormal" 답변 시 bhar 인용.
     """
     n = len(stockReturns)
     hi = eventIdx + holdWindow

@@ -37,7 +37,43 @@ def calcCrossSectionIC(
 ) -> dict:
     """한 시점의 횡단면 IC (Pearson + Spearman + t-stat).
 
-    Returns dict with ic_pearson, ic_spearman, n_stocks, t_stat, is_significant.
+    Capabilities:
+        - 종목별 factorScore vs forwardReturn → Pearson + Spearman + t-stat 단일 시점
+        - n ≥ 10 필수 + perfect correlation 안전 처리 (1.0 시 t inf 회피)
+
+    Args:
+        factorScores: ``{stockCode: factorScore}``.
+        forwardReturns: ``{stockCode: forward_return}``.
+
+    Returns:
+        dict — ic_pearson/ic_spearman/n_stocks/t_stat/is_significant.
+
+    Guide:
+        Grinold-Kahn Ch.5-6 정의. IC ≥ 0.05 = useful, ≥ 0.10 = strong. |t| > 2.0 = 5% 유의.
+
+    When:
+        팩터 단일 시점 효과 검증 + AI 횡단면 alpha 답변.
+
+    How:
+        공통 종목 → x/y array → NaN 제거 → pearson/spearman → t-stat.
+
+    Requires:
+        공통 종목 ≥ 10.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCrossSectionIC({'A': 1, 'B': 2}, {'A': 0.1, 'B': 0.2})
+        >>> r["n_stocks"]
+        2
+
+    See Also:
+        - icTimeSeries : 다시점 IC + ICIR
+        - strategy.metrics.pearsonCorr / spearmanCorr : core stats
+
+    AIContext:
+        "팩터가 종목 잘 정렬" 답변 시 ic_spearman + is_significant 인용.
     """
     common = sorted(set(factorScores) & set(forwardReturns))
     if len(common) < 10:
@@ -98,6 +134,36 @@ def icTimeSeries(
         icir : float — ICIR = mean_ic / std_ic (배)
         n_periods : int — 유효 기간 수
         hit_rate : float — IC 부호 일치 비율 (0~1)
+
+    Capabilities:
+        - 시점별 calcCrossSectionIC 반복 → ic_spearman 누적 → 평균/표준편차/ICIR
+        - hit_rate = 부호 일치 비율
+
+    Guide:
+        Grinold-Kahn ICIR ≥ 0.5 = useful, ≥ 0.75 = exceptional. Fundamental Law breadth N_periods.
+
+    When:
+        팩터 시계열 견고성 + AI ICIR 답변.
+
+    How:
+        for fs, fr → calcCrossSectionIC → ic_spearman 수집 → 통계.
+
+    Requires:
+        두 series 길이 일치 + 유효 IC ≥ 2.
+
+    Raises:
+        ValueError — 두 series 길이 불일치.
+
+    Example:
+        >>> icTimeSeries(fs_list, fr_list)["icir"]
+        0.48
+
+    See Also:
+        - calcCrossSectionIC : 단일 시점
+        - strategy.metrics.fundamentalLawIR : breadth 결합
+
+    AIContext:
+        "팩터 시간적 견고성" 답변 시 icir + hit_rate 인용.
     """
     if len(factorScoresSeries) != len(forwardReturnsSeries):
         raise ValueError("factorScoresSeries / forwardReturnsSeries 길이 불일치")
@@ -151,40 +217,73 @@ def _loadAccount(lf: pl.LazyFrame, sj: str, account: str, year: str) -> dict[str
 
 
 def calcRanking(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> dict:
-    """전종목 5-팩터 멀티팩터 복합 순위 (Phase B3 정정).
+    """전종목 멀티팩터 횡단면 순위 — 5 팩터 (KR) / 3 팩터 (US) 복합 score.
 
-    2026-04-24: size (marketCap) + value (bookYield) 팩터 추가 → 5팩터 (margin/ROA/debt/size/value).
-    KR: KRX 시총 직접 사용. US: size/value 미사용 (시총 미수집) — 기존 3팩터.
-
-    학술 근거:
-    - Asness et al. (2013): Value and Momentum Everywhere
-    - Fama & French (1992): size + BM 팩터
-    - Piotroski (2000): Fundamentals score (ROA, margin, debt)
+    Capabilities:
+        scan finance.parquet 의 최신 연도 데이터로 영업이익률/ROA/부채비율 (3 팩터) + KR 한정
+        시가총액/북수익률 (size/value 2 팩터 추가) 의 백분위 평균을 복합 점수로 산출하고
+        상위 50 종목을 반환. stockCode 지정 시 해당 종목 순위 + 상위 10 인용 반환.
 
     Parameters
     ----------
-    market : str
-        시장. 기본 "KR".
-    stockCode : str | None
-        특정 종목 지정 시 해당 종목 순위 + 상위 10 반환.
+    market : str, default "KR"
+        시장 코드. KR 은 5 팩터, US 는 3 팩터 (size/value 미수집).
+    stockCode : str | None, default None
+        특정 종목 지정 시 해당 종목 순위 + 상위 10 인용.
+    **kwargs
+        forward-compat 슬롯.
 
     Returns
     -------
     dict
-        market : str — 시장
-        year : str — 기준 연도
+        market : str — 입력 echo
+        year : str — 기준 연도 (데이터 풍부한 최신 연도 자동 선택)
         totalStocks : int — 순위 산출 종목 수
-        factorsUsed : list[str] — 사용된 팩터 리스트
-        rankings : list[dict] — 상위 종목 리스트 (최대 50개)
-            stockCode : str — 6자리 종목코드
-            opMargin : float — 영업이익률 (%)
-            ROA : float — 총자산수익률 (%)
-            debtRatio : float — 부채비율 (%)
-            marketCap : float — 시가총액 (원, KR 만)
-            bookYield : float — equity/marketCap (= 1/PBR, KR 만)
-            compositeScore : float — 복합 백분위 (0~1, 1=top)
-            rank : int — 순위
-        target : dict | None — stockCode 지정 시 해당 종목 정보
+        factorsUsed : list[str] — 사용된 팩터 명 리스트
+        rankings : list[dict] — 상위 50 종목 (stockCode/opMargin/ROA/debtRatio/marketCap/bookYield/compositeScore/rank)
+        target : dict | None — stockCode 지정 시 (해당 종목 + 상위 10 인용)
+        데이터 부재 시 {**result, "error": str}.
+
+    Raises
+    ------
+    없음 (scan 결손 시 dict["error"]).
+
+    Example
+    -------
+    >>> r = calcRanking(market="KR")
+    >>> r["rankings"][0]["stockCode"], r["rankings"][0]["compositeScore"]
+    ('005930', 0.94)
+    >>> r2 = calcRanking(market="KR", stockCode="005930")
+    >>> r2["target"]["rank"]
+    7
+
+    Guide
+    -----
+    학술 근거: Asness 2013 (Value/Momentum Everywhere) · FF 1992 (size + BM) · Piotroski 2000
+    (Fundamentals). compositeScore 는 백분위 평균이므로 0~1 범위가 의미. 100 개 미만 연도는
+    fallback 으로 다음 후보 연도 자동 선택.
+
+    See Also:
+        - ``dartlab.quant.factor.value.calcValue`` : 가치 단축
+        - ``dartlab.quant.factor.quality.calcQuality`` : 퀄리티 단축
+        - ``dartlab.scan.financial`` : finance.parquet SSOT
+
+    When:
+        Quant universe ranking 진입점 + AI 종목 순위 답변.
+
+    How:
+        scan finance.parquet → 최신 연도 → 5 팩터 (KR) 또는 3 팩터 (US) 백분위
+        평균 → top-50 + stockCode 순위.
+
+    Requires
+    --------
+    - L1.5 scan: finance.parquet (시장별 100 종목 이상)
+    - KR 5 팩터: 시가총액 (KRX) 추가 필요
+
+    AIContext
+    ---------
+    "퀄리티 + 가치 통합 상위 종목" 1 차 진입. stockCode 지정 호출은 해당 종목이 "전종목 중 어디"
+    답변에 직결. factorsUsed 함께 인용해 KR/US 차이 명시 권장.
     """
     result: dict = {"market": market}
 

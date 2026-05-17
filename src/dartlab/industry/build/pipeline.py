@@ -92,6 +92,10 @@ def buildIndustryMap(
 ) -> list[IndustryNode]:
     """4단계 파이프라인을 실행하여 nodes.json을 생성한다.
 
+    Capabilities:
+        KSIC → 제품 → docs → review 4 단계 + 재무 attach + 엣지 빌드를 1 회 실행. 결과는
+        ``data/industry/{nodes,edges}.json`` 으로 직렬화. 전 종목 산업/공정/매출 manifest 생성.
+
     Parameters
     ----------
     skipDocs : bool
@@ -103,6 +107,39 @@ def buildIndustryMap(
     -------
     list[IndustryNode]
         빌드된 전종목 노드 리스트.
+
+    Raises:
+        없음 — 개별 stage 실패 시 부분 결과로 진행.
+
+    Example:
+        >>> from dartlab.industry.build.pipeline import buildIndustryMap
+        >>> nodes = buildIndustryMap(skipDocs=False, verbose=True)
+        >>> sum(1 for n in nodes if n.stage)
+        2800
+
+    Guide:
+        ``Industry().build()`` 의 위임 대상. 전 종목 docs parquet 스캔 + finance.parquet 로드로
+        비용이 큼 — 일반 사용자 호출 금지.
+
+    When:
+        manifest stale 시 (재무 / KindList 갱신 후) 만. 일반 사용자는 ``Industry()(code)`` 조회.
+
+    How:
+        stage1_ksic.classify → stage2_product.classify → stage3_docs.enrich (선택) →
+        stage4_review.applyOverrides → attachFinancials → buildAllEdges → _saveNodes / _saveEdges.
+
+    Requires:
+        - L1 raw: DART KindList + 사업보고서 + 재무 1+ 연도
+        - L1.5 frame: scan/finance.parquet + docs/{code}.parquet
+
+    See Also:
+        - ``dartlab.industry.Industry.build`` : 본 함수 사용자 (사용자 친화 진입점)
+        - ``dartlab.industry.build.stage1_ksic.classify`` : 1 단계
+        - ``dartlab.industry.build.edges.buildAllEdges`` : 엣지 단계
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (배치). manifest 가 stale 일 가능성 (``updatedAt`` 필드 확인)
+        만 답변에 단서로 명시.
     """
     from dartlab.industry.build.stage1_ksic import classify as stage1
     from dartlab.industry.build.stage2_product import classify as stage2
@@ -184,6 +221,18 @@ def loadNodes() -> list[IndustryNode]:
     -------
     list[IndustryNode]
         로드된 노드 리스트. 파일 없거나 파싱 실패 시 빈 리스트.
+
+    Raises:
+        없음 — 파일 부재 / JSON 손상 모두 빈 리스트 반환.
+
+    Example:
+        >>> from dartlab.industry.build.pipeline import loadNodes
+        >>> nodes = loadNodes()
+        >>> nodes[0].stockCode, nodes[0].industry
+        ('005930', 'semiconductor')
+
+    Requires:
+        - ``data/industry/nodes.json`` manifest (``buildIndustryMap()`` 이후 산출).
     """
     if not _NODES_FILE.exists():
         return []
@@ -201,6 +250,18 @@ def loadEdges() -> list[IndustryEdge]:
     -------
     list[IndustryEdge]
         로드된 엣지 리스트. 파일 없거나 파싱 실패 시 빈 리스트.
+
+    Raises:
+        없음 — 파일 부재 / JSON 손상 모두 빈 리스트 반환.
+
+    Example:
+        >>> from dartlab.industry.build.pipeline import loadEdges
+        >>> edges = loadEdges()
+        >>> edges[0].fromCode, edges[0].toCode, edges[0].edgeType
+        ('006400', '005930', 'supplier')
+
+    Requires:
+        - ``data/industry/edges.json`` manifest (``buildIndustryMap()`` 이후 산출).
     """
     if not _EDGES_FILE.exists():
         return []

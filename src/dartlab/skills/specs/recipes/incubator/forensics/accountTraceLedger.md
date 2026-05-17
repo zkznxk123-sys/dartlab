@@ -22,6 +22,7 @@ capabilityRefs:
   - Company.show
   - Company.trace
 toolRefs:
+  - EngineCall
   - RunPython
 sourceRefs:
   - dartlab://skills/recipes.incubator.forensics.accountTraceLedger

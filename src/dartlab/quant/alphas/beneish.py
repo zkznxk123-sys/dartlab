@@ -140,10 +140,22 @@ def calcBeneishFactor(
     Guide:
         - 시장 스냅샷 : calcBeneishFactor()
 
-    SeeAlso:
+    See Also:
         - calcPiotroskiFactor : 재무 건강
         - calcAltmanFactor : 부실 확률
         - analysis.financial.earningsQuality : 단일 종목 이익 품질
+
+    When:
+        Quant 회계 품질 축 + AI 이익 조작 red flag 답변.
+
+    How:
+        scan finance.parquet 2 기 → 8 변수 M-Score 계산 → -1.78 임계로 red flag.
+
+    Requires:
+        scan finance.parquet (2 기 이상).
+
+    Raises:
+        없음 — 실패는 None.
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

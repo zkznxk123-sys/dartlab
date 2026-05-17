@@ -11,7 +11,7 @@ from dartlab.ai.contracts import Ref
 
 @dataclass
 class WorkbenchState:
-    """WorkbenchState — TODO 한국어 클래스 설명."""
+    """workbench 5 패스 (BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST) 누적 상태."""
 
     question: str
     threadId: str = ""
@@ -55,7 +55,7 @@ class WorkbenchState:
     recipeExpanded: bool = False
 
     def public(self, *, currentNode: str) -> dict[str, Any]:
-        """public — TODO 한국어 동작 설명."""
+        """UI 노출용 평탄화 dict — 민감 필드 제외 + ref/toolCall 카운트만."""
         return {
             "threadId": self.threadId,
             "runId": self.runId,

@@ -61,6 +61,10 @@ class PredictionSpace:
         SECTOR_ELASTICITY의 탄성치를 사용하여
         각 축 상태 → 매출 변화율로 변환.
 
+        Capabilities:
+            - 6 축 상태 × 섹터 탄성치 → 매출 영향 (%) 변환
+            - 원자재 생산자/소비자 분기 자동 적용
+
         Parameters
         ----------
         sectorKey : str | None
@@ -70,6 +74,33 @@ class PredictionSpace:
         -------
         dict[str, float]
             축 이름 → 매출 영향 추정치 (%).
+
+        Guide:
+            sectorKey 가 있으면 getElasticity 로 탄성치 조회 후 축별 곱셈.
+
+        When:
+            특정 섹터의 매크로 노출도를 매출 변화율로 환산할 때.
+
+        How:
+            getPredictionSpace 결과의 메서드로 직접 호출.
+
+        Requires:
+            synth.scenario.getElasticity, axes 가 채워진 상태.
+
+        Raises:
+            없음. 축 결손 시 해당 키 누락.
+
+        Example:
+            >>> sp = getPredictionSpace()
+            >>> sp.impactOn("반도체") if sp else {}
+            {...}
+
+        See Also:
+            - getPredictionSpace : 진입점
+            - summary : 6 축 상태 요약
+
+        AIContext:
+            AI 답변 시 "매크로 영향 합 N %" 분해 근거로 인용.
         """
         from dartlab.synth.scenario import getElasticity
 
@@ -118,6 +149,17 @@ class PredictionSpace:
             axes : dict — 축별 상태/방향/수준/모멘텀
             timestamp : str — 생성 시각
             freshness : str — 데이터 신선도
+
+        Requires:
+            axes 가 채워진 상태.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> sp = getPredictionSpace()
+            >>> sp.summary()["freshness"] if sp else "n/a"
+            'fresh'
         """
         return {
             "axes": {
@@ -381,6 +423,10 @@ def getPredictionSpace(*, forceRefresh: bool = False) -> PredictionSpace | None:
     이후 세션 내 캐시 반환 (마이크로초).
     API 키 없으면 None.
 
+    Capabilities:
+        - 6 축 (경기·금리·환율·원자재·심리·유동성) 상태 통합 산출
+        - 세션 캐시 1 시간 TTL 자동 적용
+
     Parameters
     ----------
     forceRefresh : bool
@@ -390,6 +436,33 @@ def getPredictionSpace(*, forceRefresh: bool = False) -> PredictionSpace | None:
     -------
     PredictionSpace | None
         6축 보편 예측 공간. 데이터 없으면 None.
+
+    Guide:
+        모든 예측·시나리오 분석의 매크로 컨텍스트 진입점.
+
+    When:
+        섹터 영향·시나리오 가중에 매크로 상태가 필요할 때.
+
+    How:
+        _fetchMacroData → _computeAxisState 반복 → PredictionSpace 캐시.
+
+    Requires:
+        ECOS/BOK 매크로 API 키 (없으면 None).
+
+    Raises:
+        없음. fetch 실패 시 None.
+
+    Example:
+        >>> sp = getPredictionSpace()
+        >>> sp is None or "businessCycle" in sp.axes
+        True
+
+    See Also:
+        - PredictionSpace.impactOn : 섹터별 영향
+        - PredictionSpace.summary : 6 축 요약
+
+    AIContext:
+        AI 답변 시 매크로 6 축 상태 인용으로 시나리오 가중 근거 제시.
     """
     global _SPACE_CACHE, _CACHE_TS
 

@@ -36,6 +36,8 @@ _helpers.tomMask (KR 캘린더 SSOT)
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 from dartlab.quant.screen.dataAccess import tomMask
@@ -44,11 +46,45 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, isKr
 
 
-def build(company):
+def build(company) -> "Rule | Any":
     """한국캘린더 룰 빌드. KR 전용 — US 면 NotApplicable sentinel.
 
+    Capabilities:
+        - Turn-of-the-Month (TOM) mask 진입 (월말 3 일 + 월초 3 일) → 약 30% 시간 노출
+        - 그 외 시점 청산 → 시즌 alpha 캡처
+
+    Args:
+        company: Company 객체 (KR 한정).
+
     Returns:
-        Rule (KR) 또는 BacktestResult.not_applicable (US)
+        Rule | BacktestResult.notApplicable — KR Rule, US 시 sentinel.
+
+    Guide:
+        Lakonishok-Smidt 1988 TOM 효과 + Korean Journal of Finance (KOSDAQ 2018+).
+        ``tomMask`` SSOT 사용. 다른 위치 재구현 금지.
+
+    When:
+        KR 시즌 alpha + AI 캘린더 효과 답변.
+
+    How:
+        ``getArrays`` → dates → ``tomMask`` → entry=mask, exit=~mask.
+
+    Requires:
+        KR 종목 + OHLCV 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> build(company).meta["style"]
+        'seasonalKR'
+
+    See Also:
+        - screen.dataAccess.tomMask : SSOT
+        - 한국 캘린더 effect 문헌
+
+    AIContext:
+        "월말 + 월초 진입 시즌 alpha" 답변 시 mask 활성 일자 인용.
     """
     if not isKr(company):
         from dartlab.quant.strategy.backtest import BacktestResult

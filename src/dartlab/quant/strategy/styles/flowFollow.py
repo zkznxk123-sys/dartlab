@@ -45,6 +45,7 @@ flowAnalysis.calcFlow (KR only), gather/flow.py
 from __future__ import annotations
 
 from datetime import date as Date
+from typing import Any
 
 import numpy as np
 
@@ -54,11 +55,45 @@ from dartlab.quant.strategy.signal import Signal
 from dartlab.quant.strategy.styles._common import getArrays, getStockCode, isKr
 
 
-def build(company, *, atrK: float = 3.0):
+def build(company, *, atrK: float = 3.0) -> "Rule | Any":
     """수급추종 룰 빌드. KR 전용 — US 면 NotApplicable sentinel.
 
+    Capabilities:
+        - 외국인/기관 순매수 누적 momentum + price confirmation → 진입
+        - KR 전용 (외인/기관 데이터 EDGAR 부재) → US 시 sentinel
+
+    Args:
+        company: Company 객체.
+        atrK: ATR stop 배수. 기본 ``3.0``.
+
     Returns:
-        Rule (KR) 또는 BacktestResult.not_applicable (US)
+        Rule | BacktestResult.notApplicable — KR 만 Rule, US 는 sentinel.
+
+    Guide:
+        KR 외인/기관 수급 시계열 (KRX). 미국엔 동급 데이터 없음.
+
+    When:
+        KR flow-follow strategy + AI 외국인/기관 매수 답변.
+
+    How:
+        ``calcFlow`` 일별 누적 → momentum → entry/exit Signal.
+
+    Requires:
+        KR 종목 + flow 데이터 ≥ 60 일.
+
+    Raises:
+        없음 — US 시 sentinel.
+
+    Example:
+        >>> build(company).meta["style"]
+        'flowFollow'
+
+    See Also:
+        - signal.flow.calcFlow : 수급 데이터
+        - strategy.styles.trendFollow : 가격 추세 동행
+
+    AIContext:
+        "외국인 매수 종목" 답변 시 entry 봉 인용. US 종목 시 NotApplicable 사용 불가.
     """
     # KR-only 방어
     if not isKr(company):

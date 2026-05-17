@@ -69,11 +69,14 @@ FORTY_F_HEADINGS = {
 
 def _makeProgress(total: int, title: str, *, disable: bool = False):
     """alive_bar 호환 (progress, bar) 쌍을 반환하는 헬퍼."""
+    from dartlab.core.logger import getConsole
+
     p = Progress(
         SpinnerColumn(),
         TextColumn("[bold blue]{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
+        console=getConsole(),
         disable=disable,
     )
     tid = p.add_task(title, total=total)

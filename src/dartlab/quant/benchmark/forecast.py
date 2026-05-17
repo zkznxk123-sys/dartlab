@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 
+from typing import Any, Callable
+
 import numpy as np
 
 from dartlab.core.market import resolveMarket
@@ -356,6 +358,26 @@ def forecastReturns(
     - Calibration 은 in-sample 1-step 예측의 마지막 ``int(n * calibFraction)`` 점을 사용
       (split conformal 단순화 — 정식 split 은 별도 fit/calib 파티션 필요).
     - 의존성 0 (numpy 만). statsmodels / scipy / sklearn import 금지.
+
+    Capabilities:
+        가격 시계열 → log-return → 4 모델 (Naive/AR1/ETS-Holt/Theta) 자동 선택 또는
+        ensemble → conformal half-width → horizon 별 point + 90% interval +
+        가격 타깃 단일 dict.
+
+    Guide:
+        horizon ≤ 5 (단기) 권장. 누적 90% interval 은 horizon 에 따라 빠르게
+        넓어짐 — 20+ 일은 신뢰 낮음.
+
+    Requires:
+        OHLCV ≥ 30 일.
+
+    AIContext:
+        modelChosen + forecastTable[0].pointForecast + summary 인용으로 "다음
+        5 일 ETS 예측 +1.2% (90% CI -3% ~ +5%)" 답변.
+
+    See Also:
+        - calcMomentum : 가격 모멘텀 (point estimate 비교)
+        - calcVolatility : 변동성 (conformal width 검증)
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)
@@ -467,7 +489,7 @@ def forecastRuleFactory(
     calibFraction: float = 0.2,
     alpha: float = 0.10,
     requireConfidence: bool = False,
-):
+) -> Callable[..., Any]:
     """forecast 모델 기반 walkForward rule_factory 생성.
 
     walkForward(close, rule_factory=forecastRuleFactory(threshold=0.0005), ...) 형태로
@@ -522,6 +544,33 @@ def forecastRuleFactory(
     >>> factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
     >>> bt = walkForward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)
     >>> bt.cpcv["refit_count"]   # fold 별 재학습 횟수
+
+    Capabilities:
+        - forecast 모델 (naive/ar1/etsHolt/theta) 기반 OOS prediction → entry/exit Rule 변환
+        - loose / strict (conformal interval) 2 모드
+
+    Guide:
+        walkForward 와 결합한 dynamic Rule. IS 구간에서 모델 fit + OOS 시 forecast. strict
+        는 일별 단위에서 entry 0 흔함 (conformal width 가 σ 와 동급) → loose 권장.
+
+    When:
+        Forecast-based strategy + AI 예측 기반 진입 답변.
+
+    How:
+        반환 ``_factory(isClose, oosLen)`` 가 fold 마다 호출 → 모델 fit + OOS predict.
+
+    Requires:
+        IS close ≥ 30 봉.
+
+    Raises:
+        없음 — 짧으면 empty Rule.
+
+    AIContext:
+        "예측 기반 진입 전략" 답변 시 model + threshold + sharpe 인용.
+
+    SeeAlso:
+        - strategy._backtestAdvanced.walkForward : 사용처
+        - _pickModel : 모델 자동 선택
     """
     from dartlab.quant.strategy.rule import Rule
 

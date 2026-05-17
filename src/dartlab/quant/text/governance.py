@@ -71,6 +71,36 @@ def calcGovernanceQuant(stockCode: str, *, market: str = "auto", **kwargs) -> di
         auditOpinion : str — 감사의견 요약
         outsideDirectorRatio : float — 사외이사 비율 (%)
         availableData : list[str] — 사용된 데이터 목록
+
+    Capabilities:
+        - 4 sub-축 (소유집중도/감사의견/사외이사 비율/보수 투명성) 점수 → 복합 0~100
+        - DART scan 데이터 가용한 sub-축만 사용 (부분 평가 허용)
+
+    Guide:
+        한국 governance 4 축. 30~50% 최대주주 = optimal, ≥ 70% = 과집중, < 20% = 분산.
+
+    When:
+        Text governance + AI 거버넌스 답변.
+
+    How:
+        4 scan parquet (majorHolder/auditOpinion/director/pay) 로드 → sub-점수 → 가중 평균.
+
+    Requires:
+        DART scan parquet 가용 (최소 1).
+
+    Raises:
+        없음 — 데이터 부재 시 governanceScore=None.
+
+    Example:
+        >>> calcGovernanceQuant("005930")["grade"]
+        'B'
+
+    See Also:
+        - calcSentiment / calcRiskText : 자매 text
+        - composite.calcTextComposite : 통합
+
+    AIContext:
+        "거버넌스 정량 평가" 답변 시 grade + sub-점수 인용.
     """
     market = resolveMarket(stockCode, market)
     result: dict = {"stockCode": stockCode, "market": market}

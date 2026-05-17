@@ -27,7 +27,7 @@ def updateStatus(specPath: Path, newStatus: str) -> bool:
 
 
 def readStatus(specPath: Path) -> str | None:
-    """readStatus — TODO 한국어 동작 설명."""
+    """spec frontmatter 의 status: 값 추출 (파일 부재/매치 없으면 None)."""
     if not specPath.exists():
         return None
     text = specPath.read_text(encoding="utf-8")

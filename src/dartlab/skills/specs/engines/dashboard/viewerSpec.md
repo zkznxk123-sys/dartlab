@@ -25,6 +25,7 @@ outputs:
   - sticky 첫 컬럼 + tabular-nums 표
 capabilityRefs: []
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.company.sections

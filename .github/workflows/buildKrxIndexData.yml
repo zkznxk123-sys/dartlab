@@ -61,13 +61,13 @@ jobs:
         run: |
           MODE="${{ github.event.inputs.mode || 'incremental' }}"
           if [ "$MODE" = "backfill" ]; then
-            uv run python -X utf8 scripts/build/buildKrxIndexData.py \
+            uv run python -X utf8 .github/scripts/sync/buildKrxIndexData.py \
               --mode backfill \
               --start "${{ github.event.inputs.start }}" \
               --end "${{ github.event.inputs.end }}" \
               --push
           else
-            uv run python -X utf8 scripts/build/buildKrxIndexData.py \
+            uv run python -X utf8 .github/scripts/sync/buildKrxIndexData.py \
               --mode incremental \
               --push
           fi

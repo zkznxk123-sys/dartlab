@@ -91,7 +91,53 @@ def _buildProductIndex() -> dict[str, list[tuple[str, str]]]:
 def classify(kindList: list[dict]) -> list[IndustryNode]:
     """KindList 전종목을 산업 대분류한다.
 
-    우선순위: manualOverrides → 주요제품 키워드 → KSIC 업종명
+    Capabilities:
+        KindList (상장사 메타) 전 종목에 대해 우선순위 (manualOverrides → 주요제품 키워드 →
+        KSIC 업종명) 로 산업 대분류 매핑. 첫 매칭 단계가 confidence 결정. stage 키는 후속
+        stage2_product 가 채움.
+
+    Parameters
+    ----------
+    kindList : list[dict]
+        KindList raw row 리스트 (종목코드/회사명/업종/주요제품 컬럼).
+
+    Returns
+    -------
+    list[IndustryNode]
+        대분류 매핑된 IndustryNode 리스트. industry 채워짐 + stage 빈 문자열.
+
+    Raises:
+        없음 — 매칭 실패 종목은 결과에서 제외.
+
+    Example:
+        >>> from dartlab.industry.build.stage1_ksic import classify
+        >>> nodes = classify(kindList)
+        >>> sum(1 for n in nodes if n.industry == "semiconductor")
+        62
+
+    Guide:
+        본 함수는 ``buildIndustryMap`` 의 1 단계. manualOverrides 는 ``manualOverrides.json``
+        파일 — 부분명 매칭도 허용. confidence 0.95~1.0 (override) / 0.6~0.8 (KSIC) / 0.5~0.7
+        (제품 키워드).
+
+    When:
+        manifest 빌드 1 단계. 일반 분석 흐름 호출 없다.
+
+    How:
+        KindList 행 루프 → manualOverrides 우선 매칭 → 부분명 매칭 → 제품 키워드 인덱스 →
+        KSIC 업종명 룩업 → IndustryNode 생성.
+
+    Requires:
+        - L1 raw: KindList (DART 상장사 메타)
+        - reference: taxonomy.json + manualOverrides.json
+
+    See Also:
+        - ``dartlab.industry.build.stage2_product.classify`` : stage 채우기 2 단계
+        - ``dartlab.industry.build.pipeline.buildIndustryMap`` : 본 함수 사용자
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (배치). 답변에서 ``source=="override"`` 노드는 "운영자 확정",
+        ``"ksic"`` 노드는 "KSIC 업종명 기준" 으로 단서 인용.
     """
     manualOv = _loadManualOverrides()
     productIdx = _buildProductIndex()

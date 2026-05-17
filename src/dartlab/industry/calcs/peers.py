@@ -27,7 +27,18 @@ class PeerRow:
     isSelf: bool = False
 
     def asDict(self) -> dict[str, Any]:
-        """asDict — TODO 한국어 동작 설명."""
+        """dataclass → dict 직렬화 (values 는 얕은 복사).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> PeerRow("005930", "삼성전자").asDict()["stockCode"]
+            '005930'
+
+        Requires:
+            - 외부 의존 없음 — in-memory 변환.
+        """
         return {
             "stockCode": self.stockCode,
             "corpName": self.corpName,
@@ -76,6 +87,10 @@ def _baseValues(node: Any) -> dict[str, Any]:
 def industryPeers(stockCode: str, *, n: int = 10) -> list[PeerRow]:
     """동종업종 peer 추출.
 
+    Capabilities:
+        nodes.json 에서 대상 회사의 산업을 찾고, 동일 산업 내 매출 상위 n 사 (본 회사 포함) 의
+        PeerRow 리스트를 반환. 첫 행은 본 회사 (isSelf=True). spec_peer_matrix 가 받는 형태.
+
     Args:
         stockCode: 본 회사 6 자리 종목코드.
         n: 본 회사 포함 최대 peer 수 (매출 상위 n).
@@ -83,6 +98,37 @@ def industryPeers(stockCode: str, *, n: int = 10) -> list[PeerRow]:
     Returns:
         list[PeerRow]. 첫 행은 본 회사 (isSelf=True). 산업이 없거나 단독
         종목이면 빈 list.
+
+    Raises:
+        없음 — 산업 매핑 부재 / 단독 종목이면 빈 list.
+
+    Example:
+        >>> from dartlab.industry.calcs.peers import industryPeers
+        >>> rows = industryPeers("005930", n=5)
+        >>> rows[0].isSelf, rows[0].corpName
+        (True, '삼성전자')
+
+    Guide:
+        ``values`` 는 ``_baseValues`` 가 채우는 즉시 가용 metric (매출 (억)) 만. PER/ROE 등은
+        호출자가 ``rows[i].values[키] = ...`` 로 추가 보강.
+
+    When:
+        peer 매트릭스 UI / Story 6 막 "동종 비교" 데이터 진입점.
+
+    How:
+        ``_findIndustryFor`` → 매출 내림차순 정렬 → 본 회사 + 상위 n-1 선택 → PeerRow 변환.
+
+    Requires:
+        - L1.5 frame: industry/build/pipeline.loadNodes 산출
+        - 입력 stockCode 가 nodes 에 매핑되어 있어야 함
+
+    See Also:
+        - ``dartlab.industry.calcs.peers.industryPeerMetricKeys`` : 채워진 metric 키
+        - ``dartlab.industry.calcs.companyCalcs.calcSectorMetrics`` : 분포 + 백분위
+
+    AIContext:
+        "동종 매출 상위 N 사" 답변 기본 리스트. ``values["매출(억)"]`` 외 metric 은 호출자가
+        보강한 경우만 — 답변 시 metric 종류 명시.
     """
     industry, nodes = _findIndustryFor(stockCode)
     if not industry or not nodes:
@@ -115,7 +161,45 @@ def industryPeers(stockCode: str, *, n: int = 10) -> list[PeerRow]:
 
 
 def industryPeerMetricKeys(rows: list[PeerRow]) -> list[str]:
-    """rows 에 실제로 채워진 metric 키 목록 (열 라벨)."""
+    """rows 에 실제로 채워진 metric 키 목록 (열 라벨).
+
+    Capabilities:
+        PeerRow 리스트 안 각 행의 ``values`` 에서 적어도 하나라도 등장한 metric 키를 등장 순서
+        유지하며 unique 리스트로 반환. PeerMatrixTable UI 컬럼 라벨 결정에 사용.
+
+    Args:
+        rows: ``industryPeers`` 또는 호출자가 보강한 PeerRow 리스트.
+
+    Returns:
+        등장 metric 키 리스트. 빈 rows 또는 모든 values 가 비었으면 빈 list.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.industry.calcs.peers import industryPeers, industryPeerMetricKeys
+        >>> rows = industryPeers("005930", n=3)
+        >>> industryPeerMetricKeys(rows)
+        ['매출(억)']
+
+    Guide:
+        UI 가 컬럼 자체를 동적으로 결정할 때 사용. 빈 컬럼 자동 제거 효과.
+
+    When:
+        ``industryPeers`` 호출 직후. UI / spec 시리얼라이저가 컬럼 키 알아낼 때.
+
+    How:
+        rows 순회 → values.keys() 등장 순서 유지 dedup → 리스트 반환.
+
+    Requires:
+        - 입력 rows 가 ``industryPeers`` 산출 PeerRow 구조.
+
+    See Also:
+        - ``dartlab.industry.calcs.peers.industryPeers`` : 본 함수 입력 산출
+
+    AIContext:
+        AI 답변 매트릭스 컬럼 결정 시 사용. 빈 키 자동 제거되므로 별도 단서 없이 그대로 인용.
+    """
     seen: list[str] = []
     for r in rows:
         for k in r.values.keys():

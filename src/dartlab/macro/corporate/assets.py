@@ -68,25 +68,65 @@ def _fetchAssetData(market: str, asOf: str | None = None) -> dict[str, float | N
 def analyzeAssets(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """5대 자산 종합 해석 — 주식/채권/원자재/환율/금 + 심층 드라이버.
 
-    Parameters
-    ----------
-    market : str
-        ``"US"`` | ``"KR"``.
-    as_of : str | None
-        기준일. ``None`` 이면 최신.
-    overrides : dict | None
-        지표 강제 치환 (예: ``{"vix": 30}``).
+    Capabilities:
+        주식/채권/원자재/환율/금 5 자산 해석 + 금 3 요인 (실질금리·달러·안전자산)
+        + VIX regime + 환율 3 요인 (금리차·교역·리스크) + 구리/금 비율 + Buffett
+        Indicator (US) 를 단일 dict 로 합성. macro/summary 의 assets 축이 직접
+        호출.
 
-    Returns
-    -------
-    dict
-        - market : str — 시장 코드
-        - assets : list[dict] — 자산별 해석. 각 원소: asset:str, label:str, level:float, change:float(%), interpretation:str, implication:str
-        - goldDrivers : dict | None — 금 3요인 분해 (realRateEffect:str, dollarEffect:str, safeHavenEffect:str, dominant:str)
-        - vixRegime : dict | None — VIX 구간 판정 (level:float(pt), zone:str, zoneLabel:str, buySignal:bool)
-        - fxDrivers : dict | None — 환율 3요인 분해 (rateDiffEffect:str, tradeEffect:str, riskEffect:str, dominant:str, divergence:bool)
-        - copperGold : dict | None — 구리/금 비율 (ratio:float(배), direction:str, directionLabel:str, implication:str, description:str)
-        - marketValuation : dict | None — Buffett Indicator (buffettIndicator:float(%), zone:str, zoneLabel:str, description:str). US 전용.
+    Args:
+        market: ``"US"`` | ``"KR"``.
+        asOf: 기준일 ``YYYY-MM-DD``. ``None`` 이면 최신.
+        overrides: 지표 강제 치환 (예: ``{"vix": 30}``).
+
+    Returns:
+        dict — market/assets(5 자산 list)/goldDrivers/vixRegime/fxDrivers/
+        copperGold/marketValuation(US 전용) 키.
+
+    Example:
+        >>> r = analyzeAssets(market="US")
+        >>> r["vixRegime"]["zone"], r["assets"][0]["asset"]
+        ('normal', 'short_rate')
+
+    Guide:
+        VIX regime "panic" + goldDrivers.dominant "safe_haven" 동시 = 위험회피
+        강화. fxDrivers.divergence=True 면 환율 요인 충돌 — 단기 해석 보류.
+
+    When:
+        ``analyzeSummary`` assets 축 + AI 자산 답변 진입점.
+
+    How:
+        _fetchAssetData → overrides → interpretAssets + interpretGoldDrivers +
+        classifyVixRegime + interpretFxDrivers + copperGoldRatio +
+        marketLevelValuation (US) → dict 합성.
+
+    Requires:
+        FRED (DGS2/DGS10/T10YIE/DFII10/VIXCLS/DTWEXBGS/IR14270) + KOSIS (KR
+        USDKRW/기준금리).
+
+    Raises:
+        없음 — 개별 드라이버 실패는 None 으로 흡수.
+
+    See Also:
+        - analyzeCycle : 사이클 4 국면 (assets 와 합성)
+        - dartlab.synth.quadrant.classifyQuadrant : 성장 × 인플레
+
+    AIContext:
+        assets 5 종 중 1~2 자산 해설 + vixRegime/goldDrivers.dominant 두 필드 +
+        marketValuation.zone (US) 가 한 단락 답변 완성.
+
+    LLM Specifications:
+        AntiPatterns:
+            - assets list 만 인용 + goldDrivers/fxDrivers 무시
+            - KR 시장에 marketValuation 기대 (US 전용)
+            - VIX 수준만 인용 + zone 라벨 미사용
+        OutputSchema:
+            ``{market, assets, goldDrivers, vixRegime, fxDrivers, copperGold,
+            marketValuation}``.
+        Prerequisites: FRED + KOSIS 활성.
+        Freshness: FRED 일간 + KOSIS 분기.
+        Dataflow: _fetchAssetData → 5 드라이버 함수 → dict 합성.
+        TargetMarkets: US (풀세트), KR (assets 5 종 + fxDrivers).
     """
     data = _fetchAssetData(market, asOf=asOf)
     if overrides:

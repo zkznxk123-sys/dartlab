@@ -8,8 +8,11 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable
 
+from .compareCompanies import compareCompanies
 from .compileVisual import compileVisual
+from .createUserSkill import createUserSkill
 from .engineCall import engineCall
+from .evidenceGate import evidenceGate
 from .groundingCheck import groundingCheck
 from .inspectDataset import inspectDataset
 from .listEngineGaps import listEngineGaps
@@ -24,6 +27,8 @@ from .requestUserInput import requestUserInput
 from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
+from .scenarioOverlay import scenarioOverlay
+from .storyTemplate import pickStoryTemplate
 from .types import ToolResult, ToolSpec
 from .validateRecipe import validateRecipe
 from .webSearch import webSearch
@@ -96,21 +101,21 @@ _SPECS: dict[str, ToolSpec] = {
     # ── 데이터 호출 — 실행 도구 ──
     "EngineCall": ToolSpec(
         "EngineCall",
-        "DartLab 공개 capability 1 회 호출 (Company.show, scan, macro 등). 정형 ref 반환. 단일 데이터 조회면 RunPython 보다 이거. 다단 계산이면 RunPython.",
+        "DartLab 공개 capability 1 회 호출 (Company.show, scan, ratio, macro 등). 정형 ref 반환. **dartlab 데이터는 무조건 이것 우선** — RunPython 으로 dartlab API 를 단일 호출하는 패턴 금지. RunPython 은 EngineCall 결과의 다단 결합·랭킹·Polars 가공이 필요할 때만. **args 는 항상 dict 로 필수** — `{}` 라도 명시 (인자 0 개 capability 일 때만 빈 dict).",
         {
             "type": "object",
             "properties": {
                 "apiRef": {
                     "type": "string",
-                    "description": "예: 'Company.show', 'scan', 'macro.kospi', 'dartlab.scan'",
+                    "description": "API 이름만. **인자는 절대 합쳐 쓰지 마라** (X: 'Company.show TSLA IS freq=Q'). 예: 'Company.show', 'scan', 'macro.kospi', 'dartlab.scan'",
                 },
                 "args": {
                     "type": "object",
-                    "description": "capability 인자 (예: {'stockCode': '005930', 'topic': 'IS'})",
+                    "description": "인자 dict — **항상 필수, 빈 dict {} 라도 명시**. Company.show → {'stockCode': '005930', 'topic': 'IS'} (stockCode 필수). scan → {'axis': 'growth'}. macro → {}. **stockCode·target·topic·axis 같은 키를 plan root 가 아닌 *args 안에* 넣어라**.",
                     "additionalProperties": True,
                 },
             },
-            "required": ["apiRef"],
+            "required": ["apiRef", "args"],
         },
         readOnlyHint=True,
         destructiveHint=False,
@@ -119,7 +124,7 @@ _SPECS: dict[str, ToolSpec] = {
     ),
     "RunPython": ToolSpec(
         "RunPython",
-        "DartLab + Polars 임의 코드 실행. 다단 계산·랭킹·dataframe 가공·시계열 연산. 결과는 emit_result(table=..., values=..., date=...) keyword 형식 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: dartlab, pl(polars), normalizeColumn, columnsFor, availableTopics. 단일 capability 1 회 호출이면 EngineCall 권장.",
+        "**EngineCall 결과 후처리·다단 조합 전용**. Polars group_by / sort / 시계열 / 여러 회사 비교처럼 단일 capability 로 못 푸는 가공일 때만. **dartlab API 를 여기서 1 회 호출하는 패턴 절대 금지** — `dartlab.scan(...)` / `Company('xxx').show(...)` 같은 단일 호출은 EngineCall 의 일이다. 결과는 emit_result(table=..., values=..., date=...) keyword 형식 (dict 한 개 positional 도 자동 unpack). 사용 가능 변수: dartlab, pl(polars), normalizeColumn, columnsFor, availableTopics.",
         {
             "type": "object",
             "properties": {"code": {"type": "string"}, "runId": {"type": "string"}},
@@ -197,6 +202,37 @@ _SPECS: dict[str, ToolSpec] = {
         },
         # 디스크 쓰기 — 사용자 홈 ~/.dartlab/artifacts/ 에 새 파일 생성. 같은 이름 두 번 호출 시
         # 덮어쓰기 가능 (idempotent 아님). destructive 는 아니지만 read-only 도 아님.
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=False,
+    ),
+    "CreateUserSkill": ToolSpec(
+        "CreateUserSkill",
+        "사용자 요청으로 프로젝트 로컬 user skill 초안을 `.dartlab/skills` 아래에 작성. 공식 `src/dartlab/skills/specs` 는 절대 변경하지 않음. 엔진 capability 가 있으면 EngineCall 우선, RunPython 은 fallback 절차가 명시될 때만.",
+        {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string"},
+                "id": {
+                    "type": "string",
+                    "description": "선택. user.<slug> 로 정규화됨. 예: 'l15-event-watch' → user.l15-event-watch",
+                },
+                "purpose": {"type": "string"},
+                "whenToUse": {"type": "array", "items": {"type": "string"}},
+                "body": {"type": "string"},
+                "capabilityRefs": {"type": "array", "items": {"type": "string"}},
+                "toolRefs": {"type": "array", "items": {"type": "string"}},
+                "linkedSkills": {"type": "array", "items": {"type": "string"}},
+                "requiredEvidence": {"type": "array", "items": {"type": "string"}},
+                "expectedOutputs": {"type": "array", "items": {"type": "string"}},
+                "visualRefs": {"type": "array", "items": {"type": "string"}},
+                "visualGuidance": {"type": "array", "items": {"type": "string"}},
+                "incubating": {"type": "boolean"},
+                "overwrite": {"type": "boolean"},
+            },
+            "required": ["title", "purpose"],
+        },
         readOnlyHint=False,
         destructiveHint=False,
         idempotentHint=False,
@@ -288,6 +324,81 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "CompareCompanies": ToolSpec(
+        "CompareCompanies",
+        "다중 종목 (2~3 개) wide-format 비교. 매출·영업이익·순이익·총자산·자기자본·부채·debtRatio·ROE + 각 종목 dCR/industry badge 자동 부착. '삼성·하이닉스 비교' 류 질문에 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCodes": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "2~3 개 종목 코드. 초과 시 앞 3 개만.",
+                },
+            },
+            "required": ["stockCodes"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+    "ScenarioOverlay": ToolSpec(
+        "ScenarioOverlay",
+        "macro 시나리오 preset (146 종 — 1997 IMF / 2008 GFC / Fed DFAST 등) 의 macro overrides 와 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. '금리 +50bp 면?' 류 질문에 답변 본문 옵션 1 회 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "scenarioName": {
+                    "type": "string",
+                    "description": "preset 이름 (예: 'asia_crisis', 'semiconductor_downturn')",
+                },
+                "stockCode": {"type": "string"},
+                "severity": {"type": "string", "enum": ["mild", "moderate", "severe", "extreme", ""]},
+                "market": {"type": "string", "enum": ["KR", "US", ""]},
+            },
+            "required": ["scenarioName"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+    "PickStoryTemplate": ToolSpec(
+        "PickStoryTemplate",
+        "기업유형 (growth/value/credit_risk 등 9 enum) 자동 분류 + 추천 story 섹션 묶음. '이 회사 어떻게 봐?' 종합 분석 의도면 답변 흐름 잡기 전에 호출.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string"},
+                "question": {"type": "string"},
+            },
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
+    "EvidenceGate": ToolSpec(
+        "EvidenceGate",
+        "Skill OS spec 의 requiredEvidence ↔ 누적 refs 비교. 답변 합성 직전 호출 — missing ref kind 있으면 답변에 ⚠ + 한계 문장 추가 권장.",
+        {
+            "type": "object",
+            "properties": {
+                "skillId": {"type": "string"},
+                "refs": {
+                    "type": "array",
+                    "items": {"type": "object"},
+                    "description": "지금까지 모은 refs (각 항목 dict, 최소 'kind' 키 포함). 빈 list 도 허용 — 검증만 수행.",
+                },
+            },
+            "required": ["skillId"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "GroundingCheck": ToolSpec(
         "GroundingCheck",
         "답변 본문의 material claim (수치/날짜/랭킹) 분류 + ref token 매칭 검증. fake ref token 감지. workbench GATE 휴리스틱 표면화.",
@@ -295,7 +406,11 @@ _SPECS: dict[str, ToolSpec] = {
             "type": "object",
             "properties": {
                 "answer": {"type": "string"},
-                "refs": {"type": "array"},
+                "refs": {
+                    "type": "array",
+                    "items": {"type": "object", "additionalProperties": True},
+                    "description": "지금까지 모은 refs. 빈 list 도 허용.",
+                },
             },
             "required": ["answer"],
         },
@@ -319,7 +434,7 @@ _SPECS: dict[str, ToolSpec] = {
                             "name": {"type": "string"},
                             "description": {"type": "string"},
                             "type": {"type": "string"},
-                            "enum": {"type": "array"},
+                            "enum": {"type": "array", "items": {"type": "string"}},
                             "required": {"type": "boolean"},
                         },
                         "required": ["name"],
@@ -421,11 +536,16 @@ _TOOLS: dict[str, ToolFn] = {
     "ReadSkillMarket": readSkillMarket,
     "ReadCapability": readCapability,
     "EngineCall": engineCall,
+    "EvidenceGate": evidenceGate,
+    "PickStoryTemplate": pickStoryTemplate,
+    "CompareCompanies": compareCompanies,
+    "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
     "Read": readFile,
     "WebSearch": webSearch,
     "SaveArtifact": saveArtifact,
+    "CreateUserSkill": createUserSkill,
     "CompileVisual": compileVisual,
     "OutcomeLog": outcomeLog,
     "LookAheadGuard": lookAheadGuard,
@@ -451,6 +571,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "Read",
     "WebSearch",
     "SaveArtifact",
+    "CreateUserSkill",
     "CompileVisual",
 )
 
@@ -461,11 +582,16 @@ _LEGACY_NAME_MAP = {
     "read_skill_market": "ReadSkillMarket",
     "read_capability": "ReadCapability",
     "engine_call": "EngineCall",
+    "evidence_gate": "EvidenceGate",
+    "pick_story_template": "PickStoryTemplate",
+    "compare_companies": "CompareCompanies",
+    "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",
     "read": "Read",
     "web_search": "WebSearch",
     "save_artifact": "SaveArtifact",
+    "create_user_skill": "CreateUserSkill",
     "compile_visual": "CompileVisual",
     "outcome_log": "OutcomeLog",
     "lookahead_guard": "LookAheadGuard",
@@ -503,8 +629,21 @@ def toolSpecs(provider: Any = None) -> list[dict[str, Any]]:
 
 
 def listToolNames() -> tuple[str, ...]:
-    """listToolNames — TODO 한국어 동작 설명."""
+    """현재 등록된 모든 tool name (canonical + plugin) tuple."""
     return tuple(_SPECS.keys())
+
+
+def isToolReadOnly(name: str) -> bool:
+    """도구가 read-only 인지 (ToolSpec.readOnlyHint True). agent 의 병렬 fan-out 분기 판단.
+
+    snake/PascalCase 양쪽 인식. 미등록 도구는 보수적 False (병렬 X).
+    readOnlyHint=None (미선언) 도 보수적 False — 명시 True 인 경우만 병렬 그룹.
+    """
+    canonical = _LEGACY_NAME_MAP.get(name, name)
+    spec = _SPECS.get(canonical)
+    if spec is None:
+        return False
+    return spec.readOnlyHint is True
 
 
 def registerTool(
@@ -514,7 +653,7 @@ def registerTool(
     description: str | None = None,
     inputSchema: dict[str, Any] | None = None,
 ) -> None:
-    """registerTool — TODO 한국어 동작 설명."""
+    """plugin tool 등록 — name + 함수 + schema (canonical 이름 덮어쓰기 차단)."""
     # Legacy snake 이름 (read_skill 등) 도 canonical PascalCase 로 정규화해 보호 — plugin
     # 이 옛 이름으로 우회 등록하면 canonical 도구가 silently 덮어씌워지는 회귀 가능.
     canonical = _LEGACY_NAME_MAP.get(name, name)
@@ -539,7 +678,7 @@ def registerTool(
 
 
 def unregisterTool(name: str) -> None:
-    """unregisterTool — TODO 한국어 동작 설명."""
+    """plugin tool 등록 해제 (canonical 이름은 보호 — ValueError)."""
     canonical = _LEGACY_NAME_MAP.get(name, name)
     if canonical in CANONICAL_TOOL_NAMES:
         raise ValueError(f"canonical tool은 해제할 수 없습니다: {name} (-> {canonical})")
@@ -548,7 +687,7 @@ def unregisterTool(name: str) -> None:
 
 
 def executeTool(name: str, args: dict[str, Any] | None = None) -> dict[str, Any]:
-    """executeTool — TODO 한국어 동작 설명."""
+    """tool name + args → 등록된 함수 호출 → ToolResult.toDict() 반환."""
     canonical = _LEGACY_NAME_MAP.get(name, name)
     if canonical not in _TOOLS:
         return ToolResult(False, f"Unknown tool: {name}", error="unknown_tool").toDict()

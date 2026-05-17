@@ -335,7 +335,7 @@ def cmd_promote_to_storyboard(args: argparse.Namespace) -> int:
         "s = c.story(reportType='<선택한 키>'); print(s.summaryCard)\""
     )
     print()
-    print("4. tests/test_ai_skill_catalog_audit.py 에 cross-link 검증 추가 후 commit.")
+    print("4. tests/ai/test_ai_skill_catalog_audit.py 에 cross-link 검증 추가 후 commit.")
     return 0
 
 

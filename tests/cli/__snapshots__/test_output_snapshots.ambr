@@ -1,0 +1,41 @@
+# serializer version: 1
+# name: test_consoleStdout_collectAutoOutput
+  '''
+  자동 수집 시작: 3개 종목 docs
+    1. 삼성전자 (005930)
+    2. SK하이닉스 (000660)
+    3. 카카오 (035720)
+  
+  완료: 성공 3 / 총 3
+  
+  '''
+# ---
+# name: test_errorAndWarning_routedToSameConsole
+  '''
+  WARNING  DART API 키 미설정 — 부분 수집 모드                                                                            
+  ERROR    종목 005930 수집 실패: connection timeout                                                                      
+  
+  '''
+# ---
+# name: test_hfDownloadMarker_noTqdmChars
+  '''
+  INFO     ⬇ HF metadata/dartList.parquet                                                                                 
+  INFO     ✓ dartList.parquet (4.2 MB)                                                                                    
+  
+  '''
+# ---
+# name: test_mixedLoggerAndConsole_shareSameBuffer
+  '''
+  INFO     ⬇ HF dartList.parquet                                                                                          
+  수집 대상: 1047 종목
+  INFO     ✓ dartList.parquet (4.2 MB)                                                                                    
+  완료: 1047 종목 처리
+  
+  '''
+# ---
+# name: test_progressBar_oneCycle
+  '''
+  종목 스캔 ---------------------------------------- 0/3 -:--:--종목 스캔 ---------------------------------------- 3/3 0:00:00
+  
+  '''
+# ---

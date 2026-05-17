@@ -130,6 +130,12 @@ def buildTransitionMatrix(
         - ``mapTo20Grade``: 점수 → 등급 변환 (전이 matrix 입력)
         - S&P Annual Default Study (2024)
 
+    When:
+        등급 전이 답변 / Markov 부도확률 모형 사용 시. 주로 운영자 / AI 분석 전용.
+
+    How:
+        counts dict → ``_countsToMatrix`` (정규화 + D absorbing) → DataFrame 변환.
+
     Requires:
         counts dict 또는 transition.json (data/credit/).
 
@@ -173,6 +179,10 @@ def forwardPdLadder(
 ) -> pl.DataFrame:
     """등급별 누적 부도확률 ladder (Cohort matrix power).
 
+    Capabilities:
+        ``buildTransitionMatrix`` 결과 matrix 의 거듭제곱으로 1/3/5 년 누적 부도확률 (PD) 산출.
+        각 등급의 h 년 default 도달 확률 = ``M^h[rating, D]``. Markov 사다리.
+
     각 row 의 ``{h}yPD`` 컬럼 = ``M^h[rating, "D"]`` — h 년 누적 부도확률.
     horizon 증가 시 단조 증가, rating 악화 시 단조 증가가 정상.
 
@@ -190,6 +200,34 @@ def forwardPdLadder(
     pl.DataFrame
         ``rating`` 컬럼 + horizon 별 PD 컬럼 (예: 1yPD, 3yPD, 5yPD).
         D 등급 미정의 시 모든 PD 가 0 (degenerate).
+
+    Raises:
+        없음 — D 등급 미정의면 모든 PD 0 (degenerate matrix).
+
+    Example:
+        >>> from dartlab.credit.scoring.migration import forwardPdLadder
+        >>> pd = forwardPdLadder()
+        >>> pd.filter(pl.col("rating") == "dCR-AAA").select("1yPD", "5yPD")
+
+    Guide:
+        AAA 의 5 년 PD < 1%, B 의 5 년 PD 30%+. S&P 평균 cohort 와 비교 가능.
+
+    When:
+        부도 확률 사다리 답변 / 채권 가치평가 (PD 입력) 시.
+
+    How:
+        ``_countsToMatrix`` → numpy matrix_power(h) → D 열 추출 → DataFrame.
+
+    Requires:
+        - counts dict 또는 transition.json
+        - numpy (matrix_power)
+
+    SeeAlso:
+        - ``dartlab.credit.scoring.migration.buildTransitionMatrix`` : 1 년 matrix
+        - dCR gradeTable.estimatePD : 단년 PD 매핑
+
+    AIContext:
+        AI 답변 시 h 명시 ("5 년 누적 PD") 의무. 단년 PD 와 누적 PD 혼동 금지.
     """
     if counts is None:
         counts = _loadTransition()

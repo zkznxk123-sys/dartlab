@@ -21,6 +21,7 @@ outputs:
   - cash bridge
   - coverage warnings
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 knowledgeRefs:

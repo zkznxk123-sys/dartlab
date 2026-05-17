@@ -50,15 +50,61 @@ def nelsonSiegel(
 ) -> NelsonSiegelResult:
     """Nelson-Siegel 모델로 수익률 곡선 분해.
 
-    Grid search로 최적 λ를 찾고, OLS로 β0, β1, β2를 추정한다.
-    scipy 없이 numpy만 사용.
+    Capabilities:
+        Nelson-Siegel (1987) 3 인자 모델 (β0=Level, β1=Slope, β2=Curvature) 을
+        grid search λ (Diebold-Li 기본 1.5) + OLS 로 추정. 수익률곡선 정상/
+        평탄/역전/가파른 정상 4 라벨 해석. scipy 없이 numpy 만 사용 — 경량.
 
     Args:
-        maturities: 만기 (년 단위). 예: [0.25, 1, 2, 3, 5, 7, 10, 20, 30]
-        yields: 해당 만기의 수익률 (%). 예: [4.5, 4.3, 4.1, 4.0, 3.9, 3.85, 3.8, 3.9, 4.0]
+        maturities: 만기 (년) 리스트 (예: [0.25, 1, 2, 3, 5, 7, 10, 20, 30]).
+        yields: 해당 만기 수익률 (%) 리스트.
 
     Returns:
-        NelsonSiegelResult: β0(Level), β1(Slope), β2(Curvature) + 해석
+        NelsonSiegelResult — beta0/beta1/beta2/lamb/fitted/residuals/rmse/
+        interpretation(steep_normal/normal/flat/inverted)/description.
+
+    Example:
+        >>> r = nelsonSiegel([1, 2, 5, 10, 30], [4.5, 4.2, 3.8, 3.9, 4.1])
+        >>> r.interpretation
+        'normal'
+
+    Guide:
+        effective_slope = -β1 (장기-단기 ≈ -β1). 역전 (-0.5 미만) = 침체 경고.
+        rmse > 0.5%p 면 모델 적합도 낮음 (만기 4 개 미만일 경우 흔함).
+
+    When:
+        ``analyzeRates`` 내부 (US 만) 또는 외부 호출자가 만기별 yield 직접
+        제공 시.
+
+    How:
+        만기/yield → grid search λ 0.3~6.0 → OLS lstsq → 최저 RMSE → β →
+        slope 해석 라벨.
+
+    Requires:
+        만기 ≥ 3 개. 일반적으로 8 개 (DGS1/2/3/5/7/10/20/30) 권장.
+
+    Raises:
+        없음 (만기 < 3 면 insufficient interpretation 반환).
+
+    See Also:
+        - decomposeLongRate : DKW 분해 (실질금리/BEI)
+        - analyzeRates : yieldCurve 호출 진입점
+
+    AIContext:
+        interpretation 라벨 1 단어 + slope 값 인용으로 1 문장 답변 완성.
+
+    LLM Specifications:
+        AntiPatterns:
+            - β1 부호 직역 (양수=정상 X). effective_slope = -β1.
+            - 만기 3 개 미만에 강한 단정
+            - rmse 미공개 + 모델 적합도 검증 누락
+        OutputSchema:
+            NelsonSiegelResult ``(beta0, beta1, beta2, lamb, fitted, residuals,
+            rmse, interpretation, description)``.
+        Prerequisites: 동일 시점 만기별 yield 데이터.
+        Freshness: 일간 (FRED DGS 시리즈).
+        Dataflow: 만기/yield → grid λ → OLS → 라벨.
+        TargetMarkets: US (FRED DGS 풀세트). KR/JP 가능 (만기 데이터 제공 시).
     """
     tau = np.asarray(maturities, dtype=np.float64)
     y = np.asarray(yields, dtype=np.float64)

@@ -21,6 +21,7 @@ outputs:
   - 매핑 metadata (category · type · confidence)
 capabilityRefs: []
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - start.dartlabSkillOs

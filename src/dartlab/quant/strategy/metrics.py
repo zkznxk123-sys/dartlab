@@ -93,6 +93,10 @@ def _normPpf(p: float) -> float:
 def sharpe(returns: np.ndarray, rf: float = 0.0) -> float:
     """연환산 Sharpe ratio.
 
+    Capabilities:
+        일별 수익률 → (mean - rf/252) / std × √252 연환산 Sharpe. Sharpe (1966)
+        risk-adjusted return 표준.
+
     Parameters
     ----------
     returns : np.ndarray
@@ -104,6 +108,33 @@ def sharpe(returns: np.ndarray, rf: float = 0.0) -> float:
     -------
     float
         연환산 Sharpe ratio (배). 표본 < 2 또는 std=0 이면 0.0.
+
+    Example:
+        >>> sharpe(returns)
+        1.45
+
+    Guide:
+        > 1.0 = 양호, > 2.0 = 우수, < 0 = 무위험 미달. DSR + haircutSharpe 와 함께
+        다중 검정 보정 권장.
+
+    When:
+        백테스트 metrics + AI 전략 평가 진입점.
+
+    How:
+        ddof=1 std + 252 거래일 가정. log return 입력 가정.
+
+    Requires:
+        returns ≥ 2 + std > 0.
+
+    Raises:
+        없음 — 0.0 반환.
+
+    See Also:
+        - sortino : 하방편차 기반
+        - dsr : 다중 시도 정정
+
+    AIContext:
+        Sharpe 단독 인용 + sample 길이/n_trials 누락 금지 — dsr 동반.
     """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
@@ -119,6 +150,10 @@ def sharpe(returns: np.ndarray, rf: float = 0.0) -> float:
 def sortino(returns: np.ndarray, rf: float = 0.0) -> float:
     """Sortino ratio — 하방편차 기반.
 
+    Capabilities:
+        일별 수익률 → (mean - rf/252) / downsideStd × √252. Sharpe 대비 상방
+        변동성 (좋은 변동) 보정 제외.
+
     Parameters
     ----------
     returns : np.ndarray
@@ -130,6 +165,31 @@ def sortino(returns: np.ndarray, rf: float = 0.0) -> float:
     -------
     float
         연환산 Sortino ratio (배). 하방 수익률 없거나 std=0 이면 0.0.
+
+    Example:
+        >>> sortino(returns)
+        2.10
+
+    Guide:
+        Sharpe < Sortino = 상방 변동성 큰 자산 (성장주). 펀드 평가 시 Sortino 우선.
+
+    When:
+        백테스트 metrics + AI 비대칭 risk 답변.
+
+    How:
+        downside = r[r<0] → ddof=1 std → 연환산.
+
+    Requires:
+        returns ≥ 2 + 하방 수익률 ≥ 1.
+
+    Raises:
+        없음.
+
+    See Also:
+        - sharpe : 양방향 변동
+
+    AIContext:
+        Sharpe vs Sortino 차이 인용으로 비대칭성 평가.
     """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
@@ -148,6 +208,10 @@ def sortino(returns: np.ndarray, rf: float = 0.0) -> float:
 def mdd(equity: np.ndarray) -> float:
     """최대낙폭 (Maximum Drawdown).
 
+    Capabilities:
+        누적 자산 곡선 → cumulative peak 대비 최대 낙폭 (음수). Calmar 비율의
+        분모 + 매크로 리스크 표준.
+
     Parameters
     ----------
     equity : np.ndarray
@@ -157,6 +221,32 @@ def mdd(equity: np.ndarray) -> float:
     -------
     float
         최대낙폭 비율 (음수, %). 예: -0.25 = -25% 낙폭. 표본 < 2 이면 0.0.
+
+    Example:
+        >>> mdd(np.array([1.0, 1.1, 0.9, 0.95]))
+        -0.182
+
+    Guide:
+        |mdd| > 0.5 = 회복 어려움. 시점 (Drawdown date) 함께 인용해 macro
+        이벤트 연결.
+
+    When:
+        백테스트 metrics + AI 낙폭 답변.
+
+    How:
+        cumulative max → (equity - peak) / peak → min.
+
+    Requires:
+        equity ≥ 2.
+
+    Raises:
+        없음.
+
+    See Also:
+        - calcTailrisk : VaR/CVaR 동반
+
+    AIContext:
+        mdd 값 + 시점 함께 인용 (macro 이벤트 매핑).
     """
     e = np.asarray(equity, dtype=np.float64)
     e = e[~np.isnan(e)]
@@ -170,15 +260,44 @@ def mdd(equity: np.ndarray) -> float:
 def winrate(tradePnls: np.ndarray) -> float:
     """승률 — pnl > 0 비율.
 
+    Capabilities:
+        거래별 손익 → 양수 비율. 트레이딩 평가 표준 metric.
+
     Parameters
     ----------
-    trade_pnls : np.ndarray
+    tradePnls : np.ndarray
         거래별 손익 배열.
 
     Returns
     -------
     float
         승률 (비율, 0~1). 거래 없으면 0.0.
+
+    Example:
+        >>> winrate(np.array([1, -1, 2, -0.5]))
+        0.5
+
+    Guide:
+        winrate 50% 미만이어도 profitFactor 큰 전략 흑자 가능 — 둘 함께 인용.
+
+    When:
+        백테스트 metrics + AI 전략 승률 답변.
+
+    How:
+        sum(p > 0) / n.
+
+    Requires:
+        tradePnls 비어있지 않음.
+
+    Raises:
+        없음.
+
+    See Also:
+        - profitFactor : 총 수익/손실 비율
+        - expectancy : 거래당 평균
+
+    AIContext:
+        winrate < 50% + PF > 1.5 → 비대칭 양봉 전략.
     """
     p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
@@ -189,15 +308,44 @@ def winrate(tradePnls: np.ndarray) -> float:
 def profitFactor(tradePnls: np.ndarray) -> float:
     """총 수익 / 총 손실 비율.
 
+    Capabilities:
+        승 거래 합 / 손 거래 합 (절댓값). 1.5+ = 양호, 2.0+ = 우수.
+
     Parameters
     ----------
-    trade_pnls : np.ndarray
+    tradePnls : np.ndarray
         거래별 손익 배열.
 
     Returns
     -------
     float
         Profit Factor (배). 손실 0 이면 inf (수익 있을 때) 또는 0.0.
+
+    Example:
+        >>> profitFactor(np.array([3, -1, 2, -1]))
+        2.5
+
+    Guide:
+        winrate × avgWin / avgLoss = PF. PF 1.0 = breakeven (수수료 차감 후 손실).
+
+    When:
+        백테스트 metrics + AI 전략 비율 답변.
+
+    How:
+        sum(p>0) / |sum(p<0)|.
+
+    Requires:
+        tradePnls 비어있지 않음.
+
+    Raises:
+        없음 — 손실 0 + 수익 0 → 0.0.
+
+    See Also:
+        - winrate : 승률
+        - expectancy : 거래당 평균
+
+    AIContext:
+        PF + winrate 인용으로 양봉/음봉 비율 답변.
     """
     p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
@@ -212,15 +360,44 @@ def profitFactor(tradePnls: np.ndarray) -> float:
 def expectancy(tradePnls: np.ndarray) -> float:
     """1 거래당 기대수익.
 
+    Capabilities:
+        거래별 손익 평균. 양수 = 흑자 전략, 음수 = 적자.
+
     Parameters
     ----------
-    trade_pnls : np.ndarray
+    tradePnls : np.ndarray
         거래별 손익 배열.
 
     Returns
     -------
     float
         거래당 평균 손익 (원). 거래 없으면 0.0.
+
+    Example:
+        >>> expectancy(np.array([1, -1, 2, -0.5]))
+        0.375
+
+    Guide:
+        expectancy × 거래 빈도 = 연간 기대 수익. 수수료 차감 후 인용.
+
+    When:
+        백테스트 metrics + AI 거래당 기대값 답변.
+
+    How:
+        mean(p).
+
+    Requires:
+        tradePnls 비어있지 않음.
+
+    Raises:
+        없음.
+
+    See Also:
+        - profitFactor : 총합 비율
+        - sharpe : 위험 조정
+
+    AIContext:
+        expectancy × 빈도 = 연간 기대 수익, 수수료 차감 후 인용.
     """
     p = np.asarray(tradePnls, dtype=np.float64)
     if len(p) == 0:
@@ -231,6 +408,9 @@ def expectancy(tradePnls: np.ndarray) -> float:
 def turnover(positions: np.ndarray) -> float:
     """포지션 회전율 — 절대값 변화 합계.
 
+    Capabilities:
+        포지션 시계열 절대값 차분 합 → 매매 빈도. 거래비용 추정 + 전략 활성도.
+
     Parameters
     ----------
     positions : np.ndarray
@@ -240,6 +420,32 @@ def turnover(positions: np.ndarray) -> float:
     -------
     float
         총 회전 (절대값 변화 합, 배). 표본 < 2 이면 0.0.
+
+    Example:
+        >>> turnover(np.array([0, 1, 0, 1]))
+        3.0
+
+    Guide:
+        연간 turnover × spread/2 = 대략 transaction cost. 1000% / 년 = 일평균 4%
+        회전 (highfreq).
+
+    When:
+        백테스트 비용 추정 + AI 전략 빈도 답변.
+
+    How:
+        sum(|diff(positions)|).
+
+    Requires:
+        positions ≥ 2.
+
+    Raises:
+        없음.
+
+    See Also:
+        - exposure : 포지션 유지 비율
+
+    AIContext:
+        turnover × spread = 대략 거래비용 추정.
     """
     p = np.asarray(positions, dtype=np.float64)
     if len(p) < 2:
@@ -250,6 +456,9 @@ def turnover(positions: np.ndarray) -> float:
 def exposure(positions: np.ndarray) -> float:
     """포지션 유지 비율 — non-zero 비중.
 
+    Capabilities:
+        포지션 시계열에서 |p| > 0 시점 비율. 시장 노출 정량화.
+
     Parameters
     ----------
     positions : np.ndarray
@@ -259,6 +468,32 @@ def exposure(positions: np.ndarray) -> float:
     -------
     float
         포지션 유지 비율 (0~1). 포지션 없으면 0.0.
+
+    Example:
+        >>> exposure(np.array([0, 1, 0, 1]))
+        0.5
+
+    Guide:
+        exposure 1.0 = 항상 시장 노출 (buy & hold). 0.3 = 70% 캐쉬 보유.
+        annualReturn 인용 시 exposure 보정.
+
+    When:
+        백테스트 + AI 시장 노출 답변.
+
+    How:
+        sum(|p| > 1e-9) / n.
+
+    Requires:
+        positions 비어있지 않음.
+
+    Raises:
+        없음.
+
+    See Also:
+        - turnover : 변화량
+
+    AIContext:
+        exposure 보정 후 annualReturn 인용 (캐쉬 보유 기간 반영).
     """
     p = np.asarray(positions, dtype=np.float64)
     if len(p) == 0:
@@ -272,18 +507,46 @@ def exposure(positions: np.ndarray) -> float:
 def dsr(observedSharpe: float, returns: np.ndarray, nTrials: int = 1) -> float:
     """Deflated Sharpe Ratio (Bailey-López de Prado 2014).
 
-    백테스트 시도 횟수(n_trials) 와 returns 의 skewness/kurtosis 를 정정해서
-    "이 Sharpe 가 우연이 아닐 확률" 을 [0, 1] 로 반환.
-
-    DSR > 0.95 → 통계적으로 강함, DSR < 0.5 → 의심.
+    Capabilities:
+        백테스트 시도 횟수(n_trials) 와 returns 의 skewness/kurtosis 를 정정해서
+        "이 Sharpe 가 우연이 아닐 확률" 을 [0, 1] 로 반환. DSR > 0.95 → 통계적
+        강함, < 0.5 → 의심.
 
     Args:
-        observed_sharpe: 관측 Sharpe (연환산)
+        observedSharpe: 관측 Sharpe (연환산)
         returns: 일별 수익률 (skew/kurtosis 계산용)
-        n_trials: 다중 백테스트 시도 횟수 (1 이면 정정 약함)
+        nTrials: 다중 백테스트 시도 횟수 (1 이면 정정 약함)
 
     Returns:
         DSR ∈ [0, 1]
+
+    Example:
+        >>> dsr(1.5, returns, nTrials=10)
+        0.78
+
+    Guide:
+        Bailey-Lopez 2014 SR* 와 결합. n_trials 100+ 면 통계적 압박 큼. 본 함수
+        는 within-strategy DSR — between-strategy 는 haircutSharpe.
+
+    When:
+        백테스트 거버넌스 + AI 전략 진정성 답변.
+
+    How:
+        skewness/kurtosis 정정 후 SR variance → null 기대 max SR (Euler) →
+        z-stat → CDF.
+
+    Requires:
+        returns ≥ 30 + observedSharpe 연환산.
+
+    Raises:
+        없음.
+
+    See Also:
+        - haircutSharpe : between-strategy 보정
+        - pbo : 과적합 확률
+
+    AIContext:
+        DSR + Sharpe 동시 인용 — 단순 Sharpe 만으로 진정성 단정 금지.
     """
     r = np.asarray(returns, dtype=np.float64)
     r = r[~np.isnan(r)]
@@ -320,15 +583,42 @@ def dsr(observedSharpe: float, returns: np.ndarray, nTrials: int = 1) -> float:
 def pbo(inSample: np.ndarray, outOfSample: np.ndarray) -> float:
     """Probability of Backtest Overfitting (Bailey-Borwein-López de Prado-Zhu 2015).
 
-    in-sample 에서 최고 성과를 낸 전략이 out-of-sample 에서 중간값 이하일 확률.
-    PBO > 0.5 → 과적합 의심.
+    Capabilities:
+        in-sample 에서 최고 성과 전략이 out-of-sample 중간값 이하일 확률. PBO >
+        0.5 = 과적합. CSCV 기반.
 
     Args:
-        in_sample: shape (n_trials, n_segments) — 각 trial × split 의 IS Sharpe
-        out_of_sample: shape (n_trials, n_segments) — 동일 trial 의 OOS Sharpe
+        inSample: shape (n_trials, n_segments) — 각 trial × split 의 IS Sharpe
+        outOfSample: shape (n_trials, n_segments) — 동일 trial 의 OOS Sharpe
 
     Returns:
         PBO ∈ [0, 1]
+
+    Example:
+        >>> pbo(is_arr, oos_arr)
+        0.35
+
+    Guide:
+        PBO < 0.3 = 강건. > 0.5 = 강한 과적합. cpcvSplits + 본 함수 결합 표준.
+
+    When:
+        백테스트 거버넌스 + AI 과적합 답변.
+
+    How:
+        각 segment 에서 IS argmax → OOS rank → 중간값 이하 카운트 / segment 수.
+
+    Requires:
+        inSample/outOfSample 동일 shape (≥ 2 segment).
+
+    Raises:
+        없음 — 0.0 반환.
+
+    See Also:
+        - dsr : DSR 단일 정정
+        - cpcvSplits : 분할 생성
+
+    AIContext:
+        DSR + PBO 동시 인용 — 과적합 양면 진단.
     """
     is_arr = np.asarray(inSample, dtype=np.float64)
     oos_arr = np.asarray(outOfSample, dtype=np.float64)
@@ -349,20 +639,47 @@ def pbo(inSample: np.ndarray, outOfSample: np.ndarray) -> float:
 # ── CPCV split 생성 (Lopez AFML) ────────────────────────────────────────────
 
 
-def cpcvSplits(nObs: int, nSplits: int = 6, nTest: int = 2, embargo: int = 0):
+def cpcvSplits(nObs: int, nSplits: int = 6, nTest: int = 2, embargo: int = 0) -> list[tuple]:
     """Combinatorial Purged Cross-Validation 인덱스 분할.
 
-    n_splits 그룹으로 나누고, n_test 개 그룹을 test 로 선택하는 모든 조합.
-    train 은 test 와 인접한 embargo 만큼 purge.
+    Capabilities:
+        Lopez de Prado AFML Ch.12 CPCV — n_splits choose n_test 조합 + embargo
+        purge. pbo + DSR 의 base.
 
     Args:
-        n_obs: 시계열 길이
-        n_splits: 전체 분할 수
-        n_test: test 그룹 수 (n_splits choose n_test 만큼 split 생성)
+        nObs: 시계열 길이
+        nSplits: 전체 분할 수
+        nTest: test 그룹 수 (nSplits choose nTest 만큼 split 생성)
         embargo: test 양 끝에서 purge 할 관측치 수
 
     Yields:
         (train_idx, test_idx) tuples
+
+    Example:
+        >>> list(cpcvSplits(100, nSplits=6, nTest=2))[:1]
+
+    Guide:
+        nSplits 6 + nTest 2 → 15 split (C(6,2)). embargo 는 1 일 거래 다음 영향
+        제거.
+
+    When:
+        백테스트 CV 분할 + pbo 입력 생성.
+
+    How:
+        np.array_split → combinations(C(n,k)) → embargo purge → train_idx 생성.
+
+    Requires:
+        nObs ≥ nSplits × 2.
+
+    Raises:
+        없음 — 부족 시 empty yield.
+
+    See Also:
+        - pbo : 본 함수 결과 소비
+        - dsr : 단일 정정
+
+    AIContext:
+        CPCV + pbo + DSR 3 종 결합으로 과적합 회피 표준 protocol.
     """
     if nObs < nSplits * 2:
         return
@@ -401,10 +718,40 @@ def cpcvSplits(nObs: int, nSplits: int = 6, nTest: int = 2, embargo: int = 0):
 def pearsonCorr(x: np.ndarray, y: np.ndarray) -> float:
     """Pearson 선형상관계수 — NaN 쌍 제거 후 계산.
 
+    Capabilities:
+        선형 관계 강도 측정. -1 (역상관) ~ +1 (정상관). 변수간 상관/팩터 IC
+        보조.
+
     Returns
     -------
     float
         ρ ∈ [-1, 1]. 표본 < 2 또는 분산 0 이면 NaN/0.
+
+    Example:
+        >>> pearsonCorr(x, y)
+        0.42
+
+    Guide:
+        outlier 민감 — 큰 outlier 시 Spearman 대체 권장. |ρ| > 0.7 = 강한 선형.
+
+    When:
+        팩터 분석 + AI 변수 상관 답변.
+
+    How:
+        NaN mask → centered xy → 분자/분모.
+
+    Requires:
+        x/y 같은 길이 + 표본 ≥ 2.
+
+    Raises:
+        없음 — NaN/0 반환.
+
+    See Also:
+        - spearmanCorr : rank-based
+        - calcFactorIC : Spearman IC
+
+    AIContext:
+        Pearson + Spearman 동시 비교 시 비선형 신호 검출.
     """
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -442,6 +789,9 @@ def _avgRank(a: np.ndarray) -> np.ndarray:
 def spearmanCorr(x: np.ndarray, y: np.ndarray) -> float:
     """Spearman 순위상관계수 — 동률 평균 rank 처리.
 
+    Capabilities:
+        rank-based 상관 — outlier robust. 팩터 IC 표준 (Alphalens).
+
     Parameters
     ----------
     x : np.ndarray
@@ -453,6 +803,33 @@ def spearmanCorr(x: np.ndarray, y: np.ndarray) -> float:
     -------
     float
         ρ_s ∈ [-1, 1]. 표본 < 2 이면 NaN.
+
+    Example:
+        >>> spearmanCorr(x, y)
+        0.55
+
+    Guide:
+        Pearson 보다 outlier robust. |ρ_s| > 0.5 = 강한 단조 관계. 팩터 IC 본
+        함수 권장.
+
+    When:
+        팩터 IC + AI 비선형 관계 답변.
+
+    How:
+        avg rank (동률 평균) → Pearson on ranks.
+
+    Requires:
+        x/y 같은 길이 + 표본 ≥ 2.
+
+    Raises:
+        없음 — NaN 반환.
+
+    See Also:
+        - pearsonCorr : 선형
+        - calcFactorIC : IC 시계열
+
+    AIContext:
+        Spearman 단독 인용 + 표본 크기 (n) 함께.
     """
     x = np.asarray(x, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -466,7 +843,42 @@ def spearmanCorr(x: np.ndarray, y: np.ndarray) -> float:
 def calcIR(alphaSeries: np.ndarray) -> float:
     """Information Ratio = mean(alpha) / std(alpha). 연환산은 호출자 책임.
 
-    Grinold Ch.5 의 raw IR. std 는 표본표준편차 (ddof=1).
+    Capabilities:
+        Grinold Ch.5 raw IR — alpha 시리즈 mean/std 비율. Active 운용의 risk-
+        adjusted 표준 metric.
+
+    Args:
+        alphaSeries: residual return 시리즈 (active vs benchmark).
+
+    Returns:
+        IR (raw, 단위 무관). nan/0 가능.
+
+    Example:
+        >>> calcIR(alpha)
+        0.42
+
+    Guide:
+        연환산 = IR × √252 (일별 alpha). IR ≥ 0.5 = 양호. fundamentalLawIR 와
+        결합해 IC × √breadth 검증.
+
+    When:
+        Active 운용 평가 + AI 잔여 alpha 답변.
+
+    How:
+        mean / std (ddof=1).
+
+    Requires:
+        alphaSeries ≥ 2.
+
+    Raises:
+        없음 — NaN/0 반환.
+
+    See Also:
+        - fundamentalLawIR : IC × √breadth
+        - icSignificance : IC t-stat
+
+    AIContext:
+        raw IR 인용 시 연환산 단위 명시 (일/주/월 등).
     """
     a = np.asarray(alphaSeries, dtype=float)
     a = a[~np.isnan(a)]
@@ -483,6 +895,16 @@ def fundamentalLawIR(ic: float, breadth: int) -> float:
 
     breadth = 연간 상호 독립인 베팅 수.
     예) IC=0.05, breadth=400 → IR=1.0 (Grinold 대표 사례).
+
+    Example:
+        >>> fundamentalLawIR(0.05, 400)
+        1.0
+
+    Requires:
+        breadth ≥ 1.
+
+    Raises:
+        없음 — breadth < 1 시 0 반환.
     """
     if breadth < 1:
         return 0.0
@@ -492,7 +914,40 @@ def fundamentalLawIR(ic: float, breadth: int) -> float:
 def rollingTimeSeriesZscore(series: np.ndarray, window: int) -> np.ndarray:
     """Rolling z-score (Grinold Ch.3 팩터 정규화): z_t = (x_t − μ_w) / σ_w.
 
-    첫 window-1 개는 NaN. std=0 또는 표본<2 이면 NaN.
+    Capabilities:
+        Rolling window z-score 표준화 — 시계열 팩터 신호 normalize. Grinold Ch.3
+        표준 (factor scaling).
+
+    Args:
+        series: 1D 시계열.
+        window: 윈도우 크기 (≥ 2).
+
+    Returns:
+        z-score 시리즈. 첫 window-1 개는 NaN.
+
+    Example:
+        >>> z = rollingTimeSeriesZscore(series, window=60)
+
+    Guide:
+        window 60 (분기) 또는 252 (1년) 권장. z 절대값 > 2 = outlier 신호.
+
+    When:
+        팩터 시계열 정규화 + AI z-score 답변.
+
+    How:
+        각 시점 chunk → mean/std → (x - mu) / sigma.
+
+    Requires:
+        series ≥ window + window ≥ 2.
+
+    Raises:
+        없음 — std=0 시 NaN.
+
+    See Also:
+        - pearsonCorr / spearmanCorr : 정규화 후 상관
+
+    AIContext:
+        rolling z 시리즈 → 신호 시계열로 변환 후 백테스트 입력.
     """
     s = np.asarray(series, dtype=float)
     n = s.size
@@ -514,7 +969,43 @@ def rollingTimeSeriesZscore(series: np.ndarray, window: int) -> np.ndarray:
 def icSignificance(icSeries: np.ndarray, *, nStocks: int | None = None) -> dict:
     """IC 시계열의 통계적 유의성 (Grinold Ch.8).
 
-    t = mean(IC) / (std(IC) / √T). |t| > 2 → 유의.
+    Capabilities:
+        IC 시계열 → t-stat (mean / SE) + hit rate + 95% CI + isSignificant
+        (|t| > 2). Grinold Ch.8 IC 유의성 표준.
+
+    Args:
+        icSeries: IC 시계열 (분기 또는 월별).
+        nStocks: 한 시점 cross-section 종목 수 (옵션, 결과에 echo).
+
+    Returns:
+        dict — meanIC/stdIC/tStat/hitRate/ci95/isSignificant/nPeriods/nStocks.
+
+    Example:
+        >>> icSignificance(ic_series)
+        {'meanIC': 0.045, 'tStat': 3.2, 'isSignificant': True, ...}
+
+    Guide:
+        |t| > 2 = 5% 유의. nStocks > 20 + nPeriods > 12 권장. multiple testing
+        보정은 haircutSharpe 사용.
+
+    When:
+        팩터 검증 + AI IC 유의성 답변.
+
+    How:
+        mean(IC) / (std(IC)/√T) → t-stat → CI → 유의 판정.
+
+    Requires:
+        icSeries ≥ 2 관측.
+
+    Raises:
+        없음 — 부족 시 NaN dict.
+
+    See Also:
+        - calcFactorIC : IC 시계열 생성
+        - haircutSharpe : multiple testing 보정
+
+    AIContext:
+        t + hitRate + meanIC 3 필드 인용으로 IC 신뢰도 답변.
     """
     r = np.asarray(icSeries, dtype=float)
     r = r[~np.isnan(r)]
@@ -550,7 +1041,42 @@ def icSignificance(icSeries: np.ndarray, *, nStocks: int | None = None) -> dict:
 def factorDecayRate(icSeries: np.ndarray) -> dict:
     """IC 시계열 AR(1) 자기상관 → 정보 반감기.
 
-    half_life = ln(0.5) / ln(ρ)  (ρ > 0).
+    Capabilities:
+        IC 시계열 자기상관 (AR1) → ρ + half-life (반감기) + persistence 라벨
+        (high/medium/low/none). 팩터 신호 지속성 정량화.
+
+    Args:
+        icSeries: IC 시계열 (분기/월).
+
+    Returns:
+        dict — autocorr/halfLifePeriods/persistence.
+
+    Example:
+        >>> factorDecayRate(ic)
+        {'autocorr': 0.45, 'halfLifePeriods': 0.87, 'persistence': 'medium'}
+
+    Guide:
+        persistence high (ρ>0.5) = 신호 지속, low (ρ<0.2) = 빠른 decay.
+        rebalance 주기 결정 시 halfLife 참고.
+
+    When:
+        팩터 alpha 지속성 + AI rebalance 주기 답변.
+
+    How:
+        IC AR(1) lag 1 → ρ → half_life = log(0.5)/log(ρ).
+
+    Requires:
+        icSeries ≥ 4.
+
+    Raises:
+        없음.
+
+    See Also:
+        - icSignificance : t-stat
+        - calcFactorIC : IC 시리즈 생성
+
+    AIContext:
+        half-life + persistence 라벨 인용으로 신호 지속성 답변.
     """
     r = np.asarray(icSeries, dtype=float)
     r = r[~np.isnan(r)]
@@ -582,7 +1108,43 @@ def breadthFromFrequency(
 ) -> int:
     """Grinold Fundamental Law 의 breadth (N) 자동 추정.
 
-    breadth ≈ rebalancesPerYear × nStocks × independenceRatio.
+    Capabilities:
+        rebalancesPerYear × nStocks × independenceRatio = breadth. fundamentalLawIR
+        의 N 추정 보조.
+
+    Args:
+        rebalancesPerYear: 연간 리밸런싱 횟수 (12 = 월별).
+        nStocks: 한 시점 universe 종목 수.
+        independenceRatio: 베팅 독립성 (1 = 완전 독립, 0.5 = 50%).
+
+    Returns:
+        breadth (int).
+
+    Example:
+        >>> breadthFromFrequency(rebalancesPerYear=12, nStocks=100, independenceRatio=0.8)
+        960
+
+    Guide:
+        independenceRatio < 1 = 종목 간 상관 (산업 집중) 반영. 일반적으로 0.5
+        ~ 0.8.
+
+    When:
+        fundamentalLawIR 호출 전 N 추정.
+
+    How:
+        rebalancesPerYear × nStocks × clip(independenceRatio, 0, 1).
+
+    Requires:
+        rebalancesPerYear/nStocks ≥ 1.
+
+    Raises:
+        없음.
+
+    See Also:
+        - fundamentalLawIR : IR = IC × √breadth
+
+    AIContext:
+        independenceRatio 가정 명시 (0.5 vs 1.0 결과 큰 차이).
     """
     if rebalancesPerYear < 1 or nStocks < 1:
         return 0
@@ -593,8 +1155,9 @@ def breadthFromFrequency(
 def impliedIRFromICDistribution(icSeries: np.ndarray, breadth: int) -> dict:
     """IC 분포 + breadth → 이론 IR vs 실현 ICIR 비교.
 
-    Fundamental Law (IR = IC × √breadth) 이론값과 실현 ICIR 을 비교해
-    전략 효율성을 평가한다.
+    Capabilities:
+        Fundamental Law (IR = IC × √breadth) 이론값과 실현 ICIR (meanIC/stdIC)
+        비교 → efficiency 비율. 전략 효율성 정량화.
 
     Parameters
     ----------
@@ -610,6 +1173,33 @@ def impliedIRFromICDistribution(icSeries: np.ndarray, breadth: int) -> dict:
         theoreticalIR : float — 이론 IR = meanIC × √breadth (배)
         realizedICIR : float — 실현 ICIR = meanIC / stdIC (배)
         efficiency : float — realizedICIR / theoreticalIR (비율)
+
+    Example:
+        >>> impliedIRFromICDistribution(ic, breadth=400)
+        {'meanIC': 0.05, 'theoreticalIR': 1.0, 'realizedICIR': 0.8, 'efficiency': 0.8}
+
+    Guide:
+        efficiency 1.0 = 이론대로 실현. < 0.5 = IC volatility 크거나 베팅 비독립.
+        > 1.0 = 이론 초과 (sample noise 검증 필요).
+
+    When:
+        Grinold fundamental law 검증 + AI 전략 효율성 답변.
+
+    How:
+        meanIC × √breadth = theo / meanIC / stdIC = real / 비율.
+
+    Requires:
+        icSeries ≥ 2 + breadth ≥ 1.
+
+    Raises:
+        없음.
+
+    See Also:
+        - fundamentalLawIR : 이론
+        - icSignificance : t-stat
+
+    AIContext:
+        efficiency 인용으로 "이론 대비 80% 실현" 답변.
     """
     r = np.asarray(icSeries, dtype=float)
     r = r[~np.isnan(r)]

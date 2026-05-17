@@ -18,6 +18,7 @@ linkedSkills:
   - recipes.valuation.damodaran.costOfCapital
   - engines.gather
 toolRefs:
+  - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef

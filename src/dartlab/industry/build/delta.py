@@ -60,6 +60,11 @@ def _extractByIds(rowSub: pl.DataFrame, idList, nmList) -> float | None:
 def computeYoyDelta() -> dict[str, dict[str, Any]]:
     """전년 대비 재무 비율 변화(YoY delta) 전 종목 사전 계산.
 
+    Capabilities:
+        scan/finance.parquet 에서 최신 2 개 연도를 추출하고 종목별로 ROE/영업이익률/순이익률/
+        매출 증감률/부채비율의 전기 대비 차이를 일괄 산출. 산업지도 CompanyCard delta
+        badge ("▲ +1.8%p") 의 데이터 소스.
+
     scan/finance.parquet 에서 최신 2개 연도를 추출하고, 종목별로
     ROE/영업이익률/순이익률/매출 증감률/부채비율 의 전기 대비 차이를 계산한다.
     산업지도 CompanyCard 의 delta badge ("▲ +1.8%p") 에 사용.
@@ -96,6 +101,33 @@ def computeYoyDelta() -> dict[str, dict[str, Any]]:
     -230.2
     >>> d['000660']['revenueYoyPct']  # SK하이닉스 매출 YoY
     41.9
+
+    Raises:
+        없음 — finance.parquet 없으면 빈 dict 반환 + warning log.
+
+    Guide:
+        파이프라인 빌드 1 회 (`buildIndustryMap`) 에서 사용. delta dict 은 industry.json
+        manifest 의 ``deltas`` 키로 직렬화돼 UI 카드/Story 6 막 narrative 에 인용.
+
+    When:
+        산업지도 manifest 빌드 시 (드물게: 회사 카드의 전년대비 badge 갱신 필요 시).
+        일반 분석 흐름에서는 호출하지 않는다 — finance.parquet 전수 스캔 비용 때문.
+
+    How:
+        ``_ensureScanData()`` → finance.parquet 로드 → 연결/개별 fallback → 최신 2 연도 분리
+        → 종목 단위 ratio 추출 → ``_diff`` / ``_pctChange`` → dict 반환.
+
+    Requires:
+        - L1.5 scan: ``scan/io/parquet._ensureScanData`` 가 산출한 finance.parquet 존재
+        - DART 연간 보고서 2 개 연도 이상
+
+    See Also:
+        - ``dartlab.industry.build.pipeline.buildIndustryMap`` : 본 함수 호출 사용자
+        - ``dartlab.scan.io.parquet.extractAccount`` : 계정 추출 헬퍼
+
+    AIContext:
+        산업지도 회사 카드의 "전년대비" 1 줄 답변 데이터 소스. AI 답변에는 ``roeDelta`` /
+        ``opMarginDelta`` / ``revenueYoyPct`` 3 개가 가장 인용 가치 높음.
     """
     from pathlib import Path
 

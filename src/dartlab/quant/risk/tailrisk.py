@@ -35,21 +35,78 @@ def _tailriskSeries(close: np.ndarray, window: int = 252) -> dict:
 def calcTailrisk(
     stockCode: str, *, market: str = "auto", riskFree: float = 0.0, series: bool = False, **kwargs
 ) -> dict:
-    """꼬리위험 종합 분석.
+    """꼬리위험 종합 분석 — VaR/CVaR + MDD + Sortino/Sharpe.
+
+    Capabilities:
+        역사적 시뮬레이션 기반 VaR (95/99%) + Expected Shortfall (CVaR) +
+        Maximum Drawdown + currentDrawdown + 하방편차 + Sortino + Sharpe +
+        downside capture. Artzner et al. (1999) coherent risk measure 표준.
+        annualReturn 은 산술평균 × 252 (CAGR 아님 — 연환산 단순화).
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
-        riskFree: 연환산 무위험수익률 (기본 0.0). Sortino/Sharpe 계산에 사용.
+        riskFree: 연환산 무위험수익률 (기본 0.0).
+        series: True 면 ``_series`` 키 추가.
 
     Returns:
-        dict with cvar95, maxDrawdown, sortino, downsideDev 등.
+        dict:
+            - ``var{95,99}`` (float): 일별 VaR.
+            - ``cvar{95,99}`` (float): 일별 ES.
+            - ``var/cvar*_annual`` (float): 연환산.
+            - ``maxDrawdown``/``maxDrawdownDate``/``currentDrawdown``.
+            - ``downsideDev``/``sortino``/``sharpe``/``annualReturn``.
+            - 또는 ``error`` (str): 데이터 부족 (30 일 미만).
 
-    Note:
-        - VaR/CVaR: 역사적 시뮬레이션 (Artzner et al. 1999)
-        - Sortino: (annualReturn - riskFree) / downsideDev
-        - Sharpe: (annualReturn - riskFree) / volatility
-        - annualReturn = mean(daily log return) × 252 (산술평균 연환산, CAGR 아님)
+    Raises:
+        없음 (error 키 반환).
+
+    Example:
+        >>> r = calcTailrisk("005930", riskFree=0.035)
+        >>> r["maxDrawdown"], r["cvar95_annual"]
+        (-0.32, -0.55)
+
+    Guide:
+        - VaR 95% 일별 -3% = 100 일 중 5 일은 -3% 이상 손실 예상.
+        - CVaR > VaR 절대값 → tail loss 가 평균보다 큼 (heavy tail).
+        - Sortino > Sharpe → 상방 변동성 큰 자산 (성장주 패턴).
+        - MDD 시점 (maxDrawdownDate) 함께 인용 시 macro 이벤트 (코로나/금리)
+          연결 가능.
+
+    See Also:
+        - ``calcVolatility``: GARCH/HAR-RV
+        - ``calcMomentum``: 가격 모멘텀
+        - ``credit.engine``: 신용 7 축 (본 vol 입력)
+
+    When:
+        Quant risk 축 진입점 + AI "최대 낙폭" · "VaR" 답변.
+
+    How:
+        OHLCV → log returns → percentile (5/1%) → VaR/CVaR → cumulative max →
+        drawdown → 하방편차 → Sortino/Sharpe.
+
+    Requires:
+        OHLCV 일별 ≥ 30 일.
+
+    AIContext:
+        VaR/CVaR + MDD 함께 인용. 단기 (30~60 일) 결과는 sample 적어 신뢰
+        제한. annualReturn 산술 vs CAGR 차이 설명 필요 (장기간 차이 큼).
+
+    LLM Specifications:
+        AntiPatterns:
+            - VaR 인용에 confidence 누락 — 95% vs 99% 명시.
+            - annualReturn 을 CAGR 로 단정 — 본 함수는 산술평균 × 252.
+        OutputSchema:
+            ``{var95, cvar95, var99, cvar99, maxDrawdown, sortino, sharpe,
+              annualReturn, downsideDev, ...}``.
+        Prerequisites:
+            OHLCV ≥ 30 일.
+        Freshness:
+            일별.
+        Dataflow:
+            OHLCV → log returns → percentile → VaR/CVaR → cumulative →
+            drawdown → downside dev → Sortino/Sharpe.
+        TargetMarkets: KR, US (OHLCV 동일 컨벤션).
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)

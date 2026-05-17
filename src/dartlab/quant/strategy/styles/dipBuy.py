@@ -50,6 +50,46 @@ def build(company, *, emaPeriod: int = 50, rsiLow: float = 50, rsiHigh: float = 
     [임계 정정 (Phase 4 R1)] 이전 RSI<40 은 강세장 + EMA50 위 와 물리적으로 양립
     불가능 (bull&above_ema 시 RSI 최소 42.5 ~ 중앙값 59). RSI<50 이 학술적으로 정확.
     RSI 30 oversold 는 추세 종료 의미 — meanReversion 룰의 영역.
+
+    Capabilities:
+        - 강세 regime + EMA 위 + RSI < 50 → 진입, RSI > 65 회복 → 청산
+        - ATR×2 stop
+
+    Args:
+        company: Company 객체.
+        emaPeriod: 장기 추세 EMA 기간. 기본 ``50``.
+        rsiLow: 진입 RSI 임계. 기본 ``50``.
+        rsiHigh: 청산 RSI 임계. 기본 ``65``.
+        atrK: ATR stop 배수. 기본 ``2.0``.
+
+    Returns:
+        Rule — entry/exit + atr stop.
+
+    Guide:
+        강세장 단기 조정 매수. regime 필터 필수 (약세장 BTFD 금지).
+
+    When:
+        Bull-market dip + AI 조정 매수 답변.
+
+    How:
+        regime + EMA50 + RSI 진입/청산 Signal.
+
+    Requires:
+        close ≥ 100 봉.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> build(company).meta["style"]
+        'dipBuy'
+
+    See Also:
+        - strategy.styles.trendFollow : 동행
+        - regime.hmm : regime 입력
+
+    AIContext:
+        "강세장 조정 매수" 답변 시 entry 봉 인용.
     """
     arr = getArrays(company)
     close = arr.get("close")

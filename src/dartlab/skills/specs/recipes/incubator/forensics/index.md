@@ -38,8 +38,8 @@ capabilityRefs:
   - scan.audit
   - scan.disclosureRisk
 toolRefs:
-  - RunPython
   - EngineCall
+  - RunPython
 knowledgeRefs:
   - start.dartlabSkillOs
   - operation.architecture
@@ -60,6 +60,14 @@ expectedOutputs:
   - L2 금지 조건을 통과한 forensics evidence ledger
   - signal별 supporting evidence와 counter evidence
   - L2 엔진 승격 후보와 계속 사용할 recipe 계약
+visualRefs:
+  - engines.viz.financialStructureCharts
+  - engines.viz.evidenceCoverage
+  - engines.viz.mermaidDiagram
+visualGuidance:
+  - "재무 원표 구조는 IS/BS/CF 기간·연결 기준이 맞고 evidenceBinding을 만들 수 있을 때만 engines.viz.financialStructureCharts로 emit한다."
+  - "coverage와 falsifier 상태는 차트보다 표가 우선이며, 시각화가 필요하면 observed 상태의 engines.viz.evidenceCoverage만 사용한다."
+  - "메커니즘은 engines.viz.mermaidDiagram으로 8노드 이하 diagram만 만들고 모든 edge를 tableRef/sourceRef에 묶는다."
 linkedSkills:
   - recipes.incubator.forensics.dataCoverageAudit
   - recipes.incubator.forensics.accountTraceLedger
@@ -115,14 +123,16 @@ examples:
   - analysis 없이 원표와 공시만으로 이익 품질 검증
   - 매출 증가가 현금으로 따라오는지 포렌식 ledger 작성
 audiences:
-  llm: L2 분석엔진을 쓰지 말고 Company.show, scan primitive, synth helper만 사용해 evidence ledger와 falsifier를 만든다.
-  agent: ReadSkill 후 GetSkillBody로 본문을 읽고 공개 호출 블록을 RunPython으로 실행해 tableRef/valueRef/dateRef를 만든다.
+  llm: L2 분석엔진을 쓰지 말고 Company.show, Company.disclosure, scan primitive는 EngineCall로 우선 호출한 뒤 synth helper RunPython fallback으로 evidence ledger와 falsifier를 만든다.
+  agent: ReadSkill 후 GetSkillBody로 본문을 읽고 capabilityRefs는 EngineCall로 먼저 호출한다. L1.5 memo builder가 필요할 때만 공개 호출 블록을 RunPython fallback으로 실행해 tableRef/valueRef/dateRef를 만든다.
   human: 원표와 공시 원문만으로 새 분석법을 실험하고, 유효하면 나중에 엔진으로 환류할 수 있게 만드는 포렌식 인큐베이터다.
 humanIntro: "이 팩은 완성된 L2 분석엔진을 잘 호출하는 조합기가 아니다. BS/IS/CF 원표, 공시 섹션, scan primitive 같은 L1/L1.5 재료만으로 아직 엔진화되지 않은 회계·공시 신호를 발굴하고, 반증 조건과 승격 후보를 함께 남긴다."
-lastUpdated: "2026-05-15"
+lastUpdated: "2026-05-17"
 ---
 
 ## 공개 호출 방식
+
+AI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 surface 로 호출한다. 아래 Python 블록은 같은 근거를 묶어 `buildEvidenceForensicsMemo` 를 실행해야 하는 **RunPython fallback** 절차다.
 
 ```python
 import dartlab
@@ -228,6 +238,8 @@ graph LR
 ## 기본 검증
 
 - 공개 호출 블록에 L2/L3 호출 문자열이 없어야 한다.
+- EngineCall 가능한 입력을 RunPython 코드가 재구현하지 않아야 한다. RunPython 은 L1.5 memo builder fallback 으로만 쓴다.
+- visualRefs 는 observed viz skill 만 포함해야 하며, tableRef/evidenceBinding 이 없으면 시각화를 emit 하지 않는다.
 - `buildEvidenceForensicsMemo` 결과에는 10개 table이 모두 있어야 한다.
 - ask가 `포렌식 팩`, `L1.5 회계 검증`, `analysis 없이` 질문에서 이 스킬을 상위 후보로 찾아야 한다.
 - 신호가 있어도 `falsifierLedger`가 없으면 답변 품질 실패로 본다.

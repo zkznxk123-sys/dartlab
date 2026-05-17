@@ -15,7 +15,7 @@ from dartlab.ai.types import LLMConfig, LLMResponse, ToolResponse
 # {"reason","usage"}). agent loop 가 kind 로 분기.
 @dataclass(frozen=True)
 class LLMEvent:
-    """LLMEvent — TODO 한국어 클래스 설명."""
+    """stream API 단위 이벤트 — kind {text/tool_call/stop/error} + data."""
 
     kind: str
     data: dict[str, Any] = field(default_factory=dict)
@@ -86,7 +86,7 @@ class BaseProvider(ABC):
         *,
         toolChoice: str | None = None,
     ) -> ToolResponse:
-        """completeWithTools — TODO 한국어 동작 설명."""
+        """tool 미지원 fallback — complete() 위임 + 빈 toolCalls 반환."""
         response = self.complete(messages)
         return ToolResponse(
             answer=response.answer,
@@ -104,12 +104,12 @@ class BaseProvider(ABC):
         *,
         toolChoice: str | None = None,
     ) -> Generator:
-        """streamWithTools — TODO 한국어 동작 설명."""
+        """stream + tool 미지원 fallback — completeWithTools 1 회 yield."""
         resp = self.completeWithTools(messages, tools, toolChoice=toolChoice)
         yield resp
 
     def formatToolResult(self, toolCallId: str, result: str) -> dict:
-        """formatToolResult — TODO 한국어 동작 설명."""
+        """tool 호출 결과 → message dict (OpenAI 호환 role=tool 형식)."""
         return {
             "role": "tool",
             "tool_call_id": toolCallId,
@@ -121,7 +121,7 @@ class BaseProvider(ABC):
         answer: str | None,
         toolCalls: list,
     ) -> dict:
-        """formatAssistantToolCalls — TODO 한국어 동작 설명."""
+        """assistant 응답 + tool_calls → message dict (OpenAI 호환 형식)."""
         import json
 
         msg: dict = {"role": "assistant", "content": answer}

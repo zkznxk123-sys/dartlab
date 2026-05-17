@@ -10,7 +10,7 @@ from dartlab.ai.contracts import Ref
 
 @dataclass(frozen=True)
 class ToolSpec:
-    """ToolSpec — TODO 한국어 클래스 설명."""
+    """LLM tool 정의 — name + description + inputSchema + MCP hint 4 종."""
 
     name: str
     description: str
@@ -24,7 +24,7 @@ class ToolSpec:
     openWorldHint: bool | None = None
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """ToolSpec 모든 필드 → dict 직렬화 (frozen dataclass 안전 변환)."""
         return asdict(self)
 
     @property
@@ -35,7 +35,7 @@ class ToolSpec:
 
 @dataclass
 class ToolResult:
-    """ToolResult — TODO 한국어 클래스 설명."""
+    """tool 실행 결과 — ok + summary + refs (Ref list) + data + error."""
 
     ok: bool
     summary: str
@@ -44,7 +44,7 @@ class ToolResult:
     error: str | None = None
 
     def toDict(self) -> dict[str, Any]:
-        """toDict — TODO 한국어 동작 설명."""
+        """refs 의 Ref 도 dict 로 평탄화한 직렬화 형태."""
         return {
             "ok": self.ok,
             "summary": self.summary,

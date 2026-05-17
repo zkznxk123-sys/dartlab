@@ -30,7 +30,7 @@ macro 쪽 내부 엔진이 raw long 지수 데이터를 직접 소비해야 할 
 See Also
 --------
 ``dartlab.gather.krxIndex`` — 공개 gather 축.
-``scripts/build/buildKrxIndexData.py`` — 운영자 수집/배포.
+``.github/scripts/sync/buildKrxIndexData.py`` — 운영자 수집/배포.
 ``engines.gather`` — gather KRX 지수 계약.
 """
 

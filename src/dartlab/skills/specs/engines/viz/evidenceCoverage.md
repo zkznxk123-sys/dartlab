@@ -21,6 +21,7 @@ outputs:
   - claim별 pass/missing/warning
   - coverage note
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 knowledgeRefs:

@@ -66,8 +66,14 @@ _AUDIT_SCRIPTS = [
 # test_structureMirror.py 가 gather scope 함수 (test_gather_have_test_mirrors) 보유.
 # test_no_raw_cross_scan.py 가 gather scope 함수 (test_gather_no_raw_cross_company_scan) 보유.
 _TEST_GATES: list[tuple[str, str]] = [
-    ("룰 7 — src↔tests mirror (gather scope)", "tests/test_structureMirror.py::test_gather_have_test_mirrors"),
-    ("룰 9 — raw cross-scan (gather scope)", "tests/test_no_raw_cross_scan.py::test_gather_no_raw_cross_company_scan"),
+    (
+        "룰 7 — src↔tests mirror (gather scope)",
+        "tests/architecture/test_structureMirror.py::test_gather_have_test_mirrors",
+    ),
+    (
+        "룰 9 — raw cross-scan (gather scope)",
+        "tests/architecture/test_no_raw_cross_scan.py::test_gather_no_raw_cross_company_scan",
+    ),
 ]
 
 

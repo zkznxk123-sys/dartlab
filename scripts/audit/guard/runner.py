@@ -100,7 +100,7 @@ def fullGates(repoRoot: Path, providers: str) -> list[ExternalGate]:
         runCommand(
             repoRoot,
             "structureMirror",
-            [py, "-X", "utf8", "-m", "pytest", "tests/test_structureMirror.py", "-v", "--tb=short"],
+            [py, "-X", "utf8", "-m", "pytest", "tests/architecture/test_structureMirror.py", "-v", "--tb=short"],
             env=providerEnv,
         )
     )

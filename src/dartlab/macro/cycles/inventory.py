@@ -70,49 +70,79 @@ def _fetchIsmData(market: str, asOf: str | None = None) -> dict[str, float | Non
 
 
 def analyzeInventory(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """재고순환 종합 분석.
+    """재고순환 종합 분석 — ISM 4 국면 + 바로미터 + 자산배분.
 
-    ISM 신규주문/재고 비율로 재고순환 4국면을 판별하고,
-    ISM PMI 수준에 따른 자산배분 바로미터를 산출한다.
+    Capabilities:
+        ISM 신규주문/재고 비율로 재고순환 4 국면 판별 (recovery/expansion/
+        slowdown/contraction) + ISM PMI 수준에 따른 자산배분 바로미터 +
+        equityImplication + bondWeight 권고. Damodaran/Howard Marks 의 cycle
+        positioning 표준 입력. KR 은 BOK PMI fallback.
 
-    Parameters
-    ----------
-    market : str
-        시장 코드 ("US" | "KR"). 기본 "US".
-    as_of : str | None
-        기준일 (YYYY-MM-DD). None이면 최신.
-    overrides : dict | None
-        AI 가정 교체 (예: ``{"ism_pmi": 52}``).
+    Args:
+        market: "US" | "KR" (기본 "US").
+        asOf: 기준일 (YYYY-MM-DD). None 시 최신.
+        overrides: AI 가정 교체 (예: ``{"ism_pmi": 52}``).
 
-    Returns
-    -------
-    dict
-        market : str — 시장 코드
-        inventoryPhase : dict | None — 재고순환 국면
-            phase : str — 국면 코드 ("recovery" | "expansion" | "slowdown" | "contraction")
-            phaseLabel : str — 한글 레이블
-            ratio : float — 신규주문/재고 비율 (배)
-            ratioMom : float | None — 비율 전기비 변화
-            equityImplication : str — 주식 시사 ("bullish" | "bearish" | "neutral")
-            equityLabel : str — 한글 레이블
-            description : str — 해설
-            source : str | None — 데이터 출처 (fallback 시 명시)
-        ismBarometer : dict | None — ISM 바로미터 (US 전용)
-            level : float — ISM PMI 수준 (pt)
-            zone : str — 구간 코드
-            zoneLabel : str — 한글 레이블
-            equityStance : str — 주식 스탠스
-            equityLabel : str — 한글 레이블
-            rateImplication : str — 금리 시사
-            rateLabel : str — 한글 레이블
-            description : str — 해설
-        ismAllocation : dict | None — ISM 기반 자산배분 (US 전용)
-            stance : str — 스탠스 코드
-            stanceLabel : str — 한글 레이블
-            equityWeight : float — 주식 비중 (%)
-            bondWeight : float — 채권 비중 (%)
-            description : str — 해설
-        timeseries : dict — 주요 시계열 (ism_pmi, new_orders, inventories)
+    Returns:
+        dict:
+            - ``market`` (str): 시장 코드.
+            - ``inventoryPhase`` (dict | None): 4 국면 + ratio + Mom +
+              equityImplication.
+            - ``ismBarometer`` (dict | None, US 전용): PMI level + zone +
+              equityStance + rateImplication.
+            - ``ismAllocation`` (dict | None, US 전용): stance + equity/bond
+              weight.
+            - ``timeseries`` (dict): ism_pmi, new_orders, inventories.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = analyzeInventory(market="US")
+        >>> r["inventoryPhase"]["phase"], r["ismBarometer"]["level"]
+        ('recovery', 51.5)
+
+    Guide:
+        - recovery (신규주문 ↑ 재고 ↓): 주식 bullish, 경기민감주 매수.
+        - expansion (둘 다 ↑): 주식 모멘텀 강함.
+        - slowdown (신규주문 ↓ 재고 ↑): 주식 bearish, 채권 강세.
+        - contraction (둘 다 ↓): 주식 매도, 안전자산.
+        ISM 50 = 확장/수축 경계.
+
+    See Also:
+        - ``classifyInventoryPhase``: 4 국면 단독
+        - ``calcLiquidity``: 유동성 regime
+        - ``analyzeCycle``: macro cycle 종합 (본 함수 입력)
+
+    When:
+        ``analyzeSummary`` 의 inventory 축 진입점. AI 자산배분 답변 1 차.
+
+    How:
+        ISM 신규주문/재고 → 비율 + MoM → 4 국면 → equityImplication. PMI 수준 →
+        barometer zone → allocation stance.
+
+    Requires:
+        ISM PMI + 신규주문 + 재고 시계열 (KR 은 BOK 분기).
+
+    AIContext:
+        phase + ratio + Mom 함께 인용. overrides 사용 시 가정 명시.
+        zone label (확장/위축/회복/축소) 직역 인용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - ratio 단독 인용 — Mom (방향) 함께.
+            - KR 에 ISM 직접 인용 — KR 은 BOK PMI fallback.
+        OutputSchema:
+            ``{market: str, inventoryPhase: dict, ismBarometer: dict,
+              ismAllocation: dict, timeseries: dict}``.
+        Prerequisites:
+            ISM (US) 또는 BOK PMI (KR) 시계열.
+        Freshness:
+            월별 (ISM 발표 직후).
+        Dataflow:
+            ISM data → 신규주문/재고 비율 → 4 국면 라벨 → PMI level →
+            barometer zone → allocation stance.
+        TargetMarkets: US (ISM), KR (BOK PMI fallback).
     """
     data = _fetchIsmData(market, asOf=asOf)
     if overrides:

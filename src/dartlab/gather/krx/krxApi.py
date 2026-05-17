@@ -1,7 +1,7 @@
 """KRX OpenAPI - 사용자 직접 호출 + HF 자동 fallback (3 모드 통합).
 
 `engines.gather §9` 의 3 경로 분기:
-    Mode A (운영자 cron) — `scripts/build/buildKrxData.py` 가 환경변수 ``KRX_API_KEY``
+    Mode A (운영자 cron) — `.github/scripts/sync/buildKrxData.py` 가 환경변수 ``KRX_API_KEY``
                           read 후 ``fetchKrxBydd(..., apiKey=key)`` 명시 전달.
                           이 모듈은 환경변수 자동 read 없음 (운영자 빌드 스크립트만).
     Mode B (사용자 + apiKey 명시) — ``dartlab.gather("krx", ..., apiKey="...")``.
@@ -138,7 +138,7 @@ async def fetchKrxBydd(
     How: KRX OpenAPI _BASE_URL/_ENDPOINT post → JSON → schema cast → DataFrame.
 
     apiKey 는 명시 필수 — 환경변수 자동 read 없음. 운영자 cron 은
-    `scripts/build/buildKrxData.py` 가 ``KRX_API_KEY`` 환경변수 read 후 명시 전달.
+    `.github/scripts/sync/buildKrxData.py` 가 ``KRX_API_KEY`` 환경변수 read 후 명시 전달.
 
     Parameters
     ----------
@@ -264,7 +264,7 @@ async def fetchKrxRange(
     """KRX OpenAPI - 기간 루프 (역방향 일별, async).
 
     Capabilities: 기간 [start, end] 역방향 일별 호출 + sleepSec 간격 + concat.
-    AIContext: 운영자 cron / scripts/build/buildKrxData 가 기간 bulk 빌드 진입.
+    AIContext: 운영자 cron / .github/scripts/sync/buildKrxData 가 기간 bulk 빌드 진입.
     Guide: ALL 이면 STK + KSQ 각각 호출 (2 배 비용). apiKey 미지정 시 raise.
     When: HF dataset 빌드 / 누락 기간 backfill 시.
     How: 역방향 (end → start) 일별 fetchKrxBydd 호출 + diagonal_relaxed concat.
@@ -385,7 +385,7 @@ def gatherKrx(
         - gather/indicators.py — 45개 보조지표 SSOT (vsma/vrsi/vmacd/...)
         - gather/_indicatorDispatch.py — target 문자열 → 함수 디스패치
         - gather/_hfBulk.py — 엔진 내부 long SSOT (loadFiltered)
-        - scripts/build/buildKrxData.py — 운영자 cron 빌드 (환경변수 사용)
+        - .github/scripts/sync/buildKrxData.py — 운영자 cron 빌드 (환경변수 사용)
         - engines.gather §9 — KRX 수집 경로 SSOT (3 모드)
 
     Args:

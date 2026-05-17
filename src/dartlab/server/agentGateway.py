@@ -259,6 +259,8 @@ def _publicEvents(event: TraceEvent, *, runId: str, messageId: str) -> list[dict
             "status": status,
             "summary": str(data.get("outputSummary") or data.get("summary") or ""),
             "refs": [str(v) for v in data.get("evidenceRefs") or []],
+            # UI evidence chip preview 용 — payload 가 큰 경우 미리보기로 절단.
+            "refDetails": _publicRefDetails(data.get("refDetails")),
             "artifacts": [a for a in data.get("artifacts") or [] if isinstance(a, dict)],
             "result": result_payload,
             "error": str(data.get("error") or "") if status == "error" else None,
@@ -492,6 +494,49 @@ def _refIds(refs: list[Any]) -> list[str]:
 
 
 _RESULT_PREVIEW_CHARS = 4000
+
+# evidence chip preview 용 ref payload preview 한도 (한 ref 당 chars).
+_REF_PREVIEW_CHARS = 2000
+
+
+def _publicRefDetails(refs: Any) -> list[dict[str, Any]]:
+    """UI evidence chip 용 ref dict 정제 — id/kind/title/sourceType 통과 + payload 미리보기 절단.
+
+    payload 가 크면 (>_REF_PREVIEW_CHARS) `bodyPreview` 한 키로 절단 + `hasMore: True` 표식.
+    UI 는 hasMore 면 `/api/ask/refs/{id}` 로 풀 fetch (v2 endpoint, 미구현 시 미리보기만).
+    """
+    if not isinstance(refs, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for ref in refs:
+        if not isinstance(ref, dict):
+            continue
+        rid = ref.get("id")
+        if not isinstance(rid, str) or not rid:
+            continue
+        item: dict[str, Any] = {
+            "id": rid,
+            "kind": str(ref.get("kind") or ""),
+            "title": str(ref.get("title") or ""),
+            "source": str(ref.get("source") or ""),
+            "sourceType": str(ref.get("sourceType") or "internal"),
+        }
+        payload = ref.get("payload")
+        if isinstance(payload, dict) and payload:
+            # body / markdown / text 류 텍스트 키 절단. 그 외는 그대로 통과 (작은 dict 가정).
+            preview_payload: dict[str, Any] = {}
+            has_more = False
+            for k, v in payload.items():
+                if isinstance(v, str) and len(v) > _REF_PREVIEW_CHARS:
+                    preview_payload[k] = v[:_REF_PREVIEW_CHARS]
+                    has_more = True
+                else:
+                    preview_payload[k] = v
+            item["payload"] = preview_payload
+            if has_more:
+                item["hasMore"] = True
+        out.append(item)
+    return out
 
 
 def _publicResultPayload(data: dict[str, Any]) -> dict[str, Any] | None:

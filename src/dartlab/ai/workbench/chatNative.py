@@ -22,7 +22,7 @@ from .prompts import DARTLAB_CHAT_SYSTEM
 
 
 def streamChatNative(question: str, provider: Any, **kwargs: Any) -> Iterator[TraceEvent]:
-    """streamChatNative — TODO 한국어 동작 설명."""
+    """workbench 우회 chat-native 모드 — system + history + question 직접 LLM 스트리밍."""
     history = list(kwargs.get("history") or kwargs.get("messages") or [])
     messages: list[dict[str, Any]] = [{"role": "system", "content": DARTLAB_CHAT_SYSTEM}]
     for entry in history:

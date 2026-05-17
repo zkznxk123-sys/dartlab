@@ -23,6 +23,7 @@ outputs:
   - chartType balance-structure-trend ChartSpec
   - chartType cashflow-signed-matrix ChartSpec
 toolRefs:
+  - EngineCall
   - RunPython
   - CompileVisual
 knowledgeRefs:

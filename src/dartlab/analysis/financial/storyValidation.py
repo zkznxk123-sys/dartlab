@@ -30,6 +30,35 @@ def calcStoryPrecedents(
     Phase 4 G15b: skipIfScanMissing=True 기본 — scan 프리빌드 (271MB) 미다운로드 시
     즉시 skip 반환. AI 대화 첫 호출에서 강제 다운로드로 인한 timeout 방지.
 
+    Capabilities:
+        - 유사 sector/lifeCycle 기업 narrative + outcome 코퍼스 수집.
+
+    Guide:
+        스토리 검증 1 단계 — 비슷한 경로 회사의 결말을 사례로 본다.
+
+    When:
+        "이 회사 시나리오, 비슷한 사례 있나?" 의도 진입 시.
+
+    How:
+        scan parquet + KnowledgeDB sector insights → 유사도 정렬 후 limit.
+
+    Requires:
+        scan finance.parquet (271MB) 또는 KnowledgeDB 인덱스.
+
+    Raises:
+        없음 (스킵 시 hint 포함 dict).
+
+    Example:
+        >>> calcStoryPrecedents(c, limit=3)["count"]
+        3
+
+    See Also:
+        - calcPlausibilityBand : 시나리오 가능 폭
+        - calcValuationSins : 밸류 모델 오류 패턴
+
+    AIContext:
+        AI 답변 "비슷한 경로 N 개" 카드의 코퍼스 공급원.
+
     Returns
     -------
     dict
@@ -255,6 +284,35 @@ def calcPlausibilityBand(
 ) -> dict[str, Any]:
     """Plausible Test — 현재 forecast 가정이 섹터 피어 분포 어디에 위치하는지.
 
+    Capabilities:
+        - 성장률/마진 가정의 피어 분포 percentile + 밴드 판정.
+
+    Guide:
+        within (p25~p75) / stretch (p75~p95) / unrealistic (>p95).
+
+    When:
+        forecast 입력값이 "현실적인지" 검증 요청 시.
+
+    How:
+        scan finance.parquet 샘플 500 → growth/margin 분포 → percentile.
+
+    Requires:
+        scan finance.parquet + forecastAssumptions or growthTrend.
+
+    Raises:
+        없음 (예외는 try/except 흡수 → source="none").
+
+    Example:
+        >>> calcPlausibilityBand(c, forecastAssumptions={"growthRate": 12})["band"]
+        "stretch"
+
+    See Also:
+        - calcStoryPrecedents : 사례 코퍼스
+        - calcValuationSins : 모델 오류 패턴
+
+    AIContext:
+        AI "가정 검증" 답변에서 stretch/unrealistic 라벨 표시에 사용.
+
     Returns
     -------
     dict
@@ -420,6 +478,35 @@ def calcValuationSins(
 
     `consistency.calcCashFlowConsistency` 와 구별: consistency 는 **가정 간 매칭**,
     이쪽은 **경쟁 수렴 / 마진 상한 / 서사-숫자 갭 등 정성적 판단 규칙** 까지 포함.
+
+    Capabilities:
+        - ROIC-WACC · 마진 상한 · 영구성장 등 valuation 7 죄 검출.
+
+    Guide:
+        info/warn/critical severity + suggestedRetry 함께 반환.
+
+    When:
+        DCF 결과를 사용자에게 보여주기 직전 sanity check 단계.
+
+    How:
+        valuation dict + ROIC/WACC/마진 → 룰 7 종 순회 → flags.
+
+    Requires:
+        valuation 결과 (dFV) + ROIC/마진 timeline.
+
+    Raises:
+        없음 (소스 부재 시 빈 flags).
+
+    Example:
+        >>> calcValuationSins(c, roicPct=8, waccPct=12)["severity"]
+        "warn"
+
+    See Also:
+        - calcPlausibilityBand : 가정 분포 검증
+        - valuation.consistency : 가정 간 매칭
+
+    AIContext:
+        AI 가 valuation 모델 사용자에게 "이 가정 위험" 경고 출력 시 인용.
 
     Returns
     -------

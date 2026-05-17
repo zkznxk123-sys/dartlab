@@ -113,7 +113,7 @@ def buildScan(*, sinceYear: int = 2021, verbose: bool = True) -> dict[str, Path 
         함수 호출만 알려주면 충분하며, 세부 구현은 각 도메인 모듈을 참조한다.
 
     Guide:
-        - 호출 직전에 ``scripts/build/buildCorpProfile.py`` 실행 권장 (결산월 SSOT 최신화).
+        - 호출 직전에 ``.github/scripts/meta/buildCorpProfile.py`` 실행 권장 (결산월 SSOT 최신화).
         - 실행 후 산출 합계 (MB) 로깅. HF 업로드는 호출자 (``prebuildData.py``) 책임.
         - valuation 은 네트워크 rate-limit 성격이 달라 별도 ``buildValuation`` cron 이 담당.
 

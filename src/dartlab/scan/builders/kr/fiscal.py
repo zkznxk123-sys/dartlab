@@ -115,7 +115,7 @@ def _loadCorpProfileMap() -> dict[str, int]:
         선택적 ``data/dart/scan/corpProfile.parquet``.
 
     SeeAlso:
-        ``scripts/build/buildCorpProfile.py``.
+        ``.github/scripts/meta/buildCorpProfile.py``.
     """
     from dartlab.core.dataLoader import _dataDir
 

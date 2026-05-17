@@ -248,7 +248,7 @@ def _refFromDict(d: dict[str, Any]) -> Ref:
 
 
 def buildContextSummary(state: WorkbenchState) -> str:
-    """buildContextSummary — TODO 한국어 동작 설명."""
+    """WorkbenchState → LLM 입력용 멀티라인 컨텍스트 문자열 (질문/skill/refs/recipe)."""
     parts: list[str] = [f"질문: {state.question}"]
     if state.selectedSkillRefs:
         parts.append("선택된 skill: " + ", ".join(r.id for r in state.selectedSkillRefs))

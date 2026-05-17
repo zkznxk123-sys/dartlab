@@ -32,6 +32,7 @@ from .api import (
     dl_router,
     macro_router,
     room_router,
+    viz_router,
 )
 from .embed import router as embed_router
 from .runtime import ensurePort, runServer  # noqa: F401 — re-exported
@@ -184,6 +185,7 @@ app.include_router(macro_router)
 app.include_router(room_router)
 app.include_router(dart_router)
 app.include_router(embed_router)
+app.include_router(viz_router)
 
 # ── MCP SSE 마운트 (HF Spaces 또는 명시적 활성화 시) ──
 if os.environ.get("SPACE_ID") or os.environ.get("DARTLAB_MCP_HTTP") == "1":

@@ -20,6 +20,11 @@ def classifyCreditCycle(
 ) -> dict:
     """신용사이클 4단계 판별.
 
+    Capabilities:
+        HY 스프레드 수준 + 6개월 방향 + Senior Loan Officer Survey 긴축비중 + Charge-off 추세
+        4 지표를 가중 투표 (HY 주도) 로 신용사이클 4 단계 (expansion / peak / contraction / trough)
+        판별. Verdad / Howard Marks 식 신용 사이클 위치 진단.
+
     Args:
         hy_spread: 현재 HY OAS (bp)
         hy_spread_6m_ago: 6개월 전 HY OAS (bp), 방향 판별용
@@ -28,6 +33,35 @@ def classifyCreditCycle(
 
     Returns:
         dict with phase, phaseLabel, components, investmentImplication
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.macro.crisis.creditCycleDetect import classifyCreditCycle
+        >>> r = classifyCreditCycle(hySpread=350, hySpread6mAgo=420, loanTightening=-5)
+        >>> r["phase"]
+        'expansion'
+
+    Guide:
+        4 단계 시간 순서: expansion → peak → contraction → trough. HY 스프레드 임계
+        (very_tight < 350, very_wide > 800) + 방향 (±50bp) 결합.
+
+    When:
+        ``macro("crisis", "creditCycle")``. AI 가 채권 / 신용 시장 답변 시.
+
+    How:
+        4 지표 각각 임계 매핑 → scores 4 단계 누적 → max → phase 결정.
+
+    Requires:
+        - hy_spread 필수. 나머지 옵션 (각각 1 표 추가).
+
+    See Also:
+        - ``dartlab.macro.crisis.detectors.creditToGDPGap`` : BIS gap
+        - ``dartlab.macro.cycles.cycle.analyzeCycle`` : 매크로 4 국면
+
+    AIContext:
+        AI 답변 시 HY 스프레드 + 방향 + phaseLabel 함께 인용. 단일 지표로 단정 금지.
     """
     # ── HY 스프레드 수준 + 방향 ──
     if hySpread < 350:

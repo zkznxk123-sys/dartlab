@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+라이브러리 내부 구조 정리와 사용자/LLM 가독성 보강 작업.
+
+### Changed
+
+- 분석·신용·거시·퀀트 엔진의 주요 함수 docstring 을 9 섹션 형식 (사용 시 주의사항 ·
+  반환 스키마 · 사전 조건 · 데이터 흐름 등) 으로 보강했다. IDE 자동완성과 외부
+  LLM tool calling 시점에 호출 맥락을 더 충실히 전달한다.
+- 큰 모듈 12 종 (presets · crisis · metrics · engine · calc · grading · predictionSignals · dcf ·
+  dFV · simulation · macroCycle · historicalContext) 을 도메인별 작은 파일로 분리했다.
+  외부 import path 와 함수 시그니처는 그대로 유지 — 사용자 코드 변경 불필요.
+  특히 predictionSignals.py 는 2194 줄에서 facade 118 줄로 축소 (95% 감소).
+- 600~900 줄로 남아 있던 6 종을 추가 분리했다 — credit/engine 845→490 (Track B
+  + 후처리 분리), valuation/dcf 754→521 (상대가치 + 민감도 + 청산가치 분리),
+  macro/historicalContext 687→376 (5 이벤트 통계 분리), credit/scoring/metrics 684→425
+  (Track B 분리), macro/cycles/macroCycle 642→381 (금리 전망 + 전환 시퀀스 분리),
+  analysis/forecast/simulation 491→244 (시나리오 시뮬레이션 분리). 1000 줄 이상이던
+  god module 11 종 + 600~900 줄대 잔존 6 종 모두 정리 완료.
+- analysis/forecast/revenueForecast 1225→785 + analysis/financial 6 종 추가
+  분리 — capital 1181→876 (자금 출처 + 플래그 분리), profitability 1007→456 (마진
+  waterfall + Penman + ROIC tree 분리), governance 1175→462 (5 깊이 분석 분리),
+  earningsQuality 1159→595 (Beneish timeline + Richardson + 이상치 5 종 분리),
+  proforma 1068→560 (build + WACC 분리), valuation 1038→620 (synthesis + price
+  target 분리). L2 엔진에 1000 줄 이상 파일은 research/types.py 카탈로그 1 종만 잔존.
+- core/palette.py 의 viz/palette 직접 import 를 lazy `__getattr__` 으로 전환하여
+  L0↔L4 양방향 cycle 차단. 아키텍처 게이트 회귀 방지.
+
+### Tests
+
+- L2 엔진 5 종에 순수함수 단위 테스트 176 케이스 신설 — macro 61 (crisis/detectors,
+  cycles/sentiment·liquidity·macroCycle, corporate/historicalContext, scenarios/
+  presets, growthAtRisk), industry 35 (taxonomy, build/insights·table_parser,
+  calcs/lifecycle), quant 31 (factor/ranking, strategy/metrics, regime/quadrant,
+  screen/strategyRules, portfolio/mapping), credit 32 (creditScorecard 10 함수),
+  analysis 17 (분리 모듈 BC re-export 검증). macro 모듈 참조율 21%→38%,
+  industry 18%→41% 로 증가.
+- analysis/financial/research/types 1099→127 — 26 dataclass 를 도메인별 3 파일로
+  분리하고 ResearchResult 의 rich rendering 13 메서드 + summary + toDict 를
+  모듈 함수로 추출 (_typesResearchRender.py). L2 엔진에 1000 줄 이상 파일 0 종 달성.
+- macro/quant 핵심 공개 함수 10 종 (Macro, analyzeCycle, analyzeCrisis,
+  analyzeForecast, analyzeTrade, decomposeLongRate, calcFearGreedProxy, Quant,
+  enrichWithIndicators, technicalVerdict) 의 docstring 을 9 섹션 표준으로
+  격상 — Capabilities + Args + Returns + Example + Guide + SeeAlso + Requires
+  + AIContext + 외부 호출자 명세 (AntiPatterns/OutputSchema/Prerequisites/
+  Freshness/Dataflow/TargetMarkets). 자동 도구 사용 없이 함수 단위 수동 작성.
+- 신용등급 표 SSOT 를 L1.5 (`synth/creditGradeTable.py`) 본체로 이동. credit/scoring 의
+  옛 위치는 shim 으로 재노출. L2↔L2 우회 호출 패턴 제거.
+
+### Fixed
+
+- 일부 모듈 docstring 의 placeholder 잔재 (`TODO 한국어 동작 설명`) 를 의미 있는 한
+  줄로 치환했다. `help()` · IDE hover 출력 가독성 개선.
+
 ## [0.10.1] - 2026-05-14
 
 DART 정기공시 증분 수집과 기본 설치 의존성을 중심으로 한 안정화 릴리스.

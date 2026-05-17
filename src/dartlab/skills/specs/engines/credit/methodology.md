@@ -29,6 +29,7 @@ outputs:
 capabilityRefs:
   - Company.credit
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.credit

@@ -47,6 +47,12 @@ def calcCashFlowConsistency(
 ) -> dict[str, Any]:
     """Damodaran 가정 간 정합성 검증.
 
+    Capabilities:
+        - 7 규칙 (TG ≤ Rf, Growth Equation, 할인율 매칭, TV 비중, 단일 모델,
+          세율 일치, 성장 과다 낙관) 검증 + 심각도/score 산출
+        - company 지정 시 ROIC/WACC/growth 자동 추출
+        - valuation dict 의 모든 필드 자동 매핑
+
     Parameters
     ----------
     valuation : dFV 결과 dict. 지정 시 내부에서 필요한 값 자동 추출.
@@ -67,6 +73,32 @@ def calcCashFlowConsistency(
         severity : str — 전체 최고 심각도
         score : int — 0~100 (100 = 완전 정합)
         checks : dict — 개별 검증 결과
+
+    Example:
+        >>> calcCashFlowConsistency(valuation=dFV_result)
+        {"score": 85, "severity": "warn", "flags": [...]}
+
+    Guide:
+        critical=-40, warn=-15, info=-5. dFV 결과 + ROIC + Growth 함께 주입.
+
+    When:
+        dFV 산출 직후 가정 검증 + story 단계 narrate 직전.
+
+    How:
+        calcCashFlowConsistency(company, valuation=dFV) 또는 individual 키 주입.
+
+    Requires:
+        synth.riskPremiums.loadDamodaranERP + core.utils.calc.reinvestmentIdentity.
+
+    Raises:
+        없음 — 누락 입력은 해당 규칙 skip.
+
+    See Also:
+        - detectExtremeFlags : 단일 가정의 극단값 검출 (역할 분담)
+        - calcDFV : 본 검증의 입력 dict 생산자
+
+    AIContext:
+        Damodaran 7 sins 정합성 위반 인용 시 flags + score 함께 노출.
     """
     # company 지정 시 자동 추출
     if company is not None:

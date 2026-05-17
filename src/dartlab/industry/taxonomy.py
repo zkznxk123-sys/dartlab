@@ -21,12 +21,46 @@ _DATA_DIR = Path(__file__).parent
 def loadTaxonomy() -> dict[str, IndustryDef]:
     """taxonomy.json을 로드하여 산업 분류체계 딕셔너리를 반환한다.
 
+    Capabilities:
+        ``data/industry/taxonomy.json`` 을 단 1 회 파싱 (lru_cache) 해 industry ID → IndustryDef
+        매핑 반환. 모든 매핑 로직 (stage/role/keyword) 의 단일 진입점.
+
     lru_cache로 세션 내 1회만 파싱.
 
     Returns
     -------
     dict[str, IndustryDef]
         산업ID → IndustryDef 매핑. 각 IndustryDef에 ksicCodes, stages 포함.
+
+    Raises:
+        FileNotFoundError: taxonomy.json 부재 시.
+        json.JSONDecodeError: 파일 손상 시.
+
+    Example:
+        >>> from dartlab.industry.taxonomy import loadTaxonomy
+        >>> taxo = loadTaxonomy()
+        >>> taxo["semiconductor"].name
+        '반도체'
+
+    Guide:
+        ``invalidateCache()`` 호출 후 다시 호출하면 재파싱. 일반적으로 ``getIndustry`` /
+        ``findIndustryByKsic`` / ``matchStageByKeywords`` 가 본 함수를 간접 사용.
+
+    When:
+        다른 taxonomy 함수가 1 회 lazy 호출. 외부 직접 호출은 드물다 — ``getIndustry`` 권장.
+
+    How:
+        JSON 로드 → industries / stages dict 파싱 → IndustryDef + StageInfo 변환.
+
+    Requires:
+        - ``src/dartlab/industry/taxonomy.json`` 파일 존재 + valid JSON
+
+    See Also:
+        - ``dartlab.industry.taxonomy.getIndustry`` : 단건 조회
+        - ``dartlab.industry.taxonomy.invalidateCache`` : 캐시 무효화
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (산업 정의 메타 룩업은 ``getIndustry`` 권장).
     """
     path = _DATA_DIR / "taxonomy.json"
     raw = json.loads(path.read_text(encoding="utf-8"))
@@ -65,6 +99,12 @@ def getIndustry(industryId: str) -> IndustryDef | None:
     -------
     IndustryDef | None
         매칭된 산업 정의. 없으면 None.
+
+    Raises:
+        없음 — 미등록 ID 면 None.
+
+    Requires:
+        - ``loadTaxonomy()`` 가 성공 (taxonomy.json valid).
     """
     return loadTaxonomy().get(industryId)
 
@@ -76,6 +116,16 @@ def listIndustries() -> list[dict[str, str]]:
     -------
     list[dict[str, str]]
         각 dict에 industryId (str), name (str), stages (int, 공정 수) 포함.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.industry.taxonomy import listIndustries
+        >>> [i["industryId"] for i in listIndustries()][:3]
+
+    Requires:
+        - ``loadTaxonomy()`` 가 성공.
     """
     return [
         {
@@ -99,6 +149,13 @@ def findIndustryByKsic(ksicName: str) -> str | None:
     -------
     str | None
         매칭된 산업 ID. 없으면 None.
+
+    Raises:
+        없음.
+
+    Requires:
+        - ``loadTaxonomy()`` 가 성공.
+        - KSIC 매칭 키워드가 taxonomy.json 각 산업의 ``ksicCodes`` 에 등록.
     """
     for indId, ind in loadTaxonomy().items():
         for code in ind.ksicCodes:
@@ -113,6 +170,11 @@ def matchStageByKeywords(
 ) -> tuple[str | None, float, list[str]]:
     """텍스트에서 키워드 매칭으로 stage를 판별한다.
 
+    Capabilities:
+        대상 산업의 각 stage 키워드 리스트와 입력 텍스트를 case-insensitive 매칭. 매칭 키워드
+        수 + 2 위와의 격차 비율로 confidence (0~1) 산출. (best_stage_key, confidence, hits)
+        튜플 반환.
+
     Parameters
     ----------
     industryId : str
@@ -124,6 +186,37 @@ def matchStageByKeywords(
     -------
     tuple[str | None, float, list[str]]
         (best_stage_key, confidence, matched_keywords).
+
+    Raises:
+        없음 — 산업 미등록 / 텍스트 빈 경우 (None, 0.0, []).
+
+    Example:
+        >>> from dartlab.industry.taxonomy import matchStageByKeywords
+        >>> matchStageByKeywords("semiconductor", "DRAM 메모리 반도체 양산")
+        ('memory', 0.85, ['DRAM', '메모리'])
+
+    Guide:
+        confidence 가 0.5 미만이면 매칭 약함 — stage4 review 의 ``findLowConfidence`` 가 검수
+        대상으로 분류. 단일 hit 는 confidence × 0.5.
+
+    When:
+        ``stage2_product.classify`` / ``stage3_docs.enrich`` 가 본문 텍스트 → stage 판별 시.
+
+    How:
+        ``getIndustry`` 로 stages 추출 → 각 stage keywords case-insensitive substring 매칭 →
+        hit 수 최댓값 산출 → 2 위 격차 비율로 confidence 보정.
+
+    Requires:
+        - taxonomy.json 의 각 stage 가 keywords 리스트 명시
+        - 입력 텍스트가 한글/영문 mix 가능 (lowercase 비교)
+
+    See Also:
+        - ``dartlab.industry.build.stage2_product.classify`` : 본 함수 사용자
+        - ``dartlab.industry.build.stage4_review.findLowConfidence`` : 저신뢰 검수
+
+    AIContext:
+        AI 가 텍스트를 stage 로 직접 매핑할 때. confidence < 0.5 이면 답변에 "키워드 매칭 부족"
+        단서 명시 권장.
     """
     ind = getIndustry(industryId)
     if ind is None or not text:
@@ -171,5 +264,13 @@ def invalidateCache() -> None:
     Notes
     -----
     taxonomy.json 수정 후 호출하면 다음 loadTaxonomy() 때 재파싱.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.industry.taxonomy import invalidateCache, loadTaxonomy
+        >>> invalidateCache()
+        >>> taxo = loadTaxonomy()  # 디스크에서 재파싱
     """
     loadTaxonomy.cache_clear()

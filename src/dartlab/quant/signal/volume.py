@@ -13,14 +13,74 @@ from dartlab.quant.screen.dataAccess import fetchOhlcv, ohlcvToArrays
 
 
 def calcVolume(stockCode: str, *, market: str = "auto", **kwargs) -> dict:
-    """거래량 종합 분석.
+    """거래량 종합 분석 — OBV/AD/PVT + 가격-거래량 다이버전스.
+
+    Capabilities:
+        On-Balance Volume (Granville 1963) 20 d 추세 + Accumulation/
+        Distribution Line + Price-Volume Trend + 가격↔거래량 다이버전스
+        탐지 (가격 상승 vs OBV 하락 = 약세 다이버전스). volumeSurge (최근
+        / 20d 평균 비율) + 거래량 regime 분류.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
 
     Returns:
-        dict with obvTrend, volumePriceDivergence, adLine 등.
+        dict:
+            - ``obvTrend`` (str): "up"|"down"|"flat" + slope.
+            - ``volumePriceDivergence`` (str): bullish/bearish/none.
+            - ``adLine`` (float): A/D 누적 값.
+            - ``volumeSurge`` (float): 최근/20d 비율.
+            - ``volumeRegime`` (str): low/normal/high.
+            - 또는 ``error`` (str): 20 일 미만.
+
+    Raises:
+        없음 (error 키).
+
+    Example:
+        >>> r = calcVolume("005930")
+        >>> r["obvTrend"], r["volumePriceDivergence"]
+        ('up', 'none')
+
+    Guide:
+        - OBV up + 가격 up = 정상 상승 (수급 동반).
+        - OBV down + 가격 up = 약세 다이버전스 (조정 가능성).
+        - volumeSurge > 3 = 이상 거래 (이벤트/공시 가능성, calcEventSignal 확인).
+
+    See Also:
+        - ``calcFlow``: KR 수급 (외국인/기관)
+        - ``calcMomentum``: 가격 모멘텀
+        - ``synth.indicators.volume``: OBV/PVT 본체
+
+    When:
+        Quant volume 축 진입점 + AI 거래량 다이버전스 답변.
+
+    How:
+        OHLCV → OBV/AD/PVT 누적 → 20d slope → 가격↔거래량 비교 → divergence
+        라벨 + surge + regime.
+
+    Requires:
+        OHLCV (close + volume, optional high/low) ≥ 20 일.
+
+    AIContext:
+        OBV trend + divergence 함께. surge 단독 인용 시 이벤트 발견 트리거로
+        사용, 원인은 calcEventSignal/공시 검색.
+
+    LLM Specifications:
+        AntiPatterns:
+            - volumeSurge 단독 인용 — 원인 (이벤트/공시) 추적 누락.
+            - 20 일 미만에 본 함수 호출 — error.
+        OutputSchema:
+            ``{obvTrend: str, volumePriceDivergence: str, adLine: float,
+              volumeSurge: float, volumeRegime: str}``.
+        Prerequisites:
+            OHLCV ≥ 20 일.
+        Freshness:
+            일별.
+        Dataflow:
+            OHLCV → OBV/AD/PVT → 20d slope → 가격↔거래량 비교 → divergence
+            라벨 + surge + regime.
+        TargetMarkets: KR (KRX), US (NYSE/NASDAQ).
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)

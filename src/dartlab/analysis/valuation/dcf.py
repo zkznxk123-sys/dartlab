@@ -6,6 +6,20 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from dartlab.analysis.valuation._dcfDdm import _annualDividends, ddmValuation
+from dartlab.analysis.valuation._dcfHelpers import (
+    _computeExitMultipleTv,
+    _epsGrowth3Y,
+    _estimateSectorPsr,
+    _fallbackNormalizedEarningsFcf,
+    _fallbackOcfBasedFcf,
+    _fcfHistory,
+    _getFcfFromSeries,
+    _getNetDebt,
+    _normalizeBaseFcf,
+    _normalizedEarnings,
+    _projectFcf,
+    _resolveBaseFcf,
+)
 from dartlab.analysis.valuation._dcfTypes import (
     DCFResult,
     DDMResult,
@@ -24,43 +38,6 @@ from dartlab.core.utils.extract import (
 )
 from dartlab.core.utils.fmt import fmtBig, fmtPrice
 from dartlab.frame.sector import SectorParams
-
-
-def _getFcfFromSeries(series: dict, annual: bool = False) -> Optional[float]:
-    """FCF = 영업CF - CAPEX."""
-    flow = getLatest if annual else getTTM
-    ocf = flow(series, "CF", "operating_cashflow")
-    capex = flow(series, "CF", "purchase_of_property_plant_and_equipment")
-    if ocf is None:
-        return None
-    return ocf - abs(capex or 0)
-
-
-def _getNetDebt(series: dict) -> float:
-    """순차입금 = 총차입금 - 현금."""
-    stb = getLatest(series, "BS", "shortterm_borrowings") or 0
-    ltb = getLatest(series, "BS", "longterm_borrowings") or 0
-    bonds = getLatest(series, "BS", "debentures") or 0
-    cash = getLatest(series, "BS", "cash_and_cash_equivalents") or 0
-    return stb + ltb + bonds - cash
-
-
-def _fcfHistory(series: dict) -> list[Optional[float]]:
-    """연간 FCF 시계열 (영업CF - CAPEX)."""
-    ocfVals = getAnnualValues(series, "CF", "operating_cashflow")
-    capexVals = getAnnualValues(series, "CF", "purchase_of_property_plant_and_equipment")
-    if not ocfVals:
-        return []
-    result: list[Optional[float]] = []
-    for i in range(len(ocfVals)):
-        o = ocfVals[i]
-        c = capexVals[i] if i < len(capexVals) else None
-        if o is None:
-            result.append(None)
-        else:
-            result.append(o - abs(c or 0))
-    return result
-
 
 # ── Damodaran Two-Stage DCF (Investment Valuation Ch.12) ──────────────────
 # 명시적 고성장 n년 → stable 수렴. Growth equation 엄격 적용.
@@ -123,6 +100,14 @@ def multiStageDcf(
         성장), mature (1 phase), decline (terminal 음수). _tsdBuildPhases
         가 자동 구성. growth/marginPath/reinvestment 모두 list 일 때 길이
         일치 필수 (불일치 시 짧은 쪽 기준 truncate).
+
+    When:
+        Damodaran Two-Stage 또는 multi-phase DCF 필요 시. calcDFV 의 TSD path
+        가 본 함수를 호출 (직접 호출은 advanced 사용자/엔진 전용).
+
+    How:
+        multiStageDcf(baseFcf=fcf, growthYears=[5,3,2], growthRates=[15,8,3],
+        terminalGrowthRate=2, wacc=10, netDebt=nd, shares=s) 형식.
 
     SeeAlso:
         - ``dcfValuation``: 단순 2-stage 버전
@@ -271,6 +256,48 @@ def twoStageDcf(
     """Two-Stage DCF — multiStageDcf wrapper (backward compat).
 
     단일 phase (n 년 × 단일 성장률) + terminal. 기존 호출 호환용.
+
+    Capabilities:
+        - 단일 phase + terminal multiStageDcf 호출 wrapper
+        - highGrowthRate 단일 값 → growthRates=[highGrowthRate] 변환
+        - 기존 caller 의 highGrowthRate 키 호환 유지
+
+    Args:
+        baseFcf: 기준 FCF (원).
+        growthYears: 명시적 고성장 구간 연수.
+        highGrowthRate: 고성장 구간 성장률 (%).
+        terminalGrowthRate: Gordon 영구성장률 (%).
+        wacc: 할인율 (%).
+        netDebt: 순차입금 (원).
+        shares: 발행주식수.
+
+    Returns:
+        dict — multiStageDcf 반환 + highGrowthRate 키 추가.
+
+    Example:
+        >>> twoStageDcf(baseFcf=1e10, growthYears=5, highGrowthRate=15,
+        ...             terminalGrowthRate=3, wacc=10, netDebt=2e10, shares=1e8)
+
+    Guide:
+        새 코드에서는 multiStageDcf 직접 호출 권장. 본 함수는 backward compat.
+
+    When:
+        기존 단일 phase DCF 코드 호환 유지 필요 시.
+
+    How:
+        twoStageDcf(baseFcf=..., growthYears=5, highGrowthRate=..., ...).
+
+    Requires:
+        multiStageDcf — 본 함수가 호출.
+
+    Raises:
+        없음.
+
+    SeeAlso:
+        - multiStageDcf : 본 함수가 호출하는 N-stage 본체
+
+    AIContext:
+        2-stage DCF 단순 인용 시 본 함수 결과 인용. multiStageDcf 동일 결과.
     """
     r = multiStageDcf(
         baseFcf=baseFcf,
@@ -288,204 +315,16 @@ def twoStageDcf(
     return r
 
 
-# ── Damodaran Liquidation Valuation (Dark Side Ch.9) ──────────────────────
-# 자산별 회수율 차등 적용. 청산 절차에서 무형/재고가 가장 손실 큼.
-
-_LIQUIDATION_RECOVERY = {
-    "cash": 1.00,  # 현금성자산
-    "receivables": 0.70,  # 매출채권
-    "inventory": 0.50,  # 재고자산
-    "tangible": 0.60,  # 유형자산
-    "intangible": 0.10,  # 무형자산 (영업권 포함)
-    "other": 0.40,  # 기타자산 fallback
-}
-
-
-def liquidationValuation(
-    *,
-    cash: float = 0.0,
-    receivables: float = 0.0,
-    inventory: float = 0.0,
-    tangibleAssets: float = 0.0,
-    intangibleAssets: float = 0.0,
-    otherAssets: float = 0.0,
-    totalLiabilities: float = 0.0,
-    shares: int | None = None,
-    recoveryOverrides: dict | None = None,
-) -> dict:
-    """Damodaran 청산가치 — 자산별 회수율 차등.
-
-    Returns
-    -------
-    dict
-        recoveries : dict — 자산별 회수 금액
-        grossRecovery : float — 총 자산 회수 합
-        netToEquity : float — 부채 상환 후 잔여
-        perShare : float | None
-        weightedRecoveryRate : float — 가중 평균 회수율 (0.0~1.0)
-    """
-    recovery = dict(_LIQUIDATION_RECOVERY)
-    if recoveryOverrides:
-        recovery.update(recoveryOverrides)
-
-    components = {
-        "cash": cash * recovery["cash"],
-        "receivables": receivables * recovery["receivables"],
-        "inventory": inventory * recovery["inventory"],
-        "tangible": tangibleAssets * recovery["tangible"],
-        "intangible": intangibleAssets * recovery["intangible"],
-        "other": otherAssets * recovery["other"],
-    }
-    gross = sum(components.values())
-    net_to_equity = gross - totalLiabilities
-    per_share = (net_to_equity / shares) if (shares and shares > 0 and net_to_equity > 0) else None
-
-    gross_raw = cash + receivables + inventory + tangibleAssets + intangibleAssets + otherAssets
-    weighted_rate = gross / gross_raw if gross_raw > 0 else 0.0
-
-    return {
-        "recoveries": components,
-        "grossRecovery": gross,
-        "netToEquity": net_to_equity,
-        "perShare": per_share,
-        "weightedRecoveryRate": weighted_rate,
-        "recoveryRates": recovery,
-    }
-
+# ── Damodaran Liquidation Valuation + Relative + Sensitivity ─────────────
+# 실 구현은 _dcfRelative.py 분리. BC 위해 re-export.
+from dartlab.analysis.valuation._dcfRelative import (  # noqa: E402
+    _LIQUIDATION_RECOVERY,
+    liquidationValuation,
+    relativeValuation,
+    sensitivityAnalysis,
+)
 
 # ── DCF ──────────────────────────────────────────────
-
-
-def _normalizeBaseFcf(series: dict, fcfCurrent: float | None, fcfHist: list, warnings: list[str]) -> float | None:
-    """사이클 기업 mid-cycle FCF 정규화. 최근 FCF 가 극단 왜곡이면 중앙값 채택."""
-    positiveFcfs = [f for f in fcfHist if f is not None and f > 0]
-    if len(positiveFcfs) < 3:
-        return fcfCurrent
-    midCycleFcf = sorted(positiveFcfs)[len(positiveFcfs) // 2]
-    if fcfCurrent is not None and fcfCurrent > 0:
-        ratio = fcfCurrent / midCycleFcf if midCycleFcf > 0 else 1
-        if ratio > 1.8 or ratio < 0.5:
-            warnings.append(f"사이클 정규화: mid-cycle FCF 적용 (최근 대비 {ratio:.1f}배 괴리)")
-            return midCycleFcf
-        return fcfCurrent
-    warnings.append("FCF 음수 → mid-cycle 양수 FCF 중앙값으로 대체")
-    return midCycleFcf
-
-
-def _fallbackOcfBasedFcf(series: dict, warnings: list[str]) -> float | None:
-    """FCF 부재 시 영업CF × 할인률 fallback (호황기 과대 방지)."""
-    ocfHist = getAnnualValues(series, "CF", "operating_cashflow")
-    positiveOcfs = [v for v in ocfHist if v is not None and v > 0]
-    allOcfs = [v for v in ocfHist if v is not None]
-    if len(positiveOcfs) >= 3:
-        midOcf = sorted(positiveOcfs)[len(positiveOcfs) // 2]
-        lossRatio = 1 - len(positiveOcfs) / max(len(allOcfs), 1) if allOcfs else 0
-        discount = 0.5 if lossRatio >= 0.5 else 0.7
-        warnings.append(f"FCF 음수 → mid-cycle 영업CF × {discount * 100:.0f}%로 대체 (적자비율 {lossRatio * 100:.0f}%)")
-        return midOcf * discount
-    ocf = getTTM(series, "CF", "operating_cashflow")
-    if ocf is not None and ocf > 0:
-        warnings.append("FCF 음수/미확인 → 영업CF × 70%로 대체 추정")
-        return ocf * 0.7
-    return None
-
-
-def _fallbackNormalizedEarningsFcf(series: dict, warnings: list[str]) -> float | None:
-    """Damodaran normalized earnings — 정상 OPM × 현재 매출 → FCF proxy."""
-    oiHist = getAnnualValues(series, "IS", "operating_profit")
-    revHist = getAnnualValues(series, "IS", "sales")
-    if not (oiHist and revHist):
-        return None
-    margins = [
-        oi / rev for oi, rev in zip(oiHist, revHist) if oi is not None and rev is not None and rev > 0 and oi > 0
-    ]
-    if not margins:
-        return None
-    normalMargin = sorted(margins)[len(margins) // 2]
-    latestRev = next((v for v in reversed(revHist) if v is not None and v > 0), None)
-    if not (latestRev and normalMargin > 0):
-        return None
-    warnings.append(f"Normalized earnings: 정상 OPM {normalMargin * 100:.1f}% × 현재 매출 → FCF proxy")
-    return latestRev * normalMargin * 0.65
-
-
-def _resolveBaseFcf(series: dict, warnings: list[str]) -> tuple[float | None, list]:
-    """기준 FCF 결정: series → mid-cycle → OCF fallback → normalized earnings."""
-    fcfCurrent = _getFcfFromSeries(series)
-    fcfHist = _fcfHistory(series)
-    fcfCurrent = _normalizeBaseFcf(series, fcfCurrent, fcfHist, warnings)
-    if fcfCurrent is None or fcfCurrent <= 0:
-        fcfCurrent = _fallbackOcfBasedFcf(series, warnings)
-    if fcfCurrent is None or fcfCurrent <= 0:
-        fcfCurrent = _fallbackNormalizedEarningsFcf(series, warnings)
-    return fcfCurrent, fcfHist
-
-
-def _projectFcf(
-    fcfCurrent: float,
-    initialGrowth: float,
-    tg: float,
-    projectionYears: int,
-    proformaFCF: list[float] | None,
-    warnings: list[str],
-) -> list[float]:
-    """Pro Forma 우선 → 아니면 (initialGrowth → tg) blend 로 FCF 시계열 예측."""
-    if proformaFCF and len(proformaFCF) > 0:
-        pf = [float(f) for f in proformaFCF if f is not None and float(f) != 0]
-        if pf:
-            while len(pf) < projectionYears:
-                pf.append(pf[-1] * (1 + tg / 100))
-            warnings.append(f"추정재무제표(Pro Forma) 기반 FCF 사용 ({len(proformaFCF)}년 원본 + 연장)")
-            return pf[:projectionYears]
-
-    projections: list[float] = []
-    prevFcf = fcfCurrent
-    for yr in range(1, projectionYears + 1):
-        blend = (yr - 1) / max(projectionYears - 1, 1)
-        growth = initialGrowth * (1 - blend) + tg * blend
-        proj = prevFcf * (1 + growth / 100)
-        projections.append(proj)
-        prevFcf = proj
-    return projections
-
-
-def _computeExitMultipleTv(
-    series: dict,
-    sectorParams: SectorParams | None,
-    initialGrowth: float,
-    tg: float,
-    projectionYears: int,
-    wacc: float,
-    pvFcfs: float,
-    netDebt: float,
-    shares: int | None,
-) -> tuple[float | None, float | None, float | None, float | None]:
-    """Exit Multiple TV 교차검증 — EBITDA × 섹터 exit multiple. (tv, ev, perShare, mult)."""
-    exitMult = sectorParams.exitMultiple if sectorParams and sectorParams.exitMultiple else None
-    if not (exitMult and exitMult > 0):
-        return None, None, None, None
-    oi = getTTM(series, "IS", "operating_profit") or getTTM(series, "IS", "operating_income")
-    if oi is None or oi <= 0:
-        return None, None, None, exitMult
-    dep = getTTM(series, "CF", "depreciation_and_amortization")
-    if dep is None:
-        ta = getLatest(series, "BS", "tangible_assets") or 0
-        ia = getLatest(series, "BS", "intangible_assets") or 0
-        dep = ta * 0.05 + ia * 0.1
-    ebitda = oi + (dep or 0)
-    if ebitda <= 0:
-        return None, None, None, exitMult
-    projEbitda = ebitda
-    for yr in range(1, projectionYears + 1):
-        blend = (yr - 1) / max(projectionYears - 1, 1)
-        g = initialGrowth * (1 - blend) + tg * blend
-        projEbitda *= 1 + g / 100
-    exitTv = projEbitda * exitMult
-    pvExitTv = exitTv / (1 + wacc / 100) ** projectionYears
-    exitEv = pvFcfs + pvExitTv
-    exitEqValue = exitEv - netDebt
-    exitPerShare = exitEqValue / shares if shares and shares > 0 else None
-    return exitTv, exitEv, exitPerShare, exitMult
 
 
 def dcfValuation(
@@ -544,6 +383,14 @@ def dcfValuation(
         WACC ≤ terminalGrowth 시 ``wacc - 2.0`` 으로 자동 조정 + warning. initial
         growth 는 매출 3Y CAGR 기반, [-5%, 15%] clamp. FCF 음수 회사는 DCF
         부적합 — 호출자가 ``calcDFV`` 의 multi-model triangulation 사용 권장.
+
+    When:
+        단일 모델 DCF 인용이 필요한 화면/CLI/notebook 에서 직접 호출.
+        다중 모델 통합은 calcDFV 사용.
+
+    How:
+        dcfValuation(series, shares=s, sectorParams=sp, currentPrice=p) 형식.
+        series 는 company.finance.timeseries 또는 frame.toTimeseries 결과.
 
     SeeAlso:
         - ``multiStageDcf``: phase 별 다중 stage DCF
@@ -662,275 +509,6 @@ def dcfValuation(
     )
 
 
-# ── 상대가치 ──────────────────────────────────────────────
-
-
-def _normalizedEarnings(series: dict, shares: int | None) -> tuple[float | None, float | None, bool]:
-    """경기순환 조정 정규화 수익 -- Damodaran/CFA 표준.
-
-    방법: 과거 3-5년 평균 ROE x 현재 BPS (mid-cycle earnings)
-    Returns: (normalizedNI, normalizedEps, wasNormalized)
-    """
-    niVals = getAnnualValues(series, "IS", "net_profit")
-    if not niVals:
-        niVals = getAnnualValues(series, "IS", "net_income")
-    eqVals = getAnnualValues(series, "BS", "total_stockholders_equity")
-    if not eqVals:
-        eqVals = getAnnualValues(series, "BS", "owners_of_parent_equity")
-
-    if not niVals or not eqVals or len(niVals) < 3 or len(eqVals) < 3:
-        return None, None, False
-
-    # 최근 3-5년 ROE 평균
-    n = min(len(niVals), len(eqVals), 5)
-    roes: list[float] = []
-    for i in range(-n, 0):
-        ni = niVals[i] if abs(i) <= len(niVals) else None
-        eq = eqVals[i] if abs(i) <= len(eqVals) else None
-        if ni is not None and eq is not None and eq > 0:
-            roes.append(ni / eq)
-
-    if len(roes) < 2:
-        return None, None, False
-
-    avgRoe = sum(roes) / len(roes)
-    currentEquity = eqVals[-1]
-    if currentEquity is None or currentEquity <= 0:
-        return None, None, False
-
-    normalizedNi = currentEquity * avgRoe
-    normalizedEps = normalizedNi / shares if shares and shares > 0 else None
-
-    # TTM 대비 30% 이상 차이나면 정규화 적용
-    ttmNi = getTTM(series, "IS", "net_profit") or getTTM(series, "IS", "net_income")
-    if ttmNi and ttmNi > 0 and normalizedNi > 0:
-        divergence = abs(ttmNi - normalizedNi) / max(ttmNi, normalizedNi)
-        return normalizedNi, normalizedEps, divergence > 0.3
-
-    return normalizedNi, normalizedEps, True
-
-
-def relativeValuation(
-    series: dict,
-    sectorParams: Optional[SectorParams] = None,
-    marketCap: Optional[float] = None,
-    shares: Optional[int] = None,
-    currentPrice: Optional[float] = None,
-) -> RelativeValuationResult:
-    """섹터 배수 기반 상대가치 추정 (Normalized Earnings 지원)."""
-    warnings: list[str] = []
-    sp = sectorParams or SectorParams(
-        discountRate=10.0,
-        growthRate=3.0,
-        perMultiple=15,
-        pbrMultiple=1.2,
-        evEbitdaMultiple=8,
-        label="기타",
-    )
-
-    sectorMults: dict[str, float] = {
-        "PER": sp.perMultiple,
-        "PBR": sp.pbrMultiple,
-        "EV/EBITDA": sp.evEbitdaMultiple,
-    }
-
-    netIncome = getTTM(series, "IS", "net_profit") or getTTM(series, "IS", "net_income")
-    equity = getLatest(series, "BS", "total_stockholders_equity") or getLatest(series, "BS", "owners_of_parent_equity")
-    revenue = getTTM(series, "IS", "sales") or getTTM(series, "IS", "revenue")
-
-    # Normalized Earnings -- 경기순환 조정
-    normNi, normEps, useNormalized = _normalizedEarnings(series, shares)
-    if useNormalized and normNi is not None:
-        netIncome = normNi
-        warnings.append("정규화 수익 적용 (과거 평균 ROE x 현재 BPS)")
-
-    multKeys = ["PER", "PBR", "EV/EBITDA", "PSR", "PEG"]
-    currentMults: dict[str, Optional[float]] = {k: None for k in multKeys}
-    if marketCap and marketCap > 0:
-        if netIncome and netIncome > 0:
-            currentMults["PER"] = round(marketCap / netIncome, 1)
-        if equity and equity > 0:
-            currentMults["PBR"] = round(marketCap / equity, 1)
-        if revenue and revenue > 0:
-            currentMults["PSR"] = round(marketCap / revenue, 2)
-
-    implied: dict[str, Optional[float]] = {k: None for k in multKeys}
-    premiumDisc: dict[str, Optional[float]] = {k: None for k in multKeys}
-
-    if shares and shares > 0:
-        if netIncome is not None and netIncome > 0:
-            eps = netIncome / shares
-            implied["PER"] = round(eps * sp.perMultiple, 0)
-
-        if equity is not None and equity > 0:
-            bps = equity / shares
-            implied["PBR"] = round(bps * sp.pbrMultiple, 0)
-
-        oi = getTTM(series, "IS", "operating_profit") or getTTM(series, "IS", "operating_income")
-        dep = getTTM(series, "CF", "depreciation_and_amortization")
-        if oi is not None and oi > 0:
-            if dep is None:
-                ta = getLatest(series, "BS", "tangible_assets") or 0
-                ia = getLatest(series, "BS", "intangible_assets") or 0
-                dep = ta * 0.05 + ia * 0.1
-                warnings.append("감가상각 미확인 -> 추정치 적용")
-            ebitda = oi + (dep or 0)
-            if ebitda > 0:
-                nd = _getNetDebt(series)
-                impliedEv = ebitda * sp.evEbitdaMultiple
-                impliedEq = impliedEv - nd
-                if impliedEq > 0:
-                    implied["EV/EBITDA"] = round(impliedEq / shares, 0)
-
-        # PSR -- 매출 기반 가치
-        if revenue is not None and revenue > 0:
-            sps = revenue / shares  # Sales Per Share
-            sectorPsr = _estimateSectorPsr(sp)
-            sectorMults["PSR"] = sectorPsr
-            implied["PSR"] = round(sps * sectorPsr, 0)
-
-        # PEG -- PER / EPS 성장률
-        epsGrowth = _epsGrowth3Y(series, shares)
-        if epsGrowth is not None and epsGrowth > 0 and currentMults.get("PER"):
-            peg = round(currentMults["PER"] / epsGrowth, 2)
-            currentMults["PEG"] = peg
-            # PEG 1.0 = 적정, 적정가 = EPS × 성장률 × 1.0 (PEG fair = 1)
-            eps = netIncome / shares if netIncome and netIncome > 0 else 0
-            if eps > 0:
-                implied["PEG"] = round(eps * epsGrowth, 0)
-                sectorMults["PEG"] = 1.0  # fair PEG
-
-    if currentPrice and currentPrice > 0:
-        for key in multKeys:
-            iv = implied[key]
-            if iv is not None and iv > 0:
-                premiumDisc[key] = round((currentPrice - iv) / iv * 100, 1)
-
-    # 가중 합의값 -- EV/EBITDA(자본구조 중립) > PER > PBR > PSR > PEG
-    multWeights = {"EV/EBITDA": 3.0, "PER": 2.5, "PBR": 1.5, "PSR": 1.0, "PEG": 1.0}
-    # 극단값 상한: 현재가의 5배 이상인 개별 멀티플은 consensus에서 제외
-    _ivCap = currentPrice * 5 if currentPrice and currentPrice > 0 else float("inf")
-    weightedSum = 0.0
-    totalWeight = 0.0
-    for key in multKeys:
-        iv = implied[key]
-        if iv is not None and 0 < iv < _ivCap:
-            w = multWeights.get(key, 1.0)
-            weightedSum += iv * w
-            totalWeight += w
-    consensus = round(weightedSum / totalWeight, 0) if totalWeight > 0 else None
-
-    if totalWeight == 0:
-        warnings.append("상대가치 추정 불가 (재무 데이터 부족)")
-
-    return RelativeValuationResult(
-        sectorMultiples=sectorMults,
-        currentMultiples=currentMults,
-        impliedValues=implied,
-        premiumDiscount=premiumDisc,
-        consensusValue=consensus,
-        warnings=warnings,
-    )
-
-
-def _estimateSectorPsr(sp: SectorParams) -> float:
-    """섹터 PSR 추정 -- PER × 순이익률 가정으로 역산."""
-    # 일반적으로 PSR = PER × 순이익률
-    # 순이익률 모르면 섹터 평균 5% 가정
-    estimatedMargin = 0.05
-    psr = sp.perMultiple * estimatedMargin
-    return round(max(psr, 0.3), 2)
-
-
-def _epsGrowth3Y(series: dict, shares: int) -> Optional[float]:
-    """EPS 3년 CAGR (%)."""
-    niVals = getAnnualValues(series, "IS", "net_profit")
-    if not niVals:
-        niVals = getAnnualValues(series, "IS", "net_income")
-    if not niVals or len(niVals) < 4 or shares <= 0:
-        return None
-
-    recent = niVals[-4:]
-    validNi = [v for v in recent if v is not None and v > 0]
-    if len(validNi) < 2:
-        return None
-
-    epsStart = validNi[0] / shares
-    epsEnd = validNi[-1] / shares
-    if epsStart <= 0 or epsEnd <= 0:
-        return None
-
-    years = len(validNi) - 1
-    cagr = _cagr(epsStart, epsEnd, years)
-    # PEG 산출용 상한: 50% (사이클 기업 적자→흑전 시 수천% 방지)
-    return min(cagr, 50.0) if cagr is not None else None
-
-
-# ── 민감도 분석 ──────────────────────────────────────────────
-
-
-def sensitivityAnalysis(
-    series: dict,
-    shares: Optional[int] = None,
-    sectorParams: Optional[SectorParams] = None,
-    currentPrice: Optional[float] = None,
-    currency: str = "KRW",
-    waccRange: float = 2.0,
-    growthRange: float = 2.0,
-    steps: int = 5,
-) -> SensitivityResult | None:
-    """WACC x 영구성장률 민감도 그리드.
-
-    DCF 결과를 WACC +-waccRange, 영구성장률 +-growthRange로 재계산.
-    """
-    baseDcf = dcfValuation(
-        series,
-        shares=shares,
-        sectorParams=sectorParams,
-        currentPrice=currentPrice,
-        currency=currency,
-    )
-    baseWacc = baseDcf.discountRate
-    baseTg = baseDcf.terminalGrowth
-
-    grid: list[dict] = []
-    waccStep = waccRange * 2 / (steps - 1) if steps > 1 else 0
-    growthStep = growthRange * 2 / (steps - 1) if steps > 1 else 0
-
-    for wi in range(steps):
-        wacc = baseWacc - waccRange + wi * waccStep
-        if wacc <= 0:
-            continue
-        for gi in range(steps):
-            tg = baseTg - growthRange + gi * growthStep
-            if tg >= wacc:
-                continue
-            result = dcfValuation(
-                series,
-                shares=shares,
-                sectorParams=sectorParams,
-                discountRate=wacc,
-                terminalGrowth=tg,
-                currentPrice=currentPrice,
-                currency=currency,
-            )
-            grid.append(
-                {
-                    "wacc": round(wacc, 1),
-                    "terminalGrowth": round(tg, 1),
-                    "perShareValue": result.perShareValue,
-                    "enterpriseValue": result.enterpriseValue,
-                }
-            )
-
-    return SensitivityResult(
-        grid=grid,
-        baseWacc=baseWacc,
-        baseTerminalGrowth=baseTg,
-        baseValue=baseDcf.perShareValue,
-    )
-
-
 # ── 종합 밸류에이션 ──────────────────────────────────────────
 
 
@@ -943,7 +521,53 @@ def fullValuation(
     currency: str = "KRW",
     discountRate: Optional[float] = None,
 ) -> ValuationSummary:
-    """DCF + DDM + 상대가치 종합 밸류에이션."""
+    """DCF + DDM + 상대가치 종합 밸류에이션.
+
+    Capabilities:
+        - dcfValuation + ddmValuation + relativeValuation 3 채널 합성
+        - 극단값 (현재가 1/20 미만) 제거 후 fairValueRange 산출
+        - 평균 대비 ratio 로 저평가/적정/고평가 verdict 판정
+
+    Args:
+        series: finance.timeseries dict (BS/IS/CF).
+        shares: 발행주식수.
+        sectorParams: 업종별 할인율/성장률.
+        marketCap: 시가총액 (상대가치용).
+        currentPrice: 현재 주가 (verdict 산출용).
+        currency: "KRW" or "USD".
+        discountRate: WACC override.
+
+    Returns:
+        ValuationSummary — dcf/ddm/relative + fairValueRange + verdict.
+
+    Example:
+        >>> r = fullValuation(series, shares=5e9, marketCap=4.5e14, currentPrice=75000)
+        >>> r.verdict, r.fairValueRange
+
+    Guide:
+        DDM 미가용 (무배당) 회사는 dcf+relative 만으로 verdict 산출.
+        극단값 floor = currentPrice/20.
+
+    When:
+        구버전 종합 밸류에이션 인터페이스 (3 채널 단순 평균). 새 코드는
+        calcDFV 의 quality-adjusted WACC + 삼각검증 사용.
+
+    How:
+        fullValuation(series, shares=s, sectorParams=sp, marketCap=mc, currentPrice=p).
+
+    Requires:
+        dcfValuation + ddmValuation + relativeValuation 헬퍼 + series 시계열.
+
+    Raises:
+        없음 — 모든 모델 실패 시 verdict="판단불가" + fairRange=None.
+
+    SeeAlso:
+        - calcDFV : v2 통합 진입점 (권장)
+        - dcfValuation / ddmValuation / relativeValuation : 채널별
+
+    AIContext:
+        구 API 인용. 새 답변은 calcDFV 결과 우선, fullValuation 은 fallback.
+    """
     dcf = dcfValuation(
         series,
         shares=shares,

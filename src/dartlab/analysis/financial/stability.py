@@ -56,28 +56,76 @@ from dartlab.core.utils.calc import safePct as _pctOf  # noqa: E402
 
 @memoizedCalc
 def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
-    """레버리지 구조 시계열 -- 부채로 얼마나 버티는가.
+    """레버리지 구조 시계열 — 부채로 얼마나 버티는가.
 
-    BS에서 부채/자본/자산 원본 금액을 가져와서
-    부채비율 + 자기자본비율 + 순차입금비율을 금액과 함께 보여준다.
+    Capabilities:
+        부채총계/자본총계/자산총계/현금/총차입금 원본 + 부채비율/자기자본
+        비율/순차입금비율 시계열. 차입금은 회사별 키 패턴 무관 sumBorrowings
+        헬퍼로 단·장기 + 사채 + 유동성장기차입금 합산. notesDetail 로 차입금/
+        리스 주석 enrichment + injectTurningPoints 로 변곡점 자동 라벨.
 
-    Returns
-    -------
-    dict
-        history : list[dict]
-            period : str — 기간
-            totalDebt : float — 부채총계 (원)
-            totalDebtYoy : float — 부채총계 전년비 (%)
-            equity : float — 자본총계 (원)
-            equityYoy : float — 자본총계 전년비 (%)
-            totalAssets : float — 자산총계 (원)
-            cash : float — 현금및현금성자산 (원)
-            totalBorrowing : float — 총차입금 (원)
-            netDebt : float — 순차입금 (원)
-            debtRatio : float — 부채비율 (%)
-            equityRatio : float — 자기자본비율 (%)
-            netDebtRatio : float — 순차입금비율 (%)
-        notesDetail : dict — 차입금/리스 주석 상세 (있을 때만)
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 12 키 (period, totalDebt + YoY, equity +
+              YoY, totalAssets, cash, totalBorrowing, netDebt, debtRatio,
+              equityRatio, netDebtRatio)
+            - ``turningPoints`` (list[dict]): debtRatio Δ ≥ 25pp 변곡점
+            - ``notesDetail`` (dict, optional): borrowings + lease 주석
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcLeverageTrend(Company("005930"))
+        >>> r["history"][0]["debtRatio"], r["history"][0]["netDebtRatio"]
+        (35.2, -8.1)  # 부채비율 35%, 순현금 (netDebt 음수)
+
+    Guide:
+        - 부채비율 > 200% 가 2+ 년 연속 = 자본 잠식 위험 (KR 제조업 기준).
+        - 순차입금비율 음수 = 순현금 (자기자본보다 현금이 많음, 삼성전자
+          전형).
+        - 차입금 키 회사별 다양 (사채/유동성장기차입금) → sumBorrowings 가
+          12 키 합산하므로 누락 없음.
+
+    When:
+        자본 안정성 시계열 진단, credit engine leverage 축 입력 생성.
+
+    How:
+        BS rawNormalized → 자본구조 항목·차입금 합산 → 3 비율 + netDebt →
+        injectTurningPoints + fetchNotesDetail enrichment.
+
+    SeeAlso:
+        - ``calcCoverageTrend``: IC (이자보상)
+        - ``calcFundingSources``: 자본/부채/차입 funding mix
+        - ``credit.engine``: 7 축 종합 (본 함수가 leverage 축 입력)
+
+    Requires:
+        BS (부채총계 + 자본총계 + 자산총계 + 현금 + 차입금 12 키 후보) ≥ 2 년.
+
+    AIContext:
+        debtRatio + netDebt 부호 함께 인용. netDebt < 0 (순현금) 회사는
+        부채비율 높아도 안전 — netDebt 부호 우선 판단. turningPoints 있으면
+        구조 변화 시점 (M&A·구조조정) 시그널로 활용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 부채비율 단독 인용 — netDebt 부호 함께 (순현금 회사 오판 방지).
+            - 단기·장기 차입금 별도 합산 시도 — sumBorrowings 가 12 키 모두
+              합산 (회사별 키 패턴 무관).
+        OutputSchema:
+            ``{history: list[dict 12키], turningPoints: list, notesDetail?: dict}``.
+        Prerequisites:
+            BS 7 계정 + 차입금 12 키 후보.
+        Freshness:
+            분기 + 시계열.
+        Dataflow:
+            BS → 부채/자본/자산/현금/차입금 → 3 비율 + netDebt →
+            injectTurningPoints + fetchNotesDetail enrichment.
+        TargetMarkets: KR (DART), US (EDGAR — 표준).
     """
     bsResult = company.select(
         "BS",
@@ -202,6 +250,13 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
         - IC 1.5~3: BB / IC < 1: 부도 위험.
         IC < 1 가 2~3 년 연속이면 채무 재조정 신호.
 
+    When:
+        이자 부담 시계열 진단, Damodaran 신용등급 매핑 입력 생성.
+
+    How:
+        IS 영업이익 + (이자비용 우선) → CF interest_paid → IS 금융비용 폴백
+        순으로 이자비용 결정 → IC = 영업이익 / |이자비용|.
+
     SeeAlso:
         - ``calcLeverageTrend``: 부채/자본 구조
         - ``calcDistressScore``: Altman Z (IC 직접 변수 아님, EBIT/TA)
@@ -296,325 +351,12 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
     return {"history": history} if history else None
 
 
-# ── 부실 판별 (Altman Z-Score) ──
+# ── 부실 판별: calcDistressScore + calcDistressEnsemble 는 _stabilityDistress.py 로 분리 ──
 
-
-@memoizedCalc
-def calcDistressScore(company, *, basePeriod: str | None = None) -> dict | None:
-    """Altman Z-Score (1968) 시계열 + 5 변수 분해 — 부실 위험 정량 진단.
-
-    Capabilities:
-        Altman (1968, JF) "Financial Ratios, Discriminant Analysis and the
-        Prediction of Corporate Bankruptcy" 의 Z-Score 시계열 산출. 5 변수
-        (X1~X5) + zScore + zone 분류. 비상장 회사는 Z''-Score (X4 변형) 자동
-        사용. 부도 예측 학술 표준.
-
-    Args:
-        company: Company 객체.
-        basePeriod: 기준 기간. None 시 최신.
-
-    Returns:
-        dict | None:
-            - ``history`` (list[dict]): 연도별 13 키 (period + 6 BS/IS 원본
-              + 5 X 변수 + zScore + zModel + zone)
-            - ``latestScore`` (float): 최신 Z-Score
-            - ``zone`` (str): "안전"/"회색"/"위험"/"판별 불가"
-            - ``diagnosticMeta`` (dict): 진단 메타
-
-    Raises:
-        없음.
-
-    Example:
-        >>> r = calcDistressScore(Company("005930"))
-        >>> r["latestScore"], r["zone"]
-        (3.2, '안전')
-
-    Guide:
-        Z-Score 임계 (Altman 1968 원형):
-        - Z > 2.99: 안전 (safe zone)
-        - 1.81 < Z < 2.99: 회색 (grey zone)
-        - Z < 1.81: 위험 (distress zone)
-        Z''-Score (비상장/제조업 외): 2.6 / 1.1 임계. KR 대기업 평균 ~ 3.5,
-        US 대기업 ~ 4.0. distress zone 2~3 년 연속이면 부도 가능성 매우 높음.
-
-    SeeAlso:
-        - ``analyzeHealth``: Z-Score 포함 종합 건전성
-        - ``calcDistressEnsemble``: Altman + Ohlson + Piotroski + CHS 합성
-        - ``dartlab.synth.distress.chsModel.calcCHS``: 현대 표준 (Campbell 2008)
-        - Altman, E. (1968) "Financial Ratios, Discriminant Analysis"
-
-    Requires:
-        BS (자산총계, 운전자본, 이익잉여금, 부채총계) + IS (매출/EBIT)
-        + 시가총액 (시장 데이터).
-
-    AIContext:
-        Z-Score 절대값 + zone + history 추세 함께 인용. 단년도 위험 진입은
-        일회성 (M&A/적자) 가능, 2 년 연속 distress zone 가 진짜 신호.
-        Altman 1968 원형은 US 제조업 — KR/금융업 응용 시 Z''-Score 권장.
-
-    LLM Specifications:
-        AntiPatterns:
-            - Z-Score 1.5 단년도 → "부도 임박" 단정 — 2~3 년 연속 distress
-              zone 확인 필수.
-            - 금융업/신규 IPO 회사 → Altman Z 적용 부적합. 본 함수가 자동
-              Z''-Score 분기.
-        OutputSchema:
-            ``{history: list[dict 13키], latestScore: float, zone: str,
-            diagnosticMeta: dict}``.
-        Prerequisites:
-            BS/IS 시계열 + 시가총액 (gather).
-        Freshness:
-            BS/IS 분기, 시가총액 일.
-        Dataflow:
-            BS/IS → 6 원본 (자산/WC/RE/EBIT/매출/부채) + 시가총액 → 5 X 변수
-            → Z = 1.2X1 + 1.4X2 + 3.3X3 + 0.6X4 + 1.0X5 → zone 분류.
-        TargetMarkets: KR (DART), US (EDGAR — Altman 원형 최적).
-    """
-    bsResult = company.select(
-        "BS", ["자산총계", "유동자산", "유동부채", "부채총계", "이익잉여금", "미처분이익잉여금(결손금)"]
-    )
-    isResult = company.select("IS", ["영업이익", "매출액"])
-
-    bsParsed = toDictBySnakeId(bsResult)
-    isParsed = toDictBySnakeId(isResult)
-    if bsParsed is None or isParsed is None:
-        return None
-
-    bsData, bsPeriods = bsParsed
-    isData, _ = isParsed
-
-    taRow = bsData.get("total_assets", {})
-    caRow = bsData.get("current_assets", {})
-    clRow = bsData.get("current_liabilities", {})
-    tlRow = bsData.get("total_liabilities", {})
-    from dartlab.core.utils.helpers import mergeRows
-
-    reRow = mergeRows(bsData.get("retained_earnings"), bsData.get("unappropriated_retained_earnings_deficit"))
-    opRow = isData.get("operating_profit", {})
-    revRow = isData.get("sales", {})
-
-    # 시가총액 (X4용) -- ratios에서 가져옴
-    ratios = getRatios(company)
-    marketCap = ratios.marketCap if ratios else None
-
-    yCols = annualColsFromPeriods(bsPeriods, basePeriod, _MAX_YEARS)
-    if not yCols:
-        return None
-    history = []
-    for col in yCols:
-        a = taRow.get(col)
-        ca = caRow.get(col)
-        cl = clRow.get(col)
-        tl = tlRow.get(col)
-        re = reRow.get(col)
-        ebit = opRow.get(col)
-        rev = revRow.get(col)
-
-        if a is None or a == 0:
-            continue
-
-        wc = (ca or 0) - (cl or 0)
-        x1 = round(wc / a, 4) if a else None
-        x2 = round(re / a, 4) if re is not None and a else None
-        x3 = round(ebit / a, 4) if ebit is not None and a else None
-        x4 = round(marketCap / tl, 4) if marketCap is not None and tl and tl > 0 else None
-        x5 = round(rev / a, 4) if rev is not None and a else None
-
-        # X4(시가총액/부채) 없으면 Altman Z'' (비제조업) 대체
-        zScore = None
-        zModel = None
-        if all(v is not None for v in [x1, x2, x3, x4, x5]):
-            zScore = round(1.2 * x1 + 1.4 * x2 + 3.3 * x3 + 0.6 * x4 + 1.0 * x5, 2)
-            zModel = "Z-Score"
-        elif all(v is not None for v in [x1, x2, x3, x5]):
-            # Z'' = 6.56*X1 + 3.26*X2 + 6.72*X3 + 1.05*X5 (book value 기반)
-            zScore = round(6.56 * x1 + 3.26 * x2 + 6.72 * x3 + 1.05 * x5, 2)
-            zModel = "Z''-Score"
-
-        if zScore is not None:
-            safeThreshold = 2.99 if zModel == "Z-Score" else 2.60
-            dangerThreshold = 1.81 if zModel == "Z-Score" else 1.10
-            if zScore > safeThreshold:
-                zone = "안전"
-            elif zScore > dangerThreshold:
-                zone = "회색"
-            else:
-                zone = "위험"
-        else:
-            zone = None
-
-        history.append(
-            {
-                "period": col,
-                "totalAssets": a,
-                "workingCapital": wc,
-                "retainedEarnings": re,
-                "ebit": ebit,
-                "revenue": rev,
-                "totalDebt": tl,
-                "x1_wcTa": x1,
-                "x2_reTa": x2,
-                "x3_ebitTa": x3,
-                "x4_mcapTl": x4,
-                "x5_revTa": x5,
-                "zScore": zScore,
-                "zModel": zModel,
-                "zone": zone,
-            }
-        )
-
-    if not history:
-        return None
-
-    latest = history[0]
-    zModel = latest.get("zModel", "")
-    result: dict = {
-        "history": history,
-        "latestScore": latest.get("zScore"),
-        "zone": latest.get("zone") or "판별 불가",
-        "diagnosticMeta": {
-            "model": zModel,
-            "precision": 0.95 if zModel == "Z-Score" else 0.82,
-            "typeIError": 0.06 if zModel == "Z-Score" else 0.15,
-            "reference": "Altman(1968)" if zModel == "Z-Score" else "Altman(1995)",
-            "marketNote": "한국 시장: Altman et al.(2014) 신흥시장 Z'' 적용",
-        },
-    }
-
-    # notes enrichment — 충당부채 (위험/회색 구간일 때 의미)
-    from dartlab.analysis.financial.companyContext import fetchNotesDetail
-
-    notesDetail = fetchNotesDetail(company, ["provisions"])
-    if notesDetail:
-        result["notesDetail"] = notesDetail
-
-    return result
-
-
-# ── 부실 앙상블 (기존 유지 -- getRatios 사용) ──
-
-
-@memoizedCalc
-def calcDistressEnsemble(company, *, basePeriod: str | None = None) -> dict | None:
-    """4개 부실예측 모델 앙상블 -- 다수결 투표.
-
-    Altman Z-Score, Ohlson O-Score, Springate S-Score, Zmijewski X-Score
-    각 모델의 판정(safe/warning/danger)을 집계하여 종합 등급 산출.
-
-    Returns
-    -------
-    dict
-        models : list[dict]
-            model : str — 모델명
-            score : float — 모델 점수 (점)
-            verdict : str — 개별 판정 ("safe"|"warning"|"danger")
-            threshold : str — 임계값 설명
-        ensemble : str — 종합 판정 ("안전"|"주의"|"위험")
-        agreement : float — 모델 간 일치도 (%)
-        dangerCount : int — 위험 판정 모델 수
-        safeCount : int — 안전 판정 모델 수
-        total : int — 전체 모델 수
-    """
-    ratios = getRatios(company)
-    if ratios is None:
-        return None
-
-    models = []
-
-    # Altman Z-Score: >2.99 safe, 1.81~2.99 gray, <1.81 danger
-    z = ratios.altmanZScore
-    if z is not None:
-        if z > 2.99:
-            verdict = "safe"
-        elif z > 1.81:
-            verdict = "warning"
-        else:
-            verdict = "danger"
-        models.append(
-            {
-                "model": "Altman Z-Score",
-                "score": z,
-                "verdict": verdict,
-                "threshold": "안전 >2.99 / 회색 1.81~2.99 / 위험 <1.81",
-            }
-        )
-
-    # Altman Z'' (비제조/신흥): >2.60 safe, 1.10~2.60 gray, <1.10 danger
-    zpp = ratios.altmanZppScore
-    if zpp is not None:
-        if zpp > 2.60:
-            verdict = "safe"
-        elif zpp > 1.10:
-            verdict = "warning"
-        else:
-            verdict = "danger"
-        models.append(
-            {
-                "model": "Altman Z''-Score",
-                "score": zpp,
-                "verdict": verdict,
-                "threshold": "안전 >2.60 / 회색 1.10~2.60 / 위험 <1.10",
-            }
-        )
-
-    # Ohlson O-Score: P(default) < 10% safe, 10~50% warning, >50% danger
-    oProb = ratios.ohlsonProbability
-    if oProb is not None:
-        if oProb < 10:
-            verdict = "safe"
-        elif oProb < 50:
-            verdict = "warning"
-        else:
-            verdict = "danger"
-        models.append(
-            {
-                "model": "Ohlson O-Score",
-                "score": ratios.ohlsonOScore,
-                "probability": oProb,
-                "verdict": verdict,
-                "threshold": "안전 <10% / 경고 10~50% / 위험 >50%",
-            }
-        )
-
-    # Springate S-Score: >0.862 safe, else danger
-    ss = ratios.springateSScore
-    if ss is not None:
-        verdict = "safe" if ss > 0.862 else "danger"
-        models.append(
-            {"model": "Springate S-Score", "score": ss, "verdict": verdict, "threshold": "안전 >0.862 / 위험 <0.862"}
-        )
-
-    # Zmijewski X-Score: <0 safe, else danger
-    xz = ratios.zmijewskiXScore
-    if xz is not None:
-        verdict = "safe" if xz < 0 else "danger"
-        models.append({"model": "Zmijewski X-Score", "score": xz, "verdict": verdict, "threshold": "안전 <0 / 위험 >0"})
-
-    if not models:
-        return None
-
-    # 다수결
-    dangerCount = sum(1 for m in models if m["verdict"] == "danger")
-    safeCount = sum(1 for m in models if m["verdict"] == "safe")
-    total = len(models)
-
-    if dangerCount > total / 2:
-        ensemble = "위험"
-    elif safeCount > total / 2:
-        ensemble = "안전"
-    else:
-        ensemble = "주의"
-
-    agreement = max(dangerCount, safeCount) / total * 100
-
-    return {
-        "models": models,
-        "ensemble": ensemble,
-        "agreement": round(agreement, 1),
-        "dangerCount": dangerCount,
-        "safeCount": safeCount,
-        "total": total,
-    }
+from dartlab.analysis.financial._stabilityDistress import (  # noqa: E402
+    calcDistressEnsemble,
+    calcDistressScore,
+)
 
 
 @memoizedCalc
@@ -647,6 +389,13 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
         - 단기차입금 비중 > 50% + refinancingRisk > 2 = 차환 위기 신호.
         - 사채 (회사채) 만기 도래 시 시장 환경 (금리/스프레드) 함께 확인.
         - 금융업/바이오는 차입 구조 다름 — 자동 폴백 분기.
+
+    When:
+        차환 리스크 진단·만기 구조 분석 시.
+
+    How:
+        BS 차입금 (제조 → 금융 → 바이오 폴백) + CF OCF → 단기 비중·유동/
+        부채총계·refinancingRisk 시계열.
 
     SeeAlso:
         - ``calcLeverageTrend``: 부채/자본 구조 (위 함수와 paired)
@@ -782,11 +531,42 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
 def calcStabilityFlags(company, *, basePeriod: str | None = None) -> dict:
     """안정성 경고/기회 플래그.
 
-    Returns
-    -------
-    dict
-        flags : list[str] — 경고/기회 플래그 문자열 목록
-        enrichedFlags : list[dict] — 상세 진단 메타 포함 플래그 목록
+    Capabilities:
+        - 부채비율·IC·차환 리스크 임계 초과 시 한국어 flags + enrichedFlags
+          (메타 포함) 동시 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict: flags (한국어 메시지 리스트) + enrichedFlags (메타 dict 리스트).
+
+    Guide:
+        지주/금융사 vs 제조업의 임계 자동 분기. 단기 비중 + OCF 동시 평가.
+
+    When:
+        보고서·UI 위험 배너에 안정성 경고 한 줄 표시.
+
+    How:
+        ``calcLeverageTrend`` + ``calcCoverageTrend`` + ``calcDebtMaturity``
+        결과를 업종별 임계와 비교 후 (메시지, 메타) 생성.
+
+    Requires:
+        하위 3 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcStabilityFlags(Company("005930"))
+        {"flags": ["..."], "enrichedFlags": [...]}
+
+    SeeAlso:
+        - ``calcLeverageTrend``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 안정성 위험 한 줄 인용 시.
     """
     flags: list[str] = []
     enriched: list[dict] = []

@@ -24,6 +24,20 @@ def calcControlValue(
 ) -> dict[str, Any] | None:
     """Status Quo vs Restructured — 최적 자본배분 시나리오의 추가 가치.
 
+    Capabilities:
+        - calcDFV (status quo) + multiStageDcf (restructured) 차이 = Control Value
+        - 섹터 p75 ROIC 부재 시 현재 × 1.3 근사 + warning
+        - Damodaran Growth Equation (g = ROIC × reinvestRate) 적용
+
+    Parameters
+    ----------
+    company : Company
+        대상 기업.
+    basePeriod : str, optional
+        기준 기간.
+    overrides : dict, optional
+        optimalROIC 등 가정 override.
+
     Restructured 가정:
     - ROIC → sector p75
     - Reinvestment rate → sector p75
@@ -40,6 +54,33 @@ def calcControlValue(
         optimalReinvestment : float — 가정 재투자율 (%)
         method : "sector_p75"
         warnings : list[str]
+
+    Example:
+        >>> calcControlValue(Company("005930"))
+        {"controlPremium": 12000, "premiumPct": 18.5, ...}
+
+    Guide:
+        Synergy 와 동시 합산 금지 — 이중계산. storyValidation 이 경고.
+
+    When:
+        M&A 시나리오 분석 또는 행동주의/지배구조 개선 가치 답변 시.
+
+    How:
+        calcControlValue(company) 또는 overrides={"optimalROIC": 15} 형식.
+
+    Requires:
+        calcDFV + multiStageDcf + calcRoicTimeline + synth.overrides + riskPremiums.
+
+    Raises:
+        없음 — 데이터 부족 시 None 또는 controlPremium=0.
+
+    See Also:
+        - calcSynergyValue : M&A 시너지 (본 함수와 독립 계산)
+        - multiStageDcf : 재구축 시나리오 DCF 본체
+        - Damodaran *Dark Side of Valuation* Ch.17
+
+    AIContext:
+        지배구조 변경/행동주의 가치 답변 시 controlPremium + premiumPct 인용.
     """
     overrides = overrides or {}
     warnings: list[str] = []
@@ -146,18 +187,55 @@ def calcSynergyValue(
 ) -> dict[str, Any] | None:
     """합병 시너지 계산 — cost / revenue / financial.
 
+    Capabilities:
+        - standalone A + B 의 calcDFV 결과 합 대비 combined 가치 차이 = synergy
+        - 유형별 multiplier (cost 5% / revenue 8% / financial 3%)
+        - integration cost 10% 차감 후 netSynergy 산출
+
     Parameters
     ----------
+    acquirer : Company
+        인수자 회사.
+    target : Company
+        피인수 회사.
     synergyType :
         "cost" — 합병 후 운영비 절감 (opex ×0.95)
         "revenue" — 교차 판매 성장 (g +2%p)
         "financial" — 자본 효율 (WACC -50bps)
+    overrides : dict, optional
+        가정 override.
 
     Returns
     -------
     dict
         standaloneA, standaloneB, combinedValue, synergy, synergyPct,
         integrationCost, netSynergy, synergyType, warnings
+
+    Example:
+        >>> calcSynergyValue(acq, tgt, synergyType="cost")
+        {"synergy": 8e10, "netSynergy": 7.2e10, ...}
+
+    Guide:
+        Control Value 와 합산 금지 — 이중계산. 시너지 multiplier 는 단순 휴리스틱.
+
+    When:
+        M&A 시나리오 분석 시 시너지 가치 인용.
+
+    How:
+        calcSynergyValue(acquirer, target, synergyType="cost"|"revenue"|"financial").
+
+    Requires:
+        calcDFV — acquirer/target 양쪽 dFV 산출 가능해야 함.
+
+    Raises:
+        없음 — calcDFV 실패 시 None.
+
+    See Also:
+        - calcControlValue : 단일 기업 지배구조 가치
+        - Damodaran *Dark Side of Valuation* Ch.17
+
+    AIContext:
+        M&A 시너지 가치 답변 시 synergyType + netSynergy + integrationCost 인용.
     """
     overrides = overrides or {}
     warnings: list[str] = []

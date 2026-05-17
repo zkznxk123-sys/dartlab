@@ -252,10 +252,43 @@ def _portfolioReturns(codes: list[str], market: str, year: str, maxN: int = 30) 
 def buildFactors(market: str = "KR") -> dict | None:
     """진짜 횡단면 SMB/HML/RMW/CMA 시계열 빌드 (캐시됨).
 
+    Capabilities:
+        - Fama-French 5 분위 portfolio 형성 → 종목 등가중 일별 log return → SMB/HML/RMW/CMA 시계열
+        - 모듈 캐시 (1 회 빌드 → 세션 동안 재사용)
+
+    Args:
+        market: ``"KR"`` 만 지원 (US 추후 추가).
+
     Returns:
-        dict with keys: year, universe, smb, hml, rmw, cma (np.ndarray),
-                        notes (proxy 사용 명시)
-        또는 None
+        dict — year/universe/smb/hml/rmw/cma (np.ndarray)/notes. 데이터 부재 시 None.
+
+    Guide:
+        Fama-French 1992/2015 표준 5 분위 형성. universe < 100 시 None. proxy 한계 (size 는
+        book equity, BM 은 equity/assets) 는 ``notes`` 에 명시.
+
+    When:
+        Factor 시계열 빌드 + AI 팩터 SMB/HML/RMW/CMA 답변.
+
+    How:
+        finance.parquet → 5 분위 portfolio → 종목 일별 수익률 평균 → SMB/HML 등.
+
+    Requires:
+        finance.parquet KR + 종목 100+ + 일별 가격 데이터.
+
+    Raises:
+        없음 — 부재 시 None.
+
+    Example:
+        >>> f = buildFactors("KR")
+        >>> f["smb"].shape
+        (1260,)
+
+    See Also:
+        - factor.calc.decomposeFactor : 사용처
+        - synth.scanBridge : 회계 데이터 추출
+
+    AIContext:
+        "한국 SMB 팩터 빌드 가능" 답변 시 universe + year 인용.
     """
     cache_key = (market, "latest")
     if cache_key in _FACTOR_CACHE:

@@ -13,10 +13,19 @@ from typing import Any
 def calcQualityWACC(company: Any, baseWacc: float, *, basePeriod: str | None = None) -> dict:
     """4엔진 질적 요인 → WACC 가감 산출.
 
+    Capabilities:
+        - 신용등급/거버넌스/이익품질/사이클 4 인자 → WACC %p 가감 합산
+        - totalSpread 는 [-2.5, +5.5] %p 로 clamp (AA 대기업 음수 프리미엄 허용)
+        - Fernandez 권고 — 적정가에 사후 곱셈 금지, 입력에서 조정
+
     Parameters
     ----------
     company : Company
-    base_wacc : float — 기본 WACC (%)
+        대상 기업.
+    baseWacc : float
+        기본 WACC (%).
+    basePeriod : str, optional
+        기준 기간.
 
     Returns
     -------
@@ -25,6 +34,32 @@ def calcQualityWACC(company: Any, baseWacc: float, *, basePeriod: str | None = N
         baseWACC : float
         totalSpread : float — 가감 합계 (%p)
         factors : list[dict]
+
+    Example:
+        >>> calcQualityWACC(Company("005930"), baseWacc=9.0)
+        {"adjustedWACC": 8.0, "totalSpread": -1.0, "factors": [...]}
+
+    Guide:
+        factors 각 dict 는 {name, spread, reason} — UI 에서 근거 표시.
+
+    When:
+        calcDFV 의 WACC 조정 단계 (Damodaran multi-stage DCF 진입 직전).
+
+    How:
+        calcQualityWACC(company, baseWacc=9.0).
+
+    Requires:
+        Company.credit/macro 메서드 + analysis.financial.governance/earningsQuality.
+
+    Raises:
+        없음 — 각 factor 헬퍼 실패 시 spread=0.0.
+
+    See Also:
+        - calcDFV : 본 함수 결과를 사용하는 진입점
+        - Fernandez "96 Common Errors" / Gompers et al. (2003)
+
+    AIContext:
+        WACC 조정 근거 답변 시 factors 의 reason 인용 (신용등급 AA 등).
     """
     factors = []
     factors.append(_creditSpread(company, basePeriod))

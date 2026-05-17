@@ -79,8 +79,59 @@ from dartlab.synth.scanBridge import (
 def aggregateEarningsCycle(financeDf: pl.DataFrame) -> EarningsCycleResult:
     """전종목 영업이익 합계 YoY → 이익 사이클.
 
+    Capabilities:
+        scan/finance.parquet 의 연간 연결 영업이익 전종목 합계 → YoY 변화 →
+        현재 방향 (expanding/contracting/stable). bottom-up 매크로 이익 사이클.
+
     Args:
-        financeDf: scan/finance.parquet 전체 DataFrame
+        financeDf: scan/finance.parquet 전체 DataFrame.
+
+    Returns:
+        EarningsCycleResult — periods/totalOperatingIncome(억원)/yoyChanges/
+        currentDirection/currentLabel/companyCount/description.
+
+    Example:
+        >>> r = aggregateEarningsCycle(financeDf)
+        >>> r.currentDirection, r.yoyChanges[-1]
+        ('expanding', 12.5)
+
+    Guide:
+        YoY > 5% = expanding, < -5% = contracting. companyCount 와 함께 인용 시
+        대표성 검증 가능 (2000+ 사 권장).
+
+    When:
+        ``analyzeCorporate`` 내부 + AI 한국 기업 이익 사이클 답변.
+
+    How:
+        _extract_annual_consolidated → _sum_account_bridge ("영업이익") → YoY
+        계산 → 5% 임계로 방향.
+
+    Requires:
+        scan/finance.parquet (연간 연결 재무제표 전종목).
+
+    Raises:
+        없음 — 2 기 미만 데이터면 "데이터부족" 반환.
+
+    See Also:
+        - ponziRatio : ICR<1 기업 비중
+        - leverageCycle : 부채비율 중앙값
+
+    AIContext:
+        currentLabel + yoyChanges[-1] + companyCount 인용으로 "2400 사 영업이익
+        +12.5% (이익확장)" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년 YoY 만 인용 + 추세 미관찰
+            - companyCount 누락 (대표성 의심 가능)
+            - 분기 데이터 입력 (연간이 표준)
+        OutputSchema:
+            EarningsCycleResult ``(periods, totalOperatingIncome, yoyChanges,
+            currentDirection, currentLabel, companyCount, description)``.
+        Prerequisites: 연간 연결 finance parquet.
+        Freshness: 분기 (실적 발표).
+        Dataflow: parquet → 연간 합계 → YoY → 방향.
+        TargetMarkets: KR (메인).
     """
     annual = _extract_annual_consolidated(financeDf)
     result = _sum_account_bridge(annual, "영업이익")
@@ -125,8 +176,59 @@ def aggregateEarningsCycle(financeDf: pl.DataFrame) -> EarningsCycleResult:
 def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
     """ICR<1 기업 비중 추이 → Minsky Ponzi 비율.
 
-    ICR(이자보상배율) = 영업이익 / 이자비용.
-    ICR < 1 = 영업이익으로 이자도 못 갚는 기업.
+    Capabilities:
+        Minsky Hypothesis (Hedge → Speculative → Ponzi finance) 의 Ponzi finance
+        단계 정량화 — ICR = 영업이익 / 이자비용 < 1 인 기업 비중 시계열 + 추세
+        (rising/stable/falling). 매크로 부채 사이클 핵심 진단.
+
+    Args:
+        financeDf: scan/finance.parquet 전체 DataFrame.
+
+    Returns:
+        PonziRatioResult — periods/ratios/currentRatio/trend/trendLabel/
+        description.
+
+    Example:
+        >>> r = ponziRatio(financeDf)
+        >>> r.currentRatio, r.trend
+        (0.15, 'rising')
+
+    Guide:
+        currentRatio > 0.2 = Ponzi 비중 위험. trend "rising" + analyzeCycle
+        contraction 동시 = 부채 사이클 피크 신호.
+
+    When:
+        ``analyzeCorporate`` 내부 + AI 한국 부채 위기 답변.
+
+    How:
+        연간 연결 → 각 연도 영업이익/이자비용 매핑 → ICR 계산 → < 1 카운트 /
+        전체 → ±0.02 임계로 trend.
+
+    Requires:
+        finance.parquet 의 영업이익 + 이자비용 계정.
+
+    Raises:
+        없음 — common 데이터 없으면 "데이터부족".
+
+    See Also:
+        - minskyPhase : Minsky 3 단계 분류
+        - leverageCycle : 부채비율 중앙값
+
+    AIContext:
+        currentRatio + trendLabel 인용으로 "ICR<1 기업 15% (상승) — Ponzi 단계
+        진입" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단년 비중 단정 + trend 미관찰
+            - 이자비용 0 분모 처리 누락
+        OutputSchema:
+            PonziRatioResult ``(periods, ratios, currentRatio, trend,
+            trendLabel, description)``.
+        Prerequisites: 영업이익 + 이자비용 계정 매핑된 finance parquet.
+        Freshness: 분기.
+        Dataflow: 연간 → ICR 매핑 → < 1 비중 → 추세.
+        TargetMarkets: KR.
     """
     from dartlab.synth.scanBridge import getAccountValue, isEdgarSchema
 
@@ -180,7 +282,62 @@ def ponziRatio(financeDf: pl.DataFrame) -> PonziRatioResult:
 
 
 def leverageCycle(financeDf: pl.DataFrame) -> LeverageCycleResult:
-    """전종목 부채비율 중간값 추이."""
+    """전종목 부채비율 중간값 추이.
+
+    Capabilities:
+        scan/finance.parquet 전종목 부채/자본 비율의 중앙값 시계열 + 추세
+        (leveraging/deleveraging/stable). Dalio 매크로 부채 사이클의 KR 미시
+        검증.
+
+    Args:
+        financeDf: scan/finance.parquet 전체 DataFrame.
+
+    Returns:
+        LeverageCycleResult — periods/medianDebtRatio(%)/currentLevel/trend/
+        trendLabel/description.
+
+    Example:
+        >>> r = leverageCycle(financeDf)
+        >>> r.trend, r.currentLevel
+        ('rising', 95.2)
+
+    Guide:
+        currentLevel > 100% = 자본 초과 부채 평균. trend "rising" + ponziRatio
+        rising 동시 = 부채 사이클 후기.
+
+    When:
+        ``analyzeCorporate`` 내부 + AI 한국 기업 부채 답변.
+
+    How:
+        _extract_annual_consolidated → _median_ratio_bridge (부채총계/자본총계) →
+        ±2%p 임계로 trend.
+
+    Requires:
+        finance.parquet 의 부채총계 + 자본총계.
+
+    Raises:
+        없음 — 2 기 미만 데이터면 "데이터부족".
+
+    See Also:
+        - ponziRatio : ICR < 1 비중
+        - aggregateEarningsCycle : 영업이익 사이클
+
+    AIContext:
+        currentLevel + trendLabel 인용으로 "부채비율 95% (상승) — 레버리지
+        사이클 후기" 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 평균 사용 (중앙값이 표준)
+            - 단년 추세 단정
+        OutputSchema:
+            LeverageCycleResult ``(periods, medianDebtRatio, currentLevel,
+            trend, trendLabel, description)``.
+        Prerequisites: 부채/자본 매핑된 finance parquet.
+        Freshness: 분기.
+        Dataflow: 연간 → 중앙값 → 추세.
+        TargetMarkets: KR.
+    """
     annual = _extract_annual_consolidated(financeDf)
     result = _median_ratio_bridge(annual, "부채총계", "자본총계")
 

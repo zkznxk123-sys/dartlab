@@ -76,45 +76,65 @@ def _loadScanFinance(market: str) -> pl.DataFrame | None:
 def analyzeCorporate(*, market: str = "KR", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
     """기업집계 매크로 분석.
 
-    전종목 재무제표(scan/finance.parquet)를 집계하여
-    이익 사이클, Ponzi 비율, 레버리지 사이클을 bottom-up으로 산출한다.
+    Capabilities:
+        scan/finance.parquet 전종목 재무제표 → bottom-up 집계 → 영업이익 사이클
+        + Ponzi 비율 (이자 > 영업이익 기업 비중) + 레버리지 사이클 (중앙값
+        부채비율). 매크로 top-down 보완.
 
-    Parameters
-    ----------
-    market : str
-        시장 코드 ("US" | "KR"). 기본 "KR".
-    as_of : str | None
-        기준일 (YYYY-MM-DD). None이면 최신.
-    overrides : dict | None
-        AI 가정 교체.
+    Args:
+        market: 시장 코드 ``"US"`` | ``"KR"``. 기본 ``"KR"``.
+        asOf: 기준일 (YYYY-MM-DD). None 이면 최신.
+        overrides: AI 가정 교체. 현재 미사용 (forward-compat).
 
-    Returns
-    -------
-    dict
-        market : str — 시장 코드
-        earningsCycle : dict | None — 이익 사이클
-            periods : list[str] — 분석 기간 리스트
-            totalOperatingIncome : list[float] — 기간별 영업이익 합계 (원 또는 달러)
-            yoyChanges : list[float | None] — 기간별 YoY 변화율 (%)
-            currentDirection : str — 현재 방향 ("expanding" | "contracting" | "stable")
-            currentLabel : str — 한글 레이블
-            companyCount : int — 분석 대상 기업 수
-            description : str — 해설
-        ponziRatio : dict | None — Ponzi 비율 (이자비용 > 영업이익 기업 비중)
-            periods : list[str] — 분석 기간 리스트
-            ratios : list[float] — 기간별 Ponzi 비율 (0~1)
-            currentRatio : float — 최신 Ponzi 비율 (0~1)
-            trend : str — 추세 ("rising" | "falling" | "stable")
-            trendLabel : str — 한글 레이블
-            description : str — 해설
-        leverageCycle : dict | None — 레버리지 사이클
-            periods : list[str] — 분석 기간 리스트
-            medianDebtRatio : list[float] — 기간별 중앙값 부채비율 (%)
-            currentLevel : float — 최신 중앙값 부채비율 (%)
-            trend : str — 추세 ("deleveraging" | "leveraging" | "stable")
-            trendLabel : str — 한글 레이블
-            description : str — 해설
-        description : str | None — 데이터 부재 시 안내 메시지
+    Returns:
+        dict — market/earningsCycle(periods/totalOperatingIncome/yoyChanges/
+        currentDirection/companyCount)/ponziRatio(periods/ratios/currentRatio/
+        trend)/leverageCycle(periods/medianDebtRatio/trend)/description.
+
+    Example:
+        >>> r = analyzeCorporate(market="KR")
+        >>> r["earningsCycle"]["currentDirection"]
+        'expanding'
+
+    Guide:
+        ponziRatio > 0.2 = 위험 (Ponzi finance 기업 비중 ↑). leverageCycle
+        trend "leveraging" + earningsCycle "contracting" 동시 = 매크로 부채 사이클
+        피크 신호.
+
+    When:
+        ``analyzeSummary`` corporate 보조축 + AI 한국 기업 매크로 답변.
+
+    How:
+        _loadScanFinance (parquet) → aggregateEarningsCycle + ponziRatio +
+        leverageCycle 3 함수 호출 → dict 합성.
+
+    Requires:
+        scan/finance.parquet (dartlab collect --scan 또는 downloadAll('scan')).
+
+    Raises:
+        없음 — parquet 없으면 description 안내 메시지 반환.
+
+    See Also:
+        - aggregateEarningsCycle : 영업이익 집계
+        - ponziRatio : Ponzi finance 비율
+        - leverageCycle : 부채비율 사이클
+
+    AIContext:
+        earningsCycle.currentLabel + ponziRatio.currentRatio + leverageCycle.
+        trendLabel 3 필드 인용으로 한 단락 답변.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 시장="US" 호출 (KR scan 한정. US 미준비)
+            - parquet 없는데 결과 단정 (description 메시지 확인 필수)
+            - currentDirection 만 인용 + ponzi/leverage 무시
+        OutputSchema:
+            ``{market, earningsCycle, ponziRatio, leverageCycle, description}``.
+        Prerequisites: scan/finance.parquet (Q 별 분기 재무제표 약 2500 사 × N
+            분기).
+        Freshness: 분기 (실적 발표 직후).
+        Dataflow: parquet → 3 집계 함수 → dict.
+        TargetMarkets: KR (메인). US 미지원.
     """
     result: dict = {"market": market.upper()}
 

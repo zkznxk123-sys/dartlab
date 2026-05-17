@@ -82,6 +82,33 @@ def calcBAB(
     Returns:
         dict — market / betaWindow / volWindow / universe / scores / topLow / topHigh
         / volScores / topLowVol / topHighVol / interpretation.
+
+    Guide:
+        Frazzini-Pedersen 2014 BAB. KR 만 지원. 252 봉 일별 OLS β + 60 봉 vol 보조 랭킹.
+
+    When:
+        Cross-sectional BAB strategy + AI low-beta 종목 답변.
+
+    How:
+        전종목 OLS β → percentile 랭킹 → topLow/High 추출. 종목별 sector 벤치 자동.
+
+    Requires:
+        KR 종목 + 252+ 봉 가격 데이터.
+
+    Raises:
+        없음 — KR 외 또는 데이터 부족 시 None.
+
+    Example:
+        >>> r = calcBAB(market="KR", stockCode="005930")
+        >>> r["stockResult"]["betaPercentile"]
+        0.32
+
+    SeeAlso:
+        - factor.calc.decomposeFactor : 단일 종목 β
+        - portfolio.optimize.allocateERC : low-vol weighting
+
+    AIContext:
+        "BAB low-beta 종목 추천" 답변 시 topLow + interpretation 인용.
     """
     if market != "KR":
         return None

@@ -101,6 +101,23 @@ intentBoosts:
       - "audit 반영"
       - "독스트링 보강"
     boost: 15.0
+  - skillIds:
+      - "recipes.incubator.thesisKillChain.index"
+      - "recipes.incubator.thesisKillChain.premortemQualityGate"
+      - "recipes.incubator.thesisKillChain.deepDive"
+    terms:
+      - "진짜 강한"
+      - "강한 스킬"
+      - "타협 없이"
+      - 타협없이
+      - "약한 결론"
+      - "품질 게이트"
+      - "quality gate"
+      - 프리모템
+      - premortem
+      - "thesis 깨"
+      - "투자 논리 깨"
+    boost: 18.0
   - skillIds: ["runtime.workbenchEvidenceFlow"]
     terms:
       - 근거
@@ -246,7 +263,7 @@ lastUpdated: '2026-05-07'
 
 ## 무엇을 하나
 
-`dartlab.skills.search(query)` 가 query 와 skill 의 매칭 점수를 계산할 때, 본 skill 의 frontmatter `intentBoosts[]` 에 정의된 18 개 의도 규칙을 적용한다. 각 rule 은 `(skillIds, terms, boost)` 로 구성:
+`dartlab.skills.search(query)` 가 query 와 skill 의 매칭 점수를 계산할 때, 본 skill 의 frontmatter `intentBoosts[]` 에 정의된 19 개 의도 규칙을 적용한다. 각 rule 은 `(skillIds, terms, boost)` 로 구성:
 
 - `skillIds[]`: 가중치를 받을 대상 skill id 목록.
 - `terms[]`: query 에 (case-insensitive substring) 등장하면 매칭으로 간주할 키워드 목록.

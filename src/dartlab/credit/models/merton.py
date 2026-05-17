@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> object:
     """BC — 사용 시점에 synth/distress/merton 동적 lookup."""
     import importlib
 

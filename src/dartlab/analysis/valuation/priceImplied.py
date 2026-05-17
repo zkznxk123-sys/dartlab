@@ -38,6 +38,58 @@ def reverseImpliedGrowth(
     원리: marketCap = PV(미래 FCF) + PV(TV)
     FCF = Revenue × margin × (1 - taxRate) + DA - CAPEX - ΔNWC ≈ Revenue × fcfMargin
     이를 g에 대해 역산하면 시장이 가정하는 매출 성장률이 나온다.
+
+    Capabilities:
+        - 이진 탐색으로 EV = DCF(g) 만족하는 g 역산
+        - FCF margin 자동 추정 (실제 OCF-CAPEX → revenue 비율, fallback 65%)
+        - ±30% hard cap (P/S 고배율 비현실 역산 방지)
+
+    Parameters
+    ----------
+    series : dict
+        finance.timeseries 시계열 dict.
+    marketCap : float
+        시가총액 (원).
+    wacc : float
+        가정 할인율 (%, 기본 10).
+    terminalGrowth : float
+        가정 영구성장률 (%, 기본 2).
+    horizon : int
+        예측 구간 (년, 기본 3).
+    netDebt : float, optional
+        순차입금 (EV 보정).
+
+    Returns
+    -------
+    PriceImpliedRevenue | None
+        impliedGrowthRate, impliedRevenue, assumedMargin, assumedWacc,
+        assumedTerminalGrowth, warnings. marketCap ≤ 0 또는 revenue 부재 시 None.
+
+    Example:
+        >>> r = reverseImpliedGrowth(series, marketCap=4.5e14)
+        >>> r.impliedGrowthRate
+
+    Guide:
+        wacc ≤ terminalGrowth 시 None. 수렴 실패 시 warning + impliedGrowthRate=0.
+
+    When:
+        "시장이 어떤 성장을 가정하고 있나" 질문 + 엔진 예측 대비 갭 분석.
+
+    How:
+        reverseImpliedGrowth(series, marketCap=mc) + computeGap(result, forecastG).
+
+    Requires:
+        getTTM (revenue/operating_profit/OCF/CAPEX).
+
+    Raises:
+        없음.
+
+    See Also:
+        - computeGap : 엔진 예측과 시장 내재 갭 + 신호
+        - dcfValuation : 정방향 DCF
+
+    AIContext:
+        시장 평가 합리성 분석 시 impliedGrowthRate 인용 + 자체 매출 예측과 갭.
     """
     if marketCap is None or marketCap <= 0:
         return None
@@ -116,7 +168,52 @@ def computeGap(
     implied: PriceImpliedRevenue,
     forecastGrowthRate: float,
 ) -> None:
-    """엔진 예측 성장률 vs 시장 내재 성장률 갭 계산 + 신호 부여."""
+    """엔진 예측 성장률 vs 시장 내재 성장률 갭 계산 + 신호 부여.
+
+    Capabilities:
+        - gap = forecastGrowthRate - impliedGrowthRate 계산
+        - ±5%p 임계 기준 underpriced/overpriced/fair 신호 부여
+        - implied 객체에 gapVsForecast/signal 속성 mutate
+
+    Parameters
+    ----------
+    implied : PriceImpliedRevenue
+        reverseImpliedGrowth 결과 (in-place 수정).
+    forecastGrowthRate : float
+        엔진/AI 예측 매출 성장률 (%).
+
+    Returns
+    -------
+    None
+        in-place 수정 — implied.gapVsForecast/signal 세팅.
+
+    Example:
+        >>> computeGap(implied, forecastGrowthRate=8.0)
+        >>> implied.signal
+        'underpriced'
+
+    Guide:
+        gap > 5%p → underpriced, < -5%p → overpriced, 그 외 fair.
+
+    When:
+        reverseImpliedGrowth 직후 자체 매출 예측과 비교 단계.
+
+    How:
+        computeGap(implied, forecastGrowthRate=engineForecast).
+
+    Requires:
+        reverseImpliedGrowth 가 반환한 PriceImpliedRevenue 인스턴스.
+
+    Raises:
+        없음.
+
+    See Also:
+        - reverseImpliedGrowth : 시장 내재 성장률 역산
+        - revenueForecast : 엔진 예측 본체
+
+    AIContext:
+        "시장이 보수적/낙관적" 판정 답변 시 gap + signal 인용.
+    """
     gap = forecastGrowthRate - implied.impliedGrowthRate
     implied.gapVsForecast = round(gap, 2)
 

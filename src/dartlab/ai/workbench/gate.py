@@ -38,7 +38,7 @@ _TABLE_KINDS = {"tableRef"}
 
 
 def runGate(state: WorkbenchState) -> Iterator[TraceEvent]:
-    """runGate — TODO 한국어 동작 설명."""
+    """GATE 패스 — answer 의 숫자/날짜/표가 ref 로 뒷받침되는지 검증."""
     state.currentPass = "gate"
     yield TraceEvent(kind="pass_enter", data={"pass": "gate"})
 

@@ -29,14 +29,37 @@ class IndustryDef:
     stages: list[StageInfo]
 
     def stageByKey(self, key: str) -> StageInfo | None:
-        """stageByKey — TODO 한국어 동작 설명."""
+        """stage key 로 StageInfo 조회. 없으면 None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> from dartlab.industry.taxonomy import getIndustry
+            >>> getIndustry("semiconductor").stageByKey("memory").name
+            '메모리'
+
+        Requires:
+            - 외부 의존 없음 (in-memory 리스트 룩업).
+        """
         for s in self.stages:
             if s.key == key:
                 return s
         return None
 
     def allKeywords(self) -> dict[str, list[str]]:
-        """stage key → keywords 매핑."""
+        """stage key → keywords 매핑.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> from dartlab.industry.taxonomy import getIndustry
+            >>> getIndustry("semiconductor").allKeywords().get("memory")[:3]
+
+        Requires:
+            - 외부 의존 없음.
+        """
         return {s.key: s.keywords for s in self.stages}
 
 
@@ -57,7 +80,18 @@ class IndustryNode:
     revenue: float | None = None  # 매출액 (원)
 
     def toDict(self) -> dict:
-        """toDict — TODO 한국어 동작 설명."""
+        """dataclass → nodes.json 행 dict 직렬화.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> IndustryNode("005930", "삼성전자", "semiconductor", "memory").toDict()["industry"]
+            'semiconductor'
+
+        Requires:
+            - 외부 의존 없음.
+        """
         return {
             "stockCode": self.stockCode,
             "corpName": self.corpName,
@@ -74,7 +108,18 @@ class IndustryNode:
 
     @staticmethod
     def fromDict(d: dict) -> IndustryNode:
-        """fromDict — TODO 한국어 동작 설명."""
+        """nodes.json 행 dict → IndustryNode 역직렬화.
+
+        Raises:
+            없음 — 누락 키는 기본값으로 폴백.
+
+        Example:
+            >>> IndustryNode.fromDict({"stockCode": "005930"}).stockCode
+            '005930'
+
+        Requires:
+            - 외부 의존 없음.
+        """
         return IndustryNode(
             stockCode=d.get("stockCode", ""),
             corpName=d.get("corpName", ""),
@@ -108,7 +153,18 @@ class IndustryEdge:
     ratio: float | None = None  # 매입비중 (%)
 
     def toDict(self) -> dict:
-        """toDict — TODO 한국어 동작 설명."""
+        """IndustryEdge → edges.json 행 dict 직렬화.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> IndustryEdge("006400", "삼성SDI", "005930", "삼성전자", "supplier", "battery").toDict()["type"]
+            'supplier'
+
+        Requires:
+            - 외부 의존 없음.
+        """
         return {
             "fromCode": self.fromCode,
             "fromName": self.fromName,
@@ -126,7 +182,18 @@ class IndustryEdge:
 
     @staticmethod
     def fromDict(d: dict) -> IndustryEdge:
-        """fromDict — TODO 한국어 동작 설명."""
+        """edges.json 행 dict → IndustryEdge 역직렬화.
+
+        Raises:
+            없음 — 누락 키는 기본값으로 폴백.
+
+        Example:
+            >>> IndustryEdge.fromDict({"fromCode": "006400", "toCode": "005930", "type": "supplier"}).edgeType
+            'supplier'
+
+        Requires:
+            - 외부 의존 없음.
+        """
         return IndustryEdge(
             fromCode=d.get("fromCode", ""),
             fromName=d.get("fromName", ""),

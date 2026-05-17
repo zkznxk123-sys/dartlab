@@ -55,6 +55,30 @@ def calcFundamentalMomentum(
 
     Returns:
         dict — market / year / universe / scores / components / topDouble / bottomDouble
+
+    Guide:
+        Chordia-Shivakumar (2006) — earnings + price double momentum 이 single
+        momentum 보다 강건. Top 10 double = 가장 확신 long.
+
+    When:
+        Quant 재무 알파 + AI double momentum 답변.
+
+    How:
+        earnings growth (YoY NI rank) + 12-1 price momentum rank → composite
+        score → top/bottom 10.
+
+    Requires:
+        scan finance.parquet + KRX OHLCV (12 개월).
+
+    Raises:
+        없음 — 실패는 None.
+
+    Example:
+        >>> calcFundamentalMomentum()["topDouble"][0]
+
+    See Also:
+        - calcMomentum : price momentum 단독
+        - calcEarningsSurprise : earnings SUE
     """
     if market != "KR":
         return None

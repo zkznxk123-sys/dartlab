@@ -36,7 +36,7 @@ def _detectGpu() -> dict[str, Any]:
 
 
 def detectOllama() -> dict[str, Any]:
-    """detectOllama — TODO 한국어 동작 설명."""
+    """ollama CLI 설치/버전/실행 상태 + 설치된 모델 목록 점검."""
     executable = shutil.which("ollama")
     version = None
     models: list[str] = []
@@ -65,5 +65,5 @@ def detectOllama() -> dict[str, Any]:
 
 
 def getInstallGuide() -> str:
-    """getInstallGuide — TODO 한국어 동작 설명."""
+    """Ollama 설치 안내 한 줄 — 외부 사용자 에러 메시지에 포함됨."""
     return "Ollama가 필요하면 https://ollama.com 에서 설치한 뒤 다시 시도하세요."

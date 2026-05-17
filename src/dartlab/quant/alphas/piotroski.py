@@ -140,10 +140,23 @@ def calcPiotroskiFactor(
         - 전종목 스냅샷 : calcPiotroskiFactor()
         - 단일종목 : analysis.financial.scorecard.calcPiotroskiDetail(company)
 
-    SeeAlso:
+    See Also:
         - analysis.financial.research.scoring.calcPiotroski : 단일 종목 9 신호
         - calcAltmanFactor : 부실 확률 (보완 축)
         - calcBeneishFactor : 이익 조작 감지 (보완 축)
+
+    When:
+        Quant 재무 건강 축 + AI 가치 + 품질 통합 스크리닝 진입점.
+
+    How:
+        scan finance.parquet 2 기 → 9 신호 매핑 (수익성 4 + 레버리지 3 + 효율
+        2) → F-Score (0~9) → strong/moderate/weak 분류.
+
+    Requires:
+        scan finance.parquet (2 기).
+
+    Raises:
+        없음 — 실패는 None.
 
     Args:
         market: ``"KR"`` | ``"US"``. 기본 ``"KR"``.

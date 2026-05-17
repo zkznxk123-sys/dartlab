@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 301,
+    "skillCount": 325,
     "categories": [
       {
         "id": "start",
@@ -32,7 +32,7 @@
         "id": "recipes",
         "title": "Recipes",
         "description": "?? ??? L1/L1.5 ??? ?? ?? ??? ???? ?? ??.",
-        "count": 96
+        "count": 120
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -4373,11 +4373,11 @@
       "id": "operation.aiEngine",
       "title": "aiEngine — dartlab.ai 내부 SSOT (7 원칙 · 도구 · provider · outcome loop)",
       "category": "operation",
-      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 9+1 도구 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.",
+      "purpose": "aiEngine 은 dartlab.ai 의 정점 SSOT — 3 층 능력 모델 (Capability/Skill/Tool) · 5 패스 workbench (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) · canonical 도구 세트 (PascalCase) · 9 종 provider 카탈로그 · outcome ground truth 선순환 · MCP 표면 매핑 · 회귀 가드. P1 lock 완료 (2026-05-05) 이후 변경은 SSOT 갱신 PR 의무. 트리거 — 'ai engine', 'workbench', 'ReadSkill', 'RunWorkbench', 'outcome_log', 'provider catalog'.",
       "whenToUse": [
         "dartlab.ai 내부 구조 이해",
         "workbench 5 패스 (BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST)",
-        "canonical 도구 화이트리스트 (9 데이터 + 1 meta)",
+        "canonical 도구 화이트리스트",
         "provider 카탈로그 (oauth-codex / openai / gemini / groq / cerebras / mistral / custom / ollama / codex)",
         "outcome ground truth 선순환 (pending → resolved + reflection)",
         "chat-native HARVEST bridge",
@@ -4388,7 +4388,7 @@
         "engines.company",
         "operation.philosophy"
       ],
-      "bodyPreview": "## 엔진 역할 `src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답. P1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무. ## 공개 호출 방식 ```python import dartlab # 진입점 — chat-native result = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None) # 진입점 — workbench (mode=analyze) result = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\") # MCP 표면 # ask · run_python · read_skill · read_capability · # web_search · save_artifact · compile_visual · run_workbench ``` LLM 이 자율적으로 canonical 9+1 도구 호출. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate. ## 호출 동작 ### 1. 3 층 능력 모델 — 모두 dartlab 전역 자산, AI 는 소비자 | 층 | 위치 | 표현 | 누가 쓰나 | |---|---|---|---| | **L1 Capability** | `s"
+      "bodyPreview": "## 엔진 역할 `src/dartlab/ai/` 의 정점 단일 진실 출처. 코드와 충돌 시 lock 후에는 SSOT 가 정답. P1 lock 완료 (2026-05-05). mock provider e2e 통과 (`tests/ai/test_workbench_loop.py`). 이후 변경은 SSOT 갱신 PR 의무. ## 공개 호출 방식 ```python import dartlab # 진입점 — chat-native result = dartlab.ask(\"삼성전자 ROE 추세 분석\", mode=None) # 진입점 — workbench (mode=analyze) result = dartlab.ask(\"삼성전자 종합 신용 분석\", mode=\"analyze\") # MCP 표면 # ask · run_python · read_skill · read_capability · # web_search · save_artifact · create_user_skill · compile_visual · run_workbench ``` LLM 이 자율적으로 canonical 도구를 호출한다. 깊은 분석은 LLM 이 `RunWorkbench` meta-tool 로 elevate 한다. ## 호출 동작 ### 1. 3 층 능력 모델 — 모두 dartlab 전역 자산, AI 는 소비자 | 층 | 위치 | 표현 | 누가 쓰나 | |---|---|---|---| | **L1 Capability** | `src/dartlab/<engine>/` | Python 함수·클래스 + docstring | 사람·AI·MCP·UI | | **L2 Skill** | `src/dartlab/skills/specs/<engine>/<id>.md` | markdown spec + frontmatter | 사람·AI·MCP·UI·audit | | **L3 Tool** | `src/dartlab/ai/tools/` | canonical tool whitelist (LLM 이 손에 쥠) | AI 전용 | - L1·L2 는 본 SSOT 의 범위 밖. 본 SSOT 는 L3 와 작업대 (workbench) 만 정의. - L2 는 AI 안에 두지 않는다. `dartlab.skills.*` 가 단일 SSOT 인프라 (SkillSpec / searchSkills / compiler). AI 는 공식 Skill OS 의 *read-only 소비자* 이며 spec 작성자나 승격자가 아니다. 예외적으로 `CreateUserSkill` 은 사용자 요청 시 `.dartlab/skills` local user draft 만 작성하고, 공식 skill 은 운영자 검토를 거친 `kind: curated` 자산으로 관리한다. ### 2. 작업대 5 패스 ``` BRIEF → WORK → CRITIQUE → COMPOSE → GATE → HARVEST ``` 각 패스는 LLM 호출 가능한 별도 단계. system prompt 는 패스별 분리 (`workbench/prompts.py`). 같은 분석가 정체성 (외부 목소리) "
     },
     {
       "id": "operation.aiProductReplatform",
@@ -4570,7 +4570,7 @@
         "반복 audit 결과를 docstring 또는 SkillSpec에 반영할 때"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 절차\n\n- 새 내용이 엔진 API 능력이면 docstring/capability로 보강한다.\n- 새 내용이 여러 엔진을 조합하는 분석 절차면 curated skill 후보로 둔다.\n- 새 내용이 테스트, 릴리즈, 문서, UI, 데이터 같은 운영 규칙이면 operation skill로 둔다.\n- 프로젝트별 실험은 `.dartlab/skills/**/*.md` user skill로 시작한다.\n- 신규 분석 skill 을 자율 발굴·검증으로 만드는 6 단계 사이클과 audit 회환은 [operation.skillDevelopmentLoop](/skills/operation.skillDevelopmentLoop) 가 SSOT (gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate → auditFeedback). 본 skill 은 graduate 단계의 *승격 규칙* 만 정의한다.\n- official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다.\n- 승격 후에도 SkillSpec은 schema를 복사하지 않고 capabilityRefs와 sourceRe"
+      "bodyPreview": "## 절차 - 새 내용이 엔진 API 능력이면 docstring/capability로 보강한다. - 새 내용이 여러 엔진을 조합하는 분석 절차면 curated skill 후보로 둔다. - 새 내용이 테스트, 릴리즈, 문서, UI, 데이터 같은 운영 규칙이면 operation skill로 둔다. - 프로젝트별 실험은 `.dartlab/skills/**/*.md` user skill로 시작한다. - 사용자가 \"내 스킬을 만들어 넣고 싶다\"는 의도를 보이면 `CreateUserSkill` 로 `.dartlab/skills` 아래에만 `kind/scope/category: user`, `status: drafted` 초안을 작성한다. 공식 `src/dartlab/skills/specs` 는 건드리지 않는다. - 신규 분석 skill 을 자율 발굴·검증으로 만드는 6 단계 사이클과 audit 회환은 [operation.skillDevelopmentLoop](/skills/operation.skillDevelopmentLoop) 가 SSOT (gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate → auditFeedback). 본 skill 은 graduate 단계의 *승격 규칙* 만 정의한다. - official 승격은 구조 lint, 서버 audit P, 사용자 확인이 모두 있을 때만 허용한다. - 승격 후에도 SkillSpec은 schema를 복사하지 않고 capabilityRefs와 sourceRefs로 원천을 연결한다. ## 로컬 user skill 작성 규칙 - 로컬 user skill 은 `CreateUserSkill` 로 만든다. 저장 위치는 `.dartlab/skills/{user.slug}.md` 또는 `.dartlab/skills/incubating/{user.slug}.md` 이며, 공식 산출물 동기화 대상이 아니다. - `capabilityRefs` 가 있으면 본문과 `toolRefs` 에서 `EngineCall` 을 먼저 둔다. `RunPython` 은 여러 EngineCall 결과 결합, L1.5 helper 확인, 표 정리 같은 `fallback` 절차로만 쓴다. - `visualRefs` 는 `status: observed` 인 `engines.viz.*` 만 허용한다. 검증되지 않은 viz skill 은 `visualGuidance` 에 후보로도 공식처럼 적지 않는다. - `ReadSkill(includeUser=true)` 로 검색·사용하되, 답변에서는 `trustTier: localUserDraft` 로 취급한다. 공식 승격 전에는 사용자 로컬 지침이지 DartLab builtin 계약이 아니다. - official 로 승격하려면 user skill 본문, selfRun 결과, redTeam 결과, 운영자 ack 를 모아 별도 변경으로 `src/dartlab/skills/specs/{category}/` 에 작성하고 산출물을 동기화한다. ##"
     },
     {
       "id": "operation.intentBoosts",
@@ -4585,7 +4585,7 @@
         "skill 검색이 의도와 어긋나"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 무엇을 하나\n\n`dartlab.skills.search(query)` 가 query 와 skill 의 매칭 점수를 계산할 때, 본 skill 의 frontmatter `intentBoosts[]` 에 정의된 18 개 의도 규칙을 적용한다. 각 rule 은 `(skillIds, terms, boost)` 로 구성:\n\n- `skillIds[]`: 가중치를 받을 대상 skill id 목록.\n- `terms[]`: query 에 (case-insensitive substring) 등장하면 매칭으로 간주할 키워드 목록.\n- `boost`: 매칭 시 점수에 더할 값.\n\n추가로 `engines.company.usEdgarReview` 는 ticker 정규식 (`\\b[A-Z]{1,5}\\b`) 매칭 시 +8.0 boost — 이는 코드 (`registry.py`) 에 남는다 (정규식 정의는 markdown 으로 옮기지 않는다).\n\n## SSOT 정책\n\n본 파일이 의도 가중치의 단일 정본이다. `src/dartlab/skills/registry.py` 의 `_INTENT_SKILL_BOOSTS` 는 본 frontmatter 를 lazy 로드하는 wrapper 만 보유한다"
+      "bodyPreview": "## 무엇을 하나\n\n`dartlab.skills.search(query)` 가 query 와 skill 의 매칭 점수를 계산할 때, 본 skill 의 frontmatter `intentBoosts[]` 에 정의된 19 개 의도 규칙을 적용한다. 각 rule 은 `(skillIds, terms, boost)` 로 구성:\n\n- `skillIds[]`: 가중치를 받을 대상 skill id 목록.\n- `terms[]`: query 에 (case-insensitive substring) 등장하면 매칭으로 간주할 키워드 목록.\n- `boost`: 매칭 시 점수에 더할 값.\n\n추가로 `engines.company.usEdgarReview` 는 ticker 정규식 (`\\b[A-Z]{1,5}\\b`) 매칭 시 +8.0 boost — 이는 코드 (`registry.py`) 에 남는다 (정규식 정의는 markdown 으로 옮기지 않는다).\n\n## SSOT 정책\n\n본 파일이 의도 가중치의 단일 정본이다. `src/dartlab/skills/registry.py` 의 `_INTENT_SKILL_BOOSTS` 는 본 frontmatter 를 lazy 로드하는 wrapper 만 보유한다. 새 의도 규칙은 본 파일의 frontmatter 에만 추가한다 — 코드 수정 불필요.\n\n## 다음 단계\n\n- [start.useSkillsCatalog](/skills/start.useSkillsCatalog) — query → skill 검색 절차.\n- [operation.opsAsSkills](/skills/operation.opsAsSkills) — 운영 문서가 어떻게 skills 로 흡수됐는지."
     },
     {
       "id": "operation.issues",
@@ -4631,7 +4631,7 @@
         "sourceRefs 기반으로 원문 위치를 보존할 때"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 절차\n\n- 과거 운영 문서 주제는 `engines.*`, `runtime.*`, `operation.*` skill로 흡수한다.\n- `/skills`와 `dartlab.skills.search()`를 공식 최초 탐색 표면으로 둔다.\n- 엔진 skill은 공개 호출 방식, 호출 동작, 대표 반환 형태, 실행 순서, 검증 게이트를 포함한다.\n- capability/docstring은 세부 필드와 코드 원천 자료이며, skill은 사람이 그대로 실행할 수 있는 공개 사용 문서다.\n- 기능 개선, API 변경, 반환 형태 변경, 운영 방식 개선이 있으면 관련 skill을 같은 변경에서 갱신한다.\n- 새 운영 규칙은 먼저 operation skill로 검색 가능해야 하며, 원문 위치가 필요하면 sourceRef를 반드시 둔다.\n- 이 전환이 완료되면 삭제된 운영 문서 경로를 공식 진입점으로 안내하지 않는다."
+      "bodyPreview": "## 절차\n\n- 과거 운영 문서 주제는 `engines.*`, `runtime.*`, `operation.*` skill로 흡수한다.\n- `/skills`와 `dartlab.skills.search()`를 공식 최초 탐색 표면으로 둔다.\n- 엔진 skill은 공개 호출 방식, 호출 동작, 대표 반환 형태, 실행 순서, 검증 게이트를 포함한다.\n- 엔진 skill은 tool card 다. 엔진이 무엇을 분석할 수 있는지, 어떤 공개 호출을 쓰는지, 어떤 evidence 를 반환하는지까지만 책임진다. 축별 상세 schema 는 capability/docstring 으로 연결하고, 여러 엔진·반증·시각화·후속 모니터링을 묶는 실제 분석 절차는 recipe skill 로 둔다.\n- recipe skill은 EngineCall 우선이다. 엔진에 이미 있는 기능을 RunPython 코드로 다시 구현하지 않고, RunPython 은 engine surface 가 아직 없거나 L1/L1.5 helper 결합이 필요한 fallback 경로로만 둔다.\n- recipe 의 visualRefs 는 observed 상태의 `engines.viz.*` 만 공식 연결한다. unveri"
     },
     {
       "id": "operation.philosophy",
@@ -4729,7 +4729,7 @@
         "독스트링 보강 후보 찾기"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 무엇을 하나\n\nDartLab 의 analysis 엔진은 25 axis 로 *재무 인과* 영역을 두텁게 덮고 있지만, Company/gather/scan 이 노출하는 원천 데이터 (가격·수급·뉴스·컨센서스·내부자거래·배당이벤트·공시텍스트·거시지표) 의 *시장신호·이벤트추적·시계열 누적* 관점은 빈칸이 많다. 또 운영 중 audit 결과가 *공개 API 의 새 축을 요구* 하는 신호로 누적될 때가 있다.\n\n이 skill 은 두 흐름을 한 곳에서 다룬다:\n1. **인큐베이션 사이클 (gapSpot → graduate)** — AI 자율 6 단계로 신규 분석 skill 을 발굴·검증·등재.\n2. **audit 회환 (auditFeedback)** — 운영 중 audit P 반복 또는 docstring 갭 적발 시 엔진 skill·docstring 으로 환류.\n\n책임 경계:\n- [operation.extendSkills](/skills/operation.extendSkills) — *승격 규칙* SSOT. user → curated, official 조건. 본 skill 의 graduate 단계가 호출.\n- [operation.coreloop](/skills/o"
+      "bodyPreview": "## 무엇을 하나 DartLab 의 analysis 엔진은 25 axis 로 *재무 인과* 영역을 두텁게 덮고 있지만, Company/gather/scan 이 노출하는 원천 데이터 (가격·수급·뉴스·컨센서스·내부자거래·배당이벤트·공시텍스트·거시지표) 의 *시장신호·이벤트추적·시계열 누적* 관점은 빈칸이 많다. 또 운영 중 audit 결과가 *공개 API 의 새 축을 요구* 하는 신호로 누적될 때가 있다. 이 skill 은 두 흐름을 한 곳에서 다룬다: 1. **인큐베이션 사이클 (gapSpot → graduate)** — 사용자 의도에 따라 AI 가 보조하는 6 단계로 신규 분석 skill 을 발굴·검증·등재. 2. **audit 회환 (auditFeedback)** — 운영 중 audit P 반복 또는 docstring 갭 적발 시 엔진 skill·docstring 으로 환류. 책임 경계: - [operation.extendSkills](/skills/operation.extendSkills) — *승격 규칙* SSOT. user → curated, official 조건. 본 skill 의 graduate 단계가 호출. - [operation.coreloop](/skills/operation.coreloop) — 자가개선 루프 *전체* SSOT (AuditPacket/ImprovementCandidate 메타). 본 skill 은 그 하위 한 사이클. 세 skill 은 중복 규칙 금지 — 본 skill 은 *사이클 + 회환*, extendSkills 는 *규칙*, coreloop 은 *메타*. ## 6 단계 인큐베이션 사이클 ``` gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate (.dartlab/skills/incubating/) (specs/{category}/) ``` ### 1. gapSpot - `dartlab.skills.search(축_명사구)` 를 *전 카테고리* 로 호출해 유사 skill 부재 확인. operation/runtime 까지 검색 (한 카테고리만 보면 중복 회귀). - ReadCapability 로 Company/gather/scan 의 노출 데이터 인벤토리 확인. - 후보 5~8 개를 표로 nominate. 각 후보는 `(axis 명 / 사용 데이터 / 가설 한 줄)`. - 후보 1 개 선택은 운영자 발화 또는 AI 자체 판단 (위험 낮은 것부터). ### 2. dataSanityCheck - protoSkill 작성 *전* 에 사용할 capability 를 1 종목 (대형 안정형, 예: 005930) 으로 호출해 *실제 반환 형태와 시계열 길이* 를 본다. - 실행 우선순위는 `EngineCall` → `RunPython fallback` 이다. `Company.show`, `Company.trace`, `Company.disclosure`, `scan.*`, `gather.*`, `analysis.*`, `quant.*`, `"
     },
     {
       "id": "operation.stability",
@@ -5256,7 +5256,7 @@
         "recipes.valuation.damodaran.narrativeMap",
         "recipes.valuation.damodaran.storyToDrivers"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionReadiness\"][\"status\"],\n        \"implementedSkills\": system[\"promotionReadiness\"][\"skillCount\"],\n        \"plannedSkills\": len(system[\"promotionReadiness\"][\"promotionBlockers\"]),\n        \"gapCount\": len(system[\"promo"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 하위 recipe와 엔진 capability가 제공하는 Company/gather/scan/reference 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 `damodaranAnalysisSystem.json` 계약과 gap ledger 를 읽는 **RunPython fallback** 절차다.\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionR"
     },
     {
       "id": "recipes.valuation.damodaran.dataAudit",
@@ -5636,7 +5636,7 @@
         "recipes.valuation.damodaran.narrativeMap",
         "recipes.valuation.damodaran.storyToDrivers"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `gather.price`, reference lookup, 하위 Damodaran recipe 실행처럼 engine/capability surface 가 있는 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 같은 입력을 `buildDamodaranMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dict"
     },
     {
       "id": "recipes.incubator.forensics.index",
@@ -5659,7 +5659,7 @@
         "recipes.incubator.forensics.workingCapitalPressureMap",
         "recipes.incubator.forensics.noteSignalExtractor"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"deepDive\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n이 진입점은 투자 결론을 만들지 않는다. 대신 `riskScore`, `signalCount`, `candidateCount`, `decisionStatus`를 뽑고, 어떤 세부 skill을 더 읽어야 하는지 결정한다. `riskScore`는 L1/L1.5 신호의 강도일 뿐이며, 위험 단정이 아니다.\n\n### 2. 핵심 근거 수집\n\n근거는 `Company.show(\"IS\"|\"BS\"|\"CF\")`, optional section text, optional scan primitive row에서만 나온다. 답변에는 target, period, sourceRef, tableRef, valueRef, dateRef, executionRef가 함께 있어야 한다.\n\n### 3. 메커니즘 분석\n\n```mermaid\ngraph LR\n  A[\"Company.show IS/BS/CF\"] --> B[\"account trace ledger\"]\n  B --> C[\"revenue-to-cash bridge\"]\n  B --> D[\"working-capital pressure\"]\n  E[\"filing sections\"] --> F"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 surface 로 호출한다. 아래 Python 블록은 같은 근거를 묶어 `buildEvidenceForensicsMemo` 를 실행해야 하는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"deepDive\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n이 진입점은 투자 결론을 만들지 않는다. 대신 `riskScore`, `signalCount`, `candidateCount`, `decisionStatus`를 뽑고, 어떤 세부 skill을 더 읽어야 하는지 결정한다. `riskScore`는 L1/L1.5 신호의 강도일 뿐이며, 위험 단정이 아니다.\n\n### 2. 핵심 근거 수집\n\n근거는 `Company.show(\"IS\"|\"BS\"|\"CF\")`, optional section text, optional scan primitive row에서만 나온다. 답변에는 target, period, sourceRef, tableRef, valueRe"
     },
     {
       "id": "recipes.incubator.forensics.dataCoverageAudit",
@@ -5834,7 +5834,414 @@
         "recipes.incubator.forensics.workingCapitalPressureMap",
         "recipes.incubator.forensics.noteSignalExtractor"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\ntry:\n    disclosure = c.disclosure()\n    events = disclosure.head(20).to_dicts() if hasattr(disclosure, \"head\") else list(disclosure)[:20]\nexcept Exception:\n    events = []\n\nscanRows = []\nfor axis in (\"quality\", \"audit\", \"disclosureRisk\"):\n    try:\n        df = dartlab.scan(axis)\n        rows = df.head(3).to_dicts() if hasattr(df, \"head\") else []\n        for row in rows:\n            row[\"axis\"] = axis\n        scanRows.extend(rows)\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n    events=events,\n    scanRows=scanRows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"deepDive\"],\n    values={\n        \"target\": target,\n        \"riskScore\": memo[\"headline\"][\"riskScore\"],\n        \"signalCount\": memo[\"headline\"][\"signalCount\"],\n        \"candidate"
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `Company.disclosure`, `scan.quality`, `scan.audit`, `scan.disclosureRisk` 는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEvidenceForensicsMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.evidenceForensics import buildEvidenceForensicsMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\nsectionTexts = {}\nfor topic in (\"businessOverview\", \"riskFactors\", \"mdna\", \"notesDetail\"):\n    try:\n        sectionTexts[topic] = str(c.show(topic))[:20000]\n    except Exception:\n        pass\n\ntry:\n    disclosure = c.disclosure()\n    events = disclosure.head(20).to_dicts() if hasattr(disclosure, \"head\") else list(disclosure)[:20]\nexcept Exception:\n    events = []\n\nscanRows = []\nfor axis in (\"quality\", \"audit\", \"disclosureRisk\"):\n    try:\n        df = dartlab.scan(axis)\n        rows = df.head(3).to_dicts() if hasattr(df, \"head\") else []\n        for row in rows:\n            row[\"axis\"] = axis\n        scanRows.extend(rows)\n    except Exception:\n        pass\n\nmemo = buildEvidenceForensicsMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    sectionTexts=sectionTexts,\n    even"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.index",
+      "title": "Event Radar Incubator 진입점",
+      "category": "recipes",
+      "purpose": "Company.disclosure, liveFilings, gather 원자료, scan primitive, observed viz skill만으로 단기 이벤트와 시장 반응을 묶어 촉매 후보를 찾는 L1/L1.5 스킬팩 진입점이다. 트리거 - '이벤트 레이더', '촉매 체크', '공시와 주가 반응'.",
+      "whenToUse": [
+        "이벤트 레이더",
+        "촉매 체크",
+        "공시와 주가 반응",
+        "단기 이벤트 모니터",
+        "원자료 기반 catalyst",
+        "insider ownership signal",
+        "consensus drift watch"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.insiderOwnershipSignal",
+        "recipes.incubator.eventRadar.capitalActionMonitor"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.disclosure`, `Company.liveFilings`, `Company.gather`, `scan.market`, `scan.insider`, `scan.capital`은 엔진 surface로 호출한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.disclosure(days=45), limit=50)\nexcept TypeError:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    live_filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    live_filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=[*live_filings, *filings],\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gat"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "title": "Event Radar Source Coverage Audit",
+      "category": "recipes",
+      "purpose": "이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "이벤트 레이더 coverage",
+        "catalyst source audit",
+        "원자료 결손 확인"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.index",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gather_rows(\"ownership\", limit=20),\n    dividendRows=gather_rows(\"dividends\", limit=20),\n    splitRows=gather_rows(\"splits\", limit=20),\n    consensusRows=gather_rows(\"consensus\", limit=12),\n)\n\nemit_result(\n    table=memo[\"tables\"][\"sourceCoverageAudit\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=mem"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.eventInbox",
+      "title": "Event Radar Event Inbox",
+      "category": "recipes",
+      "purpose": "Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event inbox",
+        "공시 뉴스 촉매",
+        "이벤트 분류"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    try:\n        filings = rows(c.disclosure(), limit=50)\n    except Exception:\n        filings = []\n\ntry:\n    news_rows = rows(c.gather(\"news\"), limit=20)\nexcept Exception:\n    news_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=news_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"eventInbox\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n공시·뉴스 row를 날짜 역순으로 정렬하고 earnings, capitalAction, financing, governance, regulatory, filingRisk, deal category로 분류한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 공시·뉴스 날짜 |\n| `source` | filing/news |\n| `title` | 원문 제목 |\n| `category` | 이벤트 유형 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.priceFlowReaction - 이벤트 뒤 시장 반응 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - 정기·"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "title": "Event Radar Price Flow Reaction",
+      "category": "recipes",
+      "purpose": "gather price/flow 원자료로 이벤트 전후 가격·거래량·수급 반응을 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "price flow reaction",
+        "이벤트 주가 반응",
+        "거래량 수급 확인"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=40):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    flow_rows = rows(c.gather(\"flow\"), limit=40)\nexcept Exception:\n    flow_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    priceRows=price_rows,\n    flowRows=flow_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"priceFlowReaction\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n최근 2개 price row로 `priceChangePct`와 `volumeRatio`를 계산하고, 최신 flow row의 외국인·기관 순매수를 함께 둔다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 기준일 |\n| `close` | 최신 종가 |\n| `priceChangePct` | 직전 대비 변화율 |\n| `volumeRatio` | 직전 대비 거래량 배수 |\n| `netFlow` | 외국인+기관 순매수 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 어떤 이벤트가 있었는지 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - market-wide move 반증.\n\n## 기본 검증\n\n- priceRows가 없으면 priceChart를 만들지 않는다.\n-"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "title": "Event Radar Insider Ownership Signal",
+      "category": "recipes",
+      "purpose": "gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "insider ownership signal",
+        "내부자 거래",
+        "주요주주 지분 변화"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=20):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    insider_rows = rows(c.gather(\"insiderTrading\"), limit=20)\nexcept Exception:\n    insider_rows = []\n\ntry:\n    ownership_rows = rows(c.gather(\"ownership\"), limit=20)\nexcept Exception:\n    ownership_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    insiderRows=insider_rows,\n    ownershipRows=ownership_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"insiderOwnershipSignal\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n내부자 거래와 지분 변화 row에서 holder, direction, amount, status를 추출한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 거래 또는 공시 날짜 |\n| `holder` | 내부자 또는 주요주주 |\n| `direction` | buy/sell/ownershipChange/snapshot |\n| `amount` | 수량 또는 지분 변화 |\n| `status` | ok/watch/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 관련 공시 이벤트 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - 계획 거래 반증.\n\n## 기본 검증\n\n- holder가 없으면 unknown으로 표시하고 단정하지 않는다"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "title": "Event Radar Capital Action Monitor",
+      "category": "recipes",
+      "purpose": "dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "capital action monitor",
+        "배당 자사주 분할 증자",
+        "전환사채 이벤트"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.falsifierLedger"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=20):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    dividend_rows = rows(c.gather(\"dividends\"), limit=20)\nexcept Exception:\n    dividend_rows = []\n\ntry:\n    split_rows = rows(c.gather(\"splits\"), limit=20)\nexcept Exception:\n    split_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    dividendRows=dividend_rows,\n    splitRows=split_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"capitalActionMonitor\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\ndividend/split row와 filing event의 capitalAction category를 하나의 action table로 합친다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 기준일 |\n| `action` | dividend/split/filingCapitalAction |\n| `value` | 배당금, 분할비율, filing title |\n| `status` | watch/missing |\n| `evidence` | 원자료 출처 |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 자본 이벤트 공시 분류.\n2. recip"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "title": "Event Radar Consensus Drift Watch",
+      "category": "recipes",
+      "purpose": "gather consensus 원자료의 최근 두 row를 비교해 매출, 영업이익, EPS, 목표가 변화 신호를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "consensus drift",
+        "컨센서스 변화",
+        "목표주가 변동"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=12):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    consensus_rows = rows(c.gather(\"consensus\"), limit=12)\nexcept Exception:\n    consensus_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    consensusRows=consensus_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"consensusDriftWatch\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n최근 두 consensus row의 revenue, operatingProfit, eps, targetPrice 값을 비교해 revisionPct와 status를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `date` | 최신 consensus 날짜 |\n| `metric` | revenue/operatingProfit/eps/targetPrice |\n| `latest` | 최신값 |\n| `previous` | 이전값 |\n| `revisionPct` | 변화율 |\n| `status` | ok/watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.eventInbox - 컨센서스 변화 전후 이벤트 확인.\n2. recipes.incubator.eventRadar.falsifierLedger - stale update 반증.\n\n## 기본 검증\n\n- consensus row가 2개 미만이면 drift를 계산하지 않는다.\n- 단위·통화가 확인되지 않으면 결론을 제한한다."
+    },
+    {
+      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "title": "Event Radar Falsifier Ledger",
+      "category": "recipes",
+      "purpose": "이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar falsifier",
+        "촉매 반증",
+        "이벤트 결론 검산"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    flow_rows = rows(c.gather(\"flow\"), limit=40)\nexcept Exception:\n    flow_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n    flowRows=flow_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"falsifierLedger\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nevent, reaction, insider, capital, consensus 신호마다 supportingEvidence와 counterEvidenceNeeded를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `claim` | 검증 중인 주장 |\n| `supportingEvidence` | ok/watch/risk/missing |\n| `counterEvidenceNeeded` | 필요한 반증 |\n| `status` | open/notTriggered |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.engineCandidateMemo - 반복 가능한 신호만 후보로 넘긴다.\n2. recipes.incubato"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "title": "Event Radar Engine Candidate Memo",
+      "category": "recipes",
+      "purpose": "이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar engine candidate",
+        "엔진 환류 후보",
+        "recipe to engine"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.falsifierLedger",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    consensus_rows = rows(c.gather(\"consensus\"), limit=12)\nexcept Exception:\n    consensus_rows = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n    consensusRows=consensus_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"engineCandidateMemo\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\neventInbox, priceFlowReaction, insiderOwnershipSignal, capitalActionMonitor, consensusDriftWatch, scanContext를 후보 signal로 정리한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `signalId` | 후보 축 |\n| `status` | missing/ok/watch/risk |\n| `recommendedEngineOwner` | 나중에 담당할 엔진 영역 |\n| `promotionGate` | 승격 조건 |\n| `keepAsSkillAfterPromotion` | recipe 보존 여부 |\n\n## 연계 절"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "title": "Event Radar Visual Decision Pack",
+      "category": "recipes",
+      "purpose": "이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "event radar visualization",
+        "촉매 레이더 차트",
+        "observed viz binding"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=40):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ntry:\n    price_rows = rows(c.gather(\"price\"), limit=40)\nexcept Exception:\n    price_rows = []\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    priceRows=price_rows,\n)\n\nemit_result(\n    table=memo[\"tables\"][\"visualDecisionPack\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\npriceRows, coverage, signal count를 기준으로 priceChart, kpiRibbon, evidenceCoverage, mermaidDiagram의 ready/blocked를 결정한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `visualRef` | observed viz skill |\n| `status` | ready/blocked |\n| `requiredBinding` | 필요한 근거 결합 |\n| `evidence` | 선택 사유 |\n\n## 연계 절차\n\n1. recipes.incubator.eventRadar.sourceCoverageAudit - source coverage 확인.\n2. recipes.incubator.eventRadar.deepDive - 최종 답변의 visual gate.\n\n## 기본 검증\n\n- visualRefs는 observed viz만 포함한다.\n- blocked visualRef를 em"
+    },
+    {
+      "id": "recipes.incubator.eventRadar.deepDive",
+      "title": "Event Radar Deep Dive",
+      "category": "recipes",
+      "purpose": "source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다.",
+      "whenToUse": [
+        "이벤트 레이더 deep dive",
+        "촉매 후보 전체 실행",
+        "공시 주가 수급 컨센서스 종합"
+      ],
+      "nextSkills": [
+        "recipes.incubator.eventRadar.sourceCoverageAudit",
+        "recipes.incubator.eventRadar.eventInbox",
+        "recipes.incubator.eventRadar.priceFlowReaction",
+        "recipes.incubator.eventRadar.insiderOwnershipSignal",
+        "recipes.incubator.eventRadar.capitalActionMonitor"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.disclosure`, `Company.liveFilings`, `Company.gather`, `scan.market`, `scan.insider`, `scan.capital`은 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildEventRadarMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.eventRadar import buildEventRadarMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\ntry:\n    filings = rows(c.liveFilings(days=7), limit=20)\nexcept Exception:\n    try:\n        filings = rows(c.disclosure(), limit=50)\n    except Exception:\n        filings = []\n\nmemo = buildEventRadarMemo(\n    target=target,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    filings=filings,\n    newsRows=gather_rows(\"news\", limit=20),\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", limit=40),\n    insiderRows=gather_rows(\"insiderTrading\", limit=20),\n    ownershipRows=gather_rows(\"ownership\", limit=20),\n    dividendRows=gather_rows(\"dividends\", limit=20),\n    splitRow"
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.index",
+      "title": "Thesis Kill-Chain Scenario 진입점",
+      "category": "recipes",
+      "purpose": "사용자의 투자 thesis를 지지하는 대신 일부러 깨보는 pre-mortem 시나리오 스킬팩 진입점이다. Company.show 원표, Company.disclosure, Company.gather, scan primitive만으로 가정, 취약 지표, 촉발 조건, 전파 경로, tripwire, 반증 조건을 만든다. 트리거 - 'thesis kill chain', '프리모템', '투자 논리 깨보기'.",
+      "whenToUse": [
+        "thesis kill chain",
+        "프리모템",
+        "투자 논리 깨보기",
+        "thesis 반증",
+        "break scenario",
+        "시나리오 스토리보드"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.thesisIntake",
+        "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+        "recipes.incubator.thesisKillChain.assumptionLedger",
+        "recipes.incubator.thesisKillChain.fragilityMap",
+        "recipes.incubator.thesisKillChain.triggerCatalog"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `Company.gather`, `scan.market`, `scan.audit`, `scan.quality`는 엔진 surface로 호출한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildThesisKillChainMemo(\n    target=target,\n    thesis=thesis,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    filings=filings,\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", li"
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.thesisIntake",
+      "title": "Thesis Kill-Chain Thesis Intake",
+      "category": "recipes",
+      "purpose": "사용자 thesis를 받아 growth, margin, cash, balance sheet, valuation, event, macro, governance theme으로 파싱하는 pre-mortem 시작 절차다.",
+      "whenToUse": [
+        "thesis intake",
+        "투자 thesis 파싱",
+        "프리모템 시작"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.assumptionLedger",
+        "recipes.incubator.thesisKillChain.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis)\n\nemit_result(\n    table=memo[\"tables\"][\"thesisIntake\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nthesis 원문을 보존하고 핵심 theme을 파싱한다. 비어 있으면 `status=missing`으로 둔다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `thesis` | 사용자 thesis 원문 |\n| `themeCount` | 파싱된 theme 수 |\n| `themes` | growth/margin/cash 등 |\n| `status` | ok/missing |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.assumptionLedger - theme을 testable assumption으로 전환.\n2. recipes.incubator.thesisKillChain.deepDive - 전체 pre-mortem 실행.\n\n## 기본 검증\n\n- thesis 원문이 table에 남아 있어야 한다.\n- missing이면 scenarioStoryboard를 확정하지 않는다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "title": "Thesis Kill-Chain Evidence Coverage Audit",
+      "category": "recipes",
+      "purpose": "pre-mortem 시나리오에 필요한 statements, filings, price, flow, consensus, scan, assumptions coverage를 확인하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "thesis evidence coverage",
+        "pre-mortem source audit",
+        "시나리오 근거 결손"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.fragilityMap",
+        "recipes.incubator.thesisKillChain.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except Exception:\n        pass\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, statements=statements)\n\nemit_result(\n    table=memo[\"tables\"][\"evidenceCoverageAudit\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nsource별 `status`, `rowCount`, `latestDate`, `requiredFor`를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `dataset` | source 이름 |\n| `status` | ok/missing |\n| `rowCount` | row 수 |\n| `latestDate` | 최신 날짜 |\n| `requiredFor` | 필요한 후속 판단 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.fragilityMap - coverage가 있는 원자료만 사용.\n2. recipes.incubator.thesisKillChain.visualDecisionPack - coverage chart gate.\n\n## 기본 검증\n\n- evidenceCoverageAudit가 비어 있으면 실패다.\n- missing source는 답변 한계로 표시한다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "title": "Thesis Kill-Chain Assumption Ledger",
+      "category": "recipes",
+      "purpose": "사용자 thesis를 revenueGrowth, marginDurability, cashConversion, balanceSheet, valuationSupport 등 testable assumption으로 분해하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "assumption ledger",
+        "thesis 가정 분해",
+        "testable assumptions"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.thesisIntake",
+        "recipes.incubator.thesisKillChain.fragilityMap"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nassumptions = [\"매출 성장이 둔화되지 않는다\", \"CFO가 순이익을 따라온다\"]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, assumptions=assumptions)\n\nemit_result(\n    table=memo[\"tables\"][\"assumptionLedger\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nthesis 키워드와 명시 assumption을 합쳐 `assumptionId`, `claim`, `source`, `evidenceNeeded`를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `assumptionId` | 가정 식별자 |\n| `claim` | 검증할 가정 |\n| `source` | parsedThesis/user/fallback |\n| `status` | untested/missing |\n| `evidenceNeeded` | 필요한 원자료 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.fragilityMap - assumption을 깨는 지표 확인.\n2. recipes.incubator.thesisKillChain.propagationPath - trigger와 assumption 연결.\n\n## 기본 검증\n\n- assumptionId가 없는 row는 실패다.\n- evidenceNeeded가 비어 있으면 실패다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.fragilityMap",
+      "title": "Thesis Kill-Chain Fragility Map",
+      "category": "recipes",
+      "purpose": "IS/BS/CF, price/flow, consensus 원자료에서 thesis를 깨기 쉬운 revenue, margin, cash, leverage, market, expectation 취약 지표를 계산하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "fragility map",
+        "thesis 취약 지표",
+        "kill-chain 지표"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.assumptionLedger",
+        "recipes.incubator.thesisKillChain.triggerCatalog"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nc = dartlab.Company(target)\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except Exception:\n        pass\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, statements=statements)\n\nemit_result(\n    table=memo[\"tables\"][\"fragilityMap\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nrevenueGrowth, operatingMarginTrend, cashConversion, debtToEquity, cashToDebt, priceReaction, flowPressure, consensusRevision을 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `metric` | 취약 지표 |\n| `value` | 계산값 |\n| `status` | ok/watch/risk/missing |\n| `thesisBreak` | thesis가 깨지는 방식 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.triggerCatalog - watch/risk 지표를 trigger로 전환.\n2. recipes.incubator.thesisKillChain.tripwireMonitor - 임계값과 모니터링 조건 생성.\n\n## 기본 검증\n\n- 결손 지표는 missing으로 둔다.\n- watch/risk는 반드시 thesisBreak를 포함한다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "title": "Thesis Kill-Chain Trigger Catalog",
+      "category": "recipes",
+      "purpose": "fragilityMap, filings, scan primitive에서 thesis를 흔드는 촉발 조건을 모으는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "trigger catalog",
+        "thesis 촉발 조건",
+        "break trigger"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.fragilityMap",
+        "recipes.incubator.thesisKillChain.propagationPath"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nc = dartlab.Company(target)\ntry:\n    filings = c.disclosure().head(50).to_dicts()\nexcept Exception:\n    filings = []\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, filings=filings)\n\nemit_result(\n    table=memo[\"tables\"][\"triggerCatalog\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nwatch/risk fragility, filing risk keyword, scan primitive score를 trigger row로 변환한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `triggerId` | 촉발 조건 id |\n| `trigger` | 지표 또는 공시 제목 |\n| `source` | fragilityMap/filing/scan |\n| `status` | watch/risk/missing |\n| `evidence` | trigger 근거 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.propagationPath - trigger를 assumption에 연결.\n2. recipes.incubator.thesisKillChain.falsifierLedger - counter-evidence 작성.\n\n## 기본 검증\n\n- triggerId가 없으면 실패다.\n- filing trigger는 routine filing 반증을 남긴다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.propagationPath",
+      "title": "Thesis Kill-Chain Propagation Path",
+      "category": "recipes",
+      "purpose": "trigger가 어떤 mechanism을 거쳐 어떤 assumption을 깨는지 연결하는 pre-mortem 전파 경로 절차다.",
+      "whenToUse": [
+        "propagation path",
+        "thesis kill-chain path",
+        "trigger to assumption"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.triggerCatalog",
+        "recipes.incubator.thesisKillChain.tripwireMonitor"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nassumptions = [\"매출 성장이 둔화되지 않는다\", \"CFO가 순이익을 따라온다\"]\nfilings = [{\"rcept_dt\": \"20260510\", \"report_nm\": \"전환사채 발행 결정\"}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, filings=filings, assumptions=assumptions)\n\nemit_result(\n    table=memo[\"tables\"][\"propagationPath\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\ntriggerCatalog의 watch/risk trigger를 mechanism, affectedAssumption, tripwire로 연결한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `order` | 경로 순서 |\n| `triggerId` | 촉발 조건 |\n| `mechanism` | 전파 메커니즘 |\n| `affectedAssumption` | 깨지는 가정 |\n| `tripwire` | 모니터링 임계 |\n| `status` | watch/risk/missing |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.tripwireMonitor - 경로별 임계값 확인.\n2. recipes.incubator.thesisKillChain.scenarioStoryboard - path를 시나리오로 변환.\n\n## 기본 검증\n\n- affectedAssumption이 없는 경로는 실패다.\n- diagram은 8 edge 이하로 제한한다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "title": "Thesis Kill-Chain Tripwire Monitor",
+      "category": "recipes",
+      "purpose": "fragility metric별 current, threshold, action을 정리해 thesis가 깨지는 조기 경보선을 만드는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "tripwire monitor",
+        "thesis 조기 경보",
+        "kill-chain 임계값"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.fragilityMap",
+        "recipes.incubator.thesisKillChain.falsifierLedger"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"tripwireMonitor\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nfragility metric마다 threshold와 action을 붙여 monitoring row를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `tripwire` | 모니터링 지표 |\n| `current` | 현재값 |\n| `threshold` | watch/risk 임계 |\n| `status` | ok/watch/risk/missing |\n| `action` | 다음 조치 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.falsifierLedger - watch/risk 반증 조건.\n2. recipes.incubator.thesisKillChain.scenarioStoryboard - tripwire를 시나리오로 변환.\n\n## 기본 검증\n\n- threshold와 action이 없는 row는 실패다.\n- missing tripwire는 결론에 쓰지 않는다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "title": "Thesis Kill-Chain Falsifier Ledger",
+      "category": "recipes",
+      "purpose": "kill-chain path가 틀렸음을 보여줄 counter-evidence를 trigger별로 열어 thesis 붕괴 단정을 막는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "thesis falsifier",
+        "kill-chain 반증",
+        "counter evidence"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.propagationPath",
+        "recipes.incubator.thesisKillChain.scenarioStoryboard"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nfilings = [{\"rcept_dt\": \"20260510\", \"report_nm\": \"전환사채 발행 결정\"}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, filings=filings)\n\nemit_result(\n    table=memo[\"tables\"][\"falsifierLedger\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\npropagationPath의 각 claim에 counterEvidenceNeeded를 붙이고 open/notTriggered를 만든다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `claim` | 반증 대상 주장 |\n| `supportingEvidence` | watch/risk/missing |\n| `counterEvidenceNeeded` | 필요한 반증 |\n| `status` | open/notTriggered |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.scenarioStoryboard - open falsifier를 시나리오 한계로 포함.\n2. recipes.incubator.thesisKillChain.deepDive - 최종 답변에 open falsifier 노출.\n\n## 기본 검증\n\n- counterEvidenceNeeded가 비어 있으면 실패다.\n- open falsifier가 있으면 확정 표현을 쓰지 않는다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "title": "Thesis Kill-Chain Scenario Storyboard",
+      "category": "recipes",
+      "purpose": "baseIntact, erosionCase, killChainCase 세 시나리오로 thesis pre-mortem을 정리하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "scenario storyboard",
+        "pre-mortem 시나리오",
+        "base erosion kill chain"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.propagationPath",
+        "recipes.incubator.thesisKillChain.falsifierLedger",
+        "recipes.incubator.thesisKillChain.visualDecisionPack"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"scenarioStoryboard\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nthesisIntake, propagationPath, tripwireMonitor, falsifierLedger를 baseIntact, erosionCase, killChainCase로 요약한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `scenario` | baseIntact/erosionCase/killChainCase |\n| `status` | ok/watch/risk/missing |\n| `plot` | 시나리오 서술 |\n| `requiredEvidence` | 필요한 근거 |\n| `monitoring` | 후속 점검 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.visualDecisionPack - scenario chart 가능 여부 확인.\n2. recipes.incubator.thesisKillChain.deepDive - 최종 답변으로 연결.\n\n## 기본 검증\n\n- scenario 3개가 모두 있어야 한다.\n- monitoring이 없는 scenario row는 실패다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "title": "Thesis Kill-Chain Visual Decision Pack",
+      "category": "recipes",
+      "purpose": "scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다.",
+      "whenToUse": [
+        "thesis kill-chain visualization",
+        "pre-mortem chart gate",
+        "observed viz decision"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.scenarioStoryboard",
+        "recipes.incubator.thesisKillChain.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"visualDecisionPack\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nscenarioStoryboard, propagationPath, evidenceCoverageAudit 존재 여부로 scenarioVisuals, mermaidDiagram, evidenceCoverage, kpiRibbon의 ready/blocked를 결정한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `visualRef` | observed viz skill |\n| `status` | ready/blocked |\n| `requiredBinding` | 필요한 근거 결합 |\n| `evidence` | 선택 사유 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.scenarioStoryboard - scenario chart source.\n2. recipes.incubator.thesisKillChain.deepDive - 최종 visual gate.\n\n## 기본 검증\n\n- visualRefs는 observed viz만 포함한다.\n- blocked visualRef를 emit하지 않는다."
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "title": "Thesis Kill-Chain Premortem Quality Gate",
+      "category": "recipes",
+      "purpose": "Thesis Kill-Chain 결과를 최종 답변으로 쓰기 전, thesis·근거 폭·가정 수·취약 지표·trigger·전파 경로·tripwire·falsifier·scenario·visual binding을 모두 통과했는지 막판에 차단하는 품질 게이트다. 트리거 — '타협 없이 thesis 깨기', 'premortem quality gate', '강한 스킬 검증'.",
+      "whenToUse": [
+        "premortem quality gate",
+        "thesis kill-chain 품질 게이트",
+        "타협 없이 thesis 깨기",
+        "강한 스킬 검증",
+        "약한 결론 차단"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.visualDecisionPack",
+        "recipes.incubator.thesisKillChain.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `Company.gather`, `scan.market`, `scan.audit`, `scan.quality`로 근거를 먼저 확보하고, 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"premortemQualityGate\"],\n    values={\n        \"premortemQualityScore\": memo[\"headline\"][\"premortemQualityScore\"],\n        \"qualityGateStatus\": memo[\"headline\"][\"qualityGateStatus\"],\n        \"decisionStatus\": memo[\"headline\"][\"decisionStatus\"],\n    },\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n10개 gate를 모두 확인한다.\n\n| gate | 차단 의미 |\n|---|---|\n| `explicitThesis` | thesis가 없으면 프리모템이 아니라 입력 요청이다. |\n| `sourceBreadth` | L1/L1.5 근거가 좁으면 narrative로 본다. |\n| `assumptionDepth` | testable assumption 3개 미만이면 결론을 막는다. |\n| `fragilityDetected` | 취약 지표가 없으면 kill-chain이 아니다. |\n| `triggerConnected` | trigger가 없으면 시나리오가 시작되지 않는다. |\n| `propagationConnected` | trigger → mechanism → assumption 경로가 없으면 분석이 아니다. |\n| `tripwireOperational` | threshold/action 없는 risk는 모니터링할 수 없다. |\n| `falsifierOpen` | counter-evidence가 없으면 confirmation bias다. |\n| `scenarioComplete` | base/ero"
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.deepDive",
+      "title": "Thesis Kill-Chain Deep Dive",
+      "category": "recipes",
+      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate, premortem quality gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
+      "whenToUse": [
+        "thesis kill-chain deep dive",
+        "프리모템 전체 실행",
+        "투자 논리 깨보기 전체"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.thesisIntake",
+        "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+        "recipes.incubator.thesisKillChain.assumptionLedger",
+        "recipes.incubator.thesisKillChain.fragilityMap",
+        "recipes.incubator.thesisKillChain.triggerCatalog"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `Company.gather`, `scan.market`, `scan.audit`, `scan.quality`는 엔진 호출로 근거를 먼저 확보한다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\nc = dartlab.Company(target)\n\ndef rows(value, limit=30):\n    if hasattr(value, \"head\") and hasattr(value, \"to_dicts\"):\n        return value.head(limit).to_dicts()\n    if isinstance(value, list):\n        return value[:limit]\n    return []\n\ndef gather_rows(axis, limit=30):\n    try:\n        return rows(c.gather(axis), limit=limit)\n    except Exception:\n        try:\n            return rows(dartlab.gather(axis, target=target), limit=limit)\n        except Exception:\n            return []\n\nstatements = {}\nfor topic in (\"IS\", \"BS\", \"CF\"):\n    try:\n        statements[topic] = c.show(topic, freq=\"Y\")\n    except TypeError:\n        statements[topic] = c.show(topic)\n    except Exception:\n        pass\n\ntry:\n    filings = rows(c.disclosure(), limit=50)\nexcept Exception:\n    filings = []\n\nmemo = buildThesisKillChainMemo(\n    target=target,\n    thesis=thesis,\n    market=str(getattr(c, \"market\", \"KR\")),\n    companyName=str(getattr(c, \"corpName\", target)),\n    statements=statements,\n    filings=filings,\n    priceRows=gather_rows(\"price\", limit=40),\n    flowRows=gather_rows(\"flow\", "
     }
   ]
 }

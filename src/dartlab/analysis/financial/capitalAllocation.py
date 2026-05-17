@@ -59,6 +59,12 @@ def calcDividendPolicy(company, *, basePeriod: str | None = None) -> dict | None
         우선. 연속 배당 5+ 년 = dividend aristocrats 후보. KR 기준 평균 ~ 20%,
         US 기준 ~ 30% (S&P 500 평균). 배당 성장률 5%+ 가 5 년 연속 = 우수.
 
+    When:
+        Capital allocation 분석 + AI 배당 정책 답변.
+
+    How:
+        CF dividends_paid + IS net_profit → payoutRatio + CAGR + 연속 카운트.
+
     SeeAlso:
         - ``ddmValuation``: 배당 기반 가치 평가 (본 함수 입력)
         - ``calcShareholderReturn``: 자사주매입 + 배당 합산
@@ -172,6 +178,36 @@ def calcShareholderReturn(company, *, basePeriod: str | None = None) -> dict | N
             totalReturn : float — 총주주환원 (원)
             fcf : float — 잉여현금흐름 (원)
             returnToFcf : float | None — 주주환원/FCF 비율 (%)
+
+    Capabilities:
+        - 배당 + 자사주 매입 합산 → 총주주환원 vs FCF 비교 시계열
+        - returnToFcf ≥ 50% = 강한 주주환원
+
+    Guide:
+        FCF 의 50%+ 환원이 5 년 지속 = shareholder-friendly 회사. Buffett 선호 지표.
+
+    When:
+        Capital allocation + AI 주주환원 답변.
+
+    How:
+        CF dividends_paid + treasury 합산 → /FCF 시계열.
+
+    Requires:
+        CF 시계열 + FCF 계산 가능.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcShareholderReturn(company)["history"][0]["returnToFcf"]
+        65
+
+    See Also:
+        - calcDividendPolicy : 배당 단일
+        - calcFcfUsage : FCF 사용 분해
+
+    AIContext:
+        "주주환원 비율" 답변 시 returnToFcf 인용.
     """
     cfResult = company.select(
         "CF",
@@ -250,6 +286,36 @@ def calcReinvestment(company, *, basePeriod: str | None = None) -> dict | None:
             revenue : float — 매출 (원)
             capexToRevenue : float | None — CAPEX/매출 비율 (%)
             retentionRate : float | None — 유보율 (%)
+
+    Capabilities:
+        - CAPEX (유무형 합산) + 영업이익 + 유보율 시계열
+        - 재투자 강도 측정
+
+    Guide:
+        capexToRevenue ≥ 10% = 재투자 중심 (성장형). retentionRate ≥ 80% = 성장 우선.
+
+    When:
+        재투자 분석 + AI capex 답변.
+
+    How:
+        CF capex + IS revenue/net 시계열 → ratio 계산.
+
+    Requires:
+        CF/IS 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcReinvestment(company)["history"][0]["capexToRevenue"]
+        8.5
+
+    See Also:
+        - calcFcfUsage : FCF 사용
+        - investmentAnalysis.* : 정밀 capex
+
+    AIContext:
+        "재투자 강도" 답변 시 capexToRevenue + retentionRate 인용.
     """
     cfResult = company.select(
         "CF",
@@ -327,6 +393,36 @@ def calcFcfUsage(company, *, basePeriod: str | None = None) -> dict | None:
             dividendsPaid : float — 배당금 지급 (원)
             debtRepaid : float — 부채 상환 (원)
             residual : float — 잔여 현금 (원)
+
+    Capabilities:
+        - FCF → 배당/부채상환/잔여 3 분해 시계열
+        - 잔여 = M&A 또는 현금 누적
+
+    Guide:
+        residual / FCF ≥ 30% 가 5 년 지속 = 자본 적재 (war chest).
+
+    When:
+        FCF 사용처 분석 + AI 자본 배분 답변.
+
+    How:
+        CF dividends + debt repayments + FCF 계산.
+
+    Requires:
+        CF 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcFcfUsage(company)["history"][0]["residual"]
+        2000000000
+
+    See Also:
+        - calcShareholderReturn : 주주환원
+        - calcReinvestment : 재투자
+
+    AIContext:
+        "FCF 어디 쓰는가" 답변 시 dividend/debt/residual 비중 인용.
     """
     cfResult = company.select(
         "CF",
@@ -405,6 +501,36 @@ def calcDividendDocs(company, *, basePeriod: str | None = None) -> dict | None:
         payoutRatio : float | None — 배당성향 (%)
         dividendYield : float | None — 배당수익률 (%)
         period : str — 기준 기간
+
+    Capabilities:
+        - DART dividend 토픽에서 주당배당금/배당성향/배당수익률 직접 추출
+        - 보통주 기준 최신 기간
+
+    Guide:
+        DART 정식 dividend 토픽 사용 (calcDividendPolicy CF 합산 보완). dps 누락 시 None.
+
+    When:
+        AI 배당 답변 직접 수치 + 배당 관련 표시.
+
+    How:
+        ``company.select("dividend", ...)`` → 항목 매칭 → 보통주 dps/yield 추출.
+
+    Requires:
+        DART dividend 토픽.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDividendDocs(company)["dps"]
+        1500
+
+    See Also:
+        - calcDividendPolicy : CF 합산 버전
+        - calcShareholderReturn : 합산
+
+    AIContext:
+        "주당 배당금" 답변 시 dps + payoutRatio 인용.
     """
     from dartlab.core.utils.helpers import parseNumStr
 
@@ -480,6 +606,36 @@ def calcTreasuryStockStatus(company, *, basePeriod: str | None = None) -> dict |
             disposed : float — 처분수량 (주)
             retired : float — 소각수량 (주)
             endShares : float — 기말수량 (주)
+
+    Capabilities:
+        - DART treasuryStock 토픽 + EDGAR XBRL fallback 으로 자사주 시계열
+        - 취득/처분/소각 분해
+
+    Guide:
+        retired (소각) 가 acquired (취득) 보다 크면 자사주 누적 ↓ (주주환원 강).
+
+    When:
+        자사주 분석 + AI buyback 답변.
+
+    How:
+        company.show("treasuryStock") → DataFrame 총계 행 추출.
+
+    Requires:
+        DART treasuryStock 토픽 또는 EDGAR XBRL.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcTreasuryStockStatus(company)["rows"][0]["acquired"]
+        100000
+
+    See Also:
+        - calcShareholderReturn : 주주환원
+        - _edgarTreasuryStockFallback
+
+    AIContext:
+        "자사주 매입 현황" 답변 시 acquired + retired 인용.
     """
     result = company.show("treasuryStock")
 
@@ -577,6 +733,36 @@ def calcCapitalAllocationFlags(company, *, basePeriod: str | None = None) -> lis
     -------
     list[str]
         경고 메시지 문자열 리스트 (배당 초과, FCF 초과 환원, 극소 투자 등).
+
+    Capabilities:
+        - 배당 초과/FCF 초과 환원/극소 투자 등 자본배분 경고 누적
+        - story flag 박스 입력
+
+    Guide:
+        flag ≥ 2 = 자본배분 다중 경고. 배당 초과 + FCF 초과 환원 = 부채 의존.
+
+    When:
+        Capital allocation 경고 + AI 위험 답변.
+
+    How:
+        sub-calc 결과 임계 비교 → 메시지 누적.
+
+    Requires:
+        sub-calc 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcCapitalAllocationFlags(company)
+        ['배당성향 110% — 이익 초과 배당']
+
+    See Also:
+        - calcDividendPolicy : payout
+        - calcShareholderReturn : 환원/FCF
+
+    AIContext:
+        "자본배분 경고" 답변 시 flag list 인용.
     """
     flags = []
 

@@ -52,6 +52,31 @@ def calcEarningsSurprise(
 
     Returns:
         dict — market / year / prevYear / universe / scores / topPos / topNeg / interpretation
+
+    Guide:
+        Bernard-Thomas 1989 PEAD — 발표 후 60~90 일 drift. Top 10 positive 는
+        long candidate, top negative 는 short.
+
+    When:
+        Quant 펀더멘털 모멘텀 + AI 어닝 서프라이즈 답변.
+
+    How:
+        scan finance.parquet 2 기 → YoY 순이익 성장률 → 횡단면 z-score → top
+        10 양/음.
+
+    Requires:
+        scan finance.parquet (2 기 + universe ≥ 50).
+
+    Raises:
+        없음 — 실패는 None.
+
+    Example:
+        >>> r = calcEarningsSurprise()
+        >>> r["topPos"][0]
+
+    See Also:
+        - calcEarnings : 단일 종목 SUE
+        - calcPiotroskiFactor : 재무 건강
     """
     try:
         lf = loadScanParquet("finance", market)

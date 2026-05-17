@@ -17,11 +17,42 @@ import numpy as np
 def shrinkOAS(returns: np.ndarray) -> dict:
     """OAS shrinkage (Chen-Wiesel-Hero 2010) — 더 강한 oracle bound.
 
+    Capabilities:
+        - Oracle Approximating Shrinkage (OAS) → sample cov 를 scaled identity 로 축소
+        - shrinkageRatio ρ 자동 추정 + 결과 cov 매트릭스
+
     Args:
-        returns: T × N 일별 수익률.
+        returns: T × N 일별 수익률 매트릭스.
 
     Returns:
-        dict with cov, shrinkageRatio, target, n, t
+        dict — cov / shrinkageRatio / target / n / t.
+
+    Guide:
+        Ledoit-Wolf 보다 oracle bound 가 더 강함. 작은 표본 (T<N) 에서도 안정적.
+
+    When:
+        Portfolio cov 추정 + AI 표본 작은 cov 안정화 답변.
+
+    How:
+        sample_cov 계산 → trace target → OAS 공식 적용.
+
+    Requires:
+        returns T × N 매트릭스.
+
+    Raises:
+        없음 — den ≤ 0 시 ρ=0.
+
+    Example:
+        >>> r = shrinkOAS(returns)
+        >>> r["shrinkageRatio"]
+        0.18
+
+    See Also:
+        - shrinkConstantCorrelation : 대안 target
+        - denoiseRMT : eigenvalue 기반
+
+    AIContext:
+        "cov 추정 안정화 방법" 답변 시 shrinkageRatio 인용.
     """
     R = np.asarray(returns, dtype=np.float64)
     T, N = R.shape
@@ -52,6 +83,43 @@ def shrinkConstantCorrelation(returns: np.ndarray) -> dict:
     """Constant-Correlation shrinkage — Ledoit-Wolf (2003).
 
     Target = 평균 상관 ρ_avg 가 모든 off-diagonal 인 covariance.
+
+    Capabilities:
+        - sample cov 의 평균 off-diagonal 상관 ρ_avg 추출 → target = ρ_avg × σσ
+        - 단순화된 shrinkage intensity (LW 공식 압축형)
+
+    Args:
+        returns: T × N.
+
+    Returns:
+        dict — cov / shrinkageRatio / avgCorrelation / target / n / t.
+
+    Guide:
+        Ledoit-Wolf 2003 표준. 자산 간 비슷한 상관 구조 가정 시 적합.
+
+    When:
+        Portfolio cov + AI 상관 평균 답변.
+
+    How:
+        sample cov → diag scale → off-diag 평균 → target reconstruct → rho 적용.
+
+    Requires:
+        returns T × N + N ≥ 2.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = shrinkConstantCorrelation(returns)
+        >>> r["avgCorrelation"]
+        0.32
+
+    See Also:
+        - shrinkOAS : OAS 변형
+        - denoiseRMT : RMT 기반
+
+    AIContext:
+        "자산 간 평균 상관" 답변 시 avgCorrelation 인용.
     """
     R = np.asarray(returns, dtype=np.float64)
     T, N = R.shape
@@ -100,7 +168,39 @@ def denoiseRMT(returns: np.ndarray, *, alpha: float = 0.0) -> dict:
         alpha: 0~1 noise eigenvalue shrinkage 강도. 0 = 평균 대체, 1 = 그대로.
 
     Returns:
-        dict with cov (denoised), eigenSpectrum, noiseEigenCount, signalEigenCount
+        dict — cov (denoised) / qRatio / lambdaPlus / noiseEigenCount / signalEigenCount /
+        topEigenvalues / interpretation. T ≤ N 시 ``{"error": ...}``.
+
+    Capabilities:
+        - Marchenko-Pastur 임계로 noise / signal eigenvalue 분리 + noise 평균 대체
+        - alpha 보간으로 부분 보존도 가능
+
+    Guide:
+        Lopez de Prado AFML Ch.2.6 표준. q ≥ 2 (T ≥ 2N) 권장 — 안정적 임계.
+
+    When:
+        Cov 노이즈 제거 + AI "추정 오차" 답변.
+
+    How:
+        standardize → corr eigendecomposition → MP threshold → noise mask → 평균 대체 → cov 재구성.
+
+    Requires:
+        T > N (overdetermined sample).
+
+    Raises:
+        없음 — T ≤ N 시 error dict.
+
+    Example:
+        >>> r = denoiseRMT(returns)
+        >>> r["noiseEigenCount"], r["signalEigenCount"]
+        (28, 5)
+
+    See Also:
+        - shrinkOAS : scaled identity target
+        - shrinkConstantCorrelation : avg corr target
+
+    AIContext:
+        "이 cov 추정 신뢰" 답변 시 signal vs noise eigenvalue 비율 인용.
     """
     R = np.asarray(returns, dtype=np.float64)
     T, N = R.shape

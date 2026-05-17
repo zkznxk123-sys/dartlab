@@ -23,23 +23,50 @@ def decomposeMarginChange(
 ) -> dict:
     """영업마진 변화의 driver 분해 — Operating Leverage Bridge.
 
-    Operating Margin = (Revenue - COGS - SGA) / Revenue
-    ΔMargin = ΔRevenue effect + ΔCOGS effect + ΔSGA effect + FX
+    Capabilities:
+        - 영업마진 변화를 원가율 개선·판관비 효율·매출 레버리지·환율 4 driver
+          로 분해 + 기여도(%p)/share(%) 산출.
 
-    Parameters
-    ----------
-    revenueT, revenueT1 : 매출 (T 최신, T1 전기)
-    cogsT, cogsT1 : 매출원가
-    sgaT, sgaT1 : 판매관리비
-    fxImpact : 환율 효과 (옵션, %p)
+    Args:
+        revenueT: 매출 (T 최신).
+        revenueT1: 매출 (T1 전기).
+        cogsT: 매출원가 (T).
+        cogsT1: 매출원가 (T1).
+        sgaT: 판매관리비 (T).
+        sgaT1: 판매관리비 (T1).
+        fxImpact: 환율 효과 (옵션, %p).
 
-    Returns
-    -------
-    dict
-        marginT, marginT1 : float — %
-        marginDelta : float — %p
-        drivers : list[{factor, contribution_pp, share_pct}]
-        residual : float — 미설명 잔차 (%p)
+    Returns:
+        dict: marginT/marginT1/marginDelta/drivers/residual/explainedPct.
+        매출 ≤ 0 시 None 필드.
+
+    Guide:
+        매출 레버리지는 매출 성장률 × 고정비 비중 × 0.3 근사. ±2 %p cap.
+        share_pct 는 |contribution| 기반.
+
+    When:
+        영업이익률 변동의 원인 분해·McKinsey ROIC Tree 입력 생성 시.
+
+    How:
+        cogs/sga 비율 변화 → 부호 반전한 기여도 + 매출 레버리지 + FX 합산.
+
+    Requires:
+        T·T1 매출/원가/판관비 값.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> decomposeMarginChange(100, 90, 60, 56, 20, 19)
+        {"marginDelta": ..., "drivers": [...]}
+
+    SeeAlso:
+        - ``decomposeRoicChange``: ROIC 분해
+        - ``decomposeFcfChange``: FCF 분해
+
+    AIContext:
+        AI 답변에서 마진 변화의 1 차 driver 인용 시. Damodaran *Investment
+        Valuation* Ch.11 표준.
     """
     if revenueT is None or revenueT1 is None or revenueT <= 0 or revenueT1 <= 0:
         return {"marginDelta": None, "drivers": [], "residual": None}
@@ -120,20 +147,51 @@ def decomposeRoicChange(
 ) -> dict:
     """ROIC 변화 driver 분해 — Damodaran Ch.11.
 
-    ROIC = Margin × Turnover × (1 - Tax)
-    ΔROIC = ΔMargin × Turnover_avg + Margin_avg × ΔTurnover + Tax effect
+    Capabilities:
+        - ROIC 변화를 마진/회전/세금 3 driver 로 분해 + 기여도(%p)·share·
+          잔차 산출.
 
-    Parameters
-    ----------
-    roicT, roicT1 : ROIC (%)
-    marginT, marginT1 : 영업마진 (%, NOT decimal)
-    turnoverT, turnoverT1 : 자산회전 (회)
-    taxT, taxT1 : 유효세율 (%, NOT decimal)
+    Args:
+        roicT: ROIC % (T).
+        roicT1: ROIC % (T1).
+        marginT: 영업마진 % (T).
+        marginT1: 영업마진 % (T1).
+        turnoverT: 자산회전 (회, T).
+        turnoverT1: 자산회전 (회, T1).
+        taxT: 유효세율 % (T).
+        taxT1: 유효세율 % (T1).
 
-    Returns
-    -------
-    dict
-        roicDelta, drivers, residual
+    Returns:
+        dict: roicT/roicT1/roicDelta/drivers/residual/explainedPct. 입력
+        None 시 None 필드.
+
+    Guide:
+        평균값 기준 (margin_avg·turnover_avg·tax_avg). 세금 변화 부호는
+        감세 = 양수 기여로 변환.
+
+    When:
+        ROIC 변동의 원인 (마진 vs 회전 vs 세금) 정량 분해 시.
+
+    How:
+        ROIC = Margin × Turnover × (1 - Tax) 식을 미분형 (mean × delta) 으로
+        근사 분해.
+
+    Requires:
+        T·T1 의 roic/margin/turnover/tax 값.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> decomposeRoicChange(15.0, 12.0, 10, 9, 1.5, 1.4, 22, 24)
+        {"roicDelta": 3.0, "drivers": [...]}
+
+    SeeAlso:
+        - ``decomposeMarginChange``: 마진 driver
+        - ``decomposeFcfChange``: FCF driver
+
+    AIContext:
+        AI 답변에서 ROIC 개선 주요 driver 인용 시.
     """
     if any(v is None for v in (roicT, roicT1, marginT, marginT1, turnoverT, turnoverT1)):
         return {"roicDelta": None, "drivers": [], "residual": None}
@@ -200,20 +258,49 @@ def decomposeFcfChange(
 ) -> dict:
     """FCF 변화 bridge — OCF + Capex + NWC.
 
-    FCF = OCF - |Capex|
-    ΔFCF = ΔOCF + ΔCapex_savings + ΔNWC
+    Capabilities:
+        - FCF 변화를 영업CF·CAPEX·운전자본 3 driver 로 분해 + 절대값 기여도
+          + share 산출.
 
-    Parameters
-    ----------
-    fcfT, fcfT1 : FCF (원)
-    ocfT, ocfT1 : 영업CF
-    capexT, capexT1 : Capex (음수면 절대값)
-    nwcDeltaT, nwcDeltaT1 : 운전자본 변화 (옵션)
+    Args:
+        fcfT: FCF 원 (T).
+        fcfT1: FCF 원 (T1).
+        ocfT: 영업CF (T).
+        ocfT1: 영업CF (T1).
+        capexT: CAPEX (음수면 절대값으로 처리, T).
+        capexT1: CAPEX (T1).
+        nwcDeltaT: 운전자본 변화 (옵션, T).
+        nwcDeltaT1: 운전자본 변화 (옵션, T1).
 
-    Returns
-    -------
-    dict
-        fcfDelta, drivers, residual
+    Returns:
+        dict: fcfT/fcfT1/fcfDelta/drivers/residual/explainedPct.
+
+    Guide:
+        CAPEX 감소 = FCF 증가로 부호 반전. 운전자본 증가 = FCF 감소로 부호
+        반전.
+
+    When:
+        FCF 변동 원인을 OCF·CAPEX·운전자본으로 정량 분해할 때.
+
+    How:
+        FCF = OCF - |CAPEX| 식의 차분 분해 + 옵션 NWC 항.
+
+    Requires:
+        T·T1 의 fcf/ocf/capex 값.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> decomposeFcfChange(50, 30, 100, 80, 50, 50)
+        {"fcfDelta": 20.0, "drivers": [...]}
+
+    SeeAlso:
+        - ``decomposeMarginChange``: 마진 driver
+        - ``decomposeRoicChange``: ROIC driver
+
+    AIContext:
+        AI 답변에서 FCF 증감의 주요 driver 인용 시.
     """
     if any(v is None for v in (fcfT, fcfT1, ocfT, ocfT1)):
         return {"fcfDelta": None, "drivers": [], "residual": None}

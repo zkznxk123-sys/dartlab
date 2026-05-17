@@ -34,6 +34,9 @@ def analyzePredictability(
 ) -> InsightResult:
     """사업 예측가능성 분석 (0~10점 → A~F).
 
+    Capabilities:
+        - 매출/영업이익 CV + 연속성장 횟수 + 흑자 비율 4 룰 → 0~10 점 합산 → grade.
+
     Parameters
     ----------
     aSeries : dict
@@ -49,6 +52,32 @@ def analyzePredictability(
         grade : str — 'A'~'F' 등급
         summary : str — 예측가능성 점수/10 + 수준
         details : list[str] — 매출 CV, 영업이익 CV, 연속성장, 흑자 비율 등 (점)
+
+    Guide:
+        Buffett ‘moat’ 사상의 정량 근사. 변동성 낮고 매년 성장하는 사업 우대.
+
+    When:
+        analyzeFinancial 의 'predictability' 키 산출 단계.
+
+    How:
+        statistics.stdev/mean 으로 CV 산출 + reversed loop 로 streak 카운트.
+
+    Requires:
+        aSeries IS (sales/operating_profit/net_profit) 연간 ≥ 3 년.
+
+    Raises:
+        없음 (statistics 내부 ValueError 가능성은 데이터 부족 분기로 차단).
+
+    Example:
+        >>> analyzePredictability(aSeries, aYears)
+        InsightResult(grade='A', summary='예측가능성 8.2/10 — 매우 높음')
+
+    See Also:
+        - analyzeUncertainty: 대칭 (Morningstar 불확실성)
+        - analyzeCoreEarnings: 이익 품질
+
+    AIContext:
+        ‘예측 가능 사업’ 컨텍스트는 가치주/장기보유 답변 톤으로 인용.
     """
     import statistics
 
@@ -113,6 +142,10 @@ def analyzeUncertainty(
 ) -> InsightResult:
     """불확실성 등급 분석 (Morningstar 방식 5단계).
 
+    Capabilities:
+        - 매출 CV + DOL + D/E + 영업 CV 4 축 → 100 점 환산 → Low~Extreme 등급 +
+          Fair Value 밴드 (±15~55%).
+
     Parameters
     ----------
     aSeries : dict
@@ -128,6 +161,32 @@ def analyzeUncertainty(
         grade : str — 'A'~'F' 등급 (낮은 불확실성 = 좋은 등급)
         summary : str — 불확실성 등급 + Fair Value 밴드
         details : list[str] — 매출CV, DOL, D/E, 영업CV, 종합점수/100
+
+    Guide:
+        Morningstar 5 단계 (Low/Medium/High/Very High/Extreme) Fair Value 밴드 직접 매핑.
+
+    When:
+        analyzeFinancial 의 'uncertainty' 키. predictability 와 쌍으로 호출.
+
+    How:
+        4 축 별 점수 (≤25 점) → totalScore → 임계 분기 → grade + 밴드.
+
+    Requires:
+        aSeries IS (sales, operating_profit) 연간 ≥ 5 년 + BS (TL/Equity).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> analyzeUncertainty(aSeries, aYears)
+        InsightResult(grade='B', summary='불확실성 Medium — Fair Value 밴드 ±25%')
+
+    See Also:
+        - analyzePredictability: 대칭 (변동 작음 가산)
+        - quant.calcFairValueBand: 정량 밴드 입력
+
+    AIContext:
+        Fair Value 밴드 폭은 valuation 답변에서 ‘적정주가 ±N%’ 표현으로 인용.
     """
     import statistics
 
@@ -202,6 +261,10 @@ def analyzeCoreEarnings(
 ) -> InsightResult:
     """핵심이익 품질 분석 (비경상 항목 분리).
 
+    Capabilities:
+        - 실효세율 → Core Earnings (영업이익×(1-세율)) 산출 → Core CV vs Reported CV
+          비교 + 괴리 분석.
+
     Parameters
     ----------
     aSeries : dict
@@ -217,6 +280,32 @@ def analyzeCoreEarnings(
         grade : str — 'A'~'F' 등급
         summary : str — 이익 품질 요약
         details : list[str] — Core CV vs Reported CV, 안정성, 괴리 등
+
+    Guide:
+        영업외/일회성 손익이 보고이익을 왜곡하는지 검증. Reported = Core 이면 클린.
+
+    When:
+        analyzeFinancial 의 'coreEarnings' 키. uncertainty/predictability 와 동행 호출.
+
+    How:
+        세금/PBT 평균 → 실효세율 → Core 시계열 → CV 비교 + 최신 괴리 계산.
+
+    Requires:
+        aSeries IS (operating_profit/net_profit/income_taxes/profit_before_tax) ≥ 3 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> analyzeCoreEarnings(aSeries, aYears)
+        InsightResult(grade='A', summary='이익 품질 우수', ...)
+
+    See Also:
+        - analyzePredictability: 매출/영업이익 변동성
+        - calcEarningsMomentum: Sloan accrual 분해
+
+    AIContext:
+        Reported >> Core 괴리는 ‘일회성 이익 비중 큼’ 컨텍스트로 인용 — 추세 판단 시 Core 우선.
     """
     import statistics
 
@@ -303,6 +392,9 @@ def disclosureGapFlags(
 ) -> list[Flag]:
     """공시 텍스트 변화 vs 재무 지표 불일치 탐지.
 
+    Capabilities:
+        - diff 기반 공시 서술 변화 + 재무 건전성 등급 교차 → 텍스트-숫자 불일치 Flag.
+
     diff 기반으로 리스크 서술 급증/감소를 감지하고, 재무 건전성 등급과 교차 비교하여
     '서술형 리스크 급증 vs 재무 안정' 또는 '재무 악화 vs 서술형 은폐' 불일치를 찾는다.
 
@@ -319,6 +411,32 @@ def disclosureGapFlags(
         level : str — 'warning'
         category : str — 'disclosure_gap'
         text : str — 불일치 설명
+
+    Guide:
+        텍스트 톤 변화가 숫자보다 선행할 수 있다는 가정. ‘은폐’ 가설 신호로 활용.
+
+    When:
+        analyzeFinancial 후반 — risk 보강 단계에서 호출.
+
+    How:
+        disclosureDelta._safeDiffResult 로 entries 추출 → riskTopics 매칭 → healthGrade 교차.
+
+    Requires:
+        company.fetchDisclosure 의 diff 결과 + healthGrade 사전 산출.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> disclosureGapFlags(company, "A")
+        [Flag('warning', 'disclosure_gap', '서술형 리스크 급증 vs 재무 안정')]
+
+    See Also:
+        - analyzeFinancial: 상위 호출자
+        - disclosureDelta: diff 산출 유틸
+
+    AIContext:
+        ‘공시 톤 vs 재무 숫자 괴리’ 표현은 가설성 신호로 인용 — 단정 금지.
     """
     if company is None:
         return []

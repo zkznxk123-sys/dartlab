@@ -35,16 +35,74 @@ def _momentumSeries(close: np.ndarray) -> dict:
 
 
 def calcMomentum(stockCode: str, *, market: str = "auto", series: bool = False, **kwargs) -> dict:
-    """모멘텀 종합 분석.
+    """모멘텀 종합 분석 — Jegadeesh-Titman + Moskowitz TS + 52w-high.
+
+    Capabilities:
+        12-1 m 횡단면 모멘텀 (Jegadeesh-Titman 1993, 최근 1m skip 으로
+        short-term reversal 제거) + 시계열 모멘텀 (Moskowitz et al. 2012,
+        과거 12m 부호 지속) + 52주 신고가 대비 비율 (George-Hwang 2004) +
+        crash risk (skewness 기반). 데이터 252 일 미만 시 6-1 m 폴백.
 
     Args:
         stockCode: 종목코드 또는 ticker.
         market: "KR" | "US" | "auto".
-        series: True 면 dict 에 `_series` 키 추가 — Strategy DSL 입력용 시계열.
+        series: True 면 ``_series`` (ts12_1, ts6_1, ts_high52 NDArray) 추가.
 
     Returns:
-        dict with momentum12_1, tsMomentum, highRatio52w, crashRisk.
-        series=True 시 추가 키: _series = {ts12_1, ts6_1, ts_high52} (각 NDArray, 길이 N).
+        dict:
+            - ``momentum12_1`` (float): 12-1 m return (최근 1m 제외).
+            - ``return12m``/``return1m`` (float): 단순 12m/1m 수익률.
+            - ``tsMomentum`` (str): "up"|"down"|"flat".
+            - ``highRatio52w`` (float): 현재 / 52주 신고가 비율.
+            - ``crashRisk`` (float): 음의 skewness (가까울수록 폭락 위험).
+            - 또는 ``error`` (str): 22 일 미만.
+
+    Raises:
+        없음 (error 키).
+
+    Example:
+        >>> r = calcMomentum("005930")
+        >>> r["momentum12_1"], r["highRatio52w"]
+        (0.15, 0.92)  # 12-1 m +15%, 52w 신고가 92%
+
+    Guide:
+        - momentum12_1 ≥ 20% + highRatio52w ≥ 95% = 강한 모멘텀 (성장주).
+        - 음의 모멘텀 (< -10%) + crashRisk 큼 = 회복 전 추가 하락 위험.
+        - 22 일 미만 = error, 252 일 미만 = 6-1 m 폴백, ≥ 252 일 = 12-1 m.
+
+    See Also:
+        - ``calcVolume``: 거래량 흐름
+        - ``calcVolatility``: vol regime (모멘텀 회사는 vol 도 큼)
+        - ``synth.indicators.momentum``: RSI/MACD
+
+    When:
+        Quant momentum 축 진입점 + AI 모멘텀 / 신고가 답변.
+
+    How:
+        OHLCV → close → 12-1 m (skip 1m) + 6-1 m + TS + 52w high + skewness
+        합성.
+
+    Requires:
+        OHLCV 일별 ≥ 22 일 (12-1 m 완전 신호는 ≥ 252 일).
+
+    AIContext:
+        12-1 m 단독 인용 금지 — highRatio52w + crashRisk 함께. 252 일 미만은
+        6-1 m 폴백 사용 명시. KR 회사 모멘텀 사이클은 US 대비 짧음 (3~6m).
+
+    LLM Specifications:
+        AntiPatterns:
+            - 최근 1m 포함 단순 12m 인용 — short-term reversal 노이즈.
+            - 252 일 미만에 12-1 m 단정 — 본 함수가 None 반환.
+        OutputSchema:
+            ``{momentum12_1: float, return12m, return1m, tsMomentum: str,
+              highRatio52w: float, crashRisk: float}``.
+        Prerequisites:
+            OHLCV ≥ 22 일 (≥ 252 일 권장).
+        Freshness:
+            일별.
+        Dataflow:
+            OHLCV → close → 12-1 m + 6-1 m + TS + 52w high + skewness.
+        TargetMarkets: KR (KRX), US (NYSE/NASDAQ).
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)

@@ -38,19 +38,50 @@ def synthesize(
 ) -> AnalystReport:
     """복수 밸류에이션 → 가중평균 목표가 + 종합 의견.
 
+    Capabilities:
+        - DCF + 컨센서스 + 피어 멀티플 + 상대가치 4 채널 가중평균
+        - 가용 채널만 정규화 + 미가용 채널 가중치 비례 재배분
+        - DCF↔컨센서스 괴리 50% 초과 시 DCF 가중치 ×0.7 자동 조정
+
     Args:
-        dcf_target: DCF 가중 목표가 (analysis.valuation.pricetarget).
-        dcf_confidence: DCF 신뢰도 (0~1).
+        dcfTarget: DCF 가중 목표가 (analysis.valuation.pricetarget).
+        dcfConfidence: DCF 신뢰도 (0~1).
         market: MarketSnapshot (gather.types).
-        company_financials: {"eps": float, "bps": float, "ebitda": float, ...}
+        companyFinancials: {"eps": float, "bps": float, "ebitda": float, ...}
         shares: 발행주식수.
-        current_price: 현재 주가.
-        company_name: 회사명.
-        stock_code: 종목코드.
-        custom_weights: 사용자 정의 가중치 (기본값 덮어쓰기).
+        currentPrice: 현재 주가.
+        companyName: 회사명.
+        stockCode: 종목코드.
+        customWeights: 사용자 정의 가중치 (기본값 덮어쓰기).
 
     Returns:
-        AnalystReport.
+        AnalystReport — target_price, opinion, methods, confidence, warnings.
+
+    Example:
+        >>> synthesize(dcfTarget=80000, market=snap, shares=5e9, currentPrice=75000)
+
+    Guide:
+        DEFAULT_WEIGHTS = {dcf 0.30, consensus 0.35, peer 0.20, relative 0.15}.
+        애널리스트 < 3 명 시 컨센서스 가중치 ×0.5.
+
+    When:
+        Analyst.report 가 모든 채널 데이터 수집 후 호출 (단독 호출 가능).
+
+    How:
+        synthesize(dcfTarget=..., dcfConfidence=..., market=..., shares=...).
+
+    Requires:
+        AnalystReport / ValuationMethod / _classifyOpinion (types 모듈).
+
+    Raises:
+        없음 — 모든 채널 부재 시 warnings 만 담긴 빈 리포트.
+
+    See Also:
+        - Analyst.report : 본 함수의 호출자
+        - _classifyOpinion : upside → opinion 라벨
+
+    AIContext:
+        종합 목표가 답변 시 methods 의 채널별 weight + value 함께 인용.
     """
     methods: list[ValuationMethod] = []
     reasoning: list[str] = []

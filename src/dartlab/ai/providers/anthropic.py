@@ -10,7 +10,7 @@ from dartlab.ai.tools.types import ToolSpec
 
 
 class AnthropicProvider(BaseProvider):
-    """AnthropicProvider — TODO 한국어 클래스 설명."""
+    """Anthropic (Claude) provider adapter — anthropic SDK 래핑 + native tool."""
 
     name = "anthropic"
     defaultModel = "claude-sonnet-4-5-20250929"
@@ -26,7 +26,7 @@ class AnthropicProvider(BaseProvider):
         return Anthropic(apiKey=apiKey, baseUrl=self.config.baseUrl or None)
 
     def checkAvailable(self) -> bool:
-        """checkAvailable — TODO 한국어 동작 설명."""
+        """ANTHROPIC_API_KEY + anthropic SDK 동시 보유 여부."""
         if not (self.config.apiKey or os.getenv("ANTHROPIC_API_KEY")):
             return False
         try:
@@ -36,7 +36,7 @@ class AnthropicProvider(BaseProvider):
         return True
 
     def toolSchema(self, spec: ToolSpec) -> dict[str, Any]:
-        """toolSchema — TODO 한국어 동작 설명."""
+        """ToolSpec → Anthropic API native tool schema (name/description/input_schema)."""
         return {
             "name": spec.name,
             "description": spec.description,
@@ -50,7 +50,7 @@ class AnthropicProvider(BaseProvider):
         *,
         stream: bool = True,
     ) -> Iterator[LLMEvent]:
-        """complete — TODO 한국어 동작 설명."""
+        """messages + tools → Anthropic API 호출 → LLMEvent stream (text/tool_call/stop)."""
         client = self._client()
         system, normalized = _splitSystem(messages)
         kwargs: dict[str, Any] = {

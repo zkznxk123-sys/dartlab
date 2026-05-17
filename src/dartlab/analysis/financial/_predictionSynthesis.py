@@ -26,68 +26,211 @@ def _lazy(name):
     return getattr(importlib.import_module("dartlab.analysis.financial.predictionSignals"), name)
 
 
-def calcEarningsMomentum(*args, **kwargs):
-    """predictionSignals.calcEarningsMomentum lazy proxy — 본체로 위임."""
+def calcEarningsMomentum(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcEarningsMomentum lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 모듈 import 가능.
+
+    Raises:
+        없음 — 본체 위임.
+
+    Example:
+        >>> calcEarningsMomentum(company)["momentum"]
+        0.18
+    """
     return _lazy("calcEarningsMomentum")(*args, **kwargs)
 
 
-def calcPeerPrediction(*args, **kwargs):
-    """predictionSignals.calcPeerPrediction lazy proxy — 본체로 위임."""
+def calcPeerPrediction(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcPeerPrediction lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcPeerPrediction(company)["peerScore"]
+        0.62
+    """
     return _lazy("calcPeerPrediction")(*args, **kwargs)
 
 
-def calcStructuralBreak(*args, **kwargs):
-    """predictionSignals.calcStructuralBreak lazy proxy — 본체로 위임."""
+def calcStructuralBreak(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcStructuralBreak lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcStructuralBreak(company)["isBreak"]
+        True
+    """
     return _lazy("calcStructuralBreak")(*args, **kwargs)
 
 
-def calcMacroSensitivity(*args, **kwargs):
-    """predictionSignals.calcMacroSensitivity lazy proxy — 본체로 위임."""
+def calcMacroSensitivity(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcMacroSensitivity lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcMacroSensitivity(company)["score"]
+        0.4
+    """
     return _lazy("calcMacroSensitivity")(*args, **kwargs)
 
 
-def calcMacroRegression(*args, **kwargs):
-    """predictionSignals.calcMacroRegression lazy proxy — 본체로 위임."""
+def calcMacroRegression(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcMacroRegression lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcMacroRegression(company)["coefficients"]
+        {...}
+    """
     return _lazy("calcMacroRegression")(*args, **kwargs)
 
 
-def calcEventImpact(*args, **kwargs):
-    """predictionSignals.calcEventImpact lazy proxy — 본체로 위임."""
+def calcEventImpact(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcEventImpact lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEventImpact(company)["impact"]
+        0.5
+    """
     return _lazy("calcEventImpact")(*args, **kwargs)
 
 
-def calcDisclosureDelta(*args, **kwargs):
-    """predictionSignals.calcDisclosureDelta lazy proxy — 본체로 위임."""
+def calcDisclosureDelta(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcDisclosureDelta lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDisclosureDelta(company)["delta"]
+        0.3
+    """
     return _lazy("calcDisclosureDelta")(*args, **kwargs)
 
 
-def calcInventoryDivergence(*args, **kwargs):
-    """predictionSignals.calcInventoryDivergence lazy proxy — 본체로 위임."""
+def calcInventoryDivergence(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcInventoryDivergence lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcInventoryDivergence(company)["divergence"]
+        -0.2
+    """
     return _lazy("calcInventoryDivergence")(*args, **kwargs)
 
 
-def calcAnnouncementTiming(*args, **kwargs):
-    """predictionSignals.calcAnnouncementTiming lazy proxy — 본체로 위임."""
+def calcAnnouncementTiming(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcAnnouncementTiming lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAnnouncementTiming(company)["score"]
+        0.1
+    """
     return _lazy("calcAnnouncementTiming")(*args, **kwargs)
 
 
-def calcSupplyChainSignal(*args, **kwargs):
-    """predictionSignals.calcSupplyChainSignal lazy proxy — 본체로 위임."""
+def calcSupplyChainSignal(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcSupplyChainSignal lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcSupplyChainSignal(company)["score"]
+        0.0
+    """
     return _lazy("calcSupplyChainSignal")(*args, **kwargs)
 
 
-def calcConsensusDirection(*args, **kwargs):
-    """predictionSignals.calcConsensusDirection lazy proxy — 본체로 위임."""
+def calcConsensusDirection(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcConsensusDirection lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcConsensusDirection(company)["direction"]
+        'up'
+    """
     return _lazy("calcConsensusDirection")(*args, **kwargs)
 
 
-def calcFlowDirection(*args, **kwargs):
-    """predictionSignals.calcFlowDirection lazy proxy — 본체로 위임."""
+def calcFlowDirection(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcFlowDirection lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcFlowDirection(company)["direction"]
+        'inflow'
+    """
     return _lazy("calcFlowDirection")(*args, **kwargs)
 
 
-def calcRevenueDirection(*args, **kwargs):
-    """predictionSignals.calcRevenueDirection lazy proxy — 본체로 위임."""
+def calcRevenueDirection(*args, **kwargs) -> dict | None:
+    """predictionSignals.calcRevenueDirection lazy proxy — 본체로 위임.
+
+    Requires:
+        predictionSignals 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcRevenueDirection(company)["direction"]
+        'up'
+    """
     return _lazy("calcRevenueDirection")(*args, **kwargs)
 
 
@@ -108,6 +251,36 @@ def calcPredictionSynthesis(company, *, basePeriod: str | None = None) -> dict |
         nSignals : int — 유효 신호 수
         revenuePrediction : dict | None — 매출 방향 예측 (direction, confidence, streak, expectedAccuracy(%))
         aiContext : dict — AI 소비용 요약 (directionBias, keyDrivers, keyRisks)
+
+    Capabilities:
+        - 13 sub-신호 (earnings momentum/peer/structural/macro 등) 단순 평균 → consensus + direction
+        - agreementScore 로 신호 합의도 측정 + confidence 분류
+
+    Guide:
+        Green-Armstrong 2015 단순 평균이 32 편 논문 97 비교에서 최적. 가중평균 < 평균.
+
+    When:
+        analysis 예측 종합 + AI 미래 방향 답변.
+
+    How:
+        13 sub-calc 호출 → direction score 평균 → agreement + confidence.
+
+    Requires:
+        company + 13 sub-calc 가용 (대부분 best-effort).
+
+    Raises:
+        없음 — sub-calc None 일 때 skip.
+
+    Example:
+        >>> calcPredictionSynthesis(company)["consensus"]
+        'bullish'
+
+    See Also:
+        - calcPredictionFlags : 위험/기회 플래그
+        - predictionSignals : sub-신호 본체
+
+    AIContext:
+        "이 종목 방향 종합 예측" 답변 시 consensus + directionScore + keyDrivers 인용.
     """
     # 각 calc 독립 호출 (company._cache로 중복 방지는 호출자 레벨)
     momentum = calcEarningsMomentum(company, basePeriod=basePeriod)
@@ -396,6 +569,36 @@ def calcPredictionFlags(company, *, basePeriod: str | None = None) -> list[tuple
     list[tuple[str, str]] | None
         (코드, 메시지) 튜플 목록. 코드는 EARN_DECEL, HIGH_ACCRUAL 등 플래그 ID.
         플래그가 없으면 None.
+
+    Capabilities:
+        - 13 신호 결과 → 위험/기회 플래그 (EARN_DECEL/HIGH_ACCRUAL/STRUCT_VOLATILE 등) list
+        - 코드 + 한 줄 메시지 tuple
+
+    Guide:
+        story flag 박스 + AI 위험 경고 답변 표준 입력. flag ≥ 3 = 복합 위험.
+
+    When:
+        Story flag + AI 사전 경고 답변.
+
+    How:
+        13 sub-calc 결과 임계 비교 → 위반 시 tuple 누적.
+
+    Requires:
+        sub-calc 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcPredictionFlags(company)
+        [('EARN_DECEL', '이익 감속 ...'), ('HIGH_ACCRUAL', '...')]
+
+    See Also:
+        - calcPredictionSynthesis : 종합 score
+        - story.bridges.alerts : flag 소비
+
+    AIContext:
+        "이 종목 사전 경고" 답변 시 flag list 인용.
     """
     flags = []
 

@@ -131,19 +131,18 @@ def _fetchTradeData(market: str, asOf: str | None = None) -> dict[str, float | l
 
 
 def analyzeTrade(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """교역 종합 분석.
+    """교역 종합 분석 — 교역조건 + 수출 이익 선행 + 양국 선행지수 상대강도.
 
-    교역조건, 교역조건 대용치(환율-유가), 수출이익 선행,
-    양국 선행지수 상대강도, 미국 소비 연계를 종합한다.
+    Capabilities:
+        한국 수출 이익 예측을 위한 매크로 신호 — 교역조건 (수출물가 / 수입물가),
+        교역조건 대용치 (환율 YoY - 유가 YoY), 수출 이익 선행 (3 종 신호 합산),
+        양국 선행지수 상대강도 (KR LEI / US LEI), 미국 소비 연계 (PCE, 소매판매).
+        KR 특화 매크로 진단.
 
-    Parameters
-    ----------
-    market : str
-        시장 코드 ("US" | "KR"). 기본 "US".
-    as_of : str | None
-        기준일 (YYYY-MM-DD). None이면 최신.
-    overrides : dict | None
-        AI 가정 교체 (예: ``{"usdkrw": 1350}``).
+    Args:
+        market: 시장 코드. ``"US"`` 또는 ``"KR"``. 본 함수는 ``"KR"`` 권장.
+        asOf: 기준일 ``YYYY-MM-DD``. ``None`` 이면 최신.
+        overrides: AI 가정 교체. 예 ``{"usdkrw": 1350, "oil": 80}``.
 
     Returns
     -------
@@ -178,6 +177,56 @@ def analyzeTrade(*, market: str = "US", asOf: str | None = None, overrides: dict
             usRetailYoy : float — 미국 소매판매 YoY (%)
             implication : str — 시사 해설
         timeseries : dict — 주요 시계열 (oil, export_price, usdkrw 등)
+
+    Example:
+        >>> from dartlab.macro.trade.trade import analyzeTrade
+        >>> r = analyzeTrade(market="KR")
+        >>> r["termsOfTrade"]["direction"], r["exportProfit"]["signalLabel"]
+        ('improving', '확장 가능')
+
+    Guide:
+        한국 수출 기업 분석 사전 컨텍스트. 교역조건 개선 + 양국 LEI 상대강도
+        한국 우위 + 미국 소비 강세 = 한국 수출 이익 모멘텀 강세 신호.
+        반대 케이스는 약세. KR 시장 위주이고 US 는 일부 키만 채움.
+
+    See Also:
+        - ``analyzeCycle``: 사이클 4 국면 (교역과 함께 KR 진단)
+        - ``synth.scenario``: 환율 시나리오 — overrides 매핑
+        - ``industry``: 업종별 수출 비중 (교역 신호 적용 대상)
+
+    Raises:
+        없음 — 각 축 실패는 None 으로 흡수.
+
+    When:
+        ``analyzeSummary`` trade 보조축 진입점. KR 수출 답변 1 차.
+
+    How:
+        _fetchTradeData → overrides → calcToT + totProxy + exportProfitLeading +
+        leadingIndexRelativeStrength + USDKRW yoy / oil yoy 매핑 → dict 합성.
+
+    Requires:
+        ECOS (KR 수출물가/수입물가/usdkrw) + FRED (US 소매판매, PCE).
+        API key 불필요.
+
+    AIContext:
+        "한국 수출 어디로 가나" · "환율 + 유가 동시 충격 영향" · "미국 소비
+        둔화가 한국 수출 영향" 등 KR 매크로 질문에 호출.
+
+    LLM Specifications:
+        AntiPatterns:
+            - market="US" 호출 — 본 함수는 KR 위주, US 일부 키만 채움
+            - termsOfTrade.level 만 인용 (momentum 무시)
+            - overrides usdkrw 만 변경하고 oil 미동기 — 둘은 통상 함께 움직임
+        OutputSchema:
+            상기 6 키 dict. market=US 면 termsOfTrade/exportProfit 등 None.
+        Prerequisites:
+            ECOS 수출입 가격 cache + FRED 미국 소비 시리즈.
+        Freshness:
+            ECOS 월간 (수출입 가격, 익월 중순), FRED 월간 (소매판매).
+        Dataflow:
+            _fetchTradeData → overrides → termsOfTrade + totProxy +
+            exportProfit + leadingRelativeStrength + usConsumptionLink → dict.
+        TargetMarkets: KR (메인), US (보조 — 소비 link).
     """
     data = _fetchTradeData(market, asOf=asOf)
     if overrides:

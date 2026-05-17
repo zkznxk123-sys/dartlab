@@ -82,12 +82,46 @@ def build(
     원본 Avellaneda-Lee 는 PCA residual 이지만 단일 종목엔 self-residual 사용.
     s_bo = -1.25, s_so = -0.50 은 논문 권장값.
 
+    Capabilities:
+        - residual z-score < -1.25 + RSI oversold + 정상 변동성 → 진입
+        - z > -0.5 회복 → 청산 + ATR×2 stop
+
     Args:
-        z_entry: 진입 z-score 임계 (음수, 더 작을수록 강한 oversold)
-        z_exit: 청산 z-score 임계
-        z_window: rolling 기간 (논문 60일)
-        rsi_confirm: RSI 추가 확인 임계 (false signal 감소)
-        atr_k: ATR stop 배수
+        company: Company 객체.
+        zEntry: 진입 z-score 임계. 기본 ``-1.25``.
+        zExit: 청산 z 임계. 기본 ``-0.5``.
+        zWindow: rolling 기간. 기본 ``60``.
+        rsiConfirm: RSI 추가 확인 임계. 기본 ``35``.
+        atrK: ATR stop 배수. 기본 ``2.0``.
+
+    Returns:
+        Rule — entry/exit + atr stop.
+
+    Guide:
+        Avellaneda-Lee 2008 statistical arbitrage. 횡보 + low-vol regime 최적.
+
+    When:
+        Mean-reversion + AI 평균회귀 답변.
+
+    How:
+        z-score + RSI + vol q70 필터 → entry → recovery exit.
+
+    Requires:
+        close ≥ zWindow + 20.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> build(company).meta["style"]
+        'meanReversion'
+
+    See Also:
+        - strategy.styles.trendFollow : 반대 스타일
+        - strategy.styles.dipBuy : 단기 mean reversion
+
+    AIContext:
+        "평균 회귀 매수 기회" 답변 시 entry 마지막 봉 인용.
     """
     arr = getArrays(company)
     close = arr.get("close")

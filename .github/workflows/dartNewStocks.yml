@@ -70,7 +70,7 @@ jobs:
           restore-keys: dartlab-data-docs-
 
       - name: Sync KindList new stocks
-        run: uv run python -X utf8 .github/scripts/syncNewStocks.py
+        run: uv run python -X utf8 .github/scripts/sync/syncNewStocks.py
         env:
           DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -83,7 +83,7 @@ jobs:
         run: |
           if [ -s dist/changed_finance.txt ]; then
             cp dist/changed_finance.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target hf
+            uv run python .github/scripts/sync/uploadData.py --target hf
           fi
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -94,7 +94,7 @@ jobs:
         run: |
           if [ -s dist/changed_report.txt ]; then
             cp dist/changed_report.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target hf
+            uv run python .github/scripts/sync/uploadData.py --target hf
           fi
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -105,7 +105,7 @@ jobs:
         run: |
           if [ -s dist/changed_docs.txt ]; then
             cp dist/changed_docs.txt dist/changed.txt
-            uv run python .github/scripts/uploadData.py --target hf
+            uv run python .github/scripts/sync/uploadData.py --target hf
           fi
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

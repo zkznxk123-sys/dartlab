@@ -81,6 +81,10 @@ def readSkill(
             {
                 "id": spec.id,
                 "title": spec.title,
+                "kind": spec.kind,
+                "scope": spec.scope,
+                "status": spec.status,
+                "trustTier": "localUserDraft" if spec.scope == "user" else "builtin",
                 "score": match.score,
                 "purpose": spec.purpose,
                 "whenToUse": list(spec.whenToUse),

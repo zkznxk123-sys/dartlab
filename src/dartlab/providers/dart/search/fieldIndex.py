@@ -1174,6 +1174,7 @@ def pullContentIndex() -> int:
         "delta_info.json",
     ]
     ok = 0
+    _log.info("[cyan]⬇ HF[/] contentIndex (%d 파일)", len(names))
     for name in names:
         try:
             hf_hub_download(
@@ -1186,6 +1187,7 @@ def pullContentIndex() -> int:
         except Exception:
             continue
     clearCache()
+    _log.info("[green]✓[/] contentIndex (%d/%d 파일)", ok, len(names))
     return ok
 
 

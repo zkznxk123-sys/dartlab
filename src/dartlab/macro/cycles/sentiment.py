@@ -78,18 +78,73 @@ def calcFearGreedProxy(
     goldEquityRatio: float | None = None,
     cryptoMomentum: float | None = None,
 ) -> SentimentScore:
-    """FRED 4~5요소로 CNN Fear & Greed Index 근사.
+    """FRED 4~5 요소로 CNN Fear & Greed Index 근사 — 0=극단공포 / 100=극단탐욕.
+
+    Capabilities:
+        VIX (변동성) + S&P500 모멘텀 + HY 스프레드 + (옵션) 금/주식 비율 +
+        (옵션) 비트코인 모멘텀을 정규화하여 0~100 sentiment score 산출. CNN
+        Fear & Greed 의 공개 데이터 기반 근사 (실제 CNN 모델은 비공개).
 
     Args:
-        vix: CBOE VIX (낮을수록 탐욕)
-        sp500_vs_ma125: S&P500 현재가 / 125일 이동평균 비율 (1.0 = 평균, >1 = 탐욕)
-        hy_spread: HY 스프레드 bps (낮을수록 탐욕)
-        gold_equity_ratio: 금/S&P500 비율 (높을수록 공포). None이면 제외.
-        crypto_momentum: BTC 90일 변화율 (%). 유동성 과잉/긴축의 극단 지표.
-            양수=위험선호(탐욕), 음수=위험회피(공포). None이면 제외.
+        vix: CBOE VIX (낮을수록 탐욕).
+        sp500VsMa125: S&P500 현재가 / 125 일 이동평균 비율 (1.0=평균, >1=탐욕).
+        hySpread: HY 스프레드 (bps, 낮을수록 탐욕).
+        goldEquityRatio: 금 / S&P500 비율. 높을수록 공포. None 이면 제외.
+        cryptoMomentum: BTC 90 일 변화율 (%). 양수=탐욕, 음수=공포. None 이면 제외.
 
     Returns:
-        SentimentScore (0=극단공포, 100=극단탐욕)
+        ``SentimentScore`` — ``score`` (0~100 float) + ``label`` (str) +
+        ``components`` (dict[str, float]) 의 dataclass.
+
+    Example:
+        >>> from dartlab.macro.cycles.sentiment import calcFearGreedProxy
+        >>> r = calcFearGreedProxy(vix=35.0, sp500VsMa125=-10.0, hySpread=8.0)
+        >>> r.score
+        15.5
+
+    Guide:
+        Sentiment 단일 지표 의존 금지 — 사이클 + 위기 + 예측과 함께 해석.
+        score < 25 은 극단 공포 (역사적 매수 zone), > 75 은 극단 탐욕 (조심).
+        crypto 모멘텀은 2020+ 의 강력한 risk-on/off 신호.
+
+    SeeAlso:
+        - ``calcSentiment``: 종합 sentiment (본 함수 + 추가 신호 통합)
+        - ``classifyVixRegime``: VIX 단독 regime 판별
+        - CNN Fear & Greed Index 공식 페이지
+
+    When:
+        ``macro("cycle", "sentiment")``. AI 답변 "공포 / 탐욕 어디" 시.
+
+    How:
+        4~5 지표 각각 ``_normalize`` (0~100) → 가중 평균 → 0~25/45/55/75 임계 → label.
+
+    Raises:
+        없음 — 순수 산술.
+
+    Requires:
+        FRED 시리즈 VIXCLS + S&P500 + BAMLH0A0HYM2 (+ GOLDAMGBD228NLBM
+        옵션). API key 불필요.
+
+    AIContext:
+        "시장 심리 과열인가" · "공포 / 탐욕 어느 쪽" · "매수 zone 인가" 등
+        심리 지표 질문에 호출. score + components 둘 다 인용.
+
+    LLM Specifications:
+        AntiPatterns:
+            - score 만 인용 (components 분해 무시) — VIX 만 극단인지 모두 극단인지 다름
+            - cryptoMomentum 절대값 큰데 None 처리 — 2020+ 환경에선 포함 권장
+            - 1 일치 score 만 보고 sentiment 단정 — 추세 (5/20 일 평균) 권장
+        OutputSchema:
+            ``SentimentScore(score: float, label: str, components: dict[str, float])``.
+            components 키: ``vix``/``momentum``/``credit``/``safe_haven``?/``crypto``?.
+        Prerequisites:
+            없음 (순수 함수). 입력 3~5 float 만.
+        Freshness:
+            VIX 일간, S&P500 일간, HY 스프레드 일간 — 동일 일자 동기화 권장.
+        Dataflow:
+            (vix, sp500vsMa, hySpread, gold?, crypto?) → _normalize 5 요소
+            → 가중 평균 → SentimentScore.
+        TargetMarkets: US (FRED). KR 미지원.
     """
     components: dict[str, float] = {}
 
@@ -145,6 +200,10 @@ def estimateRateExpectation(
 ) -> RateExpectation:
     """2Y-FF 스프레드로 시장 금리 기대 방향 근사.
 
+    Capabilities:
+        2Y 국채 수익률 - Fed Funds Rate 스프레드 부호/크기로 시장의 정책금리 인하 / 인상 / 동결
+        기대 방향과 강도 (mild / moderate / strong) 판정. CME FedWatch 의 단순 대안.
+
     2Y 국채는 향후 2년간 정책금리 경로 기대를 반영.
     2Y < FF → 시장은 인하를 기대.
     2Y > FF → 시장은 인상을 기대.
@@ -156,6 +215,34 @@ def estimateRateExpectation(
 
     Returns:
         RateExpectation
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.macro.cycles.sentiment import estimateRateExpectation
+        >>> r = estimateRateExpectation(ffRate=5.25, dgs2=4.5)
+        >>> r.direction
+        'cut_expected'
+
+    Guide:
+        spread = dgs2 - ffRate. 임계 ±0.10/0.25/0.50 으로 mild/moderate/strong.
+
+    When:
+        ``macro("cycle")`` 정책금리 기대 분기. AI 답변 "시장은 인하를 기대" 류.
+
+    How:
+        spread = dgs2 - ffRate → 임계 분기 → direction/strength → RateExpectation dataclass.
+
+    Requires:
+        - FRED 시리즈 DGS2 + DFF (+ DGS10 옵션)
+
+    See Also:
+        - ``dartlab.macro.cycles.macroCycle.decomposeLongRate`` : 장기금리 분해
+        - ``dartlab.macro.cycles.macroCycle.rateOutlook`` : 정책 방향 종합
+
+    AIContext:
+        AI 답변 시 spread2yFf 값 + direction 함께 인용. 절대 spread 만으로는 모호.
     """
     spread = dgs2 - ffRate
     spread_10y2y = (dgs10 - dgs2) if dgs10 is not None else None
@@ -184,243 +271,16 @@ def estimateRateExpectation(
     )
 
 
-# ══════════════════════════════════════
-# 고용 해석
-# ══════════════════════════════════════
+# ── interpretEmployment + interpretInflation + ismAssetAllocation + krInflationModel → _sentimentRegional.py 분리 ──
 
-
-def interpretEmployment(
-    unrate: float,
-    payrolls3mAvg: float | None = None,
-) -> EmploymentSignal:
-    """고용 지표 해석.
-
-    Args:
-        unrate: 실업률 (%)
-        payrolls_3m_avg: 비농업고용 3개월 평균 변화 (천명)
-
-    Returns:
-        EmploymentSignal
-    """
-    reasons: list[str] = []
-    score = 0  # 양수=강함, 음수=약함
-
-    if unrate < 4.0:
-        score += 2
-        reasons.append(f"실업률 {unrate:.1f}% — 완전고용 수준")
-    elif unrate < 5.0:
-        score += 1
-        reasons.append(f"실업률 {unrate:.1f}% — 양호")
-    elif unrate < 6.0:
-        score -= 1
-        reasons.append(f"실업률 {unrate:.1f}% — 약화")
-    else:
-        score -= 2
-        reasons.append(f"실업률 {unrate:.1f}% — 고용 악화")
-
-    if payrolls3mAvg is not None:
-        if payrolls3mAvg > 200:
-            score += 2
-            reasons.append(f"고용 증가 3M평균 +{payrolls3mAvg:.0f}K — 강함")
-        elif payrolls3mAvg > 100:
-            score += 1
-            reasons.append(f"고용 증가 3M평균 +{payrolls3mAvg:.0f}K — 적정")
-        elif payrolls3mAvg > 0:
-            reasons.append(f"고용 증가 3M평균 +{payrolls3mAvg:.0f}K — 둔화")
-        else:
-            score -= 2
-            reasons.append(f"고용 감소 3M평균 {payrolls3mAvg:.0f}K — 경고")
-
-    if score >= 3:
-        state, label = "strong", "강함"
-    elif score >= 1:
-        state, label = "moderate", "보통"
-    elif score >= -1:
-        state, label = "weakening", "약화"
-    else:
-        state, label = "weak", "약함"
-
-    return EmploymentSignal(state=state, stateLabel=label, reasoning=tuple(reasons))
-
-
-# ══════════════════════════════════════
-# 물가 해석
-# ══════════════════════════════════════
-
-
-def interpretInflation(
-    cpiYoy: float,
-    coreCpiYoy: float | None = None,
-    bei5y: float | None = None,
-    bei10y: float | None = None,
-) -> InflationSignal:
-    """물가 지표 해석.
-
-    Args:
-        cpi_yoy: CPI YoY (%)
-        core_cpi_yoy: Core CPI YoY (%)
-        bei_5y: 5년 BEI (%) — 기대인플레이션
-        bei_10y: 10년 BEI (%) — 기대인플레이션
-
-    Returns:
-        InflationSignal
-    """
-    reasons: list[str] = []
-    heat = 0  # 양수=과열, 음수=냉각
-
-    if cpiYoy > 4.0:
-        heat += 3
-        reasons.append(f"CPI {cpiYoy:.1f}% — 인플레이션 과열")
-    elif cpiYoy > 3.0:
-        heat += 2
-        reasons.append(f"CPI {cpiYoy:.1f}% — 목표 상회")
-    elif cpiYoy > 1.5:
-        reasons.append(f"CPI {cpiYoy:.1f}% — 목표 부근")
-    elif cpiYoy > 0:
-        heat -= 1
-        reasons.append(f"CPI {cpiYoy:.1f}% — 둔화")
-    else:
-        heat -= 2
-        reasons.append(f"CPI {cpiYoy:.1f}% — 디플레이션 우려")
-
-    if coreCpiYoy is not None:
-        if coreCpiYoy > 3.5:
-            heat += 1
-            reasons.append(f"Core CPI {coreCpiYoy:.1f}% — 기조적 인플레")
-        elif coreCpiYoy < 2.0:
-            heat -= 1
-            reasons.append(f"Core CPI {coreCpiYoy:.1f}% — 기조 둔화")
-
-    if bei5y is not None:
-        if bei5y > 2.8:
-            heat += 1
-            reasons.append(f"5Y BEI {bei5y:.2f}% — 기대인플레 상승")
-        elif bei5y < 1.8:
-            heat -= 1
-            reasons.append(f"5Y BEI {bei5y:.2f}% — 기대인플레 하락")
-
-    if heat >= 3:
-        state, label = "hot", "과열"
-    elif heat >= 1:
-        state, label = "warm", "높음"
-    elif heat >= -1:
-        state, label = "target", "목표부근"
-    elif heat >= -2:
-        state, label = "cool", "둔화"
-    else:
-        state, label = "cold", "디플레우려"
-
-    return InflationSignal(state=state, stateLabel=label, reasoning=tuple(reasons))
-
-
-# ══════════════════════════════════════
-# ISM 자산배분 (투자전략 13)
-# ══════════════════════════════════════
-
-
-@dataclass(frozen=True)
-class ISMAllocationSignal:
-    """ISM 기반 글로벌 자산배분 신호."""
-
-    ism: float
-    stance: str  # "risk_on" | "neutral" | "risk_off"
-    stanceLabel: str  # "위험자산 선호" | "중립" | "안전자산 선호"
-    equityWeight: str  # "overweight" | "neutral" | "underweight"
-    bondWeight: str  # "underweight" | "neutral" | "overweight"
-    description: str
-
-
-def ismAssetAllocation(ism: float) -> ISMAllocationSignal:
-    """ISM PMI → 글로벌 자산배분 신호.
-
-    투자전략 13: ISM지수가 세계 자산배분의 바로미터다.
-    """
-    if ism >= 55:
-        return ISMAllocationSignal(
-            ism=round(ism, 1),
-            stance="risk_on",
-            stanceLabel="위험자산 선호",
-            equityWeight="overweight",
-            bondWeight="underweight",
-            description=f"ISM {ism:.1f} ≥ 55 — 글로벌 위험자산 비중확대, 채권 축소",
-        )
-    elif ism >= 50:
-        return ISMAllocationSignal(
-            ism=round(ism, 1),
-            stance="neutral",
-            stanceLabel="중립",
-            equityWeight="neutral",
-            bondWeight="neutral",
-            description=f"ISM {ism:.1f} (50-55) — 자산배분 중립, 방향 전환 주시",
-        )
-    else:
-        return ISMAllocationSignal(
-            ism=round(ism, 1),
-            stance="risk_off",
-            stanceLabel="안전자산 선호",
-            equityWeight="underweight",
-            bondWeight="overweight",
-            description=f"ISM {ism:.1f} < 50 — 안전자산 선호, 주식 비중축소",
-        )
-
-
-# ══════════════════════════════════════
-# 한국 물가 모델 (투자전략 18)
-# ══════════════════════════════════════
-
-
-@dataclass(frozen=True)
-class KRInflationEstimate:
-    """한국 물가 방향 추정."""
-
-    fxEffect: float  # 환율 효과 (%)
-    oilEffect: float  # 유가 효과 (%)
-    combined: float  # 합산 물가 압력
-    direction: str  # "upward" | "stable" | "downward"
-    directionLabel: str  # "상승" | "안정" | "하락"
-    description: str
-
-
-def krInflationModel(fxYoy: float, oilYoy: float) -> KRInflationEstimate:
-    """한국 물가 = 환율 + 유가 모델.
-
-    투자전략 18: 우리나라 물가 흐름은 환율과 유가에 좌우된다.
-    원/달러 상승(원화약세) → 수입물가 상승 → CPI 상승.
-    유가 상승 → 에너지/운송비 상승 → CPI 상승.
-
-    Args:
-        fxYoy: USDKRW 전년대비 변화율 (%)
-        oilYoy: WTI 유가 전년대비 변화율 (%)
-
-    Returns:
-        KRInflationEstimate: 물가 방향
-    """
-    # 실증적 pass-through 계수 (한국은행 연구: 환율 0.05~0.08, 유가 0.02~0.04)
-    fx_effect = fxYoy * 0.06
-    oil_effect = oilYoy * 0.03
-    combined = fx_effect + oil_effect
-
-    if combined > 0.5:
-        direction = "upward"
-        direction_label = "상승"
-        desc = f"환율({fxYoy:+.1f}%) + 유가({oilYoy:+.1f}%) → 물가 상승 압력 {combined:+.1f}%p"
-    elif combined < -0.5:
-        direction = "downward"
-        direction_label = "하락"
-        desc = f"환율({fxYoy:+.1f}%) + 유가({oilYoy:+.1f}%) → 물가 하락 압력 {combined:+.1f}%p"
-    else:
-        direction = "stable"
-        direction_label = "안정"
-        desc = f"환율({fxYoy:+.1f}%) + 유가({oilYoy:+.1f}%) → 물가 안정 {combined:+.1f}%p"
-
-    return KRInflationEstimate(
-        fxEffect=round(fx_effect, 2),
-        oilEffect=round(oil_effect, 2),
-        combined=round(combined, 2),
-        direction=direction,
-        directionLabel=direction_label,
-        description=desc,
-    )
+from dartlab.macro.cycles._sentimentRegional import (  # noqa: E402, F401
+    ISMAllocationSignal,
+    KRInflationEstimate,
+    interpretEmployment,
+    interpretInflation,
+    ismAssetAllocation,
+    krInflationModel,
+)
 
 
 def _fetchSentimentData(market: str, asOf: str | None = None) -> dict[str, float | None]:
@@ -474,25 +334,74 @@ def _fetchSentimentData(market: str, asOf: str | None = None) -> dict[str, float
 
 
 def calcSentiment(*, market: str = "US", asOf: str | None = None, overrides: dict | None = None, **kwargs) -> dict:
-    """시장 심리 종합 분석 — 공포탐욕 근사 + VIX 구간 + JLN 불확실성.
+    """시장 심리 종합 분석 — 공포탐욕 + VIX regime + JLN 불확실성.
 
-    Parameters
-    ----------
-    market : str
-        ``"US"`` | ``"KR"``.
-    as_of : str | None
-        기준일. ``None`` 이면 최신.
-    overrides : dict | None
-        지표 강제 치환 (예: ``{"vix": 35}``).
+    Capabilities:
+        VIX (옵션 내재) + S&P 500 vs MA125 + HY spread 합성 → CNN 공포탐욕
+        근사 score (0~100, 5 components). VIX 구간 판정 (extreme_fear/fear/
+        neutral/greed/extreme_greed) + buySignal (역설지표). JLN Macro
+        Uncertainty (Jurado-Ludvigson-Ng 2015 AER, 132 시계열 예측오차 기반
+        실물 불확실성) 와 VIX 의 분기 추적.
 
-    Returns
-    -------
-    dict
-        - market : str — 시장 코드
-        - fearGreed : dict | None — 공포탐욕 근사 (score:float(점, 0-100), zone:str, zoneLabel:str, components:dict)
-        - vixRegime : dict | None — VIX 구간 판정 (level:float(pt), zone:str, zoneLabel:str, buySignal:bool)
-        - timeseries : dict — vix / sp500 / hy_spread 시계열
-        - macroUncertainty : dict | None — JLN 실물 불확실성 (value:float, zone:str, zoneLabel:str, vsVix:str, description:str)
+    Args:
+        market: "US" | "KR".
+        asOf: 기준일. None 시 최신.
+        overrides: 지표 강제 치환 (예: ``{"vix": 35}``).
+
+    Returns:
+        dict:
+            - ``fearGreed`` (dict | None): score + zone + components.
+            - ``vixRegime`` (dict | None): level + zone + buySignal.
+            - ``macroUncertainty`` (dict | None): JLN value + vsVix.
+            - ``timeseries`` (dict): vix / sp500 / hy_spread.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcSentiment(market="US")
+        >>> r["fearGreed"]["zone"], r["vixRegime"]["level"]
+        ('extreme_fear', 35.2)  # 역설적으로 buySignal=True
+
+    Guide:
+        - fearGreed score 25 미만 (extreme_fear) = 역설지표 매수 신호.
+        - score 75 초과 (extreme_greed) = 과열 (매도 신호 가능).
+        - JLN >> VIX 차이 큼 = 실물경제 불확실성 > 금융 (recession 전조 가능).
+        - VIX 30+ 가 6 개월 지속 = 위험회피 regime.
+
+    SeeAlso:
+        - ``calcFearGreedProxy``: 5 컴포넌트 단독
+        - ``classifyVixRegime``: VIX 구간 라벨
+        - ``calcLiquidity``: HY spread 함께
+
+    When:
+        ``macro("cycle", "sentiment")`` 진입점. AI 가 시장 심리 종합 답변 시.
+
+    How:
+        ``_fetchSentimentData`` → overrides → ``calcFearGreedProxy`` + classifyVixRegime + JLN
+        합성 → dict.
+
+    Requires:
+        FRED VIX (VIXCLS) + S&P 500 + HY OAS + (옵션) JLN.
+
+    AIContext:
+        score + zone + 핵심 component 함께. extreme zone 은 역설 신호일 수
+        있어 단정 금지. JLN > VIX 이면 실물 우려 명시.
+
+    LLM Specifications:
+        AntiPatterns:
+            - VIX 단독으로 sentiment 단정 — 5 컴포넌트 합성 결과 사용.
+            - extreme_fear 를 "위험" 단정 — buySignal=True 인 역설지표.
+        OutputSchema:
+            ``{market, fearGreed: dict?, vixRegime: dict?, macroUncertainty:
+              dict?, timeseries: dict}``.
+        Prerequisites:
+            FRED VIXCLS + SP500 + HY OAS + (JLN optional).
+        Freshness:
+            일별 (VIX/SP500), 월별 (JLN).
+        Dataflow:
+            VIX + SP500 vs MA125 + HY → fearGreed → VIX regime → JLN 별도.
+        TargetMarkets: US (FRED), KR (KOSPI 변동성).
     """
     data = _fetchSentimentData(market, asOf=asOf)
     if overrides:

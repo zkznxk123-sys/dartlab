@@ -26,6 +26,7 @@ outputs:
   - totalAssetsSeries / totalFundingSeries
   - finance:BS evidenceBinding
 toolRefs:
+  - EngineCall
   - RunPython
 knowledgeRefs:
   - engines.viz

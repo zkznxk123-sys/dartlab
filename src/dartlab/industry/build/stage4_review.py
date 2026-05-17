@@ -32,6 +32,11 @@ def _loadOverrides() -> dict[str, list[dict]]:
 def applyOverrides(nodes: list[IndustryNode]) -> list[IndustryNode]:
     """overrides.json의 확정 매핑을 노드에 적용한다.
 
+    Capabilities:
+        ``data/industry/overrides.json`` 의 운영자 확정 매핑을 빌드된 노드에 강제 반영.
+        exclude entry → (stockCode, industryId) 제거. 일반 entry → stage/confidence 덮어쓰기
+        또는 신규 노드 추가 (source="manual").
+
     Override entry 포맷:
     - 일반 매핑: ``{"stockCode": "X", "stage": "Y", "confidence": 1.0, ...}``
       → (stockCode, industryId) 노드 stage/confidence 덮어쓰기 또는 신규 추가.
@@ -48,6 +53,36 @@ def applyOverrides(nodes: list[IndustryNode]) -> list[IndustryNode]:
     -------
     list[IndustryNode]
         override 적용 후 노드 리스트 (제외된 노드는 빠지고 신규 매핑은 추가).
+
+    Raises:
+        없음 — overrides.json 손상 시 warning + 입력 그대로 반환.
+
+    Example:
+        >>> from dartlab.industry.build.stage4_review import applyOverrides
+        >>> nodes = applyOverrides(nodes)  # in-place 보정
+
+    Guide:
+        ``buildIndustryMap`` 파이프라인의 마지막 단계. ``addOverride()`` 로 운영자/AI 가 추가한
+        보정 매핑이 본 함수에서 강제 반영.
+
+    When:
+        manifest 빌드 종료 직전에만 호출. 일반 분석 흐름에서 직접 호출 없다.
+
+    How:
+        overrides.json 로드 → exclude 쌍 set 구성 → 노드 필터 → 일반 entry 루프로 in-place
+        덮어쓰기 또는 신규 노드 append.
+
+    Requires:
+        - ``data/industry/overrides.json`` (없으면 nodes 그대로)
+        - 입력 nodes 의 (stockCode, industry) 키 의미 보존
+
+    See Also:
+        - ``dartlab.industry.addOverride`` : override 추가 API
+        - ``dartlab.industry.build.stage4_review.findLowConfidence`` : 검수 대상
+
+    AIContext:
+        AI 가 직접 호출하지 않는다 (배치 stage 4 내부). 답변 시 source="manual" 노드는 "운영자
+        확정" 단서 인용 가능.
     """
     overrides = _loadOverrides()
     if not overrides:
@@ -113,5 +148,16 @@ def findLowConfidence(
     -------
     list[IndustryNode]
         confidence < threshold 또는 stage가 빈 노드.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> from dartlab.industry.build.stage4_review import findLowConfidence
+        >>> low = findLowConfidence(nodes, threshold=0.5)
+        >>> [n.stockCode for n in low[:3]]
+
+    Requires:
+        - 입력 nodes 의 confidence / stage 필드 의미.
     """
     return [n for n in nodes if n.confidence < threshold or not n.stage]

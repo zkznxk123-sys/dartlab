@@ -15,7 +15,7 @@ from .state import WorkbenchState
 
 
 def runBrief(state: WorkbenchState, provider: WorkbenchProvider) -> Iterator[TraceEvent]:
-    """runBrief — TODO 한국어 동작 설명."""
+    """BRIEF 패스 — 회상 + lens 분기 + plan 생성 (TraceEvent stream)."""
     # P5 wiring: 기억 회상
     state.recall = recall(state.question, k=5) or []
 

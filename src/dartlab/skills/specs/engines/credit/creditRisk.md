@@ -25,6 +25,7 @@ capabilityRefs:
   - scan.cashflow
 toolRefs:
   - search_reference
+  - EngineCall
   - RunPython
   - finalize_answer
 knowledgeRefs:
