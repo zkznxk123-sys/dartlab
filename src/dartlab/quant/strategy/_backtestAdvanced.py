@@ -117,6 +117,9 @@ def walkForward(
         - cpcv : Combinatorial Purged CV
         - strategy.metrics.pbo : 산출
 
+    AIContext:
+        "OOS 검정 결과" 답변 시 OOS sharpe + pbo + segments 인용.
+
     Notes
     -----
     rule_factory 사용 예 (forecast 모델 OOS 검증):
@@ -334,6 +337,9 @@ def multiAssetBacktest(
     See Also:
         - vectorBacktest : 단일 종목
         - portfolio.allocateERC : risk parity weights
+
+    AIContext:
+        "다종목 분산 시 성과" 답변 시 포트 sharpe + weights 인용.
     """
     from dataclasses import dataclass
 
@@ -510,6 +516,14 @@ def cpcv(
     See Also:
         - walkForward : sliding window
         - strategy.metrics.cpcvSplits : split 생성
+
+    Example:
+        >>> r = cpcv(close, rule, nSplits=6, nTest=2)
+        >>> r.cpcv["fold_count"]
+        15
+
+    AIContext:
+        "CPCV 견고성" 답변 시 fold 별 sharpe + DSR 인용.
     """
     n = len(close)
     fold_sharpes: list[float] = []

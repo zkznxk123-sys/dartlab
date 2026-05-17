@@ -136,22 +136,53 @@ def vectorBacktest(
     - **intrabar stop**: stop level 이 [low[t], high[t]] 안에 있으면 stop 가격 정확 체결
     - **last bar 청산**: 열린 포지션은 close[-1] 강제 마감
 
+    Capabilities:
+        - long-only 정밀 체결 + 갭 처리 + ADV impact + intrabar stop + last-bar 강제 청산
+        - DSR 정정 (multiple trials) + Sharpe/MDD/turnover/exposure 메타
+
     Args:
-        close: 일별 종가 (NDArray[float64])
-        rule: Rule 객체 (entry_expr, exit_expr, sizing, stop)
-        open_, high, low: optional, 정밀 체결 / 갭 / intrabar stop 용
-        volume: optional, ADV impact 계산용 (capital_pct_of_adv > 0 시)
-        dates: optional, period 메타
-        fee_bps: 양방향 수수료 (basis points, 한쪽씩 절반 적용)
-        slip_bps: 기본 슬리피지 (bps)
-        impact_bps_per_pct: 충격 비용 (1% ADV 진입 시 N bps 추가)
-        capital_pct_of_adv: 진입 자본의 거래량 대비 비율 (0 = 무시)
-        style: 스타일 식별자
-        n_trials: DSR 정정용 시도 횟수
-        exec_mode: "next_open" | "close"
+        close: 일별 종가.
+        rule: Rule 객체 (entry/exit/sizing/stop).
+        open_/high/low: 정밀 체결 / 갭 / intrabar stop 용.
+        volume: ADV impact 계산.
+        dates: period 메타.
+        feeBps: 양방향 수수료 (bps).
+        slipBps: 기본 슬리피지 (bps).
+        impactBpsPerPct: 1% ADV 진입 시 추가 bps.
+        capitalPctOfAdv: 진입 자본의 거래량 대비 비율.
+        style: 스타일 식별자.
+        nTrials: DSR 정정용 시도 횟수.
+        execMode: ``"next_open"`` | ``"close"``.
 
     Returns:
-        BacktestResult
+        BacktestResult — sharpe/mdd/dsr/trades/oos/cpcv etc.
+
+    Guide:
+        Strategy 백테스트 표준 엔진. exec_mode="next_open" + intrabar stop 으로
+        realistic 시뮬레이션. n_trials 명시로 DSR multiple testing 정정.
+
+    When:
+        Strategy 평가 + AI 백테스트 결과 답변.
+
+    How:
+        next_open/close 체결 분기 → gap/impact 비용 → intrabar stop → equity 시계열.
+
+    Requires:
+        close 길이 ≥ 30 + rule 길이 일치.
+
+    Raises:
+        없음 — 짧으면 error sentinel.
+
+    Example:
+        >>> vectorBacktest(close, rule).sharpe
+        1.18
+
+    See Also:
+        - walkForward : OOS sliding
+        - cpcv : Combinatorial Purged CV
+
+    AIContext:
+        "이 룰 백테스트 결과" 답변 시 sharpe + mdd + trades 인용.
     """
     n = len(close)
     if n < 30 or len(rule) != n:

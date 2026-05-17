@@ -97,6 +97,36 @@ def build(company, *, holdWindow: int = 20, atrK: float = 3.0) -> Rule:
     Rule
         entry = filing_flag & above_sma5, exit = 보유기간 경과.
         allFilings 없으면 빈 룰 (entry/exit 전부 False).
+
+    Capabilities:
+        - DART 공시 일자 매칭 → 발표 후 holdWindow 일 보유 → PEAD drift 포착
+        - 단기 추세 confirmation (above SMA5) + ATR stop
+
+    Guide:
+        Bernard-Thomas 1989 PEAD 표준. holdWindow 20 = 1 개월 drift, 60 = 분기.
+
+    When:
+        Earnings/공시 drift + AI PEAD 답변.
+
+    How:
+        allFilings 로드 → filing_set 매칭 → window flag → entry/exit Signal.
+
+    Requires:
+        OHLCV + allFilings parquet ≥ 1 일.
+
+    Raises:
+        없음 — allFilings 부재 시 빈 Rule.
+
+    Example:
+        >>> build(company, holdWindow=20).meta["style"]
+        'eventDriven'
+
+    See Also:
+        - signal.eventStudy.calcCAR : event-study
+        - screen.dataAccess.loadAllfilingsForStock : 공시 데이터
+
+    AIContext:
+        "공시 후 보유 시 PEAD" 답변 시 entry filing date 인용.
     """
     arr = getArrays(company)
     close = arr.get("close")

@@ -68,10 +68,47 @@ def build(
         - EMA20 > EMA60 (단기 추세 동조)
         - MACD histogram 양전환 (옵션, use_macd_filter)
 
+    Capabilities:
+        - TSMOM (Time-Series Momentum) 12-1 + EMA20/60 cross + 선택적 MACD 필터 → entry Rule
+        - ATR Chandelier exit (k=3.0) 동행
+
     Args:
-        ema_fast/ema_slow: SMA crossover 기간
-        atr_k: ATR Chandelier exit 배수
-        use_macd_filter: MACD 추가 필터 (기본 True)
+        company: Company 객체 (stockCode 보유).
+        emaFast: 단기 EMA 기간. 기본 ``20``.
+        emaSlow: 장기 EMA 기간. 기본 ``60``.
+        atrK: ATR Chandelier exit 배수. 기본 ``3.0``.
+        useMacdFilter: MACD 추가 필터. 기본 ``True``.
+
+    Returns:
+        Rule — entry/exit Rule + atr stop.
+
+    Guide:
+        Moskowitz-Ooi-Pedersen 2012 + AQR 2013 표준. 250 봉 이상 필요 (12 개월 momentum).
+
+    When:
+        Trend-following strategy 백테스트 + AI 추세 전략 답변.
+
+    How:
+        getArrays → EMA + tsmom → Signal 합성 → entry/exit → atr stop.
+
+    Requires:
+        close ≥ 252 봉.
+
+    Raises:
+        없음 — 데이터 부족 시 empty Rule.
+
+    Example:
+        >>> rule = build(company)
+        >>> rule.meta["style"]
+        'trendFollow'
+
+    See Also:
+        - strategy.styles.meanReversion : 반대 스타일
+        - strategy.styles.breakout : 진입 신호 유사
+        - signal.momentum : tsmom core
+
+    AIContext:
+        "추세추종 진입 가능" 답변 시 entry 마지막 봉 + atr stop 인용.
     """
     arr = getArrays(company)
     close = arr.get("close")
