@@ -242,6 +242,37 @@ def resolveBenchmarkStack(
         sector : dict | None — 산업/업종 지수 후보
         style : dict | None — 대형/중형/소형 지수 후보
         candidates : list[dict] — 후보 목록
+
+    Capabilities:
+        - 종목 → 시장/섹터/style 3 축 벤치마크 후보 자동 결정
+        - benchmark 명시 시 explicit 우선 + fallbackReason 동행
+
+    Guide:
+        ``benchmarkMode`` 가 ``"sector"`` 면 산업 지수 우선. ``"style"`` 면 시총 분위
+        (대/중/소) 지수. ``"auto"`` 는 sector 로 매핑.
+
+    When:
+        β 계산 + factor 분해 + AI 벤치 선택 답변.
+
+    How:
+        시장 감지 → KR 분기 (KOSPI/KOSDAQ) → market/sector/style 후보 생성 → ``_selectPrimary``.
+
+    Requires:
+        stockCode 유효 + 시장 정보 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> resolveBenchmarkStack("005930", benchmarkMode="sector")["primary"]["indexName"]
+        '코스피 200'
+
+    SeeAlso:
+        - resolveBenchmark : 단일 primary 추출
+        - fetchBenchmarkOhlcv : 후속 OHLCV 로드
+
+    AIContext:
+        "이 종목 벤치마크" 답변 시 primary + candidates 인용.
     """
     actualMarket = resolveMarket(stockCode or "", market)
     if actualMarket == "US":
@@ -331,6 +362,36 @@ def resolveBenchmark(
             KRX 지수명 또는 US 심볼.
         reason : str
             explicit/listing/market/fallback.
+
+    Capabilities:
+        - ``resolveBenchmarkStack`` 의 primary 만 추출 + ``benchmarkMode/benchmarkStack`` 메타 포함
+        - explicit benchmark 우선 후 시장 fallback
+
+    Guide:
+        단일 primary 만 필요시 사용. stack 전체가 필요하면 ``resolveBenchmarkStack`` 직접 호출.
+
+    When:
+        β/factor 계산 직전 단일 벤치 결정 + AI "사용한 벤치" 답변.
+
+    How:
+        ``resolveBenchmarkStack`` → primary dict + benchmarkMode 키 보강.
+
+    Requires:
+        stockCode + market 정보.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> resolveBenchmark("005930")["indexName"]
+        '코스피 200'
+
+    SeeAlso:
+        - resolveBenchmarkStack : 전체 stack
+        - fetchBenchmarkOhlcv : OHLCV 로드
+
+    AIContext:
+        "벤치마크 무엇 사용했나" 답변 시 indexName + reason 인용.
     """
     stack = resolveBenchmarkStack(
         stockCode,
@@ -385,6 +446,51 @@ def fetchBenchmarkOhlcv(
     KR은 ``krxIndex`` HF 데이터셋을 사용하고, US는 기존 ``price`` 경로를 유지한다.
     ``return_meta=True``면 결과 DataFrame과 ``benchmarkUsed`` metadata를 함께
     반환한다.
+
+    Capabilities:
+        - KR: HF krxIndex bulk + ``_krxIndexToOhlcv`` 정규화 → KOSPI/KOSDAQ/섹터 지수 OHLCV
+        - US: GatherEntry("price") 경유 ^GSPC 또는 명시 심볼
+        - returnMeta=True 시 nObs 카운트 포함 dict 메타 동행
+
+    Args:
+        stockCode: 6 자리 KR 종목코드 또는 US ticker.
+        market: ``"auto" | "KR" | "KOSPI" | "KOSDAQ" | "US"``.
+        benchmark: 명시 벤치. 우선순위 최상.
+        benchmarkMode: ``"market" | "sector" | "style" | "auto"``.
+        start: 시작일 ``YYYY-MM-DD``.
+        end: 종료일.
+        returnMeta: True 면 ``(df, meta)`` 반환.
+        includeStackDetail: True 면 style 후보까지 빌드.
+
+    Returns:
+        pl.DataFrame | tuple[pl.DataFrame|None, dict] — OHLCV 또는 메타 포함.
+
+    Guide:
+        β/factor 계산의 표준 벤치 입력. KR 은 HF cache, US 는 Yahoo Finance.
+
+    When:
+        β/factor 분해 + AI 벤치 OHLCV 답변.
+
+    How:
+        ``resolveBenchmark`` → source 분기 → KRX bulk 또는 GatherEntry → df + meta.
+
+    Requires:
+        KR: HF krxIndex 다운로드. US: 네트워크 + GatherEntry.
+
+    Raises:
+        없음 — 실패 시 None 또는 ``(None, meta)``.
+
+    Example:
+        >>> df = fetchBenchmarkOhlcv("005930", benchmarkMode="market")
+        >>> df.columns[:3]
+        ['date', 'open', 'high']
+
+    SeeAlso:
+        - resolveBenchmark : 벤치 결정
+        - factor.calc.decomposeFactor : β 분해
+
+    AIContext:
+        "벤치 시계열" 답변 시 indexName + nObs 인용.
     """
     meta = resolveBenchmark(
         stockCode,
@@ -434,7 +540,49 @@ def benchmarkSnapshot(
     start: str | None = None,
     end: str | None = None,
 ) -> dict[str, Any]:
-    """``quant("benchmark")`` 축 구현 — 벤치마크와 기간 수익률 요약."""
+    """``quant("benchmark")`` 축 구현 — 벤치마크와 기간 수익률 요약.
+
+    Capabilities:
+        - fetchBenchmarkOhlcv → 기간 수익률 + 누적 + 통계 요약 dict
+        - story 6 막 벤치 박스 표준 입력
+
+    Args:
+        stockCode: 종목코드.
+        market: ``"auto" | "KR" | "US"`` 등.
+        benchmark: 명시 벤치.
+        benchmarkMode: ``"market" | "sector" | "style" | "auto"``.
+        start: 시작일.
+        end: 종료일.
+
+    Returns:
+        dict — benchmark/period/returns 등 요약. 데이터 없음 시 ``{error}``.
+
+    Guide:
+        Quant benchmark 축 표준. 단일 종목 ↔ 벤치 비교.
+
+    When:
+        Quant benchmark axis + AI 벤치 대비 성과 답변.
+
+    How:
+        ``fetchBenchmarkOhlcv`` → close 시계열 → 기간 % 수익률 산출.
+
+    Requires:
+        stockCode + 벤치 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> benchmarkSnapshot("005930", benchmarkMode="sector")["benchmark"]
+        {'indexName': '코스피 200', ...}
+
+    SeeAlso:
+        - fetchBenchmarkOhlcv : OHLCV
+        - factor.decomposeFactor : 다변수
+
+    AIContext:
+        "벤치 대비 N% 초과" 답변 시 returns 요약 인용.
+    """
     df, meta = fetchBenchmarkOhlcv(
         stockCode,
         market=market,
