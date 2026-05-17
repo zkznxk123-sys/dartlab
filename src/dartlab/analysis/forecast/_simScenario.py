@@ -92,6 +92,12 @@ def simulateScenario(
         충격 (GDP -2%p, 금리 +200bp). severely_adverse = 2 표준편차.
         learnedBetas 입력 시 (simulateHistorical) 정적 탄성치 override.
 
+    When:
+        시나리오 단일 단위 시뮬레이션이 필요할 때 (다른 simulator 의 기본 단위).
+
+    How:
+        MacroScenario 정규화 → 업종 탄성치 → 매출/마진/FCF path → DCF 산출.
+
     SeeAlso:
         - ``simulateAllScenarios``: 3 시나리오 일괄
         - ``simulateHistorical``: 과거 위기 재현
@@ -286,6 +292,17 @@ def simulateAllScenarios(
     -------
     dict[str, SimulationResult]
         시나리오 키 → SimulationResult 매핑.
+
+    Requires:
+        PRESET_SCENARIOS 에 정의된 키 + simulateScenario 함수.
+
+    Raises:
+        없음. 키 누락은 결과에서 자동 제외.
+
+    Example:
+        >>> r = simulateAllScenarios(series)
+        >>> "baseline" in r
+        True
     """
     keys = scenarios or list(PRESET_SCENARIOS.keys())
     return {

@@ -263,6 +263,10 @@ def stressTest(
 ) -> StressTestResult:
     """CCAR 스타일 스트레스 테스트 — 극한 시나리오 하 재무 건전성 평가.
 
+    Capabilities:
+        - 3 년 후 부채비율·유동비율·이자보상배율 추정
+        - 생존 위험도·배당 지속성·회복 시점 자동 판정
+
     Parameters
     ----------
     series : dict
@@ -285,6 +289,33 @@ def stressTest(
         survivalRisk : str — 생존 위험도 ("low" | "medium" | "high" | "critical")
         dividendSustainable : bool — 배당 지속 가능 여부
         recoveryTimeline : str — 회복 전망 설명
+
+    Guide:
+        Bank-style CCAR 시나리오를 비은행 회사에도 적용한 generic 스트레스.
+
+    When:
+        극한 거시 시나리오 (adverse/severelyAdverse) 하 생존 평가가 필요할 때.
+
+    How:
+        simulateScenario → base 재무 지표 → 3 년 후 비율 추정 + 위험도 점수.
+
+    Requires:
+        series 의 BS/IS/CF 와 PRESET_SCENARIOS 의 시나리오 키.
+
+    Raises:
+        없음. 데이터 부족은 None 으로 표기.
+
+    Example:
+        >>> r = stressTest(series, scenario="adverse")
+        >>> r.survivalRisk in ("low", "medium", "high", "critical")
+        True
+
+    See Also:
+        - monteCarloForecast : 분포 시뮬
+        - simulateScenario : 시나리오 시뮬
+
+    AIContext:
+        AI 답변 시 survivalRisk + recoveryTimeline 함께 인용 — 단독 수치 인용 금지.
     """
     warnings: list[str] = []
 
