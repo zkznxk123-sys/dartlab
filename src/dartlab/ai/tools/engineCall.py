@@ -41,6 +41,7 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
     """Validate and execute a public DartLab API call plan."""
 
     call_plan = dict(plan or kwargs or {})
+    _normalizeArgsDict(call_plan)
     apiRef = _apiRef(call_plan)
     if not apiRef:
         return ToolResult(False, "apiRef를 확인하지 못했습니다.", error="missing_api_ref")
@@ -58,6 +59,24 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
     if apiRef in {"dartlab.capabilities", "capabilities"}:
         return _capabilities(call_plan)
     return _genericPublicCall(apiRef, call_plan)
+
+
+def _normalizeArgsDict(plan: dict[str, Any]) -> None:
+    """ToolSpec schema 가 args 를 dict 로 정의 — 모델 양식 그대로 flatten.
+
+    LLM 표준 호출: `{"apiRef": "Company.show", "args": {"stockCode": "005930", "topic": "IS"}}`.
+    이전 핸들러들은 `plan["args"]` 를 list 로 가정 (옛 형식) → dict 면 `list(dict)` 가 *키* 만
+    뽑아 회귀 (`company_not_resolved`). dict 면 키들을 plan root 로 흡수 + args 를 빈 list 로.
+    """
+    raw = plan.get("args")
+    if not isinstance(raw, dict):
+        return
+    # 충돌 회피 — plan root 에 이미 명시된 키는 우선 (옛 호환).
+    for key, value in raw.items():
+        plan.setdefault(key, value)
+    # 핸들러들이 `list(plan.get("args") or [])` 패턴 — dict 가 list 로 캐스팅되어 키만 뽑히는
+    # 회귀 차단. flatten 후 args 는 빈 list 로 재설정.
+    plan["args"] = []
 
 
 def _apiRef(plan: dict[str, Any]) -> str:
@@ -121,7 +140,9 @@ def _companyShow(plan: dict[str, Any]) -> ToolResult:
     if company is None:
         return ToolResult(
             False,
-            "종목을 먼저 특정해야 재무제표를 확인할 수 있습니다. 예: `삼성전자 재무상태표 확인`",
+            "stockCode 누락 — EngineCall 호출 시 args dict 안에 stockCode 를 반드시 포함. 예: "
+            '{"apiRef":"Company.show","args":{"stockCode":"005930","topic":"IS"}} '
+            "(plan root 가 아닌 args 안에).",
             error="company_not_resolved",
         )
     companyName = str(getattr(company, "corpName", None) or getattr(company, "name", None) or "")

@@ -101,7 +101,7 @@ _SPECS: dict[str, ToolSpec] = {
     # ── 데이터 호출 — 실행 도구 ──
     "EngineCall": ToolSpec(
         "EngineCall",
-        "DartLab 공개 capability 1 회 호출 (Company.show, scan, ratio, macro 등). 정형 ref 반환. **dartlab 데이터는 무조건 이것 우선** — RunPython 으로 dartlab API 를 단일 호출하는 패턴 금지. RunPython 은 EngineCall 결과의 다단 결합·랭킹·Polars 가공이 필요할 때만.",
+        "DartLab 공개 capability 1 회 호출 (Company.show, scan, ratio, macro 등). 정형 ref 반환. **dartlab 데이터는 무조건 이것 우선** — RunPython 으로 dartlab API 를 단일 호출하는 패턴 금지. RunPython 은 EngineCall 결과의 다단 결합·랭킹·Polars 가공이 필요할 때만. **args 는 항상 dict 로 필수** — `{}` 라도 명시 (인자 0 개 capability 일 때만 빈 dict).",
         {
             "type": "object",
             "properties": {
@@ -111,11 +111,11 @@ _SPECS: dict[str, ToolSpec] = {
                 },
                 "args": {
                     "type": "object",
-                    "description": "인자 dict — 모든 인자는 여기. 예: Company.show → {'stockCode': '005930', 'topic': 'IS'} / scan → {'axis': 'growth'} / macro → {}",
+                    "description": "인자 dict — **항상 필수, 빈 dict {} 라도 명시**. Company.show → {'stockCode': '005930', 'topic': 'IS'} (stockCode 필수). scan → {'axis': 'growth'}. macro → {}. **stockCode·target·topic·axis 같은 키를 plan root 가 아닌 *args 안에* 넣어라**.",
                     "additionalProperties": True,
                 },
             },
-            "required": ["apiRef"],
+            "required": ["apiRef", "args"],
         },
         readOnlyHint=True,
         destructiveHint=False,
