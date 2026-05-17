@@ -266,6 +266,28 @@ def packSkyline(
     return placed
 
 
+# sub 별 카드 narrative 정렬 우선순위 — KPI 가 hero, 추세는 본문, 분해/위험은 끝.
+# 사용자 1 지시: 카드 순서 = 의미 흐름 (위→아래 / 좌→우 = 종합 → 분해).
+_NARRATIVE_KIND_ORDER: dict[str, int] = {
+    "kpiTile": 0,
+    "diffView": 1,
+    "scoreBadge": 2,
+    "narrativeBridge": 3,
+    "trend": 4,
+    "breakdown": 5,
+    "waterfall": 6,
+    "comparisonTable": 7,
+    "radar": 8,
+    "scatter": 9,
+    "matrix": 10,
+    "gauge": 11,
+    "topList": 12,
+    "percentileRank": 13,
+    "phaseIndicator": 14,
+    "sankey": 15,
+}
+
+
 def planTabLayout(
     tab: str,
     *,
@@ -277,6 +299,8 @@ def planTabLayout(
     Args:
         tab: 'financial'/'portfolio'/.../'macro'.
         sub: 재무제표 sub view ('performance' 등). None = 전체.
+            tab='financial' + sub=None 일 때는 OVERVIEW_KEYS 의 curated 12 카드
+            (한눈에 진단 narrative) 만. 38 카드 dump 가 아닌 흐름 view.
         colCount: grid column 수.
 
     Returns:
@@ -286,7 +310,21 @@ def planTabLayout(
         >>> planTabLayout('financial', sub='performance')
         [{'cardKey': 'kpiOpMarginPerf', 'x': 0, 'y': 0, 'w': 1, 'h': 1, ...}, ...]
     """
+    if tab == "financial" and sub is None:
+        from dartlab.viz.catalog.finance import OVERVIEW_KEYS
+
+        ordered: list[tuple[str, CatalogEntry]] = []
+        for k in OVERVIEW_KEYS:
+            entry = CATALOG.get(k)
+            if entry is not None:
+                ordered.append((k, entry))
+        return packSkyline(ordered, colCount=colCount)
+
     cards = queryCards(tab=tab, sub=sub)
+    if sub is not None:
+        # sub view: KPI hero → trend → radar/gauge → topList/phase. catalog dict
+        # 순서가 narrative 와 어긋난 경우 보정. stable sort 라 동일 kind 끼리는 catalog 순서.
+        cards.sort(key=lambda kc: _NARRATIVE_KIND_ORDER.get(kc[1].get("kind", "trend"), 99))
     return packSkyline(cards, colCount=colCount)
 
 
