@@ -3032,6 +3032,116 @@
       "dataSources": [],
       "requiredSetup": [],
       "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.index",
+      "title": "Thesis Kill-Chain Scenario 진입점",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": [
+        "브라우저 snapshot 범위에서는 filings, price, flow, consensus row가 제한될 수 있다."
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.thesisIntake",
+      "title": "Thesis Kill-Chain Thesis Intake",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "title": "Thesis Kill-Chain Evidence Coverage Audit",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "title": "Thesis Kill-Chain Assumption Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.fragilityMap",
+      "title": "Thesis Kill-Chain Fragility Map",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "title": "Thesis Kill-Chain Trigger Catalog",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.propagationPath",
+      "title": "Thesis Kill-Chain Propagation Path",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "title": "Thesis Kill-Chain Tripwire Monitor",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "title": "Thesis Kill-Chain Falsifier Ledger",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "title": "Thesis Kill-Chain Scenario Storyboard",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "title": "Thesis Kill-Chain Visual Decision Pack",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.deepDive",
+      "title": "Thesis Kill-Chain Deep Dive",
+      "category": "recipes",
+      "status": "limited",
+      "dataSources": [],
+      "requiredSetup": [],
+      "limitations": []
     }
   ]
 }

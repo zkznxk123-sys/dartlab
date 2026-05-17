@@ -304,7 +304,7 @@
       "title": "Company",
       "category": "engines",
       "purpose": "Company 엔진은 종목코드 하나를 target으로 고정하고 재무, 공시, 검색, 분석, 신용, 수집, 퀀트, 매크로, 스토리, 산업 연결을 제공하는 facade 실행 스킬이다. 트리거 — '회사 분석', '단일 기업', '005930', 'Company.show'.",
-      "inDegree": 83,
+      "inDegree": 87,
       "outDegree": 12,
       "cluster": "company",
       "isEntry": false,
@@ -512,7 +512,7 @@
       "title": "Gather",
       "category": "engines",
       "purpose": "Gather 엔진은 가격, 컨센서스, 수급, 뉴스, 배당, 소유구조, 섹터, 매크로, catalyst 일정 등 외부/보조 데이터를 수집하는 실행 스킬이다. 트리거 — '가격', '뉴스', '소유구조', '컨센서스', '외부 데이터 수집', '다가오는 일정'.",
-      "inDegree": 125,
+      "inDegree": 128,
       "outDegree": 7,
       "cluster": "gather",
       "isEntry": false,
@@ -1617,7 +1617,7 @@
       "title": "Scan",
       "category": "engines",
       "purpose": "Scan 엔진은 시장/유니버스 횡단면에서 후보를 발굴하고 순위를 계산하는 실행 스킬이다. 트리거 — '스캔', '종목 발굴', '후보 추출', '랭킹'.",
-      "inDegree": 55,
+      "inDegree": 59,
       "outDegree": 8,
       "cluster": "scan",
       "isEntry": false,
@@ -1994,7 +1994,7 @@
       "title": "Viz (차트·다이어그램 spec)",
       "category": "engines",
       "purpose": "Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
-      "inDegree": 26,
+      "inDegree": 31,
       "outDegree": 14,
       "cluster": "viz",
       "isEntry": false,
@@ -2176,7 +2176,7 @@
       "title": "dartlab 아키텍처 — 전체 청사진",
       "category": "operation",
       "purpose": "dartlab 아키텍처 — 전체 청사진 운영 규칙을 Skill OS에서 확인하고 변경 전후 검증 게이트로 사용한다.",
-      "inDegree": 8,
+      "inDegree": 9,
       "outDegree": 1,
       "cluster": "operation",
       "isEntry": false,
@@ -2397,7 +2397,7 @@
       "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
       "purpose": "AI 가 분석 빈칸을 발굴해 신규 skill 초안을 만들고 같은 세션에서 자가 실행으로 검증해 정식 등재까지 가는 6 단계 사이클과, 운영 중 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 회환 절차를 합쳐 한 곳에서 관리한다. 트리거 — 신규 분석 skill 만들자 / 분석 빈칸 메우기 / audit 결과 반영.",
-      "inDegree": 7,
+      "inDegree": 12,
       "outDegree": 4,
       "cluster": "operation",
       "isEntry": false,
@@ -3162,6 +3162,210 @@
       "isLeaf": false,
       "isOrphan": false,
       "audiences": []
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "title": "Thesis Kill-Chain Assumption Ledger",
+      "category": "recipes",
+      "purpose": "사용자 thesis를 revenueGrowth, marginDurability, cashConversion, balanceSheet, valuationSupport 등 testable assumption으로 분해하는 L1/L1.5 절차다.",
+      "inDegree": 4,
+      "outDegree": 3,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.deepDive",
+      "title": "Thesis Kill-Chain Deep Dive",
+      "category": "recipes",
+      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
+      "inDegree": 4,
+      "outDegree": 13,
+      "cluster": "recipes",
+      "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "title": "Thesis Kill-Chain Evidence Coverage Audit",
+      "category": "recipes",
+      "purpose": "pre-mortem 시나리오에 필요한 statements, filings, price, flow, consensus, scan, assumptions coverage를 확인하는 L1/L1.5 절차다.",
+      "inDegree": 2,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "title": "Thesis Kill-Chain Falsifier Ledger",
+      "category": "recipes",
+      "purpose": "kill-chain path가 틀렸음을 보여줄 counter-evidence를 trigger별로 열어 thesis 붕괴 단정을 막는 L1/L1.5 절차다.",
+      "inDegree": 4,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.fragilityMap",
+      "title": "Thesis Kill-Chain Fragility Map",
+      "category": "recipes",
+      "purpose": "IS/BS/CF, price/flow, consensus 원자료에서 thesis를 깨기 쉬운 revenue, margin, cash, leverage, market, expectation 취약 지표를 계산하는 L1/L1.5 절차다.",
+      "inDegree": 6,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.index",
+      "title": "Thesis Kill-Chain Scenario 진입점",
+      "category": "recipes",
+      "purpose": "사용자의 투자 thesis를 지지하는 대신 일부러 깨보는 pre-mortem 시나리오 스킬팩 진입점이다. Company.show 원표, Company.disclosure, Company.gather, scan primitive만으로 가정, 취약 지표, 촉발 조건, 전파 경로, tripwire, 반증 조건을 만든다. 트리거 - 'thesis kill chain', '프리모템', '투자 논리 깨보기'.",
+      "inDegree": 0,
+      "outDegree": 18,
+      "cluster": "recipes",
+      "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.propagationPath",
+      "title": "Thesis Kill-Chain Propagation Path",
+      "category": "recipes",
+      "purpose": "trigger가 어떤 mechanism을 거쳐 어떤 assumption을 깨는지 연결하는 pre-mortem 전파 경로 절차다.",
+      "inDegree": 5,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "title": "Thesis Kill-Chain Scenario Storyboard",
+      "category": "recipes",
+      "purpose": "baseIntact, erosionCase, killChainCase 세 시나리오로 thesis pre-mortem을 정리하는 L1/L1.5 절차다.",
+      "inDegree": 4,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.thesisIntake",
+      "title": "Thesis Kill-Chain Thesis Intake",
+      "category": "recipes",
+      "purpose": "사용자 thesis를 받아 growth, margin, cash, balance sheet, valuation, event, macro, governance theme으로 파싱하는 pre-mortem 시작 절차다.",
+      "inDegree": 3,
+      "outDegree": 3,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "title": "Thesis Kill-Chain Trigger Catalog",
+      "category": "recipes",
+      "purpose": "fragilityMap, filings, scan primitive에서 thesis를 흔드는 촉발 조건을 모으는 L1/L1.5 절차다.",
+      "inDegree": 4,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "title": "Thesis Kill-Chain Tripwire Monitor",
+      "category": "recipes",
+      "purpose": "fragility metric별 current, threshold, action을 정리해 thesis가 깨지는 조기 경보선을 만드는 L1/L1.5 절차다.",
+      "inDegree": 3,
+      "outDegree": 3,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "title": "Thesis Kill-Chain Visual Decision Pack",
+      "category": "recipes",
+      "purpose": "scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다.",
+      "inDegree": 3,
+      "outDegree": 4,
+      "cluster": "recipes",
+      "isEntry": false,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
     },
     {
       "id": "recipes.macro.betaPeerScreen",
@@ -4221,7 +4425,7 @@
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
       "purpose": "ask 작업대의 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 와 각 패스에서 발급해야 할 ref kind 를 단일 SSOT 로 못박는다.",
-      "inDegree": 11,
+      "inDegree": 17,
       "outDegree": 0,
       "cluster": "runtime",
       "isEntry": false,
@@ -4234,7 +4438,7 @@
       "title": "DartLab Skill OS 최초 진입",
       "category": "start",
       "purpose": "사람과 LLM 이 DartLab 을 처음 볼 때 Skills 카탈로그 하나에서 분석 · 엔진 능력 · 운영 규칙 · 확장 절차를 찾는 공식 시작점이다. 외부 API 문서나 흩어진 ops 폴더 대신 skill 검색 → frontmatter 확인 → 본문 절차 → 검증 게이트 순서를 따른다.",
-      "inDegree": 38,
+      "inDegree": 39,
       "outDegree": 7,
       "cluster": "start",
       "isEntry": true,
@@ -10882,6 +11086,361 @@
       "kind": "linkedRecipe"
     },
     {
+      "src": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "dst": "recipes.incubator.thesisKillChain.thesisIntake",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.thesisIntake",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.thesisIntake",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "start.dartlabSkillOs",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "operation.architecture",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "engines.gather",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.propagationPath",
+      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.propagationPath",
+      "dst": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.propagationPath",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.propagationPath",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.thesisIntake",
+      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.thesisIntake",
+      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.thesisIntake",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "dst": "engines.company",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "dst": "engines.scan",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
       "src": "recipes.macro.betaPeerScreen",
       "dst": "engines.gather.industryPeers",
       "kind": "linkedRecipe"
@@ -12832,6 +13391,8 @@
     "recipes.incubator.eventRadar.index",
     "recipes.incubator.forensics.deepDive",
     "recipes.incubator.forensics.index",
+    "recipes.incubator.thesisKillChain.deepDive",
+    "recipes.incubator.thesisKillChain.index",
     "recipes.valuation.damodaran.index",
     "start.dartlabSkillOs",
     "start.firstAnalysisRecipe",
@@ -13005,6 +13566,19 @@
       "recipes.incubator.forensics.noteSignalExtractor",
       "recipes.incubator.forensics.revenueToCashBridge",
       "recipes.incubator.forensics.workingCapitalPressureMap"
+    ],
+    [
+      "recipes.incubator.thesisKillChain.assumptionLedger",
+      "recipes.incubator.thesisKillChain.deepDive",
+      "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "recipes.incubator.thesisKillChain.falsifierLedger",
+      "recipes.incubator.thesisKillChain.fragilityMap",
+      "recipes.incubator.thesisKillChain.propagationPath",
+      "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "recipes.incubator.thesisKillChain.thesisIntake",
+      "recipes.incubator.thesisKillChain.triggerCatalog",
+      "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "recipes.incubator.thesisKillChain.visualDecisionPack"
     ]
   ],
   "orphans": [
