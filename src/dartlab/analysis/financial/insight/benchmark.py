@@ -385,6 +385,16 @@ def getBenchmark(sector: Sector, market: str = "KR") -> SectorBenchmark:
         roeQ1 : float — ROE Q1 (%)
         roeQ3 : float — ROE Q3 (%)
         n : int — 표본 수
+
+    Requires:
+        하드코딩 상수 (BENCHMARKS, US_BENCHMARKS) — 외부 의존성 없음.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> getBenchmark(Sector.TECH, "KR")
+        SectorBenchmark(omMedian=..., ...)
     """
     if market == "US":
         return US_BENCHMARKS.get(sector, US_DEFAULT_BENCHMARK)
@@ -393,6 +403,9 @@ def getBenchmark(sector: Sector, market: str = "KR") -> SectorBenchmark:
 
 def sectorAdjustment(value: float | None, median: float, q1: float, q3: float) -> int:
     """섹터 중앙값 대비 가점/감점 (±1).
+
+    Capabilities:
+        - 섹터 Q1/Q3 임계 비교 → 등급 가산점 (+1/0/-1) 산출.
 
     Q3 이상 → +1 (업종 상위)
     Q1 이하 → -1 (업종 하위)
@@ -413,6 +426,32 @@ def sectorAdjustment(value: float | None, median: float, q1: float, q3: float) -
     -------
     int
         adjustment : int — +1 (업종 상위) | 0 (평균) | -1 (업종 하위) (점)
+
+    Guide:
+        getBenchmark 로 추출한 q1/q3 와 함께 호출. 절대 임계 대신 상대 위치 보정.
+
+    When:
+        analyzeProfitability 등 grading 모듈에서 섹터 보정 단계.
+
+    How:
+        value >= q3 → +1, value <= q1 → -1, 그 외 0.
+
+    Requires:
+        median/q1/q3 사전 산출.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> sectorAdjustment(20.0, 12.0, 6.0, 18.0)
+        1
+
+    See Also:
+        - getBenchmark: 섹터 분위수 lookup
+        - analyzeProfitability: 가산점 사용자
+
+    AIContext:
+        섹터 상위/하위 표현 (‘업종 평균 이상/이하’) 에 직접 인용.
     """
     if value is None:
         return 0

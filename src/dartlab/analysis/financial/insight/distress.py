@@ -234,6 +234,10 @@ def calcDistress(
 ) -> DistressResult:
     """부실 예측 종합 스코어카드 계산.
 
+    Capabilities:
+        - Altman Z/Z'' · Ohlson O · Springate · Zmijewski · Merton 5 모델 통합 점수 +
+          zone (safe/grey/distress) + 학술 근거 + 해석 텍스트 생성.
+
     각 모델의 원시 값 → zone 판정 → 해석 텍스트 → 학술 참조를 포함한
     세계 수준의 근거 기반 레포트를 생성한다.
 
@@ -256,6 +260,32 @@ def calcDistress(
     -------
     DistressResult
         종합 부실 점수, zone, 개별 모델 판정, 해석 텍스트.
+
+    Guide:
+        부도 12 개월 예측 종합 시그널. 5 모델 합의 도(unanimous/majority) 가 핵심.
+
+    When:
+        analyzeFinancial 후반부. anomaly + ratios 산출 직후 1 회 호출.
+
+    How:
+        ratios 의 모델별 score → _normalize* → 가중합 → zone 분류 → 해석 텍스트.
+
+    Requires:
+        ratios.{altmanZ/ohlson/springate/zmijewski/...} 사전 산출. credit.calcMerton 옵션.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDistress(ratios, anomalies, isFinancial=False, mertonResult={"d2d": 5.2, ...})
+        DistressResult(zone='safe', score=78, ...)
+
+    See Also:
+        - credit.calcMerton: 시장 기반 부실 거리
+        - calcCreditScore: 은행/금융업 별도 신용평가
+
+    AIContext:
+        ‘부실 위험 zone + 모델 합의 도’ 답변 시 인용. distress zone 은 우선 알림.
     """
     # Merton 사용 여부: 비금융 + 수렴된 결과만
     useMerton = mertonResult is not None and not isFinancial and mertonResult.get("converged", False)

@@ -169,6 +169,16 @@ def buildSpec() -> dict:
         description : str — 엔진 설명
         summary : dict — 영역/등급/이상치/부실/신용 요약
         detail : dict — 영역별 상세 메타데이터
+
+    Requires:
+        모듈 상수 (AREAS · ANOMALY_DETECTORS · DISTRESS_MODELS · CREDIT_RATING) 로딩.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> buildSpec()["name"]
+        'insight'
     """
     return {
         "name": "insight",

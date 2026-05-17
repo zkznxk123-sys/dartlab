@@ -81,6 +81,12 @@ def analyzeRiskSummary(insights: dict[str, InsightResult]) -> InsightResult:
         7~9 = C, 10~14 = D, 15+ = F. 가장 많은 danger 가 어디서 왔는지
         details 첫 라인에 명시.
 
+    When:
+        analyzeFinancial 마지막 단계. 8 영역 InsightResult 산출 직후 호출.
+
+    How:
+        영역 키 8 종 순회 → risks Flag 합집합 → severity 가중 합산 → grade 매핑.
+
     SeeAlso:
         - ``analyzeOpportunitySummary``: 반대 (강점 통합)
         - ``credit.engine.evaluateCompany``: 본 함수와 별도 신용 등급
@@ -151,6 +157,10 @@ def analyzeRiskSummary(insights: dict[str, InsightResult]) -> InsightResult:
 def analyzeOpportunitySummary(insights: dict[str, InsightResult]) -> InsightResult:
     """기회 종합 분석.
 
+    Capabilities:
+        - 8 영역 InsightResult.opportunities Flag 합집합 → 강점/긍정 카운트
+          → 종합 투자매력 등급 A~F 산출.
+
     Parameters
     ----------
     insights : dict[str, InsightResult]
@@ -163,6 +173,32 @@ def analyzeOpportunitySummary(insights: dict[str, InsightResult]) -> InsightResu
         summary : str — 기회 종합 요약
         details : list[str] — 개별 기회 텍스트 목록
         opportunities : list[Flag] — 전체 기회 플래그 취합
+
+    Guide:
+        analyzeRiskSummary 와 대칭. 강점 (strong) + 긍정 (positive) 카운트 기반 등급.
+
+    When:
+        analyzeFinancial 후반. 8 영역 InsightResult 산출 직후 risk 와 함께 호출.
+
+    How:
+        영역 키 8 종 순회 → opportunities Flag 합 → strong/positive 카운트 → 등급 매핑.
+
+    Requires:
+        영역별 InsightResult.opportunities 보유.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> analyzeOpportunitySummary({"health": ..., "cashflow": ...})
+        InsightResult(grade='B', summary='투자 매력 있음 ...')
+
+    See Also:
+        - analyzeRiskSummary: 대칭 (위험 통합)
+        - analyzeFinancial: 상위 호출자
+
+    AIContext:
+        ‘투자 강점’ 답변 시 opportunities 텍스트 직접 인용. truncate 금지.
     """
     allOpps: list[Flag] = []
     for key in [

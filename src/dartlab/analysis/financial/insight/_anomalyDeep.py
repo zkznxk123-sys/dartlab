@@ -21,6 +21,9 @@ _BIG4_KEYWORDS = ["삼일", "PwC", "삼정", "KPMG", "한영", "EY", "안진", "
 def detectTrendDeterioration(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
     """시계열 악화 패턴 탐지: 연속적자, ICR<1, 부채비율 상승.
 
+    Capabilities:
+        - 순이익/영업CF 연속 적자 + ICR<1 연속 + 부채비율 연속 상승 4 패턴 감지.
+
     실험 084/006 검증 결과 기반.
     severity: 4기+ danger, 3기 warning, 2기 info.
 
@@ -35,6 +38,32 @@ def detectTrendDeterioration(aSeries: dict, isFinancial: bool = False) -> list[A
     -------
     list[Anomaly]
         감지된 악화 패턴 목록.
+
+    Guide:
+        급격한 단일 사건이 아닌 ‘연속성’ 신호 — 디폴트 1~2 년 선행 지표.
+
+    When:
+        runAnomalyDetection 7 번째 룰. 비금융은 4 패턴, 금융은 2 패턴.
+
+    How:
+        시계열 reversed loop 로 연속 streak 카운트 → 임계 기준 severity 매핑.
+
+    Requires:
+        aSeries IS/CF/BS 연간 시계열 ≥ 4 년 권장.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectTrendDeterioration(aSeries)
+        [Anomaly('danger', 'trendDeterioration', '순이익 4기 연속 적자')]
+
+    See Also:
+        - detectEarningsQuality: 단일 분기 신호
+        - calcDistress: 종합 부실 모델
+
+    AIContext:
+        ‘N 기 연속’ 표현은 추세적 악화 컨텍스트로 직접 인용. 단기 변동과 구분.
     """
     anomalies: list[Anomaly] = []
 
@@ -120,6 +149,9 @@ def detectTrendDeterioration(aSeries: dict, isFinancial: bool = False) -> list[A
 def detectCCCDeterioration(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
     """CCC(현금전환주기) 악화 탐지.
 
+    Capabilities:
+        - DSO + DIO - DPO 시계열 → 3 기 연속 확대 streak 탐지.
+
     실험 084/007 검증 결과 기반.
     CCC 3기+ 연속 확대 시 운전자본 경색 경고.
     금융업 제외 (DSO/DIO/CCC 비적용).
@@ -135,6 +167,32 @@ def detectCCCDeterioration(aSeries: dict, isFinancial: bool = False) -> list[Ano
     -------
     list[Anomaly]
         CCC 악화 이상 신호 목록.
+
+    Guide:
+        CCC 확대 = 현금 회수 지연 → 단기 유동성 압박. 4 기+ 는 warning.
+
+    When:
+        runAnomalyDetection 8 번째 룰. 비금융업만 실행.
+
+    How:
+        매출/매출원가/매출채권/재고/매입채무 5 계정 시계열 → CCC 산출 → 연속 증가.
+
+    Requires:
+        aSeries IS/BS 연간 ≥ 4 년 + 매출/COGS/AR/INV/AP 비결측.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectCCCDeterioration(aSeries)
+        [Anomaly('warning', 'cccDeterioration', 'CCC 4기 연속 확대 ...')]
+
+    See Also:
+        - detectWorkingCapitalAnomaly: 단일 사건 신호
+        - calcCCC: 정량 산출
+
+    AIContext:
+        ‘N 기 연속 CCC 확대’ 표현은 운전자본 경색 컨텍스트로 인용.
     """
     if isFinancial:
         return []
@@ -216,6 +274,10 @@ def _isBig4(auditor: str | None) -> bool:
 def detectAuditRedFlags(auditData: AuditDataForAnomaly | None) -> list[Anomaly]:
     """감사 Red Flag 탐지 — PCAOB AS 3101, ISA 570/701/705, SOX 302/404.
 
+    Capabilities:
+        - 감사인 교체 패턴 + 감사보수 ±30% + 계속기업/내부통제 약점 + 비적정 의견 +
+          KAM 급증 6 종 룰 통합.
+
     6개 항목: 감사인 교체, 감사보수 급변, 계속기업 불확실성,
     내부통제 취약점, 감사의견 비적정, KAM 급증.
 
@@ -228,6 +290,32 @@ def detectAuditRedFlags(auditData: AuditDataForAnomaly | None) -> list[Anomaly]:
     -------
     list[Anomaly]
         감사 관련 이상 신호 목록.
+
+    Guide:
+        세계 표준 감사 프레임 (PCAOB/ISA/SOX) 기반. ‘계속기업 의문’ 은 디폴트 직전 신호.
+
+    When:
+        runAnomalyDetection 내부에서 호출 (analyzeFinancial 가 auditData 추출).
+
+    How:
+        auditors/fees/opinions/kamCounts 시계열을 6 룰 분기.
+
+    Requires:
+        AuditDataForAnomaly dataclass (auditors/fees/opinions/kamCounts/플래그) 사전 구축.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectAuditRedFlags(audit)
+        [Anomaly('danger', 'audit', '계속기업 불확실성 ...')]
+
+    See Also:
+        - analyzeAudit: 단독 진입점
+        - runAnomalyDetection: 11 룰 통합 실행
+
+    AIContext:
+        ISA/PCAOB 표준 인용으로 신뢰도 강화. ‘감사인 교체’ + ‘비적정 의견’ 조합은 최우선 알림.
     """
     if auditData is None:
         return []

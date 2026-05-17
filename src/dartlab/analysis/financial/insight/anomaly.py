@@ -34,6 +34,9 @@ def _yoyChange(vals: list[float | None]) -> float | None:
 def detectEarningsQuality(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
     """이익 품질 이상치: 영업이익↑ but 영업CF↓ (금융업 제외).
 
+    Capabilities:
+        - 영업이익·영업CF YoY 괴리 + 순이익 흑자 vs 영업CF 적자 탐지.
+
     Parameters
     ----------
     aSeries : dict
@@ -48,6 +51,32 @@ def detectEarningsQuality(aSeries: dict, isFinancial: bool = False) -> list[Anom
         category : str — 'earningsQuality'
         text : str — 이상치 설명 메시지
         magnitude : float — 괴리 크기 (%)
+
+    Guide:
+        영업이익↑ + 영업CF↓ 조합은 매출채권/재고 누적·발생주의 왜곡 신호.
+
+    When:
+        runAnomalyDetection 내부 첫 룰. 비금융업 분석 시 자동 호출.
+
+    How:
+        getAnnualValues 로 영업이익·영업CF·순이익 시계열 추출 → YoY 비교.
+
+    Requires:
+        aSeries 에 IS/CF 연간 시계열 ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectEarningsQuality({"IS": {...}, "CF": {...}})
+        [Anomaly('danger', 'earningsQuality', '...')]
+
+    See Also:
+        - runAnomalyDetection: 11 룰 종합 실행
+        - detectCashBurn: 현금 소진 보완 탐지
+
+    AIContext:
+        Anomaly.text 그대로 사용자 답변 인용. danger 우선 노출.
     """
     anomalies: list[Anomaly] = []
 
@@ -108,6 +137,9 @@ def detectEarningsQuality(aSeries: dict, isFinancial: bool = False) -> list[Anom
 def detectWorkingCapitalAnomaly(aSeries: dict) -> list[Anomaly]:
     """운전자본 이상치: 매출채권/재고 급증 > 매출 증가.
 
+    Capabilities:
+        - 매출 성장 대비 매출채권·재고 과잉 증가 비교 탐지.
+
     Parameters
     ----------
     aSeries : dict
@@ -120,6 +152,32 @@ def detectWorkingCapitalAnomaly(aSeries: dict) -> list[Anomaly]:
         category : str — 'workingCapital'
         text : str — 이상치 설명 메시지
         magnitude : float — 매출 대비 초과 증가율 (%p)
+
+    Guide:
+        매출채권 +30% + 매출 +5% = 수금 지연. 재고 급증은 판매 부진 신호.
+
+    When:
+        runAnomalyDetection 내부 2 번째 룰. 모든 산업 호출 (금융업 포함).
+
+    How:
+        AR · 재고 · 매출 YoY 비교 → 격차 임계 (20~30%p) 초과 시 fire.
+
+    Requires:
+        aSeries.BS (매출채권·재고) + aSeries.IS (매출) ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectWorkingCapitalAnomaly({"BS": {...}, "IS": {...}})
+        [Anomaly('warning', 'workingCapital', '...')]
+
+    See Also:
+        - detectCashBurn: 운전자본 누적 → 현금 소진 후행 지표
+        - calcCCC: 현금전환주기 정량화
+
+    AIContext:
+        text 인용 시 ‘수금 지연/재고 과잉 가능성’ 신호로 전달.
     """
     anomalies: list[Anomaly] = []
 
@@ -170,6 +228,9 @@ def detectWorkingCapitalAnomaly(aSeries: dict) -> list[Anomaly]:
 def detectBalanceSheetShift(aSeries: dict) -> list[Anomaly]:
     """BS 구조 급변: 부채/차입금/자본 ±50% 이상.
 
+    Capabilities:
+        - 부채총계·단기/장기차입금·사채·자본총계 YoY ±50% 이상 + 자본잠식 탐지.
+
     Parameters
     ----------
     aSeries : dict
@@ -182,6 +243,33 @@ def detectBalanceSheetShift(aSeries: dict) -> list[Anomaly]:
         category : str — 'balanceSheetShift'
         text : str — 항목별 급변 설명
         magnitude : float — YoY 변화율 (%)
+
+    Guide:
+        ±100% 초과는 warning, 자본 마이너스 = 자본잠식 danger 자동 승격.
+
+    When:
+        runAnomalyDetection 3 번째 룰. 모든 산업 적용.
+
+    How:
+        BS 5 항목 (부채·단기/장기차입·사채·자본) YoY 산출 + 자본 latest 음수 검사.
+
+    Requires:
+        aSeries.BS 연간 시계열 ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectBalanceSheetShift({"BS": {...}})
+        [Anomaly('danger', 'balanceSheetShift', '자본잠식 ...')]
+
+    See Also:
+        - detectCashBurn: 차입 급증 후행 현금 흐름 신호
+        - calcDistress: 재무부실 종합 점수
+
+    AIContext:
+        자본잠식 danger 는 최우선 알림. 부채 급증 + 영업CF 적자 조합은
+        detectCashBurn 신호와 함께 인용.
     """
     anomalies: list[Anomaly] = []
 
@@ -226,6 +314,9 @@ def detectBalanceSheetShift(aSeries: dict) -> list[Anomaly]:
 def detectCashBurn(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
     """현금 소진: 현금 급감, 영업CF적자+재무CF양수 (금융업 제외).
 
+    Capabilities:
+        - 현금성 자산 -50% 이상 YoY 감소 + 영업CF 적자/재무CF 양수 조합 탐지.
+
     Parameters
     ----------
     aSeries : dict
@@ -240,6 +331,32 @@ def detectCashBurn(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
         category : str — 'cashBurn'
         text : str — 현금 소진 설명
         magnitude : float — 현금 변화율 (%) 또는 None
+
+    Guide:
+        영업적자를 차입으로 메우는 패턴은 디폴트 직전 흔한 신호.
+
+    When:
+        runAnomalyDetection 4 번째 룰. 비금융업은 두 가지 패턴, 금융업은 현금 급감만.
+
+    How:
+        BS.cash 변화율 + CF.operating · CF.financing 최신 부호 비교.
+
+    Requires:
+        aSeries.BS.cash + aSeries.CF (operating, financing) 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectCashBurn({"BS": {...}, "CF": {...}})
+        [Anomaly('warning', 'cashBurn', '영업CF 적자 ...')]
+
+    See Also:
+        - detectBalanceSheetShift: 차입 급증 동시 신호
+        - calcDistress: 부실 종합 점수
+
+    AIContext:
+        ‘차입으로 영업적자 보전’ 문구는 부정적 톤으로 인용. 디폴트 위험 컨텍스트.
     """
     anomalies: list[Anomaly] = []
 
@@ -285,6 +402,9 @@ def detectCashBurn(aSeries: dict, isFinancial: bool = False) -> list[Anomaly]:
 def detectMarginDivergence(aSeries: dict) -> list[Anomaly]:
     """마진 급변: 영업이익률 ±5%p, 영업외손익 급변.
 
+    Capabilities:
+        - 영업이익률 YoY ±5%p 변동 + 영업외손익(NI-OP gap) 급변 탐지.
+
     Parameters
     ----------
     aSeries : dict
@@ -297,6 +417,32 @@ def detectMarginDivergence(aSeries: dict) -> list[Anomaly]:
         category : str — 'marginDivergence'
         text : str — 마진 변동 설명
         magnitude : float — 마진 변동 (%p) 또는 영업외손익 비율 (%)
+
+    Guide:
+        영업외손익이 영업이익 대비 30% 이상 변하면 일회성 손익 의심.
+
+    When:
+        runAnomalyDetection 5 번째 룰. 모든 산업 호출.
+
+    How:
+        매출/영업이익/순이익 시계열 2 년치 → 마진 차이 · NI-OP 갭 비교.
+
+    Requires:
+        aSeries.IS (sales, operating_profit, net_profit) ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectMarginDivergence({"IS": {...}})
+        [Anomaly('warning', 'marginDivergence', '영업이익률 악화 ...')]
+
+    See Also:
+        - calcMarginWaterfall: 마진 단계별 분해
+        - calcMarginTrend: 5 단계 마진 시계열
+
+    AIContext:
+        마진 악화 warning + 영업외손익 급변은 ‘이익 품질 + 일회성 손익’ 컨텍스트로 인용.
     """
     anomalies: list[Anomaly] = []
 
@@ -350,6 +496,9 @@ def detectMarginDivergence(aSeries: dict) -> list[Anomaly]:
 def detectFinancialSectorAnomaly(aSeries: dict, isFinancial: bool) -> list[Anomaly]:
     """금융업 전용 이상치: 부채비율 급변, 순이익 급감.
 
+    Capabilities:
+        - 금융업 부채비율 ±100%p 급변 + 순이익 -30% 이상 감소 탐지.
+
     Parameters
     ----------
     aSeries : dict
@@ -364,6 +513,32 @@ def detectFinancialSectorAnomaly(aSeries: dict, isFinancial: bool) -> list[Anoma
         category : str — 'financialSector'
         text : str — 금융업 이상치 설명
         magnitude : float — 부채비율 변동 (%p) 또는 순이익 변화율 (%)
+
+    Guide:
+        금융업은 부채비율 자체가 1000%대라 일반 룰 부적합 — 별도 룰 적용.
+
+    When:
+        runAnomalyDetection 6 번째 룰. isFinancial=True 시에만 활성.
+
+    How:
+        부채/자본 비율 YoY 차이 + 순이익 YoY 변화율 임계 비교.
+
+    Requires:
+        aSeries.BS (부채/자본) + aSeries.IS (순이익) ≥ 2 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectFinancialSectorAnomaly({"BS": {...}, "IS": {...}}, True)
+        [Anomaly('warning', 'financialSector', '...')]
+
+    See Also:
+        - detectIncompleteYear: 분기 누락 검사
+        - detectFinancialSector: 금융업 분류기
+
+    AIContext:
+        금융업 컨텍스트 한정. isFinancial 판정은 detector.detectFinancialSector 사전 호출.
     """
     if not isFinancial:
         return []
@@ -430,6 +605,11 @@ def runAnomalyDetection(
 ) -> list[Anomaly]:
     """전체 이상치 탐지 실행 — 11개 룰 기반 종합.
 
+    Capabilities:
+        - 11 룰 (earningsQuality / workingCapital / balanceSheetShift / cashBurn /
+          marginDivergence / financialSector / trend / CCC / audit / Benford / revenueQuality)
+          순차 실행 + severity 정렬.
+
     Parameters
     ----------
     aSeries : dict
@@ -447,6 +627,32 @@ def runAnomalyDetection(
         category : str — 이상치 분류 (earningsQuality, workingCapital, balanceSheetShift 등)
         text : str — 한국어 이상치 설명
         magnitude : float | None — 이상치 크기
+
+    Guide:
+        analyzeFinancial 파이프라인 끝단에서 호출. UI 카드 ‘이상 신호’ 직접 입력.
+
+    When:
+        모든 재무 분석 요청 시. 분기 단위가 아닌 연간 집계 후 1 회.
+
+    How:
+        세부 detect* 11 종을 호출 후 severity ('danger'→'warning'→'info') 로 정렬.
+
+    Requires:
+        aSeries IS/BS/CF 연간 시계열 ≥ 2 년. auditData 는 선택.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> runAnomalyDetection(aSeries, isFinancial=False, auditData=audit)
+        [Anomaly('danger', ...), Anomaly('warning', ...)]
+
+    See Also:
+        - analyzeFinancial: 상위 파이프라인 호출자
+        - calcDistress: 부실 종합 점수 (Altman/Springate/Zmijewski)
+
+    AIContext:
+        ‘이상 신호 N 건’ 답변에 직접 인용. danger 우선 노출. 항목별 text 가 사용자 친화.
     """
     anomalies: list[Anomaly] = []
     anomalies.extend(detectEarningsQuality(aSeries, isFinancial))

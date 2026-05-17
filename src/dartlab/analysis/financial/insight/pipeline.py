@@ -164,6 +164,10 @@ def analyzeFinancial(
 ) -> AnalysisResult | None:
     """종목 종합 인사이트 분석.
 
+    Capabilities:
+        - 재무비율 + 10 영역 InsightResult + 11 anomaly 룰 + distress (4~5 모델) +
+          summary 텍스트 + profile (성장/안정/배당 등) 통합 결과 생성.
+
     Args:
         stockCode: 종목코드 또는 CIK.
         company: Company 인스턴스. None이고 series도 없으면 DART pivot 시도.
@@ -175,6 +179,34 @@ def analyzeFinancial(
 
     Returns:
         AnalysisResult 또는 데이터 부족 시 None.
+
+    Guide:
+        insight 엔진 단일 진입점. UI 카드 / 대화형 답변 모두 본 함수 결과 직접 사용.
+
+    When:
+        Ask Workbench 의 ‘재무 분석’ 의도. Company 객체 또는 stockCode 만 있을 때.
+
+    How:
+        FinanceDocAccessor 로 series → calcRatios → detectFinancialSector → 10 영역 분석
+        → anomaly → distress → summary 순.
+
+    Requires:
+        FinanceDocAccessor (DART/EDGAR pivot 캐시). marketData 는 옵션.
+
+    Raises:
+        없음 — 데이터 부족 시 None.
+
+    Example:
+        >>> analyzeFinancial("005930")
+        AnalysisResult(corpName='삼성전자', ...)
+
+    See Also:
+        - analyzeAudit: 감사 단독 분석
+        - calcDistress: 부실 종합 모델
+
+    AIContext:
+        AnalysisResult.summary 가 사용자 친화 텍스트. profile + distress.zone + risk.grade 3
+        조합으로 대표 답변 구성.
     """
     if qSeriesPair is None or aSeriesPair is None:
         accessor = getFinanceDocAccessor()
@@ -307,6 +339,16 @@ def analyzeAudit(company) -> list[Anomaly]:
     -------
     list[Anomaly]
         감사 관련 이상 신호 목록.
+
+    Requires:
+        company.fetchAuditOpinion / auditor / fee 데이터 보유.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> analyzeAudit(Company("005930"))
+        [Anomaly('warning', 'audit', '...'), ...]
     """
     auditData = _extractAuditData(company)
     return detectAuditRedFlags(auditData)
