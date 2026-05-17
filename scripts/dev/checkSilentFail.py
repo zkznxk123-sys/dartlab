@@ -41,6 +41,9 @@ _ALLOWLIST_FILES: frozenset[str] = frozenset(
         "ai/tools/listEngineGaps.py",
         "channel/devtunnel.py",
         "server/api/ai.py",
+        # blog/05-company-reports/ 디렉토리는 옵셔널 — 분석 회사 블로그 글이 없으면
+        # 빈 리스트가 정상. 회사 헤더 블로그 태그용 노출 헬퍼.
+        "server/api/company.py",
         # 런타임 데이터 캐시 (HF/API 응답 파일) — 없으면 빈 결과가 정상
         "synth/bottomUpBeta.py",  # peer 추출 헬퍼 — finance.parquet 없으면 peer 0 정상
         "core/observability/mapping_ledger.py",  # 옵트인 ledger — 파일 없으면 비어있는게 정상
