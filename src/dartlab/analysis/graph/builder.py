@@ -338,17 +338,45 @@ def buildGraph(company: Any, *, basePeriod: str | None = None) -> CompanyGraph:
     14축 calc 캐시 재사용 → 빌드 < 2초.
     메모리 < 50MB (dict-of-dicts, Polars 비사용).
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 6 막 (Act1~Act5 + transitions) 인과 노드/엣지 자동 추출 → CompanyGraph 반환.
 
-    Returns
-    -------
-    CompanyGraph
-        6막 인과 그래프. nodes (metric/segment/event) + edges (causes/partOf/derived/anomaly).
+    Guide:
+        14 축 calc 결과를 metric/segment/event 노드로 등록 후 causes/partOf/derived/anomaly 엣지 연결.
+
+    When:
+        traverse 쿼리 (causes/timeline 등) 또는 그래프 시각화 전 단계.
+
+    How:
+        basePeriod 미지정 시 resolveBasePeriod 추정. _buildAct1~5 + _buildActTransitions 순차.
+
+    Requires:
+        company 가 stockCode/corpName/14 축 select·show API 보유.
+
+    Raises:
+        없음. 내부 calc 실패는 _SAFE try 흡수.
+
+    Parameters:
+        company : Company
+            분석 대상 기업.
+        basePeriod : str, optional
+            기준 기간.
+
+    Returns:
+        CompanyGraph
+            6막 인과 그래프. nodes (metric/segment/event) + edges (causes/partOf/derived/anomaly).
+
+    Example:
+        >>> g = buildGraph(samsung)
+        >>> g.summary()
+        "nodes=120, edges=180"
+
+    See Also:
+        - traverse.causes : 본 그래프 역방향 인과 BFS.
+        - traverse.timelineNarrative : 시계열 서사.
+
+    AIContext:
+        무환각 답변 백엔드 그래프. 모든 주장은 노드 ID 추적 가능.
     """
     stockCode = getattr(company, "stockCode", None) or getattr(company, "ticker", "") or ""
     corpName = getattr(company, "corpName", "") or ""

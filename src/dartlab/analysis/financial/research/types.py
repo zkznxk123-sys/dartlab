@@ -115,13 +115,35 @@ class ResearchResult:
             return f"<pre>{self.summary()}</pre>"
 
     def summary(self) -> str:
-        """텍스트 summary (rich 없이도 작동)."""
+        """텍스트 summary (rich 없이도 작동).
+
+        Requires:
+            _typesResearchRender.summary 위임 가능 환경.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> result.summary()
+            "..."
+        """
         from dartlab.analysis.financial.research._typesResearchRender import summary as _s
 
         return _s(self)
 
     def toDict(self) -> dict:
-        """dict 직렬화 (asdict + DISCLAIMER 포함)."""
+        """dict 직렬화 (asdict + DISCLAIMER 포함).
+
+        Requires:
+            _typesResearchRender.toDict 위임 가능 환경.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> result.toDict()
+            {"piotroski": {...}, "DISCLAIMER": "..."}
+        """
         from dartlab.analysis.financial.research._typesResearchRender import toDict as _d
 
         return _d(self)

@@ -12,12 +12,39 @@ from dartlab.core.memory import memoizedCalc
 def calcSemiconductorKpis(company, *, basePeriod: str | None = None) -> dict | None:
     """반도체 핵심 KPI.
 
-    Returns
-    -------
-    dict | None
-        capexCycle : dict — CAPEX/매출 3Y + 사이클 위치 추정
-        aspProxy : dict | None — 매출/생산량 → ASP 추정
-        utilizationProxy : dict | None — 가동률 추정
+    Capabilities:
+        - CAPEX/매출 5Y 사이클 + 반도체 세그먼트 감지.
+
+    Guide:
+        CF purchase_of_property_plant_and_equipment / IS sales → ratio history → phase 판정.
+
+    When:
+        삼성전자·SK하이닉스 등 반도체 사이클 판단 시.
+
+    How:
+        latest > avg×1.2 = 확장, ×0.8 미만 = 축소, 중간 = 유지.
+
+    Requires:
+        company.select("CF", ["purchase_of_property_plant_and_equipment"]) + select("IS", ["sales"]).
+
+    Raises:
+        없음. AttributeError·ValueError·TypeError·KeyError try 흡수.
+
+    Returns:
+        dict | None
+            capexCycle : dict — CAPEX/매출 3Y + 사이클 위치 추정
+            aspProxy : dict | None — 매출/생산량 → ASP 추정
+            utilizationProxy : dict | None — 가동률 추정
+
+    Example:
+        >>> calcSemiconductorKpis(삼성전자)
+        {"capexCycle": {...}, "aspProxy": {...}}
+
+    See Also:
+        - dispatcher.sectorKpi : 섹터 자동 라우팅.
+
+    AIContext:
+        반도체 사이클 (확장/유지/축소) 위치 판단 인용.
     """
     from dartlab.core.utils.helpers import annualColsFromPeriods, toDictBySnakeId
 

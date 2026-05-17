@@ -623,10 +623,37 @@ def _renderSectorKpis(result, console) -> None:
 def summary(result) -> str:
     """plain text 전체 출력 (rich 없는 환경용).
 
-    Returns
-    -------
-    str
-        리포트 전체를 plain text로 포맷한 문자열.
+    Capabilities:
+        - rich 미설치 환경 (서버 로그·노트북 fallback) 에서도 리포트 본문 출력.
+
+    Guide:
+        meta → executive → thesis → narrative → valuation → risk → market 순 plain text.
+
+    When:
+        rich import 실패 또는 console 미지원 환경.
+
+    How:
+        '-' × 50 구분선 + key/value lines.append → "\n".join.
+
+    Requires:
+        result 가 ResearchResult 호환 dataclass (meta·executive·thesis 등 속성).
+
+    Raises:
+        없음. None 필드 가드 처리.
+
+    Returns:
+        str
+            리포트 전체를 plain text로 포맷한 문자열.
+
+    Example:
+        >>> summary(result)
+        "==================================================\n  Acme Corp 종합 기업분석 리포트\n..."
+
+    See Also:
+        - toDict : dict 직렬화 버전.
+
+    AIContext:
+        rich 미가용 환경 자동 fallback. 본문 톤 그대로 유지.
     """
     sep = "-" * 50
     lines: list[str] = []
@@ -726,9 +753,18 @@ def summary(result) -> str:
 def toDict(result) -> dict:
     """전체 리포트를 dict로 변환.
 
-    Returns
-    -------
-    dict
-        dataclass 전체를 재귀적으로 dict로 변환한 결과.
+    Requires:
+        result 가 dataclass 인스턴스 (asdict 호환).
+
+    Raises:
+        없음. dataclass 가 아니면 TypeError 전파.
+
+    Example:
+        >>> toDict(result)
+        {"meta": {...}, "executive": {...}, ...}
+
+    Returns:
+        dict
+            dataclass 전체를 재귀적으로 dict로 변환한 결과.
     """
     return asdict(result)

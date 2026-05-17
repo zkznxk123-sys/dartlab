@@ -80,17 +80,43 @@ def calcPiotroski(
 ) -> PiotroskiScore:
     """Piotroski F-Score 9-signal.
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열 ``{sjDiv: {snakeId: [값, ...]}}``.
+    Capabilities:
+        - 9 신호 (수익성 4 + 건전성 3 + 효율성 2) 점수화 → 0~9 합산.
 
-    Returns
-    -------
-    PiotroskiScore
-        total : int — F-Score 합계 (0~9점)
-        components : dict[str, bool] — 9개 신호별 통과 여부
-        interpretation : str — ``"strong"`` | ``"moderate"`` | ``"weak"``
+    Guide:
+        ROA · OCF · ROA 증가 · CF>NI · 부채 감소 · 유동비 증가 · 무희석 · GM 증가 · 자산회전 증가.
+
+    When:
+        가치주 스크리닝·재무 건전성 1차 필터.
+
+    How:
+        각 신호 boolean → True 합계. >=7 strong, >=4 moderate, 이하 weak.
+
+    Requires:
+        aSeries 에 IS net_profit/sales/gross_profit · BS total_assets/equity/borrowings · CF operating_cashflow 시계열.
+
+    Raises:
+        없음. 데이터 결측 시 해당 신호 False.
+
+    Parameters:
+        aSeries : dict
+            연간 재무 시계열 ``{sjDiv: {snakeId: [값, ...]}}``.
+
+    Returns:
+        PiotroskiScore
+            total : int — F-Score 합계 (0~9점)
+            components : dict[str, bool] — 9개 신호별 통과 여부
+            interpretation : str — ``"strong"`` | ``"moderate"`` | ``"weak"``
+
+    Example:
+        >>> calcPiotroski(aSeries)
+        PiotroskiScore(total=7, components={...}, interpretation="strong")
+
+    See Also:
+        - calcAllScores : 6 종 스코어 일괄 호출 진입점.
+
+    AIContext:
+        Piotroski 7점 이상 = 펀더멘털 강화 신호 인용.
     """
     components: dict[str, bool] = {}
 
@@ -187,20 +213,46 @@ def calcMagicFormula(
 ) -> MagicFormulaScore:
     """Greenblatt Magic Formula — ROIC + Earnings Yield.
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열.
-    currentPrice : float | None
-        현재 주가 (원 또는 달러).
-    sharesOutstanding : float | None
-        발행주식수 (주).
+    Capabilities:
+        - ROIC + Earnings Yield 2 인자 산출 (Greenblatt 1999).
 
-    Returns
-    -------
-    MagicFormulaScore
-        roic : float | None — 투하자본수익률 (%)
-        earningsYield : float | None — 이익수익률 (%)
+    Guide:
+        ROIC = EBIT / (TA - CL - cash). EY = EBIT / EV. EV = market_cap + debt - cash.
+
+    When:
+        가치 + 퀄리티 동시 충족 종목 스크리닝 시.
+
+    How:
+        2 지표 합산이 아니라 순위 합계로 종목 비교 (본 함수는 raw 값만).
+
+    Requires:
+        aSeries IS operating_profit + BS total_assets/current_liabilities/cash. currentPrice·sharesOutstanding 옵션.
+
+    Raises:
+        없음. invested capital ≤ 0 또는 EV ≤ 0 시 None.
+
+    Parameters:
+        aSeries : dict
+            연간 재무 시계열.
+        currentPrice : float | None
+            현재 주가 (원 또는 달러).
+        sharesOutstanding : float | None
+            발행주식수 (주).
+
+    Returns:
+        MagicFormulaScore
+            roic : float | None — 투하자본수익률 (%)
+            earningsYield : float | None — 이익수익률 (%)
+
+    Example:
+        >>> calcMagicFormula(aSeries, currentPrice=50000, sharesOutstanding=1e8)
+        MagicFormulaScore(roic=15.2, earningsYield=8.1)
+
+    See Also:
+        - calcAllScores : 통합 진입점.
+
+    AIContext:
+        ROIC > 15% + EY > 8% = 양호한 magic formula 후보.
     """
     op = _latest(aSeries, "IS", "operating_profit")
     ta = _latest(aSeries, "BS", "total_assets")
@@ -240,21 +292,47 @@ def calcQmj(
 ) -> QmjScore:
     """AQR Quality Minus Junk 4-pillar.
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열.
-    aYears : list[str]
-        연도 목록.
+    Capabilities:
+        - profitability/growth/safety/payout 4 축 통합 quality 점수.
 
-    Returns
-    -------
-    QmjScore
-        profitability : float | None — 수익성 평균 (비율)
-        growth : float | None — 매출 CAGR (비율)
-        safety : float | None — 안전성 점수 (0~1)
-        payout : float | None — 배당성향 (비율)
-        composite : float | None — 4-pillar 평균 (비율)
+    Guide:
+        AQR 2013 Asness·Frazzini·Pedersen QMJ 단순화. composite = 4 축 평균.
+
+    When:
+        팩터 모델·smart-beta 노출 평가 시.
+
+    How:
+        profitability = ROE/ROA/GM/CFOA 평균. safety = 1-debtRatio + min(CR/2, 1) 평균. payout = abs(div)/NI.
+
+    Requires:
+        aSeries IS net_profit/sales/gross_profit · BS total_assets/equity/liabilities/current_assets/current_liabilities · CF operating_cashflow/dividends_paid.
+
+    Raises:
+        없음. 데이터 결측 시 해당 pillar None.
+
+    Parameters:
+        aSeries : dict
+            연간 재무 시계열.
+        aYears : list[str]
+            연도 목록.
+
+    Returns:
+        QmjScore
+            profitability : float | None — 수익성 평균 (비율)
+            growth : float | None — 매출 CAGR (비율)
+            safety : float | None — 안전성 점수 (0~1)
+            payout : float | None — 배당성향 (비율)
+            composite : float | None — 4-pillar 평균 (비율)
+
+    Example:
+        >>> calcQmj(aSeries, ["2022", "2023", "2024"])
+        QmjScore(profitability=0.18, growth=0.07, safety=0.6, payout=0.3, composite=0.29)
+
+    See Also:
+        - calcAllScores : 통합 진입점.
+
+    AIContext:
+        QMJ composite 가 높은 종목은 quality 노출 강함.
     """
     # --- Profitability ---
     ni = _latest(aSeries, "IS", "net_profit")
@@ -325,23 +403,49 @@ def calcLynchFairValue(
 ) -> LynchFairValue:
     """Peter Lynch: Fair Value = EPS Growth Rate * EPS.
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열.
-    currentPrice : float | None
-        현재 주가 (원 또는 달러).
-    sharesOutstanding : float | None
-        발행주식수 (주).
+    Capabilities:
+        - Lynch 적정가 + PEG + 저평가/적정/고평가 시그널.
 
-    Returns
-    -------
-    LynchFairValue
-        earningsGrowthRate : float | None — EPS 성장률 (%)
-        fairValue : float | None — Lynch 적정가 (원 또는 달러)
-        currentPrice : float | None — 현재 주가
-        pegRatio : float | None — PEG 비율 (배)
-        signal : str | None — ``"undervalued"`` | ``"fair"`` | ``"overvalued"``
+    Guide:
+        성장률(%) × EPS = fair value. PER/growth = PEG (1 미만 저평가 통상해석).
+
+    When:
+        성장주 합리적 가격대 판단 시.
+
+    How:
+        validNi 첫/끝 → CAGR(%) × latest EPS. currentPrice/fairValue ratio < 0.8 / > 1.2 시 신호.
+
+    Requires:
+        aSeries IS net_profit ≥ 3 시점 + sharesOutstanding > 0.
+
+    Raises:
+        없음. 데이터 부족 시 빈 LynchFairValue.
+
+    Parameters:
+        aSeries : dict
+            연간 재무 시계열.
+        currentPrice : float | None
+            현재 주가 (원 또는 달러).
+        sharesOutstanding : float | None
+            발행주식수 (주).
+
+    Returns:
+        LynchFairValue
+            earningsGrowthRate : float | None — EPS 성장률 (%)
+            fairValue : float | None — Lynch 적정가 (원 또는 달러)
+            currentPrice : float | None — 현재 주가
+            pegRatio : float | None — PEG 비율 (배)
+            signal : str | None — ``"undervalued"`` | ``"fair"`` | ``"overvalued"``
+
+    Example:
+        >>> calcLynchFairValue(aSeries, currentPrice=70000, sharesOutstanding=1e8)
+        LynchFairValue(earningsGrowthRate=15, fairValue=90000, ...)
+
+    See Also:
+        - calcAllScores : 통합 진입점.
+
+    AIContext:
+        성장률 = fair PER 가정. 적자/마이너스 성장 시 적용 불가.
     """
     niList = aSeries.get("IS", {}).get("net_profit", [])
     validNi = [(i, v) for i, v in enumerate(niList) if v is not None and v > 0]
@@ -393,15 +497,41 @@ def calcBuffettOwnerEarnings(
 ) -> float | None:
     """Buffett Owner Earnings = NI + D&A - maintenance CAPEX.
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열.
+    Capabilities:
+        - 회계 NI 보정 → 실제 주주에게 환원 가능한 현금흐름 산출.
 
-    Returns
-    -------
-    float | None
-        Owner Earnings (원 또는 달러). 데이터 부족 시 None.
+    Guide:
+        OCF - maintenance CAPEX (CAPEX 의 70% 가정). Berkshire Hathaway 1986 letter 정의 근사.
+
+    When:
+        밸류에이션 분모 (EV/OE) · DCF 자유현금흐름 대용.
+
+    How:
+        ocf - abs(capex) × 0.7. Maintenance vs growth CAPEX 분리 불가능해 휴리스틱.
+
+    Requires:
+        aSeries CF operating_cashflow + purchase_of_property_plant_and_equipment.
+
+    Raises:
+        없음. ni 또는 ocf None 시 None.
+
+    Parameters:
+        aSeries : dict
+            연간 재무 시계열.
+
+    Returns:
+        float | None
+            Owner Earnings (원 또는 달러). 데이터 부족 시 None.
+
+    Example:
+        >>> calcBuffettOwnerEarnings(aSeries)
+        12300000000
+
+    See Also:
+        - calcAllScores : 통합 진입점.
+
+    AIContext:
+        OE > NI = 회계 보수적·CAPEX 적은 비즈니스.
     """
     ni = _latest(aSeries, "IS", "net_profit")
     # depreciation 근사: operating_profit - ebit가 아니라 CF에서 D&A 추출
@@ -428,26 +558,52 @@ def calcDuPont(
 ) -> DuPontResult:
     """DuPont 5-factor 분해: ROE = 세금부담 * 이자부담 * OPM * 회전율 * 레버리지.
 
-    Parameters
-    ----------
-    aSeries : dict
-        연간 재무 시계열.
-    aYears : list[str]
-        연도 목록.
+    Capabilities:
+        - 최근 5Y ROE 5 인자 분해 + driver (margin/turnover/leverage) 식별.
 
-    Returns
-    -------
-    DuPontResult
-        netMargin : list[float | None] — 순이익률 (비율)
-        assetTurnover : list[float | None] — 총자산회전율 (배)
-        equityMultiplier : list[float | None] — 자기자본승수 (배)
-        roe : list[float | None] — 자기자본이익률 (비율)
-        periods : list[str] — 연도 목록
-        driver : str — ROE 변동 주요 동인 (``"margin"`` | ``"turnover"`` | ``"leverage"`` | ``"balanced"``)
-        taxBurden : list[float | None] — 세금부담률 (비율)
-        interestBurden : list[float | None] — 이자부담률 (비율)
-        operatingMargin : list[float | None] — 영업이익률 (비율)
-        roic : list[float | None] — 투하자본수익률 (비율)
+    Guide:
+        3-factor (margin × turnover × leverage) + 5-factor (taxBurden × interestBurden × OPM × turnover × leverage) 동시 산출.
+
+    When:
+        ROE 변화 원인 분석·동종업계 비교 시.
+
+    How:
+        각 인자 변동계수(CV) 계산 → 최대 CV 가 driver. 모두 0 이면 balanced.
+
+    Requires:
+        aSeries IS net_profit/sales/operating_profit/income_before_tax · BS total_assets/equity/current_liabilities/cash.
+
+    Raises:
+        없음. 데이터 결측 시 해당 칸 None.
+
+    Parameters:
+        aSeries : dict
+            연간 재무 시계열.
+        aYears : list[str]
+            연도 목록.
+
+    Returns:
+        DuPontResult
+            netMargin : list[float | None] — 순이익률 (비율)
+            assetTurnover : list[float | None] — 총자산회전율 (배)
+            equityMultiplier : list[float | None] — 자기자본승수 (배)
+            roe : list[float | None] — 자기자본이익률 (비율)
+            periods : list[str] — 연도 목록
+            driver : str — ROE 변동 주요 동인 (``"margin"`` | ``"turnover"`` | ``"leverage"`` | ``"balanced"``)
+            taxBurden : list[float | None] — 세금부담률 (비율)
+            interestBurden : list[float | None] — 이자부담률 (비율)
+            operatingMargin : list[float | None] — 영업이익률 (비율)
+            roic : list[float | None] — 투하자본수익률 (비율)
+
+    Example:
+        >>> calcDuPont(aSeries, ["2020", "2021", "2022", "2023", "2024"])
+        DuPontResult(roe=[...], driver="margin", ...)
+
+    See Also:
+        - calcAllScores : 통합 진입점.
+
+    AIContext:
+        ROE 개선이 마진 vs 회전 vs 레버리지 어디서 왔는지 설명 인용.
     """
     niList = aSeries.get("IS", {}).get("net_profit", [])
     salesList = aSeries.get("IS", {}).get("sales", [])
@@ -577,15 +733,24 @@ def calcAllScores(
 ) -> QuantScores:
     """모든 정량 스코어 한 번에 계산.
 
-    Returns
-    -------
-    QuantScores
-        piotroski : PiotroskiScore — F-Score (0~9점)
-        magicFormula : MagicFormulaScore — ROIC + Earnings Yield
-        qmj : QmjScore — Quality Minus Junk 4-pillar
-        lynchFairValue : LynchFairValue — Lynch 적정가
-        buffettOwnerEarnings : float | None — Owner Earnings (원 또는 달러)
-        dupont : DuPontResult — DuPont 5-factor 분해
+    Requires:
+        aSeries 가 IS/BS/CF snake_id 시계열 dict, aYears 연도 list.
+
+    Raises:
+        없음. 하위 계산자 결측 시 dataclass 필드 None.
+
+    Returns:
+        QuantScores
+            piotroski : PiotroskiScore — F-Score (0~9점)
+            magicFormula : MagicFormulaScore — ROIC + Earnings Yield
+            qmj : QmjScore — Quality Minus Junk 4-pillar
+            lynchFairValue : LynchFairValue — Lynch 적정가
+            buffettOwnerEarnings : float | None — Owner Earnings (원 또는 달러)
+            dupont : DuPontResult — DuPont 5-factor 분해
+
+    Example:
+        >>> calcAllScores(aSeries, aYears, currentPrice=70000, sharesOutstanding=1e8)
+        QuantScores(piotroski=..., magicFormula=..., qmj=..., ...)
     """
     return QuantScores(
         piotroski=calcPiotroski(aSeries),
