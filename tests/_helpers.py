@@ -237,7 +237,12 @@ def captureRichOutput(fn, *, width: int = 120, color: bool = False) -> str:
                 savedRichHandler = h
                 h.console = newConsole
         fn()
-        return newConsole.export_text(clear=False, styles=color)
+        out = newConsole.export_text(clear=False, styles=color)
+        # rich Progress BarColumn 은 환경 따라 character 가 다름 (Linux=`━` unicode
+        # block, Windows cp949 fallback=`-` ASCII dash). snapshot 환경 독립성 위해
+        # 두 형태를 한 ASCII dash 로 normalize.
+        out = out.replace("━", "-")
+        return out
     finally:
         _loggerMod._console = savedConsole
         if savedRichHandler is not None:

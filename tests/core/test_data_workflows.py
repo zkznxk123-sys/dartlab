@@ -15,7 +15,8 @@ def test_edgar_builder_public_facade_imports() -> None:
 
 
 def test_edgar_sync_workflow_uses_current_builder_path() -> None:
-    workflow = Path(".github/workflows/edgarSync.yml").read_text(encoding="utf-8")
+    repoRoot = Path(__file__).resolve().parents[2]
+    workflow = (repoRoot / ".github" / "workflows" / "edgarSync.yml").read_text(encoding="utf-8")
 
     assert "from dartlab.scan.builders.edgar import buildEdgarFinance" in workflow
     assert "dartlab.scan.edgarBuilder" not in workflow
