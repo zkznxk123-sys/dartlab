@@ -91,6 +91,35 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
     exogenousAxes에서 업종 최적 3지표를 가져오고, 범용 3지표(금리/환율/IPI)와 비교.
     R-squared가 높은 쪽을 채택. 현재 외생변수 상태 × beta로 매출 방향 추정.
 
+    Capabilities:
+        - 매출-매크로 회귀 (업종 최적 + 범용) + 종합 방향 라벨.
+
+    Guide:
+        R² 높은 쪽 채택 → 외생 변수 현재값 × beta = 방향.
+
+    When:
+        "거시 환경이 이 회사 매출에 어떻게?" 매크로 의도 진입 시.
+
+    How:
+        IS 매출 시계열 + exogenous indicators → 회귀 → R²/impact.
+
+    Requires:
+        gather 매크로 시계열 + IS 매출 ≥ 4 년.
+
+    Raises:
+        없음 (데이터 부재 시 None).
+
+    Example:
+        >>> calcMacroSensitivity(c)["netDirection"]
+        "positive"
+
+    See Also:
+        - calcValuationBand : 매크로 시나리오별 밴드
+        - exogenousAxes : 업종 최적 지표 룩업
+
+    AIContext:
+        AI 답변 "금리 인상시 이 회사 영향" 코너 핵심 evidence.
+
     Returns
     -------
     dict
@@ -298,6 +327,35 @@ def calcMacroSensitivity(company, *, basePeriod: str | None = None) -> dict | No
 @memoizedCalc
 def calcValuationBand(company, *, basePeriod: str | None = None) -> dict | None:
     """PER/PBR 정규분포 밴드에서 현재 위치.
+
+    Capabilities:
+        - PER/PBR 정규분포 밴드 + 현재 위치 zone 라벨.
+
+    Guide:
+        과거 분포 평균/표준편차 기준 z-score → 저평가/적정/고평가.
+
+    When:
+        "지금 비싼가 싼가?" 멀티플 평가 의도 진입 시.
+
+    How:
+        ratios show → PER/PBR 시계열 → calcMultipleBand → zone 합성.
+
+    Requires:
+        company.show("ratios") 반환 + PER/PBR 시계열.
+
+    Raises:
+        없음 (예외 시 None).
+
+    Example:
+        >>> calcValuationBand(c)["overallZone"]
+        "저평가"
+
+    See Also:
+        - calcMacroSensitivity : 매크로 영향
+        - macro.cycles.macroCycle : 밴드 계산 원본
+
+    AIContext:
+        AI "현재 멀티플 위치" 카드 zone/percentile 표시에 사용.
 
     Returns
     -------

@@ -89,6 +89,12 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
         효율 매우 우수 (Apple/Amazon). CCC 증가 추세 = 운전자본 부담 (재고
         쌓임 또는 매출채권 회수 지연). KR 제조업 평균 CCC ~ 60~90 일.
 
+    When:
+        "운전자본 효율 추세?" 운전자본/회전율 의도 진입 시.
+
+    How:
+        IS+BS 추출 → 회전율 4 종 → DSO/DIO/DPO/CCC → history dict.
+
     SeeAlso:
         - ``calcWorkingCapital``: 운전자본 절대값 시계열
         - ``calcAssetStructure``: 자산 영업/비영업 분리
@@ -192,6 +198,35 @@ def calcTurnoverTrend(company, *, basePeriod: str | None = None) -> dict | None:
 @memoizedCalc
 def calcEfficiencyFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """효율성 경고/기회 플래그.
+
+    Capabilities:
+        - 회전율 하락 · 재고 급증 · CCC 악화 등 경고 텍스트 산출.
+
+    Guide:
+        calcTurnoverTrend history 비교로 추세 신호 검출.
+
+    When:
+        대시보드 "효율성 신호" 카드 또는 요약 답변 합성 시.
+
+    How:
+        turnoverTrend 호출 → 회전율/CCC YoY 비교 → 임계 통과 시 push.
+
+    Requires:
+        calcTurnoverTrend 가 history ≥ 2 년 반환.
+
+    Raises:
+        없음 (데이터 부재 시 빈 리스트).
+
+    Example:
+        >>> calcEfficiencyFlags(c)
+        ["총자산회전율 3기 연속 하락 (0.45회)", ...]
+
+    See Also:
+        - calcTurnoverTrend : 회전율 시계열 원천
+        - calcSummaryFlags : 통합 flags
+
+    AIContext:
+        AI 가 "효율성 신호" 코너에서 경고 문장으로 직접 인용.
 
     Returns
     -------

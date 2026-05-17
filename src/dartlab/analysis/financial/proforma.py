@@ -318,11 +318,33 @@ def _ehrCollectSeries(series: dict, n: int) -> dict[str, list]:
     """IS/CF/BS 10+ 계정 시계열 일괄 수집. 반환: {key: list[float]}."""
 
     def ttm(sj: str, acc: str) -> list:
-        """주제 sj·계정 acc 의 TTM 시계열 n 개."""
+        """주제 sj·계정 acc 의 TTM 시계열 n 개.
+
+        Requires:
+            상위 series dict 와 n 이 클로저로 캡쳐.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> ttm("IS", "sales")
+            [..., ...]
+        """
         return _annualTtmValues(series, sj, acc, n)
 
     def bs(acc: str) -> list:
-        """BS 계정 acc 의 연말 잔액 시계열 n 개."""
+        """BS 계정 acc 의 연말 잔액 시계열 n 개.
+
+        Requires:
+            series dict 안에 BS 슬롯 존재.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> bs("current_assets")
+            [..., ...]
+        """
         return _annualLatestValues(series, "BS", acc, n)
 
     return {
@@ -459,6 +481,35 @@ def extractHistoricalRatios(
     years: int = 5,
 ) -> HistoricalRatios:
     """과거 시계열에서 구조적 비율을 중위값으로 추출 orchestrator (Q3.1f split).
+
+    Capabilities:
+        - 11 개 구조 비율 (gm/sga/tax/dep/int/nwc/capex/div/ar/inv/ap) 추출.
+
+    Guide:
+        proforma forecast 입력으로 쓰는 안정 비율 셋트.
+
+    When:
+        forecast 빌드 직전, 과거 비율 골격이 필요할 때.
+
+    How:
+        series 시계열 → _ehrCollectSeries → 각 ehr 헬퍼 가중평균.
+
+    Requires:
+        series dict 에 IS/CF/BS 슬롯 ≥ 2 년.
+
+    Raises:
+        없음 (부재 시 default + warnings).
+
+    Example:
+        >>> extractHistoricalRatios(series, years=5).gross_margin
+        35.0
+
+    See Also:
+        - buildBaselineForecast : 본 비율 소비
+        - calcScenarioSensitivity : 비율 변형 민감도
+
+    AIContext:
+        AI proforma 답변에서 "최근 5 년 평균 마진" 인용에 사용.
 
     Parameters
     ----------

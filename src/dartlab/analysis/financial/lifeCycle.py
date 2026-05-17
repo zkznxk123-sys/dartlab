@@ -45,6 +45,35 @@ def calcLifeCycle(
 ) -> dict | None:
     """기업 생애주기 단계 판별.
 
+    Capabilities:
+        - 매출 CAGR · 마진 CV · ROIC-WACC · FCF streak 신호로 phase 판정.
+
+    Guide:
+        earlyGrowth/highGrowth/matureGrowth/matureStable/decline/turnaround 6 라벨.
+
+    When:
+        밸류에이션 모델 선택 직전 또는 회사 성격 분류 시.
+
+    How:
+        _gatherSignals → KR 조정 → _classify → inflection 보강 → modelHint.
+
+    Requires:
+        IS/CF 시계열 ≥ 3 년 + ROIC 계산 가능.
+
+    Raises:
+        없음 (신호 부재 시 None).
+
+    Example:
+        >>> calcLifeCycle(c)["phase"]
+        "matureGrowth"
+
+    See Also:
+        - needsNormalized : decline/turnaround 게이트
+        - dFV : modelHint 소비
+
+    AIContext:
+        AI 답변 "이 회사 성격" + 적합 valuation 모델 라우팅에 사용.
+
     Returns
     -------
     dict | None

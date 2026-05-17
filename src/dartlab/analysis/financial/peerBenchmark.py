@@ -34,6 +34,34 @@ def calcPeerRanking(company, *, basePeriod: str | None = None) -> dict | None:
     scan 데이터에서 최신 기간 기준 백분위(percentile)와
     순위(rank)를 계산한다. 결과는 company._cache에 저장하여 재활용.
 
+    Capabilities:
+        - 8 개 핵심 비율의 시장 내 percentile/rank 산출.
+
+    Guide:
+        company 단일 종목을 전 시장 횡단면과 대조.
+
+    When:
+        "이 회사는 시장에서 어디?" 묻는 비교 분석 시점.
+
+    How:
+        Company.fromCode → calcPeerRanking(c) → rankings 리스트 소비.
+
+    Requires:
+        scan parquet (전 종목 ratio) + company.stockCode.
+
+    Raises:
+        없음 (데이터 부재 시 None 반환).
+
+    Example:
+        >>> calcPeerRanking(c)
+        {"rankings": [{"ratioName": "roe", "percentile": 72.5, ...}, ...]}
+
+    See Also:
+        - calcRiskReturnPosition : 수익/위험 사분면
+
+    AIContext:
+        AI 답변에서 "동종 대비 ROE 상위 X%" 인용에 사용.
+
     Returns
     -------
     dict
@@ -76,6 +104,35 @@ def calcRiskReturnPosition(company, *, basePeriod: str | None = None) -> dict | 
 
     ROE(수익) x 부채비율(위험)에서 시장 내 사분면 위치를 결정한다.
     calcPeerRanking 캐시가 있으면 재활용.
+
+    Capabilities:
+        - ROE x 부채비율 4 분면 라벨링 + 평가 코멘트.
+
+    Guide:
+        고수익-저위험 = 우량, 저수익-고위험 = 구조 개선 필요.
+
+    When:
+        "수익성과 안정성 동시 평가" 의도가 들어왔을 때.
+
+    How:
+        calcPeerRanking 캐시 재사용 → 사분면 판정.
+
+    Requires:
+        peerRanking 데이터 또는 scan parquet 직접 조회.
+
+    Raises:
+        없음 (데이터 부재 시 None).
+
+    Example:
+        >>> calcRiskReturnPosition(c)
+        {"quadrant": "고수익-저위험", "assessment": "우량", ...}
+
+    See Also:
+        - calcPeerRanking : 백분위 산출 원본
+        - calcPeerBenchmarkFlags : 사분면 기반 플래그
+
+    AIContext:
+        AI 가 회사 포지션 한 단어 평가 시 "우량/구조 개선 필요" 인용.
 
     Returns
     -------
@@ -142,6 +199,35 @@ def calcRiskReturnPosition(company, *, basePeriod: str | None = None) -> dict | 
 @memoizedCalc
 def calcPeerBenchmarkFlags(company, *, basePeriod: str | None = None) -> list[tuple[str, str]]:
     """비교분석 경고/기회 플래그.
+
+    Capabilities:
+        - 백분위 극단값에서 warning/opportunity 코멘트 산출.
+
+    Guide:
+        상위/하위 10% 임계로 시장 내 두드러진 항목만 노출.
+
+    When:
+        "이 회사의 시장 내 약점/강점 한 줄?" 요청 시.
+
+    How:
+        calcPeerRanking 결과 소비 → 임계 필터 → 사분면 보강.
+
+    Requires:
+        calcPeerRanking 가 None 아니어야 동작.
+
+    Raises:
+        없음 (랭킹 부재 시 빈 리스트).
+
+    Example:
+        >>> calcPeerBenchmarkFlags(c)
+        [("ROE 상위 5% (22.3%)", "opportunity"), ...]
+
+    See Also:
+        - calcPeerRanking : flags 의 원천
+        - calcRiskReturnPosition : 사분면 라벨
+
+    AIContext:
+        AI 가 "강점/약점 한 줄" 요약 카드 생성에 사용.
 
     Returns
     -------

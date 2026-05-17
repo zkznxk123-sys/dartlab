@@ -55,6 +55,35 @@ def calcScorecard(company, *, basePeriod: str | None = None) -> dict | None:
     기존 5영역(수익성/성장성/안정성/효율성/현금흐름)
     + 이익품질/투자효율/재무정합성.
 
+    Capabilities:
+        - 8 영역 grade 산출 + 종합 profile 라벨.
+
+    Guide:
+        insights.grades + 별도 4 종 헬퍼 등급을 한 dict 로 합성.
+
+    When:
+        "한 화면에 종합 등급" 요약 카드가 필요할 때.
+
+    How:
+        analyzeFinancial → grades → 헬퍼 4 등급 보강 → items list.
+
+    Requires:
+        company.stockCode + analyzeFinancial 가능 (insights pipeline).
+
+    Raises:
+        없음 (None 반환).
+
+    Example:
+        >>> calcScorecard(c)
+        {"items": [{"area": "수익성", "grade": "A"}, ...], "profile": "premium"}
+
+    See Also:
+        - calcSummaryFlags : 등급 ↦ 문장 요약
+        - calcPiotroskiDetail : 9 점 표 세부
+
+    AIContext:
+        AI 답변 "종합 평가" 헤더 카드 색상/라벨 결정에 사용.
+
     Returns
     -------
     dict
@@ -272,6 +301,35 @@ def _calcCrossStatementGrade(company, *, basePeriod: str | None = None) -> str |
 def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | None:
     """Piotroski F-Score 9개 항목 상세.
 
+    Capabilities:
+        - Piotroski 9 신호 component 별 pass/fail + 총점.
+
+    Guide:
+        F-Score 0~9 — 8 이상 quality, 2 이하 distressed 신호.
+
+    When:
+        "건전성 9 칸 체크리스트" 카드 출력 시.
+
+    How:
+        company._buildFinanceSeries(Y) → calcPiotroski → 라벨 매핑.
+
+    Requires:
+        annual finance series 가용해야 동작.
+
+    Raises:
+        없음 (예외 시 None).
+
+    Example:
+        >>> calcPiotroskiDetail(c)["total"]
+        7
+
+    See Also:
+        - calcScorecard : 8 영역 등급 묶음
+        - research.scoring.calcPiotroski : 원본 계산
+
+    AIContext:
+        AI 답변 "F-Score 7/9" 칸 차트 데이터로 사용.
+
     Returns
     -------
     dict
@@ -316,6 +374,35 @@ def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | Non
 @memoizedCalc
 def calcSummaryFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """전체 경고/기회 요약 -- 8영역 플래그 수집.
+
+    Capabilities:
+        - 8 영역 flag 함수 결과를 단일 리스트로 합성.
+
+    Guide:
+        도메인별 calc*Flags 호출 → 하나의 인사이트 리스트.
+
+    When:
+        대시보드 상단 "주요 신호" 카드 1 회 출력 시.
+
+    How:
+        profitability/growth/stability/efficiency/eq/inv/cs flags 모음.
+
+    Requires:
+        하위 flag 함수들이 import 가능.
+
+    Raises:
+        없음 (개별 영역 실패는 try/except 흡수).
+
+    Example:
+        >>> calcSummaryFlags(c)
+        ["영업이익률 3기 연속 하락 ...", ...]
+
+    See Also:
+        - calcScorecard : 등급 dict
+        - 도메인별 calc*Flags
+
+    AIContext:
+        AI 답변 "이번 분기 주목 신호" 카드의 원천 텍스트.
 
     Returns
     -------

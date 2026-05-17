@@ -84,6 +84,12 @@ def calcMarginTrend(company, *, basePeriod: str | None = None) -> dict | None:
         margin 안정 (변동 ±2%p) + Net margin 변동 큼 = 영업외 손익 영향
         (한국 회사 흔함). 금융업은 NIM (Net Interest Margin) 별도 분석.
 
+    When:
+        "이익 구조가 어떻게 변했나?" 마진 추세 비교가 필요할 때.
+
+    How:
+        company.select("IS", [..]) → 5 단계 추출 → YoY 계산 → history dict.
+
     SeeAlso:
         - ``analyzeProfitability``: 정성 분석 (본 함수 결과 사용)
         - ``calcReturnTrend``: ROE/ROA/ROIC 시계열
@@ -266,6 +272,12 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
         vs (영업마진 5% × 자산회전 1.5 × 레버리지 2.0) 는 질이 다르다 —
         후자는 레버리지 의존. 듀퐁 attribution 으로 ROE 변화 원인 추적.
 
+    When:
+        "ROE 가 어디서 왔나?" 듀퐁 분해 의도 진입 시.
+
+    How:
+        IS+BS 추출 → 듀퐁 5 요소 산식 → history list 반환.
+
     SeeAlso:
         - ``calcMarginTrend``: 5 마진 단계 시계열
         - ``calcPenmanDecomposition``: Penman RNOA + 재무레버리지 분해
@@ -362,6 +374,35 @@ def calcReturnTrend(company, *, basePeriod: str | None = None) -> dict | None:
 @memoizedCalc
 def calcProfitabilityFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """수익성 경고/기회 플래그.
+
+    Capabilities:
+        - 영업이익률 추세 + 듀퐁 요소 극단값 검출.
+
+    Guide:
+        3 기 연속 하락 · 적자 · 레버리지 의존 등 텍스트 경고 묶음.
+
+    When:
+        "수익성 위험 신호 있나?" 의도 또는 요약 카드 생성 시.
+
+    How:
+        calcMarginTrend / calcReturnTrend 결과 소비 → 임계 비교.
+
+    Requires:
+        marginTrend · returnTrend 가 동작 가능해야 함.
+
+    Raises:
+        없음 (데이터 부재 시 빈 리스트).
+
+    Example:
+        >>> calcProfitabilityFlags(c)
+        ["영업이익률 3기 연속 하락 (4.2%)", ...]
+
+    See Also:
+        - calcMarginTrend : 마진 시계열
+        - calcReturnTrend : 듀퐁 분해
+
+    AIContext:
+        AI 답변 "수익성 한 줄 평가" 코너의 경고 문구로 직접 사용.
 
     Returns
     -------

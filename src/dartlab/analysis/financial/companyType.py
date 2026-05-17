@@ -148,7 +148,36 @@ _TEMPLATE_CHECKS: list[tuple[str, object]] = [
 
 
 def detectTemplates(company) -> list[str]:
-    """기업 재무 데이터에서 해당하는 스토리 템플릿 전부 반환."""
+    """기업 재무 데이터에서 해당하는 스토리 템플릿 전부 반환.
+
+    Capabilities:
+        - 9 종 템플릿 (턴어라운드/지주/성장/현금부자 등) 다중 매칭.
+
+    Guide:
+        한 회사가 여러 라벨 동시 충족 가능 — 전부 반환.
+
+    When:
+        스토리 작성 라우팅 — "어느 템플릿 코퍼스 쓸까?" 결정 시.
+
+    How:
+        _TEMPLATE_CHECKS 9 개 순회 → 매칭 이름 누적.
+
+    Requires:
+        company 객체와 각 check 가 요구하는 재무 슬롯.
+
+    Raises:
+        없음 (각 check 예외는 흡수).
+
+    Example:
+        >>> detectTemplates(c)
+        ["성장", "프랜차이즈"]
+
+    See Also:
+        - detectTemplate : 첫 매칭만 반환
+
+    AIContext:
+        AI 가 회사 설명 톤/구조 라우팅 (성장 vs 가치) 결정에 사용.
+    """
     results: list[str] = []
     for name, check in _TEMPLATE_CHECKS:
         try:
@@ -160,6 +189,17 @@ def detectTemplates(company) -> list[str]:
 
 
 def detectTemplate(company) -> str | None:
-    """기업 재무 데이터에서 스토리 템플릿 자동 판별. 첫 매칭 반환."""
+    """기업 재무 데이터에서 스토리 템플릿 자동 판별. 첫 매칭 반환.
+
+    Requires:
+        company 객체.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectTemplate(c)
+        "성장"
+    """
     results = detectTemplates(company)
     return results[0] if results else None

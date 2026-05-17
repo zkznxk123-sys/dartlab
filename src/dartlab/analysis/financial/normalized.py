@@ -32,6 +32,35 @@ def calcNormalizedFcf(
         Normalized OI = latest Revenue × Normalized Margin
         Normalized FCF = Normalized OI × (1 - tax) × (1 - reinvestmentRate)
 
+    Capabilities:
+        - 사이클/회복 기업의 정상 마진·OI·FCF 산출.
+
+    Guide:
+        양수 마진 중앙값으로 사이클 평탄화 → latest revenue 곱.
+
+    When:
+        decline/turnaround 기업 DCF 입력 정상화가 필요할 때.
+
+    How:
+        margin 중앙값 → NOPAT = OI×(1-tax) → FCF = NOPAT×(1-reinvest).
+
+    Requires:
+        revenue/margin history ≥ 3 점.
+
+    Raises:
+        없음 (skip dict 반환).
+
+    Example:
+        >>> calcNormalizedFcf([100,90,110], [0.05,-0.02,0.06])["method"]
+        "median_positive_margin"
+
+    See Also:
+        - needsNormalized : 적용 조건 판단
+        - calcLifeCycle : phase 라벨
+
+    AIContext:
+        AI 가 적자 이력 기업 DCF 답변에 "정규화 FCF" 인용 시 사용.
+
     Parameters
     ----------
     revenueHistory : 매출 시계열 (최신 먼저 권장, 하지만 자동 정렬 안 함 — 입력 그대로)
@@ -127,6 +156,35 @@ def needsNormalized(
     2. 최근 lookbackYears 내 ROIC 음수 1회 이상 (가치 파괴 이력)
 
     건강한 기업 (matureGrowth/matureStable/highGrowth 중 ROIC 지속 양수) 은 False.
+
+    Capabilities:
+        - 정규화 FCF 적용 필요/불필요 boolean 게이트.
+
+    Guide:
+        라이프사이클 + ROIC 이력 두 신호로 게이트.
+
+    When:
+        DCF 입력값 정규화할지 라우팅 결정 직전.
+
+    How:
+        phase ∈ {decline, turnaround} 또는 최근 ROIC 음수 1회+ → True.
+
+    Requires:
+        lifeCyclePhase 또는 roicHistory 중 하나.
+
+    Raises:
+        없음 (None 입력 시 False).
+
+    Example:
+        >>> needsNormalized("decline", None)
+        True
+
+    See Also:
+        - calcNormalizedFcf : 본 게이트 통과 시 호출
+        - calcLifeCycle : phase 산출
+
+    AIContext:
+        AI 가 valuation pipeline 라우팅 시 normalized branch 선택에 사용.
     """
     if lifeCyclePhase in ("decline", "turnaround"):
         return True
