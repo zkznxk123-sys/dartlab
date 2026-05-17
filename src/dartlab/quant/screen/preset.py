@@ -167,6 +167,36 @@ def calcScreen(*, market: str = "KR", preset: str = "quality", stockCode: str | 
             ROA : float (%) | opMargin : float (%) | salesGrowth : float (%)
         targetPassed : bool — stockCode 지정 시 통과 여부
         target : dict | None — stockCode 지정 시 해당 종목 정보
+
+    Capabilities:
+        - quality/value/growth/dividend/momentum/lowvol/breakout 프리셋별 종목 필터링
+        - stockCode 지정 시 단일 종목 pass/fail 진단
+
+    Guide:
+        프리셋 명세 ``_PRESETS`` SSOT. 신규 프리셋 추가 시 본 dict 등록.
+
+    When:
+        Universe 스크리닝 + AI "이 조건 통과 종목" 답변.
+
+    How:
+        프리셋 분기 → finance.parquet 로드 또는 가격 기반 screening.
+
+    Requires:
+        scan finance.parquet 또는 가격 데이터.
+
+    Raises:
+        없음 — 미지정 프리셋 시 ``available`` 키 반환.
+
+    Example:
+        >>> calcScreen(preset="quality", market="KR")["count"]
+        42
+
+    See Also:
+        - factor.ranking.calcRanking : 종합 ranking
+        - screen.dataAccess.loadScanParquet : 데이터
+
+    AIContext:
+        "퀄리티 종목 추천" 답변 시 preset + stocks 인용.
     """
     if preset not in _PRESETS:
         return {"error": f"알 수 없는 프리셋: {preset}", "available": list(_PRESETS.keys())}

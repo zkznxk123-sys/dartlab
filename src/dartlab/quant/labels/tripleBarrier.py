@@ -187,6 +187,38 @@ def metaLabel(
             precision : float — primary 신호 정확도 (%)
             agreementRate : float — 같은 부호 비율
             interpretation : str
+
+    Capabilities:
+        - primary signal vs triBarrier ground truth 비교 → meta label (binary)
+        - precision + agreementRate 산출
+
+    Guide:
+        Lopez de Prado AFML Ch.3.6 — 2 단계 모델 (방향 + size). primary 정확도가 낮을 때
+        meta 모델이 진입 size 조절.
+
+    When:
+        ML strategy 2-stage + AI 메타 라벨링 답변.
+
+    How:
+        primary != 0 필터 → 부호 매칭 boolean → precision/agreement 통계.
+
+    Requires:
+        같은 길이 array + primary ±1 signals.
+
+    Raises:
+        없음 — 길이 mismatch 시 ``{error}``.
+
+    Example:
+        >>> r = metaLabel(primary, barriers)
+        >>> r["precision"]
+        0.62
+
+    See Also:
+        - triBarrier : ground truth 라벨링
+        - strategy.signal.Signal : primary signal
+
+    AIContext:
+        "primary 신호 정확도" 답변 시 precision 인용.
     """
     p = np.asarray(primarySignals, dtype=np.int8)
     t = np.asarray(triBarrierLabels, dtype=np.int8)

@@ -158,7 +158,38 @@ def calcBHAR(
         holdWindow: 후속 보유 일수. 기본 ``60`` (3개월).
 
     Returns:
-        dict — bhar, bhar_stock, bhar_market, interpretation
+        dict — eventIdx/holdWindow/bharStock/bharMarket/bhar/interpretation.
+
+    Capabilities:
+        - 종목 누적 수익 - 시장 누적 수익 → 장기 abnormal return
+        - holdWindow 60 일 (3 개월) 표준
+
+    Guide:
+        Barber-Lyon 1997 표준. 장기 drift (60~120 일) 검정에 적합. CAR (짧은 window) 와
+        구분.
+
+    When:
+        Long-horizon event drift + AI 장기 abnormal 답변.
+
+    How:
+        eventIdx 이후 holdWindow 봉 cumulative product - 시장 cumulative product.
+
+    Requires:
+        시계열 길이 ≥ eventIdx + holdWindow + 1.
+
+    Raises:
+        없음 — 범위 초과 시 ``{error}``.
+
+    Example:
+        >>> calcBHAR(stockR, marketR, eventIdx=120)["bhar"]
+        4.2
+
+    See Also:
+        - calcCAR : 단기 CAR
+        - signal.eventStudy : 위 모듈
+
+    AIContext:
+        "공시 후 3 개월 abnormal" 답변 시 bhar 인용.
     """
     n = len(stockReturns)
     hi = eventIdx + holdWindow

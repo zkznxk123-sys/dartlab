@@ -158,6 +158,37 @@ def calcPattern(stockCode: str, *, market: str = "auto", lookback: int = 20, **k
         nearestSupport, supportDistance : float — 가장 가까운 지지 + 거리 (%)
         nearestResistance, resistanceDistance : float — 저항
         patternVerdict : str — "bullish"/"bearish"/"neutral"/"no_pattern"
+
+    Capabilities:
+        - 캔들스틱 패턴 (망치/십자가 등) + 지지/저항 자동 탐지
+        - 최근 lookback 봉 내 패턴 + verdict 종합
+
+    Guide:
+        Nison 1991 캔들스틱 기본 패턴. lookback 20 일 표준. supportDistance 5% 미만 = 임박.
+
+    When:
+        Quant pattern 축 + AI 캔들 패턴 답변.
+
+    How:
+        OHLCV → 봉 패턴 탐지 → pivot 기반 support/resistance → 정렬.
+
+    Requires:
+        OHLCV ≥ lookback 봉.
+
+    Raises:
+        없음 — 데이터 부재 시 ``{error}``.
+
+    Example:
+        >>> r = calcPattern("005930", lookback=20)
+        >>> r["patternVerdict"]
+        'bullish'
+
+    See Also:
+        - chartPatterns.detectChartPatterns : 거시 차트 패턴
+        - calcRegime : regime
+
+    AIContext:
+        "최근 캔들 패턴 + 지지선" 답변 시 patterns + nearestSupport 인용.
     """
     market = resolveMarket(stockCode, market)
     ohlcv = fetchOhlcv(stockCode, **kwargs)

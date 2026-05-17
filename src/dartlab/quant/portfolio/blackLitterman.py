@@ -158,6 +158,37 @@ def buildSimpleViews(
 
     Returns:
         (P, q) — view picking matrix + 기대수익 벡터.
+
+    Capabilities:
+        - viewSpec dict → P (K×N picking matrix) + q (K 연 기대수익) 변환
+        - 연 수익 → 일별 (÷252) 자동 변환
+
+    Guide:
+        Black-Litterman 표준. absolute view 만 지원 (relative view 는 K×2 P 직접 빌드).
+
+    When:
+        BL posterior 빌드 + AI "전문가 견해 반영" 답변.
+
+    How:
+        viewSpec 순회 → 종목 인덱스 → P 행 표시 → q 일별 정규화.
+
+    Requires:
+        viewSpec 종목코드가 stockCodes 안.
+
+    Raises:
+        없음 — 미존재 코드 skip.
+
+    Example:
+        >>> P, q = buildSimpleViews(["005930","000660"], {"005930": 0.15})
+        >>> P.shape
+        (1, 2)
+
+    SeeAlso:
+        - blackLitterman : BL posterior 산출
+        - portfolio.optimize : weights
+
+    AIContext:
+        "전문가 견해를 포트에 반영" 답변 시 viewSpec 인용.
     """
     code_idx = {c: i for i, c in enumerate(stockCodes)}
     K = len(viewSpec)

@@ -44,6 +44,38 @@ def calcPairs(*, market: str = "KR", stockCode: str | None = None, **kwargs) -> 
         totalPairsTested : int — 검정한 총 페어 수
         cointegratedPairs : int — 공적분 성립 페어 수
         stocksUsed : list[str] — 분석에 사용된 종목 코드
+
+    Capabilities:
+        - 자산 상위 5 종목 페어 × Engle-Granger ADF 검정 → 공적분 페어 추출
+        - half-life + spread z-score → 진입 후보 평가
+
+    Guide:
+        Vidyamurthy 2004 표준. ADF < -2.86 (5%) = 공적분. halfLife < 30 일 + |spreadZ| > 2
+        = 진입 후보.
+
+    When:
+        Pair trading + AI 공적분 페어 답변.
+
+    How:
+        top-5 종목 → 모든 페어 ADF → 공적분 정렬 → top-10.
+
+    Requires:
+        finance.parquet + OHLCV ≥ 252 일.
+
+    Raises:
+        없음 — 데이터 부재 시 ``{error}``.
+
+    Example:
+        >>> r = calcPairs(market="KR")
+        >>> r["cointegratedPairs"]
+        3
+
+    See Also:
+        - risk.johansen.calcVECM : 다변량 공적분
+        - regime.regime : pair regime
+
+    AIContext:
+        "공적분 페어 후보" 답변 시 stockA/stockB + adfStat 인용.
     """
     result: dict = {"market": market}
 

@@ -298,15 +298,41 @@ def _fitGarch11(returns: np.ndarray) -> dict | None:
     def negLogLikelihood(params) -> float:
         """GARCH(1,1) 음의 로그우도 — Nelder-Mead 최적화 목적함수.
 
-        Parameters
-        ----------
-        params : array-like
-            [omega, alpha, beta] GARCH 파라미터.
+        Capabilities:
+            - GARCH(1,1) sigma² 시계열 + Gaussian log-likelihood 누적 → 음수 반환
+            - 파라미터 제약 (ω > 0, α ≥ 0, β ≥ 0, α+β < 1) 위반 시 1e10 penalty
 
-        Returns
-        -------
-        float
-            음의 로그우도 (값). 파라미터 제약 위반 시 1e10.
+        Args:
+            params: ``[omega, alpha, beta]`` GARCH 파라미터.
+
+        Returns:
+            float — 음의 로그우도 (최적화 minimize target).
+
+        Guide:
+            Bollerslev 1986 GARCH(1,1) 표준. closure 내부 함수 — outer ``calcGARCH`` 가 사용.
+
+        When:
+            GARCH 파라미터 추정 internal + AI 변동성 모델링 답변.
+
+        How:
+            sigma2 시계열 → log + resid²/sigma2 누적 → -ll.
+
+        Requires:
+            outer scope 의 returns + resid + var_init.
+
+        Raises:
+            없음 — 제약 위반 시 penalty 반환.
+
+        Example:
+            >>> negLogLikelihood([0.001, 0.08, 0.85])
+            -1240.5
+
+        SeeAlso:
+            - calcGARCH : 외부 wrapper
+            - _nelderMead : 옵티마이저
+
+        AIContext:
+            GARCH 추정의 internal objective. AI 사용자에게 직접 노출 X.
         """
         omega, alpha, beta = params
         if omega <= 0 or alpha < 0 or beta < 0 or alpha + beta >= 1:

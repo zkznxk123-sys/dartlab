@@ -157,6 +157,37 @@ def findMinDForStationarity(
             optimalD : float | None — ADF p < 0.05 통과하는 최소 d
             results : list[dict] — 각 d 의 ADF stat, p-value, corr
             recommendation : str
+
+    Capabilities:
+        - d 격자 sweep → 각 d 별 FFD diff + ADF 통과 여부 → 최소 stationary d
+        - 메모리 보존도 최대화
+
+    Guide:
+        Lopez de Prado AFML Ch.5.5. d=1 은 메모리 소멸, d=0 은 stationary 부재.
+        optimalD 가 둘의 균형.
+
+    When:
+        FFD 사전 분석 + AI fractional differentiation 답변.
+
+    How:
+        d 0~1 step 0.05 sweep → fracDiffFFD + adfTest → 통과 시 최소 d.
+
+    Requires:
+        series ≥ 100.
+
+    Raises:
+        없음 — 통과 d 없을 시 None.
+
+    Example:
+        >>> findMinDForStationarity(series)["optimalD"]
+        0.45
+
+    See Also:
+        - fracDiffFFD : 핵심 diff
+        - signal.pairsTrading._adfTest : ADF
+
+    AIContext:
+        "FFD 최소 d 권장" 답변 시 optimalD + recommendation 인용.
     """
     from dartlab.quant.signal.pairsTrading import _adfTest
 

@@ -97,11 +97,44 @@ def optimizeMeanCVaR(
     w = np.ones(N) / N
 
     def cvar(weights: np.ndarray) -> float:
-        """포트폴리오 weights 의 CVaR (alpha 분위 tail loss 평균)."""
-        port = R @ weights
-        var_thresh = np.quantile(port, alpha)
-        tail = port[port <= var_thresh]
-        return -float(tail.mean()) if len(tail) > 0 else 0.0
+        """포트폴리오 weights 의 CVaR (alpha 분위 tail loss 평균).
+
+        Capabilities:
+            - alpha 하위 quantile 의 평균 손실 (Expected Shortfall) 계산
+            - 음수 부호 → 손실 양수화 (큰 값 = 위험)
+
+        Args:
+            weights: 가중치 벡터.
+
+        Returns:
+            float — CVaR (양수, 손실).
+
+        Guide:
+            Rockafellar-Uryasev 2000 CVaR. alpha=0.05 → 5% 최악 시나리오 평균 손실.
+
+        When:
+            CVaR optimization 내부 objective + AI tail risk 답변.
+
+        How:
+            R @ w 포트 수익률 → quantile → tail mask 평균.
+
+        Requires:
+            R 매트릭스 (T × N) 외부 closure.
+
+        Raises:
+            없음 — 빈 tail 시 0.
+
+        Example:
+            >>> cvar(np.array([0.5, 0.5]))
+            0.012
+
+        SeeAlso:
+            - optimizeCVaR : 외부 wrapper
+            - risk.var : VaR
+
+        AIContext:
+            "5% 최악 손실 평균" 답변에 인용.
+        """
 
     # Projected gradient descent (단순)
     lr = 0.005

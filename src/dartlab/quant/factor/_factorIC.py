@@ -259,18 +259,43 @@ from dartlab.quant.factor._calcHelpers import _interpretIC, _rank1d
 def calcFactorICAll(*, market: str = "KR", horizon: int = 5) -> dict | None:
     """4 팩터 (size/value/quality/investment) 의 Cross-Sectional IC 종합.
 
+    Capabilities:
+        - 4 팩터 동시 IC + ICIR 평가 + strongest 식별
+        - story factor IC 블록 직접 진입
+
     Args:
         market: ``"KR"`` 만 지원.
         horizon: forward return 기간. 기본 ``5`` (주간 시그널).
 
     Returns:
-        dict
-            market : str
-            year : str
-            horizon : int
-            factors : list[dict] — 각 dict 는 calcFactorIC 결과
-            strongest : str | None — |ICIR| 최대 팩터
-            interpretation : str
+        dict — market/year/horizon/factors/strongest/interpretation. 데이터 부재 None.
+
+    Guide:
+        Grinold-Kahn Ch.5 IC 횡단면 정의. ICIR ≥ 0.5 = useful, ≥ 0.75 = exceptional.
+
+    When:
+        Story factor IC 블록 + AI "유효 팩터" 답변.
+
+    How:
+        4 팩터 순회 → calcFactorIC → max(|ICIR|) 선정.
+
+    Requires:
+        scan finance.parquet + market 가용.
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> r = calcFactorICAll(market="KR")
+        >>> r["strongest"]
+        'quality'
+
+    See Also:
+        - calcFactorIC : 단일 팩터 IC
+        - factor.ranking.icTimeSeries : 일반 IC 시계열
+
+    AIContext:
+        "유효한 팩터" 답변 시 strongest + 각 팩터 ICIR 인용.
     """
     rows = []
     for fname in ("size", "value", "quality", "investment"):

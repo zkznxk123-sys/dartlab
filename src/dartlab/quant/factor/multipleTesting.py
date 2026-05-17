@@ -160,6 +160,35 @@ def realityCheck(
             pValue : float — Reality Check p
             isSignificant : bool — p < 0.05
             interpretation : str
+
+    Guide:
+        White 2000 Reality Check. data snooping bias 보정의 표준. p < 0.05 = 다수 전략 중
+        하나라도 유의.
+
+    When:
+        다수 전략 후보 우위 검정 + AI 백테스트 신뢰성 답변.
+
+    How:
+        excess matrix → stationary bootstrap (Politis-Romano block length 10) → null
+        distribution → p-value.
+
+    Requires:
+        T ≥ 30 + 전략 길이 = 벤치 길이.
+
+    Raises:
+        없음 — 길이 mismatch 또는 짧으면 ``{error}``.
+
+    Example:
+        >>> r = realityCheck([s1, s2, s3], bench)
+        >>> r["isSignificant"]
+        False
+
+    SeeAlso:
+        - haircutSharpe : 다중 시도 Sharpe 정정
+        - strategy.metrics.dsr : Deflated Sharpe Ratio
+
+    AIContext:
+        "여러 전략 후보 중 유의" 답변 시 p-value + maxExcessMean 인용.
     """
     bench = np.asarray(benchmarkReturns, dtype=np.float64)
     excess = []

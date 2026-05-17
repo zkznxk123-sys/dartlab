@@ -337,6 +337,34 @@ def calcFactorTearSheetAll(*, market: str = "KR") -> dict | None:
             factors : list[dict] — 각 dict 는 calcFactorTearSheet 결과
             strongest : str | None — 가장 강한 |Sharpe| 팩터명
             interpretation : str — 종합 정성 평가
+
+    Guide:
+        story 시장분석 블록 표준 진입. KR 4 팩터 (SMB/HML/RMW/CMA) 동시 평가 + 강한 팩터
+        식별. US 는 아직 buildFactors 미빌드.
+
+    When:
+        Story factor tearsheet 블록 + AI "가장 강한 팩터" 답변.
+
+    How:
+        4 팩터 순회 → calcFactorTearSheet → max(|Sharpe|) 선정.
+
+    Requires:
+        ``buildFactors`` KR 완료 + 4 팩터 시계열 가용.
+
+    Raises:
+        없음 — 데이터 부재 시 None.
+
+    Example:
+        >>> r = calcFactorTearSheetAll(market="KR")
+        >>> r["strongest"]
+        'rmw'
+
+    See Also:
+        - calcFactorTearSheet : 단일 팩터
+        - buildFactors : 팩터 빌드
+
+    AIContext:
+        "한국 시장 가장 강한 팩터" 답변 시 strongest + interpretation 인용.
     """
     factors = []
     for fname in ("smb", "hml", "rmw", "cma"):

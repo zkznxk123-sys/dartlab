@@ -148,6 +148,37 @@ def sharpeNetOfCost(
             netSharpe : float — Sharpe (cost 차감 후)
             costShare : float — 비용이 gross 수익 대비 차지 비율 (%)
             interpretation : str
+
+    Capabilities:
+        - Almgren-Chriss 모델로 거래당 비용 → 연간 turnover 곱 → net Sharpe 산출
+        - costShare 로 비용 효율 평가
+
+    Guide:
+        Almgren-Chriss 2000 표준. costShare ≥ 30% 면 alpha 의 1/3 이상 비용 — 회전률 줄여야.
+
+    When:
+        Net Sharpe 평가 + AI 거래비용 답변.
+
+    How:
+        spread + impact (cost per trade) × turnover × 2 → 연간 비용 → Sharpe 정정.
+
+    Requires:
+        rawReturns ≥ 30 봉.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = sharpeNetOfCost(returns, turnoverPerYear=10)
+        >>> r["netSharpe"]
+        0.85
+
+    SeeAlso:
+        - tradeCost : 단일 거래 비용
+        - strategy.metrics.sharpe : gross Sharpe
+
+    AIContext:
+        "거래비용 차감 후 진짜 Sharpe" 답변 시 netSharpe + costShare 인용.
     """
     r = np.asarray(rawReturns, dtype=np.float64)
     r = r[np.isfinite(r)]

@@ -544,6 +544,33 @@ def forecastRuleFactory(
     >>> factory = forecastRuleFactory(threshold=0.0005, models=["ar1"])
     >>> bt = walkForward(close, rule=None, rule_factory=factory, train=180, test=30, step=30)
     >>> bt.cpcv["refit_count"]   # fold 별 재학습 횟수
+
+    Capabilities:
+        - forecast 모델 (naive/ar1/etsHolt/theta) 기반 OOS prediction → entry/exit Rule 변환
+        - loose / strict (conformal interval) 2 모드
+
+    Guide:
+        walkForward 와 결합한 dynamic Rule. IS 구간에서 모델 fit + OOS 시 forecast. strict
+        는 일별 단위에서 entry 0 흔함 (conformal width 가 σ 와 동급) → loose 권장.
+
+    When:
+        Forecast-based strategy + AI 예측 기반 진입 답변.
+
+    How:
+        반환 ``_factory(isClose, oosLen)`` 가 fold 마다 호출 → 모델 fit + OOS predict.
+
+    Requires:
+        IS close ≥ 30 봉.
+
+    Raises:
+        없음 — 짧으면 empty Rule.
+
+    AIContext:
+        "예측 기반 진입 전략" 답변 시 model + threshold + sharpe 인용.
+
+    SeeAlso:
+        - strategy._backtestAdvanced.walkForward : 사용처
+        - _pickModel : 모델 자동 선택
     """
     from dartlab.quant.strategy.rule import Rule
 
