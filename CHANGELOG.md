@@ -58,6 +58,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 일부 모듈 docstring 의 placeholder 잔재 (`TODO 한국어 동작 설명`) 를 의미 있는 한
   줄로 치환했다. `help()` · IDE hover 출력 가독성 개선.
+- MCP tool schema 의 array property 일부 (`GroundingCheck.refs` · `RequestUserInput.fields[].enum`)
+  에 `items` 필드가 누락돼 OpenAI strict function-calling validator 가 HTTP 400 으로
+  거부하던 문제를 해소했다. Codex 계열 백엔드에서도 dartlab MCP 도구가 정상 호출된다.
+
+### Contributors
+
+- @ryankr — OpenAI strict 모드 호환을 위한 MCP tool schema 누락 픽스 ([#33](https://github.com/eddmpython/dartlab/pull/33)).
 
 ## [0.10.1] - 2026-05-14
 
