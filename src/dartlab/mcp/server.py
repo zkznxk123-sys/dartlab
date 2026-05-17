@@ -235,19 +235,19 @@ def createServer():
             ToolAnnotations,
         ) = _importMcp()
     except ImportError:
-        # transports.py 와 같은 namespace collision 우회 — sys.path 의 모든 path 에서
-        # mcp/__init__.py 의 첫 500 바이트에 'dartlab' 포함이면 그 path 제거.
+        # transports.py 와 같은 namespace collision 우회 — standalone mcp SDK 는
+        # 'mcp/server/__init__.py' 가 존재. 그게 없는 path 의 mcp 는 collision.
         import os
         import sys
 
         _badPaths = set()
         for _p in sys.path:
             _cand = os.path.join(_p, "mcp", "__init__.py")
-            if os.path.exists(_cand):
-                with open(_cand, "rb") as _f:
-                    _head = _f.read(500)
-                if b"dartlab" in _head:
-                    _badPaths.add(os.path.normpath(_p))
+            if not os.path.exists(_cand):
+                continue
+            _serverInit = os.path.join(_p, "mcp", "server", "__init__.py")
+            if not os.path.exists(_serverInit):
+                _badPaths.add(os.path.normpath(_p))
         for _k in [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]:
             del sys.modules[_k]
         sys.path[:] = [p for p in sys.path if os.path.normpath(p) not in _badPaths]

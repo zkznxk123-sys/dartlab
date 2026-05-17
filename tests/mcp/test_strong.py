@@ -37,7 +37,13 @@ async def _run_probe() -> dict:
     env["DARTLAB_PROGRESS_INTERVAL_SEC"] = "0.4"
     # 로컬 회귀 테스트는 PATH 의 전역 dartlab.exe 가 아니라 현재 checkout 의 모듈을 띄운다.
     # 사용자 설치 경로는 tests/test_mcp_tools.py 의 설정 출력 테스트가 별도로 고정한다.
-    server = StdioServerParameters(command=sys.executable, args=["-X", "utf8", "-m", "dartlab.mcp"], env=env)
+    # cwd 를 tests/ 가 아닌 곳으로 명시 — sys.path[0] 가 'tests/' 면 'tests/mcp/__init__.py'
+    # 가 'import mcp' 로 잡혀 standalone mcp SDK 와 collision (2026-05-17 회귀).
+    import tempfile
+
+    server = StdioServerParameters(
+        command=sys.executable, args=["-X", "utf8", "-m", "dartlab.mcp"], env=env, cwd=tempfile.gettempdir()
+    )
 
     out: dict = {}
     async with stdio_client(server) as (read, write):

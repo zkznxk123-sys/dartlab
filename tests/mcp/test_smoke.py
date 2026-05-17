@@ -14,9 +14,14 @@ pytestmark = pytest.mark.unit
 
 def _spawn_mcp_stdio() -> subprocess.Popen:
     """`python -X utf8 -m dartlab.mcp` 를 stdio 서버로 spawn."""
+    import tempfile
+
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
     env["PYTHONUTF8"] = "1"
+    # cwd 를 tests/ 또는 tests/mcp/ 가 아닌 곳으로 명시 — subprocess sys.path[0]
+    # 이 'tests/' 가 되면 'tests/mcp/__init__.py' 가 'import mcp' 로 잡혀
+    # standalone mcp SDK 와 namespace collision (CI 회귀 원인, 2026-05-17).
     return subprocess.Popen(
         [sys.executable, "-X", "utf8", "-m", "dartlab.mcp"],
         stdin=subprocess.PIPE,
@@ -24,6 +29,7 @@ def _spawn_mcp_stdio() -> subprocess.Popen:
         stderr=subprocess.PIPE,
         env=env,
         bufsize=0,
+        cwd=tempfile.gettempdir(),
     )
 
 
@@ -69,6 +75,8 @@ def test_mcp_create_server_cold_path_under_threshold():
         "t1 = time.perf_counter()\n"
         "sys.stdout.write(f'{(t1-t0)*1000:.0f}\\n')\n"
     )
+    import tempfile
+
     env = os.environ.copy()
     env["PYTHONUTF8"] = "1"
     result = subprocess.run(
@@ -77,6 +85,7 @@ def test_mcp_create_server_cold_path_under_threshold():
         text=True,
         env=env,
         timeout=30,
+        cwd=tempfile.gettempdir(),  # tests/ namespace collision 차단
     )
     assert result.returncode == 0, f"create_server() 부팅 실패: {result.stderr}"
     elapsed_ms = float(result.stdout.strip().splitlines()[-1])

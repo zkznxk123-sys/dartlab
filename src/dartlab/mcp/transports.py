@@ -36,15 +36,17 @@ def runStdio() -> None:
             _cand = os.path.join(_p, "mcp", "__init__.py")
             if os.path.exists(_cand):
                 sys.stderr.write(f"[dartlab.mcp]   sys.path[{_i}]={_p!r} has mcp at {_cand}\n")
-        # 'mcp' 로 잘못 잡힌 dartlab/mcp/ 의 부모 path 들을 모두 제거.
+        # 'mcp' 로 잘못 잡힌 path 들을 모두 제거. 판정: standalone mcp SDK 는
+        # 'mcp/server/__init__.py' 가 존재. 그게 없는 path 의 mcp 는 collision
+        # (dartlab/mcp 또는 tests/mcp 등).
         _badPaths = set()
         for _p in sys.path:
             _cand = os.path.join(_p, "mcp", "__init__.py")
-            if os.path.exists(_cand):
-                with open(_cand, "rb") as _f:
-                    _head = _f.read(500)
-                if b"dartlab" in _head:
-                    _badPaths.add(os.path.normpath(_p))
+            if not os.path.exists(_cand):
+                continue
+            _serverInit = os.path.join(_p, "mcp", "server", "__init__.py")
+            if not os.path.exists(_serverInit):
+                _badPaths.add(os.path.normpath(_p))
         sys.stderr.write(f"[dartlab.mcp] removing bad paths: {_badPaths}\n")
         for _k in [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]:
             del sys.modules[_k]
