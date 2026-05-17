@@ -6,8 +6,12 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import {
+	Activity,
+	Briefcase,
+	Calculator,
 	Download,
 	FileText,
+	Globe2,
 	LayoutDashboard,
 	MessageSquare,
 	MessageSquarePlus,
@@ -18,8 +22,11 @@ import {
 	PinOff,
 	Search,
 	Settings,
+	ShieldAlert,
 	Sun,
+	Telescope,
 	Trash2,
+	Users,
 } from 'lucide-react';
 
 import {
@@ -54,6 +61,9 @@ import {
 	SidebarMenuAction,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarMenuSub,
+	SidebarMenuSubButton,
+	SidebarMenuSubItem,
 	SidebarRail,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -86,7 +96,7 @@ export function AppSidebar() {
 	const navigate = useNavigate();
 	const { theme, setTheme } = useTheme();
 
-	const isDashboard = pathname.startsWith('/dashboard');
+	const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/analysis');
 	const isDark =
 		theme === 'dark' ||
 		(theme === 'system' &&
@@ -120,13 +130,13 @@ export function AppSidebar() {
 									variant="ghost"
 									size="icon"
 									className="size-7"
-									onClick={() => navigate({ to: isDashboard ? '/ask' : '/dashboard' })}
-									aria-label={isDashboard ? 'Ask 모드' : 'Dashboard 모드'}
+									onClick={() => navigate({ to: isDashboard ? '/ask' : '/analysis' })}
+									aria-label={isDashboard ? 'Ask 모드' : '기업분석 모드'}
 								>
 									{isDashboard ? <MessageSquare /> : <LayoutDashboard />}
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent>{isDashboard ? 'Ask 모드' : 'Dashboard 모드'}</TooltipContent>
+							<TooltipContent>{isDashboard ? 'Ask 모드' : '기업분석 모드'}</TooltipContent>
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -188,29 +198,85 @@ export function AppSidebar() {
 	);
 }
 
-// 사이드바 = 회사 검색 (최상단) + 뷰 메뉴 (현재 "재무제표" 단일, 미래 가치평가·peer 등 추가 자리).
-// 최근 5 개 회사는 SidebarFooter 에 별도.
+// 사이드바 — 기업분석 모드:
+//   회사 검색 (최상단) + 8 서브탭 메뉴 + (Footer) 최근 회사.
+//   현재 URL 에 stockCode 가 없으면 첫 메뉴 클릭 시 /analysis (회사 선택 안내) 로 이동.
+const FINANCIAL_SUBS = [
+	{ key: 'overview', title: '전체' },
+	{ key: 'growth', title: '수익·성장' },
+	{ key: 'profitability', title: '수익성·효율성' },
+	{ key: 'capitalStructure', title: '재무건전성' },
+	{ key: 'cashflow', title: '현금·배분' },
+	{ key: 'risk', title: '리스크·신호' },
+] as const;
+
 function DashboardNav() {
 	const { pathname } = useLocation();
-	const views = [
-		{ id: 'financial', title: '재무제표', icon: FileText, url: '/dashboard' as const },
+	const search = useLocation({ select: (l) => l.search }) as { view?: string };
+
+	// /analysis/{code}/{tab} 또는 /dashboard/{code} 에서 code 추출
+	const codeMatch = pathname.match(/^\/(?:analysis|dashboard)\/([^/]+)/);
+	const code = codeMatch?.[1];
+
+	const isFinancial = !!code && pathname.startsWith(`/analysis/${code}/financial`);
+	const activeSubView = isFinancial ? (search?.view ?? 'overview') : null;
+
+	// 탑다운 narrative — 회사 안 → 밖 → 환경 → 원본.
+	const tabs = [
+		{ id: 'financial', title: '재무제표', icon: FileText, to: '/analysis/$code/financial' as const },
+		{ id: 'portfolio', title: '사업포트폴리오', icon: Briefcase, to: '/analysis/$code/portfolio' as const },
+		{ id: 'valuation', title: '가치평가', icon: Calculator, to: '/analysis/$code/valuation' as const },
+		{ id: 'governance', title: '거버넌스·리스크', icon: ShieldAlert, to: '/analysis/$code/governance' as const },
+		{ id: 'peer', title: '동종비교', icon: Users, to: '/analysis/$code/peer' as const },
+		{ id: 'lifecycle', title: '생애주기·시나리오', icon: Activity, to: '/analysis/$code/lifecycle' as const },
+		{ id: 'macro', title: '거시·섹터', icon: Globe2, to: '/analysis/$code/macro' as const },
+		{ id: 'viewer', title: 'Viewer', icon: Telescope, to: '/analysis/$code/viewer' as const },
 	];
+
 	return (
 		<>
 			<CompanySearch />
 			<SidebarGroup>
 				<SidebarGroupContent>
 					<SidebarMenu>
-						{views.map((v) => {
-							const isActive = pathname === v.url || pathname.startsWith(v.url + '/');
-							return (
-								<SidebarMenuItem key={v.id}>
-									<SidebarMenuButton asChild isActive={isActive} tooltip={v.title}>
-										<Link to={v.url}>
-											<v.icon />
-											<span>{v.title}</span>
+						{tabs.map((t) => {
+							const isActive = !!code && pathname.startsWith(`/analysis/${code}/${t.id}`);
+							const renderMain = () =>
+								code ? (
+									<SidebarMenuButton asChild isActive={isActive} tooltip={t.title}>
+										<Link to={t.to} params={{ code }} search={t.id === 'financial' ? { period: 'quarterly', view: 'overview' } : { period: 'quarterly' }}>
+											<t.icon />
+											<span>{t.title}</span>
 										</Link>
 									</SidebarMenuButton>
+								) : (
+									<SidebarMenuButton asChild tooltip={`${t.title} (회사 선택 필요)`} className="opacity-50">
+										<Link to="/analysis">
+											<t.icon />
+											<span>{t.title}</span>
+										</Link>
+									</SidebarMenuButton>
+								);
+							return (
+								<SidebarMenuItem key={t.id}>
+									{renderMain()}
+									{t.id === 'financial' && code && isFinancial && (
+										<SidebarMenuSub>
+											{FINANCIAL_SUBS.map((s) => (
+												<SidebarMenuSubItem key={s.key}>
+													<SidebarMenuSubButton asChild isActive={activeSubView === s.key}>
+														<Link
+															to="/analysis/$code/financial"
+															params={{ code }}
+															search={{ period: 'quarterly', view: s.key }}
+														>
+															<span>{s.title}</span>
+														</Link>
+													</SidebarMenuSubButton>
+												</SidebarMenuSubItem>
+											))}
+										</SidebarMenuSub>
+									)}
 								</SidebarMenuItem>
 							);
 						})}
@@ -361,7 +427,7 @@ function CollapsedActionMenu() {
 	const navigate = useNavigate();
 	const { theme, setTheme } = useTheme();
 
-	const isDashboard = pathname.startsWith('/dashboard');
+	const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/analysis');
 	const isDark =
 		theme === 'dark' ||
 		(theme === 'system' &&
@@ -374,11 +440,11 @@ function CollapsedActionMenu() {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
-							onClick={() => navigate({ to: isDashboard ? '/ask' : '/dashboard' })}
-							tooltip={isDashboard ? 'Ask 모드' : 'Dashboard 모드'}
+							onClick={() => navigate({ to: isDashboard ? '/ask' : '/analysis' })}
+							tooltip={isDashboard ? 'Ask 모드' : '기업분석 모드'}
 						>
 							{isDashboard ? <MessageSquare /> : <LayoutDashboard />}
-							<span>{isDashboard ? 'Ask' : 'Dashboard'}</span>
+							<span>{isDashboard ? 'Ask' : '기업분석'}</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 					<SidebarMenuItem>

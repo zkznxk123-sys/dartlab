@@ -36,6 +36,9 @@
 	--color-chart-3: var(--chart-3);
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
+	--color-chart-6: var(--chart-6);
+	--color-chart-7: var(--chart-7);
+	--color-chart-8: var(--chart-8);
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -70,11 +73,15 @@
 	--border: oklch(0.922 0 0);
 	--input: oklch(0.922 0 0);
 	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
+	/* Tableau 10 inspired (oklch). categorical, L·H 충분 분산. */
+	--chart-1: oklch(0.53 0.10 250);  /* #4E79A7  blue   — primary */
+	--chart-2: oklch(0.71 0.16 65);   /* #F28E2B  orange — accent  */
+	--chart-3: oklch(0.60 0.20 25);   /* #E15759  red    — negative */
+	--chart-4: oklch(0.71 0.06 185);  /* #76B7B2  teal   — neutral */
+	--chart-5: oklch(0.60 0.13 140);  /* #59A14F  green  — positive */
+	--chart-6: oklch(0.83 0.15 90);   /* #EDC949  yellow */
+	--chart-7: oklch(0.59 0.08 330);  /* #AF7AA1  purple */
+	--chart-8: oklch(0.75 0.10 15);   /* #FF9DA7  pink   */
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
@@ -104,11 +111,15 @@
 	--border: oklch(1 0 0 / 10%);
 	--input: oklch(1 0 0 / 15%);
 	--ring: oklch(0.556 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
+	/* Tableau dark — 동일 hue, L +0.10~0.15 로 다크에서 가독성 */
+	--chart-1: oklch(0.68 0.10 250);
+	--chart-2: oklch(0.78 0.14 65);
+	--chart-3: oklch(0.72 0.18 25);
+	--chart-4: oklch(0.78 0.06 185);
+	--chart-5: oklch(0.72 0.13 140);
+	--chart-6: oklch(0.88 0.13 90);
+	--chart-7: oklch(0.70 0.08 330);
+	--chart-8: oklch(0.82 0.09 15);
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
 	--sidebar-primary: oklch(0.488 0.243 264.376);
