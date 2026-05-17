@@ -12,7 +12,7 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
-FIXTURE_DIR = Path(__file__).parent / "fixtures"
+FIXTURE_DIR = Path(__file__).parent.parent / "fixtures"
 FIXTURE_REPORT = FIXTURE_DIR / "005930.report.parquet"
 
 

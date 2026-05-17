@@ -27,7 +27,7 @@ _SAFE_EXCEPTIONS = (
     pl.exceptions.PolarsError,
 )
 
-FIXTURE_DIR = Path(__file__).parent / "fixtures"
+FIXTURE_DIR = Path(__file__).parent.parent / "fixtures"
 _SAMSUNG = "005930"
 
 
