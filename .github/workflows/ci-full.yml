@@ -39,7 +39,9 @@ jobs:
           pip install "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
           # mcp 명시 우선 install — dartlab.mcp namespace 회피.
           pip install "mcp[cli]>=1.0,<1.27.1"
-          pip install -e .[all]
+          # dartlab non-editable install — editable (.pth) 의 'src' path 추가가
+          # 'src/dartlab/mcp/' 를 standalone 'mcp' 와 collision 시키는 회귀 차단.
+          pip install .
       # realData/heavy/freshInstall 제외 — 이들은 realdata-suite / ci-nightly 담당.
       - name: Run tests with coverage (Python 3.12)
         if: matrix.python-version == '3.12'
