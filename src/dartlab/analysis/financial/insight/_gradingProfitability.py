@@ -59,6 +59,12 @@ def analyzeProfitability(
         5~10% = 보통 (+1), 0~5% = 저조 (-1), < 0% = 적자 (-2). ROE > 15% =
         우수, > 10% = 양호. 섹터 보정으로 IT/utility 차이 반영.
 
+    When:
+        analyzeFinancial 의 'profitability' 키 산출 단계. ratios 산출 직후 호출.
+
+    How:
+        ratios.{operatingMargin/netMargin/roe/roa} 임계 분기 + sectorAdjustment 가산점.
+
     SeeAlso:
         - ``analyzePerformance``: 성장성 (수익성과 보완)
         - ``analyzeHealth``: 재무건전성 (ROE/레버리지 cross-check)

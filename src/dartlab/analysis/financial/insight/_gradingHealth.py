@@ -55,6 +55,12 @@ def analyzeHealth(ratios: RatioResult, isFinancial: bool = False, currency: str 
         Piotroski F-Score: 9 = 최고, 0~3 = 부실. Ohlson O-Score 0.5 이상 =
         부도 확률 50%+. 본 함수는 3 모델 합산 + 부채비율 정성 평가.
 
+    When:
+        analyzeFinancial 의 'health' 키 산출 단계. ratios 산출 직후 호출.
+
+    How:
+        ratios.{debtRatio/currentRatio/zScore/oScore/fScore} 룰 분기 → score → grade.
+
     SeeAlso:
         - ``analyzeCashflow``: 현금흐름 (건전성과 보완)
         - ``credit.engine.evaluateCompany``: 종합 신용등급

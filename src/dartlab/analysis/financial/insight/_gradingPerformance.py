@@ -58,6 +58,12 @@ def analyzePerformance(
         0~10% = 안정 (+1), -10~0% = 감소, < -10% = 급감 (-2 + danger).
         영업이익 +50%+ = 급증, < -30% = 급감. 변동성 30%+ = warning.
 
+    When:
+        analyzeFinancial 의 'performance' 키 산출 단계. 가장 먼저 호출.
+
+    How:
+        detectIncompleteYear 로 4Q 미완 제외 → revGrowth/opGrowth/volatility → score.
+
     SeeAlso:
         - ``analyzeProfitability``: 수익성 (성장 + 마진)
         - ``calcStructuralBreak``: 매출/영업이익 구조변화점 감지

@@ -55,6 +55,12 @@ def analyzeCashflow(
         (3 년 연속) = 자본배분 여력. OCF/NI > 1 = 이익이 현금으로 뒷받침,
         < 0.7 = 발생액 의존 (Sloan 경고).
 
+    When:
+        analyzeFinancial 의 10 영역 중 'cashflow' 키 산출 단계.
+
+    How:
+        ratios.{ocfMargin/fcfMargin/ocfToNi} 룰 분기 → score 합산 → _scoreToGrade.
+
     SeeAlso:
         - ``analyzeHealth``: 재무건전성 (현금흐름과 보완)
         - ``calcEarningsMomentum``: Sloan 분해 단독 호출

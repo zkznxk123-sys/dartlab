@@ -84,6 +84,9 @@ def _analyzeGovernanceFromSections(company: Company) -> InsightResult:
 def analyzeGovernance(company: Company | None) -> InsightResult:
     """지배구조 분석.
 
+    Capabilities:
+        - 최대주주 지분 + 감사의견 + 감사인 (Big4 지속) + 내부통제 + 배당 5 신호 통합.
+
     Parameters
     ----------
     company : Company | None
@@ -97,6 +100,32 @@ def analyzeGovernance(company: Company | None) -> InsightResult:
         details : list[str] — 최대주주, 감사의견, 감사인, 내부통제, 배당 등
         risks : list[Flag] — 지배구조 리스크
         opportunities : list[Flag] — 지배구조 강점
+
+    Guide:
+        report 네임스페이스 없으면 sections fallback (EDGAR). KR/US 동일 진입점.
+
+    When:
+        analyzeFinancial 의 'governance' 키 산출.
+
+    How:
+        rpt.majorHolder/audit/internalControl 추출 → 룰 분기 → score/maxScore 누적 → grade.
+
+    Requires:
+        company.report (DART KR) 또는 company.sections (EDGAR US) 보유.
+
+    Raises:
+        없음 — 데이터 부재 시 'N' 등급.
+
+    Example:
+        >>> analyzeGovernance(Company("005930"))
+        InsightResult(grade='A', summary='지배구조 양호', ...)
+
+    See Also:
+        - _analyzeGovernanceFromSections: EDGAR fallback
+        - analyzeAudit: 감사 단독 분석
+
+    AIContext:
+        ‘지배구조 양호/주의’ 답변 시 details 항목 인용. 감사의견 비적정은 우선 노출.
     """
     details: list[str] = []
     risks: list[Flag] = []

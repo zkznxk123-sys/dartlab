@@ -402,6 +402,9 @@ def detectAuditRedFlags(auditData: AuditDataForAnomaly | None) -> list[Anomaly]:
 def detectBenfordAnomaly(aSeries: dict) -> list[Anomaly]:
     """Benford's Law 이상치 탐지 — 회계 조작 의심 신호.
 
+    Capabilities:
+        - 재무제표 모든 IS/BS/CF 값 첫 자릿수 분포 → Benford 기대분포 χ² 검정.
+
     Nigrini (1996), AICPA 공식 감사 절차.
     재무제표 수치의 첫째 유효 자릿수 분포를 Benford 기대 분포와 비교.
     χ² > 15.51 (df=8, p<0.05) → warning, χ² > 20.09 (p<0.01) → danger.
@@ -415,6 +418,32 @@ def detectBenfordAnomaly(aSeries: dict) -> list[Anomaly]:
     -------
     list[Anomaly]
         Benford 분포 이탈 이상 신호 목록.
+
+    Guide:
+        통계적 정황 신호이지 단독 증거 아님. 다른 anomaly 와 결합해야 의미 있음.
+
+    When:
+        runAnomalyDetection 10 번째 룰. 모든 산업 호출. 최소 50 개 숫자 필요.
+
+    How:
+        IS/BS/CF 모든 값 첫 자릿수 추출 → 기대 분포 P(d)=log10(1+1/d) χ² 비교.
+
+    Requires:
+        aSeries 시계열 ≥ 4 년치 데이터 (≥ 50 숫자 확보).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectBenfordAnomaly(aSeries)
+        [Anomaly('warning', 'benford', 'χ²=18.5 ...')]
+
+    See Also:
+        - detectAuditRedFlags: 정성적 신호
+        - detectRevenueQuality: 매출 인식 이상
+
+    AIContext:
+        ‘회계 조작 의심’ 단정 금지. ‘통계적 정황 신호’ 로 인용.
     """
     anomalies: list[Anomaly] = []
 
@@ -481,6 +510,10 @@ def detectBenfordAnomaly(aSeries: dict) -> list[Anomaly]:
 def detectRevenueQuality(aSeries: dict) -> list[Anomaly]:
     """매출 품질 탐지 — Dechow & Dichev (2002).
 
+    Capabilities:
+        - OCF/Revenue 비율 < 0 + 3 기 연속 하락 + AR 성장 vs 매출 성장 1.5× 초과
+          3 룰 통합.
+
     OCF/Revenue 비율 추세: 매출이 늘어도 현금이 안 들어오면 의심.
     - OCF/Revenue < 0 (매출 흑자인데 영업CF 적자) → danger
     - OCF/Revenue 3기 연속 하락 → warning
@@ -495,6 +528,32 @@ def detectRevenueQuality(aSeries: dict) -> list[Anomaly]:
     -------
     list[Anomaly]
         매출 품질 이상 신호 목록.
+
+    Guide:
+        Dechow & Dichev (2002) accrual quality 학술 프레임. 발생주의 왜곡 정공법.
+
+    When:
+        runAnomalyDetection 11 번째 룰. 모든 산업 호출.
+
+    How:
+        매출/영업CF/매출채권 시계열 → OCF/Revenue 비율 + AR vs 매출 성장 비교.
+
+    Requires:
+        aSeries IS (sales) + CF (operating_cashflow) + BS (AR) 연간 시계열 ≥ 4 년.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> detectRevenueQuality(aSeries)
+        [Anomaly('warning', 'revenueQuality', 'OCF/Revenue 3기 연속 하락 ...')]
+
+    See Also:
+        - detectEarningsQuality: 이익 품질 단일 분기
+        - detectWorkingCapitalAnomaly: 운전자본 단일 사건
+
+    AIContext:
+        ‘매출 인식 vs 현금 회수 괴리’ 컨텍스트로 인용. Dechow 학술 출처 가능.
     """
     anomalies: list[Anomaly] = []
 
