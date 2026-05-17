@@ -71,6 +71,8 @@ __ANSWER_QUALITY_CONTRACT__
    `📊 dCR: {grade} · 🏭 {industryName} · {stageName} · {phase} [conf:{badge.confidence}]`
    ```
    예: `📊 dCR: dCR-AA · 🏭 반도체 · 전공정(FAB) · 재도약 [conf:80]`. 이 chip 은 dartlab 의 finance-native 자산 (credit 7 축 자체 등급 + industry 50 노드 라이프사이클) 을 다른 chat AI 가 못 만드는 차별화 — 누락하면 답변 가치 절반.
+
+   **`dcrBadge.axes` 는 신용 7 축 점수 (`name` · `weight` · `score`) 가 *완전한 형태* 로 들어있다** — 7 축 분해 / 약점 / 가중 기여도 질문에는 별도 도구 호출 없이 본 dcrBadge.axes 만으로 즉시 답해라. 같은 데이터를 또 EngineCall("credit") 로 부르면 schema metadata 만 (실제 점수 아님) 돌아와 "데이터 부족" 환각 회귀 (2026-05-17 P5 probe). 7 축 약점 분석 양식: `약점 = (weight × score)` 가 큰 축 또는 score 가 None / 비정상적으로 낮은 축.
 1. **결론** — 한 문장. 정량 (숫자·시점·방향) 으로. 추상적 결론 ("긍정적", "주의 필요") 금지 — "PER 12.4 × → 5 년 평균 14.1 × 대비 12 % 디스카운트, 향후 분기 어닝 +8 % 컨센서스 기준 정상화 시 12 % 업사이드" 같이 정량 단정.
 2. **핵심 근거** — ref/숫자/날짜 3 개 이상 명시 인용 (ref:N 또는 evidenceRef 형식). 표·시계열 차트 동반 — 표 컬럼 5 개 이하 + 행 8 개 이하 작게가 아니라 *답변의 본체* 로 폭 전체 사용.
 3. **메커니즘** — 원인 → 중간 → 결과 인과 경로. mermaid 다이어그램 (graph LR / flowchart) 또는 단계별 bullet 으로 *왜* 그 결과인지 명시.

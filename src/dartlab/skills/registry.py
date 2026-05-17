@@ -119,8 +119,19 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
         if cached is not None:
             return list(cached)
 
-    # builtin spec 은 우리 책임 — 실패 시 raise (개발자 즉시 인지).
-    specs = [_loadSpec(path, defaultScope="builtin") for path in _builtinSpecPaths()]
+    # builtin spec — 정상 contract 는 모두 통과해야 하지만, 1 개의 frontmatter 누락이 전체
+    # ReadSkill 검색을 마비시키면 ask mode 자체가 죽는다 (2026-05-17 OAuth probe 6/6 에서
+    # cardCatalog.md WIP frontmatter 누락 → ReadSkill cascade ValueError 발견). 따라서 runtime
+    # 은 user spec 과 동일하게 spec 단위 skip + 경고. 엄격 검증은 `verifyAllBuiltinSpecsStrict()`
+    # 가 CI / test 에서 명시 호출 (tests/skills/test_skills.py::test_all_builtin_specs_lint_clean).
+    specs: list[SkillSpec] = []
+    for path in _builtinSpecPaths():
+        try:
+            spec = _loadSpec(path, defaultScope="builtin")
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("builtin skill spec skipped on load (%s): %s", path.name, exc)
+            continue
+        specs.append(spec)
     if includeUser:
         # user spec 은 실험적 — 1 개 깨져도 전체 listSkills 가 무너지면 ReadSkill tool 자체가
         # 못 돈다. spec 단위로 skip + 경고. lintSkill 도 동일 — user spec 1 개의 lint 실패가
@@ -138,15 +149,47 @@ def listSkills(*, includeUser: bool = True) -> list[SkillSpec]:
                 continue
             specs.append(spec)
     _validateUniqueIds(specs)
+    valid_specs: list[SkillSpec] = []
     for spec in specs:
         if spec.scope == "builtin":
-            lintSkill(spec)
-    result = sorted(specs, key=lambda item: item.id)
+            try:
+                lintSkill(spec)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("builtin skill spec failed lint, skipped (%s): %s", spec.id, exc)
+                continue
+        valid_specs.append(spec)
+    result = sorted(valid_specs, key=lambda item: item.id)
     _warnGraphIntegrityOnce(result)
 
     if not _skillsCacheDisabled():
         _LIST_SKILLS_CACHE[includeUser] = tuple(result)
     return result
+
+
+def verifyAllBuiltinSpecsStrict() -> None:
+    """모든 builtin spec 의 load + lint 를 strict 모드로 검증 (실패 시 첫 실패에서 raise).
+
+    listSkills 는 runtime resilience 를 위해 broken builtin 을 skip + warn 하지만,
+    CI / test 는 contract 위반을 fail-loud 로 잡아야 한다. 본 함수가 그 strict gate.
+
+    Raises
+    ------
+    ValueError
+        builtin spec load 또는 lint 실패. message 에 file path + 원인 포함.
+    """
+    failures: list[str] = []
+    for path in _builtinSpecPaths():
+        try:
+            spec = _loadSpec(path, defaultScope="builtin")
+        except Exception as exc:  # noqa: BLE001
+            failures.append(f"{path.name}: load 실패 — {type(exc).__name__}: {exc}")
+            continue
+        try:
+            lintSkill(spec)
+        except Exception as exc:  # noqa: BLE001
+            failures.append(f"{spec.id} ({path.name}): lint 실패 — {exc}")
+    if failures:
+        raise ValueError("builtin skill spec contract 위반:\n  - " + "\n  - ".join(failures))
 
 
 _GRAPH_WARNED = False

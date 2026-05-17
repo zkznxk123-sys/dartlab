@@ -544,6 +544,23 @@ runtimeCompatibility:
     assert any("unknown capabilities" in record.message for record in caplog.records)
 
 
+def test_all_builtin_specs_lint_clean() -> None:
+    """모든 builtin spec 의 contract strict 검증 (load + lint 통과).
+
+    listSkills 자체는 runtime resilience 를 위해 broken builtin 을 skip + warn 하므로
+    잘못된 spec 이 silently 누락되어도 ask mode 는 살아남는다. 본 테스트가 그
+    strict gate — CI 에서 새로 추가된 spec 의 frontmatter 누락 / lint 위반 즉시 fail.
+
+    회귀 가드: 2026-05-17 cardCatalog.md WIP frontmatter (runtimeCompatibility.pyodide
+    누락) 가 ReadSkill cascade ValueError 일으켜 OAuth ask 6 probe 모두 실패. listSkills
+    runtime tolerant + 본 strict 테스트 분리로 두 요구 (1 개 깨져도 ask 살아남기 + CI
+    contract 강제) 양립.
+    """
+    from dartlab.skills.registry import verifyAllBuiltinSpecsStrict
+
+    verifyAllBuiltinSpecsStrict()
+
+
 def test_skill_lint_rejects_engine_skill_without_execution_contract() -> None:
     spec = skills.SkillSpec(
         id="engines.bad",
