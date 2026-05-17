@@ -32,7 +32,18 @@ def _lazy(name):
 
 
 def simulateScenario(*args, **kwargs) -> dict | None:
-    """simulation.simulateScenario lazy proxy — 본체로 위임."""
+    """simulation.simulateScenario lazy proxy — 본체로 위임.
+
+    Requires:
+        dartlab.analysis.forecast.simulation 모듈 import 가능.
+
+    Raises:
+        없음. 본체 함수의 예외 그대로 전파.
+
+    Example:
+        >>> simulateScenario(series, macroScenario)
+        SimulationResult(...)
+    """
     return _lazy("simulateScenario")(*args, **kwargs)
 
 
@@ -92,6 +103,10 @@ def simulateHistorical(
 ) -> SimulationResult:
     """역사적 충격 재현 시뮬레이션 — 과거 위기가 반복되면 어떻게 되는가.
 
+    Capabilities:
+        - GFC/COVID 등 4 역사 거시 경로로 시뮬레이션
+        - 학습 베타 오버라이드 옵션 지원
+
     Parameters
     ----------
     series : dict
@@ -114,6 +129,33 @@ def simulateHistorical(
     SimulationResult
         역사적 시나리오 기반 시뮬레이션 결과.
         elasticityUsed가 학습값이면 assumptions에 "학습" 표기.
+
+    Guide:
+        HISTORICAL_SCENARIOS dict 에서 사전 정의 거시 경로 선택 후 적용.
+
+    When:
+        "이 회사에 GFC 가 반복되면?" 류 시나리오 답변이 필요할 때.
+
+    How:
+        HISTORICAL_SCENARIOS 조회 → elasticity 결정 → simulateScenario 위임.
+
+    Requires:
+        synth.scenario 의 SectorElasticity / getElasticity, simulation 모듈.
+
+    Raises:
+        없음. 미지원 키는 warnings 포함 빈 결과.
+
+    Example:
+        >>> r = simulateHistorical(series, "gfc_2008")
+        >>> r.scenarioName
+        'gfc_2008'
+
+    See Also:
+        - backtestSimulation : 백테스트
+        - simulateScenario : 단일 시나리오
+
+    AIContext:
+        AI 답변 시 historical key 와 거시 경로 (gdp/금리/환율) 함께 인용.
     """
     sc = HISTORICAL_SCENARIOS.get(historicalKey)
     if sc is None:
@@ -174,6 +216,10 @@ def backtestSimulation(
     2. 실제 결과와 비교
     3. 방향 정확도 + 오차 + 시나리오 적중률 산출
 
+    Capabilities:
+        - 4 역사 시나리오 전체 백테스트 + 정확도 산출
+        - 방향 정확도·오차·15%p 적중률 동시 보고
+
     Parameters
     ----------
     series : dict
@@ -192,6 +238,33 @@ def backtestSimulation(
         scenarioHitRate : float — 15%p 이내 적중률 (%)
         details : list[dict] — 시나리오별 상세 비교
         데이터 부족 시 None.
+
+    Guide:
+        시뮬레이션 모듈 신뢰도를 회사 단위로 정량 검증할 때 호출.
+
+    When:
+        시뮬레이션 결과를 답변에 인용하기 전 신뢰도 자체 검증이 필요할 때.
+
+    How:
+        HISTORICAL_SCENARIOS 반복 → simulateScenario → 실적과 비교.
+
+    Requires:
+        series 가 역사 시나리오 기간 매출 시계열 포함.
+
+    Raises:
+        없음. 비교 데이터 부족 시 None.
+
+    Example:
+        >>> bt = backtestSimulation(series)
+        >>> bt is None or bt.scenariosTested >= 1
+        True
+
+    See Also:
+        - simulateHistorical : 단일 역사 시뮬
+        - HISTORICAL_SCENARIOS : 사전 정의 거시 경로
+
+    AIContext:
+        AI 답변 시 백테스트 적중률 N%를 함께 인용해 신뢰도 표시.
     """
     details: list[dict] = []
     warnings: list[str] = []

@@ -35,7 +35,18 @@ def __getattr__(name: str) -> object:
 
 
 def forecastMetric(*args, **kwargs) -> dict | None:
-    """revenueForecast.forecastMetric lazy proxy — 본체로 위임."""
+    """revenueForecast.forecastMetric lazy proxy — 본체로 위임.
+
+    Requires:
+        dartlab.analysis.forecast.revenueForecast 모듈 import 가능.
+
+    Raises:
+        없음. 본체 함수의 예외 그대로 전파.
+
+    Example:
+        >>> forecastMetric(series, metric="revenue")
+        ForecastResult(...)
+    """
     return _lazy("forecastMetric")(*args, **kwargs)
 
 

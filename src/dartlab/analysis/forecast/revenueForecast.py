@@ -295,6 +295,13 @@ def forecastRevenue(
         backlog (수주 산업 — 건설/조선/방산), consensus (대형주). 4 source
         모두 사용 가능 시 confidence=high. 1 개 source 만이면 medium 이하.
 
+    When:
+        매출 단일 예측이 아닌 4 source 앙상블 + 시나리오가 필요할 때.
+
+    How:
+        fundamentalGrowth + segment + backlog + consensus 가중 평균 후
+        라이프사이클 보정.
+
     SeeAlso:
         - ``_extractSegmentForecasts``: 세그먼트 source
         - ``_computeBacklogSignal``: backlog source

@@ -101,6 +101,14 @@ def multiStageDcf(
         가 자동 구성. growth/marginPath/reinvestment 모두 list 일 때 길이
         일치 필수 (불일치 시 짧은 쪽 기준 truncate).
 
+    When:
+        Damodaran Two-Stage 또는 multi-phase DCF 필요 시. calcDFV 의 TSD path
+        가 본 함수를 호출 (직접 호출은 advanced 사용자/엔진 전용).
+
+    How:
+        multiStageDcf(baseFcf=fcf, growthYears=[5,3,2], growthRates=[15,8,3],
+        terminalGrowthRate=2, wacc=10, netDebt=nd, shares=s) 형식.
+
     SeeAlso:
         - ``dcfValuation``: 단순 2-stage 버전
         - ``calcDFV``: 다중 모델 통합 (본 함수 호출)
@@ -248,6 +256,48 @@ def twoStageDcf(
     """Two-Stage DCF — multiStageDcf wrapper (backward compat).
 
     단일 phase (n 년 × 단일 성장률) + terminal. 기존 호출 호환용.
+
+    Capabilities:
+        - 단일 phase + terminal multiStageDcf 호출 wrapper
+        - highGrowthRate 단일 값 → growthRates=[highGrowthRate] 변환
+        - 기존 caller 의 highGrowthRate 키 호환 유지
+
+    Args:
+        baseFcf: 기준 FCF (원).
+        growthYears: 명시적 고성장 구간 연수.
+        highGrowthRate: 고성장 구간 성장률 (%).
+        terminalGrowthRate: Gordon 영구성장률 (%).
+        wacc: 할인율 (%).
+        netDebt: 순차입금 (원).
+        shares: 발행주식수.
+
+    Returns:
+        dict — multiStageDcf 반환 + highGrowthRate 키 추가.
+
+    Example:
+        >>> twoStageDcf(baseFcf=1e10, growthYears=5, highGrowthRate=15,
+        ...             terminalGrowthRate=3, wacc=10, netDebt=2e10, shares=1e8)
+
+    Guide:
+        새 코드에서는 multiStageDcf 직접 호출 권장. 본 함수는 backward compat.
+
+    When:
+        기존 단일 phase DCF 코드 호환 유지 필요 시.
+
+    How:
+        twoStageDcf(baseFcf=..., growthYears=5, highGrowthRate=..., ...).
+
+    Requires:
+        multiStageDcf — 본 함수가 호출.
+
+    Raises:
+        없음.
+
+    SeeAlso:
+        - multiStageDcf : 본 함수가 호출하는 N-stage 본체
+
+    AIContext:
+        2-stage DCF 단순 인용 시 본 함수 결과 인용. multiStageDcf 동일 결과.
     """
     r = multiStageDcf(
         baseFcf=baseFcf,
@@ -333,6 +383,14 @@ def dcfValuation(
         WACC ≤ terminalGrowth 시 ``wacc - 2.0`` 으로 자동 조정 + warning. initial
         growth 는 매출 3Y CAGR 기반, [-5%, 15%] clamp. FCF 음수 회사는 DCF
         부적합 — 호출자가 ``calcDFV`` 의 multi-model triangulation 사용 권장.
+
+    When:
+        단일 모델 DCF 인용이 필요한 화면/CLI/notebook 에서 직접 호출.
+        다중 모델 통합은 calcDFV 사용.
+
+    How:
+        dcfValuation(series, shares=s, sectorParams=sp, currentPrice=p) 형식.
+        series 는 company.finance.timeseries 또는 frame.toTimeseries 결과.
 
     SeeAlso:
         - ``multiStageDcf``: phase 별 다중 stage DCF
@@ -463,7 +521,53 @@ def fullValuation(
     currency: str = "KRW",
     discountRate: Optional[float] = None,
 ) -> ValuationSummary:
-    """DCF + DDM + 상대가치 종합 밸류에이션."""
+    """DCF + DDM + 상대가치 종합 밸류에이션.
+
+    Capabilities:
+        - dcfValuation + ddmValuation + relativeValuation 3 채널 합성
+        - 극단값 (현재가 1/20 미만) 제거 후 fairValueRange 산출
+        - 평균 대비 ratio 로 저평가/적정/고평가 verdict 판정
+
+    Args:
+        series: finance.timeseries dict (BS/IS/CF).
+        shares: 발행주식수.
+        sectorParams: 업종별 할인율/성장률.
+        marketCap: 시가총액 (상대가치용).
+        currentPrice: 현재 주가 (verdict 산출용).
+        currency: "KRW" or "USD".
+        discountRate: WACC override.
+
+    Returns:
+        ValuationSummary — dcf/ddm/relative + fairValueRange + verdict.
+
+    Example:
+        >>> r = fullValuation(series, shares=5e9, marketCap=4.5e14, currentPrice=75000)
+        >>> r.verdict, r.fairValueRange
+
+    Guide:
+        DDM 미가용 (무배당) 회사는 dcf+relative 만으로 verdict 산출.
+        극단값 floor = currentPrice/20.
+
+    When:
+        구버전 종합 밸류에이션 인터페이스 (3 채널 단순 평균). 새 코드는
+        calcDFV 의 quality-adjusted WACC + 삼각검증 사용.
+
+    How:
+        fullValuation(series, shares=s, sectorParams=sp, marketCap=mc, currentPrice=p).
+
+    Requires:
+        dcfValuation + ddmValuation + relativeValuation 헬퍼 + series 시계열.
+
+    Raises:
+        없음 — 모든 모델 실패 시 verdict="판단불가" + fairRange=None.
+
+    SeeAlso:
+        - calcDFV : v2 통합 진입점 (권장)
+        - dcfValuation / ddmValuation / relativeValuation : 채널별
+
+    AIContext:
+        구 API 인용. 새 답변은 calcDFV 결과 우선, fullValuation 은 fallback.
+    """
     dcf = dcfValuation(
         series,
         shares=shares,

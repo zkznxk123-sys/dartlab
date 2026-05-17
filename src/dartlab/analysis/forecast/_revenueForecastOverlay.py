@@ -30,6 +30,10 @@ def applyAiOverlay(
 ) -> RevenueForecastResult:
     """AI 보정을 예측 결과에 적용.
 
+    Capabilities:
+        - AI 가설 성장률 조정 + 시나리오 확률 이동 적용
+        - 연간 ±10%p · 총 ±20%p 가드레일 자동 캡
+
     Parameters
     ----------
     result : RevenueForecastResult
@@ -42,6 +46,33 @@ def applyAiOverlay(
     RevenueForecastResult
         보정 적용된 새 예측 결과.
         aiOverlay.applied = True, assumptions에 보정 요약 추가.
+
+    Guide:
+        forecastRevenue 결과에 overlay 가 있으면 마지막에 적용.
+
+    When:
+        AI 답변 단계에서 회사 맥락으로 예측 보정이 필요할 때.
+
+    How:
+        growthAdjustment 캡 적용 → 보정 시계열 재산출 → 시나리오 확률 정규화.
+
+    Requires:
+        RevenueForecastResult + RevenueForecastAIOverlay (reasoning 비어있지 않음).
+
+    Raises:
+        없음. reasoning 비어 있으면 원본 그대로 반환.
+
+    Example:
+        >>> r2 = applyAiOverlay(r, overlay)
+        >>> r2.aiOverlay.applied
+        True
+
+    See Also:
+        - forecastRevenue : 베이스 예측
+        - RevenueForecastAIOverlay : 보정 dataclass
+
+    AIContext:
+        AI 답변 시 보정 사유 (reasoning) 와 함께 인용 — 단독 인용 금지.
     """
     if not overlay.reasoning:
         log.warning("AI overlay rejected: reasoning 비어있음")

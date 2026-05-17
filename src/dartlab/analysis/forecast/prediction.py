@@ -69,6 +69,10 @@ def collectSignals(company, *, usePredictionAxis: bool = False) -> ContextSignal
     usePredictionAxis=True이면 analysis("forecast", "예측신호") 결과를 추가로 소비하여
     공시 tone, 변화 강도, 성장 조정치를 enrichment한다.
 
+    Capabilities:
+        - insight 등급·diff 변화율·rank·sector cyclicality 통합 수집
+        - 예측신호 축 선택적 enrichment
+
     Parameters
     ----------
     company : Company
@@ -80,6 +84,33 @@ def collectSignals(company, *, usePredictionAxis: bool = False) -> ContextSignal
     -------
     ContextSignals
         insight 등급, diff 변화율, 사이클 정보 등 맥락 신호.
+
+    Guide:
+        adjustProbabilities 진입 전 단계에서 호출해 ContextSignals 를 채운다.
+
+    When:
+        시나리오 확률 보정에 필요한 사전 신호 수집이 필요할 때.
+
+    How:
+        Company 의 insights·_docs.diff·rank·sectorInfo 를 순차적으로 흡수.
+
+    Requires:
+        Company 객체 (insights, _docs, sectorInfo 일부 가능).
+
+    Raises:
+        없음. 각 신호 소스 실패는 except 후 skip.
+
+    Example:
+        >>> sig = collectSignals(company, usePredictionAxis=True)
+        >>> isinstance(sig, ContextSignals)
+        True
+
+    See Also:
+        - adjustProbabilities : 수집된 신호로 확률 조정
+        - ContextSignals : 결과 dataclass
+
+    AIContext:
+        AI 답변 시 시나리오 확률 보정 근거를 추적하는 데 인용.
     """
     signals = ContextSignals()
 
@@ -298,6 +329,10 @@ def adjustProbabilities(
 ) -> dict[str, float]:
     """기본 확률을 맥락 신호로 재가중한다.
 
+    Capabilities:
+        - ContextSignals 의 adjustments 를 적용해 시나리오 확률 재가중
+        - 음수 방지 하한 + 합계 1.0 정규화
+
     Parameters
     ----------
     baseProbs : dict[str, float]
@@ -309,6 +344,32 @@ def adjustProbabilities(
     -------
     dict[str, float]
         재가중된 시나리오별 확률 (합계 1.0 정규화).
+
+    Guide:
+        collectSignals 결과를 입력으로 받아 _computeAdjustments 자동 호출.
+
+    When:
+        기본 확률을 회사 맥락 신호로 보정해야 할 때.
+
+    How:
+        signals.adjustments 가 비어 있으면 _computeAdjustments 호출 후 적용.
+
+    Requires:
+        ContextSignals (collectSignals 결과 권장).
+
+    Raises:
+        없음. 빈 신호는 baseProbs 그대로 반환.
+
+    Example:
+        >>> adjustProbabilities({"baseline": 0.5, "adverse": 0.5}, sig)
+        {'baseline': ..., 'adverse': ...}
+
+    See Also:
+        - collectSignals : 신호 수집
+        - calibrateScenarios : 외부 시장 신호로 보정
+
+    AIContext:
+        AI 답변 시 "맥락 신호 N 개로 시나리오 확률 X→Y 조정" 인용.
     """
     # adjustments가 아직 계산되지 않았으면 자동 계산
     if not signals.adjustments and (

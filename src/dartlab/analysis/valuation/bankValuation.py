@@ -24,6 +24,11 @@ def calcBankExcessReturn(
 
     Equity Value = Book Equity + Σ[(ROE - Ke) × BV × g^t] / (Ke - g)
 
+    Capabilities:
+        - explicit n년 Excess Return 현가 + Gordon Terminal
+        - Book Equity 가 의사 CapEx 역할 → 은행 표준 가치평가
+        - g ≥ Ke 시 자동 보정 + warnings
+
     Parameters
     ----------
     bookEquity : 자기자본 (원)
@@ -43,6 +48,33 @@ def calcBankExcessReturn(
         impliedPBR : equityValue / bookEquity
         method : "excess_return"
         warnings : list[str]
+
+    Example:
+        >>> calcBankExcessReturn(1e13, roe=8.0, costOfEquity=9.0)
+        {"impliedPBR": 0.85, ...}
+
+    Guide:
+        impliedPBR > 5x 또는 < 0 시 warning. ROE < Ke 영구 가정은 음수 PBR.
+
+    When:
+        은행/금융지주 dFV 본 수식 호출 시 (calcBankDFV 내부).
+
+    How:
+        calcBankExcessReturn(bookEquity=eq, roe=r, costOfEquity=ke) 형식.
+
+    Requires:
+        bookEquity > 0, roe/costOfEquity 정상값.
+
+    Raises:
+        없음 — 무효 입력은 method="skip" 반환.
+
+    See Also:
+        - calcBankDFV : 본 함수의 dFV 진입점 wrapper
+        - Damodaran *Investment Valuation* Ch.21
+
+    AIContext:
+        은행 적정주가 근거 인용 — impliedPBR 가 한국 은행 평균 0.5~1.0 범위
+        대비 위치를 함께 설명.
     """
     warnings: list[str] = []
 

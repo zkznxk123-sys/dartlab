@@ -48,7 +48,18 @@ def _extractVolatility(series: dict) -> dict[str, float]:
 
 
 def simulateScenario(*args, **kwargs):
-    """simulation.simulateScenario lazy proxy (cycle 회피)."""
+    """simulation.simulateScenario lazy proxy (cycle 회피).
+
+    Requires:
+        dartlab.analysis.forecast.simulation 모듈 import 가능.
+
+    Raises:
+        없음. 본체 함수의 예외 그대로 전파.
+
+    Example:
+        >>> simulateScenario(series, "baseline")
+        SimulationResult(...)
+    """
     from dartlab.analysis.forecast.simulation import simulateScenario as _ss
 
     return _ss(*args, **kwargs)
@@ -68,6 +79,10 @@ def monteCarloForecast(
     seed: int | None = None,
 ) -> MonteCarloResult:
     """Monte Carlo 시뮬레이션으로 매출·이익·FCF 분포 추정.
+
+    Capabilities:
+        - 시나리오 평균 경로에 정규 노이즈 추가해 분포 산출
+        - P5/P25/P50/P75/P95 백분위 + VaR95 + 상승 확률 동행
 
     Parameters
     ----------
@@ -98,6 +113,33 @@ def monteCarloForecast(
         stdDev : float — 매출 표준편차 (원)
         var95 : float — 95% VaR 매출 (원)
         upsideProbability : float — 현재 대비 상승 확률 (%)
+
+    Guide:
+        결정론적 시뮬 결과를 확률 분포로 확장. seed 고정으로 재현 가능.
+
+    When:
+        단일 적정가가 아닌 확률 분포가 필요할 때.
+
+    How:
+        시나리오 평균 경로 산출 → Gaussian 노이즈 × iterations 반복 → 백분위.
+
+    Requires:
+        매출 시계열 존재, sectorKey (없으면 default elasticity).
+
+    Raises:
+        없음. 매출 0/None 시 빈 결과 + warnings.
+
+    Example:
+        >>> r = monteCarloForecast(series, iterations=1000, seed=42)
+        >>> "매출" in r.percentiles or r.warnings
+        True
+
+    See Also:
+        - stressTest : 단일 극한 시나리오
+        - simulateScenario : 결정론적 시뮬
+
+    AIContext:
+        AI 답변 시 P50/P95 백분위 + 상승확률 표로 인용 — VaR 함께 표시.
     """
     if seed is not None:
         random.seed(seed)

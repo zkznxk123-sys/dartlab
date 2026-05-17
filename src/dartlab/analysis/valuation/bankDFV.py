@@ -25,6 +25,11 @@ _FINANCIAL_GROUP_KEYWORDS = (
 def isFinancialCompany(company: Any) -> bool:
     """sector/industryGroup 기반 금융업 검출 (Enum/str 모두 처리).
 
+    Capabilities:
+        - sector.sector 키워드 매칭 (금융/Financial/Bank 등)
+        - industryGroup 키워드 (은행/금융지주/증권/보험/카드)
+        - 종목명 fallback 매칭
+
     Parameters
     ----------
     company : Company
@@ -34,6 +39,32 @@ def isFinancialCompany(company: Any) -> bool:
     -------
     bool
         금융업이면 True.
+
+    Example:
+        >>> isFinancialCompany(Company("055550"))  # 신한지주
+        True
+
+    Guide:
+        calcDFV 가 본 함수로 금융업 분기 → calcBankDFV 로 dispatch.
+
+    When:
+        dFV 진입 시 금융업 분기 판정 단계.
+
+    How:
+        isFinancialCompany(company) 직접 호출.
+
+    Requires:
+        company.sector + (optional) industryGroup + corpName/name.
+
+    Raises:
+        없음 — 누락 속성은 falsy 처리.
+
+    See Also:
+        - calcBankDFV : 본 함수 True 시 호출되는 금융업 dFV
+        - calcDFV : 분기 진입점
+
+    AIContext:
+        금융업 분기 근거 — 사용자 회사가 금융인지 설명 시 인용.
     """
     sector = getattr(company, "sector", None)
     if sector is None:
@@ -56,12 +87,56 @@ def isFinancialCompany(company: Any) -> bool:
 def calcBankDFV(company: Any, *, basePeriod: str | None = None, overrides: dict | None = None) -> dict | None:
     """은행 전용 dFV — Excess Return Model.
 
+    Capabilities:
+        - Book Equity + ROE + CoE → Damodaran Excess Return Model
+        - calcDFV 호환 스키마 (dFV/scenarios/upside/opinion/confidence)
+        - 한국 은행 평균 beta 0.95 + Damodaran ERP 기반 CoE
+
+    Parameters
+    ----------
+    company : Company
+        대상 금융업 회사.
+    basePeriod : str, optional
+        기준 기간 (미사용 — BS 최신 자동).
+    overrides : dict, optional
+        countryCode/terminalGrowth 등 override.
+
     Returns
     -------
     dict (calcDFV 호환 스키마)
         dFV, scenarios, currentPrice, upside, opinion, confidence
         primaryModel : "bankExcessReturn"
         bankModel : detail dict (impliedPBR, excessReturn, ...)
+
+    Example:
+        >>> calcBankDFV(Company("055550"))
+        {"dFV": 48000, "opinion": "보유", ...}
+
+    Guide:
+        Book Equity ≤ 0 또는 net income ≤ 0 시 None. shares 역산 실패 시 한국
+        은행 평균 PBR 0.85 fallback.
+
+    When:
+        isFinancialCompany True 인 회사의 dFV 계산 시점.
+
+    How:
+        calcBankDFV(company) 또는 overrides 로 가정 주입.
+
+    Requires:
+        company.select(BS, [자본총계]), select(IS, [당기순이익]) 가용 +
+        bankValuation.calcBankExcessReturn + synth.overrides + riskPremiums.
+
+    Raises:
+        없음 — ImportError/속성 누락은 None 반환.
+
+    See Also:
+        - calcBankExcessReturn : Excess Return 본 수식
+        - isFinancialCompany : 분기 게이트
+        - calcDFV : 통합 진입점
+
+    AIContext:
+        은행/금융지주 적정주가 답변 시 dFV/impliedPBR/excessReturn 인용.
+        일반 DCF 대신 본 모델 사용 이유 (CapEx 부재) 설명.
     """
     try:
         from dartlab.analysis.valuation.bankValuation import calcBankExcessReturn

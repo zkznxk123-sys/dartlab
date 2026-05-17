@@ -111,6 +111,14 @@ def calcDFV(
         secondary 2 개 cross-check 후 triangulation 일치도 ±25% 내면
         confidence=high.
 
+    When:
+        Company 분석 종료 시점에 단일 적정주가가 필요할 때. AI Q&A 의 dFV 슬롯
+        에서 항상 본 함수 결과 인용.
+
+    How:
+        calcDFV(Company("005930")) 또는 overrides={"wacc": 8.5} 형식.
+        금융업/지주사는 자동으로 calcBankDFV/calcHoldingDFV dispatch.
+
     SeeAlso:
         - ``dartlab.analysis.valuation.dcf.dcfValuation``: DCF 단독
         - ``dartlab.analysis.valuation.dcf.ddmValuation``: DDM 단독

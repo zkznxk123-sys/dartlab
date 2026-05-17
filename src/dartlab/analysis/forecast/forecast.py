@@ -143,6 +143,10 @@ def forecastMetric(
 ) -> ForecastResult:
     """단일 메트릭 시계열 예측.
 
+    Capabilities:
+        - OLS·CAGR decay·평균회귀 3 모델 자동 선택
+        - 구조적 전환 감지 후 후행 구간만 학습
+
     Parameters
     ----------
     series : dict
@@ -166,6 +170,33 @@ def forecastMetric(
         confidence : str — 신뢰도 ("high" | "medium" | "low")
         rSquared : float — 결정계수 (0~1)
         growthRate : float — 적용 성장률 (%)
+
+    Guide:
+        finance.timeseries dict 한 개 + metric 키 하나로 단일 항목 예측.
+
+    When:
+        단일 재무 항목의 향후 3~5 년 예측이 필요할 때.
+
+    How:
+        forecastAll 내부에서 항목별 반복 호출되거나 단독 사용.
+
+    Requires:
+        timeseries 에 해당 metric annual 값 ≥ 3 개.
+
+    Raises:
+        없음. 데이터 부족 시 ForecastResult.warnings 에 사유 누적.
+
+    Example:
+        >>> r = forecastMetric(series, metric="revenue", horizon=3)
+        >>> r.method in ("linear", "cagr_decay", "mean_revert", "N/A")
+        True
+
+    See Also:
+        - forecastAll : 다중 메트릭 일괄 예측
+        - scenarioAnalysis : optimistic/baseline/adverse 시나리오
+
+    AIContext:
+        AI 답변 시 method·confidence·rSquared 를 함께 인용해 신뢰도 표시.
     """
     warnings: list[str] = []
     target = FORECAST_TARGETS.get(metric)
@@ -371,6 +402,10 @@ def forecastAll(
     매출은 정교한 앙상블, 영업이익/순이익은 매출x마진 연동.
     마진 연동 실패 시 단순 시계열 OLS fallback.
 
+    Capabilities:
+        - 매출·영업이익·순이익·OCF 4 메트릭 일괄 예측
+        - 매출 기반 마진 연동 + OLS fallback 자동 전환
+
     Parameters
     ----------
     series : dict
@@ -385,6 +420,33 @@ def forecastAll(
     dict[str, ForecastResult]
         메트릭 키 → ForecastResult 매핑.
         키: "revenue", "operating_income", "net_income", "operating_cashflow".
+
+    Guide:
+        forecastMetric 을 4 번 호출하는 진입점. DCF 사전 단계로 사용.
+
+    When:
+        예측 대시보드·DCF 입력·시나리오 분석 전 일괄 예측이 필요할 때.
+
+    How:
+        forecastMetric (revenue) → marginLinkedForecast 또는 forecastMetric 반복.
+
+    Requires:
+        finance.timeseries dict 1 개.
+
+    Raises:
+        없음. 항목별 실패는 ForecastResult.warnings 누적.
+
+    Example:
+        >>> r = forecastAll(series, horizon=3)
+        >>> "revenue" in r
+        True
+
+    See Also:
+        - forecastMetric : 단일 메트릭
+        - scenarioAnalysis : 시나리오 가중
+
+    AIContext:
+        AI 답변 시 메트릭별 method + confidence 표로 인용.
     """
     results: dict[str, ForecastResult] = {}
 
@@ -419,6 +481,10 @@ def scenarioAnalysis(
 ) -> ScenarioResult:
     """3-Scenario DCF 분석 — Bull/Base/Bear 확률가중 적정가.
 
+    Capabilities:
+        - Bull/Base/Bear 3 시나리오 DCF 적정가 산출
+        - 확률 가중 단일 주당 가치 합산
+
     Parameters
     ----------
     series : dict
@@ -439,6 +505,33 @@ def scenarioAnalysis(
         probability : dict — 시나리오별 확률 (%)
         weightedValue : float | None — 확률가중 주당 적정가 (원)
         currentPrice : float | None — 현재 주가 (원)
+
+    Guide:
+        DCF 3 회 호출 + 50/25/25 가중치로 단일 weightedValue 산출.
+
+    When:
+        단일 DCF 적정가가 아닌 확률 가중 적정가가 필요할 때.
+
+    How:
+        dcfValuation 을 base/bull/bear 파라미터로 3 회 호출.
+
+    Requires:
+        valuation.dcf 의 dcfValuation 함수.
+
+    Raises:
+        없음. FCF 부족 시 warnings 누적.
+
+    Example:
+        >>> r = scenarioAnalysis(series, shares=1_000_000)
+        >>> r.probability["base"]
+        50
+
+    See Also:
+        - calibrateScenarios : 외부 신호로 확률 보정
+        - sensitivityAnalysis : WACC × 성장률 민감도
+
+    AIContext:
+        AI 답변 시 weightedValue 와 시나리오별 perShareValue 표로 인용.
     """
     from dartlab.analysis.valuation.dcf import DCFResult, dcfValuation
 
@@ -525,6 +618,10 @@ def sensitivityAnalysis(
 ) -> SensitivityResult:
     """WACC x Terminal Growth 민감도 테이블.
 
+    Capabilities:
+        - WACC × 영구성장률 격자 DCF 주당가치 매트릭스 산출
+        - 기준값 대비 상하 범위 자동 격자 생성
+
     Parameters
     ----------
     series : dict
@@ -551,6 +648,33 @@ def sensitivityAnalysis(
         baseWacc : float — 기준 WACC (%)
         baseGrowth : float — 기준 영구성장률 (%)
         baseValue : float — 기준 주당 가치 (원)
+
+    Guide:
+        DCF 결과 변동성을 매트릭스 히트맵으로 시각화하는 데이터 소스.
+
+    When:
+        단일 적정가가 아닌 입력 가정에 따른 가치 범위가 필요할 때.
+
+    How:
+        dcfValuation 을 waccSteps × growthSteps 격자만큼 반복 호출.
+
+    Requires:
+        valuation.dcf 의 dcfValuation 함수.
+
+    Raises:
+        없음. 결손 격자는 0 처리.
+
+    Example:
+        >>> r = sensitivityAnalysis(series, shares=1_000_000)
+        >>> len(r.matrix)
+        5
+
+    See Also:
+        - scenarioAnalysis : 3 시나리오 확률 가중
+        - dcfValuation : 단일 적정가
+
+    AIContext:
+        AI 답변 시 매트릭스 min/max 범위로 가치 폭 표시.
     """
     from dartlab.analysis.valuation.dcf import dcfValuation
 

@@ -236,6 +236,10 @@ def createSimulation(
 ) -> ScenarioSimulation:
     """시나리오 시뮬레이션 생성.
 
+    Capabilities:
+        - Bull/Base/Bear 3 ProForma + 분기 매출/영업이익 목표 산출
+        - 마진 블렌딩 + 계절성 분해 + 시나리오별 DCF 가치
+
     Args:
         company: Company 객체.
         scenarioName: 사용자 지정 이름 ("반도체 회복" 등).
@@ -249,6 +253,33 @@ def createSimulation(
 
     Returns:
         ScenarioSimulation — 3개 시나리오 ProForma + 분기 목표 + DCF.
+
+    Guide:
+        baseYear 시점 데이터 컷오프 → 3 시나리오 ProForma → 분기 목표 분배.
+
+    When:
+        분기별 실적 트래킹용 ProForma 목표가 필요할 때.
+
+    How:
+        buildProforma 3 회 (bull/base/bear) + 계절성 가중치로 분기 목표 분해.
+
+    Requires:
+        company 의 _buildFinanceSeries / show("IS"). baseYear 데이터 있어야 함.
+
+    Raises:
+        ValueError : baseYear 데이터로 ProForma 생성 실패 시.
+
+    Example:
+        >>> sim = createSimulation(company, "반도체 회복", 10.0)
+        >>> "base" in sim.proformaResults
+        True
+
+    See Also:
+        - judgeQuarter : 분기 판정
+        - buildProforma : ProForma 빌더
+
+    AIContext:
+        AI 답변 시 분기별 목표 vs 실적 트래킹 근거로 인용.
     """
     # 성장률 경로 생성
     if isinstance(revenueGrowth, (int, float)):
@@ -362,6 +393,10 @@ def judgeQuarter(
 ) -> QuarterJudgment:
     """분기 실적 판정.
 
+    Capabilities:
+        - 분기 실적이 어느 시나리오에 부합하는지 자동 판정
+        - 시나리오 가중 재예측 + 행동 권고 동행
+
     Args:
         simulation: createSimulation()으로 생성한 시뮬레이션.
         quarter: 분기 식별자 ("2025Q1").
@@ -370,6 +405,34 @@ def judgeQuarter(
 
     Returns:
         QuarterJudgment — 판정 + 행동 + 재예측.
+
+    Guide:
+        실적 발표 직후 호출해 simulation 의 시나리오 가중을 갱신한다.
+
+    When:
+        분기 실적이 발표되어 시나리오 적중도를 평가할 때.
+
+    How:
+        quarter 의 Q-index 추출 → bull/base/bear 목표 비교 → 판정 dataclass 반환.
+
+    Requires:
+        createSimulation 으로 생성된 ScenarioSimulation.
+
+    Raises:
+        ValueError : quarter 형식 오류 시.
+        IndexError : qIdx 범위 초과 시.
+
+    Example:
+        >>> j = judgeQuarter(sim, "2025Q1", 1e12, 1e11)
+        >>> j is not None
+        True
+
+    See Also:
+        - createSimulation : 사전 단계
+        - buildProforma : ProForma 빌더
+
+    AIContext:
+        AI 답변 시 "X 분기 실적은 Y 시나리오 부합" 판정 인용.
     """
     qIdx = int(quarter[-1]) - 1  # Q1=0, Q2=1, ...
 

@@ -20,6 +20,10 @@ def calibrateScenarios(
 ) -> tuple[dict[str, float], list[str]]:
     """외부 시장 데이터로 DCF 시나리오 확률 보정.
 
+    Capabilities:
+        - 컨센서스·수급·매크로 신호로 시나리오 확률 재가중
+        - 보정 사유 trace 로그 동행 반환
+
     Args:
         base_probs: 기존 시나리오 확률 (예: {"baseline": 0.40, ...}).
         dcf_baseline_price: DCF baseline 시나리오 목표가.
@@ -27,6 +31,28 @@ def calibrateScenarios(
 
     Returns:
         (보정된 확률 dict, 보정 근거 list).
+
+    Guide:
+        DCF 시나리오 prior 가 만들어진 직후 외부 시장 데이터로 후처리한다.
+
+    When:
+        DCF 산출 직후 시장 신호로 시나리오 가중 조정이 필요할 때.
+
+    How:
+        forecastMetric 또는 scenarioAnalysis 흐름 마지막 단계 보정으로 호출.
+
+    Requires:
+        MarketSnapshot (컨센서스·수급·매크로 dict).
+
+    Raises:
+        없음. 결측 신호는 보정 스킵.
+
+    See Also:
+        - forecastMetric : 시계열 예측 본체
+        - scenarioAnalysis : 다중 시나리오 산출
+
+    AIContext:
+        AI 답변 시 "시장 신호 N 개로 시나리오 X% → Y% 보정" 근거 인용.
     """
     probs = dict(baseProbs)
     reasons: list[str] = []

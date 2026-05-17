@@ -50,6 +50,16 @@ def generateKey(stockCode: str, horizon: int, version: str = "v3") -> str:
     -------
     str
         "{stockCode}_{YYYYMMDD}_{horizon}y_{version}" 형태의 키.
+
+    Requires:
+        없음. 호출 시각 UTC 사용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> generateKey("005930", 3).endswith("_3y_v3")
+        True
     """
     dateStr = datetime.now(timezone.utc).strftime("%Y%m%d")
     return f"{stockCode}_{dateStr}_{horizon}y_{version}"
@@ -57,6 +67,10 @@ def generateKey(stockCode: str, horizon: int, version: str = "v3") -> str:
 
 def saveForecast(record: ForwardTestRecord) -> Path:
     """예측 기록을 로컬 JSON에 저장 (opt-in).
+
+    Capabilities:
+        - 예측 기록을 종목별 JSON 파일에 누적 저장
+        - 동일 key 자동 덮어쓰기
 
     Parameters
     ----------
@@ -67,6 +81,33 @@ def saveForecast(record: ForwardTestRecord) -> Path:
     -------
     Path
         저장된 파일 경로 (~/.dartlab/forward_tests/{stockCode}.json).
+
+    Guide:
+        예측 실행 직후 호출해 사후 평가용 ground truth 와 비교 자료 누적.
+
+    When:
+        예측 결과를 캘리브레이션·forward test 평가용으로 보관할 때.
+
+    How:
+        forecastAll/scenarioAnalysis 결과를 ForwardTestRecord 로 묶어 호출.
+
+    Requires:
+        쓰기 가능한 홈 디렉토리.
+
+    Raises:
+        OSError : 파일 쓰기 실패 시.
+
+    Example:
+        >>> p = saveForecast(record)
+        >>> p.suffix
+        '.json'
+
+    See Also:
+        - loadRecords : 기록 조회
+        - evaluate : 사후 평가
+
+    AIContext:
+        AI 답변 시 forward test 누적 후 캘리브레이션 점수 트래킹에 사용.
     """
     _FORWARD_TEST_DIR.mkdir(parents=True, exist_ok=True)
     filepath = _FORWARD_TEST_DIR / f"{record.stockCode}.json"
@@ -86,6 +127,10 @@ def saveForecast(record: ForwardTestRecord) -> Path:
 def loadRecords(stockCode: str) -> list[ForwardTestRecord]:
     """종목별 저장된 예측 기록 로드.
 
+    Capabilities:
+        - 종목 단일 JSON 파일에서 모든 예측 기록 복원
+        - 깨진 레코드는 debug 로그 후 스킵
+
     Parameters
     ----------
     stockCode : str
@@ -95,6 +140,33 @@ def loadRecords(stockCode: str) -> list[ForwardTestRecord]:
     -------
     list[ForwardTestRecord]
         해당 종목의 모든 예측 기록. 파일 없으면 빈 리스트.
+
+    Guide:
+        evaluate 또는 evaluateCalibration 의 입력 소스.
+
+    When:
+        과거 예측 결과를 다시 평가하거나 통계 집계할 때.
+
+    How:
+        _loadRaw → dict → dataclass 복원. 깨진 레코드는 debug 로그 후 스킵.
+
+    Requires:
+        ~/.dartlab/forward_tests/ 디렉토리 읽기 가능.
+
+    Raises:
+        없음. 파일 없으면 빈 리스트.
+
+    Example:
+        >>> records = loadRecords("005930")
+        >>> isinstance(records, list)
+        True
+
+    See Also:
+        - saveForecast : 기록 저장
+        - evaluate : 단일 기록 평가
+
+    AIContext:
+        AI 답변 시 과거 예측 회수 → 사후 평가용 데이터 소스.
     """
     filepath = _FORWARD_TEST_DIR / f"{stockCode}.json"
     raw = _loadRaw(filepath)
@@ -113,6 +185,10 @@ def evaluate(
 ) -> dict:
     """예측 vs 실적 비교 평가.
 
+    Capabilities:
+        - MAE·MAPE·방향 정확도·시나리오 적중을 한 번에 계산
+        - 결과를 record.evaluation 에 in-place 기록
+
     Parameters
     ----------
     record : ForwardTestRecord
@@ -129,6 +205,33 @@ def evaluate(
         scenarioHit : str — 시나리오 적중 범위 ("within_range" | "above_bull" | "below_bear")
         nCompared : int — 비교 기간 수
         evaluatedAt : str — 평가 시각 (ISO 8601)
+
+    Guide:
+        실적이 들어온 시점에 호출. record.evaluation 에 in-place 기록.
+
+    When:
+        예측 horizon 경과 후 실적 수치를 확보했을 때.
+
+    How:
+        projected vs actualRevenue 페어를 zip 비교, 시나리오 범위 적중률 계산.
+
+    Requires:
+        actualRevenue 최소 1 기.
+
+    Raises:
+        없음. n=0 이면 error dict 반환.
+
+    Example:
+        >>> r = evaluate(record, [1e9, 1.1e9, 1.2e9])
+        >>> "mape" in r
+        True
+
+    See Also:
+        - evaluateCalibration : 전체 통계 집계
+        - generateCalibrationReport : 캘리브레이션 리포트
+
+    AIContext:
+        AI 답변 시 사후 정확도 MAPE/방향 정확도 표로 인용.
     """
     from dartlab.core.messaging import missingDataHint
 
@@ -222,6 +325,10 @@ def evaluateCalibration(
     모든 기록에서 directionProbability와 directionActual을 수집하여
     Brier Score + reliability diagram 생성.
 
+    Capabilities:
+        - 다종목·다버전 forward test 누적 기록 통합 캘리브레이션
+        - directionProbability·directionActual 자동 수집
+
     Parameters
     ----------
     stockCodes : list[str], optional
@@ -232,6 +339,33 @@ def evaluateCalibration(
     dict | None
         CalibrationReport dict (brierScore, reliabilityBins 등).
         데이터 5건 미만 시 None.
+
+    Guide:
+        주기적으로 호출해 dartlab 전체 예측 품질 트래킹 데이터 산출.
+
+    When:
+        시스템 전체의 확률 보정도를 평가할 때 (월/분기 단위).
+
+    How:
+        loadRecords 로 종목별 기록 → directionProbability/Actual 수집 → generateCalibrationReport.
+
+    Requires:
+        forward_tests 디렉토리에 5 건 이상 기록.
+
+    Raises:
+        없음. 데이터 부족 시 None.
+
+    Example:
+        >>> r = evaluateCalibration(["005930"])
+        >>> r is None or "brierScore" in r
+        True
+
+    See Also:
+        - generateCalibrationReport : 단일 리포트 생성
+        - loadRecords : 종목별 기록 로드
+
+    AIContext:
+        AI 답변 시 시스템 전체 캘리브레이션 점수로 인용.
     """
     from dartlab.analysis.forecast.calibrationMetrics import generateCalibrationReport
 
