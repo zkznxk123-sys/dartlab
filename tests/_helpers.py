@@ -229,7 +229,12 @@ def captureRichOutput(fn, *, width: int = 120, color: bool = False) -> str:
     buf = io.StringIO()
     newConsole = Console(file=buf, record=True, force_terminal=True, width=width, color_system="truecolor")
     savedConsole = _loggerMod._console
+    savedProgress = _loggerMod._progress
     _loggerMod._console = newConsole
+    # Progress singleton 도 reset — 이전 호출이 만든 Progress 가 이전 console 에
+    # 묶여있으면 newConsole 로 redirect 안 됨. None 으로 비우면 다음 getProgress()
+    # 가 newConsole 로 재생성.
+    _loggerMod._progress = None
     try:
         savedRichHandler = None
         for h in _loggerMod.logging.getLogger(_loggerMod._ROOT_NAME).handlers:
@@ -245,5 +250,6 @@ def captureRichOutput(fn, *, width: int = 120, color: bool = False) -> str:
         return out
     finally:
         _loggerMod._console = savedConsole
+        _loggerMod._progress = savedProgress
         if savedRichHandler is not None:
             savedRichHandler.console = savedConsole
