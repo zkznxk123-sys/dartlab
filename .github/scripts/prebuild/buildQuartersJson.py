@@ -178,6 +178,11 @@ def _extract_company(df: pl.DataFrame, stockCode: str) -> dict | None:
 
 
 def main() -> int:
+    # prebuild = offline only.
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()
+
     print(f"[quarters.json 빌드] {SRC}...", flush=True)
     t0 = time.time()
 

@@ -155,6 +155,11 @@ def _loadBlogIndex() -> dict[str, dict]:
 
 
 def main() -> int:
+    # prebuild = offline only.
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()
+
     blog = _loadBlogIndex()
     print(f"blog entries: {len(blog)}", flush=True)
 

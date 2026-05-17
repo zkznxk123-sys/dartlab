@@ -216,6 +216,11 @@ def _extract_annual(df: pl.DataFrame, stockCode: str) -> dict:
 
 
 def main() -> int:
+    # prebuild = offline only.
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()
+
     print(f"[finance.json 빌드] loading {SRC}...", flush=True)
     t0 = time.time()
 

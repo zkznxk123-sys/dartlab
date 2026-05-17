@@ -89,6 +89,11 @@ def _validate_dashboard_manifest(
 
 
 def main() -> int:
+    # prebuild = offline only.
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()
+
     sections = []
     for sec in listSections():
         sections.append(

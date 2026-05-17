@@ -1,15 +1,19 @@
-"""DART corp_profile prefetch — 결산월(acc_mt) 권위 SSOT 빌드 (P-S11, Phase 3).
+"""DART corp_profile prefetch — 결산월(acc_mt) 권위 SSOT 빌드.
 
 OpenDART ``companyInfo()`` 의 ``acc_mt`` (결산월) 를 corp_code 전종목에 대해 prefetch
 하여 ``data/dart/scan/corpProfile.parquet`` 으로 저장. ``_fiscalMonthMap()`` 가 1순위로
 사용하여 listing (KIND) 누락 + raw rcept_no 추정 한계 (사업보고서 없는 신규 상장사
 12 fallback) 를 해소한다.
 
+책임 위치: **sync (meta) 단계** — 외부 API 호출이므로 prebuild 안에 박으면 안 된다.
+``kindlist.yml`` 의 corp_profile step 으로 매일 cron 갱신, HF dataset ``dart/scan/`` 에
+upload. prebuild 는 HF 에서 다운로드한 parquet 만 읽는다.
+
 사용법::
 
-    uv run python -X utf8 scripts/build/buildCorpProfile.py
-    uv run python -X utf8 scripts/build/buildCorpProfile.py --limit 100   # 테스트
-    uv run python -X utf8 scripts/build/buildCorpProfile.py --workers 5   # 동시 호출 수
+    uv run python -X utf8 .github/scripts/meta/buildCorpProfile.py
+    uv run python -X utf8 .github/scripts/meta/buildCorpProfile.py --limit 100   # 테스트
+    uv run python -X utf8 .github/scripts/meta/buildCorpProfile.py --workers 5   # 동시 호출 수
 
 환경변수: ``OPEN_DART_KEY`` 또는 ``DART_API_KEY`` 필수.
 """
@@ -23,17 +27,12 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-# repo 루트에서 실행 가능하도록 경로 정리
-_ROOT = Path(__file__).resolve().parents[2]
-if str(_ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(_ROOT / "src"))
+import polars as pl
 
-import polars as pl  # noqa: E402
-
-from dartlab.core.dataLoader import _dataDir  # noqa: E402
-from dartlab.providers.dart.openapi.client import DartClient  # noqa: E402
-from dartlab.providers.dart.openapi.corpCode import loadCorpCodes  # noqa: E402
-from dartlab.providers.dart.openapi.disclosure import companyInfo  # noqa: E402
+from dartlab.core.dataLoader import _dataDir
+from dartlab.providers.dart.openapi.client import DartClient
+from dartlab.providers.dart.openapi.corpCode import loadCorpCodes
+from dartlab.providers.dart.openapi.disclosure import companyInfo
 
 
 def _resolveApiKey() -> str:

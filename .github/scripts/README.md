@@ -32,13 +32,14 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 | [sync/buildKrxData.py](sync/buildKrxData.py) | KRX OpenAPI → 연도별 raw parquet + HF push | `buildKrxData.yml` |
 | [sync/buildKrxIndexData.py](sync/buildKrxIndexData.py) | KRX 지수 OHLCV bulk 수집 + HF push | `buildKrxIndexData.yml` |
 | [sync/buildMacroData.py](sync/buildMacroData.py) | FRED/ECOS 카탈로그 → HF macro 벌크 parquet | `macroData.yml` |
+| [sync/buildMacroCycle.py](sync/buildMacroCycle.py) | analyzeCycle → `macro/cycle/{kr,us}.json` HF push (KR/US phase 분석) | `macroData.yml` |
+| [sync/prebuildValuation.py](sync/prebuildValuation.py) | valuation snapshot parquet 빌드 + HF 업로드 (Naver API) | `valuationSnapshot.yml` |
 
 ### prebuild/ — derived artifact build (parquet → JSON / aggregate)
 
 | 스크립트 | 역할 | 호출 workflow |
 |---|---|---|
 | [prebuild/prebuildData.py](prebuild/prebuildData.py) | DART scan prebuild parquet 빌드 + HF 업로드 | `dataPrebuild.yml` |
-| [prebuild/prebuildValuation.py](prebuild/prebuildValuation.py) | valuation snapshot parquet 빌드 + HF 업로드 | `valuationSnapshot.yml` |
 | [prebuild/buildIndustryMap.py](prebuild/buildIndustryMap.py) | 산업지도 시각화 JSON (atlas/industries/companies) | `mapBuild.yml` |
 | [prebuild/buildFinanceJson.py](prebuild/buildFinanceJson.py) | finance.parquet → dashboards/finance.json (전 상장사 5Y) | `mapBuild.yml` |
 | [prebuild/buildQuartersJson.py](prebuild/buildQuartersJson.py) | finance.parquet → dashboards/quarters.json (분기 시계열) | `mapBuild.yml` |
@@ -52,6 +53,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 |---|---|---|
 | [meta/updateKindList.py](meta/updateKindList.py) | KRX KIND 상장법인 목록 크롤 (`corpList.parquet`) | `kindlist.yml` |
 | [meta/updateDartList.py](meta/updateDartList.py) | OpenDART CORPCODE.xml → `dartList.parquet` | `kindlist.yml` |
+| [meta/buildCorpProfile.py](meta/buildCorpProfile.py) | OpenDART companyInfo prefetch → `corpProfile.parquet` (acc_mt SSOT). 매일 incremental, missing 만 호출 | `kindlist.yml` |
 
 ### search/ — search index build
 
@@ -70,7 +72,7 @@ repo 의 `scripts/` (build/dev/audit 도구) 와 *별개* — `.github/scripts/`
 
 ## sub-dir 스크립트의 `_hfRetry` import 규약
 
-5 개 스크립트 (`sync/uploadData`, `prebuild/prebuildData`, `prebuild/prebuildValuation`, `search/buildSearchDelta`, `search/buildSearchMain`) 가 `_hfRetry` 사용. sub-dir 의 sys.path 가 부모를 못 잡으므로 다음 boilerplate:
+5 개 스크립트 (`sync/uploadData`, `sync/prebuildValuation`, `prebuild/prebuildData`, `search/buildSearchDelta`, `search/buildSearchMain`) 가 `_hfRetry` 사용. sub-dir 의 sys.path 가 부모를 못 잡으므로 다음 boilerplate:
 
 ```python
 import sys

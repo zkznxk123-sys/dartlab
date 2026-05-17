@@ -137,3 +137,52 @@ jobs:
           "
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      # ── corpProfile (DART companyInfo prefetch — acc_mt SSOT) ─────────────
+      - name: Install dartlab (for buildCorpProfile)
+        run: pip install -e .
+
+      - name: Resume corpProfile from HF (incremental)
+        run: |
+          mkdir -p data/dart/scan
+          python -c "
+          from huggingface_hub import hf_hub_download
+          import shutil
+          try:
+              p = hf_hub_download(
+                  repo_id='eddmpython/dartlab-data',
+                  repo_type='dataset',
+                  filename='dart/scan/corpProfile.parquet',
+              )
+              shutil.copy(p, 'data/dart/scan/corpProfile.parquet')
+              print('corpProfile resume: HF parquet 다운로드 OK')
+          except Exception as e:
+              print(f'corpProfile resume skip (cold start): {e}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: Build corpProfile (incremental — DART companyInfo)
+        run: |
+          export OPEN_DART_KEY="${DART_API_KEYS%%,*}"
+          python -X utf8 .github/scripts/meta/buildCorpProfile.py --workers 5
+        env:
+          DART_API_KEYS: ${{ secrets.DART_API_KEYS }}
+
+      - name: Upload corpProfile to HuggingFace
+        if: ${{ hashFiles('data/dart/scan/corpProfile.parquet') != '' }}
+        run: |
+          python -c "
+          from huggingface_hub import HfApi
+          api = HfApi(token='${{ secrets.HF_TOKEN }}')
+          api.upload_file(
+              repo_id='eddmpython/dartlab-data',
+              repo_type='dataset',
+              path_or_fileobj='data/dart/scan/corpProfile.parquet',
+              path_in_repo='dart/scan/corpProfile.parquet',
+              commit_message='auto-update corpProfile (acc_mt SSOT)',
+          )
+          print('corpProfile HuggingFace 업로드 완료')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

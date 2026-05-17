@@ -1367,6 +1367,11 @@ def buildSearchIndex() -> list[dict]:
 
 
 def main() -> None:
+    # prebuild = offline only.
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--companies",

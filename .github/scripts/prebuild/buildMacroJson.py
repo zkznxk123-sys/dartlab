@@ -98,28 +98,59 @@ SECTOR_SENSITIVITY = {
 }
 
 
-def _analyze_market(market: str) -> dict:
-    """classifyCycle for market. 실패 시 기본값."""
-    try:
-        from dartlab.macro.cycles.cycle import analyzeCycle
+def _fallback(market: str) -> dict:
+    return {
+        "market": market,
+        "phase": "expansion",
+        "phaseLabel": "확장",
+        "confidence": "low",
+        "signals": [],
+        "sectorStrategy": "데이터 수집 중.",
+    }
 
-        result = analyzeCycle(market=market)
-        # 시계열은 제거 (용량 축소)
-        result.pop("timeseries", None)
+
+def _analyze_market(market: str) -> dict:
+    """sync 단계 (buildMacroCycle.py) 가 미리 산출한 cycle JSON 을 읽는다.
+
+    HF dataset ``macro/cycle/{market}.json`` 우선, 없으면 로컬 cache, 모두 없으면
+    기본값. 본 함수는 외부 API 호출 0 — prebuild offline 가드 통과.
+    """
+    lower = market.lower()
+
+    # 1. 로컬 cache (sync 단계가 같은 머신에서 돌았다면 존재)
+    localPath = ROOT / "data" / "macro" / "cycle" / f"{lower}.json"
+    if localPath.exists():
+        try:
+            return json.loads(localPath.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"  ⚠ {market} local cache load 실패: {e}", flush=True)
+
+    # 2. HF dataset 다운로드 (offline 가드는 HF 호스트 default allow)
+    try:
+        from huggingface_hub import hf_hub_download
+
+        path = hf_hub_download(
+            repo_id="eddmpython/dartlab-data",
+            repo_type="dataset",
+            filename=f"macro/cycle/{lower}.json",
+        )
+        result = json.loads(Path(path).read_text(encoding="utf-8"))
+        # 로컬 cache 도 저장 — 다음 실행 빠르게.
+        localPath.parent.mkdir(parents=True, exist_ok=True)
+        localPath.write_text(json.dumps(result, ensure_ascii=False, indent=0), encoding="utf-8")
         return result
     except Exception as e:
-        print(f"  ⚠ {market}: {type(e).__name__}: {e}", flush=True)
-        return {
-            "market": market,
-            "phase": "expansion",
-            "phaseLabel": "확장",
-            "confidence": "low",
-            "signals": [],
-            "sectorStrategy": "데이터 수집 중.",
-        }
+        print(f"  ⚠ {market} HF cycle JSON 미가용 ({type(e).__name__}): fallback", flush=True)
+        return _fallback(market)
 
 
 def main() -> int:
+    # prebuild = offline only. analyzeCycle (외부 API) 호출은 sync 단계로 이전,
+    # 여기서는 HF dataset 의 macro/cycle/{kr,us}.json 만 다운로드해서 사용.
+    from dartlab.core.offlineGuard import enforceOffline
+
+    enforceOffline()
+
     t0 = time.time()
     print("[macro.json 빌드]", flush=True)
 
