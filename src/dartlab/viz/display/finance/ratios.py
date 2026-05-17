@@ -70,6 +70,7 @@ def stability(norm: pl.DataFrame, nPeriods: int, periodKind: PeriodKind) -> dict
         "periods": periods,
         "currentRatio": [_pct(_safeDiv(curA[i], curL[i])) for i in range(len(periods))],
         "quickRatio": [_quick(i) for i in range(len(periods))],
+        "cashRatio": [_pct(_safeDiv(cash[i], curL[i])) for i in range(len(periods))],
         "debtRatio": [_pct(_safeDiv(liab[i], eq[i])) for i in range(len(periods))],
         "equityRatio": [_pct(_safeDiv(eq[i], assets[i])) for i in range(len(periods))],
     }

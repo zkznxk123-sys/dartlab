@@ -63,6 +63,103 @@ def apiSearch(q: str = Query(..., min_length=1)):
         raise HTTPException(status_code=400, detail=guideDetail(exc)) from exc
 
 
+_BLOG_REPORTS_DIR = "blog/05-company-reports"
+
+
+def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
+    """blog/05-company-reports/{NN}-{CODE}-{slug}/ 패턴에서 stockCode 일치하는 글 추출.
+
+    회사 헤더의 블로그 태그용. 미발견 시 빈 리스트.
+
+    URL 검증: 디렉토리 안 index.md / page.md / README.md 중 하나가 존재해야 노출.
+    frontmatter 의 `publishedUrl` / `permalink` 가 있으면 그 값 우선 사용.
+    없으면 GitHub Pages 추정 URL 도 노출 금지 (깨진 링크 차단).
+    """
+    from pathlib import Path
+
+    base = Path(__file__).resolve().parents[4] / _BLOG_REPORTS_DIR
+    if not base.exists():
+        return []
+    posts: list[dict[str, str]] = []
+    code_pad = str(stockCode).zfill(6)
+    for child in sorted(base.iterdir()):
+        if not child.is_dir():
+            continue
+        name = child.name  # NN-CODE-slug
+        parts = name.split("-", 2)
+        if len(parts) < 3:
+            continue
+        post_code = parts[1]
+        if post_code != code_pad:
+            continue
+        slug = parts[2]
+        # 본문 파일 + frontmatter publishedUrl/permalink 확인.
+        md = None
+        for candidate in ("index.md", "page.md", "README.md"):
+            p = child / candidate
+            if p.exists():
+                md = p
+                break
+        if md is None:
+            continue  # 본문 없으면 노출 금지
+        published_url = ""
+        try:
+            text = md.read_text(encoding="utf-8", errors="ignore")
+            if text.startswith("---"):
+                fm_end = text.find("---", 3)
+                if fm_end > 0:
+                    fm = text[3:fm_end]
+                    for line in fm.splitlines():
+                        line = line.strip()
+                        for key in ("publishedUrl:", "permalink:", "url:"):
+                            if line.startswith(key):
+                                v = line[len(key) :].strip().strip('"').strip("'")
+                                if v.startswith("http"):
+                                    published_url = v
+                                break
+                        if published_url:
+                            break
+        except OSError:
+            pass
+        if not published_url:
+            continue  # 외부 published URL 미확인 시 노출 금지 (404 차단)
+        title = slug.replace("-", " ")
+        posts.append({"title": title, "slug": slug, "url": published_url})
+    return posts
+
+
+def _findSector(stockCode: str) -> str:
+    """KRX listing 에서 업종 추출. 미발견 시 빈 문자열."""
+    try:
+        df = dartlab.searchName(str(stockCode))
+        if isEmptyDf(df):
+            return ""
+        rows = df.to_dicts()
+        for r in rows:
+            sc = str(r.get("종목코드", r.get("stockCode", "")))
+            if sc.zfill(6) == str(stockCode).zfill(6):
+                return str(r.get("업종", "") or "")
+        return str(rows[0].get("업종", "") or "")
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+@router.get("/api/company/{code}/meta")
+def apiCompanyMeta(code: str):
+    """회사 헤더 확장 메타 — 섹터 / 제품 / 블로그 글.
+
+    제품 라벨은 placeholder (사업보고서 추출은 후속 PR).
+    """
+    sector = _findSector(code)
+    blog_posts = _findBlogPosts(code)
+    return {
+        "stockCode": code,
+        "sector": sector,
+        "products": [],  # 후속 PR: 사업보고서 주요제품 섹션 키워드 추출
+        "blogPosts": blog_posts,
+    }
+
+
 @router.get("/api/company/{code}")
 def apiCompany(code: str):
     """종목 기본 정보 + 사용 가능 API surface 목록."""

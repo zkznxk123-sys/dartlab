@@ -34,12 +34,15 @@ from dartlab.core.logger import getLogger
 _log = getLogger(__name__)
 
 
-# ── 팔레트 ──
-from dartlab.core.palette import COLORS  # noqa: F401
-
+# ── 팔레트 (SSOT 는 dartlab.viz.palette) ──
 # core/select.py 가 viz 의존 없이 HTML 렌더 — viz import 시점에 자동 등록.
 # pyodide 등 plotly 미설치 환경은 viz import 자체가 실패해 register 도 안 됨.
 from dartlab.reference.render import register as _registerRenderer
+
+# ── 새 SSOT API: catalog + builder + render 4 매체 ──
+from dartlab.viz.builder import buildView  # noqa: F401
+from dartlab.viz.catalog import CATALOG, TAB_KEYS, listCards  # noqa: F401
+from dartlab.viz.catalog.finance import FINANCE_DASHBOARD_KEYS  # noqa: F401
 from dartlab.viz.charts import (
     balanceSheet as balance_sheet_chart,
 )
@@ -94,6 +97,8 @@ from dartlab.viz.generators import (  # noqa: F401
     specSensitivityHeatmap,
     specSixActRadar,
 )
+from dartlab.viz.palette import COLORS, INTENT_MAP, TONE_MAP, resolveColor  # noqa: F401
+from dartlab.viz.render import toAscii, toPlotly, toRechartsSpec, toSvg  # noqa: F401
 
 # ── ChartSpec → 매체 렌더러 ──
 from dartlab.viz.renderers.ascii import renderAscii  # noqa: F401
@@ -288,8 +293,20 @@ def emitDiagram(diagramType: str, source: str, *, title: str = "") -> None:
 
 
 __all__ = [
-    # palette
+    # palette (SSOT)
     "COLORS",
+    "INTENT_MAP",
+    "TONE_MAP",
+    "resolveColor",
+    # 새 SSOT API
+    "buildView",
+    "CATALOG",
+    "FINANCE_DASHBOARD_KEYS",
+    "listCards",
+    "toRechartsSpec",
+    "toPlotly",
+    "toSvg",
+    "toAscii",
     # spec
     "VizSpec",
     "VizIntent",
