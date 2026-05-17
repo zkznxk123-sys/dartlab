@@ -235,17 +235,22 @@ def createServer():
             ToolAnnotations,
         ) = _importMcp()
     except ImportError:
-        # editable install namespace collision 우회 — 'mcp' top-level lookup 이
-        # dartlab.mcp 로 잡혔을 가능성 (transports.py 와 같은 회귀). cleanup +
-        # path remove 후 SDK 재 import. ImportError 와 ModuleNotFoundError 둘 다.
+        # transports.py 와 같은 namespace collision 우회 — sys.path 의 모든 path 에서
+        # mcp/__init__.py 의 첫 500 바이트에 'dartlab' 포함이면 그 path 제거.
         import os
         import sys
-        from pathlib import Path
 
-        _dartlabRoot = str(Path(__file__).resolve().parent.parent)
+        _badPaths = set()
+        for _p in sys.path:
+            _cand = os.path.join(_p, "mcp", "__init__.py")
+            if os.path.exists(_cand):
+                with open(_cand, "rb") as _f:
+                    _head = _f.read(500)
+                if b"dartlab" in _head:
+                    _badPaths.add(os.path.normpath(_p))
         for _k in [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]:
             del sys.modules[_k]
-        sys.path[:] = [p for p in sys.path if os.path.normpath(p) != os.path.normpath(_dartlabRoot)]
+        sys.path[:] = [p for p in sys.path if os.path.normpath(p) not in _badPaths]
         try:
             (
                 Server,

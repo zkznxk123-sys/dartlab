@@ -21,21 +21,34 @@ def runStdio() -> None:
 
     try:
         from mcp.server.stdio import stdio_server
-    except ImportError:
-        # editable install 의 namespace collision 우회 — sys.path 에 'src/dartlab'
-        # 가 추가돼 'import mcp' 가 dartlab.mcp 로 잡혔을 가능성. 두 형태:
-        #   1. ModuleNotFoundError: 'mcp.server.stdio'; 'mcp.server' is not a package
-        #   2. ImportError: cannot import name 'X' from 'mcp.server' (dartlab/.../server.py)
-        # sys.modules cleanup + sys.path 에서 dartlab 디렉토리 제거 후 SDK 재 import.
-        # dartlab 자체는 이미 sys.modules 에 로드된 상태라 영향 없음.
+    except ImportError as initial_exc:
+        # editable install 또는 cwd-collision 우회 — sys.path 의 어떤 path 가
+        # 'mcp' 를 dartlab.mcp 로 잡았을 가능성. diagnostic dump 후 cleanup.
         import os
         import sys
         from pathlib import Path
 
-        _dartlabRoot = str(Path(__file__).resolve().parent.parent)
+        # Diagnostic: stderr 에 sys.path + 발견된 mcp 패키지 dump (CI 회귀 추적용)
+        sys.stderr.write(f"[dartlab.mcp] initial import failed: {initial_exc}\n")
+        sys.stderr.write(f"[dartlab.mcp] cwd={os.getcwd()}\n")
+        sys.stderr.write(f"[dartlab.mcp] sys.path={sys.path}\n")
+        for _i, _p in enumerate(sys.path):
+            _cand = os.path.join(_p, "mcp", "__init__.py")
+            if os.path.exists(_cand):
+                sys.stderr.write(f"[dartlab.mcp]   sys.path[{_i}]={_p!r} has mcp at {_cand}\n")
+        # 'mcp' 로 잘못 잡힌 dartlab/mcp/ 의 부모 path 들을 모두 제거.
+        _badPaths = set()
+        for _p in sys.path:
+            _cand = os.path.join(_p, "mcp", "__init__.py")
+            if os.path.exists(_cand):
+                with open(_cand, "rb") as _f:
+                    _head = _f.read(500)
+                if b"dartlab" in _head:
+                    _badPaths.add(os.path.normpath(_p))
+        sys.stderr.write(f"[dartlab.mcp] removing bad paths: {_badPaths}\n")
         for _k in [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]:
             del sys.modules[_k]
-        sys.path[:] = [p for p in sys.path if os.path.normpath(p) != os.path.normpath(_dartlabRoot)]
+        sys.path[:] = [p for p in sys.path if os.path.normpath(p) not in _badPaths]
         try:
             from mcp.server.stdio import stdio_server
         except ImportError as exc:
