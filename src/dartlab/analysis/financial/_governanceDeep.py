@@ -77,35 +77,90 @@ def _loadRelatedPartyTx(*args, **kwargs):
 
 
 def calcOwnershipTrend(*args, **kwargs):
-    """최대주주 지분 시계열 — governance.py 본체로 위임 (cycle 회피용 lazy proxy)."""
+    """최대주주 지분 시계열 — governance.py 본체로 위임 (cycle 회피용 lazy proxy).
+
+    Requires:
+        governance.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcOwnershipTrend(company)["latest"]
+        0.62
+    """
     from dartlab.analysis.financial.governance import calcOwnershipTrend as _f
 
     return _f(*args, **kwargs)
 
 
 def calcBoardComposition(*args, **kwargs):
-    """이사회 구성 분석 — governance.py 본체로 위임 (cycle 회피용 lazy proxy)."""
+    """이사회 구성 분석 — governance.py 본체로 위임 (cycle 회피용 lazy proxy).
+
+    Requires:
+        governance.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcBoardComposition(company)["outsideRatio"]
+        0.6
+    """
     from dartlab.analysis.financial.governance import calcBoardComposition as _f
 
     return _f(*args, **kwargs)
 
 
 def calcAuditOpinionTrend(*args, **kwargs):
-    """감사 의견 시계열 — governance.py 본체로 위임 (cycle 회피용 lazy proxy)."""
+    """감사 의견 시계열 — governance.py 본체로 위임 (cycle 회피용 lazy proxy).
+
+    Requires:
+        governance.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAuditOpinionTrend(company)["latest"]
+        '적정'
+    """
     from dartlab.analysis.financial.governance import calcAuditOpinionTrend as _f
 
     return _f(*args, **kwargs)
 
 
 def calcExecutivePayDivergence(*args, **kwargs):
-    """임원 보수 괴리 — governance.py 본체로 위임 (cycle 회피용 lazy proxy)."""
+    """임원 보수 괴리 — governance.py 본체로 위임 (cycle 회피용 lazy proxy).
+
+    Requires:
+        governance.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcExecutivePayDivergence(company)["divergence"]
+        2.5
+    """
     from dartlab.analysis.financial.governance import calcExecutivePayDivergence as _f
 
     return _f(*args, **kwargs)
 
 
 def calcIndependentDirectorQuality(*args, **kwargs):
-    """사외이사 품질 — governance.py 본체로 위임 (cycle 회피용 lazy proxy)."""
+    """사외이사 품질 — governance.py 본체로 위임 (cycle 회피용 lazy proxy).
+
+    Requires:
+        governance.py 본체 import.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcIndependentDirectorQuality(company)["score"]
+        70
+    """
     from dartlab.analysis.financial.governance import calcIndependentDirectorQuality as _f
 
     return _f(*args, **kwargs)
@@ -119,6 +174,36 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
     -------
     list[tuple[str, str]]
         (message, severity) 쌍 목록. severity: "warning" | "opportunity"
+
+    Capabilities:
+        - 5 governance sub-calc 결과 → warning/opportunity 플래그 자동 누적
+        - 최대주주/이사회/감사/보수/사외이사 결과 종합
+
+    Guide:
+        story governance 플래그 박스. flag ≥ 2 = governance 위험 다중 신호.
+
+    When:
+        Story governance flag + AI 거버넌스 위험 답변.
+
+    How:
+        5 sub-calc 호출 → 임계 비교 → 플래그 누적.
+
+    Requires:
+        governance sub-calc 가용.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcGovernanceFlags(company)
+        [('최대주주 지분 70%+', 'warning')]
+
+    See Also:
+        - calcOwnerConcentration : 종합 owner score
+        - governance.* : sub-calc
+
+    AIContext:
+        "거버넌스 위험" 답변 시 flag 인용.
     """
     flags: list[tuple[str, str]] = []
 
@@ -256,6 +341,10 @@ def calcGovernanceFlags(company, *, basePeriod: str | None = None) -> list[tuple
 def calcOwnerConcentration(company, *, basePeriod: str | None = None) -> dict | None:
     """오너 집중도 — 본인/특수관계 분리 지분 시계열.
 
+    Capabilities:
+        - 본인 vs 특수관계인 지분을 분리하여 연도별 합산 + 5 년 변동폭 추출
+        - 한국 chaebol 소유-지배 괴리 식별
+
     report.majorHolder df에서 연도별 본인("본인") 지분과 특수관계인 합산
     지분을 분리한다. 한국 시장 특유의 "소유-지배 괴리(control-ownership
     disparity)"는 특수관계인을 통한 간접 지배가 크게 벌어질수록 커지므로,
@@ -307,6 +396,18 @@ def calcOwnerConcentration(company, *, basePeriod: str | None = None) -> dict | 
     `top1Share < 10%`이면서 `topHolderRatio > 40%`이면 소유-지배 괴리가
     큰 패턴(특수관계인을 통한 간접 지배). `top1Change5y < -5%p`이면
     본인 지분 희석 국면으로 상속·승계 이벤트 신호일 수 있다.
+
+    When:
+        한국 chaebol 특화 governance 평가 + AI 소유 구조 답변.
+
+    How:
+        report.majorHolder pivot → 본인/특수관계 분리 → 연도별 합산.
+
+    Requires:
+        report.majorHolder df.
+
+    AIContext:
+        chaebol 소유-지배 괴리 답변 시 top1Share + topHolderRatio 인용.
 
     See Also
     --------

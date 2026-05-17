@@ -103,16 +103,52 @@ class CompanyGraph:
         ----------
         node : Node
             추가할 노드.
+
+        Requires:
+            node.id 유효.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> g.addNode(Node(id='n1', type='company', label='X'))
         """
         self.nodes[node.id] = node
 
     def addEdge(self, edge: Edge) -> None:
         """엣지 추가 (forward + reverse 동시 등록).
 
-        Parameters
-        ----------
-        edge : Edge
-            추가할 엣지.
+        Capabilities:
+            - source → target forward + reverse 양방향 동시 등록
+            - 동일 (src, tgt) 면 덮어쓰기
+
+        Args:
+            edge: 추가할 Edge.
+
+        Guide:
+            traverse 양방향 탐색을 위해 forward + reverse 둘 다 유지.
+
+        When:
+            CompanyGraph 빌드 + AI 관계 답변.
+
+        How:
+            edges[src][tgt] = edge + reverse[tgt][src] = edge.
+
+        Requires:
+            edge.source/target 가 그래프 노드.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> g.addEdge(Edge(source='a', target='b'))
+
+        See Also:
+            - addNode : 노드 등록
+            - outgoing / incoming : 탐색
+
+        AIContext:
+            그래프 빌드 invisible. AI 답변 시 traverse 만 호출.
         """
         # forward
         if edge.source not in self.edges:
@@ -128,13 +164,23 @@ class CompanyGraph:
 
         Parameters
         ----------
-        node_id : str
+        nodeId : str
             노드 고유 ID.
 
         Returns
         -------
         Node | None
             해당 노드. 없으면 None.
+
+        Requires:
+            nodeId 문자열.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> g.getNode('n1').label
+            'X'
         """
         return self.nodes.get(nodeId)
 
@@ -143,13 +189,23 @@ class CompanyGraph:
 
         Parameters
         ----------
-        node_id : str
+        nodeId : str
             출발 노드 ID.
 
         Returns
         -------
         list[Edge]
             해당 노드에서 나가는 엣지 리스트.
+
+        Requires:
+            nodeId 가 그래프에 있을 필요는 없음 (없으면 빈 list).
+
+        Raises:
+            없음.
+
+        Example:
+            >>> [e.target for e in g.outgoing('n1')]
+            ['n2']
         """
         return list(self.edges.get(nodeId, {}).values())
 
@@ -158,30 +214,65 @@ class CompanyGraph:
 
         Parameters
         ----------
-        node_id : str
+        nodeId : str
             도착 노드 ID.
 
         Returns
         -------
         list[Edge]
             해당 노드로 들어오는 엣지 리스트.
+
+        Requires:
+            없음.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> [e.source for e in g.incoming('n2')]
+            ['n1']
         """
         return list(self.reverse.get(nodeId, {}).values())
 
     def findNodes(self, *, type: NodeType | None = None, label: str = "") -> list[Node]:
         """조건 매칭 노드 검색.
 
-        Parameters
-        ----------
-        type : NodeType, optional
-            필터링할 노드 타입.
-        label : str
-            부분 매칭할 라벨 (대소문자 무시).
+        Capabilities:
+            - type 필터 + label substring 검색
+            - 두 조건 AND
 
-        Returns
-        -------
-        list[Node]
-            조건에 맞는 노드 리스트.
+        Args:
+            type: 노드 타입 (선택).
+            label: 라벨 부분 매칭 (대소문자 무시).
+
+        Returns:
+            list[Node] — 매칭 노드.
+
+        Guide:
+            type=NodeType.COMPANY + label="삼성" → 삼성 계열사 노드 조회.
+
+        When:
+            graph traverse 진입점 + AI 관계 탐색 답변.
+
+        How:
+            self.nodes 순회 → type/label 조건 필터.
+
+        Requires:
+            그래프 빌드 완료.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> g.findNodes(type=NodeType.COMPANY, label="삼성")
+            [Node(...)]
+
+        See Also:
+            - outgoing / incoming : 관계 탐색
+            - traverse.* : BFS/DFS
+
+        AIContext:
+            "이 그래프의 X 타입 노드" 답변 시 사용.
         """
         results = []
         for n in self.nodes.values():
@@ -202,6 +293,16 @@ class CompanyGraph:
         -------
         int
             그래프 내 총 엣지 수.
+
+        Requires:
+            없음.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> g.edgeCount()
+            42
         """
         return sum(len(targets) for targets in self.edges.values())
 
@@ -212,5 +313,15 @@ class CompanyGraph:
         -------
         str
             "CompanyGraph(기업명): N nodes, M edges" 형식.
+
+        Requires:
+            없음.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> g.summary()
+            'CompanyGraph(삼성전자): 12 nodes, 42 edges'
         """
         return f"CompanyGraph({self.corpName}): {len(self)} nodes, {self.edgeCount()} edges"
