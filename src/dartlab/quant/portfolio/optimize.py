@@ -231,6 +231,39 @@ def optimizeMeanVar(
         - 종목 ≤ 12: enumeration으로 globally optimal.
         - 종목 > 12: iterative active-set.
         - Tangency Sharpe는 (μ - rf) / σ.
+
+    Capabilities:
+        - Markowitz 1952 표준 MV + Tangency 동시 산출
+        - active-set QP 정확 + Ledoit-Wolf shrinkage 옵션
+        - dataPoints < 60 시 adequacy=low 명시
+
+    Guide:
+        N ≤ 12 면 enumeration globally optimal, > 12 iterative active-set. 단기 표본
+        (252 봉 미만) 에서 ledoit_wolf 권장.
+
+    When:
+        Portfolio 최적 weights + AI 분산 투자 답변.
+
+    How:
+        _buildReturns → cov 추정 → active-set MinVar + Tangency.
+
+    Requires:
+        stockCodes ≥ 2 + 가격 데이터.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = optimizeMeanVar(["005930","000660"])
+        >>> r["minVariance"]["sharpe"]
+        0.48
+
+    See Also:
+        - optimizeRiskParity : HRP
+        - allocateERC : risk parity ERC
+
+    AIContext:
+        "Min-Var 또는 Tangency 포트" 답변 시 weights 인용.
     """
     result: dict = {"stockCodes": stockCodes}
 
@@ -315,7 +348,35 @@ def optimizeRiskParity(stockCodes: list[str], *, market: str = "auto", **kwargs)
     Examples
     --------
     >>> from dartlab.quant.portfolio.optimize import optimizeRiskParity
-    >>> optimizeRiskParity(["005930", "000660", "035720"])"""
+    >>> optimizeRiskParity(["005930", "000660", "035720"])
+
+    Capabilities:
+        - 상관 거리 기반 single-linkage hierarchical clustering → recursive bisection 역분산
+        - cov 추정 오류에 강건 (Lopez de Prado 2016 HRP)
+
+    Guide:
+        Markowitz Min-Var 보다 ill-conditioned cov 에 강건. 다종목 (≥ 10) 에서 효과 큼.
+
+    When:
+        Portfolio 분산 + AI 견고한 weights 답변.
+
+    How:
+        ``corr`` → distance matrix → single-linkage clustering → recursive bisection
+        역분산 가중.
+
+    Requires:
+        stockCodes ≥ 2 + 가격 데이터.
+
+    Raises:
+        없음.
+
+    SeeAlso:
+        - optimizeMeanVar : Markowitz MV
+        - allocateERC : 상관 고려 risk parity
+
+    AIContext:
+        "HRP 분산 포트" 답변 시 weights + clusterOrder 인용.
+    """
     result: dict = {"stockCodes": stockCodes}
 
     if len(stockCodes) < 2:

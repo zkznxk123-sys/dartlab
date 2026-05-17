@@ -156,6 +156,42 @@ class Rule:
         lag=1 이면 어제 신호로 오늘 진입 (next-bar 체결과 결합 시 t-1 신호 → t+1 체결).
 
         학술 근거: Lopez de Prado AFML — "When in doubt, shift by 1".
+
+        Capabilities:
+            - entry_expr/exit_expr 시리즈 lag 봉만큼 right-shift → 미래 정보 차단
+            - meta 에 ``shift_lag`` 키로 기록
+
+        Args:
+            lag: 미룰 봉 수. 기본 ``1``. 0 이면 self 반환.
+
+        Returns:
+            Rule — 새 객체 (immutable 패턴).
+
+        Guide:
+            Lopez de Prado AFML 권고. lag=1 = next-bar 체결 안전 가드. lag=2+ = 매우 보수적.
+
+        When:
+            신호 안전성 검증 + AI lookahead 의혹 답변.
+
+        How:
+            새 array 초기화 → ent[lag:] = entry[:-lag] → 새 Rule 반환.
+
+        Requires:
+            self.entry_expr/exit_expr 동일 길이.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> rule.shiftLag(1).meta["shift_lag"]
+            1
+
+        See Also:
+            - lookaheadCheck : 누설 통계 검증
+            - strategy.backtest.vectorBacktest : next-bar 체결
+
+        AIContext:
+            "lookahead bias 안전한가" 답변 시 shiftLag(1) 적용 권장.
         """
         if lag <= 0:
             return self
@@ -181,8 +217,41 @@ class Rule:
             2. 만약 entry 시점 직후 수익률이 비현실적으로 높으면 leakage 의심.
             3. 정직한 신호는 +1~5% 정도, leakage 신호는 +20%+ 자주 나타남.
 
+        Capabilities:
+            - entry 시점 5 봉 forward return vs random 시점 비교 → ratio + suspicious 플래그
+            - ratio > 5 + entry avg > 5% 또는 entry avg > 10% 시 suspicious=True
+
+        Args:
+            close: 종가 시계열 (entry_expr 길이 일치).
+
         Returns:
-            dict {entry_n_avg_ret_5d, random_avg_ret_5d, ratio, suspicious}
+            dict — n_entries/entry_forward_5d_avg/random_forward_5d_avg/ratio/suspicious.
+
+        Guide:
+            Rule 검증의 paranoid sanity. suspicious=True 면 신호 정의 재검토.
+
+        When:
+            Rule 정의 검증 + AI "이 신호 신뢰" 답변.
+
+        How:
+            entry indices → 5 봉 forward → 평균 vs random 시점 평균 → ratio.
+
+        Requires:
+            self.entry_expr 길이 ≥ 30 + entry 시그널 ≥ 5.
+
+        Raises:
+            없음 — 부적 시 error dict.
+
+        Example:
+            >>> rule.lookaheadCheck(close)["suspicious"]
+            False
+
+        See Also:
+            - shiftLag : 가드
+            - strategy.backtest.vectorBacktest : 실제 백테스트
+
+        AIContext:
+            "이 룰 lookahead 의혹" 답변 시 ratio + suspicious 인용.
         """
         n = len(self.entry_expr)
         if n < 30 or len(close) != n:

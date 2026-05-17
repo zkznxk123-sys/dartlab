@@ -37,7 +37,43 @@ def calcCrossSectionIC(
 ) -> dict:
     """한 시점의 횡단면 IC (Pearson + Spearman + t-stat).
 
-    Returns dict with ic_pearson, ic_spearman, n_stocks, t_stat, is_significant.
+    Capabilities:
+        - 종목별 factorScore vs forwardReturn → Pearson + Spearman + t-stat 단일 시점
+        - n ≥ 10 필수 + perfect correlation 안전 처리 (1.0 시 t inf 회피)
+
+    Args:
+        factorScores: ``{stockCode: factorScore}``.
+        forwardReturns: ``{stockCode: forward_return}``.
+
+    Returns:
+        dict — ic_pearson/ic_spearman/n_stocks/t_stat/is_significant.
+
+    Guide:
+        Grinold-Kahn Ch.5-6 정의. IC ≥ 0.05 = useful, ≥ 0.10 = strong. |t| > 2.0 = 5% 유의.
+
+    When:
+        팩터 단일 시점 효과 검증 + AI 횡단면 alpha 답변.
+
+    How:
+        공통 종목 → x/y array → NaN 제거 → pearson/spearman → t-stat.
+
+    Requires:
+        공통 종목 ≥ 10.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> r = calcCrossSectionIC({'A': 1, 'B': 2}, {'A': 0.1, 'B': 0.2})
+        >>> r["n_stocks"]
+        2
+
+    See Also:
+        - icTimeSeries : 다시점 IC + ICIR
+        - strategy.metrics.pearsonCorr / spearmanCorr : core stats
+
+    AIContext:
+        "팩터가 종목 잘 정렬" 답변 시 ic_spearman + is_significant 인용.
     """
     common = sorted(set(factorScores) & set(forwardReturns))
     if len(common) < 10:
@@ -98,6 +134,36 @@ def icTimeSeries(
         icir : float — ICIR = mean_ic / std_ic (배)
         n_periods : int — 유효 기간 수
         hit_rate : float — IC 부호 일치 비율 (0~1)
+
+    Capabilities:
+        - 시점별 calcCrossSectionIC 반복 → ic_spearman 누적 → 평균/표준편차/ICIR
+        - hit_rate = 부호 일치 비율
+
+    Guide:
+        Grinold-Kahn ICIR ≥ 0.5 = useful, ≥ 0.75 = exceptional. Fundamental Law breadth N_periods.
+
+    When:
+        팩터 시계열 견고성 + AI ICIR 답변.
+
+    How:
+        for fs, fr → calcCrossSectionIC → ic_spearman 수집 → 통계.
+
+    Requires:
+        두 series 길이 일치 + 유효 IC ≥ 2.
+
+    Raises:
+        ValueError — 두 series 길이 불일치.
+
+    Example:
+        >>> icTimeSeries(fs_list, fr_list)["icir"]
+        0.48
+
+    See Also:
+        - calcCrossSectionIC : 단일 시점
+        - strategy.metrics.fundamentalLawIR : breadth 결합
+
+    AIContext:
+        "팩터 시간적 견고성" 답변 시 icir + hit_rate 인용.
     """
     if len(factorScoresSeries) != len(forwardReturnsSeries):
         raise ValueError("factorScoresSeries / forwardReturnsSeries 길이 불일치")
