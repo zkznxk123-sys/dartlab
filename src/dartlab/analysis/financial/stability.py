@@ -91,6 +91,13 @@ def calcLeverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
         - 차입금 키 회사별 다양 (사채/유동성장기차입금) → sumBorrowings 가
           12 키 합산하므로 누락 없음.
 
+    When:
+        자본 안정성 시계열 진단, credit engine leverage 축 입력 생성.
+
+    How:
+        BS rawNormalized → 자본구조 항목·차입금 합산 → 3 비율 + netDebt →
+        injectTurningPoints + fetchNotesDetail enrichment.
+
     SeeAlso:
         - ``calcCoverageTrend``: IC (이자보상)
         - ``calcFundingSources``: 자본/부채/차입 funding mix
@@ -243,6 +250,13 @@ def calcCoverageTrend(company, *, basePeriod: str | None = None) -> dict | None:
         - IC 1.5~3: BB / IC < 1: 부도 위험.
         IC < 1 가 2~3 년 연속이면 채무 재조정 신호.
 
+    When:
+        이자 부담 시계열 진단, Damodaran 신용등급 매핑 입력 생성.
+
+    How:
+        IS 영업이익 + (이자비용 우선) → CF interest_paid → IS 금융비용 폴백
+        순으로 이자비용 결정 → IC = 영업이익 / |이자비용|.
+
     SeeAlso:
         - ``calcLeverageTrend``: 부채/자본 구조
         - ``calcDistressScore``: Altman Z (IC 직접 변수 아님, EBIT/TA)
@@ -375,6 +389,13 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
         - 단기차입금 비중 > 50% + refinancingRisk > 2 = 차환 위기 신호.
         - 사채 (회사채) 만기 도래 시 시장 환경 (금리/스프레드) 함께 확인.
         - 금융업/바이오는 차입 구조 다름 — 자동 폴백 분기.
+
+    When:
+        차환 리스크 진단·만기 구조 분석 시.
+
+    How:
+        BS 차입금 (제조 → 금융 → 바이오 폴백) + CF OCF → 단기 비중·유동/
+        부채총계·refinancingRisk 시계열.
 
     SeeAlso:
         - ``calcLeverageTrend``: 부채/자본 구조 (위 함수와 paired)
@@ -510,11 +531,42 @@ def calcDebtMaturity(company, *, basePeriod: str | None = None) -> dict | None:
 def calcStabilityFlags(company, *, basePeriod: str | None = None) -> dict:
     """안정성 경고/기회 플래그.
 
-    Returns
-    -------
-    dict
-        flags : list[str] — 경고/기회 플래그 문자열 목록
-        enrichedFlags : list[dict] — 상세 진단 메타 포함 플래그 목록
+    Capabilities:
+        - 부채비율·IC·차환 리스크 임계 초과 시 한국어 flags + enrichedFlags
+          (메타 포함) 동시 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict: flags (한국어 메시지 리스트) + enrichedFlags (메타 dict 리스트).
+
+    Guide:
+        지주/금융사 vs 제조업의 임계 자동 분기. 단기 비중 + OCF 동시 평가.
+
+    When:
+        보고서·UI 위험 배너에 안정성 경고 한 줄 표시.
+
+    How:
+        ``calcLeverageTrend`` + ``calcCoverageTrend`` + ``calcDebtMaturity``
+        결과를 업종별 임계와 비교 후 (메시지, 메타) 생성.
+
+    Requires:
+        하위 3 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcStabilityFlags(Company("005930"))
+        {"flags": ["..."], "enrichedFlags": [...]}
+
+    SeeAlso:
+        - ``calcLeverageTrend``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 안정성 위험 한 줄 인용 시.
     """
     flags: list[str] = []
     enriched: list[dict] = []

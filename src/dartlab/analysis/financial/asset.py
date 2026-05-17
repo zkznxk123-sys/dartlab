@@ -144,6 +144,13 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
         과다 (지주사 또는 자본배분 비효율 신호). NOA 증가 추세 = 자본 재투자
         (cumulative reinvestment). Penman ROE 분해: ROE = RNOA + FLEV × Spread.
 
+    When:
+        자본배분 진단·RNOA 계산 입력·자산 구조 시계열 분석 시.
+
+    How:
+        BS rawNormalized → 영업자산 (PPE + 무형 + 운전자본) + 비영업 (현금 +
+        투자) 분리 → NOA 합성 → diagnosis + notesDetail enrichment.
+
     SeeAlso:
         - ``calcWorkingCapital``: 순운전자본 분해
         - ``calcCapexPattern``: 고정영업자산 변화
@@ -336,26 +343,44 @@ def calcAssetStructure(company, *, basePeriod: str | None = None) -> dict | None
 def calcWorkingCapital(company, *, basePeriod: str | None = None) -> dict | None:
     """운전자본 상세 + CCC.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 순운전자본 (WC = 매출채권 + 재고 - 매입채무) + 회전일수 3 + 현금전환
+          주기 (CCC) 시계열.
 
-    Returns
-    -------
-    dict | None
-        latest : dict
-            wc : float — 순운전자본 (원)
-            receivables : float — 매출채권 (원)
-            inventory : float — 재고자산 (원)
-            payables : float — 매입채무 (원)
-            receivableDays : float — 매출채권 회수일수 (일)
-            inventoryDays : float — 재고자산 보유일수 (일)
-            payableDays : float — 매입채무 지급일수 (일)
-            ccc : float — 현금전환주기 (일)
-        history : list[dict] — 연도별 운전자본 시계열
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: latest (8 키) + history (연도별 6 키) 행 리스트. 데이터
+        부재 시 None.
+
+    Guide:
+        CCC > 120 일 = 현금 회수 느림 (경고). CCC < 0 = 운전자본 유리 (선수금
+        의존 비즈니스). 매출채권/재고 fallback 체인 자동 적용.
+
+    When:
+        운전자본 효율 진단·CCC 시계열 표시·현금 회수 사이클 분석 시.
+
+    How:
+        BS rec/inv/pay + IS 매출/매출원가 매핑 → 일수 = 잔액 / flow × 365.
+
+    Requires:
+        BS (매출채권/재고/매입채무) + IS (매출/매출원가).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcWorkingCapital(Company("005930"))
+        {"latest": {"ccc": 45.2, ...}, "history": [...]}
+
+    SeeAlso:
+        - ``calcAssetStructure``: NOA 분해
+        - ``efficiency``: 회전율
+
+    AIContext:
+        AI 답변에서 CCC·운전자본 효율 한 줄 인용 시.
     """
     bsAccounts = ["매출채권", "매출채권및기타채권", "재고자산", "매입채무", "매입채무및기타채무"]
     isAccounts = ["매출액", "매출원가"]
@@ -444,10 +469,42 @@ from dartlab.analysis.financial._assetCapex import (  # noqa: E402, F401
 def calcAssetFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """자산 구조 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 메시지 문자열 리스트 (비영업자산 과다, CCC 과다, CAPEX 부족/과잉, 자산효율 악화 등).
+    Capabilities:
+        - 비영업자산 과다·건설중인자산 비중·재고 비대화·CCC 과다 등을
+          한국어 flags 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        flag 임계 — nonOpAssetsPct ≥ 40, CIP/TA ≥ 10%, inventory/TA ≥ 20%,
+        CCC > 120 일.
+
+    When:
+        보고서·UI 위험 배너에 자산 구조 경고 한 줄 표시.
+
+    How:
+        ``calcAssetStructure`` + ``calcWorkingCapital`` 결과를 임계와 비교.
+
+    Requires:
+        하위 2 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcAssetFlags(Company("005930"))
+        ["CCC 145일 — 현금 회수 매우 느림"]
+
+    SeeAlso:
+        - ``calcAssetStructure``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 자산 구조 위험 한 줄 인용 시.
     """
     flags = []
 

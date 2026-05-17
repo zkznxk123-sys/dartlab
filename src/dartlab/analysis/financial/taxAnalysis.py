@@ -24,23 +24,43 @@ from dartlab.core.utils.calc import safePct as _pct  # noqa: E402
 def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | None:
     """유효세율 시계열 — 법인세비용/세전이익.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 연도별 유효세율 + 법정세율 (KR 24%) gap 시계열 + Q4 4 분기 합산 fallback.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            preTaxIncome : float — 세전이익 (원)
-            taxExpense : float — 법인세비용 (원)
-            effectiveTaxRate : float | None — 유효세율 (%)
-            statutoryRate : float — 법정세율 (%)
-            taxGap : float | None — 유효-법정 세율 갭 (%p)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history (preTaxIncome/taxExpense/effectiveTaxRate/
+        statutoryRate/taxGap) 행 리스트. 데이터 부재 시 None.
+
+    Guide:
+        법정세율 24% (KR 대기업 근사). taxGap > 0 = 세금혜택 미적용, < 0 =
+        세금 절약 효과.
+
+    When:
+        세금 부담 시계열 진단·세전 이익 대비 세금 효율 평가 시.
+
+    How:
+        IS rawNormalized 매핑 → annualSumFlow (Q4 fallback) → 비율 계산.
+
+    Requires:
+        IS (법인세비용/법인세차감전순이익) 시계열.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcEffectiveTaxRate(Company("005930"))
+        {"history": [{"period": "...", "effectiveTaxRate": 22.5, ...}]}
+
+    SeeAlso:
+        - ``calcTaxCashConversion``: 현금 납부 비교
+        - ``calcDeferredTax``: 이연 잔액
+
+    AIContext:
+        AI 답변에서 유효세율·세금 효율 한 줄 인용 시.
     """
     accounts = ["법인세비용", "법인세차감전순이익", "세전이익"]
     isResult = company.select("IS", accounts)
@@ -94,21 +114,43 @@ def calcEffectiveTaxRate(company, *, basePeriod: str | None = None) -> dict | No
 def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | None:
     """세금 현금화 시계열 — IS 법인세비용 vs CF 법인세납부.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 연도별 IS 법인세비용 + CF 법인세납부 + 납부/비용 비율 시계열.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            taxExpense : float — 법인세비용 (원)
-            taxPaid : float | None — 법인세납부액 (원)
-            taxCashRatio : float | None — 납부/비용 비율 (%)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history (taxExpense/taxPaid/taxCashRatio) 행 리스트.
+        IS 데이터 부재 시 None.
+
+    Guide:
+        taxCashRatio > 150% = 과거 이연분 정산 (과대 납부 패턴). 100% 근처
+        = 정상.
+
+    When:
+        세금 비용의 현금 뒷받침 여부 추적·이연법인세 정산 패턴 확인 시.
+
+    How:
+        IS 법인세비용 + CF income_taxes 매핑 → annualSumFlow 합산 → 비율.
+
+    Requires:
+        IS 법인세비용 + CF payments_of_income_taxes.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcTaxCashConversion(Company("005930"))
+        {"history": [{"period": "...", "taxCashRatio": 95.2, ...}]}
+
+    SeeAlso:
+        - ``calcEffectiveTaxRate``: 유효세율 시계열
+        - ``calcDeferredTax``: 이연 잔액
+
+    AIContext:
+        AI 답변에서 세금 현금화 한 줄 인용 시.
     """
     isResult = company.select("IS", ["법인세비용"])
     cfResult = company.select("CF", ["payments_of_income_taxes"])
@@ -165,22 +207,43 @@ def calcTaxCashConversion(company, *, basePeriod: str | None = None) -> dict | N
 def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
     """이연법인세 시계열 — 이연자산/부채 추세.
 
-    Parameters
-    ----------
-    company : Company
-        분석 대상 기업.
-    basePeriod : str, optional
-        기준 기간.
+    Capabilities:
+        - 이연법인세자산/부채/순이연 + 자산 비중 시계열.
 
-    Returns
-    -------
-    dict | None
-        history : list[dict]
-            period : str — 기간
-            deferredTaxAsset : float — 이연법인세자산 (원)
-            deferredTaxLiability : float — 이연법인세부채 (원)
-            netDeferredTax : float — 순이연법인세 (원)
-            dtaToTotalAssets : float | None — 이연자산/총자산 비율 (%)
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        dict | None: history (deferredTaxAsset/Liability/netDeferredTax/
+        dtaToTotalAssets) 행 리스트. 데이터 부재 시 None.
+
+    Guide:
+        DTA 급증 = 미래 과세소득 가정 검토 필요. dtaToTotalAssets > 5% =
+        실현 가능성 진단 필요.
+
+    When:
+        이연법인세 잔액 추세·실현 가능성 진단 시.
+
+    How:
+        BS 이연 자산/부채/자산총계 매핑 → 잔액 + 비중 시계열.
+
+    Requires:
+        BS 이연법인세 자산·부채·자산총계.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcDeferredTax(Company("005930"))
+        {"history": [{"period": "...", "netDeferredTax": 12345, ...}]}
+
+    SeeAlso:
+        - ``calcEffectiveTaxRate``: 유효세율 시계열
+        - ``calcTaxCashConversion``: 현금 납부
+
+    AIContext:
+        AI 답변에서 이연법인세 추세 인용 시.
     """
     bsResult = company.select("BS", ["이연법인세자산", "이연법인세부채", "자산총계"])
     bsParsed = toDictBySnakeId(bsResult)
@@ -223,11 +286,43 @@ def calcDeferredTax(company, *, basePeriod: str | None = None) -> dict | None:
 def calcTaxFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """세금 관련 경고 신호.
 
-    Returns
-    -------
-    list[str]
-        경고 메시지 문자열 리스트 (극저/고세율, 세금혜택 의존, 세금현금 과대납부,
-        이연법인세 급증/연속 증가 등).
+    Capabilities:
+        - 극저/고세율, 세금혜택 구조적 의존, 세율 변동성, 세금현금 과대납부,
+          이연법인세 급증/연속 증가 등을 한국어 flags 산출.
+
+    Args:
+        company: 분석 대상 기업.
+        basePeriod: 기준 기간.
+
+    Returns:
+        list[str]: 한국어 경고 메시지. 임계 미달 시 빈 리스트.
+
+    Guide:
+        임계 — 유효세율 < 10% 또는 > 35%, 법정세율 50% 미만 3 기 연속,
+        변동계수 > 0.5, taxCashRatio > 150%, DTA 2x+ 급증.
+
+    When:
+        보고서·UI 위험 배너에 세금 관련 경고 한 줄 표시.
+
+    How:
+        ``calcEffectiveTaxRate`` + ``calcTaxCashConversion`` + ``calcDeferredTax``
+        결과를 임계와 비교 후 한국어 포맷팅.
+
+    Requires:
+        하위 3 calc 가용성.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> calcTaxFlags(Company("005930"))
+        ["유효세율 8.1% — 극저세율 ..."]
+
+    SeeAlso:
+        - ``calcEffectiveTaxRate``: 본 함수 입력
+
+    AIContext:
+        AI 답변에서 세금 리스크 한 줄 인용 시.
     """
     flags = []
 
