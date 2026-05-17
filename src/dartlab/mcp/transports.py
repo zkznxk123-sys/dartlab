@@ -21,8 +21,25 @@ def runStdio() -> None:
 
     try:
         from mcp.server.stdio import stdio_server
-    except ImportError as exc:
-        raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
+    except ImportError:
+        # editable install 의 namespace collision 우회 — sys.path 에 'src/dartlab'
+        # 가 추가돼 'import mcp' 가 dartlab.mcp 로 잡혔을 가능성. 두 형태:
+        #   1. ModuleNotFoundError: 'mcp.server.stdio'; 'mcp.server' is not a package
+        #   2. ImportError: cannot import name 'X' from 'mcp.server' (dartlab/.../server.py)
+        # sys.modules cleanup + sys.path 에서 dartlab 디렉토리 제거 후 SDK 재 import.
+        # dartlab 자체는 이미 sys.modules 에 로드된 상태라 영향 없음.
+        import os
+        import sys
+        from pathlib import Path
+
+        _dartlabRoot = str(Path(__file__).resolve().parent.parent)
+        for _k in [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]:
+            del sys.modules[_k]
+        sys.path[:] = [p for p in sys.path if os.path.normpath(p) != os.path.normpath(_dartlabRoot)]
+        try:
+            from mcp.server.stdio import stdio_server
+        except ImportError as exc:
+            raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
     app = createServer()
 

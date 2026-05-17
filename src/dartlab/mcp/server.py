@@ -193,7 +193,8 @@ def createServer():
     Raises:
         ImportError: MCP SDK 가 설치되어 있지 않을 때.
     """
-    try:
+
+    def _importMcp():
         from mcp.server import Server
         from mcp.server.lowlevel.server import ReadResourceContents
         from mcp.types import (
@@ -206,8 +207,60 @@ def createServer():
             Tool,
             ToolAnnotations,
         )
-    except ImportError as exc:
-        raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
+
+        return (
+            Server,
+            ReadResourceContents,
+            GetPromptResult,
+            Prompt,
+            PromptArgument,
+            PromptMessage,
+            Resource,
+            TextContent,
+            Tool,
+            ToolAnnotations,
+        )
+
+    try:
+        (
+            Server,
+            ReadResourceContents,
+            GetPromptResult,
+            Prompt,
+            PromptArgument,
+            PromptMessage,
+            Resource,
+            TextContent,
+            Tool,
+            ToolAnnotations,
+        ) = _importMcp()
+    except ImportError:
+        # editable install namespace collision 우회 — 'mcp' top-level lookup 이
+        # dartlab.mcp 로 잡혔을 가능성 (transports.py 와 같은 회귀). cleanup +
+        # path remove 후 SDK 재 import. ImportError 와 ModuleNotFoundError 둘 다.
+        import os
+        import sys
+        from pathlib import Path
+
+        _dartlabRoot = str(Path(__file__).resolve().parent.parent)
+        for _k in [k for k in sys.modules if k == "mcp" or k.startswith("mcp.")]:
+            del sys.modules[_k]
+        sys.path[:] = [p for p in sys.path if os.path.normpath(p) != os.path.normpath(_dartlabRoot)]
+        try:
+            (
+                Server,
+                ReadResourceContents,
+                GetPromptResult,
+                Prompt,
+                PromptArgument,
+                PromptMessage,
+                Resource,
+                TextContent,
+                Tool,
+                ToolAnnotations,
+            ) = _importMcp()
+        except ImportError as exc:
+            raise ImportError("MCP SDK 필요: pip install --upgrade dartlab") from exc
 
     app = Server("dartlab", instructions=MCP_INSTRUCTIONS)
     mcpLog.info("MCP 서버 초기화 완료")
