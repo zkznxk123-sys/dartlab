@@ -11,8 +11,11 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
 def _load_server_ask_audit():
-    path = Path("scripts/audit/serverAskAudit.py")
+    path = _REPO_ROOT / "scripts" / "audit" / "serverAskAudit.py"
     spec = importlib.util.spec_from_file_location("serverAskAudit", path)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
@@ -110,7 +113,7 @@ def test_server_ask_audit_compacts_refs_and_selected_skills():
 
 
 def test_generate_spec_parses_ai_contract_block():
-    path = Path("scripts/build/generateSpec.py")
+    path = _REPO_ROOT / "scripts" / "build" / "generateSpec.py"
     spec = importlib.util.spec_from_file_location("generateSpec", path)
     assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
