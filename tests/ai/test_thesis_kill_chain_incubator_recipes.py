@@ -27,6 +27,7 @@ KILL_CHAIN_IDS = {
     "recipes.incubator.thesisKillChain.falsifierLedger",
     "recipes.incubator.thesisKillChain.scenarioStoryboard",
     "recipes.incubator.thesisKillChain.visualDecisionPack",
+    "recipes.incubator.thesisKillChain.premortemQualityGate",
     "recipes.incubator.thesisKillChain.deepDive",
 }
 
@@ -91,6 +92,7 @@ def testThesisKillChainSkillsAreExposedThroughAiEntryPoints() -> None:
     entry = readSkill("thesis kill chain 프리모템 투자 논리 깨보기", limit=8, includeUser=False)
     path = readSkill("thesisKillChain propagation path trigger assumption", limit=8, includeUser=False)
     scenario = readSkill("thesisKillChain scenario storyboard base erosion kill", limit=8, includeUser=False)
+    strong = readSkill("진짜 강하게 thesis 깨봐 타협 없이 품질 게이트", limit=8, includeUser=False)
 
     assert entry.ok
     assert entry.data["skills"][0]["id"] == "recipes.incubator.thesisKillChain.index"
@@ -98,12 +100,18 @@ def testThesisKillChainSkillsAreExposedThroughAiEntryPoints() -> None:
     assert path.data["skills"][0]["id"] == "recipes.incubator.thesisKillChain.propagationPath"
     assert scenario.ok
     assert scenario.data["skills"][0]["id"] == "recipes.incubator.thesisKillChain.scenarioStoryboard"
+    assert strong.ok
+    strong_ids = [row["id"] for row in strong.data["skills"]]
+    assert "recipes.incubator.thesisKillChain.premortemQualityGate" in strong_ids[:3]
+    assert any(skill_id.startswith("recipes.incubator.thesisKillChain.") for skill_id in strong_ids[:3])
 
     body = getSkillBody("recipes.incubator.thesisKillChain.deepDive", includeUser=False)
     assert body.ok
     raw = body.data["body"]
     assert "buildThesisKillChainMemo" in raw
     assert "recipes.incubator.thesisKillChain.scenarioStoryboard" in raw
+    assert "premortemQualityGate" in raw
+    assert "타협 없는 사용 기준" in raw
 
 
 def testThesisKillChainSkillsAreInPublicSkillArtifacts() -> None:
@@ -261,9 +269,13 @@ def testThesisKillChainSynthBuildsDeepPremortemFromL15Inputs() -> None:
         "falsifierLedger",
         "scenarioStoryboard",
         "visualDecisionPack",
+        "premortemQualityGate",
         "deepDive",
     } <= set(memo["tables"])
-    assert len(memo["tables"]["deepDive"]) == 11
+    assert len(memo["tables"]["premortemQualityGate"]) == 10
+    assert memo["headline"]["premortemQualityScore"] >= 90
+    assert memo["headline"]["qualityGateStatus"] == "flagshipReady"
+    assert len(memo["tables"]["deepDive"]) == 12
     assert memo["tables"]["deepDive"][-1]["step"] == "finalDecision"
     assert {row["scenario"] for row in memo["tables"]["scenarioStoryboard"]} == {
         "baseIntact",
@@ -274,4 +286,21 @@ def testThesisKillChainSynthBuildsDeepPremortemFromL15Inputs() -> None:
     assert any(row["triggerId"].startswith("filing:financingStress") for row in memo["tables"]["triggerCatalog"])
     assert any(row["status"] == "open" for row in memo["tables"]["falsifierLedger"])
     assert all(row["status"] == "ready" for row in memo["tables"]["visualDecisionPack"])
+    assert all(row["status"] == "ok" for row in memo["tables"]["premortemQualityGate"])
     assert any(source["id"] == "l15ThesisKillChain" for source in memo["sources"])
+
+
+def testThesisKillChainQualityGateFailsClosedOnWeakInputs() -> None:
+    from dartlab.synth.thesisKillChain import buildThesisKillChainMemo
+
+    memo = buildThesisKillChainMemo(target="WEAK", thesis="")
+
+    gate = {row["gate"]: row for row in memo["tables"]["premortemQualityGate"]}
+    assert memo["decisionStatus"] == "needsThesis"
+    assert memo["headline"]["qualityGateStatus"] == "weak"
+    assert memo["headline"]["premortemQualityScore"] < 50
+    assert gate["explicitThesis"]["status"] == "risk"
+    assert gate["sourceBreadth"]["status"] == "risk"
+    assert gate["propagationConnected"]["status"] == "risk"
+    assert gate["visualBindingReady"]["status"] == "risk"
+    assert memo["headline"]["decisionStatus"] != "usable"

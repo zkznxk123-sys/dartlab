@@ -87,8 +87,22 @@ def buildThesisKillChainMemo(
         has_paths=any(row["status"] in {"watch", "risk"} for row in propagation_rows),
         has_coverage=any(row["status"] == "ok" for row in coverage_rows),
     )
+    quality_rows = _premortemQualityGate(
+        thesis_rows=thesis_rows,
+        coverage_rows=coverage_rows,
+        assumption_rows=assumption_rows,
+        fragility_rows=fragility_rows,
+        trigger_rows=trigger_rows,
+        propagation_rows=propagation_rows,
+        tripwire_rows=tripwire_rows,
+        falsifier_rows=falsifier_rows,
+        scenario_rows=scenario_rows,
+        visual_rows=visual_rows,
+    )
+    quality_score = _qualityScore(quality_rows)
+    quality_gate_status = _qualityGateStatus(quality_score)
     score = _killRiskScore(fragility_rows, trigger_rows, tripwire_rows)
-    decision_status = "usable" if thesis_rows and any(row["status"] == "ok" for row in coverage_rows) else "needsThesis"
+    decision_status = _decisionStatus(thesis_rows, quality_gate_status)
     latest_date = asOf or _latestDate(raw_sets["filings"], raw_sets["priceRows"], raw_sets["consensusRows"])
     deep_rows = _deepDiveRows(
         thesisIntake=thesis_rows,
@@ -101,7 +115,10 @@ def buildThesisKillChainMemo(
         falsifierLedger=falsifier_rows,
         scenarioStoryboard=scenario_rows,
         visualDecisionPack=visual_rows,
+        premortemQualityGate=quality_rows,
         kill_score=score,
+        quality_score=quality_score,
+        quality_gate_status=quality_gate_status,
         decision_status=decision_status,
     )
 
@@ -121,6 +138,8 @@ def buildThesisKillChainMemo(
             "triggerCount": sum(1 for row in trigger_rows if row["status"] in {"watch", "risk"}),
             "openTripwireCount": sum(1 for row in tripwire_rows if row["status"] in {"watch", "risk"}),
             "openFalsifierCount": sum(1 for row in falsifier_rows if row["status"] == "open"),
+            "premortemQualityScore": quality_score,
+            "qualityGateStatus": quality_gate_status,
             "decisionStatus": decision_status,
         },
         "tables": {
@@ -134,6 +153,7 @@ def buildThesisKillChainMemo(
             "falsifierLedger": falsifier_rows,
             "scenarioStoryboard": scenario_rows,
             "visualDecisionPack": visual_rows,
+            "premortemQualityGate": quality_rows,
             "deepDive": deep_rows,
         },
         "sources": [
@@ -619,9 +639,166 @@ def _visualDecisionRows(*, has_scenarios: bool, has_paths: bool, has_coverage: b
     ]
 
 
+def _premortemQualityGate(
+    *,
+    thesis_rows: list[dict[str, Any]],
+    coverage_rows: list[dict[str, Any]],
+    assumption_rows: list[dict[str, Any]],
+    fragility_rows: list[dict[str, Any]],
+    trigger_rows: list[dict[str, Any]],
+    propagation_rows: list[dict[str, Any]],
+    tripwire_rows: list[dict[str, Any]],
+    falsifier_rows: list[dict[str, Any]],
+    scenario_rows: list[dict[str, Any]],
+    visual_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    ok_datasets = [row for row in coverage_rows if row.get("status") == "ok"]
+    active_fragility = [row for row in fragility_rows if row.get("status") in {"watch", "risk"}]
+    active_triggers = [row for row in trigger_rows if row.get("status") in {"watch", "risk"}]
+    active_paths = [row for row in propagation_rows if row.get("status") in {"watch", "risk"}]
+    active_tripwires = [row for row in tripwire_rows if row.get("status") in {"watch", "risk"}]
+    open_falsifiers = [row for row in falsifier_rows if row.get("status") == "open"]
+    scenarios = {str(row.get("scenario")) for row in scenario_rows}
+    scenario_statuses = {str(row.get("status") or "missing") for row in scenario_rows}
+    ready_visuals = [row for row in visual_rows if row.get("status") == "ready"]
+    required_scenarios = {"baseIntact", "erosionCase", "killChainCase"}
+
+    gates = [
+        _qualityGateRow(
+            "explicitThesis",
+            bool(thesis_rows) and thesis_rows[0].get("status") == "ok",
+            required="user thesis text or explicit assumptions",
+            evidence=f"thesisStatus={thesis_rows[0].get('status') if thesis_rows else 'missing'}",
+            failure_mode="no explicit thesis means the pack can only ask for input",
+            next_action="collect thesis before building scenarios",
+        ),
+        _qualityGateRow(
+            "sourceBreadth",
+            len(ok_datasets) >= 4,
+            required="at least four L1/L1.5 evidence sets",
+            evidence=f"okDatasets={len(ok_datasets)}/{len(coverage_rows)}",
+            failure_mode="single-source premortem becomes narrative",
+            next_action="add Company.show, filing, gather, or scan rows",
+        ),
+        _qualityGateRow(
+            "assumptionDepth",
+            sum(1 for row in assumption_rows if row.get("status") != "missing") >= 3,
+            required="three or more testable assumptions",
+            evidence=f"assumptions={len(assumption_rows)}",
+            failure_mode="one broad claim cannot support a kill-chain",
+            next_action="split thesis into growth, margin, cash, balance-sheet, or event assumptions",
+        ),
+        _qualityGateRow(
+            "fragilityDetected",
+            bool(active_fragility),
+            required="at least one raw-data fragility or watch item",
+            evidence=f"activeFragilities={len(active_fragility)}",
+            failure_mode="no weak point means no kill-chain path",
+            next_action="refresh statements, market rows, consensus, or scan primitives",
+        ),
+        _qualityGateRow(
+            "triggerConnected",
+            bool(active_triggers),
+            required="triggerCatalog has watch/risk trigger",
+            evidence=f"activeTriggers={len(active_triggers)}",
+            failure_mode="fragility without a trigger cannot become a scenario",
+            next_action="bind metric, filing, or scan trigger to the thesis",
+        ),
+        _qualityGateRow(
+            "propagationConnected",
+            bool(active_paths) and all(row.get("affectedAssumption") for row in active_paths),
+            required="trigger to mechanism to assumption path",
+            evidence=f"activePaths={len(active_paths)}",
+            failure_mode="trigger list without mechanism is not an analysis skill",
+            next_action="show triggerId, mechanism, affectedAssumption, tripwire together",
+        ),
+        _qualityGateRow(
+            "tripwireOperational",
+            bool(active_tripwires) and all(row.get("threshold") and row.get("action") for row in tripwire_rows),
+            required="threshold and action for active tripwires",
+            evidence=f"activeTripwires={len(active_tripwires)}",
+            failure_mode="open risk without a threshold cannot be monitored",
+            next_action="add threshold/action rows before answering",
+        ),
+        _qualityGateRow(
+            "falsifierOpen",
+            bool(open_falsifiers),
+            required="open counter-evidence ledger",
+            evidence=f"openFalsifiers={len(open_falsifiers)}",
+            failure_mode="pre-mortem without counter-evidence becomes confirmation bias",
+            next_action="state the exact evidence that would rescue the thesis",
+        ),
+        _qualityGateRow(
+            "scenarioComplete",
+            required_scenarios <= scenarios and "missing" not in scenario_statuses,
+            required="baseIntact, erosionCase, killChainCase all active",
+            evidence=f"scenarios={','.join(sorted(scenarios))}; statuses={','.join(sorted(scenario_statuses))}",
+            failure_mode="storyboard that misses erosion or kill case is incomplete",
+            next_action="complete all three scenarios before final answer",
+        ),
+        _qualityGateRow(
+            "visualBindingReady",
+            bool(visual_rows) and len(ready_visuals) == len(visual_rows),
+            required="all selected observed viz refs are ready",
+            evidence=f"readyVisuals={len(ready_visuals)}/{len(visual_rows)}",
+            failure_mode="chart without bound table/value refs hides weak evidence",
+            next_action="emit only ready visualRefs or fall back to tables",
+        ),
+    ]
+    for order, row in enumerate(gates, start=1):
+        row["order"] = order
+    return gates
+
+
+def _qualityGateRow(
+    gate: str,
+    passed: bool,
+    *,
+    required: str,
+    evidence: str,
+    failure_mode: str,
+    next_action: str,
+) -> dict[str, Any]:
+    return {
+        "gate": gate,
+        "status": "ok" if passed else "risk",
+        "required": required,
+        "evidence": evidence,
+        "failureMode": failure_mode,
+        "nextAction": "preserve in answer" if passed else next_action,
+    }
+
+
+def _qualityScore(rows: list[dict[str, Any]]) -> int:
+    if not rows:
+        return 0
+    passed = sum(1 for row in rows if row.get("status") == "ok")
+    return round(passed * 100 / len(rows))
+
+
+def _qualityGateStatus(score: int) -> str:
+    if score >= 90:
+        return "flagshipReady"
+    if score >= 70:
+        return "operatorReview"
+    return "weak"
+
+
+def _decisionStatus(thesis_rows: list[dict[str, Any]], quality_gate_status: str) -> str:
+    if quality_gate_status == "flagshipReady":
+        return "usable"
+    if not thesis_rows or thesis_rows[0].get("status") != "ok":
+        return "needsThesis"
+    if quality_gate_status == "operatorReview":
+        return "needsReview"
+    return "needsEvidence"
+
+
 def _deepDiveRows(
     *,
     kill_score: int,
+    quality_score: int,
+    quality_gate_status: str,
     decision_status: str,
     **tables: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -642,13 +819,24 @@ def _deepDiveRows(
         {
             "order": len(rows) + 1,
             "step": "finalDecision",
-            "status": "watch" if kill_score else "ok" if decision_status == "usable" else "missing",
+            "status": _finalDecisionStatus(kill_score, quality_gate_status, decision_status),
             "rowCount": len(rows),
-            "evidence": f"killRiskScore={kill_score}; decisionStatus={decision_status}",
+            "evidence": (
+                f"killRiskScore={kill_score}; premortemQualityScore={quality_score}; "
+                f"qualityGateStatus={quality_gate_status}; decisionStatus={decision_status}"
+            ),
             "nextAction": "answer with assumption, propagation path, tripwire, and falsifier together",
         }
     )
     return rows
+
+
+def _finalDecisionStatus(kill_score: int, quality_gate_status: str, decision_status: str) -> str:
+    if quality_gate_status == "weak":
+        return "risk"
+    if quality_gate_status == "operatorReview" or kill_score:
+        return "watch"
+    return "ok" if decision_status == "usable" else "missing"
 
 
 def _statementPanel(statements: Mapping[str, pl.DataFrame]) -> list[dict[str, Any]]:

@@ -1994,7 +1994,7 @@
       "title": "Viz (차트·다이어그램 spec)",
       "category": "engines",
       "purpose": "Viz 는 분석 결과를 19 종 차트 spec (line · bar · table · radar · waterfall · heatmap · histogram · combo · sparkline · pie + DartLab 특화 차트) 으로 변환하는 시각화 엔진이다. RunPython 안에서 `emit_chart(spec)` · `emit_diagram(type, source)` 로 stdout 마커 출력 → AI 도구 결과로 인라인 렌더. 트리거 — '시각화', '차트', 'emit_chart', 'CompileVisual'.",
-      "inDegree": 31,
+      "inDegree": 32,
       "outDegree": 14,
       "cluster": "viz",
       "isEntry": false,
@@ -2397,7 +2397,7 @@
       "title": "Skill 개발 루프 — 자율 인큐베이션 + audit 회환",
       "category": "operation",
       "purpose": "AI 가 분석 빈칸을 발굴해 신규 skill 초안을 만들고 같은 세션에서 자가 실행으로 검증해 정식 등재까지 가는 6 단계 사이클과, 운영 중 audit 결과를 엔진 skill 또는 docstring 개선으로 되돌리는 회환 절차를 합쳐 한 곳에서 관리한다. 트리거 — 신규 분석 skill 만들자 / 분석 빈칸 메우기 / audit 결과 반영.",
-      "inDegree": 12,
+      "inDegree": 13,
       "outDegree": 4,
       "cluster": "operation",
       "isEntry": false,
@@ -3184,9 +3184,9 @@
       "id": "recipes.incubator.thesisKillChain.deepDive",
       "title": "Thesis Kill-Chain Deep Dive",
       "category": "recipes",
-      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
-      "inDegree": 4,
-      "outDegree": 13,
+      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate, premortem quality gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
+      "inDegree": 5,
+      "outDegree": 14,
       "cluster": "recipes",
       "isEntry": true,
       "isLeaf": false,
@@ -3254,9 +3254,26 @@
       "category": "recipes",
       "purpose": "사용자의 투자 thesis를 지지하는 대신 일부러 깨보는 pre-mortem 시나리오 스킬팩 진입점이다. Company.show 원표, Company.disclosure, Company.gather, scan primitive만으로 가정, 취약 지표, 촉발 조건, 전파 경로, tripwire, 반증 조건을 만든다. 트리거 - 'thesis kill chain', '프리모템', '투자 논리 깨보기'.",
       "inDegree": 0,
-      "outDegree": 18,
+      "outDegree": 19,
       "cluster": "recipes",
       "isEntry": true,
+      "isLeaf": false,
+      "isOrphan": false,
+      "audiences": [
+        "agent",
+        "human",
+        "llm"
+      ]
+    },
+    {
+      "id": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "title": "Thesis Kill-Chain Premortem Quality Gate",
+      "category": "recipes",
+      "purpose": "Thesis Kill-Chain 결과를 최종 답변으로 쓰기 전, thesis·근거 폭·가정 수·취약 지표·trigger·전파 경로·tripwire·falsifier·scenario·visual binding을 모두 통과했는지 막판에 차단하는 품질 게이트다. 트리거 — '타협 없이 thesis 깨기', 'premortem quality gate', '강한 스킬 검증'.",
+      "inDegree": 2,
+      "outDegree": 5,
+      "cluster": "recipes",
+      "isEntry": false,
       "isLeaf": false,
       "isOrphan": false,
       "audiences": [
@@ -3355,7 +3372,7 @@
       "title": "Thesis Kill-Chain Visual Decision Pack",
       "category": "recipes",
       "purpose": "scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다.",
-      "inDegree": 3,
+      "inDegree": 4,
       "outDegree": 4,
       "cluster": "recipes",
       "isEntry": false,
@@ -4425,7 +4442,7 @@
       "title": "Workbench 5 패스 + ref 발급 명세",
       "category": "runtime",
       "purpose": "ask 작업대의 5 패스 (BRIEF→WORK→CRITIQUE→COMPOSE→GATE→HARVEST) 와 각 패스에서 발급해야 할 ref kind 를 단일 SSOT 로 못박는다.",
-      "inDegree": 17,
+      "inDegree": 18,
       "outDegree": 0,
       "cluster": "runtime",
       "isEntry": false,
@@ -11152,6 +11169,11 @@
     },
     {
       "src": "recipes.incubator.thesisKillChain.deepDive",
+      "dst": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.deepDive",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
@@ -11287,6 +11309,11 @@
     },
     {
       "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.index",
       "dst": "recipes.incubator.thesisKillChain.deepDive",
       "kind": "linkedRecipe"
     },
@@ -11322,6 +11349,31 @@
     },
     {
       "src": "recipes.incubator.thesisKillChain.index",
+      "dst": "engines.viz",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "kind": "linkedRecipe"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "dst": "runtime.workbenchEvidenceFlow",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "dst": "operation.skillDevelopmentLoop",
+      "kind": "knowledge"
+    },
+    {
+      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
@@ -13573,6 +13625,7 @@
       "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
       "recipes.incubator.thesisKillChain.falsifierLedger",
       "recipes.incubator.thesisKillChain.fragilityMap",
+      "recipes.incubator.thesisKillChain.premortemQualityGate",
       "recipes.incubator.thesisKillChain.propagationPath",
       "recipes.incubator.thesisKillChain.scenarioStoryboard",
       "recipes.incubator.thesisKillChain.thesisIntake",

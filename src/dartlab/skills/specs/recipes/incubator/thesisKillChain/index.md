@@ -34,6 +34,7 @@ outputs:
   - falsifier ledger
   - scenario storyboard
   - visual decision pack
+  - premortem quality gate
 capabilityRefs:
   - Company.show
   - Company.disclosure
@@ -66,6 +67,7 @@ expectedOutputs:
   - thesis를 깨는 kill-chain scenario ledger
   - assumption별 취약 지표와 tripwire
   - open falsifier와 counter-evidence
+  - premortemQualityGate와 qualityGateStatus
   - observed viz surface 선택
 visualRefs:
   - engines.viz.scenarioVisuals
@@ -88,6 +90,7 @@ linkedSkills:
   - recipes.incubator.thesisKillChain.falsifierLedger
   - recipes.incubator.thesisKillChain.scenarioStoryboard
   - recipes.incubator.thesisKillChain.visualDecisionPack
+  - recipes.incubator.thesisKillChain.premortemQualityGate
   - recipes.incubator.thesisKillChain.deepDive
 gap:
   primary:
@@ -122,6 +125,7 @@ forbidden:
   - c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.
   - thesis를 지지하는 결론부터 쓰지 않는다.
   - open tripwire가 있는데 확정 표현을 쓰지 않는다.
+  - premortemQualityGate가 weak인데 thesis 결론을 쓰지 않는다.
   - observed 상태가 아닌 viz skill을 visualRefs에 연결하지 않는다.
 failureModes:
   - thesis를 testable assumption으로 쪼개지 않음
@@ -241,7 +245,7 @@ tripwire가 watch/risk로 바뀌면 같은 helper를 다시 실행한다. 사용
 
 | key | 의미 |
 |---|---|
-| `headline` | killRiskScore, assumptionCount, openTripwireCount, openFalsifierCount |
+| `headline` | killRiskScore, premortemQualityScore, qualityGateStatus, openTripwireCount, openFalsifierCount |
 | `tables.thesisIntake` | 사용자 thesis와 파싱된 theme |
 | `tables.assumptionLedger` | testable assumption |
 | `tables.fragilityMap` | 원자료 취약 지표 |
@@ -250,6 +254,14 @@ tripwire가 watch/risk로 바뀌면 같은 helper를 다시 실행한다. 사용
 | `tables.tripwireMonitor` | 임계값과 현재 상태 |
 | `tables.falsifierLedger` | 반증 조건 |
 | `tables.scenarioStoryboard` | base/erosion/kill-chain 시나리오 |
+| `tables.premortemQualityGate` | 최종 답변 차단 gate |
+
+## 타협 없는 사용 기준
+
+- `qualityGateStatus == "flagshipReady"`가 아니면 thesis를 방어하는 결론으로 가지 않는다.
+- `premortemQualityGate`의 risk row는 최종 답변 앞부분에 그대로 드러낸다.
+- sourceBreadth, propagationConnected, falsifierOpen 중 하나라도 risk면 다음 EngineCall/RunPython 보강 절차가 답변의 결론이다.
+- 시각화는 `visualDecisionPack`이 ready인 observed viz만 사용한다.
 
 ## 연계 절차
 
@@ -263,11 +275,13 @@ tripwire가 watch/risk로 바뀌면 같은 helper를 다시 실행한다. 사용
 8. recipes.incubator.thesisKillChain.falsifierLedger - counter-evidence 열기.
 9. recipes.incubator.thesisKillChain.scenarioStoryboard - pre-mortem 시나리오 작성.
 10. recipes.incubator.thesisKillChain.visualDecisionPack - observed viz 선택.
-11. recipes.incubator.thesisKillChain.deepDive - 전체 실행.
+11. recipes.incubator.thesisKillChain.premortemQualityGate - 약한 결론 차단.
+12. recipes.incubator.thesisKillChain.deepDive - 전체 실행.
 
 ## 기본 검증
 
 - 공개 호출 블록에 L2/L3 호출 문자열이 없어야 한다.
-- `buildThesisKillChainMemo` 결과에는 11개 table이 모두 있어야 한다.
+- `buildThesisKillChainMemo` 결과에는 12개 table이 모두 있어야 한다.
 - scenarioStoryboard는 baseIntact, erosionCase, killChainCase를 모두 포함해야 한다.
+- premortemQualityGate가 weak이면 `decisionStatus`는 usable이면 안 된다.
 - 답변은 propagationPath와 falsifierLedger 없이 thesis 결론을 쓰면 실패다.

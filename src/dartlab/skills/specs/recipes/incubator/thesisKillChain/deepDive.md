@@ -8,7 +8,7 @@ status: observed
 entryHint: true
 graphTier: L1.5
 cluster: incubator.thesisKillChain
-purpose: thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.
+purpose: thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate, premortem quality gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.
 whenToUse:
   - thesis kill-chain deep dive
   - 프리모템 전체 실행
@@ -22,6 +22,7 @@ outputs:
   - killRiskScore
   - open tripwire count
   - scenario storyboard
+  - premortem quality gate
 capabilityRefs:
   - Company.show
   - Company.disclosure
@@ -47,8 +48,9 @@ requiredEvidence:
   - sourceRef
   - executionRef
 expectedOutputs:
-  - 11단계 deepDive ledger
+  - 12단계 deepDive ledger
   - killRiskScore와 openTripwireCount
+  - premortemQualityScore와 qualityGateStatus
   - propagationPath와 scenarioStoryboard
   - visualDecisionPack
 visualRefs:
@@ -72,6 +74,7 @@ linkedSkills:
   - recipes.incubator.thesisKillChain.falsifierLedger
   - recipes.incubator.thesisKillChain.scenarioStoryboard
   - recipes.incubator.thesisKillChain.visualDecisionPack
+  - recipes.incubator.thesisKillChain.premortemQualityGate
 gap:
   primary:
     - synth
@@ -102,6 +105,7 @@ runtimeCompatibility:
 forbidden:
   - c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.
   - thesis 지지 결론으로 답변을 시작하지 않는다.
+  - premortemQualityGate가 weak이면 final conclusion을 쓰지 않는다.
   - blocked visualRef를 emit하지 않는다.
 failureModes:
   - 기존 companyDeepAnalysis로 우회
@@ -179,6 +183,8 @@ emit_result(
         "killRiskScore": memo["headline"]["killRiskScore"],
         "openTripwires": memo["headline"]["openTripwireCount"],
         "openFalsifiers": memo["headline"]["openFalsifierCount"],
+        "premortemQualityScore": memo["headline"]["premortemQualityScore"],
+        "qualityGateStatus": memo["headline"]["qualityGateStatus"],
         "decisionStatus": memo["headline"]["decisionStatus"],
     },
     date=memo["asOf"],
@@ -188,7 +194,7 @@ emit_result(
 
 ## 호출 동작
 
-`thesisIntake`부터 `visualDecisionPack`까지 한 번에 만들고, 마지막 `finalDecision` row는 killRiskScore와 decisionStatus만 요약한다.
+`thesisIntake`부터 `premortemQualityGate`까지 한 번에 만들고, 마지막 `finalDecision` row는 killRiskScore, qualityGateStatus, decisionStatus를 요약한다.
 
 ## 대표 반환 형태
 
@@ -215,10 +221,18 @@ emit_result(
 8. recipes.incubator.thesisKillChain.falsifierLedger - falsifier ledger.
 9. recipes.incubator.thesisKillChain.scenarioStoryboard - scenario storyboard.
 10. recipes.incubator.thesisKillChain.visualDecisionPack - visual gate.
+11. recipes.incubator.thesisKillChain.premortemQualityGate - final answer gate.
+
+## 타협 없는 사용 기준
+
+- `premortemQualityGate`의 risk row가 있으면 결론보다 차단 사유와 nextAction을 먼저 쓴다.
+- `qualityGateStatus == "weak"`이면 `decisionStatus == "usable"`이 될 수 없다.
+- `operatorReview`이면 확정 결론 대신 보강할 EngineCall 목록과 어떤 gate가 막혔는지 답한다.
 
 ## 기본 검증
 
 - 공개 호출 블록은 AST parse가 되어야 한다.
 - 공개 호출 블록은 L2/L3 호출 문자열을 포함하면 실패다.
 - scenarioStoryboard에는 baseIntact, erosionCase, killChainCase가 모두 있어야 한다.
+- premortemQualityGate는 10개 gate를 반환해야 한다.
 - ready가 아닌 visualRef는 차트로 emit하지 않는다.

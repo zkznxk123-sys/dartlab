@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 338,
+    "skillCount": 339,
     "categories": [
       {
         "id": "start",
@@ -32,7 +32,7 @@
         "id": "recipes",
         "title": "Recipes",
         "description": "?? ??? L1/L1.5 ??? ?? ?? ??? ???? ?? ??.",
-        "count": 133
+        "count": 134
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -34967,7 +34967,8 @@
         "tripwire monitor",
         "falsifier ledger",
         "scenario storyboard",
-        "visual decision pack"
+        "visual decision pack",
+        "premortem quality gate"
       ],
       "apiRefs": [
         "Company.show",
@@ -35002,6 +35003,7 @@
         "recipes.incubator.thesisKillChain.falsifierLedger",
         "recipes.incubator.thesisKillChain.scenarioStoryboard",
         "recipes.incubator.thesisKillChain.visualDecisionPack",
+        "recipes.incubator.thesisKillChain.premortemQualityGate",
         "recipes.incubator.thesisKillChain.deepDive"
       ],
       "requires": [],
@@ -35012,9 +35014,14 @@
         "dartlab://skills/recipes.incubator.thesisKillChain.index"
       ],
       "procedure": [
+        "`qualityGateStatus == \"flagshipReady\"`가 아니면 thesis를 방어하는 결론으로 가지 않는다.",
+        "`premortemQualityGate`의 risk row는 최종 답변 앞부분에 그대로 드러낸다.",
+        "sourceBreadth, propagationConnected, falsifierOpen 중 하나라도 risk면 다음 EngineCall/RunPython 보강 절차가 답변의 결론이다.",
+        "시각화는 `visualDecisionPack`이 ready인 observed viz만 사용한다.",
         "공개 호출 블록에 L2/L3 호출 문자열이 없어야 한다.",
-        "`buildThesisKillChainMemo` 결과에는 11개 table이 모두 있어야 한다.",
+        "`buildThesisKillChainMemo` 결과에는 12개 table이 모두 있어야 한다.",
         "scenarioStoryboard는 baseIntact, erosionCase, killChainCase를 모두 포함해야 한다.",
+        "premortemQualityGate가 weak이면 `decisionStatus`는 usable이면 안 된다.",
         "답변은 propagationPath와 falsifierLedger 없이 thesis 결론을 쓰면 실패다."
       ],
       "recipeSteps": [],
@@ -35031,6 +35038,7 @@
         "thesis를 깨는 kill-chain scenario ledger",
         "assumption별 취약 지표와 tripwire",
         "open falsifier와 counter-evidence",
+        "premortemQualityGate와 qualityGateStatus",
         "observed viz surface 선택"
       ],
       "visualGuidance": [
@@ -35055,6 +35063,7 @@
         "c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.",
         "thesis를 지지하는 결론부터 쓰지 않는다.",
         "open tripwire가 있는데 확정 표현을 쓰지 않는다.",
+        "premortemQualityGate가 weak인데 thesis 결론을 쓰지 않는다.",
         "observed 상태가 아닌 viz skill을 visualRefs에 연결하지 않는다."
       ],
       "examples": [
@@ -36185,13 +36194,153 @@
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"visualDecisionPack\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nscenarioStoryboard, propagationPath, evidenceCoverageAudit 존재 여부로 scenarioVisuals, mermaidDiagram, evidenceCoverage, kpiRibbon의 ready/blocked를 결정한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `visualRef` | observed viz skill |\n| `status` | ready/blocked |\n| `requiredBinding` | 필요한 근거 결합 |\n| `evidence` | 선택 사유 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.scenarioStoryboard - scenario chart source.\n2. recipes.incubator.thesisKillChain.deepDive - 최종 visual gate.\n\n## 기본 검증\n\n- visualRefs는 observed viz만 포함한다.\n- blocked visualRef를 emit하지 않는다."
     },
     {
+      "id": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "title": "Thesis Kill-Chain Premortem Quality Gate",
+      "category": "recipes",
+      "categoryTitle": "Recipes",
+      "kind": "recipe",
+      "status": "observed",
+      "purpose": "Thesis Kill-Chain 결과를 최종 답변으로 쓰기 전, thesis·근거 폭·가정 수·취약 지표·trigger·전파 경로·tripwire·falsifier·scenario·visual binding을 모두 통과했는지 막판에 차단하는 품질 게이트다. 트리거 — '타협 없이 thesis 깨기', 'premortem quality gate', '강한 스킬 검증'.",
+      "whenToUse": [
+        "premortem quality gate",
+        "thesis kill-chain 품질 게이트",
+        "타협 없이 thesis 깨기",
+        "강한 스킬 검증",
+        "약한 결론 차단"
+      ],
+      "inputs": [
+        "thesisIntake",
+        "evidenceCoverageAudit",
+        "assumptionLedger",
+        "fragilityMap",
+        "triggerCatalog",
+        "propagationPath",
+        "tripwireMonitor",
+        "falsifierLedger",
+        "scenarioStoryboard",
+        "visualDecisionPack"
+      ],
+      "requiredInputs": [],
+      "outputs": [
+        "premortemQualityGate table",
+        "premortemQualityScore",
+        "qualityGateStatus"
+      ],
+      "apiRefs": [
+        "Company.show",
+        "Company.disclosure",
+        "Company.gather",
+        "scan.market",
+        "scan.audit",
+        "scan.quality"
+      ],
+      "toolRefs": [
+        "EngineCall",
+        "RunPython"
+      ],
+      "datasetRefs": [],
+      "knowledgeRefs": [
+        "runtime.workbenchEvidenceFlow",
+        "operation.skillDevelopmentLoop",
+        "engines.viz"
+      ],
+      "linkedSkills": [
+        "recipes.incubator.thesisKillChain.visualDecisionPack",
+        "recipes.incubator.thesisKillChain.deepDive"
+      ],
+      "requires": [],
+      "alternatives": [],
+      "succeededBy": [],
+      "deprecatedBy": [],
+      "sourceRefs": [
+        "dartlab://skills/recipes.incubator.thesisKillChain.premortemQualityGate"
+      ],
+      "procedure": [
+        "`qualityGateStatus == \"flagshipReady\"`일 때만 `decisionStatus == \"usable\"`로 답한다.",
+        "`operatorReview`이면 결론보다 누락 gate와 보강 순서를 먼저 말한다.",
+        "`weak`이면 thesis 결론을 쓰지 않고, 부족한 근거와 다음 EngineCall 목록을 제시한다.",
+        "`risk` row를 삭제하거나 평균 점수로 숨기면 이 스킬은 실패다.",
+        "`premortemQualityGate`는 10개 gate를 반환해야 한다.",
+        "`flagshipReady`는 gate 90% 이상 통과일 때만 가능하다.",
+        "`weak` 상태에서는 thesis 결론을 확정하지 않는다."
+      ],
+      "recipeSteps": [],
+      "requiredEvidence": [
+        "skillRef",
+        "target",
+        "tableRef",
+        "valueRef",
+        "dateRef",
+        "sourceRef",
+        "executionRef"
+      ],
+      "expectedOutputs": [
+        "gate별 ok/risk 판정",
+        "weak/operatorReview/flagshipReady 상태",
+        "답변 차단 사유와 nextAction"
+      ],
+      "visualGuidance": [
+        "premortemQualityGate는 engines.viz.evidenceCoverage 표로만 보조한다.",
+        "premortemQualityScore와 qualityGateStatus는 engines.viz.kpiRibbon으로 작게 표시한다."
+      ],
+      "visualRefs": [
+        "engines.viz.evidenceCoverage",
+        "engines.viz.kpiRibbon"
+      ],
+      "failureModes": [
+        "sourceBreadth가 부족한데 narrative로 보강",
+        "propagationPath 없이 trigger만 나열",
+        "open falsifier 없이 scenario 확정",
+        "weak 상태를 usable처럼 표현"
+      ],
+      "forbidden": [
+        "qualityGateStatus가 weak이면 final conclusion을 쓰지 않는다.",
+        "premortemQualityGate risk row를 숨기지 않는다.",
+        "blocked visualRef를 emit하지 않는다."
+      ],
+      "examples": [
+        "이 thesis kill-chain이 답변 가능한 품질인지 게이트로 막아봐",
+        "타협 없이 thesis 프리모템 품질 검증"
+      ],
+      "runtimeCompatibility": {
+        "server": {
+          "status": "supported"
+        },
+        "localPython": {
+          "status": "supported"
+        },
+        "mcp": {
+          "status": "supported"
+        },
+        "webAi": {
+          "status": "supported"
+        },
+        "pyodide": {
+          "status": "limited"
+        }
+      },
+      "audiences": {
+        "llm": "이 스킬은 최종 답변 차단 게이트다. risk row가 있으면 그 사유와 nextAction을 먼저 말한다.",
+        "agent": "answer draft 전에 premortemQualityGate를 확인하고 weak/operatorReview이면 보수적으로 답한다.",
+        "human": "pre-mortem 결과가 정말 강한지, 아니면 근거가 빈 narrative인지 판정하는 마지막 게이트다."
+      },
+      "predecessors": [],
+      "successors": [],
+      "isLeafNode": false,
+      "entryHint": false,
+      "graphTier": "L1.5",
+      "cluster": "incubator.thesisKillChain",
+      "humanIntro": "premortemQualityGate는 Thesis Kill-Chain을 강하게 만드는 장치다. 분석이 그럴듯해 보여도 thesis, 근거 폭, 전파 경로, 반증, 시각화 결합 중 하나가 비면 최종 답변을 막는다.",
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `Company.gather`, `scan.market`, `scan.audit`, `scan.quality`로 근거를 먼저 확보하고, 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"premortemQualityGate\"],\n    values={\n        \"premortemQualityScore\": memo[\"headline\"][\"premortemQualityScore\"],\n        \"qualityGateStatus\": memo[\"headline\"][\"qualityGateStatus\"],\n        \"decisionStatus\": memo[\"headline\"][\"decisionStatus\"],\n    },\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n10개 gate를 모두 확인한다.\n\n| gate | 차단 의미 |\n|---|---|\n| `explicitThesis` | thesis가 없으면 프리모템이 아니라 입력 요청이다. |\n| `sourceBreadth` | L1/L1.5 근거가 좁으면 narrative로 본다. |\n| `assumptionDepth` | testable assumption 3개 미만이면 결론을 막는다. |\n| `fragilityDetected` | 취약 지표가 없으면 kill-chain이 아니다. |\n| `triggerConnected` | trigger가 없으면 시나리오가 시작되지 않는다. |\n| `propagationConnected` | trigger → mechanism → assumption 경로가 없으면 분석이 아니다. |\n| `tripwireOperational` | threshold/action 없는 risk는 모니터링할 수 없다. |\n| `falsifierOpen` | counter-evidence가 없으면 confirmation bias다. |\n| `scenarioComplete` | base/ero"
+    },
+    {
       "id": "recipes.incubator.thesisKillChain.deepDive",
       "title": "Thesis Kill-Chain Deep Dive",
       "category": "recipes",
       "categoryTitle": "Recipes",
       "kind": "recipe",
       "status": "observed",
-      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
+      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate, premortem quality gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
       "whenToUse": [
         "thesis kill-chain deep dive",
         "프리모템 전체 실행",
@@ -36207,7 +36356,8 @@
         "deepDive step ledger",
         "killRiskScore",
         "open tripwire count",
-        "scenario storyboard"
+        "scenario storyboard",
+        "premortem quality gate"
       ],
       "apiRefs": [
         "Company.show",
@@ -36237,7 +36387,8 @@
         "recipes.incubator.thesisKillChain.tripwireMonitor",
         "recipes.incubator.thesisKillChain.falsifierLedger",
         "recipes.incubator.thesisKillChain.scenarioStoryboard",
-        "recipes.incubator.thesisKillChain.visualDecisionPack"
+        "recipes.incubator.thesisKillChain.visualDecisionPack",
+        "recipes.incubator.thesisKillChain.premortemQualityGate"
       ],
       "requires": [],
       "alternatives": [],
@@ -36247,9 +36398,13 @@
         "dartlab://skills/recipes.incubator.thesisKillChain.deepDive"
       ],
       "procedure": [
+        "`premortemQualityGate`의 risk row가 있으면 결론보다 차단 사유와 nextAction을 먼저 쓴다.",
+        "`qualityGateStatus == \"weak\"`이면 `decisionStatus == \"usable\"`이 될 수 없다.",
+        "`operatorReview`이면 확정 결론 대신 보강할 EngineCall 목록과 어떤 gate가 막혔는지 답한다.",
         "공개 호출 블록은 AST parse가 되어야 한다.",
         "공개 호출 블록은 L2/L3 호출 문자열을 포함하면 실패다.",
         "scenarioStoryboard에는 baseIntact, erosionCase, killChainCase가 모두 있어야 한다.",
+        "premortemQualityGate는 10개 gate를 반환해야 한다.",
         "ready가 아닌 visualRef는 차트로 emit하지 않는다."
       ],
       "recipeSteps": [],
@@ -36263,8 +36418,9 @@
         "executionRef"
       ],
       "expectedOutputs": [
-        "11단계 deepDive ledger",
+        "12단계 deepDive ledger",
         "killRiskScore와 openTripwireCount",
+        "premortemQualityScore와 qualityGateStatus",
         "propagationPath와 scenarioStoryboard",
         "visualDecisionPack"
       ],
@@ -36288,6 +36444,7 @@
       "forbidden": [
         "c.analysis, c.credit, c.quant, c.macro, c.industry, c.story를 호출하지 않는다.",
         "thesis 지지 결론으로 답변을 시작하지 않는다.",
+        "premortemQualityGate가 weak이면 final conclusion을 쓰지 않는다.",
         "blocked visualRef를 emit하지 않는다."
       ],
       "examples": [

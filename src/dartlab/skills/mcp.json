@@ -2,7 +2,7 @@
   "meta": {
     "entrySkillId": "start.dartlabSkillOs",
     "canonicalSurface": "DartLab Skill OS",
-    "skillCount": 324,
+    "skillCount": 325,
     "categories": [
       {
         "id": "start",
@@ -32,7 +32,7 @@
         "id": "recipes",
         "title": "Recipes",
         "description": "?? ??? L1/L1.5 ??? ?? ?? ??? ???? ?? ??.",
-        "count": 119
+        "count": 120
       }
     ],
     "sourcePolicy": "Skills are public execution documents. API and behavior changes must update related skills."
@@ -4585,7 +4585,7 @@
         "skill 검색이 의도와 어긋나"
       ],
       "nextSkills": [],
-      "bodyPreview": "## 무엇을 하나\n\n`dartlab.skills.search(query)` 가 query 와 skill 의 매칭 점수를 계산할 때, 본 skill 의 frontmatter `intentBoosts[]` 에 정의된 18 개 의도 규칙을 적용한다. 각 rule 은 `(skillIds, terms, boost)` 로 구성:\n\n- `skillIds[]`: 가중치를 받을 대상 skill id 목록.\n- `terms[]`: query 에 (case-insensitive substring) 등장하면 매칭으로 간주할 키워드 목록.\n- `boost`: 매칭 시 점수에 더할 값.\n\n추가로 `engines.company.usEdgarReview` 는 ticker 정규식 (`\\b[A-Z]{1,5}\\b`) 매칭 시 +8.0 boost — 이는 코드 (`registry.py`) 에 남는다 (정규식 정의는 markdown 으로 옮기지 않는다).\n\n## SSOT 정책\n\n본 파일이 의도 가중치의 단일 정본이다. `src/dartlab/skills/registry.py` 의 `_INTENT_SKILL_BOOSTS` 는 본 frontmatter 를 lazy 로드하는 wrapper 만 보유한다"
+      "bodyPreview": "## 무엇을 하나\n\n`dartlab.skills.search(query)` 가 query 와 skill 의 매칭 점수를 계산할 때, 본 skill 의 frontmatter `intentBoosts[]` 에 정의된 19 개 의도 규칙을 적용한다. 각 rule 은 `(skillIds, terms, boost)` 로 구성:\n\n- `skillIds[]`: 가중치를 받을 대상 skill id 목록.\n- `terms[]`: query 에 (case-insensitive substring) 등장하면 매칭으로 간주할 키워드 목록.\n- `boost`: 매칭 시 점수에 더할 값.\n\n추가로 `engines.company.usEdgarReview` 는 ticker 정규식 (`\\b[A-Z]{1,5}\\b`) 매칭 시 +8.0 boost — 이는 코드 (`registry.py`) 에 남는다 (정규식 정의는 markdown 으로 옮기지 않는다).\n\n## SSOT 정책\n\n본 파일이 의도 가중치의 단일 정본이다. `src/dartlab/skills/registry.py` 의 `_INTENT_SKILL_BOOSTS` 는 본 frontmatter 를 lazy 로드하는 wrapper 만 보유한다. 새 의도 규칙은 본 파일의 frontmatter 에만 추가한다 — 코드 수정 불필요.\n\n## 다음 단계\n\n- [start.useSkillsCatalog](/skills/start.useSkillsCatalog) — query → skill 검색 절차.\n- [operation.opsAsSkills](/skills/operation.opsAsSkills) — 운영 문서가 어떻게 skills 로 흡수됐는지."
     },
     {
       "id": "operation.issues",
@@ -6207,10 +6207,28 @@
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"visualDecisionPack\"],\n    values=memo[\"headline\"],\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\nscenarioStoryboard, propagationPath, evidenceCoverageAudit 존재 여부로 scenarioVisuals, mermaidDiagram, evidenceCoverage, kpiRibbon의 ready/blocked를 결정한다.\n\n## 대표 반환 형태\n\n| column | 의미 |\n|---|---|\n| `visualRef` | observed viz skill |\n| `status` | ready/blocked |\n| `requiredBinding` | 필요한 근거 결합 |\n| `evidence` | 선택 사유 |\n\n## 연계 절차\n\n1. recipes.incubator.thesisKillChain.scenarioStoryboard - scenario chart source.\n2. recipes.incubator.thesisKillChain.deepDive - 최종 visual gate.\n\n## 기본 검증\n\n- visualRefs는 observed viz만 포함한다.\n- blocked visualRef를 emit하지 않는다."
     },
     {
+      "id": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "title": "Thesis Kill-Chain Premortem Quality Gate",
+      "category": "recipes",
+      "purpose": "Thesis Kill-Chain 결과를 최종 답변으로 쓰기 전, thesis·근거 폭·가정 수·취약 지표·trigger·전파 경로·tripwire·falsifier·scenario·visual binding을 모두 통과했는지 막판에 차단하는 품질 게이트다. 트리거 — '타협 없이 thesis 깨기', 'premortem quality gate', '강한 스킬 검증'.",
+      "whenToUse": [
+        "premortem quality gate",
+        "thesis kill-chain 품질 게이트",
+        "타협 없이 thesis 깨기",
+        "강한 스킬 검증",
+        "약한 결론 차단"
+      ],
+      "nextSkills": [
+        "recipes.incubator.thesisKillChain.visualDecisionPack",
+        "recipes.incubator.thesisKillChain.deepDive"
+      ],
+      "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show`, `Company.disclosure`, `Company.gather`, `scan.market`, `scan.audit`, `scan.quality`로 근거를 먼저 확보하고, 아래 Python 블록은 확보한 L1/L1.5 근거를 `buildThesisKillChainMemo`로 묶는 **RunPython fallback** 절차다.\n\n```python\nfrom dartlab.synth.thesisKillChain import buildThesisKillChainMemo\n\ntarget = \"005930\"\nthesis = \"매출 성장과 현금 전환이 유지되어 valuation discount가 해소된다\"\npriceRows = [{\"date\": \"2026-05-11\", \"close\": 90000}, {\"date\": \"2026-05-10\", \"close\": 100000}]\n\nmemo = buildThesisKillChainMemo(target=target, thesis=thesis, priceRows=priceRows)\n\nemit_result(\n    table=memo[\"tables\"][\"premortemQualityGate\"],\n    values={\n        \"premortemQualityScore\": memo[\"headline\"][\"premortemQualityScore\"],\n        \"qualityGateStatus\": memo[\"headline\"][\"qualityGateStatus\"],\n        \"decisionStatus\": memo[\"headline\"][\"decisionStatus\"],\n    },\n    date=memo[\"asOf\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n10개 gate를 모두 확인한다.\n\n| gate | 차단 의미 |\n|---|---|\n| `explicitThesis` | thesis가 없으면 프리모템이 아니라 입력 요청이다. |\n| `sourceBreadth` | L1/L1.5 근거가 좁으면 narrative로 본다. |\n| `assumptionDepth` | testable assumption 3개 미만이면 결론을 막는다. |\n| `fragilityDetected` | 취약 지표가 없으면 kill-chain이 아니다. |\n| `triggerConnected` | trigger가 없으면 시나리오가 시작되지 않는다. |\n| `propagationConnected` | trigger → mechanism → assumption 경로가 없으면 분석이 아니다. |\n| `tripwireOperational` | threshold/action 없는 risk는 모니터링할 수 없다. |\n| `falsifierOpen` | counter-evidence가 없으면 confirmation bias다. |\n| `scenarioComplete` | base/ero"
+    },
+    {
       "id": "recipes.incubator.thesisKillChain.deepDive",
       "title": "Thesis Kill-Chain Deep Dive",
       "category": "recipes",
-      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
+      "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate, premortem quality gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
       "whenToUse": [
         "thesis kill-chain deep dive",
         "프리모템 전체 실행",
