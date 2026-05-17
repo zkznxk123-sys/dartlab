@@ -600,7 +600,9 @@ def test_builtin_skill_specs_are_package_sources() -> None:
     start = skills.get("start.dartlabSkillOs", includeUser=False)
     source_path = str(start.source.get("path", "")).replace("\\", "/")
 
-    assert "/src/dartlab/skills/specs/start/dartlabSkillOs.md" in source_path
+    # editable install 에서는 src/dartlab/... 경로, non-editable install 에서는
+    # site-packages/dartlab/... 경로. 핵심은 dartlab/skills/specs/ prefix.
+    assert "dartlab/skills/specs/start/dartlabSkillOs.md" in source_path
 
 
 def test_list_skills_caches_result_for_repeat_calls() -> None:
