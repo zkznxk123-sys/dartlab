@@ -164,9 +164,18 @@ uv run python -X utf8 landing/_scripts/buildCompanyCharts.py --code 005930
 # → landing/static/charts/005930/manifest.json + section JSON
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+차트 시각화에서 다음 4 룰 강행:
+
+1. **차트 생성은 `CompileVisual` tool 1 회** — chartType + data + 인자. RunPython 직접 matplotlib/plotly 호출 금지 (visualRef 미발급 → UI 렌더 실패).
+2. **모든 차트의 `evidenceBinding` 필수** — 차트 안 모든 값에 ref 박힌 source 명시. evidenceBinding 누락 시 거부 (해결책 포함 경고).
+3. **데이터 부족 시 차트 만들지 마라** — 표 + coverage note 로 낮춘다. 환각 차트 (X 값 없는 그래프, peer 4 개 미만 분포 등) 금지.
+4. **본문 안 차트 인용에 `<visualRef:...>` 표기** — UI 가 inline 렌더링하므로 ref id 필수.
+
 ## 호출 동작
 
-`emit_chart(spec)` — ChartSpec dict 를 stdout 에 `[VIZ_SPEC_START]...[VIZ_SPEC_END]` 마커로 출력. AI agent 가 `extract_viz_specs(stdout)` 로 추출 → `view_spec` TraceEvent → 클라이언트 `ChartRenderer` 가 인라인 렌더. `evidenceBinding` 또는 `evidenceIds` 누락 시 거부 (해결책 포함 경고).
+`emit_chart(spec)` — ChartSpec dict 를 stdout 에 `[VIZ_SPEC_START]...[VIZ_SPEC_END]` 마커로 출력. agent 가 `extract_viz_specs(stdout)` 로 추출 → `view_spec` TraceEvent → 클라이언트 `ChartRenderer` 가 인라인 렌더. `evidenceBinding` 또는 `evidenceIds` 누락 시 거부 (해결책 포함 경고).
 
 `emit_diagram(type, source)` — mermaid · graphviz 같은 다이어그램 소스. 같은 마커 패턴.
 

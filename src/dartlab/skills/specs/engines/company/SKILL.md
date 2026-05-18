@@ -136,6 +136,15 @@ story = c.story()
 industry = c.industry()
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+단일 종목 질문은 본 엔진이 1 차 진입점. 다음 4 룰 강행:
+
+1. **`EngineCall(apiRef="Company.show", args={"stockCode": "...", "topic": "..."})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.
+2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `\`table:Company.show:005930\`` 형식 backtick 또는 `<tableRef:id>` 각괄호.
+3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.show 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.
+4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.show 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.
+
 ## 호출 동작
 
 Company 생성 시 target과 market/provider를 확정한다. 이후 `show/select/trace`는 원자료 조회, `analysis/credit/quant/macro/story`는 하위 엔진 호출, `gather`는 보조 데이터 수집, `disclosure/liveFilings/readFiling`은 공시 접근을 담당한다.
