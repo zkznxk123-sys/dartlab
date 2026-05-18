@@ -247,20 +247,10 @@ async def apiVizLayout(
     """
     effectiveView = _LEGACY_VIEW_REDIRECT.get(view or "", view)
 
-    # v3-r5 §3 — 2 단 packing. 1) spec build → 2) _isCardEmpty 통과 카드만 packSkyline.
-    from dartlab.viz.catalog import CATALOG
-    from dartlab.viz.layout import packSkyline, queryCards
-
-    if effectiveView:
-        cards = queryCards(tab=tab, sub=effectiveView)
-    elif tab == "financial":
-        # v3-r6 — view 없으면 재무분석 1 view (OVERVIEW_KEYS curated 14 카드).
-        from dartlab.viz.catalog.finance import OVERVIEW_KEYS
-
-        cards = [(k, CATALOG[k]) for k in OVERVIEW_KEYS if k in CATALOG]
-    else:
-        cards = queryCards(tab=tab)
-    if not cards:
+    # v3-r6 — planTabLayout 단일 호출 (view=null + tab=financial → OVERVIEW_KEYS 8 카드).
+    # _isCardEmpty 2 단 packing 일시 폐기 (backend hang 회피). 후속 PR 에서 cost 낮춰 재도입.
+    placed = planTabLayout(tab, sub=effectiveView)
+    if not placed:
         return {
             "stockCode": stockCode,
             "tab": tab,
@@ -272,17 +262,12 @@ async def apiVizLayout(
         }
 
     await _prefetchCompany(stockCode)
-    cardKeys = [k for k, _ in cards]
+    cardKeys = [p["cardKey"] for p in placed]
 
-    # v3-r6 — sequential build (deadlock 회피). 동시 to_thread 가 Polars GIL 잠금 → hang.
-    specs: list[dict[str, Any]] = []
-    for k in cardKeys:
-        specs.append(await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods))
-    specMap = dict(zip(cardKeys, specs))
+    async def _one(k: str) -> dict[str, Any]:
+        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
 
-    # 의미 무효 카드 omit — 운영자 원칙 4. _isCardEmpty 통과 카드만 packing.
-    nonEmptyCards = [(k, e) for k, e in cards if not _isCardEmpty(specMap[k])]
-    placed = packSkyline(nonEmptyCards, colCount=24)
+    specs = await asyncio.gather(*[_one(k) for k in cardKeys])
 
     return {
         "stockCode": stockCode,
@@ -291,5 +276,5 @@ async def apiVizLayout(
         "periodKind": periodKind,
         "colCount": 24,
         "layout": placed,
-        "cards": {k: specMap[k] for k, _ in nonEmptyCards},
+        "cards": dict(zip(cardKeys, specs)),
     }
