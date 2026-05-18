@@ -1128,6 +1128,126 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "help": "R&D / 매출. 5% 이상 = 기술 집약 (반도체·제약·SW), 1~3% = 일반 제조, 1% 미만 = 기술 의존도 낮음. 추세 ↑ = 미래 베팅 확대.",
     },
     # ─────────────────────────────────────────────────────────────
+    # 25. 배당성향 — 배당 / 순이익. 주주환원 비중. 30~50% 안정.
+    # ─────────────────────────────────────────────────────────────
+    "payoutRatio": {
+        "kind": "trend",
+        "title": "배당성향",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "cashflow",
+        "seriesPlan": [
+            {
+                "key": "payout",
+                "label": "배당 / 순이익",
+                "color": COLORS[4],
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "ratio": {
+                    "num": {"dividendsPaid": -100},
+                    "den": {"netIncome": 1},
+                    "scale": 1,
+                },
+            },
+        ],
+        "options": {
+            "unit": "%",
+            "refLines": [
+                {"value": 30, "label": "30%", "intent": "neutral"},
+                {"value": 50, "label": "50%", "intent": "positive"},
+            ],
+        },
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "배당 / 순이익. 30~50% = 성숙 안정 기업 정통. 100% 초과 = 이익 초과 배당 (지속 불가). 0% = 성장 재투자 우선 또는 적자. dividendsPaid 부호 음수라 ×−1 보정.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 26. 현금 보유 비중 — 현금 / 자산. 보수적 경영 신호 + M&A 여력.
+    # ─────────────────────────────────────────────────────────────
+    "cashAssetsRatio": {
+        "kind": "trend",
+        "title": "현금 보유 비중",
+        "topic": "BS",
+        "tab": "financial",
+        "subCategory": "capitalStructure",
+        "seriesPlan": [
+            {
+                "key": "cashRatio",
+                "label": "현금 / 자산",
+                "color": COLORS[5],
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"cash": 1}, "den": {"assets": 1}, "scale": 100},
+            },
+        ],
+        "options": {
+            "unit": "%",
+            "refLines": [
+                {"value": 10, "label": "10%", "intent": "neutral"},
+            ],
+        },
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "현금성자산 / 총자산. 10% 이상 = 보수적 경영 + M&A·배당·자사주 여력. 5% 미만 = 단기 유동성 부담 가능. 사업 모델별 정상 범위 다름 (현금 집약 IT 는 높고 제조는 낮음).",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 27. 자본 성장 — 자기자본 YoY. 내부 유보 누적 추세.
+    # ─────────────────────────────────────────────────────────────
+    "equityGrowth": {
+        "kind": "trend",
+        "title": "자본 성장",
+        "topic": "BS",
+        "tab": "financial",
+        "subCategory": "growth",
+        "seriesPlan": [
+            {
+                "key": "equityYoy",
+                "label": "자기자본 증가율",
+                "color": COLORS[3],
+                "intent": "primary",
+                "unit": "%",
+                "type": "bar",
+                "yoy": "equity",
+            },
+        ],
+        "options": {"unit": "%"},
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "자기자본 전년 동기 대비 증가율. 양수 지속 = 내부유보 누적 (이익 안 빼가고 재투자). 음수 = 배당 + 자사주매입 > 순이익 (또는 결손금). 매출 성장과 비교해 자본 효율 변화 단서.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 28. 실효세율 — 법인세 / 세전이익. 24% 표준 + 안정성.
+    # ─────────────────────────────────────────────────────────────
+    "effectiveTaxRate": {
+        "kind": "trend",
+        "title": "실효세율",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "quality",
+        "seriesPlan": [
+            {
+                "key": "etr",
+                "label": "법인세 / 세전이익",
+                "color": COLORS[1],
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "ratio": {
+                    "num": {"incomeTax": 100},
+                    "den": {"operatingIncome": 1, "financeIncome": 1, "financeCosts": -1},
+                    "scale": 1,
+                },
+            },
+        ],
+        "options": {
+            "unit": "%",
+            "refLines": [
+                {"value": 24, "label": "24% (법정)", "intent": "neutral"},
+            ],
+        },
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "법인세 / 세전이익. 한국 법정 24% (1억 초과). 5% 이하·100% 초과 같은 이상치는 일회성 세금조정 또는 세전이익 손실 신호. 추세 변동성 ↑ = 회계 추정 의존도 ↑.",
+    },
+    # ─────────────────────────────────────────────────────────────
     # 24. 영업이익 → 순이익 walk — 4 단 막대. 본업과 비본업/세금 분리.
     # ─────────────────────────────────────────────────────────────
     "taxWalk": {
@@ -1183,47 +1303,46 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
 
 
 FINANCE_DASHBOARD_KEYS: list[str] = [
-    # ─ 자금조달 · 자본구조 (사용자 narrative 시작점) ─
-    # row 1: 자산구조 hero 12×3 — 자산 = 부채+자본 dual-stack 한눈에.
-    "assetComposition",
-    # row 2: 부채상세 4×3 + 자본상세 4×3 + 손익구조 4×3 — "자세한 자금조달 + 선순환 단서".
-    "liabilityDetail",
-    "equityDetail",
-    "incomeBreakdown",
-    # ─ 영업의 선순환 (마진·수익성·효율) ─
-    # row 3: 이익률 3 + 수익성(ROE/ROA) 3 + DuPont 분해 3 + ROIC 3 — 자본효율 4 시각.
-    "marginTrend",
-    "returnTrend",
-    "dupont",
-    "roic",
-    # row 4: 비용구조 3 + 활동성 3 + R&D 강도 3 + 영업→순이익 walk 3.
-    "costStructureTrend",
-    "turnoverTrend",
-    "rndIntensity",
-    "taxWalk",
-    # row 5: 성장성 3 + CCC 3 + 이익품질 3 + 발생액 비율 (Sloan) 3 — 성장 질 + 분식 의심.
-    "growthYoy",
-    "workingCapitalDays",
-    "earningsQuality",
-    "sloanAccruals",
-    # ─ 현금 흐름 · 재무 안정 ─
-    # row 6: 현금흐름 3 + 잉여현금흐름 3 + 자본배분 3 + 순차입금 3 — 현금 일생.
-    "cashflowSigned",
-    "fcfTrend",
-    "capitalAllocation",
-    "netDebt",
-    # row 7: 안정성 3 + 유동성 3 + Altman Z' 3 + 변동큰지표 3 — 부도 위험 4 시각.
-    "stabilityRatio",
-    "liquidityTrend",
-    "altmanZ",
-    "riskAnomaly",
-    # row 8: 레버리지 6 + 이자보상배율 6.
-    "leverageTrend",
-    "interestCoverage",
+    # ─ 01 자본구조 · 자산구조 — 자금조달 + 자산 운용 (정통 단계 1+2). ─
+    "assetComposition",       # 12×3 hero — 자산 = 부채+자본
+    "liabilityDetail",         # 4×3
+    "equityDetail",            # 4×3
+    "cashAssetsRatio",         # 3×3 — 현금/자산 (M&A 여력)
+    "incomeBreakdown",         # 4×3 — 손익구조 (선순환 진입)
+    "workingCapitalDays",      # 3×3 — CCC (운전자본 묶임)
+    # ─ 02 영업 효율 · 자본 효율 — 마진·자본 효율·R&D·세금 (정통 단계 3+5). ─
+    "marginTrend",             # 3×3
+    "returnTrend",             # 3×3 — ROE/ROA
+    "dupont",                  # 3×3 — DuPont 분해
+    "roic",                    # 3×3 — ROIC vs WACC
+    "costStructureTrend",      # 3×3
+    "turnoverTrend",           # 3×3 — 활동성
+    "rndIntensity",            # 3×3 — R&D 강도
+    "taxWalk",                 # 3×3 — 영업→순이익
+    "effectiveTaxRate",        # 3×3 — 실효세율 (이익품질 단서)
+    # ─ 03 현금 일생 · 자본배분 — CFO/FCF/배분/주주환원/이익품질 (정통 단계 4+10). ─
+    "cashflowSigned",          # 3×3 — CFO/CFI/CFF
+    "fcfTrend",                # 3×3 — FCF
+    "capitalAllocation",       # 3×3 — CapEx/배당/R&D
+    "payoutRatio",             # 3×3 — 배당성향
+    "earningsQuality",         # 3×3 — CFO/NI
+    "sloanAccruals",           # 3×3 — 발생액 (분식 의심)
+    # ─ 04 재무 안정 · 부도 위험 — 안정성·유동성·레버리지·Altman (정통 단계 7+8). ─
+    "stabilityRatio",          # 3×3
+    "liquidityTrend",          # 3×3
+    "altmanZ",                 # 3×3 — Altman Z'
+    "interestCoverage",        # 3×3 — 이자보상배율
+    "netDebt",                 # 3×3 — 순차입금
+    "leverageTrend",           # 3×3 — D/E·D/A·유동
+    # ─ 05 성장의 질 · 이상신호 — 매출/자본 성장·변동큰지표 (정통 단계 6+8). ─
+    "growthYoy",               # 3×3 — 매출/OP/NI YoY
+    "equityGrowth",            # 3×3 — 자본 YoY
+    "riskAnomaly",             # 3×3 — 변동 큰 지표
 ]
-"""26 카드 narrative — 자산구조 hero → 자금조달 → 마진/효율 (DuPont·ROIC 추가)
-→ 성장/품질 (CCC·Sloan 추가) → 현금/배분 (자본배분·순차입금 추가) → 안정/부도
-(Altman Z' 추가). 정통 분석 흐름 강화 (2026-05-19 운영자 명시 카드 다양성)."""
+"""30 카드 / 5 section narrative — 정통 분석 10 단계 매핑:
+01 자본+자산구조 (1+2)  /  02 영업·자본 효율 (3+5)  /  03 현금 일생·자본배분 (4+10)
+04 재무 안정·부도 위험 (7+8)  /  05 성장의 질·이상신호 (6+8).
+신설 4: payoutRatio·cashAssetsRatio·equityGrowth·effectiveTaxRate (2026-05-19)."""
 
 
 # OVERVIEW_KEYS — 재무제표분석 1 view 의 curated 카드 셋트.

@@ -164,15 +164,23 @@ function FinancialTab() {
 
 	// narrative section 정의 — cardKey → sectionIdx. backend layout 그대로 받되
 	// 여기서 split 후 각 section 내 y 좌표 normalize (그룹 내 min y 빼기).
+	// 정통 분석 10 단계 매핑 — 5 section narrative.
 	const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 		{
-			title: '자금조달 · 자본구조',
-			subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리고 있는가.',
-			keys: new Set(['assetComposition', 'liabilityDetail', 'equityDetail', 'incomeBreakdown']),
+			title: '자본구조 · 자산구조',
+			subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리는가 — CCC 까지.',
+			keys: new Set([
+				'assetComposition',
+				'liabilityDetail',
+				'equityDetail',
+				'cashAssetsRatio',
+				'incomeBreakdown',
+				'workingCapitalDays',
+			]),
 		},
 		{
-			title: '영업의 선순환',
-			subtitle: '마진·수익성·자본효율·DuPont·ROIC·R&D — 본업이 진짜로 돈을 벌고 있는가.',
+			title: '영업 효율 · 자본 효율',
+			subtitle: '마진·수익성·DuPont 분해·ROIC·R&D 강도·세금 walk — 본업이 진짜로 돈을 버는가.',
 			keys: new Set([
 				'marginTrend',
 				'returnTrend',
@@ -182,27 +190,37 @@ function FinancialTab() {
 				'turnoverTrend',
 				'rndIntensity',
 				'taxWalk',
-				'growthYoy',
-				'workingCapitalDays',
+				'effectiveTaxRate',
+			]),
+		},
+		{
+			title: '현금 일생 · 자본배분',
+			subtitle: '현금흐름·FCF·자본배분(CapEx/배당/R&D)·배당성향·이익품질·발생액 — 번 돈은 어디로.',
+			keys: new Set([
+				'cashflowSigned',
+				'fcfTrend',
+				'capitalAllocation',
+				'payoutRatio',
 				'earningsQuality',
 				'sloanAccruals',
 			]),
 		},
 		{
-			title: '현금 흐름 · 재무 안정',
-			subtitle: '현금일생·자본배분·순차입금·부도 위험 (Altman Z·이자보상). 진짜 위험은 어디.',
+			title: '재무 안정 · 부도 위험',
+			subtitle: '안정성·유동성·이자보상·Altman Z·순차입금·레버리지 — 회사가 망할 수 있는가.',
 			keys: new Set([
-				'cashflowSigned',
-				'fcfTrend',
-				'capitalAllocation',
-				'netDebt',
 				'stabilityRatio',
 				'liquidityTrend',
 				'altmanZ',
-				'riskAnomaly',
-				'leverageTrend',
 				'interestCoverage',
+				'netDebt',
+				'leverageTrend',
 			]),
+		},
+		{
+			title: '성장의 질 · 이상신호',
+			subtitle: '매출 YoY·자본 YoY·변동 큰 지표 — 성장이 진짜인가, 위험한 신호는 없는가.',
+			keys: new Set(['growthYoy', 'equityGrowth', 'riskAnomaly']),
 		},
 	];
 
