@@ -1228,21 +1228,45 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
 KPI 1×1 4 개 = 한 row, 자산구조 2×3 + 부채/자본 1×3 = 한 row, trend 2×2 4 개 = 두 row."""
 
 
-# v3-r6 — 재무분석 1 view (운영자 명시): 자산구조 dual-stack hero + KPI 4 + 본질 chart 4.
-# 8 카드 (polars cost 감소). 후속 PR 에서 carrier 확보 후 chart 추가.
+# v3-r6 — 재무제표 분석 1 view (운영자 명시): 명시 4 카드 + 진짜 재무분석 전 영역.
+# bento 2026 시선 흐름 (F-pattern): KPI strip → 자산구조 hero → BS detail → 수익성 → 현금 → 건전성 → 품질 → 자본배분 → 생애주기 → 리스크.
 OVERVIEW_KEYS: list[str] = [
-    # Hero — 자산구조 dual-stack (영업+비영업 = 총자산 | 부채+자본). 회계 등식 24×8.
-    "assetComposition",
-    # KPI strip — 매출·영업이익·ROE·부채비율 (각 3×2, 한 행 12 col 차지)
+    # ── KPI strip — 핵심 4 지표 (매출·영업이익·ROE·부채비율) ──
     "kpiRevenue",
     "kpiOperatingIncome",
     "kpiRoe",
     "kpiDebtRatio",
-    # 손익·자본·현금 본질 (각 6×4 chart)
-    "incomeBreakdown",  # 손익구조 (매출 bar + 영업이익/순이익 line)
-    "equityDetail",  # 자본상세 (자본금·잉여금·기타자본 stacked)
-    "cashflowSigned",  # 현금흐름 signed (영업/투자/재무 + 순현금증감 line)
+    # ── BS 구조 — 명시 4 카드 (자산·부채·자본·손익) ──
+    "assetComposition",  # 자산구조 dual-stack (영업+비영업 = 총자산 | 부채+자본)
+    "liabilityDetail",  # 부채상세 (매입채무·단기차입·장기차입)
+    "equityDetail",  # 자본상세 (자본금·잉여금·기타자본)
+    "incomeBreakdown",  # 손익구조 (매출 + 영업이익/순이익)
+    # ── 수익성·성장성·이익률 ──
     "marginTrend",  # 이익률 (gpm/opm/npm)
+    "returnTrend",  # 수익성 (ROE/ROA)
+    "growthYoy",  # 성장성 (매출/영업/순이익 YoY)
+    "costStructureTrend",  # 비용구조 stacked
+    # ── 현금흐름 ──
+    "cashflowSigned",  # 영업/투자/재무 + 순현금증감
+    "fcfTrend",  # 잉여현금흐름 (영업CF - CapEx)
+    # ── 재무건전성 ──
+    "leverageTrend",  # 레버리지 (D/E + D/A + 유동비율)
+    "stabilityRatio",  # 안정성 (부채비율 + 자기자본비율)
+    "liquidityTrend",  # 유동성 (유동/당좌/현금)
+    "workingCapitalDays",  # 운전자본 (DSO + DIO)
+    # ── 활동성·이익품질 ──
+    "turnoverTrend",  # 활동성 (회전율)
+    "dupontRadar",  # DuPont 3 인자 분해
+    "earningsPersistenceGauge",  # 이익 지속성 gauge
+    # ── 자본배분 ──
+    "capitalAllocationBars",  # 배분 (CapEx/배당/자사주)
+    "capitalAllocationWaterfall",  # 배분 waterfall
+    "maturityProfile",  # 부채 만기 분포
+    # ── 생애주기 + 리스크 신호 ──
+    "riskLifeCycle",  # 생애주기 strip (24×2)
+    "riskDistress",  # Altman Z 부실 위험
+    "riskDistressDecomp",  # Altman Z 5 인자 분해
+    "riskAnomaly",  # 이상신호 topList
 ]
 """재무분석 1 view (v3-r6) — Anthropic data-viz + bento 2026 룰 적용.
 운영자 명시: '자산구조 / 부채상세 / 자본상세 / 손익구조 + 그래프+테이블 균형 + 카드 작게 + 빈칸 0'."""

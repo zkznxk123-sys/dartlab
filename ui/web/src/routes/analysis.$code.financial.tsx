@@ -27,53 +27,11 @@ import { dashKeys } from '@/features/dashboard/api/queryKeys';
 
 type SubView = FinancialSubCategory;
 
-// 7 분석 방법론 view.
-const VALID_VIEWS: SubView[] = [
-	'story',
-	'dupont',
-	'value',
-	'growth',
-	'credit',
-	'quality',
-	'snowflake',
-];
-
-// 옛 sub view URL → 7 방법론 자동 redirect.
-const LEGACY_REDIRECT: Record<string, SubView> = {
-	overview: 'snowflake',
-	performance: 'dupont',
-	capitalStructure: 'credit',
-	cashflow: 'quality',
-	risk: 'credit',
-	profitability: 'dupont',
-	// growth 는 옛에도 새에도 있음 — 새 의미 (성장투자) 그대로.
-};
-
-const SUB_TITLES: Record<SubView, string> = {
-	story: 'Story 서사 (6 막 인과)',
-	dupont: 'DuPont 분해 (ROE 원천)',
-	value: 'Value 가치투자 (Graham·Buffett·Damodaran)',
-	growth: 'Growth 성장투자 (Lynch·Fisher)',
-	credit: 'Credit 신용분석 (Altman·이자보상·만기)',
-	quality: 'Quality 이익품질 (Beneish·Sloan·CF·NI)',
-	snowflake: 'Snowflake 종합 (Simply Wall St 5 차원)',
-	// legacy — validateSearch 가 redirect 하므로 노출 안 됨.
-	performance: 'DuPont 분해 (ROE 원천)',
-	capitalStructure: 'Credit 신용분석 (Altman·이자보상·만기)',
-	cashflow: 'Quality 이익품질 (Beneish·Sloan·CF·NI)',
-	risk: 'Credit 신용분석 (Altman·이자보상·만기)',
-	profitability: 'DuPont 분해 (ROE 원천)',
-};
-
 export const Route = createFileRoute('/analysis/$code/financial')({
 	component: FinancialTab,
-	validateSearch: (search: Record<string, unknown>): { view: SubView | null } => {
-		// v3-r6 — sub view 일시 폐기. view 없으면 null → backend OVERVIEW_KEYS curated 1 view.
-		const raw = String(search.view ?? '');
-		if (!raw) return { view: null };
-		const redirected = LEGACY_REDIRECT[raw] ?? raw;
-		const view = (VALID_VIEWS as string[]).includes(redirected) ? (redirected as SubView) : null;
-		return { view };
+	validateSearch: (_search: Record<string, unknown>): { view: SubView | null } => {
+		// v3-r6 — sub view 일시 폐기. URL ?view stale 도 무조건 null → OVERVIEW_KEYS curated 1 view.
+		return { view: null };
 	},
 });
 
@@ -89,7 +47,6 @@ function ChartLoading() {
 
 function FinancialTab() {
 	const { code } = Route.useParams();
-	const { view } = Route.useSearch();
 	const { period: periodKind } = parentRoute.useSearch();
 
 	const { data: catalog } = useQuery({
@@ -98,8 +55,8 @@ function FinancialTab() {
 		staleTime: Infinity,
 	});
 
-	// 7 방법론 모두 sub 단위 query.
-	const apiView = view;
+	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
+	const apiView = null;
 	const { data, isError, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
 		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40),
@@ -151,7 +108,7 @@ function FinancialTab() {
 			)}
 
 			<div className="border-b bg-card/30 px-4 py-2 text-xs text-muted-foreground">
-				재무제표분석 / <span className="font-medium text-foreground">{view ? SUB_TITLES[view] : '재무분석 (자산구조·손익·현금흐름·재무비율)'}</span>
+				재무제표분석 / <span className="font-medium text-foreground">재무분석 (자산구조·부채상세·자본상세·손익구조)</span>
 			</div>
 
 			{placed.length === 0 ? (
