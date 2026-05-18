@@ -48,14 +48,24 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
             f"{skillId}: requiredEvidence 미정의 — gate skip.",
             data={"ok": True, "missing": [], "requiredEvidence": [], "skillId": skillId},
         )
+    # SSOT 분리 — Ref.kind 검증 가능한 항목 (suffix "Ref") 만 gate 가 책임.
+    # 메타 필드 (target/period/metric/topic 등) 는 답변 본문 헤더 chip 룰이 관리 (workbench/prompts.py).
+    # 두 가지 혼재 시 gate 가 메타 필드를 "missing" 처리하면 영구 warn → broken-windows.
+    requiredRefs = [k for k in required if k.endswith("Ref")]
+    metaFields = [k for k in required if not k.endswith("Ref")]
     presentKinds = sorted({_refKind(r) for r in (refs or []) if _refKind(r)})
-    missing = [k for k in required if k not in presentKinds]
+    missing = [k for k in requiredRefs if k not in presentKinds]
     ok = not missing
-    msg = (
-        f"{skillId}: requiredEvidence 모두 충족 ({', '.join(required)})"
-        if ok
-        else f"{skillId}: ref 부족 — missing: {', '.join(missing)}"
-    )
+    parts = []
+    if requiredRefs:
+        parts.append(
+            f"ref kinds 모두 충족 ({', '.join(requiredRefs)})"
+            if ok
+            else f"ref 부족 — missing: {', '.join(missing)}"
+        )
+    if metaFields:
+        parts.append(f"메타 필드 ({', '.join(metaFields)}) 는 답변 헤더에서 확인")
+    msg = f"{skillId}: " + " · ".join(parts) if parts else f"{skillId}: gate skip"
     gateRef = Ref(
         id=f"evidenceGate:{skillId}",
         kind="verifyRef",
@@ -64,7 +74,8 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
         payload={
             "ok": ok,
             "missing": missing,
-            "requiredEvidence": required,
+            "requiredRefs": requiredRefs,
+            "metaFields": metaFields,
             "presentKinds": presentKinds,
             "skillId": skillId,
             "confidenceMethod": "verify",
@@ -78,7 +89,8 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
         data={
             "ok": ok,
             "missing": missing,
-            "requiredEvidence": required,
+            "requiredRefs": requiredRefs,
+            "metaFields": metaFields,
             "presentKinds": presentKinds,
             "skillId": skillId,
         },

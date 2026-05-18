@@ -37,7 +37,7 @@ import polars as pl
 from dartlab.core.observability import mapping_ledger
 from dartlab.core.polarsUtil import isEmptyDf
 from dartlab.core.utils.ordering import sortSeries
-from dartlab.core.utils.period import extractYear, formatPeriod
+from dartlab.core.utils.period import extractYear, formatPeriod, parsePeriod
 from dartlab.providers.dart.finance.mapper import AccountMapper
 
 _log = logging.getLogger(__name__)
@@ -830,7 +830,12 @@ def _aggregateAnnual(
     qSeries: dict[str, dict[str, list[float | None]]],
     qPeriods: list[str],
 ) -> tuple[dict[str, dict[str, list[float | None]]], list[str]]:
-    """분기별 standalone → 연도별 집계."""
+    """분기별 standalone → 연도별 집계.
+
+    Partial year (4 분기 미만) 은 column label 에 분기 수 표시.
+    예: 2026 에 Q1 만 있으면 label = "2026Q1" (full year "2026" 와 구분).
+    LLM 이 표에서 partial 데이터를 full-year 와 혼동하는 것을 차단.
+    """
     yearSet: dict[str, list[int]] = {}
     for i, p in enumerate(qPeriods):
         year = extractYear(p)
@@ -839,6 +844,15 @@ def _aggregateAnnual(
     years = sorted(yearSet.keys())
     nYears = len(years)
     yearIdx = {y: i for i, y in enumerate(years)}
+
+    yearLabels: list[str] = []
+    for y in years:
+        qIndices = yearSet[y]
+        if len(qIndices) >= 4:
+            yearLabels.append(y)
+        else:
+            maxQ = max(parsePeriod(qPeriods[i])[1] for i in qIndices)
+            yearLabels.append(f"{y}Q{maxQ}")
 
     result: dict[str, dict[str, list[float | None]]] = {"BS": {}, "IS": {}, "CF": {}}
 
@@ -858,7 +872,7 @@ def _aggregateAnnual(
 
             result[sjDiv][snakeId] = annual
 
-    return result, years
+    return result, yearLabels
 
 
 def _aggregateCumulative(
