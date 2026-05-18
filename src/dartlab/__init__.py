@@ -14,6 +14,13 @@ from typing import Any
 # 그 어떤 dartlab 서브모듈 import 보다 앞에 위치한다.
 if "POLARS_MAX_THREADS" not in _os.environ and (_os.cpu_count() or 4) > 4:
     _os.environ["POLARS_MAX_THREADS"] = "4"
+
+# Polars streaming engine (1.40+) — 큰 집계/조인의 intermediate 를 chunked
+# 처리해 Rust arena fragmentation 누적 회피. 005380 c.story() 실측 -277MB
+# (1222 → 945). parity test 5 종목 × 11 case strict equals 통과 확인.
+# 사용자 명시 설정은 존중.
+if "POLARS_AUTO_NEW_STREAMING" not in _os.environ:
+    _os.environ["POLARS_AUTO_NEW_STREAMING"] = "1"
 del _os
 
 _IS_PYODIDE = sys.platform == "emscripten"
