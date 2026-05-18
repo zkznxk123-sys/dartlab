@@ -87,6 +87,36 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
+      # KRX KIND listing + corpProfile seed — prebuild = offline only 이므로 buildScan
+      # 이 KIND HTTP 호출 시 OfflineViolation. kindlist.yml 이 HF push 한 결과를
+      # 다운로드해 KIND file cache 위치에 둔다. 2026-05-18 회귀 차단.
+      - name: Seed KRX KIND + corpProfile from HF
+        run: |
+          mkdir -p data/kindList data/dartList data/dart/scan
+          python -c "
+          from pathlib import Path
+          from huggingface_hub import hf_hub_download
+          import shutil
+          for src, dst in [
+              ('metadata/corpList.parquet', 'data/kindList/corpList.parquet'),
+              ('metadata/dartList.parquet', 'data/dartList/dartList.parquet'),
+              ('dart/scan/corpProfile.parquet', 'data/dart/scan/corpProfile.parquet'),
+          ]:
+              try:
+                  p = hf_hub_download(
+                      repo_id='eddmpython/dartlab-data',
+                      repo_type='dataset',
+                      filename=src,
+                  )
+                  Path(dst).parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy(p, dst)
+                  print(f'seed: {src} -> {dst}')
+              except Exception as e:
+                  print(f'seed skip ({src}): {type(e).__name__}: {e}')
+          "
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
       - name: Build DART scan prebuilds + upload
         run: uv run python -X utf8 .github/scripts/prebuild/prebuildData.py
         env:
