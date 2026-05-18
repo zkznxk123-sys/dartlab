@@ -1,14 +1,18 @@
 """항목 → snakeId 매핑.
 
-매핑 파이프라인 7 단계:
+매핑 파이프라인 단계 (입력·사전 양방향 normalize):
 
 1. account_id prefix 제거 → normalizedId
 2. ID_SYNONYMS 로 영문 ID 동의어 통합
 3. ACCOUNT_NAME_SYNONYMS 로 한글명 동의어 통합
-4. accountMappings.json 조회 (한글명 우선 → 영문ID)
-5. 공백 제거 후 재조회
-6. 괄호+공백 제거 후 재조회
-7. 미매핑 → None
+4. accountMappings.json 직접 조회 (한글명 우선 → 영문ID)
+5. 입력 공백 제거 후 사전 직접 조회
+6. 사전 공백 변형 역인덱스 조회 (사전 키 공백/tab/ZWSP 흡수)
+7. 입력 괄호+공백 제거 후 사전 직접 조회
+8. 사전 괄호 변형 역인덱스 조회 (예: '현금의 기타유입' ↔ '현금의기타유입(유출)')
+9. 입력 하이픈 제거 후 사전 조회 (실험 081-001)
+10. 사전 하이픈 변형 역인덱스 조회
+11. 미매핑 → None
 
 데이터 SSOT (`engines.mappers` 학습 파이프라인 참조):
 
@@ -213,6 +217,8 @@ class AccountMapper:
     _mappings: Optional[dict[str, str]] = None
     _stdAccountsRaw: Optional[dict[str, dict]] = None
     _noHyphenIndex: Optional[dict[str, str]] = None  # lazy 빌드
+    _noSpaceIndex: Optional[dict[str, str]] = None  # 사전 키 공백/특수문자 제거 역인덱스
+    _noParenIndex: Optional[dict[str, str]] = None  # 사전 키 괄호+공백 제거 역인덱스
 
     @classmethod
     def get(cls) -> AccountMapper:
@@ -293,6 +299,8 @@ class AccountMapper:
         cls._mappings = None
         cls._stdAccountsRaw = None
         cls._noHyphenIndex = None
+        cls._noSpaceIndex = None
+        cls._noParenIndex = None
 
     def __init__(self):
         if AccountMapper._mappings is None:
@@ -318,6 +326,37 @@ class AccountMapper:
                     idx[stripped] = snakeId
             AccountMapper._noHyphenIndex = idx
         return AccountMapper._noHyphenIndex
+
+    def _getNoSpaceIndex(self) -> dict[str, str]:
+        """사전 키 공백/tab/ZWSP 제거 역인덱스 — 사전 변형 흡수.
+
+        사전에 ``'당기 순이익'`` 형태가 있어도 ``'당기순이익'`` 로 조회 가능.
+        """
+        if AccountMapper._noSpaceIndex is None:
+            idx: dict[str, str] = {}
+            for key, snakeId in self._mappings.items():
+                stripped = key.replace(" ", "").replace("\t", "").replace("​", "")
+                if stripped != key and stripped not in self._mappings:
+                    idx[stripped] = snakeId
+            AccountMapper._noSpaceIndex = idx
+        return AccountMapper._noSpaceIndex
+
+    def _getNoParenIndex(self) -> dict[str, str]:
+        """사전 키 괄호+공백 제거 역인덱스 — ``'X(Y)'`` ↔ 입력 ``'X'`` 흡수.
+
+        예: 사전 ``'현금의기타유입(유출)'`` → idx ``'현금의기타유입'``.
+        입력 ``'현금의 기타유입'`` → noSpace ``'현금의기타유입'`` 매칭.
+        cycle 5 (2026-05-18) 의 케이스 b 류 자동 흡수.
+        """
+        if AccountMapper._noParenIndex is None:
+            idx: dict[str, str] = {}
+            for key, snakeId in self._mappings.items():
+                noSpace = key.replace(" ", "")
+                stripped = _PAREN_RE.sub("", noSpace)
+                if stripped != noSpace and stripped and stripped not in self._mappings:
+                    idx[stripped] = snakeId
+            AccountMapper._noParenIndex = idx
+        return AccountMapper._noParenIndex
 
     def map(self, accountId: str, accountNm: str) -> Optional[str]:
         """``account_id`` + ``account_nm`` → snakeId — DART XBRL 정규화 핵심 함수.
@@ -414,9 +453,21 @@ class AccountMapper:
             if noSpace != normalizedNm and noSpace in self._mappings:
                 return self._mappings[noSpace]
 
+            # 사전 공백 변형 역인덱스 — 사전 키 안 공백/tab/ZWSP 흡수
+            nsIdx = self._getNoSpaceIndex()
+            if noSpace in nsIdx:
+                return nsIdx[noSpace]
+
             noParen = _PAREN_RE.sub("", noSpace)
             if noParen != noSpace and noParen in self._mappings:
                 return self._mappings[noParen]
+
+            # 사전 괄호 변형 역인덱스 — '현금의 기타유입' ↔ '현금의기타유입(유출)'
+            npIdx = self._getNoParenIndex()
+            if noParen in npIdx:
+                return npIdx[noParen]
+            if noSpace != noParen and noSpace in npIdx:
+                return npIdx[noSpace]
 
             # 하이픈/대시 정규화 fallback (실험 081-001: 미매핑 98.5%가 하이픈 차이)
             # 양방향: 입력에서 하이픈 제거 → 사전 조회, 사전에서 하이픈 제거 → 역인덱스 조회
