@@ -49,7 +49,7 @@ KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
     "gauge": {"cs": 4, "rs": 3, "variance": ["4x4", "6x4", "8x4", "24x4"]},
     "topList": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "24x4"]},
     # chart 6×4 default — 한 행 4 카드, 그래프·테이블 균형. 시리즈 많을 때 wide.
-    "trend": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "12x6", "12x8", "24x4", "24x6", "24x8"]},
+    "trend": {"cs": 1, "rs": 3, "variance": ["6x4", "8x4", "12x4", "12x6", "12x8", "24x4", "24x6", "24x8"]},
     "breakdown": {"cs": 6, "rs": 4, "variance": ["8x4", "12x6"]},
     "scatter": {"cs": 6, "rs": 4, "variance": ["8x4", "12x6"]},
     "matrix": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "24x4"]},
@@ -193,20 +193,13 @@ def resolveLayout(entry: CatalogEntry) -> tuple[int, int]:
             )
         return cs, rs
 
-    # kind=trend 자동 보정 (v3-r6 작게 + bento 2026 룰):
-    # 1~3 시리즈 = 6×4 (default, 한 행 4 카드)
-    # 4~5 시리즈 = 8×4 (한 행 3 카드)
-    # 6~7 시리즈 = 12×4 (한 행 2 카드, wide)
-    # 8+ 시리즈 (assetComposition 9 dual-stack 등) = 24×8 (hero, footer 9 row 수용)
+    # kind=trend 자동 보정 — 운영자 명시 (2026-05-18) 부채상세 1×3 크기 통일.
+    # 8+ 시리즈 (assetComposition 9 dual-stack 등) 만 24×8 hero 예외 유지.
     if kind == "trend":
         nSeries = len(entry.get("seriesPlan") or [])
         if nSeries >= 8:
             return 24, 8
-        if 6 <= nSeries <= 7:
-            return 12, 4
-        if 4 <= nSeries <= 5:
-            return 8, 4
-        # 1~3 시리즈 = 6×4 (default)
+        return 1, 3
 
     return default["cs"], default["rs"]
 
