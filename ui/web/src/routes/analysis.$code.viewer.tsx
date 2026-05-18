@@ -146,45 +146,6 @@ function _periodLabel(p: unknown): string {
 	return '';
 }
 
-// DART 표준 leaf root — backend topic cross-contamination 차단용.
-const KNOWN_LEAF_ROOTS: ReadonlySet<string> = new Set([
-	'회사의 개요', '회사의 연혁', '자본금 변동사항',
-	'주식의 총수 등', '정관에 관한 사항', '배당에 관한 사항',
-	'사업의 개요', '주요 제품 및 서비스', '원재료 및 생산설비',
-	'매출 및 수주상황', '위험관리 및 파생거래', '주요계약 및 연구개발활동',
-	'기타 참고사항',
-	'재무비율', '요약재무정보', '연결재무제표', '연결재무제표 주석',
-	'재무제표', '재무제표 주석', '재무상태표', '손익계산서',
-	'포괄손익계산서', '현금흐름표', '자본변동표',
-]);
-
-function _stripNumbering(s: string): string {
-	if (!s) return '';
-	return s.replace(/^(?:\d+|[IVXivx]+|[가-하])\.\s*/, '').trim();
-}
-
-// 순차 state machine — backend topic API 가 이미 자기 topic 만 슬라이스한 case 가 기본.
-// 단, companyOverview 처럼 cross-contamination 이 박혀 있는 topic 도 있어 다른 KNOWN_LEAF_ROOT
-// heading 이 path 에 등장하면 그 시점부터 false 로 플립. 끝까지 매칭 root 만 또는 비어있으면
-// 모두 KEEP (기본 신뢰). 빈 headingPath 만 가진 정상 본문이 드롭되는 회귀 차단.
-function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafCore: string): ViewerSection[] {
-	if (!ownLeafCore) return allSections;
-	const kept: ViewerSection[] = [];
-	let activeOwn = true;
-	for (const s of allSections) {
-		const path = s.headingPath ?? [];
-		let foundRoot: string | null = null;
-		for (const h of path) {
-			const t = typeof h === 'string' ? (h as string) : (h?.text || '');
-			const core = _stripNumbering(t);
-			if (core && KNOWN_LEAF_ROOTS.has(core)) foundRoot = core;
-		}
-		if (foundRoot !== null) activeOwn = foundRoot === ownLeafCore;
-		if (activeOwn) kept.push(s);
-	}
-	return kept;
-}
-
 function _bodyParagraphs(body: string | undefined | null): string[] {
 	if (!body || !body.trim()) return [];
 	const blocks = body.replace(/\r\n?/g, '\n').split(/\n\s*\n+/);
@@ -345,10 +306,10 @@ function ViewerTab() {
 	const canOlder = windowEndIdx >= 0 && windowEndIdx + 1 < allPeriods.length;
 	const canNewer = windowEndIdx > 0;
 
-	// 본문 sections — latest fetch 의 sections 가 SSOT (행 정의 + 헤딩).
-	const ownLeafCore = _stripNumbering(latestViewer?.topicLabel || '');
-	const allSections = latestViewer?.textDocument?.sections ?? [];
-	const sectionsOwn = _filterToOwnLeaf(allSections, ownLeafCore);
+	// 본문 sections — backend topic API 슬라이스 그대로 신뢰 (dartlab section SSOT).
+	// 프론트 own-leaf 필터 제거 — companyOverview 같은 wide topic 의 22 sections 가
+	// 1 개로 잘려나가던 회귀 차단. cross-contamination 은 backend 책임.
+	const sectionsOwn = latestViewer?.textDocument?.sections ?? [];
 	// 윈도우 3 period 중 한 곳이라도 timeline 에 포함되는 section 만 행으로 노출.
 	const sections = useMemo(() => {
 		if (windowPeriods.length === 0) return sectionsOwn;
@@ -478,7 +439,7 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="py-4">
+					<div className="w-full min-w-0 max-w-full overflow-hidden py-4">
 						<header className="mb-6 border-b pb-4">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
@@ -671,7 +632,6 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 		: { tag: 'h3' as const, cls: '' };
 	return (
 		<section className="scroll-mt-6" id={`sec-${section.id}`}>
-			{title && <HeadingTag className={cn(headingCls, 'mb-2')}>{title.text}</HeadingTag>}
 			<div
 				className="grid gap-3"
 				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, minmax(0, 1fr))` }}
@@ -679,8 +639,12 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 				{windowPeriods.map((p) => {
 					const body = bodyByPeriod[p];
 					const paragraphs = _bodyParagraphs(body);
+					const has = body !== undefined && body !== null && body !== '';
 					return (
 						<div key={p} className="min-w-0 text-[13px] leading-6 break-words">
+							{title && has && (
+								<HeadingTag className={cn(headingCls, 'mb-1.5')}>{title.text}</HeadingTag>
+							)}
 							{paragraphs.length > 0 ? (
 								<div className="space-y-2 text-foreground/90">
 									{paragraphs.map((para, i) => (
@@ -689,7 +653,7 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 										</p>
 									))}
 								</div>
-							) : body !== undefined ? (
+							) : has ? (
 								<p className="italic text-muted-foreground/50">[본문 없음]</p>
 							) : (
 								<p className="italic text-muted-foreground/30">—</p>
