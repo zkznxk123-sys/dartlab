@@ -284,6 +284,7 @@ def loadData(
     asOf: str | None = None,
     refresh: str = "auto",
     columns: list[str] | None = None,
+    predicate: pl.Expr | None = None,
 ) -> pl.DataFrame:
     """종목코드 → DataFrame. 로컬에 없으면 릴리즈에서 자동 다운로드.
 
@@ -291,6 +292,13 @@ def loadData(
     에 LRU(max 16) 캐시된다. accessor 레벨 캐시가 evict 되어도 disk 재파싱
     을 면해주어 대기업 + 다축 analysis 호출 시 메모리·시간 누적을 막는다.
     `refresh="force"` 는 캐시를 우회한다.
+
+    Phase B-2 — ``predicate`` kw 추가. polars expression 을 전달하면
+    ``scan_parquet().filter(predicate).collect(streaming)`` 으로 predicate
+    pushdown 활성화 (Phase A 의 row group sort 가 row group skipping 도
+    동행). caller (single-statement fast path) 가 ``pl.col("sj_div").is_in(
+    [...])`` 같은 expression 으로 디스크 디코드량 자체를 축소. ``predicate``
+    가 있는 호출은 ``_LOAD_CACHE`` 우회 — 슬라이스마다 별도 캐시는 무의미.
     """
     if _IS_PYODIDE:
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
@@ -306,9 +314,9 @@ def loadData(
     if category in {"krxPrices", "krxIndices"} and refresh == "auto":
         krxShouldRefresh = _shouldRefreshHfCategory(path, category, refresh)
 
-    # LRU cache 조회
+    # LRU cache 조회 — predicate 호출은 슬라이스라 캐시 우회.
     cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)
-    if refresh != "force" and krxShouldRefresh is not True:
+    if predicate is None and refresh != "force" and krxShouldRefresh is not True:
         cached = _LOAD_CACHE.get(cacheKey)
         if cached is not None:
             _LOAD_CACHE.move_to_end(cacheKey)
@@ -337,9 +345,9 @@ def loadData(
             krxShouldRefresh if krxShouldRefresh is not None else _shouldRefreshHfCategory(path, category, refresh)
         )
         _ensureLocalParquet(stockCode, path, category, shouldRefresh=shouldRefresh)
-    # lazy scan: sinceYear 필터 또는 컬럼 프로젝션이 있으면 scan_parquet 사용
+    # lazy scan: sinceYear · columns · predicate 중 하나라도 있으면 scan_parquet 경로
     yearColCandidates = ("year", "bsns_year")
-    useLazy = sinceYear is not None or columns is not None
+    useLazy = sinceYear is not None or columns is not None or predicate is not None
     if useLazy:
         lf = pl.scan_parquet(str(path))
         schemaNames = lf.collect_schema().names()
@@ -352,6 +360,9 @@ def loadData(
                         yearCol = yearCol.cast(pl.Int32, strict=False)
                     lf = lf.filter(yearCol >= sinceYear)
                     break
+        # caller predicate (single-statement fast path 등) — row group skipping 활성화
+        if predicate is not None:
+            lf = lf.filter(predicate)
         # 컬럼 프로젝션
         if columns:
             available = [c for c in columns if c in schemaNames]
@@ -363,10 +374,11 @@ def loadData(
         df = pl.read_parquet(str(path))
     result = _normalizeLoadedFrame(df, category)
 
-    # LRU 저장 (refresh="force" 여도 결과는 캐시에 남김 — 다음 auto 호출 재사용)
-    _LOAD_CACHE[cacheKey] = result
-    while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
-        _LOAD_CACHE.popitem(last=False)
+    # predicate 호출은 슬라이스라 LRU 캐시 저장 안 함 (다른 slice 조회 시 cache miss 가 의도).
+    if predicate is None:
+        _LOAD_CACHE[cacheKey] = result
+        while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
+            _LOAD_CACHE.popitem(last=False)
     return result
 
 
