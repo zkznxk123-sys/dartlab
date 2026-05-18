@@ -965,21 +965,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "layout": {"colSpan": 2, "rowSpan": 3},
         "help": "영업CF → CapEx · 배당 · 잉여 분해. 본업이 만든 현금 사용처.",
     },
-    # ─────────────────────────────────────────────────────────────
-    # 18. 리스크·신호 — distress gauge
-    # ─────────────────────────────────────────────────────────────
-    "riskDistress": {
-        "kind": "gauge",
-        "title": "부실 위험 (Altman Z')",
-        "topic": "ratios",
-        "tab": "financial",
-        "subCategory": "risk",
-        "seriesPlan": [],
-        "dataSpec": {"adapter": "distressGauge"},
-        "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 2},
-        "help": "Altman Z' (private firm) 부실 예측. ≥2.9 안전 / 1.23~2.9 주의 / <1.23 위험.",
-    },
+    # riskDistress (부실 위험 Altman Z') 폐기 — 운영자 명시 2026-05-18.
     # ─────────────────────────────────────────────────────────────
     # 19. 리스크·신호 — 이상신호 top 6
     # ─────────────────────────────────────────────────────────────
@@ -999,21 +985,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "layout": {"colSpan": 2, "rowSpan": 3},
         "help": "전년 대비 변동 큰 지표 top 6 (절대 변동값 기준). DSO/DIO/마진/레버리지 동향.",
     },
-    # ─────────────────────────────────────────────────────────────
-    # 20. 리스크·신호 — phaseIndicator (생애주기)
-    # ─────────────────────────────────────────────────────────────
-    "riskLifeCycle": {
-        "kind": "phaseIndicator",
-        "title": "생애주기 단계",
-        "topic": "CF",
-        "tab": "financial",
-        "subCategory": "risk",
-        "seriesPlan": [],
-        "dataSpec": {"adapter": "lifeCyclePhase"},
-        "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 1},
-        "help": "CF 3축 부호 + 매출 성장률로 6 단계 (도입·성장·성숙Ⅰ·성숙Ⅱ·쇠퇴·회복) 추정.",
-    },
+    # riskLifeCycle (생애주기 단계) 폐기 — 운영자 명시 2026-05-18.
     "workingCapitalDays": {
         "kind": "trend",
         "title": "운전자본",
@@ -1083,10 +1055,8 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "stabilityRatio",
     "liquidityTrend",
     "workingCapitalDays",
-    # 리스크·신호 sub
-    "riskDistress",
+    # 리스크·신호 sub — riskDistress·riskLifeCycle 폐기 (2026-05-18)
     "riskAnomaly",
-    "riskLifeCycle",
 ]
 """dashboard 카드 노출 순서 — bento 밀도 packing 기준.
 KPI 1×1 4 개 = 한 row, 자산구조 2×3 + 부채/자본 1×3 = 한 row, trend 2×2 4 개 = 두 row."""
