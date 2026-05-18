@@ -25,7 +25,11 @@ import { cn } from '@/lib/utils';
 
 interface TocTopic {
 	topic: string;
-	topicLabel?: string;
+	label?: string;          // 백엔드 표준 — `safeTopicLabel` 결과 (한글)
+	topicLabel?: string;     // 옛 field — 호환
+	textCount?: number;
+	tableCount?: number;
+	hasChanges?: boolean;
 }
 interface TocChapter {
 	chapter: string;
@@ -85,6 +89,7 @@ interface ViewerResponse {
 	topicLabel?: string;
 	compact?: boolean;
 	period?: string | null;
+	dartUrl?: string | null;  // 최신 정기보고서 DART 뷰어 URL (rcpNo 기반)
 	textDocument?: {
 		topic?: string;
 		mode?: string;
@@ -333,7 +338,7 @@ function ViewerTab() {
 												)}
 											>
 												<ChevronRight className="size-3 shrink-0 opacity-50" />
-												<span className="truncate">{t.topicLabel || t.topic}</span>
+												<span className="truncate">{t.label || t.topicLabel || t.topic}</span>
 											</button>
 										);
 									})}
@@ -412,9 +417,17 @@ function ViewerTab() {
 									)}
 								</div>
 								<a
-									href={`https://dart.fss.or.kr/dsab007/main.do?selectKey=${code}`}
+									href={
+										viewer?.dartUrl ||
+										`https://dart.fss.or.kr/dsab007/main.do?selectKey=${code}`
+									}
 									target="_blank"
 									rel="noreferrer noopener"
+									title={
+										viewer?.dartUrl
+											? '최신 정기보고서 DART 뷰어로 이동'
+											: '회사 공시 검색 (최신 보고서 정보 없음 — fallback)'
+									}
 									className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs text-muted-foreground hover:bg-accent"
 								>
 									<ExternalLink className="size-3" /> DART 원본

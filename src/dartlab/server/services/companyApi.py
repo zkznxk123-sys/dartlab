@@ -91,6 +91,49 @@ def filterBlocksByPeriod(blocks: list, period: str) -> list:
     return filtered
 
 
+# DART 정기보고서 표준 11 장 — Roman numeral → 한글 풀네임.
+# 원본 sections.parquet 의 `chapter` 컬럼은 "I"/"II"/.. 만 들고와 한글 풀네임
+# 없음. 본 매핑이 사용자 노출용 라벨 표준.
+_DART_CHAPTERS_KR: dict[str, str] = {
+    "I": "I. 회사의 개요",
+    "II": "II. 사업의 내용",
+    "III": "III. 재무에 관한 사항",
+    "IV": "IV. 이사의 경영진단 및 분석의견 등",
+    "V": "V. 회계감사인의 감사의견 등",
+    "VI": "VI. 이사회 등 회사의 기관에 관한 사항",
+    "VII": "VII. 주주에 관한 사항",
+    "VIII": "VIII. 임원 및 직원 등에 관한 사항",
+    "IX": "IX. 계열회사 등에 관한 사항",
+    "X": "X. 대주주 등과의 거래내용",
+    "XI": "XI. 그 밖에 투자자 보호를 위하여 필요한 사항",
+}
+
+
+def _chapterLabelKr(chapter: str) -> str:
+    """chapter 키 (예 "I", "II.", "III. 재무에 관한 사항") → 표준 한글 풀네임."""
+    if not isinstance(chapter, str):
+        return str(chapter)
+    raw = chapter.strip()
+    if not raw:
+        return raw
+    # 이미 풀네임 박혀있으면 그대로 (finance_chapter 처럼 코드에서 박은 것).
+    if "." in raw and len(raw.split(".", 1)[-1].strip()) > 0:
+        return raw
+    prefix = raw.split(".")[0].strip()
+    return _DART_CHAPTERS_KR.get(prefix, raw)
+
+
+def _latestDartUrl(company: Company) -> str | None:
+    """최신 정기보고서의 DART 뷰어 URL (rcpNo 기반). filings 비어있으면 None."""
+    try:
+        df = company.filings()
+        if df is None or df.is_empty():
+            return None
+        return df.row(0, named=True).get("dartUrl")
+    except (AttributeError, ValueError, KeyError):
+        return None
+
+
 def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
     """뷰어 목차(Table of Contents)를 구성한다.
 
@@ -161,7 +204,8 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
                         break
 
             chapter_value = topic_frame.item(0, "chapter") if "chapter" in topic_frame.columns else None
-            chapter = chapter_value if isinstance(chapter_value, str) and chapter_value else "기타"
+            chapter_raw = chapter_value if isinstance(chapter_value, str) and chapter_value else "기타"
+            chapter = _chapterLabelKr(chapter_raw)
             if chapter not in chapter_map:
                 chapter_map[chapter] = []
                 chapter_order.append(chapter)
@@ -273,6 +317,7 @@ def buildViewer(
         company._viewer_cache[topic] = blocks
 
     textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
+    dartUrl = _latestDartUrl(company)
     if compact:
         return {
             "stockCode": company.stockCode,
@@ -281,6 +326,7 @@ def buildViewer(
             "topicLabel": safeTopicLabel(company, topic),
             "period": None,
             "compact": True,
+            "dartUrl": dartUrl,
             "textDocument": _compactTextDocument(textDoc, limit=limit),
         }
 
@@ -290,6 +336,7 @@ def buildViewer(
         "topic": topic,
         "topicLabel": safeTopicLabel(company, topic),
         "period": None,
+        "dartUrl": dartUrl,
         "blocks": [serializeViewerBlock(block) for block in blocks],
         "textDocument": textDoc,
     }

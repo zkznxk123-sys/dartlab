@@ -429,7 +429,7 @@ def apiCompanyViewerTopic(
                 viewerBlocks,
                 viewerTextDocument,
             )
-            from ..services.companyApi import _compactTextDocument
+            from ..services.companyApi import _compactTextDocument, _latestDartUrl
 
             if not hasattr(company, "_viewer_cache"):
                 company._viewer_cache = {}
@@ -449,6 +449,7 @@ def apiCompanyViewerTopic(
                 "topicLabel": safeTopicLabel(company, topic),
                 "period": period,
                 "compact": compact,
+                "dartUrl": _latestDartUrl(company),
                 "blocks": [] if compact else [serializeViewerBlock(block) for block in blocks],
                 "textDocument": textDoc,
             }
