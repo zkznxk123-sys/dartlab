@@ -1,5 +1,5 @@
-// 24-col fine grid (v3) — 백엔드 Layout Engine 의 (x,y,w,h) 좌표 + 24 col 고정.
-// cellSize ≈ 56px (viewport 1700 sidebar 240 기준).
+// 12-col bento 2026 grid (v3-r7) — backend planTabLayout(colCount=12) 좌표.
+// cellSize ≈ 113px (viewport 1700 sidebar 240 기준, gap 16 padding 24).
 // 핵심: cellHeight === cellWidth 동기화 → w === h 면 자동 1:1 정사각.
 // gridstack.js 미도입 (정적 grid, 드래그 X). CSS grid 만으로 동일 효과 + bundle 추가 0.
 
@@ -13,13 +13,14 @@ interface Props {
 }
 
 // SSOT — TabDashboard / financial.$code.tsx 픽셀 산출식이 동일 상수 사용.
-export const BENTO_GAP_PX = 4;
-export const BENTO_PAD_PX = 8;
-export const BENTO_COL_COUNT = 24;
-export const BENTO_MIN_CELL_PX = 40;
-// CardShell chrome (header 28 + content padding top+bottom + footer border 1 — Step 8.2)
+// bento 2026 §4: gap 16px + padding 24px.
+export const BENTO_GAP_PX = 16;
+export const BENTO_PAD_PX = 24;
+export const BENTO_COL_COUNT = 12;
+export const BENTO_MIN_CELL_PX = 80;
+// CardShell chrome (header 28 + content padding top+bottom + footer border 1)
 export const BENTO_CARD_HEADER_PX = 28;
-export const BENTO_CARD_PAD_PX = 8; // content area pt+pb 합 (8 = py-1 두 변)
+export const BENTO_CARD_PAD_PX = 8;
 
 const GAP_PX = BENTO_GAP_PX;
 const PAD_PX = BENTO_PAD_PX;

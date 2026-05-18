@@ -42,7 +42,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "최근 매출 + 전기 대비. 본업 규모 변화 첫 신호.",
     },
     "kpiOperatingIncome": {
@@ -58,7 +58,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "본업 수익성. 매출 대비 비율은 영업이익률 카드 참조.",
     },
     "kpiRoe": {
@@ -79,7 +79,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "자기자본수익률. 주주 자본 대비 이익 창출 능력. 15%+ 우량.",
     },
     "kpiDebtRatio": {
@@ -100,7 +100,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "부채/자본. 200% 이상은 재무 부담. 50% 이하는 보수적 자본구조.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -211,8 +211,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원", "dualStack": True},
-        # 운영자 명시 (2026-05-18) — 24×4 hero (자동 24×8 우회).
-        "layout": {"colSpan": 24, "rowSpan": 4},
+        # v3-r7 12-col grid — 12×4 hero full row (bento 2026 §1).
+        "layout": {"colSpan": 12, "rowSpan": 4},
         "help": "자산(왼쪽) = 부채+자본(오른쪽). 두 막대 높이는 항상 같다 (회계 등식). 매출채권·재고도 영업자산이지만 운전자본 회수기간 신호로 따로 분리. 기타 영업자산은 PPE·무형·관계사 등 비유동 본업 자본. 금융부채 ↑ 이자 부담, 이익잉여금 ↑ 내부유보 건전.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -267,7 +267,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 1, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "매입채무는 무이자 영업부채 (좋은 부채). 단기차입금 ↑ 은 자금 압박 신호. 장기차입금·사채는 만기 분산되지만 이자 비용 부담. 영업부채 비중이 크면 운전자본으로 자금 조달 — 건전.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -322,7 +322,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 1, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "이익잉여금이 매년 누적 증가하면 건전한 내부유보. 자본금 변동 없이 잉여금만 증가하면 이상적. 기타자본 음수는 자기주식 매입 (주주환원). 자본잉여금은 주식발행초과금.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -829,7 +829,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "tilePlans": [{"label": "매출", "account": "revenue", "unit": "원", "intent": "primary"}],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "최근 매출 + 전기 대비.",
     },
     "kpiGrowthOpIncome": {
@@ -844,7 +844,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "tilePlans": [{"label": "영업이익", "account": "operatingIncome", "unit": "원", "intent": "positive"}],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "본업 수익성. 매출 대비 비율은 이익률 카드.",
     },
     "kpiGrowthNetIncome": {
@@ -859,7 +859,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "tilePlans": [{"label": "순이익", "account": "netIncome", "unit": "원", "intent": "primary"}],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "법인세·이자 차감 후 최종 이익.",
     },
     "kpiGrowthFcf": {
@@ -876,7 +876,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "영업CF − CapEx. 주주에게 돌려줄 수 있는 진짜 현금.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -894,7 +894,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "tilePlans": [{"label": "영업CF", "account": "cfOperating", "unit": "원", "intent": "positive"}],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "본업이 만든 현금. 순이익과 차이는 발생주의/현금주의 gap.",
     },
     "kpiCashCapex": {
@@ -909,7 +909,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "tilePlans": [{"label": "CapEx", "account": "capex", "unit": "원", "intent": "negative"}],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "유형자산 투자. 사업 확장 vs 유지보수 신호.",
     },
     "kpiCashFcf": {
@@ -926,7 +926,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "영업CF − CapEx. 배당·자사주·부채상환 여력.",
     },
     "kpiCashFcfMargin": {
@@ -948,7 +948,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 1},
         "help": "매출 1 원당 FCF. 10%+ 우량.",
     },
     # cashflowAllocation (자본배분 흐름 sankey) 폐기 — 운영자 명시 2026-05-18.
@@ -970,7 +970,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "fn": "calcEarningsQualityFlags",
         },
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 2},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "전년 대비 변동 큰 지표 top 6 (절대 변동값 기준). DSO/DIO/마진/레버리지 동향.",
     },
     # riskLifeCycle (생애주기 단계) 폐기 — 운영자 명시 2026-05-18.
