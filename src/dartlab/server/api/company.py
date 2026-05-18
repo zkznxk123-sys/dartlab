@@ -93,7 +93,10 @@ def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
             continue
         if parts[1] != code_pad:
             continue
-        slug = parts[2]
+        # landing route /blog/[slug] 의 slug 형식은 `CODE-slug` (예: 000660-skhynix).
+        # landing src/routes/blog/[slug]/+page.ts normalizePath 와 일치.
+        # backend 가 `skhynix` 단독으로 보내면 landing 에서 404 — 회귀 차단 (2026-05-19).
+        slug = f"{parts[1]}-{parts[2]}"
         md = None
         for candidate in ("index.md", "page.md", "README.md"):
             p = child / candidate
