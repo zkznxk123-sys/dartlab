@@ -66,14 +66,16 @@ def apiSearch(q: str = Query(..., min_length=1)):
 _BLOG_REPORTS_DIR = "blog/05-company-reports"
 
 
+_BLOG_BASE_URL = "https://eddmpython.github.io/dartlab/blog"
+
+
 def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
-    """blog/05-company-reports/{NN}-{CODE}-{slug}/ 패턴에서 stockCode 일치하는 글 추출.
+    """blog/05-company-reports/{NN}-{CODE}-{slug}/ 의 frontmatter 확인 후 발간 link.
 
-    회사 헤더의 블로그 태그용. 미발견 시 빈 리스트.
-
-    URL 검증: 디렉토리 안 index.md / page.md / README.md 중 하나가 존재해야 노출.
-    frontmatter 의 `publishedUrl` / `permalink` 가 있으면 그 값 우선 사용.
-    없으면 GitHub Pages 추정 URL 도 노출 금지 (깨진 링크 차단).
+    발간 판정: frontmatter 의 `title` + `date` + `category: company-reports` 박혀있으면 발간.
+    URL 우선순위:
+      1. frontmatter publishedUrl / permalink / url (http 시작)
+      2. fallback — landing route `/blog/{slug}` 추정 URL (NN-CODE-{slug} 의 slug 부분).
     """
     from pathlib import Path
 
@@ -89,11 +91,9 @@ def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
         parts = name.split("-", 2)
         if len(parts) < 3:
             continue
-        post_code = parts[1]
-        if post_code != code_pad:
+        if parts[1] != code_pad:
             continue
         slug = parts[2]
-        # 본문 파일 + frontmatter publishedUrl/permalink 확인.
         md = None
         for candidate in ("index.md", "page.md", "README.md"):
             p = child / candidate
@@ -101,30 +101,43 @@ def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
                 md = p
                 break
         if md is None:
-            continue  # 본문 없으면 노출 금지
-        published_url = ""
+            continue
         try:
             text = md.read_text(encoding="utf-8", errors="ignore")
-            if text.startswith("---"):
-                fm_end = text.find("---", 3)
-                if fm_end > 0:
-                    fm = text[3:fm_end]
-                    for line in fm.splitlines():
-                        line = line.strip()
-                        for key in ("publishedUrl:", "permalink:", "url:"):
-                            if line.startswith(key):
-                                v = line[len(key) :].strip().strip('"').strip("'")
-                                if v.startswith("http"):
-                                    published_url = v
-                                break
-                        if published_url:
-                            break
         except OSError:
-            pass
-        if not published_url:
-            continue  # 외부 published URL 미확인 시 노출 금지 (404 차단)
-        title = slug.replace("-", " ")
-        posts.append({"title": title, "slug": slug, "url": published_url})
+            continue
+        if not text.startswith("---"):
+            continue
+        fm_end = text.find("---", 3)
+        if fm_end < 0:
+            continue
+        fm = text[3:fm_end]
+        # frontmatter 핵심 필드 추출.
+        title = ""
+        category = ""
+        has_date = False
+        published_url = ""
+        for line in fm.splitlines():
+            stripped = line.strip()
+            if not title and stripped.startswith("title:"):
+                title = stripped[len("title:") :].strip().strip('"').strip("'")
+            elif not category and stripped.startswith("category:"):
+                category = stripped[len("category:") :].strip().strip('"').strip("'")
+            elif not has_date and stripped.startswith("date:"):
+                has_date = True
+            elif not published_url:
+                for key in ("publishedUrl:", "permalink:", "url:"):
+                    if stripped.startswith(key):
+                        v = stripped[len(key) :].strip().strip('"').strip("'")
+                        if v.startswith("http"):
+                            published_url = v
+                        break
+        # 발간 판정 — title + date + company-reports 카테고리.
+        if not (title and has_date and category == "company-reports"):
+            continue
+        # URL 결정 — frontmatter publishedUrl 우선, 없으면 추정.
+        url = published_url or f"{_BLOG_BASE_URL}/{slug}"
+        posts.append({"title": title, "slug": slug, "url": url})
     return posts
 
 
