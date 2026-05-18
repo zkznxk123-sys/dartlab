@@ -91,8 +91,16 @@ def filterBlocksByPeriod(blocks: list, period: str) -> list:
     return filtered
 
 
-def buildToc(company: Company) -> dict[str, Any]:
-    """뷰어 목차(Table of Contents)를 구성한다."""
+def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
+    """뷰어 목차(Table of Contents)를 구성한다.
+
+    Args:
+        company: Company 인스턴스.
+        metaOnly: True 면 chapter/topic 트리 + textCount/tableCount 만 반환
+            하고 `hasChanges` (period 간 비교) 계산을 skip. period 비교가
+            sections frame 의 iter_rows 전체 순회라 가장 무거운 부분 —
+            TOC 진입 시 화면 표시에 필요 없으면 metaOnly=True.
+    """
     sec = company.sections
     if sec is None:
         return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=[]).model_dump()
@@ -128,7 +136,7 @@ def buildToc(company: Company) -> dict[str, Any]:
 
     period_re = _re.compile(r"^\d{4}(Q[1-4])?$")
     period_cols = sorted([col for col in sec.columns if period_re.fullmatch(col)], reverse=True)
-    latest2 = period_cols[:2] if len(period_cols) >= 2 else []
+    latest2 = period_cols[:2] if (not metaOnly and len(period_cols) >= 2) else []
 
     if "topic" in sec.columns:
         for row in sec.iter_rows(named=True):

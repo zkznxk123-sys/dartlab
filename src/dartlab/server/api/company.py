@@ -268,11 +268,21 @@ def apiCompanyInit(code: str, request: Request, response: Response):
 
 
 @router.get("/api/company/{code}/toc")
-def apiCompanyToc(code: str, request: Request, response: Response):
-    """목차(TOC) — chapter/topic 트리 구조."""
+def apiCompanyToc(
+    code: str,
+    request: Request,
+    meta: bool = Query(True, description="True (default) — hasChanges 계산 skip 으로 경량 응답"),
+    response: Response = None,
+):
+    """목차(TOC) — chapter/topic 트리 구조.
+
+    `meta=true` (default) 면 hasChanges (period 간 sections 비교) skip 한 경량
+    응답. 대시보드 사이드바 진입은 트리 구조 + 카운트만 필요. frontend 가
+    변경 표시 필요 시 `meta=false` 명시.
+    """
     try:
         company = getCompany(code)
-        data = buildToc(company)
+        data = buildToc(company, metaOnly=meta)
         return etagResponse(request, response, data, maxAge=300, swr=1800)
     except HANDLED_API_ERRORS as exc:
         raise HTTPException(status_code=404, detail=guideDetail(exc)) from exc
