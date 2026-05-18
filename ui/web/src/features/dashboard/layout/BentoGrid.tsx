@@ -44,21 +44,23 @@ export function BentoGrid({ placed, renderCard }: Props) {
 		};
 	}, []);
 
+	// columns 은 minmax(0, 1fr) 유연 분배 — 컨테이너 폭 넘어 수평스크롤 절대 X.
+	// rows 만 실측한 cellSize 로 동기 → cs===rs 이면 자동 1:1 정사각.
 	return (
 		<div
 			ref={gridRef}
-			className="grid"
+			className="grid w-full max-w-full"
 			style={{
 				gap: `${GAP_PX}px`,
 				padding: `${PAD_PX}px`,
-				gridTemplateColumns: `repeat(${COL_COUNT}, ${cellSize}px)`,
+				gridTemplateColumns: `repeat(${COL_COUNT}, minmax(0, 1fr))`,
 				gridAutoRows: `${cellSize}px`,
-				justifyContent: 'start',
 			}}
 		>
 			{placed.map((p) => (
 				<div
 					key={p.cardKey}
+					className="min-w-0"
 					style={{
 						gridColumn: `span ${p.w} / span ${p.w}`,
 						gridRow: `span ${p.h} / span ${p.h}`,
