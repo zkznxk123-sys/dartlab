@@ -16,7 +16,7 @@ pytestmark = pytest.mark.unit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-CLI_PATH = REPO_ROOT / "scripts" / "dev" / "recipe_promote.py"
+CLI_PATH = REPO_ROOT / "src" / "dartlab" / "skills" / "recipePromote.py"
 
 
 def _loadCli():
@@ -105,7 +105,7 @@ def test_promote_rejects_when_scorecard_fails(tmp_path: Path, cli_module, monkey
     args.skillId = "recipes.credit.distressDual"
     args.toStatus = "verified"
     args.force = False
-    rc = cli_module.cmd_promote(args)
+    rc = cli_module.cmdPromote(args)
     assert rc == 1
     # 파일 status 변하지 않았는지 확인.
     text = path.read_text(encoding="utf-8")
@@ -123,7 +123,7 @@ def test_promote_with_force_bypasses_scorecard(tmp_path: Path, cli_module, monke
     args.skillId = "recipes.quality.cliProbe"
     args.toStatus = "verified"
     args.force = True
-    rc = cli_module.cmd_promote(args)
+    rc = cli_module.cmdPromote(args)
     assert rc == 0
     text = path.read_text(encoding="utf-8")
     assert "status: verified" in text
@@ -139,7 +139,7 @@ def test_promote_noop_when_already_target_status(tmp_path: Path, cli_module, mon
     args.skillId = "recipes.quality.cliProbe"
     args.toStatus = "verified"
     args.force = False
-    rc = cli_module.cmd_promote(args)
+    rc = cli_module.cmdPromote(args)
     assert rc == 0
 
 
@@ -153,7 +153,7 @@ def test_promote_rejects_unknown_transition_without_force(tmp_path: Path, cli_mo
     args.skillId = "recipes.quality.cliProbe"
     args.toStatus = "curated"
     args.force = False
-    rc = cli_module.cmd_promote(args)
+    rc = cli_module.cmdPromote(args)
     assert rc == 1
 
 
@@ -165,7 +165,7 @@ def test_deprecate_requires_reason(tmp_path: Path, cli_module, monkeypatch):
     args = type("Args", (), {})()
     args.skillId = "recipes.quality.cliProbe"
     args.reason = ""
-    rc = cli_module.cmd_deprecate(args)
+    rc = cli_module.cmdDeprecate(args)
     assert rc == 1
 
 
@@ -177,7 +177,7 @@ def test_deprecate_marks_status_deprecated(tmp_path: Path, cli_module, monkeypat
     args = type("Args", (), {})()
     args.skillId = "recipes.quality.cliProbe"
     args.reason = "drift > 50%"
-    rc = cli_module.cmd_deprecate(args)
+    rc = cli_module.cmdDeprecate(args)
     assert rc == 0
     text = path.read_text(encoding="utf-8")
     assert "status: deprecated" in text
@@ -192,5 +192,5 @@ def test_promote_to_storyboard_requires_verified_or_curated(tmp_path: Path, cli_
     )
     args = type("Args", (), {})()
     args.skillId = "recipes.quality.cliProbe"
-    rc = cli_module.cmd_promote_to_storyboard(args)
+    rc = cli_module.cmdPromoteToStoryboard(args)
     assert rc == 1

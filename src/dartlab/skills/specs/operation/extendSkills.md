@@ -115,8 +115,6 @@ SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpd
 
 신규 cadence recipe (dailyMorningNote · catalystCalendar · thesisTracker) 도 같은 규칙으로 작성.
 
-기존 skill 일괄 audit 은 `src/dartlab/skills/audit_trigger_phrases.py` (idempotent, dry-run 지원).
-
 ## Skill 확장 보조 CLI
 
 신규 엔진·axis·recipe 추가는 사용자가 선택한 작업 범위에 맞춰 보조 CLI 로 스켈레톤을 만든 뒤, 운영자·사용자·사용자가 명시적으로 위임한 AI 가 SkillSpec 과 산출물을 함께 정리한다.
@@ -149,13 +147,6 @@ uv run python -X utf8 src/dartlab/skills/addAxis.py {group} {axis} \
 4. SKILL.md 3 강제 섹션 본문 채우기
 
 `--dry-run` 으로 미리보기. axis / recipe / operation / start / runtime sub-spec 은 수동 4 단계 절차 ([skill-os-add](file://./.claude/skills/skill-os-add/SKILL.md)) 따름.
-
-### Trigger phrase + orphan 보조 audit
-
-| 스크립트 | 역할 |
-|---|---|
-| `src/dartlab/skills/audit_trigger_phrases.py` | 각 SKILL.md / recipe.md 의 `purpose:` 끝에 "트리거: '...', '...'." 한 문장 추가. 이미 있으면 skip. Scope 4 trigger phrase 룰 ("Trigger phrase 작성 규칙" 섹션) 자동 sweep. `--dry-run` 미리보기. **로컬 dev 도구 — CI 비포함**. 실행 후 git diff 검토 |
-| `src/dartlab/skills/skillGraphOrphanReport.py` | Skill Graph phase 1 warn-only 가 카운트만 출력하는 orphan 노드를 카테고리별로 묶고 자동 분류 가능 후보 (자연 leaf) 는 `isLeafNode: true` 마킹 추천, 그 외 misclassification 은 connect 권고. orphan lint phase 2/3 전환 전 정리 보조 |
 
 ## 신규 frontmatter 필드 8 종 (Skill Graph 모델)
 

@@ -89,7 +89,6 @@ dependencies = [
 
 [project.scripts]
 dartlab = "dartlab.cli.main:main"
-dartlab-coreloop = "dartlab.cli.coreloop:main"
 
 [project.entry-points."dartlab.plugins"]
 

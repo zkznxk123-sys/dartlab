@@ -1,4 +1,4 @@
-"""recipe_promote — recipe lifecycle 운영자 CLI (status frontmatter 단독 권한).
+"""recipePromote — recipe lifecycle 운영자 CLI (status frontmatter 단독 권한).
 
 `feedback_no_graph_regression.md` 준수: 자기개선 사다리 회피. 어떤 자동 도구도 status
 frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
@@ -11,9 +11,9 @@ frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
 - ``promote-to-storyboard <id>`` — verified → storyboard 이식 가이드 (수동).
 
 실행:
-    uv run python -X utf8 src/dartlab/skills/recipe_promote.py list
-    uv run python -X utf8 src/dartlab/skills/recipe_promote.py inspect recipes.credit.distressDual
-    uv run python -X utf8 src/dartlab/skills/recipe_promote.py promote recipes.credit.distressDual
+    uv run python -X utf8 src/dartlab/skills/recipePromote.py list
+    uv run python -X utf8 src/dartlab/skills/recipePromote.py inspect recipes.credit.distressDual
+    uv run python -X utf8 src/dartlab/skills/recipePromote.py promote recipes.credit.distressDual
 """
 
 from __future__ import annotations
@@ -149,7 +149,8 @@ def _skillIdForPath(path: Path) -> str:
 # ── 서브커맨드 ──
 
 
-def cmd_list(args: argparse.Namespace) -> int:
+def cmdList(args: argparse.Namespace) -> int:
+    """recipe 목록과 status·run·passRate 표 출력."""
     if not RECIPE_DIR.is_dir():
         print(f"recipe 디렉터리 없음: {RECIPE_DIR}", file=sys.stderr)
         return 1
@@ -181,7 +182,8 @@ def cmd_list(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_inspect(args: argparse.Namespace) -> int:
+def cmdInspect(args: argparse.Namespace) -> int:
+    """단일 recipe 의 scorecard·drift·최근 run 표시."""
     skill_id = args.skillId
     path = _pathFor(skill_id)
     if not path.exists():
@@ -239,7 +241,8 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_promote(args: argparse.Namespace) -> int:
+def cmdPromote(args: argparse.Namespace) -> int:
+    """status 전이 — tested→verified 는 scorecard 게이트, 그 외는 --force."""
     skill_id = args.skillId
     path = _pathFor(skill_id)
     if not path.exists():
@@ -292,7 +295,8 @@ def cmd_promote(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_deprecate(args: argparse.Namespace) -> int:
+def cmdDeprecate(args: argparse.Namespace) -> int:
+    """recipe 폐기 — drift/중복 사유 필수 기록."""
     skill_id = args.skillId
     path = _pathFor(skill_id)
     if not path.exists():
@@ -306,7 +310,8 @@ def cmd_deprecate(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_promote_to_storyboard(args: argparse.Namespace) -> int:
+def cmdPromoteToStoryboard(args: argparse.Namespace) -> int:
+    """verified/curated recipe 의 storyboard 이식 수동 가이드 출력."""
     skill_id = args.skillId
     meta = _recipeMeta(skill_id)
     cur_status = str(meta.get("status", "unknown"))
@@ -343,17 +348,18 @@ def cmd_promote_to_storyboard(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """argparse subparser 진입점 — list/inspect/promote/deprecate/promote-to-storyboard 디스패치."""
     parser = argparse.ArgumentParser(description="recipe lifecycle 운영자 CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_list = sub.add_parser("list", help="recipe 목록 + status + run 통계")
     p_list.add_argument("--status", help="특정 status 만 필터 (drafted/unverified/tested/verified/curated/deprecated)")
-    p_list.set_defaults(func=cmd_list)
+    p_list.set_defaults(func=cmdList)
 
     p_inspect = sub.add_parser("inspect", help="단일 recipe 의 scorecard + drift")
     p_inspect.add_argument("skillId")
     p_inspect.add_argument("--recent", type=int, default=10, help="최근 N run 표시 (기본 10)")
-    p_inspect.set_defaults(func=cmd_inspect)
+    p_inspect.set_defaults(func=cmdInspect)
 
     p_promote = sub.add_parser("promote", help="status 전이 (tested → verified 등)")
     p_promote.add_argument("skillId")
@@ -364,19 +370,19 @@ def main(argv: list[str] | None = None) -> int:
         choices=["unverified", "tested", "verified", "curated"],
     )
     p_promote.add_argument("--force", action="store_true", help="scorecard 게이트 우회 (운영자 책임)")
-    p_promote.set_defaults(func=cmd_promote)
+    p_promote.set_defaults(func=cmdPromote)
 
     p_deprecate = sub.add_parser("deprecate", help="recipe 폐기 (drift/중복)")
     p_deprecate.add_argument("skillId")
     p_deprecate.add_argument("--reason", required=True)
-    p_deprecate.set_defaults(func=cmd_deprecate)
+    p_deprecate.set_defaults(func=cmdDeprecate)
 
     p_storyboard = sub.add_parser(
         "promote-to-storyboard",
         help="verified recipe → story.reportType 이식 가이드 (수동)",
     )
     p_storyboard.add_argument("skillId")
-    p_storyboard.set_defaults(func=cmd_promote_to_storyboard)
+    p_storyboard.set_defaults(func=cmdPromoteToStoryboard)
 
     args = parser.parse_args(argv)
     return args.func(args)

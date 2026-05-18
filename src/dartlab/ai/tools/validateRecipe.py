@@ -11,7 +11,7 @@ phase chain 없음. 단순 흐름:
 6. 모든 target 종료 후 computeScorecard 로 6 신호 산출
 
 자기개선 사다리 회피 — status frontmatter 자동 변경 X. 본 도구는 *append-only* run 기록만.
-승격은 운영자 CLI (`src/dartlab/skills/recipe_promote.py promote <id>`).
+승격은 운영자 CLI (`src/dartlab/skills/recipePromote.py promote <id>`).
 
 CLAUDE.md 메모리 규칙: maxTargets=5 강제 (Polars Rust heap, Company 1 개 ≈ 200~500MB, gc 미회수).
 """
