@@ -950,25 +950,12 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "layout": {"colSpan": 1, "rowSpan": 1},
         "help": "매출 1 원당 FCF. 10%+ 우량.",
     },
-    # ─────────────────────────────────────────────────────────────
-    # 17. 현금·배분 sankey (CFO → 사용처)
-    # ─────────────────────────────────────────────────────────────
-    "cashflowAllocation": {
-        "kind": "sankey",
-        "title": "자본배분 흐름",
-        "topic": "CF",
-        "tab": "financial",
-        "subCategory": "cashflow",
-        "seriesPlan": [],
-        "dataSpec": {"adapter": "cashflowSankey"},
-        "options": {},
-        "layout": {"colSpan": 2, "rowSpan": 3},
-        "help": "영업CF → CapEx · 배당 · 잉여 분해. 본업이 만든 현금 사용처.",
-    },
+    # cashflowAllocation (자본배분 흐름 sankey) 폐기 — 운영자 명시 2026-05-18.
     # riskDistress (부실 위험 Altman Z') 폐기 — 운영자 명시 2026-05-18.
     # ─────────────────────────────────────────────────────────────
     # 19. 리스크·신호 — 이상신호 top 6
     # ─────────────────────────────────────────────────────────────
+    # 변동 큰 지표 — colSpan=1 rowSpan=2 (6 item 짧은 list, 여백 0). 운영자 명시 2026-05-18.
     "riskAnomaly": {
         "kind": "topList",
         "title": "변동 큰 지표",
@@ -982,7 +969,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "fn": "calcEarningsQualityFlags",
         },
         "options": {},
-        "layout": {"colSpan": 2, "rowSpan": 3},
+        "layout": {"colSpan": 1, "rowSpan": 2},
         "help": "전년 대비 변동 큰 지표 top 6 (절대 변동값 기준). DSO/DIO/마진/레버리지 동향.",
     },
     # riskLifeCycle (생애주기 단계) 폐기 — 운영자 명시 2026-05-18.
@@ -1048,7 +1035,6 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "kpiCashCapex",
     "kpiCashFcf",
     "kpiCashFcfMargin",
-    "cashflowAllocation",
     "fcfTrend",
     # 재무건전성 sub
     "leverageTrend",
