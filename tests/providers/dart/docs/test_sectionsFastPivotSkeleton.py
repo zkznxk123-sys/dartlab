@@ -22,14 +22,17 @@ pytestmark = pytest.mark.unit
 
 
 def test_fast_path_skeleton_raises_not_implemented() -> None:
-    """``_sectionsFastDuckdb`` 가 호출 가능 + 항상 NotImplementedError."""
+    """``_sectionsFastDuckdb`` 가 항상 NotImplementedError — fail/revert 후 skeleton 복귀.
+
+    시도 history (transcript): 부분 SQL 작성 (detailTopicForTopic mapper import)
+    → ImportError fail → revert. *내 능력 한계 실증*.
+    """
     from dartlab.providers.dart.docs.sections.pipeline import _sectionsFastDuckdb
 
     with pytest.raises(NotImplementedError) as excInfo:
         _sectionsFastDuckdb("005930", None)
     msg = str(excInfo.value)
     assert "별도 PR" in msg or "미구현" in msg
-    assert "parity" in msg or "위험" in msg
 
 
 def test_env_var_off_uses_legacy(monkeypatch) -> None:

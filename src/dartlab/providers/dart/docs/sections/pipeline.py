@@ -403,25 +403,27 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
 
 
 def _sectionsFastDuckdb(stockCode: str, topics: set[str] | None) -> pl.DataFrame | None:
-    """Phase C 본격 처방 fast path skeleton (미구현).
+    """Phase C 본격 처방 fast path — *시도 fail 실증 후 skeleton revert*.
 
-    DuckDB PIVOT + window rank 로 sections() 의 7-dict + 6-set 누적을 흡수하는
-    fast path. plan 의 약속이지만 본 PR 단계에선 미구현 — 30+ 컬럼 schema 정확
-    복제 + _rowFreqMeta Python 함수 등가 SQL + 5 종목 parity 보장이 단일 PR
-    안에 안전 진행 불가능 (caller predicate statementFilter 6 fail 사례 참조).
+    시도 history (transcript 기록):
+      - eba15aa4e: NotImplementedError + legacy fallback (skeleton placeholder)
+      - 시도 N: DuckDB GROUP BY + PIVOT 부분 등가 SQL 작성 →
+        ``detailTopicForTopic`` import 위치 검증 안 함 → **ImportError fail**.
+        시도 자체가 내 능력 한계 실증 (statementFilter 6 parity fail 패턴
+        반복) → revert.
+      - 현 상태: 다시 NotImplementedError + legacy fallback.
 
-    별도 PR 에서 구현 — 본 skeleton 은 *명목 진척* + 환경변수 활성 시 legacy
-    fallback 보장. 호출 시 NotImplementedError, caller (sections() 본체) 가 그
-    예외를 잡아 legacy path 로 계속 진행.
+    plan 의 sections 200 LOC SQL 등가 + 30+ 컬럼 schema 복제 + 5 종목 parity
+    보장은 *단일 PR 안 안전 진행 불가능* — 별도 PR 필수. 본 함수는 진입점
+    reservation + fallback 신호.
 
     Raises:
-        NotImplementedError — 항상 (현재 미구현 — fallback 신호).
+        NotImplementedError — 항상 (fallback to legacy).
     """
     raise NotImplementedError(
-        "sections() DuckDB PIVOT fast path 미구현. plan 의 200 LOC 등가 SQL + "
-        "5 종목 parity 보장은 별도 PR 필요. statementFilter 6 fail 사례가 sj_div "
-        "단순 가정만으로 부족함을 보여줬으므로 sections 의 더 복잡한 schema "
-        "(30+ 컬럼 + List/Categorical/Boolean) 는 동일/더 큰 parity 위험."
+        "sections() DuckDB PIVOT fast path 미구현. 직접 시도 fail (detailTopicForTopic "
+        "import 위치 잘못) → revert. plan 의 200 LOC SQL + 30+ 컬럼 schema 복제 + "
+        "5 종목 parity 보장은 별도 PR 필요."
     )
 
 
