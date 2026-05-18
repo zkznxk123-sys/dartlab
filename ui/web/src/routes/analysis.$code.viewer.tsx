@@ -433,29 +433,45 @@ function ViewerTab() {
 	const rows = useMemo(() => {
 		const allEntries = latestViewer?.textDocument?.entries ?? [];
 		const ws = new Set(windowPeriods);
-		type Row =
+		type Row = (
 			| { kind: 'section'; id: string; section: ViewerSection }
-			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string> };
+			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string> }
+		) & { priority: number; entryIdx: number };
 		const out: Row[] = [];
 		const secMap = new Map(sectionsOwn.map((s) => [s.id, s]));
-		for (const e of allEntries) {
+		// priority: 윈도우 period index 중 가장 빠른 (=가장 newest) column 에 등장 → 작은 값.
+		// 어디에도 안 보이면 dropped. 같은 priority 면 entry 순서 유지.
+		const _firstWindowIdx = (periodsPresent: Set<string>): number => {
+			for (let i = 0; i < windowPeriods.length; i++) {
+				if (periodsPresent.has(windowPeriods[i])) return i;
+			}
+			return Number.POSITIVE_INFINITY;
+		};
+		for (let ei = 0; ei < allEntries.length; ei++) {
+			const e = allEntries[ei];
 			if (e.kind === 'section') {
 				const sid = e.sectionId ?? '';
 				if (!ownIds.has(sid)) continue;
 				const s = secMap.get(sid)!;
-				// 윈도우 3 period 중 한 곳이라도 timeline 매칭 시 노출.
-				if (!(s.timeline ?? []).some((t) => ws.has(_periodLabel(t?.period)))) continue;
-				out.push({ kind: 'section', id: `s-${sid}`, section: s });
+				const tlSet = new Set((s.timeline ?? []).map((t) => _periodLabel(t?.period)).filter(Boolean));
+				if (![...tlSet].some((p) => ws.has(p))) continue;
+				const pri = _firstWindowIdx(tlSet);
+				out.push({ kind: 'section', id: `s-${sid}`, section: s, priority: pri, entryIdx: ei });
 			} else if (e.kind === 'block_ref' && (e.blockKind === 'raw_markdown' || e.blockKind === 'finance')) {
 				const bid = e.blockRef;
 				if (bid == null) continue;
 				const pmd = tablesByBlock[bid];
 				if (!pmd) continue;
-				// 윈도우 3 period 중 한 곳이라도 표 데이터 있으면 노출.
-				if (!windowPeriods.some((p) => (pmd[p] ?? '').trim().length > 0)) continue;
-				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd });
+				const tablePeriods = new Set(
+					Object.entries(pmd).filter(([, v]) => (v ?? '').trim().length > 0).map(([p]) => p),
+				);
+				if (![...tablePeriods].some((p) => ws.has(p))) continue;
+				const pri = _firstWindowIdx(tablePeriods);
+				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd, priority: pri, entryIdx: ei });
 			}
 		}
+		// stable sort by (priority asc, entryIdx asc) — newest-column-first, 같은 column 안에선 원래 순서.
+		out.sort((a, b) => (a.priority - b.priority) || (a.entryIdx - b.entryIdx));
 		return out;
 	}, [latestViewer, sectionsOwn, ownIds, tablesByBlock, windowPeriods]);
 
