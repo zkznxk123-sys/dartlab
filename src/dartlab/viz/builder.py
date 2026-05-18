@@ -123,12 +123,13 @@ def _analysisCallSeries(spec: dict[str, Any], stockCode: str, periods: list[str]
         return None
 
     def _drill(d: Any, path: str) -> Any:
+        # outputKey "history.mScore" 형태: "history" 까지 dict 워킹 + 나머지는 per-row 키 (행 안에서 찾음).
         cur = d
         for part in path.split("."):
             if isinstance(cur, dict) and part in cur:
                 cur = cur[part]
             else:
-                return None
+                return cur if isinstance(cur, list) else None
         return cur
 
     val = _drill(result, outputKey) if outputKey else result

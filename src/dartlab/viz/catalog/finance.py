@@ -580,7 +580,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # ─────────────────────────────────────────────────────────────
     "leverageTrend": {
         "kind": "trend",
-        "title": "레버리지",
+        "title": "레버리지 (부채자본·부채자산·유동)",
         "topic": "BS",
         "tab": "financial",
         "subCategory": "capitalStructure",
@@ -614,7 +614,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 12, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "부채자본비율 100% 미만 안정, 200% 이상 부담. 부채자산비율은 전체 자산 중 부채 비중. 유동비율은 단기 지급능력 (1 년 내 갚을 부채 대비 1 년 내 현금화 자산).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -647,7 +647,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "부채비율 100% 미만 = 자본이 부채보다 큼 (보수적 재무구조). 자기자본비율 50% 이상 = 자기자본 의존도 높음 (안정성). 두 지표는 같은 정보를 다른 각도로.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -695,7 +695,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 150, "label": "1.5", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "유동비율 150% 이상이 안전선 (참조선). 당좌비율은 재고 제외한 보수적 지표 — 재고 안 팔려도 갚을 수 있는가. 현금비율은 가장 보수적 — 현금만으로 갚을 수 있는가.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -801,7 +801,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 3.0, "label": "3.0 (안전)", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "영업이익 / 금융비용. 1.0 미만이면 본업이 이자도 못 갚는 위험. 3.0 이상이 안전선. 추세 하락은 부채 증가 또는 본업 악화 — 신용 등급 강등 직전 신호.",
     },
     # kpiCashFcf / kpiCashFcfMargin / kpiCashCapex 폐기 — 운영자 명시 2026-05-18
@@ -1525,14 +1525,14 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "earningsQuality",          # row8   3 ├
     "sloanAccruals",            # row8   3 ├ = 12
     "netDebt",                  # row8   3 ┘  (4→3 사이즈 조정)
-    # ─ 04 재무 안정 · 부도 위험 (정통 7+8). 3 row. Beneish·distressEnsemble 신설. ─
-    "stabilityRatio",           # row9   4 ┐
-    "liquidityTrend",           # row9   4 ├ = 12
-    "beneishMTimeline",         # row9   4 ┘  (N2 신설)
+    # ─ 04 재무 안정 · 부도 위험 (정통 7+8). 2 row. Beneish·distressEnsemble 신설. ─
+    "stabilityRatio",           # row9   3 ┐
+    "liquidityTrend",           # row9   3 ├
+    "leverageTrend",            # row9   3 ├ = 12
+    "interestCoverage",         # row9   3 ┘
     "altmanZ",                  # row10  4 ┐
     "distressEnsemble",         # row10  4 ├ = 12  (N9 신설, gauge)
-    "interestCoverage",         # row10  4 ┘
-    "leverageTrend",            # row11 12 = 12   (wide wrap-up, 4→12 사이즈 조정)
+    "beneishMTimeline",         # row10  4 ┘  (N2 신설)
     # ─ 05 성장의 질 · 이상신호 (정통 6+8). 2 row. Piotroski·집중도 신설. ─
     "growthYoy",                # row12  4 ┐
     "equityGrowth",             # row12  4 ├ = 12
@@ -1540,9 +1540,9 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "piotroskiFScore",          # row13  6 ┐ = 12  (N5 신설)
     "segmentConcentration",     # row13  6 ┘  (N7 신설)
 ]
-"""38 카드 / 5 section / 14 row. 모든 row col 합 = 12 강행.
+"""38 카드 / 5 section / 13 row. 모든 row col 합 = 12 강행.
 01 자본+자산구조 (3 row) / 02 영업·자본 효율 (4 row) / 03 현금 일생·자본배분 (2 row)
-04 재무 안정·부도 위험 (3 row) / 05 성장의 질·이상신호 (2 row).
+04 재무 안정·부도 위험 (2 row) / 05 성장의 질·이상신호 (2 row).
 
 정통 깊이 신설 9 (2026-05-19):
 - dupont5Step (3단→5단), penmanRoeDecomp, roicWaccGap, operatingLeverage,
