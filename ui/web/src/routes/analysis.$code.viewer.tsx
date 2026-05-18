@@ -179,6 +179,19 @@ function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafKey: string): Vie
 	});
 }
 
+// section body 또는 heading 에서 sub-order 추출 — 예 "6-1.", "6-2.", "6-3." 또는 "(1)", "(2)".
+// backend entries 순서가 잘못 박힌 경우 (dividend 처럼 6-3 이 6-1 앞에 옴) 보정 용도.
+function _subOrder(text: string): number | null {
+	if (!text) return null;
+	// "6-1.", "6-2." 같은 N-M. 패턴 우선
+	const dash = /^\s*\d+-(\d+)\.\s/.exec(text);
+	if (dash) return parseInt(dash[1], 10);
+	// "(1)", "(2)" 패턴
+	const paren = /^\s*\((\d+)\)\s/.exec(text);
+	if (paren) return parseInt(paren[1], 10);
+	return null;
+}
+
 // 단순 markdown 파이프 테이블 → 2D 배열. `| --- |` separator row 는 제거.
 // 셀 안 `&cr;` 같은 HTML escape 는 backend 에서 이미 처리됐다고 가정.
 function _parseMarkdownTable(md: string): string[][] {
@@ -436,7 +449,7 @@ function ViewerTab() {
 		type Row = (
 			| { kind: 'section'; id: string; section: ViewerSection }
 			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string> }
-		) & { priority: number; entryIdx: number };
+		) & { priority: number; subOrder: number; entryIdx: number };
 		const out: Row[] = [];
 		const secMap = new Map(sectionsOwn.map((s) => [s.id, s]));
 		// priority: 윈도우 period index 중 가장 빠른 (=가장 newest) column 에 등장 → 작은 값.
@@ -456,7 +469,12 @@ function ViewerTab() {
 				const tlSet = new Set((s.timeline ?? []).map((t) => _periodLabel(t?.period)).filter(Boolean));
 				if (![...tlSet].some((p) => ws.has(p))) continue;
 				const pri = _firstWindowIdx(tlSet);
-				out.push({ kind: 'section', id: `s-${sid}`, section: s, priority: pri, entryIdx: ei });
+				// sub-order — body 또는 첫 heading 에서 "N-M." 추출. backend entries 순서가
+				// 잘못된 dividend 같은 topic 에서 6-1 → 6-2 → 6-3 정렬 회복.
+				const titleText = _sectionTitle(s)?.text || '';
+				const bodyText = s.latest?.body || '';
+				const so = _subOrder(bodyText) ?? _subOrder(titleText) ?? Number.POSITIVE_INFINITY;
+				out.push({ kind: 'section', id: `s-${sid}`, section: s, priority: pri, subOrder: so, entryIdx: ei });
 			} else if (e.kind === 'block_ref' && (e.blockKind === 'raw_markdown' || e.blockKind === 'finance')) {
 				const bid = e.blockRef;
 				if (bid == null) continue;
@@ -467,11 +485,20 @@ function ViewerTab() {
 				);
 				if (![...tablePeriods].some((p) => ws.has(p))) continue;
 				const pri = _firstWindowIdx(tablePeriods);
-				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd, priority: pri, entryIdx: ei });
+				// 표는 sub-order 없음 — 표가 sub-section 본문 사이에 등장하면 그 section 의
+				// subOrder 옆에 붙도록 entryIdx 만으로 자연 위치.
+				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd, priority: pri, subOrder: Number.POSITIVE_INFINITY, entryIdx: ei });
 			}
 		}
-		// stable sort by (priority asc, entryIdx asc) — newest-column-first, 같은 column 안에선 원래 순서.
-		out.sort((a, b) => (a.priority - b.priority) || (a.entryIdx - b.entryIdx));
+		// sort 우선순위: (subOrder asc) → (priority asc) → (entryIdx asc).
+		// subOrder 가 명시된 (6-1/6-2/6-3) section 이 *항상* 그 번호 순으로 먼저.
+		// subOrder=∞ 인 section 들 중에선 window 의 newest period 등장 (priority 0) 우선.
+		// 같은 priority 안에선 backend entryIdx 그대로.
+		out.sort((a, b) => {
+			if (a.subOrder !== b.subOrder) return a.subOrder - b.subOrder;
+			if (a.priority !== b.priority) return a.priority - b.priority;
+			return a.entryIdx - b.entryIdx;
+		});
 		return out;
 	}, [latestViewer, sectionsOwn, ownIds, tablesByBlock, windowPeriods]);
 
