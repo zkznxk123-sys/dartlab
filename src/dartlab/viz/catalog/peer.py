@@ -26,7 +26,7 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "title": "동종 백분위 비교",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {"adapter": "peerComparison"},
         "options": {},

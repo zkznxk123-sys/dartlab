@@ -20,7 +20,7 @@ def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent:
         "title": title,
         "topic": "ratios" if ratio else "IS",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "credit",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
@@ -30,14 +30,17 @@ def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent:
 
 
 GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
-    "governanceKpiCfNi": _kpi(
-        "영업CF/순이익",
-        "CF/NI",
-        ratio={"num": {"cfOperating": 1}, "den": {"netIncome": 1}, "scale": 100},
-        unit="%",
-        intent="primary",
-        helpText="100%↑ 정상. 70% 미만 지속은 분식 의심.",
-    ),
+    "governanceKpiCfNi": {
+        **_kpi(
+            "영업CF/순이익",
+            "CF/NI",
+            ratio={"num": {"cfOperating": 1}, "den": {"netIncome": 1}, "scale": 100},
+            unit="%",
+            intent="primary",
+            helpText="100%↑ 정상. 70% 미만 지속은 분식 의심.",
+        ),
+        "subCategory": "quality",
+    },
     "governanceKpiEquityRatio": _kpi(
         "자기자본비율",
         "자기자본/자산",
@@ -54,14 +57,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         intent="accent",
         helpText="누적 이익잉여금 비중. 높을수록 보수적 거버넌스.",
     ),
-    "governanceKpiDebtRatio": _kpi(
-        "부채비율",
-        "부채/자본",
-        ratio={"num": {"liabilities": 1}, "den": {"equity": 1}, "scale": 100},
-        unit="%",
-        intent="negative",
-        helpText="200%+ 부담. 거버넌스 관점 자본구조 첫 신호.",
-    ),
+    # governanceKpiDebtRatio 폐기 — finance.kpiDebtRatio 와 ratio 완전 중복 (v3-r5 §6).
     # distressGauge 폐기 — finance.py riskDistress 와 중복 gauge (Altman Z')
     # anomalySignals 폐기 — finance.py riskAnomaly 와 중복 topList (이상신호)
     "earningsQualityTrend": {
@@ -99,7 +95,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "자본 거버넌스",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "equityRatio",
@@ -131,7 +127,6 @@ GOVERNANCE_KEYS: list[str] = [
     "governanceKpiCfNi",
     "governanceKpiEquityRatio",
     "governanceKpiReRatio",
-    "governanceKpiDebtRatio",
     "earningsQualityTrend",
     "capitalGovernance",
 ]

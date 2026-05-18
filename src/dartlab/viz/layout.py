@@ -282,26 +282,36 @@ def packSkyline(
     return placed
 
 
-# sub 별 카드 narrative 정렬 우선순위 — KPI 가 hero, 추세는 본문, 분해/위험은 끝.
-# 사용자 1 지시: 카드 순서 = 의미 흐름 (위→아래 / 좌→우 = 종합 → 분해).
+# v3-r5 §9 — F-pattern 시선 흐름. Hero (narrativeBridge/radar/scoreBadge/wide gauge/phaseIndicator)
+# 가 *좌상단* y=0 박히게 priority 0. KPI strip 그 다음, 본문 trend, 끝에 signals.
+# 추가 규칙: layout.colSpan >= 24 인 카드는 priority 강제 0 (wide hero 우선) — resolveKindOrder 참조.
 _NARRATIVE_KIND_ORDER: dict[str, int] = {
-    "kpiTile": 0,
+    "narrativeBridge": 0,  # Tier 1 — conclusion / hero text
+    "scoreBadge": 0,
+    "radar": 0,  # Tier 1 — hero polygon
+    "phaseIndicator": 0,  # Tier 1 — strip
+    "kpiTile": 1,  # Tier 2 — result
     "diffView": 1,
-    "scoreBadge": 2,
-    "narrativeBridge": 3,
-    "trend": 4,
-    "breakdown": 5,
-    "waterfall": 6,
-    "comparisonTable": 7,
-    "radar": 8,
-    "scatter": 9,
-    "matrix": 10,
-    "gauge": 11,
-    "topList": 12,
-    "percentileRank": 13,
-    "phaseIndicator": 14,
-    "sankey": 15,
+    "topList": 2,  # Tier 3 — decomp
+    "gauge": 2,  # 일반 gauge (wide 는 entry cs 로 priority 0 강제)
+    "trend": 3,  # Tier 3 — trend body
+    "breakdown": 4,
+    "scatter": 5,
+    "matrix": 6,
+    "waterfall": 7,
+    "comparisonTable": 8,  # Tier 4 — peer
+    "percentileRank": 8,
 }
+
+
+def _kindOrderKey(entry: CatalogEntry) -> int:
+    """카드 정렬 우선순위 — kind + layout 폭 결합. wide hero (cs >= 24) 강제 priority 0."""
+    kind = entry.get("kind", "trend")
+    layout = entry.get("layout") or {}
+    cs = layout.get("colSpan", 0)
+    if cs >= 24:
+        return 0
+    return _NARRATIVE_KIND_ORDER.get(kind, 99)
 
 
 def planTabLayout(
@@ -338,9 +348,9 @@ def planTabLayout(
 
     cards = queryCards(tab=tab, sub=sub)
     if sub is not None:
-        # sub view: KPI hero → trend → radar/gauge → topList/phase. catalog dict
-        # 순서가 narrative 와 어긋난 경우 보정. stable sort 라 동일 kind 끼리는 catalog 순서.
-        cards.sort(key=lambda kc: _NARRATIVE_KIND_ORDER.get(kc[1].get("kind", "trend"), 99))
+        # sub view: Hero (narrativeBridge/radar/scoreBadge/wide) → KPI → trend → signals.
+        # stable sort 라 동일 priority 끼리는 catalog 순서. wide hero (cs >= 24) 강제 priority 0.
+        cards.sort(key=lambda kc: _kindOrderKey(kc[1]))
     return packSkyline(cards, colCount=colCount)
 
 
