@@ -683,13 +683,42 @@ def _pivotToSeries(
 ) -> dict[str, dict[str, list[float | None]]]:
     """DataFrame → {sjDiv: {snakeId: [값...]}} 피벗.
 
-    같은 (sjDiv, snakeId, period) 슬롯에 여러 값이 들어올 경우 account_id
-    우선순위(IFRS 표준 > DART 사내 > 기타)로 선택. 사유는
-    ``_accountIdPriority`` docstring 참조.
+    Phase B 처방 — DuckDB 기반 PIVOT 으로 위임. Python row dict 누적 0,
+    priorityTrack window 함수로 흡수. 결과 dict 는 caller 호환 동일.
 
     ``stockCode`` 는 ENV ``DARTLAB_MAPPING_LEDGER`` 가 활성일 때
     ledger ndjson 에 함께 기록 (prod 동작 0 영향).
+
+    Legacy (구 Python iter_rows 본체) 는 ``_pivotToSeriesLegacy`` 로 보존 —
+    parity test 와 pyodide WASM fallback 에서 사용.
     """
+    # pyodide WASM: DuckDB 미가용 → legacy fallback.
+    import sys
+
+    if sys.platform == "emscripten":
+        return _pivotToSeriesLegacy(df, periods, stockCode)
+
+    from dartlab.providers.dart.finance.pivotArrow import pivotToSeriesArrow
+
+    result = pivotToSeriesArrow(
+        df,
+        periods,
+        accountIdPriority=_accountIdPriority,
+        fallbackSnakeId=_fallbackSnakeId,
+        ifrsTopLevelIds=_IFRS_TOP_LEVEL_IDS,
+        stockCode=stockCode,
+    )
+    _fillSnakeIdGaps(result)
+    sortSeries(result)
+    return result
+
+
+def _pivotToSeriesLegacy(
+    df: pl.DataFrame,
+    periods: list[str],
+    stockCode: str | None = None,
+) -> dict[str, dict[str, list[float | None]]]:
+    """Phase B 이전의 Python iter_rows 본체 — parity test + pyodide fallback 보존."""
     mapper = AccountMapper.get()
     periodIdx = {p: i for i, p in enumerate(periods)}
     nPeriods = len(periods)
