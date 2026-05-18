@@ -211,8 +211,8 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원", "dualStack": True},
-        # v3-r7 12-col grid — 12×4 hero full row (bento 2026 §1).
-        "layout": {"colSpan": 12, "rowSpan": 4},
+        # v3-r7 12-col grid — 12×3 hero (운영자 명시 높이 줄임 2026-05-18).
+        "layout": {"colSpan": 12, "rowSpan": 3},
         "help": "자산(왼쪽) = 부채+자본(오른쪽). 두 막대 높이는 항상 같다 (회계 등식). 매출채권·재고도 영업자산이지만 운전자본 회수기간 신호로 따로 분리. 기타 영업자산은 PPE·무형·관계사 등 비유동 본업 자본. 금융부채 ↑ 이자 부담, 이익잉여금 ↑ 내부유보 건전.",
     },
     # ─────────────────────────────────────────────────────────────
