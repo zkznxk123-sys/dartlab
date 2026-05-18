@@ -76,25 +76,21 @@ BLOCKS: dict[str, list[str]] = {
         "growthYoy",
     ],
     "capitalStructureCore": [
-        "kpiDebtRatio",
-        "kpiCurrentRatio",
-        "kpiCashAssets",
-        "kpiInterestCoverage",
+        # 단순 KPI tile (kpiDebtRatio 등) 폐기 — finance.py 카드 narrative 통합 (2026-05-18).
         "assetComposition",
         "liabilityDetail",
         "equityDetail",
+        "stabilityRatio",
         "liquidityTrend",
         "leverageTrend",
+        "interestCoverage",
     ],
     "cashflowCore": [
-        "kpiCashOp",
-        "kpiCashFcf",
-        "kpiCashFcfMargin",
-        "kpiCashPayout",
+        # 단순 KPI tile (kpiCashOp 등) 폐기 — cashflowSigned + fcfTrend + earningsQuality 가 narrative 흡수.
         "cashflowSigned",
         "fcfTrend",
-        "capitalAllocationBars",
-        "capitalAllocationWaterfall",
+        "earningsQuality",
+        "workingCapitalDays",
     ],
     "riskCore": [
         "altmanZGauge",

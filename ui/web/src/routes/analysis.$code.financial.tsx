@@ -1,7 +1,7 @@
 // /analysis/$code/financial — 재무제표분석.
-// 7 분석 방법론 sub view (story/dupont/value/growth/credit/quality/snowflake).
-// 같은 회사를 그레이엄·린치·S&P·Sloan 등 다른 학파 시각으로 다르게 본다.
-// catalog 의 subCategory 필드로 카드 자동 분류. URL ?view=<sub> 로 핀.
+// 자금조달 → 영업 선순환 → 현금·안정 3 narrative section. 사용자 명시 흐름
+// (자산구조 → 부채상세 → 자본상세 → 손익구조) 한 viewport 진입, 그 다음 스크롤로
+// 마진/수익성/현금/안정 분기. 카드 KPI tile 8 폐기.
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createFileRoute, getRouteApi } from '@tanstack/react-router';
@@ -101,6 +101,50 @@ function FinancialTab() {
 
 	const placed = data?.layout ?? [];
 
+	// narrative section 정의 — cardKey → sectionIdx. backend layout 그대로 받되
+	// 여기서 split 후 각 section 내 y 좌표 normalize (그룹 내 min y 빼기).
+	const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
+		{
+			title: '자금조달 · 자본구조',
+			subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리고 있는가.',
+			keys: new Set(['assetComposition', 'liabilityDetail', 'equityDetail', 'incomeBreakdown']),
+		},
+		{
+			title: '영업의 선순환',
+			subtitle: '마진·수익성·비용·활동성·이익품질. 본업이 진짜로 돈을 벌고 있는가.',
+			keys: new Set([
+				'marginTrend',
+				'returnTrend',
+				'costStructureTrend',
+				'turnoverTrend',
+				'growthYoy',
+				'workingCapitalDays',
+				'earningsQuality',
+				'riskAnomaly',
+			]),
+		},
+		{
+			title: '현금 흐름 · 재무 안정',
+			subtitle: '회계이익 vs 현금. 부채 안전판. 단기 지급능력. 자본구조 안정성.',
+			keys: new Set([
+				'cashflowSigned',
+				'fcfTrend',
+				'stabilityRatio',
+				'liquidityTrend',
+				'leverageTrend',
+				'interestCoverage',
+			]),
+		},
+	];
+
+	const grouped = SECTIONS.map((section) => {
+		const cards = placed.filter((p) => section.keys.has(p.cardKey));
+		if (cards.length === 0) return null;
+		const minY = Math.min(...cards.map((c) => c.y));
+		const normalized = cards.map((c) => ({ ...c, y: c.y - minY }));
+		return { section, cards: normalized };
+	}).filter((g): g is { section: typeof SECTIONS[0]; cards: typeof placed } => g !== null);
+
 	return (
 		<>
 			{isError && (
@@ -108,10 +152,6 @@ function FinancialTab() {
 					백엔드 응답 오류: {String((error as Error)?.message || 'unknown')} — 서버 재시작 필요할 수 있음
 				</div>
 			)}
-
-			<div className="border-b bg-card/30 px-4 py-2 text-xs text-muted-foreground">
-				재무제표분석 / <span className="font-medium text-foreground">재무분석 (자산구조·부채상세·자본상세·손익구조)</span>
-			</div>
 
 			{placed.length === 0 ? (
 				isLoading ? (
@@ -125,7 +165,25 @@ function FinancialTab() {
 					</div>
 				)
 			) : (
-				<BentoGrid placed={placed} renderCard={renderCard} />
+				<div className="flex flex-col">
+					{grouped.map(({ section, cards }, idx) => (
+						<section key={section.title} className={idx === 0 ? '' : 'mt-2'}>
+							<header className="flex items-baseline justify-between gap-3 px-6 pt-4 pb-1">
+								<div className="flex items-baseline gap-3">
+									<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+										{String(idx + 1).padStart(2, '0')}
+									</span>
+									<h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+										{section.title}
+									</h2>
+									<span className="text-[11px] text-muted-foreground">{section.subtitle}</span>
+								</div>
+								<div aria-hidden className="hidden flex-1 self-center border-t border-border/40 lg:block" />
+							</header>
+							<BentoGrid placed={cards} renderCard={renderCard} />
+						</section>
+					))}
+				</div>
 			)}
 		</>
 	);

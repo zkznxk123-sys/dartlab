@@ -42,7 +42,7 @@ export function CompanyHeader({ stockCode, corpName, periodKind, onPeriodKindCha
 	});
 
 	return (
-		<div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+		<div className="flex items-center justify-between gap-3 px-4 py-3">
 			<div className="flex min-w-0 flex-wrap items-baseline gap-2">
 				{corpName ? (
 					<>

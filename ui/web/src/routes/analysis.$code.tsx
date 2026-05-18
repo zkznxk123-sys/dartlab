@@ -52,15 +52,21 @@ function AnalysisLayout() {
 		if (corpName && code) push(code, corpName);
 	}, [code, corpName, push]);
 
+	// sticky CompanyHeader + 자식 scroll area. 부모 flex-1 이지만 min-h-0 박아야
+	// 자식 overflow 가 동작. 헤더는 sticky top-0 + bg/blur 로 카드 위에 떠 있음.
 	return (
-		<div className="flex flex-1 flex-col">
-			<CompanyHeader
-				stockCode={code}
-				corpName={corpName}
-				periodKind={periodKind}
-				onPeriodKindChange={setPeriodKind}
-			/>
-			<Outlet />
+		<div className="flex min-h-0 flex-1 flex-col">
+			<div className="sticky top-0 z-20 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/65">
+				<CompanyHeader
+					stockCode={code}
+					corpName={corpName}
+					periodKind={periodKind}
+					onPeriodKindChange={setPeriodKind}
+				/>
+			</div>
+			<div className="min-h-0 flex-1 overflow-y-auto tiny-scroll">
+				<Outlet />
+			</div>
 		</div>
 	);
 }

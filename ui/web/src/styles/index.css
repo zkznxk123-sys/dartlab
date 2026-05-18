@@ -54,35 +54,36 @@
 }
 
 :root {
-	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
+	--radius: 0.5rem;
+	/* light — broadsheet 종이톤. background 가 살짝 가라앉아 card 가 위로 떠 보임. */
+	--background: oklch(0.985 0.003 95);
+	--foreground: oklch(0.18 0 0);
 	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
+	--card-foreground: oklch(0.16 0 0);
 	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
+	--popover-foreground: oklch(0.16 0 0);
 	--primary: oklch(0.205 0 0);
 	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
+	--secondary: oklch(0.965 0.003 95);
 	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
+	--muted: oklch(0.965 0.003 95);
+	--muted-foreground: oklch(0.50 0 0);
+	--accent: oklch(0.96 0.005 95);
 	--accent-foreground: oklch(0.205 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	/* Tableau 10 inspired (oklch). categorical, L·H 충분 분산. */
-	--chart-1: oklch(0.53 0.10 250);  /* #4E79A7  blue   — primary */
-	--chart-2: oklch(0.71 0.16 65);   /* #F28E2B  orange — accent  */
-	--chart-3: oklch(0.60 0.20 25);   /* #E15759  red    — negative */
-	--chart-4: oklch(0.71 0.06 185);  /* #76B7B2  teal   — neutral */
-	--chart-5: oklch(0.60 0.13 140);  /* #59A14F  green  — positive */
-	--chart-6: oklch(0.83 0.15 90);   /* #EDC949  yellow */
-	--chart-7: oklch(0.59 0.08 330);  /* #AF7AA1  purple */
-	--chart-8: oklch(0.75 0.10 15);   /* #FF9DA7  pink   */
-	--sidebar: oklch(0.985 0 0);
+	--destructive: oklch(0.56 0.18 28);
+	--border: oklch(0.90 0.005 95);
+	--input: oklch(0.90 0.005 95);
+	--ring: oklch(0.68 0 0);
+	/* Financial broadsheet palette — muted, 분석체. yellow/pink/cyan 폐기, sage·amber·brick·stone·sand·plum·rose. */
+	--chart-1: oklch(0.52 0.11 245);  /* sapphire — primary */
+	--chart-2: oklch(0.70 0.13 75);   /* amber — accent */
+	--chart-3: oklch(0.56 0.16 28);   /* brick — negative */
+	--chart-4: oklch(0.62 0.05 195);  /* stone teal — neutral */
+	--chart-5: oklch(0.58 0.11 145);  /* sage — positive */
+	--chart-6: oklch(0.72 0.08 85);   /* sand */
+	--chart-7: oklch(0.50 0.09 275);  /* deep plum */
+	--chart-8: oklch(0.60 0.10 35);   /* clay rose */
+	--sidebar: oklch(0.97 0.005 95);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
 	--sidebar-primary-foreground: oklch(0.985 0 0);
@@ -93,34 +94,35 @@
 }
 
 .dark {
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.205 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.205 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
-	/* Tableau dark — 동일 hue, L +0.10~0.15 로 다크에서 가독성 */
-	--chart-1: oklch(0.68 0.10 250);
-	--chart-2: oklch(0.78 0.14 65);
-	--chart-3: oklch(0.72 0.18 25);
-	--chart-4: oklch(0.78 0.06 185);
-	--chart-5: oklch(0.72 0.13 140);
-	--chart-6: oklch(0.88 0.13 90);
-	--chart-7: oklch(0.70 0.08 330);
-	--chart-8: oklch(0.82 0.09 15);
-	--sidebar: oklch(0.205 0 0);
+	/* dark — Bloomberg/Nikkei tone. background 깊은 slate, card 살짝 띄움, border 옅게. */
+	--background: oklch(0.16 0.005 250);
+	--foreground: oklch(0.96 0 0);
+	--card: oklch(0.205 0.005 250);
+	--card-foreground: oklch(0.97 0 0);
+	--popover: oklch(0.225 0.006 250);
+	--popover-foreground: oklch(0.97 0 0);
+	--primary: oklch(0.93 0 0);
+	--primary-foreground: oklch(0.20 0 0);
+	--secondary: oklch(0.26 0.005 250);
+	--secondary-foreground: oklch(0.97 0 0);
+	--muted: oklch(0.255 0.005 250);
+	--muted-foreground: oklch(0.68 0.01 250);
+	--accent: oklch(0.275 0.008 250);
+	--accent-foreground: oklch(0.97 0 0);
+	--destructive: oklch(0.72 0.18 28);
+	--border: oklch(0.92 0.01 250 / 12%);
+	--input: oklch(0.92 0.01 250 / 16%);
+	--ring: oklch(0.65 0.04 250);
+	/* Financial dark — L +0.12 ~ +0.18, C 살짝 ↓ 글래어 방지. */
+	--chart-1: oklch(0.68 0.11 245);  /* sapphire */
+	--chart-2: oklch(0.80 0.12 75);   /* amber */
+	--chart-3: oklch(0.72 0.16 28);   /* brick */
+	--chart-4: oklch(0.74 0.05 195);  /* stone teal */
+	--chart-5: oklch(0.72 0.12 145);  /* sage */
+	--chart-6: oklch(0.82 0.08 85);   /* sand */
+	--chart-7: oklch(0.66 0.09 275);  /* plum */
+	--chart-8: oklch(0.74 0.10 35);   /* clay rose */
+	--sidebar: oklch(0.185 0.005 250);
 	--sidebar-foreground: oklch(0.985 0 0);
 	--sidebar-primary: oklch(0.488 0.243 264.376);
 	--sidebar-primary-foreground: oklch(0.985 0 0);
