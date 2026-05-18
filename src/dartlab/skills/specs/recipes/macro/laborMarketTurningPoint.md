@@ -14,10 +14,7 @@ whenToUse:
   - Sahm rule
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.macro.forecast
-  - engines.macro.cycle
-  - engines.macro.summary
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython
@@ -125,7 +122,7 @@ emit_result(
 
 ## 연계 절차
 
-1. 노동시장 둔화가 확인되면 `engines.macro.forecast` 로 침체확률과 LEI를 함께 확인한다.
+1. 노동시장 둔화가 확인되면 `engines.macro` 로 침체확률과 LEI를 함께 확인한다.
 2. 금리곡선 선행 신호와 비교하려면 `recipes.macro.yieldCurveStress` 로 이동한다.
 3. 신용 스트레스가 동반되면 `recipes.credit.cycleStressMap` 으로 확장한다.
 

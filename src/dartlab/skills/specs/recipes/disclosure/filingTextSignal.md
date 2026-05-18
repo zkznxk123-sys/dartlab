@@ -12,7 +12,7 @@ whenToUse:
   - 위험 키워드 빈도
   - going concern signal
 linkedSkills:
-  - engines.gather.collect
+  - engines.gather
   - engines.search
   - engines.analysis.predictionSignal
 toolRefs:

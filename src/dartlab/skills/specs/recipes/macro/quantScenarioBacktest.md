@@ -12,7 +12,7 @@ whenToUse:
   - regime walk-forward
   - 위기 시나리오 quant
 linkedSkills:
-  - engines.macro.scenario
+  - engines.macro
   - engines.quant.walkforward
   - engines.quant.backtest
 toolRefs:

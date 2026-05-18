@@ -13,11 +13,7 @@ whenToUse:
   - 현재 매크로 위치
   - historical positioning
 linkedSkills:
-  - engines.macro.summary
-  - engines.macro.cycle
-  - engines.macro.crisis
-  - engines.macro.scenario
-  - engines.macro.assets
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython

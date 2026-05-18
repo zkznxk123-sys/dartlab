@@ -157,7 +157,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.credit.creditRisk` (base dCR + 7 axis), `engines.analysis.macroSensitivity` (금리·환율 elasticity), `engines.analysis.financing` (차입 만기·변동/고정 비율), `engines.macro.rates` (시장 금리 곡선).
+- **skillRef**: `engines.credit.creditRisk` (base dCR + 7 axis), `engines.analysis.macroSensitivity` (금리·환율 elasticity), `engines.analysis.financing` (차입 만기·변동/고정 비율), `engines.macro` (시장 금리 곡선).
 - **sourceRef**: DART 재무제표 — IS (operating_profit, interest_expense), BS (total_borrowings, total_liabilities, equity). 분기 또는 연간 freq 명시.
 - **tableRef** (5 행 sensitivity curve): rateShockBp ∈ {0, 100, 200, 300, 400, 500} × {shockedGrade, shockedICR, icrDelta, bindingAxis}.
 - **valueRef**: baseGrade · baseICR · shockedGrade@200bp · shockedICR@200bp · icrDelta · bindingAxis.

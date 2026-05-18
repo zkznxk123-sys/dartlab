@@ -13,7 +13,7 @@ whenToUse:
   - 자동 risk 블럭
 linkedSkills:
   - engines.quant.toneChange
-  - engines.gather.news
+  - engines.gather
   - engines.analysis.disclosureChange
   - engines.story
 toolRefs:

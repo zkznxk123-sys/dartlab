@@ -14,7 +14,6 @@ whenToUse:
   - macro stress chart
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
   - engines.viz
   - recipes.macro.tailRiskScenarioScan
   - recipes.macro.dollarFundingStress

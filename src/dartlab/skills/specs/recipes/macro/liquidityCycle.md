@@ -15,11 +15,7 @@ whenToUse:
   - 위기 신호
   - 거시 환경
 linkedSkills:
-  - engines.macro.marketReview
-  - engines.macro.rates
-  - engines.macro.liquidity
-  - engines.macro.crisis
-  - engines.macro.summary
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython
@@ -94,11 +90,11 @@ final = dartlab.macro("summary")
 
 ## 연계 절차
 
-1. engines.macro.marketReview — 매크로 환경 종합
-2. engines.macro.rates — 금리 곡선
-3. engines.macro.liquidity — 유동성 지표
-4. engines.macro.crisis — 위기 신호
-5. engines.macro.summary — 최종 종합
+1. engines.macro — 매크로 환경 종합
+2. engines.macro — 금리 곡선
+3. engines.macro — 유동성 지표
+4. engines.macro — 위기 신호
+5. engines.macro — 최종 종합
 
 ## 기본 검증
 

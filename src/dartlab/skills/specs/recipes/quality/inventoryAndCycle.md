@@ -14,10 +14,9 @@ whenToUse:
   - 수요 사이클
   - 재고 분석
 linkedSkills:
-  - engines.macro.inventory
+  - engines.macro
   - engines.company.researchStarter
   - engines.analysis.efficiency
-  - engines.macro.cycle
 toolRefs:
   - EngineCall
   - RunPython
@@ -95,10 +94,10 @@ cycle = dartlab.macro("cycle")
 
 ## 연계 절차
 
-1. engines.macro.inventory — 산업 재고 지수
+1. engines.macro — 산업 재고 지수
 2. engines.company.researchStarter — 회사 진입
 3. engines.analysis.efficiency — 회사 회전율
-4. engines.macro.cycle — 경기 사이클
+4. engines.macro — 경기 사이클
 
 ## 기본 검증
 

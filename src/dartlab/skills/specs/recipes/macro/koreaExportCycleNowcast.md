@@ -14,11 +14,7 @@ whenToUse:
   - export nowcast
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.gather.price
-  - engines.macro.trade
-  - engines.macro.corporate
-  - engines.macro.summary
+  - engines.macro
   - engines.scan.macroBeta
 toolRefs:
   - EngineCall

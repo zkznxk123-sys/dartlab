@@ -15,7 +15,7 @@ linkedSkills:
   - engines.company
   - engines.quant.qmj
   - engines.scan.macroBeta
-  - engines.macro.cycle
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython

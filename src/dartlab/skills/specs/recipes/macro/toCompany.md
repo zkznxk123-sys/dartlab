@@ -15,8 +15,7 @@ whenToUse:
   - 금리 인상 영향
   - 환율 영향
 linkedSkills:
-  - engines.macro.marketReview
-  - engines.macro.rates
+  - engines.macro
   - engines.analysis.macroSensitivity
   - engines.company.researchStarter
   - engines.analysis.financing
@@ -98,8 +97,8 @@ financing = c.analysis("financial", "재무구조")
 
 ## 연계 절차
 
-1. engines.macro.marketReview — 현재 매크로 환경 (금리·환율·경기 사이클)
-2. engines.macro.rates — 금리 변동 흐름 (필요 시)
+1. engines.macro — 현재 매크로 환경 (금리·환율·경기 사이클)
+2. engines.macro — 금리 변동 흐름 (필요 시)
 3. engines.company.researchStarter — 회사 진입
 4. engines.analysis.macroSensitivity — 매크로 변수별 회사 P&L elasticity
 5. engines.analysis.financing — 자본구조 (이자부 부채·외화 부채 비중)

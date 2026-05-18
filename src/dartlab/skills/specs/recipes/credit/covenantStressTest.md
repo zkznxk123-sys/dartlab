@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.analysis.financing
-  - engines.macro.scenario
+  - engines.macro
   - engines.credit
 toolRefs:
   - EngineCall

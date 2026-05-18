@@ -14,10 +14,7 @@ whenToUse:
   - inflation breadth
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.macro.rates
-  - engines.macro.scenario
-  - engines.macro.summary
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython
@@ -126,7 +123,7 @@ emit_result(
 ## 연계 절차
 
 1. 인플레 확산성이 높으면 `recipes.macro.yieldCurveStress` 로 금리곡선과 정책 압력을 확인한다.
-2. 상품/에너지 충격 중심이면 `engines.macro.scenario` 의 인플레이션 충격 경로와 비교한다.
+2. 상품/에너지 충격 중심이면 `engines.macro` 의 인플레이션 충격 경로와 비교한다.
 3. 한국 수출/환율 영향은 `recipes.macro.koreaExportCycleNowcast` 로 넘긴다.
 
 ## 기본 검증

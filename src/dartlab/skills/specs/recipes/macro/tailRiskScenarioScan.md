@@ -13,10 +13,7 @@ whenToUse:
   - 하방 시나리오
   - scenario scan
 linkedSkills:
-  - engines.macro.scenario
-  - engines.macro.crisis
-  - engines.macro.assets
-  - engines.macro.summary
+  - engines.macro
   - engines.quant.tailrisk
 toolRefs:
   - EngineCall

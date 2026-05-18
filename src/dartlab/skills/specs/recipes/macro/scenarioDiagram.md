@@ -13,7 +13,7 @@ whenToUse:
   - 경제 흐름도
   - mermaid
 linkedSkills:
-  - engines.macro.scenario
+  - engines.macro
   - engines.viz
   - recipes.macro.tailRiskScenarioScan
   - recipes.macro.historicalPositioning
@@ -145,11 +145,11 @@ emit_result(
 
 3 종 ref 모두 답변에 명시 인용 (`requiredEvidence: skillRef + sourceRef + executionRef`).
 
-- **skillRef**: `engines.macro.scenario` (이 recipe 진입점), `engines.macro.crisis` (역사 위기 사례), `engines.scan.capital` (방어/취약 섹터 현재 분포). 답변 결론·메커니즘 단에서 *어느 skill 출처* 인지 명시.
+- **skillRef**: `engines.macro` (이 recipe 진입점), `engines.macro` (역사 위기 사례), `engines.scan.capital` (방어/취약 섹터 현재 분포). 답변 결론·메커니즘 단에서 *어느 skill 출처* 인지 명시.
 - **sourceRef**: `dartlab.macro("scenario", ...)` 가 반환한 시나리오 meta (description / type / transmission / historicalCases). 시점 (asOf) 포함.
 - **executionRef**: RunPython 안 계산 결과 (위 monitoring 표·values dict). 답변에 "RunPython 실행 결과: ref:N" 형식 인용.
 
-진입점 엔진: `engines.macro.*` (시나리오 정의) + `engines.viz` (다이어그램 emit). 도구 호출: `RunPython` (조합 계산) + `CompileVisual` (대안 시각화).
+진입점 엔진: `engines.macro` (axis 별 호출) (시나리오 정의) + `engines.viz` (다이어그램 emit). 도구 호출: `RunPython` (조합 계산) + `CompileVisual` (대안 시각화).
 
 ### 3. 메커니즘 분석
 

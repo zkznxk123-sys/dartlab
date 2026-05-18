@@ -58,10 +58,11 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "engines.viz.tableBackedChart",
         "engines.company.researchStarter",
         "engines.company.usEdgarReview",
-        "engines.macro.marketReview",
         "engines.quant.damodaranValuation",
         "engines.story.companyCausal",
     } <= ids
+    # engines.macro.marketReview 는 Phase B 흡수 (2026-05-18) 로 base SKILL.md 의 axis 표에 inline.
+    # axis-level sub-spec 13 종 모두 흡수 — 본 plan 의 "엔진당 1 manual" 정책.
 
     assert not any(item.startswith("basic.") for item in ids)
     assert not any(item.startswith("capability:") for item in ids)
@@ -204,8 +205,11 @@ def test_application_skills_cover_engine_guide_axes() -> None:
     for axis in dartlab.quant().get_column("axis").to_list():
         assert f"engines.quant.{axis}" in ids
 
+    # engines.macro axis-level sub-spec 13 종은 Phase B 흡수 (2026-05-18) — base SKILL.md
+    # 의 axis 표에 inline. base body 에 axis name 이 있는지로 검증 (sub-spec 강제 X).
+    macro_body = _skill_body("engines.macro")
     for axis in dartlab.macro().get_column("axis").to_list():
-        assert f"engines.macro.{axis}" in ids
+        assert axis in macro_body, f"engines.macro base SKILL.md 의 axis 표에 {axis} 누락"
 
 
 def test_analysis_application_skills_have_correct_call_example() -> None:
@@ -327,7 +331,16 @@ def test_scan_application_skills_have_correct_call_example() -> None:
 
 
 def test_gather_application_skills_cover_public_methods() -> None:
-    ids = {item.id for item in skills.list(includeUser=False)}
+    """engines.gather method 14 종이 base SKILL.md 의 axis 표에 모두 row 로 존재.
+
+    2026-05-18 Phase B 흡수 — axis-level sub-spec 14 종 (price, flow, history, news, sector,
+    insiderTrading, majorShareholders, ownership, industryPeers, macro, collect, dividends,
+    splits, revenueConsensus) 은 base SKILL.md 의 "전체 축/메서드 목록" 표 + "axis-specific
+    회피" 표 두 곳에 inline. listing 만 standalone 유지.
+    """
+    gather_body = _skill_body("engines.gather")
+    listing_body = _skill_body("engines.gather.listing")
+    assert listing_body, "engines.gather.listing standalone 유지 (회사 listing 데이터 큐레이션)"
 
     for slug in {
         "price",
@@ -345,7 +358,7 @@ def test_gather_application_skills_cover_public_methods() -> None:
         "macro",
         "collect",
     }:
-        assert f"engines.gather.{slug}" in ids
+        assert slug in gather_body, f"engines.gather base SKILL.md 에 {slug} 누락"
 
 
 def test_skill_search_routes_to_engine_owned_application_skills() -> None:
@@ -356,7 +369,12 @@ def test_skill_search_routes_to_engine_owned_application_skills() -> None:
     assert skills.search("최근 주가지수 강세", includeUser=False)[0].skill.id == "engines.scan.krxIndexStrength"
     assert skills.search("차트 만들어줘", includeUser=False)[0].skill.id == "engines.viz.tableBackedChart"
     assert skills.search("미국 주식 분석", includeUser=False)[0].skill.id == "engines.company.usEdgarReview"
-    assert skills.search("금리 환율 매크로", includeUser=False)[0].skill.id == "engines.macro.marketReview"
+    # engines.macro.marketReview 는 Phase B 흡수 — base engines.macro 의 axis 표에 inline.
+    # search 결과 top 1 이 engines.macro (base) 또는 recipes.macro.* 중 하나면 OK.
+    macroTop = skills.search("금리 환율 매크로", includeUser=False)[0].skill.id
+    assert macroTop in {"engines.macro"} or macroTop.startswith("recipes.macro."), (
+        f"macro 검색 top 이 base engines.macro 또는 recipes.macro.* 가 아님: {macroTop}"
+    )
     assert skills.search("기업 신용 위험", includeUser=False)[0].skill.id == "engines.credit.creditRisk"
 
 

@@ -15,7 +15,7 @@ linkedSkills:
   - engines.company
   - engines.analysis.revenueForecast
   - engines.analysis.macroSensitivity
-  - engines.macro.scenario
+  - engines.macro
   - engines.analysis.valuation
 toolRefs:
   - EngineCall

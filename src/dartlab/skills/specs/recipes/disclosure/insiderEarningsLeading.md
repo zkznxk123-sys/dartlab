@@ -13,7 +13,7 @@ whenToUse:
   - cluster timing
 linkedSkills:
   - engines.company
-  - engines.gather.insiderTrading
+  - engines.gather
   - engines.quant.surprise
   - engines.analysis.predictionSignal
 toolRefs:

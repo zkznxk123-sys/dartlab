@@ -14,15 +14,6 @@ whenToUse:
   - economic six acts
 linkedSkills:
   - engines.macro
-  - engines.macro.cycle
-  - engines.macro.rates
-  - engines.macro.liquidity
-  - engines.macro.crisis
-  - engines.macro.assets
-  - engines.macro.sentiment
-  - engines.macro.forecast
-  - engines.macro.scenario
-  - engines.macro.summary
 toolRefs:
   - EngineCall
   - RunPython
@@ -114,7 +105,7 @@ emit_result(table=rows, values=values, date="latest")
 
 `requiredEvidence: skillRef + tableRef + dateRef + valueRef + executionRef` 5 종 모두 답변에 명시.
 
-- **skillRef**: `engines.macro.summary` (1 막 진입) + `engines.macro.{cycle,rates,liquidity,crisis,assets,sentiment,forecast}` 7 축 각각. 답변에 "skill: engines.macro.cycle 의 phase" 식 인용.
+- **skillRef**: `engines.macro` (1 막 진입) + 7 축 (cycle, rates, liquidity, crisis, assets, sentiment, forecast) 각각 `dartlab.macro("{axis}")` 호출. 답변에 "skill: engines.macro 의 phase" 식 인용.
 - **sourceRef**: 각 axis 의 reference 원자료 (예: 한국은행 ECOS / 국가통계청 / Fed FRED). axis result 의 `sourceUrl`·`provider` 명시.
 - **tableRef**: 6 막별 (act / axis / 핵심값 / 방향) 4 컬럼 표 한 개. 답변 본체 시각화.
 - **dateRef**: 각 axis 의 `asOf` (최신 관측일) — quarterly 기준 정합 권장.

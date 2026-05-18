@@ -13,7 +13,7 @@ whenToUse:
   - 회사 분석 종합 보고서
   - 종목 깊이 분석
 linkedSkills:
-  - engines.macro.marketReview
+  - engines.macro
   - engines.analysis.peerComparison
   - engines.scan.profitability
   - engines.company.researchStarter
@@ -119,7 +119,7 @@ valuation = c.analysis("valuation")
 
 emit_result(
     table=[
-        {"step": "macro", "skill": "engines.macro.marketReview", "result": "read before company conclusion"},
+        {"step": "macro", "skill": "engines.macro", "result": "read before company conclusion"},
         {"step": "company", "skill": "engines.company.researchStarter", "result": compact(bs)},
         {"step": "profitability", "skill": "engines.analysis.profitability", "result": compact(profitability)},
         {"step": "quality", "skill": "engines.analysis.earningsQuality", "result": compact(quality)},
@@ -150,7 +150,7 @@ emit_result(
 
 ## 연계 절차
 
-1. engines.macro.marketReview — 매크로 환경 (금리·환율·경기 사이클)
+1. engines.macro — 매크로 환경 (금리·환율·경기 사이클)
 2. engines.scan.profitability — peer 후보 5~10 (수익성 축)
 3. engines.company.researchStarter — 회사 진입 + show("BS") + show("IS")
 4. engines.analysis.profitability — ROE DuPont 분해 (마진 × 회전 × 레버리지)
