@@ -239,6 +239,15 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
         return (roman_order.get(prefix, 99), chapter)
 
     sorted_chapters = sorted(chapter_order, key=_chapterSortKey)
+    # DART 표준 — chapter 안 topics 자연 순서대로 1, 2, 3... 번호. 이미 "N." 접두 있으면
+    # 중복 안 박음 (idempotent).
+    for chapter in sorted_chapters:
+        topics = chapter_map[chapter]
+        for idx, t in enumerate(topics, 1):
+            current = t.label or t.topic
+            if _re.match(r"^\d+\.\s", current):
+                continue
+            t.label = f"{idx}. {current}"
     chapters = [TocChapter(chapter=chapter, topics=chapter_map[chapter]) for chapter in sorted_chapters]
     return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=chapters).model_dump()
 
