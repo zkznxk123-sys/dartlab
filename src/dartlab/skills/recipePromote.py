@@ -30,13 +30,9 @@ RECIPE_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes"
 # 프로젝트 모듈 import 를 위해 src 를 path 추가.
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from dartlab.ai.recipes import (  # noqa: E402
-    computeScorecard,
-    detectDrift,
-    loadRuns,
-)
-
 # ── frontmatter 조작 (recipe_schema_migrate.py 와 같은 surgical line-level) ──
+# `dartlab.ai.recipes` import 는 양방향 cycle (ai <-> skills) 회피를 위해
+# 각 command 함수 본문 안에서 lazy import 한다.
 
 
 _FRONTMATTER_DELIM = "---"
@@ -151,6 +147,8 @@ def _skillIdForPath(path: Path) -> str:
 
 def cmdList(args: argparse.Namespace) -> int:
     """recipe 목록과 status·run·passRate 표 출력."""
+    from dartlab.ai.recipes import loadRuns
+
     if not RECIPE_DIR.is_dir():
         print(f"recipe 디렉터리 없음: {RECIPE_DIR}", file=sys.stderr)
         return 1
@@ -184,6 +182,8 @@ def cmdList(args: argparse.Namespace) -> int:
 
 def cmdInspect(args: argparse.Namespace) -> int:
     """단일 recipe 의 scorecard·drift·최근 run 표시."""
+    from dartlab.ai.recipes import computeScorecard, detectDrift, loadRuns
+
     skill_id = args.skillId
     path = _pathFor(skill_id)
     if not path.exists():
@@ -243,6 +243,8 @@ def cmdInspect(args: argparse.Namespace) -> int:
 
 def cmdPromote(args: argparse.Namespace) -> int:
     """status 전이 — tested→verified 는 scorecard 게이트, 그 외는 --force."""
+    from dartlab.ai.recipes import computeScorecard, loadRuns
+
     skill_id = args.skillId
     path = _pathFor(skill_id)
     if not path.exists():
