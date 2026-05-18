@@ -920,12 +920,21 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
                     "_repPeriod": periodKey,
                 }
 
-        # 전체 빌드만 주기적 GC — 부분 빌드는 데이터가 적어 불필요
-        if topics is None and _pIdx % 10 == 9:
+        # Phase C-1 (minimal) — 명시적 회수: projected/expanded 의 큰 Python list 는
+        # next iteration 시작 전에 ref 끊기 (Python heap reclaim 만, Rust heap 무관).
+        # `projected` 가 local var 라 다음 iteration 의 새 할당으로 자연 GC 되지만
+        # 거대 list 의 경우 ref 가 다음 iteration 시작 전 살아있을 수 있다.
+        projected = None  # noqa: F841 — 명시적 ref drop
+        # 전체 빌드만 주기적 GC — 부분 빌드는 데이터가 적어 불필요.
+        # Phase C-1 빈도 강화: 10 period → 5 period 마다 (Python dict 누적 회수 가속).
+        if topics is None and _pIdx % 5 == 4:
             gc.collect()
 
-    # 메모리 해제: periodRows는 pop으로 이미 소진, 빈 dict 정리
+    # 메모리 해제: periodRows 는 pop 으로 이미 소진, 빈 dict 정리
     del periodRows
+    # Phase C-1 — 본격 DuckDB PIVOT 처방은 별도 트랙 (200 LOC 치환 + sqlBuild.py 신규).
+    # 본 단계는 *Python heap 회수 가속 만* — Rust heap 무관, peak 감소 효과 제한적.
+    gc.collect()
 
     if not validPeriods or not topicMap:
         return None
