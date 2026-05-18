@@ -345,12 +345,39 @@ function ViewerTab() {
 	const canOlder = windowEndIdx >= 0 && windowEndIdx + 1 < allPeriods.length;
 	const canNewer = windowEndIdx > 0;
 
-	// 본문 sections — latest fetch 의 sections (heading 깊이 계산용).
+	// 본문 sections — latest fetch 의 sections 가 SSOT (행 정의 + 헤딩).
 	const ownLeafCore = _stripNumbering(latestViewer?.topicLabel || '');
 	const allSections = latestViewer?.textDocument?.sections ?? [];
 	const sectionsOwn = _filterToOwnLeaf(allSections, ownLeafCore);
+	// 윈도우 3 period 중 한 곳이라도 timeline 에 포함되는 section 만 행으로 노출.
+	const sections = useMemo(() => {
+		if (windowPeriods.length === 0) return sectionsOwn;
+		const ws = new Set(windowPeriods);
+		return sectionsOwn.filter((s) =>
+			(s.timeline ?? []).some((t) => ws.has(_periodLabel(t?.period))),
+		);
+	}, [sectionsOwn, windowPeriods]);
 
-	// period → dartUrl.
+	// section.id → period → body. timeline 게이트로 stale 누설 차단.
+	const bodyByIdByPeriod = useMemo(() => {
+		const map: Record<string, Record<string, string | null>> = {};
+		for (let i = 0; i < windowPeriods.length; i++) {
+			const p = windowPeriods[i];
+			const v = windowViewers[i];
+			if (!p || !v) continue;
+			const secs = v.textDocument?.sections ?? [];
+			for (const s of secs) {
+				const inPeriod = (s.timeline ?? []).some(
+					(t) => _periodLabel(t?.period) === p,
+				);
+				if (!inPeriod) continue;
+				if (!map[s.id]) map[s.id] = {};
+				map[s.id][p] = s.latest?.body ?? null;
+			}
+		}
+		return map;
+	}, [windowPeriods, windowViewers]);
+
 	const dartUrlByPeriod = useMemo(() => {
 		const m: Record<string, string | null> = {};
 		for (let i = 0; i < windowPeriods.length; i++) {
@@ -363,14 +390,14 @@ function ViewerTab() {
 
 	const minLevel = useMemo(() => {
 		let m = Number.POSITIVE_INFINITY;
-		for (const s of sectionsOwn) {
+		for (const s of sections) {
 			for (const h of s.headingPath ?? []) {
 				const lvl = typeof h?.level === 'number' ? h.level : 0;
 				if (lvl > 0 && lvl < m) m = lvl;
 			}
 		}
 		return Number.isFinite(m) ? m : 1;
-	}, [sectionsOwn]);
+	}, [sections]);
 
 	// 헤더 시간축 — 전체 periods 의 update 상태 마커. timeline 데이터에서 status 계산.
 	// 단순화 — sections 의 timeline 합쳐 각 period 의 변경 카운트.
@@ -451,7 +478,7 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="w-full px-2 py-4">
+					<div className="py-4">
 						<header className="mb-6 border-b pb-4">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
@@ -520,40 +547,24 @@ function ViewerTab() {
 							</div>
 						)}
 
-						{/* 본문 — 각 column 이 그 period 의 실제 보고서 sections 만 위아래로 독립 렌더.
-						    row 정렬 폐기 — 2026Q1 이 "기재하지 않습니다" 1 줄이면 그 컬럼만 1 줄. */}
-						<div
-							className="grid gap-3"
-							style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
-						>
-							{windowPeriods.map((p, i) => {
-								const v = windowViewers[i];
-								const periodSecs = (v?.textDocument?.sections ?? []).filter((s) => {
-									if (!(s.timeline ?? []).some((t) => _periodLabel(t?.period) === p)) return false;
-									// own-leaf 필터도 적용 — companyOverview 류 cross-contamination 차단.
-									if (!ownLeafCore) return true;
-									const path = s.headingPath ?? [];
-									let foundRoot: string | null = null;
-									for (const h of path) {
-										const txt = typeof h === 'string' ? (h as string) : (h?.text || '');
-										const core = _stripNumbering(txt);
-										if (core && KNOWN_LEAF_ROOTS.has(core)) foundRoot = core;
-									}
-									return foundRoot === null || foundRoot === ownLeafCore;
-								});
-								return (
-									<div key={p} className="min-w-0 space-y-5">
-										{periodSecs.length === 0 ? (
-											<p className="italic text-muted-foreground/50 text-[13px]">[본문 없음]</p>
-										) : (
-											periodSecs.map((s) => (
-												<PeriodSection key={s.id} section={s} minLevel={minLevel} />
-											))
-										)}
-									</div>
-								);
-							})}
-						</div>
+						{/* 본문 — dartlab section.id 단위 row, 3 column 셀. heading 은 row 헤더로 1 회 */}
+						{sections.length === 0 ? (
+							<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
+								본문 데이터가 없습니다.
+							</div>
+						) : (
+							<div className="space-y-8">
+								{sections.map((s) => (
+									<SectionRow
+										key={s.id}
+										section={s}
+										windowPeriods={windowPeriods}
+										bodyByPeriod={bodyByIdByPeriod[s.id] || {}}
+										minLevel={minLevel}
+									/>
+								))}
+							</div>
+						)}
 					</div>
 				)}
 			</main>
@@ -646,33 +657,46 @@ function TimelineRibbon({
 	);
 }
 
-interface PeriodSectionProps {
+interface SectionRowProps {
 	section: ViewerSection;
+	windowPeriods: string[];
+	bodyByPeriod: Record<string, string | null>;
 	minLevel: number;
 }
 
-function PeriodSection({ section, minLevel }: PeriodSectionProps) {
+function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionRowProps) {
 	const title = _sectionTitle(section);
 	const { tag: HeadingTag, cls: headingCls } = title
 		? _headingStyle(title.level || minLevel, minLevel)
 		: { tag: 'h3' as const, cls: '' };
-	const body = section.latest?.body ?? '';
-	const paragraphs = _bodyParagraphs(body);
 	return (
-		<section className="min-w-0 scroll-mt-6" id={`sec-${section.id}`}>
-			{title && <HeadingTag className={cn(headingCls, 'mb-1.5')}>{title.text}</HeadingTag>}
-			<div className="text-[13px] leading-6 break-words">
-				{paragraphs.length > 0 ? (
-					<div className="space-y-2 text-foreground/90">
-						{paragraphs.map((para, i) => (
-							<p key={i} className="whitespace-pre-wrap">
-								{para}
-							</p>
-						))}
-					</div>
-				) : (
-					<p className="italic text-muted-foreground/50">[본문 기재 없음]</p>
-				)}
+		<section className="scroll-mt-6" id={`sec-${section.id}`}>
+			{title && <HeadingTag className={cn(headingCls, 'mb-2')}>{title.text}</HeadingTag>}
+			<div
+				className="grid gap-3"
+				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, minmax(0, 1fr))` }}
+			>
+				{windowPeriods.map((p) => {
+					const body = bodyByPeriod[p];
+					const paragraphs = _bodyParagraphs(body);
+					return (
+						<div key={p} className="min-w-0 text-[13px] leading-6 break-words">
+							{paragraphs.length > 0 ? (
+								<div className="space-y-2 text-foreground/90">
+									{paragraphs.map((para, i) => (
+										<p key={i} className="whitespace-pre-wrap">
+											{para}
+										</p>
+									))}
+								</div>
+							) : body !== undefined ? (
+								<p className="italic text-muted-foreground/50">[본문 없음]</p>
+							) : (
+								<p className="italic text-muted-foreground/30">—</p>
+							)}
+						</div>
+					);
+				})}
 			</div>
 		</section>
 	);
