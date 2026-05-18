@@ -94,38 +94,25 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
 
     validPeriods: list[str] = []
     latestAnnualRows: list[dict[str, object]] | None = None
-    # streaming vstack — 매 period DF 즉시 누적. schema 명시로 from_dicts
-    # 의 infer 단계 임시 buffer 회피.
+    # streaming vstack — 매 period DataFrame 즉시 누적. _reportRowsToTopicRows
+    # 가 이미 polars DataFrame 반환 (이전 list[dict] 51167 누적 → 9 컬럼
+    # list + 단일 polars 변환으로 -163MB Python heap).
     periodRowsDf: pl.DataFrame | None = None
-    _ROW_SCHEMA = {
-        "chapter": pl.Utf8,
-        "topic": pl.Utf8,
-        "blockType": pl.Utf8,
-        "blockOrder": pl.Int64,
-        "sourceBlockOrder": pl.Int64,
-        "text": pl.Utf8,
-        "majorNum": pl.Int64,
-        "orderSeq": pl.Int64,
-        "sourceTopic": pl.Utf8,
-    }
 
     for periodKey, reportKind, ccol, subset in iterPeriodSubsets(stockCode):
         validPeriods.append(periodKey)
-        topicRows = _reportRowsToTopicRows(subset, ccol)
+        topicDf = _reportRowsToTopicRows(subset, ccol)
         if reportKind == "annual" and latestAnnualRows is None:
-            latestAnnualRows = topicRows
-        if topicRows:
-            df = pl.from_dicts(topicRows, schema=_ROW_SCHEMA).with_columns(
-                pl.lit(periodKey).alias("_periodKey")
-            )
+            # chapterTeacherTopics 가 list[dict] 가정 — 첫 annual 만 변환 (작음)
+            latestAnnualRows = topicDf.to_dicts() if topicDf.height > 0 else []
+        if topicDf.height > 0:
+            df = topicDf.with_columns(pl.lit(periodKey).alias("_periodKey"))
             if periodRowsDf is None:
                 periodRowsDf = df
             else:
                 periodRowsDf = periodRowsDf.vstack(df)
             df = None  # noqa: F841
-        # topicRows 참조 — latestAnnualRows 만 보존, 나머지 자연 release
-        if reportKind != "annual" or latestAnnualRows is not topicRows:
-            topicRows = None  # noqa: F841 — 명시적 ref drop
+        topicDf = None  # noqa: F841 — 명시적 ref drop
 
     teacherTopics = chapterTeacherTopics(latestAnnualRows or [])
     latestAnnualRows = None  # noqa: F841
@@ -910,18 +897,45 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     return result
 
 
+_REPORT_ROW_SCHEMA: dict[str, pl.DataType] = {
+    "chapter": pl.Utf8,
+    "topic": pl.Utf8,
+    "blockType": pl.Utf8,
+    "blockOrder": pl.Int64,
+    "sourceBlockOrder": pl.Int64,
+    "text": pl.Utf8,
+    "majorNum": pl.Int64,
+    "orderSeq": pl.Int64,
+    "sourceTopic": pl.Utf8,
+}
+
+
 def _reportRowsToTopicRows(
     subset: pl.DataFrame,
     contentCol: str,
-) -> list[dict[str, object]]:
-    emitted: list[dict[str, object]] = []
+) -> pl.DataFrame:
+    """row 별 dict 누적 → 9 컬럼 list 누적 + polars DataFrame 반환.
+
+    이전 list[dict] 누적은 51167 dict × ~3KB = ~163MB Python heap 의 최대
+    leak source. 9 컬럼 list 누적 + 한 번 polars 변환으로 Python heap 회피.
+    """
+    chapters: list[str] = []
+    topics: list[str] = []
+    blockTypes: list[str] = []
+    blockOrders: list[int] = []
+    sourceBlockOrders: list[int] = []
+    texts: list[str] = []
+    majorNums: list[int] = []
+    orderSeqs: list[int] = []
+    sourceTopics: list[str] = []
+
     topicBlockCounts: dict[tuple[str, str], int] = {}
     currentMajorNum: int | None = None
     idx = 0
     # 장 제목 행은 보류했다가, 소항목이 없는 단독 장이면 등록한다.
     pendingChapter: dict[str, object] | None = None
     if subset.is_empty():
-        return emitted
+        return pl.DataFrame(schema=_REPORT_ROW_SCHEMA)
 
     cols = subset.columns
     titleIdx = cols.index("section_title")
@@ -932,19 +946,15 @@ def _reportRowsToTopicRows(
         topicKey = (ch, tp)
         nextBlockOrder = topicBlockCounts.get(topicKey, 0)
         for blockType, blockText in _splitContentBlocks(content):
-            emitted.append(
-                {
-                    "chapter": ch,
-                    "topic": tp,
-                    "blockType": blockType,
-                    "blockOrder": nextBlockOrder,
-                    "sourceBlockOrder": nextBlockOrder,
-                    "text": blockText,
-                    "majorNum": majorNum,
-                    "orderSeq": idx,
-                    "sourceTopic": rawT,
-                }
-            )
+            chapters.append(ch)
+            topics.append(tp)
+            blockTypes.append(blockType)
+            blockOrders.append(nextBlockOrder)
+            sourceBlockOrders.append(nextBlockOrder)
+            texts.append(blockText)
+            majorNums.append(majorNum)
+            orderSeqs.append(idx)
+            sourceTopics.append(rawT)
             nextBlockOrder += 1
             idx += 1
         topicBlockCounts[topicKey] = nextBlockOrder
@@ -1004,7 +1014,20 @@ def _reportRowsToTopicRows(
     # 마지막 장 처리
     _flushPending()
 
-    return emitted
+    return pl.DataFrame(
+        {
+            "chapter": chapters,
+            "topic": topics,
+            "blockType": blockTypes,
+            "blockOrder": blockOrders,
+            "sourceBlockOrder": sourceBlockOrders,
+            "text": texts,
+            "majorNum": majorNums,
+            "orderSeq": orderSeqs,
+            "sourceTopic": sourceTopics,
+        },
+        schema=_REPORT_ROW_SCHEMA,
+    )
 
 
 _NOTES_TOPICS = frozenset({"financialNotes", "consolidatedNotes"})

@@ -120,10 +120,11 @@ def test_subsets_build_peak_under_30mb() -> None:
     assert delta < 30, f"41x subsets peak +{delta:.0f}MB ≥ 30MB — polars op 회귀 의심"
 
 
-def test_report_rows_dict_accumulation_under_250mb() -> None:
-    """41x _reportRowsToTopicRows 결과 dict 51167 누적 — peak < 250MB.
+def test_report_rows_polars_accumulation_under_200mb() -> None:
+    """41x _reportRowsToTopicRows 결과 polars DataFrame 51167 row 누적 — peak < 200MB.
 
-    005380 baseline: +163MB (51167 dict × ~3.2KB). 최대 source. 회귀 한계 250MB.
+    이전 list[dict] 51167 누적 +163MB → polars DataFrame 변환 후 +118MB.
+    9 컬럼 list 누적 → 단일 polars 변환. 회귀 한계 200MB (variance 마진).
     """
     if not _hasDocs(_stockCode()):
         pytest.skip("docs parquet 부재")
@@ -139,10 +140,10 @@ def test_report_rows_dict_accumulation_under_250mb() -> None:
         accumulated[(periodKey, reportKind)] = _reportRowsToTopicRows(subset, ccol)
     p1 = _peakMb()
     delta = p1 - p0
-    totalDicts = sum(len(v) for v in accumulated.values())
-    assert delta < 250, (
-        f"_reportRowsToTopicRows 51167 dict 누적 peak +{delta:.0f}MB ≥ 250MB — "
-        f"max source 회귀 의심 (현재 {totalDicts} dicts)"
+    totalRows = sum(d.height for d in accumulated.values())
+    assert delta < 200, (
+        f"_reportRowsToTopicRows 51167 polars row 누적 peak +{delta:.0f}MB ≥ 200MB — "
+        f"polars refactor 회귀 의심 (현재 {totalRows} rows)"
     )
 
 
