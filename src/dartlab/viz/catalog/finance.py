@@ -122,9 +122,10 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "subCategory": "credit",
         "seriesPlan": [
             # ── 자산 stack ─────────────────────────────────────
+            # v3-r6 — 영업/비영업 분류 라벨 명시 (analysis.financial.asset.calcAssetStructure 정통).
             {
                 "key": "cash",
-                "label": "현금성자산",
+                "label": "현금성 (비영업)",
                 "color": COLORS[5],
                 "intent": "neutral",
                 "unit": "원",
@@ -134,7 +135,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
             {
                 "key": "receivables",
-                "label": "매출채권",
+                "label": "매출채권 (영업운전)",
                 "color": COLORS[1],
                 "intent": "accent",
                 "unit": "원",
@@ -144,7 +145,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
             {
                 "key": "inventories",
-                "label": "재고자산",
+                "label": "재고 (영업운전)",
                 "color": COLORS[6],
                 "intent": "accent",
                 "unit": "원",
@@ -154,7 +155,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
             {
                 "key": "opAssetCore",
-                "label": "기타 영업자산",
+                "label": "유형·무형·투자 (영업고정+비영업)",
                 "color": COLORS[2],
                 "intent": "primary",
                 "unit": "원",
@@ -1227,28 +1228,21 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
 KPI 1×1 4 개 = 한 row, 자산구조 2×3 + 부채/자본 1×3 = 한 row, trend 2×2 4 개 = 두 row."""
 
 
-# v3-r6 — 재무분석 1 view (운영자 명시): 자산구조 dual-stack hero + KPI 4 + 본질 chart 9.
-# bento 2026 가이드 룰 + Anthropic data-viz skill 채택. cell 합 384 / 24 = 16 row → viewport fit.
+# v3-r6 — 재무분석 1 view (운영자 명시): 자산구조 dual-stack hero + KPI 4 + 본질 chart 4.
+# 8 카드 (polars cost 감소). 후속 PR 에서 carrier 확보 후 chart 추가.
 OVERVIEW_KEYS: list[str] = [
-    # Hero — 자산구조 dual-stack (영업+비영업 = 총자산 | 부채+자본). 회계 등식 24×6.
+    # Hero — 자산구조 dual-stack (영업+비영업 = 총자산 | 부채+자본). 회계 등식 24×8.
     "assetComposition",
     # KPI strip — 매출·영업이익·ROE·부채비율 (각 3×2, 한 행 12 col 차지)
     "kpiRevenue",
     "kpiOperatingIncome",
     "kpiRoe",
     "kpiDebtRatio",
-    # 손익·현금·자본 본질 (각 6×4 chart)
+    # 손익·자본·현금 본질 (각 6×4 chart)
     "incomeBreakdown",  # 손익구조 (매출 bar + 영업이익/순이익 line)
-    "liabilityDetail",  # 부채상세 (매입채무·기타영업부채·단기·장기차입금 stacked)
-    "equityDetail",  # 자본상세 (자본금·자본잉여금·이익잉여금·기타자본 stacked)
+    "equityDetail",  # 자본상세 (자본금·잉여금·기타자본 stacked)
     "cashflowSigned",  # 현금흐름 signed (영업/투자/재무 + 순현금증감 line)
-    # 수익성·성장 추세 (각 6×4)
     "marginTrend",  # 이익률 (gpm/opm/npm)
-    "returnTrend",  # ROE/ROA
-    "growthYoy",  # 매출/영업/순이익 YoY
-    # 안전성·유동성 (각 6×4)
-    "leverageTrend",  # D/E + D/A + 유동비율
-    "liquidityTrend",  # 유동/당좌/현금비율
 ]
 """재무분석 1 view (v3-r6) — Anthropic data-viz + bento 2026 룰 적용.
 운영자 명시: '자산구조 / 부채상세 / 자본상세 / 손익구조 + 그래프+테이블 균형 + 카드 작게 + 빈칸 0'."""

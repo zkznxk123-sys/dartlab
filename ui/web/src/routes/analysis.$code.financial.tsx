@@ -10,7 +10,12 @@ import { Loader2 } from 'lucide-react';
 import { CardShell } from '@/features/dashboard/cards/CardShell';
 import { ChartMiniTable } from '@/features/dashboard/cards/ChartMiniTable';
 import { VizChart } from '@/features/dashboard/charts/VizChart';
-import { BentoGrid } from '@/features/dashboard/layout/BentoGrid';
+import {
+	BentoGrid,
+	BENTO_GAP_PX,
+	BENTO_CARD_HEADER_PX,
+	BENTO_CARD_PAD_PX,
+} from '@/features/dashboard/layout/BentoGrid';
 import {
 	fetchCatalog,
 	fetchTabLayout,
@@ -62,12 +67,12 @@ const SUB_TITLES: Record<SubView, string> = {
 
 export const Route = createFileRoute('/analysis/$code/financial')({
 	component: FinancialTab,
-	validateSearch: (search: Record<string, unknown>): { view: SubView } => {
+	validateSearch: (search: Record<string, unknown>): { view: SubView | null } => {
+		// v3-r6 — sub view 일시 폐기. view 없으면 null → backend OVERVIEW_KEYS curated 1 view.
 		const raw = String(search.view ?? '');
+		if (!raw) return { view: null };
 		const redirected = LEGACY_REDIRECT[raw] ?? raw;
-		const view = (VALID_VIEWS as string[]).includes(redirected)
-			? (redirected as SubView)
-			: 'snowflake';
+		const view = (VALID_VIEWS as string[]).includes(redirected) ? (redirected as SubView) : null;
 		return { view };
 	},
 });
@@ -115,17 +120,19 @@ function FinancialTab() {
 		const seriesCount = spec?.series?.length ?? 0;
 		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0);
 		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-		// cellHeight === cellWidth 라 카드 실제 px = w*cellSize + (w-1)*gap.
-		// 헤더 24 + 푸터 + padding 빼고 차트 영역 채움.
-		const footerHeight = hasFooter ? 24 + Math.min(seriesCount, 12) * 16 + 16 : 0;
-		const total = p.h * cellSize + (p.h - 1) * 8;
-		const bodyHeight = Math.max(60, total - 28 - footerHeight - 4);
+		// v3-r6 — TabDashboard 와 동일 산출식 (BentoGrid 상수 SSOT).
+		// footerH = thead 20 + N rows × 20 + py 8 + border 1.
+		const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
+		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
+		const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight);
+		const kind = spec?.kind ?? p.kind;
 		return (
 			<CardShell
 				title={title}
 				help={help}
 				colSpan={p.w}
 				rowSpan={p.h}
+				kind={kind}
 				footer={footer}
 			>
 				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
@@ -144,7 +151,7 @@ function FinancialTab() {
 			)}
 
 			<div className="border-b bg-card/30 px-4 py-2 text-xs text-muted-foreground">
-				재무제표분석 / <span className="font-medium text-foreground">{SUB_TITLES[view]}</span>
+				재무제표분석 / <span className="font-medium text-foreground">{view ? SUB_TITLES[view] : '재무분석 (자산구조·손익·현금흐름·재무비율)'}</span>
 			</div>
 
 			{placed.length === 0 ? (

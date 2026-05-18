@@ -251,7 +251,15 @@ async def apiVizLayout(
     from dartlab.viz.catalog import CATALOG
     from dartlab.viz.layout import packSkyline, queryCards
 
-    cards = queryCards(tab=tab, sub=effectiveView) if effectiveView else queryCards(tab=tab)
+    if effectiveView:
+        cards = queryCards(tab=tab, sub=effectiveView)
+    elif tab == "financial":
+        # v3-r6 — view 없으면 재무분석 1 view (OVERVIEW_KEYS curated 14 카드).
+        from dartlab.viz.catalog.finance import OVERVIEW_KEYS
+
+        cards = [(k, CATALOG[k]) for k in OVERVIEW_KEYS if k in CATALOG]
+    else:
+        cards = queryCards(tab=tab)
     if not cards:
         return {
             "stockCode": stockCode,
@@ -266,10 +274,10 @@ async def apiVizLayout(
     await _prefetchCompany(stockCode)
     cardKeys = [k for k, _ in cards]
 
-    async def _one(k: str) -> dict[str, Any]:
-        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
-
-    specs = await asyncio.gather(*[_one(k) for k in cardKeys])
+    # v3-r6 — sequential build (deadlock 회피). 동시 to_thread 가 Polars GIL 잠금 → hang.
+    specs: list[dict[str, Any]] = []
+    for k in cardKeys:
+        specs.append(await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods))
     specMap = dict(zip(cardKeys, specs))
 
     # 의미 무효 카드 omit — 운영자 원칙 4. _isCardEmpty 통과 카드만 packing.

@@ -197,11 +197,11 @@ def resolveLayout(entry: CatalogEntry) -> tuple[int, int]:
     # 1~3 시리즈 = 6×4 (default, 한 행 4 카드)
     # 4~5 시리즈 = 8×4 (한 행 3 카드)
     # 6~7 시리즈 = 12×4 (한 행 2 카드, wide)
-    # 8+ 시리즈 (assetComposition 9 dual-stack 등) = 24×6 (hero 한 행 전체)
+    # 8+ 시리즈 (assetComposition 9 dual-stack 등) = 24×8 (hero, footer 9 row 수용)
     if kind == "trend":
         nSeries = len(entry.get("seriesPlan") or [])
         if nSeries >= 8:
-            return 24, 6
+            return 24, 8
         if 6 <= nSeries <= 7:
             return 12, 4
         if 4 <= nSeries <= 5:
