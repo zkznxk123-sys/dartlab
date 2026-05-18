@@ -127,6 +127,11 @@ def toRechartsSpec(
         "rowOrder",
         "colOrder",
         "tone",  # heatmap (matrix)
+        "transitions",
+        "summaryLine",  # narrativeBridge / scoreBadge
+        "grade",
+        "overallScore",
+        "dimensions",  # scoreBadge
         "layout",  # bento packing (colSpan, rowSpan)
     ):
         if extra in view:

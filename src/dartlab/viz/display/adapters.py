@@ -864,6 +864,155 @@ def buildAnomalyTopList(company: Any) -> list[dict[str, Any]]:
     return items[:6]
 
 
+_ACT_LABELS = ["1막 사업", "2막 수익", "3막 현금", "4막 안정", "5막 배분", "6막 미래"]
+
+
+def buildNarrativeBridge(company: Any) -> dict[str, Any]:
+    """Story view 6 막 전환 자연어 — `story.narrative.buildActTransitions` 5 줄 + 종합 1 줄.
+
+    Returns:
+        {transitions: [{from, to, text}, ...], summaryLine: str}.
+        engine 호출 실패하면 빈 transitions 반환 (renderer 가 placeholder 표시).
+    """
+    transitions: list[dict[str, str]] = []
+    summary = ""
+    try:
+        from dartlab.story import narrative as _narr
+
+        blockMap = getattr(company, "_blockMap", None) or {}
+        tdict = _narr.buildActTransitions(company, blockMap) or {}
+        for i in range(1, 6):
+            key = f"{i}→{i + 1}"
+            text = tdict.get(key, "")
+            if not text:
+                continue
+            transitions.append(
+                {
+                    "from": _ACT_LABELS[i - 1],
+                    "to": _ACT_LABELS[i],
+                    "text": text,
+                }
+            )
+        try:
+            threads = _narr.detectThreads(company, blockMap) or []
+            summary = _narr.buildCirculationSummary(threads) or ""
+        except (AttributeError, ValueError, TypeError):
+            summary = ""
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
+    return {"transitions": transitions, "summaryLine": summary}
+
+
+def buildSnowflakeRadar(company: Any) -> dict[str, Any]:
+    """Snowflake 5 차원 radar — Value/Future/Past/Health/Dividend 0~5 점.
+
+    `analysis.financial.intrinsic.calcSnowflake5Score` 호출. 점수 dict →
+    radar categories + 단일 polygon series.
+    """
+    try:
+        from dartlab.analysis.financial import intrinsic as _intr
+
+        scores = _intr.calcSnowflake5Score(company) or {}
+    except (ImportError, AttributeError, ValueError, TypeError):
+        scores = {}
+    dims = ["value", "future", "past", "health", "dividend"]
+    labels = {"value": "Value", "future": "Future", "past": "Past", "health": "Health", "dividend": "Dividend"}
+    categories = [labels[d] for d in dims]
+    data = [float(scores.get(d, 0) or 0) for d in dims]
+    return {
+        "categories": categories,
+        "series": [
+            {
+                "key": "snowflake",
+                "label": "Snowflake 5",
+                "data": data,
+                "unit": "점",
+                "intent": "primary",
+                "type": "line",
+            }
+        ],
+    }
+
+
+_GRADE_BUCKETS = [
+    (90, "A+"),
+    (80, "A"),
+    (70, "B+"),
+    (60, "B"),
+    (50, "C+"),
+    (40, "C"),
+    (0, "D"),
+]
+
+
+def buildSnowflakeKpi(company: Any, tilePlans: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Snowflake 단일 차원 KPI — tilePlan.dim 별 0~5 점.
+
+    intrinsic.calcSnowflake5Score 한 번 호출 + 각 tilePlan 의 dim 값 추출.
+    """
+    try:
+        from dartlab.analysis.financial import intrinsic as _intr
+
+        scores = _intr.calcSnowflake5Score(company) or {}
+    except (ImportError, AttributeError, ValueError, TypeError):
+        scores = {}
+    tiles: list[dict[str, Any]] = []
+    for plan in tilePlans or []:
+        dim = plan.get("dim", "")
+        val = scores.get(dim)
+        if isinstance(val, (int, float)):
+            value: float | None = float(val)
+        else:
+            value = None
+        tiles.append(
+            {
+                "label": plan.get("label", dim),
+                "value": value,
+                "prev": None,
+                "unit": plan.get("unit", "점"),
+                "intent": plan.get("intent", "primary"),
+                "sparkline": [],
+            }
+        )
+    return tiles
+
+
+def buildScoreBadge(company: Any) -> dict[str, Any]:
+    """Snowflake 종합 평점 카드 — 5 차원 점수 × 20 평균 → grade + 한 줄 서사."""
+    try:
+        from dartlab.analysis.financial import intrinsic as _intr
+
+        scores = _intr.calcSnowflake5Score(company) or {}
+    except (ImportError, AttributeError, ValueError, TypeError):
+        scores = {}
+    dims = [
+        ("value", "Value"),
+        ("future", "Future"),
+        ("past", "Past"),
+        ("health", "Health"),
+        ("dividend", "Dividend"),
+    ]
+    dimList = [{"key": k, "label": label, "score": float(scores.get(k, 0) or 0)} for k, label in dims]
+    vals = [d["score"] for d in dimList if isinstance(d["score"], (int, float))]
+    if vals:
+        overall = sum(vals) / len(vals) * 20.0
+    else:
+        overall = 0.0
+    grade = "D"
+    for cut, g in _GRADE_BUCKETS:
+        if overall >= cut:
+            grade = g
+            break
+    parts = " · ".join(f"{d['label']} {d['score']:.1f}/5" for d in dimList)
+    summaryLine = f"{parts} — 종합 {overall:.0f}점 ({grade})"
+    return {
+        "grade": grade,
+        "overallScore": round(overall, 1),
+        "dimensions": dimList,
+        "summaryLine": summaryLine,
+    }
+
+
 __all__ = [
     "LIFE_CYCLE_PHASES",
     "buildBeneishGauge",
@@ -875,7 +1024,11 @@ __all__ = [
     "buildDistressGauge",
     "buildKpiTilesFromNorm",
     "buildLifeCyclePhase",
+    "buildNarrativeBridge",
     "buildPeerComparison",
     "buildPeerScatter",
+    "buildScoreBadge",
+    "buildSnowflakeKpi",
+    "buildSnowflakeRadar",
     "buildTopListFromFlags",
 ]

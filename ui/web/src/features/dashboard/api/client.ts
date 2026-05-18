@@ -121,7 +121,14 @@ export interface RechartsSpec {
 	rowOrder?: string[];
 	colOrder?: string[];
 	tone?: 'sequential' | 'diverging';
-	// bento layout — entry.layout 이 pass-through 됨 (12-col 기준, colSpan/rowSpan 1~12).
+	// narrativeBridge — Story view 6 막 인과 자연어
+	transitions?: Array<{ from: string; to: string; text: string }>;
+	summaryLine?: string;
+	// scoreBadge — Snowflake 5 차원 종합 평점
+	grade?: string;
+	overallScore?: number | null;
+	dimensions?: Array<{ key: string; label: string; score: number }>;
+	// bento layout — entry.layout 이 pass-through 됨 (24-col 기준, colSpan/rowSpan 1~24).
 	layout?: LayoutSpec;
 }
 

@@ -39,6 +39,8 @@ ViewKind = Literal[
     "diffView",  # 전년대비 변화 KPI (값+%+화살표)
     "topList",  # 상위/하위 N 항목 list + inline bar
     "kpiTile",  # 큰 숫자 + sparkline + delta
+    "narrativeBridge",  # 6 막 전환 자연어 5 줄 (1→2 / 2→3 ... 5→6)
+    "scoreBadge",  # 5 차원 종합 점수 + 등급 + 한 줄 서사
 ]
 
 SeriesAxis = Literal["left", "right"]
@@ -333,6 +335,13 @@ class View(TypedDict, total=False):
     rowOrder: list[str]
     colOrder: list[str]
     tone: Literal["sequential", "diverging"]
+    # narrativeBridge — 6 막 전환 자연어 (story view 의 인과 흐름)
+    transitions: list[dict[str, str]]  # [{from: "1막", to: "2막", text: "..."}, ...]
+    summaryLine: str  # 종합 한 줄
+    # scoreBadge — Snowflake 5 차원 종합
+    grade: str  # "A+" / "B" 등
+    overallScore: float | None  # 0~100
+    dimensions: list[dict[str, Any]]  # [{key, label, score(0~5), note}]
     # bento layout pass-through (renderer 가 grid 배치에 사용).
     layout: LayoutSpec
 

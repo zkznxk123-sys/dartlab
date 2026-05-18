@@ -34,7 +34,9 @@ import { makePeriodFormatter } from './period';
 import { ComparisonTable } from '../cards/ComparisonTable';
 import { DiffView } from '../cards/DiffView';
 import { KpiTile } from '../cards/KpiTile';
+import { NarrativeBridge } from '../cards/NarrativeBridge';
 import { PhaseIndicator } from '../cards/PhaseIndicator';
+import { ScoreBadge } from '../cards/ScoreBadge';
 import { TopList } from '../cards/TopList';
 import { GaugeChart } from './GaugeChart';
 import { HeatmapChart } from './HeatmapChart';
@@ -409,6 +411,29 @@ export function VizChart({ spec: rawSpec, height = 280, size }: Props) {
 					colOrder={spec.colOrder}
 					tone={spec.tone}
 					height={height}
+				/>
+			);
+		}
+		case 'radar': {
+			if (!spec.series?.length || !spec.categories?.length)
+				return <ErrorState title={spec.title} error="레이더 데이터 없음" />;
+			return <RadarBlock spec={spec} height={height} />;
+		}
+		case 'narrativeBridge': {
+			return (
+				<NarrativeBridge
+					transitions={spec.transitions ?? []}
+					summaryLine={spec.summaryLine}
+				/>
+			);
+		}
+		case 'scoreBadge': {
+			return (
+				<ScoreBadge
+					grade={spec.grade}
+					overallScore={spec.overallScore}
+					dimensions={spec.dimensions}
+					summaryLine={spec.summaryLine}
 				/>
 			);
 		}

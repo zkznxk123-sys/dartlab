@@ -251,6 +251,8 @@ _NON_TREND_KINDS = frozenset(
         "matrix",
         "radar",
         "waterfall",
+        "narrativeBridge",
+        "scoreBadge",
     }
 )
 
@@ -344,6 +346,17 @@ def _buildKindSpecView(
         result = adapters.buildDuPontRadar(norm, periods)
         base_view["categories"] = result.get("categories", [])
         base_view["series"] = result.get("series", [])
+    elif adapter_name == "narrativeBridge":
+        base_view.update(adapters.buildNarrativeBridge(company))
+    elif adapter_name == "snowflakeRadar":
+        result = adapters.buildSnowflakeRadar(company)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "snowflakeKpi":
+        tilePlans = spec.get("tilePlans", [])
+        base_view["tiles"] = adapters.buildSnowflakeKpi(company, tilePlans)
+    elif adapter_name == "scoreBadge":
+        base_view.update(adapters.buildScoreBadge(company))
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass

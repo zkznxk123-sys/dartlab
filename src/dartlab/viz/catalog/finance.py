@@ -1400,8 +1400,125 @@ _STORY_CARDS: dict[str, CatalogEntry] = {
         "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "1막 매출 + 2막 영업이익 동시 — 서사의 큰 줄기.",
     },
+    # 매출 시계열 옆 (16 col 공간) — 현금·자본 시계열 → 3~5막 검증.
+    "storyCashEquityTrend": {
+        "kind": "trend",
+        "title": "현금·자본 시계열 (3~5막 검증)",
+        "topic": "CF",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [
+            {
+                "key": "cfOperating",
+                "label": "영업CF",
+                "color": COLORS[3],
+                "intent": "primary",
+                "unit": "원",
+                "type": "bar",
+                "account": "cfOperating",
+            },
+            {
+                "key": "fcf",
+                "label": "FCF",
+                "color": COLORS[2],
+                "intent": "positive",
+                "unit": "원",
+                "type": "line",
+                "compose": {"cfOperating": 1, "capex": -1},
+            },
+            {
+                "key": "equity",
+                "label": "자기자본",
+                "color": COLORS[1],
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "right",
+                "account": "equity",
+            },
+        ],
+        "options": {"unit": "원"},
+        "layout": {"colSpan": 8, "rowSpan": 8},
+        "help": "3막 현금(영업CF) → FCF → 5막 배분 가능 자본(자기자본) 누적. 매출 옆에서 인과 검증.",
+    },
+    # 6 막 인과 자연어 wide (8 번 카드 — Story view 의 결론).
+    "narrativeBridge": {
+        "kind": "narrativeBridge",
+        "title": "6 막 인과 — 서사 흐름",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "narrativeBridge"},
+        "options": {},
+        "layout": {"colSpan": 24, "rowSpan": 4},
+        "help": "1막→2막→3막→4막→5막→6막 5 단계 전환의 자연어 인과. 운영자가 6 KPI 가 *어떻게 연결되는지* 한눈에.",
+    },
 }
 FINANCE_CARDS.update(_STORY_CARDS)
+
+
+# ──────────────────────────────────────────────────────────────────────
+# Snowflake view (Simply Wall St 5 차원 종합) — radar hero + 5 KPI + 종합 badge.
+# 5 차원: Value · Future · Past · Health · Dividend (각 0~5 점).
+# ──────────────────────────────────────────────────────────────────────
+
+
+def _snowflakeKpi(title: str, label: str, dimKey: str, helpText: str) -> CatalogEntry:
+    """Snowflake 5 차원 단일 점수 카드 — snowflakeKpi adapter 가 calcSnowflake5Score 의 dim 값 추출."""
+    return {
+        "kind": "kpiTile",
+        "title": title,
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "snowflake",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "snowflakeKpi",
+            "tilePlans": [{"label": label, "dim": dimKey, "unit": "점", "intent": "primary"}],
+        },
+        "options": {"unit": "점", "snowflakeDim": dimKey, "maxValue": 5},
+        "layout": {"colSpan": 4, "rowSpan": 2},
+        "help": helpText,
+    }
+
+
+_SNOWFLAKE_CARDS: dict[str, CatalogEntry] = {
+    "snowflakeRadar": {
+        "kind": "radar",
+        "title": "Snowflake 5 차원",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "snowflake",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "snowflakeRadar"},
+        "options": {"unit": "점", "maxValue": 5},
+        "layout": {"colSpan": 12, "rowSpan": 12},
+        "help": "Value/Future/Past/Health/Dividend 5 차원 종합. 한 그림 — 전 학파 합성.",
+    },
+    "snowflakeValueScore": _snowflakeKpi(
+        "Value", "Value 5", "value", "PER 기반 가치 점수 (낮을수록 좋음, 5~30 range)."
+    ),
+    "snowflakeFutureScore": _snowflakeKpi("Future", "Future 5", "future", "매출 CAGR 5y — 미래 성장 점수 (-10%~+30%)."),
+    "snowflakePastScore": _snowflakeKpi("Past", "Past 5", "past", "ROE — 과거 수익성 점수 (0~30%)."),
+    "snowflakeHealthScore": _snowflakeKpi("Health", "Health 5", "health", "이자보상배율 — 재무 건전성 점수 (0~20 배)."),
+    "snowflakeDividendScore": _snowflakeKpi(
+        "Dividend", "Dividend 5", "dividend", "배당수익률 — 배당 매력 점수 (0~6%)."
+    ),
+    "snowflakeScoreBadge": {
+        "kind": "scoreBadge",
+        "title": "종합 평점",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "snowflake",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "scoreBadge"},
+        "options": {},
+        "layout": {"colSpan": 24, "rowSpan": 3},
+        "help": "5 차원 × 20 평균 0~100 → A+/A/B+/B/C+/C/D 등급. 한 줄 서사.",
+    },
+}
+FINANCE_CARDS.update(_SNOWFLAKE_CARDS)
 
 
 __all__ = ["FINANCE_CARDS", "FINANCE_DASHBOARD_KEYS", "OVERVIEW_KEYS"]
