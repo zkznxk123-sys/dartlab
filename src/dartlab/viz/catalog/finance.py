@@ -507,7 +507,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "성장성",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "dupont",
+        "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "revenueYoy",
@@ -825,7 +825,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "매출",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "dupont",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -840,7 +840,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "영업이익",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "dupont",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -855,7 +855,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "순이익",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "dupont",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -870,7 +870,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "잉여현금흐름",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "dupont",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -1045,7 +1045,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부실 위험 (Altman Z')",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "credit",
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressGauge"},
         "options": {},
@@ -1104,7 +1104,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부실 위험 분해 (Altman Z' 5 인자)",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "credit",
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressDecomp"},
         "options": {},
@@ -1116,7 +1116,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "변동 큰 지표",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "flagsTopList",
@@ -1135,7 +1135,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "생애주기 단계",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},

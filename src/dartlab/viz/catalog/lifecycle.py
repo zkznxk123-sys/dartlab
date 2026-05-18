@@ -41,7 +41,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "title": "생애주기 단계",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
@@ -130,7 +130,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "title": "자본 배치 추이",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "capex",

@@ -77,7 +77,7 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "title": "자본배분 (시간축)",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {"adapter": "capitalAllocationBars"},
         "options": {"stacked": True, "unit": "원"},

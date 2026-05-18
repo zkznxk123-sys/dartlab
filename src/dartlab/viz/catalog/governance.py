@@ -67,7 +67,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부실 위험 (Altman Z')",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "credit",
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressGauge"},
         "options": {},
@@ -79,7 +79,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "이상 신호",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "flagsTopList",
@@ -95,7 +95,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "이익 품질",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "snowflake",
+        "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "cfNi",
