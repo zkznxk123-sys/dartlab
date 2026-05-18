@@ -173,6 +173,15 @@ repayment = c.credit("채무상환")
 
 **회귀 가드** — 7 축 점수가 이미 `dcrBadge.axes` 에 있는데 `EngineCall("credit")` 재호출하면 axis 가이드 metadata (axis · label · description · group) 만 반환되어 "데이터 부족" 환각 (2026-05-17 OAuth P5 probe 재현). 약점 분해는 본문의 [기본 실행 순서](#기본-실행-순서) 가 정공.
 
+### 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+신용도·약점 질문에서 다음 4 룰은 강행 — 위반 시 답변 품질 65 점 이하 회귀.
+
+1. **단일 종목 신용 질문은 `Company.show("IS")` 1 회 + `data.dcrBadge.axes` 인용 강제**. `EngineCall("credit")` 7 회 분해 금지. `dcrBadge` 가 이미 7 축 `{name, weight, score}` 완전 형태로 부착.
+2. **본문 안 7 축 점수에는 inline ref 표기 필수** — `채무상환 67 [tableRef:...]` 형식. ref 없는 axis 점수는 답변에 적지 않음.
+3. **`dataAsOf` stale (3 분기 전 이상) 확인 → 답변 첫 줄 명시**.
+4. **RunPython 직접 ratio 계산 금지** — interestCoverage / DSCR / OCF/Debt 같은 표준 비율은 모두 `dcrBadge.axes` 안 점수로 발급됨. 자체 계산은 dcrBadge 부재 시에만 fallback.
+
 ## 7 축 목록
 
 | axis | label | weight | 핵심 지표 |

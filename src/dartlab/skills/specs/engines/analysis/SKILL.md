@@ -157,6 +157,50 @@ profitability = dartlab.analysis("financial", "수익성", stockCode="005930")
 
 노트북이나 MCP에서 사람이 따라 할 때도 같은 순서로 쓴다. 먼저 `c.analysis()`로 가능한 축을 확인하고, 그 다음 실제 축을 호출한다.
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+22 axis 질문 (수익성·밸류에이션·안정성·효율성·종합평가·이익품질·자본배분·성장성 등) 에서 다음 4 룰은 강행이다 — 위반 시 refs=0 회귀로 답변 품질 65 점 이하 하락.
+
+1. **1 차 도구는 EngineCall 강제**. axis 명이 질문에 있거나 22 axis 가이드 표에 매칭되면 `EngineCall(apiRef="Company.analysis", args={...})` 또는 `EngineCall(apiRef="Company.show", args={...})` 가 첫 호출. **RunPython 직접 ratio 계산은 engine 호출 결과가 부재할 때만 fallback** — 처음부터 raw 계산 금지.
+
+   이유: EngineCall 결과 dict 는 `@tagConfidence` 데코레이터로 `tableRef`·`valueRef`·`dateRef`·`executionRef` 자동 발급. RunPython 은 raw eval — refs 0 발급. 답변 본문 인용 가치체인이 깨진다.
+
+2. **본문 안 모든 숫자에는 inline ref 표기 필수**. 형식: `13.07% [ref:vr_...]` 또는 `[tableRef: tr_...]`. ref 없는 숫자는 답변에 적지 않거나 "EngineCall 재시도 필요" 명시.
+
+3. **dataAsOf 확인 → 답변 첫 줄 명시**. 결과 dict 의 `dataAsOf` 가 stale (3 분기 이상 전) 이면 "현재 시점 단정 X — dataAsOf 기준" 명시.
+
+4. **flags / assumptions / freshness 누락 시 답변 보류**. 결과의 `flags` 가 non-empty 면 "데이터 제한" 으로 답변에 인용. assumptions 가 있는 축 (valuation 등) 은 항상 본문에 노출.
+
+## 분기 추세가 필요한 경우 (axis 22 종은 연간 한정)
+
+`Company.analysis(axis=...)` 의 22 axis 분석은 **연간 시계열 기반**. analyzeProfitability 등 내부 함수는 `aSeries: dict` (annual series) 만 받는다. 즉 "최근 분기 수익성 어땠어 / Q1 회복 신호 있어" 류 질문은 engine 의 axis 함수 단독으로 답할 수 없다.
+
+조합 패턴:
+
+```python
+# 1. 분기 raw (show 는 freq='Q' 지원)
+isQ = c.show("IS", freq="Q")  # 분기 손익
+bsQ = c.show("BS", freq="Q")  # 분기 재무상태
+
+# 2. 연간 axis 분석 (grade + 임계값 + 추세)
+profit = c.analysis("financial", "수익성")  # 연간 grade A~F + DuPont
+
+# 3. ai 가 1+2 결합해 narrative — 연간 grade + 분기 최신 추세 동시 인용
+```
+
+agent EngineCall 양식:
+
+```python
+# 분기 raw
+EngineCall(apiRef="Company.show", args={"stockCode": "005930", "stmt": "IS", "freq": "Q"})
+EngineCall(apiRef="Company.show", args={"stockCode": "005930", "stmt": "BS", "freq": "Q"})
+
+# 연간 axis
+EngineCall(apiRef="Company.analysis", args={"stockCode": "005930", "group": "financial", "axis": "수익성"})
+```
+
+분기-축 통합은 engine 미지원 — 3 호출 결과를 ai 가 답변에 직접 엮는다. show 결과의 `tableRef`·`valueRef` 와 analysis 결과의 `executionRef` 가 함께 발급되어 refs 가치체인 유지.
+
 ## 호출 동작
 
 `axis`가 없으면 실행 가능한 분석 축 가이드 DataFrame을 반환한다. 이 가이드는 사람이 어떤 축을 골라야 하는지 보여주는 공개 메뉴다.
