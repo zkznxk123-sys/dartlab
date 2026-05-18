@@ -196,11 +196,14 @@ function _subOrder(text: string): number | null {
 // 셀 안 `&cr;` 같은 HTML escape 는 backend 에서 이미 처리됐다고 가정.
 function _parseMarkdownTable(md: string): string[][] {
 	if (!md) return [];
-	const lines = md.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.startsWith('|'));
+	const lines = md
+		.split(/\r?\n/)
+		.map((l) => l.trim())
+		.filter((l) => l.includes('|')); // leading | 없어도 OK — DART markdown 일부는 prefix 없음
 	const rows: string[][] = [];
 	for (const line of lines) {
-		// separator row: `| --- | --- |`
-		if (/^\|\s*[-:|\s]+\|\s*$/.test(line)) continue;
+		// separator row: `| --- | --- |` 또는 leading | 없는 `--- | ---`
+		if (/^\|?\s*[-:|\s]+\|?\s*$/.test(line) && line.replace(/[|\s]/g, '').replace(/[-:]/g, '') === '') continue;
 		const cells = line
 			.replace(/^\|/, '')
 			.replace(/\|$/, '')
