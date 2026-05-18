@@ -15,7 +15,7 @@ whenToUse:
   - 매출채권 급증
   - 영업이익 신뢰성
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -94,7 +94,7 @@ is_df = c.show("IS")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. engines.analysis — 일회성·발생주의
 3. engines.analysis — CFO·FCF·배당 충당
 4. engines.analysis — 시계열 정합성

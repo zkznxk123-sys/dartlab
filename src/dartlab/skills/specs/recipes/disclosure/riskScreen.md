@@ -15,7 +15,6 @@ whenToUse:
   - 위험 신호 종목
 linkedSkills:
   - engines.scan
-  - engines.scan.crossSectionStockScreen
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -91,7 +90,7 @@ top_risks = risk_scan.head(10)
 
 `requiredEvidence: skillRef + tableRef + dateRef` 3 종 명시.
 
-- **skillRef**: `engines.scan` (위험 점수 본 스캔), `engines.scan.crossSectionStockScreen` (size·매출 필터), `engines.analysis` (개별 종목 변화 신호 검증), `engines.company.disclosureEvent` (후속 case 별 확인).
+- **skillRef**: `engines.scan` (위험 점수 본 스캔), `engines.scan` (size·매출 필터), `engines.analysis` (개별 종목 변화 신호 검증), `engines.company` (후속 case 별 확인).
 - **sourceRef**: DART 공시 — 전종목 disclosure 시계열 (정정/주요사항/지분 분포). 산업 분류 (`KICS_3` 또는 `GICS`). 시가총액 시계열.
 - **tableRef** (3 표):
   1. 위험 점수 분포 — 분위 × {점수, 표본 수, median, σ}

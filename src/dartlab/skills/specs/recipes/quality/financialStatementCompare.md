@@ -14,7 +14,7 @@ whenToUse:
   - 동종 비교
   - 종목 비교
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -95,8 +95,8 @@ right_roe = right.analysis("financial", "수익성")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 첫 회사 진입 + show("BS") + show("IS")
-2. engines.company.researchStarter — 둘째 회사 진입 + show("BS") + show("IS")
+1. engines.company — 첫 회사 진입 + show("BS") + show("IS")
+2. engines.company — 둘째 회사 진입 + show("BS") + show("IS")
 3. engines.analysis — 양사 같은 기간 정렬 + 핵심 차이
 4. engines.analysis — 양사 ROE DuPont 분해
 5. engines.analysis — 양사 자본구조 비교 (선택)

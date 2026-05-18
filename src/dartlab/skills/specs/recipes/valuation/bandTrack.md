@@ -14,7 +14,7 @@ whenToUse:
   - valuation 추적
   - 현재가 적정 여부
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
   - engines.quant
   - engines.scan
@@ -98,7 +98,7 @@ peer_band = dartlab.scan("valuation")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. engines.analysis — 역사 ±σ 밴드
 3. engines.quant — 기술적 가치 신호
 4. engines.scan — peer 횡단

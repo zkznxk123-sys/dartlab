@@ -256,3 +256,112 @@ agent (ai/mcp/server) 가 본 엔진을 호출할 때는 `EngineCall(apiRef="sca
 ## 기본 검증
 
 스킬은 공개 실행 문서다. `dartlab.scan()`의 guide 축, 공개 호출, 대표 반환 컬럼이 바뀌면 이 파일과 관련 응용 스킬을 같은 변경에서 갱신한다.
+
+
+---
+
+# 흡수된 sub-spec 본문 (Phase D, 2026-05-18)
+
+## (흡수) engines.scan.crossSectionStockScreen 본문
+
+## 절차
+
+- RuntimeDatasetCatalog에서 KRX 가격 또는 종목 데이터셋 후보를 찾는다.
+- `InspectDataset`으로 종목코드, 종목명, 날짜, 가격/거래대금/등락률 컬럼을 확인한다.
+- `RunPython`으로 동일 기준의 횡단면 ranking 표를 만든다. 표에는 종목 식별자, 종목명, 기준일, 비교 시작일 또는 기간, ranking metric, rank가 있어야 한다.
+- ranking 또는 “찾아줘” 유형의 결과는 답변 prose보다 table ref와 필요 시 CSV artifact가 우선이다. 산출물 ref가 없으면 후보 발굴을 완료한 것으로 보지 않는다.
+- 최종 답변 본문에는 입력/유니버스, 필터, 계산식/지표, 결과 섹션을 두고 markdown evidence table을 렌더링한다.
+- 상위 N개 숫자 claim은 ranking table/value ref에 직접 묶고, 기준일·기간·universe·metric을 답변에 함께 밝힌다.
+- 후보 표가 2개 이상이고 동일 metric이 있으면 compile_visual로 요약 차트를 만들 수 있지만, chart는 table ref 이후에만 만든다.
+
+## 공개 호출 방식
+
+- `dartlab.scan()`
+- `dartlab.scan("fields")`
+- `dartlab.scan("ratio", universe="KR")`
+- `dartlab.scan("account", account="revenue")`
+
+## 호출 동작
+
+- 시장/유니버스 횡단면에서 필터, 순위, peer 위치를 계산한다. 단일 종목 원자료 확인은 Company가 우선이다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- ranking/filter DataFrame을 반환한다. 핵심 컬럼은 universe, asOf/latestAsOf, stockCode/ticker, name, metric, value, rank, basis다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
+
+## (흡수) engines.scan.krxIndexStrength 본문
+
+## 절차
+
+- RuntimeDatasetCatalog에서 KRX 지수 데이터셋 후보를 찾는다.
+- `InspectDataset`으로 날짜 컬럼, 지수명 컬럼, 가격/등락률 컬럼, 최신 관측일을 확인한다.
+- `RunPython`으로 최신일 기준 비교 가능한 지수별 수익률 또는 등락률 표를 계산한다.
+- 강세 판단은 기준일, 기간, universe, metric이 모두 있는 표를 근거로 제한한다.
+- visual은 지수별 비교 표가 있을 때만 만든다.
+
+## 공개 호출 방식
+
+- `dartlab.scan()`
+- `dartlab.scan("fields")`
+- `dartlab.scan("ratio", universe="KR")`
+- `dartlab.scan("account", account="revenue")`
+
+## 호출 동작
+
+- 시장/유니버스 횡단면에서 필터, 순위, peer 위치를 계산한다. 단일 종목 원자료 확인은 Company가 우선이다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- ranking/filter DataFrame을 반환한다. 핵심 컬럼은 universe, asOf/latestAsOf, stockCode/ticker, name, metric, value, rank, basis다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
+
+## (흡수) engines.scan.undervaluedQuality 본문
+
+## 절차
+
+- `engines.scan` 기본 skill로 가능한 횡단면 축을 확인한다.
+- valuation metric과 profitability metric이 같은 universe와 기준일에서 있는지 확인한다.
+- `RunPython`으로 후보 표를 만들고 value metric만 아니라 profitability 보조 지표를 같이 둔다.
+- 최종 답변은 입력/유니버스, 필터, 계산식/지표, 결과를 명시하고 후보별 valuation/profitability evidence table을 본문에 렌더링한다.
+- 낮은 valuation은 후보 조건이지 최종 투자 판단이 아니라고 한계를 남긴다.
+
+## 공개 호출 방식
+
+- `dartlab.scan()`
+- `dartlab.scan("fields")`
+- `dartlab.scan("ratio", universe="KR")`
+- `dartlab.scan("account", account="revenue")`
+
+## 호출 동작
+
+- 시장/유니버스 횡단면에서 필터, 순위, peer 위치를 계산한다. 단일 종목 원자료 확인은 Company가 우선이다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- ranking/filter DataFrame을 반환한다. 핵심 컬럼은 universe, asOf/latestAsOf, stockCode/ticker, name, metric, value, rank, basis다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.

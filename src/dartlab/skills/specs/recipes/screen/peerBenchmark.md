@@ -15,7 +15,7 @@ whenToUse:
   - 동일 산업 비교
   - peer 5종
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.industry
   - engines.analysis
   - engines.scan

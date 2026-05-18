@@ -16,7 +16,6 @@ whenToUse:
   - 시가총액 하위
 linkedSkills:
   - engines.scan
-  - engines.scan.crossSectionStockScreen
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -98,7 +97,7 @@ quality = dartlab.scan("profitability")
 1. engines.scan — 성장
 2. engines.scan — 저평가
 3. engines.scan — 수익성
-4. engines.scan.crossSectionStockScreen — 시가총액 + 매출 필터
+4. engines.scan — 시가총액 + 매출 필터
 5. engines.analysis — quality 검증
 
 ## 기본 검증

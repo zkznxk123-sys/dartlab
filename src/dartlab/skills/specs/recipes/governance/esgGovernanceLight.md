@@ -14,7 +14,7 @@ whenToUse:
   - ESG 점검
   - 비재무 audit
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
   - recipes.governance.auditComposite
   - engines.scan
@@ -96,7 +96,7 @@ consistency = c.analysis("financial", "재무정합성")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. engines.analysis — G 종합
 3. recipes.governance.auditComposite — 감사 신호
 4. engines.scan — S 보조 (인력)

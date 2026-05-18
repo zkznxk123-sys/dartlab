@@ -16,7 +16,7 @@ whenToUse:
   - workforce
   - capital allocation
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.scan
   - engines.analysis
   - recipes.quality.capitalAllocationScorecard
@@ -252,7 +252,7 @@ graph LR
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 대상 회사와 provider를 고정한다.
+1. engines.company — 대상 회사와 provider를 고정한다.
 2. engines.scan — 직원수·평균급여·인당 매출의 횡단 위치를 확인한다.
 3. engines.scan — 배당·자사주·총환원율·희석 신호를 확인한다.
 4. engines.analysis — 자본배분 우선순위와 재투자/환원 균형을 확인한다.

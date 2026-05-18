@@ -14,7 +14,7 @@ whenToUse:
   - 배당 지속 가능성
   - 배당 성장률
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - recipes.dividend.capitalReturn
   - engines.analysis
 toolRefs:
@@ -93,7 +93,7 @@ return_axis = c.analysis("financial", "배당주주환원")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. recipes.dividend.capitalReturn — 배당·자사주 종합
 3. engines.analysis — 자본배분 의지
 4. engines.analysis — FCF 가 배당 충당 가능 여부

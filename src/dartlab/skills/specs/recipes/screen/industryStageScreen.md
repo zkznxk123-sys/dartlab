@@ -13,7 +13,7 @@ whenToUse:
   - quality value 후행기
 linkedSkills:
   - engines.industry
-  - engines.scan.crossSectionStockScreen
+  - engines.scan
   - engines.quant
 toolRefs:
   - EngineCall

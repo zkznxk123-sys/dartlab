@@ -15,7 +15,7 @@ whenToUse:
   - 매출 전망 시나리오
   - 적정주가 범위
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
   - engines.macro
   - engines.quant
@@ -101,7 +101,7 @@ regime = c.quant("국면")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. engines.analysis — 매출 base/bull/bear
 3. engines.analysis — 매크로 elasticity
 4. engines.macro — 매크로 시나리오 가정

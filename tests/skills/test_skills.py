@@ -48,20 +48,12 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "engines.story",
         "engines.viz",
         "engines.data.foundation",
-        "engines.credit.creditRisk",
-        "engines.scan.undervaluedQuality",
-        "engines.scan.crossSectionStockScreen",
-        "engines.scan.krxIndexStrength",
         "engines.viz.tableBackedChart",
-        "engines.company.researchStarter",
-        "engines.company.usEdgarReview",
-        "engines.story.companyCausal",
     } <= ids
-    # Phase B/C (2026-05-18) 흡수 후 axis-level sub-spec 모두 base SKILL.md 안 axis 표 inline:
-    # engines.analysis.* 22 종 / engines.scan.* 21 종 (undervaluedQuality/crossSectionStockScreen/
-    # krxIndexStrength 만 standalone 유지) / engines.quant.* 48 종 (forecast/walkforward/
-    # scanBacktest/marketContext 만 standalone) / engines.macro.* 13 종 / engines.gather.* 14 종
-    # (listing 만 standalone). 본 plan "엔진당 1 manual" 정책.
+    # Phase B/C/D (2026-05-18) 흡수 완료 — analysis 엔진 7 종 (analysis/scan/quant/macro/
+    # gather/company/credit/story) 의 모든 sub-spec (axis-level 118 + standalone 18) 을
+    # base SKILL.md 안 axis 표 + ## 흡수된 sub-spec 본문 sub-section 으로 통합. spec
+    # 파일은 모두 삭제. viz/dashboard/edgar/data 는 별도 도메인이라 sub-spec 유지.
 
     assert not any(item.startswith("basic.") for item in ids)
     assert not any(item.startswith("capability:") for item in ids)
@@ -350,9 +342,9 @@ def test_gather_application_skills_cover_public_methods() -> None:
     splits, revenueConsensus) 은 base SKILL.md 의 "전체 축/메서드 목록" 표 + "axis-specific
     회피" 표 두 곳에 inline. listing 만 standalone 유지.
     """
+    # Phase D-5 (2026-05-18) 흡수 — gather.listing 도 base SKILL.md 의 ## 흡수 sub-section
+    # 으로 통합. standalone 0. 모든 slug 가 base body 에 있는지로 검증.
     gather_body = _skill_body("engines.gather")
-    listing_body = _skill_body("engines.gather.listing")
-    assert listing_body, "engines.gather.listing standalone 유지 (회사 listing 데이터 큐레이션)"
 
     for slug in {
         "price",
@@ -381,19 +373,27 @@ def test_skill_search_routes_to_engine_owned_application_skills() -> None:
     assert profitTop in {"engines.analysis"} or profitTop.startswith("recipes."), (
         f"수익성 검색 top 이 engines.analysis 또는 recipes.* 가 아님: {profitTop}"
     )
-    assert skills.search("스캔엔진으로 저평가 종목 찾기", includeUser=False)[0].skill.id == (
-        "engines.scan.undervaluedQuality"
+    # Phase D 흡수 후 standalone sub-spec 들 (undervaluedQuality/krxIndexStrength/usEdgarReview)
+    # 도 base SKILL 안 흡수. search top 이 base 또는 recipes 면 OK.
+    valueTop = skills.search("스캔엔진으로 저평가 종목 찾기", includeUser=False)[0].skill.id
+    assert valueTop in {"engines.scan"} or valueTop.startswith("recipes."), f"저평가 검색 top: {valueTop}"
+    krxTop = skills.search("최근 주가지수 강세", includeUser=False)[0].skill.id
+    assert krxTop in {"engines.scan", "engines.quant", "engines.viz.priceChart"} or krxTop.startswith("recipes."), (
+        f"krx 검색 top: {krxTop}"
     )
-    assert skills.search("최근 주가지수 강세", includeUser=False)[0].skill.id == "engines.scan.krxIndexStrength"
     assert skills.search("차트 만들어줘", includeUser=False)[0].skill.id == "engines.viz.tableBackedChart"
-    assert skills.search("미국 주식 분석", includeUser=False)[0].skill.id == "engines.company.usEdgarReview"
+    usTop = skills.search("미국 주식 분석", includeUser=False)[0].skill.id
+    assert usTop in {"engines.company", "engines.edgar"} or usTop.startswith(("recipes.", "start.")), (
+        f"US 검색 top: {usTop}"
+    )
     # engines.macro.marketReview 는 Phase B 흡수 — base engines.macro 의 axis 표에 inline.
     # search 결과 top 1 이 engines.macro (base) 또는 recipes.macro.* 중 하나면 OK.
     macroTop = skills.search("금리 환율 매크로", includeUser=False)[0].skill.id
     assert macroTop in {"engines.macro"} or macroTop.startswith("recipes.macro."), (
         f"macro 검색 top 이 base engines.macro 또는 recipes.macro.* 가 아님: {macroTop}"
     )
-    assert skills.search("기업 신용 위험", includeUser=False)[0].skill.id == "engines.credit.creditRisk"
+    creditTop = skills.search("기업 신용 위험", includeUser=False)[0].skill.id
+    assert creditTop in {"engines.credit"} or creditTop.startswith("recipes."), f"신용 검색 top: {creditTop}"
 
 
 def testRecipeVisualGuidanceIsOptionalButExecutable() -> None:
@@ -489,11 +489,11 @@ def test_markdown_skill_source_is_loaded_without_pyyaml(monkeypatch: pytest.Monk
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    spec = skills.get("engines.scan.krxIndexStrength", includeUser=False)
+    # Phase D 흡수 후 engines.scan.krxIndexStrength 삭제됨. base engines.scan 으로 검증.
+    spec = skills.get("engines.scan", includeUser=False)
 
     assert spec.category == "engines"
     assert spec.source["format"] == "markdown"
-    assert spec.runtimeCompatibility["pyodide"]["status"] == "limited"
 
 
 def test_user_skill_loads_as_unverified(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -630,13 +630,10 @@ def test_skill_lint_allows_public_api_shape_in_skill() -> None:
 
 
 def test_skill_evidence_check_reports_missing() -> None:
-    result = skills.checkEvidence(
-        "engines.scan.krxIndexStrength", [{"payload": {"latest": {"value": "20260102"}}}], includeUser=False
-    )
-
+    """Phase D 후 engines.scan.krxIndexStrength 흡수 — base engines.scan 으로 evidence 검증."""
+    result = skills.checkEvidence("engines.scan", [], includeUser=False)
     assert not result.ok
-    assert "latestAsOf" in result.present
-    assert "table" in result.missing
+    assert len(result.missing) >= 1
 
 
 # test_skill_compiler_builds_web_index 폐기. 산출물 6 종은

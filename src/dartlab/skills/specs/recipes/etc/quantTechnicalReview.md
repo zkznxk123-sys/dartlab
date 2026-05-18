@@ -15,7 +15,7 @@ whenToUse:
   - 변동성 점검
   - 차트 패턴 인식
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.quant
 toolRefs:
   - EngineCall
@@ -93,7 +93,7 @@ patterns = c.quant("패턴")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. engines.quant — 45 지표
 3. engines.quant — 모멘텀
 4. engines.quant — 변동성

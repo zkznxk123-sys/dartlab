@@ -13,7 +13,6 @@ whenToUse:
   - 위기 시나리오 quant
 linkedSkills:
   - engines.macro
-  - engines.quant.walkforward
   - engines.quant
 toolRefs:
   - EngineCall

@@ -15,7 +15,7 @@ whenToUse:
   - 재고 분석
 linkedSkills:
   - engines.macro
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -95,7 +95,7 @@ cycle = dartlab.macro("cycle")
 ## 연계 절차
 
 1. engines.macro — 산업 재고 지수
-2. engines.company.researchStarter — 회사 진입
+2. engines.company — 회사 진입
 3. engines.analysis — 회사 회전율
 4. engines.macro — 경기 사이클
 

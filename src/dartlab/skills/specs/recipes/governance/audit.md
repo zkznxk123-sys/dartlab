@@ -15,7 +15,7 @@ whenToUse:
   - 지배력 집중
   - 거버넌스 분석
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - recipes.governance.auditComposite
   - engines.analysis
   - engines.scan

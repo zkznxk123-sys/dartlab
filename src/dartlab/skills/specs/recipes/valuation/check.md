@@ -15,7 +15,7 @@ whenToUse:
   - 저평가 고평가 판단
   - 적정 주가 범위
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.analysis
   - engines.scan
   - engines.quant

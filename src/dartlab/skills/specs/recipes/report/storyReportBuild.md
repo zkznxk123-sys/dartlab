@@ -15,9 +15,8 @@ whenToUse:
   - 분석 보고서 작성
   - 회사 분석 종합 글
 linkedSkills:
-  - engines.company.researchStarter
-  - engines.story.companyCausal
-  - engines.story.dartlabStory
+  - engines.company
+  - engines.story
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -98,10 +97,10 @@ causal = c.causalWeights()
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
+1. engines.company — 회사 진입
 2. engines.analysis — 14 축 종합평가
-3. engines.story.companyCausal — 인과 가중치
-4. engines.story.dartlabStory — 14 섹션 보고서
+3. engines.story — 인과 가중치
+4. engines.story — 14 섹션 보고서
 
 ## 기본 검증
 

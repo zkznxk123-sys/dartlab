@@ -213,3 +213,71 @@ story 답변은 `target` · `reportType` · `template` · 모든 block 의 `tabl
 ## 기본 검증
 
 `Story` 클래스 시그니처 · 11 reportType · 7 template · block list 가 바뀌면 본 skill + analysis · credit 응용 skill 동시 갱신. block 추가 시 evidence 묶음 helper (`tableRef` · `valueRef`) 계약 동기.
+
+
+---
+
+# 흡수된 sub-spec 본문 (Phase D, 2026-05-18)
+
+## (흡수) engines.story.companyCausal 본문
+
+## 절차
+
+- 기업 식별과 사용 가능한 Company topic을 확인한다.
+- macro, scan 또는 industry 맥락이 필요한지 reference에서 확인한다.
+- Company.analysis와 원본 show 결과를 실행해 수치 근거를 만든다.
+- 판단 claim은 대상, 기간, metric, value ref에 묶는다.
+
+## 공개 호출 방식
+
+- `c = dartlab.Company("005930")`
+- `c.story()`
+- `dartlab.story(c)`
+
+## 호출 동작
+
+- analysis, credit, macro, scan, quant 결과를 thesis/evidence/risk/limit 구조로 조립한다. 숫자 계산은 하위 엔진 결과 ref에 묶는다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- report dict 또는 block list를 반환한다. 핵심 키는 thesis, evidenceBlocks, riskBlocks, limits, sourceRefs다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
+
+## (흡수) engines.story.dartlabStory 본문
+
+## 절차
+
+- story capability가 제공하는 report type과 한계를 확인한다.
+- 필요한 하위 엔진 근거를 실행 결과로 확보한다.
+- narrative는 숫자/날짜 claim ref를 가진 상태에서만 작성한다.
+
+## 공개 호출 방식
+
+- `c = dartlab.Company("005930")`
+- `c.story()`
+- `dartlab.story(c)`
+
+## 호출 동작
+
+- analysis, credit, macro, scan, quant 결과를 thesis/evidence/risk/limit 구조로 조립한다. 숫자 계산은 하위 엔진 결과 ref에 묶는다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- report dict 또는 block list를 반환한다. 핵심 키는 thesis, evidenceBlocks, riskBlocks, limits, sourceRefs다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.

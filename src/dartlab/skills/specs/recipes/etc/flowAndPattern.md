@@ -14,7 +14,7 @@ whenToUse:
   - 단기 매매 신호
   - 수급 패턴
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.quant
 toolRefs:
   - EngineCall
@@ -90,7 +90,7 @@ qflow = c.quant("플로우")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입 (KR 만)
+1. engines.company — 회사 진입 (KR 만)
 2. engines.quant — 패턴
 3. engines.quant — 모멘텀
 4. engines.quant — 가격·거래량 결합
