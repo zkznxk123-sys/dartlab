@@ -294,27 +294,22 @@ class BoundedCache:
             "_estimateWacc_v2",
             "_fetchBeta",
             # finance series builders — 매우 무거운 parquet load + pivot
-            # evict 시 14축 calc 가 매번 finance 를 다시 빌드해서 메모리 폭발
+            # evict 시 14축 calc 가 매번 finance 를 다시 빌드해서 메모리 폭발.
+            # Phase B 의 DuckDB pivot 으로 rebuild 비용 ~50% 감소, Phase D 의 IPC mmap
+            # 으로 parquet 디코드 ~0 — 그래도 builder 자체 cost 보존 위해 pinned 유지.
             "_finance_",
             "_financeStmt_",
             "_financeCisQuarterly",
             "_sceDataFrame",
             "_ratios_",
             "_insights_analyze",
-            # 무거운 calc 결과 (story 안 다중 호출)
-            "_calcMarketBeta",
-            "_calcTechnicalVerdict",
-            "_calcTechnicalSignals",
-            "_calcMarketRisk",
-            "_calcMarketAnalysisFlags",
-            "_calcFundamentalDivergence",
-            "_calcRoicTimeline",
-            "_calcCreditMetrics",
-            "_calcCreditScore",
-            "_calcScorecard",
-            "_calcPeerRanking",
-            "_calcDisclosureChangeSummary",
-            "_calcKeyTopicChanges",
+            # Phase D-2 — calc* 결과 13 prefix 제거.
+            # 작은 dict / scalar / 짧은 list 결과 (재계산 비용 ≤ 50ms, finance pinned 가 있으면
+            # rebuild thrashing 없음). pinned 유지 시 memory 압박 시에도 EMERGENCY 회수 안 됨.
+            # 제거된 prefix: _calcMarketBeta · _calcTechnicalVerdict · _calcTechnicalSignals ·
+            # _calcMarketRisk · _calcMarketAnalysisFlags · _calcFundamentalDivergence ·
+            # _calcRoicTimeline · _calcCreditMetrics · _calcCreditScore · _calcScorecard ·
+            # _calcPeerRanking · _calcDisclosureChangeSummary · _calcKeyTopicChanges.
         )
 
     def _isPinned(self, key: str) -> bool:

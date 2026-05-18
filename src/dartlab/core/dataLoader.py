@@ -345,9 +345,41 @@ def loadData(
             krxShouldRefresh if krxShouldRefresh is not None else _shouldRefreshHfCategory(path, category, refresh)
         )
         _ensureLocalParquet(stockCode, path, category, shouldRefresh=shouldRefresh)
+    # Phase D — .arrow IPC mirror 가 옆에 있고 더 새것이면 mmap 경로 우선 (OS page cache 위임).
+    # Phase A 가 빌드한 mirror 파일. mmap path 는 useLazy 와 무관 — predicate 도 lazy filter.
+    ipcPath = path.with_suffix(".arrow")
+    useIpcMmap = not _IS_PYODIDE and ipcPath.exists() and ipcPath.stat().st_mtime >= path.stat().st_mtime
+
     # lazy scan: sinceYear · columns · predicate 중 하나라도 있으면 scan_parquet 경로
     yearColCandidates = ("year", "bsns_year")
     useLazy = sinceYear is not None or columns is not None or predicate is not None
+    if useIpcMmap and (useLazy or True):
+        # IPC mmap — 결과 buffer 가 mmap pages 백킹, RSS 기여 = touched pages.
+        # predicate / sinceYear / columns 도 동일하게 적용 (lazy 가능).
+        lf = pl.scan_ipc(str(ipcPath), memory_map=True)
+        schemaNames = lf.collect_schema().names()
+        if sinceYear is not None:
+            for colName in yearColCandidates:
+                if colName in schemaNames:
+                    yearCol = pl.col(colName)
+                    if str(lf.collect_schema()[colName]) == "String":
+                        yearCol = yearCol.cast(pl.Int32, strict=False)
+                    lf = lf.filter(yearCol >= sinceYear)
+                    break
+        if predicate is not None:
+            lf = lf.filter(predicate)
+        if columns:
+            available = [c for c in columns if c in schemaNames]
+            if available:
+                lf = lf.select(available)
+        df = lf.collect(engine="streaming") if useLazy else pl.read_ipc(str(ipcPath), memory_map=True)
+        result = _normalizeLoadedFrame(df, category)
+        if predicate is None:
+            _LOAD_CACHE[cacheKey] = result
+            while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
+                _LOAD_CACHE.popitem(last=False)
+        return result
+
     if useLazy:
         lf = pl.scan_parquet(str(path))
         schemaNames = lf.collect_schema().names()
