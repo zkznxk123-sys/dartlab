@@ -61,7 +61,7 @@ class Gate:
     name: str
     tier: Tier
     deps: tuple[str, ...] = ()
-    install_pkg: Literal["editable", "non-editable", "extras-all", "none"] = "editable"
+    install_pkg: Literal["editable", "non-editable", "none"] = "editable"
     setup: tuple[str, ...] = ()
     cmd: str = ""
     env: dict[str, str] = field(default_factory=dict)
@@ -145,7 +145,7 @@ GATES: dict[str, Gate] = {
         name="typecheck",
         tier="fast",
         deps=("pyright",),
-        install_pkg="extras-all",
+        install_pkg="editable",
         cmd="pyright",
         blocking=False,  # 현 continue-on-error 명시화
     ),
@@ -213,7 +213,7 @@ GATES: dict[str, Gate] = {
         name="deps-check",
         tier="fast",
         deps=("deptry",),
-        install_pkg="extras-all",
+        install_pkg="editable",
         cmd="deptry src/dartlab/ --ignore DEP002,DEP003 --extend-exclude _reference",
         blocking=False,
     ),
@@ -293,7 +293,7 @@ GATES: dict[str, Gate] = {
         name="fixture-integration",
         tier="full",
         deps=("pytest", "pytest-asyncio", "hypothesis", "pytest-benchmark"),
-        install_pkg="extras-all",
+        install_pkg="editable",
         env={
             "DARTLAB_DATA_DIR": "${{ github.workspace }}/tests/fixtures",
             "PYTEST_MEMORY_LIMIT_MB": "5000",
@@ -361,7 +361,7 @@ GATES: dict[str, Gate] = {
         tier="full",
         matrix_param="test",
         deps=("pytest", "pytest-asyncio", "pytest-rerunfailures", "hypothesis"),
-        install_pkg="extras-all",
+        install_pkg="editable",
         env={
             "DARTLAB_DATA_DIR": "${{ github.workspace }}/tests/fixtures",
             "PYTEST_MEMORY_LIMIT_MB": "6000",
@@ -385,7 +385,7 @@ GATES: dict[str, Gate] = {
         tier="nightly",
         matrix_param="test",
         deps=("pytest", "pytest-asyncio", "pytest-rerunfailures", "hypothesis"),
-        install_pkg="extras-all",
+        install_pkg="editable",
         env={
             "DARTLAB_DATA_DIR": "${{ github.workspace }}/tests/fixtures",
             "PYTEST_MEMORY_LIMIT_MB": "6000",
@@ -415,7 +415,7 @@ GATES: dict[str, Gate] = {
         name="freshInstall",
         tier="nightly",
         deps=("pytest", "pytest-asyncio", "pytest-rerunfailures", "hypothesis"),
-        install_pkg="extras-all",
+        install_pkg="editable",
         env={"PYTEST_MEMORY_LIMIT_MB": "6000", "DARTLAB_TEST_LOCKED": "1"},
         cmd="bash tests/test-realdata.sh tests/realData/test_freshInstall.py -v --tb=short",
         timeout_minutes=30,
@@ -456,13 +456,11 @@ def buildShellCommand(gate: Gate, mp: dict[str, str]) -> str:
         deps_quoted = " ".join(shlex.quote(d) for d in gate.deps)
         parts.append(f"pip install {deps_quoted}")
 
-    # 2. package install
+    # 2. package install — dartlab 은 single base install SSOT (extras 그룹 금지).
     if gate.install_pkg == "editable":
         parts.append("pip install -e .")
     elif gate.install_pkg == "non-editable":
         parts.append("pip install .")
-    elif gate.install_pkg == "extras-all":
-        parts.append("pip install -e .[all]")
     # "none" → 설치 안 함
 
     # 3. setup (wheel build · venv 생성 등)
