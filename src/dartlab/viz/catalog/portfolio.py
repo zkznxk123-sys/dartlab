@@ -42,28 +42,8 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         intent="primary",
         helpText="본업 규모. 사업 부문별 비중은 비용구조·자본배분 카드에서.",
     ),
-    "portfolioKpiOp": {
-        **_kpi(
-            "영업이익",
-            "영업이익",
-            account="operatingIncome",
-            unit="원",
-            intent="positive",
-            helpText="본업 수익. 영업이익률은 별도 KPI.",
-        ),
-        "subCategory": "dupont",
-    },
-    "portfolioKpiOpMargin": {
-        **_kpi(
-            "영업이익률",
-            "영업이익률",
-            ratio={"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
-            unit="%",
-            intent="positive",
-            helpText="매출 1 원당 영업이익. 동종 평균 대비 비교가 핵심.",
-        ),
-        "subCategory": "dupont",
-    },
+    # portfolioKpiOp 폐기 — finance.py kpiOperatingIncome 와 중복
+    # portfolioKpiOpMargin 폐기 — finance.py 와 별도 KPI 인데 lifecycleKpiOpMargin 과 중복
     "portfolioKpiRnd": _kpi(
         "R&D 비중",
         "R&D/매출",
@@ -170,8 +150,6 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
 
 PORTFOLIO_KEYS: list[str] = [
     "portfolioKpiRevenue",
-    "portfolioKpiOp",
-    "portfolioKpiOpMargin",
     "portfolioKpiRnd",
     "portfolioCapitalAllocation",
     "costMix",

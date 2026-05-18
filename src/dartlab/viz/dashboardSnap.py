@@ -31,8 +31,8 @@ import asyncio
 import sys
 from pathlib import Path
 
-FINANCIAL_VIEWS = ("overview", "performance", "capitalStructure", "cashflow", "risk")
-ANALYSIS_TABS = ("portfolio", "valuation", "governance", "peer", "lifecycle", "macro", "viewer")
+FINANCIAL_VIEWS = ("story", "dupont", "value", "growth", "credit", "quality", "snowflake")
+ANALYSIS_TABS = ("viewer",)
 
 
 async def snapPage(

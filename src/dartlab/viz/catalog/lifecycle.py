@@ -67,17 +67,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         ),
         "subCategory": "dupont",
     },
-    "lifecycleKpiRoe": {
-        **_kpi(
-            "ROE",
-            "ROE",
-            ratio={"num": {"netIncome": 1}, "den": {"equity": 1}, "scale": 100},
-            unit="%",
-            intent="primary",
-            helpText="자본 효율. 단계별 정상 범위 다름.",
-        ),
-        "subCategory": "dupont",
-    },
+    # lifecycleKpiRoe 폐기 — finance.py kpiRoe 와 중복
     "lifecycleKpiFcfMargin": _kpi(
         "FCF/매출",
         "FCF Margin",
@@ -162,7 +152,6 @@ LIFECYCLE_KEYS: list[str] = [
     "lifeCyclePhase",
     "lifecycleKpiRevenue",
     "lifecycleKpiOpMargin",
-    "lifecycleKpiRoe",
     "lifecycleKpiFcfMargin",
     "cashflowPattern",
     "capitalDeployment",

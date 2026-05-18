@@ -62,34 +62,8 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         intent="negative",
         helpText="200%+ 부담. 거버넌스 관점 자본구조 첫 신호.",
     ),
-    "distressGauge": {
-        "kind": "gauge",
-        "title": "부실 위험 (Altman Z')",
-        "topic": "ratios",
-        "tab": "financial",
-        "subCategory": "credit",
-        "seriesPlan": [],
-        "dataSpec": {"adapter": "distressGauge"},
-        "options": {},
-        "layout": {"colSpan": 5, "rowSpan": 3},
-        "help": "Altman Z-Score 부실 예측. ≥3 안전 / 1.8~3 주의 / <1.8 위험.",
-    },
-    "anomalySignals": {
-        "kind": "topList",
-        "title": "이상 신호",
-        "topic": "ratios",
-        "tab": "financial",
-        "subCategory": "quality",
-        "seriesPlan": [],
-        "dataSpec": {
-            "adapter": "flagsTopList",
-            "module": "dartlab.analysis.financial.earningsQuality",
-            "fn": "calcEarningsQualityFlags",
-        },
-        "options": {},
-        "layout": {"colSpan": 5, "rowSpan": 4},
-        "help": "이익품질 / 회계 이상신호 list (earningsQualityFlags).",
-    },
+    # distressGauge 폐기 — finance.py riskDistress 와 중복 gauge (Altman Z')
+    # anomalySignals 폐기 — finance.py riskAnomaly 와 중복 topList (이상신호)
     "earningsQualityTrend": {
         "kind": "trend",
         "title": "이익 품질",
@@ -158,8 +132,6 @@ GOVERNANCE_KEYS: list[str] = [
     "governanceKpiEquityRatio",
     "governanceKpiReRatio",
     "governanceKpiDebtRatio",
-    "distressGauge",
-    "anomalySignals",
     "earningsQualityTrend",
     "capitalGovernance",
 ]
