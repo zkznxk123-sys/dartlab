@@ -402,6 +402,29 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
     return rows
 
 
+def _sectionsFastDuckdb(stockCode: str, topics: set[str] | None) -> pl.DataFrame | None:
+    """Phase C 본격 처방 fast path skeleton (미구현).
+
+    DuckDB PIVOT + window rank 로 sections() 의 7-dict + 6-set 누적을 흡수하는
+    fast path. plan 의 약속이지만 본 PR 단계에선 미구현 — 30+ 컬럼 schema 정확
+    복제 + _rowFreqMeta Python 함수 등가 SQL + 5 종목 parity 보장이 단일 PR
+    안에 안전 진행 불가능 (caller predicate statementFilter 6 fail 사례 참조).
+
+    별도 PR 에서 구현 — 본 skeleton 은 *명목 진척* + 환경변수 활성 시 legacy
+    fallback 보장. 호출 시 NotImplementedError, caller (sections() 본체) 가 그
+    예외를 잡아 legacy path 로 계속 진행.
+
+    Raises:
+        NotImplementedError — 항상 (현재 미구현 — fallback 신호).
+    """
+    raise NotImplementedError(
+        "sections() DuckDB PIVOT fast path 미구현. plan 의 200 LOC 등가 SQL + "
+        "5 종목 parity 보장은 별도 PR 필요. statementFilter 6 fail 사례가 sj_div "
+        "단순 가정만으로 부족함을 보여줬으므로 sections 의 더 복잡한 schema "
+        "(30+ 컬럼 + List/Categorical/Boolean) 는 동일/더 큰 parity 위험."
+    )
+
+
 def _reportRowsToTopicRows(
     subset: pl.DataFrame,
     contentCol: str,
@@ -802,6 +825,22 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         TargetMarkets:
             - KR (DART) — 사업/분기/반기 보고서 정기공시 한정.
     """
+    # Phase C 본격 처방 — DuckDB PIVOT fast path skeleton.
+    # 환경변수 DARTLAB_SECTIONS_FAST_PIVOT=1 활성 시 시도. 실제 SQL 등가 (30+ 컬럼
+    # schema + 9-튜플 sort key + List/Categorical/Boolean dtype + _rowFreqMeta
+    # Python 함수 등가) 는 별도 PR — caller predicate statementFilter 가 _normalizeQ4
+    # cross-statement 의존성으로 parity 6 fail 한 사례 (commit 7eebdacbc) 가
+    # 보여주듯 sj_div 단순 가정만으로 부족. sections 의 더 복잡한 schema 는 동일/
+    # 더 큰 parity 위험. 본 skeleton 은 명목 진척 — 실제 fast path 작성 시 plan
+    # 의 5 종목 parity test 가 회귀 가드.
+    import os as _os
+
+    if _os.environ.get("DARTLAB_SECTIONS_FAST_PIVOT") == "1":
+        try:
+            return _sectionsFastDuckdb(stockCode, topics)
+        except NotImplementedError:
+            pass  # legacy fallback — 본 PR 단계에선 항상 legacy
+
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}
     rowOrder: dict[tuple[str, str], dict[str, int]] = {}
