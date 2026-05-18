@@ -190,12 +190,11 @@ function FinancialTab() {
 				'turnoverTrend',
 				'rndIntensity',
 				'taxWalk',
-				'effectiveTaxRate',
 			]),
 		},
 		{
 			title: '현금 일생 · 자본배분',
-			subtitle: '현금흐름·FCF·자본배분(CapEx/배당/R&D)·배당성향·이익품질·발생액 — 번 돈은 어디로.',
+			subtitle: '현금흐름·FCF·자본배분·배당성향·이익품질·발생액·실효세율 — 번 돈은 어디로.',
 			keys: new Set([
 				'cashflowSigned',
 				'fcfTrend',
@@ -203,6 +202,7 @@ function FinancialTab() {
 				'payoutRatio',
 				'earningsQuality',
 				'sloanAccruals',
+				'effectiveTaxRate',
 			]),
 		},
 		{

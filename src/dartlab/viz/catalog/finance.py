@@ -296,7 +296,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 3},
         "help": "매출(막대·좌축) 과 영업이익·당기순이익(영역·우축) 별도 축. 우축이 좌축의 ~10% 스케일이라 이익 변동이 잘 보임. 매출 안정인데 이익 변동 크면 운영 레버리지 높음.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -348,7 +348,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "signed": True},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "정상 패턴: 영업+ / 투자- / 재무- (성숙기 기업). 영업CF 가 음수면 사업 자체로 현금 못 만드는 위험 신호. 투자+ 는 자산 매각, 재무+ 는 차입 증가 (성장기 또는 자금 부족).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -465,7 +465,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "영업이익 증가율이 매출 증가율을 넘으면 마진 동반 성장 (질 좋은 성장). 매출만 늘고 이익 정체는 가격 인하 또는 비용 증가 신호. 음수 = 역성장.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -572,7 +572,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "잉여현금흐름 = 영업현금흐름 - 자본적지출. 지속 양수면 배당·자사주 여력. 영업현금흐름/매출 비율은 이익 품질 지표 — 회계 이익이 진짜 현금으로 들어오는지.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -614,7 +614,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "부채자본비율 100% 미만 안정, 200% 이상 부담. 부채자산비율은 전체 자산 중 부채 비중. 유동비율은 단기 지급능력 (1 년 내 갚을 부채 대비 1 년 내 현금화 자산).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -647,7 +647,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "부채비율 100% 미만 = 자본이 부채보다 큼 (보수적 재무구조). 자기자본비율 50% 이상 = 자기자본 의존도 높음 (안정성). 두 지표는 같은 정보를 다른 각도로.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -695,7 +695,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 150, "label": "1.5", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "유동비율 150% 이상이 안전선 (참조선). 당좌비율은 재고 제외한 보수적 지표 — 재고 안 팔려도 갚을 수 있는가. 현금비율은 가장 보수적 — 현금만으로 갚을 수 있는가.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -801,7 +801,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 3.0, "label": "3.0 (안전)", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "영업이익 / 금융비용. 1.0 미만이면 본업이 이자도 못 갚는 위험. 3.0 이상이 안전선. 추세 하락은 부채 증가 또는 본업 악화 — 신용 등급 강등 직전 신호.",
     },
     # kpiCashFcf / kpiCashFcfMargin / kpiCashCapex 폐기 — 운영자 명시 2026-05-18
@@ -826,7 +826,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             "fn": "calcEarningsQualityFlags",
         },
         "options": {},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "전년 대비 변동 큰 지표 top 6 (절대 변동값 기준). DSO/DIO/마진/레버리지 동향.",
     },
     # riskLifeCycle (생애주기 단계) 폐기 — 운영자 명시 2026-05-18.
@@ -870,7 +870,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "일"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 3},
         "help": "CCC = DSO + DIO − DPO. 짧을수록 현금이 빨리 회수. DPO ↑ = 매입채무 길게 끌어 현금 보유 (좋다). 매출 성장에도 CCC ↑ 면 운전자본 부담 — 진정한 성장 의심.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -971,7 +971,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "signed": True},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "(단기 + 장기차입금) − 현금. 양수 = 순차입 상태, 음수 = net cash (배당·자사주·M&A 여유). 분기 추세로 deleveraging 방향성 확인.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1049,7 +1049,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 2.99, "label": "2.99 안전", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "Z' < 1.81 = 부실 위험, > 2.99 = 안전, 사이 = 회색. 단순화: equity/liabilities 비중 별도 카드(stabilityRatio). 5 요소 가중합 추세로 신용 등급 변화 사전 감지.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1095,7 +1095,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "CapEx + 배당 + R&D 의 상대 비중으로 경영진 의도 파악. CapEx ↑ = 성장기, 배당 ↑ = 성숙기, R&D ↑ = 미래 베팅. 셋 합이 FCF 와 균형 잡혀야.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1187,7 +1187,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 10, "label": "10%", "intent": "neutral"},
             ],
         },
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "현금성자산 / 총자산. 10% 이상 = 보수적 경영 + M&A·배당·자사주 여력. 5% 미만 = 단기 유동성 부담 가능. 사업 모델별 정상 범위 다름 (현금 집약 IT 는 높고 제조는 낮음).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1211,7 +1211,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "자기자본 전년 동기 대비 증가율. 양수 지속 = 내부유보 누적 (이익 안 빼가고 재투자). 음수 = 배당 + 자사주매입 > 순이익 (또는 결손금). 매출 성장과 비교해 자본 효율 변화 단서.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1303,46 +1303,46 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
 
 
 FINANCE_DASHBOARD_KEYS: list[str] = [
-    # ─ 01 자본구조 · 자산구조 — 자금조달 + 자산 운용 (정통 단계 1+2). ─
-    "assetComposition",       # 12×3 hero — 자산 = 부채+자본
-    "liabilityDetail",         # 4×3
-    "equityDetail",            # 4×3
-    "cashAssetsRatio",         # 3×3 — 현금/자산 (M&A 여력)
-    "incomeBreakdown",         # 4×3 — 손익구조 (선순환 진입)
-    "workingCapitalDays",      # 3×3 — CCC (운전자본 묶임)
-    # ─ 02 영업 효율 · 자본 효율 — 마진·자본 효율·R&D·세금 (정통 단계 3+5). ─
-    "marginTrend",             # 3×3
-    "returnTrend",             # 3×3 — ROE/ROA
-    "dupont",                  # 3×3 — DuPont 분해
-    "roic",                    # 3×3 — ROIC vs WACC
-    "costStructureTrend",      # 3×3
-    "turnoverTrend",           # 3×3 — 활동성
-    "rndIntensity",            # 3×3 — R&D 강도
-    "taxWalk",                 # 3×3 — 영업→순이익
-    "effectiveTaxRate",        # 3×3 — 실효세율 (이익품질 단서)
-    # ─ 03 현금 일생 · 자본배분 — CFO/FCF/배분/주주환원/이익품질 (정통 단계 4+10). ─
-    "cashflowSigned",          # 3×3 — CFO/CFI/CFF
-    "fcfTrend",                # 3×3 — FCF
-    "capitalAllocation",       # 3×3 — CapEx/배당/R&D
-    "payoutRatio",             # 3×3 — 배당성향
-    "earningsQuality",         # 3×3 — CFO/NI
-    "sloanAccruals",           # 3×3 — 발생액 (분식 의심)
-    # ─ 04 재무 안정 · 부도 위험 — 안정성·유동성·레버리지·Altman (정통 단계 7+8). ─
-    "stabilityRatio",          # 3×3
-    "liquidityTrend",          # 3×3
-    "altmanZ",                 # 3×3 — Altman Z'
-    "interestCoverage",        # 3×3 — 이자보상배율
-    "netDebt",                 # 3×3 — 순차입금
-    "leverageTrend",           # 3×3 — D/E·D/A·유동
-    # ─ 05 성장의 질 · 이상신호 — 매출/자본 성장·변동큰지표 (정통 단계 6+8). ─
-    "growthYoy",               # 3×3 — 매출/OP/NI YoY
-    "equityGrowth",            # 3×3 — 자본 YoY
-    "riskAnomaly",             # 3×3 — 변동 큰 지표
+    # ─ 01 자본구조 · 자산구조 (정통 1+2). 모든 row col 합 = 12 강행. ─
+    "assetComposition",        # row0  12×3 hero
+    "liabilityDetail",          # row1  4 ┐
+    "equityDetail",             # row1  4 ├ = 12
+    "cashAssetsRatio",          # row1  4 ┘
+    "incomeBreakdown",          # row2  6 ┐ = 12
+    "workingCapitalDays",       # row2  6 ┘
+    # ─ 02 영업 효율 · 자본 효율 (정통 3+5). 8 카드 = 2 row. ─
+    "marginTrend",              # row3  3 ┐
+    "returnTrend",              # row3  3 ├
+    "dupont",                   # row3  3 ├ = 12
+    "roic",                     # row3  3 ┘
+    "costStructureTrend",       # row4  3 ┐
+    "turnoverTrend",            # row4  3 ├
+    "rndIntensity",             # row4  3 ├ = 12
+    "taxWalk",                  # row4  3 ┘
+    # ─ 03 현금 일생 · 자본배분 (정통 4+10). 7 카드 = 1 row(4×3) + 1 row(3×4). ─
+    "cashflowSigned",           # row5  4 ┐
+    "fcfTrend",                 # row5  4 ├ = 12
+    "capitalAllocation",        # row5  4 ┘
+    "payoutRatio",              # row6  3 ┐
+    "earningsQuality",          # row6  3 ├
+    "sloanAccruals",            # row6  3 ├ = 12
+    "effectiveTaxRate",         # row6  3 ┘  (02 → 03 이동, 이익품질 묶음)
+    # ─ 04 재무 안정 · 부도 위험 (정통 7+8). 6 카드 = 2 row(4×3). ─
+    "stabilityRatio",           # row7  4 ┐
+    "liquidityTrend",           # row7  4 ├ = 12
+    "altmanZ",                  # row7  4 ┘
+    "interestCoverage",         # row8  4 ┐
+    "netDebt",                  # row8  4 ├ = 12
+    "leverageTrend",            # row8  4 ┘
+    # ─ 05 성장의 질 · 이상신호 (정통 6+8). 3 카드 = 1 row(4×3). ─
+    "growthYoy",                # row9  4 ┐
+    "equityGrowth",             # row9  4 ├ = 12
+    "riskAnomaly",              # row9  4 ┘
 ]
-"""30 카드 / 5 section narrative — 정통 분석 10 단계 매핑:
+"""30 카드 / 5 section / 10 row. 모든 row col 합 = 12 강행 (2026-05-19 운영자 명시).
 01 자본+자산구조 (1+2)  /  02 영업·자본 효율 (3+5)  /  03 현금 일생·자본배분 (4+10)
 04 재무 안정·부도 위험 (7+8)  /  05 성장의 질·이상신호 (6+8).
-신설 4: payoutRatio·cashAssetsRatio·equityGrowth·effectiveTaxRate (2026-05-19)."""
+신설 4: payoutRatio·cashAssetsRatio·equityGrowth·effectiveTaxRate."""
 
 
 # OVERVIEW_KEYS — 재무제표분석 1 view 의 curated 카드 셋트.
