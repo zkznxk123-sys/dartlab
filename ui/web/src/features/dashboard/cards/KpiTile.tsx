@@ -165,24 +165,23 @@ export function KpiTile({
 		);
 	}
 
-	// ──────────────────────────── 1×1 (default) — 가로 직사각 응축 ──────────
-	// 카드 실측 ~ 가로 480 × 세로 180 (4col 1fr × gridAutoRows cap 180). 콘텐츠
-	// 세로 응축이 아닌 *가로 응축* — Bloomberg/Linear 패턴. 좌측: 라벨+값+delta,
-	// 우측: 큰 sparkline 이 카드 폭 절반 차지.
+	// ──────────────────────────── 1×1 (default) — 가로 직사각 고밀도 ────────
+	// 카드 실측 ~ 480×180. 콘텐츠 밀도 ↑ — 좌측 라벨+값+delta 응축, 우측
+	// sparkline 이 카드 폭 60% × 높이 거의 전체 차지. padding/gap 최소.
 	return (
-		<div className="flex h-full w-full items-stretch gap-3 px-4 py-3">
-			<div className="flex flex-1 flex-col justify-center gap-1 min-w-0">
+		<div className="flex h-full w-full items-stretch gap-2 px-3 py-2">
+			<div className="flex flex-[2] flex-col justify-start min-w-0">
 				{label && (
-					<div className="text-[11px] uppercase tracking-wide text-muted-foreground truncate">
+					<div className="text-[11px] uppercase tracking-wide text-muted-foreground truncate leading-tight">
 						{label}
 					</div>
 				)}
-				<div className="flex items-baseline gap-1.5 tabular-nums">
-					<span className={cn('text-2xl font-semibold leading-none', toneClass)}>{displayValue}</span>
+				<div className="mt-0.5 flex items-baseline gap-1 tabular-nums">
+					<span className={cn('text-3xl font-semibold leading-none', toneClass)}>{displayValue}</span>
 					{unit && <span className="text-xs text-muted-foreground">{unit}</span>}
 				</div>
 				{deltaText && (
-					<div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+					<div className="mt-0.5 flex items-center gap-0.5 text-[11px] text-muted-foreground leading-tight">
 						{deltaIcon}
 						<span className={cn('font-medium', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]')}>
 							{deltaText}
@@ -191,8 +190,8 @@ export function KpiTile({
 				)}
 			</div>
 			{hasSparkline && (
-				<div className="flex w-1/2 items-center [&_svg]:!h-full [&_svg]:!w-full">
-					<Sparkline data={sparkline!} color={sparkColor} height={60} width={200} />
+				<div className="flex flex-[3] items-stretch [&_svg]:!h-full [&_svg]:!w-full">
+					<Sparkline data={sparkline!} color={sparkColor} height={120} width={300} />
 				</div>
 			)}
 		</div>
