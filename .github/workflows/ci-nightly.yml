@@ -1,49 +1,62 @@
 name: CI Nightly
 
-# Tier 3 — 1x/day 확장 회귀 (목표 ≤ 45분).
-# UTC 15:00 = KST 00:00. Data Sync (18:00 UTC) 전 여유 시간대.
-#
-# 책임: realdata-suite 전수 (path-filter 우회, 20 shard 모두) + 외부 venv smoke +
-# freshInstall + cross-os-realdata. PR/master ci-fast/full 이 비즈니스 로직 회귀
-# 를 담당하면, 본 파일은 **환경/데이터/분포 edge** 를 잡는다.
+# Tier 3 — 1x/day 확장 회귀 (목표 ≤ 45분). UTC 15:00 = KST 00:00.
+# 명령 SSOT = tests/run.py GATES. realdata 20 shard 도 tests/run.py 의 REALDATA_SHARDS.
 
 on:
   schedule:
-    - cron: "0 15 * * *"  # UTC 15:00 = KST 00:00 daily
+    - cron: "0 15 * * *"
   workflow_dispatch:
     inputs:
       skip_realdata:
-        description: "realdata-suite-full 건너뜀 (외부 venv / freshInstall 만)"
+        description: "realdata-suite-full 건너뜀"
         default: "false"
         type: choice
         options: ["true", "false"]
 
 concurrency:
   group: ci-nightly
-  cancel-in-progress: false  # nightly 는 cron 자연 간격 → 중첩 거의 없음
+  cancel-in-progress: false
 
 jobs:
-  guard-full-census:
+  gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: ${{ matrix.timeout || 30 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - gate: guard-full-census
+            timeout: 15
+          - gate: external-venv-smoke
+            timeout: 45
+            artifact_name: product-smoke-pypi-release
+            artifact_path: product-smoke-pypi-release.json
+          - gate: freshInstall
+          - gate: mutation-testing
+            timeout: 90
+            artifact_name: mutation-results
+            artifact_path: |
+              mutation-results.txt
+              mutants/
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install package and test tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-benchmark hypothesis
-          pip install -e .
-      - name: Run Guard full census
-        env:
-          DARTLAB_PROVIDER_SCOPE: dart,edgar
-        run: |
-          python -X utf8 tests/audit/dartlabGuard.py full --baseline tests/audit/_baselines/dartlabGuard.json
+      - name: Run ${{ matrix.gate }}
+        run: python -X utf8 tests/run.py gate ${{ matrix.gate }}
+      - name: Upload artifact
+        if: ${{ always() && matrix.artifact_name }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
+          retention-days: 30
 
-  # realData 20 shard 전수 — planRealdata 우회 (infra 변경 여부 무관).
+  # realdata 20 shard 전수 — 1 잡 / 1 shard fan-out.
+  # matrix.test_file 은 tests/run.py REALDATA_SHARDS 와 1:1
+  # (test_runEntrypoint.py 의 test_realdataShardsMatchNightlyMatrix 가 검증).
   realdata-suite-full:
     if: ${{ github.event.inputs.skip_realdata != 'true' }}
     runs-on: ubuntu-latest
@@ -74,115 +87,8 @@ jobs:
           - test_topLevelApi.py
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: "pip"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-rerunfailures hypothesis
-          pip install -e .[all]
-      - name: Run ${{ matrix.test_file }}
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "6000"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          bash tests/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
-
-  # 최신 PyPI wheel 을 빈 venv 에 설치 후 제품 smoke.
-  # 본 세션에서 수동 실행하던 것 자동화 — 사용자 실제 경험 재현.
-  external-venv-smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install uv
-        run: pip install uv
-      - name: Install latest PyPI wheel in fresh venv
-        run: |
-          uv venv /tmp/smoke-venv --python 3.12
-          uv pip install --python /tmp/smoke-venv dartlab
-      - name: Run product smoke release on latest PyPI
-        run: |
-          /tmp/smoke-venv/bin/python -X utf8 tests/audit/productSmoke.py \
-            --suite release \
-            --data-mode empty \
-            --import-mode installed \
-            --json-out product-smoke-pypi-release.json
-        env:
-          PYTHONUNBUFFERED: "1"
-      - name: Upload product smoke report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: product-smoke-pypi-release
-          path: product-smoke-pypi-release.json
-          retention-days: 30
-
-  # freshInstall — 빈 캐시에서 HF 자동 다운로드 경로 검증.
-  freshInstall:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-rerunfailures hypothesis
-          pip install -e .[all]
-      - name: Run freshInstall tests (완전 빈 캐시)
-        env:
-          PYTEST_MEMORY_LIMIT_MB: "6000"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          bash tests/test-realdata.sh tests/realData/test_freshInstall.py -v --tb=short
-
-  # Track 5 — mutmut mutation testing (core/ 한정, Linux only)
-  # Windows native 미지원 (mutmut 이슈 #397). nightly Linux runner 에서 1 회 sweep
-  # → mutation score baseline 측정. 결과 artifact 로 다운로드 후 oracle 보강 트리거.
-  mutation-testing:
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    continue-on-error: true  # 첫 baseline 측정 단계 — fail 차단 X
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package + mutmut
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis "mutmut>=3.0"
-          pip install -e .
-      - name: Run mutmut sweep (core/{formatting,cache,naming})
-        env:
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          # mutmut 가 .mutmut-cache 에 mutant 결과 누적. CI 는 매 nightly 신선 실행.
-          rm -rf .mutmut-cache mutants/
-          mutmut run || true  # mutant 일부 생존해도 다음 단계로 (baseline 측정 단계)
-      - name: Generate mutation report
-        run: |
-          mutmut results > mutation-results.txt 2>&1 || true
-          cat mutation-results.txt | head -100
-      - name: Upload mutation report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: mutation-results
-          path: |
-            mutation-results.txt
-            mutants/
-          retention-days: 30
+      - run: python -X utf8 tests/run.py gate realdata-suite-full --test ${{ matrix.test_file }}

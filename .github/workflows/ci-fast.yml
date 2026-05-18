@@ -1,8 +1,9 @@
 name: CI Fast
 
-# Tier 1 — PR / push 에 매번 도는 즉시 피드백 게이트 (목표 ≤ 3분).
-# 업계 표준 (polars / huggingface / pandas / dbt): PR 은 fast 만, heavy 는 nightly/master-only.
-# dartlab 이전 ci.yml 이 realdata-suite 까지 매 PR 마다 돌려 10~15분 허들 → 본 파일로 분할.
+# Tier 1 — PR / push 즉시 피드백 게이트 (목표 ≤ 3분).
+# 모든 게이트 명령은 tests/run.py 의 GATES dict SSOT. 본 파일은 matrix 디스패치만.
+# 신규 게이트 추가: tests/run.py 의 GATES + 본 파일 matrix.include 양쪽 동시 수정
+# (tests/audit/test_runEntrypoint.py 가 drift 차단).
 
 on:
   push:
@@ -10,416 +11,60 @@ on:
   pull_request:
     branches: [master]
 
-# 같은 ref 새 push 시 이전 실행 cancel.
 concurrency:
   group: ci-fast-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # format / lint / typecheck / smoke — 각 30초~2분, 병렬.
-  format:
+  gate:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.timeout || 20 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - gate: format
+          - gate: lint
+            fetch-depth: 2
+          - gate: architecture-l0-l15
+          - gate: typecheck
+          - gate: smoke
+            artifact_name: product-smoke-quick
+            artifact_path: product-smoke-quick.json
+          - gate: test-fast
+          - gate: wheel-smoke
+          - gate: quality-gate
+          - gate: security
+            artifact_name: pip-audit-report
+            artifact_path: audit-report.txt
+          - gate: deps-check
+          - gate: notebooks
+          - gate: snapshot-regression
+            timeout: 5
+          - gate: schema-drift
+            timeout: 5
+          - gate: eval-rule
+            timeout: 5
+          - gate: mutation-smoke
+            timeout: 5
+          - gate: test-coverage-gate
+            fetch-depth: 0
+            timeout: 5
+            artifact_name: test-coverage-gate
+            artifact_path: coverage-gate-report.json
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
+        with:
+          fetch-depth: ${{ matrix.fetch-depth || 1 }}
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Install ruff
-        run: pip install ruff==0.11.6
-      - name: Format check
-        run: ruff format --check src/dartlab/ tests/
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 2  # lint-camelcase diff (HEAD~1 vs HEAD) 위해 부모 커밋 필요
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install ruff
-        run: pip install ruff==0.11.6
-      - name: Lint check
-        run: ruff check src/dartlab/ tests/
-      # scripts/ 폴더 재생성 차단 — CLAUDE.md "scripts/ 폴더 절대 금지" 자동 가드.
-      - name: No scripts/ directory
-        run: python -X utf8 tests/audit/noScriptsDir.py
-      # silent-fail 패턴 lint — 2026-04-19 사고 class 재유입 차단.
-      - name: Silent-fail pattern check
-        run: python tests/audit/checkSilentFail.py
-      # stale reference lint — review→story / Plan v10 같은 대규모 rename 후
-      # 잔존 차단. 패턴 SSOT: tests/audit/stalePatterns.yaml.
-      # PyYAML 필요 (이미 dartlab 의존성).
-      - name: Install PyYAML
-        run: pip install pyyaml
-      - name: Stale references check
-        run: python tests/audit/stale_references.py
-      # camelCase + docstring lint — diff 기준, legacy 비차단.
-      # operation.code SSOT. 새 코드만 게이트, tests/scripts/notebooks 면제.
-      - name: camelCase + docstring lint (diff)
-        run: python -X utf8 tests/audit/lint_camelcase_ast.py --changed --strict
-      # Import cycle 검출 — 양방향 cycle (A↔B) + 3+ 모듈 cycle.
-      # 정책 SSOT: operation.architecture (동급 단방향 허용, 양방향 절대금지).
-      # P0~P3 동안 warning 모드 (continue-on-error). P3 끝 후 --strict 활성.
-      - name: Install networkx (cycle scan)
-        run: pip install networkx
-      - name: Cycle scan (lazy import 포함, P3 까지 warning)
-        run: python -X utf8 tests/audit/cycleScan.py
-        continue-on-error: true
-      # Import-linter — 상하 layer 단방향 + L2 → L3/L4 forbidden.
-      # 정책 SSOT: pyproject [tool.importlinter] (3 contracts).
-      # P0~P3 동안 warning. P3 끝 후 strict 활성.
-      - name: Install import-linter
-        run: pip install import-linter
-      - name: Layered import contracts (P3 까지 warning)
-        run: pip install -e . && lint-imports
-        continue-on-error: true
-      # 매개변수 의미 일관성 — core/naming/aliases.json 표준 사전 검사.
-      # P0 는 placeholder (사전 비어있음 → 통과). P5 부터 실효성 발생.
-      - name: Naming consistency (parameter aliases)
-        run: python -X utf8 tests/audit/namingConsistency.py
-
-  architecture-l0-l15:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package and test tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-benchmark hypothesis
-          pip install -e .
-      - name: L0-L1.5 architecture gates
-        env:
-          DARTLAB_PROVIDER_SCOPE: dart,edgar
-        run: |
-          python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package and pyright
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[all]
-          pip install pyright
-      - name: Run pyright
-        run: pyright
-        continue-on-error: true
-
-  smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .
-      # 공개 API (__all__) 만 touch — 내부 모듈 rename 에 brittle 하지 않게.
-      # `import dartlab` 자체가 __init__.py 의 모든 subsystem 로드를 강제하므로
-      # 공개 surface 무결성 + 패키지 wiring 검증을 동시에 한다.
-      - name: Import smoke test (public API)
-        run: |
-          python -c "
-          import dartlab
-          missing = [n for n in dartlab.__all__ if not hasattr(dartlab, n)]
-          if missing:
-              raise SystemExit(f'public API missing from dartlab.__all__: {missing}')
-          from dartlab import Company
-          assert callable(Company), 'Company is not callable'
-          print(f'dartlab smoke OK — {len(dartlab.__all__)} public symbols, Company callable')
-          "
-      - name: Public API scenario coverage
-        run: python -X utf8 tests/audit/publicApiCoverage.py
-      - name: Memory budget scenario mapping
-        run: python -X utf8 tests/audit/memoryBudgetAudit.py
-      - name: Product smoke quick
-        run: python -X utf8 tests/audit/productSmoke.py --suite quick --data-mode empty --import-mode source --json-out product-smoke-quick.json
-      - name: Upload product smoke quick report
-        if: always()
+      - name: Run ${{ matrix.gate }}
+        run: python -X utf8 tests/run.py gate ${{ matrix.gate }}
+      - name: Upload artifact
+        if: ${{ always() && matrix.artifact_name }}
         uses: actions/upload-artifact@v5
         with:
-          name: product-smoke-quick
-          path: product-smoke-quick.json
-          retention-days: 30
-
-  # Tier 1 의 핵심 — unit marker 만. 이전 test job 이 모든 non-realData 를 돌렸으나
-  # 그 때문에 PR feedback 이 5~10분. unit 만 돌리면 ~90초 예상.
-  # integration / requires_data / cross-os / fixture-integration 은 ci-full 로 이관.
-  test-fast:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-xdist pytest-benchmark
-          # tests/_schemas (pandera) / tests/_cassettes (vcrpy) / tests/cli/test_output_snapshots
-          # (syrupy snapshot fixture) 는 dependency-groups.dev 의 패키지가 필요.
-          pip install "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
-          # mcp 명시 우선 install — dartlab.mcp 와 standalone mcp 의 namespace 회피.
-          pip install "mcp[cli]>=1.0,<1.27.1"
-          # dartlab 를 non-editable 로 install — editable (.pth) 가 sys.path 에 추가하는
-          # 'src' 가 'src/dartlab/mcp/' 와 standalone 'mcp' 의 collision 을 유발하는
-          # 회귀 원인. CI 는 source edit 안 하니 -e 불필요. 매번 wheel build 비용 < 회귀 차단.
-          pip install .
-      # unit marker 만 — 가장 빠른 피드백. requires_data 는 fixture 없으면 data
-      # 로드 실패이므로 제외. pytest-benchmark 는 bench_*.py 수집 위해 설치.
-      - name: Run unit tests (pytest-xdist)
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "1900"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          pytest tests/ -n auto --dist loadfile --tb=short \
-            -m "unit and not requires_data" \
-            --ignore=tests/test_fixture_analysis_real.py \
-            --ignore=tests/test_fixture_credit_real.py \
-            --ignore=tests/test_fixture_story_real.py \
-            --ignore=tests/realData \
-            --benchmark-disable --no-cov
-
-  # Wheel packaging 게이트 — 2026-04-19 사고 (parserMappings 누락) 재발 방지.
-  # 사이즈 작고 빠름. Tier 1 유지.
-  wheel-smoke:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install uv
-        run: pip install uv
-      - name: Build wheel
-        run: uv run --with build python -m build --wheel --outdir dist
-      - name: Verify wheel (bundle + install runtime)
-        run: |
-          set -euo pipefail
-          WHL=$(ls dist/*.whl | head -n1)
-          python -X utf8 .github/scripts/verifyWheel.py "$WHL"
-
-  quality-gate:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install tools
-        run: pip install radon vulture
-      - name: Run quality gate
-        run: python tests/audit/qualityGate.py
-      - name: Record quality history
-        if: github.ref == 'refs/heads/master'
-        run: python tests/audit/qualityGate.py --record
-      - name: Upload quality history
-        if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v5
-        with:
-          name: quality-history
-          path: tests/audit/qualityHistory.jsonl
-          retention-days: 90
-      # 진척 측정 — baseline 부채 + docstring backlog + marker 분포 한 jsonl 행에 적재.
-      # memory/baseline_quota.md 의 분기별 quota (2026-Q2/Q3/Q4) 가시화 인프라.
-      - name: Measure progress (baseline + docstring + marker)
-        run: python -X utf8 src/dartlab/skills/measureProgress.py
-      - name: Record progress history
-        if: github.ref == 'refs/heads/master'
-        run: python -X utf8 src/dartlab/skills/measureProgress.py --record
-      - name: Upload progress history
-        if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v5
-        with:
-          name: progress-history
-          path: src/dartlab/skills/_progress/measureHistory.jsonl
-          retention-days: 90
-
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package and pip-audit
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e . pip-audit
-      - name: Run pip-audit
-        run: pip-audit --strict --desc on 2>&1 | tee audit-report.txt
-        continue-on-error: true
-      - name: Upload audit report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: pip-audit-report
-          path: audit-report.txt
-          retention-days: 30
-
-  deps-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package and deptry
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[all] deptry
-      - name: Check dependency health
-        run: deptry src/dartlab/ --ignore DEP002,DEP003 --extend-exclude _reference
-        continue-on-error: true
-
-  notebooks:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Validate notebook syntax
-        run: python tests/audit/validateNotebooks.py
-
-  # Track 1 — syrupy CLI snapshot 회귀 (HF 마커 · Progress · warning routing)
-  # 본 PR 의 acceptance test. snapshot 깨지면 PR 머지 차단.
-  snapshot-regression:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package + test deps
-        run: |
-          python -m pip install --upgrade pip
-          # pytest-cov 는 pyproject.toml [tool.pytest.ini_options] addopts 와 호환 위해 필요
-          # (--no-cov 플래그 해석은 pytest-cov 가 등록한 hook).
-          pip install pytest pytest-asyncio pytest-cov hypothesis syrupy
-          pip install -e .
-      - name: Run snapshot tests
-        env:
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          pytest tests/cli/test_output_snapshots.py -v --tb=short --no-cov
-
-  # Track 2 — Pandera schema drift (finance/report/docs raw frame 계약)
-  schema-drift:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package + Pandera
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-cov hypothesis "pandera[polars]>=0.29.0"
-          pip install -e .
-      - name: Run schema regression
-        env:
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          pytest tests/_schemas/ -v --tb=short --no-cov
-
-  # Track 3 — 에이전트 출력 6 신호 룰 채점 (외부 모델 호출 0, CI Fast 안전)
-  eval-rule:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package + test deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-cov
-          pip install -e .
-      - name: Run eval smoke
-        env:
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          pytest tests/_evals/test_eval_smoke.py -v --tb=short --no-cov
-
-  # Track 5 — Mutation smoke (Windows 호환 자작) — core/formatting + core/ratios 7 패턴
-  # 100% killed 강제. survived 발견 시 fail. CI Fast 안전 (~35초).
-  mutation-smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install package + test deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis
-          pip install -e .
-      - name: Run mutation smoke (7 patterns, must be 100% killed)
-        env:
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          python -X utf8 tests/audit/mutationSmoke.py
-
-  # Track 6 — 테스트 강제 게이트 (Phase 2 fail-on-missing 활성)
-  # baseline (tests/audit/_baselines/testCoverage.json) 대비 신규 누락만 fail.
-  # 기존 1097 부채는 grandfathered (별도 quota 트랙).
-  test-coverage-gate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0  # diff origin/master 위해 전체 히스토리
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Run gate (diff vs origin/master, fail-on-new-missing)
-        run: |
-          python -X utf8 tests/audit/testCoverageGate.py --diff origin/master --fail-on-missing --limit 30
-      - name: Run gate (all, JSON report)
-        if: always()
-        run: |
-          python -X utf8 tests/audit/testCoverageGate.py --all --json > coverage-gate-report.json
-      - name: Upload report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: test-coverage-gate
-          path: coverage-gate-report.json
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
           retention-days: 30
