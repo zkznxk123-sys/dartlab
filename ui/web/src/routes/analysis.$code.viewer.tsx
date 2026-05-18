@@ -457,7 +457,7 @@ function ViewerTab() {
 			</aside>
 
 			{/* 중앙 본문 */}
-			<main className="flex-1 overflow-y-auto">
+			<main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 				{!activeTopic ? (
 					<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
 						왼쪽에서 항목을 선택하세요.
@@ -502,7 +502,7 @@ function ViewerTab() {
 						{/* 3-column header — period + DART link */}
 						<div
 							className="sticky top-0 z-10 mb-3 grid gap-3 border-b bg-background/95 py-2 backdrop-blur"
-							style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, 1fr)` }}
+							style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
 						>
 							{windowPeriods.map((p) => {
 								const url = dartUrlByPeriod[p];
@@ -664,7 +664,7 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 			{title && <HeadingTag className={cn(headingCls, 'mb-2')}>{title.text}</HeadingTag>}
 			<div
 				className="grid gap-3"
-				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, 1fr)` }}
+				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, minmax(0, 1fr))` }}
 			>
 				{windowPeriods.map((p) => {
 					const body = bodyByPeriod[p];
@@ -672,7 +672,7 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 					return (
 						<div
 							key={p}
-							className="rounded-md border bg-card/40 p-3 text-[13px] leading-6"
+							className="min-w-0 rounded-md border bg-card/40 p-3 text-[13px] leading-6 break-words"
 						>
 							{paragraphs.length > 0 ? (
 								<div className="space-y-2 text-foreground/90">
