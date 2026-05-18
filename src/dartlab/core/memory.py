@@ -101,6 +101,63 @@ def getMemoryMb() -> float:
     return -1.0
 
 
+def getPeakRssMb() -> float:
+    """프로세스 시작 이후 *peak* RSS (Windows PMC.PeakWorkingSetSize) 를 MB 로 반환.
+
+    매직처닝하스 처방 효과 검증 — 시점 RSS (getMemoryMb) 가 peak 를 놓치는
+    문제 해결. Windows 의 PMC.PeakWorkingSetSize 가 *프로세스 수명 동안 최대*
+    working set. Linux 는 VmHWM (high water mark).
+
+    Returns -1.0 — 측정 불가 시 (지원 안 되는 OS / API fail).
+    """
+    try:
+        import ctypes
+        import ctypes.wintypes
+
+        class PMC(ctypes.Structure):
+            _fields_ = [
+                ("cb", ctypes.wintypes.DWORD),
+                ("PageFaultCount", ctypes.wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        GetCurrentProcess = ctypes.windll.kernel32.GetCurrentProcess  # type: ignore[attr-defined]
+        GetCurrentProcess.restype = ctypes.wintypes.HANDLE
+
+        GetProcessMemoryInfo = ctypes.windll.psapi.GetProcessMemoryInfo  # type: ignore[attr-defined]
+        GetProcessMemoryInfo.argtypes = [
+            ctypes.wintypes.HANDLE,
+            ctypes.POINTER(PMC),
+            ctypes.wintypes.DWORD,
+        ]
+        GetProcessMemoryInfo.restype = ctypes.wintypes.BOOL
+
+        pmc = PMC()
+        pmc.cb = ctypes.sizeof(PMC)
+        if GetProcessMemoryInfo(GetCurrentProcess(), ctypes.byref(pmc), pmc.cb):
+            return pmc.PeakWorkingSetSize / (1024 * 1024)
+    except (AttributeError, OSError, ImportError):
+        pass
+
+    # Linux fallback — VmHWM (high water mark)
+    try:
+        with open(f"/proc/{os.getpid()}/status") as f:
+            for line in f:
+                if line.startswith("VmHWM:"):
+                    return int(line.split()[1]) / 1024
+    except (FileNotFoundError, PermissionError):
+        pass
+
+    return -1.0
+
+
 def _getTotalMemoryMb() -> float:
     """시스템 전체 물리 메모리(MB)."""
     try:
