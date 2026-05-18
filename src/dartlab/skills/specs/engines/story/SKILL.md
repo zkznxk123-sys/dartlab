@@ -187,12 +187,28 @@ story 답변은 `target` · `reportType` · `template` · 모든 block 의 `tabl
 
 엔진 docstring 의 Guide 섹션이 audit 통과 → story 블록 템플릿에 반영 (같은 해석 규칙 · 같은 임계값). 반대로 story 블록 중 재현 가능 + 해석 규칙 명확한 것 → 공개 함수로 추출해 엔진 docstring Guide 로 명시. AI · story 공용 호출.
 
+## ask 모드 5 단 답변 양식과 story block 의 매핑
+
+대화형 ask (chat-native) 답변은 LLM 이 `Company.story()` 호출 없이 5 단 구조로 직접 작성하는 경우가 대부분. 그 5 단이 story block 의 단축형:
+
+| ask 5 단 | story block 대응 | evidence |
+| --- | --- | --- |
+| 0. 헤더 chip (`📊 dCR · 🏭 산업·단계 · 📅 dataAsOf`) | `summaryCard` (grade · phase · asOf) | `dcrBadge` · `industryBadge` (auto-attach) |
+| 1. 결론 (1 문장 정량) | `thesis` | valueRef · dateRef |
+| 2. 핵심 근거 (표·시계열) | `evidenceBlocks` | tableRef · valueRef |
+| 3. 메커니즘 (mermaid · 인과 chain) | `narrative` | 하위 엔진 결과 ref |
+| 4. 반례·한계 | `riskBlocks` · `limits` | scenario ref · flags |
+| 5. 후속 모니터링 (정량 임계) | `nextSignals` | 지표명 + 임계값 + 방향 |
+
+호출 `Company.story()` 는 종합 보고서 / landing 페이지 / 자유 조립 시 사용. 단일 질문 답변은 LLM 자체 작성 + 본 양식 박혀있으면 충분.
+
 ## 기본 실행 순서
 
-1. `Company(code).story()` 자동 보고서 — 가장 단순.
-2. 신용 / 가치평가 / 거버넌스 등 집중 시점이면 `reportType=` 명시.
-3. 자유 조립은 `blocks(c)` 로 block dict 받고 `Story([...])`.
-4. 출력 형식 — markdown (LLM 답변), html (landing 임베드), json (AI 후속 처리).
+1. **ask 모드 단일 답변** — LLM 이 5 단 양식 직접 작성. Company.show + 자동 부착 badge 인용. story() 호출 불필요.
+2. **종합 보고서 / landing 페이지** — `Company(code).story()` 자동 reportType.
+3. 신용 / 가치평가 / 거버넌스 등 집중 시점이면 `reportType=` 명시.
+4. 자유 조립은 `blocks(c)` 로 block dict 받고 `Story([...])`.
+5. 출력 형식 — markdown (텍스트 응답), html (landing 임베드), json (후속 처리).
 
 ## 기본 검증
 
