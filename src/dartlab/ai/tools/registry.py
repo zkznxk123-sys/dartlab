@@ -574,6 +574,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "CreateUserSkill",
     "CompileVisual",
     "ScenarioOverlay",
+    "OutcomeLog",
 )
 
 # snake_case ↔ PascalCase 호환 — 옛 호출자 / 옛 model 가 snake 로 부르면 자동 매핑.
