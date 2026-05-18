@@ -285,17 +285,14 @@ def loadData(
 ) -> pl.DataFrame:
     """종목코드 → DataFrame. 로컬에 없으면 릴리즈에서 자동 다운로드.
 
-    `(stockCode, category, …)` 조합 결과는 프로세스 수명 동안 `_LOAD_CACHE`
-    에 LRU(max 16) 캐시된다. accessor 레벨 캐시가 evict 되어도 disk 재파싱
-    을 면해주어 대기업 + 다축 analysis 호출 시 메모리·시간 누적을 막는다.
-    `refresh="force"` 는 캐시를 우회한다.
+    Phase D 에서 `_LOAD_CACHE` 폐기 — 매 호출 disk 재로드. cache 역할은
+    BoundedCache (accessor 결과) + IPC mmap (`.arrow` mirror, OS page cache
+    위임) 가 분담. `refresh="force"` 는 ETag 기반 HF refresh 만 강제.
 
-    Phase B-2 — ``predicate`` kw 추가. polars expression 을 전달하면
-    ``scan_parquet().filter(predicate).collect(streaming)`` 으로 predicate
-    pushdown 활성화 (Phase A 의 row group sort 가 row group skipping 도
-    동행). caller (single-statement fast path) 가 ``pl.col("sj_div").is_in(
-    [...])`` 같은 expression 으로 디스크 디코드량 자체를 축소. ``predicate``
-    가 있는 호출은 ``_LOAD_CACHE`` 우회 — 슬라이스마다 별도 캐시는 무의미.
+    ``predicate`` 는 polars expression — 전달 시 ``scan_parquet().filter(
+    predicate).collect(streaming)`` 으로 predicate pushdown 활성 (Phase A
+    의 row group sort 가 skipping 동행). caller (single-statement fast path)
+    가 ``pl.col("sj_div").is_in([...])`` 형식으로 디스크 디코드량 축소.
     """
     if _IS_PYODIDE:
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
@@ -310,9 +307,6 @@ def loadData(
     krxShouldRefresh: bool | None = None
     if category in {"krxPrices", "krxIndices"} and refresh == "auto":
         krxShouldRefresh = _shouldRefreshHfCategory(path, category, refresh)
-
-    # Phase D — _LOAD_CACHE 폐기. BoundedCache + IPC mmap 이 cache 역할.
-    cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)  # noqa: F841 — backward-compat unused
 
     checkMemoryAndGc(f"loadData({stockCode},{category})")
     effectiveSinceYear = sinceYear
@@ -365,9 +359,7 @@ def loadData(
             if available:
                 lf = lf.select(available)
         df = lf.collect(engine="streaming") if useLazy else pl.read_ipc(str(ipcPath), memory_map=True)
-        result = _normalizeLoadedFrame(df, category)
-        # Phase D — _LOAD_CACHE 폐기 (BoundedCache + IPC mmap 이 cache 역할).
-        return result
+        return _normalizeLoadedFrame(df, category)
 
     if useLazy:
         lf = pl.scan_parquet(str(path))
@@ -393,9 +385,7 @@ def loadData(
         df = lf.collect(engine="streaming")
     else:
         df = pl.read_parquet(str(path))
-    result = _normalizeLoadedFrame(df, category)
-    # Phase D — _LOAD_CACHE 폐기.
-    return result
+    return _normalizeLoadedFrame(df, category)
 
 
 def _ensureLocalParquet(stockCode: str, path: Path, category: str, *, shouldRefresh: bool) -> None:
