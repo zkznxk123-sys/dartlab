@@ -376,10 +376,24 @@ function ViewerTab() {
 		return '';
 	}, [toc, activeTopic]);
 	const allSections = latestViewer?.textDocument?.sections ?? [];
-	const sectionsOwn = useMemo(
-		() => _filterToOwnLeaf(allSections, ownLeafKey),
-		[allSections, ownLeafKey],
-	);
+	const sectionsOwn = useMemo(() => {
+		const filtered = _filterToOwnLeaf(allSections, ownLeafKey);
+		// dedupe by (firstHeadingText + body.trim()) — backend sections frame 가 같은
+		// stub 본문을 hp 있는 section + hp 빈 section 2 개로 자주 박는다. 같은 body 면 keep first.
+		const seen = new Set<string>();
+		const out: ViewerSection[] = [];
+		for (const s of filtered) {
+			const title = _sectionTitle(s)?.text || '';
+			const body = (s.latest?.body || '').trim();
+			const key = `${title}::${body}`;
+			if (key === '::' || seen.has(key)) {
+				if (key !== '::') continue;
+			}
+			seen.add(key);
+			out.push(s);
+		}
+		return out;
+	}, [allSections, ownLeafKey]);
 	// 윈도우 3 period 중 한 곳이라도 timeline 에 포함되는 section 만 행으로 노출.
 	const sections = useMemo(() => {
 		if (windowPeriods.length === 0) return sectionsOwn;
@@ -431,7 +445,7 @@ function ViewerTab() {
 				// 윈도우 3 period 중 한 곳이라도 timeline 매칭 시 노출.
 				if (!(s.timeline ?? []).some((t) => ws.has(_periodLabel(t?.period)))) continue;
 				out.push({ kind: 'section', id: `s-${sid}`, section: s });
-			} else if (e.kind === 'block_ref' && e.blockKind === 'raw_markdown') {
+			} else if (e.kind === 'block_ref' && (e.blockKind === 'raw_markdown' || e.blockKind === 'finance')) {
 				const bid = e.blockRef;
 				if (bid == null) continue;
 				const pmd = tablesByBlock[bid];
@@ -544,7 +558,7 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="w-full min-w-0 max-w-full overflow-hidden py-4">
+					<div className="w-full min-w-0 max-w-full overflow-hidden px-3 py-4">
 						<header className="mb-6 border-b pb-4">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>

@@ -385,22 +385,74 @@ def _compactTextDocument(
     sliced = sections[:limit] if limit > 0 else sections
     compactSections = [{key: section.get(key) for key in _VIEWER_COMPACT_SECTION_KEEP} for section in sliced]
     entries = doc.get("entries") or []
-    # raw_markdown 블록만 추출 — block id → {period: markdown}
+    # raw_markdown + finance 블록 → block id → {period: markdown}.
+    # finance.data 는 columns/rows 구조이므로 period 별 [항목, value(억원)] 표로 변환.
     tables: dict[int, dict[str, str]] = {}
     for b in (blocks or []):
-        if b.get("kind") != "raw_markdown":
+        kind = b.get("kind")
+        bid = b.get("block")
+        if bid is None:
             continue
-        rm = b.get("rawMarkdown")
-        if not isinstance(rm, dict):
-            continue
-        # 빈 markdown 제외
-        cleaned = {p: v for p, v in rm.items() if isinstance(v, str) and v.strip()}
-        if cleaned:
-            tables[int(b.get("block"))] = cleaned
+        if kind == "raw_markdown":
+            rm = b.get("rawMarkdown")
+            if not isinstance(rm, dict):
+                continue
+            cleaned = {p: v for p, v in rm.items() if isinstance(v, str) and v.strip()}
+            if cleaned:
+                tables[int(bid)] = cleaned
+        elif kind == "finance":
+            data = b.get("data") or {}
+            cols = data.get("columns") or []
+            rows = data.get("rows") or []
+            meta = b.get("meta") or {}
+            scale_div = meta.get("scaleDivisor") or 1.0
+            scale_lbl = meta.get("scale") or ""
+            # period 별 단순 markdown 표 — | 항목 | 값(억원) |
+            per_period: dict[str, str] = {}
+            label_col = "항목" if "항목" in cols else (cols[1] if len(cols) > 1 else cols[0] if cols else "")
+            periods = [c for c in cols if c not in {"snakeId", label_col}]
+            unit_hint = f" ({scale_lbl})" if scale_lbl else ""
+            for p in periods:
+                lines = [f"| 항목 | 값{unit_hint} |", "| --- | --- |"]
+                any_row = False
+                for row in rows:
+                    label = row.get(label_col)
+                    val = row.get(p)
+                    if val is None or label is None:
+                        continue
+                    try:
+                        scaled = float(val) / scale_div
+                        if abs(scaled) >= 100:
+                            display = f"{scaled:,.0f}"
+                        else:
+                            display = f"{scaled:,.2f}"
+                    except (TypeError, ValueError):
+                        display = str(val)
+                    lines.append(f"| {label} | {display} |")
+                    any_row = True
+                if any_row:
+                    per_period[p] = "\n".join(lines)
+            if per_period:
+                tables[int(bid)] = per_period
+    # td.periods 가 비어있으면 finance block meta.periods 로 보충 (IS/CF/BS/CIS/SCE
+    # topic 은 finance block 만 있고 sections 0 이라 td.periods=[] 로 옴).
+    periods = doc.get("periods")
+    if not periods:
+        derived: list[Any] = []
+        seen_period: set[str] = set()
+        for b in (blocks or []):
+            meta = b.get("meta") or {}
+            for pl in (meta.get("periods") or []):
+                if isinstance(pl, str) and pl not in seen_period:
+                    seen_period.add(pl)
+                    # PeriodRef 와 호환되는 dict 형태 — frontend _periodLabel 이 label 키 우선.
+                    derived.append({"label": pl})
+        if derived:
+            periods = derived
     return {
         "topic": doc.get("topic"),
         "mode": doc.get("mode"),
-        "periods": doc.get("periods"),
+        "periods": periods,
         "latestPeriod": doc.get("latestPeriod"),
         "firstPeriod": doc.get("firstPeriod"),
         "sectionCount": doc.get("sectionCount", total),
