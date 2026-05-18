@@ -117,7 +117,7 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "장부가 추이 — 자기자본·이익잉여금. 시장 멀티플 정상화 근거.",
     },
     "scenarioGrowth": {
@@ -147,7 +147,7 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "Bull/Base/Bear 시나리오를 위한 과거 성장 분포. 평균 + 표준편차로 g 추정.",
     },
 }

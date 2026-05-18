@@ -270,7 +270,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "매입채무는 무이자 영업부채 (좋은 부채). 단기차입금 ↑ 은 자금 압박 신호. 장기차입금·사채는 만기 분산되지만 이자 비용 부담. 영업부채 비중이 크면 운전자본으로 자금 조달 — 건전.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -325,7 +325,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "이익잉여금이 매년 누적 증가하면 건전한 내부유보. 자본금 변동 없이 잉여금만 증가하면 이상적. 기타자본 음수는 자기주식 매입 (주주환원). 자본잉여금은 주식발행초과금.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1019,7 +1019,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],  # adapter 가 series 직접 생성
         "dataSpec": {"adapter": "capitalAllocationBars"},
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "연도별 영업CF 사용처 — 설비투자 / 배당 / 부채상환 / 잉여 4 분해. 비중 변화로 capital allocation 우선순위 추적.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1034,7 +1034,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "capitalAllocationWaterfall"},
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "최근 기간 영업CF 가 어떻게 분해되는가. 영업CF → -설비투자 → -배당 → -부채상환 → 잉여. 부호별 색.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1227,29 +1227,31 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
 KPI 1×1 4 개 = 한 row, 자산구조 2×3 + 부채/자본 1×3 = 한 row, trend 2×2 4 개 = 두 row."""
 
 
-# overview = "한눈에 진단" narrative — 38 카드 dump 가 아닌 12 카드 curated.
-# 순서: KPI 4 → 회계 등식 hero → 본업+현금 → 추세 → 위험.
+# v3-r6 — 재무분석 1 view (운영자 명시): 자산구조 dual-stack hero + KPI 4 + 본질 chart 9.
+# bento 2026 가이드 룰 + Anthropic data-viz skill 채택. cell 합 384 / 24 = 16 row → viewport fit.
 OVERVIEW_KEYS: list[str] = [
-    # row 1: 핵심 KPI 4 (각 1×1) — 매출·영업이익·ROE·부채비율
+    # Hero — 자산구조 dual-stack (영업+비영업 = 총자산 | 부채+자본). 회계 등식 24×6.
+    "assetComposition",
+    # KPI strip — 매출·영업이익·ROE·부채비율 (각 3×2, 한 행 12 col 차지)
     "kpiRevenue",
     "kpiOperatingIncome",
     "kpiRoe",
     "kpiDebtRatio",
-    # row 2-5: 자산구조 dual-stack hero (4×4)
-    "assetComposition",
-    # row 6+: 본업 + 현금 (각 2×3)
-    "incomeBreakdown",
-    "cashflowSigned",
-    # row 추세 (각 2×3)
-    "marginTrend",
-    "growthYoy",
-    # row 위험 (gauge 1×2 + topList 2×3 + 생애주기 4×1)
-    "riskDistress",
-    "riskAnomaly",
-    "riskLifeCycle",
+    # 손익·현금·자본 본질 (각 6×4 chart)
+    "incomeBreakdown",  # 손익구조 (매출 bar + 영업이익/순이익 line)
+    "liabilityDetail",  # 부채상세 (매입채무·기타영업부채·단기·장기차입금 stacked)
+    "equityDetail",  # 자본상세 (자본금·자본잉여금·이익잉여금·기타자본 stacked)
+    "cashflowSigned",  # 현금흐름 signed (영업/투자/재무 + 순현금증감 line)
+    # 수익성·성장 추세 (각 6×4)
+    "marginTrend",  # 이익률 (gpm/opm/npm)
+    "returnTrend",  # ROE/ROA
+    "growthYoy",  # 매출/영업/순이익 YoY
+    # 안전성·유동성 (각 6×4)
+    "leverageTrend",  # D/E + D/A + 유동비율
+    "liquidityTrend",  # 유동/당좌/현금비율
 ]
-"""overview narrative — '5초 진단' curated 12 카드.
-사용자 요구 (P-DASH-V1 보강 2): 흐름 view 지 sub 의 dump 가 아니다."""
+"""재무분석 1 view (v3-r6) — Anthropic data-viz + bento 2026 룰 적용.
+운영자 명시: '자산구조 / 부채상세 / 자본상세 / 손익구조 + 그래프+테이블 균형 + 카드 작게 + 빈칸 0'."""
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -1397,7 +1399,7 @@ _STORY_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "1막 매출 + 2막 영업이익 동시 — 서사의 큰 줄기.",
     },
     # 매출 시계열 옆 (16 col 공간) — 현금·자본 시계열 → 3~5막 검증.
@@ -1438,7 +1440,7 @@ _STORY_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "3막 현금(영업CF) → FCF → 5막 배분 가능 자본(자기자본) 누적. 매출 옆에서 인과 검증.",
     },
     # 6 막 인과 자연어 wide (8 번 카드 — Story view 의 결론).
@@ -1476,7 +1478,7 @@ _SNOWFLAKE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "snowflakeRadar"},
         "options": {"unit": "점", "maxValue": 5},
-        "layout": {"colSpan": 12, "rowSpan": 12},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "Value/Future/Past/Health/Dividend 회계 기반 합성. 시장가 의존 metric 폐기 (PER → Owner Earnings Yield · 배당수익률 → 배당성향 등).",
     },
     "snowflakeScoreBadge": {

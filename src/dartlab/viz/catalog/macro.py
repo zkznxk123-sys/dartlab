@@ -106,7 +106,7 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "매출 절대값 + YoY. 산업 경기 사이클과의 동조성 시각화.",
     },
     "debtCycle": {
@@ -138,7 +138,7 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "stacked": True},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "차입금 시계열 — 금리 사이클 노출. 단기 비중 ↑ = 금리 민감.",
     },
 }

@@ -112,7 +112,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "영업+/투자-/재무- = 성숙기, 모두+ = 도입기, 영업- = 위기.",
     },
     "capitalDeployment": {
@@ -142,7 +142,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "CapEx + R&D 절대값. 비중 변화로 도입기→성숙기 전이 식별.",
     },
 }

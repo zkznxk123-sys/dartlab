@@ -87,7 +87,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "영업CF/순이익 100%↑ = 회계이익이 진짜 현금. 70% 미만 지속은 분식 의심.",
     },
     "capitalGovernance": {
@@ -117,7 +117,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 8, "rowSpan": 8},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "자기자본비율 + 이익잉여금/자본. 내부유보 누적 = 보수적 거버넌스.",
     },
 }

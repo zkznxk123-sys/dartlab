@@ -207,15 +207,14 @@ export function AppSidebar() {
 //   스크리너 = placeholder (실제 로직 후속 PR).
 //   재무제표분석 7 sub = 7 가지 서로 다른 재무 분석 방법론 (lens).
 //   같은 회사를 그레이엄·린치·S&P·Sloan 식 다른 학파 시각으로 본다.
-const FINANCIAL_SUBS = [
-	{ key: 'story', label: 'Story', title: '서사', icon: BookOpen, hint: '6 막 인과 — 사업→수익→현금→안정→배분→미래' },
-	{ key: 'dupont', label: 'DuPont', title: '분해', icon: PieChart, hint: 'ROE = 순이익률 × 자산회전 × 레버리지' },
-	{ key: 'value', label: 'Value', title: '가치투자', icon: Coins, hint: 'Graham·Buffett·Damodaran — PER/PBR/DCF/Owner Earnings' },
-	{ key: 'growth', label: 'Growth', title: '성장투자', icon: TrendingUp, hint: 'Lynch·Fisher — 매출 CAGR/PEG/세그먼트' },
-	{ key: 'credit', label: 'Credit', title: '신용분석', icon: ShieldCheck, hint: 'Moody’s·S&P·Altman — Z/이자보상/만기' },
-	{ key: 'quality', label: 'Quality', title: '이익품질', icon: Microscope, hint: 'Beneish·Sloan — M/발생액/CF·NI 디버전스' },
-	{ key: 'snowflake', label: 'Snowflake', title: '종합', icon: Sparkles, hint: 'Simply Wall St — Value·Future·Past·Health·Dividend' },
-] as const;
+// v3-r6 — 7 sub view 일시 폐기 (운영자 명시). 1 메뉴 "재무분석" 만 활성. 나중에 카테고리 다시 추가.
+const FINANCIAL_SUBS: ReadonlyArray<{
+	key: string;
+	label: string;
+	title: string;
+	icon: typeof BookOpen;
+	hint: string;
+}> = [];
 
 function DashboardNav() {
 	const { pathname } = useLocation();
@@ -226,7 +225,8 @@ function DashboardNav() {
 	const code = codeMatch?.[1];
 
 	const isFinancial = !!code && pathname.startsWith(`/analysis/${code}/financial`);
-	const activeSubView = isFinancial ? (search?.view ?? 'snowflake') : null;
+	// v3-r6 — view 없으면 OVERVIEW_KEYS curated 노출 (재무분석 1 view).
+	const activeSubView = isFinancial ? (search?.view ?? null) : null;
 	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
 	const isScreener = pathname.startsWith('/screener');
 
@@ -242,7 +242,7 @@ function DashboardNav() {
 				<Link
 					to={t.id === 'financial' ? '/analysis/$code/financial' : '/analysis/$code/viewer'}
 					params={{ code }}
-					search={t.id === 'financial' ? { period: 'quarterly', view: 'snowflake' } : { period: 'quarterly' }}
+					search={{ period: 'quarterly' }}
 				>
 					<t.icon />
 					<span>{t.title}</span>

@@ -22,8 +22,6 @@ import {
 
 import {
 	ChartContainer,
-	ChartLegend,
-	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 	type ChartConfig,
@@ -215,7 +213,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 						/>
 					}
 				/>
-				<ChartLegend content={<ChartLegendContent />} />
+				{/* v3-r6 — chart canvas legend 제거. mini-table 가 legend 역할 (color-dot + 라벨 + 값). chart canvas 침범 회피. */}
 				{renderSeries}
 			</Wrapper>
 		</ChartContainer>
@@ -245,7 +243,7 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 					/>
 				))}
 				<ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-				<ChartLegend content={<ChartLegendContent />} />
+				{/* v3-r6 — chart canvas legend 제거. mini-table 가 legend 역할 (color-dot + 라벨 + 값). chart canvas 침범 회피. */}
 			</RadarChart>
 		</ChartContainer>
 	);

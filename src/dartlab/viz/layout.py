@@ -40,23 +40,25 @@ from dartlab.viz.schema import CatalogEntry
 # - radar/comparisonTable = 12×12 / 12×8 hero (다차원/peer)
 # - phaseIndicator = 24×2 strip (한 행 전체 얇음)
 # - narrativeBridge/scoreBadge = 24×4 / 24×3 wide (서사/평점)
-# v3-r5 — 5×* 폐기 (24 약수 강행) + sankey 폐기 (14→13 kind) + gauge wide 24×4 신설.
-# 모든 size 는 24 의 약수 (1, 2, 3, 4, 6, 8, 12, 24). variance 도 약수만.
+# v3-r6 — bento 2026 정통 + Anthropic data-viz skill 룰.
+# KPI 3×2 가로 와이드 (한 행 8 카드 = 24col 정확). chart/table 일관 6×4 (한 행 4 카드).
+# hero (assetComposition dual-stack) variance 12×8. 모든 size 24 약수 (1,2,3,4,6,8,12,24).
 KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
-    "kpiTile": {"cs": 4, "rs": 2, "variance": ["4x3", "6x2", "8x2", "8x4", "12x2", "12x4"]},
-    "diffView": {"cs": 4, "rs": 2, "variance": ["8x4", "12x4", "24x2"]},
-    "gauge": {"cs": 4, "rs": 3, "variance": ["4x4", "6x4", "8x4", "24x4"]},  # 24x4 = wide hero
-    "topList": {"cs": 4, "rs": 4, "variance": ["8x4", "12x4", "24x4"]},
-    "trend": {"cs": 8, "rs": 8, "variance": ["12x8", "24x6", "6x6", "12x12", "12x4", "8x4"]},
-    "breakdown": {"cs": 8, "rs": 8, "variance": ["12x8", "12x6"]},
-    "scatter": {"cs": 8, "rs": 8, "variance": ["12x8"]},
-    "matrix": {"cs": 8, "rs": 8, "variance": ["12x4", "24x4"]},
-    "waterfall": {"cs": 8, "rs": 8, "variance": ["12x8"]},
-    "radar": {"cs": 12, "rs": 12, "variance": ["8x8"]},
-    "comparisonTable": {"cs": 12, "rs": 8, "variance": ["24x4", "24x8"]},
+    "kpiTile": {"cs": 3, "rs": 2, "variance": ["4x2", "6x2", "8x2", "12x2"]},
+    "diffView": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "24x2"]},
+    "gauge": {"cs": 4, "rs": 3, "variance": ["4x4", "6x4", "8x4", "24x4"]},
+    "topList": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "24x4"]},
+    # chart 6×4 default — 한 행 4 카드, 그래프·테이블 균형. 시리즈 많을 때 wide.
+    "trend": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "12x6", "12x8", "24x4", "24x6", "24x8"]},
+    "breakdown": {"cs": 6, "rs": 4, "variance": ["8x4", "12x6"]},
+    "scatter": {"cs": 6, "rs": 4, "variance": ["8x4", "12x6"]},
+    "matrix": {"cs": 6, "rs": 4, "variance": ["8x4", "12x4", "24x4"]},
+    "waterfall": {"cs": 6, "rs": 4, "variance": ["8x4", "12x6"]},
+    "radar": {"cs": 6, "rs": 6, "variance": ["8x6", "8x8"]},  # 운영자 "8×8 할 이유 X" — default 6×6
+    "comparisonTable": {"cs": 12, "rs": 6, "variance": ["12x4", "24x4", "24x6"]},
     "phaseIndicator": {"cs": 24, "rs": 2, "variance": ["24x3", "12x4"]},
     "narrativeBridge": {"cs": 24, "rs": 4, "variance": ["12x4"]},
-    "scoreBadge": {"cs": 12, "rs": 4, "variance": ["24x3", "24x4"]},  # v3-r5: 24x3 → 12x4 default
+    "scoreBadge": {"cs": 12, "rs": 4, "variance": ["24x3", "24x4"]},
 }
 
 
@@ -191,17 +193,20 @@ def resolveLayout(entry: CatalogEntry) -> tuple[int, int]:
             )
         return cs, rs
 
-    # kind=trend 자동 보정 (24-col 기준):
-    # 1~3 시리즈 = 8×8 (default 정사각, 3 카드/한행)
-    # 4~5 시리즈 = 12×12 (hero, 2 카드/한행)
-    # 6+ 시리즈 = 24×6 (wide, 한 행 전체)
+    # kind=trend 자동 보정 (v3-r6 작게 + bento 2026 룰):
+    # 1~3 시리즈 = 6×4 (default, 한 행 4 카드)
+    # 4~5 시리즈 = 8×4 (한 행 3 카드)
+    # 6~7 시리즈 = 12×4 (한 행 2 카드, wide)
+    # 8+ 시리즈 (assetComposition 9 dual-stack 등) = 24×6 (hero 한 행 전체)
     if kind == "trend":
         nSeries = len(entry.get("seriesPlan") or [])
-        if nSeries >= 6:
+        if nSeries >= 8:
             return 24, 6
+        if 6 <= nSeries <= 7:
+            return 12, 4
         if 4 <= nSeries <= 5:
-            return 12, 12
-        # 1~3 시리즈 = 8×8 (default)
+            return 8, 4
+        # 1~3 시리즈 = 6×4 (default)
 
     return default["cs"], default["rs"]
 
