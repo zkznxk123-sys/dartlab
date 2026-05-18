@@ -30,7 +30,7 @@ def _kpi(
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 5, "rowSpan": 2},
+        "layout": {"colSpan": 6, "rowSpan": 2},
         "help": helpText,
     }
 
