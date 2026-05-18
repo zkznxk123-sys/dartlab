@@ -21,6 +21,12 @@ if "POLARS_MAX_THREADS" not in _os.environ and (_os.cpu_count() or 4) > 4:
 # 사용자 명시 설정은 존중.
 if "POLARS_AUTO_NEW_STREAMING" not in _os.environ:
     _os.environ["POLARS_AUTO_NEW_STREAMING"] = "1"
+
+# Streaming chunk size — sweep 결과 (5000/10000/20000/30000/50000) chunk=10000
+# 이 sweet spot. 005380 c.story() peak 945 → 893 (-52MB). 너무 작으면
+# (chunk≤5000) thrashing, 너무 크면 (chunk≥20000) intermediate 누적.
+if "POLARS_STREAMING_CHUNK_SIZE" not in _os.environ:
+    _os.environ["POLARS_STREAMING_CHUNK_SIZE"] = "10000"
 del _os
 
 _IS_PYODIDE = sys.platform == "emscripten"
