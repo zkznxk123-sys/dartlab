@@ -147,14 +147,6 @@ function _periodLabel(p: unknown): string {
 	return '';
 }
 
-// headingPath dict 배열에서 text 만 안전 추출.
-function _headingTexts(path: ViewerHeading[] | undefined | null): string[] {
-	if (!Array.isArray(path)) return [];
-	return path
-		.map((h) => (typeof h === 'string' ? (h as string) : (h?.text ?? '')))
-		.filter((t) => typeof t === 'string' && t.trim().length > 0);
-}
-
 // 본문을 단락 prose 로 분리. 빈 줄 우선, 없으면 단일 줄바꿈.
 function _bodyParagraphs(body: string | undefined | null): string[] {
 	if (!body || !body.trim()) return [];
@@ -168,17 +160,28 @@ function _bodyParagraphs(body: string | undefined | null): string[] {
 		.filter(Boolean);
 }
 
-// 헤딩 fallback — headingPath 비어있으면 body 첫 단락 절단, 그것도 없으면 section.id.
-function _sectionTitle(section: ViewerSection): { title: string; muted: boolean } {
-	const headings = _headingTexts(section.headingPath);
-	if (headings.length > 0) return { title: headings[headings.length - 1], muted: false };
-	const paragraphs = _bodyParagraphs(section.latest?.body);
-	if (paragraphs.length > 0) {
-		const first = paragraphs[0];
-		const trimmed = first.length > 60 ? first.slice(0, 60) + '…' : first;
-		return { title: trimmed, muted: true };
+// section 의 실제 heading (headingPath 의 마지막 비어있지 않은 text). 없으면 null.
+function _sectionTitle(section: ViewerSection): { text: string; level: number } | null {
+	const path = section.headingPath ?? [];
+	for (let i = path.length - 1; i >= 0; i--) {
+		const h = path[i];
+		const text = typeof h === 'string' ? (h as string) : h?.text ?? '';
+		if (typeof text === 'string' && text.trim().length > 0) {
+			const level = typeof h === 'object' && typeof h?.level === 'number' ? h.level : 0;
+			return { text: text.trim(), level };
+		}
 	}
-	return { title: section.id, muted: true };
+	return null;
+}
+
+// heading level (DART 데이터: I.→2, 1.→3, 가.→4 식) 를 display tag/style 로 매핑.
+// 화면에 보이는 모든 headings 의 min level 을 1 로 정규화해 상대 hierarchy 유지.
+function _headingStyle(level: number, minLevel: number): { tag: 'h1' | 'h2' | 'h3' | 'h4'; cls: string } {
+	const rel = Math.max(1, level - minLevel + 1);
+	if (rel <= 1) return { tag: 'h1', cls: 'text-2xl font-semibold tracking-tight' };
+	if (rel === 2) return { tag: 'h2', cls: 'text-lg font-semibold tracking-tight' };
+	if (rel === 3) return { tag: 'h3', cls: 'text-base font-semibold' };
+	return { tag: 'h4', cls: 'text-sm font-semibold text-muted-foreground' };
 }
 
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
@@ -423,15 +426,11 @@ function ViewerTab() {
 									본문 데이터가 없습니다.
 								</div>
 							) : (
-								<div className="space-y-10">
-									{sections.map((s) => (
-										<DocumentSection key={s.id} section={s} />
-									))}
-									{td?.truncated && td?.totalSectionCount != null && (
-										<div className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
-											… 그 외 {td.totalSectionCount - allSections.length} 섹션. 필터/검색은 후속 PR.
-										</div>
-									)}
+								<DocumentBody sections={sections} />
+							)}
+							{td?.truncated && td?.totalSectionCount != null && (
+								<div className="mt-10 rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
+									… 그 외 {td.totalSectionCount - allSections.length} 섹션. 필터/검색은 후속 PR.
 								</div>
 							)}
 						</article>
@@ -453,44 +452,98 @@ function ViewerTab() {
 	);
 }
 
-function DocumentSection({ section }: { section: ViewerSection }) {
+// 본문 prose 컴포넌트 — sections 들을 자연 순서로 펼치되, body 없는 intermediate heading
+// (다음 section 의 headingPath 에 pending 으로 끌려간 것) 도 자기 자체 entry 로 렌더.
+// 결과: 1 → 2 (body 없음) → 3 → 4 → 가 (body 없음) → ... → 바 자연 흐름.
+function DocumentBody({ sections }: { sections: ViewerSection[] }) {
+	// 화면에 보일 모든 heading 의 min level 추출 — 상대 hierarchy 정규화용.
+	const minLevel = useMemo(() => {
+		let m = Number.POSITIVE_INFINITY;
+		for (const s of sections) {
+			for (const h of s.headingPath ?? []) {
+				const lvl = typeof h?.level === 'number' ? h.level : 0;
+				if (lvl > 0 && lvl < m) m = lvl;
+			}
+		}
+		return Number.isFinite(m) ? m : 1;
+	}, [sections]);
+
+	const emitted = new Set<number>();
+	const items: React.ReactNode[] = [];
+
+	for (const section of sections) {
+		const path = section.headingPath ?? [];
+		// 마지막 heading 은 section 자체의 제목 — 그 위의 intermediate 들만 별 entry 로.
+		for (let i = 0; i < path.length - 1; i++) {
+			const h = path[i];
+			const blockId = typeof h === 'object' && typeof h?.block === 'number' ? h.block : null;
+			const text = typeof h === 'object' ? (h?.text ?? '') : (h as unknown as string);
+			if (!text || (blockId != null && emitted.has(blockId))) continue;
+			if (blockId != null) emitted.add(blockId);
+			const level = typeof h === 'object' && typeof h?.level === 'number' ? h.level : 0;
+			items.push(
+				<EmptyHeading
+					key={`h-${blockId ?? i}-${section.id}`}
+					text={text}
+					level={level}
+					minLevel={minLevel}
+				/>,
+			);
+		}
+		const last = path[path.length - 1];
+		const lastBlockId = typeof last === 'object' && typeof last?.block === 'number' ? last.block : null;
+		if (lastBlockId != null) emitted.add(lastBlockId);
+		items.push(<DocumentSection key={section.id} section={section} minLevel={minLevel} />);
+	}
+
+	return <div className="space-y-8">{items}</div>;
+}
+
+// body 없는 heading — 그 자체로 한 줄 자리만 차지. "기재 없음" 한 줄 mute 표시.
+function EmptyHeading({
+	text,
+	level,
+	minLevel,
+}: {
+	text: string;
+	level: number;
+	minLevel: number;
+}) {
+	const { tag: Tag, cls } = _headingStyle(level || minLevel, minLevel);
+	return (
+		<section className="border-l-2 border-muted/40 pl-4">
+			<Tag className={cn(cls, 'text-muted-foreground')}>{text}</Tag>
+			<p className="mt-1 text-[12px] italic text-muted-foreground/70">하위 본문 없음</p>
+		</section>
+	);
+}
+
+function DocumentSection({ section, minLevel }: { section: ViewerSection; minLevel: number }) {
 	const status = section.status ?? '';
 	const statusInfo = STATUS_LABEL[status];
-	const { title, muted } = _sectionTitle(section);
-	const headings = _headingTexts(section.headingPath);
-	const breadcrumb = headings.slice(0, -1).join(' › ');
-	const lastHeading = section.headingPath?.[section.headingPath.length - 1];
-	const headingLevel = typeof lastHeading?.level === 'number' && lastHeading.level >= 3 ? 3 : 2;
-
+	const title = _sectionTitle(section);
 	const body = section.latest?.body ?? '';
 	const paragraphs = _bodyParagraphs(body);
 
-	const HeadingTag = headingLevel === 3 ? 'h3' : 'h2';
-	const headingCls =
-		headingLevel === 3
-			? 'text-base font-semibold tracking-tight mt-2'
-			: 'text-lg font-semibold tracking-tight mt-2';
+	const { tag: HeadingTag, cls: headingCls } = title
+		? _headingStyle(title.level || minLevel, minLevel)
+		: { tag: 'h2' as const, cls: '' };
 
 	return (
 		<section className="scroll-mt-6" id={`sec-${section.id}`}>
-			{breadcrumb && (
-				<div className="text-[11px] uppercase tracking-wider text-muted-foreground/80">
-					{breadcrumb}
+			{title && (
+				<div className="flex items-baseline justify-between gap-3">
+					<HeadingTag className={headingCls}>{title.text}</HeadingTag>
+					<div className="flex shrink-0 items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
+						{statusInfo && status !== 'stable' && (
+							<span className={cn('rounded px-1.5 py-0.5 font-normal', statusInfo.tone)}>
+								{statusInfo.label}
+							</span>
+						)}
+						{section.latestChange && <span>{String(section.latestChange)}</span>}
+					</div>
 				</div>
 			)}
-			<div className="flex items-baseline justify-between gap-3">
-				<HeadingTag className={cn(headingCls, muted && 'text-muted-foreground italic')}>
-					{title}
-				</HeadingTag>
-				<div className="flex shrink-0 items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
-					{statusInfo && status !== 'stable' && (
-						<span className={cn('rounded px-1.5 py-0.5 font-normal', statusInfo.tone)}>
-							{statusInfo.label}
-						</span>
-					)}
-					{section.latestChange && <span>{String(section.latestChange)}</span>}
-				</div>
-			</div>
 			<div className="mt-3 space-y-3 text-[15px] leading-7 text-foreground/90">
 				{paragraphs.length > 0 ? (
 					paragraphs.map((p, i) => (
