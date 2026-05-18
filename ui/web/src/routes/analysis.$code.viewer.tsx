@@ -146,6 +146,33 @@ function _periodLabel(p: unknown): string {
 	return '';
 }
 
+// 직전 active section 의 leaf 를 따라가며 1. 회사의 개요 / 2. 회사의 연혁 처럼
+// 같은 chapter 안 여러 leaf 가 한 topic 응답에 섞여 오는 경우 (companyOverview)
+// 사용자가 클릭한 leaf 의 sections 만 통과. headingPath 가 비어도 직전 state 유지.
+const _NUMBERED_LEAF_RE = /^\s*(\d+)\.\s*([^\n]+?)\s*$/;
+function _leafKey(text: string): string | null {
+	const m = _NUMBERED_LEAF_RE.exec(text || '');
+	if (!m) return null;
+	return `${m[1]}.${m[2].trim()}`;
+}
+function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafKey: string): ViewerSection[] {
+	if (!ownLeafKey) return allSections;
+	const kept: ViewerSection[] = [];
+	let activeOwn = true;
+	for (const s of allSections) {
+		const path = s.headingPath ?? [];
+		let foundKey: string | null = null;
+		for (const h of path) {
+			const t = typeof h === 'string' ? (h as string) : (h?.text || '');
+			const k = _leafKey(t);
+			if (k) foundKey = k;
+		}
+		if (foundKey !== null) activeOwn = foundKey === ownLeafKey;
+		if (activeOwn) kept.push(s);
+	}
+	return kept;
+}
+
 function _bodyParagraphs(body: string | undefined | null): string[] {
 	if (!body || !body.trim()) return [];
 	const blocks = body.replace(/\r\n?/g, '\n').split(/\n\s*\n+/);
@@ -306,10 +333,15 @@ function ViewerTab() {
 	const canOlder = windowEndIdx >= 0 && windowEndIdx + 1 < allPeriods.length;
 	const canNewer = windowEndIdx > 0;
 
-	// 본문 sections — backend topic API 슬라이스 그대로 신뢰 (dartlab section SSOT).
-	// 프론트 own-leaf 필터 제거 — companyOverview 같은 wide topic 의 22 sections 가
-	// 1 개로 잘려나가던 회귀 차단. cross-contamination 은 backend 책임.
-	const sectionsOwn = latestViewer?.textDocument?.sections ?? [];
+	// 본문 sections — companyOverview 처럼 backend topic 이 chapter 전체 (1~6 leaf) 를
+	// 한 응답에 묶어 보내는 경우가 있다. 사용자가 클릭한 leaf 의 sections 만 통과.
+	// ownLeafKey = "1.회사의 개요" 같은 (번호.레이블) 키. topicLabel 로 식별.
+	const ownLeafKey = _leafKey(latestViewer?.topicLabel || '') || '';
+	const allSections = latestViewer?.textDocument?.sections ?? [];
+	const sectionsOwn = useMemo(
+		() => _filterToOwnLeaf(allSections, ownLeafKey),
+		[allSections, ownLeafKey],
+	);
 	// 윈도우 3 period 중 한 곳이라도 timeline 에 포함되는 section 만 행으로 노출.
 	const sections = useMemo(() => {
 		if (windowPeriods.length === 0) return sectionsOwn;
