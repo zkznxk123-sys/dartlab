@@ -93,7 +93,7 @@ jobs:
       - name: Seed KRX KIND + corpProfile from HF
         run: |
           mkdir -p data/kindList data/dartList data/dart/scan
-          python -c "
+          uv run python -X utf8 -c "
           from pathlib import Path
           from huggingface_hub import hf_hub_download
           import shutil
