@@ -31,29 +31,31 @@ from typing import Any
 from dartlab.viz.catalog import CATALOG
 from dartlab.viz.schema import CatalogEntry
 
-# 12-col gridstack 기준 default (colSpan, rowSpan) + 허용 변형.
-# cellHeight = columnWidth 동기화라 cs==rs 면 시각 정사각.
-# 변형 한도 위반 시 resolveLayout 가 ValueError.
+# 24-col gridstack fine grid (v3): cellSize ≈ 56px (viewport 1700, sidebar 240).
+# cellHeight = columnWidth sync → cs==rs 면 시각 정사각.
+# kind 별 본질 비율 (정사각 강박 폐기):
+# - KPI/diffView = 5×2 가로 (값+추세 단일 metric)
+# - gauge/topList = 5×3 / 5×4 세로 (단일 score / 리스트)
+# - trend/breakdown/scatter/matrix/waterfall = 8×8 정사각 (시계열 + 다중 series)
+# - radar/comparisonTable = 12×12 / 12×8 hero (다차원/peer)
+# - phaseIndicator = 24×2 strip (한 행 전체 얇음)
+# - narrativeBridge/scoreBadge = 24×4 / 24×3 wide (서사/평점)
 KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
-    "kpiTile": {"cs": 3, "rs": 3, "variance": ["3x6"]},  # KPI 정사각, tall 허용
-    "diffView": {"cs": 3, "rs": 3, "variance": ["4x4"]},
-    "gauge": {"cs": 3, "rs": 6, "variance": ["4x4"]},  # tall S → 정사각 M
-    "topList": {"cs": 3, "rs": 6, "variance": ["4x4"]},  # tall S → 정사각 M
-    "phaseIndicator": {"cs": 12, "rs": 3, "variance": ["12x1", "6x3"]},  # wide / strip
-    "comparisonTable": {"cs": 4, "rs": 4, "variance": ["12x3"]},  # 정사각 → wide
-    "radar": {"cs": 6, "rs": 6, "variance": ["4x4"]},  # hero radar
-    "scatter": {"cs": 4, "rs": 4, "variance": ["6x6"]},
-    "matrix": {"cs": 4, "rs": 4, "variance": ["6x6"]},
-    "trend": {
-        "cs": 4,
-        "rs": 4,
-        "variance": ["3x6", "6x6", "12x4"],
-    },  # 차트 정사각 기본, 길쭉/hero/wide 허용
-    "breakdown": {"cs": 4, "rs": 4, "variance": ["3x6"]},
-    "waterfall": {"cs": 4, "rs": 4, "variance": ["6x6"]},
-    "scoreBadge": {"cs": 12, "rs": 3, "variance": ["6x6"]},  # wide 종합 평점
-    "narrativeBridge": {"cs": 12, "rs": 3, "variance": []},
-    "sankey": {"cs": 6, "rs": 6, "variance": ["4x4", "12x3"]},  # legacy (폐기 진행 중)
+    "kpiTile": {"cs": 5, "rs": 2, "variance": ["5x3", "4x2", "8x2", "6x2"]},
+    "diffView": {"cs": 5, "rs": 2, "variance": ["8x4"]},
+    "gauge": {"cs": 5, "rs": 3, "variance": ["8x4"]},
+    "topList": {"cs": 5, "rs": 4, "variance": ["8x4"]},
+    "trend": {"cs": 8, "rs": 8, "variance": ["12x8", "24x6", "6x6", "12x12"]},
+    "breakdown": {"cs": 8, "rs": 8, "variance": ["12x6"]},
+    "scatter": {"cs": 8, "rs": 8, "variance": ["12x8"]},
+    "matrix": {"cs": 8, "rs": 8, "variance": ["12x8"]},
+    "waterfall": {"cs": 8, "rs": 8, "variance": ["12x6"]},
+    "radar": {"cs": 12, "rs": 12, "variance": ["8x8"]},
+    "comparisonTable": {"cs": 12, "rs": 8, "variance": ["24x6"]},
+    "phaseIndicator": {"cs": 24, "rs": 2, "variance": ["12x3", "24x3"]},
+    "narrativeBridge": {"cs": 24, "rs": 4, "variance": []},
+    "scoreBadge": {"cs": 24, "rs": 3, "variance": ["12x3"]},
+    "sankey": {"cs": 12, "rs": 8, "variance": ["8x8"]},  # legacy
 }
 
 
@@ -188,24 +190,24 @@ def resolveLayout(entry: CatalogEntry) -> tuple[int, int]:
             )
         return cs, rs
 
-    # kind=trend 자동 보정 (12-col 기준):
-    # 1~3 시리즈 = 4×4 (default 정사각, 3 카드/한행)
-    # 4~5 시리즈 = 6×6 (hero, 2 카드/한행)
-    # 6+ 시리즈 = 12×4 (wide, 한 행 전체)
+    # kind=trend 자동 보정 (24-col 기준):
+    # 1~3 시리즈 = 8×8 (default 정사각, 3 카드/한행)
+    # 4~5 시리즈 = 12×12 (hero, 2 카드/한행)
+    # 6+ 시리즈 = 24×6 (wide, 한 행 전체)
     if kind == "trend":
         nSeries = len(entry.get("seriesPlan") or [])
         if nSeries >= 6:
-            return 12, 4
+            return 24, 6
         if 4 <= nSeries <= 5:
-            return 6, 6
-        # 1~3 시리즈 = 4×4 (default)
+            return 12, 12
+        # 1~3 시리즈 = 8×8 (default)
 
     return default["cs"], default["rs"]
 
 
 def packSkyline(
     cards: list[tuple[str, CatalogEntry]],
-    colCount: int = 12,
+    colCount: int = 24,
 ) -> list[dict[str, Any]]:
     """First-Fit-Decreasing skyline packing — 순서 보존 + 빈 공간 0.
 
@@ -305,7 +307,7 @@ def planTabLayout(
     tab: str,
     *,
     sub: str | None = None,
-    colCount: int = 12,
+    colCount: int = 24,
 ) -> list[dict[str, Any]]:
     """탭 + sub view → packed layout grid.
 

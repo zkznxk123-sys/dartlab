@@ -24,7 +24,7 @@ def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent:
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 5, "rowSpan": 2},
         "help": helpText,
     }
 
@@ -71,7 +71,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressGauge"},
         "options": {},
-        "layout": {"colSpan": 3, "rowSpan": 6},
+        "layout": {"colSpan": 5, "rowSpan": 3},
         "help": "Altman Z-Score 부실 예측. ≥3 안전 / 1.8~3 주의 / <1.8 위험.",
     },
     "anomalySignals": {
@@ -87,7 +87,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             "fn": "calcEarningsQualityFlags",
         },
         "options": {},
-        "layout": {"colSpan": 3, "rowSpan": 6},
+        "layout": {"colSpan": 5, "rowSpan": 4},
         "help": "이익품질 / 회계 이상신호 list (earningsQualityFlags).",
     },
     "earningsQualityTrend": {
@@ -117,7 +117,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "영업CF/순이익 100%↑ = 회계이익이 진짜 현금. 70% 미만 지속은 분식 의심.",
     },
     "capitalGovernance": {
@@ -147,7 +147,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "자기자본비율 + 이익잉여금/자본. 내부유보 누적 = 보수적 거버넌스.",
     },
 }

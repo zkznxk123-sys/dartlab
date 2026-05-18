@@ -28,7 +28,7 @@ def _kpi(
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 5, "rowSpan": 2},
         "help": helpText,
     }
 
@@ -43,7 +43,7 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
-        "layout": {"colSpan": 12, "rowSpan": 3},
+        "layout": {"colSpan": 24, "rowSpan": 2},
         "help": "회사 매출·이익 사이클 단계 (Damodaran). 외부 macroExposure 결합은 후속.",
     },
     "macroKpiRevenue": _kpi(
@@ -106,7 +106,7 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "매출 절대값 + YoY. 산업 경기 사이클과의 동조성 시각화.",
     },
     "debtCycle": {
@@ -138,7 +138,7 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "stacked": True},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "차입금 시계열 — 금리 사이클 노출. 단기 비중 ↑ = 금리 민감.",
     },
 }

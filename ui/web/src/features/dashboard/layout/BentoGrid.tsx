@@ -1,4 +1,5 @@
-// 12-col gridstack 식 bento grid — 백엔드 Layout Engine 의 (x,y,w,h) 좌표 + 12 col 고정.
+// 24-col fine grid (v3) — 백엔드 Layout Engine 의 (x,y,w,h) 좌표 + 24 col 고정.
+// cellSize ≈ 56px (viewport 1700 sidebar 240 기준).
 // 핵심: cellHeight === cellWidth 동기화 → w === h 면 자동 1:1 정사각.
 // gridstack.js 미도입 (정적 grid, 드래그 X). CSS grid 만으로 동일 효과 + bundle 추가 0.
 
@@ -11,10 +12,10 @@ interface Props {
 	renderCard: (p: PackedCard, cellSize: number) => ReactNode;
 }
 
-const GAP_PX = 8;
+const GAP_PX = 4;
 const PAD_PX = 8;
-const COL_COUNT = 12;
-const MIN_CELL_PX = 56;
+const COL_COUNT = 24;
+const MIN_CELL_PX = 40;
 
 export function BentoGrid({ placed, renderCard }: Props) {
 	const gridRef = useRef<HTMLDivElement>(null);

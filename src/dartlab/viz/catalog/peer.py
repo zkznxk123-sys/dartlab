@@ -18,7 +18,7 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "peerScatter"},
         "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "ROE × 부채비율 산점도. 회사 본인 별표, 동종 평균 참조선.",
     },
     "peerComparisonTable": {
@@ -30,7 +30,7 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "peerComparison"},
         "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 12, "rowSpan": 8},
         "help": "주요 지표 동종 분위 (회사 vs 중앙값 + p25/p75 + 백분위).",
     },
     "peerProfitability": {
@@ -60,7 +60,7 @@ PEER_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "회사의 수익성 추세 — 동종 분포 비교 보조.",
     },
     "peerGrowth": {
@@ -90,7 +90,7 @@ PEER_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "매출·순이익 YoY — 동종 분포 보조 비교 자료.",
     },
 }

@@ -28,7 +28,7 @@ def _kpi(
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 5, "rowSpan": 2},
         "help": helpText,
     }
 
@@ -81,7 +81,7 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "capitalAllocationBars"},
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "연도별 자본 사용처 — 설비투자 / 배당 / 부채상환 / 잉여. 사업 우선순위 추적.",
     },
     "costMix": {
@@ -123,7 +123,7 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 4, "rowSpan": 4},
+        "layout": {"colSpan": 8, "rowSpan": 8},
         "help": "원가·판관비·R&D 비중 추이. R&D 비중 ↑ 미래 투자 의지.",
     },
     "capitalReturns": {

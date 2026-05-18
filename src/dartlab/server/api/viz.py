@@ -202,7 +202,7 @@ async def apiVizLayout(
             "tab": tab,
             "view": effectiveView,
             "periodKind": periodKind,
-            "colCount": 12,
+            "colCount": 24,
             "layout": [],
             "cards": {},
         }
@@ -220,7 +220,7 @@ async def apiVizLayout(
         "tab": tab,
         "view": effectiveView,
         "periodKind": periodKind,
-        "colCount": 12,
+        "colCount": 24,
         "layout": placed,
         "cards": dict(zip(cardKeys, specs)),
     }

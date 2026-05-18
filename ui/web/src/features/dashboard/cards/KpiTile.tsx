@@ -88,12 +88,12 @@ export function KpiTile({
 	);
 	const deltaText = deltaPct != null ? `${deltaPct > 0 ? '+' : ''}${deltaPct.toFixed(1)}%` : null;
 
-	// 12-col 기준 분기:
-	//   hero  : w >= 6 && h >= 6  → 큰 spark 본체 + 값 오버레이 (radar 자리)
-	//   tall  : h >= 6            → 1×2 (3×6) 길쭉 KPI — 값 위 + spark + range bar
-	//   square: default (3×3)     → 정사각 — 값 중앙 + 작은 spark 배경 + delta 우상단
+	// 24-col 기준 분기 (v3):
+	//   가로 와이드 (h <= 2)   : 5×2 본질 — 헤더(label+delta) + 본문(값 좌 / spark 우)
+	//   세로 길쭉 (h >= 3)     : 5×3+ — 값 위 hero + spark 큰 + range bar 아래
+	//   hero (w >= 12 && h >= 12): radar 자리 (KpiTile 거의 안 옴)
 
-	if (w >= 6 && h >= 6) {
+	if (w >= 12 && h >= 12) {
 		return (
 			<div className="relative flex h-full w-full flex-col px-3 pt-2">
 				{label && (
@@ -125,30 +125,32 @@ export function KpiTile({
 		);
 	}
 
-	// 1×2 (3×6 12-col) — 길쭉 KPI: 값 위, 큰 spark + range bar 아래.
-	if (h >= 6) {
+	// 세로 길쭉 (5×3+ = h>=3) — 값 위, 큰 spark + range bar 아래.
+	if (h >= 3) {
 		return (
 			<div className="flex h-full w-full flex-col gap-1 px-2 py-1.5">
-				{label && (
-					<div className="text-[10px] uppercase tracking-wide text-muted-foreground truncate">
-						{label}
-					</div>
-				)}
-				<div className="flex items-baseline gap-1 tabular-nums">
-					<span className={cn('text-2xl font-semibold leading-none', toneClass)}>{displayValue}</span>
-					{unit && <span className="text-sm text-muted-foreground">{unit}</span>}
+				<div className="flex items-start justify-between gap-1">
+					{label && (
+						<div className="text-[10px] uppercase tracking-wide text-muted-foreground truncate leading-tight">
+							{label}
+						</div>
+					)}
+					{deltaText && (
+						<div className="flex shrink-0 items-center gap-0.5 text-[10px] leading-tight">
+							{deltaIcon}
+							<span className={cn('font-medium tabular-nums', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]', !positive && !negative && 'text-muted-foreground')}>
+								{deltaText}
+							</span>
+						</div>
+					)}
 				</div>
-				{deltaText && (
-					<div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-						{deltaIcon}
-						<span className={cn('font-medium', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]')}>
-							{deltaText}
-						</span>
-					</div>
-				)}
+				<div className="flex items-baseline gap-1 tabular-nums">
+					<span className={cn('text-3xl font-bold leading-none whitespace-nowrap', toneClass)}>{displayValue}</span>
+					{unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+				</div>
 				{hasSparkline && (
 					<div className="flex-1 min-h-0 [&_svg]:!h-full [&_svg]:!w-full">
-						<Sparkline data={sparkline!} color={sparkColor} height={80} width={200} />
+						<Sparkline data={sparkline!} color={sparkColor} height={80} width={240} />
 					</div>
 				)}
 				{rangePos != null && (
@@ -169,14 +171,12 @@ export function KpiTile({
 		);
 	}
 
-	// 정사각 (3×3 12-col) — default — 밀도 최우선:
-	// (1) 상단 — label 좌 + delta 우 (1 줄 응축)
-	// (2) 중앙 hero — 값 큰 폰트 (text-5xl) 카드 한가운데 차지, 카드의 주인공
-	// (3) 배경 — spark 카드 전체 fill (top-7 ~ bottom-2, opacity 0.55)
-	// 좌우 분할 폐기 (옛 회귀: "97조 원" 3 줄 줄바꿈).
+	// 가로 와이드 (5×2 본질, h <= 2) — KPI 단일 metric 정답 layout:
+	// 헤더 (label 좌 + delta 우) + 본문 (값 좌 hero / spark 우 fill)
+	// padding 최소 (px-2 py-1.5), 카드 95% 점유, dead 0
 	return (
-		<div className="relative flex h-full w-full flex-col justify-between px-2 py-1.5">
-			<div className="relative z-10 flex items-start justify-between gap-1">
+		<div className="grid h-full w-full grid-rows-[auto_1fr] gap-1 px-2 py-1.5">
+			<div className="grid grid-cols-[1fr_auto] items-start gap-1">
 				{label && (
 					<div className="min-w-0 truncate text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
 						{label}
@@ -191,16 +191,16 @@ export function KpiTile({
 					</div>
 				)}
 			</div>
-			{hasSparkline && (
-				<div className="pointer-events-none absolute inset-x-1 bottom-2 top-7 opacity-55 [&_svg]:!h-full [&_svg]:!w-full">
-					<Sparkline data={sparkline!} color={sparkColor} height={120} width={240} />
-				</div>
-			)}
-			<div className="relative z-10 flex items-baseline gap-1 tabular-nums">
-				<span className={cn('whitespace-nowrap text-[2.5rem] font-bold leading-none', toneClass)}>
+			<div className="grid min-h-0 grid-cols-[1fr_1fr] items-center gap-2">
+				<span className={cn('whitespace-nowrap text-2xl font-bold leading-none tabular-nums', toneClass)}>
 					{displayValue}
+					{unit && <span className="ml-0.5 text-[11px] font-normal text-muted-foreground">{unit}</span>}
 				</span>
-				{unit && <span className="text-sm text-muted-foreground">{unit}</span>}
+				{hasSparkline && (
+					<div className="h-full min-w-0 [&_svg]:!h-full [&_svg]:!w-full">
+						<Sparkline data={sparkline!} color={sparkColor} height={60} width={140} />
+					</div>
+				)}
 			</div>
 		</div>
 	);
