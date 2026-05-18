@@ -16,12 +16,14 @@ from dartlab.analysis.forecast._forecastTypes import (
     ScenarioResult,
     SensitivityResult,
 )
+from dartlab.core.utils.ols import _ols
 
 __all__ = [
     "ForecastResult",
     "ScenarioResult",
     "SensitivityResult",
     "_marginLinkedForecast",
+    "_ols",
     "forecastAll",
     "forecastMetric",
     "scenarioAnalysis",
