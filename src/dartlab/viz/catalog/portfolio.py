@@ -42,22 +42,28 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         intent="primary",
         helpText="본업 규모. 사업 부문별 비중은 비용구조·자본배분 카드에서.",
     ),
-    "portfolioKpiOp": _kpi(
-        "영업이익",
-        "영업이익",
-        account="operatingIncome",
-        unit="원",
-        intent="positive",
-        helpText="본업 수익. 영업이익률은 별도 KPI.",
-    ),
-    "portfolioKpiOpMargin": _kpi(
-        "영업이익률",
-        "영업이익률",
-        ratio={"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
-        unit="%",
-        intent="positive",
-        helpText="매출 1 원당 영업이익. 동종 평균 대비 비교가 핵심.",
-    ),
+    "portfolioKpiOp": {
+        **_kpi(
+            "영업이익",
+            "영업이익",
+            account="operatingIncome",
+            unit="원",
+            intent="positive",
+            helpText="본업 수익. 영업이익률은 별도 KPI.",
+        ),
+        "subCategory": "dupont",
+    },
+    "portfolioKpiOpMargin": {
+        **_kpi(
+            "영업이익률",
+            "영업이익률",
+            ratio={"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
+            unit="%",
+            intent="positive",
+            helpText="매출 1 원당 영업이익. 동종 평균 대비 비교가 핵심.",
+        ),
+        "subCategory": "dupont",
+    },
     "portfolioKpiRnd": _kpi(
         "R&D 비중",
         "R&D/매출",
@@ -71,7 +77,7 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "title": "자본배분 (시간축)",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "capitalAllocationBars"},
         "options": {"stacked": True, "unit": "원"},
@@ -83,7 +89,7 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "title": "비용 구조",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "costOfSales",
@@ -125,7 +131,7 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "title": "자본 효율 추이",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "roe",

@@ -41,7 +41,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "title": "생애주기 단계",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
@@ -56,22 +56,28 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         intent="primary",
         helpText="매출 YoY % — 도입/성장 단계 핵심 신호.",
     ),
-    "lifecycleKpiOpMargin": _kpi(
-        "영업이익률",
-        "영업이익률",
-        ratio={"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
-        unit="%",
-        intent="positive",
-        helpText="성숙기 진입 신호 — 마진 안정화.",
-    ),
-    "lifecycleKpiRoe": _kpi(
-        "ROE",
-        "ROE",
-        ratio={"num": {"netIncome": 1}, "den": {"equity": 1}, "scale": 100},
-        unit="%",
-        intent="primary",
-        helpText="자본 효율. 단계별 정상 범위 다름.",
-    ),
+    "lifecycleKpiOpMargin": {
+        **_kpi(
+            "영업이익률",
+            "영업이익률",
+            ratio={"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
+            unit="%",
+            intent="positive",
+            helpText="성숙기 진입 신호 — 마진 안정화.",
+        ),
+        "subCategory": "dupont",
+    },
+    "lifecycleKpiRoe": {
+        **_kpi(
+            "ROE",
+            "ROE",
+            ratio={"num": {"netIncome": 1}, "den": {"equity": 1}, "scale": 100},
+            unit="%",
+            intent="primary",
+            helpText="자본 효율. 단계별 정상 범위 다름.",
+        ),
+        "subCategory": "dupont",
+    },
     "lifecycleKpiFcfMargin": _kpi(
         "FCF/매출",
         "FCF Margin",
@@ -85,7 +91,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "title": "현금흐름 3축",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "cfo",
@@ -124,7 +130,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "title": "자본 배치 추이",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "growth",
+        "subCategory": "snowflake",
         "seriesPlan": [
             {
                 "key": "capex",
