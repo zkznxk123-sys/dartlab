@@ -49,26 +49,42 @@ from dartlab.providers.reportSelector import selectReport
 # ── Phase 1 캐시: parquet 로드 + topic 매핑 결과 재사용 ──
 
 _preparedCache: dict[str, "_PreparedRows"] = {}
-# _PreparedRows.periodRows 는 list[dict[str, object]] 형태 — DataFrame 을 Python
-# 객체로 변환해 보유하므로 회사 1 종목 ~수백 MB. 2 종목 동시 보유 시 GB 압박.
-# 회사 다중 분석 워크플로우는 회사 경계마다 다음 호출이 직전 캐시 evict.
+# _PreparedRows.periodRowsDf — 단일 polars DataFrame (모든 period row + _periodKey
+# 컬럼). 이전 dict[str, list[dict]] 형태 → polars Rust arena 단일 보관 으로
+# Python heap 의 dict 51000+ 누적 (~319MB for 005380) → polars DF (~100MB)
+# 으로 3× 메모리 절감.
 _PREPARED_CACHE_MAX = 1
 
 
 class _PreparedRows:
-    """Phase 1 결과 — parquet 로드 + _reportRowsToTopicRows + teacherTopics."""
+    """Phase 1 결과 — parquet 로드 + _reportRowsToTopicRows (polars DF 누적) + teacherTopics.
 
-    __slots__ = ("periodRows", "validPeriods", "teacherTopics")
+    periodRowsDf 컬럼: chapter / topic / blockType / blockOrder / sourceBlockOrder /
+    text / majorNum / orderSeq / sourceTopic / _periodKey.
+    """
+
+    __slots__ = ("periodRowsDf", "validPeriods", "teacherTopics")
 
     def __init__(
         self,
-        periodRows: dict[str, list[dict[str, object]]],
+        periodRowsDf: pl.DataFrame,
         validPeriods: list[str],
         teacherTopics: dict[str, str],
     ):
-        self.periodRows = periodRows
+        self.periodRowsDf = periodRowsDf
         self.validPeriods = validPeriods
         self.teacherTopics = teacherTopics
+
+
+def _periodRowsForKey(periodRowsDf: pl.DataFrame, periodKey: str) -> list[dict[str, object]]:
+    """단일 period 의 dict list 추출 — 짧은 lifetime materialize."""
+    if periodRowsDf.is_empty():
+        return []
+    return (
+        periodRowsDf.filter(pl.col("_periodKey") == periodKey)
+        .drop("_periodKey")
+        .to_dicts()
+    )
 
 
 def _getPrepared(stockCode: str) -> _PreparedRows:
@@ -76,21 +92,52 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
     if stockCode in _preparedCache:
         return _preparedCache[stockCode]
 
-    periodRows: dict[str, list[dict[str, object]]] = {}
     validPeriods: list[str] = []
     latestAnnualRows: list[dict[str, object]] | None = None
+    # streaming vstack — 매 period DF 즉시 누적. schema 명시로 from_dicts
+    # 의 infer 단계 임시 buffer 회피.
+    periodRowsDf: pl.DataFrame | None = None
+    _ROW_SCHEMA = {
+        "chapter": pl.Utf8,
+        "topic": pl.Utf8,
+        "blockType": pl.Utf8,
+        "blockOrder": pl.Int64,
+        "sourceBlockOrder": pl.Int64,
+        "text": pl.Utf8,
+        "majorNum": pl.Int64,
+        "orderSeq": pl.Int64,
+        "sourceTopic": pl.Utf8,
+    }
 
     for periodKey, reportKind, ccol, subset in iterPeriodSubsets(stockCode):
         validPeriods.append(periodKey)
         topicRows = _reportRowsToTopicRows(subset, ccol)
-        periodRows[periodKey] = topicRows
         if reportKind == "annual" and latestAnnualRows is None:
             latestAnnualRows = topicRows
+        if topicRows:
+            df = pl.from_dicts(topicRows, schema=_ROW_SCHEMA).with_columns(
+                pl.lit(periodKey).alias("_periodKey")
+            )
+            if periodRowsDf is None:
+                periodRowsDf = df
+            else:
+                periodRowsDf = periodRowsDf.vstack(df)
+            df = None  # noqa: F841
+        # topicRows 참조 — latestAnnualRows 만 보존, 나머지 자연 release
+        if reportKind != "annual" or latestAnnualRows is not topicRows:
+            topicRows = None  # noqa: F841 — 명시적 ref drop
 
     teacherTopics = chapterTeacherTopics(latestAnnualRows or [])
+    latestAnnualRows = None  # noqa: F841
     validPeriods = sortPeriods(validPeriods)
 
-    prepared = _PreparedRows(periodRows, validPeriods, teacherTopics)
+    if periodRowsDf is None:
+        periodRowsDf = pl.DataFrame()
+    else:
+        periodRowsDf = periodRowsDf.rechunk()  # vstack 후 chunks 정리
+    gc.collect()
+
+    prepared = _PreparedRows(periodRowsDf, validPeriods, teacherTopics)
 
     # LRU 방식: 최대치 초과 시 가장 오래된 항목 제거
     if len(_preparedCache) >= _PREPARED_CACHE_MAX:
@@ -444,7 +491,7 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     validPeriods = prepared.validPeriods
     teacherTopics = prepared.teacherTopics
     suppressed = projectionSuppressedTopics()
-    periodRows = dict(prepared.periodRows)
+    periodRowsDf = prepared.periodRowsDf
 
     if not validPeriods:
         return None
@@ -462,7 +509,7 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     rowIdxCounter = 0
 
     for pIdx, periodKey in enumerate(validPeriods):
-        projected = applyProjections(periodRows.pop(periodKey, []), teacherTopics)
+        projected = applyProjections(_periodRowsForKey(periodRowsDf, periodKey), teacherTopics)
         if topics is not None:
             projected = [r for r in projected if r.get("topic") in topics]
 
@@ -530,7 +577,7 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
         if topics is None and pIdx % 5 == 4:
             gc.collect()
 
-    del periodRows
+    # periodRowsDf 는 cache 보유 — 명시적 del 안 함 (다음 호출 재사용)
 
     if not periodDfs:
         return None
@@ -1275,8 +1322,10 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     prepared = _getPrepared(stockCode)
     validPeriods = prepared.validPeriods
     teacherTopics = prepared.teacherTopics
-    # periodRows는 pop으로 소비되므로 shallow copy (list 참조만 복사, row dict는 공유)
-    periodRows = dict(prepared.periodRows)
+    # periodRowsDf 는 단일 polars DataFrame — 매 period 별 filter + to_dicts 로 짧은
+    # lifetime 변환. 이전 dict[periodKey, list[dict]] 사본 (~319MB) → polars DF
+    # (~100MB) 로 ~3× 메모리 절감 + period 별 dict 짧은 lifetime.
+    periodRowsDf = prepared.periodRowsDf
     latestPeriod = validPeriods[-1]
 
     def _representativePeriodRank(period: str | None) -> int:
@@ -1291,7 +1340,7 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
 
     for _pIdx, periodKey in enumerate(validPeriods):
         projected = applyProjections(
-            periodRows.pop(periodKey, []),
+            _periodRowsForKey(periodRowsDf, periodKey),
             teacherTopics,
         )
         if topics is not None:
@@ -1385,8 +1434,9 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         if topics is None and _pIdx % 10 == 9:
             gc.collect()
 
-    # 메모리 해제: periodRows는 pop으로 이미 소진, 빈 dict 정리
-    del periodRows
+    # periodRowsDf 는 cache 보유 — 명시적 del 안 함. 매 period filter 의 짧은 lifetime
+    # dict 들은 next iter 시 reclaim. gc 강제 호출로 Python heap 회수 가속.
+    gc.collect()
 
     if not validPeriods or not topicMap:
         return None
