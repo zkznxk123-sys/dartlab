@@ -1,11 +1,10 @@
-// 모든 라우트 공통 — SidebarProvider + AppSidebar + SidebarInset(헤더 + Outlet) + ArtifactPanel.
+// 모든 라우트 공통 — SidebarProvider + AppSidebar + SidebarInset(헤더 + Outlet).
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import type { QueryClient } from '@tanstack/react-query';
 
 import { AppSidebar } from '@/shell/AppSidebar';
 import { SiteHeader } from '@/shell/SiteHeader';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { ArtifactPanel } from '@/features/chat/artifacts/ArtifactPanel';
 
 interface RouterContext {
 	queryClient: QueryClient;
@@ -23,7 +22,6 @@ function RootLayout() {
 				<SiteHeader />
 				<Outlet />
 			</SidebarInset>
-			<ArtifactPanel />
 		</SidebarProvider>
 	);
 }
