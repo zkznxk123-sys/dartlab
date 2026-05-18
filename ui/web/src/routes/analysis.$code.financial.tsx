@@ -114,7 +114,9 @@ function FinancialTab() {
 			rowSpan: spec?.layout?.rowSpan ?? fallback.rowSpan,
 		};
 		const seriesCount = spec?.series?.length ?? 0;
-		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0);
+		// 자산구조 dual-stack 은 9 series 박혀있어 mini-table 의미 0 + 운영자 명시 (2026-05-18) 제거.
+		const isDualStack = spec?.options?.dualStack === true;
+		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
 		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
 		const footerHeight = hasFooter ? 28 + Math.min(seriesCount, 12) * 18 + 20 : 0;
 		// rowSpan × 150 (auto-rows) − header − footer − padding.
