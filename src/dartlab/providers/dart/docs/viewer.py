@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import difflib
 import hashlib
+import html
 import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
@@ -646,7 +647,11 @@ def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> Vie
 
 
 def _textPeriodMap(block: ViewerBlock) -> dict[str, str]:
-    """text block의 period -> text 매핑."""
+    """text block의 period -> text 매핑.
+
+    DART raw 본문에 섞인 비표준 `&cr;` 를 줄바꿈으로, 표준 HTML entity
+    (`&amp;` 등) 를 디코드 — 본문 그대로 사람이 읽는 prose 가 되도록.
+    """
     if isEmptyDf(block.data):
         return {}
     row = block.data.row(0, named=True)
@@ -657,8 +662,11 @@ def _textPeriodMap(block: ViewerBlock) -> dict[str, str]:
         if value is None:
             continue
         text = str(value).strip()
-        if text:
-            result[str(key)] = text
+        if not text:
+            continue
+        text = text.replace("&cr;", "\n").replace("&CR;", "\n")
+        text = html.unescape(text)
+        result[str(key)] = text
     return result
 
 
@@ -964,7 +972,8 @@ _SENT_SPLIT_RE = re.compile(
 
 def _normalizeTextLine(line: str) -> str:
     """공시 원문 줄 단위 정규화."""
-    text = line.replace("\u00a0", " ").replace("\t", " ")
+    text = html.unescape(line)
+    text = text.replace("\u00a0", " ").replace("\t", " ")
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -987,10 +996,14 @@ def _splitSentences(text: str) -> list[str]:
     if not text or not text.strip():
         return []
 
+    # DART 비표준 entity `&cr;` (= carriage return) 를 진짜 줄바꿈으로 치환.
+    # split("\n") 가 자연스러운 문단 경계로 처리하도록 사전 정규화.
+    normalized = text.replace("&cr;", "\n").replace("&CR;", "\n")
+
     paragraphs: list[str] = []
     current: list[str] = []
 
-    for rawLine in text.strip().split("\n"):
+    for rawLine in normalized.strip().split("\n"):
         line = _normalizeTextLine(rawLine)
         if not line:
             if current:

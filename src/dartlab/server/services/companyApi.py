@@ -205,17 +205,22 @@ _VIEWER_COMPACT_SECTION_KEEP = (
     "status",
     "latestChange",
     "preview",
+    "latest",  # 최신 본문 풀텍스트 (body / status / period / digest) — prose 렌더
     "latestPeriod",
     "firstPeriod",
+    "periodCount",
+    "timeline",  # 우 패널 시간축 (period 별 status 배열)
 )
 
 
 def _compactTextDocument(doc: dict[str, Any] | None, *, limit: int) -> dict[str, Any] | None:
-    """UI 가 실제 사용하는 필드만 남긴 경량 textDocument 변환.
+    """경량 textDocument 변환 — 읽기 가능한 prose 본문 + 우 패널 history 데이터 보존.
 
-    Drops: section.views (period 별 전문 dict), section.timeline, section.latest,
-    section.order, section.bodyBlock, section.periodCount, top-level entries,
-    top-level periods. UI ([analysis.$code.viewer.tsx]) 가 안 읽는다.
+    Keep: latest (풀 본문 + digest), timeline (시간축), headingPath, status,
+    latestChange, latestPeriod, firstPeriod, periodCount, preview.
+    Drop: views (period 별 풀텍스트 dict — `?period=X` 로 lazy fetch),
+          top-level entries / periods. annotated blame 은 viewerBlock 안에 있고
+          compact 응답엔 blocks 자체가 없으므로 자동 제외.
     """
     if doc is None:
         return None
