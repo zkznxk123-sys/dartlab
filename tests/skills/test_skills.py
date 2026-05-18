@@ -58,11 +58,11 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "engines.viz.tableBackedChart",
         "engines.company.researchStarter",
         "engines.company.usEdgarReview",
-        "engines.quant.damodaranValuation",
         "engines.story.companyCausal",
     } <= ids
-    # engines.macro.marketReview 는 Phase B 흡수 (2026-05-18) 로 base SKILL.md 의 axis 표에 inline.
-    # axis-level sub-spec 13 종 모두 흡수 — 본 plan 의 "엔진당 1 manual" 정책.
+    # engines.macro.marketReview · engines.quant.damodaranValuation 는 Phase B/C 흡수
+    # (2026-05-18) 로 base SKILL.md 의 axis 표에 inline. axis-level sub-spec 다수 (macro 13,
+    # quant 48, gather 14) 모두 흡수 — 본 plan "엔진당 1 manual" 정책.
 
     assert not any(item.startswith("basic.") for item in ids)
     assert not any(item.startswith("capability:") for item in ids)
@@ -202,8 +202,11 @@ def test_application_skills_cover_engine_guide_axes() -> None:
     for axis in dartlab.scan().get_column("axis").to_list():
         assert f"engines.scan.{axis}" in ids
 
+    # engines.quant axis-level sub-spec 48 종은 Phase C-1 흡수 (2026-05-18) — base SKILL.md
+    # 의 axis 표에 inline. standalone 유지: forecast/walkforward/scanBacktest/marketContext.
+    quant_body = _skill_body("engines.quant")
     for axis in dartlab.quant().get_column("axis").to_list():
-        assert f"engines.quant.{axis}" in ids
+        assert axis in quant_body, f"engines.quant base SKILL.md 의 axis 표에 {axis} 누락"
 
     # engines.macro axis-level sub-spec 13 종은 Phase B 흡수 (2026-05-18) — base SKILL.md
     # 의 axis 표에 inline. base body 에 axis name 이 있는지로 검증 (sub-spec 강제 X).

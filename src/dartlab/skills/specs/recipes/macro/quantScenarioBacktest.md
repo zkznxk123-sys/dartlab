@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.macro
   - engines.quant.walkforward
-  - engines.quant.backtest
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - engines.quant.surprise
+  - engines.quant
   - engines.analysis.predictionSignal
 toolRefs:
   - EngineCall

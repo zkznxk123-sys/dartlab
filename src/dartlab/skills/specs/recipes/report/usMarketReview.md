@@ -17,7 +17,7 @@ whenToUse:
 linkedSkills:
   - engines.company.usEdgarReview
   - engines.macro
-  - engines.quant.verdict
+  - engines.quant
   - engines.analysis.peerComparison
 toolRefs:
   - EngineCall
@@ -105,7 +105,7 @@ EDGAR 공시 목록 + 매크로 환경 (US 시장 기준) + 기술적 판단 종
 
 1. engines.company.usEdgarReview — US 회사 EDGAR 진입
 2. engines.macro — US 시장 매크로 (FRED)
-3. engines.quant.verdict — 기술적 종합
+3. engines.quant — 기술적 종합
 4. engines.analysis.peerComparison — US peer 횡단 (있으면)
 
 ## 기본 검증

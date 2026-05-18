@@ -14,8 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.industry
   - engines.scan.crossSectionStockScreen
-  - engines.quant.piotroski
-  - engines.quant.altman
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

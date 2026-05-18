@@ -15,9 +15,7 @@ linkedSkills:
   - engines.company
   - engines.credit
   - recipes.credit.distressDual
-  - engines.quant.altman
-  - engines.quant.beneish
-  - engines.quant.piotroski
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

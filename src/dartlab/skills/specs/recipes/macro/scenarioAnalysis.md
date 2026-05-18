@@ -18,7 +18,7 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.analysis.revenueForecast
   - engines.macro
-  - engines.quant.regime
+  - engines.quant
   - engines.analysis.macroSensitivity
 toolRefs:
   - EngineCall
@@ -106,7 +106,7 @@ regime = c.quant("국면")
 2. engines.analysis.revenueForecast — 매출 base/bull/bear
 3. engines.analysis.macroSensitivity — 매크로 elasticity
 4. engines.macro — 매크로 시나리오 가정
-5. engines.quant.regime — 시장 regime
+5. engines.quant — 시장 regime
 
 ## 기본 검증
 

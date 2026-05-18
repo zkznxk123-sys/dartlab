@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.scan.profitability
   - engines.credit
-  - engines.quant.sentiment
+  - engines.quant
   - recipes.credit.quantConsensus
 toolRefs:
   - EngineCall

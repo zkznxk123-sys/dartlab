@@ -16,10 +16,7 @@ whenToUse:
   - 차트 패턴 인식
 linkedSkills:
   - engines.company.researchStarter
-  - engines.quant.indicators
-  - engines.quant.momentum
-  - engines.quant.volatility
-  - engines.quant.chartPatterns
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython
@@ -97,10 +94,10 @@ patterns = c.quant("패턴")
 ## 연계 절차
 
 1. engines.company.researchStarter — 회사 진입
-2. engines.quant.indicators — 45 지표
-3. engines.quant.momentum — 모멘텀
-4. engines.quant.volatility — 변동성
-5. engines.quant.chartPatterns — 차트 패턴
+2. engines.quant — 45 지표
+3. engines.quant — 모멘텀
+4. engines.quant — 변동성
+5. engines.quant — 차트 패턴
 
 ## 기본 검증
 

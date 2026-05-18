@@ -14,7 +14,7 @@ whenToUse:
   - scenario scan
 linkedSkills:
   - engines.macro
-  - engines.quant.tailrisk
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython
@@ -126,7 +126,7 @@ emit_result(
 
 1. 신용 시나리오가 핵심이면 `recipes.credit.cycleStressMap`.
 2. 한국 특화 위기가 필요하면 `recipes.macro.koreaMacroStressMap`.
-3. 실제 포트폴리오 손실률이 필요하면 `engines.quant.tailrisk`.
+3. 실제 포트폴리오 손실률이 필요하면 `engines.quant`.
 
 ## 기본 검증
 

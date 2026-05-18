@@ -15,9 +15,7 @@ whenToUse:
   - 수급 패턴
 linkedSkills:
   - engines.company.researchStarter
-  - engines.quant.chartPatterns
-  - engines.quant.momentum
-  - engines.quant.flow
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython
@@ -93,9 +91,9 @@ qflow = c.quant("플로우")
 ## 연계 절차
 
 1. engines.company.researchStarter — 회사 진입 (KR 만)
-2. engines.quant.chartPatterns — 패턴
-3. engines.quant.momentum — 모멘텀
-4. engines.quant.flow — 가격·거래량 결합
+2. engines.quant — 패턴
+3. engines.quant — 모멘텀
+4. engines.quant — 가격·거래량 결합
 
 ## 기본 검증
 

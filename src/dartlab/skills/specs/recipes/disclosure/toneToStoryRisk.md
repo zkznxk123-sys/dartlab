@@ -12,7 +12,7 @@ whenToUse:
   - narrative risk composite
   - 자동 risk 블럭
 linkedSkills:
-  - engines.quant.toneChange
+  - engines.quant
   - engines.gather
   - engines.analysis.disclosureChange
   - engines.story
