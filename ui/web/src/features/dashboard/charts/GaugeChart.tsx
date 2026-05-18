@@ -33,8 +33,11 @@ function clamp(v: number, lo: number, hi: number): number {
 }
 
 function pctToAngle(pct: number): number {
-	// 반원: -90° (왼쪽 끝) → 90° (오른쪽 끝)
-	return -90 + pct * 180;
+	// 반원 (정통 gauge): -180° (왼쪽 9시) → -90° (위 12시) → 0° (오른쪽 3시).
+	// SVG sin 부호 반대 (y 아래 양수) 라 음수 angle 에서 sin 음수 → cy 위쪽으로.
+	// 이전 코드 -90 + pct·180 는 오른쪽 반원 (위→아래) 만 그려 왼쪽 절반 누락 회귀
+	// (운영자 명시 2026-05-19, distressEnsemble gauge).
+	return -180 + pct * 180;
 }
 
 export function GaugeChart({ value, min, max, bands = [], label, unit, hint, height = 160 }: Props) {
