@@ -18,7 +18,6 @@ from .dispatch import (
 )
 from .handlers import (
     handleCalendar,
-    handleCommodity,
     handleDartDoc,
     handleFlow,
     handleInsider,
@@ -49,7 +48,6 @@ _AXIS_DISPATCH: dict[str, Any] = {
     "krxIndex": handleKrxIndex,
     "calendar": handleCalendar,
     "dartDoc": handleDartDoc,
-    "commodity": handleCommodity,
 }
 
 
