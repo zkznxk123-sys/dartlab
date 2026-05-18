@@ -1,4 +1,4 @@
-"""scripts/audit/mutationSmoke.py 자체 회귀 — Track 5 (Windows 호환 mutation gate).
+"""tests/audit/mutationSmoke.py 자체 회귀 — Track 5 (Windows 호환 mutation gate).
 
 본 SSOT — [tests/POLICY.md](../POLICY.md) §5 Track 5.
 

@@ -1,4 +1,4 @@
-"""scripts/dev/lint_camelcase_ast.py — `--no-shim` 플래그 동작 검증."""
+"""tests/audit/lint_camelcase_ast.py — `--no-shim` 플래그 동작 검증."""
 
 from __future__ import annotations
 

@@ -15,13 +15,10 @@ whenToUse:
   - 가치 함정 회피
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.valuation
-  - engines.scan.account
   - recipes.valuation.qualityValueScreen
   - recipes.credit.distressFilter
   - recipes.quality.piotroskiLite
-  - engines.analysis.valuation
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -85,7 +82,7 @@ Benjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, 
 - Chan-Hamao-Lakonishok (1991): 일본 시장 동일 효과 — 저-PBR + 높은 매출/주가 결합 우월.
 - 한국: 단순 저-PBR 은 chaebol discount 함정 → Graham 의 4 게이트 결합으로 함정 회피.
 
-dartlab 한계: 진정한 NCAV (Net Current Asset Value) 계산은 `(currentAssets - totalLiabilities) × 2/3` 가 marketCap 보다 커야 하는데 시가총액 시계열 직접 결합 어려움 → 본 recipe 는 PBR 게이트로 근사. NCAV 계산은 `engines.scan.account` 로 별도 후속 단계.
+dartlab 한계: 진정한 NCAV (Net Current Asset Value) 계산은 `(currentAssets - totalLiabilities) × 2/3` 가 marketCap 보다 커야 하는데 시가총액 시계열 직접 결합 어려움 → 본 recipe 는 PBR 게이트로 근사. NCAV 계산은 `engines.scan` 로 별도 후속 단계.
 
 ## 공개 호출 방식
 
@@ -153,7 +150,7 @@ candidates = (
 2. 상위 후보에 대해 NCAV 정확 계산 — `scanAccount` 로 cash·AR·inventory·totalLiabilities 가져와서 시가총액 join.
 3. `recipes.quality.piotroskiLite` 의 F-Score 추가 검증 (가치 함정 회피 강화).
 4. `recipes.credit.distressFilter` 로 부도 위험 거름.
-5. `engines.analysis.valuation` 의 DCF + valuation band — 본질가치 산출.
+5. `engines.analysis` 의 DCF + valuation band — 본질가치 산출.
 6. `engines.story` 로 narrative — 사이클 위치, 산업 구조, 자본정책 (배당·자사주) 까지.
 
 ## 기본 검증

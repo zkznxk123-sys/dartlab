@@ -48,20 +48,12 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "engines.story",
         "engines.viz",
         "engines.data.foundation",
-        "engines.analysis.profitability",
-        "engines.analysis.cashflow",
-        "engines.analysis.peerComparison",
-        "engines.credit.creditRisk",
-        "engines.scan.undervaluedQuality",
-        "engines.scan.crossSectionStockScreen",
-        "engines.scan.krxIndexStrength",
         "engines.viz.tableBackedChart",
-        "engines.company.researchStarter",
-        "engines.company.usEdgarReview",
-        "engines.macro.marketReview",
-        "engines.quant.damodaranValuation",
-        "engines.story.companyCausal",
     } <= ids
+    # Phase B/C/D (2026-05-18) 흡수 완료 — analysis 엔진 7 종 (analysis/scan/quant/macro/
+    # gather/company/credit/story) 의 모든 sub-spec (axis-level 118 + standalone 18) 을
+    # base SKILL.md 안 axis 표 + ## 흡수된 sub-spec 본문 sub-section 으로 통합. spec
+    # 파일은 모두 삭제. viz/dashboard/edgar/data 는 별도 도메인이라 sub-spec 유지.
 
     assert not any(item.startswith("basic.") for item in ids)
     assert not any(item.startswith("capability:") for item in ids)
@@ -195,17 +187,30 @@ def test_application_skills_cover_engine_guide_axes() -> None:
         "밸류에이션밴드": "valuationBand",
     }
 
+    # engines.analysis axis-level sub-spec 22 종은 Phase C-3 흡수 (2026-05-18) — base
+    # SKILL.md 의 axis 표에 inline. standalone 없음 (valuation 14 keys 양식은 base 안
+    # 별도 sub-section 으로 보존).
+    analysis_body = _skill_body("engines.analysis")
     for axis in dartlab.Company("005930").analysis().get_column("axis").to_list():
-        assert f"engines.analysis.{analysis_slugs[axis]}" in ids
+        assert axis in analysis_body, f"engines.analysis base SKILL.md 의 axis 표에 {axis} 누락"
 
+    # engines.scan axis-level sub-spec 21 종은 Phase C-2 흡수 (2026-05-18) — base SKILL.md
+    # 의 axis 표에 inline. standalone: undervaluedQuality/crossSectionStockScreen/krxIndexStrength.
+    scan_body = _skill_body("engines.scan")
     for axis in dartlab.scan().get_column("axis").to_list():
-        assert f"engines.scan.{axis}" in ids
+        assert axis in scan_body, f"engines.scan base SKILL.md 의 axis 표에 {axis} 누락"
 
+    # engines.quant axis-level sub-spec 48 종은 Phase C-1 흡수 (2026-05-18) — base SKILL.md
+    # 의 axis 표에 inline. standalone 유지: forecast/walkforward/scanBacktest/marketContext.
+    quant_body = _skill_body("engines.quant")
     for axis in dartlab.quant().get_column("axis").to_list():
-        assert f"engines.quant.{axis}" in ids
+        assert axis in quant_body, f"engines.quant base SKILL.md 의 axis 표에 {axis} 누락"
 
+    # engines.macro axis-level sub-spec 13 종은 Phase B 흡수 (2026-05-18) — base SKILL.md
+    # 의 axis 표에 inline. base body 에 axis name 이 있는지로 검증 (sub-spec 강제 X).
+    macro_body = _skill_body("engines.macro")
     for axis in dartlab.macro().get_column("axis").to_list():
-        assert f"engines.macro.{axis}" in ids
+        assert axis in macro_body, f"engines.macro base SKILL.md 의 axis 표에 {axis} 누락"
 
 
 def test_analysis_application_skills_have_correct_call_example() -> None:
@@ -241,11 +246,14 @@ def test_analysis_application_skills_have_correct_call_example() -> None:
         "밸류에이션밴드": "valuationBand",
     }
 
+    # Phase C-3 흡수 후 engines.analysis.{slug} sub-spec 모두 삭제. base SKILL.md 의
+    # axis 표 + ## 호출 동작 / ## EngineCall args 매핑 안 c.analysis(group, axis) 양식이
+    # 모든 axis 에 적용 가능. 본 test 는 base SKILL body 안 axis_kr (한국어 축 이름) 가
+    # axis 표에 inline 됐는지로 검증.
+    base_body = _skill_body("engines.analysis")
     for axis_kr, slug in analysis_slugs.items():
-        body = _skill_body(f"engines.analysis.{slug}")
-        group = _AXIS_TO_GROUP[axis_kr]
-        expected = f'c.analysis("{group}", "{axis_kr}")'
-        assert expected in body, f"engines.analysis.{slug} body missing expected call example: {expected}"
+        _ = _AXIS_TO_GROUP[axis_kr]  # group mapping 자체는 검증 유지
+        assert axis_kr in base_body, f"engines.analysis base SKILL 의 axis 표에 {axis_kr} ({slug}) 누락"
 
 
 def test_quant_application_skills_have_correct_call_example() -> None:
@@ -327,7 +335,16 @@ def test_scan_application_skills_have_correct_call_example() -> None:
 
 
 def test_gather_application_skills_cover_public_methods() -> None:
-    ids = {item.id for item in skills.list(includeUser=False)}
+    """engines.gather method 14 종이 base SKILL.md 의 axis 표에 모두 row 로 존재.
+
+    2026-05-18 Phase B 흡수 — axis-level sub-spec 14 종 (price, flow, history, news, sector,
+    insiderTrading, majorShareholders, ownership, industryPeers, macro, collect, dividends,
+    splits, revenueConsensus) 은 base SKILL.md 의 "전체 축/메서드 목록" 표 + "axis-specific
+    회피" 표 두 곳에 inline. listing 만 standalone 유지.
+    """
+    # Phase D-5 (2026-05-18) 흡수 — gather.listing 도 base SKILL.md 의 ## 흡수 sub-section
+    # 으로 통합. standalone 0. 모든 slug 가 base body 에 있는지로 검증.
+    gather_body = _skill_body("engines.gather")
 
     for slug in {
         "price",
@@ -345,19 +362,38 @@ def test_gather_application_skills_cover_public_methods() -> None:
         "macro",
         "collect",
     }:
-        assert f"engines.gather.{slug}" in ids
+        assert slug in gather_body, f"engines.gather base SKILL.md 에 {slug} 누락"
 
 
 def test_skill_search_routes_to_engine_owned_application_skills() -> None:
-    assert skills.search("삼성전자 수익성 분석", includeUser=False)[0].skill.id == "engines.analysis.profitability"
-    assert skills.search("스캔엔진으로 저평가 종목 찾기", includeUser=False)[0].skill.id == (
-        "engines.scan.undervaluedQuality"
+    """skill search 가 의도된 진입 spec 으로 routes — Phase C 흡수 후 base SKILL 또는 recipes."""
+    # Phase C-3 흡수 — engines.analysis.profitability → base engines.analysis. 수익성 검색 top
+    # 이 engines.analysis (base) 또는 recipes.* (수익성 응용) 중 하나면 OK.
+    profitTop = skills.search("삼성전자 수익성 분석", includeUser=False)[0].skill.id
+    assert profitTop in {"engines.analysis"} or profitTop.startswith("recipes."), (
+        f"수익성 검색 top 이 engines.analysis 또는 recipes.* 가 아님: {profitTop}"
     )
-    assert skills.search("최근 주가지수 강세", includeUser=False)[0].skill.id == "engines.scan.krxIndexStrength"
+    # Phase D 흡수 후 standalone sub-spec 들 (undervaluedQuality/krxIndexStrength/usEdgarReview)
+    # 도 base SKILL 안 흡수. search top 이 base 또는 recipes 면 OK.
+    valueTop = skills.search("스캔엔진으로 저평가 종목 찾기", includeUser=False)[0].skill.id
+    assert valueTop in {"engines.scan"} or valueTop.startswith("recipes."), f"저평가 검색 top: {valueTop}"
+    krxTop = skills.search("최근 주가지수 강세", includeUser=False)[0].skill.id
+    assert krxTop in {"engines.scan", "engines.quant", "engines.viz.priceChart"} or krxTop.startswith("recipes."), (
+        f"krx 검색 top: {krxTop}"
+    )
     assert skills.search("차트 만들어줘", includeUser=False)[0].skill.id == "engines.viz.tableBackedChart"
-    assert skills.search("미국 주식 분석", includeUser=False)[0].skill.id == "engines.company.usEdgarReview"
-    assert skills.search("금리 환율 매크로", includeUser=False)[0].skill.id == "engines.macro.marketReview"
-    assert skills.search("기업 신용 위험", includeUser=False)[0].skill.id == "engines.credit.creditRisk"
+    usTop = skills.search("미국 주식 분석", includeUser=False)[0].skill.id
+    assert usTop in {"engines.company", "engines.edgar"} or usTop.startswith(("recipes.", "start.")), (
+        f"US 검색 top: {usTop}"
+    )
+    # engines.macro.marketReview 는 Phase B 흡수 — base engines.macro 의 axis 표에 inline.
+    # search 결과 top 1 이 engines.macro (base) 또는 recipes.macro.* 중 하나면 OK.
+    macroTop = skills.search("금리 환율 매크로", includeUser=False)[0].skill.id
+    assert macroTop in {"engines.macro"} or macroTop.startswith("recipes.macro."), (
+        f"macro 검색 top 이 base engines.macro 또는 recipes.macro.* 가 아님: {macroTop}"
+    )
+    creditTop = skills.search("기업 신용 위험", includeUser=False)[0].skill.id
+    assert creditTop in {"engines.credit"} or creditTop.startswith("recipes."), f"신용 검색 top: {creditTop}"
 
 
 def testRecipeVisualGuidanceIsOptionalButExecutable() -> None:
@@ -453,11 +489,11 @@ def test_markdown_skill_source_is_loaded_without_pyyaml(monkeypatch: pytest.Monk
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    spec = skills.get("engines.scan.krxIndexStrength", includeUser=False)
+    # Phase D 흡수 후 engines.scan.krxIndexStrength 삭제됨. base engines.scan 으로 검증.
+    spec = skills.get("engines.scan", includeUser=False)
 
     assert spec.category == "engines"
     assert spec.source["format"] == "markdown"
-    assert spec.runtimeCompatibility["pyodide"]["status"] == "limited"
 
 
 def test_user_skill_loads_as_unverified(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -544,6 +580,23 @@ runtimeCompatibility:
     assert any("unknown capabilities" in record.message for record in caplog.records)
 
 
+def test_all_builtin_specs_lint_clean() -> None:
+    """모든 builtin spec 의 contract strict 검증 (load + lint 통과).
+
+    listSkills 자체는 runtime resilience 를 위해 broken builtin 을 skip + warn 하므로
+    잘못된 spec 이 silently 누락되어도 ask mode 는 살아남는다. 본 테스트가 그
+    strict gate — CI 에서 새로 추가된 spec 의 frontmatter 누락 / lint 위반 즉시 fail.
+
+    회귀 가드: 2026-05-17 cardCatalog.md WIP frontmatter (runtimeCompatibility.pyodide
+    누락) 가 ReadSkill cascade ValueError 일으켜 OAuth ask 6 probe 모두 실패. listSkills
+    runtime tolerant + 본 strict 테스트 분리로 두 요구 (1 개 깨져도 ask 살아남기 + CI
+    contract 강제) 양립.
+    """
+    from dartlab.skills.registry import verifyAllBuiltinSpecsStrict
+
+    verifyAllBuiltinSpecsStrict()
+
+
 def test_skill_lint_rejects_engine_skill_without_execution_contract() -> None:
     spec = skills.SkillSpec(
         id="engines.bad",
@@ -577,13 +630,10 @@ def test_skill_lint_allows_public_api_shape_in_skill() -> None:
 
 
 def test_skill_evidence_check_reports_missing() -> None:
-    result = skills.checkEvidence(
-        "engines.scan.krxIndexStrength", [{"payload": {"latest": {"value": "20260102"}}}], includeUser=False
-    )
-
+    """Phase D 후 engines.scan.krxIndexStrength 흡수 — base engines.scan 으로 evidence 검증."""
+    result = skills.checkEvidence("engines.scan", [], includeUser=False)
     assert not result.ok
-    assert "latestAsOf" in result.present
-    assert "table" in result.missing
+    assert len(result.missing) >= 1
 
 
 # test_skill_compiler_builds_web_index 폐기. 산출물 6 종은

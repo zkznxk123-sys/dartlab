@@ -153,7 +153,9 @@ class DocsCollector:
         return filings
 
     def _appendSections(self, newSections: list[dict]) -> int:
-        """새 섹션을 parquet에 추가 (원자적 교체)."""
+        """새 섹션을 parquet 에 추가 (원자적 교체, Phase A — sort + row_group_size 적용)."""
+        from dartlab.providers.dart.openapi.saver import writeParquetSorted
+
         newDf = pl.DataFrame(newSections)
 
         if self._parquetPath.exists():
@@ -162,12 +164,7 @@ class DocsCollector:
         else:
             combinedDf = newDf
 
-        tmpPath = self._parquetPath.with_suffix(".parquet.tmp")
-        combinedDf.write_parquet(tmpPath)
-
-        if self._parquetPath.exists():
-            self._parquetPath.unlink()
-        tmpPath.rename(self._parquetPath)
+        writeParquetSorted(combinedDf, self._parquetPath)
 
         return len(newSections)
 

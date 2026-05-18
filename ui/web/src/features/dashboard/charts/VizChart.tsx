@@ -22,8 +22,6 @@ import {
 
 import {
 	ChartContainer,
-	ChartLegend,
-	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 	type ChartConfig,
@@ -34,7 +32,9 @@ import { makePeriodFormatter } from './period';
 import { ComparisonTable } from '../cards/ComparisonTable';
 import { DiffView } from '../cards/DiffView';
 import { KpiTile } from '../cards/KpiTile';
+import { NarrativeBridge } from '../cards/NarrativeBridge';
 import { PhaseIndicator } from '../cards/PhaseIndicator';
+import { ScoreBadge } from '../cards/ScoreBadge';
 import { TopList } from '../cards/TopList';
 import { GaugeChart } from './GaugeChart';
 import { HeatmapChart } from './HeatmapChart';
@@ -45,6 +45,9 @@ import type { RechartsSpec, RechartsSeries } from '../api/client';
 interface Props {
 	spec: RechartsSpec;
 	height?: number;
+	// 카드 size — 카탈로그 colSpan × rowSpan. 카드 컴포넌트 내부 layout dispatch 용.
+	// 1×1 KpiTile 은 값+미니 spark 옆 배치, 2×2+ 는 spark 본체 + 값 오버레이.
+	size?: { w: number; h: number };
 }
 
 function toRows(spec: RechartsSpec): Array<Record<string, number | string | null>> {
@@ -150,7 +153,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 	const Wrapper = onlyLines ? LineChart : onlyBars ? BarChart : ComposedChart;
 
 	return (
-		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height }}>
+		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height, minWidth: 0 }}>
 			<Wrapper
 				accessibilityLayer
 				data={rows}
@@ -210,7 +213,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 						/>
 					}
 				/>
-				<ChartLegend content={<ChartLegendContent />} />
+				{/* v3-r6 — chart canvas legend 제거. mini-table 가 legend 역할 (color-dot + 라벨 + 값). chart canvas 침범 회피. */}
 				{renderSeries}
 			</Wrapper>
 		</ChartContainer>
@@ -225,7 +228,7 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 		return row;
 	});
 	return (
-		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height }}>
+		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height, minWidth: 0 }}>
 			<RadarChart data={rows}>
 				<PolarGrid />
 				<PolarAngleAxis dataKey="_x" fontSize={10} />
@@ -240,15 +243,15 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 					/>
 				))}
 				<ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-				<ChartLegend content={<ChartLegendContent />} />
+				{/* v3-r6 — chart canvas legend 제거. mini-table 가 legend 역할 (color-dot + 라벨 + 값). chart canvas 침범 회피. */}
 			</RadarChart>
 		</ChartContainer>
 	);
 }
 
-// 단일 KPI 카드 — 1 entry = 1 tile (bento 1×1).
+// 단일 KPI 카드 — 1 entry = 1 tile (bento 1×1 default).
 // 백워드 호환: spec.tiles 가 여러 개여도 첫 번째만 렌더 (옛 strip catalog 잔존 시).
-function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
+function KpiTileSingle({ spec, size }: { spec: RechartsSpec; size?: { w: number; h: number } }) {
 	const tiles = spec.tiles ?? [];
 	if (!tiles.length) {
 		return <ErrorState title={spec.title} error="KPI 데이터 없음" />;
@@ -261,7 +264,7 @@ function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
 	const tone: 'positive' | 'negative' | 'neutral' =
 		t.intent === 'positive' ? 'positive' : t.intent === 'negative' ? 'negative' : 'neutral';
 	return (
-		<div className="flex h-full w-full items-center px-2">
+		<div className="h-full w-full">
 			<KpiTile
 				label={t.label}
 				value={t.value ?? null}
@@ -269,12 +272,16 @@ function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
 				deltaPct={deltaPct}
 				subtitle={t.subtitle}
 				tone={tone}
+				sparkline={t.sparkline}
+				rangeMin={t.rangeMin}
+				rangeMax={t.rangeMax}
+				size={size}
 			/>
 		</div>
 	);
 }
 
-export function VizChart({ spec: rawSpec, height = 280 }: Props) {
+export function VizChart({ spec: rawSpec, height = 280, size }: Props) {
 	const spec = applyShadcnPalette(rawSpec);
 
 	if (spec.componentType === 'Error' || spec.error) {
@@ -288,7 +295,7 @@ export function VizChart({ spec: rawSpec, height = 280 }: Props) {
 	// kind 별 dispatch — 시계열 외 카드 패턴.
 	switch (spec.kind) {
 		case 'kpiTile':
-			return <KpiTileSingle spec={spec} />;
+			return <KpiTileSingle spec={spec} size={size} />;
 		case 'diffView':
 			return (
 				<DiffView
@@ -402,6 +409,29 @@ export function VizChart({ spec: rawSpec, height = 280 }: Props) {
 					colOrder={spec.colOrder}
 					tone={spec.tone}
 					height={height}
+				/>
+			);
+		}
+		case 'radar': {
+			if (!spec.series?.length || !spec.categories?.length)
+				return <ErrorState title={spec.title} error="레이더 데이터 없음" />;
+			return <RadarBlock spec={spec} height={height} />;
+		}
+		case 'narrativeBridge': {
+			return (
+				<NarrativeBridge
+					transitions={spec.transitions ?? []}
+					summaryLine={spec.summaryLine}
+				/>
+			);
+		}
+		case 'scoreBadge': {
+			return (
+				<ScoreBadge
+					grade={spec.grade}
+					overallScore={spec.overallScore}
+					dimensions={spec.dimensions}
+					summaryLine={spec.summaryLine}
 				/>
 			);
 		}

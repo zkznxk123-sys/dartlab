@@ -26,7 +26,13 @@ def _emitHfDownloadMarker() -> None:
 
 
 def _emitProgressBar() -> None:
-    """공용 Progress singleton 1 사이클 — bar + counter."""
+    """공용 Progress singleton 1 사이클 — bar + counter.
+
+    `progress.refresh()` 는 snapshot 결정성을 위한 강제 redraw — production
+    사용자는 `auto_refresh=True` 의 background thread tick (~0.1s) 으로 자연스
+    럽게 보지만, 동기 테스트는 thread tick 보장 없이 끝나 Linux CI 에서 빈
+    출력. refresh 명시 호출로 thread 의존성 제거.
+    """
     from dartlab.core.logger import getProgress
 
     progress = getProgress()
@@ -34,6 +40,7 @@ def _emitProgressBar() -> None:
         task = progress.add_task("종목 스캔", total=3)
         for _ in range(3):
             progress.advance(task)
+        progress.refresh()
 
 
 def _emitConsoleStdout() -> None:

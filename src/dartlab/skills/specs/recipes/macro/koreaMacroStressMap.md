@@ -14,13 +14,7 @@ whenToUse:
   - 수출 경기
   - 외국인 수급과 환율
 linkedSkills:
-  - engines.macro.trade
-  - engines.macro.rates
-  - engines.macro.liquidity
-  - engines.macro.crisis
-  - engines.macro.assets
-  - engines.macro.sentiment
-  - engines.macro.summary
+  - engines.macro
   - engines.scan
 toolRefs:
   - EngineCall

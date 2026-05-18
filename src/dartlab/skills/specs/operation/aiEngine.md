@@ -320,6 +320,14 @@ P-revised 후 노출 (MCP 서버 instructions 동시 갱신):
 
 **삭제된 가드** — `test_skill_spec_integrity.py` (AI 직접 spec 작성 경로 제거) · `test_no_external_skill_writes.py` (ai/ 가 spec 작성 안 함) · `test_golden_baseline.py` (heuristic 시대 골든 셋, P-revised 후 폐기).
 
+### 회귀 가드 보조 스크립트
+
+| 스크립트 | 역할 |
+|---|---|
+| `tests/audit/checkAgentBoundary.py` | graph 강박 회귀 패턴 lint — `ai/agent.py` 외 새 `*Loop`/`*Graph` 클래스, 5 패스 패턴 모듈, "graph 강제"/"verify 강제"/"회귀 가드" 자기 인식 단어 등장 감지. 룰 SSOT [memory/feedback_no_graph_regression.md](file://C:/Users/MSI/.claude/projects/c--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/feedback_no_graph_regression.md). 경고 모드 default, `--strict` 시 violation 시 exit 1. CI/pre-commit 추적용 |
+| `tests/ai/runners/captureGoldenBaseline.py` | 휴리스틱 `ask()` 의 출력을 baseline.json 캡처 — P1 5 패스 LLM path 와 비교 기준. 안전 question 만 사용 (Company/scan 호출 안 함, OOM 방지) |
+| `tests/ai/runners/runGoldenTrace.py` | 15 케이스 실 LLM (OAuth Codex) 1 회 호출 → outcome_log entry (`~/.dartlab/decisions/{market}/{stockCode}.md`) + taxonomy 분류 결과 `tests/ai/golden/baseline_v{N}.json` freeze. **비용 발생 — 수동 트리거 (CI 자동 실행 X)**. OAuth Codex 토큰 (`~/.dartlab/oauth_token.json` 또는 `DARTLAB_OAUTH_TOKEN`) 필수 |
+
 ## SSOT 갱신 PR 룰 (P6)
 
 본 SSOT 가 lock 된 이후 다음 변경은 SSOT 갱신 PR 의무:

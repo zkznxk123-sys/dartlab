@@ -13,9 +13,9 @@ whenToUse:
   - 후행 우량주
 linkedSkills:
   - engines.company
-  - engines.quant.qmj
-  - engines.scan.macroBeta
-  - engines.macro.cycle
+  - engines.quant
+  - engines.scan
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython

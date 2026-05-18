@@ -101,6 +101,63 @@ def getMemoryMb() -> float:
     return -1.0
 
 
+def getPeakRssMb() -> float:
+    """프로세스 시작 이후 *peak* RSS (Windows PMC.PeakWorkingSetSize) 를 MB 로 반환.
+
+    매직처닝하스 처방 효과 검증 — 시점 RSS (getMemoryMb) 가 peak 를 놓치는
+    문제 해결. Windows 의 PMC.PeakWorkingSetSize 가 *프로세스 수명 동안 최대*
+    working set. Linux 는 VmHWM (high water mark).
+
+    Returns -1.0 — 측정 불가 시 (지원 안 되는 OS / API fail).
+    """
+    try:
+        import ctypes
+        import ctypes.wintypes
+
+        class PMC(ctypes.Structure):
+            _fields_ = [
+                ("cb", ctypes.wintypes.DWORD),
+                ("PageFaultCount", ctypes.wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        GetCurrentProcess = ctypes.windll.kernel32.GetCurrentProcess  # type: ignore[attr-defined]
+        GetCurrentProcess.restype = ctypes.wintypes.HANDLE
+
+        GetProcessMemoryInfo = ctypes.windll.psapi.GetProcessMemoryInfo  # type: ignore[attr-defined]
+        GetProcessMemoryInfo.argtypes = [
+            ctypes.wintypes.HANDLE,
+            ctypes.POINTER(PMC),
+            ctypes.wintypes.DWORD,
+        ]
+        GetProcessMemoryInfo.restype = ctypes.wintypes.BOOL
+
+        pmc = PMC()
+        pmc.cb = ctypes.sizeof(PMC)
+        if GetProcessMemoryInfo(GetCurrentProcess(), ctypes.byref(pmc), pmc.cb):
+            return pmc.PeakWorkingSetSize / (1024 * 1024)
+    except (AttributeError, OSError, ImportError):
+        pass
+
+    # Linux fallback — VmHWM (high water mark)
+    try:
+        with open(f"/proc/{os.getpid()}/status") as f:
+            for line in f:
+                if line.startswith("VmHWM:"):
+                    return int(line.split()[1]) / 1024
+    except (FileNotFoundError, PermissionError):
+        pass
+
+    return -1.0
+
+
 def _getTotalMemoryMb() -> float:
     """시스템 전체 물리 메모리(MB)."""
     try:
@@ -243,9 +300,12 @@ class BoundedCache:
         "_pinned_prefixes",
         "_critical_prefixes",
         "_emergency_at",
+        "_ipc_cache_dir",
+        "_ipc_backed_prefixes",
     )
 
     def __init__(self, maxEntries: int = 30, pressureMb: float = 800.0):
+        import tempfile
         import threading
 
         self._store: OrderedDict[str, Any] = OrderedDict()
@@ -255,6 +315,13 @@ class BoundedCache:
         self._put_count = 0
         self._lock = threading.RLock()
         self._emergency_at = 0.0  # EMERGENCY 발생 시각 — cool-down 용
+        # Phase C — IPC mmap backing. _sections 같은 무거운 DataFrame 결과를 IPC 파일로
+        # 자동 저장. EMERGENCY clear 시에도 IPC 잔존 → 다음 호출 시 mmap reload (수 ms).
+        # 인스턴스별 tmpdir — Company 다중 인스턴스 간 key 충돌 회피.
+        from pathlib import Path
+
+        self._ipc_cache_dir: Path = Path(tempfile.mkdtemp(prefix="dartlab-cache-"))
+        self._ipc_backed_prefixes: tuple[str, ...] = ("_sections",)
         # critical: EMERGENCY에서도 절대 비우면 안 되는 키 (재생성 로직 없음 → KeyError).
         # 다른 pinned는 재로드 비용 크지만 가능. critical은 비우면 후속 호출 즉시 실패.
         # _pinned_prefixes 의 "Accessor" 그룹과 동기화 — pinned 의 첫 5 entries.
@@ -294,43 +361,77 @@ class BoundedCache:
             "_estimateWacc_v2",
             "_fetchBeta",
             # finance series builders — 매우 무거운 parquet load + pivot
-            # evict 시 14축 calc 가 매번 finance 를 다시 빌드해서 메모리 폭발
+            # evict 시 14축 calc 가 매번 finance 를 다시 빌드해서 메모리 폭발.
+            # Phase B 의 DuckDB pivot 으로 rebuild 비용 ~50% 감소, Phase D 의 IPC mmap
+            # 으로 parquet 디코드 ~0 — 그래도 builder 자체 cost 보존 위해 pinned 유지.
             "_finance_",
             "_financeStmt_",
             "_financeCisQuarterly",
             "_sceDataFrame",
             "_ratios_",
             "_insights_analyze",
-            # 무거운 calc 결과 (story 안 다중 호출)
-            "_calcMarketBeta",
-            "_calcTechnicalVerdict",
-            "_calcTechnicalSignals",
-            "_calcMarketRisk",
-            "_calcMarketAnalysisFlags",
-            "_calcFundamentalDivergence",
-            "_calcRoicTimeline",
-            "_calcCreditMetrics",
-            "_calcCreditScore",
-            "_calcScorecard",
-            "_calcPeerRanking",
-            "_calcDisclosureChangeSummary",
-            "_calcKeyTopicChanges",
+            # Phase D-2 — calc* 결과 13 prefix 제거.
+            # 작은 dict / scalar / 짧은 list 결과 (재계산 비용 ≤ 50ms, finance pinned 가 있으면
+            # rebuild thrashing 없음). pinned 유지 시 memory 압박 시에도 EMERGENCY 회수 안 됨.
+            # 제거된 prefix: _calcMarketBeta · _calcTechnicalVerdict · _calcTechnicalSignals ·
+            # _calcMarketRisk · _calcMarketAnalysisFlags · _calcFundamentalDivergence ·
+            # _calcRoicTimeline · _calcCreditMetrics · _calcCreditScore · _calcScorecard ·
+            # _calcPeerRanking · _calcDisclosureChangeSummary · _calcKeyTopicChanges.
         )
 
     def _isPinned(self, key: str) -> bool:
         return any(key.startswith(p) for p in self._pinned_prefixes)
 
+    def _ipcBacked(self, key: str) -> bool:
+        return any(key.startswith(p) for p in self._ipc_backed_prefixes)
+
+    def _ipcPath(self, key: str):
+        from pathlib import Path
+
+        # key 가 underscore/alphanumeric 만 가정 — dartlab cache key 규약.
+        safe = "".join(ch if ch.isalnum() or ch in "_-" else "_" for ch in key)
+        return self._ipc_cache_dir / f"{safe}.arrow"
+
     def __contains__(self, key: str) -> bool:
         with self._lock:
-            return key in self._store
+            if key in self._store:
+                return True
+            if self._ipcBacked(key):
+                return self._ipcPath(key).exists()
+            return False
 
     def __getitem__(self, key: str) -> Any:
         with self._lock:
-            self._store.move_to_end(key)
-            return self._store[key]
+            if key in self._store:
+                self._store.move_to_end(key)
+                return self._store[key]
+            # Phase C — IPC mmap reload (EMERGENCY clear 또는 evict 후).
+            if self._ipcBacked(key):
+                ipcPath = self._ipcPath(key)
+                if ipcPath.exists():
+                    try:
+                        import polars as pl
+
+                        df = pl.read_ipc(str(ipcPath), memory_map=True)
+                        self._store[key] = df
+                        return df
+                    except (OSError, ImportError):
+                        pass
+            raise KeyError(key)
 
     def __setitem__(self, key: str, value: Any) -> None:
         with self._lock:
+            # Phase C — IPC backing. _sections 류 + DataFrame 값 자동 저장 (caller 0 변경).
+            # evict 시에도 디스크에 남아 다음 호출 mmap reload — thrashing 0.
+            if self._ipcBacked(key):
+                try:
+                    import polars as pl
+
+                    if isinstance(value, pl.DataFrame):
+                        value.write_ipc(str(self._ipcPath(key)), compression="zstd")
+                except (OSError, ImportError):
+                    pass  # IPC 저장 실패 — heap 캐시만 유지 (fallback)
+
             if key in self._store:
                 self._store.move_to_end(key)
                 self._store[key] = value

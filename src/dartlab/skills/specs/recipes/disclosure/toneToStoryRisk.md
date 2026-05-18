@@ -12,9 +12,9 @@ whenToUse:
   - narrative risk composite
   - 자동 risk 블럭
 linkedSkills:
-  - engines.quant.toneChange
-  - engines.gather.news
-  - engines.analysis.disclosureChange
+  - engines.quant
+  - engines.gather
+  - engines.analysis
   - engines.story
 toolRefs:
   - EngineCall

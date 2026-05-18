@@ -14,10 +14,7 @@ whenToUse:
   - 부채 디플레이션
   - 금융위기 신호
 linkedSkills:
-  - engines.macro.crisis
-  - engines.macro.liquidity
-  - engines.macro.rates
-  - engines.macro.summary
+  - engines.macro
   - engines.credit
 toolRefs:
   - EngineCall

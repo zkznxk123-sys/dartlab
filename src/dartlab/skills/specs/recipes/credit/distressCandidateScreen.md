@@ -12,9 +12,9 @@ whenToUse:
   - credit migration
   - dCR 하락 종목
 linkedSkills:
-  - engines.scan.profitability
+  - engines.scan
   - engines.credit
-  - engines.quant.sentiment
+  - engines.quant
   - recipes.credit.quantConsensus
 toolRefs:
   - EngineCall

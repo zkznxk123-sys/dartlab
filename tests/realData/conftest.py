@@ -18,7 +18,7 @@
     - API 키 필요한 엔진(macro/ai)은 키 없으면 skip
 
 실행:
-    bash scripts/dev/test-lock.sh tests/realData -m "realData" -v --tb=short
+    bash tests/test-lock.sh tests/realData -m "realData" -v --tb=short
 """
 
 from __future__ import annotations

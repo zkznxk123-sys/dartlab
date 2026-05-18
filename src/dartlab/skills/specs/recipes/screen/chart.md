@@ -16,7 +16,6 @@ whenToUse:
 linkedSkills:
   - engines.scan
   - engines.viz.tableBackedChart
-  - engines.scan.crossSectionStockScreen
 toolRefs:
   - EngineCall
   - RunPython
@@ -88,7 +87,7 @@ scan 결과 (~2000 종목) 에서 상위 N 추출 → table-backed chart 로 시
 ## 연계 절차
 
 1. engines.scan — 전종목 스코어
-2. engines.scan.crossSectionStockScreen — 매출 규모·기간 필터
+2. engines.scan — 매출 규모·기간 필터
 3. engines.viz.tableBackedChart — chart 생성
 
 ## 기본 검증

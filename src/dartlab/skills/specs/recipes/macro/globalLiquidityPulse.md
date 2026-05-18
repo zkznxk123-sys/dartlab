@@ -15,10 +15,7 @@ whenToUse:
   - liquidity pulse
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.macro.liquidity
-  - engines.macro.rates
-  - engines.macro.summary
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython
@@ -123,7 +120,7 @@ emit_result(
 
 1. 유동성 축소가 확인되면 `recipes.macro.yieldCurveStress` 로 금리곡선 압력을 확인한다.
 2. 달러 유동성 압력이 크면 `recipes.macro.dollarFundingStress` 로 환율/위험회피 신호를 확인한다.
-3. 거시 해석으로 묶을 때는 `engines.macro.summary` 를 기준 판정으로 사용한다.
+3. 거시 해석으로 묶을 때는 `engines.macro` 를 기준 판정으로 사용한다.
 
 ## 기본 검증
 

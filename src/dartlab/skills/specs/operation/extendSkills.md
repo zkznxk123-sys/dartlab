@@ -115,25 +115,29 @@ SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpd
 
 신규 cadence recipe (dailyMorningNote · catalystCalendar · thesisTracker) 도 같은 규칙으로 작성.
 
-기존 skill 일괄 audit 은 `scripts/dev/audit_trigger_phrases.py` (idempotent, dry-run 지원).
-
 ## Skill 확장 보조 CLI
 
 신규 엔진·axis·recipe 추가는 사용자가 선택한 작업 범위에 맞춰 보조 CLI 로 스켈레톤을 만든 뒤, 운영자·사용자·사용자가 명시적으로 위임한 AI 가 SkillSpec 과 산출물을 함께 정리한다.
 
 ```bash
 # 새 엔진 (engines.{name})
-uv run python -X utf8 scripts/dev/addEngine.py myEngine \
+uv run python -X utf8 src/dartlab/skills/addEngine.py myEngine \
     --title "My Engine" \
     --purpose "myEngine 엔진은 ..."
 
-# 새 axis · recipe 는 동일 패턴 (확장 예정)
+# 기존 엔진 안 axis sub-spec 추가 (engines.{group}.{axis})
+uv run python -X utf8 src/dartlab/skills/addAxis.py {group} {axis} \
+    --title "..." --purpose "..."
 ```
 
 `addEngine.py` 가 준비하는 스켈레톤:
 
 - `src/dartlab/{name}/__init__.py` 스켈레톤 + `__all__`
 - `src/dartlab/skills/specs/engines/{name}/SKILL.md` frontmatter 5 필수 + 3 강제 섹션 placeholder
+
+`addAxis.py` (`addEngine.py` 의 축소판 — 새 엔진이 아니라 *기존 엔진 안의 응용 결* 결정) 가 준비하는 스켈레톤:
+
+- `src/dartlab/skills/specs/engines/{group}/{axis}.md` frontmatter + 3 강제 섹션 placeholder
 
 후속 정리 항목:
 

@@ -1310,6 +1310,22 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         TargetMarkets:
             - KR (DART) — 사업/분기/반기 보고서 정기공시 한정.
     """
+    # Phase C 본격 처방 — DuckDB PIVOT fast path skeleton.
+    # 환경변수 DARTLAB_SECTIONS_FAST_PIVOT=1 활성 시 시도. 실제 SQL 등가 (30+ 컬럼
+    # schema + 9-튜플 sort key + List/Categorical/Boolean dtype + _rowFreqMeta
+    # Python 함수 등가) 는 별도 PR — caller predicate statementFilter 가 _normalizeQ4
+    # cross-statement 의존성으로 parity 6 fail 한 사례 (commit 7eebdacbc) 가
+    # 보여주듯 sj_div 단순 가정만으로 부족. sections 의 더 복잡한 schema 는 동일/
+    # 더 큰 parity 위험. 본 skeleton 은 명목 진척 — 실제 fast path 작성 시 plan
+    # 의 5 종목 parity test 가 회귀 가드.
+    import os as _os
+
+    if _os.environ.get("DARTLAB_SECTIONS_FAST_PIVOT") == "1":
+        try:
+            return _sectionsFastDuckdb(stockCode, topics)
+        except NotImplementedError:
+            pass  # legacy fallback — 본 PR 단계에선 항상 legacy
+
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}
     rowOrder: dict[tuple[str, str], dict[str, int]] = {}
@@ -1430,8 +1446,14 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
                     "_repPeriod": periodKey,
                 }
 
-        # 전체 빌드만 주기적 GC — 부분 빌드는 데이터가 적어 불필요
-        if topics is None and _pIdx % 10 == 9:
+        # Phase C-1 (minimal) — 명시적 회수: projected/expanded 의 큰 Python list 는
+        # next iteration 시작 전에 ref 끊기 (Python heap reclaim 만, Rust heap 무관).
+        # `projected` 가 local var 라 다음 iteration 의 새 할당으로 자연 GC 되지만
+        # 거대 list 의 경우 ref 가 다음 iteration 시작 전 살아있을 수 있다.
+        projected = None  # noqa: F841 — 명시적 ref drop
+        # 전체 빌드만 주기적 GC — 부분 빌드는 데이터가 적어 불필요.
+        # Phase C-1 빈도 강화: 10 period → 5 period 마다 (Python dict 누적 회수 가속).
+        if topics is None and _pIdx % 5 == 4:
             gc.collect()
 
     # periodRowsDf 는 cache 보유 — 명시적 del 안 함. 매 period filter 의 짧은 lifetime

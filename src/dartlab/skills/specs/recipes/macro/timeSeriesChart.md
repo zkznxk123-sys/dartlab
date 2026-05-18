@@ -15,7 +15,6 @@ whenToUse:
   - macro time series chart
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
   - engines.viz
   - recipes.macro.yieldCurveStress
   - recipes.macro.inflationBreadthWatch

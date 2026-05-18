@@ -12,7 +12,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_script_runs_clean(capsys):
-    """``scripts/dev/showPolarsBuild.py`` main() exit 0, polars/python/platform 라인 포함."""
+    """``tests/cli/showPolarsBuild.py`` main() exit 0, polars/python/platform 라인 포함."""
     repo = Path(__file__).resolve().parent.parent.parent
     scriptPath = repo / "scripts" / "dev" / "showPolarsBuild.py"
     assert scriptPath.exists(), f"M7 스크립트 부재: {scriptPath}"

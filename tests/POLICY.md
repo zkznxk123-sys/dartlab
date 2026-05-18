@@ -126,25 +126,37 @@ tests/
 
 ---
 
-## 3. 실행 — 반드시 `test-lock.sh` 경유
+## 3. 실행 — `tests/run.py` 단일 진입점
 
-⛔ **`pytest tests/ -v` 전체 직접 실행 금지** — Polars 네이티브 메모리 (≈ 200~500MB / Company) 가 누적되면 OOM. `gc.collect()` 로 회수 불가. `test-lock.sh` 는 동시 실행 차단 + `DARTLAB_TEST_LOCKED=1` 환경 설정.
+⛔ **`pytest tests/ -v` 전체 직접 실행 금지** — Polars 네이티브 메모리 (≈ 200~500MB / Company) 가 누적되면 OOM.
+
+**모든 CI 게이트 (27 개) 는 [tests/run.py](run.py) 의 `GATES` dict 가 SSOT**. CI YAML 은 matrix 디스패치만. 로컬도 CI 와 *바이트 단위 동일* 명령으로 실행.
 
 ```powershell
-# 1 단계 — unit (안전, < 30 초)
-bash scripts/dev/test-lock.sh tests/ -m "unit and not requires_data" -v --tb=short
+# Push 전 검증 — ci-fast 의 blocking 게이트 전체 (12 종)
+uv run python -X utf8 tests/run.py preflight
 
-# 2 단계 — integration (Company 로딩)
-bash scripts/dev/test-lock.sh tests/ -m "integration and not requires_data" -v --tb=short
+# 단일 게이트 — CI matrix 가 호출하는 것과 동일
+uv run python -X utf8 tests/run.py gate format
+uv run python -X utf8 tests/run.py gate test-fast
+uv run python -X utf8 tests/run.py gate snapshot-regression --dry-run   # 명령만 보기
 
-# 3 단계 — heavy (단독)
-bash scripts/dev/test-lock.sh tests/ -m "heavy" -v --tb=short
+# Tier 전체
+uv run python -X utf8 tests/run.py tier fast --blocking-only
 
-# 단일 파일 / 폴더 (lock 안 함, 본인이 안전 보장)
+# 정보
+uv run python -X utf8 tests/run.py list           # 27 게이트 표
+uv run python -X utf8 tests/run.py audit-self     # dict 무결성
+
+# pytest 직접 호출 (단일 파일·폴더 한정 — 본인이 OOM 안전 보장)
 $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_output_snapshots.py -v
 ```
 
-메모리 안전 가드 (`conftest.py::_memory_guard_per_test`) — `PRESSURE_CRITICAL_MB=1500` 초과 시 `pytest.exit(returncode=99)`.
+`tests/run.py` 는 내부적으로 [test-lock.sh](test-lock.sh) 의 직렬화 + `DARTLAB_TEST_LOCKED=1` 와 동일 안전 보장을 한다. 메모리 안전 가드 (`conftest.py::_memory_guard_per_test`) — `PRESSURE_CRITICAL_MB=1500` 초과 시 `pytest.exit(returncode=99)`.
+
+**신규 게이트 추가**: `tests/run.py` 의 `GATES` dict 항목 + `.github/workflows/ci-{fast,full,nightly}.yml` 의 `matrix.include` 항목 양쪽을 한 PR 에서 동시 추가. 한쪽만 추가하면 [tests/audit/test_runEntrypoint.py](audit/test_runEntrypoint.py) 가 fail.
+
+**git push 자동 검증 (선택)**: `bash tests/installHooks.sh` 한 번 실행하면 `core.hooksPath = tests/hooks` 설정. 이후 `git push` 마다 [tests/hooks/pre-push](hooks/pre-push) 가 `tests/run.py preflight` 자동 호출 → 차단 12 게이트 통과 못 하면 push 중단. 일회 우회: `DARTLAB_SKIP_PREPUSH=1 git push`. 비활성화: `git config --unset core.hooksPath`.
 
 ---
 
@@ -156,7 +168,7 @@ $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_out
 | **Full** | `.github/workflows/ci-full.yml` | master push | ≤ 10 분 | `integration` + `metamorphic` + 부분 mutation |
 | **Nightly** | `.github/workflows/ci-nightly.yml` | cron 15:00 UTC | ≤ 45 분 | `realData` + `heavy` + AI eval + full mutation |
 
-**Fast 의 6 job**: format · lint · lint-camelcase · smoke · architecture-l0-l15 · test-fast + **snapshot-regression** (syrupy) + **schema-drift** (Pandera).
+**Fast 16 게이트** (modify `tests/run.py` GATES dict → 본 표가 자동으로 진실): format · lint · architecture-l0-l15 · typecheck · smoke · test-fast · wheel-smoke · quality-gate · security · deps-check · notebooks · snapshot-regression · schema-drift · eval-rule · mutation-smoke · test-coverage-gate. 이 중 blocking=False (PR 차단 안 함) 4 종 = typecheck · quality-gate · security · deps-check.
 
 PR 머지 차단 fail gate: Fast 6 + snapshot + schema. baseline 회귀 (Guard Index `strict --scope l0-l15`) 는 별도 차단.
 
@@ -243,7 +255,7 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 
 | 항목 | 위치 |
 |---|---|
-| **PR 차단 게이트** | `scripts/audit/mutationSmoke.py` (Windows + Linux 자작 7 패턴) |
+| **PR 차단 게이트** | `tests/audit/mutationSmoke.py` (Windows + Linux 자작 7 패턴) |
 | Self-test | `tests/audit/test_mutationSmoke.py` (7 종 — pattern 존재 · score 계산) |
 | CI Fast job | `.github/workflows/ci-fast.yml` `mutation-smoke` (~35 초, 100% killed 강제) |
 | Nightly 확장 sweep | `mutmut` Linux runner — `.github/workflows/ci-nightly.yml` `mutation-testing` job |
@@ -271,8 +283,8 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 
 | 항목 | 위치 |
 |---|---|
-| 게이트 스크립트 | `scripts/audit/testCoverageGate.py` |
-| Baseline 동결 | `scripts/audit/_baselines/testCoverage.json` — **1097 / 3134 (35%) 부채** |
+| 게이트 스크립트 | `tests/audit/testCoverageGate.py` |
+| Baseline 동결 | `tests/audit/_baselines/testCoverage.json` — **1097 / 3134 (35%) 부채** |
 | CI 호출 | `.github/workflows/ci-fast.yml` job `test-coverage-gate` (`continue-on-error: true`) |
 | Self-test | `tests/audit/test_testCoverageGate.py` — 12 종 |
 | 룰 | PR diff 에서 `src/dartlab/**/*.py` 의 새 공개 함수 (def, non-private) 추가 → `tests/**/test_*.py` 에 해당 함수명 등장해야 함 (substring 휴리스틱) |
@@ -288,10 +300,10 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 **갱신 절차**:
 ```powershell
 # baseline 재측정 (분기별 quota 측정)
-uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json | Out-File -Encoding utf8 scripts/audit/_baselines/testCoverage.json
+uv run python -X utf8 tests/audit/testCoverageGate.py --all --json | Out-File -Encoding utf8 tests/audit/_baselines/testCoverage.json
 
 # diff 검토 후 commit
-git diff scripts/audit/_baselines/testCoverage.json
+git diff tests/audit/_baselines/testCoverage.json
 ```
 
 ### Track 7 — Record-Replay (VCR) — ★★★ **인프라 도입 완료 (카세트 record 운영자 트리거)**
@@ -446,10 +458,10 @@ baseline 동결은 *부채 ledger* 다. 부채 자체는 잡지 못한 회귀이
 **측정 도구**:
 ```powershell
 # 분기 측정 (분기 첫 PR)
-uv run python -X utf8 scripts/audit/measureProgress.py --record
+uv run python -X utf8 src/dartlab/skills/measureProgress.py --record
 
 # baseline 재측정 (감축 commit 직전)
-uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json > scripts/audit/_baselines/testCoverage.json
+uv run python -X utf8 tests/audit/testCoverageGate.py --all --json > tests/audit/_baselines/testCoverage.json
 ```
 
 **감축 commit 형식**: `정리: testCoverage baseline 1097→950 (Q2 quota 달성)`. PR 본문에 *어느 모듈 함수에 어떤 테스트 추가했는지* 표 첨부.
@@ -499,4 +511,4 @@ uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json > scripts/a
 - 강행규칙 — `CLAUDE.md` "메모리 안전" · "변경 단위"
 - 도구 SSOT (운영자↔AI 메모리) — `memory/testing_stack.md`
 - 4 계층 import — `src/dartlab/skills/specs/operation/architecture.md` · `memory/core_boundary.md`
-- 회귀 가드 — `scripts/audit/dartlabGuard.py strict --scope l0-l15`
+- 회귀 가드 — `tests/audit/dartlabGuard.py strict --scope l0-l15`

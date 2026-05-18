@@ -1,6 +1,7 @@
-"""core/dataLoader LRU 캐시 단위 테스트.
+"""core/dataLoader LRU 캐시 폐기 회귀 (Phase D).
 
-Part 5 commit 1 — loadData 함수 레벨 memoization 회귀 보호.
+이전 buyer 의 LRU memoization 은 Phase D 에서 폐기됨. 본 모듈은 *폐기 후 동작*
+검증 — 매 호출 disk 재로드 (BoundedCache + IPC mmap 이 cache 역할 담당).
 """
 
 from __future__ import annotations
@@ -16,105 +17,50 @@ from dartlab.frame import dataLoader
 pytestmark = pytest.mark.unit
 
 
-@pytest.fixture(autouse=True)
-def _resetCache():
-    """각 테스트 전후 LRU 초기화."""
-    _LOAD_CACHE.clear()
-    yield
-    _LOAD_CACHE.clear()
-
-
 def _fakeLoadedDataFrame(category: str) -> pl.DataFrame:
     return pl.DataFrame({"year": [2023, 2024], "category": [category, category]})
 
 
-class TestLoadDataCache:
-    def test_second_call_returns_cached_dataframe(self):
-        """같은 (stockCode, category) 재호출 시 pl.read_parquet 1회만 실행."""
-        with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch(
-                "dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
-            ) as readParquet,
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
-        ):
-            a = loadData("005930", "finance")
-            b = loadData("005930", "finance")
-        assert readParquet.call_count == 1
-        assert a is b
+class TestLoadDataCachePhaseD:
+    """Phase D — _LOAD_CACHE 폐기 후 회귀."""
 
-    def test_different_keys_cache_separately(self):
-        """stockCode 또는 category 가 다르면 별도 캐시 엔트리."""
-        with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch("dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))),
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
-        ):
-            loadData("005930", "finance")
-            loadData("005930", "docs")
-            loadData("068270", "finance")
-        assert len(_LOAD_CACHE) == 3
-
-    def test_refresh_force_bypasses_cache(self):
-        """refresh="force" 는 LRU 를 우회하고 재로드."""
-        with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch(
-                "dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
-            ) as readParquet,
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
-        ):
-            loadData("005930", "finance")
-            loadData("005930", "finance", refresh="force")
-        assert readParquet.call_count == 2
-
-    def test_krx_auto_bypasses_memory_cache_when_freshness_expired(self):
-        """KRX daily 데이터는 TTL 만료 시 프로세스 LRU보다 HF freshness를 우선한다."""
-        with (
-            patch("dartlab.core.dataLoader._shouldRefreshHfCategory", side_effect=[False, True]) as shouldRefresh,
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch(
-                "dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))
-            ) as readParquet,
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
-        ):
-            first = loadData("raw-2026", "krxPrices")
-            second = loadData("raw-2026", "krxPrices")
-
-        assert shouldRefresh.call_count == 2
-        assert readParquet.call_count == 2
-        assert first is not second
-
-    def test_clear_cache_empties_store(self):
-        """_clearLoadCache 가 LRU 를 완전히 비운다."""
+    def test_load_cache_always_empty(self):
+        """_LOAD_CACHE 가 store 안 함 — 항상 empty 유지."""
         with (
             patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
             patch("dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")),
             patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
         ):
             loadData("005930", "finance")
-            loadData("068270", "finance")
-        assert len(_LOAD_CACHE) == 2
+            loadData("005930", "finance")
+            loadData("068270", "docs")
+        assert len(_LOAD_CACHE) == 0
+
+    def test_each_call_reloads_from_disk(self):
+        """캐시 폐기 → 매 호출 read_parquet 호출."""
+        with (
+            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
+            patch(
+                "dartlab.core.dataLoader.pl.read_parquet", return_value=_fakeLoadedDataFrame("finance")
+            ) as readParquet,
+            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
+        ):
+            loadData("005930", "finance")
+            loadData("005930", "finance")
+            loadData("005930", "finance")
+        assert readParquet.call_count == 3
+
+    def test_clear_load_cache_is_noop(self):
+        """_clearLoadCache 는 backward-compat no-op."""
         _clearLoadCache()
         assert len(_LOAD_CACHE) == 0
 
-    def test_lru_evicts_oldest_when_over_max(self):
-        """_LOAD_CACHE_MAX 초과 시 가장 오래된 엔트리 evict."""
-        # MAX 보다 2 많은 엔트리 삽입
-        with (
-            patch("dartlab.core.dataLoader._ensureLocalParquet", lambda *a, **k: None),
-            patch("dartlab.core.dataLoader.pl.read_parquet", side_effect=lambda p: _fakeLoadedDataFrame(str(p))),
-            patch("dartlab.core.dataLoader._normalizeLoadedFrame", side_effect=lambda df, c: df),
-        ):
-            for i in range(_LOAD_CACHE_MAX + 2):
-                loadData(f"{i:06d}", "finance")
-        assert len(_LOAD_CACHE) == _LOAD_CACHE_MAX
-
-    def test_module_level_symbols_exported(self):
-        """_LOAD_CACHE / _clearLoadCache / _LOAD_CACHE_MAX public 참조 가능."""
+    def test_module_level_symbols_preserved(self):
+        """_LOAD_CACHE / _clearLoadCache / _LOAD_CACHE_MAX backward-compat alias 유지."""
         assert hasattr(dataLoader, "_LOAD_CACHE")
         assert hasattr(dataLoader, "_clearLoadCache")
         assert hasattr(dataLoader, "_LOAD_CACHE_MAX")
+        assert dataLoader._LOAD_CACHE_MAX == 0  # 폐기 신호
 
 
 class TestWarmupFinanceAccessors:

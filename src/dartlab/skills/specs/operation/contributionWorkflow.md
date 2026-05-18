@@ -92,7 +92,7 @@ lastUpdated: '2026-05-13'
 ## 검증 규칙
 
 - 테스트는 변경 범위에 맞게 좁게 시작하고, shared behavior나 계층 경계를 건드리면 architecture/audit gate까지 넓힌다.
-- 긴 테스트나 pytest 직접 실행이 필요한 경우 `scripts/dev/test-lock.sh`를 우선 사용한다.
+- 긴 테스트나 pytest 직접 실행이 필요한 경우 `tests/test-lock.sh`를 우선 사용한다.
 - Guard Index 관련 회귀 작업은 `operation.testing`, `operation.code`, `operation.architecture`의 절차를 함께 적용한다.
 - 실패한 검증은 숨기지 않는다. 기존 실패인지, 이번 변경으로 생긴 실패인지 구분해 기록한다.
 
@@ -110,3 +110,16 @@ lastUpdated: '2026-05-13'
 README, Skill OS, landing page, blog, JSON index는 사용자가 직접 읽는 공개 산출물이다. 표현은 주체 중립적으로 쓴다.
 
 운영 실패나 폐기 이력은 필요한 경우에만 짧게 남긴다. 내부 사유, 방어적 문구, 도구 중심의 표현보다 현재 운영 원칙과 사용자가 따라야 할 절차를 먼저 적는다.
+
+## PreToolUse hook validator 스크립트
+
+`.claude/hooks/` 가 PreToolUse 시점에 호출하는 검증 스크립트. 룰 위반 시 hook 이 도구 실행 자체를 차단. 운영자↔AI 약속 (메모리·CLAUDE.md) 의 자동 강행 가드.
+
+| 스크립트 | 룰 | 차단 시점 |
+|---|---|---|
+| `.claude/hooks/check_no_ai_markers.py` | 커밋 메시지 + staged 본문에 AI attribution 마커 (생성 주체 표식 · 협업 표식 등 — 패턴 SSOT 는 해당 스크립트 본문 `BANNED_PATTERNS` 리스트) 금지. 본 spec "공개 산출물 규칙" + [MEMORY.md "주체 중립"](file://C:/Users/MSI/.claude/projects/c--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/MEMORY.md) 강행 | git commit |
+| `.claude/hooks/validate_ask.py` | `AskUserQuestion` 4 지선다 안티패턴 차단. [CLAUDE.md "사용자 질문 방식"](file://./CLAUDE.md) — 객관식 선택지 = 결정 떠넘김 | `AskUserQuestion` 도구 호출 |
+| `.claude/hooks/validate_plan.py` | `ExitPlanMode` 본문 형식 게이트. 영향 파일 / 영향 함수 / 테스트 매핑 / 롤백 4 섹션 + path ≥ 2 강행. 룰 SSOT [memory/plan_deep_gate.md](file://C:/Users/MSI/.claude/projects/c--Users-MSI-OneDrive-Desktop-sideProject-dartlab/memory/plan_deep_gate.md) + skill [plan-deep](file://./.claude/skills/plan-deep/SKILL.md) | `ExitPlanMode` 도구 호출 |
+| `.claude/hooks/validate_stop_phrase.py` | Stop hook trigger phrase 가드 — 컷오프 / 4 지선다 안티패턴 차단 | Stop hook (응답 종료 시점) |
+
+위반 시 hook 메시지에 룰 SSOT 경로 노출. 위반 회피로 hook 우회 (`--no-verify` 등) 금지 — 우회 시도 자체가 회귀로 카운트.

@@ -98,7 +98,7 @@ lastUpdated: '2026-05-03'
 |---|---|---|
 | L0 | `core` | L0 primitive 만: logger·env·types·memory·polarsUtil·formatting·constants·protocols·naming·utils·cache·di·credentials·dualAccess·palette + DIP Protocol (disclosureFetcher·gatherProvider·financeDocAccessor·listingResolver). 상위 import 금지 |
 | **L1** | `gather` · `providers` | raw 생산 owner (DART/EDGAR/EDINET 원본 SSOT). core 만 import. gather ↛ providers 상호 import 금지 |
-| **L1.5 (가공 4 형제)** | `scan` · `frame` · `synth` · `reference` | raw 생산 0, 책임 분리 가공기. core·L1 만 import. **4 형제끼리 cross import 금지** ([tests/architecture/test_l15_no_cross_import.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l15_no_cross_import.py) 강제). 책임: scan=횡단면 (한 metric × 다수 회사), frame=raw 결합 (panel/시계열 view), synth=분석 후처리·매칭·시나리오, reference=정적 JSON 룩업+매핑 엔진 |
+| **L1.5 (가공 4 형제)** | `scan` · `frame` · `synth` · `reference` | raw 생산 0, 책임 분리 가공기. core·L1 만 import. **4 형제끼리 cross import 금지** ([tests/architecture/test_l15_no_cross_import.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l15_no_cross_import.py) 강제). 책임: scan=횡단면 (한 metric × 다수 회사), frame=raw 결합 (panel/시계열 view — `disclosureDiff` 등 동일 회사 N-1 vs N 보고서 sentence-level diff 포함), synth=분석 후처리·매칭·시나리오, reference=정적 JSON 룩업+매핑 엔진 |
 | **L2 분석엔진 (5)** | `analysis` · `credit` · `macro` · `quant` · `industry` | 단일 도메인 분석. core·L1.5 만 import. L1 직접 import 는 L1.5 에 없는 raw 가 필요할 때만 예외. **다른 L2 직접 import 금지** (도메인 격리 + 순환참조 방지) |
 | **L3 조합기** | `story` | 분석엔진 X. L2 5 엔진 + L1.5 결과를 블록 단위로 결합해 6 막 보고서 직조. 자체 계산 0, 모든 숫자는 하위 엔진 ref. **L2 다중 소비 책임을 단독으로 짊어져 L2 끼리의 import 순환을 차단** |
 | L4 소비자 | `ai` · `mcp` | dartlab 라이브러리 직접 호출 — AI 자율 추론 + tool 사용 (ai) · 외부 LLM 진입 (mcp). 엔진 결과를 의심·검증·재계산 |
@@ -111,7 +111,7 @@ import 정책 (P-CORE B 정리 결과):
 3. **L1.5 4 형제 cross import 금지**: scan ↛ frame ↛ synth ↛ reference ([tests/architecture/test_l15_no_cross_import.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l15_no_cross_import.py)). core 잡동사니화 재발 방지.
 4. **L1.5 진입 룰**: 새 모듈 추가 시 ≥ 2 분석엔진이 같은 형태로 사용해야 함 ([tests/architecture/test_l15_entry_rule.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_l15_entry_rule.py)). 1 개만 쓰면 그 분석엔진 owner.
 5. **core L0 only**: core/ 가 상위 계층 import 금지 ([tests/architecture/test_core_l0_only.py](https://github.com/eddmpython/dartlab/blob/master/tests/architecture/test_core_l0_only.py)). di.py 만 lazy import 예외.
-6. **양방향 cycle 절대금지**: `scripts/audit/cycleScan.py` CI 강제 (양방향 2-cycle + 3+ 모듈 cycle 검출).
+6. **양방향 cycle 절대금지**: `tests/audit/cycleScan.py` CI 강제 (양방향 2-cycle + 3+ 모듈 cycle 검출).
 7. story 가 다중 L2 소비 책임 잔존 (조합기) — 그러나 단방향 sibling import 도 도메인적 자연 의존이면 허용.
 
 ### L0~L1.5 완료 게이트 (2026-05-13)
@@ -123,7 +123,7 @@ L0~L1.5 는 "정리했다" 가 아니라 다음 gate 가 모두 통과해야 완
 - `tests/architecture/test_l1_no_cross_import.py` — gather/providers module-level cross import 0.
 - `tests/architecture/test_l15_no_cross_import.py` — scan/frame/synth/reference sibling import 0.
 - `tests/architecture/test_import_direction.py::test_l0_l15_import_direction_strict` — L0~L1.5 가 상위 계층을 직접 import 하지 않는다.
-- `scripts/audit/cycleScan.py --strict-toplevel` — top-level package cycle 0.
+- `tests/audit/cycleScan.py --strict-toplevel` — top-level package cycle 0.
 - provider strict scope 는 `dart,edgar` 이다. `edinet` 은 API 통신 불가 상태라 복구 전까지 deferred provider 로 제외한다.
 
 ### Guard Index architecture 수집 항목
@@ -140,10 +140,10 @@ Guard Index 는 기존 architecture pytest, import-linter, audit scripts 를 같
 - tests mirror
 - stable API manifest
 
-`tests/architecture/*`, `pyproject [tool.importlinter]`, `scripts/audit/*Gate.py` 는 같은 architecture graph 를 바라보는 방향으로 유지한다. L0~L1.5 완료 확인은 다음 명령을 기본 entry 로 쓴다.
+`tests/architecture/*`, `pyproject [tool.importlinter]`, `tests/audit/*Gate.py` 는 같은 architecture graph 를 바라보는 방향으로 유지한다. L0~L1.5 완료 확인은 다음 명령을 기본 entry 로 쓴다.
 
 ```bash
-python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
+python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
 ```
 
 ### 5 L2 분석엔진 도메인 격리
@@ -165,7 +165,7 @@ python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers d
 | credit → industry | industry.Sector | chsFeatures 가 산업별 default rate 보정 |
 | macro → credit | credit.crisisDetector / excessBondPremium / creditCycle | crisis 감지가 spread 사용 |
 
-**금지**: 위 화살표의 역방향 import (양방향 cycle). `scripts/audit/cycleScan.py` CI 강제.
+**금지**: 위 화살표의 역방향 import (양방향 cycle). `tests/audit/cycleScan.py` CI 강제.
 
 분석엔진 ↔ 분석엔진 cycle 발생 시 해소 패턴 4 가지:
 1. 호출자 inversion (호출 측이 결과 미리 전달)

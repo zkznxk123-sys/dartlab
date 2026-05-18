@@ -15,7 +15,7 @@ whenToUse:
   - inspect dataset
   - schema 확인
 linkedSkills:
-  - engines.company.researchStarter
+  - engines.company
   - engines.gather
   - engines.data.foundation
 toolRefs:
@@ -87,7 +87,7 @@ topics = c.topics  # 가용 토픽 목록
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입 + topics 조회
+1. engines.company — 회사 진입 + topics 조회
 2. engines.data.foundation — 데이터 기본기 확인
 3. engines.gather — 누락 데이터 수집
 

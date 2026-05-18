@@ -17,7 +17,7 @@ def testDartlabGuardStrictJson() -> None:
             sys.executable,
             "-X",
             "utf8",
-            "scripts/audit/dartlabGuard.py",
+            "tests/audit/dartlabGuard.py",
             "strict",
             "--scope",
             "l0-l15",

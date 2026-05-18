@@ -19,24 +19,28 @@ def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent:
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "credit",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 4, "rowSpan": 2},
         "help": helpText,
     }
 
 
 GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
-    "governanceKpiCfNi": _kpi(
-        "영업CF/순이익",
-        "CF/NI",
-        ratio={"num": {"cfOperating": 1}, "den": {"netIncome": 1}, "scale": 100},
-        unit="%",
-        intent="primary",
-        helpText="100%↑ 정상. 70% 미만 지속은 분식 의심.",
-    ),
+    "governanceKpiCfNi": {
+        **_kpi(
+            "영업CF/순이익",
+            "CF/NI",
+            ratio={"num": {"cfOperating": 1}, "den": {"netIncome": 1}, "scale": 100},
+            unit="%",
+            intent="primary",
+            helpText="100%↑ 정상. 70% 미만 지속은 분식 의심.",
+        ),
+        "subCategory": "quality",
+    },
     "governanceKpiEquityRatio": _kpi(
         "자기자본비율",
         "자기자본/자산",
@@ -53,45 +57,15 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         intent="accent",
         helpText="누적 이익잉여금 비중. 높을수록 보수적 거버넌스.",
     ),
-    "governanceKpiDebtRatio": _kpi(
-        "부채비율",
-        "부채/자본",
-        ratio={"num": {"liabilities": 1}, "den": {"equity": 1}, "scale": 100},
-        unit="%",
-        intent="negative",
-        helpText="200%+ 부담. 거버넌스 관점 자본구조 첫 신호.",
-    ),
-    "distressGauge": {
-        "kind": "gauge",
-        "title": "부실 위험 (Altman Z')",
-        "topic": "ratios",
-        "tab": "governance",
-        "seriesPlan": [],
-        "dataSpec": {"adapter": "distressGauge"},
-        "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 2},
-        "help": "Altman Z-Score 부실 예측. ≥3 안전 / 1.8~3 주의 / <1.8 위험.",
-    },
-    "anomalySignals": {
-        "kind": "topList",
-        "title": "이상 신호",
-        "topic": "ratios",
-        "tab": "governance",
-        "seriesPlan": [],
-        "dataSpec": {
-            "adapter": "flagsTopList",
-            "module": "dartlab.analysis.financial.earningsQuality",
-            "fn": "calcEarningsQualityFlags",
-        },
-        "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 3},
-        "help": "이익품질 / 회계 이상신호 list (earningsQualityFlags).",
-    },
+    # governanceKpiDebtRatio 폐기 — finance.kpiDebtRatio 와 ratio 완전 중복 (v3-r5 §6).
+    # distressGauge 폐기 — finance.py riskDistress 와 중복 gauge (Altman Z')
+    # anomalySignals 폐기 — finance.py riskAnomaly 와 중복 topList (이상신호)
     "earningsQualityTrend": {
         "kind": "trend",
         "title": "이익 품질",
         "topic": "ratios",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "cfNi",
@@ -113,14 +87,15 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "영업CF/순이익 100%↑ = 회계이익이 진짜 현금. 70% 미만 지속은 분식 의심.",
     },
     "capitalGovernance": {
         "kind": "trend",
         "title": "자본 거버넌스",
         "topic": "BS",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "equityRatio",
@@ -142,7 +117,7 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "자기자본비율 + 이익잉여금/자본. 내부유보 누적 = 보수적 거버넌스.",
     },
 }
@@ -152,9 +127,6 @@ GOVERNANCE_KEYS: list[str] = [
     "governanceKpiCfNi",
     "governanceKpiEquityRatio",
     "governanceKpiReRatio",
-    "governanceKpiDebtRatio",
-    "distressGauge",
-    "anomalySignals",
     "earningsQualityTrend",
     "capitalGovernance",
 ]

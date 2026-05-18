@@ -239,7 +239,21 @@ def _materializeSeries(plan: SeriesPlan, data: list[float | None]) -> Series:
 
 
 _NON_TREND_KINDS = frozenset(
-    {"kpiTile", "diffView", "topList", "comparisonTable", "gauge", "phaseIndicator", "sankey", "scatter"}
+    {
+        "kpiTile",
+        "diffView",
+        "topList",
+        "comparisonTable",
+        "gauge",
+        "phaseIndicator",
+        "sankey",
+        "scatter",
+        "matrix",
+        "radar",
+        "waterfall",
+        "narrativeBridge",
+        "scoreBadge",
+    }
 )
 
 
@@ -253,13 +267,22 @@ def _buildKindSpecView(
     from dartlab.viz.display import adapters
 
     kind = entry.get("kind")
-    if kind not in _NON_TREND_KINDS:
-        return None
     spec = entry.get("dataSpec") or {}
     adapter_name = spec.get("adapter", "")
+    # _NON_TREND_KINDS 외에도 trend kind 가 adapter 명시한 경우 처리.
+    # (P-DASH-V1 D6: capitalAllocationBars 는 kind=trend 지만 adapter dispatch 필요.)
+    if kind not in _NON_TREND_KINDS and not adapter_name:
+        return None
 
     # 공통: norm + periods (필요한 어댑터만 사용).
-    needsNorm = adapter_name in ("kpiFromNorm", "diffFromNorm", "cashflowSankey")
+    needsNorm = adapter_name in (
+        "kpiFromNorm",
+        "diffFromNorm",
+        "cashflowSankey",
+        "capitalAllocationBars",
+        "capitalAllocationWaterfall",
+        "duPontRadar",
+    )
     norm = None
     periods: list[str] = []
     if needsNorm:
@@ -303,8 +326,39 @@ def _buildKindSpecView(
         base_view.update(adapters.buildLifeCyclePhase(company))
     elif adapter_name == "cashflowSankey":
         base_view.update(adapters.buildCashflowAllocationSankey(norm, periods))
+    elif adapter_name == "capitalAllocationBars":
+        result = adapters.buildCapitalAllocationBars(norm, periods)
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "capitalAllocationWaterfall":
+        result = adapters.buildCapitalAllocationWaterfall(norm, periods)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "distressDecomp":
+        base_view.update(adapters.buildDistressDecomp(company))
+    elif adapter_name == "scenarioSensitivity":
+        base_view.update(adapters.buildScenarioSensitivity(company))
     elif adapter_name == "peerScatter":
         base_view.update(adapters.buildPeerScatter(company))
+    elif adapter_name == "duPontRadar":
+        result = adapters.buildDuPontRadar(norm, periods)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "narrativeBridge":
+        base_view.update(adapters.buildNarrativeBridge(company))
+    elif adapter_name == "snowflakeAlert":
+        base_view.update(adapters.buildSnowflakeAlert(company))
+    elif adapter_name == "snowflakeRadar":
+        result = adapters.buildSnowflakeRadar(company)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "snowflakeKpi":
+        tilePlans = spec.get("tilePlans", [])
+        base_view["tiles"] = adapters.buildSnowflakeKpi(company, tilePlans)
+    elif adapter_name == "scoreBadge":
+        base_view.update(adapters.buildScoreBadge(company))
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass

@@ -12,9 +12,8 @@ whenToUse:
   - regime walk-forward
   - 위기 시나리오 quant
 linkedSkills:
-  - engines.macro.scenario
-  - engines.quant.walkforward
-  - engines.quant.backtest
+  - engines.macro
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

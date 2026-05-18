@@ -65,8 +65,8 @@ procedure:
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
   - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR).
-  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `.claude/skills/mapping-refresh/SKILL.md` 4 단계 — 관측 ledger → `scripts/audit/mappingLedgerCompact.py` → `scripts/dev/mappingReview.py` confirm/reject/alias/defer → `scripts/dev/mappingPromote.py` apply.
-  - prod JSON 단독 권한 진입점은 `scripts/dev/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
+  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `.claude/skills/mapping-refresh/SKILL.md` 4 단계 — 관측 ledger → `src/dartlab/reference/mapping/mappingLedgerCompact.py` → `src/dartlab/reference/mapping/mappingReview.py` confirm/reject/alias/defer → `src/dartlab/reference/mapping/mappingPromote.py` apply.
+  - prod JSON 단독 권한 진입점은 `src/dartlab/reference/mapping/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
 linkedSkills:
   - engines.company
   - engines.data.foundation
@@ -101,6 +101,14 @@ print(cols)
 # 가능 topic
 print(availableTopics())   # BS / IS / CF / CIS / SCE
 ```
+
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+mappers 는 *내부 정규화 모듈* — Company.show / scan 결과 안에서 자동 적용. 다음 3 룰 강행:
+
+1. **mappers 단독 EngineCall 금지** — `EngineCall(apiRef="mappers")` 호출 없음. Company.show / scan 결과의 `snake_id` 컬럼은 이미 정규화 완료.
+2. **snake_id 임의 추측 금지** — `normalizeColumn(topic, hint)` 또는 `columnsFor(topic)` RunPython 안에서 호출해 정확 매칭 후 사용. "total_equity" 같은 추측 키로 dict 접근 시 KeyError (P5 RunPython 회귀 사례).
+3. **`-표준계정코드 미사용-|...` fallback 데이터는 표준화 후보로 표기** — Company.show 결과 dict 의 nonstd_ 컬럼은 매핑 미완. 답변 본문에 "표준화 미완 N 건" 명시 + 임의 합산 금지.
 
 ## 호출 동작
 

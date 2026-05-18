@@ -75,6 +75,23 @@ async function fetchJson<T>(url: string): Promise<T> {
 	return (await r.json()) as T;
 }
 
+// period 값이 dict 또는 string 둘 다 올 수 있음 — 안전 string 변환.
+function _periodLabel(p: unknown): string {
+	if (p == null) return '';
+	if (typeof p === 'string' || typeof p === 'number') return String(p);
+	if (typeof p === 'object') {
+		const obj = p as Record<string, unknown>;
+		const period = obj.period;
+		if (typeof period === 'string' || typeof period === 'number') return String(period);
+		const label = obj.label;
+		if (typeof label === 'string') return label;
+		const year = obj.year;
+		const quarter = obj.quarter;
+		if (year != null) return quarter != null ? `${year}Q${quarter}` : String(year);
+	}
+	return '';
+}
+
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
 	updated: { label: '변경', tone: 'bg-[var(--chart-2)]/20 text-[var(--chart-2)]' },
 	new: { label: '신규', tone: 'bg-[var(--chart-5)]/20 text-[var(--chart-5)]' },
@@ -212,7 +229,7 @@ function ViewerTab() {
 										) : null}
 										{td.firstPeriod && td.latestPeriod && (
 											<span className="ml-2 font-mono">
-												{td.firstPeriod} → {td.latestPeriod}
+												{_periodLabel(td.firstPeriod)} → {_periodLabel(td.latestPeriod)}
 											</span>
 										)}
 									</div>
@@ -267,7 +284,7 @@ function SectionItem({ section }: { section: ViewerSection }) {
 							{statusInfo.label}
 						</span>
 					)}
-					{section.latestChange && <span>{section.latestChange}</span>}
+					{section.latestChange && <span>{_periodLabel(section.latestChange) || String(section.latestChange)}</span>}
 				</div>
 			</div>
 			{section.preview && (

@@ -2,7 +2,7 @@
 id: operation.recipePromote
 title: Recipe 6-stage lifecycle + status 승급 CLI
 category: operation
-purpose: Recipe sub-spec 의 status frontmatter 변경은 `scripts/dev/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.
+purpose: Recipe sub-spec 의 status frontmatter 변경은 `src/dartlab/skills/recipePromote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.
 whenToUse:
   - recipe 승급
   - status 변경
@@ -18,7 +18,7 @@ procedure:
   - 후속 시장 반응 확인 + scorecard 6 신호 통과 시 verified
   - 사람 검토 + 블로그/영상 흡수 후 curated
   - 시장 결과 부정 또는 API 변경으로 무효화 시 deprecated
-  - 모든 status 변경은 recipe_promote.py CLI 경유 — 수동 frontmatter 편집 금지
+  - 모든 status 변경은 recipePromote.py CLI 경유 — 수동 frontmatter 편집 금지
 examples:
   - "이 recipe verified 로 승급해줘"
   - "recipe scorecard 결과 확인"
@@ -71,7 +71,7 @@ lastUpdated: "2026-05-12"
 
 ## 무엇을 하나
 
-`src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `scripts/dev/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다.
+`src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `src/dartlab/skills/recipePromote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다.
 
 배경: dartlab 의 지식 환류는 분석 실행과 커뮤니티 반응에서 나온 개선 후보를 운영자가 검토한 뒤 공식 자산에 반영하는 방식이다. recipe 도 같은 원칙을 따른다.
 
@@ -103,21 +103,21 @@ lastUpdated: "2026-05-12"
 
 ```bash
 # 현재 recipe 목록 + status
-uv run python -X utf8 scripts/dev/recipe_promote.py --list
+uv run python -X utf8 src/dartlab/skills/recipePromote.py --list
 
 # 특정 recipe 승급 (CLI 가 scorecard 검사 후 통과 시만 commit)
-uv run python -X utf8 scripts/dev/recipe_promote.py \
+uv run python -X utf8 src/dartlab/skills/recipePromote.py \
     --id recipes.report.dailyMorningNote \
     --to tested
 
 # verified 승급 (scorecard 6 신호 + reviewer note 필수)
-uv run python -X utf8 scripts/dev/recipe_promote.py \
+uv run python -X utf8 src/dartlab/skills/recipePromote.py \
     --id recipes.report.dailyMorningNote \
     --to verified \
     --reviewer-note "S&P 500 30 일 reflection 결과 hit rate 72%"
 
 # deprecated (사유 필수)
-uv run python -X utf8 scripts/dev/recipe_promote.py \
+uv run python -X utf8 src/dartlab/skills/recipePromote.py \
     --id recipes.report.dailyMorningNote \
     --to deprecated \
     --reason "FRED API 2026-06 spec 변경으로 macroRef 갱신 불가"
@@ -131,15 +131,15 @@ CLI 가 자동:
 ## scorecard 미달 시
 
 ```
-[recipe_promote] verified 승급 차단 — scorecard 6 신호 중 2 개 미달:
+[recipePromote] verified 승급 차단 — scorecard 6 신호 중 2 개 미달:
   - marketResult: ref 없음 (후속 시장 반응 확인 후 재시도)
   - timeStable: 30 일 안정성 false (현재 14 일째)
 ```
 
 ## 자동 lint — 수동 편집 차단
 
-`scripts/audit/recipeStatusGuard.py` 가 git diff 검사:
-- frontmatter `status:` 라인 변경이 recipe_promote 가 만든 commit 인지 확인.
+`tests/audit/recipeStatusGuard.py` 가 git diff 검사 (미작성 — 사용 시 추가 예정):
+- frontmatter `status:` 라인 변경이 recipePromote 가 만든 commit 인지 확인.
 - 사람/AI 가 직접 편집한 commit 이면 PR reject.
 
 ## 검토 없는 승격 차단 — 왜 이 가드가 있는가

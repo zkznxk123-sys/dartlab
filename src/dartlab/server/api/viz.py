@@ -21,10 +21,13 @@ from fastapi import APIRouter, HTTPException, Query
 from dartlab.viz import (
     CATALOG,
     FINANCE_DASHBOARD_KEYS,
+    OVERVIEW_KEYS,
     TAB_KEYS,
     buildView,
+    planTabLayout,
     toRechartsSpec,
 )
+from dartlab.viz.layout import packSkyline
 
 router = APIRouter()
 
@@ -69,6 +72,58 @@ def _safeBuildAndRender(cardKey: str, code: str, periodKind: str, nPeriods: int)
             "kind": "error",
             "title": CATALOG.get(cardKey, {}).get("title", cardKey),
         }
+
+
+def _isCardEmpty(spec: dict[str, Any]) -> bool:
+    """v3-r5 §3.1 — spec 의 데이터 의미 무효 판정. True 면 packSkyline 큐에서 omit.
+
+    의미 무효 표면 (운영자 원칙 4 위반):
+    - spec error / kind error
+    - kpiTile 의 모든 tile value None 또는 (0 + non-scoreMode)
+    - topList items 0
+    - trend 모든 series data 가 None 도배
+    - gauge value None + bands 빈
+    - radar 모든 dimension 0 (Snowflake 5 차원 0 점 도배 회피)
+    - scoreBadge dimensions 0 + overallScore None
+    - narrativeBridge transitions 0
+    """
+    if spec is None or spec.get("error"):
+        return True
+    kind = spec.get("kind")
+    if kind == "kpiTile":
+        tiles = spec.get("tiles") or []
+        if not tiles:
+            return True
+        scoreMode = (spec.get("options") or {}).get("scoreMode") is True
+        return all(
+            (t.get("value") in (None,) or (t.get("value") == 0 and not scoreMode)) for t in tiles
+        )
+    if kind in ("topList",):
+        return not (spec.get("items") or [])
+    if kind in ("comparisonTable",):
+        return not (spec.get("rows") or [])
+    if kind == "trend":
+        series = spec.get("series") or []
+        if not series:
+            return True
+        return all(all(v is None for v in (s.get("data") or [])) for s in series)
+    if kind == "gauge":
+        return spec.get("value") is None
+    if kind == "scoreBadge":
+        return not (spec.get("dimensions") or []) and spec.get("overallScore") is None
+    if kind == "narrativeBridge":
+        return not (spec.get("transitions") or [])
+    if kind == "phaseIndicator":
+        return not (spec.get("phases") or [])
+    if kind == "radar":
+        series = spec.get("series") or []
+        if not series:
+            return True
+        return all(all((v is None or v == 0) for v in (s.get("data") or [])) for s in series)
+    if kind in ("matrix", "scatter", "breakdown", "waterfall"):
+        # 기본: series + categories 둘 다 비면 omit.
+        return not (spec.get("series") or spec.get("cells") or spec.get("points") or [])
+    return False
 
 
 async def _prefetchCompany(stockCode: str) -> None:
@@ -154,3 +209,72 @@ async def apiVizSpec(
         raise HTTPException(status_code=404, detail=f"unknown cardKey: {cardKey}")
     spec = await asyncio.to_thread(_safeBuildAndRender, cardKey, stockCode, periodKind, nPeriods)
     return spec
+
+
+# 옛 4 view sub → 7 방법론 redirect (URL bookmark 호환).
+_LEGACY_VIEW_REDIRECT: dict[str, str] = {
+    "overview": "snowflake",
+    "performance": "dupont",
+    "capitalStructure": "credit",
+    "cashflow": "quality",
+    "risk": "credit",
+    "profitability": "dupont",
+}
+
+
+@router.get("/api/viz/layout/{tab}/{stockCode}")
+async def apiVizLayout(
+    tab: str,
+    stockCode: str,
+    view: str | None = Query(
+        None, description="7 방법론 sub view (story/dupont/value/growth/credit/quality/snowflake)"
+    ),
+    periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
+    nPeriods: int = Query(40, ge=2, le=80),
+) -> dict[str, Any]:
+    """탭 + 7 방법론 view → 12-col bento packed grid + 각 카드 spec.
+
+    Layout Engine (`dartlab.viz.layout`) 가 카드 카탈로그를 query 하고 12-col
+    gridstack 식 packing 산출. frontend 는 (x, y, w, h) + colCount 받아
+    cellHeight=columnWidth sync 로 자동 1:1 정사각 렌더.
+
+    Returns:
+        {
+            tab, view, periodKind, colCount: 12,
+            layout: [{cardKey, kind, title, x, y, w, h}, ...],
+            cards: {cardKey: RechartsSpec},
+        }
+    """
+    effectiveView = _LEGACY_VIEW_REDIRECT.get(view or "", view)
+
+    # v3-r6 — planTabLayout 단일 호출 (view=null + tab=financial → OVERVIEW_KEYS 8 카드).
+    # _isCardEmpty 2 단 packing 일시 폐기 (backend hang 회피). 후속 PR 에서 cost 낮춰 재도입.
+    placed = planTabLayout(tab, sub=effectiveView)
+    if not placed:
+        return {
+            "stockCode": stockCode,
+            "tab": tab,
+            "view": effectiveView,
+            "periodKind": periodKind,
+            "colCount": 24,
+            "layout": [],
+            "cards": {},
+        }
+
+    await _prefetchCompany(stockCode)
+    cardKeys = [p["cardKey"] for p in placed]
+
+    async def _one(k: str) -> dict[str, Any]:
+        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
+
+    specs = await asyncio.gather(*[_one(k) for k in cardKeys])
+
+    return {
+        "stockCode": stockCode,
+        "tab": tab,
+        "view": effectiveView,
+        "periodKind": periodKind,
+        "colCount": 24,
+        "layout": placed,
+        "cards": dict(zip(cardKeys, specs)),
+    }

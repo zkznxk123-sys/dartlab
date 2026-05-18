@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dartlab.ai.contracts import Ref
-from dartlab.skills.market import isRunnableMarketSkill, loadMarketIndex, searchMarketSkills
 
 from .types import ToolResult
 
@@ -16,6 +15,8 @@ def readSkillMarket(
     url: str | None = None,
 ) -> ToolResult:
     """Search community Skill Market entries after builtin Skill OS search."""
+    # 양방향 cycle (ai <-> skills) 회피: skills.market lazy import.
+    from dartlab.skills.market import isRunnableMarketSkill, loadMarketIndex, searchMarketSkills
 
     marketData = loadMarketIndex(url=url)
     matches = searchMarketSkills(

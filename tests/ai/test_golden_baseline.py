@@ -1,7 +1,7 @@
 """P0 골든 baseline — 휴리스틱 시대 ask() 출력 캡처/회귀.
 
 골든 셋이 비어 있으면 skip. 실제 캡처는 별도 스크립트로:
-    uv run python -X utf8 scripts/dev/captureGoldenBaseline.py
+    uv run python -X utf8 tests/ai/runners/captureGoldenBaseline.py
 
 P1 에서 LLM 작업대로 갈아끼운 뒤 본 baseline 과 비교 — diff 가 의미 있는 회귀인지 확인.
 """

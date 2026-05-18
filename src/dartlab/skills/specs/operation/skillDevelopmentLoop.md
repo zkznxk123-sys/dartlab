@@ -203,7 +203,7 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 - `ok` + 코드 작업 동반 가능 시:
   - `.dartlab/skills/incubating/user.{slug}.md` 내용을 검증 후 `src/dartlab/skills/specs/{category}/{slug}.md` 로 공식 스펙 작성
   - facade `_AXIS_REGISTRY` 등록 + 모듈 작성 (예: `src/dartlab/scan/{slug}.py`)
-  - `uv run python -X utf8 scripts/build/validateSkills.py src/dartlab/skills/specs/{category}/{slug}.md`
+  - `uv run python -X utf8 src/dartlab/skills/validateSkills.py src/dartlab/skills/specs/{category}/{slug}.md`
   - 산출물 6 종 중 노출 표면에 영향을 받는 파일을 명시적으로 동기화
 - `reject` 사유 시: incubating 에 머무르며 회귀 카운트 +1.
 
@@ -215,6 +215,22 @@ gapSpot → dataSanityCheck → protoSkill → selfRun → redTeam → graduate
 - official 승격은 *구조 lint + 서버 audit P + 운영자 확인* 셋 모두 만족할 때만.
 
 승격 시 관련 SkillSpec 의 *공개 호출 방식* 과 *대표 반환 형태* 를 같은 변경에서 갱신해야 코드↔skill 동기화 룰을 지킨다.
+
+### 7 단계 실행 스크립트 (Phase P/F/R/V)
+
+`auditFeedback` 자동화는 `data/audit/candidates/{YYYY-MM-DD}-candidates.json` 을 입력으로 받는 4 개 스크립트로 분리된다. 운영자가 cron 트리거 없이 명시 호출.
+
+| Phase | 스크립트 | 책임 | dry-run / confirm |
+|---|---|---|---|
+| **P** (Pattern) | `src/dartlab/skills/extract_skill_candidates.py` | audit ai-ask jsonl 스캔 → 동일 `(category_hash, tool_sequence_hash)` N 회 이상 성공 반복 = docstring Guide append 초안 생성. `data/audit/candidates/{YYYY-MM-DD}-candidates.json` + draft md 산출. `--sanitize` 시 question 원문 제외 (공개 공유용). `--include-audit-analysis` 시 `auditAnalysis/*.md` 의 "엔진 개선" bullet 도 후보 풀로 편입 | dry-run 기본 (산출물만), `--sanitize` 별도 |
+| **V** (Verify) | `src/dartlab/skills/verify_candidate.py` | candidate 의 예시 질문을 `POST /api/ask` 로 재질의해 동일 tool sequence 재현 확인. 재현 실패 시 promote 중단. 서버 off 시 skip + WARN | 단일 모드 (조회만) |
+| **R** (Raise) | `src/dartlab/skills/promote_skill.py` | candidate → docstring `Guide` append PR. `--confirm` 미지정 시 diff 만 출력. `--confirm --pr-draft` 시 git 브랜치 + `gh pr create --draft`. **auto-merge 금지** (`gh pr merge --auto` 호출 안 함, 3 중 방어 1 차) | dry-run 기본, `--confirm` 필요 |
+| **F** (Feedback) | `src/dartlab/skills/refine_skill.py` | 실패 신호 (error 필드 / chunk_len 낮음 / extreme_flags / override 후 재발) 집계 → docstring `Caveats` 섹션 추가 PR | dry-run 기본, `--confirm` 필요 |
+| (helper) | `src/dartlab/skills/_axis_slug.py` | 한글 축명 → ASCII slug 매핑 (`KOREAN_AXIS_SLUG`). PR 브랜치 규칙 `skill/docstring-{engine}-{axis-slug}-{YYYYMMDD}` 에 사용. promote/refine 양쪽 import. **단독 실행 모듈 아님** | n/a |
+| (helper) | `src/dartlab/skills/_parse_audit_analysis.py` | `auditAnalysis/*.md` (사람 수동 작성) 의 "엔진 개선" 섹션 bullet 추출. Phase P 의 `--include-audit-analysis` 모드 helper. **단독 실행 모듈 아님** | n/a |
+| **A** (Axis) | `src/dartlab/skills/propose_axis.py` | Phase R merge 이력 + Phase F counterexample 누적 → 엔진 axis 승격 proposal.md 생성. **엔진 코드는 건드리지 않음 — 사람 판단이 주**. 게이트 (AND): Phase R merge 3+ / counterexample 2+ / 첫 R merge 30 일+ | 단일 모드 (proposal.md 생성만) |
+
+브랜치 네이밍 룰 (helper 강행): `skill/docstring-{engine}-{axis-slug}-{YYYYMMDD}` — 한글 축명은 반드시 `_axis_slug.to_slug()` 경유. 신규 엔진·축 추가 시 `KOREAN_AXIS_SLUG` 에 동일 변경 단위에서 보강.
 
 ## ground-truth 케이스 정책
 

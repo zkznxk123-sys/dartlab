@@ -131,8 +131,8 @@ __all__ = ["finance", "docs", "filings", "Company"]
 ### 4. baseline 갱신
 
 - `tests/test_providerContract.py` 의 provider iteration 에 `"sgx"` 추가.
-- `scripts/audit/_baselines/providerSymmetry.json` 에 신규 provider 항목 등록.
-- `scripts/audit/providerSymmetry.py` 의 `_SYMMETRY_MAP` 에 SGX-specific rename / dart_only / sgx_deferred 항목 등록.
+- `tests/audit/_baselines/providerSymmetry.json` 에 신규 provider 항목 등록.
+- `tests/audit/providerSymmetry.py` 의 `_SYMMETRY_MAP` 에 SGX-specific rename / dart_only / sgx_deferred 항목 등록.
 
 ## 3 provider asymmetry (현 상태)
 

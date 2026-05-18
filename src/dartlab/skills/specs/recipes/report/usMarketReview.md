@@ -15,10 +15,10 @@ whenToUse:
   - 미국 회사 review
   - SEC 공시
 linkedSkills:
-  - engines.company.usEdgarReview
-  - engines.macro.marketReview
-  - engines.quant.verdict
-  - engines.analysis.peerComparison
+  - engines.company
+  - engines.macro
+  - engines.quant
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -103,10 +103,10 @@ EDGAR 공시 목록 + 매크로 환경 (US 시장 기준) + 기술적 판단 종
 
 ## 연계 절차
 
-1. engines.company.usEdgarReview — US 회사 EDGAR 진입
-2. engines.macro.marketReview — US 시장 매크로 (FRED)
-3. engines.quant.verdict — 기술적 종합
-4. engines.analysis.peerComparison — US peer 횡단 (있으면)
+1. engines.company — US 회사 EDGAR 진입
+2. engines.macro — US 시장 매크로 (FRED)
+3. engines.quant — 기술적 종합
+4. engines.analysis — US peer 횡단 (있으면)
 
 ## 기본 검증
 

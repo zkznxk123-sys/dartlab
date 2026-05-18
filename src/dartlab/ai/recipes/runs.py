@@ -5,7 +5,7 @@
 와 같은 tier — repo 루트에 stray 파일 두지 않음 (CLAUDE.md "⛔ 워크스페이스 청결").
 
 자기개선 사다리 회피: 본 모듈은 *append-only*. status frontmatter 자동 변경 없음.
-승격은 운영자 CLI (`scripts/dev/recipe_promote.py`) 단독 권한.
+승격은 운영자 CLI (`src/dartlab/skills/recipePromote.py`) 단독 권한.
 """
 
 from __future__ import annotations

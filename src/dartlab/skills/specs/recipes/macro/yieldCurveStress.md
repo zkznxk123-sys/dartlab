@@ -14,10 +14,7 @@ whenToUse:
   - recession signal
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.macro.rates
-  - engines.macro.forecast
-  - engines.macro.summary
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython

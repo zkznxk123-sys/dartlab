@@ -14,12 +14,8 @@ whenToUse:
   - export nowcast
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.gather.price
-  - engines.macro.trade
-  - engines.macro.corporate
-  - engines.macro.summary
-  - engines.scan.macroBeta
+  - engines.macro
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython
@@ -129,7 +125,7 @@ emit_result(
 
 1. 환율 압력이 핵심이면 `recipes.macro.dollarFundingStress` 로 연결한다.
 2. 한국 전체 스트레스 지도는 `recipes.macro.koreaMacroStressMap` 으로 확장한다.
-3. 종목/업종 후보 발굴은 `engines.scan.macroBeta` 또는 `engines.scan` 으로 넘긴다.
+3. 종목/업종 후보 발굴은 `engines.scan` 또는 `engines.scan` 으로 넘긴다.
 
 ## 기본 검증
 

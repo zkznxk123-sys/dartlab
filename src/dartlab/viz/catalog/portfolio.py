@@ -1,6 +1,6 @@
 """사업포트폴리오 탭 — KPI 4 개 분리 + 자본배분 sankey + 비용구조 + 자본효율.
 
-bento 밀도 packing: 4 KPI 한 row + sankey (2×3) + costMix (2×3) + capitalReturns (4×2).
+bento 밀도 packing: 4 KPI 한 row + 자본배분 stacked/waterfall + costMix (2×3) + capitalReturns (2×3, 3 시리즈 auto).
 """
 
 from __future__ import annotations
@@ -23,11 +23,12 @@ def _kpi(
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 4, "rowSpan": 2},
         "help": helpText,
     }
 
@@ -41,22 +42,8 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         intent="primary",
         helpText="본업 규모. 사업 부문별 비중은 비용구조·자본배분 카드에서.",
     ),
-    "portfolioKpiOp": _kpi(
-        "영업이익",
-        "영업이익",
-        account="operatingIncome",
-        unit="원",
-        intent="positive",
-        helpText="본업 수익. 영업이익률은 별도 KPI.",
-    ),
-    "portfolioKpiOpMargin": _kpi(
-        "영업이익률",
-        "영업이익률",
-        ratio={"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
-        unit="%",
-        intent="positive",
-        helpText="매출 1 원당 영업이익. 동종 평균 대비 비교가 핵심.",
-    ),
+    # portfolioKpiOp 폐기 — finance.py kpiOperatingIncome 와 중복
+    # portfolioKpiOpMargin 폐기 — finance.py 와 별도 KPI 인데 lifecycleKpiOpMargin 과 중복
     "portfolioKpiRnd": _kpi(
         "R&D 비중",
         "R&D/매출",
@@ -65,22 +52,24 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         intent="accent",
         helpText="매출 대비 R&D. 5%+ 기술집약, 1% 미만 전통산업.",
     ),
-    "capitalAllocationSankey": {
-        "kind": "sankey",
-        "title": "자본배분 흐름",
+    "portfolioCapitalAllocation": {
+        "kind": "trend",
+        "title": "자본배분 (시간축)",
         "topic": "CF",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "dupont",
         "seriesPlan": [],
-        "dataSpec": {"adapter": "cashflowSankey"},
-        "options": {},
-        "layout": {"colSpan": 2, "rowSpan": 3},
-        "help": "영업현금흐름 → CapEx · 배당 · 잉여 분해. 본업이 만든 현금이 어떻게 쓰였는가.",
+        "dataSpec": {"adapter": "capitalAllocationBars"},
+        "options": {"stacked": True, "unit": "원"},
+        "layout": {"colSpan": 6, "rowSpan": 6},
+        "help": "연도별 자본 사용처 — 설비투자 / 배당 / 부채상환 / 잉여. 사업 우선순위 추적.",
     },
     "costMix": {
         "kind": "trend",
         "title": "비용 구조",
         "topic": "IS",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "costOfSales",
@@ -114,14 +103,15 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"stacked": True, "unit": "원"},
-        "layout": {"colSpan": 2, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "원가·판관비·R&D 비중 추이. R&D 비중 ↑ 미래 투자 의지.",
     },
     "capitalReturns": {
         "kind": "trend",
         "title": "자본 효율 추이",
         "topic": "ratios",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "roe",
@@ -153,7 +143,6 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 2},
         "help": "ROE/ROA + 자산회전율. ROIC vs WACC 정밀 산출은 후속.",
     },
 }
@@ -161,10 +150,8 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
 
 PORTFOLIO_KEYS: list[str] = [
     "portfolioKpiRevenue",
-    "portfolioKpiOp",
-    "portfolioKpiOpMargin",
     "portfolioKpiRnd",
-    "capitalAllocationSankey",
+    "portfolioCapitalAllocation",
     "costMix",
     "capitalReturns",
 ]

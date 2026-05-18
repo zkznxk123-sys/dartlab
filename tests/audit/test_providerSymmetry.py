@@ -1,6 +1,6 @@
 """providerSymmetry audit 자체 검증 — P-PR1 게이트.
 
-`scripts/audit/providerSymmetry.py` 의 핵심 (_DART_ONLY / _EDINET_DEFERRED / _bodyLoc /
+`tests/audit/providerSymmetry.py` 의 핵심 (_DART_ONLY / _EDINET_DEFERRED / _bodyLoc /
 _collectPublicMethods / _scan) 가 fixture 또는 실 dart/edgar company 에 대해 정확 동작.
 """
 

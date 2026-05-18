@@ -15,10 +15,10 @@ whenToUse:
   - 부채 만기
   - 단기 장기 부채
 linkedSkills:
-  - engines.company.researchStarter
-  - engines.scan.debt
-  - engines.analysis.financing
-  - engines.credit.creditRisk
+  - engines.company
+  - engines.scan
+  - engines.analysis
+  - engines.credit
 toolRefs:
   - EngineCall
   - RunPython
@@ -103,10 +103,10 @@ credit = c.credit()
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
-2. engines.scan.debt — 부채 구조 + peer 횡단
-3. engines.analysis.financing — 자본조달 종합
-4. engines.credit.creditRisk — dCR 등급
+1. engines.company — 회사 진입
+2. engines.scan — 부채 구조 + peer 횡단
+3. engines.analysis — 자본조달 종합
+4. engines.credit — dCR 등급
 
 ## 기본 검증
 

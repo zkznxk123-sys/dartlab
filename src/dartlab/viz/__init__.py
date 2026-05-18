@@ -41,8 +41,19 @@ from dartlab.reference.render import register as _registerRenderer
 
 # ── 새 SSOT API: catalog + builder + render 4 매체 ──
 from dartlab.viz.builder import buildView  # noqa: F401
-from dartlab.viz.catalog import CATALOG, TAB_KEYS, listCards  # noqa: F401
-from dartlab.viz.catalog.finance import FINANCE_DASHBOARD_KEYS  # noqa: F401
+from dartlab.viz.catalog import (  # noqa: F401  # noqa: F401
+    CATALOG,
+    CREDIT_KEYS,
+    DUPONT_KEYS,
+    GROWTH_KEYS,
+    QUALITY_KEYS,
+    SNOWFLAKE_KEYS,
+    STORY_KEYS,
+    TAB_KEYS,
+    VALUE_KEYS,
+    listCards,
+)
+from dartlab.viz.catalog.finance import FINANCE_DASHBOARD_KEYS, OVERVIEW_KEYS  # noqa: F401
 from dartlab.viz.charts import (
     balanceSheet as balance_sheet_chart,
 )
@@ -96,6 +107,15 @@ from dartlab.viz.generators import (  # noqa: F401
     specRevenueTrend,
     specSensitivityHeatmap,
     specSixActRadar,
+)
+from dartlab.viz.layout import (  # noqa: F401
+    BLOCKS,
+    KIND_DEFAULT_TIER,
+    listBlocks,
+    packSkyline,
+    planTabLayout,
+    queryCards,
+    resolveLayout,
 )
 from dartlab.viz.palette import COLORS, INTENT_MAP, TONE_MAP, resolveColor  # noqa: F401
 from dartlab.viz.render import toAscii, toPlotly, toRechartsSpec, toSvg  # noqa: F401
@@ -302,6 +322,14 @@ __all__ = [
     "buildView",
     "CATALOG",
     "FINANCE_DASHBOARD_KEYS",
+    # 7 분석 방법론별 카드 키 (subCategory 기준 동적 추출)
+    "STORY_KEYS",
+    "DUPONT_KEYS",
+    "VALUE_KEYS",
+    "GROWTH_KEYS",
+    "CREDIT_KEYS",
+    "QUALITY_KEYS",
+    "SNOWFLAKE_KEYS",
     "listCards",
     "toRechartsSpec",
     "toPlotly",

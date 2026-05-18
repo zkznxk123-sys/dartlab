@@ -23867,7 +23867,7 @@
       "procedure": [
         "RunPython 안에서 `from dartlab.viz import emit_chart, emit_diagram`.",
         "DataFrame 으로 데이터 확보 후 emit_chart 호출 — chartType / title / data / evidenceBinding 키 필수 (본문 코드 예시 참조).",
-        "회사 페이지 정적 빌드는 `scripts/build/buildCompanyCharts.py --code <stockCode>`.",
+        "회사 페이지 정적 빌드는 `landing/_scripts/buildCompanyCharts.py --code <stockCode>`.",
         "AI tool 경로는 `CompileVisual` (registry) — 자동 evidenceBinding 묶음.",
         "drill-back 은 `series[].pointRefs[i] = {period, valueRef, rcept_no?, filingUrl?}`."
       ],
@@ -25943,7 +25943,7 @@
       "categoryTitle": "Operation",
       "kind": "curated",
       "status": "observed",
-      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `scripts/dev/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
+      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `src/dartlab/skills/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
       "whenToUse": [
         "recipe 승급",
         "status 변경",

@@ -17,25 +17,22 @@ from dartlab.core.dataConfig import (
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
-# ── loadData LRU (parquet 재로드 방지) ──
-# 같은 (stockCode, category, …) 조합이 여러 calc 에서 반복 호출될 때 disk
-# 재파싱을 막는다. accessor 레벨 캐시(Company._cache 의 _financeStmt_*)가
-# BoundedCache 에 의해 evict 되어도 이 캐시가 남아있으면 loadData 는 disk
-# 를 다시 건들이지 않는다. 결과는 이미 메모리 상 DataFrame 이므로 복제
-# 오버헤드 없음.
-#
-# max_entries 는 작게 유지: (stockCode × category=4) × 사용자 분석 빈도 =
-# 일반 세션 8~16. 초과분은 LRU evict.
-_LOAD_CACHE: "OrderedDict[tuple, pl.DataFrame]" = OrderedDict()
-# 회사 1 개 docs DataFrame 이 ~수백 MB (대기업 + 10 년치) 라 16 entry 보유 시
-# 수 GB 잠재 점유. CLAUDE.md 병렬 에이전트 2 × 카테고리 4 = 8 이 정합. LRU 압박이
-# 잦으면 BoundedCache pinned (_finance_ 등) 가 in-memory 재사용을 잡는다.
-_LOAD_CACHE_MAX = 8
+# Phase D — _LOAD_CACHE 폐기.
+# 이전 정책: 같은 (stockCode, category, …) 조합 결과를 LRU(max 8) 캐시.
+# 폐기 이유:
+#   1. BoundedCache (`Company._cache`) 가 이미 _financeStmt_* / _sections 등 결과 캐시.
+#   2. Phase A 의 IPC mirror + Phase D 의 mmap path 가 disk 재읽기를 ms 단위로 단축.
+#   3. _LOAD_CACHE 는 *원본 parquet → DataFrame* 을 영구 heap 점유 — BoundedCache 와 이중.
+#   4. *_finance_* pinned 가 BoundedCache 안 in-memory 재사용을 *이미* 잡음.
+# 폐기 효과: heap 점유 ↓ (8 × DataFrame × ~수백MB = 수 GB 잠재 회수).
+# 잔존: `_clearLoadCache` 는 호환 위해 no-op stub 으로 유지 (memory.py 가 EMERGENCY 시 호출).
+_LOAD_CACHE: "OrderedDict[tuple, pl.DataFrame]" = OrderedDict()  # 항상 empty — backward-compat alias
+_LOAD_CACHE_MAX = 0  # backward-compat 상수 — 폐기 신호
 
 
 def _clearLoadCache() -> None:
-    """BoundedCache EMERGENCY 시 호출 — disk 캐시까지 비운다."""
-    _LOAD_CACHE.clear()
+    """[deprecated] _LOAD_CACHE 가 폐기됨. backward-compat no-op."""
+    _LOAD_CACHE.clear()  # 안전 — 항상 empty
 
 
 def readParquetSafe(path) -> pl.DataFrame:
@@ -284,6 +281,7 @@ def loadData(
     asOf: str | None = None,
     refresh: str = "auto",
     columns: list[str] | None = None,
+    predicate: pl.Expr | None = None,
 ) -> pl.DataFrame:
     """종목코드 → DataFrame. 로컬에 없으면 릴리즈에서 자동 다운로드.
 
@@ -291,6 +289,13 @@ def loadData(
     에 LRU(max 16) 캐시된다. accessor 레벨 캐시가 evict 되어도 disk 재파싱
     을 면해주어 대기업 + 다축 analysis 호출 시 메모리·시간 누적을 막는다.
     `refresh="force"` 는 캐시를 우회한다.
+
+    Phase B-2 — ``predicate`` kw 추가. polars expression 을 전달하면
+    ``scan_parquet().filter(predicate).collect(streaming)`` 으로 predicate
+    pushdown 활성화 (Phase A 의 row group sort 가 row group skipping 도
+    동행). caller (single-statement fast path) 가 ``pl.col("sj_div").is_in(
+    [...])`` 같은 expression 으로 디스크 디코드량 자체를 축소. ``predicate``
+    가 있는 호출은 ``_LOAD_CACHE`` 우회 — 슬라이스마다 별도 캐시는 무의미.
     """
     if _IS_PYODIDE:
         return _loadDataPyodide(stockCode, category, sinceYear=sinceYear, columns=columns)
@@ -306,13 +311,8 @@ def loadData(
     if category in {"krxPrices", "krxIndices"} and refresh == "auto":
         krxShouldRefresh = _shouldRefreshHfCategory(path, category, refresh)
 
-    # LRU cache 조회
-    cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)
-    if refresh != "force" and krxShouldRefresh is not True:
-        cached = _LOAD_CACHE.get(cacheKey)
-        if cached is not None:
-            _LOAD_CACHE.move_to_end(cacheKey)
-            return cached
+    # Phase D — _LOAD_CACHE 폐기. BoundedCache + IPC mmap 이 cache 역할.
+    cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)  # noqa: F841 — backward-compat unused
 
     checkMemoryAndGc(f"loadData({stockCode},{category})")
     effectiveSinceYear = sinceYear
@@ -337,9 +337,38 @@ def loadData(
             krxShouldRefresh if krxShouldRefresh is not None else _shouldRefreshHfCategory(path, category, refresh)
         )
         _ensureLocalParquet(stockCode, path, category, shouldRefresh=shouldRefresh)
-    # lazy scan: sinceYear 필터 또는 컬럼 프로젝션이 있으면 scan_parquet 사용
+    # Phase D — .arrow IPC mirror 가 옆에 있고 더 새것이면 mmap 경로 우선 (OS page cache 위임).
+    # Phase A 가 빌드한 mirror 파일. mmap path 는 useLazy 와 무관 — predicate 도 lazy filter.
+    ipcPath = path.with_suffix(".arrow")
+    useIpcMmap = not _IS_PYODIDE and ipcPath.exists() and ipcPath.stat().st_mtime >= path.stat().st_mtime
+
+    # lazy scan: sinceYear · columns · predicate 중 하나라도 있으면 scan_parquet 경로
     yearColCandidates = ("year", "bsns_year")
-    useLazy = sinceYear is not None or columns is not None
+    useLazy = sinceYear is not None or columns is not None or predicate is not None
+    if useIpcMmap and (useLazy or True):
+        # IPC mmap — 결과 buffer 가 mmap pages 백킹, RSS 기여 = touched pages.
+        # predicate / sinceYear / columns 도 동일하게 적용 (lazy 가능).
+        lf = pl.scan_ipc(str(ipcPath), memory_map=True)
+        schemaNames = lf.collect_schema().names()
+        if sinceYear is not None:
+            for colName in yearColCandidates:
+                if colName in schemaNames:
+                    yearCol = pl.col(colName)
+                    if str(lf.collect_schema()[colName]) == "String":
+                        yearCol = yearCol.cast(pl.Int32, strict=False)
+                    lf = lf.filter(yearCol >= sinceYear)
+                    break
+        if predicate is not None:
+            lf = lf.filter(predicate)
+        if columns:
+            available = [c for c in columns if c in schemaNames]
+            if available:
+                lf = lf.select(available)
+        df = lf.collect(engine="streaming") if useLazy else pl.read_ipc(str(ipcPath), memory_map=True)
+        result = _normalizeLoadedFrame(df, category)
+        # Phase D — _LOAD_CACHE 폐기 (BoundedCache + IPC mmap 이 cache 역할).
+        return result
+
     if useLazy:
         lf = pl.scan_parquet(str(path))
         schemaNames = lf.collect_schema().names()
@@ -352,6 +381,9 @@ def loadData(
                         yearCol = yearCol.cast(pl.Int32, strict=False)
                     lf = lf.filter(yearCol >= sinceYear)
                     break
+        # caller predicate (single-statement fast path 등) — row group skipping 활성화
+        if predicate is not None:
+            lf = lf.filter(predicate)
         # 컬럼 프로젝션
         if columns:
             available = [c for c in columns if c in schemaNames]
@@ -362,11 +394,7 @@ def loadData(
     else:
         df = pl.read_parquet(str(path))
     result = _normalizeLoadedFrame(df, category)
-
-    # LRU 저장 (refresh="force" 여도 결과는 캐시에 남김 — 다음 auto 호출 재사용)
-    _LOAD_CACHE[cacheKey] = result
-    while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
-        _LOAD_CACHE.popitem(last=False)
+    # Phase D — _LOAD_CACHE 폐기.
     return result
 
 

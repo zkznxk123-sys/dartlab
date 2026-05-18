@@ -136,11 +136,42 @@ story = c.story()
 industry = c.industry()
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+단일 종목 질문은 본 엔진이 1 차 진입점. 다음 4 룰 강행:
+
+1. **`EngineCall(apiRef="Company.show", args={"stockCode": "...", "topic": "..."})` 1 회로 다수 답변 가능** — 응답 `data` dict 에 `dcrBadge` (Track G 7 축 신용) + `industryBadge` (Track E 산업/lifecycle/peers) 자동 부착. 신용·산업 질문은 추가 EngineCall 불필요.
+2. **본문 안 숫자 / 점수 / 등급 / peers 명에 inline ref 표기 필수** — tool result 의 `refs` 배열에 들어온 id 그대로 `\`table:Company.show:005930\`` 형식 backtick 또는 `<tableRef:id>` 각괄호.
+3. **다중 종목 비교는 `CompareCompanies` 1 회 강제** — Company.show 를 N 회 반복 호출 + RunPython 정렬 패턴 금지. 메모리 압박 + refs 가치체인 약화.
+4. **RunPython 직접 BS/IS/CF 비율 계산 금지** — Company.show 결과의 `dcrBadge.axes` (7 축 신용) 또는 Company.analysis 결과의 `items` / `history` 인용. 같은 비율 재계산은 raw fallback 만.
+
 ## 호출 동작
 
 Company 생성 시 target과 market/provider를 확정한다. 이후 `show/select/trace`는 원자료 조회, `analysis/credit/quant/macro/story`는 하위 엔진 호출, `gather`는 보조 데이터 수집, `disclosure/liveFilings/readFiling`은 공시 접근을 담당한다.
 
 무인자 또는 topic 누락 호출은 가능한 topic/axis 가이드를 반환할 수 있다. 데이터가 없으면 결손을 0으로 채우지 않고 빈 DataFrame, `None`, flags, 제한 메시지로 표현한다.
+
+### `c.show()` 응답 data 의 자동 부착 필드 (단일 종목 답변의 1 차 진입점)
+
+`c.show(topic)` 의 반환 dict (server agent/MCP 경유 시 `EngineCall(apiRef="Company.show")` 결과의 `data`) 에는 원자료 외에 다음이 자동 부착된다 — 별도 도구 호출 없이 그대로 인용:
+
+| key | 내용 | 사용처 |
+| --- | --- | --- |
+| `dcrBadge.grade` · `dcrBadge.score` · `dcrBadge.healthScore` · `dcrBadge.outlook` | dCR 등급 + 위험/건전성 점수 + 전망 | 답변 헤더 chip · 신용 한 줄 결론 |
+| `dcrBadge.axes` | **7 축 완전 형태** — 각 항목 `{name, weight, score}` (채무상환 25w/X / 자본구조 20w/X / 유동성 15w/X / 현금흐름 15w/X / 사업안정성 10w/X / 재무신뢰성 10w/X / 공시 5w/X) | 7 축 약점 분해 — 추가 `c.credit()` 호출 불필요 |
+| `dcrBadge.confidence` · `dcrBadge.confidenceMethod` | 신뢰도 (0-100, "ratio" 등) | `[conf:N]` chip |
+| `industryBadge.industryId` · `industryBadge.industryName` · `industryBadge.stageName` · `industryBadge.phase` | 산업 식별 + 라이프사이클 단계 (도입·성장·성숙·재도약·쇠퇴) | 답변 헤더 chip · 산업 맥락 |
+| `industryBadge.peers` | 같은 산업 노드의 동종 종목 list | 비교 후보 |
+
+**가드** — 7 축 점수가 `dcrBadge.axes` 에 *이미 있다*. "7 축 약점 / 점수 차이" 질문에 `EngineCall("credit")` 재호출 금지 (반환은 axis 가이드 metadata 만 — 실제 점수 아님). 약점 분해 양식: `약점 = weight × score 기여도`. 예: 재무신뢰성 10% × 25.0 = 2.50, 채무상환 25% × 6.77 = 1.69.
+
+### stockCode resolve 실패 시 행동 (회복 절차)
+
+`c = dartlab.Company(code)` 가 코드 미발견 / 비상장 / 데이터셋 미수집 면 fail-fast — 같은 코드로 `c.show / c.credit / c.analysis` 등 반복 호출 금지. 한 번 `company_not_resolved` 면 즉시 답변에 "데이터 없음" + 가능한 원인 (잘못된 6 자리 / 비상장 / 미수집) 명시. 회사명만 주어졌으면 `dartlab.Company.search("회사명")` 1 회로 코드 lookup 후 재시도, 그것도 fail 이면 멈춤.
+
+### dataAsOf freshness
+
+`c.show()` / `c.analysis()` 결과의 `latestPeriod` (또는 `dataAsOf`) 가 *오늘* 기준 stale (예: 2 분기 이상 뒤) 일 수 있다. 정기보고서 공시 지연 / 분기 잠정실적 미반영 / fixture 환경 가능성. 답변 헤더 chip 옆에 `📅 데이터 as-of {latestPeriod}` 노출 권장 — 사용자가 "지금이 최신인가" 즉시 판단.
 
 ## 전체 축/메서드 목록
 
@@ -190,3 +221,904 @@ tableRef, valueRef, dateRef, executionRef
 ## 기본 검증
 
 스킬은 공개 실행 문서다. Company 공개 메서드, 하위 엔진 연결, 대표 반환 형태가 바뀌면 이 파일과 관련 응용 스킬을 같은 변경에서 갱신한다.
+
+## 메모리 안전 — 다중 회사 loop
+
+Polars = 네이티브 Rust 힙, `gc.collect()` 회수 불가, Company 1 개 ≈ 200~500MB. 다중 회사 loop 진입점은 매 iteration 끝에 `cleanupBetweenCompanies(label=...)` 호출 또는 `with Company(code) as c:` (context manager `__exit__` 자동 호출) 강행. 누락 시 OOM.
+
+자동 검출 lint:
+
+| 스크립트 | 룰 |
+|---|---|
+| `tests/audit/cleanupBetweenCompaniesCalls.py` | M8 — AST heuristic 으로 (1) `for x in <stockCodes\|codes\|tickers\|parquetFiles>:` 패턴 (2) body 안 `loadData()` / `Company()` 무거운 호출 (3) body 안 `cleanupBetweenCompanies(` 부재 — 세 조건 AND 시 violation. baseline `tests/audit/_baselines/cleanupCalls.json` 외만 fail |
+
+
+---
+
+# 흡수된 sub-spec 본문 (Phase D-1, 2026-05-18)
+
+## (흡수) engines.company.disclosureEvent 본문
+
+## 절차
+
+- 공시 목록의 접수일, 제목, 유형을 확인한다.
+- 가능한 경우 경량 본문 조회로 제목 기준 판단을 보강한다.
+- 본문 미조회 상태에서는 제목 기준 우선순위라고 명시한다.
+
+## 공개 호출 방식
+
+- `c = dartlab.Company("005930")`
+- `c.show()`
+- `c.show("BS")`
+- `c.index()`
+- `c.trace()`
+
+## 호출 동작
+
+- 종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
+
+## (흡수) engines.company.docsInternals 본문
+
+## 엔진 역할
+
+`docsInternals` 는 `engines.company.sections` 의 내부 구현 SSOT. 외부 사용자 API 는 `c.sections` / `c.show()` 가 모두지만, 그 내부에서 일어나는 row identity 결정 · 테이블 수평화 알고리즘 · Rust 포팅 로드맵을 본 spec 이 보관.
+
+본 spec 의 청중 — dartlab 코어 컨트리뷰터 + sections pipeline R&D 진행자.
+
+## 공개 호출 방식
+
+내부 helper 는 `RunPython` 으로 직접 호출 가능:
+
+```python
+import dartlab
+from dartlab.providers.dart.docs.sections import pipeline
+
+c = dartlab.Company("005930")
+df = c.sections
+
+# structure 진단 (5 종)
+reg = pipeline.structureRegistry(df, topic="businessOverview")
+col = pipeline.structureCollisions(df, topic="businessOverview", nodeType="body")
+evt = pipeline.structureEvents(df, topic="businessOverview", nodeType="body")
+sum_ = pipeline.structureSummary(df, topic="businessOverview")
+chg = pipeline.structureChanges(df, topic="businessOverview", latestOnly=True)
+
+# semantic spine 진단 (2 종)
+sreg = pipeline.semanticRegistry(df, topic="mdna")
+scol = pipeline.semanticCollisions(df, topic="mdna")
+
+# freq projection (annual / quarterly / mixed)
+ann = pipeline.projectFreqRows(df, freqScope="annual", includeMixed=True)
+```
+
+## 호출 동작
+
+### 1. sections row identity
+
+핵심 4 가지:
+- `textPathKey + occurrence` — 논리 row identity (raw block 위치보다 우선).
+- `sourceBlockOrder` — 원래 큰 블록 경계 보존용.
+- `@topic:{topic}` root — 같은 topic 가리키는 top-level heading alias 묶기.
+- `textSemanticPathKey` — 안전한 wording drift 흡수, raw `textPathKey` 덮어쓰지 않는 병렬 의미 구조선.
+
+row 메타 해석:
+- `freqScope=annual` — 연간 row
+- `freqScope=quarterly` — 분기 전용 row
+- `freqScope=mixed` — 연간 / 분기 공용 row
+- `latestAnnualPeriod` · `latestQuarterlyPeriod` — 각 freq 의 마지막 실존 period
+
+운영 구조 4 파일:
+- `mapper.py` — title normalization · `sectionMappings.json` lookup
+- `extractors.py` — topic → subtopic DataFrame 재구성
+- `pipeline.py` — raw markdown 기반 horizontalization
+- `runtime.py` — projection · semantic / detail topic 보조
+
+### 2. structure event 진단
+
+`structureEvents(df, nodeType="body")` — comparable spine 기준 period 전이 event row. `periodLane` 기준 같은 report-kind 끼리만 비교 (annual / q1 / q2 / q3). 교차 주기 (`Q3 → annual`) 는 구조 event 로 간주하지 않는다.
+
+`eventType` 값:
+- `variant` — 같은 slot, wording 차이
+- `moved` — slot 이동
+- `reassigned` — parent 변경
+- `split` — 1 → N
+- `merge` — N → 1
+- `parallel_change` — 동시 다발 변형
+
+`structurePattern` 값 (registry 결과):
+- `same` · `variant` · `moved` · `reassigned` · `split` · `merge` · `split_merge` · `parallel`
+
+### 3. textComparablePathKey vs textSemanticPathKey
+
+- `textPathKey` — raw 위치
+- `textSemanticPathKey` — wording drift 흡수 (보수적 검증된 alias 만)
+- `textComparablePathKey` — 구조 슬롯 비교용 (businessOverview 부문명 변경, 판매경로 세부 slot 같이 raw semantic leaf 가 바뀌어도 같은 비교 슬롯)
+
+### 4. 텍스트 품질 향상 3 층
+
+`sectionMappings.json` 하나만으로 안 된다. 3 층:
+
+1. **section title mapper** — `section_title → topic` 정규화 (현 `mapper.py` + `sectionMappings.json`)
+2. **text structure mapper** — body 내부 `가.`, `1.`, `(1)`, `①` 같은 소제목 레벨 복원 (`headingPath`, `segmentOrder`, `level` 구조 메타 생성)
+3. **segment matcher** — 기간 간 같은 텍스트 segment 정렬, 추가/삭제/이동 보수 판정
+
+viewer 는 이 구조의 *소비자*. viewer 안에서 소제목/문단을 다시 추정하는 로직은 임시 보정으로만.
+
+### 5. 다종목 검증 (2026-03-18)
+
+검증 종목 — `005930` · `000660` · `035720` · `035420` · `373220` · `068270`.
+대표 topic — `companyOverview` · `businessOverview` · `mdna`.
+
+세 평가:
+- `companyOverview` · `mdna` — safe alias 가 실제 row merge 로 이어진다.
+- `businessOverview` — semantic rename 많지만 대다수 회사에서 row count 거의 안 줄어든다. 병목은 wording drift 가 아닌 **부문 이동 / 구조 이동**.
+- 그래서 semantic alias 위에 comparable slot spine + `structurePattern` 진단 병행.
+- 최신 연간 sparse 의 큰 원인 하나는 raw source 가 아닌 chapter content drop. 장 제목 content 보존 후 `005930` 최신 annual `businessOverview` coverage `177 / 436 (40.6%)` 회복.
+
+안전 alias 예:
+- `연결대상 종속기업/종속회사 개황 → 연결대상 종속사 현황`
+- `조직개편 / 조직의 변경 → 조직변경`
+- `유동성 및 자금조달과 지출 → 유동성 및 자금조달`
+- `감사위원회에 관한 사항 → 감사위원회`
+- `...에 관한 사항 → slot name` 계열의 좁은 정규화
+
+금지 merge 예:
+- `DX부문`, `CE부문`, `DS부문` — 부문명 자동 merge 금지
+- 법인명 suffix 차이 (`PTE` vs `PTE. LTD`) — heading alias 아닌 별도 법인명 정규화 레이어 필요
+- `산업의 특성`, `시장여건`, `경쟁환경` — 형제 slot, alias 아님
+
+### 6. 테이블 수평화 (table horizontalization)
+
+현재 상태 (2026-03-18):
+- 실제 `show()` 기준 — **수평화 62.9%**, 원본 fallback 37.0%, 데이터 반환률 99.9%
+- sections pipeline 은 안 건드림 — Company 의 `show()` 레이어에서만 처리
+- 위치 — `company.py::_horizontalizeTableBlock()`
+
+적용된 개선 7 가지:
+1. **헤더 시그니처 그룹핑** — `_groupHeader()` 로 기간별 다른 구조 분리
+2. **matrix multi-column 분리** — `vals ≤ headerNames` 일 때 `항목_헤더명` 분리
+3. **sparse 감지** — 항목 > 15 · `fillRate < 0.5` → 원본 fallback
+4. **수평화 실패 시 원본 텍스트 fallback**
+5. **주석번호 정규화** — `(*)`, `(*1)`, `(*1,2)` → 제거 (75 건 통합, 오탐 0)
+6. **1 block topic 자동 반환** — `show("IS")` → 바로 DataFrame
+7. **pure_kisu 차단 제거**
+
+실험 / 기각 9 가지:
+
+| 접근 | 결과 | 판정 |
+|------|------|------|
+| fuzzy matching (RapidFuzz) | 사내이사 ≈ 사외이사 89% 오탐 | 기각 |
+| suffix 분리 fuzzy | 전전기 ≈ 전기 80% 오탐 | 기각 |
+| 괄호 기반 통합 | 813 건 중 오탐 208 건 (25.6%) | 기각 |
+| 임계값 완화 (Jaccard 0.15, 목록 100) | +7.6%p 이지만 엉망 수평화 증가 | 기각 |
+| 임베딩 (ko-sroberta) | threshold 분리 불가, 속도 38 분 | 기각 |
+| 값 교차 검증 | DART 항목명 불일치 0 건, 전제 틀림 | 기각 |
+| 정규형 단독 | 기존보다 -6.6%p | 기각 |
+| Valentine | 행 매칭 불가, 기수 오매칭 | 기각 |
+| datamatch | 런타임 에러, 유지보수 중단 | 기각 |
+| py_stringmatching | 설치 실패 (Visual Studio 필요) | 기각 |
+| ML 분류기 (RandomForest) | +17%p 이나 실패 recall 낮음 | 규칙 3 개만 추출 |
+
+**핵심 교훈** — 외부 도구 / 통계적 유사도보다 **dartlab 정규화 (94%) 가 JaroWinkler (75%) 보다 정확**. DART 항목 매칭은 한국어 정규화 + 도메인 지식이 핵심.
+
+### 7. Canonical Schema 실험 결과
+
+**아이디어** — 기간별 독립 파싱 → 전 기간 동시 스캔.
+
+```
+사전계산 (Company 초기화 시 1회):
+  전 기간 테이블 동시 스캔 →
+  1. canonical header (가장 많은 기간 등장 헤더)
+  2. canonical items (전 기간 항목 합집합)
+  3. synonym map (같은 위치 표기 변형 자동 통합)
+  4. tableCategory (이력형/목록형 전 기간 통계 확정)
+  → CanonicalSchema 캐시
+
+show() 호출:
+  스키마 로드 → 확정된 구조로 파싱 → synonym map 으로 정규화
+```
+
+검증 — 삼성전자 1 종목 **51.7% → 73.0% (+21.3%p)**. 283 종목 전수 — **34.1% (기존 58.4% 보다 못함)**.
+
+```
+스키마 성공:    43,723 (34.1%)
+기존 성공:       74,832 (58.4%)
+기존만 성공:     39,972 건
+스키마만 성공:    8,863 건 (대부분 null 채움, 품질 나쁨)
+```
+
+**결론** — 1 종목 PoC 가 과대평가. 283 종목 전수에서 -24.3%p. 흡수 불가.
+
+### 8. 보조 개선
+
+- **구조 분해 매칭** (F1 95%, 오탐 0) — core + qualifier + annotation 분리
+- **셀 핑거프린트** (99.1% 구조 판별) — `_groupHeader` 보조 지표
+- **ML 발견 규칙 3 개** — `avgDateRatio > 0.28` 등 이력형 조기 감지
+
+### 9. 중기 연구 후보
+
+- **Magneto 식 SLM + LLM 2 단계** — 기존 매퍼 34,000 개 학습 데이터 활용
+- **STARMIE / Watchog 컬럼 임베딩** — 테이블 간 unionable 컬럼 자동 탐색
+- DART 테이블 수평화 연구는 세계적으로 없음 — dartlab 이 최초
+
+## 대표 반환 형태
+
+### structureSummary
+
+```text
+topic / textComparablePathKey
+  latestPeriod : str           # 마지막 실존 period
+  latestPeriodLane : str       # annual | q1 | q2 | q3
+  latestPathCount : int        # 최신 경로 수
+  eventCount : int             # 누적 event 수
+  latestEventType : str        # variant | moved | split | merge | parallel
+  latestEventFromPeriod : str
+  latestEventToPeriod : str
+```
+
+### structureChanges
+
+```text
++ structureSummary 컬럼
+  anchorPeriod : str           # latest 변화 기준 period
+  anchorPeriodLane : str
+  isLatest : bool
+  isStale : bool
+```
+
+기본 `latestOnly=True` · `changedOnly=True` — `eventCount > 0` 인 recent event 만.
+
+## Rust 포팅 로드맵
+
+### 실측 프로파일 (2026-03-20, 삼성전자)
+
+| 구간 | 시간 | 비율 | Rust 대상 |
+|------|------|------|----------|
+| DataFrame 조립 (dict 누적 → `pl.DataFrame`) | 1,468ms | 50.6% | Phase 3 |
+| `_expandStructuredRows` (textStructure 파싱) | 714ms | 24.6% | Phase 2 |
+| `_reportRowsToTopicRows` (상태 머신) | 576ms | 19.8% | Phase 2 |
+| ├─ `_splitContentBlocks` 단독 | 318ms | 11.0% | Phase 1 |
+| `iterPeriodSubsets` (selectReport) | 220ms | 7.6% | 비대상 |
+| `loadData` (parquet I/O) | 145ms | 5.0% | 비대상 |
+| `mapSectionTitle` 체인 | 3.7ms | 0.1% | Phase 1 (합성용) |
+
+다종목 — 2.4~3.2 초 / 종목 (행 6,851~13,967 × 컬럼 63~70).
+
+### 포팅 원칙
+
+1. **변하지 않는 것만 Rust 로 굳힌다** — 스키마 진화 중인 메타는 Python 유지
+2. **bottom-up** — 잎 함수 → 합성 → 파이프라인
+3. **Python fallback 유지** — Rust 빌드 실패 시 자동 대체
+4. **테스트 동일성** — Python 구현과 byte-identical
+
+### Phase 1 — 잎 함수 (순수 문자열)
+
+8 개 leaf:
+
+1. `_splitContentBlocks(content)` → `Vec<(String, String)>` (`text` | `table`). 위치 `pipeline.py:196-241` · 318ms · 안정.
+2. `_detect_heading(line)` → `Option<(u8, String, bool)>`. 위치 `textStructure.py:149-193` · 안정. 매칭 우선순위 — `[]` / `【】` (level 1, temporal marker 면 structural=false) → `I. II. III.` (level 1) → `1. 2. 3.` (level 1) → `가. 나.` (level 2) → `(1) (2)` (level 3) → `(가) (나)` (level 4) → `① ② ③` (level 4) → 짧은 괄호 ≤ 48 자 (level 3). 제외 — 빈 줄, `|` 시작, 120 자 초과, noise (`단위`/`주1`/`참고`/`출처`/`비고`).
+3. `_normalize_heading_text(text)` → `String`. `textStructure.py:77-86`. 6 단계 — `stripSectionPrefix` / `[] 【】` 제거 / 짧은 괄호 내부만 / `ㆍ → ·` / 공백 단일화 / 후행 구두점 (`-–—:：;,`) 제거.
+4. `_heading_key(text)` → `String`. `textStructure.py:90-94`. `_normalize_heading_text` + `· ㆍ` 제거 + 비단어 (`[^0-9A-Za-z가-힣]`) 제거.
+5. `normalizeSectionTitle(title)` → `String`. `mapper.py:96-105` · **99.95% 매핑률**. 7 단계 — `stripSectionPrefix` / 업종 접두사 (`(금융업)`) 제거 / 재 strip / 로마숫자 제거 / `ㆍ · → ,` / 공백 단일화 / 후행 구두점 제거.
+6. `mapSectionTitle(title)` → `String`. `mapper.py:120-128`. 1) `normalizeSectionTitle` → 2) `sectionMappings.json` HashMap (182 매핑) → 3) `_PATTERN_MAPPINGS` 85 regex 순차 매칭 → 4) 첫 매칭 / fallback normalized.
+7. `parseMajorNum(title)` → `Option<u8>`. `chunker.py`. 로마숫자 `I. II. ... XII.` → `1~12` / None.
+8. `_semantic_segment_key(labelKey, topic)` → `String`. `textStructure.py:112-130`. `@` prefix 반환 / topic alias dict (`_TOPIC_SEGMENT_ALIASES`) / `에관한사항` 접미사 제거 / `종속기업` · `종속회사 → 종속사` / topic별 변형 (`businessOverview` `영업의개황 → 영업현황`, `mdna` `환율변동영향 → 환율변동`).
+
+### Phase 2 — 합성 함수
+
+3 개:
+
+1. **`parseTextStructureWithState(text, sourceBlockOrder, topic, initialHeadings)`** — `textStructure.py:196-315`. 상태 머신: `stack: [{level, label, key, semanticKey}, ...]` + `bodyLines: 현재 body 버퍼` + `segmentOrder: 카운터`. 줄 순회 — 빈 줄 → body 버퍼 / `_detect_heading` 성공 → `flush_body()` + heading node + structural 이면 stack pop/push / 아니면 node 만 / heading 아님 → body 버퍼 / 마지막 `flush_body()`. 의존 — Phase 1 의 1-2 / 1-3 / 1-4 / 1-6 / 1-8.
+
+2. **`_reportRowsToTopicRows(subset, contentCol)`** — `pipeline.py:244-338` · 576ms. 상태 머신 — `currentMajorNum` / `pendingChapter` / `topicBlockCounts: (chapter, topic) → 다음 blockOrder`. 행 순회 — `parseMajorNum` 성공 → 이전 pending flush + 새 pending / 일반 행 → `_registerContent` 호출 (chapter 결정 → topic 결정 → `_splitContentBlocks` → emit).
+
+3. **`_expandStructuredRows(rows)`** — `pipeline.py:341-460`. projection 있으면 `(majorNum, orderSeq, sourceBlockOrder)` 정렬 → 각 row table / text 분기 → text 면 `parseTextStructureWithState` 후 nodes 개별 row 확장 → 마지막 occurrence 카운팅 (`(topic, segmentKeyBase)` 기준 `segmentKey = "{base}|occ:{N}"`).
+
+### Phase 3 — DataFrame 조립
+
+현재 1,468ms (50.6%). Python dict 누적 패턴 — `topicMap` / `rowOrder` / `rowMeta` / 5 개 더. 최종 `pipeline.py:1588-1673`.
+
+Rust 대안 — 전체 루프 Rust 에서 + Arrow RecordBatch 반환 (`pyo3-polars`).
+
+### 정적 데이터 (Rust 임베드)
+
+| 데이터 | 크기 | 로딩 |
+|--------|------|------|
+| `sectionMappings.json` | 182 매핑 | 빌드 타임 `include_str!` 또는 런타임 1 회 |
+| `_PATTERN_MAPPINGS` | 85 regex | `lazy_static!` 컴파일 |
+| `_TOPIC_SEGMENT_ALIASES` | 4 topic × 5~15 | `phf::Map` 또는 HashMap |
+| `_BUSINESS_OVERVIEW_COMPARABLE_ROOTS` | 6 | HashMap |
+| `_STRUCTURE_SLOT_ALIASES` | 2 topic × 3~15 | HashMap |
+| `REPORT_KINDS` | 4 튜플 | `const` |
+
+### Rust crate 구조 (제안)
+
+```
+dartlab-core/
+├── Cargo.toml
+│   pyo3 = "0.22" (features=["extension-module"])
+│   polars = "0.45" (features=["lazy"])
+│   pyo3-polars = "0.18"
+│   regex = "1"
+│   serde_json = "1"
+│   once_cell = "1"
+│   blake2 = "0.10"
+│
+├── src/
+│   ├── lib.rs           # PyO3 모듈 진입점
+│   ├── content.rs       # _splitContentBlocks
+│   ├── heading.rs       # _detect_heading + _normalize + _heading_key
+│   ├── mapper.rs        # SectionMapper
+│   ├── structure.rs     # parseTextStructureWithState
+│   ├── chunker.rs       # parseMajorNum
+│   ├── topic_rows.rs    # _reportRowsToTopicRows
+│   ├── expand.rs        # _expandStructuredRows
+│   ├── assembly.rs      # build_sections_dataframe (Phase 3)
+│   └── data/
+│       └── sectionMappings.json
+│
+└── tests/
+    ├── test_content.rs · test_heading.rs · test_mapper.rs · test_structure.rs
+```
+
+### 검증 전략
+
+1. **Golden test** — Python 5 종목 (`005930`/`005380`/`035720`/`000660`/`051910`) 함수 입출력 JSON 덤프 → Rust 출력 byte-identical 비교.
+2. **벤치마크** — Python vs Rust 동일 입력 wall-clock (`criterion.rs`).
+3. **회귀 방지** — Rust 빌드 실패 시 Python fallback 자동 전환.
+
+```python
+try:
+    from dartlab_core import split_content_blocks
+except ImportError:
+    from dartlab.providers.dart.docs.sections.pipeline import (
+        _splitContentBlocks as split_content_blocks,
+    )
+```
+
+### 예상 효과
+
+| Phase | 대상 | Python | Rust 예상 | 배수 |
+|-------|------|--------|----------|------|
+| 1 | `_splitContentBlocks` | 318ms | ~10ms | 30 x |
+| 1 | heading 감지 체인 | ~50ms | ~2ms | 25 x |
+| 2 | `parseTextStructureWithState` | ~650ms | ~30ms | 20 x |
+| 2 | `_reportRowsToTopicRows` | ~250ms* | ~15ms | 17 x |
+| 3 | DataFrame 조립 | 1,468ms | ~50ms | 29 x |
+| **합계** | | **~2,750ms** | **~110ms** | **~25 x** |
+
+*`_splitContentBlocks` 제외 나머지.
+
+종목당 **3 초 → 0.1 초** 목표.
+
+## production 정책 (sections 우선 topic)
+
+`Company.show()` 가 sections extractor 먼저 탄다. sections 에서 안정적으로 재구성 안 되는 topic 만 legacy parser 유지. `show()` 는 sections 결과 우선, legacy 는 fallback.
+
+현재 전회사 (283) 기준 failure 0:
+- `salesOrder` · `riskDerivative` · `segments` · `rawMaterial` · `costByNature`
+- `tangibleAsset` — legacy 유지 기준으로 검증 완료
+
+사용자 진입점 — `c.show("sections")` (raw DataFrame). `c.docs` public namespace 는 Plan v10 에서 제거됨.
+
+분석 메서드는 내부 `_DocsAccessor` (`c._docs`) 또는 `SectionsAnalyzer` (`c._analyzer`) 가 보유:
+- `c._docs.sectionsOrdered()` · `c._docs.sectionsCoverage()` · `c._docs.sectionsFreq(...)` · `c._docs.sectionsSemanticRegistry()` · `c._docs.sectionsSemanticCollisions()` · `c._docs.sectionsStructureRegistry()` · `c._docs.sectionsStructureCollisions()` · `c._docs.sectionsStructureEvents()` · `c._docs.sectionsStructureSummary()` · `c._docs.sectionsStructureChanges()` — 모두 내부 호출 (사용자 노출 X).
+- `periods()` / `ordered()` / `coverage()` — 최신우선 + 연간 `Q4` alias projection.
+
+`show()` · `diff()` · viewer · AI 가 같은 text structure 를 공유한다.
+
+## 변경 이력
+
+- 2026-03-18 — sections row identity / structure event 진단 / 다종목 검증 정착
+- 2026-03-20 — Rust 포팅 실측 프로파일 + Phase 1~3 인터페이스 확정
+- 2026-05-12 — `providers/dart/docs/dev/{sections,tableMatching,rust-porting}.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격)
+
+## (흡수) engines.company.finance 본문
+
+## 엔진 역할
+
+`company.finance` 는 사용자 capability 가 아니라 *Company 엔진 내부 sub-module* 이다. XBRL 표준 계정 매핑 + 주석 영역 6 sub-domain 파서를 묶어 단일 회사의 재무 시계열을 빌드한다. dartlab 공개 호출은 Company facade 경유.
+
+본 sub-spec 은 운영 SSOT — 파일 구조 · 6 sub-domain 책임 · 검증 결과 · 매핑 사이클을 한 곳에서 관리.
+
+## 공개 호출 방식
+
+```python
+import dartlab
+
+with dartlab.Company("005930") as c:
+    # 시계열 (분기 / 연도 / 누적) — Plan v10: c.show 단일 진입
+    q = c.show("IS", freq="Q")
+    y = c.show("IS", freq="Y")
+    cum = c.show("IS", freq="YTD")
+
+    # 재무비율
+    r = c.show("ratios")                       # CFS 기본
+    rOfs = c.show("ratios", scope="separate")  # OFS
+
+# 6 sub-domain — 주석 영역 파서
+from dartlab.finance.summary import fsSummary
+from dartlab.finance.majorHolder import majorHolder, holderOverview
+from dartlab.finance.segment import segments
+from dartlab.finance.affiliate import affiliates
+from dartlab.finance.costByNature import costByNature
+from dartlab.finance.rawMaterial import rawMaterial
+
+result = fsSummary("005930")        # 요약재무 브릿지 매칭
+mh = majorHolder("005930")          # 최대주주 + 시계열
+seg = segments("005930")            # 사업부문 / 제품 / 지역
+aff = affiliates("005930")          # 관계기업 / 공동기업
+cbn = costByNature("005930", "y")   # 비용 성격별
+raw = rawMaterial("005930")         # 원재료 / 생산설비 / 시설투자
+```
+
+## 호출 동작
+
+- `Company.timeseries` / `annual` / `cumulative` — `buildTimeseries(stockCode, fsDivPref)` 위임. CFS 우선, 없으면 OFS fallback. snakeId × period 의 nested dict 반환.
+- `Company.ratios` — `calcRatios(series, marketCap=None)` 위임. ROE · ROA · 마진 · 부채비율 · FCF 등.
+- `Company.getTimeseries(period, fsDivPref)` — 4 조합 (q/y/cum × CFS/OFS) 명시 조회.
+- `fsSummary(source, ifrsOnly=True)` — 4 단계 브릿지 매칭. 2 년 미만 → None.
+- `majorHolder(stockCode)` — 사업보고서 "VII. 주주에 관한 사항" 파싱.
+- `segments(stockCode)` / `affiliates(stockCode)` — 주석 표 추출 (일반 + 횡전개).
+- `costByNature(stockCode, period)` — 3 가지 테이블 유형 (inline / split / multiCol) 자동 감지.
+- `rawMaterial(stockCode)` — 원재료 + 유형자산 변동 + 시설투자 3 영역 동시 추출.
+
+미매핑 계정 발견 시 `engines.mappers` 학습 후보 데이터로 흐른다 (사람 검토 후 `AccountMapper.release()`).
+
+## 대표 반환 형태
+
+```text
+Company.ratios
+→ RatioResult
+   roe : float          # 자기자본이익률 (%)
+   roa : float          # 총자산이익률 (%)
+   operatingMargin : float
+   debtRatio : float
+   currentRatio : float
+   fcf : float          # Free Cash Flow
+
+fsSummary(source)
+→ AnalysisResult | None
+   corpName : str | None
+   nYears : int
+   allRate : float | None        # 전체 매칭률
+   contRate : float | None       # 연속 매칭률
+   segments : list[Segment]      # 구간 통계
+   breakpoints : list[BridgeResult]
+   yearAccounts : dict[str, YearAccounts]
+
+majorHolder(stockCode)
+→ MajorHolderResult | None
+   majorHolder : str | None      # 최대주주명
+   majorRatio : float | None
+   totalRatio : float | None
+   holders : list[Holder]
+   timeSeries : pl.DataFrame
+```
+
+## 코어 finance 엔진
+
+`src/dartlab/providers/dart/finance/` — 분기별 · 연도별 · 누적 시계열 + 재무비율.
+
+| 파일 | 역할 |
+|------|------|
+| `__init__.py` | public API export |
+| `mapper.py` | XBRL account_id + 한글명 → snakeId 매핑 (engines.mappers 위임) |
+| `sceMapper.py` | 자본변동표 (SCE) 별도 매퍼 |
+| `pivot.py` | parquet → 시계열 dict 피벗 + 동의어 병합 + 연도별/누적 집계 |
+| `scanAccount.py` | 미매핑 계정 스캔 (학습 후속 데이터) |
+| `spec.py` | 엔진 명세 (`summary.mappedAccounts` 등) |
+
+데이터 SSOT — `reference/data/accountMappings.json` (`learnedSynonyms: 31,489` / `standardAccounts: 3,402` / `merged: 34,171`). 학습 사이클은 `engines.mappers` 참조.
+
+### 시계열 API
+
+| 함수 | 반환 | 설명 |
+|------|------|------|
+| `buildTimeseries(stockCode, fsDivPref="CFS")` | `(series, periods)` | 분기별 standalone |
+| `buildAnnual(stockCode, fsDivPref="CFS")` | `(series, years)` | 연도별 |
+| `buildCumulative(stockCode, fsDivPref="CFS")` | `(series, periods)` | 분기별 누적 |
+
+### 값 추출
+
+| 함수 | 설명 |
+|------|------|
+| `getTTM(series, sjDiv, snakeId)` | 최근 4 분기 합 (IS/CF) |
+| `getLatest(series, sjDiv, snakeId)` | 최신 non-null 값 (BS) |
+| `getAnnualValues(series, sjDiv, snakeId)` | 전체 시계열 리스트 |
+| `getRevenueGrowth3Y(series)` | 매출 3 년 CAGR (%) |
+
+### 비율 계산
+
+`calcRatios(series, marketCap=None)` → `RatioResult` (ROE · ROA · 마진 · 부채 · FCF 등).
+
+### Company 통합
+
+| 호출 | 설명 |
+|--------|------|
+| `c.show(topic, freq="Q")` | 분기별 (CFS) — topic ∈ BS·IS·CF·CIS·SCE·ratios |
+| `c.show(topic, freq="Y")` | 연도별 (CFS) |
+| `c.show(topic, freq="YTD")` | 분기별 누적 (CFS) |
+| `c.show("ratios")` | 재무비율 (CFS) |
+| `c.show(topic, freq=..., scope="separate")` | 커스텀 (CFS/OFS scope) |
+
+### scope 파라미터
+
+- `"consolidated"` — 연결재무제표 (기본값). 없으면 separate fallback.
+- `"separate"` — 별도재무제표. 없으면 consolidated fallback.
+
+### 검증 결과 (삼성전자 005930, 2024)
+
+| 지표 | CFS | OFS |
+|------|-----|-----|
+| Revenue | 300.9T | 209.1T |
+| ROE | 8.29% | 5.19% |
+| Debt Ratio | 27.40% | 20.67% |
+
+## 6 sub-domain (주석 영역 파서)
+
+`src/dartlab/providers/dart/docs/finance/{name}/` + `disclosure/rawMaterial/` 의 6 영역.
+
+### 1. summary — 요약재무 브릿지 매칭
+
+`dartlab.finance.summary.fsSummary(source, ifrsOnly=True)` → `AnalysisResult | None`.
+
+DART 공시 요약재무정보에서 숫자 브릿지 매칭으로 계정명을 연도간 매핑하여 시계열 생성.
+
+| 파일 | 설명 |
+|------|------|
+| `constants.py` | 매칭 임계값, 핵심 계정 목록 |
+| `types.py` | `AnalysisResult` · `Segment` · `BridgeResult` · `YearAccounts` |
+| `contentExtractor.py` | 요약재무 영역 추출 (연결 우선) |
+| `bridgeMatcher.py` | 4 단계 숫자 브릿지 매칭 알고리즘 |
+| `segmentation.py` | 전환점 탐지, 구간 분리 |
+| `pipeline.py` | `fsSummary()` · `loadYearData()` 오케스트레이터 |
+
+**매칭 알고리즘 (4 단계)**:
+1. **정확 매칭** — N년 전기 금액 == N-1년 당기 금액 (차이 &lt; 0.5)
+2. **재작성 보정** — 이름 유사도 0.8+ 금액 차이 5% 이내
+3. **명칭변경 보정** — 이름 유사도 0.6+ 금액 차이 5% 이내
+4. **특수항목** — EPS · 회사수 등 이름 강제 매칭
+
+**검증** — 158 개 기업 구간 내 97.7%, 오매칭 0.07%. 임계 `BREAKPOINT_THRESHOLD = 0.85`. 핵심 계정 10 개.
+
+**AnalysisResult 필드** — corpName / nYears / nPairs / nBreakpoints / nSegments / allRate / contRate / segments / breakpoints / pairResults / yearAccounts.
+
+**BridgeResult** — `pairs: {당해년도 계정명: 전년도 계정명}` · `yearGap` (보통 1, 갭 있으면 2+).
+
+**입력 데이터** — polars DataFrame 또는 parquet. 필수: `year` / `report_type` / `rcept_date` / `section_title` / `section_content`. 선택: `corp_name`.
+
+### 2. majorHolder — 주주 현황
+
+`dartlab.finance.majorHolder.majorHolder(stockCode)` → `MajorHolderResult | None`.
+`dartlab.finance.majorHolder.holderOverview(stockCode)` → `HolderOverview | None`.
+
+**MajorHolderResult** — corpName / majorHolder (최대주주명) / majorRatio / totalRatio (특수관계인 포함) / holders / timeSeries.
+
+**HolderOverview** — bigHolders (5% 이상) · minority (소액주주) · voting (의결권).
+
+**파싱 성공률 (267 종목)** — 최대주주 100% (227/0/40) · 5% 이상 주주 100% (217/0/50) · 소액주주 100% (214/0/53) · 의결권 100% (223/0/44).
+
+**파싱 전략**:
+- majorHolder — "VII. 주주에 관한 사항" → "성 명 | 관 계" 헤더 + 8-cell 데이터행, "본인"/"최대주주" 관계 식별
+- 5% 이상 주주 — `| 5% 이상 주주 | 주주명 | 소유주식수 | 지분율 | 비고 |` 구조
+- 소액주주 — 단일행 `| 주주수 | 전체주주수 | 비율 | 소액주식수 | 총발행 | 비율 |`
+- 의결권 — A(발행총수) ~ F(행사가능) 보통주/우선주 분리
+
+**주의** — 2015 년 이전 보고서 테이블 구조 차이로 지분율 오류 가능. 스팩/비상장사 5% 이상 주주/소액주주 부재.
+
+### 3. segment — 사업부문 보고
+
+`dartlab.finance.segment.segments(stockCode)` → `SegmentsResult` (사업부문 · 제품 · 지역 테이블).
+
+| 파일 | 설명 |
+|------|------|
+| `types.py` | `SegmentsResult` · `SegmentTable` |
+| `extractor.py` | `core.notesExtractor` re-export |
+| `parser.py` | 부문 테이블 파싱 (일반 + 횡전개) |
+| `pipeline.py` | `segments()` 오케스트레이터 |
+
+### 4. affiliate — 관계기업 / 공동기업
+
+`dartlab.finance.affiliate.affiliates(stockCode)` → `AffiliatesResult` (지분 현황 + 변동).
+
+| 파일 | 설명 |
+|------|------|
+| `types.py` | `AffiliatesResult` · `AffiliateProfile` · `AffiliateMovement` |
+| `extractor.py` | 마크다운 테이블 행 추출 (`parseTableRows`) |
+| `parser.py` | 프로필 / 변동 파싱 (일반 + 횡전개) |
+| `pipeline.py` | `affiliates()` 오케스트레이터 |
+
+### 5. costByNature — 비용의 성격별 분류
+
+`dartlab.finance.costByNature.costByNature(stockCode, period)` → `CostByNatureResult`.
+
+**파일 구성** — `types.py` (`CostByNatureResult`) · `parser.py` (inline/split/multiCol 3 방식) · `pipeline.py`.
+
+**성능** — 171 / 171 (100%) 파싱 성공 · 시계열 173 종목 · 교차검증 일치율 87.8% · null 17.5%.
+
+**파서 구조**:
+- 3 가지 테이블 유형 자동 감지 (inline / split / multiCol)
+- 30 개 정규화 매핑 (487 원본 → 표준)
+- 22 가지 합계행 패턴 자동 제거
+
+**period** — `"y"` 사업보고서 (연간) · `"q"` Q1/반기/Q3/사업보고서 (분기) · `"h"` 반기.
+
+**ratios** — 각 비용 항목의 양수 합계 대비 비율 (%) DataFrame (year · account · amount · ratio).
+
+**제한** — 금융업/리츠/지주회사 58 / 267 미공시. 교차검증 불일치 12.2% 는 소급 재작성 (파서 오류 아님).
+
+### 6. rawMaterial — 원재료 · 생산설비 · 시설투자
+
+`dartlab.finance.rawMaterial.rawMaterial(stockCode)` → `RawMaterialResult | None`.
+
+**RawMaterialResult** — corpName / year / materials / equipment / capexItems.
+
+- **RawMaterial** — segment · item · usage · amount · ratio · supplier
+- **Equipment** — land · buildings · structures · machinery · construction · vehicles · fixtures · rou · undelivered · other · total · depreciation · capex
+- **CapexItem** — segment · amount
+
+**파싱 성공률 (267 종목)** — 원재료 93.0% · 생산설비 33.8% · 시설투자 16.2%. 125 종목 None (해당사항 없음 또는 매입 테이블 부재).
+
+**품질 검증** — ratio 이상 (>100%) 2 / DL이앤씨 1, 그 외 0 건 (amt-None / 숫자 item / total 음수 / 1조 초과 / 런타임 에러).
+
+**검증 완료 종목 스팟체크** — 삼성전자 (14 건 매입 · 2,059,452 설비) · 현대차 (17 건 · 44,533,941) · SK하이닉스 (5 건 · 60,157,474) · LG화학 (5 건 · 54,570,446) · LG · SK · F&F.
+
+**파싱 전략 (원재료 12 단계)**:
+1. 헤더 직접 감지 — `(매입액|투입액)` + `(품목|원재료|부문)` 조합
+2. `_findHeaderIndices()` 동적 매핑
+3. shifted 행 감지 (segment 생략 시 왼쪽 밀림)
+4. 합쳐진 "매입액 (비율)" 셀 분리 — `1,483,067 (43.8%)` 패턴
+5. 연도별 헤더 (`제N기`, `20XX년`) 지원
+6. 분할 헤더 (row1 + row2 병합)
+7. 비율 > 100 shifted 감지
+8. 연도 컬럼 ratio 제외
+9. 생산 테이블 필터 (생산능력/수량 키워드)
+10. 숫자 item 필터 (shift 데이터 판단)
+11. 각주 참조 필터 (`(주N)`)
+12. amount 없는 헤더 진입 차단
+
+**제한** — DL이앤씨 헤더 shifted 2 건 · 단위 혼재 (USD/천USD/백만원) 미지원 · 생산설비 33.8% (테이블 형식 다양).
+
+## 의존 (sub-domain 공통)
+
+- `dartlab.frame.dataLoader` — `loadData` · `extractCorpName` · `PERIOD_KINDS`
+- `dartlab.providers.notesExtractor` — `extractNotesContent` · `findNumberedSection`
+- `dartlab.providers.reportSelector` — 보고서 선택
+- `dartlab.providers.tableParser` — 마크다운 테이블 파싱, 금액/단위 처리
+- `engines.mappers` — 계정명 → snakeId 정규화
+
+## evidence 기준
+
+- finance 시계열 인용 시 `stockCode` · `fsDivPref` · `period` · `snakeId` · `source` (DART).
+- 6 sub-domain 인용 시 `parsing_success_rate` 명시 (예 — 원재료 93.0%, 생산설비 33.8%).
+- 미매핑 계정 발견 시 `engines.mappers` 후속 학습 후보로 로그.
+
+## 기본 검증
+
+```python
+import dartlab
+with dartlab.Company("005930") as c:
+    print(c.show("ratios").roe)                       # 8.29 (CFS)
+    print(c.show("ratios", scope="separate").roe)     # 5.19 (OFS)
+
+from dartlab.finance.summary import fsSummary
+result = fsSummary("data/docsData/005930.parquet")
+print(f"{result.corpName}: {result.allRate:.1%}")  # 매칭률
+```
+
+## 변경 이력
+
+- 2026-03-06 — 6 sub-domain 패키지 초기 구축 (affiliate / segment / summary / majorHolder / costByNature / rawMaterial)
+- 2026-03-06 — `stockCode` 시그니처 전환, `extractor` 중복 제거 → `core` re-export
+- 2026-03-07 — rawMaterial 실무 투입
+- 2026-03-09 — XBRL 계정 표준화 + Company `docs/finance` 통합
+- 2026-05-12 — STATUS.md 7 곳 → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격)
+
+## (흡수) engines.company.researchStarter 본문
+
+## 절차
+
+- 기업명, 종목코드, ticker 중 무엇이 입력됐는지 먼저 식별한다.
+- 질문 목적이 수익성, 현금흐름, 신용, 공시, 비교, 밸류에이션, 배당, 지배구조 중 어디에 가까운지 skill 검색으로 고른다.
+- 단일 기업과 특정 축이 함께 있으면 해당 engine skill과 Company.analysis/Company.show를 먼저 사용한다. scan skill은 “후보”, “랭킹”, “전체 종목”, “많이 오른” 같은 횡단 의도가 있을 때만 1차 경로가 된다.
+- 목적이 불명확하면 engines.story.companyCausal를 기본 후보로 두되, macro와 scan 맥락도 함께 확인한다.
+- 선택한 skill의 requiredEvidence를 실행 전 체크리스트로 둔다.
+- 실행 가능한 분석 질문이면 첫 답변에서 사용법만 설명하지 말고 target, period, source table ref를 만든 뒤 검산 가능한 결론을 낸다. 데이터가 부족하면 어떤 Company topic 또는 prebuild가 부족한지 한계로 남긴다.
+
+## 공개 호출 방식
+
+- `c = dartlab.Company("005930")`
+- `c.show()`
+- `c.show("BS")`
+- `c.index()`
+- `c.trace()`
+
+## 호출 동작
+
+- 종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.
+
+## (흡수) engines.company.sections 본문
+
+## 엔진 역할
+
+`sections` 는 한 회사의 전체 지도다. 각 보고기간 공시 문서를 topic 별로 쪼개고 시간축으로 옆으로 늘어놓아 가로화 보드 하나로 만든다. 개별 사업보고서를 하나씩 열지 않고 모든 공시 섹션을 시계열로 한 번에 비교한다.
+
+한국 DART 사업보고서는 수십 개 섹션을 갖는다 — 제 I 장 (회사 개황) ~ 제 XII 장 (상세표). 각 보고서가 분기/연도별로 별도 파일이라서 같은 topic ("사업의 개요") 이 여러 기간에 흩어진다. `sections` 는 이 흩어진 원문을 **topic × 기간 매트릭스**로 재구성한다.
+
+## 공개 호출 방식
+
+```python
+import dartlab
+
+c = dartlab.Company("005930")
+c.sections                       # 전체 topic × 기간 DataFrame
+c.show("BS")                     # 단일 topic + source priority
+c.trace("BS")                    # 어떤 source 가 선택됐나
+c.show("companyOverview", 0)     # 특정 블록의 실제 데이터
+```
+
+미국 종목도 같은 API:
+
+```python
+us = dartlab.Company("AAPL")
+us.sections
+us.show("10-K::item1Business")
+us.show("BS")
+```
+
+Polars DataFrame 이므로 자유 필터:
+
+```python
+import polars as pl
+
+df = c.sections.filter(pl.col("topic") == "companyOverview")
+df_text = c.sections.filter(pl.col("blockType") == "text")
+df_table = c.sections.filter(pl.col("blockType") == "table")
+```
+
+편의 메서드:
+
+```python
+c.sections.periods()    # 기간 리스트
+c.sections.ordered()    # 최신순 정렬
+c.sections.coverage()   # topic 별 기간 커버리지 요약
+```
+
+## 호출 동작
+
+`c.sections` 는 사용자 진입점. 각 행이 한 topic 블록, 각 열이 한 기간. 텍스트와 표는 원본 그대로 보존, 시간축에만 정렬한다.
+
+`c.show(topic)` 는 `sections` 위에서 동작하고 source priority 를 적용한다:
+
+1. **finance** (BS, IS, CF, CIS, SCE) — 숫자는 권위 있으므로 docs 본문보다 우선.
+2. **report** — DART 정형 공시 데이터.
+3. **docs** — 원본 산문 텍스트와 표.
+
+`c.trace(topic)` 는 어떤 source 가 실제 선택됐는지 확인:
+- 선택된 source (docs / finance / report).
+- 기간별 데이터 커버리지.
+- chapter, label 같은 메타.
+
+기간 컬럼의 `null` 은 그 기간 데이터 없음. 0 으로 대체하지 않는다.
+
+## 대표 반환 형태
+
+`c.sections` DataFrame 구조:
+
+```
+chapter │ topic            │ blockType │ textNodeType │ 2025Q4 │ 2024Q4 │ 2024Q3 │ …
+I       │ companyOverview  │ text      │ heading      │ "…"    │ "…"    │ "…"    │
+I       │ companyOverview  │ text      │ body         │ "…"    │ "…"    │ "…"    │
+I       │ companyOverview  │ table     │ null         │ "…"    │ "…"    │ null   │
+II      │ businessOverview │ text      │ heading      │ "…"    │ "…"    │ "…"    │
+```
+
+### 구조 컬럼
+
+| 컬럼 | 설명 |
+|---|---|
+| `chapter` | 최상위 장 번호 (I ~ XII). |
+| `topic` | snakeCase 표준 식별자 (`companyOverview`, `businessOverview`, `BS`, `IS`, `CF`). |
+| `blockType` | `"text"` 또는 `"table"`. |
+| `blockOrder` | topic 내 블록 순서 (원문 순서 보존). |
+| `textNodeType` | text 블록 sub-type — `"heading"` 또는 `"body"`. table 은 null. |
+| `textLevel` | heading 깊이 (1, 2, 3, ...). body / table 은 null. |
+| `textPath` | heading 의 구조 경로. |
+
+### 기간 컬럼
+
+`2025Q4`, `2024Q4`, `2024Q3`, ... 최신순. 사업보고서는 Q4. 각 셀 = 그 기간의 원본 payload (text 블록은 산문, table 블록은 markdown table). null = 데이터 없음.
+
+EDGAR 도 같은 구조. topic 이름만 SEC form 규약 (`10-K::item1Business`, `10-K::item7MDA`). 재무 topic (BS, IS, CF) 은 DART 와 같은 이름.
+
+## evidence 기준
+
+- target (종목코드 / ticker).
+- period (어느 분기/연도).
+- topic (어떤 섹션).
+- tableRef / valueRef / dateRef / executionRef.
+
+## 기본 실행 순서
+
+1. `dartlab.Company(code)` 로 회사 객체 생성.
+2. `c.sections` 또는 `c.topics` 로 사용 가능한 topic 확인.
+3. 분석할 topic 선택 → `c.show(topic)` 으로 본문 확인.
+4. 기간 비교가 필요하면 `c.diff()` · `c.diff(topic)`.
+5. source 가 의심되면 `c.trace(topic)` 으로 검증.
+
+## 기본 검증
+
+- 결과 DataFrame 의 행 수와 기간 컬럼 수 확인.
+- null 비율이 비정상이면 `coverage()` 또는 `trace()` 로 source 점검.
+- 숫자 답변은 `tableRef` / `valueRef` / `dateRef` / `executionRef` 묶어서 답변.
+
+## 다음 단계
+
+- [engines.company](/skills/engines.company) — Company facade 전체 메서드 카탈로그.
+- [engines.company.disclosureEvent](/skills/engines.company.disclosureEvent) — 공시 이벤트 추적.
+- [engines.company.usEdgarReview](/skills/engines.company.usEdgarReview) — 미국 종목 EDGAR 리뷰.
+- [start.quickStart](/skills/start.quickStart) — 8 단계 walkthrough.
+
+## (흡수) engines.company.usEdgarReview 본문
+
+## 절차
+
+- ticker를 식별하고 EDGAR Company 경로가 가능한지 확인한다.
+- EDGAR prefetched finance/docs snapshot 또는 OpenEdgar/Company.liveFilings 경로가 있는지 먼저 확인한다. 없으면 데이터 부재를 한계로 좁혀 말하고 DART 전용 경로로 대체하지 않는다.
+- Company.analysis, Company.show, Company.filings/readFiling capability를 찾아 재무와 공시 근거를 분리한다.
+- 재무 숫자는 EDGAR finance table/value ref가 있을 때만 말한다. 숫자 claim은 period, metric, value가 들어간 supporting ref에 직접 묶는다.
+- filing claim은 접수일, form, 제목 또는 본문 ref에 묶는다.
+- fiscal period가 있는 경우 calendar period와 혼동하지 않도록 기준을 밝힌다.
+- 검산이 숫자 claim을 거절하면, ref로 뒷받침되는 filing/데이터 가용성 중심의 좁은 답변으로 줄인다.
+
+## 공개 호출 방식
+
+- `c = dartlab.Company("005930")`
+- `c.show()`
+- `c.show("BS")`
+- `c.index()`
+- `c.trace()`
+
+## 호출 동작
+
+- 종목코드 또는 ticker를 target으로 고정하고 재무, 공시, 가격, 하위 엔진 호출의 단일 진입점을 제공한다. 무인자 호출은 사용 가능한 topic/axis 가이드를 반환한다.
+- 실행 전에 target, period/date, metric, source 또는 universe를 확인한다.
+- 데이터가 없거나 runtime 제한이 있으면 값을 추정하지 않고 한계와 필요한 다음 수집 경로를 말한다.
+
+## 대표 반환 형태
+
+- Company 객체 메서드는 topic별 DataFrame, dict, 또는 하위 엔진 결과를 반환한다. 핵심 식별자는 stockCode/ticker, companyName, period, topic, source, value, unit이다.
+- 전체 세부 필드는 공개 docstring/capability와 동기화한다. 코드/API 변경으로 이 설명이 오래되면 skill 갱신 누락으로 본다.
+
+## 기본 검증
+
+- 실행 결과는 tableRef, valueRef, dateRef, executionRef 중 필요한 근거로 남긴다.
+- 최종 판단의 숫자 claim은 해당 table/value ref에 직접 묶는다.
+- 스킬과 실제 공개 API의 호출 방식, 대표 반환 형태, 오류/제한 동작이 다르면 같은 변경에서 스킬을 갱신한다.

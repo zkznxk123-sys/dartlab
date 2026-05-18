@@ -1,4 +1,5 @@
 // dashboard 카드 공통 쉘 — shadcn Card 래퍼 + title + help tooltip.
+// 24-col bento (v3-r5) — colSpan/rowSpan 1~24, kind-driven chrome 위계.
 
 import type { ReactNode } from 'react';
 import { HelpCircle } from 'lucide-react';
@@ -10,57 +11,72 @@ import { cn } from '@/lib/utils';
 interface Props {
 	title: string;
 	help?: string;
-	xlSpan?: 1 | 2 | 3;
-	colSpan?: 1 | 2 | 3 | 4;
-	rowSpan?: 1 | 2 | 3 | 4 | 5 | 6;
+	// 24-col gridstack 기준 (KPI=4, chart=8, hero=12, wide=24).
+	colSpan?: number;
+	rowSpan?: number;
+	// kind-driven chrome — v3-r5 §8.3. KPI/diffView/gauge/topList = weak,
+	// trend/breakdown/scatter/matrix/waterfall/comparisonTable = mid,
+	// radar/scoreBadge/narrativeBridge/gauge(wide)/phaseIndicator(wide) = strong.
+	kind?: string;
 	children: ReactNode;
 	footer?: ReactNode;
 	headerExtra?: ReactNode;
 	className?: string;
 }
 
-// 4 col bento grid. xl breakpoint 부터 4 column. layout.colSpan 우선.
-const COL_SPAN_CLASS: Record<number, string> = {
-	1: '',
-	2: 'xl:col-span-2',
-	3: 'xl:col-span-3',
-	4: 'xl:col-span-4',
+const TIER_CLASSNAMES = {
+	weak: 'bg-muted/30 border-border/40 shadow-none',
+	mid: 'bg-card border-border/60 shadow-none',
+	strong: 'bg-card border-border shadow-sm',
+} as const;
+
+const KIND_TIER: Record<string, keyof typeof TIER_CLASSNAMES> = {
+	kpiTile: 'weak',
+	diffView: 'weak',
+	gauge: 'weak',
+	topList: 'weak',
+	trend: 'mid',
+	breakdown: 'mid',
+	scatter: 'mid',
+	matrix: 'mid',
+	waterfall: 'mid',
+	comparisonTable: 'mid',
+	radar: 'strong',
+	scoreBadge: 'strong',
+	narrativeBridge: 'strong',
+	phaseIndicator: 'weak',
 };
 
-// row 1~6 — Tailwind row-span-N 정적 클래스 (JIT 가 인식 가능한 형태).
-const ROW_SPAN_CLASS: Record<number, string> = {
-	1: 'row-span-1',
-	2: 'row-span-2',
-	3: 'row-span-3',
-	4: 'row-span-4',
-	5: 'row-span-5',
-	6: 'row-span-6',
-};
+function resolveTier(kind: string | undefined, colSpan: number | undefined): keyof typeof TIER_CLASSNAMES {
+	if (!kind) return 'mid';
+	// wide hero — gauge / phaseIndicator 가 24 col 이면 강제 strong.
+	if (colSpan != null && colSpan >= 24 && (kind === 'gauge' || kind === 'phaseIndicator')) return 'strong';
+	return KIND_TIER[kind] ?? 'mid';
+}
 
 export function CardShell({
 	title,
 	help,
-	xlSpan,
 	colSpan,
-	rowSpan = 2,
+	rowSpan: _rowSpan,
+	kind,
 	children,
 	footer,
 	headerExtra,
 	className,
 }: Props) {
-	const effectiveColSpan = colSpan ?? (xlSpan as 1 | 2 | 3 | undefined) ?? 1;
+	const tier = resolveTier(kind, colSpan);
 	return (
 		<Card
 			className={cn(
-				'flex flex-col gap-2 py-3 shadow-none overflow-hidden',
-				COL_SPAN_CLASS[effectiveColSpan] || '',
-				ROW_SPAN_CLASS[rowSpan] || 'row-span-2',
+				'flex h-full w-full flex-col gap-1 py-1 overflow-hidden border',
+				TIER_CLASSNAMES[tier],
 				className,
 			)}
 		>
-			<CardHeader className="flex flex-row items-center justify-between gap-2 px-4">
-				<div className="flex items-center gap-1.5">
-					<CardTitle className="text-sm font-medium">{title}</CardTitle>
+			<CardHeader className="flex flex-row items-center justify-between gap-1 px-2 pt-1 pb-0 h-[24px] shrink-0">
+				<div className="flex min-w-0 items-center gap-1">
+					<CardTitle className="truncate text-xs font-medium leading-tight">{title}</CardTitle>
 					{help && (
 						<TooltipProvider delayDuration={150}>
 							<Tooltip>
@@ -68,9 +84,9 @@ export function CardShell({
 									<button
 										type="button"
 										aria-label="해석 도움말"
-										className="text-muted-foreground transition-colors hover:text-foreground"
+										className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
 									>
-										<HelpCircle className="size-3.5" />
+										<HelpCircle className="size-3" />
 									</button>
 								</TooltipTrigger>
 								<TooltipContent side="bottom" align="start" className="max-w-xs whitespace-pre-line text-xs leading-relaxed">
@@ -82,9 +98,11 @@ export function CardShell({
 				</div>
 				{headerExtra}
 			</CardHeader>
-			<CardContent className="flex-1 px-2 pb-1 pt-0">{children}</CardContent>
+			<CardContent className="min-h-0 flex-1 px-1.5 pb-0 pt-0">{children}</CardContent>
 			{footer && (
-				<div className="border-t px-4 py-2 text-xs text-muted-foreground">{footer}</div>
+				<div className="border-t border-border bg-muted/20 px-2 py-1 text-[10px] text-muted-foreground">
+					{footer}
+				</div>
 			)}
 		</Card>
 	);

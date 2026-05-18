@@ -15,10 +15,8 @@ whenToUse:
   - 업종 분석
   - 사이클별 유망 섹터
 linkedSkills:
-  - engines.macro.marketReview
-  - engines.macro.cycle
-  - engines.scan.profitability
-  - engines.scan.growth
+  - engines.macro
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython
@@ -96,10 +94,10 @@ growth_scan = dartlab.scan("growth")
 
 ## 연계 절차
 
-1. engines.macro.marketReview — 매크로 환경 종합
-2. engines.macro.cycle — 경기 사이클 위치
-3. engines.scan.profitability — 섹터 횡단 수익성
-4. engines.scan.growth — 섹터 횡단 성장성
+1. engines.macro — 매크로 환경 종합
+2. engines.macro — 경기 사이클 위치
+3. engines.scan — 섹터 횡단 수익성
+4. engines.scan — 섹터 횡단 성장성
 
 ## 기본 검증
 

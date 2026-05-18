@@ -1,6 +1,6 @@
 """Analysis Graph generated from CAPABILITIES.
 
-수정하지 마세요. scripts/build/generateSpec.py 를 실행하세요.
+수정하지 마세요. src/dartlab/skills/generateSpec.py 를 실행하세요.
 """
 
 import json

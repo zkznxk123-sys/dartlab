@@ -9,21 +9,26 @@ from dartlab.viz.palette import COLORS
 from dartlab.viz.schema import CatalogEntry
 
 
-def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent: str, helpText: str) -> CatalogEntry:
+def _kpi(
+    title: str, label: str, *, ratio=None, account=None, yoy=None, unit: str, intent: str, helpText: str
+) -> CatalogEntry:
     tile: dict = {"label": label, "unit": unit, "intent": intent}
     if account:
         tile["account"] = account
     if ratio:
         tile["ratio"] = ratio
+    if yoy:
+        tile["yoy"] = yoy
     return {
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 4, "rowSpan": 2},
         "help": helpText,
     }
 
@@ -33,20 +38,21 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
         "kind": "phaseIndicator",
         "title": "경기 사이클 단계 (회사 기준)",
         "topic": "ratios",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 1},
+        "layout": {"colSpan": 24, "rowSpan": 2},
         "help": "회사 매출·이익 사이클 단계 (Damodaran). 외부 macroExposure 결합은 후속.",
     },
     "macroKpiRevenue": _kpi(
         "매출 변동",
         "매출 YoY",
-        ratio={"num": {"revenue": 1}, "den": {"revenue": 1}, "scale": 0},
-        unit="원",
+        yoy="revenue",
+        unit="%",
         intent="primary",
-        helpText="경기에 직접 노출 — 매출 변동.",
+        helpText="경기에 직접 노출 — 매출 YoY %.",
     ),
     "macroKpiOpMargin": _kpi(
         "영업이익률",
@@ -76,7 +82,8 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "매출 사이클",
         "topic": "IS",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "revenue",
@@ -99,14 +106,15 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "매출 절대값 + YoY. 산업 경기 사이클과의 동조성 시각화.",
     },
     "debtCycle": {
         "kind": "trend",
         "title": "부채 사이클",
         "topic": "BS",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "shortDebt",
@@ -130,7 +138,7 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "stacked": True},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "차입금 시계열 — 금리 사이클 노출. 단기 비중 ↑ = 금리 민감.",
     },
 }

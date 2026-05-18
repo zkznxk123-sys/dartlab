@@ -1,4 +1,4 @@
-"""scripts/audit/cycleScan.py — 양방향 cycle 검출 단위 테스트."""
+"""tests/audit/cycleScan.py — 양방향 cycle 검출 단위 테스트."""
 
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_SCRIPT = _REPO / "scripts" / "audit" / "cycleScan.py"
+_SCRIPT = _REPO / "tests" / "audit" / "cycleScan.py"
 
 
 def _loadCycleScan():
-    """scripts/audit/cycleScan.py 를 모듈로 동적 로드.
+    """tests/audit/cycleScan.py 를 모듈로 동적 로드.
 
     `sys.modules` 등록 필수 — @dataclass 가 cls.__module__ 으로 module 을 lookup
     하기 때문 (등록 누락 시 AttributeError on dataclass decoration).

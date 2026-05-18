@@ -10,7 +10,7 @@
 > - `pyodide.json` — Pyodide 런타임 manifest.
 > - `graph.json` — 257 노드 + 1337 엣지 + cycle/orphan/unreachable 메타.
 >
-> `llms.txt` · `sitemap.xml` 은 별도 `scripts/build/generateSpec.py` 책임.
+> `llms.txt` · `sitemap.xml` 은 별도 `src/dartlab/skills/generateSpec.py` 책임.
 
 ## 1. 5 카테고리 + 디렉토리
 
@@ -186,7 +186,7 @@ skill 사이 링크는 항상 `[title](/skills/{id})` 절대 path 로 박는다.
 3. 위 §2 의 필수 필드 5 개 + 권장 필드 채우기. `procedure[]` · `examples[]` 비워두기보다 1~2 개라도 채우기 (페이지 풍부도).
 4. 본문 산문 작성 (§3 권장 구조).
 5. 산출물 동기화: 변경 내용이 노출 표면에 영향을 주면 `index.json` · `agent.json` · `mcp.json` · `web.json` · `pyodide.json` · `graph.json` 중 필요한 파일을 명시적으로 patch.
-6. 검증: `uv run python -X utf8 scripts/build/validateSkills.py src/dartlab/skills/specs/{category}/{name}.md`.
+6. 검증: `uv run python -X utf8 src/dartlab/skills/validateSkills.py src/dartlab/skills/specs/{category}/{name}.md`.
 7. 랜딩 산출물을 바꿨으면 `cd landing; npm run build`.
 
 ## 5. 이미지 자산
@@ -197,7 +197,7 @@ skill 사이 링크는 항상 `[title](/skills/{id})` 절대 path 로 박는다.
 
 ## 6. 검증 게이트
 
-`scripts/build/validateSkills.py` 가 신규/수정된 .md 만 검사 (CI 에서 `git diff --name-only` 로 변경 파일 추출 후 인자 전달). 174 개 기존 파일에 일괄 강제하지 않는다.
+`src/dartlab/skills/validateSkills.py` 가 신규/수정된 .md 만 검사 (CI 에서 `git diff --name-only` 로 변경 파일 추출 후 인자 전달). 174 개 기존 파일에 일괄 강제하지 않는다.
 
 검증 항목:
 - frontmatter 존재.

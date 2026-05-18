@@ -13,9 +13,9 @@ whenToUse:
   - cluster timing
 linkedSkills:
   - engines.company
-  - engines.gather.insiderTrading
-  - engines.quant.surprise
-  - engines.analysis.predictionSignal
+  - engines.gather
+  - engines.quant
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython

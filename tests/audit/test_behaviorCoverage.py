@@ -1,6 +1,6 @@
 """behaviorCoverage audit 자체 검증 — P-PR1 게이트.
 
-`scripts/audit/behaviorCoverage.py` 의 핵심 로직 (_camelToSnake / _testPatterns /
+`tests/audit/behaviorCoverage.py` 의 핵심 로직 (_camelToSnake / _testPatterns /
 _publicMethods / _matchAny) 가 fixture src + test pair 에 대해 정확히 동작하는지 검증.
 
 baseline JSON 형식 안정성도 검증 — P-PR4/P-PR5 가 sweep 시 같은 형식 가정.

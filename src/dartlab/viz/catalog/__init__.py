@@ -41,16 +41,35 @@ register(MACRO_CARDS)
 
 
 TAB_KEYS: dict[str, list[str]] = {
-    "financial": list(FINANCE_DASHBOARD_KEYS),
-    "valuation": list(VALUATION_KEYS),
-    "portfolio": list(PORTFOLIO_KEYS),
-    "governance": list(GOVERNANCE_KEYS),
-    "peer": list(PEER_KEYS),
-    "lifecycle": list(LIFECYCLE_KEYS),
-    "macro": list(MACRO_KEYS),
+    "financial": (
+        list(FINANCE_DASHBOARD_KEYS)
+        + list(PORTFOLIO_KEYS)
+        + list(VALUATION_KEYS)
+        + list(GOVERNANCE_KEYS)
+        + list(PEER_KEYS)
+        + list(LIFECYCLE_KEYS)
+        + list(MACRO_KEYS)
+    ),
     "viewer": [],
 }
-"""8 탭 → 카드 노출 순서. 탭별 일괄 빌드 endpoint 가 이 dict 를 lookup."""
+"""2 탭 (financial + viewer) → 카드 합집합. 옛 6 탭 (portfolio/valuation/
+governance/peer/lifecycle/macro) 은 financial 안의 7 방법론 view (subCategory)
+로 흡수됨. 탭별 일괄 빌드 endpoint 는 view 별 query 로 분기."""
+
+
+# 7 분석 방법론별 카드 키 — viz.__init__ 이 export. subCategory 기준 동적 추출.
+def _bySubCategory(sub: str) -> list[str]:
+    """CATALOG 안의 subCategory == sub 인 카드키 (등록 순서 보존)."""
+    return [k for k, e in CATALOG.items() if e.get("subCategory") == sub]
+
+
+STORY_KEYS = _bySubCategory("story")
+DUPONT_KEYS = _bySubCategory("dupont")
+VALUE_KEYS = _bySubCategory("value")
+GROWTH_KEYS = _bySubCategory("growth")
+CREDIT_KEYS = _bySubCategory("credit")
+QUALITY_KEYS = _bySubCategory("quality")
+SNOWFLAKE_KEYS = _bySubCategory("snowflake")
 
 
 def listCards(prefix: str | None = None) -> list[str]:
@@ -78,6 +97,14 @@ __all__ = [
     "TAB_KEYS",
     "VALUATION_CARDS",
     "VALUATION_KEYS",
+    # 7 분석 방법론별 카드 키 (subCategory 기준 동적 추출)
+    "STORY_KEYS",
+    "DUPONT_KEYS",
+    "VALUE_KEYS",
+    "GROWTH_KEYS",
+    "CREDIT_KEYS",
+    "QUALITY_KEYS",
+    "SNOWFLAKE_KEYS",
     "listCards",
     "register",
 ]

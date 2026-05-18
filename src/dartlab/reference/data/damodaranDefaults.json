@@ -5,9 +5,9 @@
     "asOfDate": "2024-07-01",
     "maxStaleDays": 210,
     "freshnessStatus": "stale",
-    "staleReason": "Damodaran country risk premium snapshot is older than the 210-day reference gate. Run scripts/data/updateDamodaranERP.py before verified use.",
+    "staleReason": "Damodaran country risk premium snapshot is older than the 210-day reference gate. Run .github/scripts/sync/updateDamodaranERP.py before verified use.",
     "matureMarketERP": 4.60,
-    "notes": "오프라인 fallback — scripts/data/updateDamodaranERP.py 로 월 1회 갱신"
+    "notes": "오프라인 fallback — .github/scripts/sync/updateDamodaranERP.py 로 월 1회 갱신"
   },
   "countries": {
     "KR": {

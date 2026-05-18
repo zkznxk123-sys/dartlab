@@ -633,7 +633,7 @@
       "id": "countryReferenceStale",
       "status": "fallbackAccepted",
       "layer": "L1.5 reference",
-      "fillMethod": "Run and verify scripts/data/updateDamodaranERP.py against official Stern country risk premium data before verified promotion."
+      "fillMethod": "Run and verify .github/scripts/sync/updateDamodaranERP.py against official Stern country risk premium data before verified promotion."
     },
     {
       "id": "fullIndustryCashFlowDrivers",

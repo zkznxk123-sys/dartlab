@@ -45,6 +45,8 @@ EXPECTED_LAYOUT: dict[str, set[str]] = {
     "features": {
         "chsFeatures.py",
         "sectorThresholds.py",
+        "_sectorThresholdsA.py",
+        "_sectorThresholdsB.py",
         "narrative.py",
         "_narrativeTypes.py",
         "_narrativeBuilders.py",

@@ -35,6 +35,10 @@ export interface KpiTileItem {
 	unit?: string;
 	intent?: 'primary' | 'positive' | 'negative' | 'neutral' | 'accent';
 	subtitle?: string;
+	// P-DASH-V1 D11 — 카드 빈 공간 fix.
+	sparkline?: number[];
+	rangeMin?: number | null;
+	rangeMax?: number | null;
 }
 
 export interface TopListItem {
@@ -117,13 +121,20 @@ export interface RechartsSpec {
 	rowOrder?: string[];
 	colOrder?: string[];
 	tone?: 'sequential' | 'diverging';
-	// bento layout — entry.layout 이 pass-through 됨 (colSpan 1~4, rowSpan 1~3)
+	// narrativeBridge — Story view 6 막 인과 자연어
+	transitions?: Array<{ from: string; to: string; text: string }>;
+	summaryLine?: string;
+	// scoreBadge — Snowflake 5 차원 종합 평점
+	grade?: string;
+	overallScore?: number | null;
+	dimensions?: Array<{ key: string; label: string; score: number }>;
+	// bento layout — entry.layout 이 pass-through 됨 (24-col 기준, colSpan/rowSpan 1~24).
 	layout?: LayoutSpec;
 }
 
 export interface LayoutSpec {
-	colSpan?: 1 | 2 | 3 | 4;
-	rowSpan?: 1 | 2 | 3 | 4 | 5 | 6;
+	colSpan?: number;
+	rowSpan?: number;
 }
 
 export interface DashboardResponse {
@@ -133,22 +144,26 @@ export interface DashboardResponse {
 	order: string[];
 }
 
-export type AnalysisTab =
-	| 'financial'
-	| 'portfolio'
-	| 'valuation'
-	| 'governance'
-	| 'peer'
-	| 'lifecycle'
-	| 'macro'
-	| 'viewer';
+// 기업분석 단일 탭 + 공시뷰어. 옛 6 탭 (portfolio/valuation/governance/peer/
+// lifecycle/macro) 은 financial 안의 분석 방법론별 view 로 흡수.
+export type AnalysisTab = 'financial' | 'viewer';
 
+// 재무제표분석 7 분석 방법론 — 같은 회사를 그레이엄·린치·S&P·Sloan 식
+// 다른 학파 시각으로 보는 lens. legacy 6 (performance/...) 은 redirect 용.
 export type FinancialSubCategory =
+	| 'story'
+	| 'dupont'
+	| 'value'
 	| 'growth'
-	| 'profitability'
+	| 'credit'
+	| 'quality'
+	| 'snowflake'
+	// legacy (redirect)
+	| 'performance'
 	| 'capitalStructure'
 	| 'cashflow'
-	| 'risk';
+	| 'risk'
+	| 'profitability';
 
 export interface CatalogCard {
 	cardKey: string;
@@ -217,4 +232,38 @@ export function fetchCard(
 
 export function fetchCatalog(): Promise<CatalogResponse> {
 	return fetchJson<CatalogResponse>('/api/viz/catalog');
+}
+
+// ── Layout Engine — bento packed grid (P-DASH-V1) ──
+
+export interface PackedCard {
+	cardKey: string;
+	kind: string;
+	title: string;
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+}
+
+export interface TabLayoutResponse {
+	stockCode: string;
+	tab: AnalysisTab;
+	view: string | null;
+	periodKind: PeriodKind;
+	colCount: number;
+	layout: PackedCard[];
+	cards: Record<string, RechartsSpec>;
+}
+
+export function fetchTabLayout(
+	tab: AnalysisTab,
+	stockCode: string,
+	view: string | null = null,
+	periodKind: PeriodKind = 'annual',
+	nPeriods = 40,
+): Promise<TabLayoutResponse> {
+	const qs = new URLSearchParams({ periodKind, nPeriods: String(nPeriods) });
+	if (view) qs.set('view', view);
+	return fetchJson<TabLayoutResponse>(`/api/viz/layout/${tab}/${stockCode}?${qs}`);
 }

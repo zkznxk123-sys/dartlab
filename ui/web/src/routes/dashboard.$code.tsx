@@ -7,7 +7,7 @@ export const Route = createFileRoute('/dashboard/$code')({
 		throw redirect({
 			to: '/analysis/$code/financial',
 			params: { code: params.code },
-			search: { period: 'quarterly', view: 'overview' },
+			search: { period: 'quarterly', view: 'snowflake' },
 			replace: true,
 		});
 	},

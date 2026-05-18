@@ -5,7 +5,7 @@
 - Marimo (`.py`) — 코드 셀만 (마리모 UI 에서 마크다운 가독성 낮음 → 쓰지 않는다)
 - 두 포맷은 **코드 셀이 1:1 동일**해야 한다.
 
-**Colab 자동 생성**: `uv run python scripts/build/syncColabFromMarimo.py` — 11개 ipynb 를 한 번에 재생성. 마리모를 손으로 고치면 스크립트의 `NOTEBOOKS` 딕셔너리도 함께 고친다.
+**Colab 자동 생성**: `uv run python notebooks/_scripts/syncColabFromMarimo.py` — 11개 ipynb 를 한 번에 재생성. 마리모를 손으로 고치면 스크립트의 `NOTEBOOKS` 딕셔너리도 함께 고친다.
 
 ## Structure
 

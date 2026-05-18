@@ -1,8 +1,7 @@
 name: CI Full
 
-# Tier 2 — master push 직후에만 도는 통합 회귀 게이트 (목표 ≤ 10분).
-# PR 단계에서는 돌지 않음 (ci-fast 만). master merge 후 regression 검증 책임.
-# realdata-suite path-filter matrix 는 본 파일에서만 실행 (PR 에서 제거).
+# Tier 2 — master push 직후 통합 회귀 (목표 ≤ 10분). PR 단계는 ci-fast 만.
+# 명령 SSOT = tests/run.py GATES. 신규 게이트는 GATES + matrix 양쪽 동시 추가.
 
 on:
   push:
@@ -15,172 +14,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 전체 Python 3.12 / 3.13 matrix + integration + requires_data (fixture 기반).
-  # 이전 ci.yml 의 `test` job 과 동등.
-  test-full:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+  gate:
+    runs-on: ${{ matrix.runner || 'ubuntu-latest' }}
+    timeout-minutes: ${{ matrix.timeout || 20 }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.13"]
+        include:
+          - gate: test-full
+            python: "3.12"
+            artifact_name: coverage-report
+            artifact_path: htmlcov/
+          - gate: test-full
+            python: "3.13"
+          - gate: fixture-integration
+            timeout: 15
+          - gate: cross-os-smoke
+            runner: ubuntu-latest
+          - gate: cross-os-smoke
+            runner: windows-latest
+          - gate: cross-os-smoke
+            runner: macos-latest
+          - gate: product-smoke-wheel
+            timeout: 30
+            artifact_name: product-smoke-wheel-release
+            artifact_path: product-smoke-wheel-release.json
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+          python-version: ${{ matrix.python || '3.12' }}
+      - name: Run ${{ matrix.gate }}
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-cov hypothesis pytest-benchmark pytest-xdist
-          # dev group 의 vcrpy/pandera/syrupy 가 tests/_cassettes / tests/_schemas /
-          # tests/cli/test_output_snapshots 에 필요.
-          pip install "pandera[polars]>=0.29.0" "vcrpy>=6.0.0" "syrupy>=4.7.0"
-          # mcp 명시 우선 install — dartlab.mcp namespace 회피.
-          pip install "mcp[cli]>=1.0,<1.27.1"
-          # dartlab non-editable install — editable (.pth) 의 'src' path 추가가
-          # 'src/dartlab/mcp/' 를 standalone 'mcp' 와 collision 시키는 회귀 차단.
-          pip install .
-      # realData/heavy/freshInstall 제외 — 이들은 realdata-suite / ci-nightly 담당.
-      - name: Run tests with coverage (Python 3.12)
-        if: matrix.python-version == '3.12'
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "1900"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          pytest tests/ -n 2 --dist loadfile --tb=short \
-            -m "not requires_data and not heavy and not realData and not freshInstall" \
-            --ignore=tests/_fixtures/test_analysis_real.py \
-            --ignore=tests/_fixtures/test_credit_real.py \
-            --ignore=tests/_fixtures/test_story_real.py \
-            --ignore=tests/realData \
-            --cov=dartlab --cov-report=term-missing --cov-report=html --cov-report=xml \
-            --cov-fail-under=40 --benchmark-disable
-      - name: Run tests without coverage (Python 3.13)
-        if: matrix.python-version == '3.13'
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "1900"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          pytest tests/ -n 2 --dist loadfile --tb=short \
-            -m "not requires_data and not heavy and not realData and not freshInstall" \
-            --ignore=tests/_fixtures/test_analysis_real.py \
-            --ignore=tests/_fixtures/test_credit_real.py \
-            --ignore=tests/_fixtures/test_story_real.py \
-            --ignore=tests/realData \
-            --no-cov --benchmark-disable
+          python -X utf8 tests/run.py gate ${{ matrix.gate }} \
+            ${{ matrix.python && format('--python {0}', matrix.python) || '' }}
       - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.12'
+        if: ${{ matrix.gate == 'test-full' && matrix.python == '3.12' }}
         uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Upload coverage report
-        if: matrix.python-version == '3.12'
+      - name: Upload artifact
+        if: ${{ always() && matrix.artifact_name }}
         uses: actions/upload-artifact@v5
         with:
-          name: coverage-report
-          path: htmlcov/
-
-  # Fixture 기반 integration 테스트 — 큰 메모리 필요한 파일 격리 실행.
-  fixture-integration:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis pytest-benchmark
-          pip install -e .[all]
-      - name: Run fixture integration tests (high memory, sequential)
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "5000"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          for f in tests/_fixtures/test_analysis_real.py tests/_fixtures/test_credit_real.py tests/_fixtures/test_story_real.py; do
-            echo "=== $f ==="
-            pytest "$f" --tb=short -q --benchmark-disable -p no:cacheprovider || exit 1
-          done
-
-  # Cross-OS smoke — Windows/macOS 경로·인코딩·라인엔딩 회귀.
-  # PR 에서는 제거 (ubuntu 만으로도 대부분 커버), master 에서만 3 OS 검증.
-  cross-os-smoke:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install minimal deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis build pytest-cov pytest-benchmark
-          pip install -e .
-      # shell: bash — Windows 에서 기본 PowerShell 은 backslash 연속 미지원.
-      # 단일 라인으로 써도 되지만 가독성 위해 bash 명시. Linux/macOS 도 bash 기본.
-      - name: Run unit + bundle tests
-        env:
-          PYTHONIOENCODING: utf-8
-          DARTLAB_TEST_LOCKED: "1"
-        shell: bash
-        run: python -X utf8 -m pytest tests/core/test_bundledResources.py tests/audit/test_wheelPackaging.py -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
-      - name: Silent-fail lint
-        shell: bash
-        run: python -X utf8 scripts/dev/checkSilentFail.py
-
-  product-smoke-wheel:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Install uv
-        run: pip install uv
-      - name: Build wheel
-        run: |
-          uv run --with build python -m build --wheel --outdir dist
-      - name: Install wheel in isolated venv
-        run: |
-          uv venv /tmp/dartlab-product-smoke --python 3.12
-          WHL=$(ls dist/*.whl | head -n1)
-          uv pip install --python /tmp/dartlab-product-smoke "$WHL"
-      - name: Run product smoke release on wheel
-        env:
-          PYTHONUNBUFFERED: "1"
-        run: |
-          /tmp/dartlab-product-smoke/bin/python -X utf8 scripts/audit/productSmoke.py \
-            --suite release \
-            --data-mode empty \
-            --import-mode installed \
-            --json-out product-smoke-wheel-release.json
-      - name: Upload product smoke wheel report
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: product-smoke-wheel-release
-          path: product-smoke-wheel-release.json
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_path }}
           retention-days: 30
 
-  # realData 스위트 path-filter matrix — master push 에만 실행.
-  # PR 에서는 돌지 않음 (ci-fast 책임은 smoke + unit 까지).
+  # realdata 는 path-diff 동적 matrix — plan 잡 결과를 suite 잡이 받아 fan-out.
   realdata-plan:
     runs-on: ubuntu-latest
     outputs:
@@ -190,22 +74,13 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Plan realData tests by path diff
-        id: plan
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - id: plan
         env:
           GITHUB_BASE_REF: ${{ github.event.pull_request.base.ref || '' }}
-        run: |
-          python -X utf8 .github/scripts/ops/planRealdata.py > /tmp/tests.json
-          echo "plan 결과:"
-          cat /tmp/tests.json
-          echo
-          COUNT=$(python -c "import json; print(len(json.load(open('/tmp/tests.json'))))")
-          echo "tests=$(cat /tmp/tests.json)" >> $GITHUB_OUTPUT
-          if [ "$COUNT" -gt 0 ]; then
-            echo "hasAny=true" >> $GITHUB_OUTPUT
-          else
-            echo "hasAny=false" >> $GITHUB_OUTPUT
-          fi
+        run: python -X utf8 tests/run.py gate realdata-plan
 
   realdata-suite:
     needs: realdata-plan
@@ -218,20 +93,8 @@ jobs:
         test_file: ${{ fromJson(needs.realdata-plan.outputs.tests) }}
     steps:
       - uses: actions/checkout@v5
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: "pip"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio pytest-rerunfailures hypothesis
-          pip install -e .[all]
-      - name: Run ${{ matrix.test_file }}
-        env:
-          DARTLAB_DATA_DIR: ${{ github.workspace }}/tests/fixtures
-          PYTEST_MEMORY_LIMIT_MB: "6000"
-          DARTLAB_TEST_LOCKED: "1"
-        run: |
-          bash scripts/dev/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
+      - run: python -X utf8 tests/run.py gate realdata-suite --test ${{ matrix.test_file }}

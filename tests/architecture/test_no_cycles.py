@@ -21,7 +21,7 @@ REPO = Path(__file__).resolve().parent.parent.parent
 @pytest.mark.unit
 def test_no_toplevel_cycles() -> None:
     """top-level (런타임 실행) import 양방향 cycle = 0."""
-    script = REPO / "scripts" / "audit" / "cycleScan.py"
+    script = REPO / "tests" / "audit" / "cycleScan.py"
     result = subprocess.run(
         [sys.executable, "-X", "utf8", str(script), "--strict-toplevel"],
         capture_output=True,

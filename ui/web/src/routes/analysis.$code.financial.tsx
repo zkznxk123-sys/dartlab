@@ -1,5 +1,6 @@
-// /analysis/$code/financial — 재무 탭.
-// 5 서브카테고리: growth · profitability · capitalStructure · cashflow · risk.
+// /analysis/$code/financial — 재무제표분석.
+// 7 분석 방법론 sub view (story/dupont/value/growth/credit/quality/snowflake).
+// 같은 회사를 그레이엄·린치·S&P·Sloan 등 다른 학파 시각으로 다르게 본다.
 // catalog 의 subCategory 필드로 카드 자동 분류. URL ?view=<sub> 로 핀.
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -9,36 +10,28 @@ import { Loader2 } from 'lucide-react';
 import { CardShell } from '@/features/dashboard/cards/CardShell';
 import { ChartMiniTable } from '@/features/dashboard/cards/ChartMiniTable';
 import { VizChart } from '@/features/dashboard/charts/VizChart';
-import { CardGrid } from '@/features/dashboard/layout/CardGrid';
-import { fetchCatalog, fetchDashboard, type CatalogCard, type FinancialSubCategory } from '@/features/dashboard/api/client';
+import {
+	BentoGrid,
+	BENTO_GAP_PX,
+	BENTO_CARD_HEADER_PX,
+	BENTO_CARD_PAD_PX,
+} from '@/features/dashboard/layout/BentoGrid';
+import {
+	fetchCatalog,
+	fetchTabLayout,
+	type CatalogCard,
+	type FinancialSubCategory,
+	type PackedCard,
+} from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
 
-type SubView = FinancialSubCategory | 'overview';
-
-const VALID_VIEWS: SubView[] = [
-	'overview',
-	'growth',
-	'profitability',
-	'capitalStructure',
-	'cashflow',
-	'risk',
-];
-
-const SUB_TITLES: Record<SubView, string> = {
-	overview: '전체',
-	growth: '수익·성장',
-	profitability: '수익성·효율성',
-	capitalStructure: '재무건전성',
-	cashflow: '현금·배분',
-	risk: '리스크·신호',
-};
+type SubView = FinancialSubCategory;
 
 export const Route = createFileRoute('/analysis/$code/financial')({
 	component: FinancialTab,
-	validateSearch: (search: Record<string, unknown>): { view: SubView } => {
-		const raw = String(search.view ?? '');
-		const view = (VALID_VIEWS as string[]).includes(raw) ? (raw as SubView) : 'overview';
-		return { view };
+	validateSearch: (_search: Record<string, unknown>): { view: SubView | null } => {
+		// v3-r6 — sub view 일시 폐기. URL ?view stale 도 무조건 null → OVERVIEW_KEYS curated 1 view.
+		return { view: null };
 	},
 });
 
@@ -54,7 +47,6 @@ function ChartLoading() {
 
 function FinancialTab() {
 	const { code } = Route.useParams();
-	const { view } = Route.useSearch();
 	const { period: periodKind } = parentRoute.useSearch();
 
 	const { data: catalog } = useQuery({
@@ -63,9 +55,11 @@ function FinancialTab() {
 		staleTime: Infinity,
 	});
 
+	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
+	const apiView = null;
 	const { data, isError, error } = useQuery({
-		queryKey: dashKeys.dashboard(code, periodKind),
-		queryFn: () => fetchDashboard(code, periodKind, 40),
+		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
+		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60_000,
 		retry: 1,
@@ -74,67 +68,38 @@ function FinancialTab() {
 	const cardMetaByKey: Record<string, CatalogCard | undefined> = Object.fromEntries(
 		(catalog?.cards ?? []).map((c) => [c.cardKey, c]),
 	);
-	const orderedKeys: string[] = data?.order ?? catalog?.dashboardKeys ?? [];
 
-	// overview = 전체 (catalog 순서 그대로), sub-view = 해당 subCategory 만.
-	// bento grid 가 카드별 colSpan/rowSpan 으로 자동 packing — 별도 hero/triplet 하드코딩 폐기.
-	const isOverview = view === 'overview';
-	const viewKeys = orderedKeys.filter((k) => {
-		const meta = cardMetaByKey[k];
-		if (isOverview) return true;
-		return meta?.tab === 'financial' && meta?.subCategory === view;
-	});
-
-	// 4 col grid + 150 px row 기준 default layout.
-	const DEFAULT_LAYOUT: Record<string, { colSpan: 1 | 2 | 3 | 4; rowSpan: 1 | 2 | 3 | 4 | 5 | 6 }> = {
-		kpiTile: { colSpan: 1, rowSpan: 1 },
-		diffView: { colSpan: 1, rowSpan: 1 },
-		gauge: { colSpan: 1, rowSpan: 2 },
-		phaseIndicator: { colSpan: 2, rowSpan: 1 },
-		topList: { colSpan: 1, rowSpan: 3 },
-		comparisonTable: { colSpan: 2, rowSpan: 3 },
-		radar: { colSpan: 2, rowSpan: 2 },
-		scatter: { colSpan: 2, rowSpan: 2 },
-		matrix: { colSpan: 2, rowSpan: 2 },
-		trend: { colSpan: 2, rowSpan: 2 },
-		sankey: { colSpan: 3, rowSpan: 3 },
-		breakdown: { colSpan: 1, rowSpan: 2 },
-		waterfall: { colSpan: 2, rowSpan: 2 },
-	};
-
-	const renderCard = (cardKey: string) => {
-		const meta = cardMetaByKey[cardKey];
-		const spec = data?.cards?.[cardKey];
-		const title = meta?.title || spec?.title || cardKey;
+	const renderCard = (p: PackedCard, cellSize: number) => {
+		const meta = cardMetaByKey[p.cardKey];
+		const spec = data?.cards?.[p.cardKey];
+		const title = meta?.title || spec?.title || p.title;
 		const help = meta?.help;
-		const kind = spec?.kind ?? meta?.kind ?? 'trend';
-		const fallback = DEFAULT_LAYOUT[kind] ?? { colSpan: (meta?.xlSpan ?? 1) as 1 | 2 | 3 | 4, rowSpan: 2 };
-		const layout = {
-			colSpan: spec?.layout?.colSpan ?? fallback.colSpan,
-			rowSpan: spec?.layout?.rowSpan ?? fallback.rowSpan,
-		};
 		const seriesCount = spec?.series?.length ?? 0;
 		// 자산구조 dual-stack 은 9 series 박혀있어 mini-table 의미 0 + 운영자 명시 (2026-05-18) 제거.
 		const isDualStack = spec?.options?.dualStack === true;
 		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
 		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-		const footerHeight = hasFooter ? 28 + Math.min(seriesCount, 12) * 18 + 20 : 0;
-		// rowSpan × 150 (auto-rows) − header − footer − padding.
-		const total = layout.rowSpan * 150 + (layout.rowSpan - 1) * 12;
-		const bodyHeight = Math.max(80, total - 44 - footerHeight - 12);
+		// v3-r6 — TabDashboard 와 동일 산출식 (BentoGrid 상수 SSOT).
+		// footerH = thead 20 + N rows × 20 + py 8 + border 1.
+		const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
+		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
+		const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight);
+		const kind = spec?.kind ?? p.kind;
 		return (
 			<CardShell
-				key={cardKey}
 				title={title}
 				help={help}
-				colSpan={layout.colSpan}
-				rowSpan={layout.rowSpan}
+				colSpan={p.w}
+				rowSpan={p.h}
+				kind={kind}
 				footer={footer}
 			>
-				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} /> : <ChartLoading />}
+				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
 			</CardShell>
 		);
 	};
+
+	const placed = data?.layout ?? [];
 
 	return (
 		<>
@@ -145,15 +110,15 @@ function FinancialTab() {
 			)}
 
 			<div className="border-b bg-card/30 px-4 py-2 text-xs text-muted-foreground">
-				재무제표 / <span className="font-medium text-foreground">{SUB_TITLES[view]}</span>
+				재무제표분석 / <span className="font-medium text-foreground">재무분석 (자산구조·부채상세·자본상세·손익구조)</span>
 			</div>
 
-			{viewKeys.length === 0 ? (
+			{placed.length === 0 ? (
 				<div className="p-8 text-center text-sm text-muted-foreground">
 					이 카테고리의 카드가 아직 없습니다.
 				</div>
 			) : (
-				<CardGrid>{viewKeys.map((k) => renderCard(k))}</CardGrid>
+				<BentoGrid placed={placed} renderCard={renderCard} />
 			)}
 		</>
 	);

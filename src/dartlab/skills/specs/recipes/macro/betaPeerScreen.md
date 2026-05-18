@@ -12,8 +12,8 @@ whenToUse:
   - 동종업체 outlier
   - within-industry 베타
 linkedSkills:
-  - engines.gather.industryPeers
-  - engines.scan.macroBeta
+  - engines.gather
+  - engines.scan
   - engines.industry
 toolRefs:
   - EngineCall

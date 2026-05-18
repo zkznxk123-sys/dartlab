@@ -544,7 +544,9 @@ async def _collectDocsDirect(
     if failEntries:
         _appendDocsFailures(dataDir, failEntries)
 
-    # 종목별 parquet 저장
+    # 종목별 parquet 저장 (Phase A — writeParquetSorted 가 sort + row_group_size 적용)
+    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+
     results: dict[str, int] = {}
     for sc, sections in stockSections.items():
         if not sections:
@@ -562,11 +564,7 @@ async def _collectDocsDirect(
         else:
             combinedDf = newDf
 
-        tmpPath = parquetPath.with_suffix(".parquet.tmp")
-        combinedDf.write_parquet(tmpPath)
-        if parquetPath.exists():
-            parquetPath.unlink()
-        tmpPath.rename(parquetPath)
+        writeParquetSorted(combinedDf, parquetPath)
 
         results[sc] = len(sections)
 

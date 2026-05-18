@@ -15,13 +15,10 @@ whenToUse:
   - 시장 미반영 성장
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.valuation
-  - engines.scan.ratio
   - recipes.valuation.qualityValueScreen
   - recipes.credit.distressFilter
   - recipes.screen.compounderCandidates
-  - engines.analysis.valuation
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -149,7 +146,7 @@ candidates = (
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 PEG 분포.
 2. PEG ≤ 1.0 종목 (강한 신호) 에 대해 `recipes.screen.compounderCandidates` 로 5 년 일관성 추가 검증.
 3. `recipes.credit.distressFilter` 로 부도 위험 종목 제외 (성장률 통과해도 부채 급증 종목 위험).
-4. `engines.analysis.valuation` — DCF + valuation band 단일 회사 심층.
+4. `engines.analysis` — DCF + valuation band 단일 회사 심층.
 5. `engines.story` 로 narrative 생성 — 성장 동력 (제품·시장점유·신규사업) 까지 묶어 보고.
 
 ## 기본 검증

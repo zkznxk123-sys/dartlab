@@ -28,23 +28,16 @@ toolRefs:
   - finalize_answer
 knowledgeRefs:
   - engines.analysis
-  - engines.analysis.governance
-  - engines.analysis.earningsQuality
-  - engines.analysis.financialConsistency
-  - engines.analysis.disclosureChange
 linkedSkills:
-  - engines.analysis.governance
-  - engines.analysis.earningsQuality
-  - engines.analysis.financialConsistency
-  - engines.analysis.disclosureChange
+  - engines.analysis
 recipeSteps:
-  - skillId: engines.analysis.governance
+  - skillId: engines.analysis
     note: 이사회 독립성, 지배력 집중, 특수관계자 지표.
-  - skillId: engines.analysis.earningsQuality
+  - skillId: engines.analysis
     note: 이익이 진짜인지 (accruals, OCF/순이익 비교).
-  - skillId: engines.analysis.financialConsistency
+  - skillId: engines.analysis
     note: 재무제표 간 정합성 (BS-PL-CF 합치).
-  - skillId: engines.analysis.disclosureChange
+  - skillId: engines.analysis
     note: 공시 변경 추적 — 회계 기준 / 정책 변경 신호.
 sourceRefs:
   - dartlab://skills/recipes.governance.auditComposite
@@ -103,11 +96,8 @@ examples:
   - 특수관계자 거래 비중
   - 분식 의심 신호 (accrual + 정합성 + 감사)
 linkedSkills:
-  - engines.analysis.governance
-  - engines.analysis.earningsQuality
-  - engines.analysis.financialConsistency
-  - engines.analysis.disclosureChange
-  - engines.scan.audit
+  - engines.analysis
+  - engines.scan
 source:
   type: manual_skill
   format: markdown
@@ -120,10 +110,10 @@ lastUpdated: '2026-05-13'
 
 ## 연계 절차
 
-1. engines.analysis.governance — 이사회 독립성, 지배력 집중, 특수관계자 지표 확인.
-2. engines.analysis.earningsQuality — accruals, OCF/순이익 비교로 이익의 진위 점검.
-3. engines.analysis.financialConsistency — BS-PL-CF 정합성 검산.
-4. engines.analysis.disclosureChange — 공시 변경 추적 (회계 기준·정책 변경 신호).
+1. engines.analysis — 이사회 독립성, 지배력 집중, 특수관계자 지표 확인.
+2. engines.analysis — accruals, OCF/순이익 비교로 이익의 진위 점검.
+3. engines.analysis — BS-PL-CF 정합성 검산.
+4. engines.analysis — 공시 변경 추적 (회계 기준·정책 변경 신호).
 
 ## 판정 게이트
 

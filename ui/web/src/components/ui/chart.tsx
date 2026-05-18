@@ -44,7 +44,10 @@ export function ChartContainer({ id, className, children, config, ...props }: Ch
 				{...props}
 			>
 				<ChartStyle id={chartId} config={config} />
-				<RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+				{/* width="99%" — recharts 첫 paint 시 부모 width=0 측정 → -1 fallback 워닝 회피 트릭. */}
+				<RechartsPrimitive.ResponsiveContainer width="99%" height="100%" minHeight={0}>
+					{children}
+				</RechartsPrimitive.ResponsiveContainer>
 			</div>
 		</ChartContext.Provider>
 	);

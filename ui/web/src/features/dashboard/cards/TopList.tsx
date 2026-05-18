@@ -22,7 +22,7 @@ interface Props {
 export function TopList({ items, unit: defaultUnit }: Props) {
 	const maxAbs = Math.max(...items.map((i) => Math.abs(i.value)), 1);
 	return (
-		<div className="flex flex-col gap-2 px-2">
+		<div className="flex h-full w-full flex-col justify-around gap-2 px-2 py-2">
 			{items.map((it, idx) => {
 				const w = Math.min(100, (Math.abs(it.value) / maxAbs) * 100);
 				const deltaTone =

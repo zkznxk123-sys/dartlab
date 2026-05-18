@@ -132,8 +132,12 @@ crates/
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 tests/fixtures/sections_baseline/
+# HF dataset 자동 다운로드 캐시 — 100MB+ parquet 다수, git 추적 X
+tests/fixtures/dart/scan/
+tests/fixtures/krx/
+tests/fixtures/krxList/
 unsloth_compiled_cache/
-scripts/dev/_camelcaseIndex.json
+tests/audit/_camelcaseIndex.json
 
 # 구 Svelte UI 백업 (2026-05-16 React 재구축 시) — 참고용 로컬 보존
 ui/web.backup/

@@ -13,9 +13,8 @@ whenToUse:
   - quality value 후행기
 linkedSkills:
   - engines.industry
-  - engines.scan.crossSectionStockScreen
-  - engines.quant.piotroski
-  - engines.quant.altman
+  - engines.scan
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

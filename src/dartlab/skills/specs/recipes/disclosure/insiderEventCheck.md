@@ -15,10 +15,8 @@ whenToUse:
   - 자기주식 매입 매도
   - 이벤트 신호
 linkedSkills:
-  - engines.company.researchStarter
-  - engines.scan.insider
-  - engines.scan.capital
-  - engines.company.disclosureEvent
+  - engines.company
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython
@@ -91,10 +89,10 @@ holders = c.show("majorHolder")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
-2. engines.scan.insider — 내부자 매매 횡단
-3. engines.scan.capital — 자본구조 변동
-4. engines.company.disclosureEvent — 자본 관련 공시 원문
+1. engines.company — 회사 진입
+2. engines.scan — 내부자 매매 횡단
+3. engines.scan — 자본구조 변동
+4. engines.company — 자본 관련 공시 원문
 
 ## 기본 검증
 

@@ -24,11 +24,12 @@ def _kpi(
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 4, "rowSpan": 2},
         "help": helpText,
     }
 
@@ -70,7 +71,8 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
         "kind": "diffView",
         "title": "전기 대비 변화",
         "topic": "IS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "diffFromNorm",
@@ -85,14 +87,15 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
             ],
         },
         "options": {},
-        "layout": {"colSpan": 2, "rowSpan": 3},
+        "layout": {"colSpan": 8, "rowSpan": 4},
         "help": "직전 기간 대비 변화율 — 가치 펀더멘탈 모멘텀 확인.",
     },
     "relativeValueTrend": {
         "kind": "trend",
         "title": "자본 기반 가치 추이",
         "topic": "BS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "equity",
@@ -114,14 +117,15 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 2, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "장부가 추이 — 자기자본·이익잉여금. 시장 멀티플 정상화 근거.",
     },
     "scenarioGrowth": {
         "kind": "trend",
         "title": "성장 시나리오 (과거 분포)",
         "topic": "IS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "revenueYoy",
@@ -143,7 +147,7 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 6, "rowSpan": 6},
         "help": "Bull/Base/Bear 시나리오를 위한 과거 성장 분포. 평균 + 표준편차로 g 추정.",
     },
 }

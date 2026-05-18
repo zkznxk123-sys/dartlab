@@ -15,11 +15,10 @@ whenToUse:
   - 매출 전망 시나리오
   - 적정주가 범위
 linkedSkills:
-  - engines.company.researchStarter
-  - engines.analysis.revenueForecast
-  - engines.macro.scenario
-  - engines.quant.regime
-  - engines.analysis.macroSensitivity
+  - engines.company
+  - engines.analysis
+  - engines.macro
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython
@@ -102,11 +101,11 @@ regime = c.quant("국면")
 
 ## 연계 절차
 
-1. engines.company.researchStarter — 회사 진입
-2. engines.analysis.revenueForecast — 매출 base/bull/bear
-3. engines.analysis.macroSensitivity — 매크로 elasticity
-4. engines.macro.scenario — 매크로 시나리오 가정
-5. engines.quant.regime — 시장 regime
+1. engines.company — 회사 진입
+2. engines.analysis — 매출 base/bull/bear
+3. engines.analysis — 매크로 elasticity
+4. engines.macro — 매크로 시나리오 가정
+5. engines.quant — 시장 regime
 
 ## 기본 검증
 

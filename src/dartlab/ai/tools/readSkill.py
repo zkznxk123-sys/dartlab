@@ -14,7 +14,106 @@ from dartlab.ai.contracts import Ref
 
 from .types import ToolResult
 
-_BODY_PREVIEW_CHARS = 1500
+_BODY_PREVIEW_CHARS = 3000  # 엔진 spec p75 (~3174) 가 한 번에 들어가 GetSkillBody 추가 호출 불필요. 이전 600 자 cap 은 procedure 섹션 못 봤다 (2026-05-17 OAuth probe 회귀 — body 의 ## 공개 호출 방식 / ## 호출 동작 절차 미노출 → LLM 가 직접 dartlab.scan 호출 형태 추측 → company_not_resolved thrashing).
+_PROCEDURE_SECTION_HEADINGS = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태", "## 절차")
+
+# capability auto-inline cap — top-1 후보의 capabilityRefs id 마다 CAPABILITIES dict
+# 에서 payload fetch → rows[].capabilityDetails 로 inline. 이전엔 ReadSkill 후 LLM 이
+# ReadCapability 자동 동행 (시그니처/args 모르니) — capability id 만 노출되어. 2026-05-18
+# OAuth probe 결과 패턴: ReadSkill → ReadCapability → EngineCall. 본 옵션 ON 시 사라짐.
+_CAP_FIELD_CAPS = {
+    "summary": 200,
+    "args": 600,
+    "example": 500,
+    "guide": 800,
+    "capabilities": 600,
+    "returns": 400,
+}
+# top-1 외 다른 후보는 더 짧게 (summary + args 만)
+_CAP_FIELD_CAPS_OTHERS = {"summary": 200, "args": 400}
+
+
+def _inlineCapabilities(capabilityRefs: list[str], *, isTopRank: bool) -> dict[str, dict]:
+    """spec.capabilityRefs id 마다 CAPABILITIES payload fetch → trimmed dict.
+
+    top-1 후보: 모든 capabilityRefs 의 6 필드 (summary/args/example/guide/capabilities/returns).
+    그 외 후보: summary + args 만 (token 절약).
+
+    capability 가 카탈로그에 없으면 (LLM 이 spec 본문 의지) skip — graceful.
+    """
+    if not capabilityRefs:
+        return {}
+    try:
+        from dartlab.reference.capability._generated import CAPABILITIES
+    except Exception:  # noqa: BLE001
+        return {}
+    field_caps = _CAP_FIELD_CAPS if isTopRank else _CAP_FIELD_CAPS_OTHERS
+    out: dict[str, dict] = {}
+    for ref in capabilityRefs[:5]:  # cap at 5 refs per skill
+        entry = CAPABILITIES.get(ref)
+        if not isinstance(entry, dict):
+            continue
+        trimmed: dict[str, str] = {}
+        for field, cap in field_caps.items():
+            value = entry.get(field)
+            if not value:
+                continue
+            text = str(value)
+            trimmed[field] = text[:cap] if len(text) > cap else text
+        if trimmed:
+            out[ref] = trimmed
+    return out
+
+
+def _extractProcedureSections(body: str, *, cap: int) -> str:
+    """body 가 cap 보다 길면 procedure 섹션 우선 추출 — 절차가 빠지는 회귀 방지.
+
+    1) body ≤ cap → 그대로 반환.
+    2) body > cap → '## 공개 호출 방식' / '## 호출 동작' / '## 대표 반환 형태' / '## 절차'
+       섹션을 우선 cap 안에 packing. 남은 자리는 본문 앞부분 (개요/엔진 역할) 으로 채움.
+
+    절차 섹션이 없으면 단순 truncate.
+    """
+    if len(body) <= cap:
+        return body
+    lines = body.splitlines(keepends=True)
+    sections: list[tuple[str, list[str]]] = []
+    current_heading: str | None = "_intro"
+    current_lines: list[str] = []
+    for line in lines:
+        stripped = line.lstrip("# ").strip()
+        if line.startswith("## "):
+            if current_lines:
+                sections.append((current_heading or "_intro", current_lines))
+            current_heading = "## " + stripped
+            current_lines = [line]
+        else:
+            current_lines.append(line)
+    if current_lines:
+        sections.append((current_heading or "_intro", current_lines))
+    # 우선순위: procedure 섹션 → 그 외 → intro
+    priority: dict[str, int] = {}
+    for heading in _PROCEDURE_SECTION_HEADINGS:
+        priority[heading] = 0
+    for heading, _ in sections:
+        priority.setdefault(heading, 5)
+    priority["_intro"] = 9  # intro 는 마지막에
+    ordered = sorted(sections, key=lambda item: priority.get(item[0], 5))
+    out_parts: list[str] = []
+    used = 0
+    truncate_note = "\n\n_(본문 일부 — 전문은 GetSkillBody)_\n"
+    for heading, body_lines in ordered:
+        text = "".join(body_lines)
+        if used + len(text) + len(truncate_note) <= cap:
+            out_parts.append(text)
+            used += len(text)
+        else:
+            remaining = cap - used - len(truncate_note)
+            if remaining > 200:
+                out_parts.append(text[:remaining])
+                used += remaining
+            break
+    return "".join(out_parts) + truncate_note
 
 
 def readSkill(
@@ -26,37 +125,39 @@ def readSkill(
 ) -> ToolResult:
     """Skill OS 후보 검색.
 
-    Default (includeBody=False): frontmatter + bodyPreview (앞 1500 자) 만 ref payload 에.
-    includeBody=True: raw markdown 본문 전체를 payload.body 에 함께. fallback
-    workbench (brief/heuristic) 가 한 번에 본문까지 필요할 때만 사용.
+    Default (includeBody=False): frontmatter + bodyPreview (앞 3000 자, procedure 섹션
+    우선 추출) 만 ref payload 에. includeBody=True: raw markdown 본문 전체를 payload.body
+    에 함께. fallback workbench (brief/heuristic) 가 한 번에 본문까지 필요할 때만 사용.
     LLM 자율 chat-native 경로는 default 로 두고, 특정 skill 본문이 필요하면
     `get_skill_body` 도구로 두 번째 호출.
     """
-    from dartlab.skills import describeSkill, searchSkills
+    from dartlab.skills import describeSkill, getSkill, searchSkills
 
     matches = searchSkills(query or "", limit=max(1, int(limit or 8)), includeUser=includeUser)
     refs: list[Ref] = []
     rows: list[dict] = []
-    for match in matches:
-        spec = match.skill
-        body = ""
+
+    def _loadBody(skillId: str) -> str:
         try:
-            described = describeSkill(spec.id)
-            # Body 는 source.body 에 산다 — 옛 코드는 top-level 'body' 를 보고 있어
-            # 항상 빈 문자열을 받아 LLM 에 본문이 전혀 가지 않았다 (silent bug).
-            body = ((described or {}).get("source") or {}).get("body", "") if isinstance(described, dict) else ""
+            described = describeSkill(skillId)
         except Exception:  # noqa: BLE001
-            body = ""
+            return ""
+        if not isinstance(described, dict):
+            return ""
+        return ((described.get("source") or {}).get("body") or "") if described else ""
+
+    for rank, match in enumerate(matches):
+        spec = match.skill
+        body = _loadBody(spec.id)
 
         payload = spec.toDict()
         payload["score"] = match.score
         payload["reasons"] = list(match.reasons)
-        body_preview = body[:_BODY_PREVIEW_CHARS] if body else ""
+        body_preview = _extractProcedureSections(body, cap=_BODY_PREVIEW_CHARS) if body else ""
         if includeBody:
             payload["body"] = body
             payload["bodyPreview"] = body_preview
         else:
-            # Default: 본문은 bodyPreview 로만 노출. 전문은 get_skill_body 로 호출.
             payload["bodyPreview"] = body_preview
             payload["bodyTruncated"] = bool(body) and len(body) > _BODY_PREVIEW_CHARS
         refs.append(
@@ -68,15 +169,49 @@ def readSkill(
                 payload=payload,
             )
         )
-        # Chain hint — 현재 skill 다음에 자연스러운 분석 흐름. linkedSkills 우선 +
-        # succeededBy 의 첫 항목 (있으면). LLM 이 이 list 를 보고 자율적으로
-        # 다음 ReadSkill 또는 GetSkillBody 호출.
+        # Chain — linkedSkills 우선 + succeededBy 합류 (중복 제거). LLM 이 다음 호출 가이드.
         next_skills = list(spec.linkedSkills or [])
         for sid in spec.succeededBy or ():
             if sid not in next_skills:
                 next_skills.append(sid)
-        # 너무 길면 LLM context 낭비 — top 5 로 제한.
         next_skills = next_skills[:5]
+
+        # Skill pack chain expansion — top-1 후보 한정으로 linkedSkills/succeededBy 본문도
+        # 같은 ReadSkill 응답에 inline. 사용자 직관 ("스킬팩 = 연결연결, 다 안 읽으면
+        # 절차 끊김") 정공: top 후보 하나만 골랐을 때 LLM 이 GetSkillBody 추가 호출 없이
+        # 체인 전체 (max 3 노드) 를 한 번에 본다. cap 자체는 절차 섹션 우선 추출이라 inline
+        # 노드당 ~2k chars → 3 노드 = 6k chars 한도. 추가 비용 ~1.5k token (수용).
+        chain_inline: list[dict] = []
+        if rank == 0 and next_skills:
+            seen = {spec.id}
+            for linked_id in next_skills[:3]:
+                if linked_id in seen:
+                    continue
+                seen.add(linked_id)
+                try:
+                    linked_spec = getSkill(linked_id, includeUser=includeUser)
+                except Exception:  # noqa: BLE001
+                    continue
+                linked_body = _loadBody(linked_spec.id)
+                chain_inline.append(
+                    {
+                        "id": linked_spec.id,
+                        "title": linked_spec.title,
+                        "kind": linked_spec.kind,
+                        "purpose": linked_spec.purpose,
+                        "whenToUse": list(linked_spec.whenToUse),
+                        "capabilityRefs": list(linked_spec.capabilityRefs),
+                        "requiredEvidence": list(linked_spec.requiredEvidence),
+                        "bodyPreview": _extractProcedureSections(linked_body, cap=2000) if linked_body else "",
+                        "bodyTruncated": bool(linked_body) and len(linked_body) > 2000,
+                    }
+                )
+
+        # capability auto-inline — capabilityRefs id 마다 CAPABILITIES payload 자동 fetch.
+        # top-1 후보: 6 필드 (summary/args/example/guide/capabilities/returns).
+        # 그 외: summary + args 만. → ReadCapability 자동 동행 회귀 해소.
+        capability_details = _inlineCapabilities(list(spec.capabilityRefs), isTopRank=(rank == 0))
+
         rows.append(
             {
                 "id": spec.id,
@@ -89,17 +224,21 @@ def readSkill(
                 "purpose": spec.purpose,
                 "whenToUse": list(spec.whenToUse),
                 "capabilityRefs": list(spec.capabilityRefs),
+                "capabilityDetails": capability_details,
                 "requiredEvidence": list(spec.requiredEvidence),
                 "expectedOutputs": list(spec.expectedOutputs),
                 "visualGuidance": list(spec.visualGuidance),
                 "visualRefs": list(spec.visualRefs),
                 "nextSkills": next_skills,
-                "bodyPreview": body[:600] if body else "",
+                "bodyPreview": body_preview,
+                "bodyTruncated": bool(body) and len(body) > _BODY_PREVIEW_CHARS,
+                "chainInline": chain_inline,  # top-1 만 채워짐. 나머지는 빈 list.
             }
         )
     return ToolResult(
         ok=bool(refs),
-        summary=f"Skill OS 후보 {len(refs)}개",
+        summary=f"Skill OS 후보 {len(refs)}개"
+        + (f" (+ chain {len(rows[0]['chainInline'])})" if rows and rows[0].get("chainInline") else ""),
         refs=refs,
         data={"skills": rows},
     )

@@ -117,6 +117,13 @@ jobs:
           SYNC_STATE_SCOPE: fr  # 병렬 Job pending.txt 경쟁 회피
           PYTHONUNBUFFERED: "1"
 
+      # Phase A — parquet → .arrow IPC mirror 빌드. Phase D 의 read_ipc(memory_map=True)
+      # 진입점이 사용. mtime 비교로 변경된 parquet 만 재변환 (idempotent).
+      - name: Build IPC mirror (finance + report)
+        run: uv run python -X utf8 .github/scripts/sync/buildIpcMirror.py
+        env:
+          SYNC_CATEGORIES: finance,report
+
       - name: Upload to HuggingFace (finance)
         if: hashFiles('dist/changed_finance.txt') != ''
         run: |
@@ -214,6 +221,12 @@ jobs:
           SYNC_STATE_SCOPE: docs
           PYTHONUNBUFFERED: "1"
 
+      # Phase A — IPC mirror 빌드
+      - name: Build IPC mirror (docs)
+        run: uv run python -X utf8 .github/scripts/sync/buildIpcMirror.py
+        env:
+          SYNC_CATEGORY: docs
+
       - name: Upload to HuggingFace (docs)
         if: hashFiles('dist/changed_docs.txt') != ''
         run: |
@@ -286,6 +299,12 @@ jobs:
         with:
           path: data/dart/${{ matrix.category }}
           key: dartlab-data-${{ matrix.category }}-${{ github.run_id }}
+
+      # Phase A — IPC mirror 빌드
+      - name: Build IPC mirror
+        run: uv run python -X utf8 .github/scripts/sync/buildIpcMirror.py
+        env:
+          SYNC_CATEGORY: ${{ matrix.category }}
 
       - name: Upload to HuggingFace
         run: uv run python .github/scripts/sync/uploadData.py --target hf

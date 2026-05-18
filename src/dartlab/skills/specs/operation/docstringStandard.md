@@ -129,13 +129,13 @@ LLM Specifications:
 
 ## 검증
 
-`scripts/build/generateSpec.py` ([GitHub](https://github.com/eddmpython/dartlab/blob/master/scripts/build/generateSpec.py)) 의 `_parseDocstringSections` 가 `## LLM Specifications` 또는 `LLM Specifications:` 헤더를 인식해 `_parseLLMSpecs(value)` 로 sub-key 6 종 (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets) 추출 → `entry["llmSpecs"]` 에 박힌다. 이 `llmSpecs` 는:
+`src/dartlab/skills/generateSpec.py` ([GitHub](https://github.com/eddmpython/dartlab/blob/master/src/dartlab/skills/generateSpec.py)) 의 `_parseDocstringSections` 가 `## LLM Specifications` 또는 `LLM Specifications:` 헤더를 인식해 `_parseLLMSpecs(value)` 로 sub-key 6 종 (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets) 추출 → `entry["llmSpecs"]` 에 박힌다. 이 `llmSpecs` 는:
 
 - `dartlab/core/capability/_generated.py` 의 capability catalog
 - `dartlab.ai.tools.readCapability.readCapability(...)` 의 payload
 - `dartlab/mcp/_generated_tools.py` 의 mcp tool description 일부 (자동 생성)
 
-세 곳에서 동시에 사용된다. 한 docstring 변경 → `uv run python -X utf8 scripts/build/generateSpec.py` 재실행 → 세 산출물 동기 갱신.
+세 곳에서 동시에 사용된다. 한 docstring 변경 → `uv run python -X utf8 src/dartlab/skills/generateSpec.py` 재실행 → 세 산출물 동기 갱신.
 
 ## 진행 페이스
 

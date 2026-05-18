@@ -6,27 +6,29 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import {
-	Activity,
-	Briefcase,
-	Calculator,
+	BookOpen,
+	Coins,
 	Download,
 	FileText,
-	Globe2,
+	Filter,
 	LayoutDashboard,
 	MessageSquare,
 	MessageSquarePlus,
+	Microscope,
 	MoreHorizontal,
 	Moon,
 	Pencil,
+	PieChart,
 	Pin,
 	PinOff,
 	Search,
 	Settings,
-	ShieldAlert,
+	ShieldCheck,
+	Sparkles,
 	Sun,
 	Telescope,
 	Trash2,
-	Users,
+	TrendingUp,
 } from 'lucide-react';
 
 import {
@@ -56,6 +58,7 @@ import {
 	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
+	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuAction,
@@ -199,16 +202,19 @@ export function AppSidebar() {
 }
 
 // 사이드바 — 기업분석 모드:
-//   회사 검색 (최상단) + 8 서브탭 메뉴 + (Footer) 최근 회사.
-//   현재 URL 에 stockCode 가 없으면 첫 메뉴 클릭 시 /analysis (회사 선택 안내) 로 이동.
-const FINANCIAL_SUBS = [
-	{ key: 'overview', title: '전체' },
-	{ key: 'growth', title: '수익·성장' },
-	{ key: 'profitability', title: '수익성·효율성' },
-	{ key: 'capitalStructure', title: '재무건전성' },
-	{ key: 'cashflow', title: '현금·배분' },
-	{ key: 'risk', title: '리스크·신호' },
-] as const;
+//   회사 검색 + 2 그룹 (기업분석 / 스크리너).
+//   기업분석 = 재무제표분석 (7 분석 방법론 sub) + 공시뷰어.
+//   스크리너 = placeholder (실제 로직 후속 PR).
+//   재무제표분석 7 sub = 7 가지 서로 다른 재무 분석 방법론 (lens).
+//   같은 회사를 그레이엄·린치·S&P·Sloan 식 다른 학파 시각으로 본다.
+// v3-r6 — 7 sub view 일시 폐기 (운영자 명시). 1 메뉴 "재무분석" 만 활성. 나중에 카테고리 다시 추가.
+const FINANCIAL_SUBS: ReadonlyArray<{
+	key: string;
+	label: string;
+	title: string;
+	icon: typeof BookOpen;
+	hint: string;
+}> = [];
 
 function DashboardNav() {
 	const { pathname } = useLocation();
@@ -219,67 +225,86 @@ function DashboardNav() {
 	const code = codeMatch?.[1];
 
 	const isFinancial = !!code && pathname.startsWith(`/analysis/${code}/financial`);
-	const activeSubView = isFinancial ? (search?.view ?? 'overview') : null;
+	// v3-r6 — view 없으면 OVERVIEW_KEYS curated 노출 (재무분석 1 view).
+	const activeSubView = isFinancial ? (search?.view ?? null) : null;
+	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
+	const isScreener = pathname.startsWith('/screener');
 
-	// 탑다운 narrative — 회사 안 → 밖 → 환경 → 원본.
-	const tabs = [
-		{ id: 'financial', title: '재무제표', icon: FileText, to: '/analysis/$code/financial' as const },
-		{ id: 'portfolio', title: '사업포트폴리오', icon: Briefcase, to: '/analysis/$code/portfolio' as const },
-		{ id: 'valuation', title: '가치평가', icon: Calculator, to: '/analysis/$code/valuation' as const },
-		{ id: 'governance', title: '거버넌스·리스크', icon: ShieldAlert, to: '/analysis/$code/governance' as const },
-		{ id: 'peer', title: '동종비교', icon: Users, to: '/analysis/$code/peer' as const },
-		{ id: 'lifecycle', title: '생애주기·시나리오', icon: Activity, to: '/analysis/$code/lifecycle' as const },
-		{ id: 'macro', title: '거시·섹터', icon: Globe2, to: '/analysis/$code/macro' as const },
-		{ id: 'viewer', title: 'Viewer', icon: Telescope, to: '/analysis/$code/viewer' as const },
-	];
+	// 기업분석 그룹 — 단일 기업 심층 분석. 2 항목 (재무제표분석 / 공시뷰어).
+	const corpItems = [
+		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial },
+		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer },
+	] as const;
+
+	const renderCorpButton = (t: (typeof corpItems)[number]) =>
+		code ? (
+			<SidebarMenuButton asChild isActive={t.isActive} tooltip={t.title}>
+				<Link
+					to={t.id === 'financial' ? '/analysis/$code/financial' : '/analysis/$code/viewer'}
+					params={{ code }}
+					search={{ period: 'quarterly' }}
+				>
+					<t.icon />
+					<span>{t.title}</span>
+				</Link>
+			</SidebarMenuButton>
+		) : (
+			<SidebarMenuButton asChild tooltip={`${t.title} (회사 선택 필요)`} className="opacity-50">
+				<Link to="/analysis">
+					<t.icon />
+					<span>{t.title}</span>
+				</Link>
+			</SidebarMenuButton>
+		);
 
 	return (
 		<>
 			<CompanySearch />
 			<SidebarGroup>
+				<SidebarGroupLabel>기업분석</SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
-						{tabs.map((t) => {
-							const isActive = !!code && pathname.startsWith(`/analysis/${code}/${t.id}`);
-							const renderMain = () =>
-								code ? (
-									<SidebarMenuButton asChild isActive={isActive} tooltip={t.title}>
-										<Link to={t.to} params={{ code }} search={t.id === 'financial' ? { period: 'quarterly', view: 'overview' } : { period: 'quarterly' }}>
-											<t.icon />
-											<span>{t.title}</span>
-										</Link>
-									</SidebarMenuButton>
-								) : (
-									<SidebarMenuButton asChild tooltip={`${t.title} (회사 선택 필요)`} className="opacity-50">
-										<Link to="/analysis">
-											<t.icon />
-											<span>{t.title}</span>
-										</Link>
-									</SidebarMenuButton>
-								);
-							return (
-								<SidebarMenuItem key={t.id}>
-									{renderMain()}
-									{t.id === 'financial' && code && isFinancial && (
-										<SidebarMenuSub>
-											{FINANCIAL_SUBS.map((s) => (
-												<SidebarMenuSubItem key={s.key}>
-													<SidebarMenuSubButton asChild isActive={activeSubView === s.key}>
-														<Link
-															to="/analysis/$code/financial"
-															params={{ code }}
-															search={{ period: 'quarterly', view: s.key }}
-														>
-															<span>{s.title}</span>
-														</Link>
-													</SidebarMenuSubButton>
-												</SidebarMenuSubItem>
-											))}
-										</SidebarMenuSub>
-									)}
-								</SidebarMenuItem>
-							);
-						})}
+						{corpItems.map((t) => (
+							<SidebarMenuItem key={t.id}>
+								{renderCorpButton(t)}
+								{t.id === 'financial' && code && isFinancial && (
+									<SidebarMenuSub>
+										{FINANCIAL_SUBS.map((s) => (
+											<SidebarMenuSubItem key={s.key}>
+												<SidebarMenuSubButton asChild isActive={activeSubView === s.key}>
+													<Link
+														to="/analysis/$code/financial"
+														params={{ code }}
+														search={{ period: 'quarterly', view: s.key }}
+														title={s.hint}
+													>
+														<s.icon className="size-3 opacity-70" />
+														<span className="font-mono text-[10px] uppercase opacity-60 mr-1">{s.label}</span>
+														<span>{s.title}</span>
+													</Link>
+												</SidebarMenuSubButton>
+											</SidebarMenuSubItem>
+										))}
+									</SidebarMenuSub>
+								)}
+							</SidebarMenuItem>
+						))}
+					</SidebarMenu>
+				</SidebarGroupContent>
+			</SidebarGroup>
+
+			<SidebarGroup>
+				<SidebarGroupLabel>스크리너</SidebarGroupLabel>
+				<SidebarGroupContent>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton asChild isActive={isScreener} tooltip="스크리너 (준비 중)">
+								<Link to="/screener">
+									<Filter />
+									<span>스크리너 (준비 중)</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>

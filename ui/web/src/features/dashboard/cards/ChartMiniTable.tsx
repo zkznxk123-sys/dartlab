@@ -38,7 +38,7 @@ export function ChartMiniTable({ spec: rawSpec, maxPeriods = 4 }: Props) {
 						<tr key={s.key} className="border-t border-border/40">
 							<td className="py-0.5 pr-2 text-left">
 								<span
-									className="inline-block size-2 rounded-sm align-middle"
+									className="inline-block size-2 rounded-sm align-middle ring-1 ring-border"
 									style={{ background: s.color }}
 								/>
 								<span className="ml-1.5 align-middle">{s.label}</span>

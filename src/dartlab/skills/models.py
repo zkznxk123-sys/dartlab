@@ -15,7 +15,7 @@ SkillKind = Literal["generated", "curated", "user", "recipe"]
 SkillScope = Literal["builtin", "project", "user"]
 # recipe 6-stage lifecycle (drafted → unverified → tested → verified → curated → deprecated) 와
 # 비-recipe 의 기존 ladder (unverified → observed → auditP → official → deprecated) 를 합집합으로 보존.
-# 변환·승격은 scripts/dev/recipe_promote.py CLI 가 단독 권한.
+# 변환·승격은 src/dartlab/skills/recipePromote.py CLI 가 단독 권한.
 SkillStatus = Literal[
     "drafted",
     "unverified",

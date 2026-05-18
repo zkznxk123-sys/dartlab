@@ -15,10 +15,7 @@ whenToUse:
   - dollar funding stress
 linkedSkills:
   - engines.gather
-  - engines.gather.macro
-  - engines.macro.crisis
-  - engines.macro.assets
-  - engines.macro.summary
+  - engines.macro
 toolRefs:
   - EngineCall
   - RunPython
