@@ -129,19 +129,117 @@ def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
 
 
 def _findSector(stockCode: str) -> str:
-    """KRX listing 에서 업종 추출. 미발견 시 빈 문자열."""
+    """KRX listing 에서 업종 추출. searchName 실패 시 listing() 직접 매칭. 미발견 시 빈 문자열."""
+    code_pad = str(stockCode).zfill(6)
     try:
         df = dartlab.searchName(str(stockCode))
+        if not isEmptyDf(df):
+            rows = df.to_dicts()
+            for r in rows:
+                sc = str(r.get("종목코드", r.get("stockCode", "")))
+                if sc.zfill(6) == code_pad:
+                    return str(r.get("업종", "") or "")
+            return str(rows[0].get("업종", "") or "")
+    except Exception:  # noqa: BLE001
+        pass
+    # fallback — listing() 전수에서 종목코드 직접 매칭.
+    try:
+        df = dartlab.listing()
         if isEmptyDf(df):
             return ""
         rows = df.to_dicts()
         for r in rows:
             sc = str(r.get("종목코드", r.get("stockCode", "")))
-            if sc.zfill(6) == str(stockCode).zfill(6):
-                return str(r.get("업종", "") or "")
-        return str(rows[0].get("업종", "") or "")
+            if sc.zfill(6) == code_pad:
+                return str(r.get("업종", r.get("sector", "")) or "")
     except Exception:  # noqa: BLE001
-        return ""
+        pass
+    return ""
+
+
+_PRODUCT_TAG_BLOCKLIST = {"전자공시", "투자", "주식", "재무제표", "공시", "분석"}
+
+
+def _findProductsFromBlog(stockCode: str) -> list[str]:
+    """blog frontmatter tags 에서 제품 후보 추출 — 회사명/종목코드/blocklist 제외.
+
+    _PRODUCT_MAP 미커버 회사 fallback. tags 의 첫 N 개 (회사명/종목코드 제외).
+    """
+    from pathlib import Path
+
+    base = Path(__file__).resolve().parents[4] / _BLOG_REPORTS_DIR
+    if not base.exists():
+        return []
+    code_pad = str(stockCode).zfill(6)
+    for child in sorted(base.iterdir()):
+        if not child.is_dir():
+            continue
+        parts = child.name.split("-", 2)
+        if len(parts) < 3 or parts[1] != code_pad:
+            continue
+        md = None
+        for candidate in ("index.md", "page.md", "README.md"):
+            p = child / candidate
+            if p.exists():
+                md = p
+                break
+        if md is None:
+            continue
+        try:
+            text = md.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not text.startswith("---"):
+            continue
+        fm_end = text.find("---", 3)
+        if fm_end < 0:
+            continue
+        fm = text[3:fm_end]
+        # tags: 또는 tags:\n  - ... 두 형태 지원.
+        in_tags = False
+        tags: list[str] = []
+        for line in fm.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("tags:"):
+                in_tags = True
+                inline = stripped[len("tags:") :].strip()
+                if inline.startswith("[") and inline.endswith("]"):
+                    inline = inline[1:-1]
+                    for t in inline.split(","):
+                        v = t.strip().strip('"').strip("'")
+                        if v:
+                            tags.append(v)
+                    in_tags = False
+                continue
+            if in_tags:
+                if stripped.startswith("- "):
+                    v = stripped[2:].strip().strip('"').strip("'")
+                    if v:
+                        tags.append(v)
+                elif stripped and not stripped.startswith("-"):
+                    in_tags = False
+        # 회사명 / 종목코드 / blocklist 제외, 첫 4 개만.
+        out: list[str] = []
+        for t in tags:
+            if t == code_pad or t in _PRODUCT_TAG_BLOCKLIST:
+                continue
+            # 회사명 후보 (보통 첫 tag, 한글) 제외 — frontmatter 의 corpName 매칭 시 skip.
+            if "corpName:" in fm:
+                # rough: corpName 줄 추출.
+                for line in fm.splitlines():
+                    if line.strip().startswith("corpName:"):
+                        corp = line.split(":", 1)[1].strip().strip('"').strip("'")
+                        if t == corp:
+                            t = None  # type: ignore[assignment]
+                        break
+            if t is None:
+                continue
+            if t not in out:
+                out.append(t)
+            if len(out) >= 4:
+                break
+        return out
+    return []
 
 
 # 주요 회사 제품 mock map — 사업보고서 "주요제품" 추출 자동화 전 임시.
@@ -170,7 +268,8 @@ def apiCompanyMeta(code: str):
     """
     sector = _findSector(code)
     blog_posts = _findBlogPosts(code)
-    products = _PRODUCT_MAP.get(str(code).zfill(6), [])
+    # _PRODUCT_MAP hardcoded 12 회사 우선, 미커버 회사는 blog frontmatter tags fallback.
+    products = _PRODUCT_MAP.get(str(code).zfill(6)) or _findProductsFromBlog(code)
     return {
         "stockCode": code,
         "sector": sector,

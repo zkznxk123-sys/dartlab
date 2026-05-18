@@ -57,7 +57,7 @@ function FinancialTab() {
 
 	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
 	const apiView = null;
-	const { data, isError, error } = useQuery({
+	const { data, isError, isLoading, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
 		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40),
 		placeholderData: keepPreviousData,
@@ -114,9 +114,16 @@ function FinancialTab() {
 			</div>
 
 			{placed.length === 0 ? (
-				<div className="p-8 text-center text-sm text-muted-foreground">
-					이 카테고리의 카드가 아직 없습니다.
-				</div>
+				isLoading ? (
+					<div className="flex items-center justify-center p-16 text-muted-foreground">
+						<Loader2 className="size-6 animate-spin" />
+						<span className="ml-3 text-sm">재무제표 카드 빌드 중...</span>
+					</div>
+				) : (
+					<div className="p-8 text-center text-sm text-muted-foreground">
+						이 카테고리의 카드가 아직 없습니다.
+					</div>
+				)
 			) : (
 				<BentoGrid placed={placed} renderCard={renderCard} />
 			)}
