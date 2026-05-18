@@ -118,6 +118,14 @@ npm run build
 uv run python -X utf8 scripts/build/buildCompanyTier1.py 005930
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+dashboard 는 *프론트엔드 정적 페이지* 라 ask LLM 의 EngineCall 대상이 아님. 다음 3 룰 강행:
+
+1. **"회사 페이지" / "대시보드" 질문에 EngineCall 시도 금지** — `EngineCall(apiRef="dashboard")` 같은 호출 없음. 답변은 URL 안내 (`landing/static/company/{code}/index.html` 또는 `Company.view()`) 또는 동일 데이터의 원천 EngineCall (`Company.show` / `Company.analysis`) 로 우회.
+2. **dashboard 안 5 tier 데이터 (finance · ratios · grades · ecosystem · narrative) 인용 시 원천 ref 표기** — dashboard JSON 자체가 아니라 그 데이터가 유래한 `Company.show`/`Company.analysis` 결과의 `[tableRef:...]`/`[valueRef:...]` inline 표기.
+3. **빌드 미수행 종목은 "데이터 부재" 명시** — 빈 블록 페이지를 정상 응답으로 답변 금지.
+
 ## 호출 동작
 
 `Company.view(port=8400)` — 로컬 SvelteKit dev 서버를 띄우고 기본 브라우저로 `/company/{code}` 를 연다. 빌드 산출 JSON 이 없으면 페이지가 빈 블록으로 렌더된다 (해당 tier 빌드 먼저 실행 필요).

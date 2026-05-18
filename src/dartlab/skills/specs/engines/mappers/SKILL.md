@@ -102,6 +102,14 @@ print(cols)
 print(availableTopics())   # BS / IS / CF / CIS / SCE
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+mappers 는 *내부 정규화 모듈* — Company.show / scan 결과 안에서 자동 적용. 다음 3 룰 강행:
+
+1. **mappers 단독 EngineCall 금지** — `EngineCall(apiRef="mappers")` 호출 없음. Company.show / scan 결과의 `snake_id` 컬럼은 이미 정규화 완료.
+2. **snake_id 임의 추측 금지** — `normalizeColumn(topic, hint)` 또는 `columnsFor(topic)` RunPython 안에서 호출해 정확 매칭 후 사용. "total_equity" 같은 추측 키로 dict 접근 시 KeyError (P5 RunPython 회귀 사례).
+3. **`-표준계정코드 미사용-|...` fallback 데이터는 표준화 후보로 표기** — Company.show 결과 dict 의 nonstd_ 컬럼은 매핑 미완. 답변 본문에 "표준화 미완 N 건" 명시 + 임의 합산 금지.
+
 ## 호출 동작
 
 `normalizeColumn(topic, hint)` — `topic` 안에서 `hint` 와 매칭되는 표준 snake_id 반환. 매칭 실패 시 `None` (또는 ValueError, 구현 따라). 한글 풀네임 · 부분 키워드 · snake_id 자기 자신 모두 받음.
