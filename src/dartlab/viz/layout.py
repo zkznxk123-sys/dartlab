@@ -60,6 +60,8 @@ KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
     "phaseIndicator": {"cs": 12, "rs": 1, "variance": ["12x2"]},
     "narrativeBridge": {"cs": 12, "rs": 3, "variance": ["12x4"]},
     "scoreBadge": {"cs": 6, "rs": 3, "variance": ["12x3"]},
+    # candle = OHLC 시계열 + volume pane (lightweight-charts). hero 폭 강제.
+    "candle": {"cs": 12, "rs": 5, "variance": ["12x4", "12x6", "12x8"]},
 }
 
 
@@ -288,6 +290,7 @@ _NARRATIVE_KIND_ORDER: dict[str, int] = {
     "phaseIndicator": 0,  # Tier 1 — strip
     "kpiTile": 1,  # Tier 2 — result
     "diffView": 1,
+    "candle": 1,  # Tier 2 — 가격 hero (priceTrend)
     "topList": 2,  # Tier 3 — decomp
     "gauge": 2,  # 일반 gauge (wide 는 entry cs 로 priority 0 강제)
     "trend": 3,  # Tier 3 — trend body

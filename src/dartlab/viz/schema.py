@@ -41,6 +41,7 @@ ViewKind = Literal[
     "kpiTile",  # 큰 숫자 + sparkline + delta
     "narrativeBridge",  # 6 막 전환 자연어 5 줄 (1→2 / 2→3 ... 5→6)
     "scoreBadge",  # 5 차원 종합 점수 + 등급 + 한 줄 서사
+    "candle",  # OHLC 캔들스틱 + volume — quant 가격 카드 (lightweight-charts)
 ]
 
 SeriesAxis = Literal["left", "right"]

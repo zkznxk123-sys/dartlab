@@ -8,7 +8,6 @@ import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
 
 import { CardShell } from '@/features/dashboard/cards/CardShell';
-import { ChartMiniTable } from '@/features/dashboard/cards/ChartMiniTable';
 import { VizChart } from '@/features/dashboard/charts/VizChart';
 import {
 	BentoGrid,
@@ -67,16 +66,20 @@ function QuantTab() {
 		const title = meta?.title || spec?.title || p.title;
 		const help = meta?.help;
 		const seriesCount = spec?.series?.length ?? 0;
-		// trend 카드의 mini-table footer (financial 패턴 그대로).
-		const isDualStack = spec?.options?.dualStack === true;
-		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
-		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-		const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
+		const kind = spec?.kind ?? p.kind;
+		// quant 탭은 mini-table footer 의미 0 — 가격 시계열 252 일 OHLC 표는 무의미.
+		// candle / kpiTile / 가격 trend 모두 footer 제거. financial 탭과 다른 정체성.
+		const hasFooter = false;
+		const footer = undefined;
+		const footerHeight = 0;
+		// 위 변수들 사용 표시 (린트 회피용 — 향후 trend 차트 추가 시 살릴 자리).
+		void seriesCount;
+		void hasFooter;
+		void footer;
 		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
 		const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight);
-		const kind = spec?.kind ?? p.kind;
 		return (
-			<CardShell title={title} help={help} colSpan={p.w} rowSpan={p.h} kind={kind} footer={footer}>
+			<CardShell title={title} help={help} colSpan={p.w} rowSpan={p.h} kind={kind} footer={undefined}>
 				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
 			</CardShell>
 		);

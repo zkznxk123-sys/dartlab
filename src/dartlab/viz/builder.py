@@ -141,6 +141,7 @@ def _analysisCallSeries(spec: dict[str, Any], stockCode: str, periods: list[str]
             return None
 
     # timeseries: list[dict] 인 경우 period 기준 매칭. period 키 이름은 자유 ("period"/"yr"/"quarter").
+    # period 포맷 차이 (analysis "2024" ↔ builder "2024-FY", "2024Q3" ↔ "2024-Q3") 흡수.
     if isinstance(val, list):
         lookup: dict[str, float] = {}
         for row in val:
@@ -150,9 +151,15 @@ def _analysisCallSeries(spec: dict[str, Any], stockCode: str, periods: list[str]
             row_value = row.get("value") or row.get(outputKey.split(".")[-1])
             if row_period is not None and row_value is not None:
                 try:
-                    lookup[str(row_period)] = float(row_value)
+                    f = float(row_value)
                 except (TypeError, ValueError):
                     continue
+                rp = str(row_period)
+                lookup[rp] = f
+                if len(rp) == 4 and rp.isdigit():
+                    lookup[f"{rp}-FY"] = f
+                elif len(rp) == 6 and rp[:4].isdigit() and rp[4] == "Q":
+                    lookup[f"{rp[:4]}-Q{rp[5]}"] = f
         return [lookup.get(p) for p in periods]
     return None
 
@@ -448,8 +455,21 @@ def buildView(
     entry: CatalogEntry = CATALOG[cardKey]
     topic: str = entry.get("topic", "BS")  # type: ignore[assignment]
 
-    company = _cache.getCompany(stockCode)
-    corpName = getattr(company, "corpName", None)
+    # quant 탭 카드 (topic="price") 는 가격 데이터만 사용 — Company.rawFinance 무관.
+    # 동시 7 카드 build 시 Company 생성 fail (데이터셋 miss) 가 fatal 안 되도록 graceful.
+    if topic == "price":
+        company = None
+        corpName = None
+        try:
+            company = _cache.getCompany(stockCode)
+            corpName = getattr(company, "corpName", None)
+        except (ValueError, RuntimeError, OSError, AttributeError):
+            # quant adapter 는 company 안 써도 됨 — stockCode 로 직접 가격 fetch.
+            company = type("_StubCompany", (), {"stockCode": str(stockCode), "corpName": None})()
+            corpName = None
+    else:
+        company = _cache.getCompany(stockCode)
+        corpName = getattr(company, "corpName", None)
 
     # 비-시계열 kind 는 별도 어댑터.
     kind_view = _buildKindSpecView(entry, company, stockCode, periodKind, nPeriods)

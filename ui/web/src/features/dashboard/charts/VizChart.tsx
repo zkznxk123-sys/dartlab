@@ -29,6 +29,7 @@ import {
 	type ChartConfig,
 } from '@/components/ui/chart';
 import { formatAxisTick, formatValue } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { applyShadcnPalette } from './palette';
 import { makePeriodFormatter } from './period';
 import { ComparisonTable } from '../cards/ComparisonTable';
@@ -38,6 +39,7 @@ import { NarrativeBridge } from '../cards/NarrativeBridge';
 import { PhaseIndicator } from '../cards/PhaseIndicator';
 import { ScoreBadge } from '../cards/ScoreBadge';
 import { TopList } from '../cards/TopList';
+import { CandleChart } from './CandleChart';
 import { GaugeChart } from './GaugeChart';
 import { HeatmapChart } from './HeatmapChart';
 import { SankeyChart } from './SankeyChart';
@@ -253,13 +255,64 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 	);
 }
 
-// 단일 KPI 카드 — 1 entry = 1 tile (bento 1×1 default).
-// 백워드 호환: spec.tiles 가 여러 개여도 첫 번째만 렌더 (옛 strip catalog 잔존 시).
+// KPI 카드 — 1 tile = single hero, 2+ tile = inline grid strip.
+// quant 탭 카드 (verdict 6 tile, momentum/volatility/beta 4 tile) 는 strip 모드.
 function KpiTileSingle({ spec, size }: { spec: RechartsSpec; size?: { w: number; h: number } }) {
 	const tiles = spec.tiles ?? [];
 	if (!tiles.length) {
 		return <ErrorState title={spec.title} error="KPI 데이터 없음" />;
 	}
+
+	// 2 tile 이상 → strip grid 모드 (한 카드 안 multi-metric).
+	// 카드 폭 (size.w) 에 따라 column 수 자동 — wide(12)=6col, half(6)=3col, default=2col.
+	if (tiles.length >= 2) {
+		const w = size?.w ?? 12;
+		const cols = w >= 12 ? Math.min(tiles.length, 6) : w >= 6 ? Math.min(tiles.length, 3) : 2;
+		return (
+			<div
+				className="grid h-full w-full gap-2 p-1"
+				style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+			>
+				{tiles.map((t, i) => {
+					const tone: 'positive' | 'negative' | 'neutral' =
+						t.intent === 'positive' ? 'positive' : t.intent === 'negative' ? 'negative' : 'neutral';
+					const toneText =
+						tone === 'positive'
+							? 'text-[var(--chart-5)]'
+							: tone === 'negative'
+								? 'text-[var(--chart-3)]'
+								: 'text-foreground';
+					const valStr =
+						typeof t.value === 'number' && Number.isFinite(t.value)
+							? Math.abs(t.value) >= 1000
+								? t.value.toLocaleString()
+								: Math.abs(t.value) >= 100 || Number.isInteger(t.value)
+									? t.value.toFixed(0)
+									: t.value.toFixed(2)
+							: '–';
+					return (
+						<div
+							key={`${t.label}-${i}`}
+							className="flex min-w-0 flex-col justify-between gap-0.5 rounded-md border border-border/40 bg-muted/20 p-2"
+						>
+							<div className="truncate text-[10px] uppercase tracking-wide text-muted-foreground">
+								{t.label}
+							</div>
+							<div className="flex items-baseline gap-1 tabular-nums">
+								<span className={cn('text-xl font-bold leading-none', toneText)}>{valStr}</span>
+								{t.unit && <span className="text-[10px] text-muted-foreground">{t.unit}</span>}
+							</div>
+							{t.subtitle && (
+								<div className="truncate text-[10px] text-muted-foreground/80">{t.subtitle}</div>
+							)}
+						</div>
+					);
+				})}
+			</div>
+		);
+	}
+
+	// 1 tile = 기존 hero 단일 KpiTile (sparkline + range bar 살림).
 	const t = tiles[0];
 	const deltaPct =
 		t.value != null && t.prev != null && t.prev !== 0
@@ -298,6 +351,8 @@ export function VizChart({ spec: rawSpec, height = 280, size }: Props) {
 
 	// kind 별 dispatch — 시계열 외 카드 패턴.
 	switch (spec.kind) {
+		case 'candle':
+			return <CandleChart spec={spec} height={height} />;
 		case 'kpiTile':
 			return <KpiTileSingle spec={spec} size={size} />;
 		case 'diffView':

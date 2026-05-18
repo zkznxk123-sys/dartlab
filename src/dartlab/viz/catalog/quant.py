@@ -28,14 +28,14 @@ QUANT_CARDS: dict[str, CatalogEntry] = {
     # 1. signal — 가격 시계열 + 기술 종합 판정 (hero stack)
     # ─────────────────────────────────────────────────────────────
     "quantPriceTrend": {
-        "kind": "trend",
-        "title": "주가 추이",
+        "kind": "candle",
+        "title": "주가 캔들스틱",
         "topic": "price",
         "tab": "quant",
         "seriesPlan": [],  # adapter 가 동적 채움
-        "options": {"yAxisFormat": "currency"},
-        "layout": {"colSpan": 12, "rowSpan": 4},
-        "help": "최근 1년 종가 라인 + 거래량 (gather 자동 수집, Naver/Yahoo). 7일·30일 SMA overlay.",
+        "options": {"yAxisFormat": "currency", "volumePane": True},
+        "layout": {"colSpan": 12, "rowSpan": 5},
+        "help": "최근 1년 OHLC 캔들스틱 + 거래량 하단 pane + SMA(20)/SMA(60) overlay (lightweight-charts).",
         "dataSpec": {"adapter": "quantPriceTrend"},
     },
     "quantVerdictKpi": {

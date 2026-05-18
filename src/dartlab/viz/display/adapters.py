@@ -1429,9 +1429,14 @@ def _safeQuantCall(modulePath: str, fnName: str, stockCode: str, **kwargs: Any) 
 
 
 def buildQuantPriceTrend(stockCode: str) -> dict[str, Any]:
-    """최근 1 년 종가 + 거래량 + SMA(20)/SMA(60) overlay trend spec.
+    """최근 1 년 OHLCV 캔들스틱 + 거래량 + SMA(20)/SMA(60) overlay.
 
-    gather 자동 fetch (Naver/Yahoo). 데이터 부족 시 빈 series.
+    kind=candle. categories=날짜 (YYYY-MM-DD), series 5 개:
+      - open/high/low/close: 캔들 (type=bar 표시는 frontend candle renderer)
+      - sma20/sma60: 라인 overlay
+      - volume: 하단 separate pane (type=bar)
+
+    gather/quant.signal.momentum.fetchOhlcv 자동 fetch (Naver/Yahoo).
     """
     from datetime import date, timedelta
 
@@ -1456,16 +1461,22 @@ def buildQuantPriceTrend(stockCode: str) -> dict[str, Any]:
     # 최근 252 거래일만 (1 년).
     rows = rows[-252:]
     categories: list[str] = []
+    opens: list[float | None] = []
+    highs: list[float | None] = []
+    lows: list[float | None] = []
     closes: list[float | None] = []
     volumes: list[float | None] = []
     for r in rows:
         d = r.get("date") or r.get("Date")
-        c = r.get("close") or r.get("Close")
-        v = r.get("volume") or r.get("Volume")
-        categories.append(str(d) if d is not None else "")
-        closes.append(_toFloat(c))
-        volumes.append(_toFloat(v))
-    # SMA overlay.
+        # ISO 날짜 strict 형식 (lightweight-charts: 'YYYY-MM-DD').
+        ds = str(d)[:10] if d is not None else ""
+        categories.append(ds)
+        opens.append(_toFloat(r.get("open") or r.get("Open")))
+        highs.append(_toFloat(r.get("high") or r.get("High")))
+        lows.append(_toFloat(r.get("low") or r.get("Low")))
+        closes.append(_toFloat(r.get("close") or r.get("Close")))
+        volumes.append(_toFloat(r.get("volume") or r.get("Volume")))
+
     def _sma(arr: list[float | None], window: int) -> list[float | None]:
         out: list[float | None] = []
         buf: list[float] = []
@@ -1484,6 +1495,36 @@ def buildQuantPriceTrend(stockCode: str) -> dict[str, Any]:
     return {
         "categories": categories,
         "series": [
+            {
+                "key": "open",
+                "label": "시가",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": opens,
+            },
+            {
+                "key": "high",
+                "label": "고가",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": highs,
+            },
+            {
+                "key": "low",
+                "label": "저가",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": lows,
+            },
             {
                 "key": "close",
                 "label": "종가",

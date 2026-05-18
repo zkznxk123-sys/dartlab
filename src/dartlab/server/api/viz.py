@@ -137,6 +137,26 @@ async def _prefetchCompany(stockCode: str) -> None:
     await asyncio.to_thread(_warm)
 
 
+async def _prefetchQuantPrice(stockCode: str) -> None:
+    """quant 탭 전용 — 가격 OHLCV 1 회 fetch → 동시 카드 build 시 race 회피.
+
+    7 카드 (verdict/momentum/volatility/beta/forecast/priceTrend/comingSoon) 가
+    asyncio.gather 동시 build 시 각각 fetchOhlcv 호출하면 첫 cold 호출에서 race.
+    1 회 prefetch 후 fetchOhlcv 내부 캐시 hit → 나머지 6 호출은 즉시 반환.
+    """
+    def _warm() -> None:
+        try:
+            from dartlab.quant.signal.momentum import fetchOhlcv
+            from datetime import date, timedelta
+
+            start = (date.today() - timedelta(days=400)).isoformat()
+            fetchOhlcv(stockCode, start=start)
+        except Exception:  # noqa: BLE001
+            pass
+
+    await asyncio.to_thread(_warm)
+
+
 @router.get("/api/viz/dashboard/{stockCode}")
 async def apiVizDashboard(
     stockCode: str,
@@ -261,13 +281,22 @@ async def apiVizLayout(
             "cards": {},
         }
 
-    await _prefetchCompany(stockCode)
     cardKeys = [p["cardKey"] for p in placed]
 
     async def _one(k: str) -> dict[str, Any]:
         return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
 
-    specs = await asyncio.gather(*[_one(k) for k in cardKeys])
+    if tab == "quant":
+        # 가격 데이터 fetcher (gather provider) 가 동시 진입에 안전하지 않음 —
+        # asyncio.gather 시 coroutine race 로 fetchOhlcv 다중 실패. 순차 build 강행.
+        # 첫 카드 (priceTrend) 가 가격 데이터 안착시키면 후속 카드는 빠르게 진행.
+        await _prefetchQuantPrice(stockCode)
+        specs: list[dict[str, Any]] = []
+        for k in cardKeys:
+            specs.append(await _one(k))
+    else:
+        await _prefetchCompany(stockCode)
+        specs = list(await asyncio.gather(*[_one(k) for k in cardKeys]))
 
     return {
         "stockCode": stockCode,
