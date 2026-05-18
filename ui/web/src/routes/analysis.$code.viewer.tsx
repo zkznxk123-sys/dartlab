@@ -97,6 +97,14 @@ interface ViewerResponse {
 		staleCount?: number;
 		stableCount?: number;
 		sections?: ViewerSection[];
+		entries?: Array<{
+			kind: 'section' | 'block_ref';
+			order?: number;
+			sectionId?: string | null;
+			blockRef?: number;
+			blockKind?: string;
+		}>;
+		tables?: Record<number, Record<string, string>>;
 	};
 }
 
@@ -157,20 +165,37 @@ function _leafKey(text: string): string | null {
 }
 function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafKey: string): ViewerSection[] {
 	if (!ownLeafKey) return allSections;
-	const kept: ViewerSection[] = [];
-	let activeOwn = true;
-	for (const s of allSections) {
+	// 각 section 의 heading 안 numbered leaf 가 있으면 그 leaf 와 ownLeafKey 비교.
+	// 매칭 ≠ 우리 = 그 *한 section* 만 drop. state 전파 안 함 — 가/나/다 sub-heading
+	// section 들은 numbered heading 안 가지고 있어 자동으로 KEEP.
+	return allSections.filter((s) => {
 		const path = s.headingPath ?? [];
-		let foundKey: string | null = null;
 		for (const h of path) {
 			const t = typeof h === 'string' ? (h as string) : (h?.text || '');
 			const k = _leafKey(t);
-			if (k) foundKey = k;
+			if (k && k !== ownLeafKey) return false;
 		}
-		if (foundKey !== null) activeOwn = foundKey === ownLeafKey;
-		if (activeOwn) kept.push(s);
+		return true;
+	});
+}
+
+// 단순 markdown 파이프 테이블 → 2D 배열. `| --- |` separator row 는 제거.
+// 셀 안 `&cr;` 같은 HTML escape 는 backend 에서 이미 처리됐다고 가정.
+function _parseMarkdownTable(md: string): string[][] {
+	if (!md) return [];
+	const lines = md.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.startsWith('|'));
+	const rows: string[][] = [];
+	for (const line of lines) {
+		// separator row: `| --- | --- |`
+		if (/^\|\s*[-:|\s]+\|\s*$/.test(line)) continue;
+		const cells = line
+			.replace(/^\|/, '')
+			.replace(/\|$/, '')
+			.split('|')
+			.map((c) => c.trim());
+		if (cells.length > 0) rows.push(cells);
 	}
-	return kept;
+	return rows;
 }
 
 function _bodyParagraphs(body: string | undefined | null): string[] {
@@ -187,7 +212,9 @@ function _bodyParagraphs(body: string | undefined | null): string[] {
 
 function _sectionTitle(section: ViewerSection): { text: string; level: number } | null {
 	const path = section.headingPath ?? [];
-	for (let i = path.length - 1; i >= 0; i--) {
+	// FIRST non-empty heading — DART headingPath 가 hierarchical 이 아니라 [own, inherited]
+	// 순서로 박혀있는 케이스가 많아 마지막 을 쓰면 옆 section 의 heading 을 자기 것으로 오인.
+	for (let i = 0; i < path.length; i++) {
 		const h = path[i];
 		const text = typeof h === 'string' ? (h as string) : (h?.text ?? '');
 		if (typeof text === 'string' && text.trim().length > 0) {
@@ -335,8 +362,19 @@ function ViewerTab() {
 
 	// 본문 sections — companyOverview 처럼 backend topic 이 chapter 전체 (1~6 leaf) 를
 	// 한 응답에 묶어 보내는 경우가 있다. 사용자가 클릭한 leaf 의 sections 만 통과.
-	// ownLeafKey = "1.회사의 개요" 같은 (번호.레이블) 키. topicLabel 로 식별.
-	const ownLeafKey = _leafKey(latestViewer?.topicLabel || '') || '';
+	// ownLeafKey = "1.회사의 개요" 같은 (번호.레이블) 키. TOC label 사용 (backend 의
+	// viewer.topicLabel 은 번호 prefix 없어서 못 씀).
+	const ownLeafKey = useMemo(() => {
+		if (!toc || !activeTopic) return '';
+		for (const ch of toc.chapters ?? []) {
+			for (const t of ch.topics ?? []) {
+				if (t.topic === activeTopic) {
+					return _leafKey(t.label || t.topicLabel || '') || '';
+				}
+			}
+		}
+		return '';
+	}, [toc, activeTopic]);
 	const allSections = latestViewer?.textDocument?.sections ?? [];
 	const sectionsOwn = useMemo(
 		() => _filterToOwnLeaf(allSections, ownLeafKey),
@@ -370,6 +408,41 @@ function ViewerTab() {
 		}
 		return map;
 	}, [windowPeriods, windowViewers]);
+
+	// blockId → period → markdown (테이블). latest fetch 의 tables 사용 (period 무관).
+	const tablesByBlock = latestViewer?.textDocument?.tables ?? {};
+
+	// entries 순서대로 row 정의. latestViewer 가 SSOT — 본문 row 와 표 row 가 섞임.
+	// row 가 section 이면 sectionsOwn 안에 있어야 통과 (leaf filter 거른 것).
+	const ownIds = useMemo(() => new Set(sectionsOwn.map((s) => s.id)), [sectionsOwn]);
+	const rows = useMemo(() => {
+		const allEntries = latestViewer?.textDocument?.entries ?? [];
+		const ws = new Set(windowPeriods);
+		type Row =
+			| { kind: 'section'; id: string; section: ViewerSection }
+			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string> };
+		const out: Row[] = [];
+		const secMap = new Map(sectionsOwn.map((s) => [s.id, s]));
+		for (const e of allEntries) {
+			if (e.kind === 'section') {
+				const sid = e.sectionId ?? '';
+				if (!ownIds.has(sid)) continue;
+				const s = secMap.get(sid)!;
+				// 윈도우 3 period 중 한 곳이라도 timeline 매칭 시 노출.
+				if (!(s.timeline ?? []).some((t) => ws.has(_periodLabel(t?.period)))) continue;
+				out.push({ kind: 'section', id: `s-${sid}`, section: s });
+			} else if (e.kind === 'block_ref' && e.blockKind === 'raw_markdown') {
+				const bid = e.blockRef;
+				if (bid == null) continue;
+				const pmd = tablesByBlock[bid];
+				if (!pmd) continue;
+				// 윈도우 3 period 중 한 곳이라도 표 데이터 있으면 노출.
+				if (!windowPeriods.some((p) => (pmd[p] ?? '').trim().length > 0)) continue;
+				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd });
+			}
+		}
+		return out;
+	}, [latestViewer, sectionsOwn, ownIds, tablesByBlock, windowPeriods]);
 
 	const dartUrlByPeriod = useMemo(() => {
 		const m: Record<string, string | null> = {};
@@ -540,22 +613,30 @@ function ViewerTab() {
 							</div>
 						)}
 
-						{/* 본문 — dartlab section.id 단위 row, 3 column 셀. heading 은 row 헤더로 1 회 */}
-						{sections.length === 0 ? (
+						{/* 본문 — entries 순서대로 row. section + table 섞임. 3 column 셀 */}
+						{rows.length === 0 ? (
 							<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
 								본문 데이터가 없습니다.
 							</div>
 						) : (
-							<div className="space-y-8">
-								{sections.map((s) => (
-									<SectionRow
-										key={s.id}
-										section={s}
-										windowPeriods={windowPeriods}
-										bodyByPeriod={bodyByIdByPeriod[s.id] || {}}
-										minLevel={minLevel}
-									/>
-								))}
+							<div className="space-y-6">
+								{rows.map((r) =>
+									r.kind === 'section' ? (
+										<SectionRow
+											key={r.id}
+											section={r.section}
+											windowPeriods={windowPeriods}
+											bodyByPeriod={bodyByIdByPeriod[r.section.id] || {}}
+											minLevel={minLevel}
+										/>
+									) : (
+										<TableRow
+											key={r.id}
+											windowPeriods={windowPeriods}
+											periodMd={r.periodMd}
+										/>
+									),
+								)}
 							</div>
 						)}
 					</div>
@@ -690,6 +771,64 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 							) : (
 								<p className="italic text-muted-foreground/30">—</p>
 							)}
+						</div>
+					);
+				})}
+			</div>
+		</section>
+	);
+}
+
+interface TableRowProps {
+	windowPeriods: string[];
+	periodMd: Record<string, string>;
+}
+
+function TableRow({ windowPeriods, periodMd }: TableRowProps) {
+	return (
+		<section className="scroll-mt-6">
+			<div
+				className="grid gap-3"
+				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, minmax(0, 1fr))` }}
+			>
+				{windowPeriods.map((p) => {
+					const md = periodMd[p];
+					if (!md || !md.trim()) {
+						return (
+							<div key={p} className="min-w-0">
+								<p className="italic text-muted-foreground/30 text-[13px]">—</p>
+							</div>
+						);
+					}
+					const rows = _parseMarkdownTable(md);
+					if (rows.length === 0) {
+						return (
+							<div key={p} className="min-w-0">
+								<p className="italic text-muted-foreground/40 text-[13px]">[표 파싱 실패]</p>
+							</div>
+						);
+					}
+					return (
+						<div key={p} className="min-w-0 overflow-x-auto tiny-scroll">
+							<table className="w-full border-collapse text-[12px]">
+								<tbody>
+									{rows.map((cells, ri) => (
+										<tr key={ri} className="border-b border-border/40">
+											{cells.map((c, ci) => (
+												<td
+													key={ci}
+													className={cn(
+														'border border-border/30 px-2 py-1 align-top break-words',
+														ri === 0 && 'bg-muted/30 font-medium',
+													)}
+												>
+													{c}
+												</td>
+											))}
+										</tr>
+									))}
+								</tbody>
+							</table>
 						</div>
 					);
 				})}

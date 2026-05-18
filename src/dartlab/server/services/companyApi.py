@@ -364,14 +364,19 @@ _VIEWER_COMPACT_SECTION_KEEP = (
 )
 
 
-def _compactTextDocument(doc: dict[str, Any] | None, *, limit: int) -> dict[str, Any] | None:
+def _compactTextDocument(
+    doc: dict[str, Any] | None,
+    *,
+    limit: int,
+    blocks: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
     """경량 textDocument 변환 — 읽기 가능한 prose 본문 + 우 패널 history 데이터 보존.
 
     Keep: latest (풀 본문 + digest), timeline (시간축), headingPath, status,
     latestChange, latestPeriod, firstPeriod, periodCount, preview.
-    Drop: views (period 별 풀텍스트 dict — `?period=X` 로 lazy fetch),
-          top-level entries / periods. annotated blame 은 viewerBlock 안에 있고
-          compact 응답엔 blocks 자체가 없으므로 자동 제외.
+    Drop: views (period 별 풀텍스트 dict — `?period=X` 로 lazy fetch).
+    Add: entries (kind=section|block_ref, order 보존) + tables (raw_markdown
+         blocks 의 period→markdown dict) — 표 inline 렌더용.
     """
     if doc is None:
         return None
@@ -379,10 +384,23 @@ def _compactTextDocument(doc: dict[str, Any] | None, *, limit: int) -> dict[str,
     total = len(sections)
     sliced = sections[:limit] if limit > 0 else sections
     compactSections = [{key: section.get(key) for key in _VIEWER_COMPACT_SECTION_KEEP} for section in sliced]
+    entries = doc.get("entries") or []
+    # raw_markdown 블록만 추출 — block id → {period: markdown}
+    tables: dict[int, dict[str, str]] = {}
+    for b in (blocks or []):
+        if b.get("kind") != "raw_markdown":
+            continue
+        rm = b.get("rawMarkdown")
+        if not isinstance(rm, dict):
+            continue
+        # 빈 markdown 제외
+        cleaned = {p: v for p, v in rm.items() if isinstance(v, str) and v.strip()}
+        if cleaned:
+            tables[int(b.get("block"))] = cleaned
     return {
         "topic": doc.get("topic"),
         "mode": doc.get("mode"),
-        "periods": doc.get("periods"),  # 우 history 패널의 시점 list — light data
+        "periods": doc.get("periods"),
         "latestPeriod": doc.get("latestPeriod"),
         "firstPeriod": doc.get("firstPeriod"),
         "sectionCount": doc.get("sectionCount", total),
@@ -393,6 +411,8 @@ def _compactTextDocument(doc: dict[str, Any] | None, *, limit: int) -> dict[str,
         "totalSectionCount": total,
         "truncated": total > len(sliced),
         "sections": compactSections,
+        "entries": entries,
+        "tables": tables,
     }
 
 
@@ -429,6 +449,7 @@ def buildViewer(
     dartUrl = _dartUrlForPeriod(company, period)
     topicLabel = _topicDartLabel(topic, safeTopicLabel(company, topic))
     if compact:
+        serializedBlocks = [serializeViewerBlock(b) for b in blocks]
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
@@ -437,7 +458,7 @@ def buildViewer(
             "period": None,
             "compact": True,
             "dartUrl": dartUrl,
-            "textDocument": _compactTextDocument(textDoc, limit=limit),
+            "textDocument": _compactTextDocument(textDoc, limit=limit, blocks=serializedBlocks),
         }
 
     return {
