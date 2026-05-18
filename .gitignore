@@ -131,6 +131,7 @@ crates/
 .gitignore.local
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
+tests/fixtures/sections_baseline/
 unsloth_compiled_cache/
 tests/audit/_camelcaseIndex.json
 
