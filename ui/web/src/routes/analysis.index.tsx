@@ -43,7 +43,7 @@ function AnalysisIndexPage() {
 		navigate({
 			to: '/analysis/$code/financial',
 			params: { code: stockCode },
-			search: { period: 'quarterly', view: 'overview' },
+			search: { period: 'quarterly', view: 'snowflake' },
 		});
 	}
 
@@ -120,7 +120,7 @@ function AnalysisIndexPage() {
 								<Link
 									to="/analysis/$code/financial"
 									params={{ code: r.stockCode }}
-									search={{ period: 'quarterly', view: 'overview' }}
+									search={{ period: 'quarterly', view: 'snowflake' }}
 									className="text-xs font-normal text-muted-foreground"
 								>
 									{r.corpName}

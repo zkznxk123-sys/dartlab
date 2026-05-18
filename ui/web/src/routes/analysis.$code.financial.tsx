@@ -1,5 +1,6 @@
-// /analysis/$code/financial — 재무 탭.
-// 5 서브카테고리: growth · profitability · capitalStructure · cashflow · risk.
+// /analysis/$code/financial — 재무제표분석.
+// 7 분석 방법론 sub view (story/dupont/value/growth/credit/quality/snowflake).
+// 같은 회사를 그레이엄·린치·S&P·Sloan 등 다른 학파 시각으로 다르게 본다.
 // catalog 의 subCategory 필드로 카드 자동 분류. URL ?view=<sub> 로 핀.
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -19,32 +20,44 @@ import {
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
 
-type SubView = FinancialSubCategory | 'overview';
+type SubView = FinancialSubCategory;
 
-// P-DASH-V1 D7: 4 sub + overview. growth/profitability → performance 통합.
+// 7 분석 방법론 view.
 const VALID_VIEWS: SubView[] = [
-	'overview',
-	'performance',
-	'capitalStructure',
-	'cashflow',
-	'risk',
+	'story',
+	'dupont',
+	'value',
+	'growth',
+	'credit',
+	'quality',
+	'snowflake',
 ];
 
-// legacy growth/profitability → performance 자동 redirect (URL 호환).
+// 옛 sub view URL → 7 방법론 자동 redirect.
 const LEGACY_REDIRECT: Record<string, SubView> = {
-	growth: 'performance',
-	profitability: 'performance',
+	overview: 'snowflake',
+	performance: 'dupont',
+	capitalStructure: 'credit',
+	cashflow: 'quality',
+	risk: 'credit',
+	profitability: 'dupont',
+	// growth 는 옛에도 새에도 있음 — 새 의미 (성장투자) 그대로.
 };
 
 const SUB_TITLES: Record<SubView, string> = {
-	overview: '전체',
-	performance: '성과 (수익성·성장)',
-	capitalStructure: '재무건전성',
-	cashflow: '현금·배분',
-	risk: '리스크·신호',
-	// legacy 호환 — validateSearch 가 redirect 하므로 실제 노출은 없음.
-	growth: '성과 (수익성·성장)',
-	profitability: '성과 (수익성·성장)',
+	story: 'Story 서사 (6 막 인과)',
+	dupont: 'DuPont 분해 (ROE 원천)',
+	value: 'Value 가치투자 (Graham·Buffett·Damodaran)',
+	growth: 'Growth 성장투자 (Lynch·Fisher)',
+	credit: 'Credit 신용분석 (Altman·이자보상·만기)',
+	quality: 'Quality 이익품질 (Beneish·Sloan·CF·NI)',
+	snowflake: 'Snowflake 종합 (Simply Wall St 5 차원)',
+	// legacy — validateSearch 가 redirect 하므로 노출 안 됨.
+	performance: 'DuPont 분해 (ROE 원천)',
+	capitalStructure: 'Credit 신용분석 (Altman·이자보상·만기)',
+	cashflow: 'Quality 이익품질 (Beneish·Sloan·CF·NI)',
+	risk: 'Credit 신용분석 (Altman·이자보상·만기)',
+	profitability: 'DuPont 분해 (ROE 원천)',
 };
 
 export const Route = createFileRoute('/analysis/$code/financial')({
@@ -54,7 +67,7 @@ export const Route = createFileRoute('/analysis/$code/financial')({
 		const redirected = LEGACY_REDIRECT[raw] ?? raw;
 		const view = (VALID_VIEWS as string[]).includes(redirected)
 			? (redirected as SubView)
-			: 'overview';
+			: 'snowflake';
 		return { view };
 	},
 });
@@ -80,8 +93,8 @@ function FinancialTab() {
 		staleTime: Infinity,
 	});
 
-	// view='overview' 는 sub 무관 전체 → null 전달. 외 sub 만 layout query.
-	const apiView = view === 'overview' ? null : view;
+	// 7 방법론 모두 sub 단위 query.
+	const apiView = view;
 	const { data, isError, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
 		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40),
@@ -130,7 +143,7 @@ function FinancialTab() {
 			)}
 
 			<div className="border-b bg-card/30 px-4 py-2 text-xs text-muted-foreground">
-				재무제표 / <span className="font-medium text-foreground">{SUB_TITLES[view]}</span>
+				재무제표분석 / <span className="font-medium text-foreground">{SUB_TITLES[view]}</span>
 			</div>
 
 			{placed.length === 0 ? (

@@ -137,24 +137,25 @@ export interface DashboardResponse {
 	order: string[];
 }
 
-export type AnalysisTab =
-	| 'financial'
-	| 'portfolio'
-	| 'valuation'
-	| 'governance'
-	| 'peer'
-	| 'lifecycle'
-	| 'macro'
-	| 'viewer';
+// 기업분석 단일 탭 + 공시뷰어. 옛 6 탭 (portfolio/valuation/governance/peer/
+// lifecycle/macro) 은 financial 안의 분석 방법론별 view 로 흡수.
+export type AnalysisTab = 'financial' | 'viewer';
 
-// P-DASH-V1 D7: growth + profitability → performance 통합.
-// legacy 호환을 위해 union 에 남김 — URL 진입은 redirect.
+// 재무제표분석 7 분석 방법론 — 같은 회사를 그레이엄·린치·S&P·Sloan 식
+// 다른 학파 시각으로 보는 lens. legacy 6 (performance/...) 은 redirect 용.
 export type FinancialSubCategory =
+	| 'story'
+	| 'dupont'
+	| 'value'
+	| 'growth'
+	| 'credit'
+	| 'quality'
+	| 'snowflake'
+	// legacy (redirect)
 	| 'performance'
 	| 'capitalStructure'
 	| 'cashflow'
 	| 'risk'
-	| 'growth'
 	| 'profitability';
 
 export interface CatalogCard {
