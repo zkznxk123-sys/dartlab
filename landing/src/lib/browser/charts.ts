@@ -3,7 +3,7 @@
  *
  * Python `dartlab.viz` 가 빌드 타임에 dump 한 ChartSpec JSON 을 fetch.
  * 위치: `landing/static/charts/{stockCode}/manifest.json` + section JSON.
- * 빌드: `scripts/build/buildCompanyCharts.py`.
+ * 빌드: `landing/_scripts/buildCompanyCharts.py`.
  */
 
 import { base } from '$app/paths';

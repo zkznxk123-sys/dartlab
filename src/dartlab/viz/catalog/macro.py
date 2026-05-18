@@ -23,7 +23,8 @@ def _kpi(
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
@@ -37,7 +38,8 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
         "kind": "phaseIndicator",
         "title": "경기 사이클 단계 (회사 기준)",
         "topic": "ratios",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
@@ -80,7 +82,8 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "매출 사이클",
         "topic": "IS",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "revenue",
@@ -110,7 +113,8 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "부채 사이클",
         "topic": "BS",
-        "tab": "macro",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "shortDebt",

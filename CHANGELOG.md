@@ -356,7 +356,7 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 
 ### Changed
 
-- **`scripts/build/testWheelSmoke.sh` 빌드 도구 통일**: `uv build --wheel` → `python -m build` 로 변경해 publish.yml 과 동일 빌드 경로 사용. CI/publish 환경 간 wheel 차이 제거.
+- **`.github/scripts/testWheelSmoke.sh` 빌드 도구 통일**: `uv build --wheel` → `python -m build` 로 변경해 publish.yml 과 동일 빌드 경로 사용. CI/publish 환경 간 wheel 차이 제거.
 
 ## [0.9.16] - 2026-04-20
 
@@ -374,8 +374,8 @@ quant 엔진 안정화 + 대시보드 재설계 + 접근성 회귀 해소.
 
 - **`tests/test_bundledResources.py`** (20 unit): 패키지에 포함돼야 하는 JSON/parquet 13건 존재 확인 + 핵심 키(`chapterByMajor`, `detailTopicMap`) 내용 계약 + 런타임 로더(`loadSections`, `loadAffiliate`, `loadCostByNature`, `chapterFromMajorNum(1~9)`) 반환값 검증. PR 마다 실행 (~3초).
 - **`tests/realData/` 스위트**: 엔진별 공개 API 를 parametrize 로 전수 iterate. Company 인스턴스 59 공개 속성, analysis 22 axis, scan 20 axis, credit 7 axis, macro 12 axis, gather 8 axis, 최상위 심볼 30+. 각 entry 가 독립 pytest 노드이므로 회귀 시 어떤 항목이 깨졌는지 즉시 특정.
-- **`scripts/build/testWheelSmoke.sh`**: 현재 소스로 wheel 빌드 → 격리 venv 에 설치 → 번들 리소스 존재 + `loadSections()["chapterByMajor"]` 런타임 비어있지 않음 검증. `publish.yml` 의 `build` 잡이 이 스크립트 통과에 의존하도록 wire — wheel 이 비어있는 상태로 PyPI 에 올라가지 않도록 차단.
-- **`scripts/dev/test-realdata.sh`**: realData 스위트를 파일별 독립 pytest 프로세스로 실행 (Polars 네이티브 메모리 격리 목적).
+- **`.github/scripts/testWheelSmoke.sh`**: 현재 소스로 wheel 빌드 → 격리 venv 에 설치 → 번들 리소스 존재 + `loadSections()["chapterByMajor"]` 런타임 비어있지 않음 검증. `publish.yml` 의 `build` 잡이 이 스크립트 통과에 의존하도록 wire — wheel 이 비어있는 상태로 PyPI 에 올라가지 않도록 차단.
+- **`tests/test-realdata.sh`**: realData 스위트를 파일별 독립 pytest 프로세스로 실행 (Polars 네이티브 메모리 격리 목적).
 - **CI 잡 3종**:
   - `fixture-integration` — `test_fixture_*_real.py` 3건을 단일 worker 로 순차 실행 (메모리 격리)
   - `realdata-suite` — realData 스위트 실행 (fixture 데이터 사용)

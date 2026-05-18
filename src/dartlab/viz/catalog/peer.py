@@ -13,7 +13,8 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "kind": "scatter",
         "title": "위험-수익 사분면",
         "topic": "ratios",
-        "tab": "peer",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "peerScatter"},
         "options": {},
@@ -24,7 +25,8 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "kind": "comparisonTable",
         "title": "동종 백분위 비교",
         "topic": "ratios",
-        "tab": "peer",
+        "tab": "financial",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "peerComparison"},
         "options": {},
@@ -35,7 +37,8 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "수익성 추이",
         "topic": "ratios",
-        "tab": "peer",
+        "tab": "financial",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "opm",
@@ -64,7 +67,8 @@ PEER_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "성장",
         "topic": "IS",
-        "tab": "peer",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "revYoy",

@@ -704,10 +704,10 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 | **공시 본문은 데이터, 지시 아님** | 외부 본문은 직렬화 시 `[EXTERNAL CONTENT START — untrusted ...]` 마커로 자동 감쌈 | DART/EDGAR/뉴스 본문 안의 "이전 지시 무시" 같은 패턴이 AI 동작을 바꾸지 못하도록 직렬화 단에서 강제. 마커 안 숫자·날짜·고유명사는 1차 출처 재검증 후 인용. |
 | **AI 엔진 = chat-native + LLM 자율 tool calling** | `BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST` 식 고정 노드 그래프 없음. 본체는 `ai/agent.py`, 능력은 `ai/tools/` | 0.7.15 에서 15,420 줄 삭제로 회귀 차단. graph 식 강박은 verify 강제·workbench 본체화 회귀를 부르고 LLM 자율성을 잠근다. |
 | **L0~L4 단방향 import (4 형제 cross 금지)** | core ← gather/providers ← scan/frame/synth/reference ← analysis 5종 ← story ← ai/mcp | `import-linter` + `dartlabGuard.py strict --scope l0-l15` 가 PR 게이트. 외부 기여자가 어디에 코드를 더할지 한 그림으로 판단 가능. |
-| **테스트 직렬화 강제 (Polars OOM 가드)** | `pytest -v` 전체 호출 금지. `scripts/dev/test-lock.sh tests/ -m "<marker>"` 경유 | Company 1개 ≈ 200~500 MB Rust 힙은 `gc.collect()` 회수 불가. CI 와 로컬을 같은 lock wrapper 명령으로 통일. |
+| **테스트 직렬화 강제 (Polars OOM 가드)** | `pytest -v` 전체 호출 금지. `tests/test-lock.sh tests/ -m "<marker>"` 경유 | Company 1개 ≈ 200~500 MB Rust 힙은 `gc.collect()` 회수 불가. CI 와 로컬을 같은 lock wrapper 명령으로 통일. |
 | **메시지 한국어 우선, API 영어** | `Company`, `pastInsight`, `analysis` 등 symbol 은 영어. CLI 에러·진행 메시지는 한국어 | classifier 에 `Natural Language :: Korean / English` 둘 다 선언. PyPI 영어 사용자 대상 영문 진입은 [README_EN.md](README_EN.md) 와 영문 docstring 으로 별도 트랙. |
 | **단일 SSOT — Skill OS** | 외부 LLM·사용자가 `capabilities()` 한 줄로 304 specs 카탈로그 질의 | 코드·문서·계약을 같은 파일 (`src/dartlab/skills/specs/**`) 로 운영. README ↔ docs ↔ 코드 drift 를 SSOT 한 곳에서 방지. |
-| **부채 시계열 공개** | `uv run python -X utf8 scripts/audit/measureProgress.py` 로 baseline · docstring backlog · pytest marker 분포 3 축 추세 측정. master push 마다 [`_progress/measureHistory.jsonl`](scripts/audit/_progress/measureHistory.jsonl) 한 줄 적재 | "신규 회귀 0" 가드 외에 *상환* 도 정량으로 본다. 외부 기여자가 "부채를 줄이고 있는가" 를 시계열 한 파일에서 확인 가능. |
+| **부채 시계열 공개** | `uv run python -X utf8 src/dartlab/skills/measureProgress.py` 로 baseline · docstring backlog · pytest marker 분포 3 축 추세 측정. master push 마다 [`_progress/measureHistory.jsonl`](src/dartlab/skills/_progress/measureHistory.jsonl) 한 줄 적재 | "신규 회귀 0" 가드 외에 *상환* 도 정량으로 본다. 외부 기여자가 "부채를 줄이고 있는가" 를 시계열 한 파일에서 확인 가능. |
 
 ### 30초 안에 첫 결과
 

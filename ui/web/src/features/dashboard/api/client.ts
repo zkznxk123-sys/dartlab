@@ -35,6 +35,10 @@ export interface KpiTileItem {
 	unit?: string;
 	intent?: 'primary' | 'positive' | 'negative' | 'neutral' | 'accent';
 	subtitle?: string;
+	// P-DASH-V1 D11 — 카드 빈 공간 fix.
+	sparkline?: number[];
+	rangeMin?: number | null;
+	rangeMax?: number | null;
 }
 
 export interface TopListItem {
@@ -143,12 +147,15 @@ export type AnalysisTab =
 	| 'macro'
 	| 'viewer';
 
+// P-DASH-V1 D7: growth + profitability → performance 통합.
+// legacy 호환을 위해 union 에 남김 — URL 진입은 redirect.
 export type FinancialSubCategory =
-	| 'growth'
-	| 'profitability'
+	| 'performance'
 	| 'capitalStructure'
 	| 'cashflow'
-	| 'risk';
+	| 'risk'
+	| 'growth'
+	| 'profitability';
 
 export interface CatalogCard {
 	cardKey: string;
@@ -217,4 +224,37 @@ export function fetchCard(
 
 export function fetchCatalog(): Promise<CatalogResponse> {
 	return fetchJson<CatalogResponse>('/api/viz/catalog');
+}
+
+// ── Layout Engine — bento packed grid (P-DASH-V1) ──
+
+export interface PackedCard {
+	cardKey: string;
+	kind: string;
+	title: string;
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+}
+
+export interface TabLayoutResponse {
+	stockCode: string;
+	tab: AnalysisTab;
+	view: string | null;
+	periodKind: PeriodKind;
+	layout: PackedCard[];
+	cards: Record<string, RechartsSpec>;
+}
+
+export function fetchTabLayout(
+	tab: AnalysisTab,
+	stockCode: string,
+	view: string | null = null,
+	periodKind: PeriodKind = 'annual',
+	nPeriods = 40,
+): Promise<TabLayoutResponse> {
+	const qs = new URLSearchParams({ periodKind, nPeriods: String(nPeriods) });
+	if (view) qs.set('view', view);
+	return fetchJson<TabLayoutResponse>(`/api/viz/layout/${tab}/${stockCode}?${qs}`);
 }

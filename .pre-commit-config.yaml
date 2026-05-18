@@ -29,23 +29,23 @@ repos:
     hooks:
       - id: quality-gate
         name: quality-gate (complexity + dead code)
-        entry: python scripts/audit/qualityGate.py --changed-only
+        entry: python tests/audit/qualityGate.py --changed-only
         language: system
         types: [python]
         pass_filenames: false
 
       - id: lint-camelcase
         name: lint-camelcase (camelCase + docstring, diff-based)
-        entry: python -X utf8 scripts/dev/lint_camelcase_ast.py --changed --strict
+        entry: python -X utf8 tests/audit/lint_camelcase_ast.py --changed --strict
         language: system
         types: [python]
         pass_filenames: false
-        exclude: ^(tests/|experiments/|notebooks/|scripts/)
+        exclude: ^(tests/|experiments/|notebooks/)
 
       # P0~P3 warning 모드. P3 끝 후 entry 에 --strict 추가.
       - id: cycle-scan
         name: cycle-scan (양방향 import cycle 검출 — P3 까지 warning)
-        entry: python -X utf8 scripts/audit/cycleScan.py
+        entry: python -X utf8 tests/audit/cycleScan.py
         language: system
         always_run: true
         pass_filenames: false
@@ -54,15 +54,15 @@ repos:
       # P0 placeholder (aliases.json 비어있음). P5 채워지면 --strict.
       - id: naming-consistency
         name: naming-consistency (매개변수 표준 사전 검사)
-        entry: python -X utf8 scripts/audit/namingConsistency.py
+        entry: python -X utf8 tests/audit/namingConsistency.py
         language: system
         types: [python]
         pass_filenames: false
-        exclude: ^(tests/|experiments/|notebooks/|scripts/)
+        exclude: ^(tests/|experiments/|notebooks/)
 
       - id: generate-spec
         name: generate-spec (CAPABILITIES + llms.txt + reference.md)
-        entry: uv run python scripts/build/generateSpec.py
+        entry: uv run python src/dartlab/skills/generateSpec.py
         language: system
         always_run: true
         pass_filenames: false

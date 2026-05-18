@@ -23,7 +23,8 @@ def _kpi(
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
@@ -69,7 +70,8 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "자본배분 (시간축)",
         "topic": "CF",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "capitalAllocationBars"},
         "options": {"stacked": True, "unit": "원"},
@@ -80,7 +82,8 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "비용 구조",
         "topic": "IS",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "costOfSales",
@@ -121,7 +124,8 @@ PORTFOLIO_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "자본 효율 추이",
         "topic": "ratios",
-        "tab": "portfolio",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "roe",

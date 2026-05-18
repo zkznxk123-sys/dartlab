@@ -103,9 +103,10 @@ def queryCards(
     """카탈로그 다중 필터 검색.
 
     Args:
-        tab: financial/portfolio/valuation/... 8 탭 중 하나.
-        sub: 재무제표 5 sub (performance/capitalStructure/cashflow/risk).
-            None = 전체 (sub 무관).
+        tab: 'financial' 또는 'viewer' (옛 8 탭 → financial 안의 7 방법론
+            view 로 흡수됨).
+        sub: 재무제표 7 분석 방법론 — story/dupont/value/growth/credit/
+            quality/snowflake. None = 전체 (sub 무관).
         kinds: ['trend','kpiTile',...] 중 하나라도 매치.
         topic: 'IS'/'BS'/'CF'/'ratios'.
 
@@ -113,8 +114,8 @@ def queryCards(
         list[(cardKey, entry)] — catalog 순서 보존.
 
     Example:
-        >>> queryCards(tab='financial', sub='performance')
-        [('kpiOpMarginPerf', {...}), ('marginTrend', {...}), ...]
+        >>> queryCards(tab='financial', sub='dupont')
+        [('kpiRoe', {...}), ('marginTrend', {...}), ...]
     """
     out: list[tuple[str, CatalogEntry]] = []
     for k, e in CATALOG.items():

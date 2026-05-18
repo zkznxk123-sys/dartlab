@@ -41,7 +41,7 @@ jobs:
         env:
           DARTLAB_PROVIDER_SCOPE: dart,edgar
         run: |
-          python -X utf8 scripts/audit/dartlabGuard.py full --baseline scripts/audit/_baselines/dartlabGuard.json
+          python -X utf8 tests/audit/dartlabGuard.py full --baseline tests/audit/_baselines/dartlabGuard.json
 
   # realData 20 shard 전수 — planRealdata 우회 (infra 변경 여부 무관).
   realdata-suite-full:
@@ -90,7 +90,7 @@ jobs:
           PYTEST_MEMORY_LIMIT_MB: "6000"
           DARTLAB_TEST_LOCKED: "1"
         run: |
-          bash scripts/dev/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
+          bash tests/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
 
   # 최신 PyPI wheel 을 빈 venv 에 설치 후 제품 smoke.
   # 본 세션에서 수동 실행하던 것 자동화 — 사용자 실제 경험 재현.
@@ -111,7 +111,7 @@ jobs:
           uv pip install --python /tmp/smoke-venv dartlab
       - name: Run product smoke release on latest PyPI
         run: |
-          /tmp/smoke-venv/bin/python -X utf8 scripts/audit/productSmoke.py \
+          /tmp/smoke-venv/bin/python -X utf8 tests/audit/productSmoke.py \
             --suite release \
             --data-mode empty \
             --import-mode installed \
@@ -146,7 +146,7 @@ jobs:
           PYTEST_MEMORY_LIMIT_MB: "6000"
           DARTLAB_TEST_LOCKED: "1"
         run: |
-          bash scripts/dev/test-realdata.sh tests/realData/test_freshInstall.py -v --tb=short
+          bash tests/test-realdata.sh tests/realData/test_freshInstall.py -v --tb=short
 
   # Track 5 — mutmut mutation testing (core/ 한정, Linux only)
   # Windows native 미지원 (mutmut 이슈 #397). nightly Linux runner 에서 1 회 sweep

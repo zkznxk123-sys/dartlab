@@ -25,7 +25,8 @@ def _kpi(
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "lifecycle",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
@@ -39,7 +40,8 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "kind": "phaseIndicator",
         "title": "생애주기 단계",
         "topic": "CF",
-        "tab": "lifecycle",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
@@ -82,7 +84,8 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "현금흐름 3축",
         "topic": "CF",
-        "tab": "lifecycle",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "cfo",
@@ -120,7 +123,8 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "자본 배치 추이",
         "topic": "BS",
-        "tab": "lifecycle",
+        "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [
             {
                 "key": "capex",

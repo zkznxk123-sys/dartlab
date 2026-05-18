@@ -15,7 +15,7 @@
     반드시 실행해서, 스키마 드리프트 또는 파이프라인 silent-fail 을 즉시 노출한다.
 
 실행:
-    bash scripts/dev/test-lock.sh tests/realData/test_freshInstall.py -m freshInstall -v
+    bash tests/test-lock.sh tests/realData/test_freshInstall.py -m freshInstall -v
 
 주의:
     `freshInstall` 마커가 붙은 테스트는 Phase-1 캐시를 강제로 비우므로

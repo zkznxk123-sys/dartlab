@@ -97,7 +97,7 @@ AI 가 catalog/frontend 수정 → frontend 빌드 → 화면 안 보고 "완료
 ### CLI
 
 ```bash
-uv run python -X utf8 scripts/dev/dashboardSnap.py \
+uv run python -X utf8 src/dartlab/viz/dashboardSnap.py \
     --code 005930 --views all --base http://localhost:5400 \
     --out .claude/snaps/{track}/ --wait 5000
 ```

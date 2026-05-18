@@ -5,7 +5,7 @@
 `detectDrift`. AI tool (`ValidateRecipe` 등) 이 호출하는 plain library.
 
 자기개선 사다리 (status frontmatter 자동 변경) 도입 금지. status 디스크 쓰기는 항상 운영자
-CLI (`scripts/dev/recipe_promote.py`) 단독 권한. 본 패키지는 read-only + append-only run 기록만.
+CLI (`src/dartlab/skills/recipe_promote.py`) 단독 권한. 본 패키지는 read-only + append-only run 기록만.
 """
 
 from __future__ import annotations

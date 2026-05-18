@@ -1,6 +1,6 @@
 """docstringNineSection audit 자체 검증 — P-PR1 게이트.
 
-`scripts/audit/docstringNineSection.py` 의 핵심 (_SECTION_KEYWORDS / _hasSection /
+`tests/audit/docstringNineSection.py` 의 핵심 (_SECTION_KEYWORDS / _hasSection /
 _isWrapper / _isPureReturnNone / _scan) 가 fixture 에서 정확 동작 + 6 baseline schema.
 """
 

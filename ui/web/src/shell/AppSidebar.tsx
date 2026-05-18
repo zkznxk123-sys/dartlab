@@ -201,10 +201,10 @@ export function AppSidebar() {
 // 사이드바 — 기업분석 모드:
 //   회사 검색 (최상단) + 8 서브탭 메뉴 + (Footer) 최근 회사.
 //   현재 URL 에 stockCode 가 없으면 첫 메뉴 클릭 시 /analysis (회사 선택 안내) 로 이동.
+// P-DASH-V1 D7: 4 sub + overview. growth + profitability → performance 통합.
 const FINANCIAL_SUBS = [
 	{ key: 'overview', title: '전체' },
-	{ key: 'growth', title: '수익·성장' },
-	{ key: 'profitability', title: '수익성·효율성' },
+	{ key: 'performance', title: '성과' },
 	{ key: 'capitalStructure', title: '재무건전성' },
 	{ key: 'cashflow', title: '현금·배분' },
 	{ key: 'risk', title: '리스크·신호' },

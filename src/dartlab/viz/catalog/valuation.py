@@ -24,7 +24,8 @@ def _kpi(
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
@@ -70,7 +71,8 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
         "kind": "diffView",
         "title": "전기 대비 변화",
         "topic": "IS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "diffFromNorm",
@@ -92,7 +94,8 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "자본 기반 가치 추이",
         "topic": "BS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "equity",
@@ -121,7 +124,8 @@ VALUATION_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "성장 시나리오 (과거 분포)",
         "topic": "IS",
-        "tab": "valuation",
+        "tab": "financial",
+        "subCategory": "value",
         "seriesPlan": [
             {
                 "key": "revenueYoy",

@@ -34,6 +34,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "매출",
         "topic": "IS",
         "tab": "financial",
+        "subCategory": "growth",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -50,6 +51,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "영업이익",
         "topic": "IS",
         "tab": "financial",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -66,6 +68,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "ROE",
         "topic": "ratios",
         "tab": "financial",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -87,6 +90,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부채비율",
         "topic": "ratios",
         "tab": "financial",
+        "subCategory": "credit",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -115,7 +119,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "자산구조",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             # ── 자산 stack ─────────────────────────────────────
             {
@@ -222,7 +226,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부채 상세",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "payables",
@@ -277,7 +281,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "자본 상세",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "capitalStock",
@@ -332,7 +336,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "손익구조",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "revenue",
@@ -376,7 +380,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "현금흐름",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "cfOperating",
@@ -428,7 +432,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "이익률 추세",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "gpm",
@@ -470,7 +474,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "수익성",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "roe",
@@ -503,7 +507,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "성장성",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "revenueYoy",
@@ -545,7 +549,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "비용 구조",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "costOfSales",
@@ -600,7 +604,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "잉여현금흐름",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [
             {
                 "key": "operating",
@@ -652,7 +656,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "레버리지",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "debtToEquity",
@@ -694,7 +698,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "안정성",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "debtRatio",
@@ -727,7 +731,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "유동성",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "currentRatio",
@@ -775,7 +779,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "활동성",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [
             {
                 "key": "assetTurnover",
@@ -821,7 +825,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "매출",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -836,7 +840,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "영업이익",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -851,7 +855,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "순이익",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -866,7 +870,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "잉여현금흐름",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -886,7 +890,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "영업CF",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -901,7 +905,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "CapEx",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -916,7 +920,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "FCF",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -933,7 +937,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "FCF/매출",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -959,7 +963,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "DuPont 분해 (3-factor)",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         # duPontRadar adapter — 마지막 4 기간 polygon. 3 축 (NPM · Asset Turnover · Equity Multiplier) 동시 시계열.
         "dataSpec": {"adapter": "duPontRadar"},
@@ -971,7 +975,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "이익 지속성 (영업CF/순이익)",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "kpiFromNorm",
@@ -992,7 +996,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "영업 레버리지 신호",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "performance",
+        "subCategory": "dupont",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "flagsTopList",
@@ -1011,7 +1015,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "자본배분 (시간축)",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [],  # adapter 가 series 직접 생성
         "dataSpec": {"adapter": "capitalAllocationBars"},
         "options": {"stacked": True, "unit": "원"},
@@ -1026,7 +1030,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "자본배분 (단년 분해)",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "cashflow",
+        "subCategory": "quality",
         "seriesPlan": [],
         "dataSpec": {"adapter": "capitalAllocationWaterfall"},
         "options": {"unit": "원"},
@@ -1041,7 +1045,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부실 위험 (Altman Z')",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "risk",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressGauge"},
         "options": {},
@@ -1057,7 +1061,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부채 만기 분포",
         "topic": "BS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "shortDebt",
@@ -1089,7 +1093,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "시나리오 민감도 (매출 × 마진)",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "risk",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "scenarioSensitivity"},
         "options": {},
@@ -1100,7 +1104,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "부실 위험 분해 (Altman Z' 5 인자)",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "risk",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressDecomp"},
         "options": {},
@@ -1112,7 +1116,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "변동 큰 지표",
         "topic": "ratios",
         "tab": "financial",
-        "subCategory": "risk",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "flagsTopList",
@@ -1131,7 +1135,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "생애주기 단계",
         "topic": "CF",
         "tab": "financial",
-        "subCategory": "risk",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
@@ -1143,7 +1147,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "title": "운전자본",
         "topic": "IS",
         "tab": "financial",
-        "subCategory": "capitalStructure",
+        "subCategory": "credit",
         "seriesPlan": [
             {
                 "key": "dso",

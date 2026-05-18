@@ -13,7 +13,7 @@ else
 fi
 
 # 1) AI 마커 차단
-"$PYTHON" scripts/audit/check_no_ai_markers.py --check-push || exit $?
+"$PYTHON" .claude/hooks/check_no_ai_markers.py --check-push || exit $?
 
 # 2) push 범위의 변경 파일에 대응하는 테스트만 선별 실행.
 #    전수 unit 은 10분+ 소요로 비현실적 (CI 가 최종 게이트). 변경 모듈 관련 테스트 통과만

@@ -261,7 +261,7 @@ function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
 	const tone: 'positive' | 'negative' | 'neutral' =
 		t.intent === 'positive' ? 'positive' : t.intent === 'negative' ? 'negative' : 'neutral';
 	return (
-		<div className="flex h-full w-full items-center px-2">
+		<div className="h-full w-full">
 			<KpiTile
 				label={t.label}
 				value={t.value ?? null}
@@ -269,6 +269,9 @@ function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
 				deltaPct={deltaPct}
 				subtitle={t.subtitle}
 				tone={tone}
+				sparkline={t.sparkline}
+				rangeMin={t.rangeMin}
+				rangeMax={t.rangeMax}
 			/>
 		</div>
 	);

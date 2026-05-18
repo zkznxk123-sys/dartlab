@@ -214,7 +214,7 @@ def _warnGraphIntegrityOnce(specs: list[SkillSpec]) -> None:
 
     기본 off — listSkills 호출이 잦은 결 (MCP / ask / `import dartlab`) 결로 매번
     warn 출력 결이 시끄러운 결. 운영자가 점검 결로 명시 활성. 별도 점검 결은
-    `scripts/audit/skillGraphOrphanReport.py` 결로 가능.
+    `src/dartlab/skills/skillGraphOrphanReport.py` 결로 가능.
 
     phase 2 활성 시 listSkills 호출이 ValueError 로 차단되어 검색 cascade
     영향. 운영자가 broken / cycle 0 으로 만든 후에만 켤 것 (feedback_skill_os_dogfood

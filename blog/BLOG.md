@@ -348,6 +348,7 @@ SVG **최소 5개** Write → FLUX 2~3 (12 초 간격) → 본문 참조 → SEO
 2. **내부 링크 맵 갱신** — inbound 0 인 고립 글 감지.
 3. **경쟁 분석** — 상위 글에 있는데 내 글에 없는 관점.
 4. **Topic Cluster** — pillar + supporting 구조.
+5. **KnowledgeDB insights 동기화** — 신규/갱신 글의 `ai:` 블록을 `dartlab.knowledge.insights(source="blog")` 로 백필. `uv run python -X utf8 blog/_scripts/backfill_blog_insights.py --blog-root blog/ --dry-run` 으로 diff 먼저, `--confirm` 으로 KnowledgeDB 쓰기. AI 엔진의 retrieve 경로에서 글 결론이 인용 가능해진다.
 
 ---
 
@@ -832,10 +833,11 @@ https://eddmpython.github.io/dartlab/
 
 1. 본문 자산 경로가 `./assets/...` 인지.
 2. 파일명 접두사가 포스트 번호와 일치.
-3. `uv run python -X utf8 scripts/auditBlog.py` XML·밀도 이슈 확인.
-4. `npm run build` 후 `landing/build/blog/assets` 복사 확인.
-5. 자산 파일명 충돌 0.
-6. 모바일에서도 핵심 라벨 읽힘.
+3. `uv run python -X utf8 blog/_scripts/auditBlog.py` XML·밀도 이슈 확인 (글 단위 구조 audit — 단어수·SVG·내부링크·H2 분포 + 템플릿 반복도).
+4. `uv run python -X utf8 blog/_scripts/auditBlogFinance.py` (회사 포스트 한정) — markdown finance 표 ↔ `dartlab.Company().select(..., freq="Y")` 실측 1:1 비교. 코드·표·실측 3 자 정합 강행.
+5. `npm run build` 후 `landing/build/blog/assets` 복사 확인.
+6. 자산 파일명 충돌 0.
+7. 모바일에서도 핵심 라벨 읽힘.
 
 ---
 

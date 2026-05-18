@@ -18,7 +18,7 @@ _SCRIPT_PATH = _REPO_ROOT / "scripts" / "audit" / "mappingLedgerCompact.py"
 
 @pytest.fixture
 def compactMod():
-    """scripts/audit/mappingLedgerCompact.py 를 모듈로 동적 로드."""
+    """src/dartlab/reference/mapping/mappingLedgerCompact.py 를 모듈로 동적 로드."""
     spec = importlib.util.spec_from_file_location("mappingLedgerCompact", _SCRIPT_PATH)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)

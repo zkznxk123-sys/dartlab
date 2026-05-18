@@ -2,7 +2,7 @@
 
 `feedback_no_graph_regression.md` 준수: 자기개선 사다리 / HARVEST 자동 호출 도입 X. AI 가
 사용자 질문에 자율적으로 호출하는 stateless 도구. 작성된 spec 의 status 는 항상 `drafted` —
-승격은 운영자 CLI (`scripts/dev/recipe_promote.py`) 단독 권한.
+승격은 운영자 CLI (`src/dartlab/skills/recipe_promote.py`) 단독 권한.
 
 작성 위치: `src/dartlab/skills/specs/recipes/{category}/{slug}.md`. recipe-전용 frontmatter
 (gap/falsifier/expectedNovelty/testUniverse) 강제. 동일 id 가 이미 있으면 거부.
@@ -99,7 +99,7 @@ def proposeRecipe(
     Notes
     -----
     AI 가 사용자 질문에 자율적으로 호출하는 도구 — workbench HARVEST 자동 호출 X.
-    승격은 항상 운영자 CLI (`scripts/dev/recipe_promote.py promote <id>`) 단독.
+    승격은 항상 운영자 CLI (`src/dartlab/skills/recipe_promote.py promote <id>`) 단독.
     """
     skill_id = (id or "").strip()
     if not skill_id:

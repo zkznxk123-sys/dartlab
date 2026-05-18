@@ -21,10 +21,13 @@ from fastapi import APIRouter, HTTPException, Query
 from dartlab.viz import (
     CATALOG,
     FINANCE_DASHBOARD_KEYS,
+    OVERVIEW_KEYS,
     TAB_KEYS,
     buildView,
+    planTabLayout,
     toRechartsSpec,
 )
+from dartlab.viz.layout import packSkyline
 
 router = APIRouter()
 
@@ -154,3 +157,58 @@ async def apiVizSpec(
         raise HTTPException(status_code=404, detail=f"unknown cardKey: {cardKey}")
     spec = await asyncio.to_thread(_safeBuildAndRender, cardKey, stockCode, periodKind, nPeriods)
     return spec
+
+
+@router.get("/api/viz/layout/{tab}/{stockCode}")
+async def apiVizLayout(
+    tab: str,
+    stockCode: str,
+    view: str | None = Query(None, description="재무제표 sub view (performance/capitalStructure/cashflow/risk)"),
+    periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
+    nPeriods: int = Query(40, ge=2, le=80),
+) -> dict[str, Any]:
+    """탭 + sub view → bento packed grid + 각 카드 spec.
+
+    Layout Engine (`dartlab.viz.layout`) 가 카드 카탈로그를 query 하고 packing
+    까지 산출. frontend 는 받은 (x, y, w, h) 좌표대로 CSS Grid 에 dispatch.
+
+    Returns:
+        {
+            tab, view, periodKind,
+            layout: [{cardKey, kind, title, x, y, w, h}, ...],
+            cards: {cardKey: RechartsSpec},
+        }
+    """
+    # legacy growth/profitability sub → performance redirect.
+    effectiveView = view
+    if view in ("growth", "profitability"):
+        effectiveView = "performance"
+
+    # 1. 카탈로그 query + packing.
+    placed = planTabLayout(tab, sub=effectiveView)
+    if not placed:
+        return {
+            "stockCode": stockCode,
+            "tab": tab,
+            "view": effectiveView,
+            "periodKind": periodKind,
+            "layout": [],
+            "cards": {},
+        }
+
+    await _prefetchCompany(stockCode)
+    cardKeys = [p["cardKey"] for p in placed]
+
+    async def _one(k: str) -> dict[str, Any]:
+        return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
+
+    specs = await asyncio.gather(*[_one(k) for k in cardKeys])
+
+    return {
+        "stockCode": stockCode,
+        "tab": tab,
+        "view": effectiveView,
+        "periodKind": periodKind,
+        "layout": placed,
+        "cards": dict(zip(cardKeys, specs)),
+    }

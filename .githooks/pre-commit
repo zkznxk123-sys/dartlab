@@ -11,7 +11,7 @@ else
 fi
 
 # 1) AI 마커 차단
-"$PYTHON" scripts/audit/check_no_ai_markers.py --check-staged || exit $?
+"$PYTHON" .claude/hooks/check_no_ai_markers.py --check-staged || exit $?
 
 # 2) staged Python 파일 ruff format + check (experiments / notebooks 제외)
 STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$' | grep -vE '^(experiments|notebooks)/' | tr '\n' ' ')

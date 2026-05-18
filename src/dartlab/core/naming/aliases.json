@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "version": "1.0.0",
-    "description": "매개변수 의미 → 표준 이름 매핑 (SSOT). 사용처: scripts/audit/namingConsistency.py.",
+    "description": "매개변수 의미 → 표준 이름 매핑 (SSOT). 사용처: tests/audit/namingConsistency.py.",
     "policy": "src/dartlab/skills/specs/operation/code.md (의미 같으면 같은 이름 → AI 추론 단순화).",
     "lastUpdated": "2026-05-11",
     "rule": "신규 매개변수는 표준 이름 사용. alias 사용 시 namingConsistency lint fail. 표준에 없는 의미는 PR 로 사전에 추가 후 사용."

@@ -87,7 +87,7 @@ examples:
 procedure:
   - RunPython 안에서 `from dartlab.viz import emit_chart, emit_diagram`.
   - DataFrame 으로 데이터 확보 후 emit_chart 호출 — chartType / title / data / evidenceBinding 키 필수 (본문 코드 예시 참조).
-  - 회사 페이지 정적 빌드는 `scripts/build/buildCompanyCharts.py --code <stockCode>`.
+  - 회사 페이지 정적 빌드는 `landing/_scripts/buildCompanyCharts.py --code <stockCode>`.
   - AI tool 경로는 `CompileVisual` (registry) — 자동 evidenceBinding 묶음.
   - drill-back 은 `series[].pointRefs[i] = {period, valueRef, rcept_no?, filingUrl?}`.
 linkedSkills:
@@ -160,7 +160,7 @@ emit_diagram("mermaid", "graph LR\n  A-->B\n  B-->C")
 
 ```bash
 # 회사 페이지 정적 차트 빌드
-uv run python -X utf8 scripts/build/buildCompanyCharts.py --code 005930
+uv run python -X utf8 landing/_scripts/buildCompanyCharts.py --code 005930
 # → landing/static/charts/005930/manifest.json + section JSON
 ```
 
@@ -254,7 +254,7 @@ DART 정기보고서 deep-link 헬퍼: `dartlab.viz.refs.filingDeepLink(rcept_no
 Python emit_chart / auto_chart / generators
         │
         ↓
-scripts/build/buildCompanyCharts.py
+landing/_scripts/buildCompanyCharts.py
         │
         ↓
 landing/static/charts/{code}/manifest.json + section JSON

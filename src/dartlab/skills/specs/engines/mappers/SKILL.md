@@ -65,8 +65,8 @@ procedure:
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
   - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR).
-  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `.claude/skills/mapping-refresh/SKILL.md` 4 단계 — 관측 ledger → `scripts/audit/mappingLedgerCompact.py` → `scripts/dev/mappingReview.py` confirm/reject/alias/defer → `scripts/dev/mappingPromote.py` apply.
-  - prod JSON 단독 권한 진입점은 `scripts/dev/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
+  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `.claude/skills/mapping-refresh/SKILL.md` 4 단계 — 관측 ledger → `src/dartlab/reference/mapping/mappingLedgerCompact.py` → `src/dartlab/reference/mapping/mappingReview.py` confirm/reject/alias/defer → `src/dartlab/reference/mapping/mappingPromote.py` apply.
+  - prod JSON 단독 권한 진입점은 `src/dartlab/reference/mapping/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
 linkedSkills:
   - engines.company
   - engines.data.foundation

@@ -1,6 +1,6 @@
 """런타임 capabilities 카탈로그 (자동 생성).
 
-이 파일은 scripts/build/generateSpec.py가 자동 생성합니다. 직접 수정 금지.
+이 파일은 src/dartlab/skills/generateSpec.py가 자동 생성합니다. 직접 수정 금지.
 """
 
 import json

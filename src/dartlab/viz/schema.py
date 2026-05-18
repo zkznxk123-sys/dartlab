@@ -171,19 +171,29 @@ class CatalogEntry(TypedDict, total=False):
     xlSpan: Literal[1, 2, 3]
     layout: LayoutSpec
     help: str
-    # analysis 8 탭 분류 — 사이드바 메뉴 + 백엔드 catalog endpoint 분리.
-    tab: Literal[
-        "financial",
-        "portfolio",
-        "valuation",
-        "governance",
-        "peer",
-        "lifecycle",
-        "macro",
-        "viewer",
+    # 기업분석 단일 탭. 옛 8 탭 (portfolio/valuation/governance/peer/lifecycle/
+    # macro/viewer) 은 financial 안의 관점별 view 에 흡수.
+    tab: Literal["financial", "viewer"]
+    # 재무제표분석 view = 7 가지 *분석 방법론* (lens). 같은 회사를 그레이엄·
+    # 린치·S&P·Sloan 같은 서로 다른 학파 시각으로 본다. 객체 분류도, 6 막
+    # 쪼개기도 아님.
+    # legacy 6 (performance/capitalStructure/cashflow/risk/growth/profitability)
+    # 은 frontend 리다이렉트용으로 유지.
+    subCategory: Literal[
+        "story",  # 서사 — dartlab 6 막 인과 (사업→수익→현금→안정→배분→미래)
+        "dupont",  # DuPont 분해 — ROE = 순이익률 × 자산회전 × 레버리지
+        "value",  # 가치투자 — Graham·Buffett·Damodaran (PER/PBR/DCF/Owner Earnings/Moat)
+        "growth",  # 성장투자 — Lynch·Fisher (매출 CAGR/PEG/세그먼트/시장점유)
+        "credit",  # 신용분석 — Moody's·S&P·Altman (Z/이자보상/부채만기)
+        "quality",  # 이익품질 — Beneish·Sloan·Dechow (M/발생액/CF·NI 디버전스)
+        "snowflake",  # 종합 — Simply Wall St (Value·Future·Past·Health·Dividend 5 차원)
+        # legacy (redirect only)
+        "performance",
+        "capitalStructure",
+        "cashflow",
+        "risk",
+        "profitability",
     ]
-    # 재무 탭 내부 5 sub-category.
-    subCategory: Literal["growth", "profitability", "capitalStructure", "cashflow", "risk"]
     # 비-시계열 kind 의 데이터 소스 선언. adapter dispatch 가 이걸 보고 호출.
     # 예: {"adapter": "distressGauge"} / {"adapter": "lifeCyclePhase"} /
     #     {"adapter": "kpiFromNorm", "tilePlans": [...]}.
@@ -191,7 +201,11 @@ class CatalogEntry(TypedDict, total=False):
 
 
 class KpiTile(TypedDict, total=False):
-    """단일 KPI 한 칸 — kpiTile / diffView 내부 항목."""
+    """단일 KPI 한 칸 — kpiTile / diffView 내부 항목.
+
+    - sparkline: 8 분기 mini line 데이터 (카드 우측).
+    - rangeMin/rangeMax: 자체 5y range (카드 하단 percentile bar).
+    """
 
     label: str
     value: float | None
@@ -199,6 +213,9 @@ class KpiTile(TypedDict, total=False):
     unit: str
     intent: Literal["primary", "positive", "negative", "neutral", "accent"]
     subtitle: str
+    sparkline: list[float]
+    rangeMin: float | None
+    rangeMax: float | None
 
 
 class TopListItem(TypedDict, total=False):

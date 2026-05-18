@@ -19,7 +19,8 @@ def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent:
         "kind": "kpiTile",
         "title": title,
         "topic": "ratios" if ratio else "IS",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
@@ -65,7 +66,8 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "kind": "gauge",
         "title": "부실 위험 (Altman Z')",
         "topic": "ratios",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressGauge"},
         "options": {},
@@ -76,7 +78,8 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "kind": "topList",
         "title": "이상 신호",
         "topic": "ratios",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "snowflake",
         "seriesPlan": [],
         "dataSpec": {
             "adapter": "flagsTopList",
@@ -91,7 +94,8 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "이익 품질",
         "topic": "ratios",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "snowflake",
         "seriesPlan": [
             {
                 "key": "cfNi",
@@ -120,7 +124,8 @@ GOVERNANCE_CARDS: dict[str, CatalogEntry] = {
         "kind": "trend",
         "title": "자본 거버넌스",
         "topic": "BS",
-        "tab": "governance",
+        "tab": "financial",
+        "subCategory": "snowflake",
         "seriesPlan": [
             {
                 "key": "equityRatio",

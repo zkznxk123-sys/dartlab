@@ -1,4 +1,4 @@
-"""scripts/audit/testCoverageGate.py 자체 회귀 — Track 6 (게이트 자체 검증).
+"""tests/audit/testCoverageGate.py 자체 회귀 — Track 6 (게이트 자체 검증).
 
 본 SSOT — [tests/POLICY.md](../POLICY.md) §5 Track 5.
 
@@ -199,7 +199,7 @@ def test_loadBaseline_parses_missing_tuples(tmp_path: Path) -> None:
 
 
 def test_baseline_file_exists() -> None:
-    """실 baseline JSON (scripts/audit/_baselines/testCoverage.json) 존재 + 파싱 가능."""
+    """실 baseline JSON (tests/audit/_baselines/testCoverage.json) 존재 + 파싱 가능."""
     gate = _loadGateModule()
     baseline_path = _REPO / "scripts" / "audit" / "_baselines" / "testCoverage.json"
     assert baseline_path.exists(), f"baseline 누락: {baseline_path}"

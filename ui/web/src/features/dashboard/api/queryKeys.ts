@@ -11,6 +11,12 @@ export const dashKeys = {
 		code: string,
 		periodKind: 'annual' | 'quarterly' = 'annual',
 	) => ['dash', 'tab', tab, code, periodKind] as const,
+	tabLayout: (
+		tab: string,
+		code: string,
+		view: string | null,
+		periodKind: 'annual' | 'quarterly' = 'annual',
+	) => ['dash', 'layout', tab, code, view ?? 'none', periodKind] as const,
 	card: (cardKey: string, code: string, periodKind: 'annual' | 'quarterly' = 'annual') =>
 		['dash', 'card', cardKey, code, periodKind] as const,
 	catalog: () => ['dash', 'catalog'] as const,

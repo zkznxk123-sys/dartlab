@@ -132,7 +132,7 @@ crates/
 tests/fixtures/dart/docs/034730.parquet
 tests/fixtures/dart/docs/055550.parquet
 unsloth_compiled_cache/
-scripts/dev/_camelcaseIndex.json
+tests/audit/_camelcaseIndex.json
 
 # 구 Svelte UI 백업 (2026-05-16 React 재구축 시) — 참고용 로컬 보존
 ui/web.backup/

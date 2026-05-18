@@ -44,27 +44,30 @@ jobs:
         run: pip install ruff==0.11.6
       - name: Lint check
         run: ruff check src/dartlab/ tests/
+      # scripts/ 폴더 재생성 차단 — CLAUDE.md "scripts/ 폴더 절대 금지" 자동 가드.
+      - name: No scripts/ directory
+        run: python -X utf8 tests/audit/noScriptsDir.py
       # silent-fail 패턴 lint — 2026-04-19 사고 class 재유입 차단.
       - name: Silent-fail pattern check
-        run: python scripts/dev/checkSilentFail.py
+        run: python tests/audit/checkSilentFail.py
       # stale reference lint — review→story / Plan v10 같은 대규모 rename 후
-      # 잔존 차단. 패턴 SSOT: scripts/audit/stalePatterns.yaml.
+      # 잔존 차단. 패턴 SSOT: tests/audit/stalePatterns.yaml.
       # PyYAML 필요 (이미 dartlab 의존성).
       - name: Install PyYAML
         run: pip install pyyaml
       - name: Stale references check
-        run: python scripts/audit/stale_references.py
+        run: python tests/audit/stale_references.py
       # camelCase + docstring lint — diff 기준, legacy 비차단.
       # operation.code SSOT. 새 코드만 게이트, tests/scripts/notebooks 면제.
       - name: camelCase + docstring lint (diff)
-        run: python -X utf8 scripts/dev/lint_camelcase_ast.py --changed --strict
+        run: python -X utf8 tests/audit/lint_camelcase_ast.py --changed --strict
       # Import cycle 검출 — 양방향 cycle (A↔B) + 3+ 모듈 cycle.
       # 정책 SSOT: operation.architecture (동급 단방향 허용, 양방향 절대금지).
       # P0~P3 동안 warning 모드 (continue-on-error). P3 끝 후 --strict 활성.
       - name: Install networkx (cycle scan)
         run: pip install networkx
       - name: Cycle scan (lazy import 포함, P3 까지 warning)
-        run: python -X utf8 scripts/audit/cycleScan.py
+        run: python -X utf8 tests/audit/cycleScan.py
         continue-on-error: true
       # Import-linter — 상하 layer 단방향 + L2 → L3/L4 forbidden.
       # 정책 SSOT: pyproject [tool.importlinter] (3 contracts).
@@ -77,7 +80,7 @@ jobs:
       # 매개변수 의미 일관성 — core/naming/aliases.json 표준 사전 검사.
       # P0 는 placeholder (사전 비어있음 → 통과). P5 부터 실효성 발생.
       - name: Naming consistency (parameter aliases)
-        run: python -X utf8 scripts/audit/namingConsistency.py
+        run: python -X utf8 tests/audit/namingConsistency.py
 
   architecture-l0-l15:
     runs-on: ubuntu-latest
@@ -96,7 +99,7 @@ jobs:
         env:
           DARTLAB_PROVIDER_SCOPE: dart,edgar
         run: |
-          python -X utf8 scripts/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
+          python -X utf8 tests/audit/dartlabGuard.py strict --scope l0-l15 --providers dart,edgar
 
   typecheck:
     runs-on: ubuntu-latest
@@ -142,11 +145,11 @@ jobs:
           print(f'dartlab smoke OK — {len(dartlab.__all__)} public symbols, Company callable')
           "
       - name: Public API scenario coverage
-        run: python -X utf8 scripts/audit/publicApiCoverage.py
+        run: python -X utf8 tests/audit/publicApiCoverage.py
       - name: Memory budget scenario mapping
-        run: python -X utf8 scripts/audit/memoryBudgetAudit.py
+        run: python -X utf8 tests/audit/memoryBudgetAudit.py
       - name: Product smoke quick
-        run: python -X utf8 scripts/audit/productSmoke.py --suite quick --data-mode empty --import-mode source --json-out product-smoke-quick.json
+        run: python -X utf8 tests/audit/productSmoke.py --suite quick --data-mode empty --import-mode source --json-out product-smoke-quick.json
       - name: Upload product smoke quick report
         if: always()
         uses: actions/upload-artifact@v5
@@ -214,7 +217,7 @@ jobs:
         run: |
           set -euo pipefail
           WHL=$(ls dist/*.whl | head -n1)
-          python -X utf8 scripts/build/verifyWheel.py "$WHL"
+          python -X utf8 .github/scripts/verifyWheel.py "$WHL"
 
   quality-gate:
     runs-on: ubuntu-latest
@@ -228,30 +231,30 @@ jobs:
       - name: Install tools
         run: pip install radon vulture
       - name: Run quality gate
-        run: python scripts/audit/qualityGate.py
+        run: python tests/audit/qualityGate.py
       - name: Record quality history
         if: github.ref == 'refs/heads/master'
-        run: python scripts/audit/qualityGate.py --record
+        run: python tests/audit/qualityGate.py --record
       - name: Upload quality history
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v5
         with:
           name: quality-history
-          path: scripts/audit/qualityHistory.jsonl
+          path: tests/audit/qualityHistory.jsonl
           retention-days: 90
       # 진척 측정 — baseline 부채 + docstring backlog + marker 분포 한 jsonl 행에 적재.
       # memory/baseline_quota.md 의 분기별 quota (2026-Q2/Q3/Q4) 가시화 인프라.
       - name: Measure progress (baseline + docstring + marker)
-        run: python -X utf8 scripts/audit/measureProgress.py
+        run: python -X utf8 src/dartlab/skills/measureProgress.py
       - name: Record progress history
         if: github.ref == 'refs/heads/master'
-        run: python -X utf8 scripts/audit/measureProgress.py --record
+        run: python -X utf8 src/dartlab/skills/measureProgress.py --record
       - name: Upload progress history
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v5
         with:
           name: progress-history
-          path: scripts/audit/_progress/measureHistory.jsonl
+          path: src/dartlab/skills/_progress/measureHistory.jsonl
           retention-days: 90
 
   security:
@@ -302,7 +305,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Validate notebook syntax
-        run: python scripts/audit/validateNotebooks.py
+        run: python tests/audit/validateNotebooks.py
 
   # Track 1 — syrupy CLI snapshot 회귀 (HF 마커 · Progress · warning routing)
   # 본 PR 의 acceptance test. snapshot 깨지면 PR 머지 차단.
@@ -390,10 +393,10 @@ jobs:
         env:
           DARTLAB_TEST_LOCKED: "1"
         run: |
-          python -X utf8 scripts/audit/mutationSmoke.py
+          python -X utf8 tests/audit/mutationSmoke.py
 
   # Track 6 — 테스트 강제 게이트 (Phase 2 fail-on-missing 활성)
-  # baseline (scripts/audit/_baselines/testCoverage.json) 대비 신규 누락만 fail.
+  # baseline (tests/audit/_baselines/testCoverage.json) 대비 신규 누락만 fail.
   # 기존 1097 부채는 grandfathered (별도 quota 트랙).
   test-coverage-gate:
     runs-on: ubuntu-latest
@@ -408,11 +411,11 @@ jobs:
           python-version: "3.12"
       - name: Run gate (diff vs origin/master, fail-on-new-missing)
         run: |
-          python -X utf8 scripts/audit/testCoverageGate.py --diff origin/master --fail-on-missing --limit 30
+          python -X utf8 tests/audit/testCoverageGate.py --diff origin/master --fail-on-missing --limit 30
       - name: Run gate (all, JSON report)
         if: always()
         run: |
-          python -X utf8 scripts/audit/testCoverageGate.py --all --json > coverage-gate-report.json
+          python -X utf8 tests/audit/testCoverageGate.py --all --json > coverage-gate-report.json
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v5

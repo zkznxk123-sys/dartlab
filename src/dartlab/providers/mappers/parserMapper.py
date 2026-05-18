@@ -39,7 +39,7 @@ def _loadRequired(filename: str) -> dict:
             f"       → pip install -U --force-reinstall dartlab\n"
             f"    2) 편집가능 설치 (editable) 중 파일이 외부 프로세스에 의해 삭제됨\n"
             f"       → git status / git restore 로 복구\n"
-            f"  재현 방지: 릴리즈 전 bash scripts/build/testWheelSmoke.sh 필수"
+            f"  재현 방지: 릴리즈 전 bash .github/scripts/testWheelSmoke.sh 필수"
         )
     return json.loads(path.read_text(encoding="utf-8"))
 

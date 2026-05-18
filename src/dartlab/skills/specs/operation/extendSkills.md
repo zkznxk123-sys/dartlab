@@ -115,7 +115,7 @@ SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpd
 
 신규 cadence recipe (dailyMorningNote · catalystCalendar · thesisTracker) 도 같은 규칙으로 작성.
 
-기존 skill 일괄 audit 은 `scripts/dev/audit_trigger_phrases.py` (idempotent, dry-run 지원).
+기존 skill 일괄 audit 은 `src/dartlab/skills/audit_trigger_phrases.py` (idempotent, dry-run 지원).
 
 ## Skill 확장 보조 CLI
 
@@ -123,17 +123,23 @@ SCHEMA 변경 없음 — `purpose:` 본문 끝에 한 문장 추가만. `lastUpd
 
 ```bash
 # 새 엔진 (engines.{name})
-uv run python -X utf8 scripts/dev/addEngine.py myEngine \
+uv run python -X utf8 src/dartlab/skills/addEngine.py myEngine \
     --title "My Engine" \
     --purpose "myEngine 엔진은 ..."
 
-# 새 axis · recipe 는 동일 패턴 (확장 예정)
+# 기존 엔진 안 axis sub-spec 추가 (engines.{group}.{axis})
+uv run python -X utf8 src/dartlab/skills/addAxis.py {group} {axis} \
+    --title "..." --purpose "..."
 ```
 
 `addEngine.py` 가 준비하는 스켈레톤:
 
 - `src/dartlab/{name}/__init__.py` 스켈레톤 + `__all__`
 - `src/dartlab/skills/specs/engines/{name}/SKILL.md` frontmatter 5 필수 + 3 강제 섹션 placeholder
+
+`addAxis.py` (`addEngine.py` 의 축소판 — 새 엔진이 아니라 *기존 엔진 안의 응용 결* 결정) 가 준비하는 스켈레톤:
+
+- `src/dartlab/skills/specs/engines/{group}/{axis}.md` frontmatter + 3 강제 섹션 placeholder
 
 후속 정리 항목:
 
@@ -143,6 +149,13 @@ uv run python -X utf8 scripts/dev/addEngine.py myEngine \
 4. SKILL.md 3 강제 섹션 본문 채우기
 
 `--dry-run` 으로 미리보기. axis / recipe / operation / start / runtime sub-spec 은 수동 4 단계 절차 ([skill-os-add](file://./.claude/skills/skill-os-add/SKILL.md)) 따름.
+
+### Trigger phrase + orphan 보조 audit
+
+| 스크립트 | 역할 |
+|---|---|
+| `src/dartlab/skills/audit_trigger_phrases.py` | 각 SKILL.md / recipe.md 의 `purpose:` 끝에 "트리거: '...', '...'." 한 문장 추가. 이미 있으면 skip. Scope 4 trigger phrase 룰 ("Trigger phrase 작성 규칙" 섹션) 자동 sweep. `--dry-run` 미리보기. **로컬 dev 도구 — CI 비포함**. 실행 후 git diff 검토 |
+| `src/dartlab/skills/skillGraphOrphanReport.py` | Skill Graph phase 1 warn-only 가 카운트만 출력하는 orphan 노드를 카테고리별로 묶고 자동 분류 가능 후보 (자연 leaf) 는 `isLeafNode: true` 마킹 추천, 그 외 misclassification 은 connect 권고. orphan lint phase 2/3 전환 전 정리 보조 |
 
 ## 신규 frontmatter 필드 8 종 (Skill Graph 모델)
 

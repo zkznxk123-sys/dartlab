@@ -95,3 +95,10 @@ lastUpdated: '2026-05-03'
 - 실패 root cause는 `skillSearch`, `generatedSpecSearch`, `planEvidence`, `engineCall`, `runPython`, `verifyAnswer`, `composeAnswer`, `publicEvent/UI` 중 하나로 귀속한다.
 - 직접 원문 review 전에는 “품질 통과” 또는 “완료”를 주장하지 않는다.
 
+## 실행 스크립트
+
+| 스크립트 | 역할 |
+|---|---|
+| `tests/ai/runners/engineAudit.py` | dartlab 엔진 end-to-end 기능 점검 batch runner. `--stock 005930` 단일, `--quick` 핵심만, 인자 없으면 전체 종목. 결과 `data/audit/engine/{YYYY-MM-DD}/{stockCode}.json` + `report.md`. AI audit 선행 점검용 — 엔진 깨진 채 AI 돌리면 무의미 |
+
+

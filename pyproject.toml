@@ -342,7 +342,7 @@ dev = [
     "build>=1.4.0",
     "hatchling>=1.29.0",
     "hypothesis>=6.100.0",
-    "import-linter>=2.0",  # scripts/audit/cycleScan.py + pyproject [tool.importlinter] — 레이어 단방향 강제 (P0 가드)
+    "import-linter>=2.0",  # tests/audit/cycleScan.py + pyproject [tool.importlinter] — 레이어 단방향 강제 (P0 가드)
     "libcst>=1.8.6",
     "networkx[default]>=3.0",  # scripts/build/buildIndustryMap.py — Kamada-Kawai+PageRank (default extra: scipy 포함)
     "pillow>=12.1.1",
@@ -367,7 +367,7 @@ dev = [
 # 정책 SSOT: src/dartlab/skills/specs/operation/architecture.md
 #   1. 상하 단방향: L0 ← L1 ← L1.5 ← L2 ← L3 ← L4 (이 contract)
 #   2. L2 동급 단방향 허용 (sibling import OK)
-#   3. L2 양방향 순환 절대금지 (별도: scripts/audit/cycleScan.py)
+#   3. L2 양방향 순환 절대금지 (별도: tests/audit/cycleScan.py)
 # ════════════════════════════════════════════════════════════════════
 
 [tool.importlinter]

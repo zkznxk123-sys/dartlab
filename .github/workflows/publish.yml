@@ -72,7 +72,7 @@ jobs:
         run: pip install uv
 
       - name: Build wheel + verify bundled resources
-        run: bash scripts/build/testWheelSmoke.sh
+        run: bash .github/scripts/testWheelSmoke.sh
 
   build:
     name: Build package
@@ -119,13 +119,13 @@ jobs:
         run: uv run --with build python -m build
 
       # PyPI 에 업로드될 "바로 그" wheel 을 검증.
-      # scripts/build/verifyWheel.py — ci.yml 의 wheel-smoke 잡과 공통 로직.
+      # .github/scripts/verifyWheel.py — ci.yml 의 wheel-smoke 잡과 공통 로직.
       # 2026-04-19 사고 (wheel 간 drift) 재발 방지: 검증 코드 한 곳에만 있음.
       - name: Verify published wheel (bundle + runtime)
         run: |
           set -euo pipefail
           WHL=$(ls dist/*.whl | head -n1)
-          python -X utf8 scripts/build/verifyWheel.py "$WHL"
+          python -X utf8 .github/scripts/verifyWheel.py "$WHL"
 
       - name: Generate SBOM
         run: |

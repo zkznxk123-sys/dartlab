@@ -4661,7 +4661,7 @@
       "id": "operation.recipePromote",
       "title": "Recipe 6-stage lifecycle + status 승급 CLI",
       "category": "operation",
-      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `scripts/dev/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
+      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `src/dartlab/skills/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
       "whenToUse": [
         "recipe 승급",
         "status 변경",
@@ -4672,7 +4672,7 @@
         "deprecated 표시"
       ],
       "nextSkills": [],
-      "bodyPreview": "# Recipe 6-stage lifecycle — 검토 없는 승격 차단 ## 무엇을 하나 `src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `scripts/dev/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다. 배경: dartlab 의 지식 환류는 분석 실행과 커뮤니티 반응에서 나온 개선 후보를 운영자가 검토한 뒤 공식 자산에 반영하는 방식이다. recipe 도 같은 원칙을 따른다. ## 6 단계 | Status | 의미 | 승급 조건 | |---|---|---| | `drafted` | 신규 작성, 미검증 | validateRecipe sweep 통과 | | `unverified` | 골격 통과, 실행 미테스트 | 실 데이터 fixture 동행 테스트 통과 | | `tested` | 실행 OK, 시장 검증 전 | 후속 시장 반응 확인 + scorecard 6 신호 | | `verified` | 시장 결과 양호, 검증 완료 | 사람 검토 + 블로그/영상 흡수 | | `curated` | 사람 검토 + 콘텐츠 환류 | (안정 상태) | | `deprecated` | 무효화 — API 변경 · 시장 결과"
+      "bodyPreview": "# Recipe 6-stage lifecycle — 검토 없는 승격 차단 ## 무엇을 하나 `src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `src/dartlab/skills/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다. 배경: dartlab 의 지식 환류는 분석 실행과 커뮤니티 반응에서 나온 개선 후보를 운영자가 검토한 뒤 공식 자산에 반영하는 방식이다. recipe 도 같은 원칙을 따른다. ## 6 단계 | Status | 의미 | 승급 조건 | |---|---|---| | `drafted` | 신규 작성, 미검증 | validateRecipe sweep 통과 | | `unverified` | 골격 통과, 실행 미테스트 | 실 데이터 fixture 동행 테스트 통과 | | `tested` | 실행 OK, 시장 검증 전 | 후속 시장 반응 확인 + scorecard 6 신호 | | `verified` | 시장 결과 양호, 검증 완료 | 사람 검토 + 블로그/영상 흡수 | | `curated` | 사람 검토 + 콘텐츠 환류 | (안정 상태) | | `deprecated` | 무효화 — API 변경 · 시장 결과"
     },
     {
       "id": "operation.refactorChecklist",

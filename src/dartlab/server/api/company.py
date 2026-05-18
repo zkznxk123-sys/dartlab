@@ -144,18 +144,37 @@ def _findSector(stockCode: str) -> str:
         return ""
 
 
+# 주요 회사 제품 mock map — 사업보고서 "주요제품" 추출 자동화 전 임시.
+# P-DASH-V1 D14 — 헤더 라벨 가시화 목적. 실제 추출은 후속 PR.
+_PRODUCT_MAP: dict[str, list[str]] = {
+    "005930": ["메모리", "디스플레이", "파운드리", "스마트폰"],
+    "000660": ["DRAM", "NAND", "HBM"],
+    "035420": ["검색", "쇼핑", "콘텐츠", "AI"],
+    "035720": ["메신저", "콘텐츠", "AI", "모빌리티"],
+    "005380": ["승용차", "상용차", "수소"],
+    "051910": ["석유화학", "배터리", "생명과학"],
+    "207940": ["바이오시밀러", "위탁생산"],
+    "068270": ["바이오시밀러"],
+    "373220": ["배터리"],
+    "006400": ["배터리", "전자재료"],
+    "066570": ["가전", "TV", "디스플레이"],
+    "012330": ["자동차부품", "모빌리티"],
+}
+
+
 @router.get("/api/company/{code}/meta")
 def apiCompanyMeta(code: str):
     """회사 헤더 확장 메타 — 섹터 / 제품 / 블로그 글.
 
-    제품 라벨은 placeholder (사업보고서 추출은 후속 PR).
+    제품: _PRODUCT_MAP 우선, 미존재 시 빈 리스트. (사업보고서 자동 추출은 후속).
     """
     sector = _findSector(code)
     blog_posts = _findBlogPosts(code)
+    products = _PRODUCT_MAP.get(str(code).zfill(6), [])
     return {
         "stockCode": code,
         "sector": sector,
-        "products": [],  # 후속 PR: 사업보고서 주요제품 섹션 키워드 추출
+        "products": products,
         "blogPosts": blog_posts,
     }
 

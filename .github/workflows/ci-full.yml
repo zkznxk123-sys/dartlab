@@ -141,7 +141,7 @@ jobs:
         run: python -X utf8 -m pytest tests/core/test_bundledResources.py tests/audit/test_wheelPackaging.py -m "unit and not heavy" --tb=short --no-cov --benchmark-disable
       - name: Silent-fail lint
         shell: bash
-        run: python -X utf8 scripts/dev/checkSilentFail.py
+        run: python -X utf8 tests/audit/checkSilentFail.py
 
   product-smoke-wheel:
     runs-on: ubuntu-latest
@@ -166,7 +166,7 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          /tmp/dartlab-product-smoke/bin/python -X utf8 scripts/audit/productSmoke.py \
+          /tmp/dartlab-product-smoke/bin/python -X utf8 tests/audit/productSmoke.py \
             --suite release \
             --data-mode empty \
             --import-mode installed \
@@ -234,4 +234,4 @@ jobs:
           PYTEST_MEMORY_LIMIT_MB: "6000"
           DARTLAB_TEST_LOCKED: "1"
         run: |
-          bash scripts/dev/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short
+          bash tests/test-realdata.sh tests/realData/${{ matrix.test_file }} -v --tb=short

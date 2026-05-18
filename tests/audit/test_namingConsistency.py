@@ -1,4 +1,4 @@
-"""scripts/audit/namingConsistency.py — 매개변수 표준 사전 검사 단위 테스트."""
+"""tests/audit/namingConsistency.py — 매개변수 표준 사전 검사 단위 테스트."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ _SCRIPT = _REPO / "scripts" / "audit" / "namingConsistency.py"
 
 
 def _loadModule():
-    """scripts/audit/namingConsistency.py 를 모듈로 동적 로드.
+    """tests/audit/namingConsistency.py 를 모듈로 동적 로드.
 
     `sys.modules` 등록 필수 — @dataclass 가 cls.__module__ lookup 시 의존.
     """

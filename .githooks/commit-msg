@@ -10,4 +10,4 @@ else
   exit 1
 fi
 
-"$PYTHON" scripts/audit/check_no_ai_markers.py --check-commit-msg "$1"
+"$PYTHON" .claude/hooks/check_no_ai_markers.py --check-commit-msg "$1"

@@ -1,7 +1,7 @@
 # 골든 trace 명세 — 회사 5 종 × 질문 3 유형 = 15 케이스.
 #
 # 사용 — OAuth Codex 토큰으로 1 회 호출:
-#   uv run python -X utf8 scripts/dev/runGoldenTrace.py
+#   uv run python -X utf8 tests/ai/runners/runGoldenTrace.py
 #
 # 산출:
 #   - ~/.dartlab/decisions/{market}/{stockCode}.md (outcome_log entry)

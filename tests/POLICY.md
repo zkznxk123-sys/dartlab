@@ -132,13 +132,13 @@ tests/
 
 ```powershell
 # 1 단계 — unit (안전, < 30 초)
-bash scripts/dev/test-lock.sh tests/ -m "unit and not requires_data" -v --tb=short
+bash tests/test-lock.sh tests/ -m "unit and not requires_data" -v --tb=short
 
 # 2 단계 — integration (Company 로딩)
-bash scripts/dev/test-lock.sh tests/ -m "integration and not requires_data" -v --tb=short
+bash tests/test-lock.sh tests/ -m "integration and not requires_data" -v --tb=short
 
 # 3 단계 — heavy (단독)
-bash scripts/dev/test-lock.sh tests/ -m "heavy" -v --tb=short
+bash tests/test-lock.sh tests/ -m "heavy" -v --tb=short
 
 # 단일 파일 / 폴더 (lock 안 함, 본인이 안전 보장)
 $env:DARTLAB_TEST_LOCKED="1"; uv run python -X utf8 -m pytest tests/cli/test_output_snapshots.py -v
@@ -243,7 +243,7 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 
 | 항목 | 위치 |
 |---|---|
-| **PR 차단 게이트** | `scripts/audit/mutationSmoke.py` (Windows + Linux 자작 7 패턴) |
+| **PR 차단 게이트** | `tests/audit/mutationSmoke.py` (Windows + Linux 자작 7 패턴) |
 | Self-test | `tests/audit/test_mutationSmoke.py` (7 종 — pattern 존재 · score 계산) |
 | CI Fast job | `.github/workflows/ci-fast.yml` `mutation-smoke` (~35 초, 100% killed 강제) |
 | Nightly 확장 sweep | `mutmut` Linux runner — `.github/workflows/ci-nightly.yml` `mutation-testing` job |
@@ -271,8 +271,8 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 
 | 항목 | 위치 |
 |---|---|
-| 게이트 스크립트 | `scripts/audit/testCoverageGate.py` |
-| Baseline 동결 | `scripts/audit/_baselines/testCoverage.json` — **1097 / 3134 (35%) 부채** |
+| 게이트 스크립트 | `tests/audit/testCoverageGate.py` |
+| Baseline 동결 | `tests/audit/_baselines/testCoverage.json` — **1097 / 3134 (35%) 부채** |
 | CI 호출 | `.github/workflows/ci-fast.yml` job `test-coverage-gate` (`continue-on-error: true`) |
 | Self-test | `tests/audit/test_testCoverageGate.py` — 12 종 |
 | 룰 | PR diff 에서 `src/dartlab/**/*.py` 의 새 공개 함수 (def, non-private) 추가 → `tests/**/test_*.py` 에 해당 함수명 등장해야 함 (substring 휴리스틱) |
@@ -288,10 +288,10 @@ uv run python -X utf8 -m hypothesis write dartlab.core.naming > tests/_drafts/te
 **갱신 절차**:
 ```powershell
 # baseline 재측정 (분기별 quota 측정)
-uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json | Out-File -Encoding utf8 scripts/audit/_baselines/testCoverage.json
+uv run python -X utf8 tests/audit/testCoverageGate.py --all --json | Out-File -Encoding utf8 tests/audit/_baselines/testCoverage.json
 
 # diff 검토 후 commit
-git diff scripts/audit/_baselines/testCoverage.json
+git diff tests/audit/_baselines/testCoverage.json
 ```
 
 ### Track 7 — Record-Replay (VCR) — ★★★ **인프라 도입 완료 (카세트 record 운영자 트리거)**
@@ -446,10 +446,10 @@ baseline 동결은 *부채 ledger* 다. 부채 자체는 잡지 못한 회귀이
 **측정 도구**:
 ```powershell
 # 분기 측정 (분기 첫 PR)
-uv run python -X utf8 scripts/audit/measureProgress.py --record
+uv run python -X utf8 src/dartlab/skills/measureProgress.py --record
 
 # baseline 재측정 (감축 commit 직전)
-uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json > scripts/audit/_baselines/testCoverage.json
+uv run python -X utf8 tests/audit/testCoverageGate.py --all --json > tests/audit/_baselines/testCoverage.json
 ```
 
 **감축 commit 형식**: `정리: testCoverage baseline 1097→950 (Q2 quota 달성)`. PR 본문에 *어느 모듈 함수에 어떤 테스트 추가했는지* 표 첨부.
@@ -499,4 +499,4 @@ uv run python -X utf8 scripts/audit/testCoverageGate.py --all --json > scripts/a
 - 강행규칙 — `CLAUDE.md` "메모리 안전" · "변경 단위"
 - 도구 SSOT (운영자↔AI 메모리) — `memory/testing_stack.md`
 - 4 계층 import — `src/dartlab/skills/specs/operation/architecture.md` · `memory/core_boundary.md`
-- 회귀 가드 — `scripts/audit/dartlabGuard.py strict --scope l0-l15`
+- 회귀 가드 — `tests/audit/dartlabGuard.py strict --scope l0-l15`

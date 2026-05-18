@@ -2357,7 +2357,7 @@
       "id": "operation.recipePromote",
       "title": "Recipe 6-stage lifecycle + status 승급 CLI",
       "category": "operation",
-      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `scripts/dev/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
+      "purpose": "Recipe sub-spec 의 status frontmatter 변경은 `src/dartlab/skills/recipe_promote.py` CLI 단독 권한. 도구 · 운영자 수동 편집 모두 금지. 6-stage (drafted→unverified→tested→verified→curated→deprecated) + scorecard 6 신호 게이트로 검토 없는 승격을 차단한다.",
       "inDegree": 0,
       "outDegree": 2,
       "cluster": "operation",
