@@ -1,20 +1,18 @@
 """sections() peak RSS stage 별 breakdown 회귀 가드.
 
-진짜 source 자동 추적 — 누가 변경 시 메모리 증가 즉시 fail. 005380 baseline
-실측 (env-gated 진단 측정):
+005380 baseline 실측 stage 분포 (column-by-column 변환 후):
 
   Stage                                  peak Δ      비고
   ──────────────────────────────────────────────────────────
-  _getPrepared (loadData + 41x polars)   +285MB      필요 (parquet 압축 + 51167 row)
-  41x main loop (topicMap 누적)           +208MB      반환 데이터 weight 자체
+  _getPrepared (loadData + 41x polars)   +285MB      parquet 압축 해제 + 51167 row
+  41x main loop (topicMap 누적)           +208MB      반환 데이터 weight (회피 불가)
   freqMeta + topicKeysByTopic              +7MB      python dict
   dataColumns build loop                  +14MB
   pl.DataFrame (col-by-col 변환)           +88MB      Categorical encoding
   ──────────────────────────────────────────────────────────
   sections() 전체 cold peak              ~+595MB    회귀 한계 800MB (margin)
 
-c.story() peak (005380, 3 run avg): +903MB → +836MB (-66MB).
-audit baseline 13GB → 현 836MB = **15.6× 감소** 가드.
+audit baseline (2026-04-22) 13GB → sections() 595MB = 22× / c.story() 836MB = 15.6× 감소.
 
 마커: ``memory + slow + realData``. realData fixture 부재 시 skip.
 """
