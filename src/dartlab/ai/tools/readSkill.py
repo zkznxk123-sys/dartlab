@@ -17,6 +17,53 @@ from .types import ToolResult
 _BODY_PREVIEW_CHARS = 3000  # 엔진 spec p75 (~3174) 가 한 번에 들어가 GetSkillBody 추가 호출 불필요. 이전 600 자 cap 은 procedure 섹션 못 봤다 (2026-05-17 OAuth probe 회귀 — body 의 ## 공개 호출 방식 / ## 호출 동작 절차 미노출 → LLM 가 직접 dartlab.scan 호출 형태 추측 → company_not_resolved thrashing).
 _PROCEDURE_SECTION_HEADINGS = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태", "## 절차")
 
+# capability auto-inline cap — top-1 후보의 capabilityRefs id 마다 CAPABILITIES dict
+# 에서 payload fetch → rows[].capabilityDetails 로 inline. 이전엔 ReadSkill 후 LLM 이
+# ReadCapability 자동 동행 (시그니처/args 모르니) — capability id 만 노출되어. 2026-05-18
+# OAuth probe 결과 패턴: ReadSkill → ReadCapability → EngineCall. 본 옵션 ON 시 사라짐.
+_CAP_FIELD_CAPS = {
+    "summary": 200,
+    "args": 600,
+    "example": 500,
+    "guide": 800,
+    "capabilities": 600,
+    "returns": 400,
+}
+# top-1 외 다른 후보는 더 짧게 (summary + args 만)
+_CAP_FIELD_CAPS_OTHERS = {"summary": 200, "args": 400}
+
+
+def _inlineCapabilities(capabilityRefs: list[str], *, isTopRank: bool) -> dict[str, dict]:
+    """spec.capabilityRefs id 마다 CAPABILITIES payload fetch → trimmed dict.
+
+    top-1 후보: 모든 capabilityRefs 의 6 필드 (summary/args/example/guide/capabilities/returns).
+    그 외 후보: summary + args 만 (token 절약).
+
+    capability 가 카탈로그에 없으면 (LLM 이 spec 본문 의지) skip — graceful.
+    """
+    if not capabilityRefs:
+        return {}
+    try:
+        from dartlab.reference.capability._generated import CAPABILITIES
+    except Exception:  # noqa: BLE001
+        return {}
+    field_caps = _CAP_FIELD_CAPS if isTopRank else _CAP_FIELD_CAPS_OTHERS
+    out: dict[str, dict] = {}
+    for ref in capabilityRefs[:5]:  # cap at 5 refs per skill
+        entry = CAPABILITIES.get(ref)
+        if not isinstance(entry, dict):
+            continue
+        trimmed: dict[str, str] = {}
+        for field, cap in field_caps.items():
+            value = entry.get(field)
+            if not value:
+                continue
+            text = str(value)
+            trimmed[field] = text[:cap] if len(text) > cap else text
+        if trimmed:
+            out[ref] = trimmed
+    return out
+
 
 def _extractProcedureSections(body: str, *, cap: int) -> str:
     """body 가 cap 보다 길면 procedure 섹션 우선 추출 — 절차가 빠지는 회귀 방지.
@@ -160,6 +207,11 @@ def readSkill(
                     }
                 )
 
+        # capability auto-inline — capabilityRefs id 마다 CAPABILITIES payload 자동 fetch.
+        # top-1 후보: 6 필드 (summary/args/example/guide/capabilities/returns).
+        # 그 외: summary + args 만. → ReadCapability 자동 동행 회귀 해소.
+        capability_details = _inlineCapabilities(list(spec.capabilityRefs), isTopRank=(rank == 0))
+
         rows.append(
             {
                 "id": spec.id,
@@ -172,6 +224,7 @@ def readSkill(
                 "purpose": spec.purpose,
                 "whenToUse": list(spec.whenToUse),
                 "capabilityRefs": list(spec.capabilityRefs),
+                "capabilityDetails": capability_details,
                 "requiredEvidence": list(spec.requiredEvidence),
                 "expectedOutputs": list(spec.expectedOutputs),
                 "visualGuidance": list(spec.visualGuidance),
