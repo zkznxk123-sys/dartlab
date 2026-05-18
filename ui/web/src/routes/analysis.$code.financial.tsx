@@ -244,7 +244,6 @@ function FinancialTab() {
 				isLoading ? (
 					<div className="flex items-center justify-center p-16 text-muted-foreground">
 						<Loader2 className="size-6 animate-spin" />
-						<span className="ml-3 text-sm">재무제표 카드 빌드 중...</span>
 					</div>
 				) : (
 					<div className="p-8 text-center text-sm text-muted-foreground">
