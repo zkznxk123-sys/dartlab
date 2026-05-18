@@ -13,7 +13,7 @@ whenToUse:
   - 매크로 covenant breach
 linkedSkills:
   - engines.company
-  - engines.analysis.financing
+  - engines.analysis
   - engines.macro
   - engines.credit
 toolRefs:

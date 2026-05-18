@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - recipes.dividend.capitalReturn
-  - engines.analysis.cashflow
+  - engines.analysis
   - engines.macro
 toolRefs:
   - EngineCall
@@ -158,7 +158,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.analysis.cashflow` (현재 FCF coverage), `engines.analysis.profitability` (op_margin), `engines.macro` (시나리오 정의·revenue shock 기본값), `recipes.dividend.capitalReturn` (현재 payout·환원율).
+- **skillRef**: `engines.analysis` (현재 FCF coverage), `engines.analysis` (op_margin), `engines.macro` (시나리오 정의·revenue shock 기본값), `recipes.dividend.capitalReturn` (현재 payout·환원율).
 - **sourceRef**: DART 공시 — IS 5 년 (revenue, operating_profit), CF (FCF), 배당 시계열. 시나리오 revenue shock 학술 출처 — IMF report (1997), Lehman crisis report (2008), BIS COVID (2020).
 - **tableRef** (시나리오별 row): scenario × {revenueShock, shockedRevenue, shockedFCF, baseDividend, shockedCoverage, dividendSurvival}.
 - **valueRef**: imfSurvival · gfcSurvival · covidSurvival · 현재 FCF 커버리지 · 정상 시점 payout ratio.

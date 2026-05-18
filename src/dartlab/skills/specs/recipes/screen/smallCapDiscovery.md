@@ -17,7 +17,7 @@ whenToUse:
 linkedSkills:
   - engines.scan
   - engines.scan.crossSectionStockScreen
-  - engines.analysis.earningsQuality
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -99,7 +99,7 @@ quality = dartlab.scan("profitability")
 2. engines.scan — 저평가
 3. engines.scan — 수익성
 4. engines.scan.crossSectionStockScreen — 시가총액 + 매출 필터
-5. engines.analysis.earningsQuality — quality 검증
+5. engines.analysis — quality 검증
 
 ## 기본 검증
 

@@ -15,7 +15,7 @@ linkedSkills:
   - engines.company
   - engines.gather
   - engines.quant
-  - engines.analysis.predictionSignal
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython

@@ -17,7 +17,7 @@ linkedSkills:
   - engines.scan
   - recipes.valuation.qualityValueScreen
   - recipes.valuation.grahamDeepValue
-  - engines.analysis.earningsQuality
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -160,7 +160,7 @@ result = (
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 fScore 분포 표.
 2. fScore 6-7 점 종목에 대해 `recipes.valuation.qualityValueScreen` 의 GP/A 게이트 추가 통과 여부 확인.
 3. `recipes.credit.distressFilter` 로 위험 종목 제외.
-4. `engines.analysis.earningsQuality` — CFO/NI 비율 시계열 정합성 점검.
+4. `engines.analysis` — CFO/NI 비율 시계열 정합성 점검.
 5. `engines.story` 로 후보별 narrative 생성.
 
 ## 기본 검증

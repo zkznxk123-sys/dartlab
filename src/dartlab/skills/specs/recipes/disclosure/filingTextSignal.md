@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.gather
   - engines.search
-  - engines.analysis.predictionSignal
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -140,7 +140,7 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → 키워드 별 anomaly z-score.
-2. anomalyFlag = True 키워드 ≥ 2 → `engines.analysis.predictionSignal` 의 input feature.
+2. anomalyFlag = True 키워드 ≥ 2 → `engines.analysis` 의 input feature.
 3. 동시 발현 → `recipes.disclosure.toneToStoryRisk` 와 결합 — story.risk 자동 발행 트리거.
 
 ## 기본 검증

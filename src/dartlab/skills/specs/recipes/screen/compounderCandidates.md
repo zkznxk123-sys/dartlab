@@ -18,8 +18,7 @@ linkedSkills:
   - recipes.valuation.qualityValueScreen
   - recipes.valuation.garpScreen
   - recipes.credit.distressFilter
-  - engines.analysis.profitability
-  - engines.analysis.efficiency
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -147,7 +146,7 @@ candidates = (
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.scan` (ROE·revenueGrowth·grossMargin 5 년 wide), `engines.analysis.profitability` (개별 후보 ROE 동인), `engines.analysis.efficiency` (capital cycle), `engines.scan` (PER·PBR 비교용).
+- **skillRef**: `engines.scan` (ROE·revenueGrowth·grossMargin 5 년 wide), `engines.analysis` (개별 후보 ROE 동인), `engines.analysis` (capital cycle), `engines.scan` (PER·PBR 비교용).
 - **sourceRef**: DART 5 년 IS·BS — ROE = NI / equity, revenueGrowth = YoY, grossMargin = (sales-cogs)/sales. 5 년 연간 시계열.
 - **tableRef** (2 표):
   1. 후보 리스트 — stockCode · corpName · roe5yMean · roe5yStd · roe5yMin · gm5yMean · gm5yStd · 매년 ROE
@@ -249,8 +248,8 @@ graph LR
 2. 후보 → `recipes.valuation.qualityValueScreen` 의 GP/A 게이트 추가 검증.
 3. `recipes.valuation.garpScreen` 의 PEG 게이트 — compounder 가 비싸지 않은지 가치 검증.
 4. `recipes.credit.distressFilter` 통과 (안전성).
-5. `engines.analysis.profitability` — DuPont 분해로 ROE 동인 (margin × turnover × leverage) 확인.
-6. `engines.analysis.efficiency` — capital cycle (재투자 효율) 정성 분석.
+5. `engines.analysis` — DuPont 분해로 ROE 동인 (margin × turnover × leverage) 확인.
+6. `engines.analysis` — capital cycle (재투자 효율) 정성 분석.
 7. `engines.story` — moat narrative (가격결정력·전환비용·네트워크효과·규모) 까지.
 
 ## 기본 검증

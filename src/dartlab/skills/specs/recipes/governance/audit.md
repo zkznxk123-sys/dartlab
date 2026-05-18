@@ -17,7 +17,7 @@ whenToUse:
 linkedSkills:
   - engines.company.researchStarter
   - recipes.governance.auditComposite
-  - engines.analysis.governance
+  - engines.analysis
   - engines.scan
 toolRefs:
   - EngineCall
@@ -98,7 +98,7 @@ major = c.show("majorHolder")
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.analysis.governance` (이사회 + 지분 종합), `engines.analysis.governance` (감사 + 분식 신호), `engines.scan` (peer 횡단), `engines.scan` (감사 위험 횡단), `engines.company.show("majorHolder")` (최대주주 raw).
+- **skillRef**: `engines.analysis` (이사회 + 지분 종합), `engines.analysis` (감사 + 분식 신호), `engines.scan` (peer 횡단), `engines.scan` (감사 위험 횡단), `engines.company.show("majorHolder")` (최대주주 raw).
 - **sourceRef**: DART 공시 — 사업보고서 (이사회 명단, 사외이사 비율), 감사보고서 (감사 의견, 감사인 변경 이력), 주요주주 변동 5%·10% 보고. 외부 본문 (감사보고서) 는 `untrusted` 마커 처리.
 - **tableRef** (5 표):
   1. 이사회 — 사외이사 비율 · 위원회 독립성 5 종 · 임원 회의 출석률
@@ -164,6 +164,6 @@ graph LR
 - 감사 위험 횡단 → `engines.scan`
 - 거버넌스 종합 → `recipes.governance.auditComposite` (멀티 신호)
 - 거버넌스 네트워크 (특수관계 그룹) → `recipes.governance.auditNetwork`
-- 이사회 표결 정밀 → `engines.analysis.governance` direct
+- 이사회 표결 정밀 → `engines.analysis` direct
 
 재호출 트리거: "삼성전자 4 축 거버넌스 audit", "이사회 + 지분 + 감사 + 분식 결합", "감사인 변경 빈도 점검".

@@ -16,7 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.macro
   - engines.company.researchStarter
-  - engines.analysis.efficiency
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -96,7 +96,7 @@ cycle = dartlab.macro("cycle")
 
 1. engines.macro — 산업 재고 지수
 2. engines.company.researchStarter — 회사 진입
-3. engines.analysis.efficiency — 회사 회전율
+3. engines.analysis — 회사 회전율
 4. engines.macro — 경기 사이클
 
 ## 기본 검증

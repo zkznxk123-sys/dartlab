@@ -18,7 +18,7 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.story.companyCausal
   - engines.story.dartlabStory
-  - engines.analysis.scorecard
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -99,7 +99,7 @@ causal = c.causalWeights()
 ## 연계 절차
 
 1. engines.company.researchStarter — 회사 진입
-2. engines.analysis.scorecard — 14 축 종합평가
+2. engines.analysis — 14 축 종합평가
 3. engines.story.companyCausal — 인과 가중치
 4. engines.story.dartlabStory — 14 섹션 보고서
 

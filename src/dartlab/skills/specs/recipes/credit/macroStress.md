@@ -16,8 +16,7 @@ linkedSkills:
   - engines.company
   - engines.credit
   - engines.macro
-  - engines.analysis.macroSensitivity
-  - engines.analysis.financing
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -157,7 +156,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.credit.creditRisk` (base dCR + 7 axis), `engines.analysis.macroSensitivity` (금리·환율 elasticity), `engines.analysis.financing` (차입 만기·변동/고정 비율), `engines.macro` (시장 금리 곡선).
+- **skillRef**: `engines.credit.creditRisk` (base dCR + 7 axis), `engines.analysis` (금리·환율 elasticity), `engines.analysis` (차입 만기·변동/고정 비율), `engines.macro` (시장 금리 곡선).
 - **sourceRef**: DART 재무제표 — IS (operating_profit, interest_expense), BS (total_borrowings, total_liabilities, equity). 분기 또는 연간 freq 명시.
 - **tableRef** (5 행 sensitivity curve): rateShockBp ∈ {0, 100, 200, 300, 400, 500} × {shockedGrade, shockedICR, icrDelta, bindingAxis}.
 - **valueRef**: baseGrade · baseICR · shockedGrade@200bp · shockedICR@200bp · icrDelta · bindingAxis.
@@ -190,7 +189,7 @@ graph LR
 
 - **Falsifier**: shocked dCR == base dCR for ≥ 90% of KOSPI200 → recipe 노이즈 (sensitivity 작동 안 함). pythonCheck 자동 검증.
 - **휴리스틱 등급 mapping 한계**: score → 등급 변환이 간이 (85→AA, 75→A, ...). 실 dCR 알고리즘은 axis 가중 + 산업·규모 조정 더 복잡.
-- **rate sensitivity 가정**: 차입금 *전체* 에 같은 충격 가정 — 실제는 *변동/고정 비율* + 만기 분포 차등. `engines.analysis.financing` 으로 비율 확인.
+- **rate sensitivity 가정**: 차입금 *전체* 에 같은 충격 가정 — 실제는 *변동/고정 비율* + 만기 분포 차등. `engines.analysis` 으로 비율 확인.
 - **EBIT 일정 가정**: 1 차 wave 는 EBIT 고정 — 금리 ↑ 시 매출/마진 동시 압박 미반영. 2 차 wave (영업이익 -20%) 별도 시나리오 필수.
 - **회복 경로 단정 금지**: 1 분기 충격으로 dCR 영구 하락 단정 X — *지속 vs 일시* 구분 (정책 lag 4~6 분기 후 정상화 가능).
 - **한국 / 미국 시장 차이**:
@@ -212,7 +211,7 @@ graph LR
 
 연계 절차:
 - shockedGrade 가 BB 이하면 → `recipes.credit.covenantStressTest` (차입약정 위반 점검)
-- bindingAxis = 채무상환 → `engines.analysis.financing` 으로 차입 만기·변동/고정 비율
+- bindingAxis = 채무상환 → `engines.analysis` 으로 차입 만기·변동/고정 비율
 - bindingAxis = 사업안정성 → `recipes.credit.quantConsensus` (Altman / Beneish / Piotroski 합의)
 - universe 확장 (KOSPI200 전수 stress) → `recipes.credit.distressCandidateScreen`
 
@@ -246,7 +245,7 @@ graph LR
 
 1. 본 recipe → shockedGrade + bindingAxis 산출.
 2. shockedGrade 가 BB 이하로 떨어지면 `recipes.credit.covenantStressTest` 와 결합 — 차입약정 위반 가능성 함께 점검.
-3. bindingAxis = 채무상환 → `engines.analysis.financing` 으로 차입 만기 schedule + 변동/고정 비율 상세.
+3. bindingAxis = 채무상환 → `engines.analysis` 으로 차입 만기 schedule + 변동/고정 비율 상세.
 4. bindingAxis = 사업안정성 → `recipes.credit.quantConsensus` 와 결합 — Altman / Beneish / Piotroski 합의 부도 신호 동반 검증.
 5. 5 종목 실행 후 `recipes.credit.distressCandidateScreen` 으로 universe 확장.
 

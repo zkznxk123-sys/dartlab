@@ -16,8 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.company.researchStarter
   - engines.credit.creditRisk
-  - engines.analysis.stability
-  - engines.analysis.cashflow
+  - engines.analysis
   - engines.macro
 toolRefs:
   - EngineCall
@@ -143,7 +142,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 모두 답변 인용.
 
-- **skillRef**: `engines.credit.creditRisk` (dCR 산정 절차, detail=True 가중치 명시), `engines.analysis.stability` (부채비율·ICR 분해), `engines.analysis.cashflow` (CFO/부채 비율), `engines.macro` (금리 환경 + 시장 곡선).
+- **skillRef**: `engines.credit.creditRisk` (dCR 산정 절차, detail=True 가중치 명시), `engines.analysis` (부채비율·ICR 분해), `engines.analysis` (CFO/부채 비율), `engines.macro` (금리 환경 + 시장 곡선).
 - **sourceRef**: DART/EDGAR 공시 — 재무상태표 (부채 만기 분포) + 손익계산서 (이자비용·영업이익) + 현금흐름표 (CFO/FCF). 분기 보고서 asOf 명시.
 - **tableRef** 4 개:
   1. credit.metricsHistory — dCR 등급·7 축 점수의 최근 8 분기 추이
@@ -217,8 +216,8 @@ graph LR
 
 1. `engines.company.researchStarter` — 회사 진입 (종목코드 → Company 인스턴스).
 2. `engines.credit.creditRisk` — dCR 종합 + 7 축 (detail=True 가중치).
-3. `engines.analysis.stability` — 안정성 분해 (부채비율·ICR·유동비율).
-4. `engines.analysis.cashflow` — 현금흐름 quality (CFO·FCF·OCF/부채).
+3. `engines.analysis` — 안정성 분해 (부채비율·ICR·유동비율).
+4. `engines.analysis` — 현금흐름 quality (CFO·FCF·OCF/부채).
 5. `engines.macro` — 금리 환경 + 회사 조달금리 elasticity.
 
 ## 기본 검증

@@ -15,9 +15,7 @@ whenToUse:
   - 종목 비교
 linkedSkills:
   - engines.company.researchStarter
-  - engines.analysis.peerComparison
-  - engines.analysis.profitability
-  - engines.analysis.financing
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -99,9 +97,9 @@ right_roe = right.analysis("financial", "수익성")
 
 1. engines.company.researchStarter — 첫 회사 진입 + show("BS") + show("IS")
 2. engines.company.researchStarter — 둘째 회사 진입 + show("BS") + show("IS")
-3. engines.analysis.peerComparison — 양사 같은 기간 정렬 + 핵심 차이
-4. engines.analysis.profitability — 양사 ROE DuPont 분해
-5. engines.analysis.financing — 양사 자본구조 비교 (선택)
+3. engines.analysis — 양사 같은 기간 정렬 + 핵심 차이
+4. engines.analysis — 양사 ROE DuPont 분해
+5. engines.analysis — 양사 자본구조 비교 (선택)
 
 ## 기본 검증
 

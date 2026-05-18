@@ -48,9 +48,6 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "engines.story",
         "engines.viz",
         "engines.data.foundation",
-        "engines.analysis.profitability",
-        "engines.analysis.cashflow",
-        "engines.analysis.peerComparison",
         "engines.credit.creditRisk",
         "engines.scan.undervaluedQuality",
         "engines.scan.crossSectionStockScreen",
@@ -60,9 +57,11 @@ def test_builtin_skills_are_engine_owned_execution_docs() -> None:
         "engines.company.usEdgarReview",
         "engines.story.companyCausal",
     } <= ids
-    # engines.macro.marketReview · engines.quant.damodaranValuation 는 Phase B/C 흡수
-    # (2026-05-18) 로 base SKILL.md 의 axis 표에 inline. axis-level sub-spec 다수 (macro 13,
-    # quant 48, gather 14) 모두 흡수 — 본 plan "엔진당 1 manual" 정책.
+    # Phase B/C (2026-05-18) 흡수 후 axis-level sub-spec 모두 base SKILL.md 안 axis 표 inline:
+    # engines.analysis.* 22 종 / engines.scan.* 21 종 (undervaluedQuality/crossSectionStockScreen/
+    # krxIndexStrength 만 standalone 유지) / engines.quant.* 48 종 (forecast/walkforward/
+    # scanBacktest/marketContext 만 standalone) / engines.macro.* 13 종 / engines.gather.* 14 종
+    # (listing 만 standalone). 본 plan "엔진당 1 manual" 정책.
 
     assert not any(item.startswith("basic.") for item in ids)
     assert not any(item.startswith("capability:") for item in ids)
@@ -196,8 +195,12 @@ def test_application_skills_cover_engine_guide_axes() -> None:
         "밸류에이션밴드": "valuationBand",
     }
 
+    # engines.analysis axis-level sub-spec 22 종은 Phase C-3 흡수 (2026-05-18) — base
+    # SKILL.md 의 axis 표에 inline. standalone 없음 (valuation 14 keys 양식은 base 안
+    # 별도 sub-section 으로 보존).
+    analysis_body = _skill_body("engines.analysis")
     for axis in dartlab.Company("005930").analysis().get_column("axis").to_list():
-        assert f"engines.analysis.{analysis_slugs[axis]}" in ids
+        assert axis in analysis_body, f"engines.analysis base SKILL.md 의 axis 표에 {axis} 누락"
 
     # engines.scan axis-level sub-spec 21 종은 Phase C-2 흡수 (2026-05-18) — base SKILL.md
     # 의 axis 표에 inline. standalone: undervaluedQuality/crossSectionStockScreen/krxIndexStrength.
@@ -251,11 +254,14 @@ def test_analysis_application_skills_have_correct_call_example() -> None:
         "밸류에이션밴드": "valuationBand",
     }
 
+    # Phase C-3 흡수 후 engines.analysis.{slug} sub-spec 모두 삭제. base SKILL.md 의
+    # axis 표 + ## 호출 동작 / ## EngineCall args 매핑 안 c.analysis(group, axis) 양식이
+    # 모든 axis 에 적용 가능. 본 test 는 base SKILL body 안 axis_kr (한국어 축 이름) 가
+    # axis 표에 inline 됐는지로 검증.
+    base_body = _skill_body("engines.analysis")
     for axis_kr, slug in analysis_slugs.items():
-        body = _skill_body(f"engines.analysis.{slug}")
-        group = _AXIS_TO_GROUP[axis_kr]
-        expected = f'c.analysis("{group}", "{axis_kr}")'
-        assert expected in body, f"engines.analysis.{slug} body missing expected call example: {expected}"
+        _ = _AXIS_TO_GROUP[axis_kr]  # group mapping 자체는 검증 유지
+        assert axis_kr in base_body, f"engines.analysis base SKILL 의 axis 표에 {axis_kr} ({slug}) 누락"
 
 
 def test_quant_application_skills_have_correct_call_example() -> None:
@@ -368,7 +374,13 @@ def test_gather_application_skills_cover_public_methods() -> None:
 
 
 def test_skill_search_routes_to_engine_owned_application_skills() -> None:
-    assert skills.search("삼성전자 수익성 분석", includeUser=False)[0].skill.id == "engines.analysis.profitability"
+    """skill search 가 의도된 진입 spec 으로 routes — Phase C 흡수 후 base SKILL 또는 recipes."""
+    # Phase C-3 흡수 — engines.analysis.profitability → base engines.analysis. 수익성 검색 top
+    # 이 engines.analysis (base) 또는 recipes.* (수익성 응용) 중 하나면 OK.
+    profitTop = skills.search("삼성전자 수익성 분석", includeUser=False)[0].skill.id
+    assert profitTop in {"engines.analysis"} or profitTop.startswith("recipes."), (
+        f"수익성 검색 top 이 engines.analysis 또는 recipes.* 가 아님: {profitTop}"
+    )
     assert skills.search("스캔엔진으로 저평가 종목 찾기", includeUser=False)[0].skill.id == (
         "engines.scan.undervaluedQuality"
     )

@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.quant
   - engines.gather
-  - engines.analysis.disclosureChange
+  - engines.analysis
   - engines.story
 toolRefs:
   - EngineCall

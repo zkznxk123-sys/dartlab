@@ -17,7 +17,7 @@ whenToUse:
 linkedSkills:
   - engines.company.researchStarter
   - engines.scan
-  - engines.analysis.financing
+  - engines.analysis
   - engines.credit.creditRisk
 toolRefs:
   - EngineCall
@@ -105,7 +105,7 @@ credit = c.credit()
 
 1. engines.company.researchStarter — 회사 진입
 2. engines.scan — 부채 구조 + peer 횡단
-3. engines.analysis.financing — 자본조달 종합
+3. engines.analysis — 자본조달 종합
 4. engines.credit.creditRisk — dCR 등급
 
 ## 기본 검증

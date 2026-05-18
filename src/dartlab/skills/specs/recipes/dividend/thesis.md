@@ -16,8 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.company.researchStarter
   - recipes.dividend.capitalReturn
-  - engines.analysis.cashflow
-  - engines.analysis.capitalAllocation
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -96,8 +95,8 @@ return_axis = c.analysis("financial", "배당주주환원")
 
 1. engines.company.researchStarter — 회사 진입
 2. recipes.dividend.capitalReturn — 배당·자사주 종합
-3. engines.analysis.capitalAllocation — 자본배분 의지
-4. engines.analysis.cashflow — FCF 가 배당 충당 가능 여부
+3. engines.analysis — 자본배분 의지
+4. engines.analysis — FCF 가 배당 충당 가능 여부
 
 ## 기본 검증
 

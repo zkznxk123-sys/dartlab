@@ -19,7 +19,7 @@ linkedSkills:
   - recipes.valuation.garpScreen
   - recipes.valuation.grahamDeepValue
   - engines.credit
-  - engines.analysis.cashflow
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -167,7 +167,7 @@ def excludeDistress(df: pl.DataFrame, blacklist: pl.DataFrame) -> pl.DataFrame:
 1. 본 recipe 로 블랙리스트 생성 — `blacklist` DataFrame.
 2. 다른 스크리너 (`qualityValueScreen`, `garpScreen`, `grahamDeepValue`, `piotroskiLite`) 결과에서 `excludeDistress()` 호출.
 3. 단독 사용 시 — 위험 종목 명단 자체로 `engines.credit` 신용 위험 심층 분석 input.
-4. `engines.analysis.cashflow` — CFO·FCF·이자보상배율 시계열로 위험 강도 정량화.
+4. `engines.analysis` — CFO·FCF·이자보상배율 시계열로 위험 강도 정량화.
 5. `engines.story` 로 위험 narrative — 단순 "위험" X, 어떤 사이클·산업 구조·자본정책 으로 부도 시나리오 까지.
 
 ## 기본 검증

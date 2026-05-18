@@ -13,10 +13,8 @@ whenToUse:
   - DCF 분포
 linkedSkills:
   - engines.company
-  - engines.analysis.revenueForecast
-  - engines.analysis.macroSensitivity
+  - engines.analysis
   - engines.macro
-  - engines.analysis.valuation
 toolRefs:
   - EngineCall
   - RunPython

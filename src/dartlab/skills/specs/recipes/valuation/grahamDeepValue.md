@@ -18,7 +18,7 @@ linkedSkills:
   - recipes.valuation.qualityValueScreen
   - recipes.credit.distressFilter
   - recipes.quality.piotroskiLite
-  - engines.analysis.valuation
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -150,7 +150,7 @@ candidates = (
 2. 상위 후보에 대해 NCAV 정확 계산 — `scanAccount` 로 cash·AR·inventory·totalLiabilities 가져와서 시가총액 join.
 3. `recipes.quality.piotroskiLite` 의 F-Score 추가 검증 (가치 함정 회피 강화).
 4. `recipes.credit.distressFilter` 로 부도 위험 거름.
-5. `engines.analysis.valuation` 의 DCF + valuation band — 본질가치 산출.
+5. `engines.analysis` 의 DCF + valuation band — 본질가치 산출.
 6. `engines.story` 로 narrative — 사이클 위치, 산업 구조, 자본정책 (배당·자사주) 까지.
 
 ## 기본 검증

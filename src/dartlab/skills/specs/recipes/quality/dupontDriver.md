@@ -209,7 +209,7 @@ graph LR
 
 연계 절차:
 - OperatingMargin 변동 → `recipes.quality.workingCapitalQuality` (운전자본 효율)
-- AssetTurnover 변동 → CAPEX 시계열 + `engines.analysis.cashflow`
+- AssetTurnover 변동 → CAPEX 시계열 + `engines.analysis`
 - FinancialLeverage 변동 → `recipes.credit.distressDual` (부채 위험)
 - 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates`
 - 자본 배분 평가 → `recipes.quality.capitalAllocationScorecard`

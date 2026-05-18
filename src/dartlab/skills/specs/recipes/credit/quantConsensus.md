@@ -141,7 +141,7 @@ emit_result(
 
 1. 본 recipe → 4 source 합의 결과.
 2. consensus = TripleAgreement → `recipes.credit.macroStress` 와 결합 — 매크로 충격 시 추가 악화 위험.
-3. consensus = DualAgreement → `engines.analysis.earningsQuality` 로 분식 의심 별도 검증.
+3. consensus = DualAgreement → `engines.analysis` 로 분식 의심 별도 검증.
 4. universe 적용은 `recipes.credit.distressCandidateScreen` 와 결합.
 
 ## 기본 검증

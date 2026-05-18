@@ -16,8 +16,7 @@ whenToUse:
   - 적정 주가 범위
 linkedSkills:
   - engines.company.researchStarter
-  - engines.analysis.valuation
-  - engines.analysis.valuationBand
+  - engines.analysis
   - engines.scan
   - engines.quant
 toolRefs:
@@ -102,7 +101,7 @@ qval = c.quant("가치")
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.analysis.valuation` (4 방법론), `engines.analysis.valuationBand` (역사 평균 ±σ), `engines.scan` (peer 횡단), `engines.quant` (기술적 가치 신호).
+- **skillRef**: `engines.analysis` (4 방법론), `engines.analysis` (역사 평균 ±σ), `engines.scan` (peer 횡단), `engines.quant` (기술적 가치 신호).
 - **sourceRef**: DART 공시 — 5 년 IS/BS/CF (DCF cash flow projection), 배당 시계열 (DDM), 시장가 시계열 (multiple band), peer 회사 valuation snapshot.
 - **외부 가정**: 할인율 (KR 8~10% / US 7~9%), terminal 성장률 (1~3%), terminal multiple (12~18× EBITDA). 답변에 가정 명시 + 민감도.
 - **tableRef** (3 표):
@@ -169,7 +168,7 @@ graph LR
 ## 연계 절차
 - 본질가치 3 anchor 합의 → `recipes.valuation.intrinsicValueBand`
 - 역사 valuation 추세 → `recipes.valuation.bandTrack`
-- DCF 깊이 분석 → `engines.analysis.valuation` (4 방법론 detail)
+- DCF 깊이 분석 → `engines.analysis` (4 방법론 detail)
 - 자본 효율 결합 → `recipes.quality.dupontDriver` + `recipes.quality.capitalAllocationScorecard`
 - 기술적 가치 신호 → `engines.quant`
 

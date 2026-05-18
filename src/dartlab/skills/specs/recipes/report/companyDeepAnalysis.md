@@ -14,13 +14,9 @@ whenToUse:
   - 종목 깊이 분석
 linkedSkills:
   - engines.macro
-  - engines.analysis.peerComparison
+  - engines.analysis
   - engines.scan
   - engines.company.researchStarter
-  - engines.analysis.profitability
-  - engines.analysis.earningsQuality
-  - engines.analysis.valuation
-  - engines.analysis.valuationBand
 toolRefs:
   - EngineCall
   - RunPython
@@ -121,9 +117,9 @@ emit_result(
     table=[
         {"step": "macro", "skill": "engines.macro", "result": "read before company conclusion"},
         {"step": "company", "skill": "engines.company.researchStarter", "result": compact(bs)},
-        {"step": "profitability", "skill": "engines.analysis.profitability", "result": compact(profitability)},
-        {"step": "quality", "skill": "engines.analysis.earningsQuality", "result": compact(quality)},
-        {"step": "valuation", "skill": "engines.analysis.valuation", "result": compact(valuation)},
+        {"step": "profitability", "skill": "engines.analysis", "result": compact(profitability)},
+        {"step": "quality", "skill": "engines.analysis", "result": compact(quality)},
+        {"step": "valuation", "skill": "engines.analysis", "result": compact(valuation)},
     ],
     values={"target": target, "bsRows": bs.height, "isRows": is_df.height, "ratioRows": ratios.height},
     date=latest_period(bs),
@@ -153,9 +149,9 @@ emit_result(
 1. engines.macro — 매크로 환경 (금리·환율·경기 사이클)
 2. engines.scan — peer 후보 5~10 (수익성 축)
 3. engines.company.researchStarter — 회사 진입 + show("BS") + show("IS")
-4. engines.analysis.profitability — ROE DuPont 분해 (마진 × 회전 × 레버리지)
-5. engines.analysis.earningsQuality — 일회성·발생주의 점검
-6. engines.analysis.valuation — PER/PBR/EV-EBITDA + peer 비교 (가치평가 axis)
+4. engines.analysis — ROE DuPont 분해 (마진 × 회전 × 레버리지)
+5. engines.analysis — 일회성·발생주의 점검
+6. engines.analysis — PER/PBR/EV-EBITDA + peer 비교 (가치평가 axis)
 
 ## 기본 검증
 

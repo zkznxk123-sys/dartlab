@@ -16,9 +16,7 @@ whenToUse:
   - 영업이익 신뢰성
 linkedSkills:
   - engines.company.researchStarter
-  - engines.analysis.earningsQuality
-  - engines.analysis.cashflow
-  - engines.analysis.financialConsistency
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython
@@ -97,9 +95,9 @@ is_df = c.show("IS")
 ## 연계 절차
 
 1. engines.company.researchStarter — 회사 진입
-2. engines.analysis.earningsQuality — 일회성·발생주의
-3. engines.analysis.cashflow — CFO·FCF·배당 충당
-4. engines.analysis.financialConsistency — 시계열 정합성
+2. engines.analysis — 일회성·발생주의
+3. engines.analysis — CFO·FCF·배당 충당
+4. engines.analysis — 시계열 정합성
 
 ## 기본 검증
 

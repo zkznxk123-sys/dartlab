@@ -13,8 +13,7 @@ whenToUse:
   - 감사 리스크
 linkedSkills:
   - engines.company
-  - engines.analysis.earningsQuality
-  - engines.analysis.governance
+  - engines.analysis
   - engines.scan
 toolRefs:
   - EngineCall

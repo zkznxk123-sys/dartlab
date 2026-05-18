@@ -17,7 +17,7 @@ whenToUse:
 linkedSkills:
   - engines.company.researchStarter
   - engines.industry
-  - engines.analysis.peerComparison
+  - engines.analysis
   - engines.scan
 toolRefs:
   - EngineCall
@@ -133,7 +133,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + dateRef` 3 종 명시.
 
-- **skillRef**: `engines.industry` (산업 분류 + peer 추출), `engines.analysis.peerComparison` (횡단 비교), `engines.scan` (peer ratio 일괄 대안 path), `engines.company.show` (각 peer 개별 ratios).
+- **skillRef**: `engines.industry` (산업 분류 + peer 추출), `engines.analysis` (횡단 비교), `engines.scan` (peer ratio 일괄 대안 path), `engines.company.show` (각 peer 개별 ratios).
 - **sourceRef**: DART/EDGAR 공시 — *같은 분기* + *같은 회계 기준 (연결)* peer 재무. KRX 산업분류 (`sector`) 또는 GICS sub-industry.
 - **tableRef** (1+5 표):
   1. 회사 + 5 peer 종합 — code × {수익성 ROE·ROA·OPM, 안정성 부채비율·ICR, 성장성 revenue YoY·EPS YoY, valuation PER·PBR·EV/EBITDA}

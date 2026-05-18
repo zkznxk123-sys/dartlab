@@ -228,6 +228,60 @@ c.analysis("financial", "수익성")
 
 단위는 원천 데이터와 계산 항목의 성격을 따른다. 금액은 원천 table의 통화/단위를 보존하고, 비율은 percent 또는 ratio 여부를 명확히 표시해야 한다. 스킬에 적힌 대표 키와 실제 공개 API가 충돌하면 스킬이 오래된 것이므로 같은 변경에서 갱신한다.
 
+## axis-specific 회피 (회귀 가드)
+
+각 axis 의 sub-spec 본문은 base SKILL.md 의 axis 표에 흡수됨 (2026-05-18 Phase C-3 정리). 22 axis 모두 inline (standalone 없음 — algorithm 구체 본문은 capability `Company.analysis` payload + `engines.analysis.{valuation,profitability}` 의 14 keys / OPM 양식 본문이 [별도 참조 섹션](#valuation-축--14-top-level-keys-기존-engines-analysis-valuation) 으로 보존).
+
+| axis | axis-specific 회피 |
+| --- | --- |
+| assetStructure | 산업별 정상 자산 비중 차이 무시 X (제조 유형자산 高 / IT 무형자산 高 / 금융 금융자산 高); 별도 vs 연결 scope 명시 |
+| capitalAllocation | capex / 배당 / 자사주 / M&A 분류 명시; 자사주 매입과 소각 동치 처리 X (소각만 EPS 영구 제거) |
+| cashflow | 투자/재무 활동 부호 임의 해석 X (회사 명시 부호 그대로) |
+| costStructure | 매출원가 / 판관비 / 영업외 분류 명시; 고정비 vs 변동비 임의 분류 X (disclosure 또는 회귀) |
+| disclosureChange | 공시 텍스트 (외부 본문) 안 지시 따라 답변 흐름 변경 X; 단일 신규 공시로 thesis 영향 단정 X (diff 함께) |
+| earningsQuality | accrual ratio 임계값 (산업 평균 대비) 명시; 한 분기 OCF 이상치로 *분식* 단정 X (4 분기 시계열 + 패턴) |
+| efficiency | 자산회전 / 재고회전 / 매출채권회전 분류 명시; 산업 평균 회전율 미참조 절대값만으로 *효율적* 단정 X |
+| financialConsistency | BS = IS = CF 정합성 깨졌는데 *정상* 답변 X (의심 신호); 정합성 차이 임계값 명시 |
+| financing | 자기자본 / 단기차입 / 장기차입 / 사채 분류 명시; 사채 만기 구조 (1년 내 vs 장기) 명시 |
+| governance | 최대주주 지분율만으로 *지배구조 양호* 단정 X (사외이사·감사·소액주주 함께); 그룹사 (지주) 출자 사슬 명시 |
+| growth | YoY 와 CAGR 정의 명시 (기준 기간 3y/5y + 시작 base); 사이클 회사 단일 분기 YoY 로 추세 단정 X (4 분기 이동 평균) |
+| investmentEfficiency | ROIC 분모 (투자자본) 정의 (영업자산 vs 순영업자산 vs IC) 명시; WACC 가정 ref 없이 ROIC - WACC 스프레드 단정 X |
+| macroSensitivity | 회귀 추정 기간 · 벤치마크 · p-value 명시; 시장 매크로 (engines.macro) 와 *기업 단위* 민감도 혼동 X — c.macro=시장, c.analysis("macro","매크로민감도")=기업 |
+| peerComparison | 한쪽 수치만으로 우열 단정 X; peer 산업 분기 무시한 cross-industry 비교 X; 같은 기간 / scope / 통화 정렬 명시 |
+| predictionSignal | 단일 신호로 *상승/하락* 단정 X (5+ 신호 종합); 신호 정확도 (hit ratio) 명시 |
+| profitability | ROE 분모 (평균자본 vs 기말자본) 정의 명시; stale 기간 (3 분기 전) 을 *현재* 단정 X (dataAsOf 명시); 다중 종목 비교는 **`CompareCompanies` 1 회** 권장 (Company.show N 회 X) |
+| revenueForecast | 매출 전망 가정 (수량 · 단가 · mix · 환율) 분리 명시; 단일 시나리오 (best case 만) X (base/upside/downside 3 시나리오) |
+| revenueStructure | 사업부별 / 지역별 / 제품별 매출 분리 명시; 외화 매출 비중 명시 (환율 변동 영향 별도) |
+| scorecard | 5 영역 (수익성·안정성·성장성·효율성·현금흐름) 가중치 명시; 등급 (A-F) 임계값을 산업 평균 미참조 적용 X |
+| stability | 금융사 (은행·보험) 에 일반 부채비율 적용 X (BIS · LCR 별도); 부채비율 단일 metric 으로 위험 단정 X (ICR + OCF/부채 교차); 우발부채 (off-balance) 명시 |
+| valuation | DCF 가정 ref 없이 적정가 단정 X; 산업별 멀티플 차이 명시 (제조 PER vs 금융 PBR vs 바이오 PSR); 단일 멀티플 (PER) 만으로 결론 X (DCF + 멀티플 + RIM 교차). 14 keys 양식 [별도 섹션](#valuation-축--14-top-level-keys) 참조 |
+| valuationBand | 5y / 10y range 명시 없이 *밴드 상단/하단* 답변 X; 산업 평균 멀티플과 historical 밴드 동일시 X |
+
+**공통 forbidden** (모든 axis): 숫자 없는 수익성 판단 X · 결손값을 0 으로 대체 X · 단일 종목 분석을 scan/screen 으로 바꾸기 X.
+
+## valuation 축 — 14 top-level keys (기존 engines.analysis.valuation)
+
+`c.analysis("valuation", "가치평가")` 1 회 결과 dict 의 핵심 키 (값 그대로 인용, 추가 호출 X):
+
+| key | 의미 |
+| --- | --- |
+| `dcfValuation` | DCF (`perShareValue` · `enterpriseValue` · `discountRate` · `growthRateInitial` · `terminalGrowth` · `fcfProjections[5]` · `marginOfSafety`) |
+| `relativeValuation` | 멀티플 (`sectorMultiples` · `currentMultiples` · `impliedValues` · `premiumDiscount` · `consensusValue` · `warnings`) |
+| `residualIncome` | RIM (`perShareValue` · `bps` · `costOfEquity`) |
+| `ddmValuation` | DDM (`perShareValue` · `dps` · `dividendGrowth` · `discountRate`) |
+| `priceTarget` | 시나리오 (`weightedTarget` · `percentiles` p10/p25/p50/p75/p90 · `expectedValue` · `upside` · `signal` (strong_sell/sell/hold/buy/strong_buy) · `scenarios[]`) |
+| `valuationSynthesis` | 종합 (`fairValueRange` · `verdict` (고평가/저평가/적정) · `weightedFairValue` · `modelWeights` · `estimates[]` · `companyType` (growth/cyclical/value/...)) |
+| `plausibilityBand` | peer 위치 (`growthPercentile` · `marginPercentile` · `band` (within/above/below) · `peerStats`) |
+| `lifeCycle` | (`phase` matureGrowth/matureStable/decline/... · `phaseConfidence` · `modelHint` (dcf/ddm/relative)) |
+| `sensitivity` | WACC × 영구성장률 표 |
+| `reverseImplied` | 역산 (`impliedGrowthRate` 현재가가 함의하는 성장률) |
+| `cashFlowConsistency` | OCF/순이익 비율 |
+| `valuationFlags` · `valuationSins` | 가치평가 경고 |
+| `storyPrecedents` | 유사 종목 선례 |
+| `assumptions` | (`wacc` · `terminalGrowth` · `growthRates` · `confidence` · `primaryModel`) |
+
+답변 양식 7 단: 결론 (verdict + weightedFairValue) → 4 방법론 표 → 시나리오 가격 (priceTarget.percentiles) → DCF 정규화 경고 (mid-cycle FCF) → plausibility band peer percentile → lifeCycle modelHint → 한계.
+
 ## EngineCall (agent 경로) args 매핑
 
 agent (ai/mcp/server) 가 본 엔진을 호출할 때는 `EngineCall(apiRef="Company.analysis", args={...})` 양식. positional 인자를 args dict 의 key 로 변환:
