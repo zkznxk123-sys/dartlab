@@ -202,6 +202,10 @@ markers = [
     "metamorphic: 변환 후 속성 보존 (ranking shift, 단위 변환, 통화 환산)",
     # vcr — record-replay 카세트 사용 (외부 HTTP mock).
     "vcr: HTTP record-replay 카세트 사용 (네트워크 없이 회귀 검증)",
+    # Phase A — ETL 단계 검증 (parquet row group sort + IPC mirror 빌더).
+    "etl: ETL 산출물 검증 (parquet row group 메타, IPC mirror 동기성)",
+    # Phase B/D — 메모리 회귀 가드 (RSS 측정).
+    "memory: RSS 회귀 가드 — Company 1개 분석 시 peak RSS 검증",
 ]
 
 # ════════════════════════════════════════════════════════════════════

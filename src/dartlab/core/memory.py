@@ -243,9 +243,12 @@ class BoundedCache:
         "_pinned_prefixes",
         "_critical_prefixes",
         "_emergency_at",
+        "_ipc_cache_dir",
+        "_ipc_backed_prefixes",
     )
 
     def __init__(self, maxEntries: int = 30, pressureMb: float = 800.0):
+        import tempfile
         import threading
 
         self._store: OrderedDict[str, Any] = OrderedDict()
@@ -255,6 +258,13 @@ class BoundedCache:
         self._put_count = 0
         self._lock = threading.RLock()
         self._emergency_at = 0.0  # EMERGENCY 발생 시각 — cool-down 용
+        # Phase C — IPC mmap backing. _sections 같은 무거운 DataFrame 결과를 IPC 파일로
+        # 자동 저장. EMERGENCY clear 시에도 IPC 잔존 → 다음 호출 시 mmap reload (수 ms).
+        # 인스턴스별 tmpdir — Company 다중 인스턴스 간 key 충돌 회피.
+        from pathlib import Path
+
+        self._ipc_cache_dir: Path = Path(tempfile.mkdtemp(prefix="dartlab-cache-"))
+        self._ipc_backed_prefixes: tuple[str, ...] = ("_sections",)
         # critical: EMERGENCY에서도 절대 비우면 안 되는 키 (재생성 로직 없음 → KeyError).
         # 다른 pinned는 재로드 비용 크지만 가능. critical은 비우면 후속 호출 즉시 실패.
         # _pinned_prefixes 의 "Accessor" 그룹과 동기화 — pinned 의 첫 5 entries.
@@ -315,17 +325,56 @@ class BoundedCache:
     def _isPinned(self, key: str) -> bool:
         return any(key.startswith(p) for p in self._pinned_prefixes)
 
+    def _ipcBacked(self, key: str) -> bool:
+        return any(key.startswith(p) for p in self._ipc_backed_prefixes)
+
+    def _ipcPath(self, key: str):
+        from pathlib import Path
+
+        # key 가 underscore/alphanumeric 만 가정 — dartlab cache key 규약.
+        safe = "".join(ch if ch.isalnum() or ch in "_-" else "_" for ch in key)
+        return self._ipc_cache_dir / f"{safe}.arrow"
+
     def __contains__(self, key: str) -> bool:
         with self._lock:
-            return key in self._store
+            if key in self._store:
+                return True
+            if self._ipcBacked(key):
+                return self._ipcPath(key).exists()
+            return False
 
     def __getitem__(self, key: str) -> Any:
         with self._lock:
-            self._store.move_to_end(key)
-            return self._store[key]
+            if key in self._store:
+                self._store.move_to_end(key)
+                return self._store[key]
+            # Phase C — IPC mmap reload (EMERGENCY clear 또는 evict 후).
+            if self._ipcBacked(key):
+                ipcPath = self._ipcPath(key)
+                if ipcPath.exists():
+                    try:
+                        import polars as pl
+
+                        df = pl.read_ipc(str(ipcPath), memory_map=True)
+                        self._store[key] = df
+                        return df
+                    except (OSError, ImportError):
+                        pass
+            raise KeyError(key)
 
     def __setitem__(self, key: str, value: Any) -> None:
         with self._lock:
+            # Phase C — IPC backing. _sections 류 + DataFrame 값 자동 저장 (caller 0 변경).
+            # evict 시에도 디스크에 남아 다음 호출 mmap reload — thrashing 0.
+            if self._ipcBacked(key):
+                try:
+                    import polars as pl
+
+                    if isinstance(value, pl.DataFrame):
+                        value.write_ipc(str(self._ipcPath(key)), compression="zstd")
+                except (OSError, ImportError):
+                    pass  # IPC 저장 실패 — heap 캐시만 유지 (fallback)
+
             if key in self._store:
                 self._store.move_to_end(key)
                 self._store[key] = value
