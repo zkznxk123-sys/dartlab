@@ -482,7 +482,7 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="w-full px-3 py-4">
+					<div className="mx-auto max-w-5xl px-4 py-4">
 						<header className="mb-6 border-b pb-4">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
