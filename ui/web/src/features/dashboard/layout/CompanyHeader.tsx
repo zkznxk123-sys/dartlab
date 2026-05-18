@@ -25,6 +25,7 @@ interface Props {
 	corpName?: string | null;
 	periodKind: PeriodKind;
 	onPeriodKindChange: (p: PeriodKind) => void;
+	hidePeriodToggle?: boolean;
 }
 
 async function fetchMeta(stockCode: string): Promise<CompanyMeta> {
@@ -33,7 +34,7 @@ async function fetchMeta(stockCode: string): Promise<CompanyMeta> {
 	return (await r.json()) as CompanyMeta;
 }
 
-export function CompanyHeader({ stockCode, corpName, periodKind, onPeriodKindChange }: Props) {
+export function CompanyHeader({ stockCode, corpName, periodKind, onPeriodKindChange, hidePeriodToggle }: Props) {
 	const { data: meta } = useQuery({
 		queryKey: ['company', 'meta', stockCode],
 		queryFn: () => fetchMeta(stockCode),
@@ -80,20 +81,22 @@ export function CompanyHeader({ stockCode, corpName, periodKind, onPeriodKindCha
 					</a>
 				))}
 			</div>
-			<div className="flex shrink-0 items-center gap-1 rounded-md border bg-muted/40 p-0.5">
-				{(['annual', 'quarterly'] as PeriodKind[]).map((p) => (
-					<button
-						key={p}
-						type="button"
-						onClick={() => onPeriodKindChange(p)}
-						className={`rounded-sm px-2 py-1 text-xs transition-colors ${
-							periodKind === p ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-						}`}
-					>
-						{p === 'annual' ? '연간' : '분기'}
-					</button>
-				))}
-			</div>
+			{!hidePeriodToggle && (
+				<div className="flex shrink-0 items-center gap-1 rounded-md border bg-muted/40 p-0.5">
+					{(['annual', 'quarterly'] as PeriodKind[]).map((p) => (
+						<button
+							key={p}
+							type="button"
+							onClick={() => onPeriodKindChange(p)}
+							className={`rounded-sm px-2 py-1 text-xs transition-colors ${
+								periodKind === p ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+							}`}
+						>
+							{p === 'annual' ? '연간' : '분기'}
+						</button>
+					))}
+				</div>
+			)}
 		</div>
 	);
 }

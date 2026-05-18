@@ -163,12 +163,14 @@ function _stripNumbering(s: string): string {
 	return s.replace(/^(?:\d+|[IVXivx]+|[가-하])\.\s*/, '').trim();
 }
 
-// 순차 state machine — sections 순서대로 보고 root heading 만나면 ownership 결정.
-// ownLeaf 의 ownership 안 sections 만 KEEP. sub-heading-only sections 는 직전 root 의 leaf 로.
+// 순차 state machine — backend topic API 가 이미 자기 topic 만 슬라이스한 case 가 기본.
+// 단, companyOverview 처럼 cross-contamination 이 박혀 있는 topic 도 있어 다른 KNOWN_LEAF_ROOT
+// heading 이 path 에 등장하면 그 시점부터 false 로 플립. 끝까지 매칭 root 만 또는 비어있으면
+// 모두 KEEP (기본 신뢰). 빈 headingPath 만 가진 정상 본문이 드롭되는 회귀 차단.
 function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafCore: string): ViewerSection[] {
 	if (!ownLeafCore) return allSections;
 	const kept: ViewerSection[] = [];
-	let activeOwn: boolean | null = null;
+	let activeOwn = true;
 	for (const s of allSections) {
 		const path = s.headingPath ?? [];
 		let foundRoot: string | null = null;
@@ -178,7 +180,7 @@ function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafCore: string): Vi
 			if (core && KNOWN_LEAF_ROOTS.has(core)) foundRoot = core;
 		}
 		if (foundRoot !== null) activeOwn = foundRoot === ownLeafCore;
-		if (activeOwn === true) kept.push(s);
+		if (activeOwn) kept.push(s);
 	}
 	return kept;
 }
@@ -465,7 +467,7 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<div className="mx-auto max-w-7xl px-6 py-6">
+					<div className="w-full px-3 py-4">
 						<header className="mb-6 border-b pb-4">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
@@ -482,48 +484,19 @@ function ViewerTab() {
 								</div>
 							</div>
 
-							{/* 시간축 — 전체 periods + 변경 마커 + 윈도우 highlight */}
+							{/* 시간축 — 역순 라벨 리스트 + 윈도우 박스 오버레이 + 좌우 화살표.
+							    왼쪽 화살표 = 더 최신 (리스트의 좌측), 오른쪽 화살표 = 더 과거 (리스트의 우측).
+							    리스트가 newer→older 역순이라 화살표 방향과 이동 방향이 자연스럽게 일치. */}
 							<TimelineRibbon
 								periods={allPeriods}
 								changedSet={changedSet}
 								windowPeriods={windowPeriods}
 								onPick={(p) => setWindowEnd(p === allPeriods[0] ? undefined : p)}
+								onNewer={moveNewer}
+								onOlder={moveOlder}
+								canNewer={canNewer}
+								canOlder={canOlder}
 							/>
-
-							{/* 윈도우 컨트롤 — 좌우 화살표 + 현재 윈도우 표시 */}
-							<div className="mt-3 flex items-center gap-2">
-								<button
-									type="button"
-									onClick={moveOlder}
-									disabled={!canOlder}
-									title="더 과거로"
-									className={cn(
-										'inline-flex size-7 items-center justify-center rounded border bg-card text-muted-foreground',
-										canOlder ? 'hover:bg-accent' : 'opacity-30',
-									)}
-								>
-									<ChevronLeft className="size-4" />
-								</button>
-								<div className="flex-1 flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
-									{windowPeriods.map((p) => (
-										<span key={p} className="rounded bg-accent/40 px-2 py-1">
-											{p}
-										</span>
-									))}
-								</div>
-								<button
-									type="button"
-									onClick={moveNewer}
-									disabled={!canNewer}
-									title="더 최신으로"
-									className={cn(
-										'inline-flex size-7 items-center justify-center rounded border bg-card text-muted-foreground',
-										canNewer ? 'hover:bg-accent' : 'opacity-30',
-									)}
-								>
-									<ChevronRight className="size-4" />
-								</button>
-							</div>
 						</header>
 
 						{/* 3-column header — period + DART link */}
@@ -593,38 +566,82 @@ interface TimelineRibbonProps {
 	changedSet: Set<string>;
 	windowPeriods: string[];
 	onPick: (p: string) => void;
+	onNewer: () => void;
+	onOlder: () => void;
+	canNewer: boolean;
+	canOlder: boolean;
 }
 
-function TimelineRibbon({ periods, changedSet, windowPeriods, onPick }: TimelineRibbonProps) {
+function TimelineRibbon({
+	periods,
+	changedSet,
+	windowPeriods,
+	onPick,
+	onNewer,
+	onOlder,
+	canNewer,
+	canOlder,
+}: TimelineRibbonProps) {
 	if (periods.length === 0) return null;
 	const winSet = new Set(windowPeriods);
+	const windowStart = windowPeriods[0];
+	const windowEnd = windowPeriods[windowPeriods.length - 1];
 	return (
-		<div className="mt-3 flex items-center gap-px overflow-x-auto pb-1 tiny-scroll">
-			{periods.map((p) => {
-				const inWindow = winSet.has(p);
-				const changed = changedSet.has(p);
-				return (
-					<button
-						key={p}
-						type="button"
-						onClick={() => onPick(p)}
-						title={`${p}${changed ? ' · 변경' : ''}`}
-						className={cn(
-							'group relative flex h-5 w-4 shrink-0 flex-col items-center justify-center text-[8px] font-mono transition-colors',
-							inWindow
-								? 'bg-accent text-accent-foreground'
-								: 'text-muted-foreground/50 hover:bg-accent/40',
-						)}
-					>
-						<span
-							className={cn(
-								'size-1.5 rounded-full',
-								changed ? 'bg-[var(--chart-2)]' : 'bg-muted-foreground/30',
-							)}
-						/>
-					</button>
-				);
-			})}
+		<div className="mt-3 flex items-center gap-2">
+			<button
+				type="button"
+				onClick={onNewer}
+				disabled={!canNewer}
+				title="더 최신으로"
+				className={cn(
+					'inline-flex size-7 shrink-0 items-center justify-center rounded border bg-card text-muted-foreground',
+					canNewer ? 'hover:bg-accent' : 'opacity-30',
+				)}
+			>
+				<ChevronLeft className="size-4" />
+			</button>
+			<div className="flex-1 overflow-x-auto tiny-scroll">
+				<div className="flex items-stretch gap-px">
+					{periods.map((p) => {
+						const inWindow = winSet.has(p);
+						const isStart = p === windowStart;
+						const isEnd = p === windowEnd;
+						const changed = changedSet.has(p);
+						return (
+							<button
+								key={p}
+								type="button"
+								onClick={() => onPick(p)}
+								title={`${p}${changed ? ' · 변경 포함' : ''}`}
+								className={cn(
+									'shrink-0 px-2 py-1 font-mono text-[10px] transition-colors border-y',
+									inWindow
+										? 'bg-accent text-accent-foreground border-accent-foreground/40'
+										: 'border-transparent text-muted-foreground/60 hover:bg-accent/30',
+									isStart && 'rounded-l border-l',
+									isEnd && 'rounded-r border-r',
+									changed && !inWindow && 'text-[var(--chart-2)]',
+									changed && inWindow && 'font-semibold',
+								)}
+							>
+								{p}
+							</button>
+						);
+					})}
+				</div>
+			</div>
+			<button
+				type="button"
+				onClick={onOlder}
+				disabled={!canOlder}
+				title="더 과거로"
+				className={cn(
+					'inline-flex size-7 shrink-0 items-center justify-center rounded border bg-card text-muted-foreground',
+					canOlder ? 'hover:bg-accent' : 'opacity-30',
+				)}
+			>
+				<ChevronRight className="size-4" />
+			</button>
 		</div>
 	);
 }

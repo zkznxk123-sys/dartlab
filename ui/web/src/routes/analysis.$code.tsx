@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Outlet, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Outlet, createFileRoute, useLocation, useNavigate } from '@tanstack/react-router';
 
 import { CompanyHeader } from '@/features/dashboard/layout/CompanyHeader';
 import { fetchDashboard, type PeriodKind } from '@/features/dashboard/api/client';
@@ -26,8 +26,10 @@ function AnalysisLayout() {
 	const { code } = Route.useParams();
 	const search = Route.useSearch();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { push } = useRecentCompanies();
 	const [periodKind, setPeriodKind] = useState<PeriodKind>(search.period);
+	const isViewerTab = location.pathname.endsWith('/viewer');
 
 	// URL 과 state 동기화
 	useEffect(() => {
@@ -62,6 +64,7 @@ function AnalysisLayout() {
 					corpName={corpName}
 					periodKind={periodKind}
 					onPeriodKindChange={setPeriodKind}
+					hidePeriodToggle={isViewerTab}
 				/>
 			</div>
 			<div className="min-h-0 flex-1 overflow-y-auto tiny-scroll">
