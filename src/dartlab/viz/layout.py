@@ -41,10 +41,10 @@ from dartlab.viz.schema import CatalogEntry
 # - phaseIndicator = 24×2 strip (한 행 전체 얇음)
 # - narrativeBridge/scoreBadge = 24×4 / 24×3 wide (서사/평점)
 KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
-    "kpiTile": {"cs": 6, "rs": 2, "variance": ["6x3", "4x2", "8x2"]},  # 한 행 4 카드 = 24col 정확
-    "diffView": {"cs": 6, "rs": 2, "variance": ["8x4", "12x4"]},
-    "gauge": {"cs": 6, "rs": 3, "variance": ["8x4"]},  # 한 행 4 카드
-    "topList": {"cs": 6, "rs": 4, "variance": ["8x4"]},  # 한 행 4 카드
+    "kpiTile": {"cs": 4, "rs": 2, "variance": ["4x3", "6x2", "8x2"]},  # 작게 — 한 행 6 카드 = 24col 정확
+    "diffView": {"cs": 4, "rs": 2, "variance": ["8x4", "12x4"]},
+    "gauge": {"cs": 4, "rs": 3, "variance": ["8x4"]},  # 한 행 6 카드
+    "topList": {"cs": 4, "rs": 4, "variance": ["8x4"]},  # 한 행 6 카드
     "trend": {"cs": 8, "rs": 8, "variance": ["12x8", "24x6", "6x6", "12x12"]},
     "breakdown": {"cs": 8, "rs": 8, "variance": ["12x6"]},
     "scatter": {"cs": 8, "rs": 8, "variance": ["12x8"]},
