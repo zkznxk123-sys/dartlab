@@ -1,8 +1,12 @@
 // /analysis/$code/viewer — 공시 뷰어.
 // 좌: TOC 트리 (chapter > topic) · 중앙: 선택된 topic 의 sections 리스트 + preview · 우상: DART 원본.
-// 백엔드 /api/company/{code}/toc + /api/company/{code}/viewer/{topic} 활용.
+//
+// cold load 경로:
+//   - URL 에 topic 없음 → GET /api/company/{code}/init?compact=true (TOC + firstTopic + viewer 1 RTT)
+//   - URL 에 topic 있음 → /toc + /viewer/{topic}?compact=true 병렬 2 RTT (Company cold 1 회)
+// 토픽 전환: /viewer/{topic}?compact=true&limit=60. compact 가 views/timeline/blocks 제거 (payload 80%+ 감소).
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
@@ -43,11 +47,14 @@ interface ViewerResponse {
 	corpName: string;
 	topic: string;
 	topicLabel?: string;
+	compact?: boolean;
 	textDocument?: {
 		topic?: string;
 		mode?: string;
 		periods?: string[];
 		latestPeriod?: string;
+		totalSectionCount?: number;
+		truncated?: boolean;
 		firstPeriod?: string;
 		sectionCount?: number;
 		updatedCount?: number;
@@ -60,6 +67,15 @@ interface ViewerResponse {
 
 interface ViewerSearch {
 	topic?: string;
+}
+
+interface InitResponse {
+	stockCode: string;
+	corpName: string;
+	toc: TocResponse;
+	firstTopic: string | null;
+	firstChapter: string | null;
+	viewer: ViewerResponse | null;
 }
 
 export const Route = createFileRoute('/analysis/$code/viewer')({
@@ -103,14 +119,40 @@ function ViewerTab() {
 	const { code } = Route.useParams();
 	const { topic } = Route.useSearch();
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
-	const { data: toc, isLoading: tocLoading } = useQuery({
+	// cold path: URL 에 topic 없으면 /init 한 번에 toc + firstTopic + viewer.
+	const { data: initBundle, isLoading: initLoading } = useQuery({
+		queryKey: ['viewer', 'init', code],
+		queryFn: () => fetchJson<InitResponse>(`/api/company/${code}/init?compact=true&limit=60`),
+		staleTime: 5 * 60_000,
+		enabled: !topic,
+	});
+
+	// init 번들 도착 → toc / viewer 캐시 시드. URL 이 topic 으로 전환돼도 재요청 없음.
+	useEffect(() => {
+		if (!initBundle) return;
+		queryClient.setQueryData(['viewer', 'toc', code], initBundle.toc);
+		if (initBundle.firstTopic && initBundle.viewer) {
+			queryClient.setQueryData(['viewer', 'topic', code, initBundle.firstTopic], initBundle.viewer);
+		}
+	}, [initBundle, code, queryClient]);
+
+	// warm path: URL 에 topic 있으면 toc 만 별도 fetch (viewer 는 아래 useQuery 가 병렬).
+	const { data: tocOnly, isLoading: tocOnlyLoading } = useQuery({
 		queryKey: ['viewer', 'toc', code],
 		queryFn: () => fetchJson<TocResponse>(`/api/company/${code}/toc`),
 		staleTime: 5 * 60_000,
+		enabled: !!topic,
 	});
 
-	const firstTopic = useMemo(() => toc?.chapters?.[0]?.topics?.[0]?.topic, [toc]);
+	const toc = initBundle?.toc ?? tocOnly;
+	const tocLoading = topic ? tocOnlyLoading : initLoading;
+
+	const firstTopic = useMemo(
+		() => initBundle?.firstTopic ?? toc?.chapters?.[0]?.topics?.[0]?.topic,
+		[initBundle?.firstTopic, toc],
+	);
 	const activeTopic = topic ?? firstTopic;
 
 	useEffect(() => {
@@ -127,12 +169,20 @@ function ViewerTab() {
 		}
 	}, [topic, firstTopic, code, navigate]);
 
-	const { data: viewer, isLoading: viewerLoading } = useQuery({
+	// init 번들이 firstTopic viewer 를 들고 있으면 초기값으로 활용 — fetch 없이 즉시 렌더.
+	const initViewerSeed = !topic && initBundle?.viewer && initBundle.firstTopic === activeTopic
+		? initBundle.viewer
+		: undefined;
+
+	const { data: viewerFetched, isLoading: viewerFetchLoading } = useQuery({
 		queryKey: ['viewer', 'topic', code, activeTopic],
-		queryFn: () => fetchJson<ViewerResponse>(`/api/company/${code}/viewer/${activeTopic}`),
-		enabled: !!activeTopic,
+		queryFn: () => fetchJson<ViewerResponse>(`/api/company/${code}/viewer/${activeTopic}?compact=true&limit=60`),
+		enabled: !!activeTopic && !initViewerSeed,
 		staleTime: 60_000,
 	});
+
+	const viewer = viewerFetched ?? initViewerSeed;
+	const viewerLoading = !viewer && (viewerFetchLoading || (!topic && initLoading));
 
 	const td = viewer?.textDocument;
 	const sections = td?.sections ?? [];
@@ -251,12 +301,12 @@ function ViewerTab() {
 							</div>
 						) : (
 							<div className="space-y-3">
-								{sections.slice(0, 60).map((s) => (
+								{sections.map((s) => (
 									<SectionItem key={s.id} section={s} />
 								))}
-								{sections.length > 60 && (
+								{td?.truncated && td?.totalSectionCount != null && (
 									<div className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
-										… 그 외 {sections.length - 60} 섹션. 필터/검색은 후속 PR.
+										… 그 외 {td.totalSectionCount - sections.length} 섹션. 필터/검색은 후속 PR.
 									</div>
 								)}
 							</div>

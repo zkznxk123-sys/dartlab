@@ -232,8 +232,15 @@ def apiCompanySections(code: str, request: Request, response: Response):
 
 
 @router.get("/api/company/{code}/init")
-def apiCompanyInit(code: str, request: Request, response: Response):
-    """SPA 초기 로드용 번들 — toc + 첫 topic viewer + diff 요약."""
+def apiCompanyInit(
+    code: str,
+    request: Request,
+    compact: bool = Query(True, description="viewer 부분에 compact 적용 (default True)"),
+    limit: int = Query(60, ge=0, le=500, description="compact viewer sections 최대 개수"),
+    withDiff: bool = Query(False, description="diff 요약 포함 여부 (default False — 초기 로드 가속)"),
+    response: Response = None,
+):
+    """SPA 초기 로드용 번들 — toc + 첫 topic viewer + (옵션) diff 요약."""
     try:
         company = getCompany(code)
         toc_data = buildToc(company)
@@ -250,8 +257,9 @@ def apiCompanyInit(code: str, request: Request, response: Response):
         viewer_data = None
         diff_data = None
         if first_topic:
-            viewer_data = buildViewer(company, first_topic)
-            diff_data = buildDiffSummary(company, first_topic)
+            viewer_data = buildViewer(company, first_topic, compact=compact, limit=limit)
+            if withDiff:
+                diff_data = buildDiffSummary(company, first_topic)
 
         result = {
             "stockCode": company.stockCode,
@@ -294,6 +302,8 @@ def apiCompanyViewerTopic(
     topic: str,
     request: Request,
     period: str | None = Query(None, description="특정 기간만 반환 (타임라인 클릭 최적화)"),
+    compact: bool = Query(True, description="UI 가 안 쓰는 views/timeline/blocks 제거. payload 80%+ 감소"),
+    limit: int = Query(60, ge=0, le=500, description="compact 모드에서 sections 최대 개수 (0=무제한)"),
     response: Response = None,
 ):
     """단일 topic의 viewer 데이터 — sections 블록 + 텍스트 문서."""
@@ -326,7 +336,7 @@ def apiCompanyViewerTopic(
                 "textDocument": serializeViewerTextDocument(viewerTextDocument(topic, blocks)),
             }
         else:
-            data = buildViewer(company, topic)
+            data = buildViewer(company, topic, compact=compact, limit=limit)
 
         return etagResponse(request, response, data, maxAge=120, swr=600)
     except HANDLED_API_ERRORS as exc:
@@ -369,9 +379,14 @@ def apiViewerDoc(
 
 @router.post("/api/company/{code}/viewer/batch")
 async def apiCompanyViewerBatch(code: str, request: Request, response: Response):
-    """여러 topic의 viewer 데이터를 한 번에 반환 — chapter 확장 시 N+1 제거."""
+    """여러 topic의 viewer 데이터를 한 번에 반환 — chapter 확장 시 N+1 제거.
+
+    body 에 `compact: true` (default) + `limit: int` (default 60) 허용.
+    """
     body = await request.json()
     topics = body.get("topics", [])
+    compact = bool(body.get("compact", True))
+    limit = int(body.get("limit", 60))
     if not topics or not isinstance(topics, list):
         raise HTTPException(status_code=400, detail="topics 배열 필요")
     topics = topics[:20]  # 최대 20개 제한
@@ -383,7 +398,7 @@ async def apiCompanyViewerBatch(code: str, request: Request, response: Response)
             if not isinstance(topic, str):
                 continue
             try:
-                results[topic] = buildViewer(company, topic)
+                results[topic] = buildViewer(company, topic, compact=compact, limit=limit)
             except HANDLED_API_ERRORS:
                 results[topic] = None
         return etagResponse(request, response, {"results": results}, maxAge=120, swr=600)

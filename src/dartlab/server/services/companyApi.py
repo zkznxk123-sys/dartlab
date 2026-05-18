@@ -199,8 +199,58 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
     return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=chapters).model_dump()
 
 
-def buildViewer(company: Company, topic: str) -> dict[str, Any]:
-    """topic별 뷰어 블록과 텍스트 문서를 직렬화하여 반환한다."""
+_VIEWER_COMPACT_SECTION_KEEP = (
+    "id",
+    "headingPath",
+    "status",
+    "latestChange",
+    "preview",
+    "latestPeriod",
+    "firstPeriod",
+)
+
+
+def _compactTextDocument(doc: dict[str, Any] | None, *, limit: int) -> dict[str, Any] | None:
+    """UI 가 실제 사용하는 필드만 남긴 경량 textDocument 변환.
+
+    Drops: section.views (period 별 전문 dict), section.timeline, section.latest,
+    section.order, section.bodyBlock, section.periodCount, top-level entries,
+    top-level periods. UI ([analysis.$code.viewer.tsx]) 가 안 읽는다.
+    """
+    if doc is None:
+        return None
+    sections = doc.get("sections") or []
+    total = len(sections)
+    sliced = sections[:limit] if limit > 0 else sections
+    compactSections = [{key: section.get(key) for key in _VIEWER_COMPACT_SECTION_KEEP} for section in sliced]
+    return {
+        "topic": doc.get("topic"),
+        "mode": doc.get("mode"),
+        "latestPeriod": doc.get("latestPeriod"),
+        "firstPeriod": doc.get("firstPeriod"),
+        "sectionCount": doc.get("sectionCount", total),
+        "updatedCount": doc.get("updatedCount"),
+        "newCount": doc.get("newCount"),
+        "staleCount": doc.get("staleCount"),
+        "stableCount": doc.get("stableCount"),
+        "totalSectionCount": total,
+        "truncated": total > len(sliced),
+        "sections": compactSections,
+    }
+
+
+def buildViewer(
+    company: Company,
+    topic: str,
+    *,
+    compact: bool = False,
+    limit: int = 60,
+) -> dict[str, Any]:
+    """topic별 뷰어 블록과 텍스트 문서를 직렬화하여 반환한다.
+
+    compact=True 면 frontend 가 안 쓰는 무거운 필드 (views/timeline/blocks/
+    entries) 를 제거하고 sections 를 limit 개로 잘라낸다. payload 80%+ 감소.
+    """
     from dartlab.providers.dart.docs.viewer import (
         serializeViewerBlock,
         serializeViewerTextDocument,
@@ -216,6 +266,18 @@ def buildViewer(company: Company, topic: str) -> dict[str, Any]:
         blocks = viewerBlocks(company, topic)
         company._viewer_cache[topic] = blocks
 
+    textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
+    if compact:
+        return {
+            "stockCode": company.stockCode,
+            "corpName": company.corpName,
+            "topic": topic,
+            "topicLabel": safeTopicLabel(company, topic),
+            "period": None,
+            "compact": True,
+            "textDocument": _compactTextDocument(textDoc, limit=limit),
+        }
+
     return {
         "stockCode": company.stockCode,
         "corpName": company.corpName,
@@ -223,7 +285,7 @@ def buildViewer(company: Company, topic: str) -> dict[str, Any]:
         "topicLabel": safeTopicLabel(company, topic),
         "period": None,
         "blocks": [serializeViewerBlock(block) for block in blocks],
-        "textDocument": serializeViewerTextDocument(viewerTextDocument(topic, blocks)),
+        "textDocument": textDoc,
     }
 
 
