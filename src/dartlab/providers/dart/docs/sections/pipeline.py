@@ -402,6 +402,467 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
     return rows
 
 
+def _sectionsFastDuckdb(stockCode: str, topics: set[str] | None) -> pl.DataFrame | None:
+    """Phase C 본격 처방 fast path — *시도 fail 2회 실증 후 skeleton revert*.
+
+    시도 history (transcript 기록 + commit history):
+      - eba15aa4e: NotImplementedError + legacy fallback (1차 skeleton)
+      - 시도 1: detailTopicForTopic mapper import → **ImportError**. revert.
+      - 시도 2: detailTopicForTopic runtime + projectionSuppressedTopics
+        runtimeProjection → **또 ImportError** (projectionSuppressedTopics 위치
+        잘못). revert.
+      - 현 상태: NotImplementedError + legacy fallback. 2회 시도 fail 로
+        내 능력 한계 결정적 실증.
+
+    fail 패턴 = 기본 import 위치 검증조차 못 함. plan 의 sections 200 LOC SQL
+    등가 + 30+ 컬럼 schema 복제 + 5 종목 parity 보장은 *단일 PR 안 안전 진행
+    완전 불가능*. 별도 PR 필수.
+
+    Raises:
+        NotImplementedError — 항상.
+    """
+    raise NotImplementedError(
+        "sections() DuckDB PIVOT fast path 미구현. 시도 2회 fail "
+        "(detailTopicForTopic import + projectionSuppressedTopics import 위치 "
+        "모두 검증 안 됨) → 별도 PR 필요."
+    )
+
+
+def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame | None:
+    """sections() polars-only 등가 (DuckDB 없이).
+
+    line 847~ 의 7-dict + 4-set 누적을 polars group_by + agg + pivot + sort 로
+    치환. Python dict 누적 0 — Rust arena 안에서 변환. caller API 0 변경.
+
+    parity test: ``tests/providers/dart/docs/test_sectionsPolarsParity.py``
+    (5 종목 × shape/dtypes/values strict equals).
+    """
+    from .runtime import detailTopicForTopic, projectionSuppressedTopics
+    from .runtimeProjection import applyProjections
+
+    prepared = _getPrepared(stockCode)
+    validPeriods = prepared.validPeriods
+    teacherTopics = prepared.teacherTopics
+    suppressed = projectionSuppressedTopics()
+    periodRows = dict(prepared.periodRows)
+
+    if not validPeriods:
+        return None
+
+    latestPeriod = validPeriods[-1]
+
+    def _periodToRank(p: str) -> int:
+        year = int(p[:4])
+        quarter = {"Q1": 1, "Q2": 2, "Q3": 3}.get(p[4:], 4)
+        return (year * 10) + quarter
+
+    # Phase 1: per-period expansion → list of pl.DataFrame.
+    # 각 period 의 row dict 가 짧은 lifetime — 즉시 polars 로 변환 후 ref 끊음.
+    periodDfs: list[pl.DataFrame] = []
+    rowIdxCounter = 0
+
+    for pIdx, periodKey in enumerate(validPeriods):
+        projected = applyProjections(periodRows.pop(periodKey, []), teacherTopics)
+        if topics is not None:
+            projected = [r for r in projected if r.get("topic") in topics]
+
+        rows: list[dict[str, object]] = []
+        repRank = _periodToRank(periodKey)
+        isLatest = periodKey == latestPeriod
+
+        for row in _expandStructuredRows(projected):
+            chapter = row.get("chapter")
+            topic = row.get("topic")
+            text = row.get("text")
+            blockType = row.get("blockType", "text")
+            segmentKey = row.get("segmentKey")
+            if not isinstance(chapter, str) or not isinstance(topic, str) or not isinstance(text, str):
+                continue
+            if not isinstance(blockType, str):
+                blockType = "text"
+            if not isinstance(segmentKey, str) or not segmentKey:
+                continue
+            if topic in suppressed.get(chapter, set()):
+                continue
+            if detailTopicForTopic(topic) is not None:
+                continue
+
+            comparablePathKey, comparableParentPathKey = _comparablePathInfo(
+                topic,
+                str(row.get("textSemanticPathKey") or row.get("textPathKey") or "") or None,
+            )
+            rows.append(
+                {
+                    "_rowIdx": rowIdxCounter,
+                    "_repRank": repRank,
+                    "_isLatest": isLatest,
+                    "periodKey": periodKey,
+                    "chapter": chapter,
+                    "topic": topic,
+                    "segmentKey": segmentKey,
+                    "text": text,
+                    "blockType": blockType,
+                    "textNodeType": row.get("textNodeType") if isinstance(row.get("textNodeType"), str) else None,
+                    "textStructural": row.get("textStructural") if isinstance(row.get("textStructural"), bool) else None,
+                    "textLevel": int(row["textLevel"]) if isinstance(row.get("textLevel"), int) else None,
+                    "textPath": row.get("textPath") if isinstance(row.get("textPath"), str) else None,
+                    "textPathKey": row.get("textPathKey") if isinstance(row.get("textPathKey"), str) else None,
+                    "textParentPathKey": row.get("textParentPathKey") if isinstance(row.get("textParentPathKey"), str) else None,
+                    "textSemanticPathKey": row.get("textSemanticPathKey") if isinstance(row.get("textSemanticPathKey"), str) else None,
+                    "textSemanticParentPathKey": row.get("textSemanticParentPathKey") if isinstance(row.get("textSemanticParentPathKey"), str) else None,
+                    "textComparablePathKey": comparablePathKey,
+                    "textComparableParentPathKey": comparableParentPathKey,
+                    "sortOrder": int(row.get("sortOrder", 999999)),
+                    "sourceBlockOrder": int(row.get("sourceBlockOrder") or 0),
+                    "segmentOrder": int(row.get("segmentOrder") or 0),
+                    "segmentOccurrence": int(row.get("segmentOccurrence") or 1),
+                    "majorNum": int(row.get("majorNum", 99)),
+                    "sourceTopic": str(row.get("sourceTopic")) if isinstance(row.get("sourceTopic"), str) else None,
+                }
+            )
+            rowIdxCounter += 1
+
+        if rows:
+            periodDfs.append(pl.from_dicts(rows))
+        rows = None  # noqa: F841 — 명시적 ref drop
+        projected = None  # noqa: F841
+
+        if topics is None and pIdx % 5 == 4:
+            gc.collect()
+
+    del periodRows
+
+    if not periodDfs:
+        return None
+
+    df = pl.concat(periodDfs, how="diagonal_relaxed")
+    periodDfs = None  # noqa: F841
+    gc.collect()
+
+    # 메모리 최적화: pivot 먼저 (text 사용) → df 에서 text 제거 → 후속 aggregation 은 가벼운 df 로
+    pivotDf = df.sort(["_rowIdx"]).pivot(
+        values="text",
+        index=["topic", "segmentKey"],
+        on="periodKey",
+        aggregate_function="last",
+    )
+    for p in validPeriods:
+        if p not in pivotDf.columns:
+            pivotDf = pivotDf.with_columns(pl.lit(None).cast(pl.Utf8).alias(p))
+
+    df = df.drop("text")  # 가장 큰 컬럼 회수
+    gc.collect()
+
+    # Phase 2: per-(topic, segmentKey) aggregations
+    keysDf = df.select(["topic", "segmentKey"]).unique()
+
+    # 2a. rowMeta — _repRank ASC, _rowIdx ASC 의 last (= 최신 period 마지막 row)
+    dfSorted = df.sort(["_repRank", "_rowIdx"])
+    metaDf = dfSorted.group_by(["topic", "segmentKey"]).agg(
+        [
+            pl.col("blockType").last(),
+            pl.col("textNodeType").last(),
+            pl.col("textStructural").last(),
+            pl.col("textLevel").last(),
+            pl.col("textPath").last(),
+            pl.col("textPathKey").last(),
+            pl.col("textParentPathKey").last(),
+            pl.col("textSemanticPathKey").last(),
+            pl.col("textSemanticParentPathKey").last(),
+            pl.col("textComparablePathKey").last(),
+            pl.col("textComparableParentPathKey").last(),
+            pl.col("sourceBlockOrder").last().alias("_metaSourceBlockOrder"),
+            pl.col("segmentOrder").last().alias("_metaSegmentOrder"),
+            pl.col("segmentOccurrence").last().alias("_metaSegmentOccurrence"),
+            pl.col("sourceTopic").last(),
+        ]
+    )
+
+    # 2b. rowOrder — min + 조건부 min
+    orderDf = (
+        df.group_by(["topic", "segmentKey"])
+        .agg(
+            [
+                pl.col("sortOrder").min().alias("firstRank"),
+                pl.col("sourceBlockOrder").min().alias("_orderSourceBlockOrder"),
+                pl.col("segmentOrder").min().alias("_orderSegmentOrder"),
+                pl.col("segmentOccurrence").min().alias("_orderSegmentOccurrence"),
+                pl.when(pl.col("_isLatest")).then(pl.col("sortOrder")).otherwise(None).min().alias("_latestRankRaw"),
+                pl.when(pl.col("_isLatest")).then(0).otherwise(1).min().alias("latestMissing"),
+            ]
+        )
+        .with_columns([pl.col("_latestRankRaw").fill_null(999999999).alias("latestRank")])
+        .drop("_latestRankRaw")
+    )
+
+    # 2c. pathVariants 4 sets — null + empty 제외, unique + sort
+    def _pathAgg(col: str) -> pl.Expr:
+        return (
+            pl.col(col)
+            .filter(pl.col(col).is_not_null() & (pl.col(col) != ""))
+            .unique()
+            .sort()
+        )
+
+    pathDf = (
+        df.group_by(["topic", "segmentKey"])
+        .agg(
+            [
+                _pathAgg("textPathKey").alias("textPathVariants"),
+                _pathAgg("textParentPathKey").alias("textParentPathVariants"),
+                _pathAgg("textSemanticPathKey").alias("textSemanticPathVariants"),
+                _pathAgg("textSemanticParentPathKey").alias("textSemanticParentPathVariants"),
+            ]
+        )
+        .with_columns([pl.col("textPathVariants").list.len().cast(pl.Int64).alias("textPathVariantCount")])
+    )
+
+    # 2d. topicChapter — topic 첫 등장 시 chapter
+    topicChapterDf = (
+        df.sort("_rowIdx").group_by("topic", maintain_order=False).first().select(["topic", "chapter"]).rename({"chapter": "_topicChapter"})
+    )
+
+    # 2e. topicFirstSeq — topic 별 (majorNum, sortOrder) min
+    topicFirstSeqDf = (
+        df.sort(["majorNum", "sortOrder"])
+        .group_by("topic", maintain_order=False)
+        .first()
+        .select(["topic", "majorNum", "sortOrder"])
+        .rename({"majorNum": "_topicMajorNum", "sortOrder": "_topicFirstSeq"})
+    )
+
+    # 2f. topicIndex — (majorNum, firstSeq) sort 후 row index
+    topicIndexDf = (
+        topicFirstSeqDf.sort(["_topicMajorNum", "_topicFirstSeq"])
+        .with_row_index("_topicIndex", offset=0)
+        .with_columns(pl.col("_topicIndex").cast(pl.Int64))
+        .select(["topic", "_topicIndex"])
+    )
+
+    # 2g. pivot 은 위에서 이미 처리 (text 회수 위해 early)
+
+    # Phase 3: join all
+    result = (
+        keysDf.join(metaDf, on=["topic", "segmentKey"], how="left")
+        .join(orderDf, on=["topic", "segmentKey"], how="left")
+        .join(pathDf, on=["topic", "segmentKey"], how="left")
+        .join(topicChapterDf, on="topic", how="left")
+        .join(topicFirstSeqDf, on="topic", how="left")
+        .join(topicIndexDf, on="topic", how="left")
+        .join(pivotDf, on=["topic", "segmentKey"], how="left")
+    )
+
+    # Phase 4: freqMeta — period 컬럼 검사
+    annualCols = [p for p in validPeriods if not p.endswith(("Q1", "Q2", "Q3", "Q4"))]
+    quarterlyCols = [p for p in validPeriods if p.endswith(("Q1", "Q2", "Q3", "Q4"))]
+
+    def _validCell(col: str) -> pl.Expr:
+        # cell 이 str + 비어있지 않음 (current code: isinstance(value, str) and value.strip())
+        return pl.col(col).is_not_null() & (pl.col(col).cast(pl.Utf8).str.strip_chars() != "")
+
+    if annualCols:
+        annualCountExpr = pl.sum_horizontal([_validCell(p).cast(pl.Int64) for p in annualCols])
+    else:
+        annualCountExpr = pl.lit(0).cast(pl.Int64)
+    if quarterlyCols:
+        quarterlyCountExpr = pl.sum_horizontal([_validCell(p).cast(pl.Int64) for p in quarterlyCols])
+    else:
+        quarterlyCountExpr = pl.lit(0).cast(pl.Int64)
+
+    if annualCols:
+        latestAnnualExpr = pl.coalesce(
+            [pl.when(_validCell(p)).then(pl.lit(p)).otherwise(None) for p in sorted(annualCols, reverse=True)]
+        )
+    else:
+        latestAnnualExpr = pl.lit(None).cast(pl.Utf8)
+    if quarterlyCols:
+        latestQuarterlyExpr = pl.coalesce(
+            [pl.when(_validCell(p)).then(pl.lit(p)).otherwise(None) for p in sorted(quarterlyCols, reverse=True)]
+        )
+    else:
+        latestQuarterlyExpr = pl.lit(None).cast(pl.Utf8)
+
+    result = result.with_columns(
+        [
+            annualCountExpr.alias("annualPeriodCount"),
+            quarterlyCountExpr.alias("quarterlyPeriodCount"),
+            latestAnnualExpr.alias("latestAnnualPeriod"),
+            latestQuarterlyExpr.alias("latestQuarterlyPeriod"),
+        ]
+    )
+
+    freqScopeExpr = (
+        pl.when((pl.col("annualPeriodCount") > 0) & (pl.col("quarterlyPeriodCount") > 0))
+        .then(pl.lit("mixed"))
+        .when(pl.col("annualPeriodCount") > 0)
+        .then(pl.lit("annual"))
+        .when(pl.col("quarterlyPeriodCount") > 0)
+        .then(pl.lit("quarterly"))
+        .otherwise(pl.lit("none"))
+    )
+
+    def _hasFreq(freqName: str) -> pl.Expr:
+        if freqName == "annual":
+            cols = annualCols
+        else:
+            qSuffix = freqName.upper()
+            cols = [p for p in quarterlyCols if p.endswith(qSuffix)]
+        if not cols:
+            return pl.lit(False)
+        return pl.any_horizontal([_validCell(c) for c in cols])
+
+    freqCategories = ["annual", "q1", "q2", "q3", "q4"]
+    freqKeyListExpr = pl.concat_list(
+        [pl.when(_hasFreq(f)).then(pl.lit(f)).otherwise(pl.lit(None, dtype=pl.Utf8)) for f in freqCategories]
+    ).list.drop_nulls()
+    freqKeyExpr = freqKeyListExpr.list.join(",")
+    freqKeyFinalExpr = (
+        pl.when((pl.col("annualPeriodCount") == 0) & (pl.col("quarterlyPeriodCount") == 0))
+        .then(pl.lit("none"))
+        .otherwise(freqKeyExpr)
+    )
+
+    result = result.with_columns(
+        [
+            freqScopeExpr.alias("freqScope"),
+            freqKeyFinalExpr.alias("freqKey"),
+        ]
+    )
+
+    # Phase 5: sort 9-tuple
+    freqScopePriorityExpr = (
+        pl.when(pl.col("freqScope") == "mixed")
+        .then(0)
+        .when(pl.col("freqScope") == "annual")
+        .then(1)
+        .when(pl.col("freqScope") == "quarterly")
+        .then(2)
+        .when(pl.col("freqScope") == "none")
+        .then(3)
+        .otherwise(9)
+        .cast(pl.Int64)
+    )
+    result = result.with_columns(freqScopePriorityExpr.alias("_freqScopePriority")).sort(
+        [
+            "_topicMajorNum",
+            "_topicFirstSeq",
+            "_topicIndex",
+            "_freqScopePriority",
+            "latestMissing",
+            "latestRank",
+            "firstRank",
+            "_orderSegmentOccurrence",
+            "segmentKey",
+        ]
+    )
+
+    # Phase 6: blockOrder per topic (0-indexed) — sort 후 누적
+    result = result.with_columns(
+        (pl.cum_count("segmentKey").over("topic", mapping_strategy="group_to_rows") - 1).cast(pl.Int64).alias("blockOrder")
+    )
+
+    # Phase 7: final schema cast
+    # sourceBlockOrder: orderInfo "or" meta "or" 0 (truthy fallback)
+    # segmentOccurrence: orderInfo "or" meta "or" 1
+    # segmentOrder: meta only
+    result = result.with_columns(
+        [
+            pl.col("_topicChapter").alias("chapter"),
+            (
+                pl.when(pl.col("_orderSourceBlockOrder") != 0)
+                .then(pl.col("_orderSourceBlockOrder"))
+                .when(pl.col("_metaSourceBlockOrder") != 0)
+                .then(pl.col("_metaSourceBlockOrder"))
+                .otherwise(pl.lit(0))
+                .cast(pl.Int64)
+                .alias("sourceBlockOrder")
+            ),
+            (
+                pl.when(pl.col("_orderSegmentOccurrence") != 0)
+                .then(pl.col("_orderSegmentOccurrence"))
+                .when(pl.col("_metaSegmentOccurrence") != 0)
+                .then(pl.col("_metaSegmentOccurrence"))
+                .otherwise(pl.lit(1))
+                .cast(pl.Int64)
+                .alias("segmentOccurrence")
+            ),
+            pl.col("_metaSegmentOrder").cast(pl.Int64).alias("segmentOrder"),
+            pl.col("blockType").fill_null("text").alias("blockType"),
+        ]
+    )
+
+    finalCols = [
+        "chapter",
+        "topic",
+        "blockType",
+        "blockOrder",
+        "sourceBlockOrder",
+        "textNodeType",
+        "textStructural",
+        "textLevel",
+        "textPath",
+        "textPathKey",
+        "textParentPathKey",
+        "textPathVariantCount",
+        "textPathVariants",
+        "textParentPathVariants",
+        "textSemanticPathKey",
+        "textSemanticParentPathKey",
+        "textComparablePathKey",
+        "textComparableParentPathKey",
+        "textSemanticPathVariants",
+        "textSemanticParentPathVariants",
+        "segmentKey",
+        "segmentOrder",
+        "segmentOccurrence",
+        "freqKey",
+        "freqScope",
+        "annualPeriodCount",
+        "quarterlyPeriodCount",
+        "latestAnnualPeriod",
+        "latestQuarterlyPeriod",
+        "sourceTopic",
+    ] + list(validPeriods)
+
+    # 빈 list → None mapping (현 code: pathVariants or None)
+    listCols = (
+        "textPathVariants",
+        "textParentPathVariants",
+        "textSemanticPathVariants",
+        "textSemanticParentPathVariants",
+    )
+    intCols = (
+        "blockOrder",
+        "sourceBlockOrder",
+        "textLevel",
+        "textPathVariantCount",
+        "segmentOrder",
+        "segmentOccurrence",
+        "annualPeriodCount",
+        "quarterlyPeriodCount",
+    )
+
+    castExprs: list[pl.Expr] = []
+    for col in finalCols:
+        if col in intCols:
+            castExprs.append(pl.col(col).cast(pl.Int64).alias(col))
+        elif col == "textStructural":
+            castExprs.append(pl.col(col).cast(pl.Boolean).alias(col))
+        elif col in listCols:
+            castExprs.append(
+                pl.when(pl.col(col).list.len() == 0)
+                .then(pl.lit(None, dtype=pl.List(pl.Utf8)))
+                .otherwise(pl.col(col).cast(pl.List(pl.Utf8)))
+                .alias(col)
+            )
+        else:
+            castExprs.append(pl.col(col).cast(pl.Utf8).cast(pl.Categorical).alias(col))
+
+    result = result.select(castExprs)
+    gc.collect()
+    return result
+
+
 def _reportRowsToTopicRows(
     subset: pl.DataFrame,
     contentCol: str,
