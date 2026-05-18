@@ -153,7 +153,7 @@ function TrendChart({ spec, height }: { spec: RechartsSpec; height: number }) {
 	const Wrapper = onlyLines ? LineChart : onlyBars ? BarChart : ComposedChart;
 
 	return (
-		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height }}>
+		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height, minWidth: 0 }}>
 			<Wrapper
 				accessibilityLayer
 				data={rows}
@@ -228,7 +228,7 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 		return row;
 	});
 	return (
-		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height }}>
+		<ChartContainer config={config} className="!aspect-auto w-full" style={{ height, minWidth: 0 }}>
 			<RadarChart data={rows}>
 				<PolarGrid />
 				<PolarAngleAxis dataKey="_x" fontSize={10} />
