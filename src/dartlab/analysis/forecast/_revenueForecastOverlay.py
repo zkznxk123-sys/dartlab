@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from dartlab.analysis.forecast.revenueForecast import (
+from dartlab.analysis.forecast._revenueForecastTypes import (
     RevenueForecastAIOverlay,
     RevenueForecastResult,
 )
