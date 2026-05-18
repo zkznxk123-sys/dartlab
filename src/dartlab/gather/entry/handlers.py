@@ -713,3 +713,73 @@ def handleDartDoc(
     from dartlab.gather.dart.viewer import fetch as _fetchDartDoc
 
     return _fetchDartDoc(target)
+
+
+_COMMODITY_TICKERS = {
+    "WTI": ("CL=F", "WTI 원유"),
+    "Brent": ("BZ=F", "Brent 원유"),
+    "Copper": ("HG=F", "구리 (LME 선물)"),
+    "Gold": ("GC=F", "금 선물"),
+    "Silver": ("SI=F", "은 선물"),
+}
+
+
+def handleCommodity(
+    g: Any,  # noqa: ARG001
+    target: str | None,
+    *,
+    market: str,  # noqa: ARG001
+    start: str | None,
+    end: str | None,
+    marketExplicit: bool,  # noqa: ARG001
+    **kwargs: Any,
+) -> pl.DataFrame:
+    """commodity axis dispatch — 원자재 선물 가격 (Yahoo Finance via yfinance, key 0)."""
+    period = kwargs.pop("period", "1y")
+    if target:
+        key = target.strip()
+        # 대소문자 정규화 — 'wti' 도 받음
+        match = next((k for k in _COMMODITY_TICKERS if k.lower() == key.lower()), None)
+        if match is None:
+            raise ValueError(f"gather('commodity', target) target 미지원: {target!r}. 지원: {list(_COMMODITY_TICKERS)}")
+        items = [(match, *_COMMODITY_TICKERS[match])]
+    else:
+        items = [(name, sym, label) for name, (sym, label) in _COMMODITY_TICKERS.items()]
+    try:
+        import yfinance as yf
+    except ImportError as exc:
+        raise RuntimeError("yfinance 미설치 — uv pip install yfinance") from exc
+    frames: list[pl.DataFrame] = []
+    for name, sym, label in items:
+        try:
+            kwargs_hist: dict[str, Any] = {"period": period} if not (start or end) else {}
+            if start:
+                kwargs_hist["start"] = start
+            if end:
+                kwargs_hist["end"] = end
+            hist = yf.Ticker(sym).history(**kwargs_hist)
+        except Exception:  # noqa: BLE001
+            continue
+        if hist is None or hist.empty:
+            continue
+        rows = [
+            {
+                "date": idx.strftime("%Y-%m-%d"),
+                "symbol": sym,
+                "name": name,
+                "label": label,
+                "close": float(row["Close"]),
+                "open": float(row["Open"]),
+                "high": float(row["High"]),
+                "low": float(row["Low"]),
+                "volume": float(row["Volume"]) if row["Volume"] == row["Volume"] else 0.0,
+            }
+            for idx, row in hist.iterrows()
+        ]
+        if rows:
+            frames.append(pl.DataFrame(rows))
+    if not frames:
+        return pl.DataFrame(
+            schema={"date": pl.Utf8, "symbol": pl.Utf8, "name": pl.Utf8, "label": pl.Utf8, "close": pl.Float64}
+        )
+    return pl.concat(frames)

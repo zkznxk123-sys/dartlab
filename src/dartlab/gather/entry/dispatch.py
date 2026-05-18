@@ -134,6 +134,17 @@ AXIS_REGISTRY: dict[str, GatherAxisEntry] = {
         targetType="rceptNo",
         hidden=True,
     ),
+    "commodity": GatherAxisEntry(
+        label="원자재 선물",
+        description=(
+            "Yahoo Finance 원자재 선물 OHLCV — WTI/Brent (원유), Copper (LME 구리), Gold/Silver. "
+            "API 키 0 (yfinance 패키지). target 생략 시 5 종 모두 long-form 반환. "
+            "철강·석유화학·반도체·자동차 마진 분석의 원자재 driver 인용 용도."
+        ),
+        example='gather("commodity") / gather("commodity", "WTI") / gather("commodity", "Copper", period="6mo")',
+        targetRequired=False,
+        targetType="keyword",
+    ),
     "calendar": GatherAxisEntry(
         label="catalyst 일정",
         description=(
@@ -163,6 +174,7 @@ API_KEY_INFO: dict[str, str] = {
     "krx": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX OpenAPI 직접 호출)",
     "krxIndex": "불필요 (기본 HF SSOT, apiKey 명시 시 KRX idx OpenAPI 직접 호출)",
     "dartDoc": "불필요 (viewer 무인증 단건 fetch)",
+    "commodity": "불필요 (yfinance — Yahoo Finance 무인증)",
     "calendar": "DART_API_KEY (Company.disclosure 사용)",
 }
 
