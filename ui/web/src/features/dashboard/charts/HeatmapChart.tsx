@@ -42,8 +42,11 @@ export function HeatmapChart({ cells, rowOrder, colOrder, tone = 'sequential', m
 	const lookup = new Map<string, MatrixCell>();
 	for (const c of cells) lookup.set(`${c.row}|${c.col}`, c);
 	return (
-		<div className="overflow-x-auto px-2" style={height ? { height } : undefined}>
-			<table className="w-full border-separate" style={{ borderSpacing: 2 }}>
+		<div
+			className="flex h-full w-full items-center justify-center overflow-auto px-2"
+			style={height ? { height } : undefined}
+		>
+			<table className="h-full w-full border-separate" style={{ borderSpacing: 2 }}>
 				<thead>
 					<tr>
 						<th className="text-left text-xs font-normal text-muted-foreground" />

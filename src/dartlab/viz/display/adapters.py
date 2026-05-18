@@ -84,6 +84,15 @@ def buildKpiTilesFromNorm(norm: Any, periods: list[str], tilePlans: list[dict[st
         data: list[float | None] = []
         if "account" in plan:
             data = extractSeries(norm, plan["account"], periods)
+        elif "yoy" in plan:
+            base = extractSeries(norm, plan["yoy"], periods)
+            data = [None]
+            for k in range(1, len(periods)):
+                p, c = base[k - 1], base[k]
+                if p is None or c is None or p == 0:
+                    data.append(None)
+                else:
+                    data.append((c - p) / abs(p) * 100)
         elif "ratio" in plan:
             ratio = plan["ratio"]
             num_terms = ratio.get("num") or {}

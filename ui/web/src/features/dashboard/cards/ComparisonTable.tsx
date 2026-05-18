@@ -43,8 +43,8 @@ function fmt(v: number | null | undefined, unit?: string): string {
 
 export function ComparisonTable({ rows, companyLabel = '회사' }: Props) {
 	return (
-		<div className="px-2">
-			<Table>
+		<div className="flex h-full w-full flex-col justify-start overflow-auto px-2">
+			<Table className="h-full">
 				<TableHeader>
 					<TableRow>
 						<TableHead>지표</TableHead>

@@ -9,12 +9,16 @@ from dartlab.viz.palette import COLORS
 from dartlab.viz.schema import CatalogEntry
 
 
-def _kpi(title: str, label: str, *, ratio=None, account=None, unit: str, intent: str, helpText: str) -> CatalogEntry:
+def _kpi(
+    title: str, label: str, *, ratio=None, account=None, yoy=None, unit: str, intent: str, helpText: str
+) -> CatalogEntry:
     tile: dict = {"label": label, "unit": unit, "intent": intent}
     if account:
         tile["account"] = account
     if ratio:
         tile["ratio"] = ratio
+    if yoy:
+        tile["yoy"] = yoy
     return {
         "kind": "kpiTile",
         "title": title,
@@ -43,10 +47,10 @@ MACRO_CARDS: dict[str, CatalogEntry] = {
     "macroKpiRevenue": _kpi(
         "매출 변동",
         "매출 YoY",
-        ratio={"num": {"revenue": 1}, "den": {"revenue": 1}, "scale": 0},
-        unit="원",
+        yoy="revenue",
+        unit="%",
         intent="primary",
-        helpText="경기에 직접 노출 — 매출 변동.",
+        helpText="경기에 직접 노출 — 매출 YoY %.",
     ),
     "macroKpiOpMargin": _kpi(
         "영업이익률",

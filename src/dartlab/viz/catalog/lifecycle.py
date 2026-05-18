@@ -10,7 +10,7 @@ from dartlab.viz.schema import CatalogEntry
 
 
 def _kpi(
-    title: str, label: str, *, ratio=None, account=None, compose=None, unit: str, intent: str, helpText: str
+    title: str, label: str, *, ratio=None, account=None, compose=None, yoy=None, unit: str, intent: str, helpText: str
 ) -> CatalogEntry:
     tile: dict = {"label": label, "unit": unit, "intent": intent}
     if account:
@@ -19,6 +19,8 @@ def _kpi(
         tile["ratio"] = ratio
     if compose:
         tile["compose"] = compose
+    if yoy:
+        tile["yoy"] = yoy
     return {
         "kind": "kpiTile",
         "title": title,
@@ -47,10 +49,10 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
     "lifecycleKpiRevenue": _kpi(
         "매출 YoY",
         "매출 YoY",
-        ratio={"num": {"revenue": 1}, "den": {"revenue": 1}, "scale": 0},
-        unit="원",
+        yoy="revenue",
+        unit="%",
         intent="primary",
-        helpText="성장률 — 도입/성장 단계 핵심 신호.",
+        helpText="매출 YoY % — 도입/성장 단계 핵심 신호.",
     ),
     "lifecycleKpiOpMargin": _kpi(
         "영업이익률",
