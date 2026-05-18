@@ -74,6 +74,58 @@ def _safeBuildAndRender(cardKey: str, code: str, periodKind: str, nPeriods: int)
         }
 
 
+def _isCardEmpty(spec: dict[str, Any]) -> bool:
+    """v3-r5 §3.1 — spec 의 데이터 의미 무효 판정. True 면 packSkyline 큐에서 omit.
+
+    의미 무효 표면 (운영자 원칙 4 위반):
+    - spec error / kind error
+    - kpiTile 의 모든 tile value None 또는 (0 + non-scoreMode)
+    - topList items 0
+    - trend 모든 series data 가 None 도배
+    - gauge value None + bands 빈
+    - radar 모든 dimension 0 (Snowflake 5 차원 0 점 도배 회피)
+    - scoreBadge dimensions 0 + overallScore None
+    - narrativeBridge transitions 0
+    """
+    if spec is None or spec.get("error"):
+        return True
+    kind = spec.get("kind")
+    if kind == "kpiTile":
+        tiles = spec.get("tiles") or []
+        if not tiles:
+            return True
+        scoreMode = (spec.get("options") or {}).get("scoreMode") is True
+        return all(
+            (t.get("value") in (None,) or (t.get("value") == 0 and not scoreMode)) for t in tiles
+        )
+    if kind in ("topList",):
+        return not (spec.get("items") or [])
+    if kind in ("comparisonTable",):
+        return not (spec.get("rows") or [])
+    if kind == "trend":
+        series = spec.get("series") or []
+        if not series:
+            return True
+        return all(all(v is None for v in (s.get("data") or [])) for s in series)
+    if kind == "gauge":
+        return spec.get("value") is None
+    if kind == "scoreBadge":
+        return not (spec.get("dimensions") or []) and spec.get("overallScore") is None
+    if kind == "narrativeBridge":
+        return not (spec.get("transitions") or [])
+    if kind == "phaseIndicator":
+        return not (spec.get("phases") or [])
+    if kind == "radar":
+        series = spec.get("series") or []
+        if not series:
+            return True
+        return all(all((v is None or v == 0) for v in (s.get("data") or [])) for s in series)
+    if kind in ("matrix", "scatter", "breakdown", "waterfall"):
+        # 기본: series + categories 둘 다 비면 omit.
+        return not (spec.get("series") or spec.get("cells") or spec.get("points") or [])
+    return False
+
+
 async def _prefetchCompany(stockCode: str) -> None:
     """Company rawFinance 를 한 번 collect → LRU 안착. 동시 빌드 race 방지."""
     from dartlab.viz.display.finance._cache import getCompany
@@ -195,8 +247,12 @@ async def apiVizLayout(
     """
     effectiveView = _LEGACY_VIEW_REDIRECT.get(view or "", view)
 
-    placed = planTabLayout(tab, sub=effectiveView)
-    if not placed:
+    # v3-r5 §3 — 2 단 packing. 1) spec build → 2) _isCardEmpty 통과 카드만 packSkyline.
+    from dartlab.viz.catalog import CATALOG
+    from dartlab.viz.layout import packSkyline, queryCards
+
+    cards = queryCards(tab=tab, sub=effectiveView) if effectiveView else queryCards(tab=tab)
+    if not cards:
         return {
             "stockCode": stockCode,
             "tab": tab,
@@ -208,12 +264,17 @@ async def apiVizLayout(
         }
 
     await _prefetchCompany(stockCode)
-    cardKeys = [p["cardKey"] for p in placed]
+    cardKeys = [k for k, _ in cards]
 
     async def _one(k: str) -> dict[str, Any]:
         return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)
 
     specs = await asyncio.gather(*[_one(k) for k in cardKeys])
+    specMap = dict(zip(cardKeys, specs))
+
+    # 의미 무효 카드 omit — 운영자 원칙 4. _isCardEmpty 통과 카드만 packing.
+    nonEmptyCards = [(k, e) for k, e in cards if not _isCardEmpty(specMap[k])]
+    placed = packSkyline(nonEmptyCards, colCount=24)
 
     return {
         "stockCode": stockCode,
@@ -222,5 +283,5 @@ async def apiVizLayout(
         "periodKind": periodKind,
         "colCount": 24,
         "layout": placed,
-        "cards": dict(zip(cardKeys, specs)),
+        "cards": {k: specMap[k] for k, _ in nonEmptyCards},
     }

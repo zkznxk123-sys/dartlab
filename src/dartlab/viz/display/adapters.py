@@ -945,6 +945,34 @@ _GRADE_BUCKETS = [
 ]
 
 
+def buildSnowflakeAlert(company: Any) -> dict[str, Any]:
+    """Snowflake alert — 회계 기반 측정 한계 안내 1 줄.
+
+    radar / scoreBadge 가 시장가 의존 metric 폐기 후 회계 대체임을 운영자에게 노출.
+    """
+    return {
+        "transitions": [
+            {
+                "from": "측정 한계",
+                "to": "회계 기반",
+                "text": (
+                    "시장가 의존 metric (PER/PBR/배당수익률) → 회계 대체로 정규화. "
+                    "Owner Earnings Yield · 매출 CAGR3y · ROE+ROA+ROIC · Piotroski F-Score · 배당성향+RE 누적."
+                ),
+            },
+            {
+                "from": "정통 Simply Wall St",
+                "to": "dartlab 회계 기반",
+                "text": (
+                    "Simply Wall St 의 시가총액 의존 5 차원과는 점수 분포 다름. "
+                    "회계 정보만으로 가치/성장/안전 평가."
+                ),
+            },
+        ],
+        "summaryLine": "회계 기반 5 차원 — 시장가 부재 환경의 합성 평점",
+    }
+
+
 def buildSnowflakeKpi(company: Any, tilePlans: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Snowflake 단일 차원 KPI — tilePlan.dim 별 0~5 점.
 
@@ -1028,6 +1056,7 @@ __all__ = [
     "buildPeerComparison",
     "buildPeerScatter",
     "buildScoreBadge",
+    "buildSnowflakeAlert",
     "buildSnowflakeKpi",
     "buildSnowflakeRadar",
     "buildTopListFromFlags",

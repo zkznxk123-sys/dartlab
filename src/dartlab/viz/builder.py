@@ -348,6 +348,8 @@ def _buildKindSpecView(
         base_view["series"] = result.get("series", [])
     elif adapter_name == "narrativeBridge":
         base_view.update(adapters.buildNarrativeBridge(company))
+    elif adapter_name == "snowflakeAlert":
+        base_view.update(adapters.buildSnowflakeAlert(company))
     elif adapter_name == "snowflakeRadar":
         result = adapters.buildSnowflakeRadar(company)
         base_view["categories"] = result.get("categories", [])

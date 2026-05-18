@@ -144,36 +144,134 @@ def _normalize(value: float | None, *, low: float, high: float) -> float:
     return round((v - low) / (high - low) * 5.0, 2)
 
 
-def calcSnowflake5Score(company: Any) -> dict[str, float]:
-    """Simply Wall St 5 차원 — Value/Future/Past/Health/Dividend 각 0~5.
+def _avgScore(vals: list[float | None]) -> float:
+    """None 제외 평균. 비면 0.0."""
+    nums = [v for v in vals if isinstance(v, (int, float)) and v is not None]
+    if not nums:
+        return 0.0
+    return round(sum(nums) / len(nums), 2)
 
-    각 차원은 1 개 대표 지표 정규화 (간이). 후속 PR 에서 다지표 합성.
-    - Value: PER (낮을수록 좋음, 5~30 range)
-    - Future: 매출 CAGR (-10~30 range)
-    - Past: ROE (0~30 range)
-    - Health: 이자보상배율 (0~20 range)
-    - Dividend: 배당수익률 (0~6 range)
-    """
-    per = _safe(_ratio(company, "per"))
-    cagr = _safe(_ratio(company, "revenueCagr5y"))
-    roe = _safe(_ratio(company, "roe"))
+
+def _scoreOwnerEarningsYield(company: Any) -> float | None:
+    """Owner Earnings Yield (회계 EV 대체) — Owner / (assets - cash) 1~15% 가 0~5."""
+    oe = calcOwnerEarnings(company).get("value")
+    assets = _safe(_ratio(company, "totalAssetsLatest")) or _safe(_ratio(company, "assets"))
+    cash = _safe(_ratio(company, "cashLatest")) or _safe(_ratio(company, "cash"))
+    if oe is None or assets is None:
+        return None
+    ev = assets - (cash or 0)
+    if ev <= 0:
+        return None
+    yld = oe / ev * 100
+    return _normalize(yld, low=1, high=15)
+
+
+def _scoreFcfYieldAccountingEV(company: Any) -> float | None:
+    """FCF Yield (회계 EV) — FCF / (자기자본+부채-현금) 1~15% → 0~5."""
+    fcf = _safe(_ratio(company, "fcf")) or _safe(_ratio(company, "fcfTTM"))
+    equity = _safe(_ratio(company, "equity")) or _safe(_ratio(company, "equityLatest"))
+    debt = _safe(_ratio(company, "totalDebt")) or _safe(_ratio(company, "totalDebtLatest"))
+    cash = _safe(_ratio(company, "cash")) or _safe(_ratio(company, "cashLatest"))
+    if fcf is None or equity is None:
+        return None
+    ev = equity + (debt or 0) - (cash or 0)
+    if ev <= 0:
+        return None
+    return _normalize(fcf / ev * 100, low=1, high=15)
+
+
+def _scoreRevenueCagr3y(company: Any) -> float | None:
+    cagr = _safe(_ratio(company, "revenueCagr3y")) or _safe(_ratio(company, "revenueCagr5y"))
+    if cagr is None:
+        return None
+    return _normalize(cagr * 100 if abs(cagr) < 1.5 else cagr, low=-10, high=30)
+
+
+def _scoreCapexAcceleration(company: Any) -> float | None:
+    """CapEx YoY 가속 — Lynch Fisher 신호."""
+    val = _safe(_ratio(company, "capexYoyAccel")) or _safe(_ratio(company, "capexYoy"))
+    if val is None:
+        return None
+    return _normalize(val * 100 if abs(val) < 1.5 else val, low=-20, high=50)
+
+
+def _scoreRndAcceleration(company: Any) -> float | None:
+    val = _safe(_ratio(company, "rndYoy")) or _safe(_ratio(company, "rndYoyAccel"))
+    if val is None:
+        return None
+    return _normalize(val * 100 if abs(val) < 1.5 else val, low=-10, high=40)
+
+
+def _scoreRoeRoaRoic(company: Any) -> float:
+    """과거 수익성 — ROE + ROA + ROIC 평균 (5y avg 우선)."""
+    roe = _safe(_ratio(company, "roe5yAvg")) or _safe(_ratio(company, "roe"))
+    roa = _safe(_ratio(company, "roa5yAvg")) or _safe(_ratio(company, "roa"))
+    roic = _safe(_ratio(company, "roic5yAvg")) or _safe(_ratio(company, "roic"))
+    scores = [
+        _normalize(v, low=0, high=30) if v is not None else None for v in (roe, roa, roic)
+    ]
+    return _avgScore(scores)
+
+
+def _scorePiotroskiScaled(company: Any) -> float:
+    """Piotroski F-Score 0~9 → 0~5."""
+    try:
+        from dartlab.analysis.financial import research as _research
+
+        if hasattr(_research, "calcPiotroskiDetail"):
+            result = _research.calcPiotroskiDetail(company)
+            score = result.get("score") if isinstance(result, dict) else None
+            if score is not None:
+                return _normalize(score, low=0, high=9)
+    except (ImportError, AttributeError, ValueError, TypeError):
+        pass
+    # Fallback: 이자보상배율 기반 간이.
     ic = _safe(_ratio(company, "interestCoverage"))
-    dy = _safe(_ratio(company, "dividendYield"))
-    # Value 는 PER 낮을수록 좋음 → 역정규화.
-    if per is not None and 5 <= per <= 30:
-        value = round((30 - per) / 25 * 5.0, 2)
-    elif per is not None and per < 5:
-        value = 5.0
-    elif per is not None and per > 30:
-        value = 1.0
-    else:
-        value = 0.0
+    return _normalize(ic, low=0, high=20) if ic is not None else 0.0
+
+
+def _scorePayoutRatio(company: Any) -> float | None:
+    dp = _safe(_ratio(company, "dividendsPaid")) or _safe(_ratio(company, "dividendsPaidTTM"))
+    ni = _safe(_ratio(company, "netIncomeTTM")) or _safe(_ratio(company, "netIncome"))
+    if dp is None or ni is None or ni <= 0:
+        return None
+    payout = abs(dp) / ni * 100
+    return _normalize(payout, low=10, high=60)
+
+
+def _scoreRetainedCumulative(company: Any) -> float | None:
+    """RE 누적 증가율 — 내부 유보 강건성."""
+    growth = _safe(_ratio(company, "retainedEarningsCagr5y"))
+    if growth is None:
+        return None
+    return _normalize(growth * 100 if abs(growth) < 1.5 else growth, low=0, high=20)
+
+
+def calcSnowflake5Score(company: Any) -> dict[str, float]:
+    """Simply Wall St 5 차원 — 회계 대체 metric 으로 정규화 (v3-r5 §C).
+
+    시장가 의존 (PER/PBR/배당수익률) 제거 → 회계 정보만으로 5 차원 측정.
+    각 차원은 *다지표 합성 평균* (None 제외).
+
+    - **Value**: Owner Earnings Yield (EV 회계 대체) + FCF Yield (EV 회계 대체)
+    - **Future**: 매출 CAGR3y + CapEx YoY 가속 + R&D YoY 가속
+    - **Past**: ROE + ROA + ROIC (5y avg 우선)
+    - **Health**: Piotroski F-Score scaled (없으면 이자보상배율 fallback)
+    - **Dividend**: 배당성향 + 이익잉여금 5y CAGR
+    """
+    value = _avgScore([_scoreOwnerEarningsYield(company), _scoreFcfYieldAccountingEV(company)])
+    future = _avgScore(
+        [_scoreRevenueCagr3y(company), _scoreCapexAcceleration(company), _scoreRndAcceleration(company)]
+    )
+    past = _scoreRoeRoaRoic(company)
+    health = _scorePiotroskiScaled(company)
+    dividend = _avgScore([_scorePayoutRatio(company), _scoreRetainedCumulative(company)])
     return {
         "value": value,
-        "future": _normalize(cagr * 100 if cagr is not None and abs(cagr) < 1.5 else cagr, low=-10, high=30),
-        "past": _normalize(roe, low=0, high=30),
-        "health": _normalize(ic, low=0, high=20),
-        "dividend": _normalize(dy * 100 if dy is not None and dy < 1 else dy, low=0, high=6),
+        "future": future,
+        "past": past,
+        "health": health,
+        "dividend": dividend,
     }
 
 

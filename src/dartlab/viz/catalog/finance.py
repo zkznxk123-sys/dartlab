@@ -1464,29 +1464,12 @@ FINANCE_CARDS.update(_STORY_CARDS)
 # ──────────────────────────────────────────────────────────────────────
 
 
-def _snowflakeKpi(title: str, label: str, dimKey: str, helpText: str) -> CatalogEntry:
-    """Snowflake 5 차원 단일 점수 카드 — snowflakeKpi adapter 가 calcSnowflake5Score 의 dim 값 추출."""
-    return {
-        "kind": "kpiTile",
-        "title": title,
-        "topic": "ratios",
-        "tab": "financial",
-        "subCategory": "snowflake",
-        "seriesPlan": [],
-        "dataSpec": {
-            "adapter": "snowflakeKpi",
-            "tilePlans": [{"label": label, "dim": dimKey, "unit": "점", "intent": "primary"}],
-        },
-        "options": {"unit": "점", "snowflakeDim": dimKey, "maxValue": 5},
-        "layout": {"colSpan": 4, "rowSpan": 2},
-        "help": helpText,
-    }
-
-
+# v3-r5 §6 — Snowflake 5 KPI 별도 카드 폐기 (운영자 결함 4). radar / scoreBadge / alert 3 카드 view.
+# 시장가 의존 (PER/PBR/배당수익률) → 회계 대체 metric 으로 재정의 (intrinsic.calcSnowflake5Score).
 _SNOWFLAKE_CARDS: dict[str, CatalogEntry] = {
     "snowflakeRadar": {
         "kind": "radar",
-        "title": "Snowflake 5 차원",
+        "title": "Snowflake 5 차원 (회계 기반)",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "snowflake",
@@ -1494,17 +1477,8 @@ _SNOWFLAKE_CARDS: dict[str, CatalogEntry] = {
         "dataSpec": {"adapter": "snowflakeRadar"},
         "options": {"unit": "점", "maxValue": 5},
         "layout": {"colSpan": 12, "rowSpan": 12},
-        "help": "Value/Future/Past/Health/Dividend 5 차원 종합. 한 그림 — 전 학파 합성.",
+        "help": "Value/Future/Past/Health/Dividend 회계 기반 합성. 시장가 의존 metric 폐기 (PER → Owner Earnings Yield · 배당수익률 → 배당성향 등).",
     },
-    "snowflakeValueScore": _snowflakeKpi(
-        "Value", "Value 5", "value", "PER 기반 가치 점수 (낮을수록 좋음, 5~30 range)."
-    ),
-    "snowflakeFutureScore": _snowflakeKpi("Future", "Future 5", "future", "매출 CAGR 5y — 미래 성장 점수 (-10%~+30%)."),
-    "snowflakePastScore": _snowflakeKpi("Past", "Past 5", "past", "ROE — 과거 수익성 점수 (0~30%)."),
-    "snowflakeHealthScore": _snowflakeKpi("Health", "Health 5", "health", "이자보상배율 — 재무 건전성 점수 (0~20 배)."),
-    "snowflakeDividendScore": _snowflakeKpi(
-        "Dividend", "Dividend 5", "dividend", "배당수익률 — 배당 매력 점수 (0~6%)."
-    ),
     "snowflakeScoreBadge": {
         "kind": "scoreBadge",
         "title": "종합 평점",
@@ -1514,8 +1488,20 @@ _SNOWFLAKE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "scoreBadge"},
         "options": {},
-        "layout": {"colSpan": 24, "rowSpan": 3},
+        "layout": {"colSpan": 12, "rowSpan": 4},
         "help": "5 차원 × 20 평균 0~100 → A+/A/B+/B/C+/C/D 등급. 한 줄 서사.",
+    },
+    "snowflakeAlert": {
+        "kind": "narrativeBridge",
+        "title": "측정 한계 (회계 기반)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "snowflake",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "snowflakeAlert"},
+        "options": {},
+        "layout": {"colSpan": 12, "rowSpan": 4},
+        "help": "본 view 5 차원은 회계 기반 — 시장가 (PER/PBR/배당수익률) 의존 metric 은 dartlab 환경에서 측정 불가. 정통 Simply Wall St 5 차원과 차이.",
     },
 }
 FINANCE_CARDS.update(_SNOWFLAKE_CARDS)

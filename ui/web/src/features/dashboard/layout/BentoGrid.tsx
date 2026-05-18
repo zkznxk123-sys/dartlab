@@ -12,10 +12,19 @@ interface Props {
 	renderCard: (p: PackedCard, cellSize: number) => ReactNode;
 }
 
-const GAP_PX = 4;
-const PAD_PX = 8;
-const COL_COUNT = 24;
-const MIN_CELL_PX = 40;
+// SSOT — TabDashboard / financial.$code.tsx 픽셀 산출식이 동일 상수 사용.
+export const BENTO_GAP_PX = 4;
+export const BENTO_PAD_PX = 8;
+export const BENTO_COL_COUNT = 24;
+export const BENTO_MIN_CELL_PX = 40;
+// CardShell chrome (header 28 + content padding top+bottom + footer border 1 — Step 8.2)
+export const BENTO_CARD_HEADER_PX = 28;
+export const BENTO_CARD_PAD_PX = 8; // content area pt+pb 합 (8 = py-1 두 변)
+
+const GAP_PX = BENTO_GAP_PX;
+const PAD_PX = BENTO_PAD_PX;
+const COL_COUNT = BENTO_COL_COUNT;
+const MIN_CELL_PX = BENTO_MIN_CELL_PX;
 
 export function BentoGrid({ placed, renderCard }: Props) {
 	const gridRef = useRef<HTMLDivElement>(null);

@@ -40,22 +40,23 @@ from dartlab.viz.schema import CatalogEntry
 # - radar/comparisonTable = 12×12 / 12×8 hero (다차원/peer)
 # - phaseIndicator = 24×2 strip (한 행 전체 얇음)
 # - narrativeBridge/scoreBadge = 24×4 / 24×3 wide (서사/평점)
+# v3-r5 — 5×* 폐기 (24 약수 강행) + sankey 폐기 (14→13 kind) + gauge wide 24×4 신설.
+# 모든 size 는 24 의 약수 (1, 2, 3, 4, 6, 8, 12, 24). variance 도 약수만.
 KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
-    "kpiTile": {"cs": 4, "rs": 2, "variance": ["4x3", "6x2", "8x2"]},  # 작게 — 한 행 6 카드 = 24col 정확
-    "diffView": {"cs": 4, "rs": 2, "variance": ["8x4", "12x4"]},
-    "gauge": {"cs": 4, "rs": 3, "variance": ["8x4"]},  # 한 행 6 카드
-    "topList": {"cs": 4, "rs": 4, "variance": ["8x4"]},  # 한 행 6 카드
-    "trend": {"cs": 8, "rs": 8, "variance": ["12x8", "24x6", "6x6", "12x12"]},
-    "breakdown": {"cs": 8, "rs": 8, "variance": ["12x6"]},
+    "kpiTile": {"cs": 4, "rs": 2, "variance": ["4x3", "6x2", "8x2", "8x4", "12x2", "12x4"]},
+    "diffView": {"cs": 4, "rs": 2, "variance": ["8x4", "12x4", "24x2"]},
+    "gauge": {"cs": 4, "rs": 3, "variance": ["4x4", "6x4", "8x4", "24x4"]},  # 24x4 = wide hero
+    "topList": {"cs": 4, "rs": 4, "variance": ["8x4", "12x4", "24x4"]},
+    "trend": {"cs": 8, "rs": 8, "variance": ["12x8", "24x6", "6x6", "12x12", "12x4", "8x4"]},
+    "breakdown": {"cs": 8, "rs": 8, "variance": ["12x8", "12x6"]},
     "scatter": {"cs": 8, "rs": 8, "variance": ["12x8"]},
-    "matrix": {"cs": 8, "rs": 8, "variance": ["12x8"]},
-    "waterfall": {"cs": 8, "rs": 8, "variance": ["12x6"]},
+    "matrix": {"cs": 8, "rs": 8, "variance": ["12x4", "24x4"]},
+    "waterfall": {"cs": 8, "rs": 8, "variance": ["12x8"]},
     "radar": {"cs": 12, "rs": 12, "variance": ["8x8"]},
-    "comparisonTable": {"cs": 12, "rs": 8, "variance": ["24x6"]},
-    "phaseIndicator": {"cs": 24, "rs": 2, "variance": ["12x3", "24x3"]},
-    "narrativeBridge": {"cs": 24, "rs": 4, "variance": []},
-    "scoreBadge": {"cs": 24, "rs": 3, "variance": ["12x3"]},
-    "sankey": {"cs": 12, "rs": 8, "variance": ["8x8"]},  # legacy
+    "comparisonTable": {"cs": 12, "rs": 8, "variance": ["24x4", "24x8"]},
+    "phaseIndicator": {"cs": 24, "rs": 2, "variance": ["24x3", "12x4"]},
+    "narrativeBridge": {"cs": 24, "rs": 4, "variance": ["12x4"]},
+    "scoreBadge": {"cs": 12, "rs": 4, "variance": ["24x3", "24x4"]},  # v3-r5: 24x3 → 12x4 default
 }
 
 
