@@ -614,7 +614,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 12, "rowSpan": 3},
         "help": "부채자본비율 100% 미만 안정, 200% 이상 부담. 부채자산비율은 전체 자산 중 부채 비중. 유동비율은 단기 지급능력 (1 년 내 갚을 부채 대비 1 년 내 현금화 자산).",
     },
     # ─────────────────────────────────────────────────────────────
@@ -874,47 +874,74 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "help": "CCC = DSO + DIO − DPO. 짧을수록 현금이 빨리 회수. DPO ↑ = 매입채무 길게 끌어 현금 보유 (좋다). 매출 성장에도 CCC ↑ 면 운전자본 부담 — 진정한 성장 의심.",
     },
     # ─────────────────────────────────────────────────────────────
-    # 17. DuPont 분해 — ROE = 순이익률 × 자산회전율 × 자본승수.
-    #     ROE 가 NPM/Turn/Lev 중 어느 동력으로 만들어지나.
+    # 17. DuPont 5-step 분해 — ROE = Tax × IntBurden × OpMargin × AsTurn × EqMult.
+    #     Damodaran 정통 (CFA Level 1). 3-step (NPM × Turn × Lev) 의 NPM 을
+    #     Tax × IntBurden × OpMargin 으로 더 쪼개 본업 vs 세금·이자 동력 분리.
     # ─────────────────────────────────────────────────────────────
-    "dupont": {
+    "dupont5Step": {
         "kind": "trend",
-        "title": "DuPont 분해",
+        "title": "DuPont 5단 분해",
         "topic": "ratios",
         "tab": "financial",
         "subCategory": "profitability",
         "seriesPlan": [
             {
-                "key": "npm",
-                "label": "순이익률",
-                "color": COLORS[2],
-                "intent": "primary",
-                "unit": "%",
-                "type": "line",
-                "ratio": {"num": {"netIncome": 1}, "den": {"revenue": 1}, "scale": 100},
-            },
-            {
-                "key": "turnover",
-                "label": "자산회전율 (×100)",
+                "key": "taxBurden",
+                "label": "세금부담 (NI/PreTax)",
                 "color": COLORS[1],
                 "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "ratio": {
+                    "num": {"netIncome": 1},
+                    "den": {"operatingIncome": 1, "financeIncome": 1, "financeCosts": -1},
+                    "scale": 100,
+                },
+            },
+            {
+                "key": "intBurden",
+                "label": "이자부담 (PreTax/EBIT)",
+                "color": COLORS[6],
+                "intent": "neutral",
+                "unit": "%",
+                "type": "line",
+                "ratio": {
+                    "num": {"operatingIncome": 1, "financeIncome": 1, "financeCosts": -1},
+                    "den": {"operatingIncome": 1},
+                    "scale": 100,
+                },
+            },
+            {
+                "key": "opMargin",
+                "label": "영업이익률",
+                "color": COLORS[3],
+                "intent": "positive",
+                "unit": "%",
+                "type": "line",
+                "ratio": {"num": {"operatingIncome": 1}, "den": {"revenue": 1}, "scale": 100},
+            },
+            {
+                "key": "asTurn",
+                "label": "자산회전율 (×100)",
+                "color": COLORS[2],
+                "intent": "primary",
                 "unit": "%",
                 "type": "line",
                 "ratio": {"num": {"revenue": 1}, "den": {"assets": 1}, "scale": 100},
             },
             {
-                "key": "leverage",
+                "key": "eqMult",
                 "label": "자본승수 (×100)",
-                "color": COLORS[3],
-                "intent": "positive",
+                "color": COLORS[7],
+                "intent": "neutral",
                 "unit": "%",
                 "type": "line",
                 "ratio": {"num": {"assets": 1}, "den": {"equity": 1}, "scale": 100},
             },
         ],
         "options": {"unit": "%"},
-        "layout": {"colSpan": 3, "rowSpan": 3},
-        "help": "ROE = 순이익률 × 자산회전율 × 자본승수. NPM ↑ = 마진 동력, Turn ↑ = 자산 효율 동력, Lev ↑ = 부채 동력. 부채로 끌어올린 ROE 인지 분해로 확인.",
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "ROE = 세금부담 × 이자부담 × 영업이익률 × 자산회전 × 자본승수. 세금↓ 또는 이자↓ 가 부채로 ROE 끌어올리는 신호. 영업이익률↑ 만 본업 동력. Damodaran 5단 정통 (CFA Level 1).",
     },
     # ─────────────────────────────────────────────────────────────
     # 18. ROIC — 투하자본수익률. NOPAT / (자본 + 차입금). WACC 8% 참조선.
@@ -947,7 +974,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 8, "label": "WACC ≈ 8%", "intent": "neutral"},
             ],
         },
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "ROIC = NOPAT / 투하자본. WACC (≈8%) 초과 = 가치창출. 미만 = 자본 파괴. ROE 와 달리 부채 효과 제거 — 본질적 자본 효율. 세효과 0.78 단순 적용.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -971,7 +998,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원", "signed": True},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "(단기 + 장기차입금) − 현금. 양수 = 순차입 상태, 음수 = net cash (배당·자사주·M&A 여유). 분기 추세로 deleveraging 방향성 확인.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1298,51 +1325,229 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "layout": {"colSpan": 3, "rowSpan": 3},
         "help": "영업이익 + 영업외손익 − 법인세 = 순이익. 영업외 (금융수익 − 금융비용) 가 큰 비중이면 본업 외 변동성. 법인세율 (= 법인세/세전이익) 안정성도 확인.",
     },
+    # ─────────────────────────────────────────────────────────────
+    # 29. Beneish M-Score 시계열 — 8 변수 정통 분식 의심.
+    #     calcBeneishTimeline analysisCall. 임계 −1.78 = 의심.
+    # ─────────────────────────────────────────────────────────────
+    "beneishMTimeline": {
+        "kind": "trend",
+        "title": "Beneish M (8변수)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "quality",
+        "seriesPlan": [
+            {
+                "key": "mScore",
+                "label": "Beneish M-Score",
+                "color": COLORS[2],
+                "intent": "primary",
+                "unit": "",
+                "type": "line",
+                "analysisCall": {
+                    "module": "financial._earningsQualityDeepBeneish",
+                    "fn": "calcBeneishTimeline",
+                    "outputKey": "history.mScore",
+                    "outputType": "timeseries",
+                },
+            },
+        ],
+        "options": {
+            "refLines": [
+                {"value": -1.78, "label": "−1.78 (의심)", "intent": "negative"},
+                {"value": -2.22, "label": "−2.22 (정상)", "intent": "positive"},
+            ],
+        },
+        "layout": {"colSpan": 4, "rowSpan": 3},
+        "help": "Beneish 1999 정통 8 변수 (DSRI/GMI/AQI/SGI/DEPI/SGAI/TATA/LVGI) 합산. M > −1.78 = 회계조작 의심. K-IFRS 환경 false positive 잦음 — 추세 변동 함께 인용.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 30. Penman ROE 분해 — ROCE = RNOA + FLEV × SPREAD.
+    #     adapter penmanRoeBars → calcPenmanDecomposition.
+    # ─────────────────────────────────────────────────────────────
+    "penmanRoeDecomp": {
+        "kind": "trend",
+        "title": "Penman ROE 분해",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "profitability",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "penmanRoeBars"},
+        "options": {"stacked": True, "unit": "%"},
+        "layout": {"colSpan": 4, "rowSpan": 3},
+        "help": "ROCE = RNOA (영업력) + FLEV × SPREAD (레버리지 효과). 진성 고수익 = RNOA > 15% + FLEV < 0.5. 레버리지 의존 = FLEV > 1 + RNOA 보통. Penman & Nissim (2001) 정통.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 31. ROIC vs WACC gap — 가치창출 판정.
+    #     adapter roicWaccGap → calcRoicTimeline. WACC 8% 가정.
+    # ─────────────────────────────────────────────────────────────
+    "roicWaccGap": {
+        "kind": "trend",
+        "title": "ROIC vs WACC",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "profitability",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "roicWaccGap"},
+        "options": {"unit": "%"},
+        "layout": {"colSpan": 4, "rowSpan": 3},
+        "help": "Spread = ROIC − WACC. 양수 지속 = 경제적 가치 창출 (Damodaran). 음수 = 자본 파괴. WACC 단순 가정 8% (한국 평균). 정밀 WACC 필요 시 별도 카드.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 32. Piotroski F-Score 시계열 — 9 binary 점수.
+    #     calcPiotroskiTimeline analysisCall.
+    # ─────────────────────────────────────────────────────────────
+    "piotroskiFScore": {
+        "kind": "trend",
+        "title": "Piotroski F-Score",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "quality",
+        "seriesPlan": [
+            {
+                "key": "fScore",
+                "label": "F-Score (0~9)",
+                "color": COLORS[3],
+                "intent": "primary",
+                "unit": "점",
+                "type": "bar",
+                "analysisCall": {
+                    "module": "financial.scorecard",
+                    "fn": "calcPiotroskiTimeline",
+                    "outputKey": "history.score",
+                    "outputType": "timeseries",
+                },
+            },
+        ],
+        "options": {
+            "refLines": [
+                {"value": 7, "label": "7 (강건)", "intent": "positive"},
+                {"value": 3, "label": "3 (위험)", "intent": "negative"},
+            ],
+        },
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "Piotroski 2000 정통 9 binary (수익성 4 + 건전성 3 + 효율성 2). ≥ 7 = 펀더멘털 강건, ≤ 3 = 부실 신호. 시계열 추세 ↑ = 개선, ↓ = 악화.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 33. 부문별 매출 — top 6 stacked bar.
+    #     adapter segmentBreakdown → calcSegmentTrend.
+    # ─────────────────────────────────────────────────────────────
+    "segmentRevenue": {
+        "kind": "trend",
+        "title": "부문별 매출",
+        "topic": "IS",
+        "tab": "financial",
+        "subCategory": "growth",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "segmentBreakdown"},
+        "options": {"stacked": True, "unit": "원"},
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "사업보고서 III '사업의 내용' top 6 부문 매출 시계열. 부문 단일 의존 = 사업 집중 위험. 부문 다각화 추세는 안정성 신호.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 34. 사업 집중도 — HHI + top1 비중.
+    #     adapter segmentConcentration → calcConcentration.
+    # ─────────────────────────────────────────────────────────────
+    "segmentConcentration": {
+        "kind": "trend",
+        "title": "사업 집중도",
+        "topic": "IS",
+        "tab": "financial",
+        "subCategory": "risk",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "segmentConcentration"},
+        "options": {"unit": ""},
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "HHI (Herfindahl) > 5000 = 고집중 (단일 사업 위험). 1위 부문 비중 ↑ = 사업 집중. 분산 추세 = 다각화 진행.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 35. 영업레버리지 + 안전마진 — DOL bar + 안전마진 line.
+    #     adapter dolBreakeven → calcOperatingLeverage + calcBreakevenEstimate.
+    # ─────────────────────────────────────────────────────────────
+    "operatingLeverage": {
+        "kind": "trend",
+        "title": "영업레버리지",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "profitability",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "dolBreakeven"},
+        "options": {"unit": "배"},
+        "layout": {"colSpan": 3, "rowSpan": 3},
+        "help": "DOL = 영업이익 변화율 / 매출 변화율. DOL > 3 = 고정비 부담 큼 (제조업). DOL < 1.5 = 변동비 중심 (서비스). 안전마진 = (매출 − BEP)/매출. > 50% 안정.",
+    },
+    # ─────────────────────────────────────────────────────────────
+    # 36. Distress 5 모델 ensemble — Altman Z·Z''·Ohlson·Springate·Zmijewski.
+    #     adapter distressEnsembleGauge → calcDistressEnsemble.
+    # ─────────────────────────────────────────────────────────────
+    "distressEnsemble": {
+        "kind": "gauge",
+        "title": "부도 위험 (5 모델)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "credit",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "distressEnsembleGauge"},
+        "options": {},
+        "layout": {"colSpan": 4, "rowSpan": 3},
+        "help": "Altman Z·Z''·Ohlson O·Springate S·Zmijewski X 5 모델 다수결. 단일 모델 편향 제거. 일치도 < 60% = 신뢰 어려움 (모델 간 불일치).",
+    },
 }
-"""재무제표 dashboard 26 카드. 모든 series 가 catalog SeriesPlan 만으로 정의."""
+"""재무제표 dashboard 38 카드 — 정통 9 신설 (2026-05-19)."""
 
 
 FINANCE_DASHBOARD_KEYS: list[str] = [
-    # ─ 01 자본구조 · 자산구조 (정통 1+2). 모든 row col 합 = 12 강행. ─
-    "assetComposition",        # row0  12×3 hero
-    "liabilityDetail",          # row1  4 ┐
-    "equityDetail",             # row1  4 ├ = 12
-    "cashAssetsRatio",          # row1  4 ┘
-    "incomeBreakdown",          # row2  6 ┐ = 12
-    "workingCapitalDays",       # row2  6 ┘
-    # ─ 02 영업 효율 · 자본 효율 (정통 3+5). 8 카드 = 2 row. ─
-    "marginTrend",              # row3  3 ┐
-    "returnTrend",              # row3  3 ├
-    "dupont",                   # row3  3 ├ = 12
-    "roic",                     # row3  3 ┘
-    "costStructureTrend",       # row4  3 ┐
-    "turnoverTrend",            # row4  3 ├
-    "rndIntensity",             # row4  3 ├ = 12
-    "taxWalk",                  # row4  3 ┘
-    # ─ 03 현금 일생 · 자본배분 (정통 4+10). 7 카드 = 1 row(4×3) + 1 row(3×4). ─
-    "cashflowSigned",           # row5  4 ┐
-    "fcfTrend",                 # row5  4 ├ = 12
-    "capitalAllocation",        # row5  4 ┘
-    "payoutRatio",              # row6  3 ┐
-    "earningsQuality",          # row6  3 ├
-    "sloanAccruals",            # row6  3 ├ = 12
-    "effectiveTaxRate",         # row6  3 ┘  (02 → 03 이동, 이익품질 묶음)
-    # ─ 04 재무 안정 · 부도 위험 (정통 7+8). 6 카드 = 2 row(4×3). ─
-    "stabilityRatio",           # row7  4 ┐
-    "liquidityTrend",           # row7  4 ├ = 12
-    "altmanZ",                  # row7  4 ┘
-    "interestCoverage",         # row8  4 ┐
-    "netDebt",                  # row8  4 ├ = 12
-    "leverageTrend",            # row8  4 ┘
-    # ─ 05 성장의 질 · 이상신호 (정통 6+8). 3 카드 = 1 row(4×3). ─
-    "growthYoy",                # row9  4 ┐
-    "equityGrowth",             # row9  4 ├ = 12
-    "riskAnomaly",              # row9  4 ┘
+    # ─ 01 자본구조 · 자산구조 (정통 1+2). 3 row. ─
+    "assetComposition",        # row0   12 = 12
+    "liabilityDetail",          # row1   4 ┐
+    "equityDetail",             # row1   4 ├ = 12
+    "cashAssetsRatio",          # row1   4 ┘
+    "incomeBreakdown",          # row2   6 ┐ = 12
+    "workingCapitalDays",       # row2   6 ┘
+    # ─ 02 영업 효율 · 자본 효율 (정통 3+5). 4 row. DuPont 5단·Penman·ROIC-WACC·DOL 신설. ─
+    "marginTrend",              # row3   3 ┐
+    "returnTrend",              # row3   3 ├ = 12
+    "dupont5Step",              # row3   6 ┘  (N1 신설, dupont 3단 대체)
+    "penmanRoeDecomp",          # row4   4 ┐  (N3 신설)
+    "roic",                     # row4   4 ├ = 12
+    "roicWaccGap",              # row4   4 ┘  (N4 신설)
+    "costStructureTrend",       # row5   3 ┐
+    "turnoverTrend",            # row5   3 ├
+    "operatingLeverage",        # row5   3 ├ = 12  (N8 신설)
+    "taxWalk",                  # row5   3 ┘
+    "segmentRevenue",           # row6   6 ┐ = 12  (N6 신설)
+    "rndIntensity",             # row6   3 ├
+    "effectiveTaxRate",         # row6   3 ┘
+    # ─ 03 현금 일생 · 자본배분 (정통 4+10). 2 row. ─
+    "cashflowSigned",           # row7   4 ┐
+    "fcfTrend",                 # row7   4 ├ = 12
+    "capitalAllocation",        # row7   4 ┘
+    "payoutRatio",              # row8   3 ┐
+    "earningsQuality",          # row8   3 ├
+    "sloanAccruals",            # row8   3 ├ = 12
+    "netDebt",                  # row8   3 ┘  (4→3 사이즈 조정)
+    # ─ 04 재무 안정 · 부도 위험 (정통 7+8). 3 row. Beneish·distressEnsemble 신설. ─
+    "stabilityRatio",           # row9   4 ┐
+    "liquidityTrend",           # row9   4 ├ = 12
+    "beneishMTimeline",         # row9   4 ┘  (N2 신설)
+    "altmanZ",                  # row10  4 ┐
+    "distressEnsemble",         # row10  4 ├ = 12  (N9 신설, gauge)
+    "interestCoverage",         # row10  4 ┘
+    "leverageTrend",            # row11 12 = 12   (wide wrap-up, 4→12 사이즈 조정)
+    # ─ 05 성장의 질 · 이상신호 (정통 6+8). 2 row. Piotroski·집중도 신설. ─
+    "growthYoy",                # row12  4 ┐
+    "equityGrowth",             # row12  4 ├ = 12
+    "riskAnomaly",              # row12  4 ┘
+    "piotroskiFScore",          # row13  6 ┐ = 12  (N5 신설)
+    "segmentConcentration",     # row13  6 ┘  (N7 신설)
 ]
-"""30 카드 / 5 section / 10 row. 모든 row col 합 = 12 강행 (2026-05-19 운영자 명시).
-01 자본+자산구조 (1+2)  /  02 영업·자본 효율 (3+5)  /  03 현금 일생·자본배분 (4+10)
-04 재무 안정·부도 위험 (7+8)  /  05 성장의 질·이상신호 (6+8).
-신설 4: payoutRatio·cashAssetsRatio·equityGrowth·effectiveTaxRate."""
+"""38 카드 / 5 section / 14 row. 모든 row col 합 = 12 강행.
+01 자본+자산구조 (3 row) / 02 영업·자본 효율 (4 row) / 03 현금 일생·자본배분 (2 row)
+04 재무 안정·부도 위험 (3 row) / 05 성장의 질·이상신호 (2 row).
+
+정통 깊이 신설 9 (2026-05-19):
+- dupont5Step (3단→5단), penmanRoeDecomp, roicWaccGap, operatingLeverage,
+- segmentRevenue, segmentConcentration, piotroskiFScore,
+- beneishMTimeline (8변수), distressEnsemble (5 모델)."""
 
 
 # OVERVIEW_KEYS — 재무제표분석 1 view 의 curated 카드 셋트.

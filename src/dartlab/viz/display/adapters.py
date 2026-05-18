@@ -1041,6 +1041,335 @@ def buildScoreBadge(company: Any) -> dict[str, Any]:
     }
 
 
+# ─────────────────────────────────────────────────────────────
+# 정통 깊이 강화 adapter 6 (2026-05-19) — analysis 엔진 시계열 wrapping.
+# Penman ROE 분해 / ROIC-WACC spread / 세그먼트 매출 / 세그먼트 집중도 /
+# Operating Leverage·Breakeven / Distress 5 모델 ensemble.
+# ─────────────────────────────────────────────────────────────
+
+
+def buildPenmanRoeBars(company: Any) -> dict[str, Any]:
+    """calcPenmanDecomposition → RNOA + LeverageEffect stacked + ROCE line.
+
+    ROCE = RNOA + FLEV × SPREAD. RNOA 가 영업 동력, leverageEffect (= FLEV × SPREAD)
+    가 부채 효과. 두 stack 합산이 ROCE.
+    """
+    res = _safeCall("dartlab.analysis.financial._profitabilityDeep", "calcPenmanDecomposition", company)
+    history = _drill(res, "history") if isinstance(res, dict) else None
+    if not isinstance(history, list) or len(history) < 1:
+        return {}
+    periods: list[str] = []
+    rnoa: list[float | None] = []
+    levEffect: list[float | None] = []
+    roce: list[float | None] = []
+    for row in history:
+        if not isinstance(row, dict):
+            continue
+        periods.append(str(row.get("period", "")))
+        rnoa.append(_toFloat(row.get("rnoa")))
+        levEffect.append(_toFloat(row.get("leverageEffect")))
+        roce.append(_toFloat(row.get("roce")))
+    if not periods:
+        return {}
+    return {
+        "categories": periods,
+        "series": [
+            {
+                "key": "rnoa",
+                "label": "영업력 (RNOA)",
+                "color": "var(--chart-2)",
+                "intent": "primary",
+                "unit": "%",
+                "type": "bar",
+                "stack": "roce",
+                "data": rnoa,
+            },
+            {
+                "key": "leverageEffect",
+                "label": "레버리지 효과",
+                "color": "var(--chart-4)",
+                "intent": "accent",
+                "unit": "%",
+                "type": "bar",
+                "stack": "roce",
+                "data": levEffect,
+            },
+            {
+                "key": "roce",
+                "label": "ROCE 합산",
+                "color": "var(--chart-1)",
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "data": roce,
+            },
+        ],
+    }
+
+
+def buildRoicWaccGap(company: Any) -> dict[str, Any]:
+    """calcRoicTimeline → ROIC line + WACC 8% 가정 + spread bar (양수 가치창출 / 음수 자본파괴).
+
+    spread = ROIC − WACC. WACC 단순 가정 (Damodaran 한국 평균 7~9% → 8%). 정밀 WACC
+    필요 시 후속 PR (CAPM β·rf·equity risk premium 산출).
+    """
+    res = _safeCall("dartlab.analysis.financial._investmentAnalysisRoic", "calcRoicTimeline", company)
+    history = _drill(res, "history") if isinstance(res, dict) else None
+    if not isinstance(history, list) or len(history) < 1:
+        return {}
+    WACC = 8.0
+    periods: list[str] = []
+    roicList: list[float | None] = []
+    waccList: list[float | None] = []
+    spreadList: list[float | None] = []
+    for row in history:
+        if not isinstance(row, dict):
+            continue
+        period = row.get("period")
+        if period is None:
+            continue
+        periods.append(str(period))
+        roic = _toFloat(row.get("roic"))
+        roicList.append(roic)
+        waccList.append(WACC)
+        spreadList.append(roic - WACC if roic is not None else None)
+    if not periods:
+        return {}
+    return {
+        "categories": periods,
+        "series": [
+            {
+                "key": "roic",
+                "label": "ROIC",
+                "color": "var(--chart-1)",
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "data": roicList,
+            },
+            {
+                "key": "wacc",
+                "label": "WACC (≈8%)",
+                "color": "var(--chart-4)",
+                "intent": "neutral",
+                "unit": "%",
+                "type": "line",
+                "data": waccList,
+            },
+            {
+                "key": "spread",
+                "label": "Spread (ROIC−WACC)",
+                "color": "var(--chart-5)",
+                "intent": "positive",
+                "unit": "%p",
+                "type": "bar",
+                "data": spreadList,
+            },
+        ],
+    }
+
+
+def buildSegmentBreakdown(company: Any) -> dict[str, Any]:
+    """calcSegmentTrend → 부문별 매출 stacked bar.
+
+    top 6 부문만 (`_MAX_SEGMENTS` 정통). 영업이익률 별도 색 라인은 부문 ×
+    line 폭증 — 매출 stack 만 노출하고 영업이익률 추세는 별도 카드.
+    """
+    res = _safeCall("dartlab.analysis.financial._revenueSegment", "calcSegmentTrend", company)
+    if not isinstance(res, dict):
+        return {}
+    yearCols = res.get("yearCols") or []
+    rows = res.get("rows") or []
+    if not yearCols or not rows:
+        return {}
+    # period 역순 정렬 (yearCols 가 최신→과거 라 시각화는 과거→최신)
+    periods = list(reversed(yearCols))
+    palette = [f"var(--chart-{i})" for i in (2, 3, 5, 6, 7, 8)]
+    series: list[dict[str, Any]] = []
+    for idx, row in enumerate(rows[:6]):
+        if not isinstance(row, dict):
+            continue
+        name = str(row.get("name") or f"부문 {idx + 1}")
+        values = row.get("values") or {}
+        data = [_toFloat(values.get(p)) for p in periods]
+        if all(v is None for v in data):
+            continue
+        series.append(
+            {
+                "key": f"seg{idx}",
+                "label": name,
+                "color": palette[idx % len(palette)],
+                "intent": "primary" if idx == 0 else "accent",
+                "unit": "원",
+                "type": "bar",
+                "stack": "segment",
+                "data": data,
+            }
+        )
+    if not series:
+        return {}
+    return {"categories": periods, "series": series}
+
+
+def buildSegmentConcentration(company: Any) -> dict[str, Any]:
+    """calcConcentration → HHI 시계열 line + 최대 부문 비중 line.
+
+    HHI > 5000 = 고집중 (단일 사업 위험). topPct = 최대 부문 매출 비중.
+    """
+    res = _safeCall("dartlab.analysis.financial._revenueGrowth", "calcConcentration", company)
+    if not isinstance(res, dict):
+        return {}
+    hhiHistory = res.get("hhiHistory") or []
+    if not isinstance(hhiHistory, list) or len(hhiHistory) < 1:
+        # fallback — 단일 시점만 있을 때
+        hhi = _toFloat(res.get("hhi"))
+        topPct = _toFloat(res.get("topPct"))
+        if hhi is None and topPct is None:
+            return {}
+        return {
+            "categories": ["최신"],
+            "series": [
+                {"key": "hhi", "label": "HHI 집중도", "color": "var(--chart-3)", "intent": "negative",
+                 "unit": "", "type": "line", "data": [hhi]},
+                {"key": "topPct", "label": "1위 부문 비중", "color": "var(--chart-2)", "intent": "accent",
+                 "unit": "%", "type": "line", "axis": "right", "data": [topPct]},
+            ],
+        }
+    periods: list[str] = []
+    hhiList: list[float | None] = []
+    topList: list[float | None] = []
+    for row in hhiHistory:
+        if not isinstance(row, dict):
+            continue
+        periods.append(str(row.get("period", "")))
+        hhiList.append(_toFloat(row.get("hhi")))
+        topList.append(_toFloat(row.get("topPct")))
+    if not periods:
+        return {}
+    return {
+        "categories": periods,
+        "series": [
+            {
+                "key": "hhi",
+                "label": "HHI 집중도",
+                "color": "var(--chart-3)",
+                "intent": "negative",
+                "unit": "",
+                "type": "line",
+                "data": hhiList,
+            },
+            {
+                "key": "topPct",
+                "label": "1위 부문 비중",
+                "color": "var(--chart-2)",
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "axis": "right",
+                "data": topList,
+            },
+        ],
+    }
+
+
+def buildDolBreakeven(company: Any) -> dict[str, Any]:
+    """calcOperatingLeverage + calcBreakevenEstimate → DOL bar + 안전마진 line.
+
+    DOL (영업레버리지) 클수록 매출 변동에 영업이익 민감. 안전마진 = (매출 − BEP)/매출 ×100.
+    """
+    dol_res = _safeCall("dartlab.analysis.financial.costStructure", "calcOperatingLeverage", company)
+    bep_res = _safeCall("dartlab.analysis.financial.costStructure", "calcBreakevenEstimate", company)
+    dolHistory = _drill(dol_res, "history") if isinstance(dol_res, dict) else None
+    bepHistory = _drill(bep_res, "history") if isinstance(bep_res, dict) else None
+    if not isinstance(dolHistory, list):
+        dolHistory = []
+    if not isinstance(bepHistory, list):
+        bepHistory = []
+    if not dolHistory and not bepHistory:
+        return {}
+    periodSet: list[str] = []
+    seen: set[str] = set()
+    for row in dolHistory:
+        if isinstance(row, dict):
+            p = str(row.get("period", ""))
+            if p and p not in seen:
+                periodSet.append(p)
+                seen.add(p)
+    for row in bepHistory:
+        if isinstance(row, dict):
+            p = str(row.get("period", ""))
+            if p and p not in seen:
+                periodSet.append(p)
+                seen.add(p)
+    if not periodSet:
+        return {}
+    # 과거 → 최신 (정통 분석 시각화 방향)
+    periods = sorted(periodSet)
+    dolLookup = {str(row.get("period", "")): _toFloat(row.get("dol")) for row in dolHistory if isinstance(row, dict)}
+    safetyLookup = {
+        str(row.get("period", "")): _toFloat(row.get("marginOfSafety")) for row in bepHistory if isinstance(row, dict)
+    }
+    return {
+        "categories": periods,
+        "series": [
+            {
+                "key": "dol",
+                "label": "영업레버리지 (DOL)",
+                "color": "var(--chart-2)",
+                "intent": "accent",
+                "unit": "배",
+                "type": "bar",
+                "data": [dolLookup.get(p) for p in periods],
+            },
+            {
+                "key": "marginOfSafety",
+                "label": "안전마진",
+                "color": "var(--chart-5)",
+                "intent": "positive",
+                "unit": "%",
+                "type": "line",
+                "axis": "right",
+                "data": [safetyLookup.get(p) for p in periods],
+            },
+        ],
+    }
+
+
+def buildDistressEnsembleGauge(company: Any) -> dict[str, Any]:
+    """calcDistressEnsemble → 5 모델 (Altman Z·Z''·Ohlson·Springate·Zmijewski) 다수결 gauge.
+
+    agreement (다수파 일치도, %) 를 gauge value 로. ensemble label ("안전"|"주의"|"위험")
+    + 모델별 verdict 카운트는 subtitle.
+    """
+    res = _safeCall("dartlab.analysis.financial._stabilityDistress", "calcDistressEnsemble", company)
+    if not isinstance(res, dict):
+        return {}
+    agreement = _toFloat(res.get("agreement"))
+    ensemble = res.get("ensemble") or ""
+    safeCount = res.get("safeCount") or 0
+    dangerCount = res.get("dangerCount") or 0
+    total = res.get("total") or 0
+    if agreement is None or not total:
+        return {}
+    # ensemble label 별 invert: "안전" 이면 agreement 높을수록 좋음, "위험" 이면 agreement 높을수록 나쁨.
+    # gauge value = 안전 확신도 (safeCount/total × 100). 0~100 단순.
+    safetyScore = safeCount / total * 100 if total > 0 else None
+    if safetyScore is None:
+        return {}
+    return {
+        "value": round(safetyScore, 1),
+        "minValue": 0.0,
+        "maxValue": 100.0,
+        "bands": [
+            {"fromValue": 0.0, "toValue": 30.0, "label": "위험", "intent": "negative"},
+            {"fromValue": 30.0, "toValue": 60.0, "label": "주의", "intent": "accent"},
+            {"fromValue": 60.0, "toValue": 100.0, "label": "안전", "intent": "positive"},
+        ],
+        "unit": "%",
+        "subtitle": f"5 모델 다수결 — {ensemble} · 안전 {safeCount}/{total} · 위험 {dangerCount}/{total} · 일치도 {agreement:.0f}%",
+    }
+
+
 __all__ = [
     "LIFE_CYCLE_PHASES",
     "buildBeneishGauge",
@@ -1048,14 +1377,20 @@ __all__ = [
     "buildCapitalAllocationWaterfall",
     "buildCashflowAllocationSankey",
     "buildDistressDecomp",
-    "buildScenarioSensitivity",
+    "buildDistressEnsembleGauge",
     "buildDistressGauge",
+    "buildDolBreakeven",
     "buildKpiTilesFromNorm",
     "buildLifeCyclePhase",
     "buildNarrativeBridge",
     "buildPeerComparison",
     "buildPeerScatter",
+    "buildPenmanRoeBars",
+    "buildRoicWaccGap",
+    "buildScenarioSensitivity",
     "buildScoreBadge",
+    "buildSegmentBreakdown",
+    "buildSegmentConcentration",
     "buildSnowflakeAlert",
     "buildSnowflakeKpi",
     "buildSnowflakeRadar",

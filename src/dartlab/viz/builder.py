@@ -359,6 +359,38 @@ def _buildKindSpecView(
         base_view["tiles"] = adapters.buildSnowflakeKpi(company, tilePlans)
     elif adapter_name == "scoreBadge":
         base_view.update(adapters.buildScoreBadge(company))
+    elif adapter_name == "penmanRoeBars":
+        result = adapters.buildPenmanRoeBars(company)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "roicWaccGap":
+        result = adapters.buildRoicWaccGap(company)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "segmentBreakdown":
+        result = adapters.buildSegmentBreakdown(company)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "segmentConcentration":
+        result = adapters.buildSegmentConcentration(company)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "dolBreakeven":
+        result = adapters.buildDolBreakeven(company)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+    elif adapter_name == "distressEnsembleGauge":
+        base_view.update(adapters.buildDistressEnsembleGauge(company))
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass

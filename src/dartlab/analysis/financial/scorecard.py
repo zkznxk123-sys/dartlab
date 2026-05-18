@@ -372,6 +372,82 @@ def calcPiotroskiDetail(company, *, basePeriod: str | None = None) -> dict | Non
 
 
 @memoizedCalc
+def calcPiotroskiTimeline(company, *, basePeriod: str | None = None) -> dict | None:
+    """Piotroski F-Score 시계열 — 매 annual period 0~9 점.
+
+    Capabilities:
+        - 기존 calcPiotroski (단일 시점) 의 시계열 wrapper.
+        - 각 평가 시점 i 에서 series 의 [:i+1] 슬라이스로 calcPiotroski 호출.
+
+    Args:
+        company: Company 객체.
+        basePeriod: 기준 기간. None 시 최신.
+
+    Returns:
+        dict | None:
+            - ``history`` (list[dict]): 연도별 3 키
+              (period, score, breakdown: dict[str, bool] — 9 components).
+
+    Example:
+        >>> r = calcPiotroskiTimeline(Company("005930"))
+        >>> r["history"][-1]
+        {"period": "2024", "score": 7, "breakdown": {"roaPositive": True, ...}}
+
+    Guide:
+        score ≥ 7 = strong, 4~6 = moderate, ≤ 3 = weak (Piotroski 2000).
+        시계열 추세 ↑ = 펀더멘털 개선, ↓ = 악화 신호.
+
+    Requires:
+        annual 시계열 ≥ 2 년 (i ≥ 1 부터 평가).
+
+    SeeAlso:
+        - calcPiotroskiDetail : 단일 시점 9 신호 상세
+        - research._scoringDescriptive.calcPiotroski : 원본 계산
+
+    AIContext:
+        시계열 추세 + 최근 점수 함께 인용. 단일 점수만 인용 금지.
+    """
+    try:
+        annual = company._buildFinanceSeries(freq="Y")
+    except (ValueError, KeyError, AttributeError):
+        return None
+    if annual is None:
+        return None
+    aSeries, aYears = annual
+    if not aYears or len(aYears) < 2:
+        return None
+
+    from dartlab.analysis.financial.research._scoringDescriptive import calcPiotroski
+
+    history: list[dict] = []
+    nYears = len(aYears)
+    # i ∈ [1, n-1]: i=0 은 비교 prev 없어 skip. 매 i 에서 series 를 [:i+1] 로 슬라이스 후 calcPiotroski 호출
+    # (calcPiotroski 가 _latest / _latestTwo 로 마지막 2 점만 보므로 동일 결과).
+    for i in range(1, nYears):
+        sliced: dict = {}
+        for sheet, accs in aSeries.items():
+            if not isinstance(accs, dict):
+                continue
+            sliced[sheet] = {}
+            for acc, vals in accs.items():
+                if isinstance(vals, list):
+                    sliced[sheet][acc] = vals[: i + 1]
+        try:
+            score = calcPiotroski(sliced)
+        except (ValueError, KeyError, TypeError, AttributeError):
+            continue
+        history.append(
+            {
+                "period": str(aYears[i]),
+                "score": score.total,
+                "breakdown": dict(score.components),
+            }
+        )
+
+    return {"history": history} if history else None
+
+
+@memoizedCalc
 def calcSummaryFlags(company, *, basePeriod: str | None = None) -> list[str]:
     """전체 경고/기회 요약 -- 8영역 플래그 수집.
 
