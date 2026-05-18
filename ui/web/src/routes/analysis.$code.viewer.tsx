@@ -152,6 +152,47 @@ function _periodLabel(p: unknown): string {
 	return '';
 }
 
+// DART 정기보고서 표준 leaf root headings — backend topic 간 cross-contamination 제거용.
+// dartlab 의 `companyOverview` 응답이 "3. 자본금 변동사항" / "4. 주식의 총수 등" sections
+// 까지 carjack 해서 들고 있는 데 그게 사실 다른 topic (capitalChange, shareCapital) 에
+// 정상 존재한다. 이 set 에 매칭되는 *다른* leaf root 가 headingPath 에 있으면 그 section
+// 은 현 topic 본문에서 제외.
+const KNOWN_LEAF_ROOTS: ReadonlySet<string> = new Set([
+	// I. 회사의 개요
+	'회사의 개요', '회사의 연혁', '자본금 변동사항',
+	'주식의 총수 등', '정관에 관한 사항', '배당에 관한 사항',
+	// II. 사업의 내용
+	'사업의 개요', '주요 제품 및 서비스', '원재료 및 생산설비',
+	'매출 및 수주상황', '위험관리 및 파생거래', '주요계약 및 연구개발활동',
+	'기타 참고사항',
+	// III. 재무에 관한 사항
+	'재무비율', '요약재무정보', '연결재무제표', '연결재무제표 주석',
+	'재무제표', '재무제표 주석', '재무상태표', '손익계산서',
+	'포괄손익계산서', '현금흐름표', '자본변동표',
+]);
+
+// 라벨 앞 번호 prefix 제거. "1. 회사의 개요" → "회사의 개요", "I. 회사의 개요" → "회사의 개요".
+// 한글 가-하 번호 ("가.", "나.", ...) 도 제거.
+function _stripNumbering(s: string): string {
+	if (!s) return '';
+	return s.replace(/^(?:\d+|[IVXivx]+|[가-하])\.\s*/, '').trim();
+}
+
+// section 의 headingPath 에 *다른* known leaf root 가 들어있으면 true (현 topic 에서 제외).
+function _sectionBelongsToOtherLeaf(section: ViewerSection, ownLeafCore: string): boolean {
+	const path = section.headingPath ?? [];
+	if (path.length === 0) return false;
+	for (const h of path) {
+		const t = typeof h === 'string' ? (h as string) : (h?.text || '');
+		const core = _stripNumbering(t);
+		if (!core) continue;
+		if (KNOWN_LEAF_ROOTS.has(core) && core !== ownLeafCore) {
+			return true;
+		}
+	}
+	return false;
+}
+
 // 본문을 단락 prose 로 분리. 빈 줄 우선, 없으면 단일 줄바꿈.
 function _bodyParagraphs(body: string | undefined | null): string[] {
 	if (!body || !body.trim()) return [];
@@ -276,9 +317,13 @@ function ViewerTab() {
 
 	const td = viewer?.textDocument;
 	const allSections = td?.sections ?? [];
-	// 본문은 stale 제외 (제거된 항목). 우 패널 lifecycle 로 표시.
-	const sections = allSections.filter((s) => s.status !== 'stale');
-	const staleHidden = allSections.length - sections.length;
+	// leaf-level 필터: backend 의 `companyOverview` topic 응답이 다른 leaf (3.자본금변동/
+	// 4.주식의총수 등) 의 sections 까지 carjack 해서 들고 있는 cross-contamination 이 있다.
+	// headingPath 에 *다른 알려진 leaf root* 가 있는 sections 는 제외 — 현 topic 의 본
+	// 내용만 본문에. stale 도 본문에 표시 (직전 사업보고서 기준 실제 정보).
+	const ownLeafCore = _stripNumbering(viewer?.topicLabel || '');
+	const sections = allSections.filter((s) => !_sectionBelongsToOtherLeaf(s, ownLeafCore));
+	const staleHidden = sections.filter((s) => s.status === 'stale').length;
 
 	const isPastView = !!viewPeriod;
 	const topicLatestLabel = _periodLabel(td?.latestPeriod);
