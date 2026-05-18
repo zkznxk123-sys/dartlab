@@ -1,19 +1,23 @@
-// /analysis/$code/viewer — 공시 뷰어.
-// 좌: TOC 트리 (chapter > topic) · 중앙: 본문 prose (최신 풀텍스트) · 우상: DART 원본.
+// /analysis/$code/viewer — 공시 뷰어 3 단 구조 (법조문 모델).
+// 좌 (TOC) | 중앙 (본문 prose) | 우 (history 패널 + 시점 전환).
 //
-// 본문은 진짜 읽히는 문서 (법조문 본문 + 시간축 패널 모델의 PR1):
-//   - latest.body 풀텍스트를 단락 prose 로 렌더. preview (140 자 컷) 사용 X.
-//   - heading 계층 = headingPath 마지막 항목 (h2/h3), 상위는 breadcrumb.
-//   - stale (제거된) 섹션은 본문에서 제외 — 후속 PR 에서 우 history 패널의 lifecycle 영역으로.
+// 본문은 진짜 읽히는 문서:
+//   - latest.body 풀텍스트를 단락 prose 로 렌더. preview 컷 사용 X.
+//   - heading 계층 = headingPath 마지막 text (h2/h3), 상위는 breadcrumb.
+//   - body 가 비어있는 섹션은 [기재 없음] 로 mute 표시 — 우 패널에서 과거 시점 클릭 가능.
 //
-// 데이터 fetch:
-//   - cold load (URL 에 topic 없음) → /api/company/{code}/init?compact=true (TOC + firstTopic + viewer 1 RTT)
-//   - URL 에 topic 있음 → /toc + /viewer/{topic}?compact=true 병렬
-// compact 는 views (period 별 풀텍스트 dict) 만 drop — latest.body, timeline 은 유지 (PR2 우 패널 데이터 기반).
+// 우 history 패널:
+//   - 토픽 lifecycle (first → latest, 섹션 총합 / 활성 / 제거).
+//   - 시점 list (latest → first). 클릭 → URL ?viewPeriod=X → backend 가
+//     ?period=X&compact=true 로 그 시점 본문 반환. 본문 sticky 배너에
+//     "[2022Q1 시점 보기] · 최신으로" 노출.
+//   - "변경만 보기" 토글로 stable period 숨김.
+//
+// 스크롤 — 세 컬럼이 모두 독립 스크롤 (h-full overflow-hidden flex 의 자식 각각 overflow-y-auto).
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react';
+import { ChevronRight, Clock, ExternalLink, FileText, History, Loader2 } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +58,12 @@ interface ViewerTextView {
 	status?: string;
 }
 
+interface ViewerTimelineEntry {
+	period?: PeriodRef | null;
+	prevPeriod?: PeriodRef | null;
+	status?: string;
+}
+
 interface ViewerSection {
 	id: string;
 	order?: string | number;
@@ -63,9 +73,9 @@ interface ViewerSection {
 	firstPeriod?: PeriodRef | string | null;
 	periodCount?: number;
 	status?: string;            // updated · new · stable · stale
-	latestChange?: string;       // "2024Q1 → 2023Q4" 식 표기
+	latestChange?: string;
 	preview?: string;
-	timeline?: unknown[];
+	timeline?: ViewerTimelineEntry[];
 }
 
 interface ViewerResponse {
@@ -74,14 +84,15 @@ interface ViewerResponse {
 	topic: string;
 	topicLabel?: string;
 	compact?: boolean;
+	period?: string | null;
 	textDocument?: {
 		topic?: string;
 		mode?: string;
-		periods?: string[];
-		latestPeriod?: string;
+		periods?: PeriodRef[];
+		latestPeriod?: PeriodRef | string;
+		firstPeriod?: PeriodRef | string;
 		totalSectionCount?: number;
 		truncated?: boolean;
-		firstPeriod?: string;
 		sectionCount?: number;
 		updatedCount?: number;
 		newCount?: number;
@@ -93,6 +104,7 @@ interface ViewerResponse {
 
 interface ViewerSearch {
 	topic?: string;
+	viewPeriod?: string;
 }
 
 interface InitResponse {
@@ -108,6 +120,7 @@ export const Route = createFileRoute('/analysis/$code/viewer')({
 	component: ViewerTab,
 	validateSearch: (s: Record<string, unknown>): ViewerSearch => ({
 		topic: typeof s.topic === 'string' ? s.topic : undefined,
+		viewPeriod: typeof s.viewPeriod === 'string' && s.viewPeriod ? s.viewPeriod : undefined,
 	}),
 });
 
@@ -123,10 +136,10 @@ function _periodLabel(p: unknown): string {
 	if (typeof p === 'string' || typeof p === 'number') return String(p);
 	if (typeof p === 'object') {
 		const obj = p as Record<string, unknown>;
-		const period = obj.period;
-		if (typeof period === 'string' || typeof period === 'number') return String(period);
 		const label = obj.label;
 		if (typeof label === 'string') return label;
+		const period = obj.period;
+		if (typeof period === 'string' || typeof period === 'number') return String(period);
 		const year = obj.year;
 		const quarter = obj.quarter;
 		if (year != null) return quarter != null ? `${year}Q${quarter}` : String(year);
@@ -134,7 +147,7 @@ function _periodLabel(p: unknown): string {
 	return '';
 }
 
-// headingPath 가 객체 배열일 때 안전하게 텍스트만 추출.
+// headingPath dict 배열에서 text 만 안전 추출.
 function _headingTexts(path: ViewerHeading[] | undefined | null): string[] {
 	if (!Array.isArray(path)) return [];
 	return path
@@ -142,12 +155,10 @@ function _headingTexts(path: ViewerHeading[] | undefined | null): string[] {
 		.filter((t) => typeof t === 'string' && t.trim().length > 0);
 }
 
-// latest.body 를 prose 단락으로 분리. 빈 줄 (\n\n) 경계 우선, 없으면 단일 줄바꿈.
+// 본문을 단락 prose 로 분리. 빈 줄 우선, 없으면 단일 줄바꿈.
 function _bodyParagraphs(body: string | undefined | null): string[] {
 	if (!body || !body.trim()) return [];
-	const blocks = body
-		.replace(/\r\n?/g, '\n')
-		.split(/\n\s*\n+/);
+	const blocks = body.replace(/\r\n?/g, '\n').split(/\n\s*\n+/);
 	if (blocks.length > 1) {
 		return blocks.map((b) => b.replace(/\s+/g, ' ').trim()).filter(Boolean);
 	}
@@ -155,6 +166,19 @@ function _bodyParagraphs(body: string | undefined | null): string[] {
 		.split('\n')
 		.map((line) => line.replace(/\s+/g, ' ').trim())
 		.filter(Boolean);
+}
+
+// 헤딩 fallback — headingPath 비어있으면 body 첫 단락 절단, 그것도 없으면 section.id.
+function _sectionTitle(section: ViewerSection): { title: string; muted: boolean } {
+	const headings = _headingTexts(section.headingPath);
+	if (headings.length > 0) return { title: headings[headings.length - 1], muted: false };
+	const paragraphs = _bodyParagraphs(section.latest?.body);
+	if (paragraphs.length > 0) {
+		const first = paragraphs[0];
+		const trimmed = first.length > 60 ? first.slice(0, 60) + '…' : first;
+		return { title: trimmed, muted: true };
+	}
+	return { title: section.id, muted: true };
 }
 
 const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
@@ -166,7 +190,7 @@ const STATUS_LABEL: Record<string, { label: string; tone: string }> = {
 
 function ViewerTab() {
 	const { code } = Route.useParams();
-	const { topic } = Route.useSearch();
+	const { topic, viewPeriod } = Route.useSearch();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 
@@ -178,12 +202,14 @@ function ViewerTab() {
 		enabled: !topic,
 	});
 
-	// init 번들 도착 → toc / viewer 캐시 시드. URL 이 topic 으로 전환돼도 재요청 없음.
 	useEffect(() => {
 		if (!initBundle) return;
 		queryClient.setQueryData(['viewer', 'toc', code], initBundle.toc);
 		if (initBundle.firstTopic && initBundle.viewer) {
-			queryClient.setQueryData(['viewer', 'topic', code, initBundle.firstTopic], initBundle.viewer);
+			queryClient.setQueryData(
+				['viewer', 'topic', code, initBundle.firstTopic, null],
+				initBundle.viewer,
+			);
 		}
 	}, [initBundle, code, queryClient]);
 
@@ -212,20 +238,27 @@ function ViewerTab() {
 				search: (prev) => ({
 					period: prev?.period ?? 'quarterly',
 					topic: firstTopic,
+					viewPeriod: prev?.viewPeriod,
 				}),
 				replace: true,
 			});
 		}
 	}, [topic, firstTopic, code, navigate]);
 
-	// init 번들이 firstTopic viewer 를 들고 있으면 초기값으로 활용 — fetch 없이 즉시 렌더.
-	const initViewerSeed = !topic && initBundle?.viewer && initBundle.firstTopic === activeTopic
-		? initBundle.viewer
-		: undefined;
+	// 시점 전환 — viewPeriod 있으면 backend 에 ?period= 로 fetch, 없으면 최신.
+	const periodQuery = viewPeriod ? `&period=${encodeURIComponent(viewPeriod)}` : '';
+	const queryKey = ['viewer', 'topic', code, activeTopic, viewPeriod ?? null] as const;
+	const initViewerSeed =
+		!topic && !viewPeriod && initBundle?.viewer && initBundle.firstTopic === activeTopic
+			? initBundle.viewer
+			: undefined;
 
 	const { data: viewerFetched, isLoading: viewerFetchLoading } = useQuery({
-		queryKey: ['viewer', 'topic', code, activeTopic],
-		queryFn: () => fetchJson<ViewerResponse>(`/api/company/${code}/viewer/${activeTopic}?compact=true&limit=60`),
+		queryKey,
+		queryFn: () =>
+			fetchJson<ViewerResponse>(
+				`/api/company/${code}/viewer/${activeTopic}?compact=true&limit=60${periodQuery}`,
+			),
 		enabled: !!activeTopic && !initViewerSeed,
 		staleTime: 60_000,
 	});
@@ -235,13 +268,31 @@ function ViewerTab() {
 
 	const td = viewer?.textDocument;
 	const allSections = td?.sections ?? [];
-	// 본문에는 활성 섹션만 — stale (제거된 항목) 은 후속 PR 의 우 history 패널에서 lifecycle 로.
+	// 본문은 stale 제외 (제거된 항목). 우 패널 lifecycle 로 표시.
 	const sections = allSections.filter((s) => s.status !== 'stale');
 	const staleHidden = allSections.length - sections.length;
 
+	const isPastView = !!viewPeriod;
+	const topicLatestLabel = _periodLabel(td?.latestPeriod);
+	const topicFirstLabel = _periodLabel(td?.firstPeriod);
+
+	const setViewPeriod = (next: string | undefined) => {
+		navigate({
+			to: '/analysis/$code/viewer',
+			params: { code },
+			search: (prev) => ({
+				period: prev?.period ?? 'quarterly',
+				topic: activeTopic,
+				viewPeriod: next,
+			}),
+			replace: false,
+		});
+	};
+
 	return (
-		<div className="flex flex-1 overflow-hidden">
-			<aside className="w-60 shrink-0 overflow-y-auto border-r bg-card/30 p-2">
+		<div className="flex h-full overflow-hidden">
+			{/* 좌 TOC */}
+			<aside className="w-60 shrink-0 overflow-y-auto border-r bg-card/30 p-2 tiny-scroll">
 				{tocLoading ? (
 					<div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
 						<Loader2 className="size-3 animate-spin" /> 목차 로드 중…
@@ -267,6 +318,7 @@ function ViewerTab() {
 														search: (prev) => ({
 															period: prev?.period ?? 'quarterly',
 															topic: t.topic,
+															viewPeriod: undefined,
 														}),
 													})
 												}
@@ -289,6 +341,7 @@ function ViewerTab() {
 				)}
 			</aside>
 
+			{/* 중앙 본문 */}
 			<main className="flex-1 overflow-y-auto">
 				{!activeTopic ? (
 					<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -299,73 +352,103 @@ function ViewerTab() {
 						<Loader2 className="size-5 animate-spin" /> 본문 로드 중…
 					</div>
 				) : (
-					<article className="mx-auto max-w-3xl px-8 py-8">
-						<header className="mb-8 flex items-start justify-between gap-4 border-b pb-4">
-							<div>
-								<div className="text-xs text-muted-foreground">
-									{viewer?.corpName} · {code}
+					<>
+						{isPastView && (
+							<div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-amber-500/40 bg-amber-500/10 px-6 py-2 text-xs text-amber-100/90">
+								<div className="flex items-center gap-2">
+									<Clock className="size-3.5" />
+									<span>
+										<strong className="font-mono">{viewPeriod}</strong> 시점 본문 보는 중
+									</span>
 								</div>
-								<h1 className="mt-1 flex items-center gap-2 text-xl font-semibold tracking-tight">
-									<FileText className="size-4 text-muted-foreground" />
-									{viewer?.topicLabel || viewer?.topic || activeTopic}
-								</h1>
-								{td && (
-									<div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
-										<Badge variant="secondary" className="font-normal text-[10px]">
-											섹션 {sections.length}
-										</Badge>
-										{td.updatedCount ? (
-											<Badge variant="secondary" className="bg-[var(--chart-2)]/15 text-[var(--chart-2)] font-normal text-[10px]">
-												변경 {td.updatedCount}
-											</Badge>
-										) : null}
-										{td.newCount ? (
-											<Badge variant="secondary" className="bg-[var(--chart-5)]/15 text-[var(--chart-5)] font-normal text-[10px]">
-												신규 {td.newCount}
-											</Badge>
-										) : null}
-										{staleHidden > 0 && (
-											<Badge variant="outline" className="font-normal text-[10px] text-muted-foreground">
-												제거 {staleHidden} (본문 제외)
-											</Badge>
-										)}
-										{td.firstPeriod && td.latestPeriod && (
-											<span className="ml-2 font-mono">
-												{_periodLabel(td.firstPeriod)} → {_periodLabel(td.latestPeriod)}
-											</span>
-										)}
-									</div>
-								)}
-							</div>
-							<a
-								href={`https://dart.fss.or.kr/dsab007/main.do?selectKey=${code}`}
-								target="_blank"
-								rel="noreferrer noopener"
-								className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs text-muted-foreground hover:bg-accent"
-							>
-								<ExternalLink className="size-3" /> DART 원본
-							</a>
-						</header>
-
-						{sections.length === 0 ? (
-							<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
-								본문 데이터가 없습니다.
-							</div>
-						) : (
-							<div className="space-y-10">
-								{sections.map((s) => (
-									<DocumentSection key={s.id} section={s} />
-								))}
-								{td?.truncated && td?.totalSectionCount != null && (
-									<div className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
-										… 그 외 {td.totalSectionCount - allSections.length} 섹션. 필터/검색은 후속 PR.
-									</div>
-								)}
+								<button
+									type="button"
+									onClick={() => setViewPeriod(undefined)}
+									className="rounded border border-amber-400/30 px-2 py-0.5 text-[10px] uppercase tracking-wider hover:bg-amber-500/20"
+								>
+									최신으로 돌아가기
+								</button>
 							</div>
 						)}
-					</article>
+						<article className="mx-auto max-w-3xl px-8 py-8">
+							<header className="mb-8 flex items-start justify-between gap-4 border-b pb-4">
+								<div>
+									<div className="text-xs text-muted-foreground">
+										{viewer?.corpName} · {code}
+									</div>
+									<h1 className="mt-1 flex items-center gap-2 text-xl font-semibold tracking-tight">
+										<FileText className="size-4 text-muted-foreground" />
+										{viewer?.topicLabel || viewer?.topic || activeTopic}
+									</h1>
+									{td && (
+										<div className="mt-3 flex flex-wrap items-center gap-1.5 text-[10px] text-muted-foreground">
+											<Badge variant="secondary" className="font-normal text-[10px]">
+												섹션 {sections.length}
+											</Badge>
+											{td.updatedCount ? (
+												<Badge variant="secondary" className="bg-[var(--chart-2)]/15 text-[var(--chart-2)] font-normal text-[10px]">
+													변경 {td.updatedCount}
+												</Badge>
+											) : null}
+											{td.newCount ? (
+												<Badge variant="secondary" className="bg-[var(--chart-5)]/15 text-[var(--chart-5)] font-normal text-[10px]">
+													신규 {td.newCount}
+												</Badge>
+											) : null}
+											{staleHidden > 0 && (
+												<Badge variant="outline" className="font-normal text-[10px] text-muted-foreground">
+													제거 {staleHidden} (본문 제외)
+												</Badge>
+											)}
+											{topicFirstLabel && topicLatestLabel && (
+												<span className="ml-2 font-mono">
+													{topicFirstLabel} → {topicLatestLabel}
+												</span>
+											)}
+										</div>
+									)}
+								</div>
+								<a
+									href={`https://dart.fss.or.kr/dsab007/main.do?selectKey=${code}`}
+									target="_blank"
+									rel="noreferrer noopener"
+									className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs text-muted-foreground hover:bg-accent"
+								>
+									<ExternalLink className="size-3" /> DART 원본
+								</a>
+							</header>
+
+							{sections.length === 0 ? (
+								<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
+									본문 데이터가 없습니다.
+								</div>
+							) : (
+								<div className="space-y-10">
+									{sections.map((s) => (
+										<DocumentSection key={s.id} section={s} />
+									))}
+									{td?.truncated && td?.totalSectionCount != null && (
+										<div className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
+											… 그 외 {td.totalSectionCount - allSections.length} 섹션. 필터/검색은 후속 PR.
+										</div>
+									)}
+								</div>
+							)}
+						</article>
+					</>
 				)}
 			</main>
+
+			{/* 우 history 패널 */}
+			<aside className="hidden w-72 shrink-0 overflow-y-auto border-l bg-card/30 lg:block tiny-scroll">
+				<HistoryPanel
+					td={td}
+					sections={allSections}
+					staleHidden={staleHidden}
+					viewPeriod={viewPeriod}
+					onSelectPeriod={setViewPeriod}
+				/>
+			</aside>
 		</div>
 	);
 }
@@ -373,16 +456,14 @@ function ViewerTab() {
 function DocumentSection({ section }: { section: ViewerSection }) {
 	const status = section.status ?? '';
 	const statusInfo = STATUS_LABEL[status];
+	const { title, muted } = _sectionTitle(section);
 	const headings = _headingTexts(section.headingPath);
-	const title = headings[headings.length - 1] || section.id;
 	const breadcrumb = headings.slice(0, -1).join(' › ');
 	const lastHeading = section.headingPath?.[section.headingPath.length - 1];
 	const headingLevel = typeof lastHeading?.level === 'number' && lastHeading.level >= 3 ? 3 : 2;
 
 	const body = section.latest?.body ?? '';
 	const paragraphs = _bodyParagraphs(body);
-	// latest.body 가 없으면 (옛 payload 등) preview 로 fallback.
-	const fallback = paragraphs.length === 0 && section.preview ? section.preview : null;
 
 	const HeadingTag = headingLevel === 3 ? 'h3' : 'h2';
 	const headingCls =
@@ -391,14 +472,16 @@ function DocumentSection({ section }: { section: ViewerSection }) {
 			: 'text-lg font-semibold tracking-tight mt-2';
 
 	return (
-		<section className="scroll-mt-6">
+		<section className="scroll-mt-6" id={`sec-${section.id}`}>
 			{breadcrumb && (
 				<div className="text-[11px] uppercase tracking-wider text-muted-foreground/80">
 					{breadcrumb}
 				</div>
 			)}
 			<div className="flex items-baseline justify-between gap-3">
-				<HeadingTag className={headingCls}>{title}</HeadingTag>
+				<HeadingTag className={cn(headingCls, muted && 'text-muted-foreground italic')}>
+					{title}
+				</HeadingTag>
 				<div className="flex shrink-0 items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
 					{statusInfo && status !== 'stable' && (
 						<span className={cn('rounded px-1.5 py-0.5 font-normal', statusInfo.tone)}>
@@ -409,16 +492,160 @@ function DocumentSection({ section }: { section: ViewerSection }) {
 				</div>
 			</div>
 			<div className="mt-3 space-y-3 text-[15px] leading-7 text-foreground/90">
-				{paragraphs.length > 0
-					? paragraphs.map((p, i) => (
-							<p key={i} className="whitespace-pre-wrap">
-								{p}
-							</p>
-					  ))
-					: fallback
-						? <p className="text-muted-foreground italic">{fallback}</p>
-						: <p className="text-muted-foreground italic">본문 없음.</p>}
+				{paragraphs.length > 0 ? (
+					paragraphs.map((p, i) => (
+						<p key={i} className="whitespace-pre-wrap">
+							{p}
+						</p>
+					))
+				) : (
+					<p className="text-muted-foreground italic">[본문 기재 없음]</p>
+				)}
 			</div>
 		</section>
+	);
+}
+
+interface HistoryPanelProps {
+	td: ViewerResponse['textDocument'];
+	sections: ViewerSection[];
+	staleHidden: number;
+	viewPeriod: string | undefined;
+	onSelectPeriod: (p: string | undefined) => void;
+}
+
+function HistoryPanel({ td, sections, staleHidden, viewPeriod, onSelectPeriod }: HistoryPanelProps) {
+	// 토픽 전체 period list — td.periods 우선, 없으면 모든 section timeline 합집합.
+	const periods = useMemo<PeriodRef[]>(() => {
+		if (td?.periods && td.periods.length > 0) return td.periods;
+		const seen = new Map<string, PeriodRef>();
+		for (const s of sections) {
+			for (const t of s.timeline ?? []) {
+				const p = t.period as PeriodRef | null | undefined;
+				if (!p) continue;
+				const label = _periodLabel(p);
+				if (label && !seen.has(label)) seen.set(label, p);
+			}
+		}
+		return Array.from(seen.values());
+	}, [td?.periods, sections]);
+
+	// latest → first 내림차순 정렬 (sortKey 우선).
+	const sortedPeriods = useMemo(() => {
+		const withKey = periods.map((p) => ({
+			period: p,
+			label: _periodLabel(p),
+			sortKey: typeof (p as { sortKey?: number }).sortKey === 'number'
+				? (p as { sortKey?: number }).sortKey!
+				: (p.year ?? 0) * 10 + (p.quarter ?? 5),
+		}));
+		withKey.sort((a, b) => b.sortKey - a.sortKey);
+		return withKey;
+	}, [periods]);
+
+	// 각 period 에서 일어난 status 카운트 (union of section timelines).
+	const periodStats = useMemo(() => {
+		const map = new Map<string, { added: number; updated: number; removed: number; total: number }>();
+		for (const s of sections) {
+			for (const t of s.timeline ?? []) {
+				const p = t.period as PeriodRef | null | undefined;
+				if (!p) continue;
+				const label = _periodLabel(p);
+				if (!label) continue;
+				const slot = map.get(label) ?? { added: 0, updated: 0, removed: 0, total: 0 };
+				slot.total += 1;
+				if (t.status === 'new') slot.added += 1;
+				else if (t.status === 'updated') slot.updated += 1;
+				else if (t.status === 'stale') slot.removed += 1;
+				map.set(label, slot);
+			}
+		}
+		return map;
+	}, [sections]);
+
+	const totalSections = (td?.sectionCount ?? td?.totalSectionCount ?? sections.length) || 0;
+
+	if (!td) {
+		return (
+			<div className="p-4 text-xs text-muted-foreground">
+				토픽 데이터 로드 후 시간축이 표시됩니다.
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex flex-col gap-4 p-3">
+			<div>
+				<div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+					<History className="size-3" /> 시간축
+				</div>
+				<div className="text-[11px] leading-relaxed text-muted-foreground">
+					<div>
+						<span className="font-mono">{_periodLabel(td.firstPeriod) || '?'}</span>
+						<span className="mx-1">→</span>
+						<span className="font-mono">{_periodLabel(td.latestPeriod) || '?'}</span>
+					</div>
+					<div className="mt-1">
+						활성 {sections.length - staleHidden} · 제거 {staleHidden} · 총 {totalSections}
+					</div>
+				</div>
+			</div>
+
+			<div className="border-t pt-3">
+				<div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+					시점 보기
+				</div>
+				<div className="space-y-0.5">
+					<button
+						type="button"
+						onClick={() => onSelectPeriod(undefined)}
+						className={cn(
+							'flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors',
+							!viewPeriod
+								? 'bg-accent text-accent-foreground'
+								: 'text-muted-foreground hover:bg-accent/50',
+						)}
+					>
+						<span className="font-medium">최신</span>
+						<span className="font-mono text-[10px] opacity-70">
+							{_periodLabel(td.latestPeriod)}
+						</span>
+					</button>
+					{sortedPeriods.map(({ label }) => {
+						if (!label) return null;
+						const isActive = viewPeriod === label;
+						const stats = periodStats.get(label);
+						const noChange = stats && stats.added + stats.updated + stats.removed === 0;
+						return (
+							<button
+								key={label}
+								type="button"
+								onClick={() => onSelectPeriod(label)}
+								className={cn(
+									'flex w-full items-center justify-between gap-2 rounded px-2 py-1.5 text-left text-xs transition-colors',
+									isActive
+										? 'bg-accent text-accent-foreground'
+										: 'text-muted-foreground hover:bg-accent/50',
+								)}
+							>
+								<span className="font-mono">{label}</span>
+								<span className="flex items-center gap-1 text-[10px]">
+									{stats?.added ? (
+										<span className="text-[var(--chart-5)]">+{stats.added}</span>
+									) : null}
+									{stats?.updated ? (
+										<span className="text-[var(--chart-2)]">~{stats.updated}</span>
+									) : null}
+									{stats?.removed ? (
+										<span className="text-[var(--chart-3)]">−{stats.removed}</span>
+									) : null}
+									{noChange && <span className="opacity-40">·</span>}
+								</span>
+							</button>
+						);
+					})}
+				</div>
+			</div>
+		</div>
 	);
 }

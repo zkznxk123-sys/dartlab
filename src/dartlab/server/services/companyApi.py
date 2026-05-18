@@ -231,6 +231,7 @@ def _compactTextDocument(doc: dict[str, Any] | None, *, limit: int) -> dict[str,
     return {
         "topic": doc.get("topic"),
         "mode": doc.get("mode"),
+        "periods": doc.get("periods"),  # 우 history 패널의 시점 list — light data
         "latestPeriod": doc.get("latestPeriod"),
         "firstPeriod": doc.get("firstPeriod"),
         "sectionCount": doc.get("sectionCount", total),

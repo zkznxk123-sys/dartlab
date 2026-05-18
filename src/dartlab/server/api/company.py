@@ -429,6 +429,7 @@ def apiCompanyViewerTopic(
                 viewerBlocks,
                 viewerTextDocument,
             )
+            from ..services.companyApi import _compactTextDocument
 
             if not hasattr(company, "_viewer_cache"):
                 company._viewer_cache = {}
@@ -438,14 +439,18 @@ def apiCompanyViewerTopic(
                 blocks = viewerBlocks(company, topic)
                 company._viewer_cache[topic] = blocks
             blocks = filterBlocksByPeriod(blocks, period)
+            textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
+            if compact:
+                textDoc = _compactTextDocument(textDoc, limit=limit)
             data = {
                 "stockCode": company.stockCode,
                 "corpName": company.corpName,
                 "topic": topic,
                 "topicLabel": safeTopicLabel(company, topic),
                 "period": period,
-                "blocks": [serializeViewerBlock(block) for block in blocks],
-                "textDocument": serializeViewerTextDocument(viewerTextDocument(topic, blocks)),
+                "compact": compact,
+                "blocks": [] if compact else [serializeViewerBlock(block) for block in blocks],
+                "textDocument": textDoc,
             }
         else:
             data = buildViewer(company, topic, compact=compact, limit=limit)
