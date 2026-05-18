@@ -348,9 +348,20 @@ function ViewerTab() {
 	// 본문 sections — latest fetch 의 sections 기준 (leaf filter 적용).
 	const ownLeafCore = _stripNumbering(latestViewer?.topicLabel || '');
 	const allSections = latestViewer?.textDocument?.sections ?? [];
-	const sections = _filterToOwnLeaf(allSections, ownLeafCore);
+	const sectionsOwn = _filterToOwnLeaf(allSections, ownLeafCore);
+	// 윈도우 3 period 중 한 곳이라도 timeline 에 포함되는 section 만 본문에 노출.
+	const sections = useMemo(() => {
+		if (windowPeriods.length === 0) return sectionsOwn;
+		const ws = new Set(windowPeriods);
+		return sectionsOwn.filter((s) =>
+			(s.timeline ?? []).some((t) => ws.has(_periodLabel(t?.period))),
+		);
+	}, [sectionsOwn, windowPeriods]);
 
 	// section id → 각 period 의 body 매핑.
+	// 정답 게이트: section.timeline 에 그 period 가 *실제* 포함될 때만 body 노출.
+	// backend 가 period 파라미터에도 topic 전체 sections 를 반환하기 때문에
+	// timeline 없으면 옛 period 의 stale body 가 다른 period 칸에 새는 회귀 차단.
 	const bodyByIdByPeriod = useMemo(() => {
 		const map: Record<string, Record<string, string | null>> = {};
 		for (let i = 0; i < windowPeriods.length; i++) {
@@ -359,6 +370,10 @@ function ViewerTab() {
 			if (!p || !v) continue;
 			const secs = v.textDocument?.sections ?? [];
 			for (const s of secs) {
+				const inPeriod = (s.timeline ?? []).some(
+					(t) => _periodLabel(t?.period) === p,
+				);
+				if (!inPeriod) continue;
 				if (!map[s.id]) map[s.id] = {};
 				map[s.id][p] = s.latest?.body ?? null;
 			}
@@ -672,7 +687,7 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 					return (
 						<div
 							key={p}
-							className="min-w-0 rounded-md border bg-card/40 p-3 text-[13px] leading-6 break-words"
+							className="min-w-0 px-2 text-[13px] leading-6 break-words"
 						>
 							{paragraphs.length > 0 ? (
 								<div className="space-y-2 text-foreground/90">
