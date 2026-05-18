@@ -18,7 +18,7 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.industry
   - engines.analysis.peerComparison
-  - engines.scan.ratio
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython
@@ -133,7 +133,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + dateRef` 3 종 명시.
 
-- **skillRef**: `engines.industry` (산업 분류 + peer 추출), `engines.analysis.peerComparison` (횡단 비교), `engines.scan.ratio` (peer ratio 일괄 대안 path), `engines.company.show` (각 peer 개별 ratios).
+- **skillRef**: `engines.industry` (산업 분류 + peer 추출), `engines.analysis.peerComparison` (횡단 비교), `engines.scan` (peer ratio 일괄 대안 path), `engines.company.show` (각 peer 개별 ratios).
 - **sourceRef**: DART/EDGAR 공시 — *같은 분기* + *같은 회계 기준 (연결)* peer 재무. KRX 산업분류 (`sector`) 또는 GICS sub-industry.
 - **tableRef** (1+5 표):
   1. 회사 + 5 peer 종합 — code × {수익성 ROE·ROA·OPM, 안정성 부채비율·ICR, 성장성 revenue YoY·EPS YoY, valuation PER·PBR·EV/EBITDA}
@@ -214,7 +214,7 @@ graph LR
 - 산업 stage (성장/성숙/쇠퇴) → `recipes.screen.industryStageScreen`
 - valuation 깊이 → `recipes.valuation.check`
 - quality compounder 후보 → `recipes.screen.compounderCandidates`
-- 산업 평균 횡단 → `engines.scan.ratio` direct
+- 산업 평균 횡단 → `engines.scan` direct
 
 재호출 트리거: "삼성전자 vs 동종 5 peer 4 축 벤치마크", "4 대 금융지주 ratio 횡단", "산업 평균 대비 ±σ 위치".
 

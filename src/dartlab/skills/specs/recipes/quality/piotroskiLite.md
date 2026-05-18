@@ -15,9 +15,6 @@ whenToUse:
   - 가치주 quality 점수카드
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.ratio
-  - engines.scan.valuation
   - recipes.valuation.qualityValueScreen
   - recipes.valuation.grahamDeepValue
   - engines.analysis.earningsQuality

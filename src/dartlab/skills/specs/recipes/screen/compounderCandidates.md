@@ -15,8 +15,6 @@ whenToUse:
   - 우량주 횡단 비교
 linkedSkills:
   - engines.scan
-  - engines.scan.ratio
-  - engines.scan.valuation
   - recipes.valuation.qualityValueScreen
   - recipes.valuation.garpScreen
   - recipes.credit.distressFilter
@@ -149,7 +147,7 @@ candidates = (
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.scan.ratio` (ROE·revenueGrowth·grossMargin 5 년 wide), `engines.analysis.profitability` (개별 후보 ROE 동인), `engines.analysis.efficiency` (capital cycle), `engines.scan.valuation` (PER·PBR 비교용).
+- **skillRef**: `engines.scan` (ROE·revenueGrowth·grossMargin 5 년 wide), `engines.analysis.profitability` (개별 후보 ROE 동인), `engines.analysis.efficiency` (capital cycle), `engines.scan` (PER·PBR 비교용).
 - **sourceRef**: DART 5 년 IS·BS — ROE = NI / equity, revenueGrowth = YoY, grossMargin = (sales-cogs)/sales. 5 년 연간 시계열.
 - **tableRef** (2 표):
   1. 후보 리스트 — stockCode · corpName · roe5yMean · roe5yStd · roe5yMin · gm5yMean · gm5yStd · 매년 ROE

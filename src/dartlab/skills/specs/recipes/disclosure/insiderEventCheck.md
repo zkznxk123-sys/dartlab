@@ -16,8 +16,7 @@ whenToUse:
   - 이벤트 신호
 linkedSkills:
   - engines.company.researchStarter
-  - engines.scan.insider
-  - engines.scan.capital
+  - engines.scan
   - engines.company.disclosureEvent
 toolRefs:
   - EngineCall
@@ -92,8 +91,8 @@ holders = c.show("majorHolder")
 ## 연계 절차
 
 1. engines.company.researchStarter — 회사 진입
-2. engines.scan.insider — 내부자 매매 횡단
-3. engines.scan.capital — 자본구조 변동
+2. engines.scan — 내부자 매매 횡단
+3. engines.scan — 자본구조 변동
 4. engines.company.disclosureEvent — 자본 관련 공시 원문
 
 ## 기본 검증

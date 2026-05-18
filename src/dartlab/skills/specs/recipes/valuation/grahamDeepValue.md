@@ -15,9 +15,6 @@ whenToUse:
   - 가치 함정 회피
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.valuation
-  - engines.scan.account
   - recipes.valuation.qualityValueScreen
   - recipes.credit.distressFilter
   - recipes.quality.piotroskiLite
@@ -85,7 +82,7 @@ Benjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, 
 - Chan-Hamao-Lakonishok (1991): 일본 시장 동일 효과 — 저-PBR + 높은 매출/주가 결합 우월.
 - 한국: 단순 저-PBR 은 chaebol discount 함정 → Graham 의 4 게이트 결합으로 함정 회피.
 
-dartlab 한계: 진정한 NCAV (Net Current Asset Value) 계산은 `(currentAssets - totalLiabilities) × 2/3` 가 marketCap 보다 커야 하는데 시가총액 시계열 직접 결합 어려움 → 본 recipe 는 PBR 게이트로 근사. NCAV 계산은 `engines.scan.account` 로 별도 후속 단계.
+dartlab 한계: 진정한 NCAV (Net Current Asset Value) 계산은 `(currentAssets - totalLiabilities) × 2/3` 가 marketCap 보다 커야 하는데 시가총액 시계열 직접 결합 어려움 → 본 recipe 는 PBR 게이트로 근사. NCAV 계산은 `engines.scan` 로 별도 후속 단계.
 
 ## 공개 호출 방식
 

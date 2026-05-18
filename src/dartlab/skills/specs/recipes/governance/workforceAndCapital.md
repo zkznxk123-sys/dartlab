@@ -17,8 +17,7 @@ whenToUse:
   - capital allocation
 linkedSkills:
   - engines.company.researchStarter
-  - engines.scan.workforce
-  - engines.scan.capital
+  - engines.scan
   - engines.analysis.capitalAllocation
   - recipes.quality.capitalAllocationScorecard
   - recipes.dividend.capitalReturn
@@ -167,7 +166,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.scan.workforce` (직원수·인건비 횡단), `engines.scan.capital` (자본 변동 횡단), `engines.analysis.capitalAllocation` (배분 우선순위), `engines.company.workforce()` + `engines.company.capital()` (개별 회사).
+- **skillRef**: `engines.scan` (직원수·인건비 횡단), `engines.scan` (자본 변동 횡단), `engines.analysis.capitalAllocation` (배분 우선순위), `engines.company.workforce()` + `engines.company.capital()` (개별 회사).
 - **sourceRef**: DART 사업보고서 — 종업원 명세 (정규/비정규/외주 분리), 임원 보수, 인건비 시계열. 자사주 변동 보고. 분기·연간.
 - **tableRef** (3 표):
   1. workforce — year × (직원수, 인건비 총액, 인당 매출, 인당 영업이익, 인건비/매출)
@@ -254,8 +253,8 @@ graph LR
 ## 연계 절차
 
 1. engines.company.researchStarter — 대상 회사와 provider를 고정한다.
-2. engines.scan.workforce — 직원수·평균급여·인당 매출의 횡단 위치를 확인한다.
-3. engines.scan.capital — 배당·자사주·총환원율·희석 신호를 확인한다.
+2. engines.scan — 직원수·평균급여·인당 매출의 횡단 위치를 확인한다.
+3. engines.scan — 배당·자사주·총환원율·희석 신호를 확인한다.
 4. engines.analysis.capitalAllocation — 자본배분 우선순위와 재투자/환원 균형을 확인한다.
 5. recipes.quality.capitalAllocationScorecard — FCF 5 사용처와 ROIIC/SGR까지 필요할 때 확장한다.
 6. recipes.dividend.capitalReturn — 배당·자사주 정책이 핵심 질문이면 넘긴다.

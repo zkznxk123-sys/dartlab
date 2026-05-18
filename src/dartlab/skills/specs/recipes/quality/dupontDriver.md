@@ -16,7 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - engines.scan.ratio
+  - engines.scan
   - recipes.valuation.qualityValueScreen
   - recipes.screen.compounderCandidates
   - recipes.quality.capitalAllocationScorecard
@@ -152,7 +152,7 @@ result = dupontDecompose(is_df, bs_df, years)
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS 호출), `engines.scan.ratio` (비교용 산업 평균). analysis axis 의존 X — *raw 직접 계산* 이 본 recipe 핵심.
+- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS 호출), `engines.scan` (비교용 산업 평균). analysis axis 의존 X — *raw 직접 계산* 이 본 recipe 핵심.
 - **sourceRef**: DART 공시 — 5 년 손익계산서 (sales, operating_profit, earnings_before_tax, net_income) + 5 년 재무상태표 (total_assets, total_stockholders_equity). 연결재무 기준.
 - **tableRef** (4~5 행 시계열): year × {taxBurden, interestBurden, operatingMargin, assetTurnover, financialLeverage, roeReconstructed}.
 - **valueRef**: 최근년도 5 동인 + 5 년 표준편차 (변동성) + 주도 동인 (표준편차 최대) + 산업 평균 비교.

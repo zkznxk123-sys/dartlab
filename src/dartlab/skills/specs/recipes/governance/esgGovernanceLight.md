@@ -17,7 +17,7 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.analysis.governance
   - recipes.governance.auditComposite
-  - engines.scan.workforce
+  - engines.scan
   - engines.analysis.financialConsistency
 toolRefs:
   - EngineCall
@@ -100,7 +100,7 @@ consistency = c.analysis("financial", "재무정합성")
 1. engines.company.researchStarter — 회사 진입
 2. engines.analysis.governance — G 종합
 3. recipes.governance.auditComposite — 감사 신호
-4. engines.scan.workforce — S 보조 (인력)
+4. engines.scan — S 보조 (인력)
 5. engines.analysis.financialConsistency — 일관성
 
 ## 기본 검증

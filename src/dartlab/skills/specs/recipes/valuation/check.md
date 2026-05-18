@@ -18,7 +18,7 @@ linkedSkills:
   - engines.company.researchStarter
   - engines.analysis.valuation
   - engines.analysis.valuationBand
-  - engines.scan.valuation
+  - engines.scan
   - engines.quant
 toolRefs:
   - EngineCall
@@ -102,7 +102,7 @@ qval = c.quant("가치")
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.analysis.valuation` (4 방법론), `engines.analysis.valuationBand` (역사 평균 ±σ), `engines.scan.valuation` (peer 횡단), `engines.quant` (기술적 가치 신호).
+- **skillRef**: `engines.analysis.valuation` (4 방법론), `engines.analysis.valuationBand` (역사 평균 ±σ), `engines.scan` (peer 횡단), `engines.quant` (기술적 가치 신호).
 - **sourceRef**: DART 공시 — 5 년 IS/BS/CF (DCF cash flow projection), 배당 시계열 (DDM), 시장가 시계열 (multiple band), peer 회사 valuation snapshot.
 - **외부 가정**: 할인율 (KR 8~10% / US 7~9%), terminal 성장률 (1~3%), terminal multiple (12~18× EBITDA). 답변에 가정 명시 + 민감도.
 - **tableRef** (3 표):

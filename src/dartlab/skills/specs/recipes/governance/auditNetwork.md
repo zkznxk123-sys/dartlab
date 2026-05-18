@@ -11,9 +11,7 @@ whenToUse:
   - chaebol 거버넌스 위험
   - 계열사 + 감사 + 거버넌스
 linkedSkills:
-  - engines.scan.governance
-  - engines.scan.network
-  - engines.scan.audit
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython

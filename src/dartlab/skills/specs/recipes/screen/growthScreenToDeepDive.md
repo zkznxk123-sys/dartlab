@@ -14,7 +14,7 @@ whenToUse:
   - 상위 종목 분석
   - 성장성 스크리닝
 linkedSkills:
-  - engines.scan.growth
+  - engines.scan
   - engines.scan.crossSectionStockScreen
   - engines.company.researchStarter
   - engines.analysis.growth
@@ -104,7 +104,7 @@ for code in top_codes:
 
 ## 연계 절차
 
-1. engines.scan.growth — 전종목 성장성 스코어 (CAGR 기준)
+1. engines.scan — 전종목 성장성 스코어 (CAGR 기준)
 2. engines.scan.crossSectionStockScreen — 매출 규모·기간 필터로 상위 후보
 3. engines.company.researchStarter — 각 회사 진입
 4. engines.analysis.growth — 회사별 성장 분해 (P×Q × Mix)

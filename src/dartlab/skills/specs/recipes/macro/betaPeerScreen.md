@@ -13,7 +13,7 @@ whenToUse:
   - within-industry 베타
 linkedSkills:
   - engines.gather
-  - engines.scan.macroBeta
+  - engines.scan
   - engines.industry
 toolRefs:
   - EngineCall

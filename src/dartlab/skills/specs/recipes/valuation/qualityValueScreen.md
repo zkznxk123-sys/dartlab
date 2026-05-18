@@ -15,9 +15,6 @@ whenToUse:
   - 횡단 quality + value 후보 발굴
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.valuation
-  - engines.scan.ratio
   - engines.scan.undervaluedQuality
   - recipes.credit.distressFilter
   - recipes.valuation.check

@@ -15,8 +15,6 @@ whenToUse:
   - distress signal
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.account
   - recipes.valuation.qualityValueScreen
   - recipes.valuation.garpScreen
   - recipes.valuation.grahamDeepValue

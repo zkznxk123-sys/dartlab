@@ -14,7 +14,7 @@ whenToUse:
   - 정정 빈도
   - 위험 신호 종목
 linkedSkills:
-  - engines.scan.disclosureRisk
+  - engines.scan
   - engines.scan.crossSectionStockScreen
   - engines.analysis.disclosureChange
 toolRefs:
@@ -91,7 +91,7 @@ top_risks = risk_scan.head(10)
 
 `requiredEvidence: skillRef + tableRef + dateRef` 3 종 명시.
 
-- **skillRef**: `engines.scan.disclosureRisk` (위험 점수 본 스캔), `engines.scan.crossSectionStockScreen` (size·매출 필터), `engines.analysis.disclosureChange` (개별 종목 변화 신호 검증), `engines.company.disclosureEvent` (후속 case 별 확인).
+- **skillRef**: `engines.scan` (위험 점수 본 스캔), `engines.scan.crossSectionStockScreen` (size·매출 필터), `engines.analysis.disclosureChange` (개별 종목 변화 신호 검증), `engines.company.disclosureEvent` (후속 case 별 확인).
 - **sourceRef**: DART 공시 — 전종목 disclosure 시계열 (정정/주요사항/지분 분포). 산업 분류 (`KICS_3` 또는 `GICS`). 시가총액 시계열.
 - **tableRef** (3 표):
   1. 위험 점수 분포 — 분위 × {점수, 표본 수, median, σ}
@@ -154,6 +154,6 @@ graph LR
 - 공시 톤 분석 → `recipes.disclosure.toneToStoryRisk`
 - 분식 의심 결합 → `recipes.quality.earningsQualityTriad` (Sloan + Beneish + Novy-Marx)
 - 부도 위험 결합 → `recipes.credit.distressFilter`
-- 산업 횡단 → `engines.scan.disclosureRisk` direct (sector breakdown)
+- 산업 횡단 → `engines.scan` direct (sector breakdown)
 
 재호출 트리거: "전종목 공시 위험 횡단", "정정 빈도 상위 종목", "공시 위험 + 본문 검증 결합".

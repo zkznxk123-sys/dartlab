@@ -199,8 +199,11 @@ def test_application_skills_cover_engine_guide_axes() -> None:
     for axis in dartlab.Company("005930").analysis().get_column("axis").to_list():
         assert f"engines.analysis.{analysis_slugs[axis]}" in ids
 
+    # engines.scan axis-level sub-spec 21 종은 Phase C-2 흡수 (2026-05-18) — base SKILL.md
+    # 의 axis 표에 inline. standalone: undervaluedQuality/crossSectionStockScreen/krxIndexStrength.
+    scan_body = _skill_body("engines.scan")
     for axis in dartlab.scan().get_column("axis").to_list():
-        assert f"engines.scan.{axis}" in ids
+        assert axis in scan_body, f"engines.scan base SKILL.md 의 axis 표에 {axis} 누락"
 
     # engines.quant axis-level sub-spec 48 종은 Phase C-1 흡수 (2026-05-18) — base SKILL.md
     # 의 axis 표에 inline. standalone 유지: forecast/walkforward/scanBacktest/marketContext.

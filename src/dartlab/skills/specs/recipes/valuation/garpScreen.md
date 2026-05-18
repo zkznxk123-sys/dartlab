@@ -15,9 +15,6 @@ whenToUse:
   - 시장 미반영 성장
 linkedSkills:
   - engines.scan
-  - engines.scan.screen
-  - engines.scan.valuation
-  - engines.scan.ratio
   - recipes.valuation.qualityValueScreen
   - recipes.credit.distressFilter
   - recipes.screen.compounderCandidates

@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.quant
-  - engines.scan.macroBeta
+  - engines.scan
   - engines.macro
 toolRefs:
   - EngineCall

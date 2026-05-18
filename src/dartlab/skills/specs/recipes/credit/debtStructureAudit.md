@@ -16,7 +16,7 @@ whenToUse:
   - 단기 장기 부채
 linkedSkills:
   - engines.company.researchStarter
-  - engines.scan.debt
+  - engines.scan
   - engines.analysis.financing
   - engines.credit.creditRisk
 toolRefs:
@@ -104,7 +104,7 @@ credit = c.credit()
 ## 연계 절차
 
 1. engines.company.researchStarter — 회사 진입
-2. engines.scan.debt — 부채 구조 + peer 횡단
+2. engines.scan — 부채 구조 + peer 횡단
 3. engines.analysis.financing — 자본조달 종합
 4. engines.credit.creditRisk — dCR 등급
 

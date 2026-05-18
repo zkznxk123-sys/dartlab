@@ -15,7 +15,7 @@ linkedSkills:
   - engines.company
   - engines.analysis.earningsQuality
   - engines.analysis.governance
-  - engines.scan.audit
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython

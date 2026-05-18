@@ -101,8 +101,7 @@ linkedSkills:
   - engines.analysis.capitalAllocation
   - engines.analysis.cashflow
   - engines.analysis.profitability
-  - engines.scan.capital
-  - engines.scan.dividendTrend
+  - engines.scan
 source:
   type: manual_skill
   format: markdown
@@ -168,7 +167,7 @@ emit_result({
 
 `requiredEvidence: target + period + metric + table` 4 종 명시.
 
-- **skillRef**: `engines.analysis.capitalAllocation` (자본배분 — 배당/자사주/재투자 비중), `engines.analysis.cashflow` (OCF·FCF 5 년), `engines.analysis.profitability` (ROE·margin), `engines.scan.dividendTrend` (산업 평균 환원율 비교).
+- **skillRef**: `engines.analysis.capitalAllocation` (자본배분 — 배당/자사주/재투자 비중), `engines.analysis.cashflow` (OCF·FCF 5 년), `engines.analysis.profitability` (ROE·margin), `engines.scan` (산업 평균 환원율 비교).
 - **sourceRef**: DART 공시 — CF (cash_flow_from_operations, FCF), 배당 (dividend) 시계열, BS (treasury stock = 자사주 잔액). `show("dividend")` raw DPS·payout·기준일.
 - **tableRef** (3 표):
   1. 환원 시계열 — year × (DPS, 배당총액, 자사주 매입, 자사주 소각, 총환원율, FCF, FCF 커버리지)
@@ -234,7 +233,7 @@ graph LR
 - 배당 스트레스 테스트 → `recipes.dividend.stressTest` (FCF -30% 시 환원 유지?)
 - 배당 thesis 깊이 → `recipes.dividend.thesis`
 - 자본배분 종합 점수 → `recipes.quality.capitalAllocationScorecard`
-- 산업 환원 추세 → `engines.scan.dividendTrend`
+- 산업 환원 추세 → `engines.scan`
 - ROE 동인 결합 → `recipes.quality.dupontDriver`
 
 재호출 트리거: "삼성전자 주주환원 정책", "배당성향 + 배당수익률 + 자사주 환원율", "자사주 매입 vs 소각 영향", "5 년 환원 추세 + FCF 커버리지".

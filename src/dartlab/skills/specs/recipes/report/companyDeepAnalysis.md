@@ -15,7 +15,7 @@ whenToUse:
 linkedSkills:
   - engines.macro
   - engines.analysis.peerComparison
-  - engines.scan.profitability
+  - engines.scan
   - engines.company.researchStarter
   - engines.analysis.profitability
   - engines.analysis.earningsQuality
@@ -151,7 +151,7 @@ emit_result(
 ## 연계 절차
 
 1. engines.macro — 매크로 환경 (금리·환율·경기 사이클)
-2. engines.scan.profitability — peer 후보 5~10 (수익성 축)
+2. engines.scan — peer 후보 5~10 (수익성 축)
 3. engines.company.researchStarter — 회사 진입 + show("BS") + show("IS")
 4. engines.analysis.profitability — ROE DuPont 분해 (마진 × 회전 × 레버리지)
 5. engines.analysis.earningsQuality — 일회성·발생주의 점검

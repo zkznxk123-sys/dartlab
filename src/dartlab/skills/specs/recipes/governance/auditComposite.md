@@ -107,7 +107,7 @@ linkedSkills:
   - engines.analysis.earningsQuality
   - engines.analysis.financialConsistency
   - engines.analysis.disclosureChange
-  - engines.scan.audit
+  - engines.scan
 source:
   type: manual_skill
   format: markdown

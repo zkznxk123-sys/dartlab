@@ -16,7 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - engines.scan.valuation
+  - engines.scan
   - recipes.quality.dupontDriver
   - recipes.quality.capitalAllocationScorecard
   - recipes.screen.compounderCandidates
@@ -183,7 +183,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS/CF/FQ), `engines.scan.valuation` (PER/PBR snapshot 비교용). analysis valuation axis 의존 X.
+- **skillRef**: `engines.gather` 또는 `engines.company.show` (L1 raw IS/BS/CF/FQ), `engines.scan` (PER/PBR snapshot 비교용). analysis valuation axis 의존 X.
 - **sourceRef**: DART 공시 — IS (sales, operating_profit, earnings_before_tax, net_income, depreciation), BS (total_stockholders_equity, long_term_debt), CF (cash_flow_from_operations), FQ (eps_basic). 5 년 연간 시계열.
 - **외부 가정**: AAA yield (Y_AAA 4.0~5.0%), WACC_proxy (KR 7% / US 8%) — 답변에 가정 명시 + 민감도 (±1%) 동반.
 - **tableRef** (3 행 anchor): anchor × (value, interpretation, marketPriceComparison).
@@ -246,7 +246,7 @@ graph LR
 - EVA spread > 0 + CFROI > WACC → `recipes.screen.compounderCandidates` 합의 (진짜 quality)
 - EVA spread &lt; 0 + CFROI &lt; WACC → `recipes.credit.distressFilter` (자본 파괴)
 - 5 년 EVA spread 안정 양수 = quality compounder → `recipes.quality.dupontDriver` 결합
-- PER/PBR 정량 매트릭스 → `engines.scan.valuation` snapshot 비교
+- PER/PBR 정량 매트릭스 → `engines.scan` snapshot 비교
 - 자본 배분 효율 → `recipes.quality.capitalAllocationScorecard`
 
 재호출 트리거: "삼성전자 3 anchor 본질가치 band", "Graham + EVA + CFROI 결합", "시장가 vs 본질가치 band 비교".
@@ -280,7 +280,7 @@ graph LR
 3. EVA spread &gt; 0 + CFROI &gt; WACC = 진짜 capital efficiency → `recipes.screen.compounderCandidates` 와 합의.
 4. EVA spread &lt; 0 + CFROI &lt; WACC = 자본 파괴 → `recipes.credit.distressFilter` 와 결합 검토.
 5. 5 년 EVA spread 추세 — 안정 + 양수 = quality compounder, 변동 큼 = 사이클.
-6. `engines.scan.valuation` 의 PER/PBR snapshot 과 본 anchor 비교 — 시장 multiple vs 본질가치 ratio.
+6. `engines.scan` 의 PER/PBR snapshot 과 본 anchor 비교 — 시장 multiple vs 본질가치 ratio.
 
 ## 기본 검증
 

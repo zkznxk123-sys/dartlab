@@ -177,6 +177,36 @@ metric/value/score, rank, basis/source, flags
 
 `screen`은 조건식과 통과 여부, `account`/`ratio`는 계정명 또는 ratio id, 기간별 값, 기준일을 포함해야 한다. ranking/filter 결과를 말할 때는 원값과 rank를 함께 제시한다.
 
+## axis-specific 회피 (회귀 가드)
+
+각 axis 의 sub-spec 본문은 base SKILL.md 의 axis 표에 흡수됨 (2026-05-18 Phase C-2 정리). standalone 유지: `engines.scan.undervaluedQuality` · `crossSectionStockScreen` · `krxIndexStrength` (preset spec / cross-section recipe).
+
+| axis | axis-specific 회피 |
+| --- | --- |
+| account | snake_id 임의 추측 X (scanAccountList 또는 normalizeColumn 으로 정확 매칭); 단일 계정 (매출액만) 으로 비율 추정 X (비율은 ratio axis) |
+| audit | 감사의견 (한정/거절/부적정) 만으로 *분식* 단정 X; 감사인 변경과 *지배구조 위험* 단순 인과 X |
+| capital | 자사주 매입 vs 소각 동치 처리 X; 유상증자 빈도와 *위험* 단순 인과 X (사용처 capex/부채상환 확인) |
+| cashflow | 8 종 현금흐름 패턴 분류 (Healthy/Growing/Distressed/Mature/...) 명시 없이 *위험* 단정 X; capex 음수 vs 양수 의미 회사별 다름 — 부호 임의 해석 X |
+| debt | 부채비율 단일 metric 으로 *위험* 단정 X (ICR + OCF/부채 교차); 사채 1 년 만기 비중 무시 X |
+| disclosureRisk | 공시 변화 신호와 확정 사실 혼동 X; 단일 신호로 *위험* 단정 X (5+ 신호 종합) |
+| dividendTrend | 5 패턴 (연속증가/안정/감소/시작/중단) 명시 없이 단정 X; 배당 지속가능성 검증 없이 추세만 인용 X |
+| efficiency | 자산회전 / 재고회전 / 매출채권회전 분류 명시; CCC 분리 식 (DSO + DIO - DPO) 명시 |
+| fields | 필드 카탈로그 결과를 *데이터 자체* 로 인용 X (메타데이터); finance/report/docs/krx 4 source 분리 명시 |
+| governance | 최대주주 지분율만으로 *경영권 안정* 단정 X; 사외이사 비율을 산업 평균 비교 없이 답변 X |
+| growth | 6 종 패턴 (Acceleration/Steady/Deceleration/Cyclical/Recovery/Decline) 명시 없이 *고성장* 단정 X; 단일 분기 YoY 로 성장 단정 X (4 분기 평균 또는 CAGR); 사이클 회사 cycle peak/trough 영향 미고려 X |
+| insider | 임원 거래를 매수=긍정 / 매도=부정 단순 신호 X; 자사주 보유와 임원 개인 거래 혼동 X |
+| liquidity | 금융사 (은행·보험) 에 일반 유동비율 적용 X (LCR · NSFR 별도); 유동비율 단일 metric 으로 단정 X (당좌비율 + 사채만기 교차) |
+| macroBeta | 회귀 추정 기간 명시; p-value 낮은 베타를 결론에 사용 X |
+| network | 출자 사슬 단계 명시; 계열사 내부거래 비중 무시한 *독립* 회사 답변 X |
+| profitability | 산업 분기 무시한 통합 랭킹 X (제조 vs 금융 ROE 직접 비교); 결손 종목 (재무제표 미공시) 을 0 으로 채워 랭킹 하단 배치 X |
+| quality | accrual ratio 임계값 (산업 평균 대비) 명시; 단일 분기 OCF/NI 로 이익품질 단정 X (4 분기 평균) |
+| ratio | 비율 정의 (분자/분모) 명시; 산업별 비율 차이 무시한 통합 랭킹 X |
+| screen | 멀티팩터 spec 의 가중치 / 임계값 명시; preset 결과를 *맞춤형* 으로 단정 X |
+| valuation | 단일 멀티플 (PER 만) 로 *저평가* 단정 X (PBR/PSR 교차 검증); 적자 회사에 PER 적용 X (PSR/EV-Sales 권장); 산업 분기 무시 통합 PER 랭킹 X |
+| workforce | 직원수 / 평균급여 / 인건비율 분류 명시; CEO/임원 보수와 평균 직원 보수 동치 처리 X |
+
+**공통 forbidden** (모든 axis): universe/필터/계산식/기준일 명시 없이 후보 발굴 X · 결손값을 0 으로 대체 X · 단일 기업 심층 해석을 scan 으로 X (analysis/credit/quant 후속).
+
 ## evidence 기준
 
 후보 발굴 결과에는 `universe`, `datasetAsOf`, `filter`, `formula`, `table`, `executionRef`가 필요하다. 최종 답변은 회사명만 나열하지 말고 evidence table을 포함한다.

@@ -18,8 +18,7 @@ linkedSkills:
   - engines.company.researchStarter
   - recipes.governance.auditComposite
   - engines.analysis.governance
-  - engines.scan.governance
-  - engines.scan.audit
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython
@@ -99,7 +98,7 @@ major = c.show("majorHolder")
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.analysis.governance` (이사회 + 지분 종합), `engines.analysis.governance` (감사 + 분식 신호), `engines.scan.governance` (peer 횡단), `engines.scan.audit` (감사 위험 횡단), `engines.company.show("majorHolder")` (최대주주 raw).
+- **skillRef**: `engines.analysis.governance` (이사회 + 지분 종합), `engines.analysis.governance` (감사 + 분식 신호), `engines.scan` (peer 횡단), `engines.scan` (감사 위험 횡단), `engines.company.show("majorHolder")` (최대주주 raw).
 - **sourceRef**: DART 공시 — 사업보고서 (이사회 명단, 사외이사 비율), 감사보고서 (감사 의견, 감사인 변경 이력), 주요주주 변동 5%·10% 보고. 외부 본문 (감사보고서) 는 `untrusted` 마커 처리.
 - **tableRef** (5 표):
   1. 이사회 — 사외이사 비율 · 위원회 독립성 5 종 · 임원 회의 출석률
@@ -162,7 +161,7 @@ graph LR
 
 ## 연계 절차
 - 분식 가능성 정량 → `recipes.quality.earningsQualityTriad` (3 모델 합의)
-- 감사 위험 횡단 → `engines.scan.audit`
+- 감사 위험 횡단 → `engines.scan`
 - 거버넌스 종합 → `recipes.governance.auditComposite` (멀티 신호)
 - 거버넌스 네트워크 (특수관계 그룹) → `recipes.governance.auditNetwork`
 - 이사회 표결 정밀 → `engines.analysis.governance` direct

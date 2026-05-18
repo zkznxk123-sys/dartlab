@@ -17,7 +17,7 @@ whenToUse:
 linkedSkills:
   - engines.industry
   - engines.macro
-  - engines.scan.profitability
+  - engines.scan
   - engines.analysis.peerComparison
 toolRefs:
   - EngineCall
@@ -99,7 +99,7 @@ peer_scan = dartlab.scan("profitability")
 
 1. engines.industry — 산업 가치 사슬 + stage 별 종목
 2. engines.macro — 매크로 환경
-3. engines.scan.profitability — peer 횡단 수익성
+3. engines.scan — peer 횡단 수익성
 4. engines.analysis.peerComparison — 핵심 종목 비교
 
 ## 기본 검증
