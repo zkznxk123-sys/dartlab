@@ -7,28 +7,22 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
 import {
 	BookOpen,
-	Coins,
 	Download,
 	FileText,
 	Filter,
 	LayoutDashboard,
 	MessageSquare,
 	MessageSquarePlus,
-	Microscope,
 	MoreHorizontal,
 	Moon,
 	Pencil,
-	PieChart,
 	Pin,
 	PinOff,
 	Search,
 	Settings,
-	ShieldCheck,
-	Sparkles,
 	Sun,
 	Telescope,
 	Trash2,
-	TrendingUp,
 } from 'lucide-react';
 
 import {
@@ -208,8 +202,10 @@ export function AppSidebar() {
 //   재무제표분석 7 sub = 7 가지 서로 다른 재무 분석 방법론 (lens).
 //   같은 회사를 그레이엄·린치·S&P·Sloan 식 다른 학파 시각으로 본다.
 // v3-r6 — 7 sub view 일시 폐기 (운영자 명시). 1 메뉴 "재무분석" 만 활성. 나중에 카테고리 다시 추가.
+import type { FinancialSubCategory } from '@/features/dashboard/api/client';
+
 const FINANCIAL_SUBS: ReadonlyArray<{
-	key: string;
+	key: FinancialSubCategory;
 	label: string;
 	title: string;
 	icon: typeof BookOpen;
