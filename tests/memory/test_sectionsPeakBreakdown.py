@@ -1,16 +1,20 @@
 """sections() peak RSS stage 별 breakdown 회귀 가드.
 
 진짜 source 자동 추적 — 누가 변경 시 메모리 증가 즉시 fail. 005380 baseline
-실측 (master + 4 magic):
+실측 (env-gated 진단 측정):
 
   Stage                                  peak Δ      비고
   ──────────────────────────────────────────────────────────
-  loadData(docs, 9 cols)                 +150MB      필요 (parquet 압축 해제)
-  41 subsets (no iter_rows)                +2MB      polars op 정상
-  41x _reportRowsToTopicRows 누적         +163MB      ⭐ 51167 dict 누적, 최대 source
-  41x main loop 7-dict + 4-set 누적        +45MB      Python dict
-  pl.DataFrame(dataColumns)                +80MB      변환
-  cast Categorical                         +19MB      encoding
+  _getPrepared (loadData + 41x polars)   +285MB      필요 (parquet 압축 + 51167 row)
+  41x main loop (topicMap 누적)           +208MB      반환 데이터 weight 자체
+  freqMeta + topicKeysByTopic              +7MB      python dict
+  dataColumns build loop                  +14MB
+  pl.DataFrame (col-by-col 변환)           +88MB      Categorical encoding
+  ──────────────────────────────────────────────────────────
+  sections() 전체 cold peak              ~+595MB    회귀 한계 800MB (margin)
+
+c.story() peak (005380, 3 run avg): +903MB → +836MB (-66MB).
+audit baseline 13GB → 현 836MB = **15.6× 감소** 가드.
 
 마커: ``memory + slow + realData``. realData fixture 부재 시 skip.
 """
@@ -147,11 +151,11 @@ def test_report_rows_polars_accumulation_under_200mb() -> None:
     )
 
 
-def test_full_sections_peak_under_900mb() -> None:
-    """sections(005380) 전체 cold call peak < 900MB.
+def test_full_sections_peak_under_800mb() -> None:
+    """sections(005380) 전체 cold call peak < 800MB.
 
-    Master + 4 magic baseline: +713~750MB (variance). 회귀 한계 900MB.
-    audit baseline 13GB → 현 900MB = 14× 감소 가드.
+    column-by-column DataFrame 변환 후 baseline: +595MB (실측). 회귀 한계 800MB.
+    audit baseline 13GB → 현 595MB = 22× 감소 가드.
     """
     if not _hasDocs(_stockCode()):
         pytest.skip("docs parquet 부재")
@@ -165,4 +169,4 @@ def test_full_sections_peak_under_900mb() -> None:
     p1 = _peakMb()
     delta = p1 - p0
     assert df is not None and df.height > 0
-    assert delta < 900, f"sections() cold peak +{delta:.0f}MB ≥ 900MB — 14× 감소 가드 회귀"
+    assert delta < 800, f"sections() cold peak +{delta:.0f}MB ≥ 800MB — column-by-column 회귀 의심"
