@@ -129,6 +129,15 @@ print(custom.render("rich"))               # 터미널 색상
 print(custom.render("json"))               # AI 소비용
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+story 는 L3 조합기 — *자체 계산 0*. 모든 숫자는 하위 엔진 (analysis/credit/macro/quant/industry/scan) ref 인용으로 들어와야 함.
+
+1. **story 본문 안 모든 숫자에 하위 엔진 ref inline 표기 필수** — `<tableRef:...>`/`<valueRef:...>` 형식. ref 없는 숫자는 story 본문 진입 차단.
+2. **story 안에서 직접 계산 금지** — RunPython 으로 ratio/forecast/score 산출 금지. 하위 엔진 호출 결과의 `items`/`flags`/`assumptions` 그대로 차용.
+3. **블록 evidence 부족 시 빈 섹션 + `limits` 에 명시** — 임의로 채우거나 환각 금지. story 의 spec 가 "evidence 비면 빈 섹션" 정공.
+4. **reportType 미명시 시 자동 감지 결과 본문에 노출** — "자동 선택: `executive` (이유: ...)" 한 줄.
+
 ## 호출 동작
 
 `Company.story()` (인자 없음) → 자동 reportType 선택 + 기업유형 자동 감지 (template). reportType 후보: `full` · `executive` · `credit` · `valuation` · `governance` · `forecast` · `risk` 외 11 종.

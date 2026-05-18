@@ -484,11 +484,28 @@ def _finalizeResult(
             },
         )
     wrapped = wrapExternalInResult(resultDict)
+    # refs 는 ref id + kind + title + source + payload 핵심 키만 직렬화 — token 절약하면서
+    # 답변 inline 인용에 필요한 최소 정보 (id, source 식별자) 는 보존.
+    # 회귀 가드: refs 누락 시 LLM 이 답변 본문에 [ref:...] 박을 수 없어 refs=0 답변.
+    wrapped_refs = wrapped.get("refs") or []
+    refs_for_llm = [
+        {
+            "id": r.get("id"),
+            "kind": r.get("kind"),
+            "title": r.get("title"),
+            "source": r.get("source"),
+            "sourceType": r.get("sourceType", "internal"),
+            **({"payload": _trimRefPayload(r.get("payload") or {})} if r.get("payload") else {}),
+        }
+        for r in wrapped_refs
+        if isinstance(r, dict) and r.get("id")
+    ]
     content_str = json.dumps(
         {
             "ok": wrapped.get("ok"),
             "summary": wrapped.get("summary", ""),
             "data": wrapped.get("data"),
+            "refs": refs_for_llm,
             "error": wrapped.get("error"),
         },
         ensure_ascii=False,
@@ -504,6 +521,34 @@ def _finalizeResult(
             "content": content_str,
         }
     )
+
+
+_REF_PAYLOAD_KEYS = (
+    "stockCode",
+    "period",
+    "metric",
+    "value",
+    "unit",
+    "docId",
+    "page",
+    "lineStart",
+    "lineEnd",
+    "confidence",
+    "dataAsOf",
+    "axis",
+    "axisKr",
+    "stmt",
+)
+
+
+def _trimRefPayload(payload: dict[str, Any]) -> dict[str, Any]:
+    """ref.payload 에서 LLM 인용에 필요한 핵심 키만 유지 — token 절약.
+
+    핵심 키 (`stockCode` · `period` · `metric` · `value` · `docId` · `page` · `confidence` 등)
+    만 유지. 나머지 (예: 5MB raw DataFrame 직렬화) 는 drop. LLM 은 ref id 로 inline 인용,
+    상세 본문은 UI 가 별도 fetch.
+    """
+    return {k: payload[k] for k in _REF_PAYLOAD_KEYS if k in payload}
 
 
 def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> str:

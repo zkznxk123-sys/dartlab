@@ -128,6 +128,13 @@ position = c.industry()
 # → dict: chainId · chainName · stage · stageLabel · confidence · matches · products · peers
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+1. **단일 종목 산업 질문 = `Company.show("IS").data.industryBadge` 1 회 인용** (Track E 자동 부착). `EngineCall("industry")` 별도 호출 금지 — industryBadge 가 이미 industryName · stageName · phase · peers · confidence 완전 형태.
+2. **여러 종목 / 산업 전체 질문은 `EngineCall(apiRef="industry", args={...})` 1 차** — RunPython 직접 industry parquet 로드 금지.
+3. **본문 안 산업명·phase·peers 에 `<tableRef:...>` inline 표기 필수**. lifecycle phase (도입/성장/성숙/쇠퇴) 는 `[conf:30]` 기본 (Vernon 3-phase 정의 기준 변동성).
+4. **공정 (chainName) 비교는 같은 산업 안에서만**. cross-industry 비교는 한계 명시 필수.
+
 ## 호출 동작
 
 `dartlab.industry()` (인자 없음) → 등록된 산업 목록 가이드 DataFrame.

@@ -124,6 +124,15 @@ value = dartlab.scan("screen", "value")
 custom = dartlab.scan("screen", spec={"filters": []})
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+21 axis 횡단 스크리닝에서 다음 4 룰 강행 — 메모리 압박 + refs 0 회귀 차단.
+
+1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef="scan", args={"axis": "ratio", "metric": "roe"})` 양식. RunPython 으로 전 종목 parquet 직접 로드 금지 — Polars Rust 힙 누수 (Company 1 개 ≈ 200~500MB) 로 OOM 가능.
+2. **개별 종목 분석 질문에 scan 호출 금지** — "삼성전자 수익성" 처럼 단일 기업이면 `Company.show`/`Company.analysis` 사용. scan 은 *여러 종목 후보 찾기* 한정.
+3. **scan 결과 후보 → 상위 N (보통 10~20) 만 다음 단계로 전달**. 전종목 결과 그대로 답변 본문 dump 금지.
+4. **본문 숫자에 `<datasetRef:...>` + `<tableRef:...>` inline 표기 필수** — 스캔 결과는 prebuild 시점 (asOf) 변동 큼.
+
 ## 호출 동작
 
 무인자 `dartlab.scan()`은 실행 가능한 스캔 축 가이드 DataFrame을 반환한다. 특정 axis를 주면 해당 유니버스의 prebuilt parquet 또는 provider scan 함수를 읽어 DataFrame을 반환한다.

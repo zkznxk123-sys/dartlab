@@ -117,6 +117,15 @@ c = dartlab.Company("005930")
 company_quant = c.quant("모멘텀")
 ```
 
+## 강행 호출 룰 (agent 답변 품질 회귀 차단)
+
+46 axis 질문 (베타·모멘텀·변동성·factor·forecast·backtest 등) 에서 다음 4 룰 강행 — 위반 시 refs=0 회귀.
+
+1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef="quant", args={"axis": "베타", "stockCode": "005930"})` 양식. **RunPython 직접 numpy/polars 계산은 engine 결과 부재 시에만 fallback** — 처음부터 raw 계산 금지.
+2. **본문 안 숫자에 inline ref 표기 필수** — `<tableRef:...>` 또는 `<valueRef:...>` 형식. ref 없는 quant 결과는 답변 보류.
+3. **backtest 결과는 `executionRef` 명시** — 백테스트 일자 / 룰 / 파라미터 ref 박지 않으면 hindsight 환각.
+4. **forecast/walkforward 같은 가정 강한 축은 `[conf:30]` 기본** — 가정 (lookahead window · trend assumption) 본문에 명시.
+
 ## 호출 동작
 
 무인자 `dartlab.quant()`는 46개 축 가이드 DataFrame을 반환한다. axis와 종목을 주면 가격/거래량/재무/공시 snapshot을 읽어 축별 결과를 계산한다.
