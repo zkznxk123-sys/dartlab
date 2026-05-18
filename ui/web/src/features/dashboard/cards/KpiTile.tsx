@@ -169,35 +169,38 @@ export function KpiTile({
 		);
 	}
 
-	// 정사각 (3×3 12-col) — default — 값 중앙 + 배경 spark + delta 우상단.
-	// 좌우 분할 폐기 (옛 flex-[2]:flex-[3] 가 "97조 원" 3 줄 줄바꿈 회귀 원인).
+	// 정사각 (3×3 12-col) — default — 밀도 최우선:
+	// (1) 상단 — label 좌 + delta 우 (1 줄 응축)
+	// (2) 중앙 hero — 값 큰 폰트 (text-5xl) 카드 한가운데 차지, 카드의 주인공
+	// (3) 배경 — spark 카드 전체 fill (top-7 ~ bottom-2, opacity 0.55)
+	// 좌우 분할 폐기 (옛 회귀: "97조 원" 3 줄 줄바꿈).
 	return (
-		<div className="relative flex h-full w-full flex-col px-2 py-1.5">
-			{label && (
-				<div className="text-[10px] uppercase tracking-wide text-muted-foreground truncate leading-tight">
-					{label}
-				</div>
-			)}
-			{hasSparkline && (
-				<div className="pointer-events-none absolute inset-x-1 bottom-1 top-5 opacity-30 [&_svg]:!h-full [&_svg]:!w-full">
-					<Sparkline data={sparkline!} color={sparkColor} height={60} width={120} />
-				</div>
-			)}
-			<div className="relative z-10 mt-auto flex flex-col gap-0.5">
-				<div className="flex items-baseline gap-1 tabular-nums">
-					<span className={cn('whitespace-nowrap text-2xl font-semibold leading-none', toneClass)}>
-						{displayValue}
-					</span>
-					{unit && <span className="text-[11px] text-muted-foreground">{unit}</span>}
-				</div>
+		<div className="relative flex h-full w-full flex-col justify-between px-2 py-1.5">
+			<div className="relative z-10 flex items-start justify-between gap-1">
+				{label && (
+					<div className="min-w-0 truncate text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
+						{label}
+					</div>
+				)}
 				{deltaText && (
-					<div className="flex items-center gap-0.5 text-[10px] text-muted-foreground leading-tight">
+					<div className="flex shrink-0 items-center gap-0.5 text-[10px] leading-tight">
 						{deltaIcon}
-						<span className={cn('font-medium', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]')}>
+						<span className={cn('font-medium tabular-nums', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]', !positive && !negative && 'text-muted-foreground')}>
 							{deltaText}
 						</span>
 					</div>
 				)}
+			</div>
+			{hasSparkline && (
+				<div className="pointer-events-none absolute inset-x-1 bottom-2 top-7 opacity-55 [&_svg]:!h-full [&_svg]:!w-full">
+					<Sparkline data={sparkline!} color={sparkColor} height={120} width={240} />
+				</div>
+			)}
+			<div className="relative z-10 flex items-baseline gap-1 tabular-nums">
+				<span className={cn('whitespace-nowrap text-[2.5rem] font-bold leading-none', toneClass)}>
+					{displayValue}
+				</span>
+				{unit && <span className="text-sm text-muted-foreground">{unit}</span>}
 			</div>
 		</div>
 	);
