@@ -115,17 +115,18 @@ function FinancialTab() {
 		const seriesCount = spec?.series?.length ?? 0;
 		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0);
 		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-		const footerHeight = hasFooter ? 28 + Math.min(seriesCount, 12) * 18 + 20 : 0;
-		const total = p.h * cellSize + (p.h - 1) * 12;
-		const bodyHeight = Math.max(80, total - 44 - footerHeight - 12);
+		// cellHeight === cellWidth 라 카드 실제 px = w*cellSize + (w-1)*gap.
+		// 헤더 24 + 푸터 + padding 빼고 차트 영역 채움.
+		const footerHeight = hasFooter ? 24 + Math.min(seriesCount, 12) * 16 + 16 : 0;
+		const total = p.h * cellSize + (p.h - 1) * 8;
+		const bodyHeight = Math.max(60, total - 28 - footerHeight - 4);
 		return (
 			<CardShell
 				title={title}
 				help={help}
-				colSpan={p.w as 1 | 2 | 3 | 4}
-				rowSpan={p.h as 1 | 2 | 3 | 4 | 5 | 6}
+				colSpan={p.w}
+				rowSpan={p.h}
 				footer={footer}
-				className="h-full"
 			>
 				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
 			</CardShell>

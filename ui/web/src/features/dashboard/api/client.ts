@@ -121,13 +121,13 @@ export interface RechartsSpec {
 	rowOrder?: string[];
 	colOrder?: string[];
 	tone?: 'sequential' | 'diverging';
-	// bento layout — entry.layout 이 pass-through 됨 (colSpan 1~4, rowSpan 1~3)
+	// bento layout — entry.layout 이 pass-through 됨 (12-col 기준, colSpan/rowSpan 1~12).
 	layout?: LayoutSpec;
 }
 
 export interface LayoutSpec {
-	colSpan?: 1 | 2 | 3 | 4;
-	rowSpan?: 1 | 2 | 3 | 4 | 5 | 6;
+	colSpan?: number;
+	rowSpan?: number;
 }
 
 export interface DashboardResponse {
@@ -244,6 +244,7 @@ export interface TabLayoutResponse {
 	tab: AnalysisTab;
 	view: string | null;
 	periodKind: PeriodKind;
+	colCount: number;
 	layout: PackedCard[];
 	cards: Record<string, RechartsSpec>;
 }

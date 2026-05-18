@@ -55,9 +55,8 @@ export function TabCardGrid({ tab, code, periodKind }: Props) {
 		const spec = data?.cards?.[cardKey];
 		const title = meta?.title || spec?.title || cardKey;
 		const help = meta?.help;
-		const xlSpan = meta?.xlSpan ?? 1;
 		return (
-			<CardShell key={cardKey} title={title} help={help} xlSpan={xlSpan}>
+			<CardShell key={cardKey} title={title} help={help}>
 				{spec && !spec.error ? <VizChart spec={spec} height={220} /> : <ChartLoading />}
 			</CardShell>
 		);

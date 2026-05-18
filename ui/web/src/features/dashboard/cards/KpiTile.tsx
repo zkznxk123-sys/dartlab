@@ -88,8 +88,12 @@ export function KpiTile({
 	);
 	const deltaText = deltaPct != null ? `${deltaPct > 0 ? '+' : ''}${deltaPct.toFixed(1)}%` : null;
 
-	// ──────────────────────────── 2×2+ — spark 본체 + 값 오버레이 ────────────
-	if (w >= 2 && h >= 2) {
+	// 12-col 기준 분기:
+	//   hero  : w >= 6 && h >= 6  → 큰 spark 본체 + 값 오버레이 (radar 자리)
+	//   tall  : h >= 6            → 1×2 (3×6) 길쭉 KPI — 값 위 + spark + range bar
+	//   square: default (3×3)     → 정사각 — 값 중앙 + 작은 spark 배경 + delta 우상단
+
+	if (w >= 6 && h >= 6) {
 		return (
 			<div className="relative flex h-full w-full flex-col px-3 pt-2">
 				{label && (
@@ -121,16 +125,16 @@ export function KpiTile({
 		);
 	}
 
-	// ──────────────────────────── 1×2 — 값 위, 큰 spark 아래 ────────────────
-	if (h >= 2) {
+	// 1×2 (3×6 12-col) — 길쭉 KPI: 값 위, 큰 spark + range bar 아래.
+	if (h >= 6) {
 		return (
-			<div className="flex h-full w-full flex-col gap-1 px-3 py-2">
+			<div className="flex h-full w-full flex-col gap-1 px-2 py-1.5">
 				{label && (
 					<div className="text-[10px] uppercase tracking-wide text-muted-foreground truncate">
 						{label}
 					</div>
 				)}
-				<div className="flex items-baseline gap-1.5 tabular-nums">
+				<div className="flex items-baseline gap-1 tabular-nums">
 					<span className={cn('text-2xl font-semibold leading-none', toneClass)}>{displayValue}</span>
 					{unit && <span className="text-sm text-muted-foreground">{unit}</span>}
 				</div>
@@ -165,23 +169,29 @@ export function KpiTile({
 		);
 	}
 
-	// ──────────────────────────── 1×1 (default) — 가로 직사각 고밀도 ────────
-	// 카드 실측 ~ 480×180. 콘텐츠 밀도 ↑ — 좌측 라벨+값+delta 응축, 우측
-	// sparkline 이 카드 폭 60% × 높이 거의 전체 차지. padding/gap 최소.
+	// 정사각 (3×3 12-col) — default — 값 중앙 + 배경 spark + delta 우상단.
+	// 좌우 분할 폐기 (옛 flex-[2]:flex-[3] 가 "97조 원" 3 줄 줄바꿈 회귀 원인).
 	return (
-		<div className="flex h-full w-full items-stretch gap-2 px-3 py-2">
-			<div className="flex flex-[2] flex-col justify-start min-w-0">
-				{label && (
-					<div className="text-[11px] uppercase tracking-wide text-muted-foreground truncate leading-tight">
-						{label}
-					</div>
-				)}
-				<div className="mt-0.5 flex items-baseline gap-1 tabular-nums">
-					<span className={cn('text-3xl font-semibold leading-none', toneClass)}>{displayValue}</span>
-					{unit && <span className="text-xs text-muted-foreground">{unit}</span>}
+		<div className="relative flex h-full w-full flex-col px-2 py-1.5">
+			{label && (
+				<div className="text-[10px] uppercase tracking-wide text-muted-foreground truncate leading-tight">
+					{label}
+				</div>
+			)}
+			{hasSparkline && (
+				<div className="pointer-events-none absolute inset-x-1 bottom-1 top-5 opacity-30 [&_svg]:!h-full [&_svg]:!w-full">
+					<Sparkline data={sparkline!} color={sparkColor} height={60} width={120} />
+				</div>
+			)}
+			<div className="relative z-10 mt-auto flex flex-col gap-0.5">
+				<div className="flex items-baseline gap-1 tabular-nums">
+					<span className={cn('whitespace-nowrap text-2xl font-semibold leading-none', toneClass)}>
+						{displayValue}
+					</span>
+					{unit && <span className="text-[11px] text-muted-foreground">{unit}</span>}
 				</div>
 				{deltaText && (
-					<div className="mt-0.5 flex items-center gap-0.5 text-[11px] text-muted-foreground leading-tight">
+					<div className="flex items-center gap-0.5 text-[10px] text-muted-foreground leading-tight">
 						{deltaIcon}
 						<span className={cn('font-medium', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]')}>
 							{deltaText}
@@ -189,11 +199,6 @@ export function KpiTile({
 					</div>
 				)}
 			</div>
-			{hasSparkline && (
-				<div className="flex flex-[3] items-stretch [&_svg]:!h-full [&_svg]:!w-full">
-					<Sparkline data={sparkline!} color={sparkColor} height={120} width={300} />
-				</div>
-			)}
 		</div>
 	);
 }

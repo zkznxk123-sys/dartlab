@@ -1,7 +1,8 @@
 """Dashboard Layout Engine — 카드 카탈로그 query + tier resolve + bento packing.
 
 설계: catalog 의 카드 entry 가 SSOT. 본 모듈은 entry 의 (kind, layout, seriesPlan)
-을 보고 4-col bento grid 의 (colSpan, rowSpan, x, y) 좌표 자동 산출.
+을 보고 12-col gridstack 식 bento grid 의 (colSpan, rowSpan, x, y) 좌표 자동
+산출. cellHeight = columnWidth sync 라 colSpan==rowSpan 이면 자동 1:1 정사각.
 
 매커니즘 5 요소:
 1. queryCards(tab, sub, kinds) — 카탈로그 다중 필터 검색.
@@ -12,8 +13,15 @@
 
 원칙:
 - 1 entry → 1 tier (default). 변형은 catalog 의 layout 필드 명시.
-- kpiTile = XS (1×1) 고정. trend 시리즈 수 자동 보정.
+- kpiTile = 3×3 (KPI 정사각, 4 카드/한행). 차트·테이블 = 4×4 (3 카드/한행).
+  Hero = 6×6 (radar 등). Wide = 12×3 (한 행 전체).
+- trend 시리즈 수 자동 보정 (3 이하 = 4×4, 4+ = 6×6 hero).
 - 변형 한도 위반 = ValueError (lintDashboardLayout 가 PR gate).
+
+12-col 메커니즘 (운영자 요구 "그래프·테이블 1:1 정사각 3 카드/한행" 강제):
+- frontend BentoGrid: gridTemplateColumns=repeat(12, cellSize) + gridAutoRows=cellSize.
+- 차트 카드 colSpan=rowSpan=4 → 12-col 기준 3 개/한행, 자동 1:1 정사각.
+- KPI 카드 colSpan=rowSpan=3 → 12-col 기준 4 개/한행, 자동 1:1 정사각.
 """
 
 from __future__ import annotations
@@ -23,28 +31,29 @@ from typing import Any
 from dartlab.viz.catalog import CATALOG
 from dartlab.viz.schema import CatalogEntry
 
-# kind 별 default (colSpan, rowSpan) + 허용 변형 (cs x rs 문자열 list).
+# 12-col gridstack 기준 default (colSpan, rowSpan) + 허용 변형.
+# cellHeight = columnWidth 동기화라 cs==rs 면 시각 정사각.
 # 변형 한도 위반 시 resolveLayout 가 ValueError.
 KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
-    "kpiTile": {"cs": 1, "rs": 1, "variance": []},  # XS 고정
-    "diffView": {"cs": 1, "rs": 1, "variance": ["2x2", "2x3"]},
-    "gauge": {"cs": 1, "rs": 2, "variance": ["2x2"]},  # S → M 변형
-    "topList": {"cs": 1, "rs": 2, "variance": ["1x3", "2x3"]},  # S → S+ → L
-    "phaseIndicator": {"cs": 4, "rs": 1, "variance": ["2x1"]},  # W → 절반
-    "comparisonTable": {"cs": 2, "rs": 3, "variance": ["4x3"]},  # L → WIDE
-    "radar": {"cs": 2, "rs": 2, "variance": ["3x3"]},
-    "scatter": {"cs": 2, "rs": 2, "variance": ["3x3", "2x3"]},
-    "matrix": {"cs": 2, "rs": 2, "variance": ["3x3"]},
+    "kpiTile": {"cs": 3, "rs": 3, "variance": ["3x6"]},  # KPI 정사각, tall 허용
+    "diffView": {"cs": 3, "rs": 3, "variance": ["4x4"]},
+    "gauge": {"cs": 3, "rs": 6, "variance": ["4x4"]},  # tall S → 정사각 M
+    "topList": {"cs": 3, "rs": 6, "variance": ["4x4"]},  # tall S → 정사각 M
+    "phaseIndicator": {"cs": 12, "rs": 3, "variance": ["12x1", "6x3"]},  # wide / strip
+    "comparisonTable": {"cs": 4, "rs": 4, "variance": ["12x3"]},  # 정사각 → wide
+    "radar": {"cs": 6, "rs": 6, "variance": ["4x4"]},  # hero radar
+    "scatter": {"cs": 4, "rs": 4, "variance": ["6x6"]},
+    "matrix": {"cs": 4, "rs": 4, "variance": ["6x6"]},
     "trend": {
-        "cs": 2,
-        "rs": 2,
-        "variance": ["1x3", "2x3", "3x3", "4x4"],
-    },  # 정사각·세로 한정 — wide 4x2·4x3 폐기 (사용자 1 지시)
-    "breakdown": {"cs": 2, "rs": 2, "variance": ["1x2"]},
-    "waterfall": {"cs": 2, "rs": 2, "variance": ["3x3"]},
-    "scoreBadge": {"cs": 4, "rs": 4, "variance": ["2x2"]},
-    "narrativeBridge": {"cs": 4, "rs": 3, "variance": []},
-    "sankey": {"cs": 3, "rs": 3, "variance": ["2x3", "4x3"]},  # legacy 호환 (폐기 진행 중)
+        "cs": 4,
+        "rs": 4,
+        "variance": ["3x6", "6x6", "12x4"],
+    },  # 차트 정사각 기본, 길쭉/hero/wide 허용
+    "breakdown": {"cs": 4, "rs": 4, "variance": ["3x6"]},
+    "waterfall": {"cs": 4, "rs": 4, "variance": ["6x6"]},
+    "scoreBadge": {"cs": 12, "rs": 3, "variance": ["6x6"]},  # wide 종합 평점
+    "narrativeBridge": {"cs": 12, "rs": 3, "variance": []},
+    "sankey": {"cs": 6, "rs": 6, "variance": ["4x4", "12x3"]},  # legacy (폐기 진행 중)
 }
 
 
@@ -179,21 +188,24 @@ def resolveLayout(entry: CatalogEntry) -> tuple[int, int]:
             )
         return cs, rs
 
-    # kind=trend 자동 보정 (사용자 1 지시: 3~5 시리즈 = 정사각 L 2×3, 6+ = XL 4×4)
+    # kind=trend 자동 보정 (12-col 기준):
+    # 1~3 시리즈 = 4×4 (default 정사각, 3 카드/한행)
+    # 4~5 시리즈 = 6×6 (hero, 2 카드/한행)
+    # 6+ 시리즈 = 12×4 (wide, 한 행 전체)
     if kind == "trend":
         nSeries = len(entry.get("seriesPlan") or [])
         if nSeries >= 6:
-            return 4, 4
-        if 3 <= nSeries <= 5:
-            return 2, 3
-        # 1~2 시리즈 = M (default)
+            return 12, 4
+        if 4 <= nSeries <= 5:
+            return 6, 6
+        # 1~3 시리즈 = 4×4 (default)
 
     return default["cs"], default["rs"]
 
 
 def packSkyline(
     cards: list[tuple[str, CatalogEntry]],
-    colCount: int = 4,
+    colCount: int = 12,
 ) -> list[dict[str, Any]]:
     """First-Fit-Decreasing skyline packing — 순서 보존 + 빈 공간 0.
 
@@ -202,7 +214,7 @@ def packSkyline(
 
     Args:
         cards: queryCards 결과.
-        colCount: grid column 수 (4 = bento default).
+        colCount: grid column 수 (12 = gridstack 표준 default).
 
     Returns:
         [{cardKey, kind, title, x, y, w, h}, ...] — frontend dispatch.
@@ -293,7 +305,7 @@ def planTabLayout(
     tab: str,
     *,
     sub: str | None = None,
-    colCount: int = 4,
+    colCount: int = 12,
 ) -> list[dict[str, Any]]:
     """탭 + sub view → packed layout grid.
 

@@ -30,7 +30,7 @@ def _kpi(
         "seriesPlan": [],
         "dataSpec": {"adapter": "kpiFromNorm", "tilePlans": [tile]},
         "options": {},
-        "layout": {"colSpan": 1, "rowSpan": 1},
+        "layout": {"colSpan": 3, "rowSpan": 3},
         "help": helpText,
     }
 
@@ -45,7 +45,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "lifeCyclePhase"},
         "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 1},
+        "layout": {"colSpan": 12, "rowSpan": 3},
         "help": "Damodaran 6 단계 (도입·성장·성숙Ⅰ·성숙Ⅱ·쇠퇴·회복) + 신뢰도.",
     },
     "lifecycleKpiRevenue": _kpi(
@@ -122,7 +122,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 4, "rowSpan": 4},
         "help": "영업+/투자-/재무- = 성숙기, 모두+ = 도입기, 영업- = 위기.",
     },
     "capitalDeployment": {
@@ -152,7 +152,7 @@ LIFECYCLE_CARDS: dict[str, CatalogEntry] = {
             },
         ],
         "options": {"unit": "원"},
-        "layout": {"colSpan": 2, "rowSpan": 2},
+        "layout": {"colSpan": 4, "rowSpan": 4},
         "help": "CapEx + R&D 절대값. 비중 변화로 도입기→성숙기 전이 식별.",
     },
 }

@@ -1,6 +1,6 @@
-// Bento packed grid — backend Layout Engine 이 산출한 (x, y, w, h) 좌표대로 렌더.
-// 시각 정사각 강제: grid-auto-rows = column width. cs=rs 면 시각 정사각.
-// 4 col xl + 2 col md + 1 col sm — Tailwind breakpoint 와 동기.
+// 12-col gridstack 식 bento grid — 백엔드 Layout Engine 의 (x,y,w,h) 좌표 + 12 col 고정.
+// 핵심: cellHeight === cellWidth 동기화 → w === h 면 자동 1:1 정사각.
+// gridstack.js 미도입 (정적 grid, 드래그 X). CSS grid 만으로 동일 효과 + bundle 추가 0.
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -12,32 +12,23 @@ interface Props {
 }
 
 const GAP_PX = 8;
-const PAD_PX = 12;
-// cellSize cap — column width 가 너무 크면 카드 dead space 폭발 (KPI 1×1 이
-// 465×465 px). Stripe/Linear/Vercel bento 패턴은 ~130~180px 정사각. 1920px
-// 4col 도 카드 정사각 비율 유지하되 크기 cap.
-const CELL_CAP_PX = 180;
-
-function columnsFor(viewportWidth: number): number {
-	if (viewportWidth >= 1280) return 4;
-	if (viewportWidth >= 768) return 2;
-	return 1;
-}
+const PAD_PX = 8;
+const COL_COUNT = 12;
+const MIN_CELL_PX = 56;
 
 export function BentoGrid({ placed, renderCard }: Props) {
 	const gridRef = useRef<HTMLDivElement>(null);
-	const [cellSize, setCellSize] = useState<number>(200);
+	const [cellSize, setCellSize] = useState<number>(80);
 
 	useLayoutEffect(() => {
 		const el = gridRef.current;
 		if (!el) return;
 
 		const measure = () => {
-			const cols = columnsFor(window.innerWidth);
 			const inner = el.clientWidth - PAD_PX * 2;
-			const totalGap = GAP_PX * Math.max(0, cols - 1);
-			const raw = Math.floor((inner - totalGap) / cols);
-			const cell = Math.max(80, Math.min(CELL_CAP_PX, raw));
+			const totalGap = GAP_PX * (COL_COUNT - 1);
+			const raw = Math.floor((inner - totalGap) / COL_COUNT);
+			const cell = Math.max(MIN_CELL_PX, raw);
 			setCellSize((prev) => (prev === cell ? prev : cell));
 		};
 
@@ -56,11 +47,13 @@ export function BentoGrid({ placed, renderCard }: Props) {
 	return (
 		<div
 			ref={gridRef}
-			className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4"
+			className="grid"
 			style={{
 				gap: `${GAP_PX}px`,
 				padding: `${PAD_PX}px`,
+				gridTemplateColumns: `repeat(${COL_COUNT}, ${cellSize}px)`,
 				gridAutoRows: `${cellSize}px`,
+				justifyContent: 'start',
 			}}
 		>
 			{placed.map((p) => (

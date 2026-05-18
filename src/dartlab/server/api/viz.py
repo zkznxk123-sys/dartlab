@@ -159,32 +159,42 @@ async def apiVizSpec(
     return spec
 
 
+# 옛 4 view sub → 7 방법론 redirect (URL bookmark 호환).
+_LEGACY_VIEW_REDIRECT: dict[str, str] = {
+    "overview": "snowflake",
+    "performance": "dupont",
+    "capitalStructure": "credit",
+    "cashflow": "quality",
+    "risk": "credit",
+    "profitability": "dupont",
+}
+
+
 @router.get("/api/viz/layout/{tab}/{stockCode}")
 async def apiVizLayout(
     tab: str,
     stockCode: str,
-    view: str | None = Query(None, description="재무제표 sub view (performance/capitalStructure/cashflow/risk)"),
+    view: str | None = Query(
+        None, description="7 방법론 sub view (story/dupont/value/growth/credit/quality/snowflake)"
+    ),
     periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
     nPeriods: int = Query(40, ge=2, le=80),
 ) -> dict[str, Any]:
-    """탭 + sub view → bento packed grid + 각 카드 spec.
+    """탭 + 7 방법론 view → 12-col bento packed grid + 각 카드 spec.
 
-    Layout Engine (`dartlab.viz.layout`) 가 카드 카탈로그를 query 하고 packing
-    까지 산출. frontend 는 받은 (x, y, w, h) 좌표대로 CSS Grid 에 dispatch.
+    Layout Engine (`dartlab.viz.layout`) 가 카드 카탈로그를 query 하고 12-col
+    gridstack 식 packing 산출. frontend 는 (x, y, w, h) + colCount 받아
+    cellHeight=columnWidth sync 로 자동 1:1 정사각 렌더.
 
     Returns:
         {
-            tab, view, periodKind,
+            tab, view, periodKind, colCount: 12,
             layout: [{cardKey, kind, title, x, y, w, h}, ...],
             cards: {cardKey: RechartsSpec},
         }
     """
-    # legacy growth/profitability sub → performance redirect.
-    effectiveView = view
-    if view in ("growth", "profitability"):
-        effectiveView = "performance"
+    effectiveView = _LEGACY_VIEW_REDIRECT.get(view or "", view)
 
-    # 1. 카탈로그 query + packing.
     placed = planTabLayout(tab, sub=effectiveView)
     if not placed:
         return {
@@ -192,6 +202,7 @@ async def apiVizLayout(
             "tab": tab,
             "view": effectiveView,
             "periodKind": periodKind,
+            "colCount": 12,
             "layout": [],
             "cards": {},
         }
@@ -209,6 +220,7 @@ async def apiVizLayout(
         "tab": tab,
         "view": effectiveView,
         "periodKind": periodKind,
+        "colCount": 12,
         "layout": placed,
         "cards": dict(zip(cardKeys, specs)),
     }

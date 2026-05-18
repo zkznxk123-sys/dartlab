@@ -60,18 +60,11 @@ export function TabDashboard({ tab, code, periodKind, titlePrefix }: Props) {
 		const seriesCount = spec?.series?.length ?? 0;
 		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0);
 		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-		const footerHeight = hasFooter ? 28 + Math.min(seriesCount, 12) * 18 + 20 : 0;
-		const total = p.h * cellSize + (p.h - 1) * 12;
-		const h = Math.max(80, total - 44 - footerHeight - 12);
+		const footerHeight = hasFooter ? 24 + Math.min(seriesCount, 12) * 16 + 16 : 0;
+		const total = p.h * cellSize + (p.h - 1) * 8;
+		const h = Math.max(60, total - 28 - footerHeight - 4);
 		return (
-			<CardShell
-				title={title}
-				help={help}
-				colSpan={p.w as 1 | 2 | 3 | 4}
-				rowSpan={p.h as 1 | 2 | 3 | 4 | 5 | 6}
-				footer={footer}
-				className="h-full"
-			>
+			<CardShell title={title} help={help} colSpan={p.w} rowSpan={p.h} footer={footer}>
 				{spec && !spec.error ? <VizChart spec={spec} height={h} /> : <ChartLoading />}
 			</CardShell>
 		);
