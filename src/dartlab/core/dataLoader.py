@@ -17,25 +17,22 @@ from dartlab.core.dataConfig import (
 
 _IS_PYODIDE = sys.platform == "emscripten"
 
-# ── loadData LRU (parquet 재로드 방지) ──
-# 같은 (stockCode, category, …) 조합이 여러 calc 에서 반복 호출될 때 disk
-# 재파싱을 막는다. accessor 레벨 캐시(Company._cache 의 _financeStmt_*)가
-# BoundedCache 에 의해 evict 되어도 이 캐시가 남아있으면 loadData 는 disk
-# 를 다시 건들이지 않는다. 결과는 이미 메모리 상 DataFrame 이므로 복제
-# 오버헤드 없음.
-#
-# max_entries 는 작게 유지: (stockCode × category=4) × 사용자 분석 빈도 =
-# 일반 세션 8~16. 초과분은 LRU evict.
-_LOAD_CACHE: "OrderedDict[tuple, pl.DataFrame]" = OrderedDict()
-# 회사 1 개 docs DataFrame 이 ~수백 MB (대기업 + 10 년치) 라 16 entry 보유 시
-# 수 GB 잠재 점유. CLAUDE.md 병렬 에이전트 2 × 카테고리 4 = 8 이 정합. LRU 압박이
-# 잦으면 BoundedCache pinned (_finance_ 등) 가 in-memory 재사용을 잡는다.
-_LOAD_CACHE_MAX = 8
+# Phase D — _LOAD_CACHE 폐기.
+# 이전 정책: 같은 (stockCode, category, …) 조합 결과를 LRU(max 8) 캐시.
+# 폐기 이유:
+#   1. BoundedCache (`Company._cache`) 가 이미 _financeStmt_* / _sections 등 결과 캐시.
+#   2. Phase A 의 IPC mirror + Phase D 의 mmap path 가 disk 재읽기를 ms 단위로 단축.
+#   3. _LOAD_CACHE 는 *원본 parquet → DataFrame* 을 영구 heap 점유 — BoundedCache 와 이중.
+#   4. *_finance_* pinned 가 BoundedCache 안 in-memory 재사용을 *이미* 잡음.
+# 폐기 효과: heap 점유 ↓ (8 × DataFrame × ~수백MB = 수 GB 잠재 회수).
+# 잔존: `_clearLoadCache` 는 호환 위해 no-op stub 으로 유지 (memory.py 가 EMERGENCY 시 호출).
+_LOAD_CACHE: "OrderedDict[tuple, pl.DataFrame]" = OrderedDict()  # 항상 empty — backward-compat alias
+_LOAD_CACHE_MAX = 0  # backward-compat 상수 — 폐기 신호
 
 
 def _clearLoadCache() -> None:
-    """BoundedCache EMERGENCY 시 호출 — disk 캐시까지 비운다."""
-    _LOAD_CACHE.clear()
+    """[deprecated] _LOAD_CACHE 가 폐기됨. backward-compat no-op."""
+    _LOAD_CACHE.clear()  # 안전 — 항상 empty
 
 
 def readParquetSafe(path) -> pl.DataFrame:
@@ -314,13 +311,8 @@ def loadData(
     if category in {"krxPrices", "krxIndices"} and refresh == "auto":
         krxShouldRefresh = _shouldRefreshHfCategory(path, category, refresh)
 
-    # LRU cache 조회 — predicate 호출은 슬라이스라 캐시 우회.
-    cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)
-    if predicate is None and refresh != "force" and krxShouldRefresh is not True:
-        cached = _LOAD_CACHE.get(cacheKey)
-        if cached is not None:
-            _LOAD_CACHE.move_to_end(cacheKey)
-            return cached
+    # Phase D — _LOAD_CACHE 폐기. BoundedCache + IPC mmap 이 cache 역할.
+    cacheKey = (stockCode, category, sinceYear, tuple(columns or ()), asOf, refresh)  # noqa: F841 — backward-compat unused
 
     checkMemoryAndGc(f"loadData({stockCode},{category})")
     effectiveSinceYear = sinceYear
@@ -374,10 +366,7 @@ def loadData(
                 lf = lf.select(available)
         df = lf.collect(engine="streaming") if useLazy else pl.read_ipc(str(ipcPath), memory_map=True)
         result = _normalizeLoadedFrame(df, category)
-        if predicate is None:
-            _LOAD_CACHE[cacheKey] = result
-            while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
-                _LOAD_CACHE.popitem(last=False)
+        # Phase D — _LOAD_CACHE 폐기 (BoundedCache + IPC mmap 이 cache 역할).
         return result
 
     if useLazy:
@@ -405,12 +394,7 @@ def loadData(
     else:
         df = pl.read_parquet(str(path))
     result = _normalizeLoadedFrame(df, category)
-
-    # predicate 호출은 슬라이스라 LRU 캐시 저장 안 함 (다른 slice 조회 시 cache miss 가 의도).
-    if predicate is None:
-        _LOAD_CACHE[cacheKey] = result
-        while len(_LOAD_CACHE) > _LOAD_CACHE_MAX:
-            _LOAD_CACHE.popitem(last=False)
+    # Phase D — _LOAD_CACHE 폐기.
     return result
 
 

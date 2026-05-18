@@ -60,8 +60,8 @@ def test_predicate_filters_rows(tmp_path: Path, monkeypatch) -> None:
     assert set(bsOnly.get_column("sj_div").to_list()) == {"BS"}
 
 
-def test_predicate_bypasses_load_cache(tmp_path: Path, monkeypatch) -> None:
-    """predicate 호출은 _LOAD_CACHE 에 저장 안 함."""
+def test_predicate_call_yields_filtered_result(tmp_path: Path, monkeypatch) -> None:
+    """Phase D — predicate 호출도 동일하게 cache 미사용 (모든 호출이 일관 동작)."""
     from dartlab.core import dataLoader
 
     parquetPath = tmp_path / "dart" / "finance" / "005930.parquet"
@@ -74,13 +74,13 @@ def test_predicate_bypasses_load_cache(tmp_path: Path, monkeypatch) -> None:
 
     dataLoader._LOAD_CACHE.clear()
 
-    dataLoader.loadData("005930", category="finance", predicate=pl.col("sj_div") == "BS")
+    result = dataLoader.loadData("005930", category="finance", predicate=pl.col("sj_div") == "BS")
+    assert result.height == 2
+    assert len(dataLoader._LOAD_CACHE) == 0
 
-    assert len(dataLoader._LOAD_CACHE) == 0, "predicate 호출이 _LOAD_CACHE 에 저장됨"
 
-
-def test_no_predicate_still_caches(tmp_path: Path, monkeypatch) -> None:
-    """predicate 없는 호출은 기존 _LOAD_CACHE 동작."""
+def test_no_predicate_returns_full_data(tmp_path: Path, monkeypatch) -> None:
+    """Phase D — _LOAD_CACHE 폐기 후 predicate 없는 호출도 매번 disk 재로드."""
     from dartlab.core import dataLoader
 
     parquetPath = tmp_path / "dart" / "finance" / "005930.parquet"
@@ -95,7 +95,8 @@ def test_no_predicate_still_caches(tmp_path: Path, monkeypatch) -> None:
 
     full = dataLoader.loadData("005930", category="finance")
     assert full.height == 5
-    assert len(dataLoader._LOAD_CACHE) == 1
+    # Phase D — _LOAD_CACHE 폐기. 항상 empty.
+    assert len(dataLoader._LOAD_CACHE) == 0
 
 
 def test_predicate_with_columns(tmp_path: Path, monkeypatch) -> None:
