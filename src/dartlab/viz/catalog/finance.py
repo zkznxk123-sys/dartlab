@@ -1252,4 +1252,156 @@ OVERVIEW_KEYS: list[str] = [
 사용자 요구 (P-DASH-V1 보강 2): 흐름 view 지 sub 의 dump 가 아니다."""
 
 
+# ──────────────────────────────────────────────────────────────────────
+# Story view (6 막 서사) — Phase 1b 최소 보강.
+# 각 막 1 KPI = 6 카드. narrativeBridge / scoreBadge hero 는 후속 PR.
+# 기존 KPI 와 중복으로 보이지만 *관점 다르면 동일 지표도 다른 해석* 원칙.
+# ──────────────────────────────────────────────────────────────────────
+_STORY_CARDS: dict[str, CatalogEntry] = {
+    "storyAct1Revenue": {
+        "kind": "kpiTile",
+        "title": "1막 사업 — 매출",
+        "topic": "IS",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {"label": "매출", "account": "revenue", "unit": "원", "intent": "primary"},
+            ],
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 1},
+        "help": "1막 — 무엇을 파는가. 사업 규모의 시작점.",
+    },
+    "storyAct2OpIncome": {
+        "kind": "kpiTile",
+        "title": "2막 수익 — 영업이익",
+        "topic": "IS",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {"label": "영업이익", "account": "operatingIncome", "unit": "원", "intent": "positive"},
+            ],
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 1},
+        "help": "2막 — 얼마나 잘 버는가. 본업 수익성.",
+    },
+    "storyAct3CashOp": {
+        "kind": "kpiTile",
+        "title": "3막 현금 — 영업CF",
+        "topic": "CF",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {"label": "영업CF", "account": "cfOperating", "unit": "원", "intent": "primary"},
+            ],
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 1},
+        "help": "3막 — 이익이 현금으로 도는가. 영업현금흐름.",
+    },
+    "storyAct4DebtRatio": {
+        "kind": "kpiTile",
+        "title": "4막 안정 — 부채비율",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {
+                    "label": "부채비율",
+                    "ratio": {"num": {"liabilities": 1}, "den": {"equity": 1}, "scale": 100},
+                    "unit": "%",
+                    "intent": "negative",
+                },
+            ],
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 1},
+        "help": "4막 — 버틸 수 있나. 자본 대비 부채 부담.",
+    },
+    "storyAct5Roe": {
+        "kind": "kpiTile",
+        "title": "5막 배분 — ROE",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {
+                    "label": "ROE",
+                    "ratio": {"num": {"netIncome": 1}, "den": {"equity": 1}, "scale": 100},
+                    "unit": "%",
+                    "intent": "primary",
+                },
+            ],
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 1},
+        "help": "5막 — 번 돈을 어떻게 쓰나. 주주 자본 효율.",
+    },
+    "storyAct6Growth": {
+        "kind": "kpiTile",
+        "title": "6막 미래 — 매출 성장률",
+        "topic": "IS",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [],
+        "dataSpec": {
+            "adapter": "kpiFromNorm",
+            "tilePlans": [
+                {"label": "매출 YoY", "yoy": "revenue", "unit": "%", "intent": "positive"},
+            ],
+        },
+        "options": {},
+        "layout": {"colSpan": 1, "rowSpan": 1},
+        "help": "6막 — 앞으로 어떻게 될까. 매출 성장 모멘텀.",
+    },
+    "storyRevenueTrend": {
+        "kind": "trend",
+        "title": "매출 시계열 (서사 전반)",
+        "topic": "IS",
+        "tab": "financial",
+        "subCategory": "story",
+        "seriesPlan": [
+            {
+                "key": "revenue",
+                "label": "매출",
+                "color": COLORS[0],
+                "intent": "primary",
+                "unit": "원",
+                "type": "bar",
+                "account": "revenue",
+            },
+            {
+                "key": "operatingIncome",
+                "label": "영업이익",
+                "color": COLORS[4],
+                "intent": "positive",
+                "unit": "원",
+                "type": "line",
+                "account": "operatingIncome",
+            },
+        ],
+        "options": {"unit": "원"},
+        "layout": {"colSpan": 2, "rowSpan": 3},
+        "help": "1막 매출 + 2막 영업이익 동시 — 서사의 큰 줄기.",
+    },
+}
+FINANCE_CARDS.update(_STORY_CARDS)
+
+
 __all__ = ["FINANCE_CARDS", "FINANCE_DASHBOARD_KEYS", "OVERVIEW_KEYS"]
