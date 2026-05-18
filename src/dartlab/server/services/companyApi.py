@@ -123,15 +123,108 @@ def _chapterLabelKr(chapter: str) -> str:
     return _DART_CHAPTERS_KR.get(prefix, raw)
 
 
-def _latestDartUrl(company: Company) -> str | None:
-    """최신 정기보고서의 DART 뷰어 URL (rcpNo 기반). filings 비어있으면 None."""
+# dartlab 내부 topic key → DART 정기보고서 표준 한글 라벨.
+# safeTopicLabel (Company._topicLabel) 의 결과 ("회사개요정량" 식 dartlab 단축형) 가
+# 사용자 노출이라 부적절 — DART 원본 라벨과 일치시켜야 사용자가 인지 가능.
+_DART_TOPIC_LABEL: dict[str, str] = {
+    # I. 회사의 개요
+    "companyOverview": "회사의 개요",
+    "companyHistory": "회사의 연혁",
+    "capitalChange": "자본금 변동사항",
+    "shareCapital": "주식의 총수 등",
+    "articlesOfIncorporation": "정관에 관한 사항",
+    "dividend": "배당에 관한 사항",
+    # II. 사업의 내용
+    "businessOverview": "사업의 개요",
+    "productService": "주요 제품 및 서비스",
+    "rawMaterial": "원재료 및 생산설비",
+    "salesOrder": "매출 및 수주상황",
+    "riskDerivative": "위험관리 및 파생거래",
+    "majorContractsAndRnd": "주요계약 및 연구개발활동",
+    "otherReferences": "기타 참고사항",
+    # III. 재무에 관한 사항
+    "fsSummary": "요약재무정보",
+    "consolidatedStatements": "연결재무제표",
+    "consolidatedNotes": "연결재무제표 주석",
+    "financialStatements": "재무제표",
+    "financialNotes": "재무제표 주석",
+    "ratios": "재무비율",
+    "BS": "재무상태표",
+    "IS": "손익계산서",
+    "CIS": "포괄손익계산서",
+    "CF": "현금흐름표",
+    "SCE": "자본변동표",
+    # IV. 이사의 경영진단 및 분석의견 등
+    "cautionaryStatement": "주의사항",
+    "mdnaOverview": "이사의 경영진단 및 분석의견 개요",
+    "financialConditionAndResults": "재무상태 및 영업실적",
+    "liquidityAndCapitalResources": "유동성 및 자금조달",
+    "otherFinance": "기타 재무사항",
+    "audit": "회계감사인의 감사의견",
+    # V. 회계감사인의 감사의견 등
+    "mdna": "경영진단 및 분석의견",
+    "internalControl": "내부통제에 관한 사항",
+    "auditContract": "감사용역 계약",
+    "nonAuditContract": "비감사용역 계약",
+}
+
+
+def _topicDartLabel(topic: str, fallback: str | None = None) -> str:
+    """topic 키 → DART 표준 한글 라벨. 매핑 부재 시 fallback 또는 topic 그대로."""
+    label = _DART_TOPIC_LABEL.get(topic)
+    if label:
+        return label
+    return fallback or topic
+
+
+# period (예 "2024Q1") → 정기보고서 기준월 패턴 (예 "(2024.03)").
+def _periodToReportPattern(period: str) -> str | None:
+    import re as _re
+
+    match = _re.fullmatch(r"(\d{4})(?:Q([1-4]))?", period.strip())
+    if not match:
+        return None
+    year = match.group(1)
+    quarter = match.group(2)
+    if quarter is None or quarter == "4":
+        return f"({year}.12)"  # 사업보고서 (연간 또는 Q4)
+    if quarter == "1":
+        return f"({year}.03)"
+    if quarter == "2":
+        return f"({year}.06)"
+    if quarter == "3":
+        return f"({year}.09)"
+    return None
+
+
+def _dartUrlForPeriod(company: Company, period: str | None = None) -> str | None:
+    """period 에 해당하는 정기보고서의 DART 뷰어 URL.
+
+    period=None → 최신 보고서. period 매칭 row 없으면 최신으로 fallback.
+    """
     try:
         df = company.filings()
         if df is None or df.is_empty():
             return None
-        return df.row(0, named=True).get("dartUrl")
+        latest_url = df.row(0, named=True).get("dartUrl")
+        if period is None:
+            return latest_url
+
+        import polars as pl
+
+        pattern = _periodToReportPattern(period)
+        if pattern is None:
+            return latest_url
+        matched = df.filter(pl.col("reportType").str.contains(pattern, literal=True))
+        if matched.is_empty():
+            return latest_url
+        return matched.row(0, named=True).get("dartUrl")
     except (AttributeError, ValueError, KeyError):
         return None
+
+
+# 옛 별칭 — 외부 caller 호환.
+_latestDartUrl = _dartUrlForPeriod
 
 
 def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
@@ -174,7 +267,12 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
             chapter_map[finance_chapter] = []
             chapter_order.append(finance_chapter)
         chapter_map[finance_chapter].append(
-            TocTopic(topic=topic, label=safeTopicLabel(company, topic), textCount=0, tableCount=1)
+            TocTopic(
+                topic=topic,
+                label=_topicDartLabel(topic, safeTopicLabel(company, topic)),
+                textCount=0,
+                tableCount=1,
+            )
         )
 
     period_re = _re.compile(r"^\d{4}(Q[1-4])?$")
@@ -212,7 +310,7 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
             chapter_map[chapter].append(
                 TocTopic(
                     topic=topic,
-                    label=safeTopicLabel(company, topic),
+                    label=_topicDartLabel(topic, safeTopicLabel(company, topic)),
                     textCount=int(text_count),
                     tableCount=int(table_count),
                     hasChanges=has_changes,
@@ -304,11 +402,13 @@ def buildViewer(
     *,
     compact: bool = False,
     limit: int = 60,
+    period: str | None = None,
 ) -> dict[str, Any]:
     """topic별 뷰어 블록과 텍스트 문서를 직렬화하여 반환한다.
 
     compact=True 면 frontend 가 안 쓰는 무거운 필드 (views/timeline/blocks/
     entries) 를 제거하고 sections 를 limit 개로 잘라낸다. payload 80%+ 감소.
+    period 인자는 dartUrl 해상도 용도 — period 매칭 보고서 URL 반환 (None 이면 최신).
     """
     from dartlab.providers.dart.docs.viewer import (
         serializeViewerBlock,
@@ -326,13 +426,14 @@ def buildViewer(
         company._viewer_cache[topic] = blocks
 
     textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
-    dartUrl = _latestDartUrl(company)
+    dartUrl = _dartUrlForPeriod(company, period)
+    topicLabel = _topicDartLabel(topic, safeTopicLabel(company, topic))
     if compact:
         return {
             "stockCode": company.stockCode,
             "corpName": company.corpName,
             "topic": topic,
-            "topicLabel": safeTopicLabel(company, topic),
+            "topicLabel": topicLabel,
             "period": None,
             "compact": True,
             "dartUrl": dartUrl,
@@ -343,7 +444,7 @@ def buildViewer(
         "stockCode": company.stockCode,
         "corpName": company.corpName,
         "topic": topic,
-        "topicLabel": safeTopicLabel(company, topic),
+        "topicLabel": topicLabel,
         "period": None,
         "dartUrl": dartUrl,
         "blocks": [serializeViewerBlock(block) for block in blocks],
