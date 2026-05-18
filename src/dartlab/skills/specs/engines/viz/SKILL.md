@@ -171,7 +171,7 @@ uv run python -X utf8 landing/_scripts/buildCompanyCharts.py --code 005930
 1. **차트 생성은 `CompileVisual` tool 1 회** — chartType + data + 인자. RunPython 직접 matplotlib/plotly 호출 금지 (visualRef 미발급 → UI 렌더 실패).
 2. **모든 차트의 `evidenceBinding` 필수** — 차트 안 모든 값에 ref 박힌 source 명시. evidenceBinding 누락 시 거부 (해결책 포함 경고).
 3. **데이터 부족 시 차트 만들지 마라** — 표 + coverage note 로 낮춘다. 환각 차트 (X 값 없는 그래프, peer 4 개 미만 분포 등) 금지.
-4. **본문 안 차트 인용에 `<visualRef:...>` 표기** — UI 가 inline 렌더링하므로 ref id 필수.
+4. **본문 안 차트 인용에 `[visualRef:...]` 표기** — UI 가 inline 렌더링하므로 ref id 필수.
 
 ## 호출 동작
 

@@ -117,7 +117,7 @@ sensitivity = c.analysis("macro", "매크로민감도")   # 기업 단위 매크
 12 axis 매크로 질문 (cycle·rates·inflation·corporate·trade 등) 에서 다음 4 룰 강행.
 
 1. **1 차 도구는 EngineCall 강제**. `EngineCall(apiRef="macro", args={"axis": "rates", "market": "KR"})` 양식. RunPython 직접 ECOS/FRED 호출 금지 — 본 엔진이 HF SSOT 캐시 + tableRef 발급 담당.
-2. **본문 숫자에 `<valueRef:...>` 또는 `<dateRef:...>` inline 표기 필수**. macro 데이터는 시점 (asOf) 변동 큼 — dateRef 누락 시 stale 데이터 환각.
+2. **본문 숫자에 `[valueRef:...]` 또는 `[dateRef:...]` inline 표기 필수**. macro 데이터는 시점 (asOf) 변동 큼 — dateRef 누락 시 stale 데이터 환각.
 3. **cycle / inventory 4 phase 판정은 `[conf:30]` 기본** — 회고적 신호임을 명시. NBER vs ECRI vs Cleveland Fed 정의 차이 인지.
 4. **단일 지표로 사이클 단정 금지** — CLI·LEI·yield curve 중 최소 2 종 ref 동행. 단일 지표 답변은 한계 명시 필수.
 
