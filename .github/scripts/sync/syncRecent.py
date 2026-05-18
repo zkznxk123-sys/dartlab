@@ -837,12 +837,15 @@ def main():
         distDir.mkdir(exist_ok=True)
         failPath = distDir / "sync_verification_failed.json"
         failPath.write_text(json.dumps(verifyFailures, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"[syncRecent] 수집 후 검증 실패: {len(verifyFailures)}건 — HF 업로드 중단")
+        # checkpoint upload (df6dbd37a) 도입 이후 verify 는 fail-safe 가 아닌 추적용.
+        # 수집된 종목은 이미 incremental 로 HF push 완료, 잔여 missing 은 다음 sync 의
+        # rcept_no 비교에서 자연 retry. 옛 동작 (sys.exit(1)) 은 정상 push 후에도
+        # workflow fail 처리해 monitor 알림 다발 + cron 깨짐.
+        print(f"[syncRecent] 수집 후 검증 잔여 누락: {len(verifyFailures)}건 — 다음 sync 자연 회복")
         for item in verifyFailures[:20]:
-            print(f"[syncRecent] missing {item['category']} {item['stockCode']} {item['rceptNo']} {item['reportNm']}")
+            print(f"[syncRecent] pending {item['category']} {item['stockCode']} {item['rceptNo']} {item['reportNm']}")
         if len(verifyFailures) > 20:
             print(f"[syncRecent] ... 외 {len(verifyFailures) - 20}건")
-        sys.exit(1)
 
     elapsed = time.time() - startTime
 
