@@ -1048,4 +1048,10 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
 KPI 1×1 4 개 = 한 row, 자산구조 2×3 + 부채/자본 1×3 = 한 row, trend 2×2 4 개 = 두 row."""
 
 
-__all__ = ["FINANCE_CARDS", "FINANCE_DASHBOARD_KEYS"]
+# OVERVIEW_KEYS — 재무제표분석 1 view 의 curated 카드 셋트.
+# 현재 폐기 후 단일 view 라 FINANCE_DASHBOARD_KEYS 전체와 동일.
+# 후속 PR 에서 관점 (perspective) 박을 때 OVERVIEW 는 *축약 셋트*, FINANCE_DASHBOARD 는 *전체* 로 분기 가능.
+OVERVIEW_KEYS: list[str] = list(FINANCE_DASHBOARD_KEYS)
+
+
+__all__ = ["FINANCE_CARDS", "FINANCE_DASHBOARD_KEYS", "OVERVIEW_KEYS"]
