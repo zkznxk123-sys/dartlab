@@ -11,20 +11,26 @@ HF_BASE_URL = f"https://huggingface.co/datasets/{HF_REPO}/resolve/main"
 
 DATA_RELEASES: dict[str, dict] = {
     # ── 사용자 공개 (brand.ts 동기화 대상) ──
+    # ipcMirror: True 면 sync ETL 이 parquet 외에 .arrow IPC mirror artifact 도 빌드.
+    # Phase D 의 pl.read_ipc(memory_map=True) 진입점이 사용. mmap 안 되는 환경 (pyodide)
+    # 은 무시 후 parquet fallback.
     "docs": {
         "dir": "dart/docs",
         "label": "DART 공시 문서 데이터",
         "public": True,
+        "ipcMirror": True,
     },
     "finance": {
         "dir": "dart/finance",
         "label": "재무 숫자 데이터",
         "public": True,
+        "ipcMirror": True,
     },
     "report": {
         "dir": "dart/report",
         "label": "정기보고서 데이터",
         "public": True,
+        "ipcMirror": True,
     },
     "scan": {
         "dir": "dart/scan",

@@ -102,8 +102,8 @@ def _uploadHf(category: str) -> None:
         print("[uploadData] HuggingFace 증분 업로드 완료")
         return
 
-    # fallback: 전체 폴더 업로드
-    files = list(localDir.glob("*.parquet"))
+    # fallback: 전체 폴더 업로드 (parquet + .arrow IPC mirror)
+    files = list(localDir.glob("*.parquet")) + list(localDir.glob("*.arrow"))
     if not files:
         print(f"[uploadData] {localDir}에 업로드할 파일 없음")
         return

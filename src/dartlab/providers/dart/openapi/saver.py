@@ -448,12 +448,58 @@ def korColumns(
 
 # ── 저장 ───────────────────────────────────────────────────
 
+# Phase A — predicate pushdown 활성화. row group 안 데이터가 sort 순서로 들어가면
+# row group statistics (min/max) 가 disjoint 가 되어 pl.scan_parquet().filter() 가
+# irrelevant row group 을 skip 한다. category 별 sort 키는 가장 자주 filter 되는 컬럼.
+_SORT_BY_CATEGORY: dict[str, list[str]] = {
+    "finance": ["sj_div", "fs_div", "bsns_year", "reprt_nm", "account_id"],
+    "report": ["apiType", "bsns_year", "rcept_no"],
+    "docs": ["year", "report_type", "section_order"],
+    "filings": ["bsns_year", "rcept_dt", "rcept_no"],
+    "allFilings": ["bsns_year", "rcept_dt", "rcept_no"],
+}
+_ROW_GROUP_SIZE = 4096
+
+
+def _categoryForPath(dest: Path) -> str | None:
+    """``data/dart/{category}/{stockCode}.parquet`` 경로에서 category 추출."""
+    parts = dest.parts
+    if "dart" in parts:
+        idx = parts.index("dart")
+        if idx + 1 < len(parts) - 1:
+            return parts[idx + 1]
+    return None
+
+
+def writeParquetSorted(df: pl.DataFrame, dest: Path) -> None:
+    """category 자동 추론 + sort + row_group_size 적용 후 원자적 write.
+
+    Phase A 처방 — DART finance/report/docs parquet 의 row group statistics 를
+    sort 컬럼 기반 disjoint 으로 만들어 predicate pushdown 을 활성화한다.
+
+    Args:
+        df: 저장할 DataFrame.
+        dest: 최종 parquet 경로. ``data/dart/{category}/...`` 패턴이면 sort 자동.
+            그 외 경로는 sort 없이 write (호환 보존).
+    """
+    cat = _categoryForPath(dest)
+    sortBy = _SORT_BY_CATEGORY.get(cat or "", [])
+    sortCols = [c for c in sortBy if c in df.columns]
+    if sortCols:
+        df = df.sort(sortCols)
+    tmp = dest.with_name(f"{dest.name}.tmp")
+    df.write_parquet(
+        tmp,
+        compression="zstd",
+        statistics=True,
+        row_group_size=_ROW_GROUP_SIZE,
+    )
+    tmp.replace(dest)
+
 
 def _writeParquetAtomic(df: pl.DataFrame, dest: Path) -> None:
-    """Write parquet through a temp file so a failed write cannot corrupt dest."""
-    tmp = dest.with_name(f"{dest.name}.tmp")
-    df.write_parquet(tmp)
-    tmp.replace(dest)
+    """Atomic write — Phase A 이후 ``writeParquetSorted`` 로 위임."""
+    writeParquetSorted(df, dest)
 
 
 def _keyExpr(columns: Sequence[str]) -> pl.Expr:

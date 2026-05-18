@@ -419,7 +419,9 @@ class ZipDocsCollector:
         if not allSections:
             return 0
 
-        # parquet 저장 (기존 파일 있으면 누적)
+        # parquet 저장 (기존 파일 있으면 누적, Phase A — sort + row_group_size 적용)
+        from dartlab.providers.dart.openapi.saver import writeParquetSorted
+
         newDf = pl.DataFrame(allSections)
 
         if self._parquetPath.exists():
@@ -428,12 +430,7 @@ class ZipDocsCollector:
         else:
             combinedDf = newDf
 
-        tmpPath = self._parquetPath.with_suffix(".parquet.tmp")
-        combinedDf.write_parquet(tmpPath)
-
-        if self._parquetPath.exists():
-            self._parquetPath.unlink()
-        tmpPath.rename(self._parquetPath)
+        writeParquetSorted(combinedDf, self._parquetPath)
 
         self._loadExisting()
 

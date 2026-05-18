@@ -831,7 +831,9 @@ async def _collectDocs(
     if not allSections:
         return 0
 
-    # 3. parquet 저장
+    # 3. parquet 저장 (Phase A — writeParquetSorted 가 row group sort + statistics 적용)
+    from dartlab.providers.dart.openapi.saver import writeParquetSorted
+
     newDf = pl.DataFrame(allSections)
     if parquetPath.exists():
         existingDf = pl.read_parquet(parquetPath)
@@ -839,11 +841,7 @@ async def _collectDocs(
     else:
         combinedDf = newDf
 
-    tmpPath = parquetPath.with_suffix(".parquet.tmp")
-    combinedDf.write_parquet(tmpPath)
-    if parquetPath.exists():
-        parquetPath.unlink()
-    tmpPath.rename(parquetPath)
+    writeParquetSorted(combinedDf, parquetPath)
 
     return len(allSections)
 
