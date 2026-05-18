@@ -378,18 +378,19 @@ function ViewerTab() {
 	const allSections = latestViewer?.textDocument?.sections ?? [];
 	const sectionsOwn = useMemo(() => {
 		const filtered = _filterToOwnLeaf(allSections, ownLeafKey);
-		// dedupe by (firstHeadingText + body.trim()) — backend sections frame 가 같은
-		// stub 본문을 hp 있는 section + hp 빈 section 2 개로 자주 박는다. 같은 body 면 keep first.
+		// dedupe by body 만 — backend sections frame 가 같은 stub 본문을 hp 있는 section +
+		// hp 빈 section 2 개로 박는다. 같은 body 면 첫 번째만 keep (보통 hp 있는 게 먼저).
+		// 빈 body 는 dedupe 안 함 (각자 독립 row 로 노출).
 		const seen = new Set<string>();
 		const out: ViewerSection[] = [];
 		for (const s of filtered) {
-			const title = _sectionTitle(s)?.text || '';
 			const body = (s.latest?.body || '').trim();
-			const key = `${title}::${body}`;
-			if (key === '::' || seen.has(key)) {
-				if (key !== '::') continue;
+			if (!body) {
+				out.push(s);
+				continue;
 			}
-			seen.add(key);
+			if (seen.has(body)) continue;
+			seen.add(body);
 			out.push(s);
 		}
 		return out;
