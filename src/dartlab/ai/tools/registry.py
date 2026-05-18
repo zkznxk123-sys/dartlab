@@ -9,6 +9,7 @@ import inspect
 from typing import Any, Callable
 
 from .compareCompanies import compareCompanies
+from .compareDisclosure import compareDisclosure
 from .compileVisual import compileVisual
 from .createUserSkill import createUserSkill
 from .engineCall import engineCall
@@ -343,6 +344,24 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "CompareDisclosure": ToolSpec(
+        "CompareDisclosure",
+        "공시 분기/연도 diff 강행 도구 — RunPython 대신 무조건 본 도구. DART 공시 본문 sentence-level diff + 의미 분류 (가이던스 상향/하향·리스크 추가·회계정책 변경·사업 라인 변경) 5 종 자동 발급. 같은 회사의 두 보고서 (예: '2024.09' vs '2025.09') 28 섹션 자동 매칭, top intensityScore 분류, disclosureRef + chip 발급. 트리거 = '새로 추가된 리스크' / '가이던스 변화' / '분기 공시 diff' / '전분기 대비' / 'YoY 공시' / '보고서 변경사항' / 'N-1 vs N' 키워드. *RunPython 으로 자체 difflib 호출 금지* (LLM 흉내 회귀). dartlab DART 공시 parquet 시계열 위에서만 성립. ok=False 시에만 fallback.",
+        {
+            "type": "object",
+            "properties": {
+                "stockCode": {"type": "string", "description": "6 자리 종목코드 (예: '005930')."},
+                "periodA": {"type": "string", "description": "N-1 기 (예: '2024.09' 또는 '분기보고서 (2024.09)')."},
+                "periodB": {"type": "string", "description": "N 기. periodA 와 같은 양식."},
+                "topN": {"type": "integer", "description": "intensityScore 상위 N 섹션만 분류 (기본 10)."},
+            },
+            "required": ["stockCode", "periodA", "periodB"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "ScenarioOverlay": ToolSpec(
         "ScenarioOverlay",
         "macro 시나리오 preset (146 종 — 1997 IMF / 2008 GFC / Fed DFAST 등) 의 macro overrides 와 업종 탄성치 결합 → 종목별 매출/마진/NIM 임팩트 거친 추정. '금리 +50bp 면?' 류 질문에 답변 본문 옵션 1 회 호출.",
@@ -539,6 +558,7 @@ _TOOLS: dict[str, ToolFn] = {
     "EvidenceGate": evidenceGate,
     "PickStoryTemplate": pickStoryTemplate,
     "CompareCompanies": compareCompanies,
+    "CompareDisclosure": compareDisclosure,
     "ScenarioOverlay": scenarioOverlay,
     "RunPython": runPython,
     "InspectDataset": inspectDataset,
@@ -573,6 +593,7 @@ CANONICAL_V2: tuple[str, ...] = (
     "SaveArtifact",
     "CreateUserSkill",
     "CompileVisual",
+    "CompareDisclosure",
 )
 
 # snake_case ↔ PascalCase 호환 — 옛 호출자 / 옛 model 가 snake 로 부르면 자동 매핑.
@@ -585,6 +606,7 @@ _LEGACY_NAME_MAP = {
     "evidence_gate": "EvidenceGate",
     "pick_story_template": "PickStoryTemplate",
     "compare_companies": "CompareCompanies",
+    "compare_disclosure": "CompareDisclosure",
     "scenario_overlay": "ScenarioOverlay",
     "run_python": "RunPython",
     "inspect_dataset": "InspectDataset",
