@@ -127,7 +127,7 @@ function FinancialTab() {
 				footer={footer}
 				className="h-full"
 			>
-				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} /> : <ChartLoading />}
+				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
 			</CardShell>
 		);
 	};

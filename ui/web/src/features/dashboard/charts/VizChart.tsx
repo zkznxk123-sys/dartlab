@@ -45,6 +45,9 @@ import type { RechartsSpec, RechartsSeries } from '../api/client';
 interface Props {
 	spec: RechartsSpec;
 	height?: number;
+	// 카드 size — 카탈로그 colSpan × rowSpan. 카드 컴포넌트 내부 layout dispatch 용.
+	// 1×1 KpiTile 은 값+미니 spark 옆 배치, 2×2+ 는 spark 본체 + 값 오버레이.
+	size?: { w: number; h: number };
 }
 
 function toRows(spec: RechartsSpec): Array<Record<string, number | string | null>> {
@@ -246,9 +249,9 @@ function RadarBlock({ spec, height }: { spec: RechartsSpec; height: number }) {
 	);
 }
 
-// 단일 KPI 카드 — 1 entry = 1 tile (bento 1×1).
+// 단일 KPI 카드 — 1 entry = 1 tile (bento 1×1 default).
 // 백워드 호환: spec.tiles 가 여러 개여도 첫 번째만 렌더 (옛 strip catalog 잔존 시).
-function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
+function KpiTileSingle({ spec, size }: { spec: RechartsSpec; size?: { w: number; h: number } }) {
 	const tiles = spec.tiles ?? [];
 	if (!tiles.length) {
 		return <ErrorState title={spec.title} error="KPI 데이터 없음" />;
@@ -272,12 +275,13 @@ function KpiTileSingle({ spec }: { spec: RechartsSpec }) {
 				sparkline={t.sparkline}
 				rangeMin={t.rangeMin}
 				rangeMax={t.rangeMax}
+				size={size}
 			/>
 		</div>
 	);
 }
 
-export function VizChart({ spec: rawSpec, height = 280 }: Props) {
+export function VizChart({ spec: rawSpec, height = 280, size }: Props) {
 	const spec = applyShadcnPalette(rawSpec);
 
 	if (spec.componentType === 'Error' || spec.error) {
@@ -291,7 +295,7 @@ export function VizChart({ spec: rawSpec, height = 280 }: Props) {
 	// kind 별 dispatch — 시계열 외 카드 패턴.
 	switch (spec.kind) {
 		case 'kpiTile':
-			return <KpiTileSingle spec={spec} />;
+			return <KpiTileSingle spec={spec} size={size} />;
 		case 'diffView':
 			return (
 				<DiffView

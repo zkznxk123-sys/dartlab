@@ -11,8 +11,12 @@ interface Props {
 	renderCard: (p: PackedCard, cellSize: number) => ReactNode;
 }
 
-const GAP_PX = 12;
+const GAP_PX = 8;
 const PAD_PX = 12;
+// cellSize cap — column width 가 너무 크면 카드 dead space 폭발 (KPI 1×1 이
+// 465×465 px). Stripe/Linear/Vercel bento 패턴은 ~130~180px 정사각. 1920px
+// 4col 도 카드 정사각 비율 유지하되 크기 cap.
+const CELL_CAP_PX = 180;
 
 function columnsFor(viewportWidth: number): number {
 	if (viewportWidth >= 1280) return 4;
@@ -32,7 +36,8 @@ export function BentoGrid({ placed, renderCard }: Props) {
 			const cols = columnsFor(window.innerWidth);
 			const inner = el.clientWidth - PAD_PX * 2;
 			const totalGap = GAP_PX * Math.max(0, cols - 1);
-			const cell = Math.max(80, Math.floor((inner - totalGap) / cols));
+			const raw = Math.floor((inner - totalGap) / cols);
+			const cell = Math.max(80, Math.min(CELL_CAP_PX, raw));
 			setCellSize((prev) => (prev === cell ? prev : cell));
 		};
 
