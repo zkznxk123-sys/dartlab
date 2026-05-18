@@ -119,27 +119,48 @@ result = dartlab.analysis("valuation", "가치평가", company=c)
 
 Company 의 finance/disclosure/market snapshot 을 읽어 가치평가 축 계산 항목을 산출한다. 결손 값은 0 으로 채우지 않고 `flags`, `assumptions`, `dataAsOf`, 빈 history, null 로 표현한다. 자세한 동작은 base SKILL `engines.analysis` 의 `## 호출 동작` 참조.
 
-## 대표 반환 형태
+## 대표 반환 형태 — 14 top-level keys
 
-dict 반환. 공통 키:
+`c.analysis("valuation", "가치평가")` 1 회 호출 결과 dict 의 핵심 키 (값 그대로 답변에 인용 — 추가 호출 불필요):
 
-- `items`: 축별 계산 항목과 결과
-- `history`: 기간별 시계열
-- `displayHints`: 표/차트 표시 힌트
-- `turningPoints`: 전환점 (해당 시)
-- `dataAsOf`, `assumptions`, `flags`: 데이터 기준일, 가정, 결손/이상 신호
-- `_summary`: 사람이 읽을 요약
-- `tableRef` / `valueRef` / `dateRef` / `executionRef`: evidence 참조
+| key | 의미 | 답변 활용 |
+| --- | --- | --- |
+| `dcfValuation` | DCF 결과 (`perShareValue` · `enterpriseValue` · `discountRate` · `growthRateInitial` · `terminalGrowth` · `fcfProjections[5]` · `marginOfSafety`) | DCF 적정가 단일값 + 가정 |
+| `relativeValuation` | 멀티플 결과 (`sectorMultiples` · `currentMultiples` · `impliedValues` · `premiumDiscount` · `consensusValue` · `warnings`) | PER/PBR/EV-EBITDA/PSR 비교 표 |
+| `residualIncome` | RIM (`perShareValue` · `bps` · `costOfEquity`) | 잔여이익 적정가 |
+| `ddmValuation` | DDM (`perShareValue` · `dps` · `dividendGrowth` · `discountRate`) | 배당할인 적정가 |
+| `priceTarget` | 시나리오 가격 (`weightedTarget` · `percentiles` p10/p25/p50/p75/p90 · `expectedValue` · `upside` · `signal` (strong_sell/sell/hold/buy/strong_buy) · `scenarios[]`) | 시나리오 가격 목표 + 신호 |
+| `valuationSynthesis` | 종합 가중 (`fairValueRange` · `verdict` (고평가/저평가/적정) · `weightedFairValue` · `modelWeights` · `estimates[]` · `companyType` (growth/cyclical/value/...)) | 결론 1 줄 + 4 방법론 가중 표 |
+| `plausibilityBand` | peer 그룹 위치 (`growthPercentile` · `marginPercentile` · `band` (within/above/below) · `peerStats`) | 적정가 신뢰성 sanity check |
+| `lifeCycle` | 라이프사이클 (`phase` (matureGrowth/matureStable/decline/...) · `phaseConfidence` · `modelHint` (dcf/ddm/relative)) | 어느 방법론이 가장 적합한지 힌트 |
+| `sensitivity` | WACC × 영구성장률 표 | DCF 가정 민감도 |
+| `reverseImplied` | 역산 (`impliedGrowthRate`) | 현재가가 함의하는 성장률 |
+| `cashFlowConsistency` | OCF/순이익 비율 | 이익품질 sanity |
+| `valuationFlags` · `valuationSins` | 가치평가 경고 | 답변 한계 섹션 |
+| `storyPrecedents` | 유사 종목 선례 | peer 인사이트 |
+| `assumptions` | 가정 dict (`wacc` · `terminalGrowth` · `growthRates` · `confidence` · `primaryModel`) | 답변 본문에 가정 명시 |
 
-전체 반환 키는 base SKILL `engines.analysis` 표 + `_analysisImpl` docstring 으로 검산.
+공통 evidence: `tableRef` / `valueRef` / `dateRef` / `executionRef`.
+
+## 답변 양식 (4 방법론 + 시나리오 + 종합)
+
+답변 구조:
+
+1. **결론** (1 문장) — `valuationSynthesis.verdict` + `weightedFairValue` + 현재가 비교 (`signal`).
+2. **4 방법론 표** — DCF / 상대가치 / RIM / DDM 적정가 + 비중 (`modelWeights`) + 핵심 가정 (DCF=WACC·g·FCF / 멀티플=배수 / RIM=COE·BPS / DDM=DPS·growth).
+3. **시나리오 가격 목표** — `priceTarget.percentiles` p10/p50/p90 + `expectedValue` + `signal`.
+4. **DCF 정규화 경고** — `relativeValuation.warnings` 또는 `valuationFlags` ("최근 대비 기준 FCF 가 N 배 괴리" 류) 그대로 인용. 사이클 기업은 mid-cycle FCF 사용 사실 명시.
+5. **plausibility band** — `band` (within/above/below) + peer percentile 로 적정가 sanity check.
+6. **lifeCycle modelHint** — 어느 방법론에 가중치 더 줄지 (예: matureGrowth → DCF 우위 / growth → 상대가치 우위).
+7. **반례·한계** — `assumptions.confidence` + `valuationFlags` + 현재가 snapshot 기준 (실시간 시장가 비교 별도 필요 명시).
 
 ## 기본 실행 순서
 
-1. 대상, 기간, 원천 데이터 확정.
-2. 위 공개 호출을 그대로 실행.
-3. `dataAsOf`, 결손 값, `flags`, `assumptions` 점검.
-4. 숫자 claim 은 `tableRef` / `valueRef` / `dateRef` / `executionRef` 에 묶음.
-5. 다축 보고서 조립은 `engines.story` 또는 상위 recipe 가 담당.
+1. 대상 (종목코드) 확정.
+2. `Company.show("IS")` 1 회 → 헤더 chip (dcrBadge + industryBadge) + dataAsOf 확보.
+3. `c.analysis("valuation", "가치평가")` 1 회 → 14 keys 결과 — **이 1 회로 4 방법론 + 시나리오 + 가중 적정가 + plausibility band 다 답 가능**. 추가 EngineCall 금지 (DCF/멀티플 별도 호출 안 됨).
+4. `assumptions.confidence` 가 `low` 면 valuationFlags 한계 강화.
+5. 답변 본문에 14 keys 의 값 그대로 인용 + 4 방법론 표 + priceTarget 시나리오.
 
 ## 기본 검증
 
