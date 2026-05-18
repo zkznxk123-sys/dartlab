@@ -611,7 +611,7 @@ function TimelineRibbon({
 			>
 				<ChevronLeft className="size-4" />
 			</button>
-			<div className="flex-1 overflow-x-auto tiny-scroll">
+			<div className="min-w-0 flex-1 overflow-x-auto tiny-scroll">
 				<div className="flex items-stretch gap-px">
 					{periods.map((p) => {
 						const inWindow = winSet.has(p);
