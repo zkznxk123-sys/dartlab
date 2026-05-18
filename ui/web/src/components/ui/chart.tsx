@@ -152,12 +152,13 @@ export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltip
 			<div
 				ref={ref}
 				className={cn(
-					'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl',
+					// label 좌·value 우 정렬 위해 충분한 min-width + nowrap. 운영자 명시 2026-05-19.
+					'grid min-w-[11rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-3 py-2 text-xs shadow-xl',
 					className,
 				)}
 			>
 				{!nestLabel ? tooltipLabel : null}
-				<div className="grid gap-1.5">
+				<div className="grid gap-1">
 					{(payload as Array<{ dataKey?: string; name?: string; value?: number; color?: string; payload?: Record<string, unknown> }>).map(
 						(item, index) => {
 							const key = `${nameKey || item.name || item.dataKey || 'value'}`;
@@ -167,8 +168,8 @@ export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltip
 								<div
 									key={item.dataKey || index}
 									className={cn(
-										'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
-										indicator === 'dot' && 'items-center',
+										// flex-nowrap — label / value 같은 줄 양끝 정렬 보장. 너비 좁아 wrap 시 value 가 label 앞으로 가는 회귀 차단.
+										'flex w-full flex-nowrap items-center gap-2.5 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
 									)}
 								>
 									{formatter && item?.value !== undefined && item.name ? (
@@ -182,7 +183,7 @@ export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltip
 													<div
 														className={cn('shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]', {
 															'h-2.5 w-2.5': indicator === 'dot',
-															'w-1': indicator === 'line',
+															'w-1 h-3': indicator === 'line',
 															'w-0 border-[1.5px] border-dashed bg-transparent': indicator === 'dashed',
 															'my-0.5': nestLabel && indicator === 'dashed',
 														})}
@@ -195,17 +196,14 @@ export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltip
 													/>
 												)
 											)}
-											<div className={cn('flex flex-1 justify-between leading-none', nestLabel ? 'items-end' : 'items-center')}>
-												<div className="grid gap-1.5">
-													{nestLabel ? tooltipLabel : null}
-													<span className="text-muted-foreground">{itemConfig?.label || item.name}</span>
-												</div>
-												{item.value !== undefined && (
-													<span className="font-mono font-medium tabular-nums text-foreground">
-														{formatTooltipNumber(item.value as number)}
-													</span>
-												)}
-											</div>
+											<span className="min-w-0 flex-1 truncate text-left text-muted-foreground">
+												{itemConfig?.label || item.name}
+											</span>
+											{item.value !== undefined && (
+												<span className="shrink-0 text-right font-mono font-medium tabular-nums text-foreground">
+													{formatTooltipNumber(item.value as number)}
+												</span>
+											)}
 										</>
 									)}
 								</div>
@@ -251,7 +249,7 @@ export function ChartLegendContent({ className, hideIcon = false, payload, verti
 	const { config } = useChart();
 	if (!payload?.length) return null;
 	return (
-		<div className={cn('flex items-center justify-center gap-4 flex-wrap', verticalAlign === 'top' ? 'pb-3' : 'pt-3', className)}>
+		<div className={cn('flex items-center justify-center gap-4 flex-wrap', verticalAlign === 'top' ? 'pb-4' : 'pt-4 pb-2', className)}>
 			{payload.map((item) => {
 				const key = `${nameKey || item.dataKey || 'value'}`;
 				const itemConfig = getPayloadConfigFromPayload(config, item, key);

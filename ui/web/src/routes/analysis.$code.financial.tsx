@@ -22,8 +22,10 @@ import {
 	type CatalogCard,
 	type FinancialSubCategory,
 	type PackedCard,
+	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
+import { formatValue } from '@/lib/format';
 
 type SubView = FinancialSubCategory;
 
@@ -69,6 +71,63 @@ function FinancialTab() {
 		(catalog?.cards ?? []).map((c) => [c.cardKey, c]),
 	);
 
+	// Tremor 정통 — 헤더 우측 latest value + YoY Δ (% point or 비율 변화). primary 시리즈
+	// (또는 첫 비-stack 시리즈) 의 마지막 유효값과 4 분기 전 값 비교. dual-stack / multi-axis
+	// 카드는 모호하므로 표시 생략.
+	function computeHeaderMetric(spec: RechartsSpec | undefined): React.ReactNode {
+		if (!spec || spec.kind !== 'trend') return null;
+		if (spec.options?.dualStack) return null;
+		if (!spec.series?.length) return null;
+		// primary series 선택 우선순위: intent='primary' → 첫 비-stack line → series[0].
+		const primary =
+			spec.series.find((s) => s.intent === 'primary') ??
+			spec.series.find((s) => !s.stack && s.type === 'line') ??
+			spec.series[0];
+		const data = primary?.data ?? [];
+		const lastIdx = data.length - 1;
+		const last = lastIdx >= 0 ? data[lastIdx] : null;
+		// 비교 기간 — periodKind 가 quarterly 면 4 step 전 (YoY), annual 이면 1 step 전.
+		const lookback = periodKind === 'quarterly' ? 4 : 1;
+		const prevIdx = lastIdx - lookback;
+		const prev = prevIdx >= 0 ? data[prevIdx] : null;
+		if (last == null || !Number.isFinite(last as number)) return null;
+		const unit = primary?.unit ?? '';
+		const lastStr = formatValue(last as number, unit);
+		let deltaNode: React.ReactNode = null;
+		if (prev != null && Number.isFinite(prev as number)) {
+			// % 단위는 절대값 차이 (%p), 외 단위는 비율 변화 (%).
+			const isPct = unit === '%' || unit === '배' || unit === '회';
+			const delta = isPct
+				? (last as number) - (prev as number)
+				: (prev as number) !== 0
+					? ((last as number) - (prev as number)) / Math.abs(prev as number) * 100
+					: null;
+			if (delta != null && Number.isFinite(delta)) {
+				const sign = delta > 0 ? '+' : '';
+				const suffix = isPct ? (unit === '%' ? '%p' : (unit === '회' ? '회' : '배')) : '%';
+				const tone =
+					Math.abs(delta) < 0.05
+						? 'text-muted-foreground/80'
+						: delta > 0
+							? 'text-emerald-500 dark:text-emerald-400'
+							: 'text-rose-500 dark:text-rose-400';
+				deltaNode = (
+					<span className={`text-[10.5px] font-medium ${tone}`}>
+						{sign}
+						{Math.abs(delta) >= 10 ? delta.toFixed(0) : delta.toFixed(1)}
+						{suffix}
+					</span>
+				);
+			}
+		}
+		return (
+			<>
+				<span className="text-[12px] font-mono font-semibold text-foreground">{lastStr}</span>
+				{deltaNode}
+			</>
+		);
+	}
+
 	const renderCard = (p: PackedCard, cellSize: number) => {
 		const meta = cardMetaByKey[p.cardKey];
 		const spec = data?.cards?.[p.cardKey];
@@ -85,6 +144,7 @@ function FinancialTab() {
 		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
 		const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight);
 		const kind = spec?.kind ?? p.kind;
+		const headerMetric = computeHeaderMetric(spec);
 		return (
 			<CardShell
 				title={title}
@@ -93,6 +153,7 @@ function FinancialTab() {
 				rowSpan={p.h}
 				kind={kind}
 				footer={footer}
+				headerExtra={headerMetric}
 			>
 				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
 			</CardShell>
@@ -111,26 +172,34 @@ function FinancialTab() {
 		},
 		{
 			title: '영업의 선순환',
-			subtitle: '마진·수익성·비용·활동성·이익품질. 본업이 진짜로 돈을 벌고 있는가.',
+			subtitle: '마진·수익성·자본효율·DuPont·ROIC·R&D — 본업이 진짜로 돈을 벌고 있는가.',
 			keys: new Set([
 				'marginTrend',
 				'returnTrend',
+				'dupont',
+				'roic',
 				'costStructureTrend',
 				'turnoverTrend',
+				'rndIntensity',
+				'taxWalk',
 				'growthYoy',
 				'workingCapitalDays',
 				'earningsQuality',
-				'riskAnomaly',
+				'sloanAccruals',
 			]),
 		},
 		{
 			title: '현금 흐름 · 재무 안정',
-			subtitle: '회계이익 vs 현금. 부채 안전판. 단기 지급능력. 자본구조 안정성.',
+			subtitle: '현금일생·자본배분·순차입금·부도 위험 (Altman Z·이자보상). 진짜 위험은 어디.',
 			keys: new Set([
 				'cashflowSigned',
 				'fcfTrend',
+				'capitalAllocation',
+				'netDebt',
 				'stabilityRatio',
 				'liquidityTrend',
+				'altmanZ',
+				'riskAnomaly',
 				'leverageTrend',
 				'interestCoverage',
 			]),

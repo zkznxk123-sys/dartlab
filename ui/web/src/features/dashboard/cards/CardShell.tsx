@@ -50,15 +50,16 @@ export function CardShell({
 		>
 			<CardHeader
 				className={cn(
-					'flex flex-row items-center justify-between gap-2 px-2.5 pt-1.5 pb-1 shrink-0 border-b border-border/40',
-					isHero ? 'h-[32px]' : 'h-[26px]',
+					// Tremor 정통 — header 우측에 metric slot. title 가독성 강화 (12px / 13.5px).
+					'flex flex-row items-baseline justify-between gap-3 px-3 pt-2 pb-1.5 shrink-0 border-b border-border/40',
+					isHero ? 'h-[38px]' : 'h-[32px]',
 				)}
 			>
-				<div className="flex min-w-0 items-center gap-1.5">
+				<div className="flex min-w-0 items-baseline gap-1.5">
 					<CardTitle
 						className={cn(
-							'truncate font-medium leading-tight tracking-tight text-foreground/90',
-							isHero ? 'text-[13px]' : 'text-[11.5px]',
+							'truncate font-semibold leading-tight tracking-tight text-foreground',
+							isHero ? 'text-[13.5px]' : 'text-[12px]',
 						)}
 					>
 						{title}
@@ -70,7 +71,7 @@ export function CardShell({
 									<button
 										type="button"
 										aria-label="해석 도움말"
-										className="shrink-0 text-muted-foreground/70 transition-colors hover:text-foreground"
+										className="shrink-0 self-center text-muted-foreground/60 transition-colors hover:text-foreground"
 									>
 										<HelpCircle className="size-3" />
 									</button>
@@ -86,11 +87,13 @@ export function CardShell({
 						</TooltipProvider>
 					)}
 				</div>
-				{headerExtra}
+				{headerExtra && (
+					<div className="flex shrink-0 items-baseline gap-2 tabular-nums">{headerExtra}</div>
+				)}
 			</CardHeader>
-			<CardContent className="min-h-0 flex-1 px-2 pb-1 pt-1.5">{children}</CardContent>
+			<CardContent className="min-h-0 flex-1 px-2 pb-2 pt-1.5">{children}</CardContent>
 			{footer && (
-				<div className="border-t border-border/40 bg-muted/30 px-2.5 py-1 text-[10px] text-muted-foreground tabular-nums">
+				<div className="mt-1 border-t border-border/40 bg-muted/30 px-2.5 py-1.5 text-[10px] text-muted-foreground tabular-nums">
 					{footer}
 				</div>
 			)}
