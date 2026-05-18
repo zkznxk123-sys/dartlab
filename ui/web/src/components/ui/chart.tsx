@@ -172,40 +172,56 @@ export const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltip
 										'flex w-full flex-nowrap items-center gap-2.5 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
 									)}
 								>
-									{formatter && item?.value !== undefined && item.name ? (
-										formatter(item.value as never, item.name as never, item as never, index, item.payload as never)
-									) : (
-										<>
-											{itemConfig?.icon ? (
-												<itemConfig.icon />
-											) : (
-												!hideIndicator && (
-													<div
-														className={cn('shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]', {
-															'h-2.5 w-2.5': indicator === 'dot',
-															'w-1 h-3': indicator === 'line',
-															'w-0 border-[1.5px] border-dashed bg-transparent': indicator === 'dashed',
-															'my-0.5': nestLabel && indicator === 'dashed',
-														})}
-														style={
-															{
-																'--color-bg': indicatorColor,
-																'--color-border': indicatorColor,
-															} as React.CSSProperties
-														}
-													/>
-												)
-											)}
-											<span className="min-w-0 flex-1 truncate text-left text-muted-foreground">
-												{itemConfig?.label || item.name}
-											</span>
-											{item.value !== undefined && (
-												<span className="shrink-0 text-right font-mono font-medium tabular-nums text-foreground">
-													{formatTooltipNumber(item.value as number)}
+									{(() => {
+										// formatter 가 있어도 indicator + 라벨좌·값우 layout 으로 정렬한다.
+										// recharts convention: formatter return [content, name]. content=값, name=라벨.
+										let displayLabel: React.ReactNode = itemConfig?.label || item.name;
+										let displayValue: React.ReactNode =
+											item.value !== undefined ? formatTooltipNumber(item.value as number) : null;
+										if (formatter && item?.value !== undefined && item.name) {
+											const r = formatter(item.value as never, item.name as never, item as never, index, item.payload as never);
+											if (Array.isArray(r)) {
+												// [content, name] — content 가 값(이미 단위 포맷), name 이 라벨.
+												if (r[0] !== undefined) displayValue = r[0] as React.ReactNode;
+												if (r[1] !== undefined) displayLabel = r[1] as React.ReactNode;
+											} else if (r !== undefined && r !== null) {
+												// 단순 ReactNode 반환 — 값 자리에 박음.
+												displayValue = r as React.ReactNode;
+											}
+										}
+										return (
+											<>
+												{itemConfig?.icon ? (
+													<itemConfig.icon />
+												) : (
+													!hideIndicator && (
+														<div
+															className={cn('shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]', {
+																'h-2.5 w-2.5': indicator === 'dot',
+																'w-1 h-3': indicator === 'line',
+																'w-0 border-[1.5px] border-dashed bg-transparent': indicator === 'dashed',
+																'my-0.5': nestLabel && indicator === 'dashed',
+															})}
+															style={
+																{
+																	'--color-bg': indicatorColor,
+																	'--color-border': indicatorColor,
+																} as React.CSSProperties
+															}
+														/>
+													)
+												)}
+												<span className="min-w-0 flex-1 truncate text-left text-muted-foreground">
+													{displayLabel}
 												</span>
-											)}
-										</>
-									)}
+												{displayValue != null && (
+													<span className="shrink-0 text-right font-mono font-medium tabular-nums text-foreground">
+														{displayValue}
+													</span>
+												)}
+											</>
+										);
+									})()}
 								</div>
 							);
 						},
