@@ -13,6 +13,7 @@ from dartlab.viz.catalog.lifecycle import LIFECYCLE_CARDS, LIFECYCLE_KEYS
 from dartlab.viz.catalog.macro import MACRO_CARDS, MACRO_KEYS
 from dartlab.viz.catalog.peer import PEER_CARDS, PEER_KEYS
 from dartlab.viz.catalog.portfolio import PORTFOLIO_CARDS, PORTFOLIO_KEYS
+from dartlab.viz.catalog.quant import QUANT_CARDS, QUANT_KEYS
 from dartlab.viz.catalog.valuation import VALUATION_CARDS, VALUATION_KEYS
 from dartlab.viz.schema import CatalogEntry
 
@@ -38,6 +39,7 @@ register(GOVERNANCE_CARDS)
 register(PEER_CARDS)
 register(LIFECYCLE_CARDS)
 register(MACRO_CARDS)
+register(QUANT_CARDS)
 
 
 TAB_KEYS: dict[str, list[str]] = {
@@ -50,6 +52,7 @@ TAB_KEYS: dict[str, list[str]] = {
         + list(LIFECYCLE_KEYS)
         + list(MACRO_KEYS)
     ),
+    "quant": list(QUANT_KEYS),
     "viewer": [],
 }
 """2 탭 (financial + viewer) → 카드 합집합. 옛 6 탭 (portfolio/valuation/
@@ -94,6 +97,8 @@ __all__ = [
     "PEER_KEYS",
     "PORTFOLIO_CARDS",
     "PORTFOLIO_KEYS",
+    "QUANT_CARDS",
+    "QUANT_KEYS",
     "TAB_KEYS",
     "VALUATION_CARDS",
     "VALUATION_KEYS",

@@ -45,7 +45,7 @@ from dartlab.viz.schema import CatalogEntry
 # Metric 3×1 (KPI 핵심) / Accent 2×1 (KPI 확장 / 6 개 한 줄) / Strip 4×3.
 # 모든 size 12 약수 (1,2,3,4,6,12).
 KIND_DEFAULT_TIER: dict[str, dict[str, Any]] = {
-    "kpiTile": {"cs": 3, "rs": 1, "variance": ["2x1", "4x1", "6x1", "12x1"]},
+    "kpiTile": {"cs": 3, "rs": 1, "variance": ["2x1", "4x1", "6x1", "6x2", "12x1", "12x2"]},
     "diffView": {"cs": 4, "rs": 2, "variance": ["3x2", "6x2", "12x2"]},
     "gauge": {"cs": 3, "rs": 3, "variance": ["4x3", "6x3"]},
     "topList": {"cs": 4, "rs": 3, "variance": ["3x3", "6x3", "12x3"]},

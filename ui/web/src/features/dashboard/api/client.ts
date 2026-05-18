@@ -144,9 +144,10 @@ export interface DashboardResponse {
 	order: string[];
 }
 
-// 기업분석 단일 탭 + 공시뷰어. 옛 6 탭 (portfolio/valuation/governance/peer/
-// lifecycle/macro) 은 financial 안의 분석 방법론별 view 로 흡수.
-export type AnalysisTab = 'financial' | 'viewer';
+// 기업분석 3 탭 (financial / quant / viewer). 옛 6 탭 (portfolio/valuation/
+// governance/peer/lifecycle/macro) 은 financial 안의 분석 방법론별 view 로 흡수.
+// quant = 가격 시계열 + 기술/모멘텀/변동성/베타/예측/백테스트 (재무 알파 X).
+export type AnalysisTab = 'financial' | 'quant' | 'viewer';
 
 // 재무제표분석 7 분석 방법론 — 같은 회사를 그레이엄·린치·S&P·Sloan 식
 // 다른 학파 시각으로 보는 lens. legacy 6 (performance/...) 은 redirect 용.

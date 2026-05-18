@@ -391,6 +391,24 @@ def _buildKindSpecView(
             base_view["series"] = result["series"]
     elif adapter_name == "distressEnsembleGauge":
         base_view.update(adapters.buildDistressEnsembleGauge(company))
+    # quant 탭 adapter — stockCode 만 받음 (가격 데이터는 quant 엔진이 자체 fetch).
+    elif adapter_name == "quantPriceTrend":
+        result = adapters.buildQuantPriceTrend(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "quantVerdictKpi":
+        base_view["tiles"] = adapters.buildQuantVerdictKpi(stockCode).get("tiles", [])
+    elif adapter_name == "quantMomentumKpi":
+        base_view["tiles"] = adapters.buildQuantMomentumKpi(stockCode).get("tiles", [])
+    elif adapter_name == "quantVolatilityKpi":
+        base_view["tiles"] = adapters.buildQuantVolatilityKpi(stockCode).get("tiles", [])
+    elif adapter_name == "quantBetaKpi":
+        base_view["tiles"] = adapters.buildQuantBetaKpi(stockCode).get("tiles", [])
+    elif adapter_name == "quantForecastKpi":
+        base_view["tiles"] = adapters.buildQuantForecastKpi(stockCode).get("tiles", [])
+    elif adapter_name == "quantComingSoon":
+        label = (spec or {}).get("label", "준비 중")
+        base_view["tiles"] = adapters.buildQuantComingSoon(label).get("tiles", [])
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass

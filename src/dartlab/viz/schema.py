@@ -173,9 +173,10 @@ class CatalogEntry(TypedDict, total=False):
     xlSpan: Literal[1, 2, 3]
     layout: LayoutSpec
     help: str
-    # 기업분석 단일 탭. 옛 8 탭 (portfolio/valuation/governance/peer/lifecycle/
-    # macro/viewer) 은 financial 안의 관점별 view 에 흡수.
-    tab: Literal["financial", "viewer"]
+    # 기업분석 3 탭. 옛 8 탭 (portfolio/valuation/governance/peer/lifecycle/
+    # macro) 은 financial 안의 관점별 view 에 흡수.
+    # quant = 가격 시계열 + 기술/팩터/리스크/예측 (재무 알파 X — financial owner).
+    tab: Literal["financial", "quant", "viewer"]
     # 재무제표분석 view = 7 가지 *분석 방법론* (lens). 같은 회사를 그레이엄·
     # 린치·S&P·Sloan 같은 서로 다른 학파 시각으로 본다. 객체 분류도, 6 막
     # 쪼개기도 아님.

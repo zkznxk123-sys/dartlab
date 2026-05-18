@@ -1395,4 +1395,392 @@ __all__ = [
     "buildSnowflakeKpi",
     "buildSnowflakeRadar",
     "buildTopListFromFlags",
+    # quant 탭 adapter 7 개 (가격·기술·모멘텀·변동성·베타·예측·placeholder).
+    "buildQuantPriceTrend",
+    "buildQuantVerdictKpi",
+    "buildQuantMomentumKpi",
+    "buildQuantVolatilityKpi",
+    "buildQuantBetaKpi",
+    "buildQuantForecastKpi",
+    "buildQuantComingSoon",
 ]
+
+
+# ─────────────────────────────────────────────────────────────
+# quant 탭 어댑터 — dartlab.quant 엔진 axis 산출물 → KPI tile / trend.
+# stockCode 직접 받음 (company.rawFinance 와 무관, 가격 데이터 자체 fetch).
+# 실패 (network · 데이터 부족) 시 빈 spec → frontend 에서 "데이터 없음" 표시.
+# ─────────────────────────────────────────────────────────────
+
+
+def _safeQuantCall(modulePath: str, fnName: str, stockCode: str, **kwargs: Any) -> Any:
+    """quant 모듈 함수 안전 호출. import / 실행 실패 → None."""
+    try:
+        mod = importlib.import_module(modulePath)
+    except ImportError:
+        return None
+    fn = getattr(mod, fnName, None)
+    if fn is None:
+        return None
+    try:
+        return fn(stockCode, **kwargs)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def buildQuantPriceTrend(stockCode: str) -> dict[str, Any]:
+    """최근 1 년 종가 + 거래량 + SMA(20)/SMA(60) overlay trend spec.
+
+    gather 자동 fetch (Naver/Yahoo). 데이터 부족 시 빈 series.
+    """
+    from datetime import date, timedelta
+
+    start = (date.today() - timedelta(days=400)).isoformat()
+    try:
+        from dartlab.quant.signal.momentum import fetchOhlcv  # type: ignore[import-untyped]
+    except ImportError:
+        return {"categories": [], "series": []}
+    try:
+        ohlcv = fetchOhlcv(stockCode, start=start)
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+
+    if ohlcv is None:
+        return {"categories": [], "series": []}
+    try:
+        rows = ohlcv.to_dicts() if hasattr(ohlcv, "to_dicts") else list(ohlcv)
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    if not rows:
+        return {"categories": [], "series": []}
+    # 최근 252 거래일만 (1 년).
+    rows = rows[-252:]
+    categories: list[str] = []
+    closes: list[float | None] = []
+    volumes: list[float | None] = []
+    for r in rows:
+        d = r.get("date") or r.get("Date")
+        c = r.get("close") or r.get("Close")
+        v = r.get("volume") or r.get("Volume")
+        categories.append(str(d) if d is not None else "")
+        closes.append(_toFloat(c))
+        volumes.append(_toFloat(v))
+    # SMA overlay.
+    def _sma(arr: list[float | None], window: int) -> list[float | None]:
+        out: list[float | None] = []
+        buf: list[float] = []
+        for v in arr:
+            if v is not None:
+                buf.append(v)
+                if len(buf) > window:
+                    buf.pop(0)
+                out.append(sum(buf) / len(buf) if len(buf) == window else None)
+            else:
+                out.append(None)
+        return out
+
+    sma20 = _sma(closes, 20)
+    sma60 = _sma(closes, 60)
+    return {
+        "categories": categories,
+        "series": [
+            {
+                "key": "close",
+                "label": "종가",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": closes,
+            },
+            {
+                "key": "sma20",
+                "label": "SMA(20)",
+                "color": "#10b981",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": sma20,
+            },
+            {
+                "key": "sma60",
+                "label": "SMA(60)",
+                "color": "#f59e0b",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": sma60,
+            },
+            {
+                "key": "volume",
+                "label": "거래량",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "주",
+                "type": "bar",
+                "axis": "right",
+                "data": volumes,
+            },
+        ],
+    }
+
+
+def _kpiTile(label: str, value: Any, *, unit: str = "", intent: str = "primary", subtitle: str = "") -> dict[str, Any]:
+    """간이 KpiTile dict 생성."""
+    return {
+        "label": label,
+        "value": _toFloat(value),
+        "prev": None,
+        "unit": unit,
+        "intent": intent,
+        "subtitle": subtitle,
+    }
+
+
+def buildQuantVerdictKpi(stockCode: str) -> dict[str, Any]:
+    """quant.verdict → 6 tile KPI (점수·판정·RSI·ADX·BB위치·SMA 돌파)."""
+    result = _safeQuantCall("dartlab.quant.screen.axTechnical", "calcVerdict", stockCode)
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"tiles": []}
+    verdict = str(result.get("verdict", "—"))
+    intentByVerdict = {
+        "강세": "positive",
+        "중립": "neutral",
+        "약세": "negative",
+    }
+    score = result.get("score")
+    rsi = result.get("rsi")
+    adx = result.get("adx")
+    bb = result.get("bbPosition")
+    aboveSma20 = result.get("aboveSma20")
+    aboveSma60 = result.get("aboveSma60")
+    tiles = [
+        _kpiTile("판단", score, unit="점", intent=intentByVerdict.get(verdict, "neutral"), subtitle=verdict),
+        _kpiTile("RSI(14)", rsi, unit="%", intent="primary", subtitle="과매수 70+ / 과매도 30-"),
+        _kpiTile("ADX", adx, unit="%", intent="primary", subtitle="추세 강도 25+ 강함"),
+        _kpiTile("BB 위치", bb, unit="%", intent="neutral", subtitle="0=하단 100=상단"),
+        _kpiTile(
+            "SMA20 돌파",
+            1.0 if aboveSma20 else 0.0,
+            unit="",
+            intent="positive" if aboveSma20 else "negative",
+            subtitle="단기 추세",
+        ),
+        _kpiTile(
+            "SMA60 돌파",
+            1.0 if aboveSma60 else 0.0,
+            unit="",
+            intent="positive" if aboveSma60 else "negative",
+            subtitle="중기 추세",
+        ),
+    ]
+    return {"tiles": tiles}
+
+
+def buildQuantMomentumKpi(stockCode: str) -> dict[str, Any]:
+    """quant.momentum → 4 tile KPI (12-1m or 6-1m · TS 1m · 52w high · streak).
+
+    데이터 252 일 미만일 때 momentum12_1=None → 6-1m fallback. crashRisk 는
+    문자열 ("low"/"high") · streak/streakDirection 가 추가 정보.
+    """
+    result = _safeQuantCall("dartlab.quant.signal.momentum", "calcMomentum", stockCode)
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"tiles": []}
+    mom12_1 = result.get("momentum12_1")
+    mom6_1 = result.get("momentum6_1")
+    # momentum12_1 우선, None 이면 6-1 fallback.
+    momPrimary = mom12_1 if mom12_1 is not None else mom6_1
+    momLabel = "12-1m 모멘텀" if mom12_1 is not None else "6-1m 모멘텀 (fallback)"
+    ts1m = _drill(result, "tsMomentum.1m.return")
+    ts1mSignal = str(_drill(result, "tsMomentum.1m.signal") or "—")
+    high52 = result.get("highRatio52w")
+    streak = result.get("streak")
+    streakDir = str(result.get("streakDirection") or "")
+    verdict = str(result.get("momentumVerdict") or "—")
+    intentByVerdict = {
+        "strong_bullish": "positive",
+        "bullish": "positive",
+        "neutral": "neutral",
+        "bearish": "negative",
+        "strong_bearish": "negative",
+    }
+    intentMom = intentByVerdict.get(verdict, "primary")
+    tiles = [
+        _kpiTile(
+            momLabel,
+            momPrimary * 100 if isinstance(momPrimary, (int, float)) else momPrimary,
+            unit="%",
+            intent=intentMom,
+            subtitle=f"verdict={verdict}",
+        ),
+        _kpiTile(
+            "1m 수익률 (TS)",
+            ts1m * 100 if isinstance(ts1m, (int, float)) else ts1m,
+            unit="%",
+            intent="primary",
+            subtitle=f"signal={ts1mSignal}",
+        ),
+        _kpiTile(
+            "52주 신고가 비율",
+            high52 * 100 if isinstance(high52, (int, float)) else high52,
+            unit="%",
+            intent="primary",
+            subtitle="95%+ 강한 추세 (George-Hwang)",
+        ),
+        _kpiTile(
+            f"연속 {streakDir or '추세'}",
+            streak,
+            unit="일",
+            intent="positive" if streakDir == "상승" else ("negative" if streakDir == "하락" else "neutral"),
+            subtitle="동일 방향 연속 일수",
+        ),
+    ]
+    return {"tiles": tiles}
+
+
+def buildQuantVolatilityKpi(stockCode: str) -> dict[str, Any]:
+    """quant.volatility → 4 tile KPI (20일·60일 RV · HAR-RV · GARCH · 레짐)."""
+    result = _safeQuantCall("dartlab.quant.risk.volatility", "calcVolatility", stockCode)
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"tiles": []}
+    rv20 = result.get("realizedVol_20d")
+    rv60 = result.get("realizedVol_60d")
+    harRV = result.get("harRV")
+    garch = result.get("garchVol")
+    regime = str(result.get("volRegime") or "—")
+    shape = str(result.get("volCurveShape") or "")
+    intentByRegime = {"low": "positive", "normal": "neutral", "high": "negative", "extreme": "negative"}
+    tiles = [
+        _kpiTile(
+            "RV 20일 (연환산)",
+            rv20 * 100 if isinstance(rv20, (int, float)) and rv20 < 5 else rv20,
+            unit="%",
+            intent=intentByRegime.get(regime, "primary"),
+            subtitle=f"regime={regime}",
+        ),
+        _kpiTile(
+            "RV 60일",
+            rv60 * 100 if isinstance(rv60, (int, float)) and rv60 < 5 else rv60,
+            unit="%",
+            intent="primary",
+            subtitle=f"커브={shape or '—'}",
+        ),
+        _kpiTile(
+            "HAR-RV",
+            harRV * 100 if isinstance(harRV, (int, float)) and harRV < 5 else harRV,
+            unit="%",
+            intent="accent",
+            subtitle="Heterogeneous AR (1d+5d+22d)",
+        ),
+        _kpiTile(
+            "GARCH(1,1)",
+            garch * 100 if isinstance(garch, (int, float)) and garch < 5 else garch,
+            unit="%",
+            intent="primary",
+            subtitle="조건부 — 다음날 예측",
+        ),
+    ]
+    return {"tiles": tiles}
+
+
+def buildQuantBetaKpi(stockCode: str) -> dict[str, Any]:
+    """quant.beta → 4 tile KPI (β · R² · CAPM 기대 · 상대강도)."""
+    result = _safeQuantCall("dartlab.quant.screen.axTechnical", "calcBeta", stockCode)
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"tiles": []}
+    beta = result.get("value")
+    r2 = result.get("r2")
+    capm = result.get("capmExpected")
+    rs = result.get("relativeStrength")
+    interp = str(result.get("interpretation", ""))
+    tiles = [
+        _kpiTile("β", beta, unit="배", intent="primary", subtitle=interp[:30] if interp else "시장 민감도"),
+        _kpiTile("R²", r2, unit="%", intent="neutral", subtitle="시장 설명력"),
+        _kpiTile("CAPM 기대", capm, unit="%", intent="accent", subtitle="rf + β × 시장프리미엄"),
+        _kpiTile("상대강도", rs, unit="배", intent="primary", subtitle="벤치마크 대비"),
+    ]
+    return {"tiles": tiles}
+
+
+def buildQuantForecastKpi(stockCode: str) -> dict[str, Any]:
+    """quant.forecast → 4 tile KPI (point · CI 폭 · model · 정상성).
+
+    horizon=5 일 일별 수익률 예측. forecastTable: [{date, point, lower, upper, ...}].
+    누적은 합성. 90% Conformal interval (predictive coverage 보장).
+    """
+    result = _safeQuantCall(
+        "dartlab.quant.benchmark.forecast", "forecastReturns", stockCode, horizon=5
+    )
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"tiles": []}
+    table = result.get("forecastTable") or []
+    halfWidth = result.get("conformalHalfWidth")
+    model = str(result.get("modelChosen", "auto"))
+    pAdf = result.get("pAdfStationary")
+    summary = result.get("summary") or {}
+    # 누적 수익률 — table 의 일별 point 합산 (log-return 가정이면 합, simple 이면 곱-1).
+    # summary 에 있으면 우선 사용.
+    cumPoint = summary.get("cumulativeReturn") if isinstance(summary, dict) else None
+    if cumPoint is None and isinstance(table, list):
+        try:
+            pts = [_toFloat(row.get("point") if isinstance(row, dict) else None) for row in table]
+            valid = [p for p in pts if p is not None]
+            cumPoint = sum(valid) if valid else None
+        except Exception:  # noqa: BLE001
+            cumPoint = None
+    pointFloat = _toFloat(cumPoint)
+    intent = (
+        "positive" if pointFloat is not None and pointFloat > 0
+        else "negative" if pointFloat is not None and pointFloat < 0
+        else "neutral"
+    )
+    tiles = [
+        _kpiTile(
+            "5일 누적 예측",
+            cumPoint * 100 if isinstance(cumPoint, (int, float)) and abs(cumPoint) < 1 else cumPoint,
+            unit="%",
+            intent=intent,
+            subtitle=f"model={model}",
+        ),
+        _kpiTile(
+            "90% CI 반폭",
+            halfWidth * 100 if isinstance(halfWidth, (int, float)) and halfWidth < 1 else halfWidth,
+            unit="%",
+            intent="accent",
+            subtitle="Conformal predictive coverage 90%",
+        ),
+        _kpiTile(
+            "정상성 p-value",
+            pAdf,
+            unit="",
+            intent="primary",
+            subtitle="ADF — 0.05 미만이면 정상",
+        ),
+        _kpiTile(
+            "예측 모델",
+            len(result.get("modelsConsidered") or []),
+            unit="개",
+            intent="neutral",
+            subtitle=f"선택={model}",
+        ),
+    ]
+    return {"tiles": tiles}
+
+
+def buildQuantComingSoon(label: str = "준비 중") -> dict[str, Any]:
+    """placeholder KPI 1 tile — 미구현 카드 graceful 빈 표시."""
+    return {
+        "tiles": [
+            {
+                "label": label,
+                "value": None,
+                "prev": None,
+                "unit": "",
+                "intent": "neutral",
+                "subtitle": "엔진 wiring 진행 중 — 다음 commit 에서 실값",
+            }
+        ]
+    }

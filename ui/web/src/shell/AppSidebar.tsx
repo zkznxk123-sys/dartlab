@@ -11,6 +11,7 @@ import {
 	FileText,
 	Filter,
 	LayoutDashboard,
+	LineChart,
 	MessageSquare,
 	MessageSquarePlus,
 	MoreHorizontal,
@@ -223,20 +224,22 @@ function DashboardNav() {
 	const isFinancial = !!code && pathname.startsWith(`/analysis/${code}/financial`);
 	// v3-r6 — view 없으면 OVERVIEW_KEYS curated 노출 (재무분석 1 view).
 	const activeSubView = isFinancial ? (search?.view ?? null) : null;
+	const isQuant = !!code && pathname.startsWith(`/analysis/${code}/quant`);
 	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
 	const isScreener = pathname.startsWith('/screener');
 
-	// 기업분석 그룹 — 단일 기업 심층 분석. 2 항목 (재무제표분석 / 공시뷰어).
+	// 기업분석 그룹 — 단일 기업 심층 분석. 3 항목 (재무제표분석 / 퀀트 / 공시뷰어).
 	const corpItems = [
-		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial },
-		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer },
+		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial' },
+		{ id: 'quant', title: '퀀트', icon: LineChart, isActive: isQuant, route: '/analysis/$code/quant' },
+		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer' },
 	] as const;
 
 	const renderCorpButton = (t: (typeof corpItems)[number]) =>
 		code ? (
 			<SidebarMenuButton asChild isActive={t.isActive} tooltip={t.title}>
 				<Link
-					to={t.id === 'financial' ? '/analysis/$code/financial' : '/analysis/$code/viewer'}
+					to={t.route}
 					params={{ code }}
 					search={{ period: 'quarterly' }}
 				>
