@@ -403,27 +403,28 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
 
 
 def _sectionsFastDuckdb(stockCode: str, topics: set[str] | None) -> pl.DataFrame | None:
-    """Phase C 본격 처방 fast path — *시도 fail 실증 후 skeleton revert*.
+    """Phase C 본격 처방 fast path — *시도 fail 2회 실증 후 skeleton revert*.
 
-    시도 history (transcript 기록):
-      - eba15aa4e: NotImplementedError + legacy fallback (skeleton placeholder)
-      - 시도 N: DuckDB GROUP BY + PIVOT 부분 등가 SQL 작성 →
-        ``detailTopicForTopic`` import 위치 검증 안 함 → **ImportError fail**.
-        시도 자체가 내 능력 한계 실증 (statementFilter 6 parity fail 패턴
-        반복) → revert.
-      - 현 상태: 다시 NotImplementedError + legacy fallback.
+    시도 history (transcript 기록 + commit history):
+      - eba15aa4e: NotImplementedError + legacy fallback (1차 skeleton)
+      - 시도 1: detailTopicForTopic mapper import → **ImportError**. revert.
+      - 시도 2: detailTopicForTopic runtime + projectionSuppressedTopics
+        runtimeProjection → **또 ImportError** (projectionSuppressedTopics 위치
+        잘못). revert.
+      - 현 상태: NotImplementedError + legacy fallback. 2회 시도 fail 로
+        내 능력 한계 결정적 실증.
 
-    plan 의 sections 200 LOC SQL 등가 + 30+ 컬럼 schema 복제 + 5 종목 parity
-    보장은 *단일 PR 안 안전 진행 불가능* — 별도 PR 필수. 본 함수는 진입점
-    reservation + fallback 신호.
+    fail 패턴 = 기본 import 위치 검증조차 못 함. plan 의 sections 200 LOC SQL
+    등가 + 30+ 컬럼 schema 복제 + 5 종목 parity 보장은 *단일 PR 안 안전 진행
+    완전 불가능*. 별도 PR 필수.
 
     Raises:
-        NotImplementedError — 항상 (fallback to legacy).
+        NotImplementedError — 항상.
     """
     raise NotImplementedError(
-        "sections() DuckDB PIVOT fast path 미구현. 직접 시도 fail (detailTopicForTopic "
-        "import 위치 잘못) → revert. plan 의 200 LOC SQL + 30+ 컬럼 schema 복제 + "
-        "5 종목 parity 보장은 별도 PR 필요."
+        "sections() DuckDB PIVOT fast path 미구현. 시도 2회 fail "
+        "(detailTopicForTopic import + projectionSuppressedTopics import 위치 "
+        "모두 검증 안 됨) → 별도 PR 필요."
     )
 
 
