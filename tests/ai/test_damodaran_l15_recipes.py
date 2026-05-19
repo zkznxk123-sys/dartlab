@@ -461,7 +461,8 @@ def testDamodaranIndexIsEntrySkillForAnalysisSystem() -> None:
 
 
 def testDamodaranErpUpdaterTargetsReferenceData() -> None:
-    script = (REPO_ROOT / "scripts" / "data" / "updateDamodaranERP.py").read_text(encoding="utf-8")
+    # scripts/ 폴더 폐기 (CLAUDE.md noScriptsDir 룰) — .github/scripts/sync/ 로 이전.
+    script = (REPO_ROOT / ".github" / "scripts" / "sync" / "updateDamodaranERP.py").read_text(encoding="utf-8")
 
     assert '"reference" / "data" / "damodaranDefaults.json"' in script
     assert '"core" / "data" / "damodaranDefaults.json"' not in script

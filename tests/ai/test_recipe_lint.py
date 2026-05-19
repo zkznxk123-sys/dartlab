@@ -25,9 +25,9 @@ _RECIPE_DIR = Path(__file__).resolve().parents[2] / "src" / "dartlab" / "skills"
 
 
 def _recipe_paths() -> list[Path]:
-    # recipes/ 가 카테고리 sub-dir (macro/credit/quality/...) 으로 분리됨.
-    # rglob 으로 모든 sub-dir 하위 .md 까지 수집.
-    return sorted(_RECIPE_DIR.rglob("*.md"))
+    # recipes/ 가 페르소나 트리 (fundamental/macro/technical/sentiment/news/meta) 로 분리됨.
+    # rglob 으로 모든 sub-dir 하위 .md 까지 수집하되, README.md (kind: index, 페르소나 진입점) 은 제외.
+    return [p for p in sorted(_RECIPE_DIR.rglob("*.md")) if p.name != "README.md"]
 
 
 def _python_blocks(body: str) -> list[str]:

@@ -3,7 +3,7 @@ id: recipes.news.README
 title: News 페르소나 — 미커버 (의도적)
 purpose: 뉴스·공시 본문·외부 텍스트 페르소나는 현재 dartlab 에서 미커버. 외부 AI 페르소나 트렌드와 비교 메시지 자리.
 category: recipes
-kind: index
+kind: curated
 status: published
 whenToUse:
   - 뉴스 분석 페르소나 커버리지 확인

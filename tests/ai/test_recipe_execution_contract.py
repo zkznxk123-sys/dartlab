@@ -13,10 +13,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SPECS = REPO_ROOT / "src" / "dartlab" / "skills" / "specs"
 
 KEY_RECIPE_PATHS = [
-    SPECS / "recipes" / "incubator" / "forensics" / "index.md",
-    SPECS / "recipes" / "incubator" / "forensics" / "deepDive.md",
-    SPECS / "recipes" / "valuation" / "damodaran" / "index.md",
-    SPECS / "recipes" / "valuation" / "damodaran" / "deepDive.md",
+    SPECS / "recipes" / "fundamental" / "quality" / "forensics" / "index.md",
+    SPECS / "recipes" / "fundamental" / "quality" / "forensics" / "deepDive.md",
+    SPECS / "recipes" / "fundamental" / "valuation" / "damodaran" / "index.md",
+    SPECS / "recipes" / "fundamental" / "valuation" / "damodaran" / "deepDive.md",
 ]
 
 
