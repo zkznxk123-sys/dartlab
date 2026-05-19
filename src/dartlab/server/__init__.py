@@ -86,6 +86,19 @@ async def _prewarmOauthCodexModels() -> None:
         logger.debug("oauth-codex models prewarm 실패", exc_info=exc)
 
 
+async def _prewarmVizCatalog() -> None:
+    """viz catalog cold import (quant/finance/portfolio... 8 도메인) 을 startup 으로 흡수.
+
+    `/api/viz/layout/quant/{stockCode}` 첫 호출 시 dartlab.viz.catalog import chain
+    이 ~30s + 가 걸려 frontend useQuery timeout → 퀀트 탭 스피너 무한. background
+    thread 로 미리 import 시켜두면 사용자 첫 화면 진입 시 import cache hit.
+    """
+    try:
+        await asyncio.to_thread(lambda: __import__("dartlab.viz.layout", fromlist=["planTabLayout"]))
+    except (ImportError, OSError, RuntimeError, ValueError) as exc:
+        logger.debug("viz catalog prewarm 실패", exc_info=exc)
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """앱 수명주기 관리 -- Ollama preload, oauth-codex models prewarm, 룸 생성/정리."""
@@ -94,6 +107,8 @@ async def lifespan(_: FastAPI):
     # 회귀 가드: 과거 secret_store prewarm 은 잘못된 DPAPI 가설 기반이라 제거됨.
     # 이번 prewarm 은 측정 기반 (cold availableModels() = 43s 검증).
     models_prewarm_task = asyncio.create_task(_prewarmOauthCodexModels())
+    # viz catalog cold import — quant 탭 진입 시 useQuery 30s timeout 사고 차단.
+    viz_prewarm_task = asyncio.create_task(_prewarmVizCatalog())
     preload_task = asyncio.create_task(_preloadOllamaOnce()) if _should_preload_ollama() else None
 
     # 채널 모드: 협업 룸 자동 생성 + 백그라운드 정리
@@ -123,6 +138,10 @@ async def lifespan(_: FastAPI):
             models_prewarm_task.cancel()
         with suppress(asyncio.CancelledError):
             await models_prewarm_task
+        if not viz_prewarm_task.done():
+            viz_prewarm_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await viz_prewarm_task
 
 
 # dartlab logger 초기화 후 tool 진행 라인을 SSE 로 흘리기 위한 capture 설치.
