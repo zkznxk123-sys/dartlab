@@ -15,8 +15,8 @@
 
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2 } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, Minimize2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -607,10 +607,32 @@ function ViewerTab() {
 		return s;
 	}, [sectionsOwn]);
 
+	// 전체보기 토글 — TOC + 앱 chrome 숨김, 본문 viewport 100%.
+	// fixed inset-0 z-50 로 외부 레이아웃 덮음 (부모 레이아웃 손대지 않음). ESC 로 복귀.
+	const [isFullscreen, setIsFullscreen] = useState(false);
+	useEffect(() => {
+		if (!isFullscreen) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') setIsFullscreen(false);
+		};
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
+	}, [isFullscreen]);
+
 	return (
-		<div className="flex h-full overflow-hidden">
-			{/* 좌 TOC */}
-			<aside className="w-60 shrink-0 overflow-y-auto border-r bg-card/30 p-2 tiny-scroll">
+		<div
+			className={cn(
+				'flex h-full overflow-hidden',
+				isFullscreen && 'fixed inset-0 z-50 bg-background',
+			)}
+		>
+			{/* 좌 TOC — 전체보기 시 hidden */}
+			<aside
+				className={cn(
+					'w-60 shrink-0 overflow-y-auto border-r bg-card/30 p-2 tiny-scroll',
+					isFullscreen && 'hidden',
+				)}
+			>
 				{tocLoading ? (
 					<div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
 						<Loader2 className="size-3 animate-spin" /> 목차 로드 중…
@@ -662,8 +684,19 @@ function ViewerTab() {
 										{latestViewer?.topicLabel || latestViewer?.topic || activeTopic}
 									</h1>
 								</div>
-								<div className="text-[11px] text-muted-foreground">
-									섹션 {sectionsOwn.length} · 전체 기간 {allPeriods.length}
+								<div className="flex items-center gap-3">
+									<div className="text-[11px] text-muted-foreground">
+										섹션 {sectionsOwn.length} · 전체 기간 {allPeriods.length}
+									</div>
+									<button
+										type="button"
+										onClick={() => setIsFullscreen((v) => !v)}
+										title={isFullscreen ? '전체보기 해제 (Esc)' : '전체보기'}
+										className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-accent"
+									>
+										{isFullscreen ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
+										{isFullscreen ? '복귀' : '전체'}
+									</button>
 								</div>
 							</div>
 
