@@ -90,3 +90,30 @@ def test_hyphen_index_still_works(mapper) -> None:
 def test_unmapped_returns_none(mapper) -> None:
     """완전 미매핑은 None — 환각 매핑 회귀 가드."""
     assert mapper.map("", "절대로존재하지않을_unit_test_key_zzz_999") is None
+
+
+def test_suffix_trim_absorbs_eok(mapper) -> None:
+    """입력 '액' 1글자 suffix 흡수 — 사전 base 키로 fallback.
+
+    cycle 12 회귀: cycle 10 박은 '영업양도로 인한 현금 유입' 와
+    '영업양도로 인한 현금유입액' 가 'equality-only' 매칭으로 다른 키 취급 →
+    매번 액 suffix 변형 patch 필요. 본 가드는 *입력에 액 suffix 있을 때*
+    사전 base 키로 자동 fallback 보장.
+    """
+    cls = mapper.__class__
+    sentinel_base = "테스트_액suffix_가드_sentinel"
+    sentinel_trim = sentinel_base + "액"
+    sentinel_snake = "sales"
+    mapper._mappings[sentinel_base] = sentinel_snake
+    cls._noSpaceIndex = cls._noParenIndex = cls._noHyphenIndex = None
+    try:
+        got = mapper.map("", sentinel_trim)
+        assert got == sentinel_snake, f"액 suffix 흡수 실패: got={got!r}"
+    finally:
+        mapper._mappings.pop(sentinel_base, None)
+        cls._noSpaceIndex = cls._noParenIndex = cls._noHyphenIndex = None
+
+
+def test_suffix_trim_eok_preserves_meaning(mapper) -> None:
+    """'매출액' 같은 base key 직접 매핑은 suffix-trim 영향 안 받음 — idempotent."""
+    assert mapper.map("", "매출액") == "sales"

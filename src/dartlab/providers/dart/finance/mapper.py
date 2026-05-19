@@ -1,6 +1,6 @@
 """항목 → snakeId 매핑.
 
-매핑 파이프라인 단계 (입력·사전 양방향 normalize):
+매핑 파이프라인 단계 (입력·사전 양방향 normalize + 짧은 suffix 흡수):
 
 1. account_id prefix 제거 → normalizedId
 2. ID_SYNONYMS 로 영문 ID 동의어 통합
@@ -12,7 +12,9 @@
 8. 사전 괄호 변형 역인덱스 조회 (예: '현금의 기타유입' ↔ '현금의기타유입(유출)')
 9. 입력 하이픈 제거 후 사전 조회 (실험 081-001)
 10. 사전 하이픈 변형 역인덱스 조회
-11. 미매핑 → None
+11. 입력 짧은 한국어 suffix 제거 후 사전 재조회 — '액'/'등'/'외' 1글자
+    (cycle 12 회귀: '영업양도로 인한 현금 유입' ↔ '영업양도로 인한 현금유입액')
+12. 미매핑 → None
 
 데이터 SSOT (`engines.mappers` 학습 파이프라인 참조):
 
@@ -33,6 +35,11 @@ from dartlab.core.utils.ordering import sortOrder as _commonSortOrder
 
 _PREFIX_RE = re.compile(r"^(?:ifrs-full_|ifrs_|dart_|ifrs-smes_)")
 _PAREN_RE = re.compile(r"\([^)]*\)")
+
+# 한국어 짧은 명사 suffix — 의미 손실 없는 fold 대상
+# '액' 금액 (현금유입액↔현금유입), '등' etc. (자산등↔자산), '외' 외에 (차입금외↔차입금)
+# 길이 우선 매칭 (길이 1 만 사용; 더 긴 suffix 추가 시 의미 손실 위험 검토 후)
+_KOR_TRIM_SUFFIXES = ("액", "등", "외")
 
 ID_SYNONYMS: dict[str, str] = {
     "ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod": "ProfitsOfAssociatesAndJointVenturesAccountedForUsingEquityMethod",
@@ -477,6 +484,24 @@ class AccountMapper:
             nhIdx = self._getNoHyphenIndex()
             if noHyphen in nhIdx:
                 return nhIdx[noHyphen]
+
+            # 짧은 한국어 suffix 흡수 — '액'/'등'/'외' 1글자
+            # cycle 12 회귀: '영업양도로 인한 현금 유입' (사전) ↔ '영업양도로 인한 현금유입액' (입력)
+            # 모든 정규화 layer 양쪽에 시도
+            for sfx in _KOR_TRIM_SUFFIXES:
+                if not noSpace.endswith(sfx):
+                    continue
+                trimmed = noSpace[: -len(sfx)]
+                if not trimmed:
+                    continue
+                if trimmed in self._mappings:
+                    return self._mappings[trimmed]
+                if trimmed in nsIdx:
+                    return nsIdx[trimmed]
+                if trimmed in npIdx:
+                    return npIdx[trimmed]
+                if trimmed in nhIdx:
+                    return nhIdx[trimmed]
 
         return None
 
