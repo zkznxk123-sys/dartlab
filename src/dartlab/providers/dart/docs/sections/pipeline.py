@@ -947,8 +947,13 @@ def _reportRowsToTopicRows(
     topicBlockCounts: dict[tuple[str, str], int] = {}
     currentMajorNum: int | None = None
     idx = 0
-    # 장 제목 행은 보류했다가, 소항목이 없는 단독 장이면 등록한다.
+    # 장 제목 행은 보류했다가 다음 chapter / 끝 시점에 처리. pendingSubLines 은
+    # 그 사이 등록된 sub-section block text 의 set — chapter row content 의 block 중
+    # sub-section 에 *이미 있는* block 은 catch-all 중복이므로 skip, 없는 unique block
+    # 만 별도 등록 (옛 보고서에 sub-section 분할 안 된 표/본문이 chapter row 에만
+    # 들어있는 케이스 손실 차단).
     pendingChapter: dict[str, object] | None = None
+    pendingSubLines: set[str] = set()
     if subset.is_empty():
         return pl.DataFrame(schema=_REPORT_ROW_SCHEMA)
 
@@ -956,7 +961,15 @@ def _reportRowsToTopicRows(
     titleIdx = cols.index("section_title")
     contentIdx = cols.index(contentCol)
 
-    def _registerContent(ch: str, tp: str, rawT: str, content: str, majorNum: int) -> None:
+    def _registerContent(
+        ch: str,
+        tp: str,
+        rawT: str,
+        content: str,
+        majorNum: int,
+        *,
+        trackedSubLines: set[str] | None = None,
+    ) -> None:
         nonlocal idx
         topicKey = (ch, tp)
         nextBlockOrder = topicBlockCounts.get(topicKey, 0)
@@ -972,11 +985,20 @@ def _reportRowsToTopicRows(
             sourceTopics.append(rawT)
             nextBlockOrder += 1
             idx += 1
+            if trackedSubLines is not None:
+                for ln in blockText.splitlines():
+                    s = ln.strip()
+                    if s:
+                        trackedSubLines.add(s)
         topicBlockCounts[topicKey] = nextBlockOrder
 
     def _registerPendingChapter() -> None:
-        nonlocal pendingChapter
+        """chapter row 처리. sub-section 이 *없으면* 전체 등록 (lonely chapter).
+        sub-section 이 *있으면* chapter content 의 block 중 sub-section 에 없는
+        unique block 만 등록 — 옛 보고서의 chapter-only 표/본문 손실 차단."""
+        nonlocal pendingChapter, pendingSubLines, idx
         if pendingChapter is None:
+            pendingSubLines = set()
             return
         pTitle = str(pendingChapter.get("section_title") or "").strip()
         pContent = str(pendingChapter.get(contentCol) or "").strip()
@@ -986,8 +1008,43 @@ def _reportRowsToTopicRows(
             if ch is not None:
                 rawT = stripSectionPrefix(pTitle)
                 tp = mapSectionTitle(rawT)
-                _registerContent(ch, tp, rawT, pContent, pMajor)
+                if not pendingSubLines:
+                    _registerContent(ch, tp, rawT, pContent, pMajor)
+                else:
+                    # block 단위 dedup — sub-section 에 *없는* line 비율이 유의미한
+                    # block 만 등록 (table row 들 중 일부만 누락되는 케이스 포착).
+                    uniqueBlocks: list[tuple[str, str]] = []
+                    for blockType, blockText in _splitContentBlocks(pContent):
+                        lines = [ln.strip() for ln in blockText.splitlines() if ln.strip()]
+                        if not lines:
+                            continue
+                        missing = [ln for ln in lines if ln not in pendingSubLines]
+                        # block 안에 sub-section 에 없는 *의미있는* line 이 한 줄이라도
+                        # 있으면 unique block 으로 간주 → 등록. block 의 일부 row 만
+                        # chapter row 에 추가로 존재하는 케이스 (table row 일부, footnote
+                        # 등) 도 손실 차단. ratio 50% 였던 이전 임계값은 표 한두 줄 누락
+                        # 케이스를 놓쳤음.
+                        meaningful = [ln for ln in missing if len(ln) >= 8]
+                        if meaningful:
+                            uniqueBlocks.append((blockType, blockText))
+                    if uniqueBlocks:
+                        topicKey = (ch, tp)
+                        nextBlockOrder = topicBlockCounts.get(topicKey, 0)
+                        for blockType, blockText in uniqueBlocks:
+                            chapters.append(ch)
+                            topics.append(tp)
+                            blockTypes.append(blockType)
+                            blockOrders.append(nextBlockOrder)
+                            sourceBlockOrders.append(nextBlockOrder)
+                            texts.append(blockText)
+                            majorNums.append(pMajor)
+                            orderSeqs.append(idx)
+                            sourceTopics.append(rawT)
+                            nextBlockOrder += 1
+                            idx += 1
+                        topicBlockCounts[topicKey] = nextBlockOrder
         pendingChapter = None
+        pendingSubLines = set()
 
     def _flushPending() -> None:
         _registerPendingChapter()
@@ -1009,18 +1066,10 @@ def _reportRowsToTopicRows(
             _flushPending()
             currentMajorNum = majorNum
             pendingChapter = record
+            pendingSubLines = set()
             continue
         if currentMajorNum is None:
             continue
-
-        # 소항목 행이 따라오면 이전 장 제목 행은 폐기한다. DART parquet 의 chapter
-        # row content 는 소항목 content 의 concat 본 (중복 8KB+). 등록 시 catch-all
-        # 블록이 만들어져 textPath/segmentKey 가 소항목 행과 alias 되며, sourceBlockOrder
-        # 카운터까지 잠식한다 (2026Q1 placeholder 가 "정관 > 사업목적추가현황" textPath
-        # 에 박힌 회귀의 근본 원인). pendingChapter 등록은 _flushPending() 가 다음
-        # chapter 직전·끝에서만 — 그 시점까지 소항목이 하나도 없을 때만 lonely-chapter
-        # 로 살아남는다.
-        pendingChapter = None
 
         chapter = chapterFromMajorNum(currentMajorNum)
         if chapter is None:
@@ -1030,10 +1079,19 @@ def _reportRowsToTopicRows(
         topic = mapSectionTitle(rawTitle)
         # section_title 자체를 content 앞에 prepend — text structure parser 가
         # "1. 회사의 개요" 를 level-3 heading 으로 인식하여 textPath 의 최상단에
-        # 박힘. 이로써 placeholder("기재하지 아니하였습니다") 도 자기 section
-        # heading 아래로 배치되어 다른 sub-section heading state 와 충돌 차단.
+        # 박힘. placeholder("기재하지 아니하였습니다") 도 자기 section heading
+        # 아래로 segmentKey 부여되어 cross-section alias 차단.
         contentWithTitle = f"{title}\n{content.strip()}"
-        _registerContent(chapter, topic, rawTitle, contentWithTitle, currentMajorNum)
+        # sub-section 등록과 동시에 pendingSubLines 에 line 누적 — 이후 chapter
+        # row flush 시 unique-block 판정에 사용.
+        _registerContent(
+            chapter,
+            topic,
+            rawTitle,
+            contentWithTitle,
+            currentMajorNum,
+            trackedSubLines=pendingSubLines,
+        )
 
     # 마지막 장 처리
     _flushPending()
