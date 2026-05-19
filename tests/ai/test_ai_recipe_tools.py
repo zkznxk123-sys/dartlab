@@ -109,6 +109,22 @@ def test_propose_recipe_writes_drafted_spec(tmp_path: Path, monkeypatch: pytest.
     assert "## 공개 호출 방식" in text  # placeholder body 자동 작성.
 
 
+def test_propose_recipe_writes_nested_persona_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        "dartlab.ai.tools.proposeRecipe._RECIPE_DIR",
+        tmp_path,
+    )
+    result = proposeRecipe(
+        id="recipes.fundamental.valuation.damodaran.unitProbe",
+        title="페르소나 트리 nested id probe",
+        gap={"primary": ["analysis", "credit"]},
+        falsifier={"description": "x"},
+    )
+    assert result.ok, result.summary
+    written = tmp_path / "fundamental" / "valuation" / "damodaran" / "unitProbe.md"
+    assert written.exists()
+
+
 def test_propose_recipe_rejects_duplicate(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         "dartlab.ai.tools.proposeRecipe._RECIPE_DIR",

@@ -4,8 +4,9 @@
 사용자 질문에 자율적으로 호출하는 stateless 도구. 작성된 spec 의 status 는 항상 `drafted` —
 승격은 운영자 CLI (`src/dartlab/skills/recipePromote.py`) 단독 권한.
 
-작성 위치: `src/dartlab/skills/specs/recipes/{category}/{slug}.md`. recipe-전용 frontmatter
-(gap/falsifier/expectedNovelty/testUniverse) 강제. 동일 id 가 이미 있으면 거부.
+작성 위치: `src/dartlab/skills/specs/recipes/{persona}[/{domain}...]/{slug}.md`.
+id 는 `recipes.<persona>[.<domain>...].<slug>` 형식 (≥3 parts, depth 가변). recipe-전용
+frontmatter (gap/falsifier/expectedNovelty/testUniverse) 강제. 동일 id 가 이미 있으면 거부.
 """
 
 from __future__ import annotations
@@ -49,7 +50,7 @@ def _slug(skillId: str) -> str:
 def _recipePath(skillId: str) -> Path:
     parts = skillId.split(".")
     if len(parts) >= 3 and parts[0] == "recipes":
-        return _RECIPE_DIR / parts[1] / f"{parts[-1]}.md"
+        return _RECIPE_DIR.joinpath(*parts[1:-1]) / f"{parts[-1]}.md"
     return _RECIPE_DIR / f"{_slug(skillId)}.md"
 
 
@@ -71,7 +72,9 @@ def proposeRecipe(
     Parameters
     ----------
     id : str
-        ``recipes.<category>.<slug>`` 형식. 동일 id 가 이미 존재하면 거부.
+        ``recipes.<persona>[.<domain>...].<slug>`` 형식 (≥3 parts, depth 가변).
+        예: ``recipes.fundamental.dividend.thesis``, ``recipes.fundamental.valuation.damodaran.fcffDcf``.
+        동일 id 가 이미 존재하면 거부.
     title : str
         한국어 제목. 공백만이면 거부.
     purpose : str, optional
@@ -105,10 +108,10 @@ def proposeRecipe(
     if not skill_id:
         return ToolResult(False, "id 가 비어 있다", error="missing_id")
     parts = skill_id.split(".")
-    if len(parts) != 3 or parts[0] != "recipes" or not parts[1] or not parts[2]:
+    if len(parts) < 3 or parts[0] != "recipes" or not all(parts[1:]):
         return ToolResult(
             False,
-            f"id 는 'recipes.<category>.<slug>' 형식 (got {skill_id!r})",
+            f"id 는 'recipes.<persona>[.<domain>...].<slug>' 형식 (≥3 parts, got {skill_id!r})",
             error="invalid_id_prefix",
         )
     if not (title or "").strip():

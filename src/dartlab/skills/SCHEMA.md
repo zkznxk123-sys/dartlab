@@ -20,11 +20,11 @@
 | `runtime` | `specs/runtime/{name}.md` | 실행 환경 (Pyodide, MCP, Web AI, Local Python, VSCode) |
 | `operation` | `specs/operation/{name}.md` | 운영 규칙 (philosophy, code, apiContract, architecture, testing) |
 | `engines` | `specs/engines/{group}/SKILL.md` (기본) + `specs/engines/{group}/{axis}.md` (응용) | 엔진별 기본 사용법 + 응용 실행 스킬 |
-| `recipes` | `specs/recipes/{domain}/{name}.md` | 여러 엔진을 묶어 깊은 분석 품질을 강제하는 조합 절차 |
+| `recipes` | `specs/recipes/{persona}[/{domain}...]/{name}.md` | L1.5 이하 (core·gather/providers·scan/frame/synth/reference) 조합 실험장. 검증 통과 + 엔진 능가 → L2 엔진으로 흡수 |
 
 엔진 응용 스킬의 `id` 는 `engines.{group}.{axis}` 형식 (예: `engines.analysis.cashflow`). 기본 스킬은 `engines.{group}` (예: `engines.company`).
 
-Recipe id 는 `recipes.{domain}.{name}` 형식이다. `{domain}` 이 이미 방향을 설명하므로 `{name}` 에 같은 단어를 반복하지 않는다. 예: `recipes.credit.deepDive`, `recipes.dividend.capitalReturn`, `recipes.governance.audit`, `recipes.macro.sixActs`. 나쁜 예: `recipes.credit.creditDeepDive`, `recipes.dividend.dividendThesis`.
+Recipe id 는 `recipes.{persona}[.{domain}...].{name}` 형식 (≥3 parts, depth 가변). 디렉토리 경로 ↔ id 가 1:1. `{persona}` 는 분석가 역할 (`fundamental`, `macro`, `technical`, `sentiment`, `news` 등), `{domain}` 은 그 아래 세부 분야 (예: `fundamental/valuation`, `fundamental/credit`). 같은 단어 반복 금지 — `recipes.fundamental.credit.deepDive` 는 OK, `recipes.fundamental.credit.creditDeepDive` 는 나쁜 예.
 
 ## 2. frontmatter 필드
 
