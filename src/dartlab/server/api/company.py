@@ -35,27 +35,57 @@ stream_topic_summary = streamTopicSummary
 
 @router.get("/api/search")
 def apiSearch(q: str = Query(..., min_length=1)):
-    """종목 검색 — substring 우선, 결과 없으면 fuzzy(초성/Levenshtein) fallback."""
-    try:
-        df = dartlab.searchName(q)
-        rows = df.to_dicts() if len(df) > 0 else []
-        fuzzy_used = False
+    """종목 검색 — 회사명 substring + KIND 주요제품 substring 합집합. 둘 다 0 이면 fuzzy.
 
-        if not rows:
+    "HBM" → SK하이닉스, "메모리" → 삼성전자/SK하이닉스 등 *제품 키워드* 로
+    회사 찾기 지원. KIND parquet 의 `주요제품` 컬럼이 SSOT (kindlist 1 회 룩업).
+    결과 row 에 sector + products 노출 → 사용자 즉시 회사 정체성 인지.
+    """
+    import polars as pl
+
+    try:
+        # 1. 회사명 substring (dartlab.searchName)
+        df = dartlab.searchName(q)
+        name_rows = df.to_dicts() if len(df) > 0 else []
+
+        # 2. 주요제품 substring — KIND listing parquet 의 `주요제품` 컬럼.
+        #    회사명 매칭에 못 잡힌 회사만 추가 (dedup by 종목코드).
+        product_rows: list[dict] = []
+        try:
+            listing_df = dartlab.listing()
+            if not isEmptyDf(listing_df) and "주요제품" in listing_df.columns:
+                mask = pl.col("주요제품").cast(pl.Utf8).str.contains(q, literal=True)
+                product_rows = listing_df.filter(mask).head(40).to_dicts()
+        except (AttributeError, OSError, RuntimeError, ValueError):
+            pass
+
+        seen = {str(r.get("종목코드", r.get("stockCode", ""))).zfill(6) for r in name_rows}
+        combined = list(name_rows)
+        for r in product_rows:
+            code = str(r.get("종목코드", r.get("stockCode", ""))).zfill(6)
+            if code in seen:
+                continue
+            seen.add(code)
+            combined.append(r)
+
+        fuzzy_used = False
+        # 3. 회사명·제품 둘 다 0 → 초성/Levenshtein fuzzy fallback.
+        if not combined:
             from dartlab.gather.krx.listing import fuzzySearch
 
             df = fuzzySearch(q, maxResults=20)
-            rows = df.to_dicts() if len(df) > 0 else []
-            fuzzy_used = bool(rows)
+            combined = df.to_dicts() if len(df) > 0 else []
+            fuzzy_used = bool(combined)
 
         mapped = []
-        for row in rows[:20]:
+        for row in combined[:20]:
             mapped.append(
                 {
                     "corpName": row.get("회사명", row.get("corpName", "")),
                     "stockCode": row.get("종목코드", row.get("stockCode", "")),
                     "market": row.get("시장구분", ""),
                     "sector": row.get("업종", ""),
+                    "products": row.get("주요제품", ""),
                 }
             )
         return {"results": mapped, "fuzzy": fuzzy_used}

@@ -90,10 +90,22 @@ export function CompanySearch() {
 											isActive={i === focusIdx}
 											onClick={() => pick(i)}
 											onMouseEnter={() => setFocusIdx(i)}
-											tooltip={`${h.corpName} (${h.stockCode})`}
+											tooltip={`${h.corpName} (${h.stockCode})${h.products ? ` — ${h.products}` : ''}`}
+											className="h-auto py-1.5"
 										>
-											<span className="truncate">{h.corpName}</span>
-											<span className="ml-auto font-mono text-[10px] text-muted-foreground">{h.stockCode}</span>
+											<div className="flex w-full min-w-0 flex-col gap-0.5">
+												<div className="flex items-baseline gap-2">
+													<span className="truncate font-medium">{h.corpName}</span>
+													<span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
+														{h.stockCode}
+													</span>
+												</div>
+												{(h.sector || h.products) && (
+													<div className="truncate text-[10px] text-muted-foreground">
+														{[h.sector, h.products].filter(Boolean).join(' · ')}
+													</div>
+												)}
+											</div>
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								))

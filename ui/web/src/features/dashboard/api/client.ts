@@ -8,6 +8,7 @@ export interface SearchHit {
 	corpName: string;
 	market?: string;
 	sector?: string;
+	products?: string;
 	score?: number;
 }
 
