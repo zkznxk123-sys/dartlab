@@ -638,11 +638,12 @@ function ViewerTab() {
 				isFullscreen && 'fixed inset-0 z-50 bg-background',
 			)}
 		>
-			{/* 좌 TOC — 전체보기 시 hidden */}
+			{/* 좌 TOC — 전체보기에서도 유지 (사용자 요청 — fullscreen 시 인덱스 같이 확장).
+			   너비는 동일 (240px) 유지하되 fullscreen 모드 background 보강. */}
 			<aside
 				className={cn(
 					'w-60 shrink-0 overflow-y-auto border-r bg-card/30 p-2 tiny-scroll',
-					isFullscreen && 'hidden',
+					isFullscreen && 'bg-card',
 				)}
 			>
 				{tocLoading ? (
