@@ -63,12 +63,29 @@ def run(args) -> int:
     if shouldOpen:
         import threading
         import time
+        import urllib.error
+        import urllib.request
 
-        def _open() -> None:
-            time.sleep(1.5)
-            webbrowser.open(target)
+        probe = f"http://127.0.0.1:{port}/api/status?probe=0"
 
-        threading.Thread(target=_open, daemon=True).start()
+        def _waitAndOpen() -> None:
+            for _ in range(40):
+                time.sleep(0.5)
+                try:
+                    resp = urllib.request.urlopen(probe, timeout=1)
+                    if resp.status == 200:
+                        opened = webbrowser.open(target)
+                        if not opened:
+                            print(f"\n  브라우저 자동 열기 실패 — 직접 여세요: {target}\n", flush=True)
+                        return
+                except (OSError, urllib.error.URLError):
+                    continue
+            print(f"\n  서버 준비 확인 실패 — 직접 여세요: {target}\n", flush=True)
+
+        threading.Thread(target=_waitAndOpen, daemon=True).start()
+        print(f"  서버 준비 후 브라우저를 엽니다. 안 열리면 직접: {target}")
+        print("  종료: Ctrl+C")
+        print()
 
     runServer(host=host, port=port)
     return 0
