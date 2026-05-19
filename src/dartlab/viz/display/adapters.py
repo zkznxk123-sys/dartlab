@@ -1406,6 +1406,13 @@ __all__ = [
     "buildQuantBetaKpi",
     "buildQuantForecastKpi",
     "buildQuantComingSoon",
+    # backtest 6 카드 (8 style 일괄 backtest 1 회 + cache).
+    "buildQuantEquityCurve",
+    "buildQuantDrawdownChart",
+    "buildQuantMonthlyHeatmap",
+    "buildQuantStyleMatrix",
+    "buildQuantRollingSharpe",
+    "buildQuantAnnualReturns",
 ]
 
 
@@ -1861,4 +1868,393 @@ def buildQuantComingSoon(label: str = "준비 중") -> dict[str, Any]:
                 "subtitle": "엔진 wiring 진행 중 — 다음 commit 에서 실값",
             }
         ]
+    }
+
+
+# ─────────────────────────────────────────────────────────────
+# 백테스트 6 카드 — 1 stockCode 당 8 style backtest 1 회만, module-level cache.
+# 6 카드 (equity·drawdown·monthly heatmap·style matrix·rolling sharpe·annual)
+# 가 동일 cache 결과 공유.
+# ─────────────────────────────────────────────────────────────
+
+
+_BACKTEST_CACHE: dict[str, dict[str, Any]] = {}
+_BACKTEST_CACHE_LIMIT = 8
+
+
+def _backtestAllStyles(stockCode: str) -> dict[str, Any] | None:
+    """8 style backtest 일괄 — module-level LRU cache (max 8 종목).
+
+    반환:
+        {
+          stockCode, dates: list[str], close: list[float],
+          buyHoldEquity: list[float],
+          results: {style: BacktestResult},  # 8 style
+          returns: {style: list[float]},
+          equities: {style: list[float]},
+        }
+    """
+    if stockCode in _BACKTEST_CACHE:
+        return _BACKTEST_CACHE[stockCode]
+    try:
+        import dartlab
+        from dartlab.quant.strategy import presets, backtest
+        from dartlab.quant.signal.momentum import fetchOhlcv
+    except ImportError:
+        return None
+
+    try:
+        company = dartlab.Company(stockCode)
+        ohlcv = fetchOhlcv(stockCode)
+    except Exception:  # noqa: BLE001
+        return None
+    if ohlcv is None or not hasattr(ohlcv, "to_dicts"):
+        return None
+
+    try:
+        close = ohlcv["close"].to_numpy()
+        high = ohlcv["high"].to_numpy()
+        low = ohlcv["low"].to_numpy()
+        open_ = ohlcv["open"].to_numpy()
+        volume = ohlcv["volume"].to_numpy()
+        dates = [str(d)[:10] for d in ohlcv["date"].to_list()]
+    except Exception:  # noqa: BLE001
+        return None
+    if len(close) < 30:
+        return None
+
+    # buy-hold baseline equity (normalize 시작=1.0).
+    import numpy as np
+
+    bh = (close / close[0]).tolist()
+
+    reg = presets.STYLE_REGISTRY()
+    results: dict[str, Any] = {}
+    equities: dict[str, list[float]] = {"buyHold": bh}
+    returns: dict[str, list[float]] = {}
+    for styleKey, builder in reg.items():
+        try:
+            rule = builder(company)
+            r = backtest.vectorBacktest(
+                close, rule,
+                open_=open_, high=high, low=low, volume=volume, dates=dates,
+                style=styleKey,
+            )
+            results[styleKey] = r
+            eq = getattr(r, "equity", None)
+            rt = getattr(r, "returns", None)
+            if eq is not None and hasattr(eq, "tolist"):
+                equities[styleKey] = eq.tolist()
+            elif eq is not None:
+                equities[styleKey] = list(eq)
+            if rt is not None and hasattr(rt, "tolist"):
+                returns[styleKey] = rt.tolist()
+            elif rt is not None:
+                returns[styleKey] = list(rt)
+        except Exception:  # noqa: BLE001
+            continue
+
+    out = {
+        "stockCode": stockCode,
+        "dates": dates,
+        "close": close.tolist(),
+        "buyHoldEquity": bh,
+        "results": results,
+        "equities": equities,
+        "returns": returns,
+    }
+    _BACKTEST_CACHE[stockCode] = out
+    if len(_BACKTEST_CACHE) > _BACKTEST_CACHE_LIMIT:
+        # FIFO eviction.
+        oldest = next(iter(_BACKTEST_CACHE))
+        if oldest != stockCode:
+            _BACKTEST_CACHE.pop(oldest, None)
+    return out
+
+
+_STYLE_COLORS = {
+    "buyHold": "#94a3b8",
+    "trendFollow": "#2563eb",
+    "meanReversion": "#ef4444",
+    "breakout": "#f59e0b",
+    "dipBuy": "#10b981",
+    "eventDriven": "#8b5cf6",
+    "flowFollow": "#ec4899",
+    "lowVolDefensive": "#06b6d4",
+    "seasonalKR": "#a855f7",
+}
+_STYLE_LABELS = {
+    "buyHold": "Buy & Hold",
+    "trendFollow": "추세추종",
+    "meanReversion": "평균회귀",
+    "breakout": "돌파",
+    "dipBuy": "눌림목매수",
+    "eventDriven": "이벤트",
+    "flowFollow": "수급추종",
+    "lowVolDefensive": "저변동방어",
+    "seasonalKR": "한국캘린더",
+}
+
+
+def buildQuantEquityCurve(stockCode: str) -> dict[str, Any]:
+    """8 style equity overlay + buy-hold baseline. trend kind.
+
+    9 라인 (buyHold + 8 style). 시작 1.0 normalize. 사용자 즉시 비교 가능.
+    """
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"categories": [], "series": []}
+    dates = bt["dates"]
+    eqs = bt["equities"]
+    series: list[dict[str, Any]] = []
+    for key, data in eqs.items():
+        if not data or all(v is None or v == 0 for v in data):
+            continue
+        intent = "primary" if key == "buyHold" else "accent"
+        series.append({
+            "key": key,
+            "label": _STYLE_LABELS.get(key, key),
+            "color": _STYLE_COLORS.get(key, "#64748b"),
+            "intent": intent,
+            "unit": "배",
+            "type": "line",
+            "axis": "left",
+            "data": data,
+        })
+    return {"categories": dates, "series": series}
+
+
+def buildQuantDrawdownChart(stockCode: str) -> dict[str, Any]:
+    """Drawdown trend — best style (sharpe 1 위) 의 equity 에서 (equity / runMax - 1) 시계열.
+
+    음수 면적. 0 참조선.
+    """
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"categories": [], "series": []}
+    # best style 선택 — buyHold 제외, sharpe 가장 높은 style.
+    results = bt.get("results") or {}
+    best_key = None
+    best_sharpe = float("-inf")
+    for k, r in results.items():
+        s = getattr(r, "sharpe", None) or 0
+        if s > best_sharpe:
+            best_sharpe = s
+            best_key = k
+    if best_key is None:
+        return {"categories": [], "series": []}
+    eq = bt["equities"].get(best_key) or []
+    if not eq:
+        return {"categories": [], "series": []}
+    run_max = 0.0
+    dd: list[float | None] = []
+    for v in eq:
+        if v is None:
+            dd.append(None)
+            continue
+        if v > run_max:
+            run_max = v
+        dd.append((v / run_max - 1) * 100 if run_max > 0 else 0)
+    return {
+        "categories": bt["dates"],
+        "series": [{
+            "key": "drawdown",
+            "label": f"Drawdown ({_STYLE_LABELS.get(best_key, best_key)})",
+            "color": "#ef4444",
+            "intent": "negative",
+            "unit": "%",
+            "type": "area",
+            "axis": "left",
+            "data": dd,
+        }],
+        "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}]},
+    }
+
+
+def _monthlyReturns(dates: list[str], returns: list[float]) -> dict[tuple[int, int], float]:
+    """(year, month) → 월간 누적수익률 (%). returns 는 일별 simple return."""
+    out: dict[tuple[int, int], list[float]] = {}
+    for d, r in zip(dates, returns):
+        if r is None or len(d) < 7:
+            continue
+        try:
+            y = int(d[:4])
+            m = int(d[5:7])
+        except ValueError:
+            continue
+        out.setdefault((y, m), []).append(r)
+    # 일별 simple return 합 ≈ 월간 (작은 값 가정). 정확 = (1+r1)*(1+r2)... - 1.
+    monthly: dict[tuple[int, int], float] = {}
+    for ym, rs in out.items():
+        cum = 1.0
+        for r in rs:
+            cum *= 1 + r
+        monthly[ym] = (cum - 1) * 100
+    return monthly
+
+
+def buildQuantMonthlyHeatmap(stockCode: str) -> dict[str, Any]:
+    """Monthly Returns Heatmap — matrix kind. row=year, col=month, cells=수익률 %.
+
+    best style returns 기반.
+    """
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"cells": []}
+    results = bt.get("results") or {}
+    best_key = None
+    best_sharpe = float("-inf")
+    for k, r in results.items():
+        s = getattr(r, "sharpe", None) or 0
+        if s > best_sharpe:
+            best_sharpe = s
+            best_key = k
+    if best_key is None:
+        return {"cells": []}
+    rets = bt["returns"].get(best_key) or []
+    if not rets:
+        return {"cells": []}
+    monthly = _monthlyReturns(bt["dates"], rets)
+    if not monthly:
+        return {"cells": []}
+    years = sorted({y for y, _ in monthly.keys()})
+    cells: list[dict[str, Any]] = []
+    for y in years:
+        for m in range(1, 13):
+            v = monthly.get((y, m))
+            cells.append({"row": str(y), "col": f"{m}월", "value": v, "unit": "%"})
+    return {
+        "cells": cells,
+        "rowOrder": [str(y) for y in years],
+        "colOrder": [f"{m}월" for m in range(1, 13)],
+        "tone": "diverging",
+        "options": {"styleKey": best_key, "styleLabel": _STYLE_LABELS.get(best_key, best_key)},
+    }
+
+
+def buildQuantStyleMatrix(stockCode: str) -> dict[str, Any]:
+    """8 style 성과 매트릭스 — comparisonTable kind. row=style, col=Sharpe/Sortino/MDD/WinRate/Expectancy/Turnover.
+
+    각 row 의 self 값 = 본 종목 style 성과. peer 자리는 0 (single-stock context).
+    """
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"rows": []}
+    results = bt.get("results") or {}
+    if not results:
+        return {"rows": []}
+    rows: list[dict[str, Any]] = []
+    for styleKey, r in results.items():
+        sharpe = getattr(r, "sharpe", None)
+        sortino = getattr(r, "sortino", None)
+        mddVal = getattr(r, "mdd", None)
+        winrateVal = getattr(r, "winrate", None)
+        expectancyVal = getattr(r, "expectancy", None)
+        turnoverVal = getattr(r, "turnover", None)
+        # comparisonTable 의 row 는 single metric — 본 카드는 style x metric 행렬이라
+        # 형식 차이. 대신 multi-column row 구조로 변형 (label=style, self=sharpe, percentile=원본 6 column dict).
+        rows.append({
+            "label": _STYLE_LABELS.get(styleKey, styleKey),
+            "self": _toFloat(sharpe),
+            "peerMedian": _toFloat(sortino),
+            "peerP25": _toFloat(mddVal),
+            "peerP75": _toFloat(winrateVal),
+            "percentile": _toFloat(expectancyVal),
+            "unit": "배",
+            "higherIsBetter": True,
+        })
+    return {
+        "rows": rows,
+        "peerCount": 0,
+        "options": {
+            "columnLabels": ["전략", "Sharpe", "Sortino", "MaxDD", "WinRate", "Expectancy"],
+            "styleMatrix": True,
+        },
+    }
+
+
+def buildQuantRollingSharpe(stockCode: str) -> dict[str, Any]:
+    """Rolling 252-day Sharpe — best style returns 기반. trend kind."""
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"categories": [], "series": []}
+    results = bt.get("results") or {}
+    best_key = None
+    best_sharpe = float("-inf")
+    for k, r in results.items():
+        s = getattr(r, "sharpe", None) or 0
+        if s > best_sharpe:
+            best_sharpe = s
+            best_key = k
+    if best_key is None:
+        return {"categories": [], "series": []}
+    rets = bt["returns"].get(best_key) or []
+    if len(rets) < 60:
+        return {"categories": [], "series": []}
+    import numpy as np
+
+    window = 60  # ~3 개월. 252 면 단일 종목 1 년 데이터에서 1 점만 — 60 일이 적합.
+    arr = np.array([(r if r is not None else 0.0) for r in rets], dtype=float)
+    sharpe: list[float | None] = [None] * len(arr)
+    for i in range(window, len(arr)):
+        w = arr[i - window:i]
+        mu = float(np.mean(w))
+        sd = float(np.std(w, ddof=1))
+        sharpe[i] = (mu / sd) * (252 ** 0.5) if sd > 0 else None
+    return {
+        "categories": bt["dates"],
+        "series": [{
+            "key": "rollSharpe",
+            "label": f"Rolling Sharpe ({_STYLE_LABELS.get(best_key, best_key)})",
+            "color": "#10b981",
+            "intent": "primary",
+            "unit": "배",
+            "type": "line",
+            "axis": "left",
+            "data": sharpe,
+        }],
+        "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}, {"value": 1, "label": "양호", "color": "#10b981"}]},
+    }
+
+
+def buildQuantAnnualReturns(stockCode: str) -> dict[str, Any]:
+    """연도별 수익률 bar — best style. trend kind (categories=연도, series bar)."""
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"categories": [], "series": []}
+    results = bt.get("results") or {}
+    best_key = None
+    best_sharpe = float("-inf")
+    for k, r in results.items():
+        s = getattr(r, "sharpe", None) or 0
+        if s > best_sharpe:
+            best_sharpe = s
+            best_key = k
+    if best_key is None:
+        return {"categories": [], "series": []}
+    rets = bt["returns"].get(best_key) or []
+    annual: dict[int, float] = {}
+    for d, r in zip(bt["dates"], rets):
+        if r is None or len(d) < 4:
+            continue
+        try:
+            y = int(d[:4])
+        except ValueError:
+            continue
+        annual.setdefault(y, 1.0)
+        annual[y] *= 1 + r
+    years = sorted(annual.keys())
+    data = [(annual[y] - 1) * 100 for y in years]
+    return {
+        "categories": [str(y) for y in years],
+        "series": [{
+            "key": "annual",
+            "label": f"연수익률 ({_STYLE_LABELS.get(best_key, best_key)})",
+            "color": "#2563eb",
+            "intent": "primary",
+            "unit": "%",
+            "type": "bar",
+            "axis": "left",
+            "data": data,
+        }],
     }

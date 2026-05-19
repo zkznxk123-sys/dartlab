@@ -133,9 +133,16 @@ function QuantTab() {
 			keys: new Set(['quantMomentumKpi']),
 		},
 		{
-			title: '백테스트',
-			subtitle: '8 style equity curve + Sharpe/Sortino/MaxDD — 본 종목 전략별 성과 (속편).',
-			keys: new Set(['quantBacktestComingSoon']),
+			title: '백테스트 (8 style)',
+			subtitle: 'trendFollow · meanReversion · breakout · dipBuy · eventDriven · flowFollow · lowVolDefensive · seasonalKR 8 정통 룰 — Sharpe 1위 style 자동 도출.',
+			keys: new Set([
+				'quantEquityCurve',
+				'quantDrawdownChart',
+				'quantMonthlyHeatmap',
+				'quantStyleMatrix',
+				'quantRollingSharpe',
+				'quantAnnualReturns',
+			]),
 		},
 		{
 			title: '리스크 (변동성·베타)',

@@ -432,6 +432,41 @@ def _buildKindSpecView(
     elif adapter_name == "quantComingSoon":
         label = (spec or {}).get("label", "준비 중")
         base_view["tiles"] = adapters.buildQuantComingSoon(label).get("tiles", [])
+    # backtest 6 카드 — 8 style 일괄 backtest module-level cache 공유.
+    elif adapter_name == "quantEquityCurve":
+        result = adapters.buildQuantEquityCurve(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "quantDrawdownChart":
+        result = adapters.buildQuantDrawdownChart(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantMonthlyHeatmap":
+        result = adapters.buildQuantMonthlyHeatmap(stockCode)
+        base_view["cells"] = result.get("cells", [])
+        base_view["rowOrder"] = result.get("rowOrder", [])
+        base_view["colOrder"] = result.get("colOrder", [])
+        base_view["tone"] = result.get("tone", "diverging")
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantStyleMatrix":
+        result = adapters.buildQuantStyleMatrix(stockCode)
+        base_view["rows"] = result.get("rows", [])
+        base_view["peerCount"] = result.get("peerCount", 0)
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantRollingSharpe":
+        result = adapters.buildQuantRollingSharpe(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantAnnualReturns":
+        result = adapters.buildQuantAnnualReturns(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass
