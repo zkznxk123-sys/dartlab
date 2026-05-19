@@ -21,9 +21,6 @@ outputs:
   - anomaly candidate rows
   - candidate status
 capabilityRefs:
-  - scan.quality
-  - scan.audit
-  - scan.disclosureRisk
 toolRefs:
   - RunPython
   - EngineCall

@@ -21,8 +21,6 @@ outputs:
 capabilityRefs:
   - Company.disclosure
   - scan.market
-  - scan.audit
-  - scan.quality
 toolRefs:
   - EngineCall
   - RunPython

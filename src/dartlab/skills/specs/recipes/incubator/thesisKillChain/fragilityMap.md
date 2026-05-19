@@ -20,7 +20,6 @@ outputs:
 capabilityRefs:
   - Company.show
   - Company.gather
-  - scan.quality
 toolRefs:
   - EngineCall
   - RunPython

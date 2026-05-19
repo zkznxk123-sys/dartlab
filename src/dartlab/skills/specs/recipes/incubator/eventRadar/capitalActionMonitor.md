@@ -21,7 +21,6 @@ outputs:
 capabilityRefs:
   - Company.disclosure
   - Company.gather
-  - scan.capital
 toolRefs:
   - EngineCall
   - RunPython

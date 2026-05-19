@@ -28,8 +28,6 @@ capabilityRefs:
   - Company.disclosure
   - Company.gather
   - scan.market
-  - scan.audit
-  - scan.quality
 toolRefs:
   - EngineCall
   - RunPython

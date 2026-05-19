@@ -19,7 +19,6 @@ outputs:
   - insiderOwnershipSignal table
 capabilityRefs:
   - Company.gather
-  - scan.insider
 toolRefs:
   - EngineCall
   - RunPython

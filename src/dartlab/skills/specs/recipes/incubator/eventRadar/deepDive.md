@@ -26,8 +26,6 @@ capabilityRefs:
   - Company.liveFilings
   - Company.gather
   - scan.market
-  - scan.insider
-  - scan.capital
 toolRefs:
   - EngineCall
   - RunPython

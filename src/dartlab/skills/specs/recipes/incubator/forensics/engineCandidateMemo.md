@@ -24,7 +24,6 @@ outputs:
   - keepAsSkillAfterPromotion
 capabilityRefs:
   - Company.show
-  - scan.quality
 toolRefs:
   - EngineCall
   - RunPython

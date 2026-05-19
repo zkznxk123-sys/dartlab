@@ -34,9 +34,6 @@ capabilityRefs:
   - Company.show
   - Company.trace
   - Company.disclosure
-  - scan.quality
-  - scan.audit
-  - scan.disclosureRisk
 toolRefs:
   - EngineCall
   - RunPython
