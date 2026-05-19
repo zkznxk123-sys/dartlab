@@ -94,10 +94,10 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
 
     validPeriods: list[str] = []
     latestAnnualRows: list[dict[str, object]] | None = None
-    # streaming vstack — 매 period DataFrame 즉시 누적. _reportRowsToTopicRows
-    # 가 이미 polars DataFrame 반환 (이전 list[dict] 51167 누적 → 9 컬럼
-    # list + 단일 polars 변환으로 -163MB Python heap).
-    periodRowsDf: pl.DataFrame | None = None
+    # period 별 DataFrame 을 list 에 모은 뒤 단일 pl.concat 으로 결합.
+    # 이전 vstack 반복 (~31 period O(N) 마다 새 frame 복사) → O(N×periods) Python
+    # heap 압박. 단일 concat 은 polars 내부 chunk 단위 zero-copy → 메모리·시간 둘 다 절감.
+    periodFrames: list[pl.DataFrame] = []
 
     for periodKey, reportKind, ccol, subset in iterPeriodSubsets(stockCode):
         validPeriods.append(periodKey)
@@ -106,22 +106,18 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
             # chapterTeacherTopics 가 list[dict] 가정 — 첫 annual 만 변환 (작음)
             latestAnnualRows = topicDf.to_dicts() if topicDf.height > 0 else []
         if topicDf.height > 0:
-            df = topicDf.with_columns(pl.lit(periodKey).alias("_periodKey"))
-            if periodRowsDf is None:
-                periodRowsDf = df
-            else:
-                periodRowsDf = periodRowsDf.vstack(df)
-            df = None  # noqa: F841
+            periodFrames.append(topicDf.with_columns(pl.lit(periodKey).alias("_periodKey")))
         topicDf = None  # noqa: F841 — 명시적 ref drop
 
     teacherTopics = chapterTeacherTopics(latestAnnualRows or [])
     latestAnnualRows = None  # noqa: F841
     validPeriods = sortPeriods(validPeriods)
 
-    if periodRowsDf is None:
+    if not periodFrames:
         periodRowsDf = pl.DataFrame()
     else:
-        periodRowsDf = periodRowsDf.rechunk()  # vstack 후 chunks 정리
+        periodRowsDf = pl.concat(periodFrames, how="vertical").rechunk()
+    periodFrames = []  # noqa: F841 — drop frame refs
     gc.collect()
 
     prepared = _PreparedRows(periodRowsDf, validPeriods, teacherTopics)
