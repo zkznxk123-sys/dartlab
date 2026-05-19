@@ -564,7 +564,7 @@ ANALYSIS_GRAPH: dict = json.loads(
             }
         },
         "macro.recent": {
-            "capabilities": "KR: ECOS 한국은행, US: FRED 거시지표. 기본은 HF 벌크 데이터셋이라 API 키 불필요. apiKey 명시 시 직접 API 호출. 지표 미지정 시 전체 반환.",
+            "capabilities": "ECOS(KR) / FRED(US) 거시지표 시계열. 기본 HF 벌크 (apiKey 없음), apiKey 명시 시 ECOS/FRED 직접 API.",
             "contractId": "macro.recent",
             "evidenceSchema": {
                 "asOfKeys": [
@@ -2837,7 +2837,7 @@ ANALYSIS_GRAPH: dict = json.loads(
             }
         }
     ],
-    "sourceHash": "27d9c7c104a5724e"
+    "sourceHash": "2f423b03135c1715"
 }
 """
 )

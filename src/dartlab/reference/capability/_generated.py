@@ -15,7 +15,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company": {
         "aicontext": "AI 는 `dartlab.ask()` 로 접근 (Company 를 직접 생성하지 않음).\n사람은 Company 객체 하나로 노트북·스크립트에서 모든 엔진 호출.\n엔진은 사람의 분석엔진이자 AI 의 skill (docstring SSOT) — 한 파일 두 역할.",
-        "args": "codeOrName: 종목코드, 회사명, 또는 영문 ticker.",
+        "args": "stockCode: 종목코드, 회사명, 또는 영문 ticker.",
         "capabilities": "종목 파사드 하나로 엔진 전수 접근: analysis · credit · quant · macro ·\nindustry · gather · show. 엔진 이름만 기억하면 됨.\n종목코드 (\"005930\"), 회사명 (\"삼성전자\"), 영문 ticker (\"AAPL\") 모두 지원\ncanHandle() 체인: provider priority 순 자동 라우팅 (DART → EDGAR)\n새 국가 추가 시 이 파일 수정 불필요 — provider 패키지만 추가\n핵심 인터페이스: show(topic) / index / trace(topic) / diff() / select()\n모든 데이터 접근은 ``c.show(topic)`` 으로 통합 — finance topic\n(BS·IS·CF·CIS·SCE·ratios) 도 ``c.show(\"BS\")`` · ``c.show(\"IS\", freq=\"Y\")``\n처럼 호출. 별도 namespace property 나 바로가기는 사용하지 않는다\n(``c.docs / c.finance / c.report / c.profile`` · ``c.BS / c.IS / c.CF /\nc.CIS / c.ratios / c.timeseries`` 는 Plan v10 에서 제거).\n메타: sections, topics, filings(), market, currency",
         "example": "import dartlab\n\n# 사람의 만능 관문 — 한 객체로 전 엔진\nc = dartlab.Company(\"005930\")     # 삼성전자 (DART)\nc.story()                         # 분석 스토리 (보고서)\nc.analysis(\"financial\", \"수익성\") # 재무 분석\nc.credit()                        # 신용\nc.quant()                         # 주가\nc.show(\"businessOverview\")        # 원본 사업 개요\n\n# 글로벌 (EDGAR 자동 라우팅)\nc = dartlab.Company(\"AAPL\")\nc.analysis(\"financial\", \"valuation\")\n\n# module-level 엔진도 `stockCode=` 로 호출 가능 (일관성 규약)\ndartlab.analysis.financial(\"수익성\", stockCode=\"005930\")\ndartlab.credit(stockCode=\"005930\")",
         "guide": "AI 역할: AI는 Company를 단일 종목 분석의 라우터로 보고 대상 식별, 사용 가능한 topic, 하위 엔진 선택을 정한다.\n데이터 기본기: Company 경로는 target, provider(DART/EDGAR), topic,\nsource, period 를 먼저 고정하고, 이 원자료 ref 를 analysis · credit ·\nstory 같은 응용 엔진으로 넘긴다.\nHandoff: 최신 주가/뉴스/거시 원자료가 필요하면 gather 로 보강하고,\npeer/rank/universe 비교가 필요하면 scan 으로 넘어간다.\n\"삼성전자 재무제표\" -> c = Company(\"005930\"); c.show(\"IS\")\n\"사업 개요 보여줘\" -> c.show(\"businessOverview\")\n\"어떤 데이터 있어?\" -> c.index 또는 c.topics\n\"출처 추적\" -> c.trace(\"revenue\")\n\"기간 변화\" -> c.diff()\n\"종합평가\" -> c.analysis(\"financial\", \"종합평가\")\n\"스토리 보고서\" -> c.story()\n\"Apple 분석\" -> Company(\"AAPL\") (자동 EDGAR 라우팅)",
@@ -150,11 +150,39 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "aicontext": "AI가 분석 전 과정을 주도. dartlab 엔진(analysis, scan, gather 등)을\n도구로 호출하여 데이터 수집, 계산, 판단, 해석을 수행.",
         "args": "question: 질문 텍스트.\ninclude: 포함할 분석 패키지 목록. None이면 자동 선택.\nexclude: 제외할 분석 패키지 목록.\nprovider: LLM provider 이름 (openai, ollama, codex 등). None이면 기본값.\nmodel: 모델명. None이면 provider 기본값.\nstream: True면 스트리밍 제너레이터 반환.\nreflect: True면 답변 후 자기 평가 수행.\n**kwargs: provider별 추가 옵션.",
         "capabilities": "엔진 계산 결과를 컨텍스트로 조립하여 LLM에 전달\n질문 분류 기반 분석 패키지 자동 선택 (financial, valuation, risk 등)\n멀티 provider 지원 (openai, ollama, codex 등)\n스트리밍 응답 지원",
-        "example": "c = Company(\"005930\")\nc.ask(\"영업이익률 추세는?\")\nc.ask(\"핵심 리스크 3가지\", provider=\"codex\")\n\n# 스트리밍\nfor chunk in c.ask(\"배당 분석해줘\", stream=True):\nprint(chunk, end=\"\")",
+        "example": ">>> c = Company(\"005930\")\n>>> c.ask(\"영업이익률 추세는?\")\n>>> c.ask(\"핵심 리스크 3가지\", provider=\"codex\")\n\n# 스트리밍\nfor chunk in c.ask(\"배당 분석해줘\", stream=True):\nprint(chunk, end=\"\")",
         "guide": "\"영업이익률 분석해줘\" → c.ask(\"영업이익률 추세는?\")\n\"AI한테 질문하고 싶어\" → c.ask(\"질문\")\n\"스트리밍으로 답변받기\" → c.ask(\"질문\", stream=True)",
         "kind": "method",
-        "requires": "API 키: LLM provider API 키 (OPENAI_API_KEY 등)",
-        "returns": "str -- LLM 응답 텍스트. stream=True면 Generator[str].",
+        "llmSpecs": {
+            "antiPatterns": [
+                "응답 직접 외부 인용 → AI 환각 검증 의무. dartlab tool 결과만 신뢰.",
+                "reflect=True 항상 정확 X — 시간/토큰 2 배.",
+                "stream=True 결과 list() 즉시 변환 → stream 의미 사라짐."
+            ],
+            "dataflow": "question + self.stockCode → ai.kernel.ask → tool calling → 본 함수.",
+            "freshness": "LLM 응답 + 본 회사 데이터 freshness 의 min.",
+            "outputSchema": "str (stream=False) 또는 Generator[str] (stream=True).",
+            "prerequisites": "LLM API 키 (OPENAI_API_KEY / ANTHROPIC_API_KEY 환경변수).",
+            "targetMarkets": "KR (DART) — workbench evidence + ask 인터페이스."
+        },
+        "requires": "API 키: LLM provider API 키 (``OPENAI_API_KEY`` 등).",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "ValueError",
+                "type": "provider/model 미설정 + 환경변수 키 부재.",
+                "unit": null
+            },
+            {
+                "depth": 0,
+                "description": "",
+                "name": "RuntimeError",
+                "type": "LLM API 호출 실패 (네트워크/quota).",
+                "unit": null
+            }
+        ],
+        "returns": "str — LLM 응답 텍스트. ``stream=True`` 면 ``Generator[str]``.\n\nRaises:\nValueError: provider/model 미설정 + 환경변수 키 부재.\nRuntimeError: LLM API 호출 실패 (네트워크/quota).",
         "seeAlso": "chat: 에이전트 모드 (tool calling 기반 심화 분석)\nask: AI 종합 분석 (자연어 대화)\nstory: AI 없는 데이터 검토서",
         "summary": "LLM에게 이 기업에 대해 질문."
     },
@@ -170,7 +198,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "\"한정/부적정\" 같은 무거운 결과를 답변 본문에 단정 노출 (출처 + 연도 함께)",
                 "audit() 결과를 매 분석마다 호출 (캐시 — 1 회면 충분)"
             ],
-            "freshness": "report 데이터 기준 — 정기보고서 마감 후 30~45 일.",
+            "freshness": "report 데이터 기준 — 정기보고서 마감 후 30~45 일. Raises: 없음.",
             "outputSchema": [
                 "opinion : str — 감사의견 (적정 / 한정 / 부적정 / 의견거절)",
                 "auditorChanges : list[dict] — 감사인 변경 이력 (year, from, to, reason)",
@@ -222,12 +250,50 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "감사 리스크 종합 분석."
     },
     "Company.calendar": {
+        "aicontext": "AI 가 \"다음 공시 catalyst\" 답변 시 본 함수 결과 인용. 예상일 ± 며칠 명시 의무.",
+        "args": "horizonDays: 미래 horizon (기본 30 일).",
+        "capabilities": "본 회사 disclosure history (최근 400 일 정기공시) → predictCalendar 위임 → 정기보고서\ncycle 추론 (분기/반기/사업보고서 패턴). horizonDays 내 예상 공시일 리스트.",
+        "example": ">>> Company(\"005930\").calendar()",
+        "guide": "\"다음 정기공시 언제\" → 본 함수.",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "history 부재 회사 (신규 상장) → 빈 DataFrame. caller 분기 의무.",
+                "horizon 큰 값 (>180) → 예측 정확도 낮음 — 분기 1 회 cycle 한정."
+            ],
+            "dataflow": "disclosure(days=400, type=\"A\") → predictCalendar(history, horizonDays) → 본 함수.",
+            "freshness": "호출 시점 (disclosure() API 실시간).",
+            "outputSchema": "pl.DataFrame (OUTPUT_SCHEMA) — [stockCode, expectedDate, reportType, confidence].",
+            "prerequisites": "disclosure history (최근 400 일).",
+            "targetMarkets": "KR (DART 정기공시 cycle)."
+        },
+        "requires": "dartlab\npolars",
+        "returns": "catalyst DataFrame.\n\nRaises:\n없음.",
+        "seeAlso": "``dartlab.providers.dart.ops.calendar.predictCalendar`` — backend cycle 추론.\n``edgar.Company.calendar`` — US 패리티 (현재 미구현 stub).",
         "summary": "다가오는 정기공시 catalyst 일정 추론 (Korea 시장)."
     },
     "Company.canHandle": {
+        "aicontext": "Company 팩토리 내부. AI 가 직접 호출 X — Company() 가 자동 dispatch.",
+        "args": "code: 종목코드/회사명 후보 문자열.",
+        "capabilities": "6 자리 alphanumeric (KR stockCode) 또는 한글 (회사명) 매칭. EDGAR 의 5 자리 영문 ticker\n와 disjoint — 라우터 정확 dispatch.",
+        "example": ">>> Company(\"005930\").canHandle()",
+        "guide": "\"DART 처리 가능 코드냐\" → 본 함수.",
         "kind": "method",
-        "returns": "bool\nTrue 면 DART provider 로 처리. 6자리 alphanumeric (KR 종목코드)\n또는 한글 포함 문자열이면 True.",
+        "llmSpecs": {
+            "antiPatterns": [
+                "영문 5 자 ticker (예 \"AAPL\") → False — EDGAR 가 처리.",
+                "빈 문자열 → False (re.match 실패).",
+                "6 자리지만 영문 only (예 \"ABCDEF\") → True 가능 — KRX KIND lookup 시 실 매치 필요."
+            ],
+            "dataflow": "사용자 입력 → Company() → 본 함수 → DART 분기 결정.",
+            "freshness": "정적 패턴.",
+            "outputSchema": "bool.",
+            "prerequisites": "입력이 str.",
+            "targetMarkets": "KR (KOSPI/KOSDAQ/KONEX)."
+        },
+        "requires": "dartlab\npolars",
+        "returns": "bool — DART 처리 가능 여부.",
+        "seeAlso": "``edgar.Company.canHandle`` — US ticker 패리티.\n``priority`` — 라우터 정렬 SSOT.",
         "summary": "DART 종목코드(6자) 또는 한글 회사명이면 처리 가능."
     },
     "Company.capital": {
@@ -251,65 +317,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "총환원율 : float — % ((배당 + 자사주) / 시가총액)",
                 "분류 : str — 환원형 / 중립 / 희석형"
             ],
-            "targetMarkets": "KR"
+            "targetMarkets": [
+                "KR",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "6자리 종목코드",
-                "name": "종목코드",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "회사명",
-                "name": "종목명",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "배당수익률 (%)",
-                "name": "배당수익률",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "배당성향 (%)",
-                "name": "배당성향",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "자사주 매입 주수 (주)",
-                "name": "자사주매입",
-                "type": "int",
-                "unit": "주"
-            },
-            {
-                "depth": 0,
-                "description": "(배당 + 자사주) / 시가총액 (%)",
-                "name": "총환원율",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "환원형/중립/희석형",
-                "name": "분류",
-                "type": "str",
-                "unit": null
-            }
-        ],
-        "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n배당수익률 : float — 배당수익률 (%)\n배당성향 : float — 배당성향 (%)\n자사주매입 : int — 자사주 매입 주수 (주)\n총환원율 : float — (배당 + 자사주) / 시가총액 (%)\n분류 : str — 환원형/중립/희석형\n데이터 없으면 None.",
+        "returns": "pl.DataFrame [종목코드, 종목명, 배당수익률, 배당성향, 자사주매입, 총환원율, 분류] 또는 None.",
         "seeAlso": "show: c.show(\"dividend\")로 docs 기반 배당 상세\nsceMatrix: 자본변동표 (배당/자사주가 자본에 미치는 영향)\ndebt: 부채 구조 (자본 정책의 다른 면)",
         "summary": "주주환원 분석 (배당, 자사주, 총환원율)."
     },
     "Company.causalWeights": {
+        "aicontext": "AI 가 \"이 회사 핵심 인과 chain\" 답변 시 본 함수 결과 인용 — 단일 지표가 아닌 chain 구조.",
+        "capabilities": "6 막 (수익구조→수익성→현금흐름→자금조달→자산배치→가치평가) 의 인과 가중치 (amplify/\ndampen/neutral) 계산. 매 막 출발/도착 지표 + delta + weight + direction.",
+        "example": ">>> Company(\"005930\").causalWeights()",
         "guide": "\"인과 체인\" → c.causalWeights()\n\"어느 막이 약해\" → 결과의 direction='dampen' 필터",
         "kind": "method",
         "llmSpecs": {
@@ -317,7 +339,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "direction 단독 인용 (weight + metric 함께)",
                 "6 막 인과는 종목 분석 한정 — 매크로 / 산업 분석에는 부적합"
             ],
-            "freshness": "finance 시계열 시점.",
+            "freshness": "finance 시계열 시점. Raises: 없음.",
             "outputSchema": [
                 "from_act : str — 출발 막",
                 "to_act : str — 도착 막",
@@ -328,21 +350,65 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "direction : str — amplify / dampen / neutral"
             ]
         },
+        "requires": "dartlab\npolars",
         "returns": "list[dict] — from_act/to_act/metric_from/metric_to/delta_from/delta_to/weight/direction",
+        "seeAlso": "``valuationImpact`` — 본 가중치를 DCF override 로 변환.\n``storyTree`` — 본 가중치 적용한 3 trajectory.\n``dartlab.story.narrative.buildCausalWeights`` — implementation.",
         "summary": "6막 인과 가중치 — 수익구조→수익성→현금흐름→자금조달→자산배치→가치평가 amplify/dampen/neutral."
+    },
+    "Company.cleanupCache": {
+        "aicontext": "AI 가 다종목 batch (50+ 종목 분석) 안 본 함수 의무 호출. 누락 시 Rust heap 누적 OOM.",
+        "capabilities": "인스턴스 ``self._cache`` (BoundedCache) 의 모든 entry evict + Polars 네이티브 힙\n``cleanupBetweenCompanies`` 호출. KR multi-company loop 사이 회수.",
+        "example": ">>> c = Company(\"005930\")\n>>> c.show(\"IS\")\n>>> n = c.cleanupCache()\n>>> print(f\"evicted {n} entries\")\n\nRaises:\n없음 (cleanupBetweenCompanies 가 내부 silent).",
+        "guide": "\"다음 종목 진입 전 메모리 회수\" → 본 함수 또는 ``with Company(c):`` 컨텍스트.",
+        "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "호출 없이 다종목 순회 → Polars 힙 누적 → OOM.",
+                "``gc.collect()`` 만 호출 → Rust heap 회수 X. 본 함수 필수."
+            ],
+            "dataflow": "self._cache → clear → cleanupBetweenCompanies(label) → Rust heap.",
+            "freshness": "호출 시점 즉시.",
+            "outputSchema": "int — evict 된 entry 수.",
+            "prerequisites": "인스턴스 활성 상태.",
+            "targetMarkets": "KR — 본 클래스 인스턴스."
+        },
+        "requires": "dartlab\npolars",
+        "returns": "evict 된 cache entry 수.",
+        "seeAlso": "``memorySnapshot`` — 호출 전/후 RSS 비교.\n``__exit__`` — context manager 종료 시 본 함수 자동 호출.\n``dartlab.core.memory.cleanupBetweenCompanies`` — Polars Rust heap 회수.",
+        "summary": "BoundedCache 전체 evict + cleanupBetweenCompanies 실행."
     },
     "Company.codeName": {
         "args": "stockCode: 6자리 종목코드.",
+        "example": ">>> Company(\"005930\").codeName()",
         "kind": "method",
-        "returns": "str | None — 회사명. 못 찾으면 None.",
+        "llmSpecs": {
+            "antiPatterns": "회사명 입력 → None (반대 방향은 nameToCode).",
+            "dataflow": "codeToName(stockCode) → 본 staticmethod.",
+            "freshness": "KIND 갱신 시점.",
+            "outputSchema": "str 회사명 또는 None.",
+            "prerequisites": "ListingResolver origin.",
+            "targetMarkets": "KR."
+        },
+        "returns": "str | None — 회사명. 못 찾으면 None.\n\nRaises:\n없음.",
         "summary": "종목코드 → 회사명 변환."
     },
     "Company.contextSlices": {
         "aicontext": "ask()/chat()의 시스템 프롬프트에 직접 주입되는 데이터\nLLM이 소비하는 최종 형태의 컨텍스트",
         "capabilities": "retrievalBlocks를 LLM 컨텍스트 윈도우에 맞게 슬라이싱\n토큰 예산 내에서 최대한 많은 관련 정보를 담는 압축 포맷\ntopic/period 기준 우선순위 정렬",
-        "example": "c = Company(\"005930\")\nc.contextSlices            # LLM용 context 슬라이스",
+        "example": "c = Company(\"005930\")\nc.contextSlices            # LLM용 context 슬라이스\n\nRaises:\n없음.",
         "guide": "\"LLM에 들어가는 컨텍스트\" → c.contextSlices\n\"AI가 보는 데이터\" → c.contextSlices",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "슬라이스 그대로 컨텍스트 → 토큰 부담. topic 필터링.",
+                "슬라이스 ID 의 안정성 가정 X — sections 갱신 시 재산정."
+            ],
+            "dataflow": "docs.sections → docs.contextSlices accessor → 본 property.",
+            "freshness": "sections 갱신 시점.",
+            "outputSchema": "pl.DataFrame [sliceId, topic, period, content, tokenCount] 또는 None.",
+            "prerequisites": "docs.sections + slicer (LLM context budget).",
+            "targetMarkets": "KR (DART 정기보고서 RAG)."
+        },
         "requires": "데이터: docs (자동 다운로드)",
         "returns": "pl.DataFrame | None -- 슬라이싱된 context 블록. docs 없으면 None.",
         "seeAlso": "retrievalBlocks: 슬라이싱 전 전체 retrieval 블록\nask: contextSlices를 내부적으로 소비하는 AI 질문 인터페이스",
@@ -381,8 +447,16 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "독립 신용평가 — dCR 20단계 등급 (내부 구현)."
     },
     "Company.currency": {
-        "example": "c = Company(\"005930\")\nc.currency  # \"KRW\"",
+        "example": "c = Company(\"005930\")\nc.currency  # \"KRW\"\n\nRaises:\n없음.",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": "외화 결산 회사 (드물지만 가능) 도 본 함수 \"KRW\" 반환 — 실 보고통화 별도 확인.",
+            "dataflow": "본 property → \"KRW\".",
+            "freshness": "정적.",
+            "outputSchema": "고정 str \"KRW\".",
+            "prerequisites": "없음 (상수).",
+            "targetMarkets": "KR — 한국 표준 통화."
+        },
         "returns": "str — \"KRW\".",
         "seeAlso": "market: 시장 코드",
         "summary": "통화 코드 (DART 제공자는 항상 KRW)."
@@ -407,54 +481,14 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "ICR : float — 배 (이자보상배율)",
                 "위험등급 : str — 안전 / 주의 / 경고 / 위험"
             ],
-            "targetMarkets": "KR"
+            "targetMarkets": [
+                "KR",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "6자리 종목코드",
-                "name": "종목코드",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "회사명",
-                "name": "종목명",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "부채비율 (%)",
-                "name": "부채비율",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "차입금의존도 (%)",
-                "name": "차입금의존도",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "이자보상배율 (배)",
-                "name": "ICR",
-                "type": "float",
-                "unit": "배"
-            },
-            {
-                "depth": 0,
-                "description": "안전/주의/경고/위험",
-                "name": "위험등급",
-                "type": "str",
-                "unit": null
-            }
-        ],
-        "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n부채비율 : float — 부채비율 (%)\n차입금의존도 : float — 차입금의존도 (%)\nICR : float — 이자보상배율 (배)\n위험등급 : str — 안전/주의/경고/위험\n데이터 없으면 None.",
+        "returns": "pl.DataFrame [종목코드, 부채비율, 차입금의존도, ICR, 위험등급] 또는 None.",
         "seeAlso": "BS: 재무상태표 (부채 원본 데이터)\nratios: 재무비율 (부채비율 포함)\ncapital: 주주환원 (자본 정책의 다른 면)",
         "summary": "부채 구조 분석 (차입금, 부채비율, 만기 구조)."
     },
@@ -465,9 +499,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.diff()                                    # 전체 변경 요약\nc.diff(\"businessOverview\")                  # 사업개요 변경 이력\nc.diff(\"businessOverview\", \"2023\", \"2024\")  # 줄 단위 diff",
         "guide": "\"공시에서 뭐가 바뀌었어?\" → c.diff()\n\"사업개요 변경 이력\" → c.diff(\"businessOverview\")\n\"2023 vs 2024 차이\" → c.diff(\"businessOverview\", \"2023\", \"2024\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "줄 단위 diff (3 인자) 결과를 그대로 LLM → 거대 본문 토큰 폭증. 변경 줄만.",
+                "period 형식 변형 (\"2023Q4\" vs \"2023\") → sections 컬럼명 매칭 X."
+            ],
+            "dataflow": "docs.sections → 모드 별 diff (summary/history/lineDiff) → 본 함수.",
+            "freshness": "sections 갱신 시점.",
+            "outputSchema": "호출 모드별 — (1) 전체 요약 (2) topic 히스토리 (3) 줄 단위 diff DataFrame.",
+            "prerequisites": "docs.sections (2 기간 이상).",
+            "targetMarkets": "KR (DART 정기보고서 변경)."
+        },
         "requires": "데이터: docs (2개 이상 기간 필요)",
         "returns": "pl.DataFrame | None — 변경 요약, 히스토리, 또는 줄 단위 diff.",
-        "seeAlso": "watch: 변화 중요도 스코어링 (diff보다 요약적)\nkeywordTrend: 키워드 빈도 추이 (텍스트 변화의 다른 관점)\nshow: 특정 기간 원문 조회",
+        "seeAlso": "watch: 변화 중요도 스코어링 (diff보다 요약적)\nkeywordTrend: 키워드 빈도 추이 (텍스트 변화의 다른 관점)\nshow: 특정 기간 원문 조회\n\nRaises:\n없음.",
         "summary": "기간간 텍스트 변경 비교."
     },
     "Company.disclosure": {
@@ -482,7 +527,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "전종목 disclosure() (단일 종목 전용 — 전종목은 dartlab.search())",
                 "days 와 start/end 동시 (start/end 우선)"
             ],
-            "freshness": "DART API 실시간 (분 단위). filings() 와 다름 (filings 는 local cache).",
+            "freshness": "DART API 실시간 (분 단위). filings() 와 다름 (filings 는 local cache). Raises: 없음.",
             "outputSchema": [
                 "rceptNo : str — 공시 접수번호 (readFiling 입력용)",
                 "filedAt : str — 공시 일자 (YYYY-MM-DD)",
@@ -502,42 +547,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "facts 결과를 그대로 답변 본문에 dump (수백 행)",
                 "value 가 텍스트일 때 숫자 계산 시도 (numeric 파싱 별도)"
             ],
-            "freshness": "sections / finance / report 의 c.update() 시점.",
+            "freshness": "sections / finance / report 의 c.update() 시점. Raises: 없음.",
             "outputSchema": [
                 "topic : str — topic 식별자",
                 "period : str — 기간 (2025Q4 형식)",
                 "value : str — 텍스트 또는 숫자 요약"
             ]
         },
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "데이터 소스 topic",
-                "name": "topic",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "기간 (예: \"2025Q4\")",
-                "name": "period",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "해당 topic/period 의 텍스트 또는 숫자 요약",
-                "name": "value",
-                "type": "str",
-                "unit": null
-            }
-        ],
-        "returns": "pl.DataFrame | None\ntopic : str — 데이터 소스 topic\nperiod : str — 기간 (예: \"2025Q4\")\nvalue : str — 해당 topic/period 의 텍스트 또는 숫자 요약\n데이터 없으면 None.",
+        "returns": "pl.DataFrame [topic, period, value] 또는 None.",
         "summary": "topic × period 형태의 통합 facts 테이블 (sections + finance + report merge)."
     },
     "Company.filings": {
         "aicontext": "어떤 공시가 보유돼 있는지 확인하여 분석 범위 결정에 활용",
         "capabilities": "로컬에 보유한 공시 문서 목록\n기간별, 문서유형별 정리\nDART 뷰어 링크 포함",
+        "example": ">>> Company(\"005930\").filings()",
         "guide": "\"이 회사 공시 목록 보여줘\" → c.filings()\n\"어떤 보고서가 있어?\" → c.filings()로 보유 문서 확인",
         "kind": "method",
         "llmSpecs": {
@@ -545,7 +568,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "실시간 공시 확인용으로 사용 (filings 는 local cache — 실시간은 disclosure/liveFilings)",
                 "readFiling 호출 전 filings 결과의 컬럼명 추측 (rceptNo 사용)"
             ],
-            "freshness": "local cache 기반. c.update() 호출 시점이 기준.",
+            "freshness": "local cache 기반. c.update() 호출 시점이 기준. Raises: 없음.",
             "outputSchema": [
                 "rceptNo : str — 공시 접수번호 (readFiling 입력용)",
                 "filedAt : str — 공시 일자",
@@ -559,8 +582,17 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "공시 문서 목록 + DART 뷰어 링크."
     },
     "Company.fiscalYearEnd": {
+        "example": ">>> Company(\"005930\").fiscalYearEnd()",
         "kind": "property",
-        "returns": "\"12-31\".",
+        "llmSpecs": {
+            "antiPatterns": "모든 KR 회사 12-31 단정 X — 드물지만 다른 회계년도 존재 가능 (실 종목 결산월 확인).",
+            "dataflow": "본 property → \"12-31\".",
+            "freshness": "정적.",
+            "outputSchema": "고정 str \"12-31\".",
+            "prerequisites": "없음 (관습 상수).",
+            "targetMarkets": "KR — 한국 회계 관습 표준."
+        },
+        "returns": "\"12-31\".\n\nRaises:\n없음.",
         "summary": "회계연도 종료 월-일 (한국 종목은 12-31 표준)."
     },
     "Company.gather": {
@@ -576,7 +608,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "flow 를 EDGAR ticker (US) 에 호출 (KR 전용)",
                 "news 의 target 비워두고 종목 무관 결과 기대 (종목 fallback 발생)"
             ],
-            "freshness": "price/flow: T+1 (전일 종가). macro: ECOS/FRED 갱신 주기. news: 실시간 RSS.",
+            "freshness": "price/flow: T+1 (전일 종가). macro: ECOS/FRED 갱신 주기. news: 실시간 RSS. Raises: 없음.",
             "outputSchema": [
                 "price: date / open / high / low / close / volume (원, 정수)",
                 "flow: date / 외국인순매수 / 기관순매수 (KR 전용, 정수)",
@@ -739,68 +771,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "종합점수 : float — 100 점 만점",
                 "등급 : str — A/B/C/D/E"
             ],
-            "targetMarkets": "KR (DART)"
+            "targetMarkets": [
+                "KR (DART)",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "6자리 종목코드",
-                "name": "종목코드",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "회사명",
-                "name": "종목명",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "최대주주 + 특수관계인 지분율 (%)",
-                "name": "최대주주지분율",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "사외이사 비율 (%)",
-                "name": "사외이사비율",
-                "type": "float",
-                "unit": "%"
-            },
-            {
-                "depth": 0,
-                "description": "감사위원회 설치 여부",
-                "name": "감사위원회",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "거버넌스 종합 점수 (100점 만점)",
-                "name": "종합점수",
-                "type": "float",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "A/B/C/D/E 등급",
-                "name": "등급",
-                "type": "str",
-                "unit": null
-            }
-        ],
-        "returns": "pl.DataFrame | None\n종목코드 : str — 6자리 종목코드\n종목명 : str — 회사명\n최대주주지분율 : float — 최대주주 + 특수관계인 지분율 (%)\n사외이사비율 : float — 사외이사 비율 (%)\n감사위원회 : str — 감사위원회 설치 여부\n종합점수 : float — 거버넌스 종합 점수 (100점 만점)\n등급 : str — A/B/C/D/E 등급\n데이터 없으면 None.",
+        "returns": "pl.DataFrame [종목코드, 종목명, 최대주주지분율, 사외이사비율, 감사위원회, 종합점수, 등급] 또는 None.",
         "seeAlso": "network: 출자/계열사 관계 (거버넌스의 다른 관점)\naudit: 감사 리스크 (감사위원회와 연관)",
         "summary": "지배구조 분석 (이사회, 감사위원, 최대주주)."
     },
     "Company.index": {
         "aicontext": "LLM이 Company 전체 구조를 파악하는 핵심 진입점\nask()에서 어떤 데이터를 참조할지 결정하는 기초 정보",
         "capabilities": "docs sections + finance + report 전체를 하나의 목차로 통합\n각 항목의 chapter, topic, label, kind, source, periods, shape, preview 제공\nsections 메타데이터 + 존재 확인만으로 구성 (파서 미호출, lazy)\nviewer/렌더러가 소비하는 메타데이터 원천",
-        "example": "c = Company(\"005930\")\nc.index                    # 전체 구조 목차\nc.index.filter(pl.col(\"source\") == \"docs\")  # docs 항목만",
+        "example": ">>> c = Company(\"005930\")\n>>> c.index                    # 전체 구조 목차\nc.index.filter(pl.col(\"source\") == \"docs\")  # docs 항목만",
         "guide": "\"전체 목차 보여줘\" → c.index\n\"어떤 데이터가 있는지 구조적으로\" → c.index",
         "kind": "property",
         "llmSpecs": {
@@ -820,22 +805,25 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "preview : str — 첫 줄 미리보기"
             ]
         },
-        "requires": "데이터: docs/finance/report 중 하나 이상 (자동 다운로드)",
+        "requires": "데이터: docs/finance/report 중 하나 이상 (자동 다운로드).",
         "returnSchema": [
             {
                 "depth": 0,
                 "description": "",
-                "name": "pl.DataFrame -- 컬럼",
-                "type": "chapter, topic, label, kind, source, periods, shape, preview",
+                "name": "pl.DataFrame — 컬럼",
+                "type": "chapter, topic, label, kind, source, periods, shape, preview.",
                 "unit": null
             }
         ],
-        "returns": "pl.DataFrame -- 컬럼: chapter, topic, label, kind, source, periods, shape, preview",
+        "returns": "pl.DataFrame — 컬럼: chapter, topic, label, kind, source, periods, shape, preview.\n\nRaises:\n없음 (데이터 부재 시 빈 DataFrame).",
         "seeAlso": "topics: topic 단위 요약 (index보다 간결)\nsections: 전체 sections 지도 (index의 원본)\nprofile: 통합 프로필 접근자",
         "summary": "현재 공개 Company 구조 인덱스 DataFrame -- 전체 데이터 목차."
     },
     "Company.industry": {
+        "aicontext": "동종 비교 시 sector (11 대) 보다 chain stage 가 더 정밀 — AI 가 peer 선정에 본 함수 활용.",
+        "capabilities": "회사의 산업 밸류체인 내 위치 (upstream/midstream/downstream/fab/equipment 등) 분류 +\n같은 stage peer 종목코드 list 반환. sector vs industry 분리 — 후자는 가치사슬 차원.",
         "example": "c = Company(\"005930\")\npos = c.industry()\n# {'chainId': 'semiconductor', 'stage': 'fab', 'stageLabel': '전공정(FAB)', ...}",
+        "guide": "\"이 회사 가치사슬 어디\" → 본 함수.\n\"같은 stage peer\" → result[\"peers\"].",
         "kind": "method",
         "llmSpecs": {
             "antiPatterns": [
@@ -843,7 +831,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "peers 추측 (industry().peers 가 실제 매칭된 종목)",
                 "confidence 무시하고 단정 (낮으면 매칭 신뢰도 낮음)"
             ],
-            "freshness": "산업 지도 정의 시점 — 운영자 수동 업데이트.",
+            "freshness": "산업 지도 정의 시점 — 운영자 수동 업데이트. Raises: 없음.",
             "outputSchema": [
                 "chainId : str — 산업 체인 ID (semiconductor / automobile / ...)",
                 "chainName : str — 한글 산업명",
@@ -853,6 +841,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "peers : list[str] — 같은 stage 종목코드"
             ]
         },
+        "requires": "dartlab\npolars",
         "returnSchema": [
             {
                 "depth": 0,
@@ -863,6 +852,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "dict | None: 산업 내 위치 정보.\nchainId, chainName, stage, stageLabel, confidence, matches, products, peers.\n매칭 실패 시 None.",
+        "seeAlso": "``sector`` — WICS 11 대 섹터 분류 (industry 와 다른 차원).\n``sectorParams`` — 섹터별 valuation 파라미터.\n``dartlab.industry.calcs.companyCalcs.calcChainPosition`` — 본 함수 backend.",
         "summary": "이 회사의 밸류체인 산업 내 위치를 분석한다."
     },
     "Company.keywordTrend": {
@@ -872,16 +862,39 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.keywordTrend(\"AI\")\nc.keywordTrend(keywords=[\"AI\", \"ESG\"])\nc.keywordTrend()                  # 54개 내장 키워드 전체",
         "guide": "\"AI 언급 추이\" → c.keywordTrend(\"AI\")\n\"ESG 관련 변화\" → c.keywordTrend(\"ESG\")\n\"전체 키워드 트렌드\" → c.keywordTrend()",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "짧은 keyword (\"AI\") → 단어 경계 무시 매칭 (\"RAID\" 도 hit). 정확 매칭 시 정규식.",
+                "빈도 절대값 비교 X — 본문 길이 차이 무시. 정규화 별도."
+            ],
+            "dataflow": "docs.sections + keywords → keywordFrequency → 본 DF.",
+            "freshness": "sections 갱신 시점.",
+            "outputSchema": "pl.DataFrame [topic, period, keyword, count] 또는 None.",
+            "prerequisites": "docs.sections.",
+            "targetMarkets": "KR (DART 정기보고서 텍스트)."
+        },
         "requires": "데이터: docs (자동 다운로드)",
         "returns": "pl.DataFrame | None — topic x period x keyword 빈도.",
-        "seeAlso": "diff: 텍스트 줄 단위 변경 비교 (키워드가 아닌 전체 변경)\nwatch: 변화 중요도 스코어링",
+        "seeAlso": "diff: 텍스트 줄 단위 변경 비교 (키워드가 아닌 전체 변경)\nwatch: 변화 중요도 스코어링\n\nRaises:\n없음.",
         "summary": "공시 텍스트 키워드 빈도 추이 (topic x period x keyword)."
     },
     "Company.listing": {
         "args": "forceRefresh: True면 캐시 무시, KIND에서 재다운로드.",
         "capabilities": "KOSPI + KOSDAQ 전체 상장법인\n종목코드, 종목명, 시장구분, 업종",
+        "example": ">>> Company(\"005930\").listing()",
         "kind": "method",
-        "requires": "데이터: listing (자동 다운로드)",
+        "llmSpecs": {
+            "antiPatterns": [
+                "forceRefresh=True 빈번 호출 → KRX 부하.",
+                "전체 ~2500 row 그대로 LLM → 토큰 폭증. search 활용."
+            ],
+            "dataflow": "getKindList(forceRefresh) → 본 staticmethod.",
+            "freshness": "KIND 갱신 시점 (일 단위).",
+            "outputSchema": "pl.DataFrame — [code, name, market, sector, ...].",
+            "prerequisites": "인터넷 + KRX KIND endpoint.",
+            "targetMarkets": "KR (KOSPI + KOSDAQ + KONEX)."
+        },
+        "requires": "데이터: listing (자동 다운로드)\n\nRaises:\n없음.",
         "returns": "pl.DataFrame — code, name, market, sector 등.",
         "summary": "KRX 전체 상장법인 목록 (KIND 기준)."
     },
@@ -904,7 +917,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "title : str — 공시 제목",
                 "importance : float — 중요도 점수"
             ],
-            "targetMarkets": "KR"
+            "targetMarkets": [
+                "KR",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "API 키: DART_API_KEY",
         "returns": "pl.DataFrame -- docId, filedAt, title, formType, docUrl, viewerUrl 등 정규화된 공시 목록.",
@@ -912,6 +929,10 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "OpenDART 기준 실시간 공시 목록 조회."
     },
     "Company.macro": {
+        "aicontext": "거시환경 회사 영향 답변 시 본 함수. axis 미지정 시 가이드 반환 — AI 가 카탈로그 먼저 확인.",
+        "args": "axis: 매크로 축 (한글 — \"사이클\" / \"위기\" / \"시나리오\" / \"유동성\" / \"심리\"). None 이면 가이드.\ntarget: axis=\"시나리오\" 시 시나리오 이름 (예 \"2008 금융위기\").\noverrides: 매크로 가정 교체 dict.\n**kwargs: 축별 추가 인자.",
+        "capabilities": "KR 시장 매크로 (ECOS + KRX 데이터) 자동 위임. market=\"KR\" 자동 주입. KR 회사 매크로 영향\n분석 entry — US 회사는 edgar.macro 별도.",
+        "example": ">>> Company(\"005930\").macro()",
         "guide": "When: 거시경제 환경·사이클 판단이 필요할 때.\nHow: axis 로 분석 영역 지정. 무인자 = 가이드.\n\"매크로\" → c.macro()\n\"경기 사이클\" → c.macro(\"사이클\")\n\"위기 진단\" → c.macro(\"위기\")\n\"2008 시나리오\" → c.macro(\"시나리오\", \"2008 금융위기\")\nVerified:\nmacro(\"사이클\") → CLI + 사분면 + 금리 + 유동성 + 심리 6축 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\nmacro + analysis → 경제 고려한 종목 분석 (observed via thesis ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "method",
         "llmSpecs": {
@@ -919,13 +940,14 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "axis 추측 (한글 — 사이클 / 위기 / 시나리오 / 유동성 / 심리)",
                 "종목 매크로 = 시장 매크로 혼동 (이건 c.macro = 시장 KR 자동)"
             ],
-            "freshness": "ECOS / FRED 갱신 주기 (월 / 분기).",
+            "freshness": "ECOS / FRED 갱신 주기 (월 / 분기). Raises: 없음.",
             "outputSchema": [
                 "axis=\"사이클\": dict — quadrant + indicators + narrative",
                 "axis=\"시나리오\": dict — historical analogue + projection",
                 "axis 미지정: 가이드 DataFrame"
             ]
         },
+        "requires": "dartlab\npolars",
         "returnSchema": [
             {
                 "depth": 0,
@@ -943,16 +965,60 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "pl.DataFrame | dict\naxis=None: 가이드 DataFrame (axis/label/description/example/group).\naxis 지정: dict — 축별 매크로 분석 결과 (indicators, narrative 포함).",
+        "seeAlso": "``dartlab.macro.Macro`` — 매크로 backend SSOT.\n``edgar.Company.macro`` — US 패리티.",
         "summary": "시장 매크로 (6막 인과 — 사이클/재고/기업/정책/유동성/심리/시나리오). KR 자동 위임."
     },
     "Company.market": {
-        "example": "c = Company(\"005930\")\nc.market  # \"KR\"",
+        "example": "c = Company(\"005930\")\nc.market  # \"KR\"\n\nRaises:\n없음.",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": "시장 세분화 (KOSPI vs KOSDAQ) 필요 시 본 값 부족 — listing 메타에서.",
+            "dataflow": "본 property → \"KR\".",
+            "freshness": "정적.",
+            "outputSchema": "고정 str \"KR\".",
+            "prerequisites": "없음 (상수).",
+            "targetMarkets": "KR — DART provider 통합 라벨."
+        },
         "returns": "str — \"KR\".",
         "seeAlso": "currency: 통화 코드",
         "summary": "시장 코드 (DART 제공자는 항상 KR)."
     },
+    "Company.memorySnapshot": {
+        "aicontext": "OOM tripwire 발동 직전 본 함수로 회사별 메모리 분포 보고 + AI 가 cleanup 결정.",
+        "capabilities": "``self._cache`` entry 수 + 현 프로세스 RSS (MB) dict 합산. MemorySafeProvider Protocol entry.",
+        "example": ">>> c = Company(\"005930\")\n>>> c.memorySnapshot()\n{'cacheSize': 12, 'rssMb': 450}\n\nRaises:\n없음.",
+        "guide": "\"이 회사가 메모리 얼마 쓰나\" → 본 함수.\n\"cleanupCache 효과 확인\" → 호출 전/후 비교.",
+        "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "RSS 절대값 환경 간 비교 X (Windows vs WSL 차이) — 동일 환경 내 추세만.",
+                "cacheSize 0 == 메모리 정리 완료 X. Polars Rust heap 별도 영역."
+            ],
+            "dataflow": "psutil RSS + self._cache len → 본 함수.",
+            "freshness": "호출 시점.",
+            "outputSchema": "dict {\"cacheSize\": int, \"rssMb\": int}.",
+            "prerequisites": "psutil (getMemoryMb 의존).",
+            "targetMarkets": "KR — 본 클래스 인스턴스 추적."
+        },
+        "requires": "dartlab\npolars",
+        "returnSchema": [
+            {
+                "depth": 0,
+                "description": "",
+                "name": "keys",
+                "type": "\"cacheSize\" (BoundedCache entry 수), \"rssMb\" (현 RSS MB).",
+                "unit": null
+            }
+        ],
+        "returns": "keys: \"cacheSize\" (BoundedCache entry 수), \"rssMb\" (현 RSS MB).",
+        "seeAlso": "``cleanupCache`` — 본 함수가 보여준 RSS 회수.\n``dartlab.core.memory.getMemoryMb`` — psutil 기반 RSS.",
+        "summary": "캐시 size + 현 RSS snapshot."
+    },
     "Company.narrativeDiff": {
+        "aicontext": "AI 가 \"이 valuation 핵심 가정\" 답변 시 본 함수 결과 contribution 큰 순 인용.",
+        "args": "claims: 영향 분석 대상 claim 리스트. None 이면 전체 default claims.",
+        "capabilities": "각 claim 제거 후 FV 재계산 → contribution 측정. Thought Anchors 기반 정량 기여도.",
+        "example": ">>> Company(\"005930\").narrativeDiff()",
         "guide": "\"가치 기여도\" → c.narrativeDiff()\n\"낮은WACC 기여 몇%\" → 결과 필터 claim='낮은WACC'",
         "kind": "method",
         "llmSpecs": {
@@ -960,7 +1026,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "contribution 단독 인용 (delta_abs + delta_pct 함께)",
                 "claim 추측 (default 또는 명시 list 만)"
             ],
-            "freshness": "story 인과 체인 시점.",
+            "freshness": "story 인과 체인 시점. Raises: 없음.",
             "outputSchema": [
                 "claim : str — narrative claim 식별자",
                 "dFV_neutral : float — 중립 시나리오 가치",
@@ -969,7 +1035,9 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "contribution : float — 기여도 (정규화)"
             ]
         },
+        "requires": "dartlab\npolars",
         "returns": "list[dict] — claim/dFV_neutral/delta_abs/delta_pct/contribution",
+        "seeAlso": "``storyTree`` — base trajectory.\n``causalWeights`` — claim 가중치.\n``dartlab.story.narrativeDiff.computeImpact`` — implementation.",
         "summary": "각 claim 제거 시 dFV 변화 — Thought Anchors 기반 정량 기여도."
     },
     "Company.network": {
@@ -985,7 +1053,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "hops > 2 (네트워크 폭주, 메모리 부담)",
                 "\"순환출자 = 분식\" 단정 X (한국 그룹 일반)"
             ],
-            "freshness": "대량보유/임원 공시 기준.",
+            "freshness": "대량보유/임원 공시 기준. Raises: 없음.",
             "outputSchema": [
                 "view=\"members\": 종목코드 / 종목명 / 그룹 / 지분율",
                 "view=\"edges\": from / to / 지분율 / 출자유형",
@@ -1005,14 +1073,34 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.news()           # 최근 30일\nc.news(days=7)     # 최근 7일",
         "guide": "\"최근 뉴스 보여줘\" → c.news()\n\"이번 주 뉴스\" → c.news(days=7)",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "본문 그대로 인용 → external untrusted 룰 위반. wrap_external_in_result 마커 후.",
+                "days 큰 값 (>90) → 외부 API 부하/pagination 비용."
+            ],
+            "dataflow": "getGatherProvider().news(corpName, market=\"KR\", days) → 본 함수.",
+            "freshness": "외부 origin 실시간.",
+            "outputSchema": "pl.DataFrame [title, date, source, link] 또는 None.",
+            "prerequisites": "인터넷 + 뉴스 origin (gatherProvider — Naver/Google).",
+            "targetMarkets": "KR (한국어 뉴스 위주)."
+        },
         "requires": "없음 (공개 RSS)",
         "returns": "pl.DataFrame — title, date, source, link.",
-        "seeAlso": "liveFilings: 최신 공시 (뉴스가 아닌 공식 공시)\ngather: 뉴스 포함 4축 외부 데이터 수집",
+        "seeAlso": "liveFilings: 최신 공시 (뉴스가 아닌 공식 공시)\ngather: 뉴스 포함 4축 외부 데이터 수집\n\nRaises:\n없음.",
         "summary": "최근 뉴스 수집."
     },
     "Company.priority": {
+        "example": ">>> Company(\"005930\").priority()",
         "kind": "method",
-        "returns": "int\nprovider 우선순위. DART 는 10 — EDGAR (20) 보다 먼저 시도.",
+        "llmSpecs": {
+            "antiPatterns": "본 상수 외부에서 hard-code 비교 — 라우터 순서 변경 시 회귀.",
+            "dataflow": "Company 팩토리 → 본 함수 → provider 우선순위 정렬.",
+            "freshness": "라우터 SSOT 변경 시.",
+            "outputSchema": "int 상수 10.",
+            "prerequisites": "없음.",
+            "targetMarkets": "KR — primary provider."
+        },
+        "returns": "int 상수 10 (DART = primary).",
         "summary": "낮을수록 먼저 시도. DART=10 (기본 provider)."
     },
     "Company.quant": {
@@ -1053,7 +1141,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "sizeClass : str — large / mid / small",
                 "sectorTotal : int — 섹터 종목 수"
             ],
-            "targetMarkets": "KR"
+            "targetMarkets": [
+                "KR",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "데이터: buildSnapshot() 사전 실행 필요",
         "returns": "RankInfo 또는 스냅샷 미빌드 시 None.",
@@ -1071,7 +1163,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "분석 답변에 raw parquet 직접 인용 (sections / show 가공본 우선)",
                 "메모리 부담 큼 — 매 호출마다 호출 X (캐시)"
             ],
-            "freshness": "HuggingFace parquet 다운로드 시점.",
+            "freshness": "HuggingFace parquet 다운로드 시점. Raises: 없음.",
             "outputSchema": "HuggingFace docs parquet 원본 — 컬럼 구조는 dataset 별로 다름"
         },
         "requires": "데이터: HuggingFace docs parquet (자동 다운로드)",
@@ -1090,7 +1182,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "분석 답변에 raw parquet 직접 인용 (show(\"BS\") 등 가공본 우선)",
                 "매 호출 reload (캐시 — 1 회면 충분)"
             ],
-            "freshness": "HuggingFace finance parquet 다운로드 시점.",
+            "freshness": "HuggingFace finance parquet 다운로드 시점. Raises: 없음.",
             "outputSchema": "XBRL 정규화 전 원본 — bsns_year / sj_div / account_id / amount 등"
         },
         "requires": "데이터: HuggingFace finance parquet (자동 다운로드)",
@@ -1109,7 +1201,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "report 원본을 본문 답변에 직접 인용 (show / story 가공본 우선)",
                 "매 호출 reload (캐시 — 1 회면 충분)"
             ],
-            "freshness": "HuggingFace report parquet 다운로드 시점.",
+            "freshness": "HuggingFace report parquet 다운로드 시점. Raises: 없음.",
             "outputSchema": "정기보고서 API 원본 — 컬럼은 보고서 form 별로 다름"
         },
         "requires": "데이터: HuggingFace report parquet (자동 다운로드)",
@@ -1129,7 +1221,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "종목 이름 (str) 을 filing 인자로 전달 (rceptNo 또는 row 만)",
                 "sections=True + maxChars 동시 (sections 일 때 maxChars 무시)"
             ],
-            "freshness": "DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download.",
+            "freshness": "DART API 실시간. 단 본문 캐시 없음 — 매 호출 = 새 download. Raises: 없음.",
             "outputSchema": [
                 "rceptNo : str — 공시 접수번호",
                 "viewerUrl : str — DART 뷰어 링크",
@@ -1143,17 +1235,45 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "접수번호 또는 liveFilings row로 공시 원문을 읽는다."
     },
     "Company.resolve": {
-        "args": "codeOrName: 종목코드 (\"005930\") 또는 종목명 (\"삼성전자\").",
+        "aicontext": "AI 가 사용자 발화 \"삼성전자\" / \"005930\" 모두 처리 — 일관 stockCode 반환.",
+        "args": "stockCode: 종목코드 (\"005930\") 또는 종목명 (\"삼성전자\").",
+        "capabilities": "입력이 6 자리 alphanumeric 이면 그대로 (대문자화), 한국어 회사명이면 nameToCode 위임.\n사용자 입력 표준화 entry — KR 종목코드 또는 회사명 양쪽 받는 헬퍼.",
+        "example": ">>> Company(\"005930\").resolve()",
+        "guide": "\"사용자 모호 입력 → 표준 종목코드\" → 본 함수.",
         "kind": "method",
-        "returns": "str | None — 6자리 종목코드. 못 찾으면 None.",
+        "llmSpecs": {
+            "antiPatterns": [
+                "영문 5 자 → 6 자리 매칭 X → nameToCode 시도 → None. EDGAR 코드는 다른 provider.",
+                "회사명 정확 매치만 — 부분 매치는 ``searchName``."
+            ],
+            "dataflow": "입력 → regex 6 자 검사 → 통과 시 upper, 실패 시 nameToCode.",
+            "freshness": "KIND 갱신 시점.",
+            "outputSchema": "str (6 자 대문자) 또는 None.",
+            "prerequisites": "ListingResolver origin.",
+            "targetMarkets": "KR."
+        },
+        "requires": "dartlab\npolars",
+        "returns": "str | None — 6자리 종목코드. 못 찾으면 None.\n\nRaises:\n없음.",
+        "seeAlso": "``codeName`` — 반대 (code → name).\n``nameToCode`` — module-level 등가.",
         "summary": "종목코드 또는 회사명 → 종목코드 변환."
     },
     "Company.retrievalBlocks": {
         "aicontext": "ask()/chat()에서 원문 기반 답변 생성 시 소스로 사용\nretrieval 기반 컨텍스트 주입의 원천 데이터",
         "capabilities": "docs 원문을 markdown 형태 그대로 보존한 검색용 블록\n각 블록은 topic/subtopic/period 단위로 분할\nRAG, 벡터 검색, 원문 참조에 최적화된 포맷",
-        "example": "c = Company(\"005930\")\nc.retrievalBlocks          # 전체 retrieval 블록",
+        "example": "c = Company(\"005930\")\nc.retrievalBlocks          # 전체 retrieval 블록\n\nRaises:\n없음.",
         "guide": "\"원문 검색용 블록\" → c.retrievalBlocks\n\"RAG용 데이터\" → c.retrievalBlocks",
         "kind": "property",
+        "llmSpecs": {
+            "antiPatterns": [
+                "block_id 의 안정성 가정 X — sections 갱신 시 재산정.",
+                "본 블록 벡터 임베딩 사전 계산 가정 X — 별도 처리."
+            ],
+            "dataflow": "docs.sections → 청킹 → 본 property.",
+            "freshness": "sections 갱신 시점.",
+            "outputSchema": "pl.DataFrame [topic, subtopic, period, content] 또는 None.",
+            "prerequisites": "docs.sections.",
+            "targetMarkets": "KR (DART 정기보고서 RAG)."
+        },
         "requires": "데이터: docs (자동 다운로드)",
         "returnSchema": [
             {
@@ -1169,8 +1289,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "원문 markdown 보존 retrieval block DataFrame."
     },
     "Company.search": {
-        "args": "keyword: 검색어 (부분 일치).",
+        "args": "keyword: 검색어 (부분 일치).\nlimit: 최대 행 수. None 이면 무제한.",
+        "example": ">>> Company.search(\"삼성\", limit=10)\n\nRaises:\n없음.",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "limit 없이 흔한 keyword → 수십~수백 row.",
+                "영문 keyword → 매치 X (KIND 한국어 origin)."
+            ],
+            "dataflow": "searchName(keyword, limit) → 본 staticmethod.",
+            "freshness": "KIND 갱신 시점.",
+            "outputSchema": "pl.DataFrame [stockCode, corpName, market, sector, ...].",
+            "prerequisites": "ListingResolver origin.",
+            "targetMarkets": "KR."
+        },
         "returns": "pl.DataFrame — 매칭 종목 목록.",
         "summary": "회사명 부분 검색 (KIND 목록 기준)."
     },
@@ -1185,7 +1317,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "단일 topic 만 필요한데 sections 호출 (메모리 폭주 — show(topic) 사용)",
                 "sections 결과를 캐시 안 하고 반복 호출 (re-build 비용 큼)"
             ],
-            "freshness": "docs/finance/report 3 source 각각의 최신 시점. c.update() 시점.",
+            "freshness": "docs/finance/report 3 source 각각의 최신 시점. c.update() 시점. Raises: 없음.",
             "outputSchema": [
                 "chapter : str — 장 이름",
                 "topic : str — topic 식별자",
@@ -1216,7 +1348,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "confidence : float — 0.0~1.0 (1.0 = override, 0.5+ = 키워드 매칭)",
                 "source : str — override / keyword / industry"
             ],
-            "targetMarkets": "KR"
+            "targetMarkets": [
+                "KR",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "데이터: KIND 상장사 목록 (자동 로드)",
         "returns": "SectorInfo (sector, industryGroup, confidence, source).",
@@ -1231,45 +1367,19 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "kind": "property",
         "requires": "데이터: sector 분류 결과 (자동 연산)",
         "returns": "SectorParams (discountRate, growthRate, perMultiple, ...).",
-        "seeAlso": "sector: 섹터 분류 정보 (sectorParams의 기반)\nvaluation: 밸류에이션 (sectorParams를 내부적으로 소비)",
+        "seeAlso": "sector: 섹터 분류 정보 (sectorParams의 기반)\nvaluation: 밸류에이션 (sectorParams를 내부적으로 소비)\n\nRaises:\n없음.",
         "summary": "현재 종목의 섹터별 밸류에이션 파라미터."
     },
     "Company.select": {
-        "args": "topic: IS, BS, CF, CIS, SCE 또는 docs topic.\nindList: 행 필터. 한글 항목/snakeId/항목명. 단일 str 도 가능.\ncolList: 열(기간) 필터. 단일 str 도 가능.\nfreq: 시계열 주기 — ``\"Q\"`` (분기, 기본) / ``\"Y\"`` (연간) / ``\"YTD\"`` (누적).\nscope: 재무제표 범위 — ``\"consolidated\"`` (연결, 기본) / ``\"separate\"`` (별도).",
-        "example": "c.select(\"IS\", [\"매출액\", \"영업이익\"])\nc.select(\"IS\", [\"매출액\"], freq=\"Y\")              # 연간 매출\nc.select(\"BS\", [\"자본총계\"], scope=\"separate\")    # 별도 자본\nc.select(\"IS\", [\"매출액\"]).chart()",
+        "aicontext": "show() 전체 노출 비용 회피 — 필요 행/열만 정밀 추출 후 LLM 컨텍스트 주입.",
+        "capabilities": "show() 결과의 indList (행/계정) × colList (열/기간) 동시 필터. SelectResult 로 감싸\n``.chart()`` 체이닝 + export. strict=True 시 매치 0 면 ValueError.",
+        "example": ">>> c = Company(\"005930\")\n>>> c.select(\"IS\", [\"매출액\"])           # call form\n>>> c.select.IS([\"매출액\"])              # attr form\n>>> c.select.IS([\"매출액\"], freq=\"Y\")    # attr + kwargs\n\nRaises:\n없음 (해당 topic 부재 시 ``_selectImpl`` 이 None 반환).",
+        "guide": "\"매출액만 2024\" → ``c.select(\"IS\", \"매출액\", \"2024\")``.\n\"여러 계정 + 여러 연도\" → ``c.select(\"IS\", [\"매출액\", \"당기순이익\"], [\"2024\", \"2023\"])``.",
         "kind": "property",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "",
-                "name": "내부 DataFrame 접근",
-                "type": "result.df (pl.DataFrame).",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "계정 식별자",
-                "name": "snakeId",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "계정명",
-                "name": "항목",
-                "type": "str",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "분기별 값 (원 단위)",
-                "name": "2025Q4, 2025Q3, ...",
-                "type": "float",
-                "unit": null
-            }
-        ],
-        "returns": "SelectResult\nshow()와 동일 컬럼 구조에서 indList/colList로 필터된 행/열.\n.chart() 체이닝으로 시각화 가능.\n내부 DataFrame 접근: result.df (pl.DataFrame).\nfinance topic 예시 (c.select(\"IS\", [\"매출액\"])):\nsnakeId : str — 계정 식별자\n항목 : str — 계정명\n2025Q4, 2025Q3, ... : float — 분기별 값 (원 단위)\n행 매칭 실패 시 ValueError.",
-        "summary": "show() 결과에서 행(indList) + 열(colList) 필터 — 내부 구현."
+        "requires": "dartlab\npolars",
+        "returns": "``CallableAccessor`` — call/attr form 둘 다 ``_selectImpl`` 호출. ``SelectResult``\n반환 (filtered DataFrame + meta). 상세는 ``_selectImpl`` docstring.",
+        "seeAlso": "``_selectImpl`` — 실제 필터 구현.\n``show`` — 본 함수의 입력 source.\n``dartlab.frame.select.SelectResult`` — 반환 객체 + ``.chart()`` 체이닝.",
+        "summary": "``show()`` 결과에서 행/열 필터 — dual access proxy."
     },
     "Company.show": {
         "aicontext": "120+ topic 단일 접근점 — LLM 이 데이터 조회 핵심 도구\nfinance topic 은 freq/scope 토글로 분기/연간/연결/별도 자유 전환",
@@ -1380,7 +1490,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "매 분석마다 c.sources 호출 (캐시 — 1 회면 충분)",
                 "sources 결과로 분석 결정 (가용성만 확인, 실제 분석은 show)"
             ],
-            "freshness": "rawDocs / rawFinance / rawReport 의 다운로드 시점 기준.",
+            "freshness": "rawDocs / rawFinance / rawReport 의 다운로드 시점 기준. Raises: 없음.",
             "outputSchema": [
                 "source : str — docs / finance / report",
                 "available : bool — 데이터 보유 여부",
@@ -1405,8 +1515,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.status": {
         "capabilities": "로컬 데이터 현황 (종목별 docs/finance/report 보유 여부)\n최종 업데이트 일시",
+        "example": ">>> Company(\"005930\").status()",
         "kind": "method",
-        "returns": "pl.DataFrame — 종목코드, 회사명, docs/finance/report 유무, 최종일시.",
+        "llmSpecs": {
+            "antiPatterns": [
+                "전체 status DataFrame LLM 컨텍스트 → 수천 row.",
+                "보유 == 최신 가정 X — update() 미실행 시 stale 가능."
+            ],
+            "dataflow": "data/{docs,finance,report}/*.parquet → buildIndex → 본 staticmethod.",
+            "freshness": "호출 시점 디스크 스캔.",
+            "outputSchema": "pl.DataFrame [stockCode, corpName, docs:bool, finance:bool, report:bool, lastUpdated].",
+            "prerequisites": "로컬 data/ 디렉토리 인덱스 build.",
+            "targetMarkets": "KR — 로컬 보유 종목 카탈로그."
+        },
+        "returns": "pl.DataFrame — 종목코드, 회사명, docs/finance/report 유무, 최종일시.\n\nRaises:\n없음.",
         "summary": "로컬에 보유한 전체 종목 인덱스."
     },
     "Company.story": {
@@ -1436,6 +1558,9 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "재무제표 구조화 보고서 — 기업이야기꾼의 대본 (내부 구현)."
     },
     "Company.storyTree": {
+        "aicontext": "AI 가 \"이 회사 가치 시나리오\" 답변 시 본 함수 3 trajectory 인용. 단일 값 X.",
+        "args": "basePeriod: 기준 fiscal period. None 이면 최신 분기.",
+        "capabilities": "possible (낙관) / plausible (중도) / probable (보수) 3 DCF 계산 + spread/mean 요약.\nDamodaran 3P 방법론.",
         "guide": "\"3 시나리오 가치\" → c.storyTree()\n\"서사 민감도\" → c.storyTree()['summary']['spreadPct']",
         "kind": "method",
         "llmSpecs": {
@@ -1443,7 +1568,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "단일 시나리오 (예: probable) 만 인용 (3 시나리오 + 분포 함께)",
                 "spreadPct 가 작으면 \"확실\" 단정 X (가정 강도와 함께)"
             ],
-            "freshness": "finance 시계열 시점.",
+            "freshness": "finance 시계열 시점. Raises: 없음.",
             "outputSchema": [
                 "possible : dict — 낙관 시나리오 DCF 결과",
                 "plausible : dict — 중도 시나리오",
@@ -1451,7 +1576,9 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "summary : dict — min / max / spread / spreadPct / mean"
             ]
         },
+        "requires": "dartlab\npolars",
         "returns": "dict — possible/plausible/probable + summary {min/max/spread/spreadPct/mean}",
+        "seeAlso": "``causalWeights`` / ``valuationImpact`` — 본 함수의 입력 시나리오.\n``validateStory`` — 본 결과의 plausibility 검증.",
         "summary": "Damodaran 3P — possible(낙관)/plausible(중도)/probable(보수) 3 DCF + 민감도."
     },
     "Company.table": {
@@ -1461,23 +1588,41 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.table(\"employee\")                    # 첫 번째 subtopic\nc.table(\"employee\", \"직원현황\")         # 특정 subtopic\nc.table(\"employee\", numeric=True)       # 숫자 변환",
         "guide": "\"직원 현황 테이블\" → c.table(\"employee\")\n\"표 데이터를 숫자로\" → c.table(topic, numeric=True)",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "numeric=True 후 변환 실패 row 가 None — caller 가 null 분기 의무.",
+                "subtopic 이름 추측 — 정확 이름은 sections 본문 또는 show(topic) 확인."
+            ],
+            "dataflow": "docs.subtables → parseSubtopicTable(numeric) → period filter → 본 함수.",
+            "freshness": "docs 갱신 시점.",
+            "outputSchema": "ParsedSubtopicTable {df: pl.DataFrame, subtopic: str, columns: list} 또는 None.",
+            "prerequisites": "docs 본 회사 보유 + 해당 topic 의 markdown table 본문.",
+            "targetMarkets": "KR (DART 정기보고서 표)."
+        },
         "requires": "데이터: docs (자동 다운로드)",
         "returns": "ParsedSubtopicTable (df, subtopic, columns) 또는 파싱 불가 시 None",
-        "seeAlso": "show: topic 전체 데이터 (table은 subtopic 단위 파싱)\nselect: show() 결과에서 행/열 필터",
+        "seeAlso": "show: topic 전체 데이터 (table은 subtopic 단위 파싱)\nselect: show() 결과에서 행/열 필터\n\nRaises:\n없음.",
         "summary": "subtopic wide 셀의 markdown table을 구조화 DataFrame으로 파싱."
     },
     "Company.topicSummaries": {
+        "aicontext": "workbench query routing — 사용자 자연어 → topic 선택 시 본 dict 으로 후보 좁힘.",
+        "capabilities": "finance 6 topic 은 고정 한국어 설명 + docs topic 은 최신 사업보고서 첫 200 자 요약 합산.\nAI 가 topic 라우팅 결정 시 (어느 topic 사용자 질문에 해당?) 의 origin.",
+        "guide": "\"이 회사 어떤 데이터 어떤 내용 담고 있나\" → 본 함수.",
         "kind": "method",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "",
-                "name": "키 = topic 이름 (예",
-                "type": "\"BS\", \"IS\", \"dividend\", \"companyOverview\")",
-                "unit": null
-            }
-        ],
-        "returns": "dict[str, str]\n키 = topic 이름 (예: \"BS\", \"IS\", \"dividend\", \"companyOverview\")\n값 = 200자 요약 텍스트",
+        "llmSpecs": {
+            "antiPatterns": [
+                "200 자 cap → 본문 전체 가정 X — 자세히는 show() 호출 의무.",
+                "본 함수 결과는 cache — 새 보고서 업데이트 시 새 인스턴스 만들어야."
+            ],
+            "dataflow": "finance summaries (고정) + docs latest report 200 자 합산.",
+            "freshness": "인스턴스 cache — 동일 인스턴스 lifetime 동안 고정.",
+            "outputSchema": "dict[str, str] — topic 이름 → 한국어 요약 (≤ 200 자).",
+            "prerequisites": "최신 사업보고서 docs (선택) + finance topic 카탈로그.",
+            "targetMarkets": "KR."
+        },
+        "requires": "dartlab\npolars",
+        "returns": "dict[str, str] — topic → 200 자 요약 텍스트.",
+        "seeAlso": "``topics`` — DataFrame 카탈로그.\n``index`` — topic 메타 보드.\n``mapSectionTitle`` — sections title 정규화 매핑.",
         "summary": "토픽별 요약 dict — AI가 경로 탐색에 사용."
     },
     "Company.topics": {
@@ -1491,7 +1636,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "매 호출마다 c.topics 재호출 (캐시 — 1 회면 충분)",
                 "topics 결과로 추측한 토픽명을 show() 에 잘못 매핑 (정확한 topic 문자열 필요)"
             ],
-            "freshness": "docs/finance/report 각각의 c.update() 시점.",
+            "freshness": "docs/finance/report 각각의 c.update() 시점. Raises: 없음.",
             "outputSchema": [
                 "order : int — chapter 순서",
                 "chapter : str — 장 이름",
@@ -1518,20 +1663,35 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "Company.trace": {
         "aicontext": "데이터 출처 신뢰도 판단 — finance > report > docs 우선순위 확인\n분석 결과의 근거 투명성 확보",
-        "args": "topic: topic 이름.\nperiod: 특정 기간. None이면 전체.",
-        "capabilities": "topic별 데이터 출처 확인 (docs, finance, report)\n출처 선택 이유 (우선순위, fallback 경로)\n각 출처별 데이터 행 수, 기간 수, 커버리지",
-        "example": "c.trace(\"BS\")           # 재무상태표 출처\nc.trace(\"dividend\")     # 배당 데이터 출처",
+        "args": "topic: topic 이름.\nperiod: 특정 기간. None 이면 전체.",
+        "capabilities": "topic 별 데이터 출처 확인 (docs, finance, report)\n출처 선택 이유 (우선순위, fallback 경로)\n각 출처별 데이터 행 수, 기간 수, 커버리지",
+        "example": ">>> c.trace(\"BS\")           # 재무상태표 출처\n>>> c.trace(\"dividend\")     # 배당 데이터 출처",
         "guide": "\"이 데이터 어디서 온 거야?\" → c.trace(\"BS\")\n\"데이터 출처 확인\" → c.trace(topic)",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "결과 없이 show() 인용 → AI 환각 위험. trace 결과 source 명시 의무.",
+                "period 인자는 metadata 만 — 실 row 필터는 show() 가 처리."
+            ],
+            "dataflow": "topic → resolveTopic → ratios/finance/docs 분기 → source priority 결정 → 본 dict.",
+            "freshness": "호출 시점 (sections + finance index 기준).",
+            "outputSchema": [
+                "dict {topic, period, primarySource, fallbackSources, selectedPayloadRef,",
+                "availableSources:list, whySelected, template?, rowCount?, yearCount?, coverage?} 또는 None."
+            ],
+            "prerequisites": "docs/finance/report origin 중 최소 1 보유.",
+            "targetMarkets": "KR (DART provenance)."
+        },
         "requires": "데이터: docs + finance + report (보유한 것만 추적)",
-        "returns": "dict — primarySource, fallbackSources, whySelected, availableSources 등.",
+        "returns": "dict — primarySource, fallbackSources, whySelected, availableSources 등.\ntopic 미존재 시 None.\n\nRaises:\n없음 (데이터 부재 시 None 반환).",
         "seeAlso": "show: topic 데이터 조회 (trace로 출처 확인 후 열람)\nsources: 3개 source 전체 가용 현황",
-        "summary": "topic 데이터의 출처(docs/finance/report)와 선택 근거 추적."
+        "summary": "topic 데이터의 출처 (docs/finance/report) 와 선택 근거 추적."
     },
     "Company.update": {
         "aicontext": "데이터 최신성 유지에 활용 — 분석 전 자동 갱신 트리거 가능",
         "args": "categories: [\"finance\", \"docs\", \"report\"]. None이면 전체.",
         "capabilities": "DART API로 최신 공시 확인 후 누락분만 수집\n카테고리별 선택 수집",
+        "example": ">>> Company(\"005930\").update()",
         "guide": "\"최신 공시 반영해줘\" → c.update()\n\"데이터 업데이트\" → c.update()로 증분 수집",
         "kind": "method",
         "llmSpecs": {
@@ -1539,7 +1699,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "분석 전 무조건 update() 호출 (이미 최신이면 불필요한 비용)",
                 "categories 에 \"all\" 같은 값 (None 또는 list[str] 만)"
             ],
-            "freshness": "호출 시점에 DART API 와 비교해 누락만 수집. 매 호출 시점 = 최신 기준.",
+            "freshness": "호출 시점에 DART API 와 비교해 누락만 수집. 매 호출 시점 = 최신 기준. Raises: 없음.",
             "outputSchema": [
                 "finance : int — 추가 수집된 finance 건수",
                 "docs : int — 추가 수집된 docs 건수",
@@ -1561,10 +1721,24 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "누락된 최신 공시를 증분 수집."
     },
     "Company.validateStory": {
+        "aicontext": "AI 가 사용자 valuation 가정 reality check 시 본 함수. critical 이면 강한 경고 의무.",
         "args": "overrides: 검증 기준 조율 (VALUATION_KEYS).",
         "capabilities": "calcStoryPrecedents (scan peer + KnowledgeDB insights)\ncalcPlausibilityBand (섹터 피어 분포 percentile)\ncalcValuationSins (정합성 규칙 위반)\noverrides 로 AI 개입 (lifeCyclePhase, terminalGrowth 등)",
-        "example": "c = Company(\"005930\")\nr = c.validateStory()\nfor f in r[\"rules\"][\"flags\"]:\nprint(f['severity'], f['reason'])",
+        "example": "c = Company(\"005930\")\nr = c.validateStory()\nfor f in r[\"rules\"][\"flags\"]:\nprint(f['severity'], f['reason'])\n\nRaises:\n없음.",
+        "guide": "\"이 가정 그럴듯하나\" → 본 함수 결과 plausibility band.\n\"valuation 의 위험 신호\" → result[\"rules\"] severity = \"critical\".",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "overall \"info\" 결과를 \"안전\" 결론 → severity 는 룰 위반 부재일 뿐 valuation 정답 아님.",
+                "precedents 자동 선정 — 사용자 명시 시 다른 결과 가능."
+            ],
+            "dataflow": "precedents+band+sins 3 분석 → severity 종합 → 본 함수.",
+            "freshness": "호출 시점.",
+            "outputSchema": "dict {\"precedents\": dict, \"plausibility\": dict, \"rules\": dict, \"overall\": str}.",
+            "prerequisites": "storyTree base + 동종 universe.",
+            "targetMarkets": "KR (DART valuation 검증)."
+        },
+        "requires": "dartlab\npolars",
         "returnSchema": [
             {
                 "depth": 0,
@@ -1596,9 +1770,13 @@ CAPABILITIES: dict[str, dict] = json.loads(
             }
         ],
         "returns": "dict\nprecedents : dict — Possible Test 결과\nplausibility : dict — Plausible Test 결과\nrules : dict — Probable Test 결과\noverall : str — \"info\" | \"warn\" | \"critical\"",
+        "seeAlso": "``storyTree`` / ``causalWeights`` — 검증 대상 story.\n``dartlab.analysis.financial.storyValidation`` — 3 테스트 backend.",
         "summary": "Damodaran 스토리 검증 — Possible / Plausible / Probable 3 테스트 통합."
     },
     "Company.valuationImpact": {
+        "aicontext": "narrative 가 valuation 어떻게 바꾸나 답변 시 본 함수. base/adjusted 비교 의무.",
+        "capabilities": "causalWeights chain → DCF 파라미터 (terminalGrowth/WACC) 가산 + narrative 근거.\nnarrative → 숫자 피드백 — AI 가 직접 override 적용 가능한 hint dict.",
+        "example": ">>> Company(\"005930\").valuationImpact()",
         "guide": "\"WACC 조정 어떻게\" → c.valuationImpact()['waccAdj']\n\"override 근거\" → c.valuationImpact()['narrative']",
         "kind": "method",
         "llmSpecs": {
@@ -1606,7 +1784,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "waccAdj 단독 노출 (narrative 근거 함께)",
                 "DCF 직접 override 적용 X (overrides 는 힌트, 사용자 판단 후 적용)"
             ],
-            "freshness": "story 인과 체인 기준 — finance 데이터 시점.",
+            "freshness": "story 인과 체인 기준 — finance 데이터 시점. Raises: 없음.",
             "outputSchema": [
                 "terminalGrowthAdj : float — terminal growth 가산 (% 포인트)",
                 "waccAdj : float — WACC 가산 (% 포인트)",
@@ -1614,7 +1792,9 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "overrides : dict — analysis(valuation, overrides=...) 호출용"
             ]
         },
+        "requires": "dartlab\npolars",
         "returns": "dict — terminalGrowthAdj/waccAdj/narrative/overrides",
+        "seeAlso": "``causalWeights`` — 본 함수의 입력 chain.\n``storyTree`` — 본 override 적용 3 시나리오.\n``analysis(\"valuation\")`` — 본 overrides 직접 주입 가능.",
         "summary": "인과 체인에서 DCF override 힌트 — narrative → 숫자 피드백."
     },
     "Company.view": {
@@ -1624,9 +1804,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c = Company(\"005930\")\nc.view()",
         "guide": "\"공시 뷰어 열어줘\" → c.view()\n\"브라우저에서 보기\" → c.view()",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "headless 환경 (CI/docker) 호출 → 브라우저 launch 실패. notebooks/JupyterLab 전용.",
+                "점유된 포트 → OSError. caller port 변경 의무."
+            ],
+            "dataflow": "self.stockCode → launchViewer → FastAPI 서버 + 브라우저 open.",
+            "freshness": "호출 시점 (서버 데이터 별도 fetch X).",
+            "outputSchema": "None — side effect (브라우저 자동 open).",
+            "prerequisites": "로컬 표시 가능 환경 + dartlab.providers.viewer.",
+            "targetMarkets": "KR (DART 정기보고서 viewer)."
+        },
         "requires": "데이터: HuggingFace docs parquet (자동 다운로드)",
         "returns": "None",
-        "seeAlso": "index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)\nsections: 뷰어의 원본 데이터",
+        "seeAlso": "index: 뷰어가 소비하는 메타데이터 (프로그래밍 접근)\nsections: 뷰어의 원본 데이터\n\nRaises:\n없음.",
         "summary": "브라우저에서 공시 뷰어를 엽니다."
     },
     "Company.watch": {
@@ -1636,9 +1827,20 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "example": "c.watch()                    # 전체 중요도 순\nc.watch(\"riskManagement\")    # 특정 topic",
         "guide": "\"뭐가 크게 바뀌었어?\" → c.watch()\n\"리스크 관련 변화\" → c.watch(\"riskManagement\")",
         "kind": "method",
+        "llmSpecs": {
+            "antiPatterns": [
+                "score 임계 hard-code 후 \"큰 변화\" 결론 X — 회사별 base score 분포 다름.",
+                "결과 None ≠ \"변화 없음\" — sections 부재로 분석 불가일 수 있음."
+            ],
+            "dataflow": "scan.watch.scanner.scanCompany(self, topic) → toDataframe → 본 함수.",
+            "freshness": "sections 갱신 시점.",
+            "outputSchema": "pl.DataFrame [topic, score, changeType, fromPeriod, toPeriod, details] 또는 None.",
+            "prerequisites": "docs.sections (정기보고서 본문 2 기간+).",
+            "targetMarkets": "KR (DART 정기보고서 변경 감지)."
+        },
         "requires": "데이터: docs (자동 다운로드)",
         "returns": "pl.DataFrame | None — topic, score, changeType, details 등.",
-        "seeAlso": "diff: 줄 단위 상세 변경 비교 (watch보다 세밀)\nkeywordTrend: 키워드 빈도 추이",
+        "seeAlso": "diff: 줄 단위 상세 변경 비교 (watch보다 세밀)\nkeywordTrend: 키워드 빈도 추이\n\nRaises:\n없음.",
         "summary": "공시 변화 감지 — 중요도 스코어링 기반 변화 요약."
     },
     "Company.workforce": {
@@ -1660,7 +1862,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "평균근속 : float — 년",
                 "1인당매출 : float — 억원"
             ],
-            "targetMarkets": "KR"
+            "targetMarkets": [
+                "KR",
+                "Raises:",
+                "없음."
+            ]
         },
         "requires": "데이터: DART 정기보고서 (자동 수집)",
         "returns": "DataFrame 또는 데이터 없으면 None.",
@@ -2047,28 +2253,12 @@ CAPABILITIES: dict[str, dict] = json.loads(
     },
     "analysis": {
         "guide": "AI 역할: AI는 analysis를 단일 기업 재무·가치·리스크 해석 엔진으로 보고 axis/subaxis와 필요한 재무 evidence를 선택한다.\n\n진입점 패턴: ``Company.analysis(axis)`` 또는 sub-module (``analysis.financial`` ·\n``analysis.valuation`` 등) 직접 import.",
-        "kind": "module",
+        "kind": "function",
         "summary": "Analysis 엔진 — L2 분석 모듈 통합."
     },
     "ask": {
-        "args": "question: 자연어 질문.\nstockCode: UI/서버가 현재 화면 종목코드를 힌트로 전달 (선택).\nprovider: LLM provider.\nstream: True 면 실시간 스트리밍 출력 (기본). False 면 조용히 전체 텍스트 반환.\nraw: True 면 Generator 를 직접 반환 (커스텀 UI 용).",
-        "capabilities": "자연어로 기업/시장 분석 (DartLab API·데이터셋·skills 를 검색 후 실행)\n스트리밍 출력 (기본) / 배치 반환 / Generator 직접 제어\n원본 검증 · 가정 조정 · 업종 비교는 run_python 결과와 ref 로 검산",
-        "example": "import dartlab\ndartlab.ask(\"삼성전자 수익성 분석해줘\")\ndartlab.ask(\"삼성전자 분석\", stream=False)  # 조용히 전체 텍스트",
-        "guide": "\"삼성전자 수익성 분석\" -> dartlab.ask(\"삼성전자 수익성 분석해줘\")\n\"삼성 vs SK하이닉스\" -> dartlab.ask(\"삼성전자와 SK하이닉스 비교\")\n\"반도체 업황\" -> dartlab.ask(\"반도체 업황 어때\")  (종목 불필요)",
         "kind": "function",
-        "requires": "AI: provider 설정 (dartlab.setup() 참조)",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "",
-                "name": "str | None",
-                "type": "전체 답변 텍스트. 설정 오류 시 None. (raw=True 일 때만 Generator[str])",
-                "unit": null
-            }
-        ],
-        "returns": "str | None: 전체 답변 텍스트. 설정 오류 시 None. (raw=True 일 때만 Generator[str])",
-        "seeAlso": "Company: 원본 데이터 조회 (show/select)\nscan: 전종목 비교 (프로그래밍)\nskills: 공용 분석 절차 검색",
-        "summary": "AI 에게 질문. LLM 이 DartLab 을 읽고 실행한 뒤 검산해 답한다."
+        "summary": "LLM 에게 dartlab 컨텍스트로 질문 — dartlab.ai.kernel.ask wrapper."
     },
     "capabilities": {
         "aicontext": "AI가 \"dartlab에 뭐가 있는지\" 모를 때 탐색용.\ncapabilities() → 목차 확인 → capabilities(\"analysis\") → 상세 확인 → execute_code.\ncapabilities(search=\"재무건전성\") → 질문 관련 API 검색 → 코드 생성.",
@@ -2096,8 +2286,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "dartlab 전체 기능 카탈로그 조회."
     },
     "codeToName": {
+        "example": ">>> codeToName(\"005930\")\n'삼성전자'",
         "kind": "function",
-        "returns": "str | None\n회사명. 못 찾으면 None.",
+        "requires": "``getKindList()`` 캐시 가용 — 첫 호출 시 KIND HTTP fetch.",
+        "returns": "str | None\n회사명. 못 찾으면 None.\n\nRaises\n없음\n``getKindList()`` 가 빈 DataFrame 반환 시 None.",
+        "seeAlso": "nameToCode : 역방향 — 회사명 → 코드.\nresolver.codeToName : Protocol 위임 진입점.",
         "summary": "종목코드 → 회사명."
     },
     "collect": {
@@ -2128,6 +2321,8 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "dartlab 전역 설정."
     },
     "credit": {
+        "aicontext": "AI 가 회사 부도 위험 / 재무 건전성 평가 진입점. axes 7 개 score 와 grade 종합 인용.\n시점 단정보다 \"정기보고서 마감 후 30~45 일 시차\" 단서 권장.\n\nParameters\nstockCode : str | None\n종목코드 또는 ticker. None이면 7축 가이드 DataFrame 반환.\naxis : str | None\n축 이름 (\"등급\" → 종합, \"채무상환\"/\"자본구조\"/\"유동성\"/\"현금흐름\"/\n\"사업안정성\"/\"재무신뢰성\"/\"공시리스크\" → 해당 축만).\n영문 alias(\"repayment\", \"leverage\" 등)도 지원.\ndetail : bool\nTrue이면 7축 상세 + 모든 지표 시계열 + 서사(narrative) 포함.\nbasePeriod : str | None\n분석 기준 기간 (예: \"2024\"). None이면 최신.",
+        "capabilities": "DART/EDGAR 공시 재무제표만으로 dCR 독립 신용등급을 산출하는 단일 진입점. 무인자 호출 시\n가이드, stockCode 만 호출 시 종합 등급, axis 지정 시 해당 축만 반환. 79 개사 검증 대기업\n87% / 중대형 82% 정확도. 외부 API 키 불필요.",
         "guide": "AI 역할: AI는 credit을 상환능력·재무건전성 판단 엔진으로 보고 부채, 현금흐름, 이자보상, 만기 근거를 요구한다.\nWhen: 종목의 부도 위험·재무 건전성을 독립 평가할 때.\nHow: credit 단독으로 종합 등급 확인 → analysis(안정성, 현금흐름) 와 함께 심층 진단.\nstory credit 타입이 credit + analysis(안정성) + analysis(현금흐름) + analysis(자금조달) 순서로 조합.\nVerified:\ncredit 단독 → dCR 등급 + 7축 위험점수 + PD 추정 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)\ncredit + analysis(안정성,현금흐름) → 부도 위험 종합 진단 (observed via ai-ask, 2026-04-25 — 정식 Phase P 판정 아님)",
         "kind": "function",
         "llmSpecs": {
@@ -2135,6 +2330,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "axis 영문 (\"repayment\") 사용 시 한글 alias 함께 — 한글 우선 권장",
                 "종합 score 단독 인용 (grade + 7 축 dict 함께)",
                 "\"부도 위험 높음\" 단정 X (등급 + outlook + 시계열 함께)"
+            ],
+            "dataflow": [
+                "stockCode → engine.evaluate → 7 축 calc (repayment/leverage/",
+                "liquidity/cashFlow/businessStability/reliability/disclosureRisk)",
+                "→ 가중 점수 합산 → CHS notch → grade 변환 → dict 조립."
             ],
             "freshness": "정기보고서 마감 후 30~45 일.",
             "outputSchema": [
@@ -2148,6 +2348,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
             "prerequisites": "finance + report 데이터 (자동 다운로드)",
             "targetMarkets": "KR (DART)"
         },
+        "requires": "L1 raw: DART 정기보고서 (자동 다운로드) 또는 EDGAR 10-K/10-Q\nL1.5 frame: 재무제표 가공 frame",
         "returnSchema": [
             {
                 "depth": 0,
@@ -2456,13 +2657,18 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "kind": "gather_axis",
         "summary": "catalyst 일정"
     },
+    "gather.dartDoc": {
+        "capabilities": "14자리 rcept_no 만으로 DART 공시 viewer 의 원문 본문 fetch (무인증). 공시 인덱스 페이지에서 sub-doc 목차를 받고 각 섹션 HTML 을 텍스트 (테이블 마크다운 보존) 로 변환. API key 불필요 — providers/dart/openapi (key 기반 OpenDART) 와 분리된 viewer 단건 fetch 진입점.",
+        "kind": "gather_axis",
+        "summary": "DART 공시 원문"
+    },
     "gather.flow": {
-        "capabilities": "외국인/기관 순매수 동향 (KR 전용, 네이버 금융). US는 미지원 → None",
+        "capabilities": "외국인/기관 순매수 시계열 (KR 전용, Naver).",
         "kind": "gather_axis",
         "summary": "수급"
     },
     "gather.insider": {
-        "capabilities": "임원/주요주주 주식 거래 내역. KR: DART API (API 키: DART_API_KEY)",
+        "capabilities": "내부자 (임원·주요주주) 거래 (KR DART · DART_API_KEY 필요).",
         "kind": "gather_axis",
         "summary": "내부자거래"
     },
@@ -2595,7 +2801,7 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "KRX 지수 일별 매매현황 (시장군별 전체 지수 패키지)"
     },
     "gather.macro": {
-        "capabilities": "KR: ECOS 한국은행, US: FRED 거시지표. 기본은 HF 벌크 데이터셋이라 API 키 불필요. apiKey 명시 시 직접 API 호출. 지표 미지정 시 전체 반환.",
+        "capabilities": "ECOS(KR) / FRED(US) 거시지표 시계열. 기본 HF 벌크 (apiKey 없음), apiKey 명시 시 ECOS/FRED 직접 API.",
         "contractId": "macro.recent",
         "evidenceSchema": {
             "asOfKeys": [
@@ -2679,14 +2885,14 @@ CAPABILITIES: dict[str, dict] = json.loads(
         }
     },
     "gather.news": {
-        "capabilities": "Google News RSS 최근 30일. API 키 불필요. 한글/영문 검색어 모두 지원",
+        "capabilities": "Google News RSS 뉴스 수집 (기본 최근 30일).",
         "kind": "gather_axis",
         "summary": "뉴스"
     },
     "gather.ownership": {
-        "capabilities": "기관/외국인 보유 현황 (비율+주수). KR: 네이버 금융",
+        "capabilities": "기관/외국인 지분 보유 현황 (KR Naver).",
         "kind": "gather_axis",
-        "summary": "지분"
+        "summary": "지분 보유"
     },
     "gather.peers": {
         "capabilities": "동종업종 피어 종목 목록 (종목코드+시총). KR: KRX/네이버",
@@ -2694,12 +2900,12 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "피어"
     },
     "gather.price": {
-        "capabilities": "OHLCV 시계열 (수정주가). KR: 네이버 차트 API (최대 12년 일봉, API 키 불필요). US/해외: Yahoo v8 → 네이버 글로벌 자동 fallback. 시장 지수도 가능: gather('price', 'KOSPI')",
+        "capabilities": "OHLCV 시계열 (수정주가). KR: Naver, US: Yahoo. 기본 1년, 최대 6000거래일. 시장 지수 (KOSPI/KOSDAQ/KPI200) 도 자동 인식.",
         "kind": "gather_axis",
         "summary": "주가"
     },
     "gather.sector": {
-        "capabilities": "업종 분류 + 동종업종 PER. KR: KRX KIND + 네이버 금융",
+        "capabilities": "업종 분류 (KR KIND+Naver / US sectorCode).",
         "kind": "gather_axis",
         "summary": "업종"
     },
@@ -2712,12 +2918,21 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "stage 추측 (industryId 별로 다름 — industry(industryId) 결과의 공정 컬럼 확인)",
                 "summary 와 timeline 동시 (둘 중 하나만)"
             ],
+            "dataflow": [
+                "industryId → loadNodes (nodes.json) → industry filter",
+                "→ stage filter → 공정명 룩업 (taxonomy.getIndustry) →",
+                "DataFrame 조립. summary 모드는 buildIndustrySummary 경유."
+            ],
             "freshness": "taxonomy 정의 시점 — 운영자 수동 업데이트.",
             "outputSchema": [
                 "industryId 미지정: 산업ID / 산업명 / 공정수",
                 "industryId 지정: 공정 / 종목코드 / 종목명",
                 "summary=True: 공정 / 매출합계 / 영업이익합계",
                 "timeline=True: 연도 / 공정별 매출 컬럼"
+            ],
+            "prerequisites": [
+                "taxonomy + nodes.json (운영자 매핑 산출물)",
+                "summary=True 시 재무 데이터 (자동 다운로드)"
             ],
             "targetMarkets": "KR"
         },
@@ -2912,6 +3127,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "market 미지정 시 default \"US\" — KR 분석 의도면 명시 필수",
                 "overrides 키 추측 (cyclePhase / rateScenario / fxScenario / liquidityScenario)"
             ],
+            "dataflow": [
+                "axis → _resolve → _AXIS_REGISTRY 룩업 → importlib.import_module",
+                "→ 축 함수 호출 (market + overrides + kwargs) → dict 결과",
+                "→ buildAssumptions 보강 → 반환."
+            ],
             "freshness": "FRED / ECOS 갱신 주기 (월 / 분기).",
             "outputSchema": [
                 "axis=\"사이클\": dict — phase / label / confidence / indicators",
@@ -3030,8 +3250,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "summary": "교역"
     },
     "nameToCode": {
+        "example": ">>> nameToCode(\"삼성전자\")\n'005930'",
         "kind": "function",
-        "returns": "str | None\n6자리 종목코드. 못 찾으면 None.",
+        "requires": "``getKindList()`` 캐시 가용 + 사용자 입력이 KIND 목록과 *정확* 일치.",
+        "returns": "str | None\n6자리 종목코드. 못 찾으면 None.\n\nRaises\n없음\n``getKindList()`` 가 빈 DataFrame 반환 시 None.",
+        "seeAlso": "codeToName : 역방향 — 코드 → 회사명.\nfuzzy.searchName : 부분 일치 + 자모 분해 검색.\nresolver.nameToCode : Protocol 위임 진입점.",
         "summary": "회사명 → 종목코드. 정확히 일치하는 첫 번째 결과."
     },
     "pastInsight": {
@@ -3059,6 +3282,11 @@ CAPABILITIES: dict[str, dict] = json.loads(
                 "stockCode 형식 혼동 — KR 6 자리 숫자 / US ticker 알파벳",
                 "axis=\"베타\" 호출 시 benchmarkMode 미지정 (default market — 섹터 의도면 명시)",
                 "quant(\"005930\", \"판단\") deprecated 형식 (axis 가 첫 인자)"
+            ],
+            "dataflow": [
+                "axis 입력 → _ALIASES/_OLD_METRICS 정규화 → _AXIS_REGISTRY 룩업",
+                "→ gather(\"price\")/scan/synth 데이터 패치 → 축별 calc 함수",
+                "→ 종목 dict 또는 횡단면 pl.DataFrame 반환."
             ],
             "freshness": "price 데이터 — T+1 (전일 종가).",
             "outputSchema": [
@@ -3354,61 +3582,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "seeAlso": "analysis : 개별 종목 재무 심층 분석.\nquant : 가격 기반 정량 신호.\ncredit : 개별 종목 신용 분석.",
         "summary": "축(axis)별 전종목 횡단분석."
     },
-    "scan.account": {
-        "capabilities": "전종목 단일 계정 시계열 (매출액, 영업이익 등)",
-        "kind": "scan_axis",
-        "summary": "계정"
-    },
-    "scan.audit": {
-        "capabilities": "감사의견, 감사인변경, 특기사항, 감사독립성비율",
-        "kind": "scan_axis",
-        "summary": "감사리스크"
-    },
-    "scan.capital": {
-        "capabilities": "배당, 자사주(취득/처분/소각), 증자/감자, 환원 분류",
-        "kind": "scan_axis",
-        "summary": "주주환원"
-    },
-    "scan.cashflow": {
-        "capabilities": "OCF/ICF/FCF + 현금흐름 패턴 분류 (8종)",
-        "kind": "scan_axis",
-        "summary": "현금흐름"
-    },
-    "scan.debt": {
-        "capabilities": "사채만기, 부채비율, ICR, 위험등급",
-        "kind": "scan_axis",
-        "summary": "부채구조"
-    },
-    "scan.disclosureRisk": {
-        "capabilities": "공시 변화 기반 선행 리스크 (우발부채, 감사변경, 계열변화, 사업전환)",
-        "kind": "scan_axis",
-        "summary": "공시리스크"
-    },
-    "scan.dividendTrend": {
-        "capabilities": "DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단)",
-        "kind": "scan_axis",
-        "summary": "배당추이"
-    },
-    "scan.efficiency": {
-        "capabilities": "자산/재고/매출채권 회전율 + CCC(현금전환주기) + 등급",
-        "kind": "scan_axis",
-        "summary": "효율성"
-    },
-    "scan.fields": {
-        "capabilities": "조건형 스크리닝용 필드 검색 (finance/report/docs/krx/krxIndex)",
-        "kind": "scan_axis",
-        "summary": "필드카탈로그"
-    },
-    "scan.governance": {
-        "capabilities": "지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산)",
-        "kind": "scan_axis",
-        "summary": "거버넌스"
-    },
-    "scan.growth": {
-        "capabilities": "매출/영업이익/순이익 CAGR + 성장 패턴 분류 (6종)",
-        "kind": "scan_axis",
-        "summary": "성장성"
-    },
     "scan.industry": {
         "acceptanceCriteria": {
             "industryUniverse": true,
@@ -3551,21 +3724,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
             ]
         }
     },
-    "scan.insider": {
-        "capabilities": "최대주주 지분변동, 자기주식 현황, 경영권 안정성",
-        "kind": "scan_axis",
-        "summary": "내부자지분"
-    },
-    "scan.liquidity": {
-        "capabilities": "유동비율 + 당좌비율 — 단기 지급능력",
-        "kind": "scan_axis",
-        "summary": "유동성"
-    },
-    "scan.macroBeta": {
-        "capabilities": "전종목 GDP/금리/환율 베타 횡단면 (OLS 회귀). 사전 수집: Ecos().series('GDP', enrich=True)",
-        "kind": "scan_axis",
-        "summary": "거시베타"
-    },
     "scan.market": {
         "artifactPolicy": {
             "primaryCsv": true
@@ -3663,44 +3821,9 @@ CAPABILITIES: dict[str, dict] = json.loads(
             ]
         }
     },
-    "scan.network": {
-        "capabilities": "상장사 관계 네트워크 (출자/지분/계열)",
-        "kind": "scan_axis",
-        "summary": "네트워크"
-    },
-    "scan.profitability": {
-        "capabilities": "영업이익률/순이익률/ROE/ROA + 등급",
-        "kind": "scan_axis",
-        "summary": "수익성"
-    },
-    "scan.quality": {
-        "capabilities": "Accrual Ratio + CF/NI 비율 — 이익이 현금 뒷받침되는지",
-        "kind": "scan_axis",
-        "summary": "이익의 질"
-    },
-    "scan.ratio": {
-        "capabilities": "전종목 단일 재무비율 시계열 (ROE, 부채비율 등)",
-        "kind": "scan_axis",
-        "summary": "비율"
-    },
-    "scan.screen": {
-        "capabilities": "멀티팩터 프리셋 + spec 기반 조건형 스크리닝",
-        "kind": "scan_axis",
-        "summary": "스크리닝"
-    },
-    "scan.valuation": {
-        "capabilities": "PER/PBR/PSR + 시가총액 + 등급 (네이버 실시간)",
-        "kind": "scan_axis",
-        "summary": "밸류에이션"
-    },
-    "scan.workforce": {
-        "capabilities": "직원수, 평균급여, 인건비율, 1인당부가가치, 성장률, 고액보수",
-        "kind": "scan_axis",
-        "summary": "인력/급여"
-    },
     "search": {
         "aicontext": "BETA — 우선 사용 비권장. 단일 종목 공시는 Company.disclosure/liveFilings 우선.\nsearch 호출 후 0건이면 즉시 fallback (재호출/키워드 변형 round 낭비 금지).",
-        "args": "query: 검색어 (한국어). \"유상증자\", \"반도체 HBM 투자\" 등.\ncorp: 종목 필터 (종목코드 \"005930\" 또는 회사명 \"삼성전자\").\nstart: 시작일 (YYYYMMDD).\nend: 종료일 (YYYYMMDD).\ntopK: 반환 건수 (기본 10).\nscope: ``\"auto\"`` (기본), ``\"title\"``, ``\"content\"``, ``\"both\"``.",
+        "args": "query: 검색어 (한국어). \"유상증자\", \"반도체 HBM 투자\" 등.\ncorp: 종목 필터 (종목코드 \"005930\" 또는 회사명 \"삼성전자\").\nstart: 시작일 (YYYYMMDD).\nend: 종료일 (YYYYMMDD).\nlimit: 반환 건수 (기본 10).\nscope: ``\"auto\"`` (기본), ``\"title\"``, ``\"content\"``, ``\"both\"``.",
         "capabilities": "제목 검색: 공시 유형명/섹션 제목에서 매칭 (\"유상증자\", \"대표이사 변경\")\n본문 검색: 사업보고서 등 본문에서 개념 매칭 (\"반도체 HBM 투자\", \"환율 리스크\")\n종목/기간 필터 지원\nDART 공시 뷰어 링크 포함 (dartUrl 컬럼)",
         "example": "import dartlab\ndartlab.search(\"유상증자\")                                # 제목 매칭\ndartlab.search(\"반도체 HBM 투자\")                          # 본문 자동 매칭\ndartlab.search(\"환율 리스크\", scope=\"content\")              # 본문 강제\ndartlab.search(\"대표이사 변경\", corp=\"005930\")              # 종목 필터",
         "guide": "\"유상증자 한 회사?\" -> search(\"유상증자\") [BETA, 0건이면 stop]\n\"반도체 투자 트렌드?\" -> search(\"반도체 HBM 투자\") [BETA, 0건이면 stop]\n\"삼성전자 최근 공시\" -> Company(\"005930\").disclosure() (search 아님)",
@@ -3803,56 +3926,6 @@ CAPABILITIES: dict[str, dict] = json.loads(
         "returns": "None (터미널/노트북에 안내 출력).",
         "seeAlso": "ask: AI 질문 (setup 완료 후 사용)\nchat: AI 대화 (setup 완료 후 사용)\nllm.configure: 프로그래밍 방식 provider 설정",
         "summary": "AI provider 설정 안내 + 인터랙티브 설정."
-    },
-    "topdown": {
-        "args": "market: \"KR\" | \"US\"\nsectors: 특정 섹터만 지정. None이면 사이클 국면 자동 매핑.\ntopN: 섹터당 추천 종목 수\nas_of: 백테스트용 기준일",
-        "kind": "function",
-        "returnSchema": [
-            {
-                "depth": 0,
-                "description": "",
-                "name": "dict",
-                "type": "{",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "",
-                "name": "\"cycle\"",
-                "type": "{phase, label, confidence, ...},",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "",
-                "name": "\"transition\"",
-                "type": "{...} | None,",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "",
-                "name": "\"recommendedSectors\"",
-                "type": "[...],",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "",
-                "name": "\"screens\"",
-                "type": "{sector: [{stockCode, name, signals, ...}, ...]},",
-                "unit": null
-            },
-            {
-                "depth": 0,
-                "description": "",
-                "name": "\"narrative\"",
-                "type": "\"사이클 → 섹터 → 종목 인과 사슬 문장\"",
-                "unit": null
-            }
-        ],
-        "returns": "dict: {\n\"cycle\": {phase, label, confidence, ...},\n\"transition\": {...} | None,\n\"recommendedSectors\": [...],\n\"screens\": {sector: [{stockCode, name, signals, ...}, ...]},\n\"narrative\": \"사이클 → 섹터 → 종목 인과 사슬 문장\"\n}",
-        "summary": "탑다운 분석 — 시장 → 섹터 → 종목."
     },
     "verbose": {
         "kind": "module",

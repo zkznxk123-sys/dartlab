@@ -26,7 +26,7 @@ import textwrap
 from pathlib import Path
 from typing import Any, get_type_hints
 
-ROOT = Path(__file__).resolve().parent.parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent.parent
 SRC = ROOT / "src"
 sys.path.insert(0, str(SRC))
 
@@ -1206,7 +1206,7 @@ def _dataclassesSection() -> str:
     lines.append(_dataclassTable(Flag, "Flag"))
     lines.append(_dataclassTable(AnalysisResult, "AnalysisResult"))
 
-    from dartlab.core.sector.types import SectorInfo, SectorParams
+    from dartlab.frame.sector.core import SectorInfo, SectorParams
 
     lines.append(_dataclassTable(SectorInfo, "SectorInfo"))
     lines.append(_dataclassTable(SectorParams, "SectorParams"))
@@ -1540,7 +1540,7 @@ def _parseAxisRegistry(
 
 def _applyAiContractMetadata(entries: dict[str, dict[str, Any]]) -> None:
     """Attach generated contract metadata from core capabilities SSOT."""
-    from dartlab.core.capability.registry import getAnalysisContractSpecs
+    from dartlab.reference.capability.registry import getAnalysisContractSpecs
 
     for key, contract in getAnalysisContractSpecs().items():
         entries.setdefault(key, {})
@@ -2284,8 +2284,8 @@ def main():
     capabilitiesPath = ROOT / "CAPABILITIES.md"
     llmsTxtPath = ROOT / "landing" / "static" / "llms.txt"
     skillRefPath = ROOT / ".claude" / "skills" / "dartlab" / "reference.md"
-    capabilitiesPyPath = SRC / "dartlab" / "core" / "capability" / "_generated.py"
-    analysisGraphPyPath = SRC / "dartlab" / "core" / "capability" / "_generated_analysis_graph.py"
+    capabilitiesPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated.py"
+    analysisGraphPyPath = SRC / "dartlab" / "reference" / "capability" / "_generated_analysis_graph.py"
 
     skillRefPath.parent.mkdir(parents=True, exist_ok=True)
 
