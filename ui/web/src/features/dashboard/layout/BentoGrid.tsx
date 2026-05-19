@@ -68,18 +68,27 @@ export function BentoGrid({ placed, renderCard }: Props) {
 				gridAutoRows: `${cellSize}px`,
 			}}
 		>
-			{placed.map((p) => (
-				<div
-					key={p.cardKey}
-					className="min-w-0"
-					style={{
-						gridColumn: `span ${p.w} / span ${p.w}`,
-						gridRow: `span ${p.h} / span ${p.h}`,
-					}}
-				>
-					{renderCard(p, cellSize)}
-				</div>
-			))}
+			{placed.map((p) => {
+				// content-visibility: auto — 화면 밖 cell 의 layout/style/paint 자체 skip.
+				// 8~12 Recharts SVG 동시 mount 가 main thread 점유하던 비용 차단. `auto`
+				// prefix 의 containIntrinsicSize 는 카드가 한 번 표시된 뒤엔 실측 size 를
+				// 기억해 스크롤 점프 차단. 첫 진입 전 placeholder size 는 셀 계산식 그대로.
+				const cellOuterH = p.h * cellSize + (p.h - 1) * GAP_PX;
+				return (
+					<div
+						key={p.cardKey}
+						className="min-w-0"
+						style={{
+							gridColumn: `span ${p.w} / span ${p.w}`,
+							gridRow: `span ${p.h} / span ${p.h}`,
+							contentVisibility: 'auto',
+							containIntrinsicSize: `auto ${cellOuterH}px`,
+						}}
+					>
+						{renderCard(p, cellSize)}
+					</div>
+				);
+			})}
 		</div>
 	);
 }
