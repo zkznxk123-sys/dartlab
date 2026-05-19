@@ -42,6 +42,18 @@ forbidden:
   - "git add -A 또는 git add . (매핑 외 다른 변경 섞임 위험)"
   - "_metadata.addedCount 갱신 누락"
   - "compact JSON → indented JSON 변환 (git diff 폭증)"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
+    notes: []
 ---
 
 # mappingRefresh — accountMappings.json 보강 4 단계 파이프라인
