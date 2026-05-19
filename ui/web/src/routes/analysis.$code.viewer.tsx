@@ -378,12 +378,21 @@ function ViewerTab() {
 	});
 	const latestViewer = latestFetched ?? latestSeed;
 
-	// 토픽의 모든 period (latest → first 내림차순).
+	// 토픽의 모든 period (latest → first 내림차순). is/bs 와 동일 — annual 은 Q4
+	// 뒤로 (year, quarter=5) sort key 로 정렬. lexicographic localeCompare 는
+	// '2025Q3' > '2025' 로 보아 사업보고서를 Q3 보고서 뒤에 두는 회귀 (사업보고서가
+	// 가장 최신인데도 잘못된 위치에 박힘) → 명시 sort key 강제.
 	const allPeriods = useMemo<string[]>(() => {
 		const ps = latestViewer?.textDocument?.periods ?? [];
 		const labels = ps.map((p) => _periodLabel(p)).filter(Boolean);
-		// 응답이 보통 desc 정렬되어 있지만 안전망.
-		labels.sort((a, b) => b.localeCompare(a));
+		const sortKey = (p: string): number => {
+			const m = /^(\d{4})(Q([1-4]))?$/.exec(p);
+			if (!m) return -1;
+			const year = parseInt(m[1], 10);
+			const q = m[3] ? parseInt(m[3], 10) : 5; // 연간 = Q4 뒤
+			return year * 10 + q;
+		};
+		labels.sort((a, b) => sortKey(b) - sortKey(a));
 		return labels;
 	}, [latestViewer]);
 
