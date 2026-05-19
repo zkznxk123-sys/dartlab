@@ -63,7 +63,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.dividend.capitalReturn",
+      "id": "recipes.fundamental.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
       "category": "recipes",
       "status": "limited",
@@ -1427,7 +1427,7 @@
       ]
     },
     {
-      "id": "recipes.dividend.stressTest",
+      "id": "recipes.fundamental.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
       "category": "recipes",
       "status": "limited",
@@ -1436,7 +1436,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.dividend.thesis",
+      "id": "recipes.fundamental.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
       "category": "recipes",
       "status": "limited",

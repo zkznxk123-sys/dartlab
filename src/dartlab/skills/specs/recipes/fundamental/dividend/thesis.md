@@ -1,5 +1,5 @@
 ---
-id: recipes.dividend.thesis
+id: recipes.fundamental.dividend.thesis
 title: 배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)
 category: recipes
 kind: recipe
@@ -15,7 +15,7 @@ whenToUse:
   - 배당 성장률
 linkedSkills:
   - engines.company
-  - recipes.dividend.capitalReturn
+  - recipes.fundamental.dividend.capitalReturn
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -94,7 +94,7 @@ return_axis = c.analysis("financial", "배당주주환원")
 ## 연계 절차
 
 1. engines.company — 회사 진입
-2. recipes.dividend.capitalReturn — 배당·자사주 종합
+2. recipes.fundamental.dividend.capitalReturn — 배당·자사주 종합
 3. engines.analysis — 자본배분 의지
 4. engines.analysis — FCF 가 배당 충당 가능 여부
 

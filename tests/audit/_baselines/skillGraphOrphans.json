@@ -210,14 +210,14 @@
         "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목"
       },
       {
-        "id": "recipes.dividend.stressTest",
+        "id": "recipes.fundamental.dividend.stressTest",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계"
       },
       {
-        "id": "recipes.dividend.thesis",
+        "id": "recipes.fundamental.dividend.thesis",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

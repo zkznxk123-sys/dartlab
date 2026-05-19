@@ -1,5 +1,5 @@
 ---
-id: recipes.dividend.capitalReturn
+id: recipes.fundamental.dividend.capitalReturn
 title: 배당과 주주환원 분석
 kind: recipe
 scope: builtin
@@ -36,7 +36,7 @@ recipeSteps:
   - skillId: engines.analysis
     note: 이익률과 ROE 가 환원 여력을 만들어내는지.
 sourceRefs:
-  - dartlab://skills/recipes.dividend.capitalReturn
+  - dartlab://skills/recipes.fundamental.dividend.capitalReturn
 requiredEvidence:
   - target
   - period
@@ -223,8 +223,8 @@ graph LR
 | 산업 평균 환원율 vs 회사 | (scan) | — | ±15%p 차이 | 연간 |
 
 연계 절차:
-- 배당 스트레스 테스트 → `recipes.dividend.stressTest` (FCF -30% 시 환원 유지?)
-- 배당 thesis 깊이 → `recipes.dividend.thesis`
+- 배당 스트레스 테스트 → `recipes.fundamental.dividend.stressTest` (FCF -30% 시 환원 유지?)
+- 배당 thesis 깊이 → `recipes.fundamental.dividend.thesis`
 - 자본배분 종합 점수 → `recipes.quality.capitalAllocationScorecard`
 - 산업 환원 추세 → `engines.scan`
 - ROE 동인 결합 → `recipes.quality.dupontDriver`

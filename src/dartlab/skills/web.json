@@ -339,7 +339,7 @@
       "linkedSkills": [
         "engines.analysis.cashflow",
         "engines.analysis.investmentEfficiency",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.scan.capital"
       ],
       "requires": [],
@@ -787,7 +787,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.dividend.capitalReturn",
+      "id": "recipes.fundamental.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -836,7 +836,7 @@
       "succeededBy": [],
       "deprecatedBy": [],
       "sourceRefs": [
-        "dartlab://skills/recipes.dividend.capitalReturn"
+        "dartlab://skills/recipes.fundamental.dividend.capitalReturn"
       ],
       "procedure": [
         "배당성향 / 총환원율 만으로 결론 짓지 않는다. 위 3 축 결과가 모두 일관되어야 \"지속 가능\" claim 을 허용.",
@@ -5259,7 +5259,7 @@
       ],
       "linkedSkills": [
         "engines.scan.dividendTrend",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.gather.splits"
       ],
       "requires": [],
@@ -16505,7 +16505,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.dividend.stressTest",
+      "id": "recipes.fundamental.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16530,7 +16530,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "engines.company",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.analysis.cashflow",
         "engines.macro.scenario"
       ],
@@ -16592,7 +16592,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.dividend.thesis",
+      "id": "recipes.fundamental.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16619,7 +16619,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "engines.company.researchStarter",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.analysis.cashflow",
         "engines.analysis.capitalAllocation"
       ],
@@ -16643,7 +16643,7 @@
           "note": "회사 진입"
         },
         {
-          "skillId": "recipes.dividend.capitalReturn",
+          "skillId": "recipes.fundamental.dividend.capitalReturn",
           "note": "배당·자사주 종합"
         },
         {
@@ -21476,7 +21476,7 @@
       ],
       "linkedSkills": [
         "engines.analysis.capitalAllocation",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.scan.dividendTrend"
       ],
       "requires": [],
@@ -22041,7 +22041,7 @@
         "engines.analysis"
       ],
       "linkedSkills": [
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.analysis.cashflow",
         "engines.scan.capital"
       ],

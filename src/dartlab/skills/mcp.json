@@ -113,7 +113,7 @@
       "nextSkills": [
         "engines.analysis.cashflow",
         "engines.analysis.investmentEfficiency",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.scan.capital"
       ],
       "bodyPreview": "## 엔진 역할\n\nanalysis 엔진의 자본배분 축 응용 skill — 번 돈을 어디에 쓰는가. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/analysis/financial/__init__.py`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\n# 1. 가이드 확인 (선택)\nc.analysis()\n\n# 2. 실제 axis 실행\nresult = c.analysis(\"financial\", \"자본배분\")\n\n# 3. 모듈 함수형 (대안)\nresult = dartlab.analysis(\"financial\", \"자본배분\", company=c)\n```\n\n## 호출 동작\n\nCompany 의 finance/disclosure/market snapshot 을 읽어 자본배분 축 계산 항목을 산출한다. 결손 값은 0 으로 채우지 않고 `flags`, `assumptions`, `dataAsOf`, 빈 history, null 로 표현한다. 자세한 동작은 base SKILL `engines.analysis` 의 `## 호출 동작` 참조.\n\n## 대표 반환 형태\n\ndict 반"
@@ -180,7 +180,7 @@
       "bodyPreview": "## 엔진 역할\n\nanalysis 엔진의 공시변화 축 응용 skill — 이 회사의 공시가 뭐가 달라졌는가. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/analysis/financial/__init__.py`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\n# 1. 가이드 확인 (선택)\nc.analysis()\n\n# 2. 실제 axis 실행\nresult = c.analysis(\"governance\", \"공시변화\")\n\n# 3. 모듈 함수형 (대안)\nresult = dartlab.analysis(\"governance\", \"공시변화\", company=c)\n```\n\n## 호출 동작\n\nCompany 의 finance/disclosure/market snapshot 을 읽어 공시변화 축 계산 항목을 산출한다. 결손 값은 0 으로 채우지 않고 `flags`, `assumptions`, `dataAsOf`, 빈 history, null 로 표현한다. 자세한 동작은 base SKILL `engines.analysis` 의 `## 호출 동작` 참조.\n\n## 대표 반환 형태"
     },
     {
-      "id": "recipes.dividend.capitalReturn",
+      "id": "recipes.fundamental.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
       "category": "recipes",
       "purpose": "배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.",
@@ -928,7 +928,7 @@
       ],
       "nextSkills": [
         "engines.scan.dividendTrend",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.gather.splits"
       ],
       "bodyPreview": "## 엔진 역할\n\ngather 엔진의 배당 응용 skill — DPS · 배당락일 · 배당기준일 등 배당 이벤트 이력. SSOT 는 `Gather` class (`src/dartlab/gather/__init__.py`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. KR 기본\nresult = dartlab.gather(\"dividends\", \"005930\")\n\n# 2. US 시장\nresult = dartlab.gather(\"dividends\", \"AAPL\", market=\"US\")\n```\n\n## 호출 동작\n\nprovider / cache / snapshot 데이터를 읽어 배당 결과를 반환한다. 캐시 hit 시 즉시 반환, miss 시 외부 API 호출 (실패 시 fallback chain). API 키가 필요한 provider 는 누락 시 `None` / 빈 결과 + 안내 — 결과 없음으로 오해하지 않는다. 자세한 동작은 base SKILL `engines.gather` + `Gather.dividends` 메서드 docstring 참조.\n\n## 대표 반환 형태\n\nDataFrame · list · snapshot 객체 또"
@@ -2889,7 +2889,7 @@
       "bodyPreview": "## 학술 근거\n\nEdward Altman, *\"Financial Ratios, Discriminant Analysis and the Prediction of Corporate Bankruptcy\"* (Journal of Finance, 1968): 5 변수 가중 합 Z-Score 모델. 1946-1965 미국 제조업 부도 1 년 전 80-90% 적중.\n\nZ = 1.2·X₁ + 1.4·X₂ + 3.3·X₃ + 0.6·X₄ + 1.0·X₅\n\n| 변수 | 정의 | dartlab 가능? |\n|---|---|---|\n| X₁ | working capital / total assets | ◯ (account 직접) |\n| X₂ | retained earnings / total assets | ◯ (account 직접) |\n| X₃ | EBIT / total assets | ◯ (operating_profit / total_assets) |\n| X₄ | market value of equity / book value of total liabilities | ✗ (시총 시계열 결합 어려움) |\n| X₅ | sales / total assets | ◯ (totalAsset"
     },
     {
-      "id": "recipes.dividend.stressTest",
+      "id": "recipes.fundamental.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
       "category": "recipes",
       "purpose": "배당 정책 회사가 1997 IMF / 2008 GFC / 2020 COVID 시나리오에서 FCF 커버리지가 무너지는 임계 + 배당 cut/suspend 가능성 산출. 정상 시점 dividend yield 만 보고 매수하는 전략의 매크로 위험 가시화. analysis ↔ macro 격리 메우는 조합. 트리거 — '배당 스트레스', 'dividend cut 위험', '경기침체 배당'.",
@@ -2901,14 +2901,14 @@
       ],
       "nextSkills": [
         "engines.company",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.analysis.cashflow",
         "engines.macro.scenario"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\nc = dartlab.Company(\"005930\")\n\n# 1. 현재 배당 + FCF coverage\ndiv = c.analysis(\"dividendCapitalReturn\", \"배당정책\")\npayout_ratio = div.get(\"payoutRatio\", 0.3) if isinstance(div, dict) else 0.3\nfcf_coverage = div.get(\"fcfCoverage\", 1.5) if isinstance(div, dict) else 1.5\n\n# 2. P&L baseline — revenue / opMargin\nis_df = c.show(\"IS\", freq=\"Y\")\n\ndef fetch(df, snake, year=\"2024\"):\n    row = df.filter(pl.col(\"snakeId\") == snake).select(year)\n    return float(row.to_numpy()[0][0]) if row.height > 0 else 0.0\n\nrevenue = fetch(is_df, \"revenue\")\nop_profit ="
     },
     {
-      "id": "recipes.dividend.thesis",
+      "id": "recipes.fundamental.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
       "category": "recipes",
       "purpose": "회사의 배당 매력도를 자본배분 의지 + 현금흐름 quality + 과거 배당 정책 3 축으로 평가하는 절차. 트리거 — '배당 매력도', '배당 정책', '배당 thesis'.",
@@ -2922,7 +2922,7 @@
       ],
       "nextSkills": [
         "engines.company.researchStarter",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.analysis.cashflow",
         "engines.analysis.capitalAllocation"
       ],
@@ -3858,7 +3858,7 @@
       ],
       "nextSkills": [
         "engines.analysis.capitalAllocation",
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.scan.dividendTrend"
       ],
       "bodyPreview": "## 엔진 역할\n\nscan 엔진의 주주환원 축 응용 skill — 배당, 자사주 (취득 / 처분 / 소각), 증자 / 감자, 환원 분류. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `scanCapital()` 함수 docstring.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 문자열 호출\ndf = dartlab.scan(\"capital\")\n\n# 2. accessor (동등)\ndf = dartlab.scan.capital()\n```\n\n## 호출 동작\n\n전종목 finance / disclosure / market universe 를 읽어 주주환원 축 지표를 산출한다. 배당, 자사주 (취득 / 처분 / 소각), 증자 / 감자, 환원 분류. 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `scanCapital()` docstring 참조.\n\n## 대표 반환 형태\n\nDataFrame 반환. 공통 column:\n\n- `stockCode` / `c"
@@ -3943,7 +3943,7 @@
         "DPS 3개년 시계열 + 패턴 분류 (연속증가/안정/감소/시작/중단)"
       ],
       "nextSkills": [
-        "recipes.dividend.capitalReturn",
+        "recipes.fundamental.dividend.capitalReturn",
         "engines.analysis.cashflow",
         "engines.scan.capital"
       ],

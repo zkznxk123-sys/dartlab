@@ -1,5 +1,5 @@
 ---
-id: recipes.dividend.stressTest
+id: recipes.fundamental.dividend.stressTest
 title: 배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계
 category: recipes
 kind: recipe
@@ -13,7 +13,7 @@ whenToUse:
   - FCF coverage 매크로
 linkedSkills:
   - engines.company
-  - recipes.dividend.capitalReturn
+  - recipes.fundamental.dividend.capitalReturn
   - engines.analysis
   - engines.macro
 toolRefs:
@@ -158,7 +158,7 @@ emit_result(
 
 `requiredEvidence: skillRef + tableRef + valueRef + dateRef` 4 종 명시.
 
-- **skillRef**: `engines.analysis` (현재 FCF coverage), `engines.analysis` (op_margin), `engines.macro` (시나리오 정의·revenue shock 기본값), `recipes.dividend.capitalReturn` (현재 payout·환원율).
+- **skillRef**: `engines.analysis` (현재 FCF coverage), `engines.analysis` (op_margin), `engines.macro` (시나리오 정의·revenue shock 기본값), `recipes.fundamental.dividend.capitalReturn` (현재 payout·환원율).
 - **sourceRef**: DART 공시 — IS 5 년 (revenue, operating_profit), CF (FCF), 배당 시계열. 시나리오 revenue shock 학술 출처 — IMF report (1997), Lehman crisis report (2008), BIS COVID (2020).
 - **tableRef** (시나리오별 row): scenario × {revenueShock, shockedRevenue, shockedFCF, baseDividend, shockedCoverage, dividendSurvival}.
 - **valueRef**: imfSurvival · gfcSurvival · covidSurvival · 현재 FCF 커버리지 · 정상 시점 payout ratio.
@@ -220,6 +220,6 @@ graph LR
 - dividend cut/suspend 2+ 시나리오 → `recipes.credit.macroStress` (신용 axis 동시 점검)
 - universe 검증 → `recipes.credit.distressCandidateScreen` (dividend payer 한정)
 - 시나리오 직접 비교 → `recipes.macro.scenarioDiagram`
-- 배당 정책 종합 → `recipes.dividend.capitalReturn`
+- 배당 정책 종합 → `recipes.fundamental.dividend.capitalReturn`
 
 재호출 트리거: "삼성전자 2008 시나리오 배당 유지 가능?", "KT&G 1997 시나리오 dividend cut 임계", "경기침체 시 배당 cut 위험".

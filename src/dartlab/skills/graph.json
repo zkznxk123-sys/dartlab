@@ -2670,7 +2670,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.dividend.capitalReturn",
+      "id": "recipes.fundamental.dividend.capitalReturn",
       "title": "배당과 주주환원 분석",
       "category": "recipes",
       "purpose": "배당, 자사주, 총환원율을 자본배분 + 현금흐름 + 수익성 축의 결합으로 점검하는 다단 응용.",
@@ -2683,7 +2683,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.dividend.stressTest",
+      "id": "recipes.fundamental.dividend.stressTest",
       "title": "배당 지속 가능성 — 매크로 침체 시나리오 별 cut/suspend 임계",
       "category": "recipes",
       "purpose": "배당 정책 회사가 1997 IMF / 2008 GFC / 2020 COVID 시나리오에서 FCF 커버리지가 무너지는 임계 + 배당 cut/suspend 가능성 산출. 정상 시점 dividend yield 만 보고 매수하는 전략의 매크로 위험 가시화. analysis ↔ macro 격리 메우는 조합. 트리거 — '배당 스트레스', 'dividend cut 위험', '경기침체 배당'.",
@@ -2696,7 +2696,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.dividend.thesis",
+      "id": "recipes.fundamental.dividend.thesis",
       "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)",
       "category": "recipes",
       "purpose": "회사의 배당 매력도를 자본배분 의지 + 현금흐름 quality + 과거 배당 정책 3 축으로 평가하는 절차. 트리거 — '배당 매력도', '배당 정책', '배당 thesis'.",
@@ -4604,7 +4604,7 @@
     },
     {
       "src": "engines.analysis.capitalAllocation",
-      "dst": "recipes.dividend.capitalReturn",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -5699,7 +5699,7 @@
     },
     {
       "src": "engines.gather.dividends",
-      "dst": "recipes.dividend.capitalReturn",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -8514,7 +8514,7 @@
     },
     {
       "src": "engines.scan.capital",
-      "dst": "recipes.dividend.capitalReturn",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -8639,7 +8639,7 @@
     },
     {
       "src": "engines.scan.dividendTrend",
-      "dst": "recipes.dividend.capitalReturn",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -10253,87 +10253,87 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.scan.capital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.scan.dividendTrend",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis.cashflow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.capitalReturn",
       "dst": "engines.analysis.profitability",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.dividend.stressTest",
+      "src": "recipes.fundamental.dividend.stressTest",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.stressTest",
-      "dst": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.stressTest",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.stressTest",
+      "src": "recipes.fundamental.dividend.stressTest",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.stressTest",
+      "src": "recipes.fundamental.dividend.stressTest",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.thesis",
+      "src": "recipes.fundamental.dividend.thesis",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.thesis",
-      "dst": "recipes.dividend.capitalReturn",
+      "src": "recipes.fundamental.dividend.thesis",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.thesis",
+      "src": "recipes.fundamental.dividend.thesis",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.dividend.thesis",
+      "src": "recipes.fundamental.dividend.thesis",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "linkedRecipe"
     },
@@ -10544,7 +10544,7 @@
     },
     {
       "src": "recipes.governance.workforceAndCapital",
-      "dst": "recipes.dividend.capitalReturn",
+      "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
@@ -13574,7 +13574,7 @@
       "engines.viz.priceChart",
       "engines.viz.scenarioVisuals",
       "recipes.disclosure.event",
-      "recipes.dividend.capitalReturn",
+      "recipes.fundamental.dividend.capitalReturn",
       "recipes.governance.auditComposite"
     ],
     [
@@ -13675,8 +13675,8 @@
     "recipes.disclosure.insiderEventCheck",
     "recipes.disclosure.riskScreen",
     "recipes.disclosure.toneToStoryRisk",
-    "recipes.dividend.stressTest",
-    "recipes.dividend.thesis",
+    "recipes.fundamental.dividend.stressTest",
+    "recipes.fundamental.dividend.thesis",
     "recipes.etc.dataAvailabilityFirst",
     "recipes.etc.flowAndPattern",
     "recipes.etc.quantTechnicalReview",
@@ -13852,8 +13852,8 @@
     "recipes.disclosure.insiderEventCheck",
     "recipes.disclosure.riskScreen",
     "recipes.disclosure.toneToStoryRisk",
-    "recipes.dividend.stressTest",
-    "recipes.dividend.thesis",
+    "recipes.fundamental.dividend.stressTest",
+    "recipes.fundamental.dividend.thesis",
     "recipes.etc.dataAvailabilityFirst",
     "recipes.etc.flowAndPattern",
     "recipes.etc.quantTechnicalReview",

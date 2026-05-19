@@ -238,7 +238,7 @@ intentBoosts:
       - cashflow
       - "cash flow"
     boost: 10.0
-  - skillIds: ["recipes.dividend.capitalReturn"]
+  - skillIds: ["recipes.fundamental.dividend.capitalReturn"]
     terms:
       - 배당
       - 주주환원
