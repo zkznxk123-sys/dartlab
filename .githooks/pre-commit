@@ -43,4 +43,12 @@ if [ -n "$STAGED_PY" ]; then
     echo "  uv run ruff check --fix src/dartlab tests/" >&2
     exit 1
   }
+
+  # 3) staged 파일 camelCase + 9 섹션 docstring lint (diff 기준 — legacy 통과)
+  "$PYTHON" -X utf8 tests/audit/lint_camelcase_ast.py --strict $STAGED_PY || {
+    echo "" >&2
+    echo "[lint-camelcase] snake_case 식별자 또는 4 섹션 docstring 누락. 위 위반을 고친 뒤 재커밋." >&2
+    echo "  룰 SSOT: src/dartlab/skills/specs/operation/code.md" >&2
+    exit 1
+  }
 fi
