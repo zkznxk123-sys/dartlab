@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 from sse_starlette.sse import EventSourceResponse
@@ -468,13 +469,67 @@ def apiCompanyViewerTopic(
     topic: str,
     request: Request,
     period: str | None = Query(None, description="특정 기간만 반환 (타임라인 클릭 최적화)"),
+    periods: str | None = Query(
+        None,
+        description="comma-separated 다중 기간 — 한 호출로 window 5 period 통합 (viewer 의 4 fanout 회피).",
+    ),
     compact: bool = Query(True, description="UI 가 안 쓰는 views/timeline/blocks 제거. payload 80%+ 감소"),
     limit: int = Query(60, ge=0, le=500, description="compact 모드에서 sections 최대 개수 (0=무제한)"),
     response: Response = None,
 ):
-    """단일 topic의 viewer 데이터 — sections 블록 + 텍스트 문서."""
+    """단일 topic의 viewer 데이터 — sections 블록 + 텍스트 문서.
+
+    period: 단일 기간 (타임라인 클릭).
+    periods: comma-separated 다중 기간 — byPeriod dict 형태로 한 호출 반환. viewer
+    가 windowPeriods (보통 5 개) 를 한 번에 받기 위한 경로. period 와 동시 지정 시
+    periods 가 우선.
+    """
     try:
         company = getCompany(code)
+
+        # 다중 period 모드 — 한 호출로 window 응답.
+        if periods is not None:
+            from dartlab.providers.dart.docs.viewer import (
+                serializeViewerTextDocument,
+                viewerBlocks,
+                viewerTextDocument,
+            )
+
+            from ..services.companyApi import (
+                _compactTextDocument,
+                _dartUrlForPeriod,
+                _topicDartLabel,
+            )
+
+            periodList = [p.strip() for p in periods.split(",") if p.strip()]
+            if not hasattr(company, "_viewer_cache"):
+                company._viewer_cache = {}
+            if topic in company._viewer_cache:
+                allBlocks = company._viewer_cache[topic]
+            else:
+                allBlocks = viewerBlocks(company, topic)
+                company._viewer_cache[topic] = allBlocks
+            byPeriod: dict[str, Any] = {}
+            for p in periodList:
+                blocks = filterBlocksByPeriod(allBlocks, p)
+                textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
+                if compact:
+                    textDoc = _compactTextDocument(textDoc, limit=limit)
+                byPeriod[p] = {
+                    "period": p,
+                    "dartUrl": _dartUrlForPeriod(company, p),
+                    "textDocument": textDoc,
+                }
+            data = {
+                "stockCode": company.stockCode,
+                "corpName": company.corpName,
+                "topic": topic,
+                "topicLabel": _topicDartLabel(topic, safeTopicLabel(company, topic)),
+                "periods": periodList,
+                "compact": compact,
+                "byPeriod": byPeriod,
+            }
+            return etagResponse(request, response, data, maxAge=120, swr=600)
 
         if period is not None:
             from dartlab.providers.dart.docs.viewer import (
