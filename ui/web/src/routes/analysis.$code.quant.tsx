@@ -145,9 +145,14 @@ function QuantTab() {
 			]),
 		},
 		{
-			title: '리스크 (변동성·베타)',
-			subtitle: 'GARCH(1,1) 조건부 변동성 + 시장 베타 + CAPM 기대수익률 — 시장 민감도와 리스크.',
-			keys: new Set(['quantVolatilityKpi', 'quantBetaKpi']),
+			title: '리스크 (β·변동성·Snowflake)',
+			subtitle: 'Bloomberg BETA 산점도 + OLS β/α/R² · 5d/20d/60d/120d 변동성 term · drawdown 깊이 분포 · SWS 5 axis snowflake.',
+			keys: new Set([
+				'quantBetaScatter',
+				'quantVolatilityTerm',
+				'quantDrawdownDistribution',
+				'quantSnowflakeRadar',
+			]),
 		},
 		{
 			title: '예측 (Conformal)',

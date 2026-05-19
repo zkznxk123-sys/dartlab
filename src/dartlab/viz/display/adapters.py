@@ -1413,6 +1413,11 @@ __all__ = [
     "buildQuantStyleMatrix",
     "buildQuantRollingSharpe",
     "buildQuantAnnualReturns",
+    # risk 4 카드.
+    "buildQuantBetaScatter",
+    "buildQuantVolatilityTerm",
+    "buildQuantDrawdownDistribution",
+    "buildQuantSnowflakeRadar",
 ]
 
 
@@ -2214,6 +2219,237 @@ def buildQuantRollingSharpe(stockCode: str) -> dict[str, Any]:
             "data": sharpe,
         }],
         "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}, {"value": 1, "label": "양호", "color": "#10b981"}]},
+    }
+
+
+def buildQuantBetaScatter(stockCode: str) -> dict[str, Any]:
+    """β 산점도 — 시장 일별 수익률 X, 종목 일별 수익률 Y + OLS 회귀선 ref.
+
+    scatter kind. xRef=시장 평균, yRef=종목 평균. 박스 안 β/α/R² 표시는 frontend.
+    """
+    try:
+        from dartlab.quant.signal.momentum import fetchOhlcv
+        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
+        import numpy as np
+    except ImportError:
+        return {"points": []}
+    try:
+        stock = fetchOhlcv(stockCode)
+        bench = fetchBenchmarkOhlcv(market="KR")
+    except Exception:  # noqa: BLE001
+        return {"points": []}
+    if stock is None or bench is None:
+        return {"points": []}
+    try:
+        s_dates = [str(d)[:10] for d in stock["date"].to_list()]
+        s_close = stock["close"].to_numpy()
+        b_dates = [str(d)[:10] for d in bench["date"].to_list()]
+        b_close = bench["close"].to_numpy()
+    except Exception:  # noqa: BLE001
+        return {"points": []}
+    # 날짜 매칭.
+    b_map = {d: b_close[i] for i, d in enumerate(b_dates)}
+    matched_s: list[float] = []
+    matched_b: list[float] = []
+    for i, d in enumerate(s_dates):
+        if d in b_map:
+            matched_s.append(s_close[i])
+            matched_b.append(b_map[d])
+    if len(matched_s) < 30:
+        return {"points": []}
+    s_arr = np.array(matched_s)
+    b_arr = np.array(matched_b)
+    s_ret = (s_arr[1:] / s_arr[:-1] - 1) * 100
+    b_ret = (b_arr[1:] / b_arr[:-1] - 1) * 100
+    points = [{"x": float(bx), "y": float(sx), "label": f"{i}", "self": False} for i, (bx, sx) in enumerate(zip(b_ret, s_ret))]
+    # OLS β/α/R².
+    bm = float(np.mean(b_ret))
+    sm = float(np.mean(s_ret))
+    cov = float(np.mean((b_ret - bm) * (s_ret - sm)))
+    var_b = float(np.var(b_ret))
+    beta = cov / var_b if var_b > 0 else 0.0
+    alpha = sm - beta * bm
+    ss_tot = float(np.sum((s_ret - sm) ** 2))
+    ss_res = float(np.sum((s_ret - (alpha + beta * b_ret)) ** 2))
+    r2 = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
+    return {
+        "points": points,
+        "xLabel": "시장 (KOSPI) 일별 수익률",
+        "yLabel": f"{stockCode} 일별 수익률",
+        "xUnit": "%",
+        "yUnit": "%",
+        "xRef": round(bm, 3),
+        "yRef": round(sm, 3),
+        "options": {
+            "betaSummary": {
+                "beta": round(beta, 3),
+                "alpha": round(alpha, 4),
+                "r2": round(r2, 3),
+                "n": len(points),
+            },
+        },
+    }
+
+
+def buildQuantVolatilityTerm(stockCode: str) -> dict[str, Any]:
+    """변동성 Term Structure — 5d/20d/60d/120d realized 시계열 (rolling std, 연환산).
+
+    trend kind. 4 line. 단일 시점 KPI 대신 시간에 따른 변동성 진화.
+    """
+    try:
+        from dartlab.quant.signal.momentum import fetchOhlcv
+        import numpy as np
+    except ImportError:
+        return {"categories": [], "series": []}
+    try:
+        ohlcv = fetchOhlcv(stockCode)
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    if ohlcv is None:
+        return {"categories": [], "series": []}
+    try:
+        dates = [str(d)[:10] for d in ohlcv["date"].to_list()]
+        close = ohlcv["close"].to_numpy()
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    if len(close) < 130:
+        return {"categories": [], "series": []}
+    rets = np.diff(close) / close[:-1]
+
+    def _rollingVol(window: int) -> list[float | None]:
+        out: list[float | None] = [None] * len(close)
+        for i in range(window, len(rets) + 1):
+            w = rets[i - window:i]
+            sd = float(np.std(w, ddof=1))
+            out[i] = sd * (252 ** 0.5) * 100  # 연환산 %
+        return out
+
+    rv5 = _rollingVol(5)
+    rv20 = _rollingVol(20)
+    rv60 = _rollingVol(60)
+    rv120 = _rollingVol(120)
+    return {
+        "categories": dates,
+        "series": [
+            {"key": "rv5", "label": "5d", "color": "#ef4444", "intent": "accent",
+             "unit": "%", "type": "line", "axis": "left", "data": rv5},
+            {"key": "rv20", "label": "20d", "color": "#f59e0b", "intent": "accent",
+             "unit": "%", "type": "line", "axis": "left", "data": rv20},
+            {"key": "rv60", "label": "60d", "color": "#10b981", "intent": "accent",
+             "unit": "%", "type": "line", "axis": "left", "data": rv60},
+            {"key": "rv120", "label": "120d", "color": "#2563eb", "intent": "primary",
+             "unit": "%", "type": "line", "axis": "left", "data": rv120},
+        ],
+    }
+
+
+def buildQuantDrawdownDistribution(stockCode: str) -> dict[str, Any]:
+    """Drawdown 깊이 분포 — best style equity 의 모든 drawdown 깊이 히스토그램.
+
+    trend kind, bar. categories=깊이 구간 (0-2%, 2-5%, 5-10%, 10-15%, 15-20%, 20%+),
+    series=빈도 (일수). 사용자가 *이 종목 이 전략의 drawdown 통계 분포*.
+    """
+    bt = _backtestAllStyles(stockCode)
+    if bt is None:
+        return {"categories": [], "series": []}
+    results = bt.get("results") or {}
+    best_key = None
+    best_sharpe = float("-inf")
+    for k, r in results.items():
+        s = getattr(r, "sharpe", None) or 0
+        if s > best_sharpe:
+            best_sharpe = s
+            best_key = k
+    if best_key is None:
+        return {"categories": [], "series": []}
+    eq = bt["equities"].get(best_key) or []
+    if not eq:
+        return {"categories": [], "series": []}
+    # drawdown sequence — 모든 시점 dd %.
+    run_max = 0.0
+    depths: list[float] = []
+    for v in eq:
+        if v is None:
+            continue
+        if v > run_max:
+            run_max = v
+        if run_max > 0:
+            dd = (1 - v / run_max) * 100  # 양수 깊이 %.
+            depths.append(dd)
+    # 구간 bin.
+    bins = [(0, 2, "0~2%"), (2, 5, "2~5%"), (5, 10, "5~10%"), (10, 15, "10~15%"), (15, 20, "15~20%"), (20, 999, "20%+")]
+    counts = [sum(1 for d in depths if lo <= d < hi) for lo, hi, _ in bins]
+    labels = [lbl for _, _, lbl in bins]
+    return {
+        "categories": labels,
+        "series": [{
+            "key": "freq",
+            "label": f"빈도 ({_STYLE_LABELS.get(best_key, best_key)})",
+            "color": "#ef4444",
+            "intent": "negative",
+            "unit": "일",
+            "type": "bar",
+            "axis": "left",
+            "data": counts,
+        }],
+    }
+
+
+def _normalizeScore(v: float | None, lo: float, hi: float) -> float:
+    """v 를 [lo, hi] 범위에서 0~5 점으로 정규화. 범위 밖 clamp."""
+    if v is None:
+        return 0.0
+    if hi <= lo:
+        return 0.0
+    s = (v - lo) / (hi - lo) * 5
+    return max(0.0, min(5.0, s))
+
+
+def buildQuantSnowflakeRadar(stockCode: str) -> dict[str, Any]:
+    """Snowflake 5 axis radar — Technical / Momentum / RiskInverse / Factor / Forecast.
+
+    각 축 0~5 점 (Simply Wall St 스타일). radar kind.
+    """
+    # 5 axis 종합.
+    verdict = _safeQuantCall("dartlab.quant.screen.axTechnical", "calcVerdict", stockCode) or {}
+    momentum = _safeQuantCall("dartlab.quant.signal.momentum", "calcMomentum", stockCode) or {}
+    volatility = _safeQuantCall("dartlab.quant.risk.volatility", "calcVolatility", stockCode) or {}
+    beta = _safeQuantCall("dartlab.quant.screen.axTechnical", "calcBeta", stockCode) or {}
+    forecast = _safeQuantCall("dartlab.quant.benchmark.forecast", "forecastReturns", stockCode, horizon=5) or {}
+
+    # Technical: verdict score (-5~+5) → 0~5.
+    tech = _normalizeScore(_toFloat(verdict.get("score")), -5, 5)
+    # Momentum: momentum12_1 또는 6_1 — 0% ~ 100% 가 0~5.
+    mom_val = momentum.get("momentum12_1")
+    if mom_val is None:
+        mom_val = momentum.get("momentum6_1")
+    mom = _normalizeScore(_toFloat(mom_val), 0, 1.0)  # 100% → 5 점.
+    # RiskInverse: 변동성 낮을수록 좋음 (KR 평균 25~30%) — RV20 0.2 → 5, 0.8 → 0.
+    rv20 = _toFloat(volatility.get("realizedVol_20d"))
+    risk_inv = _normalizeScore(-(rv20 if rv20 is not None else 0.8), -0.8, -0.2)  # 0.2 → 5, 0.8 → 0
+    # Factor: R² 0~1 (시장 설명력 = 안정성 일부) — *0~100* 단위면 /100.
+    r2 = _toFloat(beta.get("r2"))
+    if r2 is not None and r2 > 1:
+        r2 /= 100
+    fac = _normalizeScore(r2, 0, 0.8)
+    # Forecast: conformal CI 폭이 좁을수록 양호 (신뢰), point 양수일수록 좋음. 종합 = (point - halfWidth) 양수 정도.
+    point = _toFloat(forecast.get("summary", {}).get("cumulativeReturn") if isinstance(forecast.get("summary"), dict) else None)
+    half = _toFloat(forecast.get("conformalHalfWidth"))
+    fc_signal = (point if point is not None else 0) - (half if half is not None else 0.1)
+    fc = _normalizeScore(fc_signal, -0.1, 0.05)
+    return {
+        "categories": ["기술", "모멘텀", "리스크(역)", "팩터", "예측"],
+        "series": [{
+            "key": "snowflake",
+            "label": "종합",
+            "color": "#2563eb",
+            "intent": "primary",
+            "unit": "점",
+            "type": "line",
+            "axis": "left",
+            "data": [round(tech, 2), round(mom, 2), round(risk_inv, 2), round(fac, 2), round(fc, 2)],
+        }],
+        "options": {"maxValue": 5},
     }
 
 

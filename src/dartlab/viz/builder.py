@@ -467,6 +467,28 @@ def _buildKindSpecView(
         result = adapters.buildQuantAnnualReturns(stockCode)
         base_view["categories"] = result.get("categories", [])
         base_view["series"] = result.get("series", [])
+    # risk 4 카드.
+    elif adapter_name == "quantBetaScatter":
+        result = adapters.buildQuantBetaScatter(stockCode)
+        for key in ("points", "xLabel", "yLabel", "xUnit", "yUnit", "xRef", "yRef"):
+            if key in result:
+                base_view[key] = result[key]
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantVolatilityTerm":
+        result = adapters.buildQuantVolatilityTerm(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "quantDrawdownDistribution":
+        result = adapters.buildQuantDrawdownDistribution(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "quantSnowflakeRadar":
+        result = adapters.buildQuantSnowflakeRadar(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass

@@ -156,29 +156,51 @@ QUANT_CARDS: dict[str, CatalogEntry] = {
         "dataSpec": {"adapter": "quantAnnualReturns"},
     },
     # ─────────────────────────────────────────────────────────────
-    # 4. risk — 변동성 (GARCH) + 시장 베타 (CAPM)
+    # 4. risk — Bloomberg BETA 산점도 + 변동성 term + drawdown 분포 + Snowflake radar
     # ─────────────────────────────────────────────────────────────
-    "quantVolatilityKpi": {
-        "kind": "kpiTile",
-        "title": "변동성 패널",
+    "quantBetaScatter": {
+        "kind": "scatter",
+        "title": "β 산점도 (시장 vs 종목)",
         "topic": "price",
         "tab": "quant",
         "seriesPlan": [],
         "options": {},
-        "layout": {"colSpan": 6, "rowSpan": 2},
-        "help": "20일 실현변동성 + GARCH(1,1) 조건부 변동성 + HAR-RV. 일별·연환산 동시 표시.",
-        "dataSpec": {"adapter": "quantVolatilityKpi"},
+        "layout": {"colSpan": 6, "rowSpan": 4},
+        "help": "Bloomberg BETA 정통 — 시장(KOSPI) 일별 수익률 X, 종목 일별 수익률 Y. OLS β/α/R² 산점도 분포.",
+        "dataSpec": {"adapter": "quantBetaScatter"},
     },
-    "quantBetaKpi": {
-        "kind": "kpiTile",
-        "title": "시장 베타 (CAPM)",
+    "quantVolatilityTerm": {
+        "kind": "trend",
+        "title": "변동성 Term Structure",
         "topic": "price",
         "tab": "quant",
         "seriesPlan": [],
         "options": {},
-        "layout": {"colSpan": 6, "rowSpan": 2},
-        "help": "벤치마크 대비 베타 + R² + CAPM 기대수익률 + 상대강도. KR=KOSPI/KOSDAQ 자동 선택.",
-        "dataSpec": {"adapter": "quantBetaKpi"},
+        "layout": {"colSpan": 6, "rowSpan": 4},
+        "help": "5d / 20d / 60d / 120d rolling realized vol (연환산 %) 시계열. 단기 변동성 spike vs 장기 추세 비교.",
+        "dataSpec": {"adapter": "quantVolatilityTerm"},
+    },
+    "quantDrawdownDistribution": {
+        "kind": "trend",
+        "title": "Drawdown 깊이 분포",
+        "topic": "price",
+        "tab": "quant",
+        "seriesPlan": [],
+        "options": {},
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "Best style equity 의 모든 drawdown 깊이 히스토그램 — 0~2% / 2~5% / 5~10% / 10~15% / 15~20% / 20%+ 6 구간 빈도(일수).",
+        "dataSpec": {"adapter": "quantDrawdownDistribution"},
+    },
+    "quantSnowflakeRadar": {
+        "kind": "radar",
+        "title": "Snowflake 5 axis",
+        "topic": "price",
+        "tab": "quant",
+        "seriesPlan": [],
+        "options": {},
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "Simply Wall St 정통 5 차원 종합 — 기술 / 모멘텀 / 리스크(역) / 팩터 / 예측. 각 축 0~5 점.",
+        "dataSpec": {"adapter": "quantSnowflakeRadar"},
     },
     # ─────────────────────────────────────────────────────────────
     # 5. forecast — 일별 수익률 예측 + Conformal CI
