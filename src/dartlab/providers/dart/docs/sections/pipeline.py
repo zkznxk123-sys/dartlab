@@ -23,10 +23,14 @@ period key 형식:
 from __future__ import annotations
 
 import gc
+import logging
+import os
 import re
 from collections.abc import Iterator
 
 import polars as pl
+
+_log = logging.getLogger(__name__)
 
 from dartlab.core.dataLoader import loadData
 from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
@@ -576,6 +580,22 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     df = pl.concat(periodDfs, how="diagonal_relaxed")
     periodDfs = None  # noqa: F841
     gc.collect()
+
+    # pivot last-wins 충돌 가시화 — (topic, segmentKey, periodKey) 중복 row 가
+    # 있으면 _rowIdx 마지막 text 만 살아남음 (silent loss). 정상 케이스는
+    # occurrence 카운터가 차단하지만 비표준 보고서 구조에서 누수 가능.
+    # DARTLAB_SECTIONS_STRICT=1 환경변수 시 ValueError 승격.
+    collisionDf = df.group_by(["topic", "segmentKey", "periodKey"]).len().filter(pl.col("len") > 1)
+    collisionCount = collisionDf.height
+    if collisionCount > 0:
+        samples = collisionDf.head(3).to_dicts()
+        msg = (
+            f"sections pivot 충돌 {collisionCount} 건 — (topic, segmentKey, periodKey) "
+            f"중복 키. _rowIdx 마지막만 보존. 샘플: {samples}"
+        )
+        if os.environ.get("DARTLAB_SECTIONS_STRICT") == "1":
+            raise ValueError(msg)
+        _log.warning(msg)
 
     # 메모리 최적화: pivot 먼저 (text 사용) → df 에서 text 제거 → 후속 aggregation 은 가벼운 df 로
     pivotDf = df.sort(["_rowIdx"]).pivot(
