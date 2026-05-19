@@ -73,12 +73,21 @@ def splitNotesSections(df: pl.DataFrame) -> pl.DataFrame:
     if not df.filter(notes_mask).height:
         return df
 
-    # period 컬럼 — 본문 추출용. 표준 형식: 2024 / 2024Q1 등.
-    period_cols = [c for c in df.columns if re.fullmatch(r"\d{4}(Q[1-4])?", c)]
-    # 우선순위: 최신 period → 옛 period (사업보고서가 본문 풀, 분기보고서가 stub).
-    period_cols_sorted = sorted(period_cols, reverse=True)
+    # 본문 추출용 period 컬럼 — annual (사업보고서, `2024` 등) 만 사용.
+    # 이유: 분기보고서와 사업보고서가 동일 주석에도 *다른* N 번호를 매김 (분기엔
+    # 일부 sub-section 생략). NOTES_SUB_SECTIONS SSOT 는 사업보고서 표준 번호 기준
+    # 이므로 분기 본문으로 N 추출하면 잘못된 sub-topic key 생성. annual 우선.
+    annual_cols = [c for c in df.columns if re.fullmatch(r"\d{4}", c)]
+    quarter_cols = [c for c in df.columns if re.fullmatch(r"\d{4}Q[1-4]", c)]
+    # annual 최신부터 (예 2025 > 2024 > 2023), 없으면 quarter Q4 (사업보고서 동치) → 그 외 quarter.
+    annual_cols_sorted = sorted(annual_cols, reverse=True)
+    q4_cols_sorted = sorted([c for c in quarter_cols if c.endswith("Q4")], reverse=True)
+    other_q_cols_sorted = sorted([c for c in quarter_cols if not c.endswith("Q4")], reverse=True)
+    period_cols_sorted = annual_cols_sorted + q4_cols_sorted + other_q_cols_sorted
 
-    notes_df = df.filter(notes_mask)
+    # (topic, blockOrder) 정렬 — cumsum 그룹화의 정확성을 위해 보고서 흐름 순서 강제.
+    # docsSec frame 의 default 순서는 입력 데이터 순서이지 보고서 흐름이 아닐 수 있다.
+    notes_df = df.filter(notes_mask).sort(["topic", "blockOrder"])
     other_df = df.filter(~notes_mask)
 
     # 본문 추출 — period 컬럼 중 첫 non-empty 가 대표 본문.
