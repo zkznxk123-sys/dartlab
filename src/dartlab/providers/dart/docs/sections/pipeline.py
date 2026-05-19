@@ -69,6 +69,10 @@ TOPIC_CANONICAL_CHAPTER: dict[str, str] = {
     "consolidatedNotes": "III",
     "financialStatements": "III",
     "financialNotes": "III",
+    "audit": "V",
+    "auditOpinion": "V",
+    "auditContract": "V",
+    "nonAuditContract": "V",
 }
 
 _preparedCache: dict[str, "_PreparedRows"] = {}

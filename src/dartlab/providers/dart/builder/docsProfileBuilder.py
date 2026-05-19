@@ -50,7 +50,7 @@ _STATIC_CHAPTER_MAP: dict[str, str] = {
     "financialStatements": "III", # 4. 재무제표
     "financialNotes": "III",      # 5. 재무제표 주석
     "dividend": "III",            # 6. 배당에 관한 사항 (← 누락 채움)
-    # V. 회계감사인의 감사의견 등
+    # V. 회계감사인의 감사의견 등 (DART 최신 표준 — 옛 보고서는 IV 에 있어 frame 흔들림)
     "audit": "V",
     "auditOpinion": "V",
     "auditContract": "V",
