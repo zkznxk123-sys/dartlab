@@ -18,7 +18,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	BentoGrid,
 	BENTO_GAP_PX,
@@ -160,6 +160,31 @@ function CardRender({
 		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
 	);
 	const [open, setOpen] = useState(false);
+	// viewport lazy mount — 화면 밖 카드는 VizChart 컴포넌트 mount 자체 skip.
+	// content-visibility: auto (BentoGrid) 가 paint 는 skip 하지만 React reconcile·
+	// effect 비용은 그대로 발생 → IO 로 mount 단계까지 미룸. rootMargin 200px 로
+	// 사용자가 스크롤 도달 직전 미리 mount → 인지 latency 0.
+	const wrapperRef = useRef<HTMLDivElement>(null);
+	const [visible, setVisible] = useState(false);
+	useEffect(() => {
+		if (visible) return;
+		const el = wrapperRef.current;
+		if (!el) return;
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const e of entries) {
+					if (e.isIntersecting) {
+						setVisible(true);
+						io.disconnect();
+						break;
+					}
+				}
+			},
+			{ rootMargin: '200px 0px' },
+		);
+		io.observe(el);
+		return () => io.disconnect();
+	}, [visible]);
 	const kind = spec?.kind ?? packed.kind;
 	const headerMetric = computeHeaderMetric(spec);
 	// Koyfin 패턴 — primary series 시계열 sparkline (마지막 24 분기).
@@ -175,7 +200,7 @@ function CardRender({
 		// 최근 24 step 만 (sparkline 너무 길면 잡음).
 		return data.slice(-24);
 	})();
-	const ready = !!spec && !spec.error;
+	const ready = !!spec && !spec.error && visible;
 	const headerCombined = ready ? (
 		<>
 			{sparklineData && sparklineData.length >= 2 && (
@@ -189,6 +214,7 @@ function CardRender({
 	return (
 		<>
 			<div
+				ref={wrapperRef}
 				onClick={() => ready && setOpen(true)}
 				className={ready ? 'cursor-pointer transition-opacity hover:opacity-95' : 'h-full'}
 				role={ready ? 'button' : undefined}
