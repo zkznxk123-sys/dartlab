@@ -141,30 +141,21 @@ function SnowflakeHero({ stockCode, periodKind }: { stockCode: string; periodKin
 	);
 }
 
-// 카드 1 장당 useQuery 1 개 — mount 시 즉시 fetch, 가장 빠른 카드부터 paint.
-// 이전: layout API 가 34 카드 spec 다 들고와서 가장 느린 카드가 전체 막음.
-function CardWithQuery({
-	stockCode,
-	periodKind,
+// 카드 1 장 render — bundle 모드에서 spec 은 prop 으로 주입됨 (per-card fetch 폐기).
+// 이전 progressive load 는 35 round-trip 때문에 bundle (asyncio.gather) 보다 5x 느렸음.
+function CardRender({
+	spec,
 	packed,
 	meta,
 	cardOuterH,
 	computeHeaderMetric,
 }: {
-	stockCode: string;
-	periodKind: PeriodKind;
+	spec: RechartsSpec | undefined;
 	packed: PackedCard;
 	meta: CatalogCard | undefined;
 	cardOuterH: number;
 	computeHeaderMetric: (spec: RechartsSpec | undefined) => React.ReactNode;
 }) {
-	const { data: spec, isError } = useQuery({
-		queryKey: dashKeys.card(packed.cardKey, stockCode, periodKind),
-		queryFn: () => fetchCard(packed.cardKey, stockCode, periodKind, 40),
-		placeholderData: keepPreviousData,
-		staleTime: 5 * 60_000,
-		retry: 1,
-	});
 	const title = meta?.title || spec?.title || packed.title;
 	const help = meta?.help;
 	const seriesCount = spec?.series?.length ?? 0;
@@ -192,7 +183,7 @@ function CardWithQuery({
 		// 최근 24 step 만 (sparkline 너무 길면 잡음).
 		return data.slice(-24);
 	})();
-	const ready = !!spec && !spec.error && !isError;
+	const ready = !!spec && !spec.error;
 	const headerCombined = ready ? (
 		<>
 			{sparklineData && sparklineData.length >= 2 && (
@@ -275,11 +266,11 @@ function FinancialTab() {
 	});
 
 	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
-	// progressive load — layout 만 먼저 받고 (수 ms), 카드 spec 은 CardWithQuery 가 카드별 fetch.
+	// bundle load — backend asyncio.gather 가 progressive (35 round-trip) 보다 5x 빠름 (warm cache 0.36s vs 1.82s).
 	const apiView = null;
 	const { data, isError, isLoading, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
-		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, true),
+		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, false),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60_000,
 		retry: 1,
@@ -348,11 +339,11 @@ function FinancialTab() {
 
 	const renderCard = (p: PackedCard, cellSize: number) => {
 		const meta = cardMetaByKey[p.cardKey];
+		const spec = data?.cards?.[p.cardKey];
 		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
 		return (
-			<CardWithQuery
-				stockCode={code}
-				periodKind={periodKind}
+			<CardRender
+				spec={spec}
 				packed={p}
 				meta={meta}
 				cardOuterH={cardOuterH}
