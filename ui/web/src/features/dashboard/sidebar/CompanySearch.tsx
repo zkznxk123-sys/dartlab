@@ -12,11 +12,13 @@ import { SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, Side
 import { searchCompanies } from '../api/client';
 import { dashKeys } from '../api/queryKeys';
 import { useDebounce } from '../hooks/useDebounce';
+import { usePrefetchCompany } from '../hooks/usePrefetchCompany';
 import { useRecentCompanies } from '../hooks/useRecentCompanies';
 
 export function CompanySearch() {
 	const navigate = useNavigate();
 	const { push } = useRecentCompanies();
+	const prefetch = usePrefetchCompany();
 	const [q, setQ] = useState('');
 	const [focusIdx, setFocusIdx] = useState(-1);
 	const dq = useDebounce(q.trim(), 200);
@@ -32,6 +34,13 @@ export function CompanySearch() {
 	useEffect(() => {
 		setFocusIdx(hits.length > 0 ? 0 : -1);
 	}, [dq, hits.length]);
+
+	// focused row (키보드 cycle / hover) 진입 시 prefetch — 클릭 시점에 이미 캐시 hit.
+	useEffect(() => {
+		if (focusIdx < 0) return;
+		const hit = hits[focusIdx];
+		if (hit?.stockCode) prefetch(hit.stockCode);
+	}, [focusIdx, hits, prefetch]);
 
 	function pick(idx: number) {
 		const hit = hits[idx];

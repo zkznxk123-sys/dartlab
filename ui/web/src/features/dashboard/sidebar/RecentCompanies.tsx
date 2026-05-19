@@ -5,10 +5,12 @@ import { History } from 'lucide-react';
 
 import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 
+import { usePrefetchCompany } from '../hooks/usePrefetchCompany';
 import { useRecentCompanies } from '../hooks/useRecentCompanies';
 
 export function RecentCompanies() {
 	const { items } = useRecentCompanies();
+	const prefetch = usePrefetchCompany();
 	if (!items.length) return null;
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -17,7 +19,12 @@ export function RecentCompanies() {
 				<SidebarMenu>
 					{items.map((r) => (
 						<SidebarMenuItem key={r.stockCode}>
-							<SidebarMenuButton asChild tooltip={`${r.corpName} (${r.stockCode})`}>
+							<SidebarMenuButton
+								asChild
+								tooltip={`${r.corpName} (${r.stockCode})`}
+								onMouseEnter={() => prefetch(r.stockCode)}
+								onFocus={() => prefetch(r.stockCode)}
+							>
 								<Link to="/dashboard/$code" params={{ code: r.stockCode }}>
 									<History />
 									<span className="truncate">{r.corpName}</span>
