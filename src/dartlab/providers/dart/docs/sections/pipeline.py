@@ -48,6 +48,29 @@ from dartlab.providers.reportSelector import selectReport
 
 # ── Phase 1 캐시: parquet 로드 + topic 매핑 결과 재사용 ──
 
+# DART 표준 chapter canonical override —
+# section frame 의 chapter 컬럼은 row 단위로 박혀있고, topic 단위 chapter 는 first row
+# chapter 사용. 분기보고서가 같은 topic 의 stub 을 사업보고서와 다른 chapter 에 둘 때
+# 데이터 순서에 따라 chapter 가 흔들림. 표준 매핑으로 고정.
+#
+# 동일 표준 매핑이 `builder/docsProfileBuilder.py::_STATIC_CHAPTER_MAP` 에도 있다
+# (buildSections 의 finance/report 합병용). 본 두 매핑은 *반드시 동일* 해야 한다.
+# 분리된 이유: pipeline 은 docs 파이프라인 안, docsProfileBuilder 는 3-source 통합
+# 빌더 안 — 모듈 경계가 달라 직접 import 시 circular dep 위험.
+TOPIC_CANONICAL_CHAPTER: dict[str, str] = {
+    "companyOverview": "I",
+    "companyHistory": "I",
+    "capitalChange": "I",
+    "shareCapital": "I",
+    "articlesOfIncorporation": "I",
+    "dividend": "III",
+    "fsSummary": "III",
+    "consolidatedStatements": "III",
+    "consolidatedNotes": "III",
+    "financialStatements": "III",
+    "financialNotes": "III",
+}
+
 _preparedCache: dict[str, "_PreparedRows"] = {}
 # _PreparedRows.periodRowsDf — 단일 polars DataFrame (모든 period row + _periodKey
 # 컬럼). 이전 dict[str, list[dict]] 형태 → polars Rust arena 단일 보관 으로
@@ -799,9 +822,19 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     # sourceBlockOrder: orderInfo "or" meta "or" 0 (truthy fallback)
     # segmentOccurrence: orderInfo "or" meta "or" 1
     # segmentOrder: meta only
+    # chapter 결정 — TOPIC_CANONICAL_CHAPTER 에 명시된 topic 은 강제 표준 값. 그 외는
+    # _topicChapter (first row chapter) 사용. canonical map 으로 분기보고서 stub chapter
+    # 가 사업보고서 본문 chapter 를 덮어쓰는 회귀 차단.
+    chapter_expr: pl.Expr = pl.col("_topicChapter")
+    for topic_key, canonical_chapter in TOPIC_CANONICAL_CHAPTER.items():
+        chapter_expr = (
+            pl.when(pl.col("topic") == topic_key)
+            .then(pl.lit(canonical_chapter))
+            .otherwise(chapter_expr)
+        )
     result = result.with_columns(
         [
-            pl.col("_topicChapter").alias("chapter"),
+            chapter_expr.alias("chapter"),
             (
                 pl.when(pl.col("_orderSourceBlockOrder") != 0)
                 .then(pl.col("_orderSourceBlockOrder"))
@@ -1397,7 +1430,8 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
             if not isinstance(segmentKey, str) or not segmentKey:
                 continue
             if topic not in topicChapter:
-                topicChapter[topic] = chapter
+                # canonical override 가 있으면 DART 표준 chapter 강제, 없으면 first-seen.
+                topicChapter[topic] = TOPIC_CANONICAL_CHAPTER.get(topic, chapter)
             if topic in suppressed.get(chapter, set()):
                 continue
             if detailTopicForTopic(topic) is not None:
@@ -1564,7 +1598,8 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
             semanticPathVariants = sorted(semanticPathVariantsByKey.get(key, set()))
             semanticParentPathVariants = sorted(semanticParentPathVariantsByKey.get(key, set()))
 
-            dataColumns["chapter"].append(topicChapter.get(topic))
+            # canonical override 가 있으면 강제, 없으면 topicChapter (first-seen) 사용.
+            dataColumns["chapter"].append(TOPIC_CANONICAL_CHAPTER.get(topic, topicChapter.get(topic)))
             dataColumns["topic"].append(topic)
             dataColumns["blockType"].append(str(meta.get("blockType") or "text"))
             dataColumns["blockOrder"].append(blockOrder)

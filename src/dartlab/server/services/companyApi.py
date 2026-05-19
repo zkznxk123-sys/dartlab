@@ -304,10 +304,6 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
             chapter_value = topic_frame.item(0, "chapter") if "chapter" in topic_frame.columns else None
             chapter_raw = chapter_value if isinstance(chapter_value, str) and chapter_value else "기타"
             chapter = _chapterLabelKr(chapter_raw)
-            # DART 표준 override — sections frame 이 잘못 분류한 topic 강제 교정.
-            # 배당에 관한 사항은 III. 재무에 관한 사항 안 leaf (사업보고서 기준).
-            if topic == "dividend":
-                chapter = "III. 재무에 관한 사항"
             if chapter not in chapter_map:
                 chapter_map[chapter] = []
                 chapter_order.append(chapter)
