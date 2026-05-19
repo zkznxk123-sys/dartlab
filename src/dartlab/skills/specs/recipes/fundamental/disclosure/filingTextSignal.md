@@ -1,5 +1,5 @@
 ---
-id: recipes.disclosure.filingTextSignal
+id: recipes.fundamental.disclosure.filingTextSignal
 title: 8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature
 category: recipes
 kind: recipe
@@ -141,7 +141,7 @@ emit_result(
 
 1. 본 recipe → 키워드 별 anomaly z-score.
 2. anomalyFlag = True 키워드 ≥ 2 → `engines.analysis` 의 input feature.
-3. 동시 발현 → `recipes.disclosure.toneToStoryRisk` 와 결합 — story.risk 자동 발행 트리거.
+3. 동시 발현 → `recipes.fundamental.disclosure.toneToStoryRisk` 와 결합 — story.risk 자동 발행 트리거.
 
 ## 기본 검증
 

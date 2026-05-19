@@ -1376,7 +1376,7 @@
       ]
     },
     {
-      "id": "recipes.disclosure.event",
+      "id": "recipes.fundamental.disclosure.event",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
       "category": "recipes",
       "status": "limited",
@@ -1387,7 +1387,7 @@
       ]
     },
     {
-      "id": "recipes.disclosure.riskScreen",
+      "id": "recipes.fundamental.disclosure.riskScreen",
       "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
       "category": "recipes",
       "status": "limited",
@@ -1398,7 +1398,7 @@
       ]
     },
     {
-      "id": "recipes.disclosure.toneToStoryRisk",
+      "id": "recipes.fundamental.disclosure.toneToStoryRisk",
       "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
       "category": "recipes",
       "status": "limited",
@@ -1491,7 +1491,7 @@
       ]
     },
     {
-      "id": "recipes.disclosure.filingTextSignal",
+      "id": "recipes.fundamental.disclosure.filingTextSignal",
       "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
       "category": "recipes",
       "status": "limited",
@@ -1595,7 +1595,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.disclosure.insiderEarningsLeading",
+      "id": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
       "category": "recipes",
       "status": "limited",
@@ -1604,7 +1604,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.disclosure.insiderEventCheck",
+      "id": "recipes.fundamental.disclosure.insiderEventCheck",
       "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
       "category": "recipes",
       "status": "limited",

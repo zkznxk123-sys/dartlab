@@ -189,14 +189,14 @@
         "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)"
       },
       {
-        "id": "recipes.disclosure.riskScreen",
+        "id": "recipes.fundamental.disclosure.riskScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
         "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)"
       },
       {
-        "id": "recipes.disclosure.toneToStoryRisk",
+        "id": "recipes.fundamental.disclosure.toneToStoryRisk",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -238,7 +238,7 @@
         "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)"
       },
       {
-        "id": "recipes.disclosure.filingTextSignal",
+        "id": "recipes.fundamental.disclosure.filingTextSignal",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
@@ -294,14 +294,14 @@
         "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목"
       },
       {
-        "id": "recipes.disclosure.insiderEarningsLeading",
+        "id": "recipes.fundamental.disclosure.insiderEarningsLeading",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표"
       },
       {
-        "id": "recipes.disclosure.insiderEventCheck",
+        "id": "recipes.fundamental.disclosure.insiderEventCheck",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

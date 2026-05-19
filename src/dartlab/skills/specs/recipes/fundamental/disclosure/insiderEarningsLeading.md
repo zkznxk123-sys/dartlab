@@ -1,5 +1,5 @@
 ---
-id: recipes.disclosure.insiderEarningsLeading
+id: recipes.fundamental.disclosure.insiderEarningsLeading
 title: 내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표
 category: recipes
 kind: recipe
@@ -147,5 +147,5 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → cluster signal 보유 종목 식별.
-2. clusterFlag = True → `recipes.disclosure.filingTextSignal` 과 결합 — MD&A tone change 동행 검증.
+2. clusterFlag = True → `recipes.fundamental.disclosure.filingTextSignal` 과 결합 — MD&A tone change 동행 검증.
 3. universe 검증은 `recipes.credit.distressCandidateScreen` 의 inverse — cluster + low distress = 강한 매수 신호.

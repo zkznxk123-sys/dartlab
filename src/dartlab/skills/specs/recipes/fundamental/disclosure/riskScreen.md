@@ -1,5 +1,5 @@
 ---
-id: recipes.disclosure.riskScreen
+id: recipes.fundamental.disclosure.riskScreen
 title: 공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)
 category: recipes
 kind: recipe
@@ -149,8 +149,8 @@ graph LR
 | 외부 KIS/NICE 신용 watch 진입 | 일관성 | 분기 |
 
 ## 연계 절차
-- 상위 후보 case 별 → `recipes.disclosure.event` (개별 종목 본문 검증)
-- 공시 톤 분석 → `recipes.disclosure.toneToStoryRisk`
+- 상위 후보 case 별 → `recipes.fundamental.disclosure.event` (개별 종목 본문 검증)
+- 공시 톤 분석 → `recipes.fundamental.disclosure.toneToStoryRisk`
 - 분식 의심 결합 → `recipes.quality.earningsQualityTriad` (Sloan + Beneish + Novy-Marx)
 - 부도 위험 결합 → `recipes.credit.distressFilter`
 - 산업 횡단 → `engines.scan` direct (sector breakdown)

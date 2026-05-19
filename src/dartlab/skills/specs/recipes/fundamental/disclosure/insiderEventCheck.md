@@ -1,5 +1,5 @@
 ---
-id: recipes.disclosure.insiderEventCheck
+id: recipes.fundamental.disclosure.insiderEventCheck
 title: 내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)
 category: recipes
 kind: recipe

@@ -26,7 +26,7 @@ linkedSkills:
   - engines.gather
   - engines.company
   - engines.scan
-  - recipes.disclosure.event
+  - recipes.fundamental.disclosure.event
 toolRefs:
   - RunPython
   - EngineCall
@@ -80,7 +80,7 @@ procedure:
   - emit_result(table=공시표, values={종목 변동률들}, date=오늘) 로 ref 발급.
   - 1 페이지 본문 — 헤드라인 (가장 큰 변동) + 신규 공시 hot 3 + 시장 요약 + 오늘 주목 시간 (실적 발표 등 catalystCalendar 와 연동 가능).
 linkedSkills:
-  - recipes.disclosure.event
+  - recipes.fundamental.disclosure.event
   - recipes.report.catalystCalendar
 sourceRefs:
   - dartlab://skills/engines.gather
@@ -156,7 +156,7 @@ emit_result(
 2. engines.company — 종목별 disclosure 시계열
 3. engines.scan — 시장 변동 횡단 (선택)
 4. recipes.report.catalystCalendar — 오늘 주목 catalyst 결합
-5. recipes.disclosure.event — 흥미로운 공시는 상세 분석 path
+5. recipes.fundamental.disclosure.event — 흥미로운 공시는 상세 분석 path
 
 ## 한계
 

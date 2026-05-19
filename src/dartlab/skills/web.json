@@ -707,7 +707,7 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [
-        "recipes.disclosure.event",
+        "recipes.fundamental.disclosure.event",
         "engines.scan.disclosureRisk",
         "engines.search",
         "runtime.workbenchEvidenceFlow"
@@ -14706,7 +14706,7 @@
       "linkedSkills": [
         "engines.gather",
         "recipes.report.dailyMorningNote",
-        "recipes.disclosure.event",
+        "recipes.fundamental.disclosure.event",
         "engines.company"
       ],
       "requires": [],
@@ -14738,7 +14738,7 @@
           "note": "thesis 의 catalyst 영역 갱신"
         },
         {
-          "skillId": "recipes.disclosure.event",
+          "skillId": "recipes.fundamental.disclosure.event",
           "note": "발생한 이벤트 사후 분석 path"
         }
       ],
@@ -15671,7 +15671,7 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.disclosure.event",
+        "recipes.fundamental.disclosure.event",
         "recipes.report.catalystCalendar"
       ],
       "requires": [],
@@ -15709,7 +15709,7 @@
           "note": "오늘 주목 catalyst 결합"
         },
         {
-          "skillId": "recipes.disclosure.event",
+          "skillId": "recipes.fundamental.disclosure.event",
           "note": "흥미로운 공시는 상세 분석 path"
         }
       ],
@@ -15995,7 +15995,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.disclosure.event",
+      "id": "recipes.fundamental.disclosure.event",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16113,7 +16113,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.disclosure.riskScreen",
+      "id": "recipes.fundamental.disclosure.riskScreen",
       "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16221,7 +16221,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.disclosure.toneToStoryRisk",
+      "id": "recipes.fundamental.disclosure.toneToStoryRisk",
       "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -17160,7 +17160,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.disclosure.filingTextSignal",
+      "id": "recipes.fundamental.disclosure.filingTextSignal",
       "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18222,7 +18222,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.disclosure.insiderEarningsLeading",
+      "id": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18308,7 +18308,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.disclosure.insiderEventCheck",
+      "id": "recipes.fundamental.disclosure.insiderEventCheck",
       "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -21936,7 +21936,7 @@
       "linkedSkills": [
         "engines.analysis.disclosureChange",
         "recipes.governance.auditComposite",
-        "recipes.disclosure.event"
+        "recipes.fundamental.disclosure.event"
       ],
       "requires": [],
       "alternatives": [],

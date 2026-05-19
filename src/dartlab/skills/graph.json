@@ -2592,7 +2592,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.disclosure.event",
+      "id": "recipes.fundamental.disclosure.event",
       "title": "공시 이벤트 분석 (목록 + 원문 + 변화 추적)",
       "category": "recipes",
       "purpose": "단일 회사의 최근 공시 이벤트를 목록 + 원문 + 기간간 변화 3 축으로 분석하는 절차. 신규 공시/주요사항 발생 시 thesis 영향 평가. 트리거 — '최근 공시', '신규 공시 영향', '공시 본문 변화', 'thesis 영향 평가'.",
@@ -2605,7 +2605,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.disclosure.filingTextSignal",
+      "id": "recipes.fundamental.disclosure.filingTextSignal",
       "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature",
       "category": "recipes",
       "purpose": "최근 365 일 공시 본문에서 \"going concern\" / \"의견거절\" / \"거짓서명\" / \"계속기업\" 같은 위험 키워드 빈도가 trailing 3y baseline 대비 z-score ≥ 2 이면 비정상 신호. predictionSignal feature 로 입력. Loughran-McDonald sentiment 의 일반 dictionary 와 다른 anomaly-on-rare-keywords 접근. search/edgar ↔ analysis 격리 메우는 조합. 트리거 — 'filing text signal', '공시 키워드 anomaly', '사업보고서 위험 신호'.",
@@ -2618,7 +2618,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.disclosure.insiderEarningsLeading",
+      "id": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "title": "내부자 매수 클러스터 → 다음 분기 어닝 surprise 선행지표",
       "category": "recipes",
       "purpose": "내부자 (임원·5% 이상 주주) 매수 거래가 *클러스터* 형태 (180 일 안 ≥ 3 명 동시) 일 때만 다음 분기 EPS surprise 와 양의 IC 가진다는 Cohen-Malloy-Pomorski (2012) \"Decoding Inside Information\" 결과 적용. 단순 net-buy 가 아닌 *집단 매수 동시성* 이 핵심. gather ↔ quant ↔ analysis 격리 메우는 조합. 트리거 — '내부자 매수 클러스터', 'insider cluster signal'.",
@@ -2631,7 +2631,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.disclosure.insiderEventCheck",
+      "id": "recipes.fundamental.disclosure.insiderEventCheck",
       "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)",
       "category": "recipes",
       "purpose": "회사의 내부자 거래·자본변동·임원 변경 같은 이벤트 신호를 시계열로 점검하는 절차. 거버넌스 점검의 보완. 트리거 — '내부자 거래', '임원 변경', '자본변동 이벤트'.",
@@ -2644,7 +2644,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.disclosure.riskScreen",
+      "id": "recipes.fundamental.disclosure.riskScreen",
       "title": "공시 위험 스크린 (전종목 disclosure 위험 + 정정 신호)",
       "category": "recipes",
       "purpose": "전종목 횡단으로 공시 위험 신호 (정정 빈도, 자기자본 변동, 영업환경 변경 등) 가 높은 종목 후보를 추출하는 절차. 트리거 — '공시 위험 스캔', '정정 빈도 횡단', '공시 위험 후보'.",
@@ -2657,7 +2657,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.disclosure.toneToStoryRisk",
+      "id": "recipes.fundamental.disclosure.toneToStoryRisk",
       "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)",
       "category": "recipes",
       "purpose": "MD&A tone change + 뉴스 헤드라인 tone + 공시 fundamental shift 3 신호 composite \"narrative risk\" 점수 임계 초과 시 storyboard 신설 부담 없이 story.risk 섹션에 injection 가능한 markdown 블럭 자동 발행. storyboard 추가 부담 회피하면서 기존 story 의 risk 부분 보강. quant ↔ gather ↔ analysis ↔ story 격리 메우는 4-engine 조합. 트리거 — 'story risk auto', '공시 tone story 발행', 'narrative risk score'.",
@@ -4684,7 +4684,7 @@
     },
     {
       "src": "engines.analysis.disclosureChange",
-      "dst": "recipes.disclosure.event",
+      "dst": "recipes.fundamental.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
@@ -8619,7 +8619,7 @@
     },
     {
       "src": "engines.scan.disclosureRisk",
-      "dst": "recipes.disclosure.event",
+      "dst": "recipes.fundamental.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
@@ -10133,122 +10133,122 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.event",
+      "src": "recipes.fundamental.disclosure.event",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.event",
+      "src": "recipes.fundamental.disclosure.event",
       "dst": "engines.company.disclosureEvent",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.event",
+      "src": "recipes.fundamental.disclosure.event",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.event",
+      "src": "recipes.fundamental.disclosure.event",
       "dst": "engines.scan.disclosureRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.event",
+      "src": "recipes.fundamental.disclosure.event",
       "dst": "engines.gather.news",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.event",
+      "src": "recipes.fundamental.disclosure.event",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.filingTextSignal",
+      "src": "recipes.fundamental.disclosure.filingTextSignal",
       "dst": "engines.gather.collect",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.filingTextSignal",
+      "src": "recipes.fundamental.disclosure.filingTextSignal",
       "dst": "engines.search",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.filingTextSignal",
+      "src": "recipes.fundamental.disclosure.filingTextSignal",
       "dst": "engines.analysis.predictionSignal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEarningsLeading",
+      "src": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEarningsLeading",
+      "src": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "dst": "engines.gather.insiderTrading",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEarningsLeading",
+      "src": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "dst": "engines.quant.surprise",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEarningsLeading",
+      "src": "recipes.fundamental.disclosure.insiderEarningsLeading",
       "dst": "engines.analysis.predictionSignal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEventCheck",
+      "src": "recipes.fundamental.disclosure.insiderEventCheck",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEventCheck",
+      "src": "recipes.fundamental.disclosure.insiderEventCheck",
       "dst": "engines.scan.insider",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEventCheck",
+      "src": "recipes.fundamental.disclosure.insiderEventCheck",
       "dst": "engines.scan.capital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.insiderEventCheck",
+      "src": "recipes.fundamental.disclosure.insiderEventCheck",
       "dst": "engines.company.disclosureEvent",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.riskScreen",
+      "src": "recipes.fundamental.disclosure.riskScreen",
       "dst": "engines.scan.disclosureRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.riskScreen",
+      "src": "recipes.fundamental.disclosure.riskScreen",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.riskScreen",
+      "src": "recipes.fundamental.disclosure.riskScreen",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.toneToStoryRisk",
+      "src": "recipes.fundamental.disclosure.toneToStoryRisk",
       "dst": "engines.quant.toneChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.toneToStoryRisk",
+      "src": "recipes.fundamental.disclosure.toneToStoryRisk",
       "dst": "engines.gather.news",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.toneToStoryRisk",
+      "src": "recipes.fundamental.disclosure.toneToStoryRisk",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.disclosure.toneToStoryRisk",
+      "src": "recipes.fundamental.disclosure.toneToStoryRisk",
       "dst": "engines.story",
       "kind": "linkedRecipe"
     },
@@ -12279,7 +12279,7 @@
     },
     {
       "src": "recipes.report.catalystCalendar",
-      "dst": "recipes.disclosure.event",
+      "dst": "recipes.fundamental.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
@@ -12334,7 +12334,7 @@
     },
     {
       "src": "recipes.report.dailyMorningNote",
-      "dst": "recipes.disclosure.event",
+      "dst": "recipes.fundamental.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
@@ -13573,7 +13573,7 @@
       "engines.viz.peerMatrix",
       "engines.viz.priceChart",
       "engines.viz.scenarioVisuals",
-      "recipes.disclosure.event",
+      "recipes.fundamental.disclosure.event",
       "recipes.fundamental.dividend.capitalReturn",
       "recipes.governance.auditComposite"
     ],
@@ -13670,11 +13670,11 @@
     "recipes.credit.deepDive",
     "recipes.credit.distressCandidateScreen",
     "recipes.credit.macroStress",
-    "recipes.disclosure.filingTextSignal",
-    "recipes.disclosure.insiderEarningsLeading",
-    "recipes.disclosure.insiderEventCheck",
-    "recipes.disclosure.riskScreen",
-    "recipes.disclosure.toneToStoryRisk",
+    "recipes.fundamental.disclosure.filingTextSignal",
+    "recipes.fundamental.disclosure.insiderEarningsLeading",
+    "recipes.fundamental.disclosure.insiderEventCheck",
+    "recipes.fundamental.disclosure.riskScreen",
+    "recipes.fundamental.disclosure.toneToStoryRisk",
     "recipes.fundamental.dividend.stressTest",
     "recipes.fundamental.dividend.thesis",
     "recipes.etc.dataAvailabilityFirst",
@@ -13846,12 +13846,12 @@
     "recipes.credit.leverageSensitivity",
     "recipes.credit.macroStress",
     "recipes.credit.quantConsensus",
-    "recipes.disclosure.event",
-    "recipes.disclosure.filingTextSignal",
-    "recipes.disclosure.insiderEarningsLeading",
-    "recipes.disclosure.insiderEventCheck",
-    "recipes.disclosure.riskScreen",
-    "recipes.disclosure.toneToStoryRisk",
+    "recipes.fundamental.disclosure.event",
+    "recipes.fundamental.disclosure.filingTextSignal",
+    "recipes.fundamental.disclosure.insiderEarningsLeading",
+    "recipes.fundamental.disclosure.insiderEventCheck",
+    "recipes.fundamental.disclosure.riskScreen",
+    "recipes.fundamental.disclosure.toneToStoryRisk",
     "recipes.fundamental.dividend.stressTest",
     "recipes.fundamental.dividend.thesis",
     "recipes.etc.dataAvailabilityFirst",

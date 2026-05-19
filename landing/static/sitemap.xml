@@ -716,17 +716,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.event</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.disclosure.event</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.riskScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.disclosure.riskScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.toneToStoryRisk</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.disclosure.toneToStoryRisk</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -771,7 +771,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.filingTextSignal</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.disclosure.filingTextSignal</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -821,12 +821,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.insiderEarningsLeading</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.disclosure.insiderEarningsLeading</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.disclosure.insiderEventCheck</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.disclosure.insiderEventCheck</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
