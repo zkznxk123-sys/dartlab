@@ -24,7 +24,25 @@
 
 엔진 응용 스킬의 `id` 는 `engines.{group}.{axis}` 형식 (예: `engines.analysis.cashflow`). 기본 스킬은 `engines.{group}` (예: `engines.company`).
 
-Recipe id 는 `recipes.{persona}[.{domain}...].{name}` 형식 (≥3 parts, depth 가변). 디렉토리 경로 ↔ id 가 1:1. `{persona}` 는 분석가 역할 (`fundamental`, `macro`, `technical`, `sentiment`, `news` 등), `{domain}` 은 그 아래 세부 분야 (예: `fundamental/valuation`, `fundamental/credit`). 같은 단어 반복 금지 — `recipes.fundamental.credit.deepDive` 는 OK, `recipes.fundamental.credit.creditDeepDive` 는 나쁜 예.
+Recipe id 는 `recipes.{persona}[.{domain}...].{name}` 형식 (≥3 parts, depth 가변). 디렉토리 경로 ↔ id 가 1:1. 같은 단어 반복 금지 — `recipes.fundamental.credit.deepDive` 는 OK, `recipes.fundamental.credit.creditDeepDive` 는 나쁜 예.
+
+### 1.1 페르소나 트리 SSOT
+
+recipes/ 는 *분석가 페르소나* 별로 분류된다. 외부 트렌드인 "AI 펀더멘털/센티먼트/뉴스/테크니컬 애널리스트" 가 추론으로 결론을 만드는 반면, dartlab 의 recipe 는 모두 *L1.5 이하 (core·gather/providers·scan/frame/synth/reference) 조합* 으로만 작성되어 raw 근거가 추적 가능하다. 페르소나는 메시지 라벨이지 코드 구조가 아니다 — engines/ 의 4 계층 import 룰은 페르소나 트리와 무관하게 그대로 강제된다.
+
+| 페르소나 | 위치 | 의미 | 현재 커버리지 |
+|---|---|---|---|
+| `fundamental` | `recipes/fundamental/{domain}/{name}.md` | 재무·가치평가·신용·자본배분·지배구조·공시 — 펀더멘털 분석가가 보는 모든 것 | valuation(damodaran 포함) · quality · credit · dividend · governance · disclosure (+ 미커버 산업 단계 등 추가 가능) |
+| `macro` | `recipes/macro/{name}.md` | 거시·시클·금리·환율·유동성·시나리오 | 21 recipes |
+| `technical` | `recipes/technical/{name}.md` | 가격·수익률·팩터·차트 (quant 엔진 부분 조합) | 미커버 → 1+ 예정 |
+| `sentiment` | `recipes/sentiment/` | 투자심리·플로우·포지셔닝 | **미커버** (의도적 — placeholder README) |
+| `news` | `recipes/news/` | 뉴스·공시 본문·외부 텍스트 | **미커버** (의도적 — placeholder README) |
+| `meta` | `recipes/meta/{name}.md` | 페르소나가 아닌 *cross-cutting 작업 종류* — 보고서 합성·1차 스크리닝·테제 검증·사용 가이드 | report · screen · thesisKillChain · workflow |
+
+페르소나 분류 룰:
+- recipe 의 *주된 시점* (어떤 분석가가 사용할지) 으로 1차 분류. 펀더멘털 분석가의 *공시 이벤트 감시* = `fundamental/disclosure/eventRadar/`, 펀더멘털의 *이익의 질 forensics* = `fundamental/quality/forensics/`.
+- 여러 페르소나가 동등하게 쓰는 결과물·필터·테제 검증 = `meta/`.
+- "미커버" 페르소나 (sentiment·news) 는 빈 폴더 + README 로 *정직 표시* — 있는 척 placeholder 채우지 않는다.
 
 ## 2. frontmatter 필드
 
