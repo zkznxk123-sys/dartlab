@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.industryStageScreen
+id: recipes.meta.screen.industryStageScreen
 title: 산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목
 category: recipes
 kind: recipe

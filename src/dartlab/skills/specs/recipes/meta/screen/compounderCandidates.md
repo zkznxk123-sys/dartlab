@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.compounderCandidates
+id: recipes.meta.screen.compounderCandidates
 title: Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝
 category: recipes
 kind: recipe

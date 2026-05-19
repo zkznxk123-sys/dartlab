@@ -2511,7 +2511,7 @@
         "engines.company",
         "engines.gather",
         "recipes.fundamental.quality.dupontDriver",
-        "recipes.screen.compounderCandidates",
+        "recipes.meta.screen.compounderCandidates",
         "recipes.fundamental.valuation.intrinsicValueBand"
       ],
       "bodyPreview": "## 학술 근거\n\nWarren Buffett 주주서한 (Berkshire Hathaway, 1977-2024): \"**Capital allocation is the most important job of a CEO.**\" 핵심 원칙:\n\n- **5 사용처** — Free Cash Flow 가 어디로 가나: (1) 재투자 (CAPEX·R&D), (2) 배당, (3) 자사주 매입, (4) M&A, (5) 부채 상환.\n- **ROIIC** (Return on Incremental Invested Capital) = ΔNOPAT / ΔInvestedCapital. 새로 투입한 자본 1 원이 얻는 수익률. 본질적 capital efficiency.\n- **SGR** (Sustainable Growth Rate) = ROE × (1 − payoutRatio). 외부 자본조달 없이 가능한 성장 한계.\n\n학술 검증:\n- Penman-Reggiani (2018): ROIIC &gt; WACC 인 회사가 미래 abnormal return 강함. 단순 ROE 보다 우월.\n- Damodaran (2010): \"Capital Allocation Quality\" — 5 사용처 비중이 "
@@ -2598,7 +2598,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport statistics\n\nc = dartlab.Company(\"005930\")\n\n# 1. revenue 기본 forecast (base/bull/bear)\nforecast = c.analysis(\"revenueForecast\", \"매출예측\")\nbase_revenue = forecast.get(\"baseRevenue\", 0) if isinstance(forecast, dict) else 0\n\n# 2. 매크로 sensitivity (회사별 elasticity)\nsensitivity = c.analysis(\"macroSensitivity\", \"매크로민감도\")\nrate_elasticity = sensitivity.get(\"rateElasticity\", -0.05) if isinstance(sensitivity, dict) else -0.05\nfx_elasticity = sensitivity.get(\"fxElasticity\", 0.1) if isinstance(sensitivity, dict) else 0.1\n\n# 3. 매크로 시나리오 grid (1 차 w"
     },
     {
-      "id": "recipes.screen.compounderCandidates",
+      "id": "recipes.meta.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "recipes",
       "purpose": "Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차. 트리거 — 'compounder 발굴', 'quality 일관 종목', 'Buffett 스타일 횡단'.",
@@ -2946,7 +2946,7 @@
         "engines.gather",
         "engines.scan.ratio",
         "recipes.fundamental.valuation.qualityValueScreen",
-        "recipes.screen.compounderCandidates"
+        "recipes.meta.screen.compounderCandidates"
       ],
       "bodyPreview": "## 학술 근거\n\nDuPont 사 (E.I. du Pont de Nemours, 1920 년대) 가 도입한 ROE 분해. CFA Institute Level 1 표준 (CFA Curriculum, FRA Reading 22). 핵심 식:\n\nROE = (NI / EBT) × (EBT / EBIT) × (EBIT / Sales) × (Sales / Avg Assets) × (Avg Assets / Avg Equity)\n    = TaxBurden × InterestBurden × OperatingMargin × AssetTurnover × FinancialLeverage\n\n각 항목의 의미:\n- **TaxBurden** — 세후 / 세전. 1 에 가까울수록 세부담 낮음. 산업·국가·세제 의존.\n- **InterestBurden** — 세전 / 영업이익. 1 에 가까울수록 이자비용 낮음. 부채 자본 구조 반영.\n- **OperatingMargin** — 영업이익 / 매출. 사업 본업의 수익성.\n- **AssetTurnover** — 매출 / 평균자산. 자산 효율 (자본 회전).\n- **FinancialLeverage** — 평균자산 / 평균자기자본. 부채를 통한 자"
     },
@@ -3161,7 +3161,7 @@
       "bodyPreview": "## 학술 근거\n\nBenjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, with Dodd): **Margin of Safety** — 시장가 &lt; 본질가치 와 자본구조 안전성 동시 요구. 핵심 게이트:\n\n1. **PBR ≤ 1.0** — 시장가 ≤ 장부가 (회계상 청산가치 안전마진).\n2. **Current Ratio ≥ 2.0** — 단기 부채 대비 유동자산 2 배 이상 (유동성 안전).\n3. **Debt Ratio ≤ 50%** — 자본 대비 부채 1:1 이내 (레버리지 안전).\n4. **5 년 흑자** — 사이클 전체 생존성 검증.\n\n학술 검증:\n- Lakonishok-Shleifer-Vishny (1994): 저-PBR 가치주 1968-90 미국 연 17.3% vs 성장주 9.3%.\n- Chan-Hamao-Lakonishok (1991): 일본 시장 동일 효과 — 저-PBR + 높은 매출/주가 결합 우월.\n- 한국: 단순 저-PBR 은 chaebol discount 함정 → Graham 의 4 게이트 결합으로 함정 회피.\n\ndartlab 한계: 진정한 NCAV"
     },
     {
-      "id": "recipes.screen.growthScreenToDeepDive",
+      "id": "recipes.meta.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
       "category": "recipes",
       "purpose": "전종목 성장 스캔으로 후보를 추리고 상위 N 종에 대해 회사별 깊이 분석을 진행하는 절차. 트리거 — '성장 스캔 후 깊이 분석', '상위 N 깊이 분석'.",
@@ -3183,7 +3183,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1) 전종목 성장 스캔 (CAGR 기준)\ncandidates = dartlab.scan(\"growth\")  # tableRef\n\n# 2) 상위 5 종 (사용자가 결정)\ntop_codes = candidates.head(5)[\"stockCode\"].to_list()\n\n# 3) 각 회사 sequential 분석 (CLAUDE.md 메모리 안전)\nfor code in top_codes:\n    c = dartlab.Company(code)\n    bs = c.show(\"BS\")\n    growth = c.analysis(\"financial\", \"성장성\")\n    quality = c.analysis(\"financial\", \"이익품질\")\n```\n\n## 호출 동작\n\n성장 스캔은 매출·영업이익·순이익 CAGR 기준 후보를 만든다. 상위 N 종 (보통 3~5) 에 대해 sequential 깊이 분석.\n\n1. `dartlab.scan(\"growth\")` — 전종목 (~2,000) 성장성 스코어\n2. 상위 N 후보 추출 (단, 매출 규모·기간 필터 통과 조건 명시)\n3. 각 회사 sequential 진"
     },
     {
-      "id": "recipes.screen.industryDeepDive",
+      "id": "recipes.meta.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
       "category": "recipes",
       "purpose": "단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능. 트리거 — '산업 깊이 분석', '가치 사슬', '핵심 종목', '업종 분석'.",
@@ -3205,7 +3205,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nindustry_map = dartlab.industry(\"반도체\")\nupstream = dartlab.industry(\"반도체\", \"upstream\")\nmacro = dartlab.macro()\npeer_scan = dartlab.scan(\"profitability\")\n```\n\n## 호출 동작\n\n산업 가치 사슬 (upstream → midstream → downstream) → 매크로 영향 → peer 횡단 수익성 종합. 종목 없이 산업 자체 분석.\n\n1. industry(industry_name) — 산업 가치 사슬 지도\n2. industry(industry_name, stage) — 단계별 종목 (upstream/midstream/downstream)\n3. macro() — 매크로 환경 (산업 영향 변수)\n4. scan(\"profitability\") — peer 횡단 수익성\n\n## 대표 반환 형태\n\n- `tableRef` 4 개 (industry 지도 + stage 종목 + macro + peer scan)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.indus"
     },
     {
-      "id": "recipes.screen.industryStageScreen",
+      "id": "recipes.meta.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
       "category": "recipes",
       "purpose": "도입기 / 후행기 산업 안에서 PER < 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.",
@@ -3413,7 +3413,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 매크로 환경 + 회사 진입 + sensitivity\nmacro = dartlab.macro()\nc = dartlab.Company(\"005930\")\nsens = c.analysis(\"financial\", \"macro민감도\")\nfinancing = c.analysis(\"financial\", \"재무구조\")\n```\n\n## 호출 동작\n\n매크로 변수 (금리·환율·유가) → 회사 P&L 항목 (매출·원가·이자비용·외환환산) 의 elasticity 를 계산하고 시나리오별 영향을 표로 낸다.\n\n1. 매크로 한 시점 snapshot (`dartlab.macro()`)\n2. 회사 진입\n3. macro sensitivity axis — elasticity 계산\n4. 자본구조 (이자부 부채·달러 부채 비중) 점검\n\n## 대표 반환 형태\n\n- `tableRef` 2 개 (macro snapshot, sensitivity 표)\n- `valueRef` 4+ 개 (환율 elasticity, 금리 elasticity, 유가 elasticity)\n- `dateRef` 1 개 (분석 기준 시점)\n\n## 연계 절차\n\n1."
     },
     {
-      "id": "recipes.screen.peerBenchmark",
+      "id": "recipes.meta.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
       "category": "recipes",
       "purpose": "회사를 같은 산업 peer 5~10 종과 핵심 ratio (수익성/안정성/성장성/valuation) 4 축으로 벤치마크하는 절차. 트리거 — 'peer 비교', '동종 5~10 종 벤치마크', 'ratio 4 축'.",
@@ -3544,7 +3544,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nforecast = c.analysis(\"forecast\", \"매출전망\")\nsensitivity = c.analysis(\"financial\", \"macro민감도\")\nmacro_scenario = dartlab.macro(\"scenario\")\nregime = c.quant(\"국면\")\n```\n\n## 호출 동작\n\n회사 매출 전망 (3 시나리오) → 매크로 변수별 sensitivity → 매크로 시나리오 가정 → 현재 시장 regime 판정 결합. 가정 변수를 정해진 grid 로 흔들어 결과 분포 생성.\n\n1. 회사 진입\n2. analysis(\"forecast\", \"매출전망\") — base/bull/bear 매출\n3. analysis(\"financial\", \"macro민감도\") — 환율·금리·유가 elasticity\n4. macro(\"scenario\") — 매크로 시나리오 가정 grid\n5. quant(\"국면\") — 시장 regime 판정 (bull/bear/range)\n\n## 대표 반환 형태\n\n- `tableRef` 3+ 개 (forecas"
     },
     {
-      "id": "recipes.screen.chart",
+      "id": "recipes.meta.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
       "category": "recipes",
       "purpose": "scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계. 트리거 — '스캔 후 차트', 'table-backed chart', '보고서 직전 시각화'.",
@@ -3586,7 +3586,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nmacro_summary = dartlab.macro()\ncycle = dartlab.macro(\"cycle\")\nprofit_scan = dartlab.scan(\"profitability\")\ngrowth_scan = dartlab.scan(\"growth\")\n```\n\n## 호출 동작\n\n매크로 환경 종합 → 경기 사이클 위치 (확장/둔화/침체/회복) → 섹터별 수익성·성장성 횡단 → 사이클 위치 적합 섹터 후보. 종목 없이 매크로·섹터 분석 가능.\n\n1. macro() — 금리·환율·경기 사이클 종합 한 시점\n2. macro(\"cycle\") — 경기 사이클 위치 + 시계열\n3. scan(\"profitability\") — 섹터 횡단 수익성 (상위 10~20)\n4. scan(\"growth\") — 섹터 횡단 성장성 (상위 10~20)\n5. 결합: 사이클 위치 → 적합 섹터 그룹 (예: 회복기 → 산업재·소재, 침체기 → 필수소비재·헬스케어)\n\n## 대표 반환 형태\n\n- `tableRef` 4 개 (macro snapshot + cycle 시계열 + profitability scan + growth "
     },
     {
-      "id": "recipes.screen.smallCapDiscovery",
+      "id": "recipes.meta.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
       "category": "recipes",
       "purpose": "시가총액 하위 종목 중 성장 + 저평가 + 회계 quality 가 양호한 후보를 발굴하는 절차. small-cap value+growth thesis. 트리거 — '중소형주 발굴', 'small cap discovery', '소외 종목'.",

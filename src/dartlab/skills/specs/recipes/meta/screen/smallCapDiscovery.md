@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.smallCapDiscovery
+id: recipes.meta.screen.smallCapDiscovery
 title: 중소형주 발굴 (성장 + valuation + quality 교집합)
 category: recipes
 kind: recipe

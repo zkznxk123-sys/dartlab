@@ -19,7 +19,7 @@ linkedSkills:
   - engines.scan
   - recipes.fundamental.quality.dupontDriver
   - recipes.fundamental.quality.capitalAllocationScorecard
-  - recipes.screen.compounderCandidates
+  - recipes.meta.screen.compounderCandidates
   - recipes.fundamental.valuation.qualityValueScreen
 toolRefs:
   - EngineCall
@@ -243,7 +243,7 @@ graph LR
 | 시장가 / V (안전마진) | (계산) | &lt; 50% = 강한 매수 | 일간 |
 
 연계 절차:
-- EVA spread > 0 + CFROI > WACC → `recipes.screen.compounderCandidates` 합의 (진짜 quality)
+- EVA spread > 0 + CFROI > WACC → `recipes.meta.screen.compounderCandidates` 합의 (진짜 quality)
 - EVA spread &lt; 0 + CFROI &lt; WACC → `recipes.fundamental.credit.distressFilter` (자본 파괴)
 - 5 년 EVA spread 안정 양수 = quality compounder → `recipes.fundamental.quality.dupontDriver` 결합
 - PER/PBR 정량 매트릭스 → `engines.scan` snapshot 비교
@@ -277,7 +277,7 @@ graph LR
 
 1. 본 recipe → 3 anchor 표 + 해석.
 2. Graham V vs 시장가 — 시장가 &lt; V × 0.5 = 안전마진 (deep value).
-3. EVA spread &gt; 0 + CFROI &gt; WACC = 진짜 capital efficiency → `recipes.screen.compounderCandidates` 와 합의.
+3. EVA spread &gt; 0 + CFROI &gt; WACC = 진짜 capital efficiency → `recipes.meta.screen.compounderCandidates` 와 합의.
 4. EVA spread &lt; 0 + CFROI &lt; WACC = 자본 파괴 → `recipes.fundamental.credit.distressFilter` 와 결합 검토.
 5. 5 년 EVA spread 추세 — 안정 + 양수 = quality compounder, 변동 큼 = 사이클.
 6. `engines.scan` 의 PER/PBR snapshot 과 본 anchor 비교 — 시장 multiple vs 본질가치 ratio.

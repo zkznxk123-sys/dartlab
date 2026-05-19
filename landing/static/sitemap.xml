@@ -671,7 +671,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.compounderCandidates</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.compounderCandidates</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -806,17 +806,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.growthScreenToDeepDive</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.growthScreenToDeepDive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.industryDeepDive</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.industryDeepDive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.industryStageScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.industryStageScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -866,7 +866,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.peerBenchmark</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.peerBenchmark</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -896,7 +896,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.chart</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.chart</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -906,7 +906,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.screen.smallCapDiscovery</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.screen.smallCapDiscovery</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

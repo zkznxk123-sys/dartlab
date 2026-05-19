@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.growthScreenToDeepDive
+id: recipes.meta.screen.growthScreenToDeepDive
 title: 성장 스캔 → 상위 후보 → 각 회사 분석
 category: recipes
 kind: recipe

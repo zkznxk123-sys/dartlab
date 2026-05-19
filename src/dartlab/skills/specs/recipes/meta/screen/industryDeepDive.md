@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.industryDeepDive
+id: recipes.meta.screen.industryDeepDive
 title: 산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)
 category: recipes
 kind: recipe

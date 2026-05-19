@@ -3853,7 +3853,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.chart",
+      "id": "recipes.meta.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
       "category": "recipes",
       "purpose": "scan 으로 후보를 스크리닝한 뒤 그 결과를 table-backed chart 로 시각화하는 절차. UI / 보고서 출력 직전 단계. 트리거 — '스캔 후 차트', 'table-backed chart', '보고서 직전 시각화'.",
@@ -3866,7 +3866,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.compounderCandidates",
+      "id": "recipes.meta.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "recipes",
       "purpose": "Buffett-style quality compounder 발굴 — ROE / revenueGrowth / grossMargin 의 5 년 평균과 표준편차로 사이클 무관 일관 quality 종목을 횡단으로 식별하는 절차. 트리거 — 'compounder 발굴', 'quality 일관 종목', 'Buffett 스타일 횡단'.",
@@ -3879,7 +3879,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.growthScreenToDeepDive",
+      "id": "recipes.meta.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
       "category": "recipes",
       "purpose": "전종목 성장 스캔으로 후보를 추리고 상위 N 종에 대해 회사별 깊이 분석을 진행하는 절차. 트리거 — '성장 스캔 후 깊이 분석', '상위 N 깊이 분석'.",
@@ -3892,7 +3892,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.industryDeepDive",
+      "id": "recipes.meta.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
       "category": "recipes",
       "purpose": "단일 산업의 가치 사슬 + 매크로 영향 + 핵심 종목 3 축으로 산업 자체를 분석하는 절차. 종목 없이도 가능. 트리거 — '산업 깊이 분석', '가치 사슬', '핵심 종목', '업종 분석'.",
@@ -3905,7 +3905,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.industryStageScreen",
+      "id": "recipes.meta.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
       "category": "recipes",
       "purpose": "도입기 / 후행기 산업 안에서 PER &lt; 10 + Piotroski F ≥ 7 + Altman Z″ > 3 인 under-followed 종목 발굴. 일반 value screen 은 stage-blind 라 수확기 (mature) 산업의 value trap 에 빠짐. industry ↔ scan ↔ quant 격리 메우는 조합. 트리거 — '산업 stage screen', '도입기 가치', 'underfollowed value'.",
@@ -3918,7 +3918,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.peerBenchmark",
+      "id": "recipes.meta.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
       "category": "recipes",
       "purpose": "회사를 같은 산업 peer 5~10 종과 핵심 ratio (수익성/안정성/성장성/valuation) 4 축으로 벤치마크하는 절차. 트리거 — 'peer 비교', '동종 5~10 종 벤치마크', 'ratio 4 축'.",
@@ -3931,7 +3931,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.screen.smallCapDiscovery",
+      "id": "recipes.meta.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
       "category": "recipes",
       "purpose": "시가총액 하위 종목 중 성장 + 저평가 + 회계 quality 가 양호한 후보를 발굴하는 절차. small-cap value+growth thesis. 트리거 — '중소형주 발굴', 'small cap discovery', '소외 종목'.",
@@ -12054,7 +12054,7 @@
     },
     {
       "src": "recipes.fundamental.quality.capitalAllocationScorecard",
-      "dst": "recipes.screen.compounderCandidates",
+      "dst": "recipes.meta.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
@@ -12109,7 +12109,7 @@
     },
     {
       "src": "recipes.fundamental.quality.dupontDriver",
-      "dst": "recipes.screen.compounderCandidates",
+      "dst": "recipes.meta.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
@@ -12423,167 +12423,167 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.chart",
+      "src": "recipes.meta.screen.chart",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.chart",
+      "src": "recipes.meta.screen.chart",
       "dst": "engines.viz.tableBackedChart",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.chart",
+      "src": "recipes.meta.screen.chart",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "recipes.fundamental.valuation.garpScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.compounderCandidates",
+      "src": "recipes.meta.screen.compounderCandidates",
       "dst": "engines.analysis.efficiency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.growthScreenToDeepDive",
+      "src": "recipes.meta.screen.growthScreenToDeepDive",
       "dst": "engines.scan.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.growthScreenToDeepDive",
+      "src": "recipes.meta.screen.growthScreenToDeepDive",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.growthScreenToDeepDive",
+      "src": "recipes.meta.screen.growthScreenToDeepDive",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.growthScreenToDeepDive",
+      "src": "recipes.meta.screen.growthScreenToDeepDive",
       "dst": "engines.analysis.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.growthScreenToDeepDive",
+      "src": "recipes.meta.screen.growthScreenToDeepDive",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryDeepDive",
+      "src": "recipes.meta.screen.industryDeepDive",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryDeepDive",
+      "src": "recipes.meta.screen.industryDeepDive",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryDeepDive",
+      "src": "recipes.meta.screen.industryDeepDive",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryDeepDive",
+      "src": "recipes.meta.screen.industryDeepDive",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryStageScreen",
+      "src": "recipes.meta.screen.industryStageScreen",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryStageScreen",
+      "src": "recipes.meta.screen.industryStageScreen",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryStageScreen",
+      "src": "recipes.meta.screen.industryStageScreen",
       "dst": "engines.quant.piotroski",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.industryStageScreen",
+      "src": "recipes.meta.screen.industryStageScreen",
       "dst": "engines.quant.altman",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.peerBenchmark",
+      "src": "recipes.meta.screen.peerBenchmark",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.peerBenchmark",
+      "src": "recipes.meta.screen.peerBenchmark",
       "dst": "engines.industry",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.peerBenchmark",
+      "src": "recipes.meta.screen.peerBenchmark",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.peerBenchmark",
+      "src": "recipes.meta.screen.peerBenchmark",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.smallCapDiscovery",
+      "src": "recipes.meta.screen.smallCapDiscovery",
       "dst": "engines.scan.growth",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.smallCapDiscovery",
+      "src": "recipes.meta.screen.smallCapDiscovery",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.smallCapDiscovery",
+      "src": "recipes.meta.screen.smallCapDiscovery",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.smallCapDiscovery",
+      "src": "recipes.meta.screen.smallCapDiscovery",
       "dst": "engines.scan.crossSectionStockScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.screen.smallCapDiscovery",
+      "src": "recipes.meta.screen.smallCapDiscovery",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
@@ -13179,7 +13179,7 @@
     },
     {
       "src": "recipes.fundamental.valuation.garpScreen",
-      "dst": "recipes.screen.compounderCandidates",
+      "dst": "recipes.meta.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
@@ -13254,7 +13254,7 @@
     },
     {
       "src": "recipes.fundamental.valuation.intrinsicValueBand",
-      "dst": "recipes.screen.compounderCandidates",
+      "dst": "recipes.meta.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
@@ -13580,7 +13580,7 @@
     [
       "recipes.fundamental.credit.distressFilter",
       "recipes.fundamental.quality.piotroskiLite",
-      "recipes.screen.compounderCandidates",
+      "recipes.meta.screen.compounderCandidates",
       "recipes.fundamental.valuation.garpScreen",
       "recipes.fundamental.valuation.grahamDeepValue",
       "recipes.fundamental.valuation.qualityValueScreen"
@@ -13707,12 +13707,12 @@
     "recipes.meta.report.storyReportBuild",
     "recipes.meta.report.thesisTracker",
     "recipes.meta.report.usMarketReview",
-    "recipes.screen.chart",
-    "recipes.screen.growthScreenToDeepDive",
-    "recipes.screen.industryDeepDive",
-    "recipes.screen.industryStageScreen",
-    "recipes.screen.peerBenchmark",
-    "recipes.screen.smallCapDiscovery",
+    "recipes.meta.screen.chart",
+    "recipes.meta.screen.growthScreenToDeepDive",
+    "recipes.meta.screen.industryDeepDive",
+    "recipes.meta.screen.industryStageScreen",
+    "recipes.meta.screen.peerBenchmark",
+    "recipes.meta.screen.smallCapDiscovery",
     "recipes.fundamental.valuation.bandTrack",
     "runtime.channel",
     "runtime.dataAvailabilityCheck",
@@ -13898,13 +13898,13 @@
     "recipes.meta.report.storyReportBuild",
     "recipes.meta.report.thesisTracker",
     "recipes.meta.report.usMarketReview",
-    "recipes.screen.chart",
-    "recipes.screen.compounderCandidates",
-    "recipes.screen.growthScreenToDeepDive",
-    "recipes.screen.industryDeepDive",
-    "recipes.screen.industryStageScreen",
-    "recipes.screen.peerBenchmark",
-    "recipes.screen.smallCapDiscovery",
+    "recipes.meta.screen.chart",
+    "recipes.meta.screen.compounderCandidates",
+    "recipes.meta.screen.growthScreenToDeepDive",
+    "recipes.meta.screen.industryDeepDive",
+    "recipes.meta.screen.industryStageScreen",
+    "recipes.meta.screen.peerBenchmark",
+    "recipes.meta.screen.smallCapDiscovery",
     "recipes.fundamental.valuation.bandTrack",
     "recipes.fundamental.valuation.check",
     "recipes.fundamental.valuation.garpScreen",

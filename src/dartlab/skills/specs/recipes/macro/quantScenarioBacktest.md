@@ -111,7 +111,7 @@ emit_result(table=rows, values={"market": market, "regimeCount": len(rows), "sce
 
 1. 본 recipe → regime × factor 매트릭스.
 2. quality factor 위기 outperform 확인 → `recipes.macro.qualityMacroBeta` 의 단일 회사 결과와 정합성 검증.
-3. value 후행기 부진 → `recipes.screen.industryStageScreen` 의 stage filter 가 효과 있는지 보강.
+3. value 후행기 부진 → `recipes.meta.screen.industryStageScreen` 의 stage filter 가 효과 있는지 보강.
 
 ## 기본 검증
 

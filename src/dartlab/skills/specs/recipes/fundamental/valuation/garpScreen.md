@@ -17,7 +17,7 @@ linkedSkills:
   - engines.scan
   - recipes.fundamental.valuation.qualityValueScreen
   - recipes.fundamental.credit.distressFilter
-  - recipes.screen.compounderCandidates
+  - recipes.meta.screen.compounderCandidates
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -131,7 +131,7 @@ candidates = (
 ## 한계
 
 - **EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 &gt; netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.
-- **단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `recipes.screen.compounderCandidates` 로 보완.
+- **단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `recipes.meta.screen.compounderCandidates` 로 보완.
 - **PEG 1.5 임계는 한국 KOSPI 분포 기반** — 미국은 1.0 표준. 시장별 조정 필요.
 - **성장률 음수 종목 자동 제외** — netProfitGrowth ≤ 0 이면 PEG 음수 → 무의미. 흑자 게이트 (`netMargin > 0`) 필수.
 - **고성장 + 고PER 조합도 통과** — 예: PER 50, growth 40 → PEG 1.25. 절대 PER 게이트 추가 권장 (PER ≤ 30).
@@ -144,7 +144,7 @@ candidates = (
 ## 연계 절차
 
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 PEG 분포.
-2. PEG ≤ 1.0 종목 (강한 신호) 에 대해 `recipes.screen.compounderCandidates` 로 5 년 일관성 추가 검증.
+2. PEG ≤ 1.0 종목 (강한 신호) 에 대해 `recipes.meta.screen.compounderCandidates` 로 5 년 일관성 추가 검증.
 3. `recipes.fundamental.credit.distressFilter` 로 부도 위험 종목 제외 (성장률 통과해도 부채 급증 종목 위험).
 4. `engines.analysis` — DCF + valuation band 단일 회사 심층.
 5. `engines.story` 로 narrative 생성 — 성장 동력 (제품·시장점유·신규사업) 까지 묶어 보고.

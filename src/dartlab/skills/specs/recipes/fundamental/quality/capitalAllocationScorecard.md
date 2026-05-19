@@ -17,7 +17,7 @@ linkedSkills:
   - engines.company
   - engines.gather
   - recipes.fundamental.quality.dupontDriver
-  - recipes.screen.compounderCandidates
+  - recipes.meta.screen.compounderCandidates
   - recipes.fundamental.valuation.intrinsicValueBand
   - recipes.fundamental.quality.workingCapitalQuality
 gap:
@@ -181,7 +181,7 @@ emit_result(
 3. M&A 비중 큰 회사 → 인수 후 통합 효율 (goodwill 추적) 별도.
 4. 자사주 비중 큰 회사 → 소각 vs 보유 구분, EPS 변화로 검증.
 5. SGR &lt; actual growth → 외부 자본조달 의존 (유상증자·차입) 확인.
-6. `recipes.screen.compounderCandidates` 와 상호 검증 — 진짜 compounder 는 ROIIC &gt; 15% 일관.
+6. `recipes.meta.screen.compounderCandidates` 와 상호 검증 — 진짜 compounder 는 ROIIC &gt; 15% 일관.
 
 ## 기본 검증
 

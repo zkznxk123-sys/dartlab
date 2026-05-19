@@ -1281,7 +1281,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.screen.compounderCandidates",
+      "id": "recipes.meta.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "recipes",
       "status": "limited",
@@ -1564,7 +1564,7 @@
       ]
     },
     {
-      "id": "recipes.screen.growthScreenToDeepDive",
+      "id": "recipes.meta.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
       "category": "recipes",
       "status": "limited",
@@ -1575,7 +1575,7 @@
       ]
     },
     {
-      "id": "recipes.screen.industryDeepDive",
+      "id": "recipes.meta.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
       "category": "recipes",
       "status": "limited",
@@ -1586,7 +1586,7 @@
       ]
     },
     {
-      "id": "recipes.screen.industryStageScreen",
+      "id": "recipes.meta.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
       "category": "recipes",
       "status": "limited",
@@ -1688,7 +1688,7 @@
       ]
     },
     {
-      "id": "recipes.screen.peerBenchmark",
+      "id": "recipes.meta.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
       "category": "recipes",
       "status": "limited",
@@ -1752,7 +1752,7 @@
       ]
     },
     {
-      "id": "recipes.screen.chart",
+      "id": "recipes.meta.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
       "category": "recipes",
       "status": "limited",
@@ -1774,7 +1774,7 @@
       ]
     },
     {
-      "id": "recipes.screen.smallCapDiscovery",
+      "id": "recipes.meta.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
       "category": "recipes",
       "status": "limited",

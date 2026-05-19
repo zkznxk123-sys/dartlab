@@ -273,21 +273,21 @@
         "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)"
       },
       {
-        "id": "recipes.screen.growthScreenToDeepDive",
+        "id": "recipes.meta.screen.growthScreenToDeepDive",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "성장 스캔 → 상위 후보 → 각 회사 분석"
       },
       {
-        "id": "recipes.screen.industryDeepDive",
+        "id": "recipes.meta.screen.industryDeepDive",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)"
       },
       {
-        "id": "recipes.screen.industryStageScreen",
+        "id": "recipes.meta.screen.industryStageScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -343,7 +343,7 @@
         "title": "매크로 → 섹터 → 회사 영향 (transmission)"
       },
       {
-        "id": "recipes.screen.peerBenchmark",
+        "id": "recipes.meta.screen.peerBenchmark",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -371,7 +371,7 @@
         "title": "시나리오 분석 (forecast + macro 시나리오 + quant regime)"
       },
       {
-        "id": "recipes.screen.chart",
+        "id": "recipes.meta.screen.chart",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
@@ -385,7 +385,7 @@
         "title": "섹터 로테이션 분석 (매크로 + scan + industry)"
       },
       {
-        "id": "recipes.screen.smallCapDiscovery",
+        "id": "recipes.meta.screen.smallCapDiscovery",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,

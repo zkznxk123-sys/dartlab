@@ -1,5 +1,5 @@
 ---
-id: recipes.screen.peerBenchmark
+id: recipes.meta.screen.peerBenchmark
 title: peer 벤치마크 (산업 + 횡단 비교 + ratio)
 category: recipes
 kind: recipe
@@ -210,10 +210,10 @@ graph LR
 - `executionRef` — RunPython 실행 id.
 
 ## 연계 절차
-- 산업 깊이 분석 → `recipes.screen.industryDeepDive`
-- 산업 stage (성장/성숙/쇠퇴) → `recipes.screen.industryStageScreen`
+- 산업 깊이 분석 → `recipes.meta.screen.industryDeepDive`
+- 산업 stage (성장/성숙/쇠퇴) → `recipes.meta.screen.industryStageScreen`
 - valuation 깊이 → `recipes.fundamental.valuation.check`
-- quality compounder 후보 → `recipes.screen.compounderCandidates`
+- quality compounder 후보 → `recipes.meta.screen.compounderCandidates`
 - 산업 평균 횡단 → `engines.scan` direct
 
 재호출 트리거: "삼성전자 vs 동종 5 peer 4 축 벤치마크", "4 대 금융지주 ratio 횡단", "산업 평균 대비 ±σ 위치".

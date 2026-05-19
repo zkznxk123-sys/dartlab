@@ -14503,7 +14503,7 @@
         "engines.company",
         "engines.gather",
         "recipes.fundamental.quality.dupontDriver",
-        "recipes.screen.compounderCandidates",
+        "recipes.meta.screen.compounderCandidates",
         "recipes.fundamental.valuation.intrinsicValueBand",
         "recipes.fundamental.quality.workingCapitalQuality"
       ],
@@ -15014,7 +15014,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.compounderCandidates",
+      "id": "recipes.meta.screen.compounderCandidates",
       "title": "Compounder 후보 — ROE/매출/마진 5 년 일관성 스크리닝",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16739,7 +16739,7 @@
         "engines.gather",
         "engines.scan.ratio",
         "recipes.fundamental.valuation.qualityValueScreen",
-        "recipes.screen.compounderCandidates",
+        "recipes.meta.screen.compounderCandidates",
         "recipes.fundamental.quality.capitalAllocationScorecard"
       ],
       "requires": [],
@@ -17513,7 +17513,7 @@
         "engines.scan.ratio",
         "recipes.fundamental.valuation.qualityValueScreen",
         "recipes.fundamental.credit.distressFilter",
-        "recipes.screen.compounderCandidates",
+        "recipes.meta.screen.compounderCandidates",
         "engines.analysis.valuation"
       ],
       "requires": [],
@@ -17533,7 +17533,7 @@
         "`grade : str` — valuation grade",
         "`pegApprox : float` — PEG 근사 (낮을수록 저평가)",
         "**EPS 성장률 → netProfitGrowth 근사** — 자사주 매입 비중 큰 미국 기업에서 EPS 성장률 &gt; netProfitGrowth (주식수 감소). 한국에서는 자사주 소각 부재로 두 값 거의 동일.",
-        "**단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `recipes.screen.compounderCandidates` 로 보완."
+        "**단일 연도 성장률 의존** — Lynch 원전은 5 년 평균 EPS 성장률 사용. 본 recipe 는 YoY 1 년 (분기/연간) 만. 5 년 일관성은 `recipes.meta.screen.compounderCandidates` 로 보완."
       ],
       "recipeSteps": [],
       "requiredEvidence": [
@@ -17899,7 +17899,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.growthScreenToDeepDive",
+      "id": "recipes.meta.screen.growthScreenToDeepDive",
       "title": "성장 스캔 → 상위 후보 → 각 회사 분석",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18022,7 +18022,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.industryDeepDive",
+      "id": "recipes.meta.screen.industryDeepDive",
       "title": "산업 deep-dive (산업 지도 + 섹터 매크로 + 핵심 종목)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18137,7 +18137,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.industryStageScreen",
+      "id": "recipes.meta.screen.industryStageScreen",
       "title": "산업 stage 도입/후행기 + 가치 + 퀄리티 + 생존 가능 종목",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18452,7 +18452,7 @@
         "engines.scan.valuation",
         "recipes.fundamental.quality.dupontDriver",
         "recipes.fundamental.quality.capitalAllocationScorecard",
-        "recipes.screen.compounderCandidates",
+        "recipes.meta.screen.compounderCandidates",
         "recipes.fundamental.valuation.qualityValueScreen"
       ],
       "requires": [],
@@ -19167,7 +19167,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.peerBenchmark",
+      "id": "recipes.meta.screen.peerBenchmark",
       "title": "peer 벤치마크 (산업 + 횡단 비교 + ratio)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -19830,7 +19830,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.chart",
+      "id": "recipes.meta.screen.chart",
       "title": "스캔 + 차트 결합 (scan 결과 → table-backed chart)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20054,7 +20054,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.screen.smallCapDiscovery",
+      "id": "recipes.meta.screen.smallCapDiscovery",
       "title": "중소형주 발굴 (성장 + valuation + quality 교집합)",
       "category": "recipes",
       "categoryTitle": "Recipes",

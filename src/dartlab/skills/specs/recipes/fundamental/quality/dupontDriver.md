@@ -18,7 +18,7 @@ linkedSkills:
   - engines.gather
   - engines.scan
   - recipes.fundamental.valuation.qualityValueScreen
-  - recipes.screen.compounderCandidates
+  - recipes.meta.screen.compounderCandidates
   - recipes.fundamental.quality.capitalAllocationScorecard
 toolRefs:
   - EngineCall
@@ -211,7 +211,7 @@ graph LR
 - OperatingMargin 변동 → `recipes.fundamental.quality.workingCapitalQuality` (운전자본 효율)
 - AssetTurnover 변동 → CAPEX 시계열 + `engines.analysis`
 - FinancialLeverage 변동 → `recipes.fundamental.credit.distressDual` (부채 위험)
-- 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates`
+- 5 년 일관 quality compounder 인지 → `recipes.meta.screen.compounderCandidates`
 - 자본 배분 평가 → `recipes.fundamental.quality.capitalAllocationScorecard`
 
 재호출 트리거: "삼성전자 5 년 ROE 5 동인 분해", "DuPont 동인 표준편차 큰 항목 식별", "산업 평균 분해 + 회사 비교".
@@ -246,7 +246,7 @@ graph LR
 3. OperatingMargin 변동 → `recipes.fundamental.quality.workingCapitalQuality` 로 운전자본 효율 점검.
 4. AssetTurnover 변동 → 자산 재투자 시점 (CAPEX 시계열) 분석.
 5. FinancialLeverage 변동 → `recipes.fundamental.credit.distressDual` 로 부채 위험 점검.
-6. 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates` 와 상호 검증.
+6. 5 년 일관 quality compounder 인지 → `recipes.meta.screen.compounderCandidates` 와 상호 검증.
 
 ## 기본 검증
 
