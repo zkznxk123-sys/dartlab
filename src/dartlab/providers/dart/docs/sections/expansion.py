@@ -15,15 +15,16 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from dartlab.providers.dart.docs.sections.segmentKeyer import SegmentKeyer
 from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
 
 _NOTES_TOPICS = frozenset({"financialNotes", "consolidatedNotes"})
 
 
 def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, object]]:
-    """rows를 text structure로 확장하여 yield한다. occurrence는 인라인 카운트."""
+    """rows를 text structure로 확장하여 yield한다. occurrence는 SegmentKeyer 인라인 카운트."""
     headingStateByTopic: dict[str, list[dict[str, object]]] = {}
-    occurrenceCount: dict[tuple[str, str], int] = {}
+    keyer = SegmentKeyer()
     lastHeadingKeyByTopic: dict[str, str] = {}
 
     hasProjection = False
@@ -80,16 +81,16 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             baseRow["textStructural"] = None
             baseRow["segmentOrder"] = 0
             lastKey = lastHeadingKeyByTopic.get(topic)
-            if topic in _NOTES_TOPICS and lastKey:
-                segmentKeyBase = f"table|sem:{lastKey}"
-            else:
-                segmentKeyBase = f"table|sb:{sourceBlockOrder}"
+            segmentKeyBase, occurrence, segmentKey = keyer.forTableBlock(
+                topic,
+                sourceBlockOrder=sourceBlockOrder,
+                notesHeadingKey=lastKey,
+                isNotesTopic=topic in _NOTES_TOPICS,
+            )
             baseRow["segmentKeyBase"] = segmentKeyBase
             baseRow["sortOrder"] = orderSeq * 1000
-            occKey = (topic, segmentKeyBase)
-            occurrenceCount[occKey] = occurrenceCount.get(occKey, 0) + 1
-            baseRow["segmentOccurrence"] = occurrenceCount[occKey]
-            baseRow["segmentKey"] = f"{segmentKeyBase}|occ:{occurrenceCount[occKey]}"
+            baseRow["segmentOccurrence"] = occurrence
+            baseRow["segmentKey"] = segmentKey
             yield baseRow
             continue
 
@@ -120,8 +121,8 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
                 textParentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
                 textSemanticPathKey = " > ".join(semanticPathKeys) if semanticPathKeys else None
                 textSemanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
-                segmentKeyBase = (
-                    f"body|p:{textSemanticPathKey}" if textSemanticPathKey else f"body|lv:{textLevel}|a:empty"
+                segmentKeyBase, occurrence, segmentKey = keyer.forTextBody(
+                    topic, textLevel=textLevel, textSemanticPathKey=textSemanticPathKey
                 )
             else:
                 textLevel = 0
@@ -130,7 +131,7 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
                 textParentPathKey = None
                 textSemanticPathKey = None
                 textSemanticParentPathKey = None
-                segmentKeyBase = "body|lv:0|a:empty"
+                segmentKeyBase, occurrence, segmentKey = keyer.forTextNoHeading(topic)
             baseRow["textLevel"] = textLevel
             baseRow["textPath"] = textPath
             baseRow["textPathKey"] = textPathKey
@@ -140,10 +141,8 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             baseRow["segmentOrder"] = 0
             baseRow["segmentKeyBase"] = segmentKeyBase
             baseRow["sortOrder"] = orderSeq * 1000
-            occKey = (topic, segmentKeyBase)
-            occurrenceCount[occKey] = occurrenceCount.get(occKey, 0) + 1
-            baseRow["segmentOccurrence"] = occurrenceCount[occKey]
-            baseRow["segmentKey"] = f"{segmentKeyBase}|occ:{occurrenceCount[occKey]}"
+            baseRow["segmentOccurrence"] = occurrence
+            baseRow["segmentKey"] = segmentKey
             yield baseRow
             continue
 
@@ -159,11 +158,9 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             nodeRow["textSemanticPathKey"] = node.get("textSemanticPathKey")
             nodeRow["textSemanticParentPathKey"] = node.get("textSemanticParentPathKey")
             nodeRow["segmentOrder"] = node["segmentOrder"]
-            segmentKeyBase = node["segmentKeyBase"]
+            segmentKeyBase, occurrence, segmentKey = keyer.forTextHeadingNode(topic, str(node["segmentKeyBase"]))
             nodeRow["segmentKeyBase"] = segmentKeyBase
             nodeRow["sortOrder"] = (orderSeq * 1000) + int(node["segmentOrder"])
-            occKey = (topic, str(segmentKeyBase))
-            occurrenceCount[occKey] = occurrenceCount.get(occKey, 0) + 1
-            nodeRow["segmentOccurrence"] = occurrenceCount[occKey]
-            nodeRow["segmentKey"] = f"{segmentKeyBase}|occ:{occurrenceCount[occKey]}"
+            nodeRow["segmentOccurrence"] = occurrence
+            nodeRow["segmentKey"] = segmentKey
             yield nodeRow
