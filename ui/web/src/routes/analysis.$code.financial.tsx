@@ -26,11 +26,13 @@ import {
 	BENTO_CARD_PAD_PX,
 } from '@/features/dashboard/layout/BentoGrid';
 import {
+	fetchCard,
 	fetchCatalog,
 	fetchTabLayout,
 	type CatalogCard,
 	type FinancialSubCategory,
 	type PackedCard,
+	type PeriodKind,
 	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
@@ -133,37 +135,29 @@ function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 	);
 }
 
-// 카드 1 장 render — bundle 모드에서 spec 은 prop 으로 주입됨 (per-card fetch 폐기).
-// 이전 progressive load 는 35 round-trip 때문에 bundle (asyncio.gather) 보다 5x 느렸음.
+// 카드 1 장 render — eager spec 은 prop 으로 주입 (apiVizLayout 의 첫 eagerN +
+// hero 카드). eager 외 카드는 visible (viewport 진입) 시 fetchCard 단일 호출.
+// backend TTL 캐시 (Task 2) 가 같은 카드 두 번 build 0 보장. 이전 progressive
+// load 의 35 round-trip 문제는 lazy 호출이 viewport 분산 + 캐시 hit 으로 해소.
 function CardRender({
-	spec,
+	spec: bundledSpec,
 	packed,
 	meta,
 	cardOuterH,
 	computeHeaderMetric,
+	stockCode,
+	periodKind,
 }: {
 	spec: RechartsSpec | undefined;
 	packed: PackedCard;
 	meta: CatalogCard | undefined;
 	cardOuterH: number;
 	computeHeaderMetric: (spec: RechartsSpec | undefined) => React.ReactNode;
+	stockCode: string;
+	periodKind: PeriodKind;
 }) {
-	const title = meta?.title || spec?.title || packed.title;
-	const help = meta?.help;
-	const seriesCount = spec?.series?.length ?? 0;
-	const isDualStack = spec?.options?.dualStack === true;
-	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
-	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-	const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
-	const bodyHeight = Math.max(
-		60,
-		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
-	);
-	const [open, setOpen] = useState(false);
-	// viewport lazy mount — 화면 밖 카드는 VizChart 컴포넌트 mount 자체 skip.
-	// content-visibility: auto (BentoGrid) 가 paint 는 skip 하지만 React reconcile·
-	// effect 비용은 그대로 발생 → IO 로 mount 단계까지 미룸. rootMargin 200px 로
-	// 사용자가 스크롤 도달 직전 미리 mount → 인지 latency 0.
+	// lazy spec fetch — viewport 진입 (visible) 시 bundled spec 없으면 단일 호출.
+	// backend TTL 캐시로 같은 카드 두 번 build 0. hover prefetch (Task 7) 와도 dedup.
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const [visible, setVisible] = useState(false);
 	useEffect(() => {
@@ -185,6 +179,28 @@ function CardRender({
 		io.observe(el);
 		return () => io.disconnect();
 	}, [visible]);
+	const needsLazy = visible && !bundledSpec;
+	const { data: lazySpec } = useQuery({
+		queryKey: dashKeys.card(packed.cardKey, stockCode, periodKind),
+		queryFn: () => fetchCard(packed.cardKey, stockCode, periodKind, 40),
+		enabled: needsLazy,
+		staleTime: 5 * 60_000,
+		retry: 1,
+	});
+	const spec = bundledSpec ?? lazySpec;
+
+	const title = meta?.title || spec?.title || packed.title;
+	const help = meta?.help;
+	const seriesCount = spec?.series?.length ?? 0;
+	const isDualStack = spec?.options?.dualStack === true;
+	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
+	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
+	const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
+	const bodyHeight = Math.max(
+		60,
+		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
+	);
+	const [open, setOpen] = useState(false);
 	const kind = spec?.kind ?? packed.kind;
 	const headerMetric = computeHeaderMetric(spec);
 	// Koyfin 패턴 — primary series 시계열 sparkline (마지막 24 분기).
@@ -366,6 +382,8 @@ function FinancialTab() {
 				meta={meta}
 				cardOuterH={cardOuterH}
 				computeHeaderMetric={computeHeaderMetric}
+				stockCode={code}
+				periodKind={periodKind}
 			/>
 		);
 	};

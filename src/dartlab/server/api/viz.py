@@ -315,6 +315,12 @@ async def apiVizLayout(
     layoutOnly: bool = Query(
         False, description="True → layout 만 반환, cards 는 빈 dict. frontend 가 카드별 progressive load."
     ),
+    eagerN: int = Query(
+        6,
+        ge=0,
+        le=80,
+        description="첫 페인트 즉시 build 할 카드 수. 나머지는 frontend 가 IntersectionObserver hit 시 /api/viz/spec/{cardKey}/{code} 호출 (TTL 캐시로 중복 build 0). 0=전체 lazy, 큰 값=전체 eager.",
+    ),
 ) -> dict[str, Any]:
     """탭 + 7 방법론 view → 12-col bento packed grid + 각 카드 spec.
 
@@ -353,7 +359,14 @@ async def apiVizLayout(
     heroKeys: list[str] = []
     if tab == "financial":
         heroKeys.append("snowflakeRadar")
-    buildKeys = cardKeys + [k for k in heroKeys if k not in cardKeys]
+
+    # eager set — 첫 페인트에 spec 동행할 카드. 카드 순서대로 첫 eagerN + heroKeys.
+    # 나머지 (lazyKeys) 는 frontend 가 viewport 진입 시 /api/viz/spec/{cardKey}/{code}
+    # 호출. backend TTL 캐시 (Task 2) 가 중복 build 0 보장 → 사용자가 끝까지 스크롤
+    # 해도 같은 카드 두 번 build 안 함. cold layout 5s → 1~2s 목표.
+    eagerCardKeys = cardKeys[: max(0, eagerN)]
+    lazyCardKeys = cardKeys[max(0, eagerN) :]
+    buildKeys = eagerCardKeys + [k for k in heroKeys if k not in eagerCardKeys]
 
     if layoutOnly:
         # progressive load mode — frontend 가 /api/viz/spec/{cardKey}/{stockCode} 로 카드별 fetch.
@@ -365,6 +378,7 @@ async def apiVizLayout(
             "colCount": 24,
             "layout": placed,
             "cards": {},
+            "lazyKeys": cardKeys,
         }
 
     async def _one(k: str) -> dict[str, Any]:
@@ -390,4 +404,6 @@ async def apiVizLayout(
         "colCount": 24,
         "layout": placed,
         "cards": dict(zip(buildKeys, specs)),
+        # frontend 가 viewport 진입 시 fetchCard 할 카드 목록 (eager 외).
+        "lazyKeys": lazyCardKeys,
     }

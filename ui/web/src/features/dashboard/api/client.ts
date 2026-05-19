@@ -278,6 +278,8 @@ export interface TabLayoutResponse {
 	colCount: number;
 	layout: PackedCard[];
 	cards: Record<string, RechartsSpec>;
+	// eager 외 카드 — frontend 가 viewport 진입 시 fetchCard 로 spec 받음.
+	lazyKeys?: string[];
 }
 
 export function fetchTabLayout(
@@ -287,8 +289,9 @@ export function fetchTabLayout(
 	periodKind: PeriodKind = 'annual',
 	nPeriods = 40,
 	layoutOnly = false,
+	eagerN = 6,
 ): Promise<TabLayoutResponse> {
-	const qs = new URLSearchParams({ periodKind, nPeriods: String(nPeriods) });
+	const qs = new URLSearchParams({ periodKind, nPeriods: String(nPeriods), eagerN: String(eagerN) });
 	if (view) qs.set('view', view);
 	if (layoutOnly) qs.set('layoutOnly', 'true');
 	return fetchJson<TabLayoutResponse>(`/api/viz/layout/${tab}/${stockCode}?${qs}`);
