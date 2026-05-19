@@ -48,32 +48,10 @@ from dartlab.providers.reportSelector import selectReport
 
 # ── Phase 1 캐시: parquet 로드 + topic 매핑 결과 재사용 ──
 
-# DART 표준 chapter canonical override —
-# section frame 의 chapter 컬럼은 row 단위로 박혀있고, topic 단위 chapter 는 first row
-# chapter 사용. 분기보고서가 같은 topic 의 stub 을 사업보고서와 다른 chapter 에 둘 때
-# 데이터 순서에 따라 chapter 가 흔들림. 표준 매핑으로 고정.
-#
-# 동일 표준 매핑이 `builder/docsProfileBuilder.py::_STATIC_CHAPTER_MAP` 에도 있다
-# (buildSections 의 finance/report 합병용). 본 두 매핑은 *반드시 동일* 해야 한다.
-# 분리된 이유: pipeline 은 docs 파이프라인 안, docsProfileBuilder 는 3-source 통합
-# 빌더 안 — 모듈 경계가 달라 직접 import 시 circular dep 위험.
-TOPIC_CANONICAL_CHAPTER: dict[str, str] = {
-    "companyOverview": "I",
-    "companyHistory": "I",
-    "capitalChange": "I",
-    "shareCapital": "I",
-    "articlesOfIncorporation": "I",
-    "dividend": "III",
-    "fsSummary": "III",
-    "consolidatedStatements": "III",
-    "consolidatedNotes": "III",
-    "financialStatements": "III",
-    "financialNotes": "III",
-    "audit": "V",
-    "auditOpinion": "V",
-    "auditContract": "V",
-    "nonAuditContract": "V",
-}
+# DART 표준 chapter canonical override — SSOT 는 reference 레이어.
+# 분기보고서가 같은 topic 의 stub 을 사업보고서와 다른 chapter 에 둘 때 데이터 순서에
+# 따라 chapter 가 흔들리는 것을 차단. 표준 매핑이 first-seen 보다 우선.
+from dartlab.reference.docs.topicStandard import TOPIC_CANONICAL_CHAPTER  # noqa: E402
 
 _preparedCache: dict[str, "_PreparedRows"] = {}
 # _PreparedRows.periodRowsDf — 단일 polars DataFrame (모든 period row + _periodKey

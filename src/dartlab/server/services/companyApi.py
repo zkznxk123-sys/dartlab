@@ -91,90 +91,12 @@ def filterBlocksByPeriod(blocks: list, period: str) -> list:
     return filtered
 
 
-# DART 정기보고서 표준 11 장 — Roman numeral → 한글 풀네임.
-# 원본 sections.parquet 의 `chapter` 컬럼은 "I"/"II"/.. 만 들고와 한글 풀네임
-# 없음. 본 매핑이 사용자 노출용 라벨 표준.
-_DART_CHAPTERS_KR: dict[str, str] = {
-    "I": "I. 회사의 개요",
-    "II": "II. 사업의 내용",
-    "III": "III. 재무에 관한 사항",
-    "IV": "IV. 이사의 경영진단 및 분석의견 등",
-    "V": "V. 회계감사인의 감사의견 등",
-    "VI": "VI. 이사회 등 회사의 기관에 관한 사항",
-    "VII": "VII. 주주에 관한 사항",
-    "VIII": "VIII. 임원 및 직원 등에 관한 사항",
-    "IX": "IX. 계열회사 등에 관한 사항",
-    "X": "X. 대주주 등과의 거래내용",
-    "XI": "XI. 그 밖에 투자자 보호를 위하여 필요한 사항",
-}
-
-
-def _chapterLabelKr(chapter: str) -> str:
-    """chapter 키 (예 "I", "II.", "III. 재무에 관한 사항") → 표준 한글 풀네임."""
-    if not isinstance(chapter, str):
-        return str(chapter)
-    raw = chapter.strip()
-    if not raw:
-        return raw
-    # 이미 풀네임 박혀있으면 그대로 (finance_chapter 처럼 코드에서 박은 것).
-    if "." in raw and len(raw.split(".", 1)[-1].strip()) > 0:
-        return raw
-    prefix = raw.split(".")[0].strip()
-    return _DART_CHAPTERS_KR.get(prefix, raw)
-
-
-# dartlab 내부 topic key → DART 정기보고서 표준 한글 라벨.
-# safeTopicLabel (Company._topicLabel) 의 결과 ("회사개요정량" 식 dartlab 단축형) 가
-# 사용자 노출이라 부적절 — DART 원본 라벨과 일치시켜야 사용자가 인지 가능.
-_DART_TOPIC_LABEL: dict[str, str] = {
-    # I. 회사의 개요
-    "companyOverview": "회사의 개요",
-    "companyHistory": "회사의 연혁",
-    "capitalChange": "자본금 변동사항",
-    "shareCapital": "주식의 총수 등",
-    "articlesOfIncorporation": "정관에 관한 사항",
-    "dividend": "배당에 관한 사항",
-    # II. 사업의 내용
-    "businessOverview": "사업의 개요",
-    "productService": "주요 제품 및 서비스",
-    "rawMaterial": "원재료 및 생산설비",
-    "salesOrder": "매출 및 수주상황",
-    "riskDerivative": "위험관리 및 파생거래",
-    "majorContractsAndRnd": "주요계약 및 연구개발활동",
-    "otherReferences": "기타 참고사항",
-    # III. 재무에 관한 사항
-    "fsSummary": "요약재무정보",
-    "consolidatedStatements": "연결재무제표",
-    "consolidatedNotes": "연결재무제표 주석",
-    "financialStatements": "재무제표",
-    "financialNotes": "재무제표 주석",
-    "ratios": "재무비율",
-    "BS": "재무상태표",
-    "IS": "손익계산서",
-    "CIS": "포괄손익계산서",
-    "CF": "현금흐름표",
-    "SCE": "자본변동표",
-    # IV. 이사의 경영진단 및 분석의견 등
-    "cautionaryStatement": "주의사항",
-    "mdnaOverview": "이사의 경영진단 및 분석의견 개요",
-    "financialConditionAndResults": "재무상태 및 영업실적",
-    "liquidityAndCapitalResources": "유동성 및 자금조달",
-    "otherFinance": "기타 재무사항",
-    "audit": "회계감사인의 감사의견",
-    # V. 회계감사인의 감사의견 등
-    "mdna": "경영진단 및 분석의견",
-    "internalControl": "내부통제에 관한 사항",
-    "auditContract": "감사용역 계약",
-    "nonAuditContract": "비감사용역 계약",
-}
-
-
-def _topicDartLabel(topic: str, fallback: str | None = None) -> str:
-    """topic 키 → DART 표준 한글 라벨. 매핑 부재 시 fallback 또는 topic 그대로."""
-    label = _DART_TOPIC_LABEL.get(topic)
-    if label:
-        return label
-    return fallback or topic
+# DART 표준 (chapter/label) — SSOT 는 ``dartlab.reference.docs.topicStandard``.
+# 서버는 reference 의 helper 를 직접 호출. 중복 매핑 제거.
+from dartlab.reference.docs.topicStandard import (  # noqa: E402
+    chapterLabelKr as _chapterLabelKr,
+    labelFor as _topicDartLabel,
+)
 
 
 # period (예 "2024Q1") → 정기보고서 기준월 패턴 (예 "(2024.03)").

@@ -28,60 +28,10 @@ if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
 
 
-# DART 정기보고서 표준 (사업보고서) chapter 매핑. 분기보고서가 stub 을 다른 chapter
-# 에 두는 케이스가 있어 분포 기반 추론이 불가 — 표준 명시가 단일 진실값.
-_STATIC_CHAPTER_MAP: dict[str, str] = {
-    # I. 회사의 개요
-    "companyOverview": "I",       # 1. 회사의 개요
-    "companyHistory": "I",        # 2. 회사의 연혁
-    "capitalChange": "I",         # 3. 자본금 변동사항 (← 옛 매핑 VII 오류 교정)
-    "shareCapital": "I",          # 4. 주식의 총수 등
-    "articlesOfIncorporation": "I",  # 5. 정관에 관한 사항
-    # III. 재무에 관한 사항
-    "BS": "III",
-    "IS": "III",
-    "CIS": "III",
-    "CF": "III",
-    "SCE": "III",
-    "ratios": "III",
-    "fsSummary": "III",           # 1. 요약재무정보
-    "consolidatedStatements": "III",  # 2. 연결재무제표
-    "consolidatedNotes": "III",   # 3. 연결재무제표 주석
-    "financialStatements": "III", # 4. 재무제표
-    "financialNotes": "III",      # 5. 재무제표 주석
-    "dividend": "III",            # 6. 배당에 관한 사항 (← 누락 채움)
-    # V. 회계감사인의 감사의견 등 (DART 최신 표준 — 옛 보고서는 IV 에 있어 frame 흔들림)
-    "audit": "V",
-    "auditOpinion": "V",
-    "auditContract": "V",
-    "nonAuditContract": "V",
-    # VI. 이사회 등 회사의 기관에 관한 사항
-    "outsideDirector": "VI",
-    # VII. 주주에 관한 사항
-    "majorHolder": "VII",
-    "majorHolderChange": "VII",
-    "minorityHolder": "VII",
-    "treasuryStock": "VII",
-    "stockTotal": "VII",
-    "shareholderMeeting": "VII",
-    # VIII. 임원 및 직원 등에 관한 사항
-    "employee": "VIII",
-    "executive": "VIII",
-    "topPay": "VIII",
-    "unregisteredExecutivePay": "VIII",
-    "executivePayAllTotal": "VIII",
-    "executivePayIndividual": "VIII",
-    "executivePayByType": "VIII",
-    "executivePayTotal": "VIII",
-    # IX. 계열회사 등에 관한 사항
-    "investedCompany": "IX",
-    "relatedPartyTx": "IX",
-    # X. 그 밖에 투자자 보호를 위하여 필요한 사항
-    "publicOfferingUsage": "X",
-    "privateOfferingUsage": "X",
-    "corporateBond": "X",
-    "shortTermBond": "X",
-}
+# DART 정기보고서 표준 chapter 매핑 — SSOT 는 reference 레이어
+# (``dartlab.reference.docs.topicStandard.TOPIC_CANONICAL_CHAPTER``).
+# buildSections 의 finance/report 합병 synthetic row 에 사용.
+from dartlab.reference.docs.topicStandard import TOPIC_CANONICAL_CHAPTER as _STATIC_CHAPTER_MAP
 
 
 def profileTable(company: Company) -> pl.DataFrame | None:
