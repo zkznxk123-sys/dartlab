@@ -14096,7 +14096,7 @@
       }
     },
     {
-      "id": "recipes.quality.capitalAllocationScorecard",
+      "id": "recipes.fundamental.quality.capitalAllocationScorecard",
       "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -14124,10 +14124,10 @@
       "linkedSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.dupontDriver",
+        "recipes.fundamental.quality.dupontDriver",
         "recipes.screen.compounderCandidates",
         "recipes.valuation.intrinsicValueBand",
-        "recipes.quality.workingCapitalQuality"
+        "recipes.fundamental.quality.workingCapitalQuality"
       ],
       "requires": [],
       "alternatives": [],
@@ -14203,7 +14203,7 @@
       ]
     },
     {
-      "id": "recipes.quality.cashflowGovernanceDualSignal",
+      "id": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -14969,7 +14969,7 @@
         "engines.company",
         "engines.gather",
         "recipes.credit.distressFilter",
-        "recipes.quality.earningsQualityTriad",
+        "recipes.fundamental.quality.earningsQualityTriad",
         "recipes.credit.leverageSensitivity",
         "engines.credit"
       ],
@@ -16289,7 +16289,7 @@
       ]
     },
     {
-      "id": "recipes.quality.dupontDriver",
+      "id": "recipes.fundamental.quality.dupontDriver",
       "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16320,7 +16320,7 @@
         "engines.scan.ratio",
         "recipes.valuation.qualityValueScreen",
         "recipes.screen.compounderCandidates",
-        "recipes.quality.capitalAllocationScorecard"
+        "recipes.fundamental.quality.capitalAllocationScorecard"
       ],
       "requires": [],
       "alternatives": [],
@@ -16394,7 +16394,7 @@
       ]
     },
     {
-      "id": "recipes.quality.earningsQualityCheck",
+      "id": "recipes.fundamental.quality.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16510,7 +16510,7 @@
       ]
     },
     {
-      "id": "recipes.quality.earningsQualityTriad",
+      "id": "recipes.fundamental.quality.earningsQualityTriad",
       "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16538,7 +16538,7 @@
       "linkedSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.workingCapitalQuality",
+        "recipes.fundamental.quality.workingCapitalQuality",
         "recipes.credit.distressFilter",
         "recipes.credit.distressDual",
         "recipes.valuation.qualityValueScreen"
@@ -16815,7 +16815,7 @@
       ]
     },
     {
-      "id": "recipes.quality.financialStatementCompare",
+      "id": "recipes.fundamental.quality.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -17382,7 +17382,7 @@
         "engines.scan.account",
         "recipes.valuation.qualityValueScreen",
         "recipes.credit.distressFilter",
-        "recipes.quality.piotroskiLite",
+        "recipes.fundamental.quality.piotroskiLite",
         "engines.analysis.valuation"
       ],
       "requires": [],
@@ -17998,8 +17998,8 @@
         "engines.company",
         "engines.gather",
         "engines.scan.valuation",
-        "recipes.quality.dupontDriver",
-        "recipes.quality.capitalAllocationScorecard",
+        "recipes.fundamental.quality.dupontDriver",
+        "recipes.fundamental.quality.capitalAllocationScorecard",
         "recipes.screen.compounderCandidates",
         "recipes.valuation.qualityValueScreen"
       ],
@@ -18075,7 +18075,7 @@
       ]
     },
     {
-      "id": "recipes.quality.inventoryAndCycle",
+      "id": "recipes.fundamental.quality.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18218,7 +18218,7 @@
       "linkedSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.dupontDriver",
+        "recipes.fundamental.quality.dupontDriver",
         "recipes.credit.distressFilter",
         "recipes.credit.distressDual"
       ],
@@ -18815,7 +18815,7 @@
       ]
     },
     {
-      "id": "recipes.quality.piotroskiLite",
+      "id": "recipes.fundamental.quality.piotroskiLite",
       "title": "Piotroski F-Score 7 항목 횡단 점수카드",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20496,7 +20496,7 @@
       ]
     },
     {
-      "id": "recipes.quality.workingCapitalQuality",
+      "id": "recipes.fundamental.quality.workingCapitalQuality",
       "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20525,8 +20525,8 @@
       "linkedSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.dupontDriver",
-        "recipes.quality.earningsQualityTriad",
+        "recipes.fundamental.quality.dupontDriver",
+        "recipes.fundamental.quality.earningsQualityTriad",
         "recipes.credit.distressFilter"
       ],
       "requires": [],

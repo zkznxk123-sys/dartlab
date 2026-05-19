@@ -156,5 +156,5 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → triple flag 종목 KR universe 산출.
-2. 각 종목 → `recipes.quality.cashflowGovernanceDualSignal` 의 회사별 단독 검증.
+2. 각 종목 → `recipes.fundamental.quality.cashflowGovernanceDualSignal` 의 회사별 단독 검증.
 3. distress 동시 발현 → `recipes.credit.distressCandidateScreen` 결과와 교집합.

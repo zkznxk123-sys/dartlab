@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.financialStatementCompare
+id: recipes.fundamental.quality.financialStatementCompare
 title: 두 회사 재무제표 비교 (peer + show + 분해)
 category: recipes
 kind: recipe

@@ -3658,7 +3658,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.capitalAllocationScorecard",
+      "id": "recipes.fundamental.quality.capitalAllocationScorecard",
       "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
       "category": "recipes",
       "purpose": "Buffett-style 자본배분 평가 — FCF 의 5 사용처 (재투자·배당·자사주·M&A·부채상환) 비중 + 증분자본수익률 (ROIIC) + 지속가능성장률 (SGR) 을 L1 raw 시계열에서 직접 계산해 경영진의 자본배분 효율을 평가하는 절차. analysis axis 미사용. 트리거 — '자본배분 평가', 'FCF 사용처', 'ROIIC', 'Buffett 자본배분'.",
@@ -3671,7 +3671,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.cashflowGovernanceDualSignal",
+      "id": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
       "category": "recipes",
       "purpose": "accrual ratio (현금흐름 vs 회계이익 갭) + governance amber (이사회 독립성 / 특수관계자) + audit-change (감사인 변경) 3 신호 동시 발현 시 분식 / 회계 신뢰도 적신호. Dechow et al (2011) \"Predicting Material Accounting Misstatements\" 학술 결과 적용. analysis ↔ scan 격리 메우는 조합. 트리거 — '분식 의심', '회계 신뢰도', 'accrual governance audit'.",
@@ -3684,7 +3684,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.dupontDriver",
+      "id": "recipes.fundamental.quality.dupontDriver",
       "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
       "category": "recipes",
       "purpose": "ROE 변동의 진짜 원인을 5 동인 (세부담·이자부담·영업마진·자산회전·재무레버리지) 으로 분리해 단일 회사 5 년 시계열에서 어떤 요소가 ROE 를 끌고 갔는지 정량화하는 절차. L1 raw (`c.show(\"BS\"|\"IS\")`) 만 사용. 트리거 — 'ROE 분해', 'DuPont 5 동인', 'ROE 추적'.",
@@ -3697,7 +3697,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.earningsQualityCheck",
+      "id": "recipes.fundamental.quality.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
       "category": "recipes",
       "purpose": "회사 발표 이익의 quality 를 발생주의 vs 현금흐름 괴리 + 재무 항목 정합성 + 일회성 비중 3 축으로 점검하는 절차. 트리거 — '이익 quality 점검', '발생주의 vs 현금흐름', '일회성 비중'.",
@@ -3710,7 +3710,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.earningsQualityTriad",
+      "id": "recipes.fundamental.quality.earningsQualityTriad",
       "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
       "category": "recipes",
       "purpose": "이익 quality 를 3 학술 모델 (Sloan accruals · Beneish M-Score · Novy-Marx GP/A) 동시 적용으로 합의 점수화. analysis axis 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Sloan accruals', 'Beneish M-Score', 'Novy-Marx GP/A', '이익 quality 3 모델'.",
@@ -3723,7 +3723,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.financialStatementCompare",
+      "id": "recipes.fundamental.quality.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "recipes",
       "purpose": "두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차. 트리거 — '재무제표 비교', '두 회사 차이', '회사 간 비교'.",
@@ -3736,7 +3736,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.inventoryAndCycle",
+      "id": "recipes.fundamental.quality.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
       "category": "recipes",
       "purpose": "산업 재고 사이클 + 회사 재고 회전 + 매크로 수요 신호 결합으로 사이클 위치를 진단하는 절차. 반도체·석유화학·철강 등에 유용. 트리거 — '재고 사이클', '회전 진단', '반도체/석유화학 사이클'.",
@@ -3749,7 +3749,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.piotroskiLite",
+      "id": "recipes.fundamental.quality.piotroskiLite",
       "title": "Piotroski F-Score 7 항목 횡단 점수카드",
       "category": "recipes",
       "purpose": "Piotroski (2000) F-Score 의 9 항목 중 dartlab ratio 로 가능한 7 항목을 횡단 계산해 저평가 종목군에서 우량 회사를 골라내는 점수카드 절차. 트리거 — 'F-Score', 'Piotroski 7 항목', '저평가 우량 발굴'.",
@@ -3762,7 +3762,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.quality.workingCapitalQuality",
+      "id": "recipes.fundamental.quality.workingCapitalQuality",
       "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
       "category": "recipes",
       "purpose": "Cash Conversion Cycle (DSO + DIO − DPO) + 매출채권·재고·매입채무 회전율 5 년 추세를 L1 raw (`c.show(\"BS\"|\"IS\")`) 에서 직접 계산해 매출 신뢰도와 운전자본 효율을 정량화하는 절차. analysis axis 미사용. 트리거 — '운전자본 quality', '재고 매출채권', 'CCC 진단'.",
@@ -9999,7 +9999,7 @@
     },
     {
       "src": "recipes.credit.distressDual",
-      "dst": "recipes.quality.earningsQualityTriad",
+      "dst": "recipes.fundamental.quality.earningsQualityTriad",
       "kind": "linkedRecipe"
     },
     {
@@ -10064,7 +10064,7 @@
     },
     {
       "src": "recipes.credit.leverageSensitivity",
-      "dst": "recipes.quality.dupontDriver",
+      "dst": "recipes.fundamental.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
@@ -10539,7 +10539,7 @@
     },
     {
       "src": "recipes.fundamental.governance.workforceAndCapital",
-      "dst": "recipes.quality.capitalAllocationScorecard",
+      "dst": "recipes.fundamental.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
@@ -12038,232 +12038,232 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.capitalAllocationScorecard",
+      "src": "recipes.fundamental.quality.capitalAllocationScorecard",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.capitalAllocationScorecard",
+      "src": "recipes.fundamental.quality.capitalAllocationScorecard",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.capitalAllocationScorecard",
-      "dst": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.capitalAllocationScorecard",
+      "dst": "recipes.fundamental.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.capitalAllocationScorecard",
+      "src": "recipes.fundamental.quality.capitalAllocationScorecard",
       "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.capitalAllocationScorecard",
+      "src": "recipes.fundamental.quality.capitalAllocationScorecard",
       "dst": "recipes.valuation.intrinsicValueBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.capitalAllocationScorecard",
-      "dst": "recipes.quality.workingCapitalQuality",
+      "src": "recipes.fundamental.quality.capitalAllocationScorecard",
+      "dst": "recipes.fundamental.quality.workingCapitalQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.cashflowGovernanceDualSignal",
+      "src": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.cashflowGovernanceDualSignal",
+      "src": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.cashflowGovernanceDualSignal",
+      "src": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.cashflowGovernanceDualSignal",
+      "src": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.dupontDriver",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.dupontDriver",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.dupontDriver",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.dupontDriver",
       "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.dupontDriver",
       "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.dupontDriver",
-      "dst": "recipes.quality.capitalAllocationScorecard",
+      "src": "recipes.fundamental.quality.dupontDriver",
+      "dst": "recipes.fundamental.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityCheck",
+      "src": "recipes.fundamental.quality.earningsQualityCheck",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityCheck",
+      "src": "recipes.fundamental.quality.earningsQualityCheck",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityCheck",
+      "src": "recipes.fundamental.quality.earningsQualityCheck",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityCheck",
+      "src": "recipes.fundamental.quality.earningsQualityCheck",
       "dst": "engines.analysis.financialConsistency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityTriad",
+      "src": "recipes.fundamental.quality.earningsQualityTriad",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityTriad",
+      "src": "recipes.fundamental.quality.earningsQualityTriad",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityTriad",
-      "dst": "recipes.quality.workingCapitalQuality",
+      "src": "recipes.fundamental.quality.earningsQualityTriad",
+      "dst": "recipes.fundamental.quality.workingCapitalQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityTriad",
+      "src": "recipes.fundamental.quality.earningsQualityTriad",
       "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityTriad",
+      "src": "recipes.fundamental.quality.earningsQualityTriad",
       "dst": "recipes.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.earningsQualityTriad",
+      "src": "recipes.fundamental.quality.earningsQualityTriad",
       "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.financialStatementCompare",
+      "src": "recipes.fundamental.quality.financialStatementCompare",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.financialStatementCompare",
+      "src": "recipes.fundamental.quality.financialStatementCompare",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.financialStatementCompare",
+      "src": "recipes.fundamental.quality.financialStatementCompare",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.financialStatementCompare",
+      "src": "recipes.fundamental.quality.financialStatementCompare",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.inventoryAndCycle",
+      "src": "recipes.fundamental.quality.inventoryAndCycle",
       "dst": "engines.macro.inventory",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.inventoryAndCycle",
+      "src": "recipes.fundamental.quality.inventoryAndCycle",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.inventoryAndCycle",
+      "src": "recipes.fundamental.quality.inventoryAndCycle",
       "dst": "engines.analysis.efficiency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.inventoryAndCycle",
+      "src": "recipes.fundamental.quality.inventoryAndCycle",
       "dst": "engines.macro.cycle",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "recipes.valuation.grahamDeepValue",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.piotroskiLite",
+      "src": "recipes.fundamental.quality.piotroskiLite",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.workingCapitalQuality",
+      "src": "recipes.fundamental.quality.workingCapitalQuality",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.workingCapitalQuality",
+      "src": "recipes.fundamental.quality.workingCapitalQuality",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.workingCapitalQuality",
-      "dst": "recipes.quality.dupontDriver",
+      "src": "recipes.fundamental.quality.workingCapitalQuality",
+      "dst": "recipes.fundamental.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.workingCapitalQuality",
-      "dst": "recipes.quality.earningsQualityTriad",
+      "src": "recipes.fundamental.quality.workingCapitalQuality",
+      "dst": "recipes.fundamental.quality.earningsQualityTriad",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.quality.workingCapitalQuality",
+      "src": "recipes.fundamental.quality.workingCapitalQuality",
       "dst": "recipes.credit.distressFilter",
       "kind": "linkedRecipe"
     },
@@ -13219,7 +13219,7 @@
     },
     {
       "src": "recipes.valuation.grahamDeepValue",
-      "dst": "recipes.quality.piotroskiLite",
+      "dst": "recipes.fundamental.quality.piotroskiLite",
       "kind": "linkedRecipe"
     },
     {
@@ -13244,12 +13244,12 @@
     },
     {
       "src": "recipes.valuation.intrinsicValueBand",
-      "dst": "recipes.quality.dupontDriver",
+      "dst": "recipes.fundamental.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
       "src": "recipes.valuation.intrinsicValueBand",
-      "dst": "recipes.quality.capitalAllocationScorecard",
+      "dst": "recipes.fundamental.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
@@ -13579,7 +13579,7 @@
     ],
     [
       "recipes.credit.distressFilter",
-      "recipes.quality.piotroskiLite",
+      "recipes.fundamental.quality.piotroskiLite",
       "recipes.screen.compounderCandidates",
       "recipes.valuation.garpScreen",
       "recipes.valuation.grahamDeepValue",
@@ -13588,10 +13588,10 @@
     [
       "recipes.credit.distressDual",
       "recipes.credit.leverageSensitivity",
-      "recipes.quality.capitalAllocationScorecard",
-      "recipes.quality.dupontDriver",
-      "recipes.quality.earningsQualityTriad",
-      "recipes.quality.workingCapitalQuality",
+      "recipes.fundamental.quality.capitalAllocationScorecard",
+      "recipes.fundamental.quality.dupontDriver",
+      "recipes.fundamental.quality.earningsQualityTriad",
+      "recipes.fundamental.quality.workingCapitalQuality",
       "recipes.valuation.intrinsicValueBand"
     ],
     [
@@ -13700,10 +13700,10 @@
     "recipes.macro.stressMatrixChart",
     "recipes.macro.timeSeriesChart",
     "recipes.macro.toCompany",
-    "recipes.quality.cashflowGovernanceDualSignal",
-    "recipes.quality.earningsQualityCheck",
-    "recipes.quality.financialStatementCompare",
-    "recipes.quality.inventoryAndCycle",
+    "recipes.fundamental.quality.cashflowGovernanceDualSignal",
+    "recipes.fundamental.quality.earningsQualityCheck",
+    "recipes.fundamental.quality.financialStatementCompare",
+    "recipes.fundamental.quality.inventoryAndCycle",
     "recipes.report.storyReportBuild",
     "recipes.report.thesisTracker",
     "recipes.report.usMarketReview",
@@ -13883,15 +13883,15 @@
     "recipes.macro.timeSeriesChart",
     "recipes.macro.toCompany",
     "recipes.macro.yieldCurveStress",
-    "recipes.quality.capitalAllocationScorecard",
-    "recipes.quality.cashflowGovernanceDualSignal",
-    "recipes.quality.dupontDriver",
-    "recipes.quality.earningsQualityCheck",
-    "recipes.quality.earningsQualityTriad",
-    "recipes.quality.financialStatementCompare",
-    "recipes.quality.inventoryAndCycle",
-    "recipes.quality.piotroskiLite",
-    "recipes.quality.workingCapitalQuality",
+    "recipes.fundamental.quality.capitalAllocationScorecard",
+    "recipes.fundamental.quality.cashflowGovernanceDualSignal",
+    "recipes.fundamental.quality.dupontDriver",
+    "recipes.fundamental.quality.earningsQualityCheck",
+    "recipes.fundamental.quality.earningsQualityTriad",
+    "recipes.fundamental.quality.financialStatementCompare",
+    "recipes.fundamental.quality.inventoryAndCycle",
+    "recipes.fundamental.quality.piotroskiLite",
+    "recipes.fundamental.quality.workingCapitalQuality",
     "recipes.report.catalystCalendar",
     "recipes.report.companyDeepAnalysis",
     "recipes.report.dailyMorningNote",

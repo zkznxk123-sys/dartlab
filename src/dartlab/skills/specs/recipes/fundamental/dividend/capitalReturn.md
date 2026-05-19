@@ -225,8 +225,8 @@ graph LR
 연계 절차:
 - 배당 스트레스 테스트 → `recipes.fundamental.dividend.stressTest` (FCF -30% 시 환원 유지?)
 - 배당 thesis 깊이 → `recipes.fundamental.dividend.thesis`
-- 자본배분 종합 점수 → `recipes.quality.capitalAllocationScorecard`
+- 자본배분 종합 점수 → `recipes.fundamental.quality.capitalAllocationScorecard`
 - 산업 환원 추세 → `engines.scan`
-- ROE 동인 결합 → `recipes.quality.dupontDriver`
+- ROE 동인 결합 → `recipes.fundamental.quality.dupontDriver`
 
 재호출 트리거: "삼성전자 주주환원 정책", "배당성향 + 배당수익률 + 자사주 환원율", "자사주 매입 vs 소각 영향", "5 년 환원 추세 + FCF 커버리지".

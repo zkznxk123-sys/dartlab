@@ -646,12 +646,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.capitalAllocationScorecard</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.capitalAllocationScorecard</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.cashflowGovernanceDualSignal</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.cashflowGovernanceDualSignal</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -751,17 +751,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.dupontDriver</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.dupontDriver</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.earningsQualityCheck</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.earningsQualityCheck</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.earningsQualityTriad</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.earningsQualityTriad</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -776,7 +776,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.financialStatementCompare</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.financialStatementCompare</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -836,7 +836,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.inventoryAndCycle</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.inventoryAndCycle</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -871,7 +871,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.piotroskiLite</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.piotroskiLite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -946,7 +946,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.quality.workingCapitalQuality</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.quality.workingCapitalQuality</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

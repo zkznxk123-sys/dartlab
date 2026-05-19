@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.workingCapitalQuality
+id: recipes.fundamental.quality.workingCapitalQuality
 title: 운전자본 quality (CCC + 회전율 추세 — L1 raw)
 category: recipes
 kind: recipe
@@ -17,8 +17,8 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - recipes.quality.dupontDriver
-  - recipes.quality.earningsQualityTriad
+  - recipes.fundamental.quality.dupontDriver
+  - recipes.fundamental.quality.earningsQualityTriad
   - recipes.credit.distressFilter
 toolRefs:
   - EngineCall
@@ -164,9 +164,9 @@ quality = quality.with_columns(
 ## 연계 절차
 
 1. 본 recipe → CCC + 회전율 + AR/Inv vs Sales gap 5 년.
-2. arVsSalesGap 양수 + 누적 → `recipes.quality.earningsQualityTriad` 의 Sloan accruals 신호 점검.
+2. arVsSalesGap 양수 + 누적 → `recipes.fundamental.quality.earningsQualityTriad` 의 Sloan accruals 신호 점검.
 3. CCC 추세 확장 → 운전자본 자금 부담 증가 → `recipes.credit.distressFilter` 와 상호 검증.
-4. DSO·DIO·DPO 동인별 변화 → `recipes.quality.dupontDriver` 의 AssetTurnover 변동과 일치 확인.
+4. DSO·DIO·DPO 동인별 변화 → `recipes.fundamental.quality.dupontDriver` 의 AssetTurnover 변동과 일치 확인.
 5. 산업 평균 (반도체·소비재·통신 등) 과 비교 — 절대값 절대 직접 비교 X.
 
 ## 기본 검증

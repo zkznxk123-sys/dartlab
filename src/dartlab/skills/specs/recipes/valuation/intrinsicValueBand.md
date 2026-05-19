@@ -17,8 +17,8 @@ linkedSkills:
   - engines.company
   - engines.gather
   - engines.scan
-  - recipes.quality.dupontDriver
-  - recipes.quality.capitalAllocationScorecard
+  - recipes.fundamental.quality.dupontDriver
+  - recipes.fundamental.quality.capitalAllocationScorecard
   - recipes.screen.compounderCandidates
   - recipes.valuation.qualityValueScreen
 toolRefs:
@@ -245,9 +245,9 @@ graph LR
 연계 절차:
 - EVA spread > 0 + CFROI > WACC → `recipes.screen.compounderCandidates` 합의 (진짜 quality)
 - EVA spread &lt; 0 + CFROI &lt; WACC → `recipes.credit.distressFilter` (자본 파괴)
-- 5 년 EVA spread 안정 양수 = quality compounder → `recipes.quality.dupontDriver` 결합
+- 5 년 EVA spread 안정 양수 = quality compounder → `recipes.fundamental.quality.dupontDriver` 결합
 - PER/PBR 정량 매트릭스 → `engines.scan` snapshot 비교
-- 자본 배분 효율 → `recipes.quality.capitalAllocationScorecard`
+- 자본 배분 효율 → `recipes.fundamental.quality.capitalAllocationScorecard`
 
 재호출 트리거: "삼성전자 3 anchor 본질가치 band", "Graham + EVA + CFROI 결합", "시장가 vs 본질가치 band 비교".
 

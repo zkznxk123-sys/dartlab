@@ -2495,7 +2495,7 @@
       "bodyPreview": "## 엔진 역할\n\nquant 엔진 답변의 세계 수준 품질 게이트. 본 skill 은 axis 응용이 아니라 *품질 검증 메타 skill* 이다. 답변 작성 후 본 게이트로 검증한 다음 finalize.\n\n## 공개 호출 방식\n\n본 skill 은 직접 호출되는 axis 가 아니다. 다른 quant axis 결과를 검증할 때 본 skill 의 게이트 5 항목을 답변에 적용한다.\n\n```python\nimport dartlab\n\n# quant axis 결과\nresult = dartlab.quant(\"damodaranValuation\", \"005930\")\n\n# 답변 finalize 전 본 skill 의 게이트 5 항목 (학술 출처 / 표본 / 가정 / OOS / 벤치마크) 확인\n```\n\n## 호출 동작\n\n게이트 5 항목 (학술 출처 / 표본 차이 / 가정 / OOS 검증 / 벤치마크) 의 통과 여부를 답변에 명시. 미통과 항목은 답변에 한계로 노출.\n\n## 대표 반환 형태\n\n본 skill 자체는 결과를 반환하지 않는다. 다른 quant axis 의 결과 답변 본문에 게이트 5 항목 통과 여부 표 (또는 한계 문장) 가 포함되어야 한다.\n\n## 게이트 항목\n\n1. **"
     },
     {
-      "id": "recipes.quality.capitalAllocationScorecard",
+      "id": "recipes.fundamental.quality.capitalAllocationScorecard",
       "title": "자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)",
       "category": "recipes",
       "purpose": "Buffett-style 자본배분 평가 — FCF 의 5 사용처 (재투자·배당·자사주·M&A·부채상환) 비중 + 증분자본수익률 (ROIIC) + 지속가능성장률 (SGR) 을 L1 raw 시계열에서 직접 계산해 경영진의 자본배분 효율을 평가하는 절차. analysis axis 미사용. 트리거 — '자본배분 평가', 'FCF 사용처', 'ROIIC', 'Buffett 자본배분'.",
@@ -2510,14 +2510,14 @@
       "nextSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.dupontDriver",
+        "recipes.fundamental.quality.dupontDriver",
         "recipes.screen.compounderCandidates",
         "recipes.valuation.intrinsicValueBand"
       ],
       "bodyPreview": "## 학술 근거\n\nWarren Buffett 주주서한 (Berkshire Hathaway, 1977-2024): \"**Capital allocation is the most important job of a CEO.**\" 핵심 원칙:\n\n- **5 사용처** — Free Cash Flow 가 어디로 가나: (1) 재투자 (CAPEX·R&D), (2) 배당, (3) 자사주 매입, (4) M&A, (5) 부채 상환.\n- **ROIIC** (Return on Incremental Invested Capital) = ΔNOPAT / ΔInvestedCapital. 새로 투입한 자본 1 원이 얻는 수익률. 본질적 capital efficiency.\n- **SGR** (Sustainable Growth Rate) = ROE × (1 − payoutRatio). 외부 자본조달 없이 가능한 성장 한계.\n\n학술 검증:\n- Penman-Reggiani (2018): ROIIC &gt; WACC 인 회사가 미래 abnormal return 강함. 단순 ROE 보다 우월.\n- Damodaran (2010): \"Capital Allocation Quality\" — 5 사용처 비중이 "
     },
     {
-      "id": "recipes.quality.cashflowGovernanceDualSignal",
+      "id": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
       "title": "현금흐름 품질 × 거버넌스 감사 동시 적신호",
       "category": "recipes",
       "purpose": "accrual ratio (현금흐름 vs 회계이익 갭) + governance amber (이사회 독립성 / 특수관계자) + audit-change (감사인 변경) 3 신호 동시 발현 시 분식 / 회계 신뢰도 적신호. Dechow et al (2011) \"Predicting Material Accounting Misstatements\" 학술 결과 적용. analysis ↔ scan 격리 메우는 조합. 트리거 — '분식 의심', '회계 신뢰도', 'accrual governance audit'.",
@@ -2677,7 +2677,7 @@
         "engines.company",
         "engines.gather",
         "recipes.credit.distressFilter",
-        "recipes.quality.earningsQualityTriad",
+        "recipes.fundamental.quality.earningsQualityTriad",
         "recipes.credit.leverageSensitivity"
       ],
       "bodyPreview": "## 학술 근거\n\n### 1. Altman Z″-Score (1995, 비제조업 / 신흥시장 변형)\nEdward Altman, *\"Predicting Financial Distress of Companies: Revisiting the Z-Score and ZETA Models\"* — 원전 Z-Score (1968) 의 비제조업 / 신흥시장 변형:\n\nZ″ = 6.56·X1 + 3.26·X2 + 6.72·X3 + 1.05·X4\n\n| 변수 | 정의 |\n|---|---|\n| X1 | working capital / total assets |\n| X2 | retained earnings / total assets |\n| X3 | EBIT / total assets |\n| X4 | book value of equity / total liabilities |\n\n해석:\n- Z″ &gt; 2.60 = 안전 (Safe Zone)\n- 1.10 ≤ Z″ ≤ 2.60 = 회색 (Grey Zone)\n- Z″ &lt; 1.10 = 위험 (Distress Zone)\n\n원전 Z-Score 의 X5 (Sales/Assets) 제거 → 비제조업 (서비스·금융·플랫폼) 부적합 해소.\n\n###"
@@ -2929,7 +2929,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\ndividend = c.show(\"dividend\")\ncapital = c.analysis(\"financial\", \"자본배분\")\ncashflow = c.analysis(\"financial\", \"현금흐름\")\nreturn_axis = c.analysis(\"financial\", \"배당주주환원\")\n```\n\n## 호출 동작\n\n배당 정책 raw 데이터 → 자본배분 우선순위 (배당 vs CAPEX vs 자사주) → 현금흐름 quality (FCF / 배당 충당 비율) → 주주환원 시계열 종합.\n\n1. 회사 진입\n2. show(\"dividend\") — 과거 배당 정책 시계열 + 배당성향\n3. analysis(\"financial\", \"자본배분\") — 자본배분 의지 점수\n4. analysis(\"financial\", \"현금흐름\") — FCF / 배당 충당 비율\n5. analysis(\"financial\", \"배당주주환원\") — 주주환원 종합 (있으면)\n\n## 대표 반환 형태\n\n- `tableRef` 3+ 개 (dividend 정책 + 자본배분 + 현금흐름)"
     },
     {
-      "id": "recipes.quality.dupontDriver",
+      "id": "recipes.fundamental.quality.dupontDriver",
       "title": "DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)",
       "category": "recipes",
       "purpose": "ROE 변동의 진짜 원인을 5 동인 (세부담·이자부담·영업마진·자산회전·재무레버리지) 으로 분리해 단일 회사 5 년 시계열에서 어떤 요소가 ROE 를 끌고 갔는지 정량화하는 절차. L1 raw (`c.show(\"BS\"|\"IS\")`) 만 사용. 트리거 — 'ROE 분해', 'DuPont 5 동인', 'ROE 추적'.",
@@ -2951,7 +2951,7 @@
       "bodyPreview": "## 학술 근거\n\nDuPont 사 (E.I. du Pont de Nemours, 1920 년대) 가 도입한 ROE 분해. CFA Institute Level 1 표준 (CFA Curriculum, FRA Reading 22). 핵심 식:\n\nROE = (NI / EBT) × (EBT / EBIT) × (EBIT / Sales) × (Sales / Avg Assets) × (Avg Assets / Avg Equity)\n    = TaxBurden × InterestBurden × OperatingMargin × AssetTurnover × FinancialLeverage\n\n각 항목의 의미:\n- **TaxBurden** — 세후 / 세전. 1 에 가까울수록 세부담 낮음. 산업·국가·세제 의존.\n- **InterestBurden** — 세전 / 영업이익. 1 에 가까울수록 이자비용 낮음. 부채 자본 구조 반영.\n- **OperatingMargin** — 영업이익 / 매출. 사업 본업의 수익성.\n- **AssetTurnover** — 매출 / 평균자산. 자산 효율 (자본 회전).\n- **FinancialLeverage** — 평균자산 / 평균자기자본. 부채를 통한 자"
     },
     {
-      "id": "recipes.quality.earningsQualityCheck",
+      "id": "recipes.fundamental.quality.earningsQualityCheck",
       "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)",
       "category": "recipes",
       "purpose": "회사 발표 이익의 quality 를 발생주의 vs 현금흐름 괴리 + 재무 항목 정합성 + 일회성 비중 3 축으로 점검하는 절차. 트리거 — '이익 quality 점검', '발생주의 vs 현금흐름', '일회성 비중'.",
@@ -2973,7 +2973,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nquality = c.analysis(\"financial\", \"이익품질\")\ncashflow = c.analysis(\"financial\", \"현금흐름\")\nconsistency = c.analysis(\"financial\", \"재무정합성\")\nbs = c.show(\"BS\")\nis_df = c.show(\"IS\")\n```\n\n## 호출 동작\n\n발표 이익 → 일회성 vs 경상 분리 → 매출채권·재고 변동률 vs 매출 성장 → 영업이익 vs CFO 괴리 → 재무 항목 시계열 정합성 종합.\n\n1. 회사 진입\n2. analysis(\"financial\", \"이익품질\") — 일회성 비중 + 발생주의 신호\n3. analysis(\"financial\", \"현금흐름\") — CFO / 영업이익 비율\n4. analysis(\"financial\", \"재무정합성\") — BS·IS·CF 시계열 일관성\n5. show(\"BS\") + show(\"IS\") — 매출채권·재고·매출 raw\n\n## 대표 반환 형태\n\n- `tableRef` 3 개 (quality 표 + cashflow 표 "
     },
     {
-      "id": "recipes.quality.earningsQualityTriad",
+      "id": "recipes.fundamental.quality.earningsQualityTriad",
       "title": "이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)",
       "category": "recipes",
       "purpose": "이익 quality 를 3 학술 모델 (Sloan accruals · Beneish M-Score · Novy-Marx GP/A) 동시 적용으로 합의 점수화. analysis axis 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Sloan accruals', 'Beneish M-Score', 'Novy-Marx GP/A', '이익 quality 3 모델'.",
@@ -2988,7 +2988,7 @@
       "nextSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.workingCapitalQuality",
+        "recipes.fundamental.quality.workingCapitalQuality",
         "recipes.credit.distressFilter",
         "recipes.credit.distressDual"
       ],
@@ -3035,7 +3035,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport statistics\n\nc = dartlab.Company(\"005930\")\n\n# 1. 365 일 공시 list\nfilings_recent = c.gather(\"collect\", days=365) if hasattr(c, \"gather\") else []\nif isinstance(filings_recent, pl.DataFrame):\n    recent_list = filings_recent.to_dicts()\nelif isinstance(filings_recent, list):\n    recent_list = filings_recent\nelse:\n    recent_list = []\n\n# 2. trailing 3y baseline (1095 일 ~ 365 일)\nbaseline_filings = c.gather(\"collect\", days=1095) if hasattr(c, \"gather\") else []\nif isinstance(baseline_filings, pl.DataFrame):\n    baseline_list = baseline_fili"
     },
     {
-      "id": "recipes.quality.financialStatementCompare",
+      "id": "recipes.fundamental.quality.financialStatementCompare",
       "title": "두 회사 재무제표 비교 (peer + show + 분해)",
       "category": "recipes",
       "purpose": "두 회사의 재무제표를 같은 기준 기간에서 비교하고 핵심 차이를 분해해 평가하는 절차. 트리거 — '재무제표 비교', '두 회사 차이', '회사 간 비교'.",
@@ -3281,13 +3281,13 @@
         "engines.company",
         "engines.gather",
         "engines.scan.valuation",
-        "recipes.quality.dupontDriver",
-        "recipes.quality.capitalAllocationScorecard"
+        "recipes.fundamental.quality.dupontDriver",
+        "recipes.fundamental.quality.capitalAllocationScorecard"
       ],
       "bodyPreview": "## 학술 근거\n\n3 학술 framework 동시 적용 — 회계 기반 (Graham), 자본비용 기반 (EVA), 현금흐름 기반 (CFROI) 의 3 anchor 가 서로 다른 가정 → 합의 시 본질가치 band.\n\n### 1. Graham 수정공식 (1974)\nBenjamin Graham, *Intelligent Investor* + 1974 Toronto 강연에서 수정:\n\nV = EPS × (8.5 + 2g) × 4.4 / Y_AAA\n\n| 항 | 의미 |\n|---|---|\n| 8.5 | 무성장 회사 적정 PER |\n| 2g | 성장률 (%) × 2 |\n| 4.4 | 1962 AAA 회사채 yield 정규화 상수 |\n| Y_AAA | 현재 AAA 회사채 yield (%) |\n\n검증:\n- 1962-2000 미국 백테스트 — 본 공식 V × 0.5 &lt; 시장가 = 안전마진. 매수 후 5 년 평균 +6%p 초과수익.\n\n### 2. EVA Spread (Stern Stewart, 1991)\nG. Bennett Stewart III, *The Quest for Value*:\n\nEVA = NOPAT − (WACC × Invested Capital)\n    = (R"
     },
     {
-      "id": "recipes.quality.inventoryAndCycle",
+      "id": "recipes.fundamental.quality.inventoryAndCycle",
       "title": "재고·사이클 점검 (inventory + macro cycle + 회사 영향)",
       "category": "recipes",
       "purpose": "산업 재고 사이클 + 회사 재고 회전 + 매크로 수요 신호 결합으로 사이클 위치를 진단하는 절차. 반도체·석유화학·철강 등에 유용. 트리거 — '재고 사이클', '회전 진단', '반도체/석유화학 사이클'.",
@@ -3324,7 +3324,7 @@
       "nextSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.dupontDriver",
+        "recipes.fundamental.quality.dupontDriver",
         "recipes.credit.distressFilter",
         "recipes.credit.distressDual"
       ],
@@ -3435,7 +3435,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\n# 같은 산업 종목 추출\nsector = c.sector\npeer_codes = dartlab.industry(sector, \"downstream\")[\"stockCode\"].head(5).to_list()\n\n# 각 peer 분석 (sequential — 메모리 안전)\npeers = []\nfor code in peer_codes:\n    p = dartlab.Company(code)\n    peers.append({\"code\": code, \"ratios\": p.show(\"ratios\")})\n```\n\n## 호출 동작\n\n회사 산업 → peer 5~10 추출 → 각 peer 의 핵심 ratio + 회사 ratio 비교 → 횡단 비교 표.\n\n1. 회사 진입 + 산업 식별\n2. industry(sector, stage) — peer 후보\n3. 각 peer 의 c.show(\"ratios\") — sequential\n4. analysis(\"financial\", \"peer비교\") — 횡단 표 생성\n\n## 대표 반환 형태\n\n- `tableRef` 1+5 "
     },
     {
-      "id": "recipes.quality.piotroskiLite",
+      "id": "recipes.fundamental.quality.piotroskiLite",
       "title": "Piotroski F-Score 7 항목 횡단 점수카드",
       "category": "recipes",
       "purpose": "Piotroski (2000) F-Score 의 9 항목 중 dartlab ratio 로 가능한 7 항목을 횡단 계산해 저평가 종목군에서 우량 회사를 골라내는 점수카드 절차. 트리거 — 'F-Score', 'Piotroski 7 항목', '저평가 우량 발굴'.",
@@ -3761,7 +3761,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nworkforce = c.workforce()\ncapital = c.capital()\nallocation = c.analysis(\"financial\", \"자본배분\")\n```\n\n## 호출 동작\n\n인력 변화 + 자본 변동 + 자본배분 의지 종합. 인력 효율성 (매출/직원수) + 자본 효율성 (CAPEX/매출) 양쪽 확인.\n\n1. 회사 진입\n2. workforce() — 직원 수 + 인건비 시계열\n3. capital() — 자본 변동 (자사주 / 신주 / 배당)\n4. analysis(\"financial\", \"자본배분\") — 자본배분 우선순위\n\n## 대표 반환 형태\n\n- `tableRef` 3 개 (workforce + capital + allocation)\n- `valueRef` 4+ (직원수 / 매출당 직원 / CAPEX / FCF)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.company.researchStarter — 회사 진입\n2. engines.scan.workforce — 인력 횡단\n3. engines.s"
     },
     {
-      "id": "recipes.quality.workingCapitalQuality",
+      "id": "recipes.fundamental.quality.workingCapitalQuality",
       "title": "운전자본 quality (CCC + 회전율 추세 — L1 raw)",
       "category": "recipes",
       "purpose": "Cash Conversion Cycle (DSO + DIO − DPO) + 매출채권·재고·매입채무 회전율 5 년 추세를 L1 raw (`c.show(\"BS\"|\"IS\")`) 에서 직접 계산해 매출 신뢰도와 운전자본 효율을 정량화하는 절차. analysis axis 미사용. 트리거 — '운전자본 quality', '재고 매출채권', 'CCC 진단'.",
@@ -3777,8 +3777,8 @@
       "nextSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.quality.dupontDriver",
-        "recipes.quality.earningsQualityTriad",
+        "recipes.fundamental.quality.dupontDriver",
+        "recipes.fundamental.quality.earningsQualityTriad",
         "recipes.credit.distressFilter"
       ],
       "bodyPreview": "## 학술 근거\n\n운전자본 (Working Capital) = 유동자산 − 유동부채. 그 안에서 **순운전자본 회전 사이클** 을 측정하는 framework:\n\n- **DSO** (Days Sales Outstanding) = (매출채권 / 매출) × 365\n- **DIO** (Days Inventory Outstanding) = (재고 / 매출원가) × 365\n- **DPO** (Days Payables Outstanding) = (매입채무 / 매출원가) × 365\n- **CCC** (Cash Conversion Cycle) = DSO + DIO − DPO. 현금이 운전자본에 묶여 있는 일수.\n\n학술·실무 검증:\n- Sloan (1996) 의 accruals anomaly — 매출채권·재고 급증이 미래 abnormal return 음(-) 예측. 본 recipe 의 변동률 분석이 그 신호.\n- Dechow-Kothari-Watts (1998): CCC 단축 = 운전자본 효율 + 매출 신뢰도 동시 시그널.\n- Damodaran (2007): 매출 성장보다 매출채권 성장 빠른 회사 = \"매출 인식 의심\" — 분식 회계 신호.\n\n핵심 패턴:\n- **DSO 급증*"

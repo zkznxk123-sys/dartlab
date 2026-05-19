@@ -169,7 +169,7 @@ graph LR
 - 본질가치 3 anchor 합의 → `recipes.valuation.intrinsicValueBand`
 - 역사 valuation 추세 → `recipes.valuation.bandTrack`
 - DCF 깊이 분석 → `engines.analysis` (4 방법론 detail)
-- 자본 효율 결합 → `recipes.quality.dupontDriver` + `recipes.quality.capitalAllocationScorecard`
+- 자본 효율 결합 → `recipes.fundamental.quality.dupontDriver` + `recipes.fundamental.quality.capitalAllocationScorecard`
 - 기술적 가치 신호 → `engines.quant`
 
 재호출 트리거: "삼성전자 4 방법론 종합 적정주가 범위", "가치평가 + valuation band 결합", "DCF best/base/worst 시나리오".

@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.capitalAllocationScorecard
+id: recipes.fundamental.quality.capitalAllocationScorecard
 title: 자본배분 점수카드 (FCF 5 사용처 + ROIIC + SGR — L1 raw)
 category: recipes
 kind: recipe
@@ -16,10 +16,10 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - recipes.quality.dupontDriver
+  - recipes.fundamental.quality.dupontDriver
   - recipes.screen.compounderCandidates
   - recipes.valuation.intrinsicValueBand
-  - recipes.quality.workingCapitalQuality
+  - recipes.fundamental.quality.workingCapitalQuality
 gap:
   primary:
     - analysis
@@ -177,7 +177,7 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → 5 년 자본배분 표 + ROIIC + SGR.
-2. ROIIC &lt; SGR 이면 capital 비효율 신호 → `recipes.quality.dupontDriver` 로 ROE 동인 점검.
+2. ROIIC &lt; SGR 이면 capital 비효율 신호 → `recipes.fundamental.quality.dupontDriver` 로 ROE 동인 점검.
 3. M&A 비중 큰 회사 → 인수 후 통합 효율 (goodwill 추적) 별도.
 4. 자사주 비중 큰 회사 → 소각 vs 보유 구분, EPS 변화로 검증.
 5. SGR &lt; actual growth → 외부 자본조달 의존 (유상증자·차입) 확인.

@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.inventoryAndCycle
+id: recipes.fundamental.quality.inventoryAndCycle
 title: 재고·사이클 점검 (inventory + macro cycle + 회사 영향)
 category: recipes
 kind: recipe

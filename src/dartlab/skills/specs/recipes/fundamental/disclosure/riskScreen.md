@@ -151,7 +151,7 @@ graph LR
 ## 연계 절차
 - 상위 후보 case 별 → `recipes.fundamental.disclosure.event` (개별 종목 본문 검증)
 - 공시 톤 분석 → `recipes.fundamental.disclosure.toneToStoryRisk`
-- 분식 의심 결합 → `recipes.quality.earningsQualityTriad` (Sloan + Beneish + Novy-Marx)
+- 분식 의심 결합 → `recipes.fundamental.quality.earningsQualityTriad` (Sloan + Beneish + Novy-Marx)
 - 부도 위험 결합 → `recipes.credit.distressFilter`
 - 산업 횡단 → `engines.scan` direct (sector breakdown)
 

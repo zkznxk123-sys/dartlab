@@ -212,8 +212,8 @@ graph LR
 - GP/A 게이트 결합 → `recipes.valuation.qualityValueScreen`
 - PEG 가치 게이트 → `recipes.valuation.garpScreen` (비싸지 않은지)
 - 안정성 게이트 → `recipes.credit.distressFilter`
-- ROE 동인 (margin × turnover × leverage) → `recipes.quality.dupontDriver`
-- 자본배분 정성 → `recipes.quality.capitalAllocationScorecard`
+- ROE 동인 (margin × turnover × leverage) → `recipes.fundamental.quality.dupontDriver`
+- 자본배분 정성 → `recipes.fundamental.quality.capitalAllocationScorecard`
 - moat narrative → `engines.story`
 
 재호출 트리거: "KR 시장 5 년 일관 compounder 후보", "ROE >= 15% + 표준편차 작은 종목", "매출 안정 성장 + 고-margin", "compounder + valuation 결합".

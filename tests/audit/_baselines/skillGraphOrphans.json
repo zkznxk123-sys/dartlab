@@ -140,7 +140,7 @@
         "title": "Quant - 세계 수준 quality bar"
       },
       {
-        "id": "recipes.quality.cashflowGovernanceDualSignal",
+        "id": "recipes.fundamental.quality.cashflowGovernanceDualSignal",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -224,7 +224,7 @@
         "title": "배당 thesis (자본배분 + 현금흐름 quality + 배당 정책)"
       },
       {
-        "id": "recipes.quality.earningsQualityCheck",
+        "id": "recipes.fundamental.quality.earningsQualityCheck",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -245,7 +245,7 @@
         "title": "8-K / 사업보고서 비정상 키워드 빈도 → predictionSignal feature"
       },
       {
-        "id": "recipes.quality.financialStatementCompare",
+        "id": "recipes.fundamental.quality.financialStatementCompare",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -308,7 +308,7 @@
         "title": "내부자 거래·이벤트 점검 (insider scan + 공시 + 자본변동)"
       },
       {
-        "id": "recipes.quality.inventoryAndCycle",
+        "id": "recipes.fundamental.quality.inventoryAndCycle",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

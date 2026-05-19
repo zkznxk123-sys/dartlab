@@ -62,7 +62,7 @@ def test_append_run_creates_file_then_appends(runsDir: Path) -> None:
 
 
 def test_load_runs_returns_empty_for_unknown_skill(runsDir: Path) -> None:
-    df = loadRuns("recipes.quality.nonexistent")
+    df = loadRuns("recipes.fundamental.quality.nonexistent")
     assert df.is_empty()
     assert "runId" in df.columns
 

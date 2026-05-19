@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.earningsQualityTriad
+id: recipes.fundamental.quality.earningsQualityTriad
 title: 이익 quality 3 모델 합의 (Sloan + Beneish + Novy-Marx — L1 raw)
 category: recipes
 kind: recipe
@@ -16,7 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - recipes.quality.workingCapitalQuality
+  - recipes.fundamental.quality.workingCapitalQuality
   - recipes.credit.distressFilter
   - recipes.credit.distressDual
   - recipes.valuation.qualityValueScreen
@@ -222,7 +222,7 @@ graph LR
 | 정정공시 빈도 | (DART) | — | 3+/연 | 분기 |
 
 연계 절차:
-- riskScore = 2 → `recipes.quality.workingCapitalQuality` (AR/Inv vs Sales gap)
+- riskScore = 2 → `recipes.fundamental.quality.workingCapitalQuality` (AR/Inv vs Sales gap)
 - 분식 의심 → `c.disclosure(...)` 의 감사보고서 의견·정정공시 빈도
 - GP/A 강 + Sloan 약 = 진짜 quality → `recipes.valuation.qualityValueScreen`
 - 분식 + 부도 → `recipes.credit.distressDual` (강한 회피 신호)
@@ -257,7 +257,7 @@ graph LR
 ## 연계 절차
 
 1. 본 recipe → 5 년 3 모델 점수 + riskScore.
-2. riskScore = 2 (양 모델 의심) → `recipes.quality.workingCapitalQuality` 의 AR/Inv vs Sales gap 점검.
+2. riskScore = 2 (양 모델 의심) → `recipes.fundamental.quality.workingCapitalQuality` 의 AR/Inv vs Sales gap 점검.
 3. 실제 분식 의심 회사 → 공시 (`c.disclosure(...)`) 의 감사보고서 의견·정정공시 빈도 검증.
 4. GP/A 강 (상위 10%) + Sloan 약 (하위 30%) = 진짜 quality. `recipes.valuation.qualityValueScreen` 와 상호 검증.
 5. `recipes.credit.distressDual` 와 결합 — 분식 의심 + 부도 위험 = 강한 회피 신호.

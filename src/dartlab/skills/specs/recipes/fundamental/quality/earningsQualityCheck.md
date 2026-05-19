@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.earningsQualityCheck
+id: recipes.fundamental.quality.earningsQualityCheck
 title: 이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)
 category: recipes
 kind: recipe

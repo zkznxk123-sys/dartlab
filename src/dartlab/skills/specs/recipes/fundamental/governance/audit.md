@@ -130,7 +130,7 @@ graph LR
 - **이사회 독립성**: 사외이사 비율 ≥ 50%·위원회 (감사·보상·추천·지속가능) 모두 사외이사 과반 → 통과. 명목 사외이사 (친족·전 임원) 가드 권장.
 - **지배력 집중**: 최대주주 + 우호 지분 ≥ 50% → 일방적 의사결정 risk. < 30% → 인수 위험 (KR 적대적 M&A 사례 드물어도 watch).
 - **감사 신호**: 적정 이외 의견 (한정/부적정/의견거절) 발생 시 즉시 high risk. 감사인 1 회 변경 = 정상, 3+ 변경 = watch.
-- **분식 가능성**: Sloan ACC + Beneish M + Novy-Marx GP/A 3 모델 합의 (`recipes.quality.earningsQualityTriad` 결합).
+- **분식 가능성**: Sloan ACC + Beneish M + Novy-Marx GP/A 3 모델 합의 (`recipes.fundamental.quality.earningsQualityTriad` 결합).
 
 **4 축 합의**: 4/4 우위 = quality governance, 1~2 축 열위 = 산업 평균, 3~4 축 열위 = 보수적 회피.
 
@@ -160,7 +160,7 @@ graph LR
 | 분식 | Beneish M | > -1.78 | 분기 |
 
 ## 연계 절차
-- 분식 가능성 정량 → `recipes.quality.earningsQualityTriad` (3 모델 합의)
+- 분식 가능성 정량 → `recipes.fundamental.quality.earningsQualityTriad` (3 모델 합의)
 - 감사 위험 횡단 → `engines.scan`
 - 거버넌스 종합 → `recipes.fundamental.governance.auditComposite` (멀티 신호)
 - 거버넌스 네트워크 (특수관계 그룹) → `recipes.fundamental.governance.auditNetwork`

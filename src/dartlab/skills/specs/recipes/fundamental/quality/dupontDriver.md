@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.dupontDriver
+id: recipes.fundamental.quality.dupontDriver
 title: DuPont 5-step ROE 동인 분해 (L1 raw 시계열 직접 계산)
 category: recipes
 kind: recipe
@@ -19,7 +19,7 @@ linkedSkills:
   - engines.scan
   - recipes.valuation.qualityValueScreen
   - recipes.screen.compounderCandidates
-  - recipes.quality.capitalAllocationScorecard
+  - recipes.fundamental.quality.capitalAllocationScorecard
 toolRefs:
   - EngineCall
   - RunPython
@@ -208,11 +208,11 @@ graph LR
 | roeReconstructed | (계산) | (계산) | (scan.ratio) | ±2%p YoY |
 
 연계 절차:
-- OperatingMargin 변동 → `recipes.quality.workingCapitalQuality` (운전자본 효율)
+- OperatingMargin 변동 → `recipes.fundamental.quality.workingCapitalQuality` (운전자본 효율)
 - AssetTurnover 변동 → CAPEX 시계열 + `engines.analysis`
 - FinancialLeverage 변동 → `recipes.credit.distressDual` (부채 위험)
 - 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates`
-- 자본 배분 평가 → `recipes.quality.capitalAllocationScorecard`
+- 자본 배분 평가 → `recipes.fundamental.quality.capitalAllocationScorecard`
 
 재호출 트리거: "삼성전자 5 년 ROE 5 동인 분해", "DuPont 동인 표준편차 큰 항목 식별", "산업 평균 분해 + 회사 비교".
 
@@ -243,7 +243,7 @@ graph LR
 
 1. 본 recipe → ROE 5 동인 시계열 도출.
 2. 동인 변화 큰 (표준편차 큰) 항목 식별 — ROE 변동의 원인.
-3. OperatingMargin 변동 → `recipes.quality.workingCapitalQuality` 로 운전자본 효율 점검.
+3. OperatingMargin 변동 → `recipes.fundamental.quality.workingCapitalQuality` 로 운전자본 효율 점검.
 4. AssetTurnover 변동 → 자산 재투자 시점 (CAPEX 시계열) 분석.
 5. FinancialLeverage 변동 → `recipes.credit.distressDual` 로 부채 위험 점검.
 6. 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates` 와 상호 검증.

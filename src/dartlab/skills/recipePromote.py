@@ -131,7 +131,7 @@ def _recipeMeta(skillId: str) -> dict[str, object]:
 def _pathFor(skillId: str) -> Path:
     parts = skillId.split(".")
     if len(parts) >= 3 and parts[0] == "recipes":
-        return RECIPE_DIR / parts[1] / f"{parts[-1]}.md"
+        return RECIPE_DIR.joinpath(*parts[1:-1]) / f"{parts[-1]}.md"
     slug = parts[-1] or skillId
     return RECIPE_DIR / f"{slug}.md"
 

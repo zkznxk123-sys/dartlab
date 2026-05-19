@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.piotroskiLite
+id: recipes.fundamental.quality.piotroskiLite
 title: Piotroski F-Score 7 항목 횡단 점수카드
 category: recipes
 kind: recipe

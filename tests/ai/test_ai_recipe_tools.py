@@ -65,7 +65,7 @@ def test_propose_recipe_requires_recipes_prefix():
 
 def test_propose_recipe_requires_gap_with_two_engines():
     result = proposeRecipe(
-        id="recipes.quality.testCase",
+        id="recipes.fundamental.quality.testCase",
         title="gap primary 1 개",
         gap={"primary": ["analysis"]},
         falsifier={"description": "x"},
@@ -76,7 +76,7 @@ def test_propose_recipe_requires_gap_with_two_engines():
 
 def test_propose_recipe_requires_falsifier_description():
     result = proposeRecipe(
-        id="recipes.quality.testCase",
+        id="recipes.fundamental.quality.testCase",
         title="falsifier 빈 description",
         gap={"primary": ["a", "b"]},
         falsifier={"pythonCheck": "assert True"},
@@ -91,7 +91,7 @@ def test_propose_recipe_writes_drafted_spec(tmp_path: Path, monkeypatch: pytest.
         tmp_path,
     )
     result = proposeRecipe(
-        id="recipes.quality.unitProbe",
+        id="recipes.fundamental.quality.unitProbe",
         title="단위 테스트 probe",
         purpose="unit 검증",
         gap={"primary": ["analysis", "credit"]},
@@ -101,11 +101,11 @@ def test_propose_recipe_writes_drafted_spec(tmp_path: Path, monkeypatch: pytest.
         requiredEvidence=["skillRef", "tableRef"],
     )
     assert result.ok, result.summary
-    written = tmp_path / "quality" / "unitProbe.md"
+    written = tmp_path / "fundamental" / "quality" / "unitProbe.md"
     assert written.exists()
     text = written.read_text(encoding="utf-8")
     assert "status: drafted" in text
-    assert "recipes.quality.unitProbe" in text
+    assert "recipes.fundamental.quality.unitProbe" in text
     assert "## 공개 호출 방식" in text  # placeholder body 자동 작성.
 
 
@@ -131,7 +131,7 @@ def test_propose_recipe_rejects_duplicate(tmp_path: Path, monkeypatch: pytest.Mo
         tmp_path,
     )
     args = dict(
-        id="recipes.quality.dupCheck",
+        id="recipes.fundamental.quality.dupCheck",
         title="중복 검사",
         gap={"primary": ["a", "b"]},
         falsifier={"description": "x"},
@@ -205,7 +205,7 @@ def test_validate_recipe_runs_on_test_universe(tmp_path: Path, monkeypatch: pyte
         patch("dartlab.ai.tools.validateRecipe.getSkillBody", _stub_get_skill_body),
         patch("dartlab.ai.tools.validateRecipe.runPython", _stub_run_python),
     ):
-        result = validateRecipe("recipes.quality.unitProbe", capture=True)
+        result = validateRecipe("recipes.fundamental.quality.unitProbe", capture=True)
 
     assert result.ok, result.summary
     assert result.data["targetCount"] == 2
@@ -223,7 +223,7 @@ def test_validate_recipe_caps_targets_at_five(monkeypatch: pytest.MonkeyPatch, t
         patch("dartlab.ai.tools.validateRecipe.runPython", _stub_run_python),
     ):
         result = validateRecipe(
-            "recipes.quality.unitProbe",
+            "recipes.fundamental.quality.unitProbe",
             targets=["005930", "000660", "035420", "051910", "055550", "066570", "012450"],
             capture=False,
         )
@@ -245,7 +245,7 @@ def test_validate_recipe_returns_missing_evidence(monkeypatch: pytest.MonkeyPatc
         patch("dartlab.ai.tools.validateRecipe.getSkillBody", _stub_get_skill_body),
         patch("dartlab.ai.tools.validateRecipe.runPython", _missing_kinds),
     ):
-        result = validateRecipe("recipes.quality.unitProbe", targets=["005930"], capture=False)
+        result = validateRecipe("recipes.fundamental.quality.unitProbe", targets=["005930"], capture=False)
 
     assert result.ok
     assert "tableRef" in result.data["missingEvidence"]
@@ -257,7 +257,7 @@ def test_validate_recipe_rejects_missing_skill(monkeypatch: pytest.MonkeyPatch):
         return ToolResult(False, "not found", error="not_found")
 
     with patch("dartlab.ai.tools.validateRecipe.getSkillBody", _not_found):
-        result = validateRecipe("recipes.quality.nonexistent")
+        result = validateRecipe("recipes.fundamental.quality.nonexistent")
     assert not result.ok
     assert result.error == "skill_not_found"
 
@@ -268,7 +268,7 @@ def test_validate_recipe_rejects_recipe_without_python_block(monkeypatch: pytest
         return ToolResult(True, "ok", data={"id": skill_id, "body": body})
 
     with patch("dartlab.ai.tools.validateRecipe.getSkillBody", _no_block):
-        result = validateRecipe("recipes.quality.broken")
+        result = validateRecipe("recipes.fundamental.quality.broken")
     assert not result.ok
     assert result.error == "missing_python_block"
 

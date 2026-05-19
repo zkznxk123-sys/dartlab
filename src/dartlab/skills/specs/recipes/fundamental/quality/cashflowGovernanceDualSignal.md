@@ -1,5 +1,5 @@
 ---
-id: recipes.quality.cashflowGovernanceDualSignal
+id: recipes.fundamental.quality.cashflowGovernanceDualSignal
 title: 현금흐름 품질 × 거버넌스 감사 동시 적신호
 category: recipes
 kind: recipe
