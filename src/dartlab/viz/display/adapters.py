@@ -1396,8 +1396,10 @@ __all__ = [
     "buildSnowflakeKpi",
     "buildSnowflakeRadar",
     "buildTopListFromFlags",
-    # quant 탭 adapter 7 개 (가격·기술·모멘텀·변동성·베타·예측·placeholder).
+    # quant 탭 adapter (가격·기술·모멘텀·변동성·베타·예측·placeholder + RSI/MACD sub-pane).
     "buildQuantPriceTrend",
+    "buildQuantRsiTrend",
+    "buildQuantMacdTrend",
     "buildQuantVerdictKpi",
     "buildQuantMomentumKpi",
     "buildQuantVolatilityKpi",
@@ -1493,80 +1495,114 @@ def buildQuantPriceTrend(stockCode: str) -> dict[str, Any]:
 
     sma20 = _sma(closes, 20)
     sma60 = _sma(closes, 60)
+
+    # 매수/매도 marker — calcSignals.recentEvents 의 시점 + 방향.
+    # frontend CandleChart 가 spec.options.markers 보고 lightweight-charts setMarkers.
+    markers: list[dict[str, Any]] = []
+    signals = _safeQuantCall("dartlab.quant.screen.axTechnical", "calcSignals", stockCode)
+    if isinstance(signals, dict):
+        events = signals.get("recentEvents") or []
+        for ev in events:
+            if not isinstance(ev, dict):
+                continue
+            ds = str(ev.get("date") or "")[:10]
+            direction = str(ev.get("direction") or "")
+            evType = str(ev.get("type") or "")
+            if not ds:
+                continue
+            isBuy = direction in ("매수", "buy", "long", "bullish")
+            isSell = direction in ("매도", "sell", "short", "bearish")
+            if not (isBuy or isSell):
+                continue
+            markers.append({
+                "time": ds,
+                "position": "belowBar" if isBuy else "aboveBar",
+                "color": "#ef4444" if isBuy else "#2563eb",
+                "shape": "arrowUp" if isBuy else "arrowDown",
+                "text": evType,
+            })
+
     return {
         "categories": categories,
         "series": [
-            {
-                "key": "open",
-                "label": "시가",
-                "color": "#94a3b8",
-                "intent": "neutral",
-                "unit": "원",
-                "type": "line",
-                "axis": "left",
-                "data": opens,
-            },
-            {
-                "key": "high",
-                "label": "고가",
-                "color": "#94a3b8",
-                "intent": "neutral",
-                "unit": "원",
-                "type": "line",
-                "axis": "left",
-                "data": highs,
-            },
-            {
-                "key": "low",
-                "label": "저가",
-                "color": "#94a3b8",
-                "intent": "neutral",
-                "unit": "원",
-                "type": "line",
-                "axis": "left",
-                "data": lows,
-            },
-            {
-                "key": "close",
-                "label": "종가",
-                "color": "#2563eb",
-                "intent": "primary",
-                "unit": "원",
-                "type": "line",
-                "axis": "left",
-                "data": closes,
-            },
-            {
-                "key": "sma20",
-                "label": "SMA(20)",
-                "color": "#10b981",
-                "intent": "accent",
-                "unit": "원",
-                "type": "line",
-                "axis": "left",
-                "data": sma20,
-            },
-            {
-                "key": "sma60",
-                "label": "SMA(60)",
-                "color": "#f59e0b",
-                "intent": "accent",
-                "unit": "원",
-                "type": "line",
-                "axis": "left",
-                "data": sma60,
-            },
-            {
-                "key": "volume",
-                "label": "거래량",
-                "color": "#94a3b8",
-                "intent": "neutral",
-                "unit": "주",
-                "type": "bar",
-                "axis": "right",
-                "data": volumes,
-            },
+            {"key": "open", "label": "시가", "color": "#94a3b8", "intent": "neutral",
+             "unit": "원", "type": "line", "axis": "left", "data": opens},
+            {"key": "high", "label": "고가", "color": "#94a3b8", "intent": "neutral",
+             "unit": "원", "type": "line", "axis": "left", "data": highs},
+            {"key": "low", "label": "저가", "color": "#94a3b8", "intent": "neutral",
+             "unit": "원", "type": "line", "axis": "left", "data": lows},
+            {"key": "close", "label": "종가", "color": "#2563eb", "intent": "primary",
+             "unit": "원", "type": "line", "axis": "left", "data": closes},
+            {"key": "sma20", "label": "SMA(20)", "color": "#10b981", "intent": "accent",
+             "unit": "원", "type": "line", "axis": "left", "data": sma20},
+            {"key": "sma60", "label": "SMA(60)", "color": "#f59e0b", "intent": "accent",
+             "unit": "원", "type": "line", "axis": "left", "data": sma60},
+            {"key": "volume", "label": "거래량", "color": "#94a3b8", "intent": "neutral",
+             "unit": "주", "type": "bar", "axis": "right", "data": volumes},
         ],
+        "options": {"markers": markers},
+    }
+
+
+def _calcIndicatorsDf(stockCode: str) -> Any:
+    """calcIndicators DataFrame — RSI/MACD 카드 공용 데이터원. cache 없음 (server 측 단일 thread 반복 호출은 가격 캐시 hit 후 모두 sub-second)."""
+    return _safeQuantCall("dartlab.quant.screen.axTechnical", "calcIndicators", stockCode)
+
+
+def buildQuantRsiTrend(stockCode: str) -> dict[str, Any]:
+    """RSI(14) sub-pane trend — 과매수(70) · 과매도(30) 참조선.
+
+    series 1 + options.refLines 2.
+    """
+    df = _calcIndicatorsDf(stockCode)
+    if df is None or not hasattr(df, "columns") or "rsi14" not in df.columns:
+        return {"categories": [], "series": []}
+    try:
+        rows = df.tail(252).to_dicts()
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    categories = [str(r.get("date"))[:10] for r in rows]
+    rsi = [_toFloat(r.get("rsi14")) for r in rows]
+    return {
+        "categories": categories,
+        "series": [
+            {"key": "rsi14", "label": "RSI(14)", "color": "#8b5cf6", "intent": "primary",
+             "unit": "%", "type": "line", "axis": "left", "data": rsi},
+        ],
+        "options": {
+            "refLines": [
+                {"value": 70, "label": "과매수", "color": "#ef4444"},
+                {"value": 30, "label": "과매도", "color": "#10b981"},
+            ],
+            "yDomain": [0, 100],
+        },
+    }
+
+
+def buildQuantMacdTrend(stockCode: str) -> dict[str, Any]:
+    """MACD sub-pane — line + signal + histogram bar."""
+    df = _calcIndicatorsDf(stockCode)
+    if df is None or not hasattr(df, "columns") or "macd" not in df.columns:
+        return {"categories": [], "series": []}
+    try:
+        rows = df.tail(252).to_dicts()
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    categories = [str(r.get("date"))[:10] for r in rows]
+    macd = [_toFloat(r.get("macd")) for r in rows]
+    sig = [_toFloat(r.get("macdSignal")) for r in rows]
+    hist = [_toFloat(r.get("macdHist")) for r in rows]
+    return {
+        "categories": categories,
+        "series": [
+            {"key": "macdHist", "label": "Histogram", "color": "#94a3b8", "intent": "neutral",
+             "unit": "", "type": "bar", "axis": "left", "data": hist},
+            {"key": "macd", "label": "MACD", "color": "#2563eb", "intent": "primary",
+             "unit": "", "type": "line", "axis": "left", "data": macd},
+            {"key": "macdSignal", "label": "Signal", "color": "#f59e0b", "intent": "accent",
+             "unit": "", "type": "line", "axis": "left", "data": sig},
+        ],
+        "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}]},
     }
 
 

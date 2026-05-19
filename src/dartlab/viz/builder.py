@@ -404,6 +404,21 @@ def _buildKindSpecView(
         result = adapters.buildQuantPriceTrend(stockCode)
         base_view["categories"] = result.get("categories", [])
         base_view["series"] = result.get("series", [])
+        # candle 카드는 markers 도 options 안에 박아 frontend 가 setMarkers 호출.
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantRsiTrend":
+        result = adapters.buildQuantRsiTrend(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantMacdTrend":
+        result = adapters.buildQuantMacdTrend(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
     elif adapter_name == "quantVerdictKpi":
         base_view["tiles"] = adapters.buildQuantVerdictKpi(stockCode).get("tiles", [])
     elif adapter_name == "quantMomentumKpi":

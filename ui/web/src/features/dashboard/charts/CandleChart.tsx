@@ -10,6 +10,7 @@
 import { useEffect, useRef } from 'react';
 import {
 	createChart,
+	createSeriesMarkers,
 	CandlestickSeries,
 	HistogramSeries,
 	LineSeries,
@@ -88,6 +89,26 @@ export function CandleChart({ spec, height = 400 }: Props) {
 					formatter: (p: number) => Math.round(p).toLocaleString('ko-KR'),
 				},
 			});
+			// 매수/매도 marker — calcSignals.recentEvents.
+			const optMarkers = (spec.options?.markers as Array<{
+				time: string;
+				position: 'belowBar' | 'aboveBar';
+				color: string;
+				shape: 'arrowUp' | 'arrowDown' | 'circle' | 'square';
+				text?: string;
+			}> | undefined) || [];
+			if (optMarkers.length) {
+				createSeriesMarkers(
+					candleSeries,
+					optMarkers.map((m) => ({
+						time: m.time as Time,
+						position: m.position,
+						color: m.color,
+						shape: m.shape,
+						text: m.text,
+					})),
+				);
+			}
 			const candleData = spec.categories
 				.map((t, i) => ({
 					time: t as Time,

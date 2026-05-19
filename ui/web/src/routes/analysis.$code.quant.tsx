@@ -124,8 +124,8 @@ function QuantTab() {
 	const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 		{
 			title: '가격·기술 신호',
-			subtitle: '최근 1년 OHLC 캔들 + SMA(20)/SMA(60) overlay + RSI·ADX·BB위치 종합 판정.',
-			keys: new Set(['quantPriceTrend', 'quantVerdictKpi']),
+			subtitle: '최근 1년 OHLC 캔들 + 매수/매도 marker + SMA(20)/SMA(60) overlay · RSI(14) · MACD sub-pane + 종합 판정.',
+			keys: new Set(['quantPriceTrend', 'quantRsiTrend', 'quantMacdTrend', 'quantVerdictKpi']),
 		},
 		{
 			title: '모멘텀 (Jegadeesh-Titman 12-1m)',

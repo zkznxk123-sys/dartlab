@@ -49,6 +49,28 @@ QUANT_CARDS: dict[str, CatalogEntry] = {
         "help": "강세/중립/약세 + 종합 점수 (-5~+5) + RSI(14)·ADX·BB위치·SMA20/60 돌파.",
         "dataSpec": {"adapter": "quantVerdictKpi"},
     },
+    "quantRsiTrend": {
+        "kind": "trend",
+        "title": "RSI(14)",
+        "topic": "price",
+        "tab": "quant",
+        "seriesPlan": [],
+        "options": {},
+        "layout": {"colSpan": 12, "rowSpan": 2},
+        "help": "Relative Strength Index 14일 — 70+ 과매수 / 30- 과매도 (Wilder 1978).",
+        "dataSpec": {"adapter": "quantRsiTrend"},
+    },
+    "quantMacdTrend": {
+        "kind": "trend",
+        "title": "MACD",
+        "topic": "price",
+        "tab": "quant",
+        "seriesPlan": [],
+        "options": {},
+        "layout": {"colSpan": 12, "rowSpan": 2},
+        "help": "Moving Average Convergence Divergence — line · signal · histogram (Appel 1979). histogram 양수 = 모멘텀 강화.",
+        "dataSpec": {"adapter": "quantMacdTrend"},
+    },
     # ─────────────────────────────────────────────────────────────
     # 2. factor — 모멘텀 (Jegadeesh-Titman 12-1m + 52w high)
     # ─────────────────────────────────────────────────────────────
