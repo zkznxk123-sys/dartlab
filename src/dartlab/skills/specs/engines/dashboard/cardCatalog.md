@@ -24,14 +24,7 @@ outputs:
   - list[(cardKey, CatalogEntry)] from queryCards
   - (colSpan, rowSpan) from resolveLayout
   - packed grid from packSkyline / planTabLayout
-capabilityRefs:
-  - dartlab.viz.layout.queryCards
-  - dartlab.viz.layout.resolveLayout
-  - dartlab.viz.layout.packSkyline
-  - dartlab.viz.layout.planTabLayout
-  - dartlab.viz.layout.listBlocks
-  - dartlab.viz.layout.KIND_DEFAULT_TIER
-  - dartlab.viz.layout.BLOCKS
+capabilityRefs: []
 knowledgeRefs:
   - engines.dashboard
   - engines.viz
@@ -43,6 +36,17 @@ requiredEvidence:
 expectedOutputs:
   - layoutTuple
   - packedGrid
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
 ---
 
 # 대시보드 카드 카탈로그 SSOT

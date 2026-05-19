@@ -1,3 +1,36 @@
+---
+id: operation.sectionsRefactor
+title: sections 파이프라인 — 구조 정리 + 리팩터링 + 속도 최적화 방향
+kind: curated
+scope: builtin
+status: observed
+category: operation
+purpose: dart/docs/sections/ 9538 줄 16 파일 책임 경계 정리 + 부채 원장 + 리팩터링/속도 최적화 후보 정리. 새 작업 진입 전 본 문서 §N 참조.
+whenToUse:
+  - sections 파이프라인 리팩터링
+  - sections 속도 최적화
+  - sections 메모리 최적화
+  - chapter row catch-all 회귀
+  - placeholder textPath alias 회귀
+  - table textPath 누락 회귀
+  - blockOrder gap 회귀
+inputs:
+  - 작업 목적
+  - 대상 단계 (mapper / 수평화 / 주석 수평화)
+  - 검증 범위 (parity test + invariant test)
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
+---
+
 # sections 파이프라인 — 구조 정리 + 리팩터링 + 속도 최적화 방향
 
 > dartlab 공시뷰어의 핵심 — DART 정기보고서 (사업/분기/반기) 의 raw parquet 을 (topic × period) wide 보드로 변환하는 4 단계 파이프라인. 본 문서는 현재 9,538 줄 16 파일의 책임 경계 정리 + 부채 식별 + 개선 방향.

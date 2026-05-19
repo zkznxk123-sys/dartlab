@@ -22,14 +22,23 @@ inputs:
 outputs:
   - 페이지 layout (bento packing)
   - visual snapshot (Playwright PNG)
-capabilityRefs:
-  - dartlab.viz.layout.planTabLayout
-  - dartlab.viz.layout.listBlocks
+capabilityRefs: []
 knowledgeRefs:
   - engines.dashboard.cardCatalog
   - engines.viz
 sourceRefs:
   - dartlab://skills/operation.dashboardDesign
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
 ---
 
 # 대시보드 배치·설계 원칙
