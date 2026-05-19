@@ -1023,7 +1023,17 @@ def showSectionsTopic(
         blockIndex = company._buildBlockIndex(topicRows)
         if blockIndex.height == 1:
             return company.show(topic, blockIndex["block"][0], period=period, raw=raw)
-        return blockIndex
+        # multi-block topic — sections frame slice (wide 시계열) 그대로 반환.
+        # 이전 회귀 (block index 만 출력) 되돌림. block index 가 필요하면
+        # ``company._buildBlockIndex(topicRows)`` 또는 ``c.show(topic, block=N)`` 명시 호출.
+        period_cols = [c for c in topicRows.columns if _isPeriodColumn(c)]
+        keep_meta = [c for c in ("blockOrder", "blockType", "textPath", "sourceTopic") if c in topicRows.columns]
+        if keep_meta or period_cols:
+            cleaned = topicRows.select(keep_meta + period_cols)
+            if period and isinstance(period, str) and period in cleaned.columns:
+                cleaned = cleaned.select(keep_meta + [period])
+            return cleaned
+        return topicRows
 
     boRows = topicRows.filter(pl.col("blockOrder") == block)
     if boRows.is_empty():

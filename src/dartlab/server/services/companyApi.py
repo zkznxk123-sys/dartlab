@@ -421,6 +421,26 @@ def _compactTextDocument(
             cleaned = {p: v for p, v in rm.items() if isinstance(v, str) and v.strip()}
             if cleaned:
                 tables[int(bid)] = cleaned
+        elif kind == "structured":
+            # horizontalized table — serializeViewerBlock 거치며 data 가 {columns, rows} dict 형태.
+            # 표 전체를 단일 markdown 으로 변환하여 latest period 키 아래 둠. 누락 시 viewer 의
+            # 12 structured block (연결대상 종속회사 개황 등 1.회사의 개요 핵심 표) 가 사라짐.
+            data = b.get("data") or {}
+            cols = data.get("columns") or []
+            rows = data.get("rows") or []
+            if cols and rows:
+                lines = ["| " + " | ".join(str(c) for c in cols) + " |", "| " + " | ".join(["---"] * len(cols)) + " |"]
+                for row in rows:
+                    cells = []
+                    for c in cols:
+                        v = row.get(c) if isinstance(row, dict) else None
+                        cells.append("" if v is None else str(v).replace("|", "\\|"))
+                    lines.append("| " + " | ".join(cells) + " |")
+                md = "\n".join(lines)
+                meta = b.get("meta") or {}
+                periods_list = meta.get("periods") or []
+                target_period = next((p for p in periods_list if isinstance(p, str)), None) or "_"
+                tables[int(bid)] = {target_period: md}
         elif kind == "finance":
             data = b.get("data") or {}
             cols = data.get("columns") or []

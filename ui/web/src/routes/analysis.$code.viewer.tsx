@@ -543,7 +543,10 @@ function ViewerTab() {
 				const bodyText = s.latest?.body || '';
 				const so = _subOrder(bodyText) ?? _subOrder(titleText) ?? Number.POSITIVE_INFINITY;
 				out.push({ kind: 'section', id: `s-${sid}`, section: s, priority: pri, subOrder: so, entryIdx: ei });
-			} else if (e.kind === 'block_ref' && (e.blockKind === 'raw_markdown' || e.blockKind === 'finance')) {
+			} else if (
+				e.kind === 'block_ref' &&
+				(e.blockKind === 'raw_markdown' || e.blockKind === 'finance' || e.blockKind === 'structured')
+			) {
 				const bid = e.blockRef;
 				if (bid == null) continue;
 				const pmd = tablesByBlock[bid];
