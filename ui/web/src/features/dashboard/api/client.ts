@@ -263,8 +263,10 @@ export function fetchTabLayout(
 	view: string | null = null,
 	periodKind: PeriodKind = 'annual',
 	nPeriods = 40,
+	layoutOnly = false,
 ): Promise<TabLayoutResponse> {
 	const qs = new URLSearchParams({ periodKind, nPeriods: String(nPeriods) });
 	if (view) qs.set('view', view);
+	if (layoutOnly) qs.set('layoutOnly', 'true');
 	return fetchJson<TabLayoutResponse>(`/api/viz/layout/${tab}/${stockCode}?${qs}`);
 }

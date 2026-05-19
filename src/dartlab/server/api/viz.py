@@ -251,6 +251,9 @@ async def apiVizLayout(
     ),
     periodKind: str = Query("annual", pattern="^(annual|quarterly)$"),
     nPeriods: int = Query(40, ge=2, le=80),
+    layoutOnly: bool = Query(
+        False, description="True → layout 만 반환, cards 는 빈 dict. frontend 가 카드별 progressive load."
+    ),
 ) -> dict[str, Any]:
     """탭 + 7 방법론 view → 12-col bento packed grid + 각 카드 spec.
 
@@ -282,6 +285,18 @@ async def apiVizLayout(
         }
 
     cardKeys = [p["cardKey"] for p in placed]
+
+    if layoutOnly:
+        # progressive load mode — frontend 가 /api/viz/spec/{cardKey}/{stockCode} 로 카드별 fetch.
+        return {
+            "stockCode": stockCode,
+            "tab": tab,
+            "view": effectiveView,
+            "periodKind": periodKind,
+            "colCount": 24,
+            "layout": placed,
+            "cards": {},
+        }
 
     async def _one(k: str) -> dict[str, Any]:
         return await asyncio.to_thread(_safeBuildAndRender, k, stockCode, periodKind, nPeriods)

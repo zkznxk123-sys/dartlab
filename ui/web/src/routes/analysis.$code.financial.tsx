@@ -17,11 +17,13 @@ import {
 	BENTO_CARD_PAD_PX,
 } from '@/features/dashboard/layout/BentoGrid';
 import {
+	fetchCard,
 	fetchCatalog,
 	fetchTabLayout,
 	type CatalogCard,
 	type FinancialSubCategory,
 	type PackedCard,
+	type PeriodKind,
 	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
@@ -47,6 +49,63 @@ function ChartLoading() {
 	);
 }
 
+// 카드 1 장당 useQuery 1 개 — mount 시 즉시 fetch, 가장 빠른 카드부터 paint.
+// 이전: layout API 가 34 카드 spec 다 들고와서 가장 느린 카드가 전체 막음.
+function CardWithQuery({
+	stockCode,
+	periodKind,
+	packed,
+	meta,
+	cardOuterH,
+	computeHeaderMetric,
+}: {
+	stockCode: string;
+	periodKind: PeriodKind;
+	packed: PackedCard;
+	meta: CatalogCard | undefined;
+	cardOuterH: number;
+	computeHeaderMetric: (spec: RechartsSpec | undefined) => React.ReactNode;
+}) {
+	const { data: spec, isError } = useQuery({
+		queryKey: dashKeys.card(packed.cardKey, stockCode, periodKind),
+		queryFn: () => fetchCard(packed.cardKey, stockCode, periodKind, 40),
+		placeholderData: keepPreviousData,
+		staleTime: 5 * 60_000,
+		retry: 1,
+	});
+	const title = meta?.title || spec?.title || packed.title;
+	const help = meta?.help;
+	const seriesCount = spec?.series?.length ?? 0;
+	const isDualStack = spec?.options?.dualStack === true;
+	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
+	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
+	const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
+	const bodyHeight = Math.max(
+		60,
+		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
+	);
+	const kind = spec?.kind ?? packed.kind;
+	const headerMetric = computeHeaderMetric(spec);
+	const ready = !!spec && !spec.error && !isError;
+	return (
+		<CardShell
+			title={title}
+			help={help}
+			colSpan={packed.w}
+			rowSpan={packed.h}
+			kind={kind}
+			footer={ready ? footer : undefined}
+			headerExtra={ready ? headerMetric : undefined}
+		>
+			{ready ? (
+				<VizChart spec={spec} height={bodyHeight} size={{ w: packed.w, h: packed.h }} />
+			) : (
+				<ChartLoading />
+			)}
+		</CardShell>
+	);
+}
+
 function FinancialTab() {
 	const { code } = Route.useParams();
 	const { period: periodKind } = parentRoute.useSearch();
@@ -58,10 +117,11 @@ function FinancialTab() {
 	});
 
 	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
+	// progressive load — layout 만 먼저 받고 (수 ms), 카드 spec 은 CardWithQuery 가 카드별 fetch.
 	const apiView = null;
 	const { data, isError, isLoading, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
-		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40),
+		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, true),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60_000,
 		retry: 1,
@@ -130,33 +190,16 @@ function FinancialTab() {
 
 	const renderCard = (p: PackedCard, cellSize: number) => {
 		const meta = cardMetaByKey[p.cardKey];
-		const spec = data?.cards?.[p.cardKey];
-		const title = meta?.title || spec?.title || p.title;
-		const help = meta?.help;
-		const seriesCount = spec?.series?.length ?? 0;
-		// 자산구조 dual-stack 은 9 series 박혀있어 mini-table 의미 0 + 운영자 명시 (2026-05-18) 제거.
-		const isDualStack = spec?.options?.dualStack === true;
-		const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
-		const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-		// v3-r6 — TabDashboard 와 동일 산출식 (BentoGrid 상수 SSOT).
-		// footerH = thead 20 + N rows × 20 + py 8 + border 1.
-		const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
 		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
-		const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight);
-		const kind = spec?.kind ?? p.kind;
-		const headerMetric = computeHeaderMetric(spec);
 		return (
-			<CardShell
-				title={title}
-				help={help}
-				colSpan={p.w}
-				rowSpan={p.h}
-				kind={kind}
-				footer={footer}
-				headerExtra={headerMetric}
-			>
-				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
-			</CardShell>
+			<CardWithQuery
+				stockCode={code}
+				periodKind={periodKind}
+				packed={p}
+				meta={meta}
+				cardOuterH={cardOuterH}
+				computeHeaderMetric={computeHeaderMetric}
+			/>
 		);
 	};
 
