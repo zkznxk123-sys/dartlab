@@ -71,7 +71,7 @@ function SnowflakeHero({ stockCode, periodKind }: { stockCode: string; periodKin
 	if (!spec || spec.error) {
 		return (
 			<div className="px-6 pt-4">
-				<div className="flex h-[220px] w-full items-center justify-center rounded-lg border bg-card text-muted-foreground">
+				<div className="flex h-[220px] w-full items-center justify-center text-muted-foreground">
 					<Loader2 className="size-5 animate-spin" />
 				</div>
 			</div>
@@ -101,7 +101,7 @@ function SnowflakeHero({ stockCode, periodKind }: { stockCode: string; periodKin
 					</span>
 				</div>
 			</div>
-			<div className="grid grid-cols-12 gap-3 rounded-lg border bg-card p-4">
+			<div className="grid grid-cols-12 gap-3">
 				<div className="col-span-12 md:col-span-7">
 					<VizChart spec={spec} height={280} size={{ w: 7, h: 4 }} />
 				</div>
