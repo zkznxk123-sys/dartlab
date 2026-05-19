@@ -14,6 +14,8 @@ web 측이 dark/light 토글에 맞춰 자체 적용 (서버는 catalog 기본 h
 from __future__ import annotations
 
 import asyncio
+import time
+from collections import OrderedDict
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
@@ -30,6 +32,35 @@ from dartlab.viz import (
 from dartlab.viz.layout import packSkyline
 
 router = APIRouter()
+
+
+# ── 카드 spec TTL 캐시 ──
+# (cardKey, code, periodKind, nPeriods) → (ts, spec). 같은 회사·기간 spec 이
+# 여러 endpoint·동시 호출에서 중복 build 되던 비용 차단. error spec 은 캐시 X.
+# 5 분 TTL — 동일 세션 안 회사 전환·재진입·hover prefetch race 모두 보호.
+_SPEC_CACHE: "OrderedDict[tuple[str, str, str, int], tuple[float, dict[str, Any]]]" = OrderedDict()
+_SPEC_CACHE_TTL_SEC = 300.0
+_SPEC_CACHE_MAX = 512
+
+
+def _specCacheGet(key: tuple[str, str, str, int]) -> dict[str, Any] | None:
+    item = _SPEC_CACHE.get(key)
+    if item is None:
+        return None
+    ts, spec = item
+    if time.monotonic() - ts > _SPEC_CACHE_TTL_SEC:
+        _SPEC_CACHE.pop(key, None)
+        return None
+    _SPEC_CACHE.move_to_end(key)
+    return spec
+
+
+def _specCacheSet(key: tuple[str, str, str, int], spec: dict[str, Any]) -> None:
+    if spec.get("error"):
+        return
+    _SPEC_CACHE[key] = (time.monotonic(), spec)
+    while len(_SPEC_CACHE) > _SPEC_CACHE_MAX:
+        _SPEC_CACHE.popitem(last=False)
 
 
 def _catalogMeta() -> list[dict[str, Any]]:
@@ -60,10 +91,14 @@ async def apiVizCatalog() -> dict[str, Any]:
 
 
 def _safeBuildAndRender(cardKey: str, code: str, periodKind: str, nPeriods: int) -> dict[str, Any]:
-    """buildView + toRechartsSpec — 예외는 카드 단위 error envelope."""
+    """buildView + toRechartsSpec — 예외는 카드 단위 error envelope. TTL 캐시 적용."""
+    cacheKey = (cardKey, str(code).zfill(6), periodKind, int(nPeriods))
+    hit = _specCacheGet(cacheKey)
+    if hit is not None:
+        return hit
     try:
         view = buildView(cardKey, code, periodKind=periodKind, nPeriods=nPeriods)  # type: ignore[arg-type]
-        return toRechartsSpec(view)
+        spec = toRechartsSpec(view)
     except Exception as exc:  # noqa: BLE001
         return {
             "cardKey": cardKey,
@@ -72,6 +107,8 @@ def _safeBuildAndRender(cardKey: str, code: str, periodKind: str, nPeriods: int)
             "kind": "error",
             "title": CATALOG.get(cardKey, {}).get("title", cardKey),
         }
+    _specCacheSet(cacheKey, spec)
+    return spec
 
 
 def _isCardEmpty(spec: dict[str, Any]) -> bool:
@@ -95,9 +132,7 @@ def _isCardEmpty(spec: dict[str, Any]) -> bool:
         if not tiles:
             return True
         scoreMode = (spec.get("options") or {}).get("scoreMode") is True
-        return all(
-            (t.get("value") in (None,) or (t.get("value") == 0 and not scoreMode)) for t in tiles
-        )
+        return all((t.get("value") in (None,) or (t.get("value") == 0 and not scoreMode)) for t in tiles)
     if kind in ("topList",):
         return not (spec.get("items") or [])
     if kind in ("comparisonTable",):
@@ -126,15 +161,39 @@ def _isCardEmpty(spec: dict[str, Any]) -> bool:
     return False
 
 
+# ── prefetch in-flight dedup ──
+# 회사 페이지 진입 시 여러 endpoint (layout · spec · 미래 추가) 가 동시에
+# _prefetchCompany 호출 → 각자 rawFinance LazyFrame collect (200~500MB) trigger →
+# race + 메모리·CPU 낭비. 같은 stockCode 동시 호출은 첫 번째 Task 1 회만 실행하고
+# 나머지는 그 결과 await.
+_PREFETCH_INFLIGHT: dict[str, asyncio.Task[None]] = {}
+_PREFETCH_LOCK = asyncio.Lock()
+
+
 async def _prefetchCompany(stockCode: str) -> None:
-    """Company rawFinance 를 한 번 collect → LRU 안착. 동시 빌드 race 방지."""
-    from dartlab.viz.display.finance._cache import getCompany
+    """Company rawFinance 1 회 collect → LRU 안착. 동시 호출은 dedup."""
+    code = str(stockCode).strip()
 
-    def _warm() -> None:
-        c = getCompany(stockCode)
-        _ = c.rawFinance  # lazy frame collect 강제
+    async def _warmOnce() -> None:
+        from dartlab.viz.display.finance._cache import getCompany
 
-    await asyncio.to_thread(_warm)
+        def _warm() -> None:
+            c = getCompany(code)
+            _ = c.rawFinance  # lazy frame collect 강제
+
+        await asyncio.to_thread(_warm)
+
+    async with _PREFETCH_LOCK:
+        task = _PREFETCH_INFLIGHT.get(code)
+        if task is None or task.done():
+            task = asyncio.create_task(_warmOnce())
+            _PREFETCH_INFLIGHT[code] = task
+    try:
+        await task
+    finally:
+        async with _PREFETCH_LOCK:
+            if _PREFETCH_INFLIGHT.get(code) is task and task.done():
+                _PREFETCH_INFLIGHT.pop(code, None)
 
 
 async def _prefetchQuantPrice(stockCode: str) -> None:
@@ -144,10 +203,12 @@ async def _prefetchQuantPrice(stockCode: str) -> None:
     asyncio.gather 동시 build 시 각각 fetchOhlcv 호출하면 첫 cold 호출에서 race.
     1 회 prefetch 후 fetchOhlcv 내부 캐시 hit → 나머지 6 호출은 즉시 반환.
     """
+
     def _warm() -> None:
         try:
-            from dartlab.quant.signal.momentum import fetchOhlcv
             from datetime import date, timedelta
+
+            from dartlab.quant.signal.momentum import fetchOhlcv
 
             start = (date.today() - timedelta(days=400)).isoformat()
             fetchOhlcv(stockCode, start=start)
