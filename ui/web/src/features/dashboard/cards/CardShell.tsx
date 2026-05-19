@@ -18,6 +18,8 @@ interface Props {
 	footer?: ReactNode;
 	headerExtra?: ReactNode;
 	className?: string;
+	// Playwright `dashboardSnap.py` 정량 측정용 — `[data-cardkey]` selector.
+	cardKey?: string;
 }
 
 function surfaceClass(colSpan: number | undefined): string {
@@ -38,10 +40,12 @@ export function CardShell({
 	footer,
 	headerExtra,
 	className,
+	cardKey,
 }: Props) {
 	const isHero = colSpan != null && colSpan >= 12;
 	return (
 		<Card
+			data-cardkey={cardKey}
 			className={cn(
 				'flex h-full w-full flex-col gap-0 py-0 overflow-hidden rounded-md border',
 				surfaceClass(colSpan),

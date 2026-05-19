@@ -1,7 +1,9 @@
-// /analysis/$code/quant — 퀀트 대시보드.
-// 5 section bento — gather 가격 raw + dartlab.quant 엔진 산출물 (signal · factor ·
-// backtest · risk · forecast). financial.tsx 패턴 미러 — backend /api/viz/layout/
-// quant/{code} 한 번 호출, frontend SECTIONS array 가 cardKey set 으로 5 분할.
+// /analysis/$code/quant — 퀀트 대시보드 v3 (progressive load).
+//
+// Phase 1: layout-only fetch (cards 빈 dict) — backend 100ms 반환, grid 즉시 배치
+// Phase 2: 각 카드별 useQuery(fetchCard) — 빠른 카드부터 점진 표시 (waterfall)
+//
+// 5~30s 대기 → 첫 카드 1~2s 도착 (가격 prefetch 안착 후 카드 직렬 build 각 0.1~1s).
 
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createFileRoute, getRouteApi } from '@tanstack/react-router';
@@ -16,10 +18,12 @@ import {
 	BENTO_CARD_PAD_PX,
 } from '@/features/dashboard/layout/BentoGrid';
 import {
+	fetchCard,
 	fetchCatalog,
 	fetchTabLayout,
 	type CatalogCard,
 	type PackedCard,
+	type PeriodKind,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
 
@@ -32,9 +36,57 @@ const parentRoute = getRouteApi('/analysis/$code');
 
 function ChartLoading() {
 	return (
-		<div className="flex h-[220px] w-full items-center justify-center text-muted-foreground">
+		<div className="flex h-full w-full items-center justify-center text-muted-foreground">
 			<Loader2 className="size-5 animate-spin" />
 		</div>
+	);
+}
+
+interface CardCellProps {
+	p: PackedCard;
+	cellSize: number;
+	code: string;
+	periodKind: PeriodKind;
+	meta?: CatalogCard;
+}
+
+// CardCell — 카드 1 개 = 1 query. hooks rules 강행으로 renderCard 안 useQuery 불가 →
+// 컴포넌트 분리. backend `/api/viz/spec/{cardKey}/{code}` lazy 호출.
+function CardCell({ p, cellSize, code, periodKind, meta }: CardCellProps) {
+	const { data: spec, isError, error } = useQuery({
+		queryKey: dashKeys.card(p.cardKey, code, periodKind),
+		queryFn: () => fetchCard(p.cardKey, code, periodKind, 40),
+		staleTime: 5 * 60_000,
+		retry: 1,
+		// 카드별 fetch — backend 측 quant 순차 build 룰 그대로 (각 spec endpoint 가
+		// 단일 thread 안 build). 가격 prefetch 후엔 sub-second.
+	});
+	const title = meta?.title || spec?.title || p.title;
+	const help = meta?.help;
+	const kind = spec?.kind ?? p.kind;
+	const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
+	const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX);
+	const errMsg = isError ? String((error as Error)?.message || 'fetch 실패') : spec?.error;
+	return (
+		<CardShell
+			cardKey={p.cardKey}
+			title={title}
+			help={help}
+			colSpan={p.w}
+			rowSpan={p.h}
+			kind={kind}
+		>
+			{spec && !spec.error ? (
+				<VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} />
+			) : errMsg ? (
+				<div className="flex h-full flex-col items-center justify-center gap-1 p-3 text-center text-xs text-muted-foreground">
+					<div className="font-medium text-foreground/80">{title}</div>
+					<div className="line-clamp-3 opacity-80">{errMsg}</div>
+				</div>
+			) : (
+				<ChartLoading />
+			)}
+		</CardShell>
 	);
 }
 
@@ -48,9 +100,10 @@ function QuantTab() {
 		staleTime: Infinity,
 	});
 
+	// Phase 1 — layout 만 fetch (layoutOnly=true). 100ms 안 grid 배치 시작.
 	const { data, isError, isLoading, error } = useQuery({
 		queryKey: dashKeys.tabLayout('quant', code, null, periodKind),
-		queryFn: () => fetchTabLayout('quant', code, null, periodKind, 40),
+		queryFn: () => fetchTabLayout('quant', code, null, periodKind, 40, true),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60_000,
 		retry: 1,
@@ -60,30 +113,9 @@ function QuantTab() {
 		(catalog?.cards ?? []).map((c) => [c.cardKey, c]),
 	);
 
-	const renderCard = (p: PackedCard, cellSize: number) => {
-		const meta = cardMetaByKey[p.cardKey];
-		const spec = data?.cards?.[p.cardKey];
-		const title = meta?.title || spec?.title || p.title;
-		const help = meta?.help;
-		const seriesCount = spec?.series?.length ?? 0;
-		const kind = spec?.kind ?? p.kind;
-		// quant 탭은 mini-table footer 의미 0 — 가격 시계열 252 일 OHLC 표는 무의미.
-		// candle / kpiTile / 가격 trend 모두 footer 제거. financial 탭과 다른 정체성.
-		const hasFooter = false;
-		const footer = undefined;
-		const footerHeight = 0;
-		// 위 변수들 사용 표시 (린트 회피용 — 향후 trend 차트 추가 시 살릴 자리).
-		void seriesCount;
-		void hasFooter;
-		void footer;
-		const cardOuterH = p.h * cellSize + (p.h - 1) * BENTO_GAP_PX;
-		const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight);
-		return (
-			<CardShell title={title} help={help} colSpan={p.w} rowSpan={p.h} kind={kind} footer={undefined}>
-				{spec && !spec.error ? <VizChart spec={spec} height={bodyHeight} size={{ w: p.w, h: p.h }} /> : <ChartLoading />}
-			</CardShell>
-		);
-	};
+	const renderCard = (p: PackedCard, cellSize: number) => (
+		<CardCell p={p} cellSize={cellSize} code={code} periodKind={periodKind} meta={cardMetaByKey[p.cardKey]} />
+	);
 
 	const placed = data?.layout ?? [];
 
@@ -92,7 +124,7 @@ function QuantTab() {
 	const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 		{
 			title: '가격·기술 신호',
-			subtitle: '최근 1년 종가 + SMA(20)/SMA(60) overlay + RSI·ADX·BB위치 종합 판정.',
+			subtitle: '최근 1년 OHLC 캔들 + SMA(20)/SMA(60) overlay + RSI·ADX·BB위치 종합 판정.',
 			keys: new Set(['quantPriceTrend', 'quantVerdictKpi']),
 		},
 		{
@@ -129,7 +161,7 @@ function QuantTab() {
 		<>
 			{isError && (
 				<div className="border-b bg-destructive/10 px-4 py-2 text-xs text-destructive">
-					백엔드 응답 오류: {String((error as Error)?.message || 'unknown')} — 서버 재시작 필요할 수 있음
+					레이아웃 응답 오류: {String((error as Error)?.message || 'unknown')} — 서버 재시작 필요할 수 있음
 				</div>
 			)}
 
