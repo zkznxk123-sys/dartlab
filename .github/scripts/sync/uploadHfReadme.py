@@ -51,7 +51,7 @@ size_categories:
 <a href="https://github.com/eddmpython/dartlab"><img src="https://img.shields.io/badge/GitHub-dartlab-ea4647?style=for-the-badge&labelColor=050811&logo=github&logoColor=white" alt="GitHub"></a>
 <a href="https://pypi.org/project/dartlab/"><img src="https://img.shields.io/pypi/v/dartlab?style=for-the-badge&color=ea4647&labelColor=050811&logo=pypi&logoColor=white" alt="PyPI"></a>
 <a href="https://eddmpython.github.io/dartlab/"><img src="https://img.shields.io/badge/Docs-GitHub_Pages-38bdf8?style=for-the-badge&labelColor=050811&logo=github-pages&logoColor=white" alt="Docs"></a>
-<a href="https://buymeacoffee.com/dartlab"><img src="https://img.shields.io/badge/Sponsor-Buy_Me_A_Coffee-ffdd00?style=for-the-badge&labelColor=050811&logo=buy-me-a-coffee&logoColor=white" alt="Sponsor"></a>
+<a href="https://buymeacoffee.com/eddmpython"><img src="https://img.shields.io/badge/Sponsor-Buy_Me_A_Coffee-ffdd00?style=for-the-badge&labelColor=050811&logo=buy-me-a-coffee&logoColor=white" alt="Sponsor"></a>
 </p>
 
 </div>
@@ -167,7 +167,7 @@ Apache 2.0 — same as [DartLab](https://github.com/eddmpython/dartlab).
 
 If DartLab is useful for your work, consider supporting the project:
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Support-ffdd00?style=for-the-badge&labelColor=050811&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/dartlab)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Support-ffdd00?style=for-the-badge&labelColor=050811&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/eddmpython)
 
 - [GitHub Issues](https://github.com/eddmpython/dartlab/issues) — bug reports, feature requests
 - [Blog](https://eddmpython.github.io/dartlab/blog/) — 120+ articles on Korean disclosure analysis

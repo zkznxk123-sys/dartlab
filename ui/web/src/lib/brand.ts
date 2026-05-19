@@ -11,7 +11,7 @@ export const brand = {
 	url: 'https://eddmpython.github.io/dartlab/',
 	repo: 'https://github.com/eddmpython/dartlab',
 	pypi: 'https://pypi.org/project/dartlab/',
-	coffee: 'https://buymeacoffee.com/dartlab',
+	coffee: 'https://buymeacoffee.com/eddmpython',
 	desktop: 'https://github.com/eddmpython/dartlab-desktop/releases/latest/download/DartLab.exe',
 	colab: 'https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb',
 	molab: 'https://molab.marimo.io/github/eddmpython/dartlab/blob/master/notebooks/marimo/01_company.py',

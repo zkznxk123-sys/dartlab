@@ -59,7 +59,7 @@
         dartlab은 1인 개발 프로젝트입니다. 전 상장사 데이터 수집·보관·분석 비용을 후원으로 충당합니다. GitHub Star만 눌러주셔도 큰 힘이 됩니다.
       </p>
       <div class="cta-row">
-        <a href="https://buymeacoffee.com/dartlab" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+        <a href="https://buymeacoffee.com/eddmpython" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
           <span>☕</span> Buy Me A Coffee
         </a>
         <a href="https://github.com/eddmpython/dartlab" class="btn">
