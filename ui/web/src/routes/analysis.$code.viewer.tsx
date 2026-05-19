@@ -686,7 +686,12 @@ function ViewerTab() {
 					</div>
 				) : (
 					<div className="w-full min-w-0 max-w-full overflow-hidden px-3 py-4">
-						<header className="mb-6 border-b pb-4">
+						{/* 상위 타임라인 + 3-column period header 를 한 묶음으로 sticky.
+						    스크롤 시에도 화면 상단에 고정 — 사용자가 본문 어디 보든 어느
+						    period 인지 + 어느 topic 인지 + 시간축 이동 버튼 항상 보임.
+						    전체보기 (isFullscreen) 모드 동일 동작. */}
+						<div className="sticky top-0 z-20 -mx-3 mb-6 border-b bg-background/95 px-3 backdrop-blur">
+						<header className="pb-2 pt-2">
 							<div className="flex items-baseline justify-between gap-3">
 								<div>
 									<div className="text-xs text-muted-foreground">
@@ -728,9 +733,9 @@ function ViewerTab() {
 							/>
 						</header>
 
-						{/* 3-column header — period + DART link */}
+						{/* 3-column header — period + DART link. 상위 sticky 묶음 안. */}
 						<div
-							className="sticky top-0 z-10 mb-3 grid gap-3 border-b bg-background/95 py-2 backdrop-blur"
+							className="grid gap-3 py-2"
 							style={{ gridTemplateColumns: `repeat(${WINDOW_SIZE}, minmax(0, 1fr))` }}
 						>
 							{windowPeriods.map((p) => {
@@ -758,6 +763,8 @@ function ViewerTab() {
 								);
 							})}
 						</div>
+					</div>
+					{/* sticky 묶음 끝 */}
 
 						{windowLoading && (
 							<div className="my-3 flex items-center gap-2 text-xs text-muted-foreground">
