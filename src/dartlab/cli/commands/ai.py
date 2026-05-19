@@ -19,9 +19,9 @@ def configureParser(subparsers) -> None:
     parser.add_argument("--dev", action="store_true", help="개발 모드 (Svelte dev 서버 동시 실행)")
     parser.add_argument("--no-browser", action="store_true", help="브라우저 자동 열기 비활성화")
     parser.add_argument(
-        "--force-restart",
+        "--keep-existing",
         action="store_true",
-        help="포트를 이미 점유 중인 dartlab 서버를 강제 종료 후 재시작 (기본: 그대로 사용)",
+        help="포트를 점유 중인 dartlab 이 있으면 종료하지 않고 그대로 사용 (기본: 종료 후 재시작)",
     )
     parser.set_defaults(handler=run)
 
@@ -46,7 +46,7 @@ def run(args) -> int:
     shouldOpen = not args.no_browser and not os.environ.get("DARTLAB_NO_BROWSER")
     target = "http://localhost:5400" if args.dev else url
 
-    status = ensurePort(port, forceRestart=args.force_restart)
+    status = ensurePort(port, keepExisting=args.keep_existing)
     if status == "already_running":
         print()
         print(f"  이미 실행 중인 서버를 사용합니다 → {target}")
@@ -55,7 +55,6 @@ def run(args) -> int:
             webbrowser.open(target)
         else:
             print("  브라우저에서 위 주소를 여세요.")
-        print("  강제 재시작이 필요하면: dartlab ai --force-restart")
         print()
         return 0
     if status == "failed":

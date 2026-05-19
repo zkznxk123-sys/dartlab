@@ -80,13 +80,13 @@ def _killPort(port: int) -> bool:
     return True
 
 
-def ensurePort(port: int, *, forceRestart: bool = False) -> str:
+def ensurePort(port: int, *, keepExisting: bool = False) -> str:
     """포트 확보. "ok" | "already_running" | "failed" 반환.
 
-    살아있는 dartlab 이 점유 중이면 ``already_running`` 을 돌려주고 그대로 둔다 —
-    두 번째 인스턴스가 첫 인스턴스를 죽이지 않게 막는다. ``forceRestart=True``
-    일 때만 기존 dartlab 을 강제 종료한 뒤 재시작한다. 다른 프로세스(혹은 응답
-    없는 좀비) 가 포트를 잡고 있으면 사용자에게 안내 후 ``failed``.
+    기본 동작 — 포트가 점유돼 있으면 종료 후 재사용한다 (살아있는 dartlab 이든
+    좀비든). 매번 명확히 어떤 PID 를 죽이는지 로그로 남긴다 — silent kill 회귀를
+    *피하지 않고 가시화* 하는 방향. ``keepExisting=True`` 일 때만 살아있는
+    dartlab 을 그대로 두고 ``already_running`` 을 돌려준다.
     """
     import socket
 
@@ -102,20 +102,21 @@ def ensurePort(port: int, *, forceRestart: bool = False) -> str:
     except OSError:
         pass
 
-    if _isDartlabAlive(port):
-        if not forceRestart:
-            _log.info("기존 dartlab 서버가 포트 %d 에서 실행 중입니다 — 그대로 사용합니다.", port)
-            return "already_running"
-        _log.info("기존 dartlab 서버 종료 중 (포트 %d, --force-restart)...", port)
-        if _killPort(port):
-            _log.info("종료 완료. 재시작합니다.")
-            return "ok"
-        _log.error("포트 %d 을 해제할 수 없습니다.", port)
-        return "failed"
+    alive = _isDartlabAlive(port)
+    if alive and keepExisting:
+        _log.info("기존 dartlab 서버가 포트 %d 에서 실행 중입니다 — 그대로 사용합니다.", port)
+        return "already_running"
 
-    _log.error("포트 %d 이 다른 프로세스에 의해 점유돼 있습니다.", port)
+    if alive:
+        _log.info("기존 dartlab 서버 종료 후 재시작 (포트 %d)...", port)
+    else:
+        _log.info("포트 %d 점유 중 — 기존 프로세스 종료 후 재시작...", port)
+    if _killPort(port):
+        _log.info("종료 완료. 재시작합니다.")
+        return "ok"
+
+    _log.error("포트 %d 을 해제할 수 없습니다.", port)
     _log.error("다른 포트를 사용하세요: dartlab ai --port %d", port + 1)
-    _log.error("또는 강제 정리: dartlab ai --force-restart (dartlab 좀비일 때만)")
     return "failed"
 
 
