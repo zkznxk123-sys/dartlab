@@ -275,21 +275,120 @@ NOTES_SUB_SECTIONS: list[tuple[int, str, str]] = [
 ]
 
 
-# ── 주석 5 ── chapter III (재무에 관한 사항) 표준 layout
-# DART 사업보고서 chapter III 의 표준 순서. backend buildToc 가 chapter III topic
-# 들을 본 layout 순서로 정렬 + 자동 그루핑 (consolidatedNotes_NN_xxx → consolidatedNotes
-# folder, BS/IS/CIS/CF/SCE → financialStatements folder).
+# ── 주석 5 ── DART 사업보고서 chapter 별 표준 topic 순서 SSOT
+# 각 chapter 의 topic 표준 순서. backend buildToc 가 본 layout 순서로 topic 정렬.
+# layout 에 없는 topic 은 tail 에 alphabetical 로 append.
+# chapter III 만 sub-topic grouping 추가 처리 (consolidatedNotes_NN_xxx → folder).
 #
-# layout 에 없는 chapter III topic 은 layout 뒤에 *first-appearance* 순서로 append.
-CHAPTER_III_LAYOUT: tuple[str, ...] = (
-    "ratios",
-    "fsSummary",
-    "consolidatedStatements",
-    "consolidatedNotes",
-    "financialStatements",
-    "financialNotes",
-    "dividend",
-)
+# 출처: DART 정기보고서 표준 양식 (대분류 11 + 별표 1).
+CHAPTER_LAYOUT: dict[str, tuple[str, ...]] = {
+    # I. 회사의 개요
+    "I": (
+        "companyOverview",
+        "companyHistory",
+        "capitalChange",
+        "shareCapital",
+        "articlesOfIncorporation",
+    ),
+    # II. 사업의 내용
+    "II": (
+        "businessOverview",
+        "productService",
+        "rawMaterial",
+        "salesOrder",
+        "riskDerivative",
+        "majorContractsAndRnd",
+        "otherReferences",
+    ),
+    # III. 재무에 관한 사항 (sub-topic grouping 별도 처리)
+    "III": (
+        "ratios",
+        "fsSummary",
+        "consolidatedStatements",
+        "consolidatedNotes",
+        "financialStatements",
+        "financialNotes",
+        "dividend",
+    ),
+    # IV. 이사의 경영진단 및 분석의견 등
+    "IV": (
+        "cautionaryStatement",
+        "mdnaOverview",
+        "financialConditionAndResults",
+        "liquidityAndCapitalResources",
+        "otherFinance",
+    ),
+    # V. 회계감사인의 감사의견 등
+    "V": (
+        "audit",
+        "internalControl",
+        "auditContract",
+        "nonAuditContract",
+        "mdna",
+    ),
+    # VI. 이사회 등 회사의 기관에 관한 사항
+    "VI": (
+        "boardOfDirectors",
+        "auditSystem",
+        "shareholderMeeting",
+        "outsideDirector",
+    ),
+    # VII. 주주에 관한 사항
+    "VII": (
+        "majorHolder",
+        "majorHolderChange",
+        "minorityHolder",
+        "stockTotal",
+        "treasuryStock",
+    ),
+    # VIII. 임원 및 직원 등에 관한 사항
+    "VIII": (
+        "executive",
+        "employee",
+        "executivePay",
+        "executivePayAllTotal",
+        "executivePayIndividual",
+        "executivePayByType",
+        "executivePayTotal",
+        "topPay",
+        "unregisteredExecutivePay",
+    ),
+    # IX. 계열회사 등에 관한 사항
+    "IX": (
+        "affiliateGroup",
+        "investedCompany",
+    ),
+    # X. 대주주 등과의 거래내용
+    "X": (
+        "relatedPartyTx",
+        "corporateBond",
+        "commercialPaper",
+        "shortTermBond",
+        "debtSecurities",
+        "privateOfferingUsage",
+        "publicOfferingUsage",
+    ),
+    # XI. 그 밖에 투자자 보호를 위하여 필요한 사항
+    "XI": (
+        "sanction",
+        "contingentLiability",
+        "disclosureChanges",
+        "subsequentEvents",
+        "expertConfirmation",
+        "investorProtection",
+    ),
+    # XII. 상세표
+    "XII": (
+        "subsidiaryDetail",
+        "affiliateGroupDetail",
+        "investmentInOtherDetail",
+        "rndDetail",
+        "appendixSchedule",
+    ),
+}
+
+# alias — 옛 코드 호환 (chapter III layout 만 별도 reference).
+CHAPTER_III_LAYOUT: tuple[str, ...] = CHAPTER_LAYOUT["III"]
 
 # financialStatements folder 의 자식 (DART 표준 5 표 순서).
 FINANCIAL_STATEMENT_CHILDREN: tuple[str, ...] = ("BS", "IS", "CIS", "CF", "SCE")
@@ -348,6 +447,33 @@ def chapterIIIOrder(topic: str) -> int:
     """
     try:
         return CHAPTER_III_LAYOUT.index(topic)
+    except ValueError:
+        return 999
+
+
+def chapterTopicOrder(topic: str, chapter: str) -> int:
+    """chapter 안 topic 의 DART 표준 정렬 키. layout 에 없으면 999.
+
+    Args:
+        topic: dartlab topic 키.
+        chapter: Roman chapter ("I" ~ "XII").
+
+    Returns:
+        0-based index 또는 layout 부재 시 999.
+
+    Example:
+        >>> chapterTopicOrder("companyOverview", "I")
+        0
+        >>> chapterTopicOrder("articlesOfIncorporation", "I")
+        4
+        >>> chapterTopicOrder("unknownTopic", "I")
+        999
+    """
+    layout = CHAPTER_LAYOUT.get(chapter)
+    if not layout:
+        return 999
+    try:
+        return layout.index(topic)
     except ValueError:
         return 999
 

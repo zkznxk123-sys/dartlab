@@ -98,6 +98,7 @@ from dartlab.reference.docs.topicStandard import (  # noqa: E402
     FINANCIAL_STATEMENT_CHILDREN,
     chapterIIIOrder,
     chapterIIIParent,
+    chapterTopicOrder,
 )
 from dartlab.reference.docs.topicStandard import (
     chapterLabelKr as _chapterLabelKr,
@@ -291,15 +292,18 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
         return (roman_order.get(prefix, 99), chapter)
 
     sorted_chapters = sorted(chapter_order, key=_chapterSortKey)
+    # chapter III 외 chapter 는 SSOT CHAPTER_LAYOUT 으로 topic 정렬 + 1, 2, 3... 재할당.
+    # layout 부재 topic 은 tail 에 first-appearance (alphabetical) 순서로.
+    label_strip_re = _re.compile(r"^\d+\.\s*")
     for chapter in sorted_chapters:
         if chapter == finance_chapter:
-            continue  # chapter III 는 이미 _groupChapterIII 에서 번호 부여
+            continue  # chapter III 는 이미 _groupChapterIII 에서 정렬 + 번호 부여
+        roman = chapter.split(".")[0].strip()
         topics = chapter_map[chapter]
+        topics.sort(key=lambda t, r=roman: (chapterTopicOrder(t.topic, r), t.topic))
         for idx, t in enumerate(topics, 1):
-            current = t.label or t.topic
-            if _re.match(r"^\d+\.\s", current):
-                continue
-            t.label = f"{idx}. {current}"
+            base = label_strip_re.sub("", t.label or t.topic)
+            t.label = f"{idx}. {base}"
 
     chapters = [TocChapter(chapter=chapter, topics=chapter_map[chapter]) for chapter in sorted_chapters]
     return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=chapters).model_dump()
