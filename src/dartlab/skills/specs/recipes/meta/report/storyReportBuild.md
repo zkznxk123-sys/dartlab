@@ -1,5 +1,5 @@
 ---
-id: recipes.report.storyReportBuild
+id: recipes.meta.report.storyReportBuild
 title: story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)
 category: recipes
 kind: recipe

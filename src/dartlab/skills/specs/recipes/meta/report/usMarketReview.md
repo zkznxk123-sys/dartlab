@@ -1,5 +1,5 @@
 ---
-id: recipes.report.usMarketReview
+id: recipes.meta.report.usMarketReview
 title: 미국 종목 review (EDGAR + macro + quant)
 category: recipes
 kind: recipe

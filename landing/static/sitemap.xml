@@ -656,12 +656,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.catalystCalendar</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.report.catalystCalendar</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.companyDeepAnalysis</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.report.companyDeepAnalysis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -701,7 +701,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.dailyMorningNote</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.report.dailyMorningNote</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -911,17 +911,17 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.storyReportBuild</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.report.storyReportBuild</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.thesisTracker</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.report.thesisTracker</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.report.usMarketReview</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.report.usMarketReview</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

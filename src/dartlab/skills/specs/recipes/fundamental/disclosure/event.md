@@ -167,6 +167,6 @@ graph LR
 - 동종 횡단 공시 위험 → `engines.scan`
 - 공시 톤 → 스토리 위험 → `recipes.fundamental.disclosure.toneToStoryRisk`
 - 임원 거래 → `recipes.fundamental.disclosure.insiderEventCheck`
-- 정량 신호 (M&A·자사주) thesis 결합 → `recipes.report.companyDeepAnalysis`
+- 정량 신호 (M&A·자사주) thesis 결합 → `recipes.meta.report.companyDeepAnalysis`
 
 재호출 트리거: "삼성전자 최근 30 일 공시", "자사주 매입 공시 영향", "M&A 공시 thesis 영향", "공시 본문 + 기간간 변화".

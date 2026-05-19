@@ -491,7 +491,7 @@ def createServer():
             GetPromptResult: user role PromptMessage 를 포함한 MCP prompt 응답.
 
         Example:
-            `prompt = await getPrompt("recipes.report.dailyMorningNote", {"tickers": "005930"})`
+            `prompt = await getPrompt("recipes.meta.report.dailyMorningNote", {"tickers": "005930"})`
 
         Raises:
             ValueError: name 에 해당하는 prompt skill 이 없을 때.

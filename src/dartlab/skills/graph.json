@@ -3775,7 +3775,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.report.catalystCalendar",
+      "id": "recipes.meta.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "recipes",
       "purpose": "커버리지 종목들의 다가오는 catalyst (정기공시 due · 분기/반기/사업보고서) 일정을 fiscal cycle 추론으로 미리 정리하는 절차. 트리거 — '실적 일정', '다가오는 catalyst', 'catalyst calendar', '정기공시 예정'.",
@@ -3788,7 +3788,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.report.companyDeepAnalysis",
+      "id": "recipes.meta.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "recipes",
       "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료. 트리거 — '기업 깊이 분석', '6 막 종합', '단일 종목 deep dive'.",
@@ -3801,7 +3801,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.report.dailyMorningNote",
+      "id": "recipes.meta.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
       "category": "recipes",
       "purpose": "야간/새벽 사이 신규 DART 공시 + 커버리지 종목 변동률 + 시장 마감/개장 +주요 macro 이벤트를 1 페이지 morning note 로 묶는 일일 cadence 절차. 트리거 — '오늘 아침', '야간 공시 정리', 'morning note', '오버나잇 정리'.",
@@ -3814,7 +3814,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.report.storyReportBuild",
+      "id": "recipes.meta.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
       "category": "recipes",
       "purpose": "회사 종합 보고서를 14 축 분석 + 6 막 인과 + story 섹션 조립으로 만드는 절차. review 엔진의 표준 출력. 트리거 — '보고서 작성', '기업 이야기 조립', 'story 빌드'.",
@@ -3827,7 +3827,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.report.thesisTracker",
+      "id": "recipes.meta.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
       "category": "recipes",
       "purpose": "종목별 투자 thesis 본문 + pillar 3~5 + risk 3~5 + catalyst N + falsifiable 게이트 (반증 불가능 thesis 거부) 를 로컬 파일로 관리하는 cadence 절차. 트리거 — '논거 점검', 'thesis check', 'X 종목 thesis 갱신', '논거 추적'.",
@@ -3840,7 +3840,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.report.usMarketReview",
+      "id": "recipes.meta.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
       "category": "recipes",
       "purpose": "미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근. 트리거 — '미국 시장 점검', 'US market review', 'EDGAR 분기'.",
@@ -12268,157 +12268,157 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.catalystCalendar",
+      "src": "recipes.meta.report.catalystCalendar",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.catalystCalendar",
-      "dst": "recipes.report.dailyMorningNote",
+      "src": "recipes.meta.report.catalystCalendar",
+      "dst": "recipes.meta.report.dailyMorningNote",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.catalystCalendar",
+      "src": "recipes.meta.report.catalystCalendar",
       "dst": "recipes.fundamental.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.catalystCalendar",
+      "src": "recipes.meta.report.catalystCalendar",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.catalystCalendar",
+      "src": "recipes.meta.report.catalystCalendar",
       "dst": "engines.gather",
       "kind": "source"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.analysis.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.companyDeepAnalysis",
       "dst": "engines.analysis.valuationBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.dailyMorningNote",
+      "src": "recipes.meta.report.dailyMorningNote",
       "dst": "recipes.fundamental.disclosure.event",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.dailyMorningNote",
-      "dst": "recipes.report.catalystCalendar",
+      "src": "recipes.meta.report.dailyMorningNote",
+      "dst": "recipes.meta.report.catalystCalendar",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.dailyMorningNote",
+      "src": "recipes.meta.report.dailyMorningNote",
       "dst": "engines.gather",
       "kind": "source"
     },
     {
-      "src": "recipes.report.dailyMorningNote",
+      "src": "recipes.meta.report.dailyMorningNote",
       "dst": "engines.company",
       "kind": "source"
     },
     {
-      "src": "recipes.report.storyReportBuild",
+      "src": "recipes.meta.report.storyReportBuild",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.storyReportBuild",
+      "src": "recipes.meta.report.storyReportBuild",
       "dst": "engines.story.companyCausal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.storyReportBuild",
+      "src": "recipes.meta.report.storyReportBuild",
       "dst": "engines.story.dartlabStory",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.storyReportBuild",
+      "src": "recipes.meta.report.storyReportBuild",
       "dst": "engines.analysis.scorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.thesisTracker",
+      "src": "recipes.meta.report.thesisTracker",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.thesisTracker",
+      "src": "recipes.meta.report.thesisTracker",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.thesisTracker",
-      "dst": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.thesisTracker",
+      "dst": "recipes.meta.report.companyDeepAnalysis",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.thesisTracker",
-      "dst": "recipes.report.dailyMorningNote",
+      "src": "recipes.meta.report.thesisTracker",
+      "dst": "recipes.meta.report.dailyMorningNote",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.thesisTracker",
+      "src": "recipes.meta.report.thesisTracker",
       "dst": "engines.company",
       "kind": "source"
     },
     {
-      "src": "recipes.report.thesisTracker",
-      "dst": "recipes.report.companyDeepAnalysis",
+      "src": "recipes.meta.report.thesisTracker",
+      "dst": "recipes.meta.report.companyDeepAnalysis",
       "kind": "source"
     },
     {
-      "src": "recipes.report.usMarketReview",
+      "src": "recipes.meta.report.usMarketReview",
       "dst": "engines.company.usEdgarReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.usMarketReview",
+      "src": "recipes.meta.report.usMarketReview",
       "dst": "engines.macro.marketReview",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.usMarketReview",
+      "src": "recipes.meta.report.usMarketReview",
       "dst": "engines.quant.verdict",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.report.usMarketReview",
+      "src": "recipes.meta.report.usMarketReview",
       "dst": "engines.analysis.peerComparison",
       "kind": "linkedRecipe"
     },
@@ -13704,9 +13704,9 @@
     "recipes.fundamental.quality.earningsQualityCheck",
     "recipes.fundamental.quality.financialStatementCompare",
     "recipes.fundamental.quality.inventoryAndCycle",
-    "recipes.report.storyReportBuild",
-    "recipes.report.thesisTracker",
-    "recipes.report.usMarketReview",
+    "recipes.meta.report.storyReportBuild",
+    "recipes.meta.report.thesisTracker",
+    "recipes.meta.report.usMarketReview",
     "recipes.screen.chart",
     "recipes.screen.growthScreenToDeepDive",
     "recipes.screen.industryDeepDive",
@@ -13892,12 +13892,12 @@
     "recipes.fundamental.quality.inventoryAndCycle",
     "recipes.fundamental.quality.piotroskiLite",
     "recipes.fundamental.quality.workingCapitalQuality",
-    "recipes.report.catalystCalendar",
-    "recipes.report.companyDeepAnalysis",
-    "recipes.report.dailyMorningNote",
-    "recipes.report.storyReportBuild",
-    "recipes.report.thesisTracker",
-    "recipes.report.usMarketReview",
+    "recipes.meta.report.catalystCalendar",
+    "recipes.meta.report.companyDeepAnalysis",
+    "recipes.meta.report.dailyMorningNote",
+    "recipes.meta.report.storyReportBuild",
+    "recipes.meta.report.thesisTracker",
+    "recipes.meta.report.usMarketReview",
     "recipes.screen.chart",
     "recipes.screen.compounderCandidates",
     "recipes.screen.growthScreenToDeepDive",

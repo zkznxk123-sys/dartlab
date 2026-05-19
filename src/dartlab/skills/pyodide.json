@@ -1250,7 +1250,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.report.catalystCalendar",
+      "id": "recipes.meta.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "recipes",
       "status": "limited",
@@ -1261,7 +1261,7 @@
       ]
     },
     {
-      "id": "recipes.report.companyDeepAnalysis",
+      "id": "recipes.meta.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "recipes",
       "status": "limited",
@@ -1343,7 +1343,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.report.dailyMorningNote",
+      "id": "recipes.meta.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
       "category": "recipes",
       "status": "limited",
@@ -1785,7 +1785,7 @@
       ]
     },
     {
-      "id": "recipes.report.storyReportBuild",
+      "id": "recipes.meta.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
       "category": "recipes",
       "status": "limited",
@@ -1796,7 +1796,7 @@
       ]
     },
     {
-      "id": "recipes.report.thesisTracker",
+      "id": "recipes.meta.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
       "category": "recipes",
       "status": "limited",
@@ -1807,7 +1807,7 @@
       ]
     },
     {
-      "id": "recipes.report.usMarketReview",
+      "id": "recipes.meta.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
       "category": "recipes",
       "status": "limited",

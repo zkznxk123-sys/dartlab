@@ -14289,7 +14289,7 @@
       ]
     },
     {
-      "id": "recipes.report.catalystCalendar",
+      "id": "recipes.meta.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -14323,7 +14323,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "engines.gather",
-        "recipes.report.dailyMorningNote",
+        "recipes.meta.report.dailyMorningNote",
         "recipes.fundamental.disclosure.event",
         "engines.company"
       ],
@@ -14348,11 +14348,11 @@
           "note": "gather('calendar', codes, horizon_days) 호출"
         },
         {
-          "skillId": "recipes.report.dailyMorningNote",
+          "skillId": "recipes.meta.report.dailyMorningNote",
           "note": "morning note 의 \"오늘 주목\" 섹션과 연동"
         },
         {
-          "skillId": "recipes.report.thesisTracker",
+          "skillId": "recipes.meta.report.thesisTracker",
           "note": "thesis 의 catalyst 영역 갱신"
         },
         {
@@ -14407,7 +14407,7 @@
       "visualRefs": []
     },
     {
-      "id": "recipes.report.companyDeepAnalysis",
+      "id": "recipes.meta.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -15236,7 +15236,7 @@
       ]
     },
     {
-      "id": "recipes.report.dailyMorningNote",
+      "id": "recipes.meta.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -15272,7 +15272,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "recipes.fundamental.disclosure.event",
-        "recipes.report.catalystCalendar"
+        "recipes.meta.report.catalystCalendar"
       ],
       "requires": [],
       "alternatives": [],
@@ -15305,7 +15305,7 @@
           "note": "시장 변동 횡단 (선택)"
         },
         {
-          "skillId": "recipes.report.catalystCalendar",
+          "skillId": "recipes.meta.report.catalystCalendar",
           "note": "오늘 주목 catalyst 결합"
         },
         {
@@ -19692,7 +19692,7 @@
       ]
     },
     {
-      "id": "recipes.report.storyReportBuild",
+      "id": "recipes.meta.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -19807,7 +19807,7 @@
       ]
     },
     {
-      "id": "recipes.report.thesisTracker",
+      "id": "recipes.meta.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -19843,8 +19843,8 @@
       "linkedSkills": [
         "engines.company",
         "engines.scan",
-        "recipes.report.companyDeepAnalysis",
-        "recipes.report.dailyMorningNote"
+        "recipes.meta.report.companyDeepAnalysis",
+        "recipes.meta.report.dailyMorningNote"
       ],
       "requires": [],
       "alternatives": [],
@@ -19852,7 +19852,7 @@
       "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.company",
-        "dartlab://skills/recipes.report.companyDeepAnalysis"
+        "dartlab://skills/recipes.meta.report.companyDeepAnalysis"
       ],
       "procedure": [
         "ticker 확정 + 신규/갱신 분기.",
@@ -19869,15 +19869,15 @@
           "note": "pillar 정량 검증의 1 차 evidence (Company.show / analysis / credit)"
         },
         {
-          "skillId": "recipes.report.companyDeepAnalysis",
+          "skillId": "recipes.meta.report.companyDeepAnalysis",
           "note": "thesis 신규 작성 시 6 막 분석으로 본문 보강"
         },
         {
-          "skillId": "recipes.report.catalystCalendar",
+          "skillId": "recipes.meta.report.catalystCalendar",
           "note": "thesis 의 catalyst 영역 자동 갱신"
         },
         {
-          "skillId": "recipes.report.dailyMorningNote",
+          "skillId": "recipes.meta.report.dailyMorningNote",
           "note": "새 데이터 포인트 발견 시 thesis 갱신 trigger"
         },
         {
@@ -19944,7 +19944,7 @@
       ]
     },
     {
-      "id": "recipes.report.usMarketReview",
+      "id": "recipes.meta.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
       "category": "recipes",
       "categoryTitle": "Recipes",

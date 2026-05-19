@@ -1,5 +1,5 @@
 ---
-id: recipes.report.companyDeepAnalysis
+id: recipes.meta.report.companyDeepAnalysis
 title: 회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)
 category: recipes
 kind: recipe

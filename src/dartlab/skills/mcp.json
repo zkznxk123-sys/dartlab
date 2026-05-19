@@ -2536,7 +2536,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\nc = dartlab.Company(\"005930\")\n\n# 1. earnings quality — accrual ratio 계산\neq = c.analysis(\"earningsQuality\", \"수익품질\")\naccrual_ratio = eq.get(\"accrualRatio\") if isinstance(eq, dict) else 0\nfcf_ni_ratio = eq.get(\"fcfToNi\") if isinstance(eq, dict) else 1\nhigh_accrual = accrual_ratio > 0.05  # 75th percentile heuristic\n\n# 2. governance — 이사회 독립성 / 특수관계자 비중\ngov = c.analysis(\"governance\", \"거버넌스\")\nboard_independence = gov.get(\"boardIndependence\", 0.5) if isinstance(gov, dict) else 0.5\nrelated_party = gov.get(\"relatedPartyRatio\", 0) if isinstance"
     },
     {
-      "id": "recipes.report.catalystCalendar",
+      "id": "recipes.meta.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "recipes",
       "purpose": "커버리지 종목들의 다가오는 catalyst (정기공시 due · 분기/반기/사업보고서) 일정을 fiscal cycle 추론으로 미리 정리하는 절차. 트리거 — '실적 일정', '다가오는 catalyst', 'catalyst calendar', '정기공시 예정'.",
@@ -2550,14 +2550,14 @@
       ],
       "nextSkills": [
         "engines.gather",
-        "recipes.report.dailyMorningNote",
+        "recipes.meta.report.dailyMorningNote",
         "recipes.fundamental.disclosure.event",
         "engines.company"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\ntickers = [\"005930\", \"000660\", \"035420\"]\ndf = dartlab.gather(\"calendar\", tickers, horizon_days=30)\n# df: date, code, eventType, title, source, impactHint, confidence\n\nemit_result(\n    table=df.to_dicts(),\n    date=str(df[\"date\"].max()) if not df.is_empty() else None,\n)\n```\n\n## 호출 동작\n\n`gather('calendar')` 가 회사별 disclosure 시계열에서 마지막 정기보고서 → 다음 fiscal cycle due 추론. horizon 안의 이벤트만 반환.\n\n1. tickers + horizon 확정.\n2. gather('calendar', codes, horizon_days) — DART API 호출 (각 종목 disclosure 1 회).\n3. confidence 별 classification.\n4. 본문 — 이번 주 / 다음 주 / 그 후 그룹핑.\n5. cata"
     },
     {
-      "id": "recipes.report.companyDeepAnalysis",
+      "id": "recipes.meta.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "recipes",
       "purpose": "단일 회사의 깊이 있는 분석을 매크로 환경, 산업 위치, 회사 본질, ROE 분해, 회계 quality, 가치평가 6 단으로 엮는 절차. 마지막 valuation 단계 누락 시 종합 분석 미완료. 트리거 — '기업 깊이 분석', '6 막 종합', '단일 종목 deep dive'.",
@@ -2724,7 +2724,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport math\n\nc = dartlab.Company(\"005930\")\n\n# 1. dCR 등급 + 7 axis (정성 + 정량 종합)\ncredit = c.credit(detail=True)\ndcr_grade = credit[\"grade\"]\ndcr_distress = dcr_grade in (\"CCC\", \"CC\", \"C\", \"D\", \"BB-\")\n\n# 2. Altman Z″ (비제조업 변형) — recipes.fundamental.credit.distressDual 본문 참조\nbs = c.show(\"BS\", freq=\"Y\")\nis_df = c.show(\"IS\", freq=\"Y\")\n\ndef fetch(df, snake, year=\"2024\"):\n    row = df.filter(pl.col(\"snakeId\") == snake).select(year)\n    return float(row.to_numpy()[0][0]) if row.height > 0 else 0.0\n\nca = fetch(bs, \"current_assets\")\ncl = fetch(bs, \"curren"
     },
     {
-      "id": "recipes.report.dailyMorningNote",
+      "id": "recipes.meta.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
       "category": "recipes",
       "purpose": "야간/새벽 사이 신규 DART 공시 + 커버리지 종목 변동률 + 시장 마감/개장 +주요 macro 이벤트를 1 페이지 morning note 로 묶는 일일 cadence 절차. 트리거 — '오늘 아침', '야간 공시 정리', 'morning note', '오버나잇 정리'.",
@@ -2738,7 +2738,7 @@
       ],
       "nextSkills": [
         "recipes.fundamental.disclosure.event",
-        "recipes.report.catalystCalendar"
+        "recipes.meta.report.catalystCalendar"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nfrom datetime import date, timedelta\n\ntickers = [\"005930\", \"000660\", \"035420\"]  # 사용자 커버리지 또는 default\nyesterday = (date.today() - timedelta(days=1)).isoformat()\ntoday = date.today().isoformat()\n\n# 신규 공시 — 종목별 disclosure 시계열에서 어제 이후 filedAt 만 필터\nnews_rows = []\nfor code in tickers:\n    c = dartlab.Company(code)\n    df = c.disclosure(days=2)  # 최근 2 일치 — 야간 공시 포함\n    if df is None or df.is_empty():\n        continue\n    df = df.filter(pl.col(\"filedAt\") >= yesterday)\n    for row in df.iter_rows(named=True):\n        news_rows.append({\"code\": code, **row})\n\n# 종목 "
     },
@@ -3609,7 +3609,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\ngrowth = dartlab.scan(\"growth\")\nvaluation = dartlab.scan(\"valuation\")\nquality = dartlab.scan(\"profitability\")\n# 시가총액 하위 + 3 축 교집합\n```\n\n## 호출 동작\n\n3 축 스캔 결과 + 시가총액 필터 (하위 30%) 교집합으로 small-cap 후보 추출. 각 후보의 quality 등급 추가.\n\n1. scan(\"growth\") — 매출/영업이익 CAGR\n2. scan(\"valuation\") — PER/PBR/EV/EBITDA\n3. scan(\"profitability\") — OPM/ROE\n4. crossSectionStockScreen — 시가총액 하위 + 매출 규모 하한\n5. 교집합 + analysis(\"earningsQuality\") 로 quality 검증\n\n## 대표 반환 형태\n\n- `tableRef` 4+ 개 (3 scan + 교집합)\n- `dateRef` 1 개\n- 답변 본문 markdown table — 후보 5~10 행 (시가총액 / 매출 CAGR / PER / OPM / quality"
     },
     {
-      "id": "recipes.report.storyReportBuild",
+      "id": "recipes.meta.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
       "category": "recipes",
       "purpose": "회사 종합 보고서를 14 축 분석 + 6 막 인과 + story 섹션 조립으로 만드는 절차. review 엔진의 표준 출력. 트리거 — '보고서 작성', '기업 이야기 조립', 'story 빌드'.",
@@ -3631,7 +3631,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nscorecard = c.analysis(\"financial\", \"종합평가\")\nstory_full = c.story()\nstory_section = c.story(\"수익구조\")\ncausal = c.causalWeights()\n```\n\n## 호출 동작\n\n14 축 분석 종합평가 → causal 가중치 → story 14 섹션 조립 → 보고서 markdown 출력. 개별 섹션만 필요하면 story(section) 으로 부분 호출.\n\n1. 회사 진입\n2. analysis(\"financial\", \"종합평가\") — 14 축 등급 종합\n3. causalWeights() — 인과 가중치\n4. story() — 14 섹션 보고서 조립 (또는 story(section) 부분)\n5. 결과 markdown 본문 + 핵심 ref 합산\n\n## 대표 반환 형태\n\n- `tableRef` 1+ 개 (scorecard 14 축)\n- 답변 본문에 markdown 14 섹션 (또는 부분 섹션)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.compa"
     },
     {
-      "id": "recipes.report.thesisTracker",
+      "id": "recipes.meta.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
       "category": "recipes",
       "purpose": "종목별 투자 thesis 본문 + pillar 3~5 + risk 3~5 + catalyst N + falsifiable 게이트 (반증 불가능 thesis 거부) 를 로컬 파일로 관리하는 cadence 절차. 트리거 — '논거 점검', 'thesis check', 'X 종목 thesis 갱신', '논거 추적'.",
@@ -3646,13 +3646,13 @@
       "nextSkills": [
         "engines.company",
         "engines.scan",
-        "recipes.report.companyDeepAnalysis",
-        "recipes.report.dailyMorningNote"
+        "recipes.meta.report.companyDeepAnalysis",
+        "recipes.meta.report.dailyMorningNote"
       ],
       "bodyPreview": "## thesis 파일 schema (~/.dartlab/thesis/`{ticker}.md`)\n\n```markdown\n---\nticker: 005930\nposition: long  # long | short | watch\ncreated: 2026-05-07\nlastUpdated: 2026-05-07\n---\n\n# {company} thesis\n\n## 본문 (1-2 문단)\n\n핵심 thesis 한 문단 + 시기 (e.g., \"12-18 개월 horizon\").\n\n## pillar 3~5\n\n### pillar 1 — {간략 이름}\n- expectation: {정량 — 숫자/구간/기한}\n- 반증 조건: {어떤 관측이면 반증}\n- current status: {신규 시점에는 baseline}\n- trend: {신규 시점 — 기록 없음}\n\n### pillar 2-5 — 같은 형식\n\n## risk 3~5\n\n각 risk: 한 줄 + 발생 시 thesis 영향.\n\n## catalyst N\n\n날짜 + 이벤트 + 예상 임팩트 (catalystCalendar 와 연동).\n\n## 갱신 로그\n\n- {날짜}: {새 데이터 포인트 한 줄} → pillar X strengthen / we"
     },
     {
-      "id": "recipes.report.usMarketReview",
+      "id": "recipes.meta.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
       "category": "recipes",
       "purpose": "미국 상장 회사 (티커 기반) 의 EDGAR 공시 + 매크로 환경 + 기술적 신호를 종합 review 하는 절차. KR DART 와 다른 소스·접근. 트리거 — '미국 시장 점검', 'US market review', 'EDGAR 분기'.",

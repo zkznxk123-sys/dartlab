@@ -14671,7 +14671,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.report.catalystCalendar",
+      "id": "recipes.meta.report.catalystCalendar",
       "title": "catalyst 일정 캘린더 (다가오는 정기공시 추론)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -14705,7 +14705,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "engines.gather",
-        "recipes.report.dailyMorningNote",
+        "recipes.meta.report.dailyMorningNote",
         "recipes.fundamental.disclosure.event",
         "engines.company"
       ],
@@ -14730,11 +14730,11 @@
           "note": "gather('calendar', codes, horizon_days) 호출"
         },
         {
-          "skillId": "recipes.report.dailyMorningNote",
+          "skillId": "recipes.meta.report.dailyMorningNote",
           "note": "morning note 의 \"오늘 주목\" 섹션과 연동"
         },
         {
-          "skillId": "recipes.report.thesisTracker",
+          "skillId": "recipes.meta.report.thesisTracker",
           "note": "thesis 의 catalyst 영역 갱신"
         },
         {
@@ -14791,7 +14791,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.report.companyDeepAnalysis",
+      "id": "recipes.meta.report.companyDeepAnalysis",
       "title": "회사 종합 분석 (매크로 → 산업 → 회사 → 분해 → quality → valuation)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -15636,7 +15636,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.report.dailyMorningNote",
+      "id": "recipes.meta.report.dailyMorningNote",
       "title": "일일 morning note (야간 공시 + 시장 변동 정리)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -15672,7 +15672,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "recipes.fundamental.disclosure.event",
-        "recipes.report.catalystCalendar"
+        "recipes.meta.report.catalystCalendar"
       ],
       "requires": [],
       "alternatives": [],
@@ -15705,7 +15705,7 @@
           "note": "시장 변동 횡단 (선택)"
         },
         {
-          "skillId": "recipes.report.catalystCalendar",
+          "skillId": "recipes.meta.report.catalystCalendar",
           "note": "오늘 주목 catalyst 결합"
         },
         {
@@ -20176,7 +20176,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.report.storyReportBuild",
+      "id": "recipes.meta.report.storyReportBuild",
       "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20293,7 +20293,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.report.thesisTracker",
+      "id": "recipes.meta.report.thesisTracker",
       "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20329,8 +20329,8 @@
       "linkedSkills": [
         "engines.company",
         "engines.scan",
-        "recipes.report.companyDeepAnalysis",
-        "recipes.report.dailyMorningNote"
+        "recipes.meta.report.companyDeepAnalysis",
+        "recipes.meta.report.dailyMorningNote"
       ],
       "requires": [],
       "alternatives": [],
@@ -20338,7 +20338,7 @@
       "deprecatedBy": [],
       "sourceRefs": [
         "dartlab://skills/engines.company",
-        "dartlab://skills/recipes.report.companyDeepAnalysis"
+        "dartlab://skills/recipes.meta.report.companyDeepAnalysis"
       ],
       "procedure": [
         "ticker 확정 + 신규/갱신 분기.",
@@ -20355,15 +20355,15 @@
           "note": "pillar 정량 검증의 1 차 evidence (Company.show / analysis / credit)"
         },
         {
-          "skillId": "recipes.report.companyDeepAnalysis",
+          "skillId": "recipes.meta.report.companyDeepAnalysis",
           "note": "thesis 신규 작성 시 6 막 분석으로 본문 보강"
         },
         {
-          "skillId": "recipes.report.catalystCalendar",
+          "skillId": "recipes.meta.report.catalystCalendar",
           "note": "thesis 의 catalyst 영역 자동 갱신"
         },
         {
-          "skillId": "recipes.report.dailyMorningNote",
+          "skillId": "recipes.meta.report.dailyMorningNote",
           "note": "새 데이터 포인트 발견 시 thesis 갱신 trigger"
         },
         {
@@ -20432,7 +20432,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.report.usMarketReview",
+      "id": "recipes.meta.report.usMarketReview",
       "title": "미국 종목 review (EDGAR + macro + quant)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -26436,7 +26436,7 @@
       },
       "humanIntro": null,
       "visualRefs": [],
-      "bodyHuman": "# Recipe 6-stage lifecycle — 검토 없는 승격 차단\n\n## 무엇을 하나\n\n`src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `src/dartlab/skills/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다.\n\n배경: dartlab 의 지식 환류는 분석 실행과 커뮤니티 반응에서 나온 개선 후보를 운영자가 검토한 뒤 공식 자산에 반영하는 방식이다. recipe 도 같은 원칙을 따른다.\n\n## 6 단계\n\n| Status | 의미 | 승급 조건 |\n|---|---|---|\n| `drafted` | 신규 작성, 미검증 | validateRecipe sweep 통과 |\n| `unverified` | 골격 통과, 실행 미테스트 | 실 데이터 fixture 동행 테스트 통과 |\n| `tested` | 실행 OK, 시장 검증 전 | 후속 시장 반응 확인 + scorecard 6 신호 |\n| `verified` | 시장 결과 양호, 검증 완료 | 사람 검토 + 블로그/영상 흡수 |\n| `curated` | 사람 검토 + 콘텐츠 환류 | (안정 상태) |\n| `deprecated` | 무효화 — API 변경 · 시장 결과 부정 | 사유 필수 |\n\n## scorecard 6 신호\n\n`tested → verified` 게이트:\n\n1. `executionRef` — 실행 코드 ref 존재.\n2. `tableRef` — 출력 표 ref 존재.\n3. `valueRef` — 핵심 수치 ref 존재.\n4. `webRef` — 외부 출처 (있으면).\n5. `marketResult` — 후속 시장 반응 결과 ref.\n6. `timeStable` — 7 일 / 30 일 / 90 일 안정성.\n\n6 신호 *모두* 통과해야 verified.\n\n## 공개 호출 방식\n\n```bash\n# 현재 recipe 목록 + status\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py --list\n\n# 특정 recipe 승급 (CLI 가 scorecard 검사 후 통과 시만 commit)\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py \\\n    --id recipes.report.dailyMorningNote \\\n    --to tested\n\n# verified 승급 (scorecard 6 신호 + reviewer note 필수)\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py \\\n    --id recipes.report.dailyMorningNote \\\n    --to verified \\\n    --reviewer-note \"S&P 500 30 일 reflection 결과 hit rate 72%\"\n\n# deprecated (사유 필수)\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py \\\n    --id recipes.report.dailyMorningNote \\\n    --to deprecated \\\n    --reason \"FRED API 2026-06 spec 변경으로 macroRef 갱신 불가\"\n```\n\nCLI 가 자동:\n- frontmatter `status` 갱신\n- `recipes/_history.jsonl` append\n- git commit (단일 path) — `commit -o <recipe.md> recipes/_history.jsonl` 형식\n\n## scorecard 미달 시\n\n```\n[recipe_promote] verified 승급 차단 — scorecard 6 신호 중 2 개 미달:\n  - marketResult: ref 없음 (후속 시장 반응 확인 후 재시도)\n  - timeStable: 30 일 안정성 false (현재 14 일째)\n```\n\n## 자동 lint — 수동 편집 차단\n\n`scripts/audit/recipeStatusGuard.py` 가 git diff 검사:\n- frontmatter `status:` 라인 변경이 recipe_promote 가 만든 commit 인지 확인.\n- 사람/AI 가 직접 편집한 commit 이면 PR reject.\n\n## 검토 없는 승격 차단 — 왜 이 가드가 있는가\n\n- recipe 는 실행 결과, 반례, 커뮤니티 반응, 운영자 검토가 함께 있을 때만 승격한다.\n- 도구가 recipe 를 직접 verified 로 마크하면 검증 전 아이디어가 공식 실행 지식처럼 보일 수 있다.\n- 본 룰은 status 변경 권한을 CLI 한 곳으로 모아 검토 근거와 승격 이력을 남긴다.\n\n## 다음 단계\n\n- 새 recipe 작성 → 강제 섹션 + 4 단계: [operation.skillDevelopmentLoop](/skills/operation.skillDevelopmentLoop).\n- recipe scorecard 정의 + 후속 시장 반응 확인 절차: `operation.coreloop`.\n- 공개 지식 환류와 커밋 방식: `operation.contributionWorkflow`.\n\n## 무엇을 하지 *않는가*\n\n- frontmatter `status` 수동 편집 (git diff 에서 자동 검출 reject).\n- scorecard 미달 verified 승급.\n- tested 건너뛰고 verified 점프.\n- 검토 근거 없는 status 변경 (CLI 호출 제외 — CLI 안에서도 명시 인자 필요).\n\n근본: `operation.coreloop` · `operation.contributionWorkflow`."
+      "bodyHuman": "# Recipe 6-stage lifecycle — 검토 없는 승격 차단\n\n## 무엇을 하나\n\n`src/dartlab/skills/specs/recipes/**/*.md` 의 status frontmatter 는 *6 단계* lifecycle 을 거친다. 변경 권한은 `src/dartlab/skills/recipe_promote.py` CLI 단독. AI · 도구 · 운영자 수동 편집 모두 금지. 검토 없는 recipe 승격을 차단하는 코드화된 운영 규칙이다.\n\n배경: dartlab 의 지식 환류는 분석 실행과 커뮤니티 반응에서 나온 개선 후보를 운영자가 검토한 뒤 공식 자산에 반영하는 방식이다. recipe 도 같은 원칙을 따른다.\n\n## 6 단계\n\n| Status | 의미 | 승급 조건 |\n|---|---|---|\n| `drafted` | 신규 작성, 미검증 | validateRecipe sweep 통과 |\n| `unverified` | 골격 통과, 실행 미테스트 | 실 데이터 fixture 동행 테스트 통과 |\n| `tested` | 실행 OK, 시장 검증 전 | 후속 시장 반응 확인 + scorecard 6 신호 |\n| `verified` | 시장 결과 양호, 검증 완료 | 사람 검토 + 블로그/영상 흡수 |\n| `curated` | 사람 검토 + 콘텐츠 환류 | (안정 상태) |\n| `deprecated` | 무효화 — API 변경 · 시장 결과 부정 | 사유 필수 |\n\n## scorecard 6 신호\n\n`tested → verified` 게이트:\n\n1. `executionRef` — 실행 코드 ref 존재.\n2. `tableRef` — 출력 표 ref 존재.\n3. `valueRef` — 핵심 수치 ref 존재.\n4. `webRef` — 외부 출처 (있으면).\n5. `marketResult` — 후속 시장 반응 결과 ref.\n6. `timeStable` — 7 일 / 30 일 / 90 일 안정성.\n\n6 신호 *모두* 통과해야 verified.\n\n## 공개 호출 방식\n\n```bash\n# 현재 recipe 목록 + status\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py --list\n\n# 특정 recipe 승급 (CLI 가 scorecard 검사 후 통과 시만 commit)\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py \\\n    --id recipes.meta.report.dailyMorningNote \\\n    --to tested\n\n# verified 승급 (scorecard 6 신호 + reviewer note 필수)\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py \\\n    --id recipes.meta.report.dailyMorningNote \\\n    --to verified \\\n    --reviewer-note \"S&P 500 30 일 reflection 결과 hit rate 72%\"\n\n# deprecated (사유 필수)\nuv run python -X utf8 src/dartlab/skills/recipe_promote.py \\\n    --id recipes.meta.report.dailyMorningNote \\\n    --to deprecated \\\n    --reason \"FRED API 2026-06 spec 변경으로 macroRef 갱신 불가\"\n```\n\nCLI 가 자동:\n- frontmatter `status` 갱신\n- `recipes/_history.jsonl` append\n- git commit (단일 path) — `commit -o <recipe.md> recipes/_history.jsonl` 형식\n\n## scorecard 미달 시\n\n```\n[recipe_promote] verified 승급 차단 — scorecard 6 신호 중 2 개 미달:\n  - marketResult: ref 없음 (후속 시장 반응 확인 후 재시도)\n  - timeStable: 30 일 안정성 false (현재 14 일째)\n```\n\n## 자동 lint — 수동 편집 차단\n\n`scripts/audit/recipeStatusGuard.py` 가 git diff 검사:\n- frontmatter `status:` 라인 변경이 recipe_promote 가 만든 commit 인지 확인.\n- 사람/AI 가 직접 편집한 commit 이면 PR reject.\n\n## 검토 없는 승격 차단 — 왜 이 가드가 있는가\n\n- recipe 는 실행 결과, 반례, 커뮤니티 반응, 운영자 검토가 함께 있을 때만 승격한다.\n- 도구가 recipe 를 직접 verified 로 마크하면 검증 전 아이디어가 공식 실행 지식처럼 보일 수 있다.\n- 본 룰은 status 변경 권한을 CLI 한 곳으로 모아 검토 근거와 승격 이력을 남긴다.\n\n## 다음 단계\n\n- 새 recipe 작성 → 강제 섹션 + 4 단계: [operation.skillDevelopmentLoop](/skills/operation.skillDevelopmentLoop).\n- recipe scorecard 정의 + 후속 시장 반응 확인 절차: `operation.coreloop`.\n- 공개 지식 환류와 커밋 방식: `operation.contributionWorkflow`.\n\n## 무엇을 하지 *않는가*\n\n- frontmatter `status` 수동 편집 (git diff 에서 자동 검출 reject).\n- scorecard 미달 verified 승급.\n- tested 건너뛰고 verified 점프.\n- 검토 근거 없는 status 변경 (CLI 호출 제외 — CLI 안에서도 명시 인자 필요).\n\n근본: `operation.coreloop` · `operation.contributionWorkflow`."
     },
     {
       "id": "operation.refactorChecklist",

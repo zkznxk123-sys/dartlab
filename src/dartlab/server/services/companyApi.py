@@ -376,13 +376,13 @@ def _groupChapterIII(entries: list[TocTopic]) -> list[TocTopic]:
 # 가독성 위해 backend 가 marker 앞에 \n\n 삽입 후 viewer 가 whiteSpace:'pre-wrap' 으로 렌더.
 # 표 markdown line (`|` 시작) 은 건들지 않음 — 표 깨짐 차단.
 _PARA_BREAK_PATTERNS = (
-    _re.compile(r"(?<=\S)(?=\(\d+\))"),  # (1) (2) ... paren-numeric
-    _re.compile(r"(?<=\S)(?=[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])"),  # 동그라미 숫자
-    _re.compile(r"(?<=\S)(?=※)"),  # ※ 유의/주석
-    _re.compile(r"(?<=\S)(?=\(기준일)"),  # 표 prefix
-    _re.compile(r"(?<=\S)(?=\(단위)"),
-    _re.compile(r"(?<=\S)(?=\[[^\]\n]{1,40}\])"),  # [짧은 대괄호 제목]
-    _re.compile(r"(?<=\S)(?=\d+\.\d+\s+[가-힣])"),  # 1.1 / 1.2 dotted heading
+    _re.compile(r"(?<=.)(?=\(\d+\))"),  # (1) (2) ... paren-numeric
+    _re.compile(r"(?<=.)(?=[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])"),  # 동그라미 숫자
+    _re.compile(r"(?<=.)(?=※)"),  # ※ 유의/주석
+    _re.compile(r"(?<=.)(?=\(기준일)"),  # 표 prefix
+    _re.compile(r"(?<=.)(?=\(단위)"),
+    _re.compile(r"(?<=.)(?=\[[^\]\n]{1,40}\])"),  # [짧은 대괄호 제목]
+    _re.compile(r"(?<=.)(?=\d+\.\d+\s+[가-힣])"),  # 1.1 / 1.2 dotted heading
 )
 
 

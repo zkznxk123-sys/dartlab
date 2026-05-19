@@ -1,5 +1,5 @@
 ---
-id: recipes.report.thesisTracker
+id: recipes.meta.report.thesisTracker
 title: 종목별 투자 thesis 트래커 (falsifiable 게이트 포함)
 category: recipes
 kind: recipe
@@ -23,8 +23,8 @@ outputs:
 linkedSkills:
   - engines.company
   - engines.scan
-  - recipes.report.companyDeepAnalysis
-  - recipes.report.dailyMorningNote
+  - recipes.meta.report.companyDeepAnalysis
+  - recipes.meta.report.dailyMorningNote
 toolRefs:
   - RunPython
   - EngineCall
@@ -83,7 +83,7 @@ procedure:
   - 본문 — 한국어 점검 결과 + scorecard 표 + 다음 cycle 갱신 시기 (보통 분기 단위).
 sourceRefs:
   - dartlab://skills/engines.company
-  - dartlab://skills/recipes.report.companyDeepAnalysis
+  - dartlab://skills/recipes.meta.report.companyDeepAnalysis
 lastUpdated: '2026-05-13'
 ---
 
@@ -190,9 +190,9 @@ emit_result(
 ## 연계 절차
 
 1. engines.company — pillar 정량 검증의 1 차 evidence (Company.show / analysis / credit)
-2. recipes.report.companyDeepAnalysis — thesis 신규 작성 시 6 막 분석으로 본문 보강
-3. recipes.report.catalystCalendar — thesis 의 catalyst 영역 자동 갱신
-4. recipes.report.dailyMorningNote — 새 데이터 포인트 발견 시 thesis 갱신 trigger
+2. recipes.meta.report.companyDeepAnalysis — thesis 신규 작성 시 6 막 분석으로 본문 보강
+3. recipes.meta.report.catalystCalendar — thesis 의 catalyst 영역 자동 갱신
+4. recipes.meta.report.dailyMorningNote — 새 데이터 포인트 발견 시 thesis 갱신 trigger
 5. engines.scan — pillar 횡단 검증 (peer 비교)
 
 ## falsifiable 게이트

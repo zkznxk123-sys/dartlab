@@ -392,21 +392,21 @@
         "title": "중소형주 발굴 (성장 + valuation + quality 교집합)"
       },
       {
-        "id": "recipes.report.storyReportBuild",
+        "id": "recipes.meta.report.storyReportBuild",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "story 보고서 조립 (분석 14 축 + 인과 + 종합 보고)"
       },
       {
-        "id": "recipes.report.thesisTracker",
+        "id": "recipes.meta.report.thesisTracker",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 6,
         "title": "종목별 투자 thesis 트래커 (falsifiable 게이트 포함)"
       },
       {
-        "id": "recipes.report.usMarketReview",
+        "id": "recipes.meta.report.usMarketReview",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

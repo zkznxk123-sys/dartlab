@@ -1,5 +1,5 @@
 ---
-id: recipes.report.catalystCalendar
+id: recipes.meta.report.catalystCalendar
 title: catalyst 일정 캘린더 (다가오는 정기공시 추론)
 category: recipes
 kind: recipe
@@ -22,7 +22,7 @@ outputs:
   - 한국어 weekly preview 본문
 linkedSkills:
   - engines.gather
-  - recipes.report.dailyMorningNote
+  - recipes.meta.report.dailyMorningNote
   - recipes.fundamental.disclosure.event
   - engines.company
 toolRefs:
@@ -106,8 +106,8 @@ emit_result(
 ## 연계 절차
 
 1. engines.gather — gather('calendar', codes, horizon_days) 호출
-2. recipes.report.dailyMorningNote — morning note 의 "오늘 주목" 섹션과 연동
-3. recipes.report.thesisTracker — thesis 의 catalyst 영역 갱신
+2. recipes.meta.report.dailyMorningNote — morning note 의 "오늘 주목" 섹션과 연동
+3. recipes.meta.report.thesisTracker — thesis 의 catalyst 영역 갱신
 4. recipes.fundamental.disclosure.event — 발생한 이벤트 사후 분석 path
 
 ## 한계 (P0)

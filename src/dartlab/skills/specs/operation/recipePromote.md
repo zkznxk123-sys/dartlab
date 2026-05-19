@@ -107,18 +107,18 @@ uv run python -X utf8 src/dartlab/skills/recipePromote.py --list
 
 # 특정 recipe 승급 (CLI 가 scorecard 검사 후 통과 시만 commit)
 uv run python -X utf8 src/dartlab/skills/recipePromote.py \
-    --id recipes.report.dailyMorningNote \
+    --id recipes.meta.report.dailyMorningNote \
     --to tested
 
 # verified 승급 (scorecard 6 신호 + reviewer note 필수)
 uv run python -X utf8 src/dartlab/skills/recipePromote.py \
-    --id recipes.report.dailyMorningNote \
+    --id recipes.meta.report.dailyMorningNote \
     --to verified \
     --reviewer-note "S&P 500 30 일 reflection 결과 hit rate 72%"
 
 # deprecated (사유 필수)
 uv run python -X utf8 src/dartlab/skills/recipePromote.py \
-    --id recipes.report.dailyMorningNote \
+    --id recipes.meta.report.dailyMorningNote \
     --to deprecated \
     --reason "FRED API 2026-06 spec 변경으로 macroRef 갱신 불가"
 ```
