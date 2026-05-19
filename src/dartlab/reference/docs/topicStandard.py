@@ -31,6 +31,11 @@
 
 from __future__ import annotations
 
+import re
+
+# notes sub-topic key 패턴 — `{parent}_NN_slug` (NN = zero-padded 2 자리).
+_NOTES_SUB_TOPIC_RE = re.compile(r"^(?:financialNotes|consolidatedNotes)_(?P<num>\d{2})_[A-Za-z]\w*$")
+
 # ── chapter 1 ── topic → canonical chapter (Roman)
 # DART 사업보고서 최신 표준 위치. 분기보고서가 stub 을 다른 chapter 에 두는 케이스가
 # 있어 데이터 분포 (mode/first-seen) 추론 불가 — 명시 매핑이 단일 진실값.
@@ -236,6 +241,9 @@ def chapterFor(topic: str) -> str | None:
 def labelFor(topic: str, fallback: str | None = None) -> str:
     """topic key → DART 표준 한글 label. 매핑 부재 시 fallback 또는 topic 그대로.
 
+    notes sub-topic (``financialNotes_NN_slug`` 형식) 은 자동으로
+    ``N. {한글}`` 반환 (NOTES_SUB_SECTIONS lookup).
+
     Args:
         topic: dartlab topic 키.
         fallback: 매핑 부재 시 반환할 값. None 이면 topic key 그대로.
@@ -246,10 +254,19 @@ def labelFor(topic: str, fallback: str | None = None) -> str:
     Example:
         >>> labelFor("dividend")
         '배당에 관한 사항'
+        >>> labelFor("financialNotes_05_financialAssetsTransfer")
+        '5. 금융자산의 양도'
     """
     label = TOPIC_DISPLAY_LABEL.get(topic)
     if label:
         return label
+    # notes sub-topic 패턴 — `{parent}_NN_slug`.
+    sub_match = _NOTES_SUB_TOPIC_RE.match(topic)
+    if sub_match:
+        number = int(sub_match.group("num"))
+        for n, _slug, korean in NOTES_SUB_SECTIONS:
+            if n == number:
+                return notesSubTopicLabel(number, korean)
     return fallback if fallback is not None else topic
 
 

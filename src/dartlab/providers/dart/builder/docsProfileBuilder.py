@@ -355,6 +355,10 @@ def buildSections(company: Company) -> pl.DataFrame | None:
         company._hintOnce("sections", "sections", "docs")
         company._cache[cacheKey] = None
         return None
+    # 재무제표 주석 (financialNotes/consolidatedNotes) 수평화 — N. 헤딩 기준 분할.
+    from dartlab.providers.dart.builder.notesSplit import splitNotesSections
+
+    docsSec = splitNotesSections(docsSec)
     periodCols = [c for c in docsSec.columns if _isPeriodColumn(c)]
     cm = chapterMap(company)
 
