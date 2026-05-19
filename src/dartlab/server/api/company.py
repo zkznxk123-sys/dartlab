@@ -144,33 +144,48 @@ def _findBlogPosts(stockCode: str) -> list[dict[str, str]]:
     return posts
 
 
-def _findSector(stockCode: str) -> str:
-    """KRX listing 에서 업종 추출. searchName 실패 시 listing() 직접 매칭. 미발견 시 빈 문자열."""
+def _findCorpMeta(stockCode: str) -> dict[str, str]:
+    """KRX listing 1 회 룩업으로 corpName + sector + market 동시 추출.
+
+    Company 객체 초기화 (rawFinance LazyFrame collect = 200~500MB) 우회. kindlist
+    parquet 단일 룩업만으로 회사 헤더 표시에 필요한 전 메타 반환 (0~5ms).
+    """
     code_pad = str(stockCode).zfill(6)
+    out = {"corpName": "", "sector": "", "market": ""}
     try:
         df = dartlab.searchName(str(stockCode))
         if not isEmptyDf(df):
             rows = df.to_dicts()
+            hit = None
             for r in rows:
                 sc = str(r.get("종목코드", r.get("stockCode", "")))
                 if sc.zfill(6) == code_pad:
-                    return str(r.get("업종", "") or "")
-            return str(rows[0].get("업종", "") or "")
+                    hit = r
+                    break
+            r = hit or rows[0]
+            out["corpName"] = str(r.get("회사명", r.get("corpName", "")) or "")
+            out["sector"] = str(r.get("업종", r.get("sector", "")) or "")
+            out["market"] = str(r.get("시장구분", r.get("market", "")) or "")
+            if hit is not None:
+                return out
     except Exception:  # noqa: BLE001
         pass
     # fallback — listing() 전수에서 종목코드 직접 매칭.
     try:
         df = dartlab.listing()
         if isEmptyDf(df):
-            return ""
+            return out
         rows = df.to_dicts()
         for r in rows:
             sc = str(r.get("종목코드", r.get("stockCode", "")))
             if sc.zfill(6) == code_pad:
-                return str(r.get("업종", r.get("sector", "")) or "")
+                out["corpName"] = out["corpName"] or str(r.get("회사명", r.get("corpName", "")) or "")
+                out["sector"] = out["sector"] or str(r.get("업종", r.get("sector", "")) or "")
+                out["market"] = out["market"] or str(r.get("시장구분", r.get("market", "")) or "")
+                return out
     except Exception:  # noqa: BLE001
         pass
-    return ""
+    return out
 
 
 _PRODUCT_TAG_BLOCKLIST = {"전자공시", "투자", "주식", "재무제표", "공시", "분석"}
@@ -278,17 +293,23 @@ _PRODUCT_MAP: dict[str, list[str]] = {
 
 @router.get("/api/company/{code}/meta")
 def apiCompanyMeta(code: str):
-    """회사 헤더 확장 메타 — 섹터 / 제품 / 블로그 글.
+    """회사 헤더 확장 메타 — corpName + 시장 + 섹터 + 제품 + 블로그 글.
 
-    제품: _PRODUCT_MAP 우선, 미존재 시 빈 리스트. (사업보고서 자동 추출은 후속).
+    kindlist parquet 단일 룩업만으로 응답 (Company.rawFinance collect 우회).
+    회사 페이지 진입 시 부모 layout 의 corpName 도 본 endpoint 가 SSOT —
+    회사명 한 글자 받자고 `/api/viz/dashboard/{code}` 전체 빌드하던 회귀 차단
+    (P-DASH-V2, 2026-05-19).
+
+    제품: _PRODUCT_MAP 우선, 미존재 시 blog frontmatter tags fallback.
     """
-    sector = _findSector(code)
+    corp = _findCorpMeta(code)
     blog_posts = _findBlogPosts(code)
-    # _PRODUCT_MAP hardcoded 12 회사 우선, 미커버 회사는 blog frontmatter tags fallback.
     products = _PRODUCT_MAP.get(str(code).zfill(6)) or _findProductsFromBlog(code)
     return {
         "stockCode": code,
-        "sector": sector,
+        "corpName": corp["corpName"],
+        "market": corp["market"],
+        "sector": corp["sector"],
         "products": products,
         "blogPosts": blog_posts,
     }
@@ -432,6 +453,7 @@ def apiCompanyViewerTopic(
                 viewerBlocks,
                 viewerTextDocument,
             )
+
             from ..services.companyApi import (
                 _compactTextDocument,
                 _dartUrlForPeriod,

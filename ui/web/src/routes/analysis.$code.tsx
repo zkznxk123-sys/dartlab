@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Outlet, createFileRoute, useLocation, useNavigate } from '@tanstack/react-router';
 
 import { CompanyHeader } from '@/features/dashboard/layout/CompanyHeader';
-import { fetchDashboard, type PeriodKind } from '@/features/dashboard/api/client';
+import { fetchCompanyMeta, type PeriodKind } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
 import { useRecentCompanies } from '@/features/dashboard/hooks/useRecentCompanies';
 
@@ -42,13 +42,16 @@ function AnalysisLayout() {
 		}
 	}, [periodKind, search.period, navigate]);
 
-	// 회사명 가져오기 — financial 탭 데이터에서 meta.corpName 추출 (가벼운 한 번 호출)
-	const { data: dash } = useQuery({
-		queryKey: dashKeys.dashboard(code, periodKind),
-		queryFn: () => fetchDashboard(code, periodKind, 40),
-		staleTime: 5 * 60_000,
+	// 회사명 — kindlist parquet 단일 룩업 (0~5ms). CompanyHeader 도 같은 queryKey
+	// 라 React Query 가 자동 dedup → 회사 진입 시 meta 호출 1 회. 이전엔 dashboard
+	// 전체 (FINANCE_DASHBOARD_KEYS × nPeriods=40) 빌드해서 corpName 한 글자만
+	// 뽑던 회귀 (P-DASH-V2).
+	const { data: meta } = useQuery({
+		queryKey: dashKeys.companyMeta(code),
+		queryFn: () => fetchCompanyMeta(code),
+		staleTime: 10 * 60_000,
 	});
-	const corpName = (dash?.cards?.[dash?.order?.[0] || '']?.meta as { corpName?: string } | undefined)?.corpName;
+	const corpName = meta?.corpName;
 
 	useEffect(() => {
 		if (corpName && code) push(code, corpName);

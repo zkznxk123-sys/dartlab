@@ -203,6 +203,28 @@ export function fetchDashboard(
 	return fetchJson<DashboardResponse>(`/api/viz/dashboard/${stockCode}?${qs}`);
 }
 
+// 회사 헤더 메타 — kindlist parquet 단일 룩업 (corpName + 시장 + 섹터 + 제품 + 블로그).
+// 첫 페인트에서 회사명 받는 SSOT. fetchDashboard 로 dashboard 전체 빌드해서 corpName
+// 한 글자 뽑던 회귀 차단용 (P-DASH-V2).
+export interface CompanyBlogPost {
+	title: string;
+	slug: string;
+	url: string;
+}
+
+export interface CompanyMeta {
+	stockCode: string;
+	corpName: string;
+	market: string;
+	sector: string;
+	products: string[];
+	blogPosts: CompanyBlogPost[];
+}
+
+export function fetchCompanyMeta(stockCode: string): Promise<CompanyMeta> {
+	return fetchJson<CompanyMeta>(`/api/company/${stockCode}/meta`);
+}
+
 export interface TabDashboardResponse {
 	stockCode: string;
 	tab: AnalysisTab;

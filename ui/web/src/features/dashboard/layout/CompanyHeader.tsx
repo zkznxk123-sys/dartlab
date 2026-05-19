@@ -1,24 +1,14 @@
 // 회사 헤더 — 종목명·코드·기간 토글 + 섹터·제품·블로그 태그 (C13).
+// corpName 은 본 컴포넌트 own meta query 의 SSOT — 부모 layout 도 같은 queryKey 로
+// dedup 되어 1 회 호출. fetchDashboard 회귀 차단 (P-DASH-V2).
 
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 
-import type { PeriodKind } from '../api/client';
-
-interface BlogPost {
-	title: string;
-	slug: string;
-	url: string;
-}
-
-interface CompanyMeta {
-	stockCode: string;
-	sector: string;
-	products: string[];
-	blogPosts: BlogPost[];
-}
+import { fetchCompanyMeta, type PeriodKind } from '../api/client';
+import { dashKeys } from '../api/queryKeys';
 
 interface Props {
 	stockCode: string;
@@ -28,26 +18,21 @@ interface Props {
 	hidePeriodToggle?: boolean;
 }
 
-async function fetchMeta(stockCode: string): Promise<CompanyMeta> {
-	const r = await fetch(`/api/company/${stockCode}/meta`);
-	if (!r.ok) throw new Error(`HTTP ${r.status}`);
-	return (await r.json()) as CompanyMeta;
-}
-
 export function CompanyHeader({ stockCode, corpName, periodKind, onPeriodKindChange, hidePeriodToggle }: Props) {
 	const { data: meta } = useQuery({
-		queryKey: ['company', 'meta', stockCode],
-		queryFn: () => fetchMeta(stockCode),
+		queryKey: dashKeys.companyMeta(stockCode),
+		queryFn: () => fetchCompanyMeta(stockCode),
 		staleTime: 10 * 60_000,
 		retry: 1,
 	});
+	const displayName = corpName || meta?.corpName || '';
 
 	return (
 		<div className="flex items-center justify-between gap-3 px-4 py-3">
 			<div className="flex min-w-0 flex-wrap items-baseline gap-2">
-				{corpName ? (
+				{displayName ? (
 					<>
-						<h1 className="truncate text-base font-semibold">{corpName}</h1>
+						<h1 className="truncate text-base font-semibold">{displayName}</h1>
 						<span className="font-mono text-xs text-muted-foreground">{stockCode}</span>
 					</>
 				) : (

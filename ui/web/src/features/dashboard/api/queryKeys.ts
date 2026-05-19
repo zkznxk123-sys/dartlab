@@ -20,4 +20,5 @@ export const dashKeys = {
 	card: (cardKey: string, code: string, periodKind: 'annual' | 'quarterly' = 'annual') =>
 		['dash', 'card', cardKey, code, periodKind] as const,
 	catalog: () => ['dash', 'catalog'] as const,
+	companyMeta: (code: string) => ['dash', 'companyMeta', code] as const,
 };
