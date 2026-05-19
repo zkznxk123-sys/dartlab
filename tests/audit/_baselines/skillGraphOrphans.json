@@ -175,7 +175,7 @@
         "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성"
       },
       {
-        "id": "recipes.etc.dataAvailabilityFirst",
+        "id": "recipes.meta.workflow.dataAvailabilityFirst",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
@@ -252,7 +252,7 @@
         "title": "두 회사 재무제표 비교 (peer + show + 분해)"
       },
       {
-        "id": "recipes.etc.flowAndPattern",
+        "id": "recipes.meta.workflow.flowAndPattern",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -357,7 +357,7 @@
         "title": "퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주"
       },
       {
-        "id": "recipes.etc.quantTechnicalReview",
+        "id": "recipes.technical.quantTechnicalReview",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
@@ -413,7 +413,7 @@
         "title": "미국 종목 review (EDGAR + macro + quant)"
       },
       {
-        "id": "recipes.etc.usageAndApi",
+        "id": "recipes.meta.workflow.usageAndApi",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 1,

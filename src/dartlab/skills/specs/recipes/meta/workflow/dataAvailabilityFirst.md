@@ -1,5 +1,5 @@
 ---
-id: recipes.etc.dataAvailabilityFirst
+id: recipes.meta.workflow.dataAvailabilityFirst
 title: 데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)
 category: recipes
 kind: recipe

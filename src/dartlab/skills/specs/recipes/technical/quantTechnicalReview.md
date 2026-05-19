@@ -1,5 +1,5 @@
 ---
-id: recipes.etc.quantTechnicalReview
+id: recipes.technical.quantTechnicalReview
 title: quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)
 category: recipes
 kind: recipe

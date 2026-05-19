@@ -429,7 +429,7 @@ def testRecipeVisualGuidanceIsOptionalButExecutable() -> None:
             )
         ), f"{spec.id} visualGuidance does not name a concrete visual surface"
     assert visualRecipeCount < len(recipeSpecs)
-    assert skills.get("recipes.etc.usageAndApi", includeUser=False).visualGuidance == []
+    assert skills.get("recipes.meta.workflow.usageAndApi", includeUser=False).visualGuidance == []
 
 
 def testReadSkillExposesRecipeVisualGuidance() -> None:

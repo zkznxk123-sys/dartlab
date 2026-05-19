@@ -15770,7 +15770,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.etc.dataAvailabilityFirst",
+      "id": "recipes.meta.workflow.dataAvailabilityFirst",
       "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -17367,7 +17367,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.etc.flowAndPattern",
+      "id": "recipes.meta.workflow.flowAndPattern",
       "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -19586,7 +19586,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.etc.quantTechnicalReview",
+      "id": "recipes.technical.quantTechnicalReview",
       "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20552,7 +20552,7 @@
       "bodyHuman": null
     },
     {
-      "id": "recipes.etc.usageAndApi",
+      "id": "recipes.meta.workflow.usageAndApi",
       "title": "dartlab 사용법·API 설명 (RunPython 우회)",
       "category": "recipes",
       "categoryTitle": "Recipes",

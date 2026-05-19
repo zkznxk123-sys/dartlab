@@ -2709,7 +2709,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.etc.dataAvailabilityFirst",
+      "id": "recipes.meta.workflow.dataAvailabilityFirst",
       "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
       "category": "recipes",
       "purpose": "분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방. 트리거 — '데이터 있나 확인', '분석 전 데이터 점검', '수집 누락 체크'.",
@@ -2722,7 +2722,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.etc.flowAndPattern",
+      "id": "recipes.meta.workflow.flowAndPattern",
       "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
       "category": "recipes",
       "purpose": "단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차. 트리거 — '수급', '외인 기관 매매', '차트 패턴', '단기 entry/exit'.",
@@ -2735,7 +2735,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.etc.quantTechnicalReview",
+      "id": "recipes.technical.quantTechnicalReview",
       "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
       "category": "recipes",
       "purpose": "단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차. 트리거 — '기술적 신호', '모멘텀 변동성', '차트 패턴 4 축'.",
@@ -2748,7 +2748,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.etc.usageAndApi",
+      "id": "recipes.meta.workflow.usageAndApi",
       "title": "dartlab 사용법·API 설명 (RunPython 우회)",
       "category": "recipes",
       "purpose": "dartlab 의 기능·사용법·API 를 설명하는 질문에서 ReadSkill + ReadCapability 만 사용하고 RunPython 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.",
@@ -10338,67 +10338,67 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.dataAvailabilityFirst",
+      "src": "recipes.meta.workflow.dataAvailabilityFirst",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.dataAvailabilityFirst",
+      "src": "recipes.meta.workflow.dataAvailabilityFirst",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.dataAvailabilityFirst",
+      "src": "recipes.meta.workflow.dataAvailabilityFirst",
       "dst": "engines.data.foundation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.flowAndPattern",
+      "src": "recipes.meta.workflow.flowAndPattern",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.flowAndPattern",
+      "src": "recipes.meta.workflow.flowAndPattern",
       "dst": "engines.quant.chartPatterns",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.flowAndPattern",
+      "src": "recipes.meta.workflow.flowAndPattern",
       "dst": "engines.quant.momentum",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.flowAndPattern",
+      "src": "recipes.meta.workflow.flowAndPattern",
       "dst": "engines.quant.flow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.quantTechnicalReview",
+      "src": "recipes.technical.quantTechnicalReview",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.quantTechnicalReview",
+      "src": "recipes.technical.quantTechnicalReview",
       "dst": "engines.quant.indicators",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.quantTechnicalReview",
+      "src": "recipes.technical.quantTechnicalReview",
       "dst": "engines.quant.momentum",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.quantTechnicalReview",
+      "src": "recipes.technical.quantTechnicalReview",
       "dst": "engines.quant.volatility",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.quantTechnicalReview",
+      "src": "recipes.technical.quantTechnicalReview",
       "dst": "engines.quant.chartPatterns",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.etc.usageAndApi",
+      "src": "recipes.meta.workflow.usageAndApi",
       "dst": "start.dartlabSkillOs",
       "kind": "linkedRecipe"
     },
@@ -13677,10 +13677,10 @@
     "recipes.fundamental.disclosure.toneToStoryRisk",
     "recipes.fundamental.dividend.stressTest",
     "recipes.fundamental.dividend.thesis",
-    "recipes.etc.dataAvailabilityFirst",
-    "recipes.etc.flowAndPattern",
-    "recipes.etc.quantTechnicalReview",
-    "recipes.etc.usageAndApi",
+    "recipes.meta.workflow.dataAvailabilityFirst",
+    "recipes.meta.workflow.flowAndPattern",
+    "recipes.technical.quantTechnicalReview",
+    "recipes.meta.workflow.usageAndApi",
     "recipes.fundamental.governance.auditNetwork",
     "recipes.fundamental.governance.esgGovernanceLight",
     "recipes.fundamental.governance.workforceAndCapital",
@@ -13854,10 +13854,10 @@
     "recipes.fundamental.disclosure.toneToStoryRisk",
     "recipes.fundamental.dividend.stressTest",
     "recipes.fundamental.dividend.thesis",
-    "recipes.etc.dataAvailabilityFirst",
-    "recipes.etc.flowAndPattern",
-    "recipes.etc.quantTechnicalReview",
-    "recipes.etc.usageAndApi",
+    "recipes.meta.workflow.dataAvailabilityFirst",
+    "recipes.meta.workflow.flowAndPattern",
+    "recipes.technical.quantTechnicalReview",
+    "recipes.meta.workflow.usageAndApi",
     "recipes.fundamental.governance.audit",
     "recipes.fundamental.governance.auditNetwork",
     "recipes.fundamental.governance.esgGovernanceLight",

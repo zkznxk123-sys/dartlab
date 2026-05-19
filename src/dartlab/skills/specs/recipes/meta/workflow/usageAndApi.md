@@ -1,5 +1,5 @@
 ---
-id: recipes.etc.usageAndApi
+id: recipes.meta.workflow.usageAndApi
 title: dartlab 사용법·API 설명 (RunPython 우회)
 category: recipes
 kind: recipe

@@ -706,7 +706,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.dataAvailabilityFirst</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.workflow.dataAvailabilityFirst</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -781,7 +781,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.flowAndPattern</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.workflow.flowAndPattern</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -886,7 +886,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.quantTechnicalReview</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.technical.quantTechnicalReview</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -926,7 +926,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.etc.usageAndApi</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.meta.workflow.usageAndApi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

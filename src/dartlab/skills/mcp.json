@@ -2743,7 +2743,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nfrom datetime import date, timedelta\n\ntickers = [\"005930\", \"000660\", \"035420\"]  # 사용자 커버리지 또는 default\nyesterday = (date.today() - timedelta(days=1)).isoformat()\ntoday = date.today().isoformat()\n\n# 신규 공시 — 종목별 disclosure 시계열에서 어제 이후 filedAt 만 필터\nnews_rows = []\nfor code in tickers:\n    c = dartlab.Company(code)\n    df = c.disclosure(days=2)  # 최근 2 일치 — 야간 공시 포함\n    if df is None or df.is_empty():\n        continue\n    df = df.filter(pl.col(\"filedAt\") >= yesterday)\n    for row in df.iter_rows(named=True):\n        news_rows.append({\"code\": code, **row})\n\n# 종목 "
     },
     {
-      "id": "recipes.etc.dataAvailabilityFirst",
+      "id": "recipes.meta.workflow.dataAvailabilityFirst",
       "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)",
       "category": "recipes",
       "purpose": "분석 시작 전 필요한 데이터 (finance/docs/report/price) 가 local 에 있는지 확인하고 누락 시 수집을 트리거하는 절차. emit_result 실패 사이클 예방. 트리거 — '데이터 있나 확인', '분석 전 데이터 점검', '수집 누락 체크'.",
@@ -3056,7 +3056,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 두 회사 진입 (sequential — 메모리 안전)\nleft = dartlab.Company(\"005930\")    # 삼성전자\nright = dartlab.Company(\"000660\")   # SK하이닉스\n\n# 같은 기간 재무제표 + ROE 분해\nleft_bs = left.show(\"BS\")\nright_bs = right.show(\"BS\")\nleft_roe = left.analysis(\"financial\", \"수익성\")\nright_roe = right.analysis(\"financial\", \"수익성\")\n```\n\n## 호출 동작\n\n각 회사는 sequential 로 로드한다 (CLAUDE.md 메모리 안전 규칙: Company 동시 3 개 이상 로드 금지). 비교는 같은 분기 기준으로 정렬한다.\n\n1. 두 회사 식별 (종목코드 또는 회사명)\n2. 각 회사 `show(\"BS\")` 와 `show(\"IS\")` — 같은 분기로 정렬\n3. ROE DuPont 분해를 두 회사 동일 axis 로 호출\n4. 비교 표 생성 — markdown table 본문 노출\n\n## 대표 반환 형태\n\n- `tab"
     },
     {
-      "id": "recipes.etc.flowAndPattern",
+      "id": "recipes.meta.workflow.flowAndPattern",
       "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)",
       "category": "recipes",
       "purpose": "단일 종목의 수급 (외인/기관 매매) + 차트 패턴 + 모멘텀 신호를 결합해 단기 entry/exit 보조 신호를 만드는 절차. 트리거 — '수급', '외인 기관 매매', '차트 패턴', '단기 entry/exit'.",
@@ -3498,7 +3498,7 @@
       "bodyPreview": "## 학술 근거\n\nRobert Novy-Marx, *\"The Other Side of Value: The Gross Profitability Premium\"* (Journal of Financial Economics, 2013): **Gross Profit / Total Assets** (GP/A) 가 ROE·ROA·ROIC 보다 강력한 quality factor. 핵심 발견:\n\n- GP/A 는 가치 (B/M) 와 음(−) 상관 → 둘을 결합하면 hedge 효과로 위험 추가 없이 초과수익.\n- 1963-2010 미국에서 GP/A 상위 quintile 이 하위 quintile 대비 연 4-5%p 초과수익 (Fama-French 3-factor 보정 후).\n- 다른 quality 지표 (ROE·earnings growth) 가 가치 (low P/E·P/B) 와 양 상관 → 결합 시 quality 와 value 가 같은 방향, 분산 효과 약함.\n\ndartlab 의 ratio 13 종에 GP/A 직접은 없지만 `grossMargin × totalAssetTurnover ≈ GP/A` 로 분해 근사 가능 (DuPont 식). 한국 시장에서는 chaebol govern"
     },
     {
-      "id": "recipes.etc.quantTechnicalReview",
+      "id": "recipes.technical.quantTechnicalReview",
       "title": "quant 기술적 review (지표 + 모멘텀 + 변동성 + 패턴)",
       "category": "recipes",
       "purpose": "단일 종목의 기술적 신호를 지표 종합 + 모멘텀 + 변동성 + 차트 패턴 4 축으로 묶어 entry/exit 판단을 보강하는 절차. 트리거 — '기술적 신호', '모멘텀 변동성', '차트 패턴 4 축'.",
@@ -3674,7 +3674,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"AAPL\")\n\nfilings = c.filings()  # EDGAR 10-K/10-Q 목록\nrecent = c.disclosure(days=90)\nmacro = dartlab.macro()\nqverdict = c.quant(\"판단\")\n```\n\n## 호출 동작\n\nEDGAR 공시 목록 + 매크로 환경 (US 시장 기준) + 기술적 판단 종합. KR DART 와 다른 점: 공시 형식 (10-K, 10-Q, 8-K), 회계 기준 (US GAAP), 회계연도 (12 월 외 다양).\n\n1. US 티커 회사 진입 (예: AAPL, MSFT)\n2. filings() — EDGAR 10-K / 10-Q / 8-K 목록\n3. disclosure(days=90) — 최근 90 일 공시\n4. macro() — US 시장 매크로 (FRED 기반)\n5. quant(\"판단\") — 기술적 종합 신호\n\n## 대표 반환 형태\n\n- `tableRef` 3 개 (filings + disclosure + macro)\n- `valueRef` 3+ (quant verdict / RSI / A"
     },
     {
-      "id": "recipes.etc.usageAndApi",
+      "id": "recipes.meta.workflow.usageAndApi",
       "title": "dartlab 사용법·API 설명 (RunPython 우회)",
       "category": "recipes",
       "purpose": "dartlab 의 기능·사용법·API 를 설명하는 질문에서 ReadSkill + ReadCapability 만 사용하고 RunPython 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.",

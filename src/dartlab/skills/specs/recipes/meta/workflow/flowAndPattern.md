@@ -1,5 +1,5 @@
 ---
-id: recipes.etc.flowAndPattern
+id: recipes.meta.workflow.flowAndPattern
 title: 수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)
 category: recipes
 kind: recipe
