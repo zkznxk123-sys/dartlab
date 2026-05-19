@@ -175,60 +175,59 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     df = df.drop("text")
     gc.collect()
 
-    # Phase 2: per-(topic, segmentKey) aggregations
+    # Phase 2: per-(topic, segmentKey) aggregations — meta + order + path 3 group_by
+    # → 단일 group_by 통합 (operation.sectionsRefactor §6 후보 B). dfSorted 위에서:
+    #   - last() (meta) — _repRank/_rowIdx 정렬 후 최신 period 마지막 row
+    #   - min() (order) — 정렬과 무관
+    #   - .filter().unique().sort() (path) — 정렬과 무관
     keysDf = df.select(["topic", "segmentKey"]).unique()
 
     dfSorted = df.sort(["_repRank", "_rowIdx"])
-    metaDf = dfSorted.group_by(["topic", "segmentKey"]).agg(
-        [
-            pl.col("blockType").last(),
-            pl.col("textNodeType").last(),
-            pl.col("textStructural").last(),
-            pl.col("textLevel").last(),
-            pl.col("textPath").last(),
-            pl.col("textPathKey").last(),
-            pl.col("textParentPathKey").last(),
-            pl.col("textSemanticPathKey").last(),
-            pl.col("textSemanticParentPathKey").last(),
-            pl.col("textComparablePathKey").last(),
-            pl.col("textComparableParentPathKey").last(),
-            pl.col("sourceBlockOrder").last().alias("_metaSourceBlockOrder"),
-            pl.col("segmentOrder").last().alias("_metaSegmentOrder"),
-            pl.col("segmentOccurrence").last().alias("_metaSegmentOccurrence"),
-            pl.col("sourceTopic").last(),
-        ]
-    )
 
-    orderDf = (
-        df.group_by(["topic", "segmentKey"])
+    def _pathAgg(col: str) -> pl.Expr:
+        return pl.col(col).filter(pl.col(col).is_not_null() & (pl.col(col) != "")).unique().sort()
+
+    metaOrderPathDf = (
+        dfSorted.group_by(["topic", "segmentKey"])
         .agg(
             [
+                # meta — last() (dfSorted 마지막 = 최신 period 마지막 row)
+                pl.col("blockType").last(),
+                pl.col("textNodeType").last(),
+                pl.col("textStructural").last(),
+                pl.col("textLevel").last(),
+                pl.col("textPath").last(),
+                pl.col("textPathKey").last(),
+                pl.col("textParentPathKey").last(),
+                pl.col("textSemanticPathKey").last(),
+                pl.col("textSemanticParentPathKey").last(),
+                pl.col("textComparablePathKey").last(),
+                pl.col("textComparableParentPathKey").last(),
+                pl.col("sourceBlockOrder").last().alias("_metaSourceBlockOrder"),
+                pl.col("segmentOrder").last().alias("_metaSegmentOrder"),
+                pl.col("segmentOccurrence").last().alias("_metaSegmentOccurrence"),
+                pl.col("sourceTopic").last(),
+                # order — min()
                 pl.col("sortOrder").min().alias("firstRank"),
                 pl.col("sourceBlockOrder").min().alias("_orderSourceBlockOrder"),
                 pl.col("segmentOrder").min().alias("_orderSegmentOrder"),
                 pl.col("segmentOccurrence").min().alias("_orderSegmentOccurrence"),
                 pl.when(pl.col("_isLatest")).then(pl.col("sortOrder")).otherwise(None).min().alias("_latestRankRaw"),
                 pl.when(pl.col("_isLatest")).then(0).otherwise(1).min().alias("latestMissing"),
-            ]
-        )
-        .with_columns([pl.col("_latestRankRaw").fill_null(999999999).alias("latestRank")])
-        .drop("_latestRankRaw")
-    )
-
-    def _pathAgg(col: str) -> pl.Expr:
-        return pl.col(col).filter(pl.col(col).is_not_null() & (pl.col(col) != "")).unique().sort()
-
-    pathDf = (
-        df.group_by(["topic", "segmentKey"])
-        .agg(
-            [
+                # path variants
                 _pathAgg("textPathKey").alias("textPathVariants"),
                 _pathAgg("textParentPathKey").alias("textParentPathVariants"),
                 _pathAgg("textSemanticPathKey").alias("textSemanticPathVariants"),
                 _pathAgg("textSemanticParentPathKey").alias("textSemanticParentPathVariants"),
             ]
         )
-        .with_columns([pl.col("textPathVariants").list.len().cast(pl.Int64).alias("textPathVariantCount")])
+        .with_columns(
+            [
+                pl.col("_latestRankRaw").fill_null(999999999).alias("latestRank"),
+                pl.col("textPathVariants").list.len().cast(pl.Int64).alias("textPathVariantCount"),
+            ]
+        )
+        .drop("_latestRankRaw")
     )
 
     topicChapterDf = (
@@ -256,9 +255,7 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
 
     # Phase 3: join all
     result = (
-        keysDf.join(metaDf, on=["topic", "segmentKey"], how="left")
-        .join(orderDf, on=["topic", "segmentKey"], how="left")
-        .join(pathDf, on=["topic", "segmentKey"], how="left")
+        keysDf.join(metaOrderPathDf, on=["topic", "segmentKey"], how="left")
         .join(topicChapterDf, on="topic", how="left")
         .join(topicFirstSeqDf, on="topic", how="left")
         .join(topicIndexDf, on="topic", how="left")

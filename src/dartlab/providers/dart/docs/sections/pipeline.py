@@ -61,7 +61,11 @@ _preparedCache: dict[str, "_PreparedRows"] = {}
 # 컬럼). 이전 dict[str, list[dict]] 형태 → polars Rust arena 단일 보관 으로
 # Python heap 의 dict 51000+ 누적 (~319MB for 005380) → polars DF (~100MB)
 # 으로 3× 메모리 절감.
-_PREPARED_CACHE_MAX = 1
+#
+# DARTLAB_SECTIONS_CACHE 환경변수로 cache size 조정 (default 1). 다종목 batch
+# (예 dashboard 빌더) 시 size 늘려 parquet 재로드 회피. 단 종목당 ~100MB Rust
+# arena 보관이므로 메모리 trade-off 고려.
+_PREPARED_CACHE_MAX = int(os.environ.get("DARTLAB_SECTIONS_CACHE", "1"))
 
 
 class _PreparedRows:
