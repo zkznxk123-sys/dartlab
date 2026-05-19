@@ -18,9 +18,9 @@ export const BENTO_GAP_PX = 16;
 export const BENTO_PAD_PX = 24;
 export const BENTO_COL_COUNT = 12;
 export const BENTO_MIN_CELL_PX = 80;
-// CardShell chrome (header 28 + content padding top+bottom + footer border 1)
-export const BENTO_CARD_HEADER_PX = 28;
-export const BENTO_CARD_PAD_PX = 8;
+// CardShell chrome — CardHeader h-[32px] + border 1, CardContent pt 6 + pb 8.
+export const BENTO_CARD_HEADER_PX = 33;
+export const BENTO_CARD_PAD_PX = 14;
 
 const GAP_PX = BENTO_GAP_PX;
 const PAD_PX = BENTO_PAD_PX;

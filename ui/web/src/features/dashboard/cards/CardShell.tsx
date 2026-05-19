@@ -37,12 +37,12 @@ export function CardShell({
 		<Card
 			data-cardkey={cardKey}
 			className={cn(
-				'flex h-full w-full flex-col gap-0 py-0 overflow-hidden',
+				'flex h-full w-full flex-col gap-0 py-0 shadow-none overflow-hidden',
 				className,
 			)}
 		>
 			<CardHeader
-				className="flex h-[32px] flex-row items-baseline justify-between gap-3 px-3 pt-2 pb-1.5 shrink-0 border-b"
+				className="!grid-cols-none flex h-[32px] flex-row items-center justify-between gap-3 px-3 !pb-1.5 !pt-0 shrink-0 border-b"
 			>
 				<div className="flex min-w-0 items-baseline gap-1.5">
 					<CardTitle className="truncate text-[12px] font-semibold leading-tight tracking-tight">
