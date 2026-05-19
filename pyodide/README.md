@@ -78,11 +78,3 @@ python pyodide/build.py
 # wheel 빌드 + HF 업로드
 python pyodide/build.py --upload
 ```
-
-## 로컬 테스트
-
-```bash
-cd pyodide
-npm install pyodide@0.27.2
-node test_node.mjs
-```
