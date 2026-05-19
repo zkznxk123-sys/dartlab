@@ -513,14 +513,13 @@ function ViewerTab() {
 	const ownIds = useMemo(() => new Set(sectionsOwn.map((s) => s.id)), [sectionsOwn]);
 	const rows = useMemo(() => {
 		const allEntries = latestViewer?.textDocument?.entries ?? [];
-		const allSecs = latestViewer?.textDocument?.sections ?? [];
-		const allSecMap = new Map(allSecs.map((s) => [s.id, s]));
 		const ws = new Set(windowPeriods);
 		type Row = (
 			| { kind: 'section'; id: string; section: ViewerSection }
 			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string> }
 		) & { priority: number; subOrder: number; entryIdx: number };
 		const out: Row[] = [];
+		const secMap = new Map(sectionsOwn.map((s) => [s.id, s]));
 		// priority: 윈도우 period index 중 가장 빠른 (=가장 newest) column 에 등장 → 작은 값.
 		// 어디에도 안 보이면 dropped. 같은 priority 면 entry 순서 유지.
 		const _firstWindowIdx = (periodsPresent: Set<string>): number => {
@@ -529,26 +528,12 @@ function ViewerTab() {
 			}
 			return Number.POSITIVE_INFINITY;
 		};
-		// 표 leaf 추적용 state machine — backend topic 이 chapter 전체 (1~6 leaf) 를 한 응답에
-		// 묶어 보내고 표 entry 는 leaf 헤더 (textPath) 가 없어서 leaf 식별 불가. 직전 numbered
-		// section 의 leaf 를 표에 할당. user 가 클릭한 leaf 와 일치하는 표만 통과 — SK 하이닉스
-		// 1. 회사의 개요 화면에 4. 주식의 총수 표 (block 8/10/11/12/13/14) 가 새는 회귀 차단.
-		let currentTableLeaf: string | null = null;
 		for (let ei = 0; ei < allEntries.length; ei++) {
 			const e = allEntries[ei];
 			if (e.kind === 'section') {
 				const sid = e.sectionId ?? '';
-				const s = allSecMap.get(sid);
-				if (s) {
-					// hp 안의 첫 numbered leaf 추출 → state 갱신.
-					for (const h of s.headingPath ?? []) {
-						const t = (typeof h === 'string' ? h : h?.text) || '';
-						const k = _leafKey(t);
-						if (k) { currentTableLeaf = k; break; }
-					}
-				}
 				if (!ownIds.has(sid)) continue;
-				if (!s) continue;
+				const s = secMap.get(sid)!;
 				const tlSet = new Set((s.timeline ?? []).map((t) => _periodLabel(t?.period)).filter(Boolean));
 				if (![...tlSet].some((p) => ws.has(p))) continue;
 				const pri = _firstWindowIdx(tlSet);
@@ -561,9 +546,6 @@ function ViewerTab() {
 			} else if (e.kind === 'block_ref' && (e.blockKind === 'raw_markdown' || e.blockKind === 'finance')) {
 				const bid = e.blockRef;
 				if (bid == null) continue;
-				// leaf gate — currentTableLeaf 와 ownLeafKey 비교. ownLeafKey 없으면 통과
-				// (단일 leaf topic — 다른 chapter). 둘 다 있을 때만 strict 비교.
-				if (ownLeafKey && currentTableLeaf && currentTableLeaf !== ownLeafKey) continue;
 				const pmd = tablesByBlock[bid];
 				if (!pmd) continue;
 				const tablePeriods = new Set(
@@ -586,7 +568,7 @@ function ViewerTab() {
 			return a.entryIdx - b.entryIdx;
 		});
 		return out;
-	}, [latestViewer, sectionsOwn, ownIds, ownLeafKey, tablesByBlock, windowPeriods]);
+	}, [latestViewer, sectionsOwn, ownIds, tablesByBlock, windowPeriods]);
 
 	const dartUrlByPeriod = useMemo(() => {
 		const m: Record<string, string | null> = {};

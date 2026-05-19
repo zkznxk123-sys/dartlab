@@ -47,7 +47,6 @@ from dartlab.providers.dart.docs.sections.textStructure import parseTextStructur
 from dartlab.providers.reportSelector import selectReport
 
 # ── Phase 1 캐시: parquet 로드 + topic 매핑 결과 재사용 ──
-
 # DART 표준 chapter canonical override — SSOT 는 reference 레이어.
 # 분기보고서가 같은 topic 의 stub 을 사업보고서와 다른 chapter 에 둘 때 데이터 순서에
 # 따라 chapter 가 흔들리는 것을 차단. 표준 매핑이 first-seen 보다 우선.
@@ -85,11 +84,7 @@ def _periodRowsForKey(periodRowsDf: pl.DataFrame, periodKey: str) -> list[dict[s
     """단일 period 의 dict list 추출 — 짧은 lifetime materialize."""
     if periodRowsDf.is_empty():
         return []
-    return (
-        periodRowsDf.filter(pl.col("_periodKey") == periodKey)
-        .drop("_periodKey")
-        .to_dicts()
-    )
+    return periodRowsDf.filter(pl.col("_periodKey") == periodKey).drop("_periodKey").to_dicts()
 
 
 def _getPrepared(stockCode: str) -> _PreparedRows:
@@ -542,13 +537,21 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
                     "text": text,
                     "blockType": blockType,
                     "textNodeType": row.get("textNodeType") if isinstance(row.get("textNodeType"), str) else None,
-                    "textStructural": row.get("textStructural") if isinstance(row.get("textStructural"), bool) else None,
+                    "textStructural": row.get("textStructural")
+                    if isinstance(row.get("textStructural"), bool)
+                    else None,
                     "textLevel": int(row["textLevel"]) if isinstance(row.get("textLevel"), int) else None,
                     "textPath": row.get("textPath") if isinstance(row.get("textPath"), str) else None,
                     "textPathKey": row.get("textPathKey") if isinstance(row.get("textPathKey"), str) else None,
-                    "textParentPathKey": row.get("textParentPathKey") if isinstance(row.get("textParentPathKey"), str) else None,
-                    "textSemanticPathKey": row.get("textSemanticPathKey") if isinstance(row.get("textSemanticPathKey"), str) else None,
-                    "textSemanticParentPathKey": row.get("textSemanticParentPathKey") if isinstance(row.get("textSemanticParentPathKey"), str) else None,
+                    "textParentPathKey": row.get("textParentPathKey")
+                    if isinstance(row.get("textParentPathKey"), str)
+                    else None,
+                    "textSemanticPathKey": row.get("textSemanticPathKey")
+                    if isinstance(row.get("textSemanticPathKey"), str)
+                    else None,
+                    "textSemanticParentPathKey": row.get("textSemanticParentPathKey")
+                    if isinstance(row.get("textSemanticParentPathKey"), str)
+                    else None,
                     "textComparablePathKey": comparablePathKey,
                     "textComparableParentPathKey": comparableParentPathKey,
                     "sortOrder": int(row.get("sortOrder", 999999)),
@@ -636,12 +639,7 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
 
     # 2c. pathVariants 4 sets — null + empty 제외, unique + sort
     def _pathAgg(col: str) -> pl.Expr:
-        return (
-            pl.col(col)
-            .filter(pl.col(col).is_not_null() & (pl.col(col) != ""))
-            .unique()
-            .sort()
-        )
+        return pl.col(col).filter(pl.col(col).is_not_null() & (pl.col(col) != "")).unique().sort()
 
     pathDf = (
         df.group_by(["topic", "segmentKey"])
@@ -658,7 +656,11 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
 
     # 2d. topicChapter — topic 첫 등장 시 chapter
     topicChapterDf = (
-        df.sort("_rowIdx").group_by("topic", maintain_order=False).first().select(["topic", "chapter"]).rename({"chapter": "_topicChapter"})
+        df.sort("_rowIdx")
+        .group_by("topic", maintain_order=False)
+        .first()
+        .select(["topic", "chapter"])
+        .rename({"chapter": "_topicChapter"})
     )
 
     # 2e. topicFirstSeq — topic 별 (majorNum, sortOrder) min
@@ -797,7 +799,9 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
 
     # Phase 6: blockOrder per topic (0-indexed) — sort 후 누적
     result = result.with_columns(
-        (pl.cum_count("segmentKey").over("topic", mapping_strategy="group_to_rows") - 1).cast(pl.Int64).alias("blockOrder")
+        (pl.cum_count("segmentKey").over("topic", mapping_strategy="group_to_rows") - 1)
+        .cast(pl.Int64)
+        .alias("blockOrder")
     )
 
     # Phase 7: final schema cast
@@ -809,11 +813,7 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
     # 가 사업보고서 본문 chapter 를 덮어쓰는 회귀 차단.
     chapter_expr: pl.Expr = pl.col("_topicChapter")
     for topic_key, canonical_chapter in TOPIC_CANONICAL_CHAPTER.items():
-        chapter_expr = (
-            pl.when(pl.col("topic") == topic_key)
-            .then(pl.lit(canonical_chapter))
-            .otherwise(chapter_expr)
-        )
+        chapter_expr = pl.when(pl.col("topic") == topic_key).then(pl.lit(canonical_chapter)).otherwise(chapter_expr)
     result = result.with_columns(
         [
             chapter_expr.alias("chapter"),
@@ -1676,4 +1676,55 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         values = dataColumns.pop(colName)
         seriesList.append(pl.Series(colName, values, dtype=schema[colName]))
         values = None  # noqa: F841 — 즉시 ref drop
-    return pl.DataFrame(seriesList)
+    out = pl.DataFrame(seriesList)
+    return _dropChapterCatchAllDuplicates(out)
+
+
+# chapter title catch-all 매칭 — sectionMappings.json 의 "I. 회사의 개요" / "II. 사업의 내용"
+# 류 룰이 만든 sourceTopic. specific leaf row 가 같은 (chapter, sourceBlockOrder) 로 존재하면
+# catch-all 쪽은 중복 — 1.회사의 개요 leaf 화면이 4.주식의 총수 표를 머금는 회귀 차단.
+_CHAPTER_CATCH_ALL_RE = re.compile(r"^(?:I{1,3}|IV|V|VI{0,3}|IX|X|XI|XII)\.\s")
+
+
+def _dropChapterCatchAllDuplicates(df: pl.DataFrame) -> pl.DataFrame:
+    """chapter-level catch-all 중복 row drop.
+
+    문제: ``sectionMappings.json`` 의 ``"I. 회사의 개요"`` 류 룰이 DART HTML section title 이
+    chapter heading 자체일 때 모든 sub-block 을 chapter-level topic (``companyOverview`` 등)
+    으로 일괄 매핑. 동시에 sub-heading 으로 들어온 block 은 specific topic (``shareCapital`` 등)
+    으로도 매핑 — 같은 ``sourceBlockOrder`` (원본 DART HTML block) 가 두 topic 으로 중복.
+
+    결과: 1.회사의 개요 leaf 화면이 4.주식의 총수 표 (주식의 종류, 자기주식 취득 등) 를 머금는
+    프론트 leak.
+
+    해결: ``sourceTopic`` 이 ``"X. ..."`` 패턴 (chapter title catch-all) 이고 같은 ``(chapter,
+    sourceBlockOrder)`` 가 non-catch-all sourceTopic row 로 존재하면 catch-all row drop.
+    specific 단독 sourceBlockOrder 는 보존 (catch-all row 도 KEEP).
+
+    Args:
+        df: ``sections()`` 의 raw 결과.
+
+    Returns:
+        catch-all 중복 row 제거된 frame. 다른 row 는 변경 0.
+    """
+    if df is None or df.height == 0:
+        return df
+    needed = {"sourceTopic", "sourceBlockOrder", "chapter"}
+    if not needed.issubset(df.columns):
+        return df
+
+    is_catch_all = pl.col("sourceTopic").cast(pl.Utf8).str.contains(_CHAPTER_CATCH_ALL_RE.pattern)
+    specific_keys = (
+        df.lazy()
+        .filter(pl.col("sourceTopic").is_not_null() & ~is_catch_all)
+        .select(["chapter", "sourceBlockOrder"])
+        .unique()
+        .with_columns(pl.lit(True).alias("_hasSpecific"))
+        .collect()
+    )
+    if specific_keys.is_empty():
+        return df
+
+    joined = df.join(specific_keys, on=["chapter", "sourceBlockOrder"], how="left")
+    keep = ~(is_catch_all & pl.col("_hasSpecific").fill_null(False))
+    return joined.filter(keep).drop("_hasSpecific")
