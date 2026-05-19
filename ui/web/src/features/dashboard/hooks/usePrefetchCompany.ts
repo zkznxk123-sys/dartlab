@@ -25,10 +25,12 @@ export function usePrefetchCompany() {
 			queryFn: () => fetchTabLayout('financial', stockCode, null, periodKind, 40, false),
 			staleTime: 5 * 60_000,
 		});
-		void queryClient.prefetchQuery({
-			queryKey: dashKeys.tabLayout('quant', stockCode, null, periodKind),
-			queryFn: () => fetchTabLayout('quant', stockCode, null, periodKind, 40, true),
-			staleTime: 5 * 60_000,
-		});
+		// 퀀트 prefetch — 사이드바에서 비활성 상태이므로 prefetch 도 꺼둠.
+		// (응답성 회귀 정리 후 재활성화)
+		// void queryClient.prefetchQuery({
+		// 	queryKey: dashKeys.tabLayout('quant', stockCode, null, periodKind),
+		// 	queryFn: () => fetchTabLayout('quant', stockCode, null, periodKind, 40, true),
+		// 	staleTime: 5 * 60_000,
+		// });
 	};
 }

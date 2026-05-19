@@ -229,14 +229,29 @@ function DashboardNav() {
 	const isScreener = pathname.startsWith('/screener');
 
 	// 기업분석 그룹 — 단일 기업 심층 분석. 3 항목 (재무제표분석 / 퀀트 / 공시뷰어).
+	// quant 는 응답성 회귀 (viz catalog cold + 카드 다수) 가 정리되기 전까지 비활성.
+	// disabled 항목은 sidebar 에 노출만 하고 클릭 시 라우팅 막음.
 	const corpItems = [
-		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial' },
-		{ id: 'quant', title: '퀀트', icon: LineChart, isActive: isQuant, route: '/analysis/$code/quant' },
-		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer' },
+		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial', disabled: false },
+		{ id: 'quant', title: '퀀트 (준비 중)', icon: LineChart, isActive: isQuant, route: '/analysis/$code/quant', disabled: true },
+		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer', disabled: false },
 	] as const;
 
-	const renderCorpButton = (t: (typeof corpItems)[number]) =>
-		code ? (
+	const renderCorpButton = (t: (typeof corpItems)[number]) => {
+		// disabled 항목 (예 quant 준비 중) — 클릭 0, 회색조. 회사 유무와 무관.
+		if (t.disabled) {
+			return (
+				<SidebarMenuButton
+					tooltip={`${t.title} — 응답성 작업 중. 추후 활성화`}
+					className="cursor-not-allowed opacity-40"
+					aria-disabled
+				>
+					<t.icon />
+					<span>{t.title}</span>
+				</SidebarMenuButton>
+			);
+		}
+		return code ? (
 			<SidebarMenuButton asChild isActive={t.isActive} tooltip={t.title}>
 				<Link
 					to={t.route}
@@ -255,6 +270,7 @@ function DashboardNav() {
 				</Link>
 			</SidebarMenuButton>
 		);
+	};
 
 	return (
 		<>
