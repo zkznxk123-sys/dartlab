@@ -308,7 +308,7 @@ def _hasRecipe(state: WorkbenchState) -> bool:
 
 def _hasForensicsRecipe(skillRefs: list[Ref]) -> bool:
     """L1.5 forensics recipe는 RunPython helper 기반이라 workbench 전용 plan으로 실행한다."""
-    return any(_skillId(ref).startswith("recipes.incubator.forensics.") for ref in skillRefs)
+    return any(_skillId(ref).startswith("recipes.fundamental.quality.forensics.") for ref in skillRefs)
 
 
 def _recipeRefForState(state: WorkbenchState) -> Ref | None:

@@ -102,9 +102,9 @@ intentBoosts:
       - "독스트링 보강"
     boost: 15.0
   - skillIds:
-      - "recipes.incubator.thesisKillChain.index"
-      - "recipes.incubator.thesisKillChain.premortemQualityGate"
-      - "recipes.incubator.thesisKillChain.deepDive"
+      - "recipes.meta.thesisKillChain.index"
+      - "recipes.meta.thesisKillChain.premortemQualityGate"
+      - "recipes.meta.thesisKillChain.deepDive"
     terms:
       - "진짜 강한"
       - "강한 스킬"

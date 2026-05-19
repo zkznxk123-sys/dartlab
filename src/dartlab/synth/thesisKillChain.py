@@ -175,7 +175,7 @@ def buildThesisKillChainMemo(
             {
                 "id": "thesisKillChainSkillPack",
                 "title": "Thesis Kill-Chain Scenario skill pack",
-                "url": "dartlab://skills/recipes.incubator.thesisKillChain.index",
+                "url": "dartlab://skills/recipes.meta.thesisKillChain.index",
             },
         ],
     }

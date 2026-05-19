@@ -13,20 +13,20 @@ import pytest
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-FORENSICS_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "incubator" / "forensics"
+FORENSICS_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "fundamental" / "quality" / "forensics"
 
 FORENSICS_IDS = {
-    "recipes.incubator.forensics.index",
-    "recipes.incubator.forensics.dataCoverageAudit",
-    "recipes.incubator.forensics.accountTraceLedger",
-    "recipes.incubator.forensics.revenueToCashBridge",
-    "recipes.incubator.forensics.workingCapitalPressureMap",
-    "recipes.incubator.forensics.noteSignalExtractor",
-    "recipes.incubator.forensics.eventToStatementMatcher",
-    "recipes.incubator.forensics.crossSectionAnomalyRank",
-    "recipes.incubator.forensics.falsifierLedger",
-    "recipes.incubator.forensics.engineCandidateMemo",
-    "recipes.incubator.forensics.deepDive",
+    "recipes.fundamental.quality.forensics.index",
+    "recipes.fundamental.quality.forensics.dataCoverageAudit",
+    "recipes.fundamental.quality.forensics.accountTraceLedger",
+    "recipes.fundamental.quality.forensics.revenueToCashBridge",
+    "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
+    "recipes.fundamental.quality.forensics.noteSignalExtractor",
+    "recipes.fundamental.quality.forensics.eventToStatementMatcher",
+    "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
+    "recipes.fundamental.quality.forensics.falsifierLedger",
+    "recipes.fundamental.quality.forensics.engineCandidateMemo",
+    "recipes.fundamental.quality.forensics.deepDive",
 }
 
 BANNED_L2_CALLS = (
@@ -92,17 +92,17 @@ def testForensicsSkillsAreExposedThroughAiEntryPoints() -> None:
     bridge = readSkill("revenue to cash bridge 매출 현금 괴리", limit=8, includeUser=False)
 
     assert entry.ok
-    assert entry.data["skills"][0]["id"] == "recipes.incubator.forensics.index"
+    assert entry.data["skills"][0]["id"] == "recipes.fundamental.quality.forensics.index"
     assert deep.ok
-    assert deep.data["skills"][0]["id"] == "recipes.incubator.forensics.deepDive"
+    assert deep.data["skills"][0]["id"] == "recipes.fundamental.quality.forensics.deepDive"
     assert bridge.ok
-    assert bridge.data["skills"][0]["id"] == "recipes.incubator.forensics.revenueToCashBridge"
+    assert bridge.data["skills"][0]["id"] == "recipes.fundamental.quality.forensics.revenueToCashBridge"
 
-    body = getSkillBody("recipes.incubator.forensics.deepDive", includeUser=False)
+    body = getSkillBody("recipes.fundamental.quality.forensics.deepDive", includeUser=False)
     assert body.ok
     raw = body.data["body"]
     assert "buildEvidenceForensicsMemo" in raw
-    assert "recipes.incubator.forensics.engineCandidateMemo" in raw
+    assert "recipes.fundamental.quality.forensics.engineCandidateMemo" in raw
 
 
 def testForensicsSkillsAreInPublicSkillArtifacts() -> None:
@@ -119,11 +119,11 @@ def testForensicsSkillsAreInPublicSkillArtifacts() -> None:
             recipe_meta = [row for row in payload["meta"]["categories"] if row["id"] == "recipes"]
             assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
         if name in {"index.json", "agent.json", "mcp.json"}:
-            assert by_id["recipes.incubator.forensics.index"]["bodyPreview"]
+            assert by_id["recipes.fundamental.quality.forensics.index"]["bodyPreview"]
         if name in {"index.json", "agent.json", "web.json"}:
-            assert by_id["recipes.incubator.forensics.deepDive"]["expectedOutputs"]
+            assert by_id["recipes.fundamental.quality.forensics.deepDive"]["expectedOutputs"]
         if name == "web.json":
-            assert by_id["recipes.incubator.forensics.index"]["bodyHuman"]
+            assert by_id["recipes.fundamental.quality.forensics.index"]["bodyHuman"]
 
     graph = json.loads((artifact_dir / "graph.json").read_text(encoding="utf-8"))
     graph_ids = {node["id"] for node in graph.get("nodes", [])}

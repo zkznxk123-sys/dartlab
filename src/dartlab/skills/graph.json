@@ -2826,7 +2826,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "id": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "title": "Event Radar Capital Action Monitor",
       "category": "recipes",
       "purpose": "dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.",
@@ -2843,7 +2843,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "id": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
       "title": "Event Radar Consensus Drift Watch",
       "category": "recipes",
       "purpose": "gather consensus 원자료의 최근 두 row를 비교해 매출, 영업이익, EPS, 목표가 변화 신호를 확인하는 L1/L1.5 절차다.",
@@ -2860,7 +2860,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.deepDive",
+      "id": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "title": "Event Radar Deep Dive",
       "category": "recipes",
       "purpose": "source coverage, event inbox, price/flow reaction, insider/ownership, capital action, consensus drift, falsifier, engine candidate, visual gate를 한 번에 실행하는 이벤트 레이더 최종 절차다.",
@@ -2877,7 +2877,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "id": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
       "title": "Event Radar Engine Candidate Memo",
       "category": "recipes",
       "purpose": "이벤트 레이더에서 반복 가능한 신호를 나중에 엔진으로 환류할 후보로 정리하되, recipe 검산 경로는 계속 유지하는 L1/L1.5 절차다.",
@@ -2894,7 +2894,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.eventInbox",
+      "id": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "title": "Event Radar Event Inbox",
       "category": "recipes",
       "purpose": "Company.disclosure/liveFilings와 gather.news 원자료의 제목·본문 키워드만으로 단기 이벤트 inbox를 만드는 L1/L1.5 절차다.",
@@ -2911,7 +2911,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "id": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "title": "Event Radar Falsifier Ledger",
       "category": "recipes",
       "purpose": "이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.",
@@ -2928,7 +2928,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.index",
+      "id": "recipes.fundamental.disclosure.eventRadar.index",
       "title": "Event Radar Incubator 진입점",
       "category": "recipes",
       "purpose": "Company.disclosure, liveFilings, gather 원자료, scan primitive, observed viz skill만으로 단기 이벤트와 시장 반응을 묶어 촉매 후보를 찾는 L1/L1.5 스킬팩 진입점이다. 트리거 - '이벤트 레이더', '촉매 체크', '공시와 주가 반응'.",
@@ -2945,7 +2945,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "id": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
       "title": "Event Radar Insider Ownership Signal",
       "category": "recipes",
       "purpose": "gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.",
@@ -2962,7 +2962,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "id": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "title": "Event Radar Price Flow Reaction",
       "category": "recipes",
       "purpose": "gather price/flow 원자료로 이벤트 전후 가격·거래량·수급 반응을 확인하는 L1/L1.5 절차다.",
@@ -2979,7 +2979,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "id": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "title": "Event Radar Source Coverage Audit",
       "category": "recipes",
       "purpose": "이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.",
@@ -2996,7 +2996,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "id": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
       "title": "Event Radar Visual Decision Pack",
       "category": "recipes",
       "purpose": "이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.",
@@ -3013,7 +3013,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.forensics.accountTraceLedger",
+      "id": "recipes.fundamental.quality.forensics.accountTraceLedger",
       "title": "Forensics Account Trace Ledger",
       "category": "recipes",
       "purpose": "매출, CFO, 매출채권, 재고, 매입채무 같은 포렌식 핵심 metric이 어떤 raw statement row에서 왔는지 추적해 엔진 승격 전 계정 매핑 품질을 검증한다. 트리거 — '계정 trace ledger', 'raw 계정 매핑 검산'.",
@@ -3026,7 +3026,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "id": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
       "title": "Cross Section Anomaly Rank",
       "category": "recipes",
       "purpose": "scan.quality, scan.audit, scan.disclosureRisk 같은 L1.5 횡단 primitive를 포렌식 후보 발굴에만 사용하고, 단일 기업 결론은 원표 selfRun으로 다시 검증하게 만든다. 트리거 — '포렌식 이상치 랭킹', 'scan primitive 이상치'.",
@@ -3039,7 +3039,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.dataCoverageAudit",
+      "id": "recipes.fundamental.quality.forensics.dataCoverageAudit",
       "title": "Forensics Data Coverage Audit",
       "category": "recipes",
       "purpose": "포렌식 분석 전에 Company.show 원표와 L1.5 helper가 실제로 어떤 기간·계정 coverage를 갖는지 확인해 결손을 0으로 채우는 회귀를 막는다. 트리거 — '포렌식 데이터 coverage', '원표 결손 점검'.",
@@ -3052,7 +3052,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.deepDive",
+      "id": "recipes.fundamental.quality.forensics.deepDive",
       "title": "Evidence Forensics Deep Dive",
       "category": "recipes",
       "purpose": "L2 분석엔진 없이 data coverage, account trace, revenue-cash bridge, working capital, note/event signal, falsifier, engine candidate memo를 한 번에 실행하는 깊은 포렌식 팩 최종 절차다. 트리거 — '포렌식 deep dive', 'analysis 없이 깊게 검증'.",
@@ -3069,7 +3069,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.forensics.engineCandidateMemo",
+      "id": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "title": "Forensics Engine Candidate Memo",
       "category": "recipes",
       "purpose": "포렌식 스킬 실행 결과에서 반복 가능하고 반증 조건이 명확한 신호를 L2 엔진 후보로 정리하되, 승격 후에도 recipe 검산 경로로 계속 남기는 계약을 만든다. 트리거 — '엔진 후보 memo', '스킬에서 엔진 환류'.",
@@ -3082,7 +3082,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.eventToStatementMatcher",
+      "id": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
       "title": "Event To Statement Matcher",
       "category": "recipes",
       "purpose": "유상증자, 전환사채, 정정공시, 감사의견, 소송 같은 공시 이벤트를 같은 기간의 원표 압력과 맞춰 이벤트가 재무제표 변화와 연결되는지 검증한다. 트리거 — '이벤트 재무제표 매칭', '공시 이벤트 포렌식'.",
@@ -3095,7 +3095,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.falsifierLedger",
+      "id": "recipes.fundamental.quality.forensics.falsifierLedger",
       "title": "Forensics Falsifier Ledger",
       "category": "recipes",
       "purpose": "revenue-to-cash, working capital, note signal, event match에서 나온 의심 신호마다 반대 설명과 추가 확인 항목을 열어 스킬이 과잉 결론으로 흐르지 않게 한다. 트리거 — '포렌식 반증 ledger', '의심 신호 반례'.",
@@ -3108,7 +3108,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.index",
+      "id": "recipes.fundamental.quality.forensics.index",
       "title": "Evidence Forensics Incubator 진입점",
       "category": "recipes",
       "purpose": "L2 분석엔진을 호출하지 않고 Company.show 원표, DART/EDGAR 공시 원문, scan primitive, synth helper만으로 회계·공시 포렌식 신호를 실험하고 엔진 승격 후보를 남기는 L1/L1.5 스킬팩 진입점이다. 트리거 — '포렌식 팩', 'L1.5 회계 검증', '엔진 후보 인큐베이터'.",
@@ -3125,7 +3125,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.forensics.noteSignalExtractor",
+      "id": "recipes.fundamental.quality.forensics.noteSignalExtractor",
       "title": "Filing Note Signal Extractor",
       "category": "recipes",
       "purpose": "사업보고서·주석 원문에서 대손, 재고평가, 특수관계자, 계속기업, 소송, 파생상품, 정정, 팩토링 같은 rare keyword 신호를 추출해 원표 신호의 설명력을 보강한다. 트리거 — '주석 포렌식 신호', '공시 rare keyword', '대손 재고평가 주석'.",
@@ -3138,7 +3138,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.revenueToCashBridge",
+      "id": "recipes.fundamental.quality.forensics.revenueToCashBridge",
       "title": "Revenue To Cash Bridge",
       "category": "recipes",
       "purpose": "L2 이익품질 엔진 없이 raw IS/BS/CF만으로 매출 성장, 매출채권 성장, CFO/순이익 괴리를 연결해 매출이 현금으로 회수되는지 검증한다. 트리거 — '매출 현금 bridge', 'revenue to cash', '매출채권 괴리'.",
@@ -3151,7 +3151,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "id": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
       "title": "Working Capital Pressure Map",
       "category": "recipes",
       "purpose": "raw BS/IS만으로 DSO, DIO, DPO, CCC와 재고 성장 gap을 계산해 운전자본 압력이 이익품질·유동성 신호로 승격 가능한지 실험한다. 트리거 — '운전자본 pressure', 'CCC 원표 계산', '재고 매출 gap'.",
@@ -3164,7 +3164,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "id": "recipes.meta.thesisKillChain.assumptionLedger",
       "title": "Thesis Kill-Chain Assumption Ledger",
       "category": "recipes",
       "purpose": "사용자 thesis를 revenueGrowth, marginDurability, cashConversion, balanceSheet, valuationSupport 등 testable assumption으로 분해하는 L1/L1.5 절차다.",
@@ -3181,7 +3181,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.deepDive",
+      "id": "recipes.meta.thesisKillChain.deepDive",
       "title": "Thesis Kill-Chain Deep Dive",
       "category": "recipes",
       "purpose": "thesis intake, evidence coverage, assumption ledger, fragility map, trigger catalog, propagation path, tripwire, falsifier, scenario storyboard, visual gate, premortem quality gate를 한 번에 실행하는 pre-mortem 시나리오 최종 절차다.",
@@ -3198,7 +3198,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "id": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "title": "Thesis Kill-Chain Evidence Coverage Audit",
       "category": "recipes",
       "purpose": "pre-mortem 시나리오에 필요한 statements, filings, price, flow, consensus, scan, assumptions coverage를 확인하는 L1/L1.5 절차다.",
@@ -3215,7 +3215,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "id": "recipes.meta.thesisKillChain.falsifierLedger",
       "title": "Thesis Kill-Chain Falsifier Ledger",
       "category": "recipes",
       "purpose": "kill-chain path가 틀렸음을 보여줄 counter-evidence를 trigger별로 열어 thesis 붕괴 단정을 막는 L1/L1.5 절차다.",
@@ -3232,7 +3232,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.fragilityMap",
+      "id": "recipes.meta.thesisKillChain.fragilityMap",
       "title": "Thesis Kill-Chain Fragility Map",
       "category": "recipes",
       "purpose": "IS/BS/CF, price/flow, consensus 원자료에서 thesis를 깨기 쉬운 revenue, margin, cash, leverage, market, expectation 취약 지표를 계산하는 L1/L1.5 절차다.",
@@ -3249,7 +3249,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.index",
+      "id": "recipes.meta.thesisKillChain.index",
       "title": "Thesis Kill-Chain Scenario 진입점",
       "category": "recipes",
       "purpose": "사용자의 투자 thesis를 지지하는 대신 일부러 깨보는 pre-mortem 시나리오 스킬팩 진입점이다. Company.show 원표, Company.disclosure, Company.gather, scan primitive만으로 가정, 취약 지표, 촉발 조건, 전파 경로, tripwire, 반증 조건을 만든다. 트리거 - 'thesis kill chain', '프리모템', '투자 논리 깨보기'.",
@@ -3266,7 +3266,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "id": "recipes.meta.thesisKillChain.premortemQualityGate",
       "title": "Thesis Kill-Chain Premortem Quality Gate",
       "category": "recipes",
       "purpose": "Thesis Kill-Chain 결과를 최종 답변으로 쓰기 전, thesis·근거 폭·가정 수·취약 지표·trigger·전파 경로·tripwire·falsifier·scenario·visual binding을 모두 통과했는지 막판에 차단하는 품질 게이트다. 트리거 — '타협 없이 thesis 깨기', 'premortem quality gate', '강한 스킬 검증'.",
@@ -3283,7 +3283,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.propagationPath",
+      "id": "recipes.meta.thesisKillChain.propagationPath",
       "title": "Thesis Kill-Chain Propagation Path",
       "category": "recipes",
       "purpose": "trigger가 어떤 mechanism을 거쳐 어떤 assumption을 깨는지 연결하는 pre-mortem 전파 경로 절차다.",
@@ -3300,7 +3300,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "id": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "title": "Thesis Kill-Chain Scenario Storyboard",
       "category": "recipes",
       "purpose": "baseIntact, erosionCase, killChainCase 세 시나리오로 thesis pre-mortem을 정리하는 L1/L1.5 절차다.",
@@ -3317,7 +3317,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.thesisIntake",
+      "id": "recipes.meta.thesisKillChain.thesisIntake",
       "title": "Thesis Kill-Chain Thesis Intake",
       "category": "recipes",
       "purpose": "사용자 thesis를 받아 growth, margin, cash, balance sheet, valuation, event, macro, governance theme으로 파싱하는 pre-mortem 시작 절차다.",
@@ -3334,7 +3334,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "id": "recipes.meta.thesisKillChain.triggerCatalog",
       "title": "Thesis Kill-Chain Trigger Catalog",
       "category": "recipes",
       "purpose": "fragilityMap, filings, scan primitive에서 thesis를 흔드는 촉발 조건을 모으는 L1/L1.5 절차다.",
@@ -3351,7 +3351,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "id": "recipes.meta.thesisKillChain.tripwireMonitor",
       "title": "Thesis Kill-Chain Tripwire Monitor",
       "category": "recipes",
       "purpose": "fragility metric별 current, threshold, action을 정리해 thesis가 깨지는 조기 경보선을 만드는 L1/L1.5 절차다.",
@@ -3368,7 +3368,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "id": "recipes.meta.thesisKillChain.visualDecisionPack",
       "title": "Thesis Kill-Chain Visual Decision Pack",
       "category": "recipes",
       "purpose": "scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다.",
@@ -10553,942 +10553,942 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
-      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
+      "dst": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "src": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "src": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "src": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.consensusDriftWatch",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.consensusDriftWatch",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "src": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.priceFlowReaction",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
-      "dst": "recipes.incubator.eventRadar.visualDecisionPack",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "dst": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "src": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
       "dst": "operation.architecture",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "src": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.eventInbox",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.eventInbox",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.eventInbox",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.eventInbox",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.falsifierLedger",
-      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
+      "dst": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.falsifierLedger",
-      "dst": "recipes.incubator.eventRadar.priceFlowReaction",
+      "src": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
+      "dst": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.falsifierLedger",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.priceFlowReaction",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.visualDecisionPack",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "start.dartlabSkillOs",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "operation.architecture",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.index",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "src": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "src": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.priceFlowReaction",
-      "dst": "recipes.incubator.eventRadar.eventInbox",
+      "src": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
+      "dst": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.priceFlowReaction",
-      "dst": "recipes.incubator.eventRadar.falsifierLedger",
+      "src": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
+      "dst": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.priceFlowReaction",
+      "src": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.priceFlowReaction",
+      "src": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
-      "dst": "recipes.incubator.eventRadar.index",
+      "src": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
+      "dst": "recipes.fundamental.disclosure.eventRadar.index",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "src": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "src": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "src": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.visualDecisionPack",
-      "dst": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "src": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
+      "dst": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.visualDecisionPack",
-      "dst": "recipes.incubator.eventRadar.deepDive",
+      "src": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
+      "dst": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.eventRadar.visualDecisionPack",
+      "src": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.eventRadar.visualDecisionPack",
+      "src": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.accountTraceLedger",
-      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "src": "recipes.fundamental.quality.forensics.accountTraceLedger",
+      "dst": "recipes.fundamental.quality.forensics.revenueToCashBridge",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.accountTraceLedger",
-      "dst": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "src": "recipes.fundamental.quality.forensics.accountTraceLedger",
+      "dst": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.crossSectionAnomalyRank",
-      "dst": "recipes.incubator.forensics.deepDive",
+      "src": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
+      "dst": "recipes.fundamental.quality.forensics.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.crossSectionAnomalyRank",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.dataCoverageAudit",
-      "dst": "recipes.incubator.forensics.accountTraceLedger",
+      "src": "recipes.fundamental.quality.forensics.dataCoverageAudit",
+      "dst": "recipes.fundamental.quality.forensics.accountTraceLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.dataCoverageAudit",
-      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "src": "recipes.fundamental.quality.forensics.dataCoverageAudit",
+      "dst": "recipes.fundamental.quality.forensics.revenueToCashBridge",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.dataCoverageAudit",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.dataCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.accountTraceLedger",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.accountTraceLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.revenueToCashBridge",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.noteSignalExtractor",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.noteSignalExtractor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.eventToStatementMatcher",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.deepDive",
+      "src": "recipes.fundamental.quality.forensics.deepDive",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.engineCandidateMemo",
-      "dst": "recipes.incubator.forensics.deepDive",
+      "src": "recipes.fundamental.quality.forensics.engineCandidateMemo",
+      "dst": "recipes.fundamental.quality.forensics.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.eventToStatementMatcher",
-      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "src": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
+      "dst": "recipes.fundamental.quality.forensics.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.eventToStatementMatcher",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.falsifierLedger",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.falsifierLedger",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.dataCoverageAudit",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.dataCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.accountTraceLedger",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.accountTraceLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.revenueToCashBridge",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.revenueToCashBridge",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.noteSignalExtractor",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.noteSignalExtractor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.eventToStatementMatcher",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
-      "dst": "recipes.incubator.forensics.deepDive",
+      "src": "recipes.fundamental.quality.forensics.index",
+      "dst": "recipes.fundamental.quality.forensics.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.index",
+      "src": "recipes.fundamental.quality.forensics.index",
       "dst": "start.dartlabSkillOs",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.index",
+      "src": "recipes.fundamental.quality.forensics.index",
       "dst": "operation.architecture",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.index",
+      "src": "recipes.fundamental.quality.forensics.index",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.index",
+      "src": "recipes.fundamental.quality.forensics.index",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.index",
+      "src": "recipes.fundamental.quality.forensics.index",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.forensics.noteSignalExtractor",
-      "dst": "recipes.incubator.forensics.eventToStatementMatcher",
+      "src": "recipes.fundamental.quality.forensics.noteSignalExtractor",
+      "dst": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.noteSignalExtractor",
-      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "src": "recipes.fundamental.quality.forensics.noteSignalExtractor",
+      "dst": "recipes.fundamental.quality.forensics.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.revenueToCashBridge",
-      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "src": "recipes.fundamental.quality.forensics.revenueToCashBridge",
+      "dst": "recipes.fundamental.quality.forensics.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.revenueToCashBridge",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.revenueToCashBridge",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.workingCapitalPressureMap",
-      "dst": "recipes.incubator.forensics.falsifierLedger",
+      "src": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
+      "dst": "recipes.fundamental.quality.forensics.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.forensics.workingCapitalPressureMap",
-      "dst": "recipes.incubator.forensics.engineCandidateMemo",
+      "src": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
+      "dst": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.assumptionLedger",
-      "dst": "recipes.incubator.thesisKillChain.thesisIntake",
+      "src": "recipes.meta.thesisKillChain.assumptionLedger",
+      "dst": "recipes.meta.thesisKillChain.thesisIntake",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.assumptionLedger",
-      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.assumptionLedger",
+      "dst": "recipes.meta.thesisKillChain.fragilityMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "src": "recipes.meta.thesisKillChain.assumptionLedger",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.thesisIntake",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.thesisIntake",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.assumptionLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.fragilityMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.triggerCatalog",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.propagationPath",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.tripwireMonitor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.visualDecisionPack",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
-      "dst": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "src": "recipes.meta.thesisKillChain.deepDive",
+      "dst": "recipes.meta.thesisKillChain.premortemQualityGate",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.deepDive",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.deepDive",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.deepDive",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
-      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
+      "dst": "recipes.meta.thesisKillChain.fragilityMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
-      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
+      "dst": "recipes.meta.thesisKillChain.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "src": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "src": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "src": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
-      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.falsifierLedger",
+      "dst": "recipes.meta.thesisKillChain.propagationPath",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
-      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "src": "recipes.meta.thesisKillChain.falsifierLedger",
+      "dst": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "src": "recipes.meta.thesisKillChain.falsifierLedger",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "src": "recipes.meta.thesisKillChain.falsifierLedger",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.fragilityMap",
-      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "src": "recipes.meta.thesisKillChain.fragilityMap",
+      "dst": "recipes.meta.thesisKillChain.assumptionLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.fragilityMap",
-      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "src": "recipes.meta.thesisKillChain.fragilityMap",
+      "dst": "recipes.meta.thesisKillChain.triggerCatalog",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.fragilityMap",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.fragilityMap",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.fragilityMap",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.thesisIntake",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.thesisIntake",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.assumptionLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.fragilityMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.triggerCatalog",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.propagationPath",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.tripwireMonitor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.visualDecisionPack",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.premortemQualityGate",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
-      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.index",
+      "dst": "recipes.meta.thesisKillChain.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "start.dartlabSkillOs",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "operation.architecture",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "engines.gather",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.index",
+      "src": "recipes.meta.thesisKillChain.index",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
-      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "src": "recipes.meta.thesisKillChain.premortemQualityGate",
+      "dst": "recipes.meta.thesisKillChain.visualDecisionPack",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
-      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.premortemQualityGate",
+      "dst": "recipes.meta.thesisKillChain.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "src": "recipes.meta.thesisKillChain.premortemQualityGate",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "src": "recipes.meta.thesisKillChain.premortemQualityGate",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "src": "recipes.meta.thesisKillChain.premortemQualityGate",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.propagationPath",
-      "dst": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "src": "recipes.meta.thesisKillChain.propagationPath",
+      "dst": "recipes.meta.thesisKillChain.triggerCatalog",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.propagationPath",
-      "dst": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "src": "recipes.meta.thesisKillChain.propagationPath",
+      "dst": "recipes.meta.thesisKillChain.tripwireMonitor",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.propagationPath",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.propagationPath",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
-      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.scenarioStoryboard",
+      "dst": "recipes.meta.thesisKillChain.propagationPath",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
-      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "src": "recipes.meta.thesisKillChain.scenarioStoryboard",
+      "dst": "recipes.meta.thesisKillChain.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
-      "dst": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "src": "recipes.meta.thesisKillChain.scenarioStoryboard",
+      "dst": "recipes.meta.thesisKillChain.visualDecisionPack",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "src": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "src": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.thesisIntake",
-      "dst": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "src": "recipes.meta.thesisKillChain.thesisIntake",
+      "dst": "recipes.meta.thesisKillChain.assumptionLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.thesisIntake",
-      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.thesisIntake",
+      "dst": "recipes.meta.thesisKillChain.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.thesisIntake",
+      "src": "recipes.meta.thesisKillChain.thesisIntake",
       "dst": "operation.skillDevelopmentLoop",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
-      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.triggerCatalog",
+      "dst": "recipes.meta.thesisKillChain.fragilityMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
-      "dst": "recipes.incubator.thesisKillChain.propagationPath",
+      "src": "recipes.meta.thesisKillChain.triggerCatalog",
+      "dst": "recipes.meta.thesisKillChain.propagationPath",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "src": "recipes.meta.thesisKillChain.triggerCatalog",
       "dst": "engines.company",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "src": "recipes.meta.thesisKillChain.triggerCatalog",
       "dst": "engines.scan",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.tripwireMonitor",
-      "dst": "recipes.incubator.thesisKillChain.fragilityMap",
+      "src": "recipes.meta.thesisKillChain.tripwireMonitor",
+      "dst": "recipes.meta.thesisKillChain.fragilityMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.tripwireMonitor",
-      "dst": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "src": "recipes.meta.thesisKillChain.tripwireMonitor",
+      "dst": "recipes.meta.thesisKillChain.falsifierLedger",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "src": "recipes.meta.thesisKillChain.tripwireMonitor",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
-      "dst": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "src": "recipes.meta.thesisKillChain.visualDecisionPack",
+      "dst": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
-      "dst": "recipes.incubator.thesisKillChain.deepDive",
+      "src": "recipes.meta.thesisKillChain.visualDecisionPack",
+      "dst": "recipes.meta.thesisKillChain.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "src": "recipes.meta.thesisKillChain.visualDecisionPack",
       "dst": "engines.viz",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "src": "recipes.meta.thesisKillChain.visualDecisionPack",
       "dst": "runtime.workbenchEvidenceFlow",
       "kind": "knowledge"
     },
@@ -13439,12 +13439,12 @@
     }
   ],
   "entries": [
-    "recipes.incubator.eventRadar.deepDive",
-    "recipes.incubator.eventRadar.index",
-    "recipes.incubator.forensics.deepDive",
-    "recipes.incubator.forensics.index",
-    "recipes.incubator.thesisKillChain.deepDive",
-    "recipes.incubator.thesisKillChain.index",
+    "recipes.fundamental.disclosure.eventRadar.deepDive",
+    "recipes.fundamental.disclosure.eventRadar.index",
+    "recipes.fundamental.quality.forensics.deepDive",
+    "recipes.fundamental.quality.forensics.index",
+    "recipes.meta.thesisKillChain.deepDive",
+    "recipes.meta.thesisKillChain.index",
     "recipes.fundamental.valuation.damodaran.index",
     "start.dartlabSkillOs",
     "start.firstAnalysisRecipe",
@@ -13595,43 +13595,43 @@
       "recipes.fundamental.valuation.intrinsicValueBand"
     ],
     [
-      "recipes.incubator.eventRadar.capitalActionMonitor",
-      "recipes.incubator.eventRadar.consensusDriftWatch",
-      "recipes.incubator.eventRadar.deepDive",
-      "recipes.incubator.eventRadar.engineCandidateMemo",
-      "recipes.incubator.eventRadar.eventInbox",
-      "recipes.incubator.eventRadar.falsifierLedger",
-      "recipes.incubator.eventRadar.index",
-      "recipes.incubator.eventRadar.insiderOwnershipSignal",
-      "recipes.incubator.eventRadar.priceFlowReaction",
-      "recipes.incubator.eventRadar.sourceCoverageAudit",
-      "recipes.incubator.eventRadar.visualDecisionPack"
+      "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
+      "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
+      "recipes.fundamental.disclosure.eventRadar.deepDive",
+      "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
+      "recipes.fundamental.disclosure.eventRadar.eventInbox",
+      "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
+      "recipes.fundamental.disclosure.eventRadar.index",
+      "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
+      "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
+      "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
+      "recipes.fundamental.disclosure.eventRadar.visualDecisionPack"
     ],
     [
-      "recipes.incubator.forensics.accountTraceLedger",
-      "recipes.incubator.forensics.crossSectionAnomalyRank",
-      "recipes.incubator.forensics.dataCoverageAudit",
-      "recipes.incubator.forensics.deepDive",
-      "recipes.incubator.forensics.engineCandidateMemo",
-      "recipes.incubator.forensics.eventToStatementMatcher",
-      "recipes.incubator.forensics.falsifierLedger",
-      "recipes.incubator.forensics.noteSignalExtractor",
-      "recipes.incubator.forensics.revenueToCashBridge",
-      "recipes.incubator.forensics.workingCapitalPressureMap"
+      "recipes.fundamental.quality.forensics.accountTraceLedger",
+      "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
+      "recipes.fundamental.quality.forensics.dataCoverageAudit",
+      "recipes.fundamental.quality.forensics.deepDive",
+      "recipes.fundamental.quality.forensics.engineCandidateMemo",
+      "recipes.fundamental.quality.forensics.eventToStatementMatcher",
+      "recipes.fundamental.quality.forensics.falsifierLedger",
+      "recipes.fundamental.quality.forensics.noteSignalExtractor",
+      "recipes.fundamental.quality.forensics.revenueToCashBridge",
+      "recipes.fundamental.quality.forensics.workingCapitalPressureMap"
     ],
     [
-      "recipes.incubator.thesisKillChain.assumptionLedger",
-      "recipes.incubator.thesisKillChain.deepDive",
-      "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
-      "recipes.incubator.thesisKillChain.falsifierLedger",
-      "recipes.incubator.thesisKillChain.fragilityMap",
-      "recipes.incubator.thesisKillChain.premortemQualityGate",
-      "recipes.incubator.thesisKillChain.propagationPath",
-      "recipes.incubator.thesisKillChain.scenarioStoryboard",
-      "recipes.incubator.thesisKillChain.thesisIntake",
-      "recipes.incubator.thesisKillChain.triggerCatalog",
-      "recipes.incubator.thesisKillChain.tripwireMonitor",
-      "recipes.incubator.thesisKillChain.visualDecisionPack"
+      "recipes.meta.thesisKillChain.assumptionLedger",
+      "recipes.meta.thesisKillChain.deepDive",
+      "recipes.meta.thesisKillChain.evidenceCoverageAudit",
+      "recipes.meta.thesisKillChain.falsifierLedger",
+      "recipes.meta.thesisKillChain.fragilityMap",
+      "recipes.meta.thesisKillChain.premortemQualityGate",
+      "recipes.meta.thesisKillChain.propagationPath",
+      "recipes.meta.thesisKillChain.scenarioStoryboard",
+      "recipes.meta.thesisKillChain.thesisIntake",
+      "recipes.meta.thesisKillChain.triggerCatalog",
+      "recipes.meta.thesisKillChain.tripwireMonitor",
+      "recipes.meta.thesisKillChain.visualDecisionPack"
     ]
   ],
   "orphans": [

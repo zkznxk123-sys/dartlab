@@ -2832,7 +2832,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.index",
+      "id": "recipes.fundamental.quality.forensics.index",
       "title": "Evidence Forensics Incubator 진입점",
       "category": "recipes",
       "status": "limited",
@@ -2843,7 +2843,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.forensics.dataCoverageAudit",
+      "id": "recipes.fundamental.quality.forensics.dataCoverageAudit",
       "title": "Forensics Data Coverage Audit",
       "category": "recipes",
       "status": "limited",
@@ -2852,7 +2852,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.accountTraceLedger",
+      "id": "recipes.fundamental.quality.forensics.accountTraceLedger",
       "title": "Forensics Account Trace Ledger",
       "category": "recipes",
       "status": "limited",
@@ -2861,7 +2861,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.revenueToCashBridge",
+      "id": "recipes.fundamental.quality.forensics.revenueToCashBridge",
       "title": "Revenue To Cash Bridge",
       "category": "recipes",
       "status": "limited",
@@ -2870,7 +2870,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.workingCapitalPressureMap",
+      "id": "recipes.fundamental.quality.forensics.workingCapitalPressureMap",
       "title": "Working Capital Pressure Map",
       "category": "recipes",
       "status": "limited",
@@ -2879,7 +2879,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.noteSignalExtractor",
+      "id": "recipes.fundamental.quality.forensics.noteSignalExtractor",
       "title": "Filing Note Signal Extractor",
       "category": "recipes",
       "status": "limited",
@@ -2888,7 +2888,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.eventToStatementMatcher",
+      "id": "recipes.fundamental.quality.forensics.eventToStatementMatcher",
       "title": "Event To Statement Matcher",
       "category": "recipes",
       "status": "limited",
@@ -2897,7 +2897,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.crossSectionAnomalyRank",
+      "id": "recipes.fundamental.quality.forensics.crossSectionAnomalyRank",
       "title": "Cross Section Anomaly Rank",
       "category": "recipes",
       "status": "limited",
@@ -2906,7 +2906,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.falsifierLedger",
+      "id": "recipes.fundamental.quality.forensics.falsifierLedger",
       "title": "Forensics Falsifier Ledger",
       "category": "recipes",
       "status": "limited",
@@ -2915,7 +2915,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.engineCandidateMemo",
+      "id": "recipes.fundamental.quality.forensics.engineCandidateMemo",
       "title": "Forensics Engine Candidate Memo",
       "category": "recipes",
       "status": "limited",
@@ -2924,7 +2924,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.forensics.deepDive",
+      "id": "recipes.fundamental.quality.forensics.deepDive",
       "title": "Evidence Forensics Deep Dive",
       "category": "recipes",
       "status": "limited",
@@ -2933,7 +2933,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.index",
+      "id": "recipes.fundamental.disclosure.eventRadar.index",
       "title": "Event Radar Incubator 진입점",
       "category": "recipes",
       "status": "limited",
@@ -2944,7 +2944,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.eventRadar.sourceCoverageAudit",
+      "id": "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
       "title": "Event Radar Source Coverage Audit",
       "category": "recipes",
       "status": "limited",
@@ -2953,7 +2953,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.eventInbox",
+      "id": "recipes.fundamental.disclosure.eventRadar.eventInbox",
       "title": "Event Radar Event Inbox",
       "category": "recipes",
       "status": "limited",
@@ -2962,7 +2962,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.priceFlowReaction",
+      "id": "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
       "title": "Event Radar Price Flow Reaction",
       "category": "recipes",
       "status": "limited",
@@ -2971,7 +2971,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.insiderOwnershipSignal",
+      "id": "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
       "title": "Event Radar Insider Ownership Signal",
       "category": "recipes",
       "status": "limited",
@@ -2980,7 +2980,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.capitalActionMonitor",
+      "id": "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
       "title": "Event Radar Capital Action Monitor",
       "category": "recipes",
       "status": "limited",
@@ -2989,7 +2989,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.consensusDriftWatch",
+      "id": "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
       "title": "Event Radar Consensus Drift Watch",
       "category": "recipes",
       "status": "limited",
@@ -2998,7 +2998,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.falsifierLedger",
+      "id": "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
       "title": "Event Radar Falsifier Ledger",
       "category": "recipes",
       "status": "limited",
@@ -3007,7 +3007,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.engineCandidateMemo",
+      "id": "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
       "title": "Event Radar Engine Candidate Memo",
       "category": "recipes",
       "status": "limited",
@@ -3016,7 +3016,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.visualDecisionPack",
+      "id": "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
       "title": "Event Radar Visual Decision Pack",
       "category": "recipes",
       "status": "limited",
@@ -3025,7 +3025,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.eventRadar.deepDive",
+      "id": "recipes.fundamental.disclosure.eventRadar.deepDive",
       "title": "Event Radar Deep Dive",
       "category": "recipes",
       "status": "limited",
@@ -3034,7 +3034,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.index",
+      "id": "recipes.meta.thesisKillChain.index",
       "title": "Thesis Kill-Chain Scenario 진입점",
       "category": "recipes",
       "status": "limited",
@@ -3045,7 +3045,7 @@
       ]
     },
     {
-      "id": "recipes.incubator.thesisKillChain.thesisIntake",
+      "id": "recipes.meta.thesisKillChain.thesisIntake",
       "title": "Thesis Kill-Chain Thesis Intake",
       "category": "recipes",
       "status": "limited",
@@ -3054,7 +3054,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
+      "id": "recipes.meta.thesisKillChain.evidenceCoverageAudit",
       "title": "Thesis Kill-Chain Evidence Coverage Audit",
       "category": "recipes",
       "status": "limited",
@@ -3063,7 +3063,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.assumptionLedger",
+      "id": "recipes.meta.thesisKillChain.assumptionLedger",
       "title": "Thesis Kill-Chain Assumption Ledger",
       "category": "recipes",
       "status": "limited",
@@ -3072,7 +3072,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.fragilityMap",
+      "id": "recipes.meta.thesisKillChain.fragilityMap",
       "title": "Thesis Kill-Chain Fragility Map",
       "category": "recipes",
       "status": "limited",
@@ -3081,7 +3081,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.triggerCatalog",
+      "id": "recipes.meta.thesisKillChain.triggerCatalog",
       "title": "Thesis Kill-Chain Trigger Catalog",
       "category": "recipes",
       "status": "limited",
@@ -3090,7 +3090,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.propagationPath",
+      "id": "recipes.meta.thesisKillChain.propagationPath",
       "title": "Thesis Kill-Chain Propagation Path",
       "category": "recipes",
       "status": "limited",
@@ -3099,7 +3099,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.tripwireMonitor",
+      "id": "recipes.meta.thesisKillChain.tripwireMonitor",
       "title": "Thesis Kill-Chain Tripwire Monitor",
       "category": "recipes",
       "status": "limited",
@@ -3108,7 +3108,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.falsifierLedger",
+      "id": "recipes.meta.thesisKillChain.falsifierLedger",
       "title": "Thesis Kill-Chain Falsifier Ledger",
       "category": "recipes",
       "status": "limited",
@@ -3117,7 +3117,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.scenarioStoryboard",
+      "id": "recipes.meta.thesisKillChain.scenarioStoryboard",
       "title": "Thesis Kill-Chain Scenario Storyboard",
       "category": "recipes",
       "status": "limited",
@@ -3126,7 +3126,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.visualDecisionPack",
+      "id": "recipes.meta.thesisKillChain.visualDecisionPack",
       "title": "Thesis Kill-Chain Visual Decision Pack",
       "category": "recipes",
       "status": "limited",
@@ -3135,7 +3135,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.premortemQualityGate",
+      "id": "recipes.meta.thesisKillChain.premortemQualityGate",
       "title": "Thesis Kill-Chain Premortem Quality Gate",
       "category": "recipes",
       "status": "limited",
@@ -3144,7 +3144,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.incubator.thesisKillChain.deepDive",
+      "id": "recipes.meta.thesisKillChain.deepDive",
       "title": "Thesis Kill-Chain Deep Dive",
       "category": "recipes",
       "status": "limited",

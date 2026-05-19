@@ -13,20 +13,22 @@ import pytest
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EVENT_RADAR_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "incubator" / "eventRadar"
+EVENT_RADAR_DIR = (
+    REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "fundamental" / "disclosure" / "eventRadar"
+)
 
 EVENT_RADAR_IDS = {
-    "recipes.incubator.eventRadar.index",
-    "recipes.incubator.eventRadar.sourceCoverageAudit",
-    "recipes.incubator.eventRadar.eventInbox",
-    "recipes.incubator.eventRadar.priceFlowReaction",
-    "recipes.incubator.eventRadar.insiderOwnershipSignal",
-    "recipes.incubator.eventRadar.capitalActionMonitor",
-    "recipes.incubator.eventRadar.consensusDriftWatch",
-    "recipes.incubator.eventRadar.falsifierLedger",
-    "recipes.incubator.eventRadar.engineCandidateMemo",
-    "recipes.incubator.eventRadar.visualDecisionPack",
-    "recipes.incubator.eventRadar.deepDive",
+    "recipes.fundamental.disclosure.eventRadar.index",
+    "recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit",
+    "recipes.fundamental.disclosure.eventRadar.eventInbox",
+    "recipes.fundamental.disclosure.eventRadar.priceFlowReaction",
+    "recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal",
+    "recipes.fundamental.disclosure.eventRadar.capitalActionMonitor",
+    "recipes.fundamental.disclosure.eventRadar.consensusDriftWatch",
+    "recipes.fundamental.disclosure.eventRadar.falsifierLedger",
+    "recipes.fundamental.disclosure.eventRadar.engineCandidateMemo",
+    "recipes.fundamental.disclosure.eventRadar.visualDecisionPack",
+    "recipes.fundamental.disclosure.eventRadar.deepDive",
 }
 
 BANNED_L2_CALLS = (
@@ -92,17 +94,17 @@ def testEventRadarSkillsAreExposedThroughAiEntryPoints() -> None:
     visual = readSkill("eventRadar visual decision pack observed viz priceChart kpiRibbon", limit=8, includeUser=False)
 
     assert entry.ok
-    assert entry.data["skills"][0]["id"] == "recipes.incubator.eventRadar.index"
+    assert entry.data["skills"][0]["id"] == "recipes.fundamental.disclosure.eventRadar.index"
     assert reaction.ok
-    assert reaction.data["skills"][0]["id"] == "recipes.incubator.eventRadar.priceFlowReaction"
+    assert reaction.data["skills"][0]["id"] == "recipes.fundamental.disclosure.eventRadar.priceFlowReaction"
     assert visual.ok
-    assert visual.data["skills"][0]["id"] == "recipes.incubator.eventRadar.visualDecisionPack"
+    assert visual.data["skills"][0]["id"] == "recipes.fundamental.disclosure.eventRadar.visualDecisionPack"
 
-    body = getSkillBody("recipes.incubator.eventRadar.deepDive", includeUser=False)
+    body = getSkillBody("recipes.fundamental.disclosure.eventRadar.deepDive", includeUser=False)
     assert body.ok
     raw = body.data["body"]
     assert "buildEventRadarMemo" in raw
-    assert "recipes.incubator.eventRadar.visualDecisionPack" in raw
+    assert "recipes.fundamental.disclosure.eventRadar.visualDecisionPack" in raw
 
 
 def testEventRadarSkillsAreInPublicSkillArtifacts() -> None:
@@ -119,11 +121,11 @@ def testEventRadarSkillsAreInPublicSkillArtifacts() -> None:
             recipe_meta = [row for row in payload["meta"]["categories"] if row["id"] == "recipes"]
             assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
         if name in {"index.json", "agent.json", "mcp.json"}:
-            assert by_id["recipes.incubator.eventRadar.index"]["bodyPreview"]
+            assert by_id["recipes.fundamental.disclosure.eventRadar.index"]["bodyPreview"]
         if name in {"index.json", "agent.json", "web.json"}:
-            assert by_id["recipes.incubator.eventRadar.deepDive"]["expectedOutputs"]
+            assert by_id["recipes.fundamental.disclosure.eventRadar.deepDive"]["expectedOutputs"]
         if name == "web.json":
-            assert by_id["recipes.incubator.eventRadar.index"]["bodyHuman"]
+            assert by_id["recipes.fundamental.disclosure.eventRadar.index"]["bodyHuman"]
 
     graph = json.loads((artifact_dir / "graph.json").read_text(encoding="utf-8"))
     graph_ids = {node["id"] for node in graph.get("nodes", [])}

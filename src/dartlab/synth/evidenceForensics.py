@@ -203,7 +203,7 @@ def buildEvidenceForensicsMemo(
             {
                 "id": "forensicsSkillPack",
                 "title": "Evidence Forensics Incubator skill pack",
-                "url": "dartlab://skills/recipes.incubator.forensics.index",
+                "url": "dartlab://skills/recipes.fundamental.quality.forensics.index",
             },
         ],
     }

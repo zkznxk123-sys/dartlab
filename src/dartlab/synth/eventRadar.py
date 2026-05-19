@@ -155,7 +155,7 @@ def buildEventRadarMemo(
             {
                 "id": "eventRadarSkillPack",
                 "title": "Event Radar Incubator skill pack",
-                "url": "dartlab://skills/recipes.incubator.eventRadar.index",
+                "url": "dartlab://skills/recipes.fundamental.disclosure.eventRadar.index",
             },
         ],
     }

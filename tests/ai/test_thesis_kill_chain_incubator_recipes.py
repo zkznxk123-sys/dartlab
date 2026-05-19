@@ -13,22 +13,22 @@ import pytest
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-KILL_CHAIN_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "incubator" / "thesisKillChain"
+KILL_CHAIN_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "meta" / "thesisKillChain"
 
 KILL_CHAIN_IDS = {
-    "recipes.incubator.thesisKillChain.index",
-    "recipes.incubator.thesisKillChain.thesisIntake",
-    "recipes.incubator.thesisKillChain.evidenceCoverageAudit",
-    "recipes.incubator.thesisKillChain.assumptionLedger",
-    "recipes.incubator.thesisKillChain.fragilityMap",
-    "recipes.incubator.thesisKillChain.triggerCatalog",
-    "recipes.incubator.thesisKillChain.propagationPath",
-    "recipes.incubator.thesisKillChain.tripwireMonitor",
-    "recipes.incubator.thesisKillChain.falsifierLedger",
-    "recipes.incubator.thesisKillChain.scenarioStoryboard",
-    "recipes.incubator.thesisKillChain.visualDecisionPack",
-    "recipes.incubator.thesisKillChain.premortemQualityGate",
-    "recipes.incubator.thesisKillChain.deepDive",
+    "recipes.meta.thesisKillChain.index",
+    "recipes.meta.thesisKillChain.thesisIntake",
+    "recipes.meta.thesisKillChain.evidenceCoverageAudit",
+    "recipes.meta.thesisKillChain.assumptionLedger",
+    "recipes.meta.thesisKillChain.fragilityMap",
+    "recipes.meta.thesisKillChain.triggerCatalog",
+    "recipes.meta.thesisKillChain.propagationPath",
+    "recipes.meta.thesisKillChain.tripwireMonitor",
+    "recipes.meta.thesisKillChain.falsifierLedger",
+    "recipes.meta.thesisKillChain.scenarioStoryboard",
+    "recipes.meta.thesisKillChain.visualDecisionPack",
+    "recipes.meta.thesisKillChain.premortemQualityGate",
+    "recipes.meta.thesisKillChain.deepDive",
 }
 
 BANNED_L2_CALLS = (
@@ -95,21 +95,21 @@ def testThesisKillChainSkillsAreExposedThroughAiEntryPoints() -> None:
     strong = readSkill("진짜 강하게 thesis 깨봐 타협 없이 품질 게이트", limit=8, includeUser=False)
 
     assert entry.ok
-    assert entry.data["skills"][0]["id"] == "recipes.incubator.thesisKillChain.index"
+    assert entry.data["skills"][0]["id"] == "recipes.meta.thesisKillChain.index"
     assert path.ok
-    assert path.data["skills"][0]["id"] == "recipes.incubator.thesisKillChain.propagationPath"
+    assert path.data["skills"][0]["id"] == "recipes.meta.thesisKillChain.propagationPath"
     assert scenario.ok
-    assert scenario.data["skills"][0]["id"] == "recipes.incubator.thesisKillChain.scenarioStoryboard"
+    assert scenario.data["skills"][0]["id"] == "recipes.meta.thesisKillChain.scenarioStoryboard"
     assert strong.ok
     strong_ids = [row["id"] for row in strong.data["skills"]]
-    assert "recipes.incubator.thesisKillChain.premortemQualityGate" in strong_ids[:3]
-    assert any(skill_id.startswith("recipes.incubator.thesisKillChain.") for skill_id in strong_ids[:3])
+    assert "recipes.meta.thesisKillChain.premortemQualityGate" in strong_ids[:3]
+    assert any(skill_id.startswith("recipes.meta.thesisKillChain.") for skill_id in strong_ids[:3])
 
-    body = getSkillBody("recipes.incubator.thesisKillChain.deepDive", includeUser=False)
+    body = getSkillBody("recipes.meta.thesisKillChain.deepDive", includeUser=False)
     assert body.ok
     raw = body.data["body"]
     assert "buildThesisKillChainMemo" in raw
-    assert "recipes.incubator.thesisKillChain.scenarioStoryboard" in raw
+    assert "recipes.meta.thesisKillChain.scenarioStoryboard" in raw
     assert "premortemQualityGate" in raw
     assert "타협 없는 사용 기준" in raw
 
@@ -128,11 +128,11 @@ def testThesisKillChainSkillsAreInPublicSkillArtifacts() -> None:
             recipe_meta = [row for row in payload["meta"]["categories"] if row["id"] == "recipes"]
             assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
         if name in {"index.json", "agent.json", "mcp.json"}:
-            assert by_id["recipes.incubator.thesisKillChain.index"]["bodyPreview"]
+            assert by_id["recipes.meta.thesisKillChain.index"]["bodyPreview"]
         if name in {"index.json", "agent.json", "web.json"}:
-            assert by_id["recipes.incubator.thesisKillChain.deepDive"]["expectedOutputs"]
+            assert by_id["recipes.meta.thesisKillChain.deepDive"]["expectedOutputs"]
         if name == "web.json":
-            assert by_id["recipes.incubator.thesisKillChain.index"]["bodyHuman"]
+            assert by_id["recipes.meta.thesisKillChain.index"]["bodyHuman"]
 
     graph = json.loads((artifact_dir / "graph.json").read_text(encoding="utf-8"))
     graph_ids = {node["id"] for node in graph.get("nodes", [])}
