@@ -203,18 +203,40 @@ QUANT_CARDS: dict[str, CatalogEntry] = {
         "dataSpec": {"adapter": "quantSnowflakeRadar"},
     },
     # ─────────────────────────────────────────────────────────────
-    # 5. forecast — 일별 수익률 예측 + Conformal CI
+    # 5. forecast — Conformal fan chart + Monte Carlo paths + HMM regime phase
     # ─────────────────────────────────────────────────────────────
-    "quantForecastKpi": {
-        "kind": "kpiTile",
-        "title": "수익률 예측 (Conformal)",
+    "quantForecastFan": {
+        "kind": "trend",
+        "title": "Forecast Fan (20일 horizon)",
         "topic": "price",
         "tab": "quant",
         "seriesPlan": [],
         "options": {},
-        "layout": {"colSpan": 12, "rowSpan": 2},
-        "help": "5일 horizon Naive·AR(1)·ETS-Holt·Theta 자동 dispatch + 90% Conformal interval. point + lower/upper 표시.",
-        "dataSpec": {"adapter": "quantForecastKpi"},
+        "layout": {"colSpan": 12, "rowSpan": 4},
+        "help": "20일 horizon Naive·AR(1)·ETS-Holt·Theta 자동 dispatch 점 예측 + 90% Conformal CI 상/하단. 가격 단위 price band.",
+        "dataSpec": {"adapter": "quantForecastFan"},
+    },
+    "quantMonteCarloPaths": {
+        "kind": "trend",
+        "title": "Monte Carlo (GBM 200 path)",
+        "topic": "price",
+        "tab": "quant",
+        "seriesPlan": [],
+        "options": {},
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "Geometric Brownian Motion 200 path × 20일 horizon. 25/50/75 percentile band + VaR(5%)/CVaR(5%) 표기.",
+        "dataSpec": {"adapter": "quantMonteCarloPaths"},
+    },
+    "quantRegimePhase": {
+        "kind": "phaseIndicator",
+        "title": "HMM Regime",
+        "topic": "price",
+        "tab": "quant",
+        "seriesPlan": [],
+        "options": {},
+        "layout": {"colSpan": 6, "rowSpan": 3},
+        "help": "Hamilton 2-state HMM bull/bear regime — 약세 / 중립 / 상승 / 강한 상승 4 phase 중 현재 위치 + bullProb confidence.",
+        "dataSpec": {"adapter": "quantRegimePhase"},
     },
 }
 """quant 탭 7 카드 (signal 2 + factor 1 + backtest 1 + risk 2 + forecast 1).

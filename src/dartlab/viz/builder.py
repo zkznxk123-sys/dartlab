@@ -399,6 +399,14 @@ def _buildKindSpecView(
             base_view["series"] = result["series"]
     elif adapter_name == "distressEnsembleGauge":
         base_view.update(adapters.buildDistressEnsembleGauge(company))
+    elif adapter_name == "snowflakeRadar":
+        result = adapters.buildSnowflakeRadar(company)
+        if "categories" in result:
+            base_view["categories"] = result["categories"]
+        if "series" in result:
+            base_view["series"] = result["series"]
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
     # quant 탭 adapter — stockCode 만 받음 (가격 데이터는 quant 엔진이 자체 fetch).
     elif adapter_name == "quantPriceTrend":
         result = adapters.buildQuantPriceTrend(stockCode)
@@ -489,6 +497,22 @@ def _buildKindSpecView(
         base_view["series"] = result.get("series", [])
         if "options" in result:
             base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    # forecast 3 카드.
+    elif adapter_name == "quantForecastFan":
+        result = adapters.buildQuantForecastFan(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+    elif adapter_name == "quantMonteCarloPaths":
+        result = adapters.buildQuantMonteCarloPaths(stockCode)
+        base_view["categories"] = result.get("categories", [])
+        base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
+    elif adapter_name == "quantRegimePhase":
+        result = adapters.buildQuantRegimePhase(stockCode)
+        for key in ("phases", "current", "confidence", "subtitle"):
+            if key in result:
+                base_view[key] = result[key]
     else:
         # adapter 미지정 — 빈 spec 으로라도 kind 보존.
         pass

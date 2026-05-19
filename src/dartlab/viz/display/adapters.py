@@ -1371,6 +1371,109 @@ def buildDistressEnsembleGauge(company: Any) -> dict[str, Any]:
     }
 
 
+def buildSnowflakeRadar(company: Any) -> dict[str, Any]:
+    """5 정통 axis 0~10 점수 radar — Simply Wall St "Snowflake" 패턴.
+
+    각 axis 절대 임계값 (peer 불필요, industry-agnostic):
+      - 수익성   ROE %               : 0/5/10/15/20 → 0/3/6/8/10p
+      - 자본효율 ROIC %              : 동일
+      - 안정성   자기자본/자산 %     : 0/20/40/60/80
+      - 유동성   유동비율 (배)       : 0.5/1.0/1.5/2.0/3.0
+      - 현금흐름 FCF/매출 %          : -5/0/5/10/15
+
+    최근 4 분기 평균 (단일 분기 노이즈 흡수). 데이터 부족 axis 는 0p 처리 (radar 표시).
+    회사 강·약점이 한 장에 보임.
+    """
+    from dartlab.viz.data import normalize as _norm
+    from dartlab.viz.display.finance.accounts import extractSeries
+    from dartlab.viz.display.finance.periods import lastNPeriods
+
+    norm = _norm.normalize(company.rawFinance)
+    periods = lastNPeriods(company.rawFinance, 4, "quarterly")
+    if not periods:
+        return {}
+
+    def _avg(values: list[float | None]) -> float | None:
+        valid = [v for v in values if v is not None]
+        return sum(valid) / len(valid) if valid else None
+
+    def _ratio(numKey: str, denKey: str, scale: float = 100.0) -> float | None:
+        num = extractSeries(norm, numKey, periods)
+        den = extractSeries(norm, denKey, periods)
+        outs = []
+        for n, d in zip(num, den):
+            if n is not None and d is not None and d != 0:
+                outs.append(n / d * scale)
+        return _avg(outs) if outs else None
+
+    def _score(v: float | None, points: list[tuple[float, float]]) -> float | None:
+        if v is None:
+            return None
+        if v <= points[0][0]:
+            return points[0][1]
+        if v >= points[-1][0]:
+            return points[-1][1]
+        for i in range(len(points) - 1):
+            v0, s0 = points[i]
+            v1, s1 = points[i + 1]
+            if v0 <= v <= v1:
+                return round(s0 + (v - v0) / (v1 - v0) * (s1 - s0), 1)
+        return None
+
+    roe = _ratio("netIncome", "equity")
+    roicRes = _safeCall("dartlab.analysis.financial._investmentAnalysisRoic", "calcRoicTimeline", company)
+    roicHist = _drill(roicRes, "history") if isinstance(roicRes, dict) else None
+    roicValues: list[float] = []
+    if isinstance(roicHist, list):
+        for row in roicHist[-4:]:
+            if isinstance(row, dict):
+                v = _toFloat(row.get("roic") or row.get("value"))
+                if v is not None:
+                    roicValues.append(v)
+    roic = _avg(roicValues) if roicValues else None
+    equityRatio = _ratio("equity", "assets")
+    currentRatio = _ratio("currentAssets", "currentLiabilities", scale=1.0)
+    ocf = extractSeries(norm, "operatingCashflow", periods)
+    capex = extractSeries(norm, "capex", periods)
+    revenue = extractSeries(norm, "revenue", periods)
+    fcfMargins: list[float] = []
+    for o, c, r in zip(ocf, capex, revenue):
+        if o is not None and c is not None and r is not None and r != 0:
+            fcfMargins.append((o - abs(c)) / r * 100)
+    fcfMargin = _avg(fcfMargins) if fcfMargins else None
+
+    axes = [
+        ("수익성 (ROE)", roe, [(0, 0), (5, 3), (10, 6), (15, 8), (20, 10)], "%"),
+        ("자본효율 (ROIC)", roic, [(0, 0), (5, 3), (10, 6), (15, 8), (20, 10)], "%"),
+        ("안정성 (자기자본/자산)", equityRatio, [(0, 0), (20, 3), (40, 6), (60, 8), (80, 10)], "%"),
+        ("유동성 (유동비율)", currentRatio, [(0.5, 0), (1.0, 3), (1.5, 6), (2.0, 8), (3.0, 10)], "배"),
+        ("현금흐름 (FCF/매출)", fcfMargin, [(-5, 0), (0, 3), (5, 6), (10, 8), (15, 10)], "%"),
+    ]
+    categories = [a[0] for a in axes]
+    scores = [_score(a[1], a[2]) for a in axes]
+    rawValues = [a[1] for a in axes]
+    rawUnits = [a[3] for a in axes]
+    return {
+        "categories": categories,
+        "series": [
+            {
+                "key": "score",
+                "label": "점수 (0~10)",
+                "color": "var(--chart-2)",
+                "type": "radar",
+                "data": [s if s is not None else 0 for s in scores],
+                "unit": "점",
+                "intent": "primary",
+            },
+        ],
+        "options": {
+            "rawValues": rawValues,
+            "rawUnits": rawUnits,
+            "max": 10,
+        },
+    }
+
+
 __all__ = [
     "LIFE_CYCLE_PHASES",
     "buildBeneishGauge",
@@ -1391,6 +1494,7 @@ __all__ = [
     "buildScenarioSensitivity",
     "buildScoreBadge",
     "buildSegmentBreakdown",
+    "buildSnowflakeRadar",
     "buildSegmentConcentration",
     "buildSnowflakeAlert",
     "buildSnowflakeKpi",
@@ -1418,6 +1522,10 @@ __all__ = [
     "buildQuantVolatilityTerm",
     "buildQuantDrawdownDistribution",
     "buildQuantSnowflakeRadar",
+    # forecast 3 카드 (이벤트 스터디는 후행).
+    "buildQuantForecastFan",
+    "buildQuantMonteCarloPaths",
+    "buildQuantRegimePhase",
 ]
 
 
@@ -2403,6 +2511,135 @@ def _normalizeScore(v: float | None, lo: float, hi: float) -> float:
         return 0.0
     s = (v - lo) / (hi - lo) * 5
     return max(0.0, min(5.0, s))
+
+
+def buildQuantForecastFan(stockCode: str) -> dict[str, Any]:
+    """Forecast Fan Chart — N-day horizon × {pointForecast, lower/upperBound} band.
+
+    forecastReturns(horizon=20) → forecastTable 10/20 row. trend kind 4 series:
+      - lastClose anchor (1 점)
+      - pricePoint (point forecast 시계열)
+      - priceLower / priceUpper (90% Conformal band, area-like 2 line)
+    """
+    result = _safeQuantCall("dartlab.quant.benchmark.forecast", "forecastReturns", stockCode, horizon=20)
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"categories": [], "series": []}
+    table = result.get("forecastTable") or []
+    if not isinstance(table, list) or len(table) == 0:
+        return {"categories": [], "series": []}
+    lastClose = _toFloat(result.get("lastClose"))
+    lastDate = str(result.get("lastDate") or "today")[:10]
+    # categories — last date + horizon 1..N. forecastTable horizon 인덱스로 라벨.
+    categories = [lastDate] + [f"+{int(r.get('horizon', i + 1))}일" for i, r in enumerate(table)]
+    points: list[float | None] = [lastClose]
+    lowers: list[float | None] = [lastClose]
+    uppers: list[float | None] = [lastClose]
+    for row in table:
+        if not isinstance(row, dict):
+            continue
+        points.append(_toFloat(row.get("pricePoint")))
+        lowers.append(_toFloat(row.get("priceLower")))
+        uppers.append(_toFloat(row.get("priceUpper")))
+    model = str(result.get("modelChosen", "auto"))
+    return {
+        "categories": categories,
+        "series": [
+            {"key": "upper", "label": "90% CI 상단", "color": "#10b981", "intent": "accent",
+             "unit": "원", "type": "line", "axis": "left", "data": uppers},
+            {"key": "point", "label": f"점 예측 ({model})", "color": "#2563eb", "intent": "primary",
+             "unit": "원", "type": "line", "axis": "left", "data": points},
+            {"key": "lower", "label": "90% CI 하단", "color": "#ef4444", "intent": "accent",
+             "unit": "원", "type": "line", "axis": "left", "data": lowers},
+        ],
+    }
+
+
+def buildQuantMonteCarloPaths(stockCode: str) -> dict[str, Any]:
+    """Monte Carlo GBM 100 paths × 20 day horizon + VaR/CVaR.
+
+    drift μ = 평균 일별 수익률, σ = 일별 std (last 252 day).
+    paths = lastClose × exp((μ − σ²/2)t + σ × sqrt(t) × Z).
+    trend kind. 25/50/75 percentile band + median bold line. options.varCvar 표기.
+    """
+    try:
+        from dartlab.quant.signal.momentum import fetchOhlcv
+        import numpy as np
+    except ImportError:
+        return {"categories": [], "series": []}
+    try:
+        ohlcv = fetchOhlcv(stockCode)
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    if ohlcv is None:
+        return {"categories": [], "series": []}
+    try:
+        close = ohlcv["close"].to_numpy()
+        lastDate = str(ohlcv["date"].to_list()[-1])[:10]
+    except Exception:  # noqa: BLE001
+        return {"categories": [], "series": []}
+    if len(close) < 30:
+        return {"categories": [], "series": []}
+    rets = np.diff(np.log(close[-252:]))
+    mu = float(np.mean(rets))
+    sigma = float(np.std(rets, ddof=1))
+    lastClose = float(close[-1])
+    horizon = 20
+    nPaths = 200
+    rng = np.random.default_rng(seed=42)
+    # GBM simulation.
+    Z = rng.standard_normal(size=(nPaths, horizon))
+    log_paths = np.cumsum((mu - sigma ** 2 / 2) + sigma * Z, axis=1)
+    paths = lastClose * np.exp(log_paths)
+    # 25/50/75 percentile time series.
+    p25 = np.percentile(paths, 25, axis=0).tolist()
+    p50 = np.percentile(paths, 50, axis=0).tolist()
+    p75 = np.percentile(paths, 75, axis=0).tolist()
+    # VaR / CVaR 5% (horizon 끝).
+    final = paths[:, -1]
+    var5 = float(np.percentile(final, 5))
+    cvar5 = float(np.mean(final[final <= var5])) if (final <= var5).any() else var5
+    categories = [lastDate] + [f"+{i + 1}일" for i in range(horizon)]
+    return {
+        "categories": categories,
+        "series": [
+            {"key": "p75", "label": "75 percentile", "color": "#10b981", "intent": "accent",
+             "unit": "원", "type": "line", "axis": "left", "data": [lastClose] + p75},
+            {"key": "p50", "label": "Median", "color": "#2563eb", "intent": "primary",
+             "unit": "원", "type": "line", "axis": "left", "data": [lastClose] + p50},
+            {"key": "p25", "label": "25 percentile", "color": "#ef4444", "intent": "accent",
+             "unit": "원", "type": "line", "axis": "left", "data": [lastClose] + p25},
+        ],
+        "options": {
+            "varCvar": {"var5": round(var5, 0), "cvar5": round(cvar5, 0), "lastClose": lastClose, "nPaths": nPaths},
+        },
+    }
+
+
+def buildQuantRegimePhase(stockCode: str) -> dict[str, Any]:
+    """HMM regime phase indicator — 약세/중립/강세/강한상승 4 phase + bullProb confidence.
+
+    phaseIndicator kind. current=현재 phase index, confidence=bullProb.
+    """
+    result = _safeQuantCall("dartlab.quant.regime.hmm", "calcRegime", stockCode)
+    if result is None or not isinstance(result, dict) or result.get("error"):
+        return {"phases": [], "current": 0, "confidence": None}
+    regimeLabel = str(result.get("regimeLabel") or result.get("trendVerdict") or "").lower()
+    trendVerdict = str(result.get("trendVerdict") or "").lower()
+    bullProb = _toFloat(result.get("bullProb"))
+    phases = ["약세", "중립", "상승", "강한 상승"]
+    current = 1  # default 중립.
+    if "강한" in regimeLabel or "strong" in trendVerdict:
+        current = 3
+    elif "강세" in regimeLabel or "bull" in regimeLabel or "up" in trendVerdict:
+        current = 2
+    elif "약세" in regimeLabel or "bear" in regimeLabel or "down" in trendVerdict:
+        current = 0
+    return {
+        "phases": phases,
+        "current": current,
+        "confidence": bullProb,
+        "subtitle": f"HMM {regimeLabel or trendVerdict or '—'} · bullProb {bullProb:.2f}" if bullProb is not None else regimeLabel,
+    }
 
 
 def buildQuantSnowflakeRadar(stockCode: str) -> dict[str, Any]:

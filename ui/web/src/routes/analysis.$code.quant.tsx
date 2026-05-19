@@ -155,9 +155,9 @@ function QuantTab() {
 			]),
 		},
 		{
-			title: '예측 (Conformal)',
-			subtitle: '5일 horizon 수익률 점예측 + 90% Conformal interval (Naive·AR·ETS·Theta).',
-			keys: new Set(['quantForecastKpi']),
+			title: '예측 (Conformal + Monte Carlo + HMM)',
+			subtitle: '20일 horizon point + 90% CI fan · GBM 200 path Monte Carlo + VaR/CVaR · Hamilton HMM bull/bear regime.',
+			keys: new Set(['quantForecastFan', 'quantMonteCarloPaths', 'quantRegimePhase']),
 		},
 	];
 
