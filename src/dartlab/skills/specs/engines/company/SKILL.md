@@ -278,6 +278,31 @@ Polars = 네이티브 Rust 힙, `gc.collect()` 회수 불가, Company 1 개 ≈ 
 
 본 spec 의 청중 — dartlab 코어 컨트리뷰터 + sections pipeline R&D 진행자.
 
+### 데이터 손실 정책 (의도 drop + 잠재 손실 가시화)
+
+`c.sections` 는 원본 `docs.parquet` 의 *모든* row 를 보존하지 않는다. 의도된 drop 5 종:
+
+1. **chapter 결정 전 prelude row** — `parseMajorNum` 미인식 + 첫 chapter 헤딩 등장 전 sub-section row drop (`reportRows.py:1067-1072`).
+2. **chapter row catch-all dedup** — sub-section 에 cover 된 chapter row block drop. 8자 미만 line 만 있는 block 은 unique 후보에서 제외 (`reportRows.py:1023`).
+3. **projection-suppressed sourceTopic** — chapter II 합산 topic 이 `applyProjections` 로 분배된 후 원본 sourceTopic row drop (`aggregation.py` line ~95).
+4. **detailTopic suppression** — `detailTopicForTopic(topic) is not None` 매치 row drop — 이미 detail 분류된 row 가 본체에서 제거 (`aggregation.py` line ~97).
+5. **정정공시 silent drop** — `providers/reportSelector.py::selectReport` 가 원본 우선 / 정정공시만 있을 때 최신 type 1 건 선택. 정정 전 본문 비교는 sections layer 에선 불가능 (logger.info 한 줄로 관찰 가능).
+
+본 정책의 정량 관찰치 (5 종목 baseline 박제 전 005930 단일): byte 보존율 **0.511**. 즉 원본 byte 의 ~49% 가 의도 drop 으로 빠짐.
+
+**잠재 손실 3 종** (silent → 측정 가능):
+
+- **pivot last-wins 충돌** — `aggregation.py` pivot 직전 `(topic, segmentKey, periodKey)` 중복 카운터 logger.warning. `DARTLAB_SECTIONS_STRICT=1` → ValueError 승격.
+- **chapter dedup 8자 임계** — `reportRows.py:1023` 의 `len(ln) >= 8` 임계. 짧은 row 만 있는 chapter-only 표 손실 가능.
+- **정정공시 silent drop** — 위 (5) 와 동일 — `logger.info` 한 줄.
+
+회귀 가드:
+- `tests/audit/sectionsLossAccount.py` — round-trip 회계 (byte/line/row 보존율 baseline tolerance 0.02).
+- `tests/audit/sectionsMemoryAudit.py` — Python heap peak + RSS growth baseline tolerance 20%.
+- `tests/providers/dart/docs/test_sectionsInvariants.py` — invariant 3 (pivot 충돌 0, 8자 임계, selectReport 정책).
+
+상세: `operation.sectionsRefactor §9-11`.
+
 ## 공개 호출 방식
 
 내부 helper 는 `RunPython` 으로 직접 호출 가능:

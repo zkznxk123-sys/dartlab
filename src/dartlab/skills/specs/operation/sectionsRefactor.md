@@ -246,16 +246,16 @@ heading state machine 은 sequential dependency (이전 row 의 stack 이 다음
 
 ## 7. 우선순위 권고
 
-본 리팩터링/최적화의 *완료 순서*:
+본 리팩터링/최적화의 *완료 순서* (✓ = 완료):
 
-1. **§4 부채 1 — pipeline.py 모듈 분리** (1834 → 7 모듈). 한 번에 PR. 외부 API 변경 0. parity test 가 가드.
-2. **§4 부채 2 — chapter row dedup 단일화**. Phase 1 의 unique-block fix 가 모든 케이스 cover 하는지 확장 검증 후 Phase 4 `_dropChapterCatchAllDuplicates` 폐기. 회귀 시 parity test 가 catch.
-3. **§4 부채 5 — heading stack 부모 보존**. 같은 level heading 이 형제로 들어와도 부모 정보 유지. `textStructure.py` 의 stack pop 로직 수정. notes topic textPath 깊이 1 → 2~3 으로 회복.
-4. **§6 후보 B — 5 group_by 통합**. 측정 후 20%+ 개선이면 채택.
-5. **§4 부채 3 — `SegmentKeyer` 추상화**. segmentKeyBase 룰을 단일 클래스로 모음. literal 문자열 분산 차단.
+1. ✓ **§4 부채 1 — pipeline.py 모듈 분리** (1838 → 688 줄 slim + 7 신규 모듈). master `2e91d2ce9`.
+2. **§4 부채 2 — chapter row dedup 단일화**. Phase 1 의 unique-block fix 가 모든 케이스 cover 하는지 측정 audit 박은 뒤 Phase 4 `_dropChapterCatchAllDuplicates` 폐기 (후속 PR).
+3. **§4 부채 5 — heading stack 부모 보존**. 같은 level heading 형제 시 부모 보존. notes topic textPath 깊이 1 → 2~3 회복. **의미 변경** — parity baseline regen 필요 (별도 PR).
+4. ✓ **§6 후보 B — group_by 통합**. 3 group_by → 1 group_by. master `6496da651`.
+5. ✓ **§4 부채 3 — `SegmentKeyer` 추상화**. literal 4 곳 통합. master `ace890903`.
 6. **§4 부채 4 — mapper L1.5 reference 이전**. 의존성 사이클 검토 후. 우선순위 낮음.
 
-각 항목은 단일 commit 단위. parity test + ruff format/lint + 5 종목 baseline regen 동행.
+각 항목은 단일 commit 단위. parity test + ruff format/lint 동행.
 
 ## 8. 회귀 가드
 
@@ -263,6 +263,61 @@ heading state machine 은 sequential dependency (이전 row 의 stack 이 다음
 
 - `bash tests/test-lock.sh tests/providers/dart/docs/sections/ -v` — 94 test PASS.
 - `bash tests/test-lock.sh tests/providers/dart/docs/test_sectionsPolarsParity.py -v` — 5 종목 baseline parquet 과 shape/dtypes/values 일치.
-- 시각 검증: `sections('000660', topics=None)` 의 결과를 viewer 에서 확인. 2026Q1 placeholder 위치 (`companyOverview` blockOrder=0/1) + table textPath 부여 (`consolidatedNotes` 모든 table row null 0) + blockOrder contiguous (gap 0).
+- `bash tests/test-lock.sh tests/providers/dart/docs/test_sectionsInvariants.py -v` — pivot 충돌 0 + 8자 임계 + selectReport 정책 3 invariant.
+- 시각 검증: `sections('000660', topics=None)` 의 결과를 viewer 에서 확인. table textPath 부여 (`consolidatedNotes` 모든 table row null 0) + blockOrder contiguous (gap 0).
 
-본 문서는 *부채 원장*. 항목별 진행 commit 메시지에 `sectionsRefactor.md §N` 참조하고, 완료된 항목은 본 문서에서 제거 또는 *완료 표시* 후 회귀 재발 시 reopen.
+본 문서는 *부채 원장*. 항목별 진행 commit 메시지에 `sectionsRefactor.md §N` 참조.
+
+## 9. 무손실 보장 — round-trip 회계
+
+원본 `docs.parquet` 의 `section_content` 총량 vs `c.sections` 결과의 모든 period 컬럼 총량을 byte/line/row 3 지표로 비교. baseline 박제 후 회귀 tolerance 0.02 차단.
+
+```powershell
+uv run python -X utf8 tests/audit/sectionsLossAccount.py --check
+uv run python -X utf8 tests/audit/sectionsLossAccount.py --write-baseline
+```
+
+`tests/audit/sectionsLossAccount.py` + `tests/audit/_baselines/sectionsLossBaseline.json`. nightly 게이트 `sections-loss`. 005930 단일 측정 결과 byte 보존율 **0.511** — 의도 drop (chapter 결정 전 prelude · projection-suppressed · detailTopic 매치) 누적의 첫 정량 관찰치.
+
+해석: byte 보존율 자체보다 *baseline 회귀 추적* 이 본 audit 의 가치. 회귀 0.02 초과 시 fail.
+
+### 잠재 손실 3 종 — invariant 가드
+
+silent → 측정 가능 상태 전환:
+
+1. **pivot last-wins 충돌** — `aggregation.py` 의 `_sectionsPolarsOnly` 가 pivot 직전 `(topic, segmentKey, periodKey)` 중복 카운터 계산 + logger.warning. `DARTLAB_SECTIONS_STRICT=1` 환경변수 시 ValueError 승격. invariant: `test_no_pivot_key_collision` (5 종목 fixture).
+2. **chapter dedup 8자 임계** — `reportRows.py:1023` 의 `meaningful = [ln for ln in missing if len(ln) >= 8]` 임계. invariant: `test_chapter_dedup_8char_recall` (합성 골든).
+3. **selectReport 정정공시 silent drop** — `providers/reportSelector.py::selectReport` 가 정정공시 drop 시 `logger.info` 한 줄 (year, kind, drop 건수, 선택 type). invariant: `test_selectReport_correction_policy` (합성 DataFrame).
+
+본 invariant 는 `tests/providers/dart/docs/test_sectionsInvariants.py` 에 단일화. 모두 PASS 가 가드.
+
+## 10. 정밀도 트랙 (후속 PR)
+
+무손실 인프라 (§9) 가 박힌 위에서 정밀도 향상을 측정 가능. 본 트랙은 *의미 변경* 이라 parity baseline regen 필요:
+
+1. **heading stack 부모 보존** ([§4 부채 5](#)) — textStructure.py 의 stack pop 룰. 같은 level heading 형제 시 부모 보존. notes topic textPath 깊이 1 → 2~3 회복. 측정: invariant 1 (충돌 0 유지) + memory peak 유지 + parity baseline regen.
+2. **mapper.py 미매핑 패턴 측정·보강** — `tests/audit/sectionsMappingRate.py` 신설 (sample 200 종목 × `measureMappingRate`). 매핑률 < 98% 시 fail. unmapped top-10 stderr.
+3. **chapter dedup 8자 임계 골든** — 005930 또는 특정 종목의 chapter row + sub-section row 골든 박제. 임계 조정 시 회귀 가드.
+
+각 항목 진행 전 §9 의 4 audit (loss + memory + 신규 mapping + 신규 benchmark) baseline 박제 필수.
+
+## 11. 속도·메모리 측정 인프라
+
+### 속도
+
+`operation.sectionsRefactor §6 후보 B` 적용 (3 group_by → 1 group_by, master `6496da651`). 후속 측정 audit `tests/audit/sectionsBenchmark.py` (신설 예정) — 5 종목 × 3 시나리오 × 3 회 median 박제, regression 10% warn.
+
+`DARTLAB_SECTIONS_CACHE` 환경변수 (default 1) — 다종목 batch 시 cache size 증가로 parquet 재로드 회피.
+
+### 메모리
+
+```powershell
+uv run python -X utf8 tests/audit/sectionsMemoryAudit.py --check
+uv run python -X utf8 tests/audit/sectionsMemoryAudit.py --write-baseline
+```
+
+`tracemalloc` Python heap peak + `psutil` RSS growth 측정. baseline tolerance 20% 회귀 차단. 005930 측정 결과: rows=7899, pythonPeak=124.6MB, rssGrowth=0.0MB (호출 후 회수).
+
+aggregation.py 의 gc.collect() 빈도: period 별 5 → 3 로 강화 (master `f4e52f9a5`).
+
+nightly 게이트 `sections-loss` + `sections-memory` 양쪽 blocking=False — 정보 표시 우선, 회귀 시 별도 commit 으로 baseline 재박제.
