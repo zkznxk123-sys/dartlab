@@ -1149,16 +1149,42 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
         baseRow["sourceBlockOrder"] = sourceBlockOrder
 
         if blockType != "text":
-            baseRow["textNodeType"] = None
+            # table / 비-text block 도 직전 heading state 의 textPath 를 상속한다.
+            # 이전엔 모두 None 처리 → 주석 표 (consolidatedNotes/financialNotes) 가
+            # blockOrder=2,4,6... 에 textPath=null 로 박혀 viewer 가 어떤 주석
+            # 항목 표인지 식별 불가. companyOverview 같은 일반 topic 의 표 (자기주식
+            # 취득 표, 본점소재지 표 등) 도 같은 회귀. heading state 는 본문 row
+            # 처리 시 갱신되므로 그 시점의 state 가 직전 heading path 이다.
+            currentHeadings = headingStateByTopic.get(topic, [])
+            if currentHeadings:
+                pathLabels = [str(item["label"]) for item in currentHeadings]
+                pathKeys = [str(item["key"]) for item in currentHeadings if str(item["key"])]
+                semanticPathKeys = [
+                    str(item["semanticKey"]) for item in currentHeadings if str(item.get("semanticKey"))
+                ]
+                lastLevel = currentHeadings[-1]["level"]
+                baseRow["textLevel"] = int(lastLevel) if isinstance(lastLevel, (int, str)) else None
+                baseRow["textPath"] = " > ".join(pathLabels) if pathLabels else None
+                baseRow["textPathKey"] = " > ".join(pathKeys) if pathKeys else None
+                baseRow["textParentPathKey"] = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
+                baseRow["textSemanticPathKey"] = " > ".join(semanticPathKeys) if semanticPathKeys else None
+                baseRow["textSemanticParentPathKey"] = (
+                    " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
+                )
+            else:
+                baseRow["textLevel"] = None
+                baseRow["textPath"] = None
+                baseRow["textPathKey"] = None
+                baseRow["textParentPathKey"] = None
+                baseRow["textSemanticPathKey"] = None
+                baseRow["textSemanticParentPathKey"] = None
+            baseRow["textNodeType"] = "table"
             baseRow["textStructural"] = None
-            baseRow["textLevel"] = None
-            baseRow["textPath"] = None
-            baseRow["textPathKey"] = None
-            baseRow["textParentPathKey"] = None
-            baseRow["textSemanticPathKey"] = None
-            baseRow["textSemanticParentPathKey"] = None
             baseRow["segmentOrder"] = 0
-            # 주석 topic: 직전 heading의 시맨틱 키로 table 블록을 식별 (기간간 정렬)
+            # 주석 topic: 직전 heading의 시맨틱 키로 table 블록을 식별 (기간간 정렬).
+            # 같은 heading 아래 sb 가 달라도 같은 segmentKeyBase 로 묶여 occurrence
+            # count 로 distinguish — 기간 간 동일 heading 의 동일 순서 표가 한 row
+            # 로 합쳐짐. 비주석 topic 은 기존대로 sb 기반 (heading 정보가 적어).
             lastKey = lastHeadingKeyByTopic.get(topic)
             if topic in _NOTES_TOPICS and lastKey:
                 segmentKeyBase = f"table|sem:{lastKey}"
