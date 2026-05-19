@@ -41,6 +41,8 @@ jobs:
               mutants/
           - gate: sections-loss
             timeout: 10
+          - gate: sections-memory
+            timeout: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

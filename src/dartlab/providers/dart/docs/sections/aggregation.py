@@ -137,7 +137,10 @@ def _sectionsPolarsOnly(stockCode: str, topics: set[str] | None) -> pl.DataFrame
         rows = None  # noqa: F841 — 명시적 ref drop
         projected = None  # noqa: F841
 
-        if topics is None and pIdx % 5 == 4:
+        # gc.collect() 빈도 — 종목 005380 (~51k row, 31 period) 기준 period 당
+        # ~10MB Python heap 누적. period 별 dict 누적 → polars 변환 시점 ref drop
+        # 후 gc 가 dict 메모리 회수. 빈도 ↑ 시 회수 더 자주, CPU overhead 미미.
+        if topics is None and pIdx % 3 == 2:
             gc.collect()
 
     if not periodDfs:

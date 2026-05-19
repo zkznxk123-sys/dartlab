@@ -444,6 +444,16 @@ GATES: dict[str, Gate] = {
         blocking=False,
         timeout_minutes=10,
     ),
+    "sections-memory": Gate(
+        name="sections-memory",
+        tier="nightly",
+        deps=("psutil",),
+        install_pkg="editable",
+        env={"DARTLAB_TEST_LOCKED": "1"},
+        cmd="python -X utf8 tests/audit/sectionsMemoryAudit.py --check",
+        blocking=False,
+        timeout_minutes=15,
+    ),
 }
 
 
