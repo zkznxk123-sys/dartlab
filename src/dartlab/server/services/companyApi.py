@@ -94,7 +94,15 @@ def filterBlocksByPeriod(blocks: list, period: str) -> list:
 # DART 표준 (chapter/label) — SSOT 는 ``dartlab.reference.docs.topicStandard``.
 # 서버는 reference 의 helper 를 직접 호출. 중복 매핑 제거.
 from dartlab.reference.docs.topicStandard import (  # noqa: E402
+    CHAPTER_III_LAYOUT,
+    FINANCIAL_STATEMENT_CHILDREN,
+    chapterIIIOrder,
+    chapterIIIParent,
+)
+from dartlab.reference.docs.topicStandard import (
     chapterLabelKr as _chapterLabelKr,
+)
+from dartlab.reference.docs.topicStandard import (
     labelFor as _topicDartLabel,
 )
 
@@ -152,6 +160,11 @@ _latestDartUrl = _dartUrlForPeriod
 def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
     """뷰어 목차(Table of Contents)를 구성한다.
 
+    chapter III (재무에 관한 사항) 만 SSOT layout (``CHAPTER_III_LAYOUT``) 기반으로
+    정렬·그루핑 — 7 top-level entry (요약→연결재무→연결주석→재무→재무주석→배당) 안에
+    sub-topic 31 개씩이 ``children`` folder 로 둥지. 다른 chapter 는 sections frame
+    first-appearance 순서 유지.
+
     Args:
         company: Company 인스턴스.
         metaOnly: True 면 chapter/topic 트리 + textCount/tableCount 만 반환
@@ -167,39 +180,39 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
 
     import polars as pl
 
-    chapter_map: dict[str, list[TocTopic]] = {}
-    chapter_order: list[str] = []
+    period_re = _re.compile(r"^\d{4}(Q[1-4])?$")
+    period_cols = sorted([col for col in sec.columns if period_re.fullmatch(col)], reverse=True)
+    latest2 = period_cols[:2] if (not metaOnly and len(period_cols) >= 2) else []
+
+    # ── 1 단계 ── 모든 topic 의 (chapter, label, textCount, tableCount, hasChanges) 수집.
+    # raw_entries 는 first-appearance 순서. chapter III 외 chapter 는 이 순서 그대로 사용.
+    raw_entries: list[tuple[str, TocTopic]] = []  # (chapter_kr, topic)
     seen_topics: set[str] = set()
 
     finance_topics = ("BS", "IS", "CIS", "CF", "SCE", "ratios")
     finance_chapter = "III. 재무에 관한 사항"
     for topic in finance_topics:
         try:
-            df = getattr(company, topic, None) if topic != "ratios" else None
             if topic == "ratios":
-                ratio_pair = company._ratioSeries() if getattr(company, "_hasFinance", False) else None
-                if ratio_pair is None:
+                if not getattr(company, "_hasFinance", False) or company._ratioSeries() is None:
                     continue
-            elif df is None:
-                continue
+            else:
+                if getattr(company, topic, None) is None:
+                    continue
         except (AttributeError, TypeError):
             continue
         seen_topics.add(topic)
-        if finance_chapter not in chapter_map:
-            chapter_map[finance_chapter] = []
-            chapter_order.append(finance_chapter)
-        chapter_map[finance_chapter].append(
-            TocTopic(
-                topic=topic,
-                label=_topicDartLabel(topic, safeTopicLabel(company, topic)),
-                textCount=0,
-                tableCount=1,
+        raw_entries.append(
+            (
+                finance_chapter,
+                TocTopic(
+                    topic=topic,
+                    label=_topicDartLabel(topic, safeTopicLabel(company, topic)),
+                    textCount=0,
+                    tableCount=1,
+                ),
             )
         )
-
-    period_re = _re.compile(r"^\d{4}(Q[1-4])?$")
-    period_cols = sorted([col for col in sec.columns if period_re.fullmatch(col)], reverse=True)
-    latest2 = period_cols[:2] if (not metaOnly and len(period_cols) >= 2) else []
 
     if "topic" in sec.columns:
         for row in sec.iter_rows(named=True):
@@ -225,20 +238,39 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
 
             chapter_value = topic_frame.item(0, "chapter") if "chapter" in topic_frame.columns else None
             chapter_raw = chapter_value if isinstance(chapter_value, str) and chapter_value else "기타"
-            chapter = _chapterLabelKr(chapter_raw)
-            if chapter not in chapter_map:
-                chapter_map[chapter] = []
-                chapter_order.append(chapter)
-            chapter_map[chapter].append(
-                TocTopic(
-                    topic=topic,
-                    label=_topicDartLabel(topic, safeTopicLabel(company, topic)),
-                    textCount=int(text_count),
-                    tableCount=int(table_count),
-                    hasChanges=has_changes,
+            chapter_kr = _chapterLabelKr(chapter_raw)
+            raw_entries.append(
+                (
+                    chapter_kr,
+                    TocTopic(
+                        topic=topic,
+                        label=_topicDartLabel(topic, safeTopicLabel(company, topic)),
+                        textCount=int(text_count),
+                        tableCount=int(table_count),
+                        hasChanges=has_changes,
+                    ),
                 )
             )
 
+    # ── 2 단계 ── chapter 별 bucket + chapter III 만 SSOT layout 기반 그루핑.
+    chapter_map: dict[str, list[TocTopic]] = {}
+    chapter_order: list[str] = []
+    iii_entries: list[TocTopic] = []  # chapter III topics — 그루핑 위해 별도 수집
+
+    for chapter_kr, topic in raw_entries:
+        if chapter_kr == finance_chapter:
+            iii_entries.append(topic)
+            continue
+        if chapter_kr not in chapter_map:
+            chapter_map[chapter_kr] = []
+            chapter_order.append(chapter_kr)
+        chapter_map[chapter_kr].append(topic)
+
+    if iii_entries:
+        chapter_map[finance_chapter] = _groupChapterIII(iii_entries)
+        chapter_order.append(finance_chapter)
+
+    # ── 3 단계 ── chapter 정렬 (Roman 순) + chapter III 외 N. 번호 자동 부여.
     roman_order = {
         "I": 1,
         "II": 2,
@@ -259,17 +291,80 @@ def buildToc(company: Company, *, metaOnly: bool = False) -> dict[str, Any]:
         return (roman_order.get(prefix, 99), chapter)
 
     sorted_chapters = sorted(chapter_order, key=_chapterSortKey)
-    # DART 표준 — chapter 안 topics 자연 순서대로 1, 2, 3... 번호. 이미 "N." 접두 있으면
-    # 중복 안 박음 (idempotent).
     for chapter in sorted_chapters:
+        if chapter == finance_chapter:
+            continue  # chapter III 는 이미 _groupChapterIII 에서 번호 부여
         topics = chapter_map[chapter]
         for idx, t in enumerate(topics, 1):
             current = t.label or t.topic
             if _re.match(r"^\d+\.\s", current):
                 continue
             t.label = f"{idx}. {current}"
+
     chapters = [TocChapter(chapter=chapter, topics=chapter_map[chapter]) for chapter in sorted_chapters]
     return TocResponse(stockCode=company.stockCode, corpName=company.corpName, chapters=chapters).model_dump()
+
+
+def _groupChapterIII(entries: list[TocTopic]) -> list[TocTopic]:
+    """chapter III topic 들을 SSOT layout 순서 + parent-child 구조로 그루핑.
+
+    - sub-topic (``consolidatedNotes_NN_*`` / ``financialNotes_NN_*`` / ``BS/IS/...``)
+      은 ``chapterIIIParent`` 로 부모 식별 후 자식으로 둥지.
+    - top-level 은 ``CHAPTER_III_LAYOUT`` 순서대로. layout 부재 topic 은 tail 에
+      first-appearance 순서로 append.
+    - top-level 에 1, 2, 3... 번호 부여 (기존 label 의 N. prefix 덮어쓰기).
+    - notes 자식: ``N. 한글`` 그대로 (NOTES_SUB_SECTIONS).
+    - financialStatements 자식: ``FINANCIAL_STATEMENT_CHILDREN`` 순서 (BS/IS/CIS/CF/SCE).
+    """
+    by_topic: dict[str, TocTopic] = {t.topic: t for t in entries}
+    children_of: dict[str, list[TocTopic]] = {}
+    top_level: list[TocTopic] = []
+
+    for t in entries:
+        parent = chapterIIIParent(t.topic)
+        if parent is None:
+            top_level.append(t)
+        else:
+            children_of.setdefault(parent, []).append(t)
+
+    # parent folder 가 entries 에 자체 row 없이 자식만 있는 경우 가상 entry 추가.
+    for parent in children_of:
+        if parent not in by_topic:
+            virtual = TocTopic(
+                topic=parent,
+                label=_topicDartLabel(parent, parent),
+                textCount=0,
+                tableCount=0,
+            )
+            by_topic[parent] = virtual
+            top_level.append(virtual)
+
+    # top-level 정렬 — layout 순서 우선, 그 외 first-appearance.
+    top_level.sort(key=lambda t: (chapterIIIOrder(t.topic), t.topic))
+
+    # 자식 정렬 + 부착.
+    def _childSortKey(child: TocTopic, parentTopic: str) -> tuple[int, str]:
+        if parentTopic == "financialStatements":
+            try:
+                return (FINANCIAL_STATEMENT_CHILDREN.index(child.topic), "")
+            except ValueError:
+                return (99, child.topic)
+        m = _re.match(r"^.+_(\d{2})_", child.topic)
+        if m:
+            return (int(m.group(1)), "")
+        return (99, child.topic)
+
+    for parentTopic, kids in children_of.items():
+        kids.sort(key=lambda c, p=parentTopic: _childSortKey(c, p))
+        by_topic[parentTopic].children = kids
+
+    # top-level 번호 부여 (1, 2, 3...) — 기존 "N. " prefix 덮어쓰기.
+    label_strip_re = _re.compile(r"^\d+\.\s*")
+    for idx, t in enumerate(top_level, 1):
+        base = label_strip_re.sub("", t.label or t.topic)
+        t.label = f"{idx}. {base}"
+
+    return top_level
 
 
 _VIEWER_COMPACT_SECTION_KEEP = (
@@ -310,7 +405,7 @@ def _compactTextDocument(
     # raw_markdown + finance 블록 → block id → {period: markdown}.
     # finance.data 는 columns/rows 구조이므로 period 별 [항목, value(억원)] 표로 변환.
     tables: dict[int, dict[str, str]] = {}
-    for b in (blocks or []):
+    for b in blocks or []:
         kind = b.get("kind")
         bid = b.get("block")
         if bid is None:
@@ -362,9 +457,9 @@ def _compactTextDocument(
     if not periods:
         derived: list[Any] = []
         seen_period: set[str] = set()
-        for b in (blocks or []):
+        for b in blocks or []:
             meta = b.get("meta") or {}
-            for pl in (meta.get("periods") or []):
+            for pl in meta.get("periods") or []:
                 if isinstance(pl, str) and pl not in seen_period:
                     seen_period.add(pl)
                     # PeriodRef 와 호환되는 dict 형태 — frontend _periodLabel 이 label 키 우선.

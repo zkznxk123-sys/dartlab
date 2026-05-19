@@ -28,6 +28,7 @@ interface TocTopic {
 	textCount?: number;
 	tableCount?: number;
 	hasChanges?: boolean;
+	children?: TocTopic[];
 }
 interface TocChapter {
 	chapter: string;
@@ -248,6 +249,65 @@ function _headingStyle(level: number, minLevel: number): { tag: 'h2' | 'h3' | 'h
 	return { tag: 'h4', cls: 'text-sm font-semibold text-muted-foreground' };
 }
 
+interface TocTopicNodeProps {
+	node: TocTopic;
+	activeTopic: string | undefined;
+	code: string;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	navigate: any;
+	depth?: number;
+}
+function TocTopicNode({ node, activeTopic, code, navigate, depth = 0 }: TocTopicNodeProps) {
+	const isActive = node.topic === activeTopic;
+	const hasChildren = !!node.children && node.children.length > 0;
+	const childActive = hasChildren && node.children!.some((c) => c.topic === activeTopic);
+	const goTo = (t: string) =>
+		navigate({
+			to: '/analysis/$code/viewer',
+			params: { code },
+			search: (prev: { period?: string }) => ({
+				period: prev?.period ?? 'quarterly',
+				topic: t,
+				windowEnd: undefined,
+			}),
+		});
+	return (
+		<div>
+			<button
+				type="button"
+				onClick={() => goTo(node.topic)}
+				className={cn(
+					'flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs transition-colors',
+					depth > 0 && 'pl-4',
+					isActive
+						? 'bg-accent text-accent-foreground'
+						: childActive
+							? 'text-foreground'
+							: 'text-muted-foreground hover:bg-accent/50',
+					hasChildren && 'font-semibold',
+				)}
+			>
+				<ChevronRight className={cn('size-3 shrink-0 opacity-50', hasChildren && 'rotate-90')} />
+				<span className="truncate">{node.label || node.topicLabel || node.topic}</span>
+			</button>
+			{hasChildren && (
+				<div className="ml-2 mt-0.5 space-y-0.5 border-l border-border/40 pl-1">
+					{node.children!.map((c) => (
+						<TocTopicNode
+							key={c.topic}
+							node={c}
+							activeTopic={activeTopic}
+							code={code}
+							navigate={navigate}
+							depth={depth + 1}
+						/>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 function ViewerTab() {
 	const { code } = Route.useParams();
 	const { topic, windowEnd } = Route.useSearch();
@@ -386,6 +446,11 @@ function ViewerTab() {
 			for (const t of ch.topics ?? []) {
 				if (t.topic === activeTopic) {
 					return _leafKey(t.label || t.topicLabel || '') || '';
+				}
+				for (const c of t.children ?? []) {
+					if (c.topic === activeTopic) {
+						return _leafKey(c.label || c.topicLabel || '') || '';
+					}
 				}
 			}
 		}
@@ -558,35 +623,15 @@ function ViewerTab() {
 									{ch.chapter}
 								</div>
 								<div className="space-y-0.5">
-									{ch.topics?.map((t) => {
-										const isActive = t.topic === activeTopic;
-										return (
-											<button
-												key={t.topic}
-												type="button"
-												onClick={() =>
-													navigate({
-														to: '/analysis/$code/viewer',
-														params: { code },
-														search: (prev) => ({
-															period: prev?.period ?? 'quarterly',
-															topic: t.topic,
-															windowEnd: undefined,
-														}),
-													})
-												}
-												className={cn(
-													'flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs transition-colors',
-													isActive
-														? 'bg-accent text-accent-foreground'
-														: 'text-muted-foreground hover:bg-accent/50',
-												)}
-											>
-												<ChevronRight className="size-3 shrink-0 opacity-50" />
-												<span className="truncate">{t.label || t.topicLabel || t.topic}</span>
-											</button>
-										);
-									})}
+									{ch.topics?.map((t) => (
+										<TocTopicNode
+											key={t.topic}
+											node={t}
+											activeTopic={activeTopic}
+											code={code}
+											navigate={navigate}
+										/>
+									))}
 								</div>
 							</div>
 						))}

@@ -143,13 +143,20 @@ class ChannelConnectRequest(BaseModel):
 
 
 class TocTopic(BaseModel):
-    """뷰어 목차의 개별 topic 항목."""
+    """뷰어 목차의 개별 topic 항목.
+
+    chapter III 의 ``consolidatedNotes`` / ``financialNotes`` / ``financialStatements``
+    은 folder leaf 로, 31 개 sub-section / 5 표 가 ``children`` 으로 둥지.
+    folder leaf 도 ``topic`` 키 (예 ``"financialNotes"``) 가 있어 직접 클릭 가능
+    (parent 본문 residual = splitter 가 N 못 잡은 0.07% row).
+    """
 
     topic: str
     label: str
     textCount: int
     tableCount: int
     hasChanges: bool = False
+    children: list["TocTopic"] = []
 
 
 class TocChapter(BaseModel):

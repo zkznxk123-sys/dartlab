@@ -119,6 +119,12 @@ TOPIC_CANONICAL_CHAPTER: dict[str, str] = {
     "sanction": "XI",
     "subsequentEvents": "XI",
     "expertConfirmation": "XI",
+    # XII. 상세표 (별표 — 4 형제 detail 보고서)
+    "affiliateGroupDetail": "XII",
+    "appendixSchedule": "XII",
+    "investmentInOtherDetail": "XII",
+    "rndDetail": "XII",
+    "subsidiaryDetail": "XII",
 }
 
 
@@ -159,10 +165,56 @@ TOPIC_DISPLAY_LABEL: dict[str, str] = {
     "otherFinance": "기타 재무사항",
     # V. 회계감사인의 감사의견 등
     "audit": "회계감사인의 감사의견",
+    "auditOpinion": "회계감사인의 감사의견",
     "mdna": "경영진단 및 분석의견",
     "internalControl": "내부통제에 관한 사항",
     "auditContract": "감사용역 계약",
     "nonAuditContract": "비감사용역 계약",
+    # VI. 이사회 등 회사의 기관에 관한 사항
+    "boardOfDirectors": "이사회에 관한 사항",
+    "auditSystem": "감사제도에 관한 사항",
+    "shareholderMeeting": "주주의 의결권 행사에 관한 사항",
+    "outsideDirector": "사외이사 및 변동현황",
+    # VII. 주주에 관한 사항
+    "majorHolder": "최대주주에 관한 사항",
+    "majorHolderChange": "최대주주 변동현황",
+    "minorityHolder": "소액주주 현황",
+    "stockTotal": "주식의 분포",
+    "treasuryStock": "자기주식 취득 및 처분",
+    # VIII. 임원 및 직원 등에 관한 사항
+    "executive": "임원 현황",
+    "employee": "직원 등의 현황",
+    "executivePay": "임원의 보수",
+    "executivePayAllTotal": "임원 보수 총액",
+    "executivePayIndividual": "개별 임원 보수",
+    "topPay": "보수 상위 5 인",
+    "unregisteredExecutivePay": "미등기임원 보수",
+    "executivePayByType": "유형별 임원 보수",
+    "executivePayTotal": "임원 보수 총계",
+    # IX. 계열회사 등에 관한 사항
+    "affiliateGroup": "계열회사 현황",
+    "investedCompany": "타법인출자 현황",
+    # X. 대주주 등과의 거래내용
+    "relatedPartyTx": "대주주 등과의 거래내용",
+    "commercialPaper": "기업어음증권 미상환잔액",
+    "corporateBond": "회사채 미상환잔액",
+    "debtSecurities": "채무증권 발행실적",
+    "privateOfferingUsage": "사모자금 사용내역",
+    "publicOfferingUsage": "공모자금 사용내역",
+    "shortTermBond": "단기사채 미상환잔액",
+    # XI. 그 밖에 투자자 보호를 위하여 필요한 사항
+    "investorProtection": "투자자 보호",
+    "disclosureChanges": "공시내용 변경",
+    "contingentLiability": "우발부채",
+    "sanction": "제재현황",
+    "subsequentEvents": "후발사건",
+    "expertConfirmation": "전문가 확인",
+    # XII. 상세표
+    "affiliateGroupDetail": "계열회사 상세",
+    "appendixSchedule": "상세표",
+    "investmentInOtherDetail": "타법인출자 상세",
+    "rndDetail": "연구개발 상세",
+    "subsidiaryDetail": "종속회사 상세",
 }
 
 
@@ -179,6 +231,7 @@ CHAPTER_LABEL_KR: dict[str, str] = {
     "IX": "IX. 계열회사 등에 관한 사항",
     "X": "X. 대주주 등과의 거래내용",
     "XI": "XI. 그 밖에 투자자 보호를 위하여 필요한 사항",
+    "XII": "XII. 상세표",
 }
 
 
@@ -220,6 +273,83 @@ NOTES_SUB_SECTIONS: list[tuple[int, str, str]] = [
     (31, "relatedParty", "특수관계자와의 거래"),
     (32, "subsequentEvents", "보고기간후사건"),
 ]
+
+
+# ── 주석 5 ── chapter III (재무에 관한 사항) 표준 layout
+# DART 사업보고서 chapter III 의 표준 순서. backend buildToc 가 chapter III topic
+# 들을 본 layout 순서로 정렬 + 자동 그루핑 (consolidatedNotes_NN_xxx → consolidatedNotes
+# folder, BS/IS/CIS/CF/SCE → financialStatements folder).
+#
+# layout 에 없는 chapter III topic 은 layout 뒤에 *first-appearance* 순서로 append.
+CHAPTER_III_LAYOUT: tuple[str, ...] = (
+    "ratios",
+    "fsSummary",
+    "consolidatedStatements",
+    "consolidatedNotes",
+    "financialStatements",
+    "financialNotes",
+    "dividend",
+)
+
+# financialStatements folder 의 자식 (DART 표준 5 표 순서).
+FINANCIAL_STATEMENT_CHILDREN: tuple[str, ...] = ("BS", "IS", "CIS", "CF", "SCE")
+
+# chapter III sub-topic → parent folder topic 매핑. None 이면 직속 leaf.
+_NOTES_PARENT_RE = re.compile(r"^(?P<parent>financialNotes|consolidatedNotes)_\d{2}_")
+
+
+def chapterIIIParent(topic: str) -> str | None:
+    """chapter III sub-topic → parent folder topic. 직속이면 None.
+
+    매핑:
+        - ``BS/IS/CIS/CF/SCE`` → ``financialStatements``
+        - ``financialNotes_NN_xxx`` → ``financialNotes``
+        - ``consolidatedNotes_NN_xxx`` → ``consolidatedNotes``
+        - 그 외 → None (직속)
+
+    Args:
+        topic: dartlab topic 키.
+
+    Returns:
+        parent topic key 또는 None.
+
+    Example:
+        >>> chapterIIIParent("financialNotes_05_financialAssetsTransfer")
+        'financialNotes'
+        >>> chapterIIIParent("BS")
+        'financialStatements'
+        >>> chapterIIIParent("dividend") is None
+        True
+    """
+    if topic in FINANCIAL_STATEMENT_CHILDREN:
+        return "financialStatements"
+    match = _NOTES_PARENT_RE.match(topic)
+    if match:
+        return match.group("parent")
+    return None
+
+
+def chapterIIIOrder(topic: str) -> int:
+    """chapter III layout 안 topic 의 정렬 키. layout 에 없으면 999.
+
+    Args:
+        topic: dartlab topic 키.
+
+    Returns:
+        0-based index 또는 layout 부재 시 999.
+
+    Example:
+        >>> chapterIIIOrder("consolidatedNotes")
+        3
+        >>> chapterIIIOrder("dividend")
+        6
+        >>> chapterIIIOrder("unknownTopic")
+        999
+    """
+    try:
+        return CHAPTER_III_LAYOUT.index(topic)
+    except ValueError:
+        return 999
 
 
 def chapterFor(topic: str) -> str | None:
