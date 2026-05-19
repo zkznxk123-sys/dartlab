@@ -1727,4 +1727,15 @@ def _dropChapterCatchAllDuplicates(df: pl.DataFrame) -> pl.DataFrame:
 
     joined = df.join(specific_keys, on=["chapter", "sourceBlockOrder"], how="left")
     keep = ~(is_catch_all & pl.col("_hasSpecific").fill_null(False))
-    return joined.filter(keep).drop("_hasSpecific")
+    dedup = joined.filter(keep).drop("_hasSpecific")
+
+    # dedup 후 blockOrder 가 듬성듬성 (예 29, 32, 44…) — topic 별 0-based contiguous 재부여.
+    # 기존 blockOrder 의 *상대 순서* 유지 (절대값만 reset). sourceBlockOrder 는 보존
+    # (원본 DART HTML block 인덱스이므로 변경 X).
+    if "blockOrder" in dedup.columns and "topic" in dedup.columns and dedup.height > 0:
+        dedup = dedup.sort(["topic", "blockOrder"]).with_columns(
+            (pl.cum_count("blockOrder").over("topic", mapping_strategy="group_to_rows") - 1)
+            .cast(pl.Int64)
+            .alias("blockOrder")
+        )
+    return dedup
