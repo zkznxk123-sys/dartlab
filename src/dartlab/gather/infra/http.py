@@ -137,13 +137,23 @@ def runAsync(coro):
     --------
     GatherHttpClient : 본 함수의 caller.
     """
+    # coro 누수 차단 — 어떤 경로로 raise 되든 coro.close() 보장.
+    # (이전: _getThreadLoop / threadPool 실패 시 coro 가 await 안 되어 RuntimeWarning 발생)
     try:
-        asyncio.get_running_loop()
-    except RuntimeError:
-        # loop 없음 — 직접 실행 (persistent loop 사용)
-        return _runInThreadLoop(coro)
-    # 이미 loop 실행 중 → 별도 스레드의 persistent loop
-    return _threadPool.submit(_runInThreadLoop, coro).result()
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            # loop 없음 — 직접 실행 (persistent loop 사용)
+            return _runInThreadLoop(coro)
+        # 이미 loop 실행 중 → 별도 스레드의 persistent loop
+        return _threadPool.submit(_runInThreadLoop, coro).result()
+    except BaseException:
+        # coro 가 await 됐다면 close 는 no-op. await 전 raise 면 cleanup.
+        try:
+            coro.close()
+        except Exception:  # noqa: BLE001
+            pass
+        raise
 
 
 # ══════════════════════════════════════
