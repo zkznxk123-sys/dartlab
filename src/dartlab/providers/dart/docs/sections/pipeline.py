@@ -1013,10 +1013,14 @@ def _reportRowsToTopicRows(
         if currentMajorNum is None:
             continue
 
-        # 장 제목 행의 content도 raw source-of-truth로 보존한다.
-        # 이후 소항목이 같은 semantic row를 채우면 그 셀만 overwrite되고,
-        # 장 제목에만 있던 segment는 그대로 남는다.
-        _registerPendingChapter()
+        # 소항목 행이 따라오면 이전 장 제목 행은 폐기한다. DART parquet 의 chapter
+        # row content 는 소항목 content 의 concat 본 (중복 8KB+). 등록 시 catch-all
+        # 블록이 만들어져 textPath/segmentKey 가 소항목 행과 alias 되며, sourceBlockOrder
+        # 카운터까지 잠식한다 (2026Q1 placeholder 가 "정관 > 사업목적추가현황" textPath
+        # 에 박힌 회귀의 근본 원인). pendingChapter 등록은 _flushPending() 가 다음
+        # chapter 직전·끝에서만 — 그 시점까지 소항목이 하나도 없을 때만 lonely-chapter
+        # 로 살아남는다.
+        pendingChapter = None
 
         chapter = chapterFromMajorNum(currentMajorNum)
         if chapter is None:
@@ -1024,7 +1028,12 @@ def _reportRowsToTopicRows(
 
         rawTitle = stripSectionPrefix(title)
         topic = mapSectionTitle(rawTitle)
-        _registerContent(chapter, topic, rawTitle, content.strip(), currentMajorNum)
+        # section_title 자체를 content 앞에 prepend — text structure parser 가
+        # "1. 회사의 개요" 를 level-3 heading 으로 인식하여 textPath 의 최상단에
+        # 박힘. 이로써 placeholder("기재하지 아니하였습니다") 도 자기 section
+        # heading 아래로 배치되어 다른 sub-section heading state 와 충돌 차단.
+        contentWithTitle = f"{title}\n{content.strip()}"
+        _registerContent(chapter, topic, rawTitle, contentWithTitle, currentMajorNum)
 
     # 마지막 장 처리
     _flushPending()
