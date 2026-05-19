@@ -7,7 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-라이브러리 내부 구조 정리와 사용자/LLM 가독성 보강 작업.
+## [0.10.2] - 2026-05-20
+
+공시뷰어 정확성 회귀 차단 + 퀀트 탭 응답성 + sections 파이프라인 메모리 절감.
+
+### Fixed
+
+- 공시뷰어 sections 가 DART 보고서 chapter row 와 sub-section row 를 모두 등록해
+  catch-all 중복 블록이 sub-section 블록과 alias 되던 회귀 차단. 2026Q1 분기보고서의
+  '기재하지 아니하였습니다' placeholder 가 엉뚱한 textPath ('정관 > 사업목적 추가
+  현황' 등) 에 박히던 사고 해소.
+- 옛 보고서의 chapter row 에만 있고 sub-section 으로 분할되지 않은 표/footnote
+  (회사채 미상환 잔액 / 사외이사 선임 등 65 케이스 378KB) 가 chapter row 폐기로
+  손실되던 회귀 복구. chapter content 의 block 중 sub-section line set 에 없는
+  unique block 만 lonely-등록.
+- 공시뷰어 period 컬럼 정렬을 lexicographic 에서 `(year, q=5 for annual)` key 로
+  교체. '2025Q3' > '2025' 로 평가되어 사업보고서가 Q3 보고서 뒤로 밀리던 회귀 차단.
+- 공시뷰어 표(table) block row 에 직전 heading 의 textPath 가 누락되어 viewer 가
+  어떤 항목 표인지 식별 못 하던 회귀 해소. consolidatedNotes 1989 표 row 전수 부여.
+
+### Changed
+
+- 공시뷰어 본문 cell 의 단락 break heuristic 을 backend 에 추가. (1)/(2)/[제목]/※/
+  (단위) 같은 marker 앞에 줄바꿈 삽입 — 한 cell 에 여러 단락이 늘어지던 가독성
+  사고 (삼양홀딩스 12. 차입금 등) 해소. 표 markdown line 은 보호.
+- 공시뷰어 전체보기 모드에서 좌 TOC (목차) 가 같이 확장되도록 변경. 이전엔 전체보기
+  시 TOC 가 숨겨져 다른 항목으로 이동할 때마다 전체보기 해제가 필요했음.
+- 공시뷰어 다중 기간 묶음 응답 `?periods=p1,p2,...` 엔드포인트 추가. 5 period
+  window 를 한 호출로 byPeriod dict 반환 — 기존 fanout 호출 (~5 round-trip) 을
+  1 회로 통합 가능.
+- sections 파이프라인 Phase 1 의 period 별 vstack 반복을 단일 `pl.concat` 으로 치환.
+  Python heap peak SK하이닉스 93MB → 24MB, 현대차 130MB → 46MB (-60~70%).
+- 라이브러리 내부 구조 정리와 사용자/LLM 가독성 보강 작업.
 
 ### Changed
 
