@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.growthFeasibility
+id: recipes.fundamental.valuation.damodaran.growthFeasibility
 title: Damodaran 성장 실현가능성 검증
 category: recipes
 kind: recipe
@@ -13,10 +13,10 @@ whenToUse:
   - 내재 성장률 검증
   - Damodaran growth driver
 linkedSkills:
-  - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.reinvestmentRoc
-  - recipes.valuation.damodaran.costOfCapital
-  - recipes.valuation.damodaran.scenarioFalsifier
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.reinvestmentRoc
+  - recipes.fundamental.valuation.damodaran.costOfCapital
+  - recipes.fundamental.valuation.damodaran.scenarioFalsifier
 toolRefs:
   - EngineCall
   - RunPython
@@ -227,10 +227,10 @@ Damodaran식 성장 가정은 `growth = reinvestment rate x ROC`로 닫혀야 �
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.reinvestmentRoc - value driver 입력.
-2. recipes.valuation.damodaran.costOfCapital - ROC-WACC 비교.
-3. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF 요구 성장률 비교.
-4. recipes.valuation.damodaran.fcffDcf - 통과한 성장 가정만 DCF로 전달.
+1. recipes.fundamental.valuation.damodaran.reinvestmentRoc - value driver 입력.
+2. recipes.fundamental.valuation.damodaran.costOfCapital - ROC-WACC 비교.
+3. recipes.fundamental.valuation.damodaran.scenarioFalsifier - reverse DCF 요구 성장률 비교.
+4. recipes.fundamental.valuation.damodaran.fcffDcf - 통과한 성장 가정만 DCF로 전달.
 
 ## 기본 검증
 

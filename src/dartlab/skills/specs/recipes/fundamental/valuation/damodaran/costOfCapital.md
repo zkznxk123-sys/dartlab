@@ -1,33 +1,34 @@
 ---
-id: recipes.valuation.damodaran.reinvestmentRoc
-title: Damodaran 재투자율과 ROC
+id: recipes.fundamental.valuation.damodaran.costOfCapital
+title: Damodaran 비용자본 가정
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 정규화 재무 패널에서 sales-to-capital, reinvestment rate, ROIC/ROC, incremental ROC를 계산하고 성장률이 재투자와 수익성으로 설명되는지 반증하는 절차. 트리거 — 'ROIC 재투자율', 'growth = ROC x reinvestment', 'Damodaran value driver'.
+purpose: 국가 ERP, 무위험금리, 세율, 산업 beta와 debt/capital 기본값을 L1.5 reference에서 읽어 WACC 가정과 fallback reason을 만드는 절차. 트리거 — 'WACC 가정', 'Damodaran ERP beta', '비용자본 reference'.
 whenToUse:
-  - ROIC 재투자율
-  - growth equals ROC times reinvestment
-  - Damodaran value driver
-  - sales to capital
-  - incremental ROC
+  - WACC 가정
+  - Damodaran ERP beta
+  - 비용자본 reference
+  - cost of capital
+  - 다모다란 자본비용
 linkedSkills:
-  - recipes.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.dataAudit
+  - recipes.fundamental.valuation.damodaran.businessModelFit
   - engines.company
 toolRefs:
   - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef
-  - tableRef
+  - sourceRef
   - valueRef
   - dateRef
   - executionRef
 expectedOutputs:
-  - sales-to-capital ? reinvestment rate ? ROIC/ROC ?
-  - ???? ????? ????? ????? ??
-  - incremental ROC ?? ?? ?? ??
+  - risk-free ? ERP ? beta ? debt cost ? tax ? WACC assumption table
+  - country/industry reference freshness? fallback reason
+  - WACC ???? confidence
 
 expectedNovelty:
   - damodaranL15Memo
@@ -41,21 +42,21 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - 성장률을 과거 CAGR만으로 확정하지 않는다.
-  - invested capital 결손 시 ROC를 계산하지 않는다.
+  - stale country ERP를 정상 reference처럼 사용하지 않는다.
+  - beta나 부채비용 fallback을 숨기지 않는다.
   - L2 엔진 호출 금지.
 failureModes:
-  - 음수 invested capital에서 ROC 폭주
-  - 성장률과 재투자율 불일치를 무시
-  - 산업 sales-to-capital fallback 사유 누락
+  - 국가 ERP와 기업 통화를 혼동
+  - effective tax rate와 marginal tax rate를 혼합
+  - 금융업 WACC를 제조업 FCFF DCF에 그대로 적용
 examples:
-  - 삼성전자 reinvestment ROC
-  - AAPL sales-to-capital sanity check
-  - INTC incremental ROC 반증
+  - 삼성전자 WACC 가정
+  - AAPL Damodaran beta ERP
+  - semiconductor industry WACC fallback
 gap:
   primary:
-    - company
     - reference
+    - gather
 testUniverse:
   market: KR+US
   stockCodes:
@@ -66,7 +67,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "매출 성장률이 implied reinvestment capacity를 초과하는데도 optimistic growth로 통과시키면 실패로 본다."
+  description: "country reference stale 또는 industry fallback이 있는데 confidence를 high로 표시하면 실패로 본다."
 lastUpdated: "2026-05-13"
 ---
 
@@ -187,7 +188,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["reinvestmentRoc"],
+    table=memo["tables"]["costOfCapital"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -199,36 +200,36 @@ emit_result(
 
 ### 1. 결론 도출
 
-가치 driver를 `growth = reinvestmentRate x ROC` 관점에서 한 문장으로 판정한다. 성장 가정이 가능한지, 과한지, 보수적인지 구분한다.
+WACC를 점추정이 아니라 `base`, `low`, `high` 범위로 제시한다. stale 또는 industry fallback이 있으면 confidence를 낮춘다.
 
 ### 2. 핵심 근거 수집
 
-정규화 재무 패널의 NOPAT, invested capital, capex, 감가상각, 운전자본 증감과 산업 sales-to-capital fallback을 묶는다.
+country reference에서 risk-free rate, total ERP, tax rate를 읽고 industry reference에서 beta, debt/capital, cost of debt, cost of capital을 읽는다.
 
 ### 3. 메커니즘 분석
 
-재투자는 `capex - depreciation + deltaNonCashWorkingCapital`로 계산한다. ROC는 `NOPAT / investedCapital`, incremental ROC는 `deltaNOPAT / deltaInvestedCapital`로 계산한다.
+개별 beta가 없는 v1에서는 industry beta를 기본값으로 쓴다. 개별 가격 beta primitive가 L1.5에 추가되기 전까지는 industry fallback을 명시한다.
 
 ### 4. 반례·한계
 
-negative invested capital, 구조조정 적자, 대규모 M&A 연도는 평균에서 제외하거나 별도 flag를 둔다. 산업 fallback은 결론 강도를 낮춘다.
+KR 기업이 USD 매출 중심이어도 통화와 국가 ERP가 다를 수 있다. 통화·상장시장·매출지역이 충돌하면 단일 WACC로 단정하지 않는다.
 
 ### 5. 후속 모니터링
 
-성장률, 재투자율, ROC, sales-to-capital의 불일치 항목을 `fcffDcf`의 assumption guard로 넘긴다.
+ERP as-of, risk-free shift, industry beta table, 개별 부채비용 대체 데이터를 모니터링한다.
 
 ## 대표 반환 형태
 
-`valueDrivers : dict` — `reinvestmentRate`, `roc`, `incrementalRoc`, `salesToCapital`, `impliedGrowth`, `flags`를 담는다.
+`costOfCapital : dict` — `riskFreeRatePct`, `erpPct`, `beta`, `costOfEquityPct`, `preTaxCostOfDebtPct`, `taxRatePct`, `waccPct`, `confidence`, `fallbacks`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.normalizedFinancials - 입력 패널 생성.
-2. recipes.valuation.damodaran.fcffDcf - 성장률과 reinvestment consistency 반영.
-3. recipes.valuation.damodaran.scenarioFalsifier - 가격 내재 성장률과 비교.
+1. recipes.fundamental.valuation.damodaran.reinvestmentRoc - ROC와 WACC spread 비교.
+2. recipes.fundamental.valuation.damodaran.fcffDcf - 할인율 범위 적용.
+3. recipes.fundamental.valuation.damodaran.scenarioFalsifier - WACC 민감도 반증.
 
 ## 기본 검증
 
-- 성장률이 ROC x 재투자율보다 크면 반드시 반례로 표시한다.
-- industry default를 썼으면 `fallback: true`와 source as-of를 결과에 남긴다.
+- country reference stale이면 `confidence: low` 또는 갱신 필요 flag가 있어야 한다.
+- industry key가 없으면 totalMarketWithoutFinancials fallback과 사유를 남긴다.
 

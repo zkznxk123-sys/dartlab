@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.financialFirmExcessReturn
+id: recipes.fundamental.valuation.damodaran.financialFirmExcessReturn
 title: Damodaran 금융업 Excess Return 경로
 category: recipes
 kind: recipe
@@ -11,8 +11,8 @@ whenToUse:
   - 금융업 가치평가
   - 은행 Damodaran
 linkedSkills:
-  - recipes.valuation.damodaran.businessModelFit
-  - recipes.valuation.damodaran.costOfCapital
+  - recipes.fundamental.valuation.damodaran.businessModelFit
+  - recipes.fundamental.valuation.damodaran.costOfCapital
 toolRefs:
   - EngineCall
   - RunPython
@@ -144,5 +144,5 @@ emit_result(
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.businessModelFit - 금융업 blocker 확인.
-2. recipes.valuation.damodaran.costOfCapital - cost of equity reference 확인.
+1. recipes.fundamental.valuation.damodaran.businessModelFit - 금융업 blocker 확인.
+2. recipes.fundamental.valuation.damodaran.costOfCapital - cost of equity reference 확인.

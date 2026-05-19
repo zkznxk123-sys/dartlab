@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.peerMultipleDecomposition
+id: recipes.fundamental.valuation.damodaran.peerMultipleDecomposition
 title: Damodaran Peer Multiple 분해
 category: recipes
 kind: recipe
@@ -11,8 +11,8 @@ whenToUse:
   - 상대가치 분해
   - multiple sanity check
 linkedSkills:
-  - recipes.valuation.damodaran.relativeCheck
-  - recipes.valuation.damodaran.storyToDrivers
+  - recipes.fundamental.valuation.damodaran.relativeCheck
+  - recipes.fundamental.valuation.damodaran.storyToDrivers
 toolRefs:
   - EngineCall
   - RunPython
@@ -152,9 +152,9 @@ US peer primitive가 없으면 peer universe는 partial로 남긴다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.relativeCheck - 회사 multiple 계산.
-2. recipes.valuation.damodaran.storyToDrivers - multiple 차이를 driver로 해석.
-3. recipes.valuation.damodaran.scenarioFalsifier - 가격 내재 스토리와 대조.
+1. recipes.fundamental.valuation.damodaran.relativeCheck - 회사 multiple 계산.
+2. recipes.fundamental.valuation.damodaran.storyToDrivers - multiple 차이를 driver로 해석.
+3. recipes.fundamental.valuation.damodaran.scenarioFalsifier - 가격 내재 스토리와 대조.
 
 ## 기본 검증
 

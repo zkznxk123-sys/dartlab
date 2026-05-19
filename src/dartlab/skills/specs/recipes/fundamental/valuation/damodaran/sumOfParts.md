@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.sumOfParts
+id: recipes.fundamental.valuation.damodaran.sumOfParts
 title: Damodaran Sum-of-Parts 경로
 category: recipes
 kind: recipe
@@ -11,8 +11,8 @@ whenToUse:
   - SOTP
   - 세그먼트 가치평가
 linkedSkills:
-  - recipes.valuation.damodaran.narrativeMap
-  - recipes.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.narrativeMap
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
 toolRefs:
   - EngineCall
   - RunPython
@@ -144,5 +144,5 @@ emit_result(
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.narrativeMap - 사업 단위 후보 확인.
-2. recipes.valuation.damodaran.normalizedFinancials - 전체 재무 baseline 확인.
+1. recipes.fundamental.valuation.damodaran.narrativeMap - 사업 단위 후보 확인.
+2. recipes.fundamental.valuation.damodaran.normalizedFinancials - 전체 재무 baseline 확인.

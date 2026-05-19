@@ -18,7 +18,7 @@ linkedSkills:
   - engines.gather
   - recipes.fundamental.quality.dupontDriver
   - recipes.screen.compounderCandidates
-  - recipes.valuation.intrinsicValueBand
+  - recipes.fundamental.valuation.intrinsicValueBand
   - recipes.fundamental.quality.workingCapitalQuality
 gap:
   primary:

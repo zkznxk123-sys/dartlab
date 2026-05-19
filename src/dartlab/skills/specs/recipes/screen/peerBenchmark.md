@@ -212,7 +212,7 @@ graph LR
 ## 연계 절차
 - 산업 깊이 분석 → `recipes.screen.industryDeepDive`
 - 산업 stage (성장/성숙/쇠퇴) → `recipes.screen.industryStageScreen`
-- valuation 깊이 → `recipes.valuation.check`
+- valuation 깊이 → `recipes.fundamental.valuation.check`
 - quality compounder 후보 → `recipes.screen.compounderCandidates`
 - 산업 평균 횡단 → `engines.scan` direct
 

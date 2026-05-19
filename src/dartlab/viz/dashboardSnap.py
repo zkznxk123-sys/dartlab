@@ -51,7 +51,7 @@ async def measureCards(page: Any) -> list[dict[str, Any]]:
         v3-r5 PNG 어림짐작 회귀 차단 — JSON 정량 metric 직접 검수.
     """
     # CardShell 의 wrapper 는 BentoGrid 의 직접 자식 div (grid-column span ...).
-    cardHandles = await page.locator('div.grid > div').all()
+    cardHandles = await page.locator("div.grid > div").all()
     metrics: list[dict[str, Any]] = []
     for h in cardHandles:
         try:
@@ -69,14 +69,14 @@ async def measureCards(page: Any) -> list[dict[str, Any]]:
             pass
         chartBox = None
         try:
-            chart = h.locator('.recharts-surface, svg.recharts-surface').first
+            chart = h.locator(".recharts-surface, svg.recharts-surface").first
             if await chart.count():
                 chartBox = await chart.bounding_box()
         except Exception:  # noqa: BLE001
             pass
         tableBox = None
         try:
-            table = h.locator('table').first
+            table = h.locator("table").first
             if await table.count():
                 tableBox = await table.bounding_box()
         except Exception:  # noqa: BLE001
@@ -133,9 +133,7 @@ async def snapPage(
                     "viewport": {"w": viewport[0], "h": viewport[1]},
                     "cardCount": len(cardMetrics),
                     "totalOverlapPx": round(sum(c["overlapPx"] for c in cardMetrics), 1),
-                    "avgDensityPct": round(
-                        sum(c["densityPct"] for c in cardMetrics) / len(cardMetrics), 1
-                    )
+                    "avgDensityPct": round(sum(c["densityPct"] for c in cardMetrics) / len(cardMetrics), 1)
                     if cardMetrics
                     else 0,
                     "cards": cardMetrics,
@@ -198,9 +196,7 @@ def main() -> int:
     parser.add_argument("--width", type=int, default=1920)
     parser.add_argument("--height", type=int, default=1200)
     parser.add_argument("--wait", type=int, default=2500, help="screenshot 전 대기 ms")
-    parser.add_argument(
-        "--measure", action="store_true", help="카드별 metric JSON 동시 저장 (PNG 어림짐작 금지)"
-    )
+    parser.add_argument("--measure", action="store_true", help="카드별 metric JSON 동시 저장 (PNG 어림짐작 금지)")
     args = parser.parse_args()
 
     if args.views == "all":

@@ -23,7 +23,7 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
     Parameters
     ----------
     skillId : str
-        Skill OS 식별자 (예: ``"recipes.valuation.damodaran.index"``).
+        Skill OS 식별자 (예: ``"recipes.fundamental.valuation.damodaran.index"``).
     refs : list[Ref] | list[dict] | None
         지금까지 누적한 ref 리스트. 도구 결과의 ``refs`` 평탄화.
 
@@ -59,9 +59,7 @@ def evidenceGate(skillId: str, refs: list[Ref] | list[dict] | None = None) -> To
     parts = []
     if requiredRefs:
         parts.append(
-            f"ref kinds 모두 충족 ({', '.join(requiredRefs)})"
-            if ok
-            else f"ref 부족 — missing: {', '.join(missing)}"
+            f"ref kinds 모두 충족 ({', '.join(requiredRefs)})" if ok else f"ref 부족 — missing: {', '.join(missing)}"
         )
     if metaFields:
         parts.append(f"메타 필드 ({', '.join(metaFields)}) 는 답변 헤더에서 확인")

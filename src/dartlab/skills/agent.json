@@ -14126,7 +14126,7 @@
         "engines.gather",
         "recipes.fundamental.quality.dupontDriver",
         "recipes.screen.compounderCandidates",
-        "recipes.valuation.intrinsicValueBand",
+        "recipes.fundamental.valuation.intrinsicValueBand",
         "recipes.fundamental.quality.workingCapitalQuality"
       ],
       "requires": [],
@@ -14655,8 +14655,8 @@
         "engines.scan",
         "engines.scan.ratio",
         "engines.scan.valuation",
-        "recipes.valuation.qualityValueScreen",
-        "recipes.valuation.garpScreen",
+        "recipes.fundamental.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.garpScreen",
         "recipes.fundamental.credit.distressFilter",
         "engines.analysis.profitability",
         "engines.analysis.efficiency"
@@ -16009,9 +16009,9 @@
         "engines.scan",
         "engines.scan.screen",
         "engines.scan.account",
-        "recipes.valuation.qualityValueScreen",
-        "recipes.valuation.garpScreen",
-        "recipes.valuation.grahamDeepValue",
+        "recipes.fundamental.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.garpScreen",
+        "recipes.fundamental.valuation.grahamDeepValue",
         "engines.credit",
         "engines.analysis.cashflow"
       ],
@@ -16318,7 +16318,7 @@
         "engines.company",
         "engines.gather",
         "engines.scan.ratio",
-        "recipes.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.qualityValueScreen",
         "recipes.screen.compounderCandidates",
         "recipes.fundamental.quality.capitalAllocationScorecard"
       ],
@@ -16541,7 +16541,7 @@
         "recipes.fundamental.quality.workingCapitalQuality",
         "recipes.fundamental.credit.distressFilter",
         "recipes.fundamental.credit.distressDual",
-        "recipes.valuation.qualityValueScreen"
+        "recipes.fundamental.valuation.qualityValueScreen"
       ],
       "requires": [],
       "alternatives": [],
@@ -17047,7 +17047,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.garpScreen",
+      "id": "recipes.fundamental.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -17077,7 +17077,7 @@
         "engines.scan.screen",
         "engines.scan.valuation",
         "engines.scan.ratio",
-        "recipes.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.qualityValueScreen",
         "recipes.fundamental.credit.distressFilter",
         "recipes.screen.compounderCandidates",
         "engines.analysis.valuation"
@@ -17350,7 +17350,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.grahamDeepValue",
+      "id": "recipes.fundamental.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -17380,7 +17380,7 @@
         "engines.scan.screen",
         "engines.scan.valuation",
         "engines.scan.account",
-        "recipes.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.qualityValueScreen",
         "recipes.fundamental.credit.distressFilter",
         "recipes.fundamental.quality.piotroskiLite",
         "engines.analysis.valuation"
@@ -17969,7 +17969,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.intrinsicValueBand",
+      "id": "recipes.fundamental.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -18001,7 +18001,7 @@
         "recipes.fundamental.quality.dupontDriver",
         "recipes.fundamental.quality.capitalAllocationScorecard",
         "recipes.screen.compounderCandidates",
-        "recipes.valuation.qualityValueScreen"
+        "recipes.fundamental.valuation.qualityValueScreen"
       ],
       "requires": [],
       "alternatives": [],
@@ -18845,8 +18845,8 @@
         "engines.scan.screen",
         "engines.scan.ratio",
         "engines.scan.valuation",
-        "recipes.valuation.qualityValueScreen",
-        "recipes.valuation.grahamDeepValue",
+        "recipes.fundamental.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.grahamDeepValue",
         "engines.analysis.earningsQuality"
       ],
       "requires": [],
@@ -19005,7 +19005,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.qualityValueScreen",
+      "id": "recipes.fundamental.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -19037,7 +19037,7 @@
         "engines.scan.ratio",
         "engines.scan.undervaluedQuality",
         "recipes.fundamental.credit.distressFilter",
-        "recipes.valuation.check",
+        "recipes.fundamental.valuation.check",
         "engines.analysis.valuation"
       ],
       "requires": [],
@@ -20147,7 +20147,7 @@
       "visualRefs": []
     },
     {
-      "id": "recipes.valuation.bandTrack",
+      "id": "recipes.fundamental.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20261,7 +20261,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.check",
+      "id": "recipes.fundamental.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -28959,7 +28959,7 @@
       "apiRefs": []
     },
     {
-      "id": "recipes.valuation.damodaran.index",
+      "id": "recipes.fundamental.valuation.damodaran.index",
       "title": "Damodaran L1/L1.5 분석체계 진입점",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29001,27 +29001,27 @@
         "operation.code"
       ],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier",
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers",
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.accountTraceAudit",
-        "recipes.valuation.damodaran.rdCapitalization",
-        "recipes.valuation.damodaran.leaseDebtAdjustment",
-        "recipes.valuation.damodaran.oneOffAdjustment",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.growthFeasibility",
-        "recipes.valuation.damodaran.costOfCapital",
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.relativeCheck",
-        "recipes.valuation.damodaran.peerMultipleDecomposition",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf",
-        "recipes.valuation.damodaran.scenarioFalsifier",
-        "recipes.valuation.damodaran.deepDive"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+        "recipes.fundamental.valuation.damodaran.rdCapitalization",
+        "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.growthFeasibility",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.relativeCheck",
+        "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+        "recipes.fundamental.valuation.damodaran.deepDive"
       ],
       "requires": [],
       "alternatives": [],
@@ -29097,8 +29097,8 @@
       ],
       "predecessors": [],
       "successors": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.deepDive"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.deepDive"
       ],
       "audiences": {},
       "isLeafNode": false,
@@ -29109,7 +29109,7 @@
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 하위 recipe와 엔진 capability가 제공하는 Company/gather/scan/reference 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 `damodaranAnalysisSystem.json` 계약과 gap ledger 를 읽는 **RunPython fallback** 절차다.\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionR"
     },
     {
-      "id": "recipes.valuation.damodaran.dataAudit",
+      "id": "recipes.fundamental.valuation.damodaran.dataAudit",
       "title": "Damodaran L1.5 데이터 감사",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29202,7 +29202,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.businessModelFit",
+      "id": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "title": "Damodaran 모델 적합성 게이트",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29226,7 +29226,7 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
         "engines.company",
         "engines.gather"
       ],
@@ -29291,7 +29291,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "id": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "title": "Damodaran 생애주기 분류",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29315,9 +29315,9 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.normalizedFinancials"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials"
       ],
       "requires": [],
       "alternatives": [],
@@ -29382,7 +29382,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.narrativeMap",
+      "id": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "title": "Damodaran 내러티브 맵",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29405,9 +29405,9 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier"
       ],
       "requires": [],
       "alternatives": [],
@@ -29468,7 +29468,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _marketData():\n    out = {}\n    "
     },
     {
-      "id": "recipes.valuation.damodaran.storyToDrivers",
+      "id": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "title": "Damodaran 스토리-드라이버 변환",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29490,9 +29490,9 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "requires": [],
       "alternatives": [],
@@ -29552,7 +29552,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _marketData():\n    try:\n        frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\n        if isinstance(frame, pl.DataFrame) and frame.height:\n            return {\"priceDate\": str(frame.tail(1).to_dicts()[0].get(\"date\", \"\"))}\n    except Exception as exc:\n        return {\"priceError\": type(exc).__name__}\n    return {}\n\n\ncountry_defaults = _loadReference(\"damodaranDefaults.json\")\nindustry_defaults = _loadReference(\"damodaranIndustryDefaults.json\")\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in ("
     },
     {
-      "id": "recipes.valuation.damodaran.normalizedFinancials",
+      "id": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "title": "Damodaran 정규화 재무 패널",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29576,8 +29576,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
         "engines.company"
       ],
       "requires": [],
@@ -29641,7 +29641,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.accountTraceAudit",
+      "id": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "title": "Damodaran 계정 출처 감사",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29665,8 +29665,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.normalizedFinancials"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials"
       ],
       "requires": [],
       "alternatives": [],
@@ -29730,7 +29730,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ncountry_defaults = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranDefaults.json\").read_text(encoding=\"utf-8\")\n)\nindustry_defaults = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranIndustryDefaults.json\").read_text(encoding=\"utf-8\")\n)\nstatements = {topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")}\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements=statements,\n    countryDefaults=country_defaults,\n    industryDefaults=industry_defaults,\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"accountTraceAudit\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\nvaluation에"
     },
     {
-      "id": "recipes.valuation.damodaran.rdCapitalization",
+      "id": "recipes.fundamental.valuation.damodaran.rdCapitalization",
       "title": "Damodaran R&D 자본화 감사",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29752,8 +29752,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.accountTraceAudit"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit"
       ],
       "requires": [],
       "alternatives": [],
@@ -29806,7 +29806,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    price_frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\n    price_date = str(price_frame.tail(1).to_dicts()[0].get(\"date\", \"\")) if isinstance(price_frame, pl.DataFrame) and price_frame.height else None\nexcept Exception:\n    price_date = None\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={\"priceDate\": price_date} if price"
     },
     {
-      "id": "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
       "title": "Damodaran 리스부채 조정 감사",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29828,8 +29828,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.costOfCapital"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.costOfCapital"
       ],
       "requires": [],
       "alternatives": [],
@@ -29882,7 +29882,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"leaseDebtAdjustment\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도"
     },
     {
-      "id": "recipes.valuation.damodaran.oneOffAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
       "title": "Damodaran 일회성 항목 조정 감사",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29904,8 +29904,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.accountTraceAudit"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit"
       ],
       "requires": [],
       "alternatives": [],
@@ -29958,7 +29958,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"oneOffAdjustment\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n"
     },
     {
-      "id": "recipes.valuation.damodaran.reinvestmentRoc",
+      "id": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "title": "Damodaran 재투자율과 ROC",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -29982,7 +29982,7 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
         "engines.company"
       ],
       "requires": [],
@@ -30046,7 +30046,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.growthFeasibility",
+      "id": "recipes.fundamental.valuation.damodaran.growthFeasibility",
       "title": "Damodaran 성장 실현가능성 검증",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30070,10 +30070,10 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.costOfCapital",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "requires": [],
       "alternatives": [],
@@ -30138,7 +30138,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.costOfCapital",
+      "id": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "title": "Damodaran 비용자본 가정",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30162,8 +30162,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
         "engines.company"
       ],
       "requires": [],
@@ -30227,7 +30227,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.fcffDcf",
+      "id": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "title": "Damodaran FCFF DCF 밴드",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30251,9 +30251,9 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
         "engines.company",
         "engines.gather"
       ],
@@ -30319,7 +30319,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.relativeCheck",
+      "id": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "title": "Damodaran 상대가치 검산",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30343,7 +30343,7 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
         "engines.scan",
         "engines.gather"
       ],
@@ -30408,7 +30408,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "id": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
       "title": "Damodaran Peer Multiple 분해",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30430,8 +30430,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.relativeCheck",
-        "recipes.valuation.damodaran.storyToDrivers"
+        "recipes.fundamental.valuation.damodaran.relativeCheck",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers"
       ],
       "requires": [],
       "alternatives": [],
@@ -30486,7 +30486,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    price_frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    price_frame = pl.DataFrame()\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\ntable = list(memo[\"tables\"][\"peerMultipleDecomposition\"])\ntry:\n    scan_frame = dartlab.scan(\"valuation\") if market == \"KR\" else pl.DataFrame()\n    scan_status = "
     },
     {
-      "id": "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "id": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
       "title": "Damodaran 금융업 Excess Return 경로",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30508,8 +30508,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.costOfCapital"
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.costOfCapital"
       ],
       "requires": [],
       "alternatives": [],
@@ -30562,7 +30562,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"financialFirmExcessReturn\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1"
     },
     {
-      "id": "recipes.valuation.damodaran.sumOfParts",
+      "id": "recipes.fundamental.valuation.damodaran.sumOfParts",
       "title": "Damodaran Sum-of-Parts 경로",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30584,8 +30584,8 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.normalizedFinancials"
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials"
       ],
       "requires": [],
       "alternatives": [],
@@ -30638,7 +30638,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"sumOfParts\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n단일 회사 "
     },
     {
-      "id": "recipes.valuation.damodaran.distressAdjustedDcf",
+      "id": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
       "title": "Damodaran Distress 조정 DCF 경로",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30660,9 +30660,9 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.costOfCapital",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "requires": [],
       "alternatives": [],
@@ -30715,7 +30715,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    price_frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    price_frame = pl.DataFrame()\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"distressAdjustedDcf\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"s"
     },
     {
-      "id": "recipes.valuation.damodaran.scenarioFalsifier",
+      "id": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "title": "Damodaran 시나리오 반증",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30739,9 +30739,9 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
         "engines.gather"
       ],
       "requires": [],
@@ -30805,7 +30805,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.deepDive",
+      "id": "recipes.fundamental.valuation.damodaran.deepDive",
       "title": "Damodaran L1/L1.5 딥다이브",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -30830,26 +30830,26 @@
       "datasetRefs": [],
       "knowledgeRefs": [],
       "linkedSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier",
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers",
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.accountTraceAudit",
-        "recipes.valuation.damodaran.rdCapitalization",
-        "recipes.valuation.damodaran.leaseDebtAdjustment",
-        "recipes.valuation.damodaran.oneOffAdjustment",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.growthFeasibility",
-        "recipes.valuation.damodaran.costOfCapital",
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.relativeCheck",
-        "recipes.valuation.damodaran.peerMultipleDecomposition",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+        "recipes.fundamental.valuation.damodaran.rdCapitalization",
+        "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.growthFeasibility",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.relativeCheck",
+        "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "requires": [],
       "alternatives": [],

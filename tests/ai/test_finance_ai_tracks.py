@@ -76,7 +76,7 @@ def test_track_i_evidence_gate_missing() -> None:
     agent.py 의 failure_streak 가 gate 검증 실패까지 도구 실패로 계상해 결국 차단되는
     회귀 (2026-05-17 OAuth Q2 probe 에서 EvidenceGate "error" status 표시 확인).
     """
-    result = executeTool("EvidenceGate", {"skillId": "recipes.valuation.damodaran.index", "refs": []})
+    result = executeTool("EvidenceGate", {"skillId": "recipes.fundamental.valuation.damodaran.index", "refs": []})
     assert result["ok"] is True  # tool 정상 실행
     assert result["data"]["ok"] is False  # gate validation 실패
     assert isinstance(result["data"]["missing"], list)

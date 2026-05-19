@@ -15,9 +15,9 @@ whenToUse:
   - distress signal
 linkedSkills:
   - engines.scan
-  - recipes.valuation.qualityValueScreen
-  - recipes.valuation.garpScreen
-  - recipes.valuation.grahamDeepValue
+  - recipes.fundamental.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.garpScreen
+  - recipes.fundamental.valuation.grahamDeepValue
   - engines.credit
   - engines.analysis
 toolRefs:

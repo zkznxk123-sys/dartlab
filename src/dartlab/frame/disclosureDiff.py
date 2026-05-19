@@ -67,8 +67,14 @@ def diffDisclosure(
     aFrame = _selectReport(df, periodA, "periodA")
     bFrame = _selectReport(df, periodB, "periodB")
 
-    sectionsA = {row["section_title"]: (row["section_order"], row["section_content"] or "") for row in aFrame.iter_rows(named=True)}
-    sectionsB = {row["section_title"]: (row["section_order"], row["section_content"] or "") for row in bFrame.iter_rows(named=True)}
+    sectionsA = {
+        row["section_title"]: (row["section_order"], row["section_content"] or "")
+        for row in aFrame.iter_rows(named=True)
+    }
+    sectionsB = {
+        row["section_title"]: (row["section_order"], row["section_content"] or "")
+        for row in bFrame.iter_rows(named=True)
+    }
     common = sorted(set(sectionsA) & set(sectionsB), key=lambda s: sectionsB[s][0])
 
     rows: list[dict] = []
@@ -127,7 +133,9 @@ def _selectReport(df: pl.DataFrame, period: str, label: str) -> pl.DataFrame:
     if contains.height:
         types = contains["report_type"].unique().to_list()
         if len(types) > 1:
-            raise ValueError(f"{label}='{period}' 가 {len(types)} 개 보고서에 매칭: {types}. 정확 표기 (예: '분기보고서 (2024.09)') 사용.")
+            raise ValueError(
+                f"{label}='{period}' 가 {len(types)} 개 보고서에 매칭: {types}. 정확 표기 (예: '분기보고서 (2024.09)') 사용."
+            )
         return contains.sort("section_order")
     available = sorted(df["report_type"].unique().to_list())
     raise ValueError(f"{label}='{period}' 매칭 보고서 없음. 가용: {available}")

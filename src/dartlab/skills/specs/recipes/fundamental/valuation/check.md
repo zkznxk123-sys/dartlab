@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.check
+id: recipes.fundamental.valuation.check
 title: 가치평가 점검 (DCF + 상대가치 + valuation band)
 category: recipes
 kind: recipe
@@ -166,8 +166,8 @@ graph LR
 | 분기 FCF YoY | (CF) | -20% 이상 | 분기 |
 
 ## 연계 절차
-- 본질가치 3 anchor 합의 → `recipes.valuation.intrinsicValueBand`
-- 역사 valuation 추세 → `recipes.valuation.bandTrack`
+- 본질가치 3 anchor 합의 → `recipes.fundamental.valuation.intrinsicValueBand`
+- 역사 valuation 추세 → `recipes.fundamental.valuation.bandTrack`
 - DCF 깊이 분석 → `engines.analysis` (4 방법론 detail)
 - 자본 효율 결합 → `recipes.fundamental.quality.dupontDriver` + `recipes.fundamental.quality.capitalAllocationScorecard`
 - 기술적 가치 신호 → `engines.quant`

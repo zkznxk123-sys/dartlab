@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.garpScreen
+id: recipes.fundamental.valuation.garpScreen
 title: GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)
 category: recipes
 kind: recipe
@@ -15,7 +15,7 @@ whenToUse:
   - 시장 미반영 성장
 linkedSkills:
   - engines.scan
-  - recipes.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.qualityValueScreen
   - recipes.fundamental.credit.distressFilter
   - recipes.screen.compounderCandidates
   - engines.analysis

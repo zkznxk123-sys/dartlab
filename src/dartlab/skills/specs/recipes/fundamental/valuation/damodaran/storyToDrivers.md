@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.storyToDrivers
+id: recipes.fundamental.valuation.damodaran.storyToDrivers
 title: Damodaran 스토리-드라이버 변환
 category: recipes
 kind: recipe
@@ -11,9 +11,9 @@ whenToUse:
   - 스토리를 숫자로
   - Damodaran driver map
 linkedSkills:
-  - recipes.valuation.damodaran.narrativeMap
-  - recipes.valuation.damodaran.reinvestmentRoc
-  - recipes.valuation.damodaran.scenarioFalsifier
+  - recipes.fundamental.valuation.damodaran.narrativeMap
+  - recipes.fundamental.valuation.damodaran.reinvestmentRoc
+  - recipes.fundamental.valuation.damodaran.scenarioFalsifier
 toolRefs:
   - EngineCall
   - RunPython
@@ -157,9 +157,9 @@ Damodaran식 스토리는 수치 가정으로 검증 가능해야 한다. revers
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.narrativeMap - narrative 요소를 구조화.
-2. recipes.valuation.damodaran.growthFeasibility - driver의 성장 정합성 반증.
-3. recipes.valuation.damodaran.scenarioFalsifier - 현재 가격 내재 스토리 반증.
+1. recipes.fundamental.valuation.damodaran.narrativeMap - narrative 요소를 구조화.
+2. recipes.fundamental.valuation.damodaran.growthFeasibility - driver의 성장 정합성 반증.
+3. recipes.fundamental.valuation.damodaran.scenarioFalsifier - 현재 가격 내재 스토리 반증.
 
 ## 기본 검증
 

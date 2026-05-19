@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.deepDive
+id: recipes.fundamental.valuation.damodaran.deepDive
 title: Damodaran L1/L1.5 딥다이브
 category: recipes
 kind: recipe
@@ -13,26 +13,26 @@ whenToUse:
   - DCF band reverse DCF
   - story engine 전 단계 valuation memo
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - recipes.valuation.damodaran.businessModelFit
-  - recipes.valuation.damodaran.lifeCycleClassifier
-  - recipes.valuation.damodaran.narrativeMap
-  - recipes.valuation.damodaran.storyToDrivers
-  - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.accountTraceAudit
-  - recipes.valuation.damodaran.rdCapitalization
-  - recipes.valuation.damodaran.leaseDebtAdjustment
-  - recipes.valuation.damodaran.oneOffAdjustment
-  - recipes.valuation.damodaran.reinvestmentRoc
-  - recipes.valuation.damodaran.growthFeasibility
-  - recipes.valuation.damodaran.costOfCapital
-  - recipes.valuation.damodaran.fcffDcf
-  - recipes.valuation.damodaran.relativeCheck
-  - recipes.valuation.damodaran.peerMultipleDecomposition
-  - recipes.valuation.damodaran.financialFirmExcessReturn
-  - recipes.valuation.damodaran.sumOfParts
-  - recipes.valuation.damodaran.distressAdjustedDcf
-  - recipes.valuation.damodaran.scenarioFalsifier
+  - recipes.fundamental.valuation.damodaran.dataAudit
+  - recipes.fundamental.valuation.damodaran.businessModelFit
+  - recipes.fundamental.valuation.damodaran.lifeCycleClassifier
+  - recipes.fundamental.valuation.damodaran.narrativeMap
+  - recipes.fundamental.valuation.damodaran.storyToDrivers
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.accountTraceAudit
+  - recipes.fundamental.valuation.damodaran.rdCapitalization
+  - recipes.fundamental.valuation.damodaran.leaseDebtAdjustment
+  - recipes.fundamental.valuation.damodaran.oneOffAdjustment
+  - recipes.fundamental.valuation.damodaran.reinvestmentRoc
+  - recipes.fundamental.valuation.damodaran.growthFeasibility
+  - recipes.fundamental.valuation.damodaran.costOfCapital
+  - recipes.fundamental.valuation.damodaran.fcffDcf
+  - recipes.fundamental.valuation.damodaran.relativeCheck
+  - recipes.fundamental.valuation.damodaran.peerMultipleDecomposition
+  - recipes.fundamental.valuation.damodaran.financialFirmExcessReturn
+  - recipes.fundamental.valuation.damodaran.sumOfParts
+  - recipes.fundamental.valuation.damodaran.distressAdjustedDcf
+  - recipes.fundamental.valuation.damodaran.scenarioFalsifier
 toolRefs:
   - EngineCall
   - RunPython
@@ -276,26 +276,26 @@ graph LR
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.dataAudit - 데이터 가능성.
-2. recipes.valuation.damodaran.businessModelFit - 모델 적합성.
-3. recipes.valuation.damodaran.lifeCycleClassifier - 수명주기.
-4. recipes.valuation.damodaran.narrativeMap - 내러티브 맵.
-5. recipes.valuation.damodaran.storyToDrivers - 스토리-드라이버 변환.
-6. recipes.valuation.damodaran.normalizedFinancials - 재무 패널.
-7. recipes.valuation.damodaran.accountTraceAudit - 계정 trace.
-8. recipes.valuation.damodaran.rdCapitalization - R&D 자본화 감사.
-9. recipes.valuation.damodaran.leaseDebtAdjustment - 리스부채 감사.
-10. recipes.valuation.damodaran.oneOffAdjustment - 일회성 항목 감사.
-11. recipes.valuation.damodaran.reinvestmentRoc - value driver.
-12. recipes.valuation.damodaran.growthFeasibility - 성장 가능성 반증.
-13. recipes.valuation.damodaran.costOfCapital - WACC.
-14. recipes.valuation.damodaran.fcffDcf - 가치 밴드.
-15. recipes.valuation.damodaran.relativeCheck - 상대가치 검산.
-16. recipes.valuation.damodaran.peerMultipleDecomposition - peer multiple 분해.
-17. recipes.valuation.damodaran.financialFirmExcessReturn - 금융업 경로.
-18. recipes.valuation.damodaran.sumOfParts - SOTP 경로.
-19. recipes.valuation.damodaran.distressAdjustedDcf - distress 경로.
-20. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF 반증.
+1. recipes.fundamental.valuation.damodaran.dataAudit - 데이터 가능성.
+2. recipes.fundamental.valuation.damodaran.businessModelFit - 모델 적합성.
+3. recipes.fundamental.valuation.damodaran.lifeCycleClassifier - 수명주기.
+4. recipes.fundamental.valuation.damodaran.narrativeMap - 내러티브 맵.
+5. recipes.fundamental.valuation.damodaran.storyToDrivers - 스토리-드라이버 변환.
+6. recipes.fundamental.valuation.damodaran.normalizedFinancials - 재무 패널.
+7. recipes.fundamental.valuation.damodaran.accountTraceAudit - 계정 trace.
+8. recipes.fundamental.valuation.damodaran.rdCapitalization - R&D 자본화 감사.
+9. recipes.fundamental.valuation.damodaran.leaseDebtAdjustment - 리스부채 감사.
+10. recipes.fundamental.valuation.damodaran.oneOffAdjustment - 일회성 항목 감사.
+11. recipes.fundamental.valuation.damodaran.reinvestmentRoc - value driver.
+12. recipes.fundamental.valuation.damodaran.growthFeasibility - 성장 가능성 반증.
+13. recipes.fundamental.valuation.damodaran.costOfCapital - WACC.
+14. recipes.fundamental.valuation.damodaran.fcffDcf - 가치 밴드.
+15. recipes.fundamental.valuation.damodaran.relativeCheck - 상대가치 검산.
+16. recipes.fundamental.valuation.damodaran.peerMultipleDecomposition - peer multiple 분해.
+17. recipes.fundamental.valuation.damodaran.financialFirmExcessReturn - 금융업 경로.
+18. recipes.fundamental.valuation.damodaran.sumOfParts - SOTP 경로.
+19. recipes.fundamental.valuation.damodaran.distressAdjustedDcf - distress 경로.
+20. recipes.fundamental.valuation.damodaran.scenarioFalsifier - reverse DCF 반증.
 
 ## 기본 검증
 

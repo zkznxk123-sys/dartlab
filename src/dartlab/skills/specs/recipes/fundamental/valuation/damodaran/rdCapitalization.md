@@ -1,18 +1,18 @@
 ---
-id: recipes.valuation.damodaran.oneOffAdjustment
-title: Damodaran 일회성 항목 조정 감사
+id: recipes.fundamental.valuation.damodaran.rdCapitalization
+title: Damodaran R&D 자본화 감사
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 손상, 구조조정, 중단영업, 소송, 비경상 손익 등 one-off line item을 찾아 normalized EBIT/FCFF 조정 필요성을 표시하는 절차. 트리거 — 'one-off adjustment', '비경상 손익 조정', '정규화 이익'.
+purpose: L1 재무제표의 연구개발비 라인을 찾아 R&D 자본화 필요 여부와 결손을 표시하는 Damodaran식 정규화 절차. 트리거 — 'R&D capitalization', '연구개발비 자본화', 'Damodaran R&D adjustment'.
 whenToUse:
-  - one-off adjustment
-  - 비경상 손익 조정
-  - 정규화 이익
+  - R&D capitalization
+  - 연구개발비 자본화
+  - Damodaran R&D adjustment
 linkedSkills:
-  - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.accountTraceAudit
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.accountTraceAudit
 toolRefs:
   - EngineCall
   - RunPython
@@ -24,12 +24,12 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedOutputs:
-  - impairment/restructuring/discontinued ? ??? ?? ??
-  - normalized EBIT ?? ??? ??
-  - ?? ??? ? ??? fallback ??
+  - R&D ?? ?? ?? ??? ??? ???
+  - ?? L1/L1.5 ?? ?? ? fallbackAccepted ?? blocker
+  - normalized EBIT/FCFF ?? ? ?? ?
 
 expectedNovelty:
-  - oneOffNormalizationAudit
+  - rdAdjustmentAudit
 runtimeCompatibility:
   server:
     status: supported
@@ -37,11 +37,11 @@ runtimeCompatibility:
     status: supported
 forbidden:
   - L2 엔진 호출 금지.
-  - 일회성 라인 결손을 정상 반복손익으로 단정하지 않는다.
+  - R&D 라인이 없는데 0으로 확정하지 않는다.
 failureModes:
-  - 손상차손을 반복 영업마진으로 반영
+  - 연구개발비 결손을 정상 비용 구조로 오판
 examples:
-  - INTC one-off adjustment
+  - AAPL R&D 자본화 감사
 gap:
   primary:
     - Company
@@ -56,7 +56,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "one-off 후보가 있는데 normalizedFinancials 반영 후보로 표시하지 않으면 실패로 본다."
+  description: "R&D 라인이 없는데 capitalization adjustment를 usable로 표시하면 실패로 본다."
 lastUpdated: "2026-05-14"
 ---
 
@@ -92,9 +92,10 @@ def _safeShow(topic):
 
 
 try:
-    dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
+    price_frame = dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
+    price_date = str(price_frame.tail(1).to_dicts()[0].get("date", "")) if isinstance(price_frame, pl.DataFrame) and price_frame.height else None
 except Exception:
-    pass
+    price_date = None
 
 memo = buildDamodaranMemo(
     target=target,
@@ -104,11 +105,11 @@ memo = buildDamodaranMemo(
     statements={topic: _safeShow(topic) for topic in ("IS", "BS", "CF")},
     countryDefaults=_loadReference("damodaranDefaults.json"),
     industryDefaults=_loadReference("damodaranIndustryDefaults.json"),
-    marketData={},
+    marketData={"priceDate": price_date} if price_date else {},
 )
 
 emit_result(
-    table=memo["tables"]["oneOffAdjustment"],
+    table=memo["tables"]["rdCapitalization"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -120,29 +121,29 @@ emit_result(
 
 ### 1. 결론 도출
 
-one-off 후보 line item을 찾고 정규화 후보로 표시한다.
+R&D 라인이 있으면 자본화 검토 대상으로, 없으면 `fallbackAccepted` 결손으로 표시한다.
 
 ### 2. 핵심 근거 수집
 
-`Company.show("IS"|"CF")` line item의 snakeId와 항목명을 검색한다.
+`Company.show("IS"|"CF")`의 snakeId와 항목명을 검색한다.
 
 ### 3. 메커니즘 분석
 
-반복 영업력과 일회성 항목을 분리해야 성장·마진 가정이 과대/과소 추정되지 않는다.
+R&D는 성장 투자 성격이 강하므로 비용 처리된 금액이 크면 NOPAT와 invested capital 정규화 후보가 된다.
 
 ### 4. 반례·한계
 
-반복 구조조정 여부는 텍스트 근거가 필요하므로 line item 감사 단계에서 confidence를 낮춘다.
+상각기간 추정은 아직 reference가 없으므로 엔진 계산이 아니라 감사 절차로 둔다.
 
 ### 5. 후속 모니터링
 
-후속 스킬은 `normalizedFinancials`, `scenarioFalsifier`다.
+후속 스킬은 `normalizedFinancials`와 `fcffDcf`다.
 
 ## 대표 반환 형태
 
-`oneOffAdjustment : list[dict]` — `adjustment`, `status`, `lineItem`, `latestValue`, `action`.
+`rdCapitalization : list[dict]` — `adjustment`, `status`, `lineItem`, `latestYear`, `latestValue`, `action`.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.accountTraceAudit - 계정 trace 확인.
-2. recipes.valuation.damodaran.normalizedFinancials - 정규화 후보 반영.
+1. recipes.fundamental.valuation.damodaran.accountTraceAudit - 계정 trace 확인.
+2. recipes.fundamental.valuation.damodaran.normalizedFinancials - 정규화 패널 반영 후보 점검.

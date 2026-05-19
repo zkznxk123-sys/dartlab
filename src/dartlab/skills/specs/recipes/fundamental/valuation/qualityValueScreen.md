@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.qualityValueScreen
+id: recipes.fundamental.valuation.qualityValueScreen
 title: Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)
 category: recipes
 kind: recipe
@@ -16,7 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.scan
   - recipes.fundamental.credit.distressFilter
-  - recipes.valuation.check
+  - recipes.fundamental.valuation.check
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -161,7 +161,7 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 묶음.
-2. 상위 5~10 종목에 대해 `recipes.valuation.check` 로 단일 회사 가치평가 (DCF + valuation band) 심층.
+2. 상위 5~10 종목에 대해 `recipes.fundamental.valuation.check` 로 단일 회사 가치평가 (DCF + valuation band) 심층.
 3. `recipes.fundamental.credit.distressFilter` 로 부도 위험 종목 제외.
 4. `engines.analysis` 로 발생주의 신호 점검 (CFO/NI 비율).
 5. `engines.story` 로 6 막 인과 보고서 조합.

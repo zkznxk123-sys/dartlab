@@ -15,8 +15,8 @@ whenToUse:
   - 우량주 횡단 비교
 linkedSkills:
   - engines.scan
-  - recipes.valuation.qualityValueScreen
-  - recipes.valuation.garpScreen
+  - recipes.fundamental.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.garpScreen
   - recipes.fundamental.credit.distressFilter
   - engines.analysis
 toolRefs:
@@ -187,7 +187,7 @@ graph LR
 - **단년도 고-ROE 금지**: 5 년 평균·std·min 3 종 합의 필수.
 - **매출 역성장 1 회 → 자격 박탈 X**: 사이클성 (자동차·반도체) vs 일회성 (M&A 흡수) 구분 필요. 본 recipe 는 *5 년 모두 양성장* 강제 → 사이클 자연 제외.
 - **ROE 자본구조 영향**: 부채 ↑ → 자본 ↓ → ROE 인위적 상승. `debtRatio ≤ 100` 보조 게이트 권장.
-- **ROIC > WACC 부재**: Buffett 원전 framework 핵심. dartlab WACC 부재로 ROE 만 사용. capital efficiency 검증 약함 — `recipes.valuation.intrinsicValueBand` 의 EVA spread 결합.
+- **ROIC > WACC 부재**: Buffett 원전 framework 핵심. dartlab WACC 부재로 ROE 만 사용. capital efficiency 검증 약함 — `recipes.fundamental.valuation.intrinsicValueBand` 의 EVA spread 결합.
 - **5 년 시계열 가용성**: 신규 IPO (5 년 미만) 자동 제외. 사업부 개편·분할도 역사 단절.
 - **산업 정상 ROE 차이**: 대형주 vs 중소형주, 산업별 (금융 15% vs IT 25%) 정상 분포 다름. 산업 percentile 게이트 권장.
 - **일회성 효과**: M&A·자산 매각으로 ROE 단발 변동.
@@ -209,8 +209,8 @@ graph LR
 | 분기 매출 YoY | < 0% = compounder 제외 후보 | 분기 |
 
 연계 절차:
-- GP/A 게이트 결합 → `recipes.valuation.qualityValueScreen`
-- PEG 가치 게이트 → `recipes.valuation.garpScreen` (비싸지 않은지)
+- GP/A 게이트 결합 → `recipes.fundamental.valuation.qualityValueScreen`
+- PEG 가치 게이트 → `recipes.fundamental.valuation.garpScreen` (비싸지 않은지)
 - 안정성 게이트 → `recipes.fundamental.credit.distressFilter`
 - ROE 동인 (margin × turnover × leverage) → `recipes.fundamental.quality.dupontDriver`
 - 자본배분 정성 → `recipes.fundamental.quality.capitalAllocationScorecard`
@@ -245,8 +245,8 @@ graph LR
 ## 연계 절차
 
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 ROE/매출/마진 5 년 분포.
-2. 후보 → `recipes.valuation.qualityValueScreen` 의 GP/A 게이트 추가 검증.
-3. `recipes.valuation.garpScreen` 의 PEG 게이트 — compounder 가 비싸지 않은지 가치 검증.
+2. 후보 → `recipes.fundamental.valuation.qualityValueScreen` 의 GP/A 게이트 추가 검증.
+3. `recipes.fundamental.valuation.garpScreen` 의 PEG 게이트 — compounder 가 비싸지 않은지 가치 검증.
 4. `recipes.fundamental.credit.distressFilter` 통과 (안전성).
 5. `engines.analysis` — DuPont 분해로 ROE 동인 (margin × turnover × leverage) 확인.
 6. `engines.analysis` — capital cycle (재투자 효율) 정성 분석.

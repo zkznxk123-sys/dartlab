@@ -17,7 +17,7 @@ linkedSkills:
   - engines.company
   - engines.gather
   - engines.scan
-  - recipes.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.qualityValueScreen
   - recipes.screen.compounderCandidates
   - recipes.fundamental.quality.capitalAllocationScorecard
 toolRefs:

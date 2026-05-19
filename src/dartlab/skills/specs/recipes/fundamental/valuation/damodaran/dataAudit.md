@@ -1,23 +1,21 @@
 ---
-id: recipes.valuation.damodaran.fcffDcf
-title: Damodaran FCFF DCF 밴드
+id: recipes.fundamental.valuation.damodaran.dataAudit
+title: Damodaran L1.5 데이터 감사
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 정규화 FCFF, 재투자율, ROC, WACC를 조합해 고성장기, 전환기, 정상상태의 FCFF DCF 가치 밴드를 만드는 절차. 트리거 — 'FCFF DCF', 'Damodaran DCF band', 'terminal ROC consistency'.
+purpose: Damodaran식 가치평가를 시작하기 전에 L1/L1.5 데이터만으로 재무, 가격, 시총, 세그먼트, 국가·산업 기본값, 문서 근거가 충분한지 판정하는 절차. 트리거 — 'Damodaran 데이터 감사', 'L1.5 가치평가 가능성', 'DCF 전 데이터 점검'.
 whenToUse:
-  - FCFF DCF
-  - Damodaran DCF band
-  - terminal ROC consistency
-  - intrinsic value DCF
-  - 다모다란 가치 밴드
+  - Damodaran 데이터 감사
+  - L1.5 가치평가 가능성
+  - DCF 전 데이터 점검
+  - KR US valuation data audit
+  - 다모다란 스킬 기초 점검
 linkedSkills:
-  - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.reinvestmentRoc
-  - recipes.valuation.damodaran.costOfCapital
   - engines.company
   - engines.gather
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython
@@ -28,9 +26,9 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedOutputs:
-  - bear/base/bull FCFF DCF ?? ??
-  - terminal value share? terminal growth/ROC consistency check
-  - per-share/upside ?? ?? ??? blocker
+  - IS/BS/CF/??/??/reference ?? ??? ?
+  - usable ? usableWithFallback ? blocked ??
+  - missing evidence? fallback reason ??
 
 expectedNovelty:
   - damodaranL15Memo
@@ -43,18 +41,20 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: limited
+    limitations:
+      - 패키지 내장 reference JSON과 로컬 데이터 snapshot만 점검한다.
 forbidden:
-  - terminal growth가 risk-free rate를 초과하는 가정을 통과시키지 않는다.
-  - reinvestment 없이 고성장률만 넣지 않는다.
-  - L2 엔진 호출 금지.
+  - c.analysis, c.quant, c.credit, c.industry, c.story, dartlab.macro 호출 금지.
+  - Company.show("PRICE")를 가격 SSOT로 쓰지 않는다.
+  - 누락 데이터를 0으로 채우지 않는다.
 failureModes:
-  - terminal value가 전체 가치의 대부분인데 민감도 누락
-  - negative FCFF를 기계적으로 평균
-  - 금융업에 generic FCFF 적용
+  - DART와 EDGAR의 topic alias 차이를 coverage 부족이 아니라 사업 변화로 오판
+  - Damodaran reference가 stale인데 정상 가정으로 사용
+  - 금융업을 일반 FCFF DCF 가능 대상으로 통과
 examples:
-  - 삼성전자 FCFF DCF band
-  - AAPL terminal growth consistency
-  - INTC turnaround DCF blocker
+  - 삼성전자 Damodaran 데이터 감사
+  - AAPL L1.5 가치평가 가능성 점검
+  - DCF 전에 missing evidence 정리
 gap:
   primary:
     - gather
@@ -69,7 +69,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "terminal growth, ROC, reinvestment가 서로 불일치해도 fair value band를 확정하면 실패로 본다."
+  description: "country/industry reference 또는 price path가 결손인데 usable 판정을 내리면 실패로 본다."
 lastUpdated: "2026-05-13"
 ---
 
@@ -190,7 +190,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["fcffDcf"],
+    table=memo["tables"]["dataAudit"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -202,37 +202,37 @@ emit_result(
 
 ### 1. 결론 도출
 
-가치 밴드는 `bear`, `base`, `bull` 3개로 낸다. 결론은 “현재가 대비 할인율”보다 “어떤 성장·마진·ROC 스토리가 가격에 필요한가”를 함께 말한다.
+대상 기업을 `usable`, `usableWithFallback`, `blocked` 중 하나로 판정한다. `usable`은 재무 3표, 가격, 국가 reference, 산업 reference가 모두 확인된 경우에만 쓴다.
 
 ### 2. 핵심 근거 수집
 
-정규화 FCFF, 성장률, 재투자율, ROC, WACC, terminal growth ceiling, 가격 path를 사용한다.
+`Company.show("IS"|"BS"|"CF"|"ratios"|"segments")`, `dartlab.gather("price")`, `reference/data/damodaranDefaults.json`, `reference/data/damodaranIndustryDefaults.json`를 확인한다.
 
 ### 3. 메커니즘 분석
 
-명시기간 FCFF는 매출 성장, 마진, 세율, 재투자로 만든다. terminal value는 정상상태 ROC와 재투자율이 terminal growth를 설명할 때만 통과한다.
+데이터 감사는 계산 전 게이트다. 재무 패널이 없으면 정규화가 불가능하고, 가격·시총이 없으면 reverse DCF가 불가능하며, reference가 stale이면 비용자본 가정이 fallback으로 내려간다.
 
 ### 4. 반례·한계
 
-terminal value 비중이 과도하면 결론을 낮춘다. turnaround 기업은 normalized FCFF가 양수로 전환되는 근거가 없으면 blocked로 둔다.
+EDGAR는 KR topic alias보다 거칠 수 있다. `segments`가 없거나 사업 설명 topic이 provider별 이름으로만 있으면 결론을 낮은 confidence로 내려야 한다.
 
 ### 5. 후속 모니터링
 
-마진, sales-to-capital, WACC, terminal growth 민감도를 `scenarioFalsifier`로 넘긴다.
+country reference as-of, industry reference coverage, price latest date, missing topic list를 다음 단계로 넘긴다.
 
 ## 대표 반환 형태
 
-`dcfBand : dict` — `bear`, `base`, `bull`, `terminalValueShare`, `assumptionTable`, `consistencyFlags`, `fallbacks`를 담는다.
+`coverage : list[dict]` — `area`, `status`, `rows`, `reason`을 담는다. 최종 `decision`은 `usable`, `usableWithFallback`, `blocked` 중 하나다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.costOfCapital - 할인율 범위.
-2. recipes.valuation.damodaran.relativeCheck - DCF 결과의 peer sanity check.
-3. recipes.valuation.damodaran.scenarioFalsifier - reverse DCF와 민감도 반증.
+1. recipes.fundamental.valuation.damodaran.businessModelFit - 모델 적합성 판정.
+2. recipes.fundamental.valuation.damodaran.normalizedFinancials - 재무 패널 정규화.
+3. recipes.fundamental.valuation.damodaran.costOfCapital - reference stale/fallback 반영.
 
 ## 기본 검증
 
-- terminal growth는 country risk-free rate 이하.
-- growth는 reinvestmentRate x ROC로 설명 가능해야 한다.
-- price path가 없으면 reverse DCF와 현재가 비교는 blocked 처리한다.
+- 5개 고정 타깃 중 KR 1개, US 1개 이상은 `usableWithFallback` 이상이어야 한다.
+- 금융업 타깃은 데이터가 있어도 일반 FCFF `usable`로 승격하지 않는다.
+- L2 호출 금지 정적 검사를 통과해야 한다.
 

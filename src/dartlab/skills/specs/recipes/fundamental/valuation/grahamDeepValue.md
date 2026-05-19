@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.grahamDeepValue
+id: recipes.fundamental.valuation.grahamDeepValue
 title: Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)
 category: recipes
 kind: recipe
@@ -15,7 +15,7 @@ whenToUse:
   - 가치 함정 회피
 linkedSkills:
   - engines.scan
-  - recipes.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.qualityValueScreen
   - recipes.fundamental.credit.distressFilter
   - recipes.fundamental.quality.piotroskiLite
   - engines.analysis

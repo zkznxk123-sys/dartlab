@@ -13,32 +13,34 @@ import pytest
 pytestmark = pytest.mark.unit
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DAMODARAN_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "valuation" / "damodaran"
+DAMODARAN_DIR = (
+    REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes" / "fundamental" / "valuation" / "damodaran"
+)
 REFERENCE_DATA = REPO_ROOT / "src" / "dartlab" / "reference" / "data"
 
 DAMODARAN_IDS = {
-    "recipes.valuation.damodaran.index",
-    "recipes.valuation.damodaran.dataAudit",
-    "recipes.valuation.damodaran.businessModelFit",
-    "recipes.valuation.damodaran.lifeCycleClassifier",
-    "recipes.valuation.damodaran.narrativeMap",
-    "recipes.valuation.damodaran.storyToDrivers",
-    "recipes.valuation.damodaran.normalizedFinancials",
-    "recipes.valuation.damodaran.accountTraceAudit",
-    "recipes.valuation.damodaran.rdCapitalization",
-    "recipes.valuation.damodaran.leaseDebtAdjustment",
-    "recipes.valuation.damodaran.oneOffAdjustment",
-    "recipes.valuation.damodaran.reinvestmentRoc",
-    "recipes.valuation.damodaran.growthFeasibility",
-    "recipes.valuation.damodaran.costOfCapital",
-    "recipes.valuation.damodaran.fcffDcf",
-    "recipes.valuation.damodaran.relativeCheck",
-    "recipes.valuation.damodaran.peerMultipleDecomposition",
-    "recipes.valuation.damodaran.financialFirmExcessReturn",
-    "recipes.valuation.damodaran.sumOfParts",
-    "recipes.valuation.damodaran.distressAdjustedDcf",
-    "recipes.valuation.damodaran.scenarioFalsifier",
-    "recipes.valuation.damodaran.deepDive",
+    "recipes.fundamental.valuation.damodaran.index",
+    "recipes.fundamental.valuation.damodaran.dataAudit",
+    "recipes.fundamental.valuation.damodaran.businessModelFit",
+    "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+    "recipes.fundamental.valuation.damodaran.narrativeMap",
+    "recipes.fundamental.valuation.damodaran.storyToDrivers",
+    "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+    "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+    "recipes.fundamental.valuation.damodaran.rdCapitalization",
+    "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+    "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+    "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+    "recipes.fundamental.valuation.damodaran.growthFeasibility",
+    "recipes.fundamental.valuation.damodaran.costOfCapital",
+    "recipes.fundamental.valuation.damodaran.fcffDcf",
+    "recipes.fundamental.valuation.damodaran.relativeCheck",
+    "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+    "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+    "recipes.fundamental.valuation.damodaran.sumOfParts",
+    "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+    "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+    "recipes.fundamental.valuation.damodaran.deepDive",
 }
 
 BANNED_L2_CALLS = (
@@ -95,21 +97,21 @@ def testDamodaranSkillsAreExposedThroughAiEntryPoints() -> None:
     peer = readSkill("peer multiple decomposition 다모다란 상대가치", limit=6, includeUser=False)
 
     assert entry.ok
-    assert entry.data["skills"][0]["id"] == "recipes.valuation.damodaran.index"
+    assert entry.data["skills"][0]["id"] == "recipes.fundamental.valuation.damodaran.index"
     assert entry.data["skills"][0]["expectedOutputs"]
     assert narrative.ok
-    assert narrative.data["skills"][0]["id"] == "recipes.valuation.damodaran.storyToDrivers"
+    assert narrative.data["skills"][0]["id"] == "recipes.fundamental.valuation.damodaran.storyToDrivers"
     assert narrative.data["skills"][0]["expectedOutputs"]
     assert financial.ok
-    assert financial.data["skills"][0]["id"] == "recipes.valuation.damodaran.financialFirmExcessReturn"
+    assert financial.data["skills"][0]["id"] == "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn"
     assert peer.ok
-    assert peer.data["skills"][0]["id"] == "recipes.valuation.damodaran.peerMultipleDecomposition"
+    assert peer.data["skills"][0]["id"] == "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition"
 
-    body = getSkillBody("recipes.valuation.damodaran.deepDive", includeUser=False)
+    body = getSkillBody("recipes.fundamental.valuation.damodaran.deepDive", includeUser=False)
     assert body.ok
     raw = body.data["body"]
-    assert "recipes.valuation.damodaran.storyToDrivers" in raw
-    assert "recipes.valuation.damodaran.distressAdjustedDcf" in raw
+    assert "recipes.fundamental.valuation.damodaran.storyToDrivers" in raw
+    assert "recipes.fundamental.valuation.damodaran.distressAdjustedDcf" in raw
 
 
 def testDamodaranSkillsAreInPublicSkillArtifacts() -> None:
@@ -126,11 +128,11 @@ def testDamodaranSkillsAreInPublicSkillArtifacts() -> None:
             recipe_meta = [row for row in payload["meta"]["categories"] if row["id"] == "recipes"]
             assert recipe_meta and recipe_meta[0]["count"] == sum(row.get("category") == "recipes" for row in rows)
         if name in {"index.json", "agent.json", "mcp.json"}:
-            assert by_id["recipes.valuation.damodaran.index"]["bodyPreview"]
+            assert by_id["recipes.fundamental.valuation.damodaran.index"]["bodyPreview"]
         if name in {"index.json", "agent.json", "web.json"}:
-            assert by_id["recipes.valuation.damodaran.deepDive"]["expectedOutputs"]
+            assert by_id["recipes.fundamental.valuation.damodaran.deepDive"]["expectedOutputs"]
         if name == "web.json":
-            assert by_id["recipes.valuation.damodaran.index"]["bodyHuman"]
+            assert by_id["recipes.fundamental.valuation.damodaran.index"]["bodyHuman"]
 
     graph = json.loads((artifact_dir / "graph.json").read_text(encoding="utf-8"))
     graph_ids = {node["id"] for node in graph.get("nodes", [])}
@@ -353,7 +355,7 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
     assert industry["gapLedger"], "industry defaults must expose remaining L1.5 gaps"
 
     assert system["_meta"]["coverageStatus"] == "system-contract-v1"
-    assert system["skillTree"]["entrySkill"] == "recipes.valuation.damodaran.index"
+    assert system["skillTree"]["entrySkill"] == "recipes.fundamental.valuation.damodaran.index"
     assert system["promotionReadiness"]["status"] == "operatorReviewReady"
     assert system["promotionReadiness"]["skillCount"] == len(DAMODARAN_IDS)
     assert system["promotionReadiness"]["executionSkillCount"] == len(DAMODARAN_IDS) - 1
@@ -363,32 +365,32 @@ def testDamodaranReferenceDataHasStaleAndSourceGates() -> None:
     assert {route["target"] for route in system["promotionReadiness"]["dogfoodRoutes"]} >= {"005930", "AAPL", "138930"}
     assert system["promotionReadiness"]["promotionBlockers"]
     assert {
-        "recipes.valuation.damodaran.lifeCycleClassifier",
-        "recipes.valuation.damodaran.accountTraceAudit",
-        "recipes.valuation.damodaran.growthFeasibility",
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers",
-        "recipes.valuation.damodaran.rdCapitalization",
-        "recipes.valuation.damodaran.leaseDebtAdjustment",
-        "recipes.valuation.damodaran.oneOffAdjustment",
-        "recipes.valuation.damodaran.peerMultipleDecomposition",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+        "recipes.fundamental.valuation.damodaran.growthFeasibility",
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers",
+        "recipes.fundamental.valuation.damodaran.rdCapitalization",
+        "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+        "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
     } <= set(system["skillTree"]["currentExecutablePath"])
     assert {
-        "recipes.valuation.damodaran.lifeCycleClassifier",
-        "recipes.valuation.damodaran.accountTraceAudit",
-        "recipes.valuation.damodaran.growthFeasibility",
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers",
-        "recipes.valuation.damodaran.rdCapitalization",
-        "recipes.valuation.damodaran.leaseDebtAdjustment",
-        "recipes.valuation.damodaran.oneOffAdjustment",
-        "recipes.valuation.damodaran.peerMultipleDecomposition",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+        "recipes.fundamental.valuation.damodaran.growthFeasibility",
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers",
+        "recipes.fundamental.valuation.damodaran.rdCapitalization",
+        "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+        "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
     }.isdisjoint(system["skillTree"]["nextSkillTargets"])
     assert system["skillTree"]["nextSkillTargets"] == []
     assert len(system["concepts"]) == 10
@@ -454,7 +456,7 @@ def testDamodaranIndexIsEntrySkillForAnalysisSystem() -> None:
     assert "Reverse DCF" in index_text
     assert "engineSupplementBacklog" in index_text
     assert "엔진 보강 후보" in index_text
-    for skill_id in DAMODARAN_IDS - {"recipes.valuation.damodaran.index"}:
+    for skill_id in DAMODARAN_IDS - {"recipes.fundamental.valuation.damodaran.index"}:
         assert skill_id in index_text
 
 

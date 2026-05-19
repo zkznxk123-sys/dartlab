@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.bandTrack
+id: recipes.fundamental.valuation.bandTrack
 title: valuation band 추적 (역사 평균 ±σ vs 현재가)
 category: recipes
 kind: recipe

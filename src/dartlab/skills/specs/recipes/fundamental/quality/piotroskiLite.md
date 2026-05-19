@@ -15,8 +15,8 @@ whenToUse:
   - 가치주 quality 점수카드
 linkedSkills:
   - engines.scan
-  - recipes.valuation.qualityValueScreen
-  - recipes.valuation.grahamDeepValue
+  - recipes.fundamental.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.grahamDeepValue
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -158,7 +158,7 @@ result = (
 ## 연계 절차
 
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 fScore 분포 표.
-2. fScore 6-7 점 종목에 대해 `recipes.valuation.qualityValueScreen` 의 GP/A 게이트 추가 통과 여부 확인.
+2. fScore 6-7 점 종목에 대해 `recipes.fundamental.valuation.qualityValueScreen` 의 GP/A 게이트 추가 통과 여부 확인.
 3. `recipes.fundamental.credit.distressFilter` 로 위험 종목 제외.
 4. `engines.analysis` — CFO/NI 비율 시계열 정합성 점검.
 5. `engines.story` 로 후보별 narrative 생성.

@@ -19,7 +19,7 @@ linkedSkills:
   - recipes.fundamental.quality.workingCapitalQuality
   - recipes.fundamental.credit.distressFilter
   - recipes.fundamental.credit.distressDual
-  - recipes.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.qualityValueScreen
 gap:
   primary:
     - analysis
@@ -224,7 +224,7 @@ graph LR
 연계 절차:
 - riskScore = 2 → `recipes.fundamental.quality.workingCapitalQuality` (AR/Inv vs Sales gap)
 - 분식 의심 → `c.disclosure(...)` 의 감사보고서 의견·정정공시 빈도
-- GP/A 강 + Sloan 약 = 진짜 quality → `recipes.valuation.qualityValueScreen`
+- GP/A 강 + Sloan 약 = 진짜 quality → `recipes.fundamental.valuation.qualityValueScreen`
 - 분식 + 부도 → `recipes.fundamental.credit.distressDual` (강한 회피 신호)
 
 재호출 트리거: "삼성전자 3 모델 합의 quality", "Sloan + Beneish + Novy-Marx 결합", "분식 의심 신호 (3 모델 일관)".
@@ -259,7 +259,7 @@ graph LR
 1. 본 recipe → 5 년 3 모델 점수 + riskScore.
 2. riskScore = 2 (양 모델 의심) → `recipes.fundamental.quality.workingCapitalQuality` 의 AR/Inv vs Sales gap 점검.
 3. 실제 분식 의심 회사 → 공시 (`c.disclosure(...)`) 의 감사보고서 의견·정정공시 빈도 검증.
-4. GP/A 강 (상위 10%) + Sloan 약 (하위 30%) = 진짜 quality. `recipes.valuation.qualityValueScreen` 와 상호 검증.
+4. GP/A 강 (상위 10%) + Sloan 약 (하위 30%) = 진짜 quality. `recipes.fundamental.valuation.qualityValueScreen` 와 상호 검증.
 5. `recipes.fundamental.credit.distressDual` 와 결합 — 분식 의심 + 부도 위험 = 강한 회피 신호.
 
 ## 기본 검증

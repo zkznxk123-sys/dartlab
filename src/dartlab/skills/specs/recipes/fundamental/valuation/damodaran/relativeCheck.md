@@ -1,34 +1,34 @@
 ---
-id: recipes.valuation.damodaran.costOfCapital
-title: Damodaran 비용자본 가정
+id: recipes.fundamental.valuation.damodaran.relativeCheck
+title: Damodaran 상대가치 검산
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 국가 ERP, 무위험금리, 세율, 산업 beta와 debt/capital 기본값을 L1.5 reference에서 읽어 WACC 가정과 fallback reason을 만드는 절차. 트리거 — 'WACC 가정', 'Damodaran ERP beta', '비용자본 reference'.
+purpose: EV/Sales, EV/EBIT, PE, PB 등 상대가치를 DCF 결론의 sanity check로만 사용하고 US valuation scan 부재는 partial gap으로 남기는 절차. 트리거 — 'relative valuation check', 'DCF peer sanity', 'Damodaran multiple cross-check'.
 whenToUse:
-  - WACC 가정
-  - Damodaran ERP beta
-  - 비용자본 reference
-  - cost of capital
-  - 다모다란 자본비용
+  - relative valuation check
+  - DCF peer sanity
+  - Damodaran multiple cross-check
+  - EV Sales EV EBIT
+  - 상대가치 검산
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - recipes.valuation.damodaran.businessModelFit
-  - engines.company
+  - recipes.fundamental.valuation.damodaran.fcffDcf
+  - engines.scan
+  - engines.gather
 toolRefs:
   - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef
-  - sourceRef
+  - tableRef
   - valueRef
   - dateRef
   - executionRef
 expectedOutputs:
-  - risk-free ? ERP ? beta ? debt cost ? tax ? WACC assumption table
-  - country/industry reference freshness? fallback reason
-  - WACC ???? confidence
+  - EV/Sales ? EV/EBIT ? P/B ? ???? sanity check
+  - DCF ??? multiple implied story ??
+  - US/KR peer availability? partial fallback
 
 expectedNovelty:
   - damodaranL15Memo
@@ -42,20 +42,20 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - stale country ERP를 정상 reference처럼 사용하지 않는다.
-  - beta나 부채비용 fallback을 숨기지 않는다.
+  - multiple만으로 본질가치를 확정하지 않는다.
+  - US valuation scan 부재를 숨기지 않는다.
   - L2 엔진 호출 금지.
 failureModes:
-  - 국가 ERP와 기업 통화를 혼동
-  - effective tax rate와 marginal tax rate를 혼합
-  - 금융업 WACC를 제조업 FCFF DCF에 그대로 적용
+  - peer group 없이 market-wide multiple만 비교
+  - 적자 기업 PE를 정상 multiple로 사용
+  - KR valuation snapshot을 US 기업에 적용
 examples:
-  - 삼성전자 WACC 가정
-  - AAPL Damodaran beta ERP
-  - semiconductor industry WACC fallback
+  - 삼성전자 DCF peer sanity
+  - AAPL US relative valuation partial
+  - EV Sales multiple check
 gap:
   primary:
-    - reference
+    - scan
     - gather
 testUniverse:
   market: KR+US
@@ -67,7 +67,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "country reference stale 또는 industry fallback이 있는데 confidence를 high로 표시하면 실패로 본다."
+  description: "US valuation scan 부재를 partial gap으로 표시하지 않으면 실패로 본다."
 lastUpdated: "2026-05-13"
 ---
 
@@ -188,7 +188,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["costOfCapital"],
+    table=memo["tables"]["relativeCheck"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -200,36 +200,36 @@ emit_result(
 
 ### 1. 결론 도출
 
-WACC를 점추정이 아니라 `base`, `low`, `high` 범위로 제시한다. stale 또는 industry fallback이 있으면 confidence를 낮춘다.
+상대가치는 DCF를 대체하지 않고 sanity check로만 쓴다. DCF가 peer multiple 분포와 크게 어긋나면 가정 재검토를 요구한다.
 
 ### 2. 핵심 근거 수집
 
-country reference에서 risk-free rate, total ERP, tax rate를 읽고 industry reference에서 beta, debt/capital, cost of debt, cost of capital을 읽는다.
+KR은 `scan("valuation")` snapshot과 가격 path를 쓴다. US는 v1에서 가격 path만 확인하고 peer valuation primitive 부재를 gap으로 남긴다.
 
 ### 3. 메커니즘 분석
 
-개별 beta가 없는 v1에서는 industry beta를 기본값으로 쓴다. 개별 가격 beta primitive가 L1.5에 추가되기 전까지는 industry fallback을 명시한다.
+EV/Sales는 마진과 sales-to-capital 가정의 sanity check, EV/EBIT은 정상 마진의 sanity check, PB는 금융업·자본집약 업종의 보조 체크로 쓴다.
 
 ### 4. 반례·한계
 
-KR 기업이 USD 매출 중심이어도 통화와 국가 ERP가 다를 수 있다. 통화·상장시장·매출지역이 충돌하면 단일 WACC로 단정하지 않는다.
+적자 기업 PE, 현금 과다 기업 EV multiple, 회계 기준이 다른 peer group은 결론 강도를 낮춘다.
 
 ### 5. 후속 모니터링
 
-ERP as-of, risk-free shift, industry beta table, 개별 부채비용 대체 데이터를 모니터링한다.
+US valuation scan 구현, peer group mapping, market cap/share count normalization을 gap ledger로 넘긴다.
 
 ## 대표 반환 형태
 
-`costOfCapital : dict` — `riskFreeRatePct`, `erpPct`, `beta`, `costOfEquityPct`, `preTaxCostOfDebtPct`, `taxRatePct`, `waccPct`, `confidence`, `fallbacks`를 담는다.
+`relativeCheck : dict` — `multiples`, `peerCoverage`, `sanityFlags`, `missingPrimitives`, `status`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.reinvestmentRoc - ROC와 WACC spread 비교.
-2. recipes.valuation.damodaran.fcffDcf - 할인율 범위 적용.
-3. recipes.valuation.damodaran.scenarioFalsifier - WACC 민감도 반증.
+1. recipes.fundamental.valuation.damodaran.fcffDcf - DCF 결과 입력.
+2. recipes.fundamental.valuation.damodaran.scenarioFalsifier - multiple이 깨는 가정 반증.
+3. recipes.fundamental.valuation.damodaran.deepDive - 최종 memo에 gap 반영.
 
 ## 기본 검증
 
-- country reference stale이면 `confidence: low` 또는 갱신 필요 flag가 있어야 한다.
-- industry key가 없으면 totalMarketWithoutFinancials fallback과 사유를 남긴다.
+- US 기업은 `partial` 또는 `blocked` 표시 없이 relative valuation 완료 선언 금지.
+- multiple 결과는 DCF 가정 검산으로만 사용한다.
 

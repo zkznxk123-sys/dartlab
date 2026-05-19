@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.accountTraceAudit
+id: recipes.fundamental.valuation.damodaran.accountTraceAudit
 title: Damodaran 계정 출처 감사
 category: recipes
 kind: recipe
@@ -13,8 +13,8 @@ whenToUse:
   - Damodaran account audit
   - 재무제표 출처 확인
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - recipes.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.dataAudit
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
 toolRefs:
   - EngineCall
   - RunPython
@@ -153,9 +153,9 @@ trace 결손 계정은 `normalizedFinancials`, `reinvestmentRoc`, `fcffDcf`의 c
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.normalizedFinancials - 계정 사용 결과.
-2. recipes.valuation.damodaran.reinvestmentRoc - capex/working capital trace 검증.
-3. recipes.valuation.damodaran.fcffDcf - trace 결손 시 DCF confidence 하향.
+1. recipes.fundamental.valuation.damodaran.normalizedFinancials - 계정 사용 결과.
+2. recipes.fundamental.valuation.damodaran.reinvestmentRoc - capex/working capital trace 검증.
+3. recipes.fundamental.valuation.damodaran.fcffDcf - trace 결손 시 DCF confidence 하향.
 
 ## 기본 검증
 

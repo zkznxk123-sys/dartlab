@@ -1,20 +1,21 @@
 ---
-id: recipes.valuation.damodaran.relativeCheck
-title: Damodaran 상대가치 검산
+id: recipes.fundamental.valuation.damodaran.scenarioFalsifier
+title: Damodaran 시나리오 반증
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: EV/Sales, EV/EBIT, PE, PB 등 상대가치를 DCF 결론의 sanity check로만 사용하고 US valuation scan 부재는 partial gap으로 남기는 절차. 트리거 — 'relative valuation check', 'DCF peer sanity', 'Damodaran multiple cross-check'.
+purpose: bull/base/bear 민감도, reverse DCF, 현재 가격이 요구하는 성장·마진·ROC를 계산해 Damodaran식 내재 스토리를 반증하는 절차. 트리거 — 'reverse DCF', '내재 성장률', 'Damodaran scenario falsifier'.
 whenToUse:
-  - relative valuation check
-  - DCF peer sanity
-  - Damodaran multiple cross-check
-  - EV Sales EV EBIT
-  - 상대가치 검산
+  - reverse DCF
+  - 내재 성장률
+  - Damodaran scenario falsifier
+  - valuation sensitivity
+  - 시나리오 반증
 linkedSkills:
-  - recipes.valuation.damodaran.fcffDcf
-  - engines.scan
+  - recipes.fundamental.valuation.damodaran.fcffDcf
+  - recipes.fundamental.valuation.damodaran.reinvestmentRoc
+  - recipes.fundamental.valuation.damodaran.costOfCapital
   - engines.gather
 toolRefs:
   - EngineCall
@@ -26,9 +27,9 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedOutputs:
-  - EV/Sales ? EV/EBIT ? P/B ? ???? sanity check
-  - DCF ??? multiple implied story ??
-  - US/KR peer availability? partial fallback
+  - bear/base/bull scenario table
+  - reverse DCF ?? ???? plausibility
+  - ?? ??? ??? story? break condition
 
 expectedNovelty:
   - damodaranL15Memo
@@ -42,21 +43,21 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - multiple만으로 본질가치를 확정하지 않는다.
-  - US valuation scan 부재를 숨기지 않는다.
+  - 단일 base case만으로 결론을 내지 않는다.
+  - 가격 내재 가정을 계산하지 않고 저평가/고평가를 단정하지 않는다.
   - L2 엔진 호출 금지.
 failureModes:
-  - peer group 없이 market-wide multiple만 비교
-  - 적자 기업 PE를 정상 multiple로 사용
-  - KR valuation snapshot을 US 기업에 적용
+  - WACC 민감도만 보고 마진·재투자 민감도 누락
+  - terminal value share 과다를 무시
+  - reverse DCF가 가격 path 없이 실행됨
 examples:
-  - 삼성전자 DCF peer sanity
-  - AAPL US relative valuation partial
-  - EV Sales multiple check
+  - 삼성전자 reverse DCF
+  - AAPL 현재가 내재 성장률
+  - INTC turnaround bull bear scenario
 gap:
   primary:
-    - scan
     - gather
+    - reference
 testUniverse:
   market: KR+US
   stockCodes:
@@ -67,7 +68,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "US valuation scan 부재를 partial gap으로 표시하지 않으면 실패로 본다."
+  description: "현재 가격이 요구하는 성장·마진·ROC를 계산하지 않으면 scenario falsifier 실패로 본다."
 lastUpdated: "2026-05-13"
 ---
 
@@ -188,7 +189,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["relativeCheck"],
+    table=memo["tables"]["scenarioFalsifier"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -200,36 +201,36 @@ emit_result(
 
 ### 1. 결론 도출
 
-상대가치는 DCF를 대체하지 않고 sanity check로만 쓴다. DCF가 peer multiple 분포와 크게 어긋나면 가정 재검토를 요구한다.
+현재 가격이 요구하는 성장, 마진, ROC가 과거·산업·재투자 능력과 맞는지 판정한다.
 
 ### 2. 핵심 근거 수집
 
-KR은 `scan("valuation")` snapshot과 가격 path를 쓴다. US는 v1에서 가격 path만 확인하고 peer valuation primitive 부재를 gap으로 남긴다.
+DCF 밴드, WACC 범위, 가격 path, 정규화 마진, sales-to-capital, ROC를 사용한다.
 
 ### 3. 메커니즘 분석
 
-EV/Sales는 마진과 sales-to-capital 가정의 sanity check, EV/EBIT은 정상 마진의 sanity check, PB는 금융업·자본집약 업종의 보조 체크로 쓴다.
+reverse DCF는 가격을 입력으로 두고 필요한 매출 성장률 또는 terminal margin을 역산한다. 역산값이 산업 상위권을 넘어가면 bull case라도 반증 flag를 남긴다.
 
 ### 4. 반례·한계
 
-적자 기업 PE, 현금 과다 기업 EV multiple, 회계 기준이 다른 peer group은 결론 강도를 낮춘다.
+가격 path가 없으면 reverse DCF는 blocked다. terminal value share가 높으면 모든 scenario에 confidence penalty를 부여한다.
 
 ### 5. 후속 모니터링
 
-US valuation scan 구현, peer group mapping, market cap/share count normalization을 gap ledger로 넘긴다.
+다음 실적 발표에서 매출 성장, 마진, capex, 운전자본, WACC 변화가 내재 스토리를 확인하는지 추적한다.
 
 ## 대표 반환 형태
 
-`relativeCheck : dict` — `multiples`, `peerCoverage`, `sanityFlags`, `missingPrimitives`, `status`를 담는다.
+`scenarioFalsifier : dict` — `scenarioGrid`, `reverseDcf`, `requiredGrowth`, `requiredMargin`, `requiredRoc`, `breakConditions`, `monitoringTriggers`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.fcffDcf - DCF 결과 입력.
-2. recipes.valuation.damodaran.scenarioFalsifier - multiple이 깨는 가정 반증.
-3. recipes.valuation.damodaran.deepDive - 최종 memo에 gap 반영.
+1. recipes.fundamental.valuation.damodaran.fcffDcf - DCF 밴드 입력.
+2. recipes.fundamental.valuation.damodaran.relativeCheck - peer multiple 반증 결합.
+3. recipes.fundamental.valuation.damodaran.deepDive - 최종 memo의 반례·한계 섹션.
 
 ## 기본 검증
 
-- US 기업은 `partial` 또는 `blocked` 표시 없이 relative valuation 완료 선언 금지.
-- multiple 결과는 DCF 가정 검산으로만 사용한다.
+- bull/base/bear 3개 scenario가 모두 있어야 한다.
+- reverse DCF는 가격 입력이 없으면 blocked로 남긴다.
 

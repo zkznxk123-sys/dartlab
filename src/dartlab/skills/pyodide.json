@@ -1522,7 +1522,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.garpScreen",
+      "id": "recipes.fundamental.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
       "category": "recipes",
       "status": "limited",
@@ -1553,7 +1553,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.grahamDeepValue",
+      "id": "recipes.fundamental.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "recipes",
       "status": "limited",
@@ -1615,7 +1615,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.intrinsicValueBand",
+      "id": "recipes.fundamental.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
       "category": "recipes",
       "status": "limited",
@@ -1719,7 +1719,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.qualityValueScreen",
+      "id": "recipes.fundamental.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
       "category": "recipes",
       "status": "limited",
@@ -1827,7 +1827,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.bandTrack",
+      "id": "recipes.fundamental.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
       "category": "recipes",
       "status": "limited",
@@ -1838,7 +1838,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.check",
+      "id": "recipes.fundamental.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "recipes",
       "status": "limited",
@@ -2630,7 +2630,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.index",
+      "id": "recipes.fundamental.valuation.damodaran.index",
       "title": "Damodaran L1/L1.5 분석체계 진입점",
       "category": "recipes",
       "status": "limited",
@@ -2641,7 +2641,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.damodaran.dataAudit",
+      "id": "recipes.fundamental.valuation.damodaran.dataAudit",
       "title": "Damodaran L1.5 데이터 감사",
       "category": "recipes",
       "status": "limited",
@@ -2652,7 +2652,7 @@
       ]
     },
     {
-      "id": "recipes.valuation.damodaran.businessModelFit",
+      "id": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "title": "Damodaran 모델 적합성 게이트",
       "category": "recipes",
       "status": "limited",
@@ -2661,7 +2661,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "id": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "title": "Damodaran 생애주기 분류",
       "category": "recipes",
       "status": "limited",
@@ -2670,7 +2670,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.narrativeMap",
+      "id": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "title": "Damodaran 내러티브 맵",
       "category": "recipes",
       "status": "limited",
@@ -2679,7 +2679,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.storyToDrivers",
+      "id": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "title": "Damodaran 스토리-드라이버 변환",
       "category": "recipes",
       "status": "limited",
@@ -2688,7 +2688,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.normalizedFinancials",
+      "id": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "title": "Damodaran 정규화 재무 패널",
       "category": "recipes",
       "status": "limited",
@@ -2697,7 +2697,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.accountTraceAudit",
+      "id": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "title": "Damodaran 계정 출처 감사",
       "category": "recipes",
       "status": "limited",
@@ -2706,7 +2706,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.rdCapitalization",
+      "id": "recipes.fundamental.valuation.damodaran.rdCapitalization",
       "title": "Damodaran R&D 자본화 감사",
       "category": "recipes",
       "status": "unknown",
@@ -2715,7 +2715,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
       "title": "Damodaran 리스부채 조정 감사",
       "category": "recipes",
       "status": "unknown",
@@ -2724,7 +2724,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.oneOffAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
       "title": "Damodaran 일회성 항목 조정 감사",
       "category": "recipes",
       "status": "unknown",
@@ -2733,7 +2733,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.reinvestmentRoc",
+      "id": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "title": "Damodaran 재투자율과 ROC",
       "category": "recipes",
       "status": "limited",
@@ -2742,7 +2742,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.growthFeasibility",
+      "id": "recipes.fundamental.valuation.damodaran.growthFeasibility",
       "title": "Damodaran 성장 실현가능성 검증",
       "category": "recipes",
       "status": "limited",
@@ -2751,7 +2751,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.costOfCapital",
+      "id": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "title": "Damodaran 비용자본 가정",
       "category": "recipes",
       "status": "limited",
@@ -2760,7 +2760,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.fcffDcf",
+      "id": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "title": "Damodaran FCFF DCF 밴드",
       "category": "recipes",
       "status": "limited",
@@ -2769,7 +2769,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.relativeCheck",
+      "id": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "title": "Damodaran 상대가치 검산",
       "category": "recipes",
       "status": "limited",
@@ -2778,7 +2778,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "id": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
       "title": "Damodaran Peer Multiple 분해",
       "category": "recipes",
       "status": "unknown",
@@ -2787,7 +2787,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "id": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
       "title": "Damodaran 금융업 Excess Return 경로",
       "category": "recipes",
       "status": "unknown",
@@ -2796,7 +2796,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.sumOfParts",
+      "id": "recipes.fundamental.valuation.damodaran.sumOfParts",
       "title": "Damodaran Sum-of-Parts 경로",
       "category": "recipes",
       "status": "unknown",
@@ -2805,7 +2805,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.distressAdjustedDcf",
+      "id": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
       "title": "Damodaran Distress 조정 DCF 경로",
       "category": "recipes",
       "status": "unknown",
@@ -2814,7 +2814,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.scenarioFalsifier",
+      "id": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "title": "Damodaran 시나리오 반증",
       "category": "recipes",
       "status": "limited",
@@ -2823,7 +2823,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.valuation.damodaran.deepDive",
+      "id": "recipes.fundamental.valuation.damodaran.deepDive",
       "title": "Damodaran L1/L1.5 딥다이브",
       "category": "recipes",
       "status": "limited",

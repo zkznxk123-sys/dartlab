@@ -1,19 +1,18 @@
 ---
-id: recipes.valuation.damodaran.distressAdjustedDcf
-title: Damodaran Distress 조정 DCF 경로
+id: recipes.fundamental.valuation.damodaran.leaseDebtAdjustment
+title: Damodaran 리스부채 조정 감사
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 부채비율, FCFF 음수 비율, DCF 상태를 이용해 일반 DCF에 distress 조정이 필요한지 판정하는 절차. 트리거 — 'distress adjusted DCF', '부실위험 DCF', '재무위험 가치평가'.
+purpose: L1 재무제표에서 리스·사용권자산·리스부채 라인을 찾아 부채와 영업자산 조정 필요성을 표시하는 절차. 트리거 — 'lease debt adjustment', '리스부채 조정', '사용권자산 가치평가'.
 whenToUse:
-  - distress adjusted DCF
-  - 부실위험 DCF
-  - 재무위험 가치평가
+  - lease debt adjustment
+  - 리스부채 조정
+  - 사용권자산 가치평가
 linkedSkills:
-  - recipes.valuation.damodaran.fcffDcf
-  - recipes.valuation.damodaran.costOfCapital
-  - recipes.valuation.damodaran.scenarioFalsifier
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
+  - recipes.fundamental.valuation.damodaran.costOfCapital
 toolRefs:
   - EngineCall
   - RunPython
@@ -25,28 +24,27 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedOutputs:
-  - debt-to-equity ? negative FCFF ratio ?? distress route
-  - base DCF ?? ?? ??? distress ?? ???
-  - distress model ?? ? blocker/fallback status
+  - lease/right-of-use ?? ?? ??
+  - debt/WACC/FCFF ?? ??? ??
+  - ?? ?? ?? ? blocker ?? fallback note
 
 expectedNovelty:
-  - distressDcfRoute
+  - leaseDebtAudit
 runtimeCompatibility:
   server:
     status: supported
   localPython:
     status: supported
 forbidden:
-  - L2 credit 엔진 호출 금지.
-  - distress 신호를 무시하고 base DCF만 결론으로 쓰지 않는다.
+  - L2 엔진 호출 금지.
+  - 리스 라인이 없는데 부채 조정 완료로 표시하지 않는다.
 failureModes:
-  - FCFF 지속 음수 기업을 정상 terminal value로만 평가
+  - 리스부채를 순부채에서 누락
 examples:
-  - INTC distress adjusted DCF 점검
+  - 리스부채 Damodaran 조정
 gap:
   primary:
     - Company
-    - gather
     - synth
 testUniverse:
   market: KR+US
@@ -58,7 +56,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "distressReviewRequired 신호가 있는데 final memo가 usable만 표시하면 실패로 본다."
+  description: "lease line item이 없는데 usable 조정을 선언하면 실패로 본다."
 lastUpdated: "2026-05-14"
 ---
 
@@ -94,9 +92,9 @@ def _safeShow(topic):
 
 
 try:
-    price_frame = dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
+    dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
 except Exception:
-    price_frame = pl.DataFrame()
+    pass
 
 memo = buildDamodaranMemo(
     target=target,
@@ -110,7 +108,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["distressAdjustedDcf"],
+    table=memo["tables"]["leaseDebtAdjustment"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -122,29 +120,29 @@ emit_result(
 
 ### 1. 결론 도출
 
-부채비율과 FCFF 음수 비율이 높으면 distress 조정 필요로 표시한다.
+리스 관련 line item을 찾아 부채·자본 조정 후보인지 표시한다.
 
 ### 2. 핵심 근거 수집
 
-`Company.show("BS"|"CF")`, Damodaran WACC reference, DCF 상태를 사용한다.
+`Company.show("BS"|"CF")`의 snakeId와 항목명을 검색한다.
 
 ### 3. 메커니즘 분석
 
-부실위험이 큰 기업은 going-concern DCF만으로 결론을 내리면 terminal value가 과대평가될 수 있다.
+운영리스 또는 사용권자산은 부채비율, invested capital, FCFF 조정에 영향을 준다.
 
 ### 4. 반례·한계
 
-시장 기반 default spread와 distress probability primitive가 없으면 확률가중 DCF는 보류한다.
+만기별 리스 지급액이 없으면 현재가치 재계산은 하지 않고 결손을 남긴다.
 
 ### 5. 후속 모니터링
 
-후속 스킬은 `scenarioFalsifier`와 `deepDive`다.
+후속 스킬은 `costOfCapital`, `fcffDcf`다.
 
 ## 대표 반환 형태
 
-`distressAdjustedDcf : list[dict]` — `metric`, `value`, `status`.
+`leaseDebtAdjustment : list[dict]` — `adjustment`, `status`, `lineItem`, `latestValue`, `action`.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.fcffDcf - base DCF 상태 확인.
-2. recipes.valuation.damodaran.scenarioFalsifier - 반증 조건 확인.
+1. recipes.fundamental.valuation.damodaran.accountTraceAudit - 계정 trace 확인.
+2. recipes.fundamental.valuation.damodaran.costOfCapital - 부채비율 fallback 확인.

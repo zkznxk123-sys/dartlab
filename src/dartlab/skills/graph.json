@@ -3944,7 +3944,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.bandTrack",
+      "id": "recipes.fundamental.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
       "category": "recipes",
       "purpose": "회사 valuation multiple (PER/PBR/EV/EBITDA) 의 역사 평균 ±σ 밴드 안 현재 위치를 추적하는 절차. 단순 스냅샷이 아닌 시계열 추적. 트리거 — '밸류에이션 band 추적', '시계열 valuation', '멀티플 변천'.",
@@ -3957,7 +3957,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.check",
+      "id": "recipes.fundamental.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "recipes",
       "purpose": "회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차. 트리거 — '밸류에이션 점검', 'fair value', '저평가 판단'.",
@@ -3970,7 +3970,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.accountTraceAudit",
+      "id": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "title": "Damodaran 계정 출처 감사",
       "category": "recipes",
       "purpose": "Damodaran식 재무 정규화에 쓰인 매출, EBIT, 세금, CFO, capex, 감가상각, 현금, 부채, 자본, 운전자본 계정의 L1 출처를 감사하는 절차. 트리거 — '계정 trace', '출처 감사', 'valuation account provenance'.",
@@ -3983,7 +3983,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.businessModelFit",
+      "id": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "title": "Damodaran 모델 적합성 게이트",
       "category": "recipes",
       "purpose": "일반 FCFF DCF를 적용해도 되는 회사인지 금융업, 보험, 지주, 적자, 고성장, 경기순환, 구조전환 유형으로 먼저 분류하는 절차. 트리거 — 'DCF 모델 적합성', '금융업 DCF 차단', 'Damodaran business model fit'.",
@@ -3996,7 +3996,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.costOfCapital",
+      "id": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "title": "Damodaran 비용자본 가정",
       "category": "recipes",
       "purpose": "국가 ERP, 무위험금리, 세율, 산업 beta와 debt/capital 기본값을 L1.5 reference에서 읽어 WACC 가정과 fallback reason을 만드는 절차. 트리거 — 'WACC 가정', 'Damodaran ERP beta', '비용자본 reference'.",
@@ -4009,7 +4009,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.dataAudit",
+      "id": "recipes.fundamental.valuation.damodaran.dataAudit",
       "title": "Damodaran L1.5 데이터 감사",
       "category": "recipes",
       "purpose": "Damodaran식 가치평가를 시작하기 전에 L1/L1.5 데이터만으로 재무, 가격, 시총, 세그먼트, 국가·산업 기본값, 문서 근거가 충분한지 판정하는 절차. 트리거 — 'Damodaran 데이터 감사', 'L1.5 가치평가 가능성', 'DCF 전 데이터 점검'.",
@@ -4022,7 +4022,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.deepDive",
+      "id": "recipes.fundamental.valuation.damodaran.deepDive",
       "title": "Damodaran L1/L1.5 딥다이브",
       "category": "recipes",
       "purpose": "L2 분석 엔진 없이 L1/L1.5 데이터와 Damodaran식 가정 검증만으로 가치평가 memo, DCF 밴드, reverse DCF, 반증, storyboardReady 초안을 만드는 최종 오케스트레이터. 트리거 — 'Damodaran deep dive', 'L1/L1.5 가치평가 memo', '다모다란 딥다이브'.",
@@ -4035,7 +4035,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.distressAdjustedDcf",
+      "id": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
       "title": "Damodaran Distress 조정 DCF 경로",
       "category": "recipes",
       "purpose": "부채비율, FCFF 음수 비율, DCF 상태를 이용해 일반 DCF에 distress 조정이 필요한지 판정하는 절차. 트리거 — 'distress adjusted DCF', '부실위험 DCF', '재무위험 가치평가'.",
@@ -4048,7 +4048,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.fcffDcf",
+      "id": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "title": "Damodaran FCFF DCF 밴드",
       "category": "recipes",
       "purpose": "정규화 FCFF, 재투자율, ROC, WACC를 조합해 고성장기, 전환기, 정상상태의 FCFF DCF 가치 밴드를 만드는 절차. 트리거 — 'FCFF DCF', 'Damodaran DCF band', 'terminal ROC consistency'.",
@@ -4061,7 +4061,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "id": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
       "title": "Damodaran 금융업 Excess Return 경로",
       "category": "recipes",
       "purpose": "은행·보험·증권 등 금융업이 일반 FCFF에서 차단될 때 book equity, ROE proxy, cost of equity를 이용해 excess-return 모델 필요성을 표시하는 절차. 트리거 — 'financial firm excess return', '금융업 가치평가', '은행 Damodaran'.",
@@ -4074,7 +4074,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.growthFeasibility",
+      "id": "recipes.fundamental.valuation.damodaran.growthFeasibility",
       "title": "Damodaran 성장 실현가능성 검증",
       "category": "recipes",
       "purpose": "성장률이 reinvestment rate와 ROC로 설명되는지, 현재 가격이 요구하는 성장률이 정규화 재무와 맞는지 검증하는 Damodaran식 value driver 반증 절차. 트리거 — 'growth feasibility', '성장률 실현가능성', 'reinvestment ROC consistency'.",
@@ -4087,7 +4087,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.index",
+      "id": "recipes.fundamental.valuation.damodaran.index",
       "title": "Damodaran L1/L1.5 분석체계 진입점",
       "category": "recipes",
       "purpose": "Damodaran식 분석을 DCF 계산 하나가 아니라 narrative, life cycle, 재무 정규화, value driver, risk, intrinsic/relative valuation, 특수상황, reverse DCF, memo까지 이어지는 L1/L1.5 스킬 체계로 라우팅하는 최초 진입점이다. 트리거 — '다모다란 분석', 'Damodaran valuation system', 'L1/L1.5 가치평가 스킬팩'.",
@@ -4100,7 +4100,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
       "title": "Damodaran 리스부채 조정 감사",
       "category": "recipes",
       "purpose": "L1 재무제표에서 리스·사용권자산·리스부채 라인을 찾아 부채와 영업자산 조정 필요성을 표시하는 절차. 트리거 — 'lease debt adjustment', '리스부채 조정', '사용권자산 가치평가'.",
@@ -4113,7 +4113,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "id": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "title": "Damodaran 생애주기 분류",
       "category": "recipes",
       "purpose": "L1 재무 패널만으로 Damodaran식 기업 생애주기(highGrowth, matureGrowth, matureStable, decline, turnaround, financialFirmOnly)를 분류하고 DCF 가정의 출발점을 고정하는 절차. 트리거 — 'Damodaran life cycle', '기업 생애주기 분류', '성장 단계 판정'.",
@@ -4126,7 +4126,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.narrativeMap",
+      "id": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "title": "Damodaran 내러티브 맵",
       "category": "recipes",
       "purpose": "Company metadata, topics, 재무 패널, reference mapping을 엮어 사업 스토리를 성장·마진·리스크·모델 경로로 구조화하는 L1/L1.5 절차. 트리거 — 'Damodaran narrative map', '스토리 숫자 연결', '사업 내러티브 가치평가'.",
@@ -4139,7 +4139,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.normalizedFinancials",
+      "id": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "title": "Damodaran 정규화 재무 패널",
       "category": "recipes",
       "purpose": "L1 재무제표만으로 매출, 영업이익, 세율, NOPAT, 운전자본, 감가상각, capex, FCF를 5-10년 패널로 정규화하는 절차. 트리거 — 'normalized financials', 'Damodaran 재무 정규화', 'FCFF 계산 전 패널'.",
@@ -4152,7 +4152,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.oneOffAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
       "title": "Damodaran 일회성 항목 조정 감사",
       "category": "recipes",
       "purpose": "손상, 구조조정, 중단영업, 소송, 비경상 손익 등 one-off line item을 찾아 normalized EBIT/FCFF 조정 필요성을 표시하는 절차. 트리거 — 'one-off adjustment', '비경상 손익 조정', '정규화 이익'.",
@@ -4165,7 +4165,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "id": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
       "title": "Damodaran Peer Multiple 분해",
       "category": "recipes",
       "purpose": "EV/Sales, EV/EBIT, P/B 같은 상대가치 multiple을 성장·마진·ROC·리스크 driver로 분해해 DCF sanity check로만 쓰는 절차. 트리거 — 'peer multiple decomposition', '상대가치 분해', 'multiple sanity check'.",
@@ -4178,7 +4178,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.rdCapitalization",
+      "id": "recipes.fundamental.valuation.damodaran.rdCapitalization",
       "title": "Damodaran R&D 자본화 감사",
       "category": "recipes",
       "purpose": "L1 재무제표의 연구개발비 라인을 찾아 R&D 자본화 필요 여부와 결손을 표시하는 Damodaran식 정규화 절차. 트리거 — 'R&D capitalization', '연구개발비 자본화', 'Damodaran R&D adjustment'.",
@@ -4191,7 +4191,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.reinvestmentRoc",
+      "id": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "title": "Damodaran 재투자율과 ROC",
       "category": "recipes",
       "purpose": "정규화 재무 패널에서 sales-to-capital, reinvestment rate, ROIC/ROC, incremental ROC를 계산하고 성장률이 재투자와 수익성으로 설명되는지 반증하는 절차. 트리거 — 'ROIC 재투자율', 'growth = ROC x reinvestment', 'Damodaran value driver'.",
@@ -4204,7 +4204,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.relativeCheck",
+      "id": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "title": "Damodaran 상대가치 검산",
       "category": "recipes",
       "purpose": "EV/Sales, EV/EBIT, PE, PB 등 상대가치를 DCF 결론의 sanity check로만 사용하고 US valuation scan 부재는 partial gap으로 남기는 절차. 트리거 — 'relative valuation check', 'DCF peer sanity', 'Damodaran multiple cross-check'.",
@@ -4217,7 +4217,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.scenarioFalsifier",
+      "id": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "title": "Damodaran 시나리오 반증",
       "category": "recipes",
       "purpose": "bull/base/bear 민감도, reverse DCF, 현재 가격이 요구하는 성장·마진·ROC를 계산해 Damodaran식 내재 스토리를 반증하는 절차. 트리거 — 'reverse DCF', '내재 성장률', 'Damodaran scenario falsifier'.",
@@ -4230,7 +4230,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.storyToDrivers",
+      "id": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "title": "Damodaran 스토리-드라이버 변환",
       "category": "recipes",
       "purpose": "narrativeMap의 사업 스토리를 성장률, 정상 마진, sales-to-capital, WACC, terminal growth, reverse DCF 요구 성장률로 변환하는 절차. 트리거 — 'story to drivers', '스토리를 숫자로', 'Damodaran driver map'.",
@@ -4243,7 +4243,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.damodaran.sumOfParts",
+      "id": "recipes.fundamental.valuation.damodaran.sumOfParts",
       "title": "Damodaran Sum-of-Parts 경로",
       "category": "recipes",
       "purpose": "세그먼트·지주회사·복합 사업에 대해 단일 FCFF 대신 segment별 revenue/EBIT 근거와 결손을 분리하는 절차. 트리거 — 'sum of parts', 'SOTP', '세그먼트 가치평가'.",
@@ -4256,7 +4256,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.garpScreen",
+      "id": "recipes.fundamental.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
       "category": "recipes",
       "purpose": "Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차. 트리거 — 'GARP', 'PEG', 'Lynch 성장가치', 'PEG ≤ 1'.",
@@ -4269,7 +4269,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.grahamDeepValue",
+      "id": "recipes.fundamental.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "recipes",
       "purpose": "Benjamin Graham (1949) 안전마진 framework 을 ratio 4 게이트 + 5 년 흑자 후처리로 근사해 한국 chaebol discount 트랩을 회피한 deep value 후보를 횡단으로 발굴하는 절차. 트리거 — 'Graham deep value', '안전마진', 'chaebol discount 회피'.",
@@ -4282,7 +4282,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.intrinsicValueBand",
+      "id": "recipes.fundamental.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
       "category": "recipes",
       "purpose": "단일 회사 본질가치를 Graham 수정공식 + EVA spread + CFROI proxy 3 anchor 로 동시 추정해 시장가와 비교한 가치 판정 band 를 만드는 절차. analysis valuation axis 미사용, L1 raw (`c.show(\"IS\"|\"BS\"|\"CF\"|\"PRICE\"|\"FQ\")`) 만 사용. 트리거 — '본질가치 band', 'Graham + EVA + CFROI', 'fair value 3 anchor'.",
@@ -4295,7 +4295,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.valuation.qualityValueScreen",
+      "id": "recipes.fundamental.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
       "category": "recipes",
       "purpose": "Novy-Marx (2013) gross profitability factor (Gross Profit / Total Assets) 와 단순 가치 (PER/PBR) 를 결합해 한국 chaebol discount 트랩을 회피한 quality value 후보를 횡단으로 발굴하는 절차. 트리거 — 'gross profitability', 'Novy-Marx 2013', 'quality value 횡단'.",
@@ -10029,17 +10029,17 @@
     },
     {
       "src": "recipes.fundamental.credit.distressFilter",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
       "src": "recipes.fundamental.credit.distressFilter",
-      "dst": "recipes.valuation.garpScreen",
+      "dst": "recipes.fundamental.valuation.garpScreen",
       "kind": "linkedRecipe"
     },
     {
       "src": "recipes.fundamental.credit.distressFilter",
-      "dst": "recipes.valuation.grahamDeepValue",
+      "dst": "recipes.fundamental.valuation.grahamDeepValue",
       "kind": "linkedRecipe"
     },
     {
@@ -12059,7 +12059,7 @@
     },
     {
       "src": "recipes.fundamental.quality.capitalAllocationScorecard",
-      "dst": "recipes.valuation.intrinsicValueBand",
+      "dst": "recipes.fundamental.valuation.intrinsicValueBand",
       "kind": "linkedRecipe"
     },
     {
@@ -12104,7 +12104,7 @@
     },
     {
       "src": "recipes.fundamental.quality.dupontDriver",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
@@ -12164,7 +12164,7 @@
     },
     {
       "src": "recipes.fundamental.quality.earningsQualityTriad",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
@@ -12229,12 +12229,12 @@
     },
     {
       "src": "recipes.fundamental.quality.piotroskiLite",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
       "src": "recipes.fundamental.quality.piotroskiLite",
-      "dst": "recipes.valuation.grahamDeepValue",
+      "dst": "recipes.fundamental.valuation.grahamDeepValue",
       "kind": "linkedRecipe"
     },
     {
@@ -12454,12 +12454,12 @@
     },
     {
       "src": "recipes.screen.compounderCandidates",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
       "src": "recipes.screen.compounderCandidates",
-      "dst": "recipes.valuation.garpScreen",
+      "dst": "recipes.fundamental.valuation.garpScreen",
       "kind": "linkedRecipe"
     },
     {
@@ -12588,717 +12588,717 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.bandTrack",
+      "src": "recipes.fundamental.valuation.bandTrack",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.bandTrack",
+      "src": "recipes.fundamental.valuation.bandTrack",
       "dst": "engines.analysis.valuationBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.bandTrack",
+      "src": "recipes.fundamental.valuation.bandTrack",
       "dst": "engines.quant.value",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.bandTrack",
+      "src": "recipes.fundamental.valuation.bandTrack",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.check",
+      "src": "recipes.fundamental.valuation.check",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.check",
+      "src": "recipes.fundamental.valuation.check",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.check",
+      "src": "recipes.fundamental.valuation.check",
       "dst": "engines.analysis.valuationBand",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.check",
+      "src": "recipes.fundamental.valuation.check",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.check",
+      "src": "recipes.fundamental.valuation.check",
       "dst": "engines.quant.value",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.accountTraceAudit",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.accountTraceAudit",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.businessModelFit",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.businessModelFit",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.costOfCapital",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.costOfCapital",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.costOfCapital",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.costOfCapital",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.dataAudit",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.dataAudit",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.dataAudit",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.narrativeMap",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.storyToDrivers",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.accountTraceAudit",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.rdCapitalization",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.rdCapitalization",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.oneOffAdjustment",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.growthFeasibility",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.growthFeasibility",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.relativeCheck",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.sumOfParts",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.sumOfParts",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.distressAdjustedDcf",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.deepDive",
-      "dst": "recipes.valuation.damodaran.scenarioFalsifier",
+      "src": "recipes.fundamental.valuation.damodaran.deepDive",
+      "dst": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.distressAdjustedDcf",
-      "dst": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+      "dst": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.distressAdjustedDcf",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.distressAdjustedDcf",
-      "dst": "recipes.valuation.damodaran.scenarioFalsifier",
+      "src": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+      "dst": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.fcffDcf",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.fcffDcf",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.fcffDcf",
-      "dst": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.fcffDcf",
+      "dst": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.fcffDcf",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.fcffDcf",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.financialFirmExcessReturn",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.financialFirmExcessReturn",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.growthFeasibility",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.growthFeasibility",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.growthFeasibility",
-      "dst": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.growthFeasibility",
+      "dst": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.growthFeasibility",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.growthFeasibility",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.growthFeasibility",
-      "dst": "recipes.valuation.damodaran.scenarioFalsifier",
+      "src": "recipes.fundamental.valuation.damodaran.growthFeasibility",
+      "dst": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "successor"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.deepDive",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.deepDive",
       "kind": "successor"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.narrativeMap",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.storyToDrivers",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.accountTraceAudit",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.rdCapitalization",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.rdCapitalization",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.oneOffAdjustment",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.growthFeasibility",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.growthFeasibility",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.relativeCheck",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.sumOfParts",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.sumOfParts",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.distressAdjustedDcf",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.scenarioFalsifier",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
-      "dst": "recipes.valuation.damodaran.deepDive",
+      "src": "recipes.fundamental.valuation.damodaran.index",
+      "dst": "recipes.fundamental.valuation.damodaran.deepDive",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
+      "src": "recipes.fundamental.valuation.damodaran.index",
       "dst": "start.dartlabSkillOs",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
+      "src": "recipes.fundamental.valuation.damodaran.index",
       "dst": "operation.architecture",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
+      "src": "recipes.fundamental.valuation.damodaran.index",
       "dst": "operation.testing",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.valuation.damodaran.index",
+      "src": "recipes.fundamental.valuation.damodaran.index",
       "dst": "operation.code",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.valuation.damodaran.leaseDebtAdjustment",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.leaseDebtAdjustment",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.lifeCycleClassifier",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.lifeCycleClassifier",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.lifeCycleClassifier",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.narrativeMap",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.narrativeMap",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.narrativeMap",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.narrativeMap",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.narrativeMap",
-      "dst": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "src": "recipes.fundamental.valuation.damodaran.narrativeMap",
+      "dst": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.normalizedFinancials",
-      "dst": "recipes.valuation.damodaran.dataAudit",
+      "src": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+      "dst": "recipes.fundamental.valuation.damodaran.dataAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.normalizedFinancials",
-      "dst": "recipes.valuation.damodaran.businessModelFit",
+      "src": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+      "dst": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.oneOffAdjustment",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.oneOffAdjustment",
-      "dst": "recipes.valuation.damodaran.accountTraceAudit",
+      "src": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+      "dst": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.peerMultipleDecomposition",
-      "dst": "recipes.valuation.damodaran.relativeCheck",
+      "src": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+      "dst": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.peerMultipleDecomposition",
-      "dst": "recipes.valuation.damodaran.storyToDrivers",
+      "src": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+      "dst": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.rdCapitalization",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.rdCapitalization",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.rdCapitalization",
-      "dst": "recipes.valuation.damodaran.accountTraceAudit",
+      "src": "recipes.fundamental.valuation.damodaran.rdCapitalization",
+      "dst": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.reinvestmentRoc",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.relativeCheck",
-      "dst": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.relativeCheck",
+      "dst": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.relativeCheck",
+      "src": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.relativeCheck",
+      "src": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.scenarioFalsifier",
-      "dst": "recipes.valuation.damodaran.fcffDcf",
+      "src": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+      "dst": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.scenarioFalsifier",
-      "dst": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+      "dst": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.scenarioFalsifier",
-      "dst": "recipes.valuation.damodaran.costOfCapital",
+      "src": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+      "dst": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.scenarioFalsifier",
+      "src": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.storyToDrivers",
-      "dst": "recipes.valuation.damodaran.narrativeMap",
+      "src": "recipes.fundamental.valuation.damodaran.storyToDrivers",
+      "dst": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.storyToDrivers",
-      "dst": "recipes.valuation.damodaran.reinvestmentRoc",
+      "src": "recipes.fundamental.valuation.damodaran.storyToDrivers",
+      "dst": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.storyToDrivers",
-      "dst": "recipes.valuation.damodaran.scenarioFalsifier",
+      "src": "recipes.fundamental.valuation.damodaran.storyToDrivers",
+      "dst": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.sumOfParts",
-      "dst": "recipes.valuation.damodaran.narrativeMap",
+      "src": "recipes.fundamental.valuation.damodaran.sumOfParts",
+      "dst": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.damodaran.sumOfParts",
-      "dst": "recipes.valuation.damodaran.normalizedFinancials",
+      "src": "recipes.fundamental.valuation.damodaran.sumOfParts",
+      "dst": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.garpScreen",
+      "src": "recipes.fundamental.valuation.garpScreen",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "engines.scan.account",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "recipes.fundamental.quality.piotroskiLite",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.grahamDeepValue",
+      "src": "recipes.fundamental.valuation.grahamDeepValue",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
       "dst": "recipes.fundamental.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
       "dst": "recipes.fundamental.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
       "dst": "recipes.screen.compounderCandidates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.intrinsicValueBand",
-      "dst": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.intrinsicValueBand",
+      "dst": "recipes.fundamental.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "engines.scan.valuation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "engines.scan.ratio",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "engines.scan.undervaluedQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
-      "dst": "recipes.valuation.check",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
+      "dst": "recipes.fundamental.valuation.check",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.valuation.qualityValueScreen",
+      "src": "recipes.fundamental.valuation.qualityValueScreen",
       "dst": "engines.analysis.valuation",
       "kind": "linkedRecipe"
     },
@@ -13445,7 +13445,7 @@
     "recipes.incubator.forensics.index",
     "recipes.incubator.thesisKillChain.deepDive",
     "recipes.incubator.thesisKillChain.index",
-    "recipes.valuation.damodaran.index",
+    "recipes.fundamental.valuation.damodaran.index",
     "start.dartlabSkillOs",
     "start.firstAnalysisRecipe",
     "start.installUv",
@@ -13581,9 +13581,9 @@
       "recipes.fundamental.credit.distressFilter",
       "recipes.fundamental.quality.piotroskiLite",
       "recipes.screen.compounderCandidates",
-      "recipes.valuation.garpScreen",
-      "recipes.valuation.grahamDeepValue",
-      "recipes.valuation.qualityValueScreen"
+      "recipes.fundamental.valuation.garpScreen",
+      "recipes.fundamental.valuation.grahamDeepValue",
+      "recipes.fundamental.valuation.qualityValueScreen"
     ],
     [
       "recipes.fundamental.credit.distressDual",
@@ -13592,7 +13592,7 @@
       "recipes.fundamental.quality.dupontDriver",
       "recipes.fundamental.quality.earningsQualityTriad",
       "recipes.fundamental.quality.workingCapitalQuality",
-      "recipes.valuation.intrinsicValueBand"
+      "recipes.fundamental.valuation.intrinsicValueBand"
     ],
     [
       "recipes.incubator.eventRadar.capitalActionMonitor",
@@ -13713,7 +13713,7 @@
     "recipes.screen.industryStageScreen",
     "recipes.screen.peerBenchmark",
     "recipes.screen.smallCapDiscovery",
-    "recipes.valuation.bandTrack",
+    "recipes.fundamental.valuation.bandTrack",
     "runtime.channel",
     "runtime.dataAvailabilityCheck",
     "runtime.mcpWorkbench",
@@ -13905,12 +13905,12 @@
     "recipes.screen.industryStageScreen",
     "recipes.screen.peerBenchmark",
     "recipes.screen.smallCapDiscovery",
-    "recipes.valuation.bandTrack",
-    "recipes.valuation.check",
-    "recipes.valuation.garpScreen",
-    "recipes.valuation.grahamDeepValue",
-    "recipes.valuation.intrinsicValueBand",
-    "recipes.valuation.qualityValueScreen",
+    "recipes.fundamental.valuation.bandTrack",
+    "recipes.fundamental.valuation.check",
+    "recipes.fundamental.valuation.garpScreen",
+    "recipes.fundamental.valuation.grahamDeepValue",
+    "recipes.fundamental.valuation.intrinsicValueBand",
+    "recipes.fundamental.valuation.qualityValueScreen",
     "runtime.channel",
     "runtime.dataAvailabilityCheck",
     "runtime.mcp",

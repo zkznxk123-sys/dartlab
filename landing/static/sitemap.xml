@@ -786,7 +786,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.garpScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.valuation.garpScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -801,7 +801,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.grahamDeepValue</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.valuation.grahamDeepValue</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -831,7 +831,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.intrinsicValueBand</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.valuation.intrinsicValueBand</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -881,7 +881,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.qualityValueScreen</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.valuation.qualityValueScreen</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -931,12 +931,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.bandTrack</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.valuation.bandTrack</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.valuation.check</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.valuation.check</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

@@ -1,20 +1,19 @@
 ---
-id: recipes.valuation.damodaran.normalizedFinancials
-title: Damodaran 정규화 재무 패널
+id: recipes.fundamental.valuation.damodaran.reinvestmentRoc
+title: Damodaran 재투자율과 ROC
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: L1 재무제표만으로 매출, 영업이익, 세율, NOPAT, 운전자본, 감가상각, capex, FCF를 5-10년 패널로 정규화하는 절차. 트리거 — 'normalized financials', 'Damodaran 재무 정규화', 'FCFF 계산 전 패널'.
+purpose: 정규화 재무 패널에서 sales-to-capital, reinvestment rate, ROIC/ROC, incremental ROC를 계산하고 성장률이 재투자와 수익성으로 설명되는지 반증하는 절차. 트리거 — 'ROIC 재투자율', 'growth = ROC x reinvestment', 'Damodaran value driver'.
 whenToUse:
-  - normalized financials
-  - Damodaran 재무 정규화
-  - FCFF 계산 전 패널
-  - NOPAT invested capital panel
-  - 다모다란 정규화 재무
+  - ROIC 재투자율
+  - growth equals ROC times reinvestment
+  - Damodaran value driver
+  - sales to capital
+  - incremental ROC
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - recipes.valuation.damodaran.businessModelFit
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
   - engines.company
 toolRefs:
   - EngineCall
@@ -26,9 +25,9 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedOutputs:
-  - 5-10? normalized financial panel
-  - revenue ? EBIT ? tax ? NOPAT ? FCFF? source trace
-  - ?? ??? ??? fallback ??
+  - sales-to-capital ? reinvestment rate ? ROIC/ROC ?
+  - ???? ????? ????? ????? ??
+  - incremental ROC ?? ?? ?? ??
 
 expectedNovelty:
   - damodaranL15Memo
@@ -42,17 +41,17 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - 결손 계정을 0으로 채우지 않는다.
-  - 일회성 적자를 정상 마진으로 단정하지 않는다.
+  - 성장률을 과거 CAGR만으로 확정하지 않는다.
+  - invested capital 결손 시 ROC를 계산하지 않는다.
   - L2 엔진 호출 금지.
 failureModes:
-  - DART/EDGAR 계정명 차이를 같은 snakeId로 정규화하지 못함
-  - capex 부호를 반대로 해석
-  - flow 항목과 stock 항목을 같은 방식으로 합산
+  - 음수 invested capital에서 ROC 폭주
+  - 성장률과 재투자율 불일치를 무시
+  - 산업 sales-to-capital fallback 사유 누락
 examples:
-  - 삼성전자 10년 normalized financials
-  - AAPL NOPAT invested capital 패널
-  - 반도체 사이클 정상 마진 계산
+  - 삼성전자 reinvestment ROC
+  - AAPL sales-to-capital sanity check
+  - INTC incremental ROC 반증
 gap:
   primary:
     - company
@@ -67,7 +66,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "revenue, operating income, CFO 중 하나라도 trace 없이 계산되면 정규화 패널 실패로 본다."
+  description: "매출 성장률이 implied reinvestment capacity를 초과하는데도 optimistic growth로 통과시키면 실패로 본다."
 lastUpdated: "2026-05-13"
 ---
 
@@ -188,7 +187,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["normalizedFinancials"],
+    table=memo["tables"]["reinvestmentRoc"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -200,36 +199,36 @@ emit_result(
 
 ### 1. 결론 도출
 
-정규화 패널의 사용 가능 기간과 결손 계정을 먼저 말한다. 최소 5년 미만이면 DCF 가정보다 데이터 한계를 앞에 둔다.
+가치 driver를 `growth = reinvestmentRate x ROC` 관점에서 한 문장으로 판정한다. 성장 가정이 가능한지, 과한지, 보수적인지 구분한다.
 
 ### 2. 핵심 근거 수집
 
-IS/BS/CF 연간 표와 주요 계정 trace를 묶는다. 매출, 영업이익, 법인세, CFO, capex, 감가상각, 현금, 총부채, 자본, 운전자본 계정의 출처를 남긴다.
+정규화 재무 패널의 NOPAT, invested capital, capex, 감가상각, 운전자본 증감과 산업 sales-to-capital fallback을 묶는다.
 
 ### 3. 메커니즘 분석
 
-NOPAT은 영업이익과 실효세율에서 만들고, invested capital은 영업자본 중심으로 계산한다. capex와 운전자본 증감은 FCFF 연결을 위해 따로 보관한다.
+재투자는 `capex - depreciation + deltaNonCashWorkingCapital`로 계산한다. ROC는 `NOPAT / investedCapital`, incremental ROC는 `deltaNOPAT / deltaInvestedCapital`로 계산한다.
 
 ### 4. 반례·한계
 
-세율이 음수이거나 60%를 넘으면 normalized tax fallback을 쓴다. 적자 기업은 단순 평균 대신 사이클 정상화 또는 turnaround flag를 남긴다.
+negative invested capital, 구조조정 적자, 대규모 M&A 연도는 평균에서 제외하거나 별도 flag를 둔다. 산업 fallback은 결론 강도를 낮춘다.
 
 ### 5. 후속 모니터링
 
-다음 단계는 재투자율, ROC, FCFF를 같은 패널에서 계산한다. 결손 계정은 `dataAudit` gap ledger로 되돌린다.
+성장률, 재투자율, ROC, sales-to-capital의 불일치 항목을 `fcffDcf`의 assumption guard로 넘긴다.
 
 ## 대표 반환 형태
 
-`normalizedPanel : list[dict]` — `year`, `revenue`, `ebit`, `taxRate`, `nopat`, `investedCapital`, `cfo`, `capex`, `fcff`, `sourceTrace`를 담는다.
+`valueDrivers : dict` — `reinvestmentRate`, `roc`, `incrementalRoc`, `salesToCapital`, `impliedGrowth`, `flags`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.reinvestmentRoc - 정규화 패널에서 재투자율과 ROC 계산.
-2. recipes.valuation.damodaran.fcffDcf - FCFF 현금흐름으로 가치 밴드 계산.
-3. recipes.valuation.damodaran.scenarioFalsifier - 정규화 값으로 reverse DCF 반증.
+1. recipes.fundamental.valuation.damodaran.normalizedFinancials - 입력 패널 생성.
+2. recipes.fundamental.valuation.damodaran.fcffDcf - 성장률과 reinvestment consistency 반영.
+3. recipes.fundamental.valuation.damodaran.scenarioFalsifier - 가격 내재 성장률과 비교.
 
 ## 기본 검증
 
-- 각 핵심 계정은 trace 또는 명시적 fallback reason을 가져야 한다.
-- flow 항목은 연간 flow, BS 항목은 연말 stock으로 취급한다.
+- 성장률이 ROC x 재투자율보다 크면 반드시 반례로 표시한다.
+- industry default를 썼으면 `fallback: true`와 source as-of를 결과에 남긴다.
 

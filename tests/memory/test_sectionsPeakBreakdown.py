@@ -83,7 +83,9 @@ def test_load_data_peak_under_200mb() -> None:
     df = loadData(_stockCode(), sinceYear=2016, columns=_SECTIONS_REQUIRED_COLS)
     p1 = _peakMb()
     delta = p1 - p0
-    assert delta < 200, f"loadData peak +{delta:.0f}MB ≥ 200MB — docs parquet 컬럼 추가 또는 압축 해제 비용 증가 회귀 의심"
+    assert delta < 200, (
+        f"loadData peak +{delta:.0f}MB ≥ 200MB — docs parquet 컬럼 추가 또는 압축 해제 비용 증가 회귀 의심"
+    )
     assert df.height > 0
 
 

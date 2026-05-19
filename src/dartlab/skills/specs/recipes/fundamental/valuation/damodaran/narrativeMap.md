@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.damodaran.narrativeMap
+id: recipes.fundamental.valuation.damodaran.narrativeMap
 title: Damodaran 내러티브 맵
 category: recipes
 kind: recipe
@@ -12,9 +12,9 @@ whenToUse:
   - 사업 내러티브 가치평가
   - narrative and numbers
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - recipes.valuation.damodaran.businessModelFit
-  - recipes.valuation.damodaran.lifeCycleClassifier
+  - recipes.fundamental.valuation.damodaran.dataAudit
+  - recipes.fundamental.valuation.damodaran.businessModelFit
+  - recipes.fundamental.valuation.damodaran.lifeCycleClassifier
 toolRefs:
   - EngineCall
   - RunPython
@@ -173,9 +173,9 @@ emit_result(
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.dataAudit - 사용 가능한 L1/L1.5 근거 확인.
-2. recipes.valuation.damodaran.businessModelFit - 모델 경로 확정.
-3. recipes.valuation.damodaran.storyToDrivers - narrative를 수치 driver로 변환.
+1. recipes.fundamental.valuation.damodaran.dataAudit - 사용 가능한 L1/L1.5 근거 확인.
+2. recipes.fundamental.valuation.damodaran.businessModelFit - 모델 경로 확정.
+3. recipes.fundamental.valuation.damodaran.storyToDrivers - narrative를 수치 driver로 변환.
 
 ## 기본 검증
 

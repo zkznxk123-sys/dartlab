@@ -1,39 +1,40 @@
 ---
-id: recipes.valuation.damodaran.businessModelFit
-title: Damodaran 모델 적합성 게이트
+id: recipes.fundamental.valuation.damodaran.lifeCycleClassifier
+title: Damodaran 생애주기 분류
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: 일반 FCFF DCF를 적용해도 되는 회사인지 금융업, 보험, 지주, 적자, 고성장, 경기순환, 구조전환 유형으로 먼저 분류하는 절차. 트리거 — 'DCF 모델 적합성', '금융업 DCF 차단', 'Damodaran business model fit'.
+purpose: L1 재무 패널만으로 Damodaran식 기업 생애주기(highGrowth, matureGrowth, matureStable, decline, turnaround, financialFirmOnly)를 분류하고 DCF 가정의 출발점을 고정하는 절차. 트리거 — 'Damodaran life cycle', '기업 생애주기 분류', '성장 단계 판정'.
 whenToUse:
-  - DCF 모델 적합성
-  - 금융업 DCF 차단
-  - Damodaran business model fit
-  - business model valuation gate
-  - 다모다란 모델 선택
+  - Damodaran life cycle
+  - 기업 생애주기 분류
+  - 성장 단계 판정
+  - mature growth stable decline
+  - DCF 가정 출발점
 linkedSkills:
-  - recipes.valuation.damodaran.dataAudit
-  - engines.company
-  - engines.gather
+  - recipes.fundamental.valuation.damodaran.dataAudit
+  - recipes.fundamental.valuation.damodaran.businessModelFit
+  - recipes.fundamental.valuation.damodaran.normalizedFinancials
 toolRefs:
   - EngineCall
   - RunPython
 requiredEvidence:
   - skillRef
+  - sourceRef
   - tableRef
   - valueRef
   - dateRef
   - executionRef
 expectedOutputs:
-  - generic FCFF ?? ??? ?? ??
-  - ???????distress???? fallback route
-  - ?? ?? confidence? ?? valuation path
+  - growth ? margin ? ROC-WACC spread ?? life-cycle phase
+  - phase? valuation assumption ??
+  - ?? confidence? ?? ??
 
 expectedNovelty:
-  - damodaranL15Memo
-  - reverseDcfFalsifier
-  - l15GapLedger
+  - lifeCyclePhase
+  - growthMarginRocEvidence
+  - financialFirmBlocker
 runtimeCompatibility:
   server:
     status: supported
@@ -42,21 +43,21 @@ runtimeCompatibility:
   pyodide:
     status: limited
 forbidden:
-  - 금융업을 일반 제조업 FCFF DCF로 통과시키지 않는다.
-  - 단일 적자 연도만 보고 구조적 부실로 단정하지 않는다.
+  - 금융업을 generic FCFF 생애주기로 통과시키지 않는다.
+  - 단일 연도 성장률만으로 highGrowth 또는 decline을 확정하지 않는다.
   - L2 엔진 호출 금지.
 failureModes:
-  - 은행의 예금부채를 영업부채처럼 취급
-  - 사이클 저점 적자를 영구 적자 기업으로 오판
-  - 지주회사 NAV 할인과 영업회사 DCF를 혼합
+  - 경기순환 저점의 적자를 영구 decline으로 오판
+  - FCF 전환 여부 없이 turnaround를 놓침
+  - ROC-WACC spread를 보지 않고 성장률만으로 단계 분류
 examples:
-  - 138930 일반 FCFF DCF 차단
-  - 반도체 경기순환 모델 적합성
-  - AAPL mature quality 분류
+  - 삼성전자 Damodaran 생애주기 분류
+  - INTC turnaround gate
+  - 138930 금융업 generic FCFF 차단
 gap:
   primary:
-    - company
-    - gather
+    - synth
+    - reference
 testUniverse:
   market: KR+US
   stockCodes:
@@ -67,8 +68,8 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "금융업 또는 보험업을 genericFcffEligible=true로 통과시키면 실패로 본다."
-lastUpdated: "2026-05-13"
+  description: "금융업 또는 FCF 결손 기업을 정상 matureStable로 통과시키면 실패로 본다."
+lastUpdated: "2026-05-14"
 ---
 
 ## 공개 호출 방식
@@ -188,7 +189,7 @@ memo = buildDamodaranMemo(
 )
 
 emit_result(
-    table=memo["tables"]["modelFit"],
+    table=memo["tables"]["lifeCycleClassifier"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -200,36 +201,36 @@ emit_result(
 
 ### 1. 결론 도출
 
-`genericFcffCandidate`, `cyclicalFcff`, `turnaroundNeedsNormalization`, `financialFirmOnly`, `holdingCompanyNeedsNav` 중 하나로 모델 적합성을 낸다.
+최근 성장률, 정상 마진, ROC-WACC spread, FCFF 양수 비율로 생애주기 phase를 낸다. 금융업은 `financialFirmOnly`로 분리하고 generic FCFF phase를 부여하지 않는다.
 
 ### 2. 핵심 근거 수집
 
-회사명, 시장, 세그먼트, 손익계산서, 재무상태표, 최근 적자 여부, 부채 구조를 L1/L1.5 표면에서만 읽는다.
+`normalizedFinancials`의 매출 성장, 영업마진, FCFF, `reinvestmentRoc`의 ROC, `costOfCapital`의 WACC를 사용한다.
 
 ### 3. 메커니즘 분석
 
-Damodaran식 valuation은 회사 유형이 먼저다. 같은 매출 성장률이라도 은행, 반도체, 소프트웨어, 지주회사는 현금흐름과 자본 정의가 다르므로 DCF 엔진보다 모델 적합성 게이트가 앞선다.
+성장률이 높고 ROC가 WACC를 넘으면 growth 단계, 성장률이 낮고 현금흐름이 안정되면 stable 단계, 성장률이 음수거나 FCFF 전환 근거가 약하면 decline/turnaround로 낮춘다.
 
 ### 4. 반례·한계
 
-텍스트 alias만으로 업종을 확정하지 않는다. 세그먼트와 재무제표 구조가 충돌하면 `usableWithFallback` 이하로 낮춘다.
+순환주는 단순 최근 5년 성장률만으로 안정 단계로 확정하지 않는다. cycle-normal margin은 별도 `cyclicalNormalizer`가 채워질 때까지 fallback이다.
 
 ### 5. 후속 모니터링
 
-모델 적합성 결과는 `fcffDcf`의 실행 가능 여부와 `relativeCheck`의 비교군 선택에 전달한다.
+다음 단계는 phase별 성장률 상한, terminal margin, reinvestment rate를 `growthFeasibility`와 `fcffDcf`에 넘긴다.
 
 ## 대표 반환 형태
 
-`modelFit : dict` — `modelType`, `genericFcffEligible`, `blockers`, `fallbackModel`, `evidence`를 포함한다.
+`lifeCycleClassifier : list[dict]` — `metric`, `value`, `status`, `confidence`, `source`를 담는다.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.dataAudit - 데이터 가능성 확인.
-2. recipes.valuation.damodaran.normalizedFinancials - generic FCFF 후보만 정규화.
-3. recipes.valuation.damodaran.relativeCheck - generic FCFF 부적합 기업의 대체 sanity check.
+1. recipes.fundamental.valuation.damodaran.businessModelFit - 금융업/특수상황 차단.
+2. recipes.fundamental.valuation.damodaran.normalizedFinancials - 성장률과 FCFF 패널.
+3. recipes.fundamental.valuation.damodaran.growthFeasibility - phase와 성장 가정 정합성 검증.
 
 ## 기본 검증
 
-- `138930`은 일반 FCFF DCF 차단 또는 financial-firm 전용 모델 필요로 분류되어야 한다.
-- 제조·소프트웨어 기업은 결손이 없을 때 generic FCFF 후보로 통과 가능해야 한다.
-
+- 5개 고정 타깃에서 실행되어야 한다.
+- `138930`은 generic FCFF phase가 아니라 financial-firm blocker로 남아야 한다.
+- 최소 3년 미만 패널은 phase 확정 금지.

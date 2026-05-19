@@ -1,5 +1,5 @@
 ---
-id: recipes.valuation.intrinsicValueBand
+id: recipes.fundamental.valuation.intrinsicValueBand
 title: 본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)
 category: recipes
 kind: recipe
@@ -20,7 +20,7 @@ linkedSkills:
   - recipes.fundamental.quality.dupontDriver
   - recipes.fundamental.quality.capitalAllocationScorecard
   - recipes.screen.compounderCandidates
-  - recipes.valuation.qualityValueScreen
+  - recipes.fundamental.valuation.qualityValueScreen
 toolRefs:
   - EngineCall
   - RunPython

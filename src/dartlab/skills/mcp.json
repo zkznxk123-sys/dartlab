@@ -2512,7 +2512,7 @@
         "engines.gather",
         "recipes.fundamental.quality.dupontDriver",
         "recipes.screen.compounderCandidates",
-        "recipes.valuation.intrinsicValueBand"
+        "recipes.fundamental.valuation.intrinsicValueBand"
       ],
       "bodyPreview": "## 학술 근거\n\nWarren Buffett 주주서한 (Berkshire Hathaway, 1977-2024): \"**Capital allocation is the most important job of a CEO.**\" 핵심 원칙:\n\n- **5 사용처** — Free Cash Flow 가 어디로 가나: (1) 재투자 (CAPEX·R&D), (2) 배당, (3) 자사주 매입, (4) M&A, (5) 부채 상환.\n- **ROIIC** (Return on Incremental Invested Capital) = ΔNOPAT / ΔInvestedCapital. 새로 투입한 자본 1 원이 얻는 수익률. 본질적 capital efficiency.\n- **SGR** (Sustainable Growth Rate) = ROE × (1 − payoutRatio). 외부 자본조달 없이 가능한 성장 한계.\n\n학술 검증:\n- Penman-Reggiani (2018): ROIIC &gt; WACC 인 회사가 미래 abnormal return 강함. 단순 ROE 보다 우월.\n- Damodaran (2010): \"Capital Allocation Quality\" — 5 사용처 비중이 "
     },
@@ -2614,8 +2614,8 @@
         "engines.scan",
         "engines.scan.ratio",
         "engines.scan.valuation",
-        "recipes.valuation.qualityValueScreen",
-        "recipes.valuation.garpScreen"
+        "recipes.fundamental.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.garpScreen"
       ],
       "bodyPreview": "## 학술 근거\n\nWarren Buffett (Berkshire Hathaway 주주서한, 1977-2024): \"wonderful company at fair price\" — 단년도 고-ROE 가 아니라 **사이클 전체 일관 고-ROE**. 핵심 신호:\n\n- ROE ≥ 15% 일관 5 년 + 표준편차 작음 (사이클 무관).\n- 매출 안정 성장 (역성장 없음).\n- grossMargin 안정 — moat (가격결정력) 의 정량 신호.\n\n학술 검증:\n- Asness-Frazzini-Pedersen, *\"Quality Minus Junk\"* (2019): profitability + safety + payout 결합 quality factor. 1956-2016 미국 연 5%p 초과수익. 핵심 — 단년도가 아닌 5 년 평균 + 일관성 (표준편차 역수).\n- Novy-Marx (2014): ROE 일관성 (low volatility) 가 high mean ROE 보다 미래 수익률과 강한 상관.\n- Sloan (1996): 일관 고-ROE 회사가 mean reversion 회피하는 비율 30% (전체 평균 5%) — 진짜 moat 신호.\n\ndartlab 한계: RO"
     },
@@ -2883,8 +2883,8 @@
         "engines.scan",
         "engines.scan.screen",
         "engines.scan.account",
-        "recipes.valuation.qualityValueScreen",
-        "recipes.valuation.garpScreen"
+        "recipes.fundamental.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.garpScreen"
       ],
       "bodyPreview": "## 학술 근거\n\nEdward Altman, *\"Financial Ratios, Discriminant Analysis and the Prediction of Corporate Bankruptcy\"* (Journal of Finance, 1968): 5 변수 가중 합 Z-Score 모델. 1946-1965 미국 제조업 부도 1 년 전 80-90% 적중.\n\nZ = 1.2·X₁ + 1.4·X₂ + 3.3·X₃ + 0.6·X₄ + 1.0·X₅\n\n| 변수 | 정의 | dartlab 가능? |\n|---|---|---|\n| X₁ | working capital / total assets | ◯ (account 직접) |\n| X₂ | retained earnings / total assets | ◯ (account 직접) |\n| X₃ | EBIT / total assets | ◯ (operating_profit / total_assets) |\n| X₄ | market value of equity / book value of total liabilities | ✗ (시총 시계열 결합 어려움) |\n| X₅ | sales / total assets | ◯ (totalAsset"
     },
@@ -2945,7 +2945,7 @@
         "engines.company",
         "engines.gather",
         "engines.scan.ratio",
-        "recipes.valuation.qualityValueScreen",
+        "recipes.fundamental.valuation.qualityValueScreen",
         "recipes.screen.compounderCandidates"
       ],
       "bodyPreview": "## 학술 근거\n\nDuPont 사 (E.I. du Pont de Nemours, 1920 년대) 가 도입한 ROE 분해. CFA Institute Level 1 표준 (CFA Curriculum, FRA Reading 22). 핵심 식:\n\nROE = (NI / EBT) × (EBT / EBIT) × (EBIT / Sales) × (Sales / Avg Assets) × (Avg Assets / Avg Equity)\n    = TaxBurden × InterestBurden × OperatingMargin × AssetTurnover × FinancialLeverage\n\n각 항목의 의미:\n- **TaxBurden** — 세후 / 세전. 1 에 가까울수록 세부담 낮음. 산업·국가·세제 의존.\n- **InterestBurden** — 세전 / 영업이익. 1 에 가까울수록 이자비용 낮음. 부채 자본 구조 반영.\n- **OperatingMargin** — 영업이익 / 매출. 사업 본업의 수익성.\n- **AssetTurnover** — 매출 / 평균자산. 자산 효율 (자본 회전).\n- **FinancialLeverage** — 평균자산 / 평균자기자본. 부채를 통한 자"
@@ -3077,7 +3077,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nflow = c.gather(\"flow\")  # 외인/기관 수급\npatterns = c.quant(\"패턴\")\nmomentum = c.quant(\"모멘텀\")\nqflow = c.quant(\"플로우\")\n```\n\n## 호출 동작\n\n외인/기관 수급 + 차트 패턴 + 모멘텀 + quant flow 결합. KR 종목만.\n\n1. 회사 진입\n2. gather(\"flow\") — 외인/기관 일별 순매수\n3. quant(\"패턴\") — 차트 패턴\n4. quant(\"모멘텀\") — 단/중/장기 모멘텀\n5. quant(\"플로우\") — 가격·거래량 결합 신호\n\n## 대표 반환 형태\n\n- `tableRef` 3 개 (flow / patterns / momentum)\n- `valueRef` 4+ (외인 누적 / 기관 누적 / 패턴 신호 / 모멘텀)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.company.researchStarter — 회사 진입 (KR 만)\n2. engines.quant.chartPatterns — 패턴\n3. engines.q"
     },
     {
-      "id": "recipes.valuation.garpScreen",
+      "id": "recipes.fundamental.valuation.garpScreen",
       "title": "GARP 스크리닝 (Lynch PEG 근사 + 부채 게이트)",
       "category": "recipes",
       "purpose": "Lynch GARP (Growth at Reasonable Price) — PEG = PER / 이익성장률 ≤ 1 을 dartlab 의 netProfitGrowth 로 근사하고 부채·매출성장 게이트 를 더해 성장+가치 결합 후보를 횡단으로 발굴하는 절차. 트리거 — 'GARP', 'PEG', 'Lynch 성장가치', 'PEG ≤ 1'.",
@@ -3094,7 +3094,7 @@
         "engines.scan.screen",
         "engines.scan.valuation",
         "engines.scan.ratio",
-        "recipes.valuation.qualityValueScreen"
+        "recipes.fundamental.valuation.qualityValueScreen"
       ],
       "bodyPreview": "## 학술 근거\n\nPeter Lynch, *One Up On Wall Street* (1989): GARP (Growth at Reasonable Price) — 가치투자 한정 저PER + 성장투자 한정 고성장 의 절충.\n\n- **PEG ratio** = PER / 이익성장률 (%). PEG ≤ 1 = 시장이 성장률을 미반영.\n- 핵심 발견: PER 단독 또는 성장률 단독 보다 두 결합이 sharpe ratio 우월.\n- Lynch Magellan Fund (1977-1990): 연 29% 수익률 — 본 framework 의 실증.\n\n학술적 후속: Easton (2004) — implied growth rate 와 PER 결합. Bradshaw (2004) — 애널리스트 LTG (long-term growth) + PER 결합 모델 우월성.\n\ndartlab 한계: EPS 직접 컬럼 X → `netProfitGrowth` 로 근사. EPS 성장률 ≈ 순이익 성장률 (자사주 매입·신주발행 비중 작은 시기) 이므로 합리적 근사.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\n# 1) 성장 게이트 — ne"
     },
@@ -3139,7 +3139,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\n# 1. governance composite scan\ngov = dartlab.scan(\"governance\", market=\"KR\")\nif isinstance(gov, pl.DataFrame):\n    gov_df = gov\nelif isinstance(gov, list):\n    gov_df = pl.DataFrame(gov)\nelse:\n    gov_df = pl.DataFrame()\n\n# 2. network density scan\nnet = dartlab.scan(\"network\", market=\"KR\")\nif isinstance(net, pl.DataFrame):\n    net_df = net\nelif isinstance(net, list):\n    net_df = pl.DataFrame(net)\nelse:\n    net_df = pl.DataFrame()\n\n# 3. audit-change scan\naudit = dartlab.scan(\"audit\", market=\"KR\")\nif isinstance(audit, pl.DataFrame):\n   "
     },
     {
-      "id": "recipes.valuation.grahamDeepValue",
+      "id": "recipes.fundamental.valuation.grahamDeepValue",
       "title": "Graham deep value 안전마진 스크리닝 (PBR + 유동성 + 저레버리지)",
       "category": "recipes",
       "purpose": "Benjamin Graham (1949) 안전마진 framework 을 ratio 4 게이트 + 5 년 흑자 후처리로 근사해 한국 chaebol discount 트랩을 회피한 deep value 후보를 횡단으로 발굴하는 절차. 트리거 — 'Graham deep value', '안전마진', 'chaebol discount 회피'.",
@@ -3156,7 +3156,7 @@
         "engines.scan.screen",
         "engines.scan.valuation",
         "engines.scan.account",
-        "recipes.valuation.qualityValueScreen"
+        "recipes.fundamental.valuation.qualityValueScreen"
       ],
       "bodyPreview": "## 학술 근거\n\nBenjamin Graham, *The Intelligent Investor* (1949) + *Security Analysis* (1934, with Dodd): **Margin of Safety** — 시장가 &lt; 본질가치 와 자본구조 안전성 동시 요구. 핵심 게이트:\n\n1. **PBR ≤ 1.0** — 시장가 ≤ 장부가 (회계상 청산가치 안전마진).\n2. **Current Ratio ≥ 2.0** — 단기 부채 대비 유동자산 2 배 이상 (유동성 안전).\n3. **Debt Ratio ≤ 50%** — 자본 대비 부채 1:1 이내 (레버리지 안전).\n4. **5 년 흑자** — 사이클 전체 생존성 검증.\n\n학술 검증:\n- Lakonishok-Shleifer-Vishny (1994): 저-PBR 가치주 1968-90 미국 연 17.3% vs 성장주 9.3%.\n- Chan-Hamao-Lakonishok (1991): 일본 시장 동일 효과 — 저-PBR + 높은 매출/주가 결합 우월.\n- 한국: 단순 저-PBR 은 chaebol discount 함정 → Graham 의 4 게이트 결합으로 함정 회피.\n\ndartlab 한계: 진정한 NCAV"
     },
@@ -3265,7 +3265,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\ninsider = dartlab.scan(\"insider\")\ncapital = dartlab.scan(\"capital\")\nevents = c.disclosure(days=180, type=\"자기주식\")\nholders = c.show(\"majorHolder\")\n```\n\n## 호출 동작\n\n내부자 매매 패턴 + 자본변동 (자사주 매입/매도, 유상증자, 무상증자) + 최근 공시 이벤트 + 최대주주 지분 변화.\n\n1. 회사 진입\n2. scan(\"insider\") — 내부자 매매 횡단 (peer 대비 강도)\n3. scan(\"capital\") — 자본구조 변동 횡단\n4. disclosure(days=180, type=...) — 최근 자본 관련 공시\n5. show(\"majorHolder\") — 최대주주 / 주요주주 변화\n\n## 대표 반환 형태\n\n- `tableRef` 4 개 (insider scan + capital scan + disclosure + majorHolder)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.com"
     },
     {
-      "id": "recipes.valuation.intrinsicValueBand",
+      "id": "recipes.fundamental.valuation.intrinsicValueBand",
       "title": "본질가치 3 anchor (Graham + EVA + CFROI proxy — L1 raw)",
       "category": "recipes",
       "purpose": "단일 회사 본질가치를 Graham 수정공식 + EVA spread + CFROI proxy 3 anchor 로 동시 추정해 시장가와 비교한 가치 판정 band 를 만드는 절차. analysis valuation axis 미사용, L1 raw (`c.show(\"IS\"|\"BS\"|\"CF\"|\"PRICE\"|\"FQ\")`) 만 사용. 트리거 — '본질가치 band', 'Graham + EVA + CFROI', 'fair value 3 anchor'.",
@@ -3452,7 +3452,7 @@
         "engines.scan.screen",
         "engines.scan.ratio",
         "engines.scan.valuation",
-        "recipes.valuation.qualityValueScreen"
+        "recipes.fundamental.valuation.qualityValueScreen"
       ],
       "bodyPreview": "## 학술 근거\n\nJoseph Piotroski, *\"Value Investing: The Use of Historical Financial Statement Information to Separate Winners from Losers\"* (Journal of Accounting Research, 2000): 저-PBR (가치주) 유니버스 안에서 9 가지 fundamental 신호로 점수화. 1976-1996 미국 백테스트:\n\n- 고-점수 (8-9 점) 가치주 연 13.4% vs 저-점수 (0-1 점) 5.9%.\n- 점수 0 → 1 단위 상승 시 평균 +1.5%p 초과수익.\n- 가치주 (BM 상위 quintile) 안에서 작동, 성장주에서는 약함.\n\n원전 9 항목 중 dartlab ratio 13 종으로 가능한 7 항목만 사용 (lite). 신주발행 (자본금 변동) 과 ΔassetTurnover 는 한국 회계 특이성으로 노이즈 큼 → 제외. 미국 적용 시 둘 추가 가능.\n\n## 7 항목 (각 1 점, 합계 0~7)\n\n| 번호 | 항목 | dartlab 계산 |\n|---|---|---|\n| 1 | ROA &gt; 0 | `roa > 0` |\n| 2 | CFO"
     },
@@ -3476,7 +3476,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\nc = dartlab.Company(\"005930\")\n\n# 1. QMJ quality score\nqmj = c.quant(\"qmj\")\nquality_score = qmj[\"score\"] if isinstance(qmj, dict) else 0\nquality_decile = qmj.get(\"decile\", 5) if isinstance(qmj, dict) else 5\n\n# 2. macro cycle phase (early-recovery / mid-expansion / late-cycle / contraction)\ncycle = dartlab.macro(\"cycle\", market=\"KR\")\nphase = cycle.get(\"phase\", \"unknown\") if isinstance(cycle, dict) else \"unknown\"\n\n# 3. macro beta — 회사 sensitivity 60M rolling\nbeta = c.scan(\"macroBeta\") if hasattr(c, \"scan\") else None\nrate_beta = beta.get(\""
     },
     {
-      "id": "recipes.valuation.qualityValueScreen",
+      "id": "recipes.fundamental.valuation.qualityValueScreen",
       "title": "Quality + Value 횡단 스크리닝 (Novy-Marx GP/A 기반)",
       "category": "recipes",
       "purpose": "Novy-Marx (2013) gross profitability factor (Gross Profit / Total Assets) 와 단순 가치 (PER/PBR) 를 결합해 한국 chaebol discount 트랩을 회피한 quality value 후보를 횡단으로 발굴하는 절차. 트리거 — 'gross profitability', 'Novy-Marx 2013', 'quality value 횡단'.",
@@ -3694,7 +3694,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\n# 사용법 질문은 ReadSkill + ReadCapability 만 사용\n# RunPython 으로 가짜 숫자 만들지 않는다\nfrom dartlab.ai.tools.readSkill import readSkill\nfrom dartlab.ai.tools.readCapability import readCapability\n\nskills = readSkill(\"dartlab 사용법\", limit=8)\ncaps = readCapability(\"Company.show\", limit=5)\n```\n\n## 호출 동작\n\n사용법·API 설명 질문은 **계산이 필요 없다**. 가짜 숫자 만들지 않고 skill 절차 + capability docstring 으로 좁은 설명을 답한다.\n\n1. `ReadSkill` 로 관련 skill 본문 검색\n2. `ReadCapability` 로 호출 가능한 API docstring 검색\n3. skill ref + apiRef 를 본문에 인용해 답변\n4. **RunPython 으로 emit_result 호출 X** — 사용법은 evidence table 이 필요 없다\n\n## 대표 반환 형태\n\n- `skil"
     },
     {
-      "id": "recipes.valuation.bandTrack",
+      "id": "recipes.fundamental.valuation.bandTrack",
       "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)",
       "category": "recipes",
       "purpose": "회사 valuation multiple (PER/PBR/EV/EBITDA) 의 역사 평균 ±σ 밴드 안 현재 위치를 추적하는 절차. 단순 스냅샷이 아닌 시계열 추적. 트리거 — '밸류에이션 band 추적', '시계열 valuation', '멀티플 변천'.",
@@ -3715,7 +3715,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nband = c.analysis(\"financial\", \"밸류에이션밴드\")\nqval = c.quant(\"가치\")\npeer_band = dartlab.scan(\"valuation\")\n```\n\n## 호출 동작\n\n회사 valuation multiple 시계열 → 역사 평균 + σ → 현재 위치 (- 1σ / 평균 / + 1σ 등) → peer 횡단 비교.\n\n1. 회사 진입\n2. analysis(\"financial\", \"밸류에이션밴드\") — 시계열 + 역사 평균 ±σ\n3. quant(\"가치\") — 기술적 가치 신호 (역사 평균 대비)\n4. scan(\"valuation\") — peer 횡단 멀티플\n\n## 대표 반환 형태\n\n- `tableRef` 3 개 (band 시계열 + qvalue + peer)\n- `valueRef` 4+ (현재 PER / 5 년 평균 / σ 위치 / peer median)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.company.researchStarter — 회사 진입\n2. engines.ana"
     },
     {
-      "id": "recipes.valuation.check",
+      "id": "recipes.fundamental.valuation.check",
       "title": "가치평가 점검 (DCF + 상대가치 + valuation band)",
       "category": "recipes",
       "purpose": "회사의 valuation 을 DCF 절대평가 + 상대가치 (peer multiple) + valuation band (역사 평균 대비) 3 축으로 종합 점검하는 절차. 트리거 — '밸류에이션 점검', 'fair value', '저평가 판단'.",
@@ -5237,7 +5237,7 @@
       "bodyPreview": "## 절차\n\n1. edge 마다 근거 문장, 수치, 또는 분석 결과 ref 를 붙인다.\n2. `graph LR` 을 기본으로 쓰고 6~8노드 이하로 제한한다.\n3. 노드 라벨에는 가능한 한 방향성 또는 임계값을 포함한다.\n4. 관계 근거가 부족하면 diagram 을 만들지 않고 bullet path 로 낮춘다.\n\n## 공개 호출 방식\n\n```python\nfrom dartlab.viz import emit_diagram\n\nsource = \"graph LR\\n  A[금리 +100bp] --> B[이자비용 증가]\\n  B --> C[ICR 하락]\"\nemit_diagram(\"mermaid\", source)\n```\n\n## 호출 동작\n\n- 입력 view 또는 rows 를 검산 가능한 ChartSpec 으로 변환한다.\n- `evidenceBinding` 또는 `evidenceIds` 가 없으면 emit 하지 않는다.\n- 데이터가 부족하면 값을 추정하지 않고 표, coverage note, 또는 bullet path 로 낮춘다.\n\n## 대표 반환 형태\n\n- `dict` ChartSpec: `chartType`, `title`, `series` 또는 `data`, `categories`, `evidenceBinding`, `meta`.\n- Mermaid 계열은 diagram source 와 node/edge evidence refs 를 함께 남긴다.\n\n## 기본 검증\n\n- diagram 의 모든 edge 가 answer claim 또는 evidence ref 로 되짚어져야 한다.\n- Mermaid 는 설명을 대체하지 않고 메커니즘 섹션에만 배치한다."
     },
     {
-      "id": "recipes.valuation.damodaran.index",
+      "id": "recipes.fundamental.valuation.damodaran.index",
       "title": "Damodaran L1/L1.5 분석체계 진입점",
       "category": "recipes",
       "purpose": "Damodaran식 분석을 DCF 계산 하나가 아니라 narrative, life cycle, 재무 정규화, value driver, risk, intrinsic/relative valuation, 특수상황, reverse DCF, memo까지 이어지는 L1/L1.5 스킬 체계로 라우팅하는 최초 진입점이다. 트리거 — '다모다란 분석', 'Damodaran valuation system', 'L1/L1.5 가치평가 스킬팩'.",
@@ -5250,16 +5250,16 @@
         "다모다란 최초 진입점"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier",
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers"
       ],
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. 하위 recipe와 엔진 capability가 제공하는 Company/gather/scan/reference 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 `damodaranAnalysisSystem.json` 계약과 gap ledger 를 읽는 **RunPython fallback** 절차다.\n\n```python\nimport importlib.resources as resources\nimport json\n\ntarget = \"005930\"\n\nsystem = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranAnalysisSystem.json\").read_text(encoding=\"utf-8\")\n)\n\nconcept_rows = [\n    {\n        \"order\": concept[\"order\"],\n        \"concept\": concept[\"label\"],\n        \"status\": concept[\"status\"],\n        \"implementedSkills\": len(concept[\"implementedSkills\"]),\n        \"plannedSkills\": len(concept[\"plannedSkills\"]),\n        \"gapCount\": len(concept[\"gapIds\"]),\n    }\n    for concept in system[\"concepts\"]\n]\ngap_rows = [\n    {\n        \"order\": 100 + idx,\n        \"concept\": gap[\"id\"],\n        \"status\": gap[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": None,\n        \"gapCount\": 1,\n    }\n    for idx, gap in enumerate(system[\"gapLedger\"], start=1)\n]\nengine_rows = [\n    {\n        \"order\": 200 + idx,\n        \"concept\": item[\"id\"],\n        \"status\": item[\"status\"],\n        \"implementedSkills\": None,\n        \"plannedSkills\": len(item[\"requiredBeforeEngineWork\"]),\n        \"gapCount\": 1,\n    }\n    for idx, item in enumerate(system[\"engineSupplementBacklog\"], start=1)\n]\npromotion_rows = [\n    {\n        \"order\": 300,\n        \"concept\": \"promotionReadiness\",\n        \"status\": system[\"promotionR"
     },
     {
-      "id": "recipes.valuation.damodaran.dataAudit",
+      "id": "recipes.fundamental.valuation.damodaran.dataAudit",
       "title": "Damodaran L1.5 데이터 감사",
       "category": "recipes",
       "purpose": "Damodaran식 가치평가를 시작하기 전에 L1/L1.5 데이터만으로 재무, 가격, 시총, 세그먼트, 국가·산업 기본값, 문서 근거가 충분한지 판정하는 절차. 트리거 — 'Damodaran 데이터 감사', 'L1.5 가치평가 가능성', 'DCF 전 데이터 점검'.",
@@ -5278,7 +5278,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.businessModelFit",
+      "id": "recipes.fundamental.valuation.damodaran.businessModelFit",
       "title": "Damodaran 모델 적합성 게이트",
       "category": "recipes",
       "purpose": "일반 FCFF DCF를 적용해도 되는 회사인지 금융업, 보험, 지주, 적자, 고성장, 경기순환, 구조전환 유형으로 먼저 분류하는 절차. 트리거 — 'DCF 모델 적합성', '금융업 DCF 차단', 'Damodaran business model fit'.",
@@ -5290,14 +5290,14 @@
         "다모다란 모델 선택"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
         "engines.company",
         "engines.gather"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.lifeCycleClassifier",
+      "id": "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
       "title": "Damodaran 생애주기 분류",
       "category": "recipes",
       "purpose": "L1 재무 패널만으로 Damodaran식 기업 생애주기(highGrowth, matureGrowth, matureStable, decline, turnaround, financialFirmOnly)를 분류하고 DCF 가정의 출발점을 고정하는 절차. 트리거 — 'Damodaran life cycle', '기업 생애주기 분류', '성장 단계 판정'.",
@@ -5309,14 +5309,14 @@
         "DCF 가정 출발점"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.normalizedFinancials"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.narrativeMap",
+      "id": "recipes.fundamental.valuation.damodaran.narrativeMap",
       "title": "Damodaran 내러티브 맵",
       "category": "recipes",
       "purpose": "Company metadata, topics, 재무 패널, reference mapping을 엮어 사업 스토리를 성장·마진·리스크·모델 경로로 구조화하는 L1/L1.5 절차. 트리거 — 'Damodaran narrative map', '스토리 숫자 연결', '사업 내러티브 가치평가'.",
@@ -5327,14 +5327,14 @@
         "narrative and numbers"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _marketData():\n    out = {}\n    "
     },
     {
-      "id": "recipes.valuation.damodaran.storyToDrivers",
+      "id": "recipes.fundamental.valuation.damodaran.storyToDrivers",
       "title": "Damodaran 스토리-드라이버 변환",
       "category": "recipes",
       "purpose": "narrativeMap의 사업 스토리를 성장률, 정상 마진, sales-to-capital, WACC, terminal growth, reverse DCF 요구 성장률로 변환하는 절차. 트리거 — 'story to drivers', '스토리를 숫자로', 'Damodaran driver map'.",
@@ -5344,14 +5344,14 @@
         "Damodaran driver map"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _marketData():\n    try:\n        frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\n        if isinstance(frame, pl.DataFrame) and frame.height:\n            return {\"priceDate\": str(frame.tail(1).to_dicts()[0].get(\"date\", \"\"))}\n    except Exception as exc:\n        return {\"priceError\": type(exc).__name__}\n    return {}\n\n\ncountry_defaults = _loadReference(\"damodaranDefaults.json\")\nindustry_defaults = _loadReference(\"damodaranIndustryDefaults.json\")\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in ("
     },
     {
-      "id": "recipes.valuation.damodaran.normalizedFinancials",
+      "id": "recipes.fundamental.valuation.damodaran.normalizedFinancials",
       "title": "Damodaran 정규화 재무 패널",
       "category": "recipes",
       "purpose": "L1 재무제표만으로 매출, 영업이익, 세율, NOPAT, 운전자본, 감가상각, capex, FCF를 5-10년 패널로 정규화하는 절차. 트리거 — 'normalized financials', 'Damodaran 재무 정규화', 'FCFF 계산 전 패널'.",
@@ -5363,14 +5363,14 @@
         "다모다란 정규화 재무"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
         "engines.company"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.accountTraceAudit",
+      "id": "recipes.fundamental.valuation.damodaran.accountTraceAudit",
       "title": "Damodaran 계정 출처 감사",
       "category": "recipes",
       "purpose": "Damodaran식 재무 정규화에 쓰인 매출, EBIT, 세금, CFO, capex, 감가상각, 현금, 부채, 자본, 운전자본 계정의 L1 출처를 감사하는 절차. 트리거 — '계정 trace', '출처 감사', 'valuation account provenance'.",
@@ -5382,13 +5382,13 @@
         "재무제표 출처 확인"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.normalizedFinancials"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ncountry_defaults = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranDefaults.json\").read_text(encoding=\"utf-8\")\n)\nindustry_defaults = json.loads(\n    resources.files(\"dartlab.reference.data\").joinpath(\"damodaranIndustryDefaults.json\").read_text(encoding=\"utf-8\")\n)\nstatements = {topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")}\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements=statements,\n    countryDefaults=country_defaults,\n    industryDefaults=industry_defaults,\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"accountTraceAudit\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\nvaluation에"
     },
     {
-      "id": "recipes.valuation.damodaran.rdCapitalization",
+      "id": "recipes.fundamental.valuation.damodaran.rdCapitalization",
       "title": "Damodaran R&D 자본화 감사",
       "category": "recipes",
       "purpose": "L1 재무제표의 연구개발비 라인을 찾아 R&D 자본화 필요 여부와 결손을 표시하는 Damodaran식 정규화 절차. 트리거 — 'R&D capitalization', '연구개발비 자본화', 'Damodaran R&D adjustment'.",
@@ -5398,13 +5398,13 @@
         "Damodaran R&D adjustment"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.accountTraceAudit"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    price_frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\n    price_date = str(price_frame.tail(1).to_dicts()[0].get(\"date\", \"\")) if isinstance(price_frame, pl.DataFrame) and price_frame.height else None\nexcept Exception:\n    price_date = None\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={\"priceDate\": price_date} if price"
     },
     {
-      "id": "recipes.valuation.damodaran.leaseDebtAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
       "title": "Damodaran 리스부채 조정 감사",
       "category": "recipes",
       "purpose": "L1 재무제표에서 리스·사용권자산·리스부채 라인을 찾아 부채와 영업자산 조정 필요성을 표시하는 절차. 트리거 — 'lease debt adjustment', '리스부채 조정', '사용권자산 가치평가'.",
@@ -5414,13 +5414,13 @@
         "사용권자산 가치평가"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.costOfCapital"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.costOfCapital"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"leaseDebtAdjustment\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도"
     },
     {
-      "id": "recipes.valuation.damodaran.oneOffAdjustment",
+      "id": "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
       "title": "Damodaran 일회성 항목 조정 감사",
       "category": "recipes",
       "purpose": "손상, 구조조정, 중단영업, 소송, 비경상 손익 등 one-off line item을 찾아 normalized EBIT/FCFF 조정 필요성을 표시하는 절차. 트리거 — 'one-off adjustment', '비경상 손익 조정', '정규화 이익'.",
@@ -5430,13 +5430,13 @@
         "정규화 이익"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.accountTraceAudit"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"oneOffAdjustment\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n"
     },
     {
-      "id": "recipes.valuation.damodaran.reinvestmentRoc",
+      "id": "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
       "title": "Damodaran 재투자율과 ROC",
       "category": "recipes",
       "purpose": "정규화 재무 패널에서 sales-to-capital, reinvestment rate, ROIC/ROC, incremental ROC를 계산하고 성장률이 재투자와 수익성으로 설명되는지 반증하는 절차. 트리거 — 'ROIC 재투자율', 'growth = ROC x reinvestment', 'Damodaran value driver'.",
@@ -5448,13 +5448,13 @@
         "incremental ROC"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
         "engines.company"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.growthFeasibility",
+      "id": "recipes.fundamental.valuation.damodaran.growthFeasibility",
       "title": "Damodaran 성장 실현가능성 검증",
       "category": "recipes",
       "purpose": "성장률이 reinvestment rate와 ROC로 설명되는지, 현재 가격이 요구하는 성장률이 정규화 재무와 맞는지 검증하는 Damodaran식 value driver 반증 절차. 트리거 — 'growth feasibility', '성장률 실현가능성', 'reinvestment ROC consistency'.",
@@ -5466,15 +5466,15 @@
         "Damodaran growth driver"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.costOfCapital",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.costOfCapital",
+      "id": "recipes.fundamental.valuation.damodaran.costOfCapital",
       "title": "Damodaran 비용자본 가정",
       "category": "recipes",
       "purpose": "국가 ERP, 무위험금리, 세율, 산업 beta와 debt/capital 기본값을 L1.5 reference에서 읽어 WACC 가정과 fallback reason을 만드는 절차. 트리거 — 'WACC 가정', 'Damodaran ERP beta', '비용자본 reference'.",
@@ -5486,14 +5486,14 @@
         "다모다란 자본비용"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
         "engines.company"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.fcffDcf",
+      "id": "recipes.fundamental.valuation.damodaran.fcffDcf",
       "title": "Damodaran FCFF DCF 밴드",
       "category": "recipes",
       "purpose": "정규화 FCFF, 재투자율, ROC, WACC를 조합해 고성장기, 전환기, 정상상태의 FCFF DCF 가치 밴드를 만드는 절차. 트리거 — 'FCFF DCF', 'Damodaran DCF band', 'terminal ROC consistency'.",
@@ -5505,16 +5505,16 @@
         "다모다란 가치 밴드"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
         "engines.company",
         "engines.gather"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.relativeCheck",
+      "id": "recipes.fundamental.valuation.damodaran.relativeCheck",
       "title": "Damodaran 상대가치 검산",
       "category": "recipes",
       "purpose": "EV/Sales, EV/EBIT, PE, PB 등 상대가치를 DCF 결론의 sanity check로만 사용하고 US valuation scan 부재는 partial gap으로 남기는 절차. 트리거 — 'relative valuation check', 'DCF peer sanity', 'Damodaran multiple cross-check'.",
@@ -5526,14 +5526,14 @@
         "상대가치 검산"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
         "engines.scan",
         "engines.gather"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.peerMultipleDecomposition",
+      "id": "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
       "title": "Damodaran Peer Multiple 분해",
       "category": "recipes",
       "purpose": "EV/Sales, EV/EBIT, P/B 같은 상대가치 multiple을 성장·마진·ROC·리스크 driver로 분해해 DCF sanity check로만 쓰는 절차. 트리거 — 'peer multiple decomposition', '상대가치 분해', 'multiple sanity check'.",
@@ -5543,13 +5543,13 @@
         "multiple sanity check"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.relativeCheck",
-        "recipes.valuation.damodaran.storyToDrivers"
+        "recipes.fundamental.valuation.damodaran.relativeCheck",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    price_frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    price_frame = pl.DataFrame()\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\ntable = list(memo[\"tables\"][\"peerMultipleDecomposition\"])\ntry:\n    scan_frame = dartlab.scan(\"valuation\") if market == \"KR\" else pl.DataFrame()\n    scan_status = "
     },
     {
-      "id": "recipes.valuation.damodaran.financialFirmExcessReturn",
+      "id": "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
       "title": "Damodaran 금융업 Excess Return 경로",
       "category": "recipes",
       "purpose": "은행·보험·증권 등 금융업이 일반 FCFF에서 차단될 때 book equity, ROE proxy, cost of equity를 이용해 excess-return 모델 필요성을 표시하는 절차. 트리거 — 'financial firm excess return', '금융업 가치평가', '은행 Damodaran'.",
@@ -5559,13 +5559,13 @@
         "은행 Damodaran"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.costOfCapital"
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.costOfCapital"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"financialFirmExcessReturn\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1"
     },
     {
-      "id": "recipes.valuation.damodaran.sumOfParts",
+      "id": "recipes.fundamental.valuation.damodaran.sumOfParts",
       "title": "Damodaran Sum-of-Parts 경로",
       "category": "recipes",
       "purpose": "세그먼트·지주회사·복합 사업에 대해 단일 FCFF 대신 segment별 revenue/EBIT 근거와 결손을 분리하는 절차. 트리거 — 'sum of parts', 'SOTP', '세그먼트 가치평가'.",
@@ -5575,13 +5575,13 @@
         "세그먼트 가치평가"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.normalizedFinancials"
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    pass\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"sumOfParts\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"sources\"],\n)\n```\n\n## 호출 동작\n\n### 1. 결론 도출\n\n단일 회사 "
     },
     {
-      "id": "recipes.valuation.damodaran.distressAdjustedDcf",
+      "id": "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
       "title": "Damodaran Distress 조정 DCF 경로",
       "category": "recipes",
       "purpose": "부채비율, FCFF 음수 비율, DCF 상태를 이용해 일반 DCF에 distress 조정이 필요한지 판정하는 절차. 트리거 — 'distress adjusted DCF', '부실위험 DCF', '재무위험 가치평가'.",
@@ -5591,14 +5591,14 @@
         "재무위험 가치평가"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.costOfCapital",
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ntry:\n    price_frame = dartlab.gather(\"price\", target, market=\"US\") if market == \"US\" else dartlab.gather(\"price\", target)\nexcept Exception:\n    price_frame = pl.DataFrame()\n\nmemo = buildDamodaranMemo(\n    target=target,\n    market=market,\n    currency=currency,\n    companyName=company_name,\n    statements={topic: _safeShow(topic) for topic in (\"IS\", \"BS\", \"CF\")},\n    countryDefaults=_loadReference(\"damodaranDefaults.json\"),\n    industryDefaults=_loadReference(\"damodaranIndustryDefaults.json\"),\n    marketData={},\n)\n\nemit_result(\n    table=memo[\"tables\"][\"distressAdjustedDcf\"],\n    values=memo[\"headline\"],\n    date=memo.get(\"asOf\"),\n    units=memo[\"units\"],\n    sources=memo[\"s"
     },
     {
-      "id": "recipes.valuation.damodaran.scenarioFalsifier",
+      "id": "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
       "title": "Damodaran 시나리오 반증",
       "category": "recipes",
       "purpose": "bull/base/bear 민감도, reverse DCF, 현재 가격이 요구하는 성장·마진·ROC를 계산해 Damodaran식 내재 스토리를 반증하는 절차. 트리거 — 'reverse DCF', '내재 성장률', 'Damodaran scenario falsifier'.",
@@ -5610,15 +5610,15 @@
         "시나리오 반증"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.costOfCapital",
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.costOfCapital",
         "engines.gather"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dicts()[0]\n    out = {}\n    if close_col and latest.get(close_col) is not None:\n        out[\"price\"] = latest.get(close_col)\n    if date_col and latest.get(date_col) is not None:\n        out[\"priceDate\"] = str(latest.get(date_col))\n    return out\n\n\ndef _market"
     },
     {
-      "id": "recipes.valuation.damodaran.deepDive",
+      "id": "recipes.fundamental.valuation.damodaran.deepDive",
       "title": "Damodaran L1/L1.5 딥다이브",
       "category": "recipes",
       "purpose": "L2 분석 엔진 없이 L1/L1.5 데이터와 Damodaran식 가정 검증만으로 가치평가 memo, DCF 밴드, reverse DCF, 반증, storyboardReady 초안을 만드는 최종 오케스트레이터. 트리거 — 'Damodaran deep dive', 'L1/L1.5 가치평가 memo', '다모다란 딥다이브'.",
@@ -5630,11 +5630,11 @@
         "story engine 전 단계 valuation memo"
       ],
       "nextSkills": [
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier",
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers"
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers"
       ],
       "bodyPreview": "## 공개 호출 방식\n\nAI 도구 실행 순서는 `EngineCall` 우선이다. `Company.show(\"IS\"|\"BS\"|\"CF\")`, `gather.price`, reference lookup, 하위 Damodaran recipe 실행처럼 engine/capability surface 가 있는 입력은 EngineCall 로 먼저 확보한다. 아래 Python 블록은 같은 입력을 `buildDamodaranMemo` 로 묶는 **RunPython fallback** 절차다.\n\n```python\nimport dartlab\nimport importlib.resources as resources\nimport json\nfrom pathlib import Path\n\nimport polars as pl\nfrom dartlab.synth.damodaranL15 import buildDamodaranMemo\n\ntarget = \"005930\"\nc = dartlab.Company(target)\nmarket = getattr(c, \"market\", \"US\" if not target.isdigit() else \"KR\")\ncurrency = getattr(c, \"currency\", \"USD\" if market == \"US\" else \"KRW\")\ncompany_name = getattr(c, \"corpName\", getattr(c, \"companyName\", target))\n\n\ndef _loadReference(name):\n    return json.loads(resources.files(\"dartlab.reference.data\").joinpath(name).read_text(encoding=\"utf-8\"))\n\n\ndef _safeShow(topic):\n    try:\n        table = c.show(topic, freq=\"Y\")\n    except TypeError:\n        table = c.show(topic)\n    except Exception:\n        return pl.DataFrame()\n    return table if isinstance(table, pl.DataFrame) else pl.DataFrame()\n\n\ndef _latestPrice(frame):\n    if not isinstance(frame, pl.DataFrame) or frame.height == 0:\n        return {}\n    date_col = \"date\" if \"date\" in frame.columns else \"Date\" if \"Date\" in frame.columns else None\n    close_col = \"close\" if \"close\" in frame.columns else \"Close\" if \"Close\" in frame.columns else None\n    latest = frame.sort(date_col).tail(1).to_dicts()[0] if date_col else frame.tail(1).to_dict"
     },

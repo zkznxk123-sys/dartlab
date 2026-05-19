@@ -1,18 +1,19 @@
 ---
-id: recipes.valuation.damodaran.rdCapitalization
-title: Damodaran R&D 자본화 감사
+id: recipes.fundamental.valuation.damodaran.distressAdjustedDcf
+title: Damodaran Distress 조정 DCF 경로
 category: recipes
 kind: recipe
 scope: builtin
 status: unverified
-purpose: L1 재무제표의 연구개발비 라인을 찾아 R&D 자본화 필요 여부와 결손을 표시하는 Damodaran식 정규화 절차. 트리거 — 'R&D capitalization', '연구개발비 자본화', 'Damodaran R&D adjustment'.
+purpose: 부채비율, FCFF 음수 비율, DCF 상태를 이용해 일반 DCF에 distress 조정이 필요한지 판정하는 절차. 트리거 — 'distress adjusted DCF', '부실위험 DCF', '재무위험 가치평가'.
 whenToUse:
-  - R&D capitalization
-  - 연구개발비 자본화
-  - Damodaran R&D adjustment
+  - distress adjusted DCF
+  - 부실위험 DCF
+  - 재무위험 가치평가
 linkedSkills:
-  - recipes.valuation.damodaran.normalizedFinancials
-  - recipes.valuation.damodaran.accountTraceAudit
+  - recipes.fundamental.valuation.damodaran.fcffDcf
+  - recipes.fundamental.valuation.damodaran.costOfCapital
+  - recipes.fundamental.valuation.damodaran.scenarioFalsifier
 toolRefs:
   - EngineCall
   - RunPython
@@ -24,27 +25,28 @@ requiredEvidence:
   - dateRef
   - executionRef
 expectedOutputs:
-  - R&D ?? ?? ?? ??? ??? ???
-  - ?? L1/L1.5 ?? ?? ? fallbackAccepted ?? blocker
-  - normalized EBIT/FCFF ?? ? ?? ?
+  - debt-to-equity ? negative FCFF ratio ?? distress route
+  - base DCF ?? ?? ??? distress ?? ???
+  - distress model ?? ? blocker/fallback status
 
 expectedNovelty:
-  - rdAdjustmentAudit
+  - distressDcfRoute
 runtimeCompatibility:
   server:
     status: supported
   localPython:
     status: supported
 forbidden:
-  - L2 엔진 호출 금지.
-  - R&D 라인이 없는데 0으로 확정하지 않는다.
+  - L2 credit 엔진 호출 금지.
+  - distress 신호를 무시하고 base DCF만 결론으로 쓰지 않는다.
 failureModes:
-  - 연구개발비 결손을 정상 비용 구조로 오판
+  - FCFF 지속 음수 기업을 정상 terminal value로만 평가
 examples:
-  - AAPL R&D 자본화 감사
+  - INTC distress adjusted DCF 점검
 gap:
   primary:
     - Company
+    - gather
     - synth
 testUniverse:
   market: KR+US
@@ -56,7 +58,7 @@ testUniverse:
     - "INTC"
   asOfPolicy: latest
 falsifier:
-  description: "R&D 라인이 없는데 capitalization adjustment를 usable로 표시하면 실패로 본다."
+  description: "distressReviewRequired 신호가 있는데 final memo가 usable만 표시하면 실패로 본다."
 lastUpdated: "2026-05-14"
 ---
 
@@ -93,9 +95,8 @@ def _safeShow(topic):
 
 try:
     price_frame = dartlab.gather("price", target, market="US") if market == "US" else dartlab.gather("price", target)
-    price_date = str(price_frame.tail(1).to_dicts()[0].get("date", "")) if isinstance(price_frame, pl.DataFrame) and price_frame.height else None
 except Exception:
-    price_date = None
+    price_frame = pl.DataFrame()
 
 memo = buildDamodaranMemo(
     target=target,
@@ -105,11 +106,11 @@ memo = buildDamodaranMemo(
     statements={topic: _safeShow(topic) for topic in ("IS", "BS", "CF")},
     countryDefaults=_loadReference("damodaranDefaults.json"),
     industryDefaults=_loadReference("damodaranIndustryDefaults.json"),
-    marketData={"priceDate": price_date} if price_date else {},
+    marketData={},
 )
 
 emit_result(
-    table=memo["tables"]["rdCapitalization"],
+    table=memo["tables"]["distressAdjustedDcf"],
     values=memo["headline"],
     date=memo.get("asOf"),
     units=memo["units"],
@@ -121,29 +122,29 @@ emit_result(
 
 ### 1. 결론 도출
 
-R&D 라인이 있으면 자본화 검토 대상으로, 없으면 `fallbackAccepted` 결손으로 표시한다.
+부채비율과 FCFF 음수 비율이 높으면 distress 조정 필요로 표시한다.
 
 ### 2. 핵심 근거 수집
 
-`Company.show("IS"|"CF")`의 snakeId와 항목명을 검색한다.
+`Company.show("BS"|"CF")`, Damodaran WACC reference, DCF 상태를 사용한다.
 
 ### 3. 메커니즘 분석
 
-R&D는 성장 투자 성격이 강하므로 비용 처리된 금액이 크면 NOPAT와 invested capital 정규화 후보가 된다.
+부실위험이 큰 기업은 going-concern DCF만으로 결론을 내리면 terminal value가 과대평가될 수 있다.
 
 ### 4. 반례·한계
 
-상각기간 추정은 아직 reference가 없으므로 엔진 계산이 아니라 감사 절차로 둔다.
+시장 기반 default spread와 distress probability primitive가 없으면 확률가중 DCF는 보류한다.
 
 ### 5. 후속 모니터링
 
-후속 스킬은 `normalizedFinancials`와 `fcffDcf`다.
+후속 스킬은 `scenarioFalsifier`와 `deepDive`다.
 
 ## 대표 반환 형태
 
-`rdCapitalization : list[dict]` — `adjustment`, `status`, `lineItem`, `latestYear`, `latestValue`, `action`.
+`distressAdjustedDcf : list[dict]` — `metric`, `value`, `status`.
 
 ## 연계 절차
 
-1. recipes.valuation.damodaran.accountTraceAudit - 계정 trace 확인.
-2. recipes.valuation.damodaran.normalizedFinancials - 정규화 패널 반영 후보 점검.
+1. recipes.fundamental.valuation.damodaran.fcffDcf - base DCF 상태 확인.
+2. recipes.fundamental.valuation.damodaran.scenarioFalsifier - 반증 조건 확인.

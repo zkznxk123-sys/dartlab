@@ -88,29 +88,29 @@
     ]
   },
   "skillTree": {
-    "entrySkill": "recipes.valuation.damodaran.index",
+    "entrySkill": "recipes.fundamental.valuation.damodaran.index",
     "currentExecutablePath": [
-      "recipes.valuation.damodaran.dataAudit",
-      "recipes.valuation.damodaran.businessModelFit",
-      "recipes.valuation.damodaran.lifeCycleClassifier",
-      "recipes.valuation.damodaran.narrativeMap",
-      "recipes.valuation.damodaran.storyToDrivers",
-      "recipes.valuation.damodaran.normalizedFinancials",
-      "recipes.valuation.damodaran.accountTraceAudit",
-      "recipes.valuation.damodaran.rdCapitalization",
-      "recipes.valuation.damodaran.leaseDebtAdjustment",
-      "recipes.valuation.damodaran.oneOffAdjustment",
-      "recipes.valuation.damodaran.reinvestmentRoc",
-      "recipes.valuation.damodaran.growthFeasibility",
-      "recipes.valuation.damodaran.costOfCapital",
-      "recipes.valuation.damodaran.fcffDcf",
-      "recipes.valuation.damodaran.relativeCheck",
-      "recipes.valuation.damodaran.peerMultipleDecomposition",
-      "recipes.valuation.damodaran.financialFirmExcessReturn",
-      "recipes.valuation.damodaran.sumOfParts",
-      "recipes.valuation.damodaran.distressAdjustedDcf",
-      "recipes.valuation.damodaran.scenarioFalsifier",
-      "recipes.valuation.damodaran.deepDive"
+      "recipes.fundamental.valuation.damodaran.dataAudit",
+      "recipes.fundamental.valuation.damodaran.businessModelFit",
+      "recipes.fundamental.valuation.damodaran.lifeCycleClassifier",
+      "recipes.fundamental.valuation.damodaran.narrativeMap",
+      "recipes.fundamental.valuation.damodaran.storyToDrivers",
+      "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+      "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+      "recipes.fundamental.valuation.damodaran.rdCapitalization",
+      "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+      "recipes.fundamental.valuation.damodaran.oneOffAdjustment",
+      "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+      "recipes.fundamental.valuation.damodaran.growthFeasibility",
+      "recipes.fundamental.valuation.damodaran.costOfCapital",
+      "recipes.fundamental.valuation.damodaran.fcffDcf",
+      "recipes.fundamental.valuation.damodaran.relativeCheck",
+      "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition",
+      "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+      "recipes.fundamental.valuation.damodaran.sumOfParts",
+      "recipes.fundamental.valuation.damodaran.distressAdjustedDcf",
+      "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+      "recipes.fundamental.valuation.damodaran.deepDive"
     ],
     "nextSkillTargets": []
   },
@@ -121,10 +121,10 @@
       "label": "Narrative & Numbers",
       "question": "회사의 스토리가 어떤 성장, 마진, 재투자, ROC 가정으로 번역되는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.narrativeMap",
-        "recipes.valuation.damodaran.storyToDrivers",
-        "recipes.valuation.damodaran.scenarioFalsifier",
-        "recipes.valuation.damodaran.deepDive"
+        "recipes.fundamental.valuation.damodaran.narrativeMap",
+        "recipes.fundamental.valuation.damodaran.storyToDrivers",
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier",
+        "recipes.fundamental.valuation.damodaran.deepDive"
       ],
       "plannedSkills": [],
       "dataRequirements": [
@@ -146,12 +146,12 @@
       "label": "Business Life Cycle",
       "question": "기업이 고성장, 전환, 성숙, 쇠퇴, 턴어라운드 중 어디에 있는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.lifeCycleClassifier"
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.lifeCycleClassifier"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.cyclicalNormalizer",
-        "recipes.valuation.damodaran.turnaroundGate"
+        "recipes.fundamental.valuation.damodaran.cyclicalNormalizer",
+        "recipes.fundamental.valuation.damodaran.turnaroundGate"
       ],
       "dataRequirements": [
         "revenueGrowthPanel",
@@ -171,12 +171,12 @@
       "label": "Financial Statement Normalization",
       "question": "회계 숫자를 valuation용 영업 현금흐름과 invested capital로 재구성했는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.normalizedFinancials",
-        "recipes.valuation.damodaran.dataAudit",
-        "recipes.valuation.damodaran.accountTraceAudit",
-        "recipes.valuation.damodaran.rdCapitalization",
-        "recipes.valuation.damodaran.leaseDebtAdjustment",
-        "recipes.valuation.damodaran.oneOffAdjustment"
+        "recipes.fundamental.valuation.damodaran.normalizedFinancials",
+        "recipes.fundamental.valuation.damodaran.dataAudit",
+        "recipes.fundamental.valuation.damodaran.accountTraceAudit",
+        "recipes.fundamental.valuation.damodaran.rdCapitalization",
+        "recipes.fundamental.valuation.damodaran.leaseDebtAdjustment",
+        "recipes.fundamental.valuation.damodaran.oneOffAdjustment"
       ],
       "plannedSkills": [],
       "dataRequirements": [
@@ -200,12 +200,12 @@
       "label": "Growth, Margin, Reinvestment, ROC",
       "question": "성장률이 재투자율과 자본수익성으로 설명되는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.reinvestmentRoc",
-        "recipes.valuation.damodaran.growthFeasibility"
+        "recipes.fundamental.valuation.damodaran.reinvestmentRoc",
+        "recipes.fundamental.valuation.damodaran.growthFeasibility"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.incrementalRoc",
-        "recipes.valuation.damodaran.salesToCapitalBenchmark"
+        "recipes.fundamental.valuation.damodaran.incrementalRoc",
+        "recipes.fundamental.valuation.damodaran.salesToCapitalBenchmark"
       ],
       "dataRequirements": [
         "salesToCapital",
@@ -227,12 +227,12 @@
       "label": "Risk & Cost of Capital",
       "question": "통화, 국가 ERP, beta, debt cost, tax가 같은 기준으로 정합적인가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.costOfCapital"
+        "recipes.fundamental.valuation.damodaran.costOfCapital"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.countryRiskPremium",
-        "recipes.valuation.damodaran.currencyConsistency",
-        "recipes.valuation.damodaran.betaDebtFallbackAudit"
+        "recipes.fundamental.valuation.damodaran.countryRiskPremium",
+        "recipes.fundamental.valuation.damodaran.currencyConsistency",
+        "recipes.fundamental.valuation.damodaran.betaDebtFallbackAudit"
       ],
       "dataRequirements": [
         "countryErp",
@@ -256,13 +256,13 @@
       "label": "Intrinsic Valuation",
       "question": "기업 유형에 맞는 내재가치 모델이 쓰였는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.fcffDcf",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf"
+        "recipes.fundamental.valuation.damodaran.fcffDcf",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.fcfeDcf"
+        "recipes.fundamental.valuation.damodaran.fcfeDcf"
       ],
       "dataRequirements": [
         "fcffPanel",
@@ -286,11 +286,11 @@
       "label": "Relative Valuation",
       "question": "multiple이 성장, 마진, risk 차이를 반영해 sanity check로만 쓰였는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.relativeCheck",
-        "recipes.valuation.damodaran.peerMultipleDecomposition"
+        "recipes.fundamental.valuation.damodaran.relativeCheck",
+        "recipes.fundamental.valuation.damodaran.peerMultipleDecomposition"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.multipleNarrativeCheck"
+        "recipes.fundamental.valuation.damodaran.multipleNarrativeCheck"
       ],
       "dataRequirements": [
         "peerUniverse",
@@ -312,17 +312,17 @@
       "label": "Special Situations",
       "question": "금융업, 순환주, 원자재, 적자 성장주, 지주, distress 같은 예외 모델이 분리됐는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.businessModelFit",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf"
+        "recipes.fundamental.valuation.damodaran.businessModelFit",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.specialSituationClassifier",
-        "recipes.valuation.damodaran.financialFirmExcessReturn",
-        "recipes.valuation.damodaran.cyclicalNormalizer",
-        "recipes.valuation.damodaran.sumOfParts",
-        "recipes.valuation.damodaran.distressAdjustedDcf"
+        "recipes.fundamental.valuation.damodaran.specialSituationClassifier",
+        "recipes.fundamental.valuation.damodaran.financialFirmExcessReturn",
+        "recipes.fundamental.valuation.damodaran.cyclicalNormalizer",
+        "recipes.fundamental.valuation.damodaran.sumOfParts",
+        "recipes.fundamental.valuation.damodaran.distressAdjustedDcf"
       ],
       "dataRequirements": [
         "financialFirmCapital",
@@ -346,11 +346,11 @@
       "label": "Falsification / Reverse DCF",
       "question": "현재 가격이 요구하는 성장, 마진, ROC가 성립 가능한가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.scenarioFalsifier"
+        "recipes.fundamental.valuation.damodaran.scenarioFalsifier"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.breakCondition",
-        "recipes.valuation.damodaran.sensitivityGrid"
+        "recipes.fundamental.valuation.damodaran.breakCondition",
+        "recipes.fundamental.valuation.damodaran.sensitivityGrid"
       ],
       "dataRequirements": [
         "marketCap",
@@ -374,11 +374,11 @@
       "label": "Valuation Memo / Storyboard",
       "question": "결론이 단일 적정가가 아니라 가정, 반증, 결손, storyboardReady로 남는가.",
       "implementedSkills": [
-        "recipes.valuation.damodaran.deepDive"
+        "recipes.fundamental.valuation.damodaran.deepDive"
       ],
       "plannedSkills": [
-        "recipes.valuation.damodaran.storyboardSchema",
-        "recipes.valuation.damodaran.memoQualityGate"
+        "recipes.fundamental.valuation.damodaran.storyboardSchema",
+        "recipes.fundamental.valuation.damodaran.memoQualityGate"
       ],
       "dataRequirements": [
         "dataAudit",
@@ -482,7 +482,7 @@
       "status": "deferredUntilSkillVerified",
       "whyEngineNeedsIt": "deepDive already emits storyboardReady draft, but the story engine needs a stable schema adapter before it can render valuation narratives.",
       "requiredBeforeEngineWork": [
-        "recipes.valuation.damodaran.deepDive evidenceCompleteness 1.00",
+        "recipes.fundamental.valuation.damodaran.deepDive evidenceCompleteness 1.00",
         "operator promotion to verified",
         "storyboardReady schema fixture for KR and US nonfinancial targets"
       ],

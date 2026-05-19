@@ -207,9 +207,7 @@ def _scoreRoeRoaRoic(company: Any) -> float:
     roe = _safe(_ratio(company, "roe5yAvg")) or _safe(_ratio(company, "roe"))
     roa = _safe(_ratio(company, "roa5yAvg")) or _safe(_ratio(company, "roa"))
     roic = _safe(_ratio(company, "roic5yAvg")) or _safe(_ratio(company, "roic"))
-    scores = [
-        _normalize(v, low=0, high=30) if v is not None else None for v in (roe, roa, roic)
-    ]
+    scores = [_normalize(v, low=0, high=30) if v is not None else None for v in (roe, roa, roic)]
     return _avgScore(scores)
 
 
@@ -260,9 +258,7 @@ def calcSnowflake5Score(company: Any) -> dict[str, float]:
     - **Dividend**: 배당성향 + 이익잉여금 5y CAGR
     """
     value = _avgScore([_scoreOwnerEarningsYield(company), _scoreFcfYieldAccountingEV(company)])
-    future = _avgScore(
-        [_scoreRevenueCagr3y(company), _scoreCapexAcceleration(company), _scoreRndAcceleration(company)]
-    )
+    future = _avgScore([_scoreRevenueCagr3y(company), _scoreCapexAcceleration(company), _scoreRndAcceleration(company)])
     past = _scoreRoeRoaRoic(company)
     health = _scorePiotroskiScaled(company)
     dividend = _avgScore([_scorePayoutRatio(company), _scoreRetainedCumulative(company)])
