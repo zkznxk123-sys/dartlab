@@ -26,13 +26,11 @@ import {
 	BENTO_CARD_PAD_PX,
 } from '@/features/dashboard/layout/BentoGrid';
 import {
-	fetchCard,
 	fetchCatalog,
 	fetchTabLayout,
 	type CatalogCard,
 	type FinancialSubCategory,
 	type PackedCard,
-	type PeriodKind,
 	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
@@ -60,14 +58,8 @@ function ChartLoading() {
 
 // Snowflake 5-axis hero — Simply Wall St 패턴. 헤더 아래, BentoGrid 위에 단독 render.
 // 5 정통 axis (수익성/자본효율/안정성/유동성/현금흐름) 절대 임계값 0~10 점수.
-function SnowflakeHero({ stockCode, periodKind }: { stockCode: string; periodKind: PeriodKind }) {
-	const { data: spec } = useQuery({
-		queryKey: dashKeys.card('snowflakeRadar', stockCode, periodKind),
-		queryFn: () => fetchCard('snowflakeRadar', stockCode, periodKind, 40),
-		placeholderData: keepPreviousData,
-		staleTime: 5 * 60_000,
-		retry: 1,
-	});
+// spec 은 apiVizLayout bundle 에서 동행 (round-trip + prefetch 1 회 절약).
+function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 	if (!spec || spec.error) {
 		return (
 			<div className="px-6 pt-4">
@@ -452,7 +444,7 @@ function FinancialTab() {
 				)
 			) : (
 				<div className="flex flex-col">
-					<SnowflakeHero stockCode={code} periodKind={periodKind} />
+					<SnowflakeHero spec={data?.cards?.snowflakeRadar} />
 					{grouped.map(({ section, cards }, idx) => (
 						<section key={section.title} className={idx === 0 ? '' : 'mt-2'}>
 							<header className="flex items-baseline justify-between gap-3 px-6 pt-4 pb-1">

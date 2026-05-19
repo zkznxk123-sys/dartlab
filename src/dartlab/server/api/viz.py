@@ -347,6 +347,14 @@ async def apiVizLayout(
 
     cardKeys = [p["cardKey"] for p in placed]
 
+    # hero 카드 — layout 의 BentoGrid 에는 안 들어가지만 frontend 가 헤더 영역에서
+    # 별도 render 하는 spec. 같은 prefetch + gather 안에서 빌드해 round-trip + cold
+    # prefetch 1 회 절약. financial 탭의 snowflakeRadar 가 대표 사례.
+    heroKeys: list[str] = []
+    if tab == "financial":
+        heroKeys.append("snowflakeRadar")
+    buildKeys = cardKeys + [k for k in heroKeys if k not in cardKeys]
+
     if layoutOnly:
         # progressive load mode — frontend 가 /api/viz/spec/{cardKey}/{stockCode} 로 카드별 fetch.
         return {
@@ -368,11 +376,11 @@ async def apiVizLayout(
         # 첫 카드 (priceTrend) 가 가격 데이터 안착시키면 후속 카드는 빠르게 진행.
         await _prefetchQuantPrice(stockCode)
         specs: list[dict[str, Any]] = []
-        for k in cardKeys:
+        for k in buildKeys:
             specs.append(await _one(k))
     else:
         await _prefetchCompany(stockCode)
-        specs = list(await asyncio.gather(*[_one(k) for k in cardKeys]))
+        specs = list(await asyncio.gather(*[_one(k) for k in buildKeys]))
 
     return {
         "stockCode": stockCode,
@@ -381,5 +389,5 @@ async def apiVizLayout(
         "periodKind": periodKind,
         "colCount": 24,
         "layout": placed,
-        "cards": dict(zip(cardKeys, specs)),
+        "cards": dict(zip(buildKeys, specs)),
     }
