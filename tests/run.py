@@ -435,6 +435,15 @@ GATES: dict[str, Gate] = {
         blocking=False,
         timeout_minutes=90,
     ),
+    "sections-loss": Gate(
+        name="sections-loss",
+        tier="nightly",
+        install_pkg="editable",
+        env={"DARTLAB_TEST_LOCKED": "1"},
+        cmd="python -X utf8 tests/audit/sectionsLossAccount.py --check",
+        blocking=False,
+        timeout_minutes=10,
+    ),
 }
 
 

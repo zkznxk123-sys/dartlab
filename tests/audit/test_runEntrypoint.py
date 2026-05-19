@@ -125,8 +125,8 @@ def test_realdataShardsMatchNightlyMatrix():
 
 @pytest.mark.unit
 def test_totalGateCountFrozen():
-    """27 게이트 동결 — 의도 없는 추가/삭제 방지. 변경 시 본 테스트 함께 수정."""
-    assert len(GATES) == 27, f"게이트 수 변경: {len(GATES)} (의도된 변경이면 본 테스트도 수정)"
+    """28 게이트 동결 — 의도 없는 추가/삭제 방지. 변경 시 본 테스트 함께 수정."""
+    assert len(GATES) == 28, f"게이트 수 변경: {len(GATES)} (의도된 변경이면 본 테스트도 수정)"
 
 
 @pytest.mark.unit
@@ -134,4 +134,4 @@ def test_tierDistributionFrozen():
     from collections import Counter
 
     c = Counter(g.tier for g in GATES.values())
-    assert dict(c) == {"fast": 16, "full": 6, "nightly": 5}, f"tier 분포 변경: {dict(c)}"
+    assert dict(c) == {"fast": 16, "full": 6, "nightly": 6}, f"tier 분포 변경: {dict(c)}"

@@ -39,6 +39,8 @@ jobs:
             artifact_path: |
               mutation-results.txt
               mutants/
+          - gate: sections-loss
+            timeout: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
