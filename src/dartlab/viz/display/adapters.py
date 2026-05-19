@@ -1237,38 +1237,39 @@ def buildSegmentConcentration(company: Any) -> dict[str, Any]:
         }
     periods: list[str] = []
     hhiList: list[float | None] = []
-    topList: list[float | None] = []
     for row in hhiHistory:
         if not isinstance(row, dict):
             continue
-        periods.append(str(row.get("period", "")))
+        # calcConcentration uses "year" key (not "period"). topPct 은 history 행에 없어 시계열 series 생략.
+        periods.append(str(row.get("year") or row.get("period") or ""))
         hhiList.append(_toFloat(row.get("hhi")))
-        topList.append(_toFloat(row.get("topPct")))
+    # 오래된 → 최신 순서 강제 (calcConcentration 은 newest first)
+    if periods and len(periods) > 1 and periods[0] > periods[-1]:
+        periods.reverse()
+        hhiList.reverse()
     if not periods:
         return {}
+    topPctNow = _toFloat(res.get("topPct"))
+    label = f"HHI 집중도 (현재 1위 {topPctNow:.1f}%)" if topPctNow is not None else "HHI 집중도"
     return {
         "categories": periods,
         "series": [
             {
                 "key": "hhi",
-                "label": "HHI 집중도",
+                "label": label,
                 "color": "var(--chart-3)",
                 "intent": "negative",
                 "unit": "",
                 "type": "line",
                 "data": hhiList,
             },
-            {
-                "key": "topPct",
-                "label": "1위 부문 비중",
-                "color": "var(--chart-2)",
-                "intent": "accent",
-                "unit": "%",
-                "type": "line",
-                "axis": "right",
-                "data": topList,
-            },
         ],
+        "options": {
+            "refLines": [
+                {"value": 2500, "label": "2500 (보통)", "intent": "neutral"},
+                {"value": 5000, "label": "5000 (고집중)", "intent": "negative"},
+            ],
+        },
     }
 
 

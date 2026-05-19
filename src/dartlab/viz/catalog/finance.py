@@ -1076,7 +1076,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 2.99, "label": "2.99 안전", "intent": "positive"},
             ],
         },
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 3},
         "help": "Z' < 1.81 = 부실 위험, > 2.99 = 안전, 사이 = 회색. 단순화: equity/liabilities 비중 별도 카드(stabilityRatio). 5 요소 가중합 추세로 신용 등급 변화 사전 감지.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1271,7 +1271,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 {"value": 24, "label": "24% (법정)", "intent": "neutral"},
             ],
         },
-        "layout": {"colSpan": 3, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 3},
         "help": "법인세 / 세전이익. 한국 법정 24% (1억 초과). 5% 이하·100% 초과 같은 이상치는 일회성 세금조정 또는 세전이익 손실 신호. 추세 변동성 ↑ = 회계 추정 의존도 ↑.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1456,7 +1456,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "segmentConcentration"},
         "options": {"unit": ""},
-        "layout": {"colSpan": 6, "rowSpan": 3},
+        "layout": {"colSpan": 4, "rowSpan": 3},
         "help": "HHI (Herfindahl) > 5000 = 고집중 (단일 사업 위험). 1위 부문 비중 ↑ = 사업 집중. 분산 추세 = 다각화 진행.",
     },
     # ─────────────────────────────────────────────────────────────
@@ -1488,7 +1488,7 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "seriesPlan": [],
         "dataSpec": {"adapter": "distressEnsembleGauge"},
         "options": {},
-        "layout": {"colSpan": 4, "rowSpan": 3},
+        "layout": {"colSpan": 6, "rowSpan": 3},
         "help": "Altman Z·Z''·Ohlson O·Springate S·Zmijewski X 5 모델 다수결. 단일 모델 편향 제거. 일치도 < 60% = 신뢰 어려움 (모델 간 불일치).",
     },
 }
@@ -1515,8 +1515,7 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "operatingLeverage",        # row5   3 ├ = 12  (N8 신설)
     "taxWalk",                  # row5   3 ┘
     "segmentRevenue",           # row6   6 ┐ = 12  (N6 신설)
-    "rndIntensity",             # row6   3 ├
-    "effectiveTaxRate",         # row6   3 ┘
+    "effectiveTaxRate",         # row6   6 ┘  (rndIntensity 005930 0% 회수 → 폐기, effectiveTaxRate 6 확장)
     # ─ 03 현금 일생 · 자본배분 (정통 4+10). 2 row. ─
     "cashflowSigned",           # row7   4 ┐
     "fcfTrend",                 # row7   4 ├ = 12
@@ -1524,30 +1523,31 @@ FINANCE_DASHBOARD_KEYS: list[str] = [
     "payoutRatio",              # row8   3 ┐
     "earningsQuality",          # row8   3 ├
     "sloanAccruals",            # row8   3 ├ = 12
-    "netDebt",                  # row8   3 ┘  (4→3 사이즈 조정)
-    # ─ 04 재무 안정 · 부도 위험 (정통 7+8). 2 row. Beneish·distressEnsemble 신설. ─
+    "netDebt",                  # row8   3 ┘
+    # ─ 04 재무 안정 · 부도 위험. 2 row. (Beneish 데이터 sparse 폐기) ─
     "stabilityRatio",           # row9   3 ┐
     "liquidityTrend",           # row9   3 ├
     "leverageTrend",            # row9   3 ├ = 12
     "interestCoverage",         # row9   3 ┘
-    "altmanZ",                  # row10  4 ┐
-    "distressEnsemble",         # row10  4 ├ = 12  (N9 신설, gauge)
-    "beneishMTimeline",         # row10  4 ┘  (N2 신설)
-    # ─ 05 성장의 질 · 이상신호 (정통 6+8). 2 row. Piotroski·집중도 신설. ─
-    "growthYoy",                # row12  4 ┐
-    "equityGrowth",             # row12  4 ├ = 12
-    "riskAnomaly",              # row12  4 ┘
-    "piotroskiFScore",          # row13  6 ┐ = 12  (N5 신설)
-    "segmentConcentration",     # row13  6 ┘  (N7 신설)
+    "altmanZ",                  # row10  6 ┐ = 12  (Beneish 폐기 → 6 확장)
+    "distressEnsemble",         # row10  6 ┘  (gauge, 5 모델 종합)
+    # ─ 05 성장의 질 · 이상신호. 1 row. (Piotroski annual sparse, riskAnomaly 데이터 0 폐기) ─
+    "growthYoy",                # row11  4 ┐
+    "equityGrowth",             # row11  4 ├ = 12
+    "segmentConcentration",     # row11  4 ┘  (HHI 시계열, 부문 다각화 추이)
 ]
-"""38 카드 / 5 section / 13 row. 모든 row col 합 = 12 강행.
+"""34 카드 / 5 section / 12 row. 모든 row col 합 = 12 강행.
 01 자본+자산구조 (3 row) / 02 영업·자본 효율 (4 row) / 03 현금 일생·자본배분 (2 row)
-04 재무 안정·부도 위험 (2 row) / 05 성장의 질·이상신호 (2 row).
+04 재무 안정·부도 위험 (2 row) / 05 성장의 질·이상신호 (1 row).
 
-정통 깊이 신설 9 (2026-05-19):
+데이터 sparse 폐기 4 (2026-05-19, 데이터 충실도 검증 후):
+- beneishMTimeline (annual 7/40 회수 = 17%), piotroskiFScore (10/40 = 25%)
+- rndIntensity (005930 0/40 = 0%, R&D 별도 보고 없음)
+- riskAnomaly (0 series 발생)
+
+신설 유지 5 (충실도 80%+):
 - dupont5Step (3단→5단), penmanRoeDecomp, roicWaccGap, operatingLeverage,
-- segmentRevenue, segmentConcentration, piotroskiFScore,
-- beneishMTimeline (8변수), distressEnsemble (5 모델)."""
+- segmentRevenue, segmentConcentration, distressEnsemble (gauge)."""
 
 
 # OVERVIEW_KEYS — 재무제표분석 1 view 의 curated 카드 셋트.

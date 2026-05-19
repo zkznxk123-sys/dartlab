@@ -180,7 +180,7 @@ function FinancialTab() {
 		},
 		{
 			title: '영업 효율 · 자본 효율',
-			subtitle: '마진·수익성·DuPont 5단·Penman·ROIC-WACC·세그먼트·R&D — 본업이 진짜로 돈을 버는가.',
+			subtitle: '마진·수익성·DuPont 5단·Penman·ROIC-WACC·세그먼트 — 본업이 진짜로 돈을 버는가.',
 			keys: new Set([
 				'marginTrend',
 				'returnTrend',
@@ -193,7 +193,6 @@ function FinancialTab() {
 				'operatingLeverage',
 				'taxWalk',
 				'segmentRevenue',
-				'rndIntensity',
 				'effectiveTaxRate',
 			]),
 		},
@@ -212,25 +211,22 @@ function FinancialTab() {
 		},
 		{
 			title: '재무 안정 · 부도 위험',
-			subtitle: '안정성·유동성·Beneish 8변수·Altman Z·5 모델 ensemble·이자보상·레버리지 — 망할 수 있는가.',
+			subtitle: '안정성·유동성·Altman Z·5 모델 ensemble·이자보상·레버리지 — 망할 수 있는가.',
 			keys: new Set([
 				'stabilityRatio',
 				'liquidityTrend',
-				'beneishMTimeline',
+				'leverageTrend',
+				'interestCoverage',
 				'altmanZ',
 				'distressEnsemble',
-				'interestCoverage',
-				'leverageTrend',
 			]),
 		},
 		{
 			title: '성장의 질 · 이상신호',
-			subtitle: '매출 YoY·자본 YoY·변동 큰 지표·Piotroski F-Score·사업 집중도 — 성장이 진짜인가.',
+			subtitle: '매출 YoY·자본 YoY·사업 집중도 — 성장이 진짜인가, 한 사업에 몰빵인가.',
 			keys: new Set([
 				'growthYoy',
 				'equityGrowth',
-				'riskAnomaly',
-				'piotroskiFScore',
 				'segmentConcentration',
 			]),
 		},
