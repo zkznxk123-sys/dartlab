@@ -362,6 +362,8 @@ def _buildKindSpecView(
         result = adapters.buildSnowflakeRadar(company)
         base_view["categories"] = result.get("categories", [])
         base_view["series"] = result.get("series", [])
+        if "options" in result:
+            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
     elif adapter_name == "snowflakeKpi":
         tilePlans = spec.get("tilePlans", [])
         base_view["tiles"] = adapters.buildSnowflakeKpi(company, tilePlans)
@@ -399,14 +401,6 @@ def _buildKindSpecView(
             base_view["series"] = result["series"]
     elif adapter_name == "distressEnsembleGauge":
         base_view.update(adapters.buildDistressEnsembleGauge(company))
-    elif adapter_name == "snowflakeRadar":
-        result = adapters.buildSnowflakeRadar(company)
-        if "categories" in result:
-            base_view["categories"] = result["categories"]
-        if "series" in result:
-            base_view["series"] = result["series"]
-        if "options" in result:
-            base_view["options"] = {**base_view.get("options", {}), **result["options"]}
     # quant 탭 adapter — stockCode 만 받음 (가격 데이터는 quant 엔진이 자체 fetch).
     elif adapter_name == "quantPriceTrend":
         result = adapters.buildQuantPriceTrend(stockCode)

@@ -903,37 +903,6 @@ def buildNarrativeBridge(company: Any) -> dict[str, Any]:
     return {"transitions": transitions, "summaryLine": summary}
 
 
-def buildSnowflakeRadar(company: Any) -> dict[str, Any]:
-    """Snowflake 5 차원 radar — Value/Future/Past/Health/Dividend 0~5 점.
-
-    `analysis.financial.intrinsic.calcSnowflake5Score` 호출. 점수 dict →
-    radar categories + 단일 polygon series.
-    """
-    try:
-        from dartlab.analysis.financial import intrinsic as _intr
-
-        scores = _intr.calcSnowflake5Score(company) or {}
-    except (ImportError, AttributeError, ValueError, TypeError):
-        scores = {}
-    dims = ["value", "future", "past", "health", "dividend"]
-    labels = {"value": "Value", "future": "Future", "past": "Past", "health": "Health", "dividend": "Dividend"}
-    categories = [labels[d] for d in dims]
-    data = [float(scores.get(d, 0) or 0) for d in dims]
-    return {
-        "categories": categories,
-        "series": [
-            {
-                "key": "snowflake",
-                "label": "Snowflake 5",
-                "data": data,
-                "unit": "점",
-                "intent": "primary",
-                "type": "line",
-            }
-        ],
-    }
-
-
 _GRADE_BUCKETS = [
     (90, "A+"),
     (80, "A"),
@@ -964,8 +933,7 @@ def buildSnowflakeAlert(company: Any) -> dict[str, Any]:
                 "from": "정통 Simply Wall St",
                 "to": "dartlab 회계 기반",
                 "text": (
-                    "Simply Wall St 의 시가총액 의존 5 차원과는 점수 분포 다름. "
-                    "회계 정보만으로 가치/성장/안전 평가."
+                    "Simply Wall St 의 시가총액 의존 5 차원과는 점수 분포 다름. 회계 정보만으로 가치/성장/안전 평가."
                 ),
             },
         ],
@@ -1229,10 +1197,25 @@ def buildSegmentConcentration(company: Any) -> dict[str, Any]:
         return {
             "categories": ["최신"],
             "series": [
-                {"key": "hhi", "label": "HHI 집중도", "color": "var(--chart-3)", "intent": "negative",
-                 "unit": "", "type": "line", "data": [hhi]},
-                {"key": "topPct", "label": "1위 부문 비중", "color": "var(--chart-2)", "intent": "accent",
-                 "unit": "%", "type": "line", "axis": "right", "data": [topPct]},
+                {
+                    "key": "hhi",
+                    "label": "HHI 집중도",
+                    "color": "var(--chart-3)",
+                    "intent": "negative",
+                    "unit": "",
+                    "type": "line",
+                    "data": [hhi],
+                },
+                {
+                    "key": "topPct",
+                    "label": "1위 부문 비중",
+                    "color": "var(--chart-2)",
+                    "intent": "accent",
+                    "unit": "%",
+                    "type": "line",
+                    "axis": "right",
+                    "data": [topPct],
+                },
             ],
         }
     periods: list[str] = []
@@ -1389,7 +1372,7 @@ def buildSnowflakeRadar(company: Any) -> dict[str, Any]:
     from dartlab.viz.display.finance.periods import lastNPeriods
 
     norm = _norm.normalize(company.rawFinance)
-    periods = lastNPeriods(company.rawFinance, 4, "quarterly")
+    periods = lastNPeriods(norm, 4, "quarterly")
     if not periods:
         return {}
 
@@ -1433,7 +1416,8 @@ def buildSnowflakeRadar(company: Any) -> dict[str, Any]:
     roic = _avg(roicValues) if roicValues else None
     equityRatio = _ratio("equity", "assets")
     currentRatio = _ratio("currentAssets", "currentLiabilities", scale=1.0)
-    ocf = extractSeries(norm, "operatingCashflow", periods)
+    # 표준 28 계정 키 = "cfOperating" / "capex" / "revenue".
+    ocf = extractSeries(norm, "cfOperating", periods)
     capex = extractSeries(norm, "capex", periods)
     revenue = extractSeries(norm, "revenue", periods)
     fcfMargins: list[float] = []
@@ -1634,31 +1618,89 @@ def buildQuantPriceTrend(stockCode: str) -> dict[str, Any]:
             isSell = direction in ("매도", "sell", "short", "bearish")
             if not (isBuy or isSell):
                 continue
-            markers.append({
-                "time": ds,
-                "position": "belowBar" if isBuy else "aboveBar",
-                "color": "#ef4444" if isBuy else "#2563eb",
-                "shape": "arrowUp" if isBuy else "arrowDown",
-                "text": evType,
-            })
+            markers.append(
+                {
+                    "time": ds,
+                    "position": "belowBar" if isBuy else "aboveBar",
+                    "color": "#ef4444" if isBuy else "#2563eb",
+                    "shape": "arrowUp" if isBuy else "arrowDown",
+                    "text": evType,
+                }
+            )
 
     return {
         "categories": categories,
         "series": [
-            {"key": "open", "label": "시가", "color": "#94a3b8", "intent": "neutral",
-             "unit": "원", "type": "line", "axis": "left", "data": opens},
-            {"key": "high", "label": "고가", "color": "#94a3b8", "intent": "neutral",
-             "unit": "원", "type": "line", "axis": "left", "data": highs},
-            {"key": "low", "label": "저가", "color": "#94a3b8", "intent": "neutral",
-             "unit": "원", "type": "line", "axis": "left", "data": lows},
-            {"key": "close", "label": "종가", "color": "#2563eb", "intent": "primary",
-             "unit": "원", "type": "line", "axis": "left", "data": closes},
-            {"key": "sma20", "label": "SMA(20)", "color": "#10b981", "intent": "accent",
-             "unit": "원", "type": "line", "axis": "left", "data": sma20},
-            {"key": "sma60", "label": "SMA(60)", "color": "#f59e0b", "intent": "accent",
-             "unit": "원", "type": "line", "axis": "left", "data": sma60},
-            {"key": "volume", "label": "거래량", "color": "#94a3b8", "intent": "neutral",
-             "unit": "주", "type": "bar", "axis": "right", "data": volumes},
+            {
+                "key": "open",
+                "label": "시가",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": opens,
+            },
+            {
+                "key": "high",
+                "label": "고가",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": highs,
+            },
+            {
+                "key": "low",
+                "label": "저가",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": lows,
+            },
+            {
+                "key": "close",
+                "label": "종가",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": closes,
+            },
+            {
+                "key": "sma20",
+                "label": "SMA(20)",
+                "color": "#10b981",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": sma20,
+            },
+            {
+                "key": "sma60",
+                "label": "SMA(60)",
+                "color": "#f59e0b",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": sma60,
+            },
+            {
+                "key": "volume",
+                "label": "거래량",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "주",
+                "type": "bar",
+                "axis": "right",
+                "data": volumes,
+            },
         ],
         "options": {"markers": markers},
     }
@@ -1686,8 +1728,16 @@ def buildQuantRsiTrend(stockCode: str) -> dict[str, Any]:
     return {
         "categories": categories,
         "series": [
-            {"key": "rsi14", "label": "RSI(14)", "color": "#8b5cf6", "intent": "primary",
-             "unit": "%", "type": "line", "axis": "left", "data": rsi},
+            {
+                "key": "rsi14",
+                "label": "RSI(14)",
+                "color": "#8b5cf6",
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "axis": "left",
+                "data": rsi,
+            },
         ],
         "options": {
             "refLines": [
@@ -1715,12 +1765,36 @@ def buildQuantMacdTrend(stockCode: str) -> dict[str, Any]:
     return {
         "categories": categories,
         "series": [
-            {"key": "macdHist", "label": "Histogram", "color": "#94a3b8", "intent": "neutral",
-             "unit": "", "type": "bar", "axis": "left", "data": hist},
-            {"key": "macd", "label": "MACD", "color": "#2563eb", "intent": "primary",
-             "unit": "", "type": "line", "axis": "left", "data": macd},
-            {"key": "macdSignal", "label": "Signal", "color": "#f59e0b", "intent": "accent",
-             "unit": "", "type": "line", "axis": "left", "data": sig},
+            {
+                "key": "macdHist",
+                "label": "Histogram",
+                "color": "#94a3b8",
+                "intent": "neutral",
+                "unit": "",
+                "type": "bar",
+                "axis": "left",
+                "data": hist,
+            },
+            {
+                "key": "macd",
+                "label": "MACD",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "",
+                "type": "line",
+                "axis": "left",
+                "data": macd,
+            },
+            {
+                "key": "macdSignal",
+                "label": "Signal",
+                "color": "#f59e0b",
+                "intent": "accent",
+                "unit": "",
+                "type": "line",
+                "axis": "left",
+                "data": sig,
+            },
         ],
         "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}]},
     }
@@ -1909,9 +1983,7 @@ def buildQuantForecastKpi(stockCode: str) -> dict[str, Any]:
     horizon=5 일 일별 수익률 예측. forecastTable: [{date, point, lower, upper, ...}].
     누적은 합성. 90% Conformal interval (predictive coverage 보장).
     """
-    result = _safeQuantCall(
-        "dartlab.quant.benchmark.forecast", "forecastReturns", stockCode, horizon=5
-    )
+    result = _safeQuantCall("dartlab.quant.benchmark.forecast", "forecastReturns", stockCode, horizon=5)
     if result is None or not isinstance(result, dict) or result.get("error"):
         return {"tiles": []}
     table = result.get("forecastTable") or []
@@ -1931,8 +2003,10 @@ def buildQuantForecastKpi(stockCode: str) -> dict[str, Any]:
             cumPoint = None
     pointFloat = _toFloat(cumPoint)
     intent = (
-        "positive" if pointFloat is not None and pointFloat > 0
-        else "negative" if pointFloat is not None and pointFloat < 0
+        "positive"
+        if pointFloat is not None and pointFloat > 0
+        else "negative"
+        if pointFloat is not None and pointFloat < 0
         else "neutral"
     )
     tiles = [
@@ -2011,8 +2085,8 @@ def _backtestAllStyles(stockCode: str) -> dict[str, Any] | None:
         return _BACKTEST_CACHE[stockCode]
     try:
         import dartlab
-        from dartlab.quant.strategy import presets, backtest
         from dartlab.quant.signal.momentum import fetchOhlcv
+        from dartlab.quant.strategy import backtest, presets
     except ImportError:
         return None
 
@@ -2049,8 +2123,13 @@ def _backtestAllStyles(stockCode: str) -> dict[str, Any] | None:
         try:
             rule = builder(company)
             r = backtest.vectorBacktest(
-                close, rule,
-                open_=open_, high=high, low=low, volume=volume, dates=dates,
+                close,
+                rule,
+                open_=open_,
+                high=high,
+                low=low,
+                volume=volume,
+                dates=dates,
                 style=styleKey,
             )
             results[styleKey] = r
@@ -2124,16 +2203,18 @@ def buildQuantEquityCurve(stockCode: str) -> dict[str, Any]:
         if not data or all(v is None or v == 0 for v in data):
             continue
         intent = "primary" if key == "buyHold" else "accent"
-        series.append({
-            "key": key,
-            "label": _STYLE_LABELS.get(key, key),
-            "color": _STYLE_COLORS.get(key, "#64748b"),
-            "intent": intent,
-            "unit": "배",
-            "type": "line",
-            "axis": "left",
-            "data": data,
-        })
+        series.append(
+            {
+                "key": key,
+                "label": _STYLE_LABELS.get(key, key),
+                "color": _STYLE_COLORS.get(key, "#64748b"),
+                "intent": intent,
+                "unit": "배",
+                "type": "line",
+                "axis": "left",
+                "data": data,
+            }
+        )
     return {"categories": dates, "series": series}
 
 
@@ -2170,16 +2251,18 @@ def buildQuantDrawdownChart(stockCode: str) -> dict[str, Any]:
         dd.append((v / run_max - 1) * 100 if run_max > 0 else 0)
     return {
         "categories": bt["dates"],
-        "series": [{
-            "key": "drawdown",
-            "label": f"Drawdown ({_STYLE_LABELS.get(best_key, best_key)})",
-            "color": "#ef4444",
-            "intent": "negative",
-            "unit": "%",
-            "type": "area",
-            "axis": "left",
-            "data": dd,
-        }],
+        "series": [
+            {
+                "key": "drawdown",
+                "label": f"Drawdown ({_STYLE_LABELS.get(best_key, best_key)})",
+                "color": "#ef4444",
+                "intent": "negative",
+                "unit": "%",
+                "type": "area",
+                "axis": "left",
+                "data": dd,
+            }
+        ],
         "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}]},
     }
 
@@ -2266,16 +2349,18 @@ def buildQuantStyleMatrix(stockCode: str) -> dict[str, Any]:
         turnoverVal = getattr(r, "turnover", None)
         # comparisonTable 의 row 는 single metric — 본 카드는 style x metric 행렬이라
         # 형식 차이. 대신 multi-column row 구조로 변형 (label=style, self=sharpe, percentile=원본 6 column dict).
-        rows.append({
-            "label": _STYLE_LABELS.get(styleKey, styleKey),
-            "self": _toFloat(sharpe),
-            "peerMedian": _toFloat(sortino),
-            "peerP25": _toFloat(mddVal),
-            "peerP75": _toFloat(winrateVal),
-            "percentile": _toFloat(expectancyVal),
-            "unit": "배",
-            "higherIsBetter": True,
-        })
+        rows.append(
+            {
+                "label": _STYLE_LABELS.get(styleKey, styleKey),
+                "self": _toFloat(sharpe),
+                "peerMedian": _toFloat(sortino),
+                "peerP25": _toFloat(mddVal),
+                "peerP75": _toFloat(winrateVal),
+                "percentile": _toFloat(expectancyVal),
+                "unit": "배",
+                "higherIsBetter": True,
+            }
+        )
     return {
         "rows": rows,
         "peerCount": 0,
@@ -2310,23 +2395,30 @@ def buildQuantRollingSharpe(stockCode: str) -> dict[str, Any]:
     arr = np.array([(r if r is not None else 0.0) for r in rets], dtype=float)
     sharpe: list[float | None] = [None] * len(arr)
     for i in range(window, len(arr)):
-        w = arr[i - window:i]
+        w = arr[i - window : i]
         mu = float(np.mean(w))
         sd = float(np.std(w, ddof=1))
-        sharpe[i] = (mu / sd) * (252 ** 0.5) if sd > 0 else None
+        sharpe[i] = (mu / sd) * (252**0.5) if sd > 0 else None
     return {
         "categories": bt["dates"],
-        "series": [{
-            "key": "rollSharpe",
-            "label": f"Rolling Sharpe ({_STYLE_LABELS.get(best_key, best_key)})",
-            "color": "#10b981",
-            "intent": "primary",
-            "unit": "배",
-            "type": "line",
-            "axis": "left",
-            "data": sharpe,
-        }],
-        "options": {"refLines": [{"value": 0, "label": "", "color": "#475569"}, {"value": 1, "label": "양호", "color": "#10b981"}]},
+        "series": [
+            {
+                "key": "rollSharpe",
+                "label": f"Rolling Sharpe ({_STYLE_LABELS.get(best_key, best_key)})",
+                "color": "#10b981",
+                "intent": "primary",
+                "unit": "배",
+                "type": "line",
+                "axis": "left",
+                "data": sharpe,
+            }
+        ],
+        "options": {
+            "refLines": [
+                {"value": 0, "label": "", "color": "#475569"},
+                {"value": 1, "label": "양호", "color": "#10b981"},
+            ]
+        },
     }
 
 
@@ -2336,9 +2428,10 @@ def buildQuantBetaScatter(stockCode: str) -> dict[str, Any]:
     scatter kind. xRef=시장 평균, yRef=종목 평균. 박스 안 β/α/R² 표시는 frontend.
     """
     try:
-        from dartlab.quant.signal.momentum import fetchOhlcv
-        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
         import numpy as np
+
+        from dartlab.quant.benchmark.data import fetchBenchmarkOhlcv
+        from dartlab.quant.signal.momentum import fetchOhlcv
     except ImportError:
         return {"points": []}
     try:
@@ -2369,7 +2462,9 @@ def buildQuantBetaScatter(stockCode: str) -> dict[str, Any]:
     b_arr = np.array(matched_b)
     s_ret = (s_arr[1:] / s_arr[:-1] - 1) * 100
     b_ret = (b_arr[1:] / b_arr[:-1] - 1) * 100
-    points = [{"x": float(bx), "y": float(sx), "label": f"{i}", "self": False} for i, (bx, sx) in enumerate(zip(b_ret, s_ret))]
+    points = [
+        {"x": float(bx), "y": float(sx), "label": f"{i}", "self": False} for i, (bx, sx) in enumerate(zip(b_ret, s_ret))
+    ]
     # OLS β/α/R².
     bm = float(np.mean(b_ret))
     sm = float(np.mean(s_ret))
@@ -2405,8 +2500,9 @@ def buildQuantVolatilityTerm(stockCode: str) -> dict[str, Any]:
     trend kind. 4 line. 단일 시점 KPI 대신 시간에 따른 변동성 진화.
     """
     try:
-        from dartlab.quant.signal.momentum import fetchOhlcv
         import numpy as np
+
+        from dartlab.quant.signal.momentum import fetchOhlcv
     except ImportError:
         return {"categories": [], "series": []}
     try:
@@ -2427,9 +2523,9 @@ def buildQuantVolatilityTerm(stockCode: str) -> dict[str, Any]:
     def _rollingVol(window: int) -> list[float | None]:
         out: list[float | None] = [None] * len(close)
         for i in range(window, len(rets) + 1):
-            w = rets[i - window:i]
+            w = rets[i - window : i]
             sd = float(np.std(w, ddof=1))
-            out[i] = sd * (252 ** 0.5) * 100  # 연환산 %
+            out[i] = sd * (252**0.5) * 100  # 연환산 %
         return out
 
     rv5 = _rollingVol(5)
@@ -2439,14 +2535,46 @@ def buildQuantVolatilityTerm(stockCode: str) -> dict[str, Any]:
     return {
         "categories": dates,
         "series": [
-            {"key": "rv5", "label": "5d", "color": "#ef4444", "intent": "accent",
-             "unit": "%", "type": "line", "axis": "left", "data": rv5},
-            {"key": "rv20", "label": "20d", "color": "#f59e0b", "intent": "accent",
-             "unit": "%", "type": "line", "axis": "left", "data": rv20},
-            {"key": "rv60", "label": "60d", "color": "#10b981", "intent": "accent",
-             "unit": "%", "type": "line", "axis": "left", "data": rv60},
-            {"key": "rv120", "label": "120d", "color": "#2563eb", "intent": "primary",
-             "unit": "%", "type": "line", "axis": "left", "data": rv120},
+            {
+                "key": "rv5",
+                "label": "5d",
+                "color": "#ef4444",
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "axis": "left",
+                "data": rv5,
+            },
+            {
+                "key": "rv20",
+                "label": "20d",
+                "color": "#f59e0b",
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "axis": "left",
+                "data": rv20,
+            },
+            {
+                "key": "rv60",
+                "label": "60d",
+                "color": "#10b981",
+                "intent": "accent",
+                "unit": "%",
+                "type": "line",
+                "axis": "left",
+                "data": rv60,
+            },
+            {
+                "key": "rv120",
+                "label": "120d",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "%",
+                "type": "line",
+                "axis": "left",
+                "data": rv120,
+            },
         ],
     }
 
@@ -2490,16 +2618,18 @@ def buildQuantDrawdownDistribution(stockCode: str) -> dict[str, Any]:
     labels = [lbl for _, _, lbl in bins]
     return {
         "categories": labels,
-        "series": [{
-            "key": "freq",
-            "label": f"빈도 ({_STYLE_LABELS.get(best_key, best_key)})",
-            "color": "#ef4444",
-            "intent": "negative",
-            "unit": "일",
-            "type": "bar",
-            "axis": "left",
-            "data": counts,
-        }],
+        "series": [
+            {
+                "key": "freq",
+                "label": f"빈도 ({_STYLE_LABELS.get(best_key, best_key)})",
+                "color": "#ef4444",
+                "intent": "negative",
+                "unit": "일",
+                "type": "bar",
+                "axis": "left",
+                "data": counts,
+            }
+        ],
     }
 
 
@@ -2544,12 +2674,36 @@ def buildQuantForecastFan(stockCode: str) -> dict[str, Any]:
     return {
         "categories": categories,
         "series": [
-            {"key": "upper", "label": "90% CI 상단", "color": "#10b981", "intent": "accent",
-             "unit": "원", "type": "line", "axis": "left", "data": uppers},
-            {"key": "point", "label": f"점 예측 ({model})", "color": "#2563eb", "intent": "primary",
-             "unit": "원", "type": "line", "axis": "left", "data": points},
-            {"key": "lower", "label": "90% CI 하단", "color": "#ef4444", "intent": "accent",
-             "unit": "원", "type": "line", "axis": "left", "data": lowers},
+            {
+                "key": "upper",
+                "label": "90% CI 상단",
+                "color": "#10b981",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": uppers,
+            },
+            {
+                "key": "point",
+                "label": f"점 예측 ({model})",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": points,
+            },
+            {
+                "key": "lower",
+                "label": "90% CI 하단",
+                "color": "#ef4444",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": lowers,
+            },
         ],
     }
 
@@ -2562,8 +2716,9 @@ def buildQuantMonteCarloPaths(stockCode: str) -> dict[str, Any]:
     trend kind. 25/50/75 percentile band + median bold line. options.varCvar 표기.
     """
     try:
-        from dartlab.quant.signal.momentum import fetchOhlcv
         import numpy as np
+
+        from dartlab.quant.signal.momentum import fetchOhlcv
     except ImportError:
         return {"categories": [], "series": []}
     try:
@@ -2588,7 +2743,7 @@ def buildQuantMonteCarloPaths(stockCode: str) -> dict[str, Any]:
     rng = np.random.default_rng(seed=42)
     # GBM simulation.
     Z = rng.standard_normal(size=(nPaths, horizon))
-    log_paths = np.cumsum((mu - sigma ** 2 / 2) + sigma * Z, axis=1)
+    log_paths = np.cumsum((mu - sigma**2 / 2) + sigma * Z, axis=1)
     paths = lastClose * np.exp(log_paths)
     # 25/50/75 percentile time series.
     p25 = np.percentile(paths, 25, axis=0).tolist()
@@ -2602,12 +2757,36 @@ def buildQuantMonteCarloPaths(stockCode: str) -> dict[str, Any]:
     return {
         "categories": categories,
         "series": [
-            {"key": "p75", "label": "75 percentile", "color": "#10b981", "intent": "accent",
-             "unit": "원", "type": "line", "axis": "left", "data": [lastClose] + p75},
-            {"key": "p50", "label": "Median", "color": "#2563eb", "intent": "primary",
-             "unit": "원", "type": "line", "axis": "left", "data": [lastClose] + p50},
-            {"key": "p25", "label": "25 percentile", "color": "#ef4444", "intent": "accent",
-             "unit": "원", "type": "line", "axis": "left", "data": [lastClose] + p25},
+            {
+                "key": "p75",
+                "label": "75 percentile",
+                "color": "#10b981",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": [lastClose] + p75,
+            },
+            {
+                "key": "p50",
+                "label": "Median",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": [lastClose] + p50,
+            },
+            {
+                "key": "p25",
+                "label": "25 percentile",
+                "color": "#ef4444",
+                "intent": "accent",
+                "unit": "원",
+                "type": "line",
+                "axis": "left",
+                "data": [lastClose] + p25,
+            },
         ],
         "options": {
             "varCvar": {"var5": round(var5, 0), "cvar5": round(cvar5, 0), "lastClose": lastClose, "nPaths": nPaths},
@@ -2638,7 +2817,9 @@ def buildQuantRegimePhase(stockCode: str) -> dict[str, Any]:
         "phases": phases,
         "current": current,
         "confidence": bullProb,
-        "subtitle": f"HMM {regimeLabel or trendVerdict or '—'} · bullProb {bullProb:.2f}" if bullProb is not None else regimeLabel,
+        "subtitle": f"HMM {regimeLabel or trendVerdict or '—'} · bullProb {bullProb:.2f}"
+        if bullProb is not None
+        else regimeLabel,
     }
 
 
@@ -2670,22 +2851,26 @@ def buildQuantSnowflakeRadar(stockCode: str) -> dict[str, Any]:
         r2 /= 100
     fac = _normalizeScore(r2, 0, 0.8)
     # Forecast: conformal CI 폭이 좁을수록 양호 (신뢰), point 양수일수록 좋음. 종합 = (point - halfWidth) 양수 정도.
-    point = _toFloat(forecast.get("summary", {}).get("cumulativeReturn") if isinstance(forecast.get("summary"), dict) else None)
+    point = _toFloat(
+        forecast.get("summary", {}).get("cumulativeReturn") if isinstance(forecast.get("summary"), dict) else None
+    )
     half = _toFloat(forecast.get("conformalHalfWidth"))
     fc_signal = (point if point is not None else 0) - (half if half is not None else 0.1)
     fc = _normalizeScore(fc_signal, -0.1, 0.05)
     return {
         "categories": ["기술", "모멘텀", "리스크(역)", "팩터", "예측"],
-        "series": [{
-            "key": "snowflake",
-            "label": "종합",
-            "color": "#2563eb",
-            "intent": "primary",
-            "unit": "점",
-            "type": "line",
-            "axis": "left",
-            "data": [round(tech, 2), round(mom, 2), round(risk_inv, 2), round(fac, 2), round(fc, 2)],
-        }],
+        "series": [
+            {
+                "key": "snowflake",
+                "label": "종합",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "점",
+                "type": "line",
+                "axis": "left",
+                "data": [round(tech, 2), round(mom, 2), round(risk_inv, 2), round(fac, 2), round(fc, 2)],
+            }
+        ],
         "options": {"maxValue": 5},
     }
 
@@ -2720,14 +2905,16 @@ def buildQuantAnnualReturns(stockCode: str) -> dict[str, Any]:
     data = [(annual[y] - 1) * 100 for y in years]
     return {
         "categories": [str(y) for y in years],
-        "series": [{
-            "key": "annual",
-            "label": f"연수익률 ({_STYLE_LABELS.get(best_key, best_key)})",
-            "color": "#2563eb",
-            "intent": "primary",
-            "unit": "%",
-            "type": "bar",
-            "axis": "left",
-            "data": data,
-        }],
+        "series": [
+            {
+                "key": "annual",
+                "label": f"연수익률 ({_STYLE_LABELS.get(best_key, best_key)})",
+                "color": "#2563eb",
+                "intent": "primary",
+                "unit": "%",
+                "type": "bar",
+                "axis": "left",
+                "data": data,
+            }
+        ],
     }

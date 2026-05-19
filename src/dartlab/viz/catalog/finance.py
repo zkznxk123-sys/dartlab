@@ -32,7 +32,6 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
     # (incomeBreakdown · marginTrend · returnTrend · stabilityRatio · cashflowSigned)
     # 안에 시계열 + 변화율로 자연스레 들어가 있다.
     # ─────────────────────────────────────────────────────────────
-
     # ─────────────────────────────────────────────────────────────
     # 1-A. 자산구조 — dual-stack (자산 막대 ‖ 부채+자본 막대).
     #      회계 등식 자산 = 부채 + 자본 → 두 막대 동일 높이로 시각 확인.
@@ -1110,20 +1109,10 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
                 "stack": "alloc",
                 "compose": {"dividendsPaid": -1},
             },
-            {
-                "key": "rnd",
-                "label": "R&D (미래)",
-                "color": COLORS[3],
-                "intent": "primary",
-                "unit": "원",
-                "type": "bar",
-                "stack": "alloc",
-                "account": "rnd",
-            },
         ],
         "options": {"stacked": True, "unit": "원"},
         "layout": {"colSpan": 4, "rowSpan": 3},
-        "help": "CapEx + 배당 + R&D 의 상대 비중으로 경영진 의도 파악. CapEx ↑ = 성장기, 배당 ↑ = 성숙기, R&D ↑ = 미래 베팅. 셋 합이 FCF 와 균형 잡혀야.",
+        "help": "CapEx (재투자) + 배당 (주주환원) 의 상대 비중으로 경영진 자본배분 의도 파악. CapEx ↑ = 성장기, 배당 ↑ = 성숙기. R&D·자사주매입은 회사별 보고 양식 달라 별도 카드로 분리 (표준 28 계정 한정).",
     },
     # ─────────────────────────────────────────────────────────────
     # 23. R&D 강도 — R&D / 매출. 기술기업·제약은 5%+, 일반제조 1~3%.
@@ -1491,50 +1480,68 @@ FINANCE_CARDS: dict[str, CatalogEntry] = {
         "layout": {"colSpan": 6, "rowSpan": 3},
         "help": "Altman Z·Z''·Ohlson O·Springate S·Zmijewski X 5 모델 다수결. 단일 모델 편향 제거. 일치도 < 60% = 신뢰 어려움 (모델 간 불일치).",
     },
+    # ─────────────────────────────────────────────────────────────
+    # HERO. Snowflake 5-axis 정통 점수 radar (Simply Wall St 패턴).
+    #     adapter snowflakeRadar — peer 불필요 절대 임계값.
+    #     FINANCE_DASHBOARD_KEYS 에 박지 않음 → 헤더 아래 hero 자리 별도 render.
+    # ─────────────────────────────────────────────────────────────
+    "snowflakeRadar": {
+        "kind": "radar",
+        "componentType": "RadarChart",
+        "title": "회사 본질 5축 (정통 절대 임계값)",
+        "topic": "ratios",
+        "tab": "financial",
+        "subCategory": "overview",
+        "seriesPlan": [],
+        "dataSpec": {"adapter": "snowflakeRadar"},
+        "options": {},
+        "layout": {"colSpan": 12, "rowSpan": 4},
+        "help": "5 정통 axis 0~10 점수 — 수익성(ROE)·자본효율(ROIC)·안정성(자기자본/자산)·유동성(유동비율)·현금흐름(FCF/매출). peer 비교 없이 절대 임계값으로 industry-agnostic 평가. 최근 4 분기 평균.",
+    },
 }
 """재무제표 dashboard 38 카드 — 정통 9 신설 (2026-05-19)."""
 
 
 FINANCE_DASHBOARD_KEYS: list[str] = [
     # ─ 01 자본구조 · 자산구조 (정통 1+2). 3 row. ─
-    "assetComposition",        # row0   12 = 12
-    "liabilityDetail",          # row1   4 ┐
-    "equityDetail",             # row1   4 ├ = 12
-    "cashAssetsRatio",          # row1   4 ┘
-    "incomeBreakdown",          # row2   6 ┐ = 12
-    "workingCapitalDays",       # row2   6 ┘
+    "assetComposition",  # row0   12 = 12
+    "liabilityDetail",  # row1   4 ┐
+    "equityDetail",  # row1   4 ├ = 12
+    "cashAssetsRatio",  # row1   4 ┘
+    "incomeBreakdown",  # row2   6 ┐ = 12
+    "workingCapitalDays",  # row2   6 ┘
     # ─ 02 영업 효율 · 자본 효율 (정통 3+5). 4 row. DuPont 5단·Penman·ROIC-WACC·DOL 신설. ─
-    "marginTrend",              # row3   3 ┐
-    "returnTrend",              # row3   3 ├ = 12
-    "dupont5Step",              # row3   6 ┘  (N1 신설, dupont 3단 대체)
-    "penmanRoeDecomp",          # row4   4 ┐  (N3 신설)
-    "roic",                     # row4   4 ├ = 12
-    "roicWaccGap",              # row4   4 ┘  (N4 신설)
-    "costStructureTrend",       # row5   3 ┐
-    "turnoverTrend",            # row5   3 ├
-    "operatingLeverage",        # row5   3 ├ = 12  (N8 신설)
-    "taxWalk",                  # row5   3 ┘
-    "segmentRevenue",           # row6   6 ┐ = 12  (N6 신설)
-    "effectiveTaxRate",         # row6   6 ┘  (rndIntensity 005930 0% 회수 → 폐기, effectiveTaxRate 6 확장)
+    "marginTrend",  # row3   3 ┐
+    "returnTrend",  # row3   3 ├ = 12
+    "dupont5Step",  # row3   6 ┘  (N1 신설, dupont 3단 대체)
+    "penmanRoeDecomp",  # row4   4 ┐  (N3 신설)
+    "roic",  # row4   4 ├ = 12
+    "roicWaccGap",  # row4   4 ┘  (N4 신설)
+    "costStructureTrend",  # row5   3 ┐
+    "turnoverTrend",  # row5   3 ├
+    "operatingLeverage",  # row5   3 ├ = 12  (N8 신설)
+    "taxWalk",  # row5   3 ┘
+    "segmentRevenue",  # row6   6 ┐ = 12  (N6 신설)
+    "effectiveTaxRate",  # row6   6 ┘  (rndIntensity 005930 0% 회수 → 폐기, effectiveTaxRate 6 확장)
     # ─ 03 현금 일생 · 자본배분 (정통 4+10). 2 row. ─
-    "cashflowSigned",           # row7   4 ┐
-    "fcfTrend",                 # row7   4 ├ = 12
-    "capitalAllocation",        # row7   4 ┘
-    "payoutRatio",              # row8   3 ┐
-    "earningsQuality",          # row8   3 ├
-    "sloanAccruals",            # row8   3 ├ = 12
-    "netDebt",                  # row8   3 ┘
+    "cashflowSigned",  # row7   4 ┐
+    "fcfTrend",  # row7   4 ├ = 12
+    "capitalAllocation",  # row7   4 ┘
+    "payoutRatio",  # row8   3 ┐
+    "earningsQuality",  # row8   3 ├
+    "sloanAccruals",  # row8   3 ├ = 12
+    "netDebt",  # row8   3 ┘
     # ─ 04 재무 안정 · 부도 위험. 2 row. (Beneish 데이터 sparse 폐기) ─
-    "stabilityRatio",           # row9   3 ┐
-    "liquidityTrend",           # row9   3 ├
-    "leverageTrend",            # row9   3 ├ = 12
-    "interestCoverage",         # row9   3 ┘
-    "altmanZ",                  # row10  6 ┐ = 12  (Beneish 폐기 → 6 확장)
-    "distressEnsemble",         # row10  6 ┘  (gauge, 5 모델 종합)
+    "stabilityRatio",  # row9   3 ┐
+    "liquidityTrend",  # row9   3 ├
+    "leverageTrend",  # row9   3 ├ = 12
+    "interestCoverage",  # row9   3 ┘
+    "altmanZ",  # row10  6 ┐ = 12  (Beneish 폐기 → 6 확장)
+    "distressEnsemble",  # row10  6 ┘  (gauge, 5 모델 종합)
     # ─ 05 성장의 질 · 이상신호. 1 row. (Piotroski annual sparse, riskAnomaly 데이터 0 폐기) ─
-    "growthYoy",                # row11  4 ┐
-    "equityGrowth",             # row11  4 ├ = 12
-    "segmentConcentration",     # row11  4 ┘  (HHI 시계열, 부문 다각화 추이)
+    "growthYoy",  # row11  4 ┐
+    "equityGrowth",  # row11  4 ├ = 12
+    "segmentConcentration",  # row11  4 ┘  (HHI 시계열, 부문 다각화 추이)
 ]
 """34 카드 / 5 section / 12 row. 모든 row col 합 = 12 강행.
 01 자본+자산구조 (3 row) / 02 영업·자본 효율 (4 row) / 03 현금 일생·자본배분 (2 row)

@@ -9,7 +9,16 @@ import { Loader2 } from 'lucide-react';
 
 import { CardShell } from '@/features/dashboard/cards/CardShell';
 import { ChartMiniTable } from '@/features/dashboard/cards/ChartMiniTable';
+import { Sparkline } from '@/features/dashboard/charts/Sparkline';
 import { VizChart } from '@/features/dashboard/charts/VizChart';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import { useState } from 'react';
 import {
 	BentoGrid,
 	BENTO_GAP_PX,
@@ -49,6 +58,89 @@ function ChartLoading() {
 	);
 }
 
+// Snowflake 5-axis hero — Simply Wall St 패턴. 헤더 아래, BentoGrid 위에 단독 render.
+// 5 정통 axis (수익성/자본효율/안정성/유동성/현금흐름) 절대 임계값 0~10 점수.
+function SnowflakeHero({ stockCode, periodKind }: { stockCode: string; periodKind: PeriodKind }) {
+	const { data: spec } = useQuery({
+		queryKey: dashKeys.card('snowflakeRadar', stockCode, periodKind),
+		queryFn: () => fetchCard('snowflakeRadar', stockCode, periodKind, 40),
+		placeholderData: keepPreviousData,
+		staleTime: 5 * 60_000,
+		retry: 1,
+	});
+	if (!spec || spec.error) {
+		return (
+			<div className="px-6 pt-4">
+				<div className="flex h-[220px] w-full items-center justify-center rounded-lg border bg-card text-muted-foreground">
+					<Loader2 className="size-5 animate-spin" />
+				</div>
+			</div>
+		);
+	}
+	const scores = spec.series?.[0]?.data ?? [];
+	const rawValues = (spec.options?.rawValues as (number | null)[] | undefined) ?? [];
+	const rawUnits = (spec.options?.rawUnits as string[] | undefined) ?? [];
+	const categories = spec.categories ?? [];
+	const avgScore =
+		scores.filter((s): s is number => s != null).length > 0
+			? scores.reduce((sum: number, s) => sum + (s ?? 0), 0) /
+				scores.filter((s) => s != null).length
+			: 0;
+	return (
+		<section className="px-6 pt-4">
+			<div className="flex items-baseline justify-between gap-3 pb-1">
+				<div className="flex items-baseline gap-3">
+					<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+						00
+					</span>
+					<h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+						{spec.title}
+					</h2>
+					<span className="text-[11px] text-muted-foreground">
+						평균 {avgScore.toFixed(1)} / 10 · 정통 절대 임계값 (peer 무관)
+					</span>
+				</div>
+			</div>
+			<div className="grid grid-cols-12 gap-3 rounded-lg border bg-card p-4">
+				<div className="col-span-12 md:col-span-7">
+					<VizChart spec={spec} height={280} size={{ w: 7, h: 4 }} />
+				</div>
+				<div className="col-span-12 md:col-span-5 flex flex-col justify-center gap-2">
+					{categories.map((cat, i) => {
+						const score = scores[i] ?? 0;
+						const raw = rawValues[i];
+						const unit = rawUnits[i] ?? '';
+						const pct = Math.max(0, Math.min(100, (score / 10) * 100));
+						const tone =
+							score >= 8
+								? 'bg-emerald-500/70'
+								: score >= 5
+									? 'bg-amber-500/70'
+									: 'bg-rose-500/70';
+						return (
+							<div key={cat} className="flex items-center gap-3">
+								<div className="w-44 truncate text-[11px] text-muted-foreground" title={cat}>
+									{cat}
+								</div>
+								<div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
+									<div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
+								</div>
+								<div className="w-20 text-right font-mono text-[11px] tabular-nums">
+									<span className="font-semibold text-foreground">{score.toFixed(1)}</span>
+									<span className="ml-1 text-muted-foreground">/ 10</span>
+								</div>
+								<div className="w-24 text-right font-mono text-[10px] text-muted-foreground tabular-nums">
+									{raw != null ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–'}
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			</div>
+		</section>
+	);
+}
+
 // 카드 1 장당 useQuery 1 개 — mount 시 즉시 fetch, 가장 빠른 카드부터 paint.
 // 이전: layout API 가 34 카드 spec 다 들고와서 가장 느린 카드가 전체 막음.
 function CardWithQuery({
@@ -84,25 +176,91 @@ function CardWithQuery({
 		60,
 		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
 	);
+	const [open, setOpen] = useState(false);
 	const kind = spec?.kind ?? packed.kind;
 	const headerMetric = computeHeaderMetric(spec);
+	// Koyfin 패턴 — primary series 시계열 sparkline (마지막 24 분기).
+	// trend kind 의 단일 비-stack line/bar 만 의미 있음 (dual-stack/radar/gauge 는 제외).
+	const sparklineData = (() => {
+		if (!spec || spec.kind !== 'trend' || spec.options?.dualStack) return null;
+		const primary =
+			spec.series?.find((s) => s.intent === 'primary') ??
+			spec.series?.find((s) => !s.stack && s.type === 'line') ??
+			spec.series?.[0];
+		if (!primary) return null;
+		const data = primary.data ?? [];
+		// 최근 24 step 만 (sparkline 너무 길면 잡음).
+		return data.slice(-24);
+	})();
 	const ready = !!spec && !spec.error && !isError;
-	return (
-		<CardShell
-			title={title}
-			help={help}
-			colSpan={packed.w}
-			rowSpan={packed.h}
-			kind={kind}
-			footer={ready ? footer : undefined}
-			headerExtra={ready ? headerMetric : undefined}
-		>
-			{ready ? (
-				<VizChart spec={spec} height={bodyHeight} size={{ w: packed.w, h: packed.h }} />
-			) : (
-				<ChartLoading />
+	const headerCombined = ready ? (
+		<>
+			{sparklineData && sparklineData.length >= 2 && (
+				<span className="text-muted-foreground/60">
+					<Sparkline data={sparklineData} width={56} height={16} />
+				</span>
 			)}
-		</CardShell>
+			{headerMetric}
+		</>
+	) : undefined;
+	return (
+		<>
+			<div
+				onClick={() => ready && setOpen(true)}
+				className={ready ? 'cursor-pointer transition-opacity hover:opacity-95' : 'h-full'}
+				role={ready ? 'button' : undefined}
+				tabIndex={ready ? 0 : undefined}
+				onKeyDown={(e) => {
+					if (ready && (e.key === 'Enter' || e.key === ' ')) {
+						e.preventDefault();
+						setOpen(true);
+					}
+				}}
+			>
+				<CardShell
+					title={title}
+					help={help}
+					colSpan={packed.w}
+					rowSpan={packed.h}
+					kind={kind}
+					footer={ready ? footer : undefined}
+					headerExtra={headerCombined}
+				>
+					{ready ? (
+						<VizChart spec={spec} height={bodyHeight} size={{ w: packed.w, h: packed.h }} />
+					) : (
+						<ChartLoading />
+					)}
+				</CardShell>
+			</div>
+			{ready && (
+				<Dialog open={open} onOpenChange={setOpen}>
+					<DialogContent className="max-w-5xl">
+						<DialogHeader>
+							<DialogTitle className="flex items-baseline gap-3">
+								<span>{title}</span>
+								<span className="text-xs font-normal text-muted-foreground">
+									{packed.cardKey}
+								</span>
+							</DialogTitle>
+							{help && (
+								<DialogDescription className="text-[12px] leading-relaxed">
+									{help}
+								</DialogDescription>
+							)}
+						</DialogHeader>
+						<div className="space-y-4">
+							<VizChart spec={spec} height={420} size={{ w: 12, h: 6 }} />
+							{spec.kind === 'trend' && (spec.series?.length ?? 0) > 0 && !isDualStack && (
+								<div className="border-t pt-3">
+									<ChartMiniTable spec={spec} />
+								</div>
+							)}
+						</div>
+					</DialogContent>
+				</Dialog>
+			)}
+		</>
 	);
 }
 
@@ -303,6 +461,7 @@ function FinancialTab() {
 				)
 			) : (
 				<div className="flex flex-col">
+					<SnowflakeHero stockCode={code} periodKind={periodKind} />
 					{grouped.map(({ section, cards }, idx) => (
 						<section key={section.title} className={idx === 0 ? '' : 'mt-2'}>
 							<header className="flex items-baseline justify-between gap-3 px-6 pt-4 pb-1">
