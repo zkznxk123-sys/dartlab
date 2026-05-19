@@ -15,7 +15,7 @@ whenToUse:
   - 횡단 quality + value 후보 발굴
 linkedSkills:
   - engines.scan
-  - recipes.credit.distressFilter
+  - recipes.fundamental.credit.distressFilter
   - recipes.valuation.check
   - engines.analysis
 toolRefs:
@@ -162,7 +162,7 @@ emit_result(
 
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 묶음.
 2. 상위 5~10 종목에 대해 `recipes.valuation.check` 로 단일 회사 가치평가 (DCF + valuation band) 심층.
-3. `recipes.credit.distressFilter` 로 부도 위험 종목 제외.
+3. `recipes.fundamental.credit.distressFilter` 로 부도 위험 종목 제외.
 4. `engines.analysis` 로 발생주의 신호 점검 (CFO/NI 비율).
 5. `engines.story` 로 6 막 인과 보고서 조합.
 

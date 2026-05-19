@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.leverageSensitivity
+id: recipes.fundamental.credit.leverageSensitivity
 title: 영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)
 category: recipes
 kind: recipe
@@ -18,8 +18,8 @@ linkedSkills:
   - engines.company
   - engines.gather
   - recipes.fundamental.quality.dupontDriver
-  - recipes.credit.distressFilter
-  - recipes.credit.distressDual
+  - recipes.fundamental.credit.distressFilter
+  - recipes.fundamental.credit.distressDual
 toolRefs:
   - EngineCall
   - RunPython
@@ -173,9 +173,9 @@ scenarioTable = pl.DataFrame(scenarios)
 ## 연계 절차
 
 1. 본 recipe → DOL/DFL/DCL + 시나리오 표.
-2. DCL &gt; 3 = 사이클 회사 → 매크로 시나리오 (`recipes.credit.distressDual` 의 침체 가정) 와 결합.
+2. DCL &gt; 3 = 사이클 회사 → 매크로 시나리오 (`recipes.fundamental.credit.distressDual` 의 침체 가정) 와 결합.
 3. DOL 변동 → 고정비 구조 변화 (CAPEX 사이클·M&A 효과) 점검.
-4. DFL 큰 회사 → `recipes.credit.distressFilter` 의 부채비율·유동성 게이트 강화.
+4. DFL 큰 회사 → `recipes.fundamental.credit.distressFilter` 의 부채비율·유동성 게이트 강화.
 5. ROE 변동의 5 동인 (`recipes.fundamental.quality.dupontDriver`) 중 financialLeverage 변화와 DFL 변화 일치 검증.
 
 ## 기본 검증

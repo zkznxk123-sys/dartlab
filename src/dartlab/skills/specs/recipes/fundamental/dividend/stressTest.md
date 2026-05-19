@@ -217,8 +217,8 @@ graph LR
 | 신용 스프레드 BBB | (macro.rates) | +100bp | 주간 |
 
 ## 연계 절차
-- dividend cut/suspend 2+ 시나리오 → `recipes.credit.macroStress` (신용 axis 동시 점검)
-- universe 검증 → `recipes.credit.distressCandidateScreen` (dividend payer 한정)
+- dividend cut/suspend 2+ 시나리오 → `recipes.fundamental.credit.macroStress` (신용 axis 동시 점검)
+- universe 검증 → `recipes.fundamental.credit.distressCandidateScreen` (dividend payer 한정)
 - 시나리오 직접 비교 → `recipes.macro.scenarioDiagram`
 - 배당 정책 종합 → `recipes.fundamental.dividend.capitalReturn`
 

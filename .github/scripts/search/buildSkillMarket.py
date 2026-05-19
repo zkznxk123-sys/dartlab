@@ -532,7 +532,7 @@ def mapBuiltinSkills(text: str) -> list[str]:
         (("퀀트", "팩터", "quant"), "engines.quant"),
         (("산업", "밸류체인", "industry"), "engines.industry"),
         (("공시", "disclosure", "filing"), "engines.search"),
-        (("종합", "deep", "깊게"), "recipes.credit.deepDive"),
+        (("종합", "deep", "깊게"), "recipes.fundamental.credit.deepDive"),
     ]
     out: list[str] = []
     for terms, skillId in mapping:

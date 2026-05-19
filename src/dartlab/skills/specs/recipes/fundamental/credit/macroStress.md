@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.macroStress
+id: recipes.fundamental.credit.macroStress
 title: 신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성
 category: recipes
 kind: recipe
@@ -210,10 +210,10 @@ graph LR
 | 외부 KIS/NICE 신용등급 | (gather) | watch 진입 | 분기 |
 
 연계 절차:
-- shockedGrade 가 BB 이하면 → `recipes.credit.covenantStressTest` (차입약정 위반 점검)
+- shockedGrade 가 BB 이하면 → `recipes.fundamental.credit.covenantStressTest` (차입약정 위반 점검)
 - bindingAxis = 채무상환 → `engines.analysis` 으로 차입 만기·변동/고정 비율
-- bindingAxis = 사업안정성 → `recipes.credit.quantConsensus` (Altman / Beneish / Piotroski 합의)
-- universe 확장 (KOSPI200 전수 stress) → `recipes.credit.distressCandidateScreen`
+- bindingAxis = 사업안정성 → `recipes.fundamental.credit.quantConsensus` (Altman / Beneish / Piotroski 합의)
+- universe 확장 (KOSPI200 전수 stress) → `recipes.fundamental.credit.distressCandidateScreen`
 
 재호출 트리거: "삼성전자 금리 +200bp 충격에서 dCR 유지?", "현대차 환율 +10% 시 신용 axis 어디 깨지나", "HMM 영업이익 -20% 시 dCR 등급 변동".
 
@@ -244,10 +244,10 @@ graph LR
 ## 연계 절차
 
 1. 본 recipe → shockedGrade + bindingAxis 산출.
-2. shockedGrade 가 BB 이하로 떨어지면 `recipes.credit.covenantStressTest` 와 결합 — 차입약정 위반 가능성 함께 점검.
+2. shockedGrade 가 BB 이하로 떨어지면 `recipes.fundamental.credit.covenantStressTest` 와 결합 — 차입약정 위반 가능성 함께 점검.
 3. bindingAxis = 채무상환 → `engines.analysis` 으로 차입 만기 schedule + 변동/고정 비율 상세.
-4. bindingAxis = 사업안정성 → `recipes.credit.quantConsensus` 와 결합 — Altman / Beneish / Piotroski 합의 부도 신호 동반 검증.
-5. 5 종목 실행 후 `recipes.credit.distressCandidateScreen` 으로 universe 확장.
+4. bindingAxis = 사업안정성 → `recipes.fundamental.credit.quantConsensus` 와 결합 — Altman / Beneish / Piotroski 합의 부도 신호 동반 검증.
+5. 5 종목 실행 후 `recipes.fundamental.credit.distressCandidateScreen` 으로 universe 확장.
 
 ## 기본 검증
 

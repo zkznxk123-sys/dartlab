@@ -117,7 +117,7 @@ emit_result(
 
 1. 달러 압력이 유동성 문제라면 `recipes.macro.globalLiquidityPulse` 로 원인을 확인한다.
 2. 한국 시장 영향은 `recipes.macro.koreaMacroStressMap` 또는 `recipes.macro.koreaExportCycleNowcast` 로 연결한다.
-3. 신용위험이 같이 커지면 `recipes.credit.cycleStressMap` 으로 확장한다.
+3. 신용위험이 같이 커지면 `recipes.fundamental.credit.cycleStressMap` 으로 확장한다.
 
 ## 기본 검증
 

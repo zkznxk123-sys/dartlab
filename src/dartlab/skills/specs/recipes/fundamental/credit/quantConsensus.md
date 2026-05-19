@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.quantConsensus
+id: recipes.fundamental.credit.quantConsensus
 title: 신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목
 category: recipes
 kind: recipe
@@ -14,7 +14,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.credit
-  - recipes.credit.distressDual
+  - recipes.fundamental.credit.distressDual
   - engines.quant
 toolRefs:
   - EngineCall
@@ -140,9 +140,9 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → 4 source 합의 결과.
-2. consensus = TripleAgreement → `recipes.credit.macroStress` 와 결합 — 매크로 충격 시 추가 악화 위험.
+2. consensus = TripleAgreement → `recipes.fundamental.credit.macroStress` 와 결합 — 매크로 충격 시 추가 악화 위험.
 3. consensus = DualAgreement → `engines.analysis` 로 분식 의심 별도 검증.
-4. universe 적용은 `recipes.credit.distressCandidateScreen` 와 결합.
+4. universe 적용은 `recipes.fundamental.credit.distressCandidateScreen` 와 결합.
 
 ## 기본 검증
 

@@ -12,8 +12,8 @@ frontmatter 를 수정하지 않는다 — 본 CLI 가 단독 권한.
 
 실행:
     uv run python -X utf8 src/dartlab/skills/recipePromote.py list
-    uv run python -X utf8 src/dartlab/skills/recipePromote.py inspect recipes.credit.distressDual
-    uv run python -X utf8 src/dartlab/skills/recipePromote.py promote recipes.credit.distressDual
+    uv run python -X utf8 src/dartlab/skills/recipePromote.py inspect recipes.fundamental.credit.distressDual
+    uv run python -X utf8 src/dartlab/skills/recipePromote.py promote recipes.fundamental.credit.distressDual
 """
 
 from __future__ import annotations

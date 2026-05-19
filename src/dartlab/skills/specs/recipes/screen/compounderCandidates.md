@@ -17,7 +17,7 @@ linkedSkills:
   - engines.scan
   - recipes.valuation.qualityValueScreen
   - recipes.valuation.garpScreen
-  - recipes.credit.distressFilter
+  - recipes.fundamental.credit.distressFilter
   - engines.analysis
 toolRefs:
   - EngineCall
@@ -211,7 +211,7 @@ graph LR
 연계 절차:
 - GP/A 게이트 결합 → `recipes.valuation.qualityValueScreen`
 - PEG 가치 게이트 → `recipes.valuation.garpScreen` (비싸지 않은지)
-- 안정성 게이트 → `recipes.credit.distressFilter`
+- 안정성 게이트 → `recipes.fundamental.credit.distressFilter`
 - ROE 동인 (margin × turnover × leverage) → `recipes.fundamental.quality.dupontDriver`
 - 자본배분 정성 → `recipes.fundamental.quality.capitalAllocationScorecard`
 - moat narrative → `engines.story`
@@ -247,7 +247,7 @@ graph LR
 1. 본 recipe 로 후보 발굴 → `tableRef` 에 ROE/매출/마진 5 년 분포.
 2. 후보 → `recipes.valuation.qualityValueScreen` 의 GP/A 게이트 추가 검증.
 3. `recipes.valuation.garpScreen` 의 PEG 게이트 — compounder 가 비싸지 않은지 가치 검증.
-4. `recipes.credit.distressFilter` 통과 (안전성).
+4. `recipes.fundamental.credit.distressFilter` 통과 (안전성).
 5. `engines.analysis` — DuPont 분해로 ROE 동인 (margin × turnover × leverage) 확인.
 6. `engines.analysis` — capital cycle (재투자 효율) 정성 분석.
 7. `engines.story` — moat narrative (가격결정력·전환비용·네트워크효과·규모) 까지.

@@ -148,4 +148,4 @@ emit_result(
 
 1. 본 recipe → cluster signal 보유 종목 식별.
 2. clusterFlag = True → `recipes.fundamental.disclosure.filingTextSignal` 과 결합 — MD&A tone change 동행 검증.
-3. universe 검증은 `recipes.credit.distressCandidateScreen` 의 inverse — cluster + low distress = 강한 매수 신호.
+3. universe 검증은 `recipes.fundamental.credit.distressCandidateScreen` 의 inverse — cluster + low distress = 강한 매수 신호.

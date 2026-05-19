@@ -154,21 +154,21 @@
         "title": "회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50/75)"
       },
       {
-        "id": "recipes.credit.covenantStressTest",
+        "id": "recipes.fundamental.credit.covenantStressTest",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
         "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률"
       },
       {
-        "id": "recipes.credit.deepDive",
+        "id": "recipes.fundamental.credit.deepDive",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)"
       },
       {
-        "id": "recipes.credit.macroStress",
+        "id": "recipes.fundamental.credit.macroStress",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
@@ -182,7 +182,7 @@
         "title": "데이터 가용성 우선 점검 (수집 전 확인 → 누락 시 gather/update)"
       },
       {
-        "id": "recipes.credit.debtStructureAudit",
+        "id": "recipes.fundamental.credit.debtStructureAudit",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,
@@ -203,7 +203,7 @@
         "title": "공시 tone change × 산업 stage → story.risk 블럭 자동 발행 (storyboard 우회)"
       },
       {
-        "id": "recipes.credit.distressCandidateScreen",
+        "id": "recipes.fundamental.credit.distressCandidateScreen",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

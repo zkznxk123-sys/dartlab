@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.debtStructureAudit
+id: recipes.fundamental.credit.debtStructureAudit
 title: 부채 구조 audit (만기 + 이자보상 + peer 횡단)
 category: recipes
 kind: recipe

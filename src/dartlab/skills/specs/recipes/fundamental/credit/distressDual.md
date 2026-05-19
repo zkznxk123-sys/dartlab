@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.distressDual
+id: recipes.fundamental.credit.distressDual
 title: 부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)
 category: recipes
 kind: recipe
@@ -16,9 +16,9 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.gather
-  - recipes.credit.distressFilter
+  - recipes.fundamental.credit.distressFilter
   - recipes.fundamental.quality.earningsQualityTriad
-  - recipes.credit.leverageSensitivity
+  - recipes.fundamental.credit.leverageSensitivity
   - engines.credit
 toolRefs:
   - EngineCall
@@ -224,8 +224,8 @@ dual = pl.DataFrame({
 1. 본 recipe → 5 년 Z″ + O-Score + consensus.
 2. consensus = HighRisk 회사 → `engines.credit` (L2 분석 엔진) 와 비교 — 본 recipe 는 raw 직접 계산, credit 엔진은 7 축 종합.
 3. `recipes.fundamental.quality.earningsQualityTriad` 와 결합 — 분식 의심 + 부도 위험 = 강한 회피.
-4. `recipes.credit.leverageSensitivity` 와 결합 — DCL 큰 회사가 distressed 면 매크로 충격 시 적자 전환 임박.
-5. `recipes.credit.distressFilter` 의 횡단 블랙리스트와 본 recipe 의 단일 회사 결과 교차 검증.
+4. `recipes.fundamental.credit.leverageSensitivity` 와 결합 — DCL 큰 회사가 distressed 면 매크로 충격 시 적자 전환 임박.
+5. `recipes.fundamental.credit.distressFilter` 의 횡단 블랙리스트와 본 recipe 의 단일 회사 결과 교차 검증.
 
 ## 기본 검증
 

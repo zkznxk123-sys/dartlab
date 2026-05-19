@@ -157,7 +157,7 @@ cycle --> rates --> liquidity --> crisis --> assets --> forecast
 
 연계 절차:
 - 현재 위치가 불명확하면 → `recipes.macro.historicalPositioning` (과거 위기 대비 위치)
-- 신용 취약성이 핵심이면 → `recipes.credit.cycleStressMap`
+- 신용 취약성이 핵심이면 → `recipes.fundamental.credit.cycleStressMap`
 - 꼬리위험 질문이면 → `recipes.macro.tailRiskScenarioScan`
 - 회사 단위로 내려가면 → `recipes.macro.companyMacroPathProjection` 또는 `recipes.macro.toCompany`
 
@@ -173,7 +173,7 @@ cycle --> rates --> liquidity --> crisis --> assets --> forecast
 ## 연계 절차
 
 1. 현재 위치가 불명확하면 `recipes.macro.historicalPositioning` 으로 과거 위기 대비 위치를 비교한다.
-2. 신용 취약성이 핵심이면 `recipes.credit.cycleStressMap` 으로 이동한다.
+2. 신용 취약성이 핵심이면 `recipes.fundamental.credit.cycleStressMap` 으로 이동한다.
 3. 꼬리위험 질문이면 `recipes.macro.tailRiskScenarioScan` 으로 이동한다.
 4. 회사 단위로 내려가면 `recipes.macro.companyMacroPathProjection` 또는 `recipes.macro.toCompany`.
 

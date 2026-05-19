@@ -210,7 +210,7 @@ graph LR
 연계 절차:
 - OperatingMargin 변동 → `recipes.fundamental.quality.workingCapitalQuality` (운전자본 효율)
 - AssetTurnover 변동 → CAPEX 시계열 + `engines.analysis`
-- FinancialLeverage 변동 → `recipes.credit.distressDual` (부채 위험)
+- FinancialLeverage 변동 → `recipes.fundamental.credit.distressDual` (부채 위험)
 - 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates`
 - 자본 배분 평가 → `recipes.fundamental.quality.capitalAllocationScorecard`
 
@@ -245,7 +245,7 @@ graph LR
 2. 동인 변화 큰 (표준편차 큰) 항목 식별 — ROE 변동의 원인.
 3. OperatingMargin 변동 → `recipes.fundamental.quality.workingCapitalQuality` 로 운전자본 효율 점검.
 4. AssetTurnover 변동 → 자산 재투자 시점 (CAPEX 시계열) 분석.
-5. FinancialLeverage 변동 → `recipes.credit.distressDual` 로 부채 위험 점검.
+5. FinancialLeverage 변동 → `recipes.fundamental.credit.distressDual` 로 부채 위험 점검.
 6. 5 년 일관 quality compounder 인지 → `recipes.screen.compounderCandidates` 와 상호 검증.
 
 ## 기본 검증

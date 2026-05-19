@@ -126,7 +126,7 @@ emit_result(
 ## 연계 절차
 
 1. 특정 업종 영향은 `engines.scan` 또는 `engines.industry`.
-2. 신용 스트레스가 크면 `recipes.credit.cycleStressMap`.
+2. 신용 스트레스가 크면 `recipes.fundamental.credit.cycleStressMap`.
 3. 과거 위기 비교는 `recipes.macro.historicalPositioning`.
 
 ## 기본 검증

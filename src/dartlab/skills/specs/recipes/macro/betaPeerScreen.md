@@ -162,5 +162,5 @@ else:
 ## 연계 절차
 
 1. 본 recipe → idiosyncratic 매크로 outlier 종목.
-2. outlier flag → `recipes.credit.macroStress` 와 결합 — 매크로 충격 시 영향 정량화.
+2. outlier flag → `recipes.fundamental.credit.macroStress` 와 결합 — 매크로 충격 시 영향 정량화.
 3. 시장 stress 시 → 기대 P&L 분기 (outlier vs peer) 검증 → backtest.

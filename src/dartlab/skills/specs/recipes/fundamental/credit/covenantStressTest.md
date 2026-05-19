@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.covenantStressTest
+id: recipes.fundamental.credit.covenantStressTest
 title: 차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률
 category: recipes
 kind: recipe
@@ -168,5 +168,5 @@ emit_result(
 ## 연계 절차
 
 1. 본 recipe → covenant breach 확률.
-2. breach prob > 0.3 → `recipes.credit.macroStress` 와 결합 — 매크로 충격이 신용등급에 미치는 영향 동시 점검.
-3. universe 적용 — `recipes.credit.distressCandidateScreen` 의 candidate set 에서 covenant 임박 종목 우선 평가.
+2. breach prob > 0.3 → `recipes.fundamental.credit.macroStress` 와 결합 — 매크로 충격이 신용등급에 미치는 영향 동시 점검.
+3. universe 적용 — `recipes.fundamental.credit.distressCandidateScreen` 의 candidate set 에서 covenant 임박 종목 우선 평가.

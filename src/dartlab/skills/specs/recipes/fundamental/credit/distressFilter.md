@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.distressFilter
+id: recipes.fundamental.credit.distressFilter
 title: Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)
 category: recipes
 kind: recipe

@@ -2620,7 +2620,7 @@
       "bodyPreview": "## 학술 근거\n\nWarren Buffett (Berkshire Hathaway 주주서한, 1977-2024): \"wonderful company at fair price\" — 단년도 고-ROE 가 아니라 **사이클 전체 일관 고-ROE**. 핵심 신호:\n\n- ROE ≥ 15% 일관 5 년 + 표준편차 작음 (사이클 무관).\n- 매출 안정 성장 (역성장 없음).\n- grossMargin 안정 — moat (가격결정력) 의 정량 신호.\n\n학술 검증:\n- Asness-Frazzini-Pedersen, *\"Quality Minus Junk\"* (2019): profitability + safety + payout 결합 quality factor. 1956-2016 미국 연 5%p 초과수익. 핵심 — 단년도가 아닌 5 년 평균 + 일관성 (표준편차 역수).\n- Novy-Marx (2014): ROE 일관성 (low volatility) 가 high mean ROE 보다 미래 수익률과 강한 상관.\n- Sloan (1996): 일관 고-ROE 회사가 mean reversion 회피하는 비율 30% (전체 평균 5%) — 진짜 moat 신호.\n\ndartlab 한계: RO"
     },
     {
-      "id": "recipes.credit.covenantStressTest",
+      "id": "recipes.fundamental.credit.covenantStressTest",
       "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
       "category": "recipes",
       "purpose": "차입금 covenant (DSCR ≥ 1.2 / Debt/Equity ≤ 2.0 등) 가 매크로 충격 (금리 path Monte Carlo) 에서 위반될 확률 추정. 비금융기업 quasi-CCAR. 단순 신용등급보다 covenant breach 가 더 정밀한 default 선행지표. analysis ↔ macro ↔ credit 격리 메우는 조합. 트리거 — 'covenant stress', 'DSCR 충격', '차입약정 위반'.",
@@ -2639,7 +2639,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport random\n\nc = dartlab.Company(\"005930\")\n\n# 1. 차입 schedule + 명시 covenant\nfinancing = c.analysis(\"financing\", \"차입구조\")\ndebt_schedule = financing.get(\"debtSchedule\", []) if isinstance(financing, dict) else []\ncovenants = financing.get(\"covenants\", {}) if isinstance(financing, dict) else {}\n\ndscr_floor = covenants.get(\"dscrFloor\", 1.2)\nde_ceiling = covenants.get(\"debtEquityCeiling\", 2.0)\n\n# 2. P&L baseline\nis_df = c.show(\"IS\", freq=\"Y\")\nbs_df = c.show(\"BS\", freq=\"Y\")\n\ndef fetch(df, snake, year=\"2024\"):\n    row = df.filter(pl.col(\"snakeI"
     },
     {
-      "id": "recipes.credit.deepDive",
+      "id": "recipes.fundamental.credit.deepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
       "category": "recipes",
       "purpose": "단일 회사의 신용 위험을 dCR 등급 + 재무 안정성/현금흐름 분해 + 매크로 금리 환경 3 단으로 종합 평가하는 절차. 트리거 — '신용 깊이 분석', '단일 회사 신용', '부도 위험 종합'.",
@@ -2661,7 +2661,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\ncredit = c.credit(detail=True)\nstability = c.analysis(\"financial\", \"안정성\")\ncashflow = c.analysis(\"financial\", \"현금흐름\")\nrates = dartlab.macro(\"rates\")\n```\n\n## 호출 동작\n\ndCR 등급 + 7 축 위험 점수 → 안정성 + 현금흐름 분해 → 매크로 금리 환경 3 층 결합으로 종합 신용 의견. 매크로 금리 변동 시 sensitivity 도 같이 본다.\n\n1. 회사 진입\n2. credit(detail=True) — dCR 등급 + 7 축 분해 + metricsHistory\n3. analysis(\"financial\", \"안정성\") — 부채비율·이자보상배율·유동비율\n4. analysis(\"financial\", \"현금흐름\") — CFO·FCF·OCF/부채 비율\n5. macro(\"rates\") — 현재 금리 환경\n\n## 대표 반환 형태\n\n- `tableRef` 4 개 (credit metricsHistory + 안정성 표 + 현금흐"
     },
     {
-      "id": "recipes.credit.distressDual",
+      "id": "recipes.fundamental.credit.distressDual",
       "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
       "category": "recipes",
       "purpose": "단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Altman + Ohlson', '부도 위험 2 모델 합의', 'Z-Score O-Score'.",
@@ -2676,14 +2676,14 @@
       "nextSkills": [
         "engines.company",
         "engines.gather",
-        "recipes.credit.distressFilter",
+        "recipes.fundamental.credit.distressFilter",
         "recipes.fundamental.quality.earningsQualityTriad",
-        "recipes.credit.leverageSensitivity"
+        "recipes.fundamental.credit.leverageSensitivity"
       ],
       "bodyPreview": "## 학술 근거\n\n### 1. Altman Z″-Score (1995, 비제조업 / 신흥시장 변형)\nEdward Altman, *\"Predicting Financial Distress of Companies: Revisiting the Z-Score and ZETA Models\"* — 원전 Z-Score (1968) 의 비제조업 / 신흥시장 변형:\n\nZ″ = 6.56·X1 + 3.26·X2 + 6.72·X3 + 1.05·X4\n\n| 변수 | 정의 |\n|---|---|\n| X1 | working capital / total assets |\n| X2 | retained earnings / total assets |\n| X3 | EBIT / total assets |\n| X4 | book value of equity / total liabilities |\n\n해석:\n- Z″ &gt; 2.60 = 안전 (Safe Zone)\n- 1.10 ≤ Z″ ≤ 2.60 = 회색 (Grey Zone)\n- Z″ &lt; 1.10 = 위험 (Distress Zone)\n\n원전 Z-Score 의 X5 (Sales/Assets) 제거 → 비제조업 (서비스·금융·플랫폼) 부적합 해소.\n\n###"
     },
     {
-      "id": "recipes.credit.macroStress",
+      "id": "recipes.fundamental.credit.macroStress",
       "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
       "category": "recipes",
       "purpose": "단일 회사의 신용등급 (dCR + 7 axis) 가 매크로 충격 (금리 +200bp / 환율 +10% / 영업이익 -20%) 에서 유지 가능한지, 어떤 axis 가 먼저 깨지는지 판정. credit ↔ macro 격리 메우는 조합 — 정상 보고 dCR 은 시점 1 회 산출이라 미래 시나리오에서 어떻게 변하는지 보여주지 못한다. 트리거 — '신용 매크로 스트레스', '금리 충격 dCR', 'credit stress'.",
@@ -2704,7 +2704,7 @@
       "bodyPreview": "## 학술 근거\n\n### Stress Testing 기본\n- **CCAR (Comprehensive Capital Analysis and Review)** — 미연방 은행 감독 매크로 시나리오 기반 자본 충분성 평가. 본 recipe 는 단일 비금융기업 적용 변형.\n- **EBA Stress Test** — 유럽은행감독청. baseline + adverse 두 path 비교 + 자본비율 시계열.\n- **Standard & Poor's Macro Sensitivity** — 신용등급 회사 cycle 위치 + 매크로 베타 종합.\n\n### 적용 한계\n- 비금융기업 stress test 는 학계·실무 통합 표준 없음. 본 recipe 는 dCR 7 axis 별 elasticity → shocked metric → 등급 재계산 휴리스틱.\n- 금리 충격 → 이자비용 ↑ → 영업이익 ↓ → 채무상환 axis 약화 + 현금흐름 axis 약화 → dCR 등급 ↓.\n- 환율 충격 → 원자재·수출비중 별 EBIT 변동 → 사업안정성 axis + 채무상환 axis 동시 영향.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl"
     },
     {
-      "id": "recipes.credit.quantConsensus",
+      "id": "recipes.fundamental.credit.quantConsensus",
       "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
       "category": "recipes",
       "purpose": "단일 회사 부도 위험을 dCR (정성·정량 종합) + Altman Z″ + Ohlson O + Beneish M 4-source 동시 평가. 단일 모델 false positive 줄이고 triple-agreement 시 강한 위험 신호. credit ↔ quant 격리 메우는 조합. 트리거 — '신용 퀀트 합의', '부도 4 모델', 'distress consensus'.",
@@ -2717,11 +2717,11 @@
       "nextSkills": [
         "engines.company",
         "engines.credit",
-        "recipes.credit.distressDual",
+        "recipes.fundamental.credit.distressDual",
         "engines.quant.altman",
         "engines.quant.beneish"
       ],
-      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport math\n\nc = dartlab.Company(\"005930\")\n\n# 1. dCR 등급 + 7 axis (정성 + 정량 종합)\ncredit = c.credit(detail=True)\ndcr_grade = credit[\"grade\"]\ndcr_distress = dcr_grade in (\"CCC\", \"CC\", \"C\", \"D\", \"BB-\")\n\n# 2. Altman Z″ (비제조업 변형) — recipes.credit.distressDual 본문 참조\nbs = c.show(\"BS\", freq=\"Y\")\nis_df = c.show(\"IS\", freq=\"Y\")\n\ndef fetch(df, snake, year=\"2024\"):\n    row = df.filter(pl.col(\"snakeId\") == snake).select(year)\n    return float(row.to_numpy()[0][0]) if row.height > 0 else 0.0\n\nca = fetch(bs, \"current_assets\")\ncl = fetch(bs, \"curren"
+      "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\nimport math\n\nc = dartlab.Company(\"005930\")\n\n# 1. dCR 등급 + 7 axis (정성 + 정량 종합)\ncredit = c.credit(detail=True)\ndcr_grade = credit[\"grade\"]\ndcr_distress = dcr_grade in (\"CCC\", \"CC\", \"C\", \"D\", \"BB-\")\n\n# 2. Altman Z″ (비제조업 변형) — recipes.fundamental.credit.distressDual 본문 참조\nbs = c.show(\"BS\", freq=\"Y\")\nis_df = c.show(\"IS\", freq=\"Y\")\n\ndef fetch(df, snake, year=\"2024\"):\n    row = df.filter(pl.col(\"snakeId\") == snake).select(year)\n    return float(row.to_numpy()[0][0]) if row.height > 0 else 0.0\n\nca = fetch(bs, \"current_assets\")\ncl = fetch(bs, \"curren"
     },
     {
       "id": "recipes.report.dailyMorningNote",
@@ -2764,7 +2764,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\ntopics = c.topics  # 가용 토픽 목록\n# InspectDataset 으로 schema 확인\n# 누락 시 c.update() 또는 c.gather('price') 호출\n```\n\n## 호출 동작\n\n분석 의도 → 필요한 dataset 식별 → InspectDataset 으로 schema/최신 시점 확인 → 누락 시 update/gather 트리거.\n\n1. 회사 진입\n2. c.topics — 가용 토픽 목록\n3. InspectDataset — 핵심 dataset 확인 (Company.show:code:BS 등)\n4. (누락 시) c.update() — finance/docs/report 증분 수집\n5. (가격 필요 시) c.gather(\"price\") — KR/US 주가\n\n## 대표 반환 형태\n\n- `skillRef` 1 (data foundation)\n- `datasetRef` 3+ (BS / IS / CF 또는 price / macro)\n- 답변 본문: 가용 vs 누락 dataset 표\n\n## 연계 절차\n\n1. engine"
     },
     {
-      "id": "recipes.credit.debtStructureAudit",
+      "id": "recipes.fundamental.credit.debtStructureAudit",
       "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
       "category": "recipes",
       "purpose": "회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차. 트리거 — '부채 구조 audit', '만기 분포', '이자보상배율', '신용 등급 횡단'.",
@@ -2848,7 +2848,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\nc = dartlab.Company(\"005930\")\n\n# 1. quant tone change — MD&A 사업의 내용 변화\ntone = c.quant(\"toneChange\") if hasattr(c, \"quant\") else None\ntone_delta = tone.get(\"delta\", 0) if isinstance(tone, dict) else 0\ntone_z = tone.get(\"zScore\", 0) if isinstance(tone, dict) else 0\n\n# 2. 180 일 뉴스 sentiment\nnews = c.gather(\"news\", days=180) if hasattr(c, \"gather\") else None\nif isinstance(news, dict):\n    news_sentiment = news.get(\"aggregateSentiment\", 0)\nelif isinstance(news, pl.DataFrame) and \"sentiment\" in news.columns:\n    news_sentiment = float(news[\""
     },
     {
-      "id": "recipes.credit.distressCandidateScreen",
+      "id": "recipes.fundamental.credit.distressCandidateScreen",
       "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
       "category": "recipes",
       "purpose": "KOSPI200 universe 안에서 (1) dCR 등급이 전월 대비 1 notch 이상 하락 (credit migration) + (2) quant sentiment z-score ≤ -1.5 (시장 신호 약세) 동시 발현 종목 발굴. 단일 신호는 false positive 많지만 cross-source 합의는 강함. credit ↔ quant ↔ scan 격리 메우는 조합. 트리거 — 'distress candidate', '신용 sentiment 약세', 'credit migration screen'.",
@@ -2862,12 +2862,12 @@
         "engines.scan.profitability",
         "engines.credit",
         "engines.quant.sentiment",
-        "recipes.credit.quantConsensus"
+        "recipes.fundamental.credit.quantConsensus"
       ],
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\n# 1. KOSPI200 base universe\nbase = dartlab.scan(\"profitability\", market=\"KR\")\nif isinstance(base, pl.DataFrame):\n    universe = base\nelif isinstance(base, list):\n    universe = pl.DataFrame(base)\nelse:\n    universe = pl.DataFrame()\n\n# 2. 종목별 dCR + sentiment 평가 (1 차 wave: 단일 시점 — 등급 delta 는 archive 의존이라 placeholder)\nresults = []\nfor stock_code in universe[\"stockCode\"].to_list()[:50] if \"stockCode\" in universe.columns else []:\n    try:\n        c = dartlab.Company(stock_code)\n        credit = c.credit()\n        grade = credit.get(\"grade\")"
     },
     {
-      "id": "recipes.credit.distressFilter",
+      "id": "recipes.fundamental.credit.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
       "category": "recipes",
       "purpose": "Altman Z-Score (1968) 5 변수 중 dartlab 으로 가능한 4 변수 + 음수 영업CF 게이트 를 결합해 부도 위험 종목을 횡단으로 식별하고 다른 스크리너 결과의 블랙리스트로 사용하는 회피 절차. 트리거 — '부도 위험 필터', 'Altman Z 횡단', '블랙리스트', '회피 절차'.",
@@ -2989,8 +2989,8 @@
         "engines.company",
         "engines.gather",
         "recipes.fundamental.quality.workingCapitalQuality",
-        "recipes.credit.distressFilter",
-        "recipes.credit.distressDual"
+        "recipes.fundamental.credit.distressFilter",
+        "recipes.fundamental.credit.distressDual"
       ],
       "bodyPreview": "## 학술 근거\n\n3 학술 framework 동시 적용 — 각 모델이 잡지 못하는 신호를 다른 모델이 보완.\n\n### 1. Sloan Accruals (1996)\nRichard Sloan, *\"Do Stock Prices Fully Reflect Information in Accruals and Cash Flows about Future Earnings?\"* (The Accounting Review):\n\n- ACC = (NI − CFO) / Average Total Assets\n- 발생액 (accruals) 이 큰 회사 → 미래 abnormal return 음(−). 1962-1991 백테스트 연 10%p 차이.\n- 핵심 — 회계상 이익 ≠ 현금 이익. 차이가 클수록 미래 회귀 가능성.\n\n### 2. Beneish M-Score (1999)\nDaniel Beneish, *\"The Detection of Earnings Manipulation\"* (Financial Analysts Journal):\n\n- M = −4.84 + 0.92·DSRI + 0.528·GMI + 0.404·AQI + 0.892·SGI + 0.115·DEPI − 0.172·SGAI − 0."
     },
@@ -3308,7 +3308,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\ninventory_macro = dartlab.macro(\"inventory\")\nc = dartlab.Company(\"005930\")\nefficiency = c.analysis(\"financial\", \"효율성\")\ncycle = dartlab.macro(\"cycle\")\n```\n\n## 호출 동작\n\n산업 재고 지수 + 회사 재고 회전율 + 매크로 사이클 결합. 사이클 위치 (저점/회복/확장/정점/하락) 판정.\n\n1. macro(\"inventory\") — 산업 재고 지수 시계열\n2. 회사 진입\n3. analysis(\"financial\", \"효율성\") — 재고 회전율 + 매출채권 회전율\n4. macro(\"cycle\") — 경기 사이클 위치\n\n## 대표 반환 형태\n\n- `tableRef` 3 개 (inventory + efficiency + cycle)\n- `valueRef` 4+ (재고 지수 / 재고 회전 / 매출채권 회전 / 사이클 위치)\n- `dateRef` 1 개\n\n## 연계 절차\n\n1. engines.macro.inventory — 산업 재고 지수\n2. engines.company.resea"
     },
     {
-      "id": "recipes.credit.leverageSensitivity",
+      "id": "recipes.fundamental.credit.leverageSensitivity",
       "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
       "category": "recipes",
       "purpose": "매출 변동이 영업이익·순이익에 얼마나 증폭되는지 영업레버리지 (DOL) · 재무레버리지 (DFL) · 결합레버리지 (DCL) 로 정량화하고 매크로 충격 시나리오에서 본 회사가 얼마나 민감한지 평가하는 절차. L1 raw (`c.show(\"IS\")`) 시계열만 사용. 트리거 — '영업레버리지', '재무레버리지', 'DOL DFL DCL', '매크로 충격 민감도'.",
@@ -3325,8 +3325,8 @@
         "engines.company",
         "engines.gather",
         "recipes.fundamental.quality.dupontDriver",
-        "recipes.credit.distressFilter",
-        "recipes.credit.distressDual"
+        "recipes.fundamental.credit.distressFilter",
+        "recipes.fundamental.credit.distressDual"
       ],
       "bodyPreview": "## 학술 근거\n\n레버리지 분석은 corporate finance 기본 — 매출 변동이 이익에 어떻게 증폭되는지 측정.\n\n- **DOL** (Degree of Operating Leverage) = % ΔOP / % ΔSales = (Sales − VC) / (Sales − VC − FC). 고정비 비중 클수록 DOL 큼 — 매출 1% 변동 → 영업이익 N% 변동.\n- **DFL** (Degree of Financial Leverage) = % ΔNI / % ΔOP = OP / (OP − Interest). 이자비용 비중 클수록 DFL 큼.\n- **DCL** (Degree of Combined Leverage) = DOL × DFL = % ΔNI / % ΔSales. 매출 1% 변동 → 순이익 N% 변동.\n\n학술 검증:\n- Mandelker-Rhee (1984): DOL × DFL 가 stock beta 에 직접 영향. 고-DCL 회사가 system risk 높음.\n- Dugan-Shriver (1992): DOL 표준 추정 — 5 년 회귀법 (% ΔOP = α + β × % ΔSales). 본 recipe 의 추정 방법.\n- Faff-Brooks (1998"
     },
@@ -3779,7 +3779,7 @@
         "engines.gather",
         "recipes.fundamental.quality.dupontDriver",
         "recipes.fundamental.quality.earningsQualityTriad",
-        "recipes.credit.distressFilter"
+        "recipes.fundamental.credit.distressFilter"
       ],
       "bodyPreview": "## 학술 근거\n\n운전자본 (Working Capital) = 유동자산 − 유동부채. 그 안에서 **순운전자본 회전 사이클** 을 측정하는 framework:\n\n- **DSO** (Days Sales Outstanding) = (매출채권 / 매출) × 365\n- **DIO** (Days Inventory Outstanding) = (재고 / 매출원가) × 365\n- **DPO** (Days Payables Outstanding) = (매입채무 / 매출원가) × 365\n- **CCC** (Cash Conversion Cycle) = DSO + DIO − DPO. 현금이 운전자본에 묶여 있는 일수.\n\n학술·실무 검증:\n- Sloan (1996) 의 accruals anomaly — 매출채권·재고 급증이 미래 abnormal return 음(-) 예측. 본 recipe 의 변동률 분석이 그 신호.\n- Dechow-Kothari-Watts (1998): CCC 단축 = 운전자본 효율 + 매출 신뢰도 동시 시그널.\n- Damodaran (2007): 매출 성장보다 매출채권 성장 빠른 회사 = \"매출 인식 의심\" — 분식 회계 신호.\n\n핵심 패턴:\n- **DSO 급증*"
     },

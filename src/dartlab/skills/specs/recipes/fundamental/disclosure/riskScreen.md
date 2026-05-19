@@ -152,7 +152,7 @@ graph LR
 - 상위 후보 case 별 → `recipes.fundamental.disclosure.event` (개별 종목 본문 검증)
 - 공시 톤 분석 → `recipes.fundamental.disclosure.toneToStoryRisk`
 - 분식 의심 결합 → `recipes.fundamental.quality.earningsQualityTriad` (Sloan + Beneish + Novy-Marx)
-- 부도 위험 결합 → `recipes.credit.distressFilter`
+- 부도 위험 결합 → `recipes.fundamental.credit.distressFilter`
 - 산업 횡단 → `engines.scan` direct (sector breakdown)
 
 재호출 트리거: "전종목 공시 위험 횡단", "정정 빈도 상위 종목", "공시 위험 + 본문 검증 결합".

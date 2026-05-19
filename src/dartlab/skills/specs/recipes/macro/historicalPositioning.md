@@ -117,7 +117,7 @@ emit_result(
 
 ## 연계 절차
 
-1. 위기 유사성이 높으면 `recipes.credit.cycleStressMap`.
+1. 위기 유사성이 높으면 `recipes.fundamental.credit.cycleStressMap`.
 2. scenario 손실 분포가 필요하면 `recipes.macro.tailRiskScenarioScan`.
 3. 한국 시장 적용이 핵심이면 `recipes.macro.koreaMacroStressMap`.
 

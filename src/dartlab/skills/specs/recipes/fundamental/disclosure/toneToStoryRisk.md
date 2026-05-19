@@ -158,5 +158,5 @@ emit_result(
 
 1. 본 recipe → narrative risk score + (trigger 시) story risk block.
 2. trigger = True → 운영자 review → 기존 story.risk 섹션에 markdown inject (수동).
-3. 동시 다발 종목 → `recipes.credit.distressCandidateScreen` 결과와 교집합 → 강한 사전 alert.
+3. 동시 다발 종목 → `recipes.fundamental.credit.distressCandidateScreen` 결과와 교집합 → 강한 사전 alert.
 4. **storyboard 신설 우회** — 새 ReportType 추가 없이도 risk 분석 풍성도 증가.

@@ -2462,7 +2462,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.covenantStressTest",
+      "id": "recipes.fundamental.credit.covenantStressTest",
       "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
       "category": "recipes",
       "purpose": "차입금 covenant (DSCR ≥ 1.2 / Debt/Equity ≤ 2.0 등) 가 매크로 충격 (금리 path Monte Carlo) 에서 위반될 확률 추정. 비금융기업 quasi-CCAR. 단순 신용등급보다 covenant breach 가 더 정밀한 default 선행지표. analysis ↔ macro ↔ credit 격리 메우는 조합. 트리거 — 'covenant stress', 'DSCR 충격', '차입약정 위반'.",
@@ -2475,7 +2475,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.cycleStressMap",
+      "id": "recipes.fundamental.credit.cycleStressMap",
       "title": "신용사이클 스트레스 지도",
       "category": "recipes",
       "purpose": "BIS Credit-to-GDP gap, Minsky phase, Koo balance sheet recession, Fisher debt deflation, HY spread 등 macro.crisis의 신용 관련 출력을 묶어 신용사이클 위치와 tipping point를 읽는 절차. 트리거 — '신용사이클', 'credit stress', 'Minsky', '부채 디플레이션', '금융위기 신호'.",
@@ -2488,7 +2488,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.debtStructureAudit",
+      "id": "recipes.fundamental.credit.debtStructureAudit",
       "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
       "category": "recipes",
       "purpose": "회사 부채 구조를 만기 분포 + 이자보상배율 + peer 횡단 비교 + 신용 등급 4 축으로 종합 audit 하는 절차. 트리거 — '부채 구조 audit', '만기 분포', '이자보상배율', '신용 등급 횡단'.",
@@ -2501,7 +2501,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.deepDive",
+      "id": "recipes.fundamental.credit.deepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
       "category": "recipes",
       "purpose": "단일 회사의 신용 위험을 dCR 등급 + 재무 안정성/현금흐름 분해 + 매크로 금리 환경 3 단으로 종합 평가하는 절차. 트리거 — '신용 깊이 분석', '단일 회사 신용', '부도 위험 종합'.",
@@ -2514,7 +2514,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.distressCandidateScreen",
+      "id": "recipes.fundamental.credit.distressCandidateScreen",
       "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
       "category": "recipes",
       "purpose": "KOSPI200 universe 안에서 (1) dCR 등급이 전월 대비 1 notch 이상 하락 (credit migration) + (2) quant sentiment z-score ≤ -1.5 (시장 신호 약세) 동시 발현 종목 발굴. 단일 신호는 false positive 많지만 cross-source 합의는 강함. credit ↔ quant ↔ scan 격리 메우는 조합. 트리거 — 'distress candidate', '신용 sentiment 약세', 'credit migration screen'.",
@@ -2527,7 +2527,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.distressDual",
+      "id": "recipes.fundamental.credit.distressDual",
       "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
       "category": "recipes",
       "purpose": "단일 회사 부도 위험을 Altman Z″-Score (1968 비제조업 변형) + Ohlson O-Score (1980 logit) 2 학술 모델 동시 적용으로 합의 평가. analysis axis 와 credit 엔진 미사용, L1 raw (`c.show(\"BS\"|\"IS\"|\"CF\")`) 만 사용. 트리거 — 'Altman + Ohlson', '부도 위험 2 모델 합의', 'Z-Score O-Score'.",
@@ -2540,7 +2540,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.distressFilter",
+      "id": "recipes.fundamental.credit.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
       "category": "recipes",
       "purpose": "Altman Z-Score (1968) 5 변수 중 dartlab 으로 가능한 4 변수 + 음수 영업CF 게이트 를 결합해 부도 위험 종목을 횡단으로 식별하고 다른 스크리너 결과의 블랙리스트로 사용하는 회피 절차. 트리거 — '부도 위험 필터', 'Altman Z 횡단', '블랙리스트', '회피 절차'.",
@@ -2553,7 +2553,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.leverageSensitivity",
+      "id": "recipes.fundamental.credit.leverageSensitivity",
       "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
       "category": "recipes",
       "purpose": "매출 변동이 영업이익·순이익에 얼마나 증폭되는지 영업레버리지 (DOL) · 재무레버리지 (DFL) · 결합레버리지 (DCL) 로 정량화하고 매크로 충격 시나리오에서 본 회사가 얼마나 민감한지 평가하는 절차. L1 raw (`c.show(\"IS\")`) 시계열만 사용. 트리거 — '영업레버리지', '재무레버리지', 'DOL DFL DCL', '매크로 충격 민감도'.",
@@ -2566,7 +2566,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.macroStress",
+      "id": "recipes.fundamental.credit.macroStress",
       "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
       "category": "recipes",
       "purpose": "단일 회사의 신용등급 (dCR + 7 axis) 가 매크로 충격 (금리 +200bp / 환율 +10% / 영업이익 -20%) 에서 유지 가능한지, 어떤 axis 가 먼저 깨지는지 판정. credit ↔ macro 격리 메우는 조합 — 정상 보고 dCR 은 시점 1 회 산출이라 미래 시나리오에서 어떻게 변하는지 보여주지 못한다. 트리거 — '신용 매크로 스트레스', '금리 충격 dCR', 'credit stress'.",
@@ -2579,7 +2579,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.credit.quantConsensus",
+      "id": "recipes.fundamental.credit.quantConsensus",
       "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
       "category": "recipes",
       "purpose": "단일 회사 부도 위험을 dCR (정성·정량 종합) + Altman Z″ + Ohlson O + Beneish M 4-source 동시 평가. 단일 모델 false positive 줄이고 triple-agreement 시 강한 위험 신호. credit ↔ quant 격리 메우는 조합. 트리거 — '신용 퀀트 합의', '부도 4 모델', 'distress consensus'.",
@@ -9873,262 +9873,262 @@
       "kind": "source"
     },
     {
-      "src": "recipes.credit.covenantStressTest",
+      "src": "recipes.fundamental.credit.covenantStressTest",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.covenantStressTest",
+      "src": "recipes.fundamental.credit.covenantStressTest",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.covenantStressTest",
+      "src": "recipes.fundamental.credit.covenantStressTest",
       "dst": "engines.macro.scenario",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.covenantStressTest",
+      "src": "recipes.fundamental.credit.covenantStressTest",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.cycleStressMap",
+      "src": "recipes.fundamental.credit.cycleStressMap",
       "dst": "engines.macro.crisis",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.cycleStressMap",
+      "src": "recipes.fundamental.credit.cycleStressMap",
       "dst": "engines.macro.liquidity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.cycleStressMap",
+      "src": "recipes.fundamental.credit.cycleStressMap",
       "dst": "engines.macro.rates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.cycleStressMap",
+      "src": "recipes.fundamental.credit.cycleStressMap",
       "dst": "engines.macro.summary",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.cycleStressMap",
+      "src": "recipes.fundamental.credit.cycleStressMap",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.debtStructureAudit",
+      "src": "recipes.fundamental.credit.debtStructureAudit",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.debtStructureAudit",
+      "src": "recipes.fundamental.credit.debtStructureAudit",
       "dst": "engines.scan.debt",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.debtStructureAudit",
+      "src": "recipes.fundamental.credit.debtStructureAudit",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.debtStructureAudit",
+      "src": "recipes.fundamental.credit.debtStructureAudit",
       "dst": "engines.credit.creditRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.deepDive",
+      "src": "recipes.fundamental.credit.deepDive",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.deepDive",
+      "src": "recipes.fundamental.credit.deepDive",
       "dst": "engines.credit.creditRisk",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.deepDive",
+      "src": "recipes.fundamental.credit.deepDive",
       "dst": "engines.analysis.stability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.deepDive",
+      "src": "recipes.fundamental.credit.deepDive",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.deepDive",
+      "src": "recipes.fundamental.credit.deepDive",
       "dst": "engines.macro.rates",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressCandidateScreen",
+      "src": "recipes.fundamental.credit.distressCandidateScreen",
       "dst": "engines.scan.profitability",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressCandidateScreen",
+      "src": "recipes.fundamental.credit.distressCandidateScreen",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressCandidateScreen",
+      "src": "recipes.fundamental.credit.distressCandidateScreen",
       "dst": "engines.quant.sentiment",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressCandidateScreen",
-      "dst": "recipes.credit.quantConsensus",
+      "src": "recipes.fundamental.credit.distressCandidateScreen",
+      "dst": "recipes.fundamental.credit.quantConsensus",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressDual",
+      "src": "recipes.fundamental.credit.distressDual",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressDual",
+      "src": "recipes.fundamental.credit.distressDual",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressDual",
-      "dst": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressDual",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressDual",
+      "src": "recipes.fundamental.credit.distressDual",
       "dst": "recipes.fundamental.quality.earningsQualityTriad",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressDual",
-      "dst": "recipes.credit.leverageSensitivity",
+      "src": "recipes.fundamental.credit.distressDual",
+      "dst": "recipes.fundamental.credit.leverageSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressDual",
+      "src": "recipes.fundamental.credit.distressDual",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "engines.scan",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "engines.scan.screen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "engines.scan.account",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "recipes.valuation.qualityValueScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "recipes.valuation.garpScreen",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "recipes.valuation.grahamDeepValue",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.distressFilter",
       "dst": "engines.analysis.cashflow",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.leverageSensitivity",
+      "src": "recipes.fundamental.credit.leverageSensitivity",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.leverageSensitivity",
+      "src": "recipes.fundamental.credit.leverageSensitivity",
       "dst": "engines.gather",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.leverageSensitivity",
+      "src": "recipes.fundamental.credit.leverageSensitivity",
       "dst": "recipes.fundamental.quality.dupontDriver",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.leverageSensitivity",
-      "dst": "recipes.credit.distressFilter",
+      "src": "recipes.fundamental.credit.leverageSensitivity",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.leverageSensitivity",
-      "dst": "recipes.credit.distressDual",
+      "src": "recipes.fundamental.credit.leverageSensitivity",
+      "dst": "recipes.fundamental.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.macroStress",
+      "src": "recipes.fundamental.credit.macroStress",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.macroStress",
+      "src": "recipes.fundamental.credit.macroStress",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.macroStress",
+      "src": "recipes.fundamental.credit.macroStress",
       "dst": "engines.macro",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.macroStress",
+      "src": "recipes.fundamental.credit.macroStress",
       "dst": "engines.analysis.macroSensitivity",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.macroStress",
+      "src": "recipes.fundamental.credit.macroStress",
       "dst": "engines.analysis.financing",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.quantConsensus",
+      "src": "recipes.fundamental.credit.quantConsensus",
       "dst": "engines.company",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.quantConsensus",
+      "src": "recipes.fundamental.credit.quantConsensus",
       "dst": "engines.credit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.quantConsensus",
-      "dst": "recipes.credit.distressDual",
+      "src": "recipes.fundamental.credit.quantConsensus",
+      "dst": "recipes.fundamental.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.quantConsensus",
+      "src": "recipes.fundamental.credit.quantConsensus",
       "dst": "engines.quant.altman",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.quantConsensus",
+      "src": "recipes.fundamental.credit.quantConsensus",
       "dst": "engines.quant.beneish",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.credit.quantConsensus",
+      "src": "recipes.fundamental.credit.quantConsensus",
       "dst": "engines.quant.piotroski",
       "kind": "linkedRecipe"
     },
@@ -11934,7 +11934,7 @@
     },
     {
       "src": "recipes.macro.stressMatrixChart",
-      "dst": "recipes.credit.cycleStressMap",
+      "dst": "recipes.fundamental.credit.cycleStressMap",
       "kind": "linkedRecipe"
     },
     {
@@ -12154,12 +12154,12 @@
     },
     {
       "src": "recipes.fundamental.quality.earningsQualityTriad",
-      "dst": "recipes.credit.distressFilter",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
       "src": "recipes.fundamental.quality.earningsQualityTriad",
-      "dst": "recipes.credit.distressDual",
+      "dst": "recipes.fundamental.credit.distressDual",
       "kind": "linkedRecipe"
     },
     {
@@ -12264,7 +12264,7 @@
     },
     {
       "src": "recipes.fundamental.quality.workingCapitalQuality",
-      "dst": "recipes.credit.distressFilter",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
@@ -12464,7 +12464,7 @@
     },
     {
       "src": "recipes.screen.compounderCandidates",
-      "dst": "recipes.credit.distressFilter",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
@@ -13174,7 +13174,7 @@
     },
     {
       "src": "recipes.valuation.garpScreen",
-      "dst": "recipes.credit.distressFilter",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
@@ -13214,7 +13214,7 @@
     },
     {
       "src": "recipes.valuation.grahamDeepValue",
-      "dst": "recipes.credit.distressFilter",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
@@ -13289,7 +13289,7 @@
     },
     {
       "src": "recipes.valuation.qualityValueScreen",
-      "dst": "recipes.credit.distressFilter",
+      "dst": "recipes.fundamental.credit.distressFilter",
       "kind": "linkedRecipe"
     },
     {
@@ -13578,7 +13578,7 @@
       "recipes.fundamental.governance.auditComposite"
     ],
     [
-      "recipes.credit.distressFilter",
+      "recipes.fundamental.credit.distressFilter",
       "recipes.fundamental.quality.piotroskiLite",
       "recipes.screen.compounderCandidates",
       "recipes.valuation.garpScreen",
@@ -13586,8 +13586,8 @@
       "recipes.valuation.qualityValueScreen"
     ],
     [
-      "recipes.credit.distressDual",
-      "recipes.credit.leverageSensitivity",
+      "recipes.fundamental.credit.distressDual",
+      "recipes.fundamental.credit.leverageSensitivity",
       "recipes.fundamental.quality.capitalAllocationScorecard",
       "recipes.fundamental.quality.dupontDriver",
       "recipes.fundamental.quality.earningsQualityTriad",
@@ -13665,11 +13665,11 @@
     "operation.refactorChecklist",
     "operation.skillMarket",
     "operation.stability",
-    "recipes.credit.covenantStressTest",
-    "recipes.credit.debtStructureAudit",
-    "recipes.credit.deepDive",
-    "recipes.credit.distressCandidateScreen",
-    "recipes.credit.macroStress",
+    "recipes.fundamental.credit.covenantStressTest",
+    "recipes.fundamental.credit.debtStructureAudit",
+    "recipes.fundamental.credit.deepDive",
+    "recipes.fundamental.credit.distressCandidateScreen",
+    "recipes.fundamental.credit.macroStress",
     "recipes.fundamental.disclosure.filingTextSignal",
     "recipes.fundamental.disclosure.insiderEarningsLeading",
     "recipes.fundamental.disclosure.insiderEventCheck",
@@ -13836,16 +13836,16 @@
     "operation.stability",
     "operation.testing",
     "operation.ui",
-    "recipes.credit.covenantStressTest",
-    "recipes.credit.cycleStressMap",
-    "recipes.credit.debtStructureAudit",
-    "recipes.credit.deepDive",
-    "recipes.credit.distressCandidateScreen",
-    "recipes.credit.distressDual",
-    "recipes.credit.distressFilter",
-    "recipes.credit.leverageSensitivity",
-    "recipes.credit.macroStress",
-    "recipes.credit.quantConsensus",
+    "recipes.fundamental.credit.covenantStressTest",
+    "recipes.fundamental.credit.cycleStressMap",
+    "recipes.fundamental.credit.debtStructureAudit",
+    "recipes.fundamental.credit.deepDive",
+    "recipes.fundamental.credit.distressCandidateScreen",
+    "recipes.fundamental.credit.distressDual",
+    "recipes.fundamental.credit.distressFilter",
+    "recipes.fundamental.credit.leverageSensitivity",
+    "recipes.fundamental.credit.macroStress",
+    "recipes.fundamental.credit.quantConsensus",
     "recipes.fundamental.disclosure.event",
     "recipes.fundamental.disclosure.filingTextSignal",
     "recipes.fundamental.disclosure.insiderEarningsLeading",

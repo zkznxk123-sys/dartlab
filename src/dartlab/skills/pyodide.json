@@ -1292,7 +1292,7 @@
       ]
     },
     {
-      "id": "recipes.credit.covenantStressTest",
+      "id": "recipes.fundamental.credit.covenantStressTest",
       "title": "차입약정 (covenant) 임박 종목 — 매크로 충격에서의 위반 확률",
       "category": "recipes",
       "status": "limited",
@@ -1301,7 +1301,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.credit.deepDive",
+      "id": "recipes.fundamental.credit.deepDive",
       "title": "신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)",
       "category": "recipes",
       "status": "limited",
@@ -1312,7 +1312,7 @@
       ]
     },
     {
-      "id": "recipes.credit.distressDual",
+      "id": "recipes.fundamental.credit.distressDual",
       "title": "부도 위험 2 모델 합의 (Altman Z″ + Ohlson O — L1 raw)",
       "category": "recipes",
       "status": "limited",
@@ -1323,7 +1323,7 @@
       ]
     },
     {
-      "id": "recipes.credit.macroStress",
+      "id": "recipes.fundamental.credit.macroStress",
       "title": "신용×매크로 스트레스 — 금리 +200bp 충격 시 dCR 등급 유지 가능성",
       "category": "recipes",
       "status": "limited",
@@ -1334,7 +1334,7 @@
       ]
     },
     {
-      "id": "recipes.credit.quantConsensus",
+      "id": "recipes.fundamental.credit.quantConsensus",
       "title": "신용 dCR × 퀀트 부도 모델 3-source 합의 위험 종목",
       "category": "recipes",
       "status": "limited",
@@ -1365,7 +1365,7 @@
       ]
     },
     {
-      "id": "recipes.credit.debtStructureAudit",
+      "id": "recipes.fundamental.credit.debtStructureAudit",
       "title": "부채 구조 audit (만기 + 이자보상 + peer 횡단)",
       "category": "recipes",
       "status": "limited",
@@ -1407,7 +1407,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.credit.distressCandidateScreen",
+      "id": "recipes.fundamental.credit.distressCandidateScreen",
       "title": "dCR 등급 전월비 하락 + 퀀트 sentiment 동시 약세 종목",
       "category": "recipes",
       "status": "limited",
@@ -1416,7 +1416,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.credit.distressFilter",
+      "id": "recipes.fundamental.credit.distressFilter",
       "title": "Altman-lite 부도 위험 회피 필터 (역방향 블랙리스트)",
       "category": "recipes",
       "status": "limited",
@@ -1637,7 +1637,7 @@
       ]
     },
     {
-      "id": "recipes.credit.leverageSensitivity",
+      "id": "recipes.fundamental.credit.leverageSensitivity",
       "title": "영업·재무 레버리지 민감도 (DOL/DFL/DCL — L1 raw)",
       "category": "recipes",
       "status": "limited",

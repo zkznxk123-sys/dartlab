@@ -93,8 +93,8 @@ def test_set_deprecated_writes_reason(tmp_path: Path, cli_module):
 
 def test_promote_rejects_when_scorecard_fails(tmp_path: Path, cli_module, monkeypatch):
     """scorecard.meetsThresholds=False 면 promote 거부 (return 1)."""
-    path = tmp_path / "credit" / "distressDual.md"
-    _writeRecipe(path, status="unverified", skill_id="recipes.credit.distressDual")
+    path = tmp_path / "fundamental" / "credit" / "distressDual.md"
+    _writeRecipe(path, status="unverified", skill_id="recipes.fundamental.credit.distressDual")
     # RECIPE_DIR 을 tmp 로 모킹 (cli_module 의 path resolver 가 본 디렉터리 사용).
     monkeypatch.setattr(cli_module, "RECIPE_DIR", tmp_path)
     monkeypatch.setattr(cli_module, "_recipeMeta", lambda sid: {"status": "unverified"})
@@ -102,7 +102,7 @@ def test_promote_rejects_when_scorecard_fails(tmp_path: Path, cli_module, monkey
     monkeypatch.setenv("DARTLAB_RECIPE_RUNS_DIR", str(tmp_path / "runs"))
 
     args = type("Args", (), {})()
-    args.skillId = "recipes.credit.distressDual"
+    args.skillId = "recipes.fundamental.credit.distressDual"
     args.toStatus = "verified"
     args.force = False
     rc = cli_module.cmdPromote(args)

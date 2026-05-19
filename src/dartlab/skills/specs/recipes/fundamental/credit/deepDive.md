@@ -1,5 +1,5 @@
 ---
-id: recipes.credit.deepDive
+id: recipes.fundamental.credit.deepDive
 title: 신용 위험 deep-dive (credit + 재무 안정성 + 매크로 금리)
 category: recipes
 kind: recipe
@@ -198,10 +198,10 @@ graph LR
 | 시장 금리 (국고 3Y) | (macro.rates) | +50bp | 주간 |
 
 연계 절차:
-- 매크로 금리 환경이 핵심이면 → `recipes.credit.macroStress`
-- 부채 covenant 검토면 → `recipes.credit.covenantStressTest`
-- 부채 만기·구조면 → `recipes.credit.debtStructureAudit`
-- 부실 위험 screening 면 → `recipes.credit.distressFilter`
+- 매크로 금리 환경이 핵심이면 → `recipes.fundamental.credit.macroStress`
+- 부채 covenant 검토면 → `recipes.fundamental.credit.covenantStressTest`
+- 부채 만기·구조면 → `recipes.fundamental.credit.debtStructureAudit`
+- 부실 위험 screening 면 → `recipes.fundamental.credit.distressFilter`
 
 재호출 트리거: "삼성전자 dCR + 안정성 + 매크로", "신한지주 신용 위험 종합", "부채 만기 분포 + ICR + 시장금리".
 
