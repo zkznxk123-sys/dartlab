@@ -283,7 +283,7 @@
         "이 회사의 주인은 누구이며 감시는 작동하는가"
       ],
       "nextSkills": [
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.governance",
         "engines.scan.insider",
         "engines.gather.ownership"
@@ -291,7 +291,7 @@
       "bodyPreview": "## 엔진 역할\n\nanalysis 엔진의 지배구조 축 응용 skill — 이 회사의 주인은 누구이며 감시는 작동하는가. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/analysis/financial/__init__.py`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\n# 1. 가이드 확인 (선택)\nc.analysis()\n\n# 2. 실제 axis 실행\nresult = c.analysis(\"governance\", \"지배구조\")\n\n# 3. 모듈 함수형 (대안)\nresult = dartlab.analysis(\"governance\", \"지배구조\", company=c)\n```\n\n## 호출 동작\n\nCompany 의 finance/disclosure/market snapshot 을 읽어 지배구조 축 계산 항목을 산출한다. 결손 값은 0 으로 채우지 않고 `flags`, `assumptions`, `dataAsOf`, 빈 history, null 로 표현한다. 자세한 동작은 base SKILL `engines.analysis` 의 `## 호출 동작` 참조.\n\n## 대표"
     },
     {
-      "id": "recipes.governance.auditComposite",
+      "id": "recipes.fundamental.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
       "category": "recipes",
       "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.",
@@ -1644,7 +1644,7 @@
         "engines.quant",
         "engines.quant.accruals",
         "engines.analysis.earningsQuality",
-        "recipes.governance.auditComposite"
+        "recipes.fundamental.governance.auditComposite"
       ],
       "bodyPreview": "## 엔진 역할\n\nquant 엔진의 Beneish M 축 응용 skill — Beneish 1999 — 8변수 이익조작 감지, red flag (M > -1.78) 비율 + topFlag. fundamental 그룹. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/quant/__init__.py`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 문자열 호출 (횡단면 / 시장 레벨 — 종목 불필요)\nresult = dartlab.quant(\"beneish\")\n\n# 2. accessor 호출 (동등)\nresult = dartlab.quant.beneish()\n```\n\n## 호출 동작\n\n전종목 universe 의 가격 · 재무 · 시계열 snapshot 을 읽어 Beneish M 축 계산을 수행한다. Beneish 1999 — 8변수 이익조작 감지, red flag (M > -1.78) 비율 + topFlag. 결손 / 비교 불가 케이스는 결과 dict 또는 DataFrame 의 `flags` / null 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.quant` +"
     },
@@ -1867,7 +1867,7 @@
       "nextSkills": [
         "engines.quant",
         "engines.analysis.governance",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.governance"
       ],
       "bodyPreview": "## 엔진 역할\n\nquant 엔진의 거버넌스퀀트 축 응용 skill — 지배구조 품질 정량화 (사외이사비율, 감사의견, 보수). text 그룹. SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/quant/__init__.py`).\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 문자열 호출\nresult = dartlab.quant(\"governanceQuant\", \"005930\")\n\n# 2. accessor 호출 (동등)\nresult = dartlab.quant.governanceQuant(\"005930\")\n```\n\n## 호출 동작\n\n종목 005930 의 가격 · 재무 · 시계열 snapshot 을 읽어 거버넌스퀀트 축 계산을 수행한다. 지배구조 품질 정량화 (사외이사비율, 감사의견, 보수). 결손 / 비교 불가 케이스는 결과 dict 또는 DataFrame 의 `flags` / null 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.quant` + `_AXIS_REGISTRY['governanceQuant'].fn` 함수 docstring 참조.\n\n## 대표 반환 "
@@ -2995,7 +2995,7 @@
       "bodyPreview": "## 학술 근거\n\n3 학술 framework 동시 적용 — 각 모델이 잡지 못하는 신호를 다른 모델이 보완.\n\n### 1. Sloan Accruals (1996)\nRichard Sloan, *\"Do Stock Prices Fully Reflect Information in Accruals and Cash Flows about Future Earnings?\"* (The Accounting Review):\n\n- ACC = (NI − CFO) / Average Total Assets\n- 발생액 (accruals) 이 큰 회사 → 미래 abnormal return 음(−). 1962-1991 백테스트 연 10%p 차이.\n- 핵심 — 회계상 이익 ≠ 현금 이익. 차이가 클수록 미래 회귀 가능성.\n\n### 2. Beneish M-Score (1999)\nDaniel Beneish, *\"The Detection of Earnings Manipulation\"* (Financial Analysts Journal):\n\n- M = −4.84 + 0.92·DSRI + 0.528·GMI + 0.404·AQI + 0.892·SGI + 0.115·DEPI − 0.172·SGAI − 0."
     },
     {
-      "id": "recipes.governance.esgGovernanceLight",
+      "id": "recipes.fundamental.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
       "category": "recipes",
       "purpose": "정식 ESG 데이터 부재 시 dartlab 보유 신호 (지배구조 + 감사 + 종업원 + 자본배분 일관성) 만으로 가벼운 ESG audit 을 만드는 절차. 트리거 — 'ESG light', '거버넌스 audit', 'ESG 데이터 부재 시'.",
@@ -3010,7 +3010,7 @@
       "nextSkills": [
         "engines.company.researchStarter",
         "engines.analysis.governance",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.workforce",
         "engines.analysis.financialConsistency"
       ],
@@ -3099,7 +3099,7 @@
       "bodyPreview": "## 학술 근거\n\nPeter Lynch, *One Up On Wall Street* (1989): GARP (Growth at Reasonable Price) — 가치투자 한정 저PER + 성장투자 한정 고성장 의 절충.\n\n- **PEG ratio** = PER / 이익성장률 (%). PEG ≤ 1 = 시장이 성장률을 미반영.\n- 핵심 발견: PER 단독 또는 성장률 단독 보다 두 결합이 sharpe ratio 우월.\n- Lynch Magellan Fund (1977-1990): 연 29% 수익률 — 본 framework 의 실증.\n\n학술적 후속: Easton (2004) — implied growth rate 와 PER 결합. Bradshaw (2004) — 애널리스트 LTG (long-term growth) + PER 결합 모델 우월성.\n\ndartlab 한계: EPS 직접 컬럼 X → `netProfitGrowth` 로 근사. EPS 성장률 ≈ 순이익 성장률 (자사주 매입·신주발행 비중 작은 시기) 이므로 합리적 근사.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\nimport polars as pl\n\n# 1) 성장 게이트 — ne"
     },
     {
-      "id": "recipes.governance.audit",
+      "id": "recipes.fundamental.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "recipes",
       "purpose": "회사의 지배구조 위험을 이사회 독립성 + 지배력 집중 + 감사 신호 + 분식 가능성 4 축으로 종합 점검하는 절차. 트리거 — '지배구조 위험', '이사회 독립성', '감사 신호', '분식 가능성'.",
@@ -3114,7 +3114,7 @@
       ],
       "nextSkills": [
         "engines.company.researchStarter",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.analysis.governance",
         "engines.scan.governance",
         "engines.scan.audit"
@@ -3122,7 +3122,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\ngov = c.analysis(\"financial\", \"지배구조\")\ngov_audit = c.analysis(\"financial\", \"지배구조감사\")\ngov_scan = dartlab.scan(\"governance\")\naudit_scan = dartlab.scan(\"audit\")\nmajor = c.show(\"majorHolder\")\n```\n\n## 호출 동작\n\n지배구조 종합 → 감사 신호 (분식 회계 가능성) → peer 횡단 거버넌스 → 주요주주 / 최대주주 raw 데이터.\n\n1. 회사 진입\n2. analysis(\"financial\", \"지배구조\") — 이사회 독립성 + 지배력 집중 점수\n3. analysis(\"financial\", \"지배구조감사\") — 감사 신호 + 분식 가능성\n4. scan(\"governance\") — peer 횡단 거버넌스 점수\n5. scan(\"audit\") — peer 횡단 감사 위험\n6. show(\"majorHolder\") — 최대주주 / 주요주주 raw\n\n## 대표 반환 형태\n\n- `tableRef` 4+ ("
     },
     {
-      "id": "recipes.governance.auditNetwork",
+      "id": "recipes.fundamental.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
       "category": "recipes",
       "purpose": "KOSPI universe 안에서 (1) governance composite (이사회 독립성·특수관계자) + (2) network density (계열사·affiliate ratio) + (3) audit-change (최근 2 년 감사인 변경) 3 신호 동시 적신호 종목 발굴. 한국 chaebol 구조 특유의 transfer-pricing / 일감몰아주기 위험을 단일 신호로 못 잡는 한계 보완. analysis ↔ scan 격리 메우는 cross-sectional 조합. 트리거 — 'governance audit network', 'chaebol risk screen'.",
@@ -3738,7 +3738,7 @@
       "bodyPreview": "## 공개 호출 방식\n\n```python\nimport dartlab\n\nc = dartlab.Company(\"005930\")\n\nvaluation = c.analysis(\"valuation\", \"가치평가\")\nband = c.analysis(\"financial\", \"밸류에이션밴드\")\npeer_band = dartlab.scan(\"valuation\")\nqval = c.quant(\"가치\")\n```\n\n## 호출 동작\n\nvaluation 종합 (DCF·DDM·상대가치·RIM 4 방법론) → valuation band (역사 평균 ±σ 대비 현재 위치) → peer 횡단 비교 → 기술적 가치 신호.\n\n1. 회사 진입\n2. analysis(\"valuation\", \"가치평가\") — 4 방법론 종합 적정주가 범위\n3. analysis(\"financial\", \"밸류에이션밴드\") — 역사 평균 대비 위치\n4. scan(\"valuation\") — peer 횡단 valuation\n5. quant(\"가치\") — 기술적 가치 신호\n\n## 대표 반환 형태\n\n- `tableRef` 3+ (valuation 4 방법론 + band 시계열 + peer scan)\n- `valueRef` 5+ (D"
     },
     {
-      "id": "recipes.governance.workforceAndCapital",
+      "id": "recipes.fundamental.governance.workforceAndCapital",
       "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
       "category": "recipes",
       "purpose": "회사의 인력 (직원수·인건비·생산성) 과 자본 (배당·자사주·신주) 사이클을 결합해 자원 배분 전략을 분석하는 절차. 트리거 — '인력 자본', '종업원 신호', 'workforce'.",
@@ -3839,7 +3839,7 @@
         "감사의견, 감사인변경, 특기사항, 감사독립성비율"
       ],
       "nextSkills": [
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.disclosureRisk",
         "engines.analysis.earningsQuality"
       ],
@@ -3926,7 +3926,7 @@
       ],
       "nextSkills": [
         "engines.analysis.disclosureChange",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "recipes.fundamental.disclosure.event"
       ],
       "bodyPreview": "## 엔진 역할\n\nscan 엔진의 공시리스크 축 응용 skill — 공시 변화 기반 선행 리스크 (우발부채, 감사변경, 계열변화, 사업전환). SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `scanDisclosureRisk()` 함수 docstring.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 문자열 호출\ndf = dartlab.scan(\"disclosureRisk\")\n\n# 2. accessor (동등)\ndf = dartlab.scan.disclosureRisk()\n```\n\n## 호출 동작\n\n전종목 finance / disclosure / market universe 를 읽어 공시리스크 축 지표를 산출한다. 공시 변화 기반 선행 리스크 (우발부채, 감사변경, 계열변화, 사업전환). 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `scanDisclosureRisk()` docstring 참조.\n\n## 대표 반환 형태\n\nDataFrame 반환"
@@ -3999,7 +3999,7 @@
       ],
       "nextSkills": [
         "engines.analysis.governance",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.insider"
       ],
       "bodyPreview": "## 엔진 역할\n\nscan 엔진의 거버넌스 축 응용 skill — 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산). SSOT 는 `_AXIS_REGISTRY` (`src/dartlab/scan/__init__.py`) + `scanGovernance()` 함수 docstring.\n\n## 공개 호출 방식\n\n```python\nimport dartlab\n\n# 1. 문자열 호출\ndf = dartlab.scan(\"governance\")\n\n# 2. accessor (동등)\ndf = dartlab.scan.governance()\n```\n\n## 호출 동작\n\n전종목 finance / disclosure / market universe 를 읽어 거버넌스 축 지표를 산출한다. 지배구조 (지분율, 사외이사, 보수비율, 감사의견, 소액주주 분산). 결손 종목은 결과 DataFrame 의 null 또는 별도 flag 로 표현하며 0 으로 채우지 않는다. 자세한 동작은 base SKILL `engines.scan` + `scanGovernance()` docstring 참조.\n\n## 대표 반환 형태\n\nDataFrame 반환. 공통 column:\n\n- `stock"

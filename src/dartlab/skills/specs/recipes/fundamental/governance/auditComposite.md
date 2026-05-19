@@ -1,5 +1,5 @@
 ---
-id: recipes.governance.auditComposite
+id: recipes.fundamental.governance.auditComposite
 title: 지배구조와 감사 리스크 점검
 kind: recipe
 scope: builtin
@@ -40,7 +40,7 @@ recipeSteps:
   - skillId: engines.analysis
     note: 공시 변경 추적 — 회계 기준 / 정책 변경 신호.
 sourceRefs:
-  - dartlab://skills/recipes.governance.auditComposite
+  - dartlab://skills/recipes.fundamental.governance.auditComposite
 requiredEvidence:
   - target
   - period

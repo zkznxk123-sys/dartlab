@@ -1,5 +1,5 @@
 ---
-id: recipes.governance.esgGovernanceLight
+id: recipes.fundamental.governance.esgGovernanceLight
 title: ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)
 category: recipes
 kind: recipe
@@ -16,7 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.company
   - engines.analysis
-  - recipes.governance.auditComposite
+  - recipes.fundamental.governance.auditComposite
   - engines.scan
 toolRefs:
   - EngineCall
@@ -98,7 +98,7 @@ consistency = c.analysis("financial", "재무정합성")
 
 1. engines.company — 회사 진입
 2. engines.analysis — G 종합
-3. recipes.governance.auditComposite — 감사 신호
+3. recipes.fundamental.governance.auditComposite — 감사 신호
 4. engines.scan — S 보조 (인력)
 5. engines.analysis — 일관성
 

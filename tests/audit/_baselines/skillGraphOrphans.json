@@ -231,7 +231,7 @@
         "title": "이익 quality 점검 (발생주의 + 현금흐름 + 재무정합성)"
       },
       {
-        "id": "recipes.governance.esgGovernanceLight",
+        "id": "recipes.fundamental.governance.esgGovernanceLight",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
@@ -259,14 +259,14 @@
         "title": "수급·패턴 결합 (외인/기관 flow + 차트 패턴 + 모멘텀)"
       },
       {
-        "id": "recipes.governance.audit",
+        "id": "recipes.fundamental.governance.audit",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 5,
         "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)"
       },
       {
-        "id": "recipes.governance.auditNetwork",
+        "id": "recipes.fundamental.governance.auditNetwork",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 3,
@@ -427,7 +427,7 @@
         "title": "valuation band 추적 (역사 평균 ±σ vs 현재가)"
       },
       {
-        "id": "recipes.governance.workforceAndCapital",
+        "id": "recipes.fundamental.governance.workforceAndCapital",
         "category": "engines",
         "inDegree": 0,
         "outDegree": 4,

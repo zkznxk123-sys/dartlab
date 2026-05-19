@@ -1392,7 +1392,7 @@
         "engines.data.foundation"
       ],
       "linkedSkills": [
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.governance",
         "engines.scan.insider",
         "engines.gather.ownership"
@@ -1470,7 +1470,7 @@
       }
     },
     {
-      "id": "recipes.governance.auditComposite",
+      "id": "recipes.fundamental.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -1522,7 +1522,7 @@
       "succeededBy": [],
       "deprecatedBy": [],
       "sourceRefs": [
-        "dartlab://skills/recipes.governance.auditComposite"
+        "dartlab://skills/recipes.fundamental.governance.auditComposite"
       ],
       "procedure": [
         "단일 신호 (감사의견 한 줄 / 일회성 정정공시) 로 분식 단정 금지. 4 축 신호가 일관될 때만 risk claim.",
@@ -9132,7 +9132,7 @@
         "engines.quant",
         "engines.quant.accruals",
         "engines.analysis.earningsQuality",
-        "recipes.governance.auditComposite"
+        "recipes.fundamental.governance.auditComposite"
       ],
       "requires": [],
       "alternatives": [],
@@ -10440,7 +10440,7 @@
       "linkedSkills": [
         "engines.quant",
         "engines.analysis.governance",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.governance"
       ],
       "requires": [],
@@ -16615,7 +16615,7 @@
       ]
     },
     {
-      "id": "recipes.governance.esgGovernanceLight",
+      "id": "recipes.fundamental.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -16643,7 +16643,7 @@
       "linkedSkills": [
         "engines.company.researchStarter",
         "engines.analysis.governance",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.workforce",
         "engines.analysis.financialConsistency"
       ],
@@ -16670,7 +16670,7 @@
           "note": "G 종합"
         },
         {
-          "skillId": "recipes.governance.auditComposite",
+          "skillId": "recipes.fundamental.governance.auditComposite",
           "note": "감사 신호"
         },
         {
@@ -17154,7 +17154,7 @@
       ]
     },
     {
-      "id": "recipes.governance.audit",
+      "id": "recipes.fundamental.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -17182,7 +17182,7 @@
       "knowledgeRefs": [],
       "linkedSkills": [
         "engines.company.researchStarter",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.analysis.governance",
         "engines.scan.governance",
         "engines.scan.audit"
@@ -17210,7 +17210,7 @@
           "note": "지배구조 종합"
         },
         {
-          "skillId": "recipes.governance.auditComposite",
+          "skillId": "recipes.fundamental.governance.auditComposite",
           "note": "감사 신호 + 분식 가능성"
         },
         {
@@ -17272,7 +17272,7 @@
       ]
     },
     {
-      "id": "recipes.governance.auditNetwork",
+      "id": "recipes.fundamental.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20382,7 +20382,7 @@
       ]
     },
     {
-      "id": "recipes.governance.workforceAndCapital",
+      "id": "recipes.fundamental.governance.workforceAndCapital",
       "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
       "category": "recipes",
       "categoryTitle": "Recipes",
@@ -20861,7 +20861,7 @@
         "engines.analysis"
       ],
       "linkedSkills": [
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.disclosureRisk",
         "engines.analysis.earningsQuality"
       ],
@@ -21412,7 +21412,7 @@
       ],
       "linkedSkills": [
         "engines.analysis.disclosureChange",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "recipes.fundamental.disclosure.event"
       ],
       "requires": [],
@@ -21830,7 +21830,7 @@
       ],
       "linkedSkills": [
         "engines.analysis.governance",
-        "recipes.governance.auditComposite",
+        "recipes.fundamental.governance.auditComposite",
         "engines.scan.insider"
       ],
       "requires": [],

@@ -2761,7 +2761,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.governance.audit",
+      "id": "recipes.fundamental.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "recipes",
       "purpose": "회사의 지배구조 위험을 이사회 독립성 + 지배력 집중 + 감사 신호 + 분식 가능성 4 축으로 종합 점검하는 절차. 트리거 — '지배구조 위험', '이사회 독립성', '감사 신호', '분식 가능성'.",
@@ -2774,7 +2774,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.governance.auditComposite",
+      "id": "recipes.fundamental.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
       "category": "recipes",
       "purpose": "감사의견, 내부통제, 특수관계자, 지배구조 신호를 지배구조 + 이익품질 + 재무정합성 + 공시변화 4 축의 결합으로 점검하는 다단 응용.",
@@ -2787,7 +2787,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.governance.auditNetwork",
+      "id": "recipes.fundamental.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
       "category": "recipes",
       "purpose": "KOSPI universe 안에서 (1) governance composite (이사회 독립성·특수관계자) + (2) network density (계열사·affiliate ratio) + (3) audit-change (최근 2 년 감사인 변경) 3 신호 동시 적신호 종목 발굴. 한국 chaebol 구조 특유의 transfer-pricing / 일감몰아주기 위험을 단일 신호로 못 잡는 한계 보완. analysis ↔ scan 격리 메우는 cross-sectional 조합. 트리거 — 'governance audit network', 'chaebol risk screen'.",
@@ -2800,7 +2800,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.governance.esgGovernanceLight",
+      "id": "recipes.fundamental.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
       "category": "recipes",
       "purpose": "정식 ESG 데이터 부재 시 dartlab 보유 신호 (지배구조 + 감사 + 종업원 + 자본배분 일관성) 만으로 가벼운 ESG audit 을 만드는 절차. 트리거 — 'ESG light', '거버넌스 audit', 'ESG 데이터 부재 시'.",
@@ -2813,7 +2813,7 @@
       "audiences": []
     },
     {
-      "id": "recipes.governance.workforceAndCapital",
+      "id": "recipes.fundamental.governance.workforceAndCapital",
       "title": "인력·자본 stewardship",
       "category": "recipes",
       "purpose": "회사의 인력 생산성, 인건비 부담, 자본 환원·희석 신호를 결합해 경영진의 자원 배분 품질을 판단하는 깊이형 절차. 트리거 — '인력 자본', '종업원 신호', 'workforce', 'stewardship'.",
@@ -4849,7 +4849,7 @@
     },
     {
       "src": "engines.analysis.governance",
-      "dst": "recipes.governance.auditComposite",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -6874,7 +6874,7 @@
     },
     {
       "src": "engines.quant.beneish",
-      "dst": "recipes.governance.auditComposite",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -7264,7 +7264,7 @@
     },
     {
       "src": "engines.quant.governanceQuant",
-      "dst": "recipes.governance.auditComposite",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -8479,7 +8479,7 @@
     },
     {
       "src": "engines.scan.audit",
-      "dst": "recipes.governance.auditComposite",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -8614,7 +8614,7 @@
     },
     {
       "src": "engines.scan.disclosureRisk",
-      "dst": "recipes.governance.auditComposite",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -8739,7 +8739,7 @@
     },
     {
       "src": "engines.scan.governance",
-      "dst": "recipes.governance.auditComposite",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
@@ -10403,153 +10403,153 @@
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.audit",
+      "src": "recipes.fundamental.governance.audit",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.audit",
-      "dst": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.audit",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.audit",
+      "src": "recipes.fundamental.governance.audit",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.audit",
+      "src": "recipes.fundamental.governance.audit",
       "dst": "engines.scan.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.audit",
+      "src": "recipes.fundamental.governance.audit",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.earningsQuality",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.financialConsistency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.disclosureChange",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.governance",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.earningsQuality",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.financialConsistency",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.auditComposite",
       "dst": "engines.analysis.disclosureChange",
       "kind": "knowledge"
     },
     {
-      "src": "recipes.governance.auditNetwork",
+      "src": "recipes.fundamental.governance.auditNetwork",
       "dst": "engines.scan.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditNetwork",
+      "src": "recipes.fundamental.governance.auditNetwork",
       "dst": "engines.scan.network",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.auditNetwork",
+      "src": "recipes.fundamental.governance.auditNetwork",
       "dst": "engines.scan.audit",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.esgGovernanceLight",
+      "src": "recipes.fundamental.governance.esgGovernanceLight",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.esgGovernanceLight",
+      "src": "recipes.fundamental.governance.esgGovernanceLight",
       "dst": "engines.analysis.governance",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.esgGovernanceLight",
-      "dst": "recipes.governance.auditComposite",
+      "src": "recipes.fundamental.governance.esgGovernanceLight",
+      "dst": "recipes.fundamental.governance.auditComposite",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.esgGovernanceLight",
+      "src": "recipes.fundamental.governance.esgGovernanceLight",
       "dst": "engines.scan.workforce",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.esgGovernanceLight",
+      "src": "recipes.fundamental.governance.esgGovernanceLight",
       "dst": "engines.analysis.financialConsistency",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
       "dst": "engines.company.researchStarter",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
       "dst": "engines.scan.workforce",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
       "dst": "engines.scan.capital",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
       "dst": "engines.analysis.capitalAllocation",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
       "dst": "recipes.quality.capitalAllocationScorecard",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
       "dst": "recipes.fundamental.dividend.capitalReturn",
       "kind": "linkedRecipe"
     },
     {
-      "src": "recipes.governance.workforceAndCapital",
-      "dst": "recipes.governance.audit",
+      "src": "recipes.fundamental.governance.workforceAndCapital",
+      "dst": "recipes.fundamental.governance.audit",
       "kind": "linkedRecipe"
     },
     {
@@ -13575,7 +13575,7 @@
       "engines.viz.scenarioVisuals",
       "recipes.fundamental.disclosure.event",
       "recipes.fundamental.dividend.capitalReturn",
-      "recipes.governance.auditComposite"
+      "recipes.fundamental.governance.auditComposite"
     ],
     [
       "recipes.credit.distressFilter",
@@ -13681,9 +13681,9 @@
     "recipes.etc.flowAndPattern",
     "recipes.etc.quantTechnicalReview",
     "recipes.etc.usageAndApi",
-    "recipes.governance.auditNetwork",
-    "recipes.governance.esgGovernanceLight",
-    "recipes.governance.workforceAndCapital",
+    "recipes.fundamental.governance.auditNetwork",
+    "recipes.fundamental.governance.esgGovernanceLight",
+    "recipes.fundamental.governance.workforceAndCapital",
     "recipes.macro.betaPeerScreen",
     "recipes.macro.companyMacroPathProjection",
     "recipes.macro.globalLiquidityPulse",
@@ -13858,10 +13858,10 @@
     "recipes.etc.flowAndPattern",
     "recipes.etc.quantTechnicalReview",
     "recipes.etc.usageAndApi",
-    "recipes.governance.audit",
-    "recipes.governance.auditNetwork",
-    "recipes.governance.esgGovernanceLight",
-    "recipes.governance.workforceAndCapital",
+    "recipes.fundamental.governance.audit",
+    "recipes.fundamental.governance.auditNetwork",
+    "recipes.fundamental.governance.esgGovernanceLight",
+    "recipes.fundamental.governance.workforceAndCapital",
     "recipes.macro.betaPeerScreen",
     "recipes.macro.companyMacroPathProjection",
     "recipes.macro.dollarFundingStress",

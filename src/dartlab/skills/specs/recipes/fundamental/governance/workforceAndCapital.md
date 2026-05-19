@@ -1,5 +1,5 @@
 ---
-id: recipes.governance.workforceAndCapital
+id: recipes.fundamental.governance.workforceAndCapital
 title: 인력·자본 stewardship
 category: recipes
 kind: recipe
@@ -21,7 +21,7 @@ linkedSkills:
   - engines.analysis
   - recipes.quality.capitalAllocationScorecard
   - recipes.fundamental.dividend.capitalReturn
-  - recipes.governance.audit
+  - recipes.fundamental.governance.audit
 toolRefs:
   - EngineCall
   - RunPython
@@ -258,7 +258,7 @@ graph LR
 4. engines.analysis — 자본배분 우선순위와 재투자/환원 균형을 확인한다.
 5. recipes.quality.capitalAllocationScorecard — FCF 5 사용처와 ROIIC/SGR까지 필요할 때 확장한다.
 6. recipes.fundamental.dividend.capitalReturn — 배당·자사주 정책이 핵심 질문이면 넘긴다.
-7. recipes.governance.audit — 인력/자본 신호가 지배구조 리스크와 연결될 때 넘긴다.
+7. recipes.fundamental.governance.audit — 인력/자본 신호가 지배구조 리스크와 연결될 때 넘긴다.
 
 ## 기본 검증
 

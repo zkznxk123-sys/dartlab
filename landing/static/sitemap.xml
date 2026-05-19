@@ -76,7 +76,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.auditComposite</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.governance.auditComposite</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -766,7 +766,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.esgGovernanceLight</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.governance.esgGovernanceLight</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -791,12 +791,12 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.audit</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.governance.audit</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.auditNetwork</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.governance.auditNetwork</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -941,7 +941,7 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://eddmpython.github.io/dartlab/skills/recipes.governance.workforceAndCapital</loc>
+    <loc>https://eddmpython.github.io/dartlab/skills/recipes.fundamental.governance.workforceAndCapital</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>

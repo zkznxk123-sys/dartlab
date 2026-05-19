@@ -246,7 +246,7 @@ intentBoosts:
       - dividend
       - buyback
     boost: 10.0
-  - skillIds: ["recipes.governance.auditComposite"]
+  - skillIds: ["recipes.fundamental.governance.auditComposite"]
     terms:
       - 지배구조
       - 감사

@@ -1,5 +1,5 @@
 ---
-id: recipes.governance.auditNetwork
+id: recipes.fundamental.governance.auditNetwork
 title: 거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)
 category: recipes
 kind: recipe

@@ -1,5 +1,5 @@
 ---
-id: recipes.governance.audit
+id: recipes.fundamental.governance.audit
 title: 지배구조 audit (이사회 + 지분구조 + 감사 신호)
 category: recipes
 kind: recipe
@@ -16,7 +16,7 @@ whenToUse:
   - 거버넌스 분석
 linkedSkills:
   - engines.company
-  - recipes.governance.auditComposite
+  - recipes.fundamental.governance.auditComposite
   - engines.analysis
   - engines.scan
 toolRefs:
@@ -162,8 +162,8 @@ graph LR
 ## 연계 절차
 - 분식 가능성 정량 → `recipes.quality.earningsQualityTriad` (3 모델 합의)
 - 감사 위험 횡단 → `engines.scan`
-- 거버넌스 종합 → `recipes.governance.auditComposite` (멀티 신호)
-- 거버넌스 네트워크 (특수관계 그룹) → `recipes.governance.auditNetwork`
+- 거버넌스 종합 → `recipes.fundamental.governance.auditComposite` (멀티 신호)
+- 거버넌스 네트워크 (특수관계 그룹) → `recipes.fundamental.governance.auditNetwork`
 - 이사회 표결 정밀 → `engines.analysis` direct
 
 재호출 트리거: "삼성전자 4 축 거버넌스 audit", "이사회 + 지분 + 감사 + 분식 결합", "감사인 변경 빈도 점검".

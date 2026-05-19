@@ -125,7 +125,7 @@
       "limitations": []
     },
     {
-      "id": "recipes.governance.auditComposite",
+      "id": "recipes.fundamental.governance.auditComposite",
       "title": "지배구조와 감사 리스크 점검",
       "category": "recipes",
       "status": "limited",
@@ -1480,7 +1480,7 @@
       ]
     },
     {
-      "id": "recipes.governance.esgGovernanceLight",
+      "id": "recipes.fundamental.governance.esgGovernanceLight",
       "title": "ESG light 점검 (지배구조 + 감사 + 종업원 + 환경 신호)",
       "category": "recipes",
       "status": "limited",
@@ -1533,7 +1533,7 @@
       ]
     },
     {
-      "id": "recipes.governance.audit",
+      "id": "recipes.fundamental.governance.audit",
       "title": "지배구조 audit (이사회 + 지분구조 + 감사 신호)",
       "category": "recipes",
       "status": "limited",
@@ -1544,7 +1544,7 @@
       ]
     },
     {
-      "id": "recipes.governance.auditNetwork",
+      "id": "recipes.fundamental.governance.auditNetwork",
       "title": "거버넌스 + 계열사밀도 + 감사변경 triple flag (KR chaebol risk)",
       "category": "recipes",
       "status": "limited",
@@ -1849,7 +1849,7 @@
       ]
     },
     {
-      "id": "recipes.governance.workforceAndCapital",
+      "id": "recipes.fundamental.governance.workforceAndCapital",
       "title": "인력·자본 사이클 (workforce + capital + 자본배분)",
       "category": "recipes",
       "status": "limited",
