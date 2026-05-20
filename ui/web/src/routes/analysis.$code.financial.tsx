@@ -35,6 +35,7 @@ import {
 	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
+import { formatValue } from '@/lib/format';
 
 type SubView = FinancialSubCategory;
 
@@ -199,13 +200,14 @@ function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 // bundled spec 없으면 즉시 lazy fetch. content-visibility / IntersectionObserver
 // 게이트 폐기 (cell paint skip 이 lazy 트리거 막아 끝 카드 영영 spec 없음 회귀).
 // backend _SPEC_CACHE TTL + viz._prefetchCompany dedup 이 30 카드 동시 lazy 호출
-// race 차단. 카드 자체 chrome (sparkline·headerMetric·ChartMiniTable footer) 폐기 —
-// 카드 경계 + 차트 본체만. 추가 정보는 클릭 → Dialog.
+// race 차단. sparkline 만 폐기 (본 차트 데이터와 중복). footer (ChartMiniTable) +
+// headerMetric (latestValue + YoY Δ) 는 유지 — 정보 가치 충분.
 function CardRender({
 	spec: bundledSpec,
 	packed,
 	meta,
 	cardOuterH,
+	computeHeaderMetric,
 	stockCode,
 	periodKind,
 }: {
@@ -213,6 +215,7 @@ function CardRender({
 	packed: PackedCard;
 	meta: CatalogCard | undefined;
 	cardOuterH: number;
+	computeHeaderMetric: (spec: RechartsSpec | undefined) => React.ReactNode;
 	stockCode: string;
 	periodKind: PeriodKind;
 }) {
@@ -228,12 +231,23 @@ function CardRender({
 
 	const title = meta?.title || spec?.title || packed.title;
 	const help = meta?.help;
+	const seriesCount = spec?.series?.length ?? 0;
 	const isDualStack = spec?.options?.dualStack === true;
-	// body = 카드 outer - 헤더 한 줄. footer 없음 (사용자 명시: 카드 경계만).
-	const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX);
+	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
+	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
+	// footer 추정 — ChartMiniTable row 14px + thead 16px + wrapper(border-t + py-1) 9px.
+	// 카드 outer 의 40% 상한 가드 — series 많은 카드도 chart body 가 최소 60% 확보.
+	const footerHeight = hasFooter
+		? Math.min(14 * Math.min(seriesCount, 12) + 25, cardOuterH * 0.4)
+		: 0;
+	const bodyHeight = Math.max(
+		60,
+		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
+	);
 	const [open, setOpen] = useState(false);
 	const kind = spec?.kind ?? packed.kind;
 	const ready = !!spec && !spec.error;
+	const headerMetric = ready ? computeHeaderMetric(spec) : undefined;
 	return (
 		<>
 			<div
@@ -254,6 +268,8 @@ function CardRender({
 					colSpan={packed.w}
 					rowSpan={packed.h}
 					kind={kind}
+					footer={ready ? footer : undefined}
+					headerExtra={headerMetric}
 				>
 					{ready ? (
 						<VizChart spec={spec} height={bodyHeight} size={{ w: packed.w, h: packed.h }} />
@@ -321,6 +337,60 @@ function FinancialTab() {
 		(catalog?.cards ?? []).map((c) => [c.cardKey, c]),
 	);
 
+	// Tremor 정통 — 헤더 우측 latest value + YoY Δ (% point or 비율 변화). primary 시리즈
+	// (또는 첫 비-stack 시리즈) 의 마지막 유효값과 4 분기 전 값 비교. dual-stack / multi-axis
+	// 카드는 모호하므로 표시 생략.
+	function computeHeaderMetric(spec: RechartsSpec | undefined): React.ReactNode {
+		if (!spec || spec.kind !== 'trend') return null;
+		if (spec.options?.dualStack) return null;
+		if (!spec.series?.length) return null;
+		const primary =
+			spec.series.find((s) => s.intent === 'primary') ??
+			spec.series.find((s) => !s.stack && s.type === 'line') ??
+			spec.series[0];
+		const data = primary?.data ?? [];
+		const lastIdx = data.length - 1;
+		const last = lastIdx >= 0 ? data[lastIdx] : null;
+		const lookback = periodKind === 'quarterly' ? 4 : 1;
+		const prevIdx = lastIdx - lookback;
+		const prev = prevIdx >= 0 ? data[prevIdx] : null;
+		if (last == null || !Number.isFinite(last as number)) return null;
+		const unit = primary?.unit ?? '';
+		const lastStr = formatValue(last as number, unit);
+		let deltaNode: React.ReactNode = null;
+		if (prev != null && Number.isFinite(prev as number)) {
+			const isPct = unit === '%' || unit === '배' || unit === '회';
+			const delta = isPct
+				? (last as number) - (prev as number)
+				: (prev as number) !== 0
+					? ((last as number) - (prev as number)) / Math.abs(prev as number) * 100
+					: null;
+			if (delta != null && Number.isFinite(delta)) {
+				const sign = delta > 0 ? '+' : '';
+				const suffix = isPct ? (unit === '%' ? '%p' : (unit === '회' ? '회' : '배')) : '%';
+				const tone =
+					Math.abs(delta) < 0.05
+						? 'text-muted-foreground/80'
+						: delta > 0
+							? 'text-emerald-500 dark:text-emerald-400'
+							: 'text-rose-500 dark:text-rose-400';
+				deltaNode = (
+					<span className={`text-[10.5px] font-medium ${tone}`}>
+						{sign}
+						{Math.abs(delta) >= 10 ? delta.toFixed(0) : delta.toFixed(1)}
+						{suffix}
+					</span>
+				);
+			}
+		}
+		return (
+			<>
+				<span className="text-[12px] font-mono font-semibold text-foreground">{lastStr}</span>
+				{deltaNode}
+			</>
+		);
+	}
+
 	const renderCard = (p: PackedCard, cellSize: number) => {
 		const meta = cardMetaByKey[p.cardKey];
 		const spec = data?.cards?.[p.cardKey];
@@ -331,6 +401,7 @@ function FinancialTab() {
 				packed={p}
 				meta={meta}
 				cardOuterH={cardOuterH}
+				computeHeaderMetric={computeHeaderMetric}
 				stockCode={code}
 				periodKind={periodKind}
 			/>
