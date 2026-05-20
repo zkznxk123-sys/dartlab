@@ -283,6 +283,19 @@ def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
     # 본문 절 conjunction — 한 절 안 verb-ending + 후속 절 (heading 은 단일 명사구)
     if re.search(r"(?:하여|되어|함으로|함에|되면|하면|함을|되었으며|하였으며)\s", label):
         return None
+    # 본문 동사 mid-sentence — heading 은 단일 명사구 (체언), 동사 활용형 포함 = 본문 sentence.
+    # 회귀 사례 (084690 "배출부채는 할당된 배출권을 실제 배출량이 초과할 때에만 인식하며,
+    # 배출원가는 영업원가로 인식하고 있습니"). 길이 60자라 length gate 통과 + 조사 prefix
+    # 없음 + 종결사 어미 도 ("있습니" 끝). 동사 어간 + 어미 패턴 차단.
+    if re.search(
+        r"(?:인식하|적용하|사용하|포함하|기록하|평가하|판단하|관리하|운영하|실시하|발생하|결정하|반영하|구성하|영향)\S{0,2}\s",
+        label,
+    ):
+        return None
+    # heading 명사구 의 끝 — 명사 + 종결 punctuation (또는 EOL). 주어 마커 "은/는/이/가" 가
+    # 끝나 다음 절로 이어지면 본문 fragment.
+    if re.search(r"[은는이가]\s+\S", label):
+        return None
     # 명사형 종결사 "...함" / "...됨" / "...임" / "...있음" / "...없음" — 본문 절 nominalizer
     # 명사형 종결사 단독은 정상이지만 (예 "조달함") long label 의 끝이면 보고형 본문.
     if len(label) > 20 and re.search(
