@@ -6,8 +6,10 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { createFileRoute, getRouteApi } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { CardShell } from '@/features/dashboard/cards/CardShell';
+import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
 import { ChartMiniTable } from '@/features/dashboard/cards/ChartMiniTable';
 import { VizChart } from '@/features/dashboard/charts/VizChart';
 import {
@@ -17,7 +19,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { useState } from 'react';
 import {
 	BentoGrid,
 	BENTO_GAP_PX,
@@ -425,6 +426,12 @@ function CardRender({
 function FinancialTab() {
 	const { code } = Route.useParams();
 	const { period: periodKind } = parentRoute.useSearch();
+	const setLastMode = useDashboardMode((s) => s.setLastMode);
+
+	// 종목 전환 시 직전 모드 복원에 사용. 본 탭 마운트 = financial 모드 진입.
+	useEffect(() => {
+		setLastMode('financial');
+	}, [setLastMode]);
 
 	const { data: catalog } = useQuery({
 		queryKey: dashKeys.catalog(),

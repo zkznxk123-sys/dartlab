@@ -22,10 +22,10 @@ export function RecentCompanies() {
 							<SidebarMenuButton
 								asChild
 								tooltip={`${r.corpName} (${r.stockCode})`}
-								onMouseEnter={() => prefetch(r.stockCode)}
-								onFocus={() => prefetch(r.stockCode)}
+								onMouseEnter={() => prefetch(r.stockCode, { full: false })}
+								onFocus={() => prefetch(r.stockCode, { full: false })}
 							>
-								<Link to="/dashboard/$code" params={{ code: r.stockCode }}>
+								<Link to="/analysis/$code" params={{ code: r.stockCode }} search={{ period: 'quarterly' }}>
 									<History />
 									<span className="truncate">{r.corpName}</span>
 									<span className="ml-auto font-mono text-[10px] text-muted-foreground">{r.stockCode}</span>

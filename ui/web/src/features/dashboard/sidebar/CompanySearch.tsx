@@ -36,10 +36,11 @@ export function CompanySearch() {
 	}, [dq, hits.length]);
 
 	// focused row (키보드 cycle / hover) 진입 시 prefetch — 클릭 시점에 이미 캐시 hit.
+	// hover 단계는 meta + 직전 모드 1 트랙만 (full=false). 허브 마운트 시 두 모드 full prefetch.
 	useEffect(() => {
 		if (focusIdx < 0) return;
 		const hit = hits[focusIdx];
-		if (hit?.stockCode) prefetch(hit.stockCode);
+		if (hit?.stockCode) prefetch(hit.stockCode, { full: false });
 	}, [focusIdx, hits, prefetch]);
 
 	function pick(idx: number) {
@@ -47,7 +48,9 @@ export function CompanySearch() {
 		if (!hit) return;
 		push(hit.stockCode, hit.corpName);
 		setQ('');
-		navigate({ to: '/dashboard/$code', params: { code: hit.stockCode } });
+		// 허브로 진입 → 사용자가 financial / viewer 명시 선택. 무조건 financial
+		// 점프 회귀 차단 + 카드 로딩 폭주 차단.
+		navigate({ to: '/analysis/$code', params: { code: hit.stockCode }, search: { period: 'quarterly' } });
 	}
 
 	function onKey(e: React.KeyboardEvent<HTMLInputElement>) {

@@ -19,6 +19,7 @@ import { ChevronLeft, ChevronRight, ExternalLink, FileText, Loader2, Maximize2, 
 import { useEffect, useMemo, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import { useDashboardMode } from '@/features/dashboard/store/dashboardMode';
 import { cn } from '@/lib/utils';
 
 interface TocTopic {
@@ -258,6 +259,12 @@ function ViewerTab() {
 	const { topic, windowEnd } = Route.useSearch();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const setLastMode = useDashboardMode((s) => s.setLastMode);
+
+	// 종목 전환 시 직전 모드 복원에 사용. 본 탭 마운트 = viewer 모드 진입.
+	useEffect(() => {
+		setLastMode('viewer');
+	}, [setLastMode]);
 
 	// cold load — /init 한 번에 toc + firstTopic + viewer.
 	const { data: initBundle, isLoading: initLoading } = useQuery({
