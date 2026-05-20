@@ -65,7 +65,7 @@ procedure:
   - 가능 컬럼 목록은 `columnsFor(topic)` — snake_id · label · aliases.
   - topic 자체는 `availableTopics()` (BS/IS/CF/CIS/SCE).
   - 매핑 정의는 `src/dartlab/reference/data/accountMappings.json` (DART SSOT) 또는 `src/dartlab/providers/edgar/finance/mapperData/learnedSynonyms.json` (EDGAR).
-  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `.claude/skills/mapping-refresh/SKILL.md` 4 단계 — 관측 ledger → `src/dartlab/reference/mapping/mappingLedgerCompact.py` → `src/dartlab/reference/mapping/mappingReview.py` confirm/reject/alias/defer → `src/dartlab/reference/mapping/mappingPromote.py` apply.
+  - 신규 매핑 추가는 운영자 트리거 발화 ("매퍼 정리"/"mapping refresh") → `src/dartlab/skills/specs/operation/mappingRefresh.md` 4 단계 — 관측 ledger → `src/dartlab/reference/mapping/mappingLedgerCompact.py` → `src/dartlab/reference/mapping/mappingReview.py` confirm/reject/alias/defer → `src/dartlab/reference/mapping/mappingPromote.py` apply.
   - prod JSON 단독 권한 진입점은 `src/dartlab/reference/mapping/mappingPromote.py` 만. atomic write + `_metadata.{lastUpdate,addedCount,promoteCommit}` 갱신 + `AccountMapper.release()` 자동 호출.
 linkedSkills:
   - engines.company
@@ -211,8 +211,9 @@ DART 측 mapper 데이터는 `reference/data/` 로 통합 승격 (`providers/dar
 ```
 
 운영자 트리거 발화 ("매퍼 정리해줘" / "nonstd 정리" / "mapping refresh") 시
-`.claude/skills/mapping-refresh/SKILL.md` 절차서가 4 단계 inline Bash
-실행. 각 단계 사이 운영자 결정 필수 — 어떤 자동화도 prod JSON 을 직접
+운영 SSOT `src/dartlab/skills/specs/operation/mappingRefresh.md` 절차서가
+4 단계 inline Bash 실행. 각 단계 사이 운영자 결정 필수 — 어떤 자동화도
+prod JSON 을 직접
 수정하지 않는다. cycle 당 30~80 매핑 추가, 추가율은 cycle 마다 둔화
 (신중도 증가). 본 사이클 138 매핑 박은 결과 카카오 035720 nonstd 행
 66 → 28 (58% 감소).
