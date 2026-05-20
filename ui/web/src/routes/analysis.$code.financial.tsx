@@ -135,52 +135,84 @@ function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 	const rawValues = (spec.options?.rawValues as (number | null)[] | undefined) ?? [];
 	const rawUnits = (spec.options?.rawUnits as string[] | undefined) ?? [];
 	const categories = spec.categories ?? [];
-	const avgScore =
-		scores.filter((s): s is number => s != null).length > 0
-			? scores.reduce((sum: number, s) => sum + (s ?? 0), 0) /
-				scores.filter((s) => s != null).length
-			: 0;
+	const validScores = scores.filter((s): s is number => s != null);
+	const avgScore = validScores.length > 0
+		? validScores.reduce((sum, s) => sum + s, 0) / validScores.length
+		: 0;
+	// 절대 임계값 기반 verdict — peer 무관, 점수 그대로 5 구간.
+	const verdict = (() => {
+		if (avgScore >= 8.5) return { label: '매우 우수', tone: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' };
+		if (avgScore >= 7) return { label: '우수', tone: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' };
+		if (avgScore >= 5) return { label: '양호', tone: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-500' };
+		if (avgScore >= 3) return { label: '주의', tone: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' };
+		return { label: '위험', tone: 'text-rose-600 dark:text-rose-400', dot: 'bg-rose-500' };
+	})();
+	const strongest = validScores.length > 0
+		? categories[scores.indexOf(Math.max(...validScores))]
+		: null;
+	const weakest = validScores.length > 0
+		? categories[scores.indexOf(Math.min(...validScores))]
+		: null;
 	return (
 		<div className="px-3 pt-2">
-			<CardShell
-				title={spec.title}
-				colSpan={12}
-				rowSpan={3}
-				headerExtra={
-					<span className="text-[10px] text-muted-foreground">
-						평균 {avgScore.toFixed(1)} / 10 · 정통 절대 임계값
-					</span>
-				}
-			>
-				<div className="grid grid-cols-12 gap-2">
-					<div className="col-span-12 md:col-span-7">
-						<VizChart spec={spec} height={220} size={{ w: 7, h: 3 }} />
+			<CardShell title={spec.title} colSpan={12} rowSpan={4}>
+				<div className="grid grid-cols-12 gap-3">
+					{/* 좌 — radar 크게 (5 축 한눈에) */}
+					<div className="col-span-12 lg:col-span-5">
+						<VizChart spec={spec} height={300} size={{ w: 5, h: 4 }} />
 					</div>
-					<div className="col-span-12 md:col-span-5 flex flex-col justify-center gap-1.5">
+					{/* 중 — 대형 평균 점수 + verdict + 최강/최약 한 줄 */}
+					<div className="col-span-12 flex flex-col justify-center gap-1.5 lg:col-span-3">
+						<div className="flex items-baseline gap-1.5">
+							<span className="font-mono text-5xl font-bold tracking-tight tabular-nums text-foreground">
+								{avgScore.toFixed(1)}
+							</span>
+							<span className="font-mono text-base text-muted-foreground">/ 10</span>
+						</div>
+						<div className="flex items-center gap-1.5">
+							<span className={`size-1.5 rounded-full ${verdict.dot}`} />
+							<span className={`text-[13px] font-semibold ${verdict.tone}`}>{verdict.label}</span>
+							<span className="text-[10.5px] text-muted-foreground">· 5 축 평균</span>
+						</div>
+						{strongest && (
+							<div className="mt-1 flex items-baseline gap-1.5 text-[10.5px]">
+								<span className="font-mono uppercase tracking-wider text-muted-foreground/70">↑ 강점</span>
+								<span className="truncate text-foreground" title={strongest}>{strongest}</span>
+							</div>
+						)}
+						{weakest && weakest !== strongest && (
+							<div className="flex items-baseline gap-1.5 text-[10.5px]">
+								<span className="font-mono uppercase tracking-wider text-muted-foreground/70">↓ 약점</span>
+								<span className="truncate text-foreground" title={weakest}>{weakest}</span>
+							</div>
+						)}
+					</div>
+					{/* 우 — 5 축 정렬 bar */}
+					<div className="col-span-12 flex flex-col justify-center gap-2 lg:col-span-4">
 						{categories.map((cat, i) => {
 							const score = scores[i] ?? 0;
 							const raw = rawValues[i];
 							const unit = rawUnits[i] ?? '';
 							const pct = Math.max(0, Math.min(100, (score / 10) * 100));
-							const tone =
-								score >= 8
-									? 'bg-emerald-500/70'
-									: score >= 5
-										? 'bg-amber-500/70'
-										: 'bg-rose-500/70';
+							const tone = score >= 7
+								? 'bg-emerald-500'
+								: score >= 5
+									? 'bg-amber-500'
+									: score >= 3
+										? 'bg-orange-500'
+										: 'bg-rose-500';
 							return (
 								<div key={cat} className="flex items-center gap-2">
-									<div className="w-40 truncate text-[11px] text-muted-foreground" title={cat}>
+									<div className="w-28 truncate text-[11px] text-muted-foreground" title={cat}>
 										{cat}
 									</div>
 									<div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted/40">
 										<div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
 									</div>
-									<div className="w-16 text-right font-mono text-[11px] tabular-nums">
-										<span className="font-semibold text-foreground">{score.toFixed(1)}</span>
-										<span className="ml-1 text-muted-foreground">/10</span>
+									<div className="w-12 text-right font-mono text-[12px] font-semibold tabular-nums text-foreground">
+										{score.toFixed(1)}
 									</div>
-									<div className="w-20 text-right font-mono text-[10px] text-muted-foreground tabular-nums">
+									<div className="w-16 text-right font-mono text-[10px] text-muted-foreground tabular-nums">
 										{raw != null ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–'}
 									</div>
 								</div>
