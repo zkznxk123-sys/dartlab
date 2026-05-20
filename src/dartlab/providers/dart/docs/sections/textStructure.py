@@ -220,8 +220,11 @@ _LABEL_CLOSING_NOUNS = (
     "사업부문",
     "보유현황",
 )
-_RE_INLINE_PAREN_NUM = re.compile(r"(?<=\s)(?=\(\d+\)\s)")
-_RE_INLINE_PAREN_KOR = re.compile(r"(?<=\s)(?=\([가-힣]\)\s)")
+# split positions — *공백 또는 닫는 괄호 또는 한글* 후 paren marker (\d+) / (한글) 시리즈
+# 시작. 아모레/롯데쇼핑/한화생명 같이 "...100 (한강로2가)(2) 전화번호..." 처럼 `)(2)`
+# 공백 없이 이어진 본문 안 multi-marker split.
+_RE_INLINE_PAREN_NUM = re.compile(r"(?<=[\s\)\d가-힣])(?=\(\d+\)[\s가-힣])")
+_RE_INLINE_PAREN_KOR = re.compile(r"(?<=[\s\)\d가-힣])(?=\([가-힣]\)[\s가-힣])")
 _RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
 _RE_LINE_HEAD_KOREAN = re.compile(r"^[가-힣]\.\s+(.+)$")
 _RE_LINE_HEAD_NUMERIC = re.compile(r"^\d+\.\s+(.+)$")
