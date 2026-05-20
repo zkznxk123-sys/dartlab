@@ -552,6 +552,9 @@ def buildViewer(
     textDoc = serializeViewerTextDocument(viewerTextDocument(topic, blocks))
     dartUrl = _dartUrlForPeriod(company, period)
     topicLabel = _topicDartLabel(topic, safeTopicLabel(company, topic))
+    # Phase C — `rows` 단일 array 추가. sections row 의 SSOT 직렬화. frontend
+    # 점진 마이그레이션을 위해 옛 sections/entries/tables 필드 유지 (Phase D 후 deprecate).
+    rows = _buildRowsForTopic(company, topic)
     if compact:
         serializedBlocks = [serializeViewerBlock(b) for b in blocks]
         return {
@@ -562,6 +565,7 @@ def buildViewer(
             "period": None,
             "compact": True,
             "dartUrl": dartUrl,
+            "rows": rows,
             "textDocument": _compactTextDocument(textDoc, limit=limit, blocks=serializedBlocks),
         }
 
@@ -572,9 +576,62 @@ def buildViewer(
         "topicLabel": topicLabel,
         "period": None,
         "dartUrl": dartUrl,
+        "rows": rows,
         "blocks": [serializeViewerBlock(block) for block in blocks],
         "textDocument": textDoc,
     }
+
+
+def _buildRowsForTopic(company: Company, topic: str) -> list[dict[str, Any]]:
+    """sections row → SSOT 직렬화 (Phase C 신규).
+
+    plan §Phase C-1 의 slim payload 핵심 — wide-format DataFrame 의 row × cell 을
+    그대로 dict 직렬화. viewer.py 의 추상화 (ViewerBlock / ViewerTextSection /
+    ViewerDocumentEntry) 우회. frontend 가 dumb row render 가능.
+
+    schema:
+      [
+        {
+          "blockOrder": int,
+          "blockType": "text" | "table",
+          "textNodeType": "heading" | "body" | "table",
+          "textLevel": int | None,
+          "textPath": str | None,
+          "segmentKey": str,
+          "cells": {period: str}      # period → cell value 그대로 (paragraph 가공 0)
+        },
+        ...
+      ]
+    """
+    import re as _re
+
+    import polars as pl
+
+    sec = company.sections
+    if sec is None:
+        return []
+    df = sec.filter(pl.col("topic") == topic)
+    if df.is_empty():
+        return []
+    period_cols = sorted(
+        [c for c in df.columns if _re.fullmatch(r"\d{4}(?:Q[1-4])?", c)],
+        reverse=True,
+    )
+    rows: list[dict[str, Any]] = []
+    for r in df.iter_rows(named=True):
+        cells = {p: r.get(p) for p in period_cols if isinstance(r.get(p), str) and r.get(p)}
+        rows.append(
+            {
+                "blockOrder": r.get("blockOrder"),
+                "blockType": r.get("blockType"),
+                "textNodeType": r.get("textNodeType"),
+                "textLevel": r.get("textLevel"),
+                "textPath": r.get("textPath"),
+                "segmentKey": r.get("segmentKey"),
+                "cells": cells,
+            }
+        )
+    return rows
 
 
 def buildDiffSummary(company: Company, topic: str) -> dict[str, Any] | None:
