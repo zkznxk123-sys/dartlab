@@ -468,9 +468,9 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
     sections: list[ViewerTextSection] = []
     entries: list[ViewerDocumentEntry] = []
     # heading 누적 → body / 표 / 기타 non-text 만나면 *둘 다* snapshot attach + reset.
-    # 이전 코드는 body 에만 attach 하고 non-text 만나면 폐기 → 분기·연간 비대칭의 근본.
-    # textLevel 은 syntactic depth (bracket=1, numeric=3, korean=4) 라 semantic
-    # depth 와 무관 → level-pop 룰 사용 X. 원본 순서 그대로 attach.
+    # 이전 코드는 body 에만 attach, non-text 만나면 폐기 → 분기·연간 비대칭의 근본.
+    # chapter ancestor ("1. 회사의 개요") 표시는 SectionRow 가 body 비어도 헤딩 표시하는
+    # 방식으로 frontend 가 담당 → 본 backend 는 직속 preceding heading 만 attach.
     pendingHeadings: list[ViewerBlock] = []
 
     def _materializeHeadingPath(blocksList: list[ViewerBlock]) -> list[ViewerTextHeading]:
@@ -517,9 +517,8 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
             pendingHeadings = []
             continue
 
-        # non-text block — 원본 위치에 block_ref entry 삽입.
-        # 이전 코드의 `pendingHeadings = []` *폐기* 제거 — heading snapshot 을 entry 에 attach.
-        # body 와 동일하게 attach 후 reset → 표 위에도 직속 헤딩 표시 가능.
+        # non-text block (표/structured/finance) — pendingHeadings snapshot attach.
+        # 이전 코드의 `pendingHeadings = []` *폐기* 제거 → 표 위에도 직속 헤딩 표시.
         entryHeadingPath = _materializeHeadingPath(pendingHeadings)
         entries.append(
             ViewerDocumentEntry(
