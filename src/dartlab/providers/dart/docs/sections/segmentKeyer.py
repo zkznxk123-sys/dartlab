@@ -47,7 +47,21 @@ class SegmentKeyer:
         return self._emit(topic, base)
 
     def forTextHeadingNode(self, topic: str, segmentKeyBase: str) -> tuple[str, int, str]:
-        """heading node — base 는 ``textStructure.parseTextStructureWithState`` 가 부여."""
+        """heading/body node — base 는 ``textStructure.parseTextStructureWithState`` 가 부여.
+
+        SSOT 정공법: ``body|p:`` / ``heading|p:`` base 모두 occurrence 미부여 →
+        같은 semantic path = 1 row. caller (pipeline.py) 가 충돌 시 cell concat.
+        ``heading|alias|`` / ``heading|marker|`` base 는 본래 alias / marker 위치
+        구분이 필요 → occurrence 유지.
+
+        옛 룰 (heading 도 occurrence 부여) 회귀 사례: 000660 companyOverview 의
+        "[연결대상회사의 변동내용]" (2022+ 표준) 과 "[연결대상회사의 변동현황]"
+        (2020-2021 옛 표준) 이 alias 로 같은 semantic key 가 되지만 같은 period
+        안 2 개 등장 시 occ:1 / occ:2 분기 → 2 row, period 별 cell 분산.
+        path 기반 통합으로 1 row.
+        """
+        if segmentKeyBase.startswith("body|p:") or segmentKeyBase.startswith("heading|p:"):
+            return segmentKeyBase, 1, segmentKeyBase
         return self._emit(topic, segmentKeyBase)
 
     def forTableBlock(

@@ -57,6 +57,10 @@ _TOPIC_SEGMENT_ALIASES: dict[str, dict[str, str]] = {
         "연결대상회사의변동현황": "연결대상변동내용",
         "당기중종속기업변동내용": "연결대상변동내용",
         "당기연결대상회사의변동내용": "연결대상변동내용",
+        "연결대상회사의당기중변동내용": "연결대상변동내용",
+        "당기중연결대상회사의변동내용": "연결대상변동내용",
+        "당기중연결대상회사의변동현황": "연결대상변동내용",
+        "당기연결대상회사의변동현황": "연결대상변동내용",
         "본사의주소전화번호및홈페이지": "본사의주소전화번호홈페이지",
         "본사의주소전화번호및홈페이지주소": "본사의주소전화번호홈페이지",
         "본사의주소전화번호홈페이지주소": "본사의주소전화번호홈페이지",
@@ -626,20 +630,34 @@ def parseTextStructureWithState(
             parentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
             semanticPathKey = " > ".join(semanticPathKeys) if semanticPathKeys else None
             semanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
-            segmentKeyBase = f"heading|lv:{level}|p:{semanticPathKey or semanticStackKey}"
+            # heading segmentKey 는 path 만 — level prefix 제거 (SSOT 정공법).
+            # 옛 룰 `heading|lv:{level}|p:{path}` 은 같은 path 인데 source format
+            # 차이로 level 만 다른 경우 (예: 기간 A 가 "가. X" 한글 L=3, 기간 B 가
+            # "1. X" numeric L=2) segmentKey 분리 → 같은 의미 다른 row 위배.
+            # path 가 stack 끝 자신 포함이므로 ancestor chain + label 동일 = 같은 heading.
+            segmentKeyBase = f"heading|p:{semanticPathKey or semanticStackKey}"
         else:
-            # redundantTopicAlias 인 경우 — 같은 @topic alias 의 sibling heading.
-            # stack 의 해당 entry label 을 latest 로 갱신 → 자식 heading 들 textPath 에 형제
-            # 위치의 정확한 label 반영. 예: 가/나/다/라 가 모두 같은 @topic:companyOverview
-            # alias 일 때 마지막 들어온 라의 label 이 stack 에 들어가야 다음 [DX 부문] 의
-            # textPath="라. 주요 사업의 내용 > DX 부문" 으로 정확. 회귀 사례 — 갱신
-            # 없으면 stack 의 첫 push 가의 label 이 그대로 유지되어 [DX] textPath 가
-            # "가. 회사의 법적·상업적 명칭 > DX" 로 misattribute.
+            # redundantTopicAlias 인 경우 — 같은 @topic alias 의 sibling sub-section.
+            # 1) stack 의 해당 entry label 을 latest 로 갱신 → 자식 textPath 정확.
+            # 2) 그 entry 이후의 *모든* descendant pop — 직전 sub-section 의 stack
+            #    entry (L=7 bracket marker / 등) 가 새 sibling 의 descendant 로 오염되는
+            #    회귀 차단.
+            #
+            # 회귀 사례 (000660 companyOverview bo=16): 직전 "가. 연결대상 종속회사 개황"
+            # sub-section 후 [연결대상회사의 변동내용] L=7 push → stack [@topic, L:7].
+            # 새 "나. 회사의 법적·상업적 명칭" alias 가 redundantTopicAlias. 옛 룰은
+            # label 만 갱신 → stack [@topic(label:법적·상업적 명칭), L:7] 잔존 → 후속 body
+            # textPath = "회사의 법적·상업적 명칭 > 연결대상회사의 변동내용" 오염.
+            # 정공법: alias entry 이후 stack 모두 pop.
             if redundantTopicAlias:
-                for item in stack:
+                aliasIdx: int | None = None
+                for i, item in enumerate(stack):
                     if str(item["key"]) == stackKey:
+                        aliasIdx = i
                         item["label"] = labelText
                         break
+                if aliasIdx is not None and aliasIdx + 1 < len(stack):
+                    del stack[aliasIdx + 1 :]
             currentPathKeys = [str(item["key"]) for item in stack if str(item["key"])]
             currentSemanticPathKeys = [str(item["semanticKey"]) for item in stack if str(item["semanticKey"])]
             pathText = labelText
