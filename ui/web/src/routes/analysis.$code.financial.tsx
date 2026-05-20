@@ -17,7 +17,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
 	BentoGrid,
 	BENTO_GAP_PX,
@@ -42,7 +42,6 @@ type SubView = FinancialSubCategory;
 // narrative section 정의 — cardKey → sectionIdx. backend layout 그대로 받되
 // 컴포넌트에서 split 후 각 section 내 y 좌표 normalize (그룹 내 min y 빼기).
 // 정통 분석 10 단계 매핑 — 5 section narrative.
-// module-level 정의: placeholder layout 생성 useMemo 도 같은 SECTIONS 참조.
 const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 	{
 		title: '자본구조 · 자산구조',
@@ -98,8 +97,6 @@ const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
 		keys: new Set(['growthYoy', 'equityGrowth', 'segmentConcentration']),
 	},
 ];
-const SECTION_KEYS_FLAT = new Set<string>(SECTIONS.flatMap((s) => Array.from(s.keys)));
-
 export const Route = createFileRoute('/analysis/$code/financial')({
 	component: FinancialTab,
 	validateSearch: (_search: Record<string, unknown>): { view: SubView | null } => {
@@ -320,14 +317,15 @@ function FinancialTab() {
 	});
 
 	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
-	// bundle load — backend asyncio.gather 가 progressive (35 round-trip) 보다 5x 빠름 (warm cache 0.36s vs 1.82s).
-	// eagerN=3 — hero + 첫 3 카드만 동행. 4~6 번째는 IntersectionObserver lazy
-	// (CardRender visible 진입 시 fetchCard). cold gather 6→3 카드 build → 0.5s
-	// → 0.25s 절감. backend TTL 캐시 (viz._SPEC_CACHE) 가 lazy 호출 중복 build 0.
+	// bundle load — backend asyncio.gather 가 polars rawFinance 1 회 collect dedup +
+	// 34 카드 동시 build. eagerN=40 (le=80) 으로 전체 eager 강제. 옛 eagerN=3 회귀:
+	// 첫 3 카드만 즉시 paint, 나머지 31 카드 lazy fetch 가 직렬 4~5s 체감 →
+	// 사용자 "초반 3 빨리 그 뒤 한참" 회귀. backend gather 34 동시 1.5~3s 가 lazy
+	// 직렬보다 체감 짧음 (모든 카드 한꺼번에 paint).
 	const apiView = null;
-	const { data, isError, isLoading, error } = useQuery({
+	const { data, isError, isLoading, isFetching, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
-		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, false, 3),
+		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, false, 40),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60_000,
 		retry: 1,
@@ -408,34 +406,11 @@ function FinancialTab() {
 		);
 	};
 
-	// placeholder layout — catalog 의 xlSpan + kind 로 sequential pack. backend layout
-	// 응답 도착 전 5 섹션 골격 + 각 카드 spinner 즉시 paint. 인지 latency: cold ~700ms
-	// 빈 화면 → 즉시 골격 + 카드별 spinner. catalog 는 staleTime: Infinity 라 첫 1회
-	// 후 모든 진입에서 hit. 좌표는 정확하지 않으나 SECTIONS keys 매칭은 정확 →
-	// layout 응답 도착 시 카드 ID 단위 reorder 만, 카드 mount 자체는 재사용 (key=cardKey).
-	const placeholderPlaced = useMemo<PackedCard[]>(() => {
-		if (!catalog) return [];
-		const fin = (catalog.cards ?? []).filter((c) => SECTION_KEYS_FLAT.has(c.cardKey));
-		let cursorX = 0;
-		let cursorY = 0;
-		let rowH = 0;
-		const out: PackedCard[] = [];
-		for (const c of fin) {
-			const w = Math.min(12, c.xlSpan || 4);
-			const h = c.kind === 'kpiTile' ? 2 : 3;
-			if (cursorX + w > 12) {
-				cursorY += rowH;
-				cursorX = 0;
-				rowH = 0;
-			}
-			out.push({ cardKey: c.cardKey, kind: c.kind, title: c.title, x: cursorX, y: cursorY, w, h });
-			cursorX += w;
-			rowH = Math.max(rowH, h);
-		}
-		return out;
-	}, [catalog]);
-
-	const placed = data?.layout ?? placeholderPlaced;
+	// placeholder layout 폐기 — frontend sequential pack 좌표가 backend packSkyline
+	// 결과와 달라 첫 paint 시 카드 좌측 몰림 → 응답 도착 후 reorder layout shift
+	// 회귀 ("초반 왼쪽에 카드가 몰림"). 진입 초기엔 SECTIONS 헤더만 + 섹션별
+	// 단일 spinner 로 골격 표시, 좌표는 backend layout 도착 후 정확 1회 paint.
+	const placed = data?.layout ?? [];
 
 	const grouped = SECTIONS.map((section) => {
 		const cards = placed.filter((p) => section.keys.has(p.cardKey));
@@ -453,10 +428,44 @@ function FinancialTab() {
 				</div>
 			)}
 
+			{/* 종목 변경 / refetch 진행 중 — isFetching && data 있음 (keepPreviousData 옛
+			    데이터 표시 중) 일 때 상단에 indeterminate progress bar. 사용자가 "갱신
+			    중" 명확히 인지. 첫 cold (data 없음) 는 본 화면 spinner 가 담당. */}
+			{isFetching && data && (
+				<div className="sticky top-0 z-30 h-0.5 w-full overflow-hidden bg-transparent">
+					<div className="h-full w-1/3 animate-[dl-progress_1.2s_ease-in-out_infinite] bg-primary/70" />
+				</div>
+			)}
+
 			{placed.length === 0 ? (
 				isLoading ? (
-					<div className="flex items-center justify-center p-16 text-muted-foreground">
-						<Loader2 className="size-6 animate-spin" />
+					// 진입 골격 — SECTIONS 5 헤더 + 섹션별 spinner. 좌표 placeholder 폐기
+					// (좌측 몰림 layout shift 회귀 차단). backend layout 도착 후 정확
+					// 1회 paint.
+					<div className="flex flex-col">
+						<div className="px-3 pt-2">
+							<div className="flex h-[260px] items-center justify-center rounded-md border border-border/60 bg-card text-muted-foreground">
+								<Loader2 className="size-5 animate-spin" />
+							</div>
+						</div>
+						{SECTIONS.map((section, idx) => (
+							<section key={section.title} className={idx === 0 ? 'mt-1' : 'mt-0.5'}>
+								<header className="flex items-baseline gap-2 px-3 pt-2 pb-0">
+									<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+										{String(idx + 1).padStart(2, '0')}
+									</span>
+									<h2 className="text-[13px] font-semibold tracking-tight text-foreground">
+										{section.title}
+									</h2>
+									<span className="text-[10.5px] text-muted-foreground">{section.subtitle}</span>
+								</header>
+								<div className="px-3 py-1.5">
+									<div className="flex h-[180px] items-center justify-center rounded-md border border-border/40 bg-muted/20 text-muted-foreground">
+										<Loader2 className="size-4 animate-spin" />
+									</div>
+								</div>
+							</section>
+						))}
 					</div>
 				) : (
 					<div className="p-8 text-center text-sm text-muted-foreground">

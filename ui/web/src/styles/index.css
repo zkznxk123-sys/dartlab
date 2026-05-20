@@ -162,3 +162,14 @@
 .tiny-scroll::-webkit-scrollbar-corner {
 	background: transparent;
 }
+
+/* analysis/$code/financial — refetch 진행 중 상단 indeterminate progress bar.
+   keepPreviousData 로 옛 종목 카드가 표시될 때 사용자가 갱신 중임을 인지하게 함. */
+@keyframes dl-progress {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(400%);
+	}
+}
