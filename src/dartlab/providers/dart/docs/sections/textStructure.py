@@ -295,6 +295,10 @@ def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
 _RE_INLINE_PAREN_NUM = re.compile(r"(?<=[\s\)\d가-힣])(?=\(\d+\)[\s가-힣])")
 _RE_INLINE_PAREN_KOR = re.compile(r"(?<=[\s\)\d가-힣])(?=\([가-힣]\)[\s가-힣])")
 _RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
+# inline 한글 heading marker split — "{한글}{한글 가/나/다/.../하}\.\s+{한글}" 패턴.
+# parquet 본문 line-break 누락 case (005380 "연구개발활동가. 연구개발활동의 개요"):
+# "활동" + "가. 연구개발활동의 개요" 로 split. 마커 한글 1자 (가-하) 만 매칭.
+_RE_INLINE_KOR_HEADING = re.compile(r"(?<=[가-힣])(?=[가나다라마바사아자차카타파하]\.\s+[가-힣])")
 # ▣ / ▶ / ◈ 한국 DART parquet sub-section marker — 회사명/카테고리 표시. line break
 # 누락된 parquet 본문 안 inline marker 로 split. 회귀 사례 (005380 businessOverview):
 # "수주에 관한 사항▣ 현대로템" 같이 "▣" 가 한글 직후 line-break 없이 박힌 경우.
@@ -342,7 +346,13 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
         return [line]
 
     positions: set[int] = {0}
-    for pat in (_RE_INLINE_PAREN_NUM, _RE_INLINE_PAREN_KOR, _RE_INLINE_KOR_DASH_NUM, _RE_INLINE_BULLET_MARKER):
+    for pat in (
+        _RE_INLINE_PAREN_NUM,
+        _RE_INLINE_PAREN_KOR,
+        _RE_INLINE_KOR_DASH_NUM,
+        _RE_INLINE_BULLET_MARKER,
+        _RE_INLINE_KOR_HEADING,
+    ):
         for m in pat.finditer(line):
             if m.start() > 0:
                 positions.add(m.start())
