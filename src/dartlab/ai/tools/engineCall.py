@@ -61,22 +61,34 @@ def engineCall(plan: dict[str, Any] | None = None, **kwargs: Any) -> ToolResult:
     return _genericPublicCall(apiRef, call_plan)
 
 
+_RESERVED_PLAN_KEYS = frozenset({"apiRef", "engine", "method", "target", "stockCode", "args", "kwargs", "apiKey"})
+
+
 def _normalizeArgsDict(plan: dict[str, Any]) -> None:
     """ToolSpec schema 가 args 를 dict 로 정의 — 모델 양식 그대로 flatten.
 
     LLM 표준 호출: `{"apiRef": "Company.show", "args": {"stockCode": "005930", "topic": "IS"}}`.
     이전 핸들러들은 `plan["args"]` 를 list 로 가정 (옛 형식) → dict 면 `list(dict)` 가 *키* 만
     뽑아 회귀 (`company_not_resolved`). dict 면 키들을 plan root 로 흡수 + args 를 빈 list 로.
+
+    비-reserved 키 (axis/sub/topic/freq 등) 는 kwargs 에도 옮긴다. _companyShow 처럼 plan root
+    직접 읽는 경로 외, _genericCompanyMethod 가 `c.analysis(*args, **kwargs)` 식으로 전달
+    하려면 kwargs 가 채워져야. 2026-05-20 회귀: Company.analysis/gather/macro 가 root flatten
+    까지만 받고 kwargs 빈 채로 호출 → c.analysis() guide DataFrame 만 반환 → LLM 이 valuation
+    결과 못 받아 "가격 데이터 부재" 한계로 회피.
     """
     raw = plan.get("args")
     if not isinstance(raw, dict):
         return
-    # 충돌 회피 — plan root 에 이미 명시된 키는 우선 (옛 호환).
+    existing_kwargs: dict[str, Any] = dict(plan.get("kwargs") or {})
     for key, value in raw.items():
+        # plan root 에 이미 명시된 키는 우선 (옛 호환). 그 외 setdefault 로 흡수.
         plan.setdefault(key, value)
-    # 핸들러들이 `list(plan.get("args") or [])` 패턴 — dict 가 list 로 캐스팅되어 키만 뽑히는
-    # 회귀 차단. flatten 후 args 는 빈 list 로 재설정.
+        # method args/kwargs 로 전달할 키만 kwargs 에 — apiRef/engine/method/target/args 등 제외.
+        if key not in _RESERVED_PLAN_KEYS:
+            existing_kwargs.setdefault(key, value)
     plan["args"] = []
+    plan["kwargs"] = existing_kwargs
 
 
 def _apiRef(plan: dict[str, Any]) -> str:
