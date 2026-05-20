@@ -467,10 +467,11 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
     topicLatestPeriod = textPeriods[-1]
     sections: list[ViewerTextSection] = []
     entries: list[ViewerDocumentEntry] = []
-    # heading 누적 → body / 표 / 기타 non-text 만나면 *둘 다* snapshot attach + reset.
-    # 이전 코드는 body 에만 attach, non-text 만나면 폐기 → 분기·연간 비대칭의 근본.
-    # chapter ancestor ("1. 회사의 개요") 표시는 SectionRow 가 body 비어도 헤딩 표시하는
-    # 방식으로 frontend 가 담당 → 본 backend 는 직속 preceding heading 만 attach.
+    # heading stack (level-pop 누적) — 새 heading 만나면 같거나 더 깊은 level 을 pop 후 push.
+    # body/table 등 consumer 만나면 stack snapshot 만 attach, *reset 안 함* — chapter ancestor
+    # 가 sub-section table 위에도 살아남음.
+    # 이전 reset 패턴은 첫 body 가 모든 heading 을 먹어버려 후속 표 위에 chapter 표시 0.
+    # 같은 chapter 안 sub heading 사이에서는 같은 level pop 으로 자연 교체.
     pendingHeadings: list[ViewerBlock] = []
 
     def _materializeHeadingPath(blocksList: list[ViewerBlock]) -> list[ViewerTextHeading]:
@@ -497,9 +498,27 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
             )
         return out
 
+    def _blockHeadingLevel(block: ViewerBlock) -> int:
+        if isinstance(block.textLevel, int) and block.textLevel > 0:
+            return block.textLevel
+        periodMap = _textPeriodMap(block)
+        _, headingText = _selectNearestPeriodText(periodMap, None)
+        return _headingLevel(headingText or "") or 99
+
+    def _pushHeadingLevelPop(block: ViewerBlock) -> None:
+        """heading block push — 같거나 더 깊은 level 은 pop 후 추가 (chapter ancestor 살리기)."""
+        newLevel = _blockHeadingLevel(block)
+        while pendingHeadings:
+            topLevel = _blockHeadingLevel(pendingHeadings[-1])
+            if topLevel >= newLevel:
+                pendingHeadings.pop()
+            else:
+                break
+        pendingHeadings.append(block)
+
     for block in sorted(blocks, key=lambda item: item.block):
         if block.kind == "text" and block.textType == "heading":
-            pendingHeadings.append(block)
+            _pushHeadingLevelPop(block)
             continue
 
         if block.kind == "text" and block.textType == "body":
@@ -520,11 +539,8 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
                         headingPath=list(section.headingPath),
                     )
                 )
-            pendingHeadings = []
             continue
 
-        # non-text block (표/structured/finance) — pendingHeadings snapshot attach.
-        # 이전 코드의 `pendingHeadings = []` *폐기* 제거 → 표 위에도 직속 헤딩 표시.
         entryHeadingPath = _materializeHeadingPath(pendingHeadings)
         entries.append(
             ViewerDocumentEntry(
@@ -535,7 +551,6 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
                 headingPath=entryHeadingPath,
             )
         )
-        pendingHeadings = []
 
     if not sections and not entries:
         return None
