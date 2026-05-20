@@ -67,6 +67,9 @@ _DEFAULT_TOOL_NAMES: tuple[str, ...] = (
     "EvidenceGate",
     "GroundingCheck",
     "RunWorkbench",
+    # 과거 세션 transcript cross-session 검색 — "이 회사 분석한 적 있나" / "이 매핑 결정
+    # 어디서 했지" 류 질문에서 LLM 자율 호출. BM25 + FTS5 (sessionIndex.db ~/.dartlab/).
+    "SearchPastSessions",
 )
 
 
@@ -556,6 +559,7 @@ def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> 
 
     두 블록 추가 가능:
         1. stockCode 가 있으면 outcome_log past_context (CHANGELOG #572 패턴)
+            진입 직전 tryResolvePending lazy sweep 으로 pending → resolved 자동 전이 후 회수.
         2. dashboardSnapshot 이 있으면 "현재 화면" 블록 (Phase 8 bridge)
 
     빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드.
@@ -564,7 +568,19 @@ def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> 
     if stockCode:
         market = kwargs.get("market") or "KR"
         try:
-            from .memory.wiring import fetchPastContext
+            from .memory.wiring import defaultPriceLookup, fetchPastContext, tryResolvePending
+
+            # 진입 lazy resolve — 해당 종목 pending 중 minHoldingDays 충족 entry 가
+            # 있으면 시장 종가로 alpha 산출 후 resolved 전이. 다음 fetchPastContext
+            # 호출이 *방금 resolved* 된 entry 까지 회수하도록 *resolve 먼저, fetch 다음* 순서.
+            try:
+                tryResolvePending(
+                    str(stockCode),
+                    market=str(market),
+                    pricer=defaultPriceLookup if str(market) == "KR" else None,
+                )
+            except Exception:  # noqa: BLE001
+                pass
 
             past = fetchPastContext(str(stockCode), market=str(market))
         except Exception:  # noqa: BLE001
@@ -577,6 +593,18 @@ def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> 
         block = _formatDashboardSnapshotBlock(snapshot)
         if block:
             systemPrompt = f"{systemPrompt}\n\n## 현재 대시보드 화면 (사용자 시야, 신뢰)\n{block}\n"
+
+    # 운영자 톤 메타 블록 — feedback_*.md 합성기가 7 일 TTL 또는 memory mtime 변경 시
+    # 재계산. 답변 톤 일관성 확보 (자동 sweep 회피·운영자 명시 트리거·측정 후 박기).
+    # 캐시 hit 시 디스크 1 회 read 만 — turn 추가 비용 최소.
+    try:
+        from .memory.synthesizer import buildToneBlock
+
+        tone_block = buildToneBlock()
+    except Exception:  # noqa: BLE001
+        tone_block = ""
+    if tone_block:
+        systemPrompt = f"{systemPrompt}\n\n{tone_block}"
 
     return systemPrompt
 

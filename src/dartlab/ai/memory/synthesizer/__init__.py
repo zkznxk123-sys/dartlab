@@ -9,5 +9,6 @@
 from __future__ import annotations
 
 from .feedbackStats import FeedbackStats, synthFeedbackStats
+from .promptInjector import buildToneBlock
 
-__all__ = ["FeedbackStats", "synthFeedbackStats"]
+__all__ = ["FeedbackStats", "buildToneBlock", "synthFeedbackStats"]
