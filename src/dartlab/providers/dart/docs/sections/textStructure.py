@@ -14,7 +14,9 @@ _MULTISPACE_RE = re.compile(r"\s+")
 _TRAILING_PUNCT_RE = re.compile(r"[\s\-–—:：;,]+$")
 _RE_ROMAN = re.compile(r"^(?:[IVXivx]+)\.\s+(.+)$")
 _RE_NUMERIC = re.compile(r"^(?:\d+)\.\s+(.+)$")
-_RE_KOREAN = re.compile(r"^(?:[가-힣])\.\s+(.+)$")
+# 한글 heading prefix — 한 글자 + . 다음 공백 *optional*. 한국콜마 같이 "가.연결대상..."
+# 처럼 parquet 본문에서 공백 없이 박힌 경우도 매칭. closing 명사 split 이 후속 분리.
+_RE_KOREAN = re.compile(r"^(?:[가-힣])\.\s*(.+)$")
 _RE_PAREN_NUM = re.compile(r"^\((\d+)\)\s*(.+)$")
 _RE_PAREN_KOR = re.compile(r"^\(([가-힣])\)\s*(.+)$")
 _RE_CIRCLED = re.compile(r"^([①-⑳])\s*(.+)$")
