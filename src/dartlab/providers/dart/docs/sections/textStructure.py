@@ -223,6 +223,11 @@ _LABEL_CLOSING_NOUNS = (
 # split positions — *공백 또는 닫는 괄호 또는 한글* 후 paren marker (\d+) / (한글) 시리즈
 # 시작. 아모레/롯데쇼핑/한화생명 같이 "...100 (한강로2가)(2) 전화번호..." 처럼 `)(2)`
 # 공백 없이 이어진 본문 안 multi-marker split.
+# 한국 법인격 약자 — heading prefix 가 아니라 본문 명사 (회사명 부분). _RE_PAREN_KOR
+# false positive 차단용 (예 "(주)에서 푸본현대생명보험..." 본문 fragment 가 heading 으로
+# 잘못 분류되던 회귀 차단).
+_PAREN_CORPORATE_ABBREV = frozenset({"주", "사", "유", "재", "합", "조", "학", "의"})
+
 _RE_INLINE_PAREN_NUM = re.compile(r"(?<=[\s\)\d가-힣])(?=\(\d+\)[\s가-힣])")
 _RE_INLINE_PAREN_KOR = re.compile(r"(?<=[\s\)\d가-힣])(?=\([가-힣]\)[\s가-힣])")
 _RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
@@ -353,7 +358,16 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
 
     m = _RE_PAREN_KOR.match(stripped)
     if m:
-        return (5, m.group(2).strip(), True)
+        inner = m.group(1).strip()
+        # (주)/(사)/(유)/(재)/(합)/(조)/(학)/(의) — 한국 법인격 약자. heading prefix 가 아니라
+        # 본문 명사 (회사명 약자) 일 확률 압도적. 회귀 사례 (현대모비스 005380 companyOverview
+        # blockOrder 20~26): "(주)에서 푸본현대생명보험(주)로 사명이 변경됨" 본문 문장이
+        # (주) level 5 heading 으로 박혀 textPath "계열회사 현황 > 에서 푸본현대생명보험"
+        # 같은 fragment heading 행 생성 → 후속 wide-format row 의 textPath pollution.
+        if inner in _PAREN_CORPORATE_ABBREV:
+            pass
+        else:
+            return (5, m.group(2).strip(), True)
 
     m = _RE_CIRCLED.match(stripped)
     if m:
