@@ -128,19 +128,19 @@ def _extractTables(content: str) -> list[tuple[int, list[int]]]:
 
 
 def _labelInRawContent(normLabel: str, df: pl.DataFrame) -> bool:
-    """parquet 의 모든 section_content 안 (line-start 아니어도) normLabel substring 매칭.
+    """parquet 의 모든 section_title + section_content 안 normLabel substring 매칭.
 
     inline-split 으로 sections 가 만든 heading 의 label 은 parquet 본문 mid-line 에
     등장 — line-start match 에 잡히지 않음. 본 함수가 raw content 어디든 매칭.
+    section_title 도 포함 — chapter heading 들 (XII. 상세표 등) 의 evidence.
     """
     if len(normLabel) < 4:
         return False
     for row in df.iter_rows(named=True):
+        title = row.get("section_title") or ""
         content = row.get("section_content") or ""
-        if not content:
-            continue
-        normContent = re.sub(r"\s+", "", content.replace("&cr;", ""))
-        if normLabel in normContent:
+        normCombined = re.sub(r"\s+", "", (title + " " + content).replace("&cr;", ""))
+        if normLabel in normCombined:
             return True
     return False
 
