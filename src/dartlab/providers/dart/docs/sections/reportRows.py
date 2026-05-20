@@ -18,6 +18,71 @@ from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSe
 from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
 
 
+def _normalizeRowspanShift(tableMd: str) -> str:
+    """markdown table 의 rowspan continuation 빈 cell 누락 정규화.
+
+    회귀 사례 (005930 census table):
+        | 구 분 | 자회사 | 사 유 |
+        | --- | --- | --- |
+        | 신규연결 | RAINBOW... | 지분취득 |
+        | Harman... | 설립 |  |          ← col 0 비어야 하는데 col 0 에 내용, col 2 empty
+        | Viper... | 인수 |  |            ← 같은 shift 패턴
+
+    원본 parquet 가 HTML rowspan="N" 셀 continuation 을 markdown 변환 시 빈 cell
+    pad 누락 → 모든 후속 row 가 왼쪽으로 1 칸 shift.
+
+    detection: header N 컬럼, body row 중 N 컬럼 이면서 마지막 cell empty + 첫 cell
+    non-empty 인 row 가 *전체 body row 의 30% 이상* 이면 shift 패턴 판정. 해당 row
+    들의 cells 를 right-shift 1 (빈 cell pad at position 0, drop last empty cell).
+
+    회피 case (shift X): legit 한 row 별 trailing-empty (예: 마지막 col 이 "비고"
+    이고 비고 누락 row 가 많은 경우) — 이 경우 shift 안 함 (앞 row 들도 같은 패턴).
+    """
+    lines = tableMd.split("\n")
+    if len(lines) < 4:
+        return tableMd
+    parsed: list[dict] = []
+    for ln in lines:
+        s = ln.strip()
+        if s.startswith("|") and s.endswith("|"):
+            cells = [c.strip() for c in s.strip("|").split("|")]
+            isSep = all(set(c) <= {"-", ":"} for c in cells if c) and any(cells)
+            parsed.append({"line": ln, "cells": cells, "isSep": isSep, "isTable": True})
+        else:
+            parsed.append({"line": ln, "isTable": False})
+    headerCols: int | None = None
+    headerIdx = -1
+    for i, row in enumerate(parsed):
+        if row.get("isTable") and not row["isSep"]:
+            cells = row["cells"]
+            if all(cells) and len(cells) >= 3:
+                headerCols = len(cells)
+                headerIdx = i
+                break
+    if headerCols is None or headerCols < 3 or headerIdx < 0:
+        return tableMd
+    bodyRows = [
+        (i, r)
+        for i, r in enumerate(parsed)
+        if i > headerIdx and r.get("isTable") and not r["isSep"] and len(r["cells"]) == headerCols
+    ]
+    if len(bodyRows) < 3:
+        return tableMd
+    shiftCandidates = [
+        (i, r)
+        for (i, r) in bodyRows
+        if r["cells"][-1] == "" and r["cells"][0] != "" and all(c != "" for c in r["cells"][1:-1])
+    ]
+    if len(shiftCandidates) / max(1, len(bodyRows)) < 0.3:
+        return tableMd
+    for i, r in shiftCandidates:
+        newCells = [""] + r["cells"][:-1]
+        newLine = "| " + " | ".join(newCells) + " |"
+        parsed[i]["line"] = newLine
+        parsed[i]["cells"] = newCells
+    return "\n".join(p["line"] for p in parsed)
+
+
 def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
     """content를 원문 순서대로 text/table block으로 분해."""
     strippedContent = content.strip()
@@ -38,6 +103,8 @@ def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
             return
         text = "\n".join(buffer).strip()
         if text:
+            if kind == "table":
+                text = _normalizeRowspanShift(text)
             rowsAppend((kind, text))
         buffer = []
 
