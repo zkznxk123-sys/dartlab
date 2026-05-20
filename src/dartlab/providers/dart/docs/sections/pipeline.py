@@ -505,22 +505,27 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     for topic_seq in sorted(topicFirstSeq.items(), key=lambda x: x[1]):
         topicIndex[topic_seq[0]] = len(topicIndex)
 
-    _FREQ_SCOPE_PRIORITY = {"mixed": 0, "annual": 1, "quarterly": 2, "none": 3}
+    def _topicRowSortKey(k: tuple[str, str]) -> tuple[int, int, int, int, str]:
+        """본문 원문 순서 보존 — chapter (majorNum) + 최신 period 의 sourceBlockOrder + segmentOrder + occurrence + segmentKey.
 
-    def _topicRowSortKey(k: tuple[str, str]) -> tuple[int, int, int, int, int, int, int, int, str]:
+        이전 키 (firstSeq + freqScope_priority + latestMissing + latestRank + firstRank ...) 는
+        본문 원문 순서를 휴리스틱으로 뒤집어 회귀: SK하이닉스 "회사의 연혁" topic 에서
+        parquet 원문 "가. → 나. → 다. → 라." 인데 sections 가 "라. → 가. → 나. → 다." 로
+        출력. 본문 원문은 sourceBlockOrder 가 직접 반영 (reportRows.py 의 nextBlockOrder
+        counter) — 그것만 우선 정렬키로.
+
+        sourceBlockOrder 는 `rowMeta` 의 latest-period wins 값 사용 (rowOrder.sourceBlockOrder
+        는 across-periods `min` 휴리스틱 이라 옛 annual 의 위치가 우선 → 최신 annual 본문
+        순서 깨짐). rowMeta 는 `currRank >= prevRank` 갱신 룰로 최신 period 값 유지.
+        """
         topic, _segmentKey = k
-        majorNum, firstSeq = topicFirstSeq.get(topic, (99, 999999))
-        tIdx = topicIndex.get(topic, 999999)
+        majorNum, _firstSeq = topicFirstSeq.get(topic, (99, 999999))
         info = rowOrder.get(k, {})  # noqa: F821 — closure variable
-        freqMeta = freqMetaByKey.get(k, {})  # noqa: F821 — closure variable
+        meta = rowMeta.get(k, {})  # noqa: F821 — closure variable
         return (
             majorNum,
-            firstSeq,
-            tIdx,
-            _FREQ_SCOPE_PRIORITY.get(str(freqMeta.get("freqScope") or "none"), 9),
-            int(info.get("latestMissing", 1)),
-            int(info.get("latestRank", 999999999)),
-            int(info.get("firstRank", 999999999)),
+            int(meta.get("sourceBlockOrder", 999999)),
+            int(info.get("segmentOrder", 0)),
             int(info.get("segmentOccurrence", 1)),
             str(k[1]),
         )
