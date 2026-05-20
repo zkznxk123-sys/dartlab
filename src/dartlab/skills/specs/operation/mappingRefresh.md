@@ -217,6 +217,33 @@ ANTONYM_PAIRS = [
 | 0.65 ≤ score < 0.70 | 수동 선택만 (cycle 9) | 매우 높음 |
 | < 0.65 | 수동 박기만 (cycle 10~17) | sweep 비효율 |
 
+### Step 3 보조 — hash 추천 진전 layer
+
+SA substring 후보 추출 결과에 *추가 신호* — `mappingHashRecommend.recommend()`
+(4-region 256-bit characteristic hash + MinHash + cluster weight + margin/overlap
+gate) top-3 후보 + confidence. **자동 매핑 X, 운영자 검토 보조 한정**.
+
+```python
+from dartlab.reference.mapping.mappingHashRecommend import recommend
+
+cands = recommend("장기매도가능증권의 처분", sj="CF")
+# [Candidate(snakeId='disposal_of_available_for_sale_securities',
+#            confidence='high', hitKor='매도가능증권의처분', ...), ...]
+```
+
+confidence 분류 (실증 V10 카카오 None 29 기반):
+- **high** — margin ≥ 10 AND bigram overlap ≥ 0.5 (운영 정답률 ~43% 정확 + ~43% 부분 정답)
+- **medium** — margin 또는 overlap 한쪽만 통과 (운영자 의미 일치 검토 우선)
+- **low** — 둘 다 미통과 (사람 strict 검토 필수)
+
+검증 기반 (`tests/_attempts/semantic/accountMapperHashEval{V1..V10}.py`):
+- Leave-out 500 sample group HH (overlap ≥ 0.7) + cw + margin ≥ 10 = **92.9%**
+- 카카오 미커버 29 = AUTO 24% (정답 ~43%, 부분 정답 ~43%, 환각 ~14%)
+- 회귀 가드 — `tests/reference/test_mappingHashRecommend.py` (6 종)
+
+**한계** — 환각 ~14% 위험. **자동 prod patch 절대 금지**. SA substring
+후보 + hash 추천이 *양쪽 일치* 한 후보 우선, 한쪽만 신호 시 의미 검토 strict.
+
 ## 5. Step 4 — 운영자 박기
 
 후보 list 를 한 줄씩 검토 → *액션 단어 보존* + *SA 의미 일치* + *옛
