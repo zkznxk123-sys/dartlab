@@ -76,6 +76,16 @@ interface ViewerSection {
 	timeline?: Array<{ period?: PeriodRef | null; status?: string }>;
 }
 
+interface ViewerRow {
+	blockOrder: number;
+	blockType: string;
+	textNodeType?: string | null;
+	textLevel?: number | null;
+	textPath?: string | null;
+	segmentKey?: string;
+	cells: Record<string, string>;
+}
+
 interface ViewerResponse {
 	stockCode: string;
 	corpName: string;
@@ -84,6 +94,7 @@ interface ViewerResponse {
 	compact?: boolean;
 	period?: string | null;
 	dartUrl?: string | null;
+	rows?: ViewerRow[];
 	textDocument?: {
 		topic?: string;
 		mode?: string;
