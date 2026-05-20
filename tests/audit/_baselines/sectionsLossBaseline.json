@@ -1,1 +1,87 @@
-{}
+{
+  "005380": {
+    "source": {
+      "bytes": 120194605,
+      "lines": 898017,
+      "rows": 2158
+    },
+    "sections": {
+      "bytes": 50960487,
+      "lines": 358225,
+      "rows": 10438
+    },
+    "rates": {
+      "byteRate": 0.42398314799570247,
+      "lineRate": 0.39890670221165075,
+      "rowExpansion": 4.836886005560705
+    }
+  },
+  "005930": {
+    "source": {
+      "bytes": 111039653,
+      "lines": 776844,
+      "rows": 1642
+    },
+    "sections": {
+      "bytes": 56713926,
+      "lines": 402217,
+      "rows": 7899
+    },
+    "rates": {
+      "byteRate": 0.5107538115235285,
+      "lineRate": 0.5177577480163328,
+      "rowExpansion": 4.810596833130329
+    }
+  },
+  "000660": {
+    "source": {
+      "bytes": 58174969,
+      "lines": 599614,
+      "rows": 1858
+    },
+    "sections": {
+      "bytes": 26618130,
+      "lines": 283458,
+      "rows": 11722
+    },
+    "rates": {
+      "byteRate": 0.45755297265392614,
+      "lineRate": 0.47273412562081607,
+      "rowExpansion": 6.308934337997847
+    }
+  },
+  "035420": {
+    "source": {
+      "bytes": 88013071,
+      "lines": 553661,
+      "rows": 1882
+    },
+    "sections": {
+      "bytes": 41847251,
+      "lines": 254311,
+      "rows": 10187
+    },
+    "rates": {
+      "byteRate": 0.4754663202241858,
+      "lineRate": 0.45932619418741794,
+      "rowExpansion": 5.412858660998937
+    }
+  },
+  "068270": {
+    "source": {
+      "bytes": 57212523,
+      "lines": 602116,
+      "rows": 2130
+    },
+    "sections": {
+      "bytes": 21586789,
+      "lines": 220198,
+      "rows": 6774
+    },
+    "rates": {
+      "byteRate": 0.37730881052038207,
+      "lineRate": 0.36570694019092664,
+      "rowExpansion": 3.1802816901408453
+    }
+  }
+}

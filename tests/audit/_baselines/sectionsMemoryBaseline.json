@@ -1,1 +1,42 @@
-{}
+{
+  "005380": {
+    "rows": 10438,
+    "pythonPeakMb": 131.1,
+    "pythonCurrentMb": 20.3,
+    "rssBeforeMb": 0.0,
+    "rssAfterMb": 0.0,
+    "rssGrowthMb": 0.0
+  },
+  "005930": {
+    "rows": 7899,
+    "pythonPeakMb": 123.1,
+    "pythonCurrentMb": 16.9,
+    "rssBeforeMb": 0.0,
+    "rssAfterMb": 0.0,
+    "rssGrowthMb": 0.0
+  },
+  "000660": {
+    "rows": 11722,
+    "pythonPeakMb": 91.4,
+    "pythonCurrentMb": 16.9,
+    "rssBeforeMb": 0.0,
+    "rssAfterMb": 0.0,
+    "rssGrowthMb": 0.0
+  },
+  "035420": {
+    "rows": 10187,
+    "pythonPeakMb": 124.1,
+    "pythonCurrentMb": 14.6,
+    "rssBeforeMb": 0.0,
+    "rssAfterMb": 0.0,
+    "rssGrowthMb": 0.0
+  },
+  "068270": {
+    "rows": 6774,
+    "pythonPeakMb": 65.7,
+    "pythonCurrentMb": 13.0,
+    "rssBeforeMb": 0.0,
+    "rssAfterMb": 0.0,
+    "rssGrowthMb": 0.0
+  }
+}
