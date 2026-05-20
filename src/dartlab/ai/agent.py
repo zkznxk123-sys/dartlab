@@ -84,7 +84,7 @@ def runAgent(
 ) -> Iterator[TraceEvent]:
     """본체 — chat-native autonomous tool-calling 루프. agent_gateway 가 본 함수의 TraceEvent 를 SSE 로 변환."""
     history = history or []
-    systemPrompt = _injectPastContextIfAvailable(DARTLAB_CHAT_SYSTEM, _unused)
+    systemPrompt = _injectPastContextIfAvailable(DARTLAB_CHAT_SYSTEM, _unused, history=history)
     messages: list[dict[str, Any]] = [{"role": "system", "content": systemPrompt}]
     for entry in history:
         if not isinstance(entry, dict):
@@ -554,13 +554,20 @@ def _trimRefPayload(payload: dict[str, Any]) -> dict[str, Any]:
     return {k: payload[k] for k in _REF_PAYLOAD_KEYS if k in payload}
 
 
-def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> str:
+def _injectPastContextIfAvailable(
+    systemPrompt: str,
+    kwargs: dict[str, Any],
+    *,
+    history: list[dict[str, Any]] | None = None,
+) -> str:
     """kwargs 의 보조 컨텍스트를 system prompt 에 부착.
 
-    두 블록 추가 가능:
+    블록:
         1. stockCode 가 있으면 outcome_log past_context (CHANGELOG #572 패턴)
             진입 직전 tryResolvePending lazy sweep 으로 pending → resolved 자동 전이 후 회수.
         2. dashboardSnapshot 이 있으면 "현재 화면" 블록 (Phase 8 bridge)
+        3. 운영자 톤 (feedback_*.md 합성기, 7 일 TTL 캐시)
+        4. dialectic user context (장기 interest profile + 본 세션 intent, history 결정론 통계)
 
     빈 문자열이면 섹션 헤더 자체 부재 — 환각 가드.
     """
@@ -605,6 +612,18 @@ def _injectPastContextIfAvailable(systemPrompt: str, kwargs: dict[str, Any]) -> 
         tone_block = ""
     if tone_block:
         systemPrompt = f"{systemPrompt}\n\n{tone_block}"
+
+    # dialectic user context — 장기 누적 interest (sessionIndex.db) + 본 세션 의도
+    # (history 결정론 분석). 매 turn 호출이지만 profile 은 7 일 TTL 캐시 + intent 는
+    # in-memory 빠른 통계라 비용 작다. 답변 톤·우선순위를 사용자 패턴에 맞추는 핵심.
+    try:
+        from .memory.dialectic import buildUserContextBlock
+
+        user_block = buildUserContextBlock(history)
+    except Exception:  # noqa: BLE001
+        user_block = ""
+    if user_block:
+        systemPrompt = f"{systemPrompt}\n\n{user_block}"
 
     return systemPrompt
 
