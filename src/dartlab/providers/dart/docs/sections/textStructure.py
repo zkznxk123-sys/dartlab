@@ -228,6 +228,30 @@ _LABEL_CLOSING_NOUNS = (
 # 잘못 분류되던 회귀 차단).
 _PAREN_CORPORATE_ABBREV = frozenset({"주", "사", "유", "재", "합", "조", "학", "의"})
 
+# 한국 조사 prefix — heading label 검증용. label 이 조사로 시작하면 본문 fragment 일
+# 확률 압도적. 회귀 사례: "은 다음과 같습니다.", "의 환산에서 발생하는...", "기준" (closing
+# noun split 잔재) 같은 body fragment 가 heading 으로 박혀 textPath 오염.
+_HEADING_JOSA_PREFIX = re.compile(r"^(?:에서|로서|로|는|은|이|가|을|를|의|도|만|과|와|및|또는|이며|에게|에게서)\s")
+
+
+def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
+    """heading label gate — label 이 본문 fragment 같으면 None 반환.
+
+    fragment 시그널:
+    - 조사 prefix 시작 (예 "은 다음과 같습니다.")
+    - closing noun 단독 + 너무 짧음 (예 "기준" / "사항")
+    - 끝이 마침표/물음표/느낌표 종결 + 한국어 종결어미 ("다.", "요.", "까?", "오.")
+    """
+    if not label or len(label) > 120:
+        return None
+    if _HEADING_JOSA_PREFIX.match(label):
+        return None
+    # 종결문 검출 — heading 은 명사구 (체언) 가 일반. "...니다." / "...됩니다." 등 종결어미는 fragment.
+    if re.search(r"(?:니다|됩니다|입니다|하였습니다|있습니다|없습니다|같습니다|바랍니다)\.?$", label):
+        return None
+    return (level, label, True)
+
+
 _RE_INLINE_PAREN_NUM = re.compile(r"(?<=[\s\)\d가-힣])(?=\(\d+\)[\s가-힣])")
 _RE_INLINE_PAREN_KOR = re.compile(r"(?<=[\s\)\d가-힣])(?=\([가-힣]\)[\s가-힣])")
 _RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
@@ -316,8 +340,13 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
     parts: list[str] = []
     for a, b in zip(sorted_pos[:-1], sorted_pos[1:]):
         seg = line[a:b].strip()
-        if seg:
-            parts.append(seg)
+        if not seg:
+            continue
+        # split 다음 segment 가 조사로 시작 → fragment. 이전 segment 에 흡수 (split 무효화).
+        if parts and _HEADING_JOSA_PREFIX.match(seg):
+            parts[-1] = parts[-1] + " " + seg
+            continue
+        parts.append(seg)
     return parts or [line]
 
 
@@ -346,15 +375,15 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
 
     m = _RE_NUMERIC.match(stripped)
     if m:
-        return (2, m.group(1).strip(), True)
+        return _gateHeadingLabel(2, m.group(1).strip())
 
     m = _RE_KOREAN.match(stripped)
     if m:
-        return (3, m.group(1).strip(), True)
+        return _gateHeadingLabel(3, m.group(1).strip())
 
     m = _RE_PAREN_NUM.match(stripped)
     if m:
-        return (4, m.group(2).strip(), True)
+        return _gateHeadingLabel(4, m.group(2).strip())
 
     m = _RE_PAREN_KOR.match(stripped)
     if m:
@@ -367,24 +396,28 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
         if inner in _PAREN_CORPORATE_ABBREV:
             pass
         else:
-            return (5, m.group(2).strip(), True)
+            return _gateHeadingLabel(5, m.group(2).strip())
 
     m = _RE_CIRCLED.match(stripped)
     if m:
-        return (5, m.group(2).strip(), True)
+        return _gateHeadingLabel(5, m.group(2).strip())
 
     m = _RE_SHORT_PAREN.match(stripped)
     if m:
         inner = m.group(1).strip()
         if inner and len(inner) <= 48 and not _RE_HEADING_NOISE.match(inner):
             structural = not _isTemporalMarker(inner)
-            return (6, inner, structural)
+            gated = _gateHeadingLabel(6, inner)
+            if gated is not None:
+                return (6, gated[1], structural)
 
     m = _RE_BRACKET.match(stripped)
     if m:
-        text = m.group(1) or m.group(2) or ""
+        text = (m.group(1) or m.group(2) or "").strip()
         structural = not _isTemporalMarker(text)
-        return (7, text.strip(), structural)
+        gated = _gateHeadingLabel(7, text)
+        if gated is not None:
+            return (7, gated[1], structural)
 
     return None
 
