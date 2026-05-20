@@ -96,6 +96,9 @@ def _chapterMix(df: pl.DataFrame) -> list[dict[str, Any]]:
     # 본문 cell 안 "I. " / "II. " / "III. " 같은 Roman chapter marker 출현 (다른 chapter
     # 본문이 침투했을 때 시그널)
     chapter_marker_re = re.compile(r"^(?:I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII)\.\s+[가-힣]", re.MULTILINE)
+    # reference 시그널 — "참고", "참조", "기재", "위 IV", "상기 V" 등이 본문에 포함되면
+    # 다른 chapter 본문 침투 아닌 *cross-reference text*. mix detector skip.
+    reference_re = re.compile(r"참고하|참조하|참조바|기재하|기재되|언급한|상기\s|아래\s|위에서")
     for r in body_rows.iter_rows(named=True):
         row_chapter = str(r.get("chapter") or "")
         for p in period_cols:
@@ -108,6 +111,9 @@ def _chapterMix(df: pl.DataFrame) -> list[dict[str, Any]]:
             if m:
                 marker_chapter = first_line.split(".")[0].strip()
                 if row_chapter and not row_chapter.startswith(marker_chapter):
+                    # reference 패턴 cell 은 skip — 다른 chapter 침투 아닌 cross-ref
+                    if reference_re.search(cell[:300]):
+                        continue
                     bad.append(
                         {
                             "topic": r.get("topic"),
