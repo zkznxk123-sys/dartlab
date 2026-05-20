@@ -22,12 +22,12 @@ export function ChartMiniTable({ spec: rawSpec, maxPeriods = 4 }: Props) {
 
 	return (
 		<div className="overflow-x-auto">
-			<table className="w-full text-[11px] tabular-nums">
+			<table className="w-full text-[10.5px] leading-[1.25] tabular-nums">
 				<thead>
 					<tr className="text-muted-foreground">
-						<th className="py-0.5 pr-2 text-left font-normal">지표</th>
+						<th className="py-0 pr-1.5 text-left font-normal">지표</th>
 						{periods.map((p) => (
-							<th key={p} className="py-0.5 px-1 text-right font-normal">
+							<th key={p} className="py-0 px-1 text-right font-normal">
 								{fmtPeriod(p)}
 							</th>
 						))}
@@ -36,17 +36,17 @@ export function ChartMiniTable({ spec: rawSpec, maxPeriods = 4 }: Props) {
 				<tbody>
 					{spec.series.map((s) => (
 						<tr key={s.key} className="border-t border-border/40">
-							<td className="py-0.5 pr-2 text-left">
+							<td className="py-0 pr-1.5 text-left">
 								<span
-									className="inline-block size-2 rounded-sm align-middle ring-1 ring-border"
+									className="inline-block size-1.5 rounded-sm align-middle ring-1 ring-border"
 									style={{ background: s.color }}
 								/>
-								<span className="ml-1.5 align-middle">{s.label}</span>
+								<span className="ml-1 align-middle">{s.label}</span>
 							</td>
 							{periods.map((_, i) => {
 								const v = s.data[startIdx + i] ?? null;
 								return (
-									<td key={i} className="py-0.5 px-1 text-right text-foreground">
+									<td key={i} className="py-0 px-1 text-right text-foreground">
 										{formatValue(v, s.unit)}
 									</td>
 								);

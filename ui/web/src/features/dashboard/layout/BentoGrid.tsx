@@ -13,14 +13,15 @@ interface Props {
 }
 
 // SSOT — TabDashboard / financial.$code.tsx 픽셀 산출식이 동일 상수 사용.
-// bento 2026 §4: gap 16px + padding 24px.
-export const BENTO_GAP_PX = 16;
-export const BENTO_PAD_PX = 24;
+// bento 2026 §4 기본 gap/padding 16/24 에서 정보 밀도 우선으로 10/12 로 축소.
+// 카드 사이 6px·좌우 12px 절약 → cellSize 동기 증가, 한 viewport 정보량 ↑.
+export const BENTO_GAP_PX = 10;
+export const BENTO_PAD_PX = 12;
 export const BENTO_COL_COUNT = 12;
 export const BENTO_MIN_CELL_PX = 80;
-// CardShell chrome — CardHeader h-[32px] + border 1, CardContent pt 6 + pb 8.
-export const BENTO_CARD_HEADER_PX = 33;
-export const BENTO_CARD_PAD_PX = 14;
+// CardShell chrome — CardHeader h-[26px] + border 1, CardContent pt 4 + pb 4.
+export const BENTO_CARD_HEADER_PX = 27;
+export const BENTO_CARD_PAD_PX = 8;
 
 const GAP_PX = BENTO_GAP_PX;
 const PAD_PX = BENTO_PAD_PX;

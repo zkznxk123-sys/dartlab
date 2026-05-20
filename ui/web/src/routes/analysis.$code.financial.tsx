@@ -58,16 +58,19 @@ function ChartLoading() {
 	);
 }
 
-// Snowflake 5-axis hero — Simply Wall St 패턴. 헤더 아래, BentoGrid 위에 단독 render.
-// 5 정통 axis (수익성/자본효율/안정성/유동성/현금흐름) 절대 임계값 0~10 점수.
+// Snowflake 5-axis hero — Simply Wall St 패턴. 다른 5 섹션과 시각 일관 위해
+// CardShell 로 감싸 동일 카드 단위. 운영자 명시 "음영·ring·hero 차등 강조 폐기"
+// 의 후속 (CardShell.tsx 주석) — hero plain section 잔존이 일관성 파편이라 제거.
 // spec 은 apiVizLayout bundle 에서 동행 (round-trip + prefetch 1 회 절약).
 function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 	if (!spec || spec.error) {
 		return (
-			<div className="px-6 pt-4">
-				<div className="flex h-[220px] w-full items-center justify-center text-muted-foreground">
-					<Loader2 className="size-5 animate-spin" />
-				</div>
+			<div className="px-3 pt-2">
+				<CardShell title="" colSpan={12} rowSpan={3}>
+					<div className="flex h-[180px] w-full items-center justify-center text-muted-foreground">
+						<Loader2 className="size-5 animate-spin" />
+					</div>
+				</CardShell>
 			</div>
 		);
 	}
@@ -81,57 +84,55 @@ function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 				scores.filter((s) => s != null).length
 			: 0;
 	return (
-		<section className="px-6 pt-4">
-			<div className="flex items-baseline justify-between gap-3 pb-1">
-				<div className="flex items-baseline gap-3">
-					<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-						00
+		<div className="px-3 pt-2">
+			<CardShell
+				title={spec.title}
+				colSpan={12}
+				rowSpan={3}
+				headerExtra={
+					<span className="text-[10px] text-muted-foreground">
+						평균 {avgScore.toFixed(1)} / 10 · 정통 절대 임계값
 					</span>
-					<h2 className="text-[15px] font-semibold tracking-tight text-foreground">
-						{spec.title}
-					</h2>
-					<span className="text-[11px] text-muted-foreground">
-						평균 {avgScore.toFixed(1)} / 10 · 정통 절대 임계값 (peer 무관)
-					</span>
+				}
+			>
+				<div className="grid grid-cols-12 gap-2">
+					<div className="col-span-12 md:col-span-7">
+						<VizChart spec={spec} height={220} size={{ w: 7, h: 3 }} />
+					</div>
+					<div className="col-span-12 md:col-span-5 flex flex-col justify-center gap-1.5">
+						{categories.map((cat, i) => {
+							const score = scores[i] ?? 0;
+							const raw = rawValues[i];
+							const unit = rawUnits[i] ?? '';
+							const pct = Math.max(0, Math.min(100, (score / 10) * 100));
+							const tone =
+								score >= 8
+									? 'bg-emerald-500/70'
+									: score >= 5
+										? 'bg-amber-500/70'
+										: 'bg-rose-500/70';
+							return (
+								<div key={cat} className="flex items-center gap-2">
+									<div className="w-40 truncate text-[11px] text-muted-foreground" title={cat}>
+										{cat}
+									</div>
+									<div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted/40">
+										<div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
+									</div>
+									<div className="w-16 text-right font-mono text-[11px] tabular-nums">
+										<span className="font-semibold text-foreground">{score.toFixed(1)}</span>
+										<span className="ml-1 text-muted-foreground">/10</span>
+									</div>
+									<div className="w-20 text-right font-mono text-[10px] text-muted-foreground tabular-nums">
+										{raw != null ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–'}
+									</div>
+								</div>
+							);
+						})}
+					</div>
 				</div>
-			</div>
-			<div className="grid grid-cols-12 gap-3">
-				<div className="col-span-12 md:col-span-7">
-					<VizChart spec={spec} height={280} size={{ w: 7, h: 4 }} />
-				</div>
-				<div className="col-span-12 md:col-span-5 flex flex-col justify-center gap-2">
-					{categories.map((cat, i) => {
-						const score = scores[i] ?? 0;
-						const raw = rawValues[i];
-						const unit = rawUnits[i] ?? '';
-						const pct = Math.max(0, Math.min(100, (score / 10) * 100));
-						const tone =
-							score >= 8
-								? 'bg-emerald-500/70'
-								: score >= 5
-									? 'bg-amber-500/70'
-									: 'bg-rose-500/70';
-						return (
-							<div key={cat} className="flex items-center gap-3">
-								<div className="w-44 truncate text-[11px] text-muted-foreground" title={cat}>
-									{cat}
-								</div>
-								<div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
-									<div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
-								</div>
-								<div className="w-20 text-right font-mono text-[11px] tabular-nums">
-									<span className="font-semibold text-foreground">{score.toFixed(1)}</span>
-									<span className="ml-1 text-muted-foreground">/ 10</span>
-								</div>
-								<div className="w-24 text-right font-mono text-[10px] text-muted-foreground tabular-nums">
-									{raw != null ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–'}
-								</div>
-							</div>
-						);
-					})}
-				</div>
-			</div>
-		</section>
+			</CardShell>
+		</div>
 	);
 }
 
@@ -195,7 +196,13 @@ function CardRender({
 	const isDualStack = spec?.options?.dualStack === true;
 	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
 	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-	const footerHeight = hasFooter ? 20 * Math.min(seriesCount, 12) + 20 + 8 + 1 : 0;
+	// ChartMiniTable row ~14px (py-0 + text-[11px] + 1px border), thead ~16px,
+	// footer wrapper (border-t + py-1) ~9px. CardShell footer max-h-[45%] 가드와
+	// 일치시켜 chart body 가 최소 55% 보장. 시리즈 많은 카드도 footer 가 카드 outer
+	// 절반 넘지 못함.
+	const footerHeight = hasFooter
+		? Math.min(14 * Math.min(seriesCount, 12) + 25, cardOuterH * 0.45)
+		: 0;
 	const bodyHeight = Math.max(
 		60,
 		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
@@ -490,16 +497,16 @@ function FinancialTab() {
 				<div className="flex flex-col">
 					<SnowflakeHero spec={data?.cards?.snowflakeRadar} />
 					{grouped.map(({ section, cards }, idx) => (
-						<section key={section.title} className={idx === 0 ? '' : 'mt-2'}>
-							<header className="flex items-baseline justify-between gap-3 px-6 pt-4 pb-1">
-								<div className="flex items-baseline gap-3">
+						<section key={section.title} className={idx === 0 ? 'mt-1' : 'mt-0.5'}>
+							<header className="flex items-baseline justify-between gap-2 px-3 pt-2 pb-0">
+								<div className="flex items-baseline gap-2">
 									<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
 										{String(idx + 1).padStart(2, '0')}
 									</span>
-									<h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+									<h2 className="text-[13px] font-semibold tracking-tight text-foreground">
 										{section.title}
 									</h2>
-									<span className="text-[11px] text-muted-foreground">{section.subtitle}</span>
+									<span className="text-[10.5px] text-muted-foreground">{section.subtitle}</span>
 								</div>
 								<div aria-hidden className="hidden flex-1 self-center border-t border-border/40 lg:block" />
 							</header>

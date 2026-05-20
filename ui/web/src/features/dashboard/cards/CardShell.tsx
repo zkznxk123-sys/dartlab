@@ -42,7 +42,7 @@ export function CardShell({
 			)}
 		>
 			<CardHeader
-				className="!grid-cols-none flex h-[32px] flex-row items-center justify-between gap-3 px-3 !pb-1.5 !pt-0 shrink-0 border-b"
+				className="!grid-cols-none flex h-[26px] flex-row items-center justify-between gap-2 px-2 !pb-1 !pt-0 shrink-0 border-b"
 			>
 				<div className="flex min-w-0 items-baseline gap-1.5">
 					<CardTitle className="truncate text-[12px] font-semibold leading-tight tracking-tight">
@@ -75,9 +75,9 @@ export function CardShell({
 					<div className="flex shrink-0 items-baseline gap-2 tabular-nums">{headerExtra}</div>
 				)}
 			</CardHeader>
-			<CardContent className="min-h-0 flex-1 px-2 pb-2 pt-1.5">{children}</CardContent>
+			<CardContent className="min-h-0 flex-1 px-1.5 pb-1 pt-1">{children}</CardContent>
 			{footer && (
-				<div className="mt-1 border-t px-2.5 py-1.5 text-[10px] text-muted-foreground tabular-nums">
+				<div className="max-h-[45%] shrink-0 overflow-auto border-t px-2 py-1 text-[10px] text-muted-foreground tabular-nums">
 					{footer}
 				</div>
 			)}
