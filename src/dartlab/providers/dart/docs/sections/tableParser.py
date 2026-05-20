@@ -37,33 +37,39 @@ def _normalizeHashCell(cell: str) -> str:
     return c
 
 
+_RE_SENTENCE_ENDING = re.compile(r"(?:니다|입니다|같습니다|있습니다|없습니다|됩니다|합니다)\.?\s*$")
+
+
 def tableHeaderHash(md: str) -> str:
-    """markdown 표의 *real header row* (period-variable meta 제외) cells 의 안정 hash.
+    """markdown 표의 *real header row* (period-variable meta + intro 문 제외) cells 의 안정 hash.
 
     옛/최근 보고서의 *다른 의미* 표가 sourceBlockOrder 위치만 같다고 같은 segmentKey
-    받는 회귀 차단용. cells 의 period-variable meta (기준일/단위/연도/기수) 제거 후
-    normalize (lowercase + sorted) → blake2b 4-byte hex.
-
-    같은 의미 표 (분기·연간 본점소재지) 는 *meta 변동 무관 같은 hash* → 같은 segmentKey →
-    wide-format 의 *같은 row* → period 비교 가능.
+    받는 회귀 차단용. 진짜 column header row 추출:
+    - separator row (---) skip
+    - meta-only row (기준일/단위/연도) skip
+    - **intro 문 row** ("...같습니다.", "...입니다." 류 종결사 sentence) skip — period 별
+      변동되는 본문 sentence 가 첫 row 인 경우 차단
+    - 첫 진짜 header (column names) 의 cells 정규화 + sorted → blake2b 4-byte hex.
 
     Args:
         md: markdown 표 본문.
 
     Returns:
-        str — 8 글자 hex hash. 모든 row 가 meta-only 면 ``"empty"``.
+        str — 8 글자 hex hash. 진짜 header row 없으면 ``"empty"``.
     """
     for line in md.strip().split("\n"):
         stripped = line.strip()
         if not stripped.startswith("|"):
             continue
         cells = [_normalizeHashCell(c) for c in stripped.strip("|").split("|")]
-        # separator row 는 skip
+        # separator row skip
         if all(set(c) <= {"-", ":"} for c in cells if c):
             continue
-        # meta-only row (기준일/단위 제거 후 모든 cell 이 empty 또는 noise) 는 skip
         nonEmpty = [c for c in cells if c]
         if not nonEmpty:
+            continue
+        # intro 문 row skip — 본문 sentence 가 첫 row 인 경우. 종결사 매칭 시 next row.
+        if any(_RE_SENTENCE_ENDING.search(c) for c in nonEmpty):
             continue
         norm = tuple(sorted(nonEmpty))
         return hashlib.blake2b(str(norm).encode("utf-8"), digest_size=4).hexdigest()
