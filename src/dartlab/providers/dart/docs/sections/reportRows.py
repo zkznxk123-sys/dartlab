@@ -201,6 +201,24 @@ def _reportRowsToTopicRows(
             _flushPending()
             currentMajorNum = majorNum
             pendingChapter = record
+            # chapter heading row 별도 emit — section_title "1. 회사의 개요" / "2. 회사의 연혁"
+            # 자체를 sections frame 의 textLevel=2 heading row 로 등록. expansion.py 의
+            # parseTextStructureWithState 가 stack root 로 인식 → 후속 sub-heading 의
+            # textPath 가 chapter level 부터 시작 (예 "회사의 개요 > 연결대상 종속회사 개황 > ...").
+            # 이전엔 chapter title 이 textPath stack seed 로만 쓰이고 별도 row 안 됨 → sections
+            # frame 에 chapter level row 부재 (원본 그대로 보존 위배).
+            chapterForRoman = chapterFromMajorNum(majorNum)
+            if chapterForRoman is not None:
+                chapterLabel = stripSectionPrefix(title)
+                chapterTopic = mapSectionTitle(chapterLabel)
+                if chapterTopic:
+                    _registerContent(
+                        chapterForRoman,
+                        chapterTopic,
+                        chapterLabel,
+                        title,
+                        majorNum,
+                    )
             continue
         if currentMajorNum is None:
             continue
