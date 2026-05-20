@@ -67,6 +67,22 @@ _preparedCache: dict[str, "_PreparedRows"] = {}
 # arena 보관이므로 메모리 trade-off 고려.
 _PREPARED_CACHE_MAX = int(os.environ.get("DARTLAB_SECTIONS_CACHE", "1"))
 
+# sections() 최종 출력 cache — Phase 2. _preparedCache (Phase 1) 위에 추가.
+# sections() 본체가 매 호출마다 ~1.6s (SK하이닉스 기준 16 topic 전체 처리) 소요 →
+# viewer 요청마다 새로 계산. 캐시 hit 시 0 비용.
+# 키: (stockCode, frozenset(topics) | None). 값: 결과 DataFrame.
+# 크기 제한: DARTLAB_SECTIONS_RESULT_CACHE env var. default 5.
+_sectionsResultCache: dict[tuple[str, "frozenset[str] | None"], "pl.DataFrame | None"] = {}
+_SECTIONS_RESULT_CACHE_MAX = int(os.environ.get("DARTLAB_SECTIONS_RESULT_CACHE", "5"))
+
+
+def _cacheSectionsResult(cacheKey: tuple[str, "frozenset[str] | None"], result: "pl.DataFrame | None") -> None:
+    """sections() 결과 LRU 캐시 저장. 크기 제한 초과 시 가장 오래된 항목 제거."""
+    if len(_sectionsResultCache) >= _SECTIONS_RESULT_CACHE_MAX:
+        oldest = next(iter(_sectionsResultCache))
+        del _sectionsResultCache[oldest]
+    _sectionsResultCache[cacheKey] = result
+
 
 class _PreparedRows:
     """Phase 1 결과 — parquet 로드 + _reportRowsToTopicRows (polars DF 누적) + teacherTopics.
@@ -182,8 +198,13 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
     """
     if stockCode is None:
         _preparedCache.clear()
+        _sectionsResultCache.clear()
     else:
         _preparedCache.pop(stockCode, None)
+        # 같은 stockCode 의 sections 결과 cache 도 동반 해제 (topics 무관 모두)
+        toRemove = [k for k in _sectionsResultCache if k[0] == stockCode]
+        for k in toRemove:
+            _sectionsResultCache.pop(k, None)
 
 
 from dartlab.providers.dart.docs.sections.pathNormalizer import (  # noqa: F401
@@ -342,6 +363,14 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         TargetMarkets:
             - KR (DART) — 사업/분기/반기 보고서 정기공시 한정.
     """
+    # Phase 2 결과 cache — 같은 (stockCode, topics) 호출 0 비용.
+    cacheKey: tuple[str, "frozenset[str] | None"] = (
+        stockCode,
+        frozenset(topics) if topics is not None else None,
+    )
+    if cacheKey in _sectionsResultCache:
+        return _sectionsResultCache[cacheKey]
+
     # Phase C 본격 처방 — DuckDB PIVOT fast path skeleton.
     # 환경변수 DARTLAB_SECTIONS_FAST_PIVOT=1 활성 시 시도. 실제 SQL 등가 (30+ 컬럼
     # schema + 9-튜플 sort key + List/Categorical/Boolean dtype + _rowFreqMeta
@@ -494,6 +523,7 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     gc.collect()
 
     if not validPeriods or not topicMap:
+        _cacheSectionsResult(cacheKey, None)
         return None
 
     freqMetaByKey = {key: _rowFreqMeta(periodMap) for key, periodMap in topicMap.items()}
@@ -676,7 +706,9 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         seriesList.append(pl.Series(colName, values, dtype=schema[colName]))
         values = None  # noqa: F841 — 즉시 ref drop
     out = pl.DataFrame(seriesList)
-    return _dropChapterCatchAllDuplicates(out)
+    finalOut = _dropChapterCatchAllDuplicates(out)
+    _cacheSectionsResult(cacheKey, finalOut)
+    return finalOut
 
 
 # chapter title catch-all 매칭 — sectionMappings.json 의 "I. 회사의 개요" / "II. 사업의 내용"
