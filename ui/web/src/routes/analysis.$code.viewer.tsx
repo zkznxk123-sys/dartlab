@@ -192,74 +192,7 @@ function _filterToOwnLeaf(allSections: ViewerSection[], ownLeafKey: string): Vie
 	});
 }
 
-// section body 또는 heading 에서 sub-order 추출 — 예 "6-1.", "6-2.", "6-3." 또는 "(1)", "(2)".
-// backend entries 순서가 잘못 박힌 경우 (dividend 처럼 6-3 이 6-1 앞에 옴) 보정 용도.
-function _subOrder(text: string): number | null {
-	if (!text) return null;
-	// "6-1.", "6-2." 같은 N-M. 패턴 우선
-	const dash = /^\s*\d+-(\d+)\.\s/.exec(text);
-	if (dash) return parseInt(dash[1], 10);
-	// "(1)", "(2)" 패턴
-	const paren = /^\s*\((\d+)\)\s/.exec(text);
-	if (paren) return parseInt(paren[1], 10);
-	return null;
-}
-
-// 단순 markdown 파이프 테이블 → 2D 배열. `| --- |` separator row 는 제거.
-// 셀 안 `&cr;` 같은 HTML escape 는 backend 에서 이미 처리됐다고 가정.
-function _parseMarkdownTable(md: string): string[][] {
-	if (!md) return [];
-	const lines = md
-		.split(/\r?\n/)
-		.map((l) => l.trim())
-		.filter((l) => l.includes('|')); // leading | 없어도 OK — DART markdown 일부는 prefix 없음
-	const rows: string[][] = [];
-	for (const line of lines) {
-		// separator row: `| --- | --- |` 또는 leading | 없는 `--- | ---`
-		if (/^\|?\s*[-:|\s]+\|?\s*$/.test(line) && line.replace(/[|\s]/g, '').replace(/[-:]/g, '') === '') continue;
-		const cells = line
-			.replace(/^\|/, '')
-			.replace(/\|$/, '')
-			.split('|')
-			.map((c) => c.trim());
-		if (cells.length > 0) rows.push(cells);
-	}
-	return rows;
-}
-
-function _bodyParagraphs(body: string | undefined | null): string[] {
-	if (!body || !body.trim()) return [];
-	const blocks = body.replace(/\r\n?/g, '\n').split(/\n\s*\n+/);
-	if (blocks.length > 1) {
-		return blocks.map((b) => b.replace(/\s+/g, ' ').trim()).filter(Boolean);
-	}
-	return body
-		.split('\n')
-		.map((line) => line.replace(/\s+/g, ' ').trim())
-		.filter(Boolean);
-}
-
-function _sectionTitle(section: ViewerSection): { text: string; level: number } | null {
-	const path = section.headingPath ?? [];
-	// FIRST non-empty heading — DART headingPath 가 hierarchical 이 아니라 [own, inherited]
-	// 순서로 박혀있는 케이스가 많아 마지막 을 쓰면 옆 section 의 heading 을 자기 것으로 오인.
-	for (let i = 0; i < path.length; i++) {
-		const h = path[i];
-		const text = typeof h === 'string' ? (h as string) : (h?.text ?? '');
-		if (typeof text === 'string' && text.trim().length > 0) {
-			const level = typeof h === 'object' && typeof h?.level === 'number' ? h.level : 0;
-			return { text: text.trim(), level };
-		}
-	}
-	return null;
-}
-
-function _headingStyle(level: number, minLevel: number): { tag: 'h2' | 'h3' | 'h4'; cls: string } {
-	const rel = Math.max(1, level - minLevel + 1);
-	if (rel <= 1) return { tag: 'h2', cls: 'text-lg font-semibold tracking-tight' };
-	if (rel === 2) return { tag: 'h3', cls: 'text-base font-semibold' };
-	return { tag: 'h4', cls: 'text-sm font-semibold text-muted-foreground' };
-}
+// (legacy _subOrder / _parseMarkdownTable / _bodyParagraphs / _sectionTitle / _headingStyle 제거 — SSOT rows[] 사용)
 
 interface TocTopicNodeProps {
 	node: TocTopic;
@@ -497,104 +430,7 @@ function ViewerTab() {
 		}
 		return out;
 	}, [allSections, ownLeafKey]);
-	// 윈도우 3 period 중 한 곳이라도 timeline 에 포함되는 section 만 행으로 노출.
-	const sections = useMemo(() => {
-		if (windowPeriods.length === 0) return sectionsOwn;
-		const ws = new Set(windowPeriods);
-		return sectionsOwn.filter((s) =>
-			(s.timeline ?? []).some((t) => ws.has(_periodLabel(t?.period))),
-		);
-	}, [sectionsOwn, windowPeriods]);
-
-	// section.id → period → body. timeline 게이트로 stale 누설 차단.
-	const bodyByIdByPeriod = useMemo(() => {
-		const map: Record<string, Record<string, string | null>> = {};
-		for (let i = 0; i < windowPeriods.length; i++) {
-			const p = windowPeriods[i];
-			const v = windowViewers[i];
-			if (!p || !v) continue;
-			const secs = v.textDocument?.sections ?? [];
-			for (const s of secs) {
-				const inPeriod = (s.timeline ?? []).some(
-					(t) => _periodLabel(t?.period) === p,
-				);
-				if (!inPeriod) continue;
-				if (!map[s.id]) map[s.id] = {};
-				map[s.id][p] = s.latest?.body ?? null;
-			}
-		}
-		return map;
-	}, [windowPeriods, windowViewers]);
-
-	// blockId → period → markdown (테이블). latest fetch 의 tables 사용 (period 무관).
-	const tablesByBlock = latestViewer?.textDocument?.tables ?? {};
-
-	// entries 순서대로 row 정의. latestViewer 가 SSOT — 본문 row 와 표 row 가 섞임.
-	// row 가 section 이면 sectionsOwn 안에 있어야 통과 (leaf filter 거른 것).
-	const ownIds = useMemo(() => new Set(sectionsOwn.map((s) => s.id)), [sectionsOwn]);
-	const rows = useMemo(() => {
-		const allEntries = latestViewer?.textDocument?.entries ?? [];
-		const ws = new Set(windowPeriods);
-		type Row = (
-			| { kind: 'section'; id: string; section: ViewerSection }
-			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string>; headingPath: ViewerHeading[] }
-		) & { priority: number; subOrder: number; entryIdx: number };
-		const out: Row[] = [];
-		const secMap = new Map(sectionsOwn.map((s) => [s.id, s]));
-		// priority: 윈도우 period index 중 가장 빠른 (=가장 newest) column 에 등장 → 작은 값.
-		// 어디에도 안 보이면 dropped. 같은 priority 면 entry 순서 유지.
-		const _firstWindowIdx = (periodsPresent: Set<string>): number => {
-			for (let i = 0; i < windowPeriods.length; i++) {
-				if (periodsPresent.has(windowPeriods[i])) return i;
-			}
-			return Number.POSITIVE_INFINITY;
-		};
-		for (let ei = 0; ei < allEntries.length; ei++) {
-			const e = allEntries[ei];
-			if (e.kind === 'section') {
-				const sid = e.sectionId ?? '';
-				if (!ownIds.has(sid)) continue;
-				const s = secMap.get(sid)!;
-				const tlSet = new Set((s.timeline ?? []).map((t) => _periodLabel(t?.period)).filter(Boolean));
-				if (![...tlSet].some((p) => ws.has(p))) continue;
-				const pri = _firstWindowIdx(tlSet);
-				// sub-order — body 또는 첫 heading 에서 "N-M." 추출. backend entries 순서가
-				// 잘못된 dividend 같은 topic 에서 6-1 → 6-2 → 6-3 정렬 회복.
-				const titleText = _sectionTitle(s)?.text || '';
-				const bodyText = s.latest?.body || '';
-				const so = _subOrder(bodyText) ?? _subOrder(titleText) ?? Number.POSITIVE_INFINITY;
-				out.push({ kind: 'section', id: `s-${sid}`, section: s, priority: pri, subOrder: so, entryIdx: ei });
-			} else if (
-				e.kind === 'block_ref' &&
-				(e.blockKind === 'raw_markdown' || e.blockKind === 'finance' || e.blockKind === 'structured')
-			) {
-				const bid = e.blockRef;
-				if (bid == null) continue;
-				const pmd = tablesByBlock[bid];
-				if (!pmd) continue;
-				const tablePeriods = new Set(
-					Object.entries(pmd).filter(([, v]) => (v ?? '').trim().length > 0).map(([p]) => p),
-				);
-				if (![...tablePeriods].some((p) => ws.has(p))) continue;
-				const pri = _firstWindowIdx(tablePeriods);
-				// 표는 sub-order 없음 — 표가 sub-section 본문 사이에 등장하면 그 section 의
-				// subOrder 옆에 붙도록 entryIdx 만으로 자연 위치.
-				// entry.headingPath — viewer.py 의 pendingHeadings snapshot, table 위 헤딩 표시용.
-				const hp: ViewerHeading[] = Array.isArray(e.headingPath) ? e.headingPath : [];
-				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd, headingPath: hp, priority: pri, subOrder: Number.POSITIVE_INFINITY, entryIdx: ei });
-			}
-		}
-		// sort 우선순위: (subOrder asc) → (priority asc) → (entryIdx asc).
-		// subOrder 가 명시된 (6-1/6-2/6-3) section 이 *항상* 그 번호 순으로 먼저.
-		// subOrder=∞ 인 section 들 중에선 window 의 newest period 등장 (priority 0) 우선.
-		// 같은 priority 안에선 backend entryIdx 그대로.
-		out.sort((a, b) => {
-			if (a.subOrder !== b.subOrder) return a.subOrder - b.subOrder;
-			if (a.priority !== b.priority) return a.priority - b.priority;
-			return a.entryIdx - b.entryIdx;
-		});
-		return out;
-	}, [latestViewer, sectionsOwn, ownIds, tablesByBlock, windowPeriods]);
+	// (legacy `sections` useMemo + bodyByIdByPeriod / ownIds / rows / tablesByBlock 모두 제거 — SSOT rows[] 사용)
 
 	const dartUrlByPeriod = useMemo(() => {
 		const m: Record<string, string | null> = {};
@@ -605,17 +441,6 @@ function ViewerTab() {
 		}
 		return m;
 	}, [windowPeriods, windowViewers]);
-
-	const minLevel = useMemo(() => {
-		let m = Number.POSITIVE_INFINITY;
-		for (const s of sections) {
-			for (const h of s.headingPath ?? []) {
-				const lvl = typeof h?.level === 'number' ? h.level : 0;
-				if (lvl > 0 && lvl < m) m = lvl;
-			}
-		}
-		return Number.isFinite(m) ? m : 1;
-	}, [sections]);
 
 	// 헤더 시간축 — 전체 periods 의 update 상태 마커. timeline 데이터에서 status 계산.
 	// 단순화 — sections 의 timeline 합쳐 각 period 의 변경 카운트.
@@ -786,37 +611,8 @@ function ViewerTab() {
 							</div>
 						)}
 
-						{/* SSOT rows view — backend rows[] (period × content) 직접 dumb render */}
+						{/* 본문 — sections SSOT rows (period × content) 직접 dumb render */}
 						<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
-
-						{/* 본문 — entries 순서대로 row. section + table 섞임. 3 column 셀 */}
-						{rows.length === 0 ? (
-							<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
-								본문 데이터가 없습니다.
-							</div>
-						) : (
-							<div className="space-y-6">
-								{rows.map((r) =>
-									r.kind === 'section' ? (
-										<SectionRow
-											key={r.id}
-											section={r.section}
-											windowPeriods={windowPeriods}
-											bodyByPeriod={bodyByIdByPeriod[r.section.id] || {}}
-											minLevel={minLevel}
-										/>
-									) : (
-										<TableRow
-											key={r.id}
-											windowPeriods={windowPeriods}
-											periodMd={r.periodMd}
-											headingPath={r.headingPath}
-											minLevel={minLevel}
-										/>
-									),
-								)}
-							</div>
-						)}
 					</div>
 				)}
 			</main>
@@ -909,201 +705,101 @@ function TimelineRibbon({
 	);
 }
 
-interface SectionRowProps {
-	section: ViewerSection;
-	windowPeriods: string[];
-	bodyByPeriod: Record<string, string | null>;
-	minLevel: number;
-}
-
-function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionRowProps) {
-	const title = _sectionTitle(section);
-	const { tag: HeadingTag, cls: headingCls } = title
-		? _headingStyle(title.level || minLevel, minLevel)
-		: { tag: 'h3' as const, cls: '' };
-	return (
-		<section className="scroll-mt-6" id={`sec-${section.id}`}>
-			<div
-				className="grid gap-3"
-				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, minmax(0, 1fr))` }}
-			>
-				{windowPeriods.map((p) => {
-					const body = bodyByPeriod[p];
-					const paragraphs = _bodyParagraphs(body);
-					const has = body !== undefined && body !== null && body !== '';
-					return (
-						<div key={p} className="min-w-0 text-[13px] leading-6 break-words">
-							{/* 헤딩은 body 가 실제로 그 period 에 있을 때만 표시 — sections 가 본문
-							    원문만 emit 하도록 reportRows.py prepend 제거된 이후, heading 행이
-							    실제 본문에 존재할 때만 sections 에 박힘. has 조건이 분기·연간
-							    각 period 의 진짜 본문 부재 시 spurious heading 표시 차단. */}
-							{title && has && (
-								<HeadingTag className={cn(headingCls, 'mb-1.5')}>{title.text}</HeadingTag>
-							)}
-							{paragraphs.length > 0 ? (
-								<div className="space-y-2 text-foreground/90">
-									{paragraphs.map((para, i) => (
-										<p key={i} className="whitespace-pre-wrap">
-											{para}
-										</p>
-									))}
-								</div>
-							) : has ? (
-								<p className="italic text-muted-foreground/50">[본문 없음]</p>
-							) : (
-								<p className="italic text-muted-foreground/30">—</p>
-							)}
-						</div>
-					);
-				})}
-			</div>
-		</section>
-	);
-}
-
-interface TableRowProps {
-	windowPeriods: string[];
-	periodMd: Record<string, string>;
-	headingPath: ViewerHeading[];
-	minLevel: number;
-}
-
-// 표 위에 표시할 헤딩 선택 — 가장 가까운 (= headingPath 의 마지막) 비어있지 않은 헤딩 1 개.
-// topic title 과 중복 가능한 최상위 chapter ("1. 회사의 개요") 대신 표 직속 caption
-// ("[연결대상 종속회사 현황(요약)]") 가 사용자 시선 인식 가치 ↑.
-function _tableHeading(path: ViewerHeading[]): { text: string; level: number } | null {
-	if (!Array.isArray(path) || path.length === 0) return null;
-	for (let i = path.length - 1; i >= 0; i--) {
-		const h = path[i];
-		const text = typeof h === 'string' ? (h as string) : (h?.text ?? '');
-		if (typeof text === 'string' && text.trim().length > 0) {
-			const level = typeof h === 'object' && typeof h?.level === 'number' ? h.level : 0;
-			return { text: text.trim(), level };
-		}
-	}
-	return null;
-}
-
-function TableRow({ windowPeriods, periodMd, headingPath, minLevel }: TableRowProps) {
-	const heading = _tableHeading(headingPath);
-	const { tag: HeadingTag, cls: headingCls } = heading
-		? _headingStyle(heading.level || minLevel, minLevel)
-		: { tag: 'h3' as const, cls: '' };
-	return (
-		<section className="scroll-mt-6">
-			<div
-				className="grid gap-3"
-				style={{ gridTemplateColumns: `repeat(${windowPeriods.length || 1}, minmax(0, 1fr))` }}
-			>
-				{windowPeriods.map((p) => {
-					const md = periodMd[p];
-					if (!md || !md.trim()) {
-						return (
-							<div key={p} className="min-w-0">
-								{heading && (
-									<HeadingTag className={cn(headingCls, 'mb-1.5')}>{heading.text}</HeadingTag>
-								)}
-								<p className="italic text-muted-foreground/30 text-[13px]">—</p>
-							</div>
-						);
-					}
-					const rows = _parseMarkdownTable(md);
-					if (rows.length === 0) {
-						return (
-							<div key={p} className="min-w-0">
-								{heading && (
-									<HeadingTag className={cn(headingCls, 'mb-1.5')}>{heading.text}</HeadingTag>
-								)}
-								<p className="italic text-muted-foreground/40 text-[13px]">[표 파싱 실패]</p>
-							</div>
-						);
-					}
-					return (
-						<div key={p} className="min-w-0 overflow-x-auto tiny-scroll">
-							{heading && (
-								<HeadingTag className={cn(headingCls, 'mb-1.5')}>{heading.text}</HeadingTag>
-							)}
-							<table className="w-full border-collapse text-[12px]">
-								<tbody>
-									{rows.map((cells, ri) => (
-										<tr key={ri} className="border-b border-border/40">
-											{cells.map((c, ci) => (
-												<td
-													key={ci}
-													className={cn(
-														'border border-border/30 px-2 py-1 align-top break-words',
-														ri === 0 && 'bg-muted/30 font-medium',
-													)}
-												>
-													{c}
-												</td>
-											))}
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					);
-				})}
-			</div>
-		</section>
-	);
-}
-
 /**
- * SSOT rows view — backend `rows: ViewerRow[]` (period × content) 직접 dumb render.
+ * sections SSOT row view — backend `rows: ViewerRow[]` (period × content) 직접 dumb render.
  *
- * sections SSOT 3 원칙 구현 (operation.sectionsRefactor §12):
+ * operation.sectionsRefactor §12:
  * - 원본 보존: textPath / textLevel / blockOrder 원본 그대로
  * - 같은 의미 같은 row: 1 row × N period cells (path-anchored)
- * - dumb 소비: cells[period] 값 그대로 표시 — paragraph re-split / heading 합성 0
- *
- * 옛 SectionRow + TableRow 통합. backend Phase C 의 rows SSOT 산출에 직접 의존.
+ * - dumb 소비: cells[period] 값 그대로 — paragraph re-split / heading 합성 0.
+ *   blockType=table 인 cell 만 markdown table syntax → HTML table 변환 (시각 표시 용도).
  */
+
+// markdown table (`| a | b |\n| --- | --- |\n| 1 | 2 |`) → 2D string array.
+// separator row (`| --- | :--- |`) skip. dumb parser — 별 가공 없이 cell 분리만.
+function parseMarkdownTable(md: string): string[][] {
+	const lines = md.split('\n');
+	const out: string[][] = [];
+	for (const raw of lines) {
+		const line = raw.trim();
+		if (!line.startsWith('|')) continue;
+		const cells = line.replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+		if (cells.every((c) => /^[:\-\s]*$/.test(c))) continue;
+		out.push(cells);
+	}
+	return out;
+}
+
+function CellContent({ value, blockType }: { value: string; blockType: string }) {
+	if (!value) return <span className="text-xs italic text-muted-foreground">·</span>;
+	if (blockType === 'table' && value.includes('|')) {
+		const rows = parseMarkdownTable(value);
+		if (rows.length === 0) return <pre className="whitespace-pre-wrap break-words text-xs">{value}</pre>;
+		const ncols = Math.max(...rows.map((r) => r.length));
+		return (
+			<div className="overflow-x-auto">
+				<table className="w-full border-collapse text-xs">
+					<tbody>
+						{rows.map((r, ri) => {
+							const isHeader = ri === 0;
+							const Cell = isHeader ? 'th' : 'td';
+							const padded = [...r];
+							while (padded.length < ncols) padded.push('');
+							return (
+								<tr key={ri} className={isHeader ? 'bg-muted/50' : ''}>
+									{padded.map((c, ci) => (
+										<Cell key={ci} className="border border-border px-2 py-1 align-top text-left font-normal">
+											{c.replace(/&cr;/g, ' ')}
+										</Cell>
+									))}
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
+		);
+	}
+	return <div className="whitespace-pre-wrap break-words text-sm">{value}</div>;
+}
+
 function SsotRowsView({ rows, windowPeriods }: { rows: ViewerRow[]; windowPeriods: string[] }) {
 	if (rows.length === 0) {
 		return (
-			<div className="my-3 rounded-md border border-dashed border-blue-300 bg-blue-50/30 p-4 text-center text-xs text-blue-900">
-				SSOT rows 비어있음 (backend rows[] 미반환 또는 topic 본문 0).
+			<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
+				본문 데이터가 없습니다.
 			</div>
 		);
 	}
 	const periodsToShow = windowPeriods.length > 0 ? windowPeriods : Object.keys(rows[0]?.cells ?? {}).slice(0, 3);
 	return (
-		<section className="my-4 rounded-md border border-blue-200 bg-blue-50/20 p-3">
-			<div className="mb-2 flex items-center gap-2 text-xs font-semibold text-blue-900">
-				<span className="rounded bg-blue-200 px-1.5 py-0.5 font-mono text-[10px]">SSOT</span>
-				<span>sections row view — {rows.length} rows × {periodsToShow.length} periods</span>
-			</div>
-			<div className="space-y-1">
-				{rows.map((r) => (
-					<div key={`${r.blockOrder}|${r.segmentKey ?? ''}`} className="rounded border border-blue-200 bg-white px-2 py-1.5 text-xs">
-						<div className="mb-1 flex items-center gap-2 text-[10px] text-blue-900/70">
-							<span className="font-mono">bo={r.blockOrder}</span>
-							<span className="rounded bg-blue-100 px-1 py-px font-mono">{r.blockType}</span>
-							<span className="font-mono">{r.textNodeType ?? '-'}</span>
-							{r.textLevel != null && <span className="font-mono">L={r.textLevel}</span>}
-							{r.textPath && <span className="truncate" title={r.textPath}>{r.textPath}</span>}
-						</div>
-						<div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
+		<div className="space-y-4">
+			{rows.map((r) => {
+				const isHeading = r.textNodeType === 'heading';
+				return (
+					<div key={`${r.blockOrder}|${r.segmentKey ?? ''}`}>
+						{r.textPath && (
+							<div className="mb-1 truncate text-xs text-muted-foreground" title={r.textPath}>
+								{r.textPath}
+							</div>
+						)}
+						<div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
 							{periodsToShow.map((p) => {
 								const cell = r.cells?.[p] ?? '';
 								return (
-									<div key={p} className="rounded border border-gray-100 bg-gray-50 p-1.5 text-[11px]">
-										<div className="mb-1 font-mono text-[9px] text-muted-foreground">{p}</div>
-										{cell ? (
-											<div className="whitespace-pre-wrap break-words">{cell}</div>
-										) : (
-											<div className="text-[10px] italic text-muted-foreground">·</div>
-										)}
+									<div
+										key={p}
+										className={`rounded border p-2 ${isHeading ? 'bg-muted/30 font-semibold' : 'bg-card'}`}
+									>
+										<CellContent value={cell} blockType={r.blockType} />
 									</div>
 								);
 							})}
 						</div>
 					</div>
-				))}
-			</div>
-		</section>
+				);
+			})}
+		</div>
 	);
 }
 
