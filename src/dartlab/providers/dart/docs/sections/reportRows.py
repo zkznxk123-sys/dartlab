@@ -102,7 +102,7 @@ def _reportRowsToTopicRows(
     currentMajorNum: int | None = None
     idx = 0
     pendingChapter: dict[str, object] | None = None
-    pendingSubLines: set[str] = set()
+    chapterSubCount: dict[int, int] = {}
     if subset.is_empty():
         return pl.DataFrame(schema=_REPORT_ROW_SCHEMA)
 
@@ -116,8 +116,6 @@ def _reportRowsToTopicRows(
         rawT: str,
         content: str,
         majorNum: int,
-        *,
-        trackedSubLines: set[str] | None = None,
     ) -> None:
         nonlocal idx
         topicKey = (ch, tp)
@@ -134,66 +132,35 @@ def _reportRowsToTopicRows(
             sourceTopics.append(rawT)
             nextBlockOrder += 1
             idx += 1
-            if trackedSubLines is not None:
-                for ln in blockText.splitlines():
-                    s = ln.strip()
-                    if s:
-                        trackedSubLines.add(s)
         topicBlockCounts[topicKey] = nextBlockOrder
 
-    def _registerPendingChapter() -> None:
-        """chapter row 처리. sub-section 이 *없으면* 전체 등록 (lonely chapter).
-        sub-section 이 *있으면* chapter content 의 block 중 sub-section 에 없는
-        unique block 만 등록 — 옛 보고서의 chapter-only 표/본문 손실 차단."""
-        nonlocal pendingChapter, pendingSubLines, idx
+    def _flushPending() -> None:
+        """chapter section 본문 등록 — sub-section 이 *없을 때만* (lonely chapter fallback).
+
+        sub-section 이 있으면 chapter 본문은 sub 합본 (중복) — skip 으로 chapter mix
+        차단. KB금융 같이 chapter 본문이 거의 비어있고 sub 도 없는 경우만 lonely
+        등록. 옛 unique line 휴리스틱 (8자 임계 line 비교) 은 chapter header line
+        ("I. 회사의 개요") 이 sub 본문에 없어 unique 로 잡혀 chapter 본문 통째
+        등록 → chapter mix 회귀 — 본 fix 로 폐기.
+        """
+        nonlocal pendingChapter, idx
         if pendingChapter is None:
-            pendingSubLines = set()
             return
         pTitle = str(pendingChapter.get("section_title") or "").strip()
         pContent = str(pendingChapter.get(contentCol) or "").strip()
         pMajor = parseMajorNum(pTitle)
-        if pMajor is not None and pContent:
-            ch = chapterFromMajorNum(pMajor)
-            if ch is not None:
-                rawT = stripSectionPrefix(pTitle)
-                tp = mapSectionTitle(rawT)
-                if not pendingSubLines:
-                    _registerContent(ch, tp, rawT, pContent, pMajor)
-                else:
-                    uniqueBlocks: list[tuple[str, str]] = []
-                    for blockType, blockText in _splitContentBlocks(pContent):
-                        lines = [ln.strip() for ln in blockText.splitlines() if ln.strip()]
-                        if not lines:
-                            continue
-                        missing = [ln for ln in lines if ln not in pendingSubLines]
-                        # 8자 미만 line 만 있는 block 은 unique 후보에서 제외.
-                        # pipeline.py 의 이전 ratio 50% 임계는 표 한두 줄 누락
-                        # 케이스를 놓쳤음. 본 임계는 chapter-only 표 손실 차단 +
-                        # sub-section 중복 차단의 균형점.
-                        meaningful = [ln for ln in missing if len(ln) >= 8]
-                        if meaningful:
-                            uniqueBlocks.append((blockType, blockText))
-                    if uniqueBlocks:
-                        topicKey = (ch, tp)
-                        nextBlockOrder = topicBlockCounts.get(topicKey, 0)
-                        for blockType, blockText in uniqueBlocks:
-                            chapters.append(ch)
-                            topics.append(tp)
-                            blockTypes.append(blockType)
-                            blockOrders.append(nextBlockOrder)
-                            sourceBlockOrders.append(nextBlockOrder)
-                            texts.append(blockText)
-                            majorNums.append(pMajor)
-                            orderSeqs.append(idx)
-                            sourceTopics.append(rawT)
-                            nextBlockOrder += 1
-                            idx += 1
-                        topicBlockCounts[topicKey] = nextBlockOrder
         pendingChapter = None
-        pendingSubLines = set()
-
-    def _flushPending() -> None:
-        _registerPendingChapter()
+        if pMajor is None or not pContent:
+            return
+        if chapterSubCount.get(pMajor, 0) > 0:
+            # sub-section 본문 이미 등록됨 — chapter section 은 redundant.
+            return
+        ch = chapterFromMajorNum(pMajor)
+        if ch is None:
+            return
+        rawT = stripSectionPrefix(pTitle)
+        tp = mapSectionTitle(rawT)
+        _registerContent(ch, tp, rawT, pContent, pMajor)
 
     for values in subset.iter_rows():
         title = str(values[titleIdx] or "").strip()
@@ -211,7 +178,6 @@ def _reportRowsToTopicRows(
             _flushPending()
             currentMajorNum = majorNum
             pendingChapter = record
-            pendingSubLines = set()
             continue
         if currentMajorNum is None:
             continue
@@ -222,19 +188,14 @@ def _reportRowsToTopicRows(
 
         rawTitle = stripSectionPrefix(title)
         topic = mapSectionTitle(rawTitle)
-        # section_title prepend 제거 — 본문에 없는 헤딩 ("1. 회사의 개요" 등) 을
-        # 합성해 분기 column 에 sub-section heading ("나. 상호의 변경" 등) 이
-        # falling back 으로 표시되는 회귀 차단. 본문 원문만 emit → "본문에 있는
-        # 것만 표시" SSOT. cross-section alias 는 segmentKey 의 topic prefix 로
-        # 이미 분리 (per-topic occurrence 카운터) — prepend 없이도 안전.
         _registerContent(
             chapter,
             topic,
             rawTitle,
             content.strip(),
             currentMajorNum,
-            trackedSubLines=pendingSubLines,
         )
+        chapterSubCount[currentMajorNum] = chapterSubCount.get(currentMajorNum, 0) + 1
 
     _flushPending()
 
