@@ -37,12 +37,17 @@ sys.path.insert(0, str(REPO_ROOT))
 
 DOCS_DIR = REPO_ROOT / "data" / "dart" / "docs"
 
-# heading 마커 검출
-_RE_KOR_HEAD = re.compile(r"^([가나다라마바사아자차카타파하])\.\s+(\S.*)$")
+# heading 마커 검출 — DART parquet 본문 line-start patterns
+_RE_KOR_HEAD = re.compile(r"^([가나다라마바사아자차카타파하])\.\s*(\S.*)$")
 _RE_NUM_HEAD = re.compile(r"^(\d+)\.\s+(\S.*)$")
 _RE_ROMAN_HEAD = re.compile(r"^([IVXLCDM]+)\.\s+(\S.*)$")
-_RE_PAREN_NUM_HEAD = re.compile(r"^\((\d+)\)\s+(\S.*)$")
-_RE_PAREN_KOR_HEAD = re.compile(r"^\(([가-힣])\)\s+(\S.*)$")
+_RE_PAREN_NUM_HEAD = re.compile(r"^\((\d+)\)\s*(\S.*)$")
+_RE_PAREN_KOR_HEAD = re.compile(r"^\(([가-힣])\)\s*(\S.*)$")
+# bracket / paren / circle 단독 sub-section marker
+_RE_BRACKET_HEAD = re.compile(r"^(\[.+?\])\s*$")
+_RE_PAREN_PHRASE_HEAD = re.compile(r"^(\(.+?\))\s*$")
+_RE_CIRCLE_HEAD = re.compile(r"^([①-⑳⓪])\s+(\S.*)$")
+_RE_BULLET_HEAD = re.compile(r"^([▣▶◈ㅇ•※☞])\s*(\S.*)$")
 
 # 본문 fragment 제외 패턴 (heading 같은데 본문)
 _BODY_VERB_END = re.compile(r"(?:니다|됩니다|입니다|있습니다|없습니다|같습니다|바랍니다)\.?\s*$")
@@ -67,15 +72,23 @@ def _extractHeadings(content: str) -> list[tuple[int, str, str, str]]:
         if _BODY_VERB_END.search(line):
             continue
         for kind, pat in (
+            ("bracket", _RE_BRACKET_HEAD),
+            ("parenPhrase", _RE_PAREN_PHRASE_HEAD),
             ("kor", _RE_KOR_HEAD),
             ("num", _RE_NUM_HEAD),
             ("roman", _RE_ROMAN_HEAD),
             ("parenNum", _RE_PAREN_NUM_HEAD),
             ("parenKor", _RE_PAREN_KOR_HEAD),
+            ("circle", _RE_CIRCLE_HEAD),
+            ("bullet", _RE_BULLET_HEAD),
         ):
             m = pat.match(line)
             if m:
-                marker, label = m.group(1), m.group(2).strip()
+                if kind in ("bracket", "parenPhrase"):
+                    label = m.group(1).strip()
+                    marker = label[0]
+                else:
+                    marker, label = m.group(1), m.group(2).strip() if m.lastindex and m.lastindex >= 2 else m.group(1)
                 # label 자체가 verb-ending 이면 본문 fragment
                 if _BODY_VERB_END.search(label):
                     continue
