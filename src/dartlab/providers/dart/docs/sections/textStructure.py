@@ -232,7 +232,8 @@ _LABEL_CLOSING_NOUNS = (
     "기간",
     "주소",
     "번호",
-    "주요",
+    # "주요" 제거 — modifier 로 자주 쓰임 ("주요 사업의 내용", "주요 계약"). closing noun
+    # 로 split 시 "바. 주요 사업의 내용" → "바. 주요" + "사업의 내용" 의 부적절 truncation.
     "소재지",
     "홈페이지",
     "사업부문",
@@ -251,6 +252,10 @@ _PAREN_CORPORATE_ABBREV = frozenset({"주", "사", "유", "재", "합", "조", "
 # noun split 잔재) 같은 body fragment 가 heading 으로 박혀 textPath 오염.
 _HEADING_JOSA_PREFIX = re.compile(r"^(?:에서|로서|로|는|은|이|가|을|를|의|도|만|과|와|및|또는|이며|에게|에게서)\s")
 
+# 본문 conjunction adverb 단독 — "또한", "그러나", "그리고", "이러한", "다만" 등이 단독
+# 또는 첫 단어로 등장 시 본문 절 conjunction. heading 명사구 아님.
+_HEADING_CONJ_PREFIX = re.compile(r"^(?:또한|그러나|그리고|이러한|다만|아울러|특히|한편|이에|그러므로|따라서)(?:\s|$)")
+
 
 def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
     """heading label gate — label 이 본문 fragment 같으면 None 반환.
@@ -266,11 +271,19 @@ def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
         return None
     if _HEADING_JOSA_PREFIX.match(label):
         return None
+    if _HEADING_CONJ_PREFIX.match(label):
+        return None
     # 종결문 검출 — heading 은 명사구 (체언) 가 일반. "...니다." / "...됩니다." 등 종결어미는 fragment.
     if re.search(r"(?:니다|됩니다|입니다|하였습니다|있습니다|없습니다|같습니다|바랍니다)\.?$", label):
         return None
     # 본문 절 conjunction — 한 절 안 verb-ending + 후속 절 (heading 은 단일 명사구)
     if re.search(r"(?:하여|되어|함으로|함에|되면|하면|함을|되었으며|하였으며)\s", label):
+        return None
+    # 명사형 종결사 "...함" / "...됨" / "...임" / "...있음" / "...없음" — 본문 절 nominalizer
+    # 명사형 종결사 단독은 정상이지만 (예 "조달함") long label 의 끝이면 보고형 본문.
+    if len(label) > 20 and re.search(
+        r"(?:분석함|평가함|판단함|기록함|관리함|운영함|적용함|구성됨|반영됨|기재됨)\.?$", label
+    ):
         return None
     return (level, label, True)
 
