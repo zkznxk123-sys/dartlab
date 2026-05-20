@@ -1,11 +1,11 @@
 """항목 → snakeId 매핑.
 
-매핑 파이프라인 단계 (입력·사전 양방향 normalize + 짧은 suffix 흡수):
+매핑 파이프라인 단계 (사전 hit 우선 + 입력·사전 양방향 normalize + 짧은 suffix 흡수):
 
-1. account_id prefix 제거 → normalizedId
-2. ID_SYNONYMS 로 영문 ID 동의어 통합
-3. ACCOUNT_NAME_SYNONYMS 로 한글명 동의어 통합
-4. accountMappings.json 직접 조회 (한글명 우선 → 영문ID)
+1. account_id prefix 제거 → normalizedId (정보 유지 정규화)
+2. **사전 직접 hit — accountNm / normalizedId** (synonym 우회 X · 의미 보존 우선)
+3. ACCOUNT_NAME_SYNONYMS 로 한글명 동의어 통합 후 재조회
+4. ID_SYNONYMS 로 영문 ID 동의어 통합 후 재조회
 5. 입력 공백 제거 후 사전 직접 조회
 6. 사전 공백 변형 역인덱스 조회 (사전 키 공백/tab/ZWSP 흡수)
 7. 입력 괄호+공백 제거 후 사전 직접 조회
@@ -15,6 +15,11 @@
 11. 입력 짧은 한국어 suffix 제거 후 사전 재조회 — '액'/'등'/'외' 1글자
     (cycle 12 회귀: '영업양도로 인한 현금 유입' ↔ '영업양도로 인한 현금유입액')
 12. 미매핑 → None
+
+(2) 단계 우선은 사전 직접 박힌 매핑의 *의미 보존*. 사전에
+``'현금배당' → cash_dividends_paid`` 가 있을 때 ``ACCOUNT_NAME_SYNONYMS``
+``'현금배당' → '배당금'`` 정규화가 ``mappings['배당금'] = dividends`` 로
+우회하면 정보 손실. (2) 가 사전 hit 을 먼저 흡수.
 
 데이터 SSOT (`engines.mappers` 학습 파이프라인 참조):
 
@@ -447,6 +452,15 @@ class AccountMapper:
         stripped = _stripPrefix(accountId) if accountId else ""
         normalizedId = ID_SYNONYMS.get(stripped, stripped)
 
+        # 1. 사전 직접 hit (synonym 정규화 전) — 의미 보존 우선
+        # 사전에 '현금배당 → cash_dividends_paid' 가 박혀 있는데 SYNONYMS 가
+        # '현금배당 → 배당금' 으로 우회하면 정보 손실. 사전 hit 우선.
+        if accountNm and accountNm in self._mappings:
+            return self._mappings[accountNm]
+        if stripped and stripped in self._mappings:
+            return self._mappings[stripped]
+
+        # 2. ACCOUNT_NAME_SYNONYMS 정규화 후 재조회 — 사전에 없는 변형 흡수
         normalizedNm = ACCOUNT_NAME_SYNONYMS.get(accountNm, accountNm) if accountNm else ""
 
         if normalizedNm and normalizedNm in self._mappings:
