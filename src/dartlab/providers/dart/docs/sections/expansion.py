@@ -27,6 +27,11 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
     headingStateByTopic: dict[str, list[dict[str, object]]] = {}
     keyer = SegmentKeyer()
     lastHeadingKeyByTopic: dict[str, str] = {}
+    # topic 별 sticky promoteKorean — 한 번 한글 root 로 결정되면 후속 chunk 모두
+    # 한글 root 유지. chunk-level promoteKorean 은 src=0 한글 → src=2 numeric →
+    # src=4 한글 순서에서 src=2 의 numeric 이 root 로 박혀 src=4 의 한글이 sub 로
+    # misattribute (LG 회귀). topic-level sticky 로 차단.
+    promoteKoreanByTopic: dict[str, bool] = {}
 
     hasProjection = False
     for row in rows:
@@ -101,12 +106,17 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
 
         text = str(row.get("text") or "").strip()
         initialHeadings = headingStateByTopic.get(topic, [])
-        nodes, finalHeadings = parseTextStructureWithState(
+        stickyPromote = promoteKoreanByTopic.get(topic)
+        nodes, finalHeadings, chunkPromoteKorean = parseTextStructureWithState(
             text,
             sourceBlockOrder=sourceBlockOrder,
             topic=topic,
             initialHeadings=initialHeadings,
+            promoteKorean=stickyPromote,
         )
+        # 한 번 True 로 결정되면 sticky — topic 의 후속 chunk 모두 한글 root 유지.
+        if chunkPromoteKorean and not stickyPromote:
+            promoteKoreanByTopic[topic] = True
         headingStateByTopic[topic] = finalHeadings
         if topic in _NOTES_TOPICS and finalHeadings:
             lastLabel = str(finalHeadings[-1].get("label") or "")

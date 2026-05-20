@@ -332,7 +332,8 @@ def parseTextStructureWithState(
     sourceBlockOrder: int,
     topic: str | None = None,
     initialHeadings: list[dict[str, Any]] | None = None,
-) -> tuple[list[dict[str, object]], list[dict[str, Any]]]:
+    promoteKorean: bool | None = None,
+) -> tuple[list[dict[str, object]], list[dict[str, Any]], bool]:
     """텍스트를 소제목 계층 구조로 파싱하고, 최종 heading stack도 함께 반환한다.
 
     Args:
@@ -465,17 +466,23 @@ def parseTextStructureWithState(
     # (numeric > 한글) 이 비표준 본문 (현대차/LG/삼성물산 등 "가. ... / 1. ...
     # sub-numbering" 구조) 에서 역전되어 후속 한글 sibling 들이 numeric 의 sub 로
     # 박히는 회귀 차단. Roman 은 항상 chapter top 이라 강등 대상 X.
-    promoteKorean = False
-    for s in splitLines:
-        if not s:
-            continue
-        h = _detectHeading(s)
-        if h is None:
-            continue
-        firstLevel = h[0]
-        if firstLevel == 3:  # 한글이 chunk root
-            promoteKorean = True
-        break  # 첫 heading 만 봄
+    # promoteKorean 파라미터: None = chunk 첫 heading 으로 결정, True/False = 강제
+    # (topic-level sticky). expansion.py 가 topic 단위 sticky 보관.
+    effectivePromoteKorean: bool
+    if promoteKorean is None:
+        effectivePromoteKorean = False
+        for s in splitLines:
+            if not s:
+                continue
+            h = _detectHeading(s)
+            if h is None:
+                continue
+            firstLevel = h[0]
+            if firstLevel == 3:  # 한글이 chunk root
+                effectivePromoteKorean = True
+            break  # 첫 heading 만 봄
+    else:
+        effectivePromoteKorean = bool(promoteKorean)
 
     for stripped in splitLines:
         if not stripped:
@@ -491,7 +498,7 @@ def parseTextStructureWithState(
         flushBody()
         level, label, structural = heading
         # 한글 contextual root chunk 안 numeric heading → 한글 (level 3) 의 child (4)
-        if promoteKorean and level == 2:
+        if effectivePromoteKorean and level == 2:
             level = 4
         labelText = _normalizeHeadingText(label)
         labelKey = _headingKey(label)
@@ -562,7 +569,7 @@ def parseTextStructureWithState(
         segmentOrder += 1
 
     flushBody()
-    return nodes, [dict(item) for item in stack]
+    return nodes, [dict(item) for item in stack], effectivePromoteKorean
 
 
 def parseTextStructure(
@@ -618,7 +625,7 @@ def parseTextStructure(
         TargetMarkets:
             - KR (DART) sections text structure.
     """
-    nodes, _stack = parseTextStructureWithState(text, sourceBlockOrder=sourceBlockOrder, topic=topic)
+    nodes, _stack, _promote = parseTextStructureWithState(text, sourceBlockOrder=sourceBlockOrder, topic=topic)
     return nodes
 
 

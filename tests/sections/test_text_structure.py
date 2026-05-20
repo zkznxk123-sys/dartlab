@@ -37,11 +37,11 @@ def test_parse_text_structure_splits_levels_and_bodies():
 
 
 def test_parse_text_structure_carries_heading_state_across_blocks():
-    first, stack = parseTextStructureWithState(
+    first, stack, _promote1 = parseTextStructureWithState(
         "3. 재무상태 및 영업실적(연결 기준)\n가. 재무상태",
         sourceBlockOrder=0,
     )
-    second, _stack2 = parseTextStructureWithState(
+    second, _stack2, _promote2 = parseTextStructureWithState(
         "제56기 당사 자산은 전년 대비 증가하였습니다.\n나. 영업실적\n매출액은 증가하였습니다.",
         sourceBlockOrder=1,
         initialHeadings=stack,
