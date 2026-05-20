@@ -57,10 +57,19 @@ class SegmentKeyer:
         sourceBlockOrder: int,
         notesHeadingKey: str | None,
         isNotesTopic: bool,
+        headerHash: str | None = None,
     ) -> tuple[str, int, str]:
-        """table block — notes topic + heading 키 보유 시 ``table|sem:{key}``, 그 외 ``table|sb:{sb}``."""
+        """table block — notes topic 의 heading key 우선 → 표 header hash 우선 → sourceBlockOrder fallback.
+
+        headerHash 가 있을 때 ``table|h:{hash}`` base 사용 — 옛·최근 보고서의
+        "1번째 표" 위치가 같더라도 표 내용 (헤더) 이 다르면 다른 segmentKey 부여 →
+        wide-format 의 *다른 row* 로 분리. 같은 의미 표 (분기·연간 본점소재지) 는
+        같은 hash → 같은 row → 정상 horizontal align.
+        """
         if isNotesTopic and notesHeadingKey:
             base = f"table|sem:{notesHeadingKey}"
+        elif headerHash:
+            base = f"table|h:{headerHash}"
         else:
             base = f"table|sb:{sourceBlockOrder}"
         return self._emit(topic, base)

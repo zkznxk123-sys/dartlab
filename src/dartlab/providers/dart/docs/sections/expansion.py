@@ -16,6 +16,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 from dartlab.providers.dart.docs.sections.segmentKeyer import SegmentKeyer
+from dartlab.providers.dart.docs.sections.tableParser import tableHeaderHash
 from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
 
 _NOTES_TOPICS = frozenset({"financialNotes", "consolidatedNotes"})
@@ -81,11 +82,15 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             baseRow["textStructural"] = None
             baseRow["segmentOrder"] = 0
             lastKey = lastHeadingKeyByTopic.get(topic)
+            # 표 헤더 hash — 옛/최근 다른 의미 표가 같은 row 로 합쳐지는 회귀 차단.
+            tableText = str(row.get("text") or "")
+            headerHash = tableHeaderHash(tableText) if tableText else None
             segmentKeyBase, occurrence, segmentKey = keyer.forTableBlock(
                 topic,
                 sourceBlockOrder=sourceBlockOrder,
                 notesHeadingKey=lastKey,
                 isNotesTopic=topic in _NOTES_TOPICS,
+                headerHash=headerHash,
             )
             baseRow["segmentKeyBase"] = segmentKeyBase
             baseRow["sortOrder"] = orderSeq * 1000

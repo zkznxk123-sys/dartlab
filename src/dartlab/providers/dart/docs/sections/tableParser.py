@@ -8,10 +8,56 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 from collections import defaultdict
 
 import polars as pl
+
+
+def tableHeaderHash(md: str) -> str:
+    """markdown 표의 첫 데이터 행 (separator 전) cells 의 안정 hash.
+
+    옛/최근 보고서의 *다른 의미* 표가 sourceBlockOrder 위치만 같다고 같은
+    segmentKey 받는 회귀 차단용. cells normalize (lowercase + sorted) →
+    blake2b 4-byte hex. 같은 헤더 = 같은 hash, 다른 헤더 = 다른 hash.
+
+    Args:
+        md: markdown 표 본문 (`| a | b |\\n| --- | --- |\\n| 1 | 2 |` 형태).
+
+    Returns:
+        str — 8 글자 hex hash. table 형태 아니면 ``"empty"``.
+
+    Example:
+        >>> tableHeaderHash("| a | b |\\n| --- | --- |\\n| 1 | 2 |")
+        '...8자리hex...'
+
+    SeeAlso:
+        - ``segmentKeyer.SegmentKeyer.forTableBlock`` — 본 hash 를 base 로 사용.
+
+    Requires:
+        - hashlib
+
+    Capabilities:
+        - 표 헤더 정규화 + 안정 hash → wide-format segmentKey 의 *내용* anchor.
+
+    Guide:
+        - 사용자 API X — sections expansion 내부.
+
+    AIContext:
+        internal segmentKey helper — AI 직접 호출 X.
+    """
+    for line in md.strip().split("\n"):
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [c.strip().lower() for c in stripped.strip("|").split("|")]
+        if all(set(c) <= {"-", ":"} for c in cells if c):
+            continue
+        norm = tuple(sorted(c for c in cells if c))
+        return hashlib.blake2b(str(norm).encode("utf-8"), digest_size=4).hexdigest()
+    return "empty"
+
 
 # ── 서브테이블 분리 ──
 

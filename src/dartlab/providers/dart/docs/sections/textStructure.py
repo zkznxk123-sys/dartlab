@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import html
 import re
 from functools import lru_cache
 from typing import Any, Literal
@@ -85,8 +86,16 @@ _TOPIC_SEGMENT_ALIASES: dict[str, dict[str, str]] = {
 }
 
 
+_HTML_ENTITY_RE = re.compile(r"&[a-zA-Z]+;?|&#\d+;?")
+
+
 def _cleanLine(line: str) -> str:
-    return line.replace("\u00a0", " ").replace("\t", " ").rstrip()
+    # HTML entity \ub514\ucf54\ub4dc \u2014 DART \uc6d0\ubb38\uc5d0 `&cr`, `&cr;&cr` \uac19\uc740 raw entity \uac00 \ub0a8\uc544
+    # textPath / segmentKey \uc624\uc5fc\uc2dc\ud0a4\ub294 \ud68c\uadc0 \ucc28\ub2e8. html.unescape \ub294 \ud45c\uc900 entity
+    # \ub514\ucf54\ub4dc, raw `&cr` (named entity \uc544\ub2d8) \uc740 \ubcc4\ub3c4 strip.
+    decoded = html.unescape(line)
+    decoded = _HTML_ENTITY_RE.sub("", decoded)
+    return decoded.replace("\u00a0", " ").replace("\t", " ").rstrip()
 
 
 @lru_cache(maxsize=2048)
@@ -169,42 +178,53 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     if len(stripped) > 120:
         return None
 
-    m = _RE_BRACKET.match(stripped)
-    if m:
-        text = m.group(1) or m.group(2) or ""
-        structural = not _isTemporalMarker(text)
-        return (1, text.strip(), structural)
-
+    # level 매핑 — 작을수록 root 권위. DART 정기보고서 본문 위계:
+    #   Roman "I."     = 챕터 (level 1, top)
+    #   Numeric "1."   = 섹션 (level 2)
+    #   Korean "가."   = 서브섹션 (level 3)
+    #   Paren "(1)"    = 서브-서브 (level 4)
+    #   Paren "(가)"   = level 5
+    #   Circled ①     = level 5
+    #   Short paren   = level 6 (인라인 마커)
+    #   Bracket "[X]"  = level 7 (표 caption / 인라인 anchor — 최하위)
+    # 이전 매핑은 bracket=1 (top) 이라 표 caption 이 chapter 권위로 stack 비워
+    # ancestor chain 깨졌음. semantic 회복 — bracket 을 가장 깊은 level 로.
     m = _RE_ROMAN.match(stripped)
     if m:
-        return (2, m.group(1).strip(), True)
+        return (1, m.group(1).strip(), True)
 
     m = _RE_NUMERIC.match(stripped)
     if m:
-        return (3, m.group(1).strip(), True)
+        return (2, m.group(1).strip(), True)
 
     m = _RE_KOREAN.match(stripped)
     if m:
-        return (4, m.group(1).strip(), True)
+        return (3, m.group(1).strip(), True)
 
     m = _RE_PAREN_NUM.match(stripped)
     if m:
-        return (5, m.group(2).strip(), True)
+        return (4, m.group(2).strip(), True)
 
     m = _RE_PAREN_KOR.match(stripped)
     if m:
-        return (6, m.group(2).strip(), True)
+        return (5, m.group(2).strip(), True)
 
     m = _RE_CIRCLED.match(stripped)
     if m:
-        return (6, m.group(2).strip(), True)
+        return (5, m.group(2).strip(), True)
 
     m = _RE_SHORT_PAREN.match(stripped)
     if m:
         inner = m.group(1).strip()
         if inner and len(inner) <= 48 and not _RE_HEADING_NOISE.match(inner):
             structural = not _isTemporalMarker(inner)
-            return (5, inner, structural)
+            return (6, inner, structural)
+
+    m = _RE_BRACKET.match(stripped)
+    if m:
+        text = m.group(1) or m.group(2) or ""
+        structural = not _isTemporalMarker(text)
+        return (7, text.strip(), structural)
 
     return None
 
@@ -350,13 +370,15 @@ def parseTextStructureWithState(
         labelKey = _headingKey(label)
         stackKey = _canonicalHeadingKey(labelText, labelKey, level=level, topic=topic)
         semanticStackKey = _semanticSegmentKey(stackKey, topic=topic)
+        # @topic alias 가 stack 의 *어느 위치든* 중복이면 alias marker 처리.
+        # 이전 룰은 stack[-1] 만 검사 → 다른 heading 사이에 끼인 같은 @topic alias 가
+        # stack 깊은 위치에 살아있어도 다시 push 되어 "@topic > X > @topic" 같은
+        # 누적 chain 발생. semantic 위배. stack 전체 검사로 차단.
         redundantTopicAlias = (
             structural
             and bool(stack)
-            and level <= 3
             and str(stackKey).startswith("@topic:")
-            and int(stack[-1]["level"]) == level
-            and str(stack[-1]["key"]) == stackKey
+            and any(str(item["key"]) == stackKey for item in stack)
         )
 
         if structural and not redundantTopicAlias:
