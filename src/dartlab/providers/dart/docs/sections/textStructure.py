@@ -146,7 +146,19 @@ def _canonicalHeadingKey(
     level: int,
     topic: str | None,
 ) -> str:
-    if level <= 3 and isinstance(topic, str) and topic:
+    """heading 의 stackKey 결정.
+
+    원칙 1 (원본 hierarchy 보존): L=1 (Roman chapter) 만 @topic alias. L≥2
+    sub-section 은 normal labelKey 로 distinct stack entry push → 본문이
+    chapter row 에 흡수되지 않고 sub-section row 별로 분리 유지.
+
+    회귀 사례 (005930 companyOverview): "가. 회사의 법적·상업적 명칭" 의
+    mapSectionTitle 이 "companyOverview" topic 으로 매핑되어 @topic alias 화 →
+    redundantTopicAlias 로 stack push X → body 의 semanticPathKey 가 chapter
+    root 와 동일 → pivot 에서 chapter row 의 cell 로 merge → sub-section row
+    들은 heading marker 만 갖고 body 부재.
+    """
+    if level <= 1 and isinstance(topic, str) and topic:
         mapped = mapSectionTitle(labelText)
         if mapped == topic:
             return f"@topic:{topic}"
