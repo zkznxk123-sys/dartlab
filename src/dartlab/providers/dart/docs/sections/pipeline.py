@@ -445,14 +445,21 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
             key = (topic, segmentKey)
             if key not in topicMap:
                 topicMap[key] = {}
-            # 같은 (topic, segmentKey, period) 충돌 시 cell 안 concatenate —
-            # ``body|p:`` / ``heading|p:`` path-anchored merge 정공법. SegmentKeyer
-            # 가 같은 path 안 N 회 emit 을 같은 segmentKey 로 모음 → pivot 에서
-            # cell concat (옛 룰 overwrite 는 last 만 살아남아 본문 손실).
-            # text block 만 concat (table 은 별 segmentKey 라 충돌 없음).
+            # 같은 (topic, segmentKey, period) 충돌 시:
+            #  - body: cell 안 concatenate — path-anchored merge (옛 last-wins overwrite
+            #    는 본문 손실). text block 만 (table 은 별 segmentKey 라 충돌 없음).
+            #  - heading: single label per row — 같은 path 의 다른 marker text
+            #    ("(1) X" vs "1. X" 같은 marker 변형) 가 concat 되면 sections 의
+            #    "같은 의미 같은 row" 원칙 위반. first-seen 유지 (period order 가 latest→
+            #    oldest 라 첫 번째 = 가장 최신 marker).
             existingCell = topicMap[key].get(periodKey)
+            textNodeType = row.get("textNodeType")
             if existingCell and blockType == "text" and existingCell != text:
-                topicMap[key][periodKey] = existingCell + "\n\n" + text
+                if textNodeType == "heading":
+                    # heading: 첫 번째 (가장 최신 period 의 first-seen) marker 유지
+                    pass
+                else:
+                    topicMap[key][periodKey] = existingCell + "\n\n" + text
             else:
                 topicMap[key][periodKey] = text
             if isinstance(row.get("textPathKey"), str) and row.get("textPathKey"):
