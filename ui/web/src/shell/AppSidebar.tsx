@@ -9,9 +9,7 @@ import {
 	BookOpen,
 	Download,
 	FileText,
-	Filter,
 	LayoutDashboard,
-	LineChart,
 	MessageSquare,
 	MessageSquarePlus,
 	MoreHorizontal,
@@ -224,33 +222,17 @@ function DashboardNav() {
 	const isFinancial = !!code && pathname.startsWith(`/analysis/${code}/financial`);
 	// v3-r6 — view 없으면 OVERVIEW_KEYS curated 노출 (재무분석 1 view).
 	const activeSubView = isFinancial ? (search?.view ?? null) : null;
-	const isQuant = !!code && pathname.startsWith(`/analysis/${code}/quant`);
 	const isViewer = !!code && pathname.startsWith(`/analysis/${code}/viewer`);
-	const isScreener = pathname.startsWith('/screener');
 
-	// 기업분석 그룹 — 단일 기업 심층 분석. 3 항목 (재무제표분석 / 퀀트 / 공시뷰어).
-	// quant 는 응답성 회귀 (viz catalog cold + 카드 다수) 가 정리되기 전까지 비활성.
-	// disabled 항목은 sidebar 에 노출만 하고 클릭 시 라우팅 막음.
+	// 기업분석 그룹 — 단일 기업 심층 분석. 현재 2 항목 (재무제표분석 / 공시뷰어).
+	// quant 는 응답성 회귀 (viz catalog cold + 카드 다수) 가 정리되기 전까지 사이드바에서 제거.
+	// 라우트 + backend 는 유지 — 항목 한 줄 복귀 시 즉시 노출.
 	const corpItems = [
-		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial', disabled: false },
-		{ id: 'quant', title: '퀀트 (준비 중)', icon: LineChart, isActive: isQuant, route: '/analysis/$code/quant', disabled: true },
-		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer', disabled: false },
+		{ id: 'financial', title: '재무제표분석', icon: FileText, isActive: isFinancial, route: '/analysis/$code/financial' },
+		{ id: 'viewer', title: '공시뷰어', icon: Telescope, isActive: isViewer, route: '/analysis/$code/viewer' },
 	] as const;
 
 	const renderCorpButton = (t: (typeof corpItems)[number]) => {
-		// disabled 항목 (예 quant 준비 중) — 클릭 0, 회색조. 회사 유무와 무관.
-		if (t.disabled) {
-			return (
-				<SidebarMenuButton
-					tooltip={`${t.title} — 응답성 작업 중. 추후 활성화`}
-					className="cursor-not-allowed opacity-40"
-					aria-disabled
-				>
-					<t.icon />
-					<span>{t.title}</span>
-				</SidebarMenuButton>
-			);
-		}
 		return code ? (
 			<SidebarMenuButton asChild isActive={t.isActive} tooltip={t.title}>
 				<Link
@@ -308,21 +290,7 @@ function DashboardNav() {
 				</SidebarGroupContent>
 			</SidebarGroup>
 
-			<SidebarGroup>
-				<SidebarGroupLabel>스크리너</SidebarGroupLabel>
-				<SidebarGroupContent>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton asChild isActive={isScreener} tooltip="스크리너 (준비 중)">
-								<Link to="/screener">
-									<Filter />
-									<span>스크리너 (준비 중)</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarGroupContent>
-			</SidebarGroup>
+			{/* 스크리너 그룹 — 응답성/카드 작업 정리 전까지 사이드바에서 제거. 라우트는 유지. */}
 			<CollapsedActionMenu />
 		</>
 	);
