@@ -657,7 +657,11 @@ def _classifyTextType(text: str) -> str:
 
 
 def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> ViewerBlock | None:
-    """text 블록. heading이면 changeSummary 없이, body면 전체 변경 분석."""
+    """text 블록 — sections row 의 period × cell 값 그대로 보유.
+
+    Phase B 슬림화: changeSummary (inline diff + annotated blame) 생성 폐기.
+    frontend 가 미사용 (SectionRow 가 paragraphs 만 표시), backend ~700 라인 dead code.
+    """
     keepCols = [c for c in periodCols if c in boRows.columns]
     nonNullCols = [c for c in keepCols if boRows[c].null_count() < boRows.height]
     if not nonNullCols:
@@ -665,7 +669,6 @@ def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> Vie
 
     textDf = boRows.select(nonNullCols)
 
-    # 최신 기간 텍스트로 heading/body 분류
     row = boRows.row(0, named=True)
     latestText = str(row.get(nonNullCols[-1], ""))
     textType = str(row.get("textNodeType") or "")
@@ -674,12 +677,8 @@ def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> Vie
     if row.get("textStructural") is False and textType == "heading":
         textType = "body"
 
-    # textLevel — sections 메타데이터에서 heading 계층 읽기
     rawLevel = row.get("textLevel")
     textLevel = int(rawLevel) if rawLevel is not None and rawLevel == rawLevel else None
-
-    # heading이면 changeSummary 생성 안 함
-    summary = _buildChangeSummary(boRows, nonNullCols) if textType == "body" else None
 
     return ViewerBlock(
         block=bo,
@@ -691,7 +690,7 @@ def _buildTextBlock(boRows: pl.DataFrame, bo: int, periodCols: list[str]) -> Vie
             rowCount=1,
             colCount=len(nonNullCols),
         ),
-        changeSummary=summary,
+        changeSummary=None,
         textType=textType,
         textLevel=textLevel,
     )
@@ -903,27 +902,25 @@ def _buildTextView(
     period: str,
     periodMap: dict[str, str],
 ) -> ViewerTextView:
-    """section의 한 period snapshot + 직전 동주기 diff."""
+    """section 의 한 period snapshot — sections row cell value 그대로 (Phase B 슬림화).
+
+    Phase B 슬림화: diff (position-anchored chunks) + digest (변경 요약 카드) 폐기.
+    frontend SectionRow 가 `latest.body` 만 표시, `latest.diff`/`latest.digest`/`latest.status`
+    미사용. ~30 라인 dead-code 회피.
+
+    status 는 section-level (`section.timeline[].status`) 가 frontend 가 사용 — view-level
+    status 는 미사용이라 stable default.
+    """
     orderedPeriods = sorted(periodMap.keys(), key=_periodSortKey)
     _inlineHeadings, body = _extractInlineHeadingLines(periodMap[period])
     prevPeriod = _findPreviousComparablePeriod(orderedPeriods, period)
-    prevText = None
-    if prevPeriod is not None:
-        _prevInlineHeadings, prevText = _extractInlineHeadingLines(periodMap[prevPeriod])
-    status = _classifyTextViewStatus(currentText=body, prevText=prevText)
-    inlineDiff = (
-        _computeInlineDiff(prevText, body, prevPeriod, period)
-        if prevPeriod is not None and prevText is not None
-        else None
-    )
-
     return ViewerTextView(
         period=_periodRef(period),
         prevPeriod=_periodRef(prevPeriod) if prevPeriod is not None else None,
         body=body,
-        status=status,
-        diff=_buildPositionAnchoredDiff(body, prevText),
-        digest=_buildDigest([inlineDiff]) if inlineDiff is not None else None,
+        status="stable",
+        diff=[],
+        digest=None,
     )
 
 

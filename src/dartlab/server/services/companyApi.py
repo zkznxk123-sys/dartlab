@@ -371,35 +371,9 @@ def _groupChapterIII(entries: list[TocTopic]) -> list[TocTopic]:
     return top_level
 
 
-# DART parquet section_content 는 HTML ETL 단계에서 줄바꿈/공백 strip → 한 cell 안에
-# 표 (markdown |) + 본문 + (1)(2)/[제목]/※/(기준일) 같은 sub-block 이 concat 된 채로 옴.
-# 가독성 위해 backend 가 marker 앞에 \n\n 삽입 후 viewer 가 whiteSpace:'pre-wrap' 으로 렌더.
-# 표 markdown line (`|` 시작) 은 건들지 않음 — 표 깨짐 차단.
-_PARA_BREAK_PATTERNS = (
-    _re.compile(r"(?<=.)(?=\(\d+\))"),  # (1) (2) ... paren-numeric
-    _re.compile(r"(?<=.)(?=[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])"),  # 동그라미 숫자
-    _re.compile(r"(?<=.)(?=※)"),  # ※ 유의/주석
-    _re.compile(r"(?<=.)(?=\(기준일)"),  # 표 prefix
-    _re.compile(r"(?<=.)(?=\(단위)"),
-    _re.compile(r"(?<=.)(?=\[[^\]\n]{1,40}\])"),  # [짧은 대괄호 제목]
-    _re.compile(r"(?<=.)(?=\d+\.\d+\s+[가-힣])"),  # 1.1 / 1.2 dotted heading
-)
-
-
-def _breakParagraphs(text: str) -> str:
-    """단락 marker 앞 zero-width split 후 \\n\\n 삽입. 표 line 보호."""
-    if not isinstance(text, str) or not text:
-        return text
-    out_lines: list[str] = []
-    for line in text.splitlines():
-        if line.lstrip().startswith("|"):
-            out_lines.append(line)
-            continue
-        broken = line
-        for pat in _PARA_BREAK_PATTERNS:
-            broken = pat.sub("\n\n", broken)
-        out_lines.append(broken)
-    return "\n".join(out_lines)
+# Phase B 슬림화 — `_breakParagraphs` 폐기. backend 의 marker 앞 `\n\n` 삽입은 frontend
+# `_bodyParagraphs` 와 중복. sections cell value 그대로 노출, frontend 가 단일 split.
+# SSOT 원칙: sections layer 의 cell value 가 SSOT, 표시 layer 가 split 책임.
 
 
 _VIEWER_COMPACT_SECTION_KEEP = (
@@ -438,11 +412,8 @@ def _compactTextDocument(
     compactSections = []
     for section in sliced:
         item: dict[str, Any] = {key: section.get(key) for key in _VIEWER_COMPACT_SECTION_KEEP}
-        latest = item.get("latest")
-        if isinstance(latest, dict):
-            body = latest.get("body")
-            if isinstance(body, str) and body:
-                item["latest"] = {**latest, "body": _breakParagraphs(body)}
+        # Phase B 슬림화: backend 의 paragraph re-split (_breakParagraphs) 폐기.
+        # sections cell value 그대로 보존, frontend _bodyParagraphs 가 단일 split.
         compactSections.append(item)
     entries = doc.get("entries") or []
     # raw_markdown + finance 블록 → block id → {period: markdown}.
@@ -457,7 +428,8 @@ def _compactTextDocument(
             rm = b.get("rawMarkdown")
             if not isinstance(rm, dict):
                 continue
-            cleaned = {p: _breakParagraphs(v) for p, v in rm.items() if isinstance(v, str) and v.strip()}
+            # Phase B 슬림화: backend paragraph re-split 폐기. cell value 그대로.
+            cleaned = {p: v for p, v in rm.items() if isinstance(v, str) and v.strip()}
             if cleaned:
                 tables[int(bid)] = cleaned
         elif kind == "structured":
