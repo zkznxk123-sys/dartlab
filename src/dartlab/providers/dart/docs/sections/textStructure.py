@@ -170,6 +170,103 @@ def _bodyAnchor(text: str) -> str:
     return hashlib.blake2b(anchor.encode("utf-8"), digest_size=8).hexdigest()[:12]
 
 
+_LABEL_CLOSING_NOUNS = (
+    "개황",
+    "사항",
+    "내역",
+    "내용",
+    "현황",
+    "여부",
+    "개요",
+    "연혁",
+    "이력",
+    "구성",
+    "변동",
+    "변경",
+    "특징",
+    "구조",
+    "체계",
+    "기준",
+    "방침",
+    "정책",
+    "결과",
+    "분석",
+    "동향",
+    "전망",
+    "계획",
+    "성과",
+    "진척",
+    "수준",
+    "추이",
+)
+_RE_INLINE_PAREN_NUM = re.compile(r"(?<=\s)(?=\(\d+\)\s)")
+_RE_INLINE_PAREN_KOR = re.compile(r"(?<=\s)(?=\([가-힣]\)\s)")
+_RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
+_RE_LINE_HEAD_KOREAN = re.compile(r"^[가-힣]\.\s+(.+)$")
+_RE_LINE_HEAD_NUMERIC = re.compile(r"^\d+\.\s+(.+)$")
+
+
+def _splitInlineMultiHeading(line: str) -> list[str]:
+    """한 줄 안 multi-heading prefix split.
+
+    DART parquet 본문이 일부 회사 (하나금융/신한지주/현대모비스 등) 에서 한 줄에 여러
+    heading prefix 가 줄바꿈 없이 박혀 있음. sections layer 가 정규화 책임 — split 처리.
+
+    잡는 패턴:
+      - "공백 + (1) " / "공백 + (가) " → split (case 2 — 하나금융)
+      - "한글-숫자." (가-1./나-2./...) → split (case 3 — 신한지주)
+      - 한글/numeric heading label 의 *알려진 closing 명사* 직후 한글 단어 시작 → split
+        (case 1 — 현대모비스 "개황연결대상...")
+
+    Args:
+        line: 본문 한 줄 (stripped).
+
+    Returns:
+        list[str] — split 된 sub-line 들. split 없으면 [line].
+    """
+    if not line or line.startswith("|") or len(line) < 10:
+        return [line]
+
+    positions: set[int] = {0}
+    for pat in (_RE_INLINE_PAREN_NUM, _RE_INLINE_PAREN_KOR, _RE_INLINE_KOR_DASH_NUM):
+        for m in pat.finditer(line):
+            if m.start() > 0:
+                positions.add(m.start())
+
+    # case 1 — 한글/numeric heading 의 closing 명사 + 한글 단어 시작 (공백 없이도)
+    head_match = _RE_LINE_HEAD_KOREAN.match(line) or _RE_LINE_HEAD_NUMERIC.match(line)
+    if head_match:
+        labelPart = head_match.group(1)
+        # label 안 closing 명사 위치 (가장 *늦은* 위치 — heading label 의 끝)
+        labelStart = line.index(labelPart)
+        for noun in _LABEL_CLOSING_NOUNS:
+            idx = labelPart.rfind(noun)
+            if idx < 0:
+                continue
+            afterNoun = idx + len(noun)
+            if afterNoun >= len(labelPart):
+                continue
+            nextChar = labelPart[afterNoun]
+            # closing 명사 다음 한글 (단어 시작) — 본문 시작 의심
+            if "가" <= nextChar <= "힣":
+                # 단 본문 시작 단어가 *5 자 이상* 일 때만 (false positive 차단)
+                rest = labelPart[afterNoun:]
+                if len(rest) >= 5:
+                    positions.add(labelStart + afterNoun)
+                    break
+
+    if len(positions) <= 1:
+        return [line]
+    sorted_pos = sorted(positions)
+    sorted_pos.append(len(line))
+    parts: list[str] = []
+    for a, b in zip(sorted_pos[:-1], sorted_pos[1:]):
+        seg = line[a:b].strip()
+        if seg:
+            parts.append(seg)
+    return parts or [line]
+
+
 @lru_cache(maxsize=16384)
 def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     stripped = line.strip()
@@ -351,9 +448,19 @@ def parseTextStructureWithState(
         )
         segmentOrder += 1
 
-    for rawLine in text.splitlines():
-        line = _cleanLine(rawLine)
-        stripped = line.strip()
+    rawLines = text.splitlines()
+    splitLines: list[str] = []
+    for rawLine in rawLines:
+        cleaned = _cleanLine(rawLine)
+        s = cleaned.strip()
+        if not s:
+            splitLines.append("")
+            continue
+        # parquet 본문 줄바꿈 누락 회사 (하나금융/신한지주/현대모비스 등) 정규화 —
+        # 한 줄 안 multi-heading prefix 를 별 line 으로 분리.
+        splitLines.extend(_splitInlineMultiHeading(s))
+
+    for stripped in splitLines:
         if not stripped:
             if bodyLines:
                 bodyLines.append("")
