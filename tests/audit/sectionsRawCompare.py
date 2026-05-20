@@ -126,6 +126,24 @@ def _extractTables(content: str) -> list[tuple[int, list[int]]]:
     return tables
 
 
+def _labelInRawContent(normLabel: str, df: pl.DataFrame) -> bool:
+    """parquet 의 모든 section_content 안 (line-start 아니어도) normLabel substring 매칭.
+
+    inline-split 으로 sections 가 만든 heading 의 label 은 parquet 본문 mid-line 에
+    등장 — line-start match 에 잡히지 않음. 본 함수가 raw content 어디든 매칭.
+    """
+    if len(normLabel) < 4:
+        return False
+    for row in df.iter_rows(named=True):
+        content = row.get("section_content") or ""
+        if not content:
+            continue
+        normContent = re.sub(r"\s+", "", content.replace("&cr;", ""))
+        if normLabel in normContent:
+            return True
+    return False
+
+
 def auditCode(code: str, *, verbose: bool = False) -> dict[str, Any]:
     from dartlab.providers.dart import Company
 
@@ -211,9 +229,18 @@ def auditCode(code: str, *, verbose: bool = False) -> dict[str, Any]:
             stripped = re.sub(r"^\(\d+\)\s*", "", stripped).strip()
             stripped = re.sub(r"^\d+\.\s*", "", stripped).strip()
             stripped = re.sub(r"^[IVX]+\.\s*", "", stripped).strip()
+            stripped = re.sub(r"^[①-⑳⓪]\s*", "", stripped).strip()
+            stripped = re.sub(r"^\([가-힣]\)\s*", "", stripped).strip()
+            stripped = re.sub(r"^[【\[][^】\]]{0,30}[】\]]\s*", "", stripped).strip()
+            stripped = re.sub(r"^[▣▶◈ㅇ•※☞]\s*", "", stripped).strip()
             normStripped = re.sub(r"\s+", "", stripped)[:30]
-            if normStripped not in parquetHeadingLabels and not any(
-                normStripped in pHL for pHL in parquetHeadingLabels if len(pHL) > 5
+            # 추가 정합: parquet raw content 안 *어디든* (line-start 아니어도) 같은
+            # label substring 존재 시 sections heading 의 evidence 있음으로 인정.
+            # inline-split heading 의 label 은 parquet 본문 mid-line 에 등장.
+            if (
+                normStripped not in parquetHeadingLabels
+                and not any(normStripped in pHL for pHL in parquetHeadingLabels if len(pHL) > 5)
+                and not _labelInRawContent(normStripped, df)
             ):
                 spuriousHeadings.append(
                     {
