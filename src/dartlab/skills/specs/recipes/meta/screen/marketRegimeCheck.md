@@ -21,6 +21,8 @@ linkedSkills:
   - recipes.meta.screen.peerBenchmark
   - recipes.meta.screen.portfolioConstruction
   - recipes.macro.scenarioSensitivityMatrix
+  - recipes.fundamental.quality.forensics.crossSectionAnomalyRank
+  - recipes.fundamental.quality.forensics.dataCoverageAudit
 toolRefs:
   - EngineCall
   - RunPython

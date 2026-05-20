@@ -21,6 +21,11 @@ linkedSkills:
   - recipes.fundamental.quality.earningsQualityCheck
   - recipes.fundamental.quality.workingCapitalQuality
   - recipes.fundamental.quality.cashflowGovernanceDualSignal
+  - recipes.fundamental.quality.forensics.revenueToCashBridge
+  - recipes.fundamental.quality.forensics.workingCapitalPressureMap
+  - recipes.fundamental.quality.forensics.eventToStatementMatcher
+  - recipes.fundamental.quality.forensics.noteSignalExtractor
+  - recipes.fundamental.quality.forensics.accountTraceLedger
   - recipes.meta.screen.marketRegimeCheck
 toolRefs:
   - EngineCall

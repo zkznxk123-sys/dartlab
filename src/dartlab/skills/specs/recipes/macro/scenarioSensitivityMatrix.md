@@ -22,6 +22,8 @@ linkedSkills:
   - engines.credit
   - recipes.macro.scenarioAnalysis
   - recipes.meta.screen.marketRegimeCheck
+  - recipes.fundamental.quality.forensics.accountTraceLedger
+  - recipes.fundamental.quality.forensics.crossSectionAnomalyRank
 toolRefs:
   - EngineCall
   - RunPython

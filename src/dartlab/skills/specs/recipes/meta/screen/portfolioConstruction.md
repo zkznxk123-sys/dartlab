@@ -19,6 +19,10 @@ linkedSkills:
   - recipes.meta.screen.marketRegimeCheck
   - recipes.fundamental.valuation.check
   - recipes.fundamental.quality.quarterlyAnomalyDetection
+  - recipes.fundamental.quality.forensics.dataCoverageAudit
+  - recipes.fundamental.quality.forensics.crossSectionAnomalyRank
+  - recipes.fundamental.quality.forensics.falsifierLedger
+  - recipes.fundamental.quality.capitalAllocationScorecard
   - engines.company
   - engines.credit
   - engines.analysis
