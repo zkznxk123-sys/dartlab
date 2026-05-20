@@ -120,6 +120,21 @@ sensitivity = c.analysis("macro", "매크로민감도")   # 기업 단위 매크
 2. **본문 숫자에 `[valueRef:...]` 또는 `[dateRef:...]` inline 표기 필수**. macro 데이터는 시점 (asOf) 변동 큼 — dateRef 누락 시 stale 데이터 환각.
 3. **cycle / inventory 4 phase 판정은 `[conf:30]` 기본** — 회고적 신호임을 명시. NBER vs ECRI vs Cleveland Fed 정의 차이 인지.
 4. **단일 지표로 사이클 단정 금지** — CLI·LEI·yield curve 중 최소 2 종 ref 동행. 단일 지표 답변은 한계 명시 필수.
+5. **macro EngineCall 결과는 본문에 최소 1 개 수치 + dateRef inline 인용 의무**. macro 호출 했는데 답변에 결과 인용 0 회 = evidence flow 누락 회귀 (2026-05-20 OAuth probe 시나리오 F: rates/KR 3 회 호출 후 답변에 금리 수치 0 회 인용, NIM 단정 불가로 회피). 호출 결과의 핵심 지표 (예: KR base rate 3.25% [dateRef:date:macro:rates:KR:2026-Q1]) 1~2 개는 답변 본문 첫 단락에 inline. 결과 부족하면 *그 이유 + 어떤 ref 필요* 한계 명시.
+
+## 산업별 macro 연결 — rates / liquidity / trade
+
+기업 질문 + macro axis 결합 시 주로 등장하는 산업 매핑. 본 매핑은 *직접 결합 규칙* 아닌 *대표 패턴* — 실제 결합은 c.analysis("macro","매크로민감도") + 시나리오 호출로.
+
+| macro axis | 영향 큰 산업 | 결합 시 인용할 macro 지표 | 기업 측 인용할 재무 지표 |
+| --- | --- | --- | --- |
+| rates | 은행·보험·증권·리츠·고PER 성장주 | base rate / 10Y-3M / spread | 은행 NIM·예대마진, 증권 운용수익, 리츠 D/E |
+| liquidity | 자산운용·증권·중소형 성장주 | M2 증가율 / NFCI / 신용스프레드 | 거래대금, 차입 규모, 변동성 |
+| trade | 반도체·자동차·조선·정유 | 수출증가율 / 교역조건 / USD-KRW | 수출 비중·해외 매출, FX 손익 |
+| crisis | 금융·부동산·고레버리지 | Credit-to-GDP gap / Minsky / GHS | D/E, 이자보상배율, 단기차입 |
+| assets | 자산운용·증권·고배당 | 5 자산 배분 / Cu/Au / 위험선호 | ROE, 배당수익률, beta |
+
+본 표 = system prompt 로 노출. macro axis 호출 후 산업 매핑 1~2 개 인용 + 회사 재무 1~2 개 인용으로 *시장-기업 연결* 답변. 표에 없는 산업도 가능 — 표는 "최소한 이 정도는 묶어라" 가이드.
 
 ## 호출 동작
 
