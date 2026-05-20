@@ -259,13 +259,18 @@ def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
     - 조사 prefix 시작 (예 "은 다음과 같습니다.")
     - closing noun 단독 + 너무 짧음 (예 "기준" / "사항")
     - 끝이 마침표/물음표/느낌표 종결 + 한국어 종결어미 ("다.", "요.", "까?", "오.")
+    - 너무 긴 label (>80 글자) — 본문 한 문장 길이 — heading 은 명사구 짧음
+    - 본문 verb-ending mid-sentence 패턴 ("하여 ...", "되어 ...") 포함 — 절 conjunction
     """
-    if not label or len(label) > 120:
+    if not label or len(label) > 80:
         return None
     if _HEADING_JOSA_PREFIX.match(label):
         return None
     # 종결문 검출 — heading 은 명사구 (체언) 가 일반. "...니다." / "...됩니다." 등 종결어미는 fragment.
     if re.search(r"(?:니다|됩니다|입니다|하였습니다|있습니다|없습니다|같습니다|바랍니다)\.?$", label):
+        return None
+    # 본문 절 conjunction — 한 절 안 verb-ending + 후속 절 (heading 은 단일 명사구)
+    if re.search(r"(?:하여|되어|함으로|함에|되면|하면|함을|되었으며|하였으며)\s", label):
         return None
     return (level, label, True)
 
