@@ -786,6 +786,9 @@ function ViewerTab() {
 							</div>
 						)}
 
+						{/* SSOT rows view — backend rows[] (period × content) 직접 dumb render */}
+						<SsotRowsView rows={latestViewer?.rows ?? []} windowPeriods={windowPeriods} />
+
 						{/* 본문 — entries 순서대로 row. section + table 섞임. 3 column 셀 */}
 						{rows.length === 0 ? (
 							<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
@@ -1042,6 +1045,63 @@ function TableRow({ windowPeriods, periodMd, headingPath, minLevel }: TableRowPr
 						</div>
 					);
 				})}
+			</div>
+		</section>
+	);
+}
+
+/**
+ * SSOT rows view — backend `rows: ViewerRow[]` (period × content) 직접 dumb render.
+ *
+ * sections SSOT 3 원칙 구현 (operation.sectionsRefactor §12):
+ * - 원본 보존: textPath / textLevel / blockOrder 원본 그대로
+ * - 같은 의미 같은 row: 1 row × N period cells (path-anchored)
+ * - dumb 소비: cells[period] 값 그대로 표시 — paragraph re-split / heading 합성 0
+ *
+ * 옛 SectionRow + TableRow 통합. backend Phase C 의 rows SSOT 산출에 직접 의존.
+ */
+function SsotRowsView({ rows, windowPeriods }: { rows: ViewerRow[]; windowPeriods: string[] }) {
+	if (rows.length === 0) {
+		return (
+			<div className="my-3 rounded-md border border-dashed border-blue-300 bg-blue-50/30 p-4 text-center text-xs text-blue-900">
+				SSOT rows 비어있음 (backend rows[] 미반환 또는 topic 본문 0).
+			</div>
+		);
+	}
+	const periodsToShow = windowPeriods.length > 0 ? windowPeriods : Object.keys(rows[0]?.cells ?? {}).slice(0, 3);
+	return (
+		<section className="my-4 rounded-md border border-blue-200 bg-blue-50/20 p-3">
+			<div className="mb-2 flex items-center gap-2 text-xs font-semibold text-blue-900">
+				<span className="rounded bg-blue-200 px-1.5 py-0.5 font-mono text-[10px]">SSOT</span>
+				<span>sections row view — {rows.length} rows × {periodsToShow.length} periods</span>
+			</div>
+			<div className="space-y-1">
+				{rows.map((r) => (
+					<div key={`${r.blockOrder}|${r.segmentKey ?? ''}`} className="rounded border border-blue-200 bg-white px-2 py-1.5 text-xs">
+						<div className="mb-1 flex items-center gap-2 text-[10px] text-blue-900/70">
+							<span className="font-mono">bo={r.blockOrder}</span>
+							<span className="rounded bg-blue-100 px-1 py-px font-mono">{r.blockType}</span>
+							<span className="font-mono">{r.textNodeType ?? '-'}</span>
+							{r.textLevel != null && <span className="font-mono">L={r.textLevel}</span>}
+							{r.textPath && <span className="truncate" title={r.textPath}>{r.textPath}</span>}
+						</div>
+						<div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
+							{periodsToShow.map((p) => {
+								const cell = r.cells?.[p] ?? '';
+								return (
+									<div key={p} className="rounded border border-gray-100 bg-gray-50 p-1.5 text-[11px]">
+										<div className="mb-1 font-mono text-[9px] text-muted-foreground">{p}</div>
+										{cell ? (
+											<div className="whitespace-pre-wrap break-words">{cell}</div>
+										) : (
+											<div className="text-[10px] italic text-muted-foreground">·</div>
+										)}
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				))}
 			</div>
 		</section>
 	);
