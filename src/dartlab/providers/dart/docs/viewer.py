@@ -474,11 +474,17 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
     pendingHeadings: list[ViewerBlock] = []
 
     def _materializeHeadingPath(blocksList: list[ViewerBlock]) -> list[ViewerTextHeading]:
-        """ViewerBlock 들을 ViewerTextHeading 으로 변환 (각 block 의 최신 기간 텍스트 선택)."""
+        """ViewerBlock 들을 ViewerTextHeading 으로 변환 — heading 의 *전체 latest* cell value 사용.
+
+        이전엔 _selectNearestPeriodText(map, topicLatestPeriod) 가 nearest fallback 으로
+        target 에 cell 없으면 다른 period 값으로 추측 → 원문에 없는 텍스트가 흘러나가는
+        회귀. fallback 폐기 후 strict 만 — 단 heading 의 자체 latest cell value 가 있으면
+        그것 사용 (heading 의 본문 내 실재 표기).
+        """
         out: list[ViewerTextHeading] = []
         for headingBlock in blocksList:
             headingPeriodMap = _textPeriodMap(headingBlock)
-            chosenPeriod, headingText = _selectNearestPeriodText(headingPeriodMap, topicLatestPeriod)
+            chosenPeriod, headingText = _selectNearestPeriodText(headingPeriodMap, None)
             if headingText is None or chosenPeriod is None:
                 continue
             out.append(
@@ -716,25 +722,29 @@ def _periodRef(period: str) -> PeriodRef:
 def _selectNearestPeriodText(
     periodMap: dict[str, str], targetPeriod: str | None = None
 ) -> tuple[str | None, str | None]:
-    """targetPeriod와 가장 가까운 텍스트를 반환한다.
+    """targetPeriod 에 정확히 매치되는 cell value 반환. 매치 없으면 (None, None).
 
-    같은 기간 우선, 없으면 target 이하 가장 최근, 그래도 없으면 전체 최신.
+    이전 nearest fallback (이전 period 또는 전체 최신 으로 추측) 폐기. 그 fallback
+    이 원문에 없는 텍스트를 다른 period 의 cell value 로 흘려보내 사용자 화면에
+    "본문에 없는 heading 표시" 회귀를 만들었음. sections SSOT 원칙 — 그 period 에
+    cell value 없으면 표시 X. fallback 0.
+
+    targetPeriod=None 일 때만 전체 latest 반환 — 기간 무관 단순 "가장 최신 값"
+    필요할 때 (예 sections preview, 기본 cell choose).
     """
     if not periodMap:
         return (None, None)
 
-    periods = sorted(periodMap.keys(), key=_periodSortKey)
     if targetPeriod is None:
+        periods = sorted(periodMap.keys(), key=_periodSortKey)
         chosen = periods[-1]
         return (chosen, periodMap[chosen])
 
     if targetPeriod in periodMap:
         return (targetPeriod, periodMap[targetPeriod])
 
-    targetKey = _periodSortKey(targetPeriod)
-    previous = [period for period in periods if _periodSortKey(period) <= targetKey]
-    chosen = previous[-1] if previous else periods[-1]
-    return (chosen, periodMap[chosen])
+    # strict — fallback 0. 그 period 에 진짜 값 없으면 None.
+    return (None, None)
 
 
 def _classifyTextSectionStatus(
@@ -934,7 +944,10 @@ def _buildTextSection(
     headingPath: list[ViewerTextHeading] = []
     for headingBlock in headingBlocks:
         headingPeriodMap = _textPeriodMap(headingBlock)
-        chosenPeriod, headingText = _selectNearestPeriodText(headingPeriodMap, latestPeriod)
+        # heading 의 *자체 latest* cell value 사용. 이전엔 latestPeriod (= section body
+        # 의 latest) 기준으로 nearest fallback 했으나 section body period 와 heading
+        # period 가 다를 때 fallback 으로 원문 외 텍스트 노출 회귀. strict + 자체 latest.
+        chosenPeriod, headingText = _selectNearestPeriodText(headingPeriodMap, None)
         if headingText is None or chosenPeriod is None:
             continue
         headingPath.append(
