@@ -38,14 +38,21 @@ export function ChartContainer({ id, className, children, config, ...props }: Ch
 			<div
 				data-chart={chartId}
 				className={cn(
-					"flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+					// shadcn default: `flex aspect-video justify-center` → `block relative w-full`.
+					// 이유: `flex` parent 안 ResponsiveContainer 가 첫 paint frame 에 부모 dim
+					// 측정 실패 → width=-1 / height=-1 워닝 발생 (AreaChart-*.js:14). `block` +
+					// `relative` 로 ResponsiveContainer 의 부모 dim 안정 측정. aspect-video 는
+					// 호출자가 style.height 명시하므로 불필요. text-xs 와 recharts selector
+					// 토큰은 그대로 (shadcn 색·음영 룰 준수).
+					"relative block w-full text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
 					className,
 				)}
 				{...props}
 			>
 				<ChartStyle id={chartId} config={config} />
-				{/* width="99%" — recharts 첫 paint 시 부모 width=0 측정 → -1 fallback 워닝 회피 트릭. */}
-				<RechartsPrimitive.ResponsiveContainer width="99%" height="100%" minHeight={0}>
+				{/* block parent 안에서 width="100%" 가 정확 측정. 옛 99% 트릭은 flex parent
+				    의 first-frame 0 측정 회피용이었으나 block + relative 로 근본 차단. */}
+				<RechartsPrimitive.ResponsiveContainer width="100%" height="100%" minHeight={0} minWidth={0}>
 					{children}
 				</RechartsPrimitive.ResponsiveContainer>
 			</div>
