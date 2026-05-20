@@ -535,6 +535,52 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         _cacheSectionsResult(cacheKey, None)
         return None
 
+    # Cross-path table consolidation — 같은 headerHash + topic 표가 다른 path 에 분기된
+    # 경우 1 row 로 merge. 회귀 사례 (000660 businessOverview): "생산설비의현황" 표가
+    # path "주요제품서비스등 > 생산설비의현황" (9 cells annual) 과 path "생산설비의현황"
+    # (1 cell quarterly) 으로 fragment — parquet 구조 variance 로 같은 표가 다른 parent
+    # 아래 emit. headerHash 동일 → 같은 표 → 1 row 통합 (longest path = canonical).
+    _RE_H_IN_SK = re.compile(r"\|h:([0-9a-f]+)")
+    hashGroups: dict[tuple[str, str], list[tuple[str, str]]] = {}
+    for key in topicMap.keys():
+        topic_, sk_ = key
+        if not sk_.startswith("table|"):
+            continue
+        m_ = _RE_H_IN_SK.search(sk_)
+        if not m_:
+            continue
+        hashGroups.setdefault((topic_, m_.group(1)), []).append(key)
+
+    def _pathLen(k: tuple[str, str]) -> int:
+        meta_ = rowMeta.get(k, {})  # noqa: F821 — closure variable
+        return len(str(meta_.get("textSemanticPathKey") or ""))
+
+    for groupKeys in hashGroups.values():
+        if len(groupKeys) <= 1:
+            continue
+        # canonical = longest semantic path (가장 구체적 context)
+        canonical = max(groupKeys, key=_pathLen)
+        for k in groupKeys:
+            if k == canonical:
+                continue
+            # cell merge — canonical 우선, 부재 period 만 보충
+            for period_, val_ in topicMap[k].items():
+                if val_ and not topicMap[canonical].get(period_):
+                    topicMap[canonical][period_] = val_
+            # path variants 보존 — pivot 결과 textPathVariants 컬럼에 모든 variant 노출
+            for variantDict in (
+                pathVariantsByKey,
+                parentPathVariantsByKey,
+                semanticPathVariantsByKey,
+                semanticParentPathVariantsByKey,
+            ):
+                if k in variantDict:
+                    variantDict.setdefault(canonical, set()).update(variantDict[k])
+                    variantDict.pop(k, None)
+            topicMap.pop(k, None)
+            rowMeta.pop(k, None)
+            rowOrder.pop(k, None)
+
     freqMetaByKey = {key: _rowFreqMeta(periodMap) for key, periodMap in topicMap.items()}
     topicKeysByTopic: dict[str, list[tuple[str, str]]] = {}
     for key in topicMap.keys():
