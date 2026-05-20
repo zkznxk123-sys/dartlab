@@ -147,73 +147,157 @@ function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 		if (avgScore >= 3) return { label: '주의', tone: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' };
 		return { label: '위험', tone: 'text-rose-600 dark:text-rose-400', dot: 'bg-rose-500' };
 	})();
-	const strongest = validScores.length > 0
-		? categories[scores.indexOf(Math.max(...validScores))]
-		: null;
-	const weakest = validScores.length > 0
-		? categories[scores.indexOf(Math.min(...validScores))]
-		: null;
+	const strongIdx = validScores.length > 0 ? scores.indexOf(Math.max(...validScores)) : -1;
+	const weakIdx = validScores.length > 0 ? scores.indexOf(Math.min(...validScores)) : -1;
+	const fmtRaw = (i: number) => {
+		const raw = rawValues[i];
+		const unit = rawUnits[i] ?? '';
+		return raw != null && Number.isFinite(raw) ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–';
+	};
+	// 점수 분포 카운트 — verdict 5 구간.
+	const distribution = validScores.reduce(
+		(acc, s) => {
+			if (s >= 8.5) acc.excellent += 1;
+			else if (s >= 7) acc.good += 1;
+			else if (s >= 5) acc.fair += 1;
+			else if (s >= 3) acc.warn += 1;
+			else acc.bad += 1;
+			return acc;
+		},
+		{ excellent: 0, good: 0, fair: 0, warn: 0, bad: 0 },
+	);
+	const toneBar = (s: number) =>
+		s >= 7 ? 'bg-emerald-500' : s >= 5 ? 'bg-amber-500' : s >= 3 ? 'bg-orange-500' : 'bg-rose-500';
 	return (
 		<div className="px-3 pt-2">
-			<CardShell title={spec.title} colSpan={12} rowSpan={4}>
+			<CardShell title={spec.title} colSpan={12} rowSpan={5}>
 				<div className="grid grid-cols-12 gap-3">
-					{/* 좌 — radar 크게 (5 축 한눈에) */}
+					{/* 좌 col-5 — radar 더 크게 (5 축 한눈에) */}
 					<div className="col-span-12 lg:col-span-5">
-						<VizChart spec={spec} height={300} size={{ w: 5, h: 4 }} />
+						<VizChart spec={spec} height={360} size={{ w: 5, h: 5 }} />
 					</div>
-					{/* 중 — 대형 평균 점수 + verdict + 최강/최약 한 줄 */}
-					<div className="col-span-12 flex flex-col justify-center gap-1.5 lg:col-span-3">
-						<div className="flex items-baseline gap-1.5">
-							<span className="font-mono text-5xl font-bold tracking-tight tabular-nums text-foreground">
-								{avgScore.toFixed(1)}
-							</span>
-							<span className="font-mono text-base text-muted-foreground">/ 10</span>
+
+					{/* 중 col-3 — 풍부 정보 패널: 점수 / verdict / 5 구간 분포 / 강·약점 raw */}
+					<div className="col-span-12 flex flex-col justify-center gap-3 lg:col-span-3">
+						{/* 큰 점수 + verdict badge */}
+						<div className="flex flex-col gap-1">
+							<div className="flex items-baseline gap-1.5">
+								<span className="font-mono text-6xl font-bold leading-none tracking-tight tabular-nums text-foreground">
+									{avgScore.toFixed(1)}
+								</span>
+								<span className="font-mono text-lg text-muted-foreground">/ 10</span>
+							</div>
+							<div className="flex items-center gap-1.5">
+								<span className={`size-2 rounded-full ${verdict.dot}`} />
+								<span className={`text-[15px] font-semibold ${verdict.tone}`}>{verdict.label}</span>
+								<span className="text-[11px] text-muted-foreground">· 5 축 평균</span>
+							</div>
 						</div>
-						<div className="flex items-center gap-1.5">
-							<span className={`size-1.5 rounded-full ${verdict.dot}`} />
-							<span className={`text-[13px] font-semibold ${verdict.tone}`}>{verdict.label}</span>
-							<span className="text-[10.5px] text-muted-foreground">· 5 축 평균</span>
+
+						{/* 5 구간 분포 막대 — verdict tone 별 카운트 */}
+						<div className="flex flex-col gap-1">
+							<div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/70">
+								5 축 점수 분포
+							</div>
+							<div className="flex h-2 w-full overflow-hidden rounded-sm bg-muted/40">
+								{distribution.excellent > 0 && (
+									<div className="bg-emerald-500" style={{ flex: distribution.excellent }} />
+								)}
+								{distribution.good > 0 && (
+									<div className="bg-emerald-400" style={{ flex: distribution.good }} />
+								)}
+								{distribution.fair > 0 && (
+									<div className="bg-amber-500" style={{ flex: distribution.fair }} />
+								)}
+								{distribution.warn > 0 && (
+									<div className="bg-orange-500" style={{ flex: distribution.warn }} />
+								)}
+								{distribution.bad > 0 && (
+									<div className="bg-rose-500" style={{ flex: distribution.bad }} />
+								)}
+							</div>
+							<div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] tabular-nums text-muted-foreground">
+								{distribution.excellent + distribution.good > 0 && (
+									<span>
+										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-emerald-500 align-middle" />
+										우수 {distribution.excellent + distribution.good}
+									</span>
+								)}
+								{distribution.fair > 0 && (
+									<span>
+										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-amber-500 align-middle" />
+										양호 {distribution.fair}
+									</span>
+								)}
+								{distribution.warn > 0 && (
+									<span>
+										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-orange-500 align-middle" />
+										주의 {distribution.warn}
+									</span>
+								)}
+								{distribution.bad > 0 && (
+									<span>
+										<span className="mr-0.5 inline-block size-1.5 rounded-full bg-rose-500 align-middle" />
+										위험 {distribution.bad}
+									</span>
+								)}
+							</div>
 						</div>
-						{strongest && (
-							<div className="mt-1 flex items-baseline gap-1.5 text-[10.5px]">
-								<span className="font-mono uppercase tracking-wider text-muted-foreground/70">↑ 강점</span>
-								<span className="truncate text-foreground" title={strongest}>{strongest}</span>
+
+						{/* 강·약점 raw value 같이 */}
+						{strongIdx >= 0 && (
+							<div className="flex flex-col gap-0.5">
+								<div className="flex items-baseline gap-1.5 text-[11px]">
+									<span className="font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400">↑ 강점</span>
+									<span className="truncate text-foreground" title={categories[strongIdx]}>
+										{categories[strongIdx]}
+									</span>
+									<span className="ml-auto font-mono font-semibold tabular-nums text-foreground">
+										{scores[strongIdx]?.toFixed(1)}
+									</span>
+									<span className="font-mono text-muted-foreground tabular-nums">
+										· {fmtRaw(strongIdx)}
+									</span>
+								</div>
+								{weakIdx >= 0 && weakIdx !== strongIdx && (
+									<div className="flex items-baseline gap-1.5 text-[11px]">
+										<span className="font-mono uppercase tracking-wider text-rose-600 dark:text-rose-400">↓ 약점</span>
+										<span className="truncate text-foreground" title={categories[weakIdx]}>
+											{categories[weakIdx]}
+										</span>
+										<span className="ml-auto font-mono font-semibold tabular-nums text-foreground">
+											{scores[weakIdx]?.toFixed(1)}
+										</span>
+										<span className="font-mono text-muted-foreground tabular-nums">
+											· {fmtRaw(weakIdx)}
+										</span>
+									</div>
+								)}
 							</div>
 						)}
-						{weakest && weakest !== strongest && (
-							<div className="flex items-baseline gap-1.5 text-[10.5px]">
-								<span className="font-mono uppercase tracking-wider text-muted-foreground/70">↓ 약점</span>
-								<span className="truncate text-foreground" title={weakest}>{weakest}</span>
-							</div>
-						)}
 					</div>
-					{/* 우 — 5 축 정렬 bar */}
-					<div className="col-span-12 flex flex-col justify-center gap-2 lg:col-span-4">
+
+					{/* 우 col-4 — 5 축 bar (절대 임계값 marker 5·7) */}
+					<div className="col-span-12 flex flex-col justify-center gap-2.5 lg:col-span-4">
 						{categories.map((cat, i) => {
 							const score = scores[i] ?? 0;
-							const raw = rawValues[i];
-							const unit = rawUnits[i] ?? '';
 							const pct = Math.max(0, Math.min(100, (score / 10) * 100));
-							const tone = score >= 7
-								? 'bg-emerald-500'
-								: score >= 5
-									? 'bg-amber-500'
-									: score >= 3
-										? 'bg-orange-500'
-										: 'bg-rose-500';
 							return (
 								<div key={cat} className="flex items-center gap-2">
-									<div className="w-28 truncate text-[11px] text-muted-foreground" title={cat}>
+									<div className="w-32 truncate text-[11px] text-muted-foreground" title={cat}>
 										{cat}
 									</div>
-									<div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted/40">
-										<div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
+									<div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
+										{/* 절대 임계값 marker — 5 점 (양호 cutoff) · 7 점 (우수 cutoff) */}
+										<div className="absolute inset-y-0 left-[50%] w-px bg-border/70" />
+										<div className="absolute inset-y-0 left-[70%] w-px bg-border/70" />
+										<div className={`relative h-full ${toneBar(score)}`} style={{ width: `${pct}%` }} />
 									</div>
-									<div className="w-12 text-right font-mono text-[12px] font-semibold tabular-nums text-foreground">
+									<div className="w-10 text-right font-mono text-[12.5px] font-semibold tabular-nums text-foreground">
 										{score.toFixed(1)}
 									</div>
-									<div className="w-16 text-right font-mono text-[10px] text-muted-foreground tabular-nums">
-										{raw != null ? `${raw.toFixed(unit === '배' ? 2 : 1)}${unit}` : '–'}
+									<div className="w-16 text-right font-mono text-[10.5px] text-muted-foreground tabular-nums">
+										{fmtRaw(i)}
 									</div>
 								</div>
 							);
