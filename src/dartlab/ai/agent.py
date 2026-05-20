@@ -617,13 +617,18 @@ def _injectPastContextIfAvailable(
     # (history 결정론 분석). 매 turn 호출이지만 profile 은 7 일 TTL 캐시 + intent 는
     # in-memory 빠른 통계라 비용 작다. 답변 톤·우선순위를 사용자 패턴에 맞추는 핵심.
     try:
-        from .memory.dialectic import buildUserContextBlock
+        from .memory.dialectic import buildFeedbackSignalsBlock, buildUserContextBlock
 
         user_block = buildUserContextBlock(history)
+        feedback_block = buildFeedbackSignalsBlock()
     except Exception:  # noqa: BLE001
         user_block = ""
+        feedback_block = ""
     if user_block:
         systemPrompt = f"{systemPrompt}\n\n{user_block}"
+    if feedback_block:
+        # 피드백 시그널은 컨텍스트 *끝* — 가장 최근 학습 신호라 LLM 우선 활용.
+        systemPrompt = f"{systemPrompt}\n\n{feedback_block}"
 
     return systemPrompt
 

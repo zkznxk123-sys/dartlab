@@ -233,7 +233,28 @@ pending → resolved 로 entry atomic 갱신 (temp+replace)
 - **chat-native + workbench 양 경로 모두 작성**. 종목 명시 (stockCode 추출 가능) 시에 한해.
 - 기존 `memory/decisions.py` (BM25 recall) + `memory/stats.py` (skill usage) 와 직교 — outcome_log 는 *outcome ground truth*, decisions.jsonl 은 *recall 컨텍스트*.
 
-### 7. SSOT 우선
+### 7. 컨텍스트 layers — answer-time 자동 주입
+
+`runAgent` 진입 직후 `_injectPastContextIfAvailable` 가 base system prompt 끝에 다음
+4 종 블록을 순서대로 부착 (각 블록은 데이터 없으면 *섹션 헤더 자체 부재* — 환각 가드).
+
+| Layer | 모듈 | 데이터 소스 | 캐시 | 효과 |
+|---|---|---|---|---|
+| L1 outcome past context | `memory/wiring.fetchPastContext` | `~/.dartlab/decisions/{market}/{stockCode}.md` | (없음 — 진입 직전 `tryResolvePending` lazy sweep 으로 *방금 resolved* 된 alpha 포함) | 종목 분석 시 *과거 결정 회고* + alpha 자동 회수 |
+| L2 dashboard snapshot | `_formatDashboardSnapshotBlock` | kwargs `dashboardSnapshot` dict | (요청별) | UI 뷰 → agent 시야 동기화 |
+| L3 운영자 톤 | `memory/synthesizer.buildToneBlock` | `~/.claude/projects/.../memory/feedback_*.md` (auto-discover, feedback 최다 디렉토리) | `~/.dartlab/ai_memory/feedbackTone.cache.md`, 7 일 TTL + memory mtime 검사 | 답변 톤 일관성 — 톱 토큰 6 + 톱 링크 4 |
+| L4 dialectic user context | `memory/dialectic.buildUserContextBlock` | `sessionIndex.db` user role text 전체 + 현재 `history` | `~/.dartlab/ai_memory/userProfile.cache.json`, 7 일 TTL (intent 는 in-memory) | 누적 종목·테마 + 본 세션 의도 6 분류 |
+| L5 사용자 피드백 시그널 | `memory/dialectic.buildFeedbackSignalsBlock` | `sessionIndex.db` 최근 user 발화 (≤40 chars + 부정/긍정 키워드) | `~/.dartlab/ai_memory/feedbackSignals.cache.json`, 7 일 TTL | *부정 발화 회피 + 긍정 발화 강화* — LLM 이 원문 맥락 추론하여 회귀 패턴 자가 차단 |
+
+설계 원칙:
+- **결정론 통계만** — LLM 분류 호출 0. 모든 layer 가 SQL/regex/키워드 매칭.
+- **원문 인용 우선** — feedbackSignals 는 *분류 라벨 없이* 발화 원문 그대로. 해석은 답변 LLM 에 위임.
+- **회귀 가드** — layer 별 graceful skip (Exception → 빈 블록). 한 layer 실패가 답변 흐름 중단 X.
+- **순서** — outcome (객관 ground truth) → snapshot → 톤 (메모리 합성) → dialectic (사용자 통계) → 시그널 (가장 최근 학습 신호, 컨텍스트 끝에 박혀 LLM 우선 활용).
+
+답변 품질 영향 검증: `tests/_attempts/oauth_dialectic_ab_probe.py` (dialectic 효과 측정) + `tests/_attempts/oauth_feedback_signals_ab_probe.py` (시그널 효과 측정). dialectic ON 일 때 모호 질문에 *누적 통계 기반 default 가정* + top 5 종목 정확 인용, signals ON 일 때 *사용자 특정 부정 패턴* 정확 진단.
+
+### 8. SSOT 우선
 
 - 코드와 SSOT 충돌 시 (lock 이후) SSOT 가 정답. 코드를 SSOT 에 맞춘다.
 - 새 기능은 SSOT 갱신이 선행.

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from .feedbackSignals import FeedbackSignals, extractFeedbackSignals
 from .sessionIntent import SessionIntent, sessionIntent
 from .userProfile import UserProfile, userInterestProfile
 
@@ -88,4 +89,50 @@ def buildUserContextBlock(
     return "\n".join(lines) + "\n"
 
 
-__all__ = ["SessionIntent", "UserProfile", "buildUserContextBlock", "sessionIntent", "userInterestProfile"]
+def buildFeedbackSignalsBlock(*, forceRefresh: bool = False) -> str:
+    """사용자 피드백 시그널 블록 — 부정/긍정 발화 원문 직접 인용.
+
+    LLM 이 *원문 맥락* 을 보고 회피·강화 패턴을 추론. 결정론 분류 X.
+
+    Args:
+        forceRefresh: True 면 캐시 무시 재추출.
+
+    Returns:
+        markdown 블록. 시그널 없으면 빈 문자열.
+    """
+    signals = extractFeedbackSignals(forceRefresh=forceRefresh)
+    if not signals.negatives and not signals.positives:
+        return ""
+
+    lines: list[str] = ["## 사용자 피드백 시그널 (자기-학습 — 회피·강화)"]
+
+    if signals.negatives:
+        lines.append("**부정 발화 (회피 시그널 — 다음 답변에서 이런 반응 안 받게)**")
+        for s in signals.negatives:
+            preview = s.replace("\n", " ").strip()
+            lines.append(f'  - "{preview}"')
+
+    if signals.positives:
+        lines.append("**긍정 발화 (강화 시그널 — 이런 답변 패턴 유지)**")
+        for s in signals.positives:
+            preview = s.replace("\n", " ").strip()
+            lines.append(f'  - "{preview}"')
+
+    lines.append("")
+    lines.append(
+        "위 발화 원문은 *최근 sessionIndex 검출* 사용자 발화 그대로다. 분류·해석 안 됨 — *맥락 추론* 으로 어떤 답변 패턴이 부정 발화 유도했는지 / 긍정 발화 유도했는지 직접 추론하고, 같은 회귀 차단·같은 강화 유지."
+    )
+
+    return "\n".join(lines) + "\n"
+
+
+__all__ = [
+    "FeedbackSignals",
+    "SessionIntent",
+    "UserProfile",
+    "buildFeedbackSignalsBlock",
+    "buildUserContextBlock",
+    "extractFeedbackSignals",
+    "sessionIntent",
+    "userInterestProfile",
+]
