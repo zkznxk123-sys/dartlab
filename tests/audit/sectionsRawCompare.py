@@ -253,12 +253,28 @@ def auditCode(code: str, *, verbose: bool = False) -> dict[str, Any]:
                 )
 
     # missing heading: parquet 에 있지만 sections 에 없음
+    # sections 의 모든 heading + body + table cell value 안에서도 substring 매칭 시도
+    # — sections 가 heading 으로 만들지 않고 body 안에 묻어둔 경우 (inline 처리 등) 정상.
+    secAllText: str | None = None
     missingHeadings: list[str] = []
     for plabel in list(parquetHeadingLabels)[:500]:  # 너무 많으면 sampling
         if plabel not in secHeadingLabels and len(plabel) > 4:
             # 부분 매칭 시도
             if not any(plabel in shl or shl in plabel for shl in secHeadingLabels if len(shl) > 4):
-                missingHeadings.append(plabel)
+                # sections 의 모든 cell value 안 plabel 등장 여부 (lazy build)
+                if secAllText is None:
+                    parts: list[str] = []
+                    for col in periodColsSorted:
+                        try:
+                            colSeries = sec.get_column(col)
+                            for v in colSeries.to_list():
+                                if isinstance(v, str) and v:
+                                    parts.append(v)
+                        except Exception:
+                            continue
+                    secAllText = re.sub(r"\s+", "", "".join(parts))
+                if plabel not in secAllText:
+                    missingHeadings.append(plabel)
 
     return {
         "code": code,
