@@ -1,7 +1,9 @@
 """AccountMapper — accountMappings.json 읽기 전용 래퍼.
 
-기존 labels.py의 _load_account_mappings()가 로드하는 데이터를
-MapperEngine 인터페이스로 래핑한다. 원본 코드/데이터 수정 0줄.
+본 래퍼는 ``MapperEngine`` 인터페이스 (``BaseMapper.lookup``) 어댑터.
+실제 매핑 로직은 ``providers.dart.finance.mapper.AccountMapper`` (12 단계
+fallback, 역인덱스 3 종, suffix 흡수) 의 ``map()`` 본진을 *위임*. 같은
+사전 위 두 가지 매칭 로직 분산 = SSOT 위반 차단.
 """
 
 from __future__ import annotations
@@ -48,13 +50,15 @@ class AccountMapper(BaseMapper):
         return self._data().get("standardAccounts", {})
 
     def lookup(self, key: str) -> dict | None:
-        """한국어 계정명 또는 snakeId로 조회.
+        """한국어 계정명·영문 ID·snakeId 조회 (본진 12 단계 fallback 위임).
 
-        한국어 → mappings에서 snakeId 찾고 standardAccounts에서 상세 반환.
-        snakeId → standardAccounts에서 직접 반환.
+        본진 ``providers.dart.finance.mapper.AccountMapper`` 의 ``map()``
+        에 위임 — synonym · 공백/괄호/하이픈 변형 · 액 suffix 흡수 까지
+        12 단계 fallback 일관 적용. snakeId 직접 조회는 본진이 흡수 못
+        하므로 ``standardAccounts`` fallback 으로 보완.
 
         Capabilities:
-            Account mapping lookup by Korean label or canonical snakeId.
+            Account mapping lookup by Korean label, IFRS/dart ID, or snakeId.
         AIContext:
             Used when natural-language finance labels must resolve to stable account ids.
         Guide:
@@ -62,11 +66,12 @@ class AccountMapper(BaseMapper):
         When:
             Called by mapper engine consumers during account normalization.
         How:
-            Checks Korean mapping first, then direct standard account id lookup.
+            Delegates to engine ``map()`` for korean/id input; falls back to
+            ``standardAccounts`` direct lookup for snakeId input.
         Args:
-            key: Korean account name or snakeId.
+            key: Korean account name, IFRS/dart account ID, or snakeId.
         Returns:
-            Account detail dict or ``None``.
+            Account detail dict (``{snakeId, ...}``) or ``None``.
         Requires:
             Bundled account mapping data.
         Raises:
@@ -75,22 +80,25 @@ class AccountMapper(BaseMapper):
             >>> AccountMapper().lookup("__missing__") is None
             True
         SeeAlso:
-            ``korToSnakeId`` and ``snakeIdToKor``.
+            ``korToSnakeId`` and ``snakeIdToKor`` ·
+            ``providers.dart.finance.mapper.AccountMapper.map``.
         """
-        mappings = self._mappings()
+        from dartlab.providers.dart.finance.mapper import AccountMapper as Engine
+
+        engine = Engine.get()
         standards = self._standardAccounts()
 
-        # 한국어 계정명 → snakeId
-        if key in mappings:
-            sid = mappings[key]
-            detail = standards.get(sid, {})
-            return {"snakeId": sid, **detail}
-
-        # snakeId 직접 조회
-        if key in standards:
+        # 1. key 를 한글명으로 시도 — 본진 12 단계 fallback 흡수
+        snakeId = engine.map("", key)
+        # 2. 본진이 None 이면 영문 id 로 재시도 (synonym + prefix 정규화)
+        if snakeId is None:
+            snakeId = engine.map(key, "")
+        # 3. 둘 다 None 이면 key 가 이미 snakeId 인 경우
+        if snakeId is None and key in standards:
             return {"snakeId": key, **standards[key]}
-
-        return None
+        if snakeId is None:
+            return None
+        return {"snakeId": snakeId, **standards.get(snakeId, {})}
 
     def stats(self) -> MapperStats:
         """Return account mapper statistics.

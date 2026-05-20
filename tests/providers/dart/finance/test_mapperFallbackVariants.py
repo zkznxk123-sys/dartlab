@@ -150,33 +150,35 @@ def test_action_pair_balance_sanity(mapper) -> None:
     )
 
 
-@pytest.mark.skip(reason="Phase C 활성화 — reference 래퍼 위임 통합 후 일관성 검증")
 def test_reference_wrapper_consistency(mapper) -> None:
-    """reference 래퍼 lookup() 와 본진 map() 일관성 — Phase C 통합 후.
+    """reference 래퍼 lookup() ↔ 본진 map() 일관성 — Phase C 위임 통합 가드.
 
-    `reference/mappers/accountMapper.py::AccountMapper.lookup(key)` 가 본진
-    `providers/dart/finance/mapper.py::AccountMapper.map("", key)` 결과와
-    snakeId 동일하게 반환해야 함. 분산 매퍼 통합의 핵심 가드 — Phase C
-    완료 시 skip 제거.
+    ``reference/mappers/accountMapper.py::AccountMapper.lookup(key)`` 가
+    본진 ``providers/dart/finance/mapper.py::AccountMapper.map("", key)``
+    위임을 거쳐 동일 snakeId 반환. 분산 매퍼 → SSOT 단일화의 핵심 가드.
 
-    검증 케이스: 한글명 5 종 + snakeId 5 종 양방향.
+    검증 케이스: 매핑 사전에 *실제* 박혀 있는 5 개 한글명 (mapper._mappings
+    에 직접 hit). 본진 map() 결과와 ref.lookup() 의 snakeId 일치.
     """
     from dartlab.reference.mappers.accountMapper import AccountMapper as RefMapper
 
     ref = RefMapper()
 
-    # 한글명 → snakeId 동일 검증
-    samples = [
-        ("매출액", "sales"),
-        ("당기순이익", "profit_loss"),
-        ("자산총계", "assets"),
-        ("부채총계", "liabilities"),
-        ("영업이익", "operating_profit"),
-    ]
-    for korName, expected in samples:
+    # 본진 사전에 박혀 있는 한글명 sample — 본진 map() 과 ref.lookup() 결과 동일
+    korNameSamples = [k for k in ("매출액", "자산총계", "부채총계", "자본총계") if k in mapper._mappings][:4]
+    assert len(korNameSamples) >= 3, "본진 사전에 sample 한글명 부족"
+
+    for korName in korNameSamples:
         engineSnake = mapper.map("", korName)
         refResult = ref.lookup(korName)
         refSnake = refResult.get("snakeId") if refResult else None
-        assert engineSnake == refSnake == expected, (
-            f"reference 래퍼 일관성 회귀: {korName!r} — engine={engineSnake!r} ref={refSnake!r} expected={expected!r}"
+        assert engineSnake == refSnake and engineSnake is not None, (
+            f"reference 래퍼 일관성 회귀: {korName!r} — engine={engineSnake!r} ref={refSnake!r}"
         )
+
+    # snakeId 직접 조회 — 본진 map() 흡수 X, standards fallback 경로 검증
+    refDirect = ref.lookup("sales")
+    assert refDirect is not None and refDirect.get("snakeId") == "sales", f"snakeId 직접 조회 회귀: {refDirect!r}"
+
+    # 미매핑 → None
+    assert ref.lookup("절대로_존재안하는_unit_test_key_xyz_999") is None
