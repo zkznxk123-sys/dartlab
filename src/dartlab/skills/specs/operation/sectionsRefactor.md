@@ -321,3 +321,148 @@ uv run python -X utf8 tests/audit/sectionsMemoryAudit.py --write-baseline
 aggregation.py 의 gc.collect() 빈도: period 별 5 → 3 로 강화 (master `f4e52f9a5`).
 
 nightly 게이트 `sections-loss` + `sections-memory` 양쪽 blocking=False — 정보 표시 우선, 회귀 시 별도 commit 으로 baseline 재박제.
+
+## 12. sections SSOT 3 원칙 — 본 모듈의 정체
+
+> 사용자 명시 (2026-05-20 ~ 21 두 세션). 본 모듈이 *왜 존재* 하는지 + *완성 기준* 의 단일 진실값.
+
+**정체**: DART parquet 의 원본 본문을 *period × content* 의 wide-format DataFrame 으로 변환하는 **SSOT**. viewer/AI/MCP/외부 모두 본 wide-format row 를 dumb 소비.
+
+### 원칙 1. 원본 그대로 보존
+- 원본 heading hierarchy (Chapter → 가/나/다 → (1)/(2) → ...) 그대로.
+- 원본 표 형식 (`| 일자 | 주소 | 비고 |`) 그대로 — transpose 금지 (transpose 는 viewer 의 책임).
+- 원본 본문 순서 (가 → 나 → 다 → ... → 사) 그대로.
+- 원본에 없는 heading 합성 금지.
+
+### 원칙 2. 같은 의미 같은 row
+- period 간 같은 의미 본문 = wide-format 의 row × cell 단위로 정합.
+- row identity = period-invariant. `sourceBlockOrder` 같은 period-dependent 정보를 segmentKey 에 *섞지 않는다*.
+- annual=표 / quarterly=disclaimer 같은 동일 의미 다른 형태도 같은 row.
+- row N 개에 같은 path 의 cell 분산 = SSOT 위배.
+
+### 원칙 3. dumb 소비
+- viewer/AI/MCP/외부 = sections row 의 cell 값 *그대로* 사용.
+- 추가 가공 (paragraph re-split / changeSummary / horizontalize / heading 합성) 은 sections 의 책임이 아니면 다른 layer 도 책임 아님.
+- sections 가 *정규화 책임*. parquet 본문이 비일관해도 sections 가 강제 정규화.
+
+## 13. SSOT 정공법 8 종 (2026-05-20 ~ 21 세션 적용)
+
+원칙 2 (period-invariant row identity) 위배 다중 회귀 → 8 메커니즘 정공법:
+
+1. **heading segmentKey 의 `lv:` prefix 제거** ([segmentKeyer.py](../../../src/dartlab/providers/dart/docs/sections/segmentKeyer.py))
+   같은 path 인데 source format 차이로 level 만 다른 경우 (한글 "가." L=3 vs numeric "1." L=2) segmentKey 분기 → 다른 row. path = ancestor chain + label = 같은 heading 이므로 lv prefix 불필요.
+
+2. **alias-redundant heading 시 descendant pop** ([textStructure.py](../../../src/dartlab/providers/dart/docs/sections/textStructure.py))
+   `redundantTopicAlias` 시 직전 sub-section 의 stack entry (L=7 bracket 등) 잔존 → 후속 body textPath 오염 차단. alias entry 이후 descendant 모두 pop.
+
+3. **body / heading / table path-anchored merge** (segmentKeyer + pipeline)
+   `body|p:{path}` / `heading|p:{path}` base 는 occurrence 미부여 → 같은 path = 1 row. pivot 충돌 시 cell concat. table 은 `table|p:{path}|h:{headerHash}` (path + header) — 같은 section 안 다른 header 표는 별 row, 같은 표 (period 갱신) 는 같은 row.
+
+4. **bracket caption period-variable strip** (textStructure `_semanticSegmentKey`)
+   "기업집단에소속된회사 20171231 기준계열사 95개사" 류 caption 의 date + 회사수 strip → "기업집단에소속된회사기준계열사" 통합.
+
+5. **heading gate 강화** (textStructure `_gateHeadingLabel`) — body fragment promotion 차단:
+   - 길이 > 80 자 → reject (heading 은 명사구라 짧음)
+   - 조사 prefix (`은/는/이/가/을/를/의/도/만/과/와/및/또는/이며/...`)
+   - 종결 어미 (`...니다./입니다./같습니다./...`)
+   - 절 conjunction (`...하여/되어/함으로/함에/되면/하면/...`)
+   - conjunction adverb (`또한/그러나/그리고/이러한/다만/아울러/특히/한편/이에/그러므로/따라서`)
+   - 명사형 종결사 long-label (`...분석함./평가함./관리함./...`)
+   - 동사 mid-sentence (`인식하/적용하/사용하/포함하/...`)
+   - 주어 marker 중간 (`[은는이가]\s+\S` — 본문 sentence 시그널)
+
+6. **tableHeaderHash 정규화** ([tableParser.py](../../../src/dartlab/providers/dart/docs/sections/tableParser.py))
+   - "제 N기 N분기" / "제 N기 반기" / "제 N기" 통합 strip
+   - "2016년 상반기" / "2016년 1분기" / "2016년 하반기" — 한글 period 표현 통합 strip
+   - 독립 "상반기/하반기/N분기/반기" token 추가 strip
+   - 빈 괄호 `()` noise 제거
+   - intro sentence row skip — 본문 sentence ("...같습니다.") 첫 row 인 경우 next row 의 header 사용
+
+7. **pipeline cross-path table consolidation** ([pipeline.py](../../../src/dartlab/providers/dart/docs/sections/pipeline.py))
+   같은 (topic, headerHash) 표가 다른 path 에 분기된 경우 1 row 통합. longest semantic path = canonical. 옛 cell 부재 period 만 짧은-path row 에서 보충. parquet 구조 variance ("주요제품서비스등 > X" vs "X") 흡수.
+
+8. **▣/▶/◈ DART sub-section marker + inline 한글 heading split** (textStructure)
+   - `▣ 현대로템` / `▶ 카테고리` — line 시작 + inline (한글 직후 line-break 누락) 모두 split + L=5 heading 인식
+   - `활동가. 연구개발활동의 개요` — inline 한글 heading marker pattern (1-char Korean + `. ` + 한글) split
+
+### 주석 단 정공법 — 의미 기반 (한글 이름) 매핑
+
+[notesSplit.py](../../../src/dartlab/providers/dart/builder/notesSplit.py) 의 `_resolveNoteIdentity`:
+- cell 첫 줄에서 `N. {한글 이름}` 추출.
+- *한글 이름* normalize + alias map → 표준 (NN, slug) 매핑. 회사 N 번호 무시.
+- 매칭 실패 시 회사 N 번호 fallback (`_NOTES_BY_NUMBER`).
+
+회귀 사례:
+- 005380 "30. 퇴직급여제도" → 옛 룰: `financialNotes_30_segment` (틀림 — 표준 30=부문). 새 룰: alias "퇴직급여제도" → 표준 14 `definedBenefit` → `financialNotes_14_definedBenefit`.
+- 005930 "4. 공정가치금융자산" → 옛 룰: `_04_financialInstruments`. 새 룰: 한글 이름 → 표준 6 `fairValueAssets` → `financialNotes_06_fairValueAssets`.
+
+192 topic 중 매칭률 63% → 85% (+22pp). 잔존 27 은 cell 잘림 또는 회사 자체 비표준 주석.
+
+## 14. 회귀 가드 — 3 단계
+
+### 단계 1. fast tier — 5 종목 sanity ([sections-parity-fast](../../../tests/run.py) gate)
+```powershell
+uv run python -X utf8 tests/audit/sectionsParity.py --codes 005380,005930,035720,207940,000660 --strict
+```
+3 검사: `fragmentHeadings` / `chapterMix` / `koreanInversion`. 모두 0 = 통과. PR 차단 blocking gate.
+
+### 단계 2. nightly tier — 200 종목 bulk scan ([sections-parity-bulk](../../../tests/run.py) gate)
+```powershell
+uv run python -X utf8 tests/audit/sectionsBulkScan.py --sample 200 --seed 42 --json
+```
+parity FAIL 자동 식별 + row count outlier (3× IQR) + dup excess high-10 자동 출력. nightly 회귀 발견 즉시 보고.
+
+### 단계 3. ad-hoc — 특정 종목 디버그
+```powershell
+uv run python -X utf8 tests/audit/sectionsBulkScan.py --codes 084690,003410,015890
+```
+종목별 row count + dup metric + parity 즉시 측정.
+
+### known-defect 등록
+`tests/audit/sectionsParity.py` 의 `_KNOWN_DEFECTS` dict 에 등록. 신규 누락은 fail, 등록된 누락은 pass. 예:
+```python
+_KNOWN_DEFECTS: dict[str, dict[str, list[str]]] = {
+    "028260": {"companyOverview": ["나"]},  # 삼성물산 — parquet 본문 결손
+}
+```
+
+## 15. 빠른 진단 호출 cookbook
+
+### 전체 sections frame
+```python
+c = Company("005380")
+df = c.sections  # wide-format DataFrame, ~6300 rows × ~72 cols
+```
+
+### topic 별 sections row 직접
+```python
+df.filter(pl.col("topic") == "companyOverview").sort("blockOrder")
+df.filter(pl.col("topic") == "businessOverview")
+df.filter(pl.col("topic") == "financialNotes_30_segment")  # 표준 30 = 부문보고
+df.filter(pl.col("topic") == "financialNotes_14_definedBenefit")  # 표준 14 = 확정급여
+```
+
+### dup excess 빠른 점검
+```python
+g = df.group_by(["textSemanticPathKey", "blockType", "textNodeType"]).agg(pl.len().alias("n")).filter(pl.col("n") > 1)
+excess = g.select(pl.col("n").sum() - pl.len()).item()
+print(f"dup groups: {g.shape[0]}, excess rows: {excess}")
+```
+
+### 정규화된 주석 dict (extractor)
+```python
+c.show("inventory")     # 재고자산
+c.show("receivables")   # 매출채권
+c.show("borrowings")    # 차입금
+```
+extractor 기반 — sections markdown 을 *항목 × 연도* DataFrame 으로 파싱. AI/코드 분석용.
+
+## 16. 본 모듈의 완성 기준
+
+- [x] 30 종목 sectionsParity 100% (fast gate)
+- [x] 100 종목 random sample 100% (bulk scan 2026-05-21)
+- [x] 회사별 주석 번호 변동 의미 기반 매핑 (85% 정확)
+- [x] CI gate 등록 (`sections-parity-fast` blocking + `sections-parity-bulk` nightly blocking)
+- [x] 본 spec 의 §12 ~ §15 SSOT 박제
+- [ ] 200 종목 nightly bulk scan 통과 (실측 대기)
+- [ ] frontend 의 sections row dumb render 완료 검증
