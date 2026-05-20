@@ -454,6 +454,15 @@ GATES: dict[str, Gate] = {
         blocking=False,
         timeout_minutes=15,
     ),
+    "sections-precision": Gate(
+        name="sections-precision",
+        tier="nightly",
+        install_pkg="editable",
+        env={"DARTLAB_TEST_LOCKED": "1"},
+        cmd="python -X utf8 tests/audit/sectionsPrecisionAudit.py --check",
+        blocking=False,
+        timeout_minutes=15,
+    ),
 }
 
 
