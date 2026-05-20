@@ -118,8 +118,11 @@ def runAgent(
     call_cache: dict[tuple[str, str], dict[str, Any]] = {}
     # 같은 (name, args) 가 cache_hit 임계 회 반복되면 강제 차단 — LLM 이 자연어 가드 무시하고
     # 계속 부르는 회귀 (사용자 audit: scan.ratio 4 회 연속 cached) 방지.
+    # 1 = 첫 번째 cache hit 부터 즉시 block + blocked_calls 영구 등록. 2026-05-20 OAuth probe 에서
+    # 시나리오 A 가 30 회 호출 (Company.analysis 수익성 9 회 / show ratios 8 회) — limit=2 라 turn
+    # 마다 cached 메시지만 반복하고 LLM 이 무시. 1 로 박으면 hit 1 회에 영구 차단.
     cache_hit_count: dict[tuple[str, str], int] = {}
-    _CACHE_HIT_BLOCK_LIMIT = 2
+    _CACHE_HIT_BLOCK_LIMIT = 1
 
     for iteration in range(maxIterations):
         # 옛 assistant reasoning 트리밍 (마지막 2 개 외 content → None). tool_calls 보존.
@@ -193,6 +196,8 @@ def runAgent(
                 cached = call_cache.get(cache_key)
                 if cached is not None:
                     cache_hit_count[cache_key] = cache_hit_count.get(cache_key, 0) + 1
+                    if cache_hit_count[cache_key] >= _CACHE_HIT_BLOCK_LIMIT:
+                        blocked_calls.add(cache_key)
                     yield from _emitCached(tc, cached, cache_hit_count[cache_key], _CACHE_HIT_BLOCK_LIMIT, messages)
                     continue
                 (fresh_read if isToolReadOnly(tc.name) else fresh_write).append((tc, cache_key))
