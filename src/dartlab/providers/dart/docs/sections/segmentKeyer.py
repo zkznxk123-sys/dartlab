@@ -39,11 +39,15 @@ class SegmentKeyer:
         return self._emit(topic, "body|lv:0|a:empty")
 
     def forTextBody(self, topic: str, *, textLevel: int, textSemanticPathKey: str | None) -> tuple[str, int, str]:
-        """heading 아래 body block — ``body|p:{semanticPath}`` 또는 ``body|lv:{n}|a:empty``."""
+        """heading 아래 body block — ``body|p:{semanticPath}`` 또는 ``body|lv:{n}|a:empty``.
+
+        SSOT 정공법: path-anchored 인 경우 occurrence 미부여 → 같은 path = 1 row.
+        path 없는 경우만 _emit (orphan body 들 occurrence 분리 유지).
+        """
         if textSemanticPathKey:
             base = f"body|p:{textSemanticPathKey}"
-        else:
-            base = f"body|lv:{textLevel}|a:empty"
+            return base, 1, base
+        base = f"body|lv:{textLevel}|a:empty"
         return self._emit(topic, base)
 
     def forTextHeadingNode(self, topic: str, segmentKeyBase: str) -> tuple[str, int, str]:
@@ -91,10 +95,19 @@ class SegmentKeyer:
         """
         if isNotesTopic and notesHeadingKey:
             base = f"table|sem:{notesHeadingKey}"
-        elif textSemanticPathKey:
+            return self._emit(topic, base)
+        if textSemanticPathKey and headerHash and headerHash != "empty":
+            # path + header 결합 (period-invariant) — 같은 section 안 다른 표
+            # (다른 header) 는 별 row, 같은 section 안 같은 표 (period 별 시기
+            # 갱신) 는 같은 row. occurrence 미부여. ``empty`` hash 는 meta-only
+            # 표 (실제 header 부재) → 구분 불능이므로 occurrence fallback.
+            base = f"table|p:{textSemanticPathKey}|h:{headerHash}"
+            return base, 1, base
+        if textSemanticPathKey:
             base = f"table|p:{textSemanticPathKey}"
-        elif headerHash:
+            return self._emit(topic, base)
+        if headerHash:
             base = f"table|h:{headerHash}"
-        else:
-            base = f"table|sb:{sourceBlockOrder}"
+            return self._emit(topic, base)
+        base = f"table|sb:{sourceBlockOrder}"
         return self._emit(topic, base)

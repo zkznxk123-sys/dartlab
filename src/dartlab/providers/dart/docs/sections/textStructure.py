@@ -149,6 +149,17 @@ def _canonicalHeadingKey(
     return labelKey
 
 
+# bracket caption 안 period-variable 부분 strip — date + 회사수 suffix.
+# 회귀 사례 (000660 companyOverview "기업집단에 소속된 회사" bracket):
+#   "기업집단에소속된회사 20171231 기준계열사 95개사" (95 사)
+#   "기업집단에소속된회사 20181231 기준계열사 100개사" (100 사)
+#   ...
+# 모두 같은 의미 bracket 인데 date + 회사수 가 period 마다 변동 → path period-locked.
+# semantic key 에서 strip.
+_RE_PERIOD_DATE = re.compile(r"\d{8}|\d{4}\d{0,4}기준|\d{4}[\.\-/]\d{1,2}[\.\-/]\d{1,2}")
+_RE_COUNT_SUFFIX = re.compile(r"\d+개사?")
+
+
 @lru_cache(maxsize=4096)
 def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
     if not labelKey or labelKey.startswith("@"):
@@ -162,6 +173,9 @@ def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
 
     key = _RE_SUFFIX_EGWANHAN.sub("", key)
     key = key.replace("종속기업", "종속사").replace("종속회사", "종속사")
+    # period-variable date + 회사수 strip
+    key = _RE_PERIOD_DATE.sub("", key)
+    key = _RE_COUNT_SUFFIX.sub("", key)
 
     if isinstance(topic, str) and topic == "businessOverview":
         key = key.replace("영업의개황", "영업현황")
