@@ -343,6 +343,13 @@ _RE_INLINE_KOR_HEADING = re.compile(
 # 누락된 parquet 본문 안 inline marker 로 split. 회귀 사례 (005380 businessOverview):
 # "수주에 관한 사항▣ 현대로템" 같이 "▣" 가 한글 직후 line-break 없이 박힌 경우.
 _RE_INLINE_BULLET_MARKER = re.compile(r"(?<!^)(?=[▣▶◈]\s*[가-힣])")
+# circle number marker — ①②③④⑤⑥⑦⑧⑨⑩... 한글 직후 line-break 없이 박힌 경우 split.
+# 회귀 사례 (005930 affiliateGroup): "(4) 계열회사의 지분현황① 국내법인" 같이 ① 앞에
+# 한글이 line-break 없이 붙은 경우 → "(4) 계열회사의 지분현황" + "① 국내법인" 으로 split.
+_RE_INLINE_CIRCLE_MARKER = re.compile(r"(?<=[가-힣\)\d])(?=[①-⑳⓪]\s*[가-힣\(\[])")
+# bracket-bracket 인접 marker — "[34. 음식점업][35. 인테리어 ...]" 같이 sub-section
+# bracket 이 line-break 없이 연속된 경우 → 각 bracket 별 split.
+_RE_INLINE_BRACKET_ADJ = re.compile(r"(?<=\])(?=\[)")
 _RE_LINE_HEAD_KOREAN = re.compile(r"^[가-힣]\.\s+(.+)$")
 _RE_LINE_HEAD_NUMERIC = re.compile(r"^\d+\.\s+(.+)$")
 
@@ -391,6 +398,8 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
         _RE_INLINE_PAREN_KOR,
         _RE_INLINE_KOR_DASH_NUM,
         _RE_INLINE_BULLET_MARKER,
+        _RE_INLINE_CIRCLE_MARKER,
+        _RE_INLINE_BRACKET_ADJ,
         _RE_INLINE_KOR_HEADING,
     ):
         for m in pat.finditer(line):
