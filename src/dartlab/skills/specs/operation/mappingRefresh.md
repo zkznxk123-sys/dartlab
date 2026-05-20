@@ -12,7 +12,7 @@ whenToUse:
   - "accountMappings.json 미커버 계정 보강"
 procedure:
   - "Step 1 — polars lazy + anti-join 으로 전 종목 finance parquet 2~3 초 스캔, 미커버 그룹 추출"
-  - "Step 2 — mapper.map() 11 단계 fallback 더블체크, false-positive 제거"
+  - "Step 2 — mapper.map() 12 단계 fallback 더블체크, false-positive 제거"
   - "Step 3 — SA korName substring 매칭 + 5 가드 후보 추출"
   - "Step 4 — 운영자가 한 줄씩 의미 검토 + SA hard check + 짝 동시 박기"
 examples:
@@ -78,7 +78,7 @@ mapper 의 34,000+ 매핑은 *모두 운영자가 미커버 한글명을 보고 
 
 ## 2. Step 1 — polars lazy + anti-join 전수 미커버 추출
 
-`mapper.map()` 의 11 단계 fallback 중 핵심 4 단 (account_id 직 hit,
+`mapper.map()` 의 12 단계 fallback 중 핵심 4 단 (account_id 직 hit,
 account_nm 직 hit, account_id prefix 제거 후 hit, account_nm 정규화 hit)
 을 polars expression 으로 재현해 **2~3 초** 만에 전 종목 finance parquet
 에서 미커버 행 추출. 사전 변형 흡수 (noSpace/noParen/noHyphen 역인덱스
@@ -294,22 +294,45 @@ EOF
 
 `commit -o` 명시 + 주체 중립 톤 강행 (다른 파일 staged 섞임 차단).
 
-## 6. mapper.py 정공 보강 — 11 단계 fallback
+## 6. mapper.py 정공 보강 — 12 단계 fallback (사전 hit 우선)
 
-본 cycle 들에서 mapper.py 에 도입된 정공 (회귀 가드 tests/providers/dart/finance/test_mapperFallbackVariants.py 7 PASS):
+본 cycle 들에서 mapper.py 에 도입된 정공 (회귀 가드 tests/providers/dart/finance/test_mapperFallbackVariants.py 10 PASS):
 
 1. account_id `_stripPrefix` (ifrs-full_/ifrs_/dart_/ifrs-smes_ 제거)
-2. `ID_SYNONYMS` 영문 ID 동의어 통합
-3. `ACCOUNT_NAME_SYNONYMS` 한글명 동의어 통합
-4. 사전 한글명 직접 조회 (우선)
-5. 사전 영문 ID 조회 (fallback)
-6. 입력 공백 제거 후 사전 조회
-7. **사전 noSpace 역인덱스** (사전 키 공백/tab/ZWSP 흡수)
-8. 입력 괄호+공백 제거 후 사전 조회
-9. **사전 noParen 역인덱스** (예: `현금의 기타유입` ↔ `현금의기타유입(유출)`)
-10. 입력 하이픈 제거 + 사전 noHyphen 역인덱스 (실험 081-001)
+2. **사전 직접 hit — accountNm / normalizedId** (synonym 우회 X · 의미 보존 우선)
+3. `ACCOUNT_NAME_SYNONYMS` 한글명 동의어 통합 후 재조회
+4. `ID_SYNONYMS` + normalizedId 재조회
+5. 입력 공백 제거 후 사전 조회
+6. **사전 noSpace 역인덱스** (사전 키 공백/tab/ZWSP 흡수)
+7. 입력 괄호+공백 제거 후 사전 조회
+8. **사전 noParen 역인덱스** (예: `현금의 기타유입` ↔ `현금의기타유입(유출)`)
+9. 입력 하이픈 제거 후 사전 조회 (실험 081-001)
+10. **사전 noHyphen 역인덱스**
 11. **입력 짧은 한국어 suffix 흡수** (`액`/`등`/`외` — `영업양도 현금유입액` ↔ `영업양도 현금유입`)
 12. 미매핑 → None
+
+(2) 사전 직접 hit 우선 — 사전에 `현금배당 → cash_dividends_paid` 가
+박혀 있을 때 `ACCOUNT_NAME_SYNONYMS["현금배당"] = "배당금"` 정규화가
+`mappings["배당금"] = "dividends"` 로 우회 → *정보 손실* 차단.
+ACCOUNT_NAME_SYNONYMS 의 원래 의도는 사전에 *없는* 변형 흡수 — 사전 hit
+이 우선이고 SYNONYMS 는 fallback.
+
+검증 (카카오 035720, 14,913 행, 사전 hit 우선 적용 전후 row-by-row):
+
+| 카테고리 | 적용 전 | 적용 후 |
+|---|---|---|
+| 같은 snakeId | 9,027 | 9,777 (+750) |
+| 옛/신 다른 snakeId | 750 | 0 |
+| 옛 None → 신 snakeId 개선 | 4,350 | 4,350 (보존) |
+| 회귀 (옛 snakeId → 신 None) | 0 | 0 |
+
+## 6.1 reference 래퍼 SSOT 통합
+
+`src/dartlab/reference/mappers/accountMapper.py::AccountMapper.lookup(key)`
+는 본진 (`providers/dart/finance/mapper.py`) 의 `AccountMapper.map()` 위임.
+같은 사전 위 *두 매퍼 분산* 해소 — reference 호출자도 12 단계 fallback
+일관 적용. 회귀 가드 `test_reference_wrapper_consistency` 가 본진 ↔
+래퍼 결과 snakeId 동일 검증 (한글명 + snakeId 직접 + 미매핑 None 3 경로).
 
 ## 7. cycle 운용
 
@@ -468,8 +491,11 @@ snake_case 변환 박기 전 *한글명 의미 일치 가드* 필수.
 ## 13. 참조
 
 - `src/dartlab/providers/dart/finance/mapper.py::AccountMapper` — mapper
-  본체 (11 단계 fallback, 사전 변형 noSpace/noParen/noHyphen 역인덱스 +
-  suffix 흡수)
+  본진 (12 단계 fallback, 사전 hit 우선, 사전 변형 noSpace/noParen/noHyphen
+  역인덱스 + 액 suffix 흡수)
+- `src/dartlab/reference/mappers/accountMapper.py::AccountMapper` —
+  reference 래퍼. 본진 `map()` 위임 (`BaseMapper.lookup(key)` 인터페이스
+  어댑터). SSOT 단일화.
 - `src/dartlab/providers/dart/finance/pivot.py::_pivotToSeries` — nonstd
   로그 출력 위치
 - `src/dartlab/reference/data/accountMappings.json` — prod 매핑 사전
@@ -478,4 +504,5 @@ snake_case 변환 박기 전 *한글명 의미 일치 가드* 필수.
   (staging parquet 우회 경로, step 4 inline batch 와 동치)
 - `src/dartlab/reference/mapping/mappingReview.py` — staging review CLI
 - `tests/providers/dart/finance/test_mapperFallbackVariants.py` — 회귀
-  가드 7 케이스 (사전 변형 흡수 + suffix 흡수)
+  가드 10 케이스 (cycle 5/12/17 회귀 + 사전 변형 흡수 + suffix 흡수
+  + reference 래퍼 일관성 + 짝 박기 룰)

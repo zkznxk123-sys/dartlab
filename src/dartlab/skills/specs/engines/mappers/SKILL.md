@@ -186,7 +186,8 @@ DART 측 mapper 데이터는 `reference/data/` 로 통합 승격 (`providers/dar
    → 미커버 그룹 ≈ 33k (false-positive 약 33% 포함)
 
 2. mapper.map() Python 더블체크 (~0.2 초)
-   AccountMapper.get().map(accountId, accountNm) 8 단계 fallback 호출.
+   AccountMapper.get().map(accountId, accountNm) 12 단계 fallback 호출
+   (사전 hit 우선 → synonym 정규화 → 공백/괄호/하이픈 역인덱스 → 액 suffix).
    None 반환 행만 진짜 미커버 — anti-join 으로 못 잡은 synonym/정규화 단계
    false-positive 제거.
    → 진짜 미커버 ≈ 22k.
@@ -243,4 +244,6 @@ from dartlab.reference.mappers.accountMapper import AccountMapper
 mapper = AccountMapper()
 print(mapper.stats())  # MapperStats(name='account', totalEntries=34249, coverage=1.0, lastUpdated='2026-03-09')
 print(mapper.lookup("매출액"))  # {'snakeId': 'sales', ...}
+# 본 lookup() 은 본진 providers/dart/finance/mapper.py::AccountMapper.map() 위임 —
+# 12 단계 fallback (사전 hit 우선 + synonym + 변형 흡수) 일관 적용. SSOT 단일화.
 ```
