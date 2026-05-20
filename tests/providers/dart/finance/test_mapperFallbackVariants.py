@@ -148,3 +148,35 @@ def test_action_pair_balance_sanity(mapper) -> None:
         f"유입/유출 매핑 불균형 ({inflow}/{outflow}, ratio={ratio:.2f}) — "
         "한 쪽만 박는 회귀 신호. cycle 진행 시 짝 동시 박기 룰 확인."
     )
+
+
+@pytest.mark.skip(reason="Phase C 활성화 — reference 래퍼 위임 통합 후 일관성 검증")
+def test_reference_wrapper_consistency(mapper) -> None:
+    """reference 래퍼 lookup() 와 본진 map() 일관성 — Phase C 통합 후.
+
+    `reference/mappers/accountMapper.py::AccountMapper.lookup(key)` 가 본진
+    `providers/dart/finance/mapper.py::AccountMapper.map("", key)` 결과와
+    snakeId 동일하게 반환해야 함. 분산 매퍼 통합의 핵심 가드 — Phase C
+    완료 시 skip 제거.
+
+    검증 케이스: 한글명 5 종 + snakeId 5 종 양방향.
+    """
+    from dartlab.reference.mappers.accountMapper import AccountMapper as RefMapper
+
+    ref = RefMapper()
+
+    # 한글명 → snakeId 동일 검증
+    samples = [
+        ("매출액", "sales"),
+        ("당기순이익", "profit_loss"),
+        ("자산총계", "assets"),
+        ("부채총계", "liabilities"),
+        ("영업이익", "operating_profit"),
+    ]
+    for korName, expected in samples:
+        engineSnake = mapper.map("", korName)
+        refResult = ref.lookup(korName)
+        refSnake = refResult.get("snakeId") if refResult else None
+        assert engineSnake == refSnake == expected, (
+            f"reference 래퍼 일관성 회귀: {korName!r} — engine={engineSnake!r} ref={refSnake!r} expected={expected!r}"
+        )

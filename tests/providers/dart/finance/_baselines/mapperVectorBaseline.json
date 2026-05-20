@@ -1,0 +1,9 @@
+{
+  "_comment": "Phase B 시작 직전 측정 후 박을 baseline. 측정 명령은 plan.md 의 Phase D 참조.",
+  "_pending": true,
+  "rowLoopSeconds": null,
+  "vectorTargetSeconds": null,
+  "measuredAt": null,
+  "sampleStockCode": "035720",
+  "sampleRowCount": null
+}
