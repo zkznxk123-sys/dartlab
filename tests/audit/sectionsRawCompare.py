@@ -76,7 +76,8 @@ def _extractHeadings(content: str) -> list[tuple[int, str, str, str]]:
             ("parenPhrase", _RE_PAREN_PHRASE_HEAD),
             ("kor", _RE_KOR_HEAD),
             ("num", _RE_NUM_HEAD),
-            ("roman", _RE_ROMAN_HEAD),
+            # roman 챕터 (I./II./X./...) 는 sections 가 topic 으로 mapping 하고 explicit
+            # heading row 로 보존 안 함 — audit 도 검출 제외 (false positive 차단).
             ("parenNum", _RE_PAREN_NUM_HEAD),
             ("parenKor", _RE_PAREN_KOR_HEAD),
             ("circle", _RE_CIRCLE_HEAD),
