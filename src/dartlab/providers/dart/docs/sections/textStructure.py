@@ -88,6 +88,16 @@ _TOPIC_SEGMENT_ALIASES: dict[str, dict[str, str]] = {
 
 _HTML_ENTITY_RE = re.compile(r"&[a-zA-Z]+;?|&#\d+;?")
 
+# parquet 본문 줄바꿈 누락 복원 — DART HTML→parquet 변환 시 일부 회사 (현대모비스/
+# 하나금융/신한지주 등) 의 본문 줄바꿈 정보 손실. 한국어 종결사 ("입니다.", "습니다.",
+# "표기합니다." 등) 후 *한 글자 한글 + . + 공백/한글* (heading prefix) 가 이어지면
+# 줄바꿈 삽입. 의례적 종결사 매칭 — false positive 최소화.
+_RE_LINE_BREAK_REPAIR = re.compile(r"(?<=니다\.)(?=[가-힣]\.[\s가-힣])")
+
+
+def _repairLineBreaks(text: str) -> str:
+    return _RE_LINE_BREAK_REPAIR.sub("\n", text)
+
 
 def _cleanLine(line: str) -> str:
     # HTML entity \ub514\ucf54\ub4dc \u2014 DART \uc6d0\ubb38\uc5d0 `&cr`, `&cr;&cr` \uac19\uc740 raw entity \uac00 \ub0a8\uc544
@@ -198,6 +208,15 @@ _LABEL_CLOSING_NOUNS = (
     "진척",
     "수준",
     "추이",
+    "명칭",
+    "기간",
+    "주소",
+    "번호",
+    "주요",
+    "소재지",
+    "홈페이지",
+    "사업부문",
+    "보유현황",
 )
 _RE_INLINE_PAREN_NUM = re.compile(r"(?<=\s)(?=\(\d+\)\s)")
 _RE_INLINE_PAREN_KOR = re.compile(r"(?<=\s)(?=\([가-힣]\)\s)")
@@ -207,6 +226,23 @@ _RE_LINE_HEAD_NUMERIC = re.compile(r"^\d+\.\s+(.+)$")
 
 
 def _splitInlineMultiHeading(line: str) -> list[str]:
+    """한 줄 안 multi-heading split — 반복 적용으로 N 개 prefix 모두 분리."""
+    parts = [line]
+    for _ in range(20):  # iteration limit
+        newParts: list[str] = []
+        changed = False
+        for p in parts:
+            sub = _splitInlineMultiHeadingOnce(p)
+            if len(sub) > 1:
+                changed = True
+            newParts.extend(sub)
+        parts = newParts
+        if not changed:
+            break
+    return parts
+
+
+def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
     """한 줄 안 multi-heading prefix split.
 
     DART parquet 본문이 일부 회사 (하나금융/신한지주/현대모비스 등) 에서 한 줄에 여러
@@ -237,23 +273,31 @@ def _splitInlineMultiHeading(line: str) -> list[str]:
     head_match = _RE_LINE_HEAD_KOREAN.match(line) or _RE_LINE_HEAD_NUMERIC.match(line)
     if head_match:
         labelPart = head_match.group(1)
-        # label 안 closing 명사 위치 (가장 *늦은* 위치 — heading label 의 끝)
         labelStart = line.index(labelPart)
+        # label 안 closing 명사의 *모든 위치* 검사 (rfind 단일 위치는 본문 안 같은 명사
+        # repeat 시 false positive — 예: "본사의 주소, 전화번호, 홈페이지 주소법인 ...
+        # 본점 주소지는..." 의 "주소" rfind 가 "주소지" 잡음). 첫 valid 위치 (다음
+        # 글자 한글 + 잔여 5자 이상) 만 split — 본문 순서 보존 + iterative loop 가
+        # 후속 split 처리.
+        bestSplitPos: int | None = None
         for noun in _LABEL_CLOSING_NOUNS:
-            idx = labelPart.rfind(noun)
-            if idx < 0:
-                continue
-            afterNoun = idx + len(noun)
-            if afterNoun >= len(labelPart):
-                continue
-            nextChar = labelPart[afterNoun]
-            # closing 명사 다음 한글 (단어 시작) — 본문 시작 의심
-            if "가" <= nextChar <= "힣":
-                # 단 본문 시작 단어가 *5 자 이상* 일 때만 (false positive 차단)
+            for m in re.finditer(re.escape(noun), labelPart):
+                idx = m.start()
+                afterNoun = idx + len(noun)
+                if afterNoun >= len(labelPart):
+                    continue
+                nextChar = labelPart[afterNoun]
+                if not ("가" <= nextChar <= "힣"):
+                    continue
                 rest = labelPart[afterNoun:]
-                if len(rest) >= 5:
-                    positions.add(labelStart + afterNoun)
-                    break
+                if len(rest) < 5:
+                    continue
+                candidatePos = labelStart + afterNoun
+                if bestSplitPos is None or candidatePos < bestSplitPos:
+                    bestSplitPos = candidatePos
+                break  # 이 명사의 첫 valid 위치만
+        if bestSplitPos is not None:
+            positions.add(bestSplitPos)
 
     if len(positions) <= 1:
         return [line]
@@ -449,6 +493,9 @@ def parseTextStructureWithState(
         )
         segmentOrder += 1
 
+    # parquet 본문 줄바꿈 누락 회사 (현대모비스 등) — 한국어 종결사 후 한글 heading
+    # prefix 등장 시 줄바꿈 복원. 정규화 후 line 단위 처리.
+    text = _repairLineBreaks(text)
     rawLines = text.splitlines()
     splitLines: list[str] = []
     for rawLine in rawLines:
