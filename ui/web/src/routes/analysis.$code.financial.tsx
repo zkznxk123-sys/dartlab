@@ -18,7 +18,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
 	BentoGrid,
 	BENTO_GAP_PX,
@@ -39,6 +39,67 @@ import { dashKeys } from '@/features/dashboard/api/queryKeys';
 import { formatValue } from '@/lib/format';
 
 type SubView = FinancialSubCategory;
+
+// narrative section 정의 — cardKey → sectionIdx. backend layout 그대로 받되
+// 컴포넌트에서 split 후 각 section 내 y 좌표 normalize (그룹 내 min y 빼기).
+// 정통 분석 10 단계 매핑 — 5 section narrative.
+// module-level 정의: placeholder layout 생성 useMemo 도 같은 SECTIONS 참조.
+const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
+	{
+		title: '자본구조 · 자산구조',
+		subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리는가 — CCC 까지.',
+		keys: new Set([
+			'assetComposition',
+			'liabilityDetail',
+			'equityDetail',
+			'cashAssetsRatio',
+			'incomeBreakdown',
+			'workingCapitalDays',
+		]),
+	},
+	{
+		title: '영업 효율 · 자본 효율',
+		subtitle: '마진·수익성·DuPont 5단·Penman·ROIC-WACC·세그먼트 — 본업이 진짜로 돈을 버는가.',
+		keys: new Set([
+			'marginTrend',
+			'returnTrend',
+			'dupont5Step',
+			'penmanRoeDecomp',
+			'roic',
+			'roicWaccGap',
+			'costStructureTrend',
+			'turnoverTrend',
+			'operatingLeverage',
+			'taxWalk',
+			'segmentRevenue',
+			'effectiveTaxRate',
+		]),
+	},
+	{
+		title: '현금 일생 · 자본배분',
+		subtitle: '현금흐름·FCF·자본배분·배당성향·이익품질·발생액·순차입금 — 번 돈은 어디로.',
+		keys: new Set([
+			'cashflowSigned',
+			'fcfTrend',
+			'capitalAllocation',
+			'payoutRatio',
+			'earningsQuality',
+			'sloanAccruals',
+			'netDebt',
+		]),
+	},
+	{
+		title: '재무 안정 · 부도 위험',
+		subtitle: '안정성·유동성·Altman Z·5 모델 ensemble·이자보상·레버리지 — 망할 수 있는가.',
+		keys: new Set(['stabilityRatio', 'liquidityTrend', 'leverageTrend', 'interestCoverage', 'altmanZ', 'distressEnsemble']),
+	},
+	{
+		title: '성장의 질 · 이상신호',
+		subtitle: '매출 YoY·자본 YoY·사업 집중도 — 성장이 진짜인가, 한 사업에 몰빵인가.',
+		keys: new Set(['growthYoy', 'equityGrowth', 'segmentConcentration']),
+	},
+];
+const SECTION_KEYS_FLAT = new Set<string>(SECTIONS.flatMap((s) => Array.from(s.keys)));
 
 export const Route = createFileRoute('/analysis/$code/financial')({
 	component: FinancialTab,
@@ -308,10 +369,13 @@ function FinancialTab() {
 
 	// v3-r6 — sub view 폐기. view 항상 null → backend OVERVIEW_KEYS curated.
 	// bundle load — backend asyncio.gather 가 progressive (35 round-trip) 보다 5x 빠름 (warm cache 0.36s vs 1.82s).
+	// eagerN=3 — hero + 첫 3 카드만 동행. 4~6 번째는 IntersectionObserver lazy
+	// (CardRender visible 진입 시 fetchCard). cold gather 6→3 카드 build → 0.5s
+	// → 0.25s 절감. backend TTL 캐시 (viz._SPEC_CACHE) 가 lazy 호출 중복 build 0.
 	const apiView = null;
 	const { data, isError, isLoading, error } = useQuery({
 		queryKey: dashKeys.tabLayout('financial', code, apiView, periodKind),
-		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, false),
+		queryFn: () => fetchTabLayout('financial', code, apiView, periodKind, 40, false, 3),
 		placeholderData: keepPreviousData,
 		staleTime: 5 * 60_000,
 		retry: 1,
@@ -395,77 +459,34 @@ function FinancialTab() {
 		);
 	};
 
-	const placed = data?.layout ?? [];
+	// placeholder layout — catalog 의 xlSpan + kind 로 sequential pack. backend layout
+	// 응답 도착 전 5 섹션 골격 + 각 카드 spinner 즉시 paint. 인지 latency: cold ~700ms
+	// 빈 화면 → 즉시 골격 + 카드별 spinner. catalog 는 staleTime: Infinity 라 첫 1회
+	// 후 모든 진입에서 hit. 좌표는 정확하지 않으나 SECTIONS keys 매칭은 정확 →
+	// layout 응답 도착 시 카드 ID 단위 reorder 만, 카드 mount 자체는 재사용 (key=cardKey).
+	const placeholderPlaced = useMemo<PackedCard[]>(() => {
+		if (!catalog) return [];
+		const fin = (catalog.cards ?? []).filter((c) => SECTION_KEYS_FLAT.has(c.cardKey));
+		let cursorX = 0;
+		let cursorY = 0;
+		let rowH = 0;
+		const out: PackedCard[] = [];
+		for (const c of fin) {
+			const w = Math.min(12, c.xlSpan || 4);
+			const h = c.kind === 'kpiTile' ? 2 : 3;
+			if (cursorX + w > 12) {
+				cursorY += rowH;
+				cursorX = 0;
+				rowH = 0;
+			}
+			out.push({ cardKey: c.cardKey, kind: c.kind, title: c.title, x: cursorX, y: cursorY, w, h });
+			cursorX += w;
+			rowH = Math.max(rowH, h);
+		}
+		return out;
+	}, [catalog]);
 
-	// narrative section 정의 — cardKey → sectionIdx. backend layout 그대로 받되
-	// 여기서 split 후 각 section 내 y 좌표 normalize (그룹 내 min y 빼기).
-	// 정통 분석 10 단계 매핑 — 5 section narrative.
-	const SECTIONS: { title: string; subtitle: string; keys: Set<string> }[] = [
-		{
-			title: '자본구조 · 자산구조',
-			subtitle: '자산 = 부채+자본. 어떻게 자금조달해서 어떤 영업자산을 굴리는가 — CCC 까지.',
-			keys: new Set([
-				'assetComposition',
-				'liabilityDetail',
-				'equityDetail',
-				'cashAssetsRatio',
-				'incomeBreakdown',
-				'workingCapitalDays',
-			]),
-		},
-		{
-			title: '영업 효율 · 자본 효율',
-			subtitle: '마진·수익성·DuPont 5단·Penman·ROIC-WACC·세그먼트 — 본업이 진짜로 돈을 버는가.',
-			keys: new Set([
-				'marginTrend',
-				'returnTrend',
-				'dupont5Step',
-				'penmanRoeDecomp',
-				'roic',
-				'roicWaccGap',
-				'costStructureTrend',
-				'turnoverTrend',
-				'operatingLeverage',
-				'taxWalk',
-				'segmentRevenue',
-				'effectiveTaxRate',
-			]),
-		},
-		{
-			title: '현금 일생 · 자본배분',
-			subtitle: '현금흐름·FCF·자본배분·배당성향·이익품질·발생액·순차입금 — 번 돈은 어디로.',
-			keys: new Set([
-				'cashflowSigned',
-				'fcfTrend',
-				'capitalAllocation',
-				'payoutRatio',
-				'earningsQuality',
-				'sloanAccruals',
-				'netDebt',
-			]),
-		},
-		{
-			title: '재무 안정 · 부도 위험',
-			subtitle: '안정성·유동성·Altman Z·5 모델 ensemble·이자보상·레버리지 — 망할 수 있는가.',
-			keys: new Set([
-				'stabilityRatio',
-				'liquidityTrend',
-				'leverageTrend',
-				'interestCoverage',
-				'altmanZ',
-				'distressEnsemble',
-			]),
-		},
-		{
-			title: '성장의 질 · 이상신호',
-			subtitle: '매출 YoY·자본 YoY·사업 집중도 — 성장이 진짜인가, 한 사업에 몰빵인가.',
-			keys: new Set([
-				'growthYoy',
-				'equityGrowth',
-				'segmentConcentration',
-			]),
-		},
-	];
+	const placed = data?.layout ?? placeholderPlaced;
 
 	const grouped = SECTIONS.map((section) => {
 		const cards = placed.filter((p) => section.keys.has(p.cardKey));

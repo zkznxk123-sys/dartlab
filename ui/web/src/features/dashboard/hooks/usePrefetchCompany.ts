@@ -20,9 +20,12 @@ export function usePrefetchCompany() {
 			queryFn: () => fetchCompanyMeta(stockCode),
 			staleTime: 10 * 60_000,
 		});
+		// eagerN=3 — hero + 첫 3 카드만 백엔드 build. 4~6 번째는 진입 후 IntersectionObserver
+		// lazy. cold gather 6→3 카드, backend 0.5s → 0.25s 절감. 클릭 시점에 첫 viewport
+		// 카드는 캐시 hit, 나머지는 viewport 진입 시 fetchCard (TTL 캐시 중복 build 0).
 		void queryClient.prefetchQuery({
 			queryKey: dashKeys.tabLayout('financial', stockCode, null, periodKind),
-			queryFn: () => fetchTabLayout('financial', stockCode, null, periodKind, 40, false),
+			queryFn: () => fetchTabLayout('financial', stockCode, null, periodKind, 40, false, 3),
 			staleTime: 5 * 60_000,
 		});
 		// 퀀트 prefetch — 사이드바에서 비활성 상태이므로 prefetch 도 꺼둠.
