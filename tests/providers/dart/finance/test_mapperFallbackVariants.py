@@ -117,3 +117,34 @@ def test_suffix_trim_absorbs_eok(mapper) -> None:
 def test_suffix_trim_eok_preserves_meaning(mapper) -> None:
     """'매출액' 같은 base key 직접 매핑은 suffix-trim 영향 안 받음 — idempotent."""
     assert mapper.map("", "매출액") == "sales"
+
+
+def test_cycle17_paired_mapping_present(mapper) -> None:
+    """cycle 12→17 회귀 가드 — 액션 쌍 (유입↔유출) 동시 매핑 유지.
+
+    cycle 12 박은 '상환의무 있는 정부보조금...현금유입액' 의 유출 짝이
+    부재 → 8 회사 nonstd_ 재발 → cycle 17 fix. 본 가드는 *짝 entry 가
+    사전에서 사라지면 fail* — 매핑 정리 시 한 쪽만 박는 회귀 차단.
+    """
+    inflow = "상환의무 있는 정부보조금으로 인한 현금유입액"
+    outflow = "상환의무 있는 정부보조금으로 인한 현금유출액"
+    got_in = mapper.map("", inflow)
+    got_out = mapper.map("", outflow)
+    assert got_in == "change_in_government_grants", f"cycle 12 유입 매핑 회귀: got={got_in!r}"
+    assert got_out == "change_in_government_grants", f"cycle 17 유출 짝 회귀 (본 세션 잘못 재발): got={got_out!r}"
+
+
+def test_action_pair_balance_sanity(mapper) -> None:
+    """전체 사전의 유입/유출 엔딩 개수 균형 sanity — 한 쪽 부재 다발 차단.
+
+    엄밀 1:1 짝은 검증 못 함 (회사별 표현 차이) 하지만 *극단 불균형*
+    (예: 유입 200 + 유출 50) = 짝 박기 룰 위반 신호. ±25% 이내 허용.
+    """
+    inflow = sum(1 for k in mapper._mappings if k.endswith("현금유입액") or k.endswith("현금 유입"))
+    outflow = sum(1 for k in mapper._mappings if k.endswith("현금유출액") or k.endswith("현금 유출"))
+    assert inflow > 0 and outflow > 0, "유입/유출 매핑 카테고리 자체가 사라짐"
+    ratio = min(inflow, outflow) / max(inflow, outflow)
+    assert ratio >= 0.75, (
+        f"유입/유출 매핑 불균형 ({inflow}/{outflow}, ratio={ratio:.2f}) — "
+        "한 쪽만 박는 회귀 신호. cycle 진행 시 짝 동시 박기 룰 확인."
+    )
