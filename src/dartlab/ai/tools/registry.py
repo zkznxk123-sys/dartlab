@@ -28,6 +28,7 @@ from .runPython import runPython
 from .runWorkbench import runWorkbench
 from .saveArtifact import saveArtifact
 from .scenarioOverlay import scenarioOverlay
+from .searchPastSessions import searchPastSessions
 from .storyTemplate import pickStoryTemplate
 from .types import ToolResult, ToolSpec
 from .validateRecipe import validateRecipe
@@ -419,6 +420,27 @@ _SPECS: dict[str, ToolSpec] = {
         idempotentHint=True,
         openWorldHint=False,
     ),
+    "SearchPastSessions": ToolSpec(
+        "SearchPastSessions",
+        "과거 세션 transcript (~/.claude/projects/.../*.jsonl) BM25 검색. '이 회사 분석한 적 있나' · '이 매핑 결정 어디서 했지' 류 cross-session recall. rebuild=True 면 호출 전 전체 재인덱싱.",
+        {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "자유형 검색어. 공백 분리 토큰 AND 매칭."},
+                "limit": {"type": "integer", "description": "반환 hit 수 (1-50, 기본 10)"},
+                "role": {"type": "string", "enum": ["user", "assistant"], "description": "역할 필터. 생략 시 둘 다."},
+                "rebuild": {
+                    "type": "boolean",
+                    "description": "True 면 호출 전 ~/.claude/projects/ 전체 재인덱싱 (느림). 기본 False — 기존 인덱스만.",
+                },
+            },
+            "required": ["query"],
+        },
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    ),
     "RequestUserInput": ToolSpec(
         "RequestUserInput",
         "ambiguity 만났을 때 사용자에게 schema 있는 structured 입력 요청 (MCP elicit_form). MCP 컨텍스트 전용 — non-MCP 시 자연어 fallback 권장.",
@@ -555,6 +577,7 @@ _TOOLS: dict[str, ToolFn] = {
     "ProposeRecipe": proposeRecipe,
     "ValidateRecipe": validateRecipe,
     "RunWorkbench": runWorkbench,
+    "SearchPastSessions": searchPastSessions,
 }
 
 CANONICAL_TOOL_NAMES = tuple(_SPECS.keys())
