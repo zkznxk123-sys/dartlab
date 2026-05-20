@@ -514,9 +514,9 @@ function ViewerTab() {
 				)}
 			</aside>
 
-			{/* 중앙 본문 — min-h-0 + overflow-y-auto 로 own scroll container 보장.
-			   안에 sticky top-0 timeline + 본문 row 들. timeline 이 main scroll 시 상단 고정. */}
-			<main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
+			{/* 중앙 본문 — own scroll container. 안 sticky top-0 timeline + 본문 row.
+			   timeline 이 main scroll 시 상단 고정. */}
+			<main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 				{!activeTopic ? (
 					<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
 						왼쪽에서 항목을 선택하세요.
@@ -733,74 +733,53 @@ function parseMarkdownTable(md: string): string[][] {
 }
 
 function CellContent({ value, blockType }: { value: string; blockType: string }) {
-	if (!value) return <span className="text-xs italic text-muted-foreground">·</span>;
+	if (!value) return null;
 	if (blockType === 'table' && value.includes('|')) {
 		const rows = parseMarkdownTable(value);
-		if (rows.length === 0) return <pre className="whitespace-pre-wrap break-words text-xs">{value}</pre>;
+		if (rows.length === 0) return <pre className="whitespace-pre-wrap break-words text-sm">{value}</pre>;
 		const ncols = Math.max(...rows.map((r) => r.length));
 		return (
-			<div className="overflow-x-auto">
-				<table className="w-full border-collapse text-xs">
-					<tbody>
-						{rows.map((r, ri) => {
-							const isHeader = ri === 0;
-							const Cell = isHeader ? 'th' : 'td';
-							const padded = [...r];
-							while (padded.length < ncols) padded.push('');
-							return (
-								<tr key={ri} className={isHeader ? 'bg-muted/50' : ''}>
-									{padded.map((c, ci) => (
-										<Cell key={ci} className="border border-border px-2 py-1 align-top text-left font-normal">
-											{c.replace(/&cr;/g, ' ')}
-										</Cell>
-									))}
-								</tr>
-							);
-						})}
-					</tbody>
-				</table>
-			</div>
+			<table className="w-full border-collapse text-sm">
+				<tbody>
+					{rows.map((r, ri) => {
+						const padded = [...r];
+						while (padded.length < ncols) padded.push('');
+						return (
+							<tr key={ri}>
+								{padded.map((c, ci) => (
+									<td key={ci} className="border border-border px-2 py-1 align-top font-normal">
+										{c.replace(/&cr;/g, ' ')}
+									</td>
+								))}
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
 		);
 	}
 	return <div className="whitespace-pre-wrap break-words text-sm">{value}</div>;
 }
 
+// sections SSOT 그대로 — row N 개 × period M 컬럼 grid. 가공 0.
 function SsotRowsView({ rows, windowPeriods }: { rows: ViewerRow[]; windowPeriods: string[] }) {
-	if (rows.length === 0) {
-		return (
-			<div className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
-				본문 데이터가 없습니다.
-			</div>
-		);
-	}
+	if (rows.length === 0) return null;
 	const periodsToShow = windowPeriods.length > 0 ? windowPeriods : Object.keys(rows[0]?.cells ?? {}).slice(0, 3);
 	return (
 		<div className="space-y-4">
-			{rows.map((r) => {
-				const isHeading = r.textNodeType === 'heading';
-				return (
-					<div key={`${r.blockOrder}|${r.segmentKey ?? ''}`}>
-						{r.textPath && (
-							<div className="mb-1 truncate text-xs text-muted-foreground" title={r.textPath}>
-								{r.textPath}
-							</div>
-						)}
-						<div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}>
-							{periodsToShow.map((p) => {
-								const cell = r.cells?.[p] ?? '';
-								return (
-									<div
-										key={p}
-										className={`rounded border p-2 ${isHeading ? 'bg-muted/30 font-semibold' : 'bg-card'}`}
-									>
-										<CellContent value={cell} blockType={r.blockType} />
-									</div>
-								);
-							})}
+			{rows.map((r) => (
+				<div
+					key={`${r.blockOrder}|${r.segmentKey ?? ''}`}
+					className="grid gap-3"
+					style={{ gridTemplateColumns: `repeat(${periodsToShow.length}, 1fr)` }}
+				>
+					{periodsToShow.map((p) => (
+						<div key={p} className="min-w-0">
+							<CellContent value={r.cells?.[p] ?? ''} blockType={r.blockType} />
 						</div>
-					</div>
-				);
-			})}
+					))}
+				</div>
+			))}
 		</div>
 	);
 }
