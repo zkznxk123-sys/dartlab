@@ -40,6 +40,12 @@ export interface KpiTileItem {
 	sparkline?: number[];
 	rangeMin?: number | null;
 	rangeMax?: number | null;
+	// Bloomberg/Koyfin 패턴 KPI 카드용 (운영자 디자인 제안). backend 채우면 KpiTile 가
+	// 우상단 TTM + 좌하단 YoY/QoQ 동시 표시. 옛 deltaPct (prev 계산) 와 호환:
+	// yoyPct/qoqPct 가 있으면 우선, 없으면 prev → deltaPct fallback.
+	ttmValue?: number | null;
+	yoyPct?: number | null;
+	qoqPct?: number | null;
 }
 
 export interface TopListItem {

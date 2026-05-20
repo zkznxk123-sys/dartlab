@@ -333,6 +333,9 @@ function KpiTileSingle({ spec, size }: { spec: RechartsSpec; size?: { w: number;
 				rangeMin={t.rangeMin}
 				rangeMax={t.rangeMax}
 				size={size}
+				ttmValue={t.ttmValue}
+				yoyPct={t.yoyPct}
+				qoqPct={t.qoqPct}
 			/>
 		</div>
 	);

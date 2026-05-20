@@ -1,12 +1,13 @@
 // kind=kpiTile — size 별 layout dispatch.
 //
-// 카탈로그 size (colSpan × rowSpan) 가 화면 비율과 일치하지 않으면 dead
-// space 폭발 (옛 1×1 카드를 rowSpan=2 로 렌더해 justify-between 이 콘텐츠를
-// 카드 위·중·아래로 찢었던 회귀). size prop 받아 분기:
+// 가로 와이드 (h<=2) — Bloomberg/Koyfin 패턴 (운영자 명시 디자인):
+//   좌상 label · 우상 TTM · 좌중 큰 metric · 좌하 YoY+QoQ · 우하 sparkline.
+//   yoyPct/qoqPct 가 둘 다 있으면 두 줄, 없으면 옛 deltaPct 단일.
+// h>=3 — 값 위, 큰 spark 가운데, range bar 하단.
+// hero (w>=12 && h>=12) — spark 배경 + 값/delta 좌하단 오버레이.
 //
-// - 1×1: 값 + 미니 spark 옆 배치 + delta 한 줄. range bar 없음.
-// - 1×2: 값 위, 큰 spark 아래 (카드 폭 전체), range bar 하단.
-// - 2×2+: spark 배경 본체 (반투명), 값 + delta 는 좌하단 오버레이.
+// 카탈로그 size (colSpan × rowSpan) 가 화면 비율과 일치하지 않으면 dead
+// space 폭발 회귀 방지 위해 size prop 받아 분기.
 
 import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
 
@@ -24,6 +25,10 @@ interface KpiTileProps {
 	rangeMin?: number | null;
 	rangeMax?: number | null;
 	size?: { w: number; h: number };
+	// Bloomberg/Koyfin 패턴 — backend KpiTileItem 에서 받음 (옵션, 없으면 옛 deltaPct).
+	ttmValue?: number | null;
+	yoyPct?: number | null;
+	qoqPct?: number | null;
 }
 
 function formatBigNumber(v: unknown): string {
@@ -53,6 +58,9 @@ export function KpiTile({
 	rangeMin,
 	rangeMax,
 	size,
+	ttmValue,
+	yoyPct,
+	qoqPct,
 }: KpiTileProps) {
 	const displayValue = typeof value === 'number' ? formatBigNumber(value) : (value ?? '–');
 	const positive = (deltaPct ?? 0) > 0;
@@ -171,35 +179,102 @@ export function KpiTile({
 		);
 	}
 
-	// 가로 와이드 (5×2 본질, h <= 2) — KPI 단일 metric 정답 layout:
-	// 헤더 (label 좌 + delta 우) + 본문 (값 좌 hero / spark 우 fill)
-	// padding 최소 (px-2 py-1.5), 카드 95% 점유, dead 0
+	// 가로 와이드 (h<=2) — Bloomberg/Koyfin 패턴 (운영자 명시 디자인):
+	//   좌상 label · 우상 TTM · 좌중 큰 metric · 좌하 YoY+QoQ · 우하 sparkline.
+	// yoyPct/qoqPct 가 backend 에 채워져 있으면 두 줄 (YoY ▲ N.N% · QoQ ▼ N.N%),
+	// 없으면 옛 deltaPct 단일 표시. ttmValue 있으면 우상단 "TTM <fmt>" 표시.
+	const ttmStr = ttmValue != null && Number.isFinite(ttmValue) ? formatBigNumber(ttmValue) : null;
+	const hasDualDelta = yoyPct != null || qoqPct != null;
+	const renderDeltaChip = (pctLabel: string, pct: number | null | undefined) => {
+		if (pct == null || !Number.isFinite(pct)) return null;
+		const up = pct > 0;
+		const down = pct < 0;
+		const icon = up ? (
+			<TrendingUp className="size-3 text-[var(--chart-5)]" />
+		) : down ? (
+			<TrendingDown className="size-3 text-[var(--chart-3)]" />
+		) : (
+			<Minus className="size-3 text-muted-foreground" />
+		);
+		return (
+			<div className="flex items-center gap-1">
+				<span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+					{pctLabel}
+				</span>
+				{icon}
+				<span
+					className={cn(
+						'font-mono text-[11px] font-semibold tabular-nums',
+						up && 'text-[var(--chart-5)]',
+						down && 'text-[var(--chart-3)]',
+						!up && !down && 'text-muted-foreground',
+					)}
+				>
+					{up ? '+' : ''}
+					{pct.toFixed(1)}%
+				</span>
+			</div>
+		);
+	};
 	return (
-		<div className="grid h-full w-full grid-rows-[auto_1fr] gap-1 px-2 py-1.5">
-			<div className="grid grid-cols-[1fr_auto] items-start gap-1">
-				{label && (
-					<div className="min-w-0 truncate text-[10px] uppercase tracking-wide text-muted-foreground leading-tight">
-						{label}
-					</div>
-				)}
-				{deltaText && (
-					<div className="flex shrink-0 items-center gap-0.5 text-[10px] leading-tight">
-						{deltaIcon}
-						<span className={cn('font-medium tabular-nums', positive && 'text-[var(--chart-5)]', negative && 'text-[var(--chart-3)]', !positive && !negative && 'text-muted-foreground')}>
-							{deltaText}
-						</span>
-					</div>
+		<div className="grid h-full w-full grid-cols-[1fr_auto] grid-rows-[auto_1fr_auto] gap-x-2 gap-y-1 px-2.5 py-1.5">
+			{/* 좌상 — label */}
+			<div className="min-w-0 truncate text-[11px] text-muted-foreground" title={label}>
+				{label}
+			</div>
+			{/* 우상 — TTM (또는 subtitle fallback) */}
+			<div className="shrink-0 text-right font-mono text-[10.5px] text-muted-foreground tabular-nums">
+				{ttmStr ? (
+					<>
+						<span className="uppercase tracking-wider text-muted-foreground/70">TTM</span>
+						<span className="ml-1">{ttmStr}{unit ?? ''}</span>
+					</>
+				) : subtitle ? (
+					<span className="truncate">{subtitle}</span>
+				) : null}
+			</div>
+
+			{/* 좌중 — 큰 metric */}
+			<div className="col-span-1 row-span-1 flex items-baseline gap-1 self-center tabular-nums">
+				<span className={cn('whitespace-nowrap text-3xl font-bold leading-none tracking-tight', toneClass)}>
+					{displayValue}
+				</span>
+				{unit && (
+					<span className="text-[11px] font-normal text-muted-foreground">{unit}</span>
 				)}
 			</div>
-			<div className="grid min-h-0 grid-cols-[1fr_1fr] items-center gap-2">
-				<span className={cn('whitespace-nowrap text-2xl font-bold leading-none tabular-nums', toneClass)}>
-					{displayValue}
-					{unit && <span className="ml-0.5 text-[11px] font-normal text-muted-foreground">{unit}</span>}
-				</span>
-				{hasSparkline && (
-					<div className="h-full min-w-0 [&_svg]:!h-full [&_svg]:!w-full">
-						<Sparkline data={sparkline!} color={sparkColor} height={60} width={140} />
-					</div>
+			{/* 우중 — sparkline (row-span 2 로 좌측 metric + delta 영역 전체 우측 점유) */}
+			{hasSparkline ? (
+				<div className="row-span-2 h-full min-w-[80px] self-stretch [&_svg]:!h-full [&_svg]:!w-full">
+					<Sparkline data={sparkline!} color={sparkColor} height={56} width={140} />
+				</div>
+			) : (
+				<div className="row-span-2" />
+			)}
+
+			{/* 좌하 — YoY / QoQ (dual) 또는 옛 deltaPct single */}
+			<div className="col-span-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 self-end leading-tight">
+				{hasDualDelta ? (
+					<>
+						{renderDeltaChip('YoY', yoyPct)}
+						{renderDeltaChip('QoQ', qoqPct)}
+					</>
+				) : (
+					deltaText && (
+						<div className="flex items-center gap-1">
+							{deltaIcon}
+							<span
+								className={cn(
+									'font-mono text-[11px] font-semibold tabular-nums',
+									positive && 'text-[var(--chart-5)]',
+									negative && 'text-[var(--chart-3)]',
+									!positive && !negative && 'text-muted-foreground',
+								)}
+							>
+								{deltaText}
+							</span>
+						</div>
+					)
 				)}
 			</div>
 		</div>
