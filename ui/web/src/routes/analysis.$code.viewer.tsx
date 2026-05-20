@@ -473,12 +473,13 @@ function ViewerTab() {
 	return (
 		<div
 			className={cn(
-				'flex h-full overflow-hidden',
+				'flex h-full min-h-0 overflow-hidden',
 				isFullscreen && 'fixed inset-0 z-50 bg-background',
 			)}
 		>
 			{/* 좌 TOC — 전체보기에서도 유지 (사용자 요청 — fullscreen 시 인덱스 같이 확장).
-			   너비는 동일 (240px) 유지하되 fullscreen 모드 background 보강. */}
+			   너비는 동일 (240px) 유지하되 fullscreen 모드 background 보강.
+			   본문 (main) 만 scroll — sticky timeline 상단 고정. */}
 			<aside
 				className={cn(
 					'w-60 shrink-0 overflow-y-auto border-r bg-card/30 p-2 tiny-scroll',
@@ -513,8 +514,9 @@ function ViewerTab() {
 				)}
 			</aside>
 
-			{/* 중앙 본문 */}
-			<main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+			{/* 중앙 본문 — min-h-0 + overflow-y-auto 로 own scroll container 보장.
+			   안에 sticky top-0 timeline + 본문 row 들. timeline 이 main scroll 시 상단 고정. */}
+			<main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
 				{!activeTopic ? (
 					<div className="flex h-full items-center justify-center text-sm text-muted-foreground">
 						왼쪽에서 항목을 선택하세요.
