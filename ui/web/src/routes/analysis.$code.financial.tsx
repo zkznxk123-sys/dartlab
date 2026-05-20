@@ -9,7 +9,6 @@ import { Loader2 } from 'lucide-react';
 
 import { CardShell } from '@/features/dashboard/cards/CardShell';
 import { ChartMiniTable } from '@/features/dashboard/cards/ChartMiniTable';
-import { Sparkline } from '@/features/dashboard/charts/Sparkline';
 import { VizChart } from '@/features/dashboard/charts/VizChart';
 import {
 	Dialog,
@@ -18,7 +17,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
 	BentoGrid,
 	BENTO_GAP_PX,
@@ -36,7 +35,6 @@ import {
 	type RechartsSpec,
 } from '@/features/dashboard/api/client';
 import { dashKeys } from '@/features/dashboard/api/queryKeys';
-import { formatValue } from '@/lib/format';
 
 type SubView = FinancialSubCategory;
 
@@ -197,16 +195,17 @@ function SnowflakeHero({ spec }: { spec: RechartsSpec | undefined }) {
 	);
 }
 
-// 카드 1 장 render — eager spec 은 prop 으로 주입 (apiVizLayout 의 첫 eagerN +
-// hero 카드). eager 외 카드는 visible (viewport 진입) 시 fetchCard 단일 호출.
-// backend TTL 캐시 (Task 2) 가 같은 카드 두 번 build 0 보장. 이전 progressive
-// load 의 35 round-trip 문제는 lazy 호출이 viewport 분산 + 캐시 hit 으로 해소.
+// 카드 1 장 render — eager spec 은 prop 으로 주입. eager 외 카드는 *항상 mount* +
+// bundled spec 없으면 즉시 lazy fetch. content-visibility / IntersectionObserver
+// 게이트 폐기 (cell paint skip 이 lazy 트리거 막아 끝 카드 영영 spec 없음 회귀).
+// backend _SPEC_CACHE TTL + viz._prefetchCompany dedup 이 30 카드 동시 lazy 호출
+// race 차단. 카드 자체 chrome (sparkline·headerMetric·ChartMiniTable footer) 폐기 —
+// 카드 경계 + 차트 본체만. 추가 정보는 클릭 → Dialog.
 function CardRender({
 	spec: bundledSpec,
 	packed,
 	meta,
 	cardOuterH,
-	computeHeaderMetric,
 	stockCode,
 	periodKind,
 }: {
@@ -214,34 +213,10 @@ function CardRender({
 	packed: PackedCard;
 	meta: CatalogCard | undefined;
 	cardOuterH: number;
-	computeHeaderMetric: (spec: RechartsSpec | undefined) => React.ReactNode;
 	stockCode: string;
 	periodKind: PeriodKind;
 }) {
-	// lazy spec fetch — viewport 진입 (visible) 시 bundled spec 없으면 단일 호출.
-	// backend TTL 캐시로 같은 카드 두 번 build 0. hover prefetch (Task 7) 와도 dedup.
-	const wrapperRef = useRef<HTMLDivElement>(null);
-	const [visible, setVisible] = useState(false);
-	useEffect(() => {
-		if (visible) return;
-		const el = wrapperRef.current;
-		if (!el) return;
-		const io = new IntersectionObserver(
-			(entries) => {
-				for (const e of entries) {
-					if (e.isIntersecting) {
-						setVisible(true);
-						io.disconnect();
-						break;
-					}
-				}
-			},
-			{ rootMargin: '200px 0px' },
-		);
-		io.observe(el);
-		return () => io.disconnect();
-	}, [visible]);
-	const needsLazy = visible && !bundledSpec;
+	const needsLazy = !bundledSpec;
 	const { data: lazySpec } = useQuery({
 		queryKey: dashKeys.card(packed.cardKey, stockCode, periodKind),
 		queryFn: () => fetchCard(packed.cardKey, stockCode, periodKind, 40),
@@ -253,54 +228,17 @@ function CardRender({
 
 	const title = meta?.title || spec?.title || packed.title;
 	const help = meta?.help;
-	const seriesCount = spec?.series?.length ?? 0;
 	const isDualStack = spec?.options?.dualStack === true;
-	const hasFooter = !!(spec && spec.kind === 'trend' && seriesCount > 0 && !isDualStack);
-	const footer = hasFooter ? <ChartMiniTable spec={spec} /> : undefined;
-	// ChartMiniTable row ~14px (py-0 + text-[11px] + 1px border), thead ~16px,
-	// footer wrapper (border-t + py-1) ~9px. CardShell footer max-h-[45%] 가드와
-	// 일치시켜 chart body 가 최소 55% 보장. 시리즈 많은 카드도 footer 가 카드 outer
-	// 절반 넘지 못함.
-	const footerHeight = hasFooter
-		? Math.min(14 * Math.min(seriesCount, 12) + 25, cardOuterH * 0.45)
-		: 0;
-	const bodyHeight = Math.max(
-		60,
-		cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX - footerHeight,
-	);
+	// body = 카드 outer - 헤더 한 줄. footer 없음 (사용자 명시: 카드 경계만).
+	const bodyHeight = Math.max(60, cardOuterH - BENTO_CARD_HEADER_PX - BENTO_CARD_PAD_PX);
 	const [open, setOpen] = useState(false);
 	const kind = spec?.kind ?? packed.kind;
-	const headerMetric = computeHeaderMetric(spec);
-	// Koyfin 패턴 — primary series 시계열 sparkline (마지막 24 분기).
-	// trend kind 의 단일 비-stack line/bar 만 의미 있음 (dual-stack/radar/gauge 는 제외).
-	const sparklineData = (() => {
-		if (!spec || spec.kind !== 'trend' || spec.options?.dualStack) return null;
-		const primary =
-			spec.series?.find((s) => s.intent === 'primary') ??
-			spec.series?.find((s) => !s.stack && s.type === 'line') ??
-			spec.series?.[0];
-		if (!primary) return null;
-		const data = primary.data ?? [];
-		// 최근 24 step 만 (sparkline 너무 길면 잡음).
-		return data.slice(-24);
-	})();
-	const ready = !!spec && !spec.error && visible;
-	const headerCombined = ready ? (
-		<>
-			{sparklineData && sparklineData.length >= 2 && (
-				<span className="text-muted-foreground/60">
-					<Sparkline data={sparklineData} width={56} height={16} />
-				</span>
-			)}
-			{headerMetric}
-		</>
-	) : undefined;
+	const ready = !!spec && !spec.error;
 	return (
 		<>
 			<div
-				ref={wrapperRef}
 				onClick={() => ready && setOpen(true)}
-				className={ready ? 'cursor-pointer transition-opacity hover:opacity-95' : 'h-full'}
+				className={ready ? 'h-full cursor-pointer transition-opacity hover:opacity-95' : 'h-full'}
 				role={ready ? 'button' : undefined}
 				tabIndex={ready ? 0 : undefined}
 				onKeyDown={(e) => {
@@ -316,8 +254,6 @@ function CardRender({
 					colSpan={packed.w}
 					rowSpan={packed.h}
 					kind={kind}
-					footer={ready ? footer : undefined}
-					headerExtra={headerCombined}
 				>
 					{ready ? (
 						<VizChart spec={spec} height={bodyHeight} size={{ w: packed.w, h: packed.h }} />
@@ -385,63 +321,6 @@ function FinancialTab() {
 		(catalog?.cards ?? []).map((c) => [c.cardKey, c]),
 	);
 
-	// Tremor 정통 — 헤더 우측 latest value + YoY Δ (% point or 비율 변화). primary 시리즈
-	// (또는 첫 비-stack 시리즈) 의 마지막 유효값과 4 분기 전 값 비교. dual-stack / multi-axis
-	// 카드는 모호하므로 표시 생략.
-	function computeHeaderMetric(spec: RechartsSpec | undefined): React.ReactNode {
-		if (!spec || spec.kind !== 'trend') return null;
-		if (spec.options?.dualStack) return null;
-		if (!spec.series?.length) return null;
-		// primary series 선택 우선순위: intent='primary' → 첫 비-stack line → series[0].
-		const primary =
-			spec.series.find((s) => s.intent === 'primary') ??
-			spec.series.find((s) => !s.stack && s.type === 'line') ??
-			spec.series[0];
-		const data = primary?.data ?? [];
-		const lastIdx = data.length - 1;
-		const last = lastIdx >= 0 ? data[lastIdx] : null;
-		// 비교 기간 — periodKind 가 quarterly 면 4 step 전 (YoY), annual 이면 1 step 전.
-		const lookback = periodKind === 'quarterly' ? 4 : 1;
-		const prevIdx = lastIdx - lookback;
-		const prev = prevIdx >= 0 ? data[prevIdx] : null;
-		if (last == null || !Number.isFinite(last as number)) return null;
-		const unit = primary?.unit ?? '';
-		const lastStr = formatValue(last as number, unit);
-		let deltaNode: React.ReactNode = null;
-		if (prev != null && Number.isFinite(prev as number)) {
-			// % 단위는 절대값 차이 (%p), 외 단위는 비율 변화 (%).
-			const isPct = unit === '%' || unit === '배' || unit === '회';
-			const delta = isPct
-				? (last as number) - (prev as number)
-				: (prev as number) !== 0
-					? ((last as number) - (prev as number)) / Math.abs(prev as number) * 100
-					: null;
-			if (delta != null && Number.isFinite(delta)) {
-				const sign = delta > 0 ? '+' : '';
-				const suffix = isPct ? (unit === '%' ? '%p' : (unit === '회' ? '회' : '배')) : '%';
-				const tone =
-					Math.abs(delta) < 0.05
-						? 'text-muted-foreground/80'
-						: delta > 0
-							? 'text-emerald-500 dark:text-emerald-400'
-							: 'text-rose-500 dark:text-rose-400';
-				deltaNode = (
-					<span className={`text-[10.5px] font-medium ${tone}`}>
-						{sign}
-						{Math.abs(delta) >= 10 ? delta.toFixed(0) : delta.toFixed(1)}
-						{suffix}
-					</span>
-				);
-			}
-		}
-		return (
-			<>
-				<span className="text-[12px] font-mono font-semibold text-foreground">{lastStr}</span>
-				{deltaNode}
-			</>
-		);
-	}
-
 	const renderCard = (p: PackedCard, cellSize: number) => {
 		const meta = cardMetaByKey[p.cardKey];
 		const spec = data?.cards?.[p.cardKey];
@@ -452,7 +331,6 @@ function FinancialTab() {
 				packed={p}
 				meta={meta}
 				cardOuterH={cardOuterH}
-				computeHeaderMetric={computeHeaderMetric}
 				stockCode={code}
 				periodKind={periodKind}
 			/>

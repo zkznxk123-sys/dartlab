@@ -77,7 +77,7 @@ export function CardShell({
 			</CardHeader>
 			<CardContent className="min-h-0 flex-1 px-1.5 pb-1 pt-1">{children}</CardContent>
 			{footer && (
-				<div className="max-h-[45%] shrink-0 overflow-auto border-t px-2 py-1 text-[10px] text-muted-foreground tabular-nums">
+				<div className="shrink-0 border-t px-2 py-1 text-[10px] text-muted-foreground tabular-nums">
 					{footer}
 				</div>
 			)}

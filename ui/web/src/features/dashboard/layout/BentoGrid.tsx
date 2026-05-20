@@ -70,11 +70,11 @@ export function BentoGrid({ placed, renderCard }: Props) {
 			}}
 		>
 			{placed.map((p) => {
-				// content-visibility: auto — 화면 밖 cell 의 layout/style/paint 자체 skip.
-				// 8~12 Recharts SVG 동시 mount 가 main thread 점유하던 비용 차단. `auto`
-				// prefix 의 containIntrinsicSize 는 카드가 한 번 표시된 뒤엔 실측 size 를
-				// 기억해 스크롤 점프 차단. 첫 진입 전 placeholder size 는 셀 계산식 그대로.
-				const cellOuterH = p.h * cellSize + (p.h - 1) * GAP_PX;
+				// content-visibility:auto + containIntrinsicSize 폐기 — 화면 밖 cell paint
+				// skip 이 카드 내 lazy fetch / Recharts mount 트리거를 막아 "끝까지 그래프
+				// 안 나옴" 회귀. 30 Recharts 동시 mount 가 main thread 점유한다지만 lazy
+				// spec 없는 카드는 ChartLoading spinner 만 그려서 실 비용 적음, eagerN=3
+				// 카드만 즉시 Recharts mount. 정확성 우선.
 				return (
 					<div
 						key={p.cardKey}
@@ -82,8 +82,6 @@ export function BentoGrid({ placed, renderCard }: Props) {
 						style={{
 							gridColumn: `span ${p.w} / span ${p.w}`,
 							gridRow: `span ${p.h} / span ${p.h}`,
-							contentVisibility: 'auto',
-							containIntrinsicSize: `auto ${cellOuterH}px`,
 						}}
 					>
 						{renderCard(p, cellSize)}
