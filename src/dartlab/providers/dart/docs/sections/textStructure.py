@@ -460,6 +460,23 @@ def parseTextStructureWithState(
         # 한 줄 안 multi-heading prefix 를 별 line 으로 분리.
         splitLines.extend(_splitInlineMultiHeading(s))
 
+    # chunk 내 위계 추론 — 첫 detected heading 의 prefix 가 한글이면 한글이 contextual
+    # root, numeric "1./2." 는 한글의 child (level 4) 로 강등. DART 본문 위계 표준
+    # (numeric > 한글) 이 비표준 본문 (현대차/LG/삼성물산 등 "가. ... / 1. ...
+    # sub-numbering" 구조) 에서 역전되어 후속 한글 sibling 들이 numeric 의 sub 로
+    # 박히는 회귀 차단. Roman 은 항상 chapter top 이라 강등 대상 X.
+    promoteKorean = False
+    for s in splitLines:
+        if not s:
+            continue
+        h = _detectHeading(s)
+        if h is None:
+            continue
+        firstLevel = h[0]
+        if firstLevel == 3:  # 한글이 chunk root
+            promoteKorean = True
+        break  # 첫 heading 만 봄
+
     for stripped in splitLines:
         if not stripped:
             if bodyLines:
@@ -473,6 +490,9 @@ def parseTextStructureWithState(
 
         flushBody()
         level, label, structural = heading
+        # 한글 contextual root chunk 안 numeric heading → 한글 (level 3) 의 child (4)
+        if promoteKorean and level == 2:
+            level = 4
         labelText = _normalizeHeadingText(label)
         labelKey = _headingKey(label)
         stackKey = _canonicalHeadingKey(labelText, labelKey, level=level, topic=topic)
