@@ -14,47 +14,57 @@ from collections import defaultdict
 
 import polars as pl
 
+# 표 cell 정규화 — period-variable meta 제거 → 같은 의미 표가 같은 hash.
+# 회귀 사례 (000660 companyOverview): "(기준일: 2025년 12월 31일)" / "(단위 : 사)"
+# 같은 meta row 가 매 period 마다 변동되어 hash 분리 → 13 개 row 분산 → wide-format
+# pivot 의미 무너짐. 정규화로 meta 무시 후 hash → 같은 row 정합.
+_RE_META_DATE = re.compile(r"\(\s*(?:기준일|작성기준일|보고기준일|평가일|평가기준일)[^)]*\)")
+_RE_META_UNIT = re.compile(r"\(\s*단위\s*:\s*[^)]+\)")
+_RE_META_YEAR = re.compile(r"\b\d{4}(?:Q\d|\.\d{1,2})?\b")
+_RE_META_KISU = re.compile(r"제\s*\d+\s*기")
+_RE_META_DATE_FRAGMENT = re.compile(r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일")
+
+
+def _normalizeHashCell(cell: str) -> str:
+    """cell 안 period-variable meta (기준일/단위/연도/기수) 제거 후 lowercase + whitespace strip."""
+    c = _RE_META_DATE.sub("", cell)
+    c = _RE_META_UNIT.sub("", c)
+    c = _RE_META_DATE_FRAGMENT.sub("", c)
+    c = _RE_META_YEAR.sub("", c)
+    c = _RE_META_KISU.sub("", c)
+    c = re.sub(r"\s+", " ", c).strip().lower()
+    return c
+
 
 def tableHeaderHash(md: str) -> str:
-    """markdown 표의 첫 데이터 행 (separator 전) cells 의 안정 hash.
+    """markdown 표의 *real header row* (period-variable meta 제외) cells 의 안정 hash.
 
-    옛/최근 보고서의 *다른 의미* 표가 sourceBlockOrder 위치만 같다고 같은
-    segmentKey 받는 회귀 차단용. cells normalize (lowercase + sorted) →
-    blake2b 4-byte hex. 같은 헤더 = 같은 hash, 다른 헤더 = 다른 hash.
+    옛/최근 보고서의 *다른 의미* 표가 sourceBlockOrder 위치만 같다고 같은 segmentKey
+    받는 회귀 차단용. cells 의 period-variable meta (기준일/단위/연도/기수) 제거 후
+    normalize (lowercase + sorted) → blake2b 4-byte hex.
+
+    같은 의미 표 (분기·연간 본점소재지) 는 *meta 변동 무관 같은 hash* → 같은 segmentKey →
+    wide-format 의 *같은 row* → period 비교 가능.
 
     Args:
-        md: markdown 표 본문 (`| a | b |\\n| --- | --- |\\n| 1 | 2 |` 형태).
+        md: markdown 표 본문.
 
     Returns:
-        str — 8 글자 hex hash. table 형태 아니면 ``"empty"``.
-
-    Example:
-        >>> tableHeaderHash("| a | b |\\n| --- | --- |\\n| 1 | 2 |")
-        '...8자리hex...'
-
-    SeeAlso:
-        - ``segmentKeyer.SegmentKeyer.forTableBlock`` — 본 hash 를 base 로 사용.
-
-    Requires:
-        - hashlib
-
-    Capabilities:
-        - 표 헤더 정규화 + 안정 hash → wide-format segmentKey 의 *내용* anchor.
-
-    Guide:
-        - 사용자 API X — sections expansion 내부.
-
-    AIContext:
-        internal segmentKey helper — AI 직접 호출 X.
+        str — 8 글자 hex hash. 모든 row 가 meta-only 면 ``"empty"``.
     """
     for line in md.strip().split("\n"):
         stripped = line.strip()
         if not stripped.startswith("|"):
             continue
-        cells = [c.strip().lower() for c in stripped.strip("|").split("|")]
+        cells = [_normalizeHashCell(c) for c in stripped.strip("|").split("|")]
+        # separator row 는 skip
         if all(set(c) <= {"-", ":"} for c in cells if c):
             continue
-        norm = tuple(sorted(c for c in cells if c))
+        # meta-only row (기준일/단위 제거 후 모든 cell 이 empty 또는 noise) 는 skip
+        nonEmpty = [c for c in cells if c]
+        if not nonEmpty:
+            continue
+        norm = tuple(sorted(nonEmpty))
         return hashlib.blake2b(str(norm).encode("utf-8"), digest_size=4).hexdigest()
     return "empty"
 

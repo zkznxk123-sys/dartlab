@@ -87,14 +87,17 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             baseRow["textStructural"] = None
             baseRow["segmentOrder"] = 0
             lastKey = lastHeadingKeyByTopic.get(topic)
-            # 표 헤더 hash — 옛/최근 다른 의미 표가 같은 row 로 합쳐지는 회귀 차단.
+            # path-anchored segmentKey — 같은 path 안 N-th table 은 모든 period 에서 같은 segmentKey.
+            # 옛 headerHash 룰 fallback 유지 (path 없는 chapter-leaf 표 등 edge case).
             tableText = str(row.get("text") or "")
             headerHash = tableHeaderHash(tableText) if tableText else None
+            tablePathKey = baseRow.get("textSemanticPathKey") or baseRow.get("textPathKey")
             segmentKeyBase, occurrence, segmentKey = keyer.forTableBlock(
                 topic,
                 sourceBlockOrder=sourceBlockOrder,
                 notesHeadingKey=lastKey,
                 isNotesTopic=topic in _NOTES_TOPICS,
+                textSemanticPathKey=str(tablePathKey) if isinstance(tablePathKey, str) and tablePathKey else None,
                 headerHash=headerHash,
             )
             baseRow["segmentKeyBase"] = segmentKeyBase

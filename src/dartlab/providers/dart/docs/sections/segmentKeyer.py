@@ -57,17 +57,28 @@ class SegmentKeyer:
         sourceBlockOrder: int,
         notesHeadingKey: str | None,
         isNotesTopic: bool,
+        textSemanticPathKey: str | None = None,
         headerHash: str | None = None,
     ) -> tuple[str, int, str]:
-        """table block — notes topic 의 heading key 우선 → 표 header hash 우선 → sourceBlockOrder fallback.
+        """table block — `table|p:{path}|occ:{n}` (path-anchored, period-invariant).
 
-        headerHash 가 있을 때 ``table|h:{hash}`` base 사용 — 옛·최근 보고서의
-        "1번째 표" 위치가 같더라도 표 내용 (헤더) 이 다르면 다른 segmentKey 부여 →
-        wide-format 의 *다른 row* 로 분리. 같은 의미 표 (분기·연간 본점소재지) 는
-        같은 hash → 같은 row → 정상 horizontal align.
+        우선순위:
+        1. notes topic + notesHeadingKey → `table|sem:{notesHeadingKey}`
+        2. textSemanticPathKey 있음 → `table|p:{path}` + occurrence (같은 path 안 N-th table)
+        3. headerHash fallback → `table|h:{hash}` (path 없는 leaf-only chapter 인 경우)
+        4. sourceBlockOrder 최후 fallback
+
+        path-anchored 정공법:
+        - 같은 (topic, textSemanticPathKey) 안 N-th table 은 *모든 period 에서* 같은 segmentKey
+        - DART 가 표 header 포맷을 시기별로 바꿔도 (예: "구분" vs "구 분") segmentKey 분리 안 됨
+        - 옛 headerHash 룰의 fragility (header text 변형마다 hash 분리) 해결
+        - 회귀 사례 (000660 companyOverview "연결대상회사의 변동내용" 표): 시기별로 5 개
+          hash 로 분산되던 표가 1 개 segmentKey 로 정합 → wide-format 의 *1 개 row*
         """
         if isNotesTopic and notesHeadingKey:
             base = f"table|sem:{notesHeadingKey}"
+        elif textSemanticPathKey:
+            base = f"table|p:{textSemanticPathKey}"
         elif headerHash:
             base = f"table|h:{headerHash}"
         else:
