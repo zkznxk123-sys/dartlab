@@ -22,6 +22,10 @@ _RE_PAREN_KOR = re.compile(r"^\(([가-힣])\)\s*(.+)$")
 _RE_CIRCLED = re.compile(r"^([①-⑳])\s*(.+)$")
 _RE_BRACKET = re.compile(r"^\[(.+?)\]$|^【(.+?)】$")
 _RE_SHORT_PAREN = re.compile(r"^\(([^)]+)\)$")
+# ▣ / ▶ / ◈ — DART 정기보고서 본문 안 회사명/카테고리 sub-section marker.
+# 옛 룰 _RE_HEADING_NOISE 가 ◆/■ 같은 marker 제외하지 않아 본문 첫 한 줄이 heading
+# 으로 잡힐 위험은 단어 길이 제한 (≤ 60) + 한글-only 정의로 mitigate.
+_RE_BULLET_MARKER = re.compile(r"^[▣▶◈]\s*(.+)$")
 _RE_HEADING_NOISE = re.compile(
     r"^(?:"
     r"단위|주\d|참고|출처|비고"
@@ -291,6 +295,10 @@ def _gateHeadingLabel(level: int, label: str) -> tuple[int, str, bool] | None:
 _RE_INLINE_PAREN_NUM = re.compile(r"(?<=[\s\)\d가-힣])(?=\(\d+\)[\s가-힣])")
 _RE_INLINE_PAREN_KOR = re.compile(r"(?<=[\s\)\d가-힣])(?=\([가-힣]\)[\s가-힣])")
 _RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
+# ▣ / ▶ / ◈ 한국 DART parquet sub-section marker — 회사명/카테고리 표시. line break
+# 누락된 parquet 본문 안 inline marker 로 split. 회귀 사례 (005380 businessOverview):
+# "수주에 관한 사항▣ 현대로템" 같이 "▣" 가 한글 직후 line-break 없이 박힌 경우.
+_RE_INLINE_BULLET_MARKER = re.compile(r"(?<!^)(?=[▣▶◈]\s*[가-힣])")
 _RE_LINE_HEAD_KOREAN = re.compile(r"^[가-힣]\.\s+(.+)$")
 _RE_LINE_HEAD_NUMERIC = re.compile(r"^\d+\.\s+(.+)$")
 
@@ -334,7 +342,7 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
         return [line]
 
     positions: set[int] = {0}
-    for pat in (_RE_INLINE_PAREN_NUM, _RE_INLINE_PAREN_KOR, _RE_INLINE_KOR_DASH_NUM):
+    for pat in (_RE_INLINE_PAREN_NUM, _RE_INLINE_PAREN_KOR, _RE_INLINE_KOR_DASH_NUM, _RE_INLINE_BULLET_MARKER):
         for m in pat.finditer(line):
             if m.start() > 0:
                 positions.add(m.start())
@@ -454,6 +462,14 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
         gated = _gateHeadingLabel(7, text)
         if gated is not None:
             return (7, gated[1], structural)
+
+    m = _RE_BULLET_MARKER.match(stripped)
+    if m:
+        # ▣/▶/◈ 회사명/카테고리 marker — level 5 (sub-section)
+        text = m.group(1).strip()
+        gated = _gateHeadingLabel(5, text)
+        if gated is not None:
+            return (5, gated[1], True)
 
     return None
 
