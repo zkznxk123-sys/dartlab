@@ -536,27 +536,23 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         topicIndex[topic_seq[0]] = len(topicIndex)
 
     def _topicRowSortKey(k: tuple[str, str]) -> tuple[int, int, int, int, str]:
-        """본문 원문 순서 보존 — chapter (majorNum) + 최신 period 의 sourceBlockOrder + segmentOrder + occurrence + segmentKey.
+        """본문 원문 순서 보존 — chapter majorNum + 최신 period 의 (sourceBlockOrder, segmentOrder) + occurrence + segmentKey.
 
-        이전 키 (firstSeq + freqScope_priority + latestMissing + latestRank + firstRank ...) 는
-        본문 원문 순서를 휴리스틱으로 뒤집어 회귀: SK하이닉스 "회사의 연혁" topic 에서
-        parquet 원문 "가. → 나. → 다. → 라." 인데 sections 가 "라. → 가. → 나. → 다." 로
-        출력. 본문 원문은 sourceBlockOrder 가 직접 반영 (reportRows.py 의 nextBlockOrder
-        counter) — 그것만 우선 정렬키로.
-
-        sourceBlockOrder 는 `rowMeta` 의 latest-period wins 값 사용 (rowOrder.sourceBlockOrder
-        는 across-periods `min` 휴리스틱 이라 옛 annual 의 위치가 우선 → 최신 annual 본문
-        순서 깨짐). rowMeta 는 `currRank >= prevRank` 갱신 룰로 최신 period 값 유지.
+        정렬 키는 모두 ``rowMeta`` (latest-period wins) 기반. ``rowOrder`` 의
+        across-periods ``min`` 휴리스틱 (sourceBlockOrder/segmentOrder) 은 옛
+        period 의 본문 chunking 차이 (block 쪼개짐) 로 segmentOrder=0 이 박혀
+        의미 잃음 — 정렬에 쓰지 않는다. 회귀 사례: SK하이닉스 companyOverview
+        의 같은 block (sourceBlockOrder=4) 안 "나(seg=0) → 다(seg=2) → 라(seg=4)"
+        가 옛 period 영향으로 라(seg=0 min) 가 앞으로 → 본문 원문 역순.
         """
         topic, _segmentKey = k
         majorNum, _firstSeq = topicFirstSeq.get(topic, (99, 999999))
-        info = rowOrder.get(k, {})  # noqa: F821 — closure variable
         meta = rowMeta.get(k, {})  # noqa: F821 — closure variable
         return (
             majorNum,
             int(meta.get("sourceBlockOrder", 999999)),
-            int(info.get("segmentOrder", 0)),
-            int(info.get("segmentOccurrence", 1)),
+            int(meta.get("segmentOrder", 0)),
+            int(meta.get("segmentOccurrence", 1)),
             str(k[1]),
         )
 

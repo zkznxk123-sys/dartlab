@@ -395,6 +395,18 @@ def parseTextStructureWithState(
             semanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
             segmentKeyBase = f"heading|lv:{level}|p:{semanticPathKey or semanticStackKey}"
         else:
+            # redundantTopicAlias 인 경우 — 같은 @topic alias 의 sibling heading.
+            # stack 의 해당 entry label 을 latest 로 갱신 → 자식 heading 들 textPath 에 형제
+            # 위치의 정확한 label 반영. 예: 가/나/다/라 가 모두 같은 @topic:companyOverview
+            # alias 일 때 마지막 들어온 라의 label 이 stack 에 들어가야 다음 [DX 부문] 의
+            # textPath="라. 주요 사업의 내용 > DX 부문" 으로 정확. 회귀 사례 — 갱신
+            # 없으면 stack 의 첫 push 가의 label 이 그대로 유지되어 [DX] textPath 가
+            # "가. 회사의 법적·상업적 명칭 > DX" 로 misattribute.
+            if redundantTopicAlias:
+                for item in stack:
+                    if str(item["key"]) == stackKey:
+                        item["label"] = labelText
+                        break
             currentPathKeys = [str(item["key"]) for item in stack if str(item["key"])]
             currentSemanticPathKeys = [str(item["semanticKey"]) for item in stack if str(item["semanticKey"])]
             pathText = labelText
