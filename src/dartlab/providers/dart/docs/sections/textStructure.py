@@ -323,7 +323,15 @@ _RE_INLINE_KOR_DASH_NUM = re.compile(r"(?<!^)(?=[가-힣]-\d+\.)")
 # inline 한글 heading marker split — "{한글}{한글 가/나/다/.../하}\.\s+{한글}" 패턴.
 # parquet 본문 line-break 누락 case (005380 "연구개발활동가. 연구개발활동의 개요"):
 # "활동" + "가. 연구개발활동의 개요" 로 split. 마커 한글 1자 (가-하) 만 매칭.
-_RE_INLINE_KOR_HEADING = re.compile(r"(?<=[가-힣])(?=[가나다라마바사아자차카타파하]\.\s+[가-힣])")
+# 후속 단어가 conjunction adverb (또한/그러나/...) 면 split 차단 — verb ending "다." 의
+# false positive 회피. 회귀 사례 (005930 "있습니다. 또한, 대형 패널 사업은..." 의 verb
+# ending "다" 가 marker 로 잡혀 가짜 heading "다. 또한, 대형" 생성).
+_RE_INLINE_KOR_HEADING = re.compile(
+    r"(?<=[가-힣])"
+    r"(?=[가나다라마바사아자차카타파하]\.\s+"
+    r"(?!(?:또한|그러나|그리고|이러한|다만|아울러|특히|한편|이에|그러므로|따라서|그래서|그러면|그렇기)(?:\s|,))"
+    r"[가-힣])"
+)
 # ▣ / ▶ / ◈ 한국 DART parquet sub-section marker — 회사명/카테고리 표시. line break
 # 누락된 parquet 본문 안 inline marker 로 split. 회귀 사례 (005380 businessOverview):
 # "수주에 관한 사항▣ 현대로템" 같이 "▣" 가 한글 직후 line-break 없이 박힌 경우.
