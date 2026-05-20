@@ -222,15 +222,16 @@ def _reportRowsToTopicRows(
 
         rawTitle = stripSectionPrefix(title)
         topic = mapSectionTitle(rawTitle)
-        # section_title 자체를 content 앞에 prepend — text structure parser 가
-        # heading 으로 인식하여 textPath 의 최상단에 박힘. placeholder도 자기
-        # section heading 아래로 segmentKey 부여되어 cross-section alias 차단.
-        contentWithTitle = f"{title}\n{content.strip()}"
+        # section_title prepend 제거 — 본문에 없는 헤딩 ("1. 회사의 개요" 등) 을
+        # 합성해 분기 column 에 sub-section heading ("나. 상호의 변경" 등) 이
+        # falling back 으로 표시되는 회귀 차단. 본문 원문만 emit → "본문에 있는
+        # 것만 표시" SSOT. cross-section alias 는 segmentKey 의 topic prefix 로
+        # 이미 분리 (per-topic occurrence 카운터) — prepend 없이도 안전.
         _registerContent(
             chapter,
             topic,
             rawTitle,
-            contentWithTitle,
+            content.strip(),
             currentMajorNum,
             trackedSubLines=pendingSubLines,
         )

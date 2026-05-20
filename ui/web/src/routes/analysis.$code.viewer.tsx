@@ -919,10 +919,11 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 					const has = body !== undefined && body !== null && body !== '';
 					return (
 						<div key={p} className="min-w-0 text-[13px] leading-6 break-words">
-							{/* 헤딩은 body 부재 여부 무관 항상 표시 — section 의 ancestor breadcrumb 역할.
-							    이전엔 `has` 조건이 막아 분기 면제 (body 있음) 만 보이고 연간 (body 없음)
-							    column 의 동일 section 헤딩 사라짐 → 비대칭. */}
-							{title && (
+							{/* 헤딩은 body 가 실제로 그 period 에 있을 때만 표시 — sections 가 본문
+							    원문만 emit 하도록 reportRows.py prepend 제거된 이후, heading 행이
+							    실제 본문에 존재할 때만 sections 에 박힘. has 조건이 분기·연간
+							    각 period 의 진짜 본문 부재 시 spurious heading 표시 차단. */}
+							{title && has && (
 								<HeadingTag className={cn(headingCls, 'mb-1.5')}>{title.text}</HeadingTag>
 							)}
 							{paragraphs.length > 0 ? (
