@@ -261,6 +261,11 @@ class ViewerDocumentEntry:
     sectionId: str | None = None  # kind="section"일 때 — sections[].id
     blockRef: int | None = None  # kind="block_ref"일 때 — blocks[].block 번호
     blockKind: str | None = None  # "structured" | "finance" | "raw_markdown" 등
+    headingPath: list[ViewerTextHeading] = field(default_factory=list)
+    # 본 entry 가 어느 heading 들 아래 박혀야 하는지의 ancestor list.
+    # text body 의 ViewerTextSection.headingPath 와 동등 — 표/structured/finance
+    # block 위에도 동일 heading 계층 표시할 수 있게 SSOT. viewer.py 의
+    # pendingHeadings level-pop 누적에서 snapshot.
 
 
 @dataclass
@@ -462,7 +467,29 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
     topicLatestPeriod = textPeriods[-1]
     sections: list[ViewerTextSection] = []
     entries: list[ViewerDocumentEntry] = []
+    # heading 누적 → body / 표 / 기타 non-text 만나면 *둘 다* snapshot attach + reset.
+    # 이전 코드는 body 에만 attach 하고 non-text 만나면 폐기 → 분기·연간 비대칭의 근본.
+    # textLevel 은 syntactic depth (bracket=1, numeric=3, korean=4) 라 semantic
+    # depth 와 무관 → level-pop 룰 사용 X. 원본 순서 그대로 attach.
     pendingHeadings: list[ViewerBlock] = []
+
+    def _materializeHeadingPath(blocksList: list[ViewerBlock]) -> list[ViewerTextHeading]:
+        """ViewerBlock 들을 ViewerTextHeading 으로 변환 (각 block 의 최신 기간 텍스트 선택)."""
+        out: list[ViewerTextHeading] = []
+        for headingBlock in blocksList:
+            headingPeriodMap = _textPeriodMap(headingBlock)
+            chosenPeriod, headingText = _selectNearestPeriodText(headingPeriodMap, topicLatestPeriod)
+            if headingText is None or chosenPeriod is None:
+                continue
+            out.append(
+                ViewerTextHeading(
+                    block=headingBlock.block,
+                    text=headingText,
+                    period=_periodRef(chosenPeriod),
+                    level=headingBlock.textLevel or _headingLevel(headingText),
+                )
+            )
+        return out
 
     for block in sorted(blocks, key=lambda item: item.block):
         if block.kind == "text" and block.textType == "heading":
@@ -484,22 +511,26 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
                         kind="section",
                         order=block.block,
                         sectionId=section.id,
+                        headingPath=list(section.headingPath),
                     )
                 )
             pendingHeadings = []
             continue
 
-        # non-text block — 원본 위치에 block_ref entry 삽입
-        if pendingHeadings:
-            pendingHeadings = []
+        # non-text block — 원본 위치에 block_ref entry 삽입.
+        # 이전 코드의 `pendingHeadings = []` *폐기* 제거 — heading snapshot 을 entry 에 attach.
+        # body 와 동일하게 attach 후 reset → 표 위에도 직속 헤딩 표시 가능.
+        entryHeadingPath = _materializeHeadingPath(pendingHeadings)
         entries.append(
             ViewerDocumentEntry(
                 kind="block_ref",
                 order=block.block,
                 blockRef=block.block,
                 blockKind=block.kind,
+                headingPath=entryHeadingPath,
             )
         )
+        pendingHeadings = []
 
     if not sections and not entries:
         return None
@@ -1691,6 +1722,15 @@ def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str
                 "sectionId": entry.sectionId,
                 "blockRef": entry.blockRef,
                 "blockKind": entry.blockKind,
+                "headingPath": [
+                    {
+                        "block": heading.block,
+                        "text": heading.text,
+                        "period": _serializePeriodRef(heading.period),
+                        "level": heading.level,
+                    }
+                    for heading in entry.headingPath
+                ],
             }
             for entry in document.entries
         ],

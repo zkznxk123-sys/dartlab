@@ -104,6 +104,7 @@ interface ViewerResponse {
 			sectionId?: string | null;
 			blockRef?: number;
 			blockKind?: string;
+			headingPath?: ViewerHeading[];
 		}>;
 		tables?: Record<number, Record<string, string>>;
 	};
@@ -525,7 +526,7 @@ function ViewerTab() {
 		const ws = new Set(windowPeriods);
 		type Row = (
 			| { kind: 'section'; id: string; section: ViewerSection }
-			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string> }
+			| { kind: 'table'; id: string; blockId: number; periodMd: Record<string, string>; headingPath: ViewerHeading[] }
 		) & { priority: number; subOrder: number; entryIdx: number };
 		const out: Row[] = [];
 		const secMap = new Map(sectionsOwn.map((s) => [s.id, s]));
@@ -567,7 +568,9 @@ function ViewerTab() {
 				const pri = _firstWindowIdx(tablePeriods);
 				// 표는 sub-order 없음 — 표가 sub-section 본문 사이에 등장하면 그 section 의
 				// subOrder 옆에 붙도록 entryIdx 만으로 자연 위치.
-				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd, priority: pri, subOrder: Number.POSITIVE_INFINITY, entryIdx: ei });
+				// entry.headingPath — viewer.py 의 pendingHeadings snapshot, table 위 헤딩 표시용.
+				const hp: ViewerHeading[] = Array.isArray(e.headingPath) ? e.headingPath : [];
+				out.push({ kind: 'table', id: `t-${bid}`, blockId: bid, periodMd: pmd, headingPath: hp, priority: pri, subOrder: Number.POSITIVE_INFINITY, entryIdx: ei });
 			}
 		}
 		// sort 우선순위: (subOrder asc) → (priority asc) → (entryIdx asc).
@@ -793,6 +796,8 @@ function ViewerTab() {
 											key={r.id}
 											windowPeriods={windowPeriods}
 											periodMd={r.periodMd}
+											headingPath={r.headingPath}
+											minLevel={minLevel}
 										/>
 									),
 								)}
@@ -941,9 +946,31 @@ function SectionRow({ section, windowPeriods, bodyByPeriod, minLevel }: SectionR
 interface TableRowProps {
 	windowPeriods: string[];
 	periodMd: Record<string, string>;
+	headingPath: ViewerHeading[];
+	minLevel: number;
 }
 
-function TableRow({ windowPeriods, periodMd }: TableRowProps) {
+// 표 위에 표시할 헤딩 선택 — 가장 가까운 (= headingPath 의 마지막) 비어있지 않은 헤딩 1 개.
+// topic title 과 중복 가능한 최상위 chapter ("1. 회사의 개요") 대신 표 직속 caption
+// ("[연결대상 종속회사 현황(요약)]") 가 사용자 시선 인식 가치 ↑.
+function _tableHeading(path: ViewerHeading[]): { text: string; level: number } | null {
+	if (!Array.isArray(path) || path.length === 0) return null;
+	for (let i = path.length - 1; i >= 0; i--) {
+		const h = path[i];
+		const text = typeof h === 'string' ? (h as string) : (h?.text ?? '');
+		if (typeof text === 'string' && text.trim().length > 0) {
+			const level = typeof h === 'object' && typeof h?.level === 'number' ? h.level : 0;
+			return { text: text.trim(), level };
+		}
+	}
+	return null;
+}
+
+function TableRow({ windowPeriods, periodMd, headingPath, minLevel }: TableRowProps) {
+	const heading = _tableHeading(headingPath);
+	const { tag: HeadingTag, cls: headingCls } = heading
+		? _headingStyle(heading.level || minLevel, minLevel)
+		: { tag: 'h3' as const, cls: '' };
 	return (
 		<section className="scroll-mt-6">
 			<div
@@ -955,6 +982,9 @@ function TableRow({ windowPeriods, periodMd }: TableRowProps) {
 					if (!md || !md.trim()) {
 						return (
 							<div key={p} className="min-w-0">
+								{heading && (
+									<HeadingTag className={cn(headingCls, 'mb-1.5')}>{heading.text}</HeadingTag>
+								)}
 								<p className="italic text-muted-foreground/30 text-[13px]">—</p>
 							</div>
 						);
@@ -963,12 +993,18 @@ function TableRow({ windowPeriods, periodMd }: TableRowProps) {
 					if (rows.length === 0) {
 						return (
 							<div key={p} className="min-w-0">
+								{heading && (
+									<HeadingTag className={cn(headingCls, 'mb-1.5')}>{heading.text}</HeadingTag>
+								)}
 								<p className="italic text-muted-foreground/40 text-[13px]">[표 파싱 실패]</p>
 							</div>
 						);
 					}
 					return (
 						<div key={p} className="min-w-0 overflow-x-auto tiny-scroll">
+							{heading && (
+								<HeadingTag className={cn(headingCls, 'mb-1.5')}>{heading.text}</HeadingTag>
+							)}
 							<table className="w-full border-collapse text-[12px]">
 								<tbody>
 									{rows.map((cells, ri) => (
