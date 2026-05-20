@@ -20,7 +20,7 @@ import polars as pl
 # pivot 의미 무너짐. 정규화로 meta 무시 후 hash → 같은 row 정합.
 _RE_META_DATE = re.compile(r"\(\s*(?:기준일|작성기준일|보고기준일|평가일|평가기준일)[^)]*\)")
 _RE_META_UNIT = re.compile(r"\(\s*단위\s*:\s*[^)]+\)")
-_RE_META_YEAR = re.compile(r"\b\d{4}(?:Q\d|\.\d{1,2})?\b")
+_RE_META_YEAR = re.compile(r"\d{4}(?:년(?:\s*(?:상반기|하반기|\d+\s*분기))?|Q\d|\.\d{1,2})?")
 # "제 N기 N분기" / "제 N기 반기" / "제 N기" — period-variable. 다 함께 strip.
 _RE_META_KISU = re.compile(r"제\s*\d+\s*기(?:\s*\d+\s*분기|\s*반기|\s*\d+\s*기)?")
 _RE_META_DATE_FRAGMENT = re.compile(r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일")
