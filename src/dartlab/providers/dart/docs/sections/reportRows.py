@@ -102,7 +102,7 @@ def _reportRowsToTopicRows(
     currentMajorNum: int | None = None
     idx = 0
     pendingChapter: dict[str, object] | None = None
-    chapterSubCount: dict[int, int] = {}
+    chapterSubContents: dict[int, list[str]] = {}
     if subset.is_empty():
         return pl.DataFrame(schema=_REPORT_ROW_SCHEMA)
 
@@ -135,13 +135,20 @@ def _reportRowsToTopicRows(
         topicBlockCounts[topicKey] = nextBlockOrder
 
     def _flushPending() -> None:
-        """chapter section 본문 등록 — sub-section 이 *없을 때만* (lonely chapter fallback).
+        """chapter section 본문 등록 — sub-section 본문 substring 제외 후 *남은 unique* 만.
 
-        sub-section 이 있으면 chapter 본문은 sub 합본 (중복) — skip 으로 chapter mix
-        차단. KB금융 같이 chapter 본문이 거의 비어있고 sub 도 없는 경우만 lonely
-        등록. 옛 unique line 휴리스틱 (8자 임계 line 비교) 은 chapter header line
-        ("I. 회사의 개요") 이 sub 본문에 없어 unique 로 잡혀 chapter 본문 통째
-        등록 → chapter mix 회귀 — 본 fix 로 폐기.
+        Roman chapter section ("I. 회사의 개요") 본문은 보통 그 chapter 의 sub-section
+        들 (1. 회사의 개요 / 2. 회사의 연혁 / ...) 본문의 합본 — 그대로 등록하면
+        다른 chapter (회사의 연혁/자본금/주식의 총수 등) 본문이 같은 topic 안 mix
+        들어옴.
+
+        정공법: chapter 본문에서 등록된 sub 본문 substring 들을 제거 → 남은
+        unique 부분 (예: chapter 본문에만 있는 추가 설명) 만 추출하여 등록. sub
+        없는 lonely chapter (KB금융 chapter intro 같은 case) 는 통째 등록.
+
+        옛 unique line 휴리스틱 (8자 임계 line 비교) 은 chapter header line ("I. 회사의 개요")
+        이 sub 본문에 없어 unique 로 잡혀 chapter 본문 통째 등록 → chapter mix 회귀.
+        substring 비교는 sub 본문 전체가 chapter 본문에 *그대로 포함* 된 경우 정확히 제거.
         """
         nonlocal pendingChapter, idx
         if pendingChapter is None:
@@ -152,15 +159,31 @@ def _reportRowsToTopicRows(
         pendingChapter = None
         if pMajor is None or not pContent:
             return
-        if chapterSubCount.get(pMajor, 0) > 0:
-            # sub-section 본문 이미 등록됨 — chapter section 은 redundant.
-            return
         ch = chapterFromMajorNum(pMajor)
         if ch is None:
             return
         rawT = stripSectionPrefix(pTitle)
         tp = mapSectionTitle(rawT)
-        _registerContent(ch, tp, rawT, pContent, pMajor)
+
+        subContents = chapterSubContents.get(pMajor, [])
+        if not subContents:
+            # sub-section 0 → lonely chapter 통째 등록
+            _registerContent(ch, tp, rawT, pContent, pMajor)
+            return
+
+        # sub 본문 substring 제거 — 긴 것 먼저 (중복 제거 안전)
+        remainder = pContent
+        for sub in sorted(subContents, key=len, reverse=True):
+            if sub and sub in remainder:
+                remainder = remainder.replace(sub, "\n")
+        # heading-only line / 짧은 noise 제거 후 의미있는 잔여 본문만
+        meaningfulLines = [ln.strip() for ln in remainder.splitlines() if len(ln.strip()) >= 8]
+        if not meaningfulLines:
+            return
+        meaningfulText = "\n".join(meaningfulLines).strip()
+        if len(meaningfulText) < 20:
+            return
+        _registerContent(ch, tp, rawT, meaningfulText, pMajor)
 
     for values in subset.iter_rows():
         title = str(values[titleIdx] or "").strip()
@@ -188,14 +211,15 @@ def _reportRowsToTopicRows(
 
         rawTitle = stripSectionPrefix(title)
         topic = mapSectionTitle(rawTitle)
+        cleanedContent = content.strip()
         _registerContent(
             chapter,
             topic,
             rawTitle,
-            content.strip(),
+            cleanedContent,
             currentMajorNum,
         )
-        chapterSubCount[currentMajorNum] = chapterSubCount.get(currentMajorNum, 0) + 1
+        chapterSubContents.setdefault(currentMajorNum, []).append(cleanedContent)
 
     _flushPending()
 
