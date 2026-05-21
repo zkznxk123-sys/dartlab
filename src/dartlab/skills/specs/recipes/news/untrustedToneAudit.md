@@ -46,6 +46,7 @@ linkedSkills:
   - recipes.news.disclosureNewsCrosscheck
 gap:
   primary:
+    - gather
     - synth
 falsifier:
   description: "마커 없는 row 가 하나라도 있으면 wrap 실패로 본다."

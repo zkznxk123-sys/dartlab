@@ -9,6 +9,17 @@ whenToUse:
   - 뉴스 분석 페르소나 진입
   - 외부 본문 untrusted 정책 확인
   - 공시 ↔ 뉴스 cross-check 절차 선택
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
 ---
 
 # News 페르소나 — evidence-bound 진입
