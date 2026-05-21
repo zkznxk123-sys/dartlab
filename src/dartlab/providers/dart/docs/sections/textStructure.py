@@ -255,6 +255,14 @@ _LABEL_CLOSING_NOUNS = (
     "사업부문",
     "보유현황",
 )
+
+# 1-char Korean suffix 가 closing noun 과 결합해 합성어 형성 시 split 차단.
+# 회귀 사례 (005380 재무제표): "기준" + "서" → "기준서" (standard document, 1 word).
+# closing noun split 시 "기준" 까지가 가짜 heading 으로 박힘 ("마. 동 기준" 2x spurious).
+# 관찰 사례: 기준서/기준일/기준값/기준량/기준표/기준안/기준액/기준점, 내역서/내역표,
+#           현황표/현황도/현황지, 개요서/개요도, 계획서/계획안, 결과서/결과물, 방침서, 정책서.
+_LABEL_NOUN_SUFFIX_CHARS = frozenset({"서", "일", "값", "량", "표", "안", "액", "도", "지", "점", "물"})
+
 # split positions — *공백 또는 닫는 괄호 또는 한글* 후 paren marker (\d+) / (한글) 시리즈
 # 시작. 아모레/롯데쇼핑/한화생명 같이 "...100 (한강로2가)(2) 전화번호..." 처럼 `)(2)`
 # 공백 없이 이어진 본문 안 multi-marker split.
@@ -425,6 +433,12 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
                     continue
                 nextChar = labelPart[afterNoun]
                 if not ("가" <= nextChar <= "힣"):
+                    continue
+                # 1-char Korean suffix 가 closing noun 과 합성어 형성 시 split 차단.
+                # 회귀 사례 (005380 재무제표): "마. 동 기준서로 인한 회계정책..." 의 "기준"
+                # closing noun + "서" suffix = "기준서" (standard document) — split 시 가짜
+                # heading "마. 동 기준" 생성. 다른 유사 사례: 내역서/현황표/개요서/내용물.
+                if nextChar in _LABEL_NOUN_SUFFIX_CHARS:
                     continue
                 rest = labelPart[afterNoun:]
                 if len(rest) < 5:
