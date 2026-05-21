@@ -160,3 +160,31 @@ docs.parquet 완벽 판단 (sectionsRawCompare spurious=0 종목 비율 ≥ 95%)
 - `document.xml` → bytes → 메모리 streaming 파싱 → parquet upsert (디스크 zip 0)
 - `data/dart/original/` 폴더 완전 삭제
 - 사용자 명시 결정 시에만 진행 — 자동 폐기 X
+
+## §10 — Phase A 본진 합류 결과 (2026-05-21)
+
+**근본 회귀 차단 (zipDocsXml.py):**
+- `parseSectionsByTitle` body.iter() 재귀가 외부 TABLE 의 markdown 추가 + 내부 P/SPAN
+  도 leaf 로 별도 처리 → 035720 카카오 종목 한 rcept content 420MB+ 폭증. DFS 명시
+  walker + leaf-return 으로 nested duplication 0.
+- `_tableToMarkdown` iter('TR') / `.//TD` xpath 가 nested table 의 TR/cell 까지 외부
+  row 로 캡쳐 → 한 table 의 markdown 420MB+ (5030 row + 26517 cell). 직속 TR /
+  TBODY/THEAD/TFOOT 안 TR 만 + cell 도 직속 자식 only.
+
+**streaming 빌더 (`ZipDocsCollector.rebuildFromZips`):**
+- `data/dart/original/docs/{code}/*.zip` 로컬 zip 만으로 streaming pyarrow ParquetWriter
+  풀 재빌드. API 호출 0. rcept 단위 row group append → 메모리 누적 0.
+- cell split (`MAX_CELL_BYTES=1MB` paragraph 단위) + regular `pa.string()` schema —
+  polars `iter_rows` PyObject panic + 32-bit offset 회귀 차단.
+
+**5 종목 검증 (005380/005930/035720/207940/000660):**
+- sectionsParity: 0 violations / 5 codes
+- sectionsRawCompare: spurious=11 (005930/005380 = 0, 035720 = 0, 207940 = 2, 000660 = 6)
+- polars panic: 0
+- OOM: 0 (035720 broken builder 2.4GB → 14MB fixed)
+- pytest `tests/sections/test_zipDocsCollector.py`: 7 passed
+
+**Phase B (sections regex 폐기) 잔여 작업:**
+spurious=11 의 잔여 evidence (예: `(舊 SK C㈜)`, `마. 동 기준`, `(11) 참조)` 등) 은
+sections layer 의 textStructure inline split regex 가 만든 "추론 헤딩" — XML 의
+`<TITLE>` 직접 hierarchy 와 무관. Phase B 단계적 폐기로 0 달성 가능.
