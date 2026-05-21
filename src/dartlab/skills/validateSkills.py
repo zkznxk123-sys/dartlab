@@ -248,7 +248,7 @@ def _validateRecipe(
 
 def collectKnownSkillIds() -> set[str]:
     """전체 builtin skills 의 id 수집 — recipe linkedSkills 존재성 검증용."""
-    specs_root = Path(__file__).resolve().parents[2] / "src" / "dartlab" / "skills" / "specs"
+    specs_root = Path(__file__).resolve().parent / "specs"
     if not specs_root.exists():
         return set()
     ids: set[str] = set()

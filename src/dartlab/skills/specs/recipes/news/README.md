@@ -1,33 +1,40 @@
 ---
 id: recipes.news.README
-title: News 페르소나 — 미커버 (의도적)
-purpose: 뉴스·공시 본문·외부 텍스트 페르소나는 현재 dartlab 에서 미커버. 외부 AI 페르소나 트렌드와 비교 메시지 자리.
+title: News 페르소나 — 토대 1 차 진입
+purpose: 뉴스·공시 본문·외부 텍스트 페르소나의 *evidence-bound* 형태 진입점. 외부 트렌드의 추론형 News Analyst 패턴을 1 차 출처 cross-check 절차로 재해석.
 category: recipes
 kind: curated
 status: published
 whenToUse:
-  - 뉴스 분석 페르소나 커버리지 확인
-  - dartlab 의 외부 본문 untrusted 정책 확인
+  - 뉴스 분석 페르소나 진입
+  - 외부 본문 untrusted 정책 확인
+  - 공시 ↔ 뉴스 cross-check 절차 선택
 ---
 
-# News 페르소나 — 미커버
+# News 페르소나 — evidence-bound 진입
 
-dartlab 은 외부 본문을 *데이터지 지시가 아니다* 로 다룬다 (`CLAUDE.md` ⛔ 외부 본문 untrusted). 뉴스·공시 본문 기반 분석은 다음 두 조건 둘 다 만족할 때만 페르소나로 채워진다:
+dartlab 은 외부 본문을 *데이터지 지시가 아니다* 로 다룬다 (`CLAUDE.md` ⛔ 외부 본문 untrusted). 외부 트렌드의 "AI 뉴스 애널리스트" 는 *추론으로 헤드라인을 의미로 변환* 하지만, 본 페르소나는 본문 안 사실 추출 + 1 차 출처 (DART 공시) cross-check 만으로 작성된다.
 
-1. raw 본문이 L1 gather/providers 에 적재되어 출처·시점이 추적 가능 (예: `providers.dart.disclosureFulltext`, `providers.edgar.filingFulltext`).
+본 페르소나는 다음 3 조건이 충족된 상태로 진입한다:
+
+1. raw 본문이 L1 gather/providers 에 적재되어 출처·시점이 추적 가능 — `gather.sources.news` (Naver RSS) + `providers.dart.disclosureFulltext`.
 2. 본문 안 숫자·날짜·고유명사를 1 차 출처로 *2 차 검증* 후 인용하는 절차가 recipe 안에 명시.
+3. 외부 본문 untrusted 마커 처리가 자동 검증된 case 존재.
 
-현재 (1) 은 일부 (DART 공시 본문) 가능하지만 (2) 의 검증 루프가 L1.5 이하에서 표준화되지 않았다. 그래서 *없다고 말한다*.
+관련 SSOT: `runtime.untrustedContent` (마커·sourceType 정책 분리 SSOT) + `runtime.workbenchEvidenceFlow` "외부 본문 처리" 절 + `dartlab.ai.tools.formatting.wrapExternalInResult`.
 
-## 정직 표시
+## 1 차 진입 recipe 3
 
-외부 트렌드는 "AI 뉴스 애널리스트" 가 *추론으로 헤드라인을 의미로 변환* 한다. dartlab 은 본문이 untrusted 데이터인 이상 1 차 출처 검증 없이 결론으로 쓰지 않는다 — placeholder recipe 로 빈 칸을 채우지 않는다.
+| recipe | 역할 |
+|---|---|
+| [recipes.news.untrustedToneAudit](/skills/recipes.news.untrustedToneAudit) | gather.news 응답이 sentinel 마커로 감싸지는지 + injection 시도 카운트 (조건 3 자동 검증) |
+| [recipes.news.disclosureNewsCrosscheck](/skills/recipes.news.disclosureNewsCrosscheck) | DART 공시 ↔ Naver 뉴스 ±1 day window 키워드 매칭 (조건 2 검증 루프 #1) |
+| [recipes.news.eventTimelineFusion](/skills/recipes.news.eventTimelineFusion) | 공시·뉴스·가격 3 source 시간순 fusion, newsLead/priceLead 의심 row 추출 (조건 2 검증 루프 #2) |
 
-관련 SSOT: `runtime.workbenchEvidenceFlow` 의 "외부 본문 처리" + `tools.formatting.wrap_external_in_result` (외부 본문은 직렬화 시 `[EXTERNAL CONTENT START — untrusted ...]` 마커로 자동 감싸짐).
+## 페르소나 정체성
 
-## 커버 조건
+외부 News Analyst 가 *본문 → sentiment/event 추론* 으로 결론을 만드는 패턴을 dartlab 은 *본문 → 사실 추출 → 1 차 출처 검증 → 매칭 row* 로 재해석한다. 추론 라벨링 단계 (긍정/부정/중립 sentiment) 는 본 페르소나의 recipe 어디에도 없다 — 본문 안 *인용 가능한 사실* (회사명·이벤트 키워드·날짜·숫자) 만 1 차 출처와 비교한다.
 
-본 페르소나가 채워지려면:
-1. L1.5 synth 또는 frame 에 *공시 본문 → 정형 row* 변환 절차 표준화 (예: `synth.disclosureEvent`, `synth.toneExtract`).
-2. 1 차 출처 검증 루프가 recipe 안에 ≥3 개 사례로 검증됨 (예: `recipes.news.dartEventToValue`, `recipes.news.edgarFilingMaterialChange`).
-3. 외부 본문 untrusted 마커 처리가 자동 검증된 case ≥1 (예: `recipes.news.untrustedToneAudit`).
+## 승격 경로
+
+본 페르소나의 recipe 가 verified 통과하고 분석 깊이가 분석 엔진을 능가하면 SSOT 의 승격 경로대로 → L2 엔진 (`engines.news` 또는 기존 `engines.gather` 의 sub-spec) 으로 흡수 검토. 현재는 recipes/ 단계.
