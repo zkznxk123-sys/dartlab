@@ -148,46 +148,20 @@ def _getOwnContent(element) -> str:
 
 
 def _parseSections(xmlContent: str) -> list[dict]:
-    """DART XML → 섹션 목록. SECTION-1/2 추출, SECTION-3 건너뜀."""
-    parser = etree.HTMLParser(recover=True, encoding="utf-8")
-    tree = etree.fromstring(xmlContent.encode("utf-8"), parser)
+    """DART XML → 섹션 목록 (정공법 — ``<TITLE>`` hierarchy 직접 사용).
 
-    sections: list[dict] = []
-    order = 0
+    기존 SECTION-1/SECTION-2 통째 본문 추출은 chapter 본문이 4MB 통째 cell 에
+    들어가 sections layer 가 regex 로 sub-section 분리 → 추론 오류 다발. 본
+    구현은 ``zipDocsXml.parseSectionsByTitle`` 로 위임 — 각 ``<TITLE>`` 별로 row
+    를 분리 + AASSOCNOTE/ATOCID hierarchy 보존 + ``<SPAN USERMARK B>`` 가/나/다
+    marker 를 markdown ``## prefix`` 로 변환.
 
-    def _walk(parent):
-        nonlocal order
-        for child in parent:
-            tag = child.tag if isinstance(child.tag, str) else ""
-            if tag == "section-1":
-                titleEl = child.find(".//title")
-                if titleEl is not None:
-                    title = etree.tostring(titleEl, method="text", encoding="unicode").strip()
-                    title = _RE_WHITESPACE.sub(" ", title)
-                else:
-                    title = f"({tag})"
-                content = _getFullContent(child)
-                sections.append({"order": order, "title": title, "content": content})
-                order += 1
-                _walk(child)
-            elif tag == "section-2":
-                titleEl = child.find(".//title")
-                if titleEl is not None:
-                    title = etree.tostring(titleEl, method="text", encoding="unicode").strip()
-                    title = _RE_WHITESPACE.sub(" ", title)
-                else:
-                    title = f"({tag})"
-                content = _getOwnContent(child)
-                sections.append({"order": order, "title": title, "content": content})
-                order += 1
-                _walk(child)
-            elif tag == "section-3":
-                pass
-            else:
-                _walk(child)
+    회귀 보장: 기존 schema 호환 (``order``/``title``/``content``) + 추가 컬럼
+    ``atocid``/``assocnote`` (sections layer 가 활용 가능).
+    """
+    from dartlab.providers.dart.openapi.zipDocsXml import parseSectionsByTitle
 
-    _walk(tree)
-    return sections
+    return parseSectionsByTitle(xmlContent)
 
 
 def _collectOneZip(client: DartClient, rceptNo: str) -> list[dict] | None:
@@ -412,6 +386,8 @@ class ZipDocsCollector:
                             "section_title": s["title"],
                             "section_url": "",
                             "section_content": s["content"],
+                            "atocid": s.get("atocid", ""),
+                            "assocnote": s.get("assocnote", ""),
                         }
                     )
                 _progress.advance(_task)

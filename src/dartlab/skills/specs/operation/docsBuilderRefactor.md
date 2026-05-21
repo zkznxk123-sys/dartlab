@@ -1,0 +1,162 @@
+---
+id: operation.docsBuilderRefactor
+title: docs 파이프라인 — viewer.do HTML → document.xml zip 정공법 전환
+kind: curated
+scope: builtin
+status: observed
+category: operation
+purpose: |
+  기존 viewer.do HTML → htmlToText() plain text 파이프라인이 heading hierarchy
+  lossy → sections layer 가 regex 추론 → 8 commit 덕지덕지 fix 누적. document.xml
+  zip 의 <TITLE ATOC AASSOCNOTE> + <TABLE rowspan/colspan> 직접 사용 정공법으로
+  전환. zip 은 로컬 임시 보관만 (HF 미공개), parquet 만 공개.
+whenToUse:
+  - docs 파이프라인 빌더 변경
+  - sections layer regex 추론 폐기 검토
+  - 새 보고서 schema 추가 (XBRL/주석/별첨)
+  - viewer.do → document.xml 전환 회귀 의심
+inputs:
+  - 대상 종목 / rcept_no
+  - 파이프라인 단계 (sync / build / upsert)
+  - 검증 범위 (sectionsRawCompare / sectionsParity)
+outputs:
+  - data/dart/docs/{code}.parquet (공개 SSOT)
+  - data/dart/original/docs/{code}/{rcept_no}.zip (로컬 임시, HF 미공개)
+  - sections layer 입력 (기존 schema 호환 + atocid/assocnote 신규)
+---
+
+## §1 — 정공법 원칙
+
+**1.1 원본 = SSOT, parquet = derived**
+- `data/dart/original/docs/{code}/{rcept_no}.zip` 은 DART 의 *불변 원본*. 재빌드 시언제든 복원 가능.
+- `data/dart/docs/{code}.parquet` 은 *derived* — zip 으로부터 언제든 재빌드.
+
+**1.2 XML 원본 직접 사용**
+- DART OpenAPI `document.xml?crtfc_key=<key>&rcept_no=<rcpNo>` 가 자체 schema XML zip 반환.
+- 안에 `<TITLE ATOC="Y" AASSOCNOTE="D-0-3-1-0" ATOCID="11">` 가 chapter/sub-section
+  hierarchy 를 *명시*.
+- `<TABLE>` 의 rowspan/colspan 이 *직접 보존*.
+- `<SPAN USERMARK="F-14 B">가. 주요 제품 매출</SPAN>` 이 가/나/다 bold sub-sub marker.
+- 추론 0 — sections layer 의 regex inline split 폐기 가능.
+
+**1.3 zip 비공개 (사용자 결정 2026-05-21)**
+- zip 은 docs.parquet 와 중복 정보 → HF 미공개.
+- `.gitignore` + HF upload guard + GitHub Actions artifact path 3 층 가드.
+- 안정화 후 zip 단계 폐기 옵션 (memory streaming 으로 즉시 파싱).
+
+## §2 — schema 비교
+
+**기존 (viewer.do plain text):**
+```
+corp_code / corp_name / stock_code / year / rcept_date / rcept_no /
+report_type / section_order / section_title / section_url / section_content
+```
+- section_content = chapter 통째 본문 (4MB+)
+- hierarchy 없음 → sections layer 가 regex 추론
+
+**신규 (document.xml `<TITLE>` 기반):**
+```
++ atocid     (TITLE 의 TOC unique ID)
++ assocnote  (path-id, D-0-{chapter}-{sub}-{subsub})
+```
+- section_content = `<TITLE>` 직속 본문만 (sub-section 분리)
+- hierarchy 명시 (assocnote path-id)
+- `<SPAN USERMARK B>` 가/나/다 → markdown `## prefix` 변환
+- `<TABLE>` → markdown table (rowspan 자동 보존)
+
+**호환:** 기존 컬럼 모두 유지. atocid/assocnote 만 신규 추가. sections layer 가
+optional 활용 — 호출자 영향 0.
+
+## §3 — 마이그레이션 매트릭스 (8 commit regex fix 폐기)
+
+| commit | 폐기 가능 근거 | 폐기 phase |
+|---|---|---|
+| `324bbc73` verb-ending negative lookbehind | XML `<TITLE>` 명시 — inline split 불필요 | B-1 |
+| `65b78f73` conjunction adverb 차단 | 동일 | B-2 |
+| `1e6500f4` table rowspan column shift 정규화 | XML `<TABLE>` rowspan 직접 보존 | B-3 |
+| `c4f1a975` circle/bracket inline split | `<SPAN USERMARK B>` 가/나/다 명시 | B-4 |
+| `31390efc` heading cell `\n\n` concat 차단 | AASSOCNOTE 가 row identity 제공 | B-5 |
+
+각 단계 — fix 제거 + 5 종목 audit 통과 + 회귀 0 확인 후 다음 단계.
+
+## §4 — 증분 contract (rcept_no upsert)
+
+`ZipDocsCollector.collect(quarters=8)`:
+1. `listFilings(stockCode, start="20160101", filingType="A")` → 정기보고서 list
+2. 기존 parquet 의 `rcept_no` 이미 있으면 skip
+3. 신규 rcept_no 만:
+   - `document.xml` API → zip bytes
+   - `data/dart/original/docs/{code}/{rcept_no}.zip` 저장 (이미 있으면 skip)
+   - XML parse → `<TITLE>` 별 row list
+   - 기존 parquet 에 append (`writeParquetSorted` 사용)
+4. rebuildFromZips: 저장된 모든 zip 재파싱 → parquet 풀 재빌드 (debug 시)
+
+## §5 — 회귀 가드
+
+**5.1 sectionsRawCompare audit (PR gate)**
+```powershell
+uv run python -X utf8 tests/audit/sectionsRawCompare.py --codes 005380,005930,035720,207940,000660 --strict
+```
+- spurious=0 + missing=N (전부터 known) — 회귀 0
+
+**5.2 sectionsParity audit (PR gate)**
+```powershell
+uv run python -X utf8 tests/audit/sectionsParity.py --codes 005380,005930,035720,207940,000660 --strict
+```
+- fragmentHeadings=0, chapterMixes=0, koreanInversions=0
+
+**5.3 unit test**
+```powershell
+bash tests/test-lock.sh tests/sections/test_zipDocsCollector.py -v
+```
+
+## §6 — GitHub Actions 통합
+
+**6.1 `.github/workflows/sync-docs.yml`** (신규)
+- 매일 02:00 KST + workflow_dispatch
+- 4 partition matrix (730 종목/job)
+- HF baseline pull → delta zip 다운 → parquet upsert
+- artifact upload: `data/dart/docs/` 만 (zip 제외)
+
+**6.2 `.github/workflows/sectionsAudit.yml`** (신규)
+- PR 트리거 — sections/ 또는 openapi/zipDocs* 변경 시
+- sectionsRawCompare + sectionsParity strict
+
+**6.3 ci-fast 게이트 (29 → 31)**
+- sections-parity-fast (기존)
+- sections-raw-compare-fast (신규)
+
+## §7 — zip 비공개 강제 (3 층 가드)
+
+1. `.gitignore` — `data/dart/original/` 라인
+2. HF upload script (`.github/scripts/sync/bulkUploadHf.py`) — `original/` 경로 explicit skip
+3. GitHub Actions artifact upload path — `data/dart/docs/` 만
+
+## §8 — 호출 cookbook
+
+**8.1 단일 종목 수집 (사용자):**
+```python
+from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
+c = ZipDocsCollector("005930")
+c.collect(includeQuarterly=True)
+```
+
+**8.2 sections layer 호출:**
+```python
+from dartlab.providers.dart import Company
+sec = Company("005930").sections   # 새 schema 입력으로 자동 동작
+```
+
+**8.3 GitHub Actions 수동 트리거:**
+```powershell
+gh workflow run sync-docs --ref master -f codes=005930
+gh run watch
+```
+
+## §9 — 안정화 후 미래 옵션
+
+docs.parquet 완벽 판단 (sectionsRawCompare spurious=0 종목 비율 ≥ 95%) 시:
+- zip 저장 단계 폐기
+- `document.xml` → bytes → 메모리 streaming 파싱 → parquet upsert (디스크 zip 0)
+- `data/dart/original/` 폴더 완전 삭제
+- 사용자 명시 결정 시에만 진행 — 자동 폐기 X

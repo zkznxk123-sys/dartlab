@@ -24,6 +24,10 @@ CATEGORY_DIR = {
 
 def main():
     category = sys.argv[1] if len(sys.argv) > 1 else "finance"
+    # DART 원본 zip 비공개 강제 — original/ 카테고리는 HF 업로드 금지 (사용자 결정 2026-05-21).
+    # 상세: CLAUDE.md "DART 원본 zip 비공개" 섹션 + operation.docsBuilderRefactor §7.
+    if "original" in category.lower():
+        raise ValueError(f"category='{category}' 거부 — data/dart/original/ 은 로컬 임시 보관 전용, HF 업로드 금지")
     dirPath = CATEGORY_DIR[category]
     localDir = Path(f"data/{dirPath}")
 

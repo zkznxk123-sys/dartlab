@@ -39,6 +39,10 @@ TODO.md
 /BROKEN_LINKS_REPORT.txt
 # Data (repo-root 만 — src/dartlab/core/data/ 같은 패키지 번들 리소스는 제외하면 안 됨)
 /data/
+# DART 원본 zip — 절대 공개 금지 (CLAUDE.md "DART 원본 zip 비공개" 강행규칙).
+# /data/ 가 이미 모두 무시하지만 명시 라인으로 의도 강조 + 미래 docs.parquet 만 별도
+# tracking 결정 시에도 zip 은 영구 차단 강제.
+/data/dart/original/
 
 # Backup (파일 삭제 대신 이동) — repo-root 만. src/dartlab 내부의 _backup/
 # (예: providers/dart/finance/mapperData/_backup/) 은 번들 리소스이므로 제외하면 안 됨.
