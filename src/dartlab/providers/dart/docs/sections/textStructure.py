@@ -486,7 +486,18 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
 
     m = _RE_PAREN_NUM.match(stripped)
     if m:
-        return _gateHeadingLabel(4, m.group(2).strip())
+        label = m.group(2).strip()
+        # malformed paren — "(11) 참조)" 처럼 group2 가 trailing `)` 끝나면 본문
+        # fragment (citation/reference) 의 잘림. heading 아님 (회귀 차단).
+        if label.endswith(")") and label.count("(") < label.count(")"):
+            pass
+        # trailing circle marker — "(2) 연결①" 처럼 circle 가 본문 마지막에 박힌
+        # 경우 본문 fragment + 다음 sub-section marker 가 line break 없이 붙은
+        # case. label 안에 circle marker 들어있으면 heading 아님.
+        elif any(c in label for c in "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⓪"):
+            pass
+        else:
+            return _gateHeadingLabel(4, label)
 
     m = _RE_PAREN_KOR.match(stripped)
     if m:
@@ -509,10 +520,19 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     if m:
         inner = m.group(1).strip()
         if inner and len(inner) <= 48 and not _RE_HEADING_NOISE.match(inner):
-            structural = not _isTemporalMarker(inner)
-            gated = _gateHeadingLabel(6, inner)
-            if gated is not None:
-                return (6, gated[1], structural)
+            # 본문 annotation marker 추가 가드 — heading 아닌 parenthetical 차단.
+            # 회귀 사례 (Phase A 후 sectionsRawCompare spurious=11):
+            # - "(舊 SK C㈜)" 5× — 옛 사명 marker (000660 SK하이닉스)
+            # - "(Frost, 2021.7월 기준)" — citation
+            # - "(*)" — placeholder
+            # - "(11) 참조)" — 잘못된 trailing `)` 의 line
+            if inner.startswith("舊 ") or "," in inner or set(inner) <= set("*") or inner.endswith(") 참조"):
+                pass
+            else:
+                structural = not _isTemporalMarker(inner)
+                gated = _gateHeadingLabel(6, inner)
+                if gated is not None:
+                    return (6, gated[1], structural)
 
     m = _RE_BRACKET.match(stripped)
     if m:
