@@ -19,6 +19,8 @@ import zipfile
 from pathlib import Path
 
 import polars as pl
+import pyarrow as pa
+import pyarrow.parquet as pq
 from bs4 import BeautifulSoup
 from lxml import etree
 
@@ -27,6 +29,34 @@ from dartlab.core.dataConfig import DATA_RELEASES
 from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.corpCode import findCorpCode, loadCorpCodes
 from dartlab.providers.dart.openapi.disclosure import listFilings
+from dartlab.providers.dart.openapi.zipDocsXml import (
+    MAX_CELL_BYTES,
+    parseSectionsByTitle,
+    splitLargeContent,
+)
+
+# DART 원본 zip 디렉토리. CLAUDE.md "DART 원본 zip 비공개" — 로컬 임시 보관 전용.
+_ORIGINAL_DOCS_DIR_NAME = "dart/original/docs"
+
+# rebuildFromZips streaming parquet schema — regular string (large_string 회피).
+# cell split (MAX_CELL_BYTES=1MB) 으로 pa.string() 32-bit offset 안전.
+_REBUILD_SCHEMA = pa.schema(
+    [
+        ("corp_code", pa.string()),
+        ("corp_name", pa.string()),
+        ("stock_code", pa.string()),
+        ("year", pa.string()),
+        ("rcept_date", pa.string()),
+        ("rcept_no", pa.string()),
+        ("report_type", pa.string()),
+        ("section_order", pa.int64()),
+        ("section_title", pa.string()),
+        ("section_url", pa.string()),
+        ("section_content", pa.string()),
+        ("atocid", pa.string()),
+        ("assocnote", pa.string()),
+    ]
+)
 
 # ── 정규식 (모듈 레벨 컴파일) ──
 
@@ -162,6 +192,66 @@ def _parseSections(xmlContent: str) -> list[dict]:
     from dartlab.providers.dart.openapi.zipDocsXml import parseSectionsByTitle
 
     return parseSectionsByTitle(xmlContent)
+
+
+def _xmlFromZip(zipPath: Path) -> str | None:
+    """로컬 zip 의 가장 큰 XML 을 utf-8 string 으로 (rebuildFromZips offline 경로)."""
+    try:
+        with zipfile.ZipFile(zipPath) as zf:
+            names = zf.namelist()
+            if not names:
+                return None
+            largest = max(names, key=lambda n: zf.getinfo(n).file_size)
+            raw = zf.read(largest)
+    except zipfile.BadZipFile:
+        return None
+    for enc in ("utf-8", "euc-kr", "cp949"):
+        try:
+            return raw.decode(enc)
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return raw.decode("utf-8", errors="replace")
+
+
+def _rcpRowsToTable(
+    meta: dict,
+    stockCode: str,
+    corpCode: str,
+    corpName: str,
+    rcptNo: str,
+    rows: list[dict],
+) -> pa.Table:
+    """rcept 의 row dict list → pyarrow Table (schema 강제). 큰 본문은 split.
+
+    section_content > MAX_CELL_BYTES row 는 markdown paragraph 단위 split → multiple
+    row (같은 atocid/assocnote 유지, section_order 는 split index 만큼 증가).
+    """
+    expanded: list[dict] = []
+    for r in rows:
+        content = r.get("content", "") or ""
+        if len(content) <= MAX_CELL_BYTES:
+            expanded.append(r)
+            continue
+        for p in splitLargeContent(content):
+            expanded.append({**r, "content": p})
+
+    n = len(expanded)
+    cols = {
+        "corp_code": [meta.get("corp_code", "") or corpCode] * n,
+        "corp_name": [meta.get("corp_name", "") or corpName] * n,
+        "stock_code": [meta.get("stock_code", "") or stockCode] * n,
+        "year": [meta.get("year", "") or ""] * n,
+        "rcept_date": [meta.get("rcept_date", "") or ""] * n,
+        "rcept_no": [rcptNo] * n,
+        "report_type": [meta.get("report_type", "") or ""] * n,
+        "section_order": list(range(n)),
+        "section_title": [r["title"] for r in expanded],
+        "section_url": [""] * n,
+        "section_content": [r["content"] for r in expanded],
+        "atocid": [r.get("atocid", "") or "" for r in expanded],
+        "assocnote": [r.get("assocnote", "") or "" for r in expanded],
+    }
+    return pa.Table.from_pydict(cols, schema=_REBUILD_SCHEMA)
 
 
 def _collectOneZip(client: DartClient, rceptNo: str) -> list[dict] | None:
@@ -418,3 +508,99 @@ class ZipDocsCollector:
                 sizeStr=f"{savedCount}섹션, {total - failCount}/{total}건",
             )
         return savedCount
+
+    def rebuildFromZips(self, *, srcDir: Path | None = None, outPath: Path | None = None) -> int:
+        """``data/dart/original/docs/{code}/*.zip`` 로컬 zip 만으로 parquet 풀 재빌드.
+
+        API 호출 0. streaming pyarrow ParquetWriter + cell split (``MAX_CELL_BYTES``) +
+        regular string schema. zip = SSOT, parquet = derived 원칙 — zip 만 있으면
+        언제든 복원. 본 method 는 ``ZipDocsCollector`` 의 offline primary 빌더 (안정성
+        검증 우선).
+
+        회귀 차단:
+        - section_content > 1MB row 는 paragraph (\\n\\n) 단위 split → multiple row
+          (같은 ``atocid``/``assocnote`` 유지, section_order 증가). polars iter_rows
+          PyObject panic 차단.
+        - row group 단위 incremental write (rcept 단위) → 메모리 누적 0.
+        - ``meta_corp_code``/``corp_name``/``year``/``rcept_date``/``report_type`` 정보는
+          기존 parquet 의 meta 만 scan + select (큰 본문 안 읽음).
+
+        Args:
+            srcDir: 종목 zip 디렉토리. 기본 ``data/dart/original/docs/{code}/``.
+            outPath: 출력 parquet 경로. 기본 ``data/dart/docs/{code}.parquet``.
+
+        Returns:
+            int — 작성된 row 수.
+
+        Raises:
+            FileNotFoundError: srcDir 에 zip 0 개.
+        """
+        root = Path(_cfg.dataDir)
+        codeDir = srcDir or (root / _ORIGINAL_DOCS_DIR_NAME / self.stockCode)
+        if not codeDir.exists():
+            raise FileNotFoundError(f"original zip dir not found: {codeDir}")
+        zips = sorted(codeDir.glob("*.zip"))
+        if not zips:
+            raise FileNotFoundError(f"no zip in {codeDir}")
+
+        outPath = outPath or self._parquetPath
+        outPath.parent.mkdir(parents=True, exist_ok=True)
+
+        # 기존 parquet 의 meta 정보만 (큰 본문 안 읽음)
+        rcptMeta: dict[str, dict] = {}
+        if self._parquetPath.exists():
+            try:
+                metaDf = (
+                    pl.scan_parquet(self._parquetPath)
+                    .select(
+                        [
+                            "corp_code",
+                            "corp_name",
+                            "stock_code",
+                            "year",
+                            "rcept_date",
+                            "rcept_no",
+                            "report_type",
+                        ]
+                    )
+                    .unique(subset=["rcept_no"])
+                    .collect()
+                )
+                for r in metaDf.iter_rows(named=True):
+                    rcptMeta[r["rcept_no"]] = r
+            except (pl.exceptions.ComputeError, OSError):
+                pass
+
+        written = 0
+        skipped = 0
+        with pq.ParquetWriter(outPath, _REBUILD_SCHEMA, compression="snappy") as writer:
+            for zp in zips:
+                rcptNo = zp.stem
+                xml = _xmlFromZip(zp)
+                if xml is None:
+                    skipped += 1
+                    continue
+                try:
+                    rows = parseSectionsByTitle(xml)
+                except Exception:
+                    skipped += 1
+                    continue
+                if not rows:
+                    skipped += 1
+                    continue
+                meta = rcptMeta.get(
+                    rcptNo,
+                    {
+                        "corp_code": self._corpCode,
+                        "corp_name": self._corpName,
+                        "stock_code": self.stockCode,
+                        "year": "",
+                        "rcept_date": "",
+                        "report_type": "",
+                    },
+                )
+                table = _rcpRowsToTable(meta, self.stockCode, self._corpCode, self._corpName, rcptNo, rows)
+                writer.write_table(table)
+                written += table.num_rows
+                del table, rows
+        return written

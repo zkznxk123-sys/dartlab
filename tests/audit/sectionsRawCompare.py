@@ -133,14 +133,18 @@ def _labelInRawContent(normLabel: str, df: pl.DataFrame) -> bool:
     inline-split 으로 sections 가 만든 heading 의 label 은 parquet 본문 mid-line 에
     등장 — line-start match 에 잡히지 않음. 본 함수가 raw content 어디든 매칭.
     section_title 도 포함 — chapter heading 들 (XII. 상세표 등) 의 evidence.
+
+    large_string column safe — iter_rows(named=True) 대신 column to_list (PyObject
+    null panic 회피). 005380 같은 대형 종목 (section_content 누적 6GB+) 에서도 안전.
     """
     if len(normLabel) < 4:
         return False
-    for row in df.iter_rows(named=True):
-        title = row.get("section_title") or ""
-        content = row.get("section_content") or ""
-        normCombined = re.sub(r"\s+", "", (title + " " + content).replace("&cr;", ""))
-        if normLabel in normCombined:
+    titles = df.get_column("section_title").to_list() if "section_title" in df.columns else []
+    contents = df.get_column("section_content").to_list() if "section_content" in df.columns else []
+    for title, content in zip(titles, contents):
+        combined = (title or "") + " " + (content or "")
+        combined = combined.replace("&cr;", "")
+        if normLabel in re.sub(r"\s+", "", combined):
             return True
     return False
 
