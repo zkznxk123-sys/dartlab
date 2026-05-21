@@ -179,12 +179,20 @@ docs.parquet 완벽 판단 (sectionsRawCompare spurious=0 종목 비율 ≥ 95%)
 
 **5 종목 검증 (005380/005930/035720/207940/000660):**
 - sectionsParity: 0 violations / 5 codes
-- sectionsRawCompare: spurious=11 (005930/005380 = 0, 035720 = 0, 207940 = 2, 000660 = 6)
+- sectionsRawCompare: spurious=11 → **Phase B-1 후 spurious=2** (commit 153bbdd45)
 - polars panic: 0
 - OOM: 0 (035720 broken builder 2.4GB → 14MB fixed)
 - pytest `tests/sections/test_zipDocsCollector.py`: 7 passed
 
-**Phase B (sections regex 폐기) 잔여 작업:**
-spurious=11 의 잔여 evidence (예: `(舊 SK C㈜)`, `마. 동 기준`, `(11) 참조)` 등) 은
-sections layer 의 textStructure inline split regex 가 만든 "추론 헤딩" — XML 의
-`<TITLE>` 직접 hierarchy 와 무관. Phase B 단계적 폐기로 0 달성 가능.
+**Phase B-1 — `_detectHeading` 가드 추가 (commit 153bbdd45):**
+- `_RE_PAREN_NUM` 결과 label 가 trailing `)` 끝나면 (citation fragment) 차단 + circle
+  marker (①~⑳⓪) 포함 시 차단.
+- `_RE_SHORT_PAREN` inner 가 `舊 X` (옛 사명 marker) / `,` 포함 (citation) /
+  `*` only (placeholder) / `") 참조"` 끝남 → 본문 annotation marker 차단.
+- 결과: 207940 (2→0), 000660 (6→0). 005380 의 `마. 동 기준` 2x 만 잔여.
+
+**Phase B-2 잔여 (별도 세션):**
+`마. 동 기준` 2x — 005380 재무제표 본문 "마. 동 기준서로 인한 회계정책 변경..." 의
+실제 sub-heading 이 sections layer 안 30 char 절단 + 후속 비교 로직 미스매치.
+`_RE_INLINE_KOR_HEADING` regex 단계적 폐기 (XML hierarchy 직접 사용 후 inline split
+불필요) 작업 시 함께 해결.
