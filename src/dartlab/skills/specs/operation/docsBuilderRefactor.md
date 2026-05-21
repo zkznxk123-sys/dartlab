@@ -191,8 +191,25 @@ docs.parquet 완벽 판단 (sectionsRawCompare spurious=0 종목 비율 ≥ 95%)
   `*` only (placeholder) / `") 참조"` 끝남 → 본문 annotation marker 차단.
 - 결과: 207940 (2→0), 000660 (6→0). 005380 의 `마. 동 기준` 2x 만 잔여.
 
-**Phase B-2 잔여 (별도 세션):**
-`마. 동 기준` 2x — 005380 재무제표 본문 "마. 동 기준서로 인한 회계정책 변경..." 의
-실제 sub-heading 이 sections layer 안 30 char 절단 + 후속 비교 로직 미스매치.
-`_RE_INLINE_KOR_HEADING` regex 단계적 폐기 (XML hierarchy 직접 사용 후 inline split
-불필요) 작업 시 함께 해결.
+**Phase B-2 — closing noun 합성어 suffix 가드 (commit 65ac3199f):**
+005380 잔여 spurious 2x `"마. 동 기준"` 의 근본: `_splitInlineMultiHeadingOnce` 의
+closing noun split 이 "동 기준서로 인한..." 의 "기준" 명사를 split 경계로 잡아 가짜
+heading 생성. `_LABEL_NOUN_SUFFIX_CHARS` 신설 — closing noun 직후 1-char Korean
+suffix 가 합성어 형성 시 split 차단 (기준서/내역서/현황표/계획안 등).
+
+**Phase B-3 — `_RE_KOREAN` 1-char label 가드 (commit 5fe0694db):**
+DART XML 본문 line-break 결함으로 단어 끊김 ("...있습니" / "다. 메" / "모리 반도체...")
+시 sections 의 `_RE_KOREAN` 가 "다. 메" 를 L3 heading 으로 잡아 textPath segment "메"
+잘림. label 이 1글자 한글이면 None 반환.
+
+**Phase B-4 — XML word-wrap join (commit b953860b9):**
+DART XML `<P>` 안 `<SPAN>` 들이 word-wrap 단위 분할되는 패턴. 원래 `" ".join` 이
+"국내 에서 는" 같은 잘못 추가 공백 생성. `"".join` + multispace 정리로 단어 끊김
+복원. tests/sections/test_zipDocsCollector.py 8 passed.
+
+**Phase B-5 잔여 (별도 트랙):**
+textPath 잘림 잔여 (예: `사업부문별 > ...` 의 "현황" 누락, `생산능력, 생산실 > ...`
+의 "적, 가동률" 누락, 비정상 trailing `'` quote) 은 DART XML 의 `<P>` 단위 분할
+구조 — Phase B-4 의 SPAN join 으로 단어는 복원했으나 P 간 join 은 미해결. sections
+layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merge 추가
+검토 필요. 사용자 명시 시 진행.
