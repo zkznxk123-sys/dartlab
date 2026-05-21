@@ -496,7 +496,14 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
 
     m = _RE_KOREAN.match(stripped)
     if m:
-        return _gateHeadingLabel(3, m.group(1).strip())
+        label = m.group(1).strip()
+        # 한 글자 한글 label (예: "다. 메") 은 본문 단어 끊김 fragment 일 확률 압도.
+        # 회귀 사례 (005930 II. 사업의 내용 본문 line-break 결함):
+        # "...있습니" / "다. 메" / "모리 반도체 시장..." 3 라인 분할 → "다. 메" 가
+        # L3 heading 으로 잡혀 textPath segment "메" 잘림.
+        if len(label) == 1 and "가" <= label <= "힣":
+            return None
+        return _gateHeadingLabel(3, label)
 
     m = _RE_PAREN_NUM.match(stripped)
     if m:
