@@ -89,6 +89,24 @@ def test_parseSectionsByTitle_nested_table_no_explosion():
     assert content.count("inner-") == 50  # nested cell text 는 outer cell 안 inline
 
 
+def test_parseSectionsByTitle_word_wrap_join_no_extra_space():
+    # DART XML 의 <P> 안 <SPAN> 들이 word-wrap 단위로 부서진 경우, " ".join 이 한국어
+    # 단어 사이에 잘못 공백 추가하던 회귀 차단. 005930 분기보고서 실제 구조 재현.
+    xml = """<?xml version="1.0"?>
+<DOCUMENT><BODY>
+<TITLE>테스트 섹션</TITLE>
+<P><SPAN>지역별로 보면, 국내</SPAN><SPAN>에서</SPAN><SPAN>는 </SPAN><SPAN>DX 부문</SPAN><SPAN>을 총괄</SPAN></P>
+</BODY></DOCUMENT>
+"""
+    rows = parseSectionsByTitle(xml)
+    assert len(rows) == 1
+    content = rows[0]["content"]
+    # word-wrap 복원 — "국내 에서 는" 같은 잘못 추가 공백 0
+    assert "국내에서는" in content
+    assert "국내 에서 는" not in content
+    assert "DX 부문" in content  # 의도된 공백 (SPAN 안 trailing/leading) 보존
+
+
 def test_parseSectionsByTitle_span_bold_markdown_heading():
     xml = """<?xml version="1.0"?>
 <DOCUMENT><BODY>

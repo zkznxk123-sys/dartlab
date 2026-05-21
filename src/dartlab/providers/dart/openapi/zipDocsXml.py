@@ -25,14 +25,29 @@ hierarchy (AASSOCNOTE / ATOCID) 보존.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from lxml import etree
 
+_MULTISPACE_RE = re.compile(r"\s+")
+
 
 def _elemText(elem) -> str:
-    """element 안 모든 itertext join + strip."""
-    return " ".join(elem.itertext()).strip()
+    """element 안 모든 itertext concat (no separator) + 다중 공백 정리 + strip.
+
+    DART XML 의 ``<P>`` 안에는 ``<SPAN>`` 가 word-wrap 단위로 다수 분할된다 (시각적
+    한 줄당 한 SPAN). 회귀 사례 (005930 분기보고서):
+        ``<SPAN>지역별로 보면, 국내</SPAN><SPAN>에서</SPAN><SPAN>는 </SPAN>``
+    ``" ".join`` 로 join 시 "지역별로 보면, 국내 에서 는" 처럼 공백 추가 → 의도
+    "지역별로 보면, 국내에서는" 망가짐. 단어 끊김도 동일 (예 "메모리" →
+    ``<SPAN>메</SPAN><SPAN>모리</SPAN>`` → " 메 모리").
+
+    concat 후 multiple-space → single space 정리. 영어 단어 사이 SPAN boundary 의
+    경우 source 의 공백이 SPAN 안 trailing/leading 에 포함되어 있어 손실 없음.
+    """
+    raw = "".join(elem.itertext())
+    return _MULTISPACE_RE.sub(" ", raw).strip()
 
 
 def _findDirectTRs(table):
