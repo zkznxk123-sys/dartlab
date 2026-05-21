@@ -83,7 +83,7 @@ function AnalysisHub() {
 						</div>
 					)}
 					<p className="mt-3 max-w-md text-sm text-muted-foreground">
-						어느 시각으로 분석할지 선택. 두 모드 모두 백그라운드에서 준비 중.
+						어느 시각으로 분석할지 선택.
 					</p>
 				</div>
 
