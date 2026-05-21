@@ -1,34 +1,52 @@
 ---
 id: recipes.sentiment.README
-title: Sentiment 페르소나 — 미커버 (의도적)
-purpose: 투자심리·플로우·포지셔닝 페르소나는 현재 dartlab 에서 미커버. 외부 AI 페르소나 트렌드와 비교 메시지 자리.
+title: Sentiment 페르소나 — 토대 1 차 진입 (flow-based)
+purpose: 투자심리·플로우·포지셔닝 페르소나의 *evidence-bound* 형태 진입점. 추론 라벨링 (긍정/부정) 대신 정량 신호 (외국인 imbalance · 공매도 잔고 · 내부자 cluster) 만 사용.
 category: recipes
 kind: curated
 status: published
 whenToUse:
-  - 투자심리 분석 페르소나 커버리지 확인
-  - dartlab 의 정직 표시 방침 확인
+  - 투자심리 분석 페르소나 진입
+  - flow imbalance · short balance · insider cluster 절차 선택
+  - 추론 라벨 vs 정량 신호 정책 확인
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: supported
+  pyodide:
+    status: supported
 ---
 
-# Sentiment 페르소나 — 미커버
+# Sentiment 페르소나 — evidence-bound 진입
 
-dartlab 의 모든 recipe 는 L1.5 이하 (core · gather/providers · scan/frame/synth/reference) 의 *추적 가능한 raw 조합* 으로 작성된다. 투자심리·플로우·포지셔닝 영역은 **현재 미커버** — 다음 1차 데이터 소스가 dartlab raw 층에 없기 때문:
+외부 트렌드의 "AI 센티멘트 애널리스트" 는 *뉴스·소셜 본문에서 추론으로* 심리를 만든다. dartlab 은 *본문 추론 라벨* 을 결론으로 쓰지 않는다 — 본 페르소나는 1 차 출처 (KRX·DART) raw 의 *정량 imbalance* 만으로 작성된다.
 
-- 펀드 플로우 (EPFR · ICI · KOFIA flow report)
-- 옵션 포지셔닝 (Put/Call ratio · skew · OI)
-- 공매도 잔고 (KRX 단기 종가 + 일별 변동)
-- 외국인·기관 일별 매매 (KRX investor flow)
-- 변동성 surface (VIX · KVIX · 옵션 IV)
+본 페르소나는 다음 커버 조건을 충족한 상태로 진입한다:
 
-## 정직 표시
+1. L1 raw — [gather/sources/flow.py](src/dartlab/gather/sources/flow.py) (외국인·기관 매매) · [gather/sources/insider.py](src/dartlab/gather/sources/insider.py) (내부자 거래) · [gather/sources/ownership.py](src/dartlab/gather/sources/ownership.py) (외국인 보유율) · [gather/domains/naver.py](src/dartlab/gather/domains/naver.py) `fetchFlow` 4 개 raw 사용 가능.
+2. L1.5 합성 — `c.gather("flow")`, `c.gather("insiderTrading")` 결과를 RunPython 안에서 panel 로 정렬.
+3. 본 페르소나의 recipe ≥3 개 (아래 1 차 진입 표).
 
-외부 트렌드는 "AI 센티먼트 애널리스트" 가 *뉴스·소셜 본문에서 추론으로* 심리를 만든다. dartlab 은 raw 데이터가 없으면 *없다고 말한다* — placeholder recipe 로 빈 칸을 채우지 않는다.
+## 1 차 진입 recipe 3
 
-## 커버 조건
+| recipe | 역할 |
+|---|---|
+| [recipes.sentiment.flowImbalance](/skills/recipes.sentiment.flowImbalance) | 외국인·기관·개인 순매수 imbalance + 20 거래일 z-score |
+| [recipes.sentiment.shortBalanceMomentum](/skills/recipes.sentiment.shortBalanceMomentum) | 공매도 잔고 변화율 모멘텀 (≥+1σ 또는 ≤-1σ) |
+| [recipes.sentiment.insiderClusterTiming](/skills/recipes.sentiment.insiderClusterTiming) | 내부자 매수/매도 cluster (180 day window 3+ 명) + 직전 가격 lag |
 
-본 페르소나가 채워지려면:
-1. L1 gather/providers 에 위 소스 중 ≥3 개의 raw 적재 (예: `providers.krx.shortBalance`, `providers.krx.investorFlow`).
-2. L1.5 scan/frame 에 시점·종목 정렬된 panel 가공 (예: `scan.flow`, `frame.positioning`).
-3. L1.5 이하 조합으로만 작성된 recipe ≥3 개 (예: `recipes.sentiment.shortBalanceMomentum`, `recipes.sentiment.foreignBuySignal`).
+## 미커버 영역 (정직 표시)
 
-이 3 조건을 *순서대로* 채운 뒤 본 README 를 갱신하면서 recipes 추가.
+다음 raw 는 *여전히 dartlab L1 에 없음* — 본 페르소나의 깊이 확장은 이 raw 가 들어온 뒤:
+- 옵션 Put/Call ratio · skew · OI (KRX 파생 raw 부재)
+- 변동성 surface (KVIX · 옵션 IV)
+- 펀드 플로우 panel (EPFR / KOFIA flow report)
+
+## 페르소나 정체성
+
+외부 sentiment analyst 의 *본문 → sentiment label* 추론을 dartlab 은 *raw flow imbalance → 정량 z-score → cluster timing* 으로 재해석한다. 추론 라벨 (긍정/부정/중립) 단계는 본 페르소나의 recipe 어디에도 없다 — 1 차 출처 cluster 와 z-score 만 인용한다.
