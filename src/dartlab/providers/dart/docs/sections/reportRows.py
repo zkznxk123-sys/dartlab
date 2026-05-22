@@ -48,46 +48,62 @@ def _normalizeRowspanShift(tableMd: str) -> str:
     lines = tableMd.split("\n")
     if len(lines) < 4:
         return tableMd
-    parsed: list[dict] = []
-    for ln in lines:
+
+    # 단일 패스 parse — line index 별 cells (table line 만). 비 table 은 cellsByIdx 에 없음.
+    cellsByIdx: dict[int, list[str]] = {}
+    isSepByIdx: dict[int, bool] = {}
+    for i, ln in enumerate(lines):
         s = ln.strip()
-        if s.startswith("|") and s.endswith("|"):
-            cells = [c.strip() for c in s.strip("|").split("|")]
-            isSep = all(set(c) <= {"-", ":"} for c in cells if c) and any(cells)
-            parsed.append({"line": ln, "cells": cells, "isSep": isSep, "isTable": True})
-        else:
-            parsed.append({"line": ln, "isTable": False})
+        if not (s.startswith("|") and s.endswith("|")):
+            continue
+        cells = [c.strip() for c in s.strip("|").split("|")]
+        cellsByIdx[i] = cells
+        # separator (---:- only) 검사
+        isSep = any(cells) and all(not c or set(c) <= {"-", ":"} for c in cells)
+        isSepByIdx[i] = isSep
+
+    # 첫 valid header (non-separator, ≥3 cols, all non-empty)
     headerCols: int | None = None
     headerIdx = -1
-    for i, row in enumerate(parsed):
-        if row.get("isTable") and not row["isSep"]:
-            cells = row["cells"]
-            if all(cells) and len(cells) >= 3:
-                headerCols = len(cells)
-                headerIdx = i
-                break
-    if headerCols is None or headerCols < 3 or headerIdx < 0:
+    for i, cells in cellsByIdx.items():
+        if isSepByIdx[i]:
+            continue
+        if len(cells) >= 3 and all(cells):
+            headerCols = len(cells)
+            headerIdx = i
+            break
+    if headerCols is None or headerCols < 3:
         return tableMd
-    bodyRows = [
-        (i, r)
-        for i, r in enumerate(parsed)
-        if i > headerIdx and r.get("isTable") and not r["isSep"] and len(r["cells"]) == headerCols
+
+    # body rows (header 이후, col count 일치, non-separator)
+    bodyIdxs = [
+        i for i, cells in cellsByIdx.items() if i > headerIdx and not isSepByIdx[i] and len(cells) == headerCols
     ]
-    if len(bodyRows) < 3:
+    if len(bodyIdxs) < 3:
         return tableMd
-    shiftCandidates = [
-        (i, r)
-        for (i, r) in bodyRows
-        if r["cells"][-1] == "" and r["cells"][0] != "" and all(c != "" for c in r["cells"][1:-1])
-    ]
-    if len(shiftCandidates) / max(1, len(bodyRows)) < 0.3:
+
+    # shift candidate: last cell empty + first non-empty + middle all non-empty
+    shiftIdxs: list[int] = []
+    for i in bodyIdxs:
+        cells = cellsByIdx[i]
+        if cells[-1] != "":
+            continue
+        if cells[0] == "":
+            continue
+        # middle cells all non-empty
+        if any(not c for c in cells[1:-1]):
+            continue
+        shiftIdxs.append(i)
+    if len(shiftIdxs) * 10 < len(bodyIdxs) * 3:  # < 30% — int 비교로 float 회피
         return tableMd
-    for i, r in shiftCandidates:
-        newCells = [""] + r["cells"][:-1]
-        newLine = "| " + " | ".join(newCells) + " |"
-        parsed[i]["line"] = newLine
-        parsed[i]["cells"] = newCells
-    return "\n".join(p["line"] for p in parsed)
+
+    # shift 적용 — 해당 idx 의 line 만 rewrite
+    rewritten = list(lines)
+    for i in shiftIdxs:
+        cells = cellsByIdx[i]
+        newCells = [""] + cells[:-1]
+        rewritten[i] = "| " + " | ".join(newCells) + " |"
+    return "\n".join(rewritten)
 
 
 def _splitContentBlocks(content: str) -> list[tuple[str, str]]:
