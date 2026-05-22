@@ -467,12 +467,33 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
     return parts or [line]
 
 
+# first-char dispatch — 대부분 본문 line 은 첫 자만 보고 즉시 None reject.
+# 핫 패스 최적화 (각 line 에 ~10 regex check → 1 set lookup + 0-1 regex check).
+_HEADING_PREFIX_CHARS = frozenset(
+    # Roman
+    "IVXivx"
+    # Numeric
+    "0123456789"
+    # Paren / Bracket (paren_num / paren_kor / short_paren / bracket)
+    "([【"
+    # Bullet
+    "▣▶◈"
+    # Circled (단일 char ① ~ ⑳ + ⓪)
+    "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⓪"
+)
+
+
 @lru_cache(maxsize=16384)
 def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     stripped = line.strip()
-    if not stripped or stripped.startswith("|"):
+    if not stripped or stripped[0] == "|":
         return None
     if len(stripped) > 120:
+        return None
+    # first-char dispatch: 한글 _RE_KOREAN 이 "가-힣" 매칭이므로 dict 검사 후
+    # 한글 음절 추가 검사 — 대부분 본문 line 빠른 short-circuit.
+    first = stripped[0]
+    if first not in _HEADING_PREFIX_CHARS and not ("가" <= first <= "힣"):
         return None
 
     # level 매핑 — 작을수록 root 권위. DART 정기보고서 본문 위계:
