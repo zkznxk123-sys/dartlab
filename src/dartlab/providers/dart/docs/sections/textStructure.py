@@ -700,7 +700,10 @@ def parseTextStructureWithState(
             - KR (DART) sections text structure.
     """
     nodes: list[dict[str, object]] = []
-    stack: list[dict[str, object]] = [dict(item) for item in (initialHeadings or [])]
+    # Copy-on-write — shallow list copy 만 (items dict ref 공유). 후속 mutation
+    # (item['label'] = ...) 시점에 해당 item 만 dict() copy 후 교체 (line 873-877).
+    # 메모리 churn 감소: 13k 호출 × ~5 stack items = ~65k dict copy 회피.
+    stack: list[dict[str, object]] = list(initialHeadings or [])
     bodyLines: list[str] = []
     segmentOrder = 0
 
@@ -889,7 +892,11 @@ def parseTextStructureWithState(
                 for i, item in enumerate(stack):
                     if str(item["key"]) == stackKey:
                         aliasIdx = i
-                        item["label"] = labelText
+                        # Copy-on-write: stack 의 item 은 initialHeadings 와 공유 가능.
+                        # mutation 직전 단일 item dict copy 후 교체.
+                        newItem = dict(item)
+                        newItem["label"] = labelText
+                        stack[i] = newItem
                         break
                 if aliasIdx is not None and aliasIdx + 1 < len(stack):
                     del stack[aliasIdx + 1 :]
