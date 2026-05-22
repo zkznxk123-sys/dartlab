@@ -8,7 +8,9 @@
 
 from __future__ import annotations
 
+import threading
 import time
+from dataclasses import dataclass, field
 from typing import Any
 
 import httpx
@@ -17,6 +19,21 @@ import polars as pl
 from dartlab.providers.dart.openapi.dartKey import resolveDartKeys
 
 BASE_URL = "https://opendart.fss.or.kr/api"
+
+# 키 020 (rate limit) 시 cooldown — DART 분당 580 rpm 회복 대기.
+_COOLDOWN_SEC = 60.0
+
+
+@dataclass
+class _KeySlot:
+    """단일 API 키 + per-key throttle 상태. 스레드별 slot 예약으로 간섭 차단."""
+
+    key: str
+    nextAvailable: float = 0.0  # epoch — 다음 요청 가능 시각 (예약 포함)
+    coolDownUntil: float = 0.0  # 020 발생 시 회복 시각
+    failures: int = 0  # 누적 실패 (디버그)
+    inFlight: int = 0  # 현재 진행 중 요청 수
+
 
 _ERROR_MESSAGES: dict[str, str] = {
     "000": "정상",
@@ -74,9 +91,10 @@ class DartClient:
                 "  3. 프로젝트 루트 .env 파일에 DART_API_KEY=... 작성\n"
                 "  발급: https://opendart.fss.or.kr → 인증키 신청"
             )
-        self._keyIndex = 0
         self._minInterval = 60.0 / requestsPerMinute
-        self._lastRequestTime = 0.0
+        self._slots: list[_KeySlot] = [_KeySlot(key=k) for k in self._keys]
+        self._poolLock = threading.Lock()
+        # httpx.Client 는 thread-safe (per docs) — 단일 인스턴스 공유 OK.
         self._session = httpx.Client(follow_redirects=True)
 
     @staticmethod
@@ -115,20 +133,43 @@ class DartClient:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        return self._keys[self._keyIndex]
+        return self._slots[0].key
 
-    def _rotateKey(self) -> bool:
-        """다음 키로 전환. 더 이상 없으면 False."""
-        if len(self._keys) <= 1:
-            return False
-        self._keyIndex = (self._keyIndex + 1) % len(self._keys)
-        return True
+    def _acquireSlot(self) -> tuple[_KeySlot, float]:
+        """가장 빨리 가용한 슬롯 예약 + 대기 시각 반환 (스레드 안전).
 
-    def _throttle(self) -> None:
-        elapsed = time.monotonic() - self._lastRequestTime
-        if elapsed < self._minInterval:
-            time.sleep(self._minInterval - elapsed)
-        self._lastRequestTime = time.monotonic()
+        - 모든 슬롯의 `max(nextAvailable, coolDownUntil)` 중 최소값 선택.
+        - 선택 즉시 nextAvailable 갱신 (예약) → 다른 스레드와 충돌 0.
+        - 반환된 sleepFor 만큼 caller 가 lock 밖에서 sleep.
+        """
+        now = time.monotonic()
+        with self._poolLock:
+            best: _KeySlot | None = None
+            bestAt = float("inf")
+            for s in self._slots:
+                availableAt = max(s.nextAvailable, s.coolDownUntil)
+                if availableAt < bestAt:
+                    bestAt = availableAt
+                    best = s
+            assert best is not None
+            startAt = max(now, bestAt)
+            best.nextAvailable = startAt + self._minInterval
+            best.inFlight += 1
+            return best, max(0.0, startAt - now)
+
+    def _releaseSlot(self, slot: _KeySlot) -> None:
+        with self._poolLock:
+            slot.inFlight = max(0, slot.inFlight - 1)
+
+    def _markCoolDown(self, slot: _KeySlot) -> None:
+        with self._poolLock:
+            slot.coolDownUntil = time.monotonic() + _COOLDOWN_SEC
+            slot.failures += 1
+
+    def _allSlotsCoolingDown(self) -> bool:
+        now = time.monotonic()
+        with self._poolLock:
+            return all(s.coolDownUntil > now for s in self._slots)
 
     def getJson(
         self,
@@ -193,33 +234,38 @@ class DartClient:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        triedKeys = 0
-        while triedKeys < len(self._keys):
-            self._throttle()
-            url = f"{BASE_URL}/{endpoint}"
-            merged = {"crtfc_key": self.currentKey}
-            if params:
-                merged.update(params)
-
-            resp = self._session.get(url, params=merged, timeout=30)
-            resp.raise_for_status()
-            data = resp.json()
-
-            status = data.get("status", "000")
-            if status == "000":
-                return data
-            if status == "013" and emptyOn013:
-                return {}
-            if status == "020" and self._rotateKey():
-                triedKeys += 1
-                time.sleep(1)
-                continue
-
-            msg = data.get("message", _ERROR_MESSAGES.get(status, "알 수 없는 오류"))
-            raise DartApiError(status, msg)
+        url = f"{BASE_URL}/{endpoint}"
+        cooldownAttempts = 0
+        maxCooldownAttempts = max(2 * len(self._slots), 4)
+        while cooldownAttempts < maxCooldownAttempts:
+            slot, sleepFor = self._acquireSlot()
+            if sleepFor > 0:
+                time.sleep(sleepFor)
+            try:
+                merged = {"crtfc_key": slot.key}
+                if params:
+                    merged.update(params)
+                resp = self._session.get(url, params=merged, timeout=30)
+                resp.raise_for_status()
+                data = resp.json()
+                status = data.get("status", "000")
+                if status == "000":
+                    return data
+                if status == "013" and emptyOn013:
+                    return {}
+                if status == "020":
+                    self._markCoolDown(slot)
+                    cooldownAttempts += 1
+                    if self._allSlotsCoolingDown():
+                        time.sleep(1.0)
+                    continue
+                msg = data.get("message", _ERROR_MESSAGES.get(status, "알 수 없는 오류"))
+                raise DartApiError(status, msg)
+            finally:
+                self._releaseSlot(slot)
 
         msg = _ERROR_MESSAGES.get("020", "요청 제한 초과")
-        raise DartApiError("020", f"{msg} (모든 키 소진)")
+        raise DartApiError("020", f"{msg} (모든 키 cooldown)")
 
     def getBytes(
         self,
@@ -278,33 +324,38 @@ class DartClient:
             TargetMarkets:
                 - KR (DART) 한정.
         """
-        triedKeys = 0
-        while triedKeys < len(self._keys):
-            self._throttle()
-            url = f"{BASE_URL}/{endpoint}"
-            merged = {"crtfc_key": self.currentKey}
-            if params:
-                merged.update(params)
+        url = f"{BASE_URL}/{endpoint}"
+        cooldownAttempts = 0
+        maxCooldownAttempts = max(2 * len(self._slots), 4)
+        while cooldownAttempts < maxCooldownAttempts:
+            slot, sleepFor = self._acquireSlot()
+            if sleepFor > 0:
+                time.sleep(sleepFor)
+            try:
+                merged = {"crtfc_key": slot.key}
+                if params:
+                    merged.update(params)
+                resp = self._session.get(url, params=merged, timeout=60)
+                resp.raise_for_status()
+                # OpenDART 는 바이너리 에러 시에도 JSON 반환 가능.
+                contentType = resp.headers.get("Content-Type", "")
+                if "application/json" in contentType or "text/json" in contentType:
+                    data = resp.json()
+                    status = data.get("status", "000")
+                    if status == "020":
+                        self._markCoolDown(slot)
+                        cooldownAttempts += 1
+                        if self._allSlotsCoolingDown():
+                            time.sleep(1.0)
+                        continue
+                    if status != "000":
+                        msg = data.get("message", _ERROR_MESSAGES.get(status, "알 수 없는 오류"))
+                        raise DartApiError(status, msg)
+                return resp.content
+            finally:
+                self._releaseSlot(slot)
 
-            resp = self._session.get(url, params=merged, timeout=60)
-            resp.raise_for_status()
-
-            # OpenDART는 바이너리 에러 시에도 JSON을 반환할 수 있음
-            contentType = resp.headers.get("Content-Type", "")
-            if "application/json" in contentType or "text/json" in contentType:
-                data = resp.json()
-                status = data.get("status", "000")
-                if status == "020" and self._rotateKey():
-                    triedKeys += 1
-                    time.sleep(1)
-                    continue
-                if status != "000":
-                    msg = data.get("message", _ERROR_MESSAGES.get(status, "알 수 없는 오류"))
-                    raise DartApiError(status, msg)
-
-            return resp.content
-
-        raise DartApiError("020", "요청 제한 초과 (모든 키 소진)")
+        raise DartApiError("020", "요청 제한 초과 (모든 키 cooldown)")
 
     def getDf(
         self,
