@@ -1,10 +1,13 @@
 """로컬 parquet을 HuggingFace에 배치 업로드 (초기 마이그레이션용).
 
-사용법: python bulkUploadHf.py finance
-        python bulkUploadHf.py report
-        python bulkUploadHf.py docs
+사용법:
+    python bulkUploadHf.py finance              # 미업로드만 (기존 skip)
+    python bulkUploadHf.py docs                 # 미업로드만
+    python bulkUploadHf.py docs --force         # 전체 재업로드 (schema 마이그레이션)
+    python bulkUploadHf.py docs --since 86400   # 최근 N초 안 mtime 변경분만
 """
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -23,7 +26,17 @@ CATEGORY_DIR = {
 
 
 def main():
-    category = sys.argv[1] if len(sys.argv) > 1 else "finance"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("category", nargs="?", default="finance", help="finance/report/docs")
+    parser.add_argument("--force", action="store_true", help="전체 재업로드 (schema 마이그레이션)")
+    parser.add_argument(
+        "--since",
+        type=float,
+        default=0,
+        help="최근 N초 안 mtime 변경분만 (--force 와 동시 사용 X)",
+    )
+    args = parser.parse_args()
+    category = args.category
     # DART 원본 zip 비공개 강제 — original/ 카테고리는 HF 업로드 금지 (사용자 결정 2026-05-21).
     # 상세: CLAUDE.md "DART 원본 zip 비공개" 섹션 + operation.docsBuilderRefactor §7.
     if "original" in category.lower():
@@ -50,8 +63,16 @@ def main():
         existing = set()
 
     allFiles = sorted(localDir.glob("*.parquet"))
-    remaining = [f for f in allFiles if f.name not in existing]
-    print(f"미업로드: {len(remaining)}개 / 전체: {len(allFiles)}개")
+    if args.force:
+        remaining = list(allFiles)
+        print(f"--force: 전체 {len(remaining)}개 재업로드 (schema 마이그레이션 모드)")
+    elif args.since > 0:
+        cutoff = time.time() - args.since
+        remaining = [f for f in allFiles if f.stat().st_mtime >= cutoff]
+        print(f"--since {args.since}s: 최근 변경 {len(remaining)}개 / 전체 {len(allFiles)}개")
+    else:
+        remaining = [f for f in allFiles if f.name not in existing]
+        print(f"미업로드: {len(remaining)}개 / 전체: {len(allFiles)}개")
 
     if not remaining:
         print("모두 업로드 완료")
