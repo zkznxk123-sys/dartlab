@@ -272,13 +272,12 @@ sentence-end (다./요./니다././?/!/);]) 아님 → 같은 line concat. word-w
 
 ## §12 — Sections 성능 최적화 (2026-05-22)
 
-**5 baseline cold build (이전 1052s, 평균 210s/corp):**
-- 005930: 32.34s → 7.02s
-- 035720: 40.42s → 7.84s
-- 005380: 31.93s → 7.45s
-- 207940: 27.39s → 5.19s
-- 000660: 45.82s → 5.71s
-- **TOTAL: 1052s → 33s = 32× speedup**
+**5 baseline cold build 3-trial mean (모든 cache clear, baseline 1052s):**
+- Trial 1: 28.40s / Trial 2: 27.58s / Trial 3: 27.74s
+- **Mean: 27.91s ± 0.44s** (per-corp 5.58s)
+- **Speedup: 1052s / 27.91s = 37.7×**
+- Cold→warm cache 8× 추가 (warm 3.6s for 5 baseline)
+- 10 random R2-rebuilt corps mean: 7.03s/corp
 
 **최적화 commit 11종 (모두 5 baseline parity 회귀 0):**
 1. `467ec1b7c` `_detectHeading` first-char dispatch frozenset(43) — 본문 line 즉시 None
@@ -295,6 +294,7 @@ sentence-end (다./요./니다././?/!/);]) 아님 → 같은 line concat. word-w
 12. `f10e815d0` textStructure 경로 문자열 1 패스 (body flush + heading push)
 13. `c3cf13769` 추가 lru_cache 사이즈 확대 (_normalizeHeadingText 2048 → 16384 등)
 14. `f1a789827` parseTextStructureWithState stack copy-on-write — 65k dict copy 회피
+15. `05279a3ec` 주기 GC 를 gen 0 만 호출 — 8 회 × 60ms → 8 회 × 10ms 단축
 
 **상위 핫스팟 (post-optimize, 035720 profile):**
 - `_normalizeRowspanShift`: 2.0s (12k 호출, prefilter 통과한 진짜 shift table 만)
