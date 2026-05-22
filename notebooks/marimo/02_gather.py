@@ -13,6 +13,7 @@ app = marimo.App(width="medium")
 def _():
     # gather — 외부 시장 데이터 (주가/수급/매크로/뉴스). 무인자 호출 = 가이드
     import dartlab
+
     dartlab.gather()
     return (dartlab,)
 
@@ -35,6 +36,20 @@ def _(dartlab):
 def _(dartlab):
     # KRX 전 상장사 종가 — start 만 지정하면 그 시점부터 현재까지
     dartlab.gather("krx", "close", start="20210101")
+    return
+
+
+@app.cell
+def _(dartlab):
+    # 전 상장사 시가총액 — date 한 점. 행=종목, 열=marketCap
+    dartlab.gather("krx", "marketCap", date="20240102")
+    return
+
+
+@app.cell
+def _(dartlab):
+    # raw 모드 — KRX OpenAPI 원본 컬럼 (LIST_SHRS=발행주식수, MKTCAP, TDD_CLSPRC ...)
+    dartlab.gather("krx", "raw", date="20240102")
     return
 
 
