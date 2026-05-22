@@ -26,29 +26,20 @@ import gc
 import logging
 import os
 import re
-from collections.abc import Iterator
 
 import polars as pl
 
 _log = logging.getLogger(__name__)
 
-from dartlab.core.dataLoader import loadData
-from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
-from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle, stripSectionPrefix
 from dartlab.providers.dart.docs.sections.runtime import (
     applyProjections,
-    chapterFromMajorNum,
     chapterTeacherTopics,
     detailTopicForTopic,
     projectionSuppressedTopics,
 )
 from dartlab.providers.dart.docs.sections.sectionsBase import (
-    REPORT_KINDS,
-    detectContentCol,
     sortPeriods,
 )
-from dartlab.providers.dart.docs.sections.textStructure import parseTextStructureWithState
-from dartlab.providers.reportSelector import selectReport
 
 # ── Phase 1 캐시: parquet 로드 + topic 매핑 결과 재사용 ──
 # DART 표준 chapter canonical override — SSOT 는 reference 레이어.

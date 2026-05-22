@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import polars as pl
 
-from dartlab.providers.dart.docs.sections.sectionsBase import periodOrderValue
 from dartlab.providers.dart.docs.sections.viewsRetrieval import retrievalBlocks
 
 

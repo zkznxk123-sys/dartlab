@@ -6,8 +6,6 @@ topic 분류 + 검색용 우선순위 부여한 DataFrame 으로 빌드.
 
 from __future__ import annotations
 
-from typing import Any
-
 import polars as pl
 
 from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
