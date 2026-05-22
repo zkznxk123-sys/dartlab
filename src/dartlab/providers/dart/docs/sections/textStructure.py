@@ -124,7 +124,7 @@ def _cleanLine(line: str) -> str:
     return decoded.replace("\u00a0", " ").replace("\t", " ").rstrip()
 
 
-@lru_cache(maxsize=2048)
+@lru_cache(maxsize=16384)
 def _normalizeHeadingText(text: str) -> str:
     cleaned = stripSectionPrefix(text.strip())
     cleaned = cleaned.strip("[]【】")
@@ -137,7 +137,7 @@ def _normalizeHeadingText(text: str) -> str:
     return cleaned.strip()
 
 
-@lru_cache(maxsize=2048)
+@lru_cache(maxsize=16384)
 def _headingKey(text: str) -> str:
     normalized = _normalizeHeadingText(text)
     normalized = normalized.replace("·", "").replace("ㆍ", "")
@@ -182,7 +182,7 @@ _RE_PERIOD_DATE = re.compile(r"\d{8}|\d{4}\d{0,4}기준|\d{4}[\.\-/]\d{1,2}[\.\-
 _RE_COUNT_SUFFIX = re.compile(r"\d+개사?")
 
 
-@lru_cache(maxsize=4096)
+@lru_cache(maxsize=16384)
 def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
     if not labelKey or labelKey.startswith("@"):
         return labelKey
@@ -213,7 +213,7 @@ def _isTemporalMarker(text: str) -> bool:
     return bool(_RE_TEMPORAL_MARKER.fullmatch(normalized))
 
 
-@lru_cache(maxsize=8192)
+@lru_cache(maxsize=32768)
 def _bodyAnchor(text: str) -> str:
     normalized = " ".join(text.split())
     if not normalized:
