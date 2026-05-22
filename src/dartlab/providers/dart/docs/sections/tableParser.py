@@ -29,8 +29,19 @@ _RE_META_KISU = re.compile(r"제\s*\d+\s*기(?:\s*\d+\s*분기|\s*반기|\s*\d+\
 _RE_META_DATE_FRAGMENT = re.compile(r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일")
 
 
+_RE_PAREN_EMPTY = re.compile(r"\(\s*\)")
+_RE_WHITESPACE_RUN = re.compile(r"\s+")
+
+
 def _normalizeHashCell(cell: str) -> str:
-    """cell 안 period-variable meta (기준일/단위/연도/기수) 제거 후 lowercase + whitespace strip."""
+    """cell 안 period-variable meta (기준일/단위/연도/기수) 제거 후 lowercase + whitespace strip.
+
+    핫 패스 fast-path — `(` 도 한국어 period token 도 없으면 5 regex sub 절약하고
+    whitespace 정리 + lower 만 수행. 217k 호출 × 6 regex 였던 cumtime 1.3s 축소.
+    """
+    # fast-path: paren / digit / period token 없으면 meta strip 불필요
+    if "(" not in cell and not any(ch.isdigit() for ch in cell) and "기" not in cell and "반" not in cell:
+        return _RE_WHITESPACE_RUN.sub(" ", cell).strip().lower()
     c = _RE_META_DATE.sub("", cell)
     c = _RE_META_UNIT.sub("", c)
     c = _RE_META_DATE_FRAGMENT.sub("", c)
@@ -38,8 +49,8 @@ def _normalizeHashCell(cell: str) -> str:
     c = _RE_META_KISU.sub("", c)
     c = _RE_META_PERIOD_KO.sub("", c)
     # 잔존 빈 괄호 "()" + 단위만 남은 cell 의 noise 제거
-    c = re.sub(r"\(\s*\)", "", c)
-    c = re.sub(r"\s+", " ", c).strip().lower()
+    c = _RE_PAREN_EMPTY.sub("", c)
+    c = _RE_WHITESPACE_RUN.sub(" ", c).strip().lower()
     return c
 
 
