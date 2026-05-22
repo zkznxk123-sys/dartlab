@@ -41,6 +41,8 @@ procedure:
   - AI audit 전에 선행 점검 (엔진 깨진 채 AI 돌리면 무의미).
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
@@ -72,6 +74,10 @@ source:
   absorbedKey: engineAudit
   format: markdown
 lastUpdated: '2026-05-03'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## Skill OS 흡수 규칙

@@ -49,6 +49,8 @@ requiredEvidence:
   - stockCode
   - refKind
   - decisionId
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - chat-native 답안 + ref 검증 통과
   - workbench 5 패스 통과 + GATE 통과
@@ -99,6 +101,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-17'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

@@ -52,15 +52,6 @@ expectedOutputs:
   - CGU 별 손상검사 가정 추적
   - 손상 위험 점수 + counter evidence
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 5+ 년 BS + 부문 IS 동시 로드 부담
 forbidden:
   - 영업권 손상 단정 시 *CGU 별 손상검사 가정 (할인율·성장률)* 명시 누락 금지.
   - 영업권/총자산 비율만 보고 *손상 위험* 단정 — *인수 segment 영업이익 추세* 동행 필수.
@@ -91,6 +82,21 @@ testUniverse:
 falsifier:
   description: "영업권 잔액 또는 사업보고서 주석 (손상검사 가정) 이 부재하면 손상 위험 판정 불가 — *주석 본문 확인 후 재호출* 명시."
 lastUpdated: '2026-05-20'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

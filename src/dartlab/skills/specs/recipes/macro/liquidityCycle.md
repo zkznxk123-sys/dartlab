@@ -23,6 +23,8 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
@@ -32,15 +34,6 @@ visualGuidance:
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 macro 시계열 일부 한정
 forbidden:
   - 금리 한 변수만으로 매크로 사이클 단정 금지 — 4 축 (금리 + 환율 + 유동성 + 위기) 결합.
   - 미국 금리와 KR 금리 시차 / 디커플링 무시 금지.
@@ -58,6 +51,21 @@ examples:
   - 미국 vs KR 사이클 디커플링
   - 사이클 위치 + 자산 영향 (참고용)
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

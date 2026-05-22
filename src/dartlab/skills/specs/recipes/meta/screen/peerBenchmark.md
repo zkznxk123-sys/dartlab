@@ -26,6 +26,8 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.peerMatrix"
   - "engines.viz.priceChart"
@@ -35,15 +37,6 @@ visualGuidance:
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 multi-company 동시 로드 메모리 부담
 forbidden:
   - peer 5~10 종 미만 통계 결과로 우열 단정 금지 — 통계 의미 부족.
   - 다른 분기 / 다른 회계 기준 (연결 vs 별도) peer 비교 금지 — 같은 시점 / 같은 scope 정렬.
@@ -74,6 +67,17 @@ testUniverse:
 falsifier:
   description: "peer 후보가 없거나 peerComparison/valuation 근거가 비어 있으면 benchmark 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

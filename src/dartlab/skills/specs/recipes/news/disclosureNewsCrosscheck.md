@@ -83,6 +83,10 @@ audiences:
   human: 뉴스가 공시 전에 의미 있는 정보를 알고 있었는지 row 단위로 본다.
 humanIntro: "disclosureNewsCrosscheck 는 외부 untrusted 본문 (뉴스) 을 1 차 출처 (DART 공시) 로 *2 차 검증* 하는 가장 단순한 형태다. 추론 없이 시간·회사명·키워드만 비교한다."
 lastUpdated: "2026-05-21"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

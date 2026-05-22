@@ -46,6 +46,8 @@ requiredEvidence:
   - period
   - table
   - basis
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - risk thesis
   - 공시 근거
@@ -102,6 +104,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

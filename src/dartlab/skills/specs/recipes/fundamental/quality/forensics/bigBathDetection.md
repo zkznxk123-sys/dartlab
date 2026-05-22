@@ -57,15 +57,6 @@ expectedOutputs:
   - 차기 분기 인위적 회복 ledger
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 분기 IS / 주석 동시 로드 부담
 forbidden:
   - 일회성 손실 = 빅 배스 단정 시 경영자 변경·구조조정·합병 *촉발 사건* 동행 검증 누락 금지.
   - 손상차손 인식 = 부적정 단정 시 *외부 환경 변화* (산업 침체·환율·유가) 반례 검토 누락 금지.
@@ -98,6 +89,21 @@ testUniverse:
 falsifier:
   description: "경영자 변경 timestamp 또는 손상차손 주석 부재 시 빅 배스 판정 불가 — *DART 임원변동 공시 + 주석 fetch 후 재호출* 한계 명시. 또한 *동종 업종 평균 손상률* 외부 비교 없이 빅 배스 단정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

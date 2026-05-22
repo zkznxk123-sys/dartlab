@@ -57,15 +57,6 @@ expectedOutputs:
   - 동행 사건 timing
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 자기주식 변동 + 합병 공시 동시 로드 부담
 forbidden:
   - 자사주 매입 = 주가 부양 단정 시 *주식보상·합병·지주사 전환* 정상 목적 반례 검토 누락 금지.
   - 자사주 처분 = 지배권 강화 단정 시 *제3자 처분 상대방* (백기사·임직원 RSU·합병 신주) 분류 누락 금지.
@@ -98,6 +89,21 @@ testUniverse:
 falsifier:
   description: "자사주 변동 공시 또는 처분 상대방 정보 부재 시 의도 판정 불가 — *DART 자기주식취득·처분 공시 fetch 후 재호출* 한계 명시. 또한 *경영권 분쟁 timing* 명시 없으면 지배권 강화 단정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

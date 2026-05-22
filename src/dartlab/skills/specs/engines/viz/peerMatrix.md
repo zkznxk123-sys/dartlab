@@ -35,6 +35,8 @@ requiredEvidence:
   - peerCount
   - metric
   - tableRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - peer-matrix spec
   - peer 대비 강점/약점 요약
@@ -68,6 +70,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

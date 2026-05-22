@@ -41,6 +41,8 @@ procedure:
   - '`AI role:` 또는 `AI 역할:` 로 시작하는 짧은 문장을 둔다.'
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
@@ -72,6 +74,10 @@ source:
   absorbedKey: code
   format: markdown
 lastUpdated: '2026-05-03'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## Skill OS 흡수 규칙

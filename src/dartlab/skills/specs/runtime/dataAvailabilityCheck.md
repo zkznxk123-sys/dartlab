@@ -33,6 +33,8 @@ requiredEvidence:
   - latestAsOf
   - dataset
   - metric
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 데이터 있음/없음 판단
   - 기준일
@@ -68,6 +70,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-02"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

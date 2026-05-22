@@ -30,11 +30,6 @@ expectedOutputs:
 
 expectedNovelty:
   - peerMultipleDriverMap
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - L2 valuation 또는 industry 엔진 호출 금지.
   - multiple만으로 적정가 결론을 내리지 않는다.
@@ -58,6 +53,21 @@ testUniverse:
 falsifier:
   description: "multiple을 DCF 가정 검산이 아니라 단독 결론으로 쓰면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

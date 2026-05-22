@@ -25,6 +25,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.cashflowWaterfall"
   - "engines.viz.tableBackedChart"
@@ -34,15 +36,6 @@ visualGuidance:
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
   - "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 dividend topic 단일 호출만
 forbidden:
   - 배당수익률 (dividend yield) 단일 지표만으로 매력도 단정 금지 — payout + FCF 커버리지 동반.
   - 배당성향 (payout ratio) 분모 (EPS vs FCF) 명시 없이 단정 금지.
@@ -60,6 +53,21 @@ examples:
   - 자사주 매입 / 소각 영향 분리
   - 5 년 환원 추세 + 지속 가능성
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

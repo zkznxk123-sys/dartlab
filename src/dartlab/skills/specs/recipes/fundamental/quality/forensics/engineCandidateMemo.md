@@ -51,13 +51,6 @@ gap:
     - scan
 falsifier:
   description: "ask 답변 품질과 3 케이스 selfRun 없이 engine candidate를 완료 상태로 표시하면 실패로 본다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 단일 케이스 성공을 엔진 후보 완료로 표시하지 않는다.
   - 승격 후 recipe를 폐기한다는 가정을 두지 않는다.
@@ -68,6 +61,25 @@ examples:
   - 포렌식 신호를 엔진 후보 memo로 정리
   - ask 품질 기반 L2 환류 후보
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

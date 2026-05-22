@@ -43,6 +43,8 @@ procedure:
   - '`runner.rs` — `DARTLAB_UI_DIR` 환경변수를 서버 프로세스에 주입.'
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
@@ -74,6 +76,10 @@ source:
   absorbedKey: ui
   format: markdown
 lastUpdated: '2026-05-03'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## Skill OS 흡수 규칙

@@ -35,6 +35,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.tableBackedChart"
   - "engines.viz.cashflowWaterfall"
@@ -42,15 +44,6 @@ visualGuidance:
   - "QoQ/YoY 변동 표는 engines.viz.tableBackedChart 만 사용. 절대값·QoQ·YoY·base 분리 4 컬럼 표준."
   - "OCF vs 영업이익 괴리는 engines.viz.cashflowWaterfall 로 발생주의·현금주의 분리."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 8+ 분기 동시 로드 부담
 forbidden:
   - QoQ +300% 같은 극단 변동을 "회복" 으로 단정 금지 — *base 효과·일회성·계절성* 3 후보 분리 필수.
   - 단일 분기 QoQ 만으로 추세 단정. 최소 *4 분기 시계열* 동반.
@@ -83,6 +76,17 @@ testUniverse:
 falsifier:
   description: "분기 시계열 < 4 분기이거나 IS / CF / BS 중 1+ 누락이면 anomaly 판정 불가 — *데이터 부족* 표시 후 재호출."
 lastUpdated: '2026-05-20'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

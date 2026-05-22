@@ -37,6 +37,8 @@ requiredEvidence:
   - period
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 회사 종합 페이지 (URL `/company/{code}`)
   - radar · Altman Z · Beneish M · ecosystem 위젯
@@ -81,6 +83,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

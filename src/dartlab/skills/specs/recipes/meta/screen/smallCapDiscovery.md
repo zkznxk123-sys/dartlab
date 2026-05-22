@@ -24,6 +24,8 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.peerMatrix"
   - "engines.viz.tableBackedChart"
@@ -33,15 +35,6 @@ visualGuidance:
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 multi-scan 메모리 부담
 forbidden:
   - 시가총액 하위 종목 발굴 결과를 자동 매수 추천으로 단정 금지.
   - 성장 + valuation + quality 3 축 교집합 명시 없이 후보 단정 금지.
@@ -63,6 +56,21 @@ gap:
     - scan
     - analysis
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

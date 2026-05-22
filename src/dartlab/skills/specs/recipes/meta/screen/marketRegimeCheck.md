@@ -33,6 +33,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.tableBackedChart"
   - "engines.viz.mermaidDiagram"
@@ -40,15 +41,6 @@ visualGuidance:
   - "이익 집중도는 engines.viz.tableBackedChart 의 누적 비율 표 + 검산 행으로만 표현."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram 8 노드 이하 + edge 모두 수치·sourceRef 동반."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 시총 상위 N=5+ 종 동시 로드 부담
 forbidden:
   - 펀더 장세 단정 시 이익 집중도 (top-N 합산 영업이익 / 전체 합산) 명시 누락 금지.
   - 단일 분기 (QoQ 1 회) 만으로 regime 판정 금지 — 최소 3 분기 추세 필요.
@@ -84,6 +76,17 @@ testUniverse:
 falsifier:
   description: "시총 상위 N 종 중 이익 추세 확인 가능한 종목이 50% 미만이거나, macro axis 4 종 (cycle/rates/trade/liquidity) 모두 결측이면 regime 판정 불가 — 결론을 *부분 펀더 [conf:30]* 이하로 보고 추가 데이터 요구."
 lastUpdated: '2026-05-20'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

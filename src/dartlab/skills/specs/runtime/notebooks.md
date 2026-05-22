@@ -38,6 +38,8 @@ procedure:
   - 새 노트북 작성 시 작성 규칙 (Colab 마크다운 / marimo 주석) 을 따른다.
 requiredEvidence:
   - execution
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 노트북 진입 링크
   - 실행 환경별 의존성 설치 결과
@@ -77,6 +79,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 노트북 카탈로그

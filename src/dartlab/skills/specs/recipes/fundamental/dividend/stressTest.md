@@ -24,6 +24,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.cashflowWaterfall"
   - "engines.viz.tableBackedChart"
@@ -33,13 +35,6 @@ visualGuidance:
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
   - "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 gap:
   primary:
     - analysis
@@ -71,6 +66,17 @@ examples:
   - 삼성전자 2008 시나리오 배당 유지 가능?
   - KT&G 1997 시나리오 dividend cut 임계
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

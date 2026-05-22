@@ -36,13 +36,6 @@ expectedNovelty:
   - growthFromReinvestmentRoc
   - requiredReinvestmentRate
   - reverseGrowthComparison
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 성장률을 임의 입력값으로만 두지 않는다.
   - reverse DCF 없이 현재 가격이 요구하는 성장 스토리를 단정하지 않는다.
@@ -72,6 +65,21 @@ testUniverse:
 falsifier:
   description: "성장률이 reinvestment x ROC로 설명되지 않는데 DCF 가정을 통과시키면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

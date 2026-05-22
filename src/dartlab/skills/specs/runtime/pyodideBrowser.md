@@ -22,6 +22,8 @@ toolRefs:
 requiredEvidence:
   - runtimeCompatibility
   - dataset
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - runtime limits
   - available skill list
@@ -51,6 +53,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-02"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

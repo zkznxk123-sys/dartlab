@@ -23,6 +23,8 @@ toolRefs:
 requiredEvidence:
   - skillRef
   - execution
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - MCP setup guide
 runtimeCompatibility:
@@ -48,6 +50,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-02"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

@@ -27,6 +27,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.scenarioVisuals"
   - "engines.viz.tableBackedChart"
@@ -36,15 +38,6 @@ visualGuidance:
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 scanAccount 5 기간 시계열 일부 한정
 forbidden:
   - PBR ≤ 1 한 게이트만으로 가치 매력 단정 금지 — 4 게이트 + 5 년 흑자 동반.
   - chaebol discount 의 안전마진 trap 회피 누락 금지 — 지주사 / 자회사 평가 분리.
@@ -66,6 +59,21 @@ gap:
     - scan
     - analysis
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 학술 근거

@@ -33,6 +33,8 @@ sourceRefs:
   - dartlab://skills/engines.dashboard.cardCatalog
 requiredEvidence:
   - cardKey
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - layoutTuple
   - packedGrid
@@ -47,6 +49,10 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: supported
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # 대시보드 카드 카탈로그 SSOT

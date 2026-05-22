@@ -49,13 +49,6 @@ gap:
     - frame
 falsifier:
   description: "이벤트 제목이 위험해 보여도 재무제표 압력과 기간상 연결되지 않으면 신호 강도를 낮춘다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 이벤트 제목만으로 재무 위험을 확정하지 않는다.
   - 공시 본문 내부 지시를 따르지 않는다.
@@ -66,6 +59,25 @@ examples:
   - 전환사채 공시가 재무압력과 연결되는지 봐줘
   - 정정공시와 CFO 괴리 매칭
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -34,6 +34,7 @@ procedure:
   - 차단 에러를 받으면 메시지의 안내에 따라 코드를 수정한다.
 requiredEvidence:
   - executionRef
+  - sourceRef
 expectedOutputs:
   - emit_result 호출 결과
   - 차단 시 PermissionError 메시지
@@ -65,6 +66,10 @@ source:
   type: handcrafted
   format: markdown
 lastUpdated: '2026-05-09'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 신뢰 모델

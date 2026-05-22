@@ -79,6 +79,10 @@ audiences:
   human: pre-mortem을 어떤 완성도 높은 시각 요소로 보여줄 수 있는지 확인한다.
 humanIntro: "visualDecisionPack은 pre-mortem을 차트로 보여주기 전에 근거 결합을 확인하는 게이트다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

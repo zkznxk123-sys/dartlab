@@ -84,6 +84,10 @@ audiences:
   human: 같은 사건이 공시·뉴스·가격에서 어떤 순서로 보였는지 시계열로 본다.
 humanIntro: "eventTimelineFusion 은 disclosureNewsCrosscheck 의 매칭 결과를 가격 시계열과 합친다. 정보가 공시 → 뉴스 → 가격 순으로 정상 흘렀는지, 또는 그 반대 순서가 있는지 row 단위로 본다."
 lastUpdated: "2026-05-21"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

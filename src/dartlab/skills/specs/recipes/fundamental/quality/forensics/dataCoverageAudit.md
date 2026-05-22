@@ -47,13 +47,6 @@ gap:
     - frame
 falsifier:
   description: "IS/BS/CF 중 하나가 없는데도 이후 포렌식 계산이 정상 결론처럼 진행되면 실패로 본다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 결손 원표를 0으로 채우지 않는다.
   - latestPeriod 없이 최신 데이터라고 말하지 않는다.
@@ -65,6 +58,25 @@ examples:
   - 삼성전자 포렌식 데이터 coverage
   - BS IS CF 원표 결손 점검
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

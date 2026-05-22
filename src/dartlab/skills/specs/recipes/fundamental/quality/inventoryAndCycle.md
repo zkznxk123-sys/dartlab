@@ -25,6 +25,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.cashflowWaterfall"
@@ -34,15 +36,6 @@ visualGuidance:
   - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 macro inventory 시계열 일부 한정
 forbidden:
   - 산업 재고 사이클만 보고 회사 재고 회전 단정 금지 — 회사 분기 데이터 동반.
   - ISM 재고순환 4 국면 (보충 / 축소 / 가속축적 / 강제축소) 명시 없이 사이클 단정 금지.
@@ -64,6 +57,21 @@ gap:
     - macro
     - analysis
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

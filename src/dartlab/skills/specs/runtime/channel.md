@@ -41,6 +41,8 @@ procedure:
   - 외부 패키지의 deprecated export 가 번들에 남아 런타임 `ReferenceError` 발생 → 모듈 평가 단계 throw → SPA 전체 hydration 실패.
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
@@ -72,6 +74,10 @@ source:
   absorbedKey: channel
   format: markdown
 lastUpdated: '2026-05-03'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## Skill OS 흡수 규칙

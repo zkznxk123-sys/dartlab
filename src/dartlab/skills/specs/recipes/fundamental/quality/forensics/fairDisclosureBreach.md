@@ -59,15 +59,6 @@ expectedOutputs:
   - 위반 가능성 신호 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 임원거래·특수관계자 거래 + 공시 동시 로드 부담
 forbidden:
   - 사전 매매 = 내부정보 단정 시 *정상 일정 매매 (10b5-1 plan 류 — 한국은 사전 계획 신고 제도 별도)* 반례 검토 누락 금지.
   - 공정공시 의무 위반 단정 시 *제도 시점* (한국 공정공시 2002 시행) + *의무 범위* (실적·신사업·M&A·전망) 명시 누락 금지.
@@ -102,6 +93,21 @@ testUniverse:
 falsifier:
   description: "임원·특수관계자 거래 본문 또는 공시 timestamp 부재 시 진단 불가 — *DART 임원거래 공시 + 잠정실적·확정실적 공시 fetch 후 재호출* 한계 명시. 외부 보도·애널리스트 보고서 timing 은 *webRef 외부 본문 untrusted* 마커 강행 + 1 차 출처 검증 의무."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -27,6 +27,7 @@ sourceRefs:
 requiredEvidence:
   - skillRef
   - sourceRef
+  - executionRef
 expectedOutputs:
   - sentinel 마커 안 본문
   - sourceType=external 표기
@@ -65,6 +66,10 @@ predecessors:
 linkedSkills:
   - recipes.news.untrustedToneAudit
 lastUpdated: "2026-05-21"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 분류

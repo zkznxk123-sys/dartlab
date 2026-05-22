@@ -53,15 +53,6 @@ expectedOutputs:
   - 소수주주 squeeze-out 가능성 신호 + counter evidence
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 합병 양사 동시 5 년 BS/IS 로드 부담
 forbidden:
   - 합병비율 적정 단정 시 최소 3 가지 평가 방식 (NAV · 시장가 · DCF) 비교 누락 금지.
   - 외부평가 보고서의 할인율·성장률·multiple 가정 명시 누락 금지.
@@ -92,6 +83,21 @@ testUniverse:
 falsifier:
   description: "합병 공시 본문 또는 외부평가 보고서 (할인율·성장률·multiple 가정) 가 부재하면 적정성 판정 불가 — *공시 원문 확인 후 재호출* 한계 명시."
 lastUpdated: '2026-05-20'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

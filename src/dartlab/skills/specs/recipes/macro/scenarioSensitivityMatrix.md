@@ -33,6 +33,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.tableBackedChart"
   - "engines.viz.mermaidDiagram"
@@ -40,15 +41,6 @@ visualGuidance:
   - "민감도 행렬은 engines.viz.tableBackedChart 표만 사용. 가정 + 산식 + 결과 + 한계 4 행 1 셋."
   - "전파 경로는 engines.viz.mermaidDiagram 8 노드 이하, edge 마다 수치 + sourceRef."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 전종목 scan + 산업 매핑 동시 부담
 forbidden:
   - 가정 (충격 크기·방향·기간) 명시 없이 *수혜·피해* 단정 금지.
   - 매크로 axis 결측 (`currentRate=None` 등) 일 때 *현실 전망* 단정 금지 — *외생 시나리오* 임을 명시.
@@ -79,6 +71,17 @@ testUniverse:
 falsifier:
   description: "macro 변수의 현재값 (currentRate / FX 등) 이 결측이고 가정 외 baseline 부재면 *외생 시나리오* 임을 답변 첫 문장에 명시. 변동/고정 비중 자료 없으면 절감액은 *1차 민감도 추정* 으로만 표기."
 lastUpdated: '2026-05-20'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

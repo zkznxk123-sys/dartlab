@@ -78,6 +78,10 @@ audiences:
   human: 시각화가 가능한 결과와 아직 표로 봐야 하는 결과를 구분한다.
 humanIntro: "visualDecisionPack은 사용자가 요청한 시각 요소 품질 게이트다. 완성도 높은 observed viz만 연결하고, 근거가 없으면 막는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

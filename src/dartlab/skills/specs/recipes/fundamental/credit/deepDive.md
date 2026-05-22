@@ -26,6 +26,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.cashflowWaterfall"
@@ -37,15 +39,6 @@ visualGuidance:
   - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 macro 시계열 일부 한정
 forbidden:
   - dCR 등급 한 지표만으로 부도 위험 단정 금지 — 안정성 / 현금흐름 / 매크로 동반.
   - 외부 신평사 등급 (S&P / Moody's) 과 dCR 1:1 비교 금지 — 정의 / 표본 차이.
@@ -76,6 +69,17 @@ testUniverse:
 falsifier:
   description: "credit 축만 통과하고 stability/cashflow/macro 중 하나라도 누락되면 신용 deep-dive 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

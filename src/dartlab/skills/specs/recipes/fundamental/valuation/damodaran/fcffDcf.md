@@ -27,6 +27,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - bear/base/bull FCFF DCF ?? ??
   - terminal value share? terminal growth/ROC consistency check
@@ -36,13 +37,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - terminal growth가 risk-free rate를 초과하는 가정을 통과시키지 않는다.
   - reinvestment 없이 고성장률만 넣지 않는다.
@@ -71,6 +65,21 @@ testUniverse:
 falsifier:
   description: "terminal growth, ROC, reinvestment가 서로 불일치해도 fair value band를 확정하면 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

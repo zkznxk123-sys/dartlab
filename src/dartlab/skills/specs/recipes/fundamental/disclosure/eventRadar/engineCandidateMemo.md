@@ -77,6 +77,10 @@ audiences:
   human: 어떤 recipe 신호가 엔진화될 만한지 검토한다.
 humanIntro: "engineCandidateMemo는 사용자가 말한 '진짜 스킬은 recipe'라는 방향을 보존한다. 반복 가능한 축만 엔진으로 옮기고 recipe는 검산 경로로 남긴다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -30,11 +30,6 @@ expectedOutputs:
 
 expectedNovelty:
   - oneOffNormalizationAudit
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - L2 엔진 호출 금지.
   - 일회성 라인 결손을 정상 반복손익으로 단정하지 않는다.
@@ -44,7 +39,7 @@ examples:
   - INTC one-off adjustment
 gap:
   primary:
-    - Company
+    - company
     - synth
 testUniverse:
   market: KR+US
@@ -58,6 +53,21 @@ testUniverse:
 falsifier:
   description: "one-off 후보가 있는데 normalizedFinancials 반영 후보로 표시하지 않으면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

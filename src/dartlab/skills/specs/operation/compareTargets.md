@@ -36,6 +36,7 @@ requiredEvidence:
   - tableRef (출력 표)
   - valueRef (개별 수치)
   - executionRef (실행 코드)
+  - sourceRef
 failureModes:
   - 토픽 이름 변종 미정규화 (매출액·영업수익·revenue 가 다른 컬럼으로 분리)
   - 기간 frequency 혼합 (분기 + 연도가 한 표에 섞임)
@@ -68,6 +69,10 @@ runtimeCompatibility:
     notes: []
 status: observed
 lastUpdated: "2026-05-12"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # 여러 종목 비교 — 토픽-기간 그리드 정규화

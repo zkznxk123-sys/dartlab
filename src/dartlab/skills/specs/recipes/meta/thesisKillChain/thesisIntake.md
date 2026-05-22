@@ -71,6 +71,10 @@ audiences:
   human: 내가 믿는 문장을 testable assumption으로 바꾸는 첫 단계다.
 humanIntro: "thesisIntake는 프리모템의 입력 잠금이다. 원문을 잃으면 이후 시나리오는 일반 분석으로 흐른다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

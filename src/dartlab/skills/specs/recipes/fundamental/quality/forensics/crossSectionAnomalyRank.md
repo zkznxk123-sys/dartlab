@@ -47,13 +47,6 @@ gap:
     - synth
 falsifier:
   description: "횡단면 이상치가 단일 기업 원표 검증에서 반복되지 않으면 엔진 후보로 승격하지 않는다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - scan 후보를 분석 결론으로 확정하지 않는다.
   - universe, 기준일, axis 없이 후보를 나열하지 않는다.
@@ -64,6 +57,25 @@ examples:
   - 공시리스크 이상치 후보 뽑고 원표로 검증
   - scan quality 기반 포렌식 후보
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

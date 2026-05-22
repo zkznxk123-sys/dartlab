@@ -47,6 +47,7 @@ sourceRefs:
 requiredEvidence:
   - skillRef
   - sourceRef
+  - executionRef
 expectedOutputs:
   - 시작 skill
   - 필요한 원문 위치
@@ -95,6 +96,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 DartLab 은 한국 DART 와 미국 EDGAR 공시를 구조화해 코드와 AI 가 직접 다루는 데이터로 만든다. 외부에서 처음 만나는 LLM·사람·기여자는 흩어진 API 문서나 ops 폴더가 아니라 **Skills 카탈로그** 하나에서 시작한다.

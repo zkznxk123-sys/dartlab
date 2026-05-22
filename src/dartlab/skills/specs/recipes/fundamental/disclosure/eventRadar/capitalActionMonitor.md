@@ -77,6 +77,10 @@ audiences:
   human: 자본 이벤트가 실제 촉매인지 따로 확인한다.
 humanIntro: "capitalActionMonitor는 배당·분할·증자 같은 표면상 큰 이벤트를 모으되, 반복 배당과 희석 이벤트를 분리해 과잉 해석을 막는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

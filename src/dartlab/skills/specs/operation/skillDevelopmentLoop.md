@@ -71,6 +71,8 @@ requiredEvidence:
   - groundTruthCases
   - selfRunResultTable
   - redTeamCheck
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 빈칸 후보 표 (gapSpot 결과)
   - incubating skill 본문
@@ -126,6 +128,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 무엇을 하나

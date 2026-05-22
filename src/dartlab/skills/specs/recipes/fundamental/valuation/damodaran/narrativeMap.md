@@ -32,13 +32,6 @@ expectedOutputs:
 
 expectedNovelty:
   - narrativeDriverMap
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - L2/L3 story 또는 analysis 엔진 호출 금지.
   - 텍스트 근거 없이 narrative를 확정하지 않는다.
@@ -50,7 +43,7 @@ examples:
   - AAPL 스토리를 성장과 마진 가정으로 연결
 gap:
   primary:
-    - Company
+    - company
     - gather
     - reference
 testUniverse:
@@ -65,6 +58,21 @@ testUniverse:
 falsifier:
   description: "narrative 요소가 growth, margin, risk, model route 중 하나에도 연결되지 않으면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -37,6 +37,8 @@ requiredEvidence:
   - analysisRef (4 막 재무 비율)
   - creditRef (5 막 등급)
   - storyRef (6 막 결론)
+  - executionRef
+  - sourceRef
 failureModes:
   - 6 막 골격 강제로 분석 대상 부적합 (예 비상장 · 신생 회사 → 5 막 데이터 부족)
   - 막 사이 인과 연결 없이 5 분석 결과 *나열* 만
@@ -72,6 +74,10 @@ runtimeCompatibility:
     notes: []
 status: observed
 lastUpdated: "2026-05-12"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # 6 막 인과 서사 — 기업 분석 한정

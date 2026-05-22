@@ -41,6 +41,8 @@ procedure:
   - 'CHANGELOG: `ui/vscode/CHANGELOG.md`.'
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
@@ -72,6 +74,10 @@ source:
   absorbedKey: vscode
   format: markdown
 lastUpdated: '2026-05-03'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## Skill OS 흡수 규칙

@@ -75,6 +75,10 @@ audiences:
   human: 시나리오가 어떤 근거에 기대고 있는지 먼저 본다.
 humanIntro: "coverage audit은 시나리오의 바닥이다. 없는 데이터를 상상으로 채우지 않는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

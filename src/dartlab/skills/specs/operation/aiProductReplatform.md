@@ -69,6 +69,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-04"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 확정 방향

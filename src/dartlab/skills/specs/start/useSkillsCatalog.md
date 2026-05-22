@@ -47,6 +47,8 @@ sourceRefs:
   - dartlab://skills/start.useSkillsCatalog
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 목적 skill 후보
   - capability ref 목록
@@ -92,6 +94,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 dartlab 의 모든 기능은 **`/skills` 카탈로그** 에 진입한다. 사람과 AI 가 같은 표면을 본다. 외부 API 문서나 코드 트리 직접 탐색 대신 skill frontmatter 와 본문으로 시작한다.

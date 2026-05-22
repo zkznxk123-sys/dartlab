@@ -41,6 +41,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.cashflowWaterfall"
@@ -50,15 +52,6 @@ visualGuidance:
   - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 다년 시계열 일부 한정
 forbidden:
   - 3 모델 (Sloan / Beneish / Novy-Marx) 중 1~2 만 합의해도 분식 단정 금지 — 3 모델 일관 시 risk claim.
   - 미국 표본 thresholds 를 KR 시장 동일 적용 금지.
@@ -76,6 +69,17 @@ examples:
   - 시계열 + 3 모델 합의
   - 분식 의심 신호 (3 모델 일관)
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 학술 근거

@@ -27,6 +27,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.evidenceCoverage"
   - "engines.viz.mermaidDiagram"
@@ -34,15 +36,6 @@ visualGuidance:
   - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 governance topic 단일 호출 한정
 forbidden:
   - 분식회계 단정 금지 — 의심 신호로만 표기.
   - 본문 근거 (감사보고서 dartUrl / rcept_no) 없이 지배구조 비난 금지.
@@ -64,6 +57,21 @@ gap:
     - analysis
     - scan
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -24,6 +24,8 @@ toolRefs:
 requiredEvidence:
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 expectedNovelty:
   - corrForeign
   - corrInst
@@ -49,15 +51,6 @@ falsifier:
     spreads = [abs(r.get("corrForeign", 0) - r.get("corrInst", 0)) for r in rows20]
     flat_spread = all(s < 0.05 for s in spreads)
     assert not flat_spread, "외인-기관 spread 모두 0.05 미만 — 주체 분리 무의미"
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - Naver flow API CORS
 failureModes:
   - 저유동 종목 sampleN < 10 → corr 노이즈
   - 외인 1 회성 대규모 거래로 corr outlier
@@ -71,6 +64,19 @@ examples:
   - "10일/20일/60일 수급 정합 차이"
   - "주체별 corr"
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

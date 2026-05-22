@@ -28,6 +28,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.cashflowWaterfall"
@@ -37,15 +39,6 @@ visualGuidance:
   - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 다년 시계열 일부 한정
 forbidden:
   - CCC (DSO + DIO − DPO) 한 시점 결과로 영구 운전자본 efficiency 단정 금지.
   - DSO / DIO / DPO 정의 (분기 vs 연간 환산) 명시 없이 인용 금지.
@@ -63,6 +56,21 @@ examples:
   - 매출 신뢰도 + 운전자본 quality
   - 운전자본 + 분식 의심 결합
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 학술 근거

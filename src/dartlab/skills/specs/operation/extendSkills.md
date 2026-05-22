@@ -37,6 +37,7 @@ requiredEvidence:
   - sourceRef
   - auditResult
   - userConfirmed
+  - executionRef
 expectedOutputs:
   - 확장 위치 결정
   - 승격 가능 여부
@@ -71,6 +72,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

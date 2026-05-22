@@ -37,6 +37,8 @@ sourceRefs:
 requiredEvidence:
   - 사상 게이트 적용 결과
   - SSOT 통합 점검
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 비교 가능성 분류
   - 6 막 인과 위치
@@ -81,6 +83,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 dartlab 의 존재 이유 · 설계 원칙 · 검증 게이트를 한 문서에 묶는다. 새 기능 · 변경 · 분석 시작 전 본 사상 게이트를 통과시킨다.

@@ -39,6 +39,10 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: supported
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # 대시보드 배치·설계 원칙

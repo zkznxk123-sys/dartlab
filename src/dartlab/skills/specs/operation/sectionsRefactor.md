@@ -29,6 +29,10 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: supported
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # sections 파이프라인 — 구조 정리 + 리팩터링 + 속도 최적화 방향

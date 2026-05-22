@@ -34,13 +34,6 @@ expectedNovelty:
   - valuationAccountTrace
   - missingAccountGate
   - sourceKeyAudit
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - trace가 없는 핵심 계정을 0으로 채우지 않는다.
   - DART/EDGAR 계정명 차이를 사업 변화로 해석하지 않는다.
@@ -69,6 +62,21 @@ testUniverse:
 falsifier:
   description: "revenue, EBIT, CFO, capex 중 하나라도 trace 없이 usable로 표시하면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

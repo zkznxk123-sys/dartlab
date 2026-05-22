@@ -57,15 +57,6 @@ expectedOutputs:
   - 늑장공시 신호 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 공시 본문 + IS 동시 로드 부담
 forbidden:
   - 늑장공시 단정 시 의무공시 기한 (사유 발생 익일·주요사항보고 3 일 등) 근거 누락 금지.
   - 호재 공시 부풀리기 단정 시 동일 호재 *반복 공시 횟수* + *후속 매출/이익 반영* 동행 검증 누락 금지.
@@ -98,6 +89,21 @@ testUniverse:
 falsifier:
   description: "공시 timestamp 또는 본문 부재 시 timing 진단 불가 — *DART 원문 fetch 후 재호출* 한계 명시. 또한 *시장 합의 추정치* 외부 데이터 없으면 어닝 서프라이즈 game 판정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

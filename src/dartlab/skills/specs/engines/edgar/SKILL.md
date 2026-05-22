@@ -50,6 +50,7 @@ requiredEvidence:
   - filedAt
   - tableRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 미국 종목 재무·공시
   - DartCompany 동등 inteface
@@ -94,6 +95,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

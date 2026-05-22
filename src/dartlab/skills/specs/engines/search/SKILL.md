@@ -36,6 +36,7 @@ requiredEvidence:
   - scope
   - dataAsOf
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 매칭 공시 목록
   - DART 뷰어 URL
@@ -78,6 +79,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

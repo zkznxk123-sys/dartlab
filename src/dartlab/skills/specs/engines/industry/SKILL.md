@@ -44,6 +44,7 @@ requiredEvidence:
   - stage
   - tableRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 산업 ID / 산업명
   - 공정 단계 + 종목 list
@@ -91,6 +92,13 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.peerMatrix"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 엔진 역할

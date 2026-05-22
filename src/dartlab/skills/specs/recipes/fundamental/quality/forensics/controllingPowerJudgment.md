@@ -60,15 +60,6 @@ expectedOutputs:
   - 지배력 분류 의문 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다회사 관계기업 본문 동시 로드 부담
 forbidden:
   - 실질지배력 보유 단정 시 IFRS 10 5 기준 (의결권·옵션·방어권·실질지배 신호·일관성) 명시 누락 금지.
   - 지분율 50% 이하인데 실질지배 단정 시 의결권 외 신호 (이사 선임권·재무정책·계약) 명시 누락 금지.
@@ -100,6 +91,21 @@ testUniverse:
 falsifier:
   description: "관계·종속 기업 sections + 주요주주 + 합작 공시 중 2+ 부재면 지배력 판정 불가 — '주석 본문 + 합작계약서 확인 후 재호출' 명시."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

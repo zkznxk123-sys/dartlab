@@ -24,6 +24,7 @@ sourceRefs:
   - dartlab://skills/operation.opsAsSkills
 requiredEvidence:
   - sourceRef
+  - executionRef
 expectedOutputs:
   - operation category skill
   - 원문 위치가 보존된 규칙
@@ -56,6 +57,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

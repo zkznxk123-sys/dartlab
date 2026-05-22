@@ -42,6 +42,8 @@ requiredEvidence:
   - totalAssetsSeries
   - totalFundingSeries
   - evidenceBinding
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - balance-structure-trend spec
   - 자산 배치 변화 설명
@@ -82,6 +84,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

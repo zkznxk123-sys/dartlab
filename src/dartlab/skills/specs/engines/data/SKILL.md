@@ -44,6 +44,7 @@ requiredEvidence:
   - latestAsOf
   - source
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 종목/유니버스 데이터 freshness
   - 수집 결과 종목별 카테고리별 건수
@@ -89,6 +90,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

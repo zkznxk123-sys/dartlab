@@ -40,6 +40,8 @@ sourceRefs:
 requiredEvidence:
   - 각 단계 완료 결과
   - 첫 Company target / period / topic
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 첫 분석 결과
   - 다음 단계 분기 (scan · macro · story)
@@ -75,6 +77,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 dartlab 을 처음 만나는 사람·AI 가 **환경 준비 → walkthrough → 회사 facade → 분석 축 적용** 4 단계로 첫 결과까지 도달하는 recipe. 각 단계는 별도 skill 을 가리키고, 끝나면 다음 분기 (시장 횡단 · 매크로 · 스토리) 로 자연 이어진다.

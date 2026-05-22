@@ -28,6 +28,8 @@ sourceRefs:
   - https://github.com/eddmpython/dartlab
 requiredEvidence:
   - execution
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 설치 명령
   - smoke check 결과
@@ -69,6 +71,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 무엇을 설치하나

@@ -31,6 +31,8 @@ requiredEvidence:
   - 변경된 모듈 경로
   - 테스트 통과 결과
   - exit code 일관성 확인
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 변경된 명령
   - 도움말 갱신
@@ -73,6 +75,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 dartlab CLI 는 단일 파일이 아니라 `src/dartlab/cli/` 패키지로 유지한다.

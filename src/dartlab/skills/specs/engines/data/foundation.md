@@ -41,6 +41,8 @@ requiredEvidence:
   - latestAsOf
   - table
   - rank
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - data-engine routing decision
   - source table refs
@@ -84,6 +86,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-02"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 기본 판단

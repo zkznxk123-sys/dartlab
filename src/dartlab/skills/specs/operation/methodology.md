@@ -29,6 +29,8 @@ requiredEvidence:
   - 표본 구성
   - 적중 정의
   - 한계 명시
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 엔진별 검증 결과
   - 비-적중 원인 분석
@@ -66,6 +68,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 dartlab 분석 엔진이 주장하는 수치의 근거. 각 엔진이 무엇을 · 어떻게 · 얼마나 검증했는지 투명하게 공개한다.

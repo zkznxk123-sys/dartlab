@@ -23,6 +23,8 @@ toolRefs:
 requiredEvidence:
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 expectedNovelty:
   - rateShift
   - alignment
@@ -47,15 +49,6 @@ falsifier:
         assert len(signs) >= 2, "ret60 모두 같은 부호 — 종목 변별력 0"
     if rate_shifts:
         assert abs(rate_shifts[0]) >= 0.1, "rateShift 정체 (|x| < 0.1) — alignment 무의미"
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - HF macro 데이터셋 다운로드 (CORS)
 failureModes:
   - macro HF 벌크 데이터 freshness ≤ 어제까지만 (오늘 발표 금리 미반영)
   - rateShift 90 일 윈도우 default — 더 긴 사이클 (1 년) 시그널 다름
@@ -69,6 +62,19 @@ examples:
   - "매크로 regime 역행 종목"
   - "KR base rate × momentum"
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

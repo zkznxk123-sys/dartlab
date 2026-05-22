@@ -22,6 +22,8 @@ requiredEvidence:
   - skillRef
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.peerMatrix"
   - "engines.viz.scenarioVisuals"
@@ -31,13 +33,6 @@ visualGuidance:
   - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 gap:
   primary:
     - industry
@@ -70,6 +65,17 @@ examples:
   - 도입기 산업 가치 + 퀄리티 KOSPI screen
   - 후행기 KOSPI200 underfollowed
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

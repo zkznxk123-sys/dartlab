@@ -9,6 +9,17 @@ whenToUse:
   - recipes 트리 시작점
   - 페르소나 분류 룰 확인
   - 새 recipe 어디에 두는지
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 # Recipes — 페르소나 트리

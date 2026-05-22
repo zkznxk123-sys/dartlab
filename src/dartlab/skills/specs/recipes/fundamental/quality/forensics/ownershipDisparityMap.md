@@ -55,15 +55,6 @@ expectedOutputs:
   - 차등의결권·황금주 활용 ledger
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 계열회사 다층 지분율 동시 로드 부담
 forbidden:
   - 지분율 괴리 = 부정 단정 시 *국가별 제도 차이* (한국 차등의결권 벤처기업법 2023~ vs 미국 듀얼클래스 일반화) 명시 누락 금지.
   - 순환출자 = 위법 단정 시 *공정거래법 2014~ 금지* 시점 + 기존 보유분 *해소 의무* 별도 명시.
@@ -97,6 +88,21 @@ testUniverse:
 falsifier:
   description: "주주현황·계열회사·지분율 본문 부재 시 괴리도 정량화 불가 — *사업보고서 지분율 섹션 + 계열회사 현황 fetch 후 재호출* 한계 명시. 또한 *차등의결권 도입 시점* (벤처기업법 2023) 명시 없이 한국 일반 기업 차등의결권 단정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

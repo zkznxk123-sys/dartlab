@@ -49,13 +49,6 @@ gap:
     - frame
 falsifier:
   description: "매출채권 증가가 신규 대형 고객의 결제조건 또는 계절성으로 설명되면 위험 신호를 낮춘다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 매출채권 증가 하나만으로 분식 또는 매출 과대계상을 단정하지 않는다.
   - CFO가 음수인 성장기업을 즉시 위험으로 단정하지 않는다.
@@ -66,6 +59,25 @@ examples:
   - 매출은 늘었는데 현금이 안 따라오는지 봐줘
   - 삼성전자 revenue to cash bridge
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

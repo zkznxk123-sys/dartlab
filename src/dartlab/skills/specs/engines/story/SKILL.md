@@ -41,6 +41,7 @@ requiredEvidence:
   - sections
   - tableRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 6 막 구조 보고서
   - block 별 evidence 묶음
@@ -87,6 +88,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

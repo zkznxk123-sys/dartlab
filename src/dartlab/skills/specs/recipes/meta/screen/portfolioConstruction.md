@@ -35,6 +35,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.tableBackedChart"
   - "engines.viz.peerMatrix"
@@ -42,15 +44,6 @@ visualGuidance:
   - "비중·임계값은 engines.viz.tableBackedChart 표 + 검산 행으로만 표현. 파이/도넛 차트는 표 인용 후 보조."
   - "섹터 분산은 engines.viz.peerMatrix universe + 비중 sum 검산을 함께 노출한다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 N>5 종 동시 valuation 호출 부담
 forbidden:
   - 비중 합 100% 보장 검산 누락 금지.
   - 단일 섹터 70%+ 집중을 "분산" 으로 표기 금지.
@@ -85,6 +78,17 @@ testUniverse:
 falsifier:
   description: "후보 N 종 중 50% 이상이 valuation null 또는 dCR null 이면 본 절차의 비중 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-20'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

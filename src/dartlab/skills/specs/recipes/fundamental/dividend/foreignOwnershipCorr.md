@@ -23,6 +23,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.tableBackedChart"
   - "engines.viz.mermaidDiagram"

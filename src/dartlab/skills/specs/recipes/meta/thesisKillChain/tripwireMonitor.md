@@ -74,6 +74,10 @@ audiences:
   human: thesis를 계속 들고 가도 되는지 판단할 조기 경보선이다.
 humanIntro: "tripwireMonitor는 시나리오를 운영 가능한 체크리스트로 바꾼다. 경보선이 없으면 좋은 pre-mortem도 실행되지 않는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

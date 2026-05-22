@@ -25,6 +25,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - IS/BS/CF/??/??/reference ?? ??? ?
   - usable ? usableWithFallback ? blocked ??
@@ -34,15 +35,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 패키지 내장 reference JSON과 로컬 데이터 snapshot만 점검한다.
 forbidden:
   - c.analysis, c.quant, c.credit, c.industry, c.story, dartlab.macro 호출 금지.
   - Company.show("PRICE")를 가격 SSOT로 쓰지 않는다.
@@ -71,6 +63,21 @@ testUniverse:
 falsifier:
   description: "country/industry reference 또는 price path가 결손인데 usable 판정을 내리면 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

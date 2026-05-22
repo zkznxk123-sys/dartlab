@@ -47,13 +47,6 @@ gap:
     - synth
 falsifier:
   description: "핵심 metric trace가 missing인데도 해당 metric으로 위험 신호를 계산하면 실패로 본다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 계정명 substring만 보고 단위를 확인하지 않은 채 결론화하지 않는다.
   - missing metric을 0으로 처리하지 않는다.
@@ -64,6 +57,25 @@ examples:
   - 삼성전자 raw 계정 trace
   - CFO와 매출채권 source row 확인
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -50,6 +50,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 종합 등급 (grade · score)
   - 7 축 점수
@@ -100,6 +101,14 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-08'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.mermaidDiagram"
 ---
 
 ## 엔진 역할

@@ -30,11 +30,6 @@ expectedOutputs:
 
 expectedNovelty:
   - financialFirmRoute
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - 금융업을 generic FCFF로 강제하지 않는다.
   - L2 credit/valuation 엔진 호출 금지.
@@ -44,7 +39,7 @@ examples:
   - 138930 금융업 excess return 경로
 gap:
   primary:
-    - Company
+    - company
     - reference
 testUniverse:
   market: KR+US
@@ -58,6 +53,21 @@ testUniverse:
 falsifier:
   description: "금융업 blocker가 있는데 FCFF usable로 표시하면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

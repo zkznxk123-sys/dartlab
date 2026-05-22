@@ -44,6 +44,7 @@ requiredEvidence:
   - provider
   - evidenceBinding
   - executionRef
+  - sourceRef
 expectedOutputs:
   - price-chart spec
   - 주가 추세와 거래량 설명
@@ -87,6 +88,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

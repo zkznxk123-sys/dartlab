@@ -31,11 +31,6 @@ expectedOutputs:
 
 expectedNovelty:
   - distressDcfRoute
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - L2 credit 엔진 호출 금지.
   - distress 신호를 무시하고 base DCF만 결론으로 쓰지 않는다.
@@ -45,7 +40,7 @@ examples:
   - INTC distress adjusted DCF 점검
 gap:
   primary:
-    - Company
+    - company
     - gather
     - synth
 testUniverse:
@@ -60,6 +55,21 @@ testUniverse:
 falsifier:
   description: "distressReviewRequired 신호가 있는데 final memo가 usable만 표시하면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

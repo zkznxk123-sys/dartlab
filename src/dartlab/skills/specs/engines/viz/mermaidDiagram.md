@@ -31,6 +31,8 @@ requiredEvidence:
   - node
   - edge
   - evidenceRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - Mermaid graph LR source
   - 인과 경로 설명
@@ -67,6 +69,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-16'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 양식 선택 — 데이터 모양 → 다이어그램 모양

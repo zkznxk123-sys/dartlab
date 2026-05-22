@@ -19,6 +19,8 @@ toolRefs:
 requiredEvidence:
   - table
   - metric
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - validated visual
 runtimeCompatibility:
@@ -48,6 +50,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-02"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

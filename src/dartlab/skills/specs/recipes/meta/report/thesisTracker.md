@@ -33,6 +33,8 @@ requiredEvidence:
   - skillRef
   - artifactRef
   - tableRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - thesis 파일 (markdown, gitignore)
   - pillar scorecard
@@ -46,19 +48,6 @@ visualGuidance:
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  mcp:
-    status: limited
-    limitations:
-      - 로컬 파일 (~/.dartlab/thesis/) 저장 — MCP 서버 격리 환경에서는 별도 경로 매핑 필요
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 file system 격리 — IndexedDB 등 별도 저장 필요
 failureModes:
   - 반증 불가능한 thesis 를 수용 ("회사가 좋아진다" 같은 vague claim)
   - pillar 의 expectation 을 정량 (숫자/구간/기한) 으로 명시하지 않음
@@ -85,6 +74,21 @@ sourceRefs:
   - dartlab://skills/engines.company
   - dartlab://skills/recipes.meta.report.companyDeepAnalysis
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## thesis 파일 schema (~/.dartlab/thesis/`{ticker}.md`)

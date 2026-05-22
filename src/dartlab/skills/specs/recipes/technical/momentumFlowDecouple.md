@@ -23,18 +23,10 @@ requiredEvidence:
   - tableRef
   - dateRef
   - sourceRef
+  - executionRef
 expectedOutputs:
   - 종목별 corr60 (이전 60일) + corr20 (최근 20일) + decouple = corr60 - corr20
   - 5 종목 단면 std (변별력 신호)
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - Naver flow API 직접 호출 (CORS)
 gap:
   primary:
     - gather
@@ -67,6 +59,19 @@ examples:
   - 005930 60일 vs 20일 상관 와해
   - 5 종목 correlation drop 단면
 lastUpdated: "2026-05-22"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

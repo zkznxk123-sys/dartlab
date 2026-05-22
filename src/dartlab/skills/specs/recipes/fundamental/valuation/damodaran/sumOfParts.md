@@ -30,11 +30,6 @@ expectedOutputs:
 
 expectedNovelty:
   - sumOfPartsRoute
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - 세그먼트 근거 없이 임의 SOTP를 만들지 않는다.
   - L2 industry/story 엔진 호출 금지.
@@ -44,7 +39,7 @@ examples:
   - 삼성전자 SOTP 경로 점검
 gap:
   primary:
-    - Company
+    - company
     - frame
 testUniverse:
   market: KR+US
@@ -58,6 +53,21 @@ testUniverse:
 falsifier:
   description: "segmentDisclosure가 없는데 segment별 가치를 확정하면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

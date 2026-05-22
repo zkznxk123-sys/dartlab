@@ -41,6 +41,8 @@ procedure:
   - calc 함수는 **독립 모듈** — 다른 calc 호출 가능하지만 순환 없음.
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 작업 경로
   - 확인한 근거
@@ -72,6 +74,10 @@ source:
   absorbedKey: architecture
   format: markdown
 lastUpdated: '2026-05-03'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## Skill OS 흡수 규칙

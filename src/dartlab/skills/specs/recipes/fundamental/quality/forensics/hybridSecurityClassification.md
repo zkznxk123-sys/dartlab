@@ -59,15 +59,6 @@ expectedOutputs:
   - IFRS 32 5 기준 매칭 + 분류 적정성 신호
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 5+ 년 BS + 사업보고서 sections 동시 로드 부담
 forbidden:
   - 부채 vs 자본 분류 적정 단정 시 IFRS 32 5 기준 (의무 상환·콜옵션·step-up·배당 누적·전환비율) 명시 누락 금지.
   - step-up 조항 (배당률 상승) 존재만으로 자본 분류 부정 단정 금지 — 콜옵션·실행 의지 동행 평가.
@@ -99,6 +90,21 @@ testUniverse:
 falsifier:
   description: "BS 자본·부채 항목 5+ 년 + 사업보고서 차입금·약정 sections 둘 다 부재면 분류 판정 불가 — '주석 본문 확인 후 재호출' 명시. 발행 공시 본문 추가 확인 권장."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

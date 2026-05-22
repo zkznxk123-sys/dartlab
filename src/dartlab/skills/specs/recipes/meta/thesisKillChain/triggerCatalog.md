@@ -75,6 +75,10 @@ audiences:
   human: 어떤 사건이나 지표가 thesis 붕괴를 시작할 수 있는지 본다.
 humanIntro: "triggerCatalog는 균열의 시작점을 모은다. 하나의 trigger가 바로 결론이 되지는 않는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -70,6 +70,10 @@ audiences:
   human: 내가 믿는 문장을 테스트 가능한 행으로 나눈다.
 humanIntro: "assumptionLedger는 thesis를 방어 가능한 단위로 쪼갠다. 여기서부터 pre-mortem이 실제 검증 절차가 된다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

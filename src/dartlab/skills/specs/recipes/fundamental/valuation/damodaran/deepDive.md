@@ -64,13 +64,6 @@ visualGuidance:
   - "현재가·시가총액 근거가 있을 때만 engines.viz.priceChart를 사용해 reverse DCF 맥락을 붙인다."
   - "gapLedger와 blocker는 engines.viz.evidenceCoverage 또는 표로 제시한다. blocker가 남아 있으면 시각화보다 한계 문장을 우선한다."
   - "valuation 메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 허용하고 모든 edge에 sourceRef 또는 skillRef를 둔다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - L3 story 호출 금지. storyboardReady는 초안 구조만 만든다.
   - L2 엔진 호출 금지.
@@ -99,6 +92,17 @@ testUniverse:
 falsifier:
   description: "dataAudit, modelFit, falsifier 중 하나라도 blocked인데 complete memo로 선언하면 실패로 본다."
 lastUpdated: "2026-05-17"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

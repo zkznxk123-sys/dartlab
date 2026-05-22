@@ -31,13 +31,6 @@ expectedOutputs:
 
 expectedNovelty:
   - storyDriverTranslation
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - L2/L3 story 또는 valuation 엔진 호출 금지.
   - 임의 성장률을 근거 없이 채택하지 않는다.
@@ -49,7 +42,7 @@ examples:
   - 삼성전자 성장 스토리 숫자 변환
 gap:
   primary:
-    - Company
+    - company
     - gather
     - synth
 testUniverse:
@@ -64,6 +57,21 @@ testUniverse:
 falsifier:
   description: "story claim이 driver value로 변환되지 않으면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

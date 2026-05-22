@@ -24,6 +24,8 @@ toolRefs:
 requiredEvidence:
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 expectedNovelty:
   - breakoutRatio
   - newsRatePerDay
@@ -48,15 +50,6 @@ falsifier:
     news_dead = all(r < 0.2 for r in rates)
     assert not (all_high or all_low), "breakoutRatio 한쪽 치우침 — 변별력 0"
     assert not news_dead, "전체 뉴스 < 0.2/day — confirmation 측정 불가"
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - Google News RSS CORS
 failureModes:
   - 회사명 모호 (예 동음이의어) → 뉴스 빈도 과대평가
   - 본 recipe 는 뉴스 *빈도* 만 — sentiment tone 미고려
@@ -70,6 +63,19 @@ examples:
   - "breakout 종목 뉴스 빈도 확인"
   - "신고가 + 정보 흐름 동반"
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

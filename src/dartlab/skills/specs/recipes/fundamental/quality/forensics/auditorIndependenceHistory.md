@@ -58,15 +58,6 @@ expectedOutputs:
   - 동행 사건 timing
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 사업보고서 감사 섹션 동시 로드 부담
 forbidden:
   - 감사인 변경 = 부정 신호 단정 시 *강제교체 의무* (외부감사법 9 조) 준수 정상 변경 반례 검토 누락 금지.
   - 비감사 보수 비중 큼 = 독립성 약함 단정 시 *법규상 허용 범위* (외부감사법 9 조의 4) 명시 누락 금지.
@@ -100,6 +91,21 @@ testUniverse:
 falsifier:
   description: "감사인 정보 (회계법인명·계속 감사기간·비감사 보수) 또는 감사의견 본문 부재 시 독립성 판정 불가 — *DART 사업보고서 감사 섹션 + 감사인 변경 공시 fetch 후 재호출* 한계 명시. 또한 *강제교체 적용 시점* (신외감법 2018 ~) 명시 없이 변경 = 부정 단정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

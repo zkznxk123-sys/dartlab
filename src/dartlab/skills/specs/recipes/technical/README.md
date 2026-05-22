@@ -8,6 +8,17 @@ status: published
 whenToUse:
   - 테크니컬 분석 페르소나 커버리지 확인
   - quant 엔진과 technical 페르소나의 관계
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 # Technical 페르소나

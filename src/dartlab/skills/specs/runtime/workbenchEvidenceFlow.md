@@ -35,6 +35,7 @@ requiredEvidence:
   - skillRef
   - executionRef
   - verifyRef
+  - sourceRef
 expectedOutputs:
   - 검산 가능한 답변 초안
   - claim 별 ref 매칭
@@ -81,6 +82,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 5 패스 단일 SSOT

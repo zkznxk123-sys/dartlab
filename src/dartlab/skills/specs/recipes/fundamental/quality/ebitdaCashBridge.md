@@ -56,15 +56,6 @@ expectedOutputs:
   - 인수가격 적정성 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 IS / CF / BS 동시 로드 부담
 forbidden:
   - EBITDA 만 보고 인수가격 적정 단정 시 CAPEX·운전자본·이자·법인세 4 요소 누락 효과 평가 누락 금지.
   - EV/EBITDA multiple 비교 시 *동종 업종 평균* 또는 *peer 매칭* 누락 금지.
@@ -97,6 +88,21 @@ testUniverse:
 falsifier:
   description: "CF 본문 (영업현금흐름·CAPEX) 부재 또는 EV (Enterprise Value — 시가총액 + 순부채) 산정 불가 시 적정성 판정 불가 — *Company.show CF 본문 + 인수 공시 EV 산정 본문 fetch 후 재호출* 한계 명시."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.cashflowWaterfall"
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.evidenceCoverage"
 ---
 
 ## 공개 호출 방식

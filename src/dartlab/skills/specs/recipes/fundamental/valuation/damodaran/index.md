@@ -86,15 +86,6 @@ expectedNovelty:
   - damodaranConceptTree
   - damodaranDataContract
   - damodaranGapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 로컬 parquet 가격·시총 경로 대신 bundled reference JSON 기반 체계 점검만 수행한다.
 forbidden:
   - L2/L3 분석 엔진을 최초 진입점에서 호출하지 않는다.
   - DCF 밴드 계산 가능 상태를 전체 Damodaran 분석체계 완성으로 선언하지 않는다.
@@ -128,6 +119,17 @@ falsifier:
   description: "index가 DCF 실행 가능 상태를 Damodaran 분석체계 완성으로 선언하면 실패로 본다."
 humanIntro: "Damodaran식 분석은 적정가 계산기가 아니라 스토리와 숫자를 서로 반증하는 체계다. 이 진입점은 현재 실행 가능한 L1.5 가치평가 경로와 아직 메꿔야 할 narrative, life cycle, 특수상황, peer valuation 데이터 계약을 한곳에 묶는다."
 lastUpdated: "2026-05-17"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

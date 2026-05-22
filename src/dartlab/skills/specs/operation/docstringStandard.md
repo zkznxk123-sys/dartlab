@@ -20,14 +20,24 @@ toolRefs:
   - ReadCapability
 requiredEvidence:
   - skillRef
+  - executionRef
+  - sourceRef
+lastUpdated: '2026-05-06'
 runtimeCompatibility:
   server:
     status: supported
   localPython:
     status: supported
-  pyodide:
+  mcp:
     status: supported
-lastUpdated: '2026-05-06'
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 목적

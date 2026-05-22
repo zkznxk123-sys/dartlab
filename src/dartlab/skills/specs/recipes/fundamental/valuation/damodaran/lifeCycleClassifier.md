@@ -35,13 +35,6 @@ expectedNovelty:
   - lifeCyclePhase
   - growthMarginRocEvidence
   - financialFirmBlocker
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 금융업을 generic FCFF 생애주기로 통과시키지 않는다.
   - 단일 연도 성장률만으로 highGrowth 또는 decline을 확정하지 않는다.
@@ -70,6 +63,21 @@ testUniverse:
 falsifier:
   description: "금융업 또는 FCF 결손 기업을 정상 matureStable로 통과시키면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

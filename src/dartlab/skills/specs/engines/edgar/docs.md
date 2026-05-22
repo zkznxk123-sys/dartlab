@@ -36,6 +36,8 @@ requiredEvidence:
   - form_type
   - period_key
   - accession_no
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - topic × period 매트릭스 (form_type::topicId 행)
   - 같은 연도 정렬 — annual → Q3 → Q2 → Q1
@@ -77,6 +79,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-12'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

@@ -24,6 +24,8 @@ toolRefs:
 requiredEvidence:
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 expectedNovelty:
   - atrRatio
   - upcomingEventCount
@@ -47,15 +49,6 @@ falsifier:
     no_event = sum(1 for r in result["table"] if r.get("upcomingEventCount", 0) == 0)
     assert flat < len(atrs), "atrRatio 모두 평탄 — 변별력 0"
     assert no_event < len(result["table"]) - 1, "공시 0 인 종목 다수 — 시즌 아님"
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - DART disclosure 호출 (API 키)
 failureModes:
   - 신규 상장 종목 disclosure history 부재 → upcomingEventCount 0
   - 60 거래일 ATR 표본 부족 (저유동 종목) → atrRatio 무의미
@@ -69,6 +62,19 @@ examples:
   - "공시 전 ATR jump 점검"
   - "pre-earnings drift KR"
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

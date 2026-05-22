@@ -77,6 +77,10 @@ audiences:
   human: thesis 유지, 약화, 붕괴 경로를 한 화면에 비교한다.
 humanIntro: "scenarioStoryboard는 pre-mortem을 사용자에게 전달하는 최종 형태다. 무너지는 경로만이 아니라 유지되는 조건도 같이 둔다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

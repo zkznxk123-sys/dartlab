@@ -74,6 +74,10 @@ audiences:
   human: thesis가 깨진다는 주장 자체도 반증 대상임을 확인한다.
 humanIntro: "falsifierLedger는 pre-mortem의 균형추다. thesis를 일부러 깨보되, 깨졌다는 주장도 근거 없이는 확정하지 않는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

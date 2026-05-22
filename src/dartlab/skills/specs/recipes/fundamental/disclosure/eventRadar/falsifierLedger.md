@@ -77,6 +77,10 @@ audiences:
   human: 촉매 후보가 틀릴 수 있는 이유를 먼저 확인한다.
 humanIntro: "falsifierLedger는 이 팩의 안전장치다. 좋은 이벤트처럼 보여도 반증이 열려 있으면 결론은 보류한다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

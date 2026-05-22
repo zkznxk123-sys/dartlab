@@ -39,6 +39,8 @@ requiredEvidence:
   - finance:CF
   - periods
   - evidenceBinding
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 손익 추이 matrix
   - 자산·조달 구조 stack
@@ -77,6 +79,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

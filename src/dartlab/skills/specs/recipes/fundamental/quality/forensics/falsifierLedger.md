@@ -48,13 +48,6 @@ gap:
     - reference
 falsifier:
   description: "반증 ledger가 비어 있으면 포렌식 팩의 모든 위험 결론은 미완성으로 본다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - supportingEvidence만 쓰고 counterEvidenceNeeded를 누락하지 않는다.
   - open falsifier가 있는데 결론을 확정하지 않는다.
@@ -65,6 +58,25 @@ examples:
   - 매출채권 괴리의 반증 조건 열어줘
   - 포렌식 신호 false positive 점검
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

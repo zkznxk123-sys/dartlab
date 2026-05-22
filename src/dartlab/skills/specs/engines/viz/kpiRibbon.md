@@ -33,6 +33,8 @@ requiredEvidence:
   - value
   - period
   - evidenceRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - kpi-ribbon spec
   - KPI 요약 문단
@@ -62,6 +64,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

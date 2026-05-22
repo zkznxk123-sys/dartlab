@@ -28,6 +28,8 @@ sourceRefs:
   - dartlab://skills/engines.company
 requiredEvidence:
   - execution
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 회사 단위 결과
   - 시장 단위 결과
@@ -69,6 +71,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 DartLab 은 세 가지를 한다 — **Company** (한 회사 깊게), **Scan** (시장 횡단), **Ask** (AI 분석).

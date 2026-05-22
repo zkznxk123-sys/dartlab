@@ -26,6 +26,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.cashflowWaterfall"
@@ -35,15 +37,6 @@ visualGuidance:
   - "현금흐름·배당·자본배분 bridge는 engines.viz.cashflowWaterfall을 사용하고 CF 원표와 부호 convention을 검산한다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 freq="Y" 5 기간 시계열 일부 한정
 forbidden:
   - F-Score 9 항목 중 7 항목 사용 결과를 풀-Piotroski 결과로 단정 금지 — 학술 근사.
   - 가치주 universe (BM 상위 quintile) 외에 F-Score 적용 단정 금지 — 가치주 한정.
@@ -65,6 +58,21 @@ gap:
     - scan
     - analysis
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 학술 근거

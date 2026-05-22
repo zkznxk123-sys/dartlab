@@ -25,6 +25,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.kpiRibbon"
   - "engines.viz.financialStructureCharts"
@@ -42,15 +44,6 @@ visualGuidance:
   - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 macro/scan dataset snapshot 범위 한정
 forbidden:
   - 6 단 절차 중 valuation 단계 (Step 6) 누락 시 종합 분석 미완료 — 절대 단정 금지.
   - peer 없는 절대값 (예 — 매출 12 조) 단독 노출 금지 — peer median / 5 년 평균 동반.
@@ -81,6 +74,17 @@ testUniverse:
 falsifier:
   description: "valuation 또는 quality 단계가 빠지면 회사 종합 분석 결론으로 사용하지 않는다."
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 공개 호출 방식

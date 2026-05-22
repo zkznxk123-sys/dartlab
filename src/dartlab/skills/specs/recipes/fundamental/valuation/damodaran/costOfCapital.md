@@ -34,13 +34,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - stale country ERP를 정상 reference처럼 사용하지 않는다.
   - beta나 부채비용 fallback을 숨기지 않는다.
@@ -69,6 +62,21 @@ testUniverse:
 falsifier:
   description: "country reference stale 또는 industry fallback이 있는데 confidence를 high로 표시하면 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

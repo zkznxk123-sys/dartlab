@@ -48,13 +48,6 @@ gap:
     - scan
 falsifier:
   description: "재고 증가는 수주잔고 또는 신제품 선출하 준비로 설명될 수 있으므로 매출 부진 신호와 함께 볼 때만 위험으로 본다."
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 산업별 정상 CCC 차이를 무시하고 절대 일수만 비교하지 않는다.
   - 재고 증가 하나만으로 평가손 위험을 단정하지 않는다.
@@ -65,6 +58,25 @@ examples:
   - 재고가 매출보다 빠르게 느는지 봐줘
   - 삼성전자 CCC 원표 계산
 lastUpdated: "2026-05-15"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -24,20 +24,13 @@ toolRefs:
 requiredEvidence:
   - skillRef
   - datasetRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.evidenceCoverage"
 visualGuidance:
   - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 update() 호출 제약
 forbidden:
   - 분석 시작 후 데이터 누락 발견하고 추측으로 메우기 금지 — 시작 전 점검.
   - 결손 데이터 (None) 0 으로 채워서 분석 진행 금지.
@@ -55,6 +48,21 @@ examples:
   - InspectDataset + schema 검증
   - 데이터 점검 → 분석 → 결과
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

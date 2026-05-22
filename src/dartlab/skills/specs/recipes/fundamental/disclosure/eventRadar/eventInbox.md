@@ -75,6 +75,10 @@ audiences:
   human: 공시·뉴스 원자료를 하나의 촉매 inbox로 정리한다.
 humanIntro: "eventInbox는 이벤트 후보를 모으는 단계다. 아직 원인·결론이 아니라, 뒤의 reaction과 falsifier를 붙일 후보 목록이다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

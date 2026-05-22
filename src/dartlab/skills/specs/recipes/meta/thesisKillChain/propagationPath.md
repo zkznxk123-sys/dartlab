@@ -74,6 +74,10 @@ audiences:
   human: 작은 trigger가 어떻게 핵심 가정으로 전파되는지 본다.
 humanIntro: "propagationPath는 이 팩의 핵심이다. 시나리오가 강하려면 '무슨 일이 생김'이 아니라 '어떤 경로로 가정이 깨짐'을 보여야 한다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

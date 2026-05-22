@@ -77,6 +77,10 @@ audiences:
   human: 이벤트가 시장에서 실제로 반응했는지 확인한다.
 humanIntro: "priceFlowReaction은 이벤트 후보와 시장 반응을 연결하지만, 원인 단정은 하지 않는다. 가격·거래량·수급은 falsifier와 함께 읽는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -20,13 +20,6 @@ linkedSkills:
 toolRefs:
   - ReadSkill
   - ReadCapability
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: supported
 forbidden:
   - 사용법 / API 설명 답변에 RunPython 으로 가짜 evidence (숫자) 만들기 금지.
   - skill 본문 / capability docstring 외 임의 사실 단언 금지.
@@ -44,6 +37,24 @@ examples:
   - quant axis 호출 방법
   - dartlab 능력 / 기능 안내
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.peerMatrix"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

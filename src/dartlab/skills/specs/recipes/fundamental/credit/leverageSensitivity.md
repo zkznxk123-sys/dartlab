@@ -28,6 +28,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.financialStructureCharts"
   - "engines.viz.cashflowWaterfall"
@@ -39,15 +41,6 @@ visualGuidance:
   - "stress·민감도·충격 전파는 engines.viz.scenarioVisuals를 사용하고 assumption grid 또는 수치 임계가 없으면 scenario table로 낮춘다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 다년 시계열 일부 한정
 forbidden:
   - DOL / DFL / DCL 단일 시점 결과로 영구 민감도 단정 금지 — 시계열 + 사이클 위치 동반.
   - VC / FC 분리 추정 가정 명시 없이 DOL 단정 금지 — 회계 데이터 한계.
@@ -65,6 +58,21 @@ examples:
   - 매크로 충격 시나리오 + DCL
   - 매출 -20% 시 순이익 영향
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 학술 근거

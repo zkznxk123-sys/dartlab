@@ -26,6 +26,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.peerMatrix"
   - "engines.viz.tableBackedChart"
@@ -35,15 +37,6 @@ visualGuidance:
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 valuation snapshot prebuild 의존, refresh=True 호출 불가
 forbidden:
   - GP/A 한 지표만으로 quality 단정 금지 — value (PER / PBR) 결합.
   - Novy-Marx 2013 미국 결과를 KR 시장 동일 가정으로 인용 금지.
@@ -72,6 +65,17 @@ testUniverse:
 falsifier:
   description: "quality 근거 없이 valuation snapshot 만으로 후보를 통과시키면 recipe 실패로 본다."
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 학술 근거

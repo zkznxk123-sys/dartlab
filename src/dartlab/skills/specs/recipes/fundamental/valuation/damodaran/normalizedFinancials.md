@@ -25,6 +25,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 5-10? normalized financial panel
   - revenue ? EBIT ? tax ? NOPAT ? FCFF? source trace
@@ -34,13 +35,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 결손 계정을 0으로 채우지 않는다.
   - 일회성 적자를 정상 마진으로 단정하지 않는다.
@@ -69,6 +63,21 @@ testUniverse:
 falsifier:
   description: "revenue, operating income, CFO 중 하나라도 trace 없이 계산되면 정규화 패널 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

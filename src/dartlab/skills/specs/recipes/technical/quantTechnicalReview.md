@@ -25,6 +25,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.priceChart"
   - "engines.viz.tableBackedChart"
@@ -32,15 +34,6 @@ visualGuidance:
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 price 시계열 일부 한정
 forbidden:
   - 단일 지표 (RSI / MACD / 볼린저) 만으로 entry / exit 단정 금지 — 4 축 결합.
   - 지표 표준 파라미터 (RSI 14 / MACD 12-26-9) 명시 없이 결과 인용 금지.
@@ -58,6 +51,21 @@ examples:
   - 단기 entry 보조 신호
   - 매크로 환경 + 기술적 결합
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -25,6 +25,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - EV/Sales ? EV/EBIT ? P/B ? ???? sanity check
   - DCF ??? multiple implied story ??
@@ -34,13 +35,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - multiple만으로 본질가치를 확정하지 않는다.
   - US valuation scan 부재를 숨기지 않는다.
@@ -69,6 +63,21 @@ testUniverse:
 falsifier:
   description: "US valuation scan 부재를 partial gap으로 표시하지 않으면 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

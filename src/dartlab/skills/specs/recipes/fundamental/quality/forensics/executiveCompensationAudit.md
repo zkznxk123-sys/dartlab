@@ -57,15 +57,6 @@ expectedOutputs:
   - 사외이사 독립성 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 IS / 사업보고서 본문 동시 로드 부담
 forbidden:
   - 임원 보수 과도 단정 시 *업종·규모 평균* 외부 비교 누락 금지.
   - 보수 ↔ KPI 정합 평가 시 *KPI 자체 정의* (영업이익·EPS·TSR) 명시 누락 금지.
@@ -98,6 +89,21 @@ testUniverse:
 falsifier:
   description: "임원 보수 공시 본문 부재 또는 KPI 정의 부재 시 보수 ↔ 성과 정합성 판정 불가 — *사업보고서 임원보수 섹션 fetch 후 재호출* 한계 명시. 또한 *업종·규모 평균 외부 데이터* 없이 과도 단정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -36,6 +36,7 @@ procedure:
 requiredEvidence:
   - skillRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - "3+ provider 모두 isinstance(Company(code), CompanyProtocol) == True"
   - "providerSymmetry.json 의 신규 provider 항목 missing/shallow 카운트"
@@ -69,6 +70,10 @@ source:
   type: curated
   format: markdown
 lastUpdated: '2026-05-12'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 무엇을 하나

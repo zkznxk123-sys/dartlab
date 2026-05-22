@@ -35,6 +35,8 @@ requiredEvidence:
   - period
   - cashflow metric
   - evidenceBinding
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - cashflow waterfall spec
   - 현금 bridge 설명
@@ -67,6 +69,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

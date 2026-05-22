@@ -78,6 +78,10 @@ audiences:
   human: 외부 본문 untrusted tier 가 실제로 작동하는지 row 단위로 확인하는 게이트다.
 humanIntro: "untrustedToneAudit 은 뉴스 본문이 LLM 메시지로 들어가기 전 sentinel 마커로 감싸졌는지 확인하는 첫 번째 검증이다. 마커가 없으면 본문 안 지시가 도구 호출로 새어들 위험이 있다."
 lastUpdated: "2026-05-21"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

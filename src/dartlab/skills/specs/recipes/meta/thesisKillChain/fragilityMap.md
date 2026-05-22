@@ -76,6 +76,10 @@ audiences:
   human: 어떤 숫자가 thesis를 가장 먼저 흔드는지 본다.
 humanIntro: "fragilityMap은 thesis가 깨질 수 있는 수치 지점을 찾는다. 이 단계가 없으면 pre-mortem은 문장 놀이로 끝난다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -60,15 +60,6 @@ expectedOutputs:
   - 정책 변경 의도 매트릭스
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 IS / BS / CF + 주석 동시 로드 부담
 forbidden:
   - 정책 변경 = 회계 game 단정 시 *법규 의무* (IFRS 도입·세법 개정) 정당 변경 반례 검토 누락 금지.
   - 정책 변경 vs 추정 변경 분류 모호 금지 — IAS 8 기준 (소급 vs 전진) 명시.
@@ -103,6 +94,21 @@ testUniverse:
 falsifier:
   description: "사업보고서 회계정책 주석 또는 정정공시 본문 부재 시 분류·진단 불가 — *DART 사업보고서 주석 fetch + 정정공시 본문 fetch 후 재호출* 한계 명시. 또한 *IFRS 도입 시점* (16 = 2019, 17 = 2023, 9 = 2018) 명시 없이 변경 = 부정 단정 보류."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

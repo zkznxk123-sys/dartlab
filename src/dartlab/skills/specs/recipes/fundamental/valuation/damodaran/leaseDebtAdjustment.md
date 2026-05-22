@@ -30,11 +30,6 @@ expectedOutputs:
 
 expectedNovelty:
   - leaseDebtAudit
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - L2 엔진 호출 금지.
   - 리스 라인이 없는데 부채 조정 완료로 표시하지 않는다.
@@ -44,7 +39,7 @@ examples:
   - 리스부채 Damodaran 조정
 gap:
   primary:
-    - Company
+    - company
     - synth
 testUniverse:
   market: KR+US
@@ -58,6 +53,21 @@ testUniverse:
 falsifier:
   description: "lease line item이 없는데 usable 조정을 선언하면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

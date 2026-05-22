@@ -35,6 +35,7 @@ requiredEvidence:
   - executionRef
   - tableRef
   - dateRef
+  - sourceRef
 expectedOutputs:
   - 신규 공시 N 건 표
   - 종목별 변동률 표
@@ -48,17 +49,6 @@ visualGuidance:
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
   - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  mcp:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 커버리지 list 가 작을 때만 (메모리 부담)
 failureModes:
   - 커버리지 종목 list 없이 morning note 시도
   - 공시 시점 (filedAt) 검증 없이 "어제 야간" 으로 판정
@@ -90,6 +80,21 @@ gap:
     - gather
     - scan
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

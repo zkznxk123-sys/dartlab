@@ -50,6 +50,7 @@ procedure:
 requiredEvidence:
   - skillRef
   - sourceRef
+  - executionRef
 expectedOutputs:
   - trust tier 가 표시된 community skill 후보
   - originator/reviewer/curator/implementer credit
@@ -99,6 +100,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-14"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 Skill Market 은 DartLab 의 공식 Skill OS 와 분리된 별도 커뮤니티 지식층이다. 등록 방식은 manifest 작성이나 PR 제출이 아니라 GitHub Discussions 의 `Skill Market` 카테고리에 분석 질문을 자연어로 쓰는 것이다. 전용 카테고리가 아직 없으면 `Ideas` 카테고리에 `[Skill Market]` 제목으로 쓰는 방식을 bootstrap 입구로 사용한다.

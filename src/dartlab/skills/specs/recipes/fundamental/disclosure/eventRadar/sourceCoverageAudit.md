@@ -77,6 +77,10 @@ audiences:
   human: 실행 전에 어떤 원자료가 비었는지 보는 게이트다.
 humanIntro: "source coverage는 이벤트 레이더의 첫 번째 중단점이다. 없는 source를 추정하지 않고, 어떤 판단을 못 하는지 먼저 고정한다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

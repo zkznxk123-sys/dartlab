@@ -29,6 +29,8 @@ requiredEvidence:
   - "사전 유사 매핑 패턴"
   - "옛 운영자 fold 결정 일관성"
   - "액션 단어 양쪽 일치"
+  - executionRef
+  - sourceRef
 failureModes:
   - "Ghost snakeId 박기 — SA 부재 snakeId 가 사전에 가짜로 박힘 (현재 4,368 누적 부채, 12.6%)"
   - "액션 손실 — '취득/처분/회수' 한글에 *자산 자체* snakeId 매핑 (예: 단기금융상품 취득 → shortterm_financial_instruments 자산 자체)"
@@ -54,6 +56,10 @@ runtimeCompatibility:
   pyodide:
     status: supported
     notes: []
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # mappingRefresh — accountMappings.json 보강 4 단계 파이프라인

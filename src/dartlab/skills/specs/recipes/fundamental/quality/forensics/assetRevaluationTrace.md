@@ -59,15 +59,6 @@ expectedOutputs:
   - 감정평가 가정 ledger
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 BS 유형자산 sections + 주석 동시 로드 부담
 forbidden:
   - 재평가 = 회계 game 단정 시 *공정가 모델 정상 회계처리* (IFRS 16·IAS 16) 가능성 반례 검토 누락 금지.
   - 재평가 후 ROE 개선 단정 시 *자본 증가 분모 효과* 와 *이익 증가 분자 효과* 분리 누락 금지.
@@ -101,6 +92,21 @@ testUniverse:
 falsifier:
   description: "유형자산 sections·재평가잉여금 본문 또는 자산재평가 공시 부재 시 진단 불가 — *Company.show BS 유형자산 sections + DART 자산재평가 결의 공시 fetch 후 재호출* 한계 명시. 감정평가 본문 (평가법인·평가일·평가방법) 도 사업보고서 별도 fetch 필요."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

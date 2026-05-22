@@ -63,6 +63,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 선택한 분석 축
   - 실제 공개 호출
@@ -116,6 +117,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-07'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

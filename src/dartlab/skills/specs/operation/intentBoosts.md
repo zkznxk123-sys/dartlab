@@ -259,6 +259,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-07'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 무엇을 하나

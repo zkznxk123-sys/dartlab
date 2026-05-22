@@ -24,6 +24,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - sales-to-capital ? reinvestment rate ? ROIC/ROC ?
   - ???? ????? ????? ????? ??
@@ -33,13 +34,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 성장률을 과거 CAGR만으로 확정하지 않는다.
   - invested capital 결손 시 ROC를 계산하지 않는다.
@@ -68,6 +62,21 @@ testUniverse:
 falsifier:
   description: "매출 성장률이 implied reinvestment capacity를 초과하는데도 optimistic growth로 통과시키면 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

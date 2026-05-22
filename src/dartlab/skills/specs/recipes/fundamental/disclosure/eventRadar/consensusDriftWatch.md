@@ -72,6 +72,10 @@ audiences:
   human: 시장 기대가 변했는지 원자료로만 확인한다.
 humanIntro: "consensusDriftWatch는 시장 기대의 움직임을 보는 보조 신호다. 원자료 날짜와 단위를 모르면 방향성을 말하지 않는다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

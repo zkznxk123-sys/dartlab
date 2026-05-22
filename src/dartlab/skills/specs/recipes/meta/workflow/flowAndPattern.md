@@ -24,6 +24,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.priceChart"
   - "engines.viz.tableBackedChart"
@@ -31,15 +33,6 @@ visualGuidance:
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 flow KR 전용
 forbidden:
   - 수급 한 방향 (외인 매수) 단일 신호로 매수 단정 금지 — 패턴 / 모멘텀 동반.
   - 단기 entry / exit 신호를 장기 투자 추천으로 오인 금지.
@@ -57,6 +50,21 @@ examples:
   - 수급 + 차트 패턴 결합
   - 외인 매수 + 모멘텀 결합
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

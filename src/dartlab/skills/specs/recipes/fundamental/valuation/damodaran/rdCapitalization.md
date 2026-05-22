@@ -30,11 +30,6 @@ expectedOutputs:
 
 expectedNovelty:
   - rdAdjustmentAudit
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
 forbidden:
   - L2 엔진 호출 금지.
   - R&D 라인이 없는데 0으로 확정하지 않는다.
@@ -44,7 +39,7 @@ examples:
   - AAPL R&D 자본화 감사
 gap:
   primary:
-    - Company
+    - company
     - synth
 testUniverse:
   market: KR+US
@@ -58,6 +53,21 @@ testUniverse:
 falsifier:
   description: "R&D 라인이 없는데 capitalization adjustment를 usable로 표시하면 실패로 본다."
 lastUpdated: "2026-05-14"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

@@ -59,15 +59,6 @@ expectedOutputs:
   - 인수가 적정성 + 영업권 손상 가능성 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 IS / BS / CF 동시 + 인수 공시 본문 동시 로드 부담
 forbidden:
   - LBO 부채 부담 단정 시 *Net Debt/EBITDA + 이자보상비율 + DSCR* 3 종 동시 평가 누락 금지.
   - 인수가 적정 단정 시 *EV/EBITDA + DCF + peer 비교* 3 평가 방식 누락 금지.
@@ -101,6 +92,21 @@ testUniverse:
 falsifier:
   description: "인수 공시 본문 (EV·EBITDA 산정 기초·SPC 구조) 또는 차입금 주석 (만기·금리·담보) 부재 시 LBO 적정성 판정 불가 — *DART 합병·인수 공시 + 차입금 주석 fetch 후 재호출* 한계 명시. PEF 펀드 만기·매각 시점도 외부 데이터 (펀드 운용 보고서) 필요."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

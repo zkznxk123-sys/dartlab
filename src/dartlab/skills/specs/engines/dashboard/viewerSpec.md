@@ -36,6 +36,8 @@ requiredEvidence:
   - target
   - period
   - topic
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 본문 폰트 14px / 줄간격 1.85 / 최대 너비 720px
   - 다크 배경 #050811 + 본문 rgba(241, 245, 249, 0.82)
@@ -82,6 +84,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-12'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

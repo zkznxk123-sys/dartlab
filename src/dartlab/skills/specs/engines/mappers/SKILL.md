@@ -34,6 +34,8 @@ requiredEvidence:
   - rawName
   - snakeId
   - source
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 정규화된 snake_id
   - 매핑 신뢰도 (정확/부분/실패)
@@ -74,6 +76,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-16'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

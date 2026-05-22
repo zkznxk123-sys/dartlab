@@ -44,6 +44,7 @@ requiredEvidence:
   - tableRef
   - evidenceBinding
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 차트 spec dict
   - 메시지 흐름 인라인 차트
@@ -106,6 +107,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-17'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 엔진 역할

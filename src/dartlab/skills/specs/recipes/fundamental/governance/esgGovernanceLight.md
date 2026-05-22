@@ -26,6 +26,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.evidenceCoverage"
   - "engines.viz.mermaidDiagram"
@@ -33,15 +35,6 @@ visualGuidance:
   - "근거 충족도는 engines.viz.evidenceCoverage로 검산/한계 섹션에만 배치하고 결론 차트처럼 해석하지 않는다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 docs/finance 일부 한정
 forbidden:
   - 정식 ESG 데이터 부재 시에도 신호로만 표기 — 정식 점수 단정 금지.
   - 지배구조 + 감사 + 종업원 + 자본배분 4 축 중 1~2 만 보고 ESG 단정 금지.
@@ -63,6 +56,21 @@ gap:
     - analysis
     - scan
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

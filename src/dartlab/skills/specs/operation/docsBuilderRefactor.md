@@ -23,6 +23,21 @@ outputs:
   - data/dart/docs/{code}.parquet (공개 SSOT)
   - data/dart/original/docs/{code}/{rcept_no}.zip (로컬 임시, HF 미공개)
   - sections layer 입력 (기존 schema 호환 + atocid/assocnote 신규)
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## §1 — 정공법 원칙

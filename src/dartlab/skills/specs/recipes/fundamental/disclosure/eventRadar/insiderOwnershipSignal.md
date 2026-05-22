@@ -74,6 +74,10 @@ audiences:
   human: 지분 변화가 이벤트 레이더의 보조 촉매인지 확인한다.
 humanIntro: "insiderOwnershipSignal은 거래 방향을 표시하지만 의도는 해석하지 않는다. 계획 매도와 데이터 지연은 반드시 반증 조건으로 남긴다."
 lastUpdated: "2026-05-17"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

@@ -41,6 +41,8 @@ requiredEvidence:
   - tableRef
   - valueRef
   - dateRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.cashflowWaterfall"
   - "engines.viz.financialStructureCharts"
@@ -52,15 +54,6 @@ visualGuidance:
   - "종합 보고서 첫 화면은 engines.viz.kpiRibbon으로 KPI 4~8개만 묶고 각 카드에 period·evidenceRef를 붙인다."
   - "메커니즘 diagram은 engines.viz.mermaidDiagram으로 8노드 이하만 만들고 모든 edge에 문장·수치·sourceRef 근거를 둔다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - 브라우저 안에서는 다년 시계열 일부 한정
 forbidden:
   - FCF 5 사용처 비중 명시 없이 자본배분 단정 금지.
   - ROIIC 한 분기 결과로 영구 capital efficiency 단정 금지 — 5 년 시계열 동반.
@@ -78,6 +71,17 @@ examples:
   - SGR + payoutRatio 결합
   - capital allocation 점수카드
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
 ---
 
 ## 학술 근거

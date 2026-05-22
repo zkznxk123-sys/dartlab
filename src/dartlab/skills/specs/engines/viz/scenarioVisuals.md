@@ -36,6 +36,8 @@ requiredEvidence:
   - assumption
   - metric
   - evidenceBinding
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - scenario visual spec
   - stress matrix
@@ -71,6 +73,10 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 절차

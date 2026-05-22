@@ -23,6 +23,8 @@ requiredEvidence:
   - skillRef
   - tableRef
   - artifactRef
+  - executionRef
+  - sourceRef
 visualRefs:
   - "engines.viz.priceChart"
   - "engines.viz.tableBackedChart"
@@ -30,15 +32,6 @@ visualGuidance:
   - "가격·수급 반응은 engines.viz.priceChart로만 그리며 OHLCV 기간·벤치마크·latestAsOf가 맞지 않으면 본문 차트로 쓰지 않는다."
   - "표 기반 순위·추세는 engines.viz.tableBackedChart만 사용하고 tableRef/evidenceBinding이 없으면 차트 대신 검산 표로 낮춘다."
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 안에서는 chart artifact 저장 제약
 forbidden:
   - chart 는 항상 table 뒷받침 — 단일값 chart 금지.
   - 차트 axis label / 단위 명시 없이 시각화 금지.
@@ -56,6 +49,21 @@ examples:
   - 산업별 색상 분류 chart
   - 시계열 + scan 결합 chart
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 공개 호출 방식

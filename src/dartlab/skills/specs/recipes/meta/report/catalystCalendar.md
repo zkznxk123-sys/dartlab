@@ -33,21 +33,11 @@ requiredEvidence:
   - executionRef
   - tableRef
   - dateRef
+  - sourceRef
 expectedOutputs:
   - 향후 N 일 일정 표
   - 종목별 next earnings 추론
   - 한국어 weekly preview
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  mcp:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - DART API 호출 — 인증 키 필요
 failureModes:
   - confidence LOW 인 추론을 high-confidence 답변처럼 인용
   - horizon_days 무시하고 너무 먼 cycle 까지 답변 (사용자 시야 흐림)
@@ -70,6 +60,24 @@ procedure:
 sourceRefs:
   - dartlab://skills/engines.gather
 lastUpdated: '2026-05-13'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.peerMatrix"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

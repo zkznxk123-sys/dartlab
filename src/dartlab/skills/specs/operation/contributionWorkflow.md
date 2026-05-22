@@ -40,6 +40,8 @@ requiredEvidence:
   - skillRef
   - testRef
   - gitDiffRef
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 변경 요약
   - 검증 명령과 결과
@@ -74,6 +76,10 @@ source:
   type: skill_os
   format: markdown
 lastUpdated: '2026-05-13'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 ## 원칙

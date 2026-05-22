@@ -25,6 +25,8 @@ toolRefs:
 requiredEvidence:
   - tableRef
   - dateRef
+  - executionRef
+  - sourceRef
 expectedNovelty:
   - priceFlowCorrelation
   - flowSign
@@ -46,15 +48,6 @@ falsifier:
     insufficient = sum(1 for r in result["table"] if r.get("sampleN", 0) < 10)
     assert len(signs) >= 2, "divergence 가 모든 target 동일 — 변별력 0"
     assert insufficient < len(result["table"]) / 2, "sampleN < 10 종목이 과반"
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - Naver flow API 직접 호출 (CORS)
 failureModes:
   - flow 데이터 결측 종목 → sampleN < 10 → 상관계수 신뢰도 저하
   - 거래일 휴장 다수 포함 윈도우 → 20 거래일 미만으로 단축
@@ -68,6 +61,19 @@ examples:
   - "SK 하이닉스 다이버전스 점검"
   - "모멘텀 신호 수급 confirmation"
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

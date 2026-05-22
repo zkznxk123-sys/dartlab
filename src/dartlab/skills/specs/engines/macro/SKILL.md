@@ -40,6 +40,7 @@ requiredEvidence:
   - dateRef
   - valueRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - 선택한 macro axis
   - 공개 호출
@@ -88,6 +89,14 @@ source:
   type: manual_skill
   format: markdown
 lastUpdated: '2026-05-07'
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+visualRefs:
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
+  - "engines.viz.mermaidDiagram"
 ---
 
 ## 엔진 역할

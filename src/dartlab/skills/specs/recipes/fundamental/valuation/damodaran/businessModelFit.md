@@ -25,6 +25,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - generic FCFF ?? ??? ?? ??
   - ???????distress???? fallback route
@@ -34,13 +35,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 금융업을 일반 제조업 FCFF DCF로 통과시키지 않는다.
   - 단일 적자 연도만 보고 구조적 부실로 단정하지 않는다.
@@ -69,6 +63,21 @@ testUniverse:
 falsifier:
   description: "금융업 또는 보험업을 genericFcffEligible=true로 통과시키면 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

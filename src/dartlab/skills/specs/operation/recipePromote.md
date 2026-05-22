@@ -35,6 +35,8 @@ requiredEvidence:
   - scorecard (6 신호 boolean + 점수)
   - marketResultRef (후속 시장 반응 결과 — verified 이상 필수)
   - reviewerNote (curated 승급 시 사람 검토 코멘트)
+  - executionRef
+  - sourceRef
 failureModes:
   - status frontmatter 수동 편집 (CLI 우회) — git diff 에서 발견 시 reject
   - scorecard 미달인데 verified 승급 시도 (CLI 가 차단)
@@ -65,6 +67,10 @@ runtimeCompatibility:
     notes: CLI 호출 필요 — 브라우저 환경 X
 status: observed
 lastUpdated: "2026-05-12"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 # Recipe 6-stage lifecycle — 검토 없는 승격 차단

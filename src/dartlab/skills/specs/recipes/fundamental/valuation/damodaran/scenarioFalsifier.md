@@ -26,6 +26,7 @@ requiredEvidence:
   - valueRef
   - dateRef
   - executionRef
+  - sourceRef
 expectedOutputs:
   - bear/base/bull scenario table
   - reverse DCF ?? ???? plausibility
@@ -35,13 +36,6 @@ expectedNovelty:
   - damodaranL15Memo
   - reverseDcfFalsifier
   - l15GapLedger
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
 forbidden:
   - 단일 base case만으로 결론을 내지 않는다.
   - 가격 내재 가정을 계산하지 않고 저평가/고평가를 단정하지 않는다.
@@ -70,6 +64,21 @@ testUniverse:
 falsifier:
   description: "현재 가격이 요구하는 성장·마진·ROC를 계산하지 않으면 scenario falsifier 실패로 본다."
 lastUpdated: "2026-05-13"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.financialStructureCharts"
+  - "engines.viz.scenarioVisuals"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

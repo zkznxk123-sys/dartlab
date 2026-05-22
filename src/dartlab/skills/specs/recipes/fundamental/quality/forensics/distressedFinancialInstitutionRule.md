@@ -61,15 +61,6 @@ expectedOutputs:
   - 헐값매각 가능성 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 BS / IS / 주석 동시 + 인수·매각 공시 동시 로드 부담
 forbidden:
   - BIS 8% 미달 = 부실 단정 시 *시점 일시 변동 (분기말 자본조달 직후)* 반례 검토 누락 금지.
   - NPL 급증 = 부실 단정 시 *산업 평균 NPL 동행* (시장 전반 vs 회사 단독) 비교 누락 금지.
@@ -104,6 +95,21 @@ testUniverse:
 falsifier:
   description: "금융기관 감독 지표 (BIS·NPL·LCR·RBC·K-ICS) 본문 또는 자본확충 공시 부재 시 진단 불가 — *Company.show 주석 + DART 자본확충·인수·매각 공시 fetch 후 재호출* 한계 명시. 보험사 K-ICS·증권사 NCR·은행 BIS 등 *업권별 감독 지표* 별도 적용 — 단일 지표만으로 단정 금지."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식

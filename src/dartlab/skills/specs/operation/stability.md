@@ -31,6 +31,8 @@ requiredEvidence:
   - tier 분류 결정 근거
   - 영향받는 호출처 목록
   - CHANGELOG 항목
+  - executionRef
+  - sourceRef
 expectedOutputs:
   - 변경 tier 와 적용 정책
   - deprecation 메시지 또는 즉시 제거 결정
@@ -69,6 +71,10 @@ source:
   type: curated_markdown
   owner: dartlab
 lastUpdated: "2026-05-06"
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
 ---
 
 dartlab 은 현재 **DART core 가 stable**. 본 문서는 변경 시 적용할 tier 와 호환성 정책이다.

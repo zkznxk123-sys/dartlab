@@ -60,15 +60,6 @@ expectedOutputs:
   - 잠재 손실 위험 점수
   - 엔진 승격 후보 메모
 
-runtimeCompatibility:
-  server:
-    status: supported
-  localPython:
-    status: supported
-  pyodide:
-    status: limited
-    limitations:
-      - browser 메모리 한정으로 다년 BS 파생 + 공시 본문 동시 로드 부담
 forbidden:
   - TRS 거래 적정 단정 시 자산 제거 가능성 (IFRS 9) 평가 누락 금지.
   - 의결권 분리 거래에서 실질 통제권 보유자 명시 누락 금지.
@@ -101,6 +92,21 @@ testUniverse:
 falsifier:
   description: "BS 파생자산·부채 + 충당부채 약정 + 파생 공시 중 2+ 부재면 진단 불가 — '파생 본문 + 거래 계약서 확인 후 재호출'. 거래 상대방 정보 부재 시 잠재 손익 정량 한계 명시."
 lastUpdated: '2026-05-21'
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+visualRefs:
+  - "engines.viz.evidenceCoverage"
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.tableBackedChart"
 ---
 
 ## 공개 호출 방식
