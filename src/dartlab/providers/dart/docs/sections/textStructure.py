@@ -113,6 +113,9 @@ def _cleanLine(line: str) -> str:
     # HTML entity \ub514\ucf54\ub4dc \u2014 DART \uc6d0\ubb38\uc5d0 `&cr`, `&cr;&cr` \uac19\uc740 raw entity \uac00 \ub0a8\uc544
     # textPath / segmentKey \uc624\uc5fc\uc2dc\ud0a4\ub294 \ud68c\uadc0 \ucc28\ub2e8. html.unescape \ub294 \ud45c\uc900 entity
     # \ub514\ucf54\ub4dc, raw `&cr` (named entity \uc544\ub2d8) \uc740 \ubcc4\ub3c4 strip.
+    # \ud56b \ud328\uc2a4 short-circuit: `&` / `\u00a0` / `\t` \uc5b4\ub290 \uac83\ub3c4 \uc5c6\uc73c\uba74 rstrip \ub9cc.
+    if "&" not in line and "\u00a0" not in line and "\t" not in line:
+        return line.rstrip()
     decoded = html.unescape(line)
     decoded = _HTML_ENTITY_RE.sub("", decoded)
     return decoded.replace("\u00a0", " ").replace("\t", " ").rstrip()
