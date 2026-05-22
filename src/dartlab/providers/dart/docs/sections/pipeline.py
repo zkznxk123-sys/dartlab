@@ -530,12 +530,13 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         # 거대 list 의 경우 ref 가 다음 iteration 시작 전 살아있을 수 있다.
         projected = None  # noqa: F841 — 명시적 ref drop
         # 전체 빌드만 주기적 GC — 부분 빌드는 데이터가 적어 불필요.
-        # Phase C-1 빈도 강화: 10 period → 5 period 마다 (Python dict 누적 회수 가속).
+        # generation 0 만 회수 (full GC 대비 ~5× 빠름). 짧은 lifetime dict 가 대부분
+        # gen 0 이라 효과 동일. 5 baseline profile (035720) full GC 8 회 × ~60ms = 480ms
+        # → gen 0 GC ~80ms 로 축소.
         if topics is None and _pIdx % 5 == 4:
-            gc.collect()
+            gc.collect(0)
 
-    # periodRowsDf 는 cache 보유 — 명시적 del 안 함. 매 period filter 의 짧은 lifetime
-    # dict 들은 next iter 시 reclaim. gc 강제 호출로 Python heap 회수 가속.
+    # 함수 종료 시점 1 회 full GC — 누적된 gen 1+/2 회수.
     gc.collect()
 
     if not validPeriods or not topicMap:
