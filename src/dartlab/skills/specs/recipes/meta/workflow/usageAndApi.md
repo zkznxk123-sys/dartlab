@@ -17,6 +17,8 @@ whenToUse:
   - capability 설명
 linkedSkills:
   - start.dartlabSkillOs
+  - engines.company
+  - engines.scan
 toolRefs:
   - ReadSkill
   - ReadCapability

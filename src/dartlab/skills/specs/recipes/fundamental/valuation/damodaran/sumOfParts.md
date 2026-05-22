@@ -13,6 +13,7 @@ whenToUse:
 linkedSkills:
   - recipes.fundamental.valuation.damodaran.narrativeMap
   - recipes.fundamental.valuation.damodaran.normalizedFinancials
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

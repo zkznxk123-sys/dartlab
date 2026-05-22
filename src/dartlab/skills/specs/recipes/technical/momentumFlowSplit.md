@@ -18,6 +18,7 @@ outputs:
 linkedSkills:
   - engines.gather
   - recipes.technical.momentumFlowDivergence
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

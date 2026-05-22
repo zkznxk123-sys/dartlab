@@ -43,6 +43,7 @@ visualGuidance:
 linkedSkills:
   - recipes.fundamental.disclosure.eventRadar.falsifierLedger
   - recipes.fundamental.disclosure.eventRadar.deepDive
+  - engines.company
 gap:
   primary:
     - gather

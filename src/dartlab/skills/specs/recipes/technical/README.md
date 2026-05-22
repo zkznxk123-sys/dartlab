@@ -19,6 +19,10 @@ runtimeCompatibility:
     status: limited
   pyodide:
     status: limited
+linkedSkills:
+  - engines.company
+  - engines.gather
+  - engines.quant
 ---
 
 # Technical 페르소나

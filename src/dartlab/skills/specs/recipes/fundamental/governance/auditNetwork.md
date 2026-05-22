@@ -12,6 +12,8 @@ whenToUse:
   - 계열사 + 감사 + 거버넌스
 linkedSkills:
   - engines.scan
+  - engines.company
+  - engines.analysis
 toolRefs:
   - EngineCall
   - RunPython

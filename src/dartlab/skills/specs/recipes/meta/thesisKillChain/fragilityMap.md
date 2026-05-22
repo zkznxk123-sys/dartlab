@@ -47,6 +47,7 @@ visualGuidance:
 linkedSkills:
   - recipes.meta.thesisKillChain.assumptionLedger
   - recipes.meta.thesisKillChain.triggerCatalog
+  - engines.company
 gap:
   primary:
     - synth

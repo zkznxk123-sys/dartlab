@@ -42,6 +42,8 @@ expectedOutputs:
   - 다음 확인 데이터
 linkedSkills:
   - recipes.fundamental.quality.forensics.engineCandidateMemo
+  - engines.company
+  - engines.analysis
 gap:
   primary:
     - synth

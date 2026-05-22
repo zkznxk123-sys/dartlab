@@ -13,6 +13,7 @@ whenToUse:
 linkedSkills:
   - recipes.fundamental.valuation.damodaran.businessModelFit
   - recipes.fundamental.valuation.damodaran.costOfCapital
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

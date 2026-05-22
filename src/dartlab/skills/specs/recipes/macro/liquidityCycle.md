@@ -16,6 +16,8 @@ whenToUse:
   - 거시 환경
 linkedSkills:
   - engines.macro
+  - engines.company
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython

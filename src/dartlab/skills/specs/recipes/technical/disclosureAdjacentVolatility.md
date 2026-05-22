@@ -18,6 +18,7 @@ outputs:
 linkedSkills:
   - engines.gather
   - engines.company
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

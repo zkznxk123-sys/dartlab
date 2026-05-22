@@ -16,6 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.macro
   - engines.credit
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

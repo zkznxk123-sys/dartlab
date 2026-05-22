@@ -13,6 +13,7 @@ whenToUse:
 linkedSkills:
   - recipes.fundamental.valuation.damodaran.relativeCheck
   - recipes.fundamental.valuation.damodaran.storyToDrivers
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

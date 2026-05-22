@@ -14,6 +14,8 @@ whenToUse:
   - historical positioning
 linkedSkills:
   - engines.macro
+  - engines.company
+  - engines.scan
 toolRefs:
   - EngineCall
   - RunPython

@@ -22,6 +22,7 @@ capabilityRefs:
 linkedSkills:
   - engines.gather
   - recipes.sentiment.flowImbalance
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

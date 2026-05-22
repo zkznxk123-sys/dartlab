@@ -28,6 +28,7 @@ knowledgeRefs:
   - engines.analysis
 linkedSkills:
   - engines.analysis
+  - engines.company
 recipeSteps:
   - skillId: engines.analysis
     note: 번 돈을 어디에 쓰는가 — 배당 / 자사주 / 재투자 비중 확인.

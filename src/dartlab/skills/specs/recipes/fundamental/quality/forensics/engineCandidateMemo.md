@@ -45,6 +45,7 @@ expectedOutputs:
 linkedSkills:
   - operation.skillDevelopmentLoop
   - recipes.fundamental.quality.forensics.deepDive
+  - engines.company
 gap:
   primary:
     - synth

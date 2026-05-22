@@ -49,6 +49,7 @@ visualGuidance:
 linkedSkills:
   - recipes.meta.thesisKillChain.scenarioStoryboard
   - recipes.meta.thesisKillChain.deepDive
+  - engines.company
 gap:
   primary:
     - viz

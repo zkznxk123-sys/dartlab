@@ -47,6 +47,7 @@ visualGuidance:
 linkedSkills:
   - recipes.fundamental.disclosure.eventRadar.index
   - recipes.fundamental.disclosure.eventRadar.deepDive
+  - engines.company
 gap:
   primary:
     - synth

@@ -20,6 +20,10 @@ runtimeCompatibility:
     status: supported
   pyodide:
     status: supported
+linkedSkills:
+  - engines.company
+  - engines.gather
+  - runtime.untrustedContent
 ---
 
 # News 페르소나 — evidence-bound 진입

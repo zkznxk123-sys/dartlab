@@ -41,6 +41,7 @@ expectedOutputs:
 linkedSkills:
   - recipes.fundamental.quality.forensics.revenueToCashBridge
   - recipes.fundamental.quality.forensics.workingCapitalPressureMap
+  - engines.company
 gap:
   primary:
     - reference

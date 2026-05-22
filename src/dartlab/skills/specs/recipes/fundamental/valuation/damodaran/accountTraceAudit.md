@@ -15,6 +15,7 @@ whenToUse:
 linkedSkills:
   - recipes.fundamental.valuation.damodaran.dataAudit
   - recipes.fundamental.valuation.damodaran.normalizedFinancials
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

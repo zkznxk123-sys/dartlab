@@ -45,6 +45,7 @@ visualGuidance:
 linkedSkills:
   - recipes.meta.thesisKillChain.propagationPath
   - recipes.meta.thesisKillChain.scenarioStoryboard
+  - engines.company
 gap:
   primary:
     - synth

@@ -46,6 +46,7 @@ visualGuidance:
 linkedSkills:
   - recipes.meta.thesisKillChain.fragilityMap
   - recipes.meta.thesisKillChain.propagationPath
+  - engines.company
 gap:
   primary:
     - synth

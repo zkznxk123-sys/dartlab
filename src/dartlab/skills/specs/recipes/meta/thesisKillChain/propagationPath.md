@@ -45,6 +45,7 @@ visualGuidance:
 linkedSkills:
   - recipes.meta.thesisKillChain.triggerCatalog
   - recipes.meta.thesisKillChain.tripwireMonitor
+  - engines.company
 gap:
   primary:
     - synth

@@ -30,6 +30,8 @@ knowledgeRefs:
   - engines.analysis
 linkedSkills:
   - engines.analysis
+  - engines.company
+  - engines.scan
 recipeSteps:
   - skillId: engines.analysis
     note: 이사회 독립성, 지배력 집중, 특수관계자 지표.

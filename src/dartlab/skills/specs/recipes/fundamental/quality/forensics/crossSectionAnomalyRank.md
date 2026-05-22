@@ -41,6 +41,7 @@ expectedOutputs:
 linkedSkills:
   - recipes.fundamental.quality.forensics.deepDive
   - recipes.fundamental.quality.forensics.engineCandidateMemo
+  - engines.company
 gap:
   primary:
     - scan

@@ -16,6 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.scan
   - engines.analysis
+  - engines.company
 toolRefs:
   - EngineCall
   - RunPython

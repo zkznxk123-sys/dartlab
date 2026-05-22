@@ -48,6 +48,7 @@ visualGuidance:
 linkedSkills:
   - recipes.fundamental.disclosure.eventRadar.eventInbox
   - recipes.fundamental.disclosure.eventRadar.falsifierLedger
+  - engines.company
 gap:
   primary:
     - gather

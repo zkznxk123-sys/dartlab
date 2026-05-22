@@ -48,6 +48,7 @@ visualGuidance:
 linkedSkills:
   - recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit
   - recipes.fundamental.disclosure.eventRadar.deepDive
+  - engines.company
 gap:
   primary:
     - viz

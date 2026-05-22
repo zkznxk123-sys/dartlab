@@ -41,6 +41,7 @@ expectedOutputs:
 linkedSkills:
   - recipes.fundamental.quality.forensics.accountTraceLedger
   - recipes.fundamental.quality.forensics.revenueToCashBridge
+  - engines.company
 gap:
   primary:
     - synth

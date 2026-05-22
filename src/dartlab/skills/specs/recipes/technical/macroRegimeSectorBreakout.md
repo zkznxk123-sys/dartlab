@@ -17,6 +17,8 @@ outputs:
   - dateRef (마지막 거래일)
 linkedSkills:
   - engines.gather
+  - engines.company
+  - engines.quant
 toolRefs:
   - EngineCall
   - RunPython

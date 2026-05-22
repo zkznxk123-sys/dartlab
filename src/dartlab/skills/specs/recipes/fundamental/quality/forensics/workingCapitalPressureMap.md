@@ -42,6 +42,7 @@ expectedOutputs:
 linkedSkills:
   - recipes.fundamental.quality.forensics.falsifierLedger
   - recipes.fundamental.quality.forensics.engineCandidateMemo
+  - engines.company
 gap:
   primary:
     - synth

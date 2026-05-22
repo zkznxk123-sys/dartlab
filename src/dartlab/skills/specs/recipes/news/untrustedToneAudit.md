@@ -44,6 +44,8 @@ visualGuidance:
   - "untrustedToneAudit row 가 있을 때만 engines.viz.evidenceCoverage 로 wrapped/missing 분포를 보조 표시한다."
 linkedSkills:
   - recipes.news.disclosureNewsCrosscheck
+  - engines.company
+  - engines.gather
 gap:
   primary:
     - gather

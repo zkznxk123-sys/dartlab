@@ -64,6 +64,7 @@ visualGuidance:
 linkedSkills:
   - recipes.meta.thesisKillChain.visualDecisionPack
   - recipes.meta.thesisKillChain.deepDive
+  - engines.company
 gap:
   primary:
     - synth

@@ -16,6 +16,7 @@ whenToUse:
 linkedSkills:
   - engines.scan
   - engines.viz.tableBackedChart
+  - engines.industry
 toolRefs:
   - EngineCall
   - RunPython
