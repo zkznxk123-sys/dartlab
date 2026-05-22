@@ -58,9 +58,18 @@ def _normalizeRowspanShift(tableMd: str) -> str:
             continue
         cells = [c.strip() for c in s.strip("|").split("|")]
         cellsByIdx[i] = cells
-        # separator (---:- only) 검사
-        isSep = any(cells) and all(not c or set(c) <= {"-", ":"} for c in cells)
-        isSepByIdx[i] = isSep
+        # separator (---:- only) 검사 — set 할당 없이 .strip("-:") 빈 char check
+        hasContent = False
+        isSep = True
+        for c in cells:
+            if not c:
+                continue
+            hasContent = True
+            # `---` 또는 `:-:` 류만 separator. 그 외 char 있으면 아님.
+            if c.strip("-:") != "":
+                isSep = False
+                break
+        isSepByIdx[i] = isSep and hasContent
 
     # 첫 valid header (non-separator, ≥3 cols, all non-empty)
     headerCols: int | None = None
