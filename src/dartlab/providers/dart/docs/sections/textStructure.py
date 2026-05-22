@@ -517,12 +517,24 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
         # case. label 안에 circle marker 들어있으면 heading 아님.
         elif any(c in label for c in "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⓪"):
             pass
+        # B-5 가드: body sentence fragment. paren_num label 안에 본문 문장
+        # 시그니처 (`X : Y` 콜론 + 다중 콤마 + 임베디드 paren close) 가 있으면
+        # heading 아닌 본문. 100 sample audit (2026-05-22) 발견 패턴:
+        #   "(2) 판매조건 : 수출 - L/C BASE        " → 본문 row
+        #   "(3) 생산설비의 현황 등주) 종속회사인 JW Theriac,C신약연구소" → 본문 row
+        elif " : " in label or " 등주)" in label or label.count(",") >= 2:
+            pass
+        # B-5 가드: `_RE_PAREN_KOR` 의 `(가)내지` 패턴 처럼 본 매처에서도 inner
+        # connector `내지` (= "or") 직후 단어 시작 시 본문 fragment.
+        elif "내지" in label[:8]:
+            pass
         else:
             return _gateHeadingLabel(4, label)
 
     m = _RE_PAREN_KOR.match(stripped)
     if m:
         inner = m.group(1).strip()
+        rest = m.group(2).strip()
         # (주)/(사)/(유)/(재)/(합)/(조)/(학)/(의) — 한국 법인격 약자. heading prefix 가 아니라
         # 본문 명사 (회사명 약자) 일 확률 압도적. 회귀 사례 (현대모비스 005380 companyOverview
         # blockOrder 20~26): "(주)에서 푸본현대생명보험(주)로 사명이 변경됨" 본문 문장이
@@ -530,12 +542,28 @@ def _detectHeading(line: str) -> tuple[int, str, bool] | None:
         # 같은 fragment heading 행 생성 → 후속 wide-format row 의 textPath pollution.
         if inner in _PAREN_CORPORATE_ABBREV:
             pass
+        # B-5 가드: temporal/period marker — `(당) 기초`, `(전) 기말` 등은
+        # 재무제표 표 안의 *기간 컬럼* heading 위장. sections heading 아님.
+        # 100 sample audit (2026-05-22) `(당) 기초` 2회 발견.
+        elif inner in {"당", "전", "전전", "당기", "전기", "전전기", "당분기", "전분기"}:
+            pass
+        # B-5 가드: connector `내지` (= "or", 법조문/계약서 연결사) 시작.
+        #   "(가)내지", "(나)내지(다)" 등 — 본문 인용 fragment.
+        elif rest.startswith("내지"):
+            pass
         else:
-            return _gateHeadingLabel(5, m.group(2).strip())
+            return _gateHeadingLabel(5, rest)
 
     m = _RE_CIRCLED.match(stripped)
     if m:
-        return _gateHeadingLabel(5, m.group(2).strip())
+        label = m.group(2).strip()
+        # B-5 가드: 본문 list item — 한 라인에 다중 circle marker (① X ② Y) 가
+        # 있으면 sub-section 분리가 아니라 본문 sentence (heading 아님).
+        # 100 sample audit (2026-05-22):
+        #   "① R실 산하 육가공개발1팀, 육가공개발2팀   ② 마케팅실 산하 신선마"
+        if any(c in label for c in "②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳"):
+            return None
+        return _gateHeadingLabel(5, label)
 
     m = _RE_SHORT_PAREN.match(stripped)
     if m:
