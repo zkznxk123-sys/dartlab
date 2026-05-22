@@ -1,0 +1,133 @@
+---
+id: recipes.fundamental.governance.chaebolEntityNetwork
+title: 재벌 계열사 망 (지분율·이사 동시재직)
+category: recipes
+kind: recipe
+scope: builtin
+status: drafted
+purpose: 한국 재벌 그룹 안 회사들의 지분율 cross-holding + 임원/이사 동시재직 (interlocking directorate) network 매핑. 지주사·순환출자·차등의결권의 정량 진입점. governance ↔ scan 결합.
+whenToUse:
+  - 재벌 계열사 망
+  - chaebol network
+  - 지분율 cross-holding
+  - 임원 동시재직
+linkedSkills:
+  - engines.company
+  - engines.scan
+  - engines.analysis
+toolRefs:
+  - EngineCall
+  - RunPython
+requiredEvidence:
+  - skillRef
+  - tableRef
+  - valueRef
+  - dateRef
+  - executionRef
+  - sourceRef
+visualRefs:
+  - "engines.viz.mermaidDiagram"
+  - "engines.viz.peerMatrix"
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+gap:
+  primary:
+    - analysis
+    - scan
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+    - "005380"
+falsifier:
+  description: "그룹 식별 reference 누락 시 결론 X. 단일 회사만 보고 *재벌 network* 결론 금지 — 그룹 전체 universe 필수."
+lastUpdated: "2026-05-22"
+---
+
+## 공개 호출 방식
+
+```python
+import dartlab
+import polars as pl
+
+target = "005930"
+c = dartlab.Company(target)
+
+# 그룹 식별 (reference)
+try:
+    group_info = c.show("groupAffiliation").to_dicts()
+    group_name = group_info[0].get("groupName") if group_info else None
+except Exception:
+    group_name = None
+
+try:
+    affiliates = c.scan("groupAffiliates", groupName=group_name).to_dicts() if group_name else []
+except Exception:
+    affiliates = []
+
+# 각 affiliate 와 cross-holding 비율
+network = []
+for a in affiliates[:15]:
+    code = a.get("code") or a.get("stockCode")
+    if not code:
+        continue
+    holding = float(a.get("ownershipPct") or 0)  # target → affiliate
+    reverse = float(a.get("reverseOwnershipPct") or 0)  # affiliate → target
+    shared_directors = int(a.get("sharedDirectorCount") or 0)
+    network.append({
+        "affiliate": code,
+        "name": a.get("name"),
+        "outwardPct": holding,
+        "inwardPct": reverse,
+        "crossHolding": holding > 0 and reverse > 0,
+        "sharedDirectors": shared_directors,
+    })
+
+table = pl.DataFrame(network) if network else pl.DataFrame(
+    schema={"affiliate": pl.Utf8, "name": pl.Utf8, "outwardPct": pl.Float64,
+            "inwardPct": pl.Float64, "crossHolding": pl.Boolean, "sharedDirectors": pl.Int64}
+)
+
+cross_n = int(table["crossHolding"].sum()) if table.height else 0
+emit_result(
+    table=table,
+    values={"groupName": group_name, "affiliates": table.height, "crossHoldings": cross_n},
+    date=None,
+    sources=["dartlab://show/groupAffiliation", "dartlab://scan/groupAffiliates"],
+)
+```
+
+## 호출 동작
+
+그룹 식별 후 같은 그룹 계열사 universe 수집. 각 affiliate 와 (1) target → affiliate 지분율 (2) 역방향 지분율 (3) 공유 이사 수 산출. 양방향 지분 > 0 = `crossHolding`.
+
+## 대표 반환 형태
+
+| column | 의미 |
+|---|---|
+| `affiliate` | 계열사 코드 |
+| `outwardPct` | 본 회사 → 계열사 지분율 |
+| `inwardPct` | 계열사 → 본 회사 지분율 |
+| `crossHolding` | 양방향 지분 동시 보유 |
+| `sharedDirectors` | 공유 이사 수 |
+
+## 연계 절차
+
+1. recipes.fundamental.quality.forensics.ownershipDisparityMap - 지배지분 vs 의결지분 괴리.
+2. recipes.fundamental.quality.forensics.controllingPowerJudgment - 실질지배력 판정.
+3. recipes.fundamental.governance.audit - 거버넌스 종합.
+
+## 기본 검증
+
+- 그룹 식별 reference 누락 회사 (비재벌·소규모) 는 본 recipe 비적용.
+- 공정거래위원회 발표 그룹과 IFRS 연결범위 불일치 가능 — 분리 표기.
+- 순환출자 자체가 위법 X (2014 개정 이후 신규만 금지) — *의심 후보* 표기.
