@@ -398,7 +398,12 @@ def _validateExecutionSkillContract(spec: SkillSpec) -> None:
     if spec.category != "engines":
         return
     body = str(spec.source.get("body") or "")
-    required = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태")
+    required = (
+        "## 공개 호출 방식",
+        "## 호출 동작",
+        "## 대표 반환 형태",
+        "## 기본 검증",
+    )
     missing = [heading for heading in required if heading not in body]
     if missing:
         raise ValueError(f"engine skill {spec.id} missing execution sections: {', '.join(missing)}")
@@ -420,7 +425,12 @@ def validateExecutionSkillSubstance(spec: SkillSpec) -> list[str]:
     if spec.category != "engines":
         return []
     body = str(spec.source.get("body") or "")
-    required = ("## 공개 호출 방식", "## 호출 동작", "## 대표 반환 형태")
+    required = (
+        "## 공개 호출 방식",
+        "## 호출 동작",
+        "## 대표 반환 형태",
+        "## 기본 검증",
+    )
     issues: list[str] = []
     sections = _splitSections(body, required)
     for heading, sectionBody in sections.items():

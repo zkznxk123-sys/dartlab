@@ -201,3 +201,11 @@ BLOCKS = {
 - ❌ `kpiTile` 의 layout 명시 (XS 고정, variance 없음).
 - ❌ packSkyline 결과의 빈 cell — packing 알고리즘 보장 안 되면 입력 카드
   조합이 잘못된 것 (catalog 의 layout 명시가 grid 맞춤 깨는지 검토).
+
+## 기본 검증
+
+catalog 변경 시 동기화 경로:
+
+- `src/dartlab/viz/lintDashboardLayout.py` 가 catalog 전수 검증 (variance 한도 · grid 위반 · packing 결손) — PR `lint` 게이트.
+- 새 카드 종류 추가 = catalog entry + `KIND_DEFAULT_TIER` + 본 sub-spec 의 variance 표 3 곳 동시 갱신. 누락 시 lint 거부.
+- 누락/결손 표시: `lintDashboardLayout.py` 가 `exit 2` + 위반 카드 id list 출력. 빈 cell 은 silent drop 금지.

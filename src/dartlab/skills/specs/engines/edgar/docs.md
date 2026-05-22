@@ -217,6 +217,14 @@ form_type::topicId          │ 2024-Q4 │ 2024-Q3 │ 2024-Q2 │ 2024-Q1 │ 
 - registry, AI, export, server 노출
 - `business`, `mdna`, `riskFactors` 같은 개별 공개 모듈
 
+## 기본 검증
+
+EDGAR docs 변경 시 동기화 경로:
+
+- 위 "table markdown regression 없음" · "40-F annual fallback 허용" · "progress 기준 failure taxonomy" 가 회귀 가드.
+- `dartlab.providers.edgar.docs` 공개 메서드·반환 컬럼·실패 taxonomy 가 바뀌면 본 sub-spec + base `engines.edgar` 동시 갱신.
+- 결손 표시: 본문 fetch 실패 시 빈 string X → `flags.docs_fetch_status` 에 실패 사유 명시. failure taxonomy 누락 시 운영 해석 불가능.
+
 ## 변경 이력
 
 - 2026-05-12 — `providers/edgar/docs/SPEC.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격)

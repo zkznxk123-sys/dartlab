@@ -232,6 +232,14 @@ type SectionView = {
 - [ ] 타임라인이 section 상단에서 절대 라벨로 보인다
 - [ ] 720px 최대 너비
 
+## 기본 검증
+
+viewer spec 변경 시 동기화 경로:
+
+- 위 체크리스트가 viewer 회귀 가드 (타임라인 토글 · sticky 첫 컬럼 · 최신기간 좌측 · 720px 최대 너비).
+- viewer 라우트 (`landing/src/routes/company/[code]/docs/...`) 변경 시 본 sub-spec 체크리스트도 동시 갱신. 누락 시 사용자 시점 회귀.
+- 결손 표시: viewer 가 비정상 상태일 때 빈 화면 X → "타임라인 로드 실패" 명시 + console 에 reason 출력.
+
 ## 변경 이력
 
 - 2026-05-12 — `providers/dart/docs/dev/viewerSpec.md` → 본 sub-spec 통합 (Skill OS 운영 SSOT 승격)

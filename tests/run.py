@@ -130,7 +130,8 @@ GATES: dict[str, Gate] = {
             "python -X utf8 tests/audit/lint_camelcase_ast.py --changed --strict && "
             "(python -X utf8 tests/audit/cycleScan.py || true) && "
             "(lint-imports || true) && "
-            "python -X utf8 tests/audit/namingConsistency.py"
+            "python -X utf8 tests/audit/namingConsistency.py && "
+            "python -X utf8 tests/audit/checkEngineSpecSchema.py"
         ),
     ),
     "architecture-l0-l15": Gate(
