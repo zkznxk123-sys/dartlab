@@ -249,9 +249,12 @@ layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merg
   - **Round 5 sequential exhausted: saved=28,091 / failed=26,110** (28× 더 진행, IP 차단 X)
   - 잔여: 5 키 일일 한도 020 도달 → midnight KST reset 후 진행
 - R2: rebuildAllFromZips offline — **1,846 corps / 2,735,701 rows / errors=0**
-- R3: 5 baseline sectionsParity=0 / sectionsRawCompare spurious=0. 100 random sample
-  sectionsRawCompare spurious=0 corps **70.4%** (제품 기준 ≥90% 미달). worst spurious
-  패턴 = paren_num body fragment / paren_kor temporal·내지 / circled multi-marker.
+- R3: 5 baseline sectionsParity=0 / sectionsRawCompare spurious=0.
+  - 100 random sample v6 (R2 round 1 직후): spurious=0 corps **70.4%** / spurious total 68
+  - 100 random sample v9 (R2 finalized + B-5 P-merge + 4 가드 + 15 perf opts):
+    spurious=0 corps **75.5%** / spurious total **46** (**-32%**)
+  - 제품 기준 ≥90% 여전히 미달. 잔여 worst (003480 sp=7, 033920 sp=5, 015230 sp=3)
+    는 corps 별 특수 패턴 — 일반 가드로 잡기 어렵. 향후 corp 별 deep audit 필요.
 
 ## §13 — DART per-IP 발견 → sequential exhausted 정공법 (2026-05-22)
 
