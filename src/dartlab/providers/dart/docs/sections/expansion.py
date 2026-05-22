@@ -22,6 +22,44 @@ from dartlab.providers.dart.docs.sections.textStructure import parseTextStructur
 _NOTES_TOPICS = frozenset({"financialNotes", "consolidatedNotes"})
 
 
+def _headingPathStrings(
+    headings: list[dict[str, object]],
+) -> tuple[list[str], list[str], list[str], str | None, str | None, str | None, str | None, str | None]:
+    """heading stack → (labels, keys, semanticKeys, textPath, textPathKey,
+    textParentPathKey, textSemanticPathKey, textSemanticParentPathKey).
+
+    이전: 3 회 list comprehension + 5 회 ' > '.join. 본 helper 가 1 패스 + 5 join 으로
+    축소. 200k rows × 5 stack items 핫 패스에서 단일 list iterate 로 메모리 +
+    CPU 절약.
+    """
+    pathLabels: list[str] = []
+    pathKeys: list[str] = []
+    semanticPathKeys: list[str] = []
+    for item in headings:
+        pathLabels.append(str(item["label"]))
+        k = str(item["key"])
+        if k:
+            pathKeys.append(k)
+        sk = str(item.get("semanticKey") or "")
+        if sk:
+            semanticPathKeys.append(sk)
+    textPath = " > ".join(pathLabels) if pathLabels else None
+    textPathKey = " > ".join(pathKeys) if pathKeys else None
+    textParentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
+    textSemanticPathKey = " > ".join(semanticPathKeys) if semanticPathKeys else None
+    textSemanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
+    return (
+        pathLabels,
+        pathKeys,
+        semanticPathKeys,
+        textPath,
+        textPathKey,
+        textParentPathKey,
+        textSemanticPathKey,
+        textSemanticParentPathKey,
+    )
+
+
 def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, object]]:
     """rows를 text structure로 확장하여 yield한다. occurrence는 SegmentKeyer 인라인 카운트."""
     headingStateByTopic: dict[str, list[dict[str, object]]] = {}
@@ -62,20 +100,16 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
         if blockType != "text":
             currentHeadings = headingStateByTopic.get(topic, [])
             if currentHeadings:
-                pathLabels = [str(item["label"]) for item in currentHeadings]
-                pathKeys = [str(item["key"]) for item in currentHeadings if str(item["key"])]
-                semanticPathKeys = [
-                    str(item["semanticKey"]) for item in currentHeadings if str(item.get("semanticKey"))
-                ]
+                (_, _, _, textPath, textPathKey, textParentPathKey, textSemanticPathKey, textSemanticParentPathKey) = (
+                    _headingPathStrings(currentHeadings)
+                )
                 lastLevel = currentHeadings[-1]["level"]
                 baseRow["textLevel"] = int(lastLevel) if isinstance(lastLevel, (int, str)) else None
-                baseRow["textPath"] = " > ".join(pathLabels) if pathLabels else None
-                baseRow["textPathKey"] = " > ".join(pathKeys) if pathKeys else None
-                baseRow["textParentPathKey"] = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
-                baseRow["textSemanticPathKey"] = " > ".join(semanticPathKeys) if semanticPathKeys else None
-                baseRow["textSemanticParentPathKey"] = (
-                    " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
-                )
+                baseRow["textPath"] = textPath
+                baseRow["textPathKey"] = textPathKey
+                baseRow["textParentPathKey"] = textParentPathKey
+                baseRow["textSemanticPathKey"] = textSemanticPathKey
+                baseRow["textSemanticParentPathKey"] = textSemanticParentPathKey
             else:
                 baseRow["textLevel"] = None
                 baseRow["textPath"] = None
@@ -130,15 +164,10 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             baseRow["textNodeType"] = "body"
             baseRow["textStructural"] = True
             if finalHeadings:
-                pathLabels = [str(item["label"]) for item in finalHeadings]
-                pathKeys = [str(item["key"]) for item in finalHeadings if str(item["key"])]
-                semanticPathKeys = [str(item["semanticKey"]) for item in finalHeadings if str(item["semanticKey"])]
+                (_, _, _, textPath, textPathKey, textParentPathKey, textSemanticPathKey, textSemanticParentPathKey) = (
+                    _headingPathStrings(finalHeadings)
+                )
                 textLevel = int(finalHeadings[-1]["level"])
-                textPath = " > ".join(pathLabels) if pathLabels else None
-                textPathKey = " > ".join(pathKeys) if pathKeys else None
-                textParentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
-                textSemanticPathKey = " > ".join(semanticPathKeys) if semanticPathKeys else None
-                textSemanticParentPathKey = " > ".join(semanticPathKeys[:-1]) if len(semanticPathKeys) > 1 else None
                 segmentKeyBase, occurrence, segmentKey = keyer.forTextBody(
                     topic, textLevel=textLevel, textSemanticPathKey=textSemanticPathKey
                 )
