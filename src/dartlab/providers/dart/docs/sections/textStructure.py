@@ -503,7 +503,7 @@ _HEADING_PREFIX_CHARS = frozenset(
 )
 
 
-@lru_cache(maxsize=16384)
+@lru_cache(maxsize=65536)
 def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     stripped = line.strip()
     if not stripped or stripped[0] == "|":
