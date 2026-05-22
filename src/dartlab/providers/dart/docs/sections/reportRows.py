@@ -38,6 +38,13 @@ def _normalizeRowspanShift(tableMd: str) -> str:
     회피 case (shift X): legit 한 row 별 trailing-empty (예: 마지막 col 이 "비고"
     이고 비고 누락 row 가 많은 경우) — 이 경우 shift 안 함 (앞 row 들도 같은 패턴).
     """
+    # 핫 패스 short-circuit — shift signature (`|  |` / `| |` trailing empty cell)
+    # 가 3 회 미만이면 shift 패턴 임계 (30%) 만족 불가능. 5 baseline profile 에서
+    # 59k 호출 × 1.6ms = 94s 소비 → 대부분 case (shift X) 의 full parse 회피.
+    quickMarker = tableMd.count("|  |") + tableMd.count("| |")
+    if quickMarker < 3:
+        return tableMd
+
     lines = tableMd.split("\n")
     if len(lines) < 4:
         return tableMd
