@@ -243,13 +243,31 @@ layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merg
   rcept_no 자동 수집. 사용자: `from dartlab.providers.dart.openapi import
   collectAllOriginalZips; stats = collectAllOriginalZips()`.
 
-**R1/R2/R3 진척 (1,148 / 2,928 corps 새 schema):**
-- R1: 5 sessions, +1,148 corps zip (cumulative). DART per-IP 한도 ~1k/세션 발견.
-  잔여 1,780 corps = ~57 세션 (단일 IP) 또는 GitHub Actions matrix 분산.
-- R2: rebuildAllFromZips offline — 1,148 corps / 1,695,986 rows / errors=0.
+**R1/R2/R3 진척 (1,846 / 2,928 corps 새 schema = 63%):**
+- R1 sequential 패턴 검증 (커밋 5de760ff7 + 본문 §13):
+  - Round 1-4 (옛 매-요청 rotation): saved ≤ 1k / 세션, 즉시 IP 차단
+  - **Round 5 sequential exhausted: saved=28,091 / failed=26,110** (28× 더 진행, IP 차단 X)
+  - 잔여: 5 키 일일 한도 020 도달 → midnight KST reset 후 진행
+- R2: rebuildAllFromZips offline — **1,846 corps / 2,735,701 rows / errors=0**
 - R3: 5 baseline sectionsParity=0 / sectionsRawCompare spurious=0. 100 random sample
   sectionsRawCompare spurious=0 corps **70.4%** (제품 기준 ≥90% 미달). worst spurious
   패턴 = paren_num body fragment / paren_kor temporal·내지 / circled multi-marker.
+
+## §13 — DART per-IP 발견 → sequential exhausted 정공법 (2026-05-22)
+
+**문제:** 5-key 매-요청 rotation 패턴 (`_acquireSlot` 가 매번 가장 빨리 가용한 slot 선택)
+이 DART per-IP anti-abuse 트리거. 같은 IP 에서 5 키 빠르게 번갈아 사용 = "한도
+회피 시도" 분류 → ~1k 요청 후 TCP 연결 차단.
+
+**해결:** `.github/scripts/sync/syncRecent.py` 의 `_activeClient` 패턴 동일 적용:
+- 키 1 개 580 rpm 소진 후 (020) 다음 키
+- 같은 키로 동시 worker N=4 (finance 의 `asyncio.Semaphore(4)`)
+- 매 요청 rotation X — single-key 사용 sustained
+
+**검증 (Round 5):**
+- saved=28,091 / failed=26,110 (vs 옛 패턴 saved≤1k / failed≈55k)
+- 28× 다운로드 진행, 그 후 5 키 일일 한도 020 도달 (정상 — daily reset 까지 대기)
+- 본 패턴 == DART 가 의도한 사용 방식.
 
 **Phase B-5 가드 4종 추가 (`textStructure.py`, 커밋 70a0c56ed):**
 - `_RE_PAREN_NUM` body sentence detection — `" : "` 콜론, `" 등주)"`, `,` 다중 ≥ 2.
