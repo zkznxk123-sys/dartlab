@@ -400,6 +400,14 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
     if not line or line.startswith("|") or len(line) < 10:
         return [line]
 
+    # 핫 패스 short-circuit — split trigger char (`(` / 본문 안 bullet / circled /
+    # bracket) 가 line 에 없고 첫 자가 한글/숫자 prefix 도 아니면 split 후보 0 → 즉시 [line].
+    # 대부분 본문 line (예: "당사는 ... 보고서를 작성합니다.") 은 이 가드로 7 regex 절약.
+    if not _INLINE_SPLIT_TRIGGERS.intersection(line):
+        first = line[0]
+        if not ("0" <= first <= "9") and not ("가" <= first <= "힣"):
+            return [line]
+
     positions: set[int] = {0}
     for pat in (
         _RE_INLINE_PAREN_NUM,
@@ -465,6 +473,10 @@ def _splitInlineMultiHeadingOnce(line: str) -> list[str]:
             continue
         parts.append(seg)
     return parts or [line]
+
+
+# `_splitInlineMultiHeading` short-circuit — split trigger char 가 line 에 없으면 7 regex 절약.
+_INLINE_SPLIT_TRIGGERS = frozenset("(▣▶◈[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳")
 
 
 # first-char dispatch — 대부분 본문 line 은 첫 자만 보고 즉시 None reject.
