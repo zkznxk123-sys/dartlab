@@ -11,14 +11,16 @@ DartClient 의 _KeySlot 풀이 키별 throttle + 020 cooldown 자동 마이그�
 - 020 마이그레이션: getBytes 안에서 cooldown slot 자동 회피 + 다른 slot 재선택
 
 호출 예:
-    from dartlab.providers.dart.openapi.client import DartClient
-    from dartlab.providers.dart.openapi.bulkZipFetcher import fetchZipsParallel
+    # 저수준 — (code, rceptNo) 페어 직접 지정
+    from dartlab.providers.dart.openapi import DartClient, fetchZipsParallel
     client = DartClient()
-    stats = fetchZipsParallel(
-        client,
-        [("005930", "20240514001234"), ...],
-        outDir=Path("data/dart/original/docs"),
-    )
+    stats = fetchZipsParallel(client, [("005930", "20240514001234"), ...],
+                              outDir=Path("data/dart/original/docs"))
+
+    # 고수준 — 전체 종목 일괄 (docs.parquet 의 rcept 자동 수집)
+    from dartlab.providers.dart.openapi import collectAllOriginalZips
+    stats = collectAllOriginalZips()   # data/dart/docs/*.parquet 모든 종목
+    stats = collectAllOriginalZips(codes=["005930", "000660"])  # 일부
 """
 
 from __future__ import annotations
@@ -26,13 +28,17 @@ from __future__ import annotations
 import os
 import threading
 import time
+from collections.abc import Callable, Iterable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import dartlab.config as _cfg
 from dartlab.providers.dart.openapi.client import DartClient
 
 _MIN_VALID_BYTES = 1000
+_DOCS_DIR_REL = "dart/docs"
+_ORIGINAL_DOCS_DIR_REL = "dart/original/docs"
 
 
 @dataclass
@@ -144,3 +150,75 @@ def fetchZipsParallel(
         if progressCallback:
             progressCallback(len(targets), len(targets), stats.asDict())
     return stats
+
+
+def buildTargetsFromDocsParquet(
+    codes: Iterable[str] | None = None,
+    *,
+    docsDir: Path | None = None,
+) -> list[tuple[str, str]]:
+    """data/dart/docs/{code}.parquet 의 rcept_no → (code, rceptNo) 페어 list.
+
+    Args:
+        codes: 대상 종목 코드 (None = docs 디렉토리의 전체 parquet).
+        docsDir: docs.parquet 디렉토리. None = ``{dataDir}/dart/docs``.
+    """
+    import polars as pl
+
+    docsDir = docsDir or (Path(_cfg.dataDir) / _DOCS_DIR_REL)
+    if codes is None:
+        codes = sorted(p.stem for p in docsDir.glob("*.parquet"))
+    targets: list[tuple[str, str]] = []
+    for code in codes:
+        parquet = docsDir / f"{code}.parquet"
+        if not parquet.exists():
+            continue
+        try:
+            df = pl.read_parquet(parquet, columns=["rcept_no"])
+        except Exception:
+            continue
+        for r in df.select("rcept_no").unique().to_series().to_list():
+            targets.append((code, str(r)))
+    return targets
+
+
+def collectAllOriginalZips(
+    codes: Iterable[str] | None = None,
+    *,
+    client: DartClient | None = None,
+    docsDir: Path | None = None,
+    outDir: Path | None = None,
+    workers: int = 4,
+    progressEvery: int = 500,
+    progressCallback: Callable[[int, int, dict[str, int]], None] | None = None,
+) -> FetchStats:
+    """전체 종목 (또는 지정 codes) 의 원본 zip 일괄 수집.
+
+    DART per-IP anti-abuse 회피를 위해 ``DartClient._acquireSlot`` 가 sequential
+    exhausted 패턴 (키 1개로 580 rpm 소진 후 다음 키) 사용. workers=4 = finance
+    수집의 ``asyncio.Semaphore(4)`` 패턴 동일.
+
+    Args:
+        codes: 대상 종목 코드 (None = data/dart/docs/*.parquet 의 모든 종목).
+        client: DartClient (None = 환경변수 키로 자동 생성).
+        docsDir: docs.parquet 디렉토리. None = ``{dataDir}/dart/docs``.
+        outDir: zip 출력 디렉토리. None = ``{dataDir}/dart/original/docs``.
+        workers: ThreadPoolExecutor 워커 수. default 4 (finance 패턴).
+        progressEvery: N 페어 마다 progressCallback 호출.
+        progressCallback: (done, total, statsDict) → None. 진행 표시.
+
+    Returns:
+        FetchStats — saved/skipped/failed/bytesTotal.
+    """
+    outDir = outDir or (Path(_cfg.dataDir) / _ORIGINAL_DOCS_DIR_REL)
+    if client is None:
+        client = DartClient()
+    targets = buildTargetsFromDocsParquet(codes=codes, docsDir=docsDir)
+    return fetchZipsParallel(
+        client,
+        targets,
+        outDir=outDir,
+        workers=workers,
+        progressEvery=progressEvery,
+        progressCallback=progressCallback,
+    )

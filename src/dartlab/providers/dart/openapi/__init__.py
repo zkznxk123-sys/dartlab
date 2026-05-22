@@ -18,7 +18,29 @@ s.saveFinance("재무.csv", 2020, kr=True) # 한글 컬럼 저장
 # dartKey 모듈은 module load 시점에 CredentialProvider 를 register (정공법 B — DIP).
 # core/credentials.py 의 registry 가 dart key 정보 lookup 가능하게 한다.
 from dartlab.providers.dart.openapi import dartKey as _dartKey  # noqa: F401
+from dartlab.providers.dart.openapi.bulkZipFetcher import (
+    FetchStats,
+    buildTargetsFromDocsParquet,
+    collectAllOriginalZips,
+    fetchZipsParallel,
+    safeWriteBytes,
+)
+from dartlab.providers.dart.openapi.client import DartClient
 from dartlab.providers.dart.openapi.dart import Dart, DartCompany, OpenDart, OpenDartCompany
 from dartlab.providers.dart.openapi.saver import korColumns
+from dartlab.providers.dart.openapi.zipCollector import ZipDocsCollector
 
-__all__ = ["OpenDart", "OpenDartCompany", "Dart", "DartCompany", "korColumns"]
+__all__ = [
+    "OpenDart",
+    "OpenDartCompany",
+    "Dart",
+    "DartCompany",
+    "DartClient",
+    "ZipDocsCollector",
+    "FetchStats",
+    "buildTargetsFromDocsParquet",
+    "collectAllOriginalZips",
+    "fetchZipsParallel",
+    "safeWriteBytes",
+    "korColumns",
+]
