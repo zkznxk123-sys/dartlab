@@ -736,9 +736,18 @@ def parseTextStructureWithState(
         if not body:
             return
 
-        pathLabels = [str(item["label"]) for item in stack]
-        pathKeys = [str(item["key"]) for item in stack if str(item["key"])]
-        semanticPathKeys = [str(item["semanticKey"]) for item in stack if str(item["semanticKey"])]
+        # 1 패스 — body flush 시 stack → 5 path 문자열 동시 생성.
+        pathLabels: list[str] = []
+        pathKeys: list[str] = []
+        semanticPathKeys: list[str] = []
+        for item in stack:
+            pathLabels.append(str(item["label"]))
+            k = str(item["key"])
+            if k:
+                pathKeys.append(k)
+            sk = str(item["semanticKey"])
+            if sk:
+                semanticPathKeys.append(sk)
         pathText = " > ".join(pathLabels) if pathLabels else None
         pathKey = " > ".join(pathKeys) if pathKeys else None
         parentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
@@ -839,9 +848,18 @@ def parseTextStructureWithState(
             while stack and int(stack[-1]["level"]) >= level:
                 stack.pop()
             stack.append({"level": level, "label": labelText, "key": stackKey, "semanticKey": semanticStackKey})
-            pathLabels = [str(item["label"]) for item in stack]
-            pathKeys = [str(item["key"]) for item in stack if str(item["key"])]
-            semanticPathKeys = [str(item["semanticKey"]) for item in stack if str(item["semanticKey"])]
+            # 1 패스 — 3 list comprehension 통합 (expansion.py _headingPathStrings 와 동일 패턴).
+            pathLabels: list[str] = []
+            pathKeys: list[str] = []
+            semanticPathKeys: list[str] = []
+            for item in stack:
+                pathLabels.append(str(item["label"]))
+                k = str(item["key"])
+                if k:
+                    pathKeys.append(k)
+                sk = str(item["semanticKey"])
+                if sk:
+                    semanticPathKeys.append(sk)
             pathText = " > ".join(pathLabels) if pathLabels else None
             pathKey = " > ".join(pathKeys) if pathKeys else None
             parentPathKey = " > ".join(pathKeys[:-1]) if len(pathKeys) > 1 else None
