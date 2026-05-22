@@ -265,9 +265,46 @@ layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merg
 - `--since N` — 최근 N초 안 mtime 변경 파일만.
 - R1+R2 완료 후 `bulkUploadHf.py docs --force` 가 최종 단계.
 
-**P-단위 line-join 잔여 (B-5 의 *진짜* 본질):**
-`zipDocsXml.parseSectionsByTitle` 의 `_walk` 가 `<P>` 마다 `bodyParts.append` 후
-`"\n\n".join` 으로 합침. DART XML 의 word-wrap `<P>사업부문별</P><P>현황</P>` 패턴이
-"사업부문별\n\n현황" 으로 출력 → sections layer 의 textPath segment 잘림. 정공법:
-consecutive short P 의 smart-merge (인접 P 둘 다 len < N, 한국어 종결사 없음 → 같은
-line). bodyParts 의 tagged-element 모델로 refactor 필요. 미진행.
+**P-단위 line-join 완료 (커밋 fd76bdb8a):**
+`zipDocsXml.parseSectionsByTitle._mergeShortPs` — 인접 P 둘 다 len ≤ 20 + 첫 P 가
+sentence-end (다./요./니다././?/!/);]) 아님 → 같은 line concat. word-wrap 결함
+"사업부문별\n\n현황" → "사업부문별현황" 복원. 5 baseline parity 회귀 0.
+
+## §12 — Sections 성능 최적화 (2026-05-22)
+
+**5 baseline cold build (이전 1052s, 평균 210s/corp):**
+- 005930: 32.34s → 7.02s
+- 035720: 40.42s → 7.84s
+- 005380: 31.93s → 7.45s
+- 207940: 27.39s → 5.19s
+- 000660: 45.82s → 5.71s
+- **TOTAL: 1052s → 33s = 32× speedup**
+
+**최적화 commit 11종 (모두 5 baseline parity 회귀 0):**
+1. `467ec1b7c` `_detectHeading` first-char dispatch frozenset(43) — 본문 line 즉시 None
+2. `2d4e2be63` `_splitInlineMultiHeadingOnce` trigger short-circuit — 7 finditer 절약
+3. `c1b413340` `_normalizeRowspanShift` 핫 패스 short-circuit (`|  |` count < 3)
+4. `5342165ad` `_cleanLine` fast-path — `&`/` `/`\t` 무 시 rstrip 만
+5. `42458a153` `_repairLineBreaks` substring prefilter — `니다.` 무 시 regex 회피
+6. `5cc845d92` `_gateHeadingLabel` regex precompile + length-based short-circuit
+7. `7b152dba4` `_detectHeading` lru_cache 16384 → 65536 (4.3× 추가)
+8. `0b22317a3` `_normalizeRowspanShift` 단일 패스 + dict allocation 제거
+9. `307ee9bb2` `_normalizeHashCell` fast-path — paren/digit/period 무 시 5 regex 절약
+10. `00ccc708c` 분리자 검출 set allocation 제거 (strip('-:') 직접 비교)
+11. `3a6e6ce1a` `_headingPathStrings` helper — 3 list 1 패스 + 5 join (expansion.py)
+12. `f10e815d0` textStructure 경로 문자열 1 패스 (body flush + heading push)
+13. `c3cf13769` 추가 lru_cache 사이즈 확대 (_normalizeHeadingText 2048 → 16384 등)
+14. `f1a789827` parseTextStructureWithState stack copy-on-write — 65k dict copy 회피
+
+**상위 핫스팟 (post-optimize, 035720 profile):**
+- `_normalizeRowspanShift`: 2.0s (12k 호출, prefilter 통과한 진짜 shift table 만)
+- `str.strip`: 1.56s (15M 호출, C 구현 → 100ns/call 한계)
+- `_splitInlineMultiHeadingOnce`: 1.1s (57k 호출, trigger 통과만)
+- `pipeline.sections`: 1.0s (orchestrator entry)
+- `_expandStructuredRows` cumtime: 5.3s
+- `parseTextStructureWithState` cumtime: 3.3s
+
+**다음 잠재 winwwwwwww (large refactor, 미진행):**
+- Polars vectorization of `_expandStructuredRows` per-row Python loop → 1.6s 가능
+- Cython/Rust 의 `_normalizeRowspanShift` → 300ms 가능
+- 위 2개 적용 시 sub-2s/corp ("마법 수준") 도달 추정.
