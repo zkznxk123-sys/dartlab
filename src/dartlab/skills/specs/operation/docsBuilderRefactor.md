@@ -322,7 +322,18 @@ sentence-end (다./요./니다././?/!/);]) 아님 → 같은 line concat. word-w
 - `_expandStructuredRows` cumtime: 5.3s
 - `parseTextStructureWithState` cumtime: 3.3s
 
-**다음 잠재 winwwwwwww (large refactor, 미진행):**
+**다음 잠재 win (large refactor, 미진행):**
 - Polars vectorization of `_expandStructuredRows` per-row Python loop → 1.6s 가능
 - Cython/Rust 의 `_normalizeRowspanShift` → 300ms 가능
 - 위 2개 적용 시 sub-2s/corp ("마법 수준") 도달 추정.
+
+**메모리 측정 (035720, tracemalloc):**
+- Build peak: 168MB
+- Final DataFrame estimated_size: **6MB**
+- **28× 비효율** — intermediate dict allocations (`topicMap` / `rowMeta` /
+  `_expandStructuredRows` 의 dict copy) 가 peak 의 핵심.
+
+**메모리 최강 잠재 win (large refactor, 미진행):**
+- `_expandStructuredRows` Iterator → Polars 컬럼별 직접 build (Python dict 0)
+- `topicMap` 의 `dict[tuple, dict[str, str]]` → Polars MultiIndex DataFrame 직접 build
+- 위 적용 시 peak ~ 20-30MB ("마법 수준") 도달 추정.
