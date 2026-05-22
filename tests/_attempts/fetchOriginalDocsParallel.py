@@ -73,13 +73,14 @@ def main() -> int:
         state_f.write(line + "\n")
         state_f.flush()
 
-    # workers=2 — IP 레벨 anti-abuse 회피 (5 키 × 580 rpm = ~2900 rpm 합산이 IP 차단
-    # 트리거. 2 키 동시 = ~1160 rpm 으로 보수 운영). 2026-05-22 차단 사례.
+    # workers=4 — finance/syncRecent 의 `asyncio.Semaphore(4)` 패턴 동일.
+    # client._acquireSlot 가 sequential exhausted 모드 (키 1개로 580 rpm 소진 후
+    # 다음 키) — 4 워커가 같은 키로 동시 요청. DART per-IP anti-abuse 회피.
     stats = fetchZipsParallel(
         client,
         targets,
         outDir=OUT_DIR,
-        workers=2,
+        workers=4,
         progressEvery=500,
         progressCallback=_progress,
     )

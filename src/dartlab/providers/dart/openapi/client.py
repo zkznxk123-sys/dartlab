@@ -136,23 +136,30 @@ class DartClient:
         return self._slots[0].key
 
     def _acquireSlot(self) -> tuple[_KeySlot, float]:
-        """가장 빨리 가용한 슬롯 예약 + 대기 시각 반환 (스레드 안전).
+        """순차 키 소진 패턴 — `.github/scripts/sync/syncRecent.py` 와 동일.
 
-        - 모든 슬롯의 `max(nextAvailable, coolDownUntil)` 중 최소값 선택.
-        - 선택 즉시 nextAvailable 갱신 (예약) → 다른 스레드와 충돌 0.
-        - 반환된 sleepFor 만큼 caller 가 lock 밖에서 sleep.
+        DART per-IP anti-abuse 는 매 요청 다른 키 rotation 을 abuse 로 분류.
+        finance/syncRecent 가 차단 0 으로 동작했던 이유 = 키 1개로 580 rpm 소진
+        후 다음 키. 본 method 도 같은 패턴:
+        1. 첫 가용 slot (cooldown 안 걸린 것) 반환 — 매 요청 동일 키
+        2. 같은 slot 의 throttle (slot.nextAvailable) 만 caller 가 sleep
+        3. 020 발생 → _markCoolDown 으로 60s 잠금 → 자동 다음 slot
+        4. 모든 slot cooldown → 가장 빨리 풀리는 slot 의 cooldown 시각까지 대기
+
+        스레드 안전: _poolLock 안에서 slot 선택 + nextAvailable 예약.
         """
         now = time.monotonic()
         with self._poolLock:
-            best: _KeySlot | None = None
-            bestAt = float("inf")
+            # 1. cooldown 안 걸린 첫 slot 사용 (sequential exhausted)
             for s in self._slots:
-                availableAt = max(s.nextAvailable, s.coolDownUntil)
-                if availableAt < bestAt:
-                    bestAt = availableAt
-                    best = s
-            assert best is not None
-            startAt = max(now, bestAt)
+                if s.coolDownUntil <= now:
+                    startAt = max(now, s.nextAvailable)
+                    s.nextAvailable = startAt + self._minInterval
+                    s.inFlight += 1
+                    return s, max(0.0, startAt - now)
+            # 2. 전부 cooldown — 가장 빨리 풀리는 slot 대기
+            best = min(self._slots, key=lambda s: s.coolDownUntil)
+            startAt = best.coolDownUntil
             best.nextAvailable = startAt + self._minInterval
             best.inFlight += 1
             return best, max(0.0, startAt - now)
