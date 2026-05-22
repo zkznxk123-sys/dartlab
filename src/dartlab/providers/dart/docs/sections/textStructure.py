@@ -106,6 +106,9 @@ _RE_LINE_BREAK_REPAIR = re.compile(r"(?<=니다\.)(?=[가-힣]\.[\s가-힣])")
 
 
 def _repairLineBreaks(text: str) -> str:
+    # 핫 패스 short-circuit: 패턴 prefix "니다." 가 없으면 regex 안 돌림.
+    if "니다." not in text:
+        return text
     return _RE_LINE_BREAK_REPAIR.sub("\n", text)
 
 
