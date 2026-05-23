@@ -27,7 +27,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "providerContract.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "providerContract.json"
 _DEFERRED_PROVIDERS = {"edinet"}
 
 

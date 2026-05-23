@@ -28,7 +28,7 @@ from __future__ import annotations
 import os
 import threading
 import time
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -156,6 +156,7 @@ def fetchZipsParallel(
     workers: int | None = None,
     progressEvery: int = 100,
     progressCallback=None,
+    limit: int = 0,
 ) -> FetchStats:
     """N (code, rceptNo) → outDir/{code}/{rceptNo}.zip 병렬 저장.
 
@@ -182,6 +183,8 @@ def fetchZipsParallel(
     """
     if not targets:
         return FetchStats()
+    if limit > 0:
+        targets = targets[:limit]
     if workers is None:
         workers = len(client._slots)
     stats = FetchStats()
@@ -198,6 +201,57 @@ def fetchZipsParallel(
         if progressCallback:
             progressCallback(len(targets), len(targets), stats.asDict())
     return stats
+
+
+def iterZipsParallel(
+    client: DartClient,
+    targets: list[tuple[str, str]],
+    *,
+    outDir: Path,
+    workers: int | None = None,
+) -> "Iterator[tuple[str, str, bool, int]]":
+    """``fetchZipsParallel`` 의 streaming pair — 결과 row 1 개씩 yield.
+
+    Args:
+        client: ``DartClient``.
+        targets: ``[(stockCode, rceptNo), ...]``.
+        outDir: 저장 디렉토리.
+        workers: ThreadPoolExecutor 워커 수.
+
+    Yields:
+        ``(stockCode, rceptNo, ok, bytesWritten)`` — ok=True 면 저장 성공.
+
+    Raises:
+        없음 — 개별 fetch 실패는 ok=False.
+
+    Example:
+        >>> for code, rcept, ok, n in iterZipsParallel(client, targets, outDir=Path("/tmp")):
+        ...     pass  # doctest: +SKIP
+    """
+    if not targets:
+        return
+    if workers is None:
+        workers = len(client._slots)
+    outDir.mkdir(parents=True, exist_ok=True)
+
+    def _fetchAndReport(code: str, rceptNo: str) -> tuple[str, str, bool, int]:
+        outCode = outDir / code
+        outPath = outCode / f"{rceptNo}.zip"
+        if outPath.exists() and outPath.stat().st_size > _MIN_VALID_BYTES:
+            return code, rceptNo, True, outPath.stat().st_size
+        try:
+            raw = client.getBytes("document.xml", {"rcept_no": rceptNo})
+            if not raw or len(raw) < _MIN_VALID_BYTES:
+                return code, rceptNo, False, 0
+            safeWriteBytes(outPath, raw)
+            return code, rceptNo, True, len(raw)
+        except (OSError, RuntimeError, ValueError):
+            return code, rceptNo, False, 0
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = [ex.submit(_fetchAndReport, code, rceptNo) for code, rceptNo in targets]
+        for fut in as_completed(futures):
+            yield fut.result()
 
 
 def buildTargetsFromDocsParquet(
