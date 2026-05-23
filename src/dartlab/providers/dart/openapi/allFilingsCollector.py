@@ -48,6 +48,10 @@ _ALLFILINGS_DIR_KEY = "allFilings"
 _META_SUFFIX = "_meta"  # 목록만: 20260327_meta.parquet
 # 원문포함: 20260327.parquet
 
+# 정기공시 (사업/분기/반기보고서) 는 `data/dart/docs/` 가 owner — allFilings 본문 수집에서 스킵.
+# 89% 가 docs/ 와 중복 (2026-05 검증). 부피 큰 공시 본문 중복 호출 차단.
+_PERIODIC_REPORT_PATTERNS: tuple[str, ...] = ("사업보고서", "분기보고서", "반기보고서")
+
 # ── 내부 유틸 ──
 
 
@@ -428,10 +432,17 @@ def fillContent(
         _log.info("[%s] %d건 원문 수집 시작", period, total)
 
     allRows: list[dict] = []
-    success = empty = 0
+    success = empty = skippedPeriodic = 0
 
     for idx, row in enumerate(meta.iter_rows(named=True)):
         rceptNo = row["rcept_no"]
+        reportNm = row.get("report_nm", "") or ""
+
+        # 정기공시 스킵 — docs/ 가 owner.
+        if any(p in reportNm for p in _PERIODIC_REPORT_PATTERNS):
+            skippedPeriodic += 1
+            continue
+
         sections = _collectOneDoc(client, rceptNo)
 
         if sections:
@@ -476,6 +487,22 @@ def fillContent(
     if not allRows:
         return None
 
+    # 안전장치 — 본문 0 건 성공이면 .parquet 으로 승격 X, _meta 유지.
+    # 과거 사고 (2025-04 ~ 2026-02, 222 일치) 재발 방지: API 키 한도 / 네트워크 실패로
+    # 전 row 가 empty 로 끝나도 빈 .parquet 으로 저장되어 영구 데드락 마킹됐었다.
+    # 본 가드는 *0 건 성공 = 수집 실패* 로 간주하고 retry 가능 상태로 유지한다.
+    # (정기공시만 있는 날은 skippedPeriodic > 0 이지만 success > 0 보장 안 됨 — 정기공시만 있는 날은
+    #  처리 대상 0 건이라 빈 본문 .parquet 가 합법이라 별도 분기 불필요.)
+    if success == 0 and (success + empty) > 0:
+        _log.warning(
+            "[%s] 본문 수집 0 건 (시도 %d 건 모두 empty, 정기공시 %d 건 skip) — .parquet 승격 차단, _meta 보존. "
+            "원인 확인 후 재시도 필요 (API 키 한도 / 네트워크 / URL 변경 가능).",
+            period,
+            empty,
+            skippedPeriodic,
+        )
+        return None
+
     df = pl.DataFrame(allRows).with_columns(
         pl.col("section_order").cast(pl.Int32),
     )
@@ -491,10 +518,11 @@ def fillContent(
 
     if showProgress:
         _log.info(
-            "[%s] 완료: %d건 성공, %d건 빈, %d행, %.1fMB",
+            "[%s] 완료: %d건 성공, %d건 빈, %d건 정기공시 skip(→docs/), %d행, %.1fMB",
             period,
             success,
             empty,
+            skippedPeriodic,
             df.height,
             fullPath.stat().st_size / 1024 / 1024,
         )
