@@ -1,0 +1,196 @@
+{
+  "src/dartlab/analysis/valuation/pricetarget.py": [
+    {
+      "line": 318,
+      "pattern": "stdlib random",
+      "text": "z = [random.gauss(0, 1) for _ in range(5)]"
+    }
+  ],
+  "src/dartlab/gather/domains/naverGlobal.py": [
+    {
+      "line": 60,
+      "pattern": "stdlib random",
+      "text": "delay = random.uniform(_MIN_DELAY, _MAX_DELAY)"
+    }
+  ],
+  "src/dartlab/gather/infra/http.py": [
+    {
+      "line": 260,
+      "pattern": "stdlib random",
+      "text": "\"User-Agent\": random.choice(_USER_AGENTS),"
+    },
+    {
+      "line": 384,
+      "pattern": "stdlib random",
+      "text": "jitter = random.uniform(policy.jitter_min, policy.jitter_max)"
+    },
+    {
+      "line": 390,
+      "pattern": "stdlib random",
+      "text": "req_headers = {\"User-Agent\": random.choice(_USER_AGENTS)}"
+    },
+    {
+      "line": 401,
+      "pattern": "stdlib random",
+      "text": "wait = base * (attempt + 1) + random.uniform(0.5, 2.0)"
+    },
+    {
+      "line": 406,
+      "pattern": "stdlib random",
+      "text": "wait = 2**attempt + random.uniform(0.1, 0.5)"
+    },
+    {
+      "line": 415,
+      "pattern": "stdlib random",
+      "text": "await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))"
+    },
+    {
+      "line": 482,
+      "pattern": "stdlib random",
+      "text": "jitter = random.uniform(policy.jitter_min, policy.jitter_max)"
+    },
+    {
+      "line": 488,
+      "pattern": "stdlib random",
+      "text": "req_headers = {\"User-Agent\": random.choice(_USER_AGENTS)}"
+    },
+    {
+      "line": 500,
+      "pattern": "stdlib random",
+      "text": "wait = base * (attempt + 1) + random.uniform(0.5, 2.0)"
+    },
+    {
+      "line": 505,
+      "pattern": "stdlib random",
+      "text": "wait = 2**attempt + random.uniform(0.1, 0.5)"
+    },
+    {
+      "line": 514,
+      "pattern": "stdlib random",
+      "text": "await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))"
+    }
+  ],
+  "src/dartlab/providers/dart/openapi/collector.py": [
+    {
+      "line": 302,
+      "pattern": "stdlib random",
+      "text": "time.sleep(random.uniform(minDelay, maxDelay))"
+    },
+    {
+      "line": 352,
+      "pattern": "stdlib random",
+      "text": "time.sleep(random.uniform(minDelay, maxDelay))"
+    },
+    {
+      "line": 507,
+      "pattern": "stdlib random",
+      "text": "delay = random.uniform(*stockDelay)"
+    }
+  ],
+  "src/dartlab/quant/strategy/rule.py": [
+    {
+      "line": 269,
+      "pattern": "numpy random",
+      "text": "np.random.seed(42)"
+    },
+    {
+      "line": 270,
+      "pattern": "stdlib random",
+      "text": "rand_idx = np.random.randint(0, n - forward, size=max(len(valid_entries), 100))"
+    }
+  ],
+  "src/dartlab/quant/transforms/fracDiff.py": [
+    {
+      "line": 74,
+      "pattern": "numpy random",
+      "text": ">>> r = fracDiffFFD(np.cumsum(np.random.randn(500))+100, d=0.4)"
+    }
+  ],
+  "src/dartlab/quant/transforms/matrixProfile.py": [
+    {
+      "line": 69,
+      "pattern": "numpy random",
+      "text": ">>> s = np.cumsum(np.random.randn(500))"
+    }
+  ],
+  "tests/analysis/test_insight_pipeline.py": [
+    {
+      "line": 278,
+      "pattern": "stdlib random",
+      "text": "daily_returns = [random.gauss(0, 0.02) for _ in range(200)]"
+    },
+    {
+      "line": 358,
+      "pattern": "stdlib random",
+      "text": "returns = [random.gauss(0, daily_sigma) for _ in range(252)]"
+    }
+  ],
+  "tests/audit/sectionsRawCompare.py": [
+    {
+      "line": 325,
+      "pattern": "stdlib random",
+      "text": "codes = random.sample(codes, min(args.limit, len(codes)))"
+    }
+  ],
+  "tests/macro/test_l0.py": [
+    {
+      "line": 76,
+      "pattern": "numpy random",
+      "text": "np.random.seed(42)"
+    },
+    {
+      "line": 125,
+      "pattern": "numpy random",
+      "text": "np.random.seed(42)"
+    },
+    {
+      "line": 138,
+      "pattern": "numpy random",
+      "text": "np.random.seed(42)"
+    }
+  ],
+  "tests/quant/test_extended.py": [
+    {
+      "line": 29,
+      "pattern": "numpy random",
+      "text": "np.random.seed(42)"
+    },
+    {
+      "line": 33,
+      "pattern": "numpy random",
+      "text": "base = np.cumsum(np.random.randn(n) * 0.5 + 0.3) + 100"
+    },
+    {
+      "line": 35,
+      "pattern": "numpy random",
+      "text": "base = np.cumsum(np.random.randn(n) * 0.5 - 0.3) + 100"
+    },
+    {
+      "line": 37,
+      "pattern": "numpy random",
+      "text": "base = np.cumsum(np.random.randn(n) * 0.3) + 100"
+    },
+    {
+      "line": 42,
+      "pattern": "numpy random",
+      "text": "high = close * (1 + np.abs(np.random.randn(n) * 0.01))"
+    },
+    {
+      "line": 43,
+      "pattern": "numpy random",
+      "text": "low = close * (1 - np.abs(np.random.randn(n) * 0.01))"
+    },
+    {
+      "line": 45,
+      "pattern": "numpy random",
+      "text": "volume = (np.random.rand(n) * 1_000_000 + 100_000).astype(np.int64)"
+    }
+  ],
+  "tests/quant/test_grinoldAbsorption.py": [
+    {
+      "line": 154,
+      "pattern": "numpy random",
+      "text": "np.random.seed(0)"
+    }
+  ]
+}
