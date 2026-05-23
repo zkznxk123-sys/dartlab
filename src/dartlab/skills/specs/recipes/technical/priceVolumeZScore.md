@@ -1,0 +1,179 @@
+---
+id: recipes.technical.priceVolumeZScore
+title: 거래량 z-score + 가격 변화율 동조 신호
+category: recipes
+kind: recipe
+scope: builtin
+status: tested
+graphTier: L1.5
+cluster: technical
+purpose: 일별 종가 변화율과 거래량 20 거래일 z-score 의 동조 점검. 거래량 z ≥ 2 인 row 가 양수/음수 수익률 어느 쪽으로 쏠리는지 정량 카운트. 추론 라벨 없이 *event row 비율* 만. price gather 단일.
+whenToUse:
+  - 거래량 폭증
+  - volume z-score
+  - 가격 거래량 동조
+  - high-volume day
+linkedSkills:
+  - engines.gather
+  - recipes.sentiment.priceMomentumGap
+  - recipes.technical.atrRegimeShift
+toolRefs:
+  - EngineCall
+  - RunPython
+requiredEvidence:
+  - skillRef
+  - tableRef
+  - valueRef
+  - dateRef
+  - sourceRef
+  - executionRef
+runtimeCompatibility:
+  server:
+    status: supported
+  localPython:
+    status: supported
+  mcp:
+    status: supported
+  webAi:
+    status: limited
+  pyodide:
+    status: limited
+testUniverse:
+  market: KR
+  stockCodes:
+    - "005930"
+    - "000660"
+expectedNovelty:
+  - highVolumeBalance
+  - volReturnSkew
+falsifier:
+  description: "거래일 < 30 이면 20d 윈도우 z 신뢰도 낮음 — 결론 X. 액면분할·권리락 직후 거래량 점프를 z 폭증으로 처리하면 실패."
+forbidden:
+  - 거래량 z ≥ 2 row 단독으로 추세전환 단정 금지
+  - 액면분할·corporate action 보정 없이 z 폭증 단정 금지
+failureModes:
+  - 거래일 < 30 (윈도우 부족)
+  - 액면분할·권리락 같은 corporate action 후 점프
+  - 시간외 거래 거래량 포함 여부 불명
+lastUpdated: '2026-05-23'
+---
+
+## 공개 호출 방식
+
+```python
+import dartlab
+import polars as pl
+import statistics
+
+target = "005930"
+c = dartlab.Company(target)
+
+try:
+    df = c.gather("price").head(80)
+    rows = df.to_dicts() if hasattr(df, "to_dicts") else []
+except Exception:
+    rows = []
+
+rows.sort(key=lambda r: str(r.get("date") or r.get("tradeDate") or ""))
+
+
+def floatOr(v):
+    try:
+        return float(v) if v is not None else None
+    except Exception:
+        return None
+
+
+parsed = []
+prev_close = None
+for r in rows:
+    close = floatOr(r.get("close") or r.get("closePrice") or r.get("adjClose"))
+    vol = floatOr(r.get("volume") or r.get("tradeVolume") or r.get("vol"))
+    if close is None or vol is None:
+        continue
+    ret = None
+    if prev_close and prev_close > 0:
+        ret = (close / prev_close) - 1.0
+    parsed.append(
+        {
+            "date": str(r.get("date") or r.get("tradeDate")),
+            "close": close,
+            "volume": vol,
+            "ret": ret,
+        }
+    )
+    prev_close = close
+
+WINDOW = 20
+event_pos = 0
+event_neg = 0
+events = []
+for i, r in enumerate(parsed):
+    if i < WINDOW:
+        continue
+    win = [parsed[j]["volume"] for j in range(i - WINDOW, i)]
+    mu = statistics.mean(win)
+    sd = statistics.stdev(win) if len(win) > 1 else 0
+    z = (r["volume"] - mu) / sd if sd > 0 else None
+    if z is None:
+        continue
+    if z >= 2:
+        events.append({"date": r["date"], "z": round(z, 2), "ret": r["ret"]})
+        if r["ret"] is not None:
+            if r["ret"] > 0:
+                event_pos += 1
+            elif r["ret"] < 0:
+                event_neg += 1
+
+table = pl.DataFrame(events) if events else pl.DataFrame(
+    schema={"date": pl.Utf8, "z": pl.Float64, "ret": pl.Float64}
+)
+
+n_events = len(events)
+skew = None
+if n_events > 0:
+    skew = round((event_pos - event_neg) / n_events, 3)
+
+latest_date = parsed[-1]["date"] if parsed else None
+
+emit_result(
+    table=table,
+    values={
+        "tradingDays": len(parsed),
+        "events": n_events,
+        "eventPos": event_pos,
+        "eventNeg": event_neg,
+        "posNegSkew": skew,
+    },
+    date=latest_date,
+    sources=["dartlab://gather/price"],
+)
+```
+
+## 호출 동작
+
+종가·거래량 80 거래일 row 에서 일별 수익률 + 20 거래일 rolling 거래량 z-score 계산. z ≥ 2 인 row 만 *event row* — 그 row 의 양/음 수익률 카운트 + skew = (pos − neg) / total. 추론 X.
+
+## 대표 반환 형태
+
+| column | 의미 |
+|---|---|
+| `date` | event row 일자 |
+| `z` | 거래량 z-score (≥ 2) |
+| `ret` | 당일 수익률 |
+
+values:
+- `events` — z ≥ 2 row 총 수
+- `eventPos` / `eventNeg` — 양/음 수익률 row 수
+- `posNegSkew` — (pos − neg) / events
+
+## 연계 절차
+
+1. recipes.sentiment.priceMomentumGap — event row 시점이 가속 phase 와 겹치는지.
+2. recipes.technical.atrRegimeShift — 거래량 z 와 ATR 변동성 regime 동시 확인.
+
+## 기본 검증
+
+- 거래일 < 30 → 결론 X.
+- 액면분할 직후는 거래량 점프로 z 오염 — 한계 표기.
+- skew 부호로 sentiment 라벨 단정 금지.
