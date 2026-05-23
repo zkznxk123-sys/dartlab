@@ -345,35 +345,7 @@ def parseRawMaterials(content: str) -> list[dict] | None:
                     shift = 1
 
                 def si(idx: int | None, s: int = shift) -> int | None:
-                    """si — TODO 한국어 동작 설명.
-
-                    Args:
-                        idx: 인자.
-                        s: 인자.
-
-                    Raises:
-                        없음.
-
-                    Example:
-                        >>> si(...)
-
-                    Returns:
-                        <TODO: return desc> (int | None)
-
-                    LLM Specifications:
-                        AntiPatterns:
-                            - <TODO: 안티패턴>
-                        OutputSchema:
-                            - <TODO: 출력 형태>
-                        Prerequisites:
-                            - <TODO: 사전조건>
-                        Freshness:
-                            - <TODO: 데이터 freshness>
-                        Dataflow:
-                            - <TODO: 데이터 흐름>
-                        TargetMarkets:
-                            - <TODO: 대상 시장>
-                    """
+                    """shift index — None / 음수 결과 시 None 반환 (cell 범위 밖 가드)."""
                     return idx - s if idx is not None and idx - s >= 0 else None
 
                 if si(itemIdx) is not None and si(itemIdx) < len(cells):

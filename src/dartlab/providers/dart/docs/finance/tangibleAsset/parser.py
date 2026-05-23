@@ -135,19 +135,20 @@ def splitCells(line: str) -> list[str]:
 
 
 def isAssetCategory(text: str) -> bool:
-    """isAssetCategory — TODO 한국어 동작 설명.
+    """유형자산 카테고리 판정 — 토지/건물/기계장치/차량/공구/비품/사용권 등 21 keyword 부분 일치.
 
     Args:
-        text: 인자.
+        text: 셀 또는 행 텍스트.
+
+    Returns:
+        유형자산 카테고리 keyword 포함 시 True.
 
     Raises:
         없음.
 
     Example:
-        >>> isAssetCategory(...)
-
-    Returns:
-        <TODO: return desc> (bool)
+        >>> isAssetCategory("토지")
+        True
     """
     keywords = [
         "토지",
@@ -176,57 +177,60 @@ def isAssetCategory(text: str) -> bool:
 
 
 def isMovementRow(label: str) -> bool:
-    """isMovementRow — TODO 한국어 동작 설명.
+    """변동 (취득/처분/대체/상각 등) 행 판정 — ``MOVEMENT_MARKERS`` 키워드 부분 일치.
 
     Args:
-        label: 인자.
+        label: 행 라벨 (공백 포함 가능).
+
+    Returns:
+        변동 키워드 포함 시 True.
 
     Raises:
         없음.
 
     Example:
-        >>> isMovementRow(...)
-
-    Returns:
-        <TODO: return desc> (bool)
+        >>> isMovementRow("당기 취득")
+        True
     """
     collapsed = label.replace(" ", "")
     return any(kw in collapsed for kw in MOVEMENT_MARKERS)
 
 
 def isDescriptionRow(cells: list[str]) -> bool:
-    """isDescriptionRow — TODO 한국어 동작 설명.
+    """본문 서술 행 판정 — ``DESCRIPTION_MARKERS`` 포함 + 텍스트 길이 100 자 초과.
 
     Args:
-        cells: 인자.
+        cells: 행 셀 list.
+
+    Returns:
+        설명문 키워드 + 충분한 길이 시 True (표가 아닌 본문 잔재).
 
     Raises:
         없음.
 
     Example:
-        >>> isDescriptionRow(...)
-
-    Returns:
-        <TODO: return desc> (bool)
+        >>> isDescriptionRow(["주요 유형자산의 ...장기간 내용연수..."])
+        True
     """
     text = " ".join(cells)
     return any(kw in text for kw in DESCRIPTION_MARKERS) and len(text) > 100
 
 
 def normalizeLabel(label: str) -> str:
-    """normalizeLabel — TODO 한국어 동작 설명.
+    """원본 라벨 → 표준 변동 라벨 — ``LABEL_MAP`` 정확/부분 일치 후 공백제거 fallback.
 
     Args:
-        label: 인자.
+        label: 행 라벨 (suffix ``", 유형자산"`` 제거 후 공백 정규화).
+
+    Returns:
+        표준 라벨 또는 매칭 실패 시 정규화된 입력.
 
     Raises:
         없음.
 
     Example:
-        >>> normalizeLabel(...)
-
-    Returns:
-        <TODO: return desc> (str)
+        >>> normalizeLabel("기 초 잔 액")
+        '기초잔액'
     """
     label = label.strip()
     label = re.sub(r",\s*유형자산$", "", label)

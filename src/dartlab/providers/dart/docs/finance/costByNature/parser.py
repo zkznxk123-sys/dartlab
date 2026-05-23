@@ -13,19 +13,20 @@ _SKIP_KEYWORDS = set(_CBN.get("skipKeywords", []))
 
 
 def normalizeAccountName(raw: str) -> str:
-    """normalizeAccountName — TODO 한국어 동작 설명.
+    """원본 계정명 → 표준 계정명 — ``NORMALIZE_MAP`` 키워드 매칭 (공백 제거 후 부분일치).
 
     Args:
-        raw: 인자.
+        raw: parquet 원본 계정명 (한글, 공백 가능).
+
+    Returns:
+        매칭된 표준 계정명 또는 매칭 실패 시 입력 그대로.
 
     Raises:
         없음.
 
     Example:
-        >>> normalizeAccountName(...)
-
-    Returns:
-        <TODO: return desc> (str)
+        >>> normalizeAccountName("종업원 급여")
+        '종업원급여'
     """
     cleaned = raw.replace(" ", "")
     for stdName, keywords in NORMALIZE_MAP:
@@ -36,19 +37,20 @@ def normalizeAccountName(raw: str) -> str:
 
 
 def isTotalRow(name: str) -> bool:
-    """isTotalRow — TODO 한국어 동작 설명.
+    """합계 행 판정 — ``TOTAL_PATTERNS`` 키워드 또는 ``"계"`` 단독 행.
 
     Args:
-        name: 인자.
+        name: 계정명.
+
+    Returns:
+        합계/소계/총계 행이면 True.
 
     Raises:
         없음.
 
     Example:
-        >>> isTotalRow(...)
-
-    Returns:
-        <TODO: return desc> (bool)
+        >>> isTotalRow("합 계")
+        True
     """
     cleaned = name.replace(" ", "")
     for p in TOTAL_PATTERNS:

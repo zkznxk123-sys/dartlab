@@ -205,14 +205,7 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
     hasData = False
 
     def flush():
-        """flush — TODO 한국어 동작 설명.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> flush(...)
-        """
+        """누적된 currentColumns/currentRows 를 segment block 1 개로 결정 — 메타컬럼 제외 + 행 정렬."""
         nonlocal currentColumns, currentRows, rowOrder, pendingHeaders, hasData
         if currentColumns and currentRows:
             keepIdx = [i for i, c in enumerate(currentColumns) if c and not _isMetaColumn(c)]
