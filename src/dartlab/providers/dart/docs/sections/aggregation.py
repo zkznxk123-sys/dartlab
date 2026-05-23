@@ -22,7 +22,7 @@ import polars as pl
 
 from dartlab.providers.dart.docs.sections.expansion import _expandStructuredRows
 from dartlab.providers.dart.docs.sections.pathNormalizer import _comparablePathInfo
-from dartlab.reference.docs.topicStandard import TOPIC_CANONICAL_CHAPTER
+from dartlab.providers.dart.docs.topicStandard import TOPIC_CANONICAL_CHAPTER
 
 _log = logging.getLogger("dartlab.providers.dart.docs.sections.pipeline")
 

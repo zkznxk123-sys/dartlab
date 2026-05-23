@@ -26,7 +26,7 @@ import re
 
 import polars as pl
 
-from dartlab.reference.docs.topicStandard import NOTES_SUB_SECTIONS, notesSubTopicKey
+from dartlab.providers.dart.docs.topicStandard import NOTES_SUB_SECTIONS, notesSubTopicKey
 
 # DART 표준 31 주석 번호 → (slug, 한글 label) — O(1) lookup
 _NOTES_BY_NUMBER: dict[int, tuple[str, str]] = {num: (slug, korean) for num, slug, korean in NOTES_SUB_SECTIONS}

@@ -46,7 +46,7 @@ from dartlab.providers.dart.docs.sections.sectionsBase import (
 # DART 표준 chapter canonical override — SSOT 는 reference 레이어.
 # 분기보고서가 같은 topic 의 stub 을 사업보고서와 다른 chapter 에 둘 때 데이터 순서에
 # 따라 chapter 가 흔들리는 것을 차단. 표준 매핑이 first-seen 보다 우선.
-from dartlab.reference.docs.topicStandard import TOPIC_CANONICAL_CHAPTER  # noqa: E402
+from dartlab.providers.dart.docs.topicStandard import TOPIC_CANONICAL_CHAPTER  # noqa: E402
 
 _preparedCache: dict[str, "_PreparedRows"] = {}
 # _PreparedRows.periodRowsDf — 단일 polars DataFrame (모든 period row + _periodKey

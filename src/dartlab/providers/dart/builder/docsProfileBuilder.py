@@ -28,10 +28,10 @@ if TYPE_CHECKING:
     from dartlab.providers.dart.company import Company
 
 
-# DART 정기보고서 표준 chapter 매핑 — SSOT 는 reference 레이어
-# (``dartlab.reference.docs.topicStandard.TOPIC_CANONICAL_CHAPTER``).
+# DART 정기보고서 표준 chapter 매핑 — SSOT 는 dart docs 레이어
+# (``dartlab.providers.dart.docs.topicStandard.TOPIC_CANONICAL_CHAPTER``).
 # buildSections 의 finance/report 합병 synthetic row 에 사용.
-from dartlab.reference.docs.topicStandard import TOPIC_CANONICAL_CHAPTER as _STATIC_CHAPTER_MAP
+from dartlab.providers.dart.docs.topicStandard import TOPIC_CANONICAL_CHAPTER as _STATIC_CHAPTER_MAP
 
 
 def profileTable(company: Company) -> pl.DataFrame | None:

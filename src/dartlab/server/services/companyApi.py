@@ -91,19 +91,19 @@ def filterBlocksByPeriod(blocks: list, period: str) -> list:
     return filtered
 
 
-# DART 표준 (chapter/label) — SSOT 는 ``dartlab.reference.docs.topicStandard``.
-# 서버는 reference 의 helper 를 직접 호출. 중복 매핑 제거.
-from dartlab.reference.docs.topicStandard import (  # noqa: E402
+# DART 표준 (chapter/label) — SSOT 는 ``dartlab.providers.dart.docs.topicStandard``.
+# 서버는 dart docs 레이어의 helper 를 직접 호출. 중복 매핑 제거.
+from dartlab.providers.dart.docs.topicStandard import (  # noqa: E402
     CHAPTER_III_LAYOUT,
     FINANCIAL_STATEMENT_CHILDREN,
     chapterIIIOrder,
     chapterIIIParent,
     chapterTopicOrder,
 )
-from dartlab.reference.docs.topicStandard import (
+from dartlab.providers.dart.docs.topicStandard import (
     chapterLabelKr as _chapterLabelKr,
 )
-from dartlab.reference.docs.topicStandard import (
+from dartlab.providers.dart.docs.topicStandard import (
     labelFor as _topicDartLabel,
 )
 

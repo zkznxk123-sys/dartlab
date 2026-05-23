@@ -15,7 +15,7 @@
 
 사용 예::
 
-    from dartlab.reference.docs.topicStandard import (
+    from dartlab.providers.dart.docs.topicStandard import (
         TOPIC_CANONICAL_CHAPTER,
         TOPIC_DISPLAY_LABEL,
         CHAPTER_LABEL_KR,
