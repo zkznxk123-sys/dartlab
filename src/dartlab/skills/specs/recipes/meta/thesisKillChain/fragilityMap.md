@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Fragility Map
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: IS/BS/CF, price/flow, consensus 원자료에서 thesis를 깨기 쉬운 revenue, margin, cash, leverage, market, expectation 취약 지표를 계산하는 L1/L1.5 절차다.

@@ -4,7 +4,7 @@ title: peer set capex wave 동조성 (lead / lag)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: peer set 의 capex / 매출 비율 시계열을 종목별 동기화한 뒤, 누가 capex wave 를 *선행* 하고 누가 *후행* 하는지 lag correlation 으로 식별. capex 사이클 진입 단계 (선행 = 호황 진입, 후행 = 후기 캐치업) 판정. industry ↔ scan ↔ company 조합.
 whenToUse:
   - peer capex wave

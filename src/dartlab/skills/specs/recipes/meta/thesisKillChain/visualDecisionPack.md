@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Visual Decision Pack
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: scenarioStoryboard, propagationPath, evidenceCoverageAudit, headline metric에 맞는 observed viz surface만 선택하는 L1/L1.5 절차다.

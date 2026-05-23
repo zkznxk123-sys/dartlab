@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Thesis Intake
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: 사용자 thesis를 받아 growth, margin, cash, balance sheet, valuation, event, macro, governance theme으로 파싱하는 pre-mortem 시작 절차다.

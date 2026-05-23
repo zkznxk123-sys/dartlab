@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Evidence Coverage Audit
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: pre-mortem 시나리오에 필요한 statements, filings, price, flow, consensus, scan, assumptions coverage를 확인하는 L1/L1.5 절차다.

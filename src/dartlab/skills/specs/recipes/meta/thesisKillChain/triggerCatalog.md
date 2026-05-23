@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Trigger Catalog
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: fragilityMap, filings, scan primitive에서 thesis를 흔드는 촉발 조건을 모으는 L1/L1.5 절차다.

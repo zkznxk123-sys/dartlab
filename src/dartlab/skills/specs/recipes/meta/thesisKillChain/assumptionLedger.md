@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Assumption Ledger
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: 사용자 thesis를 revenueGrowth, marginDurability, cashConversion, balanceSheet, valuationSupport 등 testable assumption으로 분해하는 L1/L1.5 절차다.

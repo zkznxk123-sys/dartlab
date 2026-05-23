@@ -4,7 +4,7 @@ title: 회사 P&L × 매크로 시나리오 grid → 적정가치 분포 (p25/50
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 기존 base/bull/bear 3 path DCF 가 아니라 매크로 146 시나리오 (rate × FX × 사이클 × 침체) grid × 회사 elasticity → 146 P&L path → 146 fair value → 분포 (p25/p50/p75 + 현재가 대비 확률) 산출. 단일 점추정의 한계 보완. company ↔ macro ↔ analysis 격리 메우는 조합. 트리거 — '시나리오 적정가치 분포', 'fair value distribution', '146 시나리오 valuation'.
 whenToUse:
   - 시나리오 적정가치 분포

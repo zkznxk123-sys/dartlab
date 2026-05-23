@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Falsifier Ledger
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: kill-chain path가 틀렸음을 보여줄 counter-evidence를 trigger별로 열어 thesis 붕괴 단정을 막는 L1/L1.5 절차다.

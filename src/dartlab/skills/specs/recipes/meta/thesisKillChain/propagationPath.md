@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Propagation Path
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: trigger가 어떤 mechanism을 거쳐 어떤 assumption을 깨는지 연결하는 pre-mortem 전파 경로 절차다.

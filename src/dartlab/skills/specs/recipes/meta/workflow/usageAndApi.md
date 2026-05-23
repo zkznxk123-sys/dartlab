@@ -4,7 +4,7 @@ title: dartlab 사용법·API 설명 (RunPython 우회)
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: dartlab 의 기능·사용법·API 를 설명하는 질문에서 ReadSkill + ReadCapability 만 사용하고 RunPython 가짜 evidence 를 만들지 않는 절차. 트리거 — '사용법 안내', 'API 도움말', 'dartlab 호출 예시'.
 whenToUse:
   - dartlab 사용법

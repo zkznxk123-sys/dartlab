@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Premortem Quality Gate
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: Thesis Kill-Chain 결과를 최종 답변으로 쓰기 전, thesis·근거 폭·가정 수·취약 지표·trigger·전파 경로·tripwire·falsifier·scenario·visual binding을 모두 통과했는지 막판에 차단하는 품질 게이트다. 트리거 — '타협 없이 thesis 깨기', 'premortem quality gate', '강한 스킬 검증'.

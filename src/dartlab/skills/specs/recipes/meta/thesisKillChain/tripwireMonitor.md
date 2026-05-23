@@ -4,7 +4,7 @@ title: Thesis Kill-Chain Tripwire Monitor
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.thesisKillChain
 purpose: fragility metric별 current, threshold, action을 정리해 thesis가 깨지는 조기 경보선을 만드는 L1/L1.5 절차다.
