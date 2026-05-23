@@ -183,19 +183,27 @@ def main() -> int:
     baseline = _loadBaseline(baselinePath)
     allowed_over = set(baseline.get("over_split", []))
     allowed_under = set(baseline.get("under_split", []))
+    # 사용자 룰로 영구 동결된 항목 — strict 모드에서도 면제.
+    # 예 providers/{dart,edgar}/company.py 는 mixin/composition/파일 분리 금지 (사용자 룰).
+    user_frozen = set(baseline.get("userFrozen", []))
 
     new_over = [v for v in violations["over_split"] if v["path"] not in allowed_over]
     new_under = [v for v in violations["under_split"] if v["path"] not in allowed_under]
 
     if args.strict:
-        if violations["over_split"] or violations["under_split"]:
+        # strict 에서도 user_frozen 만큼은 면제.
+        strict_over = [v for v in violations["over_split"] if v["path"] not in user_frozen]
+        strict_under = [v for v in violations["under_split"] if v["path"] not in user_frozen]
+        if strict_over or strict_under:
             print("\n=== STRICT FAIL ===")
-            for v in violations["over_split"][:20]:
+            for v in strict_over[:20]:
                 print(f"  [over]  {v['path']} — {v['loc']} LoC")
-            for v in violations["under_split"][:20]:
+            for v in strict_under[:20]:
                 print(f"  [under] {v['path']} — {v['loc']} LoC")
             return 1
         print("\n=== STRICT PASS ===")
+        if user_frozen:
+            print(f"(userFrozen 면제 {len(user_frozen)} 항목)")
         return 0
 
     if new_over or new_under:
