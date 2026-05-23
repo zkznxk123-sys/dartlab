@@ -68,11 +68,20 @@ _SECTIONS_RESULT_CACHE_MAX = int(os.environ.get("DARTLAB_SECTIONS_RESULT_CACHE",
 
 
 def _cacheSectionsResult(cacheKey: tuple[str, "frozenset[str] | None"], result: "pl.DataFrame | None") -> None:
-    """sections() 결과 LRU 캐시 저장. 크기 제한 초과 시 가장 오래된 항목 제거."""
+    """sections() 결과 LRU + 디스크 캐시 저장. 크기 제한 초과 시 가장 오래된 항목 제거.
+
+    Phase 3 추가: 디스크 캐시 (data/dart/sectionsCache/{code}_{hash}.parquet) 도 동시
+    저장. 프로세스 재시작 후에도 build cost 회피.
+    """
+    from dartlab.providers.dart.docs.sections.diskCache import saveDiskCache as _saveDiskCache
+
     if len(_sectionsResultCache) >= _SECTIONS_RESULT_CACHE_MAX:
         oldest = next(iter(_sectionsResultCache))
         del _sectionsResultCache[oldest]
     _sectionsResultCache[cacheKey] = result
+    # 디스크 캐시 동행 저장 — None 이면 saveDiskCache 가 skip.
+    if result is not None:
+        _saveDiskCache(cacheKey[0], cacheKey[1], result)
 
 
 class _PreparedRows:
@@ -361,6 +370,14 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     )
     if cacheKey in _sectionsResultCache:
         return _sectionsResultCache[cacheKey]
+    # Phase 3 디스크 캐시 — 프로세스 재시작 후에도 build cost 회피. docs.parquet
+    # 보다 새로운 cache 만 신뢰 (sectionsCache/{code}_{hash}.parquet).
+    from dartlab.providers.dart.docs.sections.diskCache import loadDiskCache as _loadDiskCache
+
+    diskCached = _loadDiskCache(stockCode, cacheKey[1])
+    if diskCached is not None:
+        _sectionsResultCache[cacheKey] = diskCached
+        return diskCached
 
     # Phase C 본격 처방 — DuckDB PIVOT fast path skeleton.
     # 환경변수 DARTLAB_SECTIONS_FAST_PIVOT=1 활성 시 시도. 실제 SQL 등가 (30+ 컬럼
