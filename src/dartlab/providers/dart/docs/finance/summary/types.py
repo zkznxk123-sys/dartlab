@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class YearAccounts:
-    """YearAccounts — TODO 한국어 클래스 설명."""
+    """단일 period 의 표준 계정 시계열 — accounts dict + 원본 등장 순서."""
 
     year: str  # "2024" 또는 "2024Q1"
     accounts: dict[str, list[float | None]]
@@ -18,7 +18,7 @@ class YearAccounts:
 
 @dataclass
 class BridgeResult:
-    """BridgeResult — TODO 한국어 클래스 설명."""
+    """두 period 사이 계정 매칭 결과 — 동일 계정 비율 + pair 매핑."""
 
     curYear: str  # period key
     prevYear: str
@@ -31,7 +31,7 @@ class BridgeResult:
 
 @dataclass
 class Segment:
-    """Segment — TODO 한국어 클래스 설명."""
+    """계정 구조가 일관 유지되는 연속 period 구간 — bridge 매칭률 한 임계 이상."""
 
     startYear: str  # period key
     endYear: str
@@ -43,7 +43,7 @@ class Segment:
 
 @dataclass
 class AnalysisResult:
-    """AnalysisResult — TODO 한국어 클래스 설명."""
+    """summary 파이프라인 최종 결과 — 전체/연속 매칭률 + segment 분할 + 재무제표 DF."""
 
     corpName: str | None
     nYears: int  # period 수

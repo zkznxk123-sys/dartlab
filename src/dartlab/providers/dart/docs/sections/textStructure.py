@@ -724,30 +724,13 @@ def parseTextStructureWithState(
     segmentOrder = 0
 
     def flushBody() -> None:
-        """flushBody — TODO 한국어 동작 설명.
+        """누적 bodyLines 를 body 노드 1 개로 flush — segmentOrder 증가 + 다음 line 대비 buffer 비움.
 
         Raises:
             없음.
 
         Example:
-            >>> flushBody(...)
-
-        SeeAlso:
-            - ``mapper`` / ``runtime`` — sections 호출자.
-
-        Requires:
-            - dartlab
-            - functools
-            - hashlib
-
-        Capabilities:
-            - sections 본문 텍스트 → 노드 분류 + 정규식 매칭.
-
-        Guide:
-            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-        AIContext:
-            internal text structure — AI 직접 호출 X.
+            >>> flushBody()
         """
         nonlocal bodyLines, segmentOrder
         body = "\n".join(bodyLines).strip()

@@ -45,7 +45,7 @@ class YearSections:
 
     @property
     def savings(self) -> float:
-        """savings — TODO 한국어 동작 설명.
+        """청크 압축 효율 — `1 - textChars / originalChars`. 원본 0 이면 0.0.
 
         Args:
             (인자 자동 생성).
@@ -59,41 +59,13 @@ class YearSections:
         Returns:
             float — 청크 압축 효율 (0~1).
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         if self.totalOriginalChars == 0:
             return 0.0
         return 1 - (self.totalTextChars / self.totalOriginalChars)
 
     def byMajor(self, majorNum: int) -> list[SectionChunk]:
-        """byMajor — TODO 한국어 동작 설명.
+        """주어진 chapter majorNum (I=1, II=2, ...) 의 청크만 필터.
 
         Args:
             majorNum: 인자.
@@ -107,25 +79,11 @@ class YearSections:
         Returns:
             list[SectionChunk] — 청크 리스트.
 
-        LLM Specifications:
-            AntiPatterns:
-                - 본 모듈 직접 호출 X — sections pipeline 내부.
-                - 잘못된 path 형식 ("a > b > c") 가정 X — stripSectionPrefix 후.
-            OutputSchema:
-                - SectionChunk / YearSections / dict — 함수별.
-            Prerequisites:
-                - 본 회사 docs sections 본문.
-            Freshness:
-                - docs 갱신 시점.
-            Dataflow:
-                - sections 본문 → 청킹 → dataclass.
-            TargetMarkets:
-                - KR (DART) sections 청크 타입.
         """
         return [c for c in self.chunks if c.majorNum == majorNum]
 
     def byKind(self, kind: str) -> list[SectionChunk]:
-        """byKind — TODO 한국어 동작 설명.
+        """주어진 kind (``"text"`` / ``"table"`` 등) 의 청크만 필터.
 
         Args:
             kind: 인자.
@@ -139,25 +97,11 @@ class YearSections:
         Returns:
             list[SectionChunk] — 청크 리스트.
 
-        LLM Specifications:
-            AntiPatterns:
-                - 본 모듈 직접 호출 X — sections pipeline 내부.
-                - 잘못된 path 형식 ("a > b > c") 가정 X — stripSectionPrefix 후.
-            OutputSchema:
-                - SectionChunk / YearSections / dict — 함수별.
-            Prerequisites:
-                - 본 회사 docs sections 본문.
-            Freshness:
-                - docs 갱신 시점.
-            Dataflow:
-                - sections 본문 → 청킹 → dataclass.
-            TargetMarkets:
-                - KR (DART) sections 청크 타입.
         """
         return [c for c in self.chunks if c.kind == kind]
 
     def textChunks(self) -> list[SectionChunk]:
-        """textChunks — TODO 한국어 동작 설명.
+        """텍스트 kind 청크만 필터 — `byKind("text")` 단축.
 
         Args:
             (인자 자동 생성).
@@ -171,20 +115,6 @@ class YearSections:
         Returns:
             list[SectionChunk] — 청크 리스트.
 
-        LLM Specifications:
-            AntiPatterns:
-                - 본 모듈 직접 호출 X — sections pipeline 내부.
-                - 잘못된 path 형식 ("a > b > c") 가정 X — stripSectionPrefix 후.
-            OutputSchema:
-                - SectionChunk / YearSections / dict — 함수별.
-            Prerequisites:
-                - 본 회사 docs sections 본문.
-            Freshness:
-                - docs 갱신 시점.
-            Dataflow:
-                - sections 본문 → 청킹 → dataclass.
-            TargetMarkets:
-                - KR (DART) sections 청크 타입.
         """
         return [c for c in self.chunks if c.kind not in ("skipped", "table_only")]
 
@@ -204,34 +134,6 @@ class YearSections:
         Raises:
             없음.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         kw = keyword.lower()
         hits = [c for c in self.chunks if kw in c.path.lower() or kw in c.textContent.lower()]
@@ -254,34 +156,6 @@ class YearSections:
         Returns:
             pl.DataFrame — 청크 메타.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         rows: list[dict] = []
         for c in self.textChunks():
@@ -317,34 +191,6 @@ class YearSections:
         Returns:
             dict[str, str] — 청크 path → label 매핑.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         merged: dict[str, list[str]] = {}
         for c in self.textChunks():
@@ -399,7 +245,7 @@ class SectionResult:
 
     @property
     def topics(self) -> list[str]:
-        """topics — TODO 한국어 동작 설명.
+        """등장 topic 키 정렬 list — 본 sections 결과의 모든 topic 알파벳 순서.
 
         Args:
             (인자 자동 생성).
@@ -413,26 +259,12 @@ class SectionResult:
         Returns:
             list[str] — 결과 목록.
 
-        LLM Specifications:
-            AntiPatterns:
-                - 본 모듈 직접 호출 X — sections pipeline 내부.
-                - 잘못된 path 형식 ("a > b > c") 가정 X — stripSectionPrefix 후.
-            OutputSchema:
-                - SectionChunk / YearSections / dict — 함수별.
-            Prerequisites:
-                - 본 회사 docs sections 본문.
-            Freshness:
-                - docs 갱신 시점.
-            Dataflow:
-                - sections 본문 → 청킹 → dataclass.
-            TargetMarkets:
-                - KR (DART) sections 청크 타입.
         """
         return sorted(self._topicMap.keys())
 
     @property
     def latest(self) -> YearSections | None:
-        """latest — TODO 한국어 동작 설명.
+        """가장 최신 period 의 YearSections — periods 부재 시 None.
 
         Args:
             (인자 자동 생성).
@@ -446,34 +278,6 @@ class SectionResult:
         Returns:
             YearSections 또는 None — 본 연도 청크 모음.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         if not self.periods:
             return None
@@ -481,7 +285,7 @@ class SectionResult:
 
     @property
     def years(self) -> list[str]:
-        """years — TODO 한국어 동작 설명.
+        """등장 연도 키 정렬 list — periods 중 annual 만 또는 전체 (period key 그대로).
 
         Args:
             (인자 자동 생성).
@@ -495,20 +299,6 @@ class SectionResult:
         Returns:
             list[str] — 결과 목록.
 
-        LLM Specifications:
-            AntiPatterns:
-                - 본 모듈 직접 호출 X — sections pipeline 내부.
-                - 잘못된 path 형식 ("a > b > c") 가정 X — stripSectionPrefix 후.
-            OutputSchema:
-                - SectionChunk / YearSections / dict — 함수별.
-            Prerequisites:
-                - 본 회사 docs sections 본문.
-            Freshness:
-                - docs 갱신 시점.
-            Dataflow:
-                - sections 본문 → 청킹 → dataclass.
-            TargetMarkets:
-                - KR (DART) sections 청크 타입.
         """
         return self.periods
 
@@ -528,34 +318,6 @@ class SectionResult:
         Raises:
             없음.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         kw = keyword.lower()
         hits = {t: series for t, series in self._topicMap.items() if kw in t.lower()}
@@ -578,34 +340,6 @@ class SectionResult:
         Returns:
             pl.DataFrame — 청크 메타.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         records: list[dict] = []
         for topic, series in self._topicMap.items():
@@ -637,34 +371,6 @@ class SectionResult:
         Returns:
             pl.DataFrame — 청크 메타.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         ysA = self.yearSections.get(periodA)
         ysB = self.yearSections.get(periodB)
@@ -736,34 +442,6 @@ class SectionResult:
         Returns:
             pl.DataFrame — 청크 메타.
 
-        SeeAlso:
-            - ``pipeline.py`` — sections 빌더.
-
-        Requires:
-            - dartlab
-
-        Capabilities:
-            - sections dataclass 보조.
-
-        Guide:
-            - ``c.sections`` 위임.
-
-        AIContext:
-            internal.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 직접 호출 X.
-            OutputSchema:
-                - 함수별 (SectionChunk / dict / float).
-            Prerequisites:
-                - docs sections.
-            Freshness:
-                - docs 갱신.
-            Dataflow:
-                - sections → 청킹.
-            TargetMarkets:
-                - KR (DART).
         """
         ysA = self.yearSections.get(periodA)
         ysB = self.yearSections.get(periodB)

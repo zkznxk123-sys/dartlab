@@ -474,7 +474,7 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
     blockIndex = 0
 
     def flushText() -> None:
-        """flushText — TODO 한국어 동작 설명.
+        """누적 textBuffer 를 text block 1 row 로 flush — blockIndex 증가.
 
         Raises:
             없음.
@@ -482,21 +482,6 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         Example:
             >>> flushText(...)
 
-        SeeAlso:
-            - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections 파생 뷰 helper — title 정규화 / major/minor 분할 / 마크다운 빌드.
-
-        Guide:
-            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-        AIContext:
-            internal views helper — AI 직접 호출 X.
         """
         nonlocal textBuffer, blockIndex
         text = "\n".join(textBuffer).strip()
@@ -514,7 +499,7 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         textBuffer = []
 
     def flushTable() -> None:
-        """flushTable — TODO 한국어 동작 설명.
+        """누적 tableBuffer 를 table block 1 row 로 flush — blockIndex 증가 + tableLines 카운트.
 
         Raises:
             없음.
@@ -522,21 +507,6 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         Example:
             >>> flushTable(...)
 
-        SeeAlso:
-            - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections 파생 뷰 helper — title 정규화 / major/minor 분할 / 마크다운 빌드.
-
-        Guide:
-            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-        AIContext:
-            internal views helper — AI 직접 호출 X.
         """
         nonlocal tableBuffer, blockIndex
         text = "\n".join(tableBuffer).strip()
@@ -554,7 +524,7 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         tableBuffer = []
 
     def flushAll() -> None:
-        """flushAll — TODO 한국어 동작 설명.
+        """text + table buffer 모두 flush — 라벨 전환/section 종료 시점에 호출.
 
         Raises:
             없음.
@@ -562,21 +532,6 @@ def splitMarkdownBlocks(content: str) -> list[dict[str, object]]:
         Example:
             >>> flushAll(...)
 
-        SeeAlso:
-            - ``viewsRetrieval`` / ``viewsContext`` — retrieval/context 분리.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections 파생 뷰 helper — title 정규화 / major/minor 분할 / 마크다운 빌드.
-
-        Guide:
-            - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-        AIContext:
-            internal views helper — AI 직접 호출 X.
         """
         flushText()
         flushTable()

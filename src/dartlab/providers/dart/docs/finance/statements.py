@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 # types
 @dataclass
 class StatementsResult:
-    """StatementsResult — TODO 한국어 클래스 설명."""
+    """재무제표 추출 결과 — BS/IS/CF DataFrame + 메타데이터."""
 
     corpName: str | None
     period: str  # "y" | "q" | "h"
