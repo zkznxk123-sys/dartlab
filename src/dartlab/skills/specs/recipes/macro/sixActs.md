@@ -91,7 +91,7 @@ for act, axis in enumerate(axes, start=1):
     rows.append({"act": act, "axis": axis, "resultType": type(result).__name__, "hasResult": bool(result)})
     values[f"{axis}Ready"] = bool(result)
 
-emit_result(table=rows, values=values, date="latest")
+emit_result(table=rows, values=values, date="latest", sources=["dartlab://macro/summary", "dartlab://macro/cycle", "dartlab://macro/rates"])
 ```
 
 ## 호출 동작 — 5 단 분석 구조

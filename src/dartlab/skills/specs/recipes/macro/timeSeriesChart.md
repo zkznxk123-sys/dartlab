@@ -105,6 +105,7 @@ emit_result(
     table=rows,
     values={"indicator": indicator, "points": len(rows), "latest": rows[-1]["value"] if rows else None},
     date=rows[-1]["date"] if rows else None,
+    sources=["dartlab://gather/macro"],
 )
 ```
 

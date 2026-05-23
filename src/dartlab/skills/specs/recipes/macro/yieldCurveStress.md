@@ -105,6 +105,7 @@ emit_result(
         "summaryOverall": summary.get("overall") if isinstance(summary, dict) else None,
     },
     date=summary.get("latestAsOf") if isinstance(summary, dict) else None,
+    sources=["dartlab://macro/rates", "dartlab://macro/forecast", "dartlab://macro/summary"],
 )
 ```
 

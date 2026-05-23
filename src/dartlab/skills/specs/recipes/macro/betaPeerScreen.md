@@ -145,6 +145,7 @@ else:
         table=out_rows,
         values={"outlierCount": len(out_rows), "peerCount": len(beta_rows)},
         date="2024-12-31",
+        sources=["dartlab://company/gather/industryPeers", "dartlab://company/scan/macroBeta"],
     )
 ```
 

@@ -89,6 +89,22 @@ forecast = c.analysis("forecast", "매출전망")
 sensitivity = c.analysis("financial", "macro민감도")
 macro_scenario = dartlab.macro("scenario")
 regime = c.quant("국면")
+
+emit_result(
+    table=[
+        {"step": "forecast", "ready": bool(forecast)},
+        {"step": "sensitivity", "ready": bool(sensitivity)},
+        {"step": "macro_scenario", "ready": bool(macro_scenario)},
+        {"step": "regime", "ready": bool(regime)},
+    ],
+    values={
+        "target": "005930",
+        "regimeReady": bool(regime),
+        "scenarioReady": bool(macro_scenario),
+    },
+    date="latest",
+    sources=["dartlab://company/analysis/forecast", "dartlab://company/analysis/financial", "dartlab://macro/scenario", "dartlab://company/quant"],
+)
 ```
 
 ## 호출 동작

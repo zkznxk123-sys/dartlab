@@ -104,6 +104,7 @@ emit_result(
         "krScore": krSummary.get("score") if isinstance(krSummary, dict) else None,
     },
     date=krSummary.get("latestAsOf") if isinstance(krSummary, dict) else None,
+    sources=["dartlab://macro/crisis", "dartlab://macro/assets", "dartlab://macro/summary", "dartlab://gather/macro"],
 )
 ```
 

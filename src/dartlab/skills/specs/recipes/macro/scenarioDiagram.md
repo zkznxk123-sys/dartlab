@@ -129,6 +129,7 @@ emit_result(
     table=monitoring,
     values={"scenarioName": scenarioName, "scenarioType": scenarioType, "nodeCount": len(nodes)},
     date=meta.get("asOf"),
+    sources=["dartlab://macro/scenario", "dartlab://macro/rates", "dartlab://macro/cycle"],
 )
 ```
 

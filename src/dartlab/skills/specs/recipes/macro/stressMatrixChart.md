@@ -114,7 +114,8 @@ if len(chartRows) >= 3:
 emit_result(
     table=rows,
     values={"indicatorCount": len(indicators), "chartCount": len(chartRows)},
-    date=None,
+    date=(rows[-1].get("date") if rows else None),
+    sources=["dartlab://gather/macro"],
 )
 ```
 

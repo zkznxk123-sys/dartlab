@@ -83,6 +83,21 @@ macro_summary = dartlab.macro()
 cycle = dartlab.macro("cycle")
 profit_scan = dartlab.scan("profitability")
 growth_scan = dartlab.scan("growth")
+
+emit_result(
+    table=[
+        {"axis": "macro_summary", "ready": bool(macro_summary)},
+        {"axis": "cycle", "ready": bool(cycle), "phase": (cycle.get("phase") if isinstance(cycle, dict) else None)},
+        {"axis": "profitability", "rows": (len(profit_scan) if hasattr(profit_scan, "__len__") else 0)},
+        {"axis": "growth", "rows": (len(growth_scan) if hasattr(growth_scan, "__len__") else 0)},
+    ],
+    values={
+        "cyclePhase": (cycle.get("phase") if isinstance(cycle, dict) else None),
+        "macroReady": bool(macro_summary),
+    },
+    date=(macro_summary.get("latestAsOf") if isinstance(macro_summary, dict) else None),
+    sources=["dartlab://macro", "dartlab://macro/cycle", "dartlab://scan/profitability", "dartlab://scan/growth"],
+)
 ```
 
 ## 호출 동작

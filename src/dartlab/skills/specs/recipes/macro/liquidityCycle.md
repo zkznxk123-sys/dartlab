@@ -80,6 +80,22 @@ rates = dartlab.macro("rates")
 liquidity = dartlab.macro("liquidity")
 crisis = dartlab.macro("crisis")
 final = dartlab.macro("summary")
+
+rows = [
+    {"axis": "rates", "ready": bool(rates), "regime": (rates.get("regime") if isinstance(rates, dict) else None)},
+    {"axis": "liquidity", "ready": bool(liquidity), "regime": (liquidity.get("regime") if isinstance(liquidity, dict) else None)},
+    {"axis": "crisis", "ready": bool(crisis), "zone": ((crisis.get("recessionDashboard") or {}).get("zone") if isinstance(crisis, dict) else None)},
+    {"axis": "summary", "ready": bool(final), "overall": (final.get("overall") if isinstance(final, dict) else None)},
+]
+emit_result(
+    table=rows,
+    values={
+        "cyclePhase": (final.get("phase") if isinstance(final, dict) else None),
+        "overall": (final.get("overall") if isinstance(final, dict) else None),
+    },
+    date=(final.get("latestAsOf") if isinstance(final, dict) else None),
+    sources=["dartlab://macro", "dartlab://macro/rates", "dartlab://macro/liquidity", "dartlab://macro/crisis", "dartlab://macro/summary"],
+)
 ```
 
 ## 호출 동작

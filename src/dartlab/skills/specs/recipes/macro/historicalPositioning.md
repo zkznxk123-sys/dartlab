@@ -106,6 +106,7 @@ emit_result(
         "crisisZone": ((crisis.get("recessionDashboard") or {}).get("zone") if isinstance(crisis, dict) else None),
     },
     date=current.get("latestAsOf") if isinstance(current, dict) else None,
+    sources=["dartlab://macro/summary", "dartlab://macro/cycle", "dartlab://macro/crisis", "dartlab://macro/scenario"],
 )
 ```
 

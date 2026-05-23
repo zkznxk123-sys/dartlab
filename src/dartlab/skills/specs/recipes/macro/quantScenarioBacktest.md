@@ -95,7 +95,7 @@ rows = [
     {"regime": "base", "factor": "quality", "check": "walk-forward placeholder", "scenarioCount": scenario_count},
     {"regime": "stress", "factor": "value", "check": "drawdown placeholder", "scenarioCount": scenario_count},
 ]
-emit_result(table=rows, values={"market": market, "regimeCount": len(rows), "scenarioCount": scenario_count}, date="latest")
+emit_result(table=rows, values={"market": market, "regimeCount": len(rows), "scenarioCount": scenario_count}, date="latest", sources=["dartlab://macro/scenario", "dartlab://quant/walkForward"])
 ```
 
 ## 호출 동작

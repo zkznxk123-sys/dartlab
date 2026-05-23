@@ -128,6 +128,7 @@ emit_result(
     }],
     values={"qualityDecile": quality_decile, "cyclePhase": phase, "phaseAlignment": phase_alignment},
     date="2024-12-31",
+    sources=["dartlab://company/scan/quality", "dartlab://company/scan/macroBeta", "dartlab://macro/cycle"],
 )
 ```
 

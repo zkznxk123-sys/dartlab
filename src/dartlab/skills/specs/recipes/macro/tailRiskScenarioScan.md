@@ -113,6 +113,7 @@ emit_result(
         "scenarioCount": len(rows),
     },
     date=current.get("latestAsOf") if isinstance(current, dict) else None,
+    sources=["dartlab://macro/scenario", "dartlab://macro/summary"],
 )
 ```
 

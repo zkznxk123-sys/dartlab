@@ -131,6 +131,7 @@ emit_result(
         "macroNullAxes": [a for a, v in macro_axes.items() if isinstance(v, dict) and v.get("error")],
     },
     date="latest",
+    sources=["dartlab://macro", "dartlab://scan/debt", "dartlab://scan/macroBeta"],
 )
 ```
 

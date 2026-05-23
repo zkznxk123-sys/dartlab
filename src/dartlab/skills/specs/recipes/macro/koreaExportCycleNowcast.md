@@ -111,6 +111,7 @@ emit_result(
         "summaryScore": summary.get("score") if isinstance(summary, dict) else None,
     },
     date=summary.get("latestAsOf") if isinstance(summary, dict) else None,
+    sources=["dartlab://macro/summary", "dartlab://macro/trade", "dartlab://macro/corporate", "dartlab://gather/macro", "dartlab://gather/krxIndex"],
 )
 ```
 

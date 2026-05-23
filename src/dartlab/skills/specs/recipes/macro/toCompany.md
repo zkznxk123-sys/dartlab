@@ -85,6 +85,21 @@ macro = dartlab.macro()
 c = dartlab.Company("005930")
 sens = c.analysis("financial", "macro민감도")
 financing = c.analysis("financial", "재무구조")
+
+emit_result(
+    table=[
+        {"step": "macro", "ready": bool(macro)},
+        {"step": "sensitivity", "ready": bool(sens)},
+        {"step": "financing", "ready": bool(financing)},
+    ],
+    values={
+        "target": "005930",
+        "macroReady": bool(macro),
+        "sensitivityReady": bool(sens),
+    },
+    date=(macro.get("latestAsOf") if isinstance(macro, dict) else None),
+    sources=["dartlab://macro", "dartlab://company/analysis/financial"],
+)
 ```
 
 ## 호출 동작
