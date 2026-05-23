@@ -59,36 +59,6 @@ def splitCells(line: str) -> list[str]:
 
     Returns:
         <TODO: return desc> (list[str])
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -112,36 +82,6 @@ def isSeparatorRow(line: str) -> bool:
 
     Returns:
         <TODO: return desc> (bool)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -161,36 +101,6 @@ def parseAmount(text: str) -> int | None:
 
     Returns:
         <TODO: return desc> (int | None)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     if not text or not isinstance(text, str):
         return None
@@ -230,36 +140,6 @@ def detectUnit(content: str) -> str:
 
     Returns:
         <TODO: return desc> (str)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
@@ -332,36 +212,6 @@ def parseSalesTable(content: str) -> tuple[list[dict], list[str]]:
 
     Args:
         content: <TODO: param desc> (str)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -442,36 +292,6 @@ def parseOrderBacklog(content: str) -> tuple[list[dict], list[str]]:
 
     Args:
         content: <TODO: param desc> (str)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -568,36 +388,6 @@ def salesOrder(stockCode: str) -> SalesOrderResult | None:
 
     Returns:
         <TODO: return desc> (SalesOrderResult | None)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     try:
         df = loadData(stockCode)

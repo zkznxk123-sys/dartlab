@@ -279,39 +279,6 @@ def fetchEdgarDocs(
 
     Example:
         >>> fetchEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"))
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - bs4
-        - dartlab
-        - httpx
-        - polars
-        - rich
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     ticker = ticker.upper()
     meta = _resolveTickerMeta(ticker)
@@ -368,39 +335,6 @@ def summarizeEdgarDocsFrame(df: pl.DataFrame) -> dict[str, object]:
 
     Example:
         >>> summarizeEdgarDocsFrame(df)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - bs4
-        - dartlab
-        - httpx
-        - polars
-        - rich
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     if df.is_empty():
         return {
@@ -477,39 +411,6 @@ def summarizeEdgarDocsParquet(path: Path) -> dict[str, object]:
 
     Example:
         >>> summarizeEdgarDocsParquet(Path("data/edgar/docs/AAPL.parquet"))
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - bs4
-        - dartlab
-        - httpx
-        - polars
-        - rich
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     summary = summarizeEdgarDocsFrame(pl.read_parquet(path))
     summary["path"] = str(path)
@@ -660,39 +561,6 @@ def downloadListedEdgarDocs(
 
     Example:
         >>> downloadListedEdgarDocs(limit=100)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - bs4
-        - dartlab
-        - httpx
-        - polars
-        - rich
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.core.dataLoader import _getDataRoot
 
@@ -811,39 +679,6 @@ def prepareEdgarCollectibleUniverse(
 
     Example:
         >>> prepareEdgarCollectibleUniverse(limit=1000, forceRefresh=True)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - bs4
-        - dartlab
-        - httpx
-        - polars
-        - rich
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.core.dataLoader import _getDataRoot, loadEdgarListedUniverse
 
@@ -1618,39 +1453,6 @@ def iterEdgarDocs(
     Example:
         >>> for row in iterEdgarDocs("AAPL", Path("apple.parquet"), maxFilings=5):
         ...     print(row.get("section_title"))
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - bs4
-        - dartlab
-        - httpx
-        - polars
-        - rich
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     fetchEdgarDocs(
         ticker,

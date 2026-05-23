@@ -30,37 +30,6 @@ def packagedArtifactPath(name: str) -> Iterator[Path]:
 
     Returns:
         <TODO: return desc> (Iterator[Path])
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - contextlib
-        - importlib
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     ref = files(_ARTIFACT_PACKAGE) / name
     with as_file(ref) as path:
@@ -82,37 +51,6 @@ def loadCanonicalRows() -> pl.DataFrame | None:
 
     Example:
         >>> loadCanonicalRows()
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - contextlib
-        - importlib
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     try:
         with packagedArtifactPath("canonicalRows.parquet") as path:
@@ -135,37 +73,6 @@ def loadCoverageSnapshot() -> dict[str, object] | None:
 
     Example:
         >>> loadCoverageSnapshot()
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - contextlib
-        - importlib
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     try:
         ref = files(_ARTIFACT_PACKAGE) / "mappingCoverage.latest.json"
@@ -188,37 +95,6 @@ def loadTopicDrafts() -> dict[str, object] | None:
 
     Example:
         >>> loadTopicDrafts()
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - contextlib
-        - importlib
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     try:
         ref = files(_ARTIFACT_PACKAGE) / "formTopicDrafts.json"

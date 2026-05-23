@@ -35,36 +35,6 @@ def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
     Example:
         >>> sortPeriods(["2023Q1", "2024", "2023"], descending=True)
         ['2024', '2023', '2023Q1']
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
 
     def _key(period: str) -> tuple[int, int]:
@@ -90,36 +60,6 @@ def sortTopics(topics: list[str], topicOrder: dict[str, int]) -> list[str]:
 
     Example:
         >>> sortTopics(["10-K::item7Mdna", "10-K::item1Business"], {"10-K::item1Business": 1})
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
 
     def _key(topic: str) -> tuple[int, str, str]:
@@ -144,36 +84,6 @@ def buildMarkdownWide(df: pl.DataFrame | None) -> str:
 
     Example:
         >>> buildMarkdownWide(sec)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     if isEmptyDf(df):
         return ""
@@ -206,36 +116,6 @@ def retrievalBlocks(ticker: str) -> pl.DataFrame | None:
 
     Example:
         >>> retrievalBlocks("AAPL")
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
@@ -424,36 +304,6 @@ def contextSlices(ticker: str, *, maxChars: int = 1800) -> pl.DataFrame | None:
 
     Example:
         >>> contextSlices("AAPL", maxChars=2000)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     blocks = retrievalBlocks(ticker)
     if isEmptyDf(blocks):
@@ -552,36 +402,6 @@ def freq(ticker: str) -> pl.DataFrame | None:
 
     Example:
         >>> freq("AAPL")
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 
@@ -626,36 +446,6 @@ def coverage(ticker: str) -> pl.DataFrame | None:
 
     Example:
         >>> coverage("AAPL")
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.docs.sections.pipeline import sections
 

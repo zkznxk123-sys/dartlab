@@ -60,37 +60,6 @@ def ensureEdgarDocs(
 
     Example:
         >>> ensureEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"), sinceYear=2009, asOf=None, refresh="auto")
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.core.dataConfig import DATA_RELEASES
     from dartlab.core.dataLoader import _download
@@ -149,37 +118,6 @@ def isEdgarDocsCheckExpired(path: Path) -> bool:
 
     Example:
         >>> isEdgarDocsCheckExpired(Path("data/edgar/docs/AAPL.parquet"))
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     if not path.exists():
         return True
@@ -202,37 +140,6 @@ def getLatestRegularEdgarFiling(stockCode: str, *, sinceYear: int) -> dict[str, 
 
     Example:
         >>> getLatestRegularEdgarFiling("AAPL", sinceYear=2024)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.docs.fetch import _findFilings, _getSubmissions, _resolveTickerMeta
 
@@ -265,37 +172,6 @@ def getLocalEdgarDocsState(path: Path) -> dict[str, str] | None:
 
     Example:
         >>> getLocalEdgarDocsState(Path("data/edgar/docs/AAPL.parquet"))
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     if not path.exists():
         return None
@@ -330,37 +206,6 @@ def isEdgarDocsFresh(localState: dict[str, str], latestRemote: dict[str, str], *
 
     Example:
         >>> isEdgarDocsFresh(local, remote, asOf=None)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     latestAccession = str(localState.get("latest_accession_no") or "")
     latestDate = str(localState.get("latest_filing_date") or "")
@@ -414,37 +259,6 @@ def rebuildEdgarDocs(stockCode: str, path: Path, *, sinceYear: int, sourceMode: 
 
     Example:
         >>> rebuildEdgarDocs("AAPL", Path("data/edgar/docs/AAPL.parquet"), sinceYear=2009, sourceMode="sec_api")
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.providers.edgar.docs.fetch import fetchEdgarDocs
 
@@ -483,37 +297,6 @@ def incrementalUpdateEdgarDocs(
 
     Example:
         >>> incrementalUpdateEdgarDocs("AAPL", Path("..."), sinceYear=2009, latestRemote=remote)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - inspect
-        - polars
-        - time
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     from dartlab.core.messaging import emit
     from dartlab.providers.edgar.docs.fetch import (
@@ -615,37 +398,6 @@ class EdgarDocsLoader:
 
         Example:
             >>> EdgarDocsLoader().ensure("AAPL", Path("..."), sinceYear=2024)
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - inspect
-            - polars
-            - time
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         ensureEdgarDocs(
             stockCode,

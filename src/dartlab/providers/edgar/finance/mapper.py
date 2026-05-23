@@ -99,36 +99,6 @@ class EdgarMapper:
 
         Example:
             >>> EdgarMapper.isCommonTag("Revenues")
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
         return tag.lower() in cls._commonTags
@@ -149,36 +119,6 @@ class EdgarMapper:
 
         Example:
             >>> EdgarMapper.map("Revenues", "IS")
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
 
@@ -211,36 +151,6 @@ class EdgarMapper:
 
         Example:
             >>> EdgarMapper.mapToDart("CostOfGoodsSold", "IS")
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         sid = cls.map(tag, stmtType)
         if sid is None:
@@ -259,36 +169,6 @@ class EdgarMapper:
 
         Example:
             >>> EdgarMapper.classifyTagsByStmt()
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
         stmtTags: dict[str, set[str]] = {"IS": set(), "BS": set(), "CF": set(), "CI": set()}
@@ -312,36 +192,6 @@ class EdgarMapper:
         Example:
             >>> EdgarMapper.getPrimaryStmtMap()["Revenues"]
             'IS'
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
         result: dict[str, str] = {}
@@ -366,36 +216,6 @@ class EdgarMapper:
 
         Example:
             >>> EdgarMapper.getLineOrder()["revenue"]
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
         result = {a["snakeId"]: a.get("line", 9999) for a in cls._accounts}
@@ -423,36 +243,6 @@ class EdgarMapper:
         Example:
             >>> EdgarMapper.getAccountStmt("revenue")
             'IS'
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
         for acct in cls._accounts:
@@ -488,36 +278,6 @@ class EdgarMapper:
 
         Example:
             >>> EdgarMapper.getTagsForSnakeIds(["revenue", "operating_income"])
-
-        SeeAlso:
-            - <TODO: 관련 함수/엔진>
-
-        Requires:
-            - dartlab
-            - threading
-
-        Capabilities:
-            - <TODO: 함수 핵심 책임 요약>
-
-        Guide:
-            - <TODO: 사용 시나리오>
-
-        AIContext:
-            <TODO: AI 호출 컨텍스트>
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         cls._ensureLoaded()
         sidSet = set(snakeIds)

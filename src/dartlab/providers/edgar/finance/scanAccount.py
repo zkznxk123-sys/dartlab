@@ -188,45 +188,6 @@ def scanAccount(
     Example:
         >>> df = scanAccount("sales", freq="Y")
         >>> df.sort("2025", descending=True).head(10)
-
-    SeeAlso:
-        - ``providers.dart.finance.scanAccount.scanAccount`` — KR 동치 (동일 schema).
-        - ``_buildEdgarTagKeys`` — DART snakeId → us-gaap concept set 매핑.
-        - ``_EdgarFileProcessor`` — parquet 파일별 처리 callable.
-        - ``providers.edgar.finance.xbrlConcepts`` — us-gaap concept 정규화.
-        - ``providers.edgar.openapi.identity.loadTickers`` — CIK → ticker 매핑.
-        - ``scanRatio`` (edgar) — 비율 primitive (본 함수와 join).
-
-    Requires:
-        - polars
-        - concurrent.futures.ThreadPoolExecutor
-        - dartlab.core.dataLoader (``_dataDir``)
-        - dartlab.providers.edgar.openapi.identity (``loadTickers``)
-
-    Capabilities:
-        - DART scanAccount 와 동치 schema — provider 간 횡단 비교 가능.
-        - us-gaap concept set 자동 매핑 — 다중 동의어 (``Revenues`` / ``RevenueFromContractWithCustomer``) 통합.
-        - ThreadPoolExecutor 8 worker 병렬 parquet scan.
-        - ticker (=stockCode) 정규화로 KR + US 동일 DataFrame join 가능.
-
-    Guide:
-        - "Apple 매출 시계열" → ``scanAccount("sales", freq="Y").filter(pl.col("stockCode")=="AAPL")``.
-        - "US 매출 상위 100" → ``scanAccount("sales", freq="Y").sort("2025", descending=True).head(100)``.
-        - "KR + US 횡단 비교" → KR scanAccount + US scanAccount union (동일 schema).
-
-    AIContext:
-        Ask Workbench cross-market scan — KR scanAccount 와 동일 호출로 US 시계열 추출.
-        Apple vs Samsung 비교 시 ``scanAccount("sales")`` 양 provider 호출 후 join.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 단일 종목 호출 X — 전종목 batch primitive. 단일 종목 = ``c.show("IS")``.
-            - DART snakeId 외 us-gaap concept 직접 호출 X — ``_buildEdgarTagKeys`` 가 매핑.
-            - ``dartSnakeId`` 오타 → 빈 DataFrame + warning (예외 X). 사전 ``scanAccountList()`` 확인.
-            - SEC User-Agent 미설정 → parquet origin 다운로드 실패 (HTTP 403).
-            - parquet glob 부재 → ``"EDGAR finance parquet 없음"`` warning + 빈 DataFrame.
-        OutputSchema:
-            - pl.DataFrame — ``stockCode`` (str, ticker) / ``corpName`` (str)
               / 가변 기간 컬럼 (float). freq="Q": ``"YYYYQn"`` / freq="Y": ``"YYYY"``.
             - row ≤ SEC 등록 ticker 수 (~10K).
             - 빈 DataFrame — parquet 부재 또는 tagKeys 매칭 0.
@@ -325,38 +286,6 @@ def scanRatio(
 
     Example:
         >>> scanRatio("debt_ratio", freq="Y")
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - concurrent
-        - dartlab
-        - logging
-        - polars
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
