@@ -57,6 +57,35 @@ _REGRESSION_KEYWORDS = (
     "6 막 강제",
     "회귀 가드",
     "anti-pattern",
+    # T11-5 확장 — 5 패스 노드 이름이 새 클래스/함수 식별자로 등장하면 회귀.
+    # 본 audit 은 자기 자신 (checkAgentBoundary.py) + workbench 기존 모듈은 skip.
+    "requiredEvidence 강제",
+    "GATE 차단",
+    "BRIEF 노드",
+    "WORK 노드",
+    "CRITIQUE 노드",
+    "COMPOSE 노드",
+    "HARVEST 노드",
+    "노드 그래프 강제",
+    "workbench 본체화",
+)
+
+# T11-5 — 5 패스 노드 이름이 *class 또는 def 식별자* 로 등장하면 차단.
+# 본 매트릭스는 AST 가 아닌 단순 substring 매치라 false-positive 가능 — workbench/
+# 기존 모듈은 _KNOWN_WORKBENCH_FILES 로 skip.
+_FIVE_PASS_NODE_NAMES: tuple[str, ...] = (
+    "class BriefNode",
+    "class WorkNode",
+    "class CritiqueNode",
+    "class ComposeNode",
+    "class GateNode",
+    "class HarvestNode",
+    "def runBriefPass",
+    "def runWorkPass",
+    "def runCritiquePass",
+    "def runComposePass",
+    "def runGatePass",
+    "def runHarvestPass",
 )
 
 
@@ -143,12 +172,41 @@ def _check_regression_keywords(violations: list[str]) -> None:
                 break
 
 
+def _check_five_pass_node_identifiers(violations: list[str]) -> None:
+    """T11-5 — 5 패스 노드 이름이 새 class/def 식별자로 등장하면 차단.
+
+    Range: src/dartlab/ai/ 안 (workbench 기존 모듈 제외 — 자기 자신 보호).
+    매트릭스: _FIVE_PASS_NODE_NAMES (12 패턴, class Brief/Work/...Node + def runXxxPass).
+    """
+    aiDir = SRC / "ai"
+    if not aiDir.is_dir():
+        return
+    for path in aiDir.rglob("*.py"):
+        if "workbench" in str(path).replace("\\", "/"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        # 자기 인식 docstring 인용 허용 (본 audit 처럼).
+        if "_FIVE_PASS_NODE_NAMES" in text or "feedback_no_graph_regression" in text:
+            continue
+        for pattern in _FIVE_PASS_NODE_NAMES:
+            if pattern in text:
+                rel = path.relative_to(ROOT)
+                violations.append(
+                    f"{rel} — '{pattern}' 식별자 추가 (5 패스 노드 회귀). memory/feedback_no_graph_regression.md 검토."
+                )
+                break
+
+
 def main() -> int:
     violations: list[str] = []
     _check_workbench_direct_calls(violations)
     _check_new_workbench_modules(violations)
     _check_new_loop_classes(violations)
     _check_regression_keywords(violations)
+    _check_five_pass_node_identifiers(violations)
 
     strict = "--strict" in sys.argv
 
