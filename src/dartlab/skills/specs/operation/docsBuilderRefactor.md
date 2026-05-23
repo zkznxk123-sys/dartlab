@@ -256,7 +256,41 @@ layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merg
   - 제품 기준 ≥90% 여전히 미달. 잔여 worst (003480 sp=7, 033920 sp=5, 015230 sp=3)
     는 corps 별 특수 패턴 — 일반 가드로 잡기 어렵. 향후 corp 별 deep audit 필요.
 
-## §13 — DART per-IP 발견 → sequential exhausted 정공법 (2026-05-22)
+## §14 — Phase 3 디스크 캐시 + 병렬 batch API (2026-05-23)
+
+사용자: "sections만드는시간이 8초인데 더줄일수는 없을까" + "테스트로 확실히가능한건지 확인하고 본진투입결정"
+
+**옵션 1 — sections 디스크 캐시 (`diskCache.py`, 커밋 0e08ef731):**
+- `data/dart/sectionsCache/{stockCode}_{topicsHash}.parquet` 저장
+- Freshness: `docs/{stockCode}.parquet` mtime > cache mtime → stale → rebuild
+- `topicsHash` = `blake2b(",".join(sorted(topics)), digest_size=3)`. None = `"all"`.
+- 효과:
+  - 1st cold build: 13.48s (+ 디스크 save)
+  - 2nd in-mem hit: 1.05s
+  - 3rd disk hit (in-mem cleared): **1.27s** (cold 7s 대비 ~5×)
+- 프로세스 재시작 후에도 build cost 회피.
+
+**옵션 3 검증 — ProcessPool batch (`buildBatchParallel`, 커밋 344a45779):**
+- POC (sectionsParallelPoc.py): 5 baseline 직렬 61.6s → 병렬 5 worker 19.0s = **3.25×**
+- 본진 API `buildBatchParallel(codes, workers=None)`:
+  - default workers = `min(len(codes), os.cpu_count())`
+  - 각 process 1 corp build + 디스크 캐시 자동 저장
+  - 결과 `dict[code, bool]`
+- 검증: 5 corps via 본진 API **16.42s** (3.7× speedup, 모두 success)
+- 후속 호출은 디스크 cache hit (~1.3s)
+
+**사용 예:**
+```python
+# 단일 corp — in-mem + disk cache 자동 hit
+sec = Company('005930').sections   # 1.3s if disk cache hit, 7s if cold
+
+# 배치 — ProcessPool 병렬 + 디스크 캐시 일괄
+from dartlab.providers.dart.docs.sections.diskCache import buildBatchParallel
+results = buildBatchParallel(['005930', '035720', '005380', '207940', '000660'])
+# 16s (5 corps), 후속 단일 호출 모두 ~1.3s.
+```
+
+## §15 — DART per-IP 발견 → sequential exhausted 정공법 (2026-05-22)
 
 **문제:** 5-key 매-요청 rotation 패턴 (`_acquireSlot` 가 매번 가장 빨리 가용한 slot 선택)
 이 DART per-IP anti-abuse 트리거. 같은 IP 에서 5 키 빠르게 번갈아 사용 = "한도
