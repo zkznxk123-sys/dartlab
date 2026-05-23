@@ -78,6 +78,168 @@ _cacheLock = threading.RLock()
 _CACHE_SENTINEL: object = object()
 
 
+def _representativePeriodRank(period: str | None) -> int:
+    """rowMeta latest-period wins 비교용 rank. annual=4, Q1=1, Q2=2, Q3=3."""
+    if not isinstance(period, str):
+        return -1
+    year = int(period[:4])
+    quarter = {"Q1": 1, "Q2": 2, "Q3": 3}.get(period[4:], 4)
+    return (year * 10) + quarter
+
+
+def _accumulatePeriodRows(
+    *,
+    validPeriods: list[str],
+    periodRowsDf: pl.DataFrame,
+    teacherTopics: dict[str, str],
+    topicsFilter: frozenset[str] | None,
+    suppressed: dict[str, set[str]],
+    fullBuild: bool,
+    topicMap: dict[tuple[str, str], dict[str, str]],
+    rowMeta: dict[tuple[str, str], dict[str, object]],
+    rowOrder: dict[tuple[str, str], dict[str, int]],
+    pathVariantsByKey: dict[tuple[str, str], set[str]],
+    parentPathVariantsByKey: dict[tuple[str, str], set[str]],
+    semanticPathVariantsByKey: dict[tuple[str, str], set[str]],
+    semanticParentPathVariantsByKey: dict[tuple[str, str], set[str]],
+    topicChapter: dict[str, str],
+    topicFirstSeq: dict[str, tuple[int, int]],
+) -> None:
+    """전 period × row 누적 — 7 parallel dict + topicChapter/topicFirstSeq in-place 갱신.
+
+    period 별 ``applyProjections`` + ``_expandStructuredRows`` 후 row 단위 처리:
+    - topic/segmentKey 검증 + suppressed/detailTopic filter
+    - topicMap cell merge (text concat, heading first-seen)
+    - 4 pathVariants 누적
+    - rowOrder min-aggregation (sourceBlockOrder/segmentOrder/occurrence)
+    - rowMeta latest-period wins (`_representativePeriodRank` 기반)
+
+    GC: ``fullBuild`` 시 period 5 마다 gen 0 회수 + 종료 시 1 회 full GC.
+    """
+    if not validPeriods:
+        return
+    latestPeriod = validPeriods[-1]
+
+    for _pIdx, periodKey in enumerate(validPeriods):
+        projected = applyProjections(
+            _periodRowsForKey(periodRowsDf, periodKey),
+            teacherTopics,
+        )
+        if topicsFilter is not None:
+            projected = [r for r in projected if r.get("topic") in topicsFilter]
+        for row in _expandStructuredRows(projected):
+            chapter = row["chapter"]
+            topic = row["topic"]
+            text = row["text"]
+            blockType = row.get("blockType", "text")
+            segmentKey = row.get("segmentKey")
+            if not isinstance(chapter, str) or not isinstance(topic, str) or not isinstance(text, str):
+                continue
+            if not isinstance(blockType, str):
+                blockType = "text"
+            if not isinstance(segmentKey, str) or not segmentKey:
+                continue
+            if topic not in topicChapter:
+                # canonical override 가 있으면 DART 표준 chapter 강제, 없으면 first-seen.
+                topicChapter[topic] = TOPIC_CANONICAL_CHAPTER.get(topic, chapter)
+            if topic in suppressed.get(chapter, set()):
+                continue
+            if detailTopicForTopic(topic) is not None:
+                continue
+
+            key = (topic, segmentKey)
+            if key not in topicMap:
+                topicMap[key] = {}
+            # 같은 (topic, segmentKey, period) 충돌 시:
+            #  - body: cell 안 concatenate — path-anchored merge (옛 last-wins overwrite
+            #    는 본문 손실). text block 만 (table 은 별 segmentKey 라 충돌 없음).
+            #  - heading: single label per row — 같은 path 의 다른 marker text
+            #    ("(1) X" vs "1. X" 같은 marker 변형) 가 concat 되면 sections 의
+            #    "같은 의미 같은 row" 원칙 위반. first-seen 유지 (period order 가 latest→
+            #    oldest 라 첫 번째 = 가장 최신 marker).
+            existingCell = topicMap[key].get(periodKey)
+            textNodeType = row.get("textNodeType")
+            if existingCell and blockType == "text" and existingCell != text:
+                if textNodeType == "heading":
+                    # heading: 첫 번째 (가장 최신 period 의 first-seen) marker 유지
+                    pass
+                else:
+                    topicMap[key][periodKey] = existingCell + "\n\n" + text
+            else:
+                topicMap[key][periodKey] = text
+            if isinstance(row.get("textPathKey"), str) and row.get("textPathKey"):
+                pathVariantsByKey.setdefault(key, set()).add(str(row["textPathKey"]))
+            if isinstance(row.get("textParentPathKey"), str) and row.get("textParentPathKey"):
+                parentPathVariantsByKey.setdefault(key, set()).add(str(row["textParentPathKey"]))
+            if isinstance(row.get("textSemanticPathKey"), str) and row.get("textSemanticPathKey"):
+                semanticPathVariantsByKey.setdefault(key, set()).add(str(row["textSemanticPathKey"]))
+            if isinstance(row.get("textSemanticParentPathKey"), str) and row.get("textSemanticParentPathKey"):
+                semanticParentPathVariantsByKey.setdefault(key, set()).add(str(row["textSemanticParentPathKey"]))
+            comparablePathKey, comparableParentPathKey = _comparablePathInfo(
+                topic,
+                str(row.get("textSemanticPathKey") or row.get("textPathKey") or "") or None,
+            )
+            majorNum = int(row.get("majorNum", 99))
+            sortOrder = int(row.get("sortOrder", 999999))
+            if topic not in topicFirstSeq or (majorNum, sortOrder) < topicFirstSeq[topic]:
+                topicFirstSeq[topic] = (majorNum, sortOrder)
+
+            orderInfo = rowOrder.setdefault(
+                key,
+                {
+                    "latestRank": 999999999,
+                    "latestMissing": 1,
+                    "firstRank": 999999999,
+                    "sourceBlockOrder": int(row.get("sourceBlockOrder") or 0),
+                    "segmentOrder": int(row.get("segmentOrder") or 0),
+                    "segmentOccurrence": int(row.get("segmentOccurrence") or 1),
+                },
+            )
+            orderInfo["firstRank"] = min(orderInfo["firstRank"], sortOrder)
+            orderInfo["sourceBlockOrder"] = min(orderInfo["sourceBlockOrder"], int(row.get("sourceBlockOrder") or 0))
+            orderInfo["segmentOrder"] = min(orderInfo["segmentOrder"], int(row.get("segmentOrder") or 0))
+            orderInfo["segmentOccurrence"] = min(orderInfo["segmentOccurrence"], int(row.get("segmentOccurrence") or 1))
+            if periodKey == latestPeriod:
+                orderInfo["latestMissing"] = 0
+                orderInfo["latestRank"] = min(orderInfo["latestRank"], sortOrder)
+
+            prevMeta = rowMeta.get(key)
+            prevRank = _representativePeriodRank(prevMeta.get("_repPeriod")) if isinstance(prevMeta, dict) else -1
+            currRank = _representativePeriodRank(periodKey)
+            if prevMeta is None or currRank >= prevRank:
+                rowMeta[key] = {
+                    "chapter": chapter,
+                    "topic": topic,
+                    "blockType": blockType,
+                    "sourceBlockOrder": int(row.get("sourceBlockOrder") or 0),
+                    "textNodeType": row.get("textNodeType"),
+                    "textStructural": row.get("textStructural"),
+                    "textLevel": int(row["textLevel"]) if isinstance(row.get("textLevel"), int) else None,
+                    "textPath": row.get("textPath"),
+                    "textPathKey": row.get("textPathKey"),
+                    "textParentPathKey": row.get("textParentPathKey"),
+                    "textSemanticPathKey": row.get("textSemanticPathKey"),
+                    "textSemanticParentPathKey": row.get("textSemanticParentPathKey"),
+                    "textComparablePathKey": comparablePathKey,
+                    "textComparableParentPathKey": comparableParentPathKey,
+                    "segmentKey": segmentKey,
+                    "segmentOrder": int(row.get("segmentOrder") or 0),
+                    "segmentOccurrence": int(row.get("segmentOccurrence") or 1),
+                    "sourceTopic": row.get("sourceTopic"),
+                    "_repPeriod": periodKey,
+                }
+
+        # 큰 Python list 의 ref 끊기 + 전체 빌드만 주기적 gen 0 GC (full GC 대비 ~5× 빠름).
+        # 짧은 lifetime dict 가 대부분 gen 0 이라 효과 동일. 5 baseline profile (035720)
+        # full GC 8 회 × ~60ms = 480ms → gen 0 GC ~80ms 로 축소.
+        del projected
+        if fullBuild and _pIdx % 5 == 4:
+            gc.collect(0)
+
+    # 함수 종료 시점 1 회 full GC — 누적된 gen 1+/2 회수.
+    gc.collect()
+
+
 # 같은 headerHash + topic 표가 다른 path 에 분기된 fragment — segmentKey 안 `|h:<hash>` 부분 매칭.
 _RE_TABLE_HEADER_HASH = re.compile(r"\|h:([0-9a-f]+)")
 
@@ -656,141 +818,27 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     # lifetime 변환. 이전 dict[periodKey, list[dict]] 사본 (~319MB) → polars DF
     # (~100MB) 로 ~3× 메모리 절감 + period 별 dict 짧은 lifetime.
     periodRowsDf = prepared.periodRowsDf
-    latestPeriod = validPeriods[-1]
-
-    def _representativePeriodRank(period: str | None) -> int:
-        if not isinstance(period, str):
-            return -1
-        year = int(period[:4])
-        quarter = {"Q1": 1, "Q2": 2, "Q3": 3}.get(period[4:], 4)
-        return (year * 10) + quarter
 
     topicChapter: dict[str, str] = {}
     topicFirstSeq: dict[str, tuple[int, int]] = {}
 
-    for _pIdx, periodKey in enumerate(validPeriods):
-        projected = applyProjections(
-            _periodRowsForKey(periodRowsDf, periodKey),
-            teacherTopics,
-        )
-        if topics is not None:
-            projected = [r for r in projected if r.get("topic") in topics]
-        for row in _expandStructuredRows(projected):
-            chapter = row["chapter"]
-            topic = row["topic"]
-            text = row["text"]
-            blockType = row.get("blockType", "text")
-            segmentKey = row.get("segmentKey")
-            if not isinstance(chapter, str) or not isinstance(topic, str) or not isinstance(text, str):
-                continue
-            if not isinstance(blockType, str):
-                blockType = "text"
-            if not isinstance(segmentKey, str) or not segmentKey:
-                continue
-            if topic not in topicChapter:
-                # canonical override 가 있으면 DART 표준 chapter 강제, 없으면 first-seen.
-                topicChapter[topic] = TOPIC_CANONICAL_CHAPTER.get(topic, chapter)
-            if topic in suppressed.get(chapter, set()):
-                continue
-            if detailTopicForTopic(topic) is not None:
-                continue
-
-            key = (topic, segmentKey)
-            if key not in topicMap:
-                topicMap[key] = {}
-            # 같은 (topic, segmentKey, period) 충돌 시:
-            #  - body: cell 안 concatenate — path-anchored merge (옛 last-wins overwrite
-            #    는 본문 손실). text block 만 (table 은 별 segmentKey 라 충돌 없음).
-            #  - heading: single label per row — 같은 path 의 다른 marker text
-            #    ("(1) X" vs "1. X" 같은 marker 변형) 가 concat 되면 sections 의
-            #    "같은 의미 같은 row" 원칙 위반. first-seen 유지 (period order 가 latest→
-            #    oldest 라 첫 번째 = 가장 최신 marker).
-            existingCell = topicMap[key].get(periodKey)
-            textNodeType = row.get("textNodeType")
-            if existingCell and blockType == "text" and existingCell != text:
-                if textNodeType == "heading":
-                    # heading: 첫 번째 (가장 최신 period 의 first-seen) marker 유지
-                    pass
-                else:
-                    topicMap[key][periodKey] = existingCell + "\n\n" + text
-            else:
-                topicMap[key][periodKey] = text
-            if isinstance(row.get("textPathKey"), str) and row.get("textPathKey"):
-                pathVariantsByKey.setdefault(key, set()).add(str(row["textPathKey"]))
-            if isinstance(row.get("textParentPathKey"), str) and row.get("textParentPathKey"):
-                parentPathVariantsByKey.setdefault(key, set()).add(str(row["textParentPathKey"]))
-            if isinstance(row.get("textSemanticPathKey"), str) and row.get("textSemanticPathKey"):
-                semanticPathVariantsByKey.setdefault(key, set()).add(str(row["textSemanticPathKey"]))
-            if isinstance(row.get("textSemanticParentPathKey"), str) and row.get("textSemanticParentPathKey"):
-                semanticParentPathVariantsByKey.setdefault(key, set()).add(str(row["textSemanticParentPathKey"]))
-            comparablePathKey, comparableParentPathKey = _comparablePathInfo(
-                topic,
-                str(row.get("textSemanticPathKey") or row.get("textPathKey") or "") or None,
-            )
-            majorNum = int(row.get("majorNum", 99))
-            sortOrder = int(row.get("sortOrder", 999999))
-            if topic not in topicFirstSeq or (majorNum, sortOrder) < topicFirstSeq[topic]:
-                topicFirstSeq[topic] = (majorNum, sortOrder)
-
-            orderInfo = rowOrder.setdefault(
-                key,
-                {
-                    "latestRank": 999999999,
-                    "latestMissing": 1,
-                    "firstRank": 999999999,
-                    "sourceBlockOrder": int(row.get("sourceBlockOrder") or 0),
-                    "segmentOrder": int(row.get("segmentOrder") or 0),
-                    "segmentOccurrence": int(row.get("segmentOccurrence") or 1),
-                },
-            )
-            orderInfo["firstRank"] = min(orderInfo["firstRank"], sortOrder)
-            orderInfo["sourceBlockOrder"] = min(orderInfo["sourceBlockOrder"], int(row.get("sourceBlockOrder") or 0))
-            orderInfo["segmentOrder"] = min(orderInfo["segmentOrder"], int(row.get("segmentOrder") or 0))
-            orderInfo["segmentOccurrence"] = min(orderInfo["segmentOccurrence"], int(row.get("segmentOccurrence") or 1))
-            if periodKey == latestPeriod:
-                orderInfo["latestMissing"] = 0
-                orderInfo["latestRank"] = min(orderInfo["latestRank"], sortOrder)
-
-            prevMeta = rowMeta.get(key)
-            prevRank = _representativePeriodRank(prevMeta.get("_repPeriod")) if isinstance(prevMeta, dict) else -1
-            currRank = _representativePeriodRank(periodKey)
-            if prevMeta is None or currRank >= prevRank:
-                rowMeta[key] = {
-                    "chapter": chapter,
-                    "topic": topic,
-                    "blockType": blockType,
-                    "sourceBlockOrder": int(row.get("sourceBlockOrder") or 0),
-                    "textNodeType": row.get("textNodeType"),
-                    "textStructural": row.get("textStructural"),
-                    "textLevel": int(row["textLevel"]) if isinstance(row.get("textLevel"), int) else None,
-                    "textPath": row.get("textPath"),
-                    "textPathKey": row.get("textPathKey"),
-                    "textParentPathKey": row.get("textParentPathKey"),
-                    "textSemanticPathKey": row.get("textSemanticPathKey"),
-                    "textSemanticParentPathKey": row.get("textSemanticParentPathKey"),
-                    "textComparablePathKey": comparablePathKey,
-                    "textComparableParentPathKey": comparableParentPathKey,
-                    "segmentKey": segmentKey,
-                    "segmentOrder": int(row.get("segmentOrder") or 0),
-                    "segmentOccurrence": int(row.get("segmentOccurrence") or 1),
-                    "sourceTopic": row.get("sourceTopic"),
-                    "_repPeriod": periodKey,
-                }
-
-        # Phase C-1 (minimal) — 명시적 회수: projected/expanded 의 큰 Python list 는
-        # next iteration 시작 전에 ref 끊기 (Python heap reclaim 만, Rust heap 무관).
-        # `projected` 가 local var 라 다음 iteration 의 새 할당으로 자연 GC 되지만
-        # 거대 list 의 경우 ref 가 다음 iteration 시작 전 살아있을 수 있다.
-        projected = None  # noqa: F841 — 명시적 ref drop
-        # 전체 빌드만 주기적 GC — 부분 빌드는 데이터가 적어 불필요.
-        # generation 0 만 회수 (full GC 대비 ~5× 빠름). 짧은 lifetime dict 가 대부분
-        # gen 0 이라 효과 동일. 5 baseline profile (035720) full GC 8 회 × ~60ms = 480ms
-        # → gen 0 GC ~80ms 로 축소.
-        if topics is None and _pIdx % 5 == 4:
-            gc.collect(0)
-
-    # 함수 종료 시점 1 회 full GC — 누적된 gen 1+/2 회수.
-    gc.collect()
+    _accumulatePeriodRows(
+        validPeriods=validPeriods,
+        periodRowsDf=periodRowsDf,
+        teacherTopics=teacherTopics,
+        topicsFilter=frozenset(topics) if topics is not None else None,
+        suppressed=suppressed,
+        fullBuild=topics is None,
+        topicMap=topicMap,
+        rowMeta=rowMeta,
+        rowOrder=rowOrder,
+        pathVariantsByKey=pathVariantsByKey,
+        parentPathVariantsByKey=parentPathVariantsByKey,
+        semanticPathVariantsByKey=semanticPathVariantsByKey,
+        semanticParentPathVariantsByKey=semanticParentPathVariantsByKey,
+        topicChapter=topicChapter,
+        topicFirstSeq=topicFirstSeq,
+    )
 
     if not validPeriods or not topicMap:
         _cacheSectionsResult(cacheKey, None)
