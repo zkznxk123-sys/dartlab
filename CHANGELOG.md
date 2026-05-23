@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+세계 최고 레포 PRD v1.1 트랙 14 T 첫 sprint 완료 — 운영 관측성·보안·DX·문서·테스트·UX·AI 가드·거버넌스 7 영역.
+
+### Added
+
+- `core/logger.logEvent` — 구조화 이벤트 로그 진입점 (snake_case event + JSON 직렬화 fields). metrics workflow 가 grep 으로 추출 (T1-1).
+- `.github/dependabot.yml` — weekly Monday 자동 PR. pip / github-actions / npm 3 ecosystem, 3 그룹 (core-runtime / test-tooling / 외부 도구) (T2-1).
+- `tests/audit/testLocRatio.py` — test/prod LOC 비율 측정 (현재 25 percent, 목표 80 percent). `--json` `--strict` 모드 (T6-5).
+- `tests/audit/reproSeedAudit.py` — random/numpy/polars shuffle 호출 + seed 동행 검증. baseline 부채 원장 12 파일 34 항목 (T7-3).
+- `tests/audit/checkAgentBoundary` — 5 패스 노드 식별자 12 패턴 + 회귀 단어 8 확장. workbench 외 신규 식별자 등장 감지 (T11-5).
+- `tests/run.py eval-full` — nightly tier 신규 게이트 (test_eval_live.py, 30분, blocking=False). smoke 와 분리 (T11-2).
+
+### Changed
+
+- `tests/run.py eval-rule` — `blocking=True` 명시 (fast tier PR 차단 강제, T11-2).
+- README — "두 가지 시작점" → **"세 가지 시작점"** (자연어 / Python / CLI 비교표 + 코드 길이 + 첫 결과 시간 명시). CLI 로 사용 신규 섹션 추가 (T12-1).
+- README — IDE 확장 섹션 추가 (ui/vscode/ 노출 + 4 기능 명시 + 빌드 명령 4 줄) (T4-5).
+- `.github/PULL_REQUEST_TEMPLATE.md` — 자기 변경 path 명시 + preflight 27 게이트 + docstring 9섹션 + 메모리 안전 4 체크 강제 (T14-5).
+- `CONTRIBUTING.md` — 67줄 → 238줄 확장. 5 PR 시나리오 + 강행규칙 5 분류 표 + PR 흐름 9 단계 + 외부 기여 진입 라우팅 (T10-3).
+
+### Documentation
+
+- `DEPRECATION.md` — public API 제거 정책 3 minor version notice. 1.0.0 이후 6 minor 확장 (LTS 정합). 자동 검증 게이트 라우팅 (T8-1).
+- `docs/VERSIONING.md` — 0.x beta + 1.x strict + LTS 12개월 정책. 변경 종류별 major/minor/patch 결정 표 (T14-3).
+- `docs/RELEASE.md` — 출시 12 체크리스트 4 카테고리 (코드 정합 / 보안 / 문서 / 배포). 1.0.0 추가 6 게이트. release.yml 자동화 스펙 + PyPI yank 롤백 (T14-1).
+- `docs/INCIDENTS.md` — 공개 사고 RCA 템플릿 9 섹션 (분류 / 영향 / 지속 / 증상 / 원인 5whys / 수정 / 재발 가드 / 학습). 첫 항목 2 종 등록 (T1-3).
+- `docs/SLO.md` — 4 SLO 정의 (Company.show 95 percent / CI Fast 90 percent / HF sync 95 percent / MCP boot 99 percent). error budget 50/80/100 정책 (T1-4).
+- `docs/DEVELOPMENT.md` — 첫 수정 10분 가이드 6 단계 + 핫리로드 명령 3 (uvicorn/marimo/SvelteKit) + 환경 변수 6 (T4-1 + T4-4).
+- `docs/TROUBLESHOOTING.md` — 5 에러 시나리오 (UnicodeEncodeError / OOMKilled / OfflineViolation / ImportLinter / 커밋 메시지 정책) + 빠른 진단 5 (T4-2).
+- `src/dartlab/skills/specs/{start,operation,runtime,engines}/README.md` — 4 카테고리 hub README. 추천 진입 순서 + 카테고리 라우팅 + 관련 문서 라우팅 3 섹션 통일 (T10-5).
+
+### Security
+
+- Dependabot weekly Monday 자동 PR 활성화 (label `security` 자동 부여, T2-1).
+
 ## [0.10.2] - 2026-05-20
 
 공시뷰어 정확성 회귀 차단 + 퀀트 탭 응답성 + sections 파이프라인 메모리 절감.
