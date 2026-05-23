@@ -591,7 +591,8 @@ class DartKeyProvider:
 
         try:
             status = getDartKeyStatus()
-        except Exception:
+        except (OSError, ValueError, KeyError):
+            # 환경변수/파일 읽기 실패 또는 형식 오류 — 미설정으로 응답.
             return CredentialStatus(name=self.name, configured=False, source="none")
 
         masked: str | None = None

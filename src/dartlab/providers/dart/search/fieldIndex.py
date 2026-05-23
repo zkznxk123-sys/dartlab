@@ -1184,7 +1184,8 @@ def pullContentIndex() -> int:
                 local_dir=str(dataDir),
             )
             ok += 1
-        except Exception:
+        except (OSError, ConnectionError, ValueError):
+            # HF Hub 다운로드 실패 (네트워크 / 인증 / 파일 부재) — 다음 파일 진행.
             continue
     clearCache()
     _log.info("[green]✓[/] contentIndex (%d/%d 파일)", ok, len(names))

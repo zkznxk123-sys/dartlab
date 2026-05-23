@@ -582,7 +582,8 @@ class ZipDocsCollector:
                     continue
                 try:
                     rows = parseSectionsByTitle(xml)
-                except Exception:
+                except (ValueError, AttributeError, KeyError):
+                    # XML 형식 오류 / 누락 element — 다음 zip 진행.
                     skipped += 1
                     continue
                 if not rows:

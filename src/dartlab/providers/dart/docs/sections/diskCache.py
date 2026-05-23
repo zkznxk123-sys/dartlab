@@ -134,7 +134,8 @@ def _buildOneForBatch(code: str) -> tuple[str, bool]:
 
         sec = Company(code).sections
         return (code, sec is not None and not sec.is_empty())
-    except Exception:
+    except (OSError, ValueError, KeyError, RuntimeError) as exc:
+        _log.warning("buildBatchParallel(%s) 실패: %s", code, exc)
         return (code, False)
 
 

@@ -102,7 +102,8 @@ def _fetchOne(
             return
         safeWriteBytes(outPath, raw)
         stats.add(saved=1, bytesTotal=len(raw))
-    except Exception:
+    except (OSError, RuntimeError, ValueError):
+        # DartApiError(network/rate-limit) + 디스크 IO 실패 — 카운트 후 다음 종목 진행.
         stats.add(failed=1)
 
 
@@ -175,7 +176,7 @@ def buildTargetsFromDocsParquet(
             continue
         try:
             df = pl.read_parquet(parquet, columns=["rcept_no"])
-        except Exception:
+        except (OSError, pl.exceptions.ComputeError):
             continue
         for r in df.select("rcept_no").unique().to_series().to_list():
             targets.append((code, str(r)))

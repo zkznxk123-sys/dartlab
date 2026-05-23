@@ -587,6 +587,7 @@ def _normalizeDocumentText(rawText: str) -> str:
         from dartlab.providers.dart.openapi.collector import _htmlToText
 
         normalized = _htmlToText(rawText)
-    except Exception:
+    except (ImportError, ValueError, AttributeError):
+        # HTML 파서 실패 (malformed input 등) — raw text 반환.
         normalized = ""
     return normalized or rawText
