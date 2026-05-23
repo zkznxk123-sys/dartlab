@@ -93,6 +93,45 @@ def scanRatio(
     Example:
         >>> scanRatio("roe", freq="Y").sort("2025", descending=True).head(30)
         >>> dr = scanRatio("debtRatio", freq="Y").select(["stockCode", "2025"])
+
+    SeeAlso:
+        - ``scanAccount`` — primitive 1 (단일 계정 시계열).
+        - ``scanRatioList`` — 지원 비율 카탈로그.
+        - ``scan("valuation")`` — PBR/PER 등 시가총액 기반 비율.
+
+    Requires:
+        - dartlab
+        - finance.parquet (prebuild)
+
+    Capabilities:
+        - 2664 종목 × 기간 wide DataFrame 단발 추출. polars vectorize — Python loop 0.
+        - YoY 비율 (revenueGrowth 등) 은 부호 전환 시 None 정책.
+
+    Guide:
+        - 단일 축 한 번 돌리고 끝내지 말 것. "투자할만한 회사" 류는 ROE/operatingMargin/
+          debtRatio/revenueGrowth 등 다축 join 후 교집합.
+        - 지주사·금융업·라이센싱사는 operatingMargin 비정상치 (100 % 초과) 가능 — listing()
+          섹터 필터 또는 ``c.show("IS")`` 로 구조 확인.
+
+    AIContext:
+        scan 원자 primitive 2. 광역 발굴 질문에 ``scanAccount`` 와 자유 조합. 단일 종목
+        지목 전까지 Company 호출 금지.
+
+    LLM Specifications:
+        AntiPatterns:
+            - 단일 ratio 만으로 "좋은 회사" 결론 (다축 교집합 필수).
+            - PBR/PER 시도 (``scan("valuation")`` 우회 의무).
+        OutputSchema:
+            - stockCode: str
+            - 기간 컬럼들 (YYYY 또는 YYYYQN): float (% 또는 배).
+        Prerequisites:
+            - prebuild ``finance.parquet`` 존재.
+        Freshness:
+            - prebuild 파이프라인 갱신 시점 — 보통 분기 결산 1~2 주 후.
+        Dataflow:
+            - finance.parquet → polars lazy scan → pivot → ratio 계산 → wide DataFrame.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
@@ -129,6 +168,38 @@ def scanRatioList() -> list[dict[str, str]]:
     Example:
         >>> dartlab.scan("ratio")
         >>> [r["name"] for r in scanRatioList()]
+
+    SeeAlso:
+        - ``scanRatio`` — 카탈로그의 비율 1 종을 전종목 시계열로.
+        - ``scanFields`` — 조건형 스크리닝 필드 카탈로그.
+        - ``scan("ratio")`` — 본 함수 호출 shortcut.
+
+    Requires:
+        - dartlab
+
+    Capabilities:
+        - 13 종 비율 (수익성 5 / 안정성 3 / 성장 3 / 효율 1 / CF 1) 메타 반환.
+        - ``_RATIO_DEFS`` 단일 원천 — 신규 비율 추가 시 본 함수가 자동 노출.
+
+    Guide:
+        - AI 가 사용자 질문에 맞는 비율 키를 먼저 본 함수로 확인 후 ``scanRatio`` 호출.
+
+    AIContext:
+        카탈로그 조회 함수. ``scan("fields")`` 의 finance ratio 행이 본 목록에서 생성.
+
+    LLM Specifications:
+        AntiPatterns:
+            - PBR/PER/dividendYield 등 시가총액 기반 비율을 본 목록에서 찾기 (``scan("valuation")`` 별도 경로).
+        OutputSchema:
+            - list[dict[str, str]] — keys: name / label / unit.
+        Prerequisites:
+            - 없음 (in-memory dict 변환).
+        Freshness:
+            - 즉시 (모듈 import 시점 카탈로그).
+        Dataflow:
+            - 모듈 _RATIO_DEFS → list comprehension → dict 리스트.
+        TargetMarkets:
+            - KR (DART) 한정.
     """
     return [{"name": k, "label": v["label"], "unit": "%" if v.get("pct") else "배"} for k, v in _RATIO_DEFS.items()]
 
