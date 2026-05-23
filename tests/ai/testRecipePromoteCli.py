@@ -184,6 +184,26 @@ def test_deprecate_marks_status_deprecated(tmp_path: Path, cli_module, monkeypat
     assert "drift > 50%" in text
 
 
+def test_repo_root_resolves_to_recipe_dir(cli_module):
+    """REPO_ROOT 가 parents[3] (=repo root) 로 잡혀 RECIPE_DIR 이 실제 recipes/ 디렉토리.
+
+    회귀 가드: parents[2] 였을 때 src/src/dartlab/skills/specs/recipes 를 가리켜
+    list 명령이 NotFound. parents[3] 가 정답.
+    """
+    assert cli_module.RECIPE_DIR.is_dir(), (
+        f"RECIPE_DIR 가 존재하지 않는다 — {cli_module.RECIPE_DIR}. parents[N] 가 repo root 가 아닐 가능성."
+    )
+    # 실제 recipes/ 트리 안에 known 카테고리 (fundamental/macro/meta) 존재 확인.
+    assert (cli_module.RECIPE_DIR / "fundamental").is_dir()
+    assert (cli_module.RECIPE_DIR / "macro").is_dir()
+    assert (cli_module.RECIPE_DIR / "meta").is_dir()
+
+
+def test_validate_subcommand_registered(cli_module):
+    """validate 서브커맨드가 main() 안에서 등록되도록 cmdValidate 함수 노출 확인."""
+    assert hasattr(cli_module, "cmdValidate"), "cmdValidate 함수가 모듈에 없다"
+
+
 def test_promote_to_storyboard_requires_verified_or_curated(tmp_path: Path, cli_module, monkeypatch):
     monkeypatch.setattr(
         cli_module,
