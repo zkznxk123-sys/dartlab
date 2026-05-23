@@ -26,6 +26,7 @@ import gc
 import logging
 import os
 import re
+import threading
 
 import polars as pl
 
@@ -66,6 +67,16 @@ _PREPARED_CACHE_MAX = int(os.environ.get("DARTLAB_SECTIONS_CACHE", "1"))
 _sectionsResultCache: dict[tuple[str, "frozenset[str] | None"], "pl.DataFrame | None"] = {}
 _SECTIONS_RESULT_CACHE_MAX = int(os.environ.get("DARTLAB_SECTIONS_RESULT_CACHE", "5"))
 
+# 모듈 레벨 dict 캐시 동시성 가드 — ThreadPool / async 호출 환경에서
+# `next(iter(...))` + `del` 패턴이 lock 없이 진행되면 `KeyError` / mutation during
+# iteration 가능. RLock 으로 read/evict/insert 직렬화. dashboard 빌더 같은
+# 다중 스레드 호출자 안전.
+_cacheLock = threading.RLock()
+
+# `None` 자체가 sections() 의 valid 결과 (데이터 부재) 라서 `dict.get` 의
+# `default=None` 으로 hit/miss 구분 불가. sentinel 로 miss 명시.
+_CACHE_SENTINEL: object = object()
+
 
 def _cacheSectionsResult(cacheKey: tuple[str, "frozenset[str] | None"], result: "pl.DataFrame | None") -> None:
     """sections() 결과 LRU + 디스크 캐시 저장. 크기 제한 초과 시 가장 오래된 항목 제거.
@@ -75,11 +86,12 @@ def _cacheSectionsResult(cacheKey: tuple[str, "frozenset[str] | None"], result: 
     """
     from dartlab.providers.dart.docs.sections.diskCache import saveDiskCache as _saveDiskCache
 
-    if len(_sectionsResultCache) >= _SECTIONS_RESULT_CACHE_MAX:
-        oldest = next(iter(_sectionsResultCache))
-        del _sectionsResultCache[oldest]
-    _sectionsResultCache[cacheKey] = result
-    # 디스크 캐시 동행 저장 — None 이면 saveDiskCache 가 skip.
+    with _cacheLock:
+        if len(_sectionsResultCache) >= _SECTIONS_RESULT_CACHE_MAX:
+            oldest = next(iter(_sectionsResultCache))
+            del _sectionsResultCache[oldest]
+        _sectionsResultCache[cacheKey] = result
+    # 디스크 캐시 동행 저장 — None 이면 saveDiskCache 가 skip. lock 밖에서 IO 수행.
     if result is not None:
         _saveDiskCache(cacheKey[0], cacheKey[1], result)
 
@@ -111,8 +123,10 @@ from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
 
 def _getPrepared(stockCode: str) -> _PreparedRows:
     """Phase 1 결과를 캐싱하여 반환. 같은 종목 반복 호출 시 parquet 재로드 방지."""
-    if stockCode in _preparedCache:
-        return _preparedCache[stockCode]
+    with _cacheLock:
+        cached = _preparedCache.get(stockCode)
+    if cached is not None:
+        return cached
 
     validPeriods: list[str] = []
     latestAnnualRows: list[dict[str, object]] | None = None
@@ -144,11 +158,16 @@ def _getPrepared(stockCode: str) -> _PreparedRows:
 
     prepared = _PreparedRows(periodRowsDf, validPeriods, teacherTopics)
 
-    # LRU 방식: 최대치 초과 시 가장 오래된 항목 제거
-    if len(_preparedCache) >= _PREPARED_CACHE_MAX:
-        oldest = next(iter(_preparedCache))
-        del _preparedCache[oldest]
-    _preparedCache[stockCode] = prepared
+    # LRU 방식: 최대치 초과 시 가장 오래된 항목 제거. lock 가드 — concurrent build race 차단.
+    with _cacheLock:
+        # 동시 빌드: 다른 스레드가 먼저 채웠다면 중복 작업 회피하고 그쪽 결과 채택.
+        existing = _preparedCache.get(stockCode)
+        if existing is not None:
+            return existing
+        if len(_preparedCache) >= _PREPARED_CACHE_MAX:
+            oldest = next(iter(_preparedCache))
+            del _preparedCache[oldest]
+        _preparedCache[stockCode] = prepared
     return prepared
 
 
@@ -196,15 +215,16 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
         TargetMarkets:
             - KR (DART) sections pipeline.
     """
-    if stockCode is None:
-        _preparedCache.clear()
-        _sectionsResultCache.clear()
-    else:
-        _preparedCache.pop(stockCode, None)
-        # 같은 stockCode 의 sections 결과 cache 도 동반 해제 (topics 무관 모두)
-        toRemove = [k for k in _sectionsResultCache if k[0] == stockCode]
-        for k in toRemove:
-            _sectionsResultCache.pop(k, None)
+    with _cacheLock:
+        if stockCode is None:
+            _preparedCache.clear()
+            _sectionsResultCache.clear()
+        else:
+            _preparedCache.pop(stockCode, None)
+            # 같은 stockCode 의 sections 결과 cache 도 동반 해제 (topics 무관 모두)
+            toRemove = [k for k in _sectionsResultCache if k[0] == stockCode]
+            for k in toRemove:
+                _sectionsResultCache.pop(k, None)
 
 
 from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
@@ -340,15 +360,18 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         stockCode,
         frozenset(topics) if topics is not None else None,
     )
-    if cacheKey in _sectionsResultCache:
-        return _sectionsResultCache[cacheKey]
+    with _cacheLock:
+        cached = _sectionsResultCache.get(cacheKey, _CACHE_SENTINEL)
+    if cached is not _CACHE_SENTINEL:
+        return cached  # type: ignore[return-value]
     # Phase 3 디스크 캐시 — 프로세스 재시작 후에도 build cost 회피. docs.parquet
     # 보다 새로운 cache 만 신뢰 (sectionsCache/{code}_{hash}.parquet).
     from dartlab.providers.dart.docs.sections.diskCache import loadDiskCache as _loadDiskCache
 
     diskCached = _loadDiskCache(stockCode, cacheKey[1])
     if diskCached is not None:
-        _sectionsResultCache[cacheKey] = diskCached
+        with _cacheLock:
+            _sectionsResultCache[cacheKey] = diskCached
         return diskCached
 
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
