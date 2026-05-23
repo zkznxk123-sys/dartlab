@@ -261,6 +261,38 @@ def test_emit_result_sources_dict_list_still_works():
     assert source_refs[0].title == "Source 1"
 
 
+def test_emit_result_empty_table_still_creates_table_ref():
+    """빈 DataFrame 도 'table' 키가 emit 되면 tableRef 생성 — declared evidence 측정.
+
+    회귀 가드: 이전에는 len(table)>0 일 때만 tableRef 생성 → 'insufficient data'
+    같은 정상 실행 결과가 evidence 누락으로 잡혀 scorecard fail.
+    """
+    from dartlab.ai.tools.runPython import runPython
+
+    code = "import polars as pl\nemit_result(table=pl.DataFrame(schema={'x': pl.Utf8}), values={'k': 0}, date='2026-01-01')"
+    result = runPython(code)
+    assert result.ok
+    kinds = sorted({r.kind for r in result.refs or []})
+    assert "tableRef" in kinds, f"빈 table 도 tableRef 가 생성되어야 한다: {kinds}"
+
+
+def test_emit_result_none_date_still_creates_date_ref():
+    """date=None 도 키가 emit 되면 dateRef 생성 (title='unavailable').
+
+    회귀 가드: 이전에는 date=None 이면 dateRef 생성 안 함 → recipe 가 'date 추적
+    의도' 있음을 표면 못 함.
+    """
+    from dartlab.ai.tools.runPython import runPython
+
+    code = "emit_result(values={'k': 1}, date=None)"
+    result = runPython(code)
+    assert result.ok
+    date_refs = [r for r in (result.refs or []) if r.kind == "dateRef"]
+    assert len(date_refs) == 1
+    assert date_refs[0].title == "unavailable"
+    assert date_refs[0].payload.get("specified") is False
+
+
 def test_default_safe_roots_includes_dartlab_home_and_tmp():
     from dartlab.ai.tools.runpythonGuard import _defaultSafeRoots
 
