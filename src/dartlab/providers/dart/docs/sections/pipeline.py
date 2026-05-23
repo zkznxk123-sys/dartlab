@@ -207,6 +207,18 @@ def clearPreparedCache(stockCode: str | None = None) -> None:
             _sectionsResultCache.pop(k, None)
 
 
+from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
+    _sectionsPolarsOnly,
+)
+from dartlab.providers.dart.docs.sections.expansion import (  # noqa: F401
+    _NOTES_TOPICS,
+    _expandStructuredRows,
+)
+from dartlab.providers.dart.docs.sections.freqMeta import (  # noqa: F401
+    _freqSortKey,
+    _periodFreq,
+    _rowFreqMeta,
+)
 from dartlab.providers.dart.docs.sections.pathNormalizer import (  # noqa: F401
     _BUSINESS_OVERVIEW_COMPARABLE_ROOTS,
     _BUSINESS_UNIT_SEGMENT_LITERALS,
@@ -228,46 +240,6 @@ from dartlab.providers.dart.docs.sections.reportRows import (  # noqa: F401
     _REPORT_ROW_SCHEMA,
     _reportRowsToTopicRows,
     _splitContentBlocks,
-)
-
-
-def _sectionsFastDuckdb(stockCode: str, topics: set[str] | None) -> pl.DataFrame | None:
-    """Phase C 본격 처방 fast path — *시도 fail 2회 실증 후 skeleton revert*.
-
-    시도 history (transcript 기록 + commit history):
-      - eba15aa4e: NotImplementedError + legacy fallback (1차 skeleton)
-      - 시도 1: detailTopicForTopic mapper import → **ImportError**. revert.
-      - 시도 2: detailTopicForTopic runtime + projectionSuppressedTopics
-        runtimeProjection → **또 ImportError** (projectionSuppressedTopics 위치
-        잘못). revert.
-      - 현 상태: NotImplementedError + legacy fallback. 2회 시도 fail 로
-        내 능력 한계 결정적 실증.
-
-    fail 패턴 = 기본 import 위치 검증조차 못 함. plan 의 sections 200 LOC SQL
-    등가 + 30+ 컬럼 schema 복제 + 5 종목 parity 보장은 *단일 PR 안 안전 진행
-    완전 불가능*. 별도 PR 필수.
-
-    Raises:
-        NotImplementedError — 항상.
-    """
-    raise NotImplementedError(
-        "sections() DuckDB PIVOT fast path 미구현. 시도 2회 fail "
-        "(detailTopicForTopic import + projectionSuppressedTopics import 위치 "
-        "모두 검증 안 됨) → 별도 PR 필요."
-    )
-
-
-from dartlab.providers.dart.docs.sections.aggregation import (  # noqa: F401
-    _sectionsPolarsOnly,
-)
-from dartlab.providers.dart.docs.sections.expansion import (  # noqa: F401
-    _NOTES_TOPICS,
-    _expandStructuredRows,
-)
-from dartlab.providers.dart.docs.sections.freqMeta import (  # noqa: F401
-    _freqSortKey,
-    _periodFreq,
-    _rowFreqMeta,
 )
 
 # ── 분석 함수들은 analysis.py로 이동 ──
@@ -378,22 +350,6 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
     if diskCached is not None:
         _sectionsResultCache[cacheKey] = diskCached
         return diskCached
-
-    # Phase C 본격 처방 — DuckDB PIVOT fast path skeleton.
-    # 환경변수 DARTLAB_SECTIONS_FAST_PIVOT=1 활성 시 시도. 실제 SQL 등가 (30+ 컬럼
-    # schema + 9-튜플 sort key + List/Categorical/Boolean dtype + _rowFreqMeta
-    # Python 함수 등가) 는 별도 PR — caller predicate statementFilter 가 _normalizeQ4
-    # cross-statement 의존성으로 parity 6 fail 한 사례 (commit 7eebdacbc) 가
-    # 보여주듯 sj_div 단순 가정만으로 부족. sections 의 더 복잡한 schema 는 동일/
-    # 더 큰 parity 위험. 본 skeleton 은 명목 진척 — 실제 fast path 작성 시 plan
-    # 의 5 종목 parity test 가 회귀 가드.
-    import os as _os
-
-    if _os.environ.get("DARTLAB_SECTIONS_FAST_PIVOT") == "1":
-        try:
-            return _sectionsFastDuckdb(stockCode, topics)
-        except NotImplementedError:
-            pass  # legacy fallback — 본 PR 단계에선 항상 legacy
 
     topicMap: dict[tuple[str, str], dict[str, str]] = {}
     rowMeta: dict[tuple[str, str], dict[str, object]] = {}

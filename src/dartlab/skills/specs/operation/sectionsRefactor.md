@@ -121,7 +121,6 @@ post-hoc dedup. 옛 design 에선 chapter row catch-all 과 sub-section row 가 
 - comparable path normalization (`_comparablePathInfo` 등, ~100 줄).
 - period iteration (`iterPeriodSubsets`, ~100 줄).
 - content block split (`_splitContentBlocks`, ~50 줄).
-- DuckDB fast path skeleton (`_sectionsFastDuckdb`, ~30 줄 NotImplementedError).
 - polars-only main (`_sectionsPolarsOnly`, ~450 줄).
 - topic row 생성 (`_reportRowsToTopicRows`, ~190 줄).
 - heading state expansion (`_expandStructuredRows`, ~160 줄).
