@@ -40,144 +40,25 @@ class SectionsAnalyzer:
     # ── topic manifest ──
 
     def topicManifest(self) -> pl.DataFrame:
-        """전체 topic 카탈로그 — ``chapter/topic/source/blocks/periods/latestPeriod``.
-
-        docs parquet 의 section_title 을 mapper 통해 topic 정규화 + chapter 분류.
-        4 분기 마일스톤 보고서 (Q1/Q2/Q3/annual) 모두 흡수.
+        """전체 topic 카탈로그 — chapter/topic/source/blocks/periods/latestPeriod.
 
         Returns:
-            카탈로그 wide DataFrame (chapter/order 정렬). docs 부재 시 빈 schema.
+            wide DataFrame (chapter/order 정렬) 또는 docs 부재 시 빈 schema.
 
         Raises:
             없음.
 
         Example:
             >>> analyzer.topicManifest().head()
-
         """
-        cacheKey = "_docsTopicManifest"
-        if cacheKey in self._cache:
-            return self._cache[cacheKey]
+        from dartlab.providers.dart.builder.topicManifest import buildTopicManifest
 
-        empty = _emptyTopicManifest()
-        if not self._hasDocs:
-            self._cache[cacheKey] = empty
-            return empty
-
-        from dartlab.core.dataLoader import loadData
-
-        raw = loadData(
-            self._stockCode,
-            category="docs",
-            sinceYear=2016,
-            columns=["year", "report_type", "rcept_date", "section_order", "section_title"],
+        return buildTopicManifest(
+            stockCode=self._stockCode,
+            hasDocs=self._hasDocs,
+            cache=self._cache,
+            emptyDf=_emptyTopicManifest(),
         )
-        requiredCols = {"year", "report_type", "section_order", "section_title"}
-        if isEmptyDf(raw) or not requiredCols.issubset(set(raw.columns)):
-            self._cache[cacheKey] = empty
-            return empty
-
-        from dartlab.providers.dart.docs.sections.chunker import parseMajorNum
-        from dartlab.providers.dart.docs.sections.mapper import mapSectionTitle
-        from dartlab.providers.dart.docs.sections.runtime import chapterFromMajorNum
-        from dartlab.providers.dart.docs.sections.sectionsBase import REPORT_KINDS, periodOrderValue
-        from dartlab.providers.reportSelector import selectReport
-
-        years = sorted({str(year) for year in raw["year"].drop_nulls().to_list()}, reverse=True)
-        catalog: dict[str, dict[str, Any]] = {}
-
-        for year in years:
-            for reportKind, suffix in REPORT_KINDS:
-                report = selectReport(raw, year, reportKind=reportKind)
-                if isEmptyDf(report):
-                    continue
-
-                periodKey = f"{year}{suffix}"
-                scoped = (
-                    report.select(["section_order", "section_title"])
-                    .filter(pl.col("section_title").is_not_null())
-                    .sort("section_order")
-                )
-                if scoped.is_empty():
-                    continue
-
-                currentChapter: str | None = None
-                periodCounts: dict[str, int] = {}
-                periodOrders: dict[str, int] = {}
-                periodChapters: dict[str, str] = {}
-
-                for row in scoped.iter_rows(named=True):
-                    rawTitle = str(row.get("section_title") or "").strip()
-                    if not rawTitle:
-                        continue
-                    majorNum = parseMajorNum(rawTitle)
-                    if majorNum is not None:
-                        currentChapter = chapterFromMajorNum(majorNum)
-                    topic = mapSectionTitle(rawTitle)
-                    if not topic:
-                        continue
-                    sectionOrder = int(row.get("section_order") or 0)
-                    periodCounts[topic] = periodCounts.get(topic, 0) + 1
-                    periodOrders.setdefault(topic, sectionOrder)
-                    if currentChapter and topic not in periodChapters:
-                        periodChapters[topic] = currentChapter
-
-                for topic, blockCount in periodCounts.items():
-                    chapter = periodChapters.get(topic) or "XII"
-                    sectionOrder = periodOrders.get(topic, 0)
-                    latestKey = periodOrderValue(periodKey)
-                    entry = catalog.get(topic)
-                    if entry is None:
-                        catalog[topic] = {
-                            "order": sectionOrder,
-                            "chapter": chapter,
-                            "topic": topic,
-                            "source": "docs",
-                            "blocks": blockCount,
-                            "periods": 1,
-                            "latestPeriod": periodKey,
-                            "_periods": {periodKey},
-                            "_latestKey": latestKey,
-                        }
-                        continue
-
-                    entry["order"] = min(int(entry["order"]), sectionOrder)
-                    if chapter != "XII" and entry.get("chapter") == "XII":
-                        entry["chapter"] = chapter
-                    entry["blocks"] = max(int(entry["blocks"]), blockCount)
-                    if periodKey not in entry["_periods"]:
-                        entry["_periods"].add(periodKey)
-                        entry["periods"] = len(entry["_periods"])
-                    if latestKey > int(entry["_latestKey"]):
-                        entry["latestPeriod"] = periodKey
-                        entry["_latestKey"] = latestKey
-
-        rows = [
-            {
-                "order": int(entry["order"]),
-                "chapter": str(entry["chapter"]),
-                "topic": str(entry["topic"]),
-                "source": str(entry["source"]),
-                "blocks": int(entry["blocks"]),
-                "periods": int(entry["periods"]),
-                "latestPeriod": str(entry["latestPeriod"]),
-            }
-            for entry in catalog.values()
-        ]
-        if not rows:
-            self._cache[cacheKey] = empty
-            return empty
-
-        from dartlab.providers.dart.company import _CHAPTER_ORDER
-
-        result = (
-            pl.DataFrame(rows, strict=False)
-            .with_columns(pl.col("chapter").replace(_CHAPTER_ORDER).cast(pl.Int64).alias("_chapterOrder"))
-            .sort(["_chapterOrder", "order", "topic"])
-            .drop("_chapterOrder")
-        )
-        self._cache[cacheKey] = result
-        return result
 
     def sectionTopics(self) -> list[str]:
         """topic 이름 목록 — manifest 에서 추출.
