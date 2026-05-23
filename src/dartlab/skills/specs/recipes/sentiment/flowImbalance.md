@@ -28,8 +28,8 @@ toolRefs:
   - RunPython
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
+  - valueRef
   - dateRef
   - sourceRef
   - executionRef

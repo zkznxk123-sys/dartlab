@@ -29,8 +29,8 @@ toolRefs:
   - RunPython
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
+  - valueRef
   - dateRef
   - sourceRef
   - executionRef
@@ -109,7 +109,7 @@ def parseDate(v):
     except Exception:
         return None
 
-insider_rows = rows(c.gather("insiderTrading"), limit=200)
+insider_rows = rows(c.gather("insider"), limit=200)
 price_rows = rows(c.gather("price"), limit=200)
 
 # date → price 시계열
@@ -125,8 +125,18 @@ for r in insider_rows:
     d = parseDate(r.get("date") or r.get("tradeDate") or r.get("filedAt"))
     if not d:
         continue
-    direction = "buy" if (r.get("direction") or r.get("side") or "").lower().startswith("b") else "sell"
-    person = r.get("person") or r.get("name") or r.get("filer") or "?"
+    # insider gather 스키마: tradeType(buy/sell 또는 코드), changeShares(부호로 buy/sell 추론 fallback)
+    tt = str(r.get("tradeType") or r.get("direction") or "").lower()
+    if tt.startswith("b") or tt == "1" or tt == "buy":
+        direction = "buy"
+    elif tt.startswith("s") or tt == "0" or tt == "sell":
+        direction = "sell"
+    else:
+        try:
+            direction = "buy" if float(r.get("changeShares") or 0) > 0 else "sell"
+        except Exception:
+            direction = "sell"
+    person = r.get("name") or r.get("person") or r.get("filer") or "?"
     events.append({"date": d, "direction": direction, "person": person})
 
 events.sort(key=lambda x: x["date"])
@@ -149,19 +159,38 @@ for i, e in enumerate(events):
             "latestPerson": e["person"],
         })
 
-table = pl.DataFrame(clusters) if clusters else pl.DataFrame(
-    schema={"date": pl.Utf8, "direction": pl.Utf8, "personsInWindow": pl.Int64,
-            "pricePctBefore30d": pl.Float64, "latestPerson": pl.Utf8}
-)
+_cluster_schema = {
+    "date": pl.Utf8,
+    "direction": pl.Utf8,
+    "personsInWindow": pl.Int64,
+    "pricePctBefore30d": pl.Float64,
+    "latestPerson": pl.Utf8,
+}
+table = pl.DataFrame(clusters, schema=_cluster_schema, infer_schema_length=None) if clusters else pl.DataFrame(schema=_cluster_schema)
 
 buy_n = int((table["direction"] == "buy").sum()) if table.height else 0
 sell_n = int((table["direction"] == "sell").sum()) if table.height else 0
 
+if table.height == 0:
+    # cluster 미감지 — 가장 최근 insider event 날짜를 placeholder 로 emit (date 보장).
+    if events:
+        latest_event_date = str(events[-1]["date"])
+        table = [{"direction": "no_cluster", "date": latest_event_date, "insiderEventsScanned": len(events)}]
+    else:
+        latest_event_date = None
+        table = [{"direction": "no_insider_data", "date": None}]
+else:
+    latest_event_date = str(table["date"].max())
+
 emit_result(
     table=table,
-    values={"clusters": table.height, "buyClusters": buy_n, "sellClusters": sell_n},
-    date=str(table["date"].max()) if table.height else None,
-    sources=["dartlab://gather/insiderTrading", "dartlab://gather/price"],
+    values={
+        "clusters": (table.height if hasattr(table, "height") else len(table)),
+        "buyClusters": buy_n,
+        "sellClusters": sell_n,
+    },
+    date=latest_event_date,
+    sources=["dartlab://gather/insider", "dartlab://gather/price"],
 )
 ```
 

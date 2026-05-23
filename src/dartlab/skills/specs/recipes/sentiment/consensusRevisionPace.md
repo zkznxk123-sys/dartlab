@@ -4,7 +4,7 @@ title: 컨센서스 revision 속도 (애널리스트 EPS 추정 변화율 z-scor
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: deprecated
 purpose: 30/60/90 일 윈도우 별 EPS 추정 변화율 + revision count 의 z-score. 본 신호는 *애널리스트 합의의 변화 속도* 정량화 — 단순 컨센서스 절대값이 아닌 *변화율*. sentiment 페르소나 보조.
 whenToUse:
   - 컨센서스 revision 속도
@@ -50,6 +50,8 @@ testUniverse:
 falsifier:
   description: "애널리스트 < 3 명 종목은 컨센 노이즈 큼. EPS 자체가 음수 → 양수 전환 시 변화율 정의 불안정."
 lastUpdated: "2026-05-22"
+deprecatedAt: '2026-05-23'
+deprecatedReason: "c.gather('consensus') axis 미구현 — 데이터 소스 추가 후 재작성"
 ---
 
 ## 공개 호출 방식

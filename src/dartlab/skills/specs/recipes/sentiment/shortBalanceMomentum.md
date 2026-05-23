@@ -4,7 +4,7 @@ title: 공매도 잔고 변화율 모멘텀
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: deprecated
 graphTier: L1.5
 cluster: sentiment
 purpose: 일별 공매도 잔고 (short balance, 또는 그 변화율) 의 20 거래일 z-score. 잔고 급증은 약세 베팅 cluster, 급감은 short covering 단서. 추론 라벨 없이 정량 모멘텀만. gather L1 단일. 트리거 — '공매도 잔고', 'short balance', 'short covering'.
@@ -76,6 +76,8 @@ audiences:
   human: 약세 베팅이 *얼마나* 가 아닌 *얼마나 빠르게 증가/감소* 하는지 z-score 로 본다.
 humanIntro: "shortBalanceMomentum 는 *공매도 잔고 자체* 가 아닌 *변화율 모멘텀* 을 본다. 잔고가 늘 높은 종목과 *최근 급증* 한 종목은 다른 신호다."
 lastUpdated: "2026-05-22"
+deprecatedAt: '2026-05-23'
+deprecatedReason: "c.gather('shortBalance') axis 미구현 — KRX short interest 데이터 소스 추가 후 재작성"
 ---
 
 ## 공개 호출 방식

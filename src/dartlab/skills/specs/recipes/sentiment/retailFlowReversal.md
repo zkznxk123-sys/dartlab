@@ -85,12 +85,20 @@ for i, r in enumerate(flow):
           "smartSell_retailBuy" if (z_s and z_r and z_s <= -1.5 and z_r >= 1.5) else "normal"
     rows.append({"date": r.get("date") or r.get("tradeDate"), "zRetail": z_r, "zSmart": z_s, "reversal": rev})
 
-table = pl.DataFrame(rows) if rows else pl.DataFrame(schema={"date": pl.Utf8, "zRetail": pl.Float64, "zSmart": pl.Float64, "reversal": pl.Utf8})
-rev_n = int((table["reversal"] != "normal").sum()) if table.height else 0
+if rows:
+    table = pl.DataFrame(rows)
+    rev_n = int((table["reversal"] != "normal").sum())
+    latest_date = str(table["date"].max())
+else:
+    # 윈도우 만족 X — 데이터 부족 표시 + 최신 flow 날짜 표면
+    latest_date = str(flow[-1].get("date") or flow[-1].get("tradeDate")) if flow else None
+    table = [{"reversal": "insufficient", "date": latest_date, "flowRowsAvailable": len(flow), "windowRequired": WINDOW}]
+    rev_n = 0
+
 emit_result(
     table=table,
-    values={"reversalCount": rev_n, "rows": table.height},
-    date=str(table["date"].max()) if table.height else None,
+    values={"reversalCount": rev_n, "rows": (table.height if hasattr(table, "height") else len(table))},
+    date=latest_date,
     sources=["dartlab://gather/flow"],
 )
 ```
