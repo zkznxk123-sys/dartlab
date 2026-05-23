@@ -267,3 +267,119 @@ def itemLabel(itemNum: str) -> str:
             - US (EDGAR) 한정.
     """
     return STANDARD_8K_ITEMS.get(itemNum, f"Item {itemNum}")
+
+
+# 8-K Item → business category 매핑. SEC item 번호 (1.0x = agreements, 2.0x =
+# financial, 3.0x = securities, 4.0x = auditor, 5.0x = governance, 6.0x = ABS,
+# 7.0x = Reg FD, 8.0x = other, 9.0x = exhibits) 첫 자리 + 의미 매핑.
+_ITEM_CATEGORY: dict[str, str] = {
+    "1.01": "MATERIAL_AGREEMENT",
+    "1.02": "MATERIAL_AGREEMENT",
+    "1.03": "FINANCIAL_DISTRESS",
+    "2.01": "MA_ACTIVITY",
+    "2.02": "EARNINGS",
+    "2.03": "FINANCIAL_OBLIGATION",
+    "2.04": "FINANCIAL_OBLIGATION",
+    "2.05": "RESTRUCTURING",
+    "2.06": "IMPAIRMENT",
+    "3.01": "LISTING_STATUS",
+    "3.02": "EQUITY_ISSUANCE",
+    "3.03": "SHAREHOLDER_RIGHTS",
+    "4.01": "AUDITOR_CHANGE",
+    "4.02": "ACCOUNTING_RESTATEMENT",
+    "5.01": "CONTROL_CHANGE",
+    "5.02": "EXECUTIVE_CHANGE",
+    "5.03": "GOVERNANCE",
+    "5.04": "EMPLOYEE_PLAN",
+    "5.05": "ETHICS",
+    "5.07": "SHAREHOLDER_VOTE",
+    "5.08": "SHAREHOLDER_VOTE",
+    "6.01": "ABS",
+    "7.01": "REG_FD",
+    "8.01": "OTHER",
+    "9.01": "EXHIBITS",
+}
+
+
+def itemCategory(itemNum: str) -> str:
+    """8-K Item 번호 → 비즈니스 카테고리 매핑.
+
+    25 표준 item 을 15 카테고리 (MATERIAL_AGREEMENT / EARNINGS /
+    EXECUTIVE_CHANGE / GOVERNANCE / 등) 로 분류. catalyst 시계열 분석 시
+    item 번호 raw 보다 카테고리 단위 집계가 의미.
+
+    Args:
+        itemNum: 예 ``"2.02"`` / ``"5.02"``.
+
+    Returns:
+        대문자 카테고리 ID. 미정의 item → ``"UNKNOWN"``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> itemCategory("2.02")
+        'EARNINGS'
+        >>> itemCategory("99.99")
+        'UNKNOWN'
+    """
+    return _ITEM_CATEGORY.get(itemNum, "UNKNOWN")
+
+
+def fetchItemsByCategory(items: pl.DataFrame, category: str, *, limit: int = 100) -> pl.DataFrame:
+    """parsed 8-K items DataFrame 에서 특정 카테고리만 필터.
+
+    Args:
+        items: ``parseEightKHtml`` 결과 또는 ``item`` 컬럼 보유 DataFrame.
+        category: ``itemCategory`` 반환값 (예 ``"EARNINGS"``).
+        limit: 최대 결과 row 수.
+
+    Returns:
+        해당 카테고리 items. 빈 입력 → 빈 DataFrame.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> earnings = fetchItemsByCategory(items, "EARNINGS")  # doctest: +SKIP
+    """
+    if items.is_empty() or "item" not in items.columns:
+        return items.head(0)
+    filtered = (
+        items.with_columns(pl.col("item").map_elements(itemCategory, return_dtype=pl.Utf8).alias("_category"))
+        .filter(pl.col("_category") == category)
+        .drop("_category")
+    )
+    if limit > 0:
+        filtered = filtered.head(limit)
+    return filtered
+
+
+def iterItemsByCategory(items: pl.DataFrame, category: str, *, batchSize: int = 50):
+    """``fetchItemsByCategory`` 의 streaming pair (룰 10).
+
+    Args:
+        items: ``item`` 컬럼 보유 DataFrame.
+        category: ``itemCategory`` 반환값.
+        batchSize: batch 당 row 수.
+
+    Yields:
+        pl.DataFrame — batch 단위.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> for batch in iterItemsByCategory(items, "EARNINGS"):
+        ...     pass  # doctest: +SKIP
+    """
+    if items.is_empty() or "item" not in items.columns:
+        return
+    filtered = (
+        items.with_columns(pl.col("item").map_elements(itemCategory, return_dtype=pl.Utf8).alias("_category"))
+        .filter(pl.col("_category") == category)
+        .drop("_category")
+    )
+    n = filtered.height
+    for start in range(0, n, batchSize):
+        yield filtered.slice(start, batchSize)
