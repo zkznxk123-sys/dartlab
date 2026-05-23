@@ -225,6 +225,42 @@ def test_safe_open_factory_allows_read_anywhere(tmp_path):
         target.unlink(missing_ok=True)
 
 
+def test_emit_result_sources_string_list_creates_source_refs():
+    """sources=["dartlab://..."] string list 가 sourceRef 로 변환되는지.
+
+    회귀 가드: 이전에는 list of dict 만 받아 string list 는 무시 → 모든 recipe 의
+    sourceRef 누락 → scorecard evidenceCompleteness 영구 미달.
+    """
+    from dartlab.ai.tools.runPython import runPython
+
+    code = (
+        "emit_result(values={'k': 1}, date='2026-01-01', "
+        "sources=['dartlab://gather/flow', 'dartlab://macro/fred/DGS10'])"
+    )
+    result = runPython(code)
+    assert result.ok
+    kinds = sorted({r.kind for r in result.refs or []})
+    assert "sourceRef" in kinds, f"sourceRef 누락: {kinds}"
+    assert "dateRef" in kinds, f"dateRef 누락: {kinds}"
+    source_refs = [r for r in result.refs if r.kind == "sourceRef"]
+    assert len(source_refs) == 2
+    titles = sorted(r.title for r in source_refs)
+    assert "dartlab://gather/flow" in titles
+    assert "dartlab://macro/fred/DGS10" in titles
+
+
+def test_emit_result_sources_dict_list_still_works():
+    """기존 list of dict 패턴도 유지 — 회귀 차단."""
+    from dartlab.ai.tools.runPython import runPython
+
+    code = "emit_result(values={'k': 1}, sources=[{'id': 'src1', 'title': 'Source 1', 'url': 'https://example.com'}])"
+    result = runPython(code)
+    assert result.ok
+    source_refs = [r for r in (result.refs or []) if r.kind == "sourceRef"]
+    assert len(source_refs) == 1
+    assert source_refs[0].title == "Source 1"
+
+
 def test_default_safe_roots_includes_dartlab_home_and_tmp():
     from dartlab.ai.tools.runpythonGuard import _defaultSafeRoots
 

@@ -317,7 +317,17 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
     if isinstance(sources_raw, dict):
         sources_iter = [sources_raw]
     elif isinstance(sources_raw, list):
-        sources_iter = [item for item in sources_raw if isinstance(item, dict)]
+        sources_iter = []
+        for item in sources_raw:
+            if isinstance(item, dict):
+                sources_iter.append(item)
+            elif isinstance(item, str) and item:
+                # 다수 recipe 의 관행: sources=["dartlab://..."] 또는 ["url..."] 문자열 목록.
+                # dict 래핑 — id/title 동일, url 처럼 보이면 url 도 채움.
+                wrapped: dict[str, Any] = {"id": item, "title": item}
+                if "://" in item:
+                    wrapped["url"] = item
+                sources_iter.append(wrapped)
     else:
         sources_iter = []
     for idx, source_payload in enumerate(sources_iter):
