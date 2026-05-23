@@ -698,6 +698,26 @@ e.filings("AAPL", forms=["10-K", "10-Q"])
 
 파이프라인: 로컬 캐시(즉시) → HuggingFace(자동 다운로드) → DART API(키 필요). 대부분 처음 두 단계로 충분.
 
+## IDE 확장
+
+**VSCode 확장** — `ui/vscode/` 폴더의 dartlab extension. 회사 분석 패널 + Skill OS 탐색 + MCP 서버 자동 등록을 IDE 안에서 제공한다.
+
+```bash
+# 로컬 빌드 + 설치
+cd ui/vscode
+npm install
+npm run build
+code --install-extension dartlab-*.vsix
+```
+
+기능:
+- Company panel — 종목코드 입력 후 IS / BS / CF / ratios / sections 한 화면
+- Skill OS browser — 257 노드 그래프 좌측 트리뷰
+- MCP one-click — settings 에서 `dartlab mcp` 자동 등록
+- 우클릭 → "Send to DartLab" — 선택 텍스트로 `dartlab.ask` 호출
+
+상세: [ui/vscode/README.md](ui/vscode/README.md)
+
 ## 바로 시작하기
 
 **노트북 (Colab):** [Company](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/01_company.ipynb) · [Gather](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/02_gather.ipynb) · [Scan](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/03_scan.ipynb) · [Quant](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/04_quant.ipynb) · [Analysis](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/05_analysis.ipynb) · [Macro](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/06_macro.ipynb) · [Credit](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/07_credit.ipynb) · [Story](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/08_story.ipynb) · [AI](https://colab.research.google.com/github/eddmpython/dartlab/blob/master/notebooks/colab/09_ai.ipynb)
