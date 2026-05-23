@@ -18,11 +18,14 @@ Freshness rule:
 from __future__ import annotations
 
 import hashlib
+import logging
 from pathlib import Path
 
 import polars as pl
 
 import dartlab.config as _cfg
+
+_log = logging.getLogger(__name__)
 
 _DOCS_DIR_REL = "dart/docs"
 _SECTIONS_CACHE_REL = "dart/sectionsCache"
@@ -57,12 +60,19 @@ def isDiskCacheFresh(stockCode: str, topics: frozenset[str] | None) -> bool:
 
 
 def loadDiskCache(stockCode: str, topics: frozenset[str] | None) -> pl.DataFrame | None:
-    """디스크 캐시 read. miss 또는 stale 이면 None."""
+    """디스크 캐시 read. miss 또는 stale 이면 None.
+
+    corrupt parquet (부분 write 후 crash 잔재) 는 ``OSError`` / Polars 에러 →
+    None 반환 + warning 로깅. caller 가 rebuild 진행. 옛 broken cache 는
+    다음 ``saveDiskCache`` 가 overwrite.
+    """
     if not isDiskCacheFresh(stockCode, topics):
         return None
+    cachePath = diskCachePath(stockCode, topics)
     try:
-        return pl.read_parquet(diskCachePath(stockCode, topics))
-    except Exception:
+        return pl.read_parquet(cachePath)
+    except (OSError, pl.exceptions.ComputeError, pl.exceptions.ShapeError) as exc:
+        _log.warning("sections diskCache 읽기 실패: %s — rebuild 진행 (%s)", cachePath.name, exc)
         return None
 
 
@@ -71,7 +81,12 @@ def saveDiskCache(
     topics: frozenset[str] | None,
     result: pl.DataFrame | None,
 ) -> None:
-    """build 결과 디스크 캐시 저장. None 결과는 저장 X (next build 가 다시 시도)."""
+    """build 결과 디스크 캐시 저장. None 결과는 저장 X (next build 가 다시 시도).
+
+    write 실패 (디스크 full / permission denied / corrupt cache dir) 시 warning
+    로깅 + in-memory cache 만 활용. silent fail 은 다음 프로세스 재시작 시
+    반복 cold build (~6s) 의 원인이라 명시 노출.
+    """
     if result is None or result.is_empty():
         return
     cachePath = diskCachePath(stockCode, topics)
@@ -79,9 +94,8 @@ def saveDiskCache(
     try:
         # snappy compression — 빠른 write + 적당한 압축률
         result.write_parquet(cachePath, compression="snappy")
-    except Exception:
-        # 디스크 쓰기 실패 시 silent fail — in-memory cache 만 활용
-        pass
+    except (OSError, pl.exceptions.ComputeError) as exc:
+        _log.warning("sections diskCache 쓰기 실패: %s (%s) — in-memory only", cachePath.name, exc)
 
 
 def clearDiskCache(stockCode: str | None = None) -> None:
