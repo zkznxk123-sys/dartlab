@@ -4,7 +4,7 @@ title: 퀄리티 (QMJ) × 매크로 사이클 — phase 의존 우량주
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: quality 팩터 (QMJ — Asness/Frazzini/Pedersen) 점수가 매크로 사이클 phase (early-recovery / mid-expansion / late-cycle / contraction) 별로 다르게 작동한다는 검증된 패턴을 단일 회사에 적용. quant ↔ macro 격리 메우는 조합. 트리거 — '퀄리티 사이클', 'QMJ 매크로', 'quality phase'.
 whenToUse:
   - 퀄리티 사이클

@@ -4,7 +4,7 @@ title: 경제분석 6막 진입 절차
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 종목 없이 경제분석을 시작할 때 macro 12축을 6막 인과 순서로 호출해 현재 경기 위치, 정책, 금융시스템, 시장 반응, 향후 시나리오를 한 번에 정리하는 절차. 트리거 — '경제분석 시작', '거시 전체', '매크로 6막', '경제 상황 요약'.
 whenToUse:
   - 경제분석 시작

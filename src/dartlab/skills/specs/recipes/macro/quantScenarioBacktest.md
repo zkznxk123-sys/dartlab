@@ -4,7 +4,7 @@ title: 매크로 시나리오 (1997/2008/2020) × 퀀트 팩터 walk-forward bac
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 단순 full-sample 평균 IR 이 아니라 매크로 regime 별 (1997 IMF / 2008 GFC / 2020 COVID) 팩터 (value / quality / momentum) 의 walk-forward IR / Sharpe / max drawdown 산출. 투자자가 "이번 사이클" 에서의 팩터 작동 여부를 알 수 있게. macro ↔ quant 격리 메우는 조합. 트리거 — 'macro scenario backtest', '시나리오 별 팩터', 'regime backtest'.
 whenToUse:
   - macro scenario backtest
