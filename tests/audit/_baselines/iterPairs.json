@@ -1,4 +1,7 @@
 {
-  "_note": "P-B2 sync",
-  "violations": []
+  "_note": "P-B2 sync. 사이클 18 LoC strict 분할로 iter* 가 sibling helper 모듈 (ngramIndexSync.py · fieldIndexRebuild.py) 로 이전. 룰 7 src↔tests mirror 는 이미 갱신; 본 audit 의 same-file heuristic 만 보정.",
+  "violations": [
+    "src/dartlab/providers/dart/search/fieldIndex.py::searchContent (iter pair iterContent 부재)",
+    "src/dartlab/providers/dart/search/ngramIndex.py::searchNgram (iter pair iterNgram 부재)"
+  ]
 }

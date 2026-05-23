@@ -74,7 +74,26 @@ def scanRatio(
     fsPref: str = "CFS",
     freq: str = "Q",
 ) -> pl.DataFrame:
-    """전종목 단일 재무비율 시계열. 본문 docstring 은 scanAccount.py 원본 보존."""
+    """전종목 단일 재무비율 시계열 — scan 원자 primitive 2.
+
+    Args:
+        ratioName: 비율 키 (roe/operatingMargin/debtRatio 등 13 종).
+            ``scanRatioList()`` 로 카탈로그 확인.
+        fsPref: 연결 우선 ("CFS") 또는 별도 ("OFS").
+        freq: "Q" (분기) 또는 "Y" (연간).
+
+    Returns:
+        pl.DataFrame — 2664 종목 × 기간 컬럼 wide 형식. stockCode 컬럼 + 기간별
+        비율 값 (%·배). 단위는 ``_RATIO_DEFS[ratioName]["label"]`` 참조.
+
+    Raises:
+        ValueError: 지원하지 않는 ``ratioName`` 일 때 (PBR/PER 등 시가총액 기반은
+            scanRatio 범위 밖 — ``scan("valuation")`` 사용).
+
+    Example:
+        >>> scanRatio("roe", freq="Y").sort("2025", descending=True).head(30)
+        >>> dr = scanRatio("debtRatio", freq="Y").select(["stockCode", "2025"])
+    """
     if ratioName not in _RATIO_DEFS:
         available = ", ".join(sorted(_RATIO_DEFS))
         lower = ratioName.lower()
@@ -95,7 +114,22 @@ def scanRatio(
 
 
 def scanRatioList() -> list[dict[str, str]]:
-    """사용 가능한 scanRatio 비율 목록."""
+    """사용 가능한 scanRatio 비율 카탈로그.
+
+    Args:
+        없음.
+
+    Returns:
+        list[dict[str, str]] — `{name, label, unit}` 형식의 dict 리스트. ``name``
+        은 ``scanRatio(ratioName=...)`` 에 넣는 정규 키, ``unit`` 은 ``%`` 또는 ``배``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> dartlab.scan("ratio")
+        >>> [r["name"] for r in scanRatioList()]
+    """
     return [{"name": k, "label": v["label"], "unit": "%" if v.get("pct") else "배"} for k, v in _RATIO_DEFS.items()]
 
 
