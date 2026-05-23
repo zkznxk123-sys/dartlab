@@ -47,19 +47,20 @@ class AffiliateGroupResult:
 
 # parser
 def splitCells(line: str) -> list[str]:
-    """splitCells — TODO 한국어 동작 설명.
+    """markdown table 한 행을 cell 리스트로 분할 — 앞뒤 빈 cell 제거.
 
     Args:
-        line: 인자.
+        line: ``"| 셀1 | 셀2 |"`` 형식의 markdown 표 행.
+
+    Returns:
+        앞뒤 빈 cell 제거된 cell 문자열 list.
 
     Raises:
         없음.
 
     Example:
-        >>> splitCells(...)
-
-    Returns:
-        <TODO: return desc> (list[str])
+        >>> splitCells("| a | b |")
+        ['a', 'b']
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -70,19 +71,20 @@ def splitCells(line: str) -> list[str]:
 
 
 def isSeparatorRow(line: str) -> bool:
-    """isSeparatorRow — TODO 한국어 동작 설명.
+    """markdown table separator row (``|---|---|`` 같은 ``-`` 만의 cell) 여부.
 
     Args:
-        line: 인자.
+        line: 표 행 문자열.
+
+    Returns:
+        모든 cell 이 ``-`` 만 으로 구성되면 True.
 
     Raises:
         없음.
 
     Example:
-        >>> isSeparatorRow(...)
-
-    Returns:
-        <TODO: return desc> (bool)
+        >>> isSeparatorRow("|---|---|")
+        True
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
