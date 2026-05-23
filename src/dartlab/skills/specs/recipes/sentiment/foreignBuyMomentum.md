@@ -4,7 +4,7 @@ title: 외국인 누적 순매수 모멘텀 (5/20/60 일 가속도)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 외국인 누적 순매수의 5/20/60 거래일 변화율 비교. 가속도 (5d 대비 60d 상대 기울기) 가 양수면 *가속*, 음수면 *감속*. 절대 보유 비율이 아닌 *flow 가속도* 측정.
 whenToUse:
   - 외국인 매매 모멘텀
