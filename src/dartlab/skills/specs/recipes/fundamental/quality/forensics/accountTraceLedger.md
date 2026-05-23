@@ -4,7 +4,7 @@ title: Forensics Account Trace Ledger
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 매출, CFO, 매출채권, 재고, 매입채무 같은 포렌식 핵심 metric이 어떤 raw statement row에서 왔는지 추적해 엔진 승격 전 계정 매핑 품질을 검증한다. 트리거 — '계정 trace ledger', 'raw 계정 매핑 검산'.

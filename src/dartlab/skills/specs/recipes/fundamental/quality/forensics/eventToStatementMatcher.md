@@ -4,7 +4,7 @@ title: Event To Statement Matcher
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 유상증자, 전환사채, 정정공시, 감사의견, 소송 같은 공시 이벤트를 같은 기간의 원표 압력과 맞춰 이벤트가 재무제표 변화와 연결되는지 검증한다. 트리거 — '이벤트 재무제표 매칭', '공시 이벤트 포렌식'.

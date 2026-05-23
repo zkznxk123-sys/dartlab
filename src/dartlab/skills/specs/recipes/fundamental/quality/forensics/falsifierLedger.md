@@ -4,7 +4,7 @@ title: Forensics Falsifier Ledger
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: revenue-to-cash, working capital, note signal, event match에서 나온 의심 신호마다 반대 설명과 추가 확인 항목을 열어 스킬이 과잉 결론으로 흐르지 않게 한다. 트리거 — '포렌식 반증 ledger', '의심 신호 반례'.

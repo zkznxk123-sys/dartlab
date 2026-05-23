@@ -4,7 +4,7 @@ title: Filing Note Signal Extractor
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: 사업보고서·주석 원문에서 대손, 재고평가, 특수관계자, 계속기업, 소송, 파생상품, 정정, 팩토링 같은 rare keyword 신호를 추출해 원표 신호의 설명력을 보강한다. 트리거 — '주석 포렌식 신호', '공시 rare keyword', '대손 재고평가 주석'.

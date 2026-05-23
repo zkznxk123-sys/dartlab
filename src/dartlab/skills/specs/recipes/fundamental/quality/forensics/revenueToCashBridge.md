@@ -4,7 +4,7 @@ title: Revenue To Cash Bridge
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.forensics
 purpose: L2 이익품질 엔진 없이 raw IS/BS/CF만으로 매출 성장, 매출채권 성장, CFO/순이익 괴리를 연결해 매출이 현금으로 회수되는지 검증한다. 트리거 — '매출 현금 bridge', 'revenue to cash', '매출채권 괴리'.

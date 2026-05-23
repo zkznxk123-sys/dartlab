@@ -4,7 +4,7 @@ title: Evidence Forensics Deep Dive
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 entryHint: true
 graphTier: L1.5
 cluster: incubator.forensics
