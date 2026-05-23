@@ -1,24 +1,27 @@
-"""EDGAR parse — viewer/diff 파서 placeholder (룰 2 mirror).
+"""EDGAR parse — iXBRL viewer page diff + parser (룰 2 mirror).
 
 Implementation status
 ---------------------
-- 구현 상태: **미구현 (reserved)**
-- 대응 dart 모듈: ``providers/dart/parse/`` (4 파일 / 1043 줄) — diffEvaluator,
-  viewerPageExtractor, tableHorizontalizer, scoreHelper.
-- SEC EDGAR 측 본질: 10-K/10-Q 의 HTML viewer 페이지 차이 비교 / 표 horizontalization
-  / score helper. DART 와 같은 viewer page 단위 분석 흐름은 동일하나, SEC 의
-  iXBRL 직접 제공으로 일부 책임이 ``providers/edgar/finance/xbrlConcepts`` 와 중복 가능.
+- 구현 상태 (iXbrlViewer): **구현 완료 (v1)** — `iXbrlViewer.py` ~150 줄.
+- 구현 상태 (diffEvaluator / tableHorizontalizer): **미구현** — 별 cycle 후속.
 
-언제 채울 것인가
-----------------
-- 사용자 시나리오 검증 후 — "edgar 측 viewer page diff 가 필요한 사용 사례가 등장"
-  하는 시점. 현재는 dart 측만 정착 후 분석 패턴 학습 단계.
-- 추가 시 dart/parse 의 파일 구조 미러 권장 (diffEvaluator/viewerPageExtractor/
-  tableHorizontalizer/scoreHelper 4 파일) — 호출자 (Company.show / story) 가
-  provider 분기 단순화 가능.
+대응 dart 모듈: ``providers/dart/parse/`` (4 파일 / 1043 줄) — diffEvaluator,
+viewerPageExtractor, tableHorizontalizer, scoreHelper.
 
-본 폴더는 mirror 만족 placeholder. 실제 호출 시 ``ModuleNotFoundError`` 가 아닌
-빈 namespace 노출 (``__all__ = []``).
+SEC EDGAR 측 본질:
+- 10-K/10-Q HTML iXBRL 임베디드 fact 추출 (BeautifulSoup 기반).
+- dart 와 달리 SEC 는 iXBRL 직접 제공 → 별도 viewer parser 단순.
+
+공개 surface (iXbrlViewer.py):
+- ``extractIxbrlFacts(html)`` — iXBRL HTML → fact DataFrame
+- ``fetchFactsByConcept(facts, concept)`` — concept 별 필터
+- ``iterFactsByConcept(facts, concept)`` — streaming pair (룰 10)
 """
 
-__all__: list[str] = []
+from dartlab.providers.edgar.parse.iXbrlViewer import (
+    extractIxbrlFacts,
+    fetchFactsByConcept,
+    iterFactsByConcept,
+)
+
+__all__ = ["extractIxbrlFacts", "fetchFactsByConcept", "iterFactsByConcept"]
