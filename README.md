@@ -45,14 +45,17 @@ DartLab은 DART와 EDGAR 공시를 **종목코드 하나로 비교 가능한 데
 | 전 종목 재무비율을 직접 수집·정규화한다 | `dartlab.scan("profitability")` |
 | AI 답변의 숫자를 다시 검산한다 | `dartlab.ask(...)` + 실행 근거 ref |
 
-## 두 가지 시작점
+## 세 가지 시작점
 
-DartLab은 **AI로 바로 분석하는 길**과 **Python 코드로 직접 다루는 길**을 분리해서 제공한다. 두 길은 같은 데이터와 같은 엔진을 쓴다.
+DartLab은 **AI / Python / CLI** 세 길을 같은 데이터·같은 엔진 위에 올려놓는다. 자기 맥락에 맞는 길로 진입하면 된다.
 
-| 사용 방식 | 이런 사람에게 맞다 | 첫 실행 |
-|---|---|---|
-| [AI로 바로 사용](#ai로-바로-사용) | 질문을 던지고 근거 있는 기업분석 답변을 받고 싶은 사람 | Desktop 또는 `dartlab.ask()` |
-| [Python 코드로 사용](#python-코드로-사용) | 재무제표·공시·스캔 데이터를 직접 분석하고 싶은 개발자 | `dartlab.Company("005930")` |
+| 사용 방식 | 코드 길이 | 첫 결과 | 이런 사람에게 맞다 |
+|---|---|---|---|
+| [AI로 바로 사용](#ai로-바로-사용) | 1 줄 | ~1 분 | 질문을 던지고 근거 있는 답변을 받고 싶은 분석가 |
+| [Python 코드로 사용](#python-코드로-사용) | 3-5 줄 | ~3 분 | 재무제표·공시·스캔 데이터를 직접 다루는 개발자 |
+| [CLI 로 사용](#cli-로-사용) | 1 명령 | ~2 분 | 단발 조회·자동화 스크립트·셸 파이프라인 사용자 |
+
+각 경로는 모두 `dartlab.Company` 와 같은 분석 엔진을 호출한다. **출발점만 다를 뿐 결과는 같다.**
 
 ## AI로 바로 사용
 
@@ -123,6 +126,28 @@ Python 경로의 장점:
 - **기간 비교가 기본** — 공시 본문과 재무제표를 기간 축으로 맞춘다.
 - **한국과 미국을 같은 인터페이스로 조회** — DART와 EDGAR의 차이는 provider가 흡수한다.
 - **엔진 결과를 재사용 가능** — analysis, credit, macro, quant, industry, story 결과를 코드에서 직접 다룬다.
+
+## CLI 로 사용
+
+설치 후 셸에서 `dartlab` 명령으로 같은 엔진을 호출한다. 단발 조회·셸 자동화·파이프라인 친화적.
+
+```bash
+uv add dartlab
+
+dartlab help "외인 매수"            # 도움말 + 매칭 capability 탐색
+dartlab list scan                    # scan 카테고리 recipe 인덱스
+dartlab show 005930 IS               # 손익계산서 출력 (Python c.show("IS") 등가)
+dartlab analyze 005930 --aspect credit
+dartlab mcp                          # MCP 서버 진입 (외부 LLM 도구 등록용)
+```
+
+CLI 경로의 장점:
+
+- **API 키 없이 단발 호출** — HuggingFace 캐시 자동 사용
+- **셸 파이프라인 친화** — `dartlab show ... --json | jq ...` 식으로 합성
+- **MCP 서버 진입점 동일** — `dartlab mcp` 한 명령으로 외부 어시스턴트 도구 노출
+
+> CLI 명령 전체 목록 + 옵션은 `dartlab --help` 또는 [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) 참조.
 
 ## 결과 예시
 
