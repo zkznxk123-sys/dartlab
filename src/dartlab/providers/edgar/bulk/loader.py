@@ -41,21 +41,6 @@ def registerEdgarBulkLoader() -> None:
 
     Example:
         >>> registerEdgarBulkLoader()
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - dartlab
-
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
     """
     from dartlab.core.loaders import registerLoader
 

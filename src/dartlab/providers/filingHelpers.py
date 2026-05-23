@@ -21,38 +21,8 @@ def coerceDate(value: str | date | datetime | None) -> date | None:
     Example:
         >>> coerceDate(...)
 
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
-
     Returns:
         <TODO: return desc> (date | None)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - datetime
-        - polars
     """
     if value is None:
         return None
@@ -94,38 +64,8 @@ def resolveDateWindow(
     Example:
         >>> resolveDateWindow(...)
 
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
-
     Returns:
         <TODO: return desc> (tuple[str | None, str | None])
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - datetime
-        - polars
     """
     startDate = coerceDate(start)
     endDate = coerceDate(end)
@@ -156,38 +96,8 @@ def splitKeywords(keyword: str | None) -> list[str]:
     Example:
         >>> splitKeywords(...)
 
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
-
     Returns:
         <TODO: return desc> (list[str])
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - datetime
-        - polars
     """
     if keyword is None:
         return []
@@ -209,38 +119,8 @@ def filterFilingsByKeyword(df: pl.DataFrame, *, keyword: str | None, columns: li
     Example:
         >>> filterFilingsByKeyword(...)
 
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
-
     Returns:
         <TODO: return desc> (pl.DataFrame)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - datetime
-        - polars
     """
     tokens = splitKeywords(keyword)
     if not tokens or df.is_empty():
@@ -269,38 +149,8 @@ def filingRecord(value: Any) -> dict[str, Any] | None:
     Example:
         >>> filingRecord(...)
 
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
-
     Returns:
         <TODO: return desc> (dict[str, Any] | None)
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - datetime
-        - polars
     """
     if isinstance(value, dict):
         return dict(value)
@@ -320,38 +170,8 @@ def truncateText(text: str, maxChars: int | None = None) -> tuple[str, bool]:
     Example:
         >>> truncateText(...)
 
-    Capabilities:
-        - <TODO: 함수 핵심 책임 요약>
-
-    Guide:
-        - <TODO: 사용 시나리오>
-
-    AIContext:
-        <TODO: AI 호출 컨텍스트>
-
-    LLM Specifications:
-        AntiPatterns:
-            - <TODO: 안티패턴>
-        OutputSchema:
-            - <TODO: 출력 형태>
-        Prerequisites:
-            - <TODO: 사전조건>
-        Freshness:
-            - <TODO: 데이터 freshness>
-        Dataflow:
-            - <TODO: 데이터 흐름>
-        TargetMarkets:
-            - <TODO: 대상 시장>
-
     Returns:
         <TODO: return desc> (tuple[str, bool])
-
-    SeeAlso:
-        - <TODO: 관련 함수/엔진>
-
-    Requires:
-        - datetime
-        - polars
     """
     if maxChars is None or maxChars <= 0 or len(text) <= maxChars:
         return text, False

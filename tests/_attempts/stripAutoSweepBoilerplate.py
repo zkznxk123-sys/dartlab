@@ -1,17 +1,12 @@
 """docstring auto-sweep boilerplate 제거 — `<TODO:>` 마커 박힌 5 sub-section suffix.
 
 대상: providers/ 안 docstring 의 5 sub (SeeAlso/Requires/Capabilities/Guide/AIContext/
-LLM Specifications 6 sub-keys) 가 모두 `<TODO:>` placeholder 로 박혀 있는 경우.
-이게 `feedback_no_docstring_auto_sweep.md` 의 8344 마커 회귀 잔재 (3564 현존).
+LLM Specifications 6 sub-keys) 가 `<TODO:>` placeholder 로 박혀 있는 경우.
 
 룰:
-1. AST 로 함수/클래스/메서드 docstring 식별
-2. docstring 안에 `<TODO:` 가 있으면: SeeAlso~TargetMarkets 의 boilerplate 블록을
-   regex 로 제거 (4 섹션 Args/Returns/Raises/Example 은 보존).
-3. 변경 후 AST 재파싱 — syntax error 면 revert.
-4. 변경 file path 와 절감 줄 수 출력.
-
-회귀 가드: 4 섹션 lint (`docstring4Section`) 통과 + parity.
+1. 각 section 별로 독립 regex — 순서 무관 (filingHelpers 같은 후순 배치도 대응)
+2. section 내용이 *오직 `<TODO:>` placeholder + 정적 항목 (- dartlab 등)* 이면 제거
+3. AST 재파싱 검증 — error 면 revert
 """
 
 from __future__ import annotations
@@ -21,35 +16,73 @@ import re
 import sys
 from pathlib import Path
 
-# 5 sub-section 의 정확한 boilerplate suffix pattern.
-# `SeeAlso:` 부터 `TargetMarkets:` 다음 줄까지. 들여쓰기 4 또는 8 공백.
-# Requires 안 내용 (- dartlab / - polars / - re 등) 은 가변.
-_BOILERPLATE_RE = re.compile(
-    r"\n(?P<indent> {4,8})SeeAlso:\n"  # SeeAlso: 헤더
-    r"(?:\1    -[^\n]*\n)+"  # SeeAlso 항목들
-    r"\n\1Requires:\n"
-    r"(?:\1    -[^\n]*\n)+"  # Requires 항목들 (- dartlab / - polars 등)
-    r"\n\1Capabilities:\n"
-    r"(?:\1    -[^\n]*\n)+"
-    r"\n\1Guide:\n"
-    r"(?:\1    -[^\n]*\n)+"
-    r"\n\1AIContext:\n"
-    r"(?:\1    [^\n]*\n)+"
-    r"\n\1LLM Specifications:\n"
-    r"(?:\1    [A-Z][^\n]*\n(?:\1        -[^\n]*\n)+)+",
-    re.MULTILINE,
-)
+# 각 section: 헤더 한 줄 + 다음 빈 줄까지의 들여쓰기 block.
+# 다음 section/text/closing """ 가 등장하면 종료.
+# pattern: 들여쓰기 4~8, 헤더 colon, 빈 줄 X (empty separator 가 다음 stmt 시작),
+# 라인은 ` ` * (indent+4) 또는 더 깊은 들여쓰기 (sub-section).
+
+# 5 stub sections — `<TODO:>` 만 또는 정적 `- dartlab/polars` 류만 가지는 boilerplate.
+# 비-stub (이미 의미 채워진) section 은 보존.
+_TODO_BOILERPLATE_PATTERNS = [
+    # SeeAlso block — `<TODO:>` 만이거나 짧은 placeholder
+    re.compile(
+        r"\n(?P<i> {4,8})SeeAlso:\n"
+        r"(?:\1    - ?<TODO: ?[^\n]*>\n)+",
+        re.MULTILINE,
+    ),
+    # Requires block — 자동 박힌 dartlab/polars/datetime 류 (의미 없는 박물관)
+    re.compile(
+        r"\n(?P<i> {4,8})Requires:\n"
+        r"(?:\1    - (?:dartlab|polars|datetime|re|json|os|sys|pathlib|typing|collections|functools|hashlib|gc|time|threading|logging|html|httpx|requests)\n)+",
+        re.MULTILINE,
+    ),
+    re.compile(
+        r"\n(?P<i> {4,8})Capabilities:\n"
+        r"(?:\1    - ?<TODO: ?[^\n]*>\n)+",
+        re.MULTILINE,
+    ),
+    re.compile(
+        r"\n(?P<i> {4,8})Guide:\n"
+        r"(?:\1    - ?<TODO: ?[^\n]*>\n)+",
+        re.MULTILINE,
+    ),
+    re.compile(
+        r"\n(?P<i> {4,8})AIContext:\n"
+        r"\1    ?<TODO: ?[^\n]*>\n",
+        re.MULTILINE,
+    ),
+    # LLM Specifications — 6 sub-key block 모두 <TODO:>
+    re.compile(
+        r"\n(?P<i> {4,8})LLM Specifications:\n"
+        r"\1    AntiPatterns:\n\1        -[^\n]*\n"
+        r"\1    OutputSchema:\n\1        -[^\n]*\n"
+        r"\1    Prerequisites:\n\1        -[^\n]*\n"
+        r"\1    Freshness:\n\1        -[^\n]*\n"
+        r"\1    Dataflow:\n\1        -[^\n]*\n"
+        r"\1    TargetMarkets:\n\1        -[^\n]*\n",
+        re.MULTILINE,
+    ),
+    # Returns <TODO:> placeholder (간단 변환만)
+    re.compile(
+        r"\n(?P<i> {4,8})Returns:\n"
+        r"\1    <TODO: ?return desc[^\n]*>\n",
+        re.MULTILINE,
+    ),
+]
 
 
 def stripFile(path: Path) -> tuple[int, int]:
-    """파일 1 개 처리. (제거된 boilerplate 개수, 제거된 줄 수) 반환."""
     src = path.read_text(encoding="utf-8")
     if "<TODO:" not in src:
         return (0, 0)
 
-    # 4 섹션 (Args/Returns/Raises/Example) 만 남길 위치 — boilerplate suffix 제거.
-    newSrc, count = _BOILERPLATE_RE.subn("", src)
-    if count == 0:
+    newSrc = src
+    totalCount = 0
+    for pattern in _TODO_BOILERPLATE_PATTERNS:
+        newSrc, count = pattern.subn("", newSrc)
+        totalCount += count
+
+    if totalCount == 0:
         return (0, 0)
 
     # 결과 syntax 검증
@@ -63,7 +96,7 @@ def stripFile(path: Path) -> tuple[int, int]:
     linesAfter = newSrc.count("\n")
     saved = linesBefore - linesAfter
     path.write_text(newSrc, encoding="utf-8")
-    return (count, saved)
+    return (totalCount, saved)
 
 
 def main(argv: list[str]) -> int:
@@ -72,7 +105,7 @@ def main(argv: list[str]) -> int:
     totalCount = 0
     totalSaved = 0
     for p in sorted(root.rglob("*.py")):
-        if "__pycache__" in p.parts:
+        if "__pycache__" in p.parts or "edinet" in p.parts:
             continue
         count, saved = stripFile(p)
         if count:

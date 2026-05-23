@@ -237,20 +237,6 @@ class DividendResult:
 
         Returns:
             <TODO: return desc> (int)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return len(self.years)
 
@@ -268,20 +254,6 @@ class DividendResult:
 
         Returns:
             <TODO: return desc> (pl.DataFrame | None)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return _seriesToWide(
             self.years,
@@ -319,20 +291,6 @@ class EmployeeResult:
 
         Returns:
             <TODO: return desc> (int)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return len(self.years)
 
@@ -350,20 +308,6 @@ class EmployeeResult:
 
         Returns:
             <TODO: return desc> (pl.DataFrame | None)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return _seriesToWide(
             self.years,
@@ -399,20 +343,6 @@ class MajorHolderResult:
 
         Returns:
             <TODO: return desc> (int)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return len(self.years)
 
@@ -430,20 +360,6 @@ class MajorHolderResult:
 
         Returns:
             <TODO: return desc> (pl.DataFrame | None)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return _seriesToWide(
             self.years,
@@ -509,20 +425,6 @@ class AuditResult:
 
         Returns:
             <TODO: return desc> (int)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return len(self.years)
 
@@ -540,20 +442,6 @@ class AuditResult:
 
         Returns:
             <TODO: return desc> (pl.DataFrame | None)
-
-        LLM Specifications:
-            AntiPatterns:
-                - <TODO: 안티패턴>
-            OutputSchema:
-                - <TODO: 출력 형태>
-            Prerequisites:
-                - <TODO: 사전조건>
-            Freshness:
-                - <TODO: 데이터 freshness>
-            Dataflow:
-                - <TODO: 데이터 흐름>
-            TargetMarkets:
-                - <TODO: 대상 시장>
         """
         return _seriesToWide(
             self.years,
