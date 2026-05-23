@@ -45,7 +45,7 @@ def parseTenure(text: str) -> float | None:
         >>> parseTenure(...)
 
     Returns:
-        <TODO: return desc> (float | None)
+        float | None — 결과.
     """
     if not text or text.strip() in ("", "-"):
         return None
@@ -102,7 +102,7 @@ def parseEmployeeTable(content: str) -> dict:
         >>> parseEmployeeTable(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
 

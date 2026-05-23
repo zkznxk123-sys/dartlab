@@ -236,7 +236,7 @@ class DividendResult:
             >>> nYears(...)
 
         Returns:
-            <TODO: return desc> (int)
+            int — 결과.
         """
         return len(self.years)
 
@@ -253,7 +253,7 @@ class DividendResult:
             >>> toWide(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame | None — 결과.
         """
         return _seriesToWide(
             self.years,
@@ -290,7 +290,7 @@ class EmployeeResult:
             >>> nYears(...)
 
         Returns:
-            <TODO: return desc> (int)
+            int — 결과.
         """
         return len(self.years)
 
@@ -307,7 +307,7 @@ class EmployeeResult:
             >>> toWide(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame | None — 결과.
         """
         return _seriesToWide(
             self.years,
@@ -342,7 +342,7 @@ class MajorHolderResult:
             >>> nYears(...)
 
         Returns:
-            <TODO: return desc> (int)
+            int — 결과.
         """
         return len(self.years)
 
@@ -359,7 +359,7 @@ class MajorHolderResult:
             >>> toWide(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame | None — 결과.
         """
         return _seriesToWide(
             self.years,
@@ -391,7 +391,7 @@ class ExecutiveResult:
             >>> toWide(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame | None — 결과.
         """
         rows = [
             {"metric": "총임원수", "latest": self.totalCount},
@@ -424,7 +424,7 @@ class AuditResult:
             >>> nYears(...)
 
         Returns:
-            <TODO: return desc> (int)
+            int — 결과.
         """
         return len(self.years)
 
@@ -441,7 +441,7 @@ class AuditResult:
             >>> toWide(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame | None)
+            pl.DataFrame | None — 결과.
         """
         return _seriesToWide(
             self.years,

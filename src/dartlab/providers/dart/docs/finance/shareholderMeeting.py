@@ -44,7 +44,7 @@ def splitCells(line: str) -> list[str]:
         >>> splitCells(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -67,7 +67,7 @@ def isSeparatorRow(line: str) -> bool:
         >>> isSeparatorRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -86,7 +86,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -113,7 +113,7 @@ def parseMeetingAgenda(content: str) -> list[dict]:
         >>> parseMeetingAgenda(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -183,7 +183,7 @@ def shareholderMeeting(stockCode: str) -> ShareholderMeetingResult | None:
         >>> shareholderMeeting(...)
 
     Returns:
-        <TODO: return desc> (ShareholderMeetingResult | None)
+        ShareholderMeetingResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

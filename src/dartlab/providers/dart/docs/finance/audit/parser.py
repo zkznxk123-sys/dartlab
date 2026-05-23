@@ -28,7 +28,7 @@ def findAuditSections(df: pl.DataFrame, year: str) -> list[str]:
         >>> findAuditSections(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     report = df.filter(
         (pl.col("year") == year)
@@ -77,7 +77,7 @@ def extractTableBlocks(text: str) -> list[dict]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     rawGroups: list[list[str]] = []
     currentLines: list[str] = []
@@ -187,7 +187,7 @@ def classifyBlock(block: dict) -> str:
         >>> classifyBlock(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     headerStr = " ".join(block["header"])
     metaStr = " ".join(block["meta"]) if block["meta"] else ""
@@ -236,7 +236,7 @@ def parseOpinionBlock(block: dict) -> list[dict]:
         >>> parseOpinionBlock(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     header = block["header"]
     nCols = len(header)
@@ -309,7 +309,7 @@ def parseFeeBlock(block: dict) -> list[dict]:
         >>> parseFeeBlock(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     results = []
     currentPeriod = ""
@@ -398,7 +398,7 @@ def fiscalPeriodToYear(
         >>> fiscalPeriodToYear(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 결과.
     """
     base = int(baseYear)
 
@@ -437,7 +437,7 @@ def normalizeOpinion(raw: str) -> str:
         >>> normalizeOpinion(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     if not raw:
         return ""
@@ -467,7 +467,7 @@ def dedup(items: list[dict], keys: list[str]) -> list[dict]:
         >>> dedup(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     seen: set[tuple] = set()
     result = []

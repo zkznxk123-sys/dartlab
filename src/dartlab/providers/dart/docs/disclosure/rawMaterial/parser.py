@@ -18,7 +18,7 @@ def splitCells(line: str) -> list[str]:
         >>> splitCells(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     parts = line.strip().split("|")
     if parts and parts[0].strip() == "":
@@ -94,7 +94,7 @@ def parseRawMaterials(content: str) -> list[dict] | None:
         >>> parseRawMaterials(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     inTable = False
@@ -470,7 +470,7 @@ def parseEquipment(content: str) -> dict | None:
         >>> parseEquipment(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     inTable = False
@@ -586,7 +586,7 @@ def parseCapex(content: str) -> list[dict] | None:
         >>> parseCapex(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     inSection = False

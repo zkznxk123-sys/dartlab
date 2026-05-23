@@ -46,7 +46,7 @@ def splitCells(line: str) -> list[str]:
         >>> splitCells(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -69,7 +69,7 @@ def isSeparatorRow(line: str) -> bool:
         >>> isSeparatorRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -88,7 +88,7 @@ def parseArticlesChanges(content: str) -> list[dict]:
         >>> parseArticlesChanges(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -155,7 +155,7 @@ def parseBusinessPurpose(content: str) -> list[dict]:
         >>> parseBusinessPurpose(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -226,7 +226,7 @@ def articlesOfIncorporation(stockCode: str) -> ArticlesResult | None:
         >>> articlesOfIncorporation(...)
 
     Returns:
-        <TODO: return desc> (ArticlesResult | None)
+        ArticlesResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

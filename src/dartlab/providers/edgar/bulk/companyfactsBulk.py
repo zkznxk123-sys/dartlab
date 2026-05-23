@@ -91,12 +91,12 @@ def downloadCompanyfactsBulk(
         >>> downloadCompanyfactsBulk(force=False)
 
     Args:
-        force: <TODO: param desc> (bool)
-        ttlHours: <TODO: param desc> (int)
-        progress: <TODO: param desc> (bool)
+        force: bool.
+        ttlHours: int.
+        progress: bool.
 
     Returns:
-        <TODO: return desc> (Path)
+        Path — 결과.
     """
     zipPath = _bulkDir() / "companyfacts.zip"
     tag = "companyfacts"
@@ -181,7 +181,7 @@ def extractCompanyfactsZip(zipPath: Path) -> Iterator[tuple[str, dict]]:
         ...     print(cik)
 
     Returns:
-        <TODO: return desc> (Iterator[tuple[str, dict]])
+        Iterator[tuple[str, dict]] — 결과.
     """
     with zipfile.ZipFile(zipPath, "r") as zf:
         for info in zf.infolist():
@@ -237,14 +237,14 @@ def convertBulkToParquets(
         >>> convertBulkToParquets(force=False)
 
     Args:
-        zipPath: <TODO: param desc> (Path | None)
-        outDir: <TODO: param desc> (Path | None)
-        onlyCiks: <TODO: param desc> (set[str] | None)
-        progress: <TODO: param desc> (bool)
-        force: <TODO: param desc> (bool)
+        zipPath: Path | None.
+        outDir: Path | None.
+        onlyCiks: set[str] | None.
+        progress: bool.
+        force: bool.
 
     Returns:
-        <TODO: return desc> (dict[str, int])
+        dict[str, int] — 결과.
     """
     if zipPath is None:
         zipPath = downloadCompanyfactsBulk(progress=progress)

@@ -113,8 +113,6 @@ def _makeProgress(total: int, title: str, *, disable: bool = False):
                 >>> bar.title = "downloading..."
 
             SeeAlso:
-                - <TODO: 관련 함수/엔진>
-
             Requires:
                 - bs4
                 - dartlab
@@ -123,27 +121,17 @@ def _makeProgress(total: int, title: str, *, disable: bool = False):
                 - rich
 
             Capabilities:
-                - <TODO: 함수 핵심 책임 요약>
-
             Guide:
-                - <TODO: 사용 시나리오>
-
             AIContext:
-                <TODO: AI 호출 컨텍스트>
+                (AI 호출 컨텍스트)
 
             LLM Specifications:
                 AntiPatterns:
-                    - <TODO: 안티패턴>
                 OutputSchema:
-                    - <TODO: 출력 형태>
                 Prerequisites:
-                    - <TODO: 사전조건>
                 Freshness:
-                    - <TODO: 데이터 freshness>
                 Dataflow:
-                    - <TODO: 데이터 흐름>
                 TargetMarkets:
-                    - <TODO: 대상 시장>
             """
             p.update(tid, description=v)
 

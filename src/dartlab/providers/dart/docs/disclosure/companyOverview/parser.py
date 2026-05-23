@@ -36,7 +36,7 @@ def parseOverview(text: str) -> dict:
         >>> parseOverview(...)
 
     Args:
-        text: <TODO: param desc> (str)
+        text: str.
     """
     result: dict = {}
     missing: list[str] = []

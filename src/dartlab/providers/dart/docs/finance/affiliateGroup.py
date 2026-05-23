@@ -103,7 +103,7 @@ def parseGroupSummary(content: str) -> dict | None:
         >>> parseGroupSummary(...)
 
     Returns:
-        <TODO: return desc> (dict | None)
+        dict | None — 결과.
     """
     lines = content.split("\n")
 
@@ -162,7 +162,7 @@ def parseAffiliateList(content: str) -> list[dict]:
         >>> parseAffiliateList(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     # 해외 섹션 이전까지만 사용
     cutoff = len(content)
@@ -222,7 +222,7 @@ def affiliateGroup(stockCode: str) -> AffiliateGroupResult | None:
         >>> affiliateGroup(...)
 
     Returns:
-        <TODO: return desc> (AffiliateGroupResult | None)
+        AffiliateGroupResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

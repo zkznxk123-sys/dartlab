@@ -29,7 +29,7 @@ def packagedArtifactPath(name: str) -> Iterator[Path]:
         ...     df = pl.read_parquet(p)
 
     Returns:
-        <TODO: return desc> (Iterator[Path])
+        Iterator[Path] — 결과.
     """
     ref = files(_ARTIFACT_PACKAGE) / name
     with as_file(ref) as path:

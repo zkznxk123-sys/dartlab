@@ -159,7 +159,7 @@ def extractOverview(sections: dict[str, str]) -> str | None:
         >>> extractOverview(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 결과.
     """
     for key, content in sections.items():
         if classifySection(key) == "overview":

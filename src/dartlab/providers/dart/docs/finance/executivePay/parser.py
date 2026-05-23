@@ -43,7 +43,7 @@ def extractTableBlocks(content: str) -> list[list[str]]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -72,7 +72,7 @@ def classifyBlock(block: list[str]) -> str:
         >>> classifyBlock(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     allText = ""
     for line in block[:6]:
@@ -109,7 +109,7 @@ def parsePayByTypeBlock(block: list[str]) -> list[dict]:
         >>> parsePayByTypeBlock(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     rows = []
     for line in block:
@@ -225,7 +225,7 @@ def parsePayIndividualBlock(block: list[str]) -> list[dict]:
         >>> parsePayIndividualBlock(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     rows = []
     for line in block:

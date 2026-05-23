@@ -46,7 +46,7 @@ def splitCells(line: str) -> list[str]:
         >>> splitCells(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -69,7 +69,7 @@ def isSeparatorRow(line: str) -> bool:
         >>> isSeparatorRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -88,7 +88,7 @@ def parseAuditCommittee(content: str) -> list[dict]:
         >>> parseAuditCommittee(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -144,7 +144,7 @@ def parseAuditActivity(content: str) -> list[dict]:
         >>> parseAuditActivity(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -200,7 +200,7 @@ def auditSystem(stockCode: str) -> AuditSystemResult | None:
         >>> auditSystem(...)
 
     Returns:
-        <TODO: return desc> (AuditSystemResult | None)
+        AuditSystemResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

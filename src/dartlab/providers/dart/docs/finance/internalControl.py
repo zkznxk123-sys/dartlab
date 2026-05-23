@@ -49,7 +49,7 @@ def extractTableBlocks(content: str) -> list[list[str]]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -131,7 +131,7 @@ def parseInternalControlTable(block: list[str]) -> list[dict]:
         >>> parseInternalControlTable(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 3:

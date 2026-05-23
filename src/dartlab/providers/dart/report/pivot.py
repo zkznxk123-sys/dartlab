@@ -30,7 +30,7 @@ def pivotDividend(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> Divi
         >>> pivotDividend(...)
 
     Returns:
-        <TODO: return desc> (DividendResult | None)
+        DividendResult | None — 결과.
     """
     df = extractAnnual(stockCode, "dividend", quarterNum=4, baseDf=baseDf)
     if df is None:
@@ -76,7 +76,7 @@ def pivotEmployee(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> Empl
         >>> pivotEmployee(...)
 
     Returns:
-        <TODO: return desc> (EmployeeResult | None)
+        EmployeeResult | None — 결과.
     """
     df = extractAnnual(stockCode, "employee", quarterNum=2, baseDf=baseDf)
     if df is None:
@@ -137,7 +137,7 @@ def pivotMajorHolder(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> M
         >>> pivotMajorHolder(...)
 
     Returns:
-        <TODO: return desc> (MajorHolderResult | None)
+        MajorHolderResult | None — 결과.
     """
     df = extractAnnual(stockCode, "majorHolder", quarterNum=2, baseDf=baseDf)
     if df is None:
@@ -210,7 +210,7 @@ def pivotExecutive(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> Exe
         >>> pivotExecutive(...)
 
     Returns:
-        <TODO: return desc> (ExecutiveResult | None)
+        ExecutiveResult | None — 결과.
     """
     df = extractClean(stockCode, "executive", baseDf=baseDf)
     if df is None:
@@ -249,7 +249,7 @@ def pivotAudit(stockCode: str, *, baseDf: pl.DataFrame | None = None) -> AuditRe
         >>> pivotAudit(...)
 
     Returns:
-        <TODO: return desc> (AuditResult | None)
+        AuditResult | None — 결과.
     """
     df = extractAnnual(stockCode, "auditOpinion", quarterNum=4, baseDf=baseDf)
     if df is None:

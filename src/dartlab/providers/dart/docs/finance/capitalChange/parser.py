@@ -16,7 +16,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -53,7 +53,7 @@ def extractTableBlocks(content: str) -> list[list[str]]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -84,7 +84,7 @@ def splitCells(line: str) -> list[str]:
         >>> splitCells(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -107,7 +107,7 @@ def isSeparatorRow(line: str) -> bool:
         >>> isSeparatorRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -135,7 +135,7 @@ def parseCapitalChangeTable(block: list[str]) -> dict | None:
         >>> parseCapitalChangeTable(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 4:
@@ -248,7 +248,7 @@ def parseShareTotalTable(block: list[str]) -> dict | None:
         >>> parseShareTotalTable(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 5:
@@ -346,7 +346,7 @@ def parseTreasuryStockTable(block: list[str]) -> dict | None:
         >>> parseTreasuryStockTable(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 5:

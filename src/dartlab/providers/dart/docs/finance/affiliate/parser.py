@@ -394,7 +394,7 @@ def extractProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
         >>> extractProfiles(...)
 
     Returns:
-        <TODO: return desc> (list[AffiliateProfile])
+        list[AffiliateProfile] — 결과.
     """
     results: list[AffiliateProfile] = []
     headers: list[str] | None = None
@@ -550,7 +550,7 @@ def extractMovements(rows: list[list[str]]) -> list[AffiliateMovement]:
         >>> extractMovements(...)
 
     Returns:
-        <TODO: return desc> (list[AffiliateMovement])
+        list[AffiliateMovement] — 결과.
     """
     results: list[AffiliateMovement] = []
     headers = None
@@ -681,7 +681,7 @@ def extractSimpleMovement(rows: list[list[str]]) -> list[dict]:
         >>> extractSimpleMovement(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     results: list[dict] = []
     inTable = False
@@ -903,7 +903,7 @@ def extractTransposedProfiles(rows: list[list[str]]) -> list[AffiliateProfile]:
         >>> extractTransposedProfiles(...)
 
     Returns:
-        <TODO: return desc> (list[AffiliateProfile])
+        list[AffiliateProfile] — 결과.
     """
     blocks = _findTransposedBlocks(rows)
     results: list[AffiliateProfile] = []
@@ -980,7 +980,7 @@ def extractTransposedMovements(rows: list[list[str]]) -> list[AffiliateMovement]
         >>> extractTransposedMovements(...)
 
     Returns:
-        <TODO: return desc> (list[AffiliateMovement])
+        list[AffiliateMovement] — 결과.
     """
     blocks = _findTransposedBlocks(rows)
     results: list[AffiliateMovement] = []

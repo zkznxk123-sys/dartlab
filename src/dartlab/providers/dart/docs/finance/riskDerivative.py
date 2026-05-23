@@ -104,7 +104,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -143,7 +143,7 @@ def detectUnit(content: str) -> str:
         >>> detectUnit(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
@@ -164,7 +164,7 @@ def parseFxSensitivity(content: str) -> list[dict]:
         >>> parseFxSensitivity(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -245,7 +245,7 @@ def parseDerivativeContracts(content: str) -> tuple[list[dict], list[str]]:
         >>> parseDerivativeContracts(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -343,7 +343,7 @@ def riskDerivative(stockCode: str) -> RiskDerivativeResult | None:
         >>> riskDerivative(...)
 
     Returns:
-        <TODO: return desc> (RiskDerivativeResult | None)
+        RiskDerivativeResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

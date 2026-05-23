@@ -91,7 +91,7 @@ def buildTableDf(
         >>> buildTableDf(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame | None)
+        pl.DataFrame | None — 결과.
     """
     import polars as pl
 

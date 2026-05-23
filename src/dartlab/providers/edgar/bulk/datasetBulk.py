@@ -352,12 +352,12 @@ def convertQuarterlyToParquets(
         >>> convertQuarterlyToParquets(2024, 3)
 
     Args:
-        year: <TODO: param desc> (int)
-        quarter: <TODO: param desc> (int)
-        zipPath: <TODO: param desc> (Path | None)
+        year: int.
+        quarter: int.
+        zipPath: Path | None.
 
     Returns:
-        <TODO: return desc> (dict[str, Path])
+        dict[str, Path] — 결과.
     """
     if zipPath is None:
         zipPath = downloadQuarterlyDataset(year, quarter)

@@ -44,7 +44,7 @@ def parseDividendTable(content: str) -> dict:
         >>> parseDividendTable(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     tableRows: list[list[str]] = []

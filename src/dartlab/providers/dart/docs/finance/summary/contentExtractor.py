@@ -39,7 +39,7 @@ def extractSummaryContent(report: pl.DataFrame) -> str | None:
         >>> extractSummaryContent(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 결과.
     """
     content = None
     summary = report.filter(pl.col("section_title").str.contains("요약재무정보"))

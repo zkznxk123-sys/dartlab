@@ -70,7 +70,7 @@ def parseSubsidiaryTable(content: str) -> list[dict]:
         >>> parseSubsidiaryTable(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     results = []

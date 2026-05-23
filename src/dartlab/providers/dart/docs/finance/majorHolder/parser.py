@@ -22,7 +22,7 @@ def parseMajorHolderTable(content: str) -> dict:
         >>> parseMajorHolderTable(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     result = {
@@ -131,7 +131,7 @@ def parseBigHolders(content: str) -> list[dict] | None:
         >>> parseBigHolders(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     inSection = False
@@ -223,7 +223,7 @@ def parseMinority(content: str) -> dict | None:
         >>> parseMinority(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     inSection = False
@@ -283,7 +283,7 @@ def parseVoting(content: str) -> dict | None:
         >>> parseVoting(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     inSection = False

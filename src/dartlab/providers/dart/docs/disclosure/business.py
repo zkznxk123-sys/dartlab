@@ -74,7 +74,7 @@ def classifySection(title: str) -> str | None:
         >>> classifySection(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 결과.
     """
     for key, keywords in SECTION_KEYS.items():
         for kw in keywords:
@@ -96,7 +96,7 @@ def extractFromSubSections(report: pl.DataFrame) -> dict[str, dict]:
         >>> extractFromSubSections(...)
 
     Returns:
-        <TODO: return desc> (dict[str, dict])
+        dict[str, dict] — 결과.
     """
     subSections = report.filter(
         pl.col("section_title").str.contains("사업의 개요")
@@ -146,7 +146,7 @@ def extractFromUnified(report: pl.DataFrame) -> dict[str, dict]:
         >>> extractFromUnified(...)
 
     Returns:
-        <TODO: return desc> (dict[str, dict])
+        dict[str, dict] — 결과.
     """
     mainSection = report.filter(pl.col("section_title").str.contains("사업의 내용"))
     if mainSection.height == 0:
@@ -181,7 +181,7 @@ def splitByNumber(text: str) -> list[tuple[str, str, str]]:
         >>> splitByNumber(...)
 
     Returns:
-        <TODO: return desc> (list[tuple[str, str, str]])
+        list[tuple[str, str, str]] — 결과.
     """
     allMatches = list(_SPLIT_BY_NUMBER_RE.finditer(text))
 
@@ -220,7 +220,7 @@ def getBusinessText(report: pl.DataFrame) -> str | None:
         >>> getBusinessText(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 결과.
     """
     overview = report.filter(
         pl.col("section_title").str.starts_with("1.") & pl.col("section_title").str.contains("사업의 개요")
@@ -249,7 +249,7 @@ def computeChanges(df: pl.DataFrame, years: list[str]) -> list[dict]:
         >>> computeChanges(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     changes = []
     prevText = None

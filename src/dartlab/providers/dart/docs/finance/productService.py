@@ -98,7 +98,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -137,7 +137,7 @@ def parseRatio(text: str) -> float | None:
         >>> parseRatio(...)
 
     Returns:
-        <TODO: return desc> (float | None)
+        float | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -170,7 +170,7 @@ def detectUnit(content: str) -> str:
         >>> detectUnit(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
@@ -191,7 +191,7 @@ def parseProductService(content: str) -> list[dict]:
         >>> parseProductService(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -319,7 +319,7 @@ def productService(stockCode: str) -> ProductServiceResult | None:
         >>> productService(...)
 
     Returns:
-        <TODO: return desc> (ProductServiceResult | None)
+        ProductServiceResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

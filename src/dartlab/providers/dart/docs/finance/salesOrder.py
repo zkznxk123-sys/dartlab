@@ -102,7 +102,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -141,7 +141,7 @@ def detectUnit(content: str) -> str:
         >>> detectUnit(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     m = re.search(r"단위\s*[:\s]*\s*(백만원|억원|천원|원)", content[:500])
     if m:
@@ -213,7 +213,7 @@ def parseSalesTable(content: str) -> tuple[list[dict], list[str]]:
         없음.
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -293,7 +293,7 @@ def parseOrderBacklog(content: str) -> tuple[list[dict], list[str]]:
         >>> parseOrderBacklog(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -389,7 +389,7 @@ def salesOrder(stockCode: str) -> SalesOrderResult | None:
         >>> salesOrder(...)
 
     Returns:
-        <TODO: return desc> (SalesOrderResult | None)
+        SalesOrderResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

@@ -44,7 +44,7 @@ def splitCells(line: str) -> list[str]:
         >>> splitCells(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     cells = [c.strip() for c in line.split("|")]
     while cells and cells[0] == "":
@@ -67,7 +67,7 @@ def isSeparatorRow(line: str) -> bool:
         >>> isSeparatorRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     cells = splitCells(line)
     return all(re.match(r"^-+$", c.strip()) for c in cells if c.strip())
@@ -86,7 +86,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -121,7 +121,7 @@ def parseInvestments(content: str) -> tuple[list[dict], list[str]]:
         >>> parseInvestments(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -208,7 +208,7 @@ def investmentInOther(stockCode: str) -> InvestmentInOtherResult | None:
         >>> investmentInOther(...)
 
     Returns:
-        <TODO: return desc> (InvestmentInOtherResult | None)
+        InvestmentInOtherResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

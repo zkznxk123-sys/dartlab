@@ -52,7 +52,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -89,7 +89,7 @@ def extractTableBlocks(content: str) -> list[list[str]]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -164,7 +164,7 @@ def classifyBlock(block: list[str]) -> str:
         >>> classifyBlock(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     text = " ".join(block[:8])
 
@@ -202,7 +202,7 @@ def parseGuaranteeSummary(block: list[str]) -> dict | None:
         >>> parseGuaranteeSummary(...)
 
     Returns:
-        <TODO: return desc> (dict | None)
+        dict | None — 결과.
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
 
@@ -241,7 +241,7 @@ def parseGuaranteeDetail(block: list[str]) -> dict | None:
         >>> parseGuaranteeDetail(...)
 
     Returns:
-        <TODO: return desc> (dict | None)
+        dict | None — 결과.
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
 
@@ -296,7 +296,7 @@ def parseLawsuit(block: list[str]) -> dict | None:
         >>> parseLawsuit(...)
 
     Returns:
-        <TODO: return desc> (dict | None)
+        dict | None — 결과.
     """
     result: dict = {}
 

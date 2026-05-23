@@ -21,7 +21,7 @@ def detectBreakpoints(
         >>> detectBreakpoints(...)
 
     Returns:
-        <TODO: return desc> (tuple[list[Segment], list[BridgeResult]])
+        tuple[list[Segment], list[BridgeResult]] — 결과.
     """
     segments: list[dict] = [{"years": [sortedYears[0]], "pairs": []}]
     breakpoints: list[BridgeResult] = []

@@ -47,7 +47,7 @@ def extractTableBlocks(content: str) -> list[list[str]]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -76,7 +76,7 @@ def classifyBlock(block: list[str]) -> str:
         >>> classifyBlock(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     allText = ""
     for line in block[:6]:
@@ -121,7 +121,7 @@ def parseDirectorCount(block: list[str]) -> dict | None:
         >>> parseDirectorCount(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     rows = []
     for line in block:
@@ -196,7 +196,7 @@ def parseDirectorCountFromText(content: str) -> dict | None:
         >>> parseDirectorCountFromText(...)
 
     Returns:
-        <TODO: return desc> (dict | None)
+        dict | None — 결과.
     """
     lines = content.split("\n")
     for i, line in enumerate(lines):
@@ -235,7 +235,7 @@ def parseBoardMeeting(block: list[str]) -> dict | None:
         >>> parseBoardMeeting(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     rows = []
     for line in block:
@@ -311,7 +311,7 @@ def parseCommittee(block: list[str]) -> list[dict]:
         >>> parseCommittee(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     rows = []
     for line in block:

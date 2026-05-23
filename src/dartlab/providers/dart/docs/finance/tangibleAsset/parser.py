@@ -267,7 +267,7 @@ def splitPeriodBlocks(content: str) -> list[tuple[str, str]]:
         >>> splitPeriodBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[tuple[str, str]])
+        list[tuple[str, str]] — 결과.
     """
     lines = content.split("\n")
     blocks = []

@@ -236,9 +236,9 @@ def extractNoteCategory(
         >>> extractNoteCategory("0000320193", "inventory")
 
     Args:
-        cik: <TODO: param desc> (str)
-        category: <TODO: param desc> (str)
-        edgarDir: <TODO: param desc> (Path | None)
+        cik: str.
+        category: str.
+        edgarDir: Path | None.
     """
     if category not in _CATEGORY_TAGS:
         return None

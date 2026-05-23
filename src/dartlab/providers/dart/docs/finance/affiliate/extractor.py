@@ -16,7 +16,7 @@ def parseTableRows(text: str) -> list[list[str]]:
         >>> parseTableRows(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     rows = []
     for line in text.split("\n"):

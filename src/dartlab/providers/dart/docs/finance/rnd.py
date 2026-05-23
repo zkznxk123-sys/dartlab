@@ -49,7 +49,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -78,7 +78,7 @@ def parseFloat(text: str) -> float | None:
         >>> parseFloat(...)
 
     Returns:
-        <TODO: return desc> (float | None)
+        float | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -104,7 +104,7 @@ def extractTableBlocks(content: str) -> list[list[str]]:
         >>> extractTableBlocks(...)
 
     Returns:
-        <TODO: return desc> (list[list[str]])
+        list[list[str]] — 결과.
     """
     lines = content.split("\n")
     blocks: list[list[str]] = []
@@ -185,7 +185,7 @@ def parseRndTable(block: list[str]) -> dict | None:
         >>> parseRndTable(...)
 
     Args:
-        block: <TODO: param desc> (list[str])
+        block: list[str].
     """
     dataRows = [line for line in block if not isSeparatorRow(line)]
     if len(dataRows) < 3:

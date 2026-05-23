@@ -22,7 +22,7 @@ def coerceDate(value: str | date | datetime | None) -> date | None:
         >>> coerceDate(...)
 
     Returns:
-        <TODO: return desc> (date | None)
+        date | None — 결과.
     """
     if value is None:
         return None
@@ -65,7 +65,7 @@ def resolveDateWindow(
         >>> resolveDateWindow(...)
 
     Returns:
-        <TODO: return desc> (tuple[str | None, str | None])
+        tuple[str | None, str | None] — 결과.
     """
     startDate = coerceDate(start)
     endDate = coerceDate(end)
@@ -97,7 +97,7 @@ def splitKeywords(keyword: str | None) -> list[str]:
         >>> splitKeywords(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     if keyword is None:
         return []
@@ -120,7 +120,7 @@ def filterFilingsByKeyword(df: pl.DataFrame, *, keyword: str | None, columns: li
         >>> filterFilingsByKeyword(...)
 
     Returns:
-        <TODO: return desc> (pl.DataFrame)
+        pl.DataFrame — 결과.
     """
     tokens = splitKeywords(keyword)
     if not tokens or df.is_empty():
@@ -150,7 +150,7 @@ def filingRecord(value: Any) -> dict[str, Any] | None:
         >>> filingRecord(...)
 
     Returns:
-        <TODO: return desc> (dict[str, Any] | None)
+        dict[str, Any] | None — 결과.
     """
     if isinstance(value, dict):
         return dict(value)
@@ -171,7 +171,7 @@ def truncateText(text: str, maxChars: int | None = None) -> tuple[str, bool]:
         >>> truncateText(...)
 
     Returns:
-        <TODO: return desc> (tuple[str, bool])
+        tuple[str, bool] — 결과.
     """
     if maxChars is None or maxChars <= 0 or len(text) <= maxChars:
         return text, False

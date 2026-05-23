@@ -25,7 +25,7 @@ def periodToIndex(key: str) -> int:
         >>> periodToIndex(...)
 
     Returns:
-        <TODO: return desc> (int)
+        int — 결과.
     """
     m = re.match(r"^(\d{4})(Q[1-4])?$", key)
     if not m:
@@ -61,7 +61,7 @@ def nameSimilarity(a: str, b: str) -> float:
         >>> nameSimilarity(...)
 
     Returns:
-        <TODO: return desc> (float)
+        float — 결과.
     """
     a = a.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
     b = b.replace("[", "").replace("]", "").replace("ㆍ", "").strip()
@@ -94,7 +94,7 @@ def numberBridgeMatch(
         >>> numberBridgeMatch(...)
 
     Returns:
-        <TODO: return desc> (BridgeResult)
+        BridgeResult — 결과.
     """
     matched = 0
     total = 0

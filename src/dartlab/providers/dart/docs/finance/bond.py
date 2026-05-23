@@ -61,7 +61,7 @@ def parseBondTable(content: str) -> list[dict]:
         >>> parseBondTable(...)
 
     Args:
-        content: <TODO: param desc> (str)
+        content: str.
     """
     lines = content.split("\n")
     results = []

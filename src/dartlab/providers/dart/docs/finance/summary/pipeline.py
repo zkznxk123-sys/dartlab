@@ -28,7 +28,7 @@ def loadYearData(
         >>> loadYearData(...)
 
     Returns:
-        <TODO: return desc> (dict[str, YearAccounts])
+        dict[str, YearAccounts] — 결과.
     """
     kinds = PERIOD_KINDS.get(period, PERIOD_KINDS["y"])
     yearData: dict[str, YearAccounts] = {}

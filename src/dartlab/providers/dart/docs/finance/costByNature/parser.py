@@ -140,7 +140,7 @@ def findCostByNatureSection(contents: list[str]) -> str | None:
         >>> findCostByNatureSection(...)
 
     Returns:
-        <TODO: return desc> (str | None)
+        str | None — 결과.
     """
     for content in contents:
         lines = content.split("\n")
@@ -177,7 +177,7 @@ def parseCostByNature(sectionText: str) -> dict | None:
         >>> parseCostByNature(...)
 
     Args:
-        sectionText: <TODO: param desc> (str)
+        sectionText: str.
     """
     for fn in [_tryParseInlineTable, _tryParseSplitTable, _tryParseMultiColTable]:
         result = fn(sectionText)

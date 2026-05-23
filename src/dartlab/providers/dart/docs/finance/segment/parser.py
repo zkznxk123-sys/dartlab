@@ -53,7 +53,7 @@ def isDataRow(cells: list[str]) -> bool:
         >>> isDataRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     numCount = 0
     for c in cells[1:]:
@@ -76,7 +76,7 @@ def isHeaderRow(cells: list[str]) -> bool:
         >>> isHeaderRow(...)
 
     Returns:
-        <TODO: return desc> (bool)
+        bool — 결과.
     """
     nonEmpty = [c.strip() for c in cells if c.strip()]
     if len(nonEmpty) < 2:
@@ -115,7 +115,7 @@ def mergeHeaders(headers: list[list[str]]) -> list[str]:
         >>> mergeHeaders(...)
 
     Returns:
-        <TODO: return desc> (list[str])
+        list[str] — 결과.
     """
     if len(headers) == 1:
         return list(headers[0])
@@ -166,7 +166,7 @@ def classifyTable(columns: list[str]) -> str:
         >>> classifyTable(...)
 
     Returns:
-        <TODO: return desc> (str)
+        str — 결과.
     """
     colStr = " ".join(columns)
     if any(kw in colStr for kw in ["국내", "미주", "유럽", "본사 소재지"]):
@@ -192,7 +192,7 @@ def parseSegmentTables(text: str) -> list[SegmentTable]:
         >>> parseSegmentTables(...)
 
     Returns:
-        <TODO: return desc> (list[SegmentTable])
+        list[SegmentTable] — 결과.
     """
     lines = text.split("\n")
     results: list[SegmentTable] = []

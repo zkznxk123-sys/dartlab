@@ -97,7 +97,7 @@ def parseAmount(text: str) -> int | None:
         >>> parseAmount(...)
 
     Returns:
-        <TODO: return desc> (int | None)
+        int | None — 결과.
     """
     if not text or not isinstance(text, str):
         return None
@@ -133,7 +133,7 @@ def parseEquityIssuance(content: str) -> list[dict]:
         >>> parseEquityIssuance(...)
 
     Returns:
-        <TODO: return desc> (list[dict])
+        list[dict] — 결과.
     """
     lines = content.split("\n")
     results: list[dict] = []
@@ -226,7 +226,7 @@ def fundraising(stockCode: str) -> FundraisingResult | None:
         >>> fundraising(...)
 
     Returns:
-        <TODO: return desc> (FundraisingResult | None)
+        FundraisingResult | None — 결과.
     """
     try:
         df = loadData(stockCode)

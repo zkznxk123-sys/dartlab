@@ -35,7 +35,7 @@ class SegmentTable:
             >>> toDataFrame(...)
 
         Returns:
-            <TODO: return desc> (pl.DataFrame)
+            pl.DataFrame — 결과.
         """
         import polars as pl
 
@@ -93,7 +93,7 @@ class SegmentsResult:
             >>> latestTable(...)
 
         Returns:
-            <TODO: return desc> (SegmentTable | None)
+            SegmentTable | None — 결과.
         """
         if self.tables is None:
             return None
