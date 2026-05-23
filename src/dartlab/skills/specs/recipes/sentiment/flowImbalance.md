@@ -4,7 +4,7 @@ title: 외국인·기관·개인 순매수 imbalance z-score
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 graphTier: L1.5
 cluster: sentiment
 purpose: 일별 외국인·기관·개인 순매수 row 에서 imbalance (외인 - 기관 - 개인 또는 외인+기관 vs 개인) 시계열을 만들고 20 거래일 z-score 산출. 추론 라벨 (긍정/부정) 없이 *수급 비대칭* 정량만. gather L1 단일. 트리거 — '수급 imbalance', '외인 기관 z-score', 'flow sentiment'.

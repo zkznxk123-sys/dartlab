@@ -4,7 +4,7 @@ title: 인플레이션 확산성 원자료 점검
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: CPI, PPI, 유가, 기대인플레이션, 정책금리 원자료를 gather로 모아 인플레이션이 단일 품목 충격인지 광범위한 압력인지 확인하는 절차. 트리거 — '인플레 확산', '물가 압력', 'CPI PPI 유가', '기대인플레이션'.
 whenToUse:
   - 인플레이션 확산

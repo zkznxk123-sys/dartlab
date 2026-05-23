@@ -4,7 +4,7 @@ title: 한국 매크로 스트레스 지도
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 한국 시장을 기준으로 환율, 교역, 금리, 유동성, 위기, 자산/심리 축을 묶어 외국인 수급과 수출 민감도가 큰 시장의 거시 스트레스를 판단하는 절차. 트리거 — '한국 매크로', 'KR 스트레스', '원달러', 'KOSPI 위험', '수출 경기'.
 whenToUse:
   - 한국 매크로

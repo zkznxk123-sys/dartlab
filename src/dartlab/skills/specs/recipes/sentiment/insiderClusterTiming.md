@@ -4,7 +4,7 @@ title: 내부자 매수/매도 cluster + 가격 lag
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 graphTier: L1.5
 cluster: sentiment
 purpose: 내부자 (임원·주요주주) 매수 또는 매도가 180 day window 안에 ≥3 명 동시 발현 시 cluster row 로 표기 + 직전 30 거래일 가격 변동 lag 와 같이 본다. *집단 시점* 자체가 sentiment 정량 신호. `recipes.fundamental.disclosure.insiderEarningsLeading` 의 *분기 surprise 선행* 측면과 분리 — 본 recipe 는 *단기 timing* 측면. 트리거 — '내부자 cluster', 'insider cluster', '집단 매수 시점'.

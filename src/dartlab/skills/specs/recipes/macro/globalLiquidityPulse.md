@@ -4,7 +4,7 @@ title: 글로벌 유동성 펄스 원자료 점검
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: macro 축의 유동성 판정에 아직 직접 드러나지 않는 Fed balance sheet, reverse repo, M2, 정책금리 원자료를 gather로 모아 글로벌 달러 유동성의 방향을 점검하는 절차. 트리거 — '글로벌 유동성', '달러 유동성', 'Fed balance sheet', 'RRP', 'M2'.
 whenToUse:
   - 글로벌 유동성

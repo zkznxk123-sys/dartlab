@@ -4,7 +4,7 @@ title: 노동시장 전환점 원자료 점검
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 실업률, 신규실업수당, 비농업고용, 임금, Sahm rule 관련 원자료를 gather로 확인하고 macro.forecast와 대조해 노동시장 둔화의 전환점을 찾는 절차. 트리거 — '노동시장 둔화', '실업률', '고용 전환점', 'Sahm rule'.
 whenToUse:
   - 노동시장 둔화

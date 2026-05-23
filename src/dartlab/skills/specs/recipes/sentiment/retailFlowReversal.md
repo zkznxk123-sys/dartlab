@@ -4,7 +4,7 @@ title: 개인 매매 반전 신호 (외인/기관 vs 개인 z-divergence)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 개인 순매수 z-score 와 (외인+기관) 순매수 z-score 의 부호 반대 발산. 두 z 갭 ≥ 3 인 row 는 *스마트머니 vs 개인 반전 점* 후보. sentiment 페르소나 보조.
 whenToUse:
   - 개인 매매 반전

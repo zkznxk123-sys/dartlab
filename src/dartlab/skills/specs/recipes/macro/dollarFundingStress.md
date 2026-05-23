@@ -4,7 +4,7 @@ title: 달러 펀딩 스트레스 원자료 점검
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 달러인덱스, 원달러 환율, VIX, HY spread, 금융상태지수 원자료를 gather로 확인해 글로벌 위험회피와 달러 펀딩 압력이 커지는지 판단하는 절차. 트리거 — '달러 스트레스', '달러 펀딩', 'DXY', 'USDKRW', '위험회피'.
 whenToUse:
   - 달러 스트레스

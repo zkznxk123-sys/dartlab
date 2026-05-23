@@ -4,7 +4,7 @@ title: 꼬리위험 시나리오 스캔
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 2008 금융위기, 2020 COVID, 인플레이션 충격, 신용 충격 같은 macro.scenario 결과를 나란히 실행해 현재 macro summary 대비 하방 시나리오의 손실 경로와 취약 축을 찾는 절차. 트리거 — 'tail risk', '꼬리위험', '최악 시나리오', '5시그마 이벤트'.
 whenToUse:
   - tail risk

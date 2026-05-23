@@ -4,7 +4,7 @@ title: 현재 매크로 위치의 역사적 비교
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 현재 거시 상태를 1997 아시아 위기, 2008 금융위기, 2020 COVID, 2022 인플레 긴축 같은 역사적 충격과 나란히 비교해 지금의 위치를 설명하는 절차. 트리거 — '2008과 비교', '과거 위기 대비', '현재 위치', '역사적 percentile'.
 whenToUse:
   - 과거 위기 비교
