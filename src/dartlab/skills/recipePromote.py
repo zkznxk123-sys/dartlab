@@ -24,7 +24,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 RECIPE_DIR = REPO_ROOT / "src" / "dartlab" / "skills" / "specs" / "recipes"
 
 # 프로젝트 모듈 import 를 위해 src 를 path 추가.
@@ -312,6 +312,64 @@ def cmdDeprecate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmdValidate(args: argparse.Namespace) -> int:
+    """recipe 1 건을 testUniverse 종목들에 실행 → run 기록 + scorecard 출력.
+
+    내부에서 ``dartlab.ai.tools.validateRecipe.validateRecipe`` 호출. 결과는
+    ``~/.dartlab/recipeRuns/<slug>.parquet`` 에 append (capture=True default).
+    """
+    from dartlab.ai.tools.validateRecipe import validateRecipe
+
+    skill_id = args.skillId
+    path = _pathFor(skill_id)
+    if not path.exists():
+        print(f"recipe spec 파일 없음: {path}", file=sys.stderr)
+        return 1
+    targets = list(args.targets) if args.targets else None
+    result = validateRecipe(
+        skill_id,
+        targets=targets,
+        asOf=args.asOf,
+        maxTargets=args.maxTargets,
+        capture=not args.dryRun,
+    )
+    if not result.ok:
+        print(f"validateRecipe 실패: {result.summary}", file=sys.stderr)
+        return 1
+    data = result.data or {}
+    runs = data.get("runs") or []
+    sc = data.get("scorecard") or {}
+    missing = data.get("missingEvidence") or []
+    print(f"=== {skill_id} validateRecipe ===")
+    print(f"runs: {len(runs)} (capture={'no' if args.dryRun else 'yes'})")
+    for r in runs:
+        mark = "✓" if r.get("ok") else "✗"
+        print(
+            f"  {mark} {r.get('runId', '')[:10]} {r.get('target', ''):<8} "
+            f"{r.get('headlineMetric', ''):<22} {r.get('headlineValue', '')}"
+            f"  ({r.get('durationMs', 0)} ms)"
+        )
+        if r.get("missing"):
+            print(f"      missing: {r['missing']}")
+        if r.get("errorClass"):
+            print(f"      error:   {r['errorClass']}")
+    print()
+    print("--- scorecard ---")
+    if isinstance(sc, dict):
+        print(f"  runCount:              {sc.get('runCount')}")
+        print(f"  executionPassRate:     {sc.get('executionPassRate', 0):.2%}")
+        print(f"  evidenceCompleteness:  {sc.get('evidenceCompleteness', 0):.2%}")
+        print(f"  crossTargetStability:  {sc.get('crossTargetStability', 0):.4f}")
+        print(f"  novelty:               {sc.get('novelty')}")
+        print(f"  falsifierEvaluated:    {sc.get('falsifierEvaluated')}")
+        print(f"  meetsThresholds:       {sc.get('meetsThresholds')}")
+        for note in sc.get("notes") or []:
+            print(f"  note: {note}")
+    if missing:
+        print(f"\nmissing evidence (union): {missing}")
+    return 0
+
+
 def cmdPromoteToStoryboard(args: argparse.Namespace) -> int:
     """verified/curated recipe 의 storyboard 이식 수동 가이드 출력."""
     skill_id = args.skillId
@@ -378,6 +436,30 @@ def main(argv: list[str] | None = None) -> int:
     p_deprecate.add_argument("skillId")
     p_deprecate.add_argument("--reason", required=True)
     p_deprecate.set_defaults(func=cmdDeprecate)
+
+    p_validate = sub.add_parser(
+        "validate",
+        help="recipe 1 건 testUniverse 실행 + run 기록 + scorecard (operator lifecycle 진입점)",
+    )
+    p_validate.add_argument("skillId")
+    p_validate.add_argument(
+        "--targets",
+        nargs="+",
+        help="실행 대상 stockCode 목록 (미지정시 testUniverse.stockCodes 또는 005930)",
+    )
+    p_validate.add_argument("--asOf", default=None, help="기준일 ISO yyyy-mm-dd (선택)")
+    p_validate.add_argument(
+        "--maxTargets",
+        type=int,
+        default=5,
+        help="target 상한 (CLAUDE.md 메모리 룰: ≤5, 기본 5)",
+    )
+    p_validate.add_argument(
+        "--dryRun",
+        action="store_true",
+        help="capture 비활성 — run 기록 디스크에 저장 안 함",
+    )
+    p_validate.set_defaults(func=cmdValidate)
 
     p_storyboard = sub.add_parser(
         "promote-to-storyboard",
