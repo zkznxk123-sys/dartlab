@@ -55,6 +55,9 @@ tests/_attempts/*.xml
 tests/_attempts/docs_backup_v6/
 tests/_attempts/xml_docs_v6/
 tests/_attempts/xml_extract/
+# aiAudit/ 는 dir 자체 + 안 contents 모두 무시 — AI audit probe 시도 (snake_case 파일명
+# 다수라 camelCase lint 충돌, 인큐베이션 격리)
+tests/_attempts/aiAudit/**
 
 # Node modules (all locations)
 node_modules/
