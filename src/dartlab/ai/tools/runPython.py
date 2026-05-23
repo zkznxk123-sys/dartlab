@@ -279,7 +279,10 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
         )
     ]
     table_value = emitted.get("table")
-    if table_value is not None and (not hasattr(table_value, "__len__") or len(table_value) > 0):
+    if "table" in emitted and table_value is not None:
+        # 빈 DataFrame/list 도 tableRef 를 생성 — recipe 가 schema 만 들고 "행 0" 를
+        # 표현한 결과 (insufficient data 등) 는 valid evidence. evidence 누락이 아닌
+        # 실 결과 표현이므로 scorecard 의 evidenceCompleteness 가 정확히 측정되도록.
         refs.append(
             Ref(
                 id=f"table:{runId or 'local'}:python",
@@ -302,15 +305,20 @@ def runPython(code: str, *, runId: str | None = None) -> ToolResult:
                     payload={"key": key, "value": value, "unit": (emitted.get("units") or {}).get(key)},
                 )
             )
+    # date= 키가 명시적으로 emit 됐다면 (None 이라도) dateRef 를 항상 만든다 —
+    # recipe 가 'date 정보를 추적한다' 는 의도. None 인 경우 'unavailable' 로
+    # 명시 — scorecard 가 evidence "선언 + 미가용" 을 정확히 측정하도록.
+    has_date_key = "date" in emitted or "dateRef" in emitted
     date_value = emitted.get("date") or emitted.get("dateRef")
-    if date_value:
+    if has_date_key:
+        date_str = str(date_value) if date_value else "unavailable"
         refs.append(
             Ref(
-                id=f"date:{runId or 'local'}:{str(date_value)[:32]}",
+                id=f"date:{runId or 'local'}:{date_str[:32]}",
                 kind="dateRef",
-                title=str(date_value),
+                title=date_str,
                 source=refs[0].id,
-                payload={"value": str(date_value)},
+                payload={"value": date_str, "specified": date_value is not None},
             )
         )
     sources_raw = emitted.get("sources") or emitted.get("sourceRefs")
