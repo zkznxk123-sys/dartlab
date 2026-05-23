@@ -48,6 +48,14 @@ TODO.md
 # (예: providers/dart/finance/mapperData/_backup/) 은 번들 리소스이므로 제외하면 안 됨.
 /_backup/
 
+# tests/_attempts/ 시도 산출물 데이터 — 코드·README·JSON 결과는 commit 대상이지만
+# parquet/xml 산출물 데이터는 부피 (수십~수백 MB) + 재생성 가능이라 추적 X.
+tests/_attempts/*.parquet
+tests/_attempts/*.xml
+tests/_attempts/docs_backup_v6/
+tests/_attempts/xml_docs_v6/
+tests/_attempts/xml_extract/
+
 # Node modules (all locations)
 node_modules/
 
