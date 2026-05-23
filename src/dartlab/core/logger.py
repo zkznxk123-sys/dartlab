@@ -254,3 +254,61 @@ def installRichHandler(*, level: int = logging.INFO) -> None:
         extLog.handlers = [handler]
         extLog.propagate = False
         extLog.setLevel(logging.WARNING)
+
+
+# ── Structured event log (T1-1, 운영 관측성 KPI) ──────────────
+
+
+_LEVEL_MAP: dict[str, int] = {
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "warn": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
+}
+
+
+def logEvent(level: int | str, event: str, /, **fields: object) -> None:
+    """Structured event log — extra dict 강제 entry point.
+
+    Capabilities:
+        snake_case event name + 구조화된 key/value 필드를 logger.log 의 extra=
+        로 전달. metrics workflow 가 grep 으로 event/field 추출 + 시계열 산출.
+    Args:
+        level: int (logging.INFO 등) 또는 str ("info", "warn", "error" 등).
+        event: snake_case event 식별자 (예: "company_show_start", "scan_complete").
+        **fields: 구조화 데이터. JSON 직렬화 가능 값만 (str/int/float/bool/None).
+    Example:
+        >>> from dartlab.core.logger import logEvent
+        >>> logEvent("info", "company_show_start", code="005930", source="dart")
+        >>> logEvent("warning", "scan_memory_high", peak_mb=1900, threshold_mb=1800)
+    Returns:
+        None.
+    Guide:
+        새 핵심 흐름 진입/탈출/메트릭은 plain logger.info 대신 logEvent. 기존
+        logger.info(...) 호출은 점진 마이그레이션 (T1-1 트랙, 50+ call site).
+    SeeAlso:
+        getLogger: 표준 logging.Logger 반환.
+        profileCall (T3-4 후속): 메모리/시간 자동 wrap.
+    Requires:
+        없음. logging 표준 모듈만.
+    Raises:
+        ValueError: 잘못된 level 문자열.
+    AIContext:
+        Observability SLO (T1-4) 측정 + metrics workflow (T1-2) 산출의 단일
+        진입점. 본 API 사용 비율 ≥ 90% 가 운영 점수 (KPI F.1) 의 가장 큰
+        가중 (40%).
+    """
+    if isinstance(level, str):
+        levelInt = _LEVEL_MAP.get(level.lower())
+        if levelInt is None:
+            raise ValueError(f"unknown level: {level!r}")
+    else:
+        levelInt = int(level)
+
+    _ensureDefaultHandler()
+    log = logging.getLogger(_ROOT_NAME)
+    # event 자체를 message 본문으로, fields 는 extra 로 전달
+    # → 표준 logging.Formatter 는 message 만 출력, JSON formatter 는 extra 도 직렬화.
+    log.log(levelInt, event, extra={"event": event, "fields": fields} if fields else {"event": event})
