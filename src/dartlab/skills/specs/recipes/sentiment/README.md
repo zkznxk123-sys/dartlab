@@ -35,13 +35,19 @@ linkedSkills:
 2. L1.5 합성 — `c.gather("flow")`, `c.gather("insiderTrading")` 결과를 RunPython 안에서 panel 로 정렬.
 3. 본 페르소나의 recipe ≥3 개 (아래 1 차 진입 표).
 
-## 1 차 진입 recipe 3
+## 1 차 진입 recipe
 
 | recipe | 역할 |
 |---|---|
 | [recipes.sentiment.flowImbalance](/skills/recipes.sentiment.flowImbalance) | 외국인·기관·개인 순매수 imbalance + 20 거래일 z-score |
-| [recipes.sentiment.shortBalanceMomentum](/skills/recipes.sentiment.shortBalanceMomentum) | 공매도 잔고 변화율 모멘텀 (≥+1σ 또는 ≤-1σ) |
 | [recipes.sentiment.insiderClusterTiming](/skills/recipes.sentiment.insiderClusterTiming) | 내부자 매수/매도 cluster (180 day window 3+ 명) + 직전 가격 lag |
+| [recipes.sentiment.foreignBuyMomentum](/skills/recipes.sentiment.foreignBuyMomentum) | 외국인 누적 순매수 5/20/60d 가속도 |
+| [recipes.sentiment.foreignHoldingLevel](/skills/recipes.sentiment.foreignHoldingLevel) | 외인 보유 비율 절대 수준 (5%~50% 범위) |
+| [recipes.sentiment.priceMomentumGap](/skills/recipes.sentiment.priceMomentumGap) | 가격 5/20/60d 수익률 갭 — 가속/감속 phase |
+| [recipes.sentiment.ownershipShiftSignal](/skills/recipes.sentiment.ownershipShiftSignal) | 5% 보유공시 누적 +/- 변화 |
+| [recipes.sentiment.retailFlowReversal](/skills/recipes.sentiment.retailFlowReversal) | 개인 vs 외인+기관 z-divergence 반전 |
+
+**deprecated**: `shortBalanceMomentum` · `consensusRevisionPace` (해당 gather axis 미구현 — 데이터 소스 추가 후 재작성).
 
 ## 미커버 영역 (정직 표시)
 

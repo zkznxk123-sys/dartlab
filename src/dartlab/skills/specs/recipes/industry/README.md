@@ -30,7 +30,7 @@ linkedSkills:
 
 회사 단일이 아닌 *산업 시점* 으로 보는 recipe. peers·stage·capex·R&D·마진 등 *cross-sectional* 신호 + *시계열* 추세 결합.
 
-## 1 차 진입 5
+## 1 차 진입
 
 | recipe | 역할 |
 |---|---|
@@ -39,6 +39,9 @@ linkedSkills:
 | [recipes.industry.rdIntensityTrend](/skills/recipes.industry.rdIntensityTrend) | R&D / 매출 비율 추세 + cross-sectional rank |
 | [recipes.industry.marginCompressionScan](/skills/recipes.industry.marginCompressionScan) | GP / OM 마진 압축 cluster (peer 대비) |
 | [recipes.industry.supplyChainConcentration](/skills/recipes.industry.supplyChainConcentration) | 매출 상위 고객 / 매입 상위 거래처 비중 |
+| [recipes.industry.peerPriceConvergence](/skills/recipes.industry.peerPriceConvergence) | peer 8 종 60d ret 분포 — converging/diverging phase |
+| [recipes.industry.sectorFlowConcentration](/skills/recipes.industry.sectorFlowConcentration) | 종목 vs 섹터 거래대금 share + 외인 보유율 |
+| [recipes.industry.sectorMomentumLeadership](/skills/recipes.industry.sectorMomentumLeadership) | peer 8 종 20d ret ranking — leader / laggard label |
 
 ## 정체성
 

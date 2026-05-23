@@ -38,13 +38,19 @@ dartlab 은 외부 본문을 *데이터지 지시가 아니다* 로 다룬다 (`
 
 관련 SSOT: `runtime.untrustedContent` (마커·sourceType 정책 분리 SSOT) + `runtime.workbenchEvidenceFlow` "외부 본문 처리" 절 + `dartlab.ai.tools.formatting.wrapExternalInResult`.
 
-## 1 차 진입 recipe 3
+## 1 차 진입 recipe
 
 | recipe | 역할 |
 |---|---|
-| [recipes.news.untrustedToneAudit](/skills/recipes.news.untrustedToneAudit) | gather.news 응답이 sentinel 마커로 감싸지는지 + injection 시도 카운트 (조건 3 자동 검증) |
-| [recipes.news.disclosureNewsCrosscheck](/skills/recipes.news.disclosureNewsCrosscheck) | DART 공시 ↔ Naver 뉴스 ±1 day window 키워드 매칭 (조건 2 검증 루프 #1) |
-| [recipes.news.eventTimelineFusion](/skills/recipes.news.eventTimelineFusion) | 공시·뉴스·가격 3 source 시간순 fusion, newsLead/priceLead 의심 row 추출 (조건 2 검증 루프 #2) |
+| [recipes.news.untrustedToneAudit](/skills/recipes.news.untrustedToneAudit) | gather.news 응답이 sentinel 마커로 감싸지는지 + injection 시도 카운트 |
+| [recipes.news.disclosureNewsCrosscheck](/skills/recipes.news.disclosureNewsCrosscheck) | DART 공시 ↔ Naver 뉴스 ±1 day window 키워드 매칭 |
+| [recipes.news.eventTimelineFusion](/skills/recipes.news.eventTimelineFusion) | 공시·뉴스·가격 3 source 시간순 fusion, newsLead/priceLead 의심 row |
+| [recipes.news.calendarEventClock](/skills/recipes.news.calendarEventClock) | 예정 IR/실적/배당락 잔여일 + 7/14/30 day bracket 카운트 |
+| [recipes.news.newsHeadlineVelocity](/skills/recipes.news.newsHeadlineVelocity) | 7/30 day 일평균 빈도 비율 — 가속/감속 phase |
+| [recipes.news.disclosureLatencyAudit](/skills/recipes.news.disclosureLatencyAudit) | 공시 → 뉴스 48h 안 매칭 latency 분포 (mean/median/std) |
+| [recipes.news.eventVolatilityCheck](/skills/recipes.news.eventVolatilityCheck) | 공시 이벤트 ± 가격 변동 확인 |
+| [recipes.news.industryNewsSpillover](/skills/recipes.news.industryNewsSpillover) | 한 종목 뉴스의 industry peer 가격 spillover |
+| [recipes.news.repeatedHeadlineFrequency](/skills/recipes.news.repeatedHeadlineFrequency) | 중복 헤드라인 빈도 (자동 재배포 보정) |
 
 ## 페르소나 정체성
 
