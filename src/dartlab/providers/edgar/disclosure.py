@@ -24,6 +24,311 @@ _RE_8K_ITEM_HEADER = re.compile(
 )
 
 
+def _parseForm4Xml(xml: str) -> pl.DataFrame:
+    """SEC Form 4 ownership XML → transaction row.
+
+    Form 4 XML schema:
+    - ``<reportingOwner>/<reportingOwnerId>/<rptOwnerName>`` — insider name
+    - ``<reportingOwner>/<reportingOwnerRelationship>`` — role (officer/director 등)
+    - ``<nonDerivativeTransaction>`` 또는 ``<derivativeTransaction>``:
+      - ``<transactionDate>/<value>`` — YYYY-MM-DD
+      - ``<transactionAmounts>/<transactionShares>/<value>`` — share count
+      - ``<transactionAmounts>/<transactionPricePerShare>/<value>`` — price
+      - ``<postTransactionAmounts>/<sharesOwnedFollowingTransaction>/<value>``
+      - ``<transactionCoding>/<transactionCode>`` — A/D/P/S/M/F 등
+
+    Args:
+        xml: Form 4 XML 본문.
+
+    Returns:
+        7 컬럼 DataFrame. 파싱 실패 / 매칭 0 → 빈 schema.
+
+    Raises:
+        없음.
+    """
+    if not xml or "<" not in xml:
+        return pl.DataFrame(
+            schema={
+                "insider": pl.Utf8,
+                "role": pl.Utf8,
+                "transactionDate": pl.Utf8,
+                "shares": pl.Float64,
+                "price": pl.Float64,
+                "postShares": pl.Float64,
+                "transactionCode": pl.Utf8,
+            }
+        )
+
+    import xml.etree.ElementTree as ET
+
+    try:
+        root = ET.fromstring(xml)
+    except ET.ParseError:
+        return pl.DataFrame(
+            schema={
+                "insider": pl.Utf8,
+                "role": pl.Utf8,
+                "transactionDate": pl.Utf8,
+                "shares": pl.Float64,
+                "price": pl.Float64,
+                "postShares": pl.Float64,
+                "transactionCode": pl.Utf8,
+            }
+        )
+
+    # reportingOwner 이름 + role 추출 (첫 1 명만).
+    insider = ""
+    role = ""
+    ownerNode = root.find(".//reportingOwner")
+    if ownerNode is not None:
+        nameNode = ownerNode.find(".//rptOwnerName")
+        if nameNode is not None and nameNode.text:
+            insider = nameNode.text.strip()
+        relation = ownerNode.find(".//reportingOwnerRelationship")
+        if relation is not None:
+            roles: list[str] = []
+            for childTag in ("isDirector", "isOfficer", "isTenPercentOwner", "isOther"):
+                child = relation.find(childTag)
+                if child is not None and child.text and child.text.strip() in ("1", "true"):
+                    roles.append(childTag.removeprefix("is").lower())
+            officerTitle = relation.find("officerTitle")
+            if officerTitle is not None and officerTitle.text:
+                roles.append(officerTitle.text.strip())
+            role = "/".join(roles)
+
+    rows: list[dict[str, object]] = []
+    for txnTag in ("nonDerivativeTransaction", "derivativeTransaction"):
+        for txn in root.findall(f".//{txnTag}"):
+            txnDate = _xmlValue(txn, "transactionDate/value")
+            shares = _xmlFloat(txn, "transactionAmounts/transactionShares/value")
+            price = _xmlFloat(txn, "transactionAmounts/transactionPricePerShare/value")
+            postShares = _xmlFloat(txn, "postTransactionAmounts/sharesOwnedFollowingTransaction/value")
+            code = _xmlValue(txn, "transactionCoding/transactionCode")
+            if txnDate is None and shares is None and code is None:
+                continue
+            rows.append(
+                {
+                    "insider": insider,
+                    "role": role,
+                    "transactionDate": txnDate or "",
+                    "shares": shares,
+                    "price": price,
+                    "postShares": postShares,
+                    "transactionCode": code or "",
+                }
+            )
+
+    if not rows:
+        return pl.DataFrame(
+            schema={
+                "insider": pl.Utf8,
+                "role": pl.Utf8,
+                "transactionDate": pl.Utf8,
+                "shares": pl.Float64,
+                "price": pl.Float64,
+                "postShares": pl.Float64,
+                "transactionCode": pl.Utf8,
+            }
+        )
+    return pl.DataFrame(
+        rows,
+        schema={
+            "insider": pl.Utf8,
+            "role": pl.Utf8,
+            "transactionDate": pl.Utf8,
+            "shares": pl.Float64,
+            "price": pl.Float64,
+            "postShares": pl.Float64,
+            "transactionCode": pl.Utf8,
+        },
+    )
+
+
+_DEF14A_COMP_COLUMNS = (
+    "name",
+    "position",
+    "year",
+    "salary",
+    "bonus",
+    "stockAwards",
+    "total",
+)
+
+# Summary Compensation Table 헤더 후보 — SEC convention.
+# 본 함수는 BS 없이 regex 만으로 row 추출 (간단 휴리스틱). 정확도는 별 cycle 의
+# BS 기반 parser 가 후속.
+_RE_DEF14A_YEAR = re.compile(r"\b(20\d{2})\b")
+_RE_DEF14A_DOLLAR = re.compile(r"\$?\s*([\d,]+(?:\.\d+)?)")
+
+
+def _parseDef14aCompensation(html: str) -> pl.DataFrame:
+    """DEF 14A HTML 의 Summary Compensation Table row 추출.
+
+    SEC Summary Compensation Table 표준 구조:
+    - Name and Principal Position / Year / Salary / Bonus / Stock Awards /
+      Option Awards / Non-Equity Incentive / Pension / All Other / Total.
+
+    본 함수는 BS 없이 regex 기반 휴리스틱 — table cell 단위 추출:
+    1. ``<table>`` block 식별 + ``compensation``/``summary`` 키워드 매칭
+    2. 각 row 의 cells 추출 → year 컬럼 + dollar 컬럼 위치 매핑
+    3. name + position (첫 2 셀) + 금액 (year / salary / bonus / stockAwards / total)
+
+    Args:
+        html: DEF 14A HTML 본문.
+
+    Returns:
+        7 컬럼 DataFrame. 파싱 실패 → 빈 schema.
+
+    Raises:
+        없음.
+    """
+    if not html or "<table" not in html.lower():
+        return pl.DataFrame(
+            schema={
+                "name": pl.Utf8,
+                "position": pl.Utf8,
+                "year": pl.Int64,
+                "salary": pl.Float64,
+                "bonus": pl.Float64,
+                "stockAwards": pl.Float64,
+                "total": pl.Float64,
+            }
+        )
+
+    # compensation 키워드 보유 table block 만 추출.
+    tableBlocks = re.findall(
+        r"<table[^>]*>(.*?)</table>",
+        html,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    rows: list[dict[str, object]] = []
+    for block in tableBlocks:
+        if "compensation" not in block.lower() and "salary" not in block.lower():
+            continue
+        for trMatch in re.finditer(r"<tr[^>]*>(.*?)</tr>", block, flags=re.IGNORECASE | re.DOTALL):
+            tr = trMatch.group(1)
+            cells = re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", tr, flags=re.IGNORECASE | re.DOTALL)
+            if len(cells) < 4:
+                continue
+            cleanCells = [_stripHtmlTags(c) for c in cells]
+            row = _matchCompensationRow(cleanCells)
+            if row:
+                rows.append(row)
+
+    if not rows:
+        return pl.DataFrame(
+            schema={
+                "name": pl.Utf8,
+                "position": pl.Utf8,
+                "year": pl.Int64,
+                "salary": pl.Float64,
+                "bonus": pl.Float64,
+                "stockAwards": pl.Float64,
+                "total": pl.Float64,
+            }
+        )
+    return pl.DataFrame(
+        rows,
+        schema={
+            "name": pl.Utf8,
+            "position": pl.Utf8,
+            "year": pl.Int64,
+            "salary": pl.Float64,
+            "bonus": pl.Float64,
+            "stockAwards": pl.Float64,
+            "total": pl.Float64,
+        },
+    )
+
+
+def _matchCompensationRow(cells: list[str]) -> dict[str, object] | None:
+    """compensation table row 의 cells 에서 7 필드 매칭.
+
+    Args:
+        cells: row 의 plaintext 셀 list (>= 4 개).
+
+    Returns:
+        7 컬럼 dict 또는 매칭 실패 시 None (header / sub-header / 빈 row).
+
+    Raises:
+        없음.
+    """
+    if not cells:
+        return None
+    # name = 첫 셀 (한 줄 ≤ 80 자 이상이면 row 아님).
+    name = cells[0].strip()
+    if not name or len(name) > 80:
+        return None
+    # year 컬럼 — 셀 중 4 자리 연도 단독.
+    year: int | None = None
+    yearIdx: int | None = None
+    for i, c in enumerate(cells[1:], start=1):
+        cleaned = c.strip()
+        m = _RE_DEF14A_YEAR.fullmatch(cleaned)
+        if m:
+            year = int(m.group(1))
+            yearIdx = i
+            break
+    if year is None or yearIdx is None:
+        return None
+
+    # position = name 셀 안 줄바꿈 두 번째 줄 또는 두 번째 셀.
+    position = ""
+    if "\n" in cells[0]:
+        parts = cells[0].split("\n", 1)
+        name = parts[0].strip()
+        position = parts[1].strip()
+    elif yearIdx > 1:
+        position = cells[1].strip()
+
+    # year 이후 셀 = 금액 — dollar regex 매칭 순서대로 salary / bonus / stockAwards / total.
+    amounts: list[float] = []
+    for c in cells[yearIdx + 1 :]:
+        m = _RE_DEF14A_DOLLAR.search(c)
+        if m:
+            try:
+                amounts.append(float(m.group(1).replace(",", "")))
+            except ValueError:
+                pass
+    if not amounts:
+        return None
+
+    salary = amounts[0] if len(amounts) >= 1 else None
+    bonus = amounts[1] if len(amounts) >= 2 else None
+    stockAwards = amounts[2] if len(amounts) >= 3 else None
+    total = amounts[-1] if len(amounts) >= 4 else None
+
+    return {
+        "name": name,
+        "position": position,
+        "year": year,
+        "salary": salary,
+        "bonus": bonus,
+        "stockAwards": stockAwards,
+        "total": total,
+    }
+
+
+def _xmlValue(node, path: str) -> str | None:
+    """XML node 의 path 텍스트 추출. 부재 시 None."""
+    child = node.find(path)
+    if child is None or child.text is None:
+        return None
+    text = child.text.strip()
+    return text or None
+
+
+def _xmlFloat(node, path: str) -> float | None:
+    """XML node 의 path 를 float 으로 변환. 부재/실패 → None."""
+    text = _xmlValue(node, path)
+    if not text:
+        return None
+    try:
+        return float(text.replace(",", ""))
+    except ValueError:
+        return None
+
+
 def _stripHtmlTags(html: str) -> str:
     """HTML 태그 제거 — BeautifulSoup 없이 regex 만으로 plaintext 변환.
 
@@ -166,18 +471,7 @@ def parseForm4Xml(xml: str) -> pl.DataFrame:
         TargetMarkets:
             - US (EDGAR) 한정.
     """
-    del xml
-    return pl.DataFrame(
-        schema={
-            "insider": pl.Utf8,
-            "role": pl.Utf8,
-            "transactionDate": pl.Utf8,
-            "shares": pl.Float64,
-            "price": pl.Float64,
-            "postShares": pl.Float64,
-            "transactionCode": pl.Utf8,
-        }
-    )
+    return _parseForm4Xml(xml)
 
 
 def parseDef14aHtml(html: str) -> pl.DataFrame:
@@ -226,18 +520,7 @@ def parseDef14aHtml(html: str) -> pl.DataFrame:
         TargetMarkets:
             - US (EDGAR) 한정.
     """
-    del html
-    return pl.DataFrame(
-        schema={
-            "name": pl.Utf8,
-            "position": pl.Utf8,
-            "year": pl.Int64,
-            "salary": pl.Float64,
-            "bonus": pl.Float64,
-            "stockAwards": pl.Float64,
-            "total": pl.Float64,
-        }
-    )
+    return _parseDef14aCompensation(html)
 
 
 def parseEightKHtml(html: str) -> pl.DataFrame:
