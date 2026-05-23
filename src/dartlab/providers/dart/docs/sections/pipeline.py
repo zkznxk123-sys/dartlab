@@ -78,6 +78,272 @@ _cacheLock = threading.RLock()
 _CACHE_SENTINEL: object = object()
 
 
+# 같은 headerHash + topic 표가 다른 path 에 분기된 fragment — segmentKey 안 `|h:<hash>` 부분 매칭.
+_RE_TABLE_HEADER_HASH = re.compile(r"\|h:([0-9a-f]+)")
+
+
+def _mergeFragmentTables(
+    *,
+    topicMap: dict[tuple[str, str], dict[str, str]],
+    rowMeta: dict[tuple[str, str], dict[str, object]],
+    rowOrder: dict[tuple[str, str], dict[str, int]],
+    pathVariantsByKey: dict[tuple[str, str], set[str]],
+    parentPathVariantsByKey: dict[tuple[str, str], set[str]],
+    semanticPathVariantsByKey: dict[tuple[str, str], set[str]],
+    semanticParentPathVariantsByKey: dict[tuple[str, str], set[str]],
+) -> None:
+    """Cross-path table consolidation — 같은 headerHash + topic 표를 longest path = canonical 로 통합.
+
+    회귀 사례 (000660 businessOverview): "생산설비의현황" 표가 path "주요제품서비스등 >
+    생산설비의현황" (9 cells annual) 과 path "생산설비의현황" (1 cell quarterly) 으로
+    fragment — parquet 구조 variance 로 같은 표가 다른 parent 아래 emit. headerHash
+    동일 → 같은 표 → 1 row 통합. 모든 mutation 은 인자 dict 에 in-place.
+    """
+    hashGroups: dict[tuple[str, str], list[tuple[str, str]]] = {}
+    for key in topicMap:
+        topic_, sk_ = key
+        if not sk_.startswith("table|"):
+            continue
+        m_ = _RE_TABLE_HEADER_HASH.search(sk_)
+        if not m_:
+            continue
+        hashGroups.setdefault((topic_, m_.group(1)), []).append(key)
+
+    def _pathLen(k: tuple[str, str]) -> int:
+        meta_ = rowMeta.get(k, {})
+        return len(str(meta_.get("textSemanticPathKey") or ""))
+
+    variantDicts = (
+        pathVariantsByKey,
+        parentPathVariantsByKey,
+        semanticPathVariantsByKey,
+        semanticParentPathVariantsByKey,
+    )
+    for groupKeys in hashGroups.values():
+        if len(groupKeys) <= 1:
+            continue
+        # canonical = longest semantic path (가장 구체적 context)
+        canonical = max(groupKeys, key=_pathLen)
+        for k in groupKeys:
+            if k == canonical:
+                continue
+            # cell merge — canonical 우선, 부재 period 만 보충
+            for period_, val_ in topicMap[k].items():
+                if val_ and not topicMap[canonical].get(period_):
+                    topicMap[canonical][period_] = val_
+            # path variants 보존 — pivot 결과 textPathVariants 컬럼에 모든 variant 노출
+            for variantDict in variantDicts:
+                if k in variantDict:
+                    variantDict.setdefault(canonical, set()).update(variantDict[k])
+                    variantDict.pop(k, None)
+            topicMap.pop(k, None)
+            rowMeta.pop(k, None)
+            rowOrder.pop(k, None)
+
+
+# final wide DataFrame 의 schema — 30 fixed columns + period dynamic columns.
+_SECTIONS_SCHEMA_FIXED: dict[str, pl.DataType] = {
+    "chapter": pl.Categorical,
+    "topic": pl.Categorical,
+    "blockType": pl.Categorical,
+    "blockOrder": pl.Int64,
+    "sourceBlockOrder": pl.Int64,
+    "textNodeType": pl.Categorical,
+    "textStructural": pl.Boolean,
+    "textLevel": pl.Int64,
+    "textPath": pl.Categorical,
+    "textPathKey": pl.Categorical,
+    "textParentPathKey": pl.Categorical,
+    "textPathVariantCount": pl.Int64,
+    "textPathVariants": pl.List(pl.Utf8),
+    "textParentPathVariants": pl.List(pl.Utf8),
+    "textSemanticPathKey": pl.Categorical,
+    "textSemanticParentPathKey": pl.Categorical,
+    "textComparablePathKey": pl.Categorical,
+    "textComparableParentPathKey": pl.Categorical,
+    "textSemanticPathVariants": pl.List(pl.Utf8),
+    "textSemanticParentPathVariants": pl.List(pl.Utf8),
+    "segmentKey": pl.Categorical,
+    "segmentOrder": pl.Int64,
+    "segmentOccurrence": pl.Int64,
+    "freqKey": pl.Categorical,
+    "freqScope": pl.Categorical,
+    "annualPeriodCount": pl.Int64,
+    "quarterlyPeriodCount": pl.Int64,
+    "latestAnnualPeriod": pl.Categorical,
+    "latestQuarterlyPeriod": pl.Categorical,
+    "sourceTopic": pl.Categorical,
+}
+
+
+def _assembleSectionsDataFrame(
+    *,
+    validPeriods: list[str],
+    topicMap: dict[tuple[str, str], dict[str, str]],
+    rowMeta: dict[tuple[str, str], dict[str, object]],
+    rowOrder: dict[tuple[str, str], dict[str, int]],
+    topicChapter: dict[str, str],
+    topicFirstSeq: dict[str, tuple[int, int]],
+    pathVariantsByKey: dict[tuple[str, str], set[str]],
+    parentPathVariantsByKey: dict[tuple[str, str], set[str]],
+    semanticPathVariantsByKey: dict[tuple[str, str], set[str]],
+    semanticParentPathVariantsByKey: dict[tuple[str, str], set[str]],
+    fullBuild: bool,
+) -> pl.DataFrame:
+    """누적된 dict 들을 wide pl.DataFrame 으로 조립.
+
+    조립 패턴: column-by-column 변환 — Python list 와 Arrow buffer 동시 보유 회피.
+    pop + Series 생성 후 list ref 즉시 drop. final pl.DataFrame stage peak +176MB
+    → +88MB 절감 (005380 실측, 71 컬럼 × 19781 row). 정렬 키는 `_topicRowSortKey`
+    (chapter majorNum + 최신 period sourceBlockOrder/segmentOrder/occurrence). 호출
+    후 인자 dict 들은 모두 소비됨 (caller 가 del 불필요).
+    """
+    freqMetaByKey = {key: _rowFreqMeta(periodMap) for key, periodMap in topicMap.items()}
+    topicKeysByTopic: dict[str, list[tuple[str, str]]] = {}
+    for key in topicMap:
+        topicKeysByTopic.setdefault(key[0], []).append(key)
+
+    def _topicRowSortKey(k: tuple[str, str]) -> tuple[int, int, int, int, str]:
+        """본문 원문 순서 보존 — chapter majorNum + 최신 period sourceBlockOrder/segmentOrder + occurrence + segmentKey.
+
+        정렬 키는 모두 ``rowMeta`` (latest-period wins) 기반. ``rowOrder`` 의
+        across-periods ``min`` 휴리스틱은 옛 period 의 본문 chunking 차이로 의미
+        잃음 — 정렬에 쓰지 않는다. 회귀 사례 (SK하이닉스 companyOverview): 같은
+        block (sourceBlockOrder=4) 안 "나(seg=0) → 다(seg=2) → 라(seg=4)" 가 옛
+        period 영향으로 라(seg=0 min) 가 앞으로 → 본문 원문 역순.
+        """
+        topic, _segmentKey = k
+        majorNum, _firstSeq = topicFirstSeq.get(topic, (99, 999999))
+        meta = rowMeta.get(k, {})
+        return (
+            majorNum,
+            int(meta.get("sourceBlockOrder", 999999)),
+            int(meta.get("segmentOrder", 0)),
+            int(meta.get("segmentOccurrence", 1)),
+            str(k[1]),
+        )
+
+    schema: dict[str, pl.DataType] = dict(_SECTIONS_SCHEMA_FIXED)
+    for p in validPeriods:
+        schema[p] = pl.Categorical
+
+    dataColumns: dict[str, list[object]] = {col: [] for col in schema}
+    sortedTopics = [topic for topic, _ in sorted(topicFirstSeq.items(), key=lambda x: x[1])]
+
+    for topic in sortedTopics:
+        topicKeys = sorted(topicKeysByTopic.get(topic, []), key=_topicRowSortKey)
+        for blockOrder, key in enumerate(topicKeys):
+            meta = rowMeta.get(key, {})
+            orderInfo = rowOrder.get(key, {})
+            freqMeta = freqMetaByKey.get(key, {})
+            pathVariants = sorted(pathVariantsByKey.get(key, set()))
+            parentPathVariants = sorted(parentPathVariantsByKey.get(key, set()))
+            semanticPathVariants = sorted(semanticPathVariantsByKey.get(key, set()))
+            semanticParentPathVariants = sorted(semanticParentPathVariantsByKey.get(key, set()))
+
+            # canonical override 가 있으면 강제, 없으면 topicChapter (first-seen) 사용.
+            dataColumns["chapter"].append(TOPIC_CANONICAL_CHAPTER.get(topic, topicChapter.get(topic)))
+            dataColumns["topic"].append(topic)
+            dataColumns["blockType"].append(str(meta.get("blockType") or "text"))
+            dataColumns["blockOrder"].append(blockOrder)
+            dataColumns["sourceBlockOrder"].append(
+                int(orderInfo.get("sourceBlockOrder") or meta.get("sourceBlockOrder") or 0)
+            )
+            dataColumns["textNodeType"].append(
+                str(meta["textNodeType"]) if isinstance(meta.get("textNodeType"), str) else None
+            )
+            dataColumns["textStructural"].append(
+                bool(meta["textStructural"]) if isinstance(meta.get("textStructural"), bool) else None
+            )
+            dataColumns["textLevel"].append(int(meta["textLevel"]) if isinstance(meta.get("textLevel"), int) else None)
+            dataColumns["textPath"].append(str(meta["textPath"]) if isinstance(meta.get("textPath"), str) else None)
+            dataColumns["textPathKey"].append(
+                str(meta["textPathKey"]) if isinstance(meta.get("textPathKey"), str) else None
+            )
+            dataColumns["textParentPathKey"].append(
+                str(meta["textParentPathKey"]) if isinstance(meta.get("textParentPathKey"), str) else None
+            )
+            dataColumns["textPathVariantCount"].append(len(pathVariants))
+            dataColumns["textPathVariants"].append(pathVariants or None)
+            dataColumns["textParentPathVariants"].append(parentPathVariants or None)
+            dataColumns["textSemanticPathKey"].append(
+                str(meta["textSemanticPathKey"]) if isinstance(meta.get("textSemanticPathKey"), str) else None
+            )
+            dataColumns["textSemanticParentPathKey"].append(
+                str(meta["textSemanticParentPathKey"])
+                if isinstance(meta.get("textSemanticParentPathKey"), str)
+                else None
+            )
+            dataColumns["textComparablePathKey"].append(
+                str(meta["textComparablePathKey"]) if isinstance(meta.get("textComparablePathKey"), str) else None
+            )
+            dataColumns["textComparableParentPathKey"].append(
+                str(meta["textComparableParentPathKey"])
+                if isinstance(meta.get("textComparableParentPathKey"), str)
+                else None
+            )
+            dataColumns["textSemanticPathVariants"].append(semanticPathVariants or None)
+            dataColumns["textSemanticParentPathVariants"].append(semanticParentPathVariants or None)
+            dataColumns["segmentKey"].append(str(meta.get("segmentKey") or ""))
+            dataColumns["segmentOrder"].append(int(meta.get("segmentOrder") or 0))
+            dataColumns["segmentOccurrence"].append(
+                int(orderInfo.get("segmentOccurrence") or meta.get("segmentOccurrence") or 1)
+            )
+            dataColumns["freqKey"].append(str(freqMeta.get("freqKey") or "none"))
+            dataColumns["freqScope"].append(str(freqMeta.get("freqScope") or "none"))
+            dataColumns["annualPeriodCount"].append(int(freqMeta.get("annualPeriodCount") or 0))
+            dataColumns["quarterlyPeriodCount"].append(int(freqMeta.get("quarterlyPeriodCount") or 0))
+            dataColumns["latestAnnualPeriod"].append(
+                str(freqMeta["latestAnnualPeriod"]) if isinstance(freqMeta.get("latestAnnualPeriod"), str) else None
+            )
+            dataColumns["latestQuarterlyPeriod"].append(
+                str(freqMeta["latestQuarterlyPeriod"])
+                if isinstance(freqMeta.get("latestQuarterlyPeriod"), str)
+                else None
+            )
+            dataColumns["sourceTopic"].append(
+                str(meta["sourceTopic"]) if isinstance(meta.get("sourceTopic"), str) else None
+            )
+            periodMap = topicMap.pop(key, None)
+            if periodMap:
+                for period in validPeriods:
+                    dataColumns[period].append(periodMap.get(period))
+            else:
+                for period in validPeriods:
+                    dataColumns[period].append(None)
+            # 소비한 중간 dict 항목 즉시 해제
+            rowMeta.pop(key, None)
+            rowOrder.pop(key, None)
+            pathVariantsByKey.pop(key, None)
+            parentPathVariantsByKey.pop(key, None)
+            semanticPathVariantsByKey.pop(key, None)
+            semanticParentPathVariantsByKey.pop(key, None)
+            freqMetaByKey.pop(key, None)
+
+    # 메모리 해제: DataFrame 생성 전 잔여 dict 퇴출
+    topicMap.clear()
+    rowMeta.clear()
+    rowOrder.clear()
+    pathVariantsByKey.clear()
+    parentPathVariantsByKey.clear()
+    semanticPathVariantsByKey.clear()
+    semanticParentPathVariantsByKey.clear()
+    freqMetaByKey.clear()
+
+    if fullBuild:
+        gc.collect()
+
+    # column-by-column 변환 — Python list 와 Arrow buffer 동시 보유 회피.
+    # pop + Series 생성 후 list ref 즉시 drop. final pl.DataFrame stage peak
+    # +176MB → +88MB 절감 (005380 실측, dataColumns 71 컬럼 × 19781 row).
+    seriesList = []
+    for colName in list(schema.keys()):
+        values = dataColumns.pop(colName)
+        seriesList.append(pl.Series(colName, values, dtype=schema[colName]))
+        del values  # 즉시 ref drop
+    return pl.DataFrame(seriesList)
+
+
 def _cacheSectionsResult(cacheKey: tuple[str, "frozenset[str] | None"], result: "pl.DataFrame | None") -> None:
     """sections() 결과 LRU + 디스크 캐시 저장. 크기 제한 초과 시 가장 오래된 항목 제거.
 
@@ -530,228 +796,29 @@ def sections(stockCode: str, topics: set[str] | None = None) -> pl.DataFrame | N
         _cacheSectionsResult(cacheKey, None)
         return None
 
-    # Cross-path table consolidation — 같은 headerHash + topic 표가 다른 path 에 분기된
-    # 경우 1 row 로 merge. 회귀 사례 (000660 businessOverview): "생산설비의현황" 표가
-    # path "주요제품서비스등 > 생산설비의현황" (9 cells annual) 과 path "생산설비의현황"
-    # (1 cell quarterly) 으로 fragment — parquet 구조 variance 로 같은 표가 다른 parent
-    # 아래 emit. headerHash 동일 → 같은 표 → 1 row 통합 (longest path = canonical).
-    _RE_H_IN_SK = re.compile(r"\|h:([0-9a-f]+)")
-    hashGroups: dict[tuple[str, str], list[tuple[str, str]]] = {}
-    for key in topicMap.keys():
-        topic_, sk_ = key
-        if not sk_.startswith("table|"):
-            continue
-        m_ = _RE_H_IN_SK.search(sk_)
-        if not m_:
-            continue
-        hashGroups.setdefault((topic_, m_.group(1)), []).append(key)
+    _mergeFragmentTables(
+        topicMap=topicMap,
+        rowMeta=rowMeta,
+        rowOrder=rowOrder,
+        pathVariantsByKey=pathVariantsByKey,
+        parentPathVariantsByKey=parentPathVariantsByKey,
+        semanticPathVariantsByKey=semanticPathVariantsByKey,
+        semanticParentPathVariantsByKey=semanticParentPathVariantsByKey,
+    )
 
-    def _pathLen(k: tuple[str, str]) -> int:
-        meta_ = rowMeta.get(k, {})  # noqa: F821 — closure variable
-        return len(str(meta_.get("textSemanticPathKey") or ""))
-
-    for groupKeys in hashGroups.values():
-        if len(groupKeys) <= 1:
-            continue
-        # canonical = longest semantic path (가장 구체적 context)
-        canonical = max(groupKeys, key=_pathLen)
-        for k in groupKeys:
-            if k == canonical:
-                continue
-            # cell merge — canonical 우선, 부재 period 만 보충
-            for period_, val_ in topicMap[k].items():
-                if val_ and not topicMap[canonical].get(period_):
-                    topicMap[canonical][period_] = val_
-            # path variants 보존 — pivot 결과 textPathVariants 컬럼에 모든 variant 노출
-            for variantDict in (
-                pathVariantsByKey,
-                parentPathVariantsByKey,
-                semanticPathVariantsByKey,
-                semanticParentPathVariantsByKey,
-            ):
-                if k in variantDict:
-                    variantDict.setdefault(canonical, set()).update(variantDict[k])
-                    variantDict.pop(k, None)
-            topicMap.pop(k, None)
-            rowMeta.pop(k, None)
-            rowOrder.pop(k, None)
-
-    freqMetaByKey = {key: _rowFreqMeta(periodMap) for key, periodMap in topicMap.items()}
-    topicKeysByTopic: dict[str, list[tuple[str, str]]] = {}
-    for key in topicMap.keys():
-        topicKeysByTopic.setdefault(key[0], []).append(key)
-
-    topicIndex: dict[str, int] = {}
-    for topic_seq in sorted(topicFirstSeq.items(), key=lambda x: x[1]):
-        topicIndex[topic_seq[0]] = len(topicIndex)
-
-    def _topicRowSortKey(k: tuple[str, str]) -> tuple[int, int, int, int, str]:
-        """본문 원문 순서 보존 — chapter majorNum + 최신 period 의 (sourceBlockOrder, segmentOrder) + occurrence + segmentKey.
-
-        정렬 키는 모두 ``rowMeta`` (latest-period wins) 기반. ``rowOrder`` 의
-        across-periods ``min`` 휴리스틱 (sourceBlockOrder/segmentOrder) 은 옛
-        period 의 본문 chunking 차이 (block 쪼개짐) 로 segmentOrder=0 이 박혀
-        의미 잃음 — 정렬에 쓰지 않는다. 회귀 사례: SK하이닉스 companyOverview
-        의 같은 block (sourceBlockOrder=4) 안 "나(seg=0) → 다(seg=2) → 라(seg=4)"
-        가 옛 period 영향으로 라(seg=0 min) 가 앞으로 → 본문 원문 역순.
-        """
-        topic, _segmentKey = k
-        majorNum, _firstSeq = topicFirstSeq.get(topic, (99, 999999))
-        meta = rowMeta.get(k, {})  # noqa: F821 — closure variable
-        return (
-            majorNum,
-            int(meta.get("sourceBlockOrder", 999999)),
-            int(meta.get("segmentOrder", 0)),
-            int(meta.get("segmentOccurrence", 1)),
-            str(k[1]),
-        )
-
-    schema = {
-        "chapter": pl.Categorical,
-        "topic": pl.Categorical,
-        "blockType": pl.Categorical,
-        "blockOrder": pl.Int64,
-        "sourceBlockOrder": pl.Int64,
-        "textNodeType": pl.Categorical,
-        "textStructural": pl.Boolean,
-        "textLevel": pl.Int64,
-        "textPath": pl.Categorical,
-        "textPathKey": pl.Categorical,
-        "textParentPathKey": pl.Categorical,
-        "textPathVariantCount": pl.Int64,
-        "textPathVariants": pl.List(pl.Utf8),
-        "textParentPathVariants": pl.List(pl.Utf8),
-        "textSemanticPathKey": pl.Categorical,
-        "textSemanticParentPathKey": pl.Categorical,
-        "textComparablePathKey": pl.Categorical,
-        "textComparableParentPathKey": pl.Categorical,
-        "textSemanticPathVariants": pl.List(pl.Utf8),
-        "textSemanticParentPathVariants": pl.List(pl.Utf8),
-        "segmentKey": pl.Categorical,
-        "segmentOrder": pl.Int64,
-        "segmentOccurrence": pl.Int64,
-        "freqKey": pl.Categorical,
-        "freqScope": pl.Categorical,
-        "annualPeriodCount": pl.Int64,
-        "quarterlyPeriodCount": pl.Int64,
-        "latestAnnualPeriod": pl.Categorical,
-        "latestQuarterlyPeriod": pl.Categorical,
-        "sourceTopic": pl.Categorical,
-    }
-    for p in validPeriods:
-        schema[p] = pl.Categorical
-
-    dataColumns: dict[str, list[object]] = {col: [] for col in schema}
-    sortedTopics = [topic for topic, _ in sorted(topicFirstSeq.items(), key=lambda x: x[1])]
-
-    for topic in sortedTopics:
-        topicKeys = sorted(topicKeysByTopic.get(topic, []), key=_topicRowSortKey)
-        for blockOrder, key in enumerate(topicKeys):
-            meta = rowMeta.get(key, {})
-            orderInfo = rowOrder.get(key, {})
-            freqMeta = freqMetaByKey.get(key, {})
-            pathVariants = sorted(pathVariantsByKey.get(key, set()))
-            parentPathVariants = sorted(parentPathVariantsByKey.get(key, set()))
-            semanticPathVariants = sorted(semanticPathVariantsByKey.get(key, set()))
-            semanticParentPathVariants = sorted(semanticParentPathVariantsByKey.get(key, set()))
-
-            # canonical override 가 있으면 강제, 없으면 topicChapter (first-seen) 사용.
-            dataColumns["chapter"].append(TOPIC_CANONICAL_CHAPTER.get(topic, topicChapter.get(topic)))
-            dataColumns["topic"].append(topic)
-            dataColumns["blockType"].append(str(meta.get("blockType") or "text"))
-            dataColumns["blockOrder"].append(blockOrder)
-            dataColumns["sourceBlockOrder"].append(
-                int(orderInfo.get("sourceBlockOrder") or meta.get("sourceBlockOrder") or 0)
-            )
-            dataColumns["textNodeType"].append(
-                str(meta["textNodeType"]) if isinstance(meta.get("textNodeType"), str) else None
-            )
-            dataColumns["textStructural"].append(
-                bool(meta["textStructural"]) if isinstance(meta.get("textStructural"), bool) else None
-            )
-            dataColumns["textLevel"].append(int(meta["textLevel"]) if isinstance(meta.get("textLevel"), int) else None)
-            dataColumns["textPath"].append(str(meta["textPath"]) if isinstance(meta.get("textPath"), str) else None)
-            dataColumns["textPathKey"].append(
-                str(meta["textPathKey"]) if isinstance(meta.get("textPathKey"), str) else None
-            )
-            dataColumns["textParentPathKey"].append(
-                str(meta["textParentPathKey"]) if isinstance(meta.get("textParentPathKey"), str) else None
-            )
-            dataColumns["textPathVariantCount"].append(len(pathVariants))
-            dataColumns["textPathVariants"].append(pathVariants or None)
-            dataColumns["textParentPathVariants"].append(parentPathVariants or None)
-            dataColumns["textSemanticPathKey"].append(
-                str(meta["textSemanticPathKey"]) if isinstance(meta.get("textSemanticPathKey"), str) else None
-            )
-            dataColumns["textSemanticParentPathKey"].append(
-                str(meta["textSemanticParentPathKey"])
-                if isinstance(meta.get("textSemanticParentPathKey"), str)
-                else None
-            )
-            dataColumns["textComparablePathKey"].append(
-                str(meta["textComparablePathKey"]) if isinstance(meta.get("textComparablePathKey"), str) else None
-            )
-            dataColumns["textComparableParentPathKey"].append(
-                str(meta["textComparableParentPathKey"])
-                if isinstance(meta.get("textComparableParentPathKey"), str)
-                else None
-            )
-            dataColumns["textSemanticPathVariants"].append(semanticPathVariants or None)
-            dataColumns["textSemanticParentPathVariants"].append(semanticParentPathVariants or None)
-            dataColumns["segmentKey"].append(str(meta.get("segmentKey") or ""))
-            dataColumns["segmentOrder"].append(int(meta.get("segmentOrder") or 0))
-            dataColumns["segmentOccurrence"].append(
-                int(orderInfo.get("segmentOccurrence") or meta.get("segmentOccurrence") or 1)
-            )
-            dataColumns["freqKey"].append(str(freqMeta.get("freqKey") or "none"))
-            dataColumns["freqScope"].append(str(freqMeta.get("freqScope") or "none"))
-            dataColumns["annualPeriodCount"].append(int(freqMeta.get("annualPeriodCount") or 0))
-            dataColumns["quarterlyPeriodCount"].append(int(freqMeta.get("quarterlyPeriodCount") or 0))
-            dataColumns["latestAnnualPeriod"].append(
-                str(freqMeta["latestAnnualPeriod"]) if isinstance(freqMeta.get("latestAnnualPeriod"), str) else None
-            )
-            dataColumns["latestQuarterlyPeriod"].append(
-                str(freqMeta["latestQuarterlyPeriod"])
-                if isinstance(freqMeta.get("latestQuarterlyPeriod"), str)
-                else None
-            )
-            dataColumns["sourceTopic"].append(
-                str(meta["sourceTopic"]) if isinstance(meta.get("sourceTopic"), str) else None
-            )
-            periodMap = topicMap.pop(key, None)
-            if periodMap:
-                for period in validPeriods:
-                    dataColumns[period].append(periodMap.get(period))
-            else:
-                for period in validPeriods:
-                    dataColumns[period].append(None)
-            # 소비한 중간 dict 항목 즉시 해제
-            rowMeta.pop(key, None)
-            rowOrder.pop(key, None)
-            pathVariantsByKey.pop(key, None)
-            parentPathVariantsByKey.pop(key, None)
-            semanticPathVariantsByKey.pop(key, None)
-            semanticParentPathVariantsByKey.pop(key, None)
-            freqMetaByKey.pop(key, None)
-
-    # 메모리 해제: DataFrame 생성 전 잔여 dict 퇴출
-    del topicMap, rowMeta, rowOrder
-    del pathVariantsByKey, parentPathVariantsByKey
-    del semanticPathVariantsByKey, semanticParentPathVariantsByKey
-    del freqMetaByKey
-
-    if topics is None:
-        gc.collect()
-
-    # column-by-column 변환 — Python list 와 Arrow buffer 동시 보유 회피.
-    # pop + Series 생성 후 list ref 즉시 drop. final pl.DataFrame stage peak
-    # +176MB → +88MB 절감 (005380 실측, dataColumns 71 컬럼 × 19781 row).
-    seriesList = []
-    for colName in list(schema.keys()):
-        values = dataColumns.pop(colName)
-        seriesList.append(pl.Series(colName, values, dtype=schema[colName]))
-        values = None  # noqa: F841 — 즉시 ref drop
-    out = pl.DataFrame(seriesList)
+    out = _assembleSectionsDataFrame(
+        validPeriods=validPeriods,
+        topicMap=topicMap,
+        rowMeta=rowMeta,
+        rowOrder=rowOrder,
+        topicChapter=topicChapter,
+        topicFirstSeq=topicFirstSeq,
+        pathVariantsByKey=pathVariantsByKey,
+        parentPathVariantsByKey=parentPathVariantsByKey,
+        semanticPathVariantsByKey=semanticPathVariantsByKey,
+        semanticParentPathVariantsByKey=semanticParentPathVariantsByKey,
+        fullBuild=topics is None,
+    )
     finalOut = _dropChapterCatchAllDuplicates(out)
     _cacheSectionsResult(cacheKey, finalOut)
     return finalOut
