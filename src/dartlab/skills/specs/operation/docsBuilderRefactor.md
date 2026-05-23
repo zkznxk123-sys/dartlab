@@ -268,6 +268,8 @@ layer 의 line-join 회복 로직 또는 XML parser 의 consecutive short-P merg
   - 1st cold build: 13.48s (+ 디스크 save)
   - 2nd in-mem hit: 1.05s
   - 3rd disk hit (in-mem cleared): **1.27s** (cold 7s 대비 ~5×)
+- **5 baseline disk hit total: 4.99s = mean 1.0s/corp** = **마법 수준 sub-2s 달성**
+  (cached path 한정. cold 5-8s 는 별도 큰 refactor 필요).
 - 프로세스 재시작 후에도 build cost 회피.
 
 **옵션 3 검증 — ProcessPool batch (`buildBatchParallel`, 커밋 344a45779):**
