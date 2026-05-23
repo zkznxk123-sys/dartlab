@@ -4,7 +4,7 @@ title: Event Radar Capital Action Monitor
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: dividends, splits, 자사주, 증자, 전환사채 등 자본 이벤트 원자료를 묶어 단기 촉매를 확인하는 L1/L1.5 절차다.
@@ -32,7 +32,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.capitalActionMonitor
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

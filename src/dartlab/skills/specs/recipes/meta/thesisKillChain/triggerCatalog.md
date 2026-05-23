@@ -31,7 +31,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.triggerCatalog
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

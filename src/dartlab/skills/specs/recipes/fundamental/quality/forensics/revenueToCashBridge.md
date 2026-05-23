@@ -30,7 +30,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.revenueToCashBridge
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

@@ -28,7 +28,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.thesisIntake
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - sourceRef
   - executionRef

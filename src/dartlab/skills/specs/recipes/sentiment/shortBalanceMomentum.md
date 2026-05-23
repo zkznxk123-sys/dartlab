@@ -28,7 +28,6 @@ toolRefs:
   - RunPython
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - dateRef
   - sourceRef

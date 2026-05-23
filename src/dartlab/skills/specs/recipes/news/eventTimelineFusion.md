@@ -33,7 +33,6 @@ sourceRefs:
   - dartlab://skills/recipes.news.eventTimelineFusion
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - dateRef
   - sourceRef

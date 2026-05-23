@@ -31,7 +31,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.falsifierLedger
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - sourceRef

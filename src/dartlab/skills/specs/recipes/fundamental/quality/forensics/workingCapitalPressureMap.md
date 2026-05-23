@@ -29,7 +29,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.workingCapitalPressureMap
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

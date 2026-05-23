@@ -39,7 +39,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.deepDive
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

@@ -31,7 +31,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.engineCandidateMemo
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

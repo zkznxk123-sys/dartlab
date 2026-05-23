@@ -44,7 +44,6 @@ recipeSteps:
 sourceRefs:
   - dartlab://skills/recipes.fundamental.governance.auditComposite
 requiredEvidence:
-  - target
   - period
   - table
   - basis

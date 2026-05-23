@@ -43,7 +43,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.ownershipDisparityMap
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

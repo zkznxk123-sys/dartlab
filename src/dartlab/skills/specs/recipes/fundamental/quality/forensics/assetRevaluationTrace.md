@@ -46,7 +46,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.assetRevaluationTrace
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

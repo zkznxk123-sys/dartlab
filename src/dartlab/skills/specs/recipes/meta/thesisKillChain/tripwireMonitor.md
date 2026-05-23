@@ -29,7 +29,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.tripwireMonitor
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

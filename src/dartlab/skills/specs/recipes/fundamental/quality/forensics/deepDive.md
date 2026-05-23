@@ -38,7 +38,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.deepDive
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

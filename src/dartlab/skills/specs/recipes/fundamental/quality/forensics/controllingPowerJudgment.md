@@ -48,7 +48,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.controllingPowerJudgment
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

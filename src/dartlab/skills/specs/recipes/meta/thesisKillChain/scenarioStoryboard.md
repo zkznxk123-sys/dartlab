@@ -32,7 +32,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.scenarioStoryboard
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - sourceRef

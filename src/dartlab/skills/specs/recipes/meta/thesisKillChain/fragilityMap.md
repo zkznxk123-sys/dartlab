@@ -31,7 +31,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.fragilityMap
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

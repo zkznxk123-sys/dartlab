@@ -28,7 +28,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.assumptionLedger
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - sourceRef
   - executionRef

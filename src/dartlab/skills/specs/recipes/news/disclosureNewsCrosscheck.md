@@ -32,7 +32,6 @@ sourceRefs:
   - dartlab://skills/recipes.news.disclosureNewsCrosscheck
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - dateRef
   - sourceRef

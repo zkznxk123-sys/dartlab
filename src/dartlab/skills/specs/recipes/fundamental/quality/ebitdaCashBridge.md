@@ -43,7 +43,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.ebitdaCashBridge
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

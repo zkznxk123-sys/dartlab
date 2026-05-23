@@ -55,7 +55,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.index
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

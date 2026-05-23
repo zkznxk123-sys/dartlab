@@ -30,7 +30,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.eventToStatementMatcher
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

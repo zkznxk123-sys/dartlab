@@ -45,7 +45,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.premortemQualityGate
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

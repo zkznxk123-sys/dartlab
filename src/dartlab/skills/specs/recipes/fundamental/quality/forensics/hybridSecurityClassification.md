@@ -48,7 +48,6 @@ linkedSkills:
   - engines.credit
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

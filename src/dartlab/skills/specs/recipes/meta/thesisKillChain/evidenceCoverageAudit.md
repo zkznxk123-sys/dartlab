@@ -32,7 +32,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.evidenceCoverageAudit
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - dateRef
   - sourceRef

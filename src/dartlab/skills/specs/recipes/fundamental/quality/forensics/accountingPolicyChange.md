@@ -47,7 +47,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.accountingPolicyChange
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

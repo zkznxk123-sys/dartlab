@@ -4,7 +4,7 @@ title: Event Radar Visual Decision Pack
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: 이벤트 레이더 결과에서 사용할 수 있는 observed viz surface만 선택하고, evidenceBinding이 없으면 차트를 막는 L1/L1.5 절차다.
@@ -28,7 +28,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.visualDecisionPack
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

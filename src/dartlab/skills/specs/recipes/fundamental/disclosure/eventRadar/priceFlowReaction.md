@@ -4,7 +4,7 @@ title: Event Radar Price Flow Reaction
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: gather price/flow 원자료로 이벤트 전후 가격·거래량·수급 반응을 확인하는 L1/L1.5 절차다.
@@ -30,7 +30,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.priceFlowReaction
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

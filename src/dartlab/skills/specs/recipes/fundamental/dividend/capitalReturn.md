@@ -39,7 +39,6 @@ recipeSteps:
 sourceRefs:
   - dartlab://skills/recipes.fundamental.dividend.capitalReturn
 requiredEvidence:
-  - target
   - period
   - metric
   - table

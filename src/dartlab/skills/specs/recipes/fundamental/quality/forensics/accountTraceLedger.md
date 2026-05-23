@@ -28,7 +28,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.accountTraceLedger
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

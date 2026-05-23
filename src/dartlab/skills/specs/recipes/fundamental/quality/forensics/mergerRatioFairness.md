@@ -42,7 +42,6 @@ linkedSkills:
   - engines.company
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

@@ -4,7 +4,7 @@ title: Event Radar Consensus Drift Watch
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: gather consensus 원자료의 최근 두 row를 비교해 매출, 영업이익, EPS, 목표가 변화 신호를 확인하는 L1/L1.5 절차다.
@@ -27,7 +27,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.consensusDriftWatch
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

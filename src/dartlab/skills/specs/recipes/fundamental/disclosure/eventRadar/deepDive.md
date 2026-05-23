@@ -4,7 +4,7 @@ title: Event Radar Deep Dive
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 entryHint: true
 graphTier: L1.5
 cluster: incubator.eventRadar
@@ -37,7 +37,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.deepDive
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

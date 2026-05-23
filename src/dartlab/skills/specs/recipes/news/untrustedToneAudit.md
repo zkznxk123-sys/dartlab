@@ -29,7 +29,6 @@ sourceRefs:
   - dartlab://skills/recipes.news.untrustedToneAudit
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - dateRef
   - sourceRef

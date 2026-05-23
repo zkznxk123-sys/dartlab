@@ -4,7 +4,7 @@ title: Event Radar Falsifier Ledger
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: 이벤트·반응·내부자·자본 이벤트·컨센서스 신호마다 필요한 반증 조건을 열어 결론 과잉을 막는 L1/L1.5 절차다.
@@ -30,7 +30,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.falsifierLedger
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

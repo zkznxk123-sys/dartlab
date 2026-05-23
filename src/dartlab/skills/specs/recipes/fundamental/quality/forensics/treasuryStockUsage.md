@@ -45,7 +45,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.treasuryStockUsage
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

@@ -4,7 +4,7 @@ title: Event Radar Incubator 진입점
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 entryHint: true
 graphTier: L1.5
 cluster: incubator.eventRadar
@@ -52,7 +52,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.index
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

@@ -45,7 +45,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.quality.forensics.auditorIndependenceHistory
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

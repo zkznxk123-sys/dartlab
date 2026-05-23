@@ -4,7 +4,7 @@ title: Event Radar Insider Ownership Signal
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: gather insiderTrading, ownership, majorShareholders 원자료로 내부자·주요주주 변화 신호를 확인하는 L1/L1.5 절차다.
@@ -29,7 +29,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.insiderOwnershipSignal
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - dateRef

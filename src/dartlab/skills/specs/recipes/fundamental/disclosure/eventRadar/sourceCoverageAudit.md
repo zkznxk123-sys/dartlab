@@ -4,7 +4,7 @@ title: Event Radar Source Coverage Audit
 category: recipes
 kind: recipe
 scope: builtin
-status: observed
+status: tested
 graphTier: L1.5
 cluster: incubator.eventRadar
 purpose: 이벤트 레이더 실행 전에 filing, news, price, flow, insider, ownership, dividend, split, consensus, scan primitive의 row coverage를 확인하는 L1/L1.5 절차다.
@@ -32,7 +32,6 @@ sourceRefs:
   - dartlab://skills/recipes.fundamental.disclosure.eventRadar.sourceCoverageAudit
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - dateRef
   - sourceRef

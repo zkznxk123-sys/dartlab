@@ -31,7 +31,6 @@ sourceRefs:
   - dartlab://skills/recipes.meta.thesisKillChain.propagationPath
 requiredEvidence:
   - skillRef
-  - target
   - tableRef
   - valueRef
   - sourceRef
