@@ -190,40 +190,6 @@ def viewerBlocks(company: Company, topic: str) -> list[ViewerBlock]:
 
     Returns:
         list[ViewerBlock] — 블록 리스트.
-
-    SeeAlso:
-        - ``Company.view`` — public surface.
-        - ``sections/views.py`` — sections 파생 뷰.
-
-    Requires:
-        - dartlab
-        - difflib
-        - hashlib
-        - polars
-
-    Capabilities:
-        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
-
-    Guide:
-        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal viewer presentation — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
-            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
-        OutputSchema:
-            - dict / list[dict] — 함수별 (블록 메타).
-        Prerequisites:
-            - 본 회사 sections + finance/report.
-        Freshness:
-            - sections 갱신 시점.
-        Dataflow:
-            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
-        TargetMarkets:
-            - KR (DART) 공시뷰어.
     """
     if topic in _FINANCE_TOPICS:
         blk = _buildFinanceBlock(company, topic)
@@ -291,40 +257,6 @@ def viewerTextDocument(topic: str, blocks: list[ViewerBlock]) -> ViewerTextDocum
 
     Returns:
         ViewerTextDocument 또는 None — 텍스트 문서.
-
-    SeeAlso:
-        - ``Company.view`` — public surface.
-        - ``sections/views.py`` — sections 파생 뷰.
-
-    Requires:
-        - dartlab
-        - difflib
-        - hashlib
-        - polars
-
-    Capabilities:
-        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
-
-    Guide:
-        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal viewer presentation — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
-            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
-        OutputSchema:
-            - dict / list[dict] — 함수별 (블록 메타).
-        Prerequisites:
-            - 본 회사 sections + finance/report.
-        Freshness:
-            - sections 갱신 시점.
-        Dataflow:
-            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
-        TargetMarkets:
-            - KR (DART) 공시뷰어.
     """
     textBlocks = [b for b in blocks if b.kind == "text"]
     if not textBlocks:
@@ -1167,40 +1099,6 @@ def serializeViewerTextDocument(document: ViewerTextDocument | None) -> dict[str
 
     Returns:
         dict[str, Any] 또는 None — 결과.
-
-    SeeAlso:
-        - ``Company.view`` — public surface.
-        - ``sections/views.py`` — sections 파생 뷰.
-
-    Requires:
-        - dartlab
-        - difflib
-        - hashlib
-        - polars
-
-    Capabilities:
-        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
-
-    Guide:
-        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal viewer presentation — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
-            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
-        OutputSchema:
-            - dict / list[dict] — 함수별 (블록 메타).
-        Prerequisites:
-            - 본 회사 sections + finance/report.
-        Freshness:
-            - sections 갱신 시점.
-        Dataflow:
-            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
-        TargetMarkets:
-            - KR (DART) 공시뷰어.
     """
     if document is None:
         return None
@@ -1284,40 +1182,6 @@ def serializeViewerBlock(block: ViewerBlock) -> dict[str, Any]:
 
     Returns:
         dict[str, Any] — 결과.
-
-    SeeAlso:
-        - ``Company.view`` — public surface.
-        - ``sections/views.py`` — sections 파생 뷰.
-
-    Requires:
-        - dartlab
-        - difflib
-        - hashlib
-        - polars
-
-    Capabilities:
-        - sections 원본 → 블록 분류 + 메타 (단위/스케일/periods) + inline diff 변환.
-
-    Guide:
-        - 사용자 API 는 ``c.view`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal viewer presentation — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company.view 또는 viewer 백엔드 위임.
-            - 블록 메타 가정 (단위/스케일) X — 정규화 후 사용.
-        OutputSchema:
-            - dict / list[dict] — 함수별 (블록 메타).
-        Prerequisites:
-            - 본 회사 sections + finance/report.
-        Freshness:
-            - sections 갱신 시점.
-        Dataflow:
-            - sections → 블록 분류 (finance/report/text/structured/raw_markdown) → 본 함수.
-        TargetMarkets:
-            - KR (DART) 공시뷰어.
     """
     result: dict[str, Any] = {
         "block": block.block,

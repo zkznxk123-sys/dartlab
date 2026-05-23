@@ -288,26 +288,6 @@ class AsyncDartClient:
 
         Example:
             >>> close(...)
-
-        SeeAlso:
-            - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
-            - ``resolveDartKeys`` — 멀티 키 resolve.
-
-        Requires:
-            - asyncio
-            - dartlab
-            - datetime
-            - httpx
-            - io
-
-        Capabilities:
-            - DART OpenAPI 배치 수집 단계 (단일 호출 / 워커 / 결과 수집). asyncio 기반 N-키 분배.
-
-        Guide:
-            - 운영자 batch 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-        AIContext:
-            internal batch helper — AI 직접 호출 X.
         """
         await self._client.aclose()
 
@@ -959,40 +939,6 @@ def batchCollect(
 
     Example:
         >>> batchCollect(...)
-
-    SeeAlso:
-        - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
-
-    Requires:
-        - asyncio
-        - dartlab
-        - datetime
-        - httpx
-        - io
-
-    Capabilities:
-        - DART OpenAPI 배치 수집 단계 — asyncio 기반 N-키 분배.
-
-    Guide:
-        - 운영자 batch 수집 파이프라인 — 사용자 API 직접 호출 X.
-
-    AIContext:
-        internal batch helper — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 단일 키로 대량 batch → 일 한도 초과. 키 N 개 필수.
-            - 동시 워커 수 >> 키 수 → rate limit.
-        OutputSchema:
-            - dict / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - 인터넷 + DART_API_KEYS.
-        Freshness:
-            - DART OpenAPI 실시간.
-        Dataflow:
-            - 종목 list → asyncio Queue → DART API → parquet.
-        TargetMarkets:
-            - KR (DART) 배치 수집.
     """
     cats = categories or ["finance", "report", "docs"]
     keys = resolveDartKeys()
@@ -1254,40 +1200,6 @@ def batchCollectAll(
 
     Returns:
         dict[str, dict[str, int]] — 종목 × 카테고리 별 수집 통계.
-
-    SeeAlso:
-        - ``batchCollect`` / ``batchCollectAll`` — batch 진입.
-
-    Requires:
-        - asyncio
-        - dartlab
-        - datetime
-        - httpx
-        - io
-
-    Capabilities:
-        - DART OpenAPI 배치 수집 단계 — asyncio 기반 N-키 분배.
-
-    Guide:
-        - 운영자 batch 수집 파이프라인 — 사용자 API 직접 호출 X.
-
-    AIContext:
-        internal batch helper — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 단일 키로 대량 batch → 일 한도 초과. 키 N 개 필수.
-            - 동시 워커 수 >> 키 수 → rate limit.
-        OutputSchema:
-            - dict / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - 인터넷 + DART_API_KEYS.
-        Freshness:
-            - DART OpenAPI 실시간.
-        Dataflow:
-            - 종목 list → asyncio Queue → DART API → parquet.
-        TargetMarkets:
-            - KR (DART) 배치 수집.
     """
     from dartlab.core.listingResolver import getListingResolver
 

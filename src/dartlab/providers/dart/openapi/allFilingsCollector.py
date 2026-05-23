@@ -161,41 +161,6 @@ def collectMetaDay(
 
     Returns:
         pl.DataFrame 또는 None — 수집 결과.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     if client is None:
         client = DartClient()
@@ -273,41 +238,6 @@ def collectMetaRange(
 
     Returns:
         int — 수집 건수.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     from datetime import datetime, timedelta
 
@@ -370,41 +300,6 @@ def fillContent(
 
     Returns:
         pl.DataFrame 또는 None — 수집 결과.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     if client is None:
         client = DartClient()
@@ -554,41 +449,6 @@ def fillContentAll(
 
     Returns:
         int — 수집 건수.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     if client is None:
         client = DartClient()
@@ -640,41 +500,6 @@ def collectedDates() -> list[str]:
 
     Returns:
         list[str] — 결과 목록.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     outDir = _allFilingsDir()
     dates = sorted(
@@ -698,41 +523,6 @@ def pendingDates() -> list[str]:
 
     Returns:
         list[str] — 결과 목록.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     outDir = _allFilingsDir()
     dates = sorted(
@@ -756,41 +546,6 @@ def loadDay(period: str) -> pl.DataFrame | None:
 
     Returns:
         pl.DataFrame 또는 None — 수집 결과.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     path = _allFilingsDir() / f"{period}.parquet"
     if not path.exists():
@@ -813,41 +568,6 @@ def loadAll() -> pl.DataFrame:
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     outDir = _allFilingsDir()
     files = sorted(f for f in outDir.glob("*.parquet") if _META_SUFFIX not in f.stem)
@@ -870,41 +590,6 @@ def stats() -> dict:
 
     Returns:
         dict — 결과 dict.
-
-    SeeAlso:
-        - ``collectMeta`` / ``fillContent`` — 2 단계 수집 함수.
-        - ``zipCollector._collectOneZip`` — 원문 파싱 backend.
-
-    Requires:
-        - bs4
-        - dartlab
-        - io
-        - polars
-        - zipfile
-
-    Capabilities:
-        - DART 전체 공시 2 단계 수집 (목록 meta + 원문 content). 일자 단위 분할 + 점진적 채움.
-
-    Guide:
-        - 운영자 수집 파이프라인 — 사용자 API 가 직접 호출 X.
-
-    AIContext:
-        internal collector — AI 가 직접 호출 X. 운영자 수집 파이프라인 entry.
-
-    LLM Specifications:
-        AntiPatterns:
-            - DART_API_KEY 일일 한도 (1만/일) 초과 시 빈 응답. 2 단계 분리 (meta vs content).
-            - 원문 수집 일괄 호출 X — 일자별 분할.
-        OutputSchema:
-            - pl.DataFrame / int / Path — 함수별 다름.
-        Prerequisites:
-            - 인터넷 + DART_API_KEY + 일자 인자.
-        Freshness:
-            - DART OpenAPI 실시간 (분 단위).
-        Dataflow:
-            - 일자 → listFilings → zipCollector → HTML→text → parquet.
-        TargetMarkets:
-            - KR (DART) 전체 공시.
     """
     completed = collectedDates()
     pending = pendingDates()

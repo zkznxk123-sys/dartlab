@@ -653,37 +653,6 @@ def normalizeCause(accountNm: str) -> str:
         'net_income'
         >>> normalizeCause("배당금 지급")
         'dividends_paid'
-
-    SeeAlso:
-        - ``normalizeDetail`` — SCE 매트릭스 **열축** (자본항목) 정규화.
-        - ``CAUSE_SYNONYMS`` / ``_CAUSE_NOSPACE`` / ``CAUSE_FALLBACK_PATTERNS`` — 매핑 origin.
-        - ``finance.pivot.buildSceMatrix`` — 본 함수 호출하는 SCE 피벗 빌더.
-
-    Requires:
-        - stdlib only (str / dict — 외부 의존 0).
-
-    Capabilities:
-        - SCE 매트릭스 행축 정규화 — 변동사유 자유 텍스트 → 표준 snakeId.
-        - 미매핑 ``"unmapped:..."`` 마커로 추적 가능 (회귀 가드).
-        - 공시별 띄어쓰기/괄호 변종 흡수.
-
-    Guide:
-        - 사용자 API 는 ``c.show("SCE")`` — 본 함수는 ``buildSceMatrix`` 내부 호출.
-        - 신규 변동사유 등장 시 ``CAUSE_SYNONYMS`` 직접 추가 (코드 변경 X).
-        - "unmapped:" prefix 결과 monitoring → 매핑 사전 갱신 시그널.
-
-    AIContext:
-        internal SCE 정규화 — AI 직접 호출 X. ``c.show("SCE")`` 출력 컬럼이 본 함수 산출물.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 함수 직접 호출 X — ``c.show("SCE")`` 위임.
-            - ``"unmapped:..."`` 반환을 매핑 실패 0 으로 가정 X — caller 가 prefix 카운트 의무.
-            - 신규 fallback 패턴 추가 시 순서 무관 X — substring 매치라 정렬 순서가 우선순위.
-            - 매핑 사전 갱신 후 본 모듈 reload 필요 X — 함수 호출 시 직접 dict 조회 (캐시 X).
-            - 동의어 추가 시 ``CAUSE_SYNONYMS`` + ``_CAUSE_NOSPACE`` 양쪽 동기화 의무.
-        OutputSchema:
-            - str — snakeId (예: ``"net_income"`` / ``"dividends_paid"`` /
               ``"capital_increase"`` / ``"acquisition_treasury"``) 또는 ``"unmapped:{원본}"``.
             - None 반환 X — 항상 str.
         Prerequisites:
@@ -905,35 +874,6 @@ def normalizeDetail(detail: str | None) -> str:
     Example:
         >>> normalizeDetail("자본의 구성요소 | 이익잉여금")
         'retained_earnings'
-
-    SeeAlso:
-        - ``CAUSE_SYNONYMS`` / ``DETAIL_MAP`` — 본 모듈 매핑.
-
-    Requires:
-        - stdlib only.
-
-    Capabilities:
-        - SCE account_nm → 변동사유 snakeId 2-tier 매핑.
-
-    Guide:
-        - 사용자 API 는 ``c.show("SCE")`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal SCE mapper — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — finance pivot.SCE 위임.
-        OutputSchema:
-            - str (snakeId) 또는 None.
-        Prerequisites:
-            - CAUSE_SYNONYMS / DETAIL_MAP 매핑.
-        Freshness:
-            - 매핑 정적.
-        Dataflow:
-            - account_nm → 2-tier 매칭 → snakeId.
-        TargetMarkets:
-            - KR (DART) SCE 매핑.
     """
     if not detail:
         return "unknown"

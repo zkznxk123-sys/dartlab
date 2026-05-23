@@ -74,40 +74,6 @@ def tokenizeWord(text: str) -> list[str]:
 
     Returns:
         list[str] — 토큰 또는 stems 리스트.
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     if not text:
         return []
@@ -231,40 +197,6 @@ def buildContentSegment(
 
     Returns:
         tuple[dict, pl.DataFrame] — (인덱스, meta).
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     t0 = time.perf_counter()
     builder = _IncrementalBuilder()
@@ -319,40 +251,6 @@ def saveSegment(idx: dict, meta: pl.DataFrame, name: str, outDir: Path | None = 
 
     Example:
         >>> saveSegment(...)
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     outDir = outDir or _contentIndexDir()
     outDir.mkdir(parents=True, exist_ok=True)
@@ -395,40 +293,6 @@ def loadSegment(name: str, inDir: Path | None = None) -> tuple[dict, pl.DataFram
 
     Returns:
         tuple[dict, pl.DataFrame] 또는 None — (인덱스, meta).
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     inDir = inDir or _contentIndexDir()
     npzPath = inDir / f"{name}.npz"
@@ -501,25 +365,6 @@ def clearCache() -> None:
 
     Example:
         >>> clearCache(...)
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
     """
     global _segments
     _segments = None
@@ -554,40 +399,6 @@ def searchContent(
 
     Returns:
         pl.DataFrame — 검색 결과 (rcept_no/score/snippet 등).
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     tokens = tokenizeWord(query)
     if not tokens:
@@ -684,40 +495,6 @@ def rebuildMain(
 
     Returns:
         int — 인덱스 빌드 건수.
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     import gc
 
@@ -846,40 +623,6 @@ def rebuildDelta(sinceDate: str | None = None, daysBack: int = 30, showProgress:
 
     Returns:
         int — 인덱스 빌드 건수.
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     from datetime import datetime, timedelta
 
@@ -940,40 +683,6 @@ def pushContentIndex(token: str | None = None) -> None:
 
     Example:
         >>> pushContentIndex(...)
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     from huggingface_hub import HfApi
 
@@ -1016,40 +725,6 @@ def pullContentIndex() -> int:
 
     Returns:
         int — 인덱스 빌드 건수.
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     from huggingface_hub import hf_hub_download
 
@@ -1105,40 +780,6 @@ def contentStats() -> dict:
 
     Returns:
         dict — 결과 통계.
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     segments = _getSegments()
     out: dict = {}
@@ -1176,40 +817,6 @@ def iterContent(
 
     Raises:
         없음.
-
-    SeeAlso:
-        - ``ngramIndex`` / ``derived`` — search 모듈 동반.
-
-    Requires:
-        - dartlab
-        - math
-        - numpy
-        - polars
-        - time
-
-    Capabilities:
-        - BM25 content 검색 backend.
-
-    Guide:
-        - "DART 본문 검색" → 본 모듈.
-
-    AIContext:
-        internal search backend — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - main 인덱스 미빌드 → 빈 결과.
-            - delta 30 일+ 누적 → main 리빌드 필요.
-        OutputSchema:
-            - list[dict] / pl.DataFrame / Path — 함수별.
-        Prerequisites:
-            - main.npz + main_meta.parquet (월 1 회 빌드).
-        Freshness:
-            - main: 월 단위, delta: 일 단위.
-        Dataflow:
-            - query → BM25 → 본 함수.
-        TargetMarkets:
-            - KR (DART) BM25.
     """
     df = searchContent(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():

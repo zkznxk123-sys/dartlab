@@ -66,38 +66,6 @@ def showFinanceTopic(
 
     Example:
         >>> showFinanceTopic(c, "IS", freq="Y")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     if topic == "ratios":
         return company._applyPeriodFilter(company._buildRatios(), period)
@@ -132,38 +100,6 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
 
     Example:
         >>> traceFinanceTopic(c, "BS", period="2024")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.docs.sections import rawPeriod
 
@@ -186,38 +122,7 @@ def traceFinanceTopic(company: Company, topic: str, *, period: str | None = None
 
         Example:
             >>> collect({"sales": [1000]}, [2024], "IS")  # nested function example
-
-        SeeAlso:
-            - ``Company.show`` / ``Company._showImpl`` — public surface.
         - ``SectionsAnalyzer`` — sections 파생표.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART show dispatch helper — topic 별 source 호출.
-
-        Guide:
-            - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-        AIContext:
-            internal dispatcher — AI 직접 호출 X.
-
-        LLM Specifications:
-            AntiPatterns:
-                - 본 모듈 직접 호출 X — Company facade (c.show/c._showImpl) 위임.
-                - topic 미정의 → None. caller None 분기.
-            OutputSchema:
-                - pl.DataFrame / None — topic 별.
-            Prerequisites:
-                - 본 회사 finance/docs/report parquet (topic source 별).
-            Freshness:
-                - finance/docs/report 갱신 시점.
-            Dataflow:
-                - topic → alias 해석 → 5 사례 분기 → finance/sections/notes/report → 본 함수.
-            TargetMarkets:
-                - KR (DART) show dispatch.
         """
         if not series:
             return
@@ -296,21 +201,6 @@ def showReportTopic(
 
     Example:
         >>> showReportTopic(c, "dividend", period="2024")
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     return company._applyPeriodFilter(reportFrame(company, topic, raw=raw), period)
 
@@ -331,38 +221,6 @@ def reportFrame(company: Company, topic: str, *, raw: bool = False) -> pl.DataFr
 
     Example:
         >>> reportFrame(c, "dividend")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     if company._report is None:
         return None
@@ -399,38 +257,6 @@ def reportFrameInner(company: Company, apiType: str, topic: str, *, raw: bool = 
 
     Example:
         >>> reportFrameInner(c, "dividend", "dividend")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.accessor.reportAccessor import reportFrameInner as _reportFrameInner
 
@@ -455,38 +281,6 @@ def showSegmentsSub(company: Company, sub: str) -> pl.DataFrame | None:
 
     Example:
         >>> showSegmentsSub(c, "region")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     segResult = company._callModule("segments")
     if segResult is None:
@@ -525,38 +319,6 @@ def showDirectTopic(
 
     Example:
         >>> showDirectTopic(c, "dividend")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     if company._hasReport:
         try:
@@ -617,38 +379,6 @@ def showSectionBlock(
 
     Example:
         >>> showSectionBlock(c, topic_df, block=0)
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     if "blockType" not in topicFrame.columns or "blockOrder" not in topicFrame.columns:
         return company._applyPeriodFilter(topicFrame, period)
@@ -706,38 +436,6 @@ def horizontalizeTableBlock(
 
     Example:
         >>> horizontalizeTableBlock(c, topic_df, 0, ["2024", "2023"])
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.parse.tableHorizontalizer import (
         horizontalizeTableBlock as _horizontalize,
@@ -784,38 +482,6 @@ def showImpl(
 
     Example:
         >>> showImpl(c, "IS", freq="Y", scope="separate")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.builder.dataShapeUtils import transposeToVertical
     from dartlab.providers.dart.company import _resolveTopic
@@ -871,38 +537,6 @@ def showFinanceStatement(
 
     Example:
         >>> showFinanceStatement(c, "IS", None, period="2024Q4", freq="Q", scope="consolidated")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame
 
@@ -946,38 +580,6 @@ def showSectionsTopic(
 
     Example:
         >>> showSectionsTopic(c, "executive", None, period="2024", raw=False, freq="Q", scope="consolidated")
-
-    SeeAlso:
-        - ``Company.show`` / ``Company._showImpl`` — public surface.
-        - ``SectionsAnalyzer`` — sections 파생표.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - DART Company.show dispatch core — topic → 5 사례 분기 → 정확 source 호출.
-
-    Guide:
-        - 사용자 API 는 ``c.show(topic)`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal dispatcher — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — Company facade 위임.
-            - topic 미정의 → None.
-        OutputSchema:
-            - pl.DataFrame / dict / None — 함수별.
-        Prerequisites:
-            - 본 회사 finance/docs/report parquet.
-        Freshness:
-            - finance/docs/report 갱신 시점.
-        Dataflow:
-            - topic → 분기 → source → 본 함수.
-        TargetMarkets:
-            - KR (DART) show dispatch.
     """
     from dartlab.providers.dart.builder.dataShapeUtils import cleanFinanceDataFrame, warnUnknownTopic
     from dartlab.providers.dart.company import _getModuleIndex

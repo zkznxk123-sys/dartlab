@@ -683,37 +683,6 @@ def parseTextStructureWithState(
 
     Returns:
         tuple[list[dict], list[dict]] — (노드, 엣지) 페어.
-
-    SeeAlso:
-        - ``mapper`` / ``runtime`` — sections 분석 호출자.
-
-    Requires:
-        - dartlab
-        - functools
-        - hashlib
-
-    Capabilities:
-        - sections 본문 텍스트 → 노드 (heading/body) 분류 + 정규식 패턴 매칭.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal text structure — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections runtime/analysis 위임.
-        OutputSchema:
-            - dict / str / list — 함수별.
-        Prerequisites:
-            - sections 본문 텍스트.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - text → 정규식 매칭 → 노드 분류 (heading/body) → 결과.
-        TargetMarkets:
-            - KR (DART) sections text structure.
     """
     nodes: list[dict[str, object]] = []
     # Copy-on-write — shallow list copy 만 (items dict ref 공유). 후속 mutation
@@ -951,37 +920,6 @@ def parseTextStructure(
 
     Returns:
         list[dict] — 결과 dict 리스트.
-
-    SeeAlso:
-        - ``mapper`` / ``runtime`` — sections 분석 호출자.
-
-    Requires:
-        - dartlab
-        - functools
-        - hashlib
-
-    Capabilities:
-        - sections 본문 텍스트 → 노드 (heading/body) 분류 + 정규식 패턴 매칭.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal text structure — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections runtime/analysis 위임.
-        OutputSchema:
-            - dict / str / list — 함수별.
-        Prerequisites:
-            - sections 본문 텍스트.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - text → 정규식 매칭 → 노드 분류 (heading/body) → 결과.
-        TargetMarkets:
-            - KR (DART) sections text structure.
     """
     nodes, _stack, _promote = parseTextStructureWithState(text, sourceBlockOrder=sourceBlockOrder, topic=topic)
     return nodes

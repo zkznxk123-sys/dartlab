@@ -32,37 +32,6 @@ def projectFreqRows(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     if df.is_empty() or "freqScope" not in df.columns:
         return df
@@ -455,37 +424,6 @@ def semanticRegistry(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     if isEmptyDf(df):
         return _emptySemanticRegistryFrame()
@@ -588,37 +526,6 @@ def structureRegistry(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     if isEmptyDf(df):
         return _emptyStructureRegistryFrame()
@@ -742,37 +649,6 @@ def structureCollisions(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     registry = structureRegistry(
         df,
@@ -812,37 +688,6 @@ def structureEvents(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     if isEmptyDf(df):
         return _emptyStructureEventsFrame()
@@ -968,37 +813,6 @@ def structureSummary(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     registry = structureRegistry(
         df,
@@ -1107,37 +921,6 @@ def structureChanges(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     summary = structureSummary(
         df,
@@ -1210,37 +993,6 @@ def semanticCollisions(
 
     Returns:
         pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``_SectionsSource`` accessor — 본 모듈 호출자.
-        - ``pipeline.py`` — sections 빌더.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - sections DataFrame → freq 투영 + semantic/structure registry 파생.
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections analysis — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — _SectionsSource accessor 위임.
-        OutputSchema:
-            - pl.DataFrame / list / dict — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - sections DataFrame → freq 투영 / semantic registry / structure registry.
-        TargetMarkets:
-            - KR (DART) sections 파생.
     """
     registry = semanticRegistry(df, topic=topic, freqScope=freqScope, includeMixed=includeMixed)
     if registry.is_empty():

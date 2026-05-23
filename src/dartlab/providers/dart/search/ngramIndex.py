@@ -172,39 +172,6 @@ def buildNgramIndex(
 
     Returns:
         int — 인덱스 건수.
-
-    SeeAlso:
-        - ``fieldIndex`` — content BM25 (본 모듈 보완).
-        - ``derived`` — 검색 후속 처리.
-
-    Requires:
-        - dartlab
-        - numpy
-        - polars
-
-    Capabilities:
-        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
-
-    Guide:
-        - "DART 공시 제목/섹션 검색" → 본 모듈.
-
-    AIContext:
-        internal title ngram — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - title 인덱스만 — content 검색 X.
-            - 동의어 사전 누락 시 자연어 hit rate 저하.
-        OutputSchema:
-            - list[dict] / dict / Path / int — 함수별.
-        Prerequisites:
-            - report_nm + section_title 인덱스 + 동의어 사전.
-        Freshness:
-            - 일 단위.
-        Dataflow:
-            - title → ngram → CSR → bincount.
-        TargetMarkets:
-            - KR (DART) title/section.
     """
     import time
 
@@ -562,45 +529,6 @@ def searchNgram(
     Example:
         >>> df = searchNgram("분기보고서 2024", stockCode="005930", limit=20)
         >>> df.select(["score", "rcept_dt", "report_nm"]).head(5)
-
-    SeeAlso:
-        - ``buildNgramIndex`` — 인덱스 빌더 (offsets/docIds CSR origin).
-        - ``_loadIndex`` — 인덱스 + meta lazy load (singleton).
-        - ``_buildTypeIndex`` / ``_matchTypes`` — L0 유형 매칭.
-        - ``_tokenize`` — bigram/trigram 토크나이저.
-        - ``fieldIndex.searchField`` — 본문 (content) 전체 검색 (본 모듈 보완).
-        - ``derived.searchDocs`` — 본 함수 wrap 후속 처리.
-        - ``pushStemIndex`` / ``pullStemIndex`` — HF 인덱스 publish/sync.
-
-    Requires:
-        - polars
-        - numpy (``bincount`` / CSR 슬라이싱)
-        - dartlab.core.dataLoader (``DART_VIEWER`` URL 상수)
-
-    Capabilities:
-        - 자연어 쿼리 → DART 공시 제목/섹션 ranked retrieval.
-        - 114 유형 동의어 라우팅 — 비공식 표기 (``"분기"``) 정규화 (``"분기보고서"``).
-        - CSR + numpy bincount — Python loop 없이 전종목 동시 ranking.
-        - corpCode / stockCode 필터 — 특정 회사 한정 검색.
-
-    Guide:
-        - "삼성전자 분기보고서" → ``searchNgram("분기보고서", stockCode="005930")``.
-        - "감사보고서 한정 의견" → ``searchNgram("감사 한정")``.
-        - 본 함수는 title 검색 전용 — 본문 (text) 검색은 ``fieldIndex.searchField``.
-
-    AIContext:
-        Ask Workbench search core — LLM 이 회사 공시 retrieval 시 entry.
-        결과 ``rcept_no`` 로 ``c.show("sections", rceptNo=...)`` 후속 호출 가능.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본문 (text) 검색 X — 제목/섹션만. 본문은 ``fieldIndex.searchField``.
-            - ``limit`` 매우 크게 (>1000) 호출 X — L0 ``limit*3`` 스캔 비용 증가.
-            - corpCode 와 stockCode 동시 지정 시 AND 필터 — OR 가정 X.
-            - 빈 결과 = 인덱스 stale 가능성 → ``pullStemIndex(force=True)``.
-            - 한국어 외 쿼리 (영문) → 동의어 사전 미적용, hit rate 저하.
-        OutputSchema:
-            - pl.DataFrame — ``score`` (float) / ``rcept_no`` (str) / ``corp_name`` (str)
               / ``stock_code`` (str) / ``rcept_dt`` (str YYYYMMDD) / ``report_nm`` (str)
               / ``section_title`` (str) / ``text`` (str) / ``dartUrl`` (str).
             - row 수 ≤ limit (L0 ∪ L1 병합 후).
@@ -824,39 +752,6 @@ def pushStemIndex(*, token: str | None = None) -> str:
 
     Returns:
         str — 결과 문자열.
-
-    SeeAlso:
-        - ``fieldIndex`` — content BM25 (본 모듈 보완).
-        - ``derived`` — 검색 후속 처리.
-
-    Requires:
-        - dartlab
-        - numpy
-        - polars
-
-    Capabilities:
-        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
-
-    Guide:
-        - "DART 공시 제목/섹션 검색" → 본 모듈.
-
-    AIContext:
-        internal title ngram — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - title 인덱스만 — content 검색 X.
-            - 동의어 사전 누락 시 자연어 hit rate 저하.
-        OutputSchema:
-            - list[dict] / dict / Path / int — 함수별.
-        Prerequisites:
-            - report_nm + section_title 인덱스 + 동의어 사전.
-        Freshness:
-            - 일 단위.
-        Dataflow:
-            - title → ngram → CSR → bincount.
-        TargetMarkets:
-            - KR (DART) title/section.
     """
     from huggingface_hub import HfApi
 
@@ -893,39 +788,6 @@ def pullStemIndex(*, token: str | None = None, force: bool = False) -> Path:
 
     Returns:
         Path — 저장 경로.
-
-    SeeAlso:
-        - ``fieldIndex`` — content BM25 (본 모듈 보완).
-        - ``derived`` — 검색 후속 처리.
-
-    Requires:
-        - dartlab
-        - numpy
-        - polars
-
-    Capabilities:
-        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
-
-    Guide:
-        - "DART 공시 제목/섹션 검색" → 본 모듈.
-
-    AIContext:
-        internal title ngram — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - title 인덱스만 — content 검색 X.
-            - 동의어 사전 누락 시 자연어 hit rate 저하.
-        OutputSchema:
-            - list[dict] / dict / Path / int — 함수별.
-        Prerequisites:
-            - report_nm + section_title 인덱스 + 동의어 사전.
-        Freshness:
-            - 일 단위.
-        Dataflow:
-            - title → ngram → CSR → bincount.
-        TargetMarkets:
-            - KR (DART) title/section.
     """
     from huggingface_hub import snapshot_download
 
@@ -993,39 +855,6 @@ def iterNgram(
 
     Raises:
         없음.
-
-    SeeAlso:
-        - ``fieldIndex`` — content BM25 (본 모듈 보완).
-        - ``derived`` — 검색 후속 처리.
-
-    Requires:
-        - dartlab
-        - numpy
-        - polars
-
-    Capabilities:
-        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
-
-    Guide:
-        - "DART 공시 제목/섹션 검색" → 본 모듈.
-
-    AIContext:
-        internal title ngram — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - title 인덱스만 — content 검색 X.
-            - 동의어 사전 누락 시 자연어 hit rate 저하.
-        OutputSchema:
-            - list[dict] / dict / Path / int — 함수별.
-        Prerequisites:
-            - report_nm + section_title 인덱스 + 동의어 사전.
-        Freshness:
-            - 일 단위.
-        Dataflow:
-            - title → ngram → CSR → bincount.
-        TargetMarkets:
-            - KR (DART) title/section.
     """
     df = searchNgram(query, corpCode=corpCode, stockCode=stockCode, limit=limit)
     if df is None or df.is_empty():
