@@ -168,7 +168,7 @@ export function getSkillSourcePath(id: string): string | undefined {
 }
 
 export function allSkillIds(): string[] {
-	return skills.map((skill) => skill.id);
+	return skills.filter((skill) => componentsById.has(skill.id)).map((skill) => skill.id);
 }
 
 export function findRelatedSkills(id: string, limit = 6): SkillDoc[] {

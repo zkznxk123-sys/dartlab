@@ -35,7 +35,7 @@ from pathlib import Path
 
 import polars as pl
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 SRC = ROOT / "data" / "dart" / "scan" / "finance.parquet"
 OUT = ROOT / "landing" / "static" / "dashboards" / "quarters.json"
 

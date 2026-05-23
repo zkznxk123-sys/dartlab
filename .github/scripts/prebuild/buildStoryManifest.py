@@ -16,7 +16,7 @@ from dartlab.story.reportTypes import REPORT_TYPES
 from dartlab.story.templates import STORY_TEMPLATES, TEMPLATES
 from dartlab.viz import listVizIntents
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "landing" / "static" / "story" / "manifest.json"
 
 EXPECTED_DASHBOARD_QUESTIONS = (

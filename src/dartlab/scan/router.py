@@ -177,7 +177,7 @@ _AXIS_REGISTRY: dict[str, _AxisEntry] = {
     ),
     "macroBeta": _AxisEntry(
         module="dartlab.scan.macroBeta",
-        fn="scan_macroBeta",
+        fn="scanMacroBeta",
         label="거시베타",
         description="전종목 GDP/금리/환율 베타 횡단면 (OLS 회귀). 사전 수집: Ecos().series('GDP', enrich=True)",
         example='scan("macroBeta")',

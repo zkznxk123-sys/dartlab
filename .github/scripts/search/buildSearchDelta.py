@@ -37,7 +37,7 @@ def main() -> int:
 
     # Phase 1: collectMeta
     print("[delta] Phase 1: collectMeta")
-    from dartlab.core.search import collectMeta, fillContent, rebuildContentDelta
+    from dartlab.providers.dart.search import collectMeta, fillContent, rebuildContentDelta
 
     t0 = time.perf_counter()
     nMeta = collectMeta(startDate, endDate)
@@ -67,7 +67,7 @@ def main() -> int:
     print("[delta] Phase 4: HF 업로드")
     from huggingface_hub import HfApi
 
-    from dartlab.core.search.fieldIndex import _contentIndexDir
+    from dartlab.providers.dart.search.fieldIndex import _contentIndexDir
 
     outDir = _contentIndexDir()
     files = ["delta.npz", "delta_stems.json", "delta_meta.parquet", "delta_info.json"]

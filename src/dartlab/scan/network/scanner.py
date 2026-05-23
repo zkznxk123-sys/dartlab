@@ -146,6 +146,9 @@ def _scanParquets(apiType: str, keepCols: list[str]) -> pl.DataFrame:
             lf = lf.with_columns([pl.lit(None).alias(c) for c in missing])
         unified.append(lf.select(sorted(all_cols)))
 
+    if not unified:
+        return pl.DataFrame(schema={c: pl.Utf8 for c in keepCols})
+
     return pl.concat(unified).collect(engine="streaming")
 
 

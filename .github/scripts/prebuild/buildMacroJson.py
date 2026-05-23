@@ -30,7 +30,7 @@ import time
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "src"))
 
 OUT = ROOT / "landing" / "static" / "dashboards" / "macro.json"

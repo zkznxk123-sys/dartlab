@@ -13,7 +13,7 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 BLOG_DIR = ROOT / "blog" / "05-company-reports"
 OUT = ROOT / "landing" / "static" / "dashboards" / "meta.json"
 

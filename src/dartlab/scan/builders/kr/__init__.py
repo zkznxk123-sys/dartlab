@@ -40,3 +40,4 @@ from dartlab.scan.builders.kr.docs.index import (  # noqa: F401
     buildEdgarDocsIndex,
     buildEdinetDocsIndex,
 )
+from dartlab.scan.builders.kr.valuationBuild import buildValuation  # noqa: F401
