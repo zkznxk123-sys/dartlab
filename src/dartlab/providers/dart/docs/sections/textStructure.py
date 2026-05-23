@@ -124,7 +124,11 @@ def _cleanLine(line: str) -> str:
     return decoded.replace("\u00a0", " ").replace("\t", " ").rstrip()
 
 
-@lru_cache(maxsize=16384)
+# 측정 (005930 + 000660 + 005380 sequential, disk cache bypass):
+#   hit=94.8% / unique=2593 entries / 종목당 ~860 unique.
+# 4096 = 종목 5 개 headroom — batch 호출에서도 hit rate 90%+ 유지.
+# 옛 16384 는 over-provisioned (currsize/maxsize=15% 만 사용).
+@lru_cache(maxsize=4096)
 def _normalizeHeadingText(text: str) -> str:
     cleaned = stripSectionPrefix(text.strip())
     cleaned = cleaned.strip("[]【】")
@@ -137,7 +141,8 @@ def _normalizeHeadingText(text: str) -> str:
     return cleaned.strip()
 
 
-@lru_cache(maxsize=16384)
+# 측정: hit=94.5% / unique=2579 — `_normalizeHeadingText` 와 동일 domain.
+@lru_cache(maxsize=4096)
 def _headingKey(text: str) -> str:
     normalized = _normalizeHeadingText(text)
     normalized = normalized.replace("·", "").replace("ㆍ", "")
@@ -182,7 +187,8 @@ _RE_PERIOD_DATE = re.compile(r"\d{8}|\d{4}\d{0,4}기준|\d{4}[\.\-/]\d{1,2}[\.\-
 _RE_COUNT_SUFFIX = re.compile(r"\d+개사?")
 
 
-@lru_cache(maxsize=16384)
+# 측정: hit=93.5% / unique=3005 — heading label × topic 도메인. 4096 충분.
+@lru_cache(maxsize=4096)
 def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
     if not labelKey or labelKey.startswith("@"):
         return labelKey
@@ -207,13 +213,19 @@ def _semanticSegmentKey(labelKey: str, *, topic: str | None) -> str:
     return key
 
 
-@lru_cache(maxsize=512)
+# 측정: hit=3.0% / 512 maxsize cap 도달 + churn. 캐시 무용 — 본문은
+# `_normalizeHeadingText` (캐시됨) + precompiled regex fullmatch 만. cache 제거가
+# 정답 (overhead > benefit).
 def _isTemporalMarker(text: str) -> bool:
     normalized = _normalizeHeadingText(text)
     return bool(_RE_TEMPORAL_MARKER.fullmatch(normalized))
 
 
-@lru_cache(maxsize=32768)
+# 측정: hit=56.5% / unique=19888 (3 종목) — 종목당 ~6630 unique body anchor.
+# 8192 = 1.2 종목 헤드룸. **key 가 본문 텍스트 (수백 B)** 라 maxsize × keysize 가
+# 캐시 메모리 본체. 옛 32768 은 ~10 MB 잠재 + linear 누적. blake2b 8 byte 자체는
+# µs 수준이라 캐시 없어도 무방하나, 56% hit 가 의미 있어서 작은 bound 유지.
+@lru_cache(maxsize=8192)
 def _bodyAnchor(text: str) -> str:
     normalized = " ".join(text.split())
     if not normalized:
@@ -503,7 +515,11 @@ _HEADING_PREFIX_CHARS = frozenset(
 )
 
 
-@lru_cache(maxsize=65536)
+# 측정: hit=81.3% / unique=48230 (3 종목) — 종목당 ~16K 본문 line. 옛 65536 은
+# 종목 4 개 즈음 cap 도달 + 이후 churn. 16384 = 1 종목 + 일부 헤드룸.
+# 다종목 batch 에서는 evict 빈번하나 hit rate 75%+ 유지 (heading prefix 패턴이
+# 종목 간 매우 중복: "I. 회사의 개요", "1. 주요사항" 등).
+@lru_cache(maxsize=16384)
 def _detectHeading(line: str) -> tuple[int, str, bool] | None:
     stripped = line.strip()
     if not stripped or stripped[0] == "|":
