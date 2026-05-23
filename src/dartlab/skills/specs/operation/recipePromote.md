@@ -108,31 +108,35 @@ testUniverse:
 ## 공개 호출 방식
 
 ```bash
-# 현재 recipe 목록 + status
-uv run python -X utf8 src/dartlab/skills/recipePromote.py --list
+# 현재 recipe 목록 + status + 누적 run/passRate (status filter 가능)
+uv run python -X utf8 src/dartlab/skills/recipePromote.py list
+uv run python -X utf8 src/dartlab/skills/recipePromote.py list --status drafted
 
-# 특정 recipe 승급 (CLI 가 scorecard 검사 후 통과 시만 commit)
-uv run python -X utf8 src/dartlab/skills/recipePromote.py \
-    --id recipes.meta.report.dailyMorningNote \
-    --to tested
+# 단일 recipe scorecard + drift + 최근 N run
+uv run python -X utf8 src/dartlab/skills/recipePromote.py inspect \
+    recipes.sentiment.foreignBuyMomentum
 
-# verified 승급 (scorecard 6 신호 + reviewer note 필수)
-uv run python -X utf8 src/dartlab/skills/recipePromote.py \
-    --id recipes.meta.report.dailyMorningNote \
-    --to verified \
-    --reviewer-note "S&P 500 30 일 reflection 결과 hit rate 72%"
+# testUniverse 종목들로 recipe 1 건 실행 → run 기록 + scorecard 출력
+uv run python -X utf8 src/dartlab/skills/recipePromote.py validate \
+    recipes.sentiment.foreignBuyMomentum \
+    --targets 005930 000660 --maxTargets 2
+
+# status 전이 — unverified/tested → verified 는 scorecard 게이트, 그 외는 --force
+uv run python -X utf8 src/dartlab/skills/recipePromote.py promote \
+    recipes.sentiment.foreignBuyMomentum --to verified
+
+uv run python -X utf8 src/dartlab/skills/recipePromote.py promote \
+    recipes.sentiment.foreignBuyMomentum --to tested --force
 
 # deprecated (사유 필수)
-uv run python -X utf8 src/dartlab/skills/recipePromote.py \
-    --id recipes.meta.report.dailyMorningNote \
-    --to deprecated \
-    --reason "FRED API 2026-06 spec 변경으로 macroRef 갱신 불가"
+uv run python -X utf8 src/dartlab/skills/recipePromote.py deprecate \
+    recipes.sentiment.shortBalanceMomentum \
+    --reason "c.gather('shortBalance') axis 미구현"
 ```
 
 CLI 가 자동:
-- frontmatter `status` 갱신
-- `recipes/_history.jsonl` append
-- git commit (단일 path) — `commit -o <recipe.md> recipes/_history.jsonl` 형식
+- frontmatter `status` 갱신 (verified 승급 시 `validatedAt` 도 추가)
+- recipe run 기록은 `~/.dartlab/recipeRuns/<slug>.parquet` (gitignored, append-only)
 
 ## scorecard 미달 시
 
