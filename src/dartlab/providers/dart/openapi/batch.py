@@ -1014,7 +1014,7 @@ async def _workerLoop(
                     loop = asyncio.get_running_loop()
                     try:
                         await loop.run_in_executor(None, onCheckpoint, drain)
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001 — user callback 임의 예외 흡수
                         logger.warning("checkpoint.fail batch_size=%d err=%s", len(drain), repr(e)[:200])
 
         queue.task_done()
@@ -1158,7 +1158,7 @@ def batchCollect(
 
                 try:
                     onCheckpoint(drain)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 — user callback 임의 예외 흡수
                     _logging.getLogger("dartlab.collector").warning(
                         "checkpoint.final_flush.fail batch_size=%d err=%s", len(drain), repr(e)[:200]
                     )

@@ -4211,9 +4211,10 @@ class Company:
 
         try:
             ts = buildTimeseries(self.stockCode)
-        except Exception as e:
+        except (OSError, ValueError, KeyError, RuntimeError, pl.exceptions.ComputeError) as e:  # noqa: BLE001
             # finance parquet 로딩/파싱 실패 → 이유 노출 후 docs fallback 허용.
             # silent 실패 시 show("IS") 가 docs 기반으로 잘못된 결과 반환하는 사례 방지.
+            # (IO / 형식 오류 / 컬럼 부재 / polars 변환 실패 — 다양한 정상 fallback 분기)
             import warnings
 
             warnings.warn(

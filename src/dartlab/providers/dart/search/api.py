@@ -735,7 +735,8 @@ def pullIndex(**kwargs):
         nContent = pullContentIndex()
         if nContent > 0:
             _log.info(f"  content 인덱스 {nContent}개 파일 다운로드")
-    except Exception as e:
+    except (OSError, ConnectionError, ValueError) as e:
+        # HF Hub 다운로드 실패 (네트워크/인증/파일 부재) — content 인덱스는 옵션, skip.
         _log.info(f"  content 인덱스 다운로드 건너뜀: {e}")
     return ngramResult
 
