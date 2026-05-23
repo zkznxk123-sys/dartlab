@@ -4,7 +4,7 @@ title: Size 팩터 (Fama-French SMB) — log market cap percentile
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: Fama-French 1992 의 Size 팩터 — log(market cap) 의 peer 단면 percentile rank. small-cap premium 측면. 단순 시총이 아닌 log 변환 후 cross-section.
 whenToUse:
   - size 팩터

@@ -4,7 +4,7 @@ title: Momentum 팩터 (Jegadeesh-Titman 12-1m return)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: Jegadeesh-Titman 1993 "Returns to Buying Winners and Selling Losers" 의 12-1m return (직전 12 개월 수익률, 단 직전 1 개월 제외) + 변동성 조정 (Sharpe) + peer rank. 단순 모멘텀이 아닌 *위험 조정* + cross-section.
 whenToUse:
   - 모멘텀 팩터

@@ -4,7 +4,7 @@ title: Value 팩터 composite (Fama-French B/M + E/P + CF/P)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: Fama-French 1992 의 Value 팩터를 B/M (Book/Market) + E/P (Earnings yield) + CF/P (Cash flow yield) 3 정의 평균으로 composite 산출. 단일 회사 + peer set percentile rank. 단일 지표 (PER 단독) 함정 회피.
 whenToUse:
   - value 팩터

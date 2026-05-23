@@ -4,7 +4,7 @@ title: ATR 변동성 체제 전환 (단기 vs 장기 ATR ratio)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: ATR(5) vs ATR(60) ratio 의 z-score. > +1.5σ = 변동성 확대 체제, < -1.5σ = 수축 체제. 단일 변동성 절대값이 아닌 *체제 전환* 추적.
 whenToUse:
   - 변동성 체제 전환
