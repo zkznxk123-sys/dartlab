@@ -45,7 +45,7 @@ class NotesMapper(BaseMapper):
 
     @property
     def name(self) -> str:
-        """name — TODO 한국어 동작 설명."""
+        """매퍼 이름 — ``"notes"`` 고정 식별자 (registry/diff 비교용)."""
         return "notes"
 
     def _data(self) -> dict:
@@ -132,7 +132,7 @@ class NotesMapper(BaseMapper):
         return info.get("category") if info else None
 
     def stats(self) -> MapperStats:
-        """stats — TODO 한국어 동작 설명."""
+        """매퍼 통계 — 총 항목 수 / 금액 항목 비율 (coverage) / 마지막 스캔 시각."""
         items = self._items()
         meta = self._data().get("_metadata", {})
         amountItems = sum(1 for v in items.values() if v.get("type") == "amount")
@@ -145,7 +145,7 @@ class NotesMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
-        """allKeys — TODO 한국어 동작 설명."""
+        """등록된 항목 키 list — items dict 키 순서 유지."""
         return list(self._items().keys())
 
     def byCategory(self, cat: str) -> list[str]:

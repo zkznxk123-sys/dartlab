@@ -126,52 +126,7 @@ class _IncrementalBuilder:
         self.docLengths: list[int] = []
 
     def addDoc(self, text: str) -> None:
-        """addDoc — TODO 한국어 동작 설명.
-
-        Args:
-            text: 인자.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> addDoc(...)
-
-        SeeAlso:
-            - ``ngramIndex`` — title/section 인덱스 (본 모듈은 content 전용).
-            - ``derived`` — 검색 후속 처리.
-
-        Requires:
-            - dartlab
-            - math
-            - numpy
-            - polars
-            - time
-
-        Capabilities:
-            - BM25 본문 검색 + 필드 분리. main + delta 세그먼트 통합.
-
-        Guide:
-            - "DART 공시 본문 검색" → 본 모듈.
-
-        AIContext:
-            workbench keyword 검색 backend — AI 가 search() entry 호출 시 본 모듈 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - main 인덱스 미빌드 → 빈 결과. 월 1 회 리빌드 의무.
-                - delta 인덱스 누적 → 30 일+ 시 main 리빌드 필요.
-            OutputSchema:
-                - list[dict] / pl.DataFrame — 검색 결과 (rcept_no/score/snippet).
-            Prerequisites:
-                - main.npz + main_meta.parquet (월 1 회 빌드).
-            Freshness:
-                - main: 월 단위, delta: 일 단위.
-            Dataflow:
-                - query → BM25 (main + delta) → union → rerank → 본 결과.
-            TargetMarkets:
-                - KR (DART) BM25 검색.
-        """
+        """document 1 개 추가 — 토크나이즈 + stem→id 매핑 + posting list 누적."""
         docId = len(self.docLengths)
         if not text:
             self.docLengths.append(0)
@@ -189,55 +144,7 @@ class _IncrementalBuilder:
             self.postings[sid].append((docId, c))
 
     def finalize(self) -> dict:
-        """finalize — TODO 한국어 동작 설명.
-
-        Args:
-            (인자 자동 생성).
-
-        Raises:
-            없음.
-
-        Example:
-            >>> finalize(...)
-
-        Returns:
-            dict — 인덱스 데이터.
-
-        SeeAlso:
-            - ``ngramIndex`` — title/section 인덱스 (본 모듈은 content 전용).
-            - ``derived`` — 검색 후속 처리.
-
-        Requires:
-            - dartlab
-            - math
-            - numpy
-            - polars
-            - time
-
-        Capabilities:
-            - BM25 본문 검색 + 필드 분리. main + delta 세그먼트 통합.
-
-        Guide:
-            - "DART 공시 본문 검색" → 본 모듈.
-
-        AIContext:
-            workbench keyword 검색 backend — AI 가 search() entry 호출 시 본 모듈 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - main 인덱스 미빌드 → 빈 결과. 월 1 회 리빌드 의무.
-                - delta 인덱스 누적 → 30 일+ 시 main 리빌드 필요.
-            OutputSchema:
-                - list[dict] / pl.DataFrame — 검색 결과 (rcept_no/score/snippet).
-            Prerequisites:
-                - main.npz + main_meta.parquet (월 1 회 빌드).
-            Freshness:
-                - main: 월 단위, delta: 일 단위.
-            Dataflow:
-                - query → BM25 (main + delta) → union → rerank → 본 결과.
-            TargetMarkets:
-                - KR (DART) BM25 검색.
-        """
+        """누적된 postings/docLengths → 인덱스 dict 직렬화 — BM25 검색 준비 완료 상태."""
         n = len(self.docLengths)
         nStems = len(self.stemToId)
         offsets = np.zeros(nStems + 1, dtype=np.int64)
@@ -797,56 +704,7 @@ def rebuildMain(
     totalDocs = 0
 
     def feedDf(df: pl.DataFrame, source: str) -> int:
-        """feedDf — TODO 한국어 동작 설명.
-
-        Args:
-            df: 인자.
-            source: 인자.
-
-        Raises:
-            없음.
-
-        Example:
-            >>> feedDf(...)
-
-        Returns:
-            int — 인덱스 빌드 건수.
-
-        SeeAlso:
-            - ``ngramIndex`` — title/section 인덱스 (본 모듈은 content 전용).
-            - ``derived`` — 검색 후속 처리.
-
-        Requires:
-            - dartlab
-            - math
-            - numpy
-            - polars
-            - time
-
-        Capabilities:
-            - BM25 본문 검색 + 필드 분리. main + delta 세그먼트 통합.
-
-        Guide:
-            - "DART 공시 본문 검색" → 본 모듈.
-
-        AIContext:
-            workbench keyword 검색 backend — AI 가 search() entry 호출 시 본 모듈 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - main 인덱스 미빌드 → 빈 결과. 월 1 회 리빌드 의무.
-                - delta 인덱스 누적 → 30 일+ 시 main 리빌드 필요.
-            OutputSchema:
-                - list[dict] / pl.DataFrame — 검색 결과 (rcept_no/score/snippet).
-            Prerequisites:
-                - main.npz + main_meta.parquet (월 1 회 빌드).
-            Freshness:
-                - main: 월 단위, delta: 일 단위.
-            Dataflow:
-                - query → BM25 (main + delta) → union → rerank → 본 결과.
-            TargetMarkets:
-                - KR (DART) BM25 검색.
-        """
+        """parquet DataFrame 의 각 row 를 builder 에 추가 + meta record 동행 — 빌드 건수 반환."""
         added = 0
         for row in df.iter_rows(named=True):
             content = (row.get("section_content") or "")[:contentLimit]

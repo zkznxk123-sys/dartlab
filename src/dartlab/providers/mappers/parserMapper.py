@@ -67,7 +67,7 @@ class ParserMapper(BaseMapper):
 
     @property
     def name(self) -> str:
-        """name — TODO 한국어 동작 설명."""
+        """매퍼 이름 — ``"parser"`` 고정 식별자 (affiliate + cost + sections 통합 매퍼)."""
         return "parser"
 
     # ── affiliate ──
@@ -146,7 +146,7 @@ class ParserMapper(BaseMapper):
         return None
 
     def stats(self) -> MapperStats:
-        """stats — TODO 한국어 동작 설명."""
+        """통합 통계 — 4 source (affiliate movement/profile/transposed + costNormalize + sectionTopicMap) 합계."""
         aff = loadAffiliate()
         cost = loadCostByNature()
         sec = loadSections()
@@ -166,7 +166,7 @@ class ParserMapper(BaseMapper):
         )
 
     def allKeys(self) -> list[str]:
-        """allKeys — TODO 한국어 동작 설명."""
+        """4 source 의 모든 key 합쳐서 list — 통합 검색 / debug 용."""
         keys: list[str] = []
         aff = loadAffiliate()
         keys.extend(aff.get("movement", {}).keys())

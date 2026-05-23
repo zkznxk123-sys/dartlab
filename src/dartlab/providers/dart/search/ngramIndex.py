@@ -768,52 +768,17 @@ def searchNgram(
 
 
 def ngramStats() -> dict:
-    """ngramStats — TODO 한국어 동작 설명.
+    """ngram 인덱스 파일 메타 통계 — stemIndex.npz 파일 크기 / stem 수 / document 수.
 
-    Args:
-        (인자 자동 생성).
+    Returns:
+        ``{"sizeMb": float, "stems": int, "documents": int}``.
 
     Raises:
         없음.
 
     Example:
-        >>> ngramStats(...)
-
-    Returns:
-        dict — 결과 dict.
-
-    SeeAlso:
-        - ``fieldIndex`` — content BM25 (본 모듈 보완).
-        - ``derived`` — 검색 후속 처리.
-
-    Requires:
-        - dartlab
-        - numpy
-        - polars
-
-    Capabilities:
-        - report_nm + section_title bigram/trigram 역인덱스 (CSR 구조). title scope BM25.
-
-    Guide:
-        - "DART 공시 제목/섹션 검색" → 본 모듈.
-
-    AIContext:
-        internal title ngram — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - title 인덱스만 — content 검색 X.
-            - 동의어 사전 누락 시 자연어 hit rate 저하.
-        OutputSchema:
-            - list[dict] / dict / Path / int — 함수별.
-        Prerequisites:
-            - report_nm + section_title 인덱스 + 동의어 사전.
-        Freshness:
-            - 일 단위.
-        Dataflow:
-            - title → ngram → CSR → bincount.
-        TargetMarkets:
-            - KR (DART) title/section.
+        >>> ngramStats()
+        {'sizeMb': 12.3, 'stems': 45678, 'documents': 12345}
     """
     outDir = _stemIndexDir()
     npzPath = outDir / "stemIndex.npz"
