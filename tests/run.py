@@ -250,6 +250,18 @@ GATES: dict[str, Gate] = {
         env={"DARTLAB_TEST_LOCKED": "1"},
         cmd="pytest tests/_evals/test_eval_smoke.py -v --tb=short --no-cov",
         timeout_minutes=5,
+        blocking=True,
+    ),
+    # T11-2 — eval full (live judge) 는 nightly 로 분리. smoke 만 fast PR gate.
+    "eval-full": Gate(
+        name="eval-full",
+        tier="nightly",
+        deps=("pytest", "pytest-asyncio", "pytest-cov"),
+        install_pkg="editable",
+        env={"DARTLAB_TEST_LOCKED": "1"},
+        cmd="pytest tests/_evals/test_eval_live.py -v --tb=short --no-cov",
+        timeout_minutes=30,
+        blocking=False,  # nightly — 실패 시 알람만, PR 차단 X
     ),
     "mutation-smoke": Gate(
         name="mutation-smoke",
