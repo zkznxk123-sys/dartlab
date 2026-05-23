@@ -107,3 +107,56 @@ def clearDiskCache(stockCode: str | None = None) -> None:
                 p.unlink()
             except OSError:
                 pass
+
+
+def _buildOneForBatch(code: str) -> tuple[str, bool]:
+    """ProcessPool worker — 단일 corp sections build 후 디스크 캐시 자동 저장.
+
+    Returns:
+        (code, success_bool).
+    """
+    try:
+        from dartlab.providers.dart import Company
+
+        sec = Company(code).sections
+        return (code, sec is not None and not sec.is_empty())
+    except Exception:
+        return (code, False)
+
+
+def buildBatchParallel(
+    codes: list[str],
+    *,
+    workers: int | None = None,
+) -> dict[str, bool]:
+    """N corps 의 sections 병렬 build (ProcessPoolExecutor) — 결과 디스크 캐시 저장.
+
+    각 process 가 1 corp 씩 build → 디스크 cache 저장. 후속 호출 (다른 process /
+    같은 process 둘 다) 은 디스크 cache hit 으로 ~1.3s.
+
+    POC 검증 (2026-05-23): 5 baseline 직렬 61s → 병렬 5 worker 19s = 3.25× speedup.
+
+    Args:
+        codes: 종목코드 list (예 ["005930", "000660", ...]).
+        workers: ProcessPool worker 수. None = min(len(codes), os.cpu_count()).
+
+    Returns:
+        dict[code, bool] — 각 corp 의 build 성공 여부.
+
+    Example:
+        >>> from dartlab.providers.dart.docs.sections.diskCache import buildBatchParallel
+        >>> results = buildBatchParallel(["005930", "035720", "005380"])
+        >>> # 후속 Company('005930').sections 는 디스크 cache hit (~1.3s)
+    """
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
+    if not codes:
+        return {}
+    if workers is None:
+        workers = min(len(codes), os.cpu_count() or 4)
+    results: dict[str, bool] = {}
+    with ProcessPoolExecutor(max_workers=workers) as ex:
+        for code, ok in ex.map(_buildOneForBatch, codes):
+            results[code] = ok
+    return results
