@@ -31,7 +31,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 _REPO = Path(__file__).resolve().parents[2]
 _DEFAULT_TARGET = _REPO / "src" / "dartlab" / "providers"
-_BASELINE = _REPO / "scripts" / "audit" / "_baselines" / "folderSize.json"
+_BASELINE = _REPO / "tests" / "audit" / "_baselines" / "folderSize.json"
 
 _SMALL_THRESHOLD = 400
 _MEDIUM_THRESHOLD = 800
