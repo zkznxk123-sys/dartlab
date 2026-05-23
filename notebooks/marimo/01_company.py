@@ -5,15 +5,15 @@
 
 import marimo
 
-__generated_with = "0.23.1"
-app = marimo.App(width="medium")
+__generated_with = "0.23.6"
+app = marimo.App(width="full")
 
 
 @app.cell
 def _():
     # Company facade — 종목코드 하나로 공시·재무·정형 데이터에 단일 진입점
     import dartlab
-    c = dartlab.Company("000660")
+    c = dartlab.Company("005930")
     c.corpName
     return (c,)
 

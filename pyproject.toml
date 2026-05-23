@@ -85,6 +85,7 @@ dependencies = [
     "PyYAML>=6.0.0,<7; sys_platform != 'emscripten'",
     # viz
     "plotly>=5.0.0,<6; sys_platform != 'emscripten'",
+    "marimo>=0.23.6",
 ]
 
 [project.scripts]
