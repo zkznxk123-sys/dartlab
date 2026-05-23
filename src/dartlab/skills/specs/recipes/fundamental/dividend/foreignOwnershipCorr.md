@@ -4,7 +4,7 @@ title: 외국인 보유율 vs 배당성향 상관
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 한국 시장에서 외국인 보유율 변화와 배당성향 변화의 시차 상관을 본다. 외국인이 *배당 정책에 영향* 한 종목 (높은 상관) vs *영향 없는* 종목 (낮은 상관) 분리. 단일 회사 시계열 5~10 년. gather ↔ analysis 격리 메우는 조합. 트리거 — '외국인 배당', 'foreign ownership dividend', '주주환원 외인 영향'.
 whenToUse:
   - 외국인 보유율 배당

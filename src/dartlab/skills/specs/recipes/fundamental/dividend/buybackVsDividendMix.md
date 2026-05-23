@@ -4,7 +4,7 @@ title: 자사주 매입 vs 배당 환원 mix
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 회사의 주주환원이 배당 단독·자사주 단독·혼합 중 어느 modus 인지 + 시점별 mix shift 가 capital allocation 의 어떤 신호 (잉여현금 정점·EPS 부양·지배구조 강화) 인지 row 단위로 분리. 단일 dividend yield 만 보는 함정 회피. analysis 격리 메우는 조합. 트리거 — '자사주 vs 배당', 'buyback vs dividend', '환원 mix'.
 whenToUse:
   - 자사주 vs 배당 환원
