@@ -12,7 +12,83 @@ dart 의 ops/insiderTrades + docs/finance/executivePay + buildLiveFilings 패리
 
 from __future__ import annotations
 
+import re
+
 import polars as pl
+
+# 8-K Item 헤더 regex — "Item X.XX" 또는 "ITEM X.XX" (대소문자 무관).
+# 본문이 plaintext / HTML 모두 매칭 — HTML 태그는 strip 후 적용.
+_RE_8K_ITEM_HEADER = re.compile(
+    r"(?:^|\n|\.|>)\s*(?:Item|ITEM)\s+([1-9]\.\d{2})\b[\s\.\-:]*",
+    re.IGNORECASE,
+)
+
+
+def _stripHtmlTags(html: str) -> str:
+    """HTML 태그 제거 — BeautifulSoup 없이 regex 만으로 plaintext 변환.
+
+    Args:
+        html: HTML 본문.
+
+    Returns:
+        태그 제거된 plaintext (entity decoded).
+
+    Raises:
+        없음.
+    """
+    if not html or "<" not in html:
+        return html
+    # script / style block 본문 제거 (그 안 텍스트가 8-K item 처럼 보이는 사고 차단).
+    text = re.sub(r"<(?:script|style)[^>]*>.*?</(?:script|style)>", " ", html, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"<[^>]+>", " ", text)
+    # HTML entity 간단 decode (& &amp; 등).
+    text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def _parseEightKItems(html: str) -> pl.DataFrame:
+    """8-K HTML → Item rows. Item X.XX 헤더 매칭 + 다음 헤더까지 본문 slice.
+
+    Args:
+        html: 8-K HTML 본문.
+
+    Returns:
+        ``item`` / ``label`` / ``text`` 3 컬럼 DataFrame. 매칭 0 → 빈 schema.
+
+    Raises:
+        없음.
+    """
+    if not html:
+        return pl.DataFrame(schema={"item": pl.Utf8, "label": pl.Utf8, "text": pl.Utf8})
+    text = _stripHtmlTags(html)
+    if not text:
+        return pl.DataFrame(schema={"item": pl.Utf8, "label": pl.Utf8, "text": pl.Utf8})
+
+    # Item 헤더 매칭 위치 모두 수집.
+    matches = list(_RE_8K_ITEM_HEADER.finditer(text))
+    if not matches:
+        return pl.DataFrame(schema={"item": pl.Utf8, "label": pl.Utf8, "text": pl.Utf8})
+
+    rows: list[dict[str, str]] = []
+    for i, match in enumerate(matches):
+        itemNum = match.group(1)
+        # 본문 = 현 헤더 끝부터 다음 헤더 시작까지.
+        bodyStart = match.end()
+        bodyEnd = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        body = text[bodyStart:bodyEnd].strip()
+        # 본문 길이 제한 (4 KB) — 8-K item 본문이 비정상적으로 큰 경우 잘림.
+        if len(body) > 4096:
+            body = body[:4096] + "..."
+        rows.append(
+            {
+                "item": itemNum,
+                "label": STANDARD_8K_ITEMS.get(itemNum, f"Item {itemNum}"),
+                "text": body,
+            }
+        )
+    return pl.DataFrame(rows, schema={"item": pl.Utf8, "label": pl.Utf8, "text": pl.Utf8})
+
 
 # 8-K 표준 Items (사용자 노출용 라벨)
 STANDARD_8K_ITEMS: dict[str, str] = {
@@ -211,14 +287,7 @@ def parseEightKHtml(html: str) -> pl.DataFrame:
         TargetMarkets:
             - US (EDGAR) 한정.
     """
-    del html
-    return pl.DataFrame(
-        schema={
-            "item": pl.Utf8,
-            "label": pl.Utf8,
-            "text": pl.Utf8,
-        }
-    )
+    return _parseEightKItems(html)
 
 
 def itemLabel(itemNum: str) -> str:
