@@ -242,10 +242,15 @@ def auditCode(code: str, *, verbose: bool = False) -> dict[str, Any]:
             # 추가 정합: parquet raw content 안 *어디든* (line-start 아니어도) 같은
             # label substring 존재 시 sections heading 의 evidence 있음으로 인정.
             # inline-split heading 의 label 은 parquet 본문 mid-line 에 등장.
+            # 짧은 stripped (< 4 chars) — original label (prefix 포함, e.g. "XII. 상세표"
+            # → "XII.상세표") 으로도 추가 시도. 100 sample 의 "XII. 상세표" 10x 같은
+            # legit Roman chapter heading 이 stripped="상세표" len 3 이라 reject 회피.
+            normOriginal = re.sub(r"\s+", "", label)[:40]
             if (
                 normStripped not in parquetHeadingLabels
                 and not any(normStripped in pHL for pHL in parquetHeadingLabels if len(pHL) > 5)
                 and not _labelInRawContent(normStripped, df)
+                and not _labelInRawContent(normOriginal, df)
             ):
                 spuriousHeadings.append(
                     {
