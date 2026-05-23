@@ -4,7 +4,7 @@ title: Disclosure News Crosscheck
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 graphTier: L1.5
 cluster: news
 purpose: DART 공시 (1 차 출처) 와 Naver 뉴스 헤드라인 (외부 untrusted) 를 같은 ±1 day window 안에서 회사명·키워드·이벤트 단어로 매칭해 정합성을 보는 절차다.

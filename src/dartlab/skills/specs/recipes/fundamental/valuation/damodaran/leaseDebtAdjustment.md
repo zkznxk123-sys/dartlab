@@ -4,7 +4,7 @@ title: Damodaran 리스부채 조정 감사
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: L1 재무제표에서 리스·사용권자산·리스부채 라인을 찾아 부채와 영업자산 조정 필요성을 표시하는 절차. 트리거 — 'lease debt adjustment', '리스부채 조정', '사용권자산 가치평가'.
 whenToUse:
   - lease debt adjustment

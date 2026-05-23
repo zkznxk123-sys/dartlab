@@ -4,7 +4,7 @@ title: Damodaran L1/L1.5 딥다이브
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: L2 분석 엔진 없이 L1/L1.5 데이터와 Damodaran식 가정 검증만으로 가치평가 memo, DCF 밴드, reverse DCF, 반증, storyboardReady 초안을 만드는 최종 오케스트레이터. 트리거 — 'Damodaran deep dive', 'L1/L1.5 가치평가 memo', '다모다란 딥다이브'.
 whenToUse:
   - Damodaran deep dive

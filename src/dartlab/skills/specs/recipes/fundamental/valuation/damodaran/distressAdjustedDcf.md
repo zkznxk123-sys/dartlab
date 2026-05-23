@@ -4,7 +4,7 @@ title: Damodaran Distress 조정 DCF 경로
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: 부채비율, FCFF 음수 비율, DCF 상태를 이용해 일반 DCF에 distress 조정이 필요한지 판정하는 절차. 트리거 — 'distress adjusted DCF', '부실위험 DCF', '재무위험 가치평가'.
 whenToUse:
   - distress adjusted DCF

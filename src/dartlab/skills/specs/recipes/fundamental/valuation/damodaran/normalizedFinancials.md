@@ -4,7 +4,7 @@ title: Damodaran 정규화 재무 패널
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: L1 재무제표만으로 매출, 영업이익, 세율, NOPAT, 운전자본, 감가상각, capex, FCF를 5-10년 패널로 정규화하는 절차. 트리거 — 'normalized financials', 'Damodaran 재무 정규화', 'FCFF 계산 전 패널'.
 whenToUse:
   - normalized financials

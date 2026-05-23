@@ -4,7 +4,7 @@ title: 외인 보유율 factor cross-section (5종 quartile)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 graphTier: L1.5
 cluster: quant
 purpose: 다종목 cross-section 에서 외인 보유 비율의 quartile 분포 측정 + 자기 종목 percentile 위치. quant factor 5 + (value/momentum/quality/size/lowVol) 와 같은 cross-section 형식. 추론 라벨 없이 ranking 만. flow gather 결합.

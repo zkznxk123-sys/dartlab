@@ -4,7 +4,7 @@ title: Damodaran Peer Multiple 분해
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: EV/Sales, EV/EBIT, P/B 같은 상대가치 multiple을 성장·마진·ROC·리스크 driver로 분해해 DCF sanity check로만 쓰는 절차. 트리거 — 'peer multiple decomposition', '상대가치 분해', 'multiple sanity check'.
 whenToUse:
   - peer multiple decomposition

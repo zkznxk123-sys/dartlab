@@ -4,7 +4,7 @@ title: Damodaran 일회성 항목 조정 감사
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: 손상, 구조조정, 중단영업, 소송, 비경상 손익 등 one-off line item을 찾아 normalized EBIT/FCFF 조정 필요성을 표시하는 절차. 트리거 — 'one-off adjustment', '비경상 손익 조정', '정규화 이익'.
 whenToUse:
   - one-off adjustment

@@ -4,7 +4,7 @@ title: Damodaran 성장 실현가능성 검증
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: 성장률이 reinvestment rate와 ROC로 설명되는지, 현재 가격이 요구하는 성장률이 정규화 재무와 맞는지 검증하는 Damodaran식 value driver 반증 절차. 트리거 — 'growth feasibility', '성장률 실현가능성', 'reinvestment ROC consistency'.
 whenToUse:
   - growth feasibility

@@ -4,7 +4,7 @@ title: Damodaran 스토리-드라이버 변환
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: narrativeMap의 사업 스토리를 성장률, 정상 마진, sales-to-capital, WACC, terminal growth, reverse DCF 요구 성장률로 변환하는 절차. 트리거 — 'story to drivers', '스토리를 숫자로', 'Damodaran driver map'.
 whenToUse:
   - story to drivers

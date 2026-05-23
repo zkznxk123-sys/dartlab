@@ -4,7 +4,7 @@ title: Damodaran 재투자율과 ROC
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: 정규화 재무 패널에서 sales-to-capital, reinvestment rate, ROIC/ROC, incremental ROC를 계산하고 성장률이 재투자와 수익성으로 설명되는지 반증하는 절차. 트리거 — 'ROIC 재투자율', 'growth = ROC x reinvestment', 'Damodaran value driver'.
 whenToUse:
   - ROIC 재투자율

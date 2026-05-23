@@ -4,7 +4,7 @@ title: 반복 헤드라인 빈도 (같은 사건의 여러 보도 카운트)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 30 일 윈도우 안 같은 회사 관련 헤드라인 중 *제목 키워드 ≥ 3 어 중복* row 를 cluster 로 묶고 cluster 빈도 카운트. 단일 보도가 *여러 매체에 동시 확산* 했는지 정량. evidence-bound 형태 (sentiment 라벨 X).
 whenToUse:
   - 반복 헤드라인

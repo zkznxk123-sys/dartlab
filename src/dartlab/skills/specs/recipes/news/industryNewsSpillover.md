@@ -4,7 +4,7 @@ title: 산업 뉴스 spillover (peer 이벤트 → target 영향 추적)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: 같은 산업 peer 의 주요 공시·뉴스 발생 직후 target 의 가격 변동 lag (T+1 / T+3 / T+5). peer 이벤트 spillover 가 *유의미* 한 회사는 동조성 강함 — 산업 분석 신호.
 whenToUse:
   - 산업 spillover

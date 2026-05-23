@@ -4,7 +4,7 @@ title: Damodaran 금융업 Excess Return 경로
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: 은행·보험·증권 등 금융업이 일반 FCFF에서 차단될 때 book equity, ROE proxy, cost of equity를 이용해 excess-return 모델 필요성을 표시하는 절차. 트리거 — 'financial firm excess return', '금융업 가치평가', '은행 Damodaran'.
 whenToUse:
   - financial firm excess return

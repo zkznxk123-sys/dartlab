@@ -4,7 +4,7 @@ title: Damodaran L1.5 데이터 감사
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: Damodaran식 가치평가를 시작하기 전에 L1/L1.5 데이터만으로 재무, 가격, 시총, 세그먼트, 국가·산업 기본값, 문서 근거가 충분한지 판정하는 절차. 트리거 — 'Damodaran 데이터 감사', 'L1.5 가치평가 가능성', 'DCF 전 데이터 점검'.
 whenToUse:
   - Damodaran 데이터 감사

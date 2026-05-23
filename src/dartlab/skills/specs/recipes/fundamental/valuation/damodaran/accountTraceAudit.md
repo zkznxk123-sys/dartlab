@@ -4,7 +4,7 @@ title: Damodaran 계정 출처 감사
 category: recipes
 kind: recipe
 scope: builtin
-status: unverified
+status: tested
 purpose: Damodaran식 재무 정규화에 쓰인 매출, EBIT, 세금, CFO, capex, 감가상각, 현금, 부채, 자본, 운전자본 계정의 L1 출처를 감사하는 절차. 트리거 — '계정 trace', '출처 감사', 'valuation account provenance'.
 whenToUse:
   - 계정 trace
