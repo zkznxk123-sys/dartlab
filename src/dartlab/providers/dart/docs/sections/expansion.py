@@ -90,10 +90,11 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
         orderedRows = rows
 
     for row in orderedRows:
-        blockType = str(row.get("blockType") or "text")
-        topic = str(row.get("topic") or "")
-        sourceBlockOrder = int(row.get("sourceBlockOrder") or row.get("blockOrder") or 0)
-        orderSeq = int(row.get("orderSeq") or 0)
+        rowGet = row.get  # local binding — dict.get attribute lookup 회피
+        blockType = str(rowGet("blockType") or "text")
+        topic = str(rowGet("topic") or "")
+        sourceBlockOrder = int(rowGet("sourceBlockOrder") or rowGet("blockOrder") or 0)
+        orderSeq = int(rowGet("orderSeq") or 0)
         baseRow = dict(row)
         baseRow["sourceBlockOrder"] = sourceBlockOrder
 
@@ -123,7 +124,7 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             lastKey = lastHeadingKeyByTopic.get(topic)
             # path-anchored segmentKey — 같은 path 안 N-th table 은 모든 period 에서 같은 segmentKey.
             # 옛 headerHash 룰 fallback 유지 (path 없는 chapter-leaf 표 등 edge case).
-            tableText = str(row.get("text") or "")
+            tableText = str(rowGet("text") or "")
             headerHash = tableHeaderHash(tableText) if tableText else None
             tablePathKey = baseRow.get("textSemanticPathKey") or baseRow.get("textPathKey")
             segmentKeyBase, occurrence, segmentKey = keyer.forTableBlock(
@@ -141,7 +142,7 @@ def _expandStructuredRows(rows: list[dict[str, object]]) -> Iterator[dict[str, o
             yield baseRow
             continue
 
-        text = str(row.get("text") or "").strip()
+        text = str(rowGet("text") or "").strip()
         initialHeadings = headingStateByTopic.get(topic, [])
         stickyPromote = promoteKoreanByTopic.get(topic)
         nodes, finalHeadings, chunkPromoteKorean = parseTextStructureWithState(
