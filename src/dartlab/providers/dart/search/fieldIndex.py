@@ -126,7 +126,20 @@ class _IncrementalBuilder:
         self.docLengths: list[int] = []
 
     def addDoc(self, text: str) -> None:
-        """document 1 개 추가 — 토크나이즈 + stem→id 매핑 + posting list 누적."""
+        """document 1 개 추가 — 토크나이즈 + stem→id 매핑 + posting list 누적.
+
+        Args:
+            text: document 본문 (빈 문자열 = 길이 0 doc 으로 기록).
+
+        Returns:
+            None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> builder.addDoc("배당에 관한 사항")  # doctest: +SKIP
+        """
         docId = len(self.docLengths)
         if not text:
             self.docLengths.append(0)
@@ -144,7 +157,18 @@ class _IncrementalBuilder:
             self.postings[sid].append((docId, c))
 
     def finalize(self) -> dict:
-        """누적된 postings/docLengths → 인덱스 dict 직렬화 — BM25 검색 준비 완료 상태."""
+        """누적된 postings/docLengths → 인덱스 dict 직렬화 — BM25 검색 준비 완료 상태.
+
+        Returns:
+            ``{"offsets": np.ndarray, "docIds": np.ndarray, "freqs": np.ndarray,
+            "docLengths": np.ndarray, "stemToId": dict, "avgDocLen": float, ...}``.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> idx = builder.finalize()  # doctest: +SKIP
+        """
         n = len(self.docLengths)
         nStems = len(self.stemToId)
         offsets = np.zeros(nStems + 1, dtype=np.int64)
@@ -704,7 +728,21 @@ def rebuildMain(
     totalDocs = 0
 
     def feedDf(df: pl.DataFrame, source: str) -> int:
-        """parquet DataFrame 의 각 row 를 builder 에 추가 + meta record 동행 — 빌드 건수 반환."""
+        """parquet DataFrame 의 각 row 를 builder 에 추가 + meta record 동행 — 빌드 건수 반환.
+
+        Args:
+            df: parquet DataFrame (``section_content`` + meta 컬럼 포함).
+            source: 인덱스 라벨 (예 ``"main"`` / ``"delta"``).
+
+        Returns:
+            추가된 doc 수.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> feedDf(df, "main")  # doctest: +SKIP
+        """
         added = 0
         for row in df.iter_rows(named=True):
             content = (row.get("section_content") or "")[:contentLimit]

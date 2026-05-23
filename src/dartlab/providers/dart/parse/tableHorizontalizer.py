@@ -320,7 +320,21 @@ def _hzFilterJunkItems(allItems: list[str]) -> list[str]:
     """숫자만 있는 항목명 제거."""
 
     def isJunk(name: str) -> bool:
-        """숫자/구두점/공백만 남는 항목명 (실제 의미 없는 noise) 판정."""
+        """숫자/구두점/공백만 남는 항목명 (실제 의미 없는 noise) 판정.
+
+        Args:
+            name: 항목명 후보.
+
+        Returns:
+            의미 없는 noise (숫자만 또는 빈 문자열) 면 True.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> isJunk("12,345")
+            True
+        """
         stripped = re.sub(r"[,.\-\s]", "", name)
         return stripped.isdigit() or not stripped
 

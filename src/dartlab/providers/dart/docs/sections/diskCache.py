@@ -43,13 +43,45 @@ def _topicsHash(topics: frozenset[str] | None) -> str:
 
 
 def diskCachePath(stockCode: str, topics: frozenset[str] | None) -> Path:
-    """sections() 결과 cache parquet 경로. topics None = 전체."""
+    """sections() 결과 cache parquet 경로. topics None = 전체.
+
+    Args:
+        stockCode: 종목코드 (6 자리).
+        topics: 부분 topic 집합 또는 None (전체).
+
+    Returns:
+        ``data/dart/sectionsCache/{stockCode}_{suffix}.parquet`` 경로 (suffix
+        는 topics hash 또는 ``"all"``).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> diskCachePath("005930", None).name
+        '005930_all.parquet'
+    """
     suffix = _topicsHash(topics)
     return Path(_cfg.dataDir) / _SECTIONS_CACHE_REL / f"{stockCode}_{suffix}.parquet"
 
 
 def isDiskCacheFresh(stockCode: str, topics: frozenset[str] | None) -> bool:
-    """디스크 캐시가 docs.parquet 보다 새로우면 True."""
+    """디스크 캐시가 docs.parquet 보다 새로우면 True.
+
+    Args:
+        stockCode: 종목코드.
+        topics: 부분 topic 집합 또는 None.
+
+    Returns:
+        cache 가 존재 + docs.parquet 보다 mtime 새로움 시 True.
+        cache 부재 → False. docs 부재 → True (cache 만 신뢰).
+
+    Raises:
+        없음.
+
+    Example:
+        >>> isDiskCacheFresh("005930", None)
+        True
+    """
     cachePath = diskCachePath(stockCode, topics)
     if not cachePath.exists():
         return False
@@ -65,6 +97,19 @@ def loadDiskCache(stockCode: str, topics: frozenset[str] | None) -> pl.DataFrame
     corrupt parquet (부분 write 후 crash 잔재) 는 ``OSError`` / Polars 에러 →
     None 반환 + warning 로깅. caller 가 rebuild 진행. 옛 broken cache 는
     다음 ``saveDiskCache`` 가 overwrite.
+
+    Args:
+        stockCode: 종목코드.
+        topics: 부분 topic 집합 또는 None.
+
+    Returns:
+        DataFrame (hit + fresh) 또는 None (miss / stale / corrupt).
+
+    Raises:
+        없음 — 모든 IO 에러는 warning + None 으로 변환.
+
+    Example:
+        >>> loadDiskCache("005930", None)  # doctest: +SKIP
     """
     if not isDiskCacheFresh(stockCode, topics):
         return None
@@ -86,6 +131,20 @@ def saveDiskCache(
     write 실패 (디스크 full / permission denied / corrupt cache dir) 시 warning
     로깅 + in-memory cache 만 활용. silent fail 은 다음 프로세스 재시작 시
     반복 cold build (~6s) 의 원인이라 명시 노출.
+
+    Args:
+        stockCode: 종목코드.
+        topics: 부분 topic 집합 또는 None.
+        result: build 결과 DataFrame. None / 빈 DataFrame 이면 저장 skip.
+
+    Returns:
+        None.
+
+    Raises:
+        없음 — IO 에러는 warning + 무시.
+
+    Example:
+        >>> saveDiskCache("005930", None, df)  # doctest: +SKIP
     """
     if result is None or result.is_empty():
         return
@@ -103,6 +162,12 @@ def clearDiskCache(stockCode: str | None = None) -> None:
 
     Args:
         stockCode: 특정 종목 cache 만 해제. None = 전체.
+
+    Raises:
+        없음 — OSError 는 무시 (best effort 삭제).
+
+    Example:
+        >>> clearDiskCache("005930")  # 005930 종목의 모든 topic hash cache 삭제
     """
     cacheDir = Path(_cfg.dataDir) / _SECTIONS_CACHE_REL
     if not cacheDir.exists():
@@ -157,6 +222,9 @@ def buildBatchParallel(
 
     Returns:
         dict[code, bool] — 각 corp 의 build 성공 여부.
+
+    Raises:
+        없음 — worker 별 예외는 (code, False) 로 변환.
 
     Example:
         >>> from dartlab.providers.dart.docs.sections.diskCache import buildBatchParallel

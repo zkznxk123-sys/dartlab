@@ -62,6 +62,9 @@ def iterPeriodSubsets(
     Returns:
         Iterator — (period, reportKind, contentCol, DataFrame) 튜플.
 
+    Raises:
+        없음.
+
     Example:
         >>> for periodKey, reportKind, ccol, subset in iterPeriodSubsets("005930"):
         ...     pass

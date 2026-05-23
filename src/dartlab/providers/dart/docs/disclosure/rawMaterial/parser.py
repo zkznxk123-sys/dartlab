@@ -345,7 +345,22 @@ def parseRawMaterials(content: str) -> list[dict] | None:
                     shift = 1
 
                 def si(idx: int | None, s: int = shift) -> int | None:
-                    """shift index — None / 음수 결과 시 None 반환 (cell 범위 밖 가드)."""
+                    """shift index — None / 음수 결과 시 None 반환 (cell 범위 밖 가드).
+
+                    Args:
+                        idx: 원본 인덱스.
+                        s: shift 양 (default = 외부 closure shift).
+
+                    Returns:
+                        shifted index 또는 (None 입력 / 음수 결과 시) None.
+
+                    Raises:
+                        없음.
+
+                    Example:
+                        >>> si(3, 1)
+                        2
+                    """
                     return idx - s if idx is not None and idx - s >= 0 else None
 
                 if si(itemIdx) is not None and si(itemIdx) < len(cells):

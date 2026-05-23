@@ -552,6 +552,9 @@ def chapterLabelKr(chapter: str) -> str:
     Returns:
         한글 풀네임. 매핑 부재 시 입력 그대로.
 
+    Raises:
+        없음.
+
     Example:
         >>> chapterLabelKr("III")
         'III. 재무에 관한 사항'
@@ -579,6 +582,9 @@ def notesSubTopicKey(parentTopic: str, number: int, slug: str) -> str:
     Returns:
         sub-topic key.
 
+    Raises:
+        없음.
+
     Example:
         >>> notesSubTopicKey("financialNotes", 5, "financialAssetsTransfer")
         'financialNotes_05_financialAssetsTransfer'
@@ -595,6 +601,9 @@ def notesSubTopicLabel(number: int, koreanName: str) -> str:
 
     Returns:
         한글 label.
+
+    Raises:
+        없음.
 
     Example:
         >>> notesSubTopicLabel(5, "금융자산의 양도")

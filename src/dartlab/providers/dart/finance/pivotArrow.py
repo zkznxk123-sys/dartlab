@@ -197,6 +197,12 @@ def pivotToSeriesArrow(
     Returns:
         ``{sjDiv: {snakeId: [v1, v2, ...]}}`` — caller 호환 dict.
         ``_fillSnakeIdGaps`` / ``sortSeries`` post-process 는 caller 가 수행.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> pivotToSeriesArrow(df, ["2024", "2023"], ...)  # doctest: +SKIP
     """
     augmented, unmappedAccounts, unmappedRows, ledgerEntries = _attachMappingColumns(
         df,

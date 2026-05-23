@@ -123,6 +123,17 @@ class SegmentKeyer:
     ) -> tuple[str, int, str]:
         """table block — `table|p:{path}|occ:{n}` (path-anchored, period-invariant).
 
+        Args:
+            topic: dartlab topic 키.
+            sourceBlockOrder: 본문 등장 순서 (fallback 용).
+            notesHeadingKey: notes topic 내 sub-heading key (있을 때 우선).
+            isNotesTopic: notes 카테고리 topic 여부.
+            textSemanticPathKey: 표가 속한 semantic path (있을 때 path-anchored).
+            headerHash: header text hash (path 없는 leaf-only chapter fallback).
+
+        Returns:
+            ``(base, occurrence, segmentKey)`` 3-tuple.
+
         우선순위:
         1. notes topic + notesHeadingKey → `table|sem:{notesHeadingKey}`
         2. textSemanticPathKey 있음 → `table|p:{path}` + occurrence (같은 path 안 N-th table)

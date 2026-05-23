@@ -481,6 +481,15 @@ def writeParquetSorted(df: pl.DataFrame, dest: Path) -> None:
         df: 저장할 DataFrame.
         dest: 최종 parquet 경로. ``data/dart/{category}/...`` 패턴이면 sort 자동.
             그 외 경로는 sort 없이 write (호환 보존).
+
+    Returns:
+        None.
+
+    Raises:
+        OSError: 디스크 쓰기 실패.
+
+    Example:
+        >>> writeParquetSorted(df, Path("data/dart/finance/005930.parquet"))  # doctest: +SKIP
     """
     cat = _categoryForPath(dest)
     sortBy = _SORT_BY_CATEGORY.get(cat or "", [])

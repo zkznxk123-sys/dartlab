@@ -52,7 +52,24 @@ class FetchStats:
     _lock: threading.Lock = field(default_factory=threading.Lock)
 
     def add(self, *, saved: int = 0, skipped: int = 0, failed: int = 0, bytesTotal: int = 0) -> None:
-        """카운터 증가 — 스레드 안전 (lock 보호). worker 가 매 결과마다 호출."""
+        """카운터 증가 — 스레드 안전 (lock 보호). worker 가 매 결과마다 호출.
+
+        Args:
+            saved: 저장 성공 카운트 delta.
+            skipped: 이미 존재로 skip 카운트 delta.
+            failed: 실패 카운트 delta.
+            bytesTotal: 누적 바이트 delta.
+
+        Returns:
+            None.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> stats = FetchStats()
+            >>> stats.add(saved=1, bytesTotal=12345)
+        """
         with self._lock:
             self.saved += saved
             self.skipped += skipped
@@ -60,7 +77,18 @@ class FetchStats:
             self.bytesTotal += bytesTotal
 
     def asDict(self) -> dict[str, int]:
-        """현재 통계 snapshot dict — 진행 표시 용 (lock 안 atomic 읽기)."""
+        """현재 통계 snapshot dict — 진행 표시 용 (lock 안 atomic 읽기).
+
+        Returns:
+            ``{"saved": int, "skipped": int, "failed": int, "bytesTotal": int}``.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> FetchStats().asDict()
+            {'saved': 0, 'skipped': 0, 'failed': 0, 'bytesTotal': 0}
+        """
         with self._lock:
             return {
                 "saved": self.saved,
@@ -75,6 +103,19 @@ def safeWriteBytes(path: Path, data: bytes) -> None:
 
     동일 path 동시 쓰기 시: 마지막 rename 만 보임. 부분 파일·읽기 중 충돌 0.
     `.tmp` suffix 에 thread id + monotonic ns 박아 두 스레드가 같은 tmp 노리는 사고 차단.
+
+    Args:
+        path: 최종 저장 경로 (parent dir 자동 생성).
+        data: 저장할 바이트.
+
+    Returns:
+        None.
+
+    Raises:
+        OSError: 디스크 full / permission denied / 잘못된 경로.
+
+    Example:
+        >>> safeWriteBytes(Path("/tmp/out.bin"), b"...")  # doctest: +SKIP
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     tag = f"{threading.get_ident()}.{time.monotonic_ns()}"
@@ -132,6 +173,12 @@ def fetchZipsParallel(
         N 개마다 progressCallback 호출.
     progressCallback : callable | None
         (done, total, statsDict) → None. 진행 표시용.
+
+    Raises:
+        없음 — 개별 fetch 실패는 stats.failed 로 변환.
+
+    Example:
+        >>> fetchZipsParallel(client, [("005930", "..."), ...], outDir=Path("/tmp"))  # doctest: +SKIP
     """
     if not targets:
         return FetchStats()
@@ -163,6 +210,15 @@ def buildTargetsFromDocsParquet(
     Args:
         codes: 대상 종목 코드 (None = docs 디렉토리의 전체 parquet).
         docsDir: docs.parquet 디렉토리. None = ``{dataDir}/dart/docs``.
+
+    Returns:
+        ``[(stockCode, rceptNo), ...]`` 페어 list (중복 제거 + parquet 부재 시 skip).
+
+    Raises:
+        없음 — 개별 parquet 읽기 실패는 skip.
+
+    Example:
+        >>> buildTargetsFromDocsParquet(codes=["005930"])  # doctest: +SKIP
     """
     import polars as pl
 
@@ -210,6 +266,12 @@ def collectAllOriginalZips(
 
     Returns:
         FetchStats — saved/skipped/failed/bytesTotal.
+
+    Raises:
+        없음 — 개별 fetch 실패는 stats.failed 로 변환.
+
+    Example:
+        >>> collectAllOriginalZips(codes=["005930"])  # doctest: +SKIP
     """
     outDir = outDir or (Path(_cfg.dataDir) / _ORIGINAL_DOCS_DIR_REL)
     if client is None:

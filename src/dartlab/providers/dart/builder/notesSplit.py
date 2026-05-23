@@ -168,6 +168,9 @@ def splitNotesSections(df: pl.DataFrame) -> pl.DataFrame:
         ``financialNotes``) 은 row 별로 sub-topic key (``financialNotes_05_xyz``) 로
         rewrite, ``sourceTopic`` 에 원래 parent 보존.
 
+    Raises:
+        없음.
+
     Example:
         >>> splitNotesSections(c.sections)  # financialNotes 113 rows → 31 sub-topic 으로 분할
 

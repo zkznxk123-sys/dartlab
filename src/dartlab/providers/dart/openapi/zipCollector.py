@@ -534,6 +534,9 @@ class ZipDocsCollector:
 
         Raises:
             FileNotFoundError: srcDir 에 zip 0 개.
+
+        Example:
+            >>> collector.rebuildFromZips()  # doctest: +SKIP
         """
         root = Path(_cfg.dataDir)
         codeDir = srcDir or (root / _ORIGINAL_DOCS_DIR_NAME / self.stockCode)

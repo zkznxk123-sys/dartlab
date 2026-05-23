@@ -73,6 +73,13 @@ def tableHeaderHash(md: str) -> str:
 
     Returns:
         str — 8 글자 hex hash. 진짜 header row 없으면 ``"empty"``.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> tableHeaderHash("| 항목 | 금액 |\\n|---|---|\\n| A | 100 |")
+        '...'
     """
     for line in md.strip().split("\n"):
         stripped = line.strip()

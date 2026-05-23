@@ -163,6 +163,9 @@ def parseSectionsByTitle(xmlContent: str) -> list[dict[str, Any]]:
         - ``assocnote``: ``<TITLE AASSOCNOTE>`` (path-id 예 ``D-0-3-1-0``,
           ``D``=document / ``L``=list / ``0``=skip / ``{chapter}`` / ``{sub}`` / ``{subsub}``).
 
+    Raises:
+        없음.
+
     Example:
         >>> with open("20260310002820.xml", encoding="utf-8") as f:
         ...     xml = f.read()
@@ -268,6 +271,14 @@ def splitLargeContent(text: str, maxBytes: int = MAX_CELL_BYTES) -> list[str]:
 
     Returns:
         분할된 list[str] — 각 원소 ≤ maxBytes char.
+
+    Raises:
+        없음.
+
+    Example:
+        >>> chunks = splitLargeContent("..." * 500000)
+        >>> all(len(c) <= MAX_CELL_BYTES for c in chunks)
+        True
     """
     if len(text) <= maxBytes:
         return [text]
