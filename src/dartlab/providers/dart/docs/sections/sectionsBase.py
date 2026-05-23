@@ -19,50 +19,20 @@ RE_ANNUAL_Q4_ALIAS = re.compile(r"^(\d{4})Q4$")
 
 
 def detectContentCol(df: pl.DataFrame) -> str:
-    """detectContentCol — TODO 한국어 동작 설명.
+    """본문 컬럼명 탐지 — ``section_content`` 우선, 없으면 ``content``.
 
     Args:
-        df: 인자.
+        df: sections parquet 조각.
+
+    Returns:
+        본문이 담긴 컬럼명 (``"section_content"`` 또는 ``"content"``).
 
     Raises:
         없음.
 
     Example:
-        >>> detectContentCol(...)
-
-    Returns:
-        str — 변환 결과.
-
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
-
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> detectContentCol(df)
+        'section_content'
     """
     if "section_content" in df.columns:
         return "section_content"
@@ -70,50 +40,20 @@ def detectContentCol(df: pl.DataFrame) -> str:
 
 
 def periodSortKey(period: str) -> tuple[int, int]:
-    """periodSortKey — TODO 한국어 동작 설명.
+    """period 문자열 → 정렬 키 ``(year, quarter)``. annual = quarter 4.
 
     Args:
-        period: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> periodSortKey(...)
+        period: ``"2024"`` (annual) 또는 ``"2024Q3"`` (분기) 형식.
 
     Returns:
-        tuple[int, int] — (year, quarter).
+        ``(year, quarter)`` tuple — annual 은 (year, 4).
 
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
+    Raises:
+        ValueError: 형식 위반.
 
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+    Example:
+        >>> periodSortKey("2024Q3")
+        (2024, 3)
     """
     value = str(period)
     if "Q" in value:
@@ -122,167 +62,79 @@ def periodSortKey(period: str) -> tuple[int, int]:
 
 
 def sortPeriods(periods: list[str], *, descending: bool = False) -> list[str]:
-    """sortPeriods — TODO 한국어 동작 설명.
+    """period 리스트 정렬 — ``periodSortKey`` 기준 (year × 4 + quarter).
 
     Args:
-        periods: 인자.
-        descending: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> sortPeriods(...)
+        periods: ``["2024", "2023Q3", ...]``.
+        descending: True 면 최신 우선.
 
     Returns:
-        list[str] — 결과 목록.
+        정렬된 list.
 
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+    Raises:
+        ValueError: ``periodSortKey`` 형식 위반.
+
+    Example:
+        >>> sortPeriods(["2023", "2024Q1", "2023Q3"], descending=True)
+        ['2024Q1', '2023', '2023Q3']
     """
     return sorted(periods, key=periodSortKey, reverse=descending)
 
 
 def periodOrderValue(period: str) -> int:
-    """periodOrderValue — TODO 한국어 동작 설명.
+    """period → 단일 정수 순위 (``year × 10 + quarter``) — sort 또는 직접 비교용.
 
     Args:
-        period: 인자.
-
-    Raises:
-        없음.
-
-    Example:
-        >>> periodOrderValue(...)
+        period: ``"2024"`` / ``"2024Q3"``.
 
     Returns:
-        int — 결과.
+        ``year * 10 + quarter`` (annual = quarter 4).
 
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
+    Raises:
+        ValueError: ``periodSortKey`` 형식 위반.
 
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+    Example:
+        >>> periodOrderValue("2024Q3")
+        20243
     """
     year, slot = periodSortKey(period)
     return year * 10 + slot
 
 
 def basePath(path: str) -> str:
-    """basePath — TODO 한국어 동작 설명.
+    """sections path 의 ``-split-N`` suffix 제거 — semantic 동치 path 매칭용.
 
     Args:
-        path: 인자.
+        path: ``"sec01-split-3"`` 같은 path.
+
+    Returns:
+        suffix 제거 후 base path (``"sec01"``).
 
     Raises:
         없음.
 
     Example:
-        >>> basePath(...)
-
-    Returns:
-        str — 변환 결과.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> basePath("sec01-split-3")
+        'sec01'
     """
     return RE_SPLIT_SUFFIX.sub("", path)
 
 
 def rawPeriod(period: str) -> str:
-    """rawPeriod — TODO 한국어 동작 설명.
+    """annual-Q4 alias (``"2024Q4"`` 등) → raw annual (``"2024"``). 다른 형식은 그대로.
 
     Args:
-        period: 인자.
+        period: ``"2024"`` / ``"2024Q4"`` / ``"2024Q3"``.
+
+    Returns:
+        annual alias 면 raw annual, 아니면 입력 그대로.
 
     Raises:
         없음.
 
     Example:
-        >>> rawPeriod(...)
-
-    Returns:
-        str — 변환 결과.
-
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
-
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> rawPeriod("2024Q4")
+        '2024'
     """
     value = str(period).strip()
     match = RE_ANNUAL_Q4_ALIAS.fullmatch(value)
@@ -292,51 +144,21 @@ def rawPeriod(period: str) -> str:
 
 
 def displayPeriod(period: str, *, annualAsQ4: bool = False) -> str:
-    """displayPeriod — TODO 한국어 동작 설명.
+    """사용자 표시용 period — annual 을 Q4 표기로 정규화 옵션.
 
     Args:
-        period: 인자.
-        annualAsQ4: 인자.
+        period: 입력 period (annual / 분기 / alias).
+        annualAsQ4: True 면 annual ``"2024"`` → ``"2024Q4"`` 변환.
+
+    Returns:
+        표시용 period 문자열.
 
     Raises:
         없음.
 
     Example:
-        >>> displayPeriod(...)
-
-    Returns:
-        str — 변환 결과.
-
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
-
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> displayPeriod("2024", annualAsQ4=True)
+        '2024Q4'
     """
     value = rawPeriod(period)
     if annualAsQ4 and RE_PERIOD.fullmatch(value) and "Q" not in value:
@@ -350,52 +172,22 @@ def periodColumns(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> list[str]:
-    """periodColumns — TODO 한국어 동작 설명.
+    """columns 중 period 형식 매칭만 추출 → 정렬 + (옵션) annual-Q4 표기.
 
     Args:
-        columns: 인자.
-        descending: 인자.
-        annualAsQ4: 인자.
+        columns: DataFrame columns list.
+        descending: True 면 최신 우선.
+        annualAsQ4: True 면 annual → ``"YYYYQ4"`` 변환.
+
+    Returns:
+        period 컬럼만 정렬된 list.
 
     Raises:
         없음.
 
     Example:
-        >>> periodColumns(...)
-
-    Returns:
-        list[str] — 결과 목록.
-
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
-
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> periodColumns(["topic", "2023", "2024Q1"], descending=True)
+        ['2024Q1', '2023']
     """
     ordered = sortPeriods([str(col) for col in columns if RE_PERIOD.fullmatch(str(col))], descending=descending)
     return [displayPeriod(period, annualAsQ4=annualAsQ4) for period in ordered]
@@ -407,52 +199,22 @@ def formatPeriodRange(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> str:
-    """formatPeriodRange — TODO 한국어 동작 설명.
+    """period 리스트 → ``"earliest..latest"`` 표기. 1 개면 단일 period, 0 개면 ``"-"``.
 
     Args:
-        periods: 인자.
-        descending: 인자.
-        annualAsQ4: 인자.
+        periods: period list.
+        descending: True 면 정렬 방향 역.
+        annualAsQ4: annual → Q4 표기.
+
+    Returns:
+        ``"2023Q1..2024Q4"`` 같은 range 문자열 (1 개면 그 period, 0 개면 ``"-"``).
 
     Raises:
         없음.
 
     Example:
-        >>> formatPeriodRange(...)
-
-    Returns:
-        str — 변환 결과.
-
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
-
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> formatPeriodRange(["2024", "2023Q1"])
+        '2023Q1..2024'
     """
     ordered = sortPeriods([rawPeriod(period) for period in periods], descending=descending)
     if not ordered:
@@ -467,52 +229,21 @@ def reorderPeriodColumns(
     descending: bool = False,
     annualAsQ4: bool = False,
 ) -> pl.DataFrame:
-    """reorderPeriodColumns — TODO 한국어 동작 설명.
+    """DataFrame 의 period 컬럼만 ``periodSortKey`` 기준 재정렬 + (옵션) annual → Q4 rename.
 
     Args:
-        df: 인자.
-        descending: 인자.
-        annualAsQ4: 인자.
+        df: meta + period 컬럼이 섞인 wide DataFrame.
+        descending: 최신 우선.
+        annualAsQ4: annual 컬럼명을 ``"YYYYQ4"`` 로 rename.
+
+    Returns:
+        meta 컬럼은 원래 순서 유지 + period 컬럼만 재정렬된 DataFrame.
 
     Raises:
         없음.
 
     Example:
-        >>> reorderPeriodColumns(...)
-
-    Returns:
-        pl.DataFrame — 결과.
-
-    SeeAlso:
-        - ``REPORT_KINDS`` / ``RE_PERIOD`` / ``RE_ANNUAL_Q4_ALIAS`` — 본 모듈 상수.
-        - ``pipeline.py`` — sections 빌더 owner.
-
-    Requires:
-        - polars
-
-    Capabilities:
-        - sections pipeline 공용 stateless utility (content col 탐지, period parsing, basePath 등).
-
-    Guide:
-        - 사용자 API 는 ``c.sections`` — 본 모듈 직접 호출 X.
-
-    AIContext:
-        internal sections base — AI 직접 호출 X.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 본 모듈 직접 호출 X — sections pipeline 내부 stateless utility.
-            - REPORT_KINDS / RE_PERIOD 정규식 외부 의존 가정 X.
-        OutputSchema:
-            - str / bool / pl.DataFrame / list — 함수별.
-        Prerequisites:
-            - 본 회사 docs sections 본문.
-        Freshness:
-            - docs 갱신 시점.
-        Dataflow:
-            - 입력 → stateless 변환 → 본 함수.
-        TargetMarkets:
-            - KR (DART) sections base.
+        >>> reorderPeriodColumns(df, descending=True)
     """
     periodCols = [str(col) for col in df.columns if RE_PERIOD.fullmatch(str(col))]
     if not periodCols:
