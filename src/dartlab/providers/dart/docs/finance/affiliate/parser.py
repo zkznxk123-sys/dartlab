@@ -6,34 +6,21 @@
 import re
 
 from dartlab.providers.dart.docs.finance.affiliate.types import AffiliateMovement, AffiliateProfile
+from dartlab.providers.tableParser import parseAmount as _coreParseAmount
 
 # ── 금액 파싱 ──────────────────────────────────────────────────
-# core.tableParser.parseAmount와 달리 "0"→0.0 반환, 횡전개 지분율(%) 처리.
+# affiliate-specific: "0" → 0.0 (지분율 0% 유효 값) + "−" (U+2212) → None (no data marker).
+# 그 외는 core.tableParser.parseAmount 위임 — 음수 / 괄호 / △ / % / 천단위 콤마 공통 처리.
 
 
 def _parseAmount(text: str) -> float | None:
-    """금액 문자열 → float."""
+    """금액 문자열 → float. affiliate 전용 — 0 보존 + U+2212 no-data 처리."""
     s = text.strip().replace("\xa0", "").replace(" ", "")
-    if not s or s == "-" or s == "−" or s == "0":
-        return 0.0 if s == "0" else None
-    negative = False
-    if s.startswith("(") and s.endswith(")"):
-        negative = True
-        s = s[1:-1]
-    if s.startswith("△"):
-        negative = True
-        s = s[1:]
-    s = s.replace(",", "")
-    if s.endswith("%"):
-        try:
-            return float(s[:-1])
-        except ValueError:
-            return None
-    try:
-        val = float(s)
-        return -val if negative else val
-    except ValueError:
+    if s == "0":
+        return 0.0
+    if s == "−":
         return None
+    return _coreParseAmount(text)
 
 
 # ── 기업명 판별 상수 ──────────────────────────────────────────
