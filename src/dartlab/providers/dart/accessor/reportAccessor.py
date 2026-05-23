@@ -171,40 +171,7 @@ def reportFrameInner(stockCode: str, apiType: str, topic: str, *, raw: bool = Fa
 
     Example:
         >>> reportFrameInner("005930", "stockTotal", "stockTotal")
-
-    SeeAlso:
-        - ``REPORT_COL_KR`` — DART API 컬럼 한국어 매핑.
-        - ``providers.dart.report.extract.extractClean`` — raw → cleaned 변환.
-        - ``reportPivotBySe`` — se × period 수평화 보조.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - report parquet 의 apiType 별 row 추출 + (a) 2015 제외 (b) stock_knd 보통주 우선 (c) se ×
           period 수평화 또는 행 기반 반환 (d) raw=False 시 한국어 컬럼 라벨화.
-
-    Guide:
-        - 사용자 API 는 ``c.show("topic")`` — 본 함수 직접 호출 X (internal helper).
-
-    AIContext:
-        internal report helper — AI 가 직접 호출 X. Company.show 가 backing 호출.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 2015 데이터 가정 X — extractClean 후 필터 제외됨.
-            - stock_knd 다양 (우선주 등) 회사 — 보통주 only filter 적용 됨.
-        OutputSchema:
-            - pl.DataFrame (수평화 또는 행 기반) 또는 None.
-        Prerequisites:
-            - report parquet + REPORT_COL_KR 매핑.
-        Freshness:
-            - DART 정기보고서 마감 후 30~45 일.
-        Dataflow:
-            - extractClean → 2015/stock_knd filter → reportPivotBySe / row-based → 본 함수.
-        TargetMarkets:
-            - KR (DART 정형 공시) 한정.
     """
     from dartlab.providers.dart.report.extract import extractClean
 
@@ -257,40 +224,7 @@ def reportPivotBySe(df: pl.DataFrame, *, raw: bool = False) -> pl.DataFrame | No
 
     Example:
         >>> reportPivotBySe(extracted_df)
-
-    SeeAlso:
-        - ``REPORT_COL_KR`` — DART API 컬럼 한국어 매핑.
-        - ``providers.dart.report.extract.extractClean`` — raw → cleaned 변환.
-        - ``reportPivotBySe`` — se × period 수평화 보조.
-
-    Requires:
-        - dartlab
-        - polars
-
-    Capabilities:
-        - report parquet 의 apiType 별 row 추출 + (a) 2015 제외 (b) stock_knd 보통주 우선 (c) se ×
           period 수평화 또는 행 기반 반환 (d) raw=False 시 한국어 컬럼 라벨화.
-
-    Guide:
-        - 사용자 API 는 ``c.show("topic")`` — 본 함수 직접 호출 X (internal helper).
-
-    AIContext:
-        internal report helper — AI 가 직접 호출 X. Company.show 가 backing 호출.
-
-    LLM Specifications:
-        AntiPatterns:
-            - 2015 데이터 가정 X — extractClean 후 필터 제외됨.
-            - stock_knd 다양 (우선주 등) 회사 — 보통주 only filter 적용 됨.
-        OutputSchema:
-            - pl.DataFrame (수평화 또는 행 기반) 또는 None.
-        Prerequisites:
-            - report parquet + REPORT_COL_KR 매핑.
-        Freshness:
-            - DART 정기보고서 마감 후 30~45 일.
-        Dataflow:
-            - extractClean → 2015/stock_knd filter → reportPivotBySe / row-based → 본 함수.
-        TargetMarkets:
-            - KR (DART 정형 공시) 한정.
     """
     df = df.with_columns((pl.col("year").cast(pl.Utf8) + "Q" + pl.col("quarterNum").cast(pl.Utf8)).alias("_period"))
     # null-only 행 제외
@@ -368,39 +302,7 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.extract("dividend")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = f"_extract_{apiType}"
         if cacheKey in self._cache:
@@ -429,39 +331,7 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.extractAnnual("stockTotal")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = f"_annual_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
@@ -490,39 +360,7 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.result("dividend")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = f"_result_{apiType}_{quarterNum}"
         if cacheKey in self._cache:
@@ -558,39 +396,7 @@ class _ReportAccessor:
         Example:
             >>> c._report.status("dividend")
             >>> c._report.status()  # 전체 28 종
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS, API_TYPES, PREFERRED_QUARTER
 
@@ -622,24 +428,7 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("dividend")  # 권장
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -658,24 +447,7 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("employee")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -694,24 +466,7 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("majorHolder")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -730,24 +485,7 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("executive")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -766,24 +504,7 @@ class _ReportAccessor:
 
         Example:
             >>> c.show("audit")
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
         """
         import warnings
 
@@ -812,39 +533,7 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.apiTypes
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         from dartlab.providers.dart.report.types import API_TYPES
 
@@ -863,39 +552,7 @@ class _ReportAccessor:
         Example:
             >>> c._report.labels["dividend"]
             '배당'
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         from dartlab.providers.dart.report.types import API_TYPE_LABELS
 
@@ -913,39 +570,7 @@ class _ReportAccessor:
 
         Example:
             >>> c._report.availableApiTypes
-
-        SeeAlso:
-            - ``REPORT_COL_KR`` (모듈 상수) — DART API 컬럼 한국어 라벨 매핑.
-            - ``Company.show`` — public 진입점 (본 accessor 가 backing).
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - DART 28 apiType (사외이사/주식총수/자기주식/배당 등) report parquet 위임 + 한국어 라벨화.
               내부 backing namespace.
-
-        Guide:
-            - 사용자 API 는 ``c.show("topic")`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임.
-
-        LLM Specifications:
-            AntiPatterns:
-                - report 데이터 부재 회사 → None. caller None 분기.
-                - 28 apiType 추측 X — REPORT_COL_KR 매핑 + 위임 함수 명시.
-            OutputSchema:
-                - pl.DataFrame [DART API 정형 컬럼 + 한국어 라벨 매핑 후] 또는 None.
-            Prerequisites:
-                - 본 회사 report parquet 보유.
-            Freshness:
-                - DART 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - report parquet → apiType 별 dispatch → 본 함수.
-            TargetMarkets:
-                - KR (DART 정기보고서 정형 공시) 한정.
         """
         cacheKey = "_availableApiTypes"
         if cacheKey in self._cache:

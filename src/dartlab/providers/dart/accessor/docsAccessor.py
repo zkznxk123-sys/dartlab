@@ -35,20 +35,6 @@ class _DocsAccessor:
         Example:
             >>> c._docs.raw.head()
 
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         return self._company.rawDocs
 
@@ -64,20 +50,6 @@ class _DocsAccessor:
         Example:
             >>> c._docs.filings().head(10)
 
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         return self._company._filings()
 
@@ -94,20 +66,6 @@ class _DocsAccessor:
         Example:
             >>> c._docs.sections.frame()
 
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         return self._sectionsAccessor if self._company._hasDocs else None
 
@@ -126,39 +84,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsOrdered(recentFirst=True)
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return None if sections is None else sections.ordered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
@@ -185,39 +112,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsCoverage()
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -239,39 +135,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsFreq("annual")
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return None if sections is None else sections.freq(freqScope, includeMixed=includeMixed)
@@ -298,39 +163,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsSemanticRegistry(freqScope="annual")
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -361,39 +195,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsSemanticCollisions()
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -426,39 +229,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureRegistry(nodeType="section")
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -496,39 +268,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureCollisions()
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -568,39 +309,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureEvents(changedOnly=True)
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -639,39 +349,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureSummary()
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -713,39 +392,8 @@ class _DocsAccessor:
 
         Example:
             >>> c._docs.sectionsStructureChanges(latestOnly=True)
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
 
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
-
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         sections = self.sections
         return (
@@ -774,20 +422,6 @@ class _DocsAccessor:
         Example:
             >>> c._docs.retrievalBlocks.head()
 
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         return self._company._retrievalBlocks()
 
@@ -804,20 +438,6 @@ class _DocsAccessor:
         Example:
             >>> c._docs.contextSlices.head()
 
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         return self._company._contextSlices()
 
@@ -849,24 +469,7 @@ class _DocsAccessor:
         Example:
             >>> c._docs.business  # deprecated
             >>> c.show("business")  # 권장
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
-
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
         """
         import warnings
 
@@ -886,24 +489,7 @@ class _DocsAccessor:
         Example:
             >>> c._docs.mdna  # deprecated
             >>> c.show("mdna")  # 권장
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
-
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
         """
         import warnings
 
@@ -923,24 +509,7 @@ class _DocsAccessor:
         Example:
             >>> c._docs.rawMaterial  # deprecated
             >>> c.show("rawMaterial")  # 권장
-
-        SeeAlso:
-            - ``_SectionsSource`` (sectionsSource.py) — 본 메서드의 backend.
-            - ``Company.sections`` — public surface.
-
-        Requires:
-            - dartlab
-            - polars
-
-        Capabilities:
-            - sections sub-namespace 위임 wrapper. _DocsAccessor 는 Company 의 docs 진입점이며 본
               메서드는 sections-level 연산 (ordered/coverage/freq/registry/collisions 등) 의 dispatch.
-
-        Guide:
-            - 사용자 API 는 ``c.show()`` / ``c.sections`` — 본 namespace 직접 호출 X.
-
-        AIContext:
-            internal accessor — AI 가 직접 호출 X. Company facade 가 본 메서드 위임 호출.
         """
         import warnings
 
@@ -963,19 +532,5 @@ class _DocsAccessor:
         Example:
             >>> c._docs.subtables("rawMaterial", raw=False)
 
-        LLM Specifications:
-            AntiPatterns:
-                - docs 부재 회사 (신규 상장 등) → None 반환. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.show()`` / ``c.sections``.
-            OutputSchema:
-                - pl.DataFrame 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - docs 갱신 시점 (정기보고서 마감 후 30~45 일).
-            Dataflow:
-                - rawDocs / sectionsSource → 본 함수.
-            TargetMarkets:
-                - KR (DART) 한정.
         """
         return self._company._sectionsSubtopicLong(topic) if raw else self._company._sectionsSubtopicWide(topic)
