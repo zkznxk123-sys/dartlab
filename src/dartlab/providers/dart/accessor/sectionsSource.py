@@ -43,20 +43,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.raw.head()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._getPrimary("sections")
 
@@ -73,20 +59,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.frame
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self.raw
 
@@ -105,20 +77,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.forTopics({"BS", "IS"})
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._getPrimary("sections", topics=frozenset(topics))
 
@@ -134,20 +92,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.topics()[:5]
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionTopics()
 
@@ -166,20 +110,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.outline("BS")
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsTopicOutline(topic=topic)
 
@@ -217,20 +147,6 @@ class _SectionsSource:
         AIContext:
             internal sections-level accessor — AI 가 직접 호출 X.
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         frame = self.raw
         if frame is None:
@@ -255,20 +171,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.ordered()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsOrdered(recentFirst=recentFirst, annualAsQ4=annualAsQ4)
 
@@ -295,20 +197,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.coverage()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsCoverage(
             topic=topic,
@@ -332,20 +220,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.freq("annual")
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsFreq(freqScope, includeMixed=includeMixed)
 
@@ -372,20 +246,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.semanticRegistry()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -417,20 +277,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.semanticCollisions()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsSemanticRegistry(
             topic=topic,
@@ -464,20 +310,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.structureRegistry()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -512,20 +344,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.structureCollisions()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureRegistry(
             topic=topic,
@@ -562,20 +380,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.structureEvents()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureEvents(
             topic=topic,
@@ -610,20 +414,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.structureSummary()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureSummary(
             topic=topic,
@@ -661,20 +451,6 @@ class _SectionsSource:
         Example:
             >>> c._docs.sections.structureChanges()
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         return self._company._docsSectionsStructureChanges(
             topic=topic,
@@ -729,20 +505,6 @@ class _SectionsSource:
         AIContext:
             internal sections-level accessor — AI 가 직접 호출 X.
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         frame = self.raw
         if frame is None:
@@ -782,20 +544,6 @@ class _SectionsSource:
         AIContext:
             internal sections-level accessor — AI 가 직접 호출 X.
 
-        LLM Specifications:
-            AntiPatterns:
-                - sections 부재 회사 → None. caller None 분기 의무.
-                - 본 namespace 직접 호출 X — 사용자 API 는 ``c.sections`` / ``c.show()``.
-            OutputSchema:
-                - pl.DataFrame (topic × period 보드) 또는 None.
-            Prerequisites:
-                - 본 회사 docs parquet 보유.
-            Freshness:
-                - 정기보고서 마감 후 30~45 일.
-            Dataflow:
-                - docs parquet → _getPrimary("sections") / 위임 helper → 본 메서드.
-            TargetMarkets:
-                - KR (DART 정기보고서 sections) 한정.
         """
         ch = self.changes()
         if isEmptyDf(ch):
