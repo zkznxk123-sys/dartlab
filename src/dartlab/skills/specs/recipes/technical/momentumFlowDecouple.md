@@ -4,7 +4,7 @@ title: 모멘텀-수급 동조 와해 (momentumFlowSplit v2 변형)
 category: recipes
 kind: recipe
 scope: builtin
-status: drafted
+status: tested
 purpose: momentumFlowSplit 의 spread bimodal 실패 (std 임계 0.50 미세 초과) 보강. v2 는 *spread 자체* 가 아닌 *상관계수의 시점간 변화* — 직전 60 거래일 가격×수급 상관 vs 최근 20 거래일 상관 = 동조성 와해 정도 (correlation drop). spread bimodal 회피. 트리거 — '동조 와해', 'momentum flow decouple', 'correlation drop'.
 whenToUse:
   - 모멘텀 수급 와해
