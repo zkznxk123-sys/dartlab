@@ -35,7 +35,21 @@ class SegmentKeyer:
         return base, occurrence, f"{base}|occ:{occurrence}"
 
     def forTextNoHeading(self, topic: str) -> tuple[str, int, str]:
-        """heading 없는 body block — ``body|lv:0|a:empty``."""
+        """heading 없는 body block — ``body|lv:0|a:empty`` base + occurrence 부여.
+
+        Args:
+            topic: dartlab topic 키.
+
+        Returns:
+            ``(base, occurrence, segmentKey)`` 3-tuple.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> keyer.forTextNoHeading("dividend")
+            ('body|lv:0|a:empty', 1, 'body|lv:0|a:empty|occ:1')
+        """
         return self._emit(topic, "body|lv:0|a:empty")
 
     def forTextBody(self, topic: str, *, textLevel: int, textSemanticPathKey: str | None) -> tuple[str, int, str]:
@@ -43,6 +57,21 @@ class SegmentKeyer:
 
         SSOT 정공법: path-anchored 인 경우 occurrence 미부여 → 같은 path = 1 row.
         path 없는 경우만 _emit (orphan body 들 occurrence 분리 유지).
+
+        Args:
+            topic: dartlab topic 키.
+            textLevel: heading depth (0 = root).
+            textSemanticPathKey: semantic path 있으면 path-anchored, 없으면 lv 기반.
+
+        Returns:
+            ``(base, occurrence, segmentKey)``.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> keyer.forTextBody("dividend", textLevel=2, textSemanticPathKey="배당정책")
+            ('body|p:배당정책', 1, 'body|p:배당정책')
         """
         if textSemanticPathKey:
             base = f"body|p:{textSemanticPathKey}"
@@ -63,6 +92,20 @@ class SegmentKeyer:
         (2020-2021 옛 표준) 이 alias 로 같은 semantic key 가 되지만 같은 period
         안 2 개 등장 시 occ:1 / occ:2 분기 → 2 row, period 별 cell 분산.
         path 기반 통합으로 1 row.
+
+        Args:
+            topic: dartlab topic 키.
+            segmentKeyBase: parseTextStructureWithState 가 부여한 base.
+
+        Returns:
+            ``(base, occurrence, segmentKey)``.
+
+        Raises:
+            없음.
+
+        Example:
+            >>> keyer.forTextHeadingNode("dividend", "body|p:배당정책")
+            ('body|p:배당정책', 1, 'body|p:배당정책')
         """
         if segmentKeyBase.startswith("body|p:") or segmentKeyBase.startswith("heading|p:"):
             return segmentKeyBase, 1, segmentKeyBase
@@ -92,6 +135,14 @@ class SegmentKeyer:
         - 옛 headerHash 룰의 fragility (header text 변형마다 hash 분리) 해결
         - 회귀 사례 (000660 companyOverview "연결대상회사의 변동내용" 표): 시기별로 5 개
           hash 로 분산되던 표가 1 개 segmentKey 로 정합 → wide-format 의 *1 개 row*
+
+        Raises:
+            없음.
+
+        Example:
+            >>> keyer.forTableBlock("dividend", sourceBlockOrder=3, notesHeadingKey=None,
+            ...     isNotesTopic=False, textSemanticPathKey="배당현황", headerHash="abc123")
+            ('table|p:배당현황|h:abc123', 1, 'table|p:배당현황|h:abc123')
         """
         if isNotesTopic and notesHeadingKey:
             base = f"table|sem:{notesHeadingKey}"

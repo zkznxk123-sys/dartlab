@@ -412,6 +412,9 @@ def chapterIIIParent(topic: str) -> str | None:
     Returns:
         parent topic key 또는 None.
 
+    Raises:
+        없음.
+
     Example:
         >>> chapterIIIParent("financialNotes_05_financialAssetsTransfer")
         'financialNotes'
@@ -437,6 +440,9 @@ def chapterIIIOrder(topic: str) -> int:
     Returns:
         0-based index 또는 layout 부재 시 999.
 
+    Raises:
+        없음.
+
     Example:
         >>> chapterIIIOrder("consolidatedNotes")
         3
@@ -460,6 +466,9 @@ def chapterTopicOrder(topic: str, chapter: str) -> int:
 
     Returns:
         0-based index 또는 layout 부재 시 999.
+
+    Raises:
+        없음.
 
     Example:
         >>> chapterTopicOrder("companyOverview", "I")
@@ -487,6 +496,9 @@ def chapterFor(topic: str) -> str | None:
     Returns:
         Roman chapter 또는 매핑 부재 시 None.
 
+    Raises:
+        없음.
+
     Example:
         >>> chapterFor("dividend")
         'III'
@@ -506,6 +518,9 @@ def labelFor(topic: str, fallback: str | None = None) -> str:
 
     Returns:
         한글 label.
+
+    Raises:
+        없음.
 
     Example:
         >>> labelFor("dividend")
