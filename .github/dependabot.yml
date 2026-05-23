@@ -1,0 +1,70 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    labels:
+      - "dependencies"
+      - "security"
+    commit-message:
+      prefix: "보안"
+      include: "scope"
+    open-pull-requests-limit: 5
+    groups:
+      core-runtime:
+        patterns:
+          - "polars*"
+          - "pyarrow"
+          - "duckdb"
+          - "fastapi"
+          - "uvicorn*"
+          - "starlette"
+          - "httpx"
+          - "pydantic*"
+      test-tooling:
+        patterns:
+          - "pytest*"
+          - "hypothesis"
+          - "syrupy"
+          - "pandera*"
+          - "mutmut"
+          - "ruff"
+      ai-tooling:
+        patterns:
+          - "openai"
+          - "anthropic"
+          - "mcp*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "보안"
+      include: "scope"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "npm"
+    directory: "/landing"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    labels:
+      - "dependencies"
+      - "landing"
+    commit-message:
+      prefix: "보안"
+      include: "scope"
+    open-pull-requests-limit: 3
