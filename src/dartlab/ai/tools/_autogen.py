@@ -169,7 +169,22 @@ def generateToolSchemas() -> list[dict[str, Any]]:
 
 
 def countAutoGenTools() -> int:
-    """현재 환경에서 자동 생성 가능한 tool 수 — quick measure."""
+    """자동 생성 가능한 tool 수 — quick measure (T10-4).
+
+    Returns:
+        generateToolSchemas() 결과 length.
+
+    Example:
+        >>> from dartlab.ai.tools._autogen import countAutoGenTools
+        >>> countAutoGenTools()
+        120  # 예시
+
+    SeeAlso:
+        generateToolSchemas: 실제 schema list.
+
+    AIContext:
+        T11-1 진척 추적 — metrics workflow 가 시계열 측정.
+    """
     return len(generateToolSchemas())
 
 

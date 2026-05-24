@@ -29,12 +29,29 @@ from typing import Protocol, runtime_checkable
 
 @runtime_checkable
 class SecretStore(Protocol):
-    """자격증명 저장소 인터페이스 — DI Protocol (CLAUDE.md core/di 패턴).
+    """자격증명 저장소 인터페이스 — DI Protocol (T10-4).
+
+    Capabilities:
+        4 메서드 (get/set/delete/listKeys) 의 표준 인터페이스. dartlab 의 DI
+        패턴 (core/di) 정합. runtime_checkable 이라 isinstance 검사 가능.
 
     구현체:
         - EnvSecretStore: os.environ (기본)
         - KeyringSecretStore: keyring 라이브러리 (후속, optional)
         - FileSecretStore: encrypted JSON (후속, optional)
+
+    Example:
+        >>> from dartlab.core.secrets import SecretStore, EnvSecretStore
+        >>> store: SecretStore = EnvSecretStore()
+        >>> isinstance(store, SecretStore)
+        True
+
+    SeeAlso:
+        registerSecretStore: DI 진입점.
+        EnvSecretStore: 기본 구현.
+
+    AIContext:
+        T2-3 보안 트랙. credential 저장 추상화의 정점.
     """
 
     def get(self, key: str) -> str | None:
