@@ -48,12 +48,40 @@ class PluginDescriptor:
 
 
 def discoverPlugins() -> list[PluginDescriptor]:  # noqa: N802  (Python convention)
-    """`dartlab.plugins` entry group 의 plugin 목록 메타 수집.
+    """`dartlab.plugins` entry group 의 plugin 목록 메타 수집 (T10-4).
 
-    동일 name 충돌 시: 첫 발견 우선 + warning (silent — logger.warn).
+    Capabilities:
+        importlib.metadata.entry_points 스캔 — load 없이 메타만 수집 (load 비용
+        피함). listPlugins / describePlugin 의 backing.
+
+    Args:
+        없음.
 
     Returns:
         PluginDescriptor 리스트 (sorted by name).
+
+    Example:
+        >>> from dartlab.core.plugins import discoverPlugins
+        >>> for d in discoverPlugins():
+        ...     print(d.name, d.kind, d.version)
+
+    Guide:
+        load 가 필요하면 loadPlugin 또는 listPlugins. 동일 name 충돌 시 첫
+        발견 우선 (silent).
+
+    SeeAlso:
+        loadPlugin: 단일 plugin 모듈 import + 메타 보강.
+        listPlugins: 전체 load + dict list.
+        describePlugin: 단일 상세.
+
+    Requires:
+        Python 3.10+ entry_points API (3.9 fallback 포함).
+
+    AIContext:
+        T5-1 외부 plugin 시스템의 진입점.
+
+    Raises:
+        없음 — 실패는 silent skip.
     """
     descriptors: dict[str, PluginDescriptor] = {}
     try:
@@ -82,13 +110,36 @@ def discoverPlugins() -> list[PluginDescriptor]:  # noqa: N802  (Python conventi
 
 
 def loadPlugin(name: str) -> ModuleType:  # noqa: N802
-    """지정된 plugin 의 모듈 로드 + 메타 보강.
+    """지정된 plugin 의 모듈 로드 + 메타 보강 (T10-4).
+
+    Capabilities:
+        entry_point name 로 모듈 import + PLUGIN_KIND / PLUGIN_SCHEMA / docstring
+        보강. 실패 시 KeyError 또는 ImportError raise.
 
     Args:
         name: entry_point 이름.
 
     Returns:
         로드된 모듈.
+
+    Example:
+        >>> from dartlab.core.plugins import loadPlugin
+        >>> mod = loadPlugin("hello")
+        >>> mod.main(name="dartlab")
+        {'greeting': 'Hello, dartlab!'}
+
+    Guide:
+        load 후 모듈의 PLUGIN_KIND / PLUGIN_SCHEMA 변수가 PluginDescriptor 에
+        반영됨. 미정의 시 default ("unknown", {}).
+
+    SeeAlso:
+        discoverPlugins / listPlugins / describePlugin.
+
+    Requires:
+        해당 plugin 패키지가 pip install 된 상태.
+
+    AIContext:
+        T5-1 외부 plugin 시스템. 외부 LLM 이 listPlugins 후 특정 plugin 호출 시.
 
     Raises:
         KeyError: 해당 name 의 plugin 없음.
@@ -168,10 +219,40 @@ def listPlugins() -> list[dict[str, Any]]:  # noqa: N802
 
 
 def describePlugin(name: str) -> dict[str, Any]:  # noqa: N802
-    """단일 plugin 상세 — load 후 dict 반환.
+    """단일 plugin 상세 — load 후 dict 반환 (T10-4).
+
+    Capabilities:
+        listPlugins 의 단일 entry 등가. MCP server 가 사용자의 *특정 plugin
+        조회* 요청 시 호출.
+
+    Args:
+        name: entry_point 이름.
+
+    Returns:
+        dict — name / moduleName / kind / version / distName / docstring / schema.
+
+    Example:
+        >>> from dartlab.core.plugins import describePlugin
+        >>> describePlugin("hello")
+        {'name': 'hello', 'kind': 'example', ...}
+
+    Guide:
+        plugin 이 무겁다면 load 비용 발생. 단순 존재 확인만 필요하면
+        discoverPlugins 사용.
+
+    SeeAlso:
+        listPlugins: 전체.
+        discoverPlugins: load 없이.
+
+    Requires:
+        해당 plugin pip install 된 상태.
+
+    AIContext:
+        T5-1 외부 plugin 시스템 + T5-5 MCP introspection 의 backing.
 
     Raises:
         KeyError: plugin 없음.
+        ImportError: 모듈 import 실패.
     """
     for d in discoverPlugins():
         if d.name == name:
