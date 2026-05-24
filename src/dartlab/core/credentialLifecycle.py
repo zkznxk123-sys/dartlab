@@ -99,12 +99,39 @@ def daysUntilExpiry(key: str, *, path: Path | None = None) -> int | None:
 
 
 def checkLifecycle(*, thresholdDays: int = 14, path: Path | None = None) -> list[CredentialAlert]:
-    """모든 등록 자격증명의 만료 임계 점검.
+    """모든 등록 자격증명의 만료 임계 점검 (T10-4).
+
+    Capabilities:
+        recordIssuance() 로 등록된 모든 key 의 만료 일자 검사. severity 분류
+        (ok / warning / critical / expired). warning 이상만 반환.
 
     Args:
-        thresholdDays: warning 임계 (기본 14일).
+        thresholdDays: warning 임계 (기본 14 일).
+        path: lifecycle 파일 override (테스트용).
+
     Returns:
         severity 가 ok 아닌 CredentialAlert 리스트.
+
+    Example:
+        >>> from dartlab.core.credentialLifecycle import recordIssuance, checkLifecycle
+        >>> recordIssuance("DART_API_KEY", lifetimeDays=90)
+        >>> alerts = checkLifecycle(thresholdDays=14)
+
+    Guide:
+        DART API key 는 사용자 갱신 — alert 발생 시 신규 발급 + setSecret +
+        recordIssuance 동행. OAuth token 은 자동 refresh 가능.
+
+    SeeAlso:
+        recordIssuance / daysUntilExpiry / SecretStore (T2-3).
+
+    Requires:
+        data/_credentials/lifecycle.json 존재 (없으면 빈 리스트 반환).
+
+    AIContext:
+        T2-4 보안 트랙. INCIDENTS 자동 알람 통합 후속.
+
+    Raises:
+        없음 — invalid entry silent skip.
     """
     data = _loadLifecycle(path)
     alerts: list[CredentialAlert] = []
