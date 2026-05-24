@@ -36,7 +36,34 @@ _ENTRY_GROUP = "dartlab.plugins"
 
 @dataclass
 class PluginDescriptor:
-    """단일 plugin 메타 — entry_points 스캔 결과."""
+    """단일 plugin 메타 — entry_points 스캔 결과 (T10-4).
+
+    Capabilities:
+        plugin 의 *load 없이 알 수 있는* 메타 (name/moduleName/version/distName)
+        + load 후 채워지는 메타 (kind/docstring/schema). dataclass 라 mutable.
+
+    Fields:
+        name: entry_point 이름.
+        moduleName: import path (예: "dartlab_plugin_example.hello:main").
+        kind: "scan"/"analysis"/"tool"/"recipe"/"example"/"unknown".
+        version: 패키지 버전.
+        distName: 배포 패키지 이름.
+        docstring: 모듈 docstring 첫 200 자 (load 후).
+        schema: PLUGIN_SCHEMA dict (load 후).
+
+    Example:
+        >>> from dartlab.core.plugins import PluginDescriptor
+        >>> d = PluginDescriptor(name="x", moduleName="x.y:main")
+        >>> d.kind  # default
+        'unknown'
+
+    SeeAlso:
+        discoverPlugins: 메타 수집.
+        loadPlugin: 모듈 import + 메타 보강.
+
+    AIContext:
+        T5-1 외부 plugin 시스템의 unit 표현.
+    """
 
     name: str
     moduleName: str
