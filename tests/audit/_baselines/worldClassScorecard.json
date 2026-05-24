@@ -1,13 +1,13 @@
 {
-  "measuredAt": "2026-05-24T04:19:22.065442+00:00",
-  "average": 77.49,
+  "measuredAt": "2026-05-24T04:32:19.605424+00:00",
+  "average": 78.34,
   "perspectives": [
     {
       "name": "운영/관측",
-      "score": 48.0,
+      "score": 60.0,
       "signals": {
-        "structured_log_ratio": 1.32,
-        "incidents_count": 2,
+        "structured_log_ratio": 3.86,
+        "incidents_count": 12,
         "metrics_workflow": true,
         "slo_doc": true,
         "health_dashboard": true
@@ -62,7 +62,7 @@
       "name": "테스트",
       "score": 58.8,
       "signals": {
-        "test_loc_ratio": 25.71,
+        "test_loc_ratio": 25.7,
         "hypothesis_files": 12,
         "mutmut_paths": 31,
         "metamorphic_patterns": 5,
@@ -97,7 +97,7 @@
       "score": 64.2,
       "signals": {
         "importlinter_exceptions": 27,
-        "module_size_ratio": 92.43,
+        "module_size_ratio": 92.48,
         "cycle_baseline": true,
         "providers_scaffold": true,
         "builders_scaffold": true

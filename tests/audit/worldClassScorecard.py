@@ -95,7 +95,10 @@ def measureOperations() -> dict[str, Any]:
     incidentsFile = DOCS / "INCIDENTS.md"
     incidentsCount = 0
     if incidentsFile.exists():
-        incidentsCount = len(re.findall(r"^## \d{4}-\d{2}", incidentsFile.read_text(encoding="utf-8"), re.MULTILINE))
+        # ## 2026-05 or ## 2025-XX or ## 2026-04-22 모두 매치 (YYYY 시작 + 공백 또는 dash)
+        incidentsCount = len(
+            re.findall(r"^## (?:19|20)\d{2}[-\s—]", incidentsFile.read_text(encoding="utf-8"), re.MULTILINE)
+        )
 
     metricsWorkflow = (REPO_ROOT / ".github" / "workflows" / "metrics.yml").exists()
     sloDoc = _docFileExists("SLO.md")
