@@ -57,7 +57,19 @@ class AuditCollector:
     finishedAt: str | None = None
 
     def observe(self, kind: str, data: dict[str, Any] | None = None) -> None:
-        """이벤트 1 건 누적 — kind + data dict + 자동 timestamp."""
+        """이벤트 1 건 누적 — kind + data dict + 자동 timestamp (T10-4).
+
+        Capabilities:
+            5 패스 (BRIEF/WORK/CRITIQUE/COMPOSE/GATE/HARVEST) 이벤트 누적. 호출
+            마다 UTC ISO timestamp 자동 부착.
+
+        Args:
+            kind: 이벤트 분류 (대문자 5 패스 권장).
+            data: 이벤트 페이로드 dict (refUsed / refProduced / message 등).
+
+        AIContext:
+            T11-4 워크벤치 trace 핵심 메서드. metrics workflow grep 가능.
+        """
         self.events.append(
             {
                 "kind": kind,
@@ -71,12 +83,27 @@ class AuditCollector:
         return None
 
     def markFinished(self) -> None:
-        """T11-4 — 5 패스 완료 시 finishedAt 기록. dumpToJson 전 호출."""
+        """5 패스 완료 시 finishedAt 기록 (T11-4 / T10-4).
+
+        Capabilities:
+            dumpToJson 전 호출 강제. idempotent — 이미 기록됐으면 no-op.
+
+        AIContext:
+            세션 종료 시점 추적. metrics workflow 가 duration 계산.
+        """
         if self.finishedAt is None:
             self.finishedAt = dt.datetime.now(dt.UTC).isoformat()
 
     def toDict(self) -> dict[str, Any]:
-        """직렬화 가능 dict 변환 — JSON dump 또는 외부 evidence flow 입력."""
+        """직렬화 가능 dict 변환 (T10-4).
+
+        Returns:
+            sessionId / question / stockCodeHint / provider / model / startedAt
+            / finishedAt / events 8 필드 dict.
+
+        SeeAlso:
+            dumpToJson: 파일 저장.
+        """
         return {
             "sessionId": self.sessionId,
             "question": self.question,
