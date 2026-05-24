@@ -1,0 +1,6 @@
+{
+  "violations": [
+    "src/dartlab/ai/tools/webSearch.py"
+  ],
+  "note": "T2-5 baseline — 신규 위반만 strict 차단"
+}
