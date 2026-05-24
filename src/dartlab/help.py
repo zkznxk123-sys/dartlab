@@ -73,14 +73,21 @@ def _extractSummary(obj: object) -> str:
 
 
 def help(query: str, *, limit: int = 5) -> list[HelpResult]:  # noqa: A001
-    """dartlab 공개 API 검색 — query 와 관련 ≥ N 개 반환.
+    """dartlab 공개 API 검색 — 자연어 query 매칭 9 섹션 docstring (T10-4).
+
+    Capabilities:
+        dartlab.__all__ 안 모든 심볼의 docstring 첫 줄 + 이름을 자연어 query 토큰
+        과 substring 매칭하여 관련 API 5 개 (또는 limit) 를 score 순서로 반환.
 
     Args:
         query: 자연어 또는 키워드 (예: "외인 매수", "재무비율", "신용 점수").
+            빈 문자열 시 전체 __all__ 둘러보기 (score 0.5).
         limit: 반환 결과 최대 개수 (기본 5).
 
     Returns:
-        score desc 정렬된 HelpResult 리스트.
+        score (0.0~1.0) desc 정렬된 HelpResult 리스트. score = (name match × 2 + doc
+        match) / (len(tokens) × 3). HelpResult 는 name / kind / summary / score 4
+        필드 dataclass.
 
     Example:
         >>> import dartlab
@@ -90,7 +97,30 @@ def help(query: str, *, limit: int = 5) -> list[HelpResult]:  # noqa: A001
 
     Guide:
         결과가 0 이면 query 토큰을 줄여 재시도. 정확한 API 모를 때는
-        ``dartlab.help("")`` 로 전체 ``__all__`` 둘러보기 가능.
+        ``dartlab.help("")`` 로 전체 ``__all__`` 둘러보기 가능. CLI 등가 명령:
+        ``dartlab help <query>``.
+
+    SeeAlso:
+        - dartlab.ask: 자연어 질문 → AI 워크벤치 답변 + ref
+        - dartlab.core.plugins.listPlugins: 외부 plugin 목록 (T5-5)
+        - dartlab.skills.readSkill: Skill OS 257 노드 검색
+
+    Requires:
+        dartlab 패키지가 import 가능해야 한다. lazy import 패턴이라 순환 import
+        회피.
+
+    AIContext:
+        외부 LLM / 신규 사용자의 *어디서 시작?* 질문에 답하는 진입점. T8-2 의
+        핵심. README "세 가지 시작점" 의 3 분기 중 자연어 진입을 보강.
+
+    LLM Specifications:
+        - AntiPatterns: 본 함수가 LLM tool registry 가 아니다 — 단순 검색 only.
+          실제 tool 호출은 dartlab.ai.tools 또는 MCP server.
+        - OutputSchema: list[HelpResult] / HelpResult = {name, kind, summary, score}.
+        - Prerequisites: dartlab 패키지가 sys.path 안.
+        - Freshness: 매 호출 시 __all__ 최신 상태 반영 (캐시 X).
+        - Dataflow: query → tokens → __all__ 순회 → score 계산 → top N.
+        - TargetMarkets: 외부 사용자 + LLM agent + CLI dartlab help.
     """
     tokens = _splitTokens(query)
 
