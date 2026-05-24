@@ -136,7 +136,35 @@ class AuditCollector:
 
     @classmethod
     def loadFromJson(cls, filePath: str | Path) -> AuditCollector:
-        """저장된 trace JSON 을 AuditCollector 로 복원 — ref circularity 분석 입력."""
+        """저장된 trace JSON 을 AuditCollector 로 복원 (T10-4).
+
+        Capabilities:
+            dumpToJson 산출물 round-trip 복원. ref circularity audit (T11-3) 의
+            대표 입력 — 저장된 trace 후처리 가능.
+
+        Args:
+            filePath: 복원 대상 JSON 경로.
+
+        Returns:
+            새 AuditCollector 인스턴스 (events + 메타 복원).
+
+        Example:
+            >>> collector = AuditCollector.loadFromJson("data/_trace/abc.json")
+            >>> len(collector.events)
+            12
+
+        SeeAlso:
+            dumpToJson / refCircularityCheck (T11-3).
+
+        Requires:
+            파일 존재 + JSON 형식 정상.
+
+        AIContext:
+            T11-4 trace round-trip. 외부 audit tool 이 trace 분석.
+
+        Raises:
+            FileNotFoundError / json.JSONDecodeError.
+        """
         data = json.loads(Path(filePath).read_text(encoding="utf-8"))
         collector = cls(
             question=data.get("question", ""),
