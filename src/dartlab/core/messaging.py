@@ -135,10 +135,22 @@ def emit(key: str, *, raiseAs: type | None = None, **kwargs: Any) -> str:
 
     if key in _STRUCTURED or any(key.startswith(prefix) for prefix in _ALWAYS_SHOW_PREFIXES):
         _log.info("%s %s", _PREFIX, text)
+        _emitStructured("message_emit", key=key, kind="structured")
     elif _ctx.verbose:
         _log.info("%s %s", _PREFIX, text)
+        _emitStructured("message_emit", key=key, kind="verbose")
 
     return text
+
+
+def _emitStructured(event: str, **fields: object) -> None:
+    """T1-1 structured log 발급 — emit/format 동행."""
+    try:
+        from dartlab.core.logger import logEvent
+
+        logEvent("info", event, **fields)
+    except ImportError:
+        pass
 
 
 def format(key: str, **kwargs: Any) -> str:
