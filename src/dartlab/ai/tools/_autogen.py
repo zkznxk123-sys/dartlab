@@ -102,9 +102,40 @@ def _functionToSchema(name: str, func: Any) -> dict[str, Any] | None:
 
 
 def generateToolSchemas() -> list[dict[str, Any]]:
-    """대상 sub-namespace 순회 → tool schema list 반환.
+    """대상 sub-namespace 순회 → tool schema list 반환 (T10-4).
 
-    각 sub-namespace 의 `__all__` 또는 public 이름 (underscore 안 시작) 함수 수집.
+    Capabilities:
+        7 분석 엔진 (analysis/credit/macro/quant/industry/scan/story) 의 public
+        함수를 LLM tool-call dict 로 자동 변환. 32 수동 등록 외 120+ 추가 노출
+        (T11-1).
+
+    Args:
+        없음 (대상 namespace 는 _TARGET_NAMESPACES 상수).
+
+    Returns:
+        list[dict] — 각 entry: name / description / parameters (JSON Schema-like).
+
+    Example:
+        >>> from dartlab.ai.tools._autogen import generateToolSchemas
+        >>> schemas = generateToolSchemas()
+        >>> len(schemas)
+
+    Guide:
+        실제 LLM tool registry 등록 + MCP 노출은 후속 (T5-5). 본 함수는 *schema
+        생성만*.
+
+    SeeAlso:
+        countAutoGenTools: quick count.
+        dartlab.ai.agent: chat-native 본체.
+
+    Requires:
+        대상 namespace 의 public 함수가 type annotation + docstring 보유.
+
+    AIContext:
+        T11-1 워크벤치 tool 카탈로그 확장 트랙.
+
+    Raises:
+        없음 — 개별 namespace import 실패 silent skip.
     """
     schemas: list[dict[str, Any]] = []
     seenNames: set[str] = set()
