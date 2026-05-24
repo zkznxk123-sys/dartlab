@@ -110,10 +110,42 @@ def loadPlugin(name: str) -> ModuleType:  # noqa: N802
 
 
 def listPlugins() -> list[dict[str, Any]]:  # noqa: N802
-    """introspection — dict list 반환 (외부 LLM / MCP tool 호환).
+    """plugin introspection — dict list 반환 (외부 LLM / MCP tool 호환) (T10-4).
 
-    각 entry: `{name, moduleName, kind, version, distName, docstring}`.
-    docstring/schema 는 load 후에만 채워지므로 본 함수는 *전체 load* 후 dict 변환.
+    Capabilities:
+        등록된 모든 dartlab.plugins entry_point 를 load 한 뒤 메타 dict 로 변환.
+        외부 LLM agent / MCP tool 이 *현재 환경 가능한 plugin* 을 동적 조회.
+
+    Args:
+        없음.
+
+    Returns:
+        list[dict] — 각 entry: name / moduleName / kind / version / distName /
+        docstring / schema. docstring 과 schema 는 load 후에만 채워짐.
+
+    Example:
+        >>> from dartlab.core.plugins import listPlugins
+        >>> for p in listPlugins():
+        ...     print(p["name"], p["kind"], p["version"])
+
+    Guide:
+        모든 plugin 을 *즉시 load* 하므로 import 비용 발생. 단순 카운트만 필요
+        하면 ``discoverPlugins()`` 사용 (load 안 함).
+
+    SeeAlso:
+        discoverPlugins: load 없이 메타만.
+        describePlugin: 단일 plugin 상세.
+        dartlab.plugins: dartlab top-level 의 PluginMeta 기반 함수 (기존).
+
+    Requires:
+        importlib.metadata.entry_points 지원 (Python 3.10+).
+
+    AIContext:
+        외부 LLM 의 *현재 가능한 도구* 발견 — MCP server 의 ListPlugins tool 의
+        backing 함수 후보 (T5-5).
+
+    Raises:
+        없음 — 개별 plugin load 실패는 silent skip.
     """
     plugins: list[dict[str, Any]] = []
     for d in discoverPlugins():
