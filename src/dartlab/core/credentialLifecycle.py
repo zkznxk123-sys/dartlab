@@ -65,13 +65,40 @@ def recordIssuance(
     lifetimeDays: int = 90,
     path: Path | None = None,
 ) -> None:
-    """자격증명 발급 시점 기록.
+    """자격증명 발급 시점 기록 (T10-4).
+
+    Capabilities:
+        DART API key / OAuth token 등의 발급 시점 + lifetime 을 lifecycle.json
+        에 누적. checkLifecycle / daysUntilExpiry 의 입력.
 
     Args:
         key: 자격증명 식별자 (예: "DART_API_KEY").
         issuedAt: ISO datetime. None 이면 현재 시각.
         lifetimeDays: 발급 후 만료까지 일 수. DART API 기본 90.
         path: lifecycle 파일 override (테스트용).
+
+    Returns:
+        None.
+
+    Example:
+        >>> from dartlab.core.credentialLifecycle import recordIssuance
+        >>> recordIssuance("DART_API_KEY", lifetimeDays=90)
+
+    Guide:
+        setSecret (T2-3) 직후 호출 권장. setup CLI 가 자동 동행하도록 후속.
+
+    SeeAlso:
+        checkLifecycle / daysUntilExpiry.
+
+    Requires:
+        쓰기 권한.
+
+    AIContext:
+        T2-4 보안 트랙.
+
+    Raises:
+        OSError: 디스크 쓰기 실패.
+        ValueError: issuedAt 형식 오류.
     """
     issued = issuedAt or dt.datetime.now(dt.UTC).isoformat()
     issuedDt = dt.datetime.fromisoformat(issued.replace("Z", "+00:00"))
@@ -88,7 +115,36 @@ def recordIssuance(
 
 
 def daysUntilExpiry(key: str, *, path: Path | None = None) -> int | None:
-    """key 의 만료까지 남은 일 수 — 기록 없으면 None."""
+    """key 의 만료까지 남은 일 수 (T10-4).
+
+    Capabilities:
+        recordIssuance() 로 기록된 key 의 expiresAt 기준 남은 일 수.
+
+    Args:
+        key: 자격증명 식별자.
+        path: lifecycle 파일 override.
+
+    Returns:
+        남은 일수 (int) 또는 None (기록 없음). 음수면 expired.
+
+    Example:
+        >>> from dartlab.core.credentialLifecycle import daysUntilExpiry
+        >>> days = daysUntilExpiry("DART_API_KEY")
+        >>> if days is not None and days < 14:
+        ...     print("갱신 임박")
+
+    SeeAlso:
+        recordIssuance / checkLifecycle.
+
+    Requires:
+        lifecycle.json 안 key 항목.
+
+    AIContext:
+        T2-4 보안 트랙. dashboard / setup CLI 에서 갱신 알람.
+
+    Raises:
+        없음 — invalid entry None 반환.
+    """
     data = _loadLifecycle(path)
     entry = data.get(key)
     if not entry:
