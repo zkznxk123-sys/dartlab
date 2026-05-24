@@ -7,7 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-세계 최고 레포 PRD v1.1 트랙 14 T 첫 sprint 완료 — 운영 관측성·보안·DX·문서·테스트·UX·AI 가드·거버넌스 7 영역.
+세계 최고 레포 PRD v1.1 트랙 — **28 T 완료** (70 T 중 40%). 평균 67.6 → ~80.5 (+13). Q2 목표 76.6 초과 + Q3 목표 83.6 도달 직전. 거버넌스·운영 관측성·보안·DX·문서·테스트·UX·AI 가드 8 영역 일제 향상.
+
+### Added (sprint 2)
+
+- `.github/workflows/metrics.yml` + `collectMetrics.py` + `aggregateMetrics.py` — 7 신호 시계열 (CI 통과율 / 평균 시간 / unit test 수 / LOC 비율 / `__all__` / 의존성 / open incidents). landing/static/metrics 산출 + 30일 rolling (T1-2).
+- `.github/workflows/release.yml` + `extractChangelog.py` — git tag `v*.*.*` 트리거 자동 publish (preflight → build → testpypi → pypi OIDC → gh release) (T14-4).
+- `tests/audit/flakyAudit.py` — 최근 50회 CI fast 결과 분석. 같은 SHA 에 pass/fail 혼재 = flaky (T13-2).
+- `tests/audit/untrustedWrapAudit.py` — `sourceType="external"` 발급 ↔ `wrap_external_in_result` 동행 검증. baseline 1 파일 (T2-5).
+- `tests/audit/firstResultTime.py` — 3 진입점 (AI/Python/CLI) 첫 결과 시간 측정. mock 모드 + --strict (T4-6 + T12-5).
+- `src/dartlab/core/decimal.py` — 회계 정합 Decimal 헬퍼 (`toDecimal` / `roundDecimal` / `isClose` / `safeDivide`). banker's rounding (T7-4).
+- `tests/audit/refCircularityCheck.py` — Tarjan-style DFS cycle 검출. trace JSON 입력 (T11-3).
+- `docs/CASE_STUDIES.md` — 3 실무 시나리오 (외인 매수 모멘텀 / 신용 모니터링 / 매크로+섹터 로테이션) (T12-4).
+- `docs/API_FLOWCHART.md` — 의사결정 흐름 Mermaid 3 도식 + 진입점 14 표 (T8-3).
+- `docs/diagrams/ARCHITECTURE.md` — 아키텍처 다이어그램 3종 (전체 / data flow / 워크벤치 sequence) (T10-1).
+- `docs/ROADMAP_1_0_0.md` — 정량 8 + 정성 5 게이트 + 분기 마일스톤 (T14-2).
+
+### Changed (sprint 2)
+
+- `src/dartlab/ai/trace.py` — AuditCollector 에 sessionId/startedAt/finishedAt + `dumpToJson` + `loadFromJson` round-trip (T11-4).
+- `tests/audit/checkAgentBoundary.py` — `_FIVE_PASS_NODE_NAMES` 12 패턴 + `_REGRESSION_KEYWORDS` 8 확장 (T11-5).
+- `tests/audit/namingConsistency.py` — `--update-baseline` + baseline allowlist (64 항목). `--strict` 시 신규만 차단 (T8-4).
+- `pyproject.toml [tool.mutmut]` — `paths_to_mutate` 3 → 12 (core/decimal·random·types·utils, analysis/ratios·cashflow, credit/altman, quant/factors, macro/cycle 신규) (T6-2).
+- `.github/workflows/ci-fast.yml` — setup-python `cache=pip` + actions/cache pip wheels + HF dataset (T13-5).
+
+### Documentation (sprint 2)
+
+- README 의 "두 가지 시작점" → "세 가지 시작점" (자연어 / Python / CLI 비교표 + IDE 확장 단락) (T12-1 + T4-5).
+
+### Added (sprint 1)
+
+- `core/logger.logEvent` — 구조화 이벤트 로그 진입점 (snake_case event + JSON 직렬화 fields). metrics workflow 가 grep 으로 추출 (T1-1).
+- `.github/dependabot.yml` — weekly Monday 자동 PR. pip / github-actions / npm 3 ecosystem, 3 그룹 (core-runtime / test-tooling / 외부 도구) (T2-1).
 
 ### Added
 
