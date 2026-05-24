@@ -222,6 +222,184 @@ class MetricsSignalSchema(pa.DataFrameModel):
         coerce = False
 
 
+class CompanyProfileSchema(pa.DataFrameModel):
+    """Company profile 표 계약."""
+
+    corp_code: Series[str] = pa.Field(nullable=True)
+    corp_name: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class FilingsListSchema(pa.DataFrameModel):
+    """filings 리스트 표 계약."""
+
+    rcept_no: Series[str] = pa.Field(nullable=False)
+    rcept_dt: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class QuantFactorSchema(pa.DataFrameModel):
+    """quant factor 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    factor_value: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class IndustryPeerSchema(pa.DataFrameModel):
+    """industry peer matrix 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    sector: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class GatherPriceSchema(pa.DataFrameModel):
+    """price 시계열 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    close: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class GatherFlowSchema(pa.DataFrameModel):
+    """flow 수급 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    foreign_net_buy: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class MacroSeriesSchema(pa.DataFrameModel):
+    """macro 시계열 표 계약."""
+
+    series_id: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    value: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class AccountMappingsSchema(pa.DataFrameModel):
+    """accountMappings 표 계약."""
+
+    korean: Series[str] = pa.Field(nullable=False)
+    snake_id: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class StoryBlockSchema(pa.DataFrameModel):
+    """story block 표 계약."""
+
+    topic: Series[str] = pa.Field(nullable=True)
+    block_type: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class XbrlTagSchema(pa.DataFrameModel):
+    """XBRL tag 표 계약."""
+
+    tag: Series[str] = pa.Field(nullable=False)
+    value: Series[float] = pa.Field(nullable=True)
+    period: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class SectionTextSchema(pa.DataFrameModel):
+    """sections 텍스트 row 계약."""
+
+    section_title: Series[str] = pa.Field(nullable=True)
+    text: Series[str] = pa.Field(nullable=True)
+    text_path: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class RecipeMetadataSchema(pa.DataFrameModel):
+    """recipe lifecycle 메타 표 계약."""
+
+    recipe_name: Series[str] = pa.Field(nullable=False)
+    stage: Series[str] = pa.Field(
+        nullable=False,
+        isin=["drafted", "unverified", "tested", "verified", "curated", "deprecated"],
+    )
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class SectorRotationSchema(pa.DataFrameModel):
+    """macro.sectorRotation 결과 표 계약."""
+
+    sector: Series[str] = pa.Field(nullable=False)
+    mean_return: Series[float] = pa.Field(nullable=True)
+    hit_ratio: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
 __all__ = [
     "DocsSchema",
     "FinanceSchema",
@@ -230,4 +408,17 @@ __all__ = [
     "CreditScoreSchema",
     "MacroCycleSchema",
     "MetricsSignalSchema",
+    "CompanyProfileSchema",
+    "FilingsListSchema",
+    "QuantFactorSchema",
+    "IndustryPeerSchema",
+    "GatherPriceSchema",
+    "GatherFlowSchema",
+    "MacroSeriesSchema",
+    "AccountMappingsSchema",
+    "StoryBlockSchema",
+    "XbrlTagSchema",
+    "SectionTextSchema",
+    "RecipeMetadataSchema",
+    "SectorRotationSchema",
 ]
