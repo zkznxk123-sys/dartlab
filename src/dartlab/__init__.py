@@ -33,6 +33,9 @@ _IS_PYODIDE = sys.platform == "emscripten"
 
 from dartlab import config, core, skills  # noqa: F401 — 공용 분석 절차 런타임
 
+# T8-2 — dartlab.help 자연어 API 발견 노출
+from dartlab.help import help  # noqa: F401, A004
+
 # .env 자동 로드 — API 키 등 환경변수. 가벼움 (yaml 한 번 파싱) 이라 module-load time 에 eager.
 # AI provider / DART API 가 환경변수에 의존하므로 attribute access 까지 미루면 첫 호출 race.
 if not _IS_PYODIDE:
@@ -944,6 +947,7 @@ __all__ = [
     "OpenEdgar",
     "config",
     "ask",
+    "help",  # T8-2 — 자연어 API 발견
     "setup",
     "search",
     "listing",
