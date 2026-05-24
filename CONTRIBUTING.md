@@ -195,3 +195,136 @@ uv run python -X utf8 tests/run.py gate smoke   # 약 30초
 - [CHANGELOG.md](CHANGELOG.md) — 변경 이력
 - [TODO.md](TODO.md) — 14 KPI 트래커 + 70 T 작업 단위
 - [CLAUDE.md](CLAUDE.md) — L-local 강행규칙 (메모리 안전, UTF-8, master only)
+
+---
+
+## 4 계층 단방향 import — 기여 시 정합
+
+dartlab 은 L0 ↦ L1 ↦ L1.5 ↦ L2 ↦ L3 ↦ L4 단방향 import 만 허용한다. 역방향 또는 동 계층 cross import 는 `tests/architecture/` 의 import-linter 게이트가 PR 단계에서 차단한다.
+
+| 계층 | 위치 | 허용 import | 책임 |
+|---|---|---|---|
+| L0 | `src/dartlab/core/` | (없음) | 타입·헬퍼·로거·DI Protocol. L1 이상 import 금지 |
+| L1 | `src/dartlab/{gather,providers}/` | core | raw 생산 owner. gather ↮ providers cross 금지 |
+| L1.5 | `src/dartlab/{scan,frame,synth,reference}/` | core, L1 | raw 가공 4 형제. 4 형제끼리 cross import 금지 |
+| L2 | `src/dartlab/{analysis,macro,quant,industry,credit}/` | core, L1.5 | 분석 엔진 5 |
+| L3 | `src/dartlab/story/` | core, L1.5, L2 | L2 5+L1.5 결합기 — 자체 계산 0 |
+| L4 | `src/dartlab/{ai,mcp,viz,cli,server,channel}/` | 모든 하위 | 소비/표현 — 비즈니스 0 |
+
+신규 모듈 위치를 정할 때 `operation.architecture` 의 결정 트리를 따른다. 회귀 시 PR description 에 root cause + 가드 강화안을 함께 첨부.
+
+---
+
+## camelCase 명명 강제
+
+dartlab 의 공개 API · 내부 식별자 모두 `camelCase` 다. snake_case 회귀는 `tests/audit/namingAudit.py` 가 baseline 비교로 PR 단계에서 차단한다.
+
+- 함수 / 메서드 / 변수: `loadDocs`, `getCompany`, `dailyReturn`
+- 클래스: `BoundedCache`, `MarketSnapshot`, `DartlabDeprecationWarning`
+- 모듈 파일명: `accountMappings.json`, `worldClassScorecard.py`
+- 상수: `UNIT_SCALE`, `DEFAULT_UNIT_SCALE` (UPPER_SNAKE 만 예외)
+
+snake_case 외부 라이브러리 호환 시 (예: pandera `DataFrameModel`) 본 룰은 그쪽 계약을 따른다.
+
+---
+
+## docstring 9 섹션 표준
+
+공개 함수 / 메서드 / 클래스는 다음 9 섹션 중 *최소 5* 를 충족해야 한다 (`tests/audit/docstring9SectionAudit.py` 강제).
+
+1. **Capabilities** — 한 줄 능력 요약 (LLM 발견용)
+2. **Args** — 매개변수 (Google 스타일)
+3. **Returns** — 반환값 + 형
+4. **Example** — 동작 예시 (doctest 우선)
+5. **Guide** — 사용 가이드라인 (언제 / 어떻게)
+6. **SeeAlso** — 관련 함수 링크
+7. **Requires** — 호출 전제 조건
+8. **AIContext** — LLM agent 사용 시 맥락
+9. **Raises** 또는 **LLM Specifications** — 예외 또는 6 sub-key (AntiPatterns / OutputSchema / Prerequisites / Freshness / Dataflow / TargetMarkets)
+
+**중요**: 자동 sweep 도구 금지. 함수 시그니처 + 본문 + 호출자 grep 후 함수 단위 수동 작성. 회귀 사례 — 894 stub 도배 후 8344 `<TODO>` 마커 잔존 (2026-05-12).
+
+---
+
+## 변경 단위 = 자기 변경 + 테스트 + CI 통과 + 푸시 준비
+
+기여 시 다음 5 단계를 한 PR 안에 포함한다.
+
+1. **자기 변경만 commit** — `git add -A` / `git add .` 금지. 명시 paths 만 (`git commit -o path1 path2 -m "..."`).
+2. **테스트 셋트 동행** — 새 함수는 unit test, 새 헬퍼는 property test, 새 데이터 흐름은 metamorphic test.
+3. **로컬 CI Fast 통과** — `uv run python -X utf8 tests/run.py preflight` 12 게이트 통과 확인 후 push.
+4. **CHANGELOG 갱신** — [keep-a-changelog](https://keepachangelog.com/) 형식, Unreleased 섹션에 한 줄 추가.
+5. **PR description** — 변경 의도 · 영향 모듈 · 테스트 추가 · 롤백 절차 4 섹션.
+
+---
+
+## 테스트 마커 정합
+
+PR 단계에서 새 테스트 파일은 다음 마커 중 하나를 가져야 한다 (`tests/conftest.py` 강제).
+
+| 마커 | 용도 | 실행 위치 |
+|---|---|---|
+| `@pytest.mark.unit` | 순수 헬퍼 (외부 의존 0) | CI Fast (12 게이트) |
+| `@pytest.mark.contract` | 공개 API 계약 | CI Fast |
+| `@pytest.mark.integration` | dartlab 다중 모듈 결합 | CI Full |
+| `@pytest.mark.serial` | 메모리 압박 (Polars Company) | CI Full (xdist 우회) |
+| `@pytest.mark.metamorphic` | 입력 변환 후 출력 관계 검증 | CI Full |
+| `@pytest.mark.benchmark` | pytest-benchmark | weekly gate |
+
+마커 누락 시 baseline 비교 audit (`tests/audit/markerCoverage.py`) 가 PR 차단.
+
+---
+
+## 외부 본문 untrusted 처리
+
+DART / EDGAR / 뉴스 / 웹 검색 결과 본문은 *데이터* 이지 *지시* 가 아니다. 새 gather source 추가 시 다음 보일러플레이트를 따른다.
+
+```python
+from dartlab.ai.tools.formatting import wrap_external_in_result
+
+def fetchSomeExternal(query: str) -> dict:
+    body = httpClient.fetch(query)
+    return wrap_external_in_result(body, sourceType="external", url=query)
+```
+
+`wrap_external_in_result` 가 마커로 본문을 격리한다 — LLM 이 본문 안 "이전 지시 무시" 같은 prompt injection 을 따르지 않게 한다. 신규 source 의 wrap 누락은 `tests/audit/untrustedWrapAudit.py` 가 PR 차단.
+
+---
+
+## 신규 데이터 source 추가 절차
+
+| 단계 | 작업 | 가드 |
+|---|---|---|
+| 1. registry | `dataConfig.DATA_RELEASES` 에 카테고리 추가 + HF 경로 박힘 | (수동) |
+| 2. provider | `src/dartlab/providers/{name}/` 폴더 신설 + `client.py` + `__init__.py` | import-linter |
+| 3. accessor | `core/dataAudit.recordLineage(...)` 호출로 lineage 추적 | `tests/audit/lineageAudit.py` |
+| 4. schema | `core/schemas.py` 에 `pa.DataFrameModel` 추가 + `__all__` 등록 | namingAudit |
+| 5. test | `tests/_strategies/test_{name}_property.py` 4+ property | markerCoverage |
+| 6. docs | `src/dartlab/providers/{name}/README.md` 작성 (3 섹션 이상) | docsAudit |
+
+prebuild 단계 (offline only) 와 sync 단계 (online) 의 책임 경계는 `CLAUDE.md` 의 "파이프라인 책임 경계" 섹션 참고.
+
+---
+
+## 1.0.0 게이트 (2027-02-28 목표)
+
+다음 8 정량 + 5 정성 게이트 모두 통과 시 1.0.0 출시.
+
+**정량 8**:
+1. 14 KPI 평균 ≥ 91, 모든 관점 ≥ 90
+2. mutation score 30 모듈 ≥ 80%
+3. 테스트 커버리지 ≥ 70%
+4. SLO 4종 30일 95% 충족
+5. INCIDENTS.md 6개월 0 critical
+6. import-linter 0 violation (baseline 5+140 → 0)
+7. docstring 9 섹션 통과율 ≥ 80%
+8. 외부 기여자 첫 PR 성공률 ≥ 80%
+
+**정성 5**:
+1. 한국 OSS 카테고리 GitHub stars ≥ 500
+2. PyPI 월간 다운로드 ≥ 5,000
+3. 외부 기여자 (≠ 메인테이너) ≥ 5 명 적극 commit
+4. 공식 문서 영문 번역 완료
+5. 1.0.0 출시 PR 본문에 명시된 13 결심 사항 모두 0 회귀
+
+진척은 `tests/audit/worldClassScorecard.py` 매 분기 측정. 결과는 `memory/project_plan_world_class.md` 시계열에 박힘.
