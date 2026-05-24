@@ -6,33 +6,10 @@ on:
   pull_request:
     branches: [master]
 
+# 주체 중립 marker 검사는 운영자 로컬 pre-commit (.claude/hooks/) 단일 게이트로 전환.
+# CI workflow 가 .claude/ (gitignored) 의 hook 을 호출하던 구조는 본질적 모순이라 폐기.
+
 jobs:
-  ai-marker-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Check banned AI markers
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PUSH_BEFORE: ${{ github.event.before }}
-          PUSH_HEAD: ${{ github.sha }}
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            python .claude/hooks/check_no_ai_markers.py --check-range "$PR_BASE" "$PR_HEAD"
-          else
-            python .claude/hooks/check_no_ai_markers.py --check-range "$PUSH_BEFORE" "$PUSH_HEAD"
-          fi
-
   block-coreloop-auto-merge:
     # Phase R auto-merge 3중 방어의 1차 (workflow) — [CORELOOP-R] PR 에 auto-merge 라벨 금지
     if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.title, '[CORELOOP-')
