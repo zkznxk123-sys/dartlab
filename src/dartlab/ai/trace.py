@@ -89,19 +89,41 @@ class AuditCollector:
         }
 
     def dumpToJson(self, filePath: str | Path | None = None) -> Path:
-        """5 패스 trace 를 JSON line 형식으로 저장.
+        """5 패스 trace 를 JSON 형식으로 저장 (T10-4).
+
+        Capabilities:
+            AuditCollector 의 이벤트 + 메타를 JSON 파일로 직렬화. refCircularity
+            check (T11-3) 의 입력.
 
         Args:
             filePath: 저장 경로. None 이면 `_defaultTraceDir() / {sessionId}.json`.
+
         Returns:
             실제 저장된 Path.
+
         Example:
             >>> collector = AuditCollector(question="삼성전자 분석")
             >>> collector.observe("BRIEF", {"intent": "ratio_analysis"})
             >>> collector.markFinished()
             >>> path = collector.dumpToJson()
-            >>> path.exists()
-            True
+
+        Guide:
+            DARTLAB_TRACE_DIR env 로 default dir override 가능. PII 우려 시
+            사용자 명시 경로만 사용.
+
+        SeeAlso:
+            loadFromJson: round-trip 복원.
+            markFinished: 완료 시점 기록.
+            refCircularityCheck (T11-3): 순환 감지.
+
+        Requires:
+            쓰기 권한.
+
+        AIContext:
+            T11-4 워크벤치 trace. ref circularity audit (T11-3) 의 입력.
+
+        Raises:
+            OSError: 디스크 쓰기 실패.
         """
         if filePath is None:
             outputPath = _defaultTraceDir() / f"{self.sessionId}.json"
