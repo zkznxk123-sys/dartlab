@@ -30,20 +30,41 @@ _decimal.getcontext().rounding = _decimal.ROUND_HALF_EVEN
 
 
 def toDecimal(value: Any, *, default: Decimal | None = None) -> Decimal:
-    """안전 변환 — float/int/str → Decimal.
+    """안전 변환 — float/int/str → Decimal (T10-4).
+
+    Capabilities:
+        float / int / str / Decimal 입력을 Decimal 로 변환. None / NaN / inf
+        같은 잘못된 입력은 default 또는 ValueError.
 
     Args:
-        value: 변환 대상. None / NaN / inf 는 default 또는 ValueError.
+        value: 변환 대상.
         default: 변환 실패 시 반환할 값. None 이면 ValueError.
+
     Returns:
         Decimal 인스턴스.
+
     Example:
         >>> toDecimal("123.45")
         Decimal('123.45')
-        >>> toDecimal(0.1 + 0.2, default=Decimal("0"))
-        Decimal('0.30000000000000004...')  # float epsilon 보존 — 신뢰 X
+        >>> toDecimal(None, default=Decimal("0"))
+        Decimal('0')
+
     Guide:
-        float → Decimal 변환은 *epsilon 보존* 이라 신뢰 X. 가능하면 str 입력.
+        float → Decimal 변환은 *epsilon 보존* 이라 신뢰 X. 가능하면 str 입력
+        또는 float 입력 시 본 함수가 str 우회로 epsilon 흡수.
+
+    SeeAlso:
+        roundDecimal / isClose / safeDivide.
+
+    Requires:
+        Decimal context (prec=28, ROUND_HALF_EVEN, 본 모듈이 자동 설정).
+
+    AIContext:
+        T7-4 회계 정합. analysis/ratios 등 재무 계산 진입 시 사용.
+
+    Raises:
+        ValueError: value is None + default None / NaN / infinity.
+        decimal.InvalidOperation: 변환 실패 + default None.
     """
     if value is None:
         if default is not None:
@@ -69,13 +90,19 @@ def toDecimal(value: Any, *, default: Decimal | None = None) -> Decimal:
 
 
 def roundDecimal(value: Decimal | float | str, *, places: int = 2) -> Decimal:
-    """반올림 — banker's rounding (HALF_EVEN, 회계 표준).
+    """반올림 — banker's rounding (HALF_EVEN, 회계 표준) (T10-4).
+
+    Capabilities:
+        Python builtin round() 의 banker's rounding 을 Decimal 로 일관 적용.
+        2.5 → 2 (짝수), 3.5 → 4 (짝수). 회계/감사 표준 정합.
 
     Args:
         value: 반올림 대상.
         places: 소수 자리수 (기본 2 — 통화 단위 정합).
+
     Returns:
         Decimal.
+
     Example:
         >>> roundDecimal("2.5", places=0)
         Decimal('2')
@@ -83,6 +110,22 @@ def roundDecimal(value: Decimal | float | str, *, places: int = 2) -> Decimal:
         Decimal('4')
         >>> roundDecimal(0.1 + 0.2, places=2)
         Decimal('0.30')
+
+    Guide:
+        통화 표시는 places=0 (원 단위) 또는 places=2 (소수점). 비율 표시는
+        places=2 또는 places=4 (basis point).
+
+    SeeAlso:
+        toDecimal / isClose / safeDivide.
+
+    Requires:
+        Decimal context. value 가 str 권장 (float epsilon 회피).
+
+    AIContext:
+        T7-4 회계 정합. viz/display/finance 의 통화 표시 직전 반올림.
+
+    Raises:
+        decimal.InvalidOperation: places 가 음수일 때 또는 value 변환 실패.
     """
     d = toDecimal(value)
     quant = Decimal("1") if places == 0 else Decimal("1").scaleb(-places)
@@ -90,16 +133,20 @@ def roundDecimal(value: Decimal | float | str, *, places: int = 2) -> Decimal:
 
 
 def isClose(a: Any, b: Any, *, absTol: str | Decimal = "0.001") -> bool:
-    """회계 정합 동등 비교 — 절대 허용 오차.
+    """회계 정합 동등 비교 — 절대 허용 오차 (T10-4).
 
-    float 의 `math.isclose` 대신 Decimal 기반. 회계 등식 검증 (자산 = 부채 + 자본)
-    이나 비율 동등 비교에서 epsilon 흡수.
+    Capabilities:
+        float 의 `math.isclose` 대신 Decimal 기반. 회계 등식 검증 (자산 =
+        부채 + 자본) 이나 비율 동등 비교에서 epsilon 흡수. 대칭 (a, b) ==
+        (b, a).
 
     Args:
         a, b: 비교 대상.
         absTol: 절대 허용 오차 (기본 0.001).
+
     Returns:
         bool.
+
     Example:
         >>> isClose(0.1 + 0.2, 0.3)
         True
@@ -107,6 +154,23 @@ def isClose(a: Any, b: Any, *, absTol: str | Decimal = "0.001") -> bool:
         False
         >>> isClose("1000.00", "1000.01", absTol="0.05")
         True
+
+    Guide:
+        회계 등식 검증 시 absTol 은 표시 단위에 맞춤 (원 단위 → "0.5", 비율
+        → "0.0001"). 메트로픽 commutativity 검증 (T6-3 test_commutativity)
+        의 reference.
+
+    SeeAlso:
+        toDecimal / roundDecimal / safeDivide.
+
+    Requires:
+        Decimal context.
+
+    AIContext:
+        T7-4 회계 정합. T6-3 metamorphic commutativity property 의 기반.
+
+    Raises:
+        ValueError: a, b, absTol 변환 실패.
     """
     da = toDecimal(a, default=Decimal("0"))
     db = toDecimal(b, default=Decimal("0"))
