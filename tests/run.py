@@ -485,6 +485,17 @@ GATES: dict[str, Gate] = {
         blocking=False,
         timeout_minutes=15,
     ),
+    # T3-2 — benchmark weekly gate. nightly tier blocking=False (baseline ±10% 회귀만 알람)
+    "benchmark-weekly": Gate(
+        name="benchmark-weekly",
+        tier="nightly",
+        deps=("pytest", "pytest-benchmark"),
+        install_pkg="editable",
+        env={"DARTLAB_TEST_LOCKED": "1"},
+        cmd="pytest tests/benchmarks/_scenarios/ -m benchmark --benchmark-only --benchmark-json=benchmark-results.json -v --tb=short",
+        blocking=False,
+        timeout_minutes=30,
+    ),
     "sections-precision": Gate(
         name="sections-precision",
         tier="nightly",
