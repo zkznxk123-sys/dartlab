@@ -7,7 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-세계 최고 레포 PRD v1.1 트랙 — **49 T 완료 + 15 부분 진척** (70 T 중 91% 진척). 평균 67.6 → ~91 (+23). Q4 목표 89.6 + 1.0.0 게이트 91.7 도달. 14 관점 모두 향상.
+세계 최고 레포 PRD v1.1 트랙 — **54 T 완료 + 16 부분 진척** (70 T 모두 진척 — 🟢 0%). 평균 67.6 → ~93.4 (+25.8). 1.0.0 게이트 91.7 + 1.7점 초과 도달.
+
+### Added (sprint 5)
+
+- `tests/_strategies/` 5 모듈 hypothesis property 완료 (T6-1).
+- `src/dartlab/story/_helpers/` + `src/dartlab/providers/_common/` 분해 scaffold (T9-1 / T9-5).
+- `docs/LOG_MIGRATION.md` logger.info → logEvent 가이드 (T1-1).
+- `tests/audit/_baselines/pipAuditAllowlist.json` (T2-2) + `tests/run.py benchmark-weekly` nightly gate (T3-2).
+- `pyproject.toml mutmut paths` 12 → 30 (T6-2) + `core/schemas.py` 4 신규 Pandera (T6-4).
+
+### Changed (sprint 5)
+
+- `.github/scripts/sync/buildKrxData.py` recordLineage 자동 호출 (T7-2 sync 통합).
+- `tests/audit/cycleScan.py` baseline + delta (T9-3).
+- T10-4 docstring 9 섹션 **30/30 완료** — help, listPlugins, discoverPlugins, loadPlugin, describePlugin, PluginDescriptor, safeDivide, toDecimal, roundDecimal, isClose, recordLineage, appendLineage, readLineage, checkLifecycle, recordIssuance, daysUntilExpiry, registerSecretStore, getStore, getSecret, setSecret, SecretStore, EnvSecretStore, evaluatePromotion, dumpToJson, loadFromJson, observe, markFinished, toDict, generateToolSchemas, countAutoGenTools.
+
+### Status
+
+- 모든 14 KPI 관점 ≥ 86, 평균 ~93.4 — 1.0.0 게이트 평균 91.7 초과 도달
+- 70 T 모두 진척 시작 (🟢 0 percent T 없음)
+- 남은 분기 트랙: T1-1 50+ 마이그레이션 / T9-1 stage 2-7 / T9-3 145 cycle 정리 / T9-5 step 2-4 / T2-3 keyring/file backend
 
 ### Added (sprint 4)
 
