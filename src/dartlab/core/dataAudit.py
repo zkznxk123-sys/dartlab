@@ -87,7 +87,24 @@ def recordLineage(
     extra: dict[str, Any] | None = None,
     baseDir: Path | None = None,
 ) -> Path:
-    """사용자 친화 wrapper — appendLineage 호출.
+    """data lineage 단일 항목 기록 — 사용자 친화 wrapper (T10-4).
+
+    Capabilities:
+        sync workflow / prebuild 단계 진입 시 *어떤 source 의 어떤 version* 이
+        언제 다운로드됐는지 jsonl line append. T7-2 (데이터 거버넌스) 의 단일
+        진입점.
+
+    Args:
+        source: 데이터 source 식별자 (예: "DART OpenAPI list", "FRED FEDFUNDS").
+        version: 데이터 버전 (날짜 또는 semver).
+        downloadedAt: ISO datetime. 빈 문자열이면 현재 시각.
+        recordHash: sha256 등 무결성 hash.
+        rowCount: 행 수 (선택).
+        extra: 추가 메타 dict (선택).
+        baseDir: 저장 root override (테스트용).
+
+    Returns:
+        쓰여진 jsonl 파일 Path (오늘자).
 
     Example:
         >>> recordLineage(
@@ -97,6 +114,25 @@ def recordLineage(
         ...     recordHash="sha256:abc",
         ...     rowCount=4123,
         ... )
+
+    Guide:
+        sync workflow 안 `.github/scripts/sync/*.py` 의 `main()` 진입 시점에
+        호출. prebuild 는 본 함수 호출 금지 (offline guard 정합).
+
+    SeeAlso:
+        appendLineage: dict 직접 append.
+        readLineage: 조회.
+        dataDriftCheck (T7-5): drift 검출.
+
+    Requires:
+        data/_lineage/ 쓰기 권한. DARTLAB_LINEAGE_DIR env override 가능.
+
+    AIContext:
+        T7-2 (데이터 거버넌스 KPI) 가중 25 percent 의 핵심 신호. metrics workflow
+        T1-2 가 시계열로 수집.
+
+    Raises:
+        OSError: 디스크 쓰기 실패.
     """
     record: dict[str, Any] = {
         "source": source,
