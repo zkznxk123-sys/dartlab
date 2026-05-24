@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 
 @pytest.mark.unit
 class TestDiProperty:
-    """DI getter/setter round-trip property 4."""
+    """DI getter/setter round-trip property 5."""
 
-    def test_finance_accessor_round_trip(self) -> None:
+    @given(marker=st.text(min_size=1, max_size=10))
+    def test_finance_accessor_round_trip(self, marker: str) -> None:
         from dartlab.core.di import getFinanceAccessor, setFinanceAccessor
 
         prior = getFinanceAccessor()
@@ -19,8 +22,10 @@ class TestDiProperty:
                 pass
 
             stub = _Stub()
+            stub.marker = marker
             setFinanceAccessor(stub)
             assert getFinanceAccessor() is stub
+            assert getFinanceAccessor().marker == marker
         finally:
             setFinanceAccessor(prior)
 
