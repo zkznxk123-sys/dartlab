@@ -183,6 +183,13 @@ def loadPlugin(name: str) -> ModuleType:  # noqa: N802
                 schema = module.PLUGIN_SCHEMA
                 if isinstance(schema, dict):
                     d.schema = dict(schema)
+            # T1-1 structured log 발급
+            try:
+                from dartlab.core.logger import logEvent
+
+                logEvent("info", "plugin_loaded", name=name, kind=d.kind, version=d.version)
+            except ImportError:
+                pass
             return module
     raise KeyError(f"plugin not found: {name!r}")
 

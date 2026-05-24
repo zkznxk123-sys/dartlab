@@ -112,6 +112,13 @@ def recordIssuance(
         "recordedAt": dt.datetime.now(dt.UTC).isoformat(),
     }
     _saveLifecycle(data, path)
+    # T1-1 structured log 발급
+    try:
+        from dartlab.core.logger import logEvent
+
+        logEvent("info", "credential_issuance_recorded", key=key, lifetime_days=lifetimeDays)
+    except ImportError:
+        pass
 
 
 def daysUntilExpiry(key: str, *, path: Path | None = None) -> int | None:
@@ -216,6 +223,21 @@ def checkLifecycle(*, thresholdDays: int = 14, path: Path | None = None) -> list
                     severity=severity,
                 )
             )
+    # T1-1 structured log 발급
+    if alerts:
+        try:
+            from dartlab.core.logger import logEvent
+
+            for a in alerts:
+                logEvent(
+                    "warning",
+                    "credential_lifecycle_alert",
+                    key=a.key,
+                    severity=a.severity,
+                    days_remaining=a.daysRemaining,
+                )
+        except ImportError:
+            pass
     return alerts
 
 

@@ -60,6 +60,22 @@ def _todayFile(baseDir: Path | None = None) -> Path:
     return baseDir / f"{today}.jsonl"
 
 
+def _emitLineageEvent(record: dict[str, Any]) -> None:
+    """T1-1 logEvent 통합 — lineage 기록 시 구조화 이벤트 발급."""
+    try:
+        from dartlab.core.logger import logEvent
+
+        logEvent(
+            "info",
+            "data_lineage_recorded",
+            source=record.get("source", ""),
+            version=record.get("version", ""),
+            row_count=record.get("rowCount", -1),
+        )
+    except ImportError:
+        pass
+
+
 def appendLineage(record: dict[str, Any], *, baseDir: Path | None = None) -> Path:
     """단일 lineage 항목을 오늘자 jsonl 에 append (T10-4).
 
@@ -99,6 +115,7 @@ def appendLineage(record: dict[str, Any], *, baseDir: Path | None = None) -> Pat
     filePath.parent.mkdir(parents=True, exist_ok=True)
     with filePath.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    _emitLineageEvent(record)  # T1-1 structured log 발급
     return filePath
 
 

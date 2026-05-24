@@ -159,6 +159,13 @@ def registerSecretStore(store: SecretStore) -> None:
     """
     global _currentStore
     _currentStore = store
+    # T1-1 structured log 발급
+    try:
+        from dartlab.core.logger import logEvent
+
+        logEvent("info", "secret_store_registered", store_type=type(store).__name__)
+    except ImportError:
+        pass
 
 
 def getStore() -> SecretStore:
@@ -206,6 +213,13 @@ def setSecret(key: str, value: str) -> None:
         T2-3 보안 트랙. setSecret 후 recordIssuance (T2-4) 호출 권장.
     """
     _currentStore.set(key, value)
+    # T1-1 structured log 발급 (value 본문은 보안상 제외)
+    try:
+        from dartlab.core.logger import logEvent
+
+        logEvent("info", "secret_set", key=key, store_type=type(_currentStore).__name__)
+    except ImportError:
+        pass
 
 
 __all__ = [
