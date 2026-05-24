@@ -382,9 +382,13 @@ def measureDocs() -> dict[str, Any]:
         if (SRC / "skills" / "specs" / cat / "README.md").exists()
     )
 
+    # 9 섹션 docstring 실측 (docstring9SectionAudit.py 호출)
+    docstring9Result = _callAudit(TESTS / "audit" / "docstring9SectionAudit.py", ["--json"])
+    docstring9PassRate = docstring9Result.get("passRate", 30)
+
     score = (
         _scoreBucket(diagrams, [(3, 90), (1, 60), (0, 0)]) * 0.20
-        + 75 * 0.25  # 9 섹션 (30 진척, ~80% public API 추정)
+        + _scoreBucket(docstring9PassRate, [(80, 95), (50, 75), (30, 55), (10, 35), (0, 20)]) * 0.25
         + _scoreBucket(subNamespaceReadme, [(14, 90), (7, 60), (0, 30)]) * 0.15
         + _scoreBucket(contributingLines, [(300, 90), (100, 60), (0, 30)]) * 0.15
         + (85 if skillHub == 4 else 50) * 0.10
@@ -398,6 +402,7 @@ def measureDocs() -> dict[str, Any]:
             "sub_namespace_readmes": subNamespaceReadme,
             "contributing_lines": contributingLines,
             "skill_hub_categories": skillHub,
+            "docstring9_pass_rate": docstring9PassRate,
         },
     }
 
