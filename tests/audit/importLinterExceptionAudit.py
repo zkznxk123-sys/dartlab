@@ -28,41 +28,50 @@ BASELINE_FILE = REPO_ROOT / "tests" / "audit" / "_baselines" / "importLinterExce
 
 
 def countExceptions() -> dict[str, int]:
-    """pyproject.toml 안 importlinter 예외 라인 카운트.
+    """pyproject.toml 안 importlinter 예외 라인 카운트 — tomllib 정확 파싱.
 
-    측정 패턴:
-        - `ignore_imports = ...` 또는 `ignore_imports = [...]`
-        - `forbidden_modules = ...`
-        - `allowed_imports = ...`
+    측정 항목 (모든 [tool.importlinter.contracts.*] section 순회):
+        - ignore_imports list 길이 합
+        - forbidden_modules list 길이 합
+        - allowed_imports list 길이 합
     """
     if not PYPROJECT.exists():
         return {"total": 0}
-    text = PYPROJECT.read_text(encoding="utf-8")
 
-    # `[tool.importlinter*]` 섹션 추출
-    importlinterSection = re.search(
-        r"\[tool\.importlinter[^\]]*\](.*?)(?=^\[|\Z)",
-        text,
-        re.MULTILINE | re.DOTALL,
-    )
-    if not importlinterSection:
-        return {"total": 0}
+    # tomllib 로 정확 파싱 (Python 3.11+). 실패 시 regex fallback.
+    try:
+        import tomllib
 
-    body = importlinterSection.group(1)
+        with PYPROJECT.open("rb") as fh:
+            data = tomllib.load(fh)
+    except (ImportError, OSError):
+        # regex fallback — 부정확하지만 graceful
+        text = PYPROJECT.read_text(encoding="utf-8")
+        ignoreLines = len(re.findall(r'^\s*"dartlab\.[^"]+",?\s*$', text, re.MULTILINE))
+        return {"total": ignoreLines, "method": "regex-fallback"}
 
-    ignoreImportsCount = len(re.findall(r"ignore_imports\s*=", body))
-    forbiddenCount = len(re.findall(r"forbidden_modules\s*=", body))
-    allowedCount = len(re.findall(r"allowed_imports\s*=", body))
+    importLinter = data.get("tool", {}).get("importlinter", {})
+    contracts = importLinter.get("contracts", [])
 
-    # 인용 라인 (list 안 string literals) 도 카운트
-    quotedLines = len(re.findall(r'^\s*"dartlab\.[^"]+",?\s*$', body, re.MULTILINE))
+    ignoreImportsTotal = 0
+    forbiddenTotal = 0
+    allowedTotal = 0
+    for contract in contracts:
+        if isinstance(contract, dict):
+            ignoreImportsTotal += len(contract.get("ignore_imports", []) or [])
+            forbiddenTotal += len(contract.get("forbidden_modules", []) or [])
+            allowedTotal += len(contract.get("allowed_imports", []) or [])
+
+    # root level (contracts 외) ignore_imports
+    rootIgnore = len(importLinter.get("ignore_imports", []) or [])
 
     return {
-        "ignore_imports_directives": ignoreImportsCount,
-        "forbidden_modules_directives": forbiddenCount,
-        "allowed_imports_directives": allowedCount,
-        "quoted_module_lines": quotedLines,
-        "total": ignoreImportsCount + forbiddenCount + allowedCount + quotedLines,
+        "ignore_imports_total": ignoreImportsTotal + rootIgnore,
+        "forbidden_modules_total": forbiddenTotal,
+        "allowed_imports_total": allowedTotal,
+        "contracts_count": len(contracts),
+        "total": ignoreImportsTotal + rootIgnore + forbiddenTotal + allowedTotal,
+        "method": "tomllib",
     }
 
 
