@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-05-24T04:43:19.426901+00:00",
-  "average": 78.54,
+  "measuredAt": "2026-05-24T09:10:16.150372+00:00",
+  "average": 79.89,
   "perspectives": [
     {
       "name": "운영/관측",
@@ -60,13 +60,13 @@
     },
     {
       "name": "테스트",
-      "score": 66.5,
+      "score": 75.0,
       "signals": {
-        "test_loc_ratio": 25.79,
-        "hypothesis_files": 17,
+        "test_loc_ratio": 25.95,
+        "hypothesis_files": 30,
         "mutmut_paths": 31,
         "metamorphic_patterns": 5,
-        "pandera_schemas": 20
+        "pandera_schemas": 51
       }
     },
     {
@@ -105,13 +105,13 @@
     },
     {
       "name": "문서",
-      "score": 66.5,
+      "score": 77.0,
       "signals": {
-        "diagrams": 1,
+        "diagrams": 3,
         "sub_namespace_readmes": 18,
-        "contributing_lines": 197,
+        "contributing_lines": 330,
         "skill_hub_categories": 4,
-        "docstring9_pass_rate": 33.27
+        "docstring9_pass_rate": 32.83
       }
     },
     {
