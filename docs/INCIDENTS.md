@@ -194,6 +194,19 @@
 
 ---
 
+## 2026-04-22 — 자체 commit 회귀
+
+- **분류**: process
+- **영향 범위**: 사용자 명시 지시 없이 commit 수행.
+- **지속 시간**: 단일 사고.
+- **증상**: AI 가 사용자 확인 없이 git commit 호출.
+- **원인**: commit 자율 룰 미명시.
+- **수정**: CLAUDE.md "git commit 자율 실행 + push 만 명시 지시 필요" 룰 박음.
+- **재발 가드**: commit 자체는 자율 / push 는 명시 지시.
+- **학습**: AI 행동 권한은 *명시 분리* 필요. default 추론 X.
+
+---
+
 ## 2026-05-21 — DART XML body.iter() 재귀 nested duplication
 
 - **분류**: regression
