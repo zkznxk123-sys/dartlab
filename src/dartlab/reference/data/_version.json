@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "accountMappingsVersion": "1.0.5",
+  "lastChangedAt": "2026-05-18",
+  "standardAccountsCount": 3143,
+  "totalMappings": 34622,
+  "history": [
+    {
+      "version": "1.0.5",
+      "date": "2026-05-18",
+      "changes": {
+        "added": ["promoteCommit e33ec2b8 (synonym 31489 → 학습 갱신)"],
+        "removed": [],
+        "renamed": []
+      },
+      "promoteCommit": "e33ec2b8e5e6ef6447c1f8d77ba465b05ced31fa"
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-04-01",
+      "changes": {
+        "added": ["initial publication"],
+        "removed": [],
+        "renamed": []
+      },
+      "promoteCommit": null
+    }
+  ],
+  "note": "T7-1 트랙 — accountMappings 버전 추적. 변경 시 version bump + history 항목 추가. drift audit 후속 (tests/audit/accountMappingsDriftAudit.py)."
+}
