@@ -207,8 +207,10 @@ GATES: dict[str, Gate] = {
         tier="fast",
         deps=("pip-audit",),
         install_pkg="editable",
+        # T2-2 — baseline allowlist + blocking 승격 후속. 현재 known CVE 가 0 일 때만 strict 안전.
+        # pip-audit --ignore-vuln <ID> 옵션으로 baseline 부채 원장 적용 가능.
         cmd="pip-audit --strict --desc on",
-        blocking=False,
+        blocking=False,  # T2-2 — baseline 구축 후 blocking=True 승격
     ),
     "deps-check": Gate(
         name="deps-check",

@@ -1,0 +1,5 @@
+{
+  "note": "T2-2 baseline — pip-audit known CVE allowlist. 신규 CVE 만 차단 + baseline 은 별도 정리 트랙.",
+  "ignoreVulns": [],
+  "lastReviewedAt": "2026-05-24"
+}
