@@ -138,6 +138,62 @@
 
 ---
 
+## 2026-04-26 — PyPI 깨진 wheel 사고
+
+- **분류**: release
+- **영향 범위**: PyPI 0.x.y 깨진 wheel publish. 외부 사용자 install 실패.
+- **지속 시간**: PyPI yank 까지 약 4 시간.
+- **증상**: `pip install dartlab` 후 `import dartlab` 실패 (missing module).
+- **원인**:
+  1. wheel build 시 src/ layout 의 일부 폴더 누락
+  2. test.pypi 검증 단계 부재
+- **수정**: PyPI yank + test.pypi 검증 단계 추가 (.github/workflows/release.yml T14-4).
+- **재발 가드**: release workflow 의 build → test.pypi smoke install → pypi 본 업로드 chain 강행.
+- **학습**: PyPI 본 업로드는 *test.pypi 검증 후* 만 허용.
+
+---
+
+## 2025-XX — accountMappings.json 누락 (v0.9.11)
+
+- **분류**: dependency
+- **영향 범위**: dartlab 0.9.11 의 wheel 안 accountMappings.json 누락. mappings/* 호출 실패.
+- **지속 시간**: 패치 release 까지.
+- **증상**: `Company.show("IS")` 시 KeyError.
+- **원인**: pyproject.toml package-data 설정 누락.
+- **수정**: package-data 명시 + verifyWheel.py audit 추가 (`.github/scripts/verifyWheel.py`).
+- **재발 가드**: wheel-smoke gate 가 accountMappings 포함 검증.
+- **학습**: data file 포함 여부 *명시 검증* 필수. 단순 wheel 빌드만으로 보장 X.
+
+---
+
+## 2026-05-08 — extras 분리 룰 같은 세션 내 2 번 위반
+
+- **분류**: tooling-regression
+- **영향 범위**: `[project.optional-dependencies]` (`[viz]`/`[server]`/등) 도입 시도 2 회.
+- **지속 시간**: 단일 sprint.
+- **증상**: dartlab single base install 단일 SSOT 룰 위반 시도.
+- **원인**: 사용자 명시 룰 미인지 + LLM 의 일반 OSS 패턴 추론.
+- **수정**: `feedback_no_extras_install.md` 메모리 박음.
+- **재발 가드**: pyproject `[project.optional-dependencies]` 그룹 도입 금지 강행.
+- **학습**: 일반 OSS 패턴 ≠ dartlab 룰. 룰 SSOT 우선 확인.
+
+---
+
+## 2026-05-19 — sections chapter row 등록 4 회귀
+
+- **분류**: data-quality
+- **영향 범위**: 공시뷰어 sections 가 chapter row 와 sub-section row 모두 등록해야 catch-all 회귀 차단. 4 회귀.
+- **지속 시간**: 약 1 주.
+- **증상**: 2026Q1 분기보고서의 '기재하지 아니하였습니다' placeholder 가 엉뚱한 textPath 에 박힘.
+- **원인**:
+  1. catch-all 중복 블록이 sub-section 블록과 alias
+  2. chapter row 만 등록 시 sub-section 의 unique block 손실
+- **수정**: chapter content 의 block 중 sub-section line set 에 없는 unique block 만 lonely-등록.
+- **재발 가드**: sections regex audit 강화 + lonely block 보존 룰.
+- **학습**: 등록 정책 변경 시 *기존 unique data* 손실 가능성 검증 필수.
+
+---
+
 ## 2026-05-21 — DART XML body.iter() 재귀 nested duplication
 
 - **분류**: regression
