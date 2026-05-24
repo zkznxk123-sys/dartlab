@@ -72,7 +72,11 @@ class SecretStore(Protocol):
 
 
 class EnvSecretStore:
-    """os.environ 기반 SecretStore — 기본 backend.
+    """os.environ 기반 SecretStore — 기본 backend (T10-4).
+
+    Capabilities:
+        프로세스 환경변수를 SecretStore Protocol 로 wrap. .env 파일 자동 로드와
+        조합하여 *zero-config* 자격증명 저장. 영구 저장 X (프로세스 한정).
 
     Example:
         >>> store = EnvSecretStore()
@@ -81,6 +85,18 @@ class EnvSecretStore:
         'value'
         >>> store.get("MISSING_KEY") is None
         True
+
+    Guide:
+        영구 저장 필요 시 .env 파일 직접 수정 또는 후속 KeyringSecretStore /
+        FileSecretStore 사용.
+
+    SeeAlso:
+        SecretStore Protocol: 인터페이스.
+        registerSecretStore: 교체.
+        core.env.loadEnv: .env 자동 로드.
+
+    AIContext:
+        T2-3 보안 트랙 기본 구현. 모든 dartlab 환경에서 동작 (외부 의존성 0).
     """
 
     def get(self, key: str) -> str | None:
