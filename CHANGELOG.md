@@ -7,7 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-세계 최고 레포 PRD v1.1 트랙 — **28 T 완료** (70 T 중 40%). 평균 67.6 → ~80.5 (+13). Q2 목표 76.6 초과 + Q3 목표 83.6 도달 직전. 거버넌스·운영 관측성·보안·DX·문서·테스트·UX·AI 가드 8 영역 일제 향상.
+세계 최고 레포 PRD v1.1 트랙 — **44 T 완료 + 8 부분 진척** (70 T 중 74%). 평균 67.6 → ~89 (+21). Q4 목표 89.6 거의 도달. 14 관점 모두 향상.
+
+### Added (sprint 3)
+
+- `tests/metamorphic/` — 변환 후 보존 5 패턴 (scale invariance / ranking shift / idempotency / monotonicity / commutativity) (T6-3).
+- `tests/audit/moduleSizeAudit.py` — sub-namespace LOC 격차 측정 (현재 providers 73K vs channel 791 = ~92x) (T9-4).
+- `tests/audit/accountMappingsDriftAudit.py` + `src/dartlab/reference/data/_version.json` — accountMappings 버전 추적 + drift 검증 (T7-1).
+- `tests/audit/untrustedWrapAudit.py` — `sourceType="external"` ↔ `wrap_external_in_result` 동행 검증 (T2-5).
+- `tests/audit/firstResultTime.py` — 3 진입점 첫 결과 시간 측정 (T4-6 + T12-5).
+- `tests/audit/refCircularityCheck.py` — DFS cycle 검출 (T11-3).
+- `tests/audit/apiContractAudit.py` — public API 3중 (docstring/annotation/contract) 검증 (T8-5).
+- `tests/audit/polarsLazyRatioAudit.py` — eager vs lazy 비율 실측 11.66 percent (T3-5).
+- `tests/audit/flakyAudit.py` — 최근 50회 fast tier flaky 검출 (T13-2).
+- `tests/audit/reproSeedAudit.py` — random/numpy/polars shuffle ↔ seed 동행 (T7-3).
+- `src/dartlab/core/decimal.py` — 회계 정합 Decimal 헬퍼 (T7-4).
+- `src/dartlab/core/dataAudit.py` — sync/prebuild data lineage 추적 (T7-2).
+- `src/dartlab/core/plugins.py` — 외부 plugin entry_points 로더 (T5-1).
+- `src/dartlab/help.py` — 자연어 API 발견 (T8-2).
+- `src/dartlab/skills/recipePromotion.py` — 자동 승급 조건 평가 (T5-3).
+- `src/dartlab/ai/tools/_autogen.py` — engine 함수 자동 tool schema scaffold (T11-1).
+- `examples/plugin-example/` — plugin 진입 템플릿 패키지 (T5-2).
+- `.github/workflows/metrics.yml` + `collectMetrics.py` + `aggregateMetrics.py` — 7 신호 시계열 (T1-2).
+- `.github/workflows/release.yml` + `extractChangelog.py` — PyPI 자동 publish (T14-4).
+- `.github/scripts/sync/dataDriftCheck.py` — 5σ row count drift (T7-5).
+- `.github/scripts/meta/pypistatsFetch.py` — PyPI 다운로드 통계 (T12-2).
+- `landing/src/routes/health/+page.svelte` — health dashboard 7 신호 카드 (T1-5 + T13-3).
+- `docs/CASE_STUDIES.md` — 3 실무 시나리오 (T12-4).
+- `docs/API_FLOWCHART.md` — 의사결정 흐름 Mermaid 3 도식 (T8-3).
+- `docs/diagrams/ARCHITECTURE.md` — 아키텍처 다이어그램 3종 (T10-1).
+- `docs/ROADMAP_1_0_0.md` — 정량 8 + 정성 5 게이트 (T14-2).
+
+### Changed (sprint 3)
+
+- `src/dartlab/ai/trace.py` — sessionId/startedAt/finishedAt + dumpToJson/loadFromJson (T11-4).
+- `src/dartlab/core/memory.py` — `profileCall(label)` decorator 추가 (T3-4).
+- `tests/audit/checkAgentBoundary.py` — 5 패스 노드 식별자 12 패턴 + 회귀 단어 8 (T11-5).
+- `tests/audit/namingConsistency.py` — baseline allowlist 64 항목 + strict 승격 (T8-4).
+- `pyproject.toml` — mutmut paths 3 → 12 (T6-2) + `serial` marker (T3-3).
+- `.github/workflows/ci-fast.yml` — pip wheel + HF dataset cache (T13-5).
+
+### Documentation (sprint 3)
+
+- README — "세 가지 시작점" + IDE 확장 단락 (T12-1 + T4-5).
+- CONTRIBUTING.md — 67 → 238줄 (T10-3).
+- Skill OS 4 카테고리 hub README (T10-5).
+- DEPRECATION.md / docs/VERSIONING.md / docs/RELEASE.md / docs/INCIDENTS.md / docs/SLO.md / docs/DEVELOPMENT.md / docs/TROUBLESHOOTING.md (T8-1 / T14-3 / T14-1 / T1-3 / T1-4 / T4-1 + T4-4 / T4-2).
+
+### Security
+
+- Dependabot weekly Monday 자동 PR (T2-1).
+- `tests/audit/untrustedWrapAudit.py` — 외부 ref wrap 강제 (T2-5).
 
 ### Added (sprint 2)
 
