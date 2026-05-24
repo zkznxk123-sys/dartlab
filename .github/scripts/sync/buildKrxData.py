@@ -268,6 +268,19 @@ def main() -> int:
         if counts:
             result = deployKrxToHF(outDir, repoId=args.repo_id)
             print(f"[hf] {result}")
+            # T7-2 — sync 단계 data lineage 자동 기록
+            try:
+                from dartlab.core.dataAudit import recordLineage
+
+                rowCountTotal = sum(counts.values()) if isinstance(counts, dict) else 0
+                recordLineage(
+                    source="KRX prices",
+                    version=args.end or "incremental",
+                    rowCount=rowCountTotal,
+                    extra={"mode": args.mode, "outDir": str(outDir)},
+                )
+            except ImportError:
+                pass  # dartlab 미설치 환경 graceful
         else:
             print("[hf] 변경된 KRX 데이터 없음 — HF push skip")
 
