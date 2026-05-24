@@ -121,8 +121,11 @@ htmlcov/
 
 # Removed sandbox dirs — never track again
 /experiments/
-/examples/
 /spaces/
+# examples/ — sandbox 였으나 T5-2 트랙으로 plugin example 패키지는 tracking 재개.
+# plugin-example 외 sandbox 잔여는 별도 정리.
+/examples/*
+!/examples/plugin-example/
 
 # Local git hooks (제공자별 셋업 — 추적 안 함)
 /.githooks/
