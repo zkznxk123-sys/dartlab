@@ -207,19 +207,74 @@ def _printLongerCycles(cycles: list[tuple[str, ...]], maxShow: int = 10) -> None
         print(f"  ... ({len(cycles) - maxShow} 종 추가, 2-cycle 해소 시 대부분 자동 정리)")
 
 
+def _baselineFile() -> Path:
+    """T9-3 baseline 위치."""
+    return Path(__file__).resolve().parent / "_baselines" / "cycleScan.json"
+
+
+def _loadBaseline() -> dict:
+    """T9-3 — baseline JSON 로드. 형식: {twoCycleCount, longerCycleCount, measuredAt}."""
+    import json as _json
+
+    path = _baselineFile()
+    if not path.exists():
+        return {}
+    try:
+        return _json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, _json.JSONDecodeError):
+        return {}
+
+
+def _saveBaseline(twoCount: int, longerCount: int) -> None:
+    """T9-3 — 현재 cycle 카운트를 baseline 으로 저장."""
+    import datetime as _dt
+    import json as _json
+
+    path = _baselineFile()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = {
+        "twoCycleCount": twoCount,
+        "longerCycleCount": longerCount,
+        "measuredAt": _dt.datetime.now(_dt.UTC).isoformat(),
+    }
+    path.write_text(_json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+
+
 def main(argv: list[str]) -> int:
-    """엔트리포인트 — CLI 옵션 파싱 후 _buildGraph + _findCycles 실행."""
+    """엔트리포인트 — CLI 옵션 파싱 후 _buildGraph + _findCycles 실행.
+
+    T9-3 — `--update-baseline` 옵션 추가. baseline 대비 신규 cycle 증가 시 strict
+    모드에서 차단. 현재 cycle 5+140 → baseline 부채 원장 후 monthly 정리.
+    """
     toplevelOnly = "--strict-toplevel" in argv
     strict = "--strict" in argv or toplevelOnly
+    updateBaseline = "--update-baseline" in argv
+
     graph = _buildGraph(toplevelOnly=toplevelOnly)
     twoCycles, longerCycles = _findCycles(graph)
     mode = "top-level only" if toplevelOnly else "전수 (lazy 포함)"
+
+    if updateBaseline:
+        _saveBaseline(len(twoCycles), len(longerCycles))
+        print(f"[cycle-scan] baseline 갱신 — 2-cycle {len(twoCycles)} / longer {len(longerCycles)}")
+        return 0
+
     if not twoCycles and not longerCycles:
         print(f"[cycle-scan/{mode}] OK — {len(graph)} 패키지 분석, cycle 0 건.")
         return 0
     print(f"[cycle-scan/{mode}] 양방향 cycle (2-cycle) {len(twoCycles)} 건 — 차단 대상:")
     _print2Cycles(twoCycles)
     _printLongerCycles(longerCycles)
+
+    # T9-3 — baseline 비교
+    baseline = _loadBaseline()
+    if baseline:
+        twoDelta = len(twoCycles) - baseline.get("twoCycleCount", 0)
+        longerDelta = len(longerCycles) - baseline.get("longerCycleCount", 0)
+        print(f"\n[cycle-scan] baseline 대비 delta: 2-cycle {twoDelta:+d} / longer {longerDelta:+d}")
+        if twoDelta > 0 or longerDelta > 0:
+            print("[cycle-scan] WARN — cycle 증가 (monthly 정리 quota 위반)")
+
     print(
         "\n정책 SSOT: src/dartlab/skills/specs/operation/architecture.md\n"
         "  - 상하 단방향: L0 ← L1 ← L1.5 ← L2 ← L3 ← L4\n"
