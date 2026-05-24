@@ -19,8 +19,8 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src" / "dartlab"
-MANIFEST_PATH = REPO_ROOT / "scripts" / "audit" / "publicApiScenarios.yml"
-BUDGET_PATH = REPO_ROOT / "scripts" / "audit" / "resourceBudgets.json"
+MANIFEST_PATH = REPO_ROOT / "tests" / "audit" / "publicApiScenarios.yml"
+BUDGET_PATH = REPO_ROOT / "tests" / "audit" / "resourceBudgets.json"
 
 
 @dataclass(frozen=True)

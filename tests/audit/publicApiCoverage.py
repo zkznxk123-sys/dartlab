@@ -16,7 +16,7 @@ from typing import Any
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MANIFEST_PATH = REPO_ROOT / "scripts" / "audit" / "publicApiScenarios.yml"
+MANIFEST_PATH = REPO_ROOT / "tests" / "audit" / "publicApiScenarios.yml"
 
 
 def _loadManifest(path: Path) -> dict[str, Any]:

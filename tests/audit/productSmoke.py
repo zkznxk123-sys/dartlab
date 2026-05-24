@@ -23,8 +23,8 @@ from typing import Any, Callable
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MANIFEST_PATH = REPO_ROOT / "scripts" / "audit" / "publicApiScenarios.yml"
-BUDGET_PATH = REPO_ROOT / "scripts" / "audit" / "resourceBudgets.json"
+MANIFEST_PATH = REPO_ROOT / "tests" / "audit" / "publicApiScenarios.yml"
+BUDGET_PATH = REPO_ROOT / "tests" / "audit" / "resourceBudgets.json"
 SAMSUNG = "005930"
 
 
