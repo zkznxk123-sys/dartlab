@@ -148,4 +148,86 @@ class DocsSchema(pa.DataFrameModel):
         coerce = False
 
 
-__all__ = ["DocsSchema", "FinanceSchema", "ReportSchema"]
+# T6-4 — 추가 schema 4 종. metrics workflow + scan + macro + credit 결과의 contract 강제.
+
+
+class ScanResultSchema(pa.DataFrameModel):
+    """scan engine 결과 표 계약 (T6-4).
+
+    Capabilities: dartlab.scan() 결과 DataFrame 의 핵심 컬럼 검증.
+    Args: 없음.
+    Returns: pandera Schema.
+    Example:
+        >>> ScanResultSchema.validate(result.table, lazy=True)
+    Guide: percentile / ranking / score 컬럼 nullable False 강제.
+    SeeAlso: FinanceSchema · ReportSchema.
+    Requires: pandera[polars] >= 0.29.
+    AIContext: scan recipe 결과의 schema drift 차단.
+    Raises: pandera.errors.SchemaError.
+    """
+
+    code: Series[str] = pa.Field(nullable=False)
+    corpName: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — recipe 별 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class CreditScoreSchema(pa.DataFrameModel):
+    """credit engine 결과 표 계약 (T6-4).
+
+    Z-score / zone / 4 component 컬럼 검증.
+    """
+
+    score: Series[float] = pa.Field(nullable=True)
+    zone: Series[str] = pa.Field(nullable=True, isin=["safe", "gray", "distress"])
+
+    class Config:
+        """strict=False — Z-score component 4 컬럼 등 추가 허용."""
+
+        strict = False
+        coerce = False
+
+
+class MacroCycleSchema(pa.DataFrameModel):
+    """macro engine cycle 결과 표 계약 (T6-4).
+
+    regime / pmi / 날짜 컬럼 검증.
+    """
+
+    regime: Series[str] = pa.Field(nullable=True, isin=["expansion", "peak", "contraction", "trough"])
+
+    class Config:
+        """strict=False — 보조 메타 허용."""
+
+        strict = False
+        coerce = False
+
+
+class MetricsSignalSchema(pa.DataFrameModel):
+    """metrics workflow 산출물 계약 (T6-4, T1-2 정합).
+
+    7 신호 의 시계열 dict 가 pl.DataFrame 으로 변환되었을 때.
+    """
+
+    signalName: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — latest/min/max/avg 등 통계 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+__all__ = [
+    "DocsSchema",
+    "FinanceSchema",
+    "ReportSchema",
+    "ScanResultSchema",
+    "CreditScoreSchema",
+    "MacroCycleSchema",
+    "MetricsSignalSchema",
+]
