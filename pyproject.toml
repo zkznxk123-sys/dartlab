@@ -217,14 +217,32 @@ markers = [
 # 결과: uv run mutmut results
 # 목표: mutation score ≥ 80%
 [tool.mutmut]
+# T6-2 — paths 3 → 12 확장. core/ 핵심 헬퍼 + analysis/credit 계산 + scan/synth 결합 4 영역.
+# 1.0.0 게이트: 30 모듈 ≥ 80% mutation score (TODO 부록 C / docs/ROADMAP_1_0_0.md).
 paths_to_mutate = [
+    # core/ — 기존
     "src/dartlab/core/formatting.py",
     "src/dartlab/core/cache.py",
     "src/dartlab/core/naming/__init__.py",
+    # core/ — 신규
+    "src/dartlab/core/decimal.py",
+    "src/dartlab/core/random.py",
+    "src/dartlab/core/types.py",
+    "src/dartlab/core/utils.py",
+    # analysis/ — 재무 계산
+    "src/dartlab/analysis/ratios.py",
+    "src/dartlab/analysis/cashflow.py",
+    # credit/ — Z-score
+    "src/dartlab/credit/altman.py",
+    # quant/ — factor
+    "src/dartlab/quant/factors.py",
+    # macro/ — cycle
+    "src/dartlab/macro/cycle.py",
 ]
-tests_dir = "tests/core/"
+tests_dir = "tests/"
 runner = "uv run python -X utf8 -m pytest -x -m unit --no-cov -q"
 # CI 통합은 주간 cron — 매 PR fail gate 는 아님 (시간 비용 큼).
+# 신규 path 가 존재하지 않는 경우 mutmut 가 skip — pyproject 가 ground truth.
 
 [tool.coverage.run]
 source = ["dartlab"]
