@@ -115,14 +115,20 @@ def isClose(a: Any, b: Any, *, absTol: str | Decimal = "0.001") -> bool:
 
 
 def safeDivide(numerator: Any, denominator: Any, *, default: Decimal = Decimal("0")) -> Decimal:
-    """0 분모 안전 나눗셈 — 재무비율 계산의 경계 처리.
+    """0 분모 안전 나눗셈 — 재무비율 계산의 경계 처리 (T10-4).
+
+    Capabilities:
+        분모가 0 / None / 변환 실패 시 raise 대신 default 반환. 재무비율 (PBR /
+        PER / ROA / ROE / DSCR) 계산의 *0 분모 사고* 차단.
 
     Args:
         numerator: 분자.
         denominator: 분모.
-        default: 분모 0 또는 None 시 반환.
+        default: 분모 0 또는 None 시 반환 (기본 Decimal("0")).
+
     Returns:
         Decimal.
+
     Example:
         >>> safeDivide(100, 0)
         Decimal('0')
@@ -130,6 +136,24 @@ def safeDivide(numerator: Any, denominator: Any, *, default: Decimal = Decimal("
         Decimal('NaN')
         >>> safeDivide("100.0", "3.0")
         Decimal('33.33333333333333333333333333')
+
+    Guide:
+        Polars DataFrame 안 비율 계산은 별도 패턴 — 본 함수는 *단일 값* 경계.
+
+    SeeAlso:
+        toDecimal: 안전 변환.
+        roundDecimal: 반올림.
+        isClose: 동등 비교.
+
+    Requires:
+        Decimal context (prec=28, ROUND_HALF_EVEN, 본 모듈이 자동 설정).
+
+    AIContext:
+        T7-4 (회계 정합 트랙) 의 핵심. analysis/ratios / credit/altman 등 재무
+        비율 계산의 일관된 경계 처리.
+
+    Raises:
+        없음 — 모든 입력 케이스가 default 또는 정상 값으로 처리.
     """
     num = toDecimal(numerator, default=Decimal("0"))
     den = toDecimal(denominator, default=Decimal("0"))
