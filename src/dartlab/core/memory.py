@@ -765,3 +765,77 @@ class OomTripwire:
                 self._exiter(rss)
                 return
             self._stop.wait(self._intervalSec)
+
+
+# ── T3-4 — profileCall decorator ──
+
+
+def profileCall(label: str, *, logEventFn: Callable[..., None] | None = None) -> Callable[[F], F]:
+    """함수 호출의 *진입/이탈 RSS + 시간* 자동 측정 + logEvent 발급.
+
+    T1-1 logEvent (구조화 로그) 와 통합. 6 facade API (Company.show / scan.* /
+    Story.compose / ask / EngineCall / MCP tool) 에 부착 → metrics workflow
+    (T1-2) 가 grep 으로 P50/P95 latency + memory peak 추출.
+
+    Args:
+        label: event 식별자 (snake_case 권장, 예: "company_show", "scan_foreign_flow").
+        logEventFn: 주입 가능한 이벤트 발급 함수. None 이면 core.logger.logEvent
+            를 lazy import (순환 import 회피).
+
+    Returns:
+        데코레이터.
+
+    Example:
+        >>> from dartlab.core.memory import profileCall
+        >>> @profileCall("company_show")
+        ... def show(self, topic): ...
+
+    Guide:
+        본 decorator 는 *측정 only* — 임계값 초과 시 raise 하지 않는다. 그건
+        ``withMemoryBudget`` 의 역할. 본 decorator 는 metrics 수집 진입점.
+
+    SeeAlso:
+        core.logger.logEvent — 구조화 이벤트 (T1-1)
+        withMemoryBudget — 임계값 초과 raise (M4)
+
+    Requires:
+        ``time.monotonic`` + ``getMemoryMb``.
+
+    AIContext:
+        Observability KPI (T1) + 성능 KPI (T3-4) 의 단일 진입점. logEvent fields
+        에 ``elapsed_ms`` / ``rss_delta_mb`` / ``rss_peak_mb`` 포함.
+    """
+
+    def decorator(fn: F) -> F:
+        @functools.wraps(fn)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # lazy import — 순환 import 회피 (logger → memory 호출 가능성)
+            emit = logEventFn
+            if emit is None:
+                try:
+                    from dartlab.core.logger import logEvent as _le  # noqa: PLC0415
+
+                    emit = _le
+                except ImportError:
+                    emit = lambda *a, **kw: None  # type: ignore[assignment]  # noqa: E731
+
+            rssBefore = getMemoryMb()
+            tStart = time.monotonic()
+            try:
+                return fn(*args, **kwargs)
+            finally:
+                rssAfter = getMemoryMb()
+                elapsedMs = round((time.monotonic() - tStart) * 1000, 2)
+                rssDelta = round(rssAfter - rssBefore, 2)
+                emit(
+                    "info",
+                    label,
+                    elapsed_ms=elapsedMs,
+                    rss_before_mb=round(rssBefore, 2),
+                    rss_after_mb=round(rssAfter, 2),
+                    rss_delta_mb=rssDelta,
+                )
+
+        return wrapper  # type: ignore[return-value]
+
+    return decorator
