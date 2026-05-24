@@ -1,0 +1,147 @@
+name: Release
+
+# T14-4 — PyPI 자동 publish. git tag `v*.*.*` push 시 트리거.
+# 전체 흐름: full gate → wheel build → test.pypi smoke → pypi 본 업로드 → gh release.
+# 짝: docs/RELEASE.md 12 체크리스트, docs/ROADMAP_1_0_0.md.
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+rc[0-9]+"   # release candidate 도 허용
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "업로드 대상"
+        type: choice
+        options: [testpypi, pypi]
+        default: testpypi
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false   # 진행 중 release 는 절대 중단 금지
+
+permissions:
+  contents: write   # gh release create
+  id-token: write   # PyPI OIDC trusted publisher
+
+jobs:
+  preflight:
+    name: Preflight (full gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Run full tier gates
+        run: python -X utf8 tests/run.py full
+      - name: Verify CHANGELOG has version section
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
+            echo "CHANGELOG.md 에 [$VERSION] 섹션 없음 — RELEASE.md 체크리스트 1 위반"
+            exit 1
+          fi
+
+  build:
+    name: Build wheel + sdist
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install build
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+      - name: Build distributions
+        run: python -m build --wheel --sdist --outdir dist
+      - name: Verify wheel + sdist
+        run: twine check dist/*
+      - name: Verify wheel install smoke
+        run: |
+          WHL=$(ls dist/*.whl | head -n1)
+          python -X utf8 .github/scripts/verifyWheel.py "$WHL"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: dist
+          path: dist/
+          retention-days: 90
+
+  testpypi:
+    name: Upload to test.pypi.org
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi   # GitHub Environment + 보호 규칙
+    if: ${{ github.event_name == 'push' || github.event.inputs.target == 'testpypi' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+      - name: Smoke install from test.pypi
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          python -m pip install --upgrade pip
+          # test.pypi 의 propagation 대기
+          for i in 1 2 3 4 5; do
+            pip install -i https://test.pypi.org/simple/ \
+              --extra-index-url https://pypi.org/simple/ \
+              "dartlab==${VERSION}" && break || sleep 30
+          done
+          python -X utf8 -c "import dartlab; print('test.pypi install OK:', dartlab.__version__)"
+
+  pypi:
+    name: Upload to pypi.org
+    needs: testpypi
+    runs-on: ubuntu-latest
+    environment: pypi   # GitHub Environment 보호 + manual approval 권장
+    if: ${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, 'rc') }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        # OIDC trusted publisher — token 없이 발행 (configure at pypi.org/manage/account/publishing/)
+
+  github-release:
+    name: GitHub Release notes
+    needs: pypi
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with:
+          name: dist
+          path: dist/
+      - name: Extract version section from CHANGELOG
+        id: notes
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          python -X utf8 .github/scripts/meta/extractChangelog.py \
+            --version "$VERSION" \
+            --output release-notes.md
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file release-notes.md \
+            dist/*.whl dist/*.tar.gz
