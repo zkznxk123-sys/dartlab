@@ -73,18 +73,57 @@ def evaluatePromotion(
     incidentsIn30Days: int | None = None,
     userManualOk: bool = False,
 ) -> PromotionEvaluation:
-    """자동 승급 조건 평가 — 사용자 의사결정 입력.
+    """recipe 자동 승급 조건 평가 — 사용자 의사결정 입력 (T10-4).
+
+    Capabilities:
+        recipe lifecycle 의 현재 단계에서 다음 단계로의 자동 승급 가능 여부
+        평가. drafted → tested 는 coverage / mutation / PR fail 3 신호.
+        tested → verified 는 incidents 0 + manual OK 2 신호. 단순 *평가 제안*
+        — 실제 status 변경은 운영자 수동 (recipePromote CLI).
 
     Args:
         recipeName: 평가 대상 recipe 이름 (예: "foreignBuyMomentum").
-        currentStage: 현재 단계.
-        coverage: unit test 커버리지 percent.
-        mutationScore: mutmut 결과 percent.
-        prFailIn24h: 최근 24h 안 PR fail 횟수.
-        incidentsIn30Days: 30 일 incidents 누적 건수.
-        userManualOk: 사용자 manual OK 여부.
+        currentStage: 현재 단계 (drafted/unverified/tested/verified/curated/deprecated).
+        coverage: unit test 커버리지 percent (drafted → tested).
+        mutationScore: mutmut 결과 percent (drafted → tested).
+        prFailIn24h: 최근 24h 안 PR fail 횟수 (drafted → tested).
+        incidentsIn30Days: 30 일 incidents 누적 건수 (tested → verified).
+        userManualOk: 사용자 manual OK 여부 (tested → verified, 필수).
+
     Returns:
-        PromotionEvaluation — recommended 여부 + 사유.
+        PromotionEvaluation — recommended 여부 + targetStage + reason +
+        failedConditions + metrics 5 필드 dataclass.
+
+    Example:
+        >>> from dartlab.skills.recipePromotion import evaluatePromotion
+        >>> result = evaluatePromotion(
+        ...     recipeName="foreignBuyMomentum",
+        ...     currentStage="drafted",
+        ...     coverage=92.5,
+        ...     mutationScore=85.0,
+        ...     prFailIn24h=0,
+        ... )
+        >>> result.recommended
+        True
+
+    Guide:
+        본 함수는 *평가만 수행*. 실제 status frontmatter 변경은 운영자가 직접
+        recipePromote.py CLI 호출 (CLAUDE.md `feedback_recipe_lifecycle` 룰).
+
+    SeeAlso:
+        PromotionEvaluation: 결과 dataclass.
+        src/dartlab/skills/recipePromote.py: 실제 status 변경 CLI.
+
+    Requires:
+        coverage / mutation / PR / incident 수치는 외부 (CI / metrics workflow)
+        에서 측정 후 전달.
+
+    AIContext:
+        T5-3 확장성 트랙. recipe 자가개선 사다리 (drafted ~ deprecated) 의 핵심.
+
+    Raises:
+        없음 — currentStage 가 evaluation 대상 아니면 recommended=False + reason
+        만 반환.
     """
     if currentStage == "drafted":
         return _evaluateDraftedToTested(
