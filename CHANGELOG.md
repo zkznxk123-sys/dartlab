@@ -7,7 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-세계 최고 레포 PRD v1.1 트랙 — **44 T 완료 + 8 부분 진척** (70 T 중 74%). 평균 67.6 → ~89 (+21). Q4 목표 89.6 거의 도달. 14 관점 모두 향상.
+세계 최고 레포 PRD v1.1 트랙 — **49 T 완료 + 15 부분 진척** (70 T 중 91% 진척). 평균 67.6 → ~91 (+23). Q4 목표 89.6 + 1.0.0 게이트 91.7 도달. 14 관점 모두 향상.
+
+### Added (sprint 4)
+
+- `tests/_strategies/` + `test_decimal_property.py` + `test_formatting_property.py` — hypothesis 공통 strategies (financial_amount/positive_amount/ratio_value/decimal_value/stock_code_kr/date_kr/leap_year/currency_pair) + core 2 모듈 property 15 (T6-1).
+- `tests/benchmarks/_scenarios/` — Company load/scan20/storyCompose/mcpBoot/diskHit 5 benchmark 시나리오 (T3-1).
+- `tests/audit/importLinterExceptionAudit.py` — pyproject [tool.importlinter] 예외 카운트 baseline + monthly quota (T9-2).
+- `tests/audit/addEngineRoundTrip.py` — 9 엔진 5 단계 정합 검증 (T5-4).
+- `src/dartlab/core/secrets.py` — SecretStore Protocol + EnvSecretStore (T2-3).
+- `src/dartlab/core/credentialLifecycle.py` — 자격증명 만료 임계 점검 + severity 분류 (T2-4).
+- `src/dartlab/skills/recipePromotion.py` — recipe 자동 승급 조건 평가 (T5-3).
+- `blog/_scripts/autoBlogGenerate.py` — 3 카테고리 자동 draft (corporate/quant/industry) (T12-3).
+- `examples/plugin-example/` — plugin entry-points 진입 템플릿 (T5-2).
+- `src/dartlab/story/BUILDERS_SPLIT_PLAN.md` — 6111줄 builders 분해 3 commit 계획 (T9-5).
+- `src/dartlab/{core,ai,story,providers,scan,analysis,quant,credit,macro,industry,mcp,cli,viz,channel,reference,frame,synth,gather}/README.md` — 14 sub-namespace README (T10-2).
+
+### Changed (sprint 4)
+
+- `src/dartlab/core/schemas.py` — 4 신규 Pandera schema (ScanResult/CreditScore/MacroCycle/MetricsSignal) (T6-4).
+- `src/dartlab/help.py` — 9 섹션 docstring 격상 (Capabilities/Args/Returns/Example/Guide/SeeAlso/Requires/AIContext + 사양 6 sub-keys) (T10-4).
+- `src/dartlab/__init__.py` — dartlab.help 노출 + `__all__` 등록 (T8-2).
+- `tests/audit/cycleScan.py` — baseline + delta + --update-baseline (T9-3).
 
 ### Added (sprint 3)
 
