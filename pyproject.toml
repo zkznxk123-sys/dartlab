@@ -207,6 +207,8 @@ markers = [
     "etl: ETL 산출물 검증 (parquet row group 메타, IPC mirror 동기성)",
     # Phase B/D — 메모리 회귀 가드 (RSS 측정).
     "memory: RSS 회귀 가드 — Company 1개 분석 시 peak RSS 검증",
+    # T3-3 — pytest-xdist serial 강제. Company / OOM 위험 테스트는 단일 worker 에서만.
+    "serial: pytest-xdist 병렬 제외 (Company 인스턴스 / Polars 힙 OOM 위험 / 전역 상태 변경)",
 ]
 
 # ════════════════════════════════════════════════════════════════════
