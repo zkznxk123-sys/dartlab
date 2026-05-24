@@ -61,13 +61,38 @@ def _todayFile(baseDir: Path | None = None) -> Path:
 
 
 def appendLineage(record: dict[str, Any], *, baseDir: Path | None = None) -> Path:
-    """단일 lineage 항목을 오늘자 jsonl 에 append.
+    """단일 lineage 항목을 오늘자 jsonl 에 append (T10-4).
+
+    Capabilities:
+        dict 형식 record 를 그대로 jsonl line append. recordLineage 의 lower-level
+        API — 임의 metadata 전달 가능.
 
     Args:
-        record: lineage dict (source / version / downloadedAt 등).
+        record: lineage dict.
         baseDir: 저장 root override (테스트용).
+
     Returns:
         쓰여진 jsonl 파일 경로.
+
+    Example:
+        >>> from dartlab.core.dataAudit import appendLineage
+        >>> appendLineage({"source": "custom", "value": 42})
+
+    Guide:
+        recordLineage 가 더 strict (필수 필드 명시). appendLineage 는 자유.
+
+    SeeAlso:
+        recordLineage: 사용자 친화 wrapper.
+        readLineage: 조회.
+
+    Requires:
+        쓰기 권한.
+
+    AIContext:
+        T7-2 데이터 거버넌스 트랙 lower-level entry.
+
+    Raises:
+        OSError: 디스크 쓰기 실패.
     """
     record = {"recordedAt": dt.datetime.now(dt.UTC).isoformat(), **record}
     filePath = _todayFile(baseDir)
@@ -153,14 +178,41 @@ def readLineage(
     source: str | None = None,
     baseDir: Path | None = None,
 ) -> list[dict[str, Any]]:
-    """저장된 lineage 조회 — 최근 N 일 + source 필터 옵션.
+    """저장된 lineage 조회 — 최근 N 일 + source 필터 옵션 (T10-4).
+
+    Capabilities:
+        data/_lineage/{date}.jsonl 파일들을 읽어 rolling window 안 record 만
+        반환. metrics workflow (T1-2) 가 본 함수로 시계열 수집.
 
     Args:
-        sinceDays: rolling window 일 수.
+        sinceDays: rolling window 일 수 (기본 30).
         source: 특정 source 만 (None 이면 전체).
         baseDir: 저장 root override.
+
     Returns:
         시간 순서 (recordedAt asc) 정렬된 dict 리스트.
+
+    Example:
+        >>> from dartlab.core.dataAudit import readLineage
+        >>> records = readLineage(sinceDays=7, source="DART OpenAPI")
+        >>> for r in records:
+        ...     print(r["recordedAt"], r["version"])
+
+    Guide:
+        대용량 lineage 시 sinceDays 축소 권장. baseDir 미지정 시 cwd 기준.
+
+    SeeAlso:
+        recordLineage / appendLineage.
+        dataDriftCheck (T7-5): drift 검출.
+
+    Requires:
+        data/_lineage/ 존재 (없으면 빈 리스트).
+
+    AIContext:
+        T7-2 데이터 거버넌스 트랙. metrics workflow 통합.
+
+    Raises:
+        없음 — invalid jsonl line silent skip.
     """
     baseDir = baseDir or _defaultLineageDir()
     if not baseDir.is_dir():
