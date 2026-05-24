@@ -145,9 +145,43 @@ def _scanFile(path: Path, aliasIndex: dict[str, tuple[str, str]]) -> list[Violat
     return violations
 
 
+def _baselineFile() -> Path:
+    """T8-4 — baseline allowlist 위치."""
+    return Path(__file__).resolve().parent / "_baselines" / "namingConsistency.json"
+
+
+def _loadBaseline() -> set[str]:
+    """기존 baseline 항목 set — 'path:line:argName' 형식."""
+    path = _baselineFile()
+    if not path.exists():
+        return set()
+    import json as _json
+
+    data = _json.loads(path.read_text(encoding="utf-8"))
+    return set(data.get("violations", []))
+
+
+def _saveBaseline(violations: list[Violation]) -> None:
+    """현재 위반을 baseline 으로 저장."""
+    path = _baselineFile()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    import json as _json
+
+    items = sorted({f"{v.path}:{v.line}:{v.argName}" for v in violations})
+    path.write_text(
+        _json.dumps(
+            {"violations": items, "note": "T8-4 baseline — 신규 위반만 strict 차단"},
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
 def main(argv: list[str]) -> int:
-    """엔트리포인트 — aliases.json 로드 후 src/ 전수 스캔."""
+    """엔트리포인트 — aliases.json 로드 후 src/ 전수 스캔. T8-4 baseline allowlist 지원."""
     strict = "--strict" in argv
+    updateBaseline = "--update-baseline" in argv
     aliases = _loadAliases()
     if not aliases:
         print("[naming-consistency] aliases.json 비어있음 (P5 에서 채워짐) — placeholder 통과.")
@@ -165,14 +199,37 @@ def main(argv: list[str]) -> int:
             continue
         fileCount += 1
         allViolations.extend(_scanFile(py, aliasIndex))
+
+    if updateBaseline:
+        _saveBaseline(allViolations)
+        print(f"[naming-consistency] baseline 갱신 — {len(allViolations)} 항목")
+        return 0
+
     if not allViolations:
         print(f"[naming-consistency] OK — {fileCount} 파일 검사, 위반 0 건.")
         return 0
-    print(f"[naming-consistency] 위반 {len(allViolations)} 건:")
-    for v in allViolations:
-        print(v.format())
+
+    # T8-4 — baseline 부채 원장 비교
+    baseline = _loadBaseline()
+    newViolations = [v for v in allViolations if f"{v.path}:{v.line}:{v.argName}" not in baseline]
+
+    print(
+        f"[naming-consistency] 전체 위반 {len(allViolations)} 건 (baseline {len(baseline)}, 신규 {len(newViolations)}):"
+    )
+    if newViolations:
+        for v in newViolations[:20]:
+            print(v.format())
+        if len(newViolations) > 20:
+            print(f"  ... 외 {len(newViolations) - 20}건")
+    else:
+        print("[naming-consistency] OK — baseline 변동 없음 (전체 위반은 부채 원장으로 추적)")
+
     print("\n룰 SSOT: src/dartlab/core/naming/aliases.json\n  - 같은 의미면 같은 매개변수 이름 강제 (AI 추론 단순화).")
-    return 2 if strict else 0
+    print("  - --strict + 신규 위반 시 exit 2. --update-baseline 으로 baseline 갱신.")
+
+    if strict and newViolations:
+        return 2
+    return 0
 
 
 if __name__ == "__main__":
