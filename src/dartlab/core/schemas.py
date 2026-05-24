@@ -400,6 +400,442 @@ class SectorRotationSchema(pa.DataFrameModel):
         coerce = False
 
 
+class DartFilingMetaSchema(pa.DataFrameModel):
+    """DART 공시 메타 표 계약."""
+
+    rcept_no: Series[str] = pa.Field(nullable=False)
+    rcept_dt: Series[str] = pa.Field(nullable=False)
+    corp_code: Series[str] = pa.Field(nullable=True)
+    report_nm: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class EdgarFilingMetaSchema(pa.DataFrameModel):
+    """EDGAR 공시 메타 표 계약."""
+
+    accession_no: Series[str] = pa.Field(nullable=False)
+    filed_at: Series[str] = pa.Field(nullable=False)
+    form: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class FinancialRatiosSchema(pa.DataFrameModel):
+    """analysis.ratios 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    period: Series[str] = pa.Field(nullable=False)
+    roa: Series[float] = pa.Field(nullable=True)
+    roe: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class CashflowAnalysisSchema(pa.DataFrameModel):
+    """analysis.cashflow 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    period: Series[str] = pa.Field(nullable=False)
+    ocf: Series[float] = pa.Field(nullable=True)
+    fcf: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class GrowthMetricsSchema(pa.DataFrameModel):
+    """analysis.growth 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    period: Series[str] = pa.Field(nullable=False)
+    yoy: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class BeneishScoreSchema(pa.DataFrameModel):
+    """credit.beneish 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    m_score: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class ForeignFlowFactorSchema(pa.DataFrameModel):
+    """quant.foreignFlow factor 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    foreign_holding_pct: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class PortfolioMappingSchema(pa.DataFrameModel):
+    """quant.portfolio.mapping 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    weight: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class SectorMomentumSchema(pa.DataFrameModel):
+    """industry.sectorMomentum 결과 표 계약."""
+
+    sector: Series[str] = pa.Field(nullable=False)
+    momentum_score: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class DisclosureLatencySchema(pa.DataFrameModel):
+    """scan.disclosureLatency 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    latency_hours: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class NewsItemSchema(pa.DataFrameModel):
+    """gather.news 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=True)
+    date: Series[str] = pa.Field(nullable=False)
+    title: Series[str] = pa.Field(nullable=False)
+    url: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class FredSeriesSchema(pa.DataFrameModel):
+    """gather.macro.fred 결과 표 계약."""
+
+    series_id: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    value: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class EcosSeriesSchema(pa.DataFrameModel):
+    """gather.macro.ecos 결과 표 계약."""
+
+    stat_code: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    value: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class KrxPriceSchema(pa.DataFrameModel):
+    """gather.krx 가격 시계열 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    date: Series[str] = pa.Field(nullable=False)
+    open: Series[float] = pa.Field(nullable=True)
+    high: Series[float] = pa.Field(nullable=True)
+    low: Series[float] = pa.Field(nullable=True)
+    close: Series[float] = pa.Field(nullable=True)
+    volume: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class ScenarioMatchSchema(pa.DataFrameModel):
+    """synth.scenarioMatch 결과 표 계약."""
+
+    target_code: Series[str] = pa.Field(nullable=False)
+    matched_code: Series[str] = pa.Field(nullable=False)
+    similarity: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class ScanRatioSchema(pa.DataFrameModel):
+    """scan.scanRatio 결과 표 계약."""
+
+    code: Series[str] = pa.Field(nullable=False)
+    ratio_name: Series[str] = pa.Field(nullable=False)
+    value: Series[float] = pa.Field(nullable=True)
+    percentile: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class CapabilityRefSchema(pa.DataFrameModel):
+    """ReadCapability 검색 결과 표 계약."""
+
+    api_ref: Series[str] = pa.Field(nullable=False)
+    name: Series[str] = pa.Field(nullable=False)
+    kind: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class SkillSpecSchema(pa.DataFrameModel):
+    """Skill OS spec frontmatter 표 계약."""
+
+    key: Series[str] = pa.Field(nullable=False)
+    category: Series[str] = pa.Field(nullable=False, isin=["start", "operation", "runtime", "engines", "recipes"])
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class TraceEventSchema(pa.DataFrameModel):
+    """ai.trace 의 event row 표 계약."""
+
+    kind: Series[str] = pa.Field(nullable=False)
+    at: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class LineageRecordSchema(pa.DataFrameModel):
+    """core.dataAudit lineage 표 계약."""
+
+    source: Series[str] = pa.Field(nullable=False)
+    recorded_at: Series[str] = pa.Field(nullable=False)
+    version: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class CredentialLifecycleSchema(pa.DataFrameModel):
+    """core.credentialLifecycle 표 계약."""
+
+    key: Series[str] = pa.Field(nullable=False)
+    issued_at: Series[str] = pa.Field(nullable=False)
+    expires_at: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class HelpResultSchema(pa.DataFrameModel):
+    """dartlab.help() 결과 표 계약."""
+
+    name: Series[str] = pa.Field(nullable=False)
+    kind: Series[str] = pa.Field(nullable=False)
+    score: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class PluginDescriptorSchema(pa.DataFrameModel):
+    """core.plugins.PluginDescriptor 표 계약."""
+
+    name: Series[str] = pa.Field(nullable=False)
+    module_name: Series[str] = pa.Field(nullable=False)
+    kind: Series[str] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class BenchmarkResultSchema(pa.DataFrameModel):
+    """pytest-benchmark 결과 표 계약."""
+
+    name: Series[str] = pa.Field(nullable=False)
+    p50_ms: Series[float] = pa.Field(nullable=True)
+    p95_ms: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class FlakyGateSchema(pa.DataFrameModel):
+    """flakyAudit 결과 표 계약."""
+
+    sha: Series[str] = pa.Field(nullable=False)
+    outcomes: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class CycleScanSchema(pa.DataFrameModel):
+    """cycleScan 결과 표 계약."""
+
+    cycle_path: Series[str] = pa.Field(nullable=False)
+    length: Series[int] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class ImportLinterExceptionSchema(pa.DataFrameModel):
+    """importLinterExceptionAudit 결과 표 계약."""
+
+    contract_name: Series[str] = pa.Field(nullable=False)
+    exception_count: Series[int] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class NamingViolationSchema(pa.DataFrameModel):
+    """namingConsistency 결과 표 계약."""
+
+    path: Series[str] = pa.Field(nullable=False)
+    func_name: Series[str] = pa.Field(nullable=False)
+    arg_name: Series[str] = pa.Field(nullable=False)
+    standard: Series[str] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class ApiContractSchema(pa.DataFrameModel):
+    """apiContractAudit 결과 표 계약."""
+
+    name: Series[str] = pa.Field(nullable=False)
+    kind: Series[str] = pa.Field(nullable=False)
+    has_docstring: Series[bool] = pa.Field(nullable=False)
+    has_type_annotation: Series[bool] = pa.Field(nullable=False)
+    has_contract_test: Series[bool] = pa.Field(nullable=False)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class DriftAlertSchema(pa.DataFrameModel):
+    """dataDriftCheck 결과 표 계약."""
+
+    table: Series[str] = pa.Field(nullable=False)
+    status: Series[str] = pa.Field(nullable=False, isin=["ok", "drift", "insufficient_baseline"])
+    sigma_delta: Series[float] = pa.Field(nullable=True)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
+class ScoreCardSchema(pa.DataFrameModel):
+    """worldClassScorecard 결과 표 계약."""
+
+    perspective: Series[str] = pa.Field(nullable=False)
+    score: Series[float] = pa.Field(nullable=False, ge=0, le=100)
+
+    class Config:
+        """strict=False — 추가 컬럼 허용."""
+
+        strict = False
+        coerce = False
+
+
 __all__ = [
     "DocsSchema",
     "FinanceSchema",
@@ -421,4 +857,36 @@ __all__ = [
     "SectionTextSchema",
     "RecipeMetadataSchema",
     "SectorRotationSchema",
+    # T6-4 sprint 추가 (30 schema 목표 도달)
+    "DartFilingMetaSchema",
+    "EdgarFilingMetaSchema",
+    "FinancialRatiosSchema",
+    "CashflowAnalysisSchema",
+    "GrowthMetricsSchema",
+    "BeneishScoreSchema",
+    "ForeignFlowFactorSchema",
+    "PortfolioMappingSchema",
+    "SectorMomentumSchema",
+    "DisclosureLatencySchema",
+    "NewsItemSchema",
+    "FredSeriesSchema",
+    "EcosSeriesSchema",
+    "KrxPriceSchema",
+    "ScenarioMatchSchema",
+    "ScanRatioSchema",
+    "CapabilityRefSchema",
+    "SkillSpecSchema",
+    "TraceEventSchema",
+    "LineageRecordSchema",
+    "CredentialLifecycleSchema",
+    "HelpResultSchema",
+    "PluginDescriptorSchema",
+    "BenchmarkResultSchema",
+    "FlakyGateSchema",
+    "CycleScanSchema",
+    "ImportLinterExceptionSchema",
+    "NamingViolationSchema",
+    "ApiContractSchema",
+    "DriftAlertSchema",
+    "ScoreCardSchema",
 ]
