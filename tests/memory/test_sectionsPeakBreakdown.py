@@ -19,14 +19,22 @@ audit baseline (2026-04-22) 13GB → sections() 595MB = 22× / c.story() 836MB =
 
 from __future__ import annotations
 
-import ctypes
 import gc
-from ctypes import byref, sizeof, wintypes
+import sys
 
 import polars as pl
 import pytest
 
-pytestmark = [pytest.mark.memory, pytest.mark.slow, pytest.mark.realData]
+pytestmark = [
+    pytest.mark.memory,
+    pytest.mark.slow,
+    pytest.mark.realData,
+    pytest.mark.skipif(sys.platform != "win32", reason="Windows GetProcessMemoryInfo 전용"),
+]
+
+if sys.platform == "win32":
+    import ctypes
+    from ctypes import byref, sizeof, wintypes
 
 
 class _PMC(ctypes.Structure):
