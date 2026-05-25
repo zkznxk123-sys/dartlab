@@ -191,3 +191,9 @@ export function findRelatedSkills(id: string, limit = 6): SkillDoc[] {
 export function isCatalogSkillId(value: string): boolean {
 	return skillById.has(value);
 }
+
+// prerender-가능 페이지 존재 여부 (allSkillById + componentsById 둘 다 만족).
+// market 페이지 등이 mappedBuiltinSkills 를 link 할 때 미존재 spec ID 차단용.
+export function hasSkillPage(id: string): boolean {
+	return allSkillById.has(id) && componentsById.has(id);
+}

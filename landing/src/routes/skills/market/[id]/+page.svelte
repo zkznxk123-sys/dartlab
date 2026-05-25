@@ -5,6 +5,7 @@
 	import { brand } from '$lib/brand';
 	import { buildAbsoluteUrl, buildBreadcrumbJsonLd, buildWebsiteJsonLd } from '$lib/seo';
 	import { displayTier, tierLabel, type MarketSkill } from '$lib/skills/marketCatalog';
+	import { hasSkillPage } from '$lib/skills/catalog';
 	import { ArrowLeft, ExternalLink, ShieldAlert } from 'lucide-svelte';
 
 	let { data } = $props<{ data: { skill: MarketSkill } }>();
@@ -204,7 +205,11 @@
 				{#if skill.mappedBuiltinSkills?.length}
 					<div class="chips">
 						{#each skill.mappedBuiltinSkills as item}
-							<a href="{base}/skills/{item}">{item}</a>
+							{#if hasSkillPage(item)}
+								<a href="{base}/skills/{item}">{item}</a>
+							{:else}
+								<span class="muted-chip">{item}</span>
+							{/if}
 						{/each}
 					</div>
 				{:else}
@@ -412,7 +417,8 @@
 		gap: 0.4rem;
 	}
 
-	.chips a {
+	.chips a,
+	.chips .muted-chip {
 		padding: 0.2rem 0.5rem;
 		border: 1px solid var(--dl-line);
 		border-radius: 5px;
@@ -420,6 +426,12 @@
 		text-decoration: none;
 		font-family: var(--dl-font-mono);
 		font-size: 0.72rem;
+	}
+
+	.chips .muted-chip {
+		color: var(--dl-text-dim);
+		opacity: 0.6;
+		cursor: default;
 	}
 
 	.execution-plan {
