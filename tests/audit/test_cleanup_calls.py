@@ -20,7 +20,7 @@ def _import_audit():
     import importlib.util
 
     repo = Path(__file__).resolve().parent.parent.parent
-    scriptPath = repo / "scripts" / "audit" / "cleanupBetweenCompaniesCalls.py"
+    scriptPath = repo / "tests" / "audit" / "cleanupBetweenCompaniesCalls.py"
     spec = importlib.util.spec_from_file_location("cleanupBetweenCompaniesCalls", scriptPath)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)

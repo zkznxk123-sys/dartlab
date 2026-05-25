@@ -23,7 +23,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parents[2]
-_GATE_PATH = _REPO / "scripts" / "audit" / "testCoverageGate.py"
+_GATE_PATH = _REPO / "tests" / "audit" / "testCoverageGate.py"
 
 
 def _loadGateModule():
@@ -201,7 +201,7 @@ def test_loadBaseline_parses_missing_tuples(tmp_path: Path) -> None:
 def test_baseline_file_exists() -> None:
     """실 baseline JSON (tests/audit/_baselines/testCoverage.json) 존재 + 파싱 가능."""
     gate = _loadGateModule()
-    baseline_path = _REPO / "scripts" / "audit" / "_baselines" / "testCoverage.json"
+    baseline_path = _REPO / "tests" / "audit" / "_baselines" / "testCoverage.json"
     assert baseline_path.exists(), f"baseline 누락: {baseline_path}"
     baseline = gate._loadBaseline(baseline_path)
     # 본 PR 도입 시점 baseline 1097 — 35% 부채. 0 이면 baseline 깨짐.

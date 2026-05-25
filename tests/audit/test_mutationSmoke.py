@@ -17,7 +17,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parents[2]
-_SMOKE_PATH = _REPO / "scripts" / "audit" / "mutationSmoke.py"
+_SMOKE_PATH = _REPO / "tests" / "audit" / "mutationSmoke.py"
 
 
 def _loadSmokeModule():

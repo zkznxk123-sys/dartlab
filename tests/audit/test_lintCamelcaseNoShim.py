@@ -11,7 +11,7 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _REPO = Path(__file__).resolve().parent.parent.parent
-_SCRIPT = _REPO / "scripts" / "dev" / "lint_camelcase_ast.py"
+_SCRIPT = _REPO / "tests" / "audit" / "lint_camelcase_ast.py"
 
 
 def _loadModule():

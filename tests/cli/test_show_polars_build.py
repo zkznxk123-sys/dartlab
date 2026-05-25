@@ -14,7 +14,7 @@ pytestmark = pytest.mark.unit
 def test_script_runs_clean(capsys):
     """``tests/cli/showPolarsBuild.py`` main() exit 0, polars/python/platform 라인 포함."""
     repo = Path(__file__).resolve().parent.parent.parent
-    scriptPath = repo / "scripts" / "dev" / "showPolarsBuild.py"
+    scriptPath = repo / "tests" / "cli" / "showPolarsBuild.py"
     assert scriptPath.exists(), f"M7 스크립트 부재: {scriptPath}"
 
     # 동적 import (sys.path 임시 추가)
