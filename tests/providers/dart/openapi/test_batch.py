@@ -114,6 +114,9 @@ def test_batch_collect_invokes_on_checkpoint_per_n_stocks(monkeypatch) -> None:
         async def close(self) -> None:
             return None
 
+        async def getDf(self, *args, **kwargs):
+            return None
+
     monkeypatch.setattr(batch, "AsyncDartClient", _FakeClient)
 
     async def _zero(*args, **kwargs):
@@ -159,6 +162,9 @@ def test_batch_collect_skips_checkpoint_when_disabled(monkeypatch) -> None:
             pass
 
         async def close(self) -> None:
+            return None
+
+        async def getDf(self, *args, **kwargs):
             return None
 
     monkeypatch.setattr(batch, "AsyncDartClient", _FakeClient)
