@@ -23,6 +23,7 @@ public_api:
     - dataDir
     - downloadAll
     - gather
+    - help
     - industry
     - listing
     - macro
@@ -99,6 +100,7 @@ scenarios:
       - dartlab.dataDir
       - dartlab.downloadAll
       - dartlab.gather
+      - dartlab.help
       - dartlab.industry
       - dartlab.listing
       - dartlab.macro
