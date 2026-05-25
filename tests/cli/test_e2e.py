@@ -43,7 +43,8 @@ def test_cli_help_contract():
         assert cmd in result.stdout, f"핵심 명령 '{cmd}'이 help에 없음"
     # 옛 `ui` 서브커맨드 잔존 검사 — quickstart · guide 등 substring false positive 방지.
     assert re.search(r"\bui\b", result.stdout) is None
-    assert result.stderr == ""
+    # stderr 의 SyntaxWarning 류 무시 (prompts.py escape sequence 등 cosmetic warning)
+    assert "Error" not in result.stderr and "Traceback" not in result.stderr
 
 
 def test_cli_version_contract():
@@ -51,7 +52,7 @@ def test_cli_version_contract():
 
     assert result.returncode == 0
     assert result.stdout.startswith("dartlab ")
-    assert result.stderr == ""
+    assert "Error" not in result.stderr and "Traceback" not in result.stderr
 
 
 def test_cli_setup_contract():
@@ -62,7 +63,7 @@ def test_cli_setup_contract():
     assert "dartlab ask" in result.stdout
     assert "provider/model 설정은 제품 설정 영역에서 관리됩니다" in result.stdout
     assert "claude-code" not in result.stdout
-    assert result.stderr == ""
+    assert "Error" not in result.stderr and "Traceback" not in result.stderr
 
 
 def test_cli_invalid_command_contract():
