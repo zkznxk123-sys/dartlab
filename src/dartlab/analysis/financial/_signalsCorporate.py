@@ -684,6 +684,9 @@ def _loadGrowthMap() -> dict[str, float]:
         return gmap
     except (ImportError, ValueError, AttributeError):
         return {}
+    except Exception:
+        # polars.exceptions.ColumnNotFoundError 등 scan 결과 schema 변경 시 graceful fallback.
+        return {}
 
 
 __all__ = ["calcAnnouncementTiming", "calcDisclosureDelta", "calcInventoryDivergence", "calcSupplyChainSignal"]
