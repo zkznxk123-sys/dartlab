@@ -4,7 +4,7 @@ title: Recipes — 페르소나 트리 인덱스
 purpose: dartlab recipes/ 트리 진입점. 페르소나별 분류와 분류 룰 SSOT 안내.
 category: recipes
 kind: curated
-status: published
+status: curated
 whenToUse:
   - recipes 트리 시작점
   - 페르소나 분류 룰 확인

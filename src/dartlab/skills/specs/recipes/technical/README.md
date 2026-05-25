@@ -4,7 +4,7 @@ title: Technical 페르소나 — 초기 단계 (1 recipe)
 purpose: 가격·수익률·팩터·차트 페르소나. quant 엔진의 L1.5 이하 조합으로 작성.
 category: recipes
 kind: curated
-status: published
+status: curated
 whenToUse:
   - 테크니컬 분석 페르소나 커버리지 확인
   - quant 엔진과 technical 페르소나의 관계

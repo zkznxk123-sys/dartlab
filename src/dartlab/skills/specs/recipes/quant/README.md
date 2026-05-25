@@ -4,7 +4,7 @@ title: Quant 페르소나 — 팩터 5 축
 purpose: value · momentum · quality · low-vol · size 5 팩터 단일 회사 적용 + cross-section rank. dartlab quant 엔진 위 recipe 층.
 category: recipes
 kind: curated
-status: published
+status: curated
 whenToUse:
   - 팩터 분석 페르소나 진입
   - value / momentum / quality / low-vol / size 5 축 확인

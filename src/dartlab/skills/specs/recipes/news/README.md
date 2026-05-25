@@ -4,7 +4,7 @@ title: News 페르소나 — 토대 1 차 진입
 purpose: 뉴스·공시 본문·외부 텍스트 페르소나의 *evidence-bound* 형태 진입점. 외부 트렌드의 추론형 News Analyst 패턴을 1 차 출처 cross-check 절차로 재해석.
 category: recipes
 kind: curated
-status: published
+status: curated
 whenToUse:
   - 뉴스 분석 페르소나 진입
   - 외부 본문 untrusted 정책 확인

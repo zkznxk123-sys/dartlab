@@ -4,7 +4,7 @@ title: Sentiment 페르소나 — 토대 1 차 진입 (flow-based)
 purpose: 투자심리·플로우·포지셔닝 페르소나의 *evidence-bound* 형태 진입점. 추론 라벨링 (긍정/부정) 대신 정량 신호 (외국인 imbalance · 공매도 잔고 · 내부자 cluster) 만 사용.
 category: recipes
 kind: curated
-status: published
+status: curated
 whenToUse:
   - 투자심리 분석 페르소나 진입
   - flow imbalance · short balance · insider cluster 절차 선택

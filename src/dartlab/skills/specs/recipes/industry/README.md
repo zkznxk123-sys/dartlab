@@ -4,7 +4,7 @@ title: Industry 페르소나 — 산업 깊이 진입
 purpose: 산업 단계·peer 매트릭스·CapEx wave·R&D 강도·마진 압축 등 *industry 분석가 시점* recipe 모음. fundamental 안 단일 회사 분석과 분리.
 category: recipes
 kind: curated
-status: published
+status: curated
 whenToUse:
   - 산업 분석 페르소나 진입
   - peer 비교 절차 선택
