@@ -132,6 +132,7 @@ export const skillsMeta: SkillIndexMeta = (skillIndex as { meta?: SkillIndexMeta
 // landing 방문자가 검색할 컨텐츠가 아님 — 빌드 JSON 은 운영자 권한이라 UI 단에서 제외.
 export const skills: SkillDoc[] = ((skillIndex as { skills?: SkillDoc[] }).skills ?? [])
 	.filter((skill) => skill.category !== 'capability' && skill.category !== 'operation')
+	.filter((skill) => componentsById.has(skill.id))
 	.map(normalizeSkillCategory);
 
 const skillById = new Map<string, SkillDoc>(skills.map((skill) => [skill.id, skill]));
